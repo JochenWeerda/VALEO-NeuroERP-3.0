@@ -10,6 +10,7 @@ from datetime import datetime
 from fastapi import Request
 from fastapi.responses import StreamingResponse
 import json
+from app.core.uuid7 import uuid7
 
 logger = logging.getLogger(__name__)
 
@@ -261,8 +262,7 @@ async def create_sse_stream(
 ) -> StreamingResponse:
     """Create an SSE stream for a channel."""
     if client_id is None:
-        import uuid
-        client_id = str(uuid.uuid4())
+        client_id = uuid7()
     
     connection = SSEConnection(channel, client_id)
     

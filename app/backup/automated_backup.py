@@ -16,6 +16,7 @@ import os
 import shutil
 import json
 from pathlib import Path
+from app.core.uuid7 import uuid7
 
 logger = logging.getLogger(__name__)
 
@@ -248,7 +249,7 @@ class ISO27001AutomatedBackup:
         Create a new backup job
         Returns job ID
         """
-        job_id = str(uuid.uuid4())
+        job_id = uuid7()
 
         # Validate job data
         self._validate_backup_job_data(job_data)
@@ -333,7 +334,7 @@ class ISO27001AutomatedBackup:
             raise ValueError(f"Backup job not found: {job_id}")
 
         job = self.backup_jobs[job_id]
-        execution_id = str(uuid.uuid4())
+        execution_id = uuid7()
 
         execution = BackupExecution(
             id=execution_id,
@@ -504,7 +505,7 @@ class ISO27001AutomatedBackup:
         Restore from backup
         Returns restore ID
         """
-        restore_id = str(uuid.uuid4())
+        restore_id = uuid7()
 
         restore = BackupRestore(
             id=restore_id,

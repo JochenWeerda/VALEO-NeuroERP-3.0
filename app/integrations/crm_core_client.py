@@ -89,6 +89,9 @@ class CRMCoreActivity(BaseModel):
     customer_id: str | None = None
     customer_name: str | None = None
     contact_id: str | None = None
+    main_topics: list[str] | None = None
+    orders_placed: list[str] | None = None
+    follow_up_actions: list[dict[str, Any] | str] | None = None
     created_at: str | None = None
     updated_at: str | None = None
 

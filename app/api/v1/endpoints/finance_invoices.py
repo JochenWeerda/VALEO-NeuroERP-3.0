@@ -11,6 +11,7 @@ from sqlalchemy import text
 import logging
 
 from app.core.database import get_db
+from app.core.tenant import get_tenant_id
 from app.documents.models import SalesInvoice, DocLine
 from app.documents.router_helpers import (
     get_repository, save_to_store, get_from_store, list_from_store
@@ -21,13 +22,24 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/finance/invoices", tags=["finance", "invoices"])
 
 
-async def _create_gl_booking_and_op(db: Session, invoice: SalesInvoice, repo) -> None:
+async def _create_gl_booking_and_op(db: Session, invoice: SalesInvoice, repo, tenant_id: str = "default") -> None:
     """
     FIBU-AR-02: Erzeugt GL-Buchung und OP für Rechnung
     """
     try:
-        tenant_id = "default"  # TODO: Get from context
         period = invoice.date[:7]  # YYYY-MM format
+        
+        # Try to get customer name from business_partners table
+        customer_name = invoice.customerId
+        try:
+            from app.infrastructure.models import BusinessPartner
+            bp = db.query(BusinessPartner).filter(
+                BusinessPartner.partner_id == invoice.customerId
+            ).first()
+            if bp:
+                customer_name = bp.name or bp.partner_number or invoice.customerId
+        except Exception:
+            pass  # Use customerId as fallback
         
         # 1. Erzeuge GL-Journal Entry (Debitoren Soll, Erlöse Haben, USt Haben)
         # Soll: Debitoren (Forderungen) = totalGross
@@ -37,10 +49,65 @@ async def _create_gl_booking_and_op(db: Session, invoice: SalesInvoice, repo) ->
         # Standard-Konten (in Production aus Konfiguration)
         debtor_account = "1200"  # Forderungen aus Lieferungen und Leistungen
         revenue_account = "8000"  # Erlöse
-        vat_account = "1776"  # USt 19%
+        
+        # VAT accounts by rate
+        vat_accounts = {
+            19.0: "1776",  # USt 19%
+            7.0: "1771",   # USt 7%
+            0.0: "1779",   # USt 0% / Freigestellt
+        }
+        
+        # Determine VAT rate from invoice lines (use most common)
+        vat_rates = [line.vatRate or 0.0 for line in invoice.lines if line.vatRate]
+        vat_rate = max(vat_rates) if vat_rates else 0.0
+        vat_account = vat_accounts.get(vat_rate, "1776")  # Default to 19%
         
         # Journal Entry erstellen
         journal_entry_id = f"JE-{invoice.number}"
+        
+        # Group revenue and VAT by rate
+        from collections import defaultdict
+        revenue_by_rate = defaultdict(float)
+        vat_by_rate = defaultdict(float)
+        
+        for line in invoice.lines:
+            net = line.qty * (line.price or 0.0)
+            vat_rate = line.vatRate or 0.0
+            vat = net * vat_rate / 100
+            revenue_by_rate[vat_rate] += net
+            vat_by_rate[vat_rate] += vat
+        
+        # Build journal entry lines
+        journal_lines = [
+            {
+                "account_id": debtor_account,
+                "debit_amount": invoice.totalGross,
+                "credit_amount": 0.0,
+                "description": f"Forderung {invoice.customerId}"
+            }
+        ]
+        
+        # Revenue lines by rate
+        for vat_rate, net_amount in revenue_by_rate.items():
+            if net_amount > 0:
+                journal_lines.append({
+                    "account_id": revenue_account,
+                    "debit_amount": 0.0,
+                    "credit_amount": net_amount,
+                    "description": f"Erlöse {vat_rate}%"
+                })
+        
+        # VAT lines by rate
+        for vat_rate, vat_amount in vat_by_rate.items():
+            if vat_amount > 0:
+                vat_acc = vat_accounts.get(vat_rate, "1776")
+                journal_lines.append({
+                    "account_id": vat_acc,
+                    "debit_amount": 0.0,
+                    "credit_amount": vat_amount,
+                    "description": f"USt {vat_rate}%"
+                })
+        
         journal_entry = {
             "id": journal_entry_id,
             "tenant_id": tenant_id,
@@ -50,26 +117,7 @@ async def _create_gl_booking_and_op(db: Session, invoice: SalesInvoice, repo) ->
             "status": "posted",
             "source": "sales_invoice",
             "source_id": invoice.number,
-            "lines": [
-                {
-                    "account_id": debtor_account,
-                    "debit_amount": invoice.totalGross,
-                    "credit_amount": 0.0,
-                    "description": f"Forderung {invoice.customerId}"
-                },
-                {
-                    "account_id": revenue_account,
-                    "debit_amount": 0.0,
-                    "credit_amount": invoice.subtotalNet,
-                    "description": "Erlöse"
-                },
-                {
-                    "account_id": vat_account,
-                    "debit_amount": 0.0,
-                    "credit_amount": invoice.totalTax,
-                    "description": "Umsatzsteuer"
-                }
-            ]
+            "lines": journal_lines
         }
         
         # Speichere Journal Entry (vereinfacht - in Production über Repository)
@@ -82,7 +130,7 @@ async def _create_gl_booking_and_op(db: Session, invoice: SalesInvoice, repo) ->
             "tenant_id": tenant_id,
             "document_number": invoice.number,
             "customer_id": invoice.customerId,
-            "customer_name": invoice.customerId,  # TODO: Get from customer service
+            "customer_name": customer_name,
             "amount": invoice.totalGross,
             "open_amount": invoice.totalGross,
             "currency": "EUR",

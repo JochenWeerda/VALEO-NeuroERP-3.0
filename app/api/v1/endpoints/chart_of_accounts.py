@@ -7,6 +7,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
+from ....core.config import settings
 from ....core.database import get_db
 from ....infrastructure.models import Account as AccountModel
 from ..schemas.base import PaginatedResponse
@@ -14,7 +15,7 @@ from ..schemas.finance import Account, AccountCreate, AccountUpdate
 
 router = APIRouter()
 
-DEFAULT_TENANT = "system"
+DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
 @router.get("/", response_model=PaginatedResponse[Account])

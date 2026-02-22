@@ -11,8 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from '@/hooks/use-toast'
-import { apiClient } from '@/lib/api-client'
-import { CheckCircle, XCircle, ShoppingCart, AlertTriangle, Send, Mail } from 'lucide-react'
+import { CheckCircle, XCircle, ShoppingCart, Send, Mail } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
@@ -56,8 +55,8 @@ const createAnfrageConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
           type: 'select',
           required: true,
           options: [
-            { value: 'BANF', label: t('crud.entities.purchaseRequest') + ' (BANF)' },
-            { value: 'ANF', label: t('crud.entities.purchaseRequest') + ' (ANF)' }
+            { value: 'BANF', label: `${t('crud.entities.purchaseRequest')} (BANF)` },
+            { value: 'ANF', label: `${t('crud.entities.purchaseRequest')} (ANF)` }
           ]
         },
         {
@@ -171,13 +170,13 @@ const createAnfrageConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
   ],
   actions: [], // Actions werden in Komponente implementiert
   api: {
-    baseUrl: '/api/einkauf/anfragen',
+    baseUrl: '/api/v1/einkauf/anfragen',
     endpoints: {
-      list: '/api/einkauf/anfragen',
-      get: '/api/einkauf/anfragen/{id}',
-      create: '/api/einkauf/anfragen',
-      update: '/api/einkauf/anfragen/{id}',
-      delete: '/api/einkauf/anfragen/{id}'
+      list: '/api/v1/einkauf/anfragen',
+      get: '/api/v1/einkauf/anfragen/{id}',
+      create: '/api/v1/einkauf/anfragen',
+      update: '/api/v1/einkauf/anfragen/{id}',
+      delete: '/api/v1/einkauf/anfragen/{id}'
     }
   },
   validation: createAnfrageSchema(t),
@@ -359,7 +358,7 @@ export default function AnfrageStammPage(): JSX.Element {
       await saveData(updateData)
 
       // Navigate to create PO from requisition
-      navigate(`/einkauf/bestellung-anlegen?requisitionId=${id}`)
+      navigate(`/einkauf/bestellungen/neu?requisitionId=${id}`)
 
       toast({
         title: t('crud.messages.createSuccess', { entityType: entityTypeLabel }),
@@ -400,7 +399,7 @@ export default function AnfrageStammPage(): JSX.Element {
       await saveData(updateData)
 
       // Send RFQ to suppliers
-      const sendResponse = await fetch(`/api/einkauf/anfragen/${id}/send`, {
+      const sendResponse = await fetch(`/api/v1/einkauf/anfragen/${id}/send`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -12,14 +12,34 @@ const SECONDS_TO_MS = 1000
 
 // Backend API URL - verwendet Backend-Port wenn verfügbar
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+const MCP_BASE_PATH = '/api/mcp'
+const DEV_TOKEN = import.meta.env.VITE_API_DEV_TOKEN || 'dev-token'
+const DEFAULT_TENANT_ID = import.meta.env.VITE_TENANT_ID || '00000000-0000-0000-0000-000000000001'
+
+export function buildMcpHeaders(additional: Record<string, string> = {}): Record<string, string> {
+  const accessToken = window.localStorage.getItem('access_token')
+  const legacyToken = window.localStorage.getItem('token')
+  const token = accessToken || legacyToken || DEV_TOKEN
+  const tenantId =
+    window.localStorage.getItem('tenant_id') ||
+    window.sessionStorage.getItem('tenant_id') ||
+    DEFAULT_TENANT_ID
+
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`,
+    'X-Tenant-ID': tenantId,
+    ...additional,
+  }
+}
 
 // MCP fetch function (placeholder for actual MCP bridge)
 export async function mcpFetch<TReq, TRes>(req: McpRequest<TReq>): Promise<McpResponse<TRes>> {
   // Placeholder - later replace with actual MCP WebSocket/HTTP bridge
   try {
-    const res = await fetch(`${API_BASE_URL}/api/v1/mcp/${req.service}/${req.action}`, {
+    const res = await fetch(`${API_BASE_URL}${MCP_BASE_PATH}/${req.service}/${req.action}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: buildMcpHeaders(),
       body: JSON.stringify(req.payload ?? {}),
     })
 

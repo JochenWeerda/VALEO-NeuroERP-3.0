@@ -87,11 +87,45 @@ async def get_business_metrics(db: Session = Depends(get_db)) -> Dict[str, Any]:
         from app.core.database import engine
         pool_status = engine.pool.status()
         
-        # 2. Event Bus Metrics
+        # 2. Event Bus Metrics (from Outbox table)
+        from app.infrastructure.eventbus.outbox import OutboxEvent
+        from datetime import timedelta
+        
+        now = datetime.utcnow()
+        today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        
+        # Pending events (not yet published)
+        pending_count = db.query(OutboxEvent).filter(OutboxEvent.published == False).count()
+        
+        # Published today
+        published_today = db.query(OutboxEvent).filter(
+            OutboxEvent.published == True,
+            OutboxEvent.published_at >= today_start
+        ).count()
+        
+        # Failed events (retries exceeded or stuck for > 24h)
+        failed_count = db.query(OutboxEvent).filter(
+            (OutboxEvent.retry_count >= 3) | 
+            ((OutboxEvent.published == False) & (OutboxEvent.timestamp < now - timedelta(hours=24)))
+        ).count()
+        
+        # Oldest pending event
+        oldest_pending = db.query(OutboxEvent).filter(
+            OutboxEvent.published == False
+        ).order_by(OutboxEvent.timestamp.asc()).first()
+        
+        # Events by type (for analysis)
+        event_types = db.query(
+            OutboxEvent.event_type,
+            db.func.count(OutboxEvent.id).label('count')
+        ).filter(OutboxEvent.published == False).group_by(OutboxEvent.event_type).all()
+        
         event_bus_metrics = {
-            "pending_events": 0,  # TODO: Query outbox table
-            "published_today": 0,  # TODO: Query outbox table
-            "failed_events": 0     # TODO: Query outbox table
+            "pending_events": pending_count,
+            "published_today": published_today,
+            "failed_events": failed_count,
+            "oldest_pending_minutes": int((now - oldest_pending.timestamp).total_seconds() / 60) if oldest_pending else 0,
+            "pending_by_type": {et.event_type: et.count for et in event_types}
         }
         
         # 3. Workflow Metrics (from Phase 3)

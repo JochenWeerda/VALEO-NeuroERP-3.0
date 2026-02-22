@@ -11,7 +11,7 @@ from typing import Dict, Any, List, Optional, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 import logging
-import uuid
+from app.core.uuid7 import uuid7
 
 logger = logging.getLogger(__name__)
 
@@ -207,7 +207,7 @@ class ISO22301BusinessContinuity:
         Perform business impact analysis for a business process
         Returns analysis ID
         """
-        analysis_id = str(uuid.uuid4())
+        analysis_id = uuid7()
 
         # Get recovery objectives for this process type
         process_type = process_data.get('process_type', 'general')
@@ -238,7 +238,7 @@ class ISO22301BusinessContinuity:
         Create a business continuity plan
         Returns plan ID
         """
-        plan_id = str(uuid.uuid4())
+        plan_id = uuid7()
 
         # Set review schedule (annual)
         next_review = datetime.utcnow() + timedelta(days=365)
@@ -266,7 +266,7 @@ class ISO22301BusinessContinuity:
         Activate incident response for business continuity event
         Returns incident ID
         """
-        incident_id = str(uuid.uuid4())
+        incident_id = uuid7()
 
         incident = IncidentRecord(
             id=incident_id,
@@ -398,7 +398,7 @@ class ISO22301BusinessContinuity:
         Schedule a business continuity recovery test
         Returns test ID
         """
-        test_id = str(uuid.uuid4())
+        test_id = uuid7()
 
         test = RecoveryTest(
             id=test_id,

@@ -22,7 +22,7 @@ def upgrade() -> None:
     # Create segments table
     op.create_table(
         'crm_marketing_segments',
-        sa.Column('id', postgresql.UUID(as_uuid=True), primary_key=True),
+        sa.Column('id', sa.String(), primary_key=True),
         sa.Column('tenant_id', sa.String(64), nullable=False),
         sa.Column('name', sa.String(255), nullable=False),
         sa.Column('description', sa.Text(), nullable=True),
@@ -41,8 +41,8 @@ def upgrade() -> None:
     # Create segment_rules table
     op.create_table(
         'crm_marketing_segment_rules',
-        sa.Column('id', postgresql.UUID(as_uuid=True), primary_key=True),
-        sa.Column('segment_id', postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column('id', sa.String(), primary_key=True),
+        sa.Column('segment_id', sa.String(), nullable=False),
         sa.Column('field', sa.String(255), nullable=False),
         sa.Column('operator', sa.Enum(
             'equals', 'not_equals', 'contains', 'not_contains', 'starts_with', 'ends_with',
@@ -59,9 +59,9 @@ def upgrade() -> None:
     # Create segment_members table
     op.create_table(
         'crm_marketing_segment_members',
-        sa.Column('id', postgresql.UUID(as_uuid=True), primary_key=True),
-        sa.Column('segment_id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('contact_id', postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column('id', sa.String(), primary_key=True),
+        sa.Column('segment_id', sa.String(), nullable=False),
+        sa.Column('contact_id', sa.String(), nullable=False),
         sa.Column('added_at', sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
         sa.Column('added_by', sa.String(255), nullable=True),
         sa.Column('removed_at', sa.DateTime(timezone=True), nullable=True),
@@ -74,8 +74,8 @@ def upgrade() -> None:
     # Create segment_performance table
     op.create_table(
         'crm_marketing_segment_performance',
-        sa.Column('id', postgresql.UUID(as_uuid=True), primary_key=True),
-        sa.Column('segment_id', postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column('id', sa.String(), primary_key=True),
+        sa.Column('segment_id', sa.String(), nullable=False),
         sa.Column('date', sa.DateTime(timezone=True), nullable=False),
         sa.Column('period_type', sa.String(20), nullable=False, server_default='daily'),
         sa.Column('member_count', sa.Integer(), nullable=False, server_default='0'),

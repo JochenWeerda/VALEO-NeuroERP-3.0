@@ -12,7 +12,7 @@ interface AuthHook {
   hasRole: (_role: string) => boolean
 }
 
-const DASHBOARD_PATH = '/dashboard'
+const DASHBOARD_PATH = '/'
 const LOGIN_PATH = '/login'
 
 const safeRedirect = (target: string): void => {
@@ -57,9 +57,16 @@ export function useAuth(): AuthHook {
 
   const logout = (): void => {
     setSafeLoading(false)
+    // Check if OIDC is actually configured (not just placeholder)
+    const discoveryUrl = (import.meta.env.VITE_OIDC_DISCOVERY_URL ?? '')
+    const placeholderPatterns = ['your-oidc-provider.com', 'example.com', 'keycloak.example.com', '{tenant-id}', '{domain}', '{application-id}', '{client-id}']
+    const oidcConfigured = discoveryUrl.length > 0 && !placeholderPatterns.some(pattern => discoveryUrl.includes(pattern))
     auth.logout()
     setSafeUser(null)
-    safeRedirect(LOGIN_PATH)
+    // Only redirect to login if OIDC is configured
+    if (oidcConfigured) {
+      safeRedirect(LOGIN_PATH)
+    }
   }
 
   const handleCallback = async (_code: string, _state: string): Promise<void> => {

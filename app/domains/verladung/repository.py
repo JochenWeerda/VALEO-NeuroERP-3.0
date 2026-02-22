@@ -5,8 +5,8 @@ Repository Pattern for Verladung Domain (Tours)
 from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
-import uuid
 from datetime import datetime
+from app.core.uuid7 import uuid7
 
 from app.domains.verladung.models import (
     Tour, TourStatus,
@@ -64,7 +64,7 @@ class TourRepository:
         if "tour_no" not in tour_data or not tour_data["tour_no"]:
             tour_data["tour_no"] = self._generate_tour_no(tour_data.get("date"))
         
-        tour = Tour(id=f"TOUR-{str(uuid.uuid4())[:8].upper()}", **tour_data)
+        tour = Tour(id=f"TOUR-{uuid7()[:8].upper()}", **tour_data)
         self.db.add(tour)
         self.db.commit()
         self.db.refresh(tour)
@@ -153,7 +153,7 @@ class TourRepository:
     ) -> TourEvent:
         """Add event to tour"""
         event = TourEvent(
-            id=f"EVT-{str(uuid.uuid4())[:8].upper()}",
+            id=f"EVT-{uuid7()[:8].upper()}",
             tour_id=tour_id,
             type=event_type,
             message=message,
@@ -190,7 +190,7 @@ class TourStopRepository:
             ).with_entities(func.max(TourStop.sequence)).scalar() or 0
             stop_data["sequence"] = max_seq + 1
         
-        stop = TourStop(id=f"STOP-{str(uuid.uuid4())[:8].upper()}", **stop_data)
+        stop = TourStop(id=f"STOP-{uuid7()[:8].upper()}", **stop_data)
         self.db.add(stop)
         self.db.commit()
         self.db.refresh(stop)
@@ -248,7 +248,7 @@ class TourDeliveryNoteRepository:
         return self.db.query(TourDeliveryNote).filter(TourDeliveryNote.dn_no == dn_no).first()
     
     def create(self, dn_data: dict) -> TourDeliveryNote:
-        dn = TourDeliveryNote(id=f"DN-{str(uuid.uuid4())[:8].upper()}", **dn_data)
+        dn = TourDeliveryNote(id=f"DN-{uuid7()[:8].upper()}", **dn_data)
         self.db.add(dn)
         self.db.commit()
         self.db.refresh(dn)

@@ -11,7 +11,7 @@ from typing import Dict, Any, List, Optional, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 import logging
-import uuid
+from app.core.uuid7 import uuid7
 
 logger = logging.getLogger(__name__)
 
@@ -245,7 +245,7 @@ class ISOComplianceMonitoring:
         Create a compliance metric
         Returns metric ID
         """
-        metric_id = str(uuid.uuid4())
+        metric_id = uuid7()
 
         metric = ComplianceMetric(
             id=metric_id,
@@ -306,7 +306,7 @@ class ISOComplianceMonitoring:
 
     def _create_metric_alert(self, metric: ComplianceMetric, threshold: float, condition: str):
         """Create an alert for metric threshold violation"""
-        alert_id = str(uuid.uuid4())
+        alert_id = uuid7()
 
         severity = AlertSeverity.MEDIUM
         if metric.metric_type == MetricType.COMPLIANCE_SCORE and metric.current_value < 90:
@@ -377,7 +377,7 @@ class ISOComplianceMonitoring:
         Create a monitoring rule
         Returns rule ID
         """
-        rule_id = str(uuid.uuid4())
+        rule_id = uuid7()
 
         rule = MonitoringRule(
             id=rule_id,
@@ -398,7 +398,7 @@ class ISOComplianceMonitoring:
         Create a compliance dashboard
         Returns dashboard ID
         """
-        dashboard_id = str(uuid.uuid4())
+        dashboard_id = uuid7()
 
         dashboard = ComplianceDashboard(
             id=dashboard_id,
@@ -419,7 +419,7 @@ class ISOComplianceMonitoring:
         Generate a compliance report
         Returns report ID
         """
-        report_id = str(uuid.uuid4())
+        report_id = uuid7()
 
         report = ComplianceReport(
             id=report_id,

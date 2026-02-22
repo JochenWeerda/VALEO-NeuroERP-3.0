@@ -11,8 +11,8 @@ from typing import Dict, Any, List, Optional, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 import logging
-import uuid
 import json
+from app.core.uuid7 import uuid7
 
 logger = logging.getLogger(__name__)
 
@@ -188,7 +188,7 @@ class ISO9001ProcessDocumentation:
         Create a new process document
         Returns document ID
         """
-        document_id = str(uuid.uuid4())
+        document_id = uuid7()
 
         # Validate required fields
         self._validate_document_data(document_data)
@@ -413,7 +413,7 @@ class ISO9001ProcessDocumentation:
         Record process execution
         Returns execution ID
         """
-        execution_id = str(uuid.uuid4())
+        execution_id = uuid7()
 
         execution = ProcessExecution(
             id=execution_id,
@@ -478,7 +478,7 @@ class ISO9001ProcessDocumentation:
         Record quality check result
         Returns record ID
         """
-        record_id = str(uuid.uuid4())
+        record_id = uuid7()
 
         record = QualityRecord(
             id=record_id,
@@ -505,7 +505,7 @@ class ISO9001ProcessDocumentation:
         Record process performance metric
         Returns metric ID
         """
-        metric_id = str(uuid.uuid4())
+        metric_id = uuid7()
 
         metric = ProcessMetric(
             id=metric_id,

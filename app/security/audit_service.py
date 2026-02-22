@@ -12,7 +12,7 @@ from dataclasses import dataclass
 import hashlib
 import json
 import logging
-import uuid
+from app.core.uuid7 import uuid7
 
 logger = logging.getLogger(__name__)
 
@@ -70,14 +70,14 @@ class ISMSAuditService:
 
     def _create_audit_entry(self, event_data: Dict[str, Any]) -> AuditEntry:
         """Create audit entry from event data"""
-        entry_id = str(uuid.uuid4())
+        entry_id = uuid7()
 
         return AuditEntry(
             id=entry_id,
             timestamp=datetime.utcnow().isoformat(),
             event_type=event_data.get('event_type', 'unknown'),
             user_id=event_data.get('user_id', 'system'),
-            tenant_id=event_data.get('tenant_id', 'system'),
+            tenant_id=event_data.get('tenant_id', '00000000-0000-0000-0000-000000000001'),
             resource_type=event_data.get('resource_type', 'unknown'),
             resource_id=event_data.get('resource_id', 'unknown'),
             action=event_data.get('action', 'unknown'),

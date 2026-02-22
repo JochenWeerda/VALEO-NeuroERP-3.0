@@ -75,6 +75,7 @@ class Customer(CustomerBase, TimestampMixin, SoftDeleteMixin):
     credit_limit: Optional[Decimal] = Field(None, ge=0, description="Credit limit")
     payment_terms: Optional[int] = Field(None, ge=0, description="Payment terms in days")
     tax_id: Optional[str] = Field(None, max_length=50, description="Tax identification number")
+    chefanweisung: Optional[str] = Field(None, description="Chefanweisung (Executive Note) - Special instructions for this customer")
     # Sales-spezifische Felder (nur neue)
     price_group: Optional[str] = Field(None, max_length=50, description="Price group")
     tax_category: Optional[str] = Field(None, max_length=50, description="Tax category")

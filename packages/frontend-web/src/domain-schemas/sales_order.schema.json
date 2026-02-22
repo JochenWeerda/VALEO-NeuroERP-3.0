@@ -30,6 +30,17 @@
       "required": false
     },
     {
+      "name": "shippingMethod",
+      "label": "Versandart",
+      "type": "select",
+      "required": false,
+      "options": [
+        { "value": "spedition", "label": "Spedition" },
+        { "value": "abholung", "label": "Abholung" },
+        { "value": "paketdienst", "label": "Paketdienst" }
+      ]
+    },
+    {
       "name": "paymentTerms",
       "label": "Zahlungsbedingungen",
       "type": "select",

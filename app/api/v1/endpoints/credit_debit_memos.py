@@ -10,7 +10,7 @@ from datetime import datetime
 from decimal import Decimal
 from pydantic import BaseModel, Field
 import logging
-import uuid
+from app.core.uuid7 import uuid7
 
 from app.core.database import get_db
 from app.documents.router_helpers import get_repository, save_to_store, get_from_store, list_from_store
@@ -143,7 +143,7 @@ async def create_credit_memo(
         net_amount, tax_amount, gross_amount = calculate_memo_totals(memo.items)
         
         # Generiere ID und Nummer
-        memo_id = str(uuid.uuid4())
+        memo_id = uuid7()
         memo_number = f"CM-{datetime.now().strftime('%Y')}-{memo_id[:8].upper()}"
         
         # Hole Lieferantennamen
@@ -200,7 +200,7 @@ async def create_debit_memo(
         net_amount, tax_amount, gross_amount = calculate_memo_totals(memo.items)
         
         # Generiere ID und Nummer
-        memo_id = str(uuid.uuid4())
+        memo_id = uuid7()
         memo_number = f"DM-{datetime.now().strftime('%Y')}-{memo_id[:8].upper()}"
         
         # Hole Lieferantennamen

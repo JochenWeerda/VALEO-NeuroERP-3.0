@@ -32,7 +32,7 @@ def upgrade() -> None:
     # AI Models table
     op.create_table(
         "crm_ai_models",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
+        sa.Column("id", sa.String(), primary_key=True, default=uuid4),
         sa.Column("tenant_id", sa.String(64), nullable=False),
         sa.Column("name", sa.String(255), nullable=False),
         sa.Column("description", sa.Text),
@@ -61,10 +61,10 @@ def upgrade() -> None:
     # Predictions table
     op.create_table(
         "crm_ai_predictions",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
+        sa.Column("id", sa.String(), primary_key=True, default=uuid4),
         sa.Column("tenant_id", sa.String(64), nullable=False),
-        sa.Column("model_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("crm_ai_models.id"), nullable=False),
-        sa.Column("entity_id", postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column("model_id", sa.String(), sa.ForeignKey("crm_ai_models.id"), nullable=False),
+        sa.Column("entity_id", sa.String(), nullable=False),
         sa.Column("entity_type", sa.String(64), nullable=False),
         sa.Column("score", sa.Float, nullable=False),
         sa.Column("prediction_class", sa.String(64)),
@@ -84,7 +84,7 @@ def upgrade() -> None:
     # Features table
     op.create_table(
         "crm_ai_features",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
+        sa.Column("id", sa.String(), primary_key=True, default=uuid4),
         sa.Column("tenant_id", sa.String(64), nullable=False),
         sa.Column("name", sa.String(255), nullable=False),
         sa.Column("description", sa.Text),
@@ -108,7 +108,7 @@ def upgrade() -> None:
     # Experiments table
     op.create_table(
         "crm_ai_experiments",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
+        sa.Column("id", sa.String(), primary_key=True, default=uuid4),
         sa.Column("tenant_id", sa.String(64), nullable=False),
         sa.Column("name", sa.String(255), nullable=False),
         sa.Column("description", sa.Text),
@@ -134,9 +134,9 @@ def upgrade() -> None:
     # Feedback table
     op.create_table(
         "crm_ai_feedback",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
+        sa.Column("id", sa.String(), primary_key=True, default=uuid4),
         sa.Column("tenant_id", sa.String(64), nullable=False),
-        sa.Column("prediction_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("crm_ai_predictions.id"), nullable=False),
+        sa.Column("prediction_id", sa.String(), sa.ForeignKey("crm_ai_predictions.id"), nullable=False),
         sa.Column("rating", sa.Integer),
         sa.Column("comments", sa.Text),
         sa.Column("feedback_type", sa.String(32), nullable=False),

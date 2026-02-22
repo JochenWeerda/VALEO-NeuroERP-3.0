@@ -11,7 +11,7 @@ from typing import Dict, Any, List, Optional, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 import logging
-import uuid
+from app.core.uuid7 import uuid7
 
 logger = logging.getLogger(__name__)
 
@@ -391,7 +391,7 @@ class ISO27001IncidentManagement:
 
         for role_info in team_roles:
             # Create placeholder team entries
-            team_id = str(uuid.uuid4())
+            team_id = uuid7()
             team_member = IncidentResponseTeam(
                 id=team_id,
                 user_id=f"placeholder_{role_info['role']}",
@@ -406,7 +406,7 @@ class ISO27001IncidentManagement:
         Detect and register a new security incident
         Returns incident ID
         """
-        incident_id = str(uuid.uuid4())
+        incident_id = uuid7()
 
         # Determine severity based on detection data
         severity = self._assess_incident_severity(detection_data)
@@ -460,14 +460,14 @@ class ISO27001IncidentManagement:
 
     def _initialize_incident_metrics(self, incident_id: str):
         """Initialize incident response metrics"""
-        metrics = IncidentMetrics(id=str(uuid.uuid4()), incident_id=incident_id)
+        metrics = IncidentMetrics(id=uuid7(), incident_id=incident_id)
         self.incident_metrics[incident_id] = metrics
 
     def _add_timeline_entry(self, incident_id: str, phase: IncidentPhase, action: str,
                           performed_by: str, details: str = "", automated: bool = False):
         """Add entry to incident timeline"""
         timeline_entry = IncidentTimeline(
-            id=str(uuid.uuid4()),
+            id=uuid7(),
             incident_id=incident_id,
             timestamp=datetime.utcnow(),
             phase=phase,
@@ -535,7 +535,7 @@ class ISO27001IncidentManagement:
         """Send incident notifications"""
         # Internal notification
         internal_communication = IncidentCommunication(
-            id=str(uuid.uuid4()),
+            id=uuid7(),
             incident_id=incident.id,
             communication_type='internal',
             recipient='incident_response_team',
@@ -638,7 +638,7 @@ class ISO27001IncidentManagement:
         Collect incident evidence
         Returns evidence ID
         """
-        evidence_id = str(uuid.uuid4())
+        evidence_id = uuid7()
 
         evidence = IncidentEvidence(
             id=evidence_id,

@@ -2,8 +2,8 @@
 CRM Seed Data - Realistische Testdaten (10+ pro Entität)
 """
 
-import uuid
 from datetime import datetime, timedelta
+from app.core.uuid7 import uuid7
 from sqlalchemy.orm import Session
 from . import models
 
@@ -14,7 +14,7 @@ def seed_crm_data(db: Session, tenant_id: str = "default"):
     # 10+ Contacts (Kunden & Lieferanten)
     contacts_data = [
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "name": "Max Mustermann",
             "company": "Mustermann Agrar GmbH",
             "email": "max.mustermann@mustermann-agrar.de",
@@ -28,7 +28,7 @@ def seed_crm_data(db: Session, tenant_id: str = "default"):
             "tenant_id": tenant_id
         },
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "name": "Anna Schmidt",
             "company": "Schmidt Landwirtschaft",
             "email": "anna@schmidt-land.de",
@@ -42,7 +42,7 @@ def seed_crm_data(db: Session, tenant_id: str = "default"):
             "tenant_id": tenant_id
         },
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "name": "Thomas Weber",
             "company": "Weber Agrar Service",
             "email": "thomas.weber@weber-agrar.com",
@@ -56,7 +56,7 @@ def seed_crm_data(db: Session, tenant_id: str = "default"):
             "tenant_id": tenant_id
         },
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "name": "Julia Meier",
             "company": "Saatgut Nord GmbH",
             "email": "j.meier@saatgut-nord.de",
@@ -70,7 +70,7 @@ def seed_crm_data(db: Session, tenant_id: str = "default"):
             "tenant_id": tenant_id
         },
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "name": "Klaus Bauer",
             "company": "Bauer Hof GmbH & Co. KG",
             "email": "klaus@bauer-hof.de",
@@ -84,7 +84,7 @@ def seed_crm_data(db: Session, tenant_id: str = "default"):
             "tenant_id": tenant_id
         },
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "name": "Petra Hoffmann",
             "company": "Düngemittel AG",
             "email": "p.hoffmann@duengemittel-ag.de",
@@ -98,7 +98,7 @@ def seed_crm_data(db: Session, tenant_id: str = "default"):
             "tenant_id": tenant_id
         },
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "name": "Michael Krüger",
             "company": "Krüger Landmaschinen",
             "email": "m.krueger@landmaschinen-krueger.de",
@@ -112,7 +112,7 @@ def seed_crm_data(db: Session, tenant_id: str = "default"):
             "tenant_id": tenant_id
         },
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "name": "Sandra Fischer",
             "company": "Fischer Gemüsebau",
             "email": "sandra@fischer-gemuese.de",
@@ -126,7 +126,7 @@ def seed_crm_data(db: Session, tenant_id: str = "default"):
             "tenant_id": tenant_id
         },
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "name": "Frank Schulz",
             "company": "Schulz Viehzucht",
             "email": "f.schulz@schulz-vieh.de",
@@ -140,7 +140,7 @@ def seed_crm_data(db: Session, tenant_id: str = "default"):
             "tenant_id": tenant_id
         },
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "name": "Monika Braun",
             "company": "BIO Hof Braun",
             "email": "monika@biohof-braun.de",
@@ -154,7 +154,7 @@ def seed_crm_data(db: Session, tenant_id: str = "default"):
             "tenant_id": tenant_id
         },
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "name": "Jürgen Vogel",
             "company": "Vogel Pflanzenschutz GmbH",
             "email": "j.vogel@vogel-psm.de",
@@ -168,7 +168,7 @@ def seed_crm_data(db: Session, tenant_id: str = "default"):
             "tenant_id": tenant_id
         },
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "name": "Sabine Klein",
             "company": "Klein & Partner Agrarberatung",
             "email": "klein@agrar-beratung.de",
@@ -190,7 +190,7 @@ def seed_crm_data(db: Session, tenant_id: str = "default"):
     # 10+ Leads
     leads_data = [
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "company": "Neuland Agrar e.K.",
             "contact_person": "Stefan Neumann",
             "email": "s.neumann@neuland-agrar.de",
@@ -205,7 +205,7 @@ def seed_crm_data(db: Session, tenant_id: str = "default"):
             "tenant_id": tenant_id
         },
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "company": "Grünland Pflegedienst",
             "contact_person": "Andrea Grün",
             "email": "info@gruenland-pflege.de",
@@ -220,7 +220,7 @@ def seed_crm_data(db: Session, tenant_id: str = "default"):
             "tenant_id": tenant_id
         },
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "company": "Hofgut Sonnenschein",
             "contact_person": "Familie Sonnenberg",
             "email": "kontakt@hofgut-sonnenschein.de",
@@ -235,7 +235,7 @@ def seed_crm_data(db: Session, tenant_id: str = "default"):
             "tenant_id": tenant_id
         },
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "company": "Tierhaltung Westfalen GmbH",
             "contact_person": "Dr. Werner Wolf",
             "email": "w.wolf@tierhaltung-west.de",
@@ -250,7 +250,7 @@ def seed_crm_data(db: Session, tenant_id: str = "default"):
             "tenant_id": tenant_id
         },
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "company": "Obstbau Meyer",
             "contact_person": "Lisa Meyer",
             "email": "l.meyer@obstbau-meyer.de",
@@ -276,7 +276,7 @@ def seed_crm_data(db: Session, tenant_id: str = "default"):
     
     activities_data = [
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "contact_id": contact_ids[0],
             "type": models.ActivityType.CALL,
             "date": datetime.now() - timedelta(days=2),
@@ -287,7 +287,7 @@ def seed_crm_data(db: Session, tenant_id: str = "default"):
             "tenant_id": tenant_id
         },
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "contact_id": contact_ids[0],
             "type": models.ActivityType.MEETING,
             "date": datetime.now() + timedelta(days=5),
@@ -298,7 +298,7 @@ def seed_crm_data(db: Session, tenant_id: str = "default"):
             "tenant_id": tenant_id
         },
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "contact_id": contact_ids[1],
             "type": models.ActivityType.EMAIL,
             "date": datetime.now() - timedelta(days=1),
@@ -309,7 +309,7 @@ def seed_crm_data(db: Session, tenant_id: str = "default"):
             "tenant_id": tenant_id
         },
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "contact_id": contact_ids[2],
             "type": models.ActivityType.VISIT,
             "date": datetime.now() - timedelta(days=7),
@@ -320,7 +320,7 @@ def seed_crm_data(db: Session, tenant_id: str = "default"):
             "tenant_id": tenant_id
         },
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "contact_id": contact_ids[2],
             "type": models.ActivityType.CALL,
             "date": datetime.now() + timedelta(days=3),
@@ -339,7 +339,7 @@ def seed_crm_data(db: Session, tenant_id: str = "default"):
     # 5+ Betriebsprofile
     betriebsprofile_data = [
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "name": "Mustermann Agrar Betriebsprofil",
             "betriebsform": "Ackerbau",
             "flaeche_ha": 250,
@@ -349,7 +349,7 @@ def seed_crm_data(db: Session, tenant_id: str = "default"):
             "tenant_id": tenant_id
         },
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "name": "Schmidt Bio-Betrieb",
             "betriebsform": "Gemüsebau (Bio)",
             "flaeche_ha": 35,
@@ -359,7 +359,7 @@ def seed_crm_data(db: Session, tenant_id: str = "default"):
             "tenant_id": tenant_id
         },
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "name": "Weber Lohnunternehmen",
             "betriebsform": "Dienstleistung",
             "flaeche_ha": 0,
@@ -369,7 +369,7 @@ def seed_crm_data(db: Session, tenant_id: str = "default"):
             "tenant_id": tenant_id
         },
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "name": "Bauer Hof Großbetrieb",
             "betriebsform": "Ackerbau & Viehzucht",
             "flaeche_ha": 250,
@@ -379,7 +379,7 @@ def seed_crm_data(db: Session, tenant_id: str = "default"):
             "tenant_id": tenant_id
         },
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "name": "Sonnenfeld Ökohof",
             "betriebsform": "Ackerbau (Bio)",
             "flaeche_ha": 120,

@@ -7,8 +7,8 @@ from __future__ import annotations
 from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session
 from sqlalchemy import select
-import uuid
 from datetime import date
+from app.core.uuid7 import uuid7
 
 from app.models.documents import DocumentHeader, DocumentLine
 
@@ -31,7 +31,7 @@ class DocumentRepository:
     ) -> DocumentHeader:
         """Erstellt neues Dokument"""
         header = DocumentHeader(
-            id=str(uuid.uuid4()),
+            id=uuid7(),
             type=doc_type,
             number=number,
             status='draft',
@@ -44,7 +44,7 @@ class DocumentRepository:
         # Lines erstellen
         for idx, line_data in enumerate(lines):
             line = DocumentLine(
-                id=str(uuid.uuid4()),
+                id=uuid7(),
                 header_id=header.id,
                 line_number=idx + 1,
                 article_id=line_data.get('article'),

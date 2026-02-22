@@ -8,7 +8,7 @@ für das Kundenportal bereit.
 from datetime import datetime, timedelta
 from decimal import Decimal
 from typing import List, Optional
-import uuid
+from app.core.uuid7 import uuid7
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
@@ -236,7 +236,7 @@ async def create_order(
     customer_number = "K-DEMO-001"
     
     # Generiere Bestellnummer
-    order_number = f"PO-{datetime.utcnow().strftime('%Y%m%d')}-{str(uuid.uuid4())[:8].upper()}"
+    order_number = f"PO-{datetime.utcnow().strftime('%Y%m%d')}-{uuid7()[:8].upper()}"
     
     # Erstelle Bestellung
     order = CustomerOrder(

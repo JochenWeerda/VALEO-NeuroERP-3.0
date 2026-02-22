@@ -35,7 +35,7 @@ def upgrade() -> None:
     # Channels table
     op.create_table(
         "crm_multichannel_channels",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
+        sa.Column("id", sa.String(), primary_key=True, default=uuid4),
         sa.Column("tenant_id", sa.String(64), nullable=False),
         sa.Column("name", sa.String(255), nullable=False),
         sa.Column("type", postgresql.ENUM('facebook', 'twitter', 'linkedin', 'instagram', 'website', 'email', 'sms', 'whatsapp', 'telegram', 'shopify', 'woocommerce', 'stripe', 'erp', name='crm_multichannel_channel_type'), nullable=False),
@@ -57,14 +57,14 @@ def upgrade() -> None:
     # Conversations table
     op.create_table(
         "crm_multichannel_conversations",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
+        sa.Column("id", sa.String(), primary_key=True, default=uuid4),
         sa.Column("tenant_id", sa.String(64), nullable=False),
-        sa.Column("channel_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("crm_multichannel_channels.id"), nullable=False),
+        sa.Column("channel_id", sa.String(), sa.ForeignKey("crm_multichannel_channels.id"), nullable=False),
         sa.Column("external_id", sa.String(255), nullable=False),
         sa.Column("thread_id", sa.String(255)),
-        sa.Column("customer_id", postgresql.UUID(as_uuid=True)),
-        sa.Column("contact_id", postgresql.UUID(as_uuid=True)),
-        sa.Column("lead_id", postgresql.UUID(as_uuid=True)),
+        sa.Column("customer_id", sa.String()),
+        sa.Column("contact_id", sa.String()),
+        sa.Column("lead_id", sa.String()),
         sa.Column("subject", sa.String(500)),
         sa.Column("status", postgresql.ENUM('open', 'closed', 'pending', 'escalated', name='crm_multichannel_conversation_status'), nullable=False, server_default='open'),
         sa.Column("priority", sa.String(16), server_default='normal'),
@@ -85,9 +85,9 @@ def upgrade() -> None:
     # Messages table
     op.create_table(
         "crm_multichannel_messages",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
+        sa.Column("id", sa.String(), primary_key=True, default=uuid4),
         sa.Column("tenant_id", sa.String(64), nullable=False),
-        sa.Column("conversation_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("crm_multichannel_conversations.id"), nullable=False),
+        sa.Column("conversation_id", sa.String(), sa.ForeignKey("crm_multichannel_conversations.id"), nullable=False),
         sa.Column("external_id", sa.String(255), nullable=False),
         sa.Column("external_parent_id", sa.String(255)),
         sa.Column("direction", postgresql.ENUM('inbound', 'outbound', name='crm_multichannel_message_direction'), nullable=False),
@@ -107,7 +107,7 @@ def upgrade() -> None:
     # Web Forms table
     op.create_table(
         "crm_multichannel_webforms",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
+        sa.Column("id", sa.String(), primary_key=True, default=uuid4),
         sa.Column("tenant_id", sa.String(64), nullable=False),
         sa.Column("name", sa.String(255), nullable=False),
         sa.Column("description", sa.Text),
@@ -132,13 +132,13 @@ def upgrade() -> None:
     # Form Submissions table
     op.create_table(
         "crm_multichannel_submissions",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
+        sa.Column("id", sa.String(), primary_key=True, default=uuid4),
         sa.Column("tenant_id", sa.String(64), nullable=False),
-        sa.Column("form_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("crm_multichannel_webforms.id"), nullable=False),
+        sa.Column("form_id", sa.String(), sa.ForeignKey("crm_multichannel_webforms.id"), nullable=False),
         sa.Column("data", postgresql.JSONB, nullable=False),
         sa.Column("metadata", postgresql.JSONB, default=dict),
         sa.Column("lead_created", sa.Boolean, nullable=False, server_default='false'),
-        sa.Column("lead_id", postgresql.UUID(as_uuid=True)),
+        sa.Column("lead_id", sa.String()),
         sa.Column("processed_at", sa.DateTime),
         sa.Column("processing_status", sa.String(32), server_default='pending'),
         sa.Column("source_url", sa.String(500)),
@@ -150,7 +150,7 @@ def upgrade() -> None:
     # Integrations table
     op.create_table(
         "crm_multichannel_integrations",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
+        sa.Column("id", sa.String(), primary_key=True, default=uuid4),
         sa.Column("tenant_id", sa.String(64), nullable=False),
         sa.Column("name", sa.String(255), nullable=False),
         sa.Column("type", sa.String(64), nullable=False),

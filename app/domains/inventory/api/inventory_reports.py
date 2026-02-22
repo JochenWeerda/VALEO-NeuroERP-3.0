@@ -7,6 +7,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
+from ....core.config import settings
 from ....core.database import get_db
 from ..application.services.inventory_service import InventoryService
 from ..application.services.replenishment_service import ReplenishmentService
@@ -14,7 +15,7 @@ from .inventory_auth import require_inventory_access, get_current_tenant_id
 
 router = APIRouter()
 
-DEFAULT_TENANT = "system"
+DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
 @router.get("/stock-alerts")

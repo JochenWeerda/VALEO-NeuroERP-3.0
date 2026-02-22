@@ -11,7 +11,7 @@ from typing import Dict, Any, List, Optional, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 import logging
-import uuid
+from app.core.uuid7 import uuid7
 
 logger = logging.getLogger(__name__)
 
@@ -273,7 +273,7 @@ class ISO27001IncidentResponse:
 
         # Create incident
         incident = Incident(
-            id=str(uuid.uuid4()),
+            id=uuid7(),
             title=detection_data.get('title', f'{incident_category.value.title()} Incident'),
             description=detection_data.get('description', 'Automatically detected security incident'),
             category=incident_category,
@@ -281,7 +281,7 @@ class ISO27001IncidentResponse:
             status=IncidentStatus.DETECTED,
             detected_at=datetime.utcnow(),
             reported_by='automated_detection',
-            tenant_id=detection_data.get('tenant_id', 'system'),
+            tenant_id=detection_data.get('tenant_id', '00000000-0000-0000-0000-000000000001'),
             affected_assets=detection_data.get('affected_assets', []),
             evidence_collected=[{
                 'type': 'detection_alert',
@@ -469,7 +469,7 @@ class ISO27001IncidentResponse:
                 'incident_id': incident_id,
                 'old_status': old_status.value,
                 'new_status': new_status.value,
-                'updated_by': update_data.get('updated_by', 'system') if update_data else 'system'
+                'updated_by': update_data.get('updated_by', '00000000-0000-0000-0000-000000000001') if update_data else '00000000-0000-0000-0000-000000000001'
             })
 
         logger.info(f"Incident {incident_id} status updated: {old_status.value} -> {new_status.value}")
@@ -565,7 +565,7 @@ class ISO27001IncidentResponse:
             }
         }
 
-    def get_incident_dashboard(self, tenant_id: str = 'system') -> Dict[str, Any]:
+    def get_incident_dashboard(self, tenant_id: str = '00000000-0000-0000-0000-000000000001') -> Dict[str, Any]:
         """Get incident dashboard data"""
         # Filter incidents by tenant
         tenant_incidents = [
@@ -622,7 +622,7 @@ class ISO27001IncidentResponse:
         """
         # Create mock incident
         mock_incident = Incident(
-            id=f"drill-{uuid.uuid4()}",
+            id=f"drill-{uuid7()}",
             title=f"Simulated {incident_type.value.title()} Incident",
             description="This is a simulated incident for training purposes",
             category=incident_type,

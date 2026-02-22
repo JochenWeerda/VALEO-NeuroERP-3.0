@@ -11,7 +11,7 @@ from typing import Dict, Any, List, Optional, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 import logging
-import uuid
+from app.core.uuid7 import uuid7
 
 logger = logging.getLogger(__name__)
 
@@ -342,7 +342,7 @@ class ISO27001OperationsSecurity:
         Create a change request
         Returns change request ID
         """
-        change_id = str(uuid.uuid4())
+        change_id = uuid7()
 
         # Assess change risk automatically
         risk_assessment = self._assess_change_risk(change_data)
@@ -418,7 +418,7 @@ class ISO27001OperationsSecurity:
 
         # Create approval record
         approval = ChangeApproval(
-            id=str(uuid.uuid4()),
+            id=uuid7(),
             change_request_id=change_id,
             approver=approval_data['approver'],
             approval_level=approval_data['approval_level'],
@@ -540,7 +540,7 @@ class ISO27001OperationsSecurity:
         Create a backup job
         Returns backup job ID
         """
-        job_id = str(uuid.uuid4())
+        job_id = uuid7()
 
         job = BackupJob(
             id=job_id,
@@ -568,7 +568,7 @@ class ISO27001OperationsSecurity:
         if job_id not in self.backup_jobs:
             raise ValueError(f"Backup job {job_id} not found")
 
-        execution_id = str(uuid.uuid4())
+        execution_id = uuid7()
 
         execution = BackupExecution(
             id=execution_id,
@@ -670,7 +670,7 @@ class ISO27001OperationsSecurity:
             return None  # No alert needed
 
         # Create alert
-        alert_id = str(uuid.uuid4())
+        alert_id = uuid7()
 
         alert = CapacityAlert(
             id=alert_id,
@@ -708,7 +708,7 @@ class ISO27001OperationsSecurity:
                             message: str, operator: str, details: Dict[str, Any] = None):
         """Log operations event"""
         log_entry = OperationsLog(
-            id=str(uuid.uuid4()),
+            id=uuid7(),
             timestamp=datetime.utcnow(),
             system_id=system_id,
             event_type=event_type,
@@ -725,7 +725,7 @@ class ISO27001OperationsSecurity:
         Create a maintenance window
         Returns window ID
         """
-        window_id = str(uuid.uuid4())
+        window_id = uuid7()
 
         window = MaintenanceWindow(
             id=window_id,
@@ -772,7 +772,7 @@ class ISO27001OperationsSecurity:
         )
 
         dashboard = OperationsDashboard(
-            id=str(uuid.uuid4()),
+            id=uuid7(),
             generated_at=datetime.utcnow(),
             period_start=datetime.utcnow() - timedelta(days=7),
             period_end=datetime.utcnow(),

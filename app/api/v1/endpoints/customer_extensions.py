@@ -10,12 +10,13 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from ....core.config import settings
 from ....core.database import get_db
 from ....infrastructure.models import Customer, Lead, Contact
 from ..schemas.base import BaseSchema
 
 router = APIRouter()
-DEFAULT_TENANT = "system"
+DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
 class GeoSearchRequest(BaseModel):
@@ -73,14 +74,14 @@ async def convert_lead_to_customer(
     db: Session = Depends(get_db),
 ):
     """POST Interessent zu Kunde"""
-    import uuid
+    from app.core.uuid7 import uuid7
     from datetime import datetime, timezone
     tid = tenant_id or DEFAULT_TENANT
     lead = db.query(Lead).filter(Lead.id == payload.lead_id).first()
     if not lead:
         raise HTTPException(404, "Lead not found")
     customer = Customer(
-        id=str(uuid.uuid4()),
+        id=uuid7(),
         customer_number=f"K-{lead.id[:8].upper()}",
         company_name=lead.company_name,
         contact_person=lead.contact_person,

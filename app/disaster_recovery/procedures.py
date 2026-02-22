@@ -11,7 +11,7 @@ from typing import Dict, Any, List, Optional, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 import logging
-import uuid
+from app.core.uuid7 import uuid7
 
 logger = logging.getLogger(__name__)
 
@@ -204,7 +204,7 @@ class ISO22301DisasterRecovery:
         Declare a disaster and initiate recovery procedures
         Returns disaster ID
         """
-        disaster_id = str(uuid.uuid4())
+        disaster_id = uuid7()
 
         declaration = DisasterDeclaration(
             id=disaster_id,
@@ -323,7 +323,7 @@ class ISO22301DisasterRecovery:
         Create a recovery procedure
         Returns procedure ID
         """
-        procedure_id = str(uuid.uuid4())
+        procedure_id = uuid7()
 
         procedure = RecoveryProcedure(
             id=procedure_id,
@@ -355,7 +355,7 @@ class ISO22301DisasterRecovery:
 
         procedure = self.recovery_procedures[procedure_id]
 
-        execution_id = str(uuid.uuid4())
+        execution_id = uuid7()
 
         execution = RecoveryExecution(
             id=execution_id,
@@ -511,7 +511,7 @@ class ISO22301DisasterRecovery:
         Create a failover configuration
         Returns configuration ID
         """
-        config_id = str(uuid.uuid4())
+        config_id = uuid7()
 
         config = FailoverConfiguration(
             id=config_id,
@@ -536,7 +536,7 @@ class ISO22301DisasterRecovery:
         Register a recovery resource
         Returns resource ID
         """
-        resource_id = str(uuid.uuid4())
+        resource_id = uuid7()
 
         resource = RecoveryResource(
             id=resource_id,

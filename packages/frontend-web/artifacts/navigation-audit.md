@@ -1,0 +1,468 @@
+# Navigation Audit
+
+Generated: 2026-02-13T22:25:03.485Z
+
+## Summary
+
+- Pages total: 308
+- Sidebar menu points total: 122
+- Starter cards total: 16
+- Missing module files: 0
+- Missing route links: 0
+- Unassigned pages (not referenced in sidebar modules): 204
+
+## Starter Cards
+
+- dashboard | Dashboard | path: `/` | module: `@/pages/start-dashboard`
+- verkauf | Verkauf | path: `/dashboard/sales` | module: `-`
+- crm | CRM & Marketing | path: `/crm/kontakte-liste` | module: `-`
+- einkauf | Einkauf | path: `/dashboard/einkauf` | module: `-`
+- fibu | Finanzbuchhaltung | path: `/fibu/hauptbuch` | module: `-`
+- lager | Lager & Bestände | path: `/lager/bestandsuebersicht` | module: `-`
+- agrar | Agrar & Warenwirtschaft | path: `/agrar/psm` | module: `-`
+- annahme | Annahme & Waage | path: `/annahme/warteschlange` | module: `-`
+- quality | Qualität & Compliance | path: `/document` | module: `-`
+- compliance | Compliance | path: `/policies` | module: `-`
+- logistik | Logistik | path: `/logistik/tourenplanung` | module: `-`
+- pos | POS & Filialen | path: `/pos/terminal` | module: `-`
+- personal | Personal | path: `/personal/mitarbeiter-liste` | module: `-`
+- controlling | Controlling | path: `/controlling/plan-ist` | module: `-`
+- workflow | Workflows | path: `/workflow/workflow-monitoring` | module: `-`
+- admin | Administration | path: `/admin/benutzer-liste` | module: `-`
+
+## Sidebar Menu Points
+
+- dashboard | Dashboard | module: `@/pages/start-dashboard` | path: `/` | file:ok, route:ok
+- verkauf | Verkauf | module: `-` | path: `-` | file:ok, route:ok
+  - sales-dashboard | Dashboard | module: `@/pages/dashboard/sales-dashboard` | path: `/dashboard/sales` | file:ok, route:ok
+  - angebot | Angebote | module: `@/pages/sales/angebote-liste` | path: `/sales` | file:ok, route:ok
+  - auftrag | Aufträge | module: `@/pages/sales/order-editor` | path: `/sales/order` | file:ok, route:ok
+  - lieferung | Lieferungen | module: `@/pages/sales/delivery-editor` | path: `/sales/delivery` | file:ok, route:ok
+  - rechnung | Rechnungen | module: `@/pages/sales/invoice-editor` | path: `/sales/invoice` | file:ok, route:ok
+  - kunden | Kunden | module: `@/pages/verkauf/kunden-liste` | path: `/verkauf/kunden-liste` | file:ok, route:ok
+  - artikel | Artikel | module: `@/pages/artikel/liste` | path: `/artikel/liste` | file:ok, route:ok
+  - analytics | Analytics | module: `@/pages/analytics` | path: `/copilot` | file:ok, route:ok
+  - reports | Berichte | module: `@/pages/reports` | path: `/reports` | file:ok, route:ok
+- crm | CRM & Marketing | module: `-` | path: `-` | file:ok, route:ok
+  - kontakte | Kontakte | module: `@/pages/crm/kontakte-liste` | path: `/crm/kontakte-liste` | file:ok, route:ok
+  - leads | Leads | module: `@/pages/crm/leads` | path: `/crm/leads` | file:ok, route:ok
+  - prospecting | Prospecting | module: `@/pages/prospecting/LeadExplorer` | path: `/prospecting/leads` | file:ok, route:ok
+  - aktivitaeten | Aktivitäten | module: `@/pages/crm/aktivitaeten` | path: `/crm/aktivitaeten` | file:ok, route:ok
+  - betriebsprofile | Betriebsprofile | module: `@/pages/crm/betriebsprofile-liste` | path: `/crm/betriebsprofile` | file:ok, route:ok
+  - kampagnen | Kampagnen | module: `@/pages/crm/campaigns` | path: `/crm/campaigns` | file:ok, route:ok
+  - kampagnen-vorlagen | Kampagnen-Vorlagen | module: `@/pages/crm/campaign-templates` | path: `/crm/campaign-templates` | file:ok, route:ok
+  - kampagnen-performance | Kampagnen-Performance | module: `@/pages/crm/campaign-performance-dashboard` | path: `/crm/campaign-performance` | file:ok, route:ok
+  - segmente | Segmente | module: `@/pages/crm/segments` | path: `/crm/segments` | file:ok, route:ok
+  - einwilligungen | Einwilligungen | module: `@/pages/crm/consent-management` | path: `/crm/consents` | file:ok, route:ok
+  - dsgvo-anfragen | DSGVO-Anfragen | module: `@/pages/crm/gdpr-requests` | path: `/crm/gdpr-requests` | file:ok, route:ok
+- einkauf | Einkauf | module: `-` | path: `-` | file:ok, route:ok
+  - einkauf-dashboard | Dashboard | module: `@/pages/dashboard/einkauf-dashboard` | path: `/dashboard/einkauf` | file:ok, route:ok
+  - bestellvorschlaege | Bestellvorschläge | module: `@/pages/einkauf/bestellvorschlaege` | path: `/einkauf/bestellvorschlaege` | file:ok, route:ok
+  - bestellungen | Bestellungen | module: `@/pages/einkauf/bestellungen-liste` | path: `/einkauf/bestellungen-liste` | file:ok, route:ok
+  - wareneingang | Wareneingang | module: `@/pages/charge/wareneingang` | path: `/charge/wareneingang` | file:ok, route:ok
+  - lieferanten | Lieferanten | module: `@/pages/einkauf/lieferanten-liste` | path: `/einkauf/lieferanten-liste` | file:ok, route:ok
+  - warengruppen | Warengruppen | module: `@/pages/einkauf/warengruppen` | path: `/einkauf/warengruppen` | file:ok, route:ok
+  - anfragen | Anfragen (RFQ) | module: `@/pages/einkauf/anfragen-liste` | path: `/einkauf/anfragen-liste` | file:ok, route:ok
+  - angebote-einkauf | Angebote | module: `@/pages/einkauf/angebote-liste` | path: `/einkauf/angebote-liste` | file:ok, route:ok
+  - rechnungseingaenge | Rechnungseingänge | module: `@/pages/einkauf/rechnungseingaenge-liste` | path: `/einkauf/rechnungseingaenge-liste` | file:ok, route:ok
+  - rechnung-abgleich | Rechnungsabgleich | module: `@/pages/einkauf/rechnung-abgleich` | path: `/einkauf/rechnung-abgleich` | file:ok, route:ok
+  - retouren | Retouren | module: `@/pages/einkauf/retouren` | path: `/einkauf/retouren` | file:ok, route:ok
+  - disposition | Disposition | module: `@/pages/disposition/liste` | path: `/disposition/liste` | file:ok, route:ok
+  - lieferantenbewertung | Lieferantenbewertung | module: `@/pages/einkauf/lieferantenbewertung` | path: `/einkauf/lieferantenbewertung` | file:ok, route:ok
+  - lieferanten-dokumente | Lieferanten-Dokumente | module: `@/pages/einkauf/lieferanten-dokumente` | path: `/einkauf/lieferanten-dokumente` | file:ok, route:ok
+  - service-entry-sheets | Service Entry Sheets | module: `@/pages/einkauf/service-entry-sheets` | path: `/einkauf/service-entry-sheets` | file:ok, route:ok
+  - audit-drilldown | Audit Drilldown | module: `@/pages/einkauf/audit-drilldown` | path: `/einkauf/audit-drilldown` | file:ok, route:ok
+  - edi-portal | EDI Portal | module: `@/pages/einkauf/edi-portal` | path: `/einkauf/edi-portal` | file:ok, route:ok
+- fibu | Finanzbuchhaltung | module: `-` | path: `-` | file:ok, route:ok
+  - hauptbuch | Hauptbuch | module: `@/pages/fibu/hauptbuch` | path: `/fibu/hauptbuch` | file:ok, route:ok
+  - debitoren | Debitoren | module: `@/pages/fibu/debitoren` | path: `/fibu/debitoren` | file:ok, route:ok
+  - kreditoren | Kreditoren | module: `@/pages/fibu/kreditoren` | path: `/fibu/kreditoren` | file:ok, route:ok
+  - buchungsjournal | Buchungsjournal | module: `@/pages/fibu/buchungsjournal` | path: `/finance/bookings/new` | file:ok, route:ok
+  - kontenplan | Kontenplan | module: `@/pages/fibu/kontenplan` | path: `/fibu/kontenplan` | file:ok, route:ok
+  - bilanz | Bilanz | module: `@/pages/fibu/bilanz` | path: `/fibu/bilanz` | file:ok, route:ok
+  - guv | GuV | module: `@/pages/fibu/guv` | path: `/fibu/guv` | file:ok, route:ok
+  - bwa | BWA | module: `@/pages/fibu/bwa` | path: `/fibu/bwa` | file:ok, route:ok
+  - anlagen | Anlagenbuchhaltung | module: `@/pages/fibu/anlagen` | path: `/fibu/anlagen` | file:ok, route:ok
+  - op-verwaltung | OP-Verwaltung | module: `@/pages/fibu/op-verwaltung` | path: `/fibu/op-verwaltung` | file:ok, route:ok
+  - offene-posten | Offene Posten | module: `@/pages/fibu/offene-posten` | path: `/fibu/offene-posten` | file:ok, route:ok
+  - zahlungslaeufe | Zahlungsläufe | module: `@/pages/fibu/zahlungslaeufe` | path: `/fibu/zahlungslaeufe` | file:ok, route:ok
+  - kostenstellenrechnung | Kostenstellen | module: `@/pages/fibu/kostenstellenrechnung` | path: `/fibu/kostenstellenrechnung` | file:ok, route:ok
+  - ustva | USt.-Voranmeldung | module: `@/pages/export/umsatzsteuervoranmeldung` | path: `/export/ustva` | file:ok, route:ok
+  - audit-trail-finance | Audit-Trail (GoBD) | module: `@/pages/finance/audit-trail` | path: `/finance/audit-trail` | file:ok, route:ok
+- lager | Lager & Bestände | module: `-` | path: `-` | file:ok, route:ok
+  - bestandsuebersicht | Bestandsübersicht | module: `@/pages/lager/bestandsuebersicht` | path: `/lager/bestandsuebersicht` | file:ok, route:ok
+  - einlagerung | Einlagerung | module: `@/pages/lager/einlagerung` | path: `/lager/einlagerung` | file:ok, route:ok
+  - auslagerung | Auslagerung | module: `@/pages/lager/auslagerung` | path: `/lager/auslagerung` | file:ok, route:ok
+  - inventur | Inventur | module: `@/pages/lager/inventur` | path: `/lager/inventur` | file:ok, route:ok
+- agrar | Agrar & Warenwirtschaft | module: `-` | path: `-` | file:ok, route:ok
+  - psm | Pflanzenschutz | module: `@/pages/agrar/psm/liste` | path: `/agrar/psm` | file:ok, route:ok
+  - duenger | Dünger | module: `@/pages/agrar/duenger-liste` | path: `/agrar/duenger-liste` | file:ok, route:ok
+  - saatgut | Saatgut | module: `@/pages/agrar/saatgut-liste` | path: `/agrar/saatgut-liste` | file:ok, route:ok
+  - bodenproben | Bodenproben | module: `@/pages/agrar/bodenproben/liste` | path: `/agrar/bodenproben` | file:ok, route:ok
+  - ernte | Ernteplanung | module: `@/pages/agrar/ernte/liste` | path: `/agrar/ernte` | file:ok, route:ok
+  - feldbuch | Feldbuch | module: `@/pages/agrar/feldbuch/schlagkartei` | path: `/agrar/feldbuch/schlagkartei` | file:ok, route:ok
+  - futtermittel | Futtermittel | module: `-` | path: `-` | file:ok, route:ok
+    - einzelfuttermittel | Einzelfuttermittel | module: `@/pages/futtermittel/einzelfuttermittel-liste` | path: `/futtermittel/einzelfuttermittel-liste` | file:ok, route:ok
+    - mischfuttermittel | Mischfuttermittel | module: `@/pages/futtermittel/mischfuttermittel-liste` | path: `/futtermittel/mischfuttermittel-liste` | file:ok, route:ok
+    - futtermittel-wareneingang | Wareneingang | module: `@/pages/futtermittel/futtermittel-wareneingang` | path: `/futtermittel/futtermittel-wareneingang` | file:ok, route:ok
+    - futtermittel-qualitaet | Qualitätskontrolle | module: `@/pages/futtermittel/futtermittel-qualitaetskontrolle` | path: `/futtermittel/futtermittel-qualitaetskontrolle` | file:ok, route:ok
+    - futtermittel-statistik | Statistik | module: `@/pages/futtermittel/futtermittel-statistik` | path: `/futtermittel/futtermittel-statistik` | file:ok, route:ok
+- annahme | Annahme & Waage | module: `-` | path: `-` | file:ok, route:ok
+  - warteschlange | Warteschlange | module: `@/pages/annahme/warteschlange` | path: `/annahme/warteschlange` | file:ok, route:ok
+  - waage-liste | Waagen | module: `@/pages/waage/liste` | path: `/waage/liste` | file:ok, route:ok
+  - wiegungen | Wiegungen | module: `@/pages/waage/wiegungen` | path: `/waage/wiegungen` | file:ok, route:ok
+- quality | Qualität & Compliance | module: `-` | path: `-` | file:ok, route:ok
+  - qm-dokumente | QM-Dokumente | module: `@/pages/document` | path: `/document` | file:ok, route:ok
+  - audit-trails | Audit Trails | module: `@/pages/admin/audit-log` | path: `/admin/audit-log` | file:ok, route:ok
+  - compliance | Compliance Cockpit | module: `@/pages/admin/compliance-dashboard` | path: `/admin/compliance` | file:ok, route:ok
+- compliance | Compliance | module: `-` | path: `-` | file:ok, route:ok
+  - policies | Policies | module: `@/pages/policy-manager` | path: `/policies` | file:ok, route:ok
+  - zulassungen | Zulassungen | module: `@/pages/compliance/zulassungen-register` | path: `/compliance/zulassungen-register` | file:ok, route:ok
+  - export-pruefprotokoll | Export-Protokoll | module: `@/pages/compliance/export-pruefprotokoll` | path: `/compliance/export-pruefprotokoll` | file:ok, route:ok
+  - eudr | EUDR-Compliance | module: `@/pages/nachhaltigkeit/eudr-compliance` | path: `/nachhaltigkeit/eudr-compliance` | file:ok, route:ok
+  - labor | Labor | module: `@/pages/qualitaet/labor-liste` | path: `/qualitaet/labor-liste` | file:ok, route:ok
+  - zertifikate | Zertifikate | module: `@/pages/zertifikate/liste` | path: `/zertifikate/liste` | file:ok, route:ok
+- logistik | Logistik | module: `-` | path: `-` | file:ok, route:ok
+  - tourenplanung | Tourenplanung | module: `@/pages/logistik/tourenplanung` | path: `/logistik/tourenplanung` | file:ok, route:ok
+  - frachtbriefe | Frachtbriefe | module: `@/pages/logistik/frachtbriefe` | path: `/logistik/frachtbriefe` | file:ok, route:ok
+- pos | POS & Filialen | module: `-` | path: `-` | file:ok, route:ok
+  - pos-terminal | POS Terminal | module: `@/pages/pos/terminal` | path: `/pos/terminal` | file:ok, route:ok
+  - tse-journal | TSE Journal | module: `@/pages/pos/tse-journal` | path: `/pos/tse-journal` | file:ok, route:ok
+  - tagesabschluss | Tagesabschluss | module: `@/pages/pos/tagesabschluss-enhanced` | path: `/pos/tagesabschluss-enhanced` | file:ok, route:ok
+  - gift-cards | Geschenkkarten | module: `@/pages/pos/gift-cards` | path: `/pos/gift-cards` | file:ok, route:ok
+  - rabatte | Rabatte | module: `@/pages/pos/rabatte` | path: `/pos/rabatte` | file:ok, route:ok
+- personal | Personal | module: `-` | path: `-` | file:ok, route:ok
+  - mitarbeiter-liste | Mitarbeiter | module: `@/pages/personal/mitarbeiter-liste` | path: `/personal/mitarbeiter-liste` | file:ok, route:ok
+  - zeiterfassung | Zeiterfassung | module: `@/pages/personal/zeiterfassung` | path: `/personal/zeiterfassung` | file:ok, route:ok
+  - stundenzettel | Stundenzettel | module: `@/pages/personal/stundenzettel` | path: `/personal/stundenzettel` | file:ok, route:ok
+  - schulungen | Schulungen | module: `@/pages/personal/schulungen` | path: `/personal/schulungen` | file:ok, route:ok
+  - schichtplan | Schichtplan | module: `@/pages/schichtplan/liste` | path: `/schichtplan/liste` | file:ok, route:ok
+- controlling | Controlling | module: `-` | path: `-` | file:ok, route:ok
+  - plan-ist | Plan/Ist-Vergleich | module: `@/pages/controlling/plan-ist` | path: `/controlling/plan-ist` | file:ok, route:ok
+  - deckungsbeitrag | Deckungsbeitrag | module: `@/pages/reports/deckungsbeitrag` | path: `/reports/deckungsbeitrag` | file:ok, route:ok
+  - liquiditaet | Liquiditätsplanung | module: `@/pages/finanzplanung/liquiditaet` | path: `/finanzplanung/liquiditaet` | file:ok, route:ok
+  - executive-dashboard | Geschäftsführung | module: `@/pages/management/executive-dashboard` | path: `/management/executive-dashboard` | file:ok, route:ok
+- workflow | Workflows | module: `-` | path: `-` | file:ok, route:ok
+  - workflow-monitoring | Monitoring | module: `@/pages/workflow/workflow-monitoring` | path: `/workflow/workflow-monitoring` | file:ok, route:ok
+  - workflow-regeln | Regeln | module: `@/pages/workflow/workflow-regeln` | path: `/workflow/workflow-regeln` | file:ok, route:ok
+  - workflow-approval | Freigaben | module: `@/pages/workflows/approval` | path: `/workflows/approval` | file:ok, route:ok
+- admin | Administration | module: `-` | path: `-` | file:ok, route:ok
+  - benutzer | Benutzer | module: `@/pages/admin/benutzer-liste` | path: `/admin/benutzer-liste` | file:ok, route:ok
+  - rollen-verwaltung | Rollen | module: `@/pages/admin/rollen-verwaltung` | path: `/admin/rollen-verwaltung` | file:ok, route:ok
+  - audit-log | Audit-Log | module: `@/pages/admin/audit-log` | path: `/admin/audit-log` | file:ok, route:ok
+  - monitoring | Monitoring | module: `@/pages/admin/monitoring/alerts` | path: `/monitoring/alerts` | file:ok, route:ok
+  - compliance-dashboard | Compliance | module: `@/pages/admin/compliance-dashboard` | path: `/admin/compliance` | file:ok, route:ok
+  - gap-pipeline | GAP-Pipeline | module: `@/pages/admin/GapPipelineConsole` | path: `/admin/gap-pipeline` | file:ok, route:ok
+  - system-einstellungen | System | module: `@/pages/einstellungen/system` | path: `/einstellungen/system` | file:ok, route:ok
+
+## All Pages
+
+- `pages/admin/audit-log.tsx` | module: `@/pages/admin/audit-log` | assigned: yes
+- `pages/admin/benutzer-liste.tsx` | module: `@/pages/admin/benutzer-liste` | assigned: yes
+- `pages/admin/compliance-dashboard.tsx` | module: `@/pages/admin/compliance-dashboard` | assigned: yes
+- `pages/admin/GapPipelineConsole.tsx` | module: `@/pages/admin/GapPipelineConsole` | assigned: yes
+- `pages/admin/monitoring/alerts.tsx` | module: `@/pages/admin/monitoring/alerts` | assigned: yes
+- `pages/admin/rollen-verwaltung.tsx` | module: `@/pages/admin/rollen-verwaltung` | assigned: yes
+- `pages/admin/setup/dms-integration.tsx` | module: `@/pages/admin/setup/dms-integration` | assigned: no
+- `pages/admin/setup/index.tsx` | module: `@/pages/admin/setup/index` | assigned: no
+- `pages/agrar/aussaat/liste.tsx` | module: `@/pages/agrar/aussaat/liste` | assigned: no
+- `pages/agrar/biostimulanzien-liste.tsx` | module: `@/pages/agrar/biostimulanzien-liste` | assigned: no
+- `pages/agrar/bodenproben/liste.tsx` | module: `@/pages/agrar/bodenproben/liste` | assigned: yes
+- `pages/agrar/duenger-liste.tsx` | module: `@/pages/agrar/duenger-liste` | assigned: yes
+- `pages/agrar/duenger-stamm.tsx` | module: `@/pages/agrar/duenger-stamm` | assigned: no
+- `pages/agrar/duenger/bedarfsrechner.tsx` | module: `@/pages/agrar/duenger/bedarfsrechner` | assigned: no
+- `pages/agrar/duenger/liste.tsx` | module: `@/pages/agrar/duenger/liste` | assigned: no
+- `pages/agrar/duenger/mischungen.tsx` | module: `@/pages/agrar/duenger/mischungen` | assigned: no
+- `pages/agrar/duenger/stamm.tsx` | module: `@/pages/agrar/duenger/stamm` | assigned: no
+- `pages/agrar/duengung/planung.tsx` | module: `@/pages/agrar/duengung/planung` | assigned: no
+- `pages/agrar/ernte/liste.tsx` | module: `@/pages/agrar/ernte/liste` | assigned: yes
+- `pages/agrar/feldbuch/massnahmen.tsx` | module: `@/pages/agrar/feldbuch/massnahmen` | assigned: no
+- `pages/agrar/feldbuch/schlag/neu.tsx` | module: `@/pages/agrar/feldbuch/schlag/neu` | assigned: no
+- `pages/agrar/feldbuch/schlagkartei.tsx` | module: `@/pages/agrar/feldbuch/schlagkartei` | assigned: yes
+- `pages/agrar/kulturpflanzen/liste.tsx` | module: `@/pages/agrar/kulturpflanzen/liste` | assigned: no
+- `pages/agrar/maschinenauslastung.tsx` | module: `@/pages/agrar/maschinenauslastung` | assigned: no
+- `pages/agrar/pflanzenschutz/applikation.tsx` | module: `@/pages/agrar/pflanzenschutz/applikation` | assigned: no
+- `pages/agrar/psm/abgabedokumentation.tsx` | module: `@/pages/agrar/psm/abgabedokumentation` | assigned: no
+- `pages/agrar/psm/auflagen-manager.tsx` | module: `@/pages/agrar/psm/auflagen-manager` | assigned: no
+- `pages/agrar/psm/beratung.tsx` | module: `@/pages/agrar/psm/beratung` | assigned: no
+- `pages/agrar/psm/liste.tsx` | module: `@/pages/agrar/psm/liste` | assigned: yes
+- `pages/agrar/psm/resistenz.tsx` | module: `@/pages/agrar/psm/resistenz` | assigned: no
+- `pages/agrar/psm/sachkunde-register.tsx` | module: `@/pages/agrar/psm/sachkunde-register` | assigned: no
+- `pages/agrar/psm/stamm.tsx` | module: `@/pages/agrar/psm/stamm` | assigned: no
+- `pages/agrar/psm/wasserschutz.tsx` | module: `@/pages/agrar/psm/wasserschutz` | assigned: no
+- `pages/agrar/saatgut-liste.tsx` | module: `@/pages/agrar/saatgut-liste` | assigned: yes
+- `pages/agrar/saatgut-stamm.tsx` | module: `@/pages/agrar/saatgut-stamm` | assigned: no
+- `pages/agrar/saatgut/bestellung.tsx` | module: `@/pages/agrar/saatgut/bestellung` | assigned: no
+- `pages/agrar/saatgut/liste.tsx` | module: `@/pages/agrar/saatgut/liste` | assigned: no
+- `pages/agrar/saatgut/sortenregister.tsx` | module: `@/pages/agrar/saatgut/sortenregister` | assigned: no
+- `pages/agrar/saatgut/stamm.tsx` | module: `@/pages/agrar/saatgut/stamm` | assigned: no
+- `pages/agrar/schlaege/karte.tsx` | module: `@/pages/agrar/schlaege/karte` | assigned: no
+- `pages/agrar/wetter/prognose.tsx` | module: `@/pages/agrar/wetter/prognose` | assigned: no
+- `pages/agrar/wetterwarnung.tsx` | module: `@/pages/agrar/wetterwarnung` | assigned: no
+- `pages/agribusiness/farmers.tsx` | module: `@/pages/agribusiness/farmers` | assigned: no
+- `pages/agribusiness/field-service-tasks.tsx` | module: `@/pages/agribusiness/field-service-tasks` | assigned: no
+- `pages/analytics.tsx` | module: `@/pages/analytics` | assigned: yes
+- `pages/annahme/abrechnung.tsx` | module: `@/pages/annahme/abrechnung` | assigned: no
+- `pages/annahme/lkw-registrierung.tsx` | module: `@/pages/annahme/lkw-registrierung` | assigned: no
+- `pages/annahme/qualitaets-check.tsx` | module: `@/pages/annahme/qualitaets-check` | assigned: no
+- `pages/annahme/warteschlange.tsx` | module: `@/pages/annahme/warteschlange` | assigned: yes
+- `pages/artikel/liste.tsx` | module: `@/pages/artikel/liste` | assigned: yes
+- `pages/artikel/stamm.tsx` | module: `@/pages/artikel/stamm` | assigned: no
+- `pages/auth/Callback.tsx` | module: `@/pages/auth/Callback` | assigned: no
+- `pages/auth/Login.tsx` | module: `@/pages/auth/Login` | assigned: no
+- `pages/banken/konten.tsx` | module: `@/pages/banken/konten` | assigned: no
+- `pages/benachrichtigungen/liste.tsx` | module: `@/pages/benachrichtigungen/liste` | assigned: no
+- `pages/charge/liste.tsx` | module: `@/pages/charge/liste` | assigned: no
+- `pages/charge/rueckverfolgung.tsx` | module: `@/pages/charge/rueckverfolgung` | assigned: no
+- `pages/charge/stamm.tsx` | module: `@/pages/charge/stamm` | assigned: no
+- `pages/charge/wareneingang.tsx` | module: `@/pages/charge/wareneingang` | assigned: yes
+- `pages/compliance/bvl-umsatzmeldung.tsx` | module: `@/pages/compliance/bvl-umsatzmeldung` | assigned: no
+- `pages/compliance/cross-compliance.tsx` | module: `@/pages/compliance/cross-compliance` | assigned: no
+- `pages/compliance/enni-meldungen.tsx` | module: `@/pages/compliance/enni-meldungen` | assigned: no
+- `pages/compliance/export-pruefprotokoll.tsx` | module: `@/pages/compliance/export-pruefprotokoll` | assigned: yes
+- `pages/compliance/pcn-ufi.tsx` | module: `@/pages/compliance/pcn-ufi` | assigned: no
+- `pages/compliance/qs-checkliste.tsx` | module: `@/pages/compliance/qs-checkliste` | assigned: no
+- `pages/compliance/saatgut-nachbau.tsx` | module: `@/pages/compliance/saatgut-nachbau` | assigned: no
+- `pages/compliance/sachkunde-register.tsx` | module: `@/pages/compliance/sachkunde-register` | assigned: no
+- `pages/compliance/vvvo-register.tsx` | module: `@/pages/compliance/vvvo-register` | assigned: no
+- `pages/compliance/zulassungen-register.tsx` | module: `@/pages/compliance/zulassungen-register` | assigned: yes
+- `pages/contracts-v2.tsx` | module: `@/pages/contracts-v2` | assigned: no
+- `pages/controlling/plan-ist.tsx` | module: `@/pages/controlling/plan-ist` | assigned: yes
+- `pages/crm/aktivitaet-detail.tsx` | module: `@/pages/crm/aktivitaet-detail` | assigned: no
+- `pages/crm/aktivitaeten.tsx` | module: `@/pages/crm/aktivitaeten` | assigned: yes
+- `pages/crm/betriebsprofil-detail.tsx` | module: `@/pages/crm/betriebsprofil-detail` | assigned: no
+- `pages/crm/betriebsprofile-liste.tsx` | module: `@/pages/crm/betriebsprofile-liste` | assigned: yes
+- `pages/crm/campaign-builder.tsx` | module: `@/pages/crm/campaign-builder` | assigned: no
+- `pages/crm/campaign-detail.tsx` | module: `@/pages/crm/campaign-detail` | assigned: no
+- `pages/crm/campaign-performance-dashboard.tsx` | module: `@/pages/crm/campaign-performance-dashboard` | assigned: yes
+- `pages/crm/campaign-template-detail.tsx` | module: `@/pages/crm/campaign-template-detail` | assigned: no
+- `pages/crm/campaign-templates.tsx` | module: `@/pages/crm/campaign-templates` | assigned: yes
+- `pages/crm/campaigns.tsx` | module: `@/pages/crm/campaigns` | assigned: yes
+- `pages/crm/consent-confirm.tsx` | module: `@/pages/crm/consent-confirm` | assigned: no
+- `pages/crm/consent-detail.tsx` | module: `@/pages/crm/consent-detail` | assigned: no
+- `pages/crm/consent-management.tsx` | module: `@/pages/crm/consent-management` | assigned: yes
+- `pages/crm/crm-dashboard.tsx` | module: `@/pages/crm/crm-dashboard` | assigned: no
+- `pages/crm/gdpr-request-detail.tsx` | module: `@/pages/crm/gdpr-request-detail` | assigned: no
+- `pages/crm/gdpr-request-public.tsx` | module: `@/pages/crm/gdpr-request-public` | assigned: no
+- `pages/crm/gdpr-requests.tsx` | module: `@/pages/crm/gdpr-requests` | assigned: yes
+- `pages/crm/kontakt-detail.tsx` | module: `@/pages/crm/kontakt-detail` | assigned: no
+- `pages/crm/kontakt-management.tsx` | module: `@/pages/crm/kontakt-management` | assigned: no
+- `pages/crm/kontakte-liste.tsx` | module: `@/pages/crm/kontakte-liste` | assigned: yes
+- `pages/crm/kunden-liste.tsx` | module: `@/pages/crm/kunden-liste` | assigned: no
+- `pages/crm/kunden-stamm-modern.tsx` | module: `@/pages/crm/kunden-stamm-modern` | assigned: no
+- `pages/crm/kunden-stamm.tsx` | module: `@/pages/crm/kunden-stamm` | assigned: no
+- `pages/crm/lead-detail.tsx` | module: `@/pages/crm/lead-detail` | assigned: no
+- `pages/crm/leads.tsx` | module: `@/pages/crm/leads` | assigned: yes
+- `pages/crm/lieferanten-liste.tsx` | module: `@/pages/crm/lieferanten-liste` | assigned: no
+- `pages/crm/lieferanten-stamm.tsx` | module: `@/pages/crm/lieferanten-stamm` | assigned: no
+- `pages/crm/opportunities-forecast.tsx` | module: `@/pages/crm/opportunities-forecast` | assigned: no
+- `pages/crm/opportunities-kanban.tsx` | module: `@/pages/crm/opportunities-kanban` | assigned: no
+- `pages/crm/opportunities-liste.tsx` | module: `@/pages/crm/opportunities-liste` | assigned: no
+- `pages/crm/opportunity-detail.tsx` | module: `@/pages/crm/opportunity-detail` | assigned: no
+- `pages/crm/segment-detail.tsx` | module: `@/pages/crm/segment-detail` | assigned: no
+- `pages/crm/segments.tsx` | module: `@/pages/crm/segments` | assigned: yes
+- `pages/dashboard/customizable.tsx` | module: `@/pages/dashboard/customizable` | assigned: no
+- `pages/dashboard/einkauf-dashboard.tsx` | module: `@/pages/dashboard/einkauf-dashboard` | assigned: yes
+- `pages/dashboard/sales-dashboard.tsx` | module: `@/pages/dashboard/sales-dashboard` | assigned: yes
+- `pages/dashboards/geschaeftsfuehrung.tsx` | module: `@/pages/dashboards/geschaeftsfuehrung` | assigned: no
+- `pages/disposition/liste.tsx` | module: `@/pages/disposition/liste` | assigned: yes
+- `pages/document.tsx` | module: `@/pages/document` | assigned: yes
+- `pages/dokumente/ablage.tsx` | module: `@/pages/dokumente/ablage` | assigned: no
+- `pages/einkauf/anfrage-stamm.tsx` | module: `@/pages/einkauf/anfrage-stamm` | assigned: no
+- `pages/einkauf/anfragen-liste.tsx` | module: `@/pages/einkauf/anfragen-liste` | assigned: yes
+- `pages/einkauf/angebot-stamm.tsx` | module: `@/pages/einkauf/angebot-stamm` | assigned: no
+- `pages/einkauf/angebote-liste.tsx` | module: `@/pages/einkauf/angebote-liste` | assigned: yes
+- `pages/einkauf/anlieferavis-liste.tsx` | module: `@/pages/einkauf/anlieferavis-liste` | assigned: no
+- `pages/einkauf/anlieferavis.tsx` | module: `@/pages/einkauf/anlieferavis` | assigned: no
+- `pages/einkauf/audit-drilldown.tsx` | module: `@/pages/einkauf/audit-drilldown` | assigned: yes
+- `pages/einkauf/auftragsbestaetigung.tsx` | module: `@/pages/einkauf/auftragsbestaetigung` | assigned: no
+- `pages/einkauf/auftragsbestaetigungen-liste.tsx` | module: `@/pages/einkauf/auftragsbestaetigungen-liste` | assigned: no
+- `pages/einkauf/bestellung-anlegen.tsx` | module: `@/pages/einkauf/bestellung-anlegen` | assigned: no
+- `pages/einkauf/bestellung-stamm.tsx` | module: `@/pages/einkauf/bestellung-stamm` | assigned: no
+- `pages/einkauf/bestellungen-liste.tsx` | module: `@/pages/einkauf/bestellungen-liste` | assigned: yes
+- `pages/einkauf/bestellvorschlaege.tsx` | module: `@/pages/einkauf/bestellvorschlaege` | assigned: yes
+- `pages/einkauf/edi-portal.tsx` | module: `@/pages/einkauf/edi-portal` | assigned: yes
+- `pages/einkauf/gutschriften-belastungen.tsx` | module: `@/pages/einkauf/gutschriften-belastungen` | assigned: no
+- `pages/einkauf/lieferanten-dokumente.tsx` | module: `@/pages/einkauf/lieferanten-dokumente` | assigned: yes
+- `pages/einkauf/lieferanten-liste.tsx` | module: `@/pages/einkauf/lieferanten-liste` | assigned: yes
+- `pages/einkauf/lieferanten-stamm.tsx` | module: `@/pages/einkauf/lieferanten-stamm` | assigned: no
+- `pages/einkauf/lieferantenbewertung.tsx` | module: `@/pages/einkauf/lieferantenbewertung` | assigned: yes
+- `pages/einkauf/rechnung-abgleich.tsx` | module: `@/pages/einkauf/rechnung-abgleich` | assigned: yes
+- `pages/einkauf/rechnungseingaenge-liste.tsx` | module: `@/pages/einkauf/rechnungseingaenge-liste` | assigned: yes
+- `pages/einkauf/rechnungseingang.tsx` | module: `@/pages/einkauf/rechnungseingang` | assigned: no
+- `pages/einkauf/reports.tsx` | module: `@/pages/einkauf/reports` | assigned: no
+- `pages/einkauf/retouren.tsx` | module: `@/pages/einkauf/retouren` | assigned: yes
+- `pages/einkauf/rfq-bids.tsx` | module: `@/pages/einkauf/rfq-bids` | assigned: no
+- `pages/einkauf/service-entry-sheets.tsx` | module: `@/pages/einkauf/service-entry-sheets` | assigned: yes
+- `pages/einkauf/wareneingang.tsx` | module: `@/pages/einkauf/wareneingang` | assigned: no
+- `pages/einkauf/warengruppen.tsx` | module: `@/pages/einkauf/warengruppen` | assigned: yes
+- `pages/einstellungen/system.tsx` | module: `@/pages/einstellungen/system` | assigned: yes
+- `pages/energie/verbrauch.tsx` | module: `@/pages/energie/verbrauch` | assigned: no
+- `pages/etiketten/drucken.tsx` | module: `@/pages/etiketten/drucken` | assigned: no
+- `pages/export/umsatzsteuervoranmeldung.tsx` | module: `@/pages/export/umsatzsteuervoranmeldung` | assigned: yes
+- `pages/fibu/anlagen.tsx` | module: `@/pages/fibu/anlagen` | assigned: yes
+- `pages/fibu/bilanz.tsx` | module: `@/pages/fibu/bilanz` | assigned: yes
+- `pages/fibu/buchungsjournal.tsx` | module: `@/pages/fibu/buchungsjournal` | assigned: yes
+- `pages/fibu/bwa.tsx` | module: `@/pages/fibu/bwa` | assigned: yes
+- `pages/fibu/debitoren-api.tsx` | module: `@/pages/fibu/debitoren-api` | assigned: no
+- `pages/fibu/debitoren.tsx` | module: `@/pages/fibu/debitoren` | assigned: yes
+- `pages/fibu/guv.tsx` | module: `@/pages/fibu/guv` | assigned: yes
+- `pages/fibu/hauptbuch.tsx` | module: `@/pages/fibu/hauptbuch` | assigned: yes
+- `pages/fibu/kontenplan.tsx` | module: `@/pages/fibu/kontenplan` | assigned: yes
+- `pages/fibu/kostenstellenrechnung.tsx` | module: `@/pages/fibu/kostenstellenrechnung` | assigned: yes
+- `pages/fibu/kreditlinien.tsx` | module: `@/pages/fibu/kreditlinien` | assigned: no
+- `pages/fibu/kreditoren.tsx` | module: `@/pages/fibu/kreditoren` | assigned: yes
+- `pages/fibu/offene-posten.tsx` | module: `@/pages/fibu/offene-posten` | assigned: yes
+- `pages/fibu/op-verwaltung.tsx` | module: `@/pages/fibu/op-verwaltung` | assigned: yes
+- `pages/fibu/sachkonto.tsx` | module: `@/pages/fibu/sachkonto` | assigned: no
+- `pages/fibu/sicherheiten.tsx` | module: `@/pages/fibu/sicherheiten` | assigned: no
+- `pages/fibu/verbindlichkeiten.tsx` | module: `@/pages/fibu/verbindlichkeiten` | assigned: no
+- `pages/fibu/zahlungseingaenge.tsx` | module: `@/pages/fibu/zahlungseingaenge` | assigned: no
+- `pages/fibu/zahlungslaeufe.tsx` | module: `@/pages/fibu/zahlungslaeufe` | assigned: yes
+- `pages/fibu/zahlungsvorschlaege.tsx` | module: `@/pages/fibu/zahlungsvorschlaege` | assigned: no
+- `pages/finance/abschluss.tsx` | module: `@/pages/finance/abschluss` | assigned: no
+- `pages/finance/ap-invoice-form.tsx` | module: `@/pages/finance/ap-invoice-form` | assigned: no
+- `pages/finance/ap-invoices-list.tsx` | module: `@/pages/finance/ap-invoices-list` | assigned: no
+- `pages/finance/audit-trail.tsx` | module: `@/pages/finance/audit-trail` | assigned: yes
+- `pages/finance/bank-abgleich.tsx` | module: `@/pages/finance/bank-abgleich` | assigned: no
+- `pages/finance/bankkonten-stamm.tsx` | module: `@/pages/finance/bankkonten-stamm` | assigned: no
+- `pages/finance/buchungserfassung.tsx` | module: `@/pages/finance/buchungserfassung` | assigned: no
+- `pages/finance/chart-of-accounts.tsx` | module: `@/pages/finance/chart-of-accounts` | assigned: no
+- `pages/finance/debitoren-liste.tsx` | module: `@/pages/finance/debitoren-liste` | assigned: no
+- `pages/finance/debitoren-stamm.tsx` | module: `@/pages/finance/debitoren-stamm` | assigned: no
+- `pages/finance/dunning-editor.tsx` | module: `@/pages/finance/dunning-editor` | assigned: no
+- `pages/finance/index.tsx` | module: `@/pages/finance/index` | assigned: no
+- `pages/finance/invoice-form.tsx` | module: `@/pages/finance/invoice-form` | assigned: no
+- `pages/finance/invoices-list.tsx` | module: `@/pages/finance/invoices-list` | assigned: no
+- `pages/finance/kasse.tsx` | module: `@/pages/finance/kasse` | assigned: no
+- `pages/finance/kontenplan.tsx` | module: `@/pages/finance/kontenplan` | assigned: no
+- `pages/finance/kreditoren-stamm.tsx` | module: `@/pages/finance/kreditoren-stamm` | assigned: no
+- `pages/finance/lastschriften-debitoren.tsx` | module: `@/pages/finance/lastschriften-debitoren` | assigned: no
+- `pages/finance/mahnwesen.tsx` | module: `@/pages/finance/mahnwesen` | assigned: no
+- `pages/finance/nebenbuch-abstimmung.tsx` | module: `@/pages/finance/nebenbuch-abstimmung` | assigned: no
+- `pages/finance/op-debitoren.tsx` | module: `@/pages/finance/op-debitoren` | assigned: no
+- `pages/finance/op-kreditoren.tsx` | module: `@/pages/finance/op-kreditoren` | assigned: no
+- `pages/finance/payment-matching.tsx` | module: `@/pages/finance/payment-matching` | assigned: no
+- `pages/finance/periods.tsx` | module: `@/pages/finance/periods` | assigned: no
+- `pages/finance/steuerschluessel.tsx` | module: `@/pages/finance/steuerschluessel` | assigned: no
+- `pages/finance/ustva.tsx` | module: `@/pages/finance/ustva` | assigned: no
+- `pages/finance/zahlungslauf-kreditoren.tsx` | module: `@/pages/finance/zahlungslauf-kreditoren` | assigned: no
+- `pages/finanzplanung/liquiditaet.tsx` | module: `@/pages/finanzplanung/liquiditaet` | assigned: yes
+- `pages/foerderung/antrag.tsx` | module: `@/pages/foerderung/antrag` | assigned: no
+- `pages/foerderung/liste.tsx` | module: `@/pages/foerderung/liste` | assigned: no
+- `pages/fuhrpark/fahrzeuge.tsx` | module: `@/pages/fuhrpark/fahrzeuge` | assigned: no
+- `pages/futter/einzel/liste.tsx` | module: `@/pages/futter/einzel/liste` | assigned: no
+- `pages/futter/einzel/stamm.tsx` | module: `@/pages/futter/einzel/stamm` | assigned: no
+- `pages/futter/misch/liste.tsx` | module: `@/pages/futter/misch/liste` | assigned: no
+- `pages/futter/misch/stamm.tsx` | module: `@/pages/futter/misch/stamm` | assigned: no
+- `pages/futtermittel/charge-verfolgung.tsx` | module: `@/pages/futtermittel/charge-verfolgung` | assigned: no
+- `pages/futtermittel/einzelfuttermittel-liste.tsx` | module: `@/pages/futtermittel/einzelfuttermittel-liste` | assigned: yes
+- `pages/futtermittel/einzelfuttermittel-stamm.tsx` | module: `@/pages/futtermittel/einzelfuttermittel-stamm` | assigned: no
+- `pages/futtermittel/futtermittel-bestellung.tsx` | module: `@/pages/futtermittel/futtermittel-bestellung` | assigned: no
+- `pages/futtermittel/futtermittel-qualitaetskontrolle.tsx` | module: `@/pages/futtermittel/futtermittel-qualitaetskontrolle` | assigned: yes
+- `pages/futtermittel/futtermittel-statistik.tsx` | module: `@/pages/futtermittel/futtermittel-statistik` | assigned: yes
+- `pages/futtermittel/futtermittel-wareneingang.tsx` | module: `@/pages/futtermittel/futtermittel-wareneingang` | assigned: yes
+- `pages/futtermittel/mischfuttermittel-liste.tsx` | module: `@/pages/futtermittel/mischfuttermittel-liste` | assigned: yes
+- `pages/futtermittel/mischfuttermittel-stamm.tsx` | module: `@/pages/futtermittel/mischfuttermittel-stamm` | assigned: no
+- `pages/inbox/index.tsx` | module: `@/pages/inbox/index` | assigned: no
+- `pages/inventory-dashboard.tsx` | module: `@/pages/inventory-dashboard` | assigned: no
+- `pages/inventory-reports.tsx` | module: `@/pages/inventory-reports` | assigned: no
+- `pages/inventory.tsx` | module: `@/pages/inventory` | assigned: no
+- `pages/inventory/epcis/index.tsx` | module: `@/pages/inventory/epcis/index` | assigned: no
+- `pages/kasse/tagesabschluss.tsx` | module: `@/pages/kasse/tagesabschluss` | assigned: no
+- `pages/labor/proben-liste.tsx` | module: `@/pages/labor/proben-liste` | assigned: no
+- `pages/lager/auslagerung.tsx` | module: `@/pages/lager/auslagerung` | assigned: yes
+- `pages/lager/bestandsuebersicht.tsx` | module: `@/pages/lager/bestandsuebersicht` | assigned: yes
+- `pages/lager/einlagerung.tsx` | module: `@/pages/lager/einlagerung` | assigned: yes
+- `pages/lager/inventur.tsx` | module: `@/pages/lager/inventur` | assigned: yes
+- `pages/lager/lagerplaetze.tsx` | module: `@/pages/lager/lagerplaetze` | assigned: no
+- `pages/lager/terminal.tsx` | module: `@/pages/lager/terminal` | assigned: no
+- `pages/logistik/frachtbriefe.tsx` | module: `@/pages/logistik/frachtbriefe` | assigned: yes
+- `pages/logistik/tourenplanung.tsx` | module: `@/pages/logistik/tourenplanung` | assigned: yes
+- `pages/mahnwesen/mahnlauf.tsx` | module: `@/pages/mahnwesen/mahnlauf` | assigned: no
+- `pages/management/executive-dashboard.tsx` | module: `@/pages/management/executive-dashboard` | assigned: yes
+- `pages/marketing/kampagnen.tsx` | module: `@/pages/marketing/kampagnen` | assigned: no
+- `pages/mobile/scanner.tsx` | module: `@/pages/mobile/scanner` | assigned: no
+- `pages/nachhaltigkeit/biodiversitaet.tsx` | module: `@/pages/nachhaltigkeit/biodiversitaet` | assigned: no
+- `pages/nachhaltigkeit/co2-bilanz.tsx` | module: `@/pages/nachhaltigkeit/co2-bilanz` | assigned: no
+- `pages/nachhaltigkeit/eudr-compliance.tsx` | module: `@/pages/nachhaltigkeit/eudr-compliance` | assigned: yes
+- `pages/personal/mitarbeiter-liste.tsx` | module: `@/pages/personal/mitarbeiter-liste` | assigned: yes
+- `pages/personal/schulungen.tsx` | module: `@/pages/personal/schulungen` | assigned: yes
+- `pages/personal/stundenzettel.tsx` | module: `@/pages/personal/stundenzettel` | assigned: yes
+- `pages/personal/zeiterfassung.tsx` | module: `@/pages/personal/zeiterfassung` | assigned: yes
+- `pages/policy-manager.tsx` | module: `@/pages/policy-manager` | assigned: yes
+- `pages/portal/anfragen.tsx` | module: `@/pages/portal/anfragen` | assigned: no
+- `pages/portal/bestellungen.tsx` | module: `@/pages/portal/bestellungen` | assigned: no
+- `pages/portal/dokumente.tsx` | module: `@/pages/portal/dokumente` | assigned: no
+- `pages/portal/feldbuch.tsx` | module: `@/pages/portal/feldbuch` | assigned: no
+- `pages/portal/index.tsx` | module: `@/pages/portal/index` | assigned: no
+- `pages/portal/naehrstoffbilanzen.tsx` | module: `@/pages/portal/naehrstoffbilanzen` | assigned: no
+- `pages/portal/rechnungen.tsx` | module: `@/pages/portal/rechnungen` | assigned: no
+- `pages/portal/shop.tsx` | module: `@/pages/portal/shop` | assigned: no
+- `pages/portal/vertraege.tsx` | module: `@/pages/portal/vertraege` | assigned: no
+- `pages/portal/zertifikate.tsx` | module: `@/pages/portal/zertifikate` | assigned: no
+- `pages/pos/customer-display.tsx` | module: `@/pages/pos/customer-display` | assigned: no
+- `pages/pos/gift-cards.tsx` | module: `@/pages/pos/gift-cards` | assigned: yes
+- `pages/pos/rabatte.tsx` | module: `@/pages/pos/rabatte` | assigned: yes
+- `pages/pos/suspended-sales.tsx` | module: `@/pages/pos/suspended-sales` | assigned: no
+- `pages/pos/tagesabschluss-enhanced.tsx` | module: `@/pages/pos/tagesabschluss-enhanced` | assigned: yes
+- `pages/pos/terminal.tsx` | module: `@/pages/pos/terminal` | assigned: yes
+- `pages/pos/tse-journal.tsx` | module: `@/pages/pos/tse-journal` | assigned: yes
+- `pages/preise/historie.tsx` | module: `@/pages/preise/historie` | assigned: no
+- `pages/preise/konditionen.tsx` | module: `@/pages/preise/konditionen` | assigned: no
+- `pages/pricing.tsx` | module: `@/pages/pricing` | assigned: no
+- `pages/produktion/mischfutter-produktion.tsx` | module: `@/pages/produktion/mischfutter-produktion` | assigned: no
+- `pages/projekte/liste.tsx` | module: `@/pages/projekte/liste` | assigned: no
+- `pages/prospecting/LeadExplorer.tsx` | module: `@/pages/prospecting/LeadExplorer` | assigned: yes
+- `pages/public/verify.tsx` | module: `@/pages/public/verify` | assigned: no
+- `pages/qualitaet/labor-auftrag.tsx` | module: `@/pages/qualitaet/labor-auftrag` | assigned: no
+- `pages/qualitaet/labor-liste.tsx` | module: `@/pages/qualitaet/labor-liste` | assigned: yes
+- `pages/qualitaet/reklamationen.tsx` | module: `@/pages/qualitaet/reklamationen` | assigned: no
+- `pages/reports.tsx` | module: `@/pages/reports` | assigned: yes
+- `pages/reports/deckungsbeitrag.tsx` | module: `@/pages/reports/deckungsbeitrag` | assigned: yes
+- `pages/reports/lagerbestand.tsx` | module: `@/pages/reports/lagerbestand` | assigned: no
+- `pages/reports/umsatz.tsx` | module: `@/pages/reports/umsatz` | assigned: no
+- `pages/rezepte/editor.tsx` | module: `@/pages/rezepte/editor` | assigned: no
+- `pages/sales/angebot-erstellen.tsx` | module: `@/pages/sales/angebot-erstellen` | assigned: no
+- `pages/sales/angebote-liste.tsx` | module: `@/pages/sales/angebote-liste` | assigned: yes
+- `pages/sales/auftraege-liste.tsx` | module: `@/pages/sales/auftraege-liste` | assigned: no
+- `pages/sales/credit-note-editor.tsx` | module: `@/pages/sales/credit-note-editor` | assigned: no
+- `pages/sales/delivery-editor.tsx` | module: `@/pages/sales/delivery-editor` | assigned: yes
+- `pages/sales/invoice-editor.tsx` | module: `@/pages/sales/invoice-editor` | assigned: yes
+- `pages/sales/lieferungen-liste.tsx` | module: `@/pages/sales/lieferungen-liste` | assigned: no
+- `pages/sales/order-editor.tsx` | module: `@/pages/sales/order-editor` | assigned: yes
+- `pages/sales/orders-modern.tsx` | module: `@/pages/sales/orders-modern` | assigned: no
+- `pages/sales/rechnungen-liste.tsx` | module: `@/pages/sales/rechnungen-liste` | assigned: no
+- `pages/schaeden/liste.tsx` | module: `@/pages/schaeden/liste` | assigned: no
+- `pages/schaeden/meldung.tsx` | module: `@/pages/schaeden/meldung` | assigned: no
+- `pages/schichtplan/liste.tsx` | module: `@/pages/schichtplan/liste` | assigned: yes
+- `pages/service/anfragen.tsx` | module: `@/pages/service/anfragen` | assigned: no
+- `pages/setup/firma.tsx` | module: `@/pages/setup/firma` | assigned: no
+- `pages/silo/kapazitaeten.tsx` | module: `@/pages/silo/kapazitaeten` | assigned: no
+- `pages/start-dashboard.tsx` | module: `@/pages/start-dashboard` | assigned: yes
+- `pages/statistik/bewegungen.tsx` | module: `@/pages/statistik/bewegungen` | assigned: no
+- `pages/stock-management.tsx` | module: `@/pages/stock-management` | assigned: no
+- `pages/subventionen/dashboard.tsx` | module: `@/pages/subventionen/dashboard` | assigned: no
+- `pages/system/live-monitor.tsx` | module: `@/pages/system/live-monitor` | assigned: no
+- `pages/tankstelle/zapfungen.tsx` | module: `@/pages/tankstelle/zapfungen` | assigned: no
+- `pages/termine/kalender.tsx` | module: `@/pages/termine/kalender` | assigned: no
+- `pages/transporte/fahrer-liste.tsx` | module: `@/pages/transporte/fahrer-liste` | assigned: no
+- `pages/verkauf/kunde-neu.tsx` | module: `@/pages/verkauf/kunde-neu` | assigned: no
+- `pages/verkauf/kunden-liste.tsx` | module: `@/pages/verkauf/kunden-liste` | assigned: yes
+- `pages/verkauf/kunden-stamm-enhanced.tsx` | module: `@/pages/verkauf/kunden-stamm-enhanced` | assigned: no
+- `pages/verkauf/kunden-stamm.tsx` | module: `@/pages/verkauf/kunden-stamm` | assigned: no
+- `pages/verladung/liste.tsx` | module: `@/pages/verladung/liste` | assigned: no
+- `pages/verladung/lkw-beladung.tsx` | module: `@/pages/verladung/lkw-beladung` | assigned: no
+- `pages/versicherungen/liste.tsx` | module: `@/pages/versicherungen/liste` | assigned: no
+- `pages/vertrag/rahmenvertraege.tsx` | module: `@/pages/vertrag/rahmenvertraege` | assigned: no
+- `pages/vertrieb/kundenumsatz.tsx` | module: `@/pages/vertrieb/kundenumsatz` | assigned: no
+- `pages/waage/liste.tsx` | module: `@/pages/waage/liste` | assigned: yes
+- `pages/waage/wiegungen.tsx` | module: `@/pages/waage/wiegungen` | assigned: yes
+- `pages/wartung/anlagen-liste.tsx` | module: `@/pages/wartung/anlagen-liste` | assigned: no
+- `pages/weighing.tsx` | module: `@/pages/weighing` | assigned: no
+- `pages/workflow/workflow-monitoring.tsx` | module: `@/pages/workflow/workflow-monitoring` | assigned: yes
+- `pages/workflow/workflow-regeln.tsx` | module: `@/pages/workflow/workflow-regeln` | assigned: yes
+- `pages/workflows/approval.tsx` | module: `@/pages/workflows/approval` | assigned: yes
+- `pages/workflows/trigger.tsx` | module: `@/pages/workflows/trigger` | assigned: no
+- `pages/zertifikate/liste.tsx` | module: `@/pages/zertifikate/liste` | assigned: yes
+

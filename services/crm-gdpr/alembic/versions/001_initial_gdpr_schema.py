@@ -22,10 +22,10 @@ def upgrade() -> None:
     # Create gdpr_requests table
     op.create_table(
         'crm_gdpr_requests',
-        sa.Column('id', postgresql.UUID(as_uuid=True), primary_key=True),
+        sa.Column('id', sa.String(), primary_key=True),
         sa.Column('tenant_id', sa.String(64), nullable=False),
         sa.Column('request_type', sa.String(20), nullable=False),  # access, deletion, portability, objection
-        sa.Column('contact_id', postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column('contact_id', sa.String(), nullable=False),
         sa.Column('status', sa.String(20), nullable=False, server_default='pending'),  # pending, in_progress, completed, rejected, cancelled
         sa.Column('requested_at', sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
         sa.Column('completed_at', sa.DateTime(timezone=True), nullable=True),
@@ -34,7 +34,7 @@ def upgrade() -> None:
         sa.Column('is_self_request', sa.Boolean, nullable=False, server_default='true'),
         sa.Column('verified_at', sa.DateTime(timezone=True), nullable=True),
         sa.Column('verification_method', sa.String(20), nullable=True),  # email, id_card, manual, other
-        sa.Column('verification_token', postgresql.UUID(as_uuid=True), nullable=True, unique=True),
+        sa.Column('verification_token', sa.String(), nullable=True, unique=True),
         sa.Column('response_data', postgresql.JSONB, nullable=True),
         sa.Column('response_file_path', sa.String(512), nullable=True),
         sa.Column('response_file_format', sa.String(10), nullable=True),  # json, csv, pdf
@@ -56,8 +56,8 @@ def upgrade() -> None:
     # Create gdpr_request_history table
     op.create_table(
         'crm_gdpr_request_history',
-        sa.Column('id', postgresql.UUID(as_uuid=True), primary_key=True),
-        sa.Column('request_id', postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column('id', sa.String(), primary_key=True),
+        sa.Column('request_id', sa.String(), nullable=False),
         sa.Column('action', sa.String(20), nullable=False),  # created, status_changed, verified, data_exported, data_deleted, rejected, cancelled
         sa.Column('old_status', sa.String(20), nullable=True),
         sa.Column('new_status', sa.String(20), nullable=True),

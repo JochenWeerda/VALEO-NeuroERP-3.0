@@ -7,7 +7,7 @@ from __future__ import annotations
 from datetime import datetime
 from decimal import Decimal
 from typing import Optional
-import uuid
+from app.core.uuid7 import uuid7
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
@@ -73,7 +73,7 @@ def _create_snapshot(db: Session, silo_id: str, tenant_id: str) -> SiloQualitySn
     )
     snapshot_values = _weighted_quality_snapshot(lots)
     snapshot = SiloQualitySnapshot(
-        id=str(uuid.uuid4()),
+        id=uuid7(),
         silo_id=silo_id,
         total_quantity_tons=snapshot_values["total_quantity_tons"],
         moisture_avg_pct=snapshot_values["moisture_avg_pct"],
@@ -295,7 +295,7 @@ async def create_silo(
         raise HTTPException(status_code=409, detail="Silo number already exists")
 
     silo = Silo(
-        id=str(uuid.uuid4()),
+        id=uuid7(),
         silo_number=payload.silo_number,
         name=payload.name,
         article_id=payload.article_id,
@@ -332,7 +332,7 @@ async def create_silo_lot(
         raise HTTPException(status_code=404, detail="Silo not found")
 
     lot = SiloLot(
-        id=str(uuid.uuid4()),
+        id=uuid7(),
         silo_id=str(silo.id),
         virtual_lot_number=payload.virtual_lot_number,
         source_ticket_id=payload.source_ticket_id,
@@ -351,7 +351,7 @@ async def create_silo_lot(
 
     db.add(
         SiloLotMovement(
-            id=str(uuid.uuid4()),
+            id=uuid7(),
             silo_lot_id=lot.id,
             movement_type="in",
             quantity_tons=payload.quantity_tons,
@@ -415,7 +415,7 @@ async def create_silo_lot_movement(
         lot.quantity_tons = Decimal(str(lot.quantity_tons)) + qty
 
     movement = SiloLotMovement(
-        id=str(uuid.uuid4()),
+        id=uuid7(),
         silo_lot_id=lot.id,
         movement_type=payload.movement_type,
         quantity_tons=payload.quantity_tons,

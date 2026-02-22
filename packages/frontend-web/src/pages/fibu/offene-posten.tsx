@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -27,13 +27,24 @@ type OffenerPosten = {
 
 interface OpenItemAPI {
   id: string
-  document_number: string
-  customer_id: string
-  customer_name: string
-  amount: number
-  currency: string
-  due_date: string
-  status: string
+  konto_nr?: string
+  konto_name?: string
+  konto_typ: 'debitoren' | 'kreditoren'
+  op_status: 'offen' | 'teilweise' | 'geschlossen' | 'storniert'
+  rechnungsnr: string
+  rechnungsdatum: string
+  faelligkeit: string
+  valuta?: string
+  op_betrag: number
+  offen: number
+  saldo?: number
+  op_text?: string
+  kunde_id?: string
+  kunde_name?: string
+  kredit_limit?: number
+  kv_limit?: number
+  sperre_grund?: string
+  letzte_bewegung_am?: string
 }
 
 function deriveStatus(dueDate: string): { tageUeberfaellig: number; mahnstufe: 0 | 1 | 2 | 3; status: OffenerPosten['status'] } {
@@ -48,15 +59,15 @@ function deriveStatus(dueDate: string): { tageUeberfaellig: number; mahnstufe: 0
 }
 
 function mapApiItem(item: OpenItemAPI): OffenerPosten {
-  const { tageUeberfaellig, mahnstufe, status } = deriveStatus(item.due_date)
+  const { tageUeberfaellig, mahnstufe, status } = deriveStatus(item.faelligkeit)
   return {
     id: item.id,
-    rechnungsNr: item.document_number,
-    kunde: item.customer_name,
-    rechnungsDatum: item.due_date, // approximate
-    faelligAm: item.due_date,
-    betrag: item.amount,
-    offen: item.amount,
+    rechnungsNr: item.rechnungsnr,
+    kunde: item.kunde_name ?? item.konto_name ?? '-',
+    rechnungsDatum: item.rechnungsdatum,
+    faelligAm: item.faelligkeit,
+    betrag: item.op_betrag,
+    offen: item.offen,
     tageUeberfaellig,
     mahnstufe,
     status,
@@ -81,17 +92,90 @@ export default function OffenePostenPage(): JSX.Element {
   const { t } = useTranslation()
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<OffenerPosten['status'] | 'alle'>('alle')
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [form, setForm] = useState({
+    rechnungsnr: '',
+    konto_nr: '',
+    konto_name: '',
+    kunde_name: '',
+    rechnungsdatum: new Date().toISOString().slice(0, 10),
+    faelligkeit: new Date().toISOString().slice(0, 10),
+    op_betrag: 0,
+    offen: 0,
+    op_text: '',
+  })
 
   const { data: allePosten = [], isLoading, isError, error, refetch } = useQuery({
     queryKey: ['fibu', 'open-items'],
     queryFn: async () => {
-      const res = await apiClient.get<{ items: OpenItemAPI[] }>('/api/v1/open-items')
+      const res = await apiClient.get<{ items: OpenItemAPI[] }>('/api/v1/finance/open-items')
       if (!res.data?.items) {
         throw new Error('Ungültige Antwort für offene Posten')
       }
       return res.data.items.map(mapApiItem)
     },
     staleTime: 2 * 60 * 1000,
+  })
+
+  const saveMutation = useMutation({
+    mutationFn: async () => {
+      const payload = {
+        konto_nr: form.konto_nr || null,
+        konto_name: form.konto_name || null,
+        konto_typ: 'debitoren',
+        op_status: 'offen',
+        rechnungsnr: form.rechnungsnr,
+        rechnungsdatum: form.rechnungsdatum,
+        faelligkeit: form.faelligkeit,
+        valuta: form.rechnungsdatum,
+        op_betrag: Number(form.op_betrag || 0),
+        saldo: 0,
+        offen: Number(form.offen || form.op_betrag || 0),
+        op_text: form.op_text || null,
+        waehrung: 'EUR',
+        kunde_id: null,
+        kunde_name: form.kunde_name || null,
+        lieferant_id: null,
+        lieferant_name: null,
+        skonto_prozent: null,
+        skonto_bis: null,
+        mahn_stufe: 0,
+        zahlbar: true,
+        letzte_bewegung_am: null,
+        kredit_limit: null,
+        kv_limit: null,
+        sperre_grund: null,
+      }
+      if (editingId) {
+        await apiClient.put(`/api/v1/finance/open-items/${editingId}`, payload)
+      } else {
+        await apiClient.post('/api/v1/finance/open-items', payload)
+      }
+    },
+    onSuccess: () => {
+      setEditingId(null)
+      setForm({
+        rechnungsnr: '',
+        konto_nr: '',
+        konto_name: '',
+        kunde_name: '',
+        rechnungsdatum: new Date().toISOString().slice(0, 10),
+        faelligkeit: new Date().toISOString().slice(0, 10),
+        op_betrag: 0,
+        offen: 0,
+        op_text: '',
+      })
+      void refetch()
+    },
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await apiClient.delete(`/api/v1/finance/open-items/${id}`)
+    },
+    onSuccess: () => {
+      void refetch()
+    },
   })
 
   if (isError) {
@@ -240,6 +324,22 @@ export default function OffenePostenPage(): JSX.Element {
           <CardTitle>Filter & Suche</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="grid gap-3 md:grid-cols-5">
+            <Input placeholder="Rechnungs-Nr." value={form.rechnungsnr} onChange={(e) => setForm((p) => ({ ...p, rechnungsnr: e.target.value }))} />
+            <Input placeholder="Konto-Nr." value={form.konto_nr} onChange={(e) => setForm((p) => ({ ...p, konto_nr: e.target.value }))} />
+            <Input placeholder="Konto/Kunde Name" value={form.konto_name} onChange={(e) => setForm((p) => ({ ...p, konto_name: e.target.value, kunde_name: e.target.value }))} />
+            <Input type="date" value={form.rechnungsdatum} onChange={(e) => setForm((p) => ({ ...p, rechnungsdatum: e.target.value }))} />
+            <Input type="date" value={form.faelligkeit} onChange={(e) => setForm((p) => ({ ...p, faelligkeit: e.target.value }))} />
+            <Input type="number" placeholder="OP-Betrag" value={form.op_betrag} onChange={(e) => setForm((p) => ({ ...p, op_betrag: Number(e.target.value || 0) }))} />
+            <Input type="number" placeholder="Offen" value={form.offen} onChange={(e) => setForm((p) => ({ ...p, offen: Number(e.target.value || 0) }))} />
+            <Input placeholder="OP-Text" value={form.op_text} onChange={(e) => setForm((p) => ({ ...p, op_text: e.target.value }))} />
+            <div className="flex gap-2">
+              <Button onClick={() => void saveMutation.mutateAsync()} disabled={saveMutation.isPending || !form.rechnungsnr}>
+                {editingId ? 'Aktualisieren' : 'Neu'}
+              </Button>
+              {editingId && <Button variant="outline" onClick={() => setEditingId(null)}>Abbrechen</Button>}
+            </div>
+          </div>
           <div className="flex gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -280,7 +380,37 @@ export default function OffenePostenPage(): JSX.Element {
             </div>
           ) : (
             <>
-              <DataTable data={filteredPosten} columns={columns} />
+                      <DataTable data={filteredPosten} columns={columns} />
+              <div className="mt-2 space-y-2">
+                {filteredPosten.map((posten) => (
+                  <div key={`crud-${posten.id}`} className="flex items-center gap-2 text-xs">
+                    <span>{posten.rechnungsNr}</span>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        const src = allePosten.find((x) => x.id === posten.id)
+                        if (!src) return
+                        setEditingId(src.id)
+                        setForm({
+                          rechnungsnr: src.rechnungsNr,
+                          konto_nr: '',
+                          konto_name: src.kunde,
+                          kunde_name: src.kunde,
+                          rechnungsdatum: src.rechnungsDatum.slice(0, 10),
+                          faelligkeit: src.faelligAm.slice(0, 10),
+                          op_betrag: src.betrag,
+                          offen: src.offen,
+                          op_text: '',
+                        })
+                      }}
+                    >
+                      Bearbeiten
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => deleteMutation.mutate(posten.id)}>Loeschen</Button>
+                  </div>
+                ))}
+              </div>
               <div className="mt-4 text-sm text-muted-foreground">
                 {filteredPosten.length} von {allePosten.length} offene(n) Posten angezeigt
               </div>

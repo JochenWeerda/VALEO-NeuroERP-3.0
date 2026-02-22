@@ -181,7 +181,7 @@ export default function BestellungenListePage(): JSX.Element {
   })
 
   const handleCreate = () => {
-    navigate('/einkauf/bestellung-anlegen')
+    navigate('/einkauf/bestellungen/neu')
   }
 
   const handleEdit = (item: any) => {
@@ -232,3 +232,5 @@ export default function BestellungenListePage(): JSX.Element {
     />
   )
 }
+
+

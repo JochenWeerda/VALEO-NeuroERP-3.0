@@ -12,6 +12,11 @@ import threading
 import time as time_module
 
 from ..workers.daily_report_worker import execute_daily_reports
+from ..workers.weekly_report_worker import execute_weekly_reports
+from ..workers.monthly_report_worker import execute_monthly_reports
+from ..workers.cleanup_worker import execute_cleanup
+from ..workers.price_monitoring_worker import execute_price_monitoring
+from ..workers.compliance_check_worker import execute_compliance_checks
 
 logger = logging.getLogger(__name__)
 
@@ -106,8 +111,12 @@ class SchedulerService:
         """Execute weekly reports job"""
         try:
             logger.info("Executing weekly reports job...")
-            # TODO: Implement weekly report generation
-            logger.info("Weekly reports job completed (placeholder)")
+            result = execute_weekly_reports()
+
+            if result.get('success'):
+                logger.info(f"Weekly reports completed: {result}")
+            else:
+                logger.error(f"Weekly reports failed: {result}")
 
         except Exception as e:
             logger.error(f"Error executing weekly reports: {e}")
@@ -116,8 +125,12 @@ class SchedulerService:
         """Execute monthly reports job"""
         try:
             logger.info("Executing monthly reports job...")
-            # TODO: Implement monthly report generation
-            logger.info("Monthly reports job completed (placeholder)")
+            result = execute_monthly_reports()
+
+            if result.get('success'):
+                logger.info(f"Monthly reports completed: {result}")
+            else:
+                logger.error(f"Monthly reports failed: {result}")
 
         except Exception as e:
             logger.error(f"Error executing monthly reports: {e}")
@@ -126,8 +139,12 @@ class SchedulerService:
         """Execute data cleanup job"""
         try:
             logger.info("Executing cleanup job...")
-            # TODO: Implement data cleanup (old logs, temp files, etc.)
-            logger.info("Cleanup job completed (placeholder)")
+            result = execute_cleanup()
+
+            if result.get('success'):
+                logger.info(f"Cleanup completed: {result}")
+            else:
+                logger.error(f"Cleanup failed: {result}")
 
         except Exception as e:
             logger.error(f"Error executing cleanup job: {e}")
@@ -136,8 +153,12 @@ class SchedulerService:
         """Execute price monitoring job"""
         try:
             logger.info("Executing price monitoring job...")
-            # TODO: Implement price monitoring
-            logger.info("Price monitoring job completed (placeholder)")
+            result = execute_price_monitoring()
+
+            if result.get('success'):
+                logger.info(f"Price monitoring completed: {result}")
+            else:
+                logger.error(f"Price monitoring failed: {result}")
 
         except Exception as e:
             logger.error(f"Error executing price monitoring: {e}")
@@ -146,8 +167,12 @@ class SchedulerService:
         """Execute compliance checks job"""
         try:
             logger.info("Executing compliance checks job...")
-            # TODO: Implement compliance checks (certificates, licenses, etc.)
-            logger.info("Compliance checks job completed (placeholder)")
+            result = execute_compliance_checks()
+
+            if result.get('success'):
+                logger.info(f"Compliance checks completed: {result}")
+            else:
+                logger.error(f"Compliance checks failed: {result}")
 
         except Exception as e:
             logger.error(f"Error executing compliance checks: {e}")

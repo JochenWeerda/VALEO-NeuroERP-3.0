@@ -11,8 +11,8 @@ from decimal import Decimal
 from datetime import date, datetime
 from pydantic import BaseModel, Field
 import logging
-import uuid
 import xml.etree.ElementTree as ET
+from app.core.uuid7 import uuid7
 from xml.dom import minidom
 
 from ....core.database import get_db
@@ -228,7 +228,7 @@ async def create_payment_run(
     Create a new payment run.
     """
     try:
-        run_id = str(uuid.uuid4())
+        run_id = uuid7()
         
         total_amount = sum(payment.amount for payment in payment_run.payments)
         
@@ -768,7 +768,7 @@ async def return_payment(
             })
         
         # Create return record
-        return_id = str(uuid.uuid4())
+        return_id = uuid7()
         return_insert = text("""
             INSERT INTO domain_erp.payment_returns
             (id, tenant_id, payment_run_id, payment_item_id, return_reason, return_date, notes, created_at)

@@ -17,8 +17,8 @@ class AccountBase(BaseModel):
     account_name: str = Field(..., min_length=1, max_length=100, description="Account name")
     account_type: str = Field(..., description="Account type (asset, liability, equity, revenue, expense)")
     category: str = Field(..., description="Account category")
-    currency: str = Field(default="EUR", min_length=3, max_length=3, description="Currency code")
-    allow_manual_entries: bool = Field(default=True, description="Allow manual journal entries")
+    currency: Optional[str] = Field(default="EUR", min_length=3, max_length=3, description="Currency code")
+    allow_manual_entries: Optional[bool] = Field(default=True, description="Allow manual journal entries")
     parent_account_id: Optional[str] = Field(None, description="Parent account ID for hierarchy")
 
     @field_validator('account_type')
@@ -34,7 +34,8 @@ class AccountBase(BaseModel):
     def validate_category(cls, v):
         valid_categories = [
             'current_assets', 'fixed_assets', 'current_liabilities', 'long_term_liabilities',
-            'equity', 'revenue', 'cost_of_goods_sold', 'operating_expenses', 'other_expenses'
+            'equity', 'revenue', 'cost_of_goods_sold', 'operating_expenses', 'other_expenses',
+            'other_income',
         ]
         if v not in valid_categories:
             raise ValueError(f'Category must be one of: {valid_categories}')
@@ -58,13 +59,13 @@ class AccountUpdate(BaseModel):
 
 class Account(AccountBase):
     """Full account schema"""
-    id: UUID
+    id: str
     tenant_id: str
     balance: Decimal = Field(default=Decimal('0.00'), description="Current balance")
     is_active: bool = Field(default=True, description="Account status")
     parent_account_id: Optional[str] = Field(None, description="Parent account ID for hierarchy")
-    created_at: datetime
-    updated_at: datetime
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
@@ -119,11 +120,11 @@ class JournalEntryLineCreate(JournalEntryLineBase):
 
 class JournalEntryLine(JournalEntryLineBase):
     """Full journal entry line schema"""
-    id: UUID
+    id: str
     tenant_id: str
     journal_entry_id: str
-    created_at: datetime
-    updated_at: datetime
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
@@ -173,7 +174,7 @@ class JournalEntryUpdate(BaseModel):
 
 class JournalEntry(JournalEntryBase):
     """Full journal entry schema"""
-    id: UUID
+    id: str
     tenant_id: str
     status: str = Field(default="draft", description="Entry status")
     total_debit: Decimal = Field(default=Decimal('0.00'), description="Total debit amount")
@@ -182,8 +183,8 @@ class JournalEntry(JournalEntryBase):
     posted_at: Optional[datetime] = None
     reversal_of: Optional[str] = None
     reversal_date: Optional[datetime] = None
-    created_at: datetime
-    updated_at: datetime
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
     lines: List[JournalEntryLine] = []
 
     class Config:

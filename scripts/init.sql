@@ -1,54 +1,38 @@
--- VALEO-NeuroERP Database Initialization
--- This script runs on first database startup
+-- scripts/init.sql (DEV)
+-- Läuft nur beim ersten Start bei leerem Volume
 
--- Create development database if it doesn't exist
--- (Already created via POSTGRES_DB environment variable)
+\connect valeo_neuro_erp;
 
--- Create additional roles for different environments
-CREATE ROLE valeo_readonly;
-CREATE ROLE valeo_app;
-CREATE ROLE valeo_migration;
+-- Extensions für eure App-DB
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+CREATE EXTENSION IF NOT EXISTS citext;
 
--- Grant permissions
-GRANT CONNECT ON DATABASE valeo_neuro_erp TO valeo_readonly;
-GRANT CONNECT ON DATABASE valeo_neuro_erp TO valeo_app;
-GRANT CONNECT ON DATABASE valeo_neuro_erp TO valeo_migration;
-
--- Create schemas for clean architecture
-CREATE SCHEMA IF NOT EXISTS domain AUTHORIZATION valeo_dev;
-CREATE SCHEMA IF NOT EXISTS infrastructure AUTHORIZATION valeo_dev;
-CREATE SCHEMA IF NOT EXISTS shared AUTHORIZATION valeo_dev;
-
--- Grant schema permissions
-GRANT USAGE ON SCHEMA domain TO valeo_readonly, valeo_app, valeo_migration;
-GRANT USAGE ON SCHEMA infrastructure TO valeo_readonly, valeo_app, valeo_migration;
-GRANT USAGE ON SCHEMA shared TO valeo_readonly, valeo_app, valeo_migration;
-
--- Enable necessary extensions
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
-CREATE EXTENSION IF NOT EXISTS "pg_stat_statements";
-CREATE EXTENSION IF NOT EXISTS "pg_buffercache";
-
--- Create audit trigger function for data integrity
-CREATE OR REPLACE FUNCTION audit_trigger_function() RETURNS trigger AS $$
-BEGIN
-    NEW.updated_at = NOW();
-    NEW.version = OLD.version + 1;
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
--- Create updated_at trigger function
-CREATE OR REPLACE FUNCTION set_updated_at() RETURNS trigger AS $$
-BEGIN
-    NEW.updated_at = NOW();
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
--- Log initialization completion
+-- Keycloak Role erstellen (wenn nicht vorhanden)
 DO $$
 BEGIN
-    RAISE NOTICE 'VALEO-NeuroERP database initialized successfully';
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'keycloak') THEN
+    CREATE ROLE keycloak WITH LOGIN PASSWORD 'keycloak_dev_2024';
+  END IF;
 END $$;
+
+-- Keycloak DB erstellen (wenn nicht vorhanden)
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = 'keycloak') THEN
+    CREATE DATABASE keycloak OWNER keycloak;
+  END IF;
+END $$;
+
+-- Sicherheitshalber: Rechte setzen (OWNER reicht meist, aber ist ok)
+GRANT ALL PRIVILEGES ON DATABASE keycloak TO keycloak;
+
+-- Domain Schemas für Multi-Schema Design
+CREATE SCHEMA IF NOT EXISTS domain_shared;
+CREATE SCHEMA IF NOT EXISTS domain_inventory;
+CREATE SCHEMA IF NOT EXISTS domain_crm;
+CREATE SCHEMA IF NOT EXISTS domain_erp;
+CREATE SCHEMA IF NOT EXISTS domain_finance;
+CREATE SCHEMA IF NOT EXISTS domain_ops;
+CREATE SCHEMA IF NOT EXISTS domain_portal;
+CREATE SCHEMA IF NOT EXISTS domain_log;
+CREATE SCHEMA IF NOT EXISTS domain_agrar;

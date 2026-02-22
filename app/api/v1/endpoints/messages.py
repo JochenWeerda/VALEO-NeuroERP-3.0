@@ -9,12 +9,13 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from ....core.config import settings
 from ....core.database import get_db
 from ....infrastructure.models import InternalMessage
 from ..schemas.base import PaginatedResponse, BaseSchema
 
 router = APIRouter()
-DEFAULT_TENANT = "system"
+DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
 class MessageOut(BaseSchema):
@@ -64,10 +65,10 @@ async def send_message(
     db: Session = Depends(get_db),
 ):
     """POST Nachricht"""
-    import uuid
+    from app.core.uuid7 import uuid7
     tid = tenant_id or DEFAULT_TENANT
     msg = InternalMessage(
-        id=str(uuid.uuid4()),
+        id=uuid7(),
         sender_id=payload.sender_id,
         recipient_id=payload.recipient_id,
         subject=payload.subject,

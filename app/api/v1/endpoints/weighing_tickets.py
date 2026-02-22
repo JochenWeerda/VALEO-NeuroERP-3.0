@@ -6,22 +6,26 @@ GET/POST/PUT for weighing tickets.
 from datetime import datetime
 from decimal import Decimal
 from typing import Any, Optional
-import uuid
-
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
+from ....core.config import settings
 from ....core.database import get_db
 from ....domains.shared.events import IntegrationEvent, get_event_publisher
 from ....infrastructure.eventbus.outbox import OutboxPublisher
-from ....infrastructure.models import AgrarContract, AgrarContractAllocation, WeighingTicket
-from modules.agrar.services.moisture_engine import MoistureEngineInput, calculate_billing_weight
+from ....infrastructure.models import AgrarContract, AgrarContractAllocation, Article, WeighingTicket
+from modules.agrar.services.weighing_domain import (
+    derive_billing_weight as _derive_billing_weight_impl,
+    resolve_ticket_allocation_quantity as _resolve_ticket_allocation_quantity_impl,
+    validate_and_compute_weights as _validate_and_compute_weights_impl,
+)
 from .agrar_contracts import _compute_status
 from ..schemas.base import PaginatedResponse, BaseSchema
+from app.core.uuid7 import uuid7
 
 router = APIRouter()
-DEFAULT_TENANT = "system"
+DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
 class WeighingTicketOut(BaseSchema):
@@ -46,6 +50,9 @@ class WeighingTicketOut(BaseSchema):
     status: str = "open"
     direction: str = "in"
     reference_doc: Optional[str] = None
+    article_group: Optional[str] = None
+    article_id: Optional[str] = None
+    notes: Optional[str] = None
 
 
 class WeighingTicketCreate(BaseModel):
@@ -65,6 +72,9 @@ class WeighingTicketCreate(BaseModel):
     quality_data: Optional[dict[str, Any]] = None
     direction: str = "in"
     reference_doc: Optional[str] = None
+    article_group: Optional[str] = None
+    article_id: Optional[str] = None
+    notes: Optional[str] = None
 
 
 class WeighingTicketUpdate(BaseModel):
@@ -81,6 +91,9 @@ class WeighingTicketUpdate(BaseModel):
     quality_data: Optional[dict[str, Any]] = None
     status: Optional[str] = None
     vehicle_plate: Optional[str] = None
+    article_group: Optional[str] = None
+    article_id: Optional[str] = None
+    notes: Optional[str] = None
 
 
 class WeighingTicketContractAllocationRequest(BaseModel):
@@ -99,36 +112,11 @@ class WeighingTicketContractAllocationOut(BaseSchema):
 
 
 def _validate_and_compute_weights(gross_weight: Optional[float], tare_weight: Optional[float], net_weight: Optional[float]) -> float | None:
-    if gross_weight is not None and gross_weight < 0:
-        raise HTTPException(status_code=400, detail="gross_weight must be >= 0")
-    if tare_weight is not None and tare_weight < 0:
-        raise HTTPException(status_code=400, detail="tare_weight must be >= 0")
-    if net_weight is not None and net_weight < 0:
-        raise HTTPException(status_code=400, detail="net_weight must be >= 0")
-
-    if gross_weight is not None and tare_weight is not None:
-        if gross_weight < tare_weight:
-            raise HTTPException(status_code=400, detail="gross_weight must be >= tare_weight")
-        computed = float(gross_weight - tare_weight)
-        if net_weight is not None and abs(float(net_weight) - computed) > 0.001:
-            raise HTTPException(status_code=400, detail="net_weight does not match gross_weight - tare_weight")
-        return computed
-    return net_weight
+    return _validate_and_compute_weights_impl(gross_weight, tare_weight, net_weight)
 
 
 def _resolve_ticket_allocation_quantity(ticket: WeighingTicket, requested_quantity: Optional[float]) -> Decimal:
-    if requested_quantity is not None:
-        quantity = Decimal(str(requested_quantity))
-    elif ticket.billing_weight is not None:
-        quantity = Decimal(str(ticket.billing_weight))
-    elif ticket.net_weight is not None:
-        quantity = Decimal(str(ticket.net_weight))
-    else:
-        raise HTTPException(status_code=400, detail="Ticket has no allocatable quantity")
-
-    if quantity <= Decimal("0"):
-        raise HTTPException(status_code=400, detail="Allocation quantity must be > 0")
-    return quantity
+    return _resolve_ticket_allocation_quantity_impl(ticket, requested_quantity)
 
 
 def _derive_billing_weight(
@@ -139,25 +127,13 @@ def _derive_billing_weight(
     impurities_pct: Optional[float],
     quality_data: Optional[dict[str, Any]],
 ) -> Optional[float]:
-    if billing_weight is not None:
-        return billing_weight
-    if net_weight is None:
-        return None
-    if moisture_pct is None and impurities_pct is None:
-        return None
-
-    cfg = quality_data or {}
-    result = calculate_billing_weight(
-        MoistureEngineInput(
-            net_weight_kg=Decimal(str(net_weight)),
-            moisture_pct=Decimal(str(moisture_pct if moisture_pct is not None else 0)),
-            impurities_pct=Decimal(str(impurities_pct if impurities_pct is not None else 0)),
-            target_moisture_pct=Decimal(str(cfg.get("target_moisture_pct", 14.0))),
-            base_impurities_pct=Decimal(str(cfg.get("base_impurities_pct", 2.0))),
-            allow_bonus=bool(cfg.get("allow_bonus", False)),
-        )
+    return _derive_billing_weight_impl(
+        net_weight=net_weight,
+        billing_weight=billing_weight,
+        moisture_pct=moisture_pct,
+        impurities_pct=impurities_pct,
+        quality_data=quality_data,
     )
-    return float(result.billing_weight_kg)
 
 
 @router.get("/", response_model=PaginatedResponse[WeighingTicketOut])
@@ -181,6 +157,35 @@ async def list_weighing_tickets(
     )
 
 
+class ArticleGroupOut(BaseModel):
+    warengruppe: str
+    count: int
+
+
+@router.get("/article-groups", response_model=list[ArticleGroupOut])
+async def list_article_groups(
+    tenant_id: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+):
+    """Liefert die vorhandenen Artikelgruppen (DISTINCT warengruppe aus articles)."""
+    from sqlalchemy import func as sqla_func
+
+    tid = tenant_id or DEFAULT_TENANT
+    rows = (
+        db.query(Article.warengruppe, sqla_func.count(Article.id).label("count"))
+        .filter(
+            Article.tenant_id == tid,
+            Article.is_active == True,  # noqa: E712
+            Article.warengruppe.isnot(None),
+            Article.warengruppe != "",
+        )
+        .group_by(Article.warengruppe)
+        .order_by(Article.warengruppe)
+        .all()
+    )
+    return [ArticleGroupOut(warengruppe=r[0], count=r[1]) for r in rows]
+
+
 @router.post("/", response_model=WeighingTicketOut, status_code=201)
 async def create_weighing_ticket(
     payload: WeighingTicketCreate,
@@ -188,10 +193,9 @@ async def create_weighing_ticket(
     db: Session = Depends(get_db),
 ):
     """POST Wiegescheine anlegen"""
-    import uuid
     tid = tenant_id or DEFAULT_TENANT
     ticket = WeighingTicket(
-        id=str(uuid.uuid4()),
+        id=uuid7(),
         ticket_number=payload.ticket_number,
         scale_id=payload.scale_id,
         vehicle_plate=payload.vehicle_plate,
@@ -214,6 +218,9 @@ async def create_weighing_ticket(
         quality_data=payload.quality_data,
         direction=payload.direction,
         reference_doc=payload.reference_doc,
+        article_group=payload.article_group,
+        article_id=payload.article_id,
+        notes=payload.notes,
         tenant_id=tid,
     )
     db.add(ticket)
@@ -286,7 +293,7 @@ async def allocate_ticket_to_contract(
         )
 
         allocation = AgrarContractAllocation(
-            id=str(uuid.uuid4()),
+            id=uuid7(),
             contract_id=contract.id,
             ticket_id=ticket.id,
             allocation_quantity_kg=float(allocation_quantity),

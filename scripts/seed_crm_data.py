@@ -9,7 +9,7 @@ import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from datetime import datetime, timedelta
-import uuid
+from app.core.uuid7 import uuid7
 
 from app.core.database import SessionLocal
 from app.infrastructure.models import Activity, FarmProfile
@@ -20,7 +20,7 @@ def seed_activities(db):
     
     activities = [
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "type": "meeting",
             "title": "Jahresgespräch 2025",
             "customer": "Musterfirma GmbH",
@@ -29,12 +29,12 @@ def seed_activities(db):
             "status": "planned",
             "assigned_to": "Hans Mueller",
             "description": "Wichtiges Jahresgespräch mit Neukunden",
-            "tenant_id": "system",
+            "tenant_id": "00000000-0000-0000-0000-000000000001",
             "created_at": datetime.now(),
             "updated_at": datetime.now(),
         },
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "type": "call",
             "title": "Telefon-Follow-up Schmidt GmbH",
             "customer": "Schmidt GmbH",
@@ -43,12 +43,12 @@ def seed_activities(db):
             "status": "planned",
             "assigned_to": "Maria Weber",
             "description": "Angebot besprechen",
-            "tenant_id": "system",
+            "tenant_id": "00000000-0000-0000-0000-000000000001",
             "created_at": datetime.now(),
             "updated_at": datetime.now(),
         },
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "type": "email",
             "title": "Angebot versenden",
             "customer": "Bio-Hof Müller",
@@ -57,7 +57,7 @@ def seed_activities(db):
             "status": "completed",
             "assigned_to": "Hans Mueller",
             "description": "Jahresangebot für Saatgut versendet",
-            "tenant_id": "system",
+            "tenant_id": "00000000-0000-0000-0000-000000000001",
             "created_at": datetime.now(),
             "updated_at": datetime.now(),
         },
@@ -75,7 +75,7 @@ def seed_farm_profiles(db):
     
     profiles = [
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "farm_name": "Bio-Hof Schmidt",
             "owner": "Hans Schmidt",
             "total_area": 150.5,
@@ -95,12 +95,12 @@ def seed_farm_profiles(db):
             },
             "certifications": ["Bio", "QS", "HACCP"],
             "notes": "Traditionsreicher Betrieb seit 1950",
-            "tenant_id": "system",
+            "tenant_id": "00000000-0000-0000-0000-000000000001",
             "created_at": datetime.now(),
             "updated_at": datetime.now(),
         },
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "farm_name": "Hof Müller",
             "owner": "Thomas Müller",
             "total_area": 85.0,
@@ -118,12 +118,12 @@ def seed_farm_profiles(db):
             },
             "certifications": ["QS"],
             "notes": "Spezialisiert auf Schweinezucht",
-            "tenant_id": "system",
+            "tenant_id": "00000000-0000-0000-0000-000000000001",
             "created_at": datetime.now(),
             "updated_at": datetime.now(),
         },
         {
-            "id": str(uuid.uuid4()),
+            "id": uuid7(),
             "farm_name": "Gemüsehof Weber",
             "owner": "Maria Weber",
             "total_area": 25.0,
@@ -140,7 +140,7 @@ def seed_farm_profiles(db):
             },
             "certifications": ["Bio", "GAP"],
             "notes": "Bio-Gemüsebau mit Direktvermarktung",
-            "tenant_id": "system",
+            "tenant_id": "00000000-0000-0000-0000-000000000001",
             "created_at": datetime.now(),
             "updated_at": datetime.now(),
         },

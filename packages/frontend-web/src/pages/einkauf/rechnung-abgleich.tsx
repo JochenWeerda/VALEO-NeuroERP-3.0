@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/api-client'
-import { CheckCircle, XCircle, AlertTriangle, FileCheck, Package, Receipt } from 'lucide-react'
+import { CheckCircle, XCircle, AlertTriangle, FileCheck, Receipt } from 'lucide-react'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 
 type MatchItem = {
@@ -93,10 +93,15 @@ export default function RechnungAbgleichPage(): JSX.Element {
 
   const loadInvoices = async () => {
     try {
-      const response = await apiClient.get('/einkauf/rechnungseingaenge?status=ERFASST,GEPRUEFT')
-      if (response.data?.data) {
-        setInvoices(response.data.data)
-      }
+      const response = await apiClient.get('/api/v1/einkauf/rechnungseingaenge')
+      const rows = Array.isArray(response.data) ? response.data : response.data?.data || response.data?.items || []
+      const normalized = rows.map((inv: any) => ({
+        id: inv.id,
+        rechnungsNummer: inv.rechnungsNummer || inv.rechnungs_nummer || inv.rechnungsnr || '',
+        lieferantName: inv.lieferantName || inv.lieferant_name || inv.lieferant || '',
+        status: String(inv.status || '').toUpperCase(),
+      }))
+      setInvoices(normalized.filter((x: any) => ['ERFASST', 'GEPRUEFT'].includes(x.status)))
     } catch (error) {
       console.error('Fehler beim Laden der Rechnungen:', error)
       toast({
@@ -112,10 +117,12 @@ export default function RechnungAbgleichPage(): JSX.Element {
     setMatching(true)
     try {
       // Lade Rechnung
-      const invoiceResponse = await apiClient.get(`/einkauf/rechnungseingaenge/${selectedInvoiceId}`)
-      const invoice = invoiceResponse.data
+      const invoiceResponse = await apiClient.get(`/api/v1/einkauf/rechnungseingaenge/${selectedInvoiceId}`)
+      const invoice = invoiceResponse.data || {}
+      const invoiceBestellungId = invoice.bestellungId || invoice.bestellung_id || invoice.bestellung
+      const invoiceWareneingangId = invoice.wareneingangId || invoice.wareneingang_id || invoice.wareneingang
 
-      if (!invoice.bestellungId) {
+      if (!invoiceBestellungId) {
         toast({
           variant: 'destructive',
           title: t('crud.messages.validationError'),
@@ -125,26 +132,14 @@ export default function RechnungAbgleichPage(): JSX.Element {
         return
       }
 
-      // Lade Bestellung
-      let purchaseOrder: any = null
-      try {
-        const poResponse = await fetch(`/api/mcp/documents/purchase_order/${invoice.bestellungId}`)
-        if (poResponse.ok) {
-          const poResult = await poResponse.json()
-          if (poResult.ok && poResult.data) {
-            purchaseOrder = poResult.data
-          }
-        }
-      } catch (mcpError) {
-        const poResponse = await apiClient.get(`/einkauf/bestellungen/${invoice.bestellungId}`)
-        purchaseOrder = poResponse.data
-      }
+      const poResponse = await apiClient.get(`/api/v1/purchase-orders/${invoiceBestellungId}`)
+      const purchaseOrder = poResponse.data
 
       // Lade Wareneingang (falls vorhanden)
       let goodsReceipt: any = null
-      if (invoice.wareneingangId) {
+      if (invoiceWareneingangId) {
         try {
-          const grResponse = await apiClient.get(`/api/purchase-workflow/orders/${invoice.bestellungId}/goods-receipt/${invoice.wareneingangId}`)
+          const grResponse = await apiClient.get(`/api/purchase-workflow/orders/${invoiceBestellungId}/goods-receipt/${invoiceWareneingangId}`)
           goodsReceipt = grResponse.data
         } catch (grError) {
           console.warn('Wareneingang nicht gefunden:', grError)
@@ -184,11 +179,15 @@ export default function RechnungAbgleichPage(): JSX.Element {
 
     const poItems = po.lines || po.items || []
     const grItems = gr?.items || []
-    const ivItems = invoice.positionen || []
+    const ivItems = invoice.positionen || invoice.items || []
 
     for (const poItem of poItems) {
       const grItem = grItems.find((gi: any) => gi.purchaseOrderItemId === poItem.id)
-      const ivItem = ivItems.find((ii: any) => ii.artikelId === poItem.productId)
+      const ivItem = ivItems.find((ii: any) => {
+        const iiArticleId = ii.artikelId || ii.artikel_id || ii.articleId || ii.productId
+        const poArticleId = poItem.productId || poItem.articleId || poItem.artikelId
+        return iiArticleId && poArticleId ? String(iiArticleId) === String(poArticleId) : false
+      })
 
       if (!ivItem) {
         itemMatches.push({
@@ -218,8 +217,8 @@ export default function RechnungAbgleichPage(): JSX.Element {
       const poQty = poItem.qty || poItem.quantity || 0
       const poPrice = poItem.price || 0
       const poTotal = poQty * poPrice
-      const ivQty = ivItem.menge || 0
-      const ivPrice = ivItem.preis || 0
+      const ivQty = Number(ivItem.menge || ivItem.quantity || 0)
+      const ivPrice = Number(ivItem.preis || ivItem.unitPrice || ivItem.einzelpreis || 0)
       const ivTotal = ivQty * ivPrice
       const grQty = grItem?.receivedQuantity || 0
       const grAccepted = grItem?.acceptedQuantity || 0
@@ -337,7 +336,7 @@ export default function RechnungAbgleichPage(): JSX.Element {
     setLoading(true)
     try {
       // Update Rechnung Status
-      await apiClient.put(`/einkauf/rechnungseingaenge/${selectedInvoiceId}`, {
+      await apiClient.put(`/api/v1/einkauf/rechnungseingaenge/${selectedInvoiceId}`, {
         status: 'FREIGEGEBEN',
         abgleichErgebnis: matchResult,
         abweichungsBegruendung: exceptionReason || undefined,
@@ -348,7 +347,7 @@ export default function RechnungAbgleichPage(): JSX.Element {
         description: 'Rechnung wurde freigegeben',
       })
 
-      navigate('/einkauf/rechnungseingaenge')
+      navigate('/einkauf/rechnungseingaenge-liste')
     } catch (error: any) {
       console.error('Fehler beim Freigeben:', error)
       toast({
@@ -386,7 +385,7 @@ export default function RechnungAbgleichPage(): JSX.Element {
           <h1 className="text-3xl font-bold">{t('crud.fields.reconciliation')}</h1>
           <p className="text-muted-foreground">2/3-Wege-Abgleich: Bestellung - Wareneingang - Rechnung</p>
         </div>
-        <Button variant="outline" onClick={() => navigate('/einkauf/rechnungseingaenge')}>
+        <Button variant="outline" onClick={() => navigate('/einkauf/rechnungseingaenge-liste')}>
           {t('common.cancel')}
         </Button>
       </div>
@@ -587,7 +586,7 @@ export default function RechnungAbgleichPage(): JSX.Element {
           </Card>
 
           <div className="flex justify-end gap-4">
-            <Button variant="outline" onClick={() => navigate('/einkauf/rechnungseingaenge')} disabled={loading}>
+            <Button variant="outline" onClick={() => navigate('/einkauf/rechnungseingaenge-liste')} disabled={loading}>
               {t('common.cancel')}
             </Button>
             <Button

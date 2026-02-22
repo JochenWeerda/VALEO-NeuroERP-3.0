@@ -22,10 +22,10 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     # Create sales_offers table
     op.create_table('sales_offers',
-        sa.Column('id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('tenant_id', postgresql.UUID(as_uuid=True), nullable=False),
-        sa.Column('customer_inquiry_id', postgresql.UUID(as_uuid=True), nullable=True),
-        sa.Column('customer_id', postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column('id', sa.String(), nullable=False),
+        sa.Column('tenant_id', sa.String(), nullable=False),
+        sa.Column('customer_inquiry_id', sa.String(), nullable=True),
+        sa.Column('customer_id', sa.String(), nullable=False),
         sa.Column('offer_number', sa.String(), nullable=False),
         sa.Column('subject', sa.String(), nullable=False),
         sa.Column('description', sa.String(), nullable=False),

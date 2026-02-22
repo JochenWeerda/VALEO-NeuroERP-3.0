@@ -33,7 +33,7 @@ def upgrade() -> None:
     # Dashboards table
     op.create_table(
         "crm_analytics_dashboards",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
+        sa.Column("id", sa.String(), primary_key=True, default=uuid4),
         sa.Column("tenant_id", sa.String(64), nullable=False),
         sa.Column("name", sa.String(255), nullable=False),
         sa.Column("description", sa.Text),
@@ -51,7 +51,7 @@ def upgrade() -> None:
     # Reports table
     op.create_table(
         "crm_analytics_reports",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
+        sa.Column("id", sa.String(), primary_key=True, default=uuid4),
         sa.Column("tenant_id", sa.String(64), nullable=False),
         sa.Column("name", sa.String(255), nullable=False),
         sa.Column("description", sa.Text),
@@ -73,7 +73,7 @@ def upgrade() -> None:
     # Metrics table
     op.create_table(
         "crm_analytics_metrics",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
+        sa.Column("id", sa.String(), primary_key=True, default=uuid4),
         sa.Column("tenant_id", sa.String(64), nullable=False),
         sa.Column("name", sa.String(255), nullable=False),
         sa.Column("description", sa.Text),
@@ -94,10 +94,10 @@ def upgrade() -> None:
     # Predictions table
     op.create_table(
         "crm_analytics_predictions",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
+        sa.Column("id", sa.String(), primary_key=True, default=uuid4),
         sa.Column("tenant_id", sa.String(64), nullable=False),
         sa.Column("model_type", sa.String(64), nullable=False),
-        sa.Column("entity_id", postgresql.UUID(as_uuid=True), nullable=False),
+        sa.Column("entity_id", sa.String(), nullable=False),
         sa.Column("entity_type", sa.String(64), nullable=False),
         sa.Column("score", sa.Float, nullable=False),
         sa.Column("confidence", sa.Float, nullable=False),
@@ -111,7 +111,7 @@ def upgrade() -> None:
     # Exports table
     op.create_table(
         "crm_analytics_exports",
-        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True, default=uuid4),
+        sa.Column("id", sa.String(), primary_key=True, default=uuid4),
         sa.Column("tenant_id", sa.String(64), nullable=False),
         sa.Column("name", sa.String(255), nullable=False),
         sa.Column("format", sa.String(16), nullable=False),

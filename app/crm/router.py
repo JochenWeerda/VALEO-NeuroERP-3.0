@@ -6,7 +6,7 @@ CRUD für Contacts, Leads, Activities, Betriebsprofile
 from fastapi import APIRouter, Depends, HTTPException, Header
 from sqlalchemy.orm import Session
 from typing import List, Optional
-import uuid
+from app.core.uuid7 import uuid7
 
 from app.core.database_pg import get_db
 from . import models, schemas
@@ -29,7 +29,7 @@ async def create_contact(
 ):
     """Create new contact"""
     db_contact = models.Contact(
-        id=str(uuid.uuid4()),
+        id=uuid7(),
         **contact.model_dump(),
         tenant_id=tenant_id
     )
@@ -136,7 +136,7 @@ async def create_lead(
 ):
     """Create new lead"""
     db_lead = models.Lead(
-        id=str(uuid.uuid4()),
+        id=uuid7(),
         **lead.model_dump(),
         tenant_id=tenant_id
     )
@@ -237,7 +237,7 @@ async def create_activity(
 ):
     """Create new activity"""
     db_activity = models.Activity(
-        id=str(uuid.uuid4()),
+        id=uuid7(),
         **activity.model_dump(),
         tenant_id=tenant_id
     )
@@ -342,7 +342,7 @@ async def create_betriebsprofil(
 ):
     """Create new Betriebsprofil"""
     db_profil = models.BetriebsProfil(
-        id=str(uuid.uuid4()),
+        id=uuid7(),
         **profil.model_dump(),
         tenant_id=tenant_id
     )
