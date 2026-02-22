@@ -550,6 +550,8 @@ class HarvestAcceptanceUpdate(BaseModel):
 
 class HarvestAcceptanceOut(BaseModel):
     """Ernte-Annahme Ausgabe."""
+    model_config = {"from_attributes": True}
+
     id: str
     acceptance_number: str
     tenant_id: str
@@ -574,9 +576,9 @@ class HarvestAcceptanceOut(BaseModel):
     origin_postal_code: Optional[str]
     origin_city: Optional[str]
     origin_country_code: Optional[str]
-    is_sustainable_biomass: bool
-    release_status: str
-    pricing_mode: str
+    is_sustainable_biomass: bool = False
+    release_status: str = "draft"
+    pricing_mode: str = "spot_daily"
     price_source_id: Optional[str]
     acceptance_mode: Optional[str]
     ownership_type: Optional[str]
@@ -590,14 +592,14 @@ class HarvestAcceptanceOut(BaseModel):
     stock_movement_id: Optional[str]
     quality_protocol_id: Optional[str]
     remarks: Optional[str]
-    print_remarks_on_acceptance_note: bool
-    print_remarks_on_settlement: bool
+    print_remarks_on_acceptance_note: bool = False
+    print_remarks_on_settlement: bool = False
     total_net_amount_eur: Optional[float]
     total_vat_amount_eur: Optional[float]
     total_gross_amount_eur: Optional[float]
     vat_rate_percent: Optional[float]
-    created_at: datetime
-    created_by: Optional[str]
+    created_at: Optional[datetime] = None
+    created_by: Optional[str] = None
     updated_at: Optional[datetime]
     updated_by: Optional[str]
 

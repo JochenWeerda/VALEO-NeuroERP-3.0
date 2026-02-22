@@ -7,6 +7,7 @@ from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse
 from typing import Dict, Any
 from datetime import datetime
+from sqlalchemy import text
 import psutil
 import logging
 
@@ -43,7 +44,7 @@ async def readiness_check() -> JSONResponse:
     try:
         from app.core.database import SessionLocal
         db = SessionLocal()
-        db.execute("SELECT 1")
+        db.execute(text("SELECT 1"))
         db.close()
         checks["database"] = {"status": "healthy", "latency_ms": 5}
     except Exception as e:

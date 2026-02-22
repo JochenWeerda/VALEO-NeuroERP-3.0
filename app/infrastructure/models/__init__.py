@@ -28,6 +28,21 @@ class Tenant(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
 
+class Branch(Base):
+    """Branch / Niederlassung model"""
+    __tablename__ = "branches"
+    __table_args__ = {"schema": "domain_shared", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=uuid7)
+    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id", ondelete="CASCADE"), nullable=False)
+    branch_number = Column(Integer, nullable=False)
+    name = Column(String(255), nullable=False)
+    address = Column(postgresql.JSONB, nullable=True)
+    is_active = Column(Boolean, nullable=False, server_default="true")
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
 class User(Base):
     """User model"""
     __tablename__ = "users"
