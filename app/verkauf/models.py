@@ -68,7 +68,7 @@ class Kunde(Base):
     umrechnung_euro = Column(Boolean, default=False)
     umrechnungskurs = Column(DECIMAL(10, 4))
     waehrung = Column(String(3), default='EUR')
-    zinstabelle_id = Column(Integer, ForeignKey("zinstabellen.id"))
+    zinstabelle_id = Column(Integer, nullable=True)
     letzter_zinstermin = Column(Date)
     saldo_letzte_zinsabrechnung = Column(DECIMAL(12, 2), default=0)
     verrechnung_automatisch = Column(Boolean, default=False)
@@ -79,7 +79,7 @@ class Kunde(Base):
     
     # Sonstiges
     nachkalkulation = Column(Boolean, default=False)
-    formular_id = Column(Integer, ForeignKey("formulare.id"))
+    formular_id = Column(Integer, nullable=True)
     offene_posten_nicht_aufrufen = Column(Boolean, default=False)
     versicherung = Column(Boolean, default=False)
     sprachschluessel = Column(String(2), default='DE')
@@ -363,7 +363,7 @@ class KundenRabatteDetail(Base):
     bezeichnung = Column(String(200))
     rabatt = Column(DECIMAL(5, 2))
     rabatt_gueltig_bis = Column(Date)
-    rabatt_liste_id = Column(Integer, ForeignKey("rabatt_listen.id"))
+    rabatt_liste_id = Column(Integer, nullable=True)
     erstellt_am = Column(DateTime)
 
     kunde = relationship("Kunde", back_populates="rabatt_details")

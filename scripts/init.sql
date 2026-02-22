@@ -25,3 +25,14 @@ END $$;
 
 -- Sicherheitshalber: Rechte setzen (OWNER reicht meist, aber ist ok)
 GRANT ALL PRIVILEGES ON DATABASE keycloak TO keycloak;
+
+-- Domain Schemas für Multi-Schema Design
+CREATE SCHEMA IF NOT EXISTS domain_shared;
+CREATE SCHEMA IF NOT EXISTS domain_inventory;
+CREATE SCHEMA IF NOT EXISTS domain_crm;
+CREATE SCHEMA IF NOT EXISTS domain_erp;
+CREATE SCHEMA IF NOT EXISTS domain_finance;
+CREATE SCHEMA IF NOT EXISTS domain_ops;
+CREATE SCHEMA IF NOT EXISTS domain_portal;
+CREATE SCHEMA IF NOT EXISTS domain_log;
+CREATE SCHEMA IF NOT EXISTS domain_agrar;

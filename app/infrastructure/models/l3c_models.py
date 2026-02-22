@@ -299,8 +299,8 @@ class HarvestAcceptance(Base):
     # Kunden-Bereich
     customer_id = Column(String, ForeignKey("domain_crm.customers.id"), nullable=False, comment="Debitor-Kto.")
     contract_id = Column(String, ForeignKey("domain_inventory.agrar_contracts.id"), nullable=True, comment="Kontrakt-Nr.")
-    forwarder_id = Column(String, ForeignKey("domain_crm.business_partners.id"), nullable=True, comment="Spediteur-Kto.")
-    intermediate_dealer_id = Column(String, ForeignKey("domain_crm.business_partners.id"), nullable=True, comment="Zw-Händler-Kto.")
+    forwarder_id = Column(String, ForeignKey("domain_crm.business_partners.partner_id"), nullable=True, comment="Spediteur-Kto.")
+    intermediate_dealer_id = Column(String, ForeignKey("domain_crm.business_partners.partner_id"), nullable=True, comment="Zw-Händler-Kto.")
     deviating_vat_id = Column(String(20), nullable=True, comment="Abweichende USTID")
 
     # ANLIEFERUNG Tab
@@ -351,7 +351,7 @@ class HarvestAcceptance(Base):
     # Anzahlung (für ADVANCE_ON_STORAGE)
     advance_payment_amount_eur = Column(DECIMAL(14, 2), nullable=True, comment="Anzahlungsbetrag (EUR) - für ADVANCE_ON_STORAGE Modus")
     advance_payment_date = Column(Date, nullable=True, comment="Anzahlungsdatum - für ADVANCE_ON_STORAGE Modus")
-    advance_invoice_id = Column(String, ForeignKey("domain_inventory.self_billing_invoices.id", ondelete="SET NULL"), nullable=True, comment="Referenz auf Anzahlungsrechnung/-gutschrift")
+    advance_invoice_id = Column(String, ForeignKey("domain_finance.self_billing_invoices.id", ondelete="SET NULL"), nullable=True, comment="Referenz auf Anzahlungsrechnung/-gutschrift")
 
     # Audit
     created_at = Column(DateTime(timezone=True), server_default=func.now())
