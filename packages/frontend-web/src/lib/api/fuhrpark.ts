@@ -69,6 +69,41 @@ export type FuhrparkFahrzeug = {
 
 export type FuhrparkFahrzeugPayload = Omit<FuhrparkFahrzeug, 'id'>
 
+export type FuhrparkTerminart = {
+  id: string
+  terminart: string
+  intervall_monate: number
+  intervall_km: number
+}
+
+export type FuhrparkTerminartPayload = Omit<FuhrparkTerminart, 'id'>
+
+export type FuhrparkRechnung = {
+  id: string
+  rechnungs_nr: string
+  datum: string
+  fahrzeug_id?: string | null
+  fahrzeug_kennzeichen?: string | null
+  sachkonto?: string | null
+  kostenart?: string | null
+  betrag_eur: number
+  notiz?: string | null
+}
+
+export type FuhrparkRechnungPayload = Omit<FuhrparkRechnung, 'id'>
+
+export type FuhrparkAusgehendesDokument = {
+  id: string
+  beleg_typ: string
+  formular?: string | null
+  ziel_modul?: string | null
+  beschreibung?: string | null
+  aktiv: boolean
+  letzter_druck?: string | null
+}
+
+export type FuhrparkAusgehendesDokumentPayload = Omit<FuhrparkAusgehendesDokument, 'id'>
+
 export async function listFuhrparkFahrzeuge(): Promise<FuhrparkFahrzeug[]> {
   return (await apiClient.get<FuhrparkFahrzeug[]>('/api/v1/fuhrpark/fahrzeuge')).data
 }
@@ -102,4 +137,58 @@ export async function unfallAnzeige(
   payload: { datum: string; ort: string; beschreibung: string },
 ): Promise<void> {
   await apiClient.post(`/api/v1/fuhrpark/fahrzeuge/${id}/unfall-anzeige`, payload)
+}
+
+export async function listFuhrparkTerminarten(): Promise<FuhrparkTerminart[]> {
+  return (await apiClient.get<FuhrparkTerminart[]>('/api/v1/fuhrpark/terminarten')).data
+}
+
+export async function createFuhrparkTerminart(payload: FuhrparkTerminartPayload): Promise<FuhrparkTerminart> {
+  return (await apiClient.post<FuhrparkTerminart>('/api/v1/fuhrpark/terminarten', payload)).data
+}
+
+export async function updateFuhrparkTerminart(id: string, payload: FuhrparkTerminartPayload): Promise<FuhrparkTerminart> {
+  return (await apiClient.patch<FuhrparkTerminart>(`/api/v1/fuhrpark/terminarten/${id}`, payload)).data
+}
+
+export async function deleteFuhrparkTerminart(id: string): Promise<void> {
+  await apiClient.delete(`/api/v1/fuhrpark/terminarten/${id}`)
+}
+
+export async function listFuhrparkRechnungen(): Promise<FuhrparkRechnung[]> {
+  return (await apiClient.get<FuhrparkRechnung[]>('/api/v1/fuhrpark/rechnungen')).data
+}
+
+export async function createFuhrparkRechnung(payload: FuhrparkRechnungPayload): Promise<FuhrparkRechnung> {
+  return (await apiClient.post<FuhrparkRechnung>('/api/v1/fuhrpark/rechnungen', payload)).data
+}
+
+export async function updateFuhrparkRechnung(id: string, payload: FuhrparkRechnungPayload): Promise<FuhrparkRechnung> {
+  return (await apiClient.patch<FuhrparkRechnung>(`/api/v1/fuhrpark/rechnungen/${id}`, payload)).data
+}
+
+export async function deleteFuhrparkRechnung(id: string): Promise<void> {
+  await apiClient.delete(`/api/v1/fuhrpark/rechnungen/${id}`)
+}
+
+export async function listFuhrparkAusgehendeDokumente(): Promise<FuhrparkAusgehendesDokument[]> {
+  return (await apiClient.get<FuhrparkAusgehendesDokument[]>('/api/v1/fuhrpark/ausgehende-dokumente')).data
+}
+
+export async function createFuhrparkAusgehendesDokument(
+  payload: FuhrparkAusgehendesDokumentPayload,
+): Promise<FuhrparkAusgehendesDokument> {
+  return (await apiClient.post<FuhrparkAusgehendesDokument>('/api/v1/fuhrpark/ausgehende-dokumente', payload)).data
+}
+
+export async function updateFuhrparkAusgehendesDokument(
+  id: string,
+  payload: FuhrparkAusgehendesDokumentPayload,
+): Promise<FuhrparkAusgehendesDokument> {
+  return (await apiClient.patch<FuhrparkAusgehendesDokument>(`/api/v1/fuhrpark/ausgehende-dokumente/${id}`, payload))
+    .data
+}
+
+export async function deleteFuhrparkAusgehendesDokument(id: string): Promise<void> {
+  await apiClient.delete(`/api/v1/fuhrpark/ausgehende-dokumente/${id}`)
 }

@@ -14,6 +14,10 @@ from app.domains.operations.models import (
     Fahrzeug, FahrzeugStatus,
     Fahrer, FahrerStatus,
     FahrzeugTour,
+    FuhrparkTerminart,
+    FuhrparkRechnung,
+    FuhrparkAusgehendesDokument,
+    SpeditionFrachttarif,
     Dokument, DokumentStatus,
     DokumentVersion,
     Charge,
@@ -236,6 +240,175 @@ class FahrzeugTourRepository:
         tour = self.get_by_id(tour_id)
         if tour:
             self.db.delete(tour)
+            self.db.commit()
+            return True
+        return False
+
+
+class FuhrparkTerminartRepository:
+    """Repository for FuhrparkTerminart operations."""
+
+    def __init__(self, db: Session):
+        self.db = db
+
+    def get_all(self) -> List[FuhrparkTerminart]:
+        return self.db.query(FuhrparkTerminart).order_by(FuhrparkTerminart.terminart.asc()).all()
+
+    def get_by_id(self, item_id: str) -> Optional[FuhrparkTerminart]:
+        return self.db.query(FuhrparkTerminart).filter(FuhrparkTerminart.id == item_id).first()
+
+    def get_by_name(self, terminart: str) -> Optional[FuhrparkTerminart]:
+        return self.db.query(FuhrparkTerminart).filter(FuhrparkTerminart.terminart == terminart).first()
+
+    def create(self, payload: dict) -> FuhrparkTerminart:
+        row = FuhrparkTerminart(id=f"FTA-{str(__import__('uuid').uuid4())[:8].upper()}", **payload)
+        self.db.add(row)
+        self.db.commit()
+        self.db.refresh(row)
+        return row
+
+    def update(self, item_id: str, payload: dict) -> Optional[FuhrparkTerminart]:
+        row = self.get_by_id(item_id)
+        if row:
+            for key, value in payload.items():
+                setattr(row, key, value)
+            self.db.commit()
+            self.db.refresh(row)
+        return row
+
+    def delete(self, item_id: str) -> bool:
+        row = self.get_by_id(item_id)
+        if row:
+            self.db.delete(row)
+            self.db.commit()
+            return True
+        return False
+
+
+class FuhrparkRechnungRepository:
+    """Repository for FuhrparkRechnung operations."""
+
+    def __init__(self, db: Session):
+        self.db = db
+
+    def get_all(self, skip: int = 0, limit: int = 200) -> List[FuhrparkRechnung]:
+        return (
+            self.db.query(FuhrparkRechnung)
+            .order_by(FuhrparkRechnung.datum.desc())
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
+
+    def get_by_id(self, item_id: str) -> Optional[FuhrparkRechnung]:
+        return self.db.query(FuhrparkRechnung).filter(FuhrparkRechnung.id == item_id).first()
+
+    def get_by_rechnungs_nr(self, rechnungs_nr: str) -> Optional[FuhrparkRechnung]:
+        return self.db.query(FuhrparkRechnung).filter(FuhrparkRechnung.rechnungs_nr == rechnungs_nr).first()
+
+    def create(self, payload: dict) -> FuhrparkRechnung:
+        row = FuhrparkRechnung(id=f"FR-{str(__import__('uuid').uuid4())[:8].upper()}", **payload)
+        self.db.add(row)
+        self.db.commit()
+        self.db.refresh(row)
+        return row
+
+    def update(self, item_id: str, payload: dict) -> Optional[FuhrparkRechnung]:
+        row = self.get_by_id(item_id)
+        if row:
+            for key, value in payload.items():
+                setattr(row, key, value)
+            self.db.commit()
+            self.db.refresh(row)
+        return row
+
+    def delete(self, item_id: str) -> bool:
+        row = self.get_by_id(item_id)
+        if row:
+            self.db.delete(row)
+            self.db.commit()
+            return True
+        return False
+
+
+class FuhrparkAusgehendesDokumentRepository:
+    """Repository for FuhrparkAusgehendesDokument operations."""
+
+    def __init__(self, db: Session):
+        self.db = db
+
+    def get_all(self, skip: int = 0, limit: int = 200) -> List[FuhrparkAusgehendesDokument]:
+        return (
+            self.db.query(FuhrparkAusgehendesDokument)
+            .order_by(FuhrparkAusgehendesDokument.created_at.desc())
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
+
+    def get_by_id(self, item_id: str) -> Optional[FuhrparkAusgehendesDokument]:
+        return self.db.query(FuhrparkAusgehendesDokument).filter(FuhrparkAusgehendesDokument.id == item_id).first()
+
+    def create(self, payload: dict) -> FuhrparkAusgehendesDokument:
+        row = FuhrparkAusgehendesDokument(id=f"FAD-{str(__import__('uuid').uuid4())[:8].upper()}", **payload)
+        self.db.add(row)
+        self.db.commit()
+        self.db.refresh(row)
+        return row
+
+    def update(self, item_id: str, payload: dict) -> Optional[FuhrparkAusgehendesDokument]:
+        row = self.get_by_id(item_id)
+        if row:
+            for key, value in payload.items():
+                setattr(row, key, value)
+            self.db.commit()
+            self.db.refresh(row)
+        return row
+
+    def delete(self, item_id: str) -> bool:
+        row = self.get_by_id(item_id)
+        if row:
+            self.db.delete(row)
+            self.db.commit()
+            return True
+        return False
+
+
+class SpeditionFrachttarifRepository:
+    """Repository for SpeditionFrachttarif (PLZ-based freight prices)."""
+
+    def __init__(self, db: Session):
+        self.db = db
+
+    def get_all(self, skip: int = 0, limit: int = 500, aktiv_only: bool = False) -> List[SpeditionFrachttarif]:
+        q = self.db.query(SpeditionFrachttarif)
+        if aktiv_only:
+            q = q.filter(SpeditionFrachttarif.aktiv.is_(True))
+        return q.order_by(SpeditionFrachttarif.spediteur.asc(), SpeditionFrachttarif.plz_von.asc()).offset(skip).limit(limit).all()
+
+    def get_by_id(self, item_id: str) -> Optional[SpeditionFrachttarif]:
+        return self.db.query(SpeditionFrachttarif).filter(SpeditionFrachttarif.id == item_id).first()
+
+    def create(self, payload: dict) -> SpeditionFrachttarif:
+        row = SpeditionFrachttarif(id=f"SFT-{str(__import__('uuid').uuid4())[:8].upper()}", **payload)
+        self.db.add(row)
+        self.db.commit()
+        self.db.refresh(row)
+        return row
+
+    def update(self, item_id: str, payload: dict) -> Optional[SpeditionFrachttarif]:
+        row = self.get_by_id(item_id)
+        if row:
+            for key, value in payload.items():
+                setattr(row, key, value)
+            self.db.commit()
+            self.db.refresh(row)
+        return row
+
+    def delete(self, item_id: str) -> bool:
+        row = self.get_by_id(item_id)
+        if row:
+            self.db.delete(row)
             self.db.commit()
             return True
         return False
