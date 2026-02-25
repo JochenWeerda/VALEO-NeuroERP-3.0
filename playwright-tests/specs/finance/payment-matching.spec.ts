@@ -10,7 +10,7 @@
  */
 
 import { test, expect } from '@playwright/test';
-import { testSetup } from '../fixtures/testSetup';
+import { testSetup } from '../../fixtures/testSetup';
 
 test.describe('Payment Matching', () => {
   let setup: Awaited<ReturnType<typeof testSetup>>;
