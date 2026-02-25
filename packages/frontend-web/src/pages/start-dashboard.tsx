@@ -242,7 +242,9 @@ export default function StartDashboardPage(): JSX.Element {
                           <Icon className="h-4 w-4" />
                         </span>
                         <div>
-                          <CardTitle className="text-base">{tile.label}</CardTitle>
+                          <CardTitle className="text-base">
+                            <Link to={tile.path} className="hover:underline">{tile.label}</Link>
+                          </CardTitle>
                           <CardDescription>{tile.description}</CardDescription>
                         </div>
                       </div>

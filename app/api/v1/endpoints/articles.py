@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from typing import Optional, List
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
-from sqlalchemy import or_
+from sqlalchemy import or_, func, text
 from sqlalchemy.orm import Session
 
 from ....core.config import settings
@@ -18,6 +18,40 @@ from ..schemas.inventory import Article, ArticleCreate, ArticleUpdate
 router = APIRouter()
 
 DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
+
+
+def _fulltext_filter(query, search_term: str):
+    """Apply PostgreSQL fulltext search with relevance ranking.
+
+    For terms >= 2 chars, uses plainto_tsquery against the GIN-indexed
+    search_vector column.  Falls back to ILIKE for very short terms
+    where stemming adds no value.
+
+    Returns (filtered_query, rank_column_or_None).
+    """
+    if len(search_term) < 2:
+        like = f"%{search_term}%"
+        return query.filter(
+            or_(
+                ArticleModel.name.ilike(like),
+                ArticleModel.article_number.ilike(like),
+            )
+        ), None
+
+    ts_query = func.plainto_tsquery(text("'german'"), search_term)
+    rank = func.ts_rank(ArticleModel.search_vector, ts_query)
+
+    # Fulltext match OR ILIKE fallback (covers partial matches the stemmer misses)
+    like = f"%{search_term}%"
+    filtered = query.filter(
+        or_(
+            ArticleModel.search_vector.op("@@")(ts_query),
+            ArticleModel.name.ilike(like),
+            ArticleModel.article_number.ilike(like),
+            ArticleModel.barcode.ilike(like),
+        )
+    )
+    return filtered, rank
 
 
 def _to_article_schema(row: ArticleModel) -> Article:
@@ -130,20 +164,13 @@ async def list_articles(
     query = db.query(ArticleModel).filter(ArticleModel.is_active == True)  # noqa: E712
     query = query.filter(ArticleModel.tenant_id == effective_tenant)
 
+    rank = None
     if search:
-        like = f"%{search}%"
-        query = query.filter(
-            or_(
-                ArticleModel.name.ilike(like),
-                ArticleModel.article_number.ilike(like),
-                ArticleModel.barcode.ilike(like),
-                ArticleModel.suchbegriff.ilike(like),
-                ArticleModel.hersteller.ilike(like),
-                ArticleModel.warengruppe.ilike(like),
-            )
-        )
+        query, rank = _fulltext_filter(query, search)
 
     total = query.count()
+    if rank is not None:
+        query = query.order_by(rank.desc())
     items = query.offset(skip).limit(limit).all()
 
     page = (skip // limit) + 1
@@ -169,24 +196,20 @@ async def search_articles(
 ):
     """Lightweight search endpoint used by the POS to power autocomplete."""
     effective_tenant = tenant_id or DEFAULT_TENANT
-    like = f"%{q}%"
     query = (
         db.query(ArticleModel)
         .filter(ArticleModel.is_active == True)  # noqa: E712
         .filter(ArticleModel.tenant_id == effective_tenant)
-        .filter(
-            or_(
-                ArticleModel.name.ilike(like),
-                ArticleModel.article_number.ilike(like),
-                ArticleModel.barcode.ilike(like),
-                ArticleModel.suchbegriff.ilike(like),
-                ArticleModel.hersteller.ilike(like),
-                ArticleModel.warengruppe.ilike(like),
-            )
-        )
-        .order_by(ArticleModel.name.asc())
-        .limit(limit)
     )
+
+    query, rank = _fulltext_filter(query, q)
+
+    if rank is not None:
+        query = query.order_by(rank.desc())
+    else:
+        query = query.order_by(ArticleModel.name.asc())
+
+    query = query.limit(limit)
 
     return [_to_article_schema(item) for item in query.all()]
 

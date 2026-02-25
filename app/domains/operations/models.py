@@ -308,6 +308,81 @@ class FahrzeugTour(Base):
     fahrer = relationship("Fahrer", back_populates="tours")
 
 
+class FuhrparkTerminart(Base):
+    """
+    Stammdaten fuer Terminarten im Fuhrpark.
+    """
+    __tablename__ = "ops_fuhrpark_terminarten"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: f"FTA-{uuid7()[:8].upper()}")
+    terminart = Column(String(120), nullable=False, unique=True)
+    intervall_monate = Column(Integer, nullable=False, default=0)
+    intervall_km = Column(Integer, nullable=False, default=0)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class FuhrparkRechnung(Base):
+    """
+    Fuhrpark-Rechnungen fuer Kosten-/Auswertungsdialoge.
+    """
+    __tablename__ = "ops_fuhrpark_rechnungen"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: f"FR-{uuid7()[:8].upper()}")
+    rechnungs_nr = Column(String(80), nullable=False, unique=True)
+    datum = Column(DateTime(timezone=True), nullable=False)
+    fahrzeug_id = Column(String, ForeignKey("domain_ops.ops_fahrzeuge.id", ondelete="SET NULL"))
+    fahrzeug_kennzeichen = Column(String(30))
+    sachkonto = Column(String(40))
+    kostenart = Column(String(120))
+    betrag_eur = Column(DECIMAL(14, 2), nullable=False, default=0)
+    notiz = Column(Text)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    fahrzeug = relationship("Fahrzeug")
+
+
+class FuhrparkAusgehendesDokument(Base):
+    """
+    Konfiguration ausgehender Belege/Dokumente (Druck- und Versandstrecke).
+    """
+    __tablename__ = "ops_fuhrpark_ausgehende_dokumente"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: f"FAD-{uuid7()[:8].upper()}")
+    beleg_typ = Column(String(120), nullable=False)
+    formular = Column(String(80))
+    ziel_modul = Column(String(255))
+    beschreibung = Column(Text)
+    aktiv = Column(Boolean, nullable=False, default=True)
+    letzter_druck = Column(DateTime(timezone=True))
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class SpeditionFrachttarif(Base):
+    “””
+    PLZ-basierte Frachttarife fuer Speditionen (Streckengeschaeft).
+    “””
+    __tablename__ = “strecke_speditionen_frachttarife”
+    __table_args__ = {“schema”: “domain_ops”, “extend_existing”: True}
+
+    id = Column(String, primary_key=True, default=lambda: f”SFT-{uuid7()[:8].upper()}”)
+    plz_von = Column(String(10), nullable=False)
+    plz_bis = Column(String(10), nullable=False)
+    spediteur = Column(String(255), nullable=False)
+    preis_eur_t = Column(DECIMAL(10, 4), nullable=False, default=0)
+    aktiv = Column(Boolean, nullable=False, default=True)
+    notiz = Column(Text)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    created_by = Column(String(100))
+    updated_by = Column(String(100))
+
+
 # â”€â”€ DOKUMENTE MODELS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 class DokumentStatus(str, enum.Enum):
