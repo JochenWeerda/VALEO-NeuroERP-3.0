@@ -20,6 +20,7 @@ from app.api.v1.endpoints import (
     journal_entries,
     articles,
     sales_orders,
+    sales_offers,
     docflow,
     warehouses,
     policies,
@@ -80,6 +81,7 @@ from app.api.v1.endpoints import (
     marketing,
     labor,
     fuhrpark,
+    strecke_speditionen,
     tours,
     sustainability,
     compat,
@@ -208,6 +210,12 @@ api_router.include_router(
     sales_orders.router,
     prefix="/sales/orders",
     tags=["sales", "orders"]
+)
+
+api_router.include_router(
+    sales_offers.router,
+    prefix="/sales/offers",
+    tags=["sales", "offers"]
 )
 
 from .endpoints import sales_delivery_notes, branches, pricing
@@ -714,6 +722,11 @@ api_router.include_router(
 # Fuhrpark API
 api_router.include_router(
     fuhrpark.router
+)
+
+# Strecke – Speditionen/Frachttarife API
+api_router.include_router(
+    strecke_speditionen.router
 )
 
 # Tours API

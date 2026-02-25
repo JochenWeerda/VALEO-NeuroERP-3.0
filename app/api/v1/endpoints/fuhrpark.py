@@ -12,7 +12,12 @@ from sqlalchemy.inspection import inspect as sa_inspect
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.domains.operations.repository import FahrzeugRepository
+from app.domains.operations.repository import (
+    FahrzeugRepository,
+    FuhrparkAusgehendesDokumentRepository,
+    FuhrparkRechnungRepository,
+    FuhrparkTerminartRepository,
+)
 
 router = APIRouter(prefix="/fuhrpark", tags=["Fuhrpark"])
 
@@ -108,6 +113,32 @@ class UnfallAnzeigePayload(BaseModel):
     datum: datetime
     ort: str = Field(..., min_length=2, max_length=255)
     beschreibung: str = Field(..., min_length=3)
+
+
+class FuhrparkTerminartPayload(BaseModel):
+    terminart: str = Field(..., min_length=2, max_length=120)
+    intervall_monate: int = Field(0, ge=0, le=1200)
+    intervall_km: int = Field(0, ge=0, le=2_000_000)
+
+
+class FuhrparkRechnungPayload(BaseModel):
+    rechnungs_nr: str = Field(..., min_length=3, max_length=80)
+    datum: datetime
+    fahrzeug_id: Optional[str] = None
+    fahrzeug_kennzeichen: Optional[str] = None
+    sachkonto: Optional[str] = None
+    kostenart: Optional[str] = None
+    betrag_eur: float = Field(..., ge=0)
+    notiz: Optional[str] = None
+
+
+class FuhrparkAusgehendesDokumentPayload(BaseModel):
+    beleg_typ: str = Field(..., min_length=2, max_length=120)
+    formular: Optional[str] = Field(default=None, max_length=80)
+    ziel_modul: Optional[str] = Field(default=None, max_length=255)
+    beschreibung: Optional[str] = None
+    aktiv: bool = True
+    letzter_druck: Optional[datetime] = None
 
 
 @router.get("/fahrzeuge", response_model=list[dict])
@@ -206,3 +237,130 @@ async def create_unfall_anzeige(
         "ort": payload.ort,
         "beschreibung": payload.beschreibung,
     }
+
+
+@router.get("/terminarten", response_model=list[dict])
+async def list_terminarten(db: Session = Depends(get_db)):
+    repo = FuhrparkTerminartRepository(db)
+    return [_to_dict(row) for row in repo.get_all()]
+
+
+@router.post("/terminarten", response_model=dict, status_code=201)
+async def create_terminart(payload: FuhrparkTerminartPayload, db: Session = Depends(get_db)):
+    repo = FuhrparkTerminartRepository(db)
+    duplicate = repo.get_by_name(payload.terminart)
+    if duplicate:
+        raise HTTPException(status_code=409, detail="Terminart already exists")
+    row = repo.create(payload.model_dump())
+    return _to_dict(row)
+
+
+@router.patch("/terminarten/{terminart_id}", response_model=dict)
+async def update_terminart(
+    terminart_id: str,
+    payload: FuhrparkTerminartPayload,
+    db: Session = Depends(get_db),
+):
+    repo = FuhrparkTerminartRepository(db)
+    existing = repo.get_by_id(terminart_id)
+    if not existing:
+        raise HTTPException(status_code=404, detail=f"Terminart {terminart_id} not found")
+    if payload.terminart != existing.terminart:
+        duplicate = repo.get_by_name(payload.terminart)
+        if duplicate:
+            raise HTTPException(status_code=409, detail="Terminart already exists")
+    updated = repo.update(terminart_id, payload.model_dump())
+    return _to_dict(updated)
+
+
+@router.delete("/terminarten/{terminart_id}", status_code=204)
+async def delete_terminart(terminart_id: str, db: Session = Depends(get_db)):
+    repo = FuhrparkTerminartRepository(db)
+    if not repo.delete(terminart_id):
+        raise HTTPException(status_code=404, detail=f"Terminart {terminart_id} not found")
+
+
+@router.get("/rechnungen", response_model=list[dict])
+async def list_rechnungen(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(200, ge=1, le=1000),
+    db: Session = Depends(get_db),
+):
+    repo = FuhrparkRechnungRepository(db)
+    return [_to_dict(row) for row in repo.get_all(skip=skip, limit=limit)]
+
+
+@router.post("/rechnungen", response_model=dict, status_code=201)
+async def create_rechnung(payload: FuhrparkRechnungPayload, db: Session = Depends(get_db)):
+    repo = FuhrparkRechnungRepository(db)
+    duplicate = repo.get_by_rechnungs_nr(payload.rechnungs_nr)
+    if duplicate:
+        raise HTTPException(status_code=409, detail="Rechnungsnummer already exists")
+    row = repo.create(payload.model_dump())
+    return _to_dict(row)
+
+
+@router.patch("/rechnungen/{rechnung_id}", response_model=dict)
+async def update_rechnung(
+    rechnung_id: str,
+    payload: FuhrparkRechnungPayload,
+    db: Session = Depends(get_db),
+):
+    repo = FuhrparkRechnungRepository(db)
+    existing = repo.get_by_id(rechnung_id)
+    if not existing:
+        raise HTTPException(status_code=404, detail=f"Rechnung {rechnung_id} not found")
+    if payload.rechnungs_nr != existing.rechnungs_nr:
+        duplicate = repo.get_by_rechnungs_nr(payload.rechnungs_nr)
+        if duplicate:
+            raise HTTPException(status_code=409, detail="Rechnungsnummer already exists")
+    updated = repo.update(rechnung_id, payload.model_dump())
+    return _to_dict(updated)
+
+
+@router.delete("/rechnungen/{rechnung_id}", status_code=204)
+async def delete_rechnung(rechnung_id: str, db: Session = Depends(get_db)):
+    repo = FuhrparkRechnungRepository(db)
+    if not repo.delete(rechnung_id):
+        raise HTTPException(status_code=404, detail=f"Rechnung {rechnung_id} not found")
+
+
+@router.get("/ausgehende-dokumente", response_model=list[dict])
+async def list_ausgehende_dokumente(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(200, ge=1, le=1000),
+    db: Session = Depends(get_db),
+):
+    repo = FuhrparkAusgehendesDokumentRepository(db)
+    return [_to_dict(row) for row in repo.get_all(skip=skip, limit=limit)]
+
+
+@router.post("/ausgehende-dokumente", response_model=dict, status_code=201)
+async def create_ausgehendes_dokument(
+    payload: FuhrparkAusgehendesDokumentPayload,
+    db: Session = Depends(get_db),
+):
+    repo = FuhrparkAusgehendesDokumentRepository(db)
+    row = repo.create(payload.model_dump())
+    return _to_dict(row)
+
+
+@router.patch("/ausgehende-dokumente/{dokument_id}", response_model=dict)
+async def update_ausgehendes_dokument(
+    dokument_id: str,
+    payload: FuhrparkAusgehendesDokumentPayload,
+    db: Session = Depends(get_db),
+):
+    repo = FuhrparkAusgehendesDokumentRepository(db)
+    existing = repo.get_by_id(dokument_id)
+    if not existing:
+        raise HTTPException(status_code=404, detail=f"Ausgehendes Dokument {dokument_id} not found")
+    updated = repo.update(dokument_id, payload.model_dump())
+    return _to_dict(updated)
+
+
+@router.delete("/ausgehende-dokumente/{dokument_id}", status_code=204)
+async def delete_ausgehendes_dokument(dokument_id: str, db: Session = Depends(get_db)):
+    repo = FuhrparkAusgehendesDokumentRepository(db)
+    if not repo.delete(dokument_id):
+        raise HTTPException(status_code=404, detail=f"Ausgehendes Dokument {dokument_id} not found")

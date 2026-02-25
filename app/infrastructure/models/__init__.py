@@ -833,7 +833,7 @@ class Article(Base):
     regal_flaeche = Column(String(50), nullable=True, comment='Shelf area')
     min_menge_auftrag = Column(DECIMAL(10, 2), nullable=True, comment='Minimum order quantity')
     kostenstelle = Column(String(50), nullable=True, comment='Cost center')
-    # Link to nutrient composition (Düngemittel)
+    # Link to nutrient composition (DÃääÃäÃäÂ¼ngemittel)
     duengemittel_inhalte_id = Column(String, ForeignKey("domain_agrar.nutrient_compositions.id"), nullable=True, comment='Nutrient composition reference')
     duengemittel_inhalte_bezeichnung = Column(String(255), nullable=True, comment='Nutrient composition name')
     # Extended LH/Agrar fields
@@ -886,6 +886,8 @@ class Article(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     deleted_at = Column(DateTime(timezone=True), nullable=True)
+    # PostgreSQL fulltext search vector (maintained by DB trigger)
+    search_vector = Column(postgresql.TSVECTOR, nullable=True)
 
 
 class ArticleSupplier(Base):
@@ -943,7 +945,7 @@ class ArticleAlternativeEan(Base):
     article_id = Column(String, ForeignKey("domain_inventory.articles.id"), nullable=False, index=True)
     ean_code = Column(String(50), nullable=False)
     bezeichnung = Column(String(100), nullable=True)
-    ist_primär = Column(Boolean, default=False)
+    is_primary = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
@@ -955,12 +957,12 @@ class ArticleUnit(Base):
 
     id = Column(String, primary_key=True, default=uuid7)
     article_id = Column(String, ForeignKey("domain_inventory.articles.id"), nullable=False, index=True)
-    einheit = Column(String(20), nullable=False, comment='Unit (kg, t, Stück, etc.)')
+    einheit = Column(String(20), nullable=False, comment='Unit (kg, t, StÃääÃäÃäÂ¼ck, etc.)')
     umrechnungsfaktor = Column(DECIMAL(10, 4), nullable=False, comment='Factor to base unit')
     preiseinheit = Column(String(20), nullable=True, comment='Price unit (per kg, per 100kg, etc.)')
     gebinde_groesse = Column(DECIMAL(10, 2), nullable=True, comment='Package size')
     gebinde_einheit = Column(String(20), nullable=True, comment='Package unit')
-    ist_primär = Column(Boolean, default=False)
+    is_primary = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
@@ -997,7 +999,7 @@ class ArticlePrintSetting(Base):
 
 
 class NutrientComposition(Base):
-    """Nutrient/Düngemittel composition - Master data for fertilizer compositions."""
+    """Nutrient/DÃääÃäÃäÂ¼ngemittel composition - Master data for fertilizer compositions."""
     __tablename__ = "nutrient_compositions"
     __table_args__ = {"schema": "domain_agrar", "extend_existing": True}
 
