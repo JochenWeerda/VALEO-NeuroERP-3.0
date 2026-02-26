@@ -17,6 +17,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { CustomerSelectionDialog, type Customer } from '@/components/sales/CustomerSelectionDialog'
 import { ArtikelSuchDialog } from '@/components/sales/ArtikelSuchDialog'
 import { LieferscheinDruckDialog, type PrintOptions } from '@/components/sales/LieferscheinDruckDialog'
+import { DmsAnhangDialog } from '@/components/dms/DmsAnhangDialog'
 import { AttestationDialog } from '@/components/sales/AttestationDialog'
 import { apiClient } from '@/lib/axios'
 import { useAuth } from '@/hooks/useAuth'
@@ -393,6 +394,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
   const [showCustomerDialog, setShowCustomerDialog] = useState(false)
   const [showArticleDialog, setShowArticleDialog] = useState(false)
   const [showPrintDialog, setShowPrintDialog] = useState(false)
+  const [showAttachmentDialog, setShowAttachmentDialog] = useState(false)
   const [showAttestationDialog, setShowAttestationDialog] = useState(false)
   const [pendingAction, setPendingAction] = useState<'print' | 'modify' | null>(null)
   const [pendingPrintOptions, setPendingPrintOptions] = useState<PrintOptions | null>(null)
@@ -1062,8 +1064,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
       push('Sofort-Rechnung noch nicht implementiert')
     },
     'open-attachments': () => {
-      // TODO: Implementieren
-      push('Unterlagen noch nicht implementiert')
+      setShowAttachmentDialog(true)
     },
       'show-information': () => {
         if (state.customer) {
@@ -1738,11 +1739,11 @@ export default function LieferscheinErfassungPage(): JSX.Element {
             <Printer className="h-4 w-4" />
             LS drucken
           </Button>
-          <Button variant="outline" size="sm" className="gap-2">
+          <Button variant="outline" size="sm" className="gap-2" onClick={() => setShowAttachmentDialog(true)}>
             <FileText className="h-4 w-4" />
             Unterlagen
           </Button>
-          <Button variant="outline" size="sm" className="gap-2">
+          <Button variant="outline" size="sm" className="gap-2" onClick={() => setShowAttachmentDialog(true)}>
             <Folder className="h-4 w-4" />
             Dateien
           </Button>
@@ -1794,6 +1795,13 @@ export default function LieferscheinErfassungPage(): JSX.Element {
         open={showPrintDialog}
         onClose={() => setShowPrintDialog(false)}
         onConfirm={handlePrint}
+      />
+      <DmsAnhangDialog
+        open={showAttachmentDialog}
+        onClose={() => setShowAttachmentDialog(false)}
+        businessObjectType="delivery_note"
+        businessObjectId={state.id}
+        title="UNTERLAGEN / DATEIEN — LIEFERSCHEIN"
       />
       <AttestationDialog
         open={showAttestationDialog}
