@@ -99,24 +99,1077 @@
     "workers": 1,
     "webServer": null
   },
-  "suites": [],
-  "errors": [
+  "suites": [
     {
-      "message": "Error: pnpm --filter frontend-web build exited with code 1",
-      "stack": "Error: pnpm --filter frontend-web build exited with code 1\n    at ChildProcess.<anonymous> (C:\\Users\\Jochen\\VALEO-NeuroERP-3.0\\playwright.global-setup.mjs:28:16)",
-      "location": {
-        "file": "C:\\Users\\Jochen\\VALEO-NeuroERP-3.0\\playwright.global-setup.mjs",
-        "column": 16,
-        "line": 28
-      },
-      "snippet": "   at ..\\playwright.global-setup.mjs:28\n\n\u001b[0m \u001b[90m 26 |\u001b[39m         resolve()\u001b[33m;\u001b[39m\n \u001b[90m 27 |\u001b[39m       } \u001b[36melse\u001b[39m {\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 28 |\u001b[39m         reject(\u001b[36mnew\u001b[39m \u001b[33mError\u001b[39m(\u001b[32m`${command} ${args.join(\" \")} exited with code ${code}`\u001b[39m))\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 29 |\u001b[39m       }\n \u001b[90m 30 |\u001b[39m     })\u001b[33m;\u001b[39m\n \u001b[90m 31 |\u001b[39m     proc\u001b[33m.\u001b[39mon(\u001b[32m\"error\"\u001b[39m\u001b[33m,\u001b[39m reject)\u001b[33m;\u001b[39m\u001b[0m"
+      "title": "auth-api.spec.ts",
+      "file": "auth-api.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "API authentication",
+          "file": "auth-api.spec.ts",
+          "line": 6,
+          "column": 6,
+          "specs": [
+            {
+              "title": "rejects unauthenticated requests",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "API_URL not configured for API authentication checks"
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "auth-api",
+                  "projectName": "auth-api",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "2a7c73fb80989e92a4cb-269477b5dad716044059",
+              "file": "auth-api.spec.ts",
+              "line": 9,
+              "column": 7
+            },
+            {
+              "title": "accepts requests with dev token",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "API_URL not configured for API authentication checks"
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "auth-api",
+                  "projectName": "auth-api",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "2a7c73fb80989e92a4cb-b178a25fa0d30db30d1e",
+              "file": "auth-api.spec.ts",
+              "line": 14,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "specs\\agrar\\duenger-smoke.spec.ts",
+      "file": "specs/agrar/duenger-smoke.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Agrar - Dünger @smoke",
+          "file": "specs/agrar/duenger-smoke.spec.ts",
+          "line": 8,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Dünger-Liste lädt",
+              "ok": true,
+              "tags": [
+                "smoke"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "b49bb22e7318805a26d5-425261812459d83ba2b9",
+              "file": "specs/agrar/duenger-smoke.spec.ts",
+              "line": 9,
+              "column": 7
+            },
+            {
+              "title": "Dünger-Stamm lädt",
+              "ok": true,
+              "tags": [
+                "smoke"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "b49bb22e7318805a26d5-542c33e6ecce49338c57",
+              "file": "specs/agrar/duenger-smoke.spec.ts",
+              "line": 16,
+              "column": 7
+            },
+            {
+              "title": "Bedarfsrechner lädt",
+              "ok": true,
+              "tags": [
+                "smoke"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "b49bb22e7318805a26d5-99ce5f283677b865668f",
+              "file": "specs/agrar/duenger-smoke.spec.ts",
+              "line": 23,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "specs\\agrar\\psm-smoke.spec.ts",
+      "file": "specs/agrar/psm-smoke.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Agrar - PSM @smoke",
+          "file": "specs/agrar/psm-smoke.spec.ts",
+          "line": 9,
+          "column": 6,
+          "specs": [
+            {
+              "title": "PSM-Liste lädt ohne Fehler",
+              "ok": true,
+              "tags": [
+                "smoke"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "fc724523fcd5ef81caaf-5af16223521f5b273ec3",
+              "file": "specs/agrar/psm-smoke.spec.ts",
+              "line": 15,
+              "column": 7
+            },
+            {
+              "title": "Export-Button funktioniert",
+              "ok": true,
+              "tags": [
+                "smoke"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "fc724523fcd5ef81caaf-784c0a1014df851d0141",
+              "file": "specs/agrar/psm-smoke.spec.ts",
+              "line": 25,
+              "column": 7
+            },
+            {
+              "title": "Navigation zu PSM-Stamm",
+              "ok": true,
+              "tags": [
+                "smoke"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "fc724523fcd5ef81caaf-ca2798b46704f87c1389",
+              "file": "specs/agrar/psm-smoke.spec.ts",
+              "line": 51,
+              "column": 7
+            },
+            {
+              "title": "Sachkunde-Register erreichbar",
+              "ok": true,
+              "tags": [
+                "smoke"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "fc724523fcd5ef81caaf-acc312be5c42241cd7f9",
+              "file": "specs/agrar/psm-smoke.spec.ts",
+              "line": 58,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "specs\\agrar\\saatgut-smoke.spec.ts",
+      "file": "specs/agrar/saatgut-smoke.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Agrar - Saatgut @smoke",
+          "file": "specs/agrar/saatgut-smoke.spec.ts",
+          "line": 8,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Saatgut-Liste lädt",
+              "ok": true,
+              "tags": [
+                "smoke"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "21446a26e473de90bd5d-f06c2be9571acd6f81f2",
+              "file": "specs/agrar/saatgut-smoke.spec.ts",
+              "line": 9,
+              "column": 7
+            },
+            {
+              "title": "Saatgut-Stamm lädt",
+              "ok": true,
+              "tags": [
+                "smoke"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "21446a26e473de90bd5d-284edf4a4bd73aaf5687",
+              "file": "specs/agrar/saatgut-smoke.spec.ts",
+              "line": 16,
+              "column": 7
+            },
+            {
+              "title": "Sortenregister lädt",
+              "ok": true,
+              "tags": [
+                "smoke"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "21446a26e473de90bd5d-abe7202ff0dd0e90b4f0",
+              "file": "specs/agrar/saatgut-smoke.spec.ts",
+              "line": 23,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "specs\\crm\\kontakte-smoke.spec.ts",
+      "file": "specs/crm/kontakte-smoke.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "CRM - Kontakte @smoke",
+          "file": "specs/crm/kontakte-smoke.spec.ts",
+          "line": 8,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Kontakte-Liste laedt ohne Fehler",
+              "ok": true,
+              "tags": [
+                "smoke"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "a4d3de475339c2726ac8-39361d870a5982deb538",
+              "file": "specs/crm/kontakte-smoke.spec.ts",
+              "line": 14,
+              "column": 7
+            },
+            {
+              "title": "Export-Button funktioniert",
+              "ok": true,
+              "tags": [
+                "smoke"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "a4d3de475339c2726ac8-3e7707266e620db43a3b",
+              "file": "specs/crm/kontakte-smoke.spec.ts",
+              "line": 27,
+              "column": 7
+            },
+            {
+              "title": "Drucken-Button funktioniert",
+              "ok": true,
+              "tags": [
+                "smoke"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "a4d3de475339c2726ac8-9c51c75602fd5b21d9d8",
+              "file": "specs/crm/kontakte-smoke.spec.ts",
+              "line": 41,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "specs\\crm\\leads-smoke.spec.ts",
+      "file": "specs/crm/leads-smoke.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "CRM - Leads @smoke",
+          "file": "specs/crm/leads-smoke.spec.ts",
+          "line": 8,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Leads-Liste lädt",
+              "ok": true,
+              "tags": [
+                "smoke"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d38d1e12aa120976dc97-cdfb21440bf650f22af5",
+              "file": "specs/crm/leads-smoke.spec.ts",
+              "line": 9,
+              "column": 7
+            },
+            {
+              "title": "Lead-Detail lädt",
+              "ok": true,
+              "tags": [
+                "smoke"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "d38d1e12aa120976dc97-8cdcb93d850d3e8a793d",
+              "file": "specs/crm/leads-smoke.spec.ts",
+              "line": 16,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "specs\\finance\\buchungsjournal-smoke.spec.ts",
+      "file": "specs/finance/buchungsjournal-smoke.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Finance - Buchungsjournal @smoke",
+          "file": "specs/finance/buchungsjournal-smoke.spec.ts",
+          "line": 8,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Buchungsjournal lädt",
+              "ok": true,
+              "tags": [
+                "smoke"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "3b40797c36473f2c1e67-f0d8e40439152df54858",
+              "file": "specs/finance/buchungsjournal-smoke.spec.ts",
+              "line": 9,
+              "column": 7
+            },
+            {
+              "title": "DATEV-Export vorhanden (Mock)",
+              "ok": true,
+              "tags": [
+                "smoke"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "3b40797c36473f2c1e67-cc96b3665cdf66640c9e",
+              "file": "specs/finance/buchungsjournal-smoke.spec.ts",
+              "line": 16,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "specs\\finance\\debitoren-smoke.spec.ts",
+      "file": "specs/finance/debitoren-smoke.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Finance - Debitoren @smoke",
+          "file": "specs/finance/debitoren-smoke.spec.ts",
+          "line": 8,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Debitoren-Liste lädt",
+              "ok": true,
+              "tags": [
+                "smoke"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "092b1208a94f6b5e8504-265167f5688288b6f0ef",
+              "file": "specs/finance/debitoren-smoke.spec.ts",
+              "line": 9,
+              "column": 7
+            },
+            {
+              "title": "Offene Posten lädt",
+              "ok": true,
+              "tags": [
+                "smoke"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "092b1208a94f6b5e8504-71f438bd26e5db66027e",
+              "file": "specs/finance/debitoren-smoke.spec.ts",
+              "line": 16,
+              "column": 7
+            },
+            {
+              "title": "OP-Verwaltung lädt",
+              "ok": true,
+              "tags": [
+                "smoke"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "092b1208a94f6b5e8504-3cd2e9b56876d32e2841",
+              "file": "specs/finance/debitoren-smoke.spec.ts",
+              "line": 23,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "specs\\inventory\\artikel-smoke.spec.ts",
+      "file": "specs/inventory/artikel-smoke.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Inventory - Artikel @smoke",
+          "file": "specs/inventory/artikel-smoke.spec.ts",
+          "line": 8,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Artikel-Liste lädt",
+              "ok": true,
+              "tags": [
+                "smoke"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "9c8bbb941bcd15c43dd0-6a401f7bc9a61df8678d",
+              "file": "specs/inventory/artikel-smoke.spec.ts",
+              "line": 9,
+              "column": 7
+            },
+            {
+              "title": "Artikel-Stamm lädt",
+              "ok": true,
+              "tags": [
+                "smoke"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "9c8bbb941bcd15c43dd0-537ad393cf0c2bdcc802",
+              "file": "specs/inventory/artikel-smoke.spec.ts",
+              "line": 16,
+              "column": 7
+            },
+            {
+              "title": "Export funktioniert",
+              "ok": true,
+              "tags": [
+                "smoke"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "9c8bbb941bcd15c43dd0-bec0a39a693d9d39123b",
+              "file": "specs/inventory/artikel-smoke.spec.ts",
+              "line": 23,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "specs\\inventory\\lager-smoke.spec.ts",
+      "file": "specs/inventory/lager-smoke.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Inventory - Lager @smoke",
+          "file": "specs/inventory/lager-smoke.spec.ts",
+          "line": 8,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Lagerbewegungen lädt",
+              "ok": true,
+              "tags": [
+                "smoke"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "28e2155fc4cdb65bf055-f47cfbf11a5088c1d512",
+              "file": "specs/inventory/lager-smoke.spec.ts",
+              "line": 9,
+              "column": 7
+            },
+            {
+              "title": "Lagerbestand lädt",
+              "ok": true,
+              "tags": [
+                "smoke"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "28e2155fc4cdb65bf055-4af5ded08ebd857e5aa2",
+              "file": "specs/inventory/lager-smoke.spec.ts",
+              "line": 16,
+              "column": 7
+            },
+            {
+              "title": "Inventory Route lädt",
+              "ok": true,
+              "tags": [
+                "smoke"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "28e2155fc4cdb65bf055-228b04d86db759270f7a",
+              "file": "specs/inventory/lager-smoke.spec.ts",
+              "line": 23,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "specs\\sales\\angebote-smoke.spec.ts",
+      "file": "specs/sales/angebote-smoke.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Sales - Angebote @smoke",
+          "file": "specs/sales/angebote-smoke.spec.ts",
+          "line": 9,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Angebote-Liste laedt ohne Fehler",
+              "ok": true,
+              "tags": [
+                "smoke"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "fd33182e1d4e7ce2a5a6-d557a85bec9371f211c9",
+              "file": "specs/sales/angebote-smoke.spec.ts",
+              "line": 15,
+              "column": 7
+            },
+            {
+              "title": "Export-Button funktioniert (Level 2/3 Fallback)",
+              "ok": true,
+              "tags": [
+                "smoke"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "fd33182e1d4e7ce2a5a6-bcce484355b3a32f876f",
+              "file": "specs/sales/angebote-smoke.spec.ts",
+              "line": 27,
+              "column": 7
+            },
+            {
+              "title": "Drucken-Button funktioniert (Level 2/3 Fallback)",
+              "ok": true,
+              "tags": [
+                "smoke"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "fd33182e1d4e7ce2a5a6-4b46baa4371d046143e4",
+              "file": "specs/sales/angebote-smoke.spec.ts",
+              "line": 53,
+              "column": 7
+            },
+            {
+              "title": "Navigation zu Angebot erstellen",
+              "ok": true,
+              "tags": [
+                "smoke"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "smoke",
+                  "projectName": "smoke",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "fd33182e1d4e7ce2a5a6-99888336256711b296fb",
+              "file": "specs/sales/angebote-smoke.spec.ts",
+              "line": 86,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "specs\\finance\\payment-matching.spec.ts",
+      "file": "specs/finance/payment-matching.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Payment Matching",
+          "file": "specs/finance/payment-matching.spec.ts",
+          "line": 15,
+          "column": 6,
+          "specs": [
+            {
+              "title": "@full - Manual Match Flow",
+              "ok": true,
+              "tags": [
+                "full"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "full",
+                  "projectName": "full",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "c3ef0bd480d52078d059-9a68804d99e4ea975de3",
+              "file": "specs/finance/payment-matching.spec.ts",
+              "line": 92,
+              "column": 7
+            },
+            {
+              "title": "@full - Match Suggestions",
+              "ok": true,
+              "tags": [
+                "full"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "full",
+                  "projectName": "full",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "c3ef0bd480d52078d059-ee7297b8935ad4a38f38",
+              "file": "specs/finance/payment-matching.spec.ts",
+              "line": 126,
+              "column": 7
+            },
+            {
+              "title": "@full - KPI Cards Display",
+              "ok": true,
+              "tags": [
+                "full"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "full",
+                  "projectName": "full",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "c3ef0bd480d52078d059-c69c66554eb6088394a7",
+              "file": "specs/finance/payment-matching.spec.ts",
+              "line": 153,
+              "column": 7
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "specs\\fallback-verification.spec.ts",
+      "file": "specs/fallback-verification.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Fallback-System Verifikation @fallback",
+          "file": "specs/fallback-verification.spec.ts",
+          "line": 12,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Sales: Angebote Export-Fallback-Level",
+              "ok": true,
+              "tags": [
+                "fallback"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "fallback-verification",
+                  "projectName": "fallback-verification",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "2448fb175b6b8102a1a1-202721bcc0e8064908c5",
+              "file": "specs/fallback-verification.spec.ts",
+              "line": 13,
+              "column": 7
+            },
+            {
+              "title": "CRM: Kontakte Export-Fallback-Level",
+              "ok": true,
+              "tags": [
+                "fallback"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "fallback-verification",
+                  "projectName": "fallback-verification",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "2448fb175b6b8102a1a1-2d9e2f65aab5643ea31f",
+              "file": "specs/fallback-verification.spec.ts",
+              "line": 50,
+              "column": 7
+            },
+            {
+              "title": "Agrar: PSM Print-Fallback-Level",
+              "ok": true,
+              "tags": [
+                "fallback"
+              ],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "fallback-verification",
+                  "projectName": "fallback-verification",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "2448fb175b6b8102a1a1-eeccbc2e2d897c8e7049",
+              "file": "specs/fallback-verification.spec.ts",
+              "line": 83,
+              "column": 7
+            }
+          ]
+        }
+      ]
     }
   ],
+  "errors": [],
   "stats": {
-    "startTime": "2025-11-16T01:55:21.692Z",
-    "duration": 2625.0460000000003,
+    "startTime": "2026-02-23T06:46:02.778Z",
+    "duration": 265.49700000000007,
     "expected": 0,
-    "skipped": 0,
+    "skipped": 38,
     "unexpected": 0,
     "flaky": 0
   }

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Operations Domain Models - Waage und Fuhrpark
 Models fÃ¼r Waagen, Wiegungen, Fahrzeuge und Fahrer
 """
@@ -364,13 +364,13 @@ class FuhrparkAusgehendesDokument(Base):
 
 
 class SpeditionFrachttarif(Base):
-    “””
+    """
     PLZ-basierte Frachttarife fuer Speditionen (Streckengeschaeft).
-    “””
-    __tablename__ = “strecke_speditionen_frachttarife”
-    __table_args__ = {“schema”: “domain_ops”, “extend_existing”: True}
+    """
+    __tablename__ = "strecke_speditionen_frachttarife"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: f”SFT-{uuid7()[:8].upper()}”)
+    id = Column(String, primary_key=True, default=lambda: f"SFT-{uuid7()[:8].upper()}")
     plz_von = Column(String(10), nullable=False)
     plz_bis = Column(String(10), nullable=False)
     spediteur = Column(String(255), nullable=False)
@@ -383,7 +383,7 @@ class SpeditionFrachttarif(Base):
     updated_by = Column(String(100))
 
 
-# â”€â”€ DOKUMENTE MODELS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# â"€â"€ DOKUMENTE MODELS â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€â"€
 
 class DokumentStatus(str, enum.Enum):
     """Dokument Status Enum"""
