@@ -337,11 +337,7 @@
       "path": "sales/angebot/neu"
     },
     {
-      "module": "@/pages/sales/angebote-liste",
-      "path": "sales"
-    },
-    {
-      "module": "@/pages/sales/angebote-liste",
+      "module": "@/pages/sales/angebot-erstellen",
       "path": "sales/angebote"
     },
     {
