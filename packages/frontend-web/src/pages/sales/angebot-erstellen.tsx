@@ -13,7 +13,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { CustomerSelectionDialog, type Customer } from '@/components/sales/CustomerSelectionDialog'
 import { ArtikelSuchDialog } from '@/components/sales/ArtikelSuchDialog'
+import { LieferscheinDruckDialog, type PrintOptions } from '@/components/sales/LieferscheinDruckDialog'
 import { useAngebote, type Angebot } from '@/lib/api/sales'
+import { apiClient } from '@/lib/axios'
+import { useToast } from '@/components/ui/toast-provider'
 import {
   ChevronLeft,
   ChevronRight,
@@ -94,6 +97,8 @@ function emptyPosition(posNr: number): CurrentPositionDetails {
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function AngebotErstellenPage(): JSX.Element {
+  const { push } = useToast()
+
   // ── Angebot-Kopf ──────────────────────────────────────────────────────────
   const [angebotNr, setAngebotNr] = useState(() => generateAngebotNr())
   const [datum, setDatum] = useState(() => new Date().toISOString().split('T')[0])
@@ -107,6 +112,8 @@ export default function AngebotErstellenPage(): JSX.Element {
   const [showAngebotAuswahl, setShowAngebotAuswahl] = useState(false) // öffnet nur per Button
   const [showCustomerDialog, setShowCustomerDialog] = useState(false)
   const [showArticleDialog, setShowArticleDialog] = useState(false)
+  const [showPrintDialog, setShowPrintDialog] = useState(false)
+  const [angebotId, setAngebotId] = useState<string | null>(null)
   const [sucheText, setSucheText] = useState('')
 
   // ── Positionen ────────────────────────────────────────────────────────────
@@ -222,6 +229,65 @@ export default function AngebotErstellenPage(): JSX.Element {
       mwstProzent: pos.mwstProzent,
       gewicht: pos.gewicht,
     })
+  }
+
+  // ── Druck ─────────────────────────────────────────────────────────────────
+
+  const handlePrint = async (options: PrintOptions): Promise<void> => {
+    try {
+      let id = angebotId
+      if (!id) {
+        // Angebot speichern, um ID zu erhalten
+        const saved = await apiClient.post<{ id: string }>('/api/v1/sales/quotations', {
+          nummer: angebotNr,
+          datum,
+          gueltig_bis: gueltigBis || null,
+          status,
+          ist_pauschal: isPauschale,
+          customer_id: customer?.id || null,
+          kontakt,
+          positionen: positionen.map((p) => ({
+            pos_nr: p.posNr,
+            artikel_id: p.artikelId,
+            artikel_nr: p.artikelNr,
+            bezeichnung: p.bezeichnung,
+            menge: p.menge,
+            einheit: p.einheit,
+            listenpreis: p.listenpreis,
+            rabatt: p.rabatt,
+            netto_preis: p.nettoPreis,
+            netto_betrag: p.nettoBetrag,
+            mwst_prozent: p.mwstProzent,
+          })),
+        })
+        id = saved.id
+        setAngebotId(id)
+      }
+
+      const params = new URLSearchParams()
+      params.append('template', options.formatvorlage)
+      params.append('copies', String(options.anzahlDrucke))
+      await apiClient.post(`/api/v1/sales/quotations/${id}/print?${params.toString()}`)
+      await apiClient.post(`/api/v1/sales/quotations/${id}/post`)
+
+      push('Angebot erfolgreich gedruckt und gebucht')
+      setShowPrintDialog(false)
+
+      // Formular zurücksetzen
+      setAngebotNr(generateAngebotNr())
+      setDatum(new Date().toISOString().split('T')[0])
+      setGueltigBis('')
+      setStatus('Offen')
+      setIsPauschale(false)
+      setKontakt('')
+      setCustomer(null)
+      setPositionen([])
+      setAktivePositionIndex(null)
+      setCurrentPosition(emptyPosition(10))
+      setAngebotId(null)
+    } catch (error: any) {
+      push(`Fehler beim Drucken: ${error.response?.data?.detail || error.message}`)
+    }
   }
 
   // ── JSX ──────────────────────────────────────────────────────────────────
@@ -583,7 +649,7 @@ export default function AngebotErstellenPage(): JSX.Element {
           <Button size="sm" className="h-7 text-xs gap-1">
             <Save className="h-3 w-3" /> Speichern
           </Button>
-          <Button variant="outline" size="sm" className="h-7 text-xs gap-1">
+          <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={() => setShowPrintDialog(true)}>
             <Printer className="h-3 w-3" /> Drucken
           </Button>
           <Button variant="outline" size="sm" className="h-7 text-xs gap-1">
@@ -698,6 +764,14 @@ export default function AngebotErstellenPage(): JSX.Element {
         open={showArticleDialog}
         onClose={() => setShowArticleDialog(false)}
         onSelect={handleArticleSelect}
+      />
+
+      {/* Druck-Dialog */}
+      <LieferscheinDruckDialog
+        open={showPrintDialog}
+        onClose={() => setShowPrintDialog(false)}
+        onConfirm={handlePrint}
+        title="ANGEBOT DRUCKEN"
       />
     </div>
   )

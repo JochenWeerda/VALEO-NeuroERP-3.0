@@ -26,7 +26,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useToast } from '@/components/ui/toast-provider'
 import { CustomerSelectionDialog, type Customer } from '@/components/sales/CustomerSelectionDialog'
 import { ArticleSearchDialog, type Article } from '@/components/sales/ArticleSearchDialog'
-import { PrintDialog } from '@/components/sales/PrintDialog'
+import { LieferscheinDruckDialog, type PrintOptions } from '@/components/sales/LieferscheinDruckDialog'
 import { apiClient } from '@/lib/axios'
 import { MoreHorizontal, Check, X, Printer, Save } from 'lucide-react'
 
@@ -169,26 +169,35 @@ export default function DeliveryEditorNewPage(): JSX.Element {
     })
   }
 
-  const handlePrint = async (printer: string, template: string): Promise<void> => {
+  const handlePrint = async (options: PrintOptions): Promise<void> => {
     try {
-      // Druck-Logik hier
-      await apiClient.post('/api/v1/sales/delivery-notes/print', {
-        deliveryNoteId: deliveryNote.deliveryNumber,
-        printer,
-        template,
-      })
+      const noteId = deliveryNote.deliveryNumber
+      const params = new URLSearchParams()
+      params.append('template', options.formatvorlage)
+      params.append('copies', String(options.anzahlDrucke))
 
-      // Lieferschein buchen
-      await apiClient.post('/api/v1/sales/delivery-notes', {
-        deliveryNumber: deliveryNote.deliveryNumber,
-        customerId: deliveryNote.customerId,
-        positions: deliveryNote.positions,
-      })
+      await apiClient.post(`/api/v1/sales/delivery-notes/${noteId}/print?${params.toString()}`)
+      await apiClient.post(`/api/v1/sales/delivery-notes/${noteId}/post`)
 
       push('Lieferschein erfolgreich gedruckt und gebucht')
-      setDeliveryNote((prev) => ({ ...prev, isPrinted: true }))
-    } catch (error) {
-      push('Fehler beim Drucken/Buchen des Lieferscheins')
+      setShowPrintDialog(false)
+      setDeliveryNote((prev) => ({
+        ...prev,
+        deliveryNumber: String(Math.floor(Math.random() * 9999999)).padStart(7, '0'),
+        customerId: '',
+        customerName: '',
+        customerAccount: '',
+        isPrinted: false,
+        isDelivered: false,
+        invoiceNumber: '',
+        positions: [],
+        netTotal: 0,
+        vatTotal: 0,
+        grossTotal: 0,
+        total: 0,
+      }))
+    } catch (error: any) {
+      push(`Fehler beim Drucken: ${error.response?.data?.detail || error.message}`)
     }
   }
 
@@ -530,7 +539,7 @@ export default function DeliveryEditorNewPage(): JSX.Element {
         onSelect={handleArticleSelect}
         customerId={deliveryNote.customerId}
       />
-      <PrintDialog
+      <LieferscheinDruckDialog
         open={showPrintDialog}
         onClose={() => setShowPrintDialog(false)}
         onConfirm={handlePrint}
