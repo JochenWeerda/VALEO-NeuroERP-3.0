@@ -1,5 +1,4 @@
-import { useState, useMemo } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useState, useMemo, useEffect } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -14,7 +13,6 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { apiClient } from '@/lib/axios'
-import { queryKeys } from '@/lib/query'
 
 export type Customer = {
   id: string
@@ -64,131 +62,56 @@ export function CustomerSelectionDialog({
   const [activeTab, setActiveTab] = useState<'all' | 'prospects' | 'active' | 'former'>('active')
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
 
-  const { data: customersData, isLoading, error } = useQuery({
-    queryKey: ['customers', 'all'], // Load all customers once, filter client-side
-    queryFn: async () => {
-      const params = new URLSearchParams()
-      // Always load ALL customers without search filter
-      // We'll do client-side filtering for better UX (no API calls on every keystroke)
-      // Note: API only supports: tenant_id, skip, limit, search
-      // - No is_active filter (we'll filter in frontend)
-      // - No customer_type filter (we'll filter in frontend)
-      // - No sort/order parameters (we'll sort in frontend)
-      
-      // Get enough results for filtering and sorting
-      params.append('limit', '200')
-      
-      // eslint-disable-next-line no-console
-      console.log('[CustomerSelectionDialog] Fetching customers with params:', params.toString())
-      
-      try {
-        const response = await apiClient.get<any>('/api/v1/crm/customers', { params })
-        // eslint-disable-next-line no-console
-        console.log('[CustomerSelectionDialog] API Response (raw):', response)
-        
-        // Handle different response structures
-        // apiClient.get already returns response.data, so response is already the PaginatedResponse
+  const [customers, setCustomers] = useState<Customer[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [fetchError, setFetchError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!open) return
+    setIsLoading(true)
+    setFetchError(null)
+    setCustomers([])
+    apiClient.get<any>('/api/v1/crm/customers/', { params: { limit: 200 } })
+      .then((response) => {
+        // axios.ts unwraps response.data directly, so response = { items: [...], total: N }
         let items: any[] = []
         if (Array.isArray(response)) {
-          // Direct array response (unlikely but possible)
           items = response
         } else if (response?.items && Array.isArray(response.items)) {
-          // PaginatedResponse structure: { items: [...], total: ..., page: ..., ... }
-          // This is the expected structure from /api/v1/crm/customers
           items = response.items
-        } else if (response?.data) {
-          // Nested structure: { data: { items: [...] } } or { data: [...] }
-          if (Array.isArray(response.data)) {
-            items = response.data
-          } else if (response.data.items && Array.isArray(response.data.items)) {
-            items = response.data.items
-          }
         }
-        
-        // If still no items, try to find any array in the response
-        if (items.length === 0 && response) {
-          // eslint-disable-next-line no-console
-          console.warn('[CustomerSelectionDialog] No items found in expected structure, searching response:', Object.keys(response))
-          // Try to find any array property
-          for (const key of Object.keys(response)) {
-            if (Array.isArray((response as any)[key])) {
-              // eslint-disable-next-line no-console
-              console.warn(`[CustomerSelectionDialog] Found array in key "${key}":`, (response as any)[key])
-              items = (response as any)[key]
-              break
-            }
-          }
-        }
-        
+        const mapped: Customer[] = items.map((c: any) => ({
+          id: c.id,
+          customerNumber: c.customer_number || c.customerNumber || '',
+          name: (c.company_name || c.name || '').trim(),
+          debitorAccount: c.customer_number || c.customerNumber || '',
+          representative: c.contact_person || c.representative,
+          postalCode: c.postal_code || c.postalCode,
+          city: c.city,
+          customerGroup: c.customer_group || c.customerGroup,
+          creditLimit: c.credit_limit?.toString() || c.creditLimit,
+          address: typeof c.address === 'string'
+            ? { street: c.address, postalCode: c.postal_code, city: c.city, phone: c.phone, fax: c.fax }
+            : c.address || { postalCode: c.postal_code, city: c.city },
+          company_name: c.company_name,
+          customer_number: c.customer_number,
+          contact_person: c.contact_person,
+          phone: c.phone,
+          email: c.email,
+          is_active: c.is_active ?? true,
+          customer_type: c.customer_type,
+          chefanweisung: c.chefanweisung || c.executive_note,
+          executiveNote: c.executive_note || c.chefanweisung,
+        }))
+        setCustomers(mapped)
+      })
+      .catch((err) => {
         // eslint-disable-next-line no-console
-        console.log('[CustomerSelectionDialog] Extracted items:', {
-          itemsCount: items.length,
-          firstItem: items[0],
-          allItems: items,
-        })
-        
-        // Map backend customer format to frontend format
-        const mapped = items.map((c: any) => ({
-        id: c.id,
-        customerNumber: c.customer_number || c.customerNumber || '',
-        name: (c.company_name || c.name || '').trim(), // Prefer company_name (backend field) over name, trim whitespace
-        debitorAccount: c.customer_number || c.customerNumber || '', // Use customer_number as debitor account
-        representative: c.contact_person || c.representative,
-        postalCode: c.postal_code || c.postalCode,
-        city: c.city,
-        customerGroup: c.customer_group || c.customerGroup,
-        creditLimit: c.credit_limit?.toString() || c.creditLimit,
-        address: typeof c.address === 'string' 
-          ? { street: c.address, postalCode: c.postal_code, city: c.city, phone: c.phone, fax: c.fax }
-          : c.address || { street: c.address_backend, postalCode: c.postal_code, city: c.city, phone: c.phone, fax: c.fax },
-        // Keep backend fields for reference
-        company_name: c.company_name,
-        customer_number: c.customer_number,
-        contact_person: c.contact_person,
-        phone: c.phone,
-        email: c.email,
-        address_backend: c.address,
-        // Add status fields for filtering
-        is_active: c.is_active ?? true,
-        customer_type: c.customer_type,
-        // Chefanweisung aus Backend
-        chefanweisung: c.chefanweisung || c.executive_note || c.executiveNote,
-        executiveNote: c.executive_note || c.executiveNote || c.chefanweisung,
-      }))
-        
-        // eslint-disable-next-line no-console
-        console.log('[CustomerSelectionDialog] Mapped customers:', mapped.length, 'items', mapped.slice(0, 3))
-        return mapped
-      } catch (err) {
-        // eslint-disable-next-line no-console
-        console.error('[CustomerSelectionDialog] Error fetching customers:', err)
-        throw err
-      }
-    },
-    enabled: open,
-    staleTime: 30_000,
-    retry: (failureCount, error: any) => {
-      // Don't retry on 401 errors
-      if (error?.response?.status === 401) {
-        return false
-      }
-      return failureCount < 3
-    },
-    // Don't throw errors - handle them gracefully
-    throwOnError: false,
-  })
-
-  const customers = customersData || []
-  
-  // eslint-disable-next-line no-console
-  console.log('[CustomerSelectionDialog] State:', {
-    customersData,
-    customersCount: customers.length,
-    isLoading,
-    error,
-    activeTab,
-    searchTerm,
-  })
+        console.error('[CustomerSelectionDialog] Fehler beim Laden:', err)
+        setFetchError(err?.message || 'Unbekannter Fehler')
+      })
+      .finally(() => setIsLoading(false))
+  }, [open])
 
   // Helper function to check if a string matches a pattern (supports * wildcard)
   const matchesPattern = (text: string, pattern: string): boolean => {
@@ -376,11 +299,9 @@ export function CustomerSelectionDialog({
           <div className="flex-1 overflow-auto border rounded">
             {isLoading ? (
               <div className="p-4 text-center text-muted-foreground">Lade Kunden...</div>
-            ) : error ? (
+            ) : fetchError ? (
               <div className="p-4 text-center text-red-600">
-                <p>Fehler beim Laden: {error instanceof Error ? error.message : 'Unbekannter Fehler'}</p>
-                {/* eslint-disable-next-line no-console */}
-                {console.error('[CustomerSelectionDialog] Query error:', error)}
+                <p>Fehler beim Laden: {fetchError}</p>
               </div>
             ) : (
               <Table>
@@ -400,13 +321,7 @@ export function CustomerSelectionDialog({
                         {isLoading ? (
                           'Lade Kunden...'
                         ) : customers.length === 0 ? (
-                          <div>
-                            <p>Keine Kunden in der Datenbank gefunden.</p>
-                            <p className="text-xs mt-2">
-                              Debug: customersData={customersData ? 'exists' : 'undefined'}, 
-                              customers.length={customers.length}
-                            </p>
-                          </div>
+                          <p>Keine Kunden in der Datenbank gefunden.</p>
                         ) : searchTerm ? (
                           `Keine Kunden gefunden für "${searchTerm}"`
                         ) : (

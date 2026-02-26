@@ -3,13 +3,93 @@
  * TanStack Query hooks for Verkauf (Orders, Offers, Deliveries, Invoices)
  */
 
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '../api-client'
 
-export type AuftragStatus = 'offen' | 'teilgeliefert' | 'geliefert' | 'fakturiert' | 'storniert'
+export type AuftragStatus = 'open' | 'offen' | 'teilgeliefert' | 'geliefert' | 'fakturiert' | 'storniert'
 export type AngebotStatus = 'offen' | 'angenommen' | 'abgelehnt' | 'abgelaufen'
-export type LieferungStatus = 'geplant' | 'unterwegs' | 'zugestellt' | 'storniert'
-export type RechnungStatus = 'offen' | 'teilbezahlt' | 'bezahlt' | 'ueberfaellig' | 'storniert'
+
+// ── Backend response shapes ───────────────────────────────────────────────────
+
+export type SalesOrderItem = {
+  id: string
+  line_number: number
+  article_number: string
+  description?: string
+  quantity: number
+  unit_price: number
+  discount_percent: number
+  line_total: number
+}
+
+export type SalesOrder = {
+  id: string
+  tenant_id: string
+  order_number: string
+  customer_id?: string
+  customer_name?: string
+  subject: string
+  description?: string
+  total_amount: number
+  currency: string
+  status: string
+  contact_person?: string
+  delivery_date?: string
+  delivery_address?: string
+  shipping_method?: string
+  payment_terms?: string
+  notes?: string
+  items: SalesOrderItem[]
+  created_at?: string
+  updated_at?: string
+  version: number
+}
+
+export type SalesOfferItem = {
+  id: string
+  line_number: number
+  article_number: string
+  description?: string
+  quantity: number
+  unit: string
+  unit_price: number
+  ek_price?: number
+  discount_percent: number
+  line_total: number
+}
+
+export type SalesOffer = {
+  id: string
+  tenant_id: string
+  offer_number: string
+  customer_id?: string
+  customer_name?: string
+  subject: string
+  description?: string
+  total_amount: number
+  currency: string
+  status: string
+  contact_person?: string
+  valid_until?: string
+  notes?: string
+  is_pauschale: boolean
+  items: SalesOfferItem[]
+  created_at?: string
+  updated_at?: string
+  version: number
+}
+
+type PaginatedResponse<T> = {
+  items: T[]
+  total: number
+  page: number
+  size: number
+  pages: number
+  has_next: boolean
+  has_prev: boolean
+}
+
+// ── Legacy UI types (kept for backward compat) ────────────────────────────────
 
 export type Auftrag = {
   id: string
@@ -31,116 +111,94 @@ export type Angebot = {
   gueltigBis: string
 }
 
-export type Lieferung = {
-  id: string
-  nummer: string
-  datum: string
-  kunde: string
-  auftragsNr: string
-  menge: number
-  totalNutrientNKg?: number
-  totalNutrientP2o5Kg?: number
-  totalCo2eKg?: number
-  status: LieferungStatus
-}
-
-export type Rechnung = {
-  id: string
-  nummer: string
-  datum: string
-  kunde: string
-  auftragsNr: string
-  betrag: number
-  faelligAm: string
-  status: RechnungStatus
-}
+// ── Query keys ────────────────────────────────────────────────────────────────
 
 export const salesKeys = {
   all: ['sales'] as const,
-  auftraege: (filters?: Record<string, unknown>) => [...salesKeys.all, 'auftraege', filters] as const,
-  angebote: (filters?: Record<string, unknown>) => [...salesKeys.all, 'angebote', filters] as const,
-  lieferungen: (filters?: Record<string, unknown>) => [...salesKeys.all, 'lieferungen', filters] as const,
-  rechnungen: (filters?: Record<string, unknown>) => [...salesKeys.all, 'rechnungen', filters] as const,
+  orders: (filters?: Record<string, unknown>) => [...salesKeys.all, 'orders', filters] as const,
+  order: (id: string) => [...salesKeys.all, 'orders', id] as const,
+  offers: (filters?: Record<string, unknown>) => [...salesKeys.all, 'offers', filters] as const,
+  offer: (id: string) => [...salesKeys.all, 'offers', id] as const,
+  // legacy aliases
+  auftraege: (filters?: Record<string, unknown>) => salesKeys.orders(filters),
+  angebote: (filters?: Record<string, unknown>) => salesKeys.offers(filters),
 }
 
-function transformMCPAuftrag(doc: any): Auftrag {
-  return {
-    id: doc.number ?? doc.id,
-    nummer: doc.number,
-    datum: doc.date,
-    kunde: doc.customerId ?? '',
-    betrag: doc.totalGross ?? 0,
-    status: (doc.status?.toLowerCase() ?? 'offen') as AuftragStatus,
-    liefertermin: doc.deliveryDate ?? '',
-  }
-}
+// ── Transformers ──────────────────────────────────────────────────────────────
 
-function transformMCPAngebot(doc: any): Angebot {
-  return {
-    id: doc.number ?? doc.id,
-    nummer: doc.number,
-    datum: doc.date,
-    kunde: doc.customerId ?? '',
-    betrag: doc.totalGross ?? 0,
-    status: (doc.status?.toLowerCase() ?? 'offen') as AngebotStatus,
-    gueltigBis: doc.validUntil ?? '',
-  }
-}
-
-function transformMCPLieferung(doc: any): Lieferung {
-  return {
-    id: doc.number ?? doc.id,
-    nummer: doc.number,
-    datum: doc.date,
-    kunde: doc.customerId ?? '',
-    auftragsNr: doc.sourceOrder ?? '',
-    menge: doc.lines?.reduce((sum: number, line: any) => sum + (line.qty ?? 0), 0) ?? 0,
-    totalNutrientNKg: doc.totalNutrientNKg ?? 0,
-    totalNutrientP2o5Kg: doc.totalNutrientP2o5Kg ?? 0,
-    totalCo2eKg: doc.totalCo2eKg ?? 0,
-    status: (doc.status?.toLowerCase() ?? 'geplant') as LieferungStatus,
-  }
-}
-
-function transformMCPRechnung(doc: any): Rechnung {
-  return {
-    id: doc.number ?? doc.id,
-    nummer: doc.number,
-    datum: doc.date,
-    kunde: doc.customerId ?? '',
-    auftragsNr: doc.sourceOrder ?? '',
-    betrag: doc.totalGross ?? 0,
-    faelligAm: doc.dueDate ?? '',
-    status: (doc.status?.toLowerCase() ?? 'offen') as RechnungStatus,
-  }
-}
-
-async function fetchMCPDocuments<T>(docType: string, transform: (doc: any) => T): Promise<T[]> {
+function formatDate(iso?: string): string {
+  if (!iso) return ''
   try {
-    const response = await apiClient.get<{ data: T[] }>(`/api/v1/sales/${docType}`)
-    return response.data.data
+    return new Date(iso).toLocaleDateString('de-DE')
   } catch {
-    const response = await fetch(`/api/mcp/documents/${docType}?skip=0&limit=100`)
-    if (!response.ok) {
-      throw new Error(`Failed to fetch ${docType}: ${response.status}`)
-    }
-
-    const result = await response.json()
-    if (!result.ok) {
-      throw new Error(`MCP fetch for ${docType} returned not ok`)
-    }
-
-    return (result.data ?? []).map(transform)
+    return iso
   }
 }
 
+function orderToAuftrag(o: SalesOrder): Auftrag {
+  return {
+    id: o.id,
+    nummer: o.order_number,
+    datum: formatDate(o.created_at),
+    kunde: o.customer_name ?? o.customer_id ?? '',
+    betrag: o.total_amount,
+    status: (o.status as AuftragStatus) ?? 'offen',
+    liefertermin: formatDate(o.delivery_date),
+  }
+}
+
+function offerToAngebot(o: SalesOffer): Angebot {
+  return {
+    id: o.id,
+    nummer: o.offer_number,
+    datum: formatDate(o.created_at),
+    kunde: o.customer_name ?? o.customer_id ?? '',
+    betrag: o.total_amount,
+    status: (o.status as AngebotStatus) ?? 'offen',
+    gueltigBis: formatDate(o.valid_until),
+  }
+}
+
+// ── Raw REST fetchers ─────────────────────────────────────────────────────────
+
+async function fetchOrders(params: Record<string, unknown> = {}): Promise<SalesOrder[]> {
+  const query = new URLSearchParams()
+  query.set('limit', '100')
+  if (params.search) query.set('search', String(params.search))
+  if (params.status) query.set('status', String(params.status))
+  if (params.customer_id) query.set('customer_id', String(params.customer_id))
+  const resp = await apiClient.get<PaginatedResponse<SalesOrder>>(`/api/v1/sales/orders/?${query.toString()}`)
+  return resp.data.items ?? []
+}
+
+async function fetchOffers(params: Record<string, unknown> = {}): Promise<SalesOffer[]> {
+  const query = new URLSearchParams()
+  query.set('limit', '100')
+  if (params.search) query.set('search', String(params.search))
+  if (params.status) query.set('status', String(params.status))
+  if (params.customer_id) query.set('customer_id', String(params.customer_id))
+  const resp = await apiClient.get<PaginatedResponse<SalesOffer>>(`/api/v1/sales/offers/?${query.toString()}`)
+  return resp.data.items ?? []
+}
+
+// ── Hooks: Orders ─────────────────────────────────────────────────────────────
+
+export function useSalesOrders(filters?: { status?: string; search?: string; customer_id?: string }) {
+  return useQuery({
+    queryKey: salesKeys.orders(filters),
+    queryFn: () => fetchOrders(filters ?? {}),
+    staleTime: 2 * 60 * 1000,
+  })
+}
+
+/** Legacy alias – returns UI-shaped Auftrag objects */
 export function useAuftraege(filters?: { status?: AuftragStatus; search?: string }) {
   return useQuery({
     queryKey: salesKeys.auftraege(filters),
-    queryFn: () => fetchMCPDocuments('sales_order', transformMCPAuftrag),
+    queryFn: () => fetchOrders(filters ?? {}),
     staleTime: 2 * 60 * 1000,
     select: (data) => {
-      let items = data
+      let items = data.map(orderToAuftrag)
       if (filters?.status) items = items.filter((a) => a.status === filters.status)
       if (filters?.search) {
         const s = filters.search.toLowerCase()
@@ -151,13 +209,24 @@ export function useAuftraege(filters?: { status?: AuftragStatus; search?: string
   })
 }
 
+// ── Hooks: Offers ─────────────────────────────────────────────────────────────
+
+export function useSalesOffers(filters?: { status?: string; search?: string; customer_id?: string }) {
+  return useQuery({
+    queryKey: salesKeys.offers(filters),
+    queryFn: () => fetchOffers(filters ?? {}),
+    staleTime: 2 * 60 * 1000,
+  })
+}
+
+/** Legacy alias – returns UI-shaped Angebot objects */
 export function useAngebote(filters?: { status?: AngebotStatus; search?: string }) {
   return useQuery({
     queryKey: salesKeys.angebote(filters),
-    queryFn: () => fetchMCPDocuments('sales_offer', transformMCPAngebot),
+    queryFn: () => fetchOffers(filters ?? {}),
     staleTime: 2 * 60 * 1000,
     select: (data) => {
-      let items = data
+      let items = data.map(offerToAngebot)
       if (filters?.status) items = items.filter((a) => a.status === filters.status)
       if (filters?.search) {
         const s = filters.search.toLowerCase()
@@ -168,46 +237,50 @@ export function useAngebote(filters?: { status?: AngebotStatus; search?: string 
   })
 }
 
-export function useLieferungen(filters?: { status?: LieferungStatus; search?: string }) {
-  return useQuery({
-    queryKey: salesKeys.lieferungen(filters),
-    queryFn: () => fetchMCPDocuments('sales_delivery', transformMCPLieferung),
-    staleTime: 2 * 60 * 1000,
-    select: (data) => {
-      let items = data
-      if (filters?.status) items = items.filter((l) => l.status === filters.status)
-      if (filters?.search) {
-        const s = filters.search.toLowerCase()
-        items = items.filter(
-          (l) =>
-            l.nummer.toLowerCase().includes(s) ||
-            l.kunde.toLowerCase().includes(s) ||
-            l.auftragsNr.toLowerCase().includes(s),
-        )
-      }
-      return items
+// ── Mutations: Offers ─────────────────────────────────────────────────────────
+
+type CreateOfferPayload = Omit<SalesOffer, 'id' | 'tenant_id' | 'version' | 'created_at' | 'updated_at'>
+
+export function useCreateOffer() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (payload: CreateOfferPayload) => {
+      const resp = await apiClient.post<SalesOffer>('/api/v1/sales/offers/', payload)
+      return resp.data
     },
+    onSuccess: () => qc.invalidateQueries({ queryKey: salesKeys.all }),
   })
 }
 
-export function useRechnungen(filters?: { status?: RechnungStatus; search?: string }) {
-  return useQuery({
-    queryKey: salesKeys.rechnungen(filters),
-    queryFn: () => fetchMCPDocuments('sales_invoice', transformMCPRechnung),
-    staleTime: 2 * 60 * 1000,
-    select: (data) => {
-      let items = data
-      if (filters?.status) items = items.filter((r) => r.status === filters.status)
-      if (filters?.search) {
-        const s = filters.search.toLowerCase()
-        items = items.filter(
-          (r) =>
-            r.nummer.toLowerCase().includes(s) ||
-            r.kunde.toLowerCase().includes(s) ||
-            r.auftragsNr.toLowerCase().includes(s),
-        )
-      }
-      return items
+export function useDeleteOffer() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await apiClient.delete(`/api/v1/sales/offers/${id}`)
     },
+    onSuccess: () => qc.invalidateQueries({ queryKey: salesKeys.all }),
+  })
+}
+
+export function useConvertOfferToOrder() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const resp = await apiClient.post<SalesOffer>(`/api/v1/sales/offers/${id}/convert-to-order`)
+      return resp.data
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: salesKeys.all }),
+  })
+}
+
+// ── Mutations: Orders ─────────────────────────────────────────────────────────
+
+export function useDeleteOrder() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await apiClient.delete(`/api/v1/sales/orders/${id}`)
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: salesKeys.all }),
   })
 }

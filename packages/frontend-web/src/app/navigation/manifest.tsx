@@ -217,9 +217,9 @@ const NAV_SECTIONS_CONFIG: RawNavItem[] = [
         id: 'angebot',
         label: 'Angebote',
         icon: FileText,
-        module: '@/pages/sales/angebote-liste',
-        preferredPath: 'sales',
-        keywords: ['angebot', 'angebot-liste'],
+        module: '@/pages/sales/angebot-erstellen',
+        preferredPath: 'sales/angebote',
+        keywords: ['angebot', 'angebot-erfassung', 'angebot-erstellen'],
         mcp: { businessDomain: 'sales', scope: 'sales:read' },
       },
       {
