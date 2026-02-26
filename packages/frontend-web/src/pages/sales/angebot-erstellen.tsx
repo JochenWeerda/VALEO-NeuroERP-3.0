@@ -1,178 +1,305 @@
-import { useMemo, useState } from 'react'
+/**
+ * Angebot-Erfassung (Verkauf)
+ * Im Stil der Lieferschein-Erfassung — einheitliches ERP-Look & Feel
+ */
 
-type AngebotRow = {
-  nr: string
-  datum: string
-  kunde: string
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Card } from '@/components/ui/card'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { useAngebote, type Angebot } from '@/lib/api/sales'
+import { ChevronLeft, ChevronRight, MoreHorizontal, Printer, Save, Trash2, X, Search, FileText } from 'lucide-react'
+
+type Position = {
+  pos: string
+  artikelNr: string
+  bezeichnung: string
+  menge: string
+  einheit: string
+  preis: string
+  rabatt: string
+  betrag: string
+  ekPreis: string
 }
 
 export default function AngebotErstellenPage(): JSX.Element {
   const [angebotNr, setAngebotNr] = useState('')
-  const [datum, setDatum] = useState('25.02.2026')
+  const [datum, setDatum] = useState(new Date().toLocaleDateString('de-DE'))
+  const [gueltigBis, setGueltigBis] = useState('')
   const [kunde, setKunde] = useState('')
-  const [search, setSearch] = useState('')
+  const [status, setStatus] = useState('Offen')
+  const [isPauschale, setIsPauschale] = useState(false)
+  const [kontakt, setKontakt] = useState('')
+  const [selectedPosition, setSelectedPosition] = useState<number | null>(null)
+  const [auswahlOffen, setAuswahlOffen] = useState(true)
+  const [sucheText, setSucheText] = useState('')
 
-  const angebote = useMemo<AngebotRow[]>(
-    () => [
-      { nr: '2500005', datum: '25.11.2025', kunde: 'Niedersachsen Port, Emden' },
-      { nr: '2500004', datum: '06.08.2025', kunde: 'Kromminga Jens-Martin' },
-      { nr: '2500003', datum: '14.07.2025', kunde: 'Hinrichs Ewald' },
-      { nr: '2500002', datum: '14.07.2025', kunde: 'Niedersachsen Port, Emden' },
-      { nr: '2500001', datum: '17.06.2025', kunde: 'Rob-Schoeningh Betriebs KG' },
-      { nr: '2400010', datum: '25.06.2024', kunde: 'Neelen Hinrich Groevehorn 1a' },
-      { nr: '2300009', datum: '12.10.2023', kunde: 'Feuerwehr Wybelsum' },
-    ],
-    [],
-  )
+  const { data: angebote = [], isLoading } = useAngebote()
 
   const filtered = angebote.filter(
-    (row) =>
-      row.nr.toLowerCase().includes(search.toLowerCase()) ||
-      row.kunde.toLowerCase().includes(search.toLowerCase()),
+    (a) =>
+      a.nummer.toLowerCase().includes(sucheText.toLowerCase()) ||
+      a.kunde.toLowerCase().includes(sucheText.toLowerCase()),
   )
 
+  const [positionen] = useState<Position[]>([
+    { pos: '10', artikelNr: '', bezeichnung: '', menge: '', einheit: 'kg', preis: '', rabatt: '0', betrag: '', ekPreis: '' },
+  ])
+
+  function handleAuswaehlen(angebot: Angebot) {
+    setAngebotNr(angebot.nummer)
+    setDatum(angebot.datum)
+    setKunde(angebot.kunde)
+    setStatus(angebot.status)
+    setAuswahlOffen(false)
+  }
+
+  const selectedPos = selectedPosition !== null ? positionen[selectedPosition] : null
+
   return (
-    <div className="min-h-full bg-[#e9e9e9] text-[11px] leading-none text-black">
-      <div className="border-b border-[#cfcfcf] bg-[#efefef] p-2">
-        <div className="flex items-center gap-4 text-[10px] uppercase text-[#333]">
-          <span>Datei</span>
-          <span>Funktionen</span>
-          <span>Allgemein</span>
-          <span>Erfassung</span>
-          <span>Abrechnung</span>
-          <span>Lager</span>
-          <span>Fenster</span>
-        </div>
+    <div className="flex flex-col h-full">
+
+      {/* Titelbalken */}
+      <div className="bg-amber-500 px-4 py-2">
+        <h1 className="text-white font-bold text-sm tracking-wide uppercase">Angebot-Erfassung</h1>
       </div>
 
-      <div className="border-b border-[#b3b3b3] bg-[#f3f3f3] px-1 py-2">
-        <div className="flex flex-wrap items-end gap-2 text-[10px]">
-          {['Kontrakt', 'Bestellung', 'Lieferschein', 'Rechnung', 'Angebot', 'Auftrag'].map((item) => (
-            <button key={item} className="h-9 min-w-[66px] border border-[#bdbdbd] bg-white px-2 text-[10px]">
-              {item}
-            </button>
-          ))}
-        </div>
-      </div>
+      {/* Kopfbereich */}
+      <Card className="m-3 p-3 rounded-md shadow-sm">
+        <div className="grid grid-cols-[auto_1fr_auto_1fr_auto_1fr] items-center gap-x-3 gap-y-2 text-sm">
 
-      <div className="border-y border-[#a38e00] bg-[#f3ea08] px-1 py-1 text-[12px] font-bold uppercase text-black">
-        Angebot
-      </div>
-
-      <div className="space-y-1 border-b border-[#c8c8c8] bg-[#ececec] p-1">
-        <div className="grid grid-cols-[80px_140px_26px_110px_120px_40px_70px_60px_90px] items-center gap-1">
-          <label>Angebot-Nr.</label>
-          <input value={angebotNr} onChange={(e) => setAngebotNr(e.target.value)} className="h-5 border border-[#a8a8a8] bg-[#f5f5f5] px-1" />
-          <button className="h-5 border border-[#a8a8a8] bg-[#efefef]">...</button>
-          <label>Kunden-Name</label>
-          <input value={kunde} onChange={(e) => setKunde(e.target.value)} className="h-5 border border-[#a8a8a8] bg-[#f9f9f9] px-1" />
-          <label>VB:</label>
-          <input value="" readOnly className="h-5 border border-[#a8a8a8] bg-[#f0f0f0] px-1" />
-          <label>Textformat:</label>
-          <select className="h-5 border border-[#a8a8a8] bg-[#f0f0f0] px-1">
-            <option>Angebot</option>
-          </select>
-        </div>
-        <div className="grid grid-cols-[80px_140px_180px_120px_110px] items-center gap-1">
-          <label>Datum:</label>
-          <input value={datum} onChange={(e) => setDatum(e.target.value)} className="h-5 border border-[#a8a8a8] bg-[#f9f9f9] px-1" />
-          <label className="flex items-center gap-1">
-            <input type="checkbox" className="h-3 w-3" />
-            Pauschal-Angebot
-          </label>
-          <label>Status:</label>
-          <input value="Offen" readOnly className="h-5 border border-[#a8a8a8] bg-[#f0f0f0] px-1" />
-        </div>
-      </div>
-
-      <div className="px-1 pt-1">
-        <div className="border border-[#bdbdbd] bg-white">
-          <div className="grid grid-cols-[40px_40px_60px_1fr_70px_40px_50px_70px_50px] border-b border-[#bdbdbd] bg-[#f3f3f3] px-1 py-[2px]">
-            <span>Zeile</span>
-            <span>Pos.</span>
-            <span>Artikel-Nr.</span>
-            <span>Bezeichnung -1-</span>
-            <span>Menge</span>
-            <span>Einh.</span>
-            <span>Einh.-Preis</span>
-            <span>Netto-Betr.</span>
-            <span>EK-Preis</span>
+          {/* Zeile 1 */}
+          <Label className="text-right whitespace-nowrap">Angebot-Nr.:</Label>
+          <div className="flex gap-1 items-center">
+            <Input value={angebotNr} onChange={(e) => setAngebotNr(e.target.value)} className="h-7 text-sm" />
+            <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => setAuswahlOffen(true)}>
+              <MoreHorizontal className="h-3 w-3" />
+            </Button>
+            <Button variant="outline" size="icon" className="h-7 w-7"><ChevronLeft className="h-3 w-3" /></Button>
+            <Button variant="outline" size="icon" className="h-7 w-7"><ChevronRight className="h-3 w-3" /></Button>
           </div>
-          <div className="h-7 bg-white" />
-        </div>
-      </div>
 
-      <div className="fixed inset-0 z-30 flex items-center justify-center bg-black/10">
-        <div className="w-[350px] border border-[#2a77b5] bg-[#ededed] shadow-[0_6px_20px_rgba(0,0,0,0.25)]">
-          <div className="flex items-center justify-between bg-[#007cc3] px-2 py-1 text-white">
-            <span>Verkaufs-Angebote</span>
-            <button className="px-1">x</button>
+          <Label className="text-right whitespace-nowrap">Datum:</Label>
+          <Input value={datum} onChange={(e) => setDatum(e.target.value)} className="h-7 text-sm" />
+
+          <Label className="text-right whitespace-nowrap">Gültig bis:</Label>
+          <Input value={gueltigBis} onChange={(e) => setGueltigBis(e.target.value)} placeholder="TT.MM.JJJJ" className="h-7 text-sm" />
+
+          {/* Zeile 2 */}
+          <Label className="text-right whitespace-nowrap">Kunde:</Label>
+          <div className="flex gap-1 items-center col-span-3">
+            <Input value={kunde} onChange={(e) => setKunde(e.target.value)} className="h-7 text-sm flex-1" />
+            <Button variant="outline" size="icon" className="h-7 w-7">
+              <MoreHorizontal className="h-3 w-3" />
+            </Button>
           </div>
-          <div className="p-2">
-            <div className="mb-2 text-[10px] font-semibold uppercase">Verkaufs-Angebote</div>
-            <div className="mb-2 flex items-center gap-2">
-              <label className="w-8">Suchen:</label>
-              <input value={search} onChange={(e) => setSearch(e.target.value)} className="h-5 flex-1 border border-[#86ccff] bg-[#76f06f] px-1" />
-            </div>
-            <div className="mb-1 flex gap-4 text-[10px]">
-              <button className="font-semibold text-[#0066cc]">ANGEBOTE</button>
-              <button>AUFTRAEGE</button>
-            </div>
-            <div className="max-h-[260px] overflow-auto border border-[#b8b8b8] bg-white">
-              <div className="grid grid-cols-[70px_80px_1fr] border-b border-[#cfcfcf] bg-[#f3f3f3] px-1 py-[2px]">
-                <span>Angebot-Nr.</span>
-                <span>Datum</span>
-                <span>Kunden-Name</span>
-              </div>
-              {filtered.map((row, idx) => (
-                <button
-                  key={row.nr}
-                  className={`grid w-full grid-cols-[70px_80px_1fr] px-1 py-[2px] text-left ${idx === 0 ? 'bg-[#0078d7] text-white' : 'bg-white hover:bg-[#eaf4ff]'}`}
+
+          <Label className="text-right whitespace-nowrap">Status:</Label>
+          <Input value={status} readOnly className="h-7 text-sm bg-muted" />
+
+          {/* Zeile 3 */}
+          <Label className="text-right whitespace-nowrap">Ansprechpartner:</Label>
+          <Input value={kontakt} onChange={(e) => setKontakt(e.target.value)} className="h-7 text-sm" />
+
+          <Label className="text-right whitespace-nowrap">Pauschal-Angebot:</Label>
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={isPauschale}
+              onChange={(e) => setIsPauschale(e.target.checked)}
+              className="h-4 w-4 rounded border-gray-300"
+            />
+          </div>
+
+          <span /><span />
+        </div>
+      </Card>
+
+      {/* Positionen */}
+      <Card className="mx-3 mb-2 rounded-md shadow-sm overflow-hidden flex-1">
+        <div className="overflow-auto">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted text-xs">
+                <TableHead className="w-12 py-1">Pos.</TableHead>
+                <TableHead className="w-24 py-1">Artikel-Nr.</TableHead>
+                <TableHead className="py-1">Bezeichnung</TableHead>
+                <TableHead className="w-20 py-1 text-right">Menge</TableHead>
+                <TableHead className="w-14 py-1">Einh.</TableHead>
+                <TableHead className="w-24 py-1 text-right">Einh.-Preis</TableHead>
+                <TableHead className="w-16 py-1 text-right">Rabatt %</TableHead>
+                <TableHead className="w-24 py-1 text-right">Netto-Betr.</TableHead>
+                <TableHead className="w-22 py-1 text-right">EK-Preis</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {positionen.map((pos, idx) => (
+                <TableRow
+                  key={idx}
+                  className={`text-xs cursor-pointer ${selectedPosition === idx ? 'bg-primary text-primary-foreground' : 'hover:bg-muted/50'}`}
+                  onClick={() => setSelectedPosition(idx)}
                 >
-                  <span>{row.nr}</span>
-                  <span>{row.datum}</span>
-                  <span>{row.kunde}</span>
-                </button>
+                  <TableCell className="py-1">{pos.pos}</TableCell>
+                  <TableCell className="py-1">{pos.artikelNr}</TableCell>
+                  <TableCell className="py-1">{pos.bezeichnung}</TableCell>
+                  <TableCell className="py-1 text-right">{pos.menge}</TableCell>
+                  <TableCell className="py-1">{pos.einheit}</TableCell>
+                  <TableCell className="py-1 text-right">{pos.preis}</TableCell>
+                  <TableCell className="py-1 text-right">{pos.rabatt}</TableCell>
+                  <TableCell className="py-1 text-right">{pos.betrag}</TableCell>
+                  <TableCell className="py-1 text-right">{pos.ekPreis}</TableCell>
+                </TableRow>
               ))}
-            </div>
-            <div className="mt-2 flex justify-end gap-1">
-              <button className="h-5 border border-[#9b9b9b] bg-[#efefef] px-4">OK</button>
-              <button className="h-5 border border-[#9b9b9b] bg-[#efefef] px-3">Abbrechen</button>
-            </div>
+              {/* Leere Eingabezeile */}
+              <TableRow className="text-xs bg-blue-50">
+                <TableCell className="py-1"><Input className="h-5 text-xs p-0 px-1 border-0 bg-transparent" /></TableCell>
+                <TableCell className="py-1"><Input className="h-5 text-xs p-0 px-1" /></TableCell>
+                <TableCell className="py-1"><Input className="h-5 text-xs p-0 px-1" /></TableCell>
+                <TableCell className="py-1"><Input className="h-5 text-xs p-0 px-1 text-right" /></TableCell>
+                <TableCell className="py-1"><Input className="h-5 text-xs p-0 px-1" /></TableCell>
+                <TableCell className="py-1"><Input className="h-5 text-xs p-0 px-1 text-right" /></TableCell>
+                <TableCell className="py-1"><Input className="h-5 text-xs p-0 px-1 text-right" /></TableCell>
+                <TableCell className="py-1 text-right text-muted-foreground">0,00</TableCell>
+                <TableCell className="py-1"><Input className="h-5 text-xs p-0 px-1 text-right" /></TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </div>
+      </Card>
+
+      {/* Positions-Details */}
+      {selectedPos !== null && (
+        <Card className="mx-3 mb-2 p-3 rounded-md shadow-sm">
+          <div className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">Positions-Details</div>
+          <div className="grid grid-cols-[auto_1fr_auto_1fr_auto_1fr_auto_1fr] items-center gap-x-3 gap-y-2 text-sm">
+            <Label className="text-right text-xs">Pos.-Nr.:</Label>
+            <Input value={selectedPos.pos} readOnly className="h-6 text-xs" />
+            <Label className="text-right text-xs">Artikel-Nr.:</Label>
+            <Input value={selectedPos.artikelNr} className="h-6 text-xs" />
+            <Label className="text-right text-xs">Listenpreis:</Label>
+            <Input value={selectedPos.preis} className="h-6 text-xs" />
+            <Label className="text-right text-xs">Betrag:</Label>
+            <Input value={selectedPos.betrag} className="h-6 text-xs" />
+          </div>
+        </Card>
+      )}
+
+      {/* Summen */}
+      <Card className="mx-3 mb-2 p-2 rounded-md shadow-sm">
+        <div className="flex items-center justify-end gap-6 text-sm">
+          <span className="text-muted-foreground text-xs">Gewicht: 0 kg</span>
+          <div className="flex items-center gap-2">
+            <Label className="text-xs">Netto:</Label>
+            <Input value="0,00 €" readOnly className="h-6 w-28 text-xs text-right bg-muted" />
+          </div>
+          <div className="flex items-center gap-2">
+            <Label className="text-xs">MwSt.:</Label>
+            <Input value="0,00 €" readOnly className="h-6 w-24 text-xs text-right bg-muted" />
+          </div>
+          <div className="flex items-center gap-2">
+            <Label className="text-xs font-semibold">Brutto:</Label>
+            <Input value="0,00 €" readOnly className="h-6 w-28 text-xs text-right font-semibold bg-muted" />
           </div>
         </div>
-      </div>
+      </Card>
 
-      <div className="mt-1 border-y border-[#bdbdbd] bg-[#efefef] px-1 py-[2px] font-semibold">Positions-Details</div>
-      <div className="grid grid-cols-[60px_80px_1fr_100px_60px_70px_60px_60px_80px] gap-1 p-1">
-        {['Pos.-Nr.', 'Artikel-Nr.', 'Artikel-Bezeichnung', 'Menge/Gebinde', 'Lagerhalle', 'Listenpreis', 'Rabatt', 'Einh.-Preis', 'Betrag'].map((label) => (
-          <label key={label} className="text-[10px]">
-            {label}
-          </label>
-        ))}
-        {Array.from({ length: 9 }).map((_, idx) => (
-          <input key={idx} value="" readOnly className="h-5 border border-[#a8a8a8] bg-white px-1" />
-        ))}
-      </div>
-
-      <div className="border-y border-[#bdbdbd] bg-[#efefef] px-1 py-[2px] font-semibold">Summen</div>
-      <div className="grid grid-cols-[1fr_80px_80px_80px] items-center gap-1 p-1">
-        <span>Gewicht: 0 kg</span>
-        <input value="Netto" readOnly className="h-5 border border-[#a8a8a8] bg-white px-1 text-[10px]" />
-        <input value="MWSt" readOnly className="h-5 border border-[#a8a8a8] bg-white px-1 text-[10px]" />
-        <input value="Brutto" readOnly className="h-5 border border-[#a8a8a8] bg-white px-1 text-[10px]" />
-      </div>
-
-      <div className="mt-1 flex items-center justify-between border-t border-[#bdbdbd] bg-[#efefef] px-1 py-1">
-        <div className="flex flex-wrap gap-1">
-          {['Drucken', 'Unterlagen', 'Dateien', 'Wiedervorlage', 'Angebot loeschen'].map((action) => (
-            <button key={action} className="h-5 border border-[#a8a8a8] bg-white px-2 text-[10px]">
-              {action}
-            </button>
-          ))}
+      {/* Aktionsleiste */}
+      <div className="border-t bg-muted/30 px-3 py-2 flex items-center justify-between gap-2">
+        <div className="flex gap-2">
+          <Button size="sm" className="h-7 text-xs gap-1">
+            <Save className="h-3 w-3" /> Speichern
+          </Button>
+          <Button variant="outline" size="sm" className="h-7 text-xs gap-1">
+            <Printer className="h-3 w-3" /> Drucken
+          </Button>
+          <Button variant="outline" size="sm" className="h-7 text-xs gap-1">
+            <FileText className="h-3 w-3" /> Unterlagen
+          </Button>
+          <Button variant="outline" size="sm" className="h-7 text-xs gap-1">
+            <FileText className="h-3 w-3" /> In Auftrag wandeln
+          </Button>
+          <Button variant="outline" size="sm" className="h-7 text-xs gap-1 text-destructive hover:text-destructive">
+            <Trash2 className="h-3 w-3" /> Löschen
+          </Button>
         </div>
-        <button className="h-5 border border-[#a8a8a8] bg-white px-3 text-[10px]">Beenden</button>
+        <Button variant="ghost" size="sm" className="h-7 text-xs gap-1">
+          <X className="h-3 w-3" /> Beenden
+        </Button>
       </div>
+
+      {/* Auswahl-Dialog */}
+      <Dialog open={auswahlOffen} onOpenChange={setAuswahlOffen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Verkaufs-Angebote</DialogTitle>
+          </DialogHeader>
+
+          <div className="flex items-center gap-2 mb-3">
+            <Search className="h-4 w-4 text-muted-foreground" />
+            <Input
+              value={sucheText}
+              onChange={(e) => setSucheText(e.target.value)}
+              placeholder="Angebot-Nr. oder Kunde suchen..."
+              className="h-8 text-sm"
+              autoFocus
+            />
+          </div>
+
+          <div className="border rounded-md overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted text-xs">
+                  <TableHead className="py-1 w-28">Angebot-Nr.</TableHead>
+                  <TableHead className="py-1 w-24">Datum</TableHead>
+                  <TableHead className="py-1">Kunde</TableHead>
+                  <TableHead className="py-1 w-20 text-right">Betrag</TableHead>
+                  <TableHead className="py-1 w-20">Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center text-sm text-muted-foreground py-6">
+                      Lade Angebote...
+                    </TableCell>
+                  </TableRow>
+                ) : filtered.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center text-sm text-muted-foreground py-6">
+                      Keine Angebote gefunden
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filtered.map((a, idx) => (
+                    <TableRow
+                      key={a.id}
+                      className={`text-xs cursor-pointer ${idx === 0 ? 'bg-primary text-primary-foreground' : 'hover:bg-muted/50'}`}
+                      onDoubleClick={() => handleAuswaehlen(a)}
+                      onClick={() => {}}
+                    >
+                      <TableCell className="py-1 font-mono">{a.nummer}</TableCell>
+                      <TableCell className="py-1">{a.datum}</TableCell>
+                      <TableCell className="py-1">{a.kunde}</TableCell>
+                      <TableCell className="py-1 text-right">{a.betrag.toLocaleString('de-DE', { minimumFractionDigits: 2 })} €</TableCell>
+                      <TableCell className="py-1">{a.status}</TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+
+          <DialogFooter className="mt-2">
+            <Button variant="outline" size="sm" onClick={() => setAuswahlOffen(false)}>Abbrechen</Button>
+            <Button size="sm" onClick={() => filtered[0] && handleAuswaehlen(filtered[0])}>
+              Übernehmen
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
