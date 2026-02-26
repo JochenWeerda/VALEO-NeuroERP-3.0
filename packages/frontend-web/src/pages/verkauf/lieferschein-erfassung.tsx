@@ -395,6 +395,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
   const [showArticleDialog, setShowArticleDialog] = useState(false)
   const [showPrintDialog, setShowPrintDialog] = useState(false)
   const [showAttachmentDialog, setShowAttachmentDialog] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [showAttestationDialog, setShowAttestationDialog] = useState(false)
   const [pendingAction, setPendingAction] = useState<'print' | 'modify' | null>(null)
   const [pendingPrintOptions, setPendingPrintOptions] = useState<PrintOptions | null>(null)
@@ -808,6 +809,54 @@ export default function LieferscheinErfassungPage(): JSX.Element {
     }
   }
 
+  // Lieferschein löschen
+  const handleDelete = async (): Promise<void> => {
+    const lsId = state.id
+    if (!lsId) {
+      // Noch nie gespeichert — Formular einfach leeren
+      setState({
+        id: null,
+        lieferscheinNr: generateLieferscheinNr(),
+        niederlassung: 0,
+        vertreter: '',
+        bediener: getUserShortName(),
+        lieferDatum: formatDateForInput(new Date()),
+        uhrzeit: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+        kostenstelle: 0,
+        lkwNr: 0,
+        gutschriftKennz: false,
+        selbstabholung: false,
+        fruehbezugRechnung: false,
+        reNrBezug: '',
+        statusGedruckt: false,
+        statusAusgeliefert: false,
+        fakturiertRechnNr: '',
+        customer: null,
+        positionen: [],
+        aktivePositionIndex: null,
+      })
+      setCurrentPosition({
+        posNr: 10, artikelNr: '', artikelId: null, artikelBezeichnung: '',
+        artikelBezeichnung2: '', mengeGebinde: 0, einheit: '', listenpreis: 0,
+        rabatt: 0, einhPreis: 0, betrag: 0, mwstProzent: 19, verfuegbar: 0,
+        kontraktNr: '', skontierf: false, fremdware: false, artikelGewicht: 0,
+        artikelGefahrgutPunkte: 0,
+      })
+      setBestellungen([])
+      setShowDeleteDialog(false)
+      return
+    }
+
+    try {
+      await apiClient.delete(`/api/v1/sales/delivery-notes/${lsId}`)
+      push('Lieferschein erfolgreich gelöscht')
+      setShowDeleteDialog(false)
+      navigate('/verkauf')
+    } catch (error: any) {
+      push(`Löschen fehlgeschlagen: ${error.response?.data?.detail || error.message}`)
+    }
+  }
+
   // Berechne Einh.-Preis und Betrag bei Änderung
   useEffect(() => {
     const nettoPreis = currentPosition.listenpreis * (1 - currentPosition.rabatt / 100)
@@ -831,8 +880,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
       }
     },
     'delete-document': () => {
-      // TODO: Implementieren
-      push('Löschen-Funktion noch nicht implementiert')
+      setShowDeleteDialog(true)
     },
     'close-document': () => navigate(-1),
     'copy-previous-full': async () => {
@@ -1390,13 +1438,21 @@ export default function LieferscheinErfassungPage(): JSX.Element {
 
                 <TabsContent value="rechnung" className="mt-2 space-y-2">
                   {state.customer ? (
-                    <div className="text-sm space-y-1">
-                      <div className="font-semibold">Zahlungsbedingungen</div>
-                      {state.customer.creditLimit && (
-                        <div>Kredit-Limit: {state.customer.creditLimit}</div>
-                      )}
-                      <div className="text-muted-foreground">Weitere Zahlungsbedingungen werden hier angezeigt</div>
-                      {/* TODO: Zahlungsbedingungen vom Backend laden */}
+                    <div className="text-sm space-y-1.5">
+                      <div className="grid grid-cols-[140px_1fr] gap-1">
+                        <span className="text-muted-foreground">Zahlungsziel:</span>
+                        <span>
+                          {state.customer.paymentTerms !== undefined
+                            ? `${state.customer.paymentTerms} Tage netto`
+                            : '—'}
+                        </span>
+                        <span className="text-muted-foreground">Kredit-Limit:</span>
+                        <span>{state.customer.creditLimit ? `${Number(state.customer.creditLimit).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}` : '—'}</span>
+                        <span className="text-muted-foreground">Debitor-Kto.:</span>
+                        <span>{state.customer.debitorAccount || '—'}</span>
+                        <span className="text-muted-foreground">Kunden-Nr.:</span>
+                        <span>{state.customer.customerNumber || '—'}</span>
+                      </div>
                     </div>
                   ) : (
                     <div className="text-sm text-muted-foreground">Kein Kunde ausgewählt</div>
@@ -1404,17 +1460,45 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                 </TabsContent>
 
                 <TabsContent value="texte" className="mt-2 space-y-2">
-                  <div className="text-sm space-y-2">
-                    <div className="text-muted-foreground">Kunden-Texte und Notizen werden hier angezeigt</div>
-                    {/* TODO: Texte vom Backend laden */}
-                  </div>
+                  {state.customer ? (
+                    <div className="text-sm space-y-2">
+                      {(state.customer.chefanweisung || state.customer.executiveNote) ? (
+                        <div>
+                          <div className="font-semibold mb-1">Chefanweisung</div>
+                          <div className="p-2 bg-amber-50 border border-amber-200 rounded whitespace-pre-wrap">
+                            {state.customer.chefanweisung || state.customer.executiveNote}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-muted-foreground">Keine Kunden-Notizen vorhanden</div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-sm text-muted-foreground">Kein Kunde ausgewählt</div>
+                  )}
                 </TabsContent>
 
                 <TabsContent value="spediteur" className="mt-2 space-y-2">
-                  <div className="text-sm space-y-2">
-                    <div className="text-muted-foreground">Spediteur-Daten werden hier angezeigt</div>
-                    {/* TODO: Spediteur-Daten vom Backend laden */}
-                  </div>
+                  {state.customer ? (
+                    <div className="text-sm space-y-1.5">
+                      <div className="grid grid-cols-[140px_1fr] gap-1">
+                        <span className="text-muted-foreground">Spediteur:</span>
+                        <span>—</span>
+                        <span className="text-muted-foreground">Lieferadresse:</span>
+                        <span>
+                          {[
+                            state.customer.address?.street,
+                            state.customer.address?.postalCode,
+                            state.customer.address?.city,
+                          ].filter(Boolean).join(', ') || state.customer.address?.city || '—'}
+                        </span>
+                        <span className="text-muted-foreground">Telefon:</span>
+                        <span>{state.customer.address?.phone || state.customer.phone || '—'}</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-sm text-muted-foreground">Kein Kunde ausgewählt</div>
+                  )}
                 </TabsContent>
 
                 <TabsContent value="lieferung" className="mt-2 space-y-2">
@@ -1759,7 +1843,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
             <Receipt className="h-4 w-4" />
             Sofort-Rechnung
           </Button>
-          <Button variant="outline" size="sm" className="gap-2 text-red-600">
+          <Button variant="outline" size="sm" className="gap-2 text-red-600" onClick={() => setShowDeleteDialog(true)}>
             <Trash2 className="h-4 w-4" />
             LS löschen
           </Button>
@@ -1796,6 +1880,24 @@ export default function LieferscheinErfassungPage(): JSX.Element {
         onClose={() => setShowPrintDialog(false)}
         onConfirm={handlePrint}
       />
+      {/* Löschen-Bestätigung */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Lieferschein löschen?</DialogTitle>
+          </DialogHeader>
+          <div className="py-2 text-sm">
+            {state.id
+              ? <>Lieferschein <strong>{state.lieferscheinNr}</strong> wird unwiderruflich gelöscht. Fortfahren?</>
+              : 'Das Formular wird geleert. Nicht gespeicherte Daten gehen verloren.'}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>Abbrechen</Button>
+            <Button variant="destructive" onClick={() => void handleDelete()}>Löschen</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <DmsAnhangDialog
         open={showAttachmentDialog}
         onClose={() => setShowAttachmentDialog(false)}

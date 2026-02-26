@@ -24,6 +24,7 @@ export type Customer = {
   city?: string
   customerGroup?: string
   creditLimit?: string
+  paymentTerms?: number    // Zahlungsziel in Tagen
   address?: {
     street?: string
     postalCode?: string
@@ -50,12 +51,14 @@ type CustomerSelectionDialogProps = {
   open: boolean
   onClose: () => void
   onSelect: (customer: Customer) => void
+  title?: string
 }
 
 export function CustomerSelectionDialog({
   open,
   onClose,
   onSelect,
+  title = 'AUSWAHL KUNDEN',
 }: CustomerSelectionDialogProps): JSX.Element {
   const [searchTerm, setSearchTerm] = useState('')
   const [extendedSearch, setExtendedSearch] = useState(true)
@@ -90,6 +93,7 @@ export function CustomerSelectionDialog({
           city: c.city,
           customerGroup: c.customer_group || c.customerGroup,
           creditLimit: c.credit_limit?.toString() || c.creditLimit,
+          paymentTerms: c.payment_terms !== undefined ? Number(c.payment_terms) : undefined,
           address: typeof c.address === 'string'
             ? { street: c.address, postalCode: c.postal_code, city: c.city, phone: c.phone, fax: c.fax }
             : c.address || { postalCode: c.postal_code, city: c.city },
@@ -257,7 +261,7 @@ export function CustomerSelectionDialog({
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader>
-          <DialogTitle>AUSWAHL KUNDEN</DialogTitle>
+          <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 flex-1 overflow-hidden flex flex-col">
