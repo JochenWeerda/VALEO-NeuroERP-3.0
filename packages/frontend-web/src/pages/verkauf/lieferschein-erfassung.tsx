@@ -16,7 +16,7 @@ import { useToast } from '@/components/ui/toast-provider'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { CustomerSelectionDialog, type Customer } from '@/components/sales/CustomerSelectionDialog'
 import { ArtikelSuchDialog } from '@/components/sales/ArtikelSuchDialog'
-import { LieferscheinDruckDialog } from '@/components/sales/LieferscheinDruckDialog'
+import { LieferscheinDruckDialog, type PrintOptions } from '@/components/sales/LieferscheinDruckDialog'
 import { AttestationDialog } from '@/components/sales/AttestationDialog'
 import { apiClient } from '@/lib/axios'
 import { useAuth } from '@/hooks/useAuth'
@@ -395,6 +395,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
   const [showPrintDialog, setShowPrintDialog] = useState(false)
   const [showAttestationDialog, setShowAttestationDialog] = useState(false)
   const [pendingAction, setPendingAction] = useState<'print' | 'modify' | null>(null)
+  const [pendingPrintOptions, setPendingPrintOptions] = useState<PrintOptions | null>(null)
   const [showInformationDialog, setShowInformationDialog] = useState(false)
   const [customerTab, setCustomerTab] = useState<'kunde' | 'lieferanschr' | 'rechnanschrift' | 'bestellung' | 'rechnung' | 'texte' | 'spediteur' | 'lieferung'>('kunde')
   
@@ -682,15 +683,16 @@ export default function LieferscheinErfassungPage(): JSX.Element {
   }
 
   // Lieferschein drucken und buchen
-  const handlePrint = async (printer: string, template: string): Promise<void> => {
+  const handlePrint = async (options: PrintOptions): Promise<void> => {
     // Wenn bereits gebucht, Attestierung erforderlich
     if (state.statusGedruckt || state.statusAusgeliefert) {
+      setPendingPrintOptions(options)
       setPendingAction('print')
       setShowAttestationDialog(true)
       return
     }
 
-    await executePrint(printer, template)
+    await executePrint(options)
   }
 
   // Attestierung bestätigt
@@ -698,8 +700,11 @@ export default function LieferscheinErfassungPage(): JSX.Element {
     setShowAttestationDialog(false)
     
     if (action === 'print') {
-      // Get printer/template from dialog state (simplified)
-      await executePrint('default', 'W00005', reason)
+      const opts: PrintOptions = pendingPrintOptions ?? {
+        formatvorlage: 'W00005', anzahlDrucke: 1, sortierung: 'pos-nr',
+        druckLieferschein: true, druckAllgemeineAngaben: false, werbetext: '',
+      }
+      await executePrint(opts, reason)
     } else if (action === 'modify') {
       // TODO: Handle modify action
       push('Korrektur noch nicht implementiert')
@@ -708,7 +713,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
   }
 
   // Druck ausführen
-  const executePrint = async (printer: string, template: string, attestation?: string): Promise<void> => {
+  const executePrint = async (options: PrintOptions, attestation?: string): Promise<void> => {
     try {
       // Wenn noch nicht gespeichert (keine ID), erst speichern
       let lsId = state.id
@@ -738,6 +743,8 @@ export default function LieferscheinErfassungPage(): JSX.Element {
       if (attestation) {
         params.append('attestation', attestation)
       }
+      params.append('template', options.formatvorlage)
+      params.append('copies', String(options.anzahlDrucke))
 
       await apiClient.post(
         `/api/v1/sales/delivery-notes/${lsId}/print?${params.toString()}`
@@ -745,18 +752,53 @@ export default function LieferscheinErfassungPage(): JSX.Element {
 
       // Buchen
       await apiClient.post(`/api/v1/sales/delivery-notes/${lsId}/post`)
-      
-      // Lieferschein neu laden, um invoice_number zu erhalten (falls fakturiert)
-      const updated = await apiClient.get<DeliveryNoteResponse>(`/api/v1/sales/delivery-notes/${lsId}`)
-      
-      setState((prev) => ({ 
-        ...prev, 
-        statusGedruckt: true, 
-        statusAusgeliefert: true,
-        fakturiertRechnNr: updated.invoice_number || '', // Vom Backend gesetzt nach Fakturierung
-      }))
+
       push('Lieferschein erfolgreich gedruckt und gebucht')
       setShowPrintDialog(false)
+
+      // Maske auf neuen leeren Lieferschein zurücksetzen
+      setState({
+        id: null,
+        lieferscheinNr: generateLieferscheinNr(),
+        niederlassung: 0,
+        vertreter: '',
+        bediener: getUserShortName(),
+        lieferDatum: formatDateForInput(new Date()),
+        uhrzeit: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+        kostenstelle: 0,
+        lkwNr: 0,
+        gutschriftKennz: false,
+        selbstabholung: false,
+        fruehbezugRechnung: false,
+        reNrBezug: '',
+        statusGedruckt: false,
+        statusAusgeliefert: false,
+        fakturiertRechnNr: '',
+        customer: null,
+        positionen: [],
+        aktivePositionIndex: null,
+      })
+      setCurrentPosition({
+        posNr: 10,
+        artikelNr: '',
+        artikelId: null,
+        artikelBezeichnung: '',
+        artikelBezeichnung2: '',
+        mengeGebinde: 0,
+        einheit: '',
+        listenpreis: 0,
+        rabatt: 0,
+        einhPreis: 0,
+        betrag: 0,
+        mwstProzent: 19,
+        verfuegbar: 0,
+        kontraktNr: '',
+        skontierf: false,
+        fremdware: false,
+        artikelGewicht: 0,
+        artikelGefahrgutPunkte: 0,
+      })
+      setBestellungen([])
     } catch (error: any) {
       // eslint-disable-next-line no-console
       console.error('Print error:', error)

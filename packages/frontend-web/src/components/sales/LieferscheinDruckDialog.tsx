@@ -15,12 +15,21 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
-import { MoreHorizontal } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
+
+export type PrintOptions = {
+  formatvorlage: string
+  anzahlDrucke: number
+  sortierung: string
+  druckLieferschein: boolean
+  druckAllgemeineAngaben: boolean
+  werbetext: string
+}
 
 type LieferscheinDruckDialogProps = {
   open: boolean
   onClose: () => void
-  onConfirm: (printer: string, template: string) => void
+  onConfirm: (options: PrintOptions) => Promise<void>
 }
 
 export function LieferscheinDruckDialog({
@@ -28,6 +37,7 @@ export function LieferscheinDruckDialog({
   onClose,
   onConfirm,
 }: LieferscheinDruckDialogProps): JSX.Element {
+  const [formatvorlage, setFormatvorlage] = useState('W00005')
   const [werbetext, setWerbetext] = useState('')
   const [anzahlDrucke, setAnzahlDrucke] = useState(1)
   const [sortierung, setSortierung] = useState('pos-nr')
@@ -37,13 +47,18 @@ export function LieferscheinDruckDialog({
   const [druckLadeInformation, setDruckLadeInformation] = useState(false)
   const [ausgeliefertUndFrei, setAusgeliefertUndFrei] = useState(false)
   const [geschaeftspapierVorschau, setGeschaeftspapierVorschau] = useState(false)
-  const [aktuellerDrucker, setAktuellerDrucker] = useState('Standard-Drucker')
+  const [loading, setLoading] = useState(false)
 
-  const handleConfirm = (): void => {
-    // Hier würde die Drucker- und Template-Auswahl erfolgen
-    // Für jetzt verwenden wir Standard-Werte
-    onConfirm(aktuellerDrucker, 'standard')
-    onClose()
+  const handleConfirm = async (): Promise<void> => {
+    setLoading(true)
+    try {
+      await onConfirm({ formatvorlage, anzahlDrucke, sortierung, druckLieferschein, druckAllgemeineAngaben, werbetext })
+      // Dialog wird vom Parent (executePrint) via onClose geschlossen
+    } catch {
+      // Fehler bereits via Toast im Parent angezeigt
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -56,22 +71,23 @@ export function LieferscheinDruckDialog({
         <div className="space-y-4 py-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="werbetext">W00005:</Label>
-              <div className="flex gap-2">
-                <Input id="werbetext" value={werbetext} onChange={(e) => setWerbetext(e.target.value)} />
-                <Button variant="ghost" size="sm">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </div>
+              <Label htmlFor="formatvorlage">Formatvorlage:</Label>
+              <select
+                id="formatvorlage"
+                className="w-full rounded-md border border-input bg-background px-3 py-2"
+                value={formatvorlage}
+                onChange={(e) => setFormatvorlage(e.target.value)}
+              >
+                <option value="W00001">W00001 — Standard-Lieferschein</option>
+                <option value="W00002">W00002 — LS mit Preisen</option>
+                <option value="W00003">W00003 — LS kompakt</option>
+                <option value="W00004">W00004 — LS für Spedition</option>
+                <option value="W00005">W00005 — LS ohne Preise</option>
+              </select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="werbetext2">Werbetext:</Label>
-              <div className="flex gap-2">
-                <Input value={werbetext} onChange={(e) => setWerbetext(e.target.value)} />
-                <Button variant="ghost" size="sm">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </div>
+              <Label htmlFor="werbetext">Werbetext:</Label>
+              <Input value={werbetext} onChange={(e) => setWerbetext(e.target.value)} />
             </div>
           </div>
 
@@ -174,18 +190,8 @@ export function LieferscheinDruckDialog({
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label>Aktueller Drucker:</Label>
-            <div className="flex items-center gap-2">
-              <Input value={aktuellerDrucker} readOnly />
-              <Button variant="outline" size="sm">
-                Drucker einrichten
-              </Button>
-            </div>
-          </div>
-
           <div className="flex gap-2">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => window.print()}>
               Drucken
             </Button>
             <Button variant="outline" size="sm">
@@ -201,10 +207,11 @@ export function LieferscheinDruckDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
+          <Button variant="outline" onClick={onClose} disabled={loading}>
             Druck nicht OK - abbrechen
           </Button>
-          <Button onClick={handleConfirm}>
+          <Button onClick={handleConfirm} disabled={loading}>
+            {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
             Druck OK - beenden
           </Button>
         </DialogFooter>
@@ -212,5 +219,3 @@ export function LieferscheinDruckDialog({
     </Dialog>
   )
 }
-
-

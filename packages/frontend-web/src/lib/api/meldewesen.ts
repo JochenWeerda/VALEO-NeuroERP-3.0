@@ -2,7 +2,7 @@
  * Meldewesen API – Connectors, Reporting Units, Schedules, Jobs
  * Backend: /api/v1/config, /api/v1/jobs
  */
-import { apiClient } from "@/lib/axios"
+import { apiClient } from "../api-client"
 
 // ── Backend API types ──────────────────────────────────────────────────────────
 
@@ -76,11 +76,11 @@ const JOBS_BASE = "/api/v1/jobs"
 // ── Connectors ─────────────────────────────────────────────────────────────────
 
 export async function listConnectors(): Promise<ConnectorApi[]> {
-  return apiClient.get<ConnectorApi[]>(`${CONFIG_BASE}/connectors`)
+  return (await apiClient.get<ConnectorApi[]>(`${CONFIG_BASE}/connectors`)).data
 }
 
 export async function getConnector(id: string): Promise<ConnectorApi> {
-  return apiClient.get<ConnectorApi>(`${CONFIG_BASE}/connectors/${id}`)
+  return (await apiClient.get<ConnectorApi>(`${CONFIG_BASE}/connectors/${id}`)).data
 }
 
 export async function createConnector(payload: {
@@ -90,14 +90,14 @@ export async function createConnector(payload: {
   config_json?: Record<string, unknown> | null
   is_active?: boolean
 }): Promise<ConnectorApi> {
-  return apiClient.put<ConnectorApi>(`${CONFIG_BASE}/connectors`, payload)
+  return (await apiClient.put<ConnectorApi>(`${CONFIG_BASE}/connectors`, payload)).data
 }
 
 export async function updateConnector(
   id: string,
   payload: { display_name?: string | null; config_json?: Record<string, unknown> | null; is_active?: boolean }
 ): Promise<ConnectorApi> {
-  return apiClient.patch<ConnectorApi>(`${CONFIG_BASE}/connectors/${id}`, payload)
+  return (await apiClient.patch<ConnectorApi>(`${CONFIG_BASE}/connectors/${id}`, payload)).data
 }
 
 export async function deleteConnector(id: string): Promise<void> {
@@ -107,7 +107,7 @@ export async function deleteConnector(id: string): Promise<void> {
 // ── Reporting Units ───────────────────────────────────────────────────────────
 
 export async function listReportingUnits(): Promise<ReportingUnitApi[]> {
-  return apiClient.get<ReportingUnitApi[]>(`${CONFIG_BASE}/reporting-units`)
+  return (await apiClient.get<ReportingUnitApi[]>(`${CONFIG_BASE}/reporting-units`)).data
 }
 
 export async function createReportingUnit(payload: {
@@ -117,7 +117,7 @@ export async function createReportingUnit(payload: {
   config_json?: Record<string, unknown> | null
   is_active?: boolean
 }): Promise<ReportingUnitApi> {
-  return apiClient.put<ReportingUnitApi>(`${CONFIG_BASE}/reporting-units`, payload)
+  return (await apiClient.put<ReportingUnitApi>(`${CONFIG_BASE}/reporting-units`, payload)).data
 }
 
 export async function updateReportingUnit(
@@ -129,7 +129,7 @@ export async function updateReportingUnit(
     is_active?: boolean
   }
 ): Promise<ReportingUnitApi> {
-  return apiClient.patch<ReportingUnitApi>(`${CONFIG_BASE}/reporting-units/${id}`, payload)
+  return (await apiClient.patch<ReportingUnitApi>(`${CONFIG_BASE}/reporting-units/${id}`, payload)).data
 }
 
 export async function deleteReportingUnit(id: string): Promise<void> {
@@ -139,7 +139,7 @@ export async function deleteReportingUnit(id: string): Promise<void> {
 // ── Schedules ─────────────────────────────────────────────────────────────────
 
 export async function listSchedules(): Promise<ScheduleApi[]> {
-  return apiClient.get<ScheduleApi[]>(`${CONFIG_BASE}/schedules`)
+  return (await apiClient.get<ScheduleApi[]>(`${CONFIG_BASE}/schedules`)).data
 }
 
 export async function createSchedule(payload: {
@@ -153,7 +153,7 @@ export async function createSchedule(payload: {
   config_json?: Record<string, unknown> | null
   is_active?: boolean
 }): Promise<ScheduleApi> {
-  return apiClient.put<ScheduleApi>(`${CONFIG_BASE}/schedules`, payload)
+  return (await apiClient.put<ScheduleApi>(`${CONFIG_BASE}/schedules`, payload)).data
 }
 
 export async function updateSchedule(
@@ -169,7 +169,7 @@ export async function updateSchedule(
     is_active?: boolean
   }
 ): Promise<ScheduleApi> {
-  return apiClient.patch<ScheduleApi>(`${CONFIG_BASE}/schedules/${id}`, payload)
+  return (await apiClient.patch<ScheduleApi>(`${CONFIG_BASE}/schedules/${id}`, payload)).data
 }
 
 export async function deleteSchedule(id: string): Promise<void> {
@@ -179,7 +179,7 @@ export async function deleteSchedule(id: string): Promise<void> {
 // ── Jobs ──────────────────────────────────────────────────────────────────────
 
 export async function runJob(payload: { schedule_id?: string | null; job_type: string; dry_run?: boolean }): Promise<JobApi> {
-  return apiClient.post<JobApi>(`${JOBS_BASE}/run`, payload)
+  return (await apiClient.post<JobApi>(`${JOBS_BASE}/run`, payload)).data
 }
 
 export async function listJobs(params?: { status?: string; limit?: number }): Promise<JobApi[]> {
@@ -188,13 +188,13 @@ export async function listJobs(params?: { status?: string; limit?: number }): Pr
   if (params?.limit != null) searchParams.set("limit", String(params.limit))
   const qs = searchParams.toString()
   const url = qs ? `${JOBS_BASE}?${qs}` : JOBS_BASE
-  return apiClient.get<JobApi[]>(url)
+  return (await apiClient.get<JobApi[]>(url)).data
 }
 
 export async function getJob(id: string): Promise<JobApi> {
-  return apiClient.get<JobApi>(`${JOBS_BASE}/${id}`)
+  return (await apiClient.get<JobApi>(`${JOBS_BASE}/${id}`)).data
 }
 
 export async function getJobArtifacts(jobId: string): Promise<JobArtifactApi[]> {
-  return apiClient.get<JobArtifactApi[]>(`${JOBS_BASE}/${jobId}/artifacts`)
+  return (await apiClient.get<JobArtifactApi[]>(`${JOBS_BASE}/${jobId}/artifacts`)).data
 }
