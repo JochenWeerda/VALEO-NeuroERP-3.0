@@ -50,7 +50,7 @@
             <button className="h-6 border border-[#9b9b9b] bg-[#ececec] px-4">Drucker Einrichten</button>
             <div className="flex gap-2">
               <button className="h-6 border border-[#9b9b9b] bg-[#ececec] px-4">Wiederholungsdruck</button>
-              <button className="h-6 border border-[#9b9b9b] bg-[#ececec] px-4">OK, drucken</button>
+              <button className="h-6 border border-[#9b9b9b] bg-[#ececec] px-4" onClick={() => window.print()}>OK, drucken</button>
               <button className="h-6 border border-[#9b9b9b] bg-[#ececec] px-4">Ausgabe in Datei</button>
               <button className="h-6 border border-[#9b9b9b] bg-[#ececec] px-4">Abbrechen</button>
             </div>

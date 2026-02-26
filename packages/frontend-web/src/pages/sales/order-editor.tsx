@@ -11,6 +11,9 @@ import { Card } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { useAuftraege, type Auftrag } from '@/lib/api/sales'
+import { LieferscheinDruckDialog, type PrintOptions } from '@/components/sales/LieferscheinDruckDialog'
+import { apiClient } from '@/lib/axios'
+import { useToast } from '@/components/ui/toast-provider'
 import { ChevronLeft, ChevronRight, MoreHorizontal, Printer, Save, Trash2, X, Search, FileText, Truck } from 'lucide-react'
 
 type Position = {
@@ -27,6 +30,7 @@ type Position = {
 }
 
 export default function SalesOrderEditorPage(): JSX.Element {
+  const { push } = useToast()
   const [auftragNr, setAuftragNr] = useState('')
   const [datum, setDatum] = useState(new Date().toLocaleDateString('de-DE'))
   const [liefertermin, setLiefertermin] = useState('')
@@ -38,6 +42,8 @@ export default function SalesOrderEditorPage(): JSX.Element {
   const [versandart, setVersandart] = useState('')
   const [selectedPosition, setSelectedPosition] = useState<number | null>(null)
   const [auswahlOffen, setAuswahlOffen] = useState(true)
+  const [showPrintDialog, setShowPrintDialog] = useState(false)
+  const [auftragId, setAuftragId] = useState<string | null>(null)
   const [sucheText, setSucheText] = useState('')
 
   const { data: auftraege = [], isLoading } = useAuftraege()
@@ -51,6 +57,50 @@ export default function SalesOrderEditorPage(): JSX.Element {
   const [positionen] = useState<Position[]>([
     { abs: '10', zeile: '20', pos: '10', artikelNr: '', bezeichnung: '', menge: '', einheit: 'kg', preis: '', betrag: '', ekPreis: '' },
   ])
+
+  const handlePrint = async (options: PrintOptions): Promise<void> => {
+    try {
+      let id = auftragId
+      if (!id) {
+        const saved = await apiClient.post<{ id: string }>('/api/v1/sales/orders', {
+          nummer: auftragNr,
+          datum,
+          liefertermin,
+          kunde,
+          status,
+          kontakt,
+          zahlungsbedingung,
+          versandart,
+          ist_pauschal: isPauschale,
+        })
+        id = saved.id
+        setAuftragId(id)
+      }
+
+      const params = new URLSearchParams()
+      params.append('template', options.formatvorlage)
+      params.append('copies', String(options.anzahlDrucke))
+      await apiClient.post(`/api/v1/sales/orders/${id}/print?${params.toString()}`)
+      await apiClient.post(`/api/v1/sales/orders/${id}/post`)
+
+      push('Auftrag erfolgreich gedruckt und gebucht')
+      setShowPrintDialog(false)
+
+      // Formular zurücksetzen
+      setAuftragNr('')
+      setDatum(new Date().toLocaleDateString('de-DE'))
+      setLiefertermin('')
+      setKunde('')
+      setStatus('Offen')
+      setKontakt('')
+      setZahlungsbedingung('')
+      setVersandart('')
+      setIsPauschale(false)
+      setAuftragId(null)
+    } catch (error: any) {
+      push(`Fehler beim Drucken: ${error.response?.data?.detail || error.message}`)
+    }
+  }
 
   function handleAuswaehlen(auftrag: Auftrag) {
     setAuftragNr(auftrag.nummer)
@@ -226,7 +276,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
           <Button size="sm" className="h-7 text-xs gap-1">
             <Save className="h-3 w-3" /> Speichern
           </Button>
-          <Button variant="outline" size="sm" className="h-7 text-xs gap-1">
+          <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={() => setShowPrintDialog(true)}>
             <Printer className="h-3 w-3" /> Drucken
           </Button>
           <Button variant="outline" size="sm" className="h-7 text-xs gap-1">
@@ -246,6 +296,14 @@ export default function SalesOrderEditorPage(): JSX.Element {
           <X className="h-3 w-3" /> Beenden
         </Button>
       </div>
+
+      {/* Druck-Dialog */}
+      <LieferscheinDruckDialog
+        open={showPrintDialog}
+        onClose={() => setShowPrintDialog(false)}
+        onConfirm={handlePrint}
+        title="AUFTRAG DRUCKEN"
+      />
 
       {/* Auswahl-Dialog */}
       <Dialog open={auswahlOffen} onOpenChange={setAuswahlOffen}>

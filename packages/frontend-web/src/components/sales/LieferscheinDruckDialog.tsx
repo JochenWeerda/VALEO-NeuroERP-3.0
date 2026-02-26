@@ -30,12 +30,14 @@ type LieferscheinDruckDialogProps = {
   open: boolean
   onClose: () => void
   onConfirm: (options: PrintOptions) => Promise<void>
+  title?: string
 }
 
 export function LieferscheinDruckDialog({
   open,
   onClose,
   onConfirm,
+  title = 'LIEFERSCHEIN DRUCKEN',
 }: LieferscheinDruckDialogProps): JSX.Element {
   const [formatvorlage, setFormatvorlage] = useState('W00005')
   const [werbetext, setWerbetext] = useState('')
@@ -65,7 +67,7 @@ export function LieferscheinDruckDialog({
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-auto">
         <DialogHeader>
-          <DialogTitle>LIEFERSCHEIN DRUCKEN</DialogTitle>
+          <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
