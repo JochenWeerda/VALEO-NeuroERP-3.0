@@ -12,6 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { useAuftraege, type Auftrag } from '@/lib/api/sales'
 import { LieferscheinDruckDialog, type PrintOptions } from '@/components/sales/LieferscheinDruckDialog'
+import { DmsAnhangDialog } from '@/components/dms/DmsAnhangDialog'
 import { apiClient } from '@/lib/axios'
 import { useToast } from '@/components/ui/toast-provider'
 import { ChevronLeft, ChevronRight, MoreHorizontal, Printer, Save, Trash2, X, Search, FileText, Truck } from 'lucide-react'
@@ -43,6 +44,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
   const [selectedPosition, setSelectedPosition] = useState<number | null>(null)
   const [auswahlOffen, setAuswahlOffen] = useState(true)
   const [showPrintDialog, setShowPrintDialog] = useState(false)
+  const [showAttachmentDialog, setShowAttachmentDialog] = useState(false)
   const [auftragId, setAuftragId] = useState<string | null>(null)
   const [sucheText, setSucheText] = useState('')
 
@@ -279,7 +281,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
           <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={() => setShowPrintDialog(true)}>
             <Printer className="h-3 w-3" /> Drucken
           </Button>
-          <Button variant="outline" size="sm" className="h-7 text-xs gap-1">
+          <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={() => setShowAttachmentDialog(true)}>
             <FileText className="h-3 w-3" /> Unterlagen
           </Button>
           <Button variant="outline" size="sm" className="h-7 text-xs gap-1">
@@ -303,6 +305,13 @@ export default function SalesOrderEditorPage(): JSX.Element {
         onClose={() => setShowPrintDialog(false)}
         onConfirm={handlePrint}
         title="AUFTRAG DRUCKEN"
+      />
+      <DmsAnhangDialog
+        open={showAttachmentDialog}
+        onClose={() => setShowAttachmentDialog(false)}
+        businessObjectType="sales_order"
+        businessObjectId={auftragId}
+        title="UNTERLAGEN / DATEIEN — AUFTRAG"
       />
 
       {/* Auswahl-Dialog */}

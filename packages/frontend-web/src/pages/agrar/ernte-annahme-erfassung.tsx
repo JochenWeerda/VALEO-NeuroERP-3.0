@@ -22,6 +22,7 @@ import { ArtikelSuchDialog } from '@/components/sales/ArtikelSuchDialog'
 import { WeighingTicketSelectionDialog, type WeighingTicket } from '@/components/agrar/WeighingTicketSelectionDialog'
 import { ContractSelectionDialog, type AgrarContract } from '@/components/agrar/ContractSelectionDialog'
 import { VarietySelectionDialog, type Variety } from '@/components/agrar/VarietySelectionDialog'
+import { DmsAnhangDialog } from '@/components/dms/DmsAnhangDialog'
 import { apiClient } from '@/lib/axios'
 import { useAuth } from '@/hooks/useAuth'
 import { useGlobalShortcuts, globalShortcutManager } from '@/lib/shortcuts/global-shortcuts'
@@ -370,6 +371,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
   const [showVarietyDialog, setShowVarietyDialog] = useState(false)
   const [showContractDialog, setShowContractDialog] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [showAttachmentDialog, setShowAttachmentDialog] = useState(false)
 
   // Keyboard Shortcuts
   useGlobalShortcuts({
@@ -1487,11 +1489,11 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                 <FileText className="h-4 w-4" />
                 Aufteilungs-Buchung
               </Button>
-              <Button variant="outline" size="sm" className="gap-2">
+              <Button variant="outline" size="sm" className="gap-2" onClick={() => setShowAttachmentDialog(true)}>
                 <Folder className="h-4 w-4" />
                 Unterlagen
               </Button>
-              <Button variant="outline" size="sm" className="gap-2">
+              <Button variant="outline" size="sm" className="gap-2" onClick={() => setShowAttachmentDialog(true)}>
                 <Folder className="h-4 w-4" />
                 Dateien
               </Button>
@@ -1721,6 +1723,13 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
       </div>
 
       {/* Dialoge */}
+      <DmsAnhangDialog
+        open={showAttachmentDialog}
+        onClose={() => setShowAttachmentDialog(false)}
+        businessObjectType="harvest_reception"
+        businessObjectId={state.id}
+        title="UNTERLAGEN / DATEIEN — ERNTE-ANNAHME"
+      />
       <CustomerSelectionDialog
         open={showCustomerDialog}
         onClose={() => setShowCustomerDialog(false)}

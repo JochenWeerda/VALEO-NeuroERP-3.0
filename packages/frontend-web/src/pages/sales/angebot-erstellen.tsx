@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { CustomerSelectionDialog, type Customer } from '@/components/sales/CustomerSelectionDialog'
 import { ArtikelSuchDialog } from '@/components/sales/ArtikelSuchDialog'
 import { LieferscheinDruckDialog, type PrintOptions } from '@/components/sales/LieferscheinDruckDialog'
+import { DmsAnhangDialog } from '@/components/dms/DmsAnhangDialog'
 import { useAngebote, type Angebot } from '@/lib/api/sales'
 import { apiClient } from '@/lib/axios'
 import { useToast } from '@/components/ui/toast-provider'
@@ -113,6 +114,7 @@ export default function AngebotErstellenPage(): JSX.Element {
   const [showCustomerDialog, setShowCustomerDialog] = useState(false)
   const [showArticleDialog, setShowArticleDialog] = useState(false)
   const [showPrintDialog, setShowPrintDialog] = useState(false)
+  const [showAttachmentDialog, setShowAttachmentDialog] = useState(false)
   const [angebotId, setAngebotId] = useState<string | null>(null)
   const [sucheText, setSucheText] = useState('')
 
@@ -652,7 +654,7 @@ export default function AngebotErstellenPage(): JSX.Element {
           <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={() => setShowPrintDialog(true)}>
             <Printer className="h-3 w-3" /> Drucken
           </Button>
-          <Button variant="outline" size="sm" className="h-7 text-xs gap-1">
+          <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={() => setShowAttachmentDialog(true)}>
             <FileText className="h-3 w-3" /> Unterlagen
           </Button>
           <Button variant="outline" size="sm" className="h-7 text-xs gap-1">
@@ -772,6 +774,13 @@ export default function AngebotErstellenPage(): JSX.Element {
         onClose={() => setShowPrintDialog(false)}
         onConfirm={handlePrint}
         title="ANGEBOT DRUCKEN"
+      />
+      <DmsAnhangDialog
+        open={showAttachmentDialog}
+        onClose={() => setShowAttachmentDialog(false)}
+        businessObjectType="quotation"
+        businessObjectId={angebotId}
+        title="UNTERLAGEN / DATEIEN — ANGEBOT"
       />
     </div>
   )
