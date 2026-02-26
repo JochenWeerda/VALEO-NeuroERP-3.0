@@ -7,7 +7,7 @@ import { auth } from './auth'
 
 const DEV_TOKEN = import.meta.env.VITE_API_DEV_TOKEN as string | undefined || 'dev-token'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? ''
 const DEFAULT_TENANT_ID = import.meta.env.VITE_TENANT_ID || '00000000-0000-0000-0000-000000000001'
 
 class APIClient {
