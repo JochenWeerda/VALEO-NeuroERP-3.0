@@ -3,7 +3,7 @@
  * Error-first fetching without mock fallback data.
  */
 
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '../api-client'
 
 export type PortalDashboard = {
@@ -46,6 +46,47 @@ export type PortalLieferscheinCompliance = {
 
 export type PortalFeldbuch = {
   id: string; schlag: string; kultur: string; flaeche: number; letzteMassnahme: string; naechsteMassnahme: string
+}
+
+// Neue Feldbuch-Typen (echte Schlag + Maßnahmen Trennung)
+export type PortalSchlag = {
+  id: string
+  name: string
+  flik?: string
+  flaeche: number
+  kultur: string
+  vorkultur?: string
+  gemeinde: string
+  gemarkung?: string
+  bodenart?: string
+  ackerzahl?: number
+  status: 'aktiv' | 'stillgelegt' | 'brache'
+}
+
+export type PortalMassnahme = {
+  id: string
+  schlagId: string | null
+  schlagName: string | null
+  datum: string
+  typ: string
+  bezeichnung?: string
+  mittel?: string
+  menge?: number
+  einheit?: string
+  flaeche?: number
+  anwender?: string
+  quelle: 'erp_service' | 'erp_lieferschein' | 'portal'
+  auflagen?: string[]
+  compliant: boolean
+  exportiert: boolean
+  bemerkung?: string
+}
+
+export type PortalFeldbuchStats = {
+  schlaege: number
+  gesamtFlaeche: number
+  massnahmen: number
+  valeoDienste: number
 }
 
 export type PortalNaehrstoffbilanz = {
@@ -117,6 +158,120 @@ export function usePortalFeldbuch() {
     queryFn: async () => (await apiClient.get<PortalFeldbuch[]>('/api/v1/portal/feldbuch')).data,
     staleTime: 5 * 60 * 1000,
   })
+}
+
+// ── Neue Feldbuch-Hooks ──────────────────────────────────────────────────
+
+export function usePortalFeldbuchSchlaege() {
+  return useQuery({
+    queryKey: ['portal', 'feldbuch', 'schlaege'],
+    queryFn: async () => (await apiClient.get<PortalSchlag[]>('/api/v1/portal/feldbuch/schlaege')).data,
+    staleTime: 5 * 60 * 1000,
+  })
+}
+
+export function usePortalFeldbuchMassnahmen(params?: {
+  schlagId?: string
+  typ?: string
+  von?: string
+  bis?: string
+}) {
+  return useQuery({
+    queryKey: ['portal', 'feldbuch', 'massnahmen', params],
+    queryFn: async () => {
+      const p = new URLSearchParams()
+      if (params?.schlagId) p.set('schlag_id', params.schlagId)
+      if (params?.typ) p.set('typ', params.typ)
+      if (params?.von) p.set('von', params.von)
+      if (params?.bis) p.set('bis', params.bis)
+      const url = `/api/v1/portal/feldbuch/massnahmen${p.toString() ? '?' + p.toString() : ''}`
+      return (await apiClient.get<PortalMassnahme[]>(url)).data
+    },
+    staleTime: 2 * 60 * 1000,
+  })
+}
+
+export function usePortalFeldbuchStats() {
+  return useQuery({
+    queryKey: ['portal', 'feldbuch', 'stats'],
+    queryFn: async () => (await apiClient.get<PortalFeldbuchStats>('/api/v1/portal/feldbuch/stats')).data,
+    staleTime: 2 * 60 * 1000,
+  })
+}
+
+export function useCreatePortalSchlag() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (data: Omit<PortalSchlag, 'id'>) =>
+      (await apiClient.post<PortalSchlag>('/api/v1/portal/feldbuch/schlaege', data)).data,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['portal', 'feldbuch', 'schlaege'] })
+      queryClient.invalidateQueries({ queryKey: ['portal', 'feldbuch', 'stats'] })
+    },
+  })
+}
+
+export function useCreatePortalMassnahme() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (data: Omit<PortalMassnahme, 'id' | 'quelle' | 'compliant' | 'exportiert'>) =>
+      (await apiClient.post<PortalMassnahme>('/api/v1/portal/feldbuch/massnahmen', data)).data,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['portal', 'feldbuch', 'massnahmen'] })
+      queryClient.invalidateQueries({ queryKey: ['portal', 'feldbuch', 'stats'] })
+    },
+  })
+}
+
+export function useUpdatePortalMassnahme() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Partial<PortalMassnahme> }) =>
+      (await apiClient.put<PortalMassnahme>(`/api/v1/portal/feldbuch/massnahmen/${id}`, data)).data,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['portal', 'feldbuch', 'massnahmen'] })
+    },
+  })
+}
+
+export async function exportFeldbuchCsv(
+  format: 'csv' | 'ackerschlagkartei',
+  params?: { schlagId?: string; von?: string; bis?: string },
+): Promise<void> {
+  const p = new URLSearchParams({ format })
+  if (params?.schlagId) p.set('schlag_id', params.schlagId)
+  if (params?.von) p.set('von', params.von)
+  if (params?.bis) p.set('bis', params.bis)
+
+  const response = await apiClient.get<Blob>(
+    `/api/v1/portal/feldbuch/export?${p.toString()}`,
+    { responseType: 'blob' },
+  )
+  const blob = new Blob([response.data], { type: 'text/csv;charset=utf-8' })
+  const url = window.URL.createObjectURL(blob)
+  const anchor = document.createElement('a')
+  anchor.href = url
+  const today = new Date().toISOString().split('T')[0]
+  anchor.download = format === 'ackerschlagkartei'
+    ? `ackerschlagkartei_${today}.csv`
+    : `feldbuch_export_${today}.csv`
+  document.body.appendChild(anchor)
+  anchor.click()
+  anchor.remove()
+  window.URL.revokeObjectURL(url)
+}
+
+export async function importFeldbuchCsv(
+  file: File,
+): Promise<{ created: number; updated: number; errors: string[] }> {
+  const formData = new FormData()
+  formData.append('file', file)
+  const response = await apiClient.post<{ created: number; updated: number; errors: string[] }>(
+    '/api/v1/portal/feldbuch/import',
+    formData,
+    { headers: { 'Content-Type': 'multipart/form-data' } },
+  )
+  return response.data
 }
 
 export function usePortalNaehrstoffbilanzen() {

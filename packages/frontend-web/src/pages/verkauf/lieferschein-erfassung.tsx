@@ -19,10 +19,13 @@ import { ArtikelSuchDialog } from '@/components/sales/ArtikelSuchDialog'
 import { LieferscheinDruckDialog, type PrintOptions } from '@/components/sales/LieferscheinDruckDialog'
 import { DmsAnhangDialog } from '@/components/dms/DmsAnhangDialog'
 import { AttestationDialog } from '@/components/sales/AttestationDialog'
+import { BelegfolgePositionenDialog, type BelegfolgePosition } from '@/components/sales/BelegfolgePositionenDialog'
 import { apiClient } from '@/lib/axios'
 import { useAuth } from '@/hooks/useAuth'
+import { useSchlaege } from '@/lib/api/agrar'
 import { useGlobalShortcuts, globalShortcutManager } from '@/lib/shortcuts/global-shortcuts'
 import { ShortcutHintButton } from '@/components/shortcuts/ShortcutHelpPanel'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ChevronLeft, ChevronRight, MoreHorizontal, Check, Printer, Save, X, FileText, Folder, FileCheck, Link as LinkIcon, Receipt, Trash2 } from 'lucide-react'
 
 // API Response Type
@@ -404,9 +407,17 @@ export default function LieferscheinErfassungPage(): JSX.Element {
   
   // State für Bestellungen
   const [bestellungen, setBestellungen] = useState<Array<{ id: string; bestellNr: string; datum: string }>>([])
-  
+  const [showBelegfolgeDialog, setShowBelegfolgeDialog] = useState(false)
+  const [vorgaengerCount, setVorgaengerCount] = useState(0)
+
   // Cache für Branch-Mapping (niederlassung -> branch_id)
   const [branchCache, setBranchCache] = useState<Map<number, string>>(new Map())
+
+  // PSM-Dienstleistung: Schlag-Auswahl für Feldbuch-Eintrag
+  const [psmSchlagId, setPsmSchlagId] = useState<string>('')
+  const [psmFlaeche, setPsmFlaeche] = useState<string>('')
+  const customerId = state.customer?.id
+  const { data: schlaege = [] } = useSchlaege(customerId)
 
   // Berechne Summen
   const summen = useMemo(() => {
@@ -433,31 +444,75 @@ export default function LieferscheinErfassungPage(): JSX.Element {
       vertreter: customer.representative || prev.vertreter || '',
     }))
     
-    // Lade Bestellungen für den ausgewählten Kunden vom Backend
+    // Lade Vorgänger-Belege für den ausgewählten Kunden (Angebote + Aufträge + Portal-Bestellungen)
     try {
-      const response = await apiClient.get<any>('/api/v1/sales/orders', {
-        params: {
-          customer_id: customer.id,
-          limit: 10, // Maximal 10 Bestellungen anzeigen
-        },
-      })
-      
-      // Handle PaginatedResponse or direct array
-      const orders = response.items || response || []
-      setBestellungen(
-        orders.map((o: any) => ({
-          id: o.id,
-          bestellNr: o.order_number || o.orderNumber || '',
-          datum: o.created_at 
-            ? new Date(o.created_at).toLocaleDateString('de-DE')
-            : new Date().toLocaleDateString('de-DE'),
-        }))
-      )
+      const [ordersResp, quotesResp, portalResp] = await Promise.allSettled([
+        apiClient.get<any>('/api/v1/sales/orders', { params: { customer_id: customer.id, limit: 20 } }),
+        apiClient.get<any>('/api/v1/sales/quotes', { params: { customer_id: customer.id, limit: 20 } }),
+        apiClient.get<any>('/api/v1/portal/bestellungen', { params: { customer_id: customer.id, status: 'bestellt', limit: 20 } }),
+      ])
+
+      const orders = ordersResp.status === 'fulfilled' ? (ordersResp.value.items || ordersResp.value || []) : []
+      const mapped = orders.map((o: any) => ({
+        id: o.id,
+        bestellNr: o.order_number || o.orderNumber || '',
+        datum: o.created_at
+          ? new Date(o.created_at).toLocaleDateString('de-DE')
+          : new Date().toLocaleDateString('de-DE'),
+      }))
+      setBestellungen(mapped)
+
+      const quotesCount = quotesResp.status === 'fulfilled'
+        ? (quotesResp.value.items || quotesResp.value || []).length
+        : 0
+      const portalCount = portalResp.status === 'fulfilled'
+        ? (Array.isArray(portalResp.value) ? portalResp.value : (portalResp.value.items || portalResp.value.data || [])).length
+        : 0
+      setVorgaengerCount(mapped.length + quotesCount + portalCount)
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.warn('Fehler beim Laden der Bestellungen:', error)
-      setBestellungen([]) // Fallback: Leere Liste
+      console.warn('Fehler beim Laden der Vorgänger-Belege:', error)
+      setBestellungen([])
+      setVorgaengerCount(0)
     }
+  }
+
+  // Belegfolge-Positionsübernahme
+  function handleBelegfolgePositionen(incoming: BelegfolgePosition[]): void {
+    const baseNr =
+      state.positionen.length > 0
+        ? Math.max(...state.positionen.map((p) => p.posNr)) + 10
+        : 10
+    const newPositionen = incoming.map((pos, idx) => {
+      const nettoPreis = pos.listenpreis * (1 - pos.rabatt / 100)
+      const nettoBetrag = nettoPreis * pos.menge
+      return {
+        posNr: baseNr + idx * 10,
+        artikelNr: pos.artikelNr,
+        artikelId: pos.artikelId,
+        bezeichnung: pos.bezeichnung,
+        bezeichnung2: pos.bezeichnung2,
+        menge: pos.menge,
+        einheit: pos.einheit,
+        listenpreis: pos.listenpreis,
+        rabatt: pos.rabatt,
+        art: '',
+        nettoPreis,
+        nettoBetrag,
+        niederlassung: String(state.niederlassung),
+        lagerhalle: '', lagerfach: '', charge: '', serienNr: '', gefPunkt: '',
+        gefahrgutPunkte: 0, gesamtGefahrgutPunkte: 0,
+        naBio: '', musterNr: '', strecke: '', zusBeleg: '', anerken: '', erloskonto: '',
+        mwstProzent: pos.mwstProzent,
+        gewicht: 0, gesamtGewicht: 0,
+        kontraktNr: '', skontierf: false, fremdware: false,
+      }
+    })
+    setState((prev) => ({
+      ...prev,
+      positionen: [...prev.positionen, ...newPositionen],
+    }))
+    push(`${newPositionen.length} Position${newPositionen.length !== 1 ? 'en' : ''} übernommen`)
   }
 
   // Artikel auswählen
@@ -755,6 +810,32 @@ export default function LieferscheinErfassungPage(): JSX.Element {
 
       // Buchen
       await apiClient.post(`/api/v1/sales/delivery-notes/${lsId}/post`)
+
+      // Feldbuch-Eintrag anlegen wenn Schlag ausgewählt
+      if (psmSchlagId && state.customer?.id) {
+        const psm_artikel = state.positionen[0]?.bezeichnung || 'PSM-Dienstleistung'
+        const psm_menge = state.positionen[0]?.menge ?? 0
+        const psm_einheit = state.positionen[0]?.einheit ?? 'l/ha'
+        try {
+          await apiClient.post('/api/v1/agrar/feldbuch/massnahmen/from-lieferschein', {
+            lieferschein_id: lsId,
+            lieferschein_datum: state.lieferDatum || new Date().toISOString(),
+            customer_id: state.customer.id,
+            schlag_id: psmSchlagId,
+            artikel_name: psm_artikel,
+            menge: psm_menge,
+            einheit: psm_einheit,
+            flaeche: psmFlaeche ? parseFloat(psmFlaeche) : 0,
+            anwender: 'VALEO GmbH',
+          })
+          push('Maßnahme im Feldbuch angelegt')
+        } catch {
+          // Feldbuch-Fehler nicht blockierend
+          push('Hinweis: Feldbuch-Eintrag konnte nicht erstellt werden')
+        }
+        setPsmSchlagId('')
+        setPsmFlaeche('')
+      }
 
       push('Lieferschein erfolgreich gedruckt und gebucht')
       setShowPrintDialog(false)
@@ -1137,6 +1218,32 @@ export default function LieferscheinErfassungPage(): JSX.Element {
         <h1 className="text-lg font-bold">LIEFERSCHEIN-ERFASSUNG</h1>
       </div>
 
+      {/* Belegfolge-Hinweis */}
+      {vorgaengerCount > 0 && state.customer && (
+        <div className="bg-amber-50 border-b border-amber-300 px-4 py-1.5 flex items-center gap-3">
+          <span className="text-amber-800 text-sm font-medium">
+            {vorgaengerCount} offene{vorgaengerCount !== 1 ? ' Vorgänger-Belege' : 'r Vorgänger-Beleg'} für{' '}
+            <strong>{state.customer.name}</strong> vorhanden
+          </span>
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-6 text-xs border-amber-400 text-amber-800 hover:bg-amber-100"
+            onClick={() => setShowBelegfolgeDialog(true)}
+          >
+            Positionen übernehmen
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-6 w-6 p-0 text-amber-600 ml-auto"
+            onClick={() => setVorgaengerCount(0)}
+          >
+            <X className="h-3 w-3" />
+          </Button>
+        </div>
+      )}
+
       <div className="flex-1 overflow-auto p-4">
         {/* Header-Bereich (3 Spalten) */}
         <Card className="mb-4 p-4">
@@ -1415,13 +1522,9 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                               variant="outline"
                               size="sm"
                               className="mt-2"
-                              onClick={async () => {
-                                // TODO: Implementiere "Alle Bestellpositionen übernehmen"
-                                // Dies erfordert eine API zum Laden der Bestellpositionen
-                                push('Alle Bestellpositionen übernehmen - noch nicht vollständig implementiert')
-                              }}
+                              onClick={() => setShowBelegfolgeDialog(true)}
                             >
-                              Alle Bestellpositionen übernehmen
+                              Positionen aus Auftrag übernehmen
                             </Button>
                           </>
                         ) : (
@@ -1776,6 +1879,45 @@ export default function LieferscheinErfassungPage(): JSX.Element {
           </div>
         </Card>
 
+        {/* PSM-Dienstleistung: Schlag-Auswahl für Feldbuch */}
+        {schlaege.length > 0 && (
+          <Card className="mb-4 p-4 border-amber-200 bg-amber-50">
+            <h2 className="mb-2 font-semibold text-sm text-amber-800">PSM-Dienstleistung → Feldbuch</h2>
+            <div className="grid grid-cols-4 gap-4">
+              <div className="space-y-1 col-span-2">
+                <Label className="text-xs">Schlag (Feldbuch):</Label>
+                <Select value={psmSchlagId} onValueChange={setPsmSchlagId}>
+                  <SelectTrigger className="h-8">
+                    <SelectValue placeholder="Schlag wählen (optional)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Kein Schlag</SelectItem>
+                    {schlaege.map(s => (
+                      <SelectItem key={s.id} value={s.id}>{s.name} ({s.flaeche} ha)</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Fläche (ha):</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={psmFlaeche}
+                  onChange={e => setPsmFlaeche(e.target.value)}
+                  placeholder="z.B. 12.5"
+                  className="h-8"
+                />
+              </div>
+              <div className="flex items-end">
+                <p className="text-xs text-amber-700">
+                  Nach dem Drucken wird automatisch ein Feldbuch-Eintrag erstellt.
+                </p>
+              </div>
+            </div>
+          </Card>
+        )}
+
         {/* Summen */}
         <Card className="mb-4 p-4">
           <div className="grid grid-cols-7 gap-4">
@@ -1905,6 +2047,16 @@ export default function LieferscheinErfassungPage(): JSX.Element {
         businessObjectId={state.id}
         title="UNTERLAGEN / DATEIEN — LIEFERSCHEIN"
       />
+
+      {state.customer && (
+        <BelegfolgePositionenDialog
+          open={showBelegfolgeDialog}
+          onClose={() => setShowBelegfolgeDialog(false)}
+          onConfirm={handleBelegfolgePositionen}
+          customerId={state.customer.id}
+          targetDocType="lieferschein"
+        />
+      )}
       <AttestationDialog
         open={showAttestationDialog}
         onClose={() => {

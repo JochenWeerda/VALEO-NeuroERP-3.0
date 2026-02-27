@@ -6,6 +6,8 @@ Main API router that includes all domain routers
 from fastapi import APIRouter
 
 from app.api.v1.endpoints import (
+    agrar_feldbuch,
+    portal_feldbuch,
     health,
     tenants,
     users,
@@ -565,6 +567,19 @@ api_router.include_router(
     portal_shop.router,
     prefix="/portal",
     tags=["portal", "shop", "customer"]
+)
+
+api_router.include_router(
+    portal_feldbuch.router,
+    prefix="/portal",
+    tags=["portal", "feldbuch"]
+)
+
+# Agrar Feldbuch (ERP-intern)
+api_router.include_router(
+    agrar_feldbuch.router,
+    prefix="/agrar",
+    tags=["agrar", "feldbuch"]
 )
 
 # ── L3-Connect Gap Closure Routers ──────────────────────────────
