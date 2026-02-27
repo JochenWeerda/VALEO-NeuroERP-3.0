@@ -1218,7 +1218,38 @@ async def portal_dokumente(db: Session = Depends(get_db)) -> list[dict[str, Any]
 
 
 @router.get("/portal/feldbuch", response_model=list)
-async def portal_feldbuch(db: Session = Depends(get_db)) -> list[dict[str, Any]]:
+async def portal_feldbuch(
+    customer_id: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+    tenant_id: Optional[str] = Depends(get_tenant_id),
+) -> list[dict[str, Any]]:
+    """
+    Backward-compat endpoint: gibt Feldbuch-Schläge aus der echten DB zurück.
+    Neue Clients nutzen /portal/feldbuch/schlaege und /portal/feldbuch/massnahmen.
+    """
+    from app.infrastructure.models.agrar_models import FeldbuchSchlag
+
+    q = db.query(FeldbuchSchlag)
+    if tenant_id:
+        q = q.filter(FeldbuchSchlag.tenant_id == tenant_id)
+    if customer_id:
+        q = q.filter(FeldbuchSchlag.customer_id == customer_id)
+    schlaege = q.order_by(FeldbuchSchlag.name).all()
+
+    if schlaege:
+        return [
+            {
+                "id": s.id,
+                "schlag": s.name,
+                "kultur": s.kultur or "",
+                "flaeche": s.flaeche,
+                "letzteMassnahme": None,
+                "naechsteMassnahme": None,
+            }
+            for s in schlaege
+        ]
+
+    # Fallback auf alten Stub wenn noch keine echten Daten vorhanden
     deliveries = _list_docs(db, "sales_delivery", limit=1000)
     return [
         {
