@@ -1006,14 +1006,16 @@ async def update_bestellung(
 async def bestellung_versenden(
     bestellung_id: str,
     versand_art: str = Query("email"),
+    empfaenger: Optional[str] = Query(None, description="Override-Empfänger (E-Mail oder Faxnummer)"),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
     """
-    Bestellung versenden: E-Mail, Fax oder EDI.
+    Bestellung versenden: E-Mail (SMTP), Fax (Twilio) oder EDI (EDIFACT/SFTP).
     Setzt Status auf 'versandt' und speichert Versanddatum.
     """
-    from datetime import datetime
+    from modules.einkauf.services.versand_service import versende_bestellung
+
     b = (
         db.query(EinkaufBestellung)
         .filter(EinkaufBestellung.id == bestellung_id,
@@ -1023,34 +1025,17 @@ async def bestellung_versenden(
     if not b:
         raise HTTPException(404, "Bestellung nicht gefunden")
 
-    # Versandlogik (Stub — reales Versenden in Schritt 4 implementiert)
-    versand_info: dict[str, Any] = {"versand_art": versand_art}
-
-    lf = db.query(EinkaufLieferant).filter(EinkaufLieferant.id == b.lieferant_id).first()
-
-    if versand_art == "email" and lf and lf.email_bestellung:
-        # E-Mail-Versand hier einklinken (z.B. SMTP-Service)
-        versand_info["empfaenger"] = lf.email_bestellung
-        versand_info["status"] = "gesendet"
-    elif versand_art == "fax" and lf and lf.fax_bestellung:
-        versand_info["empfaenger"] = lf.fax_bestellung
-        versand_info["status"] = "gesendet"
-    elif versand_art == "edi" and lf and lf.edi_kennung:
-        versand_info["edi_kennung"] = lf.edi_kennung
-        versand_info["edi_format"] = lf.edi_format or "ORDERS05"
-        versand_info["status"] = "gesendet"
-    else:
-        versand_info["status"] = "manuell"
-
-    b.versand_art = versand_art
-    b.versandt_am = datetime.now()
-    b.status = "versandt"
+    result = versende_bestellung(
+        db, b,
+        versand_art=versand_art,
+        empfaenger_override=empfaenger,
+    )
     db.commit()
 
     return {
-        "bestellung_id":   str(b.id),
-        "bestellnummer":   b.bestellnummer,
-        "versand":         versand_info,
+        "bestellung_id": str(b.id),
+        "bestellnummer": b.bestellnummer,
+        "versand":       result,
     }
 
 
