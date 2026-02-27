@@ -1312,6 +1312,167 @@ async def portal_shop(db: Session = Depends(get_db)) -> list[dict[str, Any]]:
     ]
 
 
+@router.get("/portal/products", response_model=dict)
+async def portal_products(
+    kategorie: Optional[str] = Query(None),
+    search: Optional[str] = Query(None),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(200, ge=1, le=500),
+    tenant_id: Optional[str] = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    """
+    Produktliste für den Portal-Shop.
+    Gibt {items: [...], total: N} mit Kontrakt-Fallback zurück.
+    """
+    q = db.query(ArticleModel).filter(ArticleModel.is_active == True)  # noqa: E712
+    if kategorie and kategorie != "alle":
+        q = q.filter(ArticleModel.category == kategorie)
+    if search:
+        q = q.filter(ArticleModel.name.ilike(f"%{search}%"))
+    total = q.count()
+    articles = q.order_by(ArticleModel.name.asc()).offset(skip).limit(limit).all()
+    items = [
+        {
+            "id": str(a.id),
+            "artikelnummer": str(getattr(a, "article_number", a.id)),
+            "name": a.name,
+            "kategorie": a.category or "sonstiges",
+            "beschreibung": getattr(a, "description", None) or "",
+            "einheit": a.unit or "Stk",
+            "preis": float(a.sales_price or 0),
+            "rabattPreis": None,
+            "verfuegbar": float(a.available_stock or 0) > 0,
+            "bestand": float(a.available_stock or 0),
+            "zertifikate": [],
+            "letzteBestellung": None,
+            "contractStatus": "NONE",
+            "contractPrice": None,
+            "contractRemainingQty": None,
+            "contractTotalQty": None,
+            "isPrePurchase": False,
+            "prePurchasePrice": None,
+            "prePurchaseTotalQty": None,
+            "prePurchaseRemainingQty": None,
+        }
+        for a in articles
+    ]
+    return {"items": items, "total": total}
+
+
+@router.get("/portal/orders", response_model=dict)
+async def portal_orders(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(50, ge=1, le=200),
+    status: Optional[str] = Query(None),
+    tenant_id: Optional[str] = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    """Portal-Bestellhistorie. Liest aus domain_shared sales_orders."""
+    orders = _list_docs(db, "sales_order", limit=limit, offset=skip, tenant_id=tenant_id)
+    if status:
+        orders = [o for o in orders if o.get("status") == status]
+    items = [
+        {
+            "id": o.get("id", ""),
+            "orderNumber": o.get("number") or o.get("order_number", ""),
+            "datum": o.get("created_at", "")[:10] if o.get("created_at") else "",
+            "status": o.get("status", "SUBMITTED"),
+            "totalAmount": float(o.get("total_amount") or o.get("totalAmount") or 0),
+            "currency": o.get("currency", "EUR"),
+            "positions": o.get("positions") or o.get("items") or [],
+        }
+        for o in orders
+    ]
+    return {"items": items, "total": len(items)}
+
+
+@router.get("/portal/orders/{order_id}", response_model=dict)
+async def portal_order_detail(
+    order_id: str,
+    tenant_id: Optional[str] = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    """Detail einer Portal-Bestellung."""
+    orders = _list_docs(db, "sales_order", limit=1000, tenant_id=tenant_id)
+    for o in orders:
+        if str(o.get("id")) == order_id:
+            return o
+    raise HTTPException(status_code=404, detail="Bestellung nicht gefunden")
+
+
+@router.post("/portal/orders", response_model=dict)
+async def portal_create_order(
+    body: dict = Body(...),
+    tenant_id: Optional[str] = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    """Neue Bestellung aus dem Portal anlegen."""
+    import uuid as _uuid
+    order_id = str(_uuid.uuid4())
+    order = {
+        "id": order_id,
+        "number": f"PA-{order_id[:8].upper()}",
+        "status": "SUBMITTED",
+        "created_at": _now_iso(),
+        "tenant_id": tenant_id,
+        **body,
+    }
+    save_to_store("sales_order", order_id, order, _doc_repo(db))
+    db.commit()
+    return order
+
+
+@router.get("/portal/contracts", response_model=dict)
+async def portal_contracts(
+    tenant_id: Optional[str] = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    """Aktive Verträge/Kontingente des Kunden."""
+    try:
+        contracts = _list_docs(db, "kontrakt", limit=200, tenant_id=tenant_id)
+    except Exception:
+        contracts = []
+    items = [
+        {
+            "id": c.get("id", ""),
+            "artikelId": c.get("artikel_id") or c.get("artikelId", ""),
+            "articleName": c.get("artikel_name") or c.get("articleName", ""),
+            "contractStatus": c.get("status", "ACTIVE"),
+            "contractPrice": float(c.get("preis") or c.get("contractPrice") or 0),
+            "contractRemainingQty": float(c.get("verbleibende_menge") or c.get("remainingQty") or 0),
+            "contractTotalQty": float(c.get("gesamtmenge") or c.get("totalQty") or 0),
+            "laufzeitBis": c.get("laufzeit_bis") or c.get("validUntil"),
+        }
+        for c in contracts
+    ]
+    return {"items": items, "total": len(items)}
+
+
+@router.get("/portal/pre-purchases", response_model=dict)
+async def portal_pre_purchases(
+    tenant_id: Optional[str] = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    """Vorkäufe des Kunden (Vorratskäufe)."""
+    try:
+        pps = _list_docs(db, "vorkauf", limit=200, tenant_id=tenant_id)
+    except Exception:
+        pps = []
+    items = [
+        {
+            "id": p.get("id", ""),
+            "artikelId": p.get("artikel_id", ""),
+            "articleName": p.get("artikel_name", ""),
+            "prePurchasePrice": float(p.get("preis") or 0),
+            "prePurchaseTotalQty": float(p.get("gesamtmenge") or 0),
+            "prePurchaseRemainingQty": float(p.get("verbleibende_menge") or 0),
+        }
+        for p in pps
+    ]
+    return {"items": items, "total": len(items)}
+
+
 @router.get("/portal/vertraege", response_model=list)
 async def portal_vertraege(db: Session = Depends(get_db)) -> list[dict[str, Any]]:
     try:

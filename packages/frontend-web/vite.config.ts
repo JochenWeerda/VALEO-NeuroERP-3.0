@@ -43,12 +43,14 @@ export default defineConfig(({ mode }) => {
   server: {
     // 3000 is frequently occupied (Docker/other dev servers). Default to 3001 for stability.
     port: DEV_PORT,
-    host: '0.0.0.0', // Explizit für Docker + von außen erreichbar
+    host: '0.0.0.0', // Alle Interfaces — lokal, LAN, Docker, Tunnel
     strictPort: false,
-    allowedHosts: ['localhost', 'host.docker.internal', '.local'],
+    // 'all' → localhost, LAN-IP, ngrok, Cloudflare-Tunnel, Cloud-Domain — alle erlaubt
+    allowedHosts: 'all',
     hmr: {
-      // HMR: Keep defaults (works in Docker + via host.docker.internal).
-      protocol: 'ws',
+      // HMR-Host aus Env überschreibbar (für ngrok/Tunnel: VITE_HMR_HOST=xxxx.ngrok.io)
+      protocol: env.VITE_HMR_HOST ? 'wss' : 'ws',
+      ...(env.VITE_HMR_HOST ? { host: env.VITE_HMR_HOST, port: 443 } : {}),
     },
     watch: {
       usePolling: true, // Für Docker-Kompatibilität
