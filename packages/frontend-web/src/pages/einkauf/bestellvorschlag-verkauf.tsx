@@ -24,6 +24,10 @@ type ArtikelZeile = {
   einheit: string
   auftragNr: string
   niederlassung: string
+  lieferant_name?: string
+  lieferant_id?: string
+  letzter_preis?: number
+  letzter_kauf_datum?: string
 }
 
 type Lieferant = {
@@ -103,24 +107,27 @@ export default function BestellvorschlagVerkaufPage(): JSX.Element {
   const loadData = async (): Promise<void> => {
     setLoading(true)
     try {
-      const params: Record<string, string> = {
-        auftrag_datum_von: filterVon,
-        auftrag_datum_bis: filterBis,
-      }
-      if (filterNiederlassung) params['niederlassung'] = filterNiederlassung
-      if (filterArtikelGruppe) params['artikel_gruppe'] = filterArtikelGruppe
-
-      const data = await apiClient.get<any[]>('/api/v1/einkauf/bestellvorschlaege/verkauf', { params })
+      const p = new URLSearchParams()
+      if (filterNiederlassung) p.set('niederlassung_id', filterNiederlassung)
+      if (filterArtikelGruppe) p.set('artikelgruppe', filterArtikelGruppe)
+      if (filterVon) p.set('vonDatum', filterVon)
+      if (filterBis) p.set('bisDatum', filterBis)
+      const qs = p.toString() ? `?${p}` : ''
+      const data = await apiClient.get<any[]>(`/api/v1/einkauf/bestellvorschlaege/verkauf${qs}`)
       setArtikel((data || []).map((r: any) => ({
-        id: r.id,
+        id: r.article_id,
         artikelNr: r.artikel_nr || '',
-        bezeichnung: r.bezeichnung || '',
-        auftragsMenge: parseFloat(r.auftrags_menge || '0'),
-        vorratsBestand: parseFloat(r.vorrats_bestand || '0'),
-        bestellVorschlag: parseFloat(r.bestell_vorschlag || '0'),
+        bezeichnung: r.artikel_bezeichnung || '',
+        auftragsMenge: r.offene_auftraege ?? 0,
+        vorratsBestand: r.ist_bestand ?? 0,
+        bestellVorschlag: r.vorschlag_menge ?? 0,
         einheit: r.einheit || '',
-        auftragNr: r.auftrag_nr || '',
-        niederlassung: r.niederlassung || '',
+        auftragNr: '',
+        niederlassung: '',
+        lieferant_name: r.lieferant_name,
+        lieferant_id: r.lieferant_id,
+        letzter_preis: r.letzter_preis,
+        letzter_kauf_datum: r.letzter_kauf_datum,
       })))
     } catch {
       setArtikel([])
@@ -130,32 +137,22 @@ export default function BestellvorschlagVerkaufPage(): JSX.Element {
   }
 
   const loadArtikelDetails = async (id: string): Promise<void> => {
-    try {
-      const [liefData, kontData, kaufData] = await Promise.all([
-        apiClient.get<any[]>(`/api/v1/einkauf/bestellvorschlaege/verkauf/${id}/lieferanten`).catch(() => []),
-        apiClient.get<any[]>(`/api/v1/einkauf/bestellvorschlaege/verkauf/${id}/kontrakte`).catch(() => []),
-        apiClient.get<any[]>(`/api/v1/einkauf/bestellvorschlaege/verkauf/${id}/letzte-einkaeufe`).catch(() => []),
-      ])
-      setLieferanten((liefData || []).map((r: any) => ({ liefNr: r.lief_nr || '', name: r.name || '' })))
-      setKontrakte((kontData || []).map((r: any) => ({
-        kontraktNr: r.kontrakt_nr || '',
-        lieferant: r.lieferant || '',
-        restMenge: parseFloat(r.rest_menge || '0'),
-        einhPreis: parseFloat(r.einh_preis || '0'),
-        einheit: r.einheit || '',
-      })))
-      setLetzteEinkaeufe((kaufData || []).map((r: any) => ({
-        belegNr: r.beleg_nr || '',
-        liefNr: r.lief_nr || '',
-        name: r.name || '',
-        menge: parseFloat(r.menge || '0'),
-        einhPreis: parseFloat(r.einh_preis || '0'),
-        netto: parseFloat(r.netto || '0'),
-        datum: r.datum || '',
-        liefArt: r.lief_art || '',
-      })))
-    } catch {
-      /* ignore */
+    const selected = artikel.find(a => a.id === id)
+    if (selected) {
+      setLieferanten(selected.lieferant_name
+        ? [{ liefNr: selected.lieferant_id || '', name: selected.lieferant_name }]
+        : [])
+      setKontrakte([])
+      setLetzteEinkaeufe(selected.letzter_kauf_datum ? [{
+        belegNr: '',
+        liefNr: selected.lieferant_id || '',
+        name: selected.lieferant_name || '',
+        menge: selected.bestellVorschlag,
+        einhPreis: selected.letzter_preis ?? 0,
+        netto: 0,
+        datum: selected.letzter_kauf_datum,
+        liefArt: '',
+      }] : [])
     }
   }
 

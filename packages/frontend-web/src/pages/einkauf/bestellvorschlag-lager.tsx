@@ -25,6 +25,12 @@ type ArtikelZeile = {
   einheit: string
   lagerhalle: string
   niederlassung: string
+  // aus Engine-Response
+  lieferant_name?: string
+  lieferant_id?: string
+  letzter_preis?: number
+  letzter_kauf_datum?: string
+  bedarf?: number
 }
 
 type Lieferant = {
@@ -97,23 +103,30 @@ export default function BestellvorschlagLagerPage(): JSX.Element {
   const loadData = async (): Promise<void> => {
     setLoading(true)
     try {
-      const params: Record<string, string> = {}
-      if (filterNiederlassung) params['niederlassung'] = filterNiederlassung
-      if (filterArtikelGruppe) params['artikel_gruppe'] = filterArtikelGruppe
-      if (filterArtikelNr) params['artikel_nr'] = filterArtikelNr
-
-      const data = await apiClient.get<any[]>('/api/v1/einkauf/bestellvorschlaege/lager', { params })
+      const p = new URLSearchParams()
+      if (filterNiederlassung) p.set('niederlassung_id', filterNiederlassung)
+      if (filterArtikelGruppe) p.set('artikelgruppe', filterArtikelGruppe)
+      if (filterArtikelNr) p.set('artikelNr', filterArtikelNr)
+      p.set('nur_unter_meldebestand', 'false')
+      const qs = p.toString() ? `?${p}` : ''
+      const data = await apiClient.get<any[]>(`/api/v1/einkauf/bestellvorschlaege/lager${qs}`)
       const rows = (data || []).map((r: any) => ({
-        id: r.id,
+        id: r.article_id,
         artikelNr: r.artikel_nr || '',
-        bezeichnung: r.bezeichnung || '',
-        verfBestand: parseFloat(r.verf_bestand || '0'),
-        bestandMin: parseFloat(r.bestand_min || '0'),
-        bestandMax: parseFloat(r.bestand_max || '0'),
-        vorschlagMenge: parseFloat(r.vorschlag_menge || '0'),
+        bezeichnung: r.artikel_bezeichnung || '',
+        verfBestand: r.ist_bestand ?? 0,
+        bestandMin: r.mindestbestand ?? 0,
+        bestandMax: r.maximalbestand ?? 0,
+        vorschlagMenge: r.vorschlag_menge ?? 0,
         einheit: r.einheit || '',
-        lagerhalle: r.lagerhalle || '',
-        niederlassung: r.niederlassung || '',
+        lagerhalle: '',
+        niederlassung: '',
+        // Für Detailpanel
+        lieferant_name: r.lieferant_name,
+        lieferant_id: r.lieferant_id,
+        letzter_preis: r.letzter_preis,
+        letzter_kauf_datum: r.letzter_kauf_datum,
+        bedarf: r.bedarf ?? 0,
       }))
       setArtikel(rows)
     } catch {
@@ -124,32 +137,36 @@ export default function BestellvorschlagLagerPage(): JSX.Element {
   }
 
   const loadArtikelDetails = async (id: string): Promise<void> => {
-    try {
-      const [liefData, kontData, kaufData] = await Promise.all([
-        apiClient.get<any[]>(`/api/v1/einkauf/bestellvorschlaege/lager/${id}/lieferanten`).catch(() => []),
-        apiClient.get<any[]>(`/api/v1/einkauf/bestellvorschlaege/lager/${id}/kontrakte`).catch(() => []),
-        apiClient.get<any[]>(`/api/v1/einkauf/bestellvorschlaege/lager/${id}/letzte-einkaeufe`).catch(() => []),
-      ])
-      setLieferanten((liefData || []).map((r: any) => ({ liefNr: r.lief_nr || '', name: r.name || '' })))
-      setKontrakte((kontData || []).map((r: any) => ({
-        kontraktNr: r.kontrakt_nr || '',
-        lieferant: r.lieferant || '',
-        restMenge: parseFloat(r.rest_menge || '0'),
-        einhPreis: parseFloat(r.einh_preis || '0'),
-        einheit: r.einheit || '',
-      })))
-      setLetzteEinkaeufe((kaufData || []).map((r: any) => ({
-        belegNr: r.beleg_nr || '',
-        liefNr: r.lief_nr || '',
-        name: r.name || '',
-        menge: parseFloat(r.menge || '0'),
-        einhPreis: parseFloat(r.einh_preis || '0'),
-        netto: parseFloat(r.netto || '0'),
-        datum: r.datum || '',
-        liefArt: r.lief_art || '',
-      })))
-    } catch {
-      /* ignore */
+    // Details werden aus der Hauptliste befüllt (lieferant_name, letzter_preis, etc.)
+    const selected = artikel.find(a => a.id === id)
+    if (selected) {
+      setLieferanten(selected.lieferant_name
+        ? [{ liefNr: selected.lieferant_id || '', name: selected.lieferant_name }]
+        : [])
+      setKontrakte([])
+      setLetzteEinkaeufe(selected.letzter_kauf_datum ? [{
+        belegNr: '',
+        liefNr: selected.lieferant_id || '',
+        name: selected.lieferant_name || '',
+        menge: selected.vorschlagMenge,
+        einhPreis: selected.letzter_preis ?? 0,
+        netto: 0,
+        datum: selected.letzter_kauf_datum,
+        liefArt: '',
+      }] : [])
+      // Kontrakte nachladen
+      try {
+        const data = await apiClient.get<any[]>(
+          `/api/v1/einkauf/kontrakte?lieferant_id=${encodeURIComponent(selected.lieferant_id || '')}&status=aktiv`
+        )
+        setKontrakte((data || []).map((k: any) => ({
+          kontraktNr: k.kontraktnummer || '',
+          lieferant: k.lieferant_id || '',
+          restMenge: k.offene_menge ?? 0,
+          einhPreis: 0,
+          einheit: 't',
+        })))
+      } catch { /* ignore */ }
     }
   }
 

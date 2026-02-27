@@ -24,6 +24,10 @@ type ArtikelZeile = {
   weiterer: number       // weiterer Bedarf
   einheit: string
   niederlassung: string
+  lieferant_name?: string
+  lieferant_id?: string
+  letzter_preis?: number
+  letzter_kauf_datum?: string
 }
 
 type Lieferant = {
@@ -100,20 +104,25 @@ export default function BestellvorschlagRohwarePage(): JSX.Element {
   const loadData = async (): Promise<void> => {
     setLoading(true)
     try {
-      const params: Record<string, string> = { stichtag: filterStichtag }
-      if (filterNiederlassung) params['niederlassung'] = filterNiederlassung
-
-      const data = await apiClient.get<any[]>('/api/v1/einkauf/bestellvorschlaege/rohware', { params })
+      const p = new URLSearchParams()
+      if (filterStichtag) p.set('stichtag', filterStichtag)
+      if (filterNiederlassung) p.set('niederlassung_id', filterNiederlassung)
+      const qs = p.toString() ? `?${p}` : ''
+      const data = await apiClient.get<any[]>(`/api/v1/einkauf/bestellvorschlaege/rohware${qs}`)
       setArtikel((data || []).map((r: any) => ({
-        id: r.id,
+        id: r.article_id,
         artikelNr: r.artikel_nr || '',
-        bezeichnung: r.bezeichnung || '',
-        bedarfsMenge: parseFloat(r.bedarfs_menge || '0'),
-        erfBestMenge: parseFloat(r.erf_best_menge || '0'),
-        bestVorschlag: parseFloat(r.best_vorschlag || '0'),
-        weiterer: parseFloat(r.weiterer || '0'),
+        bezeichnung: r.artikel_bezeichnung || '',
+        bedarfsMenge: r.bedarf ?? 0,
+        erfBestMenge: r.ist_bestand ?? 0,
+        bestVorschlag: r.vorschlag_menge ?? 0,
+        weiterer: 0,
         einheit: r.einheit || '',
-        niederlassung: r.niederlassung || '',
+        niederlassung: '',
+        lieferant_name: r.lieferant_name,
+        lieferant_id: r.lieferant_id,
+        letzter_preis: r.letzter_preis,
+        letzter_kauf_datum: r.letzter_kauf_datum,
       })))
     } catch {
       setArtikel([])
@@ -123,32 +132,22 @@ export default function BestellvorschlagRohwarePage(): JSX.Element {
   }
 
   const loadArtikelDetails = async (id: string): Promise<void> => {
-    try {
-      const [liefData, kontData, kaufData] = await Promise.all([
-        apiClient.get<any[]>(`/api/v1/einkauf/bestellvorschlaege/rohware/${id}/lieferanten`).catch(() => []),
-        apiClient.get<any[]>(`/api/v1/einkauf/bestellvorschlaege/rohware/${id}/kontrakte`).catch(() => []),
-        apiClient.get<any[]>(`/api/v1/einkauf/bestellvorschlaege/rohware/${id}/letzte-einkaeufe`).catch(() => []),
-      ])
-      setLieferanten((liefData || []).map((r: any) => ({ liefNr: r.lief_nr || '', name: r.name || '' })))
-      setKontrakte((kontData || []).map((r: any) => ({
-        kontraktNr: r.kontrakt_nr || '',
-        lieferant: r.lieferant || '',
-        restMenge: parseFloat(r.rest_menge || '0'),
-        einhPreis: parseFloat(r.einh_preis || '0'),
-        einheit: r.einheit || '',
-      })))
-      setLetzteEinkaeufe((kaufData || []).map((r: any) => ({
-        belegNr: r.beleg_nr || '',
-        liefNr: r.lief_nr || '',
-        name: r.name || '',
-        menge: parseFloat(r.menge || '0'),
-        einhPreis: parseFloat(r.einh_preis || '0'),
-        netto: parseFloat(r.netto || '0'),
-        datum: r.datum || '',
-        liefArt: r.lief_art || '',
-      })))
-    } catch {
-      /* ignore */
+    const selected = artikel.find(a => a.id === id)
+    if (selected) {
+      setLieferanten(selected.lieferant_name
+        ? [{ liefNr: selected.lieferant_id || '', name: selected.lieferant_name }]
+        : [])
+      setKontrakte([])
+      setLetzteEinkaeufe(selected.letzter_kauf_datum ? [{
+        belegNr: '',
+        liefNr: selected.lieferant_id || '',
+        name: selected.lieferant_name || '',
+        menge: selected.bestVorschlag,
+        einhPreis: selected.letzter_preis ?? 0,
+        netto: 0,
+        datum: selected.letzter_kauf_datum,
+        liefArt: '',
+      }] : [])
     }
   }
 
