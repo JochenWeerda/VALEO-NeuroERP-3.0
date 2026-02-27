@@ -261,3 +261,82 @@ class Biostimulanz(Base):
     tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+
+# Feldbuch / Ackerschlagkartei Models
+
+class FeldbuchSchlag(Base):
+    """Feldparzellen (Schläge) der Kunden"""
+    __tablename__ = "feldbuch_schlaege"
+    __table_args__ = {"schema": "domain_agrar", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: uuid7())
+    tenant_id = Column(String, nullable=False, index=True)
+    customer_id = Column(String, nullable=False, index=True)  # FK → domain_crm.customers
+
+    name = Column(String(200), nullable=False)
+    flik = Column(String(20), nullable=True)       # Feldblock-ID (FLIK)
+    flaeche = Column(Float, nullable=False)         # Hektar
+    kultur = Column(String(100), nullable=True)     # aktuelle Kultur
+    vorkultur = Column(String(100), nullable=True)  # Vorjahreskultur
+    gemeinde = Column(String(100), nullable=True)
+    gemarkung = Column(String(100), nullable=True)
+    bodenart = Column(String(50), nullable=True)
+    ackerzahl = Column(Float, nullable=True)        # Bodenpunktzahl
+    status = Column(String(20), default='aktiv')    # aktiv/stillgelegt/brache
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    created_by = Column(String(200), nullable=True)  # ERP-User oder 'portal:{customer_id}'
+
+    massnahmen = relationship("FeldbuchMassnahme", back_populates="schlag")
+
+
+class FeldbuchMassnahme(Base):
+    """Maßnahmen-Journal (Spritztagebuch / Ackerschlagkartei)"""
+    __tablename__ = "feldbuch_massnahmen"
+    __table_args__ = {"schema": "domain_agrar", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: uuid7())
+    tenant_id = Column(String, nullable=False, index=True)
+    schlag_id = Column(String, ForeignKey("domain_agrar.feldbuch_schlaege.id"), nullable=True)
+    customer_id = Column(String, nullable=False, index=True)
+
+    datum = Column(DateTime(timezone=True), nullable=False, index=True)
+    uhrzeit = Column(String(10), nullable=True)
+    typ = Column(String(30), nullable=False)
+    # 'psm' | 'duengung' | 'aussaat' | 'ernte' | 'bodenbearbeitung' | 'sonstiges'
+
+    bezeichnung = Column(String(300), nullable=True)    # Freitext-Bezeichnung
+    mittel = Column(String(200), nullable=True)          # Produktname (PSM, Dünger, Saatgut)
+    mittel_id = Column(String, nullable=True)            # FK → PSM / Duenger / Saatgut (optional)
+    mittel_typ = Column(String(30), nullable=True)       # 'psm' | 'duenger' | 'saatgut'
+
+    menge = Column(Float, nullable=True)                 # Aufwandmenge (l/ha, kg/ha, …)
+    einheit = Column(String(20), nullable=True)
+    flaeche = Column(Float, nullable=True)               # behandelte Fläche (ha)
+
+    anwender = Column(String(200), nullable=True)        # Wer hat ausgebracht
+    quelle = Column(String(20), nullable=False, default='portal')
+    # 'erp_service'      → von VALEO erbrachte Dienstleistung
+    # 'erp_lieferschein' → aus Lieferschein übernommen
+    # 'portal'           → vom Landwirt selbst eingetragen
+
+    lieferschein_id = Column(String, nullable=True, index=True)  # Referenz auf LS wenn quelle='erp_*'
+
+    # PSM-Compliance
+    auflagen = Column(JSONB, nullable=True)              # ['NT102', 'NW468', …]
+    wartezeit_tage = Column(Integer, nullable=True)      # Wartezeit bis Ernte (Tage)
+    windgeschwindigkeit = Column(Float, nullable=True)   # km/h
+    temperatur = Column(Float, nullable=True)            # °C
+    compliant = Column(Boolean, default=True)
+
+    exportiert = Column(Boolean, default=False)          # in ext. Ackerschlagkartei exportiert?
+    exportiert_am = Column(DateTime(timezone=True), nullable=True)
+
+    bemerkung = Column(Text, nullable=True)
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    schlag = relationship("FeldbuchSchlag", back_populates="massnahmen")

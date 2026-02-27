@@ -321,26 +321,6 @@ class AuthService {
   }
 
   /**
-   * Logout (lokale Tokens löschen)
-   */
-  logout(): void {
-    const oidcConfigured = config.oidc.discoveryUrl.length > 0
-    // In dev mode without OIDC, don't clear dev token
-    if (!oidcConfigured && this.accessToken === 'dev-token') {
-      // Keep dev token for development - just clear user if needed
-      // Don't remove tokens from localStorage
-      return
-    }
-    this.accessToken = null
-    this.refreshToken = null
-    this.user = null
-    localStorage.removeItem('access_token')
-    localStorage.removeItem('refresh_token')
-    // Optional: OIDC-Logout
-    // window.location.href = `${discovery.end_session_endpoint}?...`
-  }
-
-  /**
    * Gibt aktuellen User zurück
    */
   getUser(): User | null {

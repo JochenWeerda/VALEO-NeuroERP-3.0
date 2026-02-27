@@ -16,12 +16,16 @@ import { useToast } from '@/components/ui/toast-provider'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { CustomerSelectionDialog, type Customer } from '@/components/sales/CustomerSelectionDialog'
 import { ArtikelSuchDialog } from '@/components/sales/ArtikelSuchDialog'
-import { LieferscheinDruckDialog } from '@/components/sales/LieferscheinDruckDialog'
+import { LieferscheinDruckDialog, type PrintOptions } from '@/components/sales/LieferscheinDruckDialog'
+import { DmsAnhangDialog } from '@/components/dms/DmsAnhangDialog'
 import { AttestationDialog } from '@/components/sales/AttestationDialog'
+import { BelegfolgePositionenDialog, type BelegfolgePosition } from '@/components/sales/BelegfolgePositionenDialog'
 import { apiClient } from '@/lib/axios'
 import { useAuth } from '@/hooks/useAuth'
+import { useSchlaege } from '@/lib/api/agrar'
 import { useGlobalShortcuts, globalShortcutManager } from '@/lib/shortcuts/global-shortcuts'
 import { ShortcutHintButton } from '@/components/shortcuts/ShortcutHelpPanel'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ChevronLeft, ChevronRight, MoreHorizontal, Check, Printer, Save, X, FileText, Folder, FileCheck, Link as LinkIcon, Receipt, Trash2 } from 'lucide-react'
 
 // API Response Type
@@ -393,16 +397,27 @@ export default function LieferscheinErfassungPage(): JSX.Element {
   const [showCustomerDialog, setShowCustomerDialog] = useState(false)
   const [showArticleDialog, setShowArticleDialog] = useState(false)
   const [showPrintDialog, setShowPrintDialog] = useState(false)
+  const [showAttachmentDialog, setShowAttachmentDialog] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [showAttestationDialog, setShowAttestationDialog] = useState(false)
   const [pendingAction, setPendingAction] = useState<'print' | 'modify' | null>(null)
+  const [pendingPrintOptions, setPendingPrintOptions] = useState<PrintOptions | null>(null)
   const [showInformationDialog, setShowInformationDialog] = useState(false)
   const [customerTab, setCustomerTab] = useState<'kunde' | 'lieferanschr' | 'rechnanschrift' | 'bestellung' | 'rechnung' | 'texte' | 'spediteur' | 'lieferung'>('kunde')
   
   // State für Bestellungen
   const [bestellungen, setBestellungen] = useState<Array<{ id: string; bestellNr: string; datum: string }>>([])
-  
+  const [showBelegfolgeDialog, setShowBelegfolgeDialog] = useState(false)
+  const [vorgaengerCount, setVorgaengerCount] = useState(0)
+
   // Cache für Branch-Mapping (niederlassung -> branch_id)
   const [branchCache, setBranchCache] = useState<Map<number, string>>(new Map())
+
+  // PSM-Dienstleistung: Schlag-Auswahl für Feldbuch-Eintrag
+  const [psmSchlagId, setPsmSchlagId] = useState<string>('')
+  const [psmFlaeche, setPsmFlaeche] = useState<string>('')
+  const customerId = state.customer?.id
+  const { data: schlaege = [] } = useSchlaege(customerId)
 
   // Berechne Summen
   const summen = useMemo(() => {
@@ -429,31 +444,75 @@ export default function LieferscheinErfassungPage(): JSX.Element {
       vertreter: customer.representative || prev.vertreter || '',
     }))
     
-    // Lade Bestellungen für den ausgewählten Kunden vom Backend
+    // Lade Vorgänger-Belege für den ausgewählten Kunden (Angebote + Aufträge + Portal-Bestellungen)
     try {
-      const response = await apiClient.get<any>('/api/v1/sales/orders', {
-        params: {
-          customer_id: customer.id,
-          limit: 10, // Maximal 10 Bestellungen anzeigen
-        },
-      })
-      
-      // Handle PaginatedResponse or direct array
-      const orders = response.items || response || []
-      setBestellungen(
-        orders.map((o: any) => ({
-          id: o.id,
-          bestellNr: o.order_number || o.orderNumber || '',
-          datum: o.created_at 
-            ? new Date(o.created_at).toLocaleDateString('de-DE')
-            : new Date().toLocaleDateString('de-DE'),
-        }))
-      )
+      const [ordersResp, quotesResp, portalResp] = await Promise.allSettled([
+        apiClient.get<any>('/api/v1/sales/orders', { params: { customer_id: customer.id, limit: 20 } }),
+        apiClient.get<any>('/api/v1/sales/quotes', { params: { customer_id: customer.id, limit: 20 } }),
+        apiClient.get<any>('/api/v1/portal/bestellungen', { params: { customer_id: customer.id, status: 'bestellt', limit: 20 } }),
+      ])
+
+      const orders = ordersResp.status === 'fulfilled' ? (ordersResp.value.items || ordersResp.value || []) : []
+      const mapped = orders.map((o: any) => ({
+        id: o.id,
+        bestellNr: o.order_number || o.orderNumber || '',
+        datum: o.created_at
+          ? new Date(o.created_at).toLocaleDateString('de-DE')
+          : new Date().toLocaleDateString('de-DE'),
+      }))
+      setBestellungen(mapped)
+
+      const quotesCount = quotesResp.status === 'fulfilled'
+        ? (quotesResp.value.items || quotesResp.value || []).length
+        : 0
+      const portalCount = portalResp.status === 'fulfilled'
+        ? (Array.isArray(portalResp.value) ? portalResp.value : (portalResp.value.items || portalResp.value.data || [])).length
+        : 0
+      setVorgaengerCount(mapped.length + quotesCount + portalCount)
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.warn('Fehler beim Laden der Bestellungen:', error)
-      setBestellungen([]) // Fallback: Leere Liste
+      console.warn('Fehler beim Laden der Vorgänger-Belege:', error)
+      setBestellungen([])
+      setVorgaengerCount(0)
     }
+  }
+
+  // Belegfolge-Positionsübernahme
+  function handleBelegfolgePositionen(incoming: BelegfolgePosition[]): void {
+    const baseNr =
+      state.positionen.length > 0
+        ? Math.max(...state.positionen.map((p) => p.posNr)) + 10
+        : 10
+    const newPositionen = incoming.map((pos, idx) => {
+      const nettoPreis = pos.listenpreis * (1 - pos.rabatt / 100)
+      const nettoBetrag = nettoPreis * pos.menge
+      return {
+        posNr: baseNr + idx * 10,
+        artikelNr: pos.artikelNr,
+        artikelId: pos.artikelId,
+        bezeichnung: pos.bezeichnung,
+        bezeichnung2: pos.bezeichnung2,
+        menge: pos.menge,
+        einheit: pos.einheit,
+        listenpreis: pos.listenpreis,
+        rabatt: pos.rabatt,
+        art: '',
+        nettoPreis,
+        nettoBetrag,
+        niederlassung: String(state.niederlassung),
+        lagerhalle: '', lagerfach: '', charge: '', serienNr: '', gefPunkt: '',
+        gefahrgutPunkte: 0, gesamtGefahrgutPunkte: 0,
+        naBio: '', musterNr: '', strecke: '', zusBeleg: '', anerken: '', erloskonto: '',
+        mwstProzent: pos.mwstProzent,
+        gewicht: 0, gesamtGewicht: 0,
+        kontraktNr: '', skontierf: false, fremdware: false,
+      }
+    })
+    setState((prev) => ({
+      ...prev,
+      positionen: [...prev.positionen, ...newPositionen],
+    }))
+    push(`${newPositionen.length} Position${newPositionen.length !== 1 ? 'en' : ''} übernommen`)
   }
 
   // Artikel auswählen
@@ -682,15 +741,16 @@ export default function LieferscheinErfassungPage(): JSX.Element {
   }
 
   // Lieferschein drucken und buchen
-  const handlePrint = async (printer: string, template: string): Promise<void> => {
+  const handlePrint = async (options: PrintOptions): Promise<void> => {
     // Wenn bereits gebucht, Attestierung erforderlich
     if (state.statusGedruckt || state.statusAusgeliefert) {
+      setPendingPrintOptions(options)
       setPendingAction('print')
       setShowAttestationDialog(true)
       return
     }
 
-    await executePrint(printer, template)
+    await executePrint(options)
   }
 
   // Attestierung bestätigt
@@ -698,8 +758,11 @@ export default function LieferscheinErfassungPage(): JSX.Element {
     setShowAttestationDialog(false)
     
     if (action === 'print') {
-      // Get printer/template from dialog state (simplified)
-      await executePrint('default', 'W00005', reason)
+      const opts: PrintOptions = pendingPrintOptions ?? {
+        formatvorlage: 'W00005', anzahlDrucke: 1, sortierung: 'pos-nr',
+        druckLieferschein: true, druckAllgemeineAngaben: false, werbetext: '',
+      }
+      await executePrint(opts, reason)
     } else if (action === 'modify') {
       // TODO: Handle modify action
       push('Korrektur noch nicht implementiert')
@@ -708,7 +771,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
   }
 
   // Druck ausführen
-  const executePrint = async (printer: string, template: string, attestation?: string): Promise<void> => {
+  const executePrint = async (options: PrintOptions, attestation?: string): Promise<void> => {
     try {
       // Wenn noch nicht gespeichert (keine ID), erst speichern
       let lsId = state.id
@@ -738,6 +801,8 @@ export default function LieferscheinErfassungPage(): JSX.Element {
       if (attestation) {
         params.append('attestation', attestation)
       }
+      params.append('template', options.formatvorlage)
+      params.append('copies', String(options.anzahlDrucke))
 
       await apiClient.post(
         `/api/v1/sales/delivery-notes/${lsId}/print?${params.toString()}`
@@ -745,22 +810,131 @@ export default function LieferscheinErfassungPage(): JSX.Element {
 
       // Buchen
       await apiClient.post(`/api/v1/sales/delivery-notes/${lsId}/post`)
-      
-      // Lieferschein neu laden, um invoice_number zu erhalten (falls fakturiert)
-      const updated = await apiClient.get<DeliveryNoteResponse>(`/api/v1/sales/delivery-notes/${lsId}`)
-      
-      setState((prev) => ({ 
-        ...prev, 
-        statusGedruckt: true, 
-        statusAusgeliefert: true,
-        fakturiertRechnNr: updated.invoice_number || '', // Vom Backend gesetzt nach Fakturierung
-      }))
+
+      // Feldbuch-Eintrag anlegen wenn Schlag ausgewählt
+      if (psmSchlagId && state.customer?.id) {
+        const psm_artikel = state.positionen[0]?.bezeichnung || 'PSM-Dienstleistung'
+        const psm_menge = state.positionen[0]?.menge ?? 0
+        const psm_einheit = state.positionen[0]?.einheit ?? 'l/ha'
+        try {
+          await apiClient.post('/api/v1/agrar/feldbuch/massnahmen/from-lieferschein', {
+            lieferschein_id: lsId,
+            lieferschein_datum: state.lieferDatum || new Date().toISOString(),
+            customer_id: state.customer.id,
+            schlag_id: psmSchlagId,
+            artikel_name: psm_artikel,
+            menge: psm_menge,
+            einheit: psm_einheit,
+            flaeche: psmFlaeche ? parseFloat(psmFlaeche) : 0,
+            anwender: 'VALEO GmbH',
+          })
+          push('Maßnahme im Feldbuch angelegt')
+        } catch {
+          // Feldbuch-Fehler nicht blockierend
+          push('Hinweis: Feldbuch-Eintrag konnte nicht erstellt werden')
+        }
+        setPsmSchlagId('')
+        setPsmFlaeche('')
+      }
+
       push('Lieferschein erfolgreich gedruckt und gebucht')
       setShowPrintDialog(false)
+
+      // Maske auf neuen leeren Lieferschein zurücksetzen
+      setState({
+        id: null,
+        lieferscheinNr: generateLieferscheinNr(),
+        niederlassung: 0,
+        vertreter: '',
+        bediener: getUserShortName(),
+        lieferDatum: formatDateForInput(new Date()),
+        uhrzeit: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+        kostenstelle: 0,
+        lkwNr: 0,
+        gutschriftKennz: false,
+        selbstabholung: false,
+        fruehbezugRechnung: false,
+        reNrBezug: '',
+        statusGedruckt: false,
+        statusAusgeliefert: false,
+        fakturiertRechnNr: '',
+        customer: null,
+        positionen: [],
+        aktivePositionIndex: null,
+      })
+      setCurrentPosition({
+        posNr: 10,
+        artikelNr: '',
+        artikelId: null,
+        artikelBezeichnung: '',
+        artikelBezeichnung2: '',
+        mengeGebinde: 0,
+        einheit: '',
+        listenpreis: 0,
+        rabatt: 0,
+        einhPreis: 0,
+        betrag: 0,
+        mwstProzent: 19,
+        verfuegbar: 0,
+        kontraktNr: '',
+        skontierf: false,
+        fremdware: false,
+        artikelGewicht: 0,
+        artikelGefahrgutPunkte: 0,
+      })
+      setBestellungen([])
     } catch (error: any) {
       // eslint-disable-next-line no-console
       console.error('Print error:', error)
       push(`Fehler beim Drucken: ${error.response?.data?.detail || error.message}`)
+    }
+  }
+
+  // Lieferschein löschen
+  const handleDelete = async (): Promise<void> => {
+    const lsId = state.id
+    if (!lsId) {
+      // Noch nie gespeichert — Formular einfach leeren
+      setState({
+        id: null,
+        lieferscheinNr: generateLieferscheinNr(),
+        niederlassung: 0,
+        vertreter: '',
+        bediener: getUserShortName(),
+        lieferDatum: formatDateForInput(new Date()),
+        uhrzeit: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+        kostenstelle: 0,
+        lkwNr: 0,
+        gutschriftKennz: false,
+        selbstabholung: false,
+        fruehbezugRechnung: false,
+        reNrBezug: '',
+        statusGedruckt: false,
+        statusAusgeliefert: false,
+        fakturiertRechnNr: '',
+        customer: null,
+        positionen: [],
+        aktivePositionIndex: null,
+      })
+      setCurrentPosition({
+        posNr: 10, artikelNr: '', artikelId: null, artikelBezeichnung: '',
+        artikelBezeichnung2: '', mengeGebinde: 0, einheit: '', listenpreis: 0,
+        rabatt: 0, einhPreis: 0, betrag: 0, mwstProzent: 19, verfuegbar: 0,
+        kontraktNr: '', skontierf: false, fremdware: false, artikelGewicht: 0,
+        artikelGefahrgutPunkte: 0,
+      })
+      setBestellungen([])
+      setShowDeleteDialog(false)
+      return
+    }
+
+    try {
+      await apiClient.delete(`/api/v1/sales/delivery-notes/${lsId}`)
+      push('Lieferschein erfolgreich gelöscht')
+      setShowDeleteDialog(false)
+      navigate('/verkauf')
+    } catch (error: any) {
+      push(`Löschen fehlgeschlagen: ${error.response?.data?.detail || error.message}`)
     }
   }
 
@@ -787,8 +961,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
       }
     },
     'delete-document': () => {
-      // TODO: Implementieren
-      push('Löschen-Funktion noch nicht implementiert')
+      setShowDeleteDialog(true)
     },
     'close-document': () => navigate(-1),
     'copy-previous-full': async () => {
@@ -1020,8 +1193,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
       push('Sofort-Rechnung noch nicht implementiert')
     },
     'open-attachments': () => {
-      // TODO: Implementieren
-      push('Unterlagen noch nicht implementiert')
+      setShowAttachmentDialog(true)
     },
       'show-information': () => {
         if (state.customer) {
@@ -1045,6 +1217,32 @@ export default function LieferscheinErfassungPage(): JSX.Element {
       <div className="bg-green-600 text-white px-4 py-2">
         <h1 className="text-lg font-bold">LIEFERSCHEIN-ERFASSUNG</h1>
       </div>
+
+      {/* Belegfolge-Hinweis */}
+      {vorgaengerCount > 0 && state.customer && (
+        <div className="bg-amber-50 border-b border-amber-300 px-4 py-1.5 flex items-center gap-3">
+          <span className="text-amber-800 text-sm font-medium">
+            {vorgaengerCount} offene{vorgaengerCount !== 1 ? ' Vorgänger-Belege' : 'r Vorgänger-Beleg'} für{' '}
+            <strong>{state.customer.name}</strong> vorhanden
+          </span>
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-6 text-xs border-amber-400 text-amber-800 hover:bg-amber-100"
+            onClick={() => setShowBelegfolgeDialog(true)}
+          >
+            Positionen übernehmen
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-6 w-6 p-0 text-amber-600 ml-auto"
+            onClick={() => setVorgaengerCount(0)}
+          >
+            <X className="h-3 w-3" />
+          </Button>
+        </div>
+      )}
 
       <div className="flex-1 overflow-auto p-4">
         {/* Header-Bereich (3 Spalten) */}
@@ -1324,13 +1522,9 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                               variant="outline"
                               size="sm"
                               className="mt-2"
-                              onClick={async () => {
-                                // TODO: Implementiere "Alle Bestellpositionen übernehmen"
-                                // Dies erfordert eine API zum Laden der Bestellpositionen
-                                push('Alle Bestellpositionen übernehmen - noch nicht vollständig implementiert')
-                              }}
+                              onClick={() => setShowBelegfolgeDialog(true)}
                             >
-                              Alle Bestellpositionen übernehmen
+                              Positionen aus Auftrag übernehmen
                             </Button>
                           </>
                         ) : (
@@ -1347,13 +1541,21 @@ export default function LieferscheinErfassungPage(): JSX.Element {
 
                 <TabsContent value="rechnung" className="mt-2 space-y-2">
                   {state.customer ? (
-                    <div className="text-sm space-y-1">
-                      <div className="font-semibold">Zahlungsbedingungen</div>
-                      {state.customer.creditLimit && (
-                        <div>Kredit-Limit: {state.customer.creditLimit}</div>
-                      )}
-                      <div className="text-muted-foreground">Weitere Zahlungsbedingungen werden hier angezeigt</div>
-                      {/* TODO: Zahlungsbedingungen vom Backend laden */}
+                    <div className="text-sm space-y-1.5">
+                      <div className="grid grid-cols-[140px_1fr] gap-1">
+                        <span className="text-muted-foreground">Zahlungsziel:</span>
+                        <span>
+                          {state.customer.paymentTerms !== undefined
+                            ? `${state.customer.paymentTerms} Tage netto`
+                            : '—'}
+                        </span>
+                        <span className="text-muted-foreground">Kredit-Limit:</span>
+                        <span>{state.customer.creditLimit ? `${Number(state.customer.creditLimit).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}` : '—'}</span>
+                        <span className="text-muted-foreground">Debitor-Kto.:</span>
+                        <span>{state.customer.debitorAccount || '—'}</span>
+                        <span className="text-muted-foreground">Kunden-Nr.:</span>
+                        <span>{state.customer.customerNumber || '—'}</span>
+                      </div>
                     </div>
                   ) : (
                     <div className="text-sm text-muted-foreground">Kein Kunde ausgewählt</div>
@@ -1361,17 +1563,45 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                 </TabsContent>
 
                 <TabsContent value="texte" className="mt-2 space-y-2">
-                  <div className="text-sm space-y-2">
-                    <div className="text-muted-foreground">Kunden-Texte und Notizen werden hier angezeigt</div>
-                    {/* TODO: Texte vom Backend laden */}
-                  </div>
+                  {state.customer ? (
+                    <div className="text-sm space-y-2">
+                      {(state.customer.chefanweisung || state.customer.executiveNote) ? (
+                        <div>
+                          <div className="font-semibold mb-1">Chefanweisung</div>
+                          <div className="p-2 bg-amber-50 border border-amber-200 rounded whitespace-pre-wrap">
+                            {state.customer.chefanweisung || state.customer.executiveNote}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-muted-foreground">Keine Kunden-Notizen vorhanden</div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-sm text-muted-foreground">Kein Kunde ausgewählt</div>
+                  )}
                 </TabsContent>
 
                 <TabsContent value="spediteur" className="mt-2 space-y-2">
-                  <div className="text-sm space-y-2">
-                    <div className="text-muted-foreground">Spediteur-Daten werden hier angezeigt</div>
-                    {/* TODO: Spediteur-Daten vom Backend laden */}
-                  </div>
+                  {state.customer ? (
+                    <div className="text-sm space-y-1.5">
+                      <div className="grid grid-cols-[140px_1fr] gap-1">
+                        <span className="text-muted-foreground">Spediteur:</span>
+                        <span>—</span>
+                        <span className="text-muted-foreground">Lieferadresse:</span>
+                        <span>
+                          {[
+                            state.customer.address?.street,
+                            state.customer.address?.postalCode,
+                            state.customer.address?.city,
+                          ].filter(Boolean).join(', ') || state.customer.address?.city || '—'}
+                        </span>
+                        <span className="text-muted-foreground">Telefon:</span>
+                        <span>{state.customer.address?.phone || state.customer.phone || '—'}</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-sm text-muted-foreground">Kein Kunde ausgewählt</div>
+                  )}
                 </TabsContent>
 
                 <TabsContent value="lieferung" className="mt-2 space-y-2">
@@ -1649,6 +1879,45 @@ export default function LieferscheinErfassungPage(): JSX.Element {
           </div>
         </Card>
 
+        {/* PSM-Dienstleistung: Schlag-Auswahl für Feldbuch */}
+        {schlaege.length > 0 && (
+          <Card className="mb-4 p-4 border-amber-200 bg-amber-50">
+            <h2 className="mb-2 font-semibold text-sm text-amber-800">PSM-Dienstleistung → Feldbuch</h2>
+            <div className="grid grid-cols-4 gap-4">
+              <div className="space-y-1 col-span-2">
+                <Label className="text-xs">Schlag (Feldbuch):</Label>
+                <Select value={psmSchlagId} onValueChange={setPsmSchlagId}>
+                  <SelectTrigger className="h-8">
+                    <SelectValue placeholder="Schlag wählen (optional)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Kein Schlag</SelectItem>
+                    {schlaege.map(s => (
+                      <SelectItem key={s.id} value={s.id}>{s.name} ({s.flaeche} ha)</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Fläche (ha):</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={psmFlaeche}
+                  onChange={e => setPsmFlaeche(e.target.value)}
+                  placeholder="z.B. 12.5"
+                  className="h-8"
+                />
+              </div>
+              <div className="flex items-end">
+                <p className="text-xs text-amber-700">
+                  Nach dem Drucken wird automatisch ein Feldbuch-Eintrag erstellt.
+                </p>
+              </div>
+            </div>
+          </Card>
+        )}
+
         {/* Summen */}
         <Card className="mb-4 p-4">
           <div className="grid grid-cols-7 gap-4">
@@ -1696,11 +1965,11 @@ export default function LieferscheinErfassungPage(): JSX.Element {
             <Printer className="h-4 w-4" />
             LS drucken
           </Button>
-          <Button variant="outline" size="sm" className="gap-2">
+          <Button variant="outline" size="sm" className="gap-2" onClick={() => setShowAttachmentDialog(true)}>
             <FileText className="h-4 w-4" />
             Unterlagen
           </Button>
-          <Button variant="outline" size="sm" className="gap-2">
+          <Button variant="outline" size="sm" className="gap-2" onClick={() => setShowAttachmentDialog(true)}>
             <Folder className="h-4 w-4" />
             Dateien
           </Button>
@@ -1716,7 +1985,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
             <Receipt className="h-4 w-4" />
             Sofort-Rechnung
           </Button>
-          <Button variant="outline" size="sm" className="gap-2 text-red-600">
+          <Button variant="outline" size="sm" className="gap-2 text-red-600" onClick={() => setShowDeleteDialog(true)}>
             <Trash2 className="h-4 w-4" />
             LS löschen
           </Button>
@@ -1753,6 +2022,41 @@ export default function LieferscheinErfassungPage(): JSX.Element {
         onClose={() => setShowPrintDialog(false)}
         onConfirm={handlePrint}
       />
+      {/* Löschen-Bestätigung */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Lieferschein löschen?</DialogTitle>
+          </DialogHeader>
+          <div className="py-2 text-sm">
+            {state.id
+              ? <>Lieferschein <strong>{state.lieferscheinNr}</strong> wird unwiderruflich gelöscht. Fortfahren?</>
+              : 'Das Formular wird geleert. Nicht gespeicherte Daten gehen verloren.'}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>Abbrechen</Button>
+            <Button variant="destructive" onClick={() => void handleDelete()}>Löschen</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <DmsAnhangDialog
+        open={showAttachmentDialog}
+        onClose={() => setShowAttachmentDialog(false)}
+        businessObjectType="delivery_note"
+        businessObjectId={state.id}
+        title="UNTERLAGEN / DATEIEN — LIEFERSCHEIN"
+      />
+
+      {state.customer && (
+        <BelegfolgePositionenDialog
+          open={showBelegfolgeDialog}
+          onClose={() => setShowBelegfolgeDialog(false)}
+          onConfirm={handleBelegfolgePositionen}
+          customerId={state.customer.id}
+          targetDocType="lieferschein"
+        />
+      )}
       <AttestationDialog
         open={showAttestationDialog}
         onClose={() => {

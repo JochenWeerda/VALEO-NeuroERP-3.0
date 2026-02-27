@@ -91,6 +91,31 @@ type PaginatedResponse<T> = {
 
 // ── Legacy UI types (kept for backward compat) ────────────────────────────────
 
+export type LieferungStatus = 'geplant' | 'unterwegs' | 'zugestellt' | 'storniert'
+
+export type Lieferung = {
+  id: string
+  nummer: string
+  datum: string
+  kunde: string
+  auftragsNr: string
+  menge: number
+  status: LieferungStatus
+}
+
+export type RechnungStatus = 'offen' | 'teilbezahlt' | 'bezahlt' | 'ueberfaellig' | 'storniert'
+
+export type Rechnung = {
+  id: string
+  nummer: string
+  datum: string
+  kunde: string
+  auftragsNr: string
+  betrag: number
+  faelligAm: string
+  status: RechnungStatus
+}
+
 export type Auftrag = {
   id: string
   nummer: string
@@ -282,5 +307,39 @@ export function useDeleteOrder() {
       await apiClient.delete(`/api/v1/sales/orders/${id}`)
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: salesKeys.all }),
+  })
+}
+
+// ── Hooks: Deliveries ─────────────────────────────────────────────────────────
+
+export function useLieferungen() {
+  return useQuery<Lieferung[]>({
+    queryKey: [...salesKeys.all, 'deliveries'],
+    queryFn: async () => {
+      try {
+        const resp = await apiClient.get<{ items: Lieferung[] }>('/api/v1/sales/deliveries/?limit=100')
+        return resp.data.items ?? []
+      } catch {
+        return []
+      }
+    },
+    staleTime: 2 * 60 * 1000,
+  })
+}
+
+// ── Hooks: Invoices ───────────────────────────────────────────────────────────
+
+export function useRechnungen() {
+  return useQuery<Rechnung[]>({
+    queryKey: [...salesKeys.all, 'invoices'],
+    queryFn: async () => {
+      try {
+        const resp = await apiClient.get<{ items: Rechnung[] }>('/api/v1/sales/invoices/?limit=100')
+        return resp.data.items ?? []
+      } catch {
+        return []
+      }
+    },
+    staleTime: 2 * 60 * 1000,
   })
 }

@@ -1,4 +1,9 @@
-﻿export default function StreckengeschaeftPage(): JSX.Element {
+import { useState } from 'react'
+import { DmsAnhangDialog } from '@/components/dms/DmsAnhangDialog'
+
+export default function StreckengeschaeftPage(): JSX.Element {
+  const [showAttachmentDialog, setShowAttachmentDialog] = useState(false)
+
   return (
     <div className="min-h-full bg-[#e3e3e3] text-[11px] text-black">
       <div className="border-b border-[#c8c8c8] bg-[#efefef] px-2 py-1 font-semibold">STRECKE</div>
@@ -74,12 +79,23 @@
 
       <div className="flex items-center justify-between border-t border-[#bdbdbd] bg-[#efefef] px-1 py-1">
         <div className="flex gap-2">
-          {['Strecke loeschen', 'Duplizieren', 'Info', 'Chef-Anweis.', 'Zusatzliche Felder/Angaben zur Strecke', 'Dokumente', 'Unterlagen', 'Dateien'].map((action) => (
+          {['Strecke loeschen', 'Duplizieren', 'Info', 'Chef-Anweis.', 'Zusatzliche Felder/Angaben zur Strecke'].map((action) => (
             <button key={action} className="h-5 border border-[#9b9b9b] bg-[#ececec] px-2 text-[10px]">{action}</button>
           ))}
+          <button className="h-5 border border-[#9b9b9b] bg-[#ececec] px-2 text-[10px]" onClick={() => setShowAttachmentDialog(true)}>Dokumente</button>
+          <button className="h-5 border border-[#9b9b9b] bg-[#ececec] px-2 text-[10px]" onClick={() => setShowAttachmentDialog(true)}>Unterlagen</button>
+          <button className="h-5 border border-[#9b9b9b] bg-[#ececec] px-2 text-[10px]" onClick={() => setShowAttachmentDialog(true)}>Dateien</button>
         </div>
         <button className="h-5 border border-[#9b9b9b] bg-[#ececec] px-3 text-[10px]">Schliessen</button>
       </div>
+
+      <DmsAnhangDialog
+        open={showAttachmentDialog}
+        onClose={() => setShowAttachmentDialog(false)}
+        businessObjectType="streckengeschaeft"
+        businessObjectId={null}
+        title="UNTERLAGEN / DATEIEN — STRECKE"
+      />
     </div>
   )
 }
