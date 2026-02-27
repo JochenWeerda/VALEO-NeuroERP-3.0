@@ -113,6 +113,7 @@ type HarvestAcceptanceState = {
   intermediateDealerId: string | null
   deviatingVatId: string | null
   articleId: string | null
+  articleName: string
   varietyId: string | null
   vehiclePlate: string
   originNuts2Code: string
@@ -379,19 +380,19 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
 
   // Keyboard Shortcuts
   useGlobalShortcuts({
-    'F11': () => {
+    'copy-previous-full': () => {
       void handleCopyPreviousFull()
     },
-    'Ctrl+F8': () => {
+    'copy-previous-positions': () => {
       void handleCopyPreviousFull()
     },
-    'Ctrl+S': () => {
+    'save-document': () => {
       void handleSave()
     },
-    'Ctrl+F1': () => {
+    'open-customer-selection': () => {
       setShowCustomerDialog(true)
     },
-    'Ctrl+F2': () => {
+    'open-article-selection': () => {
       setShowArticleDialog(true)
     },
   })

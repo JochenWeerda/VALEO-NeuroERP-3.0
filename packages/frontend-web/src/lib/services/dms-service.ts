@@ -347,6 +347,4 @@ export const dmsService = {
   },
 }
 
-// Export Types
-export type { UploadOptions, LinkOptions, SearchOptions }
 
