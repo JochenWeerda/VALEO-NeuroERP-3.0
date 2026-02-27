@@ -99,6 +99,7 @@ from app.api.v1.endpoints import (
     nawaro,
     nawaro_raps,
     einkauf_lieferschein,
+    einkauf_bestellvorschlag,
     admin_monitoring,
     admin_core,
     admin_pos,
@@ -761,6 +762,11 @@ api_router.include_router(
 
 api_router.include_router(
     einkauf_lieferschein.router
+)
+
+api_router.include_router(
+    einkauf_bestellvorschlag.router,
+    tags=["einkauf", "bestellvorschlag", "kontrakte", "lager-konten"]
 )
 
 api_router.include_router(
