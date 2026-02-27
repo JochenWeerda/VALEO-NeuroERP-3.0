@@ -1,6 +1,6 @@
 /**
  * Auftrags-Erfassung (Verkauf)
- * Einheitliches ERP-Look & Feel — Gewohnheits-Prinzip nach Lieferschein-Erfassung
+ * 1:1 Struktur nach Lieferschein-Erfassung — Gewohnheits-Prinzip
  */
 
 import { useState, useEffect, useMemo } from 'react'
@@ -12,32 +12,55 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Card } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import { useToast } from '@/components/ui/toast-provider'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { CustomerSelectionDialog, type Customer } from '@/components/sales/CustomerSelectionDialog'
 import { ArtikelSuchDialog } from '@/components/sales/ArtikelSuchDialog'
 import { LieferscheinDruckDialog, type PrintOptions } from '@/components/sales/LieferscheinDruckDialog'
 import { DmsAnhangDialog } from '@/components/dms/DmsAnhangDialog'
+import { AttestationDialog } from '@/components/sales/AttestationDialog'
+import { BelegfolgePositionenDialog, type BelegfolgePosition } from '@/components/sales/BelegfolgePositionenDialog'
 import { useAuftraege, type Auftrag } from '@/lib/api/sales'
 import { apiClient } from '@/lib/axios'
-import { useToast } from '@/components/ui/toast-provider'
 import { useAuth } from '@/hooks/useAuth'
+import { useGlobalShortcuts, globalShortcutManager } from '@/lib/shortcuts/global-shortcuts'
+import { ShortcutHintButton } from '@/components/shortcuts/ShortcutHelpPanel'
 import {
-  ChevronLeft,
-  ChevronRight,
-  MoreHorizontal,
-  Printer,
-  Save,
-  Trash2,
-  X,
-  Search,
-  FileText,
-  Truck,
-  Receipt,
+  ChevronLeft, ChevronRight, MoreHorizontal, Check, Printer, Save,
+  FileText, Folder, FileCheck, Link as LinkIcon, Receipt, Trash2, Search,
 } from 'lucide-react'
+
+// ── API Response Type ──────────────────────────────────────────────────────────
+
+type AuftragResponse = {
+  id: string
+  order_number: string
+  customer_id: string | null
+  subject: string | null
+  description: string | null
+  total_amount: number
+  currency: string
+  status: string
+  contact_person: string | null
+  delivery_date: string | null
+  delivery_address: string | null
+  shipping_method: string | null
+  payment_terms: string | null
+  created_at: string
+  updated_at: string
+  items: Array<{
+    id: string
+    article_number: string
+    description: string
+    quantity: number
+    unit_price: number
+    discount_percent: number
+  }>
+}
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
-type AuftragPosition = {
+export type Position = {
   posNr: number
   artikelNr: string
   artikelId: string | null
@@ -47,21 +70,63 @@ type AuftragPosition = {
   einheit: string
   listenpreis: number
   rabatt: number
+  art: string
   nettoPreis: number
   nettoBetrag: number
-  ekPreis: number
+  niederlassung: string
+  lagerhalle: string
+  lagerfach: string
+  charge: string
+  serienNr: string
+  gefPunkt: string
+  gefahrgutPunkte: number
+  gesamtGefahrgutPunkte: number
+  naBio: string
+  musterNr: string
+  strecke: string
+  zusBeleg: string
+  anerken: string
+  erloskonto: string
   mwstProzent: number
   gewicht: number
   gesamtGewicht: number
+  kontraktNr: string
+  skontierf: boolean
+  fremdware: boolean
+  ekPreis: number
+}
+
+type AuftragState = {
+  id: string | null
+  auftragNr: string
+  niederlassung: number
+  vertreter: string
+  bediener: string
+  auftragDatum: string
+  uhrzeit: string
+  liefertermin: string
+  kostenstelle: number
+  versandart: string
+  angebotNrBezug: string
+  statusGedruckt: boolean
+  statusBestätigt: boolean
+  lieferscheinNr: string   // readonly — wird nach LS-Erstellung gesetzt
+  selbstabholung: boolean
+  pauschalAuftrag: boolean
+  betreff: string
+  notizen: string
+  customer: Customer | null
+  positionen: Position[]
+  aktivePositionIndex: number | null
 }
 
 type CurrentPositionDetails = {
   posNr: number
   artikelNr: string
   artikelId: string | null
-  bezeichnung: string
-  bezeichnung2: string
-  menge: number
+  artikelBezeichnung: string
+  artikelBezeichnung2: string
+  mengeGebinde: number
   einheit: string
   listenpreis: number
   rabatt: number
@@ -69,7 +134,18 @@ type CurrentPositionDetails = {
   betrag: number
   ekPreis: number
   mwstProzent: number
-  gewicht: number
+  verfuegbar: number
+  kontraktNr: string
+  skontierf: boolean
+  fremdware: boolean
+  artikelGewicht: number
+  artikelGefahrgutPunkte: number
+}
+
+type Angebot = {
+  id: string
+  angebotNr: string
+  datum: string
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -80,16 +156,47 @@ function generateAuftragNr(): string {
   return `AU${year}-${String(random).padStart(5, '0')}`
 }
 
-function emptyPosition(posNr: number): CurrentPositionDetails {
+function formatDateForInput(date: Date): string {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
+
+function emptyCurrentPosition(posNr: number): CurrentPositionDetails {
   return {
-    posNr, artikelNr: '', artikelId: null, bezeichnung: '', bezeichnung2: '',
-    menge: 0, einheit: '', listenpreis: 0, rabatt: 0, einhPreis: 0,
-    betrag: 0, ekPreis: 0, mwstProzent: 19, gewicht: 0,
+    posNr, artikelNr: '', artikelId: null, artikelBezeichnung: '', artikelBezeichnung2: '',
+    mengeGebinde: 0, einheit: '', listenpreis: 0, rabatt: 0, einhPreis: 0,
+    betrag: 0, ekPreis: 0, mwstProzent: 19, verfuegbar: 0, kontraktNr: '',
+    skontierf: false, fremdware: false, artikelGewicht: 0, artikelGefahrgutPunkte: 0,
   }
 }
 
-function formatEur(val: number): string {
-  return val.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €'
+function mapResponseItemsToPositionen(items: AuftragResponse['items']): Position[] {
+  return items.map((item, idx) => {
+    const nettoPreis = item.unit_price * (1 - item.discount_percent / 100)
+    return {
+      posNr: (idx + 1) * 10,
+      artikelNr: item.article_number,
+      artikelId: null,
+      bezeichnung: item.description,
+      bezeichnung2: '',
+      menge: item.quantity,
+      einheit: 'Stk',
+      listenpreis: item.unit_price,
+      rabatt: item.discount_percent,
+      art: '',
+      nettoPreis,
+      nettoBetrag: nettoPreis * item.quantity,
+      niederlassung: '',
+      lagerhalle: '', lagerfach: '', charge: '', serienNr: '', gefPunkt: '',
+      gefahrgutPunkte: 0, gesamtGefahrgutPunkte: 0,
+      naBio: '', musterNr: '', strecke: '', zusBeleg: '', anerken: '', erloskonto: '',
+      mwstProzent: 19,
+      gewicht: 0, gesamtGewicht: 0,
+      kontraktNr: '', skontierf: false, fremdware: false, ekPreis: 0,
+    }
+  })
 }
 
 // ── Component ──────────────────────────────────────────────────────────────────
@@ -100,36 +207,60 @@ export default function SalesOrderEditorPage(): JSX.Element {
   const { push } = useToast()
   const { user } = useAuth()
 
-  // ── Kopf-Daten ─────────────────────────────────────────────────────────────
-  const [auftragId, setAuftragId] = useState<string | null>(null)
-  const [auftragNr, setAuftragNr] = useState(() => generateAuftragNr())
-  const [datum, setDatum] = useState(() => new Date().toISOString().split('T')[0])
-  const [liefertermin, setLiefertermin] = useState('')
-  const [lieferadresse, setLieferadresse] = useState('')
-  const [status, setStatus] = useState('Offen')
-  const [isPauschale, setIsPauschale] = useState(false)
-  const [kontakt, setKontakt] = useState('')
-  const [zahlungsbedingung, setZahlungsbedingung] = useState('')
-  const [versandart, setVersandart] = useState('')
-  const [notizen, setNotizen] = useState('')
-  const [betreff, setBetreff] = useState('')
-  const [customer, setCustomer] = useState<Customer | null>(null)
+  const getUserShortName = (): string => {
+    if (!user) return 'SYS'
+    const name = user.name?.split(' ').map((n) => n[0]).join('').toUpperCase() ||
+      user.sub?.substring(0, 2).toUpperCase() || 'SYS'
+    return name.length > 2 ? name.substring(0, 2) : name
+  }
 
-  // ── Dialog-States ──────────────────────────────────────────────────────────
+  // ── Haupt-State ────────────────────────────────────────────────────────────
+  const [state, setState] = useState<AuftragState>({
+    id: null,
+    auftragNr: generateAuftragNr(),
+    niederlassung: 0,
+    vertreter: '',
+    bediener: getUserShortName(),
+    auftragDatum: formatDateForInput(new Date()),
+    uhrzeit: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }),
+    liefertermin: '',
+    kostenstelle: 0,
+    versandart: '',
+    angebotNrBezug: '',
+    statusGedruckt: false,
+    statusBestätigt: false,
+    lieferscheinNr: '',
+    selbstabholung: false,
+    pauschalAuftrag: false,
+    betreff: '',
+    notizen: '',
+    customer: null,
+    positionen: [],
+    aktivePositionIndex: null,
+  })
+
+  const [currentPosition, setCurrentPosition] = useState<CurrentPositionDetails>(
+    () => emptyCurrentPosition(10),
+  )
+  const [customerTab, setCustomerTab] = useState<string>('kunde')
+  const [angebote, setAngebote] = useState<Angebot[]>([])
+  const [showBelegfolgeDialog, setShowBelegfolgeDialog] = useState(false)
+  const [vorgaengerCount, setVorgaengerCount] = useState(0)
+
+  // Dialog-States
   const [showAuftragAuswahl, setShowAuftragAuswahl] = useState(!routeId)
   const [showCustomerDialog, setShowCustomerDialog] = useState(false)
   const [showArticleDialog, setShowArticleDialog] = useState(false)
   const [showPrintDialog, setShowPrintDialog] = useState(false)
   const [showAttachmentDialog, setShowAttachmentDialog] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [showAttestationDialog, setShowAttestationDialog] = useState(false)
+  const [showInformationDialog, setShowInformationDialog] = useState(false)
+  const [pendingPrintOptions, setPendingPrintOptions] = useState<PrintOptions | null>(null)
+  const [pendingAction, setPendingAction] = useState<'print' | 'modify' | 'cancel' | 'post' | 'reopen' | null>(null)
   const [sucheText, setSucheText] = useState('')
 
-  // ── Positionen ─────────────────────────────────────────────────────────────
-  const [positionen, setPositionen] = useState<AuftragPosition[]>([])
-  const [aktivePositionIndex, setAktivePositionIndex] = useState<number | null>(null)
-  const [currentPosition, setCurrentPosition] = useState<CurrentPositionDetails>(() => emptyPosition(10))
-
-  // ── Aufträge-Liste (Auswahl-Dialog) ───────────────────────────────────────
+  // Auftrags-Auswahl-Liste
   const { data: auftraege = [], isLoading } = useAuftraege()
   const filteredAuftraege = auftraege.filter(
     (a) =>
@@ -137,106 +268,192 @@ export default function SalesOrderEditorPage(): JSX.Element {
       a.kunde.toLowerCase().includes(sucheText.toLowerCase()),
   )
 
-  // ── Preis automatisch berechnen ───────────────────────────────────────────
+  // Bediener aus Session aktualisieren
+  useEffect(() => {
+    if (user) setState((prev) => ({ ...prev, bediener: getUserShortName() }))
+  }, [user])
+
+  // Bestehenden Auftrag laden wenn ID in URL
+  useEffect(() => {
+    if (!routeId) return
+    const load = async (): Promise<void> => {
+      try {
+        const response = await apiClient.get<AuftragResponse>(`/api/v1/sales/orders/${routeId}`)
+        let customer: Customer | null = null
+        if (response.customer_id) {
+          try {
+            const cd = await apiClient.get<any>(`/api/v1/crm/customers/${response.customer_id}`)
+            customer = {
+              id: cd.id,
+              customerNumber: cd.customer_number || cd.customerNumber || '',
+              name: cd.company_name || cd.name || '',
+              debitorAccount: cd.customer_number || cd.customerNumber || '',
+              representative: cd.contact_person || cd.representative,
+              postalCode: cd.postal_code || cd.postalCode,
+              city: cd.city,
+              creditLimit: cd.credit_limit?.toString(),
+              address: cd.address,
+              phone: cd.phone,
+              email: cd.email,
+              chefanweisung: cd.chefanweisung || cd.executive_note,
+              paymentTerms: cd.payment_terms,
+            }
+          } catch { /* ignore */ }
+        }
+        setState((prev) => ({
+          ...prev,
+          id: response.id,
+          auftragNr: response.order_number,
+          auftragDatum: response.created_at?.split('T')[0] || formatDateForInput(new Date()),
+          liefertermin: response.delivery_date?.split('T')[0] || '',
+          versandart: response.shipping_method || '',
+          betreff: response.subject || '',
+          notizen: response.description || '',
+          vertreter: response.contact_person || '',
+          customer,
+          positionen: mapResponseItemsToPositionen(response.items || []),
+        }))
+      } catch (error: any) {
+        push(`Fehler beim Laden: ${error.response?.data?.detail || error.message}`)
+      }
+    }
+    void load()
+  }, [routeId])
+
+  // Preis automatisch berechnen
   useEffect(() => {
     const einhPreis = currentPosition.listenpreis * (1 - currentPosition.rabatt / 100)
-    const betrag = einhPreis * currentPosition.menge
+    const betrag = einhPreis * currentPosition.mengeGebinde
     setCurrentPosition((prev) => ({ ...prev, einhPreis, betrag }))
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPosition.listenpreis, currentPosition.rabatt, currentPosition.menge])
+  }, [currentPosition.listenpreis, currentPosition.rabatt, currentPosition.mengeGebinde])
 
-  // ── Summen ─────────────────────────────────────────────────────────────────
+  // Summen
   const summen = useMemo(() => {
-    const netto = positionen.reduce((s, p) => s + p.nettoBetrag, 0)
-    const mwst = positionen.reduce((s, p) => s + (p.nettoBetrag * p.mwstProzent) / 100, 0)
+    const netto = state.positionen.reduce((s, p) => s + p.nettoBetrag, 0)
+    const mwst = state.positionen.reduce((s, p) => s + (p.nettoBetrag * p.mwstProzent) / 100, 0)
     const brutto = netto + mwst
-    const gewicht = positionen.reduce((s, p) => s + (p.gesamtGewicht || 0), 0)
-    return { netto, mwst, brutto, gewicht }
-  }, [positionen])
+    const gewicht = state.positionen.reduce((s, p) => s + p.gesamtGewicht, 0)
+    const gefahrgutPunkte = state.positionen.reduce((s, p) => s + p.gesamtGefahrgutPunkte, 0)
+    return { netto, mwst, brutto, gesamt: brutto, gewicht, gefahrgutPunkte }
+  }, [state.positionen])
 
-  // ── Handlers ───────────────────────────────────────────────────────────────
+  // ── Handler ────────────────────────────────────────────────────────────────
 
-  function handleAuftragAuswaehlen(auftrag: Auftrag) {
-    setAuftragNr(auftrag.nummer)
-    setDatum(auftrag.datum)
-    setStatus(auftrag.status)
-    setLiefertermin(auftrag.liefertermin)
-    setCustomer({ id: '', customerNumber: auftrag.nummer, name: auftrag.kunde, debitorAccount: '' })
-    setShowAuftragAuswahl(false)
+  async function handleCustomerSelect(c: Customer): Promise<void> {
+    setState((prev) => ({
+      ...prev,
+      customer: c,
+      vertreter: c.representative || prev.vertreter,
+    }))
+    // Angebote für Kunden laden
+    try {
+      const offers = await apiClient.get<any[]>(`/api/v1/sales/quotes?customer_id=${c.id}`)
+      const mapped = (offers || []).map((o) => ({
+        id: o.id,
+        angebotNr: o.quote_number || o.number || o.id,
+        datum: o.created_at?.split('T')[0] || '',
+      }))
+      setAngebote(mapped)
+      setVorgaengerCount(mapped.length)
+    } catch {
+      setAngebote([])
+      setVorgaengerCount(0)
+    }
   }
 
-  function handleCustomerSelect(c: Customer) {
-    setCustomer(c)
-    if (c.representative) setKontakt(c.representative)
-    if (c.paymentTerms) setZahlungsbedingung(`${c.paymentTerms} Tage netto`)
-    if (c.address) {
-      const adr = [c.address.street, c.address.postalCode, c.address.city].filter(Boolean).join(', ')
-      if (adr) setLieferadresse(adr)
-    }
+  function handleAuftragAuswaehlen(auftrag: Auftrag) {
+    setState((prev) => ({
+      ...prev,
+      auftragNr: auftrag.nummer,
+      auftragDatum: auftrag.datum,
+      liefertermin: auftrag.liefertermin,
+      customer: auftrag.kunde
+        ? { id: '', customerNumber: '', name: auftrag.kunde, debitorAccount: '' }
+        : null,
+    }))
+    setShowAuftragAuswahl(false)
   }
 
   function handleArticleSelect(article: any) {
     const listenpreis = article.sales_price || article.salesPrice || 0
     const ekPreis = article.purchase_price || article.purchasePrice || 0
-    const gewicht = article.weight || article.gewicht || 0
+    const artikelGewicht = article.weight || article.gewicht || 0
+    const artikelGefahrgutPunkte =
+      article.gefahrgut_punkte || article.gefahrgutPunkte ||
+      (article.gefahrgutklasse ? parseFloat(article.gefahrgutklasse) || 0 : 0)
     const mwstProzent = Number(article.mehrwertsteuer_prozent || article.mwstProzent || 19)
     setCurrentPosition((prev) => ({
       ...prev,
       artikelNr: article.article_number || article.articleNumber || '',
       artikelId: article.id || null,
-      bezeichnung: article.name || article.description || '',
-      bezeichnung2: article.description2 || '',
+      artikelBezeichnung: article.name || article.description || '',
+      artikelBezeichnung2: article.description2 || '',
       einheit: article.unit || 'Stk',
       listenpreis,
       ekPreis,
       mwstProzent,
-      gewicht,
+      artikelGewicht,
+      artikelGefahrgutPunkte,
     }))
   }
 
   function handlePositionOK() {
-    if (!currentPosition.artikelNr || !currentPosition.menge) return
-
+    if (!currentPosition.artikelNr || !currentPosition.mengeGebinde) return
     const nettoPreis = currentPosition.listenpreis * (1 - currentPosition.rabatt / 100)
-    const nettoBetrag = nettoPreis * currentPosition.menge
-    const gesamtGewicht = currentPosition.gewicht * currentPosition.menge
+    const nettoBetrag = nettoPreis * currentPosition.mengeGebinde
+    const gesamtGewicht = currentPosition.artikelGewicht * currentPosition.mengeGebinde
+    const gesamtGefahrgutPunkte = currentPosition.artikelGefahrgutPunkte * currentPosition.mengeGebinde
 
-    const newPos: AuftragPosition = {
+    const newPos: Position = {
       posNr: currentPosition.posNr,
       artikelNr: currentPosition.artikelNr,
       artikelId: currentPosition.artikelId,
-      bezeichnung: currentPosition.bezeichnung,
-      bezeichnung2: currentPosition.bezeichnung2,
-      menge: currentPosition.menge,
+      bezeichnung: currentPosition.artikelBezeichnung,
+      bezeichnung2: currentPosition.artikelBezeichnung2,
+      menge: currentPosition.mengeGebinde,
       einheit: currentPosition.einheit,
       listenpreis: currentPosition.listenpreis,
       rabatt: currentPosition.rabatt,
+      art: '',
       nettoPreis,
       nettoBetrag,
-      ekPreis: currentPosition.ekPreis,
+      niederlassung: String(state.niederlassung),
+      lagerhalle: '', lagerfach: '', charge: '', serienNr: '',
+      gefPunkt: currentPosition.artikelGefahrgutPunkte > 0
+        ? currentPosition.artikelGefahrgutPunkte.toString() : '',
+      gefahrgutPunkte: currentPosition.artikelGefahrgutPunkte,
+      gesamtGefahrgutPunkte,
+      naBio: '', musterNr: '', strecke: '', zusBeleg: '', anerken: '', erloskonto: '',
       mwstProzent: currentPosition.mwstProzent,
-      gewicht: currentPosition.gewicht,
+      gewicht: currentPosition.artikelGewicht,
       gesamtGewicht,
+      kontraktNr: currentPosition.kontraktNr,
+      skontierf: currentPosition.skontierf,
+      fremdware: currentPosition.fremdware,
+      ekPreis: currentPosition.ekPreis,
     }
 
-    if (aktivePositionIndex !== null) {
-      setPositionen((prev) => prev.map((p, i) => i === aktivePositionIndex ? newPos : p))
-    } else {
-      setPositionen((prev) => [...prev, newPos])
-    }
-    setAktivePositionIndex(null)
-    setCurrentPosition(emptyPosition(currentPosition.posNr + 10))
+    const activeIdx = state.aktivePositionIndex
+    setState((prev) => ({
+      ...prev,
+      positionen: activeIdx !== null
+        ? prev.positionen.map((p, i) => (i === activeIdx ? newPos : p))
+        : [...prev.positionen, newPos],
+      aktivePositionIndex: activeIdx !== null ? activeIdx : prev.positionen.length,
+    }))
+    setCurrentPosition(emptyCurrentPosition(currentPosition.posNr + 10))
   }
 
-  function handlePositionRowClick(pos: AuftragPosition, idx: number) {
-    setAktivePositionIndex(idx)
+  function handlePositionRowClick(pos: Position, idx: number) {
+    setState((prev) => ({ ...prev, aktivePositionIndex: idx }))
     setCurrentPosition({
       posNr: pos.posNr,
       artikelNr: pos.artikelNr,
       artikelId: pos.artikelId,
-      bezeichnung: pos.bezeichnung,
-      bezeichnung2: pos.bezeichnung2,
-      menge: pos.menge,
+      artikelBezeichnung: pos.bezeichnung,
+      artikelBezeichnung2: pos.bezeichnung2,
+      mengeGebinde: pos.menge,
       einheit: pos.einheit,
       listenpreis: pos.listenpreis,
       rabatt: pos.rabatt,
@@ -244,40 +461,42 @@ export default function SalesOrderEditorPage(): JSX.Element {
       betrag: pos.nettoBetrag,
       ekPreis: pos.ekPreis,
       mwstProzent: pos.mwstProzent,
-      gewicht: pos.gewicht,
+      verfuegbar: 0,
+      kontraktNr: pos.kontraktNr,
+      skontierf: pos.skontierf,
+      fremdware: pos.fremdware,
+      artikelGewicht: pos.gewicht,
+      artikelGefahrgutPunkte: pos.gefahrgutPunkte,
     })
-  }
-
-  function handlePositionDelete(idx: number) {
-    setPositionen((prev) => prev.filter((_, i) => i !== idx))
-    if (aktivePositionIndex === idx) {
-      setAktivePositionIndex(null)
-      setCurrentPosition(emptyPosition(10))
-    }
   }
 
   // ── Speichern ──────────────────────────────────────────────────────────────
 
   const handleSave = async (): Promise<string | null> => {
-    if (!customer) {
+    if (!state.customer) {
       push('Bitte zuerst einen Kunden auswählen')
       return null
     }
     try {
       const payload = {
-        order_number: auftragNr,
-        customer_id: customer.id,
-        subject: betreff || `Auftrag ${auftragNr}`,
-        description: notizen,
+        order_number: state.auftragNr,
+        customer_id: state.customer.id,
+        subject: state.betreff || `Auftrag ${state.auftragNr}`,
+        description: state.notizen,
         total_amount: summen.netto,
         currency: 'EUR',
-        status: status.toLowerCase().replace('ö', 'o'),
-        contact_person: kontakt || null,
-        delivery_date: liefertermin ? new Date(liefertermin).toISOString() : null,
-        delivery_address: lieferadresse || null,
-        shipping_method: versandart || null,
-        payment_terms: zahlungsbedingung || null,
-        items: positionen.map((p) => ({
+        status: state.statusBestätigt ? 'confirmed' : 'open',
+        contact_person: state.vertreter || null,
+        delivery_date: state.liefertermin ? new Date(state.liefertermin).toISOString() : null,
+        delivery_address: state.customer.address
+          ? [state.customer.address.street, state.customer.address.postalCode, state.customer.address.city]
+              .filter(Boolean).join(', ')
+          : null,
+        shipping_method: state.versandart || null,
+        payment_terms: state.customer.paymentTerms
+          ? `${state.customer.paymentTerms} Tage netto`
+          : null,
+        items: state.positionen.map((p) => ({
           article_number: p.artikelNr,
           description: p.bezeichnung,
           quantity: p.menge,
@@ -286,13 +505,13 @@ export default function SalesOrderEditorPage(): JSX.Element {
         })),
       }
 
-      if (auftragId) {
-        await apiClient.put(`/api/v1/sales/orders/${auftragId}`, payload)
+      if (state.id) {
+        await apiClient.put(`/api/v1/sales/orders/${state.id}`, payload)
         push('Auftrag gespeichert')
-        return auftragId
+        return state.id
       } else {
         const saved = await apiClient.post<{ id: string }>('/api/v1/sales/orders/', payload)
-        setAuftragId(saved.id)
+        setState((prev) => ({ ...prev, id: saved.id }))
         push('Auftrag angelegt')
         return saved.id
       }
@@ -302,17 +521,69 @@ export default function SalesOrderEditorPage(): JSX.Element {
     }
   }
 
+  // ── Drucken ────────────────────────────────────────────────────────────────
+
+  const handlePrint = async (options: PrintOptions): Promise<void> => {
+    if (state.statusGedruckt || state.statusBestätigt) {
+      setPendingPrintOptions(options)
+      setPendingAction('print')
+      setShowAttestationDialog(true)
+      return
+    }
+    await executePrint(options)
+  }
+
+  const handleAttestationConfirm = async (
+    reason: string,
+    action: 'print' | 'modify' | 'cancel' | 'post' | 'reopen',
+  ): Promise<void> => {
+    setShowAttestationDialog(false)
+    if (action === 'print') {
+      const opts: PrintOptions = pendingPrintOptions ?? {
+        formatvorlage: 'W00001', anzahlDrucke: 1, sortierung: 'pos-nr',
+        druckLieferschein: true, druckAllgemeineAngaben: false, werbetext: '',
+      }
+      await executePrint(opts, reason)
+    }
+    setPendingAction(null)
+  }
+
+  const executePrint = async (options: PrintOptions, attestation?: string): Promise<void> => {
+    try {
+      let id = state.id
+      if (!id) {
+        id = await handleSave()
+        if (!id) return
+      }
+      const params = new URLSearchParams()
+      if (attestation) params.append('attestation', attestation)
+      params.append('template', options.formatvorlage)
+      params.append('copies', String(options.anzahlDrucke))
+      await apiClient.post(`/api/v1/sales/orders/${id}/print?${params.toString()}`)
+      await apiClient.post(`/api/v1/sales/orders/${id}/post`)
+      push('Auftrag erfolgreich gedruckt und gebucht')
+      setState((prev) => ({ ...prev, statusGedruckt: true }))
+      setShowPrintDialog(false)
+    } catch (error: any) {
+      push(`Fehler beim Drucken: ${error.response?.data?.detail || error.message}`)
+    }
+  }
+
   // ── Löschen ────────────────────────────────────────────────────────────────
 
   const handleDelete = async (): Promise<void> => {
-    if (!auftragId) {
-      // Noch nicht gespeichert — Formular leeren
-      resetForm()
+    if (!state.id) {
+      setState((prev) => ({
+        ...prev,
+        id: null, auftragNr: generateAuftragNr(),
+        auftragDatum: formatDateForInput(new Date()), liefertermin: '',
+        customer: null, positionen: [], aktivePositionIndex: null,
+      }))
       setShowDeleteDialog(false)
       return
     }
     try {
-      await apiClient.delete(`/api/v1/sales/orders/${auftragId}`)
+      await apiClient.delete(`/api/v1/sales/orders/${state.id}`)
       push('Auftrag gelöscht')
       setShowDeleteDialog(false)
       navigate('/verkauf')
@@ -321,235 +592,595 @@ export default function SalesOrderEditorPage(): JSX.Element {
     }
   }
 
-  function resetForm() {
-    setAuftragId(null)
-    setAuftragNr(generateAuftragNr())
-    setDatum(new Date().toISOString().split('T')[0])
-    setLiefertermin('')
-    setLieferadresse('')
-    setStatus('Offen')
-    setIsPauschale(false)
-    setKontakt('')
-    setZahlungsbedingung('')
-    setVersandart('')
-    setNotizen('')
-    setBetreff('')
-    setCustomer(null)
-    setPositionen([])
-    setAktivePositionIndex(null)
-    setCurrentPosition(emptyPosition(10))
-  }
+  // ── Belegfolge-Positionsübernahme ──────────────────────────────────────────
 
-  // ── Drucken ────────────────────────────────────────────────────────────────
-
-  const handlePrint = async (options: PrintOptions): Promise<void> => {
-    try {
-      let id = auftragId || (await handleSave())
-      if (!id) return
-
-      const params = new URLSearchParams()
-      params.append('template', options.formatvorlage)
-      params.append('copies', String(options.anzahlDrucke))
-      await apiClient.post(`/api/v1/sales/orders/${id}/print?${params.toString()}`)
-      await apiClient.post(`/api/v1/sales/orders/${id}/post`)
-
-      push('Auftrag erfolgreich gedruckt und gebucht')
-      setShowPrintDialog(false)
-      resetForm()
-    } catch (error: any) {
-      push(`Fehler beim Drucken: ${error.response?.data?.detail || error.message}`)
-    }
+  function handleBelegfolgePositionen(incoming: BelegfolgePosition[]): void {
+    const baseNr =
+      state.positionen.length > 0
+        ? Math.max(...state.positionen.map((p) => p.posNr)) + 10
+        : 10
+    const newPositionen: Position[] = incoming.map((pos, idx) => {
+      const nettoPreis = pos.listenpreis * (1 - pos.rabatt / 100)
+      return {
+        posNr: baseNr + idx * 10,
+        artikelNr: pos.artikelNr,
+        artikelId: pos.artikelId,
+        bezeichnung: pos.bezeichnung,
+        bezeichnung2: pos.bezeichnung2,
+        menge: pos.menge,
+        einheit: pos.einheit,
+        listenpreis: pos.listenpreis,
+        rabatt: pos.rabatt,
+        art: '',
+        nettoPreis,
+        nettoBetrag: nettoPreis * pos.menge,
+        niederlassung: '',
+        lagerhalle: '', lagerfach: '', charge: '', serienNr: '', gefPunkt: '',
+        gefahrgutPunkte: 0, gesamtGefahrgutPunkte: 0,
+        naBio: '', musterNr: '', strecke: '', zusBeleg: '', anerken: '', erloskonto: '',
+        mwstProzent: pos.mwstProzent,
+        gewicht: 0, gesamtGewicht: 0,
+        kontraktNr: '', skontierf: false, fremdware: false,
+        ekPreis: pos.ekPreis,
+      }
+    })
+    setState((prev) => ({ ...prev, positionen: [...prev.positionen, ...newPositionen] }))
+    push(`${newPositionen.length} Position${newPositionen.length !== 1 ? 'en' : ''} übernommen`)
   }
 
   // ── In Lieferschein wandeln ────────────────────────────────────────────────
 
   const handleCreateLieferschein = async (): Promise<void> => {
-    const id = auftragId || (await handleSave())
+    const id = state.id || (await handleSave())
     if (!id) return
     navigate(`/verkauf/lieferschein-erfassung?auftrag=${id}`)
   }
+
+  // ── Globale Shortcuts ──────────────────────────────────────────────────────
+
+  useGlobalShortcuts({
+    'open-customer-selection': () => setShowCustomerDialog(true),
+    'open-article-selection': () => setShowArticleDialog(true),
+    'confirm-position': () => handlePositionOK(),
+    'save-document': () => void handleSave(),
+    'print-document': () => { if (!showPrintDialog) setShowPrintDialog(true) },
+    'delete-document': () => setShowDeleteDialog(true),
+    'close-document': () => navigate(-1),
+    'copy-previous-full': async () => {
+      try {
+        const response = await apiClient.get<AuftragResponse | null>('/api/v1/sales/orders/last', {
+          params: { customer_id: state.customer?.id || undefined },
+        })
+        if (!response) { push('Kein vorheriger Auftrag gefunden'); return }
+        setState((prev) => ({
+          ...prev,
+          positionen: mapResponseItemsToPositionen(response.items || []),
+        }))
+        push('Daten vom vorherigen Auftrag übernommen')
+      } catch (error: any) {
+        push(`Fehler: ${error.response?.data?.detail || error.message}`)
+      }
+    },
+    'create-invoice': () => push('Sofort-Rechnung noch nicht implementiert'),
+    'open-attachments': () => setShowAttachmentDialog(true),
+    'show-information': () => {
+      if (state.customer) setShowInformationDialog(true)
+      else push('Bitte zuerst einen Kunden auswählen')
+    },
+    cancel: () => {
+      setShowCustomerDialog(false)
+      setShowArticleDialog(false)
+      setShowPrintDialog(false)
+      setShowAttestationDialog(false)
+    },
+  })
 
   // ── JSX ────────────────────────────────────────────────────────────────────
 
   return (
     <div className="h-screen flex flex-col bg-gray-50">
-
       {/* Header */}
       <div className="bg-green-700 text-white px-4 py-2">
-        <h1 className="text-lg font-bold tracking-wide">AUFTRAGS-ERFASSUNG</h1>
+        <h1 className="text-lg font-bold">AUFTRAGS-ERFASSUNG</h1>
       </div>
 
-      <div className="flex-1 overflow-auto p-3 space-y-3">
+      {/* Belegfolge-Hinweis */}
+      {vorgaengerCount > 0 && state.customer && (
+        <div className="bg-amber-50 border-b border-amber-300 px-4 py-1.5 flex items-center gap-3">
+          <span className="text-amber-800 text-sm font-medium">
+            {vorgaengerCount} offene{vorgaengerCount !== 1 ? ' Angebote' : 's Angebot'} für{' '}
+            <strong>{state.customer.name}</strong> vorhanden
+          </span>
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-6 text-xs border-amber-400 text-amber-800 hover:bg-amber-100"
+            onClick={() => setShowBelegfolgeDialog(true)}
+          >
+            Positionen übernehmen
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-6 w-6 p-0 text-amber-600 ml-auto"
+            onClick={() => setVorgaengerCount(0)}
+          >
+            ×
+          </Button>
+        </div>
+      )}
 
-        {/* ── Kopf-Bereich ───────────────────────────────────────────────── */}
-        <Card className="p-4">
-          <div className="grid grid-cols-3 gap-6">
+      <div className="flex-1 overflow-auto p-4">
 
-            {/* Linke Spalte — Auftrag-Kopf */}
+        {/* ── Kopf-Bereich (3 Spalten) ──────────────────────────────────────── */}
+        <Card className="mb-4 p-4">
+          <div className="grid grid-cols-3 gap-4">
+
+            {/* Linke Spalte */}
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Label className="w-28 text-sm whitespace-nowrap shrink-0">Auftrag-Nr.:</Label>
-                <Input value={auftragNr} onChange={(e) => setAuftragNr(e.target.value)} className="flex-1 h-8 text-sm" />
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Auftrag suchen" onClick={() => setShowAuftragAuswahl(true)}>
+                <Label className="w-32 text-sm">Auftrags-Nr.:</Label>
+                <Input value={state.auftragNr} readOnly className="flex-1 h-8" />
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0"
+                  onClick={() => setShowAuftragAuswahl(true)}>
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0"><ChevronLeft className="h-4 w-4" /></Button>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0"><ChevronRight className="h-4 w-4" /></Button>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
               </div>
               <div className="flex items-center gap-2">
-                <Label className="w-28 text-sm shrink-0">Datum:</Label>
-                <Input type="date" value={datum} onChange={(e) => setDatum(e.target.value)} className="flex-1 h-8 text-sm" />
-              </div>
-              <div className="flex items-center gap-2">
-                <Label className="w-28 text-sm whitespace-nowrap shrink-0">Liefertermin:</Label>
-                <Input type="date" value={liefertermin} onChange={(e) => setLiefertermin(e.target.value)} className="flex-1 h-8 text-sm" />
-              </div>
-              <div className="flex items-center gap-2">
-                <Label className="w-28 text-sm shrink-0">Status:</Label>
-                <Input value={status} readOnly className="flex-1 h-8 text-sm bg-muted" />
-              </div>
-              <div className="flex items-center gap-2 pt-1">
-                <Checkbox
-                  id="pauschale"
-                  checked={isPauschale}
-                  onCheckedChange={(v) => setIsPauschale(v === true)}
+                <Label className="w-32 text-sm">Auftrag-Datum:</Label>
+                <Input
+                  type="date"
+                  value={state.auftragDatum}
+                  onChange={(e) => setState((prev) => ({ ...prev, auftragDatum: e.target.value }))}
+                  className="flex-1 h-8"
                 />
-                <Label htmlFor="pauschale" className="text-sm cursor-pointer">Pauschal-Auftrag</Label>
+                <Input
+                  type="time"
+                  value={state.uhrzeit}
+                  onChange={(e) => setState((prev) => ({ ...prev, uhrzeit: e.target.value }))}
+                  className="w-20 h-8"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <Label className="w-32 text-sm">Liefertermin:</Label>
+                <Input
+                  type="date"
+                  value={state.liefertermin}
+                  onChange={(e) => setState((prev) => ({ ...prev, liefertermin: e.target.value }))}
+                  className="flex-1 h-8"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <Label className="w-32 text-sm">Kostenstelle:</Label>
+                <Input
+                  type="number"
+                  value={state.kostenstelle}
+                  onChange={(e) => setState((prev) => ({ ...prev, kostenstelle: Number(e.target.value) }))}
+                  className="flex-1 h-8"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <Label className="w-32 text-sm whitespace-nowrap">Angebots-Nr. (Bezug):</Label>
+                <Input
+                  value={state.angebotNrBezug}
+                  onChange={(e) => setState((prev) => ({ ...prev, angebotNrBezug: e.target.value }))}
+                  className="flex-1 h-8"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  checked={state.statusGedruckt}
+                  onCheckedChange={(c) => setState((prev) => ({ ...prev, statusGedruckt: c === true }))}
+                />
+                <Label className="text-sm">gedruckt</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  checked={state.statusBestätigt}
+                  onCheckedChange={(c) => setState((prev) => ({ ...prev, statusBestätigt: c === true }))}
+                />
+                <Label className="text-sm">bestätigt</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Label className="w-32 text-sm whitespace-nowrap">in LS gewandelt:</Label>
+                <Input
+                  value={state.lieferscheinNr}
+                  readOnly
+                  className="flex-1 h-8 bg-muted cursor-not-allowed"
+                  placeholder="Wird nach LS-Erstellung zugewiesen"
+                />
               </div>
             </div>
 
-            {/* Mittlere Spalte — Kunde */}
+            {/* Mittlere Spalte */}
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Label className="w-28 text-sm whitespace-nowrap shrink-0">Kunde:</Label>
+                <Label className="w-32 text-sm">Niederlassung:</Label>
                 <Input
-                  value={customer?.name || ''}
-                  readOnly
-                  placeholder="Kunden auswählen…"
-                  className="flex-1 h-8 text-sm"
+                  type="number"
+                  value={state.niederlassung}
+                  onChange={(e) => setState((prev) => ({ ...prev, niederlassung: Number(e.target.value) }))}
+                  className="flex-1 h-8"
                 />
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowCustomerDialog(true)}>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </div>
-              {customer && (
-                <>
-                  <div className="flex items-center gap-2">
-                    <Label className="w-28 text-sm shrink-0">Kunden-Nr.:</Label>
-                    <Input value={customer.customerNumber} readOnly className="flex-1 h-8 text-sm bg-muted" />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Label className="w-28 text-sm shrink-0">Debitor-Kto.:</Label>
-                    <Input value={customer.debitorAccount} readOnly className="flex-1 h-8 text-sm bg-muted" />
-                  </div>
-                </>
-              )}
               <div className="flex items-center gap-2">
-                <Label className="w-28 text-sm whitespace-nowrap shrink-0">Ansprechpartner:</Label>
-                <Input value={kontakt} onChange={(e) => setKontakt(e.target.value)} className="flex-1 h-8 text-sm" />
+                <Label className="w-32 text-sm">Vertreter:</Label>
+                <Input value={state.vertreter} readOnly className="flex-1 h-8" />
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
               </div>
               <div className="flex items-center gap-2">
-                <Label className="w-28 text-sm shrink-0">Betreff:</Label>
-                <Input value={betreff} onChange={(e) => setBetreff(e.target.value)} placeholder="Auftrags-Betreff" className="flex-1 h-8 text-sm" />
+                <Label className="w-32 text-sm">Bediener:</Label>
+                <Input value={state.bediener} readOnly className="flex-1 h-8" />
+              </div>
+              <div className="flex items-center gap-2">
+                <Label className="w-32 text-sm">Versandart:</Label>
+                <Input
+                  value={state.versandart}
+                  onChange={(e) => setState((prev) => ({ ...prev, versandart: e.target.value }))}
+                  className="flex-1 h-8"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <a
+                  href="#"
+                  className="text-sm text-blue-600 underline hover:text-blue-800"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    void globalShortcutManager.execute('copy-previous-full')
+                  }}
+                >
+                  &gt;&gt; wie vorheriger Auftrag (F11)
+                </a>
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  checked={state.selbstabholung}
+                  onCheckedChange={(c) => setState((prev) => ({ ...prev, selbstabholung: c === true }))}
+                />
+                <Label className="text-sm">Selbstabholung</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  checked={state.pauschalAuftrag}
+                  onCheckedChange={(c) => setState((prev) => ({ ...prev, pauschalAuftrag: c === true }))}
+                />
+                <Label className="text-sm">Pauschal-Auftrag</Label>
               </div>
             </div>
 
             {/* Rechte Spalte — Kunden-Tabs */}
-            <div>
-              {customer ? (
-                <Tabs defaultValue="rechnung">
-                  <TabsList className="h-7 text-xs">
-                    <TabsTrigger value="rechnung" className="text-xs py-1 px-2">Rechnung</TabsTrigger>
-                    <TabsTrigger value="versand" className="text-xs py-1 px-2">Versand</TabsTrigger>
-                    <TabsTrigger value="texte" className="text-xs py-1 px-2">Texte</TabsTrigger>
-                  </TabsList>
+            <div className="space-y-2">
+              <Tabs value={customerTab} onValueChange={(v) => setCustomerTab(v)}>
+                <TabsList className="grid w-full grid-cols-4 h-auto">
+                  <TabsTrigger value="kunde" className="text-xs py-1">KUNDE</TabsTrigger>
+                  <TabsTrigger value="lieferanschr" className="text-xs py-1">LIEFER-ANSCHR.</TabsTrigger>
+                  <TabsTrigger value="rechnanschrift" className="text-xs py-1">RECHN.-ANSCHRIFT</TabsTrigger>
+                  <TabsTrigger value="angebot" className="text-xs py-1">ANGEBOT</TabsTrigger>
+                </TabsList>
+                <TabsList className="grid w-full grid-cols-4 h-auto mt-1">
+                  <TabsTrigger value="rechnung" className="text-xs py-1">RECHNUNG/ZAHLUNGSBED.</TabsTrigger>
+                  <TabsTrigger value="texte" className="text-xs py-1">TEXTE</TabsTrigger>
+                  <TabsTrigger value="spediteur" className="text-xs py-1">SPEDITEUR</TabsTrigger>
+                  <TabsTrigger value="lieferung" className="text-xs py-1">LIEFERUNG</TabsTrigger>
+                </TabsList>
 
-                  <TabsContent value="rechnung" className="mt-2 space-y-1 text-sm">
-                    <div className="grid grid-cols-[120px_1fr] gap-1">
-                      <span className="text-muted-foreground">Zahlungsziel:</span>
-                      <Input value={zahlungsbedingung} onChange={(e) => setZahlungsbedingung(e.target.value)} className="h-7 text-xs" />
-                      <span className="text-muted-foreground">Kredit-Limit:</span>
-                      <span className="text-sm">{customer.creditLimit ? formatEur(Number(customer.creditLimit)) : '—'}</span>
+                <TabsContent value="kunde" className="mt-2 space-y-1">
+                  {state.customer ? (
+                    <div className="text-sm space-y-1">
+                      <div className="font-semibold">{state.customer.name}</div>
+                      {state.customer.address?.street && <div>{state.customer.address.street}</div>}
+                      {(state.customer.postalCode || state.customer.city) && (
+                        <div>{[state.customer.postalCode, state.customer.city].filter(Boolean).join(' ')}</div>
+                      )}
+                      {state.customer.phone && (
+                        <div className="text-muted-foreground">Tel: {state.customer.phone}</div>
+                      )}
+                      {state.customer.email && (
+                        <div className="text-muted-foreground">E-Mail: {state.customer.email}</div>
+                      )}
+                      {state.customer.representative && (
+                        <div className="text-muted-foreground">Ansprechpartner: {state.customer.representative}</div>
+                      )}
                     </div>
-                  </TabsContent>
+                  ) : (
+                    <div className="text-sm text-muted-foreground">Kein Kunde ausgewählt</div>
+                  )}
+                </TabsContent>
 
-                  <TabsContent value="versand" className="mt-2 space-y-1 text-sm">
-                    <div className="grid grid-cols-[120px_1fr] gap-1">
-                      <span className="text-muted-foreground">Versandart:</span>
-                      <Input value={versandart} onChange={(e) => setVersandart(e.target.value)} className="h-7 text-xs" />
-                      <span className="text-muted-foreground">Lieferadresse:</span>
-                      <Input value={lieferadresse} onChange={(e) => setLieferadresse(e.target.value)} className="h-7 text-xs" />
+                <TabsContent value="lieferanschr" className="mt-2 space-y-1">
+                  {state.customer ? (
+                    <div className="text-sm space-y-1">
+                      <div className="font-semibold">Lieferanschrift</div>
+                      {state.customer.address?.street ? (
+                        <>
+                          <div>{state.customer.address.street}</div>
+                          <div>
+                            {[state.customer.address.postalCode, state.customer.address.city]
+                              .filter(Boolean).join(' ')}
+                          </div>
+                          {state.customer.address.phone && (
+                            <div className="text-muted-foreground">Tel: {state.customer.address.phone}</div>
+                          )}
+                        </>
+                      ) : (
+                        <div className="text-muted-foreground">Keine Lieferanschrift hinterlegt</div>
+                      )}
                     </div>
-                  </TabsContent>
+                  ) : (
+                    <div className="text-sm text-muted-foreground">Kein Kunde ausgewählt</div>
+                  )}
+                </TabsContent>
 
-                  <TabsContent value="texte" className="mt-2 text-sm">
-                    {(customer.chefanweisung || customer.executiveNote) ? (
-                      <div className="p-2 bg-amber-50 border border-amber-200 rounded text-xs whitespace-pre-wrap">
-                        {customer.chefanweisung || customer.executiveNote}
-                      </div>
+                <TabsContent value="rechnanschrift" className="mt-2 space-y-1">
+                  {state.customer ? (
+                    <div className="text-sm space-y-1">
+                      <div className="font-semibold">Rechnungsanschrift</div>
+                      {state.customer.address?.street ? (
+                        <>
+                          <div>{state.customer.address.street}</div>
+                          <div>
+                            {[state.customer.address.postalCode, state.customer.address.city]
+                              .filter(Boolean).join(' ')}
+                          </div>
+                          {state.customer.phone && (
+                            <div className="text-muted-foreground">Tel: {state.customer.phone}</div>
+                          )}
+                          {state.customer.email && (
+                            <div className="text-muted-foreground">E-Mail: {state.customer.email}</div>
+                          )}
+                        </>
+                      ) : (
+                        <div className="text-muted-foreground">Keine Rechnungsanschrift hinterlegt</div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-sm text-muted-foreground">Kein Kunde ausgewählt</div>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="angebot" className="mt-2 space-y-2">
+                  <div className="text-sm space-y-2">
+                    {state.customer ? (
+                      angebote.length > 0 ? (
+                        <>
+                          <div className="font-semibold">
+                            Zu Angeboten ({String(angebote.length).padStart(2, '0')})
+                          </div>
+                          <ul className="list-disc pl-5 space-y-1">
+                            {angebote.map((a) => (
+                              <li key={a.id} className="text-sm">
+                                Angebots-Nr: {a.angebotNr} vom {a.datum}
+                              </li>
+                            ))}
+                          </ul>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="mt-2"
+                            onClick={() => setShowBelegfolgeDialog(true)}
+                          >
+                            Positionen aus Angebot übernehmen
+                          </Button>
+                        </>
+                      ) : (
+                        <div className="text-muted-foreground">Es liegt kein Angebot vor</div>
+                      )
                     ) : (
-                      <p className="text-muted-foreground text-xs">Keine Kunden-Notizen</p>
+                      <div className="text-muted-foreground">Kein Kunde ausgewählt</div>
                     )}
-                  </TabsContent>
-                </Tabs>
-              ) : (
-                <div className="flex items-center justify-center h-full text-sm text-muted-foreground border border-dashed rounded-md p-4">
-                  Kunden auswählen für Details
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="rechnung" className="mt-2 space-y-1">
+                  {state.customer ? (
+                    <div className="text-sm space-y-1.5">
+                      <div className="grid grid-cols-[140px_1fr] gap-1">
+                        <span className="text-muted-foreground">Zahlungsziel:</span>
+                        <span>
+                          {state.customer.paymentTerms !== undefined
+                            ? `${state.customer.paymentTerms} Tage netto` : '—'}
+                        </span>
+                        <span className="text-muted-foreground">Kredit-Limit:</span>
+                        <span>
+                          {state.customer.creditLimit
+                            ? Number(state.customer.creditLimit).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })
+                            : '—'}
+                        </span>
+                        <span className="text-muted-foreground">Debitor-Kto.:</span>
+                        <span>{state.customer.debitorAccount || '—'}</span>
+                        <span className="text-muted-foreground">Kunden-Nr.:</span>
+                        <span>{state.customer.customerNumber || '—'}</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-sm text-muted-foreground">Kein Kunde ausgewählt</div>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="texte" className="mt-2 space-y-2">
+                  {state.customer ? (
+                    <div className="text-sm space-y-2">
+                      <div className="grid grid-cols-[80px_1fr] gap-1 items-center">
+                        <span className="text-muted-foreground">Betreff:</span>
+                        <Input
+                          value={state.betreff}
+                          onChange={(e) => setState((prev) => ({ ...prev, betreff: e.target.value }))}
+                          className="h-7 text-xs" placeholder="Auftrags-Betreff"
+                        />
+                        <span className="text-muted-foreground">Notiz:</span>
+                        <Input
+                          value={state.notizen}
+                          onChange={(e) => setState((prev) => ({ ...prev, notizen: e.target.value }))}
+                          className="h-7 text-xs" placeholder="Interne Notizen"
+                        />
+                      </div>
+                      {(state.customer.chefanweisung || state.customer.executiveNote) && (
+                        <div>
+                          <div className="font-semibold mb-1">Chefanweisung</div>
+                          <div className="p-2 bg-amber-50 border border-amber-200 rounded text-xs whitespace-pre-wrap">
+                            {state.customer.chefanweisung || state.customer.executiveNote}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-sm text-muted-foreground">Kein Kunde ausgewählt</div>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="spediteur" className="mt-2 space-y-1">
+                  {state.customer ? (
+                    <div className="text-sm space-y-1.5">
+                      <div className="grid grid-cols-[140px_1fr] gap-1">
+                        <span className="text-muted-foreground">Spediteur:</span>
+                        <span>—</span>
+                        <span className="text-muted-foreground">Versandart:</span>
+                        <span>{state.versandart || '—'}</span>
+                        <span className="text-muted-foreground">Lieferadresse:</span>
+                        <span>
+                          {[
+                            state.customer.address?.street,
+                            state.customer.address?.postalCode,
+                            state.customer.address?.city,
+                          ].filter(Boolean).join(', ') || '—'}
+                        </span>
+                        <span className="text-muted-foreground">Telefon:</span>
+                        <span>{state.customer.address?.phone || state.customer.phone || '—'}</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-sm text-muted-foreground">Kein Kunde ausgewählt</div>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="lieferung" className="mt-2 space-y-2">
+                  <div className="text-sm space-y-2">
+                    <div className="font-semibold">Lieferdaten</div>
+                    <div>Liefertermin: {state.liefertermin || '—'}</div>
+                    {state.selbstabholung && (
+                      <div className="text-muted-foreground">Selbstabholung</div>
+                    )}
+                    {state.versandart && (
+                      <div className="text-muted-foreground">Versandart: {state.versandart}</div>
+                    )}
+                  </div>
+                </TabsContent>
+              </Tabs>
+
+              {/* Debitor-Kto. unterhalb der Tabs */}
+              <div className="flex items-center gap-2">
+                <Label className="w-32 text-sm">Debitor-Kto.:</Label>
+                <Input value={state.customer?.debitorAccount || ''} readOnly className="flex-1 h-8" />
+                <ShortcutHintButton shortcut="Strg+F1">
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0"
+                    onClick={() => setShowCustomerDialog(true)}>
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </ShortcutHintButton>
+              </div>
+              {state.customer && (
+                <div className="text-sm space-y-1 pl-32">
+                  <div>{state.customer.name}</div>
+                  <div className="text-muted-foreground">
+                    Kredit-Limit: {state.customer.creditLimit || '—'}
+                  </div>
                 </div>
               )}
+              <div className="flex items-center gap-2 pl-32">
+                <a
+                  href="#"
+                  className="text-sm text-blue-600 hover:text-blue-800 underline"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    if (state.customer) setShowInformationDialog(true)
+                    else push('Bitte zuerst einen Kunden auswählen')
+                  }}
+                >
+                  Information
+                </a>
+              </div>
             </div>
           </div>
         </Card>
 
-        {/* ── Positionen-Grid ────────────────────────────────────────────── */}
-        <Card className="overflow-hidden">
-          <div className="overflow-auto max-h-64">
+        {/* ── Positionen-Grid ───────────────────────────────────────────────── */}
+        <Card className="mb-4 p-4">
+          <h2 className="mb-2 font-semibold text-sm">Positionen</h2>
+          <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow className="bg-muted text-xs">
-                  <TableHead className="w-10 py-1">Pos.</TableHead>
-                  <TableHead className="w-24 py-1">Artikel-Nr.</TableHead>
-                  <TableHead className="py-1">Bezeichnung</TableHead>
-                  <TableHead className="w-20 py-1 text-right">Menge</TableHead>
-                  <TableHead className="w-14 py-1">Einh.</TableHead>
-                  <TableHead className="w-24 py-1 text-right">Listenpreis</TableHead>
-                  <TableHead className="w-16 py-1 text-right">Rab.%</TableHead>
-                  <TableHead className="w-24 py-1 text-right">Einh.-Preis</TableHead>
-                  <TableHead className="w-28 py-1 text-right">Netto-Betrag</TableHead>
-                  <TableHead className="w-8 py-1" />
+                <TableRow>
+                  <TableHead className="w-14">Pos.-Nr.</TableHead>
+                  <TableHead className="w-24">Artikel-Nr.</TableHead>
+                  <TableHead className="w-36">Bezeichn.</TableHead>
+                  <TableHead className="w-32">Bezeichn2</TableHead>
+                  <TableHead className="w-16">Menge</TableHead>
+                  <TableHead className="w-16">Einh.</TableHead>
+                  <TableHead className="w-24">Listenpreis</TableHead>
+                  <TableHead className="w-16">Rabatt</TableHead>
+                  <TableHead className="w-16">Art</TableHead>
+                  <TableHead className="w-24">Netto-Pr.</TableHead>
+                  <TableHead className="w-24">Netto-Be.</TableHead>
+                  <TableHead className="w-20">Niederl.</TableHead>
+                  <TableHead className="w-20">Lagerhalle</TableHead>
+                  <TableHead className="w-20">Lagerfach</TableHead>
+                  <TableHead className="w-20">Charge</TableHead>
+                  <TableHead className="w-20">Serien-Nr.</TableHead>
+                  <TableHead className="w-20">Gef.-Pun.</TableHead>
+                  <TableHead className="w-20">Na.-Bio.</TableHead>
+                  <TableHead className="w-20">Muster-Nr.</TableHead>
+                  <TableHead className="w-20">Strecke</TableHead>
+                  <TableHead className="w-20">Zus.Beleg</TableHead>
+                  <TableHead className="w-20">Anerken.</TableHead>
+                  <TableHead className="w-24">Erlöskonto</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {positionen.map((pos, idx) => (
+                {state.positionen.map((pos, idx) => (
                   <TableRow
-                    key={pos.posNr}
-                    className={`text-xs cursor-pointer ${aktivePositionIndex === idx ? 'bg-primary/10' : 'hover:bg-muted/50'}`}
+                    key={idx}
+                    className={`cursor-pointer text-xs ${state.aktivePositionIndex === idx ? 'bg-green-100' : 'hover:bg-muted/50'}`}
                     onClick={() => handlePositionRowClick(pos, idx)}
                   >
-                    <TableCell className="py-1">{pos.posNr}</TableCell>
-                    <TableCell className="py-1 font-mono">{pos.artikelNr}</TableCell>
-                    <TableCell className="py-1">{pos.bezeichnung}</TableCell>
-                    <TableCell className="py-1 text-right">{pos.menge.toLocaleString('de-DE')}</TableCell>
-                    <TableCell className="py-1">{pos.einheit}</TableCell>
-                    <TableCell className="py-1 text-right">{pos.listenpreis.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</TableCell>
-                    <TableCell className="py-1 text-right">{pos.rabatt > 0 ? `${pos.rabatt}%` : ''}</TableCell>
-                    <TableCell className="py-1 text-right">{pos.nettoPreis.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</TableCell>
-                    <TableCell className="py-1 text-right font-medium">{pos.nettoBetrag.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</TableCell>
-                    <TableCell className="py-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-5 w-5 text-muted-foreground hover:text-destructive"
-                        onClick={(e) => { e.stopPropagation(); handlePositionDelete(idx) }}
-                      >
-                        <X className="h-3 w-3" />
-                      </Button>
-                    </TableCell>
+                    <TableCell>{pos.posNr}</TableCell>
+                    <TableCell className="font-mono">{pos.artikelNr}</TableCell>
+                    <TableCell>{pos.bezeichnung}</TableCell>
+                    <TableCell>{pos.bezeichnung2}</TableCell>
+                    <TableCell>{pos.menge.toLocaleString('de-DE')}</TableCell>
+                    <TableCell>{pos.einheit}</TableCell>
+                    <TableCell>{pos.listenpreis.toFixed(2)}</TableCell>
+                    <TableCell>{pos.rabatt > 0 ? `${pos.rabatt}%` : ''}</TableCell>
+                    <TableCell>{pos.art}</TableCell>
+                    <TableCell>{pos.nettoPreis.toFixed(2)}</TableCell>
+                    <TableCell>{pos.nettoBetrag.toFixed(2)}</TableCell>
+                    <TableCell>{pos.niederlassung}</TableCell>
+                    <TableCell>{pos.lagerhalle}</TableCell>
+                    <TableCell>{pos.lagerfach}</TableCell>
+                    <TableCell>{pos.charge}</TableCell>
+                    <TableCell>{pos.serienNr}</TableCell>
+                    <TableCell>{pos.gefPunkt}</TableCell>
+                    <TableCell>{pos.naBio}</TableCell>
+                    <TableCell>{pos.musterNr}</TableCell>
+                    <TableCell>{pos.strecke}</TableCell>
+                    <TableCell>{pos.zusBeleg}</TableCell>
+                    <TableCell>{pos.anerken}</TableCell>
+                    <TableCell>{pos.erloskonto}</TableCell>
                   </TableRow>
                 ))}
-                {positionen.length === 0 && (
+                {state.positionen.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={10} className="text-center text-xs text-muted-foreground py-4">
+                    <TableCell colSpan={23} className="text-center text-xs text-muted-foreground py-4">
                       Noch keine Positionen — Artikel unten eingeben
                     </TableCell>
                   </TableRow>
@@ -559,91 +1190,144 @@ export default function SalesOrderEditorPage(): JSX.Element {
           </div>
         </Card>
 
-        {/* ── Positions-Eingabe ──────────────────────────────────────────── */}
-        <Card className="p-3">
-          <div className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">
-            {aktivePositionIndex !== null ? `Position ${positionen[aktivePositionIndex]?.posNr} bearbeiten` : 'Neue Position'}
-          </div>
-          <div className="grid grid-cols-[auto_1fr_auto_1fr_auto_1fr_auto_1fr] items-center gap-x-3 gap-y-2 text-sm">
-            <Label className="text-right text-xs whitespace-nowrap">Pos.-Nr.:</Label>
-            <Input
-              type="number"
-              value={currentPosition.posNr}
-              onChange={(e) => setCurrentPosition((p) => ({ ...p, posNr: Number(e.target.value) }))}
-              className="h-7 text-xs"
-            />
-            <Label className="text-right text-xs whitespace-nowrap">Artikel-Nr.:</Label>
-            <div className="flex gap-1">
-              <Input
-                value={currentPosition.artikelNr}
-                onChange={(e) => setCurrentPosition((p) => ({ ...p, artikelNr: e.target.value }))}
-                className="h-7 text-xs flex-1"
-              />
-              <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => setShowArticleDialog(true)}>
-                <MoreHorizontal className="h-3 w-3" />
-              </Button>
+        {/* ── Positions-Details ─────────────────────────────────────────────── */}
+        <Card className="mb-4 p-4">
+          <h2 className="mb-2 font-semibold text-sm">
+            {state.aktivePositionIndex !== null
+              ? `Position ${state.positionen[state.aktivePositionIndex]?.posNr} bearbeiten`
+              : 'Positions-Details'}
+          </h2>
+          <div className="grid grid-cols-6 gap-4">
+            <div className="space-y-1">
+              <Label className="text-xs">Pos.-Nr.:</Label>
+              <Input value={currentPosition.posNr} readOnly className="h-8" />
             </div>
-            <Label className="text-right text-xs">Bezeichnung:</Label>
-            <Input
-              value={currentPosition.bezeichnung}
-              onChange={(e) => setCurrentPosition((p) => ({ ...p, bezeichnung: e.target.value }))}
-              className="h-7 text-xs col-span-3"
-            />
+            <div className="space-y-1">
+              <Label className="text-xs">Artikel-Nr.:</Label>
+              <div className="flex gap-1">
+                <Input value={currentPosition.artikelNr} readOnly className="flex-1 h-8" />
+                <ShortcutHintButton shortcut="Strg+F2">
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0"
+                    onClick={() => setShowArticleDialog(true)}>
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </ShortcutHintButton>
+              </div>
+            </div>
+            <div className="space-y-1 col-span-2">
+              <Label className="text-xs">Artikel-Bezeichn.:</Label>
+              <Input value={currentPosition.artikelBezeichnung} readOnly className="h-8" />
+              <Input value={currentPosition.artikelBezeichnung2} readOnly className="h-8" />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Menge:</Label>
+              <Input
+                type="number"
+                value={currentPosition.mengeGebinde || ''}
+                onChange={(e) => setCurrentPosition((prev) => ({ ...prev, mengeGebinde: Number(e.target.value) }))}
+                className="h-8"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Einheit:</Label>
+              <Input value={currentPosition.einheit} readOnly className="h-8" />
+            </div>
 
-            <Label className="text-right text-xs">Menge:</Label>
-            <Input
-              type="number"
-              value={currentPosition.menge || ''}
-              onChange={(e) => setCurrentPosition((p) => ({ ...p, menge: Number(e.target.value) }))}
-              className="h-7 text-xs"
-            />
-            <Label className="text-right text-xs">Einheit:</Label>
-            <Input
-              value={currentPosition.einheit}
-              onChange={(e) => setCurrentPosition((p) => ({ ...p, einheit: e.target.value }))}
-              className="h-7 text-xs"
-            />
-            <Label className="text-right text-xs whitespace-nowrap">Listenpreis:</Label>
-            <Input
-              type="number"
-              value={currentPosition.listenpreis || ''}
-              onChange={(e) => setCurrentPosition((p) => ({ ...p, listenpreis: Number(e.target.value) }))}
-              className="h-7 text-xs"
-            />
-            <Label className="text-right text-xs">Rabatt %:</Label>
-            <Input
-              type="number"
-              value={currentPosition.rabatt || ''}
-              onChange={(e) => setCurrentPosition((p) => ({ ...p, rabatt: Number(e.target.value) }))}
-              className="h-7 text-xs"
-            />
+            <div className="space-y-1">
+              <Label className="text-xs">Listenpreis:</Label>
+              <Input
+                type="number" step="0.01"
+                value={currentPosition.listenpreis || ''}
+                onChange={(e) => setCurrentPosition((prev) => ({ ...prev, listenpreis: Number(e.target.value) }))}
+                className="h-8"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Rabatt %:</Label>
+              <Input
+                type="number"
+                value={currentPosition.rabatt || ''}
+                onChange={(e) => setCurrentPosition((prev) => ({ ...prev, rabatt: Number(e.target.value) }))}
+                className="h-8"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Einh.-Preis:</Label>
+              <Input value={currentPosition.einhPreis.toFixed(2)} readOnly className="h-8" />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Betrag:</Label>
+              <Input value={currentPosition.betrag.toFixed(2)} readOnly className="h-8 font-semibold" />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">MWSt. %:</Label>
+              <Input
+                type="number"
+                value={currentPosition.mwstProzent}
+                onChange={(e) => setCurrentPosition((prev) => ({ ...prev, mwstProzent: Number(e.target.value) }))}
+                className="h-8"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">verfügbar:</Label>
+              <Input
+                value={`${currentPosition.verfuegbar} ${currentPosition.einheit}`}
+                readOnly className="h-8"
+              />
+            </div>
 
-            <Label className="text-right text-xs whitespace-nowrap">Einh.-Preis:</Label>
-            <Input value={currentPosition.einhPreis.toLocaleString('de-DE', { minimumFractionDigits: 2 })} readOnly className="h-7 text-xs bg-muted" />
-            <Label className="text-right text-xs">Betrag:</Label>
-            <Input value={currentPosition.betrag.toLocaleString('de-DE', { minimumFractionDigits: 2 })} readOnly className="h-7 text-xs bg-muted font-semibold" />
-            <Label className="text-right text-xs">MwSt.%:</Label>
-            <Input
-              type="number"
-              value={currentPosition.mwstProzent}
-              onChange={(e) => setCurrentPosition((p) => ({ ...p, mwstProzent: Number(e.target.value) }))}
-              className="h-7 text-xs"
-            />
-            <div className="col-span-2 flex gap-2 justify-end">
-              <Button
-                size="sm"
-                className="h-7 text-xs"
-                onClick={handlePositionOK}
-                disabled={!currentPosition.artikelNr || !currentPosition.menge}
-              >
-                Position übernehmen
-              </Button>
-              {aktivePositionIndex !== null && (
+            <div className="space-y-1">
+              <Label className="text-xs">Kontrakt-Nr.:</Label>
+              <Input
+                value={currentPosition.kontraktNr}
+                onChange={(e) => setCurrentPosition((prev) => ({ ...prev, kontraktNr: e.target.value }))}
+                className="h-8"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">EK-Preis:</Label>
+              <Input value={currentPosition.ekPreis.toFixed(2)} readOnly className="h-8" />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Gewicht (kg):</Label>
+              <Input value={currentPosition.artikelGewicht.toFixed(3)} readOnly className="h-8" />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Gef.-Punkte:</Label>
+              <Input value={currentPosition.artikelGefahrgutPunkte.toFixed(0)} readOnly className="h-8" />
+            </div>
+            <div className="col-span-2 flex items-end gap-3 pb-0.5">
+              <div className="flex items-center gap-1">
+                <Checkbox
+                  checked={currentPosition.fremdware}
+                  onCheckedChange={(c) => setCurrentPosition((prev) => ({ ...prev, fremdware: c === true }))}
+                />
+                <Label className="text-xs">Fremdware</Label>
+              </div>
+              <div className="flex items-center gap-1">
+                <Checkbox
+                  checked={currentPosition.skontierf}
+                  onCheckedChange={(c) => setCurrentPosition((prev) => ({ ...prev, skontierf: c === true }))}
+                />
+                <Label className="text-xs">skontierf.</Label>
+              </div>
+              <ShortcutHintButton shortcut="Strg+F3">
                 <Button
-                  size="sm"
-                  variant="outline"
-                  className="h-7 text-xs"
-                  onClick={() => { setAktivePositionIndex(null); setCurrentPosition(emptyPosition(currentPosition.posNr + 10)) }}
+                  onClick={handlePositionOK}
+                  disabled={!currentPosition.artikelNr || !currentPosition.mengeGebinde}
+                  className="h-8 gap-1"
+                >
+                  <Check className="h-4 w-4" />
+                  Zeile OK
+                </Button>
+              </ShortcutHintButton>
+              {state.aktivePositionIndex !== null && (
+                <Button
+                  variant="outline" size="sm" className="h-8"
+                  onClick={() => {
+                    setState((prev) => ({ ...prev, aktivePositionIndex: null }))
+                    setCurrentPosition(emptyCurrentPosition(currentPosition.posNr + 10))
+                  }}
                 >
                   Abbrechen
                 </Button>
@@ -652,62 +1336,99 @@ export default function SalesOrderEditorPage(): JSX.Element {
           </div>
         </Card>
 
-        {/* ── Summen ────────────────────────────────────────────────────── */}
-        <Card className="p-2">
-          <div className="flex items-center justify-end gap-6 text-sm">
-            <span className="text-muted-foreground text-xs">Gewicht: {summen.gewicht.toLocaleString('de-DE', { maximumFractionDigits: 1 })} kg</span>
-            <div className="flex items-center gap-2">
+        {/* ── Summen ────────────────────────────────────────────────────────── */}
+        <Card className="mb-4 p-4">
+          <div className="grid grid-cols-7 gap-4">
+            <div className="space-y-1">
+              <Label className="text-xs">Gewicht:</Label>
+              <Input value={`${summen.gewicht.toFixed(2)} kg`} readOnly className="h-8" />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Gef.-Pun.:</Label>
+              <Input
+                value={summen.gefahrgutPunkte.toFixed(0)}
+                readOnly
+                className={`h-8 ${summen.gefahrgutPunkte > 1000 ? 'bg-red-100 border-red-500' : summen.gefahrgutPunkte > 800 ? 'bg-yellow-100 border-yellow-500' : ''}`}
+                title={summen.gefahrgutPunkte > 1000 ? 'Warnung: Maximal 1000 Gefahrgut-Punkte erlaubt!' : ''}
+              />
+            </div>
+            <div className="space-y-1">
               <Label className="text-xs">Netto:</Label>
-              <Input value={formatEur(summen.netto)} readOnly className="h-6 w-32 text-xs text-right bg-muted" />
+              <Input value={summen.netto.toFixed(2)} readOnly className="h-8" />
             </div>
-            <div className="flex items-center gap-2">
-              <Label className="text-xs">MwSt.:</Label>
-              <Input value={formatEur(summen.mwst)} readOnly className="h-6 w-28 text-xs text-right bg-muted" />
+            <div className="space-y-1">
+              <Label className="text-xs">MWSt.:</Label>
+              <Input value={summen.mwst.toFixed(2)} readOnly className="h-8" />
             </div>
-            <div className="flex items-center gap-2">
-              <Label className="text-xs font-semibold">Brutto:</Label>
-              <Input value={formatEur(summen.brutto)} readOnly className="h-6 w-32 text-xs text-right font-semibold bg-muted" />
+            <div className="space-y-1">
+              <Label className="text-xs">Brutto:</Label>
+              <Input value={summen.brutto.toFixed(2)} readOnly className="h-8" />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Gesamt:</Label>
+              <Input value={summen.gesamt.toFixed(2)} readOnly className="h-8 font-semibold" />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">EUR</Label>
+              <Input value="EUR" readOnly className="h-8" />
             </div>
           </div>
         </Card>
 
-        {/* ── Notizen ───────────────────────────────────────────────────── */}
-        <Card className="p-3">
-          <div className="flex items-start gap-2">
-            <Label className="w-20 text-sm pt-1 shrink-0">Notizen:</Label>
-            <Input value={notizen} onChange={(e) => setNotizen(e.target.value)} placeholder="Interne Notizen zum Auftrag" className="flex-1 h-8 text-sm" />
-          </div>
-        </Card>
       </div>
 
-      {/* ── Aktionsleiste ─────────────────────────────────────────────────── */}
+      {/* ── Bottom-Toolbar ────────────────────────────────────────────────── */}
       <div className="border-t bg-white px-4 py-2 flex items-center justify-between">
         <div className="flex gap-2 flex-wrap">
-          <Button size="sm" className="gap-1 h-8" onClick={() => void handleSave()}>
-            <Save className="h-3 w-3" /> Speichern
+          <Button onClick={() => setShowPrintDialog(true)} variant="outline" size="sm" className="gap-2">
+            <Printer className="h-4 w-4" />
+            Auftrag drucken
           </Button>
-          <Button variant="outline" size="sm" className="gap-1 h-8" onClick={() => setShowPrintDialog(true)}>
-            <Printer className="h-3 w-3" /> Drucken
+          <Button variant="outline" size="sm" className="gap-2"
+            onClick={() => setShowAttachmentDialog(true)}>
+            <FileText className="h-4 w-4" />
+            Unterlagen
           </Button>
-          <Button variant="outline" size="sm" className="gap-1 h-8" onClick={() => setShowAttachmentDialog(true)}>
-            <FileText className="h-3 w-3" /> Unterlagen
+          <Button variant="outline" size="sm" className="gap-2"
+            onClick={() => setShowAttachmentDialog(true)}>
+            <Folder className="h-4 w-4" />
+            Dateien
           </Button>
-          <Button variant="outline" size="sm" className="gap-1 h-8" onClick={() => void handleCreateLieferschein()}>
-            <Truck className="h-3 w-3" /> In Lieferschein wandeln
+          <Button variant="outline" size="sm" className="gap-2">
+            <FileCheck className="h-4 w-4" />
+            Kontrakte
           </Button>
-          <Button variant="outline" size="sm" className="gap-1 h-8">
-            <Receipt className="h-3 w-3" /> Rechnung erstellen
+          <Button variant="outline" size="sm" className="gap-2"
+            onClick={() => void handleCreateLieferschein()}>
+            <LinkIcon className="h-4 w-4" />
+            In Lieferschein wandeln
           </Button>
-          <Button variant="outline" size="sm" className="gap-1 h-8 text-destructive hover:text-destructive" onClick={() => setShowDeleteDialog(true)}>
-            <Trash2 className="h-3 w-3" /> Löschen
+          <Button variant="outline" size="sm" className="gap-2">
+            <Receipt className="h-4 w-4" />
+            Sofort-Rechnung
+          </Button>
+          <Button variant="outline" size="sm" className="gap-2 text-red-600"
+            onClick={() => setShowDeleteDialog(true)}>
+            <Trash2 className="h-4 w-4" />
+            Auftrag löschen
           </Button>
         </div>
-        <Button variant="ghost" size="sm" className="gap-1 h-8" onClick={() => navigate('/verkauf')}>
-          <X className="h-3 w-3" /> Beenden
-        </Button>
+        <div className="flex gap-2">
+          <ShortcutHintButton shortcut="Strg+F4">
+            <Button onClick={() => void handleSave()} size="sm" className="gap-2">
+              <Save className="h-4 w-4" />
+              Speichern
+            </Button>
+          </ShortcutHintButton>
+          <ShortcutHintButton shortcut="Strg+F7">
+            <Button variant="outline" onClick={() => navigate('/verkauf')} size="sm">
+              Schließen
+            </Button>
+          </ShortcutHintButton>
+        </div>
       </div>
 
-      {/* ── Dialoge ───────────────────────────────────────────────────────── */}
+      {/* ── Dialoge ──────────────────────────────────────────────────────────── */}
 
       {/* Auftrag-Auswahl */}
       <Dialog open={showAuftragAuswahl} onOpenChange={setShowAuftragAuswahl}>
@@ -725,7 +1446,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
               autoFocus
             />
           </div>
-          <div className="border rounded-md overflow-hidden max-h-80 overflow-auto">
+          <div className="border rounded-md overflow-hidden max-h-80 overflow-y-auto">
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted text-xs">
@@ -739,21 +1460,30 @@ export default function SalesOrderEditorPage(): JSX.Element {
               </TableHeader>
               <TableBody>
                 {isLoading ? (
-                  <TableRow><TableCell colSpan={6} className="text-center text-sm text-muted-foreground py-6">Lade Aufträge…</TableCell></TableRow>
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center text-sm text-muted-foreground py-6">
+                      Lade Aufträge…
+                    </TableCell>
+                  </TableRow>
                 ) : filteredAuftraege.length === 0 ? (
-                  <TableRow><TableCell colSpan={6} className="text-center text-sm text-muted-foreground py-6">Keine Aufträge gefunden</TableCell></TableRow>
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center text-sm text-muted-foreground py-6">
+                      Keine Aufträge gefunden
+                    </TableCell>
+                  </TableRow>
                 ) : filteredAuftraege.map((a, idx) => (
                   <TableRow
                     key={a.id}
                     className={`text-xs cursor-pointer ${idx === 0 ? 'bg-primary/10' : 'hover:bg-muted/50'}`}
                     onDoubleClick={() => handleAuftragAuswaehlen(a)}
-                    onClick={() => {}}
                   >
                     <TableCell className="py-1 font-mono">{a.nummer}</TableCell>
                     <TableCell className="py-1">{a.datum}</TableCell>
                     <TableCell className="py-1">{a.kunde}</TableCell>
                     <TableCell className="py-1">{a.liefertermin}</TableCell>
-                    <TableCell className="py-1 text-right">{a.betrag.toLocaleString('de-DE', { minimumFractionDigits: 2 })} €</TableCell>
+                    <TableCell className="py-1 text-right">
+                      {a.betrag.toLocaleString('de-DE', { minimumFractionDigits: 2 })} €
+                    </TableCell>
                     <TableCell className="py-1">{a.status}</TableCell>
                   </TableRow>
                 ))}
@@ -761,31 +1491,41 @@ export default function SalesOrderEditorPage(): JSX.Element {
             </Table>
           </div>
           <DialogFooter className="mt-2">
-            <Button variant="outline" size="sm" onClick={() => { resetForm(); setShowAuftragAuswahl(false) }}>Neuer Auftrag</Button>
-            <Button variant="outline" size="sm" onClick={() => setShowAuftragAuswahl(false)}>Abbrechen</Button>
-            <Button size="sm" onClick={() => filteredAuftraege[0] && handleAuftragAuswaehlen(filteredAuftraege[0])}>
+            <Button variant="outline" size="sm"
+              onClick={() => {
+                setState((prev) => ({
+                  ...prev, id: null, auftragNr: generateAuftragNr(),
+                  auftragDatum: formatDateForInput(new Date()), liefertermin: '',
+                  customer: null, positionen: [], aktivePositionIndex: null,
+                }))
+                setShowAuftragAuswahl(false)
+              }}>
+              Neuer Auftrag
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setShowAuftragAuswahl(false)}>
+              Abbrechen
+            </Button>
+            <Button size="sm"
+              onClick={() => filteredAuftraege[0] && handleAuftragAuswaehlen(filteredAuftraege[0])}>
               Übernehmen
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Kunden-Auswahl */}
       <CustomerSelectionDialog
         open={showCustomerDialog}
         onClose={() => setShowCustomerDialog(false)}
-        onSelect={(c) => { handleCustomerSelect(c); setShowCustomerDialog(false) }}
+        onSelect={(c) => { void handleCustomerSelect(c); setShowCustomerDialog(false) }}
       />
 
-      {/* Artikel-Auswahl */}
       <ArtikelSuchDialog
         open={showArticleDialog}
         onClose={() => setShowArticleDialog(false)}
         onSelect={(a) => { handleArticleSelect(a); setShowArticleDialog(false) }}
-        customerId={customer?.id}
+        customerId={state.customer?.id}
       />
 
-      {/* Druck-Dialog */}
       <LieferscheinDruckDialog
         open={showPrintDialog}
         onClose={() => setShowPrintDialog(false)}
@@ -793,29 +1533,83 @@ export default function SalesOrderEditorPage(): JSX.Element {
         title="AUFTRAG DRUCKEN"
       />
 
-      {/* DMS-Anhänge */}
       <DmsAnhangDialog
         open={showAttachmentDialog}
         onClose={() => setShowAttachmentDialog(false)}
         businessObjectType="sales_order"
-        businessObjectId={auftragId}
+        businessObjectId={state.id}
         title="UNTERLAGEN / DATEIEN — AUFTRAG"
       />
 
-      {/* Löschen-Bestätigung */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
             <DialogTitle>Auftrag löschen?</DialogTitle>
           </DialogHeader>
           <div className="py-2 text-sm">
-            {auftragId
-              ? <>Auftrag <strong>{auftragNr}</strong> wird unwiderruflich gelöscht. Fortfahren?</>
+            {state.id
+              ? <><strong>{state.auftragNr}</strong> wird unwiderruflich gelöscht. Fortfahren?</>
               : 'Das Formular wird geleert. Nicht gespeicherte Daten gehen verloren.'}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>Abbrechen</Button>
             <Button variant="destructive" onClick={() => void handleDelete()}>Löschen</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <AttestationDialog
+        open={showAttestationDialog}
+        onClose={() => { setShowAttestationDialog(false); setPendingAction(null) }}
+        onConfirm={handleAttestationConfirm}
+        action={pendingAction || 'print'}
+        entityType="Auftrag"
+        entityNumber={state.auftragNr}
+      />
+
+      {state.customer && (
+        <BelegfolgePositionenDialog
+          open={showBelegfolgeDialog}
+          onClose={() => setShowBelegfolgeDialog(false)}
+          onConfirm={handleBelegfolgePositionen}
+          customerId={state.customer.id}
+          targetDocType="auftrag"
+        />
+      )}
+
+      <Dialog open={showInformationDialog} onOpenChange={setShowInformationDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Kunden-Information</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {state.customer && (
+              <>
+                <div>
+                  <h3 className="font-semibold mb-2">{state.customer.name}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Kunden-Nr.: {state.customer.customerNumber}
+                  </p>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-2">Chefanweisung</h4>
+                  {state.customer.chefanweisung || state.customer.executiveNote ? (
+                    <div className="p-3 bg-amber-50 border border-amber-200 rounded text-sm whitespace-pre-wrap">
+                      {state.customer.chefanweisung || state.customer.executiveNote}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground italic">
+                      Keine Chefanweisung für diesen Kunden hinterlegt.
+                    </p>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowInformationDialog(false)}>
+              Schließen
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
