@@ -188,21 +188,22 @@ async def enforce_bearer_token(request: Request, call_next):
     if request.method == "OPTIONS":
         response = JSONResponse(status_code=200, content={})
         origin = request.headers.get("origin")
-        if origin and origin in [str(o) for o in settings.BACKEND_CORS_ORIGINS]:
+        allow_all = settings.DEBUG or not settings.BACKEND_CORS_ORIGINS
+        if origin and (allow_all or origin in [str(o) for o in settings.BACKEND_CORS_ORIGINS]):
             response.headers["Access-Control-Allow-Origin"] = origin
             response.headers["Access-Control-Allow-Credentials"] = "true"
             response.headers["Access-Control-Allow-Methods"] = "*"
             response.headers["Access-Control-Allow-Headers"] = "*"
         return response
-    
+
     try:
         await require_bearer_token(request)
     except HTTPException as exc:
         # Return error response with CORS headers
         response = JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
-        # Add CORS headers manually for error responses
         origin = request.headers.get("origin")
-        if origin and origin in [str(o) for o in settings.BACKEND_CORS_ORIGINS]:
+        allow_all = settings.DEBUG or not settings.BACKEND_CORS_ORIGINS
+        if origin and (allow_all or origin in [str(o) for o in settings.BACKEND_CORS_ORIGINS]):
             response.headers["Access-Control-Allow-Origin"] = origin
             response.headers["Access-Control-Allow-Credentials"] = "true"
             response.headers["Access-Control-Allow-Methods"] = "*"

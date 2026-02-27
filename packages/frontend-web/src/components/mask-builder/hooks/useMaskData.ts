@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useToast } from '@/hooks/use-toast'
+import { apiClient } from '@/lib/api-client'
 
 interface UseMaskDataOptions {
   apiUrl: string
@@ -20,11 +21,8 @@ export function useMaskData<T = any>({ apiUrl, id, autoLoad = true }: UseMaskDat
     setError(null)
 
     try {
-      const response = await fetch(`${apiUrl}/${id}`)
-      if (!response.ok) throw new Error('Failed to load data')
-
-      const result = await response.json()
-      setData(result)
+      const response = await apiClient.get<T>(`${apiUrl}/${id}`)
+      setData(response.data)
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error'
       setError(errorMessage)
@@ -43,28 +41,18 @@ export function useMaskData<T = any>({ apiUrl, id, autoLoad = true }: UseMaskDat
     setError(null)
 
     try {
-      const method = id ? 'PUT' : 'POST'
-      const url = id ? `${apiUrl}/${id}` : apiUrl
+      const response = id
+        ? await apiClient.put<T>(`${apiUrl}/${id}`, formData)
+        : await apiClient.post<T>(apiUrl, formData)
 
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      })
-
-      if (!response.ok) throw new Error('Failed to save data')
-
-      const result = await response.json()
-      setData(result)
+      setData(response.data)
 
       toast({
         title: "Erfolgreich gespeichert",
         description: "Die Daten wurden erfolgreich gespeichert.",
       })
 
-      return result
+      return response.data
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error'
       setError(errorMessage)
@@ -86,11 +74,7 @@ export function useMaskData<T = any>({ apiUrl, id, autoLoad = true }: UseMaskDat
     setError(null)
 
     try {
-      const response = await fetch(`${apiUrl}/${id}`, {
-        method: 'DELETE',
-      })
-
-      if (!response.ok) throw new Error('Failed to delete data')
+      await apiClient.delete(`${apiUrl}/${id}`)
 
       setData(null)
 

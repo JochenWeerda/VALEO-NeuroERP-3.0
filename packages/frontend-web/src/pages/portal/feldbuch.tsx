@@ -1,18 +1,31 @@
 /**
  * Kundenportal - Ackerschlagkartei / Feldbuch
- * 
- * Kunden können ihre Feldbu-Daten einsehen und CSV exportieren/importieren
+ *
+ * Echte Daten via:
+ *   GET /portal/feldbuch/schlaege
+ *   GET /portal/feldbuch/massnahmen
+ *   GET /portal/feldbuch/stats
+ *   POST /portal/feldbuch/massnahmen
+ *   GET /portal/feldbuch/export?format=ackerschlagkartei
+ *   POST /portal/feldbuch/import
  */
 
-import { useState, useRef } from 'react'
-import { usePortalFeldbuch } from '@/lib/api/portal'
-import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { useRef, useState } from 'react'
+import {
+  exportFeldbuchCsv,
+  importFeldbuchCsv,
+  useCreatePortalMassnahme,
+  useCreatePortalSchlag,
+  usePortalFeldbuchMassnahmen,
+  usePortalFeldbuchSchlaege,
+  usePortalFeldbuchStats,
+  type PortalMassnahme,
+  type PortalSchlag,
+} from '@/lib/api/portal'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
-import { Skeleton } from '@/components/ui/skeleton'
-import { ErrorState } from '@/components/ErrorState'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import {
   Dialog,
   DialogContent,
@@ -21,6 +34,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Skeleton } from '@/components/ui/skeleton'
 import {
   Table,
   TableBody,
@@ -29,172 +52,554 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { ErrorState } from '@/components/ErrorState'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import {
-  Search,
+  Bug,
+  Calendar,
+  CheckCircle2,
   Download,
-  Upload,
+  Droplets,
+  FileDown,
+  FileSpreadsheet,
+  FileUp,
+  Globe,
+  Info,
   Leaf,
   MapPin,
-  Calendar,
-  FileSpreadsheet,
-  Info,
-  CheckCircle2,
-  Droplets,
-  Bug,
-  FileDown,
-  FileUp,
+  Plus,
+  Search,
   Sprout,
+  Upload,
+  AlertTriangle,
 } from 'lucide-react'
 
-interface Schlag {
-  id: string
-  name: string
-  flaeche: number
-  kultur: string
-  flik: string
-  gemeinde: string
-  gemarkung: string
-}
-
-interface Massnahme {
-  id: string
-  schlagId: string
-  schlagName: string
-  datum: string
-  typ: 'duengung' | 'psm' | 'aussaat' | 'ernte' | 'bodenbearbeitung'
-  bezeichnung: string
-  mittel?: string
-  menge?: number
-  einheit?: string
-  anwender?: string
-  bemerkung?: string
-}
+// ── Typ-Konfiguration ──────────────────────────────────────────────────────
 
 const typConfig: Record<string, { label: string; icon: React.ReactNode; color: string }> = {
-  'duengung': { label: 'Düngung', icon: <Droplets className="h-4 w-4" />, color: 'bg-blue-100 text-blue-800' },
-  'psm': { label: 'Pflanzenschutz', icon: <Bug className="h-4 w-4" />, color: 'bg-amber-100 text-amber-800' },
-  'aussaat': { label: 'Aussaat', icon: <Sprout className="h-4 w-4" />, color: 'bg-emerald-100 text-emerald-800' },
-  'ernte': { label: 'Ernte', icon: <Leaf className="h-4 w-4" />, color: 'bg-yellow-100 text-yellow-800' },
-  'bodenbearbeitung': { label: 'Bodenbearbeitung', icon: <MapPin className="h-4 w-4" />, color: 'bg-gray-100 text-gray-800' },
+  duengung: { label: 'Düngung', icon: <Droplets className="h-3 w-3" />, color: 'bg-blue-100 text-blue-800' },
+  psm: { label: 'Pflanzenschutz', icon: <Bug className="h-3 w-3" />, color: 'bg-amber-100 text-amber-800' },
+  aussaat: { label: 'Aussaat', icon: <Sprout className="h-3 w-3" />, color: 'bg-emerald-100 text-emerald-800' },
+  ernte: { label: 'Ernte', icon: <Leaf className="h-3 w-3" />, color: 'bg-yellow-100 text-yellow-800' },
+  bodenbearbeitung: { label: 'Bodenbearbeitung', icon: <MapPin className="h-3 w-3" />, color: 'bg-gray-100 text-gray-800' },
+  sonstiges: { label: 'Sonstiges', icon: <Calendar className="h-3 w-3" />, color: 'bg-slate-100 text-slate-800' },
 }
 
+function TypBadge({ typ }: { typ: string }) {
+  const cfg = typConfig[typ] ?? typConfig.sonstiges
+  return (
+    <Badge className={`${cfg.color} gap-1 font-normal`}>
+      {cfg.icon}
+      {cfg.label}
+    </Badge>
+  )
+}
+
+function QuelleBadge({ quelle }: { quelle: string }) {
+  if (quelle === 'erp_service' || quelle === 'erp_lieferschein') {
+    return (
+      <Badge className="bg-purple-100 text-purple-800 gap-1 font-normal">
+        <Globe className="h-3 w-3" />
+        VALEO Dienst
+      </Badge>
+    )
+  }
+  return null
+}
+
+// ── Schlag anlegen Dialog ──────────────────────────────────────────────────
+
+function SchlagAnlegenDialog({
+  open,
+  onOpenChange,
+}: {
+  open: boolean
+  onOpenChange: (v: boolean) => void
+}) {
+  const createSchlag = useCreatePortalSchlag()
+  const [form, setForm] = useState({ name: '', flaeche: '', kultur: '', gemeinde: '', flik: '' })
+
+  const handleSubmit = async () => {
+    if (!form.name || !form.flaeche) return
+    await createSchlag.mutateAsync({
+      name: form.name,
+      flaeche: parseFloat(form.flaeche),
+      kultur: form.kultur,
+      gemeinde: form.gemeinde,
+      flik: form.flik || undefined,
+      status: 'aktiv',
+    } as Omit<PortalSchlag, 'id'>)
+    setForm({ name: '', flaeche: '', kultur: '', gemeinde: '', flik: '' })
+    onOpenChange(false)
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <MapPin className="h-5 w-5" />
+            Schlag anlegen
+          </DialogTitle>
+          <DialogDescription>Neuen Feldschlag in Ihrer Ackerschlagkartei erfassen</DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-3">
+          <div className="space-y-1">
+            <Label>Name *</Label>
+            <Input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} placeholder="z.B. Südfeld" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label>Fläche (ha) *</Label>
+              <Input type="number" step="0.01" value={form.flaeche} onChange={e => setForm(p => ({ ...p, flaeche: e.target.value }))} placeholder="12.5" />
+            </div>
+            <div className="space-y-1">
+              <Label>Kultur</Label>
+              <Input value={form.kultur} onChange={e => setForm(p => ({ ...p, kultur: e.target.value }))} placeholder="Winterweizen" />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label>Gemeinde</Label>
+              <Input value={form.gemeinde} onChange={e => setForm(p => ({ ...p, gemeinde: e.target.value }))} placeholder="Musterdorf" />
+            </div>
+            <div className="space-y-1">
+              <Label>FLIK</Label>
+              <Input value={form.flik} onChange={e => setForm(p => ({ ...p, flik: e.target.value }))} placeholder="DE-09-12345-0001" />
+            </div>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Abbrechen</Button>
+          <Button onClick={handleSubmit} disabled={!form.name || !form.flaeche || createSchlag.isPending}>
+            {createSchlag.isPending ? 'Speichern…' : 'Schlag anlegen'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+// ── Maßnahme erfassen Dialog ───────────────────────────────────────────────
+
+function MassnahmeDialog({
+  open,
+  onOpenChange,
+  schlaege,
+}: {
+  open: boolean
+  onOpenChange: (v: boolean) => void
+  schlaege: PortalSchlag[]
+}) {
+  const createMassnahme = useCreatePortalMassnahme()
+  const [form, setForm] = useState({
+    schlagId: '',
+    datum: new Date().toISOString().split('T')[0],
+    typ: 'psm',
+    bezeichnung: '',
+    mittel: '',
+    menge: '',
+    einheit: 'l/ha',
+    flaeche: '',
+    anwender: '',
+    bemerkung: '',
+  })
+
+  const handleSubmit = async () => {
+    if (!form.datum || !form.typ) return
+    await createMassnahme.mutateAsync({
+      schlagId: form.schlagId || null,
+      schlagName: schlaege.find(s => s.id === form.schlagId)?.name ?? null,
+      datum: form.datum,
+      typ: form.typ,
+      bezeichnung: form.bezeichnung || undefined,
+      mittel: form.mittel || undefined,
+      menge: form.menge ? parseFloat(form.menge) : undefined,
+      einheit: form.einheit || undefined,
+      flaeche: form.flaeche ? parseFloat(form.flaeche) : undefined,
+      anwender: form.anwender || undefined,
+      bemerkung: form.bemerkung || undefined,
+    } as Omit<PortalMassnahme, 'id' | 'quelle' | 'compliant' | 'exportiert'>)
+    onOpenChange(false)
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Calendar className="h-5 w-5" />
+            Maßnahme erfassen
+          </DialogTitle>
+          <DialogDescription>Eigene Maßnahme in der Ackerschlagkartei dokumentieren</DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-3">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label>Schlag</Label>
+              <Select value={form.schlagId} onValueChange={v => setForm(p => ({ ...p, schlagId: v }))}>
+                <SelectTrigger><SelectValue placeholder="Schlag wählen" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Kein Schlag</SelectItem>
+                  {schlaege.map(s => (
+                    <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <Label>Datum *</Label>
+              <Input type="date" value={form.datum} onChange={e => setForm(p => ({ ...p, datum: e.target.value }))} />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label>Maßnahme-Typ *</Label>
+              <Select value={form.typ} onValueChange={v => setForm(p => ({ ...p, typ: v }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {Object.entries(typConfig).map(([key, cfg]) => (
+                    <SelectItem key={key} value={key}>{cfg.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <Label>Mittel / Produkt</Label>
+              <Input value={form.mittel} onChange={e => setForm(p => ({ ...p, mittel: e.target.value }))} placeholder="z.B. Roundup PowerFlex" />
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            <div className="space-y-1">
+              <Label>Menge</Label>
+              <Input type="number" step="0.1" value={form.menge} onChange={e => setForm(p => ({ ...p, menge: e.target.value }))} placeholder="3.5" />
+            </div>
+            <div className="space-y-1">
+              <Label>Einheit</Label>
+              <Select value={form.einheit} onValueChange={v => setForm(p => ({ ...p, einheit: v }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {['l/ha', 'kg/ha', 'ml/ha', 'g/ha', 't/ha', 'Stück/ha'].map(e => (
+                    <SelectItem key={e} value={e}>{e}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1">
+              <Label>Fläche (ha)</Label>
+              <Input type="number" step="0.01" value={form.flaeche} onChange={e => setForm(p => ({ ...p, flaeche: e.target.value }))} placeholder="12.4" />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label>Anwender</Label>
+              <Input value={form.anwender} onChange={e => setForm(p => ({ ...p, anwender: e.target.value }))} placeholder="Eigenleistung" />
+            </div>
+            <div className="space-y-1">
+              <Label>Bemerkung</Label>
+              <Input value={form.bemerkung} onChange={e => setForm(p => ({ ...p, bemerkung: e.target.value }))} />
+            </div>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Abbrechen</Button>
+          <Button onClick={handleSubmit} disabled={!form.datum || !form.typ || createMassnahme.isPending}>
+            {createMassnahme.isPending ? 'Speichern…' : 'Maßnahme erfassen'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+// ── Export Dialog ──────────────────────────────────────────────────────────
+
+function ExportDialog({
+  open,
+  onOpenChange,
+  schlaege,
+}: {
+  open: boolean
+  onOpenChange: (v: boolean) => void
+  schlaege: PortalSchlag[]
+}) {
+  const [format, setFormat] = useState<'csv' | 'ackerschlagkartei'>('ackerschlagkartei')
+  const [schlagId, setSchlagId] = useState('')
+  const [von, setVon] = useState('')
+  const [bis, setBis] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
+
+  const handleExport = async () => {
+    setLoading(true)
+    try {
+      await exportFeldbuchCsv(format, {
+        schlagId: schlagId || undefined,
+        von: von || undefined,
+        bis: bis || undefined,
+      })
+      setSuccess(true)
+      setTimeout(() => setSuccess(false), 3000)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <FileDown className="h-5 w-5" />
+            Ackerschlagkartei exportieren
+          </DialogTitle>
+          <DialogDescription>Maßnahmen als CSV für externe Ackerschlagkartei-Software</DialogDescription>
+        </DialogHeader>
+
+        {success && (
+          <Alert className="border-emerald-200 bg-emerald-50">
+            <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+            <AlertTitle className="text-emerald-800">Export erfolgreich</AlertTitle>
+            <AlertDescription className="text-emerald-700">Die CSV-Datei wurde heruntergeladen.</AlertDescription>
+          </Alert>
+        )}
+
+        <div className="grid gap-3">
+          <div className="space-y-1">
+            <Label>Format</Label>
+            <Select value={format} onValueChange={v => setFormat(v as 'csv' | 'ackerschlagkartei')}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ackerschlagkartei">Ackerschlagkartei-CSV (proPlant, 365FarmNet)</SelectItem>
+                <SelectItem value="csv">Generisches CSV (alle Felder)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1">
+            <Label>Schlag (optional)</Label>
+            <Select value={schlagId} onValueChange={setSchlagId}>
+              <SelectTrigger><SelectValue placeholder="Alle Schläge" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Alle Schläge</SelectItem>
+                {schlaege.map(s => (
+                  <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label>Von Datum</Label>
+              <Input type="date" value={von} onChange={e => setVon(e.target.value)} />
+            </div>
+            <div className="space-y-1">
+              <Label>Bis Datum</Label>
+              <Input type="date" value={bis} onChange={e => setBis(e.target.value)} />
+            </div>
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Schließen</Button>
+          <Button onClick={handleExport} disabled={loading} className="gap-2">
+            <Download className="h-4 w-4" />
+            {loading ? 'Exportiere…' : 'CSV herunterladen'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+// ── Import Dialog ──────────────────────────────────────────────────────────
+
+function ImportDialog({
+  open,
+  onOpenChange,
+}: {
+  open: boolean
+  onOpenChange: (v: boolean) => void
+}) {
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [loading, setLoading] = useState(false)
+  const [result, setResult] = useState<{ created: number; updated: number; errors: string[] } | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setLoading(true)
+    setResult(null)
+    setError(null)
+    try {
+      const res = await importFeldbuchCsv(file)
+      setResult(res)
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Unbekannter Fehler'
+      setError(msg)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleClose = () => {
+    setResult(null)
+    setError(null)
+    onOpenChange(false)
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <FileUp className="h-5 w-5" />
+            CSV importieren
+          </DialogTitle>
+          <DialogDescription>
+            Schläge und Maßnahmen aus externer Ackerschlagkartei importieren
+          </DialogDescription>
+        </DialogHeader>
+
+        {result ? (
+          <div className="space-y-3">
+            <Alert className="border-emerald-200 bg-emerald-50">
+              <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+              <AlertTitle className="text-emerald-800">Import abgeschlossen</AlertTitle>
+              <AlertDescription className="text-emerald-700">
+                {result.created} Maßnahmen importiert, {result.updated} aktualisiert.
+              </AlertDescription>
+            </Alert>
+            {result.errors.length > 0 && (
+              <Alert variant="destructive">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>{result.errors.length} Warnungen</AlertTitle>
+                <AlertDescription>
+                  <ul className="mt-1 list-disc pl-4 text-xs space-y-0.5">
+                    {result.errors.slice(0, 5).map((e, i) => <li key={i}>{e}</li>)}
+                    {result.errors.length > 5 && <li>… und {result.errors.length - 5} weitere</li>}
+                  </ul>
+                </AlertDescription>
+              </Alert>
+            )}
+          </div>
+        ) : (
+          <>
+            <Alert>
+              <Info className="h-4 w-4" />
+              <AlertTitle>Unterstützte Formate</AlertTitle>
+              <AlertDescription className="text-sm">
+                CSV mit Semikolon oder Komma als Trennzeichen.
+                Bekannte Spalten (dt./engl.): Schlag, Datum, Maßnahme, Mittel, Menge, Einheit, Fläche, Anwender.
+              </AlertDescription>
+            </Alert>
+
+            <div className="rounded-lg border-2 border-dashed p-8 text-center">
+              <FileSpreadsheet className="mx-auto h-12 w-12 text-muted-foreground" />
+              <p className="mt-2 text-sm text-muted-foreground">
+                CSV-Datei aus Ackerschlagkartei auswählen
+              </p>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".csv"
+                onChange={handleFile}
+                className="hidden"
+              />
+              <Button
+                variant="outline"
+                className="mt-3 gap-2"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={loading}
+              >
+                <Upload className="h-4 w-4" />
+                {loading ? 'Importiere…' : 'Datei auswählen'}
+              </Button>
+            </div>
+
+            {error && (
+              <Alert variant="destructive">
+                <AlertTitle>Import fehlgeschlagen</AlertTitle>
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+          </>
+        )}
+
+        <DialogFooter>
+          <Button variant="outline" onClick={handleClose}>Schließen</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+// ── Skeleton ───────────────────────────────────────────────────────────────
+
+function FeldbuchSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between">
+        <Skeleton className="h-10 w-48" />
+        <div className="flex gap-2">
+          <Skeleton className="h-10 w-24" />
+          <Skeleton className="h-10 w-24" />
+        </div>
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {[...Array(4)].map((_, i) => (
+          <Card key={i}><CardContent className="p-4"><Skeleton className="h-12 w-full" /></CardContent></Card>
+        ))}
+      </div>
+      <Skeleton className="h-10 w-full" />
+      <Card><CardContent className="p-4 space-y-3">{[...Array(5)].map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}</CardContent></Card>
+    </div>
+  )
+}
+
+// ── Hauptkomponente ────────────────────────────────────────────────────────
+
 export default function PortalFeldbuch() {
-  const [searchTerm, setSearchTerm] = useState('')
   const [activeTab, setActiveTab] = useState('schlaege')
+  const [searchTerm, setSearchTerm] = useState('')
   const [selectedSchlag, setSelectedSchlag] = useState<string>('alle')
   const [showExportDialog, setShowExportDialog] = useState(false)
   const [showImportDialog, setShowImportDialog] = useState(false)
-  const [importSuccess, setImportSuccess] = useState(false)
-  const [importError, setImportError] = useState<string | null>(null)
-  const [exportSuccess, setExportSuccess] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const { data: portalFeldbuch = [], isLoading, isError, error, refetch } = usePortalFeldbuch()
+  const [showSchlagDialog, setShowSchlagDialog] = useState(false)
+  const [showMassnahmeDialog, setShowMassnahmeDialog] = useState(false)
 
-  const schlaege: Schlag[] = portalFeldbuch.map((s) => ({
-      id: s.id,
-      name: s.schlag,
-      flaeche: s.flaeche,
-      kultur: s.kultur,
-      flik: '',
-      gemeinde: '',
-      gemarkung: '',
-    }))
+  const { data: schlaege = [], isLoading: loadingSchlaege, isError: errSchlaege, error: errSchlaegObj, refetch: refetchSchlaege } = usePortalFeldbuchSchlaege()
+  const { data: massnahmen = [], isLoading: loadingMassnahmen, isError: errMassnahmen, error: errMassnahmenObj } = usePortalFeldbuchMassnahmen()
+  const { data: stats } = usePortalFeldbuchStats()
 
-  const massnahmen: Massnahme[] = portalFeldbuch.map((s, idx) => ({
-      id: `pm-${idx}`,
-      schlagId: s.id,
-      schlagName: s.schlag,
-      datum: '',
-      typ: 'bodenbearbeitung',
-      bezeichnung: s.letzteMassnahme || 'Dokumentierte Massnahme',
-      bemerkung: s.naechsteMassnahme ? `Naechste: ${s.naechsteMassnahme}` : undefined,
-    }))
+  const isLoading = loadingSchlaege || loadingMassnahmen
+  const isError = errSchlaege || errMassnahmen
 
-  const filteredSchlaege = schlaege.filter((s) =>
+  if (isLoading) return <FeldbuchSkeleton />
+  if (isError) {
+    return <ErrorState error={(errSchlaegObj ?? errMassnahmenObj) as Error} onRetry={() => { void refetchSchlaege() }} />
+  }
+
+  // Filter
+  const filteredSchlaege = schlaege.filter(s =>
     s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    s.kultur.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    s.flik.toLowerCase().includes(searchTerm.toLowerCase())
+    (s.kultur ?? '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (s.flik ?? '').toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  const filteredMassnahmen = massnahmen.filter((m) => {
-    const matchesSearch = m.bezeichnung.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      m.schlagName.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredMassnahmen = massnahmen.filter(m => {
+    const matchesSearch =
+      (m.bezeichnung ?? '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (m.schlagName ?? '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (m.mittel ?? '').toLowerCase().includes(searchTerm.toLowerCase())
     const matchesSchlag = selectedSchlag === 'alle' || m.schlagId === selectedSchlag
     return matchesSearch && matchesSchlag
   })
 
-  const gesamtFlaeche = schlaege.reduce((sum, s) => sum + s.flaeche, 0)
-
-  const generateCSV = (data: any[], filename: string) => {
-    // Generate CSV content
-    const headers = Object.keys(data[0] || {}).join(';')
-    const rows = data.map(item => Object.values(item).join(';')).join('\n')
-    const csv = `${headers}\n${rows}`
-    
-    // Create download
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = filename
-    link.click()
-    URL.revokeObjectURL(url)
-  }
-
-  const handleExportSchlaege = () => {
-    const exportData = schlaege.map(s => ({
-      Name: s.name,
-      'Fläche (ha)': s.flaeche,
-      Kultur: s.kultur,
-      FLIK: s.flik,
-      Gemeinde: s.gemeinde,
-      Gemarkung: s.gemarkung,
-    }))
-    generateCSV(exportData, `schlaege_export_${new Date().toISOString().split('T')[0]}.csv`)
-    setExportSuccess(true)
-    setTimeout(() => setExportSuccess(false), 3000)
-  }
-
-  const handleExportMassnahmen = () => {
-    const exportData = massnahmen.map(m => ({
-      Datum: m.datum,
-      Schlag: m.schlagName,
-      Typ: typConfig[m.typ]?.label || m.typ,
-      Bezeichnung: m.bezeichnung,
-      Mittel: m.mittel || '',
-      Menge: m.menge || '',
-      Einheit: m.einheit || '',
-      Anwender: m.anwender || '',
-      Bemerkung: m.bemerkung || '',
-    }))
-    generateCSV(exportData, `massnahmen_export_${new Date().toISOString().split('T')[0]}.csv`)
-    setExportSuccess(true)
-    setTimeout(() => setExportSuccess(false), 3000)
-  }
-
-  const handleImport = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (file) {
-      setImportSuccess(false)
-      setImportError(`Import derzeit nicht verfuegbar (${file.name}). Bitte Backend-Importendpoint anbinden.`)
-    }
-  }
-
-  if (isLoading) {
-    return <FeldbuchSkeleton />
-  }
-
-  if (isError) {
-    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
-  }
+  const gesamtFlaeche = stats?.gesamtFlaeche ?? schlaege.reduce((sum, s) => sum + s.flaeche, 0)
+  const valeoDienste = stats?.valeoDienste ?? massnahmen.filter(m => m.quelle !== 'portal').length
 
   return (
     <div className="space-y-6">
@@ -202,7 +607,7 @@ export default function PortalFeldbuch() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold">Ackerschlagkartei</h1>
-          <p className="text-muted-foreground">Ihre Schläge und dokumentierte Maßnahmen</p>
+          <p className="text-muted-foreground">Ihre Schläge, dokumentierten Maßnahmen und VALEO-Dienstleistungen</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => setShowImportDialog(true)} className="gap-2">
@@ -216,24 +621,6 @@ export default function PortalFeldbuch() {
         </div>
       </div>
 
-      {/* Export Success Alert */}
-      {exportSuccess && (
-        <Alert className="border-emerald-200 bg-emerald-50">
-          <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-          <AlertTitle className="text-emerald-800">Export erfolgreich</AlertTitle>
-          <AlertDescription className="text-emerald-700">
-            Die CSV-Datei wurde heruntergeladen.
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {importError && (
-        <Alert variant="destructive">
-          <AlertTitle>Import fehlgeschlagen</AlertTitle>
-          <AlertDescription>{importError}</AlertDescription>
-        </Alert>
-      )}
-
       {/* KPIs */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
@@ -243,7 +630,7 @@ export default function PortalFeldbuch() {
                 <MapPin className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{schlaege.length}</p>
+                <p className="text-2xl font-bold">{stats?.schlaege ?? schlaege.length}</p>
                 <p className="text-sm text-muted-foreground">Schläge</p>
               </div>
             </div>
@@ -269,7 +656,7 @@ export default function PortalFeldbuch() {
                 <Calendar className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{massnahmen.length}</p>
+                <p className="text-2xl font-bold">{stats?.massnahmen ?? massnahmen.length}</p>
                 <p className="text-sm text-muted-foreground">Maßnahmen</p>
               </div>
             </div>
@@ -279,12 +666,10 @@ export default function PortalFeldbuch() {
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="rounded-lg bg-purple-100 p-2 text-purple-600">
-                <Droplets className="h-5 w-5" />
+                <Globe className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-2xl font-bold">
-                  {massnahmen.filter(m => m.anwender === 'VALEO GmbH').length}
-                </p>
+                <p className="text-2xl font-bold">{valeoDienste}</p>
                 <p className="text-sm text-muted-foreground">VALEO Dienstleistungen</p>
               </div>
             </div>
@@ -297,20 +682,20 @@ export default function PortalFeldbuch() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Suchen..."
+            placeholder="Schlag, Kultur, Mittel suchen…"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={e => setSearchTerm(e.target.value)}
             className="pl-9"
           />
         </div>
         {activeTab === 'massnahmen' && (
           <Select value={selectedSchlag} onValueChange={setSelectedSchlag}>
-            <SelectTrigger className="w-[200px]">
+            <SelectTrigger className="w-[220px]">
               <SelectValue placeholder="Schlag wählen" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="alle">Alle Schläge</SelectItem>
-              {schlaege.map((s) => (
+              {schlaege.map(s => (
                 <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
               ))}
             </SelectContent>
@@ -320,11 +705,26 @@ export default function PortalFeldbuch() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="schlaege">Schläge</TabsTrigger>
-          <TabsTrigger value="massnahmen">Maßnahmen</TabsTrigger>
-        </TabsList>
+        <div className="flex items-center justify-between">
+          <TabsList>
+            <TabsTrigger value="schlaege">Schläge ({schlaege.length})</TabsTrigger>
+            <TabsTrigger value="massnahmen">Maßnahmen ({massnahmen.length})</TabsTrigger>
+          </TabsList>
+          {activeTab === 'schlaege' && (
+            <Button size="sm" onClick={() => setShowSchlagDialog(true)} className="gap-1">
+              <Plus className="h-4 w-4" />
+              Schlag anlegen
+            </Button>
+          )}
+          {activeTab === 'massnahmen' && (
+            <Button size="sm" onClick={() => setShowMassnahmeDialog(true)} className="gap-1">
+              <Plus className="h-4 w-4" />
+              Maßnahme erfassen
+            </Button>
+          )}
+        </div>
 
+        {/* ── Schläge Tab ── */}
         <TabsContent value="schlaege" className="mt-4">
           <Card>
             <Table>
@@ -335,25 +735,33 @@ export default function PortalFeldbuch() {
                   <TableHead className="text-right">Fläche</TableHead>
                   <TableHead>FLIK</TableHead>
                   <TableHead>Gemeinde</TableHead>
+                  <TableHead>Status</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredSchlaege.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center text-muted-foreground">
-                      Keine Schläge gefunden
+                    <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                      {schlaege.length === 0
+                        ? 'Noch keine Schläge angelegt. Klicken Sie auf "Schlag anlegen".'
+                        : 'Keine Schläge gefunden'}
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredSchlaege.map((schlag) => (
+                  filteredSchlaege.map(schlag => (
                     <TableRow key={schlag.id}>
                       <TableCell className="font-medium">{schlag.name}</TableCell>
                       <TableCell>
-                        <Badge variant="secondary">{schlag.kultur}</Badge>
+                        {schlag.kultur ? <Badge variant="secondary">{schlag.kultur}</Badge> : <span className="text-muted-foreground">–</span>}
                       </TableCell>
                       <TableCell className="text-right">{schlag.flaeche.toFixed(2)} ha</TableCell>
-                      <TableCell className="font-mono text-sm">{schlag.flik}</TableCell>
-                      <TableCell>{schlag.gemeinde}</TableCell>
+                      <TableCell className="font-mono text-xs">{schlag.flik || '–'}</TableCell>
+                      <TableCell>{schlag.gemeinde || '–'}</TableCell>
+                      <TableCell>
+                        <Badge variant={schlag.status === 'aktiv' ? 'default' : 'secondary'}>
+                          {schlag.status}
+                        </Badge>
+                      </TableCell>
                     </TableRow>
                   ))
                 )}
@@ -362,6 +770,7 @@ export default function PortalFeldbuch() {
           </Card>
         </TabsContent>
 
+        {/* ── Maßnahmen Tab ── */}
         <TabsContent value="massnahmen" className="mt-4">
           <Card>
             <Table>
@@ -370,52 +779,59 @@ export default function PortalFeldbuch() {
                   <TableHead>Datum</TableHead>
                   <TableHead>Schlag</TableHead>
                   <TableHead>Typ</TableHead>
-                  <TableHead>Bezeichnung</TableHead>
-                  <TableHead>Mittel/Menge</TableHead>
+                  <TableHead>Mittel / Bezeichnung</TableHead>
+                  <TableHead>Menge</TableHead>
                   <TableHead>Anwender</TableHead>
+                  <TableHead>Quelle</TableHead>
+                  <TableHead>Compliance</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredMassnahmen.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center text-muted-foreground">
-                      Keine Maßnahmen gefunden
+                    <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
+                      {massnahmen.length === 0
+                        ? 'Noch keine Maßnahmen dokumentiert.'
+                        : 'Keine Maßnahmen gefunden'}
                     </TableCell>
                   </TableRow>
                 ) : (
-                  filteredMassnahmen.map((massnahme) => {
-                    const typ = typConfig[massnahme.typ]
-                    return (
-                      <TableRow key={massnahme.id}>
-                        <TableCell>{massnahme.datum}</TableCell>
-                        <TableCell className="font-medium">{massnahme.schlagName}</TableCell>
-                        <TableCell>
-                          <Badge className={`${typ.color} gap-1`}>
-                            {typ.icon}
-                            {typ.label}
+                  filteredMassnahmen.map(m => (
+                    <TableRow key={m.id}>
+                      <TableCell className="whitespace-nowrap">{m.datum}</TableCell>
+                      <TableCell className="font-medium">{m.schlagName || '–'}</TableCell>
+                      <TableCell>
+                        <TypBadge typ={m.typ} />
+                      </TableCell>
+                      <TableCell>
+                        {m.mittel && <span className="font-medium">{m.mittel}</span>}
+                        {m.bezeichnung && m.bezeichnung !== m.mittel && (
+                          <span className="text-muted-foreground text-xs ml-1">{m.bezeichnung}</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {m.menge != null ? (
+                          <span>{m.menge} {m.einheit}</span>
+                        ) : <span className="text-muted-foreground">–</span>}
+                      </TableCell>
+                      <TableCell>
+                        {m.anwender ? (
+                          <span className="text-sm">{m.anwender}</span>
+                        ) : <span className="text-muted-foreground">–</span>}
+                      </TableCell>
+                      <TableCell>
+                        <QuelleBadge quelle={m.quelle} />
+                      </TableCell>
+                      <TableCell>
+                        {m.typ === 'psm' && !m.compliant && (
+                          <Badge className="bg-red-100 text-red-800 gap-1">
+                            <AlertTriangle className="h-3 w-3" />
+                            Prüfen
                           </Badge>
-                        </TableCell>
-                        <TableCell>{massnahme.bezeichnung}</TableCell>
-                        <TableCell>
-                          {massnahme.mittel && massnahme.menge && (
-                            <span>{massnahme.mittel} - {massnahme.menge} {massnahme.einheit}</span>
-                          )}
-                          {massnahme.bemerkung && !massnahme.mittel && (
-                            <span className="text-muted-foreground">{massnahme.bemerkung}</span>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {massnahme.anwender ? (
-                            <Badge variant="outline" className="text-emerald-700 border-emerald-300 bg-emerald-50">
-                              {massnahme.anwender}
-                            </Badge>
-                          ) : (
-                            <span className="text-muted-foreground">-</span>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    )
-                  })
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))
                 )}
               </TableBody>
             </Table>
@@ -423,155 +839,11 @@ export default function PortalFeldbuch() {
         </TabsContent>
       </Tabs>
 
-      {/* Export Dialog */}
-      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <FileDown className="h-5 w-5" />
-              Daten exportieren
-            </DialogTitle>
-            <DialogDescription>
-              Exportieren Sie Ihre Ackerschlagkartei als CSV-Datei
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4">
-            <Button 
-              onClick={handleExportSchlaege} 
-              variant="outline" 
-              className="w-full justify-start gap-3 h-auto py-4"
-            >
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-100">
-                <MapPin className="h-5 w-5 text-emerald-600" />
-              </div>
-              <div className="text-left">
-                <p className="font-medium">Schläge exportieren</p>
-                <p className="text-sm text-muted-foreground">Alle {schlaege.length} Schläge als CSV</p>
-              </div>
-            </Button>
-
-            <Button 
-              onClick={handleExportMassnahmen} 
-              variant="outline" 
-              className="w-full justify-start gap-3 h-auto py-4"
-            >
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
-                <Calendar className="h-5 w-5 text-blue-600" />
-              </div>
-              <div className="text-left">
-                <p className="font-medium">Maßnahmen exportieren</p>
-                <p className="text-sm text-muted-foreground">Alle {massnahmen.length} Maßnahmen als CSV</p>
-              </div>
-            </Button>
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowExportDialog(false)}>
-              Schließen
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Import Dialog */}
-      <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <FileUp className="h-5 w-5" />
-              Daten importieren
-            </DialogTitle>
-            <DialogDescription>
-              Importieren Sie Schläge oder Maßnahmen aus einer CSV-Datei
-            </DialogDescription>
-          </DialogHeader>
-
-          {importSuccess ? (
-            <div className="flex flex-col items-center gap-4 py-8">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
-                <CheckCircle2 className="h-8 w-8 text-emerald-600" />
-              </div>
-              <div className="text-center">
-                <h3 className="text-lg font-semibold">Import erfolgreich!</h3>
-                <p className="text-muted-foreground">Die Daten wurden importiert.</p>
-              </div>
-            </div>
-          ) : (
-            <>
-              <Alert>
-                <Info className="h-4 w-4" />
-                <AlertTitle>CSV-Format</AlertTitle>
-                <AlertDescription>
-                  Die CSV-Datei muss im Standardformat vorliegen. 
-                  Exportieren Sie zuerst Ihre bestehenden Daten als Vorlage.
-                </AlertDescription>
-              </Alert>
-
-              <div className="space-y-4">
-                <div className="rounded-lg border-2 border-dashed p-8 text-center">
-                  <FileSpreadsheet className="mx-auto h-12 w-12 text-muted-foreground" />
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    Ziehen Sie eine CSV-Datei hierher oder
-                  </p>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept=".csv"
-                    onChange={handleImport}
-                    className="hidden"
-                  />
-                  <Button
-                    variant="outline"
-                    className="mt-2"
-                    onClick={() => fileInputRef.current?.click()}
-                  >
-                    Datei auswählen
-                  </Button>
-                </div>
-              </div>
-
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setShowImportDialog(false)}>
-                  Abbrechen
-                </Button>
-              </DialogFooter>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* Dialoge */}
+      <SchlagAnlegenDialog open={showSchlagDialog} onOpenChange={setShowSchlagDialog} />
+      <MassnahmeDialog open={showMassnahmeDialog} onOpenChange={setShowMassnahmeDialog} schlaege={schlaege} />
+      <ExportDialog open={showExportDialog} onOpenChange={setShowExportDialog} schlaege={schlaege} />
+      <ImportDialog open={showImportDialog} onOpenChange={setShowImportDialog} />
     </div>
   )
 }
-
-function FeldbuchSkeleton() {
-  return (
-    <div className="space-y-6">
-      <div className="flex justify-between">
-        <Skeleton className="h-10 w-48" />
-        <div className="flex gap-2">
-          <Skeleton className="h-10 w-24" />
-          <Skeleton className="h-10 w-24" />
-        </div>
-      </div>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {[...Array(4)].map((_, i) => (
-          <Card key={i}>
-            <CardContent className="p-4">
-              <Skeleton className="h-12 w-full" />
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-      <Skeleton className="h-10 w-full" />
-      <Card>
-        <CardContent className="p-4 space-y-3">
-          {[...Array(5)].map((_, i) => (
-            <Skeleton key={i} className="h-12 w-full" />
-          ))}
-        </CardContent>
-      </Card>
-    </div>
-  )
-}
-

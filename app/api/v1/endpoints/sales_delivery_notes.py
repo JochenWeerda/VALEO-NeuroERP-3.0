@@ -336,6 +336,33 @@ async def update_delivery_note(
     )
 
 
+@router.delete("/{ls_id}", status_code=204)
+async def delete_delivery_note(
+    ls_id: str,
+    tenant_id: str = Query(DEFAULT_TENANT),
+    db: Session = Depends(get_db),
+):
+    """Delete a delivery note. Only draft delivery notes can be deleted."""
+    row = _get_delivery_note_or_404(db, ls_id, tenant_id)
+
+    if row["status"] != "draft":
+        raise HTTPException(
+            status_code=400,
+            detail="Nur Entwürfe können gelöscht werden. Gebuchte Lieferscheine können nicht gelöscht werden.",
+        )
+
+    # Positionen zuerst löschen (FK-Constraint)
+    db.execute(
+        text("DELETE FROM domain_sales.delivery_note_positions WHERE delivery_note_id = :id"),
+        {"id": ls_id},
+    )
+    db.execute(
+        text("DELETE FROM domain_sales.delivery_notes WHERE id = :id AND tenant_id = :tenant_id"),
+        {"id": ls_id, "tenant_id": tenant_id},
+    )
+    db.commit()
+
+
 @router.post("/{ls_id}/post", response_model=DeliveryNote)
 async def post_delivery_note(
     ls_id: str,

@@ -22,6 +22,7 @@ import { ArtikelSuchDialog } from '@/components/sales/ArtikelSuchDialog'
 import { WeighingTicketSelectionDialog, type WeighingTicket } from '@/components/agrar/WeighingTicketSelectionDialog'
 import { ContractSelectionDialog, type AgrarContract } from '@/components/agrar/ContractSelectionDialog'
 import { VarietySelectionDialog, type Variety } from '@/components/agrar/VarietySelectionDialog'
+import { DmsAnhangDialog } from '@/components/dms/DmsAnhangDialog'
 import { apiClient } from '@/lib/axios'
 import { useAuth } from '@/hooks/useAuth'
 import { useGlobalShortcuts, globalShortcutManager } from '@/lib/shortcuts/global-shortcuts'
@@ -370,6 +371,11 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
   const [showVarietyDialog, setShowVarietyDialog] = useState(false)
   const [showContractDialog, setShowContractDialog] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [showAttachmentDialog, setShowAttachmentDialog] = useState(false)
+  const [showForwarderDialog, setShowForwarderDialog] = useState(false)
+  const [forwarderName, setForwarderName] = useState('')
+  const [showIntermediateDealerDialog, setShowIntermediateDealerDialog] = useState(false)
+  const [intermediateDealerName, setIntermediateDealerName] = useState('')
 
   // Keyboard Shortcuts
   useGlobalShortcuts({
@@ -1152,14 +1158,17 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                     variant="ghost"
                     size="sm"
                     className="h-8 w-8 p-0"
-                    onClick={() => {
-                      // TODO: Spediteur-Auswahl-Dialog
-                      push('Spediteur-Auswahl - noch nicht implementiert')
-                    }}
+                    onClick={() => setShowForwarderDialog(true)}
                   >
                     <MoreHorizontal className="h-4 w-4" />
                   </Button>
                 </div>
+                {forwarderName && (
+                  <div className="flex items-center gap-2">
+                    <Label className="w-32 text-sm">Name:</Label>
+                    <span className="text-sm">{forwarderName}</span>
+                  </div>
+                )}
               </TabsContent>
 
               <TabsContent value="nawaro" className="mt-4 space-y-2">
@@ -1180,14 +1189,17 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                     variant="ghost"
                     size="sm"
                     className="h-8 w-8 p-0"
-                    onClick={() => {
-                      // TODO: Zwischenhändler-Auswahl-Dialog
-                      push('Zwischenhändler-Auswahl - noch nicht implementiert')
-                    }}
+                    onClick={() => setShowIntermediateDealerDialog(true)}
                   >
                     <MoreHorizontal className="h-4 w-4" />
                   </Button>
                 </div>
+                {intermediateDealerName && (
+                  <div className="flex items-center gap-2">
+                    <Label className="w-32 text-sm">Name:</Label>
+                    <span className="text-sm">{intermediateDealerName}</span>
+                  </div>
+                )}
               </TabsContent>
             </Tabs>
           </Card>
@@ -1487,11 +1499,11 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                 <FileText className="h-4 w-4" />
                 Aufteilungs-Buchung
               </Button>
-              <Button variant="outline" size="sm" className="gap-2">
+              <Button variant="outline" size="sm" className="gap-2" onClick={() => setShowAttachmentDialog(true)}>
                 <Folder className="h-4 w-4" />
                 Unterlagen
               </Button>
-              <Button variant="outline" size="sm" className="gap-2">
+              <Button variant="outline" size="sm" className="gap-2" onClick={() => setShowAttachmentDialog(true)}>
                 <Folder className="h-4 w-4" />
                 Dateien
               </Button>
@@ -1721,6 +1733,33 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
       </div>
 
       {/* Dialoge */}
+      <CustomerSelectionDialog
+        open={showForwarderDialog}
+        onClose={() => setShowForwarderDialog(false)}
+        onSelect={(customer) => {
+          setState((prev) => ({ ...prev, forwarderId: customer.id }))
+          setForwarderName(customer.name)
+          setShowForwarderDialog(false)
+        }}
+        title="SPEDITEUR AUSWÄHLEN"
+      />
+      <CustomerSelectionDialog
+        open={showIntermediateDealerDialog}
+        onClose={() => setShowIntermediateDealerDialog(false)}
+        onSelect={(customer) => {
+          setState((prev) => ({ ...prev, intermediateDealerId: customer.id }))
+          setIntermediateDealerName(customer.name)
+          setShowIntermediateDealerDialog(false)
+        }}
+        title="ZWISCHENHÄNDLER AUSWÄHLEN"
+      />
+      <DmsAnhangDialog
+        open={showAttachmentDialog}
+        onClose={() => setShowAttachmentDialog(false)}
+        businessObjectType="harvest_reception"
+        businessObjectId={state.id}
+        title="UNTERLAGEN / DATEIEN — ERNTE-ANNAHME"
+      />
       <CustomerSelectionDialog
         open={showCustomerDialog}
         onClose={() => setShowCustomerDialog(false)}
