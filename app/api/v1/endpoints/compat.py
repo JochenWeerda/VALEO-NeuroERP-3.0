@@ -1357,30 +1357,41 @@ async def portal_products(
         }
         for a in articles
     ]
-    return {"items": items, "total": total}
+    return {
+        "items": items,
+        "total": total,
+        "page": skip // limit if limit else 0,
+        "size": limit,
+        "has_contracts": 0,
+        "has_pre_purchases": 0,
+    }
 
 
 @router.get("/portal/orders", response_model=dict)
 async def portal_orders(
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=200),
-    status: Optional[str] = Query(None),
+    status_filter: Optional[str] = Query(None),
     tenant_id: Optional[str] = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> dict[str, Any]:
-    """Portal-Bestellhistorie. Liest aus domain_shared sales_orders."""
-    orders = _list_docs(db, "sales_order", limit=limit, offset=skip, tenant_id=tenant_id)
-    if status:
-        orders = [o for o in orders if o.get("status") == status]
+    """Portal-Bestellhistorie. Gibt OrderListItem[] zurück (portal-service.ts)."""
+    orders = _list_docs(db, "sales_order", limit=limit, tenant_id=tenant_id)
+    if status_filter:
+        orders = [o for o in orders if o.get("status") == status_filter]
     items = [
         {
             "id": o.get("id", ""),
-            "orderNumber": o.get("number") or o.get("order_number", ""),
-            "datum": o.get("created_at", "")[:10] if o.get("created_at") else "",
+            "order_number": o.get("number") or o.get("order_number", ""),
+            "order_date": (o.get("created_at", "")[:10] if o.get("created_at") else
+                           o.get("datum", "")[:10] if o.get("datum") else ""),
             "status": o.get("status", "SUBMITTED"),
-            "totalAmount": float(o.get("total_amount") or o.get("totalAmount") or 0),
-            "currency": o.get("currency", "EUR"),
-            "positions": o.get("positions") or o.get("items") or [],
+            "item_count": len(o.get("positions") or o.get("items") or []),
+            "total_net": float(o.get("total_net") or o.get("total_amount") or o.get("totalAmount") or 0),
+            "main_article": (
+                (o.get("positions") or o.get("items") or [{}])[0].get("bezeichnung") or
+                (o.get("positions") or o.get("items") or [{}])[0].get("name") or ""
+            ) if (o.get("positions") or o.get("items")) else "",
         }
         for o in orders
     ]
@@ -1423,54 +1434,60 @@ async def portal_create_order(
     return order
 
 
-@router.get("/portal/contracts", response_model=dict)
+@router.get("/portal/contracts", response_model=list)
 async def portal_contracts(
     tenant_id: Optional[str] = Depends(get_tenant_id),
     db: Session = Depends(get_db),
-) -> dict[str, Any]:
-    """Aktive Verträge/Kontingente des Kunden."""
+) -> list[dict[str, Any]]:
+    """Aktive Verträge/Kontingente des Kunden (Contract[] für portal-service.ts)."""
     try:
         contracts = _list_docs(db, "kontrakt", limit=200, tenant_id=tenant_id)
     except Exception:
         contracts = []
-    items = [
+    return [
         {
             "id": c.get("id", ""),
-            "artikelId": c.get("artikel_id") or c.get("artikelId", ""),
-            "articleName": c.get("artikel_name") or c.get("articleName", ""),
-            "contractStatus": c.get("status", "ACTIVE"),
-            "contractPrice": float(c.get("preis") or c.get("contractPrice") or 0),
-            "contractRemainingQty": float(c.get("verbleibende_menge") or c.get("remainingQty") or 0),
-            "contractTotalQty": float(c.get("gesamtmenge") or c.get("totalQty") or 0),
-            "laufzeitBis": c.get("laufzeit_bis") or c.get("validUntil"),
+            "contract_number": c.get("nummer") or c.get("contract_number", ""),
+            "article_name": c.get("artikel_name") or c.get("article_name", ""),
+            "article_number": c.get("artikel_nummer") or c.get("article_number", ""),
+            "contract_price": float(c.get("preis") or c.get("contract_price") or 0),
+            "list_price": float(c.get("listenpreis") or c.get("list_price") or 0),
+            "unit": c.get("einheit") or c.get("unit", "kg"),
+            "total_quantity": float(c.get("gesamtmenge") or c.get("total_quantity") or 0),
+            "remaining_quantity": float(c.get("verbleibende_menge") or c.get("remaining_quantity") or 0),
+            "status": c.get("status", "ACTIVE"),
+            "valid_until": c.get("laufzeit_bis") or c.get("valid_until", ""),
         }
         for c in contracts
     ]
-    return {"items": items, "total": len(items)}
 
 
-@router.get("/portal/pre-purchases", response_model=dict)
+@router.get("/portal/pre-purchases", response_model=list)
 async def portal_pre_purchases(
     tenant_id: Optional[str] = Depends(get_tenant_id),
     db: Session = Depends(get_db),
-) -> dict[str, Any]:
-    """Vorkäufe des Kunden (Vorratskäufe)."""
+) -> list[dict[str, Any]]:
+    """Vorkäufe des Kunden (PrePurchase[] für portal-service.ts)."""
     try:
         pps = _list_docs(db, "vorkauf", limit=200, tenant_id=tenant_id)
     except Exception:
         pps = []
-    items = [
+    return [
         {
             "id": p.get("id", ""),
-            "artikelId": p.get("artikel_id", ""),
-            "articleName": p.get("artikel_name", ""),
-            "prePurchasePrice": float(p.get("preis") or 0),
-            "prePurchaseTotalQty": float(p.get("gesamtmenge") or 0),
-            "prePurchaseRemainingQty": float(p.get("verbleibende_menge") or 0),
+            "pre_purchase_number": p.get("nummer") or p.get("pre_purchase_number", ""),
+            "article_name": p.get("artikel_name") or p.get("article_name", ""),
+            "article_number": p.get("artikel_nummer") or p.get("article_number", ""),
+            "pre_purchase_price": float(p.get("preis") or p.get("pre_purchase_price") or 0),
+            "current_list_price": float(p.get("listenpreis") or p.get("current_list_price") or 0),
+            "unit": p.get("einheit") or p.get("unit", "kg"),
+            "total_quantity": float(p.get("gesamtmenge") or p.get("total_quantity") or 0),
+            "remaining_quantity": float(p.get("verbleibende_menge") or p.get("remaining_quantity") or 0),
+            "payment_date": p.get("zahldatum") or p.get("payment_date", ""),
+            "valid_until": p.get("laufzeit_bis") or p.get("valid_until"),
         }
         for p in pps
     ]
-    return {"items": items, "total": len(items)}
 
 
 @router.get("/portal/vertraege", response_model=list)
