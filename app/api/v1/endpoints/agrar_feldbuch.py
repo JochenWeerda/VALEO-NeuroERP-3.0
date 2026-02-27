@@ -11,6 +11,7 @@ from datetime import datetime
 from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.responses import Response
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -240,12 +241,12 @@ async def update_schlag(
     return _schlag_to_dict(schlag)
 
 
-@router.delete("/schlaege/{schlag_id}", status_code=204)
+@router.delete("/schlaege/{schlag_id}", status_code=204, response_class=Response)
 async def deactivate_schlag(
     schlag_id: str,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
-) -> None:
+) -> Response:
     schlag = (
         db.query(FeldbuchSchlag)
         .filter(FeldbuchSchlag.id == schlag_id, FeldbuchSchlag.tenant_id == tenant_id)
@@ -255,6 +256,7 @@ async def deactivate_schlag(
         raise HTTPException(status_code=404, detail="Schlag nicht gefunden")
     schlag.status = "stillgelegt"
     db.commit()
+    return Response(status_code=204)
 
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -326,12 +328,12 @@ async def update_massnahme(
     return _massnahme_to_dict(massnahme)
 
 
-@router.delete("/feldbuch/massnahmen/{massnahme_id}", status_code=204)
+@router.delete("/feldbuch/massnahmen/{massnahme_id}", status_code=204, response_class=Response)
 async def delete_massnahme(
     massnahme_id: str,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
-) -> None:
+) -> Response:
     massnahme = (
         db.query(FeldbuchMassnahme)
         .filter(FeldbuchMassnahme.id == massnahme_id, FeldbuchMassnahme.tenant_id == tenant_id)
@@ -341,6 +343,7 @@ async def delete_massnahme(
         raise HTTPException(status_code=404, detail="Maßnahme nicht gefunden")
     db.delete(massnahme)
     db.commit()
+    return Response(status_code=204)
 
 
 @router.post("/feldbuch/massnahmen/from-lieferschein", status_code=201)
