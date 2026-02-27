@@ -8,6 +8,7 @@ import {
   Calculator,
   Euro,
   FileText,
+  Globe,
   LayoutDashboard,
   Leaf,
   Package,
@@ -348,6 +349,15 @@ const NAV_SECTIONS_CONFIG: RawNavItem[] = [
         module: '@/pages/einkauf/bestellungen-liste',
         preferredPath: 'einkauf/bestellungen',
         keywords: ['bestellungen'],
+        mcp: { businessDomain: 'procurement', scope: 'procurement:read' },
+      },
+      {
+        id: 'einkauf-lieferschein-erfassung',
+        label: 'Eingehende Belege',
+        icon: FileText,
+        module: '@/pages/einkauf/lieferschein-erfassung',
+        preferredPath: 'einkauf/lieferschein-erfassung',
+        keywords: ['eingehende belege', 'einkauf lieferschein', 'wareneingang', 'kreditor'],
         mcp: { businessDomain: 'procurement', scope: 'procurement:read' },
       },
       {
@@ -1494,6 +1504,14 @@ const NAV_SECTIONS_CONFIG: RawNavItem[] = [
         mcp: { businessDomain: 'admin', scope: 'admin:read' },
       },
     ],
+  },
+  {
+    id: 'kundenportal',
+    label: 'Kundenportal',
+    icon: Globe,
+    path: '/portal',
+    keywords: ['portal', 'kunde', 'landwirt', 'shop', 'bestellung', 'futterbestellung', 'verträge'],
+    mcp: { businessDomain: 'sales', scope: 'sales:read' },
   },
 ]
 
