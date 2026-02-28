@@ -1,16 +1,36 @@
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Map, Sprout } from 'lucide-react'
+import { useSchlaege } from '@/lib/api/agrar'
+
+const kulturFarbe: Record<string, string> = {
+  Weizen: 'bg-yellow-200', Winterweizen: 'bg-yellow-200', Sommerweizen: 'bg-yellow-100',
+  Raps: 'bg-yellow-300', Winterraps: 'bg-yellow-300',
+  Mais: 'bg-green-200', Silomais: 'bg-green-300',
+  Gerste: 'bg-amber-200', Wintergerste: 'bg-amber-200', Sommergerste: 'bg-amber-100',
+  Roggen: 'bg-orange-200', Triticale: 'bg-orange-100',
+}
 
 export default function SchlagKartePage(): JSX.Element {
-  const schlaege = {
-    gesamt: 5,
-    flaeche: 125.5,
-    liste: [
-      { nummer: 'S-001', name: 'Hinterfeld', kultur: 'Weizen', flaeche: 25.0, farbe: 'bg-yellow-200' },
-      { nummer: 'S-002', name: 'Vorderfeld', kultur: 'Raps', flaeche: 18.5, farbe: 'bg-yellow-300' },
-      { nummer: 'S-003', name: 'Ostacker', kultur: 'Mais', flaeche: 32.0, farbe: 'bg-green-200' },
-    ],
+  const { data: schlaegeListe = [], isLoading } = useSchlaege()
+
+  const gesamt = schlaegeListe.length
+  const flaeche = schlaegeListe.reduce((sum, s) => sum + s.flaeche, 0)
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6 p-6">
+        <Skeleton className="h-10 w-48" />
+        <div className="grid gap-4 md:grid-cols-3">
+          <Skeleton className="h-24" />
+          <Skeleton className="h-24" />
+          <Skeleton className="h-24" />
+        </div>
+        <Skeleton className="h-96" />
+        <Skeleton className="h-64" />
+      </div>
+    )
   }
 
   return (
@@ -28,7 +48,7 @@ export default function SchlagKartePage(): JSX.Element {
           <CardContent>
             <div className="flex items-center gap-2">
               <Map className="h-5 w-5 text-blue-600" />
-              <span className="text-2xl font-bold">{schlaege.gesamt}</span>
+              <span className="text-2xl font-bold">{gesamt}</span>
             </div>
           </CardContent>
         </Card>
@@ -40,7 +60,7 @@ export default function SchlagKartePage(): JSX.Element {
           <CardContent>
             <div className="flex items-center gap-2">
               <Sprout className="h-5 w-5 text-green-600" />
-              <span className="text-2xl font-bold">{schlaege.flaeche} ha</span>
+              <span className="text-2xl font-bold">{flaeche.toFixed(1)} ha</span>
             </div>
           </CardContent>
         </Card>
@@ -50,7 +70,9 @@ export default function SchlagKartePage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Ø Schlaggröße</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold">{(schlaege.flaeche / schlaege.gesamt).toFixed(1)} ha</span>
+            <span className="text-2xl font-bold">
+              {gesamt > 0 ? (flaeche / gesamt).toFixed(1) : '0.0'} ha
+            </span>
           </CardContent>
         </Card>
       </div>
@@ -75,26 +97,34 @@ export default function SchlagKartePage(): JSX.Element {
           <CardTitle>Schlag-Übersicht</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            {schlaege.liste.map((schlag, i) => (
-              <div key={i} className="rounded-lg border p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 rounded-lg ${schlag.farbe} flex items-center justify-center font-mono font-bold`}>
-                      {schlag.nummer}
-                    </div>
-                    <div>
-                      <div className="font-semibold text-lg">{schlag.name}</div>
-                      <div className="text-sm text-muted-foreground">
-                        <Badge variant="outline" className="mr-2">{schlag.kultur}</Badge>
-                        {schlag.flaeche} ha
+          {schlaegeListe.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-4">Keine Schläge erfasst.</p>
+          ) : (
+            <div className="space-y-3">
+              {schlaegeListe.map((schlag, i) => (
+                <div key={schlag.id} className="rounded-lg border p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className={`w-12 h-12 rounded-lg ${kulturFarbe[schlag.kultur] ?? 'bg-gray-200'} flex items-center justify-center font-mono font-bold text-xs`}>
+                        {schlag.flik ? schlag.flik.slice(-4) : `S-${String(i + 1).padStart(3, '0')}`}
+                      </div>
+                      <div>
+                        <div className="font-semibold text-lg">{schlag.name}</div>
+                        <div className="text-sm text-muted-foreground">
+                          <Badge variant="outline" className="mr-2">{schlag.kultur}</Badge>
+                          {schlag.flaeche} ha
+                          {schlag.gemeinde && <span className="ml-2 text-muted-foreground">· {schlag.gemeinde}</span>}
+                        </div>
                       </div>
                     </div>
+                    <Badge variant={schlag.status === 'aktiv' ? 'outline' : 'secondary'}>
+                      {schlag.status}
+                    </Badge>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
