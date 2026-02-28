@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useQuery, useMutation } from '@tanstack/react-query'
+import { apiClient } from '@/lib/api-client'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -75,106 +77,66 @@ export default function PSMAbgabeDokumentationPage(): JSX.Element {
     updatedAt: '2024-10-15T10:30:00Z'
   })
 
-  const [isLoading, setIsLoading] = useState(false)
+  const { data: abgabeApiData } = useQuery({
+    queryKey: ['agrar', 'psm-abgabe', id],
+    queryFn: async () => {
+      const response = await apiClient.get<PSMAbgabeData>(`/api/v1/agrar/psm/abgabe/${id}`)
+      return response.data
+    },
+    enabled: !!id && id !== 'neu',
+  })
 
   useEffect(() => {
-    // Load PSM Abgabe data
-    loadAbgabeData()
-  }, [id])
+    if (abgabeApiData) setAbgabe(abgabeApiData)
+  }, [abgabeApiData])
 
-  const loadAbgabeData = async () => {
-    try {
-      // API call to load PSM Abgabe data
-      // const response = await fetch(`/api/v1/agrar/psm/abgabe/${id}`)
-      // const data = await response.json()
-      // setAbgabe(data)
-    } catch (error) {
-      console.error('Failed to load PSM Abgabe data:', error)
-    }
-  }
-
-  const handleSave = async () => {
-    setIsLoading(true)
-    try {
-      // API call to save PSM Abgabe data
-      // const response = await fetch(`/api/v1/agrar/psm/abgabe/${id}`, {
-      //   method: 'PUT',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(abgabe)
-      // })
-
-      toast({
-        title: "Gespeichert",
-        description: "PSM-Abgabe-Dokumentation wurde erfolgreich gespeichert.",
-      })
-
+  const saveMutation = useMutation({
+    mutationFn: async (data: PSMAbgabeData) => {
+      const response = await apiClient.put<PSMAbgabeData>(`/api/v1/agrar/psm/abgabe/${id}`, data)
+      return response.data
+    },
+    onSuccess: () => {
+      toast({ title: 'Gespeichert', description: 'PSM-Abgabe-Dokumentation wurde erfolgreich gespeichert.' })
       navigate('/agrar/psm/liste')
-    } catch (error) {
-      toast({
-        title: "Fehler",
-        description: "Fehler beim Speichern der PSM-Abgabe-Dokumentation.",
-        variant: "destructive",
-      })
-    } finally {
-      setIsLoading(false)
-    }
-  }
+    },
+    onError: () => {
+      toast({ title: 'Fehler', description: 'Fehler beim Speichern der PSM-Abgabe-Dokumentation.', variant: 'destructive' })
+    },
+  })
 
-  const handleStatusChange = async (newStatus: PSMAbgabeData['status']) => {
-    setIsLoading(true)
-    try {
-      const updatedAbgabe = { ...abgabe, status: newStatus, updatedAt: new Date().toISOString() }
-      setAbgabe(updatedAbgabe)
+  const statusMutation = useMutation({
+    mutationFn: async (newStatus: PSMAbgabeData['status']) => {
+      const response = await apiClient.put(`/api/v1/agrar/psm/abgabe/${id}/status`, { status: newStatus })
+      return response.data
+    },
+    onSuccess: (_data, newStatus) => {
+      setAbgabe(prev => ({ ...prev, status: newStatus, updatedAt: new Date().toISOString() }))
+      toast({ title: 'Status aktualisiert', description: `PSM-Abgabe wurde auf "${newStatus}" gesetzt.` })
+    },
+    onError: () => {
+      toast({ title: 'Fehler', description: 'Fehler beim Aktualisieren des Status.', variant: 'destructive' })
+    },
+  })
 
-      // API call to update status
-      // await fetch(`/api/v1/agrar/psm/abgabe/${id}/status`, {
-      //   method: 'PUT',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ status: newStatus })
-      // })
+  const erklaerungMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiClient.post(`/api/v1/agrar/psm/${abgabe.psmId}/erklaerung`, {})
+      return response.data
+    },
+    onSuccess: () => {
+      setAbgabe(prev => ({ ...prev, erklaerungStatus: 'eingegangen', updatedAt: new Date().toISOString() }))
+      toast({ title: 'Erklärung hochgeladen', description: 'Die Erklärung des Landwirts wurde erfolgreich hochgeladen.' })
+    },
+    onError: () => {
+      toast({ title: 'Fehler', description: 'Fehler beim Hochladen der Erklärung.', variant: 'destructive' })
+    },
+  })
 
-      toast({
-        title: "Status aktualisiert",
-        description: `PSM-Abgabe wurde auf "${newStatus}" gesetzt.`,
-      })
-    } catch (error) {
-      toast({
-        title: "Fehler",
-        description: "Fehler beim Aktualisieren des Status.",
-        variant: "destructive",
-      })
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  const isLoading = saveMutation.isPending || statusMutation.isPending || erklaerungMutation.isPending
 
-  const handleErklaerungUpload = async () => {
-    // Handle farmer declaration upload
-    try {
-      // API call to upload farmer declaration
-      // const response = await fetch(`/api/v1/agrar/psm/${abgabe.psmId}/erklaerung`, {
-      //   method: 'POST',
-      //   body: formData
-      // })
-
-      setAbgabe(prev => ({
-        ...prev,
-        erklaerungStatus: 'eingegangen',
-        updatedAt: new Date().toISOString()
-      }))
-
-      toast({
-        title: "Erklärung hochgeladen",
-        description: "Die Erklärung des Landwirts wurde erfolgreich hochgeladen.",
-      })
-    } catch (error) {
-      toast({
-        title: "Fehler",
-        description: "Fehler beim Hochladen der Erklärung.",
-        variant: "destructive",
-      })
-    }
-  }
+  const handleSave = () => saveMutation.mutate(abgabe)
+  const handleStatusChange = (newStatus: PSMAbgabeData['status']) => statusMutation.mutate(newStatus)
+  const handleErklaerungUpload = () => erklaerungMutation.mutate()
 
   const isSachkundeValid = new Date(abgabe.sachkundeGueltigBis) > new Date()
   const hasAllRequiredDocs = abgabe.dokumente.length > 0 && abgabe.erklaerungStatus !== 'ausstehend'

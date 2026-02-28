@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Skeleton } from '@/components/ui/skeleton'
 import { CheckCircle, MapPin, Shield, XCircle, Search } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
-import { useWasserschutzZonen } from '@/lib/api/agrar'
+import { useWasserschutzZonen, usePSM } from '@/lib/api/agrar'
 
 type PSMMittel = {
   id: string
@@ -34,6 +34,7 @@ export default function PSMWasserschutzPruefungPage(): JSX.Element {
   const { toast } = useToast()
 
   const { data: wasserschutzZonen, isLoading } = useWasserschutzZonen()
+  const { data: psmResponse } = usePSM()
 
   const [schlagKoordinaten, setSchlagKoordinaten] = useState({ lat: 52.5200, lng: 13.4050 })
   const [schlagAdresse, setSchlagAdresse] = useState('')
@@ -43,35 +44,18 @@ export default function PSMWasserschutzPruefungPage(): JSX.Element {
   const [pruefErgebnis, setPruefErgebnis] = useState<PruefErgebnis | null>(null)
   const [isPruefLoading, setIsPruefLoading] = useState(false)
 
-  const verfuegbarePSM: PSMMittel[] = [
-    {
-      id: 'PSM-001',
-      name: 'Roundup PowerFlex',
-      wirkstoff: 'Glyphosat',
-      wasserschutz_zulassung: false,
-      max_dosierung: 5,
-      wartezeit: 14,
-      auflagen: ['NW-Auflagen', 'B-Auflagen']
-    },
-    {
-      id: 'PSM-002',
-      name: 'Harmony SX',
-      wirkstoff: 'Thifensulfuron-methyl',
-      wasserschutz_zulassung: true,
-      max_dosierung: 15,
-      wartezeit: 7,
-      auflagen: ['NT-Auflagen']
-    },
-    {
-      id: 'PSM-003',
-      name: 'Folicur',
-      wirkstoff: 'Tebuconazol',
-      wasserschutz_zulassung: true,
-      max_dosierung: 1,
-      wartezeit: 21,
-      auflagen: ['NW-Auflagen']
+  const verfuegbarePSM: PSMMittel[] = (psmResponse?.items ?? []).map(p => {
+    const ext = p as unknown as Record<string, unknown>
+    return {
+      id: p.id,
+      name: p.mittel,
+      wirkstoff: p.wirkstoff,
+      wasserschutz_zulassung: Boolean(ext.wasserschutz_zulassung ?? ext.wasserschutz ?? false),
+      max_dosierung: Number(ext.max_dosierung ?? ext.dosierung_max ?? 0),
+      wartezeit: Number(ext.wartezeit ?? ext.wartezeit_tage ?? 0),
+      auflagen: Array.isArray(ext.auflagen) ? ext.auflagen as string[] : [],
     }
-  ]
+  })
 
   const zonen = wasserschutzZonen ?? []
 
