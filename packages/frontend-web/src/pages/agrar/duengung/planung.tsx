@@ -2,20 +2,15 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Sprout, TrendingUp } from 'lucide-react'
-import { useDuengerKomponenten } from '@/lib/api/agrar'
+import { useDuengerKomponenten, useSchlaege } from '@/lib/api/agrar'
 
 export default function DuengungsplanungPage(): JSX.Element {
-  const { data: komponenten, isLoading } = useDuengerKomponenten()
+  const { data: komponenten, isLoading: loadingKomponenten } = useDuengerKomponenten()
+  const { data: schlaegeListe = [], isLoading: loadingSchlaege } = useSchlaege()
 
-  const planung = {
-    schlaege: [
-      { schlag: 'S-001 Hinterfeld', kultur: 'Weizen', flaeche: 25, npk: { n: 180, p: 60, k: 120 }, geplant: 'KW 12' },
-      { schlag: 'S-002 Vorderfeld', kultur: 'Raps', flaeche: 18, npk: { n: 200, p: 70, k: 140 }, geplant: 'KW 13' },
-    ],
-    gesamtFlaeche: 43,
-  }
-
+  const gesamtFlaeche = schlaegeListe.reduce((sum, s) => sum + s.flaeche, 0)
   const verfuegbareKomponenten = komponenten ?? []
+  const isLoading = loadingKomponenten || loadingSchlaege
 
   if (isLoading) {
     return (
@@ -47,7 +42,7 @@ export default function DuengungsplanungPage(): JSX.Element {
           <CardContent>
             <div className="flex items-center gap-2">
               <Sprout className="h-5 w-5 text-green-600" />
-              <span className="text-2xl font-bold">{planung.schlaege.length}</span>
+              <span className="text-2xl font-bold">{schlaegeListe.length}</span>
             </div>
           </CardContent>
         </Card>
@@ -57,7 +52,7 @@ export default function DuengungsplanungPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Gesamt-Fläche</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold">{planung.gesamtFlaeche} ha</span>
+            <span className="text-2xl font-bold">{gesamtFlaeche.toFixed(1)} ha</span>
           </CardContent>
         </Card>
 
@@ -79,37 +74,42 @@ export default function DuengungsplanungPage(): JSX.Element {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            {planung.schlaege.map((schlag, i) => (
-              <Card key={i}>
+          {schlaegeListe.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-4">Keine Schläge erfasst.</p>
+            ) : (
+            <div className="space-y-3">
+            {schlaegeListe.map((schlag) => (
+              <Card key={schlag.id}>
                 <CardContent className="pt-4">
                   <div className="flex items-start justify-between mb-3">
                     <div>
-                      <div className="font-semibold text-lg">{schlag.schlag}</div>
+                      <div className="font-semibold text-lg">{schlag.name}</div>
                       <div className="text-sm text-muted-foreground">{schlag.kultur} - {schlag.flaeche} ha</div>
                     </div>
-                    <Badge variant="outline">Geplant: {schlag.geplant}</Badge>
+                    <Badge variant="outline">{schlag.status}</Badge>
                   </div>
                   <div className="grid grid-cols-3 gap-4 mt-4">
                     <div className="rounded-lg bg-blue-50 p-3 text-center">
                       <div className="text-sm text-muted-foreground">N (Stickstoff)</div>
-                      <div className="text-2xl font-bold text-blue-600">{schlag.npk.n}</div>
+                      <div className="text-lg font-bold text-blue-600 mt-1">—</div>
                       <div className="text-xs text-muted-foreground">kg/ha</div>
                     </div>
                     <div className="rounded-lg bg-orange-50 p-3 text-center">
                       <div className="text-sm text-muted-foreground">P (Phosphor)</div>
-                      <div className="text-2xl font-bold text-orange-600">{schlag.npk.p}</div>
+                      <div className="text-lg font-bold text-orange-600 mt-1">—</div>
                       <div className="text-xs text-muted-foreground">kg/ha</div>
                     </div>
                     <div className="rounded-lg bg-green-50 p-3 text-center">
                       <div className="text-sm text-muted-foreground">K (Kalium)</div>
-                      <div className="text-2xl font-bold text-green-600">{schlag.npk.k}</div>
+                      <div className="text-lg font-bold text-green-600 mt-1">—</div>
                       <div className="text-xs text-muted-foreground">kg/ha</div>
                     </div>
                   </div>
                 </CardContent>
               </Card>
             ))}
+            </div>
+            )}
           </div>
         </CardContent>
       </Card>
