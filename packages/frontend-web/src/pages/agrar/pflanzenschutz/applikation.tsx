@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Wizard } from '@/components/patterns/Wizard'
+import { useSchlaege, usePSM } from '@/lib/api/agrar'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -19,6 +20,9 @@ type ApplikationData = {
 
 export default function PflanzenschutzApplikationPage(): JSX.Element {
   const navigate = useNavigate()
+  const { data: schlaegeListe = [] } = useSchlaege()
+  const { data: psmData } = usePSM()
+  const psmListe = psmData?.items ?? []
   const [applikation, setApplikation] = useState<ApplikationData>({
     schlag: '',
     kultur: '',
@@ -55,8 +59,11 @@ export default function PflanzenschutzApplikationPage(): JSX.Element {
               className="w-full rounded-md border border-input bg-background px-3 py-2"
             >
               <option value="">-- Wählen --</option>
-              <option value="S-001">S-001 Hinterfeld (Weizen, 25 ha)</option>
-              <option value="S-002">S-002 Vorderfeld (Raps, 18 ha)</option>
+              {schlaegeListe.map(s => (
+                <option key={s.id} value={s.id}>
+                  {s.name} ({s.kultur}, {s.flaeche} ha)
+                </option>
+              ))}
             </select>
           </div>
           <div>
@@ -84,8 +91,11 @@ export default function PflanzenschutzApplikationPage(): JSX.Element {
               className="w-full rounded-md border border-input bg-background px-3 py-2"
             >
               <option value="">-- Wählen --</option>
-              <option value="fungizid-a">Fungizid A (Wirkstoff: Tebuconazol)</option>
-              <option value="herbizid-b">Herbizid B (Wirkstoff: Glyphosat)</option>
+              {psmListe.map(p => (
+                <option key={p.id} value={p.id}>
+                  {p.mittel} ({p.wirkstoff})
+                </option>
+              ))}
             </select>
           </div>
           <div>

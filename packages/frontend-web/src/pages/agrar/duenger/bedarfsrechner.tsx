@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Wizard } from '@/components/patterns/Wizard'
+import { useKulturen } from '@/lib/api/agrar'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -25,6 +26,7 @@ type BedarfData = {
 
 export default function BedarfsrechnerPage(): JSX.Element {
   const navigate = useNavigate()
+  const { data: kulturenListe = [] } = useKulturen()
   const [bedarf, setBedarf] = useState<BedarfData>({
     flaeche: 0,
     kultur: '',
@@ -84,10 +86,18 @@ export default function BedarfsrechnerPage(): JSX.Element {
               className="w-full rounded-md border border-input bg-background px-3 py-2"
             >
               <option value="">-- Wählen --</option>
-              <option value="weizen">Weizen</option>
-              <option value="gerste">Gerste</option>
-              <option value="raps">Raps</option>
-              <option value="mais">Mais</option>
+              {kulturenListe.length > 0
+                ? kulturenListe.map(k => (
+                    <option key={k.id} value={k.name.toLowerCase()}>{k.name}</option>
+                  ))
+                : (
+                  <>
+                    <option value="weizen">Weizen</option>
+                    <option value="gerste">Gerste</option>
+                    <option value="raps">Raps</option>
+                    <option value="mais">Mais</option>
+                  </>
+                )}
             </select>
           </div>
         </div>
