@@ -1458,13 +1458,13 @@ async def portal_feldbuch_stats(
         ).count()
 
         return {
-            "anzahlSchlaege": len(schlaege),
-            "gesamtflaeche": gesamtflaeche,
-            "anzahlMassnahmen": massnahmen_count,
-            "valeoLeistungen": valeo_count,
+            "schlaege": len(schlaege),
+            "gesamtFlaeche": gesamtflaeche,
+            "massnahmen": massnahmen_count,
+            "valeoDienste": valeo_count,
         }
     except Exception:
-        return {"anzahlSchlaege": 0, "gesamtflaeche": 0.0, "anzahlMassnahmen": 0, "valeoLeistungen": 0}
+        return {"schlaege": 0, "gesamtFlaeche": 0.0, "massnahmen": 0, "valeoDienste": 0}
 
 
 @router.get("/portal/feldbuch/export", response_class=None)
