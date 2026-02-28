@@ -270,13 +270,13 @@ const createKasseConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
     , onClick: () => {} }
   ],
   api: {
-    baseUrl: '/api/finance/kasse',
+    baseUrl: '/api/v1/finance/cash',
     endpoints: {
-      list: '/api/finance/kasse',
-      get: '/api/finance/kasse/{id}',
-      create: '/api/finance/kasse',
-      update: '/api/finance/kasse/{id}',
-      delete: '/api/finance/kasse/{id}'
+      list: '/api/v1/finance/cash',
+      get: '/api/v1/finance/cash/{id}',
+      create: '/api/v1/finance/cash',
+      update: '/api/v1/finance/cash/{id}',
+      delete: '/api/v1/finance/cash/{id}'
     }
   } as any,
   validation: createKasseSchema(t),
@@ -620,7 +620,7 @@ export default function KassePage(): JSX.Element {
         })
         return
       }
-      window.open(`/api/finance/kasse/${formData.id}/export`, '_blank')
+      window.open(`/api/v1/finance/cash/${formData.id}/export`, '_blank')
     }
   })
 

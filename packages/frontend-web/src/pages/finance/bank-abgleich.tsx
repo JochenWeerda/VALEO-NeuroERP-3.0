@@ -207,13 +207,13 @@ const createBankAbgleichConfig = (t: any, entityTypeLabel: string): MaskConfig =
     , onClick: () => {} }
   ],
   api: {
-    baseUrl: '/api/finance/bank',
+    baseUrl: '/api/v1/finance/bank-statements',
     endpoints: {
-      list: '/api/finance/bank',
-      get: '/api/finance/bank/{id}',
-      create: '/api/finance/bank',
-      update: '/api/finance/bank/{id}',
-      delete: '/api/finance/bank/{id}'
+      list: '/api/v1/finance/bank-statements',
+      get: '/api/v1/finance/bank-statements/{id}',
+      create: '/api/v1/finance/bank-statements',
+      update: '/api/v1/finance/bank-statements/{id}',
+      delete: '/api/v1/finance/bank-statements/{id}'
     }
   } as any,
   validation: createBankAbgleichSchema(t),
@@ -543,7 +543,7 @@ export default function BankAbgleichPage(): JSX.Element {
         })
         return
       }
-      window.open(`/api/finance/bank/${formData.id}/export`, '_blank')
+      window.open(`/api/v1/finance/bank-statements/${formData.id}/export`, '_blank')
     }
   })
 

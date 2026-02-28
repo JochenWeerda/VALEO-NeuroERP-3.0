@@ -337,13 +337,13 @@ const createUstvaConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
     , onClick: () => {} }
   ],
   api: {
-    baseUrl: '/api/finance/ustva',
+    baseUrl: '/api/v1/finance/ustva',
     endpoints: {
-      list: '/api/finance/ustva',
-      get: '/api/finance/ustva/{id}',
-      create: '/api/finance/ustva',
-      update: '/api/finance/ustva/{id}',
-      delete: '/api/finance/ustva/{id}'
+      list: '/api/v1/finance/ustva',
+      get: '/api/v1/finance/ustva/{id}',
+      create: '/api/v1/finance/ustva',
+      update: '/api/v1/finance/ustva/{id}',
+      delete: '/api/v1/finance/ustva/{id}'
     }
   } as any,
   validation: createUstvaSchema(t),
@@ -513,7 +513,7 @@ export default function UStVAPage(): JSX.Element {
       }
 
       try {
-        const response = await fetch(`/api/finance/ustva/${formData.id}/approve`, {
+        const response = await fetch(`/api/v1/finance/ustva/${formData.id}/approve`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -570,7 +570,7 @@ export default function UStVAPage(): JSX.Element {
         })
         return
       }
-      window.open(`/api/finance/ustva/${formData.id}/export`, '_blank')
+      window.open(`/api/v1/finance/ustva/${formData.id}/export`, '_blank')
     }
   })
 

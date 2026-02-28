@@ -476,7 +476,7 @@ export default function OPDebitorenPage(): JSX.Element {
       }
 
       try {
-        const response = await fetch(`/api/finance/op-debitoren/${formData.id}/mahnung`, {
+        const response = await fetch(`/api/v1/finance/dunning/${formData.id}/mahnung`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

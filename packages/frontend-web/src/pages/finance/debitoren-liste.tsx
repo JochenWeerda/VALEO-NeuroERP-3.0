@@ -197,13 +197,13 @@ const createDebitorenListConfig = (t: any): ListConfig => ({
   defaultSort: { field: 'offenerBetrag', direction: 'desc' },
   pageSize: 25,
   api: {
-    baseUrl: '/api/finance/debitoren',
+    baseUrl: '/api/v1/finance/debtors',
     endpoints: {
-      list: '/api/finance/debitoren',
-      get: '/api/finance/debitoren/{id}',
-      create: '/api/finance/debitoren',
-      update: '/api/finance/debitoren/{id}',
-      delete: '/api/finance/debitoren/{id}'
+      list: '/api/v1/finance/debtors',
+      get: '/api/v1/finance/debtors/{id}',
+      create: '/api/v1/finance/debtors',
+      update: '/api/v1/finance/debtors/{id}',
+      delete: '/api/v1/finance/debtors/{id}'
     }
   },
   permissions: ['finance.read', 'debtor.read'],

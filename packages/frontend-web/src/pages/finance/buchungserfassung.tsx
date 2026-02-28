@@ -184,13 +184,13 @@ const createBuchungConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
     , onClick: () => {} }
   ],
   api: {
-    baseUrl: '/api/finance/buchungen',
+    baseUrl: '/api/v1/journal-entries',
     endpoints: {
-      list: '/api/finance/buchungen',
-      get: '/api/finance/buchungen/{id}',
-      create: '/api/finance/buchungen',
-      update: '/api/finance/buchungen/{id}',
-      delete: '/api/finance/buchungen/{id}'
+      list: '/api/v1/journal-entries',
+      get: '/api/v1/journal-entries/{id}',
+      create: '/api/v1/journal-entries',
+      update: '/api/v1/journal-entries/{id}',
+      delete: '/api/v1/journal-entries/{id}'
     }
   } as any,
   validation: createBuchungSchema(t),
@@ -370,7 +370,7 @@ export default function BuchungserfassungPage(): JSX.Element {
       }
       setIsStornoDialogOpen(true)
     } else if (action === 'export') {
-      window.open('/api/finance/buchungen/export', '_blank')
+      window.open('/api/v1/journal-entries/export', '_blank')
     }
   })
 

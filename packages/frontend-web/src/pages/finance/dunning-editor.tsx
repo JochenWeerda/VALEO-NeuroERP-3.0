@@ -51,7 +51,7 @@ const createDunningConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
           label: t('crud.entities.debtor'),
           type: 'lookup',
           required: true,
-          endpoint: '/api/finance/debitors',
+          endpoint: '/api/v1/finance/debtors',
           displayField: 'name',
           valueField: 'id'
         },
@@ -245,13 +245,13 @@ const createDunningConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
     }
   ],
   api: {
-    baseUrl: '/api/finance/dunning',
+    baseUrl: '/api/v1/finance/dunning',
     endpoints: {
-      list: '/api/finance/dunning',
-      get: '/api/finance/dunning/{id}',
-      create: '/api/finance/dunning',
-      update: '/api/finance/dunning/{id}',
-      delete: '/api/finance/dunning/{id}'
+      list: '/api/v1/finance/dunning',
+      get: '/api/v1/finance/dunning/{id}',
+      create: '/api/v1/finance/dunning',
+      update: '/api/v1/finance/dunning/{id}',
+      delete: '/api/v1/finance/dunning/{id}'
     }
   },
   validation: createDunningSchema(t),
@@ -307,7 +307,7 @@ export default function DunningEditorPage(): JSX.Element {
         })
         return
       }
-      window.open(`/api/finance/dunning/${id}/preview`, '_blank')
+      window.open(`/api/v1/finance/dunning/${id}/export`, '_blank')
     } else if (action === 'send') {
       const isValid = validate(formData)
       if (!isValid.isValid) {
@@ -338,7 +338,7 @@ export default function DunningEditorPage(): JSX.Element {
       }
 
       try {
-        const response = await fetch(`/api/finance/dunning/${id}/payment`, {
+        const response = await fetch(`/api/v1/finance/dunning/${id}/payment`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -409,7 +409,7 @@ export default function DunningEditorPage(): JSX.Element {
         })
         return
       }
-      window.open(`/api/finance/dunning/${id}/export`, '_blank')
+      window.open(`/api/v1/finance/dunning/${id}/export`, '_blank')
     }
   })
 

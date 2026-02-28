@@ -278,7 +278,7 @@ export default function MahnwesenPage(): JSX.Element {
         })
         return
       }
-      window.open(`/api/finance/mahnwesen/${formData.id}/preview`, '_blank')
+      window.open(`/api/v1/finance/dunning/${formData.id}/export`, '_blank')
     } else if (action === 'send') {
       const isValid = validate(formData)
       if (!isValid.isValid) {
@@ -309,7 +309,7 @@ export default function MahnwesenPage(): JSX.Element {
       }
 
       try {
-        const response = await fetch(`/api/finance/mahnwesen/${formData.id}/payment`, {
+        const response = await fetch(`/api/v1/finance/dunning/${formData.id}/payment`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

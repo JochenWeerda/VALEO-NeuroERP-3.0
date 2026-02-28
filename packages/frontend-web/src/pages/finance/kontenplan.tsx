@@ -178,13 +178,13 @@ const kontenplanConfig: MaskConfig = {
     , onClick: () => {} }
   ],
   api: {
-    baseUrl: '/api/finance/kontenplan',
+    baseUrl: '/api/v1/chart-of-accounts',
     endpoints: {
-      list: '/api/finance/kontenplan',
-      get: '/api/finance/kontenplan/{id}',
-      create: '/api/finance/kontenplan',
-      update: '/api/finance/kontenplan/{id}',
-      delete: '/api/finance/kontenplan/{id}'
+      list: '/api/v1/chart-of-accounts',
+      get: '/api/v1/chart-of-accounts/{id}',
+      create: '/api/v1/chart-of-accounts',
+      update: '/api/v1/chart-of-accounts/{id}',
+      delete: '/api/v1/chart-of-accounts/{id}'
     }
   } as any,
   validation: kontenplanSchema,
@@ -226,7 +226,7 @@ export default function KontenplanPage(): JSX.Element {
       }
     } else if (action === 'export') {
       // DATEV Export
-      window.open('/api/finance/kontenplan/export', '_blank')
+      window.open('/api/v1/chart-of-accounts/export', '_blank')
     }
   })
 

@@ -286,15 +286,15 @@ const createKreditorenConfig = (t: any, entityTypeLabel: string): MaskConfig => 
     }
   ],
   api: {
-    baseUrl: '/api/finance/kreditoren',
+    baseUrl: '/api/v1/finance/creditors',
     endpoints: {
-      list: '/api/finance/kreditoren',
-      get: '/api/finance/kreditoren/{id}',
-      create: '/api/finance/kreditoren',
-      update: '/api/finance/kreditoren/{id}',
-      delete: '/api/finance/kreditoren/{id}'
-      // sanctions: '/api/finance/kreditoren/{id}/sanctions',
-      // export: '/api/finance/kreditoren/export'
+      list: '/api/v1/finance/creditors',
+      get: '/api/v1/finance/creditors/{id}',
+      create: '/api/v1/finance/creditors',
+      update: '/api/v1/finance/creditors/{id}',
+      delete: '/api/v1/finance/creditors/{id}'
+      // sanctions: '/api/v1/finance/creditors/{id}/sanctions',
+      // export: '/api/v1/finance/creditors/export'
     }
   },
   validation: createKreditorenSchema(t),
@@ -387,7 +387,7 @@ export default function KreditorenStammPage(): JSX.Element {
       // Sanktionsprüfung
       alert(t('crud.messages.sanctionsCheckInfo'))
     } else if (action === 'export') {
-      window.open('/api/finance/kreditoren/export', '_blank')
+      window.open('/api/v1/finance/creditors/export', '_blank')
     }
   })
 
