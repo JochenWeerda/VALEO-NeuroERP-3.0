@@ -219,13 +219,13 @@ const createLastschriftenConfig = (t: any, entityTypeLabel: string): MaskConfig 
     , onClick: () => {} }
   ],
   api: {
-    baseUrl: '/api/finance/lastschriften-debitoren',
+    baseUrl: '/api/v1/finance/direct-debits',
     endpoints: {
-      list: '/api/finance/lastschriften-debitoren',
-      get: '/api/finance/lastschriften-debitoren/{id}',
-      create: '/api/finance/lastschriften-debitoren',
-      update: '/api/finance/lastschriften-debitoren/{id}',
-      delete: '/api/finance/lastschriften-debitoren/{id}'
+      list: '/api/v1/finance/direct-debits',
+      get: '/api/v1/finance/direct-debits/{id}',
+      create: '/api/v1/finance/direct-debits',
+      update: '/api/v1/finance/direct-debits/{id}',
+      delete: '/api/v1/finance/direct-debits/{id}'
     }
   } as any,
   validation: createLastschriftenSchema(t),
@@ -488,7 +488,7 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
       alert(t('crud.messages.mandateValidationInfo'))
     } else if (action === 'preview') {
       // SEPA-Vorschau
-      window.open('/api/finance/lastschriften-debitoren/preview', '_blank')
+      window.open('/api/v1/finance/direct-debits/preview', '_blank')
     } else if (action === 'approve') {
       // Freigeben
       alert(t('crud.messages.approvalFunctionInfo'))
@@ -507,7 +507,7 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
         // Error wird bereits in useMaskData behandelt
       }
     } else if (action === 'export') {
-      window.open('/api/finance/lastschriften-debitoren/export', '_blank')
+      window.open('/api/v1/finance/direct-debits/export', '_blank')
     }
   })
 

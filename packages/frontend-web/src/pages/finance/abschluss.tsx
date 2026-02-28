@@ -315,13 +315,13 @@ const abschlussConfig: MaskConfig = {
     , onClick: () => {} }
   ],
   api: {
-    baseUrl: '/api/finance/abschluss',
+    baseUrl: '/api/v1/finance/abschluss',
     endpoints: {
-      list: '/api/finance/abschluss',
-      get: '/api/finance/abschluss/{id}',
-      create: '/api/finance/abschluss',
-      update: '/api/finance/abschluss/{id}',
-      delete: '/api/finance/abschluss/{id}'
+      list: '/api/v1/finance/abschluss',
+      get: '/api/v1/finance/abschluss/{id}',
+      create: '/api/v1/finance/abschluss',
+      update: '/api/v1/finance/abschluss/{id}',
+      delete: '/api/v1/finance/abschluss/{id}'
     }
   } as any,
   validation: abschlussSchema,
@@ -550,7 +550,7 @@ export default function AbschlussPage(): JSX.Element {
       // Sperren
       alert('Periodensperre-Funktion wird implementiert')
     } else if (action === 'export') {
-      window.open('/api/finance/abschluss/export', '_blank')
+      window.open('/api/v1/finance/abschluss/export', '_blank')
     }
   })
 
