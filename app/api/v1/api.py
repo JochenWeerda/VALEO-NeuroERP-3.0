@@ -7,6 +7,8 @@ from fastapi import APIRouter
 
 from app.api.v1.endpoints import (
     agrar_feldbuch,
+    agrar_wetter,
+    agrar_maschinen,
     portal_feldbuch,
     health,
     tenants,
@@ -581,6 +583,20 @@ api_router.include_router(
     agrar_feldbuch.router,
     prefix="/agrar",
     tags=["agrar", "feldbuch"]
+)
+
+# Agrar Wetter (BrightSky + Open-Meteo Proxy)
+api_router.include_router(
+    agrar_wetter.router,
+    prefix="/agrar",
+    tags=["agrar", "wetter"]
+)
+
+# Agrar Maschinenpark
+api_router.include_router(
+    agrar_maschinen.router,
+    prefix="/agrar",
+    tags=["agrar", "maschinen"]
 )
 
 # ── L3-Connect Gap Closure Routers ──────────────────────────────
