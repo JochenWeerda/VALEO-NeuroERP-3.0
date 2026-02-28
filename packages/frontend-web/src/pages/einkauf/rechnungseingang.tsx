@@ -164,7 +164,7 @@ const createRechnungseingangConfig = (t: any, entityTypeLabel: string): MaskConf
           name: 'accountCode',
           label: t('crud.fields.accountCode'),
           type: 'lookup',
-          endpoint: '/api/finance/accounts',
+          endpoint: '/api/v1/chart-of-accounts',
           displayField: 'number',
           valueField: 'id',
           helpText: t('crud.tooltips.fields.accountCode')
@@ -173,7 +173,7 @@ const createRechnungseingangConfig = (t: any, entityTypeLabel: string): MaskConf
           name: 'costCenter',
           label: t('crud.fields.costCenter'),
           type: 'lookup',
-          endpoint: '/api/finance/cost-centers',
+          endpoint: '/api/v1/finance/cost-centers',
           displayField: 'name',
           valueField: 'id',
           helpText: t('crud.tooltips.fields.costCenter')
