@@ -1,62 +1,130 @@
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { TrendingUp } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
+import { TrendingUp, RefreshCw, Download } from 'lucide-react'
+import { financeService, type BalanceSheetItem } from '@/lib/services/finance-service'
+
+const fmt = (n: number) =>
+  new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n)
+
+function ItemGroup({ title, items, total, colorClass }: {
+  title: string; items: BalanceSheetItem[]; total: number; colorClass: string
+}) {
+  return (
+    <div className="rounded-lg border p-4">
+      <div className="font-semibold text-lg mb-3">{title}</div>
+      {items.map((item, i) => (
+        <div key={i} className={`flex justify-between py-2 border-b last:border-0 pl-${item.level * 4}`}>
+          <span className="text-sm">{item.account_name}</span>
+          <span className="font-semibold">{fmt(Number(item.balance))}</span>
+        </div>
+      ))}
+      <div className="flex justify-between pt-3 mt-3 border-t-2 font-bold">
+        <span>Summe {title}</span>
+        <span className={colorClass}>{fmt(Number(total))}</span>
+      </div>
+    </div>
+  )
+}
 
 export default function BilanzPage(): JSX.Element {
-  const bilanz = {
-    periode: '31.12.2024',
-    aktiva: {
-      anlagevermoegen: {
-        gesamt: 450000,
-        positionen: [
-          { name: 'Grundstücke & Gebäude', betrag: 280000 },
-          { name: 'Technische Anlagen', betrag: 120000 },
-          { name: 'Fuhrpark', betrag: 50000 },
-        ],
-      },
-      umlaufvermoegen: {
-        gesamt: 385000,
-        positionen: [
-          { name: 'Vorräte', betrag: 185000 },
-          { name: 'Forderungen', betrag: 125000 },
-          { name: 'Bank', betrag: 65000 },
-          { name: 'Kasse', betrag: 10000 },
-        ],
-      },
-    },
-    passiva: {
-      eigenkapital: {
-        gesamt: 485000,
-        positionen: [
-          { name: 'Gezeichnetes Kapital', betrag: 250000 },
-          { name: 'Gewinnrücklage', betrag: 180000 },
-          { name: 'Jahresüberschuss', betrag: 55000 },
-        ],
-      },
-      fremdkapital: {
-        gesamt: 350000,
-        positionen: [
-          { name: 'Verbindlichkeiten LuL', betrag: 125000 },
-          { name: 'Bankdarlehen', betrag: 185000 },
-          { name: 'Sonstige Verbindlichkeiten', betrag: 40000 },
-        ],
-      },
-    },
+  const currentPeriod = new Date().toISOString().substring(0, 7) // YYYY-MM
+  const [period, setPeriod] = useState(currentPeriod)
+
+  const { data: bilanz, isLoading, isError, refetch } = useQuery({
+    queryKey: ['fibu', 'bilanz', period],
+    queryFn: () => financeService.getBilanz({ period }),
+    staleTime: 5 * 60 * 1000,
+  })
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6 p-6">
+        <Skeleton className="h-10 w-64" />
+        <div className="grid gap-4 md:grid-cols-3">
+          {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-24" />)}
+        </div>
+        <div className="grid gap-6 md:grid-cols-2">
+          <Skeleton className="h-80" />
+          <Skeleton className="h-80" />
+        </div>
+      </div>
+    )
   }
 
-  const bilanzsumme = bilanz.aktiva.anlagevermoegen.gesamt + bilanz.aktiva.umlaufvermoegen.gesamt
-  const eigenkapitalquote = ((bilanz.passiva.eigenkapital.gesamt / bilanzsumme) * 100).toFixed(1)
+  if (isError || !bilanz) {
+    return (
+      <div className="space-y-6 p-6">
+        <div className="flex items-center gap-4">
+          <div>
+            <h1 className="text-3xl font-bold">Bilanz</h1>
+            <p className="text-muted-foreground">Bilanzstichtag auswählen</p>
+          </div>
+          <Input
+            type="month"
+            value={period}
+            onChange={e => setPeriod(e.target.value)}
+            className="w-40"
+          />
+          <Button variant="outline" onClick={() => void refetch()} className="gap-2">
+            <RefreshCw className="h-4 w-4" />
+            Laden
+          </Button>
+        </div>
+        {isError && (
+          <Card className="border-amber-200 bg-amber-50">
+            <CardContent className="p-4 text-amber-800 text-sm">
+              Keine Bilanzdaten für Periode {period} vorhanden. Bitte Buchungen erfassen oder andere Periode wählen.
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    )
+  }
+
+  const bilanzsumme = Number(bilanz.total_assets)
+  const eigenkapital = Number(bilanz.total_equity)
+  const fremdkapital = Number(bilanz.total_liabilities)
+  const ekQuote = bilanzsumme > 0 ? ((eigenkapital / bilanzsumme) * 100).toFixed(1) : '0.0'
+
+  // Assets nach Typ gruppieren
+  const anlagevermoegen = bilanz.assets.filter(a => a.account_type === 'ASSET' && a.level === 0)
+  const umlaufvermoegen = bilanz.assets.filter(a => a.account_type === 'ASSET' && a.level > 0)
 
   return (
     <div className="space-y-6 p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Bilanz</h1>
-          <p className="text-muted-foreground">Stichtag: {bilanz.periode}</p>
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div className="flex items-center gap-4">
+          <div>
+            <h1 className="text-3xl font-bold">Bilanz</h1>
+            <p className="text-muted-foreground">Stichtag: {bilanz.as_of_date}</p>
+          </div>
+          <Input
+            type="month"
+            value={period}
+            onChange={e => setPeriod(e.target.value)}
+            className="w-40"
+          />
+          <Button variant="outline" size="sm" onClick={() => void refetch()} className="gap-2">
+            <RefreshCw className="h-4 w-4" />
+          </Button>
         </div>
-        <Badge variant="outline" className="text-lg px-4 py-2">
-          Eigenkapitalquote: {eigenkapitalquote}%
-        </Badge>
+        <div className="flex items-center gap-2">
+          {!bilanz.is_balanced && (
+            <Badge variant="destructive">Nicht ausgeglichen!</Badge>
+          )}
+          <Badge variant="outline" className="text-lg px-4 py-2">
+            EK-Quote: {ekQuote}%
+          </Badge>
+          <Button variant="outline" size="sm" className="gap-2">
+            <Download className="h-4 w-4" />
+            PDF
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
@@ -67,32 +135,24 @@ export default function BilanzPage(): JSX.Element {
           <CardContent>
             <div className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-blue-600" />
-              <span className="text-2xl font-bold">
-                {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(bilanzsumme)}
-              </span>
+              <span className="text-2xl font-bold">{fmt(bilanzsumme)}</span>
             </div>
           </CardContent>
         </Card>
-
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Eigenkapital</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">
-              {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(bilanz.passiva.eigenkapital.gesamt)}
-            </span>
+            <span className="text-2xl font-bold text-green-600">{fmt(eigenkapital)}</span>
           </CardContent>
         </Card>
-
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Fremdkapital</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-orange-600">
-              {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(bilanz.passiva.fremdkapital.gesamt)}
-            </span>
+            <span className="text-2xl font-bold text-orange-600">{fmt(fremdkapital)}</span>
           </CardContent>
         </Card>
       </div>
@@ -104,49 +164,32 @@ export default function BilanzPage(): JSX.Element {
             <CardTitle className="text-xl">AKTIVA</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Anlagevermögen */}
-            <div className="rounded-lg border p-4">
-              <div className="font-semibold text-lg mb-3">Anlagevermögen</div>
-              {bilanz.aktiva.anlagevermoegen.positionen.map((pos, i) => (
-                <div key={i} className="flex justify-between py-2 border-b last:border-0">
-                  <span className="text-sm">{pos.name}</span>
-                  <span className="font-semibold">
-                    {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(pos.betrag)}
-                  </span>
-                </div>
-              ))}
-              <div className="flex justify-between pt-3 mt-3 border-t-2 font-bold">
-                <span>Summe Anlagevermögen</span>
-                <span>
-                  {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(bilanz.aktiva.anlagevermoegen.gesamt)}
-                </span>
-              </div>
-            </div>
-
-            {/* Umlaufvermögen */}
-            <div className="rounded-lg border p-4">
-              <div className="font-semibold text-lg mb-3">Umlaufvermögen</div>
-              {bilanz.aktiva.umlaufvermoegen.positionen.map((pos, i) => (
-                <div key={i} className="flex justify-between py-2 border-b last:border-0">
-                  <span className="text-sm">{pos.name}</span>
-                  <span className="font-semibold">
-                    {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(pos.betrag)}
-                  </span>
-                </div>
-              ))}
-              <div className="flex justify-between pt-3 mt-3 border-t-2 font-bold">
-                <span>Summe Umlaufvermögen</span>
-                <span>
-                  {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(bilanz.aktiva.umlaufvermoegen.gesamt)}
-                </span>
-              </div>
-            </div>
-
-            {/* Gesamtsumme */}
+            {bilanz.assets.length > 0 ? (
+              <>
+                {anlagevermoegen.length > 0 && (
+                  <ItemGroup title="Anlagevermögen" items={anlagevermoegen}
+                    total={anlagevermoegen.reduce((s, a) => s + Number(a.balance), 0)} colorClass="" />
+                )}
+                {umlaufvermoegen.length > 0 && (
+                  <ItemGroup title="Umlaufvermögen" items={umlaufvermoegen}
+                    total={umlaufvermoegen.reduce((s, a) => s + Number(a.balance), 0)} colorClass="" />
+                )}
+                {anlagevermoegen.length === 0 && umlaufvermoegen.length === 0 && (
+                  bilanz.assets.map((a, i) => (
+                    <div key={i} className="flex justify-between py-2 border-b last:border-0">
+                      <span className="text-sm">{a.account_name}</span>
+                      <span className="font-semibold">{fmt(Number(a.balance))}</span>
+                    </div>
+                  ))
+                )}
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground">Keine Aktivposten vorhanden</p>
+            )}
             <div className="rounded-lg bg-blue-50 p-4">
               <div className="flex justify-between text-xl font-bold text-blue-900">
                 <span>SUMME AKTIVA</span>
-                <span>{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(bilanzsumme)}</span>
+                <span>{fmt(bilanzsumme)}</span>
               </div>
             </div>
           </CardContent>
@@ -158,49 +201,21 @@ export default function BilanzPage(): JSX.Element {
             <CardTitle className="text-xl">PASSIVA</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Eigenkapital */}
-            <div className="rounded-lg border p-4">
-              <div className="font-semibold text-lg mb-3">Eigenkapital</div>
-              {bilanz.passiva.eigenkapital.positionen.map((pos, i) => (
-                <div key={i} className="flex justify-between py-2 border-b last:border-0">
-                  <span className="text-sm">{pos.name}</span>
-                  <span className="font-semibold">
-                    {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(pos.betrag)}
-                  </span>
-                </div>
-              ))}
-              <div className="flex justify-between pt-3 mt-3 border-t-2 font-bold">
-                <span>Summe Eigenkapital</span>
-                <span className="text-green-600">
-                  {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(bilanz.passiva.eigenkapital.gesamt)}
-                </span>
-              </div>
-            </div>
-
-            {/* Fremdkapital */}
-            <div className="rounded-lg border p-4">
-              <div className="font-semibold text-lg mb-3">Fremdkapital</div>
-              {bilanz.passiva.fremdkapital.positionen.map((pos, i) => (
-                <div key={i} className="flex justify-between py-2 border-b last:border-0">
-                  <span className="text-sm">{pos.name}</span>
-                  <span className="font-semibold">
-                    {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(pos.betrag)}
-                  </span>
-                </div>
-              ))}
-              <div className="flex justify-between pt-3 mt-3 border-t-2 font-bold">
-                <span>Summe Fremdkapital</span>
-                <span>
-                  {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(bilanz.passiva.fremdkapital.gesamt)}
-                </span>
-              </div>
-            </div>
-
-            {/* Gesamtsumme */}
+            {bilanz.equity.length > 0 && (
+              <ItemGroup title="Eigenkapital" items={bilanz.equity}
+                total={eigenkapital} colorClass="text-green-600" />
+            )}
+            {bilanz.liabilities.length > 0 && (
+              <ItemGroup title="Fremdkapital" items={bilanz.liabilities}
+                total={fremdkapital} colorClass="" />
+            )}
+            {bilanz.equity.length === 0 && bilanz.liabilities.length === 0 && (
+              <p className="text-sm text-muted-foreground">Keine Passivposten vorhanden</p>
+            )}
             <div className="rounded-lg bg-blue-50 p-4">
               <div className="flex justify-between text-xl font-bold text-blue-900">
                 <span>SUMME PASSIVA</span>
-                <span>{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(bilanzsumme)}</span>
+                <span>{fmt(bilanzsumme)}</span>
               </div>
             </div>
           </CardContent>
