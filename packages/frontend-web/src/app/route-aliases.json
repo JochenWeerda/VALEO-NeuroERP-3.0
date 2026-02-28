@@ -874,7 +874,7 @@
     },
     {
       "module": "@/pages/fibu/sachkonto",
-      "path": "fibu/sachkonto"
+      "path": "fibu/sachkonto/:id"
     },
     {
       "module": "@/pages/fibu/sicherheiten",
