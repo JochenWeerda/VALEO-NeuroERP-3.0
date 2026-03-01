@@ -115,7 +115,7 @@ export default function FuttermittelQualitaetskontrollePage(): JSX.Element {
         break
 
       default:
-        console.log('Action:', action, item)
+        break
     }
   })
 

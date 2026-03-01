@@ -92,9 +92,8 @@ export default function FarmersPage(): JSX.Element {
   });
 
   // Cancel handler (if needed)
-  const handleCancel = async (id: string, reason: string) => {
-    // Implementation if farmers can be cancelled
-    console.log('Cancel farmer:', id, reason);
+  const handleCancel = async (_id: string, _reason: string) => {
+    // Farmers do not have a cancel workflow yet
   };
 
   const {

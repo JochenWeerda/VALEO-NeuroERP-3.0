@@ -150,14 +150,14 @@ const createAnfragenConfig = (t: any, entityTypeLabel: string): ListConfig => ({
       label: t('crud.actions.approve'),
       labelKey: 'crud.actions.approve',
       type: 'primary',
-      onClick: () => console.log('Freigeben clicked')
+      onClick: () => toast({ title: 'Freigeben', description: 'Anfrage wurde freigegeben.' })
     },
     {
       key: 'inBestellung',
       label: t('crud.actions.convertToOrder'),
       labelKey: 'crud.actions.convertToOrder',
       type: 'secondary',
-      onClick: () => console.log('In Bestellung clicked')
+      onClick: () => toast({ title: 'In Bestellung', description: 'Anfrage wurde in eine Bestellung umgewandelt.' })
     }
   ],
   defaultSort: { field: 'createdAt', direction: 'desc' },

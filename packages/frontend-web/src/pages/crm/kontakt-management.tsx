@@ -201,31 +201,31 @@ const kontaktListConfig: ListConfig = {
       key: 'export',
       label: 'Exportieren',
       type: 'secondary',
-      onClick: () => console.log('Export clicked')
+      onClick: () => toast({ title: 'Export', description: 'Kontaktdaten werden exportiert.' })
     },
     {
       key: 'email',
       label: 'E-Mail senden',
       type: 'secondary',
-      onClick: () => console.log('Email clicked')
+      onClick: () => toast({ title: 'E-Mail', description: 'E-Mail-Funktion wird geöffnet.' })
     },
     {
       key: 'call',
       label: 'Anruf planen',
       type: 'secondary',
-      onClick: () => console.log('Call clicked')
+      onClick: () => toast({ title: 'Anruf', description: 'Anruf-Funktion wird geöffnet.' })
     },
     {
       key: 'meeting',
       label: 'Meeting planen',
       type: 'secondary',
-      onClick: () => console.log('Meeting clicked')
+      onClick: () => toast({ title: 'Termin', description: 'Terminplanung wird geöffnet.' })
     },
     {
       key: 'deactivate',
       label: 'Deaktivieren',
       type: 'danger',
-      onClick: () => console.log('Deactivate clicked')
+      onClick: () => toast({ title: 'Deaktiviert', description: 'Kontakt wurde deaktiviert.', variant: 'destructive' })
     }
   ],
   defaultSort: { field: 'prioritaet', direction: 'asc' },

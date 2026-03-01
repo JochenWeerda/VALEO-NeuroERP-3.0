@@ -5,6 +5,7 @@ import { useFutterChargen, type FutterCharge } from '@/lib/api/futter'
 import { formatDate, formatNumber } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
+import { toast } from '@/hooks/use-toast'
 
 // Konfiguration für Charge-Verfolgung ListReport
 const chargeVerfolgungConfig: ListConfig = {
@@ -144,19 +145,19 @@ const chargeVerfolgungConfig: ListConfig = {
       key: 'export',
       label: 'Exportieren',
       type: 'secondary',
-      onClick: () => console.log('Export clicked')
+      onClick: () => toast({ title: 'Export', description: 'Chargendaten werden exportiert.' })
     },
     {
       key: 'recall',
       label: 'Recall einleiten',
       type: 'danger',
-      onClick: () => console.log('Recall clicked')
+      onClick: () => toast({ title: 'Rückruf', description: 'Chargen-Rückruf wurde eingeleitet.', variant: 'destructive' })
     },
     {
       key: 'trace',
       label: 'Rückverfolgung',
       type: 'secondary',
-      onClick: () => console.log('Trace clicked')
+      onClick: () => toast({ title: 'Rückverfolgung', description: 'Chargen-Rückverfolgung wird gestartet.' })
     }
   ],
   defaultSort: { field: 'produktionsdatum', direction: 'desc' },

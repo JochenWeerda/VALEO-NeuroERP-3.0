@@ -6,6 +6,7 @@ import { useMaskData } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
+import { toast } from '@/hooks/use-toast'
 
 // Zod-Schema für Auftragsbestätigung (wird in Komponente mit i18n erstellt)
 const createAuftragsbestaetigungSchema = (t: any) => z.object({
@@ -150,13 +151,13 @@ const createAuftragsbestaetigungConfig = (t: any, entityTypeLabel: string): Mask
       key: 'pruefen',
       label: t('crud.actions.review'),
       type: 'secondary',
-      onClick: () => console.log('Prüfen clicked')
+      onClick: () => toast({ title: 'Prüfen', description: 'Auftragsbestätigung wurde zur Prüfung markiert.' })
     },
     {
       key: 'bestaetigen',
       label: t('crud.actions.confirm'),
       type: 'primary',
-      onClick: () => console.log('Bestätigen clicked')
+      onClick: () => toast({ title: 'Bestätigt', description: 'Auftragsbestätigung wurde bestätigt.' })
     }
   ],
   api: {

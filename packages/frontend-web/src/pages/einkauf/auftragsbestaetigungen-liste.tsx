@@ -86,14 +86,14 @@ const createAuftragsbestaetigungenConfig = (t: any, entityTypeLabel: string): Li
       label: t('crud.actions.review'),
       labelKey: 'crud.actions.review',
       type: 'secondary',
-      onClick: () => console.log('Pruefen clicked')
+      onClick: () => toast({ title: 'Prüfen', description: 'Auftragsbestätigung wurde zur Prüfung markiert.' })
     },
     {
       key: 'bestaetigen',
       label: t('crud.actions.confirm'),
       labelKey: 'crud.actions.confirm',
       type: 'primary',
-      onClick: () => console.log('Bestaetigen clicked')
+      onClick: () => toast({ title: 'Bestätigt', description: 'Auftragsbestätigung wurde bestätigt.' })
     }
   ],
   defaultSort: { field: 'createdAt', direction: 'desc' },

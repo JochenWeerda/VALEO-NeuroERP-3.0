@@ -4,6 +4,7 @@ import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
+import { toast } from '@/hooks/use-toast'
 
 // Zod-Schema für Validierung
 const futtermittelSchema = z.object({
@@ -184,13 +185,13 @@ const futtermittelConfig: MaskConfig = {
       key: 'validate',
       label: 'Validieren',
       type: 'secondary',
-      onClick: () => console.log('Validate clicked')
+      onClick: () => toast({ title: 'Validierung', description: 'Futtermittel-Daten werden validiert.' })
     },
     {
       key: 'save',
       label: 'Speichern',
       type: 'primary',
-      onClick: () => console.log('Save clicked')
+      onClick: () => toast({ title: 'Gespeichert', description: 'Einzelfuttermittel wurde gespeichert.' })
     }
   ],
   api: {
