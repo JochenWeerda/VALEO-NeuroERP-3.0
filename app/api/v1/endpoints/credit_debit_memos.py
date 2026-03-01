@@ -392,10 +392,16 @@ async def settle_credit_memo(
         memo["settledAt"] = datetime.now().isoformat()
         
         save_to_store("credit_memo", memo_id, memo, repo)
-        
-        # TODO: Aktualisiere offene Beträge der Rechnungen
-        # Dies würde normalerweise über die Open Items API erfolgen
-        
+
+        # Aktualisiere offene Beträge der Rechnungen
+        memo_amount = memo.get("amount", 0)
+        per_invoice = memo_amount / len(settlement.invoiceIds) if settlement.invoiceIds else 0
+        for invoice_id in settlement.invoiceIds:
+            invoice = get_from_store("ap_invoice", invoice_id, repo)
+            if invoice:
+                invoice["openAmount"] = max(0, (invoice.get("openAmount") or invoice.get("totalGross") or 0) - per_invoice)
+                save_to_store("ap_invoice", invoice_id, invoice, repo)
+
         return {
             "status": "ok",
             "message": f"Credit memo {memo_id} settled with {len(settlement.invoiceIds)} invoices",
@@ -447,10 +453,16 @@ async def settle_debit_memo(
         memo["settledAt"] = datetime.now().isoformat()
         
         save_to_store("debit_memo", memo_id, memo, repo)
-        
-        # TODO: Aktualisiere offene Beträge der Rechnungen
-        # Dies würde normalerweise über die Open Items API erfolgen
-        
+
+        # Aktualisiere offene Beträge der Rechnungen (Belastung erhöht den offenen Betrag)
+        memo_amount = memo.get("amount", 0)
+        per_invoice = memo_amount / len(settlement.invoiceIds) if settlement.invoiceIds else 0
+        for invoice_id in settlement.invoiceIds:
+            invoice = get_from_store("ap_invoice", invoice_id, repo)
+            if invoice:
+                invoice["openAmount"] = (invoice.get("openAmount") or invoice.get("totalGross") or 0) + per_invoice
+                save_to_store("ap_invoice", invoice_id, invoice, repo)
+
         return {
             "status": "ok",
             "message": f"Debit memo {memo_id} settled with {len(settlement.invoiceIds)} invoices",
