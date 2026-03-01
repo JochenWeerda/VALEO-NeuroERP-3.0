@@ -89,3 +89,4 @@ from . import branches
 from . import pricing
 from . import config_service
 from . import job_runner
+from . import finance_actions

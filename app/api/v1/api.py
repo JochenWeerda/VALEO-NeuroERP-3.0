@@ -6,6 +6,7 @@ Main API router that includes all domain routers
 from fastapi import APIRouter
 
 from app.api.v1.endpoints import (
+    export_service,
     agrar_feldbuch,
     agrar_wetter,
     agrar_maschinen,
@@ -53,6 +54,8 @@ from app.api.v1.endpoints import (
     auto_matching,
     vat_return_export,
     closing_checklists,
+    chart_of_accounts,
+    finance_actions,
     iban_lookup,
     credit_debit_memos,
     portal_shop,
@@ -311,6 +314,12 @@ api_router.include_router(
 )
 
 api_router.include_router(
+    export_service.router,
+    prefix="/export",
+    tags=["export"]
+)
+
+api_router.include_router(
     accounting_periods.router,
     prefix="/finance/periods",
     tags=["finance", "periods", "gobd"]
@@ -428,6 +437,18 @@ api_router.include_router(
     closing_checklists.router,
     prefix="/finance",
     tags=["finance", "closing"]
+)
+
+api_router.include_router(
+    chart_of_accounts,
+    prefix="/finance",
+    tags=["finance", "kontenplan", "chart-of-accounts"]
+)
+
+api_router.include_router(
+    finance_actions.router,
+    prefix="/finance",
+    tags=["finance", "actions"]
 )
 
 api_router.include_router(

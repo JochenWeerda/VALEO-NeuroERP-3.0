@@ -87,6 +87,21 @@ class ReturnPaymentRequest(BaseModel):
     notes: Optional[str] = None
 
 
+class PaymentRunPlanRequest(BaseModel):
+    """Request to plan a payment run (suggest payments from open items)"""
+    execution_date: date = Field(..., description="Geplantes Ausführungsdatum")
+    creditor_ids: Optional[List[str]] = Field(None, description="Nur diese Kreditoren (optional)")
+    tenant_id: str = Field(default="system")
+
+
+class PaymentRunPlanResponse(BaseModel):
+    """Suggested payment run from open items"""
+    suggested_payments: List[Dict[str, Any]]
+    total_amount: Decimal
+    execution_date: date
+    message: str
+
+
 class SEPAXMLGenerator:
     """Generates SEPA pain.001.001.03 XML files"""
     
@@ -216,6 +231,76 @@ class SEPAXMLGenerator:
         rough_string = ET.tostring(root, encoding='utf-8')
         reparsed = minidom.parseString(rough_string)
         return reparsed.toprettyxml(indent="  ", encoding='utf-8').decode('utf-8')
+
+
+@router.post("/plan", response_model=PaymentRunPlanResponse)
+async def plan_payment_run(
+    request: PaymentRunPlanRequest,
+    db: Session = Depends(get_db),
+):
+    """
+    Zahlungslauf planen: Vorschlag aus offenen Posten (Kreditoren) erzeugen.
+    Liefert eine Liste vorgeschlagener Zahlungen zur Auswahl für einen Zahlungslauf.
+    """
+    try:
+        # Offene Posten Kreditoren: gruppiert nach Lieferant
+        q = text("""
+            SELECT id, lieferant_id, lieferant_name, offen, rechnungsnr, waehrung
+            FROM domain_erp.offene_posten
+            WHERE tenant_id = :tenant_id AND konto_typ = 'kreditoren' AND offen > 0
+        """)
+        params = {"tenant_id": request.tenant_id}
+        if request.creditor_ids:
+            q = text(str(q) + " AND lieferant_id = ANY(:creditor_ids)")
+            params["creditor_ids"] = request.creditor_ids
+        q = text(str(q) + " ORDER BY lieferant_name, faelligkeit")
+        rows = db.execute(q, params).fetchall()
+    except Exception:
+        # Fallback if table/columns differ
+        return PaymentRunPlanResponse(
+            suggested_payments=[],
+            total_amount=Decimal("0.00"),
+            execution_date=request.execution_date,
+            message="Keine offenen Posten (Kreditoren) gefunden oder Tabelle nicht verfügbar.",
+        )
+
+    # Group by creditor
+    by_creditor: Dict[str, Dict[str, Any]] = {}
+    for row in rows:
+        cid = str(row[1] or row[2] or "unknown")
+        if cid not in by_creditor:
+            by_creditor[cid] = {
+                "creditor_id": str(row[1]) if row[1] else cid,
+                "creditor_name": str(row[2] or "Unbekannt"),
+                "amount": Decimal("0.00"),
+                "op_ids": [],
+                "invoice_numbers": [],
+                "currency": str(row[5] or "EUR"),
+            }
+        by_creditor[cid]["amount"] += Decimal(str(row[3] or 0))
+        by_creditor[cid]["op_ids"].append(str(row[0]))
+        if row[4]:
+            by_creditor[cid]["invoice_numbers"].append(str(row[4]))
+
+    suggested = [
+        {
+            "creditor_id": v["creditor_id"],
+            "creditor_name": v["creditor_name"],
+            "amount": float(v["amount"]),
+            "op_ids": v["op_ids"],
+            "invoice_numbers": v["invoice_numbers"],
+            "purpose": ", ".join(v["invoice_numbers"][:5]) or f"Zahlung {v['creditor_name']}",
+        }
+        for v in by_creditor.values()
+    ]
+    total = sum(Decimal(str(p["amount"])) for p in suggested)
+
+    return PaymentRunPlanResponse(
+        suggested_payments=suggested,
+        total_amount=total,
+        execution_date=request.execution_date,
+        message=f"Vorschlag: {len(suggested)} Zahlung(en), Gesamt {total:.2f} EUR.",
+    )
 
 
 @router.post("", response_model=PaymentRunResponse, status_code=201)

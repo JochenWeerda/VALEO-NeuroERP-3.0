@@ -425,6 +425,148 @@ def _bootstrap_sales_order_if_needed(db: Session, tenant_id: str, doc_id: str) -
     return _fetch_doc_header(db, tenant_id, doc_id)
 
 
+def _bootstrap_sales_delivery_if_needed(db: Session, tenant_id: str, doc_id: str) -> Optional[dict[str, Any]]:
+    """Bootstrap docflow document from domain_sales.delivery_notes + delivery_note_positions."""
+    existing = _fetch_doc_header(db, tenant_id, doc_id)
+    if existing:
+        return existing
+
+    src = db.execute(
+        text(
+            """
+            SELECT id, tenant_id, delivery_note_number, customer_id, status, delivery_date, totals, created_at, updated_at
+            FROM domain_sales.delivery_notes
+            WHERE tenant_id = :tenant_id AND id = :id
+            """
+        ),
+        {"tenant_id": tenant_id, "id": doc_id},
+    ).mappings().first()
+    if not src:
+        return None
+
+    # delivery_notes may not have currency column; use totals for amounts
+    src_d = dict(src)
+    src_items = db.execute(
+        text(
+            """
+            SELECT id, pos_nr, artikel_nr, bezeichnung, menge, einheit, listenpreis, rabatt, mwst_prozent, netto_preis, netto_betrag
+            FROM domain_sales.delivery_note_positions
+            WHERE delivery_note_id = :delivery_note_id
+            ORDER BY pos_nr ASC
+            """
+        ),
+        {"delivery_note_id": doc_id},
+    ).mappings().all()
+
+    total_net = Decimal("0.00")
+    total_tax = Decimal("0.00")
+    total_gross = Decimal("0.00")
+    now = datetime.now(timezone.utc)
+    raw_date = src_d.get("delivery_date") or src_d.get("created_at")
+    if raw_date is None:
+        doc_date = now
+    elif isinstance(raw_date, datetime):
+        doc_date = raw_date if raw_date.tzinfo else raw_date.replace(tzinfo=timezone.utc)
+    else:
+        try:
+            doc_date = datetime.combine(raw_date, datetime.min.time(), tzinfo=timezone.utc)
+        except Exception:
+            doc_date = now
+
+    db.execute(
+        text(
+            """
+            INSERT INTO domain_docflow.document_headers
+            (id, tenant_id, doc_type, doc_number, status, source_system, source_ref, customer_id, supplier_id,
+             currency, total_net, total_tax, total_gross, document_date, version, created_at, updated_at)
+            VALUES
+            (:id, :tenant_id, 'sales_delivery', :doc_number, :status, 'domain_sales.delivery_notes', :source_ref, :customer_id, NULL,
+             :currency, 0, 0, 0, :document_date, 1, :created_at, :updated_at)
+            """
+        ),
+        {
+            "id": str(src_d["id"]),
+            "tenant_id": tenant_id,
+            "doc_number": src_d.get("delivery_note_number") or "",
+            "status": "open" if (src_d.get("status") or "draft") not in {"posted", "reversed"} else (src_d.get("status") or "draft"),
+            "source_ref": str(src_d["id"]),
+            "customer_id": str(src_d["customer_id"]) if src_d.get("customer_id") else None,
+            "currency": "EUR",
+            "document_date": doc_date,
+            "created_at": src_d.get("created_at") or now,
+            "updated_at": src_d.get("updated_at") or now,
+        },
+    )
+
+    for item in src_items:
+        qty_value = Decimal(str(item.get("menge") or 0))
+        price = Decimal(str(item.get("unit_price") or item.get("netto_preis") or item.get("listenpreis") or 0))
+        discount = Decimal(str(item.get("rabatt") or 0))
+        tax_rate = Decimal(str(item.get("mwst_prozent") or 0))
+        line_net, line_tax, line_gross = _line_amounts(qty_value, price, discount, tax_rate)
+        total_net += line_net
+        total_tax += line_tax
+        total_gross += line_gross
+        db.execute(
+            text(
+                """
+                INSERT INTO domain_docflow.document_items
+                (id, tenant_id, header_id, line_number, source_line_id, article_number, description, quantity, unit,
+                 unit_price, discount_percent, tax_rate, line_total_net, line_total_tax, line_total_gross, created_at, updated_at)
+                VALUES
+                (:id, :tenant_id, :header_id, :line_number, :source_line_id, :article_number, :description, :quantity, :unit,
+                 :unit_price, :discount_percent, :tax_rate, :line_total_net, :line_total_tax, :line_total_gross, NOW(), NOW())
+                """
+            ),
+            {
+                "id": str(uuid4()),
+                "tenant_id": tenant_id,
+                "header_id": doc_id,
+                "line_number": int(item.get("pos_nr") or 0),
+                "source_line_id": str(item["id"]),
+                "article_number": (item.get("artikel_nr") or "").strip() or "",
+                "description": item.get("bezeichnung"),
+                "quantity": _qty(qty_value),
+                "unit": item.get("einheit"),
+                "unit_price": price,
+                "discount_percent": discount,
+                "tax_rate": tax_rate,
+                "line_total_net": line_net,
+                "line_total_tax": line_tax,
+                "line_total_gross": line_gross,
+            },
+        )
+
+    db.execute(
+        text(
+            """
+            UPDATE domain_docflow.document_headers
+            SET total_net = :total_net, total_tax = :total_tax, total_gross = :total_gross, updated_at = NOW()
+            WHERE id = :id AND tenant_id = :tenant_id
+            """
+        ),
+        {
+            "id": doc_id,
+            "tenant_id": tenant_id,
+            "total_net": _money(total_net),
+            "total_tax": _money(total_tax),
+            "total_gross": _money(total_gross),
+        },
+    )
+    return _fetch_doc_header(db, tenant_id, doc_id)
+
+
+def _bootstrap_doc_by_id(db: Session, tenant_id: str, doc_id: str) -> Optional[dict[str, Any]]:
+    """Try docflow header, then sales_order bootstrap, then sales_delivery bootstrap."""
+    existing = _fetch_doc_header(db, tenant_id, doc_id)
+    if existing:
+        return existing
+    bootstrapped = _bootstrap_sales_order_if_needed(db, tenant_id, doc_id)
+    if bootstrapped:
+        return bootstrapped
+    return _bootstrap_sales_delivery_if_needed(db, tenant_id, doc_id)
+
+
 def _allocate_doc_number(db: Session, tenant_id: str, doc_type: str, now: datetime) -> str:
     year = now.year
     prefix = _DOC_PREFIX.get(doc_type, "DOC")
@@ -652,7 +794,7 @@ async def get_document(
     db: Session = Depends(get_db),
 ):
     effective_tenant = tenant_id or DEFAULT_TENANT
-    bootstrapped = _bootstrap_sales_order_if_needed(db, effective_tenant, doc_id)
+    bootstrapped = _bootstrap_doc_by_id(db, effective_tenant, doc_id)
     if not bootstrapped:
         raise HTTPException(status_code=404, detail="Document not found")
     db.commit()
@@ -959,7 +1101,7 @@ async def convert_document(
         return DocflowCommandResult(**idempotent, idempotent_hit=True)
 
     try:
-        source = _bootstrap_sales_order_if_needed(db, effective_tenant, doc_id)
+        source = _bootstrap_doc_by_id(db, effective_tenant, doc_id)
         if not source:
             raise HTTPException(status_code=404, detail="Source document not found")
         if payload.expected_version and int(source.get("version") or 1) != payload.expected_version:
@@ -1221,7 +1363,7 @@ async def post_document(
         return DocflowCommandResult(**idempotent, idempotent_hit=True)
 
     try:
-        header = _bootstrap_sales_order_if_needed(db, effective_tenant, doc_id)
+        header = _bootstrap_doc_by_id(db, effective_tenant, doc_id)
         if not header:
             raise HTTPException(status_code=404, detail="Document not found")
         if payload.expected_version and int(header.get("version") or 1) != payload.expected_version:

@@ -29,6 +29,8 @@ OPEN_METEO_BASE = "https://api.open-meteo.com/v1"
 # Timeout für externe API-Calls (Sek.)
 _TIMEOUT = 10.0
 
+timezone_utc = timezone.utc
+
 
 async def _get(url: str, params: dict) -> dict:
     """HTTP-GET mit Timeout-Handling."""
@@ -333,6 +335,3 @@ async def get_wetter_boden(
         ))
 
     return result
-
-
-timezone_utc = timezone.utc

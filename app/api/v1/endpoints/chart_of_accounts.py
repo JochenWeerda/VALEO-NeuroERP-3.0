@@ -2,20 +2,33 @@
 Chart of Accounts management endpoints
 """
 
-from typing import Optional
+from typing import Optional, List
+from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.responses import Response
 from sqlalchemy.orm import Session
+from sqlalchemy import text
+from pydantic import BaseModel, Field
 
 from ....core.config import settings
 from ....core.database import get_db
 from ....infrastructure.models import Account as AccountModel
+from ....finance.export_datev import DATEVExporter
 from ..schemas.base import PaginatedResponse
 from ..schemas.finance import Account, AccountCreate, AccountUpdate
 
-router = APIRouter()
+router = APIRouter(prefix="/chart-of-accounts")
 
 DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
+
+VALID_ACCOUNT_TYPES = {"asset", "liability", "equity", "revenue", "expense"}
+
+
+class ValidateResponse(BaseModel):
+    """Response for chart of accounts validation"""
+    valid: bool
+    errors: List[str] = Field(default_factory=list)
 
 
 @router.get("/", response_model=PaginatedResponse[Account])
@@ -121,4 +134,150 @@ async def delete_account(account_id: str, db: Session = Depends(get_db)):
     account.is_active = False
     db.commit()
     return {"message": "Account deactivated successfully"}
+
+
+@router.post("/validate", response_model=ValidateResponse)
+async def validate_chart_of_accounts(
+    tenant_id: Optional[str] = Query(None, description="Tenant ID"),
+    db: Session = Depends(get_db),
+):
+    """
+    Validate the chart of accounts (duplicate account numbers, valid account types).
+    """
+    effective_tenant = tenant_id or DEFAULT_TENANT
+    errors: List[str] = []
+
+    accounts = (
+        db.query(AccountModel)
+        .filter(AccountModel.tenant_id == effective_tenant, AccountModel.is_active == True)
+        .all()
+    )
+
+    seen_numbers: set = set()
+    for acc in accounts:
+        if acc.account_number in seen_numbers:
+            errors.append(f"Doppelte Kontonummer: {acc.account_number}")
+        seen_numbers.add(acc.account_number)
+
+        if acc.account_type not in VALID_ACCOUNT_TYPES:
+            errors.append(
+                f"Ungültige Kontenart '{acc.account_type}' für Konto {acc.account_number}. "
+                f"Erlaubt: {', '.join(VALID_ACCOUNT_TYPES)}"
+            )
+
+    return ValidateResponse(valid=len(errors) == 0, errors=errors)
+
+
+@router.post("/datev-export")
+async def datev_export_chart_of_accounts(
+    von_datum: str = Query(..., description="Start date YYYY-MM-DD"),
+    bis_datum: Optional[str] = Query(None, description="End date YYYY-MM-DD"),
+    tenant_id: Optional[str] = Query(None, description="Tenant ID"),
+    db: Session = Depends(get_db),
+):
+    """
+    Export bookings (journal entries) in DATEV format for the given date range.
+    Returns DATEV CSV as downloadable file.
+    """
+    effective_tenant = tenant_id or DEFAULT_TENANT
+    bis = bis_datum or von_datum
+
+    # Load journal entry lines with account numbers in date range
+    # Use domain_erp.journal_entries / journal_entry_lines if available; else finance_journal_*
+    try:
+        q = text("""
+            SELECT jel.journal_entry_id, jel.account_id, jel.debit_amount, jel.credit_amount,
+                   jel.description, jel.tax_code, je.entry_date, je.reference,
+                   coa.account_number
+            FROM domain_erp.journal_entry_lines jel
+            JOIN domain_erp.journal_entries je ON jel.journal_entry_id = je.id
+            LEFT JOIN domain_erp.chart_of_accounts coa ON coa.id = jel.account_id
+            WHERE je.tenant_id = :tenant_id
+              AND je.status = 'posted'
+              AND DATE(je.entry_date) >= :von_datum
+              AND DATE(je.entry_date) <= :bis_datum
+            ORDER BY je.entry_date, jel.journal_entry_id, jel.line_number
+        """)
+        rows = db.execute(
+            q,
+            {
+                "tenant_id": effective_tenant,
+                "von_datum": von_datum,
+                "bis_datum": bis,
+            },
+        ).fetchall()
+    except Exception:
+        # Fallback if table names differ (e.g. finance_journal_entries)
+        q = text("""
+            SELECT jel.journal_entry_id, jel.account_id, jel.debit_amount, jel.credit_amount,
+                   jel.description, jel.tax_code, je.entry_date, je.reference,
+                   coa.account_number
+            FROM domain_erp.finance_journal_entry_lines jel
+            JOIN domain_erp.finance_journal_entries je ON jel.journal_entry_id = je.id
+            LEFT JOIN domain_erp.finance_accounts coa ON coa.id = jel.account_id
+            WHERE je.tenant_id = :tenant_id
+              AND je.status = 'posted'
+              AND DATE(je.entry_date) >= :von_datum
+              AND DATE(je.entry_date) <= :bis_datum
+            ORDER BY je.entry_date, jel.journal_entry_id, jel.line_number
+        """)
+        rows = db.execute(
+            q,
+            {
+                "tenant_id": effective_tenant,
+                "von_datum": von_datum,
+                "bis_datum": bis,
+            },
+        ).fetchall()
+
+    # Build list of lines per entry for Gegenkonto
+    from collections import defaultdict
+    entry_lines = defaultdict(list)
+    for r in rows:
+        entry_lines[r[0]].append(
+            {
+                "account_number": (r[8] or "").strip() or str(r[1]),
+                "debit": float(r[2] or 0),
+                "credit": float(r[3] or 0),
+                "description": (r[4] or "")[:60],
+                "tax_code": (r[5] or "")[:4],
+                "entry_date": r[6],
+                "reference": (r[7] or "")[:36],
+            }
+        )
+
+    buchungen: List[dict] = []
+    for _je_id, lines in entry_lines.items():
+        for i, line in enumerate(lines):
+            amount = line["debit"] or line["credit"]
+            if amount <= 0:
+                continue
+            other = next(
+                (ll for j, ll in enumerate(lines) if j != i),
+                lines[0] if len(lines) > 1 else line,
+            )
+            soll_konto = line["account_number"] if line["debit"] else other["account_number"]
+            haben_konto = line["account_number"] if line["credit"] else other["account_number"]
+            buchungen.append({
+                "betrag": amount if line["debit"] else -amount,
+                "soll_konto": soll_konto,
+                "haben_konto": haben_konto,
+                "buchungsdatum": line["entry_date"],
+                "belegnummer": line["reference"],
+                "buchungstext": line["description"],
+                "steuerschluessel": line["tax_code"] or "",
+            })
+
+    von_ddmm = datetime.strptime(von_datum, "%Y-%m-%d").strftime("%d%m%Y")
+    bis_ddmm = datetime.strptime(bis, "%Y-%m-%d").strftime("%d%m%Y")
+    exporter = DATEVExporter(mandant_nr="1000", berater_nr="1000", wj_beginn="0101")
+    csv_content = exporter.export_buchungen(buchungen, von_ddmm, bis_ddmm)
+
+    return Response(
+        content=csv_content.encode("windows-1252"),
+        media_type="text/csv; charset=windows-1252",
+        headers={
+            "Content-Disposition": f'attachment; filename="DATEV_Export_{von_datum}_{bis}.csv"',
+        },
+    )
 
