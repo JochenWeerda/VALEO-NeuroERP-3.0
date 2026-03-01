@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useToast } from '@/hooks/use-toast'
 import { Wizard } from '@/components/patterns/Wizard'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -18,6 +19,7 @@ type LKWData = {
 
 export default function LKWRegistrierungPage(): JSX.Element {
   const navigate = useNavigate()
+  const { toast } = useToast()
   const [lkw, setLKW] = useState<LKWData>({
     kennzeichen: '',
     lieferant: '',
@@ -32,7 +34,10 @@ export default function LKWRegistrierungPage(): JSX.Element {
   }
 
   async function handleSubmit(): Promise<void> {
-    console.log('LKW registrieren:', lkw)
+    toast({
+      title: 'LKW registriert',
+      description: `${lkw.kennzeichen} — ${lkw.artikel} — wurde in die Warteschlange eingereiht.`,
+    })
     navigate('/annahme/warteschlange')
   }
 
