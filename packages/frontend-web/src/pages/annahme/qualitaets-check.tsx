@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useMutation } from '@tanstack/react-query'
 import { Wizard } from '@/components/patterns/Wizard'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -7,6 +8,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { AlertTriangle, CheckCircle, XCircle } from 'lucide-react'
+import { apiClient } from '@/lib/api-client'
+import { useToast } from '@/hooks/use-toast'
 
 type QualitaetsData = {
   lieferscheinNr: string
@@ -23,9 +26,10 @@ type QualitaetsData = {
 
 export default function QualitaetsCheckPage(): JSX.Element {
   const navigate = useNavigate()
+  const { toast } = useToast()
   const [qualitaet, setQualitaet] = useState<QualitaetsData>({
-    lieferscheinNr: 'LS-2025-0042',
-    artikel: 'Weizen',
+    lieferscheinNr: '',
+    artikel: '',
     feuchtigkeit: 0,
     protein: 0,
     verunreinigung: 0,
@@ -60,9 +64,36 @@ export default function QualitaetsCheckPage(): JSX.Element {
     setQualitaet(updated)
   }
 
+  const saveMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiClient.post('/api/v1/agrar/quality-protocols', {
+        moisture_pct: qualitaet.feuchtigkeit || null,
+        protein_pct: qualitaet.protein || null,
+        impurities_pct: qualitaet.verunreinigung || null,
+        source_type: 'manual',
+        other_values: {
+          fremdgeruch: qualitaet.fremdgeruch,
+          schaedlinge: qualitaet.schaedlinge,
+          farbe: qualitaet.farbe,
+          ergebnis: qualitaet.ergebnis,
+          bemerkungen: qualitaet.bemerkungen,
+          lieferschein_nr: qualitaet.lieferscheinNr,
+          artikel: qualitaet.artikel,
+        },
+      })
+      return response.data
+    },
+    onSuccess: () => {
+      toast({ title: 'Qualitätsprüfung gespeichert', description: `Ergebnis: ${qualitaet.ergebnis}` })
+      navigate('/annahme/warteschlange')
+    },
+    onError: () => {
+      toast({ title: 'Fehler beim Speichern', variant: 'destructive' })
+    },
+  })
+
   async function handleSubmit(): Promise<void> {
-    console.log('Qualitätsprüfung speichern:', qualitaet)
-    navigate('/annahme/warteschlange')
+    saveMutation.mutate()
   }
 
   const steps = [
