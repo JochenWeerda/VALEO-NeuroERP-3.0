@@ -4,6 +4,8 @@ import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
+import { toast } from '@/hooks/use-toast'
+import { apiClient } from '@/lib/axios'
 
 // Zod-Schema für Monats-/Jahresabschluss
 const abschlussSchema = z.object({
@@ -283,36 +285,12 @@ const abschlussConfig: MaskConfig = {
     }
   ],
   actions: [
-    {
-      key: 'calculate',
-      label: 'Berechnen',
-      type: 'secondary'
-    , onClick: () => {} },
-    {
-      key: 'validate',
-      label: 'Prüfen',
-      type: 'secondary'
-    , onClick: () => {} },
-    {
-      key: 'approve',
-      label: 'Freigeben',
-      type: 'primary'
-    , onClick: () => {} },
-    {
-      key: 'close',
-      label: 'Abschließen',
-      type: 'primary'
-    , onClick: () => {} },
-    {
-      key: 'lock',
-      label: 'Sperren',
-      type: 'danger'
-    , onClick: () => {} },
-    {
-      key: 'export',
-      label: 'Export',
-      type: 'secondary'
-    , onClick: () => {} }
+    { key: 'calculate', label: 'Berechnen', type: 'secondary' },
+    { key: 'validate', label: 'Prüfen', type: 'secondary' },
+    { key: 'approve', label: 'Freigeben', type: 'primary' },
+    { key: 'close', label: 'Abschließen', type: 'primary' },
+    { key: 'lock', label: 'Sperren', type: 'danger' },
+    { key: 'export', label: 'Export', type: 'secondary' }
   ],
   api: {
     baseUrl: '/api/v1/finance/abschluss',
@@ -510,6 +488,7 @@ function RueckstellungenTable({ data: _data, onChange }: { data: any[], onChange
 export default function AbschlussPage(): JSX.Element {
   const navigate = useNavigate()
   const [isDirty, setIsDirty] = useState(false)
+  const [actionLoadingKey, setActionLoadingKey] = useState<string | null>(null)
 
   const { data, loading, saveData } = useMaskData({
     apiUrl: abschlussConfig.api.baseUrl,
@@ -520,37 +499,58 @@ export default function AbschlussPage(): JSX.Element {
 
   const { handleAction } = useMaskActions(async (action: string, formData: any) => {
     if (action === 'calculate') {
-      // Berechnung durchführen
-      alert('Abschlussberechnung-Funktion wird implementiert')
-    } else if (action === 'validate') {
+      // TODO: Endpoint /api/v1/finance/closing/calculate when ready
+      toast({ title: 'Diese Aktion ist in Arbeit' })
+      return
+    }
+    if (action === 'validate') {
       const isValid = validate(formData)
-      if (isValid.isValid) {
-        alert('Abschlussprüfung erfolgreich!')
-      } else {
-        showValidationToast(isValid.errors)
-      }
-    } else if (action === 'approve') {
-      // Freigeben
-      alert('Abschlussfreigabe-Funktion wird implementiert')
-    } else if (action === 'close') {
+      if (isValid.isValid) toast({ title: 'Abschlussprüfung erfolgreich!' })
+      else showValidationToast(isValid.errors)
+      return
+    }
+    if (action === 'approve') {
+      // TODO: Endpoint /api/v1/finance/closing/approve when ready
+      toast({ title: 'Diese Aktion ist in Arbeit' })
+      return
+    }
+    if (action === 'close') {
       const isValid = validate(formData)
       if (!isValid.isValid) {
         showValidationToast(isValid.errors)
         return
       }
-
+      setActionLoadingKey('close')
       try {
-        await saveData(formData)
+        await apiClient.post('/api/v1/finance/closing/run', formData ?? {})
+        toast({ title: 'Abschluss durchgeführt' })
         setIsDirty(false)
         navigate('/finance/abschluss')
-      } catch (error) {
-        // Error wird bereits in useMaskData behandelt
+      } catch (error: any) {
+        const msg = error.response?.data?.detail ?? error.message
+        toast({ variant: 'destructive', title: 'Fehler', description: msg })
+      } finally {
+        setActionLoadingKey(null)
       }
-    } else if (action === 'lock') {
-      // Sperren
-      alert('Periodensperre-Funktion wird implementiert')
-    } else if (action === 'export') {
-      window.open('/api/v1/finance/abschluss/export', '_blank')
+      return
+    }
+    if (action === 'lock') {
+      // TODO: Endpoint /api/v1/finance/closing/lock when ready
+      toast({ title: 'Diese Aktion ist in Arbeit' })
+      return
+    }
+    if (action === 'export') {
+      setActionLoadingKey('export')
+      try {
+        const res = await apiClient.post<{ url?: string }>('/api/v1/export/list', { entity: 'closing', format: 'pdf' })
+        if (res?.url) window.open(res.url, '_blank')
+        toast({ title: 'Export erstellt' })
+      } catch (error: any) {
+        const msg = error.response?.data?.detail ?? error.message
+        toast({ variant: 'destructive', title: 'Fehler', description: msg })
+      } finally {
+        setActionLoadingKey(null)
+      }
     }
   })
 
@@ -572,6 +572,8 @@ export default function AbschlussPage(): JSX.Element {
       onSave={handleSave}
       onCancel={handleCancel}
       isLoading={loading}
+      onAction={(key, formData) => handleAction(key, formData)}
+      loadingActionKey={actionLoadingKey}
     />
   )
 }

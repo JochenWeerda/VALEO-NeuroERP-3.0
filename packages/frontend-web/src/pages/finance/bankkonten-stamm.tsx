@@ -9,7 +9,7 @@ import { z } from 'zod'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { validateIBAN, formatIBAN } from '@/lib/utils/iban-validator'
 import { useIbanLookup } from '@/hooks/useIbanLookup'
-import { apiClient } from '@/lib/api-client'
+import { apiClient } from '@/lib/axios'
 import { toast } from 'sonner'
 
 // Zod-Schema für Bankkonten-Stammdaten
@@ -96,24 +96,9 @@ const createBankKontenConfig = (t: any, entityTypeLabel: string): MaskConfig => 
     }
   ],
   actions: [
-    {
-      key: 'save',
-      label: t('crud.actions.save'),
-      type: 'primary',
-      onClick: () => {}
-    },
-    {
-      key: 'validate',
-      label: t('crud.actions.validate'),
-      type: 'secondary',
-      onClick: () => {}
-    },
-    {
-      key: 'export',
-      label: t('crud.actions.export'),
-      type: 'secondary',
-      onClick: () => {}
-    }
+    { key: 'save', label: t('crud.actions.save'), type: 'primary' },
+    { key: 'validate', label: t('crud.actions.validate'), type: 'secondary' },
+    { key: 'export', label: t('crud.actions.export'), type: 'secondary' }
   ],
   api: {
     baseUrl: '/api/v1/finance/bank-accounts',
@@ -135,6 +120,7 @@ export default function BankKontenStammPage(): JSX.Element {
   const queryClient = useQueryClient()
   const [isDirty, setIsDirty] = useState(false)
   const [formData, setFormData] = useState<any>({})
+  const [actionLoadingKey, setActionLoadingKey] = useState<string | null>(null)
   const entityType = 'bankAccount'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Bankkonto')
   const bankKontenConfig = createBankKontenConfig(t, entityTypeLabel)
@@ -253,7 +239,17 @@ export default function BankKontenStammPage(): JSX.Element {
         showValidationToast(isValid.errors)
       }
     } else if (action === 'export') {
-      window.open('/api/v1/finance/bank-accounts/export', '_blank')
+      setActionLoadingKey('export')
+      try {
+        const res = await apiClient.post<{ url?: string }>('/api/v1/export/list', { entity: 'bank_accounts', format: 'pdf', id: formData?.id })
+        if (res?.url) window.open(res.url, '_blank')
+        toast.success(t('crud.messages.exportCreated', { defaultValue: 'Export erstellt' }))
+      } catch (error: any) {
+        const msg = error.response?.data?.detail ?? error.message
+        toast.error(msg)
+      } finally {
+        setActionLoadingKey(null)
+      }
     }
   })
 
@@ -276,6 +272,8 @@ export default function BankKontenStammPage(): JSX.Element {
       onSave={handleSave}
       onCancel={handleCancel}
       isLoading={loading || isIbanLoading}
+      onAction={(key, fd) => handleAction(key, fd ?? formData)}
+      loadingActionKey={actionLoadingKey}
     />
   )
 }

@@ -6,6 +6,7 @@ import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mas
 import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
 import { toast } from '@/hooks/use-toast'
+import { apiClient } from '@/lib/axios'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 
 // Zod-Schema für Dunning (wird in Komponente mit i18n erstellt)
@@ -201,48 +202,13 @@ const createDunningConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
     }
   ],
   actions: [
-    {
-      key: 'generate',
-      label: t('crud.actions.generateDunning'),
-      type: 'secondary',
-      onClick: () => {}
-    },
-    {
-      key: 'preview',
-      label: t('crud.actions.preview'),
-      type: 'secondary',
-      onClick: () => {}
-    },
-    {
-      key: 'send',
-      label: t('crud.actions.send'),
-      type: 'primary',
-      onClick: () => {}
-    },
-    {
-      key: 'payment',
-      label: t('crud.actions.bookPayment'),
-      type: 'secondary',
-      onClick: () => {}
-    },
-    {
-      key: 'escalate',
-      label: t('crud.actions.escalate'),
-      type: 'danger',
-      onClick: () => {}
-    },
-    {
-      key: 'collection',
-      label: t('crud.actions.handOverToCollection'),
-      type: 'danger',
-      onClick: () => {}
-    },
-    {
-      key: 'export',
-      label: t('crud.actions.pdfExport'),
-      type: 'secondary',
-      onClick: () => {}
-    }
+    { key: 'generate', label: t('crud.actions.generateDunning'), type: 'secondary' },
+    { key: 'preview', label: t('crud.actions.preview'), type: 'secondary' },
+    { key: 'send', label: t('crud.actions.send'), type: 'primary' },
+    { key: 'payment', label: t('crud.actions.bookPayment'), type: 'secondary' },
+    { key: 'escalate', label: t('crud.actions.escalate'), type: 'danger' },
+    { key: 'collection', label: t('crud.actions.handOverToCollection'), type: 'danger' },
+    { key: 'export', label: t('crud.actions.pdfExport'), type: 'secondary' }
   ],
   api: {
     baseUrl: '/api/v1/finance/dunning',
@@ -263,6 +229,7 @@ export default function DunningEditorPage(): JSX.Element {
   const navigate = useNavigate()
   const { id } = useParams()
   const [isDirty, setIsDirty] = useState(false)
+  const [actionLoadingKey, setActionLoadingKey] = useState<string | null>(null)
   const entityType = 'dunning'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Mahnung')
   const dunningConfig = createDunningConfig(t, entityTypeLabel)
@@ -276,28 +243,19 @@ export default function DunningEditorPage(): JSX.Element {
 
   const { handleAction } = useMaskActions(async (action: string, formData: Record<string, unknown>) => {
     if (action === 'generate') {
-      // Mahnung generieren - berechne Gesamtforderung und generiere Text
-      const gesamtForderung = (formData.amount as number || 0) + (formData.dunningFee as number || 0) + (formData.interest as number || 0)
-      formData.totalAmount = gesamtForderung
-
-      // Generiere Standard-Mahntext basierend auf Mahnstufe
-      if (!formData.text || (formData.text as string).trim() === '') {
-        const mahnstufe = formData.dunningLevel as number || 1
-        const betrag = formData.amount as number || 0
-        const frist = formData.paymentDeadline as string || '7 Tage'
-
-        formData.text = t('crud.messages.dunningTextTemplate', {
-          mahnstufeText: mahnstufe > 1 ? t('crud.messages.dunningTextPrevious', { level: mahnstufe - 1 }) + ' ' : '',
-          betrag: betrag.toFixed(2),
-          frist: frist
-        })
+      setActionLoadingKey('generate')
+      try {
+        await apiClient.post('/api/v1/finance/dunning/run', formData ?? {})
+        toast({ title: t('crud.messages.dunningGenerated'), description: t('crud.messages.dunningGeneratedDesc', { level: formData?.dunningLevel ?? 1 }) })
+      } catch (error: any) {
+        const msg = error.response?.data?.detail ?? error.message
+        toast({ variant: 'destructive', title: t('common.error'), description: msg })
+      } finally {
+        setActionLoadingKey(null)
       }
-
-      toast({
-        title: t('crud.messages.dunningGenerated'),
-        description: t('crud.messages.dunningGeneratedDesc', { level: formData.dunningLevel }),
-      })
-    } else if (action === 'preview') {
+      return
+    }
+    if (action === 'preview') {
       // Vorschau
       if (!id || id === 'new') {
         toast({
@@ -400,16 +358,23 @@ export default function DunningEditorPage(): JSX.Element {
           // Error wird bereits in useMaskData behandelt
         }
       }
-    } else if (action === 'export') {
+    }
+    if (action === 'export') {
       if (!id || id === 'new') {
-        toast({
-          variant: 'destructive',
-          title: t('common.error'),
-          description: t('crud.messages.saveFirst'),
-        })
+        toast({ variant: 'destructive', title: t('common.error'), description: t('crud.messages.saveFirst') })
         return
       }
-      window.open(`/api/v1/finance/dunning/${id}/export`, '_blank')
+      setActionLoadingKey('export')
+      try {
+        const res = await apiClient.post<{ url?: string }>('/api/v1/export/list', { entity: 'dunning', format: 'pdf', id })
+        if (res?.url) window.open(res.url, '_blank')
+        toast({ title: t('crud.actions.pdfExport'), description: t('crud.messages.exportCreated', { defaultValue: 'Export erstellt' }) })
+      } catch (error: any) {
+        const msg = error.response?.data?.detail ?? error.message
+        toast({ variant: 'destructive', title: t('common.error'), description: msg })
+      } finally {
+        setActionLoadingKey(null)
+      }
     }
   })
 
@@ -431,6 +396,8 @@ export default function DunningEditorPage(): JSX.Element {
       onSave={handleSave}
       onCancel={handleCancel}
       isLoading={loading}
+      onAction={(key, formData) => handleAction(key, formData)}
+      loadingActionKey={actionLoadingKey}
     />
   )
 }

@@ -1,13 +1,15 @@
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useQueryClient } from '@tanstack/react-query'
 import { ListReport } from '@/components/mask-builder'
 import { formatDate, formatNumber } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
 import { getEntityTypeLabel, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 import { toast } from '@/hooks/use-toast'
-import { useRechnungseingaenge, type Rechnungseingang } from '@/lib/api/einkauf'
+import { apiClient } from '@/lib/api-client'
+import { useRechnungseingaenge, type Rechnungseingang, einkaufKeys } from '@/lib/api/einkauf'
 
 const createRechnungseingaengeConfig = (t: any, entityTypeLabel: string): ListConfig => ({
   title: entityTypeLabel,
@@ -105,29 +107,7 @@ const createRechnungseingaengeConfig = (t: any, entityTypeLabel: string): ListCo
       type: 'text'
     }
   ],
-  bulkActions: [
-    {
-      key: 'pruefen',
-      label: t('crud.actions.review'),
-      labelKey: 'crud.actions.review',
-      type: 'secondary',
-      onClick: () => console.log('Pruefen clicked')
-    },
-    {
-      key: 'freigeben',
-      label: t('crud.actions.approve'),
-      labelKey: 'crud.actions.approve',
-      type: 'primary',
-      onClick: () => console.log('Freigeben clicked')
-    },
-    {
-      key: 'verbuchen',
-      label: t('crud.actions.post'),
-      labelKey: 'crud.actions.post',
-      type: 'primary',
-      onClick: () => console.log('Verbuchen clicked')
-    }
-  ],
+  bulkActions: [], // set in component with API calls
   defaultSort: { field: 'createdAt', direction: 'desc' },
   pageSize: 25,
   api: {
@@ -144,9 +124,40 @@ const createRechnungseingaengeConfig = (t: any, entityTypeLabel: string): ListCo
   actions: []
 })
 
+const ENTWURF_STATUSES = ['ENTWURF', 'ERFASST', 'OFFEN']
+
+async function bulkWorkflow(
+  selectedItems: Array<{ id: string; status?: string }>,
+  endpointSuffix: 'pruefen' | 'freigeben' | 'verbuchen',
+  allowedStatuses: string[],
+): Promise<{ ok: number; err: number; messages: string[] }> {
+  const base = '/api/v1/einkauf/rechnungseingaenge'
+  let ok = 0
+  let err = 0
+  const messages: string[] = []
+  const toProcess = selectedItems.filter((item) =>
+    allowedStatuses.includes((item.status || '').toUpperCase()),
+  )
+  for (const item of toProcess) {
+    try {
+      await apiClient.post(`${base}/${encodeURIComponent(item.id)}/${endpointSuffix}`)
+      ok += 1
+    } catch (e: any) {
+      err += 1
+      messages.push(
+        (item as any).rechnungsNummer || item.id
+          ? `${(item as any).rechnungsNummer || item.id}: ${e?.response?.data?.detail || e?.message}`
+          : e?.response?.data?.detail || e?.message,
+      )
+    }
+  }
+  return { ok, err, messages }
+}
+
 export default function RechnungseingaengeListePage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const { data: apiData = [], isLoading } = useRechnungseingaenge()
   const data = useMemo(() => apiData.map((item: Rechnungseingang) => ({
     ...item,
@@ -156,7 +167,88 @@ export default function RechnungseingaengeListePage(): JSX.Element {
   const total = data.length
   const entityType = 'invoiceReceipt'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Rechnungseingang')
-  const rechnungseingaengeConfig = createRechnungseingaengeConfig(t, entityTypeLabel)
+  const baseConfig = createRechnungseingaengeConfig(t, entityTypeLabel)
+
+  const rechnungseingaengeConfig: ListConfig = useMemo(() => ({
+    ...baseConfig,
+    bulkActions: [
+      {
+        key: 'pruefen',
+        label: t('crud.actions.review'),
+        labelKey: 'crud.actions.review',
+        type: 'secondary',
+        onClick: async (selectedItems: any[]) => {
+          const { ok, err, messages } = await bulkWorkflow(
+            selectedItems,
+            'pruefen',
+            ENTWURF_STATUSES,
+          )
+          queryClient.invalidateQueries({ queryKey: einkaufKeys.rechnungseingaenge() })
+          if (err === 0 && ok > 0) {
+            toast({ title: t('crud.messages.success'), description: t('status.reviewed') + ` (${ok})` })
+          } else if (ok > 0) {
+            toast({ title: t('status.reviewed'), description: `${ok} OK, ${err} Fehler. ${messages.slice(0, 2).join(' ')}` })
+          } else if (messages.length) {
+            toast({ variant: 'destructive', title: t('crud.messages.error'), description: messages.slice(0, 2).join(' ') })
+          } else if (selectedItems.length === 0) {
+            toast({ variant: 'destructive', title: t('crud.messages.noSelection'), description: t('crud.messages.selectAtLeastOne') })
+          } else {
+            toast({ variant: 'destructive', title: t('crud.messages.error'), description: 'Keine Rechnungseingaenge im Status Erfasst/Entwurf/Offen.' })
+          }
+        },
+      },
+      {
+        key: 'freigeben',
+        label: t('crud.actions.approve'),
+        labelKey: 'crud.actions.approve',
+        type: 'primary',
+        onClick: async (selectedItems: any[]) => {
+          const { ok, err, messages } = await bulkWorkflow(
+            selectedItems,
+            'freigeben',
+            ['GEPRUEFT'],
+          )
+          queryClient.invalidateQueries({ queryKey: einkaufKeys.rechnungseingaenge() })
+          if (err === 0 && ok > 0) {
+            toast({ title: t('crud.messages.success'), description: t('status.approved') + ` (${ok})` })
+          } else if (ok > 0) {
+            toast({ title: t('status.approved'), description: `${ok} OK, ${err} Fehler. ${messages.slice(0, 2).join(' ')}` })
+          } else if (messages.length) {
+            toast({ variant: 'destructive', title: t('crud.messages.error'), description: messages.slice(0, 2).join(' ') })
+          } else if (selectedItems.length === 0) {
+            toast({ variant: 'destructive', title: t('crud.messages.noSelection'), description: t('crud.messages.selectAtLeastOne') })
+          } else {
+            toast({ variant: 'destructive', title: t('crud.messages.error'), description: 'Keine Rechnungseingaenge im Status Geprüft.' })
+          }
+        },
+      },
+      {
+        key: 'verbuchen',
+        label: t('crud.actions.post'),
+        labelKey: 'crud.actions.post',
+        type: 'primary',
+        onClick: async (selectedItems: any[]) => {
+          const { ok, err, messages } = await bulkWorkflow(
+            selectedItems,
+            'verbuchen',
+            ['FREIGEGEBEN'],
+          )
+          queryClient.invalidateQueries({ queryKey: einkaufKeys.rechnungseingaenge() })
+          if (err === 0 && ok > 0) {
+            toast({ title: t('crud.messages.success'), description: t('status.posted') + ` (${ok})` })
+          } else if (ok > 0) {
+            toast({ title: t('status.posted'), description: `${ok} OK, ${err} Fehler. ${messages.slice(0, 2).join(' ')}` })
+          } else if (messages.length) {
+            toast({ variant: 'destructive', title: t('crud.messages.error'), description: messages.slice(0, 2).join(' ') })
+          } else if (selectedItems.length === 0) {
+            toast({ variant: 'destructive', title: t('crud.messages.noSelection'), description: t('crud.messages.selectAtLeastOne') })
+          } else {
+            toast({ variant: 'destructive', title: t('crud.messages.error'), description: 'Keine Rechnungseingaenge im Status Freigegeben.' })
+          }
+        },
+      },
+    ],
+  }), [baseConfig, t, queryClient])
 
   const handleCreate = () => {
     navigate('/einkauf/rechnungseingang/neu')

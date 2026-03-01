@@ -9,6 +9,7 @@ import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { validateIBAN, formatIBAN, lookupIBAN } from '@/lib/utils/iban-validator'
 import { useIbanLookup } from '@/hooks/useIbanLookup'
 import { toast } from 'sonner'
+import { apiClient } from '@/lib/axios'
 
 // Zod-Schema für Kreditoren-Stammdaten (wird in Komponente mit i18n erstellt)
 const createKreditorenSchema = (t: any) => z.object({
@@ -260,30 +261,10 @@ const createKreditorenConfig = (t: any, entityTypeLabel: string): MaskConfig => 
     }
   ],
   actions: [
-    {
-      key: 'validate',
-      label: t('crud.actions.validate'),
-      type: 'secondary',
-      onClick: () => {}
-    },
-    {
-      key: 'save',
-      label: t('crud.actions.save'),
-      type: 'primary',
-      onClick: () => {}
-    },
-    {
-      key: 'sanktionspruefung',
-      label: t('crud.actions.sanctionsCheck'),
-      type: 'secondary',
-      onClick: () => {}
-    },
-    {
-      key: 'export',
-      label: t('crud.actions.export'),
-      type: 'secondary',
-      onClick: () => {}
-    }
+    { key: 'validate', label: t('crud.actions.validate'), type: 'secondary' },
+    { key: 'save', label: t('crud.actions.save'), type: 'primary' },
+    { key: 'sanktionspruefung', label: t('crud.actions.sanctionsCheck'), type: 'secondary' },
+    { key: 'export', label: t('crud.actions.export'), type: 'secondary' }
   ],
   api: {
     baseUrl: '/api/v1/finance/creditors',
@@ -306,6 +287,7 @@ export default function KreditorenStammPage(): JSX.Element {
   const navigate = useNavigate()
   const [isDirty, setIsDirty] = useState(false)
   const [formData, setFormData] = useState<any>({})
+  const [actionLoadingKey, setActionLoadingKey] = useState<string | null>(null)
   const entityType = 'creditor'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Kreditor')
   const kreditorenConfig = createKreditorenConfig(t, entityTypeLabel)
@@ -387,7 +369,17 @@ export default function KreditorenStammPage(): JSX.Element {
       // Sanktionsprüfung
       alert(t('crud.messages.sanctionsCheckInfo'))
     } else if (action === 'export') {
-      window.open('/api/v1/finance/creditors/export', '_blank')
+      setActionLoadingKey('export')
+      try {
+        const res = await apiClient.post<{ url?: string }>('/api/v1/export/list', { entity: 'creditors', format: 'pdf', id: formData?.id })
+        if (res?.url) window.open(res.url, '_blank')
+        toast.success(t('crud.messages.exportCreated', { defaultValue: 'Export erstellt' }))
+      } catch (error: any) {
+        const msg = error.response?.data?.detail ?? error.message
+        toast.error(msg)
+      } finally {
+        setActionLoadingKey(null)
+      }
     }
   })
 
@@ -445,6 +437,8 @@ export default function KreditorenStammPage(): JSX.Element {
       onSave={handleSave}
       onCancel={handleCancel}
       isLoading={loading || isIbanLoading}
+      onAction={(key, fd) => handleAction(key, fd ?? formData)}
+      loadingActionKey={actionLoadingKey}
     />
   )
 }
