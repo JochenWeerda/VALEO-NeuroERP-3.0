@@ -1,11 +1,14 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useMutation } from '@tanstack/react-query'
 import { Wizard } from '@/components/patterns/Wizard'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { AlertTriangle, CheckCircle, FileText } from 'lucide-react'
+import { apiClient } from '@/lib/api-client'
+import { useToast } from '@/hooks/use-toast'
 
 type TagesabschlussData = {
   datum: string
@@ -37,30 +40,58 @@ type TagesabschlussData = {
 
 export default function TagesabschlussEnhancedPage(): JSX.Element {
   const navigate = useNavigate()
-  
+  const { toast } = useToast()
+
   const [abschluss, setAbschluss] = useState<TagesabschlussData>({
     datum: new Date().toISOString().split('T')[0],
-    kassierer: 'Max Mustermann',
-    
-    // Auto-geladen aus TSE-Journal
-    tseTransaktionen: 47,
-    tseUmsatzBar: 1250.80,
-    tseUmsatzEC: 2890.50,
-    tseUmsatzPayPal: 450.20,
-    tseUmsatzB2B: 850.00,
-    tseGesamt: 5441.50,
-    
+    kassierer: '',
+
+    // Aus TSE-Journal geladen (Startwerte 0 bis Daten verfügbar)
+    tseTransaktionen: 0,
+    tseUmsatzBar: 0,
+    tseUmsatzEC: 0,
+    tseUmsatzPayPal: 0,
+    tseUmsatzB2B: 0,
+    tseGesamt: 0,
+
     // Manuell eingegeben
-    bargeldGezaehlt: 1248.30,
-    ecAbrechnung: 2890.50,
-    paypalAbrechnung: 450.20,
-    
+    bargeldGezaehlt: 0,
+    ecAbrechnung: 0,
+    paypalAbrechnung: 0,
+
     // Auto-berechnet
-    differenzBar: -2.50,
+    differenzBar: 0,
     differenzEC: 0,
     differenzPayPal: 0,
-    
+
     fibuStatus: 'offen',
+  })
+
+  const buchungMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiClient.post('/api/v1/pos/tagesabschluss', {
+        datum: abschluss.datum,
+        kassierer: abschluss.kassierer,
+        tse_transaktionen: abschluss.tseTransaktionen,
+        umsatz_bar: abschluss.tseUmsatzBar,
+        umsatz_ec: abschluss.tseUmsatzEC,
+        umsatz_paypal: abschluss.tseUmsatzPayPal,
+        umsatz_b2b: abschluss.tseUmsatzB2B,
+        umsatz_gesamt: abschluss.tseGesamt,
+        bargeld_gezaehlt: abschluss.bargeldGezaehlt,
+        ec_abrechnung: abschluss.ecAbrechnung,
+        paypal_abrechnung: abschluss.paypalAbrechnung,
+        differenz_bar: abschluss.differenzBar,
+      })
+      return response.data
+    },
+    onSuccess: () => {
+      toast({ title: 'Tagesabschluss gebucht', description: `Buchungsdatum: ${new Date(abschluss.datum).toLocaleDateString('de-DE')} · Belegnr: KA-${abschluss.datum}` })
+      navigate('/pos/tse-journal')
+    },
+    onError: () => {
+      toast({ title: 'Fehler beim Buchen', variant: 'destructive' })
+    },
   })
 
   function calculateDifferenzen(): void {
@@ -278,23 +309,7 @@ export default function TagesabschlussEnhancedPage(): JSX.Element {
         title="Tagesabschluss mit TSE → Fibu"
         subtitle="Kassenzählung, TSE-Export & automatische Fibu-Buchung"
         steps={steps}
-        onFinish={() => {
-          // Mock: Fibu-Buchung erstellen
-          console.log('Fibu-Buchung erstellt:', {
-            datum: abschluss.datum,
-            belegnr: `KA-${abschluss.datum}`,
-            buchungen: [
-              { soll: '1000', haben: '8400', betrag: abschluss.tseUmsatzBar, text: 'Barverkauf lt. TSE' },
-              { soll: '1200', haben: '8400', betrag: abschluss.tseUmsatzEC, text: 'EC-Verkauf lt. TSE' },
-              { soll: '1210', haben: '8400', betrag: abschluss.tseUmsatzPayPal, text: 'PayPal-Verkauf lt. TSE' },
-            ],
-          })
-          
-          // Mock: TSE-Journal-Status updaten
-          console.log('TSE-Journal als gebucht markiert (Datum:', abschluss.datum, ')')
-          
-          navigate('/pos/tse-journal')
-        }}
+        onFinish={() => { buchungMutation.mutate() }}
         onCancel={() => navigate('/pos/tse-journal')}
       />
     </div>
