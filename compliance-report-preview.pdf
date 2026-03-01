@@ -1,0 +1,51 @@
+%PDF-1.4
+1 0 obj
+<</Type/Catalog/Pages 2 0 R>>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> >> >> /Contents 4 0 R >>
+endobj
+4 0 obj
+<< /Length 1218 >>
+stream
+BT /F1 14 Tf 72.0 720.0 Td (Compliance-Report) Tj ET
+BT /F1 10 Tf 72.0 699.0 Td (Stand: 2026-03-01 12:00:00) Tj ET
+BT /F1 10 Tf 72.0 671.0 Td (Cross-Compliance gesamt: 66.7%) Tj ET
+BT /F1 10 Tf 72.0 657.0 Td (Erfuellt: 2, Offen: 1) Tj ET
+BT /F1 10 Tf 72.0 643.0 Td (ENNI: 1/2 bestaetigt) Tj ET
+BT /F1 10 Tf 72.0 615.0 Td (Bereich) Tj ET
+BT /F1 10 Tf 192.0 615.0 Td (Anforderung) Tj ET
+BT /F1 10 Tf 392.0 615.0 Td (Status) Tj ET
+BT /F1 10 Tf 472.0 615.0 Td (Frist) Tj ET
+0.5 w 72 601.0 m 540 601.0 l S
+BT /F1 10 Tf 72.0 597.0 Td (Gewaesserschutz) Tj ET
+BT /F1 10 Tf 192.0 597.0 Td (Gewaesserrandstreifen 5m) Tj ET
+BT /F1 10 Tf 392.0 597.0 Td (Erfuellt) Tj ET
+BT /F1 10 Tf 472.0 597.0 Td (2026-12-31) Tj ET
+BT /F1 10 Tf 72.0 583.0 Td (Duengeverordnung) Tj ET
+BT /F1 10 Tf 192.0 583.0 Td (Naehrstoffbilanz erstellt) Tj ET
+BT /F1 10 Tf 392.0 583.0 Td (Erfuellt) Tj ET
+BT /F1 10 Tf 472.0 583.0 Td (2026-03-31) Tj ET
+BT /F1 10 Tf 72.0 569.0 Td (PSM-Dokumentation) Tj ET
+BT /F1 10 Tf 192.0 569.0 Td (Anwendungsprotokolle vollsta) Tj ET
+BT /F1 10 Tf 392.0 569.0 Td (Offen) Tj ET
+BT /F1 10 Tf 472.0 569.0 Td (2026-03-15) Tj ET
+0.5 w 72 541.0 m 540 541.0 l S
+BT /F1 10 Tf 72.0 527.0 Td (Summe gesamt: Erfuellt 2, Offen 1) Tj ET
+
+endstream
+endobj
+xref
+0 5
+0000000000 65535 f 
+0000000009 00000 n 
+0000000054 00000 n 
+0000000111 00000 n 
+0000000286 00000 n 
+trailer << /Size 5 /Root 1 0 R >>
+startxref
+1556
+%%EOF

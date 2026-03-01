@@ -8,10 +8,29 @@ import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Building2, FileDown, Loader2, Plus, Search } from 'lucide-react'
 import { useSuppliers, type Supplier } from '@/lib/api/crm'
+import { api } from '@/lib/axios'
+import { useToast } from '@/hooks/use-toast'
 
 export default function LieferantenListePage(): JSX.Element {
   const navigate = useNavigate()
+  const { toast } = useToast()
   const [searchTerm, setSearchTerm] = useState('')
+
+  const handleExport = async () => {
+    try {
+      const res = await api.post('/api/v1/export/list', { entity: 'creditors', format: 'csv' }, { responseType: 'blob' })
+      const blob = res.data as Blob
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `export_lieferanten_${new Date().toISOString().slice(0, 10)}.csv`
+      a.click()
+      URL.revokeObjectURL(url)
+      toast({ title: 'Export erstellt', description: 'Download gestartet.' })
+    } catch (e: any) {
+      toast({ title: 'Export fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+    }
+  }
 
   const { data, isLoading } = useSuppliers({
     search: searchTerm || undefined,
@@ -147,7 +166,7 @@ export default function LieferantenListePage(): JSX.Element {
                 className="pl-10"
               />
             </div>
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" onClick={handleExport}>
               <FileDown className="h-4 w-4" />
               Export
             </Button>

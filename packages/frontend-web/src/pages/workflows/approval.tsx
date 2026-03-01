@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { toast } from '@/hooks/use-toast'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -38,7 +39,7 @@ export default function WorkflowApprovalPage(): JSX.Element {
   
   const handleReject = async (): Promise<void> => {
     if (!workflowId || !rejectionReason.trim()) {
-      alert('Bitte einen Ablehnungsgrund angeben')
+      toast({ title: 'Ablehnungsgrund fehlt', description: 'Bitte geben Sie einen Ablehnungsgrund an.', variant: 'destructive' })
       return
     }
     

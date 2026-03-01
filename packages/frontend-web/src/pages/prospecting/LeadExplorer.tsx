@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { toast } from '@/hooks/use-toast'
 import { LeadCandidate, LeadSegment } from '@/types/prospecting'
 import { fetchLeadCandidates } from '@/api/prospecting'
 import {
@@ -329,7 +330,7 @@ export default function LeadExplorer(): JSX.Element {
 
   function handleExportToCSV(): void {
     if (leadCandidates.length === 0) {
-      alert('Keine Daten zum Exportieren vorhanden')
+      toast({ title: 'Keine Daten', description: 'Es sind keine Kandidaten zum Exportieren vorhanden.' })
       return
     }
 

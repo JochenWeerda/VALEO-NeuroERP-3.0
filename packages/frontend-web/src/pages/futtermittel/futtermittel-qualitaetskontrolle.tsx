@@ -3,6 +3,7 @@ import { Worklist } from '@/components/mask-builder'
 import { useMaskActions } from '@/components/mask-builder/hooks'
 import { WorklistConfig, WorklistItem } from '@/components/mask-builder/types'
 import { useFutterQualitaet } from '@/lib/api/futter'
+import { toast } from '@/hooks/use-toast'
 
 // Konfiguration fuer Qualitaetskontrolle Worklist
 const qualityControlConfig: WorklistConfig = {
@@ -93,25 +94,25 @@ export default function FuttermittelQualitaetskontrollePage(): JSX.Element {
         setItems(prev => prev.map(i =>
           i.id === item.id ? { ...i, status: 'completed' as const } : i
         ))
-        alert(`${item.title} wurde freigegeben.`)
+        toast({ title: 'Freigegeben', description: `${item.title} wurde freigegeben.` })
         break
 
       case 'reject':
         setItems(prev => prev.map(i =>
           i.id === item.id ? { ...i, status: 'completed' as const } : i
         ))
-        alert(`${item.title} wurde abgelehnt.`)
+        toast({ title: 'Abgelehnt', description: `${item.title} wurde abgelehnt.`, variant: 'destructive' })
         break
 
       case 'analyze':
-        alert(`Analyse fuer ${item.title} wurde angefordert.`)
+        toast({ title: 'Analyse angefordert', description: `Analyse für ${item.title} wurde angefordert.` })
         break
 
       case 'escalate':
         setItems(prev => prev.map(i =>
           i.id === item.id ? { ...i, priority: 'urgent' as const } : i
         ))
-        alert(`${item.title} wurde eskaliert.`)
+        toast({ title: 'Eskaliert', description: `${item.title} wurde eskaliert.`, variant: 'destructive' })
         break
 
       default:

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { toast } from '@/hooks/use-toast'
 import { Wizard } from '@/components/patterns/Wizard'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -185,7 +186,7 @@ export default function BestellungAnlegenPage(): JSX.Element {
       navigate('/einkauf/bestellungen')
     } catch (error) {
       console.error('Fehler beim Erstellen der Bestellung:', error)
-      alert(t('crud.messages.createError', { entityType: entityTypeLabel }))
+      toast({ title: t('common.error', { defaultValue: 'Fehler' }), description: t('crud.messages.createError', { entityType: entityTypeLabel, defaultValue: 'Erstellen fehlgeschlagen.' }), variant: 'destructive' })
     }
   }
 

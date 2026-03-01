@@ -361,13 +361,12 @@ export default function KreditorenStammPage(): JSX.Element {
     } else if (action === 'validate') {
       const isValid = validate(formData)
       if (isValid.isValid) {
-        alert(t('crud.messages.validationSuccess'))
+        toast.success(t('crud.messages.validationSuccess', { defaultValue: 'Validierung erfolgreich' }))
       } else {
         showValidationToast(isValid.errors)
       }
     } else if (action === 'sanktionspruefung') {
-      // Sanktionsprüfung
-      alert(t('crud.messages.sanctionsCheckInfo'))
+      toast('Sanktionsprüfung wird in Kürze bereitgestellt.')
     } else if (action === 'export') {
       setActionLoadingKey('export')
       try {

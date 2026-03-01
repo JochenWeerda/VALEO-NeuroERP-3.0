@@ -459,17 +459,14 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
 
   const { handleAction } = useMaskActions(async (action: string, formData: any) => {
     if (action === 'add-direct-debit') {
-      // Neue Lastschrift hinzufügen wird in der Tabelle behandelt
-      alert(t('crud.messages.useTableToAddDirectDebits'))
+      toast({ title: 'Hinweis', description: 'Lastschriften werden direkt in der Tabelle hinzugefügt.' })
     } else if (action === 'validate-mandates') {
-      // Mandate prüfen
-      alert(t('crud.messages.mandateValidationInfo'))
+      toast({ title: 'Mandatsprüfung', description: 'Mandate-Validierung wird in Kürze bereitgestellt.' })
     } else if (action === 'preview') {
       // SEPA-Vorschau
       window.open('/api/v1/finance/direct-debits/preview', '_blank')
     } else if (action === 'approve') {
-      // Freigeben
-      alert(t('crud.messages.approvalFunctionInfo'))
+      toast({ title: 'Freigabe', description: 'Freigabe-Funktion wird in Kürze bereitgestellt.' })
     } else if (action === 'execute') {
       const isValid = validate(formData)
       if (!isValid.isValid) {

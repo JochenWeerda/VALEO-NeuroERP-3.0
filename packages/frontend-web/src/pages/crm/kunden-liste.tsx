@@ -310,7 +310,7 @@ export default function KundenListePage(): JSX.Element {
       onEdit={handleEdit}
       onDelete={handleDelete}
       onExport={handleExport}
-      onImport={() => alert(t('crud.messages.importFunctionInfo'))}
+      onImport={() => toast({ title: 'Import', description: t('crud.messages.importFunctionInfo', { defaultValue: 'Import-Funktion wird in Kürze bereitgestellt.' }) })}
       isLoading={isLoading}
     />
   )

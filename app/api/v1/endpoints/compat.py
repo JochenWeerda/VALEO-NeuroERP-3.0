@@ -1126,6 +1126,42 @@ async def annahme_warteschlange(db: Session = Depends(get_db)) -> dict:
     }
 
 
+class LKWRegistrierungIn(BaseModel):
+    kennzeichen: str = Field(..., min_length=1)
+    lieferant: str = Field(..., min_length=1)
+    lieferschein_nr: str = Field(default="")
+    artikel: str = Field(default="")
+    ankunftszeit: str = Field(default="")
+    prioritaet: str = Field(default="normal", description="hoch | normal | niedrig")
+
+
+class LKWRegistrierungOut(BaseModel):
+    id: str
+    kennzeichen: str
+    status: str = "warteschlange"
+
+
+@router.post("/annahme/lkw-registrierung", response_model=LKWRegistrierungOut, status_code=201, tags=["annahme"])
+async def create_lkw_registrierung(
+    payload: LKWRegistrierungIn,
+    tenant_id: str = Depends(get_tenant_id),
+) -> LKWRegistrierungOut:
+    """LKW in Annahme-Warteschlange eintragen (Stub: ID zurück, ggf. später in Queue-Tabelle persistieren)."""
+    reg_id = str(uuid4())
+    cache_set_json(f"annahme:lkw:{reg_id}", {
+        "id": reg_id,
+        "tenant_id": tenant_id,
+        "kennzeichen": payload.kennzeichen,
+        "lieferant": payload.lieferant,
+        "lieferschein_nr": payload.lieferschein_nr,
+        "artikel": payload.artikel,
+        "ankunftszeit": payload.ankunftszeit or _now_iso(),
+        "prioritaet": payload.prioritaet,
+        "status": "warteschlange",
+    }, ttl_seconds=86400 * 7)
+    return LKWRegistrierungOut(id=reg_id, kennzeichen=payload.kennzeichen, status="warteschlange")
+
+
 # Portal compatibility ------------------------------------------------------
 
 
@@ -2068,6 +2104,47 @@ async def create_einlagerung(
         menge=payload.menge,
         lagerort=payload.lagerort,
         lagerplatz=payload.lagerplatz,
+        datum=today,
+        status="gebucht",
+    )
+
+
+# ---------------------------------------------------------------------------
+# Lager Auslagerung
+# ---------------------------------------------------------------------------
+
+class AuslagerungIn(BaseModel):
+    artikel: str = Field(..., description="Artikel-Bezeichnung")
+    menge: float = Field(..., gt=0, description="Menge (z.B. Tonnen)")
+    strategie: str = Field(default="fifo", description="fifo | fefo | manuell")
+    chargen_id: Optional[str] = Field(default=None, description="Charge bei manuell")
+    verwendungszweck: Optional[str] = Field(default=None)
+
+
+class AuslagerungOut(BaseModel):
+    id: str
+    artikel: str
+    menge: float
+    strategie: str
+    chargen_id: Optional[str]
+    datum: date
+    status: str
+
+
+@router.post("/lager/auslagerung", response_model=AuslagerungOut, status_code=201, tags=["lager"])
+async def create_auslagerung(
+    payload: AuslagerungIn,
+    tenant_id: str = Depends(get_tenant_id),
+) -> AuslagerungOut:
+    """Auslagerung buchen — Stub: erzeugt Beleg-Response; kann später an domain_inventory angebunden werden."""
+    auslagerung_id = str(uuid4())
+    today = date.today()
+    return AuslagerungOut(
+        id=auslagerung_id,
+        artikel=payload.artikel,
+        menge=payload.menge,
+        strategie=payload.strategie,
+        chargen_id=payload.chargen_id,
         datum=today,
         status="gebucht",
     )

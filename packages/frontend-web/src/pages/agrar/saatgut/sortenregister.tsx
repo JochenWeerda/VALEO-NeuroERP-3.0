@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSorten, type Sorte } from '@/lib/api/agrar'
+import { useToast } from '@/hooks/use-toast'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -12,6 +13,7 @@ import { FileDown, Plus, Search } from 'lucide-react'
 
 export default function SortenregisterPage(): JSX.Element {
   const navigate = useNavigate()
+  const { toast } = useToast()
   const [searchTerm, setSearchTerm] = useState('')
   const { data, isLoading, isError, error, refetch } = useSorten()
 
@@ -32,10 +34,25 @@ export default function SortenregisterPage(): JSX.Element {
 
   const filteredData = useMemo(
     () => sorten.filter((s) =>
-      [s.name, s.art, s.zuechter].some((v) => v.toLowerCase().includes(searchTerm.toLowerCase()))
+      [s.name, s.art, s.zuechter].some((v) => (v ?? '').toLowerCase().includes(searchTerm.toLowerCase()))
     ),
     [sorten, searchTerm]
   )
+
+  const handleExport = () => {
+    const header = 'Sorte;Art;Zuechter;Zulassung;Eigenschaften;Status\n'
+    const rows = filteredData.map((s) =>
+      [s.name, s.art ?? '', s.zuechter ?? '', s.zulassung ?? '', (s.eigenschaft ?? []).join(';'), s.status ?? ''].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(';')
+    )
+    const blob = new Blob([header + rows.join('\n')], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `Sortenregister_${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast({ title: 'Export', description: `${filteredData.length} Sorten exportiert.` })
+  }
 
   const columns = [
     {
@@ -96,7 +113,7 @@ export default function SortenregisterPage(): JSX.Element {
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input placeholder="Suche..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
             </div>
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" onClick={handleExport}>
               <FileDown className="h-4 w-4" />
               Export
             </Button>

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
+import { toast } from '@/hooks/use-toast'
 import { z } from 'zod'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 
@@ -283,8 +284,7 @@ export default function CreditNoteEditorPage(): JSX.Element {
 
   const { handleAction } = useMaskActions(async (action: string, formData: Record<string, unknown>) => {
     if (action === 'calculate') {
-      // Beträge neu berechnen
-      alert(t('crud.messages.recalculateFunction'))
+      toast({ title: 'Neuberechnung', description: t('crud.messages.recalculateFunction', { defaultValue: 'Beträge werden neu berechnet.' }) })
     } else if (action === 'preview') {
       // Vorschau anzeigen
       window.open('/api/sales/credit-notes/preview', '_blank')

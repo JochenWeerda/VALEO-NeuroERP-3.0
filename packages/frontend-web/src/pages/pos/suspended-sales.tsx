@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSuspendedSales, type SuspendedSale as ApiSuspendedSale } from '@/lib/api/pos'
+import { toast } from '@/hooks/use-toast'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -45,13 +46,8 @@ export default function SuspendedSalesPage(): JSX.Element {
   const sales = suspendedSales.filter((sale) => !removedSaleIds.has(sale.id))
 
   const handleResume = (saleId: string): void => {
-    // TODO: Load suspended sale into POS terminal
-    // navigate('/pos/terminal', { state: { resumeSaleId: saleId } })
-    
-    alert(`Verkauf ${saleId} wird im POS-Terminal fortgesetzt`)
-    
-    // Sale aus Liste entfernen
     setRemovedSaleIds((prev) => new Set(prev).add(saleId))
+    navigate('/pos/terminal', { state: { resumeSaleId: saleId } })
   }
 
   const handleDelete = (saleId: string): void => {

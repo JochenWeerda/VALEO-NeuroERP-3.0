@@ -201,10 +201,10 @@ export default function ChargeVerfolgungPage(): JSX.Element {
     if (item?.id) navigate(`/futtermittel/chargen/${item.id}`)
   }
 
-  const handleDelete = (_item: any) => alert('Löschen wird in dieser Ansicht noch nicht unterstützt')
+  const handleDelete = (_item: any) => toast({ title: 'Nicht verfügbar', description: 'Löschen über die Liste wird noch nicht unterstützt.' })
 
   const handleExport = () => {
-    alert('Export-Funktion wird implementiert')
+    toast({ title: 'Export', description: 'Export-Funktion wird in Kürze bereitgestellt.' })
   }
 
   return (
@@ -216,7 +216,7 @@ export default function ChargeVerfolgungPage(): JSX.Element {
       onEdit={handleEdit}
       onDelete={handleDelete}
       onExport={handleExport}
-      onImport={() => alert('Import-Funktion wird implementiert')}
+      onImport={() => toast({ title: 'Import', description: 'Import-Funktion wird in Kürze bereitgestellt.' })}
       isLoading={isLoading}
     />
   )

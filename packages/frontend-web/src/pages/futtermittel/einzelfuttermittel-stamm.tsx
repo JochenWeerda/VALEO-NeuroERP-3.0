@@ -238,7 +238,7 @@ export default function EinzelfuttermittelStammPage(): JSX.Element {
     } else if (action === 'validate') {
       const isValid = validate(formData)
       if (isValid.isValid) {
-        alert('Validierung erfolgreich!')
+        toast({ title: 'Validierung erfolgreich', description: 'Alle Felder sind korrekt ausgefüllt.' })
       } else {
         showValidationToast(isValid.errors)
       }

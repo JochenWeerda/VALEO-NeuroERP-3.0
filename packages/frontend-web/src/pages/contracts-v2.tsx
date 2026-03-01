@@ -5,6 +5,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { toast } from '@/hooks/use-toast';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -182,7 +183,7 @@ export default function ContractsPageV2(): JSX.Element {
   // Create amendment handler
   const handleCreateAmendment = async () => {
     if (!selectedContract || !amendmentForm.reason || amendmentForm.reason.trim().length < 10) {
-      alert(t('crud.dialogs.amend.errorRequired'));
+      toast({ title: 'Pflichtfeld', description: t('crud.dialogs.amend.errorRequired', { defaultValue: 'Bitte geben Sie einen Änderungsgrund mit mindestens 10 Zeichen an.' }), variant: 'destructive' });
       return;
     }
 
@@ -209,7 +210,7 @@ export default function ContractsPageV2(): JSX.Element {
       }
     } catch (error) {
       console.error('Error creating amendment:', error);
-      alert(t('crud.messages.createError', { entityType: t('crud.entities.amendment') }));
+      toast({ title: 'Fehler', description: t('crud.messages.createError', { entityType: t('crud.entities.amendment', { defaultValue: 'Änderung' }), defaultValue: 'Erstellen fehlgeschlagen.' }), variant: 'destructive' });
     }
   };
 
@@ -286,7 +287,7 @@ export default function ContractsPageV2(): JSX.Element {
 
       <Toolbar
         onSearch={setQuery}
-        onCopilot={() => window.alert('Copilot analyzing contracts...')}
+        onCopilot={() => toast({ title: 'Copilot', description: 'KI-Analyse für Verträge wird in Kürze verfügbar.' })}
       />
 
       <Card className="p-4">

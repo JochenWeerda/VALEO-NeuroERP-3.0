@@ -289,12 +289,11 @@ export default function MischfuttermittelStammPage(): JSX.Element {
         // Error wird bereits in useMaskData behandelt
       }
     } else if (action === 'calculate') {
-      // Nährwertberechnung implementieren
-      alert('Nährwertberechnung wird implementiert')
+      toast({ title: 'Nährwertberechnung', description: 'Berechnung aus Rezeptur-Komponenten wird in Kürze bereitgestellt.' })
     } else if (action === 'validate') {
       const isValid = validate(formData)
       if (isValid.isValid) {
-        alert('Validierung erfolgreich!')
+        toast({ title: 'Validierung erfolgreich', description: 'Alle Pflichtfelder sind korrekt ausgefüllt.' })
       } else {
         showValidationToast(isValid.errors)
       }
