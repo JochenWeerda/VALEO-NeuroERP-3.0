@@ -1,10 +1,13 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useMutation } from '@tanstack/react-query'
 import { Wizard } from '@/components/patterns/Wizard'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { CheckCircle } from 'lucide-react'
+import { apiClient } from '@/lib/api-client'
+import { useToast } from '@/hooks/use-toast'
 
 type EinlagerungData = {
   chargenId: string
@@ -16,6 +19,7 @@ type EinlagerungData = {
 
 export default function EinlagerungPage(): JSX.Element {
   const navigate = useNavigate()
+  const { toast } = useToast()
   const [einlagerung, setEinlagerung] = useState<EinlagerungData>({
     chargenId: '',
     artikel: '',
@@ -28,9 +32,28 @@ export default function EinlagerungPage(): JSX.Element {
     setEinlagerung((prev) => ({ ...prev, [key]: value }))
   }
 
+  const buchungMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiClient.post('/api/v1/lager/einlagerung', {
+        chargen_id: einlagerung.chargenId,
+        artikel: einlagerung.artikel,
+        menge: einlagerung.menge,
+        lagerort: einlagerung.lagerort,
+        lagerplatz: einlagerung.lagerplatz || null,
+      })
+      return response.data
+    },
+    onSuccess: () => {
+      toast({ title: 'Einlagerung gebucht', description: `${einlagerung.artikel} (${einlagerung.chargenId}) — ${einlagerung.menge} t → ${einlagerung.lagerort}` })
+      navigate('/lager/bestandsuebersicht')
+    },
+    onError: () => {
+      toast({ title: 'Fehler beim Buchen', variant: 'destructive' })
+    },
+  })
+
   async function handleSubmit(): Promise<void> {
-    console.log('Einlagerung buchen:', einlagerung)
-    navigate('/lager/bestandsuebersicht')
+    buchungMutation.mutate()
   }
 
   const steps = [
