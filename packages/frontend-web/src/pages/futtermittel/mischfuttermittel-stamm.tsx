@@ -296,17 +296,34 @@ export default function MischfuttermittelStammPage(): JSX.Element {
         return
       }
       try {
-        const res = await api.post('/api/v1/futter/mischfuttermittel/naehrwerte/berechnen', { komponenten })
+        const res = await api.post('/api/v1/futter/mischfuttermittel/naehrwerte/berechnen', {
+          komponenten,
+          fan: 2.5,       // Milchkuh Laktation
+          modus: 'beratung',
+        })
         const result = res.data as {
           gesamtRohprotein: number
           gesamtRohfett: number
-          gesamtRohfaser: number
           gesamtRohasche: number
-          umsetzbareEnergie: number
+          me_fan1: number
+          me_fani: number
+          nel: number
+          sidp: number
+          nxp: number
+          formelwerk_energie: string
+          formelwerk_protein: string
+          omd_methode: string
+          omd_fan1_pct: number
         }
         toast({
-          title: 'Nährwertberechnung abgeschlossen',
-          description: `Rohprotein: ${result.gesamtRohprotein}% | Rohfett: ${result.gesamtRohfett}% | Energie: ${result.umsetzbareEnergie} MJ/kg`,
+          title: `Nährwerte berechnet (${result.formelwerk_energie} / ${result.formelwerk_protein})`,
+          description: [
+            `XP: ${result.gesamtRohprotein} g/kg TM`,
+            `ME FAN1: ${result.me_fan1} MJ/kg TM`,
+            `NEL: ${result.nel} MJ/kg TM`,
+            `sidP: ${result.sidp} g/kg TM`,
+            `OMD: ${result.omd_fan1_pct}% (${result.omd_methode})`,
+          ].join(' | '),
         })
       } catch (e: any) {
         toast({ title: 'Berechnung fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
