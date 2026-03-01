@@ -661,7 +661,23 @@ export default function SalesOrderEditorPage(): JSX.Element {
         push(`Fehler: ${error.response?.data?.detail || error.message}`)
       }
     },
-    'create-invoice': () => push('Sofort-Rechnung noch nicht implementiert'),
+    'create-invoice': async () => {
+      // Sofort-Rechnung: Auftrag speichern, dann direkt Rechnung erstellen (Docflow)
+      let orderId = state.id
+      if (!orderId) {
+        try { orderId = await handleSave() } catch { return }
+      }
+      if (!orderId) return
+      try {
+        const res = await apiClient.post<{ invoice_id: string; invoice_number: string }>(
+          `/api/v1/sales/orders/${orderId}/create-invoice`
+        )
+        push(`Rechnung ${res.data.invoice_number} erstellt`)
+        navigate(`/sales/invoices/${res.data.invoice_id}`)
+      } catch (e: any) {
+        push(`Sofort-Rechnung fehlgeschlagen: ${e.response?.data?.detail ?? e.message}`)
+      }
+    },
     'open-attachments': () => setShowAttachmentDialog(true),
     'show-information': () => {
       if (state.customer) setShowInformationDialog(true)
