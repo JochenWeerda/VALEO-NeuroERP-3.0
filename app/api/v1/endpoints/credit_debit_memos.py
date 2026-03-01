@@ -3,7 +3,7 @@ Credit Memos and Debit Memos API
 PROC-PAY-02: Lieferantengutschriften / Belastungen
 """
 
-from fastapi import APIRouter, HTTPException, Depends, Query
+from fastapi import APIRouter, HTTPException, Depends, Query, Request
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import datetime
@@ -17,6 +17,24 @@ from app.documents.router_helpers import get_repository, save_to_store, get_from
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/einkauf", tags=["procurement", "ap", "memos"])
+
+
+def _get_user_id_from_request(request: Request | None) -> str | None:
+    if request is None:
+        return None
+    uid = request.headers.get("X-User-ID")
+    if uid:
+        return uid
+    auth = request.headers.get("Authorization", "")
+    if auth.startswith("Bearer "):
+        try:
+            import base64 as _b64, json as _json
+            payload = auth[7:].split(".")[1]
+            payload += "=" * (4 - len(payload) % 4)
+            return _json.loads(_b64.urlsafe_b64decode(payload)).get("sub")
+        except Exception:
+            pass
+    return None
 
 
 # Pydantic Models
@@ -132,7 +150,8 @@ def get_invoice_number(invoice_id: str, db: Session) -> Optional[str]:
 @router.post("/credit-memos", response_model=CreditMemoResponse)
 async def create_credit_memo(
     memo: CreditMemoCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    request: Request = None,
 ) -> CreditMemoResponse:
     """Erstellt eine neue Gutschrift (Credit Memo)."""
     logger.info(f"Creating credit memo for supplier {memo.supplierId}")
@@ -173,9 +192,9 @@ async def create_credit_memo(
             "settled": False,
             "settledInvoiceIds": [],
             "createdAt": datetime.now().isoformat(),
-            "createdBy": "system",  # TODO: Get from auth context
+            "createdBy": _get_user_id_from_request(request) or "system",
         }
-        
+
         # Speichere in Store
         save_to_store("credit_memo", memo_id, credit_memo, repo)
         
@@ -189,7 +208,8 @@ async def create_credit_memo(
 @router.post("/debit-memos", response_model=DebitMemoResponse)
 async def create_debit_memo(
     memo: DebitMemoCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    request: Request = None,
 ) -> DebitMemoResponse:
     """Erstellt eine neue Belastung (Debit Memo)."""
     logger.info(f"Creating debit memo for supplier {memo.supplierId}")
@@ -230,9 +250,9 @@ async def create_debit_memo(
             "settled": False,
             "settledInvoiceIds": [],
             "createdAt": datetime.now().isoformat(),
-            "createdBy": "system",  # TODO: Get from auth context
+            "createdBy": _get_user_id_from_request(request) or "system",
         }
-        
+
         # Speichere in Store
         save_to_store("debit_memo", memo_id, debit_memo, repo)
         

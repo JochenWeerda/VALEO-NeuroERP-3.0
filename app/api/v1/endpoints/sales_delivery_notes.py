@@ -8,7 +8,7 @@ from typing import Optional
 import json
 from app.core.uuid7 import uuid7
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -17,6 +17,24 @@ from app.core.database import get_db
 from app.core.config import settings
 
 router = APIRouter(prefix="/sales/delivery-notes", tags=["sales", "delivery-notes"])
+
+
+def _get_user_id_from_request(request: Request | None) -> str | None:
+    if request is None:
+        return None
+    uid = request.headers.get("X-User-ID")
+    if uid:
+        return uid
+    auth = request.headers.get("Authorization", "")
+    if auth.startswith("Bearer "):
+        try:
+            import base64 as _b64, json as _json
+            payload = auth[7:].split(".")[1]
+            payload += "=" * (4 - len(payload) % 4)
+            return _json.loads(_b64.urlsafe_b64decode(payload)).get("sub")
+        except Exception:
+            pass
+    return None
 
 DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
@@ -456,6 +474,7 @@ async def print_delivery_note(
     attestation: Optional[str] = Query(None, description="Reason for printing (required if already posted)"),
     tenant_id: str = Query(DEFAULT_TENANT),
     db: Session = Depends(get_db),
+    request: Request = None,
 ):
     """Print a delivery note (with attestation if already posted)."""
     row = _get_delivery_note_or_404(db, ls_id, tenant_id)
@@ -483,7 +502,7 @@ async def print_delivery_note(
                 "tenant_id": tenant_id,
                 "entity_id": ls_id,
                 "reason": attestation,
-                "created_by": "system",  # TODO: Get from auth context (currently not available in v1 API)
+                "created_by": _get_user_id_from_request(request) or "system",
             }
         )
     

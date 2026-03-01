@@ -5,7 +5,7 @@ FIBU-AR-05: OP-Verwaltung Ausgleich/Verrechnung
 """
 
 from typing import Optional, List
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from decimal import Decimal
@@ -21,6 +21,24 @@ from pydantic import BaseModel
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/open-items", tags=["finance", "open-items"])
+
+
+def _get_user_id_from_request(request: Request | None) -> str | None:
+    if request is None:
+        return None
+    uid = request.headers.get("X-User-ID")
+    if uid:
+        return uid
+    auth = request.headers.get("Authorization", "")
+    if auth.startswith("Bearer "):
+        try:
+            import base64 as _b64, json as _json
+            payload = auth[7:].split(".")[1]
+            payload += "=" * (4 - len(payload) % 4)
+            return _json.loads(_b64.urlsafe_b64decode(payload)).get("sub")
+        except Exception:
+            pass
+    return None
 
 
 class OpenItemSettlement(BaseModel):
@@ -367,7 +385,8 @@ async def settle_open_item(
     op_id: str,
     settlement: OpenItemSettlement,
     tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    request: Request = None,
 ):
     """
     Settle an open item with a payment.
@@ -455,7 +474,7 @@ async def settle_open_item(
             
             db.execute(audit_insert, {
                 "id": audit_trail_id,
-                "user_id": None,  # TODO: Get from context
+                "user_id": _get_user_id_from_request(request),
                 "action": "settle_open_item",
                 "entity_type": "offener_posten",
                 "entity_id": op_id,
@@ -606,7 +625,8 @@ async def reverse_settlement(
     settlement_id: str,
     reason: str = Query(..., min_length=10, description="Reason for reversal (min 10 chars)"),
     tenant_id: str = Query("system", description="Tenant ID"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    request: Request = None,
 ):
     """
     Reverse a settlement (Storno).
@@ -693,7 +713,7 @@ async def reverse_settlement(
             
             db.execute(audit_insert, {
                 "id": audit_trail_id,
-                "user_id": None,  # TODO: Get from context
+                "user_id": _get_user_id_from_request(request),
                 "action": "reverse_settlement",
                 "entity_type": "offener_posten",
                 "entity_id": op_id,
