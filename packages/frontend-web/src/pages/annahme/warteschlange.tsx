@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -8,6 +9,7 @@ import { useWarteschlange } from '@/lib/api/inventory'
 import type { LKWEintrag } from '@/lib/api/inventory'
 
 export default function WarteschlangePage(): JSX.Element {
+  const navigate = useNavigate()
   const { data, isLoading } = useWarteschlange()
   const warteschlange = data?.items ?? []
 
@@ -47,9 +49,11 @@ export default function WarteschlangePage(): JSX.Element {
     {
       key: 'actions' as const,
       label: 'Aktionen',
-      render: () => (
+      render: (l: LKWEintrag) => (
         <div className="flex gap-2">
-          <Button size="sm" variant="outline">Bearbeiten</Button>
+          <Button size="sm" variant="outline" onClick={() => navigate('/annahme/qualitaets-check', { state: { eintragId: l.id } })}>
+            Bearbeiten
+          </Button>
         </div>
       ),
     },

@@ -701,9 +701,27 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
                 <a
                   href="#"
                   className="text-sm text-blue-600 underline hover:text-blue-800"
-                  onClick={(e) => {
+                  onClick={async (e) => {
                     e.preventDefault()
-                    push('Vorherigen Lieferschein laden noch nicht implementiert')
+                    if (!lsId) {
+                      push('Kein Lieferschein geöffnet.')
+                      return
+                    }
+                    try {
+                      const list = (await apiClient.get<{ id: string }[]>('/api/v1/einkauf/lieferscheine')).data
+                      const idx = list.findIndex((ls) => ls.id === lsId)
+                      if (idx < 0) {
+                        push('Aktueller Lieferschein nicht in der Liste.')
+                        return
+                      }
+                      if (idx + 1 >= list.length) {
+                        push('Kein vorheriger Lieferschein (bereits der älteste).')
+                        return
+                      }
+                      navigate(`/einkauf/lieferschein/${list[idx + 1].id}`)
+                    } catch (err: any) {
+                      push(`Fehler: ${err.response?.data?.detail ?? err.message}`)
+                    }
                   }}
                 >
                   wie vorh. LS (F11)
@@ -853,7 +871,11 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
             className="text-sm text-blue-600 underline hover:text-blue-800 font-medium"
             onClick={(e) => {
               e.preventDefault()
-              push('Bestellungen importieren noch nicht implementiert')
+              if (state.lieferant) {
+                push(`Offene Bestellungen von ${state.lieferant.name} können hier bald als Positionen übernommen werden.`)
+              } else {
+                push('Bitte zuerst einen Lieferanten auswählen. Anschließend können Bestellpositionen importiert werden.')
+              }
             }}
           >
             → Bestellung(en) importieren
