@@ -19,7 +19,7 @@ from datetime import date, datetime
 from decimal import Decimal
 from typing import Any
 
-from sqlalchemy import func, text
+from sqlalchemy import and_, func, or_, text
 from sqlalchemy.orm import Session
 
 from app.core.uuid7 import uuid7
@@ -27,6 +27,7 @@ from app.infrastructure.models.einkauf_models import (
     ArtikelLagerParameter,
     EinkaufBestellvorschlag,
     EinkaufBestellvorschlagPosition,
+    EinkaufKontrakt,
     EinkaufKontraktPosition,
     EinkaufLieferant,
 )
@@ -141,13 +142,21 @@ def _active_kontrakt_preis(db: Session, article_id: str, tenant_id: str,
         .filter(
             EinkaufKontraktPosition.article_id == article_id,
             EinkaufKontraktPosition.kontrakt.has(
-                lieferant_id=lieferant_id,
-                tenant_id=tenant_id,
+                and_(
+                    EinkaufKontrakt.lieferant_id == lieferant_id,
+                    EinkaufKontrakt.tenant_id == tenant_id,
+                )
             ),
         )
         .filter(
-            EinkaufKontraktPosition.gueltig_bis >= today,
-            EinkaufKontraktPosition.gueltig_von <= today,
+            or_(
+                EinkaufKontraktPosition.gueltig_von.is_(None),
+                EinkaufKontraktPosition.gueltig_von <= today,
+            ),
+            or_(
+                EinkaufKontraktPosition.gueltig_bis.is_(None),
+                EinkaufKontraktPosition.gueltig_bis >= today,
+            ),
         )
         .order_by(EinkaufKontraktPosition.gueltig_bis.desc())
         .first()
@@ -415,6 +424,7 @@ def engine_rohware(
 
     result = []
     for art in rohwaren:
+        alp = None
         ist = _current_stock(db, art.id, tenant_id)
 
         # Versuch: aus Produktionsaufträgen lesen
@@ -458,15 +468,16 @@ def engine_rohware(
         if fehlmenge <= 0:
             continue
 
-        # Aufrunden auf Standardbestellmenge
-        alp = alp if "alp" in dir() else (
-            db.query(ArtikelLagerParameter)
-            .filter(
-                ArtikelLagerParameter.article_id == art.id,
-                ArtikelLagerParameter.tenant_id == tenant_id,
+        # Aufrunden auf Standardbestellmenge (alp ggf. aus Fallback-Block oben)
+        if alp is None:
+            alp = (
+                db.query(ArtikelLagerParameter)
+                .filter(
+                    ArtikelLagerParameter.article_id == art.id,
+                    ArtikelLagerParameter.tenant_id == tenant_id,
+                )
+                .first()
             )
-            .first()
-        )
         vorschlag = fehlmenge
         if alp and alp.std_bestellmenge:
             std = Decimal(str(alp.std_bestellmenge))
@@ -596,6 +607,10 @@ def vorschlag_zu_bestellungen(
         if lf_key != "_kein_lieferant":
             lf = db.query(EinkaufLieferant).filter(EinkaufLieferant.id == lf_key).first()
 
+        lieferant_id = lf.id if lf else (positions[0].lieferant_id if positions else None)
+        if lieferant_id is None:
+            continue  # Bestellung ohne Lieferant nicht anlegen (NOT NULL)
+
         # Bestellnummer generieren
         ts = datetime.now().strftime("%y%m%d%H%M")
         bestell_nr = f"EK-{ts}-{lf_key[:4].upper() if lf_key != '_kein_lieferant' else 'XXXX'}"
@@ -604,7 +619,7 @@ def vorschlag_zu_bestellungen(
             id=uuid7(),
             tenant_id=tenant_id,
             bestellnummer=bestell_nr,
-            lieferant_id=lf.id if lf else positions[0].lieferant_id,
+            lieferant_id=lieferant_id,
             vorschlag_id=vorschlag.id,
             niederlassung_id=vorschlag.niederlassung_id,
             bestelldatum=dt.today(),

@@ -107,6 +107,19 @@ class ProcessDunningRequest(BaseModel):
     op_ids: Optional[List[str]] = Field(None, description="Process for specific open items")
     auto_apply_rules: bool = Field(default=True, description="Automatically apply dunning rules")
     tenant_id: str = Field(default="system")
+    as_of_date: Optional[date] = Field(None, description="Stichtag für Überfälligkeit (default: heute)")
+
+
+class DunningRunRequest(BaseModel):
+    """Request to start a dunning run (all overdue items as of date)"""
+    as_of_date: date = Field(..., description="Stichtag (YYYY-MM-DD)")
+    tenant_id: Optional[str] = Field(None, description="Tenant ID (default: system)")
+
+
+class DunningRunResponse(BaseModel):
+    """Response after starting a dunning run"""
+    run_id: str
+    notices_created: int
 
 
 @router.get("/rules", response_model=List[DunningRuleResponse])
@@ -485,6 +498,28 @@ async def process_dunning(
         db.rollback()
         logger.error(f"Error processing dunning: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to process dunning: {str(e)}")
+
+
+@router.post("/run", response_model=DunningRunResponse)
+async def run_dunning(
+    request: DunningRunRequest,
+    db: Session = Depends(get_db),
+):
+    """
+    Start a dunning run for all overdue open items as of the given date.
+    Returns run_id and number of dunning notices created.
+    """
+    tenant_id = request.tenant_id or "system"
+    run_id = str(uuid7())
+    process_request = ProcessDunningRequest(
+        tenant_id=tenant_id,
+        as_of_date=request.as_of_date,
+    )
+    created = await process_dunning(process_request, db)
+    return DunningRunResponse(
+        run_id=run_id,
+        notices_created=len(created),
+    )
 
 
 @router.post("", response_model=DunningResponse, status_code=201)

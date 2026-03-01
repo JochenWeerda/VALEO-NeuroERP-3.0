@@ -102,6 +102,7 @@ class DeliveryNoteUpdate(BaseModel):
     is_printed: Optional[bool] = None
     is_delivered: Optional[bool] = None
     invoice_number: Optional[str] = None
+    positionen: Optional[list[DeliveryNotePositionCreate]] = None
 
 
 class DeliveryNote(DeliveryNoteBase):
@@ -305,34 +306,89 @@ async def update_delivery_note(
     tenant_id: str = Query(DEFAULT_TENANT),
     db: Session = Depends(get_db),
 ):
-    """Update a delivery note."""
-    _get_delivery_note_or_404(db, ls_id, tenant_id)
-    
-    # Build update query dynamically
-    updates = {k: v for k, v in payload.model_dump(exclude_unset=True).items() if v is not None}
-    if not updates:
-        raise HTTPException(status_code=400, detail="No fields to update")
-    
-    set_clause = ", ".join(f"{k} = :{k}" for k in updates.keys())
-    updates["id"] = ls_id
-    updates["tenant_id"] = tenant_id
-    
-    db.execute(
-        text(f"""
-            UPDATE domain_sales.delivery_notes 
-            SET {set_clause}, updated_at = NOW()
-            WHERE id = :id AND tenant_id = :tenant_id
-        """),
-        updates
-    )
+    """Update a delivery note. When status is draft and positionen is provided, positions are replaced (Option A)."""
+    row = _get_delivery_note_or_404(db, ls_id, tenant_id)
+    if row["status"] != "draft" and payload.positionen is not None:
+        raise HTTPException(
+            status_code=400,
+            detail="Positionen können nur bei Entwurf (draft) geändert werden.",
+        )
+
+    # Optional: Replace positions (only when draft and positionen is provided)
+    if payload.positionen is not None and row["status"] == "draft":
+        db.execute(
+            text("DELETE FROM domain_sales.delivery_note_positions WHERE delivery_note_id = :id"),
+            {"id": ls_id},
+        )
+        netto = Decimal("0")
+        mwst = Decimal("0")
+        for pos in payload.positionen:
+            listenpreis = pos.listenpreis or Decimal("0")
+            rabatt = pos.rabatt or Decimal("0")
+            menge = pos.menge
+            mwst_prozent = pos.mwst_prozent or Decimal("19")
+            netto_preis = listenpreis * (Decimal("1") - rabatt / Decimal("100"))
+            netto_betrag = netto_preis * menge
+            mwst_betrag = netto_betrag * mwst_prozent / Decimal("100")
+            netto += netto_betrag
+            mwst += mwst_betrag
+            pos_id = uuid7()
+            db.execute(
+                text("""
+                    INSERT INTO domain_sales.delivery_note_positions (
+                        id, delivery_note_id, pos_nr, artikel_id, artikel_nr, bezeichnung, bezeichnung2,
+                        menge, einheit, listenpreis, rabatt, art, netto_preis, netto_betrag,
+                        niederlassung, lagerhalle, lagerfach, charge, serien_nr, erloskonto, mwst_prozent,
+                        kontrakt_nr, skontierf, fremdware, gef_punkt, na_bio, muster_nr, strecke, zus_beleg, anerken,
+                        created_at, updated_at
+                    ) VALUES (
+                        :id, :delivery_note_id, :pos_nr, :artikel_id, :artikel_nr, :bezeichnung, :bezeichnung2,
+                        :menge, :einheit, :listenpreis, :rabatt, :art, :netto_preis, :netto_betrag,
+                        :niederlassung, :lagerhalle, :lagerfach, :charge, :serien_nr, :erloskonto, :mwst_prozent,
+                        :kontrakt_nr, :skontierf, :fremdware, :gef_punkt, :na_bio, :muster_nr, :strecke, :zus_beleg, :anerken,
+                        NOW(), NOW()
+                    )
+                """),
+                {
+                    "id": pos_id,
+                    "delivery_note_id": ls_id,
+                    "netto_preis": netto_preis,
+                    "netto_betrag": netto_betrag,
+                    **pos.model_dump(),
+                },
+            )
+        brutto = netto + mwst
+        totals = {"netto": float(netto), "mwst": float(mwst), "brutto": float(brutto)}
+        db.execute(
+            text("""
+                UPDATE domain_sales.delivery_notes
+                SET totals = :totals::jsonb, updated_at = NOW()
+                WHERE id = :id AND tenant_id = :tenant_id
+            """),
+            {"id": ls_id, "tenant_id": tenant_id, "totals": json.dumps(totals)},
+        )
+
+    # Build header update (exclude positionen)
+    updates = {k: v for k, v in payload.model_dump(exclude_unset=True).items() if k != "positionen" and v is not None}
+    if updates:
+        set_clause = ", ".join(f"{k} = :{k}" for k in updates.keys())
+        updates["id"] = ls_id
+        updates["tenant_id"] = tenant_id
+        db.execute(
+            text(f"""
+                UPDATE domain_sales.delivery_notes
+                SET {set_clause}, updated_at = NOW()
+                WHERE id = :id AND tenant_id = :tenant_id
+            """),
+            updates,
+        )
+
     db.commit()
-    
     row = _get_delivery_note_or_404(db, ls_id, tenant_id)
     positions = _list_positions(db, ls_id)
-    
     return DeliveryNote(
         **dict(row),
-        positionen=[DeliveryNotePosition(**dict(p)) for p in positions]
+        positionen=[DeliveryNotePosition(**dict(p)) for p in positions],
     )
 
 
