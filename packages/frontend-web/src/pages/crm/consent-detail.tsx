@@ -330,11 +330,12 @@ export default function ConsentDetailPage(): JSX.Element {
         })
       }
     } else if (action === 'resendConfirmation' && id) {
-      // TODO: Implement resend confirmation email
-      toast({
-        title: t('crud.messages.comingSoon'),
-        description: t('crud.messages.resendConfirmationComingSoon')
-      })
+      try {
+        await apiClient.post(`/consents/${id}/resend-confirmation`)
+        toast({ title: t('crud.messages.confirmationSent', { defaultValue: 'Bestätigung gesendet' }) })
+      } catch (error) {
+        toast({ variant: 'destructive', title: t('crud.messages.confirmationSendError', { defaultValue: 'Fehler beim Senden' }) })
+      }
     }
   }
 

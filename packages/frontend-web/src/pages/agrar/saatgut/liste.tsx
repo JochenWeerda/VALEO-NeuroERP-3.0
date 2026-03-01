@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useSeedProducts } from '@/features/agrar/hooks'
 import { type SeedProduct } from '@/features/agrar/types'
+import { useToast } from '@/hooks/use-toast'
 
 const statusVariant: Record<string, 'default' | 'secondary' | 'outline'> = {
   active: 'default',
@@ -55,6 +56,7 @@ export default function SeedListPage(): JSX.Element {
   const { data, isLoading, error } = useSeedProducts()
   const [search, setSearch] = useState<string>('')
   const navigate = useNavigate()
+  const { toast } = useToast()
 
   const columns = useMemo<ColumnDef<SeedProduct>[]>(() => buildColumns(), [])
 
@@ -115,7 +117,18 @@ export default function SeedListPage(): JSX.Element {
           id: 'seed-export',
           label: 'Export CSV',
           onClick: (): void => {
-            // placeholder for future export
+            const header = 'ID;Bezeichnung;Kategorie;Saison;Forecast_t;Lizenzen;Status\n'
+            const rows = filteredData.map((item) =>
+              [item.id, item.name, item.category, item.season, item.forecastTons, item.licenseCount, item.status].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(';')
+            )
+            const blob = new Blob([header + rows.join('\n')], { type: 'text/csv;charset=utf-8' })
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = `Saatgut_${new Date().toISOString().slice(0, 10)}.csv`
+            a.click()
+            URL.revokeObjectURL(url)
+            toast({ title: 'Export', description: `${filteredData.length} Einträge exportiert.` })
           },
         },
       ]}
