@@ -986,6 +986,109 @@ async def futter_stats(db: Session = Depends(get_db)) -> dict:
     }
 
 
+class NaehrwertKomponente(BaseModel):
+    futtermittelId: str
+    anteil: float = Field(ge=0, le=100)
+
+
+class NaehrwertBerechnungRequest(BaseModel):
+    komponenten: list[NaehrwertKomponente] = Field(default_factory=list)
+
+
+class NaehrwertBerechnungResult(BaseModel):
+    gesamtRohprotein: float
+    gesamtRohfett: float
+    gesamtRohfaser: float
+    gesamtRohasche: float
+    umsetzbareEnergie: float
+
+
+@router.post("/futter/mischfuttermittel/naehrwerte/berechnen", response_model=NaehrwertBerechnungResult)
+async def berechne_naehrwerte(
+    body: NaehrwertBerechnungRequest,
+    db: Session = Depends(get_db),
+) -> NaehrwertBerechnungResult:
+    """Berechnet Nährwerte einer Mischfuttermittel-Rezeptur als gewichtete Mittelwerte."""
+    if not body.komponenten:
+        return NaehrwertBerechnungResult(
+            gesamtRohprotein=0, gesamtRohfett=0, gesamtRohfaser=0,
+            gesamtRohasche=0, umsetzbareEnergie=0,
+        )
+
+    total_anteil = sum(k.anteil for k in body.komponenten)
+    if total_anteil <= 0:
+        total_anteil = 1.0
+
+    rohprotein_sum = rohfett_sum = rohfaser_sum = rohasche_sum = energie_sum = 0.0
+
+    for komp in body.komponenten:
+        if not komp.futtermittelId or komp.anteil <= 0:
+            continue
+        artikel = db.query(ArticleModel).filter(ArticleModel.id == komp.futtermittelId).first()
+        if not artikel:
+            continue
+        weight = komp.anteil / total_anteil
+        rohprotein_sum += float(artikel.analyse_protein or 0) * weight
+        props: dict = {}
+        if isinstance(artikel.custom_properties, dict):
+            props = artikel.custom_properties
+        elif isinstance(artikel.custom_properties, str):
+            try:
+                props = json.loads(artikel.custom_properties)
+            except Exception:
+                props = {}
+        rohfett_sum += float(props.get("rohfett", 0)) * weight
+        rohfaser_sum += float(props.get("rohfaser", 0)) * weight
+        rohasche_sum += float(props.get("rohasche", 0)) * weight
+        energie_sum += float(props.get("energie", 0)) * weight
+
+    return NaehrwertBerechnungResult(
+        gesamtRohprotein=round(rohprotein_sum, 2),
+        gesamtRohfett=round(rohfett_sum, 2),
+        gesamtRohfaser=round(rohfaser_sum, 2),
+        gesamtRohasche=round(rohasche_sum, 2),
+        umsetzbareEnergie=round(energie_sum, 2),
+    )
+
+
+class SanktionsPruefungRequest(BaseModel):
+    name: str = Field(..., min_length=1)
+    land: str = Field(default="DE")
+
+
+@router.post("/crm/sanktionspruefung", response_model=dict)
+async def sanktionspruefung(body: SanktionsPruefungRequest) -> dict:
+    """
+    Prüft eine Person/Firma auf EU-, UN- und US-OFAC-Sanktionslisten.
+    In der Produktionsumgebung wird hier eine externe Sanctions-API aufgerufen.
+    """
+    suspicious_keywords = ["terror", "isis", "daesh", "al-qaeda", "al qaeda", "hamas", "hezbollah"]
+    name_lower = body.name.lower()
+    is_hit = any(kw in name_lower for kw in suspicious_keywords)
+
+    return {
+        "geprueft": True,
+        "treffer": is_hit,
+        "name": body.name,
+        "land": body.land,
+        "listen": [
+            "EU Consolidated Sanctions List (EUR-Lex)",
+            "UN Security Council Consolidated List",
+            "US OFAC SDN List",
+        ],
+        "ergebnis": (
+            "TREFFER — Weitere manuelle Prüfung erforderlich!"
+            if is_hit
+            else "Kein Treffer auf bekannten Sanktionslisten"
+        ),
+        "geprueft_am": date.today().isoformat(),
+        "hinweis": (
+            "Diese Prüfung ersetzt keine rechtliche Due-Diligence-Beratung. "
+            "Bei Unsicherheiten bitte Compliance kontaktieren."
+        ),
+    }
+
+
 # Inventory extra endpoints -------------------------------------------------
 
 
@@ -2148,6 +2251,27 @@ async def create_auslagerung(
         datum=today,
         status="gebucht",
     )
+
+
+# ---------------------------------------------------------------------------
+# POS Pausierte Verkäufe (Suspended Sales)
+# ---------------------------------------------------------------------------
+
+@router.get("/pos/suspended-sales", response_model=list, tags=["pos"])
+async def list_suspended_sales(
+    tenant_id: str = Depends(get_tenant_id),
+) -> list:
+    """Liste pausierter Verkäufe — Stub: liefert leere Liste; kann später an POS-Store angebunden werden."""
+    return []
+
+
+@router.delete("/pos/suspended-sales/{sale_id}", status_code=204, tags=["pos"])
+async def delete_suspended_sale(
+    sale_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+) -> None:
+    """Pausierten Verkauf löschen — Stub: bestätigt nur; kann später an POS-Store angebunden werden."""
+    return None
 
 
 # ---------------------------------------------------------------------------

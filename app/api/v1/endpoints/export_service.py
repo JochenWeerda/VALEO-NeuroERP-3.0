@@ -32,6 +32,9 @@ SUPPORTED_ENTITIES = [
     "dunning_runs",
     "audit_log",
     "users",
+    "futtermittel_einzel",
+    "futtermittel_misch",
+    "futtermittel_chargen",
 ]
 
 
@@ -211,6 +214,106 @@ def _export_users(db: Session, tenant_id: str, filt: Optional[ExportListFilter])
     return [dict(zip(cols, [_safe_str(c) for c in row])) for row in rows]
 
 
+def _export_futtermittel_einzel(db: Session, tenant_id: str, filt: Optional[ExportListFilter]) -> list[dict]:
+    """Export Einzelfuttermittel aus domain_inventory.articles."""
+    q = text("""
+        SELECT id, article_number, name, category, unit,
+               sales_price, purchase_price, hersteller,
+               analyse_protein, analyse_feuchtigkeit, naehrwertangaben,
+               chargenpflicht, gmp_plus_relevanz, created_at
+        FROM domain_inventory.articles
+        WHERE is_active = true
+        ORDER BY name
+    """)
+    try:
+        rows = db.execute(q).fetchall()
+    except Exception:
+        return []
+    out = []
+    for row in rows:
+        out.append({
+            "id": _safe_str(row[0]),
+            "artikelnummer": _safe_str(row[1]),
+            "name": _safe_str(row[2]),
+            "kategorie": _safe_str(row[3]),
+            "einheit": _safe_str(row[4]),
+            "vk_preis": _safe_str(row[5]),
+            "ek_preis": _safe_str(row[6]),
+            "hersteller": _safe_str(row[7]),
+            "protein_pct": _safe_str(row[8]),
+            "feuchtigkeit_pct": _safe_str(row[9]),
+            "naehrwertangaben": _safe_str(row[10]),
+            "chargenpflicht": _safe_str(row[11]),
+            "gmp_plus": _safe_str(row[12]),
+            "erstellt_am": _safe_str(row[13]),
+        })
+    return out
+
+
+def _export_futtermittel_misch(db: Session, tenant_id: str, filt: Optional[ExportListFilter]) -> list[dict]:
+    """Export Mischfuttermittel aus domain_inventory.articles (custom_properties)."""
+    q = text("""
+        SELECT id, article_number, name, category, unit,
+               sales_price, purchase_price, hersteller,
+               custom_properties, naehrwertangaben,
+               chargenpflicht, gmp_plus_relevanz, created_at
+        FROM domain_inventory.articles
+        WHERE is_active = true
+        ORDER BY name
+    """)
+    try:
+        rows = db.execute(q).fetchall()
+    except Exception:
+        return []
+    out = []
+    for row in rows:
+        props = row[8]
+        if isinstance(props, str):
+            try:
+                props = json.loads(props)
+            except Exception:
+                props = {}
+        props = props or {}
+        out.append({
+            "id": _safe_str(row[0]),
+            "artikelnummer": _safe_str(row[1]),
+            "name": _safe_str(row[2]),
+            "kategorie": _safe_str(row[3]),
+            "einheit": _safe_str(row[4]),
+            "vk_preis": _safe_str(row[5]),
+            "ek_preis": _safe_str(row[6]),
+            "hersteller": _safe_str(row[7]),
+            "tierart": _safe_str(props.get("tierart", "")),
+            "phase": _safe_str(props.get("phase", "")),
+            "komponenten_anzahl": _safe_str(props.get("komponenten", "")),
+            "rohfett_pct": _safe_str(props.get("rohfett", "")),
+            "rohfaser_pct": _safe_str(props.get("rohfaser", "")),
+            "energie_mj_kg": _safe_str(props.get("energie", "")),
+            "naehrwertangaben": _safe_str(row[9]),
+            "chargenpflicht": _safe_str(row[10]),
+            "gmp_plus": _safe_str(row[11]),
+            "erstellt_am": _safe_str(row[12]),
+        })
+    return out
+
+
+def _export_futtermittel_chargen(db: Session, tenant_id: str, filt: Optional[ExportListFilter]) -> list[dict]:
+    """Export Futtermittel-Chargen aus domain_ops.ops_chargen."""
+    q = text("""
+        SELECT id, chargen_id, artikel, menge, lagerort, status,
+               qualitaetsstatus, eingang, mhd, herkunft, bemerkungen
+        FROM domain_ops.ops_chargen
+        ORDER BY eingang DESC
+    """)
+    try:
+        rows = db.execute(q).fetchall()
+    except Exception:
+        return []
+    cols = ["id", "chargen_id", "artikel", "menge_kg", "lagerort", "status",
+            "qualitaetsstatus", "eingang", "mhd", "herkunft", "bemerkungen"]
+    return [dict(zip(cols, [_safe_str(c) for c in row])) for row in rows]
+
+
 def _get_entity_data(entity: str, db: Session, tenant_id: str, filt: Optional[ExportListFilter]) -> list[dict]:
     handlers = {
         "debtors": _export_debtors,
@@ -219,6 +322,9 @@ def _get_entity_data(entity: str, db: Session, tenant_id: str, filt: Optional[Ex
         "dunning_runs": _export_dunning_runs,
         "audit_log": _export_audit_log,
         "users": _export_users,
+        "futtermittel_einzel": _export_futtermittel_einzel,
+        "futtermittel_misch": _export_futtermittel_misch,
+        "futtermittel_chargen": _export_futtermittel_chargen,
     }
     fn = handlers.get(entity)
     if not fn:
