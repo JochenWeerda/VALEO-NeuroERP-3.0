@@ -481,24 +481,57 @@ export default function BestellvorschlagRohwarePage(): JSX.Element {
           Pos. löschen
         </Button>
         <Button variant="outline" size="sm" className="gap-2"
-          onClick={() => push('Manuelle Pos.: nicht implementiert')}>
+          onClick={() => {
+            const artNr = prompt('Artikelnummer:')
+            if (!artNr) return
+            const menge = parseFloat(prompt('Menge:') ?? '0')
+            if (!menge) return
+            setVorschlaege((prev) => [...prev, {
+              id: crypto.randomUUID(), liefNr: '', name: 'Manuell', artikelNr: artNr,
+              liefArt: 'frei', menge, einheit: 'kg', einhPreis: 0, preisJe1: 'kg',
+              betrag: 0, kontraktNr: '', niederlassung: '', lagerhalle: '', bediener: '', datum: new Date().toISOString().slice(0,10)
+            }])
+            push('Manuelle Position hinzugefügt')
+          }}>
           <Plus className="h-4 w-4" />
           Manuelle Pos.
         </Button>
         <Button variant="outline" size="sm" className="gap-2"
-          onClick={() => push('Calc: nicht implementiert')}>
+          onClick={() => {
+            const sel = vorschlaege.find((v) => v.id === selectedVorschlag)
+            if (!sel) { push('Bitte Position auswählen'); return }
+            const neu = parseFloat(prompt(`Menge für ${sel.artikelNr} (aktuell: ${sel.menge}):`) ?? '')
+            if (!isNaN(neu) && neu > 0)
+              setVorschlaege((prev) => prev.map((v) => v.id === selectedVorschlag ? { ...v, menge: neu, betrag: neu * v.einhPreis } : v))
+          }}>
           <Calculator className="h-4 w-4" />
           Calc
         </Button>
         <Button variant="default" size="sm"
-          onClick={() => {
+          onClick={async () => {
             if (vorschlaege.length === 0) { push('Keine Vorschläge vorhanden'); return }
-            push('Bestellung erstellen: nicht implementiert')
+            try {
+              const res = await apiClient.post('/api/v1/einkauf/bestellungen', {
+                positionen: vorschlaege.map((v) => ({ artikel_nr: v.artikelNr, menge: v.menge, einheit: v.einheit, einzelpreis: v.einhPreis })),
+                bestelldatum: new Date().toISOString().slice(0, 10),
+              })
+              push(`Bestellung erstellt: ${(res.data as any)?.bestellnummer ?? 'OK'}`)
+              setVorschlaege([])
+            } catch (e: any) { push(`Fehler: ${e.response?.data?.detail ?? e.message}`) }
           }}>
           Bestellung erstellen
         </Button>
         <Button variant="outline" size="sm"
-          onClick={() => push('Anfrage erstellen: nicht implementiert')}>
+          onClick={async () => {
+            if (vorschlaege.length === 0) { push('Keine Vorschläge vorhanden'); return }
+            try {
+              await apiClient.post('/api/v1/einkauf/anfragen', {
+                positionen: vorschlaege.map((v) => ({ artikel_nr: v.artikelNr, menge: v.menge, einheit: v.einheit })),
+                anfragedatum: new Date().toISOString().slice(0, 10),
+              })
+              push('Anfrage erstellt und weitergeleitet.')
+            } catch (e: any) { push(`Fehler: ${e.response?.data?.detail ?? e.message}`) }
+          }}>
           Anfrage erstellen
         </Button>
         <div className="ml-auto">

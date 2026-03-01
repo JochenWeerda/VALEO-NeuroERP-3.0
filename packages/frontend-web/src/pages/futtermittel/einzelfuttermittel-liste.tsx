@@ -1,5 +1,6 @@
 import { useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { ListReport } from '@/components/mask-builder'
 import { useEinzelfutter, type Einzelfutter } from '@/lib/api/futter'
 import { toast } from '@/hooks/use-toast'
@@ -156,6 +157,7 @@ async function triggerFutterExport(entity: string, label: string): Promise<void>
 
 export default function EinzelfuttermittelListePage(): JSX.Element {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const importInputRef = useRef<HTMLInputElement>(null)
   const { data: apiData = [], isLoading } = useEinzelfutter()
   const data = useMemo(() => apiData.map((item: Einzelfutter) => ({
@@ -180,7 +182,17 @@ export default function EinzelfuttermittelListePage(): JSX.Element {
     if (item?.id) navigate(`/futtermittel/einzelfuttermittel/stamm/${item.id}`)
   }
 
-  const handleDelete = (_item: any) => toast({ title: 'Nicht verfügbar', description: 'Löschen über die Liste wird noch nicht unterstützt.' })
+  const handleDelete = async (item: any) => {
+    if (!item?.id) return
+    if (!confirm(`Einzelfuttermittel "${item.name}" wirklich löschen?`)) return
+    try {
+      await api.delete(`/api/v1/futter/einzelfuttermittel/${item.id}`)
+      toast({ title: 'Gelöscht', description: `${item.name} wurde gelöscht.` })
+      queryClient.invalidateQueries({ queryKey: ['futter', 'einzel'] })
+    } catch (e: any) {
+      toast({ title: 'Löschen fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+    }
+  }
 
   const handleExport = () => triggerFutterExport('futtermittel_einzel', 'Einzelfuttermittel')
 

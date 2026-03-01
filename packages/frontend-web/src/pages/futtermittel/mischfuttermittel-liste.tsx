@@ -1,5 +1,6 @@
 import { useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { ListReport } from '@/components/mask-builder'
 import { toast } from '@/hooks/use-toast'
 import { useMischfutter, type Mischfutter } from '@/lib/api/futter'
@@ -219,6 +220,7 @@ async function triggerMischExport(): Promise<void> {
 
 export default function MischfuttermittelListePage(): JSX.Element {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const importInputRef = useRef<HTMLInputElement>(null)
   const { data: apiData = [], isLoading } = useMischfutter()
   const data = useMemo(() => apiData.map((item: Mischfutter) => ({
@@ -245,7 +247,17 @@ export default function MischfuttermittelListePage(): JSX.Element {
     if (item?.id) navigate(`/futtermittel/mischfuttermittel/stamm/${item.id}`)
   }
 
-  const handleDelete = (_item: any) => toast({ title: 'Nicht verfügbar', description: 'Löschen über die Liste wird noch nicht unterstützt.' })
+  const handleDelete = async (item: any) => {
+    if (!item?.id) return
+    if (!confirm(`Mischfuttermittel "${item.name}" wirklich löschen?`)) return
+    try {
+      await api.delete(`/api/v1/futter/mischfuttermittel/${item.id}`)
+      toast({ title: 'Gelöscht', description: `${item.name} wurde gelöscht.` })
+      queryClient.invalidateQueries({ queryKey: ['futter', 'misch'] })
+    } catch (e: any) {
+      toast({ title: 'Löschen fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+    }
+  }
 
   const handleExport = () => triggerMischExport()
 

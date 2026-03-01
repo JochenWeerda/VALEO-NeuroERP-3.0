@@ -357,6 +357,7 @@ export default function LieferantenStammPage(): JSX.Element {
       data={data}
       onSave={handleSave}
       onCancel={handleCancel}
+      onAction={handleAction}
       isLoading={loading}
     />
   )

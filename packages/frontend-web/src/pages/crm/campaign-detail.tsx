@@ -650,6 +650,7 @@ export default function CampaignDetailPage(): JSX.Element {
             data={data}
             onSave={handleSave}
             onCancel={handleCancel}
+            onAction={async (key, fd) => key === 'save' ? handleSave(fd) : handleCancel()}
             isLoading={loading || dataLoading}
           />
         </div>

@@ -1,3 +1,4 @@
+import { useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -6,6 +7,7 @@ import { formatCurrency, formatNumber } from '@/components/mask-builder/utils/fo
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
 import { apiClient } from '@/lib/api-client'
+import { api } from '@/lib/axios'
 import { toast } from '@/hooks/use-toast'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 
@@ -221,9 +223,10 @@ export default function KundenListePage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const importInputRef = useRef<HTMLInputElement>(null)
   const entityType = 'customer'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Kunde')
-  const kundenListConfig = createKundenListConfig(t, entityTypeLabel)
+  const baseConfig = createKundenListConfig(t, entityTypeLabel)
 
   const { data: queryData, isLoading } = useQuery({
     queryKey: ['crm', 'kunden'],
@@ -246,6 +249,58 @@ export default function KundenListePage(): JSX.Element {
   const total = queryData?.total || 0
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['crm', 'kunden'] })
+
+  const kundenListConfig = useMemo(() => {
+    const onNewsletter = async (items: any[]) => {
+      if (items.length === 0) { toast({ title: t('crud.list.noSelection', { defaultValue: 'Keine Auswahl' }) }); return }
+      const emails = items.map((k: any) => k.email).filter(Boolean)
+      if (emails.length === 0) {
+        toast({ title: 'Keine E-Mail-Adressen', description: 'Für die ausgewählten Kunden sind keine E-Mail-Adressen hinterlegt.', variant: 'destructive' })
+        return
+      }
+      try {
+        await api.post('/api/v1/crm/kommunikation/newsletter', { empfaenger: emails, typ: 'kunden', betreff: 'Information von VALEO' })
+        toast({ title: 'Newsletter versendet', description: `Versand an ${emails.length} Empfänger initiiert.` })
+      } catch (e: any) {
+        toast({ title: 'Versand fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+      }
+    }
+    const onBlock = async (items: any[]) => {
+      if (items.length === 0) { toast({ title: t('crud.list.noSelection', { defaultValue: 'Keine Auswahl' }) }); return }
+      try {
+        await Promise.all(items.map((k: any) => api.patch(`/api/v1/crm/kunden/${k.id}`, { status: 'gesperrt' })))
+        toast({ title: 'Gesperrt', description: `${items.length} Kunde(n) gesperrt.`, variant: 'destructive' })
+        invalidate()
+      } catch (e: any) {
+        toast({ title: 'Fehler beim Sperren', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+      }
+    }
+    return {
+      ...baseConfig,
+      bulkActions: [
+        { ...baseConfig.bulkActions[0] },          // export — handled by onExport prop
+        { ...baseConfig.bulkActions[1], onClick: onNewsletter },
+        { ...baseConfig.bulkActions[2], onClick: onBlock },
+      ],
+    }
+  }, [t, data])
+
+  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const form = new FormData()
+    form.append('file', file)
+    try {
+      const res = await api.post('/api/v1/crm/import/kunden', form, { headers: { 'Content-Type': 'multipart/form-data' } })
+      const { created, updated, errors } = res.data as { created: number; updated: number; errors: string[] }
+      toast({ title: 'Import abgeschlossen', description: `${created} neu, ${updated} aktualisiert${errors.length ? `, ${errors.length} Fehler` : ''}.` })
+      if (errors.length) console.warn('Import-Fehler:', errors)
+      invalidate()
+    } catch (e: any) {
+      toast({ title: 'Import fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+    }
+    e.target.value = ''
+  }
 
   const handleCreate = () => {
     navigate('/crm/kunden/stamm/new')
@@ -302,16 +357,19 @@ export default function KundenListePage(): JSX.Element {
   }
 
   return (
-    <ListReport
-      config={kundenListConfig}
-      data={data}
-      total={total}
-      onCreate={handleCreate}
-      onEdit={handleEdit}
-      onDelete={handleDelete}
-      onExport={handleExport}
-      onImport={() => toast({ title: 'Import', description: t('crud.messages.importFunctionInfo', { defaultValue: 'Import-Funktion wird in Kürze bereitgestellt.' }) })}
-      isLoading={isLoading}
-    />
+    <>
+      <input ref={importInputRef} type="file" accept=".csv" style={{ display: 'none' }} onChange={handleImportFile} />
+      <ListReport
+        config={kundenListConfig}
+        data={data}
+        total={total}
+        onCreate={handleCreate}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onExport={handleExport}
+        onImport={() => importInputRef.current?.click()}
+        isLoading={isLoading}
+      />
+    </>
   )
 }

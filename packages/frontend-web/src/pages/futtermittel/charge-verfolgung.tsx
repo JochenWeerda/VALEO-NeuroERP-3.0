@@ -1,5 +1,6 @@
 import { useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { ListReport } from '@/components/mask-builder'
 import { useFutterChargen, type FutterCharge } from '@/lib/api/futter'
 import { formatDate, formatNumber } from '@/components/mask-builder/utils/formatting'
@@ -195,6 +196,7 @@ async function triggerChargenExport(): Promise<void> {
 
 export default function ChargeVerfolgungPage(): JSX.Element {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const importInputRef = useRef<HTMLInputElement>(null)
   const { data: apiData = [], isLoading } = useFutterChargen()
   const data = useMemo(() => apiData.map((item: FutterCharge) => ({
@@ -219,7 +221,17 @@ export default function ChargeVerfolgungPage(): JSX.Element {
     if (item?.id) navigate(`/futtermittel/chargen/${item.id}`)
   }
 
-  const handleDelete = (_item: any) => toast({ title: 'Nicht verfügbar', description: 'Löschen über die Liste wird noch nicht unterstützt.' })
+  const handleDelete = async (item: any) => {
+    if (!item?.id) return
+    if (!confirm(`Charge "${item.chargenNummer ?? item.id}" wirklich löschen?`)) return
+    try {
+      await api.delete(`/api/v1/futter/chargen/${item.id}`)
+      toast({ title: 'Gelöscht', description: 'Charge wurde gelöscht.' })
+      queryClient.invalidateQueries({ queryKey: ['futter', 'chargen'] })
+    } catch (e: any) {
+      toast({ title: 'Löschen fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+    }
+  }
 
   const handleExport = () => triggerChargenExport()
 

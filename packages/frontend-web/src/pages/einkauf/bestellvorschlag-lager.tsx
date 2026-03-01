@@ -201,9 +201,37 @@ export default function BestellvorschlagLagerPage(): JSX.Element {
     push('Vorschlag übernommen')
   }
 
-  const handleBestellungErstellen = (): void => {
+  const handleBestellungErstellen = async (): Promise<void> => {
     if (vorschlaege.length === 0) { push('Keine Vorschläge vorhanden'); return }
-    push('Bestellung erstellen: nicht implementiert')
+    // Vorschläge nach Lieferant gruppieren → eine Bestellung pro Lieferant
+    const byLieferant = vorschlaege.reduce<Record<string, BestellVorschlag[]>>((acc, v) => {
+      const key = v.liefNr || 'unbekannt'
+      ;(acc[key] = acc[key] || []).push(v)
+      return acc
+    }, {})
+    try {
+      const created: string[] = []
+      for (const [liefNr, positionen] of Object.entries(byLieferant)) {
+        const res = await apiClient.post('/api/v1/einkauf/bestellungen', {
+          lieferant_id: liefNr,
+          lieferant_name: positionen[0].name,
+          positionen: positionen.map((v) => ({
+            artikel_nr: v.artikelNr,
+            menge: v.menge,
+            einheit: v.einheit,
+            einzelpreis: v.einhPreis,
+            kontrakt_nr: v.kontraktNr || null,
+          })),
+          niederlassung: positionen[0].niederlassung,
+          bestelldatum: new Date().toISOString().slice(0, 10),
+        })
+        created.push((res.data as any)?.bestellnummer ?? liefNr)
+      }
+      push(`${created.length} Bestellung(en) erstellt: ${created.join(', ')}`)
+      setVorschlaege([])
+    } catch (e: any) {
+      push(`Fehler beim Erstellen: ${e.response?.data?.detail ?? e.message}`)
+    }
   }
 
   const filteredVorschlaege = vorschlagFilter === 'alle'
@@ -545,12 +573,30 @@ export default function BestellvorschlagLagerPage(): JSX.Element {
           Pos. löschen
         </Button>
         <Button variant="outline" size="sm" className="gap-2"
-          onClick={() => push('Manuelle Pos.: nicht implementiert')}>
+          onClick={() => {
+            const artNr = prompt('Artikelnummer:')
+            if (!artNr) return
+            const menge = parseFloat(prompt('Menge:') ?? '0')
+            if (!menge) return
+            setVorschlaege((prev) => [...prev, {
+              id: crypto.randomUUID(), liefNr: '', name: 'Manuell', artikelNr: artNr,
+              liefArt: 'frei', menge, einheit: 'kg', einhPreis: 0, preisJe1: 'kg',
+              betrag: 0, kontraktNr: '', niederlassung: '', lagerhalle: '', bediener: '', datum: new Date().toISOString().slice(0,10)
+            }])
+            push('Manuelle Position hinzugefügt')
+          }}>
           <Plus className="h-4 w-4" />
           Manuelle Pos.
         </Button>
         <Button variant="outline" size="sm" className="gap-2"
-          onClick={() => push('Calc: nicht implementiert')}>
+          onClick={() => {
+            const sel = vorschlaege.find((v) => v.id === selectedVorschlag)
+            if (!sel) { push('Bitte Position auswählen'); return }
+            const neu = parseFloat(prompt(`Menge für ${sel.artikelNr} (aktuell: ${sel.menge}):`) ?? '')
+            if (!isNaN(neu) && neu > 0) {
+              setVorschlaege((prev) => prev.map((v) => v.id === selectedVorschlag ? { ...v, menge: neu, betrag: neu * v.einhPreis } : v))
+            }
+          }}>
           <Calculator className="h-4 w-4" />
           Calc
         </Button>
@@ -559,7 +605,18 @@ export default function BestellvorschlagLagerPage(): JSX.Element {
           Bestellung erstellen
         </Button>
         <Button variant="outline" size="sm"
-          onClick={() => push('Anfrage erstellen: nicht implementiert')}>
+          onClick={async () => {
+            if (vorschlaege.length === 0) { push('Keine Vorschläge vorhanden'); return }
+            try {
+              await apiClient.post('/api/v1/einkauf/anfragen', {
+                positionen: vorschlaege.map((v) => ({ artikel_nr: v.artikelNr, menge: v.menge, einheit: v.einheit })),
+                anfragedatum: new Date().toISOString().slice(0, 10),
+              })
+              push('Anfrage erstellt und an Lieferanten weitergeleitet.')
+            } catch (e: any) {
+              push(`Fehler: ${(e as any).response?.data?.detail ?? (e as any).message}`)
+            }
+          }}>
           Anfrage erstellen
         </Button>
         <div className="ml-auto">

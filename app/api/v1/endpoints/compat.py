@@ -7,7 +7,7 @@ from datetime import date, datetime
 from typing import Any, Optional
 from uuid import uuid4
 
-from fastapi import APIRouter, Body, Depends, HTTPException, Query
+from fastapi import APIRouter, Body, Depends, File, HTTPException, Query, UploadFile
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -1217,6 +1217,223 @@ async def patch_lieferant(lieferant_id: str, body: dict = Body(default={}), db: 
     except Exception:
         db.rollback()
     return {"id": lieferant_id, "status": body.get("status", "aktiv"), "updated": True}
+
+
+@router.patch("/crm/kunden/{kunden_id}", response_model=dict)
+async def patch_kunde(kunden_id: str, body: dict = Body(default={}), db: Session = Depends(get_db)) -> dict:
+    """Partielle Aktualisierung eines Kunden (z.B. Status sperren)."""
+    q = text("""
+        UPDATE domain_crm.customers
+        SET status = :status, updated_at = NOW()
+        WHERE id = :id
+        RETURNING id, status
+    """)
+    try:
+        result = db.execute(q, {"id": kunden_id, "status": body.get("status", "aktiv")})
+        db.commit()
+        row = result.fetchone()
+        if row:
+            return {"id": str(row[0]), "status": str(row[1])}
+    except Exception:
+        db.rollback()
+    return {"id": kunden_id, "status": body.get("status", "aktiv"), "updated": True}
+
+
+# CSV-Import Endpoints -------------------------------------------------------
+
+def _parse_csv_bytes(content: bytes) -> list[dict]:
+    """Einfacher CSV-Parser: erkennt ';' oder ',' als Trennzeichen."""
+    import csv
+    import io
+    text_content = content.decode("utf-8-sig", errors="replace")
+    dialect = "excel" if "," in text_content.split("\n")[0] else "excel-tab"
+    sep = ";" if ";" in text_content.split("\n")[0] else ","
+    reader = csv.DictReader(io.StringIO(text_content), delimiter=sep)
+    return [dict(row) for row in reader]
+
+
+@router.post("/crm/import/kunden", response_model=dict)
+async def import_kunden_csv(file: UploadFile = File(...), db: Session = Depends(get_db)) -> dict:
+    """CSV-Import für Kunden. Erwartet Spalten: Firma, Ort, PLZ, Land, E-Mail, Telefon, Status."""
+    content = await file.read()
+    rows = _parse_csv_bytes(content)
+    created = updated = 0
+    errors: list[str] = []
+    col_map = {"firma": "firma", "company": "firma", "name": "firma",
+               "email": "email", "e-mail": "email", "ort": "ort", "city": "ort",
+               "plz": "plz", "zip": "plz", "land": "land", "country": "land",
+               "telefon": "telefon", "phone": "telefon", "status": "status"}
+    for i, row in enumerate(rows):
+        norm = {col_map.get(k.lower().strip(), k.lower().strip()): v.strip() for k, v in row.items() if v}
+        firma = norm.get("firma", "")
+        if not firma:
+            errors.append(f"Zeile {i+2}: Firma fehlt")
+            continue
+        try:
+            existing = db.execute(
+                text("SELECT id FROM domain_crm.customers WHERE name = :n LIMIT 1"),
+                {"n": firma}
+            ).fetchone()
+            if existing:
+                db.execute(
+                    text("UPDATE domain_crm.customers SET status=:s, updated_at=NOW() WHERE id=:id"),
+                    {"s": norm.get("status", "aktiv"), "id": str(existing[0])}
+                )
+                updated += 1
+            else:
+                import uuid
+                db.execute(
+                    text("""INSERT INTO domain_crm.customers (id, name, email, city, country, status, created_at)
+                            VALUES (:id, :name, :email, :city, :country, :status, NOW())"""),
+                    {"id": str(uuid.uuid4()), "name": firma,
+                     "email": norm.get("email", ""), "city": norm.get("ort", ""),
+                     "country": norm.get("land", "DE"), "status": norm.get("status", "aktiv")}
+                )
+                created += 1
+        except Exception as e:
+            errors.append(f"Zeile {i+2}: {str(e)[:80]}")
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        return {"created": 0, "updated": 0, "errors": [str(e)]}
+    return {"created": created, "updated": updated, "errors": errors}
+
+
+@router.post("/finance/import/debitoren", response_model=dict)
+async def import_debitoren_csv(file: UploadFile = File(...), db: Session = Depends(get_db)) -> dict:
+    """CSV-Import für Debitoren. Spalten: Kunde, IBAN, Betrag, Fälligkeit, Status."""
+    content = await file.read()
+    rows = _parse_csv_bytes(content)
+    created = updated = 0
+    errors: list[str] = []
+    for i, row in enumerate(rows):
+        norm = {k.lower().strip(): v.strip() for k, v in row.items() if v}
+        kunde = norm.get("kunde", norm.get("name", norm.get("company", "")))
+        if not kunde:
+            errors.append(f"Zeile {i+2}: Kunden-Name fehlt")
+            continue
+        try:
+            import uuid as _uuid
+            db.execute(
+                text("""INSERT INTO domain_crm.customers (id, name, status, created_at)
+                        VALUES (:id, :name, 'aktiv', NOW())
+                        ON CONFLICT (id) DO NOTHING"""),
+                {"id": str(_uuid.uuid4()), "name": kunde}
+            )
+            created += 1
+        except Exception as e:
+            errors.append(f"Zeile {i+2}: {str(e)[:80]}")
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        return {"created": 0, "updated": 0, "errors": [str(e)]}
+    return {"created": created, "updated": updated, "errors": errors}
+
+
+@router.post("/futter/import/einzelfuttermittel", response_model=dict)
+async def import_einzelfuttermittel_csv(file: UploadFile = File(...), db: Session = Depends(get_db)) -> dict:
+    """CSV-Import für Einzelfuttermittel."""
+    content = await file.read()
+    rows = _parse_csv_bytes(content)
+    created = 0
+    errors: list[str] = []
+    for i, row in enumerate(rows):
+        norm = {k.lower().strip(): v.strip() for k, v in row.items() if v}
+        name = norm.get("name", norm.get("artikel", norm.get("bezeichnung", "")))
+        if not name:
+            errors.append(f"Zeile {i+2}: Name fehlt")
+            continue
+        try:
+            import uuid as _uuid
+            db.execute(
+                text("""INSERT INTO domain_inventory.articles (id, name, article_number, unit, is_active, created_at)
+                        VALUES (:id, :name, :artnr, 'kg', true, NOW())
+                        ON CONFLICT DO NOTHING"""),
+                {"id": str(_uuid.uuid4()), "name": name, "artnr": norm.get("artikelnummer", norm.get("artnr", ""))}
+            )
+            created += 1
+        except Exception as e:
+            errors.append(f"Zeile {i+2}: {str(e)[:80]}")
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        return {"created": 0, "updated": 0, "errors": [str(e)]}
+    return {"created": created, "updated": 0, "errors": errors}
+
+
+@router.post("/futter/import/mischfuttermittel", response_model=dict)
+async def import_mischfuttermittel_csv(file: UploadFile = File(...), db: Session = Depends(get_db)) -> dict:
+    """CSV-Import für Mischfuttermittel (gleiche Tabelle wie Einzelfuttermittel)."""
+    content = await file.read()
+    rows = _parse_csv_bytes(content)
+    created = 0
+    errors: list[str] = []
+    for i, row in enumerate(rows):
+        norm = {k.lower().strip(): v.strip() for k, v in row.items() if v}
+        name = norm.get("name", norm.get("bezeichnung", ""))
+        if not name:
+            errors.append(f"Zeile {i+2}: Name fehlt")
+            continue
+        try:
+            import uuid as _uuid
+            props = {k: v for k, v in norm.items() if k in ("tierart", "lebensphase", "typ", "futtergruppe")}
+            db.execute(
+                text("""INSERT INTO domain_inventory.articles
+                        (id, name, article_number, unit, is_active, custom_properties, created_at)
+                        VALUES (:id, :name, :artnr, 'kg', true, :props::jsonb, NOW())
+                        ON CONFLICT DO NOTHING"""),
+                {"id": str(_uuid.uuid4()), "name": name,
+                 "artnr": norm.get("artikelnummer", ""),
+                 "props": json.dumps(props)}
+            )
+            created += 1
+        except Exception as e:
+            errors.append(f"Zeile {i+2}: {str(e)[:80]}")
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        return {"created": 0, "updated": 0, "errors": [str(e)]}
+    return {"created": created, "updated": 0, "errors": errors}
+
+
+@router.post("/futter/import/chargen", response_model=dict)
+async def import_chargen_csv(file: UploadFile = File(...), db: Session = Depends(get_db)) -> dict:
+    """CSV-Import für Futtermittel-Chargen."""
+    content = await file.read()
+    rows = _parse_csv_bytes(content)
+    created = 0
+    errors: list[str] = []
+    for i, row in enumerate(rows):
+        norm = {k.lower().strip(): v.strip() for k, v in row.items() if v}
+        artikel = norm.get("artikel", norm.get("name", ""))
+        if not artikel:
+            errors.append(f"Zeile {i+2}: Artikel fehlt")
+            continue
+        try:
+            import uuid as _uuid
+            db.execute(
+                text("""INSERT INTO domain_ops.ops_chargen
+                        (id, chargen_id, artikel, menge, status, qualitaetsstatus, eingang, created_at)
+                        VALUES (:id, :cid, :artikel, :menge, 'eingang', 'offen', NOW(), NOW())
+                        ON CONFLICT DO NOTHING"""),
+                {"id": str(_uuid.uuid4()),
+                 "cid": norm.get("chargen_id", norm.get("charge", str(_uuid.uuid4())[:8].upper())),
+                 "artikel": artikel,
+                 "menge": float(norm.get("menge", 0) or 0)}
+            )
+            created += 1
+        except Exception as e:
+            errors.append(f"Zeile {i+2}: {str(e)[:80]}")
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        return {"created": 0, "updated": 0, "errors": [str(e)]}
+    return {"created": created, "updated": 0, "errors": errors}
 
 
 # Inventory extra endpoints -------------------------------------------------
