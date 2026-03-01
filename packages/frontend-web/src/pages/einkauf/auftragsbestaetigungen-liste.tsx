@@ -1,13 +1,15 @@
 ﻿import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useQueryClient } from '@tanstack/react-query'
 import { ListReport } from '@/components/mask-builder'
 import { formatDate } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
 import { getEntityTypeLabel, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 import { toast } from '@/hooks/use-toast'
-import { useAuftragsbestaetigungen, type Auftragsbestaetigung } from '@/lib/api/einkauf'
+import { useAuftragsbestaetigungen, type Auftragsbestaetigung, einkaufKeys } from '@/lib/api/einkauf'
+import { apiClient } from '@/lib/axios'
 
 const createAuftragsbestaetigungenConfig = (t: any, entityTypeLabel: string): ListConfig => ({
   title: entityTypeLabel,
@@ -115,6 +117,7 @@ const createAuftragsbestaetigungenConfig = (t: any, entityTypeLabel: string): Li
 export default function AuftragsbestaetigungenListePage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const { data: apiData = [], isLoading } = useAuftragsbestaetigungen()
   const data = useMemo(() => apiData.map((item: Auftragsbestaetigung) => ({
     ...item,
@@ -135,11 +138,16 @@ export default function AuftragsbestaetigungenListePage(): JSX.Element {
     }
   }
 
-  const handleDelete = (_item: any) => {
-    toast({
-      title: t('crud.messages.importInfo'),
-      description: 'Loeschen wird in dieser Ansicht noch nicht unterstuetzt.',
-    })
+  const handleDelete = async (item: any) => {
+    if (!item?.id) return
+    if (!confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) return
+    try {
+      await apiClient.delete(`/api/v1/einkauf/auftragsbestaetigungen/${item.id}`)
+      toast({ title: t('crud.messages.deleteSuccess') })
+      queryClient.invalidateQueries({ queryKey: einkaufKeys.bestaetigungen() })
+    } catch (e: any) {
+      toast({ title: t('crud.messages.deleteError'), description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+    }
   }
 
   const handleExport = () => {

@@ -356,7 +356,16 @@ export default function RechnungEingangErfassungPage(): JSX.Element {
                         ) : <div className="text-muted-foreground italic text-xs">Kein Lieferant</div>}
                       </div>
                       <a href="#" className="text-sm text-blue-600 underline hover:text-blue-800"
-                        onClick={(e) => { e.preventDefault(); push('Vorherige Rechnung laden: nicht implementiert') }}>
+                        onClick={async (e) => {
+                          e.preventDefault()
+                          try {
+                            const list = await apiClient.get<any[]>('/api/v1/einkauf/rechnungen')
+                            const items = Array.isArray(list.data) ? list.data : (list.data as any)?.data ?? []
+                            const idx = rechnungId ? items.findIndex((r: any) => r.id === rechnungId) : -1
+                            if (idx + 1 < items.length) navigate(`/einkauf/rechnungen/${items[idx + 1].id}`)
+                            else push('Kein vorheriger Beleg vorhanden.')
+                          } catch { push('Rechnungen konnten nicht geladen werden.') }
+                        }}>
                         wie vorh. RG (F11)
                       </a>
                       <br />
@@ -425,7 +434,10 @@ export default function RechnungEingangErfassungPage(): JSX.Element {
                       <Label className="text-sm">Tage netto Kasse</Label>
                     </div>
                     <a href="#" className="text-sm text-blue-600 underline hover:text-blue-800"
-                      onClick={(e) => { e.preventDefault(); push('Auswahl aus ZB-Stamm: nicht implementiert') }}>
+                      onClick={(e) => {
+                        e.preventDefault()
+                        navigate('/einkauf/zahlungsbedingungen')
+                      }}>
                       Auswahl aus ZB-Stamm
                     </a>
                     <div className="mt-4 space-y-2">
@@ -484,7 +496,30 @@ export default function RechnungEingangErfassungPage(): JSX.Element {
           {/* → Lieferschein-Auswahl + Rechn.-Summen */}
           <div className="flex items-center gap-6 mb-3 flex-wrap">
             <a href="#" className="text-sm text-blue-600 underline hover:text-blue-800 font-medium"
-              onClick={(e) => { e.preventDefault(); push('Lieferschein-Auswahl: nicht implementiert') }}>
+              onClick={async (e) => {
+                e.preventDefault()
+                if (!state.lieferant) { push('Bitte zuerst einen Lieferanten auswählen.'); return }
+                try {
+                  const res = await apiClient.get<any[]>('/api/v1/einkauf/lieferscheine', {
+                    params: { lieferant_id: state.lieferant.id, status: 'offen' }
+                  })
+                  const lsList = Array.isArray(res.data) ? res.data : (res.data as any)?.data ?? []
+                  if (lsList.length === 0) { push('Keine offenen Lieferscheine für diesen Lieferanten.'); return }
+                  // Übernimmt Positionen des ersten gefundenen Lieferscheins
+                  const ls = lsList[0]
+                  if (ls.positionen?.length) {
+                    setPositionen(ls.positionen.map((p: any, i: number) => ({
+                      id: crypto.randomUUID(), posNr: i + 1, liefArt: 'frei',
+                      artikelNr: p.artikel_nr ?? '', lieferantArtikelNr: '',
+                      artikelBezeichnung: p.bezeichnung ?? '', artikelBezeichnung2: '',
+                      einheit: p.einheit ?? 'kg', menge: p.menge ?? 0,
+                      einhPreis: p.einzelpreis ?? 0, betrag: (p.menge ?? 0) * (p.einzelpreis ?? 0),
+                      mwstKz: '1', mwstSatz: 19, rabatt: 0, lager: '', lagerhalle: '', lagerfach: '', info: ''
+                    })))
+                    push(`${lsList.length} Lieferschein(e) gefunden — LS ${ls.ls_nummer ?? ls.id} übernommen.`)
+                  }
+                } catch (e: any) { push(`Fehler: ${e.response?.data?.detail ?? e.message}`) }
+              }}>
               → Lieferschein-Auswahl
             </a>
             <div className="flex items-center gap-2 ml-auto flex-wrap">

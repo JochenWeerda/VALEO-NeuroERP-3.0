@@ -1,13 +1,15 @@
 ﻿import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useQueryClient } from '@tanstack/react-query'
 import { ListReport } from '@/components/mask-builder'
 import { formatDate } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
 import { getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 import { toast } from '@/hooks/use-toast'
-import { useAnlieferavis, type Anlieferavis } from '@/lib/api/einkauf'
+import { useAnlieferavis, type Anlieferavis, einkaufKeys } from '@/lib/api/einkauf'
+import { apiClient } from '@/lib/axios'
 
 const createAnlieferavisConfig = (t: any): ListConfig => ({
   title: 'Anlieferavis',
@@ -123,6 +125,7 @@ const createAnlieferavisConfig = (t: any): ListConfig => ({
 export default function AnlieferavisListePage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const anlieferavisConfig = createAnlieferavisConfig(t)
   const { data: apiData = [], isLoading } = useAnlieferavis()
   const data = useMemo(() => apiData.map((item: Anlieferavis) => ({
@@ -142,11 +145,16 @@ export default function AnlieferavisListePage(): JSX.Element {
     }
   }
 
-  const handleDelete = (_item: any) => {
-    toast({
-      title: t('crud.messages.importInfo'),
-      description: 'Loeschen wird in dieser Ansicht noch nicht unterstuetzt.',
-    })
+  const handleDelete = async (item: any) => {
+    if (!item?.id) return
+    if (!confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: 'Anlieferavis' }))) return
+    try {
+      await apiClient.delete(`/api/v1/einkauf/anlieferavis/${item.id}`)
+      toast({ title: t('crud.messages.deleteSuccess') })
+      queryClient.invalidateQueries({ queryKey: einkaufKeys.anlieferavis() })
+    } catch (e: any) {
+      toast({ title: t('crud.messages.deleteError'), description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+    }
   }
 
   return (

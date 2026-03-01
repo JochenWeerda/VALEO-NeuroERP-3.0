@@ -260,11 +260,16 @@ export default function RechnungseingaengeListePage(): JSX.Element {
     }
   }
 
-  const handleDelete = (_item: any) => {
-    toast({
-      title: t('crud.messages.importInfo'),
-      description: 'Loeschen wird in dieser Ansicht noch nicht unterstuetzt.',
-    })
+  const handleDelete = async (item: any) => {
+    if (!item?.id) return
+    if (!confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) return
+    try {
+      await apiClient.delete(`/api/v1/einkauf/rechnungen/${item.id}`)
+      toast({ title: t('crud.messages.deleteSuccess') })
+      queryClient.invalidateQueries({ queryKey: einkaufKeys.rechnungseingaenge() })
+    } catch (e: any) {
+      toast({ title: t('crud.messages.deleteError'), description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+    }
   }
 
   const handleExport = () => {
