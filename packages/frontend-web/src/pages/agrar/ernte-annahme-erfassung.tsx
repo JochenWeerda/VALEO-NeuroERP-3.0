@@ -1006,8 +1006,11 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                     checked={!!state.deviatingVatId}
                     onCheckedChange={(checked) => {
                       if (checked) {
-                        // TODO: Dialog für abweichende USt-ID öffnen
-                        push('Abweichende USt-ID - noch nicht implementiert')
+                        const ustId = prompt('Abweichende USt-ID eingeben (z.B. DE123456789):')
+                        if (ustId?.trim()) {
+                          setState((prev) => ({ ...prev, deviatingVatId: ustId.trim() }))
+                          push(`Abweichende USt-ID hinterlegt: ${ustId.trim()}`)
+                        }
                       } else {
                         setState((prev) => ({ ...prev, deviatingVatId: null }))
                       }
@@ -1173,8 +1176,57 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
               </TabsContent>
 
               <TabsContent value="nawaro" className="mt-4 space-y-2">
-                <div className="text-sm text-muted-foreground">
-                  NAWARO-Bereich - noch nicht implementiert
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Label className="w-40 text-sm shrink-0">NAWARO-Nummer:</Label>
+                      <Input
+                        value={state.nawaroNr || ''}
+                        onChange={(e) => setState((prev) => ({ ...prev, nawaroNr: e.target.value }))}
+                        placeholder="z.B. NAW-2026-001"
+                        className="flex-1 h-8" />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Label className="w-40 text-sm shrink-0">Verwendungszweck:</Label>
+                      <select
+                        value={state.nawaroZweck || ''}
+                        onChange={(e) => setState((prev) => ({ ...prev, nawaroZweck: e.target.value }))}
+                        className="flex-1 h-8 border rounded px-2">
+                        <option value="">-- bitte wählen --</option>
+                        <option value="biogas">Biogas</option>
+                        <option value="bioethanol">Bioethanol</option>
+                        <option value="biodiesel">Biodiesel</option>
+                        <option value="holz">Holz/Pellets</option>
+                        <option value="sonstige">Sonstige</option>
+                      </select>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Label className="w-40 text-sm shrink-0">Biogasanlage:</Label>
+                      <Input
+                        value={state.biogasanlage || ''}
+                        onChange={(e) => setState((prev) => ({ ...prev, biogasanlage: e.target.value }))}
+                        placeholder="Name / Betreiber"
+                        className="flex-1 h-8" />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Label className="w-40 text-sm shrink-0">EEG-Menge (t):</Label>
+                      <Input
+                        type="number" min={0} step={0.001}
+                        value={state.eegMenge ?? ''}
+                        onChange={(e) => setState((prev) => ({ ...prev, eegMenge: parseFloat(e.target.value) || 0 }))}
+                        className="flex-1 h-8" />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Label className="w-40 text-sm shrink-0">Nachhaltigkeitsnachweis:</Label>
+                      <Input
+                        value={state.nachhaltigkeitsNachweis || ''}
+                        onChange={(e) => setState((prev) => ({ ...prev, nachhaltigkeitsNachweis: e.target.value }))}
+                        placeholder="REDcert / ISCC Zertifikat-Nr."
+                        className="flex-1 h-8" />
+                    </div>
+                  </div>
                 </div>
               </TabsContent>
 

@@ -915,8 +915,15 @@ export default function LieferscheinErfassungPage(): JSX.Element {
       }
       await executePrint(opts, reason)
     } else if (action === 'modify') {
-      // TODO: Handle modify action
-      push('Korrektur noch nicht implementiert')
+      // Korrektur: setzt Status zurück auf 'offen' damit der LS editierbar wird
+      if (!state.id) { push('Kein Lieferschein geöffnet'); return }
+      try {
+        await apiClient.patch(`/api/v1/sales/delivery-notes/${state.id}`, { status: 'offen', is_printed: false })
+        dispatch({ type: 'SET_FIELD', field: 'statusGedruckt', value: false })
+        push('Lieferschein zur Korrektur geöffnet — Änderungen vornehmen und erneut speichern.')
+      } catch (e: any) {
+        push(`Korrektur fehlgeschlagen: ${e.response?.data?.detail ?? e.message}`)
+      }
     }
     // Other actions (cancel, post, reopen) are not handled yet
   }

@@ -259,7 +259,14 @@ export default function FrachtauftraegeEingangPage(): JSX.Element {
           Beleg anzeigen
         </Button>
         <Button variant="outline" size="sm" className="gap-2"
-          onClick={() => push('Calc: nicht implementiert')}>
+          onClick={() => {
+            if (!selectedItem) { push('Bitte einen Frachtauftrag auswählen'); return }
+            const neu = parseFloat(prompt(`Pauschalfracht für ${selectedItem.belegNr} (aktuell: ${selectedItem.pauschalFracht.toFixed(2)} €):`) ?? '')
+            if (!isNaN(neu) && neu >= 0) {
+              setItems((prev) => prev.map((i) => i.id === selectedItem.id ? { ...i, pauschalFracht: neu } : i))
+              push(`Pauschalfracht auf ${neu.toFixed(2)} € gesetzt.`)
+            }
+          }}>
           <Calculator className="h-4 w-4" />
           Calc
         </Button>
