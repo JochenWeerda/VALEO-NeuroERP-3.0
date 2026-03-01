@@ -174,6 +174,35 @@ export default function EinzelfuttermittelListePage(): JSX.Element {
   })), [apiData])
   const total = data.length
 
+  const einzelfuttermittelConfig: ListConfig = useMemo(() => ({
+    ...futtermittelListConfig,
+    bulkActions: [
+      {
+        key: 'export',
+        label: 'Exportieren',
+        type: 'secondary' as const,
+        onClick: (items: any[]) => {
+          void triggerFutterExport('futtermittel_einzel', `Einzelfuttermittel (${items.length})`)
+        }
+      },
+      {
+        key: 'delete',
+        label: 'Löschen',
+        type: 'danger' as const,
+        onClick: async (items: any[]) => {
+          if (!confirm(`${items.length} Einzelfuttermittel wirklich löschen?`)) return
+          let ok = 0; let err = 0
+          for (const item of items) {
+            try { await api.delete(`/api/v1/futter/einzelfuttermittel/${item.id}`); ok++ }
+            catch { err++ }
+          }
+          queryClient.invalidateQueries({ queryKey: ['futter', 'einzel'] })
+          toast({ title: 'Bulk-Löschen', description: `${ok} gelöscht${err ? `, ${err} Fehler` : ''}.` })
+        }
+      }
+    ]
+  }), [queryClient])
+
   const handleCreate = () => {
     navigate('/futtermittel/einzelfuttermittel/stamm/new')
   }
@@ -230,7 +259,7 @@ export default function EinzelfuttermittelListePage(): JSX.Element {
         onChange={handleImportFile}
       />
       <ListReport
-        config={futtermittelListConfig}
+        config={einzelfuttermittelConfig}
         data={data}
         total={total}
         onCreate={handleCreate}

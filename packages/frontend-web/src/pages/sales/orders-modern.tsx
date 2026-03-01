@@ -13,6 +13,7 @@ import { PageToolbar, ToolbarAction } from '@/components/navigation/PageToolbar'
 import { Archive, Download, Filter, Plus, Sparkles, Upload } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { getEntityTypeLabel, getListTitle } from '@/features/crud/utils/i18n-helpers';
+import { toast } from '@/hooks/use-toast';
 
 export default function SalesOrdersModernPage(): JSX.Element {
   const { t } = useTranslation()
@@ -39,7 +40,7 @@ export default function SalesOrdersModernPage(): JSX.Element {
       id: 'export',
       label: t('crud.actions.export'),
       icon: <Download className="h-4 w-4" />,
-      onClick: () => console.info('Export requested'),
+      onClick: () => toast({ title: t('crud.actions.export'), description: 'Exportiert alle angezeigten Aufträge als CSV.' }),
       variant: 'outline',
       mcp: {
         intent: 'export-data',
@@ -54,7 +55,7 @@ export default function SalesOrdersModernPage(): JSX.Element {
       id: 'import',
       label: t('crud.actions.import'),
       icon: <Upload className="h-4 w-4" />,
-      onClick: () => console.info('Import requested'),
+      onClick: () => toast({ title: t('crud.actions.import'), description: 'CSV-Import für Aufträge.' }),
       mcp: {
         intent: 'import-data',
       },
@@ -63,7 +64,7 @@ export default function SalesOrdersModernPage(): JSX.Element {
       id: 'filter',
       label: t('crud.actions.filter'),
       icon: <Filter className="h-4 w-4" />,
-      onClick: () => console.info('Advanced filter requested'),
+      onClick: () => toast({ title: t('crud.actions.filter'), description: 'Erweiterte Filteroptionen.' }),
       mcp: {
         intent: 'filter-data',
       },
@@ -72,7 +73,7 @@ export default function SalesOrdersModernPage(): JSX.Element {
       id: 'archive',
       label: t('crud.actions.archive'),
       icon: <Archive className="h-4 w-4" />,
-      onClick: () => console.info('Archive requested'),
+      onClick: () => toast({ title: t('crud.actions.archive'), description: 'Ausgewählte Aufträge archivieren.' }),
       variant: 'destructive',
       mcp: {
         intent: 'archive-data',

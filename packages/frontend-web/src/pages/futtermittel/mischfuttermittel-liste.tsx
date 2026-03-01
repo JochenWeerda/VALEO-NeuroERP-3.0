@@ -239,6 +239,47 @@ export default function MischfuttermittelListePage(): JSX.Element {
   })), [apiData])
   const total = data.length
 
+  const mischfuttermittelConfig: ListConfig = useMemo(() => ({
+    ...mischfuttermittelListConfig,
+    bulkActions: [
+      {
+        key: 'export',
+        label: 'Exportieren',
+        type: 'secondary' as const,
+        onClick: (_items: any[]) => { void triggerMischExport() }
+      },
+      {
+        key: 'recalculate',
+        label: 'Nährwerte neu berechnen',
+        type: 'secondary' as const,
+        onClick: async (items: any[]) => {
+          try {
+            await api.post('/api/v1/futter/mischfuttermittel/recalculate', { ids: items.map((i) => i.id) })
+            queryClient.invalidateQueries({ queryKey: ['futter', 'misch'] })
+            toast({ title: 'Nährwerte berechnet', description: `${items.length} Rezepturen neu berechnet.` })
+          } catch (e: any) {
+            toast({ title: 'Fehler', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+          }
+        }
+      },
+      {
+        key: 'delete',
+        label: 'Löschen',
+        type: 'danger' as const,
+        onClick: async (items: any[]) => {
+          if (!confirm(`${items.length} Mischfuttermittel wirklich löschen?`)) return
+          let ok = 0; let err = 0
+          for (const item of items) {
+            try { await api.delete(`/api/v1/futter/mischfuttermittel/${item.id}`); ok++ }
+            catch { err++ }
+          }
+          queryClient.invalidateQueries({ queryKey: ['futter', 'misch'] })
+          toast({ title: 'Bulk-Löschen', description: `${ok} gelöscht${err ? `, ${err} Fehler` : ''}.` })
+        }
+      }
+    ]
+  }), [queryClient])
+
   const handleCreate = () => {
     navigate('/futtermittel/mischfuttermittel/stamm/new')
   }
@@ -295,7 +336,7 @@ export default function MischfuttermittelListePage(): JSX.Element {
         onChange={handleImportFile}
       />
       <ListReport
-        config={mischfuttermittelListConfig}
+        config={mischfuttermittelConfig}
         data={data}
         total={total}
         onCreate={handleCreate}

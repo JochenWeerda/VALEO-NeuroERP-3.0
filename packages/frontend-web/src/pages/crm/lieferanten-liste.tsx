@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -260,6 +260,7 @@ export default function LieferantenListePage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const importInputRef = useRef<HTMLInputElement>(null)
   const baseConfig = createLieferantenListConfig(t)
 
   const { data: queryData, isLoading } = useQuery({
@@ -420,22 +421,41 @@ export default function LieferantenListePage(): JSX.Element {
     }
   }
 
+  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const formData = new FormData()
+    formData.append('file', file)
+    try {
+      const res = await api.post('/api/v1/crm/import/lieferanten', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      const { created = 0, updated = 0, errors = [] } = (res.data as any) ?? {}
+      toast({
+        title: t('crud.messages.importSuccess', { defaultValue: 'Import abgeschlossen' }),
+        description: `${created} neu, ${updated} aktualisiert${errors.length ? `, ${errors.length} Fehler` : ''}.`,
+      })
+      queryClient.invalidateQueries({ queryKey: ['crm', 'lieferanten'] })
+    } catch (err: any) {
+      toast({ title: t('crud.messages.importError', { defaultValue: 'Import fehlgeschlagen' }), description: err.response?.data?.detail ?? err.message, variant: 'destructive' })
+    }
+    e.target.value = ''
+  }
+
   return (
-    <ListReport
-      config={lieferantenListConfig}
-      data={data}
-      total={total}
-      onCreate={handleCreate}
-      onEdit={handleEdit}
-      onDelete={handleDelete}
-      onExport={handleExport}
-      onImport={() => {
-        toast({
-          title: t('crud.messages.importInfo', { defaultValue: 'Import-Funktion' }),
-          description: t('crud.messages.importComingSoon', { defaultValue: 'CSV-Import wird in der nächsten Version verfügbar sein.' }),
-        })
-      }}
-      isLoading={isLoading}
-    />
+    <>
+      <input ref={importInputRef} type="file" accept=".csv" className="hidden" onChange={handleImportFile} />
+      <ListReport
+        config={lieferantenListConfig}
+        data={data}
+        total={total}
+        onCreate={handleCreate}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onExport={handleExport}
+        onImport={() => importInputRef.current?.click()}
+        isLoading={isLoading}
+      />
+    </>
   )
 }

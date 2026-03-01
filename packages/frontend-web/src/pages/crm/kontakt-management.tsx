@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ListReport } from '@/components/mask-builder'
 import { useMaskActions } from '@/components/mask-builder/hooks'
@@ -6,6 +6,7 @@ import { createApiClient } from '@/components/mask-builder/utils/api'
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
 import { toast } from '@/hooks/use-toast'
+import { api } from '@/lib/axios'
 
 // API Client für Kontakte
 const apiClient = createApiClient('/api/crm')
@@ -249,6 +250,7 @@ export default function KontaktManagementPage(): JSX.Element {
   const [data, setData] = useState<any[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
+  const importInputRef = useRef<HTMLInputElement>(null)
 
   const { handleAction } = useMaskActions(async (action: string, item: any) => {
     if (action === 'edit' && item) {
@@ -334,22 +336,41 @@ export default function KontaktManagementPage(): JSX.Element {
     }
   }
 
+  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const formData = new FormData()
+    formData.append('file', file)
+    try {
+      const res = await api.post('/api/v1/crm/import/kunden', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      const { created = 0, updated = 0, errors = [] } = (res.data as any) ?? {}
+      toast({
+        title: 'Import abgeschlossen',
+        description: `${created} neu, ${updated} aktualisiert${errors.length ? `, ${errors.length} Fehler` : ''}.`,
+      })
+      void loadData()
+    } catch (err: any) {
+      toast({ title: 'Import fehlgeschlagen', description: err.response?.data?.detail ?? err.message, variant: 'destructive' })
+    }
+    e.target.value = ''
+  }
+
   return (
-    <ListReport
-      config={kontaktListConfig}
-      data={data}
-      total={total}
-      onCreate={handleCreate}
-      onEdit={handleEdit}
-      onDelete={handleDelete}
-      onExport={handleExport}
-      onImport={() => {
-        toast({
-          title: 'Import-Funktion',
-          description: 'CSV-Import wird in der nächsten Version verfügbar sein.',
-        })
-      }}
-      isLoading={loading}
-    />
+    <>
+      <input ref={importInputRef} type="file" accept=".csv" className="hidden" onChange={handleImportFile} />
+      <ListReport
+        config={kontaktListConfig}
+        data={data}
+        total={total}
+        onCreate={handleCreate}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onExport={handleExport}
+        onImport={() => importInputRef.current?.click()}
+        isLoading={loading}
+      />
+    </>
   )
 }
