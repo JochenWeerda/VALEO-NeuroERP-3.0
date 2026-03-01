@@ -721,7 +721,7 @@ FLOW: Dict[tuple[str, str], Callable[[dict], dict]] = {
         "customerId": payload["customerId"],
         "sourceOrder": payload["number"],
         "paymentTerms": payload.get("paymentTerms", "net30"),
-        "dueDate": payload["date"],  # TODO: +30 Tage berechnen
+        "dueDate": (datetime.fromisoformat(payload["date"]) + timedelta(days=30)).strftime("%Y-%m-%d"),
         "status": "ENTWURF",
         "lines": payload.get("lines", []),
         "subtotalNet": sum(
@@ -745,7 +745,7 @@ FLOW: Dict[tuple[str, str], Callable[[dict], dict]] = {
         "sourceOrder": payload.get("sourceOrder"),
         "sourceDelivery": payload["number"],
         "paymentTerms": "net30",
-        "dueDate": payload["date"],  # TODO: +30 Tage berechnen
+        "dueDate": (datetime.fromisoformat(payload["date"]) + timedelta(days=30)).strftime("%Y-%m-%d"),
         "status": "ENTWURF",
         "lines": [
             {**line, "price": 0, "vatRate": 19}

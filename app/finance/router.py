@@ -320,16 +320,35 @@ async def get_buchungsvorschlag(
     tenant_id: str = Depends(get_tenant_id),
     current_user=Depends(get_current_user)
 ):
-    """Generiere automatischen Buchungsvorschlag"""
-    # TODO: Implementiere Matching-Logik
+    """Generiere automatischen Buchungsvorschlag (SKR03-Regelwerk)"""
+    # SKR03-Konten für Agrar/Handel
+    RULES: dict[str, tuple[str, str, Optional[str], float]] = {
+        "ER":  ("5100", "1600", "VSt", 0.92),   # Eingangsrechnung → Handelswaren / Lieferantenverb.
+        "AR":  ("1400", "8100", "MwSt", 0.92),  # Ausgangsrechnung → Kundenforderung / Erlöse
+        "ZE":  ("1200", "1400", None, 0.88),     # Zahlungseingang → Bank / Kundenforderung
+        "ZA":  ("1600", "1200", None, 0.88),     # Zahlungsausgang → Lieferantenverb. / Bank
+        "GS":  ("1600", "5100", None, 0.80),     # Gutschrift Einkauf
+        "KN":  ("8100", "1400", None, 0.80),     # Kreditnota Verkauf
+        "SB":  ("8100", "1400", "MwSt", 0.78),  # Selbstabrechnung
+        "SK":  ("1796", "5200", None, 0.72),     # Skonto (erhaltener Skonto)
+        "EB":  ("1100", "2000", None, 0.70),     # Eröffnungsbilanz
+        "AB":  ("2000", "1100", None, 0.70),     # Abschlussbuchung
+    }
+    belegart_key = belegart.upper()[:2]
+    soll, haben, steuer_code, konfidenz = RULES.get(belegart_key, ("6000", "4400", None, 0.50))
+    steuer_betrag = round(betrag * 0.19, 2) if steuer_code else None
+    today = date.today()
+    belegnr = f"BV-{today.year}-{today.strftime('%m%d%H%M')}"
     return Buchungsvorschlag(
-        belegnr="BV-2026-0001",
-        datum=date.today(),
+        belegnr=belegnr,
+        datum=today,
         text=text,
         betrag=betrag,
-        soll_konto="6000",
-        haben_konto="4400",
-        konfidenz=0.85
+        soll_konto=soll,
+        haben_konto=haben,
+        steuer_code=steuer_code,
+        steuer_betrag=steuer_betrag,
+        konfidenz=konfidenz
     )
 
 
@@ -430,16 +449,41 @@ async def get_kostenstellen_report(
     tenant_id: str = Depends(get_tenant_id),
     current_user=Depends(get_current_user)
 ):
-    """Kostenstellen-Auswertung"""
-    # TODO: Implementiere echte Aggregation
+    """Kostenstellen-Auswertung (Budget aus Stammdaten)"""
+    from app.finance.models import Kostenstelle as KostenstelleModel
+    from sqlalchemy import select
+
+    query = select(KostenstelleModel).where(
+        KostenstelleModel.tenant_id == tenant_id,
+        KostenstelleModel.aktiv == True,
+    ).order_by(KostenstelleModel.nummer)
+    kostenstellen = db.execute(query).scalars().all()
+
+    gesamt_budget = sum(float(k.budget or 0) for k in kostenstellen)
+
+    auswertungen = [
+        {
+            "kostenstelle_id": k.id,
+            "kostenstelle_nr": k.nummer,
+            "bezeichnung": k.bezeichnung,
+            "art": k.kostenstelle_art,
+            "budget": float(k.budget or 0),
+            "budget_periode": k.budget_periode,
+            "verbraucht": 0.0,  # Phase 2: aus Buchungsjournal aggregieren
+            "offen": float(k.budget or 0),
+            "auslastung_prozent": 0.0,
+        }
+        for k in kostenstellen
+    ]
+
     return KostenstellenReport(
         periode_von=von,
         periode_bis=bis,
-        gesamt_budget=0,
+        gesamt_budget=gesamt_budget,
         gesamt_verbraucht=0,
-        gesamt_offen=0,
+        gesamt_offen=gesamt_budget,
         kostenstellen=[],
-        auswertungen=[]
+        auswertungen=auswertungen,
     )
 
 
