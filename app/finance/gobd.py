@@ -195,7 +195,7 @@ async def get_buchungslog(
             belegnr=str(row.belegtyp) if row.belegtyp else "",
             aktion=str(row.aktion),
             vorher=row.vorher,
-            nachher=row.nacher,
+            nachher=row.nachher,
             benutzer_id=str(row.benutzer_id) if row.benutzer_id else "",
             benutzer_name=str(row.benutzer_name) if row.benutzer_name else "",
             ip_adresse=str(row.ip_adresse) if row.ip_adresse else "",
@@ -213,13 +213,17 @@ async def create_buchungslog_eintrag(
     vorher: Optional[Dict[str, Any]] = None,
     nachher: Optional[Dict[str, Any]] = None,
     tenant_id: str = Depends(get_tenant_id),
-    current_user=Depends(get_current_user)
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db)
 ):
     """
     Erstelle Eintrag im revisionssicheren Journal
-    
+
     Wird automatisch bei jeder Buchung aufgerufen.
     """
+    benutzer_id = current_user.get("sub") or ""
+    ts = datetime.utcnow()
+
     # Hash berechnen
     log_data = {
         "tenant_id": tenant_id,
@@ -227,20 +231,46 @@ async def create_buchungslog_eintrag(
         "aktion": aktion,
         "vorher": vorher,
         "nachher": nachher,
-        "benutzer_id": current_user.get("sub"),
-        "timestamp": datetime.utcnow().isoformat()
+        "benutzer_id": benutzer_id,
+        "timestamp": ts.isoformat()
     }
-    
+
     hash_sha256 = hashlib.sha256(
         json.dumps(log_data, sort_keys=True).encode()
     ).hexdigest()
-    
-    # TODO: In DB speichern
-    
+
+    log_id = str(uuid.uuid4())
+    try:
+        db.execute(text("""
+            INSERT INTO domain_shared.audit_logs
+                (id, tenant_id, entity_id, entity_type, action,
+                 old_values, new_values, user_id, user_email,
+                 ip_address, created_at, hash_value)
+            VALUES
+                (:id, :tenant_id, :entity_id, 'journal_entry', :action,
+                 :old_values::jsonb, :new_values::jsonb, :user_id, :user_id,
+                 NULL, :created_at, :hash_value)
+        """), {
+            "id": log_id,
+            "tenant_id": tenant_id,
+            "entity_id": buchungs_id,
+            "action": aktion,
+            "old_values": json.dumps(vorher) if vorher else None,
+            "new_values": json.dumps(nachher) if nachher else None,
+            "user_id": benutzer_id,
+            "created_at": ts,
+            "hash_value": hash_sha256,
+        })
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Audit-Log konnte nicht gespeichert werden: {e}")
+
     return {
+        "id": log_id,
         "message": "Log-Eintrag erstellt",
         "hash_sha256": hash_sha256,
-        "timestamp": datetime.utcnow()
+        "timestamp": ts
     }
 
 
