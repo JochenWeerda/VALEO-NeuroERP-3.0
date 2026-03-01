@@ -190,7 +190,7 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
           taxAmount: inv.totalTax || inv.taxAmount || 0,
           grossAmount: inv.totalGross || inv.grossAmount || 0,
           status: inv.status,
-          openAmount: inv.totalGross || inv.grossAmount || 0, // TODO: Calculate from open items
+          openAmount: inv.openAmount ?? inv.open_amount ?? inv.totalGross ?? inv.grossAmount ?? 0,
         }))
         setOpenInvoices(invoices)
       }
