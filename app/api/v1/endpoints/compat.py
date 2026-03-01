@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+import json
+from datetime import date, datetime
 from typing import Any, Optional
 from uuid import uuid4
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query
+from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
@@ -2005,3 +2007,149 @@ async def ack_edi_message(msg_id: str, tenant_id: str = Depends(get_tenant_id), 
     cache_delete_prefix(f"compat:procurement:{tenant_id}:")
     db.commit()
     return target
+
+
+# ---------------------------------------------------------------------------
+# Lager Einlagerung
+# ---------------------------------------------------------------------------
+
+class EinlagerungIn(BaseModel):
+    chargen_id: str = Field(..., description="Chargen-ID der einzulagernden Ware")
+    artikel: str = Field(..., description="Artikel-Bezeichnung")
+    menge: float = Field(..., gt=0, description="Menge in Tonnen")
+    lagerort: str = Field(..., description="Lagerort-Code (z.B. silo-1, halle-a)")
+    lagerplatz: Optional[str] = Field(default=None, description="Optionaler Lagerplatz / Bin-Location")
+
+
+class EinlagerungOut(BaseModel):
+    id: str
+    batch_number: str
+    artikel: str
+    menge: float
+    lagerort: str
+    lagerplatz: Optional[str]
+    datum: date
+    status: str
+
+
+@router.post("/lager/einlagerung", response_model=EinlagerungOut, status_code=201, tags=["lager"])
+async def create_einlagerung(
+    payload: EinlagerungIn,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> EinlagerungOut:
+    """Einlagerung buchen — legt einen Chargen-Eintrag in domain_inventory.article_batches an."""
+    einlagerung_id = str(uuid4())
+    today = date.today()
+    # Encode lagerplatz into warehouse_id when present (e.g. "silo-1/A-12-03")
+    warehouse_key = f"{payload.lagerort}/{payload.lagerplatz}" if payload.lagerplatz else payload.lagerort
+
+    db.execute(
+        text("""
+            INSERT INTO domain_inventory.article_batches
+            (id, tenant_id, article_id, batch_number, warehouse_id, quantity, created_at)
+            VALUES (:id, :tenant_id, :article_id, :batch_number, :warehouse_id, :quantity, NOW())
+        """),
+        {
+            "id": einlagerung_id,
+            "tenant_id": tenant_id,
+            "article_id": payload.artikel,
+            "batch_number": payload.chargen_id,
+            "warehouse_id": warehouse_key,
+            "quantity": payload.menge,
+        },
+    )
+    db.commit()
+
+    return EinlagerungOut(
+        id=einlagerung_id,
+        batch_number=payload.chargen_id,
+        artikel=payload.artikel,
+        menge=payload.menge,
+        lagerort=payload.lagerort,
+        lagerplatz=payload.lagerplatz,
+        datum=today,
+        status="gebucht",
+    )
+
+
+# ---------------------------------------------------------------------------
+# POS Tagesabschluss
+# ---------------------------------------------------------------------------
+
+class TagesabschlussIn(BaseModel):
+    datum: date
+    kassierer: str = ""
+    tse_transaktionen: int = 0
+    umsatz_bar: float = 0.0
+    umsatz_ec: float = 0.0
+    umsatz_paypal: float = 0.0
+    umsatz_b2b: float = 0.0
+    umsatz_gesamt: float = 0.0
+    bargeld_gezaehlt: float = 0.0
+    ec_abrechnung: float = 0.0
+    paypal_abrechnung: float = 0.0
+    differenz_bar: float = 0.0
+
+
+class TagesabschlussOut(BaseModel):
+    id: str
+    datum: date
+    kassierer: str
+    umsatz_gesamt: float
+    status: str
+    belegnummer: str
+
+
+@router.post("/pos/tagesabschluss", response_model=TagesabschlussOut, status_code=201, tags=["pos"])
+async def create_tagesabschluss(
+    payload: TagesabschlussIn,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> TagesabschlussOut:
+    """POS Tagesabschluss buchen — schreibt in public.abschluss_checklisten."""
+    abschluss_id = str(uuid4())
+    belegnummer = f"KA-{payload.datum.isoformat()}"
+
+    items_json = json.dumps({
+        "tse_transaktionen": payload.tse_transaktionen,
+        "umsatz_bar": payload.umsatz_bar,
+        "umsatz_ec": payload.umsatz_ec,
+        "umsatz_paypal": payload.umsatz_paypal,
+        "umsatz_b2b": payload.umsatz_b2b,
+        "umsatz_gesamt": payload.umsatz_gesamt,
+        "bargeld_gezaehlt": payload.bargeld_gezaehlt,
+        "ec_abrechnung": payload.ec_abrechnung,
+        "paypal_abrechnung": payload.paypal_abrechnung,
+        "differenz_bar": payload.differenz_bar,
+        "belegnummer": belegnummer,
+    })
+
+    db.execute(
+        text("""
+            INSERT INTO abschluss_checklisten
+            (id, tenant_id, periode, abschluss_art, status, verantwortlicher,
+             beginn_datum, abschluss_datum, items, created_at, updated_at)
+            VALUES
+            (:id, :tenant_id, :periode, 'kasse', 'gebucht', :kassierer,
+             :datum, :datum, CAST(:items AS json), NOW(), NOW())
+        """),
+        {
+            "id": abschluss_id,
+            "tenant_id": tenant_id,
+            "periode": payload.datum.isoformat(),
+            "kassierer": payload.kassierer,
+            "datum": payload.datum,
+            "items": items_json,
+        },
+    )
+    db.commit()
+
+    return TagesabschlussOut(
+        id=abschluss_id,
+        datum=payload.datum,
+        kassierer=payload.kassierer,
+        umsatz_gesamt=payload.umsatz_gesamt,
+        status="gebucht",
+        belegnummer=belegnummer,
+    )
