@@ -736,6 +736,7 @@ export default function KundenStammPage(): JSX.Element {
         data={data}
         onSave={handleSave}
         onCancel={handleCancel}
+        onAction={handleAction}
         isLoading={loading}
       />
       

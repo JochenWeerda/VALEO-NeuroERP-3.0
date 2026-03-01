@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ListReport } from '@/components/mask-builder'
@@ -211,6 +211,7 @@ async function triggerExportDownload(entity: string, format: string, toastFn: (o
 export default function DebitorenListePage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const importInputRef = useRef<HTMLInputElement>(null)
   const [data, setData] = useState<any[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
@@ -307,17 +308,37 @@ export default function DebitorenListePage(): JSX.Element {
     await triggerExportDownload('debtors', 'csv', toast)
   }
 
+  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const form = new FormData()
+    form.append('file', file)
+    try {
+      const res = await api.post('/api/v1/finance/import/debitoren', form, { headers: { 'Content-Type': 'multipart/form-data' } })
+      const { created, updated, errors } = res.data as { created: number; updated: number; errors: string[] }
+      toast({ title: 'Import abgeschlossen', description: `${created} neu, ${updated} aktualisiert${errors.length ? `, ${errors.length} Fehler` : ''}.` })
+      if (errors.length) console.warn('Import-Fehler:', errors)
+      loadData()
+    } catch (e: any) {
+      toast({ title: 'Import fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+    }
+    e.target.value = ''
+  }
+
   return (
-    <ListReport
-      config={debitorenListConfig}
-      data={data}
-      total={total}
-      onCreate={handleCreate}
-      onEdit={handleEdit}
-      onDelete={handleDelete}
-      onExport={handleExport}
-      onImport={() => toast({ title: 'Import', description: t('crud.messages.importFunctionInfo', { defaultValue: 'Import-Funktion wird in Kürze bereitgestellt.' }) })}
-      isLoading={loading}
-    />
+    <>
+      <input ref={importInputRef} type="file" accept=".csv" style={{ display: 'none' }} onChange={handleImportFile} />
+      <ListReport
+        config={debitorenListConfig}
+        data={data}
+        total={total}
+        onCreate={handleCreate}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onExport={handleExport}
+        onImport={() => importInputRef.current?.click()}
+        isLoading={loading}
+      />
+    </>
   )
 }

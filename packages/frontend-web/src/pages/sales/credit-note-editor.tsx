@@ -348,6 +348,7 @@ export default function CreditNoteEditorPage(): JSX.Element {
       data={data}
       onSave={handleSave}
       onCancel={handleCancel}
+      onAction={handleAction}
       isLoading={loading}
     />
   )
