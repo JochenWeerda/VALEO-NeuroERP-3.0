@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { LeadCandidate, LeadSegment } from '@/types/prospecting'
 import { fetchLeadCandidates } from '@/api/prospecting'
 import {
@@ -42,6 +43,7 @@ const PAGE_SIZE = 20
 const YEAR_RANGE = 3
 
 export default function LeadExplorer(): JSX.Element {
+  const navigate = useNavigate()
   const currentYear = new Date().getFullYear()
   const [refYear, setRefYear] = useState<number>(currentYear)
   const [segment, setSegment] = useState<'all' | LeadSegment>('all')
@@ -125,17 +127,17 @@ export default function LeadExplorer(): JSX.Element {
     [leadCandidates, page],
   )
 
-  function handleCreateLead(candidate: LeadCandidate): void {
-    console.log('create lead', candidate)
+  function handleCreateLead(_candidate: LeadCandidate): void {
+    navigate('/crm/leads/new')
   }
 
   function handleOpenCustomer(candidate: LeadCandidate): void {
     if (!candidate.matched_customer_id) return
-    console.log('open customer', candidate.matched_customer_id)
+    navigate(`/crm/customers/${candidate.matched_customer_id}`)
   }
 
-  function handleAddTask(candidate: LeadCandidate): void {
-    console.log('add task', candidate)
+  function handleAddTask(_candidate: LeadCandidate): void {
+    navigate('/crm/leads')
   }
 
   async function refreshPipelineStatus(): Promise<void> {

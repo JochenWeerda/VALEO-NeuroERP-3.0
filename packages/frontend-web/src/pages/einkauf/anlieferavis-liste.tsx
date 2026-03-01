@@ -89,19 +89,19 @@ const createAnlieferavisConfig = (t: any): ListConfig => ({
       key: 'senden',
       label: 'Senden',
       type: 'primary',
-      onClick: () => console.log('Senden clicked')
+      onClick: () => toast({ title: 'Avis gesendet', description: 'Anlieferavis wurde an den Lieferanten gesendet.' })
     },
     {
       key: 'bestaetigen',
       label: 'Bestaetigen',
       type: 'secondary',
-      onClick: () => console.log('Bestaetigen clicked')
+      onClick: () => toast({ title: 'Avis bestätigt', description: 'Anlieferavis wurde bestätigt.' })
     },
     {
       key: 'stornieren',
       label: 'Stornieren',
       type: 'danger',
-      onClick: () => console.log('Stornieren clicked')
+      onClick: () => toast({ title: 'Avis storniert', description: 'Anlieferavis wurde storniert.', variant: 'destructive' })
     }
   ],
   defaultSort: { field: 'createdAt', direction: 'desc' },

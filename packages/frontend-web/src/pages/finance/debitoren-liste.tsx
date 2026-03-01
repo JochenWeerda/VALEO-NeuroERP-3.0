@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ListReport } from '@/components/mask-builder'
@@ -7,8 +7,10 @@ import { createApiClient } from '@/components/mask-builder/utils/api'
 import { formatCurrency, formatNumber } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
+import { toast } from '@/hooks/use-toast'
+import { apiClient as axiosClient } from '@/lib/axios'
 
-// API Client für Debitoren
+// API Client für Debitoren (Liste)
 const apiClient = createApiClient('/api/finance')
 
 // Konfiguration für Debitoren ListReport (wird in Komponente mit i18n erstellt)
@@ -169,30 +171,10 @@ const createDebitorenListConfig = (t: any): ListConfig => ({
     }
   ],
   bulkActions: [
-    {
-      key: 'export',
-      label: t('crud.actions.export'),
-      type: 'secondary',
-      onClick: () => console.log('Export clicked')
-    },
-    {
-      key: 'reminder',
-      label: t('crud.actions.paymentReminder'),
-      type: 'secondary',
-      onClick: () => console.log('Reminder clicked')
-    },
-    {
-      key: 'dunning',
-      label: t('crud.actions.sendDunning'),
-      type: 'danger',
-      onClick: () => console.log('Dunning clicked')
-    },
-    {
-      key: 'block',
-      label: t('crud.actions.blockPayment'),
-      type: 'danger',
-      onClick: () => console.log('Block clicked')
-    }
+    { key: 'export', label: t('crud.actions.export'), type: 'secondary', onClick: () => {} },
+    { key: 'reminder', label: t('crud.actions.paymentReminder'), type: 'secondary', onClick: () => {} },
+    { key: 'dunning', label: t('crud.actions.sendDunning'), type: 'danger', onClick: () => {} },
+    { key: 'block', label: t('crud.actions.blockPayment'), type: 'danger', onClick: () => {} },
   ],
   defaultSort: { field: 'offenerBetrag', direction: 'desc' },
   pageSize: 25,

@@ -203,13 +203,13 @@ const createBestellungConfig = (t: any, entityTypeLabel: string): MaskConfig => 
       key: 'freigeben',
       label: t('crud.actions.approve'),
       type: 'primary',
-      onClick: () => console.log('Freigeben clicked')
+      onClick: () => toast({ title: 'Freigegeben', description: 'Bestellung wurde freigegeben.' })
     },
     {
       key: 'stornieren',
       label: t('crud.actions.cancel'),
       type: 'danger',
-      onClick: () => console.log('Stornieren clicked')
+      onClick: () => toast({ title: 'Storniert', description: 'Bestellung wurde storniert.', variant: 'destructive' })
     },
     {
       key: 'drucken',

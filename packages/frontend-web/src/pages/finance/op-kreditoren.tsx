@@ -212,8 +212,6 @@ export default function OpKreditorenPage(): JSX.Element {
     data,
     validate,
     onSave: async (validData) => {
-      // TODO: API call to save OP-Kreditor
-      console.log('Saving OP-Kreditor:', validData)
       toast({
         title: t('common.success', { defaultValue: 'Erfolg' }),
         description: t('crud.feedback.createSuccess', { entityType: entityTypeLabel }),

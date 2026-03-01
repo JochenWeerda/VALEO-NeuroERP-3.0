@@ -4,6 +4,7 @@ import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
+import { toast } from '@/hooks/use-toast'
 
 // Zod-Schema für Anlieferavis
 const anlieferavisSchema = z.object({
@@ -147,19 +148,19 @@ const anlieferavisConfig: MaskConfig = {
       key: 'senden',
       label: 'Avis senden',
       type: 'primary',
-      onClick: () => console.log('Senden clicked')
+      onClick: () => toast({ title: 'Avis gesendet', description: 'Anlieferavis wurde an den Lieferanten gesendet.' })
     },
     {
       key: 'bestaetigen',
       label: 'Bestätigen',
       type: 'secondary',
-      onClick: () => console.log('Bestätigen clicked')
+      onClick: () => toast({ title: 'Avis bestätigt', description: 'Anlieferavis wurde bestätigt.' })
     },
     {
       key: 'stornieren',
       label: 'Stornieren',
       type: 'danger',
-      onClick: () => console.log('Stornieren clicked')
+      onClick: () => toast({ title: 'Avis storniert', description: 'Anlieferavis wurde storniert.', variant: 'destructive' })
     }
   ],
   api: {

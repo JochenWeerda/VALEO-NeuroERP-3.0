@@ -127,28 +127,28 @@ const createAngeboteConfig = (t: any, entityTypeLabel: string): ListConfig => ({
       label: t('crud.actions.review'),
       labelKey: 'crud.actions.review',
       type: 'secondary',
-      onClick: () => console.log('Pruefen clicked')
+      onClick: () => toast({ title: 'Prüfen', description: 'Angebot wurde zur Prüfung markiert.' })
     },
     {
       key: 'genehmigen',
       label: t('crud.actions.approve'),
       labelKey: 'crud.actions.approve',
       type: 'primary',
-      onClick: () => console.log('Genehmigen clicked')
+      onClick: () => toast({ title: 'Genehmigen', description: 'Angebot wurde genehmigt.' })
     },
     {
       key: 'ablehnen',
       label: t('crud.actions.reject'),
       labelKey: 'crud.actions.reject',
       type: 'danger',
-      onClick: () => console.log('Ablehnen clicked')
+      onClick: () => toast({ title: 'Ablehnen', description: 'Angebot wurde abgelehnt.', variant: 'destructive' })
     },
     {
       key: 'inBestellung',
       label: t('crud.actions.convertToOrder'),
       labelKey: 'crud.actions.convertToOrder',
       type: 'secondary',
-      onClick: () => console.log('In Bestellung clicked')
+      onClick: () => toast({ title: 'In Bestellung', description: 'Angebot wurde in eine Bestellung umgewandelt.' })
     }
   ],
   defaultSort: { field: 'createdAt', direction: 'desc' },

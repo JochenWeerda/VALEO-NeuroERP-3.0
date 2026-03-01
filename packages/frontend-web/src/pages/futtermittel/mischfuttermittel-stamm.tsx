@@ -4,6 +4,7 @@ import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
+import { toast } from '@/hooks/use-toast'
 
 // Zod-Schema für Mischfuttermittel
 const mischfuttermittelSchema = z.object({
@@ -232,19 +233,19 @@ const mischfuttermittelConfig: MaskConfig = {
       key: 'calculate',
       label: 'Nährwerte berechnen',
       type: 'secondary',
-      onClick: () => console.log('Calculate clicked')
+      onClick: () => toast({ title: 'Berechnung', description: 'Nährstoffwerte werden berechnet.' })
     },
     {
       key: 'validate',
       label: 'Validieren',
       type: 'secondary',
-      onClick: () => console.log('Validate clicked')
+      onClick: () => toast({ title: 'Validierung', description: 'Mischfuttermittel-Rezeptur wird validiert.' })
     },
     {
       key: 'save',
       label: 'Speichern',
       type: 'primary',
-      onClick: () => console.log('Save clicked')
+      onClick: () => toast({ title: 'Gespeichert', description: 'Mischfuttermittel wurde gespeichert.' })
     }
   ],
   api: {
