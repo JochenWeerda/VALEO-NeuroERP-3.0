@@ -716,11 +716,60 @@ async def create_abstimmung(
 async def execute_abstimmung(
     id: str,
     tenant_id: str = Depends(get_tenant_id),
-    current_user=Depends(get_current_user)
+    current_user=Depends(get_current_user),
+    db=Depends(get_db)
 ):
     """Führe Abstimmung aus (vergleiche NB ↔ HB)"""
-    # TODO: Implementiere echte Abstimmungslogik
-    return {"message": "Abstimmung ausgeführt", "id": id, "differenz": 0}
+    from app.finance.models import NebenbuchAbstimmung as NbModel, OffenerPosten
+    from sqlalchemy import select, func, text as sqlt
+
+    ab = db.execute(
+        select(NbModel).where(NbModel.id == id, NbModel.tenant_id == tenant_id)
+    ).scalar_one_or_none()
+    if not ab:
+        raise HTTPException(status_code=404, detail="Abstimmung nicht gefunden")
+
+    # Nebenbuch: Summe offener Posten (Debitoren + Kreditoren)
+    nb_saldo = float(
+        db.execute(
+            select(func.sum(OffenerPosten.offen)).where(
+                OffenerPosten.tenant_id == tenant_id,
+                OffenerPosten.zahlbar == True,
+            )
+        ).scalar() or 0
+    )
+
+    # Hauptbuch: Summe über finance_journal_entries für die Periode (soft-fallback)
+    hb_saldo = 0.0
+    try:
+        hb_saldo = float(
+            db.execute(sqlt("""
+                SELECT COALESCE(SUM(total_credit - total_debit), 0)
+                FROM domain_erp.journal_entries
+                WHERE tenant_id = :tid
+                  AND TO_CHAR(posting_date, 'YYYY-MM') = :periode
+            """), {"tid": tenant_id, "periode": ab.periode}).scalar() or 0
+        )
+    except Exception:
+        pass
+
+    differenz = round(nb_saldo - hb_saldo, 2)
+    ab.nebenbuch_saldo = nb_saldo
+    ab.hauptbuch_saldo = hb_saldo
+    ab.differenz = differenz
+    ab.status = "ABGESTIMMT" if abs(differenz) < 0.01 else "ABWEICHEND"
+    ab.abgestimmt_durch = str(current_user.get("sub", "system"))
+    ab.updated_at = datetime.utcnow()
+    db.commit()
+
+    return {
+        "message": "Abstimmung ausgeführt",
+        "id": id,
+        "nebenbuch_saldo": nb_saldo,
+        "hauptbuch_saldo": hb_saldo,
+        "differenz": differenz,
+        "status": ab.status,
+    }
 
 
 # ============================================================================
@@ -804,11 +853,48 @@ async def create_intercompany_buchung(
 async def create_gegenbuchung(
     id: str,
     tenant_id: str = Depends(get_tenant_id),
-    current_user=Depends(get_current_user)
+    current_user=Depends(get_current_user),
+    db=Depends(get_db)
 ):
     """Erstelle Gegenbuchung für Intercompany"""
-    # TODO: Implementiere echte Gegenbuchung
-    return {"message": "Gegenbuchung erstellt", "original_id": id, "gegenbuchung_id": uuid7()}
+    from app.finance.models import IntercompanyBuchung as ICModel
+    from sqlalchemy import select
+
+    original = db.execute(
+        select(ICModel).where(ICModel.id == id, ICModel.tenant_id == tenant_id)
+    ).scalar_one_or_none()
+    if not original:
+        raise HTTPException(status_code=404, detail="Intercompany-Buchung nicht gefunden")
+    if original.gegenbuchung_id:
+        raise HTTPException(status_code=409, detail="Gegenbuchung bereits vorhanden")
+
+    gb_id = uuid7()
+    gb_nr = f"IC-GB-{datetime.now().strftime('%Y%m%d')}-{gb_id[:4].upper()}"
+    gegenbuchung = ICModel(
+        id=gb_id,
+        tenant_id=tenant_id,
+        buchungsnr=gb_nr,
+        gesellschaft_von=original.gesellschaft_nach,
+        gesellschaft_nach=original.gesellschaft_von,
+        belegnr=f"GB-{original.belegnr}",
+        datum=datetime.utcnow().date(),
+        betrag=-original.betrag,
+        waehrung=original.waehrung,
+        wechselkurs=original.wechselkurs,
+        betrag_local=-original.betrag_local if original.betrag_local else None,
+        konto_von=original.konto_nach,
+        konto_nach=original.konto_von,
+        status="ERSTELLT",
+        referenz=f"Gegenbuchung zu {original.buchungsnr}",
+        created_at=datetime.utcnow(),
+        updated_at=datetime.utcnow(),
+    )
+    db.add(gegenbuchung)
+    original.gegenbuchung_id = gb_id
+    original.updated_at = datetime.utcnow()
+    db.commit()
+
+    return {"message": "Gegenbuchung erstellt", "original_id": id, "gegenbuchung_id": gb_id, "buchungsnr": gb_nr}
 
 
 @router.post("/intercompany/{id}/buchen")
@@ -825,11 +911,48 @@ async def buche_intercompany(
 async def get_intercompany_salden(
     gesellschaft: str,
     tenant_id: str = Depends(get_tenant_id),
-    current_user=Depends(get_current_user)
+    current_user=Depends(get_current_user),
+    db=Depends(get_db)
 ):
     """Hole Intercompany-Salden"""
-    # TODO: Implementiere echte Saldenberechnung
-    return []
+    from app.finance.models import IntercompanyBuchung as ICModel
+    from sqlalchemy import select, func
+
+    # Forderungen: betrag positiv (wir haben von anderen zu bekommen)
+    forderungen = db.execute(
+        select(
+            ICModel.gesellschaft_nach.label("gegenpartner"),
+            func.sum(ICModel.betrag).label("saldo"),
+        ).where(
+            ICModel.tenant_id == tenant_id,
+            ICModel.gesellschaft_von == gesellschaft,
+            ICModel.status.notin_(["STORNIERT"]),
+        ).group_by(ICModel.gesellschaft_nach)
+    ).all()
+
+    # Verbindlichkeiten: betrag negativ (wir schulden anderen)
+    verbindlichkeiten = db.execute(
+        select(
+            ICModel.gesellschaft_von.label("gegenpartner"),
+            func.sum(-ICModel.betrag).label("saldo"),
+        ).where(
+            ICModel.tenant_id == tenant_id,
+            ICModel.gesellschaft_nach == gesellschaft,
+            ICModel.status.notin_(["STORNIERT"]),
+        ).group_by(ICModel.gesellschaft_von)
+    ).all()
+
+    # Merge: Nettosaldo je Gegenpartner
+    saldo_map: dict[str, float] = {}
+    for row in forderungen:
+        saldo_map[row.gegenpartner] = saldo_map.get(row.gegenpartner, 0.0) + float(row.saldo or 0)
+    for row in verbindlichkeiten:
+        saldo_map[row.gegenpartner] = saldo_map.get(row.gegenpartner, 0.0) - float(row.saldo or 0)
+
+    return [
+        {"gesellschaft": gesellschaft, "gegenpartner": gp, "netto_saldo": round(saldo, 2)}
+        for gp, saldo in saldo_map.items()
+    ]
 
 
 # ============================================================================
