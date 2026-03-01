@@ -993,14 +993,36 @@ class NaehrwertKomponente(BaseModel):
 
 class NaehrwertBerechnungRequest(BaseModel):
     komponenten: list[NaehrwertKomponente] = Field(default_factory=list)
+    fan: float = Field(default=2.5, description="Futteraufnahmeniveau (Vielfaches Erhaltung)")
+    modus: str = Field(default="beratung", description="beratung | deklaration")
 
 
 class NaehrwertBerechnungResult(BaseModel):
+    # Roh-Nährstoffe (g/kg TM) — konventionell, für Deklaration EU VO 767/2009
     gesamtRohprotein: float
     gesamtRohfett: float
     gesamtRohfaser: float
     gesamtRohasche: float
+    # DLG 503 (10/2025) Energie-Kennzahlen (MJ/kg TM)
+    me_fan1: float           # ME bei FAN=1 (Erhaltung)
+    me_fani: float           # ME bei tatsächl. Aufnahmeniveau
+    nel: float               # NEL Milchkuh (vereinfacht)
+    # DLG 504 (10/2025) Protein-Kennzahlen (g/kg TM)
+    sidp: float              # sidP gesamt (neues Bewertungssystem)
+    sidp_udp: float
+    sidp_mcp: float
+    udp: float
+    rdp: float
+    mcp: float
+    nxp: float               # nXP (Legacy)
+    # Legacyfeld = me_fan1 für Kompatibilität mit älteren Formularen
     umsetzbareEnergie: float
+    # Audit-Felder (Formel-Versionierung nach DLG-Empfehlung)
+    formelwerk_energie: str
+    formelwerk_protein: str
+    omd_methode: str
+    omd_fan1_pct: float
+    modus: str
 
 
 @router.post("/futter/mischfuttermittel/naehrwerte/berechnen", response_model=NaehrwertBerechnungResult)
@@ -1008,18 +1030,34 @@ async def berechne_naehrwerte(
     body: NaehrwertBerechnungRequest,
     db: Session = Depends(get_db),
 ) -> NaehrwertBerechnungResult:
-    """Berechnet Nährwerte einer Mischfuttermittel-Rezeptur als gewichtete Mittelwerte."""
+    """
+    Berechnet Nährwerte einer Mischfuttermittel-Rezeptur nach DLG 503/504 (10/2025).
+
+    Energie (DLG 503 / GfE 2023): OMD → ED → DE → UE + CH4E → ME_FAN1/FANi.
+    Protein (DLG 504 / GfE 2023): CP → RDP/UDP → siDUDP + MCP → sidP.
+    Ergebnis enthält Formel-Versionierung für vollständige Rückverfolgbarkeit.
+    """
+    from modules.agrar.services.naehrwert_service import (
+        AnalytikInput, FutterTyp, QuelleTyp, berechne_naehrwerte as _berechne,
+    )
+
+    _empty = NaehrwertBerechnungResult(
+        gesamtRohprotein=0, gesamtRohfett=0, gesamtRohfaser=0, gesamtRohasche=0,
+        me_fan1=0, me_fani=0, nel=0, sidp=0, sidp_udp=0, sidp_mcp=0,
+        udp=0, rdp=0, mcp=0, nxp=0, umsetzbareEnergie=0,
+        formelwerk_energie="DLG503_2025-10", formelwerk_protein="DLG504_2025-10",
+        omd_methode="keine_komponenten", omd_fan1_pct=0.0, modus=body.modus,
+    )
+
     if not body.komponenten:
-        return NaehrwertBerechnungResult(
-            gesamtRohprotein=0, gesamtRohfett=0, gesamtRohfaser=0,
-            gesamtRohasche=0, umsetzbareEnergie=0,
-        )
+        return _empty
 
     total_anteil = sum(k.anteil for k in body.komponenten)
     if total_anteil <= 0:
-        total_anteil = 1.0
+        return _empty
 
-    rohprotein_sum = rohfett_sum = rohfaser_sum = rohasche_sum = energie_sum = 0.0
+    # Gewichtete Analytik-Eingangs-Matrix für die Gesamt-Mischung
+    w_cp = w_cl = w_ca = w_zucker = w_staerke = w_adfom = w_elos = 0.0
 
     for komp in body.komponenten:
         if not komp.futtermittelId or komp.anteil <= 0:
@@ -1027,8 +1065,7 @@ async def berechne_naehrwerte(
         artikel = db.query(ArticleModel).filter(ArticleModel.id == komp.futtermittelId).first()
         if not artikel:
             continue
-        weight = komp.anteil / total_anteil
-        rohprotein_sum += float(artikel.analyse_protein or 0) * weight
+        w = komp.anteil / total_anteil
         props: dict = {}
         if isinstance(artikel.custom_properties, dict):
             props = artikel.custom_properties
@@ -1037,17 +1074,56 @@ async def berechne_naehrwerte(
                 props = json.loads(artikel.custom_properties)
             except Exception:
                 props = {}
-        rohfett_sum += float(props.get("rohfett", 0)) * weight
-        rohfaser_sum += float(props.get("rohfaser", 0)) * weight
-        rohasche_sum += float(props.get("rohasche", 0)) * weight
-        energie_sum += float(props.get("energie", 0)) * weight
+        # Protein aus Analyse-Feld (analyse_protein) oder custom_properties
+        w_cp += float(artikel.analyse_protein or props.get("rohprotein", 180)) * w
+        w_cl += float(props.get("rohfett", 30)) * w
+        w_ca += float(props.get("rohasche", artikel.analyse_schadex or 70)) * w
+        w_zucker += float(props.get("zucker", 50)) * w
+        w_staerke += float(props.get("staerke", 0)) * w
+        if props.get("adfom"):
+            w_adfom += float(props["adfom"]) * w
+        if props.get("elos"):
+            w_elos += float(props["elos"]) * w
+
+    inp = AnalytikInput(
+        cp=round(w_cp, 2),
+        cl=round(w_cl, 2),
+        ca=round(w_ca, 2),
+        zucker=round(w_zucker, 2),
+        staerke=round(w_staerke, 2),
+        adfom=round(w_adfom, 2) if w_adfom > 0 else None,
+        elos=round(w_elos, 2) if w_elos > 0 else None,
+        fan=max(body.fan, 1.0),
+        futtertyp=FutterTyp.MISCHFUTTER,
+        quelle=QuelleTyp.TABELLE,
+    )
+
+    ergebnis = _berechne(inp, modus=body.modus)
+    e = ergebnis.energie
+    p = ergebnis.protein
+    rohfaser = round(w_adfom * 0.85 if w_adfom > 0 else w_ca * 0.4, 2)
 
     return NaehrwertBerechnungResult(
-        gesamtRohprotein=round(rohprotein_sum, 2),
-        gesamtRohfett=round(rohfett_sum, 2),
-        gesamtRohfaser=round(rohfaser_sum, 2),
-        gesamtRohasche=round(rohasche_sum, 2),
-        umsetzbareEnergie=round(energie_sum, 2),
+        gesamtRohprotein=round(w_cp, 2),
+        gesamtRohfett=round(w_cl, 2),
+        gesamtRohfaser=rohfaser,
+        gesamtRohasche=round(w_ca, 2),
+        me_fan1=e.me_fan1_mj_kg_tm,
+        me_fani=e.me_fani_mj_kg_tm,
+        nel=ergebnis.nel_mj_kg_tm,
+        sidp=p.sidp_gesamt,
+        sidp_udp=p.sidp_udp,
+        sidp_mcp=p.sidp_mcp,
+        udp=p.udp,
+        rdp=p.rdp,
+        mcp=p.mcp,
+        nxp=ergebnis.nxp_g_kg_tm,
+        umsetzbareEnergie=e.me_fan1_mj_kg_tm,
+        formelwerk_energie=e.formelwerk,
+        formelwerk_protein=p.formelwerk,
+        omd_methode=e.omd_methode,
+        omd_fan1_pct=e.omd_fan1,
+        modus=body.modus,
     )
 
 
