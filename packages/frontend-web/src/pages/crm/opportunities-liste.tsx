@@ -41,9 +41,9 @@ const createOpportunitiesConfig = (t: any, entityTypeLabel: string): ListConfig 
       labelKey: 'crud.entities.customer',
       sortable: true,
       filterable: true,
-      render: (value, item) => {
-        // TODO: Load customer name from API
-        return value ? <span>{value}</span> : '-'
+      render: (value, item: any) => {
+        const name = item?.customer_name ?? item?.customer?.name ?? value
+        return name ? <span>{name}</span> : '-'
       }
     },
     {

@@ -11,6 +11,7 @@ import { ListReport } from '@/components/patterns/ListReport';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/hooks/use-toast';
 import { CheckCircle, XCircle, Edit, Eye } from 'lucide-react';
 
 // API Client
@@ -166,6 +167,7 @@ const buildColumns = (): ColumnDef<SaatgutItem>[] => [
 
 const SaatgutListePage: React.FC = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [search, setSearch] = useState<string>('');
 
   // Queries
@@ -218,7 +220,18 @@ const SaatgutListePage: React.FC = () => {
           id: 'export-saatgut',
           label: 'Export CSV',
           onClick: (): void => {
-            // placeholder for export functionality
+            const header = 'Artikelnummer;Name;Sorte;Art;Zuechter;BSA;EU;VK-Preis;Lager;Reserviert;Verfuegbar\n';
+            const rows = filteredData.map((item) =>
+              [item.artikelnummer, item.name, item.sorte, item.art, item.zuechter, item.bsa_zulassung ? 'ja' : 'nein', item.eu_zulassung ? 'ja' : 'nein', item.vk_preis ?? '', item.lagerbestand, item.reserviert, item.verfuegbar].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(';')
+            );
+            const blob = new Blob([header + rows.join('\n')], { type: 'text/csv;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Saatgut_${new Date().toISOString().slice(0, 10)}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+            toast({ title: 'Export', description: `${filteredData.length} Saatgut-Einträge exportiert.` });
           },
         },
       ]}

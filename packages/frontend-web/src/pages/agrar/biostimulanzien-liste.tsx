@@ -225,7 +225,16 @@ const BiostimulanzienListePage: React.FC = () => {
           id: 'export-biostimulanzien',
           label: 'Export CSV',
           onClick: (): void => {
-            // placeholder for export functionality
+            const header = 'Artikelnummer;Name;Typ;Hersteller;EU-Zulassung;Bestand;VK-Preis\n'
+            const rows = filteredData.map((item) =>
+              `"${item.artikelnummer}";"${item.name}";"${item.typ}";"${item.hersteller ?? ''}";"${item.eu_zulassung ? 'Ja' : 'Nein'}";"${item.lagerbestand ?? 0}";"${item.vk_preis?.toFixed(2) ?? ''}"`
+            ).join('\n')
+            const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8;' })
+            const a = document.createElement('a')
+            a.href = URL.createObjectURL(blob)
+            a.download = `biostimulanzien-${new Date().toISOString().slice(0, 10)}.csv`
+            a.click()
+            URL.revokeObjectURL(a.href)
           },
         },
       ]}

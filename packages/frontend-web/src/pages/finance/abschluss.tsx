@@ -499,8 +499,15 @@ export default function AbschlussPage(): JSX.Element {
 
   const { handleAction } = useMaskActions(async (action: string, formData: any) => {
     if (action === 'calculate') {
-      // TODO: Endpoint /api/v1/finance/closing/calculate when ready
-      toast({ title: 'Diese Aktion ist in Arbeit' })
+      setActionLoadingKey('calculate')
+      try {
+        await apiClient.post('/api/v1/finance/closing/calculate', formData ?? {})
+        toast({ title: 'Berechnung abgeschlossen', description: 'Abschlusszahlen wurden berechnet.' })
+      } catch (error: any) {
+        toast({ variant: 'destructive', title: 'Fehler', description: error.response?.data?.detail ?? error.message })
+      } finally {
+        setActionLoadingKey(null)
+      }
       return
     }
     if (action === 'validate') {
@@ -510,8 +517,15 @@ export default function AbschlussPage(): JSX.Element {
       return
     }
     if (action === 'approve') {
-      // TODO: Endpoint /api/v1/finance/closing/approve when ready
-      toast({ title: 'Diese Aktion ist in Arbeit' })
+      setActionLoadingKey('approve')
+      try {
+        await apiClient.post('/api/v1/finance/closing/approve', formData ?? {})
+        toast({ title: 'Abschluss freigegeben', description: 'Abschlussgenehmigung wurde erteilt.' })
+      } catch (error: any) {
+        toast({ variant: 'destructive', title: 'Fehler', description: error.response?.data?.detail ?? error.message })
+      } finally {
+        setActionLoadingKey(null)
+      }
       return
     }
     if (action === 'close') {
@@ -535,8 +549,17 @@ export default function AbschlussPage(): JSX.Element {
       return
     }
     if (action === 'lock') {
-      // TODO: Endpoint /api/v1/finance/closing/lock when ready
-      toast({ title: 'Diese Aktion ist in Arbeit' })
+      if (!confirm('Abschluss sperren? Diese Aktion kann nicht rückgängig gemacht werden.')) return
+      setActionLoadingKey('lock')
+      try {
+        await apiClient.post('/api/v1/finance/closing/lock', formData ?? {})
+        toast({ title: 'Abschluss gesperrt', description: 'Die Periode wurde endgültig gesperrt.' })
+        navigate('/finance/abschluss')
+      } catch (error: any) {
+        toast({ variant: 'destructive', title: 'Fehler', description: error.response?.data?.detail ?? error.message })
+      } finally {
+        setActionLoadingKey(null)
+      }
       return
     }
     if (action === 'export') {
