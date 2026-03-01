@@ -213,6 +213,51 @@ export default function ChargeVerfolgungPage(): JSX.Element {
   })), [apiData])
   const total = data.length
 
+  const chargenConfig: ListConfig = useMemo(() => ({
+    ...chargeVerfolgungConfig,
+    bulkActions: [
+      {
+        key: 'export',
+        label: 'Exportieren',
+        type: 'secondary' as const,
+        onClick: (_items: any[]) => { void triggerChargenExport() }
+      },
+      {
+        key: 'recall',
+        label: 'Recall einleiten',
+        type: 'danger' as const,
+        onClick: async (items: any[]) => {
+          if (!confirm(`Rückruf für ${items.length} Charge(n) einleiten?`)) return
+          let ok = 0; let err = 0
+          for (const item of items) {
+            try {
+              await api.patch(`/api/v1/futter/chargen/${item.id}`, { status: 'recall' })
+              ok++
+            } catch { err++ }
+          }
+          queryClient.invalidateQueries({ queryKey: ['futter', 'chargen'] })
+          toast({
+            title: 'Rückruf eingeleitet',
+            description: `${ok} Charge(n) auf Recall gesetzt${err ? `, ${err} Fehler` : ''}.`,
+            variant: 'destructive'
+          })
+        }
+      },
+      {
+        key: 'trace',
+        label: 'Rückverfolgung',
+        type: 'secondary' as const,
+        onClick: (items: any[]) => {
+          if (items.length === 1) {
+            navigate(`/futtermittel/chargen/${items[0].id}/trace`)
+          } else {
+            toast({ title: 'Rückverfolgung', description: `${items.length} Chargen ausgewählt — bitte einzeln öffnen.` })
+          }
+        }
+      }
+    ]
+  }), [queryClient, navigate])
+
   const handleCreate = () => {
     navigate('/futtermittel/chargen/neu')
   }
@@ -269,7 +314,7 @@ export default function ChargeVerfolgungPage(): JSX.Element {
         onChange={handleImportFile}
       />
       <ListReport
-        config={chargeVerfolgungConfig}
+        config={chargenConfig}
         data={data}
         total={total}
         onCreate={handleCreate}
