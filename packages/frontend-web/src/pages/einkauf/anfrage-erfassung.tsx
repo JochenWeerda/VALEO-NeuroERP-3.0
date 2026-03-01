@@ -383,13 +383,29 @@ export default function AnfrageErfassungPage(): JSX.Element {
               </div>
               <div className="flex items-center gap-2 pt-1">
                 <a href="#" className="text-sm text-blue-600 underline hover:text-blue-800"
-                  onClick={(e) => { e.preventDefault(); push('Vorherige Anfrage laden: nicht implementiert') }}>
+                  onClick={async (e) => {
+                    e.preventDefault()
+                    try {
+                      const list = await apiClient.get<{ id: string }[]>('/api/v1/einkauf/anfragen')
+                      const items = Array.isArray(list.data) ? list.data : (list.data as any)?.data ?? []
+                      const idx = anfrageId ? items.findIndex((a: any) => a.id === anfrageId) : -1
+                      if (idx + 1 < items.length) {
+                        navigate(`/einkauf/anfragen/${items[idx + 1].id}`)
+                      } else {
+                        push('Kein vorheriger Auftrag vorhanden.')
+                      }
+                    } catch { push('Anfragen konnten nicht geladen werden.') }
+                  }}>
                   &gt;&gt; wie vorh. Best. (F11)
                 </a>
               </div>
               <div className="flex items-center gap-2">
                 <a href="#" className="text-sm text-blue-600 underline hover:text-blue-800"
-                  onClick={(e) => { e.preventDefault(); push('Lieferanten-Stamm öffnen: nicht implementiert') }}>
+                  onClick={(e) => {
+                    e.preventDefault()
+                    if (state.lieferant?.id) navigate(`/crm/lieferanten/stamm/${state.lieferant.id}`)
+                    else push('Bitte zuerst einen Lieferanten auswählen.')
+                  }}>
                   Lieferanten-Stamm
                 </a>
               </div>
@@ -539,8 +555,29 @@ export default function AnfrageErfassungPage(): JSX.Element {
             </TabsContent>
 
             <TabsContent value="angebot">
-              <div className="text-sm text-muted-foreground py-4">
-                Anfrage / Angebot-Vergleich — noch nicht implementiert
+              <div className="py-4 space-y-3 text-sm">
+                {positionen.length === 0 ? (
+                  <p className="text-muted-foreground">Noch keine Positionen erfasst — Angebots-Vergleich wird nach Positionserfassung verfügbar.</p>
+                ) : (
+                  <table className="w-full text-xs border-collapse">
+                    <thead><tr className="bg-gray-100">
+                      <th className="border px-2 py-1 text-left">Pos.</th>
+                      <th className="border px-2 py-1 text-left">Artikel</th>
+                      <th className="border px-2 py-1 text-right">Menge</th>
+                      <th className="border px-2 py-1 text-right">Einh.-Preis</th>
+                      <th className="border px-2 py-1 text-right">Gesamt</th>
+                    </tr></thead>
+                    <tbody>{positionen.map((p) => (
+                      <tr key={p.id}>
+                        <td className="border px-2 py-1">{p.posNr}</td>
+                        <td className="border px-2 py-1">{p.artikelBezeichnung || p.artikelNr}</td>
+                        <td className="border px-2 py-1 text-right">{p.menge} {p.einheit}</td>
+                        <td className="border px-2 py-1 text-right">{p.einhPreis.toFixed(2)} €</td>
+                        <td className="border px-2 py-1 text-right">{p.betrag.toFixed(2)} €</td>
+                      </tr>
+                    ))}</tbody>
+                  </table>
+                )}
               </div>
             </TabsContent>
 
@@ -568,8 +605,29 @@ export default function AnfrageErfassungPage(): JSX.Element {
             </TabsContent>
 
             <TabsContent value="zusatz">
-              <div className="text-sm text-muted-foreground py-4">
-                Zusätzliche Angaben — noch nicht implementiert
+              <div className="grid grid-cols-2 gap-4 text-sm pt-2">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Label className="w-36 text-xs shrink-0">Auftragstext:</Label>
+                    <textarea className="flex-1 border rounded p-1 text-xs h-16"
+                      value={state.bemerkung ?? ''}
+                      onChange={(e) => setState((p) => ({ ...p, bemerkung: e.target.value }))} />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Label className="w-36 text-xs shrink-0">Interne Notiz:</Label>
+                    <textarea className="flex-1 border rounded p-1 text-xs h-16" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Label className="w-36 text-xs shrink-0">Ihr Zeichen:</Label>
+                    <Input className="flex-1 h-8" />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Label className="w-36 text-xs shrink-0">Unser Zeichen:</Label>
+                    <Input className="flex-1 h-8" />
+                  </div>
+                </div>
               </div>
             </TabsContent>
           </Tabs>
@@ -676,11 +734,26 @@ export default function AnfrageErfassungPage(): JSX.Element {
       <div className="border-t bg-white px-4 py-2 flex items-center justify-between">
         <div className="flex gap-2">
           <Button variant="outline" size="sm" className="gap-2"
-            onClick={() => push('Lieferanten-Angebot: nicht implementiert')}>
+            onClick={async () => {
+              if (!state.lieferant) { push('Bitte zuerst einen Lieferanten auswählen.'); return }
+              if (positionen.length === 0) { push('Bitte zuerst Positionen erfassen.'); return }
+              try {
+                const payload = {
+                  lieferant_id: state.lieferant.id,
+                  lieferant_name: state.lieferant.name,
+                  positionen: positionen.map((p) => ({ artikel_nr: p.artikelNr, bezeichnung: p.artikelBezeichnung, menge: p.menge, einheit: p.einheit })),
+                  anfragedatum: state.anfrageDate,
+                }
+                const resp = state.id
+                  ? await apiClient.patch(`/api/v1/einkauf/anfragen/${state.id}`, payload)
+                  : await apiClient.post('/api/v1/einkauf/anfragen', payload)
+                push(`Lieferanten-Angebot gesendet (${(resp.data as any)?.anfrageNr ?? 'OK'})`)
+              } catch (e: any) { push(`Fehler: ${e.response?.data?.detail ?? e.message}`) }
+            }}>
             <Send className="h-4 w-4" />Lieferanten-Angebot
           </Button>
           <Button variant="outline" size="sm" className="gap-2"
-            onClick={() => push('Drucken: nicht implementiert')}>
+            onClick={() => window.print()}>
             <Printer className="h-4 w-4" />Drucken
           </Button>
           <Button variant="outline" size="sm" className="gap-2"
