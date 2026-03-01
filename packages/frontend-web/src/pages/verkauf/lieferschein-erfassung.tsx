@@ -26,7 +26,7 @@ import { useSchlaege } from '@/lib/api/agrar'
 import { useGlobalShortcuts, globalShortcutManager } from '@/lib/shortcuts/global-shortcuts'
 import { ShortcutHintButton } from '@/components/shortcuts/ShortcutHelpPanel'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { ChevronLeft, ChevronRight, MoreHorizontal, Check, Printer, Save, X, FileText, Folder, FileCheck, Link as LinkIcon, Receipt, Trash2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown, MoreHorizontal, Check, Printer, Save, X, FileText, Folder, FileCheck, Link as LinkIcon, Receipt, Trash2 } from 'lucide-react'
 
 // API Response Type
 type DeliveryNoteResponse = {
@@ -577,6 +577,81 @@ export default function LieferscheinErfassungPage(): JSX.Element {
     }
   }
 
+  // Hilfsfunktion: pos_nr auf 10, 20, 30 … setzen
+  const renumberPosNr = (positionen: Position[]): Position[] =>
+    positionen.map((p, i) => ({ ...p, posNr: (i + 1) * 10 }))
+
+  // Position löschen
+  const handleDeletePosition = (idx: number): void => {
+    const newPositionen = state.positionen.filter((_, i) => i !== idx)
+    const renumbered = renumberPosNr(newPositionen)
+    const newAktive =
+      state.aktivePositionIndex === idx
+        ? null
+        : idx < (state.aktivePositionIndex ?? -1)
+          ? (state.aktivePositionIndex ?? 0) - 1
+          : state.aktivePositionIndex
+    setState((prev) => ({
+      ...prev,
+      positionen: renumbered,
+      aktivePositionIndex: newAktive,
+    }))
+  }
+
+  // Position nach oben / unten verschieben
+  const handleMovePositionUp = (idx: number): void => {
+    if (idx <= 0) return
+    const newPositionen = [...state.positionen]
+    ;[newPositionen[idx - 1], newPositionen[idx]] = [newPositionen[idx], newPositionen[idx - 1]]
+    const renumbered = renumberPosNr(newPositionen)
+    const newAktive = state.aktivePositionIndex === idx ? idx - 1 : state.aktivePositionIndex === idx - 1 ? idx : state.aktivePositionIndex
+    setState((prev) => ({
+      ...prev,
+      positionen: renumbered,
+      aktivePositionIndex: newAktive,
+    }))
+  }
+
+  const handleMovePositionDown = (idx: number): void => {
+    if (idx >= state.positionen.length - 1) return
+    const newPositionen = [...state.positionen]
+    ;[newPositionen[idx], newPositionen[idx + 1]] = [newPositionen[idx + 1], newPositionen[idx]]
+    const renumbered = renumberPosNr(newPositionen)
+    const newAktive = state.aktivePositionIndex === idx ? idx + 1 : state.aktivePositionIndex === idx + 1 ? idx : state.aktivePositionIndex
+    setState((prev) => ({
+      ...prev,
+      positionen: renumbered,
+      aktivePositionIndex: newAktive,
+    }))
+  }
+
+  // Position aus state.positionen[idx] in currentPosition (CurrentPositionDetails) füllen
+  const selectPositionForEdit = (idx: number): void => {
+    const pos = state.positionen[idx]
+    if (!pos) return
+    setState((prev) => ({ ...prev, aktivePositionIndex: idx }))
+    setCurrentPosition({
+      posNr: pos.posNr,
+      artikelNr: pos.artikelNr,
+      artikelId: pos.artikelId,
+      artikelBezeichnung: pos.bezeichnung,
+      artikelBezeichnung2: pos.bezeichnung2,
+      mengeGebinde: pos.menge,
+      einheit: pos.einheit,
+      listenpreis: pos.listenpreis,
+      rabatt: pos.rabatt,
+      einhPreis: pos.nettoPreis,
+      betrag: pos.nettoBetrag,
+      mwstProzent: pos.mwstProzent,
+      verfuegbar: 0,
+      kontraktNr: pos.kontraktNr,
+      skontierf: pos.skontierf,
+      fremdware: pos.fremdware,
+      artikelGewicht: pos.gewicht,
+      artikelGefahrgutPunkte: pos.gefahrgutPunkte,
+    })
+  }
+
   // Position OK
   const handlePositionOK = (): void => {
     if (!currentPosition.artikelNr || !currentPosition.mengeGebinde) {
@@ -591,8 +666,10 @@ export default function LieferscheinErfassungPage(): JSX.Element {
 
     // Validierung: Maximal 1000 Gefahrgut-Punkte pro Lieferung
     const aktuelleGefahrgutPunkte = state.positionen.reduce((sum, pos) => sum + (pos.gesamtGefahrgutPunkte || 0), 0)
-    const neueGesamtGefahrgutPunkte = aktuelleGefahrgutPunkte + gesamtGefahrgutPunkte
-    
+    const neueGesamtGefahrgutPunkte = state.aktivePositionIndex !== null
+      ? aktuelleGefahrgutPunkte - (state.positionen[state.aktivePositionIndex]?.gesamtGefahrgutPunkte || 0) + gesamtGefahrgutPunkte
+      : aktuelleGefahrgutPunkte + gesamtGefahrgutPunkte
+
     if (neueGesamtGefahrgutPunkte > 1000) {
       push(`Fehler: Die maximale Anzahl von 1000 Gefahrgut-Punkten pro Lieferung würde überschritten werden. Aktuell: ${aktuelleGefahrgutPunkte.toFixed(0)}, zusätzlich: ${gesamtGefahrgutPunkte.toFixed(0)}, Gesamt: ${neueGesamtGefahrgutPunkte.toFixed(0)}`)
       return
@@ -601,7 +678,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
     const position: Position = {
       posNr: currentPosition.posNr,
       artikelNr: currentPosition.artikelNr,
-      artikelId: currentPosition.artikelId, // Artikel-ID für Backend-Mapping
+      artikelId: currentPosition.artikelId,
       bezeichnung: currentPosition.artikelBezeichnung,
       bezeichnung2: currentPosition.artikelBezeichnung2,
       menge: currentPosition.mengeGebinde,
@@ -616,9 +693,9 @@ export default function LieferscheinErfassungPage(): JSX.Element {
       lagerfach: '',
       charge: '',
       serienNr: '',
-      gefPunkt: currentPosition.artikelGefahrgutPunkte > 0 ? currentPosition.artikelGefahrgutPunkte.toString() : '', // Als String für Anzeige
-      gefahrgutPunkte: currentPosition.artikelGefahrgutPunkte, // Numerisch pro Einheit
-      gesamtGefahrgutPunkte, // Gesamt-Gefahrgut-Punkte (gefahrgutPunkte × menge)
+      gefPunkt: currentPosition.artikelGefahrgutPunkte > 0 ? currentPosition.artikelGefahrgutPunkte.toString() : '',
+      gefahrgutPunkte: currentPosition.artikelGefahrgutPunkte,
+      gesamtGefahrgutPunkte,
       naBio: '',
       musterNr: '',
       strecke: '',
@@ -626,24 +703,57 @@ export default function LieferscheinErfassungPage(): JSX.Element {
       anerken: '',
       erloskonto: '',
       mwstProzent: currentPosition.mwstProzent,
-      gewicht: currentPosition.artikelGewicht, // Gewicht pro Einheit
-      gesamtGewicht, // Gesamtgewicht (gewicht × menge)
-      kontraktNr: currentPosition.kontraktNr, // Vertragsnummer
-      skontierf: currentPosition.skontierf, // Skontierfähig
-      fremdware: currentPosition.fremdware, // Fremdware
+      gewicht: currentPosition.artikelGewicht,
+      gesamtGewicht,
+      kontraktNr: currentPosition.kontraktNr,
+      skontierf: currentPosition.skontierf,
+      fremdware: currentPosition.fremdware,
     }
 
+    if (state.aktivePositionIndex !== null) {
+      // Ersetzen an Index, dann durchnummerieren und zurücksetzen
+      const newPositionen = [...state.positionen]
+      newPositionen[state.aktivePositionIndex] = position
+      const renumbered = renumberPosNr(newPositionen)
+      const nextPosNr = (renumbered.length + 1) * 10
+      setState((prev) => ({
+        ...prev,
+        positionen: renumbered,
+        aktivePositionIndex: null,
+      }))
+      setCurrentPosition({
+        posNr: nextPosNr,
+        artikelNr: '',
+        artikelId: null,
+        artikelBezeichnung: '',
+        artikelBezeichnung2: '',
+        mengeGebinde: 0,
+        einheit: '',
+        listenpreis: 0,
+        rabatt: 0,
+        einhPreis: 0,
+        betrag: 0,
+        mwstProzent: 19,
+        verfuegbar: 0,
+        kontraktNr: '',
+        skontierf: false,
+        fremdware: false,
+        artikelGewicht: 0,
+        artikelGefahrgutPunkte: 0,
+      })
+      return
+    }
+
+    // Anhängen (wie bisher)
     setState((prev) => ({
       ...prev,
       positionen: [...prev.positionen, position],
       aktivePositionIndex: prev.positionen.length,
     }))
-
-    // Nächste Position vorbereiten
     setCurrentPosition({
       posNr: currentPosition.posNr + 10,
       artikelNr: '',
-      artikelId: null, // Reset Artikel-ID
+      artikelId: null,
       artikelBezeichnung: '',
       artikelBezeichnung2: '',
       mengeGebinde: 0,
@@ -723,7 +833,12 @@ export default function LieferscheinErfassungPage(): JSX.Element {
         })),
       }
 
-      const response = await apiClient.post<DeliveryNoteResponse>('/api/v1/sales/delivery-notes', payload)
+      let response: DeliveryNoteResponse
+      if (state.id) {
+        response = await apiClient.put<DeliveryNoteResponse>(`/api/v1/sales/delivery-notes/${state.id}`, payload)
+      } else {
+        response = await apiClient.post<DeliveryNoteResponse>('/api/v1/sales/delivery-notes', payload)
+      }
       setState((prev) => ({
         ...prev,
         id: response.id, // UUID vom Backend
@@ -737,6 +852,42 @@ export default function LieferscheinErfassungPage(): JSX.Element {
       console.error('Save error:', error)
       push(`Fehler beim Speichern: ${error.response?.data?.detail || error.message}`)
       return null // Return null on error
+    }
+  }
+
+  // Sofort-Rechnung: Lieferschein speichern, dann per Docflow in Rechnung umwandeln
+  const handleCreateInvoice = async (): Promise<void> => {
+    try {
+      const savedId = await handleSave()
+      if (!savedId) {
+        push('Lieferschein muss zuerst gespeichert werden.')
+        return
+      }
+      if (savedId && !state.id) setState((prev) => ({ ...prev, id: savedId }))
+      const lsId = savedId
+      const idempotencyKey = crypto.randomUUID()
+      const res = await apiClient.post<{
+        command: string
+        target_doc_id?: string
+        status: string
+        payload?: { target_doc_number?: string; target_doc_type?: string }
+      }>(`/api/v1/docflow/${lsId}/convert`, {
+        target_doc_type: 'sales_invoice',
+        idempotency_key: idempotencyKey,
+      })
+      const docNumber = res.payload?.target_doc_number
+      if (docNumber) {
+        push(`Rechnung ${docNumber} erstellt`)
+        setState((prev) => ({ ...prev, fakturiertRechnNr: docNumber }))
+        const targetId = res.target_doc_id
+        if (targetId && typeof navigate === 'function') {
+          navigate(`/verkauf/rechnungen/${targetId}`, { replace: false })
+        }
+      } else {
+        push('Rechnung erstellt')
+      }
+    } catch (error: any) {
+      push(`Sofort-Rechnung fehlgeschlagen: ${error.response?.data?.detail || error.message}`)
     }
   }
 
@@ -1188,10 +1339,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
         push(`Fehler: ${error.response?.data?.detail || error.message}`)
       }
     },
-    'create-invoice': () => {
-      // TODO: Implementieren
-      push('Sofort-Rechnung noch nicht implementiert')
-    },
+    'create-invoice': () => void handleCreateInvoice(),
     'open-attachments': () => {
       setShowAttachmentDialog(true)
     },
@@ -1731,6 +1879,42 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                     <TableCell>{pos.zusBeleg}</TableCell>
                     <TableCell>{pos.anerken}</TableCell>
                     <TableCell>{pos.erloskonto}</TableCell>
+                    <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center justify-end gap-0.5">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7"
+                          title="Hoch"
+                          onClick={() => handleMovePositionUp(idx)}
+                          disabled={idx <= 0}
+                        >
+                          <ChevronUp className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7"
+                          title="Runter"
+                          onClick={() => handleMovePositionDown(idx)}
+                          disabled={idx >= state.positionen.length - 1}
+                        >
+                          <ChevronDown className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-red-600 hover:text-red-700"
+                          title="Position löschen"
+                          onClick={() => handleDeletePosition(idx)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -1981,7 +2165,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
             <LinkIcon className="h-4 w-4" />
             Connect Anwendungen (Schnittstelle zB zum Waagenmodul)
           </Button>
-          <Button variant="outline" size="sm" className="gap-2">
+          <Button variant="outline" size="sm" className="gap-2" onClick={() => void handleCreateInvoice()}>
             <Receipt className="h-4 w-4" />
             Sofort-Rechnung
           </Button>

@@ -21,6 +21,10 @@ interface ObjectPageProps {
   onSave: (_data: any) => Promise<void>
   onCancel: () => void
   isLoading?: boolean
+  /** When provided, toolbar action buttons call this with (actionKey, formData) instead of action.onClick */
+  onAction?: (_actionKey: string, _formData: any) => void | Promise<void>
+  /** Key of the action currently loading (disables that button and shows spinner) */
+  loadingActionKey?: string | null
 }
 
 const ObjectPage: React.FC<ObjectPageProps> = ({
@@ -29,7 +33,9 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
   onChange,
   onSave,
   onCancel,
-  isLoading = false
+  isLoading = false,
+  onAction,
+  loadingActionKey = null
 }) => {
   const { toast } = useToast()
   const [activeTab, setActiveTab] = useState(config.tabs[0]?.key || '')
@@ -310,18 +316,28 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
           )}
         </div>
         <div className="flex gap-2">
-          {config.actions.map(action => (
-            <Button
-              key={action.key}
-              variant={action.type === 'primary' ? 'default' : 'outline'}
-              onClick={action.onClick}
-              disabled={action.disabled}
-              className="gap-2"
-            >
-              {action.icon && <span className="text-sm">{action.icon}</span>}
-              {action.label}
-            </Button>
-          ))}
+          {config.actions.map(action => {
+            const isThisLoading = loadingActionKey != null && action.key === loadingActionKey
+            return (
+              <Button
+                key={action.key}
+                variant={action.type === 'primary' ? 'default' : 'outline'}
+                onClick={() => {
+                  if (onAction) {
+                    void Promise.resolve(onAction(action.key, watch())).catch(() => { })
+                  } else {
+                    action.onClick?.()
+                  }
+                }}
+                disabled={action.disabled || isThisLoading}
+                className="gap-2"
+              >
+                {isThisLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+                {!isThisLoading && action.icon && <span className="text-sm">{action.icon}</span>}
+                {action.label}
+              </Button>
+            )
+          })}
           <Button variant="outline" onClick={onCancel} className="gap-2">
             <X className="h-4 w-4" />
             Abbrechen

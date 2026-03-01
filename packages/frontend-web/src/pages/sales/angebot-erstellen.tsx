@@ -3,7 +3,8 @@
  * Im Stil der Lieferschein-Erfassung — einheitliches ERP-Look & Feel
  */
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -99,6 +100,9 @@ function emptyPosition(posNr: number): CurrentPositionDetails {
 
 export default function AngebotErstellenPage(): JSX.Element {
   const { push } = useToast()
+  const navigate = useNavigate()
+  const [isDirty, setIsDirty] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
 
   // ── Angebot-Kopf ──────────────────────────────────────────────────────────
   const [angebotNr, setAngebotNr] = useState(() => generateAngebotNr())
@@ -153,15 +157,18 @@ export default function AngebotErstellenPage(): JSX.Element {
   // ── Handler ───────────────────────────────────────────────────────────────
 
   function handleAngebotAuswaehlen(angebot: Angebot) {
+    setAngebotId(angebot.id)
     setAngebotNr(angebot.nummer)
     setDatum(angebot.datum)
     setStatus(angebot.status)
     setShowAngebotAuswahl(false)
+    setIsDirty(false)
   }
 
   function handleCustomerSelect(c: Customer) {
     setCustomer(c)
     if (c.representative) setKontakt(c.representative)
+    setIsDirty(true)
   }
 
   function handleArticleSelect(article: any) {
@@ -181,6 +188,10 @@ export default function AngebotErstellenPage(): JSX.Element {
       mwstProzent,
       gewicht,
     }))
+  }
+
+  function renumberPositionen(items: AngebotPosition[]): AngebotPosition[] {
+    return items.map((p, i) => ({ ...p, posNr: i + 1 }))
   }
 
   function handlePositionOK() {
@@ -208,10 +219,148 @@ export default function AngebotErstellenPage(): JSX.Element {
       gesamtGewicht,
     }
 
-    setPositionen((prev) => [...prev, newPos])
-    setAktivePositionIndex(positionen.length)
-    setCurrentPosition(emptyPosition(currentPosition.posNr + 10))
+    setPositionen((prev) => {
+      let next: AngebotPosition[]
+      if (aktivePositionIndex !== null && aktivePositionIndex >= 0 && aktivePositionIndex < prev.length) {
+        next = [...prev.slice(0, aktivePositionIndex), newPos, ...prev.slice(aktivePositionIndex + 1)]
+      } else {
+        next = [...prev, newPos]
+      }
+      return renumberPositionen(next)
+    })
+    setAktivePositionIndex(null)
+    const nextPosNr = positionen.length + (aktivePositionIndex !== null ? 0 : 1) + 1
+    setCurrentPosition(emptyPosition(nextPosNr))
+    setIsDirty(true)
   }
+
+  function handlePositionDelete(idx: number) {
+    setPositionen((prev) => renumberPositionen(prev.filter((_, i) => i !== idx)))
+    setAktivePositionIndex(null)
+    setCurrentPosition(emptyPosition(10))
+    setIsDirty(true)
+  }
+
+  // ── Build API payload (header + items) ────────────────────────────────────
+  function buildOfferPayload() {
+    const items = positionen.map((p) => ({
+      article_number: p.artikelNr,
+      description: [p.bezeichnung, p.bezeichnung2].filter(Boolean).join(' ') || undefined,
+      quantity: p.menge,
+      unit: p.einheit || 'Stk',
+      unit_price: p.listenpreis,
+      discount_percent: p.rabatt,
+      ek_price: p.ekPreis ?? undefined,
+    }))
+    const total_amount = positionen.reduce((s, p) => s + p.nettoBetrag, 0)
+    return {
+      offer_number: angebotNr,
+      customer_id: customer?.id ?? null,
+      customer_name: customer?.name ?? null,
+      subject: `Angebot ${angebotNr}`,
+      description: '',
+      total_amount,
+      currency: 'EUR',
+      status: status.toLowerCase(),
+      contact_person: kontakt || null,
+      valid_until: gueltigBis || null,
+      is_pauschale: isPauschale,
+      items,
+    }
+  }
+
+  const handleSave = useCallback(async () => {
+    const payload = buildOfferPayload()
+    setIsSaving(true)
+    try {
+      const id = angebotId
+      if (id) {
+        const updated = await apiClient.patch<{
+          id: string
+          offer_number: string
+          status?: string
+        }>(`/api/v1/sales/offers/${id}`, payload)
+        setAngebotId(updated.id)
+        if (updated.offer_number) setAngebotNr(updated.offer_number)
+        push('Angebot gespeichert')
+      } else {
+        const created = await apiClient.post<{ id: string; offer_number: string }>(
+          '/api/v1/sales/offers/',
+          payload,
+        )
+        setAngebotId(created.id)
+        if (created.offer_number) setAngebotNr(created.offer_number)
+        push('Angebot erstellt')
+      }
+      setIsDirty(false)
+    } catch (err: unknown) {
+      const msg =
+        err && typeof err === 'object' && 'response' in err && err.response && typeof err.response === 'object' && 'data' in err.response
+          ? String((err.response as { data?: { detail?: string } }).data?.detail ?? (err as Error).message)
+          : (err as Error).message
+      push(`Fehler beim Speichern: ${msg}`)
+    } finally {
+      setIsSaving(false)
+    }
+  }, [
+    angebotId,
+    angebotNr,
+    customer,
+    gueltigBis,
+    isPauschale,
+    kontakt,
+    positionen,
+    status,
+    push,
+  ])
+
+  const handleConvertToOrder = useCallback(async () => {
+    const id = angebotId
+    if (!id) {
+      push('Bitte zuerst Angebot speichern')
+      return
+    }
+    try {
+      await apiClient.post(`/api/v1/sales/offers/${id}/convert-to-order`)
+      push('Angebot in Auftrag übernommen')
+      navigate(`/sales/order?fromOffer=${id}`)
+    } catch (err: unknown) {
+      const msg =
+        err && typeof err === 'object' && 'response' in err && err.response && typeof err.response === 'object' && 'data' in err.response
+          ? String((err.response as { data?: { detail?: string } }).data?.detail ?? (err as Error).message)
+          : (err as Error).message
+      push(`Fehler: ${msg}`)
+    }
+  }, [angebotId, push, navigate])
+
+  const handleDelete = useCallback(async () => {
+    const id = angebotId
+    if (!id) {
+      push('Kein gespeichertes Angebot zum Löschen')
+      return
+    }
+    try {
+      await apiClient.delete(`/api/v1/sales/offers/${id}`)
+      push('Angebot gelöscht')
+      navigate('/sales/angebote')
+    } catch (err: unknown) {
+      const msg =
+        err && typeof err === 'object' && 'response' in err && err.response && typeof err.response === 'object' && 'data' in err.response
+          ? String((err.response as { data?: { detail?: string } }).data?.detail ?? (err as Error).message)
+          : (err as Error).message
+      push(`Fehler beim Löschen: ${msg}`)
+    }
+  }, [angebotId, push, navigate])
+
+  const handleBeenden = useCallback(() => {
+    if (isDirty) {
+      if (window.confirm('Es gibt ungespeicherte Änderungen. Wirklich verlassen?')) {
+        navigate('/sales/angebote')
+      }
+    } else {
+      navigate('/sales/angebote')
+    }
+  }, [isDirty, navigate])
 
   function handlePositionRowClick(pos: AngebotPosition, idx: number) {
     setAktivePositionIndex(idx)
@@ -313,7 +462,10 @@ export default function AngebotErstellenPage(): JSX.Element {
                 <Label className="w-28 text-sm whitespace-nowrap shrink-0">Angebot-Nr.:</Label>
                 <Input
                   value={angebotNr}
-                  onChange={(e) => setAngebotNr(e.target.value)}
+                  onChange={(e) => {
+                    setAngebotNr(e.target.value)
+                    setIsDirty(true)
+                  }}
                   className="flex-1 h-8 text-sm"
                 />
                 <Button
@@ -337,7 +489,10 @@ export default function AngebotErstellenPage(): JSX.Element {
                 <Input
                   type="date"
                   value={datum}
-                  onChange={(e) => setDatum(e.target.value)}
+                  onChange={(e) => {
+                    setDatum(e.target.value)
+                    setIsDirty(true)
+                  }}
                   className="flex-1 h-8 text-sm"
                 />
               </div>
@@ -346,7 +501,10 @@ export default function AngebotErstellenPage(): JSX.Element {
                 <Input
                   type="date"
                   value={gueltigBis}
-                  onChange={(e) => setGueltigBis(e.target.value)}
+                  onChange={(e) => {
+                    setGueltigBis(e.target.value)
+                    setIsDirty(true)
+                  }}
                   className="flex-1 h-8 text-sm"
                 />
               </div>
@@ -358,7 +516,10 @@ export default function AngebotErstellenPage(): JSX.Element {
                 <Checkbox
                   id="pauschale"
                   checked={isPauschale}
-                  onCheckedChange={(c) => setIsPauschale(c === true)}
+                  onCheckedChange={(c) => {
+                    setIsPauschale(c === true)
+                    setIsDirty(true)
+                  }}
                 />
                 <Label htmlFor="pauschale" className="text-sm cursor-pointer">
                   Pauschal-Angebot
@@ -402,7 +563,10 @@ export default function AngebotErstellenPage(): JSX.Element {
                 <Label className="w-28 text-sm whitespace-nowrap shrink-0">Ansprechpartner:</Label>
                 <Input
                   value={kontakt}
-                  onChange={(e) => setKontakt(e.target.value)}
+                  onChange={(e) => {
+                    setKontakt(e.target.value)
+                    setIsDirty(true)
+                  }}
                   className="flex-1 h-8 text-sm"
                 />
               </div>
@@ -456,7 +620,7 @@ export default function AngebotErstellenPage(): JSX.Element {
                 ))}
                 {positionen.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={12} className="text-center text-xs text-muted-foreground py-4">
+                    <TableCell colSpan={13} className="text-center text-xs text-muted-foreground py-4">
                       Noch keine Positionen — Artikel im Bereich unten eingeben
                     </TableCell>
                   </TableRow>
@@ -648,7 +812,7 @@ export default function AngebotErstellenPage(): JSX.Element {
       {/* ── Bottom-Toolbar ─────────────────────────────────────────────── */}
       <div className="border-t bg-white px-4 py-2 flex items-center justify-between">
         <div className="flex gap-2">
-          <Button size="sm" className="h-7 text-xs gap-1">
+          <Button size="sm" className="h-7 text-xs gap-1" onClick={handleSave} disabled={isSaving}>
             <Save className="h-3 w-3" /> Speichern
           </Button>
           <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={() => setShowPrintDialog(true)}>
@@ -657,18 +821,25 @@ export default function AngebotErstellenPage(): JSX.Element {
           <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={() => setShowAttachmentDialog(true)}>
             <FileText className="h-3 w-3" /> Unterlagen
           </Button>
-          <Button variant="outline" size="sm" className="h-7 text-xs gap-1">
+          <Button variant="outline" size="sm" className="h-7 text-xs gap-1" onClick={handleConvertToOrder}>
             <FileText className="h-3 w-3" /> In Auftrag wandeln
           </Button>
           <Button
             variant="outline"
             size="sm"
             className="h-7 text-xs gap-1 text-destructive hover:text-destructive"
+            onClick={() => {
+              if (!angebotId) {
+                push('Kein gespeichertes Angebot zum Löschen')
+                return
+              }
+              if (window.confirm('Angebot wirklich löschen?')) void handleDelete()
+            }}
           >
             <Trash2 className="h-3 w-3" /> Löschen
           </Button>
         </div>
-        <Button variant="ghost" size="sm" className="h-7 text-xs gap-1">
+        <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={handleBeenden}>
           <X className="h-3 w-3" /> Beenden
         </Button>
       </div>

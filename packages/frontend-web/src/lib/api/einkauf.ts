@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Einkauf (Procurement) API Hooks
  * Error-first fetching without mock fallback data.
  */
@@ -259,6 +259,36 @@ export function useRechnungseingaenge() {
     queryKey: einkaufKeys.rechnungseingaenge(),
     queryFn: async () => (await apiClient.get<Rechnungseingang[]>('/api/v1/einkauf/rechnungseingaenge')).data,
     staleTime: 2 * 60 * 1000,
+  })
+}
+
+/** Workflow: Prüfen (entwurf → geprüft) */
+export function useRechnungseingangPruefen() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (id: string) =>
+      (await apiClient.post<{ message: string; status: string }>(`/api/v1/einkauf/rechnungseingaenge/${encodeURIComponent(id)}/pruefen`)).data,
+    onSuccess: () => qc.invalidateQueries({ queryKey: einkaufKeys.rechnungseingaenge() }),
+  })
+}
+
+/** Workflow: Freigeben (geprüft → freigegeben) */
+export function useRechnungseingangFreigeben() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (id: string) =>
+      (await apiClient.post<{ message: string; status: string }>(`/api/v1/einkauf/rechnungseingaenge/${encodeURIComponent(id)}/freigeben`)).data,
+    onSuccess: () => qc.invalidateQueries({ queryKey: einkaufKeys.rechnungseingaenge() }),
+  })
+}
+
+/** Workflow: Verbuchen (freigegeben → verbucht) */
+export function useRechnungseingangVerbuchen() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (id: string) =>
+      (await apiClient.post<{ message: string; status: string }>(`/api/v1/einkauf/rechnungseingaenge/${encodeURIComponent(id)}/verbuchen`)).data,
+    onSuccess: () => qc.invalidateQueries({ queryKey: einkaufKeys.rechnungseingaenge() }),
   })
 }
 
