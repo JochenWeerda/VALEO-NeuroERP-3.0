@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ListReport } from '@/components/mask-builder'
 import { useEinzelfutter, type Einzelfutter } from '@/lib/api/futter'
+import { toast } from '@/hooks/use-toast'
 import { formatCurrency, formatNumber } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
@@ -161,16 +162,14 @@ export default function EinzelfuttermittelListePage(): JSX.Element {
     if (item?.id) navigate(`/futtermittel/einzelfuttermittel/stamm/${item.id}`)
   }
 
-  const handleDelete = (_item: any) => alert('Löschen wird in dieser Ansicht noch nicht unterstützt')
+  const handleDelete = (_item: any) => toast({ title: 'Nicht verfügbar', description: 'Löschen über die Liste wird noch nicht unterstützt.' })
 
   const handleExport = () => {
-    // Export-Logik hier implementieren
-    alert('Export-Funktion wird implementiert')
+    toast({ title: 'Export', description: 'Export-Funktion wird in Kürze bereitgestellt.' })
   }
 
   const handleImport = () => {
-    // Import-Logik hier implementieren
-    alert('Import-Funktion wird implementiert')
+    toast({ title: 'Import', description: 'Import-Funktion wird in Kürze bereitgestellt.' })
   }
 
   return (

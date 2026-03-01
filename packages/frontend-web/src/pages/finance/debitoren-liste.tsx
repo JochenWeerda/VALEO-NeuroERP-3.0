@@ -8,7 +8,7 @@ import { formatCurrency, formatNumber } from '@/components/mask-builder/utils/fo
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
 import { toast } from '@/hooks/use-toast'
-import { apiClient as axiosClient } from '@/lib/axios'
+import { api } from '@/lib/axios'
 
 // API Client für Debitoren (Liste)
 const apiClient = createApiClient('/api/finance')
@@ -194,7 +194,7 @@ const createDebitorenListConfig = (t: any): ListConfig => ({
 
 async function triggerExportDownload(entity: string, format: string, toastFn: (opts: { title: string; description?: string; variant?: 'destructive' }) => void): Promise<void> {
   try {
-    const res = await axiosClient.post('/api/v1/export/list', { entity, format }, { responseType: 'blob' })
+    const res = await api.post('/api/v1/export/list', { entity, format }, { responseType: 'blob' })
     const blob = res.data as Blob
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -225,7 +225,7 @@ export default function DebitorenListePage(): JSX.Element {
           await apiClient.delete(`/debitoren/${item.id}`)
           loadData() // Liste neu laden
         } catch (error) {
-          alert(t('crud.messages.deleteError'))
+          toast({ title: t('common.error', { defaultValue: 'Fehler' }), description: t('crud.messages.deleteError', { defaultValue: 'Löschen fehlgeschlagen.' }), variant: 'destructive' })
         }
       }
     }
@@ -257,7 +257,7 @@ export default function DebitorenListePage(): JSX.Element {
     const onDunning = async (items: any[]) => {
       if (items.length === 0) { toast({ title: t('crud.list.noSelection') ?? 'Keine Auswahl' }); return }
       try {
-        await axiosClient.post('/api/v1/finance/dunning/run', { as_of_date: new Date().toISOString().slice(0, 10) })
+        await api.post('/api/v1/finance/dunning/run', { as_of_date: new Date().toISOString().slice(0, 10) })
         toast({ title: 'Mahnlauf gestartet', description: 'Mahnungen werden erstellt.' })
         loadData()
       } catch (e: any) {
@@ -268,7 +268,7 @@ export default function DebitorenListePage(): JSX.Element {
       if (items.length === 0) { toast({ title: t('crud.list.noSelection') ?? 'Keine Auswahl' }); return }
       try {
         for (const item of items) {
-          if (item.id) await axiosClient.patch(`/api/v1/finance/debtors/${item.id}`, { is_active: false })
+          if (item.id) await api.patch(`/api/v1/finance/debtors/${item.id}`, { is_active: false })
         }
         toast({ title: 'Gesperrt', description: `${items.length} Debitor(en) gesperrt.`, variant: 'destructive' })
         loadData()
@@ -316,7 +316,7 @@ export default function DebitorenListePage(): JSX.Element {
       onEdit={handleEdit}
       onDelete={handleDelete}
       onExport={handleExport}
-      onImport={() => alert(t('crud.messages.importFunctionInfo'))}
+      onImport={() => toast({ title: 'Import', description: t('crud.messages.importFunctionInfo', { defaultValue: 'Import-Funktion wird in Kürze bereitgestellt.' }) })}
       isLoading={loading}
     />
   )

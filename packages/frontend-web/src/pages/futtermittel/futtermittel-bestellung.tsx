@@ -4,6 +4,7 @@ import { Wizard } from '@/components/mask-builder'
 import { useMaskData, useMaskValidation } from '@/components/mask-builder/hooks'
 import { WizardConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
+import { toast } from '@/hooks/use-toast'
 
 // Zod-Schema für Bestellung
 const bestellungSchema = z.object({
@@ -175,10 +176,10 @@ export default function FuttermittelBestellungPage(): JSX.Element {
     setLoading(true)
     try {
       await saveData(formData)
-      alert('Bestellung wurde erfolgreich abgesendet!')
+      toast({ title: 'Bestellung abgesendet', description: 'Die Bestellung wurde erfolgreich übermittelt.' })
       navigate('/futtermittel/bestellungen')
     } catch (error) {
-      alert('Fehler beim Absenden der Bestellung')
+      toast({ title: 'Fehler', description: 'Bestellung konnte nicht abgesendet werden.', variant: 'destructive' })
     } finally {
       setLoading(false)
     }

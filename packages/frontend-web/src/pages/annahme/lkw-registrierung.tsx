@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useToast } from '@/hooks/use-toast'
 import { Wizard } from '@/components/patterns/Wizard'
+import { api } from '@/lib/axios'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent } from '@/components/ui/card'
@@ -34,11 +35,27 @@ export default function LKWRegistrierungPage(): JSX.Element {
   }
 
   async function handleSubmit(): Promise<void> {
-    toast({
-      title: 'LKW registriert',
-      description: `${lkw.kennzeichen} — ${lkw.artikel} — wurde in die Warteschlange eingereiht.`,
-    })
-    navigate('/annahme/warteschlange')
+    try {
+      await api.post('/api/v1/annahme/lkw-registrierung', {
+        kennzeichen: lkw.kennzeichen,
+        lieferant: lkw.lieferant,
+        lieferschein_nr: lkw.lieferscheinNr,
+        artikel: lkw.artikel,
+        ankunftszeit: lkw.ankunftszeit || new Date().toISOString(),
+        prioritaet: lkw.prioritaet,
+      })
+      toast({
+        title: 'LKW registriert',
+        description: `${lkw.kennzeichen} — ${lkw.artikel} — wurde in die Warteschlange eingereiht.`,
+      })
+      navigate('/annahme/warteschlange')
+    } catch (e: any) {
+      toast({
+        title: 'Registrierung fehlgeschlagen',
+        description: e.response?.data?.detail ?? e.message,
+        variant: 'destructive',
+      })
+    }
   }
 
   const steps = [

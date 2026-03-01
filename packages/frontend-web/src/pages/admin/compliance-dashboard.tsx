@@ -8,6 +8,8 @@ import {
   TrendingUp, Download, XCircle,
 } from 'lucide-react'
 import { apiClient } from '@/lib/api-client'
+import { api } from '@/lib/axios'
+import { useToast } from '@/hooks/use-toast'
 
 // ─── API-Typen ───────────────────────────────────────────────────────────────
 
@@ -62,6 +64,7 @@ const scoreColor = (score: number) =>
 // ─── Komponente ──────────────────────────────────────────────────────────────
 
 export default function ComplianceDashboardPage(): JSX.Element {
+  const { toast } = useToast()
   const { data: stats, isLoading: loadStats } = useQuery({
     queryKey: ['compliance', 'stats'],
     queryFn: async () => (await apiClient.get<ComplianceStats>('/api/v1/compliance/stats')).data,
@@ -88,6 +91,26 @@ export default function ComplianceDashboardPage(): JSX.Element {
   })
 
   const isLoading = loadStats || loadSachkunde || loadQs || loadZulassungen || loadCross
+
+  const handleReportPdf = async () => {
+    try {
+      const res = await api.get('/api/v1/compliance/report-pdf', { responseType: 'blob' })
+      const blob = res.data as Blob
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `compliance-report-${new Date().toISOString().slice(0, 10)}.pdf`
+      a.click()
+      URL.revokeObjectURL(url)
+      toast({ title: 'Compliance-Report', description: 'Download gestartet.' })
+    } catch (e: any) {
+      toast({ title: 'Download fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+    }
+  }
+
+  const handleDetails = (action: { id: string; anforderung: string; bereich: string }) => {
+    toast({ title: action.anforderung, description: `${action.bereich} — Detailansicht in Kürze verfügbar.` })
+  }
 
   // ── Berechnungen ──────────────────────────────────────────────────────────
 
@@ -171,7 +194,7 @@ export default function ComplianceDashboardPage(): JSX.Element {
           </h1>
           <p className="text-muted-foreground">Übersicht aller Compliance-Anforderungen</p>
         </div>
-        <Button className="gap-2" disabled={isLoading}>
+        <Button className="gap-2" disabled={isLoading} onClick={handleReportPdf}>
           <Download className="h-4 w-4" />
           Compliance-Report (PDF)
         </Button>
@@ -277,7 +300,7 @@ export default function ComplianceDashboardPage(): JSX.Element {
                     {action.erfuellt
                       ? <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Erfüllt</Badge>
                       : <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Offen</Badge>}
-                    <Button variant="ghost" size="sm">Details</Button>
+                    <Button variant="ghost" size="sm" onClick={() => handleDetails(action)}>Details</Button>
                   </div>
                 </div>
               ))}

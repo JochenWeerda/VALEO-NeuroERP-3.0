@@ -5,6 +5,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { toast } from '@/hooks/use-toast';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -209,7 +210,7 @@ export default function FieldServiceTasksPage(): JSX.Element {
 
       <Toolbar
         onSearch={setQuery}
-        onCopilot={() => window.alert('Copilot analyzing tasks...')}
+        onCopilot={() => toast({ title: 'Copilot', description: 'KI-Analyse für Außendienst-Aufgaben wird in Kürze verfügbar.' })}
       />
 
       <Card className="p-4">

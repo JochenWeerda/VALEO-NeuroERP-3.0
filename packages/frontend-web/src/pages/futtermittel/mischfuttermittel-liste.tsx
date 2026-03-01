@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ListReport } from '@/components/mask-builder'
+import { toast } from '@/hooks/use-toast'
 import { useMischfutter, type Mischfutter } from '@/lib/api/futter'
 import { formatCurrency, formatNumber } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
@@ -226,10 +227,10 @@ export default function MischfuttermittelListePage(): JSX.Element {
     if (item?.id) navigate(`/futtermittel/mischfuttermittel/stamm/${item.id}`)
   }
 
-  const handleDelete = (_item: any) => alert('Löschen wird in dieser Ansicht noch nicht unterstützt')
+  const handleDelete = (_item: any) => toast({ title: 'Nicht verfügbar', description: 'Löschen über die Liste wird noch nicht unterstützt.' })
 
   const handleExport = () => {
-    alert('Export-Funktion wird implementiert')
+    toast({ title: 'Export', description: 'Export-Funktion wird in Kürze bereitgestellt.' })
   }
 
   return (
@@ -241,7 +242,7 @@ export default function MischfuttermittelListePage(): JSX.Element {
       onEdit={handleEdit}
       onDelete={handleDelete}
       onExport={handleExport}
-      onImport={() => alert('Import-Funktion wird implementiert')}
+      onImport={() => toast({ title: 'Import', description: 'Import-Funktion wird in Kürze bereitgestellt.' })}
       isLoading={isLoading}
     />
   )

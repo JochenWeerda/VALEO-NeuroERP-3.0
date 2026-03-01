@@ -83,7 +83,10 @@
       "Bash(docker restart:*)",
       "Bash(powershell -command \"Get-Process -Id 59296 | Select-Object Name, Path, CommandLine\" 2>&1 || tasklist /fi \"PID eq 59296\" 2>&1)",
       "mcp__MCP_DOCKER__browser_snapshot",
-      "Bash(tasklist:*)"
+      "Bash(tasklist:*)",
+      "Bash(cd C:/Users/Jochen/VALEO-NeuroERP-3.0/packages/frontend-web && npm run build 2>&1)",
+      "WebFetch(domain:mcpmarket.com)",
+      "Bash(cd \"C:\\\\Users\\\\Jochen\\\\VALEO-NeuroERP-3.0\\\\packages\\\\frontend-web\" && npm run build 2>&1)"
     ]
   }
 }

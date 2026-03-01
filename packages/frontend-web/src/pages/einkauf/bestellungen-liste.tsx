@@ -10,7 +10,7 @@ import { getEntityTypeLabel, getStatusLabel } from '@/features/crud/utils/i18n-h
 import { usePurchaseOrders, useApprovePurchaseOrder, useCancelPurchaseOrder, INCOTERM_OPTIONS } from '@/lib/api/purchase-orders'
 
 // Konfiguration für Bestellungen ListReport (wird in Komponente mit i18n erstellt)
-const createBestellungenConfig = (t: any, entityTypeLabel: string): ListConfig => ({
+const createBestellungenConfig = (t: any, entityTypeLabel: string, onBulkPrint?: () => void): ListConfig => ({
   title: entityTypeLabel,
   titleKey: 'crud.list.title',
   subtitle: t('crud.subtitles.managePurchaseOrders'),
@@ -125,7 +125,7 @@ const createBestellungenConfig = (t: any, entityTypeLabel: string): ListConfig =
       label: t('crud.actions.print'),
       labelKey: 'crud.actions.print',
       type: 'secondary',
-      onClick: () => { /* Druck-Funktion - noch nicht implementiert */ }
+      onClick: () => { onBulkPrint?.() }
     }
   ],
   defaultSort: { field: 'createdAt', direction: 'desc' },
@@ -149,7 +149,10 @@ export default function BestellungenListePage(): JSX.Element {
   const navigate = useNavigate()
   const entityType = 'purchaseOrder'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Bestellung')
-  const bestellungenConfig = createBestellungenConfig(t, entityTypeLabel)
+  const handleBulkPrint = () => {
+    toast({ title: t('crud.actions.print'), description: 'Druck wird vorbereitet. Bitte Bestellungen in der Liste auswählen und erneut klicken, sobald der Druckdialog verfügbar ist.' })
+  }
+  const bestellungenConfig = createBestellungenConfig(t, entityTypeLabel, handleBulkPrint)
 
   const { data: orders, isLoading } = usePurchaseOrders()
   const approveMutation = useApprovePurchaseOrder()

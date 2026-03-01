@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { useToast } from '@/hooks/use-toast'
 import { Badge } from '@/components/ui/badge'
 import { CheckCircle2, ExternalLink, Loader2 } from 'lucide-react'
@@ -220,11 +220,10 @@ export default function DmsIntegrationCard(): JSX.Element {
             </div>
           </div>
         ) : (
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>Jetzt einrichten</Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[560px]">
+          <>
+            <Button onClick={() => setDialogOpen(true)}>Jetzt einrichten</Button>
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <DialogContent className="sm:max-w-[560px]">
               <DialogHeader>
                 <DialogTitle>Mayan-DMS verbinden</DialogTitle>
               </DialogHeader>
@@ -308,7 +307,8 @@ export default function DmsIntegrationCard(): JSX.Element {
                 </Button>
               </DialogFooter>
             </DialogContent>
-          </Dialog>
+            </Dialog>
+          </>
         )}
       </CardContent>
     </Card>

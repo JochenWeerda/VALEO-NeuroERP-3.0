@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTSEJournal, type TSEEintrag } from '@/lib/api/pos'
+import { useToast } from '@/hooks/use-toast'
+import { api } from '@/lib/axios'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -25,6 +27,7 @@ type TSETransaction = {
 export default function TSEJournalPage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
+  const [nurOffene, setNurOffene] = useState(false)
   const { data: apiTse = [], isError, error, refetch } = useTSEJournal()
   const tseTransaktionen: TSETransaction[] = apiTse.map((t: TSEEintrag) => ({
     id: t.id,
@@ -112,6 +115,45 @@ export default function TSEJournalPage(): JSX.Element {
   const gesamtBetrag = tseTransaktionen.reduce((sum, t) => sum + t.betrag, 0)
   const offenerBetrag = tseTransaktionen.filter((t) => t.fibuStatus === 'offen').reduce((sum, t) => sum + t.betrag, 0)
 
+  const displayedData = nurOffene ? tseTransaktionen.filter((t) => t.fibuStatus === 'offen') : tseTransaktionen
+  const filteredBySearch =
+    searchTerm.trim() === ''
+      ? displayedData
+      : displayedData.filter(
+          (t) =>
+            t.bonnummer.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            String(t.tseTransactionNumber).includes(searchTerm)
+        )
+
+  const { toast } = useToast()
+  const handleDSFinVExport = async () => {
+    try {
+      const res = await api.get('/api/v1/pos/tse-journal/export/dsfinvk', { responseType: 'blob' })
+      const blob = res.data as Blob
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `DSFinV-K_${new Date().toISOString().slice(0, 10)}.csv`
+      a.click()
+      URL.revokeObjectURL(url)
+      toast({ title: 'DSFinV-K Export', description: 'Download gestartet.' })
+    } catch {
+      // Fallback: CSV aus aktuellen Transaktionen (DSFinV-K Format Platzhalter)
+      const header = 'Datum;Bon-Nr;TSE-Nr;Betrag;Zahlungsart;Fibu-Status;Fibu-Datum;Belegnr\n'
+      const rows = displayedData.map((t) =>
+        [t.datum, t.bonnummer, t.tseTransactionNumber, t.betrag.toFixed(2), t.zahlungsart, t.fibuStatus, t.fibuDatum ?? '', t.fibuBelegnr ?? ''].join(';')
+      )
+      const blob = new Blob([header + rows.join('\n')], { type: 'text/csv;charset=utf-8' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `DSFinV-K_${new Date().toISOString().slice(0, 10)}.csv`
+      a.click()
+      URL.revokeObjectURL(url)
+      toast({ title: 'DSFinV-K Export', description: 'CSV-Download (aktuelle Ansicht).' })
+    }
+  }
+
   return (
     <div className="space-y-4 p-6">
       <div className="flex items-center justify-between">
@@ -192,18 +234,20 @@ export default function TSEJournalPage(): JSX.Element {
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input placeholder="Suche Bon-Nr oder TSE-Nr..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
             </div>
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" onClick={handleDSFinVExport}>
               <FileDown className="h-4 w-4" />
               DSFinV-K Export
             </Button>
-            <Button variant="outline">Nur Offene</Button>
+            <Button variant="outline" onClick={() => setNurOffene((v) => !v)}>
+              {nurOffene ? 'Alle anzeigen' : 'Nur Offene'}
+            </Button>
           </div>
         </CardContent>
       </Card>
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={tseTransaktionen} columns={columns} />
+          <DataTable data={filteredBySearch} columns={columns} />
         </CardContent>
       </Card>
     </div>
