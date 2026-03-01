@@ -2153,3 +2153,74 @@ async def create_tagesabschluss(
         status="gebucht",
         belegnummer=belegnummer,
     )
+
+
+# ---------------------------------------------------------------------------
+# Setup Firmenstammdaten
+# ---------------------------------------------------------------------------
+
+_FIRMA_KEY = "firma.stammdaten"
+_FIRMA_CATEGORY = "setup"
+
+
+@router.get("/setup/firma", response_model=dict, tags=["setup"])
+async def get_firma(
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Firmenstammdaten laden aus domain_shared.system_properties."""
+    row = db.execute(
+        text("""
+            SELECT property_value FROM domain_shared.system_properties
+            WHERE tenant_id = :tid AND property_key = :key
+            LIMIT 1
+        """),
+        {"tid": tenant_id, "key": _FIRMA_KEY},
+    ).first()
+    if row and row[0]:
+        try:
+            return json.loads(row[0])
+        except (ValueError, TypeError):
+            pass
+    # Defaults wenn noch nicht gespeichert
+    return {}
+
+
+@router.put("/setup/firma", response_model=dict, tags=["setup"])
+async def save_firma(
+    payload: dict = Body(...),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Firmenstammdaten speichern in domain_shared.system_properties (UPSERT)."""
+    firma_json = json.dumps(payload, ensure_ascii=False)
+    existing = db.execute(
+        text("""
+            SELECT id FROM domain_shared.system_properties
+            WHERE tenant_id = :tid AND property_key = :key
+            LIMIT 1
+        """),
+        {"tid": tenant_id, "key": _FIRMA_KEY},
+    ).first()
+
+    if existing:
+        db.execute(
+            text("""
+                UPDATE domain_shared.system_properties
+                SET property_value = :val
+                WHERE tenant_id = :tid AND property_key = :key
+            """),
+            {"tid": tenant_id, "key": _FIRMA_KEY, "val": firma_json},
+        )
+    else:
+        prop_id = str(uuid4())
+        db.execute(
+            text("""
+                INSERT INTO domain_shared.system_properties
+                (id, tenant_id, property_key, property_value, property_type, category)
+                VALUES (:id, :tid, :key, :val, 'json', :cat)
+            """),
+            {"id": prop_id, "tid": tenant_id, "key": _FIRMA_KEY, "val": firma_json, "cat": _FIRMA_CATEGORY},
+        )
+    db.commit()
+    return {"ok": True, "saved": True}

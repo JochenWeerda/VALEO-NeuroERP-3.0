@@ -1,10 +1,13 @@
 import { useState } from 'react'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Building2, Save } from 'lucide-react'
+import { apiClient } from '@/lib/api-client'
+import { useToast } from '@/hooks/use-toast'
 
 type Firmendaten = {
   name: string
@@ -24,27 +27,53 @@ type Firmendaten = {
   bic: string
 }
 
+const DEFAULTS: Firmendaten = {
+  name: 'VALEO Landhandel GmbH',
+  rechtsform: 'GmbH',
+  strasse: 'Hauptstraße 42',
+  plz: '27356',
+  ort: 'Rotenburg (Wümme)',
+  telefon: '+49 (0) 4261 12345',
+  email: 'info@valeo-landhandel.de',
+  website: 'www.valeo-landhandel.de',
+  ustid: 'DE123456789',
+  steuernr: '24/123/45678',
+  handelsregister: 'HRB 12345',
+  geschaeftsfuehrer: '',
+  bankname: '',
+  iban: '',
+  bic: '',
+}
+
 export default function FirmaSetupPage(): JSX.Element {
-  const [firma, setFirma] = useState<Firmendaten>({
-    name: 'VALERO Landhandel GmbH',
-    rechtsform: 'GmbH',
-    strasse: 'Hauptstraße 42',
-    plz: '27356',
-    ort: 'Rotenburg (Wümme)',
-    telefon: '+49 (0) 4261 12345',
-    email: 'info@valero-landhandel.de',
-    website: 'www.valero-landhandel.de',
-    ustid: 'DE123456789',
-    steuernr: '24/123/45678',
-    handelsregister: 'HRB 12345',
-    geschaeftsfuehrer: 'Max Mustermann',
-    bankname: 'Sparkasse Rotenburg-Bremervörde',
-    iban: 'DE89 2415 0000 0000 1234 56',
-    bic: 'BRLADE21ROB',
+  const { toast } = useToast()
+  const [firma, setFirma] = useState<Firmendaten>(DEFAULTS)
+
+  useQuery({
+    queryKey: ['setup', 'firma'],
+    queryFn: async () => {
+      const data = await apiClient.get<Firmendaten>('/api/v1/setup/firma')
+      if (data && Object.keys(data).length > 0) {
+        setFirma({ ...DEFAULTS, ...data })
+      }
+      return data
+    },
+  })
+
+  const saveMutation = useMutation({
+    mutationFn: async () => {
+      await apiClient.put('/api/v1/setup/firma', firma)
+    },
+    onSuccess: () => {
+      toast({ title: 'Firmendaten gespeichert', description: firma.name })
+    },
+    onError: () => {
+      toast({ title: 'Fehler beim Speichern', variant: 'destructive' })
+    },
   })
 
   function handleSave(): void {
-    console.log('Firmendaten gespeichert:', firma)
+    saveMutation.mutate()
   }
 
   return (
@@ -174,9 +203,9 @@ export default function FirmaSetupPage(): JSX.Element {
       {/* Actions */}
       <div className="flex justify-end gap-4">
         <Button variant="outline">Abbrechen</Button>
-        <Button onClick={handleSave} className="gap-2">
+        <Button onClick={handleSave} disabled={saveMutation.isPending} className="gap-2">
           <Save className="h-4 w-4" />
-          Speichern
+          {saveMutation.isPending ? 'Speichere...' : 'Speichern'}
         </Button>
       </div>
     </div>
