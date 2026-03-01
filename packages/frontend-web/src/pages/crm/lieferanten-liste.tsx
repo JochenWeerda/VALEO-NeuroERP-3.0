@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -6,6 +7,7 @@ import { formatCurrency, formatNumber } from '@/components/mask-builder/utils/fo
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
 import { apiClient } from '@/lib/api-client'
+import { api } from '@/lib/axios'
 import { toast } from '@/hooks/use-toast'
 
 // Konfiguration für Lieferanten ListReport
@@ -258,7 +260,7 @@ export default function LieferantenListePage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const lieferantenListConfig = createLieferantenListConfig(t)
+  const baseConfig = createLieferantenListConfig(t)
 
   const { data: queryData, isLoading } = useQuery({
     queryKey: ['crm', 'lieferanten'],
@@ -281,6 +283,88 @@ export default function LieferantenListePage(): JSX.Element {
   const total = queryData?.total || 0
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['crm', 'lieferanten'] })
+
+  const lieferantenListConfig = useMemo(() => {
+    const onExportBulk = async (items: any[]) => {
+      const exportData = items.length > 0 ? items : data
+      if (exportData.length === 0) {
+        toast({ title: t('crud.list.noSelection', { defaultValue: 'Keine Auswahl' }) })
+        return
+      }
+      const header = 'Firma;Ort;Land;E-Mail;Zahlungsbedingungen;Rabatt;Status\n'
+      const rows = exportData.map((l: any) =>
+        `"${l.firma}";"${l.plz || ''} ${l.ort || ''}";"${l.land || ''}";"${l.email || ''}";"${l.zahlungsbedingungen || '30 Tage'}";"${l.rabatt || 0}";"${l.status || 'aktiv'}"`
+      ).join('\n')
+      const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8;' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `lieferanten_${new Date().toISOString().slice(0, 10)}.csv`
+      a.click()
+      URL.revokeObjectURL(url)
+      toast({ title: 'Export erstellt', description: `${exportData.length} Lieferanten exportiert.` })
+    }
+
+    const onNewsletter = async (items: any[]) => {
+      if (items.length === 0) {
+        toast({ title: t('crud.list.noSelection', { defaultValue: 'Keine Auswahl' }) })
+        return
+      }
+      const emails = items.map((l: any) => l.email).filter(Boolean)
+      if (emails.length === 0) {
+        toast({ title: 'Keine E-Mail-Adressen', description: 'Für die ausgewählten Lieferanten sind keine E-Mail-Adressen hinterlegt.', variant: 'destructive' })
+        return
+      }
+      try {
+        await api.post('/api/v1/crm/kommunikation/newsletter', {
+          empfaenger: emails,
+          typ: 'lieferanten',
+          betreff: 'Information von VALEO',
+        })
+        toast({ title: 'Newsletter versendet', description: `Versand an ${emails.length} Empfänger initiiert.` })
+      } catch (e: any) {
+        toast({ title: 'Versand fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+      }
+    }
+
+    const onAudit = async (items: any[]) => {
+      if (items.length === 0) {
+        toast({ title: t('crud.list.noSelection', { defaultValue: 'Keine Auswahl' }) })
+        return
+      }
+      // Audit-Planung: navigiere zu Audit-Erstellung mit vorausgefüllten Lieferanten
+      const ids = items.map((l: any) => l.id).filter(Boolean)
+      navigate(`/crm/audits/neu?lieferanten=${ids.join(',')}`)
+    }
+
+    const onBlock = async (items: any[]) => {
+      if (items.length === 0) {
+        toast({ title: t('crud.list.noSelection', { defaultValue: 'Keine Auswahl' }) })
+        return
+      }
+      try {
+        await Promise.all(
+          items.map((l: any) =>
+            api.patch(`/api/v1/crm/lieferanten/${l.id}`, { status: 'gesperrt' })
+          )
+        )
+        toast({ title: 'Gesperrt', description: `${items.length} Lieferant(en) gesperrt.`, variant: 'destructive' })
+        invalidate()
+      } catch (e: any) {
+        toast({ title: 'Fehler beim Sperren', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+      }
+    }
+
+    return {
+      ...baseConfig,
+      bulkActions: [
+        { ...baseConfig.bulkActions[0], onClick: onExportBulk },
+        { ...baseConfig.bulkActions[1], onClick: onNewsletter },
+        { ...baseConfig.bulkActions[2], onClick: onAudit },
+        { ...baseConfig.bulkActions[3], onClick: onBlock },
+      ],
+    }
+  }, [t, data])
 
   const handleCreate = () => {
     navigate('/crm/lieferanten/stamm/new')

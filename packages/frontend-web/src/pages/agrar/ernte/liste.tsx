@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useErnten, type Ernte } from '@/lib/api/agrar'
+import { useToast } from '@/hooks/use-toast'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -12,6 +13,7 @@ import { Calendar, FileDown, Plus, Search } from 'lucide-react'
 
 export default function ErnteListePage(): JSX.Element {
   const navigate = useNavigate()
+  const { toast } = useToast()
   const [searchTerm, setSearchTerm] = useState('')
   const { data, isLoading, isError, error, refetch } = useErnten()
 
@@ -60,6 +62,26 @@ export default function ErnteListePage(): JSX.Element {
   ]
 
   const gesamtMenge = ernten.reduce((sum, e) => sum + e.menge, 0)
+  const filteredErnten = searchTerm.trim()
+    ? ernten.filter((e) =>
+        [e.schlag, e.kultur, e.status].some((v) => (v ?? '').toLowerCase().includes(searchTerm.toLowerCase()))
+      )
+    : ernten
+
+  const handleExport = () => {
+    const header = 'Schlag;Kultur;Datum;Menge_t;Ertrag_dt_ha;Status\n'
+    const rows = filteredErnten.map((e) =>
+      [e.schlag, e.kultur, e.datum, e.menge, e.ertrag, e.status].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(';')
+    )
+    const blob = new Blob([header + rows.join('\n')], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `Ernte_${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast({ title: 'Export', description: `${filteredErnten.length} Ernten exportiert.` })
+  }
 
   return (
     <div className="space-y-4 p-6">
@@ -125,7 +147,7 @@ export default function ErnteListePage(): JSX.Element {
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input placeholder="Suche..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
             </div>
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" onClick={handleExport}>
               <FileDown className="h-4 w-4" />
               Export
             </Button>
@@ -135,7 +157,7 @@ export default function ErnteListePage(): JSX.Element {
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={ernten} columns={columns} />
+          <DataTable data={filteredErnten} columns={columns} />
         </CardContent>
       </Card>
     </div>

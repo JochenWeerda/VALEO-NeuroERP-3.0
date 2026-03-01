@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useBodenproben, type Bodenprobe } from '@/lib/api/agrar'
+import { useToast } from '@/hooks/use-toast'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -12,6 +13,7 @@ import { Beaker, FileDown, Plus, Search } from 'lucide-react'
 
 export default function BodenprobenPage(): JSX.Element {
   const navigate = useNavigate()
+  const { toast } = useToast()
   const [searchTerm, setSearchTerm] = useState('')
   const { data, isLoading, isError, error, refetch } = useBodenproben()
 
@@ -29,6 +31,26 @@ export default function BodenprobenPage(): JSX.Element {
   }
 
   const proben: Bodenprobe[] = data ?? []
+  const filteredProben = searchTerm.trim()
+    ? proben.filter((p) =>
+        [p.schlag, p.labor, p.status].some((v) => (v ?? '').toLowerCase().includes(searchTerm.toLowerCase()))
+      )
+    : proben
+
+  const handleExport = () => {
+    const header = 'Schlag;Datum;Labor;N;P;K;pH;Status\n'
+    const rows = filteredProben.map((p) =>
+      [p.schlag, p.datum, p.labor ?? '', p.n, p.p, p.k, p.ph, p.status].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(';')
+    )
+    const blob = new Blob([header + rows.join('\n')], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `Bodenproben_${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast({ title: 'Export', description: `${filteredProben.length} Bodenproben exportiert.` })
+  }
 
   const columns = [
     {
@@ -116,7 +138,7 @@ export default function BodenprobenPage(): JSX.Element {
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input placeholder="Suche..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
             </div>
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" onClick={handleExport}>
               <FileDown className="h-4 w-4" />
               Export
             </Button>
@@ -126,7 +148,7 @@ export default function BodenprobenPage(): JSX.Element {
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={proben} columns={columns} />
+          <DataTable data={filteredProben} columns={columns} />
         </CardContent>
       </Card>
     </div>

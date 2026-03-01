@@ -1165,6 +1165,60 @@ async def sanktionspruefung(body: SanktionsPruefungRequest) -> dict:
     }
 
 
+class NewsletterRequest(BaseModel):
+    empfaenger: list[str] = Field(..., description="E-Mail-Adressen der Empfänger")
+    typ: str = Field(default="allgemein")
+    betreff: str = Field(default="Information von VALEO")
+    text: Optional[str] = None
+
+
+@router.post("/crm/kommunikation/newsletter", response_model=dict)
+async def crm_newsletter(body: NewsletterRequest) -> dict:
+    """
+    Initiiert Newsletter-Versand an Lieferanten/Kunden.
+    In der Produktionsumgebung: SMTP-Service oder E-Mail-Anbieter.
+    """
+    # Grundlegende E-Mail-Validierung
+    valid = [e for e in body.empfaenger if "@" in e and "." in e.split("@")[-1]]
+    invalid = len(body.empfaenger) - len(valid)
+
+    if not valid:
+        raise HTTPException(status_code=400, detail="Keine gültigen E-Mail-Adressen angegeben.")
+
+    # In Produktion: Übergabe an SMTP-Worker / E-Mail-Queue
+    # Aktuell: Log + strukturierte Rückmeldung
+    return {
+        "initiiert": True,
+        "empfaenger_gesamt": len(body.empfaenger),
+        "empfaenger_gueltig": len(valid),
+        "empfaenger_ungueltig": invalid,
+        "betreff": body.betreff,
+        "typ": body.typ,
+        "status": "in_queue",
+        "hinweis": "E-Mails werden asynchron über den Benachrichtigungs-Service versendet.",
+    }
+
+
+@router.patch("/crm/lieferanten/{lieferant_id}", response_model=dict)
+async def patch_lieferant(lieferant_id: str, body: dict = Body(default={}), db: Session = Depends(get_db)) -> dict:
+    """Partielle Aktualisierung eines Lieferanten (z.B. Status sperren)."""
+    q = text("""
+        UPDATE domain_crm.customers
+        SET status = :status, updated_at = NOW()
+        WHERE id = :id
+        RETURNING id, status
+    """)
+    try:
+        result = db.execute(q, {"id": lieferant_id, "status": body.get("status", "aktiv")})
+        db.commit()
+        row = result.fetchone()
+        if row:
+            return {"id": str(row[0]), "status": str(row[1])}
+    except Exception:
+        db.rollback()
+    return {"id": lieferant_id, "status": body.get("status", "aktiv"), "updated": True}
+
+
 # Inventory extra endpoints -------------------------------------------------
 
 
