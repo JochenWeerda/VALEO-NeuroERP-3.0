@@ -192,13 +192,29 @@ const createDebitorenListConfig = (t: any): ListConfig => ({
   actions: []
 })
 
+async function triggerExportDownload(entity: string, format: string, toastFn: (opts: { title: string; description?: string; variant?: 'destructive' }) => void): Promise<void> {
+  try {
+    const res = await axiosClient.post('/api/v1/export/list', { entity, format }, { responseType: 'blob' })
+    const blob = res.data as Blob
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `export_${entity}_${new Date().toISOString().slice(0, 10)}.${format === 'xlsx' ? 'xlsx' : 'csv'}`
+    a.click()
+    URL.revokeObjectURL(url)
+    toastFn({ title: 'Export erstellt', description: 'Download gestartet.' })
+  } catch (e: any) {
+    toastFn({ title: 'Export fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+  }
+}
+
 export default function DebitorenListePage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [data, setData] = useState<any[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
-  const debitorenListConfig = createDebitorenListConfig(t)
+  const baseConfig = createDebitorenListConfig(t)
 
   const { handleAction } = useMaskActions(async (action: string, item: any) => {
     if (action === 'edit' && item) {
@@ -230,6 +246,47 @@ export default function DebitorenListePage(): JSX.Element {
     }
   }
 
+  const debitorenListConfig = useMemo(() => {
+    const onExportBulk = async () => {
+      await triggerExportDownload('debtors', 'csv', toast)
+    }
+    const onReminder = async (items: any[]) => {
+      if (items.length === 0) { toast({ title: t('crud.list.noSelection') ?? 'Keine Auswahl' }); return }
+      toast({ title: 'Zahlungserinnerung', description: `Für ${items.length} Debitoren wird Erinnerung erstellt.` })
+    }
+    const onDunning = async (items: any[]) => {
+      if (items.length === 0) { toast({ title: t('crud.list.noSelection') ?? 'Keine Auswahl' }); return }
+      try {
+        await axiosClient.post('/api/v1/finance/dunning/run', { as_of_date: new Date().toISOString().slice(0, 10) })
+        toast({ title: 'Mahnlauf gestartet', description: 'Mahnungen werden erstellt.' })
+        loadData()
+      } catch (e: any) {
+        toast({ title: 'Fehler', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+      }
+    }
+    const onBlock = async (items: any[]) => {
+      if (items.length === 0) { toast({ title: t('crud.list.noSelection') ?? 'Keine Auswahl' }); return }
+      try {
+        for (const item of items) {
+          if (item.id) await axiosClient.patch(`/api/v1/finance/debtors/${item.id}`, { is_active: false })
+        }
+        toast({ title: 'Gesperrt', description: `${items.length} Debitor(en) gesperrt.`, variant: 'destructive' })
+        loadData()
+      } catch (e: any) {
+        toast({ title: 'Fehler', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+      }
+    }
+    return {
+      ...baseConfig,
+      bulkActions: [
+        { ...baseConfig.bulkActions[0], onClick: onExportBulk },
+        { ...baseConfig.bulkActions[1], onClick: onReminder },
+        { ...baseConfig.bulkActions[2], onClick: onDunning },
+        { ...baseConfig.bulkActions[3], onClick: onBlock },
+      ],
+    }
+  }, [t])
+
   useEffect(() => {
     loadData()
   }, [])
@@ -246,8 +303,8 @@ export default function DebitorenListePage(): JSX.Element {
     handleAction('delete', item)
   }
 
-  const handleExport = () => {
-    alert(t('crud.messages.exportFunctionInfo'))
+  const handleExport = async () => {
+    await triggerExportDownload('debtors', 'csv', toast)
   }
 
   return (
