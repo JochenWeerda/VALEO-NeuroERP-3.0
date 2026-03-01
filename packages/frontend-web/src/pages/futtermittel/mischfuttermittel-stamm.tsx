@@ -5,6 +5,7 @@ import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mas
 import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
 import { toast } from '@/hooks/use-toast'
+import { api } from '@/lib/axios'
 
 // Zod-Schema für Mischfuttermittel
 const mischfuttermittelSchema = z.object({
@@ -289,7 +290,27 @@ export default function MischfuttermittelStammPage(): JSX.Element {
         // Error wird bereits in useMaskData behandelt
       }
     } else if (action === 'calculate') {
-      toast({ title: 'Nährwertberechnung', description: 'Berechnung aus Rezeptur-Komponenten wird in Kürze bereitgestellt.' })
+      const komponenten = (formData.komponenten as Array<{ futtermittelId: string; anteil: number }>) ?? []
+      if (komponenten.length === 0) {
+        toast({ title: 'Keine Komponenten', description: 'Bitte zuerst Rezeptur-Komponenten erfassen.', variant: 'destructive' })
+        return
+      }
+      try {
+        const res = await api.post('/api/v1/futter/mischfuttermittel/naehrwerte/berechnen', { komponenten })
+        const result = res.data as {
+          gesamtRohprotein: number
+          gesamtRohfett: number
+          gesamtRohfaser: number
+          gesamtRohasche: number
+          umsetzbareEnergie: number
+        }
+        toast({
+          title: 'Nährwertberechnung abgeschlossen',
+          description: `Rohprotein: ${result.gesamtRohprotein}% | Rohfett: ${result.gesamtRohfett}% | Energie: ${result.umsetzbareEnergie} MJ/kg`,
+        })
+      } catch (e: any) {
+        toast({ title: 'Berechnung fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+      }
     } else if (action === 'validate') {
       const isValid = validate(formData)
       if (isValid.isValid) {

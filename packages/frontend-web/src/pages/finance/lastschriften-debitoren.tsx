@@ -461,12 +461,42 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
     if (action === 'add-direct-debit') {
       toast({ title: 'Hinweis', description: 'Lastschriften werden direkt in der Tabelle hinzugefügt.' })
     } else if (action === 'validate-mandates') {
-      toast({ title: 'Mandatsprüfung', description: 'Mandate-Validierung wird in Kürze bereitgestellt.' })
+      const lastschriften: any[] = formData?.lastschriften ?? []
+      const errors: string[] = []
+      lastschriften.forEach((ls: any, idx: number) => {
+        if (!ls.iban) errors.push(`Zeile ${idx + 1}: IBAN fehlt`)
+        if (!ls.bic) errors.push(`Zeile ${idx + 1}: BIC fehlt`)
+        if (!ls.mandatReferenz) errors.push(`Zeile ${idx + 1}: Mandat-Referenz fehlt`)
+        if (!ls.mandatDatum) errors.push(`Zeile ${idx + 1}: Mandat-Datum fehlt`)
+        if (!ls.debitor) errors.push(`Zeile ${idx + 1}: Debitor fehlt`)
+      })
+      if (lastschriften.length === 0) {
+        toast({ title: 'Mandatsprüfung', description: 'Keine Lastschriften vorhanden.', variant: 'destructive' })
+      } else if (errors.length > 0) {
+        toast({ title: `Mandatsprüfung: ${errors.length} Fehler`, description: errors.slice(0, 3).join(' | '), variant: 'destructive' })
+      } else {
+        toast({ title: 'Mandatsprüfung erfolgreich', description: `${lastschriften.length} Mandate geprüft — alle vollständig.` })
+      }
     } else if (action === 'preview') {
       // SEPA-Vorschau
       window.open('/api/v1/finance/direct-debits/preview', '_blank')
     } else if (action === 'approve') {
-      toast({ title: 'Freigabe', description: 'Freigabe-Funktion wird in Kürze bereitgestellt.' })
+      const isValid = validate(formData)
+      if (!isValid.isValid) {
+        showValidationToast(isValid.errors)
+        return
+      }
+      setActionLoadingKey('approve')
+      try {
+        await saveData({ ...formData, status: 'freigegeben', freigegebenAm: new Date().toISOString() })
+        setIsDirty(false)
+        toast({ title: 'Freigegeben', description: 'Lastschriftlauf wurde freigegeben.' })
+      } catch (error: any) {
+        const msg = error.response?.data?.detail ?? error.message
+        toast({ variant: 'destructive', title: t('common.error'), description: msg })
+      } finally {
+        setActionLoadingKey(null)
+      }
     } else if (action === 'execute') {
       const isValid = validate(formData)
       if (!isValid.isValid) {

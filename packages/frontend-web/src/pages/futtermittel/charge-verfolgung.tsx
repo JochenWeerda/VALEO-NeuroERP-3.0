@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ListReport } from '@/components/mask-builder'
 import { useFutterChargen, type FutterCharge } from '@/lib/api/futter'
@@ -6,6 +6,7 @@ import { formatDate, formatNumber } from '@/components/mask-builder/utils/format
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
 import { toast } from '@/hooks/use-toast'
+import { api } from '@/lib/axios'
 
 // Konfiguration für Charge-Verfolgung ListReport
 const chargeVerfolgungConfig: ListConfig = {
@@ -176,8 +177,25 @@ const chargeVerfolgungConfig: ListConfig = {
   actions: []
 }
 
+async function triggerChargenExport(): Promise<void> {
+  try {
+    const res = await api.post('/api/v1/export/list', { entity: 'futtermittel_chargen', format: 'csv' }, { responseType: 'blob' })
+    const blob = res.data as Blob
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `export_chargen_${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast({ title: 'Export erstellt', description: 'Chargen-Daten als CSV heruntergeladen.' })
+  } catch (e: any) {
+    toast({ title: 'Export fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+  }
+}
+
 export default function ChargeVerfolgungPage(): JSX.Element {
   const navigate = useNavigate()
+  const importInputRef = useRef<HTMLInputElement>(null)
   const { data: apiData = [], isLoading } = useFutterChargen()
   const data = useMemo(() => apiData.map((item: FutterCharge) => ({
     id: item.id,
@@ -203,21 +221,52 @@ export default function ChargeVerfolgungPage(): JSX.Element {
 
   const handleDelete = (_item: any) => toast({ title: 'Nicht verfügbar', description: 'Löschen über die Liste wird noch nicht unterstützt.' })
 
-  const handleExport = () => {
-    toast({ title: 'Export', description: 'Export-Funktion wird in Kürze bereitgestellt.' })
+  const handleExport = () => triggerChargenExport()
+
+  const handleImport = () => {
+    if (importInputRef.current) importInputRef.current.click()
+  }
+
+  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const formData = new FormData()
+    formData.append('file', file)
+    try {
+      const res = await api.post('/api/v1/futter/import/chargen', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      const { created = 0, updated = 0, errors = [] } = (res.data as any) ?? {}
+      toast({
+        title: 'Import abgeschlossen',
+        description: `${created} neu, ${updated} aktualisiert${errors.length ? `, ${errors.length} Fehler` : ''}.`,
+      })
+    } catch (e: any) {
+      toast({ title: 'Import fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+    }
+    e.target.value = ''
   }
 
   return (
-    <ListReport
-      config={chargeVerfolgungConfig}
-      data={data}
-      total={total}
-      onCreate={handleCreate}
-      onEdit={handleEdit}
-      onDelete={handleDelete}
-      onExport={handleExport}
-      onImport={() => toast({ title: 'Import', description: 'Import-Funktion wird in Kürze bereitgestellt.' })}
-      isLoading={isLoading}
-    />
+    <>
+      <input
+        ref={importInputRef}
+        type="file"
+        accept=".csv"
+        className="hidden"
+        onChange={handleImportFile}
+      />
+      <ListReport
+        config={chargeVerfolgungConfig}
+        data={data}
+        total={total}
+        onCreate={handleCreate}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onExport={handleExport}
+        onImport={handleImport}
+        isLoading={isLoading}
+      />
+    </>
   )
 }

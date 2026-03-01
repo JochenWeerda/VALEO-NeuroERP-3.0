@@ -366,7 +366,30 @@ export default function KreditorenStammPage(): JSX.Element {
         showValidationToast(isValid.errors)
       }
     } else if (action === 'sanktionspruefung') {
-      toast('Sanktionsprüfung wird in Kürze bereitgestellt.')
+      const name = formData?.firma || formData?.name || ''
+      const land = formData?.land || 'DE'
+      if (!name) {
+        toast('Firmenname fehlt — bitte Stammdaten zuerst ausfüllen.')
+        return
+      }
+      try {
+        const res = await apiClient.post<{
+          treffer: boolean
+          ergebnis: string
+          listen: string[]
+          geprueft_am: string
+          hinweis: string
+        }>('/api/v1/crm/sanktionspruefung', { name, land })
+        const result = res as any
+        if (result?.treffer) {
+          toast.error(`Sanktionstreffer: ${result.ergebnis}`)
+        } else {
+          toast.success(`Sanktionsprüfung OK: ${result?.ergebnis ?? 'Kein Treffer'}`)
+        }
+      } catch (e: any) {
+        const msg = e.response?.data?.detail ?? e.message
+        toast.error(`Sanktionsprüfung fehlgeschlagen: ${msg}`)
+      }
     } else if (action === 'export') {
       setActionLoadingKey('export')
       try {
