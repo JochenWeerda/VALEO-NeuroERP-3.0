@@ -1,234 +1,182 @@
 /**
  * OP-Verwaltung Kreditoren
- * FIBU-AP-05: Offene Posten für Kreditoren verwalten
- * 
- * Basierend auf op-debitoren.tsx, aber für Kreditoren (Accounts Payable)
+ * Offene Posten für Kreditoren (Accounts Payable) — Liste + Summen-Cards
  */
 
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { ObjectPage } from '@/components/mask-builder'
-import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
-import { MaskConfig } from '@/components/mask-builder/types'
-import { z } from 'zod'
-import { toast } from '@/hooks/use-toast'
-import { useTranslation } from 'react-i18next'
-import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
+import { useQuery } from '@tanstack/react-query'
+import { apiClient } from '@/lib/api-client'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { Euro, Search, AlertCircle, CheckCircle2, Clock } from 'lucide-react'
 
-// Zod-Schema für OP-Kreditoren
-const opKreditorenSchema = z.object({
-  kreditorId: z.string().min(1, "Kreditor ist erforderlich"),
-  opNummer: z.string().min(1, "OP-Nummer ist erforderlich"),
-  rechnungId: z.string().optional(),
-  buchungsdatum: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Buchungsdatum muss YYYY-MM-DD Format haben"),
-  faelligkeit: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Fälligkeit muss YYYY-MM-DD Format haben"),
-  betrag: z.number().positive("Betrag muss positiv sein"),
-  waehrung: z.string().default("EUR"),
-  offen: z.number().min(0, "Offener Betrag kann nicht negativ sein"),
-  skontoBetrag: z.number().min(0).optional(),
-  skontoDatum: z.string().optional(),
-  zahlungen: z.array(z.object({
-    datum: z.string(),
-    betrag: z.number(),
-    typ: z.enum(['zahlung', 'skonto', 'gutschrift', 'storno']),
-    referenz: z.string().optional()
-  })).optional(),
-  status: z.enum(['offen', 'teilbezahlt', 'ausgeglichen', 'mahnung', 'inkasso']),
-  letzteZahlung: z.string().optional(),
-  mahnstufe: z.number().min(0).max(3).default(0),
-  notizen: z.string().optional()
-})
+type OffenerPosten = {
+  id: string
+  partner_name?: string
+  lieferant_name?: string
+  beleg_nummer?: string
+  rechnungs_nr?: string
+  faellig_am?: string
+  betrag?: number
+  offen?: number
+  typ?: string
+  waehrung?: string
+  status?: string
+}
 
-// Konfiguration für OP-Kreditoren ObjectPage
-function createOpKreditorenConfig(t: any): MaskConfig {
-  const entityType = 'creditor'
-  const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Kreditor')
-  
-  return {
-    title: t('finance.opKreditoren.title', { defaultValue: 'OP-Verwaltung (Kreditoren)' }),
-    subtitle: t('finance.opKreditoren.subtitle', { defaultValue: 'Offene Posten für Kreditoren verwalten und Zahlungen zuordnen' }),
-    type: 'object-page',
-    tabs: [
-      {
-        key: 'grunddaten',
-        label: t('crud.detail.basicInfo', { defaultValue: 'Grunddaten' }),
-        fields: [
-          {
-            name: 'kreditorId',
-            label: t('crud.entities.creditor', { defaultValue: 'Kreditor' }),
-            type: 'select',
-            required: true,
-            options: [
-              { value: 'L001', label: 'L001 - Lieferant Nord GmbH' },
-              { value: 'L002', label: 'L002 - Agrar-Service Süd' },
-            ],
-          },
-          {
-            name: 'opNummer',
-            label: t('finance.opKreditoren.opNumber', { defaultValue: 'OP-Nummer' }),
-            type: 'text',
-            required: true,
-          },
-          {
-            name: 'rechnungId',
-            label: t('crud.fields.invoiceNumber', { defaultValue: 'Rechnungsnummer' }),
-            type: 'text',
-            required: false,
-          },
-          {
-            name: 'buchungsdatum',
-            label: t('crud.fields.bookingDate', { defaultValue: 'Buchungsdatum' }),
-            type: 'date',
-            required: true,
-          },
-          {
-            name: 'faelligkeit',
-            label: t('crud.fields.dueDate', { defaultValue: 'Fälligkeit' }),
-            type: 'date',
-            required: true,
-          },
-          {
-            name: 'betrag',
-            label: t('crud.fields.amount', { defaultValue: 'Betrag' }),
-            type: 'number',
-            required: true,
-          },
-          {
-            name: 'waehrung',
-            label: t('crud.fields.currency', { defaultValue: 'Währung' }),
-            type: 'select',
-            required: true,
-            options: [
-              { value: 'EUR', label: 'EUR' },
-              { value: 'USD', label: 'USD' },
-            ],
-          },
-        ],
-      },
-      {
-        key: 'zahlungen',
-        label: t('finance.opKreditoren.payments', { defaultValue: 'Zahlungen' }),
-        fields: [
-          {
-            name: 'zahlungen',
-            label: t('finance.opKreditoren.paymentList', { defaultValue: 'Zahlungsliste' }),
-            type: 'array',
-            fields: [
-              {
-                name: 'datum',
-                label: t('crud.fields.date', { defaultValue: 'Datum' }),
-                type: 'date',
-              },
-              {
-                name: 'betrag',
-                label: t('crud.fields.amount', { defaultValue: 'Betrag' }),
-                type: 'number',
-              },
-              {
-                name: 'typ',
-                label: t('finance.opKreditoren.paymentType', { defaultValue: 'Typ' }),
-                type: 'select',
-                options: [
-                  { value: 'zahlung', label: t('finance.opKreditoren.paymentTypes.payment', { defaultValue: 'Zahlung' }) },
-                  { value: 'skonto', label: t('finance.opKreditoren.paymentTypes.skonto', { defaultValue: 'Skonto' }) },
-                  { value: 'gutschrift', label: t('finance.opKreditoren.paymentTypes.credit', { defaultValue: 'Gutschrift' }) },
-                  { value: 'storno', label: t('finance.opKreditoren.paymentTypes.cancellation', { defaultValue: 'Storno' }) },
-                ],
-              },
-              {
-                name: 'referenz',
-                label: t('finance.opKreditoren.reference', { defaultValue: 'Referenz' }),
-                type: 'text',
-              },
-            ],
-          },
-          {
-            name: 'offen',
-            label: t('finance.opKreditoren.openAmount', { defaultValue: 'Offener Betrag' }),
-            type: 'number',
-            required: true,
-            readonly: true,
-          },
-        ],
-      },
-      {
-        key: 'status',
-        label: t('crud.fields.status', { defaultValue: 'Status' }),
-        fields: [
-          {
-            name: 'status',
-            label: t('crud.fields.status', { defaultValue: 'Status' }),
-            type: 'select',
-            required: true,
-            options: [
-              { value: 'offen', label: t('status.open', { defaultValue: 'Offen' }) },
-              { value: 'teilbezahlt', label: t('status.partial', { defaultValue: 'Teilbezahlt' }) },
-              { value: 'ausgeglichen', label: t('status.closed', { defaultValue: 'Ausgeglichen' }) },
-              { value: 'mahnung', label: t('status.dunning', { defaultValue: 'Mahnung' }) },
-              { value: 'inkasso', label: t('status.collection', { defaultValue: 'Inkasso' }) },
-            ],
-          },
-          {
-            name: 'mahnstufe',
-            label: t('finance.opKreditoren.dunningLevel', { defaultValue: 'Mahnstufe' }),
-            type: 'number',
-            min: 0,
-            max: 3,
-          },
-          {
-            name: 'letzteZahlung',
-            label: t('finance.opKreditoren.lastPayment', { defaultValue: 'Letzte Zahlung' }),
-            type: 'date',
-          },
-        ],
-      },
-      {
-        key: 'notizen',
-        label: t('crud.fields.notes', { defaultValue: 'Notizen' }),
-        fields: [
-          {
-            name: 'notizen',
-            label: t('crud.fields.notes', { defaultValue: 'Notizen' }),
-            type: 'textarea',
-          },
-        ],
-      },
-    ],
-  }
+function useOpKreditoren() {
+  return useQuery({
+    queryKey: ['finance', 'open-items', 'kreditor'],
+    queryFn: async () => (await apiClient.get<OffenerPosten[]>('/api/v1/finance/open-items?typ=kreditor')).data,
+    staleTime: 2 * 60 * 1000,
+  })
+}
+
+const fmt = (n: number, currency = 'EUR') =>
+  new Intl.NumberFormat('de-DE', { style: 'currency', currency, maximumFractionDigits: 2 }).format(n)
+
+function statusBadge(op: OffenerPosten) {
+  const today = new Date()
+  const due = op.faellig_am ? new Date(op.faellig_am) : null
+  if (due && due < today) return <Badge variant="destructive">Überfällig</Badge>
+  if (op.status === 'ausgeglichen') return <Badge variant="secondary">Ausgeglichen</Badge>
+  if (op.status === 'teilbezahlt') return <Badge variant="outline">Teilbezahlt</Badge>
+  return <Badge>Offen</Badge>
 }
 
 export default function OpKreditorenPage(): JSX.Element {
-  const { t } = useTranslation()
-  const navigate = useNavigate()
-  const entityType = 'creditor'
-  const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Kreditor')
-  
-  const config = createOpKreditorenConfig(t)
-  const { data, setData } = useMaskData(opKreditorenSchema)
-  const { validate, errors } = useMaskValidation(opKreditorenSchema, data)
-  
-  const { handleSave, handleCancel } = useMaskActions({
-    entityType: entityTypeLabel,
-    data,
-    validate,
-    onSave: async (validData) => {
-      toast({
-        title: t('common.success', { defaultValue: 'Erfolg' }),
-        description: t('crud.feedback.createSuccess', { entityType: entityTypeLabel }),
-      })
-    },
-    onCancel: () => navigate('/finance/kreditoren'),
+  const { data: ops = [], isLoading, isError } = useOpKreditoren()
+  const [search, setSearch] = useState('')
+
+  const filtered = ops.filter((op) => {
+    const name = op.partner_name ?? op.lieferant_name ?? ''
+    const nr = op.beleg_nummer ?? op.rechnungs_nr ?? ''
+    return (
+      name.toLowerCase().includes(search.toLowerCase()) ||
+      nr.toLowerCase().includes(search.toLowerCase())
+    )
   })
 
+  // Summen-Karten
+  const sumOffen = ops.reduce((s, op) => s + Number(op.offen ?? 0), 0)
+  const sumGesamt = ops.reduce((s, op) => s + Number(op.betrag ?? 0), 0)
+  const today = new Date()
+  const ueberfaellig = ops.filter((op) => op.faellig_am && new Date(op.faellig_am) < today)
+  const sumUeberfaellig = ueberfaellig.reduce((s, op) => s + Number(op.offen ?? 0), 0)
+
   return (
-    <ObjectPage
-      config={config}
-      data={data}
-      errors={errors}
-      onDataChange={setData}
-      onSave={handleSave}
-      onCancel={handleCancel}
-    />
+    <div className="space-y-6 p-6">
+      <div>
+        <h1 className="text-3xl font-bold">Offene Posten – Kreditoren</h1>
+        <p className="text-muted-foreground">Verbindlichkeiten und fällige Zahlungen verwalten</p>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <Euro className="h-4 w-4 text-blue-600" />
+              Gesamt offen
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <span className="text-2xl font-bold">{fmt(sumOffen)}</span>
+            <p className="text-xs text-muted-foreground mt-1">{ops.length} Positionen</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <AlertCircle className="h-4 w-4 text-red-600" />
+              Überfällig
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <span className="text-2xl font-bold text-red-600">{fmt(sumUeberfaellig)}</span>
+            <p className="text-xs text-muted-foreground mt-1">{ueberfaellig.length} Positionen</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-green-600" />
+              Rechnungsbetrag Gesamt
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <span className="text-2xl font-bold">{fmt(sumGesamt)}</span>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="relative max-w-sm">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          className="pl-9"
+          placeholder="Lieferant oder Belegnummer suchen…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Clock className="h-5 w-5" />
+            Offene Posten ({filtered.length})
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isLoading && <p className="text-muted-foreground text-sm">Lade offene Posten…</p>}
+          {isError && <p className="text-red-600 text-sm">Fehler beim Laden der offenen Posten.</p>}
+          {!isLoading && !isError && (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b text-left text-muted-foreground">
+                    <th className="py-2 pr-4 font-medium">Lieferant</th>
+                    <th className="py-2 pr-4 font-medium">Beleg-Nr.</th>
+                    <th className="py-2 pr-4 font-medium">Fällig am</th>
+                    <th className="py-2 pr-4 font-medium text-right">Betrag</th>
+                    <th className="py-2 pr-4 font-medium text-right">Offen</th>
+                    <th className="py-2 font-medium">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.length === 0 && (
+                    <tr>
+                      <td colSpan={6} className="py-8 text-center text-muted-foreground">
+                        Keine offenen Posten gefunden.
+                      </td>
+                    </tr>
+                  )}
+                  {filtered.map((op) => (
+                    <tr key={op.id} className="border-b hover:bg-muted/50 transition-colors">
+                      <td className="py-2 pr-4 font-medium">{op.partner_name ?? op.lieferant_name ?? '–'}</td>
+                      <td className="py-2 pr-4 font-mono text-xs">{op.beleg_nummer ?? op.rechnungs_nr ?? '–'}</td>
+                      <td className="py-2 pr-4">
+                        {op.faellig_am
+                          ? new Date(op.faellig_am).toLocaleDateString('de-DE')
+                          : '–'}
+                      </td>
+                      <td className="py-2 pr-4 text-right">
+                        {fmt(Number(op.betrag ?? 0), op.waehrung ?? 'EUR')}
+                      </td>
+                      <td className="py-2 pr-4 text-right font-semibold">
+                        {fmt(Number(op.offen ?? 0), op.waehrung ?? 'EUR')}
+                      </td>
+                      <td className="py-2">{statusBadge(op)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   )
 }
-

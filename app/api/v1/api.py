@@ -56,6 +56,10 @@ from app.api.v1.endpoints import (
     closing_checklists,
     chart_of_accounts,
     finance_actions,
+    lohn_connector,
+    quadriga_connector,
+    asset_ledger_connector,
+    fibu_connectors,
     iban_lookup,
     credit_debit_memos,
     portal_shop,
@@ -79,6 +83,7 @@ from app.api.v1.endpoints import (
     charges,
     banken,
     compliance,
+    gobd_archiv,
     disposition,
     dokumente,
     vertraege,
@@ -450,7 +455,26 @@ api_router.include_router(
     prefix="/finance",
     tags=["finance", "actions"]
 )
-
+api_router.include_router(
+    lohn_connector.router,
+    prefix="/finance",
+    tags=["finance", "lohn", "connectors"]
+)
+api_router.include_router(
+    quadriga_connector.router,
+    prefix="/finance",
+    tags=["finance", "quadriga", "connectors"]
+)
+api_router.include_router(
+    asset_ledger_connector.router,
+    prefix="/finance",
+    tags=["finance", "asset-ledger", "connectors"]
+)
+api_router.include_router(
+    fibu_connectors.router,
+    prefix="/finance",
+    tags=["finance", "fibu-connectors"]
+)
 api_router.include_router(
     iban_lookup.router,
     prefix="/finance",
@@ -730,6 +754,11 @@ api_router.include_router(
 # Compliance API
 api_router.include_router(
     compliance.router
+)
+
+# GoBD Archiv, E-Rechnung, Audit-Package (Z1/Z2/Z3)
+api_router.include_router(
+    gobd_archiv.router
 )
 
 # Disposition API

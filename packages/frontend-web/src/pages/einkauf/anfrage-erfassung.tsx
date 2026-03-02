@@ -559,6 +559,22 @@ export default function AnfrageErfassungPage(): JSX.Element {
                 {positionen.length === 0 ? (
                   <p className="text-muted-foreground">Noch keine Positionen erfasst — Angebots-Vergleich wird nach Positionserfassung verfügbar.</p>
                 ) : (
+                  <>
+                  <div className="flex items-center gap-2 mb-3">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        if (state.id) {
+                          navigate(`/einkauf/rfq-bids/${state.id}`)
+                        } else {
+                          push('Bitte zuerst Anfrage speichern, dann Angebots-Vergleich öffnen.')
+                        }
+                      }}
+                    >
+                      Angebots-Vergleich öffnen
+                    </Button>
+                  </div>
                   <table className="w-full text-xs border-collapse">
                     <thead><tr className="bg-gray-100">
                       <th className="border px-2 py-1 text-left">Pos.</th>
@@ -577,6 +593,7 @@ export default function AnfrageErfassungPage(): JSX.Element {
                       </tr>
                     ))}</tbody>
                   </table>
+                  </>
                 )}
               </div>
             </TabsContent>

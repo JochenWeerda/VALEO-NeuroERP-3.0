@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Inventory API Hooks
  * Error-first fetching without mock fallback data.
  */
@@ -139,6 +139,7 @@ export type LKWEintrag = {
   ankunft: string
   wartezeit: number
   status: 'wartend' | 'in-bearbeitung' | 'abgeschlossen'
+  lieferschein_nr?: string
 }
 
 export const inventoryExtraKeys = {
@@ -204,5 +205,27 @@ export function useWarteschlange() {
     queryFn: async () => (await apiClient.get<{ items: LKWEintrag[]; total: number }>('/api/v1/annahme/warteschlange')).data,
     staleTime: 15 * 1000,
     refetchInterval: 30 * 1000,
+  })
+}
+
+export function useWarteschlangeEintrag(id: string | undefined) {
+  return useQuery({
+    queryKey: [...inventoryExtraKeys.warteschlange(), id],
+    queryFn: async () => (await apiClient.get<LKWEintrag>(`/api/v1/annahme/warteschlange/${id}`)).data,
+    enabled: !!id,
+    staleTime: 30 * 1000,
+  })
+}
+
+export function usePatchWarteschlangeStatus() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: 'in-bearbeitung' | 'abgeschlossen' }) => {
+      const { data } = await apiClient.patch<LKWEintrag>(`/api/v1/annahme/warteschlange/${id}`, { status })
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: inventoryExtraKeys.warteschlange() })
+    },
   })
 }

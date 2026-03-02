@@ -56,7 +56,8 @@ const KPI_TILES: KpiTile[] = [
 
 function toStarterTile(section: NavItem): StarterTile | null {
   const resolvedPath = section.path ?? findFirstRoutableChildPath(section)
-  if (!resolvedPath) {
+  const path = section.id === 'fibu' ? '/fibu-suite' : resolvedPath
+  if (!path) {
     return null
   }
 
@@ -65,7 +66,7 @@ function toStarterTile(section: NavItem): StarterTile | null {
     id: section.id,
     label: section.label,
     description: `${section.mcp.businessDomain.toUpperCase()} - ${section.mcp.scope}`,
-    path: resolvedPath,
+    path,
     icon: section.icon,
     keywords,
     sectionId: section.id,

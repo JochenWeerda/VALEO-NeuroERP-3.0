@@ -80,6 +80,11 @@ class DocflowHeaderOut(BaseModel):
     updated_at: datetime
     items: list[DocflowItemOut] = Field(default_factory=list)
     pos_compliance: Optional[dict[str, Any]] = None
+    printed_at: Optional[datetime] = None
+    printed_by: Optional[str] = None
+    print_count: int = 0
+    exported_at: Optional[datetime] = None
+    exported_by: Optional[str] = None
 
 
 class DocflowConvertRequest(BaseModel):
@@ -98,11 +103,25 @@ class DocflowPostRequest(BaseModel):
     posted_by: Optional[str] = Field(default=None, max_length=100)
 
 
+class DocflowReleaseRequest(BaseModel):
+    idempotency_key: str = Field(..., min_length=8, max_length=120)
+    expected_version: Optional[int] = Field(default=None, ge=1)
+    released_by: Optional[str] = Field(default=None, max_length=100)
+
+
 class DocflowReverseRequest(BaseModel):
     idempotency_key: str = Field(..., min_length=8, max_length=120)
     reason: str = Field(..., min_length=3, max_length=300)
     expected_version: Optional[int] = Field(default=None, ge=1)
     reversed_by: Optional[str] = Field(default=None, max_length=100)
+
+
+class DocflowRecordPrintRequest(BaseModel):
+    printed_by: Optional[str] = Field(default=None, max_length=100)
+
+
+class DocflowRecordExportRequest(BaseModel):
+    exported_by: Optional[str] = Field(default=None, max_length=100)
 
 
 class DocflowCommandResult(BaseModel):
@@ -157,6 +176,7 @@ class DocflowCreateRequest(BaseModel):
     created_by: Optional[str] = Field(default=None, max_length=100)
     items: list[DocflowLineInput] = Field(default_factory=list)
     pos_compliance: Optional[PosComplianceInput] = None
+    idempotency_key: Optional[str] = Field(default=None, min_length=8, max_length=120)
 
 
 class DocflowUpdateRequest(BaseModel):
@@ -612,6 +632,42 @@ def _allocate_doc_number(db: Session, tenant_id: str, doc_type: str, now: dateti
     return f"{prefix}-{year}-{str(current).zfill(width)}"
 
 
+def _load_create_idempotency_doc_id(
+    db: Session, *, tenant_id: str, idempotency_key: str
+) -> Optional[str]:
+    row = db.execute(
+        text(
+            """
+            SELECT doc_id FROM domain_docflow.create_request_idempotency
+            WHERE tenant_id = :tenant_id AND idempotency_key = :idempotency_key
+            """
+        ),
+        {"tenant_id": tenant_id, "idempotency_key": idempotency_key},
+    ).mappings().first()
+    return str(row["doc_id"]) if row and row.get("doc_id") else None
+
+
+def _store_create_idempotency(
+    db: Session, *, tenant_id: str, idempotency_key: str, doc_id: str
+) -> None:
+    db.execute(
+        text(
+            """
+            INSERT INTO domain_docflow.create_request_idempotency
+            (id, tenant_id, idempotency_key, doc_id, created_at)
+            VALUES (:id, :tenant_id, :idempotency_key, :doc_id, NOW())
+            ON CONFLICT ON CONSTRAINT uq_docflow_create_idempotency DO NOTHING
+            """
+        ),
+        {
+            "id": str(uuid4()),
+            "tenant_id": tenant_id,
+            "idempotency_key": idempotency_key,
+            "doc_id": doc_id,
+        },
+    )
+
+
 def _load_idempotent_response(
     db: Session, *, tenant_id: str, command_name: str, resource_id: str, idempotency_key: str
 ) -> Optional[dict[str, Any]]:
@@ -738,6 +794,11 @@ def _row_to_header_out(db: Session, tenant_id: str, header_id: str) -> DocflowHe
         created_at=header["created_at"],
         updated_at=header["updated_at"],
         pos_compliance=pos_compliance,
+        printed_at=header.get("printed_at"),
+        printed_by=header.get("printed_by"),
+        print_count=int(header.get("print_count") or 0),
+        exported_at=header.get("exported_at"),
+        exported_by=header.get("exported_by"),
         items=[
             DocflowItemOut(
                 id=str(i["id"]),
@@ -817,6 +878,162 @@ async def get_pos_compliance(
     return payload
 
 
+@router.post("/{doc_id}/release", response_model=DocflowCommandResult)
+async def release_document(
+    doc_id: str,
+    payload: DocflowReleaseRequest,
+    tenant_id: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+):
+    """Entwurf freigeben: vergibt Nummer aus Nummernkreis und setzt Status auf open (GoBD: Nummer erst bei released)."""
+    effective_tenant = tenant_id or DEFAULT_TENANT
+    idempotent = _load_idempotent_response(
+        db,
+        tenant_id=effective_tenant,
+        command_name="release",
+        resource_id=doc_id,
+        idempotency_key=payload.idempotency_key,
+    )
+    if idempotent:
+        return DocflowCommandResult(**idempotent, idempotent_hit=True)
+    try:
+        header = _fetch_doc_header(db, effective_tenant, doc_id)
+        if not header:
+            raise HTTPException(status_code=404, detail="Document not found")
+        if payload.expected_version and int(header.get("version") or 1) != payload.expected_version:
+            raise HTTPException(status_code=409, detail="Version conflict")
+        if str(header.get("status")) != "draft":
+            raise HTTPException(
+                status_code=409,
+                detail="Nur Dokumente im Status Entwurf (draft) können freigegeben werden",
+            )
+        doc_type = str(header.get("doc_type") or "")
+        now = datetime.now(timezone.utc)
+        new_number = _allocate_doc_number(db, effective_tenant, doc_type, now)
+        db.execute(
+            text(
+                """
+                UPDATE domain_docflow.document_headers
+                SET doc_number = :doc_number, status = 'open', updated_at = NOW(), version = version + 1, updated_by = :updated_by
+                WHERE id = :id AND tenant_id = :tenant_id
+                """
+            ),
+            {
+                "id": doc_id,
+                "tenant_id": effective_tenant,
+                "doc_number": new_number,
+                "updated_by": payload.released_by,
+            },
+        )
+        response_payload = {
+            "command": "release",
+            "source_doc_id": doc_id,
+            "target_doc_id": None,
+            "status": "ok",
+            "payload": {"doc_number": new_number, "doc_type": doc_type},
+        }
+        _store_idempotent_response(
+            db,
+            tenant_id=effective_tenant,
+            command_name="release",
+            resource_id=doc_id,
+            idempotency_key=payload.idempotency_key,
+            response_payload=response_payload,
+        )
+        _best_effort_audit(
+            db,
+            tenant_id=effective_tenant,
+            action="docflow_release",
+            resource_type="docflow_document",
+            resource_id=doc_id,
+            payload={"doc_number": new_number, "released_by": payload.released_by},
+        )
+        db.commit()
+        return DocflowCommandResult(**response_payload)
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"release failed: {exc}") from exc
+
+
+@router.post("/{doc_id}/record-print", response_model=DocflowHeaderOut)
+async def record_print(
+    doc_id: str,
+    payload: DocflowRecordPrintRequest,
+    tenant_id: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+):
+    """Druck als Ereignis protokollieren (printed_at, print_count). Kein Status-Sperre."""
+    effective_tenant = tenant_id or DEFAULT_TENANT
+    header = _fetch_doc_header(db, effective_tenant, doc_id)
+    if not header:
+        raise HTTPException(status_code=404, detail="Document not found")
+    try:
+        db.execute(
+            text(
+                """
+                UPDATE domain_docflow.document_headers
+                SET printed_at = NOW(), printed_by = :printed_by, print_count = COALESCE(print_count, 0) + 1, updated_at = NOW()
+                WHERE id = :id AND tenant_id = :tenant_id
+                """
+            ),
+            {"id": doc_id, "tenant_id": effective_tenant, "printed_by": payload.printed_by},
+        )
+        _best_effort_audit(
+            db,
+            tenant_id=effective_tenant,
+            action="docflow_record_print",
+            resource_type="docflow_document",
+            resource_id=doc_id,
+            payload={"printed_by": payload.printed_by},
+        )
+        db.commit()
+        return _row_to_header_out(db, effective_tenant, doc_id)
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"record-print failed: {exc}") from exc
+
+
+@router.post("/{doc_id}/record-export", response_model=DocflowHeaderOut)
+async def record_export(
+    doc_id: str,
+    payload: DocflowRecordExportRequest,
+    tenant_id: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+):
+    """Export als Ereignis protokollieren (exported_at, exported_by). Kein Status-Sperre."""
+    effective_tenant = tenant_id or DEFAULT_TENANT
+    header = _fetch_doc_header(db, effective_tenant, doc_id)
+    if not header:
+        raise HTTPException(status_code=404, detail="Document not found")
+    try:
+        db.execute(
+            text(
+                """
+                UPDATE domain_docflow.document_headers
+                SET exported_at = NOW(), exported_by = :exported_by, updated_at = NOW()
+                WHERE id = :id AND tenant_id = :tenant_id
+                """
+            ),
+            {"id": doc_id, "tenant_id": effective_tenant, "exported_by": payload.exported_by},
+        )
+        _best_effort_audit(
+            db,
+            tenant_id=effective_tenant,
+            action="docflow_record_export",
+            resource_type="docflow_document",
+            resource_id=doc_id,
+            payload={"exported_by": payload.exported_by},
+        )
+        db.commit()
+        return _row_to_header_out(db, effective_tenant, doc_id)
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"record-export failed: {exc}") from exc
+
+
 @router.post("/", response_model=DocflowHeaderOut)
 async def create_document(
     payload: DocflowCreateRequest,
@@ -824,6 +1041,12 @@ async def create_document(
     db: Session = Depends(get_db),
 ):
     effective_tenant = tenant_id or DEFAULT_TENANT
+    if payload.idempotency_key:
+        existing_doc_id = _load_create_idempotency_doc_id(
+            db, tenant_id=effective_tenant, idempotency_key=payload.idempotency_key
+        )
+        if existing_doc_id:
+            return _row_to_header_out(db, effective_tenant, existing_doc_id)
     _validate_pos_compliance_requirements(payload.doc_type, payload.pos_compliance)
     now = datetime.now(timezone.utc)
     doc_id = str(uuid4())
@@ -927,6 +1150,10 @@ async def create_document(
             resource_id=doc_id,
             payload={"doc_type": payload.doc_type, "doc_number": payload.doc_number, "status": payload.status},
         )
+        if payload.idempotency_key:
+            _store_create_idempotency(
+                db, tenant_id=effective_tenant, idempotency_key=payload.idempotency_key, doc_id=doc_id
+            )
         db.commit()
         return _row_to_header_out(db, effective_tenant, doc_id)
     except HTTPException:
@@ -952,6 +1179,12 @@ async def update_document(
         raise HTTPException(status_code=409, detail="Version conflict")
     if str(header.get("status")) in {"posted", "reversed", "cancelled"}:
         raise HTTPException(status_code=409, detail="Posted/Reversed/Cancelled document cannot be edited")
+    current_status = str(header.get("status") or "draft")
+    if payload.items is not None and current_status != "draft":
+        raise HTTPException(
+            status_code=409,
+            detail="Positionen können nur im Status Entwurf (draft) ersetzt werden; für freigegebene Belege Storno/Berichtigung nutzen.",
+        )
     effective_doc_type = str(header.get("doc_type") or "")
     _validate_pos_compliance_requirements(effective_doc_type, payload.pos_compliance)
 
@@ -1111,6 +1344,41 @@ async def convert_document(
         relation_type = _TRANSITIONS.get(source_type, {}).get(payload.target_doc_type)
         if not relation_type:
             raise HTTPException(status_code=400, detail=f"Transition not allowed: {source_type} -> {payload.target_doc_type}")
+        existing_link = db.execute(
+            text(
+                """
+                SELECT to_header_id FROM domain_docflow.document_header_links
+                WHERE tenant_id = :tenant_id AND from_header_id = :from_header_id AND relation_type = :relation_type
+                """
+            ),
+            {"tenant_id": effective_tenant, "from_header_id": doc_id, "relation_type": relation_type},
+        ).mappings().first()
+        if existing_link:
+            existing_target_id = str(existing_link["to_header_id"])
+            existing_header = _fetch_doc_header(db, effective_tenant, existing_target_id)
+            target_doc_number = str(existing_header.get("doc_number") or "") if existing_header else ""
+            response_payload = {
+                "command": "convert",
+                "source_doc_id": doc_id,
+                "target_doc_id": existing_target_id,
+                "status": "ok",
+                "payload": {
+                    "target_doc_number": target_doc_number,
+                    "target_doc_type": payload.target_doc_type,
+                    "total_gross": 0,
+                    "item_count": 0,
+                },
+            }
+            _store_idempotent_response(
+                db,
+                tenant_id=effective_tenant,
+                command_name="convert",
+                resource_id=doc_id,
+                idempotency_key=payload.idempotency_key,
+                response_payload=response_payload,
+            )
+            db.commit()
+            return DocflowCommandResult(**response_payload, idempotent_hit=False)
         source_pos = _fetch_pos_compliance(db, effective_tenant, doc_id)
         if payload.target_doc_type in _POS_TYPES and not source_pos:
             raise HTTPException(status_code=400, detail="POS conversion requires source POS compliance")
@@ -1167,6 +1435,22 @@ async def convert_document(
         now = datetime.now(timezone.utc)
         target_id = str(uuid4())
         target_number = _allocate_doc_number(db, effective_tenant, payload.target_doc_type, now)
+        db.execute(
+            text(
+                """
+                INSERT INTO domain_docflow.document_header_links
+                (id, tenant_id, from_header_id, to_header_id, relation_type, created_at)
+                VALUES (:id, :tenant_id, :from_header_id, :to_header_id, :relation_type, NOW())
+                """
+            ),
+            {
+                "id": str(uuid4()),
+                "tenant_id": effective_tenant,
+                "from_header_id": doc_id,
+                "to_header_id": target_id,
+                "relation_type": relation_type,
+            },
+        )
         db.execute(
             text(
                 """

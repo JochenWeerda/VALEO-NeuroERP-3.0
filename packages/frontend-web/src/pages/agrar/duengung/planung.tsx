@@ -1,10 +1,20 @@
+import { useLocation } from 'react-router-dom'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Sprout, TrendingUp } from 'lucide-react'
 import { useDuengerKomponenten, useSchlaege } from '@/lib/api/agrar'
 
+type BedarfsrechnerState = {
+  flaeche: number
+  kultur: string
+  empfehlung: { n: number; p: number; k: number }
+  ertragsziel?: number
+}
+
 export default function DuengungsplanungPage(): JSX.Element {
+  const location = useLocation()
+  const fromBedarfsrechner = location.state?.fromBedarfsrechner as BedarfsrechnerState | undefined
   const { data: komponenten, isLoading: loadingKomponenten } = useDuengerKomponenten()
   const { data: schlaegeListe = [], isLoading: loadingSchlaege } = useSchlaege()
 
@@ -33,6 +43,22 @@ export default function DuengungsplanungPage(): JSX.Element {
         <h1 className="text-3xl font-bold">Düngungsplanung</h1>
         <p className="text-muted-foreground">Nährstoffbedarf & Planung ({verfuegbareKomponenten.length} Komponenten verfügbar)</p>
       </div>
+
+      {fromBedarfsrechner?.empfehlung && (
+        <Card className="border-green-200 bg-green-50/50">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Übernahme aus Bedarfsrechner</CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm">
+            <p className="mb-2">
+              Kultur: <strong>{fromBedarfsrechner.kultur || '–'}</strong>, Fläche: <strong>{fromBedarfsrechner.flaeche} ha</strong>
+            </p>
+            <p>
+              Empfehlung: N <strong>{fromBedarfsrechner.empfehlung.n.toFixed(0)}</strong> kg/ha, P <strong>{fromBedarfsrechner.empfehlung.p.toFixed(0)}</strong> kg/ha, K <strong>{fromBedarfsrechner.empfehlung.k.toFixed(0)}</strong> kg/ha
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card>

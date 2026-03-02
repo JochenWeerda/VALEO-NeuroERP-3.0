@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Badge } from '@/components/ui/badge'
@@ -8,6 +8,8 @@ import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { BookMarked, FileDown, Loader2, Plus, Search } from 'lucide-react'
 import { apiClient } from '@/lib/api-client'
+import { exportToCSV } from '@/lib/export-utils'
+import { useToast } from '@/hooks/use-toast'
 import { ErrorState } from '@/components/ErrorState'
 
 type Konto = {
@@ -37,6 +39,7 @@ function mapApiAccount(a: { id: string; account_number: string; name: string; ca
 
 export default function KontenplanPage(): JSX.Element {
   const navigate = useNavigate()
+  const { toast } = useToast()
   const [searchTerm, setSearchTerm] = useState('')
 
   const { data: konten = [], isLoading, isError, error, refetch } = useQuery({
@@ -55,6 +58,31 @@ export default function KontenplanPage(): JSX.Element {
 
   if (isError) {
     return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
+
+  const filteredKonten = useMemo(() => {
+    if (!searchTerm.trim()) return konten
+    const q = searchTerm.trim().toLowerCase()
+    return konten.filter((k) => k.kontonummer.toLowerCase().includes(q) || k.bezeichnung.toLowerCase().includes(q))
+  }, [konten, searchTerm])
+
+  const handleExport = () => {
+    try {
+      exportToCSV(
+        filteredKonten,
+        `kontenplan-${new Date().toISOString().slice(0, 10)}.csv`,
+        [
+          { key: 'kontonummer', label: 'Konto' },
+          { key: 'bezeichnung', label: 'Bezeichnung' },
+          { key: 'kontoart', label: 'Kontoart' },
+          { key: 'typ', label: 'Typ' },
+          { key: 'saldo', label: 'Saldo' },
+        ]
+      )
+      toast({ title: 'Export', description: `${filteredKonten.length} Konten exportiert.` })
+    } catch (e) {
+      toast({ title: 'Export fehlgeschlagen', description: String(e), variant: 'destructive' })
+    }
   }
 
   const columns = [
@@ -154,7 +182,7 @@ export default function KontenplanPage(): JSX.Element {
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input placeholder="Suche Kontonummer oder Bezeichnung..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
             </div>
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" onClick={handleExport}>
               <FileDown className="h-4 w-4" />
               Export
             </Button>
@@ -170,7 +198,7 @@ export default function KontenplanPage(): JSX.Element {
               <span className="ml-2 text-sm text-muted-foreground">Lade Kontenplan...</span>
             </div>
           ) : (
-            <DataTable data={konten} columns={columns} />
+            <DataTable data={filteredKonten} columns={columns} />
           )}
         </CardContent>
       </Card>

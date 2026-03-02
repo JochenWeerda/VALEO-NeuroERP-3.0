@@ -10,6 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AlertCircle, Euro, FileDown, Loader2, Search } from 'lucide-react'
 import { getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 import { apiClient } from '@/lib/api-client'
+import { exportToCSV } from '@/lib/export-utils'
+import { useToast } from '@/hooks/use-toast'
 import { ErrorState } from '@/components/ErrorState'
 
 type OffenerPosten = {
@@ -90,9 +92,31 @@ const statusVariantMap: Record<
 export default function OffenePostenPage(): JSX.Element {
   const navigate = useNavigate()
   const { t } = useTranslation()
+  const { toast } = useToast()
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<OffenerPosten['status'] | 'alle'>('alle')
   const [editingId, setEditingId] = useState<string | null>(null)
+
+  const handleExport = (): void => {
+    try {
+      exportToCSV(
+        filteredPosten,
+        `offene-posten-${new Date().toISOString().slice(0, 10)}.csv`,
+        [
+          { key: 'rechnungsNr', label: 'Rechnungs-Nr' },
+          { key: 'kunde', label: 'Kunde' },
+          { key: 'rechnungsDatum', label: 'Rechnungsdatum' },
+          { key: 'faelligAm', label: 'Fällig am' },
+          { key: 'betrag', label: 'Betrag' },
+          { key: 'offen', label: 'Offen' },
+          { key: 'status', label: 'Status' },
+        ]
+      )
+      toast({ title: 'Export', description: `${filteredPosten.length} offene Posten exportiert.` })
+    } catch (e) {
+      toast({ title: 'Export fehlgeschlagen', description: String(e), variant: 'destructive' })
+    }
+  }
   const [form, setForm] = useState({
     rechnungsnr: '',
     konto_nr: '',
@@ -363,7 +387,7 @@ export default function OffenePostenPage(): JSX.Element {
               <option value="mahnung3">Mahnung 3</option>
               <option value="inkasso">Inkasso</option>
             </select>
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" onClick={handleExport}>
               <FileDown className="h-4 w-4" />
               Export
             </Button>

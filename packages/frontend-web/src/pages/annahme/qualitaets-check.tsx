@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect, useRef } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import { Wizard } from '@/components/patterns/Wizard'
 import { Input } from '@/components/ui/input'
@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { AlertTriangle, CheckCircle, XCircle } from 'lucide-react'
 import { apiClient } from '@/lib/api-client'
 import { useToast } from '@/hooks/use-toast'
+import { useWarteschlangeEintrag, usePatchWarteschlangeStatus } from '@/lib/api/inventory'
 
 type QualitaetsData = {
   lieferscheinNr: string
@@ -26,7 +27,13 @@ type QualitaetsData = {
 
 export default function QualitaetsCheckPage(): JSX.Element {
   const navigate = useNavigate()
+  const location = useLocation()
   const { toast } = useToast()
+  const eintragId = (location.state as { eintragId?: string } | null)?.eintragId
+  const { data: lkwEintrag } = useWarteschlangeEintrag(eintragId)
+  const patchStatus = usePatchWarteschlangeStatus()
+  const statusSetToInBearbeitung = useRef(false)
+
   const [qualitaet, setQualitaet] = useState<QualitaetsData>({
     lieferscheinNr: '',
     artikel: '',
@@ -39,6 +46,23 @@ export default function QualitaetsCheckPage(): JSX.Element {
     bemerkungen: '',
     ergebnis: 'freigegeben',
   })
+
+  useEffect(() => {
+    if (!lkwEintrag) return
+    setQualitaet((prev) => ({
+      ...prev,
+      artikel: lkwEintrag.artikel || prev.artikel,
+      lieferscheinNr: lkwEintrag.lieferschein_nr ?? prev.lieferscheinNr,
+    }))
+  }, [lkwEintrag?.id, lkwEintrag?.artikel, lkwEintrag?.lieferschein_nr])
+
+  useEffect(() => {
+    if (!eintragId || !lkwEintrag || statusSetToInBearbeitung.current) return
+    if (lkwEintrag.status === 'wartend') {
+      statusSetToInBearbeitung.current = true
+      patchStatus.mutate({ id: eintragId, status: 'in-bearbeitung' })
+    }
+  }, [eintragId, lkwEintrag?.status])
 
   function updateField<K extends keyof QualitaetsData>(key: K, value: QualitaetsData[K]): void {
     const updated = { ...qualitaet, [key]: value }
@@ -85,6 +109,9 @@ export default function QualitaetsCheckPage(): JSX.Element {
     },
     onSuccess: () => {
       toast({ title: 'Qualitätsprüfung gespeichert', description: `Ergebnis: ${qualitaet.ergebnis}` })
+      if (eintragId) {
+        patchStatus.mutate({ id: eintragId, status: 'abgeschlossen' })
+      }
       navigate('/annahme/warteschlange')
     },
     onError: () => {

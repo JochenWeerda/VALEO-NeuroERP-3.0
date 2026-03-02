@@ -10,7 +10,13 @@ import { getEntityTypeLabel, getStatusLabel } from '@/features/crud/utils/i18n-h
 import { usePurchaseOrders, useApprovePurchaseOrder, useCancelPurchaseOrder, INCOTERM_OPTIONS } from '@/lib/api/purchase-orders'
 
 // Konfiguration für Bestellungen ListReport (wird in Komponente mit i18n erstellt)
-const createBestellungenConfig = (t: any, entityTypeLabel: string, onBulkPrint?: () => void): ListConfig => ({
+const createBestellungenConfig = (
+  t: any,
+  entityTypeLabel: string,
+  onBulkPrint?: () => void,
+  onBulkApprove?: (items: any[]) => void,
+  onBulkCancel?: (items: any[]) => void,
+): ListConfig => ({
   title: entityTypeLabel,
   titleKey: 'crud.list.title',
   subtitle: t('crud.subtitles.managePurchaseOrders'),
@@ -111,21 +117,21 @@ const createBestellungenConfig = (t: any, entityTypeLabel: string, onBulkPrint?:
       label: t('crud.actions.approve'),
       labelKey: 'crud.actions.approve',
       type: 'primary',
-      onClick: () => { /* Freigabe über handleAction gesteuert */ }
+      onClick: (items) => { onBulkApprove?.(items ?? []) }
     },
     {
       key: 'stornieren',
       label: t('crud.actions.cancel'),
       labelKey: 'crud.actions.cancel',
       type: 'danger',
-      onClick: () => { /* Storno über handleAction gesteuert */ }
+      onClick: (items) => { onBulkCancel?.(items ?? []) }
     },
     {
       key: 'drucken',
       label: t('crud.actions.print'),
       labelKey: 'crud.actions.print',
       type: 'secondary',
-      onClick: () => { onBulkPrint?.() }
+      onClick: (items) => { onBulkPrint?.(items ?? []) }
     }
   ],
   defaultSort: { field: 'createdAt', direction: 'desc' },
@@ -149,10 +155,54 @@ export default function BestellungenListePage(): JSX.Element {
   const navigate = useNavigate()
   const entityType = 'purchaseOrder'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Bestellung')
-  const handleBulkPrint = () => {
-    toast({ title: t('crud.actions.print'), description: 'Druck wird vorbereitet. Bitte Bestellungen in der Liste auswählen und erneut klicken, sobald der Druckdialog verfügbar ist.' })
+  const handleBulkPrint = (items: any[]) => {
+    if (!items?.length) {
+      toast({ title: t('crud.actions.print'), description: 'Bitte Bestellungen auswählen.', variant: 'destructive' })
+      return
+    }
+    const rows = items.map((o: any) =>
+      `<tr><td>${o.purchaseOrderNumber ?? o.id}</td><td>${o.supplier ?? o.subject ?? ''}</td><td>${o.status ?? ''}</td><td>${o.deliveryDate ? new Date(o.deliveryDate).toLocaleDateString('de-DE') : ''}</td><td>${o.totalAmount != null ? Number(o.totalAmount).toFixed(2) : ''} €</td></tr>`
+    ).join('')
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Bestellungen</title></head><body><h1>Bestellungen (${items.length})</h1><table border="1" cellpadding="4"><thead><tr><th>Bestellnr.</th><th>Lieferant</th><th>Status</th><th>Lieferdatum</th><th>Betrag</th></tr></thead><tbody>${rows}</tbody></table><p style="margin-top:1em">Erstellt: ${new Date().toLocaleString('de-DE')}</p></body></html>`
+    const w = window.open('', '_blank')
+    if (w) {
+      w.document.write(html)
+      w.document.close()
+      w.focus()
+      w.print()
+      w.close()
+      toast({ title: t('crud.actions.print'), description: `${items.length} Bestellung(en) zum Drucken geöffnet.` })
+    } else {
+      toast({ title: t('crud.actions.print'), description: 'Pop-up blockiert. Bitte Pop-ups erlauben und erneut versuchen.', variant: 'destructive' })
+    }
   }
-  const bestellungenConfig = createBestellungenConfig(t, entityTypeLabel, handleBulkPrint)
+  const handleBulkApprove = async (items: any[]) => {
+    if (items.length === 0) return
+    for (const item of items) {
+      try {
+        await approveMutation.mutateAsync(item.id)
+        toast({ title: 'Bestellung freigegeben', description: item.purchaseOrderNumber })
+      } catch {
+        toast({ variant: 'destructive', title: t('crud.messages.updateError', { entityType: entityTypeLabel }), description: item.purchaseOrderNumber })
+      }
+    }
+    if (items.length > 1) toast({ title: 'Bulk-Freigabe', description: `${items.length} Bestellungen freigegeben.` })
+  }
+  const handleBulkCancel = async (items: any[]) => {
+    if (items.length === 0) return
+    const reason = prompt(`Stornierungsgrund für ${items.length} Bestellung(en):`)
+    if (!reason) return
+    for (const item of items) {
+      try {
+        await cancelMutation.mutateAsync({ id: item.id, reason })
+        toast({ title: 'Bestellung storniert', description: item.purchaseOrderNumber })
+      } catch {
+        toast({ variant: 'destructive', title: t('crud.messages.updateError', { entityType: entityTypeLabel }), description: item.purchaseOrderNumber })
+      }
+    }
+    if (items.length > 1) toast({ title: 'Bulk-Storno', description: `${items.length} Bestellungen storniert.` })
+  }
+  const bestellungenConfig = createBestellungenConfig(t, entityTypeLabel, handleBulkPrint, handleBulkApprove, handleBulkCancel)
 
   const { data: orders, isLoading } = usePurchaseOrders()
   const approveMutation = useApprovePurchaseOrder()

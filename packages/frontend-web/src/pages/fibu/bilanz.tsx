@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { TrendingUp, RefreshCw, Download } from 'lucide-react'
 import { financeService, type BalanceSheetItem } from '@/lib/services/finance-service'
+import { exportToCSV } from '@/lib/export-utils'
+import { useToast } from '@/hooks/use-toast'
 
 const fmt = (n: number) =>
   new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n)
@@ -95,6 +97,25 @@ export default function BilanzPage(): JSX.Element {
   const anlagevermoegen = bilanz.assets.filter(a => a.account_type === 'ASSET' && a.level === 0)
   const umlaufvermoegen = bilanz.assets.filter(a => a.account_type === 'ASSET' && a.level > 0)
 
+  const { toast } = useToast()
+  const handleExport = (): void => {
+    const rows = [
+      ...bilanz.assets.map((a) => ({ typ: 'Aktiva', konto: a.account_name, saldo: a.balance })),
+      ...bilanz.equity.map((e) => ({ typ: 'Eigenkapital', konto: e.account_name, saldo: e.balance })),
+      ...bilanz.liabilities.map((l) => ({ typ: 'Passiva', konto: l.account_name, saldo: l.balance })),
+    ]
+    try {
+      exportToCSV(rows, `bilanz-${period}-${new Date().toISOString().slice(0, 10)}.csv`, [
+        { key: 'typ', label: 'Typ' },
+        { key: 'konto', label: 'Konto' },
+        { key: 'saldo', label: 'Saldo' },
+      ])
+      toast({ title: 'Export', description: 'Bilanz exportiert.' })
+    } catch (e) {
+      toast({ title: 'Export fehlgeschlagen', description: String(e), variant: 'destructive' })
+    }
+  }
+
   return (
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between flex-wrap gap-4">
@@ -120,9 +141,9 @@ export default function BilanzPage(): JSX.Element {
           <Badge variant="outline" className="text-lg px-4 py-2">
             EK-Quote: {ekQuote}%
           </Badge>
-          <Button variant="outline" size="sm" className="gap-2">
+          <Button variant="outline" size="sm" className="gap-2" onClick={handleExport}>
             <Download className="h-4 w-4" />
-            PDF
+            Export CSV
           </Button>
         </div>
       </div>

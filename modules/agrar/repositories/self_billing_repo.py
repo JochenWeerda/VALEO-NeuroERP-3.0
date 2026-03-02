@@ -177,7 +177,30 @@ class SelfBillingRepositoryImpl:
         db_models = self.db.query(DisputeRecord).filter(
             DisputeRecord.invoice_id == invoice_id
         ).order_by(DisputeRecord.created_at.desc()).all()
-        
+
         return [self._to_service_dispute(m) for m in db_models]
+
+    def get_dispute_by_id(self, dispute_id: str) -> Optional[ServiceDisputeRecord]:
+        """Ruft einen einzelnen Dispute anhand der ID ab."""
+        db_model = self.db.query(DisputeRecord).filter(
+            DisputeRecord.id == dispute_id
+        ).first()
+        return self._to_service_dispute(db_model) if db_model else None
+
+    def update_dispute(self, dispute_id: str, updates: dict) -> ServiceDisputeRecord:
+        """Aktualisiert einen Dispute-Record."""
+        db_model = self.db.query(DisputeRecord).filter(
+            DisputeRecord.id == dispute_id
+        ).first()
+        if not db_model:
+            raise ValueError(f"Dispute {dispute_id} not found")
+        for k, v in updates.items():
+            if hasattr(db_model, k):
+                setattr(db_model, k, v)
+        if "updated_at" not in updates:
+            db_model.updated_at = datetime.now()
+        self.db.commit()
+        self.db.refresh(db_model)
+        return self._to_service_dispute(db_model)
 
 

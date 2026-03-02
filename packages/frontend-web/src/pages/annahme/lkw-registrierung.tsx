@@ -1,13 +1,15 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useDropzone } from 'react-dropzone'
 import { useToast } from '@/hooks/use-toast'
 import { Wizard } from '@/components/patterns/Wizard'
 import { api } from '@/lib/axios'
+import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Camera, Clock, Truck } from 'lucide-react'
+import { Camera, Clock, Truck, Upload, X } from 'lucide-react'
 
 type LKWData = {
   kennzeichen: string
@@ -29,9 +31,94 @@ export default function LKWRegistrierungPage(): JSX.Element {
     ankunftszeit: new Date().toISOString().slice(0, 16),
     prioritaet: 'normal',
   })
+  const [attachmentIds, setAttachmentIds] = useState<string[]>([])
+  const [uploading, setUploading] = useState(false)
 
   function updateField<K extends keyof LKWData>(key: K, value: LKWData[K]): void {
     setLKW((prev) => ({ ...prev, [key]: value }))
+  }
+
+  /** Datei an Backend senden, ID in attachmentIds aufnehmen. */
+  const uploadAttachment = useCallback(
+    async (file: File): Promise<string | null> => {
+      const formData = new FormData()
+      formData.append('file', file)
+      const { data } = await api.post<{ id: string }>('/api/v1/annahme/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      return data?.id ?? null
+    },
+    [],
+  )
+
+  const onDropKennzeichen = useCallback(
+    async (accepted: File[]) => {
+      if (accepted.length === 0) return
+      setUploading(true)
+      try {
+        for (const file of accepted) {
+          const id = await uploadAttachment(file)
+          if (id) setAttachmentIds((prev) => [...prev, id])
+        }
+      } catch (e: any) {
+        toast({
+          title: 'Upload fehlgeschlagen',
+          description: e.response?.data?.detail ?? e.message,
+          variant: 'destructive',
+        })
+      } finally {
+        setUploading(false)
+      }
+    },
+    [uploadAttachment, toast],
+  )
+  const onDropLieferschein = useCallback(
+    async (accepted: File[]) => {
+      if (accepted.length === 0) return
+      setUploading(true)
+      try {
+        for (const file of accepted) {
+          const id = await uploadAttachment(file)
+          if (id) setAttachmentIds((prev) => [...prev, id])
+        }
+      } catch (e: any) {
+        toast({
+          title: 'Upload fehlgeschlagen',
+          description: e.response?.data?.detail ?? e.message,
+          variant: 'destructive',
+        })
+      } finally {
+        setUploading(false)
+      }
+    },
+    [uploadAttachment, toast],
+  )
+
+  const dropzoneCommon = {
+    accept: { 'image/*': ['.png', '.jpg', '.jpeg', '.gif', '.webp'] },
+    maxSize: 10 * 1024 * 1024,
+    multiple: true,
+    disabled: uploading,
+  }
+  const dropzoneKennzeichen = useDropzone({
+    ...dropzoneCommon,
+    onDrop: onDropKennzeichen,
+  })
+  const dropzoneLieferschein = useDropzone({
+    ...dropzoneCommon,
+    onDrop: onDropLieferschein,
+  })
+
+  /** Scan-Button: Kamera/Barcode – Platzhalter bis API integriert ist. */
+  function handleScan(field: 'kennzeichen' | 'lieferscheinNr'): void {
+    toast({
+      title: 'Scan',
+      description: 'Foto hier hochladen oder Kennzeichen bzw. Lieferschein-Nr. manuell eingeben.',
+    })
+  }
+
+  function removeAttachment(index: number): void {
+    setAttachmentIds((prev) => prev.filter((_, i) => i !== index))
   }
 
   async function handleSubmit(): Promise<void> {
@@ -43,6 +130,7 @@ export default function LKWRegistrierungPage(): JSX.Element {
         artikel: lkw.artikel,
         ankunftszeit: lkw.ankunftszeit || new Date().toISOString(),
         prioritaet: lkw.prioritaet,
+        attachment_ids: attachmentIds,
       })
       toast({
         title: 'LKW registriert',
@@ -78,17 +166,35 @@ export default function LKWRegistrierungPage(): JSX.Element {
                 required
                 className="text-lg font-semibold text-center"
               />
-              <button
+              <Button
                 type="button"
-                className="flex items-center gap-2 rounded-md border border-input bg-background px-4 hover:bg-accent"
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                onClick={() => handleScan('kennzeichen')}
+                title="Kennzeichen scannen (in Kürze)"
               >
                 <Camera className="h-4 w-4" />
                 Scan
-              </button>
+              </Button>
             </div>
             <p className="mt-2 text-sm text-muted-foreground">
-              Kennzeichen eingeben oder mit Kamera scannen
+              Kennzeichen eingeben oder Foto/Barcode hochladen (mobil geeignet)
             </p>
+          </div>
+          <div>
+            <Label>Foto Kennzeichen / Barcode (optional)</Label>
+            <div
+              {...dropzoneKennzeichen.getRootProps()}
+              className="mt-2 rounded-lg border-2 border-dashed border-muted-foreground/30 bg-muted/30 p-4 text-center cursor-pointer hover:border-primary/50 hover:bg-muted/50 transition-colors min-h-[100px] flex flex-col items-center justify-center"
+            >
+              <input {...dropzoneKennzeichen.getInputProps()} accept="image/*" capture="environment" />
+              <Upload className="h-8 w-8 text-muted-foreground mb-2" />
+              <p className="text-sm font-medium">
+                {dropzoneKennzeichen.isDragActive ? 'Ablegen…' : 'Tippen oder Foto hierher ziehen'}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">Bild von Kamera oder Galerie (iOS/Android)</p>
+            </div>
           </div>
           <div>
             <Label htmlFor="ankunftszeit">Ankunftszeit</Label>
@@ -126,13 +232,34 @@ export default function LKWRegistrierungPage(): JSX.Element {
                 onChange={(e) => updateField('lieferscheinNr', e.target.value)}
                 placeholder="z.B. LS-2025-0042"
               />
-              <button
+              <Button
                 type="button"
-                className="flex items-center gap-2 rounded-md border border-input bg-background px-4 hover:bg-accent"
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                onClick={() => handleScan('lieferscheinNr')}
+                title="Lieferschein-Nr. scannen (in Kürze)"
               >
                 <Camera className="h-4 w-4" />
                 Scan
-              </button>
+              </Button>
+            </div>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Lieferschein-Nr. eingeben oder Foto/Barcode hochladen
+            </p>
+          </div>
+          <div>
+            <Label>Foto Lieferschein / Barcode (optional)</Label>
+            <div
+              {...dropzoneLieferschein.getRootProps()}
+              className="mt-2 rounded-lg border-2 border-dashed border-muted-foreground/30 bg-muted/30 p-4 text-center cursor-pointer hover:border-primary/50 hover:bg-muted/50 transition-colors min-h-[100px] flex flex-col items-center justify-center"
+            >
+              <input {...dropzoneLieferschein.getInputProps()} accept="image/*" capture="environment" />
+              <Upload className="h-8 w-8 text-muted-foreground mb-2" />
+              <p className="text-sm font-medium">
+                {dropzoneLieferschein.isDragActive ? 'Ablegen…' : 'Tippen oder Foto hierher ziehen'}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">Bild von Kamera oder Galerie (iOS/Android)</p>
             </div>
           </div>
           <div>
@@ -204,6 +331,21 @@ export default function LKWRegistrierungPage(): JSX.Element {
                     </Badge>
                   </dd>
                 </div>
+                {attachmentIds.length > 0 && (
+                  <div className="flex justify-between items-center border-t pt-2 mt-2">
+                    <dt className="text-sm font-medium text-muted-foreground">Anhänge</dt>
+                    <dd className="flex flex-wrap gap-1">
+                      {attachmentIds.map((id, i) => (
+                        <Badge key={id} variant="secondary" className="gap-1">
+                          #{i + 1}
+                          <button type="button" onClick={() => removeAttachment(i)} className="rounded hover:bg-muted-foreground/20" aria-label="Entfernen">
+                            <X className="h-3 w-3" />
+                          </button>
+                        </Badge>
+                      ))}
+                    </dd>
+                  </div>
+                )}
               </dl>
             </CardContent>
           </Card>

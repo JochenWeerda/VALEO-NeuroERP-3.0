@@ -178,8 +178,10 @@ class JournalEntryRepository(BaseRepository[T, TCreate, TUpdate], ABC):
         pass
 
     @abstractmethod
-    async def get_entries_by_date_range(self, start_date: str, end_date: str, tenant_id: str) -> List[T]:
-        """Get journal entries by date range"""
+    async def get_entries_by_date_range(
+        self, start_date: str, end_date: str, tenant_id: str, reference: Optional[str] = None
+    ) -> List[T]:
+        """Get journal entries by date range, optionally by reference (e.g. Importlauf run_id)."""
         pass
 
     @abstractmethod

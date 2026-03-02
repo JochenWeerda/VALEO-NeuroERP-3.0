@@ -3,7 +3,7 @@ Accounting Period Management API
 FIBU-GL-05: Periodensteuerung
 """
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from typing import List, Optional
 from datetime import datetime, date
 from pydantic import BaseModel
@@ -12,6 +12,7 @@ from sqlalchemy import text
 import logging
 
 from app.core.database import get_db
+from app.core.fibu_audit import log_fibu_audit
 
 logger = logging.getLogger(__name__)
 
@@ -52,6 +53,7 @@ class PeriodUpdate(BaseModel):
 @router.post("/", response_model=AccountingPeriod, status_code=201)
 async def create_period(
     period_data: PeriodCreate,
+    request: Request,
     db: Session = Depends(get_db)
 ):
     """Create a new accounting period."""
@@ -115,7 +117,7 @@ async def create_period(
             {"id": period_id}
         ).fetchone()
 
-        return AccountingPeriod(
+        period_out = AccountingPeriod(
             id=result[0],
             tenant_id=result[1],
             period=result[2],
@@ -126,6 +128,12 @@ async def create_period(
             closed_by=result[7],
             metadata=result[8] or {}
         )
+        log_fibu_audit(
+            db, period_data.tenant_id, "create", "accounting_period", period_id,
+            {"period": period_data.period, "status": period_data.status},
+            request=request,
+        )
+        return period_out
 
     except HTTPException:
         raise
@@ -230,6 +238,7 @@ async def get_period(
 async def update_period(
     period_id: str,
     period_update: PeriodUpdate,
+    request: Request,
     db: Session = Depends(get_db)
 ):
     """Update an accounting period (e.g., close it)."""
@@ -275,6 +284,12 @@ async def update_period(
         update_query += ",".join(updates) + " WHERE id = :id"
         db.execute(text(update_query), params)
         db.commit()
+        tenant_id = existing[1]
+        log_fibu_audit(
+            db, tenant_id, "update", "accounting_period", period_id,
+            {"status": period_update.status, "closed_by": period_update.closed_by},
+            request=request,
+        )
 
         # Fetch updated period
         result = db.execute(

@@ -46,7 +46,10 @@ PY
 
 echo "📦 Führe Alembic Migrations aus..."
 if [ -f "alembic.ini" ]; then
-  alembic upgrade head || echo "⚠️ Alembic failed, continuing..."
+  if ! alembic upgrade head; then
+    echo "❌ Alembic migration failed. Bei Release/Neuinstallation muss die DB konsistent sein (leer oder alle Vorgänger-Migrationen angewendet)."
+    exit 1
+  fi
 fi
 
 echo "🚀 Starte Backend..."

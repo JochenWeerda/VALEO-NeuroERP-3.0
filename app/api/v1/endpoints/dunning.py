@@ -14,6 +14,7 @@ import logging
 from app.core.uuid7 import uuid7
 
 from ....core.database import get_db
+from ....core.gobd_artifact import register_artifact, sha256_hex
 
 logger = logging.getLogger(__name__)
 
@@ -751,6 +752,12 @@ async def send_dunning(
             raise HTTPException(status_code=404, detail="Dunning notice not found")
         
         db.commit()
+        canonical = f"Mahnung|{dunning_id}|{row[1]}|{row[3]}|{row[6]}|{row[9]}"
+        content_hash = sha256_hex(canonical.encode("utf-8"))
+        register_artifact(
+            db, tenant_id, dunning_id, "other",
+            content_hash, f"dunning/sent/{dunning_id}", file_name=f"Mahnung_{dunning_id}.pdf", created_by=None,
+        )
         
         return DunningResponse(
             id=str(row[0]),

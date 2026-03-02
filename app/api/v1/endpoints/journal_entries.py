@@ -4,12 +4,13 @@ RESTful API for journal entry management with clean architecture
 """
 
 from typing import Optional, List
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 from datetime import datetime
 
 from ....core.database import get_db
 from ....core.tenant import get_tenant_id
+from ....core.fibu_audit import log_fibu_audit
 from ....infrastructure.repositories import JournalEntryRepository
 from ....core.dependency_container import container
 from ..schemas.finance import (
@@ -23,6 +24,7 @@ router = APIRouter()
 @router.post("/", response_model=JournalEntry, status_code=201)
 async def create_journal_entry(
     entry_data: JournalEntryCreate,
+    request: Request,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
@@ -68,6 +70,11 @@ async def create_journal_entry(
         entry_dict['total_credit'] = total_credit
 
         entry = await entry_repo.create(entry_dict, tenant_id)
+        log_fibu_audit(
+            db, tenant_id, "create", "journal_entry", entry.id,
+            {"document_number": getattr(entry, "document_number", None), "period": entry_data.period},
+            request=request,
+        )
         return JournalEntry.model_validate(entry)
     except HTTPException:
         raise
@@ -81,6 +88,7 @@ async def list_journal_entries(
     status: Optional[str] = Query(None, description="Filter by status"),
     start_date: Optional[str] = Query(None, description="Start date (YYYY-MM-DD)"),
     end_date: Optional[str] = Query(None, description="End date (YYYY-MM-DD)"),
+    reference: Optional[str] = Query(None, description="Filter by reference (e.g. Importlauf run_id)"),
     skip: int = Query(0, ge=0, description="Number of items to skip"),
     limit: int = Query(100, ge=1, le=1000, description="Maximum number of items to return"),
     db: Session = Depends(get_db)
@@ -98,8 +106,10 @@ async def list_journal_entries(
         end_dt = datetime.fromisoformat(end_date) if end_date else None
 
         entries = await entry_repo.get_entries_by_date_range(
-            start_date, end_date, tenant_id
-        ) if start_date and end_date else await entry_repo.get_all(tenant_id, skip, limit)
+            start_date, end_date, tenant_id, reference=reference
+        ) if start_date and end_date else await entry_repo.get_all(
+            tenant_id, skip, limit, reference=reference
+        )
 
         # Apply status filter if provided
         if status:
@@ -149,6 +159,7 @@ async def get_journal_entry(
 async def update_journal_entry(
     entry_id: str,
     entry_data: JournalEntryUpdate,
+    request: Request,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
@@ -170,6 +181,11 @@ async def update_journal_entry(
         entry = await entry_repo.update(entry_id, entry_data.model_dump(exclude_unset=True), tenant_id)
         if not entry:
             raise HTTPException(status_code=404, detail="Journal entry not found")
+        log_fibu_audit(
+            db, tenant_id, "update", "journal_entry", entry_id,
+            {"updated_fields": list(entry_data.model_dump(exclude_unset=True).keys())},
+            request=request,
+        )
         return JournalEntry.model_validate(entry)
     except HTTPException:
         raise
@@ -180,6 +196,7 @@ async def update_journal_entry(
 @router.post("/{entry_id}/post", response_model=JournalEntry)
 async def post_journal_entry(
     entry_id: str,
+    request: Request,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
@@ -194,7 +211,11 @@ async def post_journal_entry(
         success = await entry_repo.post_entry(entry_id, tenant_id)
         if not success:
             raise HTTPException(status_code=400, detail="Failed to post journal entry")
-
+        log_fibu_audit(
+            db, tenant_id, "post", "journal_entry", entry_id,
+            {"status": "posted"},
+            request=request,
+        )
         # Return the updated entry
         entry = await entry_repo.get_by_id(entry_id, tenant_id)
         return JournalEntry.model_validate(entry)
@@ -208,6 +229,7 @@ async def post_journal_entry(
 async def reverse_journal_entry(
     entry_id: str,
     reason: str = Query(..., description="Reason for reversal"),
+    request: Optional[Request] = None,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
@@ -221,7 +243,11 @@ async def reverse_journal_entry(
         reversal_entry = await entry_repo.reverse_entry(entry_id, reason, tenant_id)
         if not reversal_entry:
             raise HTTPException(status_code=400, detail="Failed to create reversal entry")
-
+        log_fibu_audit(
+            db, tenant_id, "reverse", "journal_entry", entry_id,
+            {"reason": reason, "reversal_entry_id": reversal_entry.id},
+            request=request,
+        )
         return {
             "message": "Reversal entry created successfully",
             "original_entry_id": entry_id,
@@ -236,6 +262,7 @@ async def reverse_journal_entry(
 @router.delete("/{entry_id}", status_code=204)
 async def delete_journal_entry(
     entry_id: str,
+    request: Request,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
@@ -257,6 +284,7 @@ async def delete_journal_entry(
         success = await entry_repo.delete(entry_id, tenant_id)
         if not success:
             raise HTTPException(status_code=404, detail="Journal entry not found")
+        log_fibu_audit(db, tenant_id, "delete", "journal_entry", entry_id, {"status": "draft"}, request=request)
     except HTTPException:
         raise
     except Exception as e:

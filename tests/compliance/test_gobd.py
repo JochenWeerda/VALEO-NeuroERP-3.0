@@ -73,7 +73,7 @@ def test_journal_entry_has_all_required_fields(db: Session):
     """Test that journal entries have all GoBD-required fields."""
     from uuid import uuid4
     
-    _require_table(db, "domain_erp", "finance_journal_entries")
+    _require_table(db, "domain_erp", "journal_entries")
     entry = JournalEntry(
         id=str(uuid4()),
         entry_number="JE-2025-001",
@@ -97,7 +97,7 @@ def test_journal_entry_has_all_required_fields(db: Session):
 def test_booking_date_within_10_days_of_document_date():
     """Test that posting_date ≤ entry_date + 10 days (Zeitnähe)."""
     db = SessionLocal()
-    _require_table(db, "domain_erp", "finance_journal_entries")
+    _require_table(db, "domain_erp", "journal_entries")
     
     # Query all journal entries
     entries = db.query(JournalEntry).all()
@@ -123,7 +123,7 @@ def test_no_gaps_in_document_numbers():
 def test_all_transactions_have_audit_trail():
     """Test that all transactions are logged (Nachvollziehbarkeit)."""
     db = SessionLocal()
-    _require_table(db, "domain_erp", "finance_journal_entries")
+    _require_table(db, "domain_erp", "journal_entries")
     _require_table(db, "domain_shared", "audit_logs")
     
     # Every JournalEntry should have corresponding AuditLog
