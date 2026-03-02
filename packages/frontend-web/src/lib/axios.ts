@@ -177,26 +177,35 @@ api.interceptors.response.use(
   }
 )
 
-const apiClient = {
+// Explicit interface ensures TypeScript uses declared return types (not inferred AxiosResponse<T>)
+interface ApiClient {
+  get<T>(url: string, config?: GetConfig): Promise<T>
+  post<TResponse, TPayload = unknown>(url: string, data?: TPayload, config?: MutationConfig): Promise<TResponse>
+  put<TResponse, TPayload = unknown>(url: string, data?: TPayload, config?: MutationConfig): Promise<TResponse>
+  patch<TResponse, TPayload = unknown>(url: string, data?: TPayload, config?: MutationConfig): Promise<TResponse>
+  delete<TResponse>(url: string, config?: DeleteConfig): Promise<TResponse>
+}
+
+const apiClient: ApiClient = {
   get: async <T>(url: string, config?: GetConfig): Promise<T> => {
     const response = await api.get<T>(url, config)
-    return response.data
+    return response.data as T
   },
   post: async <TResponse, TPayload = unknown>(url: string, data?: TPayload, config?: MutationConfig): Promise<TResponse> => {
     const response = await api.post<TResponse>(url, data, config)
-    return response.data
+    return response.data as TResponse
   },
   put: async <TResponse, TPayload = unknown>(url: string, data?: TPayload, config?: MutationConfig): Promise<TResponse> => {
     const response = await api.put<TResponse>(url, data, config)
-    return response.data
+    return response.data as TResponse
   },
   patch: async <TResponse, TPayload = unknown>(url: string, data?: TPayload, config?: MutationConfig): Promise<TResponse> => {
     const response = await api.patch<TResponse>(url, data, config)
-    return response.data
+    return response.data as TResponse
   },
   delete: async <TResponse>(url: string, config?: DeleteConfig): Promise<TResponse> => {
     const response = await api.delete<TResponse>(url, config)
-    return response.data
+    return response.data as TResponse
   },
 }
 

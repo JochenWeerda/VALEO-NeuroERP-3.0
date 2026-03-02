@@ -1139,8 +1139,8 @@ class Account(Base):
 
 
 class JournalEntry(Base):
-    """Journal entry model"""
-    __tablename__ = "finance_journal_entries"
+    """Journal entry model – nutzt domain_erp.journal_entries (eine Tabelle für List + Connector)."""
+    __tablename__ = "journal_entries"
     __table_args__ = {"schema": "domain_erp", "extend_existing": True}
 
     id = Column(String, primary_key=True, default=uuid7)
@@ -1149,26 +1149,26 @@ class JournalEntry(Base):
     posting_date = Column(DateTime(timezone=True), nullable=False)
     description = Column(String(200), nullable=False)
     reference = Column(String(50), nullable=True)
-    source = Column(String(50), nullable=False)
+    source = Column(String(50), nullable=True)  # manual, connector, …
     status = Column(String(20), default="draft")  # draft, posted, reversed
     total_debit = Column(DECIMAL(15, 2), default=0)
     total_credit = Column(DECIMAL(15, 2), default=0)
     posted_by = Column(String, ForeignKey("domain_shared.users.id"), nullable=True)
     posted_at = Column(DateTime(timezone=True), nullable=True)
-    reversed_entry_id = Column(String, ForeignKey("domain_erp.finance_journal_entries.id"), nullable=True)
+    reversed_entry_id = Column(String, ForeignKey("domain_erp.journal_entries.id"), nullable=True)
     tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
 
 class JournalEntryLine(Base):
-    """Journal entry line model"""
-    __tablename__ = "finance_journal_entry_lines"
+    """Journal entry line model – nutzt domain_erp.journal_entry_lines (chart_of_accounts)."""
+    __tablename__ = "journal_entry_lines"
     __table_args__ = {"schema": "domain_erp", "extend_existing": True}
 
     id = Column(String, primary_key=True, default=uuid7)
-    journal_entry_id = Column(String, ForeignKey("domain_erp.finance_journal_entries.id"), nullable=False)
-    account_id = Column(String, ForeignKey("domain_erp.finance_accounts.id"), nullable=False)
+    journal_entry_id = Column(String, ForeignKey("domain_erp.journal_entries.id"), nullable=False)
+    account_id = Column(String, ForeignKey("domain_erp.chart_of_accounts.id"), nullable=False)
     debit = Column(DECIMAL(15, 2), default=0)
     credit = Column(DECIMAL(15, 2), default=0)
     description = Column(String(200), nullable=True)

@@ -204,7 +204,7 @@ const createZahlungslaufConfig = (t: any, entityTypeLabel: string): MaskConfig =
           return
         }
         try {
-          const response = await fetch(`/api/v1/payment-runs/${data.id}/approve`, {
+          const response = await fetch(`/api/v1/finance/payment-runs/${data.id}/approve`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({})
@@ -240,7 +240,7 @@ const createZahlungslaufConfig = (t: any, entityTypeLabel: string): MaskConfig =
           return
         }
         try {
-          const response = await fetch(`/api/v1/payment-runs/${data.id}/sepa-xml`)
+          const response = await fetch(`/api/v1/finance/payment-runs/${data.id}/sepa-xml`)
           if (response.ok) {
             const blob = await response.blob()
             const url = window.URL.createObjectURL(blob)
@@ -280,7 +280,7 @@ const createZahlungslaufConfig = (t: any, entityTypeLabel: string): MaskConfig =
         }
         try {
           // Execute payment run (generates SEPA XML and updates status)
-          const executeResponse = await fetch(`/api/v1/payment-runs/${data.id}/execute`, {
+          const executeResponse = await fetch(`/api/v1/finance/payment-runs/${data.id}/execute`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({})
@@ -289,7 +289,7 @@ const createZahlungslaufConfig = (t: any, entityTypeLabel: string): MaskConfig =
             throw new Error(await executeResponse.text())
           }
           // Download SEPA XML
-          const sepaResponse = await fetch(`/api/v1/payment-runs/${data.id}/sepa-xml`)
+          const sepaResponse = await fetch(`/api/v1/finance/payment-runs/${data.id}/sepa-xml`)
           if (sepaResponse.ok) {
             const blob = await sepaResponse.blob()
             const url = window.URL.createObjectURL(blob)
@@ -330,7 +330,7 @@ const createZahlungslaufConfig = (t: any, entityTypeLabel: string): MaskConfig =
           return
         }
         try {
-          const response = await fetch(`/api/v1/payment-runs/${data.id}/returns`)
+          const response = await fetch(`/api/v1/finance/payment-runs/${data.id}/returns`)
           if (response.ok) {
             const returns = await response.json()
             if (returns.length > 0) {
@@ -357,13 +357,13 @@ const createZahlungslaufConfig = (t: any, entityTypeLabel: string): MaskConfig =
     }
   ],
   api: {
-    baseUrl: '/api/v1/payment-runs',
+    baseUrl: '/api/v1/finance/payment-runs',
     endpoints: {
-      list: '/api/v1/payment-runs',
-      get: '/api/v1/payment-runs/{id}',
-      create: '/api/v1/payment-runs',
-      update: '/api/v1/payment-runs/{id}',
-      delete: '/api/v1/payment-runs/{id}'
+      list: '/api/v1/finance/payment-runs',
+      get: '/api/v1/finance/payment-runs/{id}',
+      create: '/api/v1/finance/payment-runs',
+      update: '/api/v1/finance/payment-runs/{id}',
+      delete: '/api/v1/finance/payment-runs/{id}'
     }
   } as any,
   validation: createZahlungslaufSchema(t),
@@ -685,7 +685,7 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
         })
         return
       }
-      window.open(`/api/finance/zahlungslauf-kreditoren/${formData.id}/preview`, '_blank')
+      window.open(`/api/v1/finance/payment-runs/${formData.id}/sepa-xml`, '_blank')
     } else if (action === 'approve') {
       // Freigeben
       if (!formData.id) {
@@ -698,7 +698,7 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
       }
 
       try {
-        const response = await fetch(`/api/finance/zahlungslauf-kreditoren/${formData.id}/approve`, {
+        const response = await fetch(`/api/v1/finance/payment-runs/${formData.id}/approve`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -751,7 +751,7 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
         })
         return
       }
-      window.open(`/api/finance/zahlungslauf-kreditoren/${formData.id}/export`, '_blank')
+      window.open(`/api/v1/finance/payment-runs/${formData.id}/sepa-xml`, '_blank')
     }
   })
 

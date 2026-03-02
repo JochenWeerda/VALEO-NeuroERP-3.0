@@ -7,7 +7,7 @@ import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { toast } from 'sonner'
-import { apiClient } from '@/lib/api-client'
+import { apiClient } from '@/lib/axios'
 
 // Zod-Schema für OP-Debitoren (wird in Komponente mit i18n erstellt)
 const createOpDebitorenSchema = (t: any) => z.object({
@@ -205,36 +205,11 @@ const createOpDebitorenConfig = (t: any, entityTypeLabel: string): MaskConfig =>
     }
   ],
   actions: [
-    {
-      key: 'zahlung',
-      label: t('crud.actions.recordPayment'),
-      type: 'secondary',
-      onClick: () => {}
-    },
-    {
-      key: 'skonto',
-      label: t('crud.actions.useDiscount'),
-      type: 'secondary',
-      onClick: () => {}
-    },
-    {
-      key: 'ausgleich',
-      label: t('crud.actions.settle'),
-      type: 'primary',
-      onClick: () => {}
-    },
-    {
-      key: 'mahnung',
-      label: t('crud.actions.createDunning'),
-      type: 'danger',
-      onClick: () => {}
-    },
-    {
-      key: 'export',
-      label: t('crud.actions.export'),
-      type: 'secondary',
-      onClick: () => {}
-    }
+    { key: 'zahlung', label: t('crud.actions.recordPayment'), type: 'secondary' },
+    { key: 'skonto', label: t('crud.actions.useDiscount'), type: 'secondary' },
+    { key: 'ausgleich', label: t('crud.actions.settle'), type: 'primary' },
+    { key: 'mahnung', label: t('crud.actions.createDunning'), type: 'danger' },
+    { key: 'export', label: t('crud.actions.export'), type: 'secondary' }
   ],
   api: {
     baseUrl: '/api/v1/finance/open-items',
@@ -367,6 +342,7 @@ export default function OPDebitorenPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [isDirty, setIsDirty] = useState(false)
+  const [actionLoadingKey, setActionLoadingKey] = useState<string | null>(null)
   const entityType = 'openItem'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'OP-Verwaltung (Debitoren)')
   const opDebitorenConfig = createOpDebitorenConfig(t, entityTypeLabel)
@@ -476,7 +452,7 @@ export default function OPDebitorenPage(): JSX.Element {
       }
 
       try {
-        const response = await fetch(`/api/finance/op-debitoren/${formData.id}/mahnung`, {
+        const response = await fetch(`/api/v1/finance/dunning/${formData.id}/mahnung`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -499,7 +475,17 @@ export default function OPDebitorenPage(): JSX.Element {
         toast.error(t('crud.messages.saveFirstGeneric'))
         return
       }
-      window.open(`/api/v1/finance/open-items/${formData.id}/export`, '_blank')
+      setActionLoadingKey('export')
+      try {
+        const res = await apiClient.post<{ url?: string }>('/api/v1/export/list', { entity: 'open_items', format: 'pdf', id: formData.id })
+        if (res?.url) window.open(res.url, '_blank')
+        toast.success(t('crud.messages.exportCreated', { defaultValue: 'Export erstellt' }))
+      } catch (error: any) {
+        const msg = error.response?.data?.detail ?? error.message
+        toast.error(msg)
+      } finally {
+        setActionLoadingKey(null)
+      }
     }
   })
 
@@ -521,6 +507,8 @@ export default function OPDebitorenPage(): JSX.Element {
       onSave={handleSave}
       onCancel={handleCancel}
       isLoading={loading}
+      onAction={(key, formData) => handleAction(key, formData)}
+      loadingActionKey={actionLoadingKey}
     />
   )
 }

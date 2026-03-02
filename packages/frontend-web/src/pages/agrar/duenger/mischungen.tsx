@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
-import { AlertTriangle, Calculator, FlaskConical, Plus, Save, Trash2 } from 'lucide-react'
+import { AlertTriangle, Calculator, ChevronDown, ChevronUp, FlaskConical, Plus, Save, Trash2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { useDuengerKomponenten } from '@/lib/api/agrar'
 
@@ -131,6 +131,24 @@ export default function DuengerMischungenPage(): JSX.Element {
       ...prev,
       komponenten: prev.komponenten.filter((_, i) => i !== index)
     }))
+  }
+
+  const moveKomponenteUp = (index: number) => {
+    if (index <= 0) return
+    setMischung(prev => {
+      const komponenten = [...prev.komponenten]
+      ;[komponenten[index - 1], komponenten[index]] = [komponenten[index], komponenten[index - 1]]
+      return { ...prev, komponenten }
+    })
+  }
+
+  const moveKomponenteDown = (index: number) => {
+    if (index >= mischung.komponenten.length - 1) return
+    setMischung(prev => {
+      const komponenten = [...prev.komponenten]
+      ;[komponenten[index], komponenten[index + 1]] = [komponenten[index + 1], komponenten[index]]
+      return { ...prev, komponenten }
+    })
   }
 
   const handleSave = async () => {
@@ -302,14 +320,22 @@ export default function DuengerMischungenPage(): JSX.Element {
                 <div key={index} className="p-4 border rounded-lg">
                   <div className="flex items-center justify-between mb-4">
                     <h4 className="font-medium">Komponente {index + 1}</h4>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => removeKomponente(index)}
-                      className="text-red-600 hover:text-red-700"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <div className="flex items-center gap-1">
+                      <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => moveKomponenteUp(index)} disabled={index === 0} title="Nach oben">
+                        <ChevronUp className="h-4 w-4" />
+                      </Button>
+                      <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => moveKomponenteDown(index)} disabled={index === mischung.komponenten.length - 1} title="Nach unten">
+                        <ChevronDown className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => removeKomponente(index)}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
 
                   <div className="grid gap-4 md:grid-cols-3">

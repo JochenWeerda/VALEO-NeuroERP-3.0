@@ -9,6 +9,7 @@ import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { validateIBAN, formatIBAN, lookupIBAN } from '@/lib/utils/iban-validator'
 import { useIbanLookup } from '@/hooks/useIbanLookup'
 import { toast } from 'sonner'
+import { apiClient } from '@/lib/axios'
 
 // Zod-Schema für Kreditoren-Stammdaten (wird in Komponente mit i18n erstellt)
 const createKreditorenSchema = (t: any) => z.object({
@@ -260,41 +261,21 @@ const createKreditorenConfig = (t: any, entityTypeLabel: string): MaskConfig => 
     }
   ],
   actions: [
-    {
-      key: 'validate',
-      label: t('crud.actions.validate'),
-      type: 'secondary',
-      onClick: () => {}
-    },
-    {
-      key: 'save',
-      label: t('crud.actions.save'),
-      type: 'primary',
-      onClick: () => {}
-    },
-    {
-      key: 'sanktionspruefung',
-      label: t('crud.actions.sanctionsCheck'),
-      type: 'secondary',
-      onClick: () => {}
-    },
-    {
-      key: 'export',
-      label: t('crud.actions.export'),
-      type: 'secondary',
-      onClick: () => {}
-    }
+    { key: 'validate', label: t('crud.actions.validate'), type: 'secondary' },
+    { key: 'save', label: t('crud.actions.save'), type: 'primary' },
+    { key: 'sanktionspruefung', label: t('crud.actions.sanctionsCheck'), type: 'secondary' },
+    { key: 'export', label: t('crud.actions.export'), type: 'secondary' }
   ],
   api: {
-    baseUrl: '/api/finance/kreditoren',
+    baseUrl: '/api/v1/finance/creditors',
     endpoints: {
-      list: '/api/finance/kreditoren',
-      get: '/api/finance/kreditoren/{id}',
-      create: '/api/finance/kreditoren',
-      update: '/api/finance/kreditoren/{id}',
-      delete: '/api/finance/kreditoren/{id}'
-      // sanctions: '/api/finance/kreditoren/{id}/sanctions',
-      // export: '/api/finance/kreditoren/export'
+      list: '/api/v1/finance/creditors',
+      get: '/api/v1/finance/creditors/{id}',
+      create: '/api/v1/finance/creditors',
+      update: '/api/v1/finance/creditors/{id}',
+      delete: '/api/v1/finance/creditors/{id}'
+      // sanctions: '/api/v1/finance/creditors/{id}/sanctions',
+      // export: '/api/v1/finance/creditors/export'
     }
   },
   validation: createKreditorenSchema(t),
@@ -306,6 +287,7 @@ export default function KreditorenStammPage(): JSX.Element {
   const navigate = useNavigate()
   const [isDirty, setIsDirty] = useState(false)
   const [formData, setFormData] = useState<any>({})
+  const [actionLoadingKey, setActionLoadingKey] = useState<string | null>(null)
   const entityType = 'creditor'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Kreditor')
   const kreditorenConfig = createKreditorenConfig(t, entityTypeLabel)
@@ -379,15 +361,47 @@ export default function KreditorenStammPage(): JSX.Element {
     } else if (action === 'validate') {
       const isValid = validate(formData)
       if (isValid.isValid) {
-        alert(t('crud.messages.validationSuccess'))
+        toast.success(t('crud.messages.validationSuccess', { defaultValue: 'Validierung erfolgreich' }))
       } else {
         showValidationToast(isValid.errors)
       }
     } else if (action === 'sanktionspruefung') {
-      // Sanktionsprüfung
-      alert(t('crud.messages.sanctionsCheckInfo'))
+      const name = formData?.firma || formData?.name || ''
+      const land = formData?.land || 'DE'
+      if (!name) {
+        toast('Firmenname fehlt — bitte Stammdaten zuerst ausfüllen.')
+        return
+      }
+      try {
+        const res = await apiClient.post<{
+          treffer: boolean
+          ergebnis: string
+          listen: string[]
+          geprueft_am: string
+          hinweis: string
+        }>('/api/v1/crm/sanktionspruefung', { name, land })
+        const result = res as any
+        if (result?.treffer) {
+          toast.error(`Sanktionstreffer: ${result.ergebnis}`)
+        } else {
+          toast.success(`Sanktionsprüfung OK: ${result?.ergebnis ?? 'Kein Treffer'}`)
+        }
+      } catch (e: any) {
+        const msg = e.response?.data?.detail ?? e.message
+        toast.error(`Sanktionsprüfung fehlgeschlagen: ${msg}`)
+      }
     } else if (action === 'export') {
-      window.open('/api/finance/kreditoren/export', '_blank')
+      setActionLoadingKey('export')
+      try {
+        const res = await apiClient.post<{ url?: string }>('/api/v1/export/list', { entity: 'creditors', format: 'pdf', id: formData?.id })
+        if (res?.url) window.open(res.url, '_blank')
+        toast.success(t('crud.messages.exportCreated', { defaultValue: 'Export erstellt' }))
+      } catch (error: any) {
+        const msg = error.response?.data?.detail ?? error.message
+        toast.error(msg)
+      } finally {
+        setActionLoadingKey(null)
+      }
     }
   })
 
@@ -445,6 +459,8 @@ export default function KreditorenStammPage(): JSX.Element {
       onSave={handleSave}
       onCancel={handleCancel}
       isLoading={loading || isIbanLoading}
+      onAction={(key, fd) => handleAction(key, fd ?? formData)}
+      loadingActionKey={actionLoadingKey}
     />
   )
 }

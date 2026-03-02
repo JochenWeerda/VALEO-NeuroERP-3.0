@@ -74,27 +74,27 @@ export const fibuKeys = {
 
 // ========== HOOKS ==========
 
-// Debitoren
+// Debitoren Offene Posten
 export function useDebitoren(filters?: { ueberfaellig?: boolean; mahn_stufe?: number }) {
   return useQuery({
     queryKey: [...fibuKeys.debitoren(), filters],
     queryFn: async () => {
-      const params = new URLSearchParams()
-      if (filters?.ueberfaellig !== undefined) params.append('ueberfaellig', String(filters.ueberfaellig))
-      if (filters?.mahn_stufe !== undefined) params.append('mahn_stufe', String(filters.mahn_stufe))
-      
-      const response = await apiClient.get<OffenerPosten[]>(`/api/fibu/debitoren?${params.toString()}`)
-      return response.data
+      const params = new URLSearchParams({ typ: 'debitor' })
+      if (filters?.mahn_stufe !== undefined) params.append('mahnstufe', String(filters.mahn_stufe))
+      const response = await apiClient.get<{ items: OffenerPosten[]; total: number }>(
+        `/api/v1/finance/open-items?${params.toString()}`
+      )
+      return response.data.items ?? []
     },
   })
 }
 
 export function useMahnen() {
   const queryClient = useQueryClient()
-  
   return useMutation({
     mutationFn: async (id: string) => {
-      const response = await apiClient.post(`/api/fibu/debitoren/${id}/mahnen`)
+      // Erstellt eine neue Mahnung für den offenen Posten
+      const response = await apiClient.post(`/api/v1/finance/dunning`, { op_id: id })
       return response.data
     },
     onSuccess: () => {
@@ -103,26 +103,26 @@ export function useMahnen() {
   })
 }
 
-// Kreditoren
+// Kreditoren Offene Posten
 export function useKreditoren(filters?: { zahlbar?: boolean }) {
   return useQuery({
     queryKey: [...fibuKeys.kreditoren(), filters],
     queryFn: async () => {
-      const params = new URLSearchParams()
+      const params = new URLSearchParams({ typ: 'kreditor' })
       if (filters?.zahlbar !== undefined) params.append('zahlbar', String(filters.zahlbar))
-      
-      const response = await apiClient.get<OffenerPosten[]>(`/api/fibu/kreditoren?${params.toString()}`)
-      return response.data
+      const response = await apiClient.get<{ items: OffenerPosten[]; total: number }>(
+        `/api/v1/finance/open-items?${params.toString()}`
+      )
+      return response.data.items ?? []
     },
   })
 }
 
 export function useZahlungslauf() {
   const queryClient = useQueryClient()
-  
   return useMutation({
     mutationFn: async (ids: string[]) => {
-      const response = await apiClient.post('/api/fibu/kreditoren/zahlungslauf', { ids })
+      const response = await apiClient.post('/api/v1/finance/payment-runs', { op_ids: ids })
       return response.data
     },
     onSuccess: () => {
@@ -132,28 +132,37 @@ export function useZahlungslauf() {
   })
 }
 
-// Buchungen
+// Buchungen (Journal Entries)
 export function useBuchungen(filters?: { datum_von?: string; datum_bis?: string; belegart?: string }) {
   return useQuery({
     queryKey: [...fibuKeys.buchungen(), filters],
     queryFn: async () => {
-      const params = new URLSearchParams()
-      if (filters?.datum_von) params.append('datum_von', filters.datum_von)
-      if (filters?.datum_bis) params.append('datum_bis', filters.datum_bis)
-      if (filters?.belegart) params.append('belegart', filters.belegart)
-      
-      const response = await apiClient.get<Buchung[]>(`/api/fibu/buchungen?${params.toString()}`)
-      return response.data
+      const params: Record<string, string> = {}
+      if (filters?.datum_von) params.entry_date_from = filters.datum_von
+      if (filters?.datum_bis) params.entry_date_to = filters.datum_bis
+      if (filters?.belegart) params.source = filters.belegart
+      const response = await apiClient.get<{ items: any[]; total: number }>(
+        '/api/v1/journal-entries', { params }
+      )
+      return (response.data.items ?? []).map((e: any): Buchung => ({
+        id: e.id,
+        belegnr: e.entry_number,
+        datum: e.posting_date || e.entry_date,
+        soll_konto: e.lines?.[0]?.account_id ?? '',
+        haben_konto: e.lines?.[1]?.account_id ?? '',
+        betrag: Number(e.total_debit || 0),
+        text: e.description,
+        belegart: e.source || 'MAN',
+      }))
     },
   })
 }
 
 export function useCreateBuchung() {
   const queryClient = useQueryClient()
-  
   return useMutation({
     mutationFn: async (buchung: Omit<Buchung, 'id'>) => {
-      const response = await apiClient.post<Buchung>('/api/fibu/buchungen', buchung)
+      const response = await apiClient.post<{ data: any }>('/api/v1/journal-entries', buchung)
       return response.data
     },
     onSuccess: () => {
@@ -168,11 +177,19 @@ export function useKonten(filters?: { typ?: string }) {
   return useQuery({
     queryKey: [...fibuKeys.konten(), filters],
     queryFn: async () => {
-      const params = new URLSearchParams()
-      if (filters?.typ) params.append('typ', filters.typ)
-      
-      const response = await apiClient.get<Konto[]>(`/api/fibu/konten?${params.toString()}`)
-      return response.data
+      const params: Record<string, string> = {}
+      if (filters?.typ) params.account_type = filters.typ
+      const response = await apiClient.get<{ items: any[]; total: number }>(
+        '/api/v1/chart-of-accounts', { params }
+      )
+      return (response.data.items ?? []).map((a: any): Konto => ({
+        id: a.id,
+        kontonummer: a.account_number,
+        bezeichnung: a.account_name,
+        kontoart: a.category ?? '',
+        typ: a.account_type,
+        saldo: Number(a.balance ?? 0),
+      }))
     },
   })
 }
@@ -181,19 +198,24 @@ export function useKonto(kontonummer: string) {
   return useQuery({
     queryKey: [...fibuKeys.konten(), kontonummer],
     queryFn: async () => {
-      const response = await apiClient.get<Konto>(`/api/fibu/konten/${kontonummer}`)
-      return response.data
+      const response = await apiClient.get<{ items: any[] }>(
+        `/api/v1/chart-of-accounts?account_number=${kontonummer}`
+      )
+      const a = response.data.items?.[0]
+      if (!a) throw new Error(`Konto ${kontonummer} nicht gefunden`)
+      return { id: a.id, kontonummer: a.account_number, bezeichnung: a.account_name,
+        kontoart: a.category ?? '', typ: a.account_type, saldo: Number(a.balance ?? 0) } as Konto
     },
     enabled: !!kontonummer,
   })
 }
 
-// Anlagen
+// Anlagen — kein Backend-Endpoint vorhanden
 export function useAnlagen() {
   return useQuery({
     queryKey: fibuKeys.anlagen(),
     queryFn: async () => {
-      const response = await apiClient.get<Anlage[]>('/api/fibu/anlagen')
+      const response = await apiClient.get<Anlage[]>('/api/v1/finance/fixed-assets')
       return response.data
     },
   })
@@ -201,10 +223,9 @@ export function useAnlagen() {
 
 export function useCreateAnlage() {
   const queryClient = useQueryClient()
-  
   return useMutation({
     mutationFn: async (anlage: Omit<Anlage, 'id' | 'kumulierte_afa' | 'buchwert'>) => {
-      const response = await apiClient.post<Anlage>('/api/fibu/anlagen', anlage)
+      const response = await apiClient.post<Anlage>('/api/v1/finance/fixed-assets', anlage)
       return response.data
     },
     onSuccess: () => {
@@ -217,7 +238,7 @@ export function useAfaBerechnung(id: string, jahr = 2025) {
   return useQuery({
     queryKey: [...fibuKeys.anlagen(), id, 'afa', jahr],
     queryFn: async () => {
-      const response = await apiClient.get(`/api/fibu/anlagen/${id}/afa?jahr=${jahr}`)
+      const response = await apiClient.get(`/api/v1/finance/fixed-assets/${id}/depreciation?year=${jahr}`)
       return response.data
     },
     enabled: !!id,
@@ -229,7 +250,10 @@ export function useBilanz(stichtag = '2024-12-31') {
   return useQuery({
     queryKey: [...fibuKeys.bilanz(), stichtag],
     queryFn: async () => {
-      const response = await apiClient.get(`/api/fibu/bilanz?stichtag=${stichtag}`)
+      const period = stichtag.substring(0, 7) // YYYY-MM
+      const response = await apiClient.get(
+        `/api/v1/finance/financial-reports/balance-sheet?period=${period}`
+      )
       return response.data
     },
   })
@@ -240,7 +264,9 @@ export function useGuV(periode = '2024') {
   return useQuery({
     queryKey: [...fibuKeys.guv(), periode],
     queryFn: async () => {
-      const response = await apiClient.get(`/api/fibu/guv?periode=${periode}`)
+      const response = await apiClient.get(
+        `/api/v1/finance/financial-reports/profit-loss?period=${periode}`
+      )
       return response.data
     },
   })
@@ -251,7 +277,10 @@ export function useBWA(monat = 10, jahr = 2025) {
   return useQuery({
     queryKey: [...fibuKeys.bwa(), monat, jahr],
     queryFn: async () => {
-      const response = await apiClient.get(`/api/fibu/bwa?monat=${monat}&jahr=${jahr}`)
+      const period = `${jahr}-${String(monat).padStart(2, '0')}`
+      const response = await apiClient.get(
+        `/api/v1/finance/financial-reports/bwa?period=${period}`
+      )
       return response.data
     },
   })
@@ -262,32 +291,33 @@ export function useOPVerwaltung() {
   return useQuery({
     queryKey: fibuKeys.opVerwaltung(),
     queryFn: async () => {
-      const response = await apiClient.get('/api/fibu/op-verwaltung')
-      return response.data
+      const response = await apiClient.get<{ items: OffenerPosten[]; total: number }>(
+        '/api/v1/finance/open-items'
+      )
+      return response.data.items ?? []
     },
   })
 }
 
-// Stats
+// Stats — kein Backend-Endpoint vorhanden
 export function useFibuStats() {
   return useQuery({
     queryKey: fibuKeys.stats(),
     queryFn: async () => {
-      const response = await apiClient.get('/api/fibu/stats')
+      const response = await apiClient.get('/api/v1/finance/stats')
       return response.data
     },
   })
 }
 
-// DATEV Export
+// DATEV Export — kein Backend-Endpoint vorhanden
 export function useDATEVExport() {
   return useMutation({
     mutationFn: async (params: { typ: string; datum_von?: string; datum_bis?: string }) => {
       const searchParams = new URLSearchParams({ typ: params.typ })
       if (params.datum_von) searchParams.append('datum_von', params.datum_von)
       if (params.datum_bis) searchParams.append('datum_bis', params.datum_bis)
-
-      const response = await apiClient.get(`/api/fibu/export/datev?${searchParams.toString()}`)
+      const response = await apiClient.get(`/api/v1/finance/export/datev?${searchParams.toString()}`)
       return response.data
     },
   })
@@ -343,7 +373,7 @@ export function useAnlagenDetail() {
   return useQuery({
     queryKey: [...fibuKeys.anlagen(), 'detail'],
     queryFn: async () => {
-      const response = await apiClient.get<AnlageDetail[]>('/api/fibu/anlagen/detail')
+      const response = await apiClient.get<AnlageDetail[]>('/api/v1/finance/fixed-assets/detail')
       return response.data
     },
     staleTime: 5 * 60 * 1000,
@@ -354,8 +384,21 @@ export function useDebitorenOP() {
   return useQuery({
     queryKey: [...fibuKeys.debitoren(), 'op'],
     queryFn: async () => {
-      const response = await apiClient.get<DebitOP[]>('/api/fibu/debitoren/op')
-      return response.data
+      const response = await apiClient.get<{ items: any[]; total: number }>(
+        '/api/v1/finance/open-items?typ=debitor'
+      )
+      return (response.data.items ?? []).map((item: any): DebitOP => ({
+        id: item.id,
+        rechnungsnr: item.beleg_nummer ?? item.rechnungsnr ?? '',
+        kunde: item.partner_name ?? item.kunde_name ?? '',
+        kundennr: item.debitor_id ?? '',
+        datum: item.faellig_am ?? '',
+        faelligkeit: item.faellig_am ?? '',
+        betrag: Number(item.betrag ?? 0),
+        offen: Number(item.offen ?? 0),
+        ueberfaellig: new Date(item.faellig_am) < new Date(),
+        mahnStufe: Number(item.mahnstufe ?? 0),
+      }))
     },
     staleTime: 2 * 60 * 1000,
   })
@@ -365,8 +408,22 @@ export function useKreditorenOP() {
   return useQuery({
     queryKey: [...fibuKeys.kreditoren(), 'op'],
     queryFn: async () => {
-      const response = await apiClient.get<KreditOP[]>('/api/fibu/kreditoren/op')
-      return response.data
+      const response = await apiClient.get<{ items: any[]; total: number }>(
+        '/api/v1/finance/open-items?typ=kreditor'
+      )
+      return (response.data.items ?? []).map((item: any): KreditOP => ({
+        id: item.id,
+        rechnungsnr: item.beleg_nummer ?? item.rechnungsnr ?? '',
+        lieferant: item.partner_name ?? item.lieferant_name ?? '',
+        lieferantennr: item.kreditor_id ?? '',
+        datum: item.faellig_am ?? '',
+        faelligkeit: item.faellig_am ?? '',
+        betrag: Number(item.betrag ?? 0),
+        offen: Number(item.offen ?? 0),
+        skonto: 0,
+        skontoBis: '',
+        zahlbar: true,
+      }))
     },
     staleTime: 2 * 60 * 1000,
   })
@@ -378,8 +435,16 @@ export function useHauptbuchBuchungen() {
   return useQuery({
     queryKey: [...fibuKeys.buchungen(), 'hauptbuch'],
     queryFn: async () => {
-      const response = await apiClient.get<HauptbuchBuchung[]>('/api/fibu/hauptbuch')
-      return response.data
+      const response = await apiClient.get<{ items: any[]; total: number }>('/api/v1/journal-entries')
+      return (response.data.items ?? []).map((e: any): HauptbuchBuchung => ({
+        id: e.id,
+        datum: e.posting_date || e.entry_date,
+        belegnummer: e.entry_number,
+        konto: e.lines?.[0]?.account_id ?? '',
+        text: e.description,
+        soll: Number(e.total_debit ?? 0),
+        haben: Number(e.total_credit ?? 0),
+      }))
     },
     staleTime: 2 * 60 * 1000,
   })
@@ -389,7 +454,7 @@ export function useKreditlinien() {
   return useQuery({
     queryKey: [...fibuKeys.all, 'kreditlinien'],
     queryFn: async () => {
-      const response = await apiClient.get<Kreditlinie[]>('/api/fibu/kreditlinien')
+      const response = await apiClient.get<Kreditlinie[]>('/api/v1/finance/credit-limits')
       return response.data
     },
     staleTime: 2 * 60 * 1000,
@@ -400,7 +465,7 @@ export function useSicherheiten() {
   return useQuery({
     queryKey: [...fibuKeys.all, 'sicherheiten'],
     queryFn: async () => {
-      const response = await apiClient.get<Sicherheit[]>('/api/fibu/sicherheiten')
+      const response = await apiClient.get<Sicherheit[]>('/api/v1/finance/collaterals')
       return response.data
     },
     staleTime: 5 * 60 * 1000,
@@ -411,8 +476,19 @@ export function useVerbindlichkeiten() {
   return useQuery({
     queryKey: [...fibuKeys.all, 'verbindlichkeiten'],
     queryFn: async () => {
-      const response = await apiClient.get<Verbindlichkeit[]>('/api/fibu/verbindlichkeiten')
-      return response.data
+      const response = await apiClient.get<{ items: any[]; total: number }>(
+        '/api/v1/finance/open-items?typ=kreditor'
+      )
+      return (response.data.items ?? []).map((item: any): Verbindlichkeit => ({
+        id: item.id,
+        rechnungsNr: item.beleg_nummer ?? '',
+        lieferant: item.partner_name ?? '',
+        rechnungsDatum: item.faellig_am ?? '',
+        faelligAm: item.faellig_am ?? '',
+        betrag: Number(item.betrag ?? 0),
+        offen: Number(item.offen ?? 0),
+        status: Number(item.offen ?? 0) === 0 ? 'bezahlt' : 'offen',
+      }))
     },
     staleTime: 2 * 60 * 1000,
   })
@@ -422,7 +498,7 @@ export function useZahlungsvorschlaege() {
   return useQuery({
     queryKey: [...fibuKeys.all, 'zahlungsvorschlaege'],
     queryFn: async () => {
-      const response = await apiClient.get<Zahlungsvorschlag[]>('/api/fibu/zahlungsvorschlaege')
+      const response = await apiClient.get<Zahlungsvorschlag[]>('/api/v1/finance/payment-suggestions')
       return response.data
     },
     staleTime: 2 * 60 * 1000,

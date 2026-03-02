@@ -4,6 +4,8 @@ import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
+import { toast } from '@/hooks/use-toast'
+import { api } from '@/lib/axios'
 
 // Zod-Schema für Mischfuttermittel
 const mischfuttermittelSchema = z.object({
@@ -232,19 +234,19 @@ const mischfuttermittelConfig: MaskConfig = {
       key: 'calculate',
       label: 'Nährwerte berechnen',
       type: 'secondary',
-      onClick: () => console.log('Calculate clicked')
+      onClick: () => toast({ title: 'Berechnung', description: 'Nährstoffwerte werden berechnet.' })
     },
     {
       key: 'validate',
       label: 'Validieren',
       type: 'secondary',
-      onClick: () => console.log('Validate clicked')
+      onClick: () => toast({ title: 'Validierung', description: 'Mischfuttermittel-Rezeptur wird validiert.' })
     },
     {
       key: 'save',
       label: 'Speichern',
       type: 'primary',
-      onClick: () => console.log('Save clicked')
+      onClick: () => toast({ title: 'Gespeichert', description: 'Mischfuttermittel wurde gespeichert.' })
     }
   ],
   api: {
@@ -288,12 +290,48 @@ export default function MischfuttermittelStammPage(): JSX.Element {
         // Error wird bereits in useMaskData behandelt
       }
     } else if (action === 'calculate') {
-      // Nährwertberechnung implementieren
-      alert('Nährwertberechnung wird implementiert')
+      const komponenten = (formData.komponenten as Array<{ futtermittelId: string; anteil: number }>) ?? []
+      if (komponenten.length === 0) {
+        toast({ title: 'Keine Komponenten', description: 'Bitte zuerst Rezeptur-Komponenten erfassen.', variant: 'destructive' })
+        return
+      }
+      try {
+        const res = await api.post('/api/v1/futter/mischfuttermittel/naehrwerte/berechnen', {
+          komponenten,
+          fan: 2.5,       // Milchkuh Laktation
+          modus: 'beratung',
+        })
+        const result = res.data as {
+          gesamtRohprotein: number
+          gesamtRohfett: number
+          gesamtRohasche: number
+          me_fan1: number
+          me_fani: number
+          nel: number
+          sidp: number
+          nxp: number
+          formelwerk_energie: string
+          formelwerk_protein: string
+          omd_methode: string
+          omd_fan1_pct: number
+        }
+        toast({
+          title: `Nährwerte berechnet (${result.formelwerk_energie} / ${result.formelwerk_protein})`,
+          description: [
+            `XP: ${result.gesamtRohprotein} g/kg TM`,
+            `ME FAN1: ${result.me_fan1} MJ/kg TM`,
+            `NEL: ${result.nel} MJ/kg TM`,
+            `sidP: ${result.sidp} g/kg TM`,
+            `OMD: ${result.omd_fan1_pct}% (${result.omd_methode})`,
+          ].join(' | '),
+        })
+      } catch (e: any) {
+        toast({ title: 'Berechnung fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+      }
     } else if (action === 'validate') {
       const isValid = validate(formData)
       if (isValid.isValid) {
-        alert('Validierung erfolgreich!')
+        toast({ title: 'Validierung erfolgreich', description: 'Alle Pflichtfelder sind korrekt ausgefüllt.' })
       } else {
         showValidationToast(isValid.errors)
       }

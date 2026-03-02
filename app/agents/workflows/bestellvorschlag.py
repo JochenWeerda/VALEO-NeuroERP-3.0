@@ -292,9 +292,24 @@ async def create_purchase_order(state: BestellvorschlagState) -> Bestellvorschla
                     "uom": article.unit or "Stk"
                 })
 
+        # Bestimme Lieferant: aus dem ersten Artikel mit Lieferanten-ID, sonst Fallback
+        supplier_id = "default-supplier"
+        for item in proposal["items"]:
+            art_repo = container.resolve(ArticleRepository)
+            art = await art_repo.get_by_id(item["article_id"], state["tenant_id"])
+            if art:
+                sid = (
+                    getattr(art, "preferred_supplier_id", None)
+                    or getattr(art, "supplier_id", None)
+                    or getattr(art, "lieferant_id", None)
+                )
+                if sid:
+                    supplier_id = sid
+                    break
+
         # Create purchase order payload
         po_data = {
-            "supplier_id": "default-supplier",  # TODO: Determine supplier from article or use default
+            "supplier_id": supplier_id,
             "items": items,
             "currency": "EUR",
             "notes": f"Auto-generated from AI procurement proposal. {proposal.get('ai_recommendations', [])}"

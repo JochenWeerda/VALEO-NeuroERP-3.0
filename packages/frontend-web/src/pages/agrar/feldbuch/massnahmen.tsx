@@ -37,6 +37,7 @@ import {
   Info
 } from 'lucide-react'
 import { useMassnahmen, useAgrarKunden } from '@/lib/api/agrar'
+import { useToast } from '@/hooks/use-toast'
 
 // Types
 type MassnahmeTyp = 'Aussaat' | 'Düngung' | 'PSM' | 'Ernte' | 'Bodenbearbeitung' | 'Sonstiges'
@@ -116,6 +117,7 @@ function MassnahmenSkeleton() {
 
 export default function MassnahmenPage(): JSX.Element {
   const navigate = useNavigate()
+  const { toast } = useToast()
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedKundeId, setSelectedKundeId] = useState<string>('all')
   const [filterTyp, setFilterTyp] = useState<string>('alle')
@@ -174,6 +176,21 @@ export default function MassnahmenPage(): JSX.Element {
       nichtExportiert: filtered.filter(m => !m.exportiert).length
     }
   }, [filteredMassnahmen])
+
+  const handleExport = () => {
+    const header = 'Datum;Schlag;Kunde;Typ;Mittel;Menge;Einheit;Flaeche_ha;Anwender;Exportiert\n'
+    const rows = filteredMassnahmen.map((m) =>
+      [m.datum, m.schlagName, m.kundeName, m.typ, m.mittel, m.menge, m.einheit, m.flaeche, m.anwender ?? '', m.exportiert ? 'ja' : 'nein'].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(';')
+    )
+    const blob = new Blob([header + rows.join('\n')], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `Massnahmen_${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast({ title: 'Export', description: `${filteredMassnahmen.length} Maßnahmen exportiert.` })
+  }
 
   // PSM-spezifische Maßnahmen für Spritztagebuch
   const psmMassnahmen = useMemo(() => {
@@ -479,7 +496,7 @@ export default function MassnahmenPage(): JSX.Element {
                         className="pl-10"
                       />
                     </div>
-                    <Button variant="outline" className="gap-2">
+                    <Button variant="outline" className="gap-2" onClick={handleExport}>
                       <FileDown className="h-4 w-4" />
                       Export
                     </Button>

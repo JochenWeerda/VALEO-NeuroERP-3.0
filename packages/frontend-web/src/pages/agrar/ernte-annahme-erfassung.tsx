@@ -4,13 +4,13 @@
  * Basierend auf Lieferschein-Erfassung (Gewohnheits-Prinzip)
  */
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
@@ -377,6 +377,8 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
   const [forwarderName, setForwarderName] = useState('')
   const [showIntermediateDealerDialog, setShowIntermediateDealerDialog] = useState(false)
   const [intermediateDealerName, setIntermediateDealerName] = useState('')
+  const [showZusFelderDialog, setShowZusFelderDialog] = useState(false)
+  const importAnalyseInputRef = useRef<HTMLInputElement | null>(null)
 
   // Keyboard Shortcuts
   useGlobalShortcuts({
@@ -491,30 +493,115 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
       
       // Lade aktualisierte Daten
       const response = await apiClient.get<HarvestAcceptanceResponse>(`/api/v1/agrar/harvest-acceptance/${state.id}`)
-      setState((prev) => ({
-        ...prev,
-        positions: response.positions?.map(pos => ({
-          id: pos.id,
-          positionNumber: pos.position_number,
-          description: pos.description,
-          isPrintable: pos.is_printable,
-          isCalculable: pos.is_calculable,
-          labValuePct: pos.lab_value_pct,
-          quantityKg: pos.quantity_kg,
-          unit: pos.unit,
-          pricePerUnitEur: pos.price_per_unit_eur,
-          amountEur: pos.amount_eur,
-        })) || [],
-        totalNetAmountEur: response.total_net_amount_eur,
-        totalVatAmountEur: response.total_vat_amount_eur,
-        totalGrossAmountEur: response.total_gross_amount_eur,
-        vatRatePercent: response.vat_rate_percent,
-      }))
+      _applyAcceptanceResponse(response)
     } catch (error: any) {
       // eslint-disable-next-line no-console
       console.error('Calculate error:', error)
       push(`Fehler bei der Berechnung: ${error.response?.data?.detail || error.message}`)
     }
+  }
+
+  const _applyAcceptanceResponse = (response: HarvestAcceptanceResponse): void => {
+    setState((prev) => ({
+      ...prev,
+      positions: response.positions?.map(pos => ({
+        id: pos.id,
+        positionNumber: pos.position_number,
+        description: pos.description,
+        isPrintable: pos.is_printable,
+        isCalculable: pos.is_calculable,
+        labValuePct: pos.lab_value_pct,
+        quantityKg: pos.quantity_kg,
+        unit: pos.unit,
+        pricePerUnitEur: pos.price_per_unit_eur,
+        amountEur: pos.amount_eur,
+      })) || [],
+      totalNetAmountEur: response.total_net_amount_eur,
+      totalVatAmountEur: response.total_vat_amount_eur,
+      totalGrossAmountEur: response.total_gross_amount_eur,
+      vatRatePercent: response.vat_rate_percent,
+    }))
+  }
+
+  const handleAbschlagrechnung = async (): Promise<void> => {
+    if (!state.id) { push('Bitte zuerst Ernte-Annahme speichern'); return }
+    try {
+      const { data } = await apiClient.post<{ total_gross_amount_eur?: number }>(`/api/v1/agrar/harvest-acceptance/${state.id}/calculate`)
+      const brutto = data?.total_gross_amount_eur != null ? `${Number(data.total_gross_amount_eur).toFixed(2)} EUR` : '–'
+      push(`Abschlagrechnung berechnet. Bruttobetrag: ${brutto}`)
+      const response = await apiClient.get<HarvestAcceptanceResponse>(`/api/v1/agrar/harvest-acceptance/${state.id}`)
+      _applyAcceptanceResponse(response)
+    } catch (error: any) {
+      push(`Fehler: ${error.response?.data?.detail || error.message}`)
+    }
+  }
+
+  const handleEndabrechnung = async (): Promise<void> => {
+    if (!state.id) { push('Bitte zuerst Ernte-Annahme speichern'); return }
+    try {
+      const { data } = await apiClient.post<{ total_gross_amount_eur?: number }>(`/api/v1/agrar/harvest-acceptance/${state.id}/calculate`)
+      const brutto = data?.total_gross_amount_eur != null ? `${Number(data.total_gross_amount_eur).toFixed(2)} EUR` : '–'
+      push(`Endabrechnung berechnet. Bruttobetrag: ${brutto}`)
+      const response = await apiClient.get<HarvestAcceptanceResponse>(`/api/v1/agrar/harvest-acceptance/${state.id}`)
+      _applyAcceptanceResponse(response)
+    } catch (error: any) {
+      push(`Fehler: ${error.response?.data?.detail || error.message}`)
+    }
+  }
+
+  const handleImportAnalyse = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = () => {
+      try {
+        const text = String(reader.result ?? '')
+        const lines = text.split(/\r?\n/).filter(Boolean)
+        if (lines.length < 2) { push('Datei enthält keine Daten (mind. Kopfzeile + eine Zeile).'); return }
+        const sep = text.includes(';') ? ';' : ','
+        const headers = lines[0].split(sep).map(h => h.trim().toLowerCase().replace(/\s+/g, ''))
+        const valIdx = headers.findIndex(h => h === 'wert' || h === 'value' || h === 'laborwert')
+        const nameIdx = headers.findIndex(h => h === 'parameter' || h === 'bezeichnung' || h === 'name')
+        const lab: Record<string, number | null> = {
+          windabgang: state.labValues.windabgang,
+          besatz: state.labValues.besatz,
+          feuchte: state.labValues.feuchte,
+          hektolitergewicht: state.labValues.hektolitergewicht,
+          lagerschwund: state.labValues.lagerschwund,
+          lagergeld: state.labValues.lagergeld,
+          wiegegebuehren: state.labValues.wiegegebuehren,
+        }
+        const nameToKey: Record<string, keyof typeof lab> = {
+          windabgang: 'windabgang', besatz: 'besatz', feuchte: 'feuchte',
+          hektolitergewicht: 'hektolitergewicht', 'hektoliter-gewicht': 'hektolitergewicht',
+          lagerschwund: 'lagerschwund', lagergeld: 'lagergeld', wiegegebühren: 'wiegegebuehren', wiegegebuehren: 'wiegegebuehren',
+        }
+        for (let i = 1; i < lines.length; i++) {
+          const cells = lines[i].split(sep).map(c => c.trim())
+          const name = nameIdx >= 0 ? cells[nameIdx]?.toLowerCase().replace(/\s+/g, '') : (headers[0] ? cells[0] : '')
+          const val = valIdx >= 0 ? parseFloat(cells[valIdx]?.replace(',', '.')) : parseFloat(cells[1]?.replace(',', '.'))
+          const key = nameToKey[name] ?? (name in lab ? (name as keyof typeof lab) : null)
+          if (key && !Number.isNaN(val)) lab[key] = val
+        }
+        const updatedLabValues = { ...state.labValues, ...lab }
+        const updatedPositions = state.positions.map(p => {
+          if (p.positionNumber === 15 && lab.windabgang != null) return { ...p, labValuePct: lab.windabgang }
+          if (p.positionNumber === 20 && lab.besatz != null) return { ...p, labValuePct: lab.besatz }
+          if (p.positionNumber === 40 && lab.feuchte != null) return { ...p, labValuePct: lab.feuchte }
+          if (p.positionNumber === 60 && lab.hektolitergewicht != null) return { ...p, quantityKg: lab.hektolitergewicht }
+          if (p.positionNumber === 63 && lab.lagerschwund != null) return { ...p, labValuePct: lab.lagerschwund }
+          if (p.positionNumber === 75 && lab.lagergeld != null) return { ...p, amountEur: lab.lagergeld }
+          if (p.positionNumber === 80 && lab.wiegegebuehren != null) return { ...p, amountEur: lab.wiegegebuehren }
+          return p
+        })
+        setState(prev => ({ ...prev, labValues: updatedLabValues, positions: updatedPositions }))
+        push('Laborwerte aus Datei übernommen.')
+      } catch (err) {
+        push('Import fehlgeschlagen. Erwartet: CSV mit Kopfzeile (z. B. Parameter;Wert oder Bezeichnung;Wert).')
+      }
+      e.target.value = ''
+    }
+    reader.readAsText(file, 'utf-8')
   }
 
   // Freigabe
@@ -1006,8 +1093,11 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                     checked={!!state.deviatingVatId}
                     onCheckedChange={(checked) => {
                       if (checked) {
-                        // TODO: Dialog für abweichende USt-ID öffnen
-                        push('Abweichende USt-ID - noch nicht implementiert')
+                        const ustId = prompt('Abweichende USt-ID eingeben (z.B. DE123456789):')
+                        if (ustId?.trim()) {
+                          setState((prev) => ({ ...prev, deviatingVatId: ustId.trim() }))
+                          push(`Abweichende USt-ID hinterlegt: ${ustId.trim()}`)
+                        }
                       } else {
                         setState((prev) => ({ ...prev, deviatingVatId: null }))
                       }
@@ -1173,8 +1263,57 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
               </TabsContent>
 
               <TabsContent value="nawaro" className="mt-4 space-y-2">
-                <div className="text-sm text-muted-foreground">
-                  NAWARO-Bereich - noch nicht implementiert
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Label className="w-40 text-sm shrink-0">NAWARO-Nummer:</Label>
+                      <Input
+                        value={state.nawaroNr || ''}
+                        onChange={(e) => setState((prev) => ({ ...prev, nawaroNr: e.target.value }))}
+                        placeholder="z.B. NAW-2026-001"
+                        className="flex-1 h-8" />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Label className="w-40 text-sm shrink-0">Verwendungszweck:</Label>
+                      <select
+                        value={state.nawaroZweck || ''}
+                        onChange={(e) => setState((prev) => ({ ...prev, nawaroZweck: e.target.value }))}
+                        className="flex-1 h-8 border rounded px-2">
+                        <option value="">-- bitte wählen --</option>
+                        <option value="biogas">Biogas</option>
+                        <option value="bioethanol">Bioethanol</option>
+                        <option value="biodiesel">Biodiesel</option>
+                        <option value="holz">Holz/Pellets</option>
+                        <option value="sonstige">Sonstige</option>
+                      </select>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Label className="w-40 text-sm shrink-0">Biogasanlage:</Label>
+                      <Input
+                        value={state.biogasanlage || ''}
+                        onChange={(e) => setState((prev) => ({ ...prev, biogasanlage: e.target.value }))}
+                        placeholder="Name / Betreiber"
+                        className="flex-1 h-8" />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Label className="w-40 text-sm shrink-0">EEG-Menge (t):</Label>
+                      <Input
+                        type="number" min={0} step={0.001}
+                        value={state.eegMenge ?? ''}
+                        onChange={(e) => setState((prev) => ({ ...prev, eegMenge: parseFloat(e.target.value) || 0 }))}
+                        className="flex-1 h-8" />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Label className="w-40 text-sm shrink-0">Nachhaltigkeitsnachweis:</Label>
+                      <Input
+                        value={state.nachhaltigkeitsNachweis || ''}
+                        onChange={(e) => setState((prev) => ({ ...prev, nachhaltigkeitsNachweis: e.target.value }))}
+                        placeholder="REDcert / ISCC Zertifikat-Nr."
+                        className="flex-1 h-8" />
+                    </div>
+                  </div>
                 </div>
               </TabsContent>
 
@@ -1417,13 +1556,13 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                     → Berechnung neu
                   </Button>
                 </ShortcutHintButton>
-                <Button variant="outline" size="sm" className="gap-2">
+                <Button variant="outline" size="sm" className="gap-2" onClick={() => void handleAbschlagrechnung()} title="Abschlagrechnung">
                   Abschlagrechnung
                 </Button>
-                <Button variant="outline" size="sm" className="gap-2">
+                <Button variant="outline" size="sm" className="gap-2" onClick={() => void handleEndabrechnung()} title="Endabrechnung">
                   Endabrechnung
                 </Button>
-                <Button variant="outline" size="sm" className="gap-2">
+                <Button variant="outline" size="sm" className="gap-2" onClick={() => setShowVarietyDialog(true)} title="Sorte bearbeiten">
                   Sorte bearbeiten
                 </Button>
               </div>
@@ -1508,7 +1647,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                 <Folder className="h-4 w-4" />
                 Dateien
               </Button>
-              <Button variant="outline" size="sm" className="gap-2">
+              <Button variant="outline" size="sm" className="gap-2" onClick={() => setShowZusFelderDialog(true)} title="Zus. Felder">
                 Zus. Felder
               </Button>
             </div>
@@ -1521,12 +1660,23 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
           <Card className="p-4">
             <CardHeader>
               <CardTitle className="text-sm">Labor-Werte</CardTitle>
+              <CardDescription className="text-xs mt-1">
+                Analyse-Bon (Druck): CSV/Export importieren. Gerät ohne Export: Werte unten manuell eintragen. Raps: Analyse per Schriftform oder E-Mail mit PDF-Anhang (Ölgehalte) → PDF unter „Unterlagen“ anhängen.
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Button variant="outline" size="sm" className="w-full">
-                <Download className="h-4 w-4 mr-2" />
-                Import Analysegerät
-              </Button>
+              <div className="flex flex-col gap-2">
+                <input type="file" accept=".csv,.txt" className="hidden" ref={importAnalyseInputRef} onChange={handleImportAnalyse} />
+                <Button variant="outline" size="sm" className="w-full" onClick={() => importAnalyseInputRef?.current?.click()} title="CSV/Text mit Parametern (z. B. Parameter;Wert) von Geräten mit Datenexport oder Analyse-Bon">
+                  <Download className="h-4 w-4 mr-2" />
+                  Import CSV (Analyse-Bon / Gerät-Export)
+                </Button>
+                <Button variant="outline" size="sm" className="w-full" onClick={() => { setShowAttachmentDialog(true); push('Raps-Analyse-PDF (Ölgehalte) unter Unterlagen anhängen. Automatische Auswertung ist in Vorbereitung.'); }} title="Raps: Analyse-Ergebnisse als PDF (z. B. aus E-Mail) anhängen">
+                  <FileText className="h-4 w-4 mr-2" />
+                  PDF anhängen (Raps Ölgehalte)
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">Manuelle Eingabe (vom Gerät ablesen):</p>
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -1790,7 +1940,46 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
         onSelect={handleVarietySelect}
         articleId={state.articleId}
       />
-      
+
+      <Dialog open={showZusFelderDialog} onOpenChange={setShowZusFelderDialog}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Zusätzliche Felder</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>Bemerkungen</Label>
+              <Textarea
+                value={state.remarks}
+                onChange={(e) => setState((prev) => ({ ...prev, remarks: e.target.value }))}
+                placeholder="Optionale Bemerkungen zur Ernte-Annahme"
+                rows={4}
+                className="mt-1"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="print-remarks-note"
+                checked={state.printRemarksOnAcceptanceNote}
+                onCheckedChange={(v) => setState((prev) => ({ ...prev, printRemarksOnAcceptanceNote: !!v }))}
+              />
+              <Label htmlFor="print-remarks-note" className="text-sm font-normal cursor-pointer">Auf Annahmeschein drucken</Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="print-remarks-settlement"
+                checked={state.printRemarksOnSettlement}
+                onCheckedChange={(v) => setState((prev) => ({ ...prev, printRemarksOnSettlement: !!v }))}
+              />
+              <Label htmlFor="print-remarks-settlement" className="text-sm font-normal cursor-pointer">Auf Abrechnung drucken</Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowZusFelderDialog(false)}>Schließen</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Delete Confirmation Dialog */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent className="sm:max-w-[500px]">

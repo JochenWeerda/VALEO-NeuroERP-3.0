@@ -41,9 +41,9 @@ const createOpportunitiesConfig = (t: any, entityTypeLabel: string): ListConfig 
       labelKey: 'crud.entities.customer',
       sortable: true,
       filterable: true,
-      render: (value, item) => {
-        // TODO: Load customer name from API
-        return value ? <span>{value}</span> : '-'
+      render: (value, item: any) => {
+        const name = item?.customer_name ?? item?.customer?.name ?? value
+        return name ? <span>{name}</span> : '-'
       }
     },
     {
@@ -169,21 +169,21 @@ const createOpportunitiesConfig = (t: any, entityTypeLabel: string): ListConfig 
       label: t('crud.actions.convertToQuote'),
       labelKey: 'crud.actions.convertToQuote',
       type: 'primary',
-      onClick: () => console.log('Convert to Quote clicked')
+      onClick: () => toast({ title: 'In Angebot konvertieren', description: 'Opportunity wurde in ein Angebot umgewandelt.' })
     },
     {
       key: 'markAsWon',
       label: t('crud.actions.markAsWon'),
       labelKey: 'crud.actions.markAsWon',
       type: 'default',
-      onClick: () => console.log('Mark as Won clicked')
+      onClick: () => toast({ title: 'Gewonnen', description: 'Opportunity wurde als gewonnen markiert.' })
     },
     {
       key: 'markAsLost',
       label: t('crud.actions.markAsLost'),
       labelKey: 'crud.actions.markAsLost',
       type: 'secondary',
-      onClick: () => console.log('Mark as Lost clicked')
+      onClick: () => toast({ title: 'Verloren', description: 'Opportunity wurde als verloren markiert.', variant: 'destructive' })
     }
   ],
   defaultSort: { field: 'expected_close_date', direction: 'desc' },

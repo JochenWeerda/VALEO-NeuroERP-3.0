@@ -332,6 +332,18 @@ async def get_vat_return(
         raise HTTPException(status_code=500, detail=f"Failed to get VAT return: {str(e)}")
 
 
+@router.get("/export/{return_id}")
+async def export_vat_return_download(
+    return_id: str,
+    tenant_id: str = Query("system", description="Tenant ID"),
+    db: Session = Depends(get_db),
+):
+    """
+    Download VAT return export (ELSTER XML). Alias for /{return_id}/elster-xml.
+    """
+    return await export_elster_xml(return_id, tenant_id, db)
+
+
 @router.get("/{return_id}/elster-xml")
 async def export_elster_xml(
     return_id: str,

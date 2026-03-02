@@ -185,36 +185,12 @@ const createMahnwesenConfig = (t: any, entityTypeLabel: string): MaskConfig => (
     }
   ],
   actions: [
-    {
-      key: 'generate',
-      label: t('crud.actions.generateDunning'),
-      type: 'secondary'
-    , onClick: () => {} },
-    {
-      key: 'preview',
-      label: t('crud.actions.preview'),
-      type: 'secondary'
-    , onClick: () => {} },
-    {
-      key: 'send',
-      label: t('crud.actions.send'),
-      type: 'primary'
-    , onClick: () => {} },
-    {
-      key: 'payment',
-      label: t('crud.actions.bookPayment'),
-      type: 'secondary'
-    , onClick: () => {} },
-    {
-      key: 'inkasso',
-      label: t('crud.actions.handOverToCollection'),
-      type: 'danger'
-    , onClick: () => {} },
-    {
-      key: 'export',
-      label: t('crud.actions.pdfExport'),
-      type: 'secondary'
-    , onClick: () => {} }
+    { key: 'generate', label: t('crud.actions.generateDunning'), type: 'secondary' },
+    { key: 'preview', label: t('crud.actions.preview'), type: 'secondary' },
+    { key: 'send', label: t('crud.actions.send'), type: 'primary' },
+    { key: 'payment', label: t('crud.actions.bookPayment'), type: 'secondary' },
+    { key: 'inkasso', label: t('crud.actions.handOverToCollection'), type: 'danger' },
+    { key: 'export', label: t('crud.actions.pdfExport'), type: 'secondary' }
   ],
   api: {
     baseUrl: '/api/v1/finance/dunning',
@@ -234,6 +210,7 @@ export default function MahnwesenPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [isDirty, setIsDirty] = useState(false)
+  const [actionLoadingKey, setActionLoadingKey] = useState<string | null>(null)
   const entityType = 'dunning'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Mahnwesen')
   const mahnwesenConfig = createMahnwesenConfig(t, entityTypeLabel)
@@ -247,28 +224,19 @@ export default function MahnwesenPage(): JSX.Element {
 
   const { handleAction } = useMaskActions(async (action: string, formData: any) => {
     if (action === 'generate') {
-      // Mahnung generieren - berechne Gesamtforderung
-      const gesamtForderung = (formData.betrag || 0) + (formData.mahngebuehr || 0) + (formData.zinsen || 0)
-      formData.gesamtForderung = gesamtForderung
-
-      // Generiere Standard-Mahntext basierend auf Mahnstufe
-      if (!formData.text || formData.text.trim() === '') {
-        const mahnstufe = formData.mahnstufe || 1
-        const betrag = formData.betrag || 0
-        const frist = formData.frist || '7 Tage'
-
-        formData.text = t('crud.messages.dunningTextTemplate', {
-          mahnstufeText: mahnstufe > 1 ? t('crud.messages.dunningTextPrevious', { level: mahnstufe - 1 }) + ' ' : '',
-          betrag: betrag.toFixed(2),
-          frist: frist
-        })
+      setActionLoadingKey('generate')
+      try {
+        await apiClient.post('/api/v1/finance/dunning/run', formData ?? {})
+        toast({ title: t('crud.messages.dunningGenerated'), description: t('crud.messages.dunningGeneratedDesc', { level: formData?.mahnstufe ?? 1 }) })
+      } catch (error: any) {
+        const msg = error.response?.data?.detail ?? error.message
+        toast({ variant: 'destructive', title: t('common.error'), description: msg })
+      } finally {
+        setActionLoadingKey(null)
       }
-
-      toast({
-        title: t('crud.messages.dunningGenerated'),
-        description: t('crud.messages.dunningGeneratedDesc', { level: formData.mahnstufe }),
-      })
-    } else if (action === 'preview') {
+      return
+    }
+    if (action === 'preview') {
       // Vorschau
       if (!formData.id) {
         toast({
@@ -278,7 +246,7 @@ export default function MahnwesenPage(): JSX.Element {
         })
         return
       }
-      window.open(`/api/finance/mahnwesen/${formData.id}/preview`, '_blank')
+      window.open(`/api/v1/finance/dunning/${formData.id}/export`, '_blank')
     } else if (action === 'send') {
       const isValid = validate(formData)
       if (!isValid.isValid) {
@@ -309,7 +277,7 @@ export default function MahnwesenPage(): JSX.Element {
       }
 
       try {
-        const response = await fetch(`/api/finance/mahnwesen/${formData.id}/payment`, {
+        const response = await fetch(`/api/v1/finance/dunning/${formData.id}/payment`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -414,6 +382,8 @@ export default function MahnwesenPage(): JSX.Element {
       onSave={handleSave}
       onCancel={handleCancel}
       isLoading={loading}
+      onAction={(key, formData) => handleAction(key, formData)}
+      loadingActionKey={actionLoadingKey}
     />
   )
 }

@@ -7,7 +7,7 @@ import logging
 from app.core.uuid7 import uuid7
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from typing import List, Optional
@@ -1076,6 +1076,109 @@ async def get_rechnungseingang(rechnung_id: str, db: Session = Depends(get_db)):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Datenbankfehler: {str(e)}")
+
+
+def _get_audit_user(request: Request) -> str:
+    """User ID for audit fields (sub or preferred_username from token, or 'system')."""
+    claims = getattr(request.state, "token_claims", None) or {}
+    return claims.get("sub") or claims.get("preferred_username") or "system"
+
+
+@router.post("/rechnungseingaenge/{rechnung_id}/pruefen")
+async def rechnungseingang_pruefen(
+    rechnung_id: str,
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    """Setzt Status auf GEPRUEFT (nur aus ENTWURF/ERFASST/OFFEN). Speichert checked_by/checked_at."""
+    row = db.execute(
+        text("SELECT id, status FROM einkauf_rechnungseingaenge WHERE id = :id OR rechnungs_nummer = :id"),
+        {"id": rechnung_id},
+    ).fetchone()
+    if not row:
+        raise HTTPException(status_code=404, detail="Rechnungseingang nicht gefunden")
+    status = (row._mapping.get("status") or "").upper()
+    allowed = ("ENTWURF", "ERFASST", "OFFEN")
+    if status not in allowed:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Prüfen nur möglich bei Status {', '.join(allowed)}. Aktuell: {status}",
+        )
+    user = _get_audit_user(request)
+    db.execute(
+        text("""
+            UPDATE einkauf_rechnungseingaenge
+            SET status = 'GEPRUEFT', checked_by = :user, checked_at = now(), updated_at = now()
+            WHERE id = :id
+        """),
+        {"id": row._mapping["id"], "user": user},
+    )
+    db.commit()
+    return {"message": "Rechnungseingang geprüft", "status": "GEPRUEFT"}
+
+
+@router.post("/rechnungseingaenge/{rechnung_id}/freigeben")
+async def rechnungseingang_freigeben(
+    rechnung_id: str,
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    """Setzt Status auf FREIGEGEBEN (nur aus GEPRUEFT). Speichert approved_by/approved_at."""
+    row = db.execute(
+        text("SELECT id, status FROM einkauf_rechnungseingaenge WHERE id = :id OR rechnungs_nummer = :id"),
+        {"id": rechnung_id},
+    ).fetchone()
+    if not row:
+        raise HTTPException(status_code=404, detail="Rechnungseingang nicht gefunden")
+    status = (row._mapping.get("status") or "").upper()
+    if status != "GEPRUEFT":
+        raise HTTPException(
+            status_code=400,
+            detail=f"Freigeben nur möglich bei Status GEPRUEFT. Aktuell: {status}",
+        )
+    user = _get_audit_user(request)
+    db.execute(
+        text("""
+            UPDATE einkauf_rechnungseingaenge
+            SET status = 'FREIGEGEBEN', approved_by = :user, approved_at = now(), updated_at = now()
+            WHERE id = :id
+        """),
+        {"id": row._mapping["id"], "user": user},
+    )
+    db.commit()
+    return {"message": "Rechnungseingang freigegeben", "status": "FREIGEGEBEN"}
+
+
+@router.post("/rechnungseingaenge/{rechnung_id}/verbuchen")
+async def rechnungseingang_verbuchen(
+    rechnung_id: str,
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    """Setzt Status auf VERBUCHT (nur aus FREIGEGEBEN). Speichert posted_by/posted_at."""
+    row = db.execute(
+        text("SELECT id, status FROM einkauf_rechnungseingaenge WHERE id = :id OR rechnungs_nummer = :id"),
+        {"id": rechnung_id},
+    ).fetchone()
+    if not row:
+        raise HTTPException(status_code=404, detail="Rechnungseingang nicht gefunden")
+    status = (row._mapping.get("status") or "").upper()
+    if status != "FREIGEGEBEN":
+        raise HTTPException(
+            status_code=400,
+            detail=f"Verbuchen nur möglich bei Status FREIGEGEBEN. Aktuell: {status}",
+        )
+    user = _get_audit_user(request)
+    db.execute(
+        text("""
+            UPDATE einkauf_rechnungseingaenge
+            SET status = 'VERBUCHT', posted_by = :user, posted_at = now(), updated_at = now()
+            WHERE id = :id
+        """),
+        {"id": row._mapping["id"], "user": user},
+    )
+    db.commit()
+    return {"message": "Rechnungseingang verbucht", "status": "VERBUCHT"}
 
 
 @router.post("/rechnungseingaenge", status_code=201)

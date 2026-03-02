@@ -1030,9 +1030,7 @@ async def download_drying_rule_document(
     if not rule:
         raise HTTPException(status_code=404, detail="Drying rule set not found")
 
-    # TODO: Wenn document_id gesetzt ist, DMS-Dokument abrufen
-    # Falls nicht: Regel-Daten als JSON zurückgeben (später: PDF generieren)
-    return {
+    response = {
         "rule_id": rule.id,
         "crop_code": rule.crop_code,
         "version": int(rule.version),
@@ -1041,8 +1039,11 @@ async def download_drying_rule_document(
         "document_id": rule.document_id,
         "method": rule.method,
         "base_moisture_pct": float(rule.base_moisture_pct),
-        "note": "TODO: PDF-Export implementieren oder DMS-Dokument abrufen",
     }
+    # Wenn DMS-Dokument verknüpft: DMS-Download-URL beifügen
+    if rule.document_id:
+        response["dms_download_url"] = f"/api/v1/dms/documents/{rule.document_id}/download"
+    return response
 
 
 # ── Drying Rule Lookup Rows CRUD (Admin-only) ────────────────────────────────

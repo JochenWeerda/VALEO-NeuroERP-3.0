@@ -4,6 +4,8 @@ import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
+import { toast } from '@/hooks/use-toast'
+import { apiClient } from '@/lib/axios'
 
 // Zod-Schema für Kontenplan
 const kontenplanSchema = z.object({
@@ -161,30 +163,18 @@ const kontenplanConfig: MaskConfig = {
     }
   ],
   actions: [
-    {
-      key: 'validate',
-      label: 'Validieren',
-      type: 'secondary'
-    , onClick: () => {} },
-    {
-      key: 'save',
-      label: 'Speichern',
-      type: 'primary'
-    , onClick: () => {} },
-    {
-      key: 'export',
-      label: 'DATEV Export',
-      type: 'secondary'
-    , onClick: () => {} }
+    { key: 'validate', label: 'Validieren', type: 'secondary' },
+    { key: 'save', label: 'Speichern', type: 'primary' },
+    { key: 'export', label: 'DATEV Export', type: 'secondary' }
   ],
   api: {
-    baseUrl: '/api/finance/kontenplan',
+    baseUrl: '/api/v1/chart-of-accounts',
     endpoints: {
-      list: '/api/finance/kontenplan',
-      get: '/api/finance/kontenplan/{id}',
-      create: '/api/finance/kontenplan',
-      update: '/api/finance/kontenplan/{id}',
-      delete: '/api/finance/kontenplan/{id}'
+      list: '/api/v1/chart-of-accounts',
+      get: '/api/v1/chart-of-accounts/{id}',
+      create: '/api/v1/chart-of-accounts',
+      update: '/api/v1/chart-of-accounts/{id}',
+      delete: '/api/v1/chart-of-accounts/{id}'
     }
   } as any,
   validation: kontenplanSchema,
@@ -194,6 +184,7 @@ const kontenplanConfig: MaskConfig = {
 export default function KontenplanPage(): JSX.Element {
   const navigate = useNavigate()
   const [isDirty, setIsDirty] = useState(false)
+  const [actionLoadingKey, setActionLoadingKey] = useState<string | null>(null)
 
   const { data, loading, saveData } = useMaskData({
     apiUrl: kontenplanConfig.api.baseUrl,
@@ -209,7 +200,6 @@ export default function KontenplanPage(): JSX.Element {
         showValidationToast(isValid.errors)
         return
       }
-
       try {
         await saveData(formData)
         setIsDirty(false)
@@ -217,16 +207,33 @@ export default function KontenplanPage(): JSX.Element {
       } catch (error) {
         // Error wird bereits in useMaskData behandelt
       }
-    } else if (action === 'validate') {
-      const isValid = validate(formData)
-      if (isValid.isValid) {
-        alert('Validierung erfolgreich!')
-      } else {
-        showValidationToast(isValid.errors)
+      return
+    }
+    if (action === 'validate') {
+      setActionLoadingKey('validate')
+      try {
+        await apiClient.post('/api/v1/finance/chart-of-accounts/validate', formData ?? {})
+        toast({ title: 'Validierung erfolgreich' })
+      } catch (error: any) {
+        const msg = error.response?.data?.detail ?? error.message
+        toast({ variant: 'destructive', title: 'Validierung fehlgeschlagen', description: msg })
+      } finally {
+        setActionLoadingKey(null)
       }
-    } else if (action === 'export') {
-      // DATEV Export
-      window.open('/api/finance/kontenplan/export', '_blank')
+      return
+    }
+    if (action === 'export') {
+      setActionLoadingKey('export')
+      try {
+        const res = await apiClient.post<{ url?: string }>('/api/v1/finance/chart-of-accounts/datev-export', formData ?? {})
+        if (res?.url) window.open(res.url, '_blank')
+        toast({ title: 'Export erstellt' })
+      } catch (error: any) {
+        const msg = error.response?.data?.detail ?? error.message
+        toast({ variant: 'destructive', title: 'Export fehlgeschlagen', description: msg })
+      } finally {
+        setActionLoadingKey(null)
+      }
     }
   })
 
@@ -248,6 +255,8 @@ export default function KontenplanPage(): JSX.Element {
       onSave={handleSave}
       onCancel={handleCancel}
       isLoading={loading}
+      onAction={(key, formData) => handleAction(key, formData)}
+      loadingActionKey={actionLoadingKey}
     />
   )
 }

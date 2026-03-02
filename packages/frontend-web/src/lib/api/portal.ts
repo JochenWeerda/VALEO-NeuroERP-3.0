@@ -247,7 +247,7 @@ export async function exportFeldbuchCsv(
     `/api/v1/portal/feldbuch/export?${p.toString()}`,
     { responseType: 'blob' },
   )
-  const blob = new Blob([response.data], { type: 'text/csv;charset=utf-8' })
+  const blob = response.data
   const url = window.URL.createObjectURL(blob)
   const anchor = document.createElement('a')
   anchor.href = url

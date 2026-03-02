@@ -541,6 +541,10 @@
       "path": "annahme/abrechnung"
     },
     {
+      "module": "@/pages/annahme/annahme-qr",
+      "path": "annahme/qr"
+    },
+    {
       "module": "@/pages/annahme/lkw-registrierung",
       "path": "annahme/lkw-registrierung"
     },
@@ -874,7 +878,7 @@
     },
     {
       "module": "@/pages/fibu/sachkonto",
-      "path": "fibu/sachkonto"
+      "path": "fibu/sachkonto/:id"
     },
     {
       "module": "@/pages/fibu/sicherheiten",
@@ -895,6 +899,18 @@
     {
       "module": "@/pages/fibu/zahlungsvorschlaege",
       "path": "fibu/zahlungsvorschlaege"
+    },
+    {
+      "module": "@/pages/fibu/lohn-connector",
+      "path": "fibu/lohn-connector"
+    },
+    {
+      "module": "@/pages/fibu/anlagen-suite",
+      "path": "fibu/anlagen-suite"
+    },
+    {
+      "module": "@/pages/fibu/anlagen-suite",
+      "path": "fibu/quadriga-connector"
     },
     {
       "module": "@/pages/finance/abschluss",

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Einkauf (Procurement) API Hooks
  * Error-first fetching without mock fallback data.
  */
@@ -262,6 +262,36 @@ export function useRechnungseingaenge() {
   })
 }
 
+/** Workflow: Prüfen (entwurf → geprüft) */
+export function useRechnungseingangPruefen() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (id: string) =>
+      (await apiClient.post<{ message: string; status: string }>(`/api/v1/einkauf/rechnungseingaenge/${encodeURIComponent(id)}/pruefen`)).data,
+    onSuccess: () => qc.invalidateQueries({ queryKey: einkaufKeys.rechnungseingaenge() }),
+  })
+}
+
+/** Workflow: Freigeben (geprüft → freigegeben) */
+export function useRechnungseingangFreigeben() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (id: string) =>
+      (await apiClient.post<{ message: string; status: string }>(`/api/v1/einkauf/rechnungseingaenge/${encodeURIComponent(id)}/freigeben`)).data,
+    onSuccess: () => qc.invalidateQueries({ queryKey: einkaufKeys.rechnungseingaenge() }),
+  })
+}
+
+/** Workflow: Verbuchen (freigegeben → verbucht) */
+export function useRechnungseingangVerbuchen() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (id: string) =>
+      (await apiClient.post<{ message: string; status: string }>(`/api/v1/einkauf/rechnungseingaenge/${encodeURIComponent(id)}/verbuchen`)).data,
+    onSuccess: () => qc.invalidateQueries({ queryKey: einkaufKeys.rechnungseingaenge() }),
+  })
+}
+
 export function useEinkaufReports() {
   return useQuery({
     queryKey: einkaufKeys.reports(),
@@ -349,5 +379,263 @@ export function useDeleteEinkaufFrachtauftrag() {
   return useMutation({
     mutationFn: async (id: string) => (await apiClient.delete(`/api/v1/einkauf/frachtauftraege/${encodeURIComponent(id)}`)).data,
     onSuccess: () => qc.invalidateQueries({ queryKey: einkaufKeys.frachtauftraege() }),
+  })
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Bestell-Vorschlag Engines + CRUD
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type BvPosition = {
+  article_id: string
+  artikel_nr?: string
+  artikel_bezeichnung?: string
+  artikel_gruppe?: string
+  einheit?: string
+  ist_bestand: number
+  offene_auftraege: number
+  bedarf: number
+  vorschlag_menge: number
+  bestell_menge?: number
+  mindestbestand: number
+  maximalbestand: number
+  meldebestand: number
+  lieferant_id?: string
+  lieferant_name?: string
+  letzter_preis?: number
+  preis_einheit?: string
+  letzter_kauf_datum?: string
+  wiederbeschaffungs_tage?: number
+  reichweite_tage?: number
+}
+
+export type EinkaufLieferant = {
+  id: string
+  lieferantennummer: string
+  firmenname: string
+  ort?: string
+  email?: string
+  telefon?: string
+  zahlungsbedingungen?: string
+  lieferzeit_tage?: number
+  bewertung?: number
+  aktiv: boolean
+}
+
+export type EinkaufKontrakt = {
+  id: string
+  kontraktnummer: string
+  lieferant_id: string
+  bezeichnung?: string
+  gueltig_von?: string
+  gueltig_bis?: string
+  status: string
+  kontrakt_typ: string
+  gesamtmenge?: number
+  offene_menge?: number
+}
+
+export type ArtikelLagerParam = {
+  id: string
+  article_id: string
+  warehouse_id?: string
+  mindestbestand: number
+  maximalbestand: number
+  meldebestand: number
+  soll_bestand?: number
+  std_lieferant_id?: string
+  std_bestellmenge?: number
+  std_einheit?: string
+  wiederbeschaffungs_tage: number
+  durchschnitt_verbrauch_tag?: number
+  reichweite_tage?: number
+  aktiv: boolean
+  notiz?: string
+}
+
+export type EinkaufBestellung = {
+  id: string
+  bestellnummer: string
+  lieferant_id: string
+  lieferant_name?: string
+  bestelldatum: string
+  lieferdatum_wunsch?: string
+  status: string
+  versand_art: string
+  versandt_am?: string
+  netto_summe?: number
+  brutto_summe?: number
+  positionen_anz: number
+}
+
+export const bvKeys = {
+  lager:   (p?: Record<string, unknown>) => ['bv', 'lager',   p] as const,
+  verkauf: (p?: Record<string, unknown>) => ['bv', 'verkauf', p] as const,
+  rohware: (p?: Record<string, unknown>) => ['bv', 'rohware', p] as const,
+  list:    (p?: Record<string, unknown>) => ['bv', 'list',    p] as const,
+  lieferanten:  ['bv', 'lieferanten']  as const,
+  kontrakte:    ['bv', 'kontrakte']    as const,
+  alp:          ['bv', 'alp']          as const,
+  bestellungen: ['bv', 'bestellungen'] as const,
+}
+
+// Engine-Hooks
+export function useVorschlagLager(params?: {
+  niederlassung_id?: string
+  artikelgruppe?: string
+  artikel_nr?: string
+  nur_unter_meldebestand?: boolean
+}) {
+  return useQuery({
+    queryKey: bvKeys.lager(params),
+    queryFn: async () => {
+      const p = new URLSearchParams()
+      if (params?.niederlassung_id) p.set('niederlassung_id', params.niederlassung_id)
+      if (params?.artikelgruppe) p.set('artikelgruppe', params.artikelgruppe)
+      if (params?.artikel_nr) p.set('artikelNr', params.artikel_nr)
+      if (params?.nur_unter_meldebestand !== undefined)
+        p.set('nur_unter_meldebestand', String(params.nur_unter_meldebestand))
+      const qs = p.toString() ? `?${p}` : ''
+      return (await apiClient.get<BvPosition[]>(`/api/v1/einkauf/bestellvorschlaege/lager${qs}`)).data
+    },
+    staleTime: 60 * 1000,
+  })
+}
+
+export function useVorschlagVerkauf(params?: {
+  niederlassung_id?: string
+  artikelgruppe?: string
+  von_datum?: string
+  bis_datum?: string
+}) {
+  return useQuery({
+    queryKey: bvKeys.verkauf(params),
+    queryFn: async () => {
+      const p = new URLSearchParams()
+      if (params?.niederlassung_id) p.set('niederlassung_id', params.niederlassung_id)
+      if (params?.artikelgruppe) p.set('artikelgruppe', params.artikelgruppe)
+      if (params?.von_datum) p.set('vonDatum', params.von_datum)
+      if (params?.bis_datum) p.set('bisDatum', params.bis_datum)
+      const qs = p.toString() ? `?${p}` : ''
+      return (await apiClient.get<BvPosition[]>(`/api/v1/einkauf/bestellvorschlaege/verkauf${qs}`)).data
+    },
+    staleTime: 60 * 1000,
+  })
+}
+
+export function useVorschlagRohware(params?: {
+  stichtag?: string
+  niederlassung_id?: string
+}) {
+  return useQuery({
+    queryKey: bvKeys.rohware(params),
+    queryFn: async () => {
+      const p = new URLSearchParams()
+      if (params?.stichtag) p.set('stichtag', params.stichtag)
+      if (params?.niederlassung_id) p.set('niederlassung_id', params.niederlassung_id)
+      const qs = p.toString() ? `?${p}` : ''
+      return (await apiClient.get<BvPosition[]>(`/api/v1/einkauf/bestellvorschlaege/rohware${qs}`)).data
+    },
+    staleTime: 60 * 1000,
+  })
+}
+
+export function useSaveBestellvorschlag() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (data: {
+      vorschlag_typ: string
+      positionen: BvPosition[]
+      parameter?: Record<string, unknown>
+      niederlassung_id?: string
+      bezeichnung?: string
+    }) => (await apiClient.post('/api/v1/einkauf/bestellvorschlaege', data)).data,
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['bv', 'list'] }),
+  })
+}
+
+export function useVorschlagZuBestellung() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (vorschlag_id: string) =>
+      (await apiClient.post(`/api/v1/einkauf/bestellvorschlaege/${encodeURIComponent(vorschlag_id)}/zu-bestellung`)).data,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['bv', 'list'] })
+      qc.invalidateQueries({ queryKey: bvKeys.bestellungen })
+    },
+  })
+}
+
+// ArtikelLagerParameter
+export function useArtikelLagerParameter(article_id?: string) {
+  return useQuery({
+    queryKey: [...bvKeys.alp, article_id],
+    queryFn: async () => {
+      const qs = article_id ? `?article_id=${encodeURIComponent(article_id)}` : ''
+      return (await apiClient.get<ArtikelLagerParam[]>(`/api/v1/einkauf/artikel-lager-parameter${qs}`)).data
+    },
+    staleTime: 5 * 60 * 1000,
+  })
+}
+
+export function useUpsertArtikelLagerParameter() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (data: Partial<ArtikelLagerParam> & { article_id: string }) => {
+      if (data.id) {
+        return (await apiClient.put(`/api/v1/einkauf/artikel-lager-parameter/${encodeURIComponent(data.id)}`, data)).data
+      }
+      return (await apiClient.post('/api/v1/einkauf/artikel-lager-parameter', data)).data
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: bvKeys.alp }),
+  })
+}
+
+// Lieferanten
+export function useEinkaufLieferanten(aktiv?: boolean) {
+  return useQuery({
+    queryKey: [...bvKeys.lieferanten, aktiv],
+    queryFn: async () => {
+      const qs = aktiv !== undefined ? `?aktiv=${aktiv}` : ''
+      return (await apiClient.get<EinkaufLieferant[]>(`/api/v1/einkauf/lieferanten${qs}`)).data
+    },
+    staleTime: 5 * 60 * 1000,
+  })
+}
+
+// Kontrakte
+export function useEinkaufKontrakte(lieferant_id?: string) {
+  return useQuery({
+    queryKey: [...bvKeys.kontrakte, lieferant_id],
+    queryFn: async () => {
+      const qs = lieferant_id ? `?lieferant_id=${encodeURIComponent(lieferant_id)}` : ''
+      return (await apiClient.get<EinkaufKontrakt[]>(`/api/v1/einkauf/kontrakte${qs}`)).data
+    },
+    staleTime: 5 * 60 * 1000,
+  })
+}
+
+// Bestellungen
+export function useEinkaufBestellungen(params?: { status?: string; von?: string; bis?: string }) {
+  return useQuery({
+    queryKey: [...bvKeys.bestellungen, params],
+    queryFn: async () => {
+      const p = new URLSearchParams()
+      if (params?.status) p.set('status', params.status)
+      if (params?.von) p.set('von', params.von)
+      if (params?.bis) p.set('bis', params.bis)
+      const qs = p.toString() ? `?${p}` : ''
+      return (await apiClient.get<EinkaufBestellung[]>(`/api/v1/einkauf/bestellungen${qs}`)).data
+    },
+    staleTime: 60 * 1000,
+  })
+}
+
+export function useBestellungVersenden() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, versand_art }: { id: string; versand_art: 'email' | 'fax' | 'edi' }) =>
+      (await apiClient.post(`/api/v1/einkauf/bestellungen/${encodeURIComponent(id)}/versenden?versand_art=${versand_art}`)).data,
+    onSuccess: () => qc.invalidateQueries({ queryKey: bvKeys.bestellungen }),
   })
 }

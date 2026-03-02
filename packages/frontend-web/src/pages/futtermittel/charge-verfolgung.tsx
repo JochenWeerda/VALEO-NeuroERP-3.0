@@ -1,10 +1,13 @@
-import { useMemo } from 'react'
+import { useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { ListReport } from '@/components/mask-builder'
 import { useFutterChargen, type FutterCharge } from '@/lib/api/futter'
 import { formatDate, formatNumber } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
+import { toast } from '@/hooks/use-toast'
+import { api } from '@/lib/axios'
 
 // Konfiguration für Charge-Verfolgung ListReport
 const chargeVerfolgungConfig: ListConfig = {
@@ -144,19 +147,19 @@ const chargeVerfolgungConfig: ListConfig = {
       key: 'export',
       label: 'Exportieren',
       type: 'secondary',
-      onClick: () => console.log('Export clicked')
+      onClick: () => toast({ title: 'Export', description: 'Chargendaten werden exportiert.' })
     },
     {
       key: 'recall',
       label: 'Recall einleiten',
       type: 'danger',
-      onClick: () => console.log('Recall clicked')
+      onClick: () => toast({ title: 'Rückruf', description: 'Chargen-Rückruf wurde eingeleitet.', variant: 'destructive' })
     },
     {
       key: 'trace',
       label: 'Rückverfolgung',
       type: 'secondary',
-      onClick: () => console.log('Trace clicked')
+      onClick: () => toast({ title: 'Rückverfolgung', description: 'Chargen-Rückverfolgung wird gestartet.' })
     }
   ],
   defaultSort: { field: 'produktionsdatum', direction: 'desc' },
@@ -175,8 +178,26 @@ const chargeVerfolgungConfig: ListConfig = {
   actions: []
 }
 
+async function triggerChargenExport(): Promise<void> {
+  try {
+    const res = await api.post('/api/v1/export/list', { entity: 'futtermittel_chargen', format: 'csv' }, { responseType: 'blob' })
+    const blob = res.data as Blob
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `export_chargen_${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast({ title: 'Export erstellt', description: 'Chargen-Daten als CSV heruntergeladen.' })
+  } catch (e: any) {
+    toast({ title: 'Export fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+  }
+}
+
 export default function ChargeVerfolgungPage(): JSX.Element {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const importInputRef = useRef<HTMLInputElement>(null)
   const { data: apiData = [], isLoading } = useFutterChargen()
   const data = useMemo(() => apiData.map((item: FutterCharge) => ({
     id: item.id,
@@ -192,6 +213,51 @@ export default function ChargeVerfolgungPage(): JSX.Element {
   })), [apiData])
   const total = data.length
 
+  const chargenConfig: ListConfig = useMemo(() => ({
+    ...chargeVerfolgungConfig,
+    bulkActions: [
+      {
+        key: 'export',
+        label: 'Exportieren',
+        type: 'secondary' as const,
+        onClick: (_items: any[]) => { void triggerChargenExport() }
+      },
+      {
+        key: 'recall',
+        label: 'Recall einleiten',
+        type: 'danger' as const,
+        onClick: async (items: any[]) => {
+          if (!confirm(`Rückruf für ${items.length} Charge(n) einleiten?`)) return
+          let ok = 0; let err = 0
+          for (const item of items) {
+            try {
+              await api.patch(`/api/v1/futter/chargen/${item.id}`, { status: 'recall' })
+              ok++
+            } catch { err++ }
+          }
+          queryClient.invalidateQueries({ queryKey: ['futter', 'chargen'] })
+          toast({
+            title: 'Rückruf eingeleitet',
+            description: `${ok} Charge(n) auf Recall gesetzt${err ? `, ${err} Fehler` : ''}.`,
+            variant: 'destructive'
+          })
+        }
+      },
+      {
+        key: 'trace',
+        label: 'Rückverfolgung',
+        type: 'secondary' as const,
+        onClick: (items: any[]) => {
+          if (items.length === 1) {
+            navigate(`/futtermittel/chargen/${items[0].id}/trace`)
+          } else {
+            toast({ title: 'Rückverfolgung', description: `${items.length} Chargen ausgewählt — bitte einzeln öffnen.` })
+          }
+        }
+      }
+    ]
+  }), [queryClient, navigate])
+
   const handleCreate = () => {
     navigate('/futtermittel/chargen/neu')
   }
@@ -200,23 +266,64 @@ export default function ChargeVerfolgungPage(): JSX.Element {
     if (item?.id) navigate(`/futtermittel/chargen/${item.id}`)
   }
 
-  const handleDelete = (_item: any) => alert('Löschen wird in dieser Ansicht noch nicht unterstützt')
+  const handleDelete = async (item: any) => {
+    if (!item?.id) return
+    if (!confirm(`Charge "${item.chargenNummer ?? item.id}" wirklich löschen?`)) return
+    try {
+      await api.delete(`/api/v1/futter/chargen/${item.id}`)
+      toast({ title: 'Gelöscht', description: 'Charge wurde gelöscht.' })
+      queryClient.invalidateQueries({ queryKey: ['futter', 'chargen'] })
+    } catch (e: any) {
+      toast({ title: 'Löschen fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+    }
+  }
 
-  const handleExport = () => {
-    alert('Export-Funktion wird implementiert')
+  const handleExport = () => triggerChargenExport()
+
+  const handleImport = () => {
+    if (importInputRef.current) importInputRef.current.click()
+  }
+
+  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const formData = new FormData()
+    formData.append('file', file)
+    try {
+      const res = await api.post('/api/v1/futter/import/chargen', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      const { created = 0, updated = 0, errors = [] } = (res.data as any) ?? {}
+      toast({
+        title: 'Import abgeschlossen',
+        description: `${created} neu, ${updated} aktualisiert${errors.length ? `, ${errors.length} Fehler` : ''}.`,
+      })
+    } catch (e: any) {
+      toast({ title: 'Import fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+    }
+    e.target.value = ''
   }
 
   return (
-    <ListReport
-      config={chargeVerfolgungConfig}
-      data={data}
-      total={total}
-      onCreate={handleCreate}
-      onEdit={handleEdit}
-      onDelete={handleDelete}
-      onExport={handleExport}
-      onImport={() => alert('Import-Funktion wird implementiert')}
-      isLoading={isLoading}
-    />
+    <>
+      <input
+        ref={importInputRef}
+        type="file"
+        accept=".csv"
+        className="hidden"
+        onChange={handleImportFile}
+      />
+      <ListReport
+        config={chargenConfig}
+        data={data}
+        total={total}
+        onCreate={handleCreate}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onExport={handleExport}
+        onImport={handleImport}
+        isLoading={isLoading}
+      />
+    </>
   )
 }

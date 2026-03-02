@@ -89,3 +89,9 @@ from . import branches
 from . import pricing
 from . import config_service
 from . import job_runner
+from . import finance_actions
+from . import lohn_connector
+from . import quadriga_connector
+from . import asset_ledger_connector
+from . import fibu_connectors
+from . import gobd_archiv

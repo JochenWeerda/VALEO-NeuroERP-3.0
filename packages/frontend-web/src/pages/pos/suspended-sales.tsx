@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSuspendedSales, type SuspendedSale as ApiSuspendedSale } from '@/lib/api/pos'
+import { toast } from '@/hooks/use-toast'
+import { api } from '@/lib/axios'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -45,19 +47,20 @@ export default function SuspendedSalesPage(): JSX.Element {
   const sales = suspendedSales.filter((sale) => !removedSaleIds.has(sale.id))
 
   const handleResume = (saleId: string): void => {
-    // TODO: Load suspended sale into POS terminal
-    // navigate('/pos/terminal', { state: { resumeSaleId: saleId } })
-    
-    alert(`Verkauf ${saleId} wird im POS-Terminal fortgesetzt`)
-    
-    // Sale aus Liste entfernen
     setRemovedSaleIds((prev) => new Set(prev).add(saleId))
+    navigate('/pos/terminal', { state: { resumeSaleId: saleId } })
   }
 
-  const handleDelete = (saleId: string): void => {
+  const handleDelete = async (saleId: string): Promise<void> => {
     if (!confirm('Pausierten Verkauf wirklich löschen?')) return
-    
-    setRemovedSaleIds((prev) => new Set(prev).add(saleId))
+    try {
+      await api.delete(`/api/v1/pos/suspended-sales/${saleId}`)
+      setRemovedSaleIds((prev) => new Set(prev).add(saleId))
+      void refetch()
+      toast({ title: 'Pausierten Verkauf gelöscht.' })
+    } catch (e: any) {
+      toast({ title: 'Löschen fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+    }
   }
 
   const formatTime = (timestamp: string): string => {

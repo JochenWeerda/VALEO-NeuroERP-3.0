@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useSearchParams } from "react-router-dom"
 import { Card } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/toast-provider"
 import { FormBuilder, type FormSchema } from "@/features/forms/FormBuilder"
 import { BelegFlowPanel } from "@/features/flows/BelegFlowPanel"
@@ -117,13 +118,43 @@ export default function SalesInvoiceEditorPage(): JSX.Element {
       if (docId) {
         await apiClient.put(`/api/v1/docflow/${docId}`, docPayload)
       } else {
-        const created = await apiClient.post("/api/v1/docflow", docPayload)
+        const idempotencyKey = crypto.randomUUID()
+        const created = await apiClient.post("/api/v1/docflow", {
+          ...docPayload,
+          idempotency_key: idempotencyKey,
+        })
         setDocId(String(created.data?.id))
       }
 
       push(getSuccessMessage(t, 'update', entityType))
     } catch {
       push(getErrorMessage(t, 'update', entityType))
+    }
+  }
+
+  async function recordPrint(): Promise<void> {
+    if (!docId) {
+      push('Bitte zuerst speichern')
+      return
+    }
+    try {
+      await apiClient.post(`/api/v1/docflow/${docId}/record-print`, { printed_by: null })
+      push('Druck protokolliert')
+    } catch {
+      push('Druck-Protokoll fehlgeschlagen')
+    }
+  }
+
+  async function recordExport(): Promise<void> {
+    if (!docId) {
+      push('Bitte zuerst speichern')
+      return
+    }
+    try {
+      await apiClient.post(`/api/v1/docflow/${docId}/record-export`, { exported_by: null })
+      push('Export protokolliert')
+    } catch {
+      push('Export-Protokoll fehlgeschlagen')
     }
   }
 
@@ -157,6 +188,16 @@ export default function SalesInvoiceEditorPage(): JSX.Element {
           onSubmit={save}
           submitLabel={`${t('crud.actions.save')} ${entityTypeLabel}`}
         />
+        {docId && (
+          <div className="mt-4 flex gap-2">
+            <Button type="button" variant="outline" size="sm" onClick={() => void recordPrint()}>
+              Druck protokollieren
+            </Button>
+            <Button type="button" variant="outline" size="sm" onClick={() => void recordExport()}>
+              Export protokollieren
+            </Button>
+          </div>
+        )}
       </Card>
     </div>
   )

@@ -8,6 +8,7 @@ import { z } from 'zod'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { lookupIBAN, formatIBAN, validateIBAN } from '@/lib/utils/iban-validator'
 import { toast } from '@/hooks/use-toast'
+import { apiClient } from '@/lib/axios'
 
 // Zod-Schema für Lastschriften Debitoren (wird in Komponente mit i18n erstellt)
 const createLastschriftenSchema = (t: any) => z.object({
@@ -187,45 +188,21 @@ const createLastschriftenConfig = (t: any, entityTypeLabel: string): MaskConfig 
     }
   ],
   actions: [
-    {
-      key: 'add-direct-debit',
-      label: t('crud.actions.addDirectDebit'),
-      type: 'secondary'
-    , onClick: () => {} },
-    {
-      key: 'validate-mandates',
-      label: t('crud.actions.validateMandates'),
-      type: 'secondary'
-    , onClick: () => {} },
-    {
-      key: 'preview',
-      label: t('crud.actions.sepaPreview'),
-      type: 'secondary'
-    , onClick: () => {} },
-    {
-      key: 'approve',
-      label: t('crud.actions.approve'),
-      type: 'primary'
-    , onClick: () => {} },
-    {
-      key: 'execute',
-      label: t('crud.actions.execute'),
-      type: 'primary'
-    , onClick: () => {} },
-    {
-      key: 'export',
-      label: t('crud.actions.sepaExport'),
-      type: 'secondary'
-    , onClick: () => {} }
+    { key: 'add-direct-debit', label: t('crud.actions.addDirectDebit'), type: 'secondary' },
+    { key: 'validate-mandates', label: t('crud.actions.validateMandates'), type: 'secondary' },
+    { key: 'preview', label: t('crud.actions.sepaPreview'), type: 'secondary' },
+    { key: 'approve', label: t('crud.actions.approve'), type: 'primary' },
+    { key: 'execute', label: t('crud.actions.execute'), type: 'primary' },
+    { key: 'export', label: t('crud.actions.sepaExport'), type: 'secondary' }
   ],
   api: {
-    baseUrl: '/api/finance/lastschriften-debitoren',
+    baseUrl: '/api/v1/finance/direct-debits',
     endpoints: {
-      list: '/api/finance/lastschriften-debitoren',
-      get: '/api/finance/lastschriften-debitoren/{id}',
-      create: '/api/finance/lastschriften-debitoren',
-      update: '/api/finance/lastschriften-debitoren/{id}',
-      delete: '/api/finance/lastschriften-debitoren/{id}'
+      list: '/api/v1/finance/direct-debits',
+      get: '/api/v1/finance/direct-debits/{id}',
+      create: '/api/v1/finance/direct-debits',
+      update: '/api/v1/finance/direct-debits/{id}',
+      delete: '/api/v1/finance/direct-debits/{id}'
     }
   } as any,
   validation: createLastschriftenSchema(t),
@@ -438,6 +415,7 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
   const navigate = useNavigate()
   const [isDirty, setIsDirty] = useState(false)
   const [formData, setFormData] = useState<any>({})
+  const [actionLoadingKey, setActionLoadingKey] = useState<string | null>(null)
   const entityType = 'directDebit'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Lastschriften Debitoren')
   const lastschriftenConfig = createLastschriftenConfig(t, entityTypeLabel)
@@ -481,33 +459,74 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
 
   const { handleAction } = useMaskActions(async (action: string, formData: any) => {
     if (action === 'add-direct-debit') {
-      // Neue Lastschrift hinzufügen wird in der Tabelle behandelt
-      alert(t('crud.messages.useTableToAddDirectDebits'))
+      toast({ title: 'Hinweis', description: 'Lastschriften werden direkt in der Tabelle hinzugefügt.' })
     } else if (action === 'validate-mandates') {
-      // Mandate prüfen
-      alert(t('crud.messages.mandateValidationInfo'))
+      const lastschriften: any[] = formData?.lastschriften ?? []
+      const errors: string[] = []
+      lastschriften.forEach((ls: any, idx: number) => {
+        if (!ls.iban) errors.push(`Zeile ${idx + 1}: IBAN fehlt`)
+        if (!ls.bic) errors.push(`Zeile ${idx + 1}: BIC fehlt`)
+        if (!ls.mandatReferenz) errors.push(`Zeile ${idx + 1}: Mandat-Referenz fehlt`)
+        if (!ls.mandatDatum) errors.push(`Zeile ${idx + 1}: Mandat-Datum fehlt`)
+        if (!ls.debitor) errors.push(`Zeile ${idx + 1}: Debitor fehlt`)
+      })
+      if (lastschriften.length === 0) {
+        toast({ title: 'Mandatsprüfung', description: 'Keine Lastschriften vorhanden.', variant: 'destructive' })
+      } else if (errors.length > 0) {
+        toast({ title: `Mandatsprüfung: ${errors.length} Fehler`, description: errors.slice(0, 3).join(' | '), variant: 'destructive' })
+      } else {
+        toast({ title: 'Mandatsprüfung erfolgreich', description: `${lastschriften.length} Mandate geprüft — alle vollständig.` })
+      }
     } else if (action === 'preview') {
       // SEPA-Vorschau
-      window.open('/api/finance/lastschriften-debitoren/preview', '_blank')
+      window.open('/api/v1/finance/direct-debits/preview', '_blank')
     } else if (action === 'approve') {
-      // Freigeben
-      alert(t('crud.messages.approvalFunctionInfo'))
+      const isValid = validate(formData)
+      if (!isValid.isValid) {
+        showValidationToast(isValid.errors)
+        return
+      }
+      setActionLoadingKey('approve')
+      try {
+        await saveData({ ...formData, status: 'freigegeben', freigegebenAm: new Date().toISOString() })
+        setIsDirty(false)
+        toast({ title: 'Freigegeben', description: 'Lastschriftlauf wurde freigegeben.' })
+      } catch (error: any) {
+        const msg = error.response?.data?.detail ?? error.message
+        toast({ variant: 'destructive', title: t('common.error'), description: msg })
+      } finally {
+        setActionLoadingKey(null)
+      }
     } else if (action === 'execute') {
       const isValid = validate(formData)
       if (!isValid.isValid) {
         showValidationToast(isValid.errors)
         return
       }
-
+      setActionLoadingKey('execute')
       try {
-        await saveData(formData)
+        await apiClient.post('/api/v1/finance/direct-debit/run', formData ?? {})
+        toast({ title: t('crud.messages.executed', { defaultValue: 'Zahlungslauf ausgeführt' }) })
         setIsDirty(false)
         navigate('/finance/lastschriften-debitoren')
-      } catch (error) {
-        // Error wird bereits in useMaskData behandelt
+      } catch (error: any) {
+        const msg = error.response?.data?.detail ?? error.message
+        toast({ variant: 'destructive', title: t('common.error'), description: msg })
+      } finally {
+        setActionLoadingKey(null)
       }
     } else if (action === 'export') {
-      window.open('/api/finance/lastschriften-debitoren/export', '_blank')
+      setActionLoadingKey('export')
+      try {
+        const res = await apiClient.post<{ url?: string }>('/api/v1/export/list', { entity: 'direct_debit', format: 'sepa' })
+        if (res?.url) window.open(res.url, '_blank')
+        toast({ title: t('crud.actions.sepaExport'), description: t('crud.messages.exportCreated', { defaultValue: 'Export erstellt' }) })
+      } catch (error: any) {
+        const msg = error.response?.data?.detail ?? error.message
+        toast({ variant: 'destructive', title: t('common.error'), description: msg })
+      } finally {
+        setActionLoadingKey(null)
+      }
     }
   })
 
@@ -530,6 +549,8 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
       onSave={handleSave}
       onCancel={handleCancel}
       isLoading={loading}
+      onAction={(key, fd) => handleAction(key, fd ?? formData)}
+      loadingActionKey={actionLoadingKey}
     />
   )
 }

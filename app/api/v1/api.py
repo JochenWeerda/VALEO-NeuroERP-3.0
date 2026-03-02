@@ -6,7 +6,10 @@ Main API router that includes all domain routers
 from fastapi import APIRouter
 
 from app.api.v1.endpoints import (
+    export_service,
     agrar_feldbuch,
+    agrar_wetter,
+    agrar_maschinen,
     portal_feldbuch,
     health,
     tenants,
@@ -51,6 +54,12 @@ from app.api.v1.endpoints import (
     auto_matching,
     vat_return_export,
     closing_checklists,
+    chart_of_accounts,
+    finance_actions,
+    lohn_connector,
+    quadriga_connector,
+    asset_ledger_connector,
+    fibu_connectors,
     iban_lookup,
     credit_debit_memos,
     portal_shop,
@@ -74,6 +83,7 @@ from app.api.v1.endpoints import (
     charges,
     banken,
     compliance,
+    gobd_archiv,
     disposition,
     dokumente,
     vertraege,
@@ -99,6 +109,7 @@ from app.api.v1.endpoints import (
     nawaro,
     nawaro_raps,
     einkauf_lieferschein,
+    einkauf_bestellvorschlag,
     admin_monitoring,
     admin_core,
     admin_pos,
@@ -308,6 +319,12 @@ api_router.include_router(
 )
 
 api_router.include_router(
+    export_service.router,
+    prefix="/export",
+    tags=["export"]
+)
+
+api_router.include_router(
     accounting_periods.router,
     prefix="/finance/periods",
     tags=["finance", "periods", "gobd"]
@@ -427,6 +444,37 @@ api_router.include_router(
     tags=["finance", "closing"]
 )
 
+api_router.include_router(
+    chart_of_accounts,
+    prefix="/finance",
+    tags=["finance", "kontenplan", "chart-of-accounts"]
+)
+
+api_router.include_router(
+    finance_actions.router,
+    prefix="/finance",
+    tags=["finance", "actions"]
+)
+api_router.include_router(
+    lohn_connector.router,
+    prefix="/finance",
+    tags=["finance", "lohn", "connectors"]
+)
+api_router.include_router(
+    quadriga_connector.router,
+    prefix="/finance",
+    tags=["finance", "quadriga", "connectors"]
+)
+api_router.include_router(
+    asset_ledger_connector.router,
+    prefix="/finance",
+    tags=["finance", "asset-ledger", "connectors"]
+)
+api_router.include_router(
+    fibu_connectors.router,
+    prefix="/finance",
+    tags=["finance", "fibu-connectors"]
+)
 api_router.include_router(
     iban_lookup.router,
     prefix="/finance",
@@ -582,6 +630,20 @@ api_router.include_router(
     tags=["agrar", "feldbuch"]
 )
 
+# Agrar Wetter (BrightSky + Open-Meteo Proxy)
+api_router.include_router(
+    agrar_wetter.router,
+    prefix="/agrar",
+    tags=["agrar", "wetter"]
+)
+
+# Agrar Maschinenpark
+api_router.include_router(
+    agrar_maschinen.router,
+    prefix="/agrar",
+    tags=["agrar", "maschinen"]
+)
+
 # ── L3-Connect Gap Closure Routers ──────────────────────────────
 
 api_router.include_router(
@@ -694,6 +756,11 @@ api_router.include_router(
     compliance.router
 )
 
+# GoBD Archiv, E-Rechnung, Audit-Package (Z1/Z2/Z3)
+api_router.include_router(
+    gobd_archiv.router
+)
+
 # Disposition API
 api_router.include_router(
     disposition.router
@@ -761,6 +828,11 @@ api_router.include_router(
 
 api_router.include_router(
     einkauf_lieferschein.router
+)
+
+api_router.include_router(
+    einkauf_bestellvorschlag.router,
+    tags=["einkauf", "bestellvorschlag", "kontrakte", "lager-konten"]
 )
 
 api_router.include_router(

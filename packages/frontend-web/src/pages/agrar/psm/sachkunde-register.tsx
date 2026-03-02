@@ -9,9 +9,11 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { AlertTriangle, Award, FileDown, Plus, Search, CheckCircle, XCircle } from 'lucide-react'
 import { usePSMSachkundeRegister, type PSMSachkundeNachweis } from '@/lib/api/agrar'
 import { ErrorState } from '@/components/ErrorState'
+import { useToast } from '@/hooks/use-toast'
 
 export default function PSMSachkundeRegisterPage(): JSX.Element {
   const navigate = useNavigate()
+  const { toast } = useToast()
   const [searchTerm, setSearchTerm] = useState('')
   const { data, isLoading, isError, error, refetch } = usePSMSachkundeRegister()
 
@@ -50,6 +52,21 @@ export default function PSMSachkundeRegisterPage(): JSX.Element {
     ),
     [nachweise, searchTerm]
   )
+
+  const handleExport = (): void => {
+    const header = 'Kunde;Kd-Nr;Nachweis-Nr;Gueltig bis;Ausstellende Stelle;Status;Compliance\n'
+    const rows = filteredData.map((s) =>
+      [s.kunde, s.kundennr, s.nachweisNr, s.gueltigBis, s.ausstellendeStelle ?? '', s.status, s.complianceStatus ?? ''].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(';')
+    )
+    const blob = new Blob([header + rows.join('\n')], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `PSM_Sachkunde_Register_${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast({ title: 'Export', description: `${filteredData.length} Einträge exportiert.` })
+  }
 
   const columns = [
     {
@@ -202,7 +219,7 @@ export default function PSMSachkundeRegisterPage(): JSX.Element {
                 className="pl-10"
               />
             </div>
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" onClick={handleExport}>
               <FileDown className="h-4 w-4" />
               Export
             </Button>

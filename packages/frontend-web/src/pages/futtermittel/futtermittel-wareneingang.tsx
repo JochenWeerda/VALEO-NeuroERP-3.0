@@ -4,6 +4,7 @@ import { Wizard } from '@/components/mask-builder'
 import { useMaskData, useMaskValidation } from '@/components/mask-builder/hooks'
 import { WizardConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
+import { toast } from '@/hooks/use-toast'
 
 // Zod-Schema für Wareneingang
 const wareneingangSchema = z.object({
@@ -293,10 +294,10 @@ export default function FuttermittelWareneingangPage(): JSX.Element {
     setLoading(true)
     try {
       await saveData({ ...formData, status: 'approved' })
-      alert('Wareneingang wurde erfolgreich freigegeben!')
+      toast({ title: 'Wareneingang freigegeben', description: 'Der Wareneingang wurde erfolgreich freigegeben.' })
       navigate('/futtermittel/wareneingang')
     } catch (error) {
-      alert('Fehler beim Freigeben des Wareneingangs')
+      toast({ title: 'Fehler', description: 'Wareneingang konnte nicht freigegeben werden.', variant: 'destructive' })
     } finally {
       setLoading(false)
     }

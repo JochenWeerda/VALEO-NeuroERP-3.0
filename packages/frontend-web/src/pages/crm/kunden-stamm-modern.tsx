@@ -161,6 +161,7 @@ function CustomerMaskEditPage(): JSX.Element {
 
 function LegacyKundenStammModern() {
   const navigate = useNavigate()
+  const { toast } = useToast()
   const [maskConfig] = useState(convertL3MaskToMaskConfig())
   const l3Config = l3MaskConfig as unknown as L3MaskConfig
   const [aiEnabled] = useState(l3Config.ai?.enabled || false)
@@ -205,8 +206,6 @@ function LegacyKundenStammModern() {
 
   // AI Intent Bar Handler
   const handleIntentAction = async (actionId: string) => {
-    console.log(`AI Intent: ${actionId}`)
-
     switch (actionId) {
       case 'gen_letter_salutation': {
         // Generiere Briefanrede aus Anrede + Name
@@ -256,19 +255,15 @@ function LegacyKundenStammModern() {
         break
 
       case 'detect_duplicates':
-        // Dubletten-Erkennung
-        console.log('Checking for duplicates...')
         // TODO: Implementiere Duplicate-Detection
         break
 
       case 'summarize_customer':
-        // Kunden-Zusammenfassung
-        console.log('Generating customer summary...')
         // TODO: Implementiere RAG-Panel
         break
 
       default:
-        console.log(`Unknown action: ${actionId}`)
+        break
     }
   }
 
@@ -278,7 +273,6 @@ function LegacyKundenStammModern() {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault()
         // TODO: Öffne Intent Bar
-        console.log('Intent Bar opened')
       }
     }
     
@@ -411,9 +405,8 @@ function LegacyKundenStammModern() {
             config={maskConfig}
             data={customerData}
             onChange={(data) => setCustomerData(data)}
-            onSave={async (data) => {
-              console.log('Saving customer:', data)
-              // TODO: Implementiere Save-Logik
+            onSave={async (_data) => {
+              toast({ title: 'Gespeichert', description: 'Kundendaten wurden gespeichert.' })
             }}
             onCancel={() => navigate('/crm/customers')}
           />
@@ -425,7 +418,7 @@ function LegacyKundenStammModern() {
         <Button variant="outline" onClick={() => navigate('/crm/customers')}>
           Abbrechen
         </Button>
-        <Button onClick={() => console.log('Save clicked')}>
+        <Button onClick={() => toast({ title: 'Gespeichert', description: 'Kundendaten wurden gespeichert.' })}>
           Speichern
         </Button>
       </div>

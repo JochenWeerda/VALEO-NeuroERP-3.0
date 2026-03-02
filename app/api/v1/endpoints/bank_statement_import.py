@@ -453,10 +453,43 @@ async def import_bank_statement(
         except Exception:
             db.rollback()
         
-        # Auto-match if requested
+        # Auto-match: offene Posten per Betrag oder Rechnungsnummer zuordnen
         if auto_match and imported_lines:
-            # TODO: Implement auto-matching logic
-            pass
+            try:
+                from app.finance.models import OffenerPosten
+                from sqlalchemy import select, func as sqlfunc
+
+                offene_posten = db.execute(
+                    select(OffenerPosten).where(OffenerPosten.zahlbar == True)
+                ).scalars().all()
+
+                for line in imported_lines:
+                    if line.status == "MATCHED":
+                        continue
+                    amt = abs(line.amount)
+                    ref = (line.remittance_info or "") + " " + (line.reference or "")
+
+                    # 1. Rechnungsnummer im Verwendungszweck
+                    match = next(
+                        (op for op in offene_posten if op.rechnungsnr and op.rechnungsnr in ref),
+                        None
+                    )
+                    # 2. Betrag-Match (Toleranz ±0.01 EUR)
+                    if not match:
+                        match = next(
+                            (op for op in offene_posten if abs(float(op.offen) - float(amt)) < 0.01),
+                            None
+                        )
+
+                    if match:
+                        line.status = "MATCHED"
+                        # Offenen Posten als ausgeglichen markieren
+                        match.offen = Decimal("0.00")
+                        match.zahlbar = False
+
+                db.commit()
+            except Exception as match_err:
+                logger.warning(f"Auto-matching fehlgeschlagen: {match_err}")
         
         return BankStatementImportResult(
             statement_id=statement_id,

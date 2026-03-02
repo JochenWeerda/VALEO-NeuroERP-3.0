@@ -597,6 +597,28 @@ class DocumentHold(Base):
 
 
 # ============================================================================
+# GOBD COMPLIANCE - AUFBEWAHRUNGSFRISTEN (Operative Tabelle)
+# ============================================================================
+
+class AufbewahrungsFristRecord(Base):
+    """Operative Aufbewahrungsfristen-Tabelle pro Dokumenttyp und Tenant."""
+    __tablename__ = "aufbewahrungsfristen"
+    __table_args__ = {"schema": "domain_finance"}
+
+    id = Column(String(36), primary_key=True)
+    tenant_id = Column(String(36), nullable=False, index=True)
+    dokument_typ = Column(String(100), nullable=False)
+    gesetzliche_grundlage = Column(String(100), nullable=True)   # "§147 AO", "§257 HGB"
+    aufbewahrungs_jahre = Column(Integer, nullable=False)
+    aeltestes_dokument_datum = Column(Date, nullable=True)
+    anzahl_dokumente = Column(Integer, default=0)
+    ablauf_datum = Column(Date, nullable=True)
+    status = Column(String(20), default="AKTIV")  # AKTIV / ABGELAUFEN
+    created_at = Column(DateTime)
+    updated_at = Column(DateTime)
+
+
+# ============================================================================
 # E-RECHNUNG (ZUGFeRD / XRechnung)
 # ============================================================================
 

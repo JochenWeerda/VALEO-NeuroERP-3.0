@@ -1,5 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useMutation } from '@tanstack/react-query'
+import { apiClient } from '@/lib/api-client'
+import { useKulturen, useSorten } from '@/lib/api/agrar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -56,23 +59,64 @@ export default function SaatgutBestellungPage(): JSX.Element {
     updatedAt: new Date().toISOString()
   })
 
-  const [isLoading, setIsLoading] = useState(false)
   const [step, setStep] = useState(1)
 
-  // Mock data for demonstration
-  const kulturArten = [
-    { value: 'weizen', label: 'Weizen' },
-    { value: 'gerste', label: 'Gerste' },
-    { value: 'raps', label: 'Raps' },
-    { value: 'mais', label: 'Mais' },
-    { value: 'roggen', label: 'Roggen' }
-  ]
+  const { data: kulturenListe = [] } = useKulturen()
+  const { data: sortenListe = [] } = useSorten()
 
-  const saatgutOptionen = [
-    { id: 'SG-001', name: 'Winterweizen Sortino', sorte: 'Sortino', kultur: 'weizen', verfuegbar: 1500, preis: 0.45 },
-    { id: 'SG-002', name: 'Wintergerste RGT Planet', sorte: 'RGT Planet', kultur: 'gerste', verfuegbar: 800, preis: 0.38 },
-    { id: 'SG-003', name: 'Winterraps DK Exception', sorte: 'DK Exception', kultur: 'raps', verfuegbar: 600, preis: 0.52 }
-  ]
+  const kulturArten = kulturenListe.length > 0
+    ? kulturenListe.map(k => ({ value: k.name.toLowerCase(), label: k.name }))
+    : [
+        { value: 'weizen', label: 'Weizen' },
+        { value: 'gerste', label: 'Gerste' },
+        { value: 'raps', label: 'Raps' },
+        { value: 'mais', label: 'Mais' },
+        { value: 'roggen', label: 'Roggen' },
+      ]
+
+  const saatgutOptionen = sortenListe.map(s => {
+    const ext = s as unknown as Record<string, unknown>
+    return {
+      id: s.id,
+      name: s.name,
+      sorte: s.name,
+      kultur: s.art.toLowerCase(),
+      verfuegbar: Number(ext.verfuegbar ?? 0),
+      preis: Number(ext.preis ?? 0),
+    }
+  })
+
+  const saveMutation = useMutation({
+    mutationFn: async (data: SaatgutBestellungData) => {
+      const response = await apiClient.post<SaatgutBestellungData>('/api/v1/agrar/saatgut/bestellung', data)
+      return response.data
+    },
+    onSuccess: () => {
+      toast({ title: 'Bestellung gespeichert', description: 'Saatgut-Bestellung wurde erfolgreich gespeichert.' })
+      navigate('/agrar/saatgut-liste')
+    },
+    onError: () => {
+      toast({ title: 'Fehler', description: 'Fehler beim Speichern der Bestellung.', variant: 'destructive' })
+    },
+  })
+
+  const submitMutation = useMutation({
+    mutationFn: async (data: SaatgutBestellungData) => {
+      const response = await apiClient.post<SaatgutBestellungData>('/api/v1/agrar/saatgut/bestellung', {
+        ...data, status: 'bestellt',
+      })
+      return response.data
+    },
+    onSuccess: () => {
+      toast({ title: 'Bestellung aufgegeben', description: 'Saatgut-Bestellung wurde erfolgreich aufgegeben.' })
+      navigate('/agrar/saatgut-liste')
+    },
+    onError: () => {
+      toast({ title: 'Fehler', description: 'Fehler beim Aufgeben der Bestellung.', variant: 'destructive' })
+    },
+  })
+
+  const isLoading = saveMutation.isPending || submitMutation.isPending
 
   const handleKulturArtChange = (kulturArt: string) => {
     setBestellung(prev => ({
@@ -103,62 +147,8 @@ export default function SaatgutBestellungPage(): JSX.Element {
     return { min: Math.round(minMenge), max: Math.round(maxMenge) }
   }
 
-  const handleSave = async () => {
-    setIsLoading(true)
-    try {
-      // API call to save Saatgut bestellung
-      // const response = await fetch('/api/v1/agrar/saatgut/bestellung', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(bestellung)
-      // })
-
-      toast({
-        title: "Bestellung gespeichert",
-        description: "Saatgut-Bestellung wurde erfolgreich gespeichert.",
-      })
-
-      navigate('/agrar/saatgut-liste')
-    } catch (error) {
-      toast({
-        title: "Fehler",
-        description: "Fehler beim Speichern der Bestellung.",
-        variant: "destructive",
-      })
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleSubmit = async () => {
-    setIsLoading(true)
-    try {
-      const updatedBestellung = { ...bestellung, status: 'bestellt' as const, updatedAt: new Date().toISOString() }
-      setBestellung(updatedBestellung)
-
-      // API call to submit Saatgut bestellung
-      // await fetch(`/api/v1/agrar/saatgut/bestellung/${bestellung.id}/submit`, {
-      //   method: 'PUT',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ status: 'bestellt' })
-      // })
-
-      toast({
-        title: "Bestellung aufgegeben",
-        description: "Saatgut-Bestellung wurde erfolgreich aufgegeben.",
-      })
-
-      navigate('/agrar/saatgut-liste')
-    } catch (error) {
-      toast({
-        title: "Fehler",
-        description: "Fehler beim Aufgeben der Bestellung.",
-        variant: "destructive",
-      })
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  const handleSave = () => saveMutation.mutate(bestellung)
+  const handleSubmit = () => submitMutation.mutate(bestellung)
 
   const nextStep = () => {
     if (step < 5) setStep(step + 1)

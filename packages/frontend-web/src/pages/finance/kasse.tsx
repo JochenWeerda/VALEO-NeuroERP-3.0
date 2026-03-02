@@ -6,6 +6,7 @@ import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mas
 import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
 import { toast } from '@/hooks/use-toast'
+import { apiClient } from '@/lib/axios'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 
 // Zod-Schema für Kasse (wird in Komponente mit i18n erstellt)
@@ -238,45 +239,21 @@ const createKasseConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
     }
   ],
   actions: [
-    {
-      key: 'add-movement',
-      label: t('crud.actions.addMovement'),
-      type: 'secondary'
-    , onClick: () => {} },
-    {
-      key: 'count-cash',
-      label: t('crud.actions.performCashCount'),
-      type: 'secondary'
-    , onClick: () => {} },
-    {
-      key: 'validate',
-      label: t('crud.actions.validate'),
-      type: 'secondary'
-    , onClick: () => {} },
-    {
-      key: 'close',
-      label: t('crud.actions.dailyClosing'),
-      type: 'primary'
-    , onClick: () => {} },
-    {
-      key: 'approve',
-      label: t('crud.actions.approve'),
-      type: 'primary'
-    , onClick: () => {} },
-    {
-      key: 'export',
-      label: t('crud.actions.export'),
-      type: 'secondary'
-    , onClick: () => {} }
+    { key: 'add-movement', label: t('crud.actions.addMovement'), type: 'secondary' },
+    { key: 'count-cash', label: t('crud.actions.performCashCount'), type: 'secondary' },
+    { key: 'validate', label: t('crud.actions.validate'), type: 'secondary' },
+    { key: 'close', label: t('crud.actions.dailyClosing'), type: 'primary' },
+    { key: 'approve', label: t('crud.actions.approve'), type: 'primary' },
+    { key: 'export', label: t('crud.actions.export'), type: 'secondary' }
   ],
   api: {
-    baseUrl: '/api/finance/kasse',
+    baseUrl: '/api/v1/finance/cash',
     endpoints: {
-      list: '/api/finance/kasse',
-      get: '/api/finance/kasse/{id}',
-      create: '/api/finance/kasse',
-      update: '/api/finance/kasse/{id}',
-      delete: '/api/finance/kasse/{id}'
+      list: '/api/v1/finance/cash',
+      get: '/api/v1/finance/cash/{id}',
+      create: '/api/v1/finance/cash',
+      update: '/api/v1/finance/cash/{id}',
+      delete: '/api/v1/finance/cash/{id}'
     }
   } as any,
   validation: createKasseSchema(t),
@@ -505,6 +482,7 @@ export default function KassePage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [isDirty, setIsDirty] = useState(false)
+  const [actionLoadingKey, setActionLoadingKey] = useState<string | null>(null)
   const entityType = 'cash'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Kasse')
   const kasseConfig = createKasseConfig(t, entityTypeLabel)
@@ -554,27 +532,21 @@ export default function KassePage(): JSX.Element {
         showValidationToast(isValid.errors)
       }
     } else if (action === 'close') {
-      // Tagesabschluss - setze Status auf geschlossen
       if (!formData.id) {
-        toast({
-          variant: 'destructive',
-          title: t('common.error'),
-          description: t('crud.messages.saveCashClosingFirst'),
-        })
+        toast({ variant: 'destructive', title: t('common.error'), description: t('crud.messages.saveCashClosingFirst') })
         return
       }
-
+      setActionLoadingKey('close')
       try {
-        const updatedData = { ...formData, status: 'geschlossen' }
-        await saveData(updatedData)
+        await apiClient.post('/api/v1/finance/cash/close-day', { id: formData.id, ...formData })
+        toast({ title: t('crud.messages.dailyClosingPerformed'), description: t('crud.messages.cashClosingClosed') })
         setIsDirty(false)
-        toast({
-          title: t('crud.messages.dailyClosingPerformed'),
-          description: t('crud.messages.cashClosingClosed'),
-        })
         navigate('/finance/kasse')
-      } catch (error) {
-        // Error wird bereits in useMaskData behandelt
+      } catch (error: any) {
+        const msg = error.response?.data?.detail ?? error.message
+        toast({ variant: 'destructive', title: t('common.error'), description: msg })
+      } finally {
+        setActionLoadingKey(null)
       }
     } else if (action === 'approve') {
       const isValid = validate(formData)
@@ -613,14 +585,20 @@ export default function KassePage(): JSX.Element {
       }
     } else if (action === 'export') {
       if (!formData.id) {
-        toast({
-          variant: 'destructive',
-          title: t('common.error'),
-          description: t('crud.messages.saveCashClosingFirst'),
-        })
+        toast({ variant: 'destructive', title: t('common.error'), description: t('crud.messages.saveCashClosingFirst') })
         return
       }
-      window.open(`/api/finance/kasse/${formData.id}/export`, '_blank')
+      setActionLoadingKey('export')
+      try {
+        const res = await apiClient.post<{ url?: string }>('/api/v1/export/list', { entity: 'cash', format: 'pdf', id: formData.id })
+        if (res?.url) window.open(res.url, '_blank')
+        toast({ title: t('crud.actions.export'), description: t('crud.messages.exportCreated', { defaultValue: 'Export erstellt' }) })
+      } catch (error: any) {
+        const msg = error.response?.data?.detail ?? error.message
+        toast({ variant: 'destructive', title: t('common.error'), description: msg })
+      } finally {
+        setActionLoadingKey(null)
+      }
     }
   })
 
@@ -642,6 +620,8 @@ export default function KassePage(): JSX.Element {
       onSave={handleSave}
       onCancel={handleCancel}
       isLoading={loading}
+      onAction={(key, formData) => handleAction(key, formData)}
+      loadingActionKey={actionLoadingKey}
     />
   )
 }

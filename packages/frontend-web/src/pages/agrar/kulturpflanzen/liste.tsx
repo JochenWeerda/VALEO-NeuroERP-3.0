@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useKulturen, type Kultur } from '@/lib/api/agrar'
 import { Badge } from '@/components/ui/badge'
@@ -8,10 +8,12 @@ import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ErrorState } from '@/components/ErrorState'
+import { useToast } from '@/hooks/use-toast'
 import { FileDown, Plus, Search, Sprout } from 'lucide-react'
 
 export default function KulturpflanzenListePage(): JSX.Element {
   const navigate = useNavigate()
+  const { toast } = useToast()
   const [searchTerm, setSearchTerm] = useState('')
   const { data, isLoading, isError, error, refetch } = useKulturen()
 
@@ -29,6 +31,26 @@ export default function KulturpflanzenListePage(): JSX.Element {
   }
 
   const kulturen: Kultur[] = data ?? []
+
+  const filteredKulturen = useMemo(
+    () => kulturen.filter((k) => k.name.toLowerCase().includes(searchTerm.toLowerCase())),
+    [kulturen, searchTerm]
+  )
+
+  const handleExport = (): void => {
+    const header = 'Kulturpflanze;Kategorie;Flaeche_ha;Ertrag_t_ha;Preis_EUR_t;DB_EUR_ha\n'
+    const rows = filteredKulturen.map((k) =>
+      [k.name, k.kategorie, k.flaeche, k.ertrag, k.preis, k.deckungsbeitrag].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(';')
+    )
+    const blob = new Blob([header + rows.join('\n')], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `Kulturpflanzen_${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast({ title: 'Export', description: `${filteredKulturen.length} Einträge exportiert.` })
+  }
 
   const columns = [
     {
@@ -114,7 +136,7 @@ export default function KulturpflanzenListePage(): JSX.Element {
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input placeholder="Suche..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
             </div>
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" onClick={handleExport}>
               <FileDown className="h-4 w-4" />
               Export
             </Button>
@@ -124,7 +146,7 @@ export default function KulturpflanzenListePage(): JSX.Element {
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={kulturen} columns={columns} />
+          <DataTable data={filteredKulturen} columns={columns} />
         </CardContent>
       </Card>
     </div>

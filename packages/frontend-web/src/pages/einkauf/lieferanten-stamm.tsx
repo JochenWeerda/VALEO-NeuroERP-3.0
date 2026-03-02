@@ -63,7 +63,7 @@ type LieferantData = {
   }>
   dokumente?: Array<{
     id: string
-    typ: 'zertifikat' | 'rahmenvertrag' | 'nda' | 'esg' | 'sonstiges'
+    typ: DokumentTyp
     titel: string
     dateiname: string
     gueltigBis?: string
@@ -71,6 +71,61 @@ type LieferantData = {
     status: 'aktiv' | 'abgelaufen' | 'wird_abgelaufen'
   }>
   bemerkungen?: string
+}
+
+/** Dokumenttypen im Lieferantenstamm (häufig bis seltener) */
+export type DokumentTyp =
+  | 'rahmenvertrag'      // Lieferantenvertrag / Rahmenvertrag
+  | 'preisliste'         // Preislisten / Konditionenblatt
+  | 'bankdaten_sepa'    // Bankdaten-Nachweis / SEPA-Mandat
+  | 'handelsregister'   // Handelsregisterauszug / Gewerbeanmeldung
+  | 'steuer_ust'        // Steuer-/USt-Bescheinigung
+  | 'onboarding'        // Onboarding-Formular / Selbstauskunft
+  | 'zertifikat'        // GMP+, QS, ISO, Bio, VLOG, HACCP
+  | 'produkt_sicherheit' // Spezifikationen, COA, SDS
+  | 'rohstoff_deklaration' // Rohstoffdeklarationen / Herkunftsnachweise
+  | 'kommunikation'     // Kommunikation / Schriftverkehr
+  | 'foto_scan'         // Fotos / Scanbelege
+  | 'signatur'          // Signatur-/Prüfdateien (z. B. PGP)
+  | 'nda'
+  | 'esg'
+  | 'sonstiges'
+
+const DOKUMENT_TYP_LABELS: Record<DokumentTyp, string> = {
+  rahmenvertrag: 'Lieferantenvertrag / Rahmenvertrag',
+  preisliste: 'Preislisten / Konditionenblatt',
+  bankdaten_sepa: 'Bankdaten-Nachweis / SEPA-Mandat',
+  handelsregister: 'Handelsregisterauszug / Gewerbeanmeldung',
+  steuer_ust: 'Steuer-/USt-Bescheinigung',
+  onboarding: 'Onboarding-Formular / Selbstauskunft',
+  zertifikat: 'Zertifikate (GMP+, QS, ISO, Bio, VLOG, HACCP)',
+  produkt_sicherheit: 'Produkt-/Sicherheitsdokumente (Spezifikationen, COA, SDS)',
+  rohstoff_deklaration: 'Rohstoffdeklarationen / Herkunftsnachweise',
+  kommunikation: 'Kommunikation / Schriftverkehr',
+  foto_scan: 'Fotos / Scanbelege',
+  signatur: 'Signatur-/Prüfdateien (z. B. PGP)',
+  nda: 'NDA',
+  esg: 'ESG',
+  sonstiges: 'Sonstiges',
+}
+
+/** Kurzbezeichnungen für die Dokumenttyp-Spalte (Tabelle) */
+const DOKUMENT_TYP_SHORT: Record<DokumentTyp, string> = {
+  rahmenvertrag: 'Rahmenvertrag',
+  preisliste: 'Preisliste/Konditionen',
+  bankdaten_sepa: 'Bankdaten/SEPA',
+  handelsregister: 'Handelsregister',
+  steuer_ust: 'Steuer/USt',
+  onboarding: 'Onboarding',
+  zertifikat: 'Zertifikat',
+  produkt_sicherheit: 'Produkt/Sicherheit',
+  rohstoff_deklaration: 'Rohstoff/Herkunft',
+  kommunikation: 'Kommunikation',
+  foto_scan: 'Foto/Scan',
+  signatur: 'Signatur/Prüfdatei',
+  nda: 'NDA',
+  esg: 'ESG',
+  sonstiges: 'Sonstiges',
 }
 
 export default function LieferantenStammPage(): JSX.Element {
@@ -90,7 +145,7 @@ export default function LieferantenStammPage(): JSX.Element {
   const [newBankDialogOpen, setNewBankDialogOpen] = useState(false)
   const [newClassificationDialogOpen, setNewClassificationDialogOpen] = useState(false)
   const [newDocumentDialogOpen, setNewDocumentDialogOpen] = useState(false)
-  const [newDocument, setNewDocument] = useState({ typ: 'zertifikat' as const, titel: '', dateiname: '', gueltigBis: '' })
+  const [newDocument, setNewDocument] = useState<{ typ: DokumentTyp; titel: string; dateiname: string; gueltigBis: string }>({ typ: 'rahmenvertrag', titel: '', dateiname: '', gueltigBis: '' })
 
   const [lieferant, setLieferant] = useState<LieferantData>({
     id: id || 'L-001',
@@ -769,12 +824,8 @@ export default function LieferantenStammPage(): JSX.Element {
                       return (
                         <TableRow key={doc.id}>
                           <TableCell>
-                            <Badge variant="outline">
-                              {doc.typ === 'zertifikat' ? t('crud.fields.certificate') :
-                               doc.typ === 'rahmenvertrag' ? t('crud.fields.frameworkContract') :
-                               doc.typ === 'nda' ? t('crud.fields.nda') :
-                               doc.typ === 'esg' ? t('crud.fields.esg') :
-                               t('crud.fields.other')}
+                            <Badge variant="outline" className="max-w-[180px] truncate" title={DOKUMENT_TYP_LABELS[doc.typ as DokumentTyp] || doc.typ}>
+                              {DOKUMENT_TYP_SHORT[doc.typ as DokumentTyp] || DOKUMENT_TYP_LABELS[doc.typ as DokumentTyp] || doc.typ}
                             </Badge>
                           </TableCell>
                           <TableCell>{doc.titel}</TableCell>
@@ -800,11 +851,29 @@ export default function LieferantenStammPage(): JSX.Element {
                               <Button
                                 size="sm"
                                 variant="ghost"
-                                onClick={() => {
-                                  toast({
-                                    title: t('crud.messages.downloadInfo'),
-                                    description: t('crud.messages.downloadComingSoon'),
-                                  })
+                                onClick={async () => {
+                                  try {
+                                    const url = `/api/v1/einkauf/lieferanten/${id}/dokumente/${doc.id}/download`
+                                    const res = await apiClient.get(url, { responseType: 'blob' }).catch(() => null)
+                                    if (res?.data instanceof Blob && res.data.size > 0) {
+                                      const a = document.createElement('a')
+                                      a.href = URL.createObjectURL(res.data)
+                                      a.download = doc.dateiname || doc.titel || 'dokument'
+                                      a.click()
+                                      URL.revokeObjectURL(a.href)
+                                      toast({ title: t('crud.messages.downloadInfo'), description: doc.dateiname })
+                                    } else {
+                                      const blob = new Blob([`Dokument: ${doc.titel}\nDateiname: ${doc.dateiname}\nTyp: ${doc.typ}\nGültig bis: ${doc.gueltigBis ?? '-'}`], { type: 'text/plain' })
+                                      const a = document.createElement('a')
+                                      a.href = URL.createObjectURL(blob)
+                                      a.download = (doc.dateiname || doc.titel || 'dokument').replace(/\.[^.]+$/, '') + '.txt'
+                                      a.click()
+                                      URL.revokeObjectURL(a.href)
+                                      toast({ title: t('crud.messages.downloadInfo'), description: 'Info-Datei erstellt (Dokument in DMS hinterlegen für echten Download).' })
+                                    }
+                                  } catch {
+                                    toast({ title: t('crud.messages.downloadInfo'), description: t('crud.messages.downloadComingSoon'), variant: 'default' })
+                                  }
                                 }}
                               >
                                 {t('crud.actions.download')}
@@ -1209,19 +1278,17 @@ export default function LieferantenStammPage(): JSX.Element {
               <Label htmlFor="docType">{t('crud.fields.type')} *</Label>
               <Select
                 value={newDocument.typ}
-                onValueChange={(value: 'zertifikat' | 'rahmenvertrag' | 'nda' | 'esg' | 'sonstiges') =>
+                onValueChange={(value: DokumentTyp) =>
                   setNewDocument(prev => ({ ...prev, typ: value }))
                 }
               >
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue placeholder="Dokumenttyp wählen" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="zertifikat">{t('crud.fields.certificate')}</SelectItem>
-                  <SelectItem value="rahmenvertrag">{t('crud.fields.frameworkContract')}</SelectItem>
-                  <SelectItem value="nda">{t('crud.fields.nda')}</SelectItem>
-                  <SelectItem value="esg">{t('crud.fields.esg')}</SelectItem>
-                  <SelectItem value="sonstiges">{t('crud.fields.other')}</SelectItem>
+                  {(Object.keys(DOKUMENT_TYP_LABELS) as DokumentTyp[]).map((typ) => (
+                    <SelectItem key={typ} value={typ}>{DOKUMENT_TYP_LABELS[typ]}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -1263,7 +1330,7 @@ export default function LieferantenStammPage(): JSX.Element {
           <DialogFooter>
             <Button variant="outline" onClick={() => {
               setNewDocumentDialogOpen(false)
-              setNewDocument({ typ: 'zertifikat', titel: '', dateiname: '', gueltigBis: '' })
+              setNewDocument({ typ: 'rahmenvertrag', titel: '', dateiname: '', gueltigBis: '' })
             }}>
               {t('common.cancel')}
             </Button>
@@ -1308,7 +1375,7 @@ export default function LieferantenStammPage(): JSX.Element {
                 }))
 
                 setNewDocumentDialogOpen(false)
-                setNewDocument({ typ: 'zertifikat', titel: '', dateiname: '', gueltigBis: '' })
+                setNewDocument({ typ: 'rahmenvertrag', titel: '', dateiname: '', gueltigBis: '' })
 
                 toast({
                   title: t('crud.messages.createSuccess', { entityType: t('crud.fields.document') }),

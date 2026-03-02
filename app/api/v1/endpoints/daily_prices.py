@@ -78,8 +78,25 @@ class DailyPriceBulkCreateIn(BaseModel):
 # ── Helper Functions ────────────────────────────────────────────────────────────
 
 def _get_user_id_from_request(request) -> Optional[str]:
-    """Holt User-ID aus Request (Placeholder)."""
-    # TODO: Aus Request-Header oder JWT-Token extrahieren
+    """Holt User-ID aus Request-Header oder Bearer-Token."""
+    if request is None:
+        return None
+    # 1. Expliziter X-User-ID Header (API-Gateway/Proxy)
+    user_id = request.headers.get("X-User-ID")
+    if user_id:
+        return user_id
+    # 2. Bearer-Token: sub-Claim ohne Validierung auslesen (Validierung erfolgt in get_current_user)
+    auth = request.headers.get("Authorization", "")
+    if auth.startswith("Bearer "):
+        token = auth[7:]
+        try:
+            import base64, json as _json
+            payload_b64 = token.split(".")[1]
+            payload_b64 += "=" * (4 - len(payload_b64) % 4)
+            claims = _json.loads(base64.urlsafe_b64decode(payload_b64))
+            return claims.get("sub")
+        except Exception:
+            pass
     return None
 
 

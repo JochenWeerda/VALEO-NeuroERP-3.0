@@ -1,12 +1,16 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { AlertTriangle, Save, ShieldAlert } from 'lucide-react'
+import { usePSMItem, agrarKeys } from '@/lib/api/agrar'
+import { apiClient } from '@/lib/api-client'
 
 type PSMData = {
   id: string
@@ -26,45 +30,104 @@ type PSMData = {
   erklaerungLandwirtStatus: string | null
 }
 
+const DEFAULT_PSM: PSMData = {
+  id: '',
+  mittel: '',
+  hersteller: '',
+  wirkstoff: '',
+  zulassungsnummer: '',
+  zulassungBis: '',
+  kulturen: [],
+  dosierung: '',
+  wasserschutz: false,
+  bienenschutz: false,
+  auflagen: [],
+  status: 'aktiv',
+  ausgangsstoffExplosivstoffe: false,
+  erklaerungLandwirtErforderlich: false,
+  erklaerungLandwirtStatus: null,
+}
+
 export default function PSMStammPage(): JSX.Element {
   const navigate = useNavigate()
-  const [psm, setPSM] = useState<PSMData>({
-    id: 'PSM-001',
-    mittel: 'Roundup PowerFlex',
-    hersteller: 'Bayer CropScience',
-    wirkstoff: 'Glyphosat 480 g/l',
-    zulassungsnummer: '024567-00',
-    zulassungBis: '2026-12-31',
-    kulturen: ['Getreide', 'Mais', 'Raps'],
-    dosierung: '3-5 l/ha',
-    wasserschutz: true,
-    bienenschutz: false,
-    auflagen: ['NT101', 'NW468', 'B4'],
-    status: 'aktiv',
-    ausgangsstoffExplosivstoffe: false,
-    erklaerungLandwirtErforderlich: false,
-    erklaerungLandwirtStatus: null,
+  const { id } = useParams<{ id: string }>()
+  const queryClient = useQueryClient()
+
+  const { data: psmData, isLoading } = usePSMItem(id || '')
+  const [psm, setPSM] = useState<PSMData>(DEFAULT_PSM)
+
+  useEffect(() => {
+    if (psmData) {
+      const ext = psmData as unknown as Record<string, unknown>
+      setPSM({
+        id: psmData.id,
+        mittel: psmData.mittel,
+        hersteller: String(ext.hersteller ?? ''),
+        wirkstoff: psmData.wirkstoff,
+        zulassungsnummer: String(ext.zulassungsnummer ?? ''),
+        zulassungBis: psmData.zulassungBis,
+        kulturen: psmData.kulturen,
+        dosierung: String(ext.dosierung ?? ''),
+        wasserschutz: Boolean(ext.wasserschutz ?? false),
+        bienenschutz: Boolean(ext.bienenschutz ?? false),
+        auflagen: Array.isArray(ext.auflagen) ? ext.auflagen as string[] : [],
+        status: psmData.status,
+        ausgangsstoffExplosivstoffe: Boolean(ext.ausgangsstoffExplosivstoffe ?? false),
+        erklaerungLandwirtErforderlich: Boolean(ext.erklaerungLandwirtErforderlich ?? false),
+        erklaerungLandwirtStatus: psmData.erklaerungLandwirtStatus,
+      })
+    }
+  }, [psmData])
+
+  const updateMutation = useMutation({
+    mutationFn: async (data: PSMData) => {
+      const response = await apiClient.patch<PSMData>(`/api/v1/agrar/psm/${id}`, data)
+      return response.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: agrarKeys.psm() })
+      navigate('/agrar/psm/liste')
+    },
   })
 
   async function handleSave(): Promise<void> {
-    console.log('PSM speichern:', psm)
-    navigate('/agrar/psm/liste')
+    await updateMutation.mutateAsync(psm)
   }
 
-  const istAblaufend = new Date(psm.zulassungBis) < new Date(Date.now() + 180 * 24 * 60 * 60 * 1000)
+  if (isLoading) {
+    return (
+      <div className="space-y-6 p-6">
+        <Skeleton className="h-10 w-64" />
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-48" />
+      </div>
+    )
+  }
+
+  if (!psmData && id && id !== 'neu') {
+    return (
+      <div className="p-6">
+        <p className="text-muted-foreground">PSM-Mittel nicht gefunden.</p>
+      </div>
+    )
+  }
+
+  const istAblaufend = psm.zulassungBis
+    ? new Date(psm.zulassungBis) < new Date(Date.now() + 180 * 24 * 60 * 60 * 1000)
+    : false
 
   return (
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">{psm.mittel}</h1>
+          <h1 className="text-3xl font-bold">{psm.mittel || 'PSM-Stammdaten'}</h1>
           <p className="text-muted-foreground">Pflanzenschutzmittel-Stammdaten</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => navigate('/agrar/psm/liste')}>
             Abbrechen
           </Button>
-          <Button onClick={handleSave} className="gap-2">
+          <Button onClick={handleSave} disabled={updateMutation.isPending} className="gap-2">
             <Save className="h-4 w-4" />
             Speichern
           </Button>

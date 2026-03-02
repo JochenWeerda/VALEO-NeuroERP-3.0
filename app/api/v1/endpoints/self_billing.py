@@ -92,8 +92,21 @@ class EinvoiceGenerateIn(BaseModel):
 # ── Helper Functions ────────────────────────────────────────────────────────────
 
 def _get_user_id_from_request(request) -> Optional[str]:
-    """Holt User-ID aus Request (Placeholder)."""
-    # TODO: Aus Request-Header oder JWT-Token extrahieren
+    """Holt User-ID aus Request-Header oder Bearer-Token."""
+    if request is None:
+        return None
+    user_id = request.headers.get("X-User-ID")
+    if user_id:
+        return user_id
+    auth = request.headers.get("Authorization", "")
+    if auth.startswith("Bearer "):
+        try:
+            import base64, json as _json
+            payload_b64 = auth[7:].split(".")[1]
+            payload_b64 += "=" * (4 - len(payload_b64) % 4)
+            return _json.loads(base64.urlsafe_b64decode(payload_b64)).get("sub")
+        except Exception:
+            pass
     return None
 
 
