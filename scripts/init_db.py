@@ -1,6 +1,8 @@
 """
-Database initialization helper.
-Executes Alembic migrations up to the latest revision.
+Database initialization helper for Release/Neuinstallation.
+Führt alle Alembic-Migrationen bis zum aktuellen Head aus (ein gemeinsamer Head
+via merge_heads_20260301: Agrar, Einkauf RE-Workflow, Docflow GoBD Schritt 3).
+Voraussetzung: DB ist leer oder alle Vorgänger-Revisionen sind bereits angewendet.
 """
 
 import time

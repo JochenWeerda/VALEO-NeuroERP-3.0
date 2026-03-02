@@ -128,6 +128,7 @@ export type Position = {
 type LieferscheinState = {
   id: string | null // UUID vom Backend
   lieferscheinNr: string
+  status: string // draft | posted | printed | delivered (nur bei draft Positionen änderbar)
   niederlassung: number
   vertreter: string
   bediener: string
@@ -202,6 +203,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
   const [state, setState] = useState<LieferscheinState>({
     id: null, // Wird beim Speichern vom Backend gesetzt
     lieferscheinNr: generateLieferscheinNr(),
+    status: 'draft',
     niederlassung: 0,
     vertreter: '', // Wird beim Kundenauswahl gesetzt
     bediener: getUserShortName(), // Aus Session
@@ -343,6 +345,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
         setState({
           id: response.id,
           lieferscheinNr: response.delivery_note_number, // Vom Backend vergeben
+          status: response.status || 'draft',
           niederlassung, // Gemappt von branch_id
           vertreter: customer?.representative || '', // Vertreter aus Kunden-Stammdaten
           bediener: getUserShortName(),
@@ -409,6 +412,14 @@ export default function LieferscheinErfassungPage(): JSX.Element {
   const [bestellungen, setBestellungen] = useState<Array<{ id: string; bestellNr: string; datum: string }>>([])
   const [showBelegfolgeDialog, setShowBelegfolgeDialog] = useState(false)
   const [vorgaengerCount, setVorgaengerCount] = useState(0)
+  const [showLieferscheinSuchenDialog, setShowLieferscheinSuchenDialog] = useState(false)
+  const [lsList, setLsList] = useState<Array<{ id: string; delivery_note_number: string; customer_id?: string; delivery_date?: string }>>([])
+  const [showNiederlassungDialog, setShowNiederlassungDialog] = useState(false)
+  const [showVertreterDialog, setShowVertreterDialog] = useState(false)
+  const [showPositionPopUpDialog, setShowPositionPopUpDialog] = useState(false)
+  const [showPositionDetailsDialog, setShowPositionDetailsDialog] = useState(false)
+  const [vertreterInput, setVertreterInput] = useState('')
+  const [branchesList, setBranchesList] = useState<Array<{ id: string; branch_number: number; name: string }>>([])
 
   // Cache für Branch-Mapping (niederlassung -> branch_id)
   const [branchCache, setBranchCache] = useState<Map<number, string>>(new Map())
@@ -843,6 +854,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
         ...prev,
         id: response.id, // UUID vom Backend
         lieferscheinNr: response.delivery_note_number,
+        status: response.status || prev.status,
         fakturiertRechnNr: response.invoice_number || '', // Vom Backend gesetzt nach Fakturierung
       }))
       push('Lieferschein erfolgreich gespeichert')
@@ -853,6 +865,67 @@ export default function LieferscheinErfassungPage(): JSX.Element {
       push(`Fehler beim Speichern: ${error.response?.data?.detail || error.message}`)
       return null // Return null on error
     }
+  }
+
+  // Lieferschein suchen / vorheriger / nächster
+  const loadLsList = async (): Promise<Array<{ id: string; delivery_note_number: string; customer_id?: string; delivery_date?: string }>> => {
+    const list = await apiClient.get<Array<{ id: string; delivery_note_number: string; customer_id?: string; delivery_date?: string }>>(
+      '/api/v1/sales/delivery-notes',
+      { params: { limit: 100 } }
+    )
+    return Array.isArray(list) ? list : (list as any)?.data ?? []
+  }
+  const handleLieferscheinSuchenOpen = async (): Promise<void> => {
+    try {
+      const list = await loadLsList()
+      setLsList(list)
+      setShowLieferscheinSuchenDialog(true)
+    } catch (e: any) {
+      push(`Fehler: ${e.response?.data?.detail ?? e.message}`)
+    }
+  }
+  const handleLieferscheinPrev = async (): Promise<void> => {
+    try {
+      const list = await loadLsList()
+      const idx = state.id ? list.findIndex((l) => l.id === state.id) : -1
+      if (idx > 0 && list[idx - 1]) {
+        navigate(`/verkauf/lieferschein-erfassung/${list[idx - 1].id}`)
+      } else {
+        push('Kein vorheriger Lieferschein')
+      }
+    } catch (e: any) {
+      push(`Fehler: ${e.response?.data?.detail ?? e.message}`)
+    }
+  }
+  const handleLieferscheinNext = async (): Promise<void> => {
+    try {
+      const list = await loadLsList()
+      const idx = state.id ? list.findIndex((l) => l.id === state.id) : -1
+      if (idx >= 0 && idx < list.length - 1 && list[idx + 1]) {
+        navigate(`/verkauf/lieferschein-erfassung/${list[idx + 1].id}`)
+      } else {
+        push('Kein nächster Lieferschein')
+      }
+    } catch (e: any) {
+      push(`Fehler: ${e.response?.data?.detail ?? e.message}`)
+    }
+  }
+  const handleNiederlassungOpen = async (): Promise<void> => {
+    try {
+      const list = await apiClient.get<Array<{ id: string; branch_number: number; name: string }>>('/api/v1/admin/branches', { params: { active_only: true } })
+      setBranchesList(Array.isArray(list) ? list : [])
+      setShowNiederlassungDialog(true)
+    } catch (e: any) {
+      push(`Fehler: ${e.response?.data?.detail ?? e.message}`)
+    }
+  }
+  const handleVertreterOpen = (): void => {
+    setVertreterInput(state.vertreter)
+    setShowVertreterDialog(true)
+  }
+  const handleVertreterConfirm = (): void => {
+    setState((prev) => ({ ...prev, vertreter: vertreterInput }))
+    setShowVertreterDialog(false)
   }
 
   // Sofort-Rechnung: Lieferschein speichern, dann per Docflow in Rechnung umwandeln
@@ -1002,6 +1075,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
       setState({
         id: null,
         lieferscheinNr: generateLieferscheinNr(),
+        status: 'draft',
         niederlassung: 0,
         vertreter: '',
         bediener: getUserShortName(),
@@ -1056,6 +1130,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
       setState({
         id: null,
         lieferscheinNr: generateLieferscheinNr(),
+        status: 'draft',
         niederlassung: 0,
         vertreter: '',
         bediener: getUserShortName(),
@@ -1408,13 +1483,13 @@ export default function LieferscheinErfassungPage(): JSX.Element {
               <div className="flex items-center gap-2">
                 <Label className="w-32 text-sm">Liefersch.-Nr.:</Label>
                 <Input value={state.lieferscheinNr} readOnly className="flex-1 h-8" />
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => void handleLieferscheinSuchenOpen()} title="Lieferschein suchen">
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => void handleLieferscheinPrev()} title="Vorheriger Lieferschein">
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => void handleLieferscheinNext()} title="Nächster Lieferschein">
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
@@ -1508,14 +1583,14 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                   }
                   className="flex-1 h-8"
                 />
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => void handleNiederlassungOpen()} title="Niederlassung auswählen">
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </div>
               <div className="flex items-center gap-2">
                 <Label className="w-32 text-sm">Vertreter:</Label>
                 <Input value={state.vertreter} readOnly className="flex-1 h-8" />
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={handleVertreterOpen} title="Vertreter eingeben">
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </div>
@@ -1862,6 +1937,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                   <TableRow
                     key={idx}
                     className={state.aktivePositionIndex === idx ? 'bg-green-100' : ''}
+                    onClick={() => selectPositionForEdit(idx)}
                   >
                     <TableCell>{pos.posNr}</TableCell>
                     <TableCell>{pos.artikelNr}</TableCell>
@@ -1895,7 +1971,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                           className="h-7 w-7"
                           title="Hoch"
                           onClick={() => handleMovePositionUp(idx)}
-                          disabled={idx <= 0}
+                          disabled={state.status !== 'draft' || idx <= 0}
                         >
                           <ChevronUp className="h-4 w-4" />
                         </Button>
@@ -1906,7 +1982,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                           className="h-7 w-7"
                           title="Runter"
                           onClick={() => handleMovePositionDown(idx)}
-                          disabled={idx >= state.positionen.length - 1}
+                          disabled={state.status !== 'draft' || idx >= state.positionen.length - 1}
                         >
                           <ChevronDown className="h-4 w-4" />
                         </Button>
@@ -1917,6 +1993,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
                           className="h-7 w-7 text-red-600 hover:text-red-700"
                           title="Position löschen"
                           onClick={() => handleDeletePosition(idx)}
+                          disabled={state.status !== 'draft'}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -2036,10 +2113,10 @@ export default function LieferscheinErfassungPage(): JSX.Element {
               <Input value={`${currentPosition.verfuegbar} ${currentPosition.einheit}`} readOnly className="h-8" />
             </div>
             <div className="flex items-end gap-2">
-              <Button variant="outline" size="sm" className="h-8">
+              <Button variant="outline" size="sm" className="h-8" onClick={() => setShowPositionPopUpDialog(true)} title="Zusatzinfos zur Position">
                 PopUp
               </Button>
-              <Button variant="outline" size="sm" className="h-8">
+              <Button variant="outline" size="sm" className="h-8" onClick={() => setShowPositionDetailsDialog(true)} title="Details zur Position">
                 Details
               </Button>
               <div className="flex items-center gap-1">
@@ -2164,11 +2241,11 @@ export default function LieferscheinErfassungPage(): JSX.Element {
             <Folder className="h-4 w-4" />
             Dateien
           </Button>
-          <Button variant="outline" size="sm" className="gap-2">
+          <Button variant="outline" size="sm" className="gap-2" onClick={() => { const q = state.customer?.id ? `?customerId=${state.customer.id}` : ''; navigate(`/contracts${q}`); push('Kontrakte geöffnet.'); }} title="Kontrakte anzeigen/verknüpfen">
             <FileCheck className="h-4 w-4" />
             Kontrakte
           </Button>
-          <Button variant="outline" size="sm" className="gap-2">
+          <Button variant="outline" size="sm" className="gap-2" onClick={() => { navigate('/waage'); push('Waagenmodul geöffnet. Connect-Einstellungen dort konfigurierbar.'); }} title="Schnittstellen (z. B. Waage)">
             <LinkIcon className="h-4 w-4" />
             Connect Anwendungen (Schnittstelle zB zum Waagenmodul)
           </Button>
@@ -2239,6 +2316,97 @@ export default function LieferscheinErfassungPage(): JSX.Element {
         title="UNTERLAGEN / DATEIEN — LIEFERSCHEIN"
       />
 
+      {/* Lieferschein suchen */}
+      <Dialog open={showLieferscheinSuchenDialog} onOpenChange={setShowLieferscheinSuchenDialog}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle>Lieferschein suchen</DialogTitle>
+          </DialogHeader>
+          <div className="overflow-auto flex-1 min-h-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Liefersch.-Nr.</TableHead>
+                  <TableHead>Kunde-ID</TableHead>
+                  <TableHead>Lieferdatum</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {lsList.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    className="cursor-pointer hover:bg-muted/50"
+                    onClick={() => {
+                      navigate(`/verkauf/lieferschein-erfassung/${row.id}`)
+                      setShowLieferscheinSuchenDialog(false)
+                    }}
+                  >
+                    <TableCell>{row.delivery_note_number}</TableCell>
+                    <TableCell>{row.customer_id ?? '—'}</TableCell>
+                    <TableCell>{row.delivery_date ?? '—'}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowLieferscheinSuchenDialog(false)}>Schließen</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Niederlassung auswählen */}
+      <Dialog open={showNiederlassungDialog} onOpenChange={setShowNiederlassungDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Niederlassung auswählen</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2 max-h-60 overflow-auto">
+            {branchesList.map((b) => (
+              <div
+                key={b.id}
+                className="flex items-center justify-between p-2 rounded border cursor-pointer hover:bg-muted/50"
+                onClick={() => {
+                  setState((prev) => ({ ...prev, niederlassung: b.branch_number }))
+                  setShowNiederlassungDialog(false)
+                }}
+              >
+                <span className="font-medium">{b.branch_number}</span>
+                <span className="text-sm text-muted-foreground">{b.name}</span>
+              </div>
+            ))}
+            {branchesList.length === 0 && (
+              <p className="text-sm text-muted-foreground">Keine Niederlassungen geladen. Bitte manuell eintragen.</p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNiederlassungDialog(false)}>Schließen</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Vertreter eingeben */}
+      <Dialog open={showVertreterDialog} onOpenChange={setShowVertreterDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Vertreter</DialogTitle>
+          </DialogHeader>
+          <div className="py-2">
+            <Label className="text-sm">Vertreter</Label>
+            <Input
+              value={vertreterInput}
+              onChange={(e) => setVertreterInput(e.target.value)}
+              className="mt-1"
+              placeholder="Name oder Nr."
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowVertreterDialog(false)}>Abbrechen</Button>
+            <Button onClick={handleVertreterConfirm}>Übernehmen</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {state.customer && (
         <BelegfolgePositionenDialog
           open={showBelegfolgeDialog}
@@ -2294,6 +2462,55 @@ export default function LieferscheinErfassungPage(): JSX.Element {
             <Button variant="outline" onClick={() => setShowInformationDialog(false)}>
               Schließen
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showPositionPopUpDialog} onOpenChange={setShowPositionPopUpDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Zusatzinfos Position</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-2 text-sm py-2">
+            <span className="text-muted-foreground">Pos.-Nr.:</span><span>{currentPosition.posNr}</span>
+            <span className="text-muted-foreground">Artikel:</span><span>{currentPosition.artikelNr}</span>
+            <span className="text-muted-foreground">Bezeichnung:</span><span className="col-span-2">{currentPosition.artikelBezeichnung || '–'}</span>
+            <span className="text-muted-foreground">Menge:</span><span>{currentPosition.mengeGebinde} {currentPosition.einheit}</span>
+            <span className="text-muted-foreground">Listenpreis:</span><span>{currentPosition.listenpreis.toFixed(2)} €</span>
+            <span className="text-muted-foreground">Rabatt:</span><span>{currentPosition.rabatt} %</span>
+            <span className="text-muted-foreground">Verfügbar:</span><span>{currentPosition.verfuegbar} {currentPosition.einheit}</span>
+            <span className="text-muted-foreground">Kontrakt-Nr.:</span><span>{currentPosition.kontraktNr || '–'}</span>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPositionPopUpDialog(false)}>Schließen</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showPositionDetailsDialog} onOpenChange={setShowPositionDetailsDialog}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Positions-Details (erweiterte Felder)</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-2 text-sm py-2">
+            <span className="text-muted-foreground">Pos.-Nr.:</span><span>{currentPosition.posNr}</span>
+            <span className="text-muted-foreground">Artikel-ID:</span><span>{currentPosition.artikelId || '–'}</span>
+            <span className="text-muted-foreground">Artikel:</span><span>{currentPosition.artikelNr}</span>
+            <span className="text-muted-foreground">Bezeichnung 2:</span><span>{currentPosition.artikelBezeichnung2 || '–'}</span>
+            <span className="text-muted-foreground">Menge (Gebinde):</span><span>{currentPosition.mengeGebinde}</span>
+            <span className="text-muted-foreground">Einheit:</span><span>{currentPosition.einheit}</span>
+            <span className="text-muted-foreground">Listenpreis:</span><span>{currentPosition.listenpreis.toFixed(2)} €</span>
+            <span className="text-muted-foreground">Einh.-Preis:</span><span>{currentPosition.einhPreis.toFixed(2)} €</span>
+            <span className="text-muted-foreground">Rabatt:</span><span>{currentPosition.rabatt} %</span>
+            <span className="text-muted-foreground">Betrag (Netto):</span><span>{currentPosition.betrag.toFixed(2)} €</span>
+            <span className="text-muted-foreground">MWSt.:</span><span>{currentPosition.mwstProzent} %</span>
+            <span className="text-muted-foreground">Gewicht/Einh.:</span><span>{currentPosition.artikelGewicht} kg</span>
+            <span className="text-muted-foreground">Gefahrgut-Pkte.:</span><span>{currentPosition.artikelGefahrgutPunkte}</span>
+            <span className="text-muted-foreground">Skontierf.:</span><span>{currentPosition.skontierf ? 'Ja' : 'Nein'}</span>
+            <span className="text-muted-foreground">Fremdware:</span><span>{currentPosition.fremdware ? 'Ja' : 'Nein'}</span>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPositionDetailsDialog(false)}>Schließen</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -21,7 +21,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useGlobalShortcuts } from '@/lib/shortcuts/global-shortcuts'
 import { ShortcutHintButton } from '@/components/shortcuts/ShortcutHelpPanel'
 import {
-  ChevronLeft, ChevronRight, MoreHorizontal, Check, Printer,
+  ChevronLeft, ChevronRight, ChevronUp, ChevronDown, MoreHorizontal, Check, Printer,
   Save, Trash2, FileText, Folder, Search, BookOpen,
 } from 'lucide-react'
 
@@ -257,6 +257,39 @@ export default function RechnungEingangErfassungPage(): JSX.Element {
     setCurrentPos(emptyPos(currentPos.posNr + 10))
   }
 
+  const renumberPosNr = (positionen: RechnungPosition[]): RechnungPosition[] =>
+    positionen.map((p, i) => ({ ...p, posNr: (i + 1) * 10 }))
+
+  const handleDeletePosition = (idx: number): void => {
+    const newPositionen = state.positionen.filter((_, i) => i !== idx)
+    const renumbered = renumberPosNr(newPositionen)
+    const newAktive =
+      state.aktivePositionIndex === idx
+        ? null
+        : idx < (state.aktivePositionIndex ?? -1)
+          ? (state.aktivePositionIndex ?? 0) - 1
+          : state.aktivePositionIndex
+    setState((prev) => ({ ...prev, positionen: renumbered, aktivePositionIndex: newAktive }))
+  }
+
+  const handleMovePositionUp = (idx: number): void => {
+    if (idx <= 0) return
+    const newPositionen = [...state.positionen]
+    ;[newPositionen[idx - 1], newPositionen[idx]] = [newPositionen[idx], newPositionen[idx - 1]]
+    const renumbered = renumberPosNr(newPositionen)
+    const newAktive = state.aktivePositionIndex === idx ? idx - 1 : state.aktivePositionIndex === idx - 1 ? idx : state.aktivePositionIndex
+    setState((prev) => ({ ...prev, positionen: renumbered, aktivePositionIndex: newAktive }))
+  }
+
+  const handleMovePositionDown = (idx: number): void => {
+    if (idx >= state.positionen.length - 1) return
+    const newPositionen = [...state.positionen]
+    ;[newPositionen[idx], newPositionen[idx + 1]] = [newPositionen[idx + 1], newPositionen[idx]]
+    const renumbered = renumberPosNr(newPositionen)
+    const newAktive = state.aktivePositionIndex === idx ? idx + 1 : state.aktivePositionIndex === idx + 1 ? idx : state.aktivePositionIndex
+    setState((prev) => ({ ...prev, positionen: renumbered, aktivePositionIndex: newAktive }))
+  }
+
   const handleSave = async (): Promise<string | null> => {
     if (!state.lieferant) { push('Bitte Lieferant auswählen'); return null }
     if (!state.rechnungNr) { push('Bitte Rechnungs-Nr. eingeben'); return null }
@@ -300,6 +333,21 @@ export default function RechnungEingangErfassungPage(): JSX.Element {
       await apiClient.delete(`/api/v1/einkauf/rechnungen/${state.id}`)
       push('Rechnung gelöscht'); setShowDeleteDialog(false); navigate('/einkauf')
     } catch (err: any) { push(`Fehler: ${err.response?.data?.detail || err.message}`) }
+  }
+
+  /** Beleg drucken und buchen: Speichern, dann Workflow Prüfen → Freigeben → Verbuchen. */
+  const handlePrintAndBook = async (): Promise<void> => {
+    const id = await handleSave()
+    if (!id) return
+    const base = '/api/v1/einkauf/rechnungseingaenge'
+    try {
+      await apiClient.post(`${base}/${encodeURIComponent(id)}/pruefen`)
+      await apiClient.post(`${base}/${encodeURIComponent(id)}/freigeben`)
+      await apiClient.post(`${base}/${encodeURIComponent(id)}/verbuchen`)
+      push('Beleg verbucht.')
+    } catch (err: any) {
+      push(`Buchung: ${err.response?.data?.detail || err.message}`)
+    }
   }
 
   useGlobalShortcuts({
@@ -370,7 +418,14 @@ export default function RechnungEingangErfassungPage(): JSX.Element {
                       </a>
                       <br />
                       <a href="#" className="text-sm text-blue-600 underline hover:text-blue-800"
-                        onClick={(e) => e.preventDefault()}>
+                        onClick={(e) => {
+                          e.preventDefault()
+                          if (state.lieferant) {
+                            navigate(`/einkauf/lieferant/${state.lieferant.id}`)
+                          } else {
+                            setShowLieferantDialog(true)
+                          }
+                        }}>
                         Lieferanten-Stamm
                       </a>
                     </div>
@@ -575,6 +630,7 @@ export default function RechnungEingangErfassungPage(): JSX.Element {
                   <TableHead className="w-16">Na.-Bio.</TableHead>
                   <TableHead className="w-24">Kosten/S.</TableHead>
                   <TableHead className="w-24">Kostenstelle</TableHead>
+                  <TableHead className="w-24 text-right">Aktionen</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -608,6 +664,22 @@ export default function RechnungEingangErfassungPage(): JSX.Element {
                     <TableCell>{pos.naBio}</TableCell>
                     <TableCell></TableCell>
                     <TableCell>{pos.kostenstelle}</TableCell>
+                    <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center justify-end gap-0.5">
+                        <Button type="button" variant="ghost" size="icon" className="h-7 w-7" title="Hoch"
+                          onClick={() => handleMovePositionUp(idx)} disabled={idx <= 0}>
+                          <ChevronUp className="h-4 w-4" />
+                        </Button>
+                        <Button type="button" variant="ghost" size="icon" className="h-7 w-7" title="Runter"
+                          onClick={() => handleMovePositionDown(idx)} disabled={idx >= state.positionen.length - 1}>
+                          <ChevronDown className="h-4 w-4" />
+                        </Button>
+                        <Button type="button" variant="ghost" size="icon" className="h-7 w-7 text-red-600 hover:text-red-700" title="Position löschen"
+                          onClick={() => handleDeletePosition(idx)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -753,7 +825,7 @@ export default function RechnungEingangErfassungPage(): JSX.Element {
       <div className="border-t bg-white px-4 py-2 flex items-center justify-between">
         <div className="flex gap-2 flex-wrap">
           <Button variant="outline" size="sm" className="gap-2"
-            onClick={() => { void handleSave().then((id) => { if (id) push('Beleg drucken und buchen') }) }}>
+            onClick={() => void handlePrintAndBook()}>
             <Printer className="h-4 w-4" />Beleg drucken und buchen
           </Button>
           <Button variant="outline" size="sm" className="gap-2"
@@ -768,7 +840,7 @@ export default function RechnungEingangErfassungPage(): JSX.Element {
             onClick={() => setShowDeleteDialog(true)}>
             <Trash2 className="h-4 w-4" />Rechnung löschen
           </Button>
-          <Button variant="outline" size="sm" className="gap-2">
+          <Button variant="outline" size="sm" className="gap-2" onClick={() => { setShowAttachmentDialog(true); push('Unterlagen geöffnet. Hier können Sie die Originalrechnung hochladen.'); }} title="Originalrechnung anzeigen/hochladen">
             <BookOpen className="h-4 w-4" />Originalrechnung ▼
           </Button>
         </div>

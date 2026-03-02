@@ -16,6 +16,7 @@ from app.core.uuid7 import uuid7
 
 from ....core.database import get_db
 from ....core.tenant import get_tenant_id
+from ....core.fibu_audit import log_fibu_audit
 from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
@@ -68,6 +69,7 @@ class OpenItemBase(BaseModel):
     konto_name: Optional[str] = None
     konto_typ: str = "debitoren"  # debitoren|kreditoren
     op_status: str = "offen"  # offen|teilweise|geschlossen|storniert
+# Statusmaschine: offen → (teilweise|geschlossen); geschlossen/storniert = unveränderbar (nur Storno/Korrektur über reverse_settlement)
     rechnungsnr: str
     rechnungsdatum: date
     faelligkeit: date
@@ -252,7 +254,7 @@ async def get_open_item(op_id: str, tenant_id: str = Depends(get_tenant_id), db:
 
 
 @router.post("", response_model=OpenItem, status_code=201)
-async def create_open_item(payload: OpenItemCreate, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+async def create_open_item(payload: OpenItemCreate, request: Request, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     _validate_op(payload)
     op_id = uuid7()
     db.execute(
@@ -304,15 +306,29 @@ async def create_open_item(payload: OpenItemCreate, tenant_id: str = Depends(get
         },
     )
     db.commit()
+    log_fibu_audit(db, tenant_id, "create", "open_item", op_id, {"rechnungsnr": payload.rechnungsnr, "op_betrag": str(payload.op_betrag)}, request=request)
     return await get_open_item(op_id, tenant_id, db)
 
 
+# Statuswerte, bei denen Update/Delete erlaubt ist (GoBD: nach Verbuchung/Schließung nur Storno)
+OP_EDITABLE_STATUSES = {"offen", "teilweise"}
+
+
 @router.put("/{op_id}", response_model=OpenItem)
-async def update_open_item(op_id: str, payload: OpenItemCreate, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+async def update_open_item(op_id: str, payload: OpenItemCreate, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db), request: Optional[Request] = None):
     _validate_op(payload)
-    exists = db.execute(text("SELECT id FROM offene_posten WHERE id = :id AND tenant_id = :tenant_id"), {"id": op_id, "tenant_id": tenant_id}).fetchone()
-    if not exists:
+    row = db.execute(
+        text("SELECT id, op_status FROM offene_posten WHERE id = :id AND tenant_id = :tenant_id"),
+        {"id": op_id, "tenant_id": tenant_id},
+    ).fetchone()
+    if not row:
         raise HTTPException(status_code=404, detail="Open item not found")
+    current_status = (row[1] if len(row) > 1 else None) or "offen"
+    if current_status not in OP_EDITABLE_STATUSES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Offener Posten mit Status '{current_status}' darf nicht geändert werden. Nur bei Status 'offen' oder 'teilweise' sind Änderungen erlaubt (GoBD).",
+        )
     db.execute(
         text(
             """
@@ -360,23 +376,34 @@ async def update_open_item(op_id: str, payload: OpenItemCreate, tenant_id: str =
         },
     )
     db.commit()
+    log_fibu_audit(db, tenant_id, "update", "open_item", op_id, {"rechnungsnr": payload.rechnungsnr, "op_status": payload.op_status}, request=request)
     return await get_open_item(op_id, tenant_id, db)
 
 
 @router.patch("/{op_id}", response_model=OpenItem)
-async def patch_open_item(op_id: str, payload: OpenItemUpdate, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+async def patch_open_item(op_id: str, payload: OpenItemUpdate, request: Request, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     existing = await get_open_item(op_id, tenant_id, db)
     merged = OpenItemCreate(**{**existing.model_dump(exclude={"id", "tenant_id", "created_at", "updated_at"}), **payload.model_dump(exclude_unset=True)})
-    return await update_open_item(op_id, merged, tenant_id, db)
+    return await update_open_item(op_id, merged, tenant_id, db, request)
 
 
 @router.delete("/{op_id}", status_code=204)
-async def delete_open_item(op_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
-    row = db.execute(text("SELECT id FROM offene_posten WHERE id = :id AND tenant_id = :tenant_id"), {"id": op_id, "tenant_id": tenant_id}).fetchone()
+async def delete_open_item(op_id: str, request: Request, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    row = db.execute(
+        text("SELECT id, op_status FROM offene_posten WHERE id = :id AND tenant_id = :tenant_id"),
+        {"id": op_id, "tenant_id": tenant_id},
+    ).fetchone()
     if not row:
         raise HTTPException(status_code=404, detail="Open item not found")
+    current_status = (row[1] if len(row) > 1 else None) or "offen"
+    if current_status not in OP_EDITABLE_STATUSES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Löschen nur bei Status 'offen' oder 'teilweise' erlaubt. Aktueller Status: '{current_status}' (GoBD).",
+        )
     db.execute(text("DELETE FROM offene_posten WHERE id = :id AND tenant_id = :tenant_id"), {"id": op_id, "tenant_id": tenant_id})
     db.commit()
+    log_fibu_audit(db, tenant_id, "delete", "open_item", op_id, {}, request=request)
     return None
 
 
@@ -395,7 +422,7 @@ async def settle_open_item(
     try:
         # Get current open item from offene_posten table
         op_query = text("""
-            SELECT id, tenant_id, rechnungsnr, datum, faelligkeit, betrag, offen, 
+            SELECT id, tenant_id, op_status, rechnungsnr, datum, faelligkeit, betrag, offen,
                    kunde_id, kunde_name, mahn_stufe, zahlbar
             FROM offene_posten
             WHERE id = :op_id AND tenant_id = :tenant_id
@@ -405,8 +432,14 @@ async def settle_open_item(
         
         if not op_row:
             raise HTTPException(status_code=404, detail="Open item not found")
-        
-        current_open_amount = Decimal(str(op_row[6])) if op_row[6] else Decimal("0.00")
+        # op_row: 0=id, 1=tenant_id, 2=op_status, 3=rechnungsnr, 4=datum, 5=faelligkeit, 6=betrag, 7=offen, ...
+        current_status = (op_row[2] if len(op_row) > 2 else None) or "offen"
+        if current_status not in OP_EDITABLE_STATUSES:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Ausgleich nur bei Status 'offen' oder 'teilweise' erlaubt. Aktueller Status: '{current_status}'.",
+            )
+        current_open_amount = Decimal(str(op_row[7])) if op_row[7] is not None else Decimal("0.00")
         # op_row indices: 0=id, 1=tenant_id, 2=rechnungsnr, 3=datum, 4=faelligkeit, 5=betrag, 6=offen
         settlement_amount = Decimal(str(settlement.payment_amount))
         
@@ -500,7 +533,7 @@ async def settle_open_item(
         """)
         
         entry_number = f"OP-SETTLE-{datetime.now().strftime('%Y%m%d')}-{op_id[:8]}"
-        description = f"OP-Ausgleich {op_row[2]} - {settlement.payment_reference or 'Zahlung'}"
+        description = f"OP-Ausgleich {op_row[3]} - {settlement.payment_reference or 'Zahlung'}"
         
         db.execute(journal_insert, {
             "id": journal_entry_id,
@@ -556,11 +589,15 @@ async def settle_open_item(
             "debit_amount": Decimal("0.00"),
             "credit_amount": settlement_amount,
             "line_number": 2,
-            "description": f"OP-Ausgleich {op_row[3]}"
+            "description": f"OP-Ausgleich {op_row[3] or ''}"
         })
         
         db.commit()
-        
+        log_fibu_audit(
+            db, tenant_id, "settle", "open_item", op_id,
+            {"settlement_id": settlement_id, "settlement_amount": float(settlement_amount), "new_open_amount": float(new_open_amount)},
+            request=request,
+        )
         return SettlementResult(
             op_id=op_id,
             settlement_id=settlement_id,
@@ -724,7 +761,11 @@ async def reverse_settlement(
             audit_trail_id = None
         
         db.commit()
-        
+        log_fibu_audit(
+            db, tenant_id, "reverse_settlement", "open_item", op_id,
+            {"settlement_id": settlement_id, "reason": reason, "new_open_amount": float(new_open_amount)},
+            request=request,
+        )
         return {
             "success": True,
             "message": "Settlement reversed successfully",

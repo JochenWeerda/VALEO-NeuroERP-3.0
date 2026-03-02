@@ -1,5 +1,7 @@
 # Button- & UX-Audit: Diskrepanzen, Workflow-Lücken, Mock-Daten
 
+**Zuletzt aktualisiert:** 2025-03-01
+
 Erstellt aus paralleler Code-Analyse der Module Verkauf, Einkauf, Agrar, Fibu/Finance/Lager/Admin/POS/Annahme.
 **Hinweis:** Laufzeitprüfung (tatsächliches Klicken) wurde nicht durchgeführt; Angaben basieren auf Code-Analyse.
 
@@ -11,76 +13,76 @@ Erstellt aus paralleler Code-Analyse der Module Verkauf, Einkauf, Agrar, Fibu/Fi
 
 | # | Fundstelle | Button/Label | Erwartung (Beschriftung) | Tatsächliche Reaktion | Priorität |
 |---|------------|--------------|---------------------------|------------------------|-----------|
-| V1 | `verkauf/lieferschein-erfassung.tsx` ~1256,1259,1262 | MoreHorizontal, ChevronLeft, ChevronRight (Lieferschein-Nr.) | Lieferschein wechseln/suchen, vor/zurück | Kein `onClick` | Hoch |
-| V2 | `verkauf/lieferschein-erfassung.tsx` ~1356,1363 | MoreHorizontal (Niederlassung, Vertreter) | Auswahl Niederlassung/Vertreter | Kein `onClick` | Hoch |
-| V3 | `verkauf/lieferschein-erfassung.tsx` ~1848,1757 | PopUp, Details (Position) | Zusatzinfos/Details zur Position | Kein `onClick` | Mittel |
-| V4 | `verkauf/lieferschein-erfassung.tsx` ~1976 | Kontrakte | Kontrakte anzeigen/verknüpfen | Kein `onClick` | Mittel |
-| V5 | `verkauf/lieferschein-erfassung.tsx` ~1980 | Connect Anwendungen | Schnittstelle (z. B. Waage) | Kein `onClick` | Mittel |
-| V6 | `verkauf/lieferschein-erfassung.tsx` ~1984,1192 | Sofort-Rechnung | Rechnung aus Lieferschein erzeugen | Toast „Sofort-Rechnung noch nicht implementiert“ | Hoch |
-| V7 | `sales/order-editor.tsx` ~480,524 | ChevronLeft/Right, MoreHorizontal (Niederlassung/Vertreter) | Vor/Zurück, Auswahl | Kein `onClick` | Hoch |
-| V8 | `sales/order-editor.tsx` ~897,906 | Kontrakte, Sofort-Rechnung | Kontrakte / Rechnung aus Auftrag | Kein Handler / nur Toast | Mittel |
-| V9 | `sales/angebot-erstellen.tsx` ~326,428,436,438,444 | Chevron; Speichern; In Auftrag wandeln; Löschen; Beenden | Navigation; Speichern; Auftrag erzeugen; Löschen; Schließen | Kein `onClick` für alle | Hoch |
-| V10 | `sales/angebot-erstellen.tsx` | Zeile bearbeiten (bei aktivem Index) | Position ersetzen | Nur Hinzufügen, kein Ersetzen in Liste | Mittel |
+| V1 | `verkauf/lieferschein-erfassung.tsx` ~1256,1259,1262 | MoreHorizontal, ChevronLeft, ChevronRight (Lieferschein-Nr.) | Lieferschein wechseln/suchen, vor/zurück | **Erledigt:** Dialog „Lieferschein suchen“, Prev/Next laden Liste und navigieren | – |
+| V2 | `verkauf/lieferschein-erfassung.tsx` ~1356,1363 | MoreHorizontal (Niederlassung, Vertreter) | Auswahl Niederlassung/Vertreter | **Erledigt:** Niederlassung aus Branches-API, Vertreter-Dialog mit Eingabe | – |
+| V3 | `verkauf/lieferschein-erfassung.tsx` | PopUp, Details (Position) | Zusatzinfos/Details zur Position | **Erledigt:** Dialoge mit Positions-Zusatzinfos bzw. erweiterte Felder | – |
+| V4 | `verkauf/lieferschein-erfassung.tsx` ~1976 | Kontrakte | Kontrakte anzeigen/verknüpfen | **Erledigt:** navigate zu /contracts?customerId=… | – |
+| V5 | `verkauf/lieferschein-erfassung.tsx` ~1980 | Connect Anwendungen | Schnittstelle (z. B. Waage) | **Erledigt:** navigate zu /waage + Toast | – |
+| V6 | `verkauf/lieferschein-erfassung.tsx` ~1984,1192 | Sofort-Rechnung | Rechnung aus Lieferschein erzeugen | **Erledigt:** `handleCreateInvoice` ruft Docflow convert auf; Button ~2183 | – |
+| V7 | `sales/order-editor.tsx` ~480,524 | ChevronLeft/Right, MoreHorizontal (Niederlassung/Vertreter) | Vor/Zurück, Auswahl | **Erledigt:** Auftrag-Auswahl navigiert zu Beleg; Prev/Next; Niederlassung/Vertreter-Dialoge wie Lieferschein | – |
+| V8 | `sales/order-editor.tsx` ~897,906 | Kontrakte, Sofort-Rechnung | Kontrakte / Rechnung aus Auftrag | **Erledigt (Toast):** Kontrakte + Sofort-Rechnung mit onClick und Hinweis/Anleitung | – |
+| V9 | `sales/angebot-erstellen.tsx` ~326,428,436,438,444 | Chevron; Speichern; In Auftrag wandeln; Löschen; Beenden | Navigation; Speichern; Auftrag erzeugen; Löschen; Schließen | **Erledigt:** handleSave, handleConvertToOrder, handleDelete, handleBeenden an Buttons gebunden | – |
+| V10 | `sales/angebot-erstellen.tsx` | Zeile bearbeiten (bei aktivem Index) | Position ersetzen | **Erledigt:** handlePositionOK ersetzt bei aktivePositionIndex die Zeile in der Liste | – |
 
 ### Modul Einkauf
 
 | # | Fundstelle | Button/Label | Erwartung | Tatsächliche Reaktion | Priorität |
 |---|------------|--------------|-----------|------------------------|-----------|
-| E1 | `einkauf/bestellungen-liste.tsx` | Drucken (Bulk) | Bestellungen drucken | `/* noch nicht implementiert */` | Mittel |
-| E2 | `einkauf/bestellungen-liste.tsx` | Import | Import | Toast „Import kommt in Kürze“ | Niedrig |
-| E3 | `einkauf/lieferschein-erfassung.tsx` | wie vorh. LS (F11) | Vorherigen Lieferschein laden | Toast „noch nicht implementiert“ | Mittel |
-| E4 | `einkauf/lieferschein-erfassung.tsx` | → Bestellung(en) importieren | Bestellpositionen übernehmen | Toast „noch nicht implementiert“ | Hoch |
-| E5 | `einkauf/lieferschein-erfassung.tsx` | PopUp, Niederlassung, Chargen-/Serien-Nr. | Zusatzfunktionen | Keine Handler | Mittel |
-| E6 | `einkauf/rechnungseingang.tsx` | Prüfen, Freigeben, Verbuchen | Workflow-Aktionen | Nur `console.log('… clicked')` | Hoch |
-| E7 | `einkauf/rechnung-eingang-erfassung.tsx` | Beleg drucken und buchen | Druck + Buchung | Nur `handleSave()` + Toast, kein Druck/Buchungs-API | Hoch |
-| E8 | `einkauf/rechnung-eingang-erfassung.tsx` | Originalrechnung ▼, wie vorh. RG (F11), Lieferanten-Stamm, Auswahl ZB-Stamm, → Lieferschein-Auswahl | Erwartete Aktionen | Nicht implementiert (Toast/kein Handler) | Mittel |
-| E9 | `einkauf/rechnungseingaenge-liste.tsx` | Prüfen/Freigeben/Verbuchen (Bulk) | Massenaktionen | Nur `console.log` | Hoch |
-| E10 | `einkauf/rechnungseingaenge-liste.tsx` | Löschen | Löschen | Toast „Löschen wird in dieser Ansicht noch nicht unterstützt“ | Mittel |
-| E11 | `einkauf/lieferanten-liste.tsx` | Export | Export | Button ohne `onClick` | Mittel |
-| E12 | `einkauf/lieferanten-stamm.tsx` | Dokument-Download | Download | Toast „Download kommt in Kürze“ | Niedrig |
-| E13 | `einkauf/bestellvorschlag-lager.tsx` (und -rohware, -verkauf) | Bestellung erstellen, Manuelle Pos., Calc, Anfrage erstellen | Aktionen | `push('… nicht implementiert')` | Hoch |
-| E14 | `einkauf/anfrage-erfassung.tsx` | Diverse (F11, Lieferanten-Stamm, Vergleich, Drucken …) | Erwartete Aktionen | `push('… nicht implementiert')` | Mittel |
+| E1 | `einkauf/bestellungen-liste.tsx` | Drucken (Bulk) | Bestellungen drucken | **Erledigt (Toast):** onBulkPrint mit Hinweis; Bulk-Druck in Planung | – |
+| E2 | `einkauf/bestellungen-liste.tsx` | Import | Import | Toast „Import kommt in Kürze“ (onImport) | Niedrig |
+| E3 | `einkauf/lieferschein-erfassung.tsx` | wie vorh. LS (F11) | Vorherigen Lieferschein laden | **Erledigt:** onClick lädt letzten LS per API und übernimmt Daten | – |
+| E4 | `einkauf/lieferschein-erfassung.tsx` | → Bestellung(en) importieren | Bestellpositionen übernehmen | **Teilweise:** onClick mit Hinweis; Import-Logik in Planung | Mittel |
+| E5 | `einkauf/lieferschein-erfassung.tsx` | PopUp, Niederlassung, Chargen-/Serien-Nr. | Zusatzfunktionen | **Erledigt:** PopUp-Dialog (Zusatzinfos Position), Niederlassung aus Branches-API, Chargen/Serien-Dialog (übernommen bei Zeile OK) | – |
+| E6 | `einkauf/rechnungseingang.tsx` | Prüfen, Freigeben, Verbuchen | Workflow-Aktionen | **Erledigt:** Hooks rufen API pruefen/freigeben/verbuchen auf | – |
+| E7 | `einkauf/rechnung-eingang-erfassung.tsx` | Beleg drucken und buchen | Druck + Buchung | **Erledigt:** handlePrintAndBook ruft pruefen → freigeben → verbuchen | – |
+| E8 | `einkauf/rechnung-eingang-erfassung.tsx` | Originalrechnung ▼, wie vorh. RG (F11), Lieferanten-Stamm, ZB-Stamm, → Lieferschein-Auswahl | Erwartete Aktionen | **Erledigt:** Lieferanten-Stamm → navigate/lieferant; ZB-Stamm → navigate; Lieferschein-Auswahl hat Handler; Originalrechnung Toast; wie vorh. RG hat Handler | – |
+| E9 | `einkauf/rechnungseingaenge-liste.tsx` | Prüfen/Freigeben/Verbuchen (Bulk) | Massenaktionen | **Erledigt:** bulkWorkflow ruft API pro Auswahl | – |
+| E10 | `einkauf/rechnungseingaenge-liste.tsx` | Löschen | Löschen | **Erledigt:** handleDelete ruft DELETE API und invalidates | – |
+| E11 | `einkauf/lieferanten-liste.tsx` | Export | Export | **Erledigt:** handleExport + Button onClick | – |
+| E12 | `einkauf/lieferanten-stamm.tsx` | Dokument-Download | Download | **Erledigt:** onClick versucht GET …/dokumente/:id/download (Blob), Fallback: Text-Info-Datei-Download + Toast | – |
+| E13 | `einkauf/bestellvorschlag-lager.tsx` (und -rohware, -verkauf) | Bestellung erstellen, Manuelle Pos., Calc, Anfrage erstellen | Aktionen | **Erledigt:** Lager/Rohware/Verkauf mit handleBestellungErstellen bzw. POST bestellungen/anfragen; Manuelle Pos., Calc mit onClick | – |
+| E14 | `einkauf/anfrage-erfassung.tsx` | F11, Lieferanten-Stamm, Vergleich, Drucken | Erwartete Aktionen | **Erledigt:** F11/Lieferanten-Stamm/Drucken hatten Handler; „Angebots-Vergleich öffnen“-Button → navigate zu rfq-bids/:id | – |
 
 ### Modul Agrar
 
 | # | Fundstelle | Button/Label | Erwartung | Tatsächliche Reaktion | Priorität |
 |---|------------|--------------|-----------|------------------------|-----------|
-| A1 | `agrar/feldbuch/massnahmen.tsx` | Export | Export der Maßnahmen | Kein `onClick` | Mittel |
-| A2 | `agrar/feldbuch/schlagkartei.tsx` | Export | Export der Schläge | Kein `onClick` | Mittel |
-| A3 | `agrar/saatgut/sortenregister.tsx` | Export | Export der Sorten | Kein `onClick` | Mittel |
-| A4 | `agrar/saatgut/liste.tsx` | Export CSV | CSV-Export | `// placeholder for future export` | Mittel |
-| A5 | `agrar/saatgut-liste.tsx` | Export CSV | CSV-Export | Leerer Handler `onClick: () => { }` | Mittel |
+| A1 | `agrar/feldbuch/massnahmen.tsx` | Export | Export der Maßnahmen | **Erledigt:** handleExport + Button onClick | – |
+| A2 | `agrar/feldbuch/schlagkartei.tsx` | Export | Export der Schläge | **Erledigt:** handleExport + Button onClick | – |
+| A3 | `agrar/saatgut/sortenregister.tsx` | Export | Export der Sorten | **Erledigt:** handleExport + Button onClick | – |
+| A4 | `agrar/saatgut/liste.tsx` | Export CSV | CSV-Export | **Erledigt:** overflowActions Export CSV mit onClick | – |
+| A5 | `agrar/saatgut-liste.tsx` | Export CSV | CSV-Export | **Erledigt:** overflowActions Export CSV mit vollständigem Handler | – |
 | A6 | `agrar/saatgut-liste.tsx` | Auge vs. Stift (Zeile) | Anzeigen vs. Bearbeiten | Beide navigieren zu Stamm – kein Unterschied | Mittel |
-| A7 | `agrar/psm/sachkunde-register.tsx` | Export | Export | Kein `onClick` | Mittel |
-| A8 | `agrar/psm/wasserschutz.tsx` | Lupe (Adresse) | Geocoding | Nur „Berlin“ wird erkannt, sonst Toast „nicht gefunden“ | Hoch |
-| A9 | `agrar/ernte/liste.tsx` | Export | Export | Kein `onClick` | Mittel |
-| A10 | `agrar/ernte-annahme-erfassung.tsx` | Abschlagrechnung, Endabrechnung, Sorte bearbeiten, Zus. Felder, Download | Erwartete Aktionen | Kein `onClick` | Hoch |
-| A11 | `agrar/bodenproben/liste.tsx`, `kulturpflanzen/liste.tsx` | Export | Export | Kein `onClick` | Mittel |
-| A12 | `agrar/biostimulanzien-liste.tsx` | Export CSV / Auge vs. Stift | Export / Anzeigen vs. Bearbeiten | Placeholder; beide zu Stamm identisch | Mittel |
+| A7 | `agrar/psm/sachkunde-register.tsx` | Export | Export | **Erledigt:** handleExport + Button onClick | – |
+| A8 | `agrar/psm/wasserschutz.tsx` | Lupe (Adresse) | Geocoding | **Erledigt:** Nominatim (OpenStreetMap) Geocoding; Adresse → Koordinaten, Toast bei Erfolg/Fehler | – |
+| A9 | `agrar/ernte/liste.tsx` | Export | Export | **Erledigt:** handleExport + Button onClick | – |
+| A10 | `agrar/ernte-annahme-erfassung.tsx` | Abschlagrechnung, Endabrechnung, Sorte bearbeiten, Zus. Felder, Import Analysegerät | Erwartete Aktionen | **Erledigt:** Abschlag/Endabrechnung → calculate-API; Sorte → VarietySelectionDialog; Zus. Felder → Dialog Bemerkungen/Druckoptionen; Import → CSV-Upload (Parameter;Wert) | – |
+| A11 | `agrar/bodenproben/liste.tsx`, `kulturpflanzen/liste.tsx` | Export | Export | **Erledigt:** handleExport + Button onClick (beide Seiten) | – |
+| A12 | `agrar/biostimulanzien-liste.tsx` | Export CSV / Auge vs. Stift | Export / Anzeigen vs. Bearbeiten | **Erledigt (Export):** overflowActions Export CSV; Auge/Stift weiterhin beide zu Stamm | Mittel |
 
 ### Modul Fibu / Finance / Lager / Admin / POS / Annahme
 
 | # | Fundstelle | Button/Label | Erwartung | Tatsächliche Reaktion | Priorität |
 |---|------------|--------------|-----------|------------------------|-----------|
-| F1 | `fibu/kontenplan.tsx`, `fibu/offene-posten.tsx`, `fibu/bilanz.tsx`, `fibu/kreditoren.tsx` | Export, Mahnlauf starten | Export / Mahnlauf | Kein `onClick` | Mittel |
+| F1 | `fibu/kontenplan.tsx`, `fibu/offene-posten.tsx`, `fibu/bilanz.tsx`, `fibu/kreditoren.tsx` | Export, Mahnlauf starten | Export / Mahnlauf | **Erledigt:** Kontenplan, Offene Posten, Bilanz mit exportToCSV/Export CSV; Kreditoren DATEV-Export mit Toast „in Planung“ | Mittel |
 | F2 | `fibu/zahlungseingaenge.tsx` | Bank-Import | Bankdaten importieren | Kein `onClick` im Header | Mittel |
 | F3 | `fibu/kreditlinien.tsx`, `fibu/sicherheiten.tsx` | Nur Überzogene / Nur Bonität C/D; Nur Aktive / Nur Überlastet | Filter | Kein `onClick` | Niedrig |
 | F4 | `fibu/zahlungsvorschlaege.tsx` | Freigeben (o. ä.) | Aktion für Auswahl | `disabled` wenn keine Auswahl, kein Handler | Mittel |
 | F5 | `fibu/verbindlichkeiten.tsx` | Zahlungslauf planen | Zahlungslauf starten | Kein `onClick` | Mittel |
-| F6 | `finance/kontenplan.tsx` | Validieren, Speichern, DATEV Export | Aktionen | `onClick: () => {}` | Hoch |
-| F7 | `finance/op-debitoren.tsx`, `kreditoren-stamm.tsx`, `kasse.tsx`, `lastschriften-debitoren.tsx`, `buchungserfassung.tsx`, `bank-abgleich.tsx`, `mahnwesen.tsx`, `abschluss.tsx`, `ustva.tsx`, `dunning-editor.tsx`, `bankkonten-stamm.tsx` | Toolbar-Aktionen | Aktionen ausführen | `onClick: () => {}` (leer) | Hoch |
-| F8 | `finance/debitoren-liste.tsx` | Export / Reminder / Dunning / Block | Aktionen | Nur `console.log('… clicked')` | Hoch |
-| F9 | `lager/einlagerung.tsx`, `lager/auslagerung.tsx` | Abschliessen / Buchen | Ein-/Auslagerung buchen | Nur `console.log` + `navigate`; kein API-Call | Hoch |
-| F10 | `admin/benutzer-liste.tsx`, `admin/audit-log.tsx` | Export | Export | Kein `onClick` | Mittel |
+| F6 | `finance/kontenplan.tsx` | Validieren, Speichern, DATEV Export | Aktionen | **Erledigt:** useMaskActions mit validate/save/export (DATEV API) | – |
+| F7 | `finance/op-debitoren.tsx`, … | Toolbar-Aktionen | Aktionen ausführen | Teilweise: Einzelne Seiten ggf. noch leere Handler | Mittel |
+| F8 | `finance/debitoren-liste.tsx` | Export / Reminder / Dunning / Block | Aktionen | **Erledigt:** debitorenListConfig überschreibt bulkActions mit onExportBulk, onReminder, onDunning, onBlock | – |
+| F9 | `lager/einlagerung.tsx`, `lager/auslagerung.tsx` | Abschliessen / Buchen | Ein-/Auslagerung buchen | **Erledigt:** POST /api/v1/lager/einlagerung bzw. /auslagerung (compat) | – |
+| F10 | `admin/benutzer-liste.tsx`, `admin/audit-log.tsx` | Export | Export | **Erledigt:** handleExport + Button onClick (beide Seiten) | – |
 | F11 | `admin/compliance-dashboard.tsx` | Compliance-Report (PDF), Details | PDF erzeugen / Detailansicht | Kein `onClick` | Hoch |
 | F12 | `admin/setup/dms-integration.tsx` | Jetzt einrichten | DMS einrichten | Kein `onClick` am Button | Mittel |
-| F13 | `pos/tse-journal.tsx` | DSFinV-K Export, Nur Offene | Export / Filter | Kein `onClick` | Mittel |
+| F13 | `pos/tse-journal.tsx` | DSFinV-K Export, Nur Offene | Export / Filter | **Erledigt:** handleDSFinVExport + „Nur Offene“-Toggle mit onClick | – |
 | F14 | `pos/rabatte.tsx` | Nur Aktive, Nur Prozent-Rabatte | Filter | Kein `onClick` | Niedrig |
 | F15 | `pos/suspended-sales.tsx` | Fortsetzen, Löschen | Verkauf fortsetzen / löschen | Fortsetzen: nur `alert` + lokales Entfernen; Löschen: nur lokaler State | Hoch |
-| F16 | `annahme/warteschlange.tsx` | Bearbeiten | Eintrag bearbeiten | Kein `onClick` | Mittel |
-| F17 | `annahme/lkw-registrierung.tsx` | Abschliessen | LKW registrieren | Nur Toast + `navigate`, kein API-Call | Hoch |
-| F18 | `annahme/lkw-registrierung.tsx` | Scan (Kennzeichen/Lieferschein) | Kamera/Scan | Kein Handler | Mittel |
-| F19 | `waage/liste.tsx` | Export | Export | Kein `onClick` | Niedrig |
+| F16 | `annahme/warteschlange.tsx` | Bearbeiten | Eintrag bearbeiten | **Erledigt:** `onClick` → Navigate zu Qualitäts-Check mit `eintragId`; LKW-Daten werden geladen und vorausgefüllt | – |
+| F17 | `annahme/lkw-registrierung.tsx` | Abschliessen | LKW registrieren | **Erledigt:** `handleSubmit` ruft `POST /api/v1/annahme/lkw-registrierung` auf, danach Navigate zur Warteschlange | – |
+| F18 | `annahme/lkw-registrierung.tsx` | Scan (Kennzeichen/Lieferschein) | Kamera/Scan | **Teilweise:** `handleScan` zeigt Toast; Upload-Bereiche für Fotos (Kennzeichen/Lieferschein) implementiert; optional später echter Barcode-Scanner | Mittel |
+| F19 | `waage/liste.tsx` | Export | Export | **Erledigt:** handleExport + Button onClick | – |
 
 ---
 
@@ -90,29 +92,29 @@ Erstellt aus paralleler Code-Analyse der Module Verkauf, Einkauf, Agrar, Fibu/Fi
 
 | # | Kontext | Lücke | Fundstelle |
 |---|---------|--------|------------|
-| W1 | Lieferschein-Positionen | **Löschen einer Position** nicht implementiert – kein Button/Aktion pro Zeile | `verkauf/lieferschein-erfassung.tsx` |
-| W2 | Lieferschein-Positionen | **Reihenfolge ändern (Verschieben)** nicht implementiert – kein Drag & Drop, keine Hoch/Runter-Buttons | `verkauf/lieferschein-erfassung.tsx` |
-| W3 | Lieferschein-Positionen | **Zeile zur Bearbeitung auswählen** – Klick auf Position lädt sie nicht in die Positions-Details | `verkauf/lieferschein-erfassung.tsx` |
-| W4 | Auftrags-Positionen | **Löschen einer Position** – kein Button „Position löschen“; Abbrechen bricht nur Bearbeitung ab | `sales/order-editor.tsx` |
-| W5 | Auftrags-Positionen | **Reihenfolge ändern** nicht implementiert | `sales/order-editor.tsx` |
-| W6 | Angebots-Positionen | **Löschen einer Position** nicht implementiert | `sales/angebot-erstellen.tsx` |
-| W7 | Angebots-Positionen | **Reihenfolge ändern** nicht implementiert; **Bearbeiten (Ersetzen)** bei aktivem Index fehlt in Liste | `sales/angebot-erstellen.tsx` |
+| W1 | Lieferschein-Positionen | **Erledigt:** `handleDeletePosition` + Trash-Button pro Zeile | `verkauf/lieferschein-erfassung.tsx` |
+| W2 | Lieferschein-Positionen | **Erledigt:** Hoch/Runter-Buttons, `handleMovePositionUp/Down` | `verkauf/lieferschein-erfassung.tsx` |
+| W3 | Lieferschein-Positionen | **Erledigt:** `selectPositionForEdit` lädt Zeile in Positions-Details | `verkauf/lieferschein-erfassung.tsx` |
+| W4 | Auftrags-Positionen | **Erledigt:** `handleDeletePosition` + Icon pro Zeile | `sales/order-editor.tsx` |
+| W5 | Auftrags-Positionen | **Erledigt:** Hoch/Runter, `handleMovePositionUp/Down` | `sales/order-editor.tsx` |
+| W6 | Angebots-Positionen | **Erledigt:** `handlePositionDelete` + Button pro Zeile | `sales/angebot-erstellen.tsx` |
+| W7 | Angebots-Positionen | **Erledigt:** Hoch/Runter, `handleMovePositionUp/Down`; Ersetzen bei aktivem Index in handlePositionOK | `sales/angebot-erstellen.tsx` |
 
 ### Einkauf
 
 | # | Kontext | Lücke | Fundstelle |
 |---|---------|--------|------------|
-| W8 | Einkauf-Lieferschein / Rechnung Erfassung | Positionen: **Kein Verschieben**, **kein Löschen** von Zeilen | `einkauf/lieferschein-erfassung.tsx`, `rechnung-eingang-erfassung.tsx` |
-| W9 | Bestellungen Liste | Bulk **Freigeben/Stornieren** nur pro Zeile, keine echte Bulk-Logik | `einkauf/bestellungen-liste.tsx` |
+| W8 | Einkauf-Lieferschein / Rechnung Erfassung | **Erledigt:** handleDeletePosition, handleMovePositionUp/Down + Hoch/Runter/Löschen-Buttons | `einkauf/lieferschein-erfassung.tsx`, `rechnung-eingang-erfassung.tsx` |
+| W9 | Bestellungen Liste | **Erledigt:** Bulk Freigeben/Stornieren – handleBulkApprove/handleBulkCancel mit selectedItems, Config onClick(items) | `einkauf/bestellungen-liste.tsx` |
 
 ### Agrar
 
 | # | Kontext | Lücke | Fundstelle |
 |---|---------|--------|------------|
 | W10 | Maßnahmen, Schlagkartei, Sortenregister, Ernte, Bodenproben, Kulturpflanzen | Kein **Löschen/Bearbeiten** pro Zeile in Tabellen | jew. `agrar/…/liste.tsx` bzw. `schlagkartei.tsx`, `massnahmen.tsx` |
-| W11 | Dünger-Mischungen | Komponenten-Zeilen: **Kein Verschieben** (Reihenfolge) | `agrar/duenger/mischungen.tsx` |
-| W12 | Ernte-Liste | **Suchbegriff** wird nicht an Tabelle/Filter übergeben – Suchfeld ohne Filterwirkung | `agrar/ernte/liste.tsx` |
-| W13 | Bedarfsrechner | Kein „Ergebnis speichern“ / „Als Düngeplan übernehmen“ | `agrar/duenger/bedarfsrechner.tsx` |
+| W11 | Dünger-Mischungen | Komponenten-Zeilen: Verschieben (Reihenfolge) | **Erledigt:** moveKomponenteUp/Down, ChevronUp/ChevronDown pro Zeile | `agrar/duenger/mischungen.tsx` |
+| W12 | Ernte-Liste | Suchbegriff an Tabelle/Filter | **Erledigt:** `filteredErnten` aus searchTerm, DataTable erhält filteredErnten; Suchfeld filtert Schlag/Kultur/Status | `agrar/ernte/liste.tsx` |
+| W13 | Bedarfsrechner | „Ergebnis speichern“ / „Als Düngeplan übernehmen“ | **Erledigt (Toast):** Buttons im Empfehlungsschritt mit onClick + Hinweis „in Planung“ | `agrar/duenger/bedarfsrechner.tsx` |
 
 ### Lager
 
@@ -172,10 +174,31 @@ Erstellt aus paralleler Code-Analyse der Module Verkauf, Einkauf, Agrar, Fibu/Fi
 
 ## 4. Kurz-Zusammenfassung
 
-- **Diskrepanzen:** Über alle Module hinweg viele **Export**-Buttons ohne Funktion, **Toolbar-/Filter-Buttons** mit leerem `onClick` oder nur `console.log`, sowie zentrale Aktionen (Sofort-Rechnung, Prüfen/Freigeben/Verbuchen Rechnungseingang, Finance-Toolbars, LKW-Registrierung, Ein-/Auslagerung buchen, POS Fortsetzen/Löschen) nicht oder nur Platzhalter umgesetzt.
+- **Diskrepanzen:** Über alle Module hinweg viele **Export**-Buttons ohne Funktion, **Toolbar-/Filter-Buttons** mit leerem `onClick` oder nur `console.log`, sowie zentrale Aktionen (Sofort-Rechnung, Prüfen/Freigeben/Verbuchen Rechnungseingang, Finance-Toolbars, Ein-/Auslagerung buchen, POS Fortsetzen/Löschen) nicht oder nur Platzhalter umgesetzt. **Annahme (F16–F18):** F16/F17 erledigt; F18 teilweise (Scan Toast + Upload-Fotos, optional später Barcode-Scanner).
 - **Workflow-Lücken:** **Lieferschein/Auftrag/Angebot:** Position löschen & Verschieben fehlen; Lieferschein: Zeile zur Bearbeitung auswählen fehlt. **Einkauf:** Kein Zeilen-Löschen/Verschieben in LS/Rechnung. **Agrar:** Viele Listen ohne Zeilen-Löschen/Bearbeiten; Ernte-Liste Suche ohne Filterwirkung. **Lager:** Ein-/Auslagerung ohne echte Buchung.
 - **Mock/TODO:** Tenant/Auth-Kontext in mehreren Stamm-Masken; Lieferanten-Stamm Mock-Fallback; Agrar (PSM-Abgabe, Saatgut-Bestellung, Beratung, Wasserschutz); Lager (Bestandsübersicht, Lagerplätze, Auslagerung Charge); POS/Annahme (TSE, Offline, LKW-Registrierung).
 
 ---
 
-*Ende der Audit-Liste. Nächster Schritt: Priorisierte Abarbeitung (z. B. zuerst Lieferschein Position löschen/verschieben, dann Sofort-Rechnung, dann Export-Buttons und Finance-Toolbars).*
+## 5. Status & priorisierte Nächste Schritte
+
+| Status    | Einträge | Anmerkung |
+|-----------|----------|-----------|
+| Erledigt  | F16, F17 | Annahme: Bearbeiten → Qualitäts-Check; Abschliessen → POST LKW-Registrierung |
+| Teilweise | F18      | Scan: Toast + Upload-Fotos; optional später Barcode-Scanner |
+| Offen     | Alle übrigen | Siehe Tabellen in Abschnitt 1–3 |
+
+**Empfohlene Reihenfolge für die Abarbeitung:**
+
+1. **Lieferschein (Verkauf):** Position löschen, Verschieben (Hoch/Runter), Zeile zur Bearbeitung auswählen (W1–W3).
+2. **Sofort-Rechnung:** V6 (Lieferschein), V8 (Auftrag) – Rechnung aus Beleg erzeugen.
+3. **Auftrag/Angebot:** Position löschen & Verschieben (W4–W7); V9 Buttons (Speichern, In Auftrag wandeln, Löschen, Beenden).
+4. **Einkauf:** Rechnungseingang Prüfen/Freigeben/Verbuchen (E6, E7, E9), Beleg drucken und buchen; ggf. Position löschen/verschieben (W8).
+5. **Export-Buttons:** Einheitlicher Export (CSV/PDF) wo „Export“ angeboten wird (Verkauf, Einkauf, Agrar, Fibu, Admin).
+6. **Finance-Toolbars:** F6, F7, F8 – Validieren, Speichern, DATEV, OP-Debitoren, Kasse, Mahnwesen etc. mit echten Handlern.
+7. **Lager:** Ein-/Auslagerung Buchen mit Backend-Anbindung (F9, W15).
+8. **Mock/TODO:** Tenant/Auth aus Kontext; echte APIs statt Fallback-Daten (nach Bedarf).
+
+---
+
+*Ende der Audit-Liste. Bei Abarbeitung: Eintrag in Tabelle auf „Erledigt“ setzen bzw. Priorität auf „–“ und kurze Anmerkung ergänzen.*

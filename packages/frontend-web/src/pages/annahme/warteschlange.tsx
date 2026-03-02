@@ -83,10 +83,18 @@ export default function WarteschlangePage(): JSX.Element {
 
   return (
     <div className="space-y-4 p-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <h1 className="text-3xl font-bold">Annahme-Warteschlange</h1>
           <p className="text-muted-foreground">LKW-Abfertigung</p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => navigate('/annahme/qr')}>
+            QR-Code (Handy)
+          </Button>
+          <Button onClick={() => navigate('/annahme/lkw-registrierung')}>
+            LKW anmelden
+          </Button>
         </div>
       </div>
 

@@ -3,18 +3,23 @@
 from __future__ import annotations
 
 import json
+import os
 from datetime import date, datetime
-from typing import Any, Optional
+from typing import Any, List, Optional
 from uuid import uuid4
 
 from fastapi import APIRouter, Body, Depends, File, HTTPException, Query, UploadFile
+from fastapi.responses import Response
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.cache import cache_delete_prefix, cache_get_json, cache_set_json
+from app.core.config import settings
 from app.core.database import get_db
+from app.core.logging import get_correlation_id
 from app.core.tenant import get_tenant_id
+from app.infrastructure.models import AuditLog
 from app.documents.router_helpers import get_repository, list_from_store, get_from_store, save_to_store
 from app.domains.operations.models import Charge, Dokument, Rahmenvertrag, ZertifikatEintrag
 from app.domains.shared.events import IntegrationEvent, get_event_publisher
@@ -758,6 +763,149 @@ async def einkauf_rechnungseingaenge_list(db: Session = Depends(get_db)) -> list
         }
         for r in rows
     ]
+
+
+def _einkauf_rechnungseingang_get_id_and_status(db: Session, rechnung_id: str) -> Optional[tuple[str, str]]:
+    """Return (id, status) or None if not found."""
+    row = db.execute(
+        text(
+            "SELECT id, status FROM einkauf_rechnungseingaenge WHERE id = :id OR rechnungs_nummer = :id"
+        ),
+        {"id": rechnung_id},
+    ).mappings().first()
+    if not row:
+        return None
+    return (str(row["id"]), (row.get("status") or "").upper())
+
+
+def _einkauf_audit_user_for_tenant(db: Session, tenant_id: str) -> Optional[tuple[str, str]]:
+    """Return (user_id, user_email) for first user in tenant, or None if none (skip audit)."""
+    try:
+        row = db.execute(
+            text(
+                "SELECT id, email FROM domain_shared.users WHERE tenant_id = :tid AND (is_active IS NULL OR is_active = true) LIMIT 1"
+            ),
+            {"tid": tenant_id},
+        ).mappings().first()
+        if row and row.get("id"):
+            return (str(row["id"]), str((row.get("email") or "unknown")[:100]))
+    except Exception:
+        pass
+    return None
+
+
+def _einkauf_rechnungseingang_write_audit(
+    db: Session,
+    tenant_id: str,
+    rechnung_id: str,
+    action: str,
+    old_status: str,
+    new_status: str,
+) -> None:
+    """Write one audit log entry for rechnungseingang status change (GoBD)."""
+    user_pair = _einkauf_audit_user_for_tenant(db, tenant_id)
+    if not user_pair:
+        return
+    user_id, user_email = user_pair
+    log_entry = AuditLog(
+        id=str(uuid4()),
+        timestamp=datetime.utcnow(),
+        user_id=user_id,
+        user_email=user_email,
+        tenant_id=tenant_id,
+        action=action,
+        entity_type="rechnungseingang",
+        entity_id=rechnung_id,
+        changes={"old": {"status": old_status}, "new": {"status": new_status}},
+        ip_address=None,
+        user_agent=None,
+        correlation_id=get_correlation_id(),
+    )
+    db.add(log_entry)
+
+
+@router.post("/einkauf/rechnungseingaenge/{rechnung_id}/pruefen")
+async def einkauf_rechnungseingang_pruefen(
+    rechnung_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
+    """Setzt Status auf GEPRUEFT (nur aus ENTWURF/ERFASST/OFFEN). GoBD: Audit-Eintrag."""
+    pair = _einkauf_rechnungseingang_get_id_and_status(db, rechnung_id)
+    if not pair:
+        raise HTTPException(status_code=404, detail="Rechnungseingang nicht gefunden")
+    rid, status = pair
+    if status not in ("ENTWURF", "ERFASST", "OFFEN"):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Prüfen nur möglich bei Status Entwurf/Erfasst/Offen. Aktuell: {status}",
+        )
+    new_status = "GEPRUEFT"
+    db.execute(
+        text(
+            "UPDATE einkauf_rechnungseingaenge SET status = :new_status, updated_at = now() WHERE id = :id"
+        ),
+        {"id": rid, "new_status": new_status},
+    )
+    _einkauf_rechnungseingang_write_audit(db, tenant_id, rid, "pruefen", status, new_status)
+    db.commit()
+    return {"message": "Rechnungseingang geprüft", "status": new_status}
+
+
+@router.post("/einkauf/rechnungseingaenge/{rechnung_id}/freigeben")
+async def einkauf_rechnungseingang_freigeben(
+    rechnung_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
+    """Setzt Status auf FREIGEGEBEN (nur aus GEPRUEFT). GoBD: Audit-Eintrag."""
+    pair = _einkauf_rechnungseingang_get_id_and_status(db, rechnung_id)
+    if not pair:
+        raise HTTPException(status_code=404, detail="Rechnungseingang nicht gefunden")
+    rid, status = pair
+    if status != "GEPRUEFT":
+        raise HTTPException(
+            status_code=400,
+            detail=f"Freigeben nur möglich bei Status GEPRUEFT. Aktuell: {status}",
+        )
+    new_status = "FREIGEGEBEN"
+    db.execute(
+        text(
+            "UPDATE einkauf_rechnungseingaenge SET status = :new_status, updated_at = now() WHERE id = :id"
+        ),
+        {"id": rid, "new_status": new_status},
+    )
+    _einkauf_rechnungseingang_write_audit(db, tenant_id, rid, "freigeben", status, new_status)
+    db.commit()
+    return {"message": "Rechnungseingang freigegeben", "status": new_status}
+
+
+@router.post("/einkauf/rechnungseingaenge/{rechnung_id}/verbuchen")
+async def einkauf_rechnungseingang_verbuchen(
+    rechnung_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
+    """Setzt Status auf VERBUCHT (nur aus FREIGEGEBEN). GoBD: Audit-Eintrag."""
+    pair = _einkauf_rechnungseingang_get_id_and_status(db, rechnung_id)
+    if not pair:
+        raise HTTPException(status_code=404, detail="Rechnungseingang nicht gefunden")
+    rid, status = pair
+    if status != "FREIGEGEBEN":
+        raise HTTPException(
+            status_code=400,
+            detail=f"Verbuchen nur möglich bei Status FREIGEGEBEN. Aktuell: {status}",
+        )
+    new_status = "VERBUCHT"
+    db.execute(
+        text(
+            "UPDATE einkauf_rechnungseingaenge SET status = :new_status, updated_at = now() WHERE id = :id"
+        ),
+        {"id": rid, "new_status": new_status},
+    )
+    _einkauf_rechnungseingang_write_audit(db, tenant_id, rid, "verbuchen", status, new_status)
+    db.commit()
+    return {"message": "Rechnungseingang verbucht", "status": new_status}
 
 
 @router.get("/einkauf/reports", response_model=dict)
@@ -1557,23 +1705,107 @@ async def inventory_lot_trace(lot_id: str, db: Session = Depends(get_db)) -> dic
     }
 
 
-@router.get("/annahme/warteschlange", response_model=dict)
-async def annahme_warteschlange(db: Session = Depends(get_db)) -> dict:
-    lots = db.query(Charge).order_by(Charge.eingang.asc()).limit(200).all()
+def _annahme_lkw_ids_key() -> str:
+    return "annahme:lkw:ids"
+
+
+def _annahme_lkw_entry_key(reg_id: str) -> str:
+    return f"annahme:lkw:{reg_id}"
+
+
+def _lkw_cache_to_item(entry: dict, position: int, tenant_id: Optional[str] = None) -> Optional[dict]:
+    """Aus Cache-Eintrag einen Warteschlange-Item bauen (position, wartezeit)."""
+    if not entry or (tenant_id and entry.get("tenant_id") != tenant_id):
+        return None
+    ankunftszeit_s = entry.get("ankunftszeit") or ""
+    wartezeit_min = 0
+    try:
+        if ankunftszeit_s:
+            normalized = ankunftszeit_s.replace("Z", "+00:00")[:19]
+            dt = datetime.fromisoformat(normalized)
+            delta = datetime.utcnow() - dt
+            wartezeit_min = max(0, int(delta.total_seconds() / 60))
+    except Exception:
+        pass
+    status = entry.get("status") or "wartend"
+    if status == "warteschlange":
+        status = "wartend"
     return {
-        "items": [
-            {
-                "id": l.id,
-                "referenz": l.chargen_id,
-                "artikel": l.artikel,
-                "menge": float(l.menge or 0),
-                "status": l.status,
-                "ankunft": l.eingang.isoformat() if l.eingang else None,
-            }
-            for l in lots
-        ],
-        "total": len(lots),
+        "id": entry.get("id"),
+        "position": position,
+        "kennzeichen": entry.get("kennzeichen", ""),
+        "lieferant": entry.get("lieferant", ""),
+        "artikel": entry.get("artikel", ""),
+        "ankunft": ankunftszeit_s,
+        "wartezeit": wartezeit_min,
+        "status": status,
+        "lieferschein_nr": entry.get("lieferschein_nr", ""),
     }
+
+
+@router.get("/annahme/warteschlange", response_model=dict)
+async def annahme_warteschlange(
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict:
+    """Liste aller LKW in der Annahme-Warteschlange (aus Cache)."""
+    ids = cache_get_json(_annahme_lkw_ids_key()) or []
+    if not isinstance(ids, list):
+        ids = []
+    items: list[dict] = []
+    for idx, reg_id in enumerate(ids):
+        if not reg_id:
+            continue
+        entry = cache_get_json(_annahme_lkw_entry_key(str(reg_id)))
+        item = _lkw_cache_to_item(entry, position=idx + 1, tenant_id=tenant_id)
+        if item:
+            items.append(item)
+    # Nach Ankunftszeit sortieren (älteste zuerst)
+    items.sort(key=lambda x: (x.get("ankunft") or ""))
+    # Positionen neu setzen
+    for i, it in enumerate(items):
+        it["position"] = i + 1
+    return {"items": items, "total": len(items)}
+
+
+@router.get("/annahme/warteschlange/{reg_id}", response_model=dict)
+async def annahme_warteschlange_get(
+    reg_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict:
+    """Einzelnen LKW-Eintrag für Qualitäts-Check o.ä. abrufen."""
+    entry = cache_get_json(_annahme_lkw_entry_key(reg_id))
+    if not entry:
+        raise HTTPException(status_code=404, detail="LKW-Eintrag nicht gefunden")
+    if entry.get("tenant_id") != tenant_id:
+        raise HTTPException(status_code=404, detail="LKW-Eintrag nicht gefunden")
+    item = _lkw_cache_to_item(entry, position=0, tenant_id=None)
+    if not item:
+        raise HTTPException(status_code=404, detail="LKW-Eintrag nicht gefunden")
+    item["position"] = 0
+    return item
+
+
+class AnnahmeStatusUpdate(BaseModel):
+    status: str = Field(..., description="in-bearbeitung | abgeschlossen")
+
+
+@router.patch("/annahme/warteschlange/{reg_id}", response_model=dict)
+async def annahme_warteschlange_patch(
+    reg_id: str,
+    body: AnnahmeStatusUpdate,
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict:
+    """Status eines LKW-Eintrags aktualisieren (z.B. In Bearbeitung, Abgeschlossen)."""
+    if body.status not in ("in-bearbeitung", "abgeschlossen"):
+        raise HTTPException(status_code=400, detail="status muss 'in-bearbeitung' oder 'abgeschlossen' sein")
+    entry = cache_get_json(_annahme_lkw_entry_key(reg_id))
+    if not entry:
+        raise HTTPException(status_code=404, detail="LKW-Eintrag nicht gefunden")
+    if entry.get("tenant_id") != tenant_id:
+        raise HTTPException(status_code=404, detail="LKW-Eintrag nicht gefunden")
+    entry["status"] = body.status
+    cache_set_json(_annahme_lkw_entry_key(reg_id), entry, ttl_seconds=86400 * 7)
+    return _lkw_cache_to_item(entry, position=0, tenant_id=None) or entry
 
 
 class LKWRegistrierungIn(BaseModel):
@@ -1583,6 +1815,7 @@ class LKWRegistrierungIn(BaseModel):
     artikel: str = Field(default="")
     ankunftszeit: str = Field(default="")
     prioritaet: str = Field(default="normal", description="hoch | normal | niedrig")
+    attachment_ids: List[str] = Field(default_factory=list, description="IDs von hochgeladenen Anhängen (Kennzeichen/Lieferschein-Fotos)")
 
 
 class LKWRegistrierungOut(BaseModel):
@@ -1591,14 +1824,42 @@ class LKWRegistrierungOut(BaseModel):
     status: str = "warteschlange"
 
 
+class AnnahmeUploadOut(BaseModel):
+    id: str
+    filename: str
+
+
+@router.post("/annahme/upload", response_model=AnnahmeUploadOut, status_code=201, tags=["annahme"])
+async def annahme_upload(
+    file: UploadFile = File(..., description="Foto/Scan Kennzeichen oder Lieferschein/Barcode"),
+    tenant_id: str = Depends(get_tenant_id),
+) -> AnnahmeUploadOut:
+    """Upload für Annahme (Kennzeichen/Lieferschein-Fotos). Mobil (Lager, Waage, Außendienst)."""
+    if not file.filename or not file.content_type or not file.content_type.startswith(("image/", "application/octet-stream")):
+        raise HTTPException(status_code=400, detail="Nur Bilddateien werden akzeptiert (image/*)")
+    content = await file.read()
+    if len(content) > getattr(settings, "MAX_UPLOAD_SIZE", 10 * 1024 * 1024):
+        raise HTTPException(status_code=413, detail="Datei zu groß")
+    upload_id = str(uuid4())
+    base_dir = os.path.join(getattr(settings, "UPLOAD_DIR", "uploads"), "annahme")
+    os.makedirs(base_dir, exist_ok=True)
+    ext = os.path.splitext(file.filename or "")[1] or ".bin"
+    safe_name = f"{upload_id}{ext}"
+    path = os.path.join(base_dir, safe_name)
+    with open(path, "wb") as f:
+        f.write(content)
+    cache_set_json(f"annahme:upload:{upload_id}", {"id": upload_id, "filename": file.filename, "path": path}, ttl_seconds=86400 * 7)
+    return AnnahmeUploadOut(id=upload_id, filename=file.filename or safe_name)
+
+
 @router.post("/annahme/lkw-registrierung", response_model=LKWRegistrierungOut, status_code=201, tags=["annahme"])
 async def create_lkw_registrierung(
     payload: LKWRegistrierungIn,
     tenant_id: str = Depends(get_tenant_id),
 ) -> LKWRegistrierungOut:
-    """LKW in Annahme-Warteschlange eintragen (Stub: ID zurück, ggf. später in Queue-Tabelle persistieren)."""
+    """LKW in Annahme-Warteschlange eintragen; erscheint in GET /annahme/warteschlange."""
     reg_id = str(uuid4())
-    cache_set_json(f"annahme:lkw:{reg_id}", {
+    cache_set_json(_annahme_lkw_entry_key(reg_id), {
         "id": reg_id,
         "tenant_id": tenant_id,
         "kennzeichen": payload.kennzeichen,
@@ -1607,9 +1868,15 @@ async def create_lkw_registrierung(
         "artikel": payload.artikel,
         "ankunftszeit": payload.ankunftszeit or _now_iso(),
         "prioritaet": payload.prioritaet,
-        "status": "warteschlange",
+        "status": "wartend",
+        "attachment_ids": payload.attachment_ids,
     }, ttl_seconds=86400 * 7)
-    return LKWRegistrierungOut(id=reg_id, kennzeichen=payload.kennzeichen, status="warteschlange")
+    ids = cache_get_json(_annahme_lkw_ids_key()) or []
+    if not isinstance(ids, list):
+        ids = []
+    ids.append(reg_id)
+    cache_set_json(_annahme_lkw_ids_key(), ids, ttl_seconds=86400 * 7)
+    return LKWRegistrierungOut(id=reg_id, kennzeichen=payload.kennzeichen, status="wartend")
 
 
 # Portal compatibility ------------------------------------------------------
@@ -2612,13 +2879,13 @@ async def list_suspended_sales(
     return []
 
 
-@router.delete("/pos/suspended-sales/{sale_id}", status_code=204, tags=["pos"])
+@router.delete("/pos/suspended-sales/{sale_id}", status_code=204, tags=["pos"], response_class=Response)
 async def delete_suspended_sale(
     sale_id: str,
     tenant_id: str = Depends(get_tenant_id),
-) -> None:
+):
     """Pausierten Verkauf löschen — Stub: bestätigt nur; kann später an POS-Store angebunden werden."""
-    return None
+    return Response(status_code=204)
 
 
 # ---------------------------------------------------------------------------

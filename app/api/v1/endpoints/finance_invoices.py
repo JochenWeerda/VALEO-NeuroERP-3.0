@@ -12,6 +12,7 @@ import logging
 
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
+from app.core.gobd_artifact import register_artifact, sha256_hex
 from app.documents.models import SalesInvoice, DocLine
 from app.documents.router_helpers import (
     get_repository, save_to_store, get_from_store, list_from_store
@@ -153,6 +154,7 @@ async def _create_gl_booking_and_op(db: Session, invoice: SalesInvoice, repo, te
 @router.post("", response_model=dict)
 async def create_invoice(
     invoice: SalesInvoice,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ) -> dict:
     """
@@ -202,7 +204,14 @@ async def create_invoice(
         
         # FIBU-AR-02: Wenn Rechnung verbucht wird (status != ENTWURF), erzeuge GL-Buchung + OP
         if invoice.status != "ENTWURF":
-            await _create_gl_booking_and_op(db, invoice, repo)
+            await _create_gl_booking_and_op(db, invoice, repo, tenant_id)
+            # GoBD: Belegartefakt für Ausgangsrechnung registrieren
+            canonical = f"{invoice.number}|{invoice.date}|{invoice.totalGross}|{invoice.customerId}"
+            content_hash = sha256_hex(canonical.encode("utf-8"))
+            register_artifact(
+                db, tenant_id, invoice.number, "other",
+                content_hash, f"invoice/ar/{invoice.number}", file_name=f"Rechnung_{invoice.number}.pdf", created_by=None,
+            )
         
         logger.info(f"Invoice created: {invoice.number}")
         

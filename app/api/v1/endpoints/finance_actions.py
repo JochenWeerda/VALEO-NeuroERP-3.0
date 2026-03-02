@@ -3,14 +3,19 @@ Finance action endpoints – Start/run actions for bank reconciliation, posting,
 Minimal action endpoints that execute a short logic or stub and return { success, message }.
 """
 
-from typing import Optional
-from fastapi import APIRouter, Depends
+import io
+from datetime import date
+from typing import List, Optional
+from fastapi import APIRouter, Depends, Query
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 from pydantic import BaseModel, Field
 
 from ....core.database import get_db
 from ....core.tenant import get_tenant_id
 from ....core.dependency_container import container
+from ....core.gobd_artifact import register_artifact, sha256_hex
 from ....infrastructure.repositories import JournalEntryRepository
 
 router = APIRouter(tags=["finance", "actions"])
@@ -113,3 +118,219 @@ async def run_closing(
     """
     # Stub: can be extended to run period closing, close periods, etc.
     return ActionResponse(success=True, message="Abschluss angestoßen.")
+
+
+# ── Credit limits ─────────────────────────────────────────────────────────────
+
+@router.get("/credit-limits", response_model=list[dict])
+async def list_credit_limits(
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Kreditlimits aus domain_erp.business_partners."""
+    try:
+        rows = db.execute(
+            text(
+                "SELECT id, partner_name, credit_limit, used_credit, currency "
+                "FROM domain_erp.business_partners "
+                "WHERE tenant_id=:tid AND credit_limit IS NOT NULL "
+                "ORDER BY partner_name"
+            ),
+            {"tid": tenant_id},
+        ).mappings().all()
+        return [dict(r) for r in rows]
+    except Exception:
+        return []
+
+
+# ── Collaterals ───────────────────────────────────────────────────────────────
+
+@router.get("/collaterals", response_model=list[dict])
+async def list_collaterals(
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Sicherheiten: Pfandrechte, Bürgschaften — aus domain_erp.collaterals oder leere Liste."""
+    try:
+        rows = db.execute(
+            text(
+                "SELECT * FROM domain_erp.collaterals "
+                "WHERE tenant_id=:tid ORDER BY created_at DESC"
+            ),
+            {"tid": tenant_id},
+        ).mappings().all()
+        return [dict(r) for r in rows]
+    except Exception:
+        return []
+
+
+# ── Payment suggestions ────────────────────────────────────────────────────────
+
+@router.get("/payment-suggestions", response_model=list[dict])
+async def list_payment_suggestions(
+    days_ahead: int = Query(14, ge=1, le=365),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Zahlungsvorschläge: Kreditor-OPs die in X Tagen fällig sind."""
+    try:
+        rows = db.execute(
+            text(
+                "SELECT id, partner_name AS lieferant, beleg_nummer AS rechnungs_nr, "
+                "       faellig_am, offen AS betrag, waehrung "
+                "FROM domain_erp.open_items "
+                "WHERE tenant_id=:tid AND typ='kreditor' AND offen > 0 "
+                "  AND faellig_am <= CURRENT_DATE + :days "
+                "ORDER BY faellig_am ASC"
+            ),
+            {"tid": tenant_id, "days": days_ahead},
+        ).mappings().all()
+        return [dict(r) for r in rows]
+    except Exception:
+        return []
+
+
+# ── Buchungsübergabe (ASC) Export ───────────────────────────────────────────────
+
+class BuchungsuebergabeExportRequest(BaseModel):
+    """Request für ASC-Buchungsübergabe an die Finanzbuchhaltung."""
+    von: date = Field(..., description="Startdatum (inkl.)")
+    bis: date = Field(..., description="Enddatum (inkl.)")
+    bediener: Optional[str] = Field(None, description="Beediener-Kürzel (leer = alle)")
+    sortierung: str = Field(
+        "datum",
+        description="Sortierung: 'datum' = Buch.-Datum+Rechnung-Nr., 'rechnungsnr' = Rechnung-Nr.+Datum",
+    )
+    buchungsarten: Optional[List[str]] = Field(
+        None, description="Filter auf bestimmte Buchungsarten (leer = alle)"
+    )
+    download: bool = Field(
+        True, description="True = Dateidownload, False = JSON-Zusammenfassung"
+    )
+
+
+class BuchungsuebergabeExportSummary(BaseModel):
+    success: bool = True
+    dateiname: str
+    von: str
+    bis: str
+    anzahl_buchungen: int
+    summe_soll: float
+    summe_haben: float
+    message: str
+
+
+@router.post("/buchungsuebergabe-export")
+async def buchungsuebergabe_export(
+    body: BuchungsuebergabeExportRequest,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """
+    Buchungsübergabe (ASC) an die Finanzbuchhaltung.
+    Erzeugt eine tab-delimited ASC-Datei mit allen Buchungssätzen im gewählten Zeitraum.
+    """
+    sort_clause = (
+        "je.entry_date, je.entry_number"
+        if body.sortierung == "datum"
+        else "je.entry_number, je.entry_date"
+    )
+
+    where_parts = [
+        "je.tenant_id = :tid",
+        "je.entry_date BETWEEN :von AND :bis",
+    ]
+    params: dict = {"tid": tenant_id, "von": body.von, "bis": body.bis}
+
+    if body.bediener:
+        where_parts.append("je.source_user = :bediener")
+        params["bediener"] = body.bediener
+
+    where_sql = " AND ".join(where_parts)
+
+    try:
+        rows = db.execute(
+            text(f"""
+                SELECT
+                    je.entry_date,
+                    je.entry_number,
+                    jel.line_number,
+                    ca.account_number,
+                    jel.debit_amount,
+                    jel.credit_amount,
+                    jel.description,
+                    je.source,
+                    jel.tax_code,
+                    jel.cost_center
+                FROM domain_erp.journal_entries je
+                JOIN domain_erp.journal_entry_lines jel ON jel.journal_entry_id = je.id
+                LEFT JOIN domain_erp.chart_of_accounts ca ON ca.id = jel.account_id
+                WHERE {where_sql}
+                ORDER BY {sort_clause}, jel.line_number
+            """),
+            params,
+        ).fetchall()
+    except Exception:
+        rows = []
+
+    # ASC-Format Spalten (tab-delimited, Windows-1252):
+    # Datum | Belegart | Belegnr | Buchungstext | Soll | Haben | Konto | Steuerschl. | Kostenstelle
+    lines = [
+        "Datum\tBelegart\tBelegnr\tBuchungstext\tSoll\tHaben\tKonto\tSteuerschl.\tKostenstelle"
+    ]
+    sum_soll = 0.0
+    sum_haben = 0.0
+
+    for row in rows:
+        edate, enr, _lnr, acct, debit, credit, desc, src, tax, cc = row
+        soll = float(debit or 0)
+        haben = float(credit or 0)
+        sum_soll += soll
+        sum_haben += haben
+        lines.append(
+            "\t".join([
+                str(edate) if edate else "",
+                str(src or "SV"),
+                str(enr or ""),
+                str(desc or "").replace("\t", " "),
+                f"{soll:.2f}".replace(".", ","),
+                f"{haben:.2f}".replace(".", ","),
+                str(acct or ""),
+                str(tax or ""),
+                str(cc or ""),
+            ])
+        )
+
+    content = "\r\n".join(lines) + "\r\n"
+    dateiname = f"FIBU_Buchungsuebergabe_{body.von.strftime('%Y%m%d')}_{body.bis.strftime('%Y%m%d')}.ASC"
+    content_bytes = content.encode("cp1252", errors="replace")
+    content_hash = sha256_hex(content_bytes)
+    header_id_export = f"Buchungsuebergabe-{body.von}-{body.bis}"
+    storage_key_export = f"export/asc/{dateiname}"
+    register_artifact(
+        db,
+        tenant_id,
+        header_id_export,
+        "other",
+        content_hash,
+        storage_key_export,
+        file_name=dateiname,
+        created_by=body.bediener,
+    )
+
+    if body.download:
+        return StreamingResponse(
+            io.BytesIO(content_bytes),
+            media_type="text/plain; charset=windows-1252",
+            headers={"Content-Disposition": f'attachment; filename="{dateiname}"'},
+        )
+
+    return BuchungsuebergabeExportSummary(
+        dateiname=dateiname,
+        von=str(body.von),
+        bis=str(body.bis),
+        anzahl_buchungen=len(rows),
+        summe_soll=round(sum_soll, 2),
+        summe_haben=round(sum_haben, 2),
+        message=f"{len(rows)} Buchungszeilen exportiert.",
+    )

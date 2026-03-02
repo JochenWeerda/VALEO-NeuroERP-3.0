@@ -117,33 +117,75 @@ class SystemOptimizerAgent:
     async def _handle_memory_critical(self, signal: Dict[str, Any]):
         """Handle critical memory situation."""
         logger.warning("⚠️ Critical memory usage detected - clearing caches")
-        
+
         try:
-            # Clear Vector Store cache (if applicable)
-            from app.infrastructure.rag.vector_store import get_vector_store
-            vector_store = get_vector_store()
-            # TODO: Implement cache clearing
-            
+            from app.core.cache import cache_delete_prefix, _mem_store, _mem_lock
+
+            # Redis: alle Keys löschen (prefix="" matcht alles)
+            cache_delete_prefix("")
+
+            # In-Memory Fallback-Store explizit leeren
+            with _mem_lock:
+                _mem_store.clear()
+
+            logger.info("✅ Redis + In-Memory-Cache geleert")
+
+            # Vector Store leeren (best-effort)
+            try:
+                from app.infrastructure.rag.vector_store import get_vector_store
+                vector_store = get_vector_store()
+                for method_name in ("clear", "reset", "flush"):
+                    if hasattr(vector_store, method_name):
+                        getattr(vector_store, method_name)()
+                        logger.info(f"✅ Vector Store via .{method_name}() geleert")
+                        break
+            except Exception as ve:
+                logger.debug(f"Vector Store nicht erreichbar oder kein clear-Method: {ve}")
+
             logger.info("✅ Caches cleared successfully")
-            
-            # Publish event for monitoring
-            from app.domains.shared.events import get_event_publisher
-            event_publisher = get_event_publisher()
-            # TODO: Create SystemOptimizationEvent
-            
+
         except Exception as e:
             logger.error(f"Failed to clear caches: {e}")
     
     async def _handle_scale_up(self, signal: Dict[str, Any]):
         """Handle scale-up signal."""
+        import os
+        from pathlib import Path
+        import httpx
+
         resource = signal.get("resource")
         logger.info(f"📈 Scale-up signal received for {resource}")
-        
-        # In a cloud environment, this would trigger auto-scaling
-        # For now, just log and alert
-        logger.warning(f"Manual intervention recommended: {signal.get('action')}")
-        
-        # TODO: Integrate with K8s HPA or cloud auto-scaling APIs
+
+        k8s_host = os.environ.get("KUBERNETES_SERVICE_HOST")
+        if k8s_host:
+            try:
+                token_path = Path("/var/run/secrets/kubernetes.io/serviceaccount/token")
+                token = token_path.read_text() if token_path.exists() else ""
+                hpa_name = os.environ.get("K8S_HPA_NAME", "valeo-backend")
+                namespace = os.environ.get("K8S_NAMESPACE", "default")
+                target_replicas = signal.get("target_replicas", 2)
+
+                async with httpx.AsyncClient(verify=False) as client:
+                    resp = await client.patch(
+                        f"https://{k8s_host}/apis/autoscaling/v2/namespaces/{namespace}"
+                        f"/horizontalpodautoscalers/{hpa_name}",
+                        headers={
+                            "Authorization": f"Bearer {token}",
+                            "Content-Type": "application/merge-patch+json",
+                        },
+                        json={"spec": {"minReplicas": target_replicas}},
+                    )
+                    if resp.status_code < 300:
+                        logger.info(f"✅ K8s HPA '{hpa_name}' auf {target_replicas} Replicas skaliert")
+                    else:
+                        logger.warning(f"K8s HPA PATCH HTTP {resp.status_code}: {resp.text[:200]}")
+            except Exception as ke:
+                logger.error(f"K8s HPA scale-up fehlgeschlagen: {ke}")
+        else:
+            logger.warning(
+                f"📈 Scale-up empfohlen — kein K8s erkannt, manuelle Intervention erforderlich: "
+                f"{signal.get('action')}"
+            )
     
     async def _handle_scale_down(self, signal: Dict[str, Any]):
         """Handle scale-down signal."""
@@ -156,12 +198,35 @@ class SystemOptimizerAgent:
     async def _handle_connection_pool(self, signal: Dict[str, Any]):
         """Handle connection pool exhaustion."""
         logger.warning("⚠️ Database connection pool near capacity")
-        
-        # Recommendation: Increase pool size or investigate slow queries
-        logger.info("Action: Investigating slow queries and increasing pool size")
-        
-        # TODO: Implement automatic pool size adjustment
-        # TODO: Trigger slow query analysis
+
+        try:
+            from app.core.database import engine
+            from sqlalchemy import text
+
+            # Slow-Query-Analyse via pg_stat_activity
+            with engine.connect() as conn:
+                rows = conn.execute(text("""
+                    SELECT pid,
+                           query,
+                           EXTRACT(EPOCH FROM (now() - query_start))::int AS sek
+                    FROM pg_stat_activity
+                    WHERE state = 'active'
+                      AND query_start < now() - interval '5 seconds'
+                    ORDER BY sek DESC
+                    LIMIT 10
+                """)).fetchall()
+
+                for r in rows:
+                    logger.warning(
+                        f"Slow Query [{r.sek}s] PID {r.pid}: {str(r.query)[:200]}"
+                    )
+
+            # Connection-Pool zurücksetzen
+            engine.dispose()
+            logger.info("✅ Connection pool neugestartet via engine.dispose()")
+
+        except Exception as e:
+            logger.error(f"Connection pool handler fehlgeschlagen: {e}")
 
 
 # LangGraph Workflow Nodes

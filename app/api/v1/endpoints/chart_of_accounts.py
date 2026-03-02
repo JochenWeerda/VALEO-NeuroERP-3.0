@@ -5,7 +5,7 @@ Chart of Accounts management endpoints
 from typing import Optional, List
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import Response
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -13,6 +13,7 @@ from pydantic import BaseModel, Field
 
 from ....core.config import settings
 from ....core.database import get_db
+from ....core.fibu_audit import log_fibu_audit
 from ....infrastructure.models import Account as AccountModel
 from ....finance.export_datev import DATEVExporter
 from ..schemas.base import PaginatedResponse
@@ -78,7 +79,7 @@ async def get_account(account_id: str, db: Session = Depends(get_db)):
 
 
 @router.post("/", response_model=Account)
-async def create_account(account: AccountCreate, db: Session = Depends(get_db)):
+async def create_account(account: AccountCreate, request: Request, db: Session = Depends(get_db)):
     """Create a new account."""
     # Check if account number already exists
     existing = db.query(AccountModel).filter(
@@ -92,6 +93,11 @@ async def create_account(account: AccountCreate, db: Session = Depends(get_db)):
     db.add(db_account)
     db.commit()
     db.refresh(db_account)
+    log_fibu_audit(
+        db, account.tenant_id, "create", "finance_account", db_account.id,
+        {"account_number": account.account_number, "account_name": account.account_name},
+        request=request,
+    )
     return Account.model_validate(db_account)
 
 
@@ -99,6 +105,7 @@ async def create_account(account: AccountCreate, db: Session = Depends(get_db)):
 async def update_account(
     account_id: str,
     account_update: AccountUpdate,
+    request: Request,
     db: Session = Depends(get_db)
 ):
     """Update an existing account."""
@@ -114,11 +121,16 @@ async def update_account(
 
     db.commit()
     db.refresh(account)
+    log_fibu_audit(
+        db, account.tenant_id, "update", "finance_account", account_id,
+        {"updated_fields": list(account_update.model_dump(exclude_unset=True).keys())},
+        request=request,
+    )
     return Account.model_validate(account)
 
 
 @router.delete("/{account_id}")
-async def delete_account(account_id: str, db: Session = Depends(get_db)):
+async def delete_account(account_id: str, request: Request, db: Session = Depends(get_db)):
     """Delete an account (soft delete by setting is_active to False)."""
     account = db.query(AccountModel).filter(AccountModel.id == account_id).first()
     if not account:
@@ -133,6 +145,11 @@ async def delete_account(account_id: str, db: Session = Depends(get_db)):
 
     account.is_active = False
     db.commit()
+    log_fibu_audit(
+        db, account.tenant_id, "delete", "finance_account", account_id,
+        {"is_active": False, "account_number": account.account_number},
+        request=request,
+    )
     return {"message": "Account deactivated successfully"}
 
 
@@ -182,53 +199,28 @@ async def datev_export_chart_of_accounts(
     effective_tenant = tenant_id or DEFAULT_TENANT
     bis = bis_datum or von_datum
 
-    # Load journal entry lines with account numbers in date range
-    # Use domain_erp.journal_entries / journal_entry_lines if available; else finance_journal_*
-    try:
-        q = text("""
-            SELECT jel.journal_entry_id, jel.account_id, jel.debit_amount, jel.credit_amount,
-                   jel.description, jel.tax_code, je.entry_date, je.reference,
-                   coa.account_number
-            FROM domain_erp.journal_entry_lines jel
-            JOIN domain_erp.journal_entries je ON jel.journal_entry_id = je.id
-            LEFT JOIN domain_erp.chart_of_accounts coa ON coa.id = jel.account_id
-            WHERE je.tenant_id = :tenant_id
-              AND je.status = 'posted'
-              AND DATE(je.entry_date) >= :von_datum
-              AND DATE(je.entry_date) <= :bis_datum
-            ORDER BY je.entry_date, jel.journal_entry_id, jel.line_number
-        """)
-        rows = db.execute(
-            q,
-            {
-                "tenant_id": effective_tenant,
-                "von_datum": von_datum,
-                "bis_datum": bis,
-            },
-        ).fetchall()
-    except Exception:
-        # Fallback if table names differ (e.g. finance_journal_entries)
-        q = text("""
-            SELECT jel.journal_entry_id, jel.account_id, jel.debit_amount, jel.credit_amount,
-                   jel.description, jel.tax_code, je.entry_date, je.reference,
-                   coa.account_number
-            FROM domain_erp.finance_journal_entry_lines jel
-            JOIN domain_erp.finance_journal_entries je ON jel.journal_entry_id = je.id
-            LEFT JOIN domain_erp.finance_accounts coa ON coa.id = jel.account_id
-            WHERE je.tenant_id = :tenant_id
-              AND je.status = 'posted'
-              AND DATE(je.entry_date) >= :von_datum
-              AND DATE(je.entry_date) <= :bis_datum
-            ORDER BY je.entry_date, jel.journal_entry_id, jel.line_number
-        """)
-        rows = db.execute(
-            q,
-            {
-                "tenant_id": effective_tenant,
-                "von_datum": von_datum,
-                "bis_datum": bis,
-            },
-        ).fetchall()
+    # domain_erp.journal_entries / journal_entry_lines (debit, credit; chart_of_accounts)
+    q = text("""
+        SELECT jel.journal_entry_id, jel.account_id, jel.debit, jel.credit,
+               jel.description, CAST(NULL AS VARCHAR) AS tax_code, je.entry_date, je.reference,
+               coa.account_number
+        FROM domain_erp.journal_entry_lines jel
+        JOIN domain_erp.journal_entries je ON jel.journal_entry_id = je.id
+        LEFT JOIN domain_erp.chart_of_accounts coa ON coa.id = jel.account_id
+        WHERE je.tenant_id = :tenant_id
+          AND je.status = 'posted'
+          AND DATE(je.entry_date) >= :von_datum
+          AND DATE(je.entry_date) <= :bis_datum
+        ORDER BY je.entry_date, jel.journal_entry_id, jel.line_number
+    """)
+    rows = db.execute(
+        q,
+        {
+            "tenant_id": effective_tenant,
+            "von_datum": von_datum,
+            "bis_datum": bis,
+        },
+    ).fetchall()
 
     # Build list of lines per entry for Gegenkonto
     from collections import defaultdict

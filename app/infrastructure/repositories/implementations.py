@@ -4,6 +4,7 @@ SQLAlchemy-based implementations of repository interfaces
 """
 
 from datetime import datetime
+from typing import Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, func, or_
 
@@ -427,6 +428,23 @@ class JournalEntryRepositoryImpl(BaseRepositoryImpl[JournalEntry, dict, dict], J
     def __init__(self, session: Session):
         super().__init__(session, JournalEntry)
 
+    async def get_all(self, tenant_id: str, skip: int = 0, limit: int = 100, **kwargs):
+        """Get journal entries; optional reference= for exact match (e.g. Importlauf run_id)."""
+        from sqlalchemy.exc import SQLAlchemyError
+        from ..repositories.base_repository import logger
+        try:
+            query = self.session.query(JournalEntry).filter(JournalEntry.tenant_id == tenant_id)
+            ref = kwargs.pop("reference", None)
+            if ref is not None:
+                query = query.filter(JournalEntry.reference == ref)
+            for key, value in kwargs.items():
+                if value is not None and hasattr(JournalEntry, key):
+                    query = query.filter(getattr(JournalEntry, key).ilike(f"%{value}%"))
+            return query.order_by(JournalEntry.entry_date.desc()).offset(skip).limit(limit).all()
+        except SQLAlchemyError as e:
+            logger.error("Error getting journal entries: %s", e)
+            return []
+
     async def post_entry(self, entry_id: str, tenant_id: str) -> bool:
         """Post a journal entry"""
         try:
@@ -441,16 +459,20 @@ class JournalEntryRepositoryImpl(BaseRepositoryImpl[JournalEntry, dict, dict], J
             self.session.rollback()
             return False
 
-    async def get_entries_by_date_range(self, start_date: str, end_date: str, tenant_id: str):
-        """Get journal entries by date range"""
+    async def get_entries_by_date_range(
+        self, start_date: str, end_date: str, tenant_id: str, reference: Optional[str] = None
+    ):
+        """Get journal entries by date range, optionally by reference (e.g. Importlauf run_id)."""
         from datetime import datetime
         start = datetime.fromisoformat(start_date)
         end = datetime.fromisoformat(end_date)
-
-        return self.session.query(JournalEntry).filter(
+        query = self.session.query(JournalEntry).filter(
             and_(
                 JournalEntry.tenant_id == tenant_id,
                 JournalEntry.entry_date >= start,
-                JournalEntry.entry_date <= end
+                JournalEntry.entry_date <= end,
             )
-        ).all()
+        )
+        if reference is not None:
+            query = query.filter(JournalEntry.reference == reference)
+        return query.order_by(JournalEntry.entry_date.desc()).all()

@@ -26,7 +26,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useGlobalShortcuts, globalShortcutManager } from '@/lib/shortcuts/global-shortcuts'
 import { ShortcutHintButton } from '@/components/shortcuts/ShortcutHelpPanel'
 import {
-  ChevronLeft, ChevronRight, MoreHorizontal, Check, Printer, Save,
+  ChevronLeft, ChevronRight, ChevronUp, ChevronDown, MoreHorizontal, Check, Printer, Save,
   FileText, Folder, FileCheck, Link as LinkIcon, Receipt, Trash2, Search,
 } from 'lucide-react'
 
@@ -259,6 +259,10 @@ export default function SalesOrderEditorPage(): JSX.Element {
   const [pendingPrintOptions, setPendingPrintOptions] = useState<PrintOptions | null>(null)
   const [pendingAction, setPendingAction] = useState<'print' | 'modify' | 'cancel' | 'post' | 'reopen' | null>(null)
   const [sucheText, setSucheText] = useState('')
+  const [showNiederlassungDialog, setShowNiederlassungDialog] = useState(false)
+  const [showVertreterDialog, setShowVertreterDialog] = useState(false)
+  const [vertreterInput, setVertreterInput] = useState('')
+  const [branchesList, setBranchesList] = useState<Array<{ id: string; branch_number: number; name: string }>>([])
 
   // Auftrags-Auswahl-Liste
   const { data: auftraege = [], isLoading } = useAuftraege()
@@ -363,16 +367,42 @@ export default function SalesOrderEditorPage(): JSX.Element {
   }
 
   function handleAuftragAuswaehlen(auftrag: Auftrag) {
-    setState((prev) => ({
-      ...prev,
-      auftragNr: auftrag.nummer,
-      auftragDatum: auftrag.datum,
-      liefertermin: auftrag.liefertermin,
-      customer: auftrag.kunde
-        ? { id: '', customerNumber: '', name: auftrag.kunde, debitorAccount: '' }
-        : null,
-    }))
+    navigate(`/sales/order-editor/${auftrag.id}`)
     setShowAuftragAuswahl(false)
+  }
+
+  function handleAuftragPrev() {
+    const idx = state.id ? auftraege.findIndex((a) => a.id === state.id) : -1
+    if (idx > 0 && auftraege[idx - 1]) {
+      navigate(`/sales/order-editor/${auftraege[idx - 1].id}`)
+    } else {
+      push('Kein vorheriger Auftrag')
+    }
+  }
+  function handleAuftragNext() {
+    const idx = state.id ? auftraege.findIndex((a) => a.id === state.id) : -1
+    if (idx >= 0 && idx < auftraege.length - 1 && auftraege[idx + 1]) {
+      navigate(`/sales/order-editor/${auftraege[idx + 1].id}`)
+    } else {
+      push('Kein nächster Auftrag')
+    }
+  }
+  const handleNiederlassungOpen = async (): Promise<void> => {
+    try {
+      const list = await apiClient.get<Array<{ id: string; branch_number: number; name: string }>>('/api/v1/admin/branches', { params: { active_only: true } })
+      setBranchesList(Array.isArray(list) ? list : [])
+      setShowNiederlassungDialog(true)
+    } catch (e: any) {
+      push(`Fehler: ${e.response?.data?.detail ?? e.message}`)
+    }
+  }
+  const handleVertreterOpen = (): void => {
+    setVertreterInput(state.vertreter)
+    setShowVertreterDialog(true)
+  }
+  const handleVertreterConfirm = (): void => {
+    setState((prev) => ({ ...prev, vertreter: vertreterInput }))
+    setShowVertreterDialog(false)
   }
 
   function handleArticleSelect(article: any) {
@@ -468,6 +498,59 @@ export default function SalesOrderEditorPage(): JSX.Element {
       artikelGewicht: pos.gewicht,
       artikelGefahrgutPunkte: pos.gefahrgutPunkte,
     })
+  }
+
+  // Nur bei Entwurf (nicht bestätigt) Positionen löschen/verschieben erlauben
+  const isDraft = !state.statusBestätigt
+
+  const renumberPosNr = (positionen: Position[]): Position[] =>
+    positionen.map((p, i) => ({ ...p, posNr: (i + 1) * 10 }))
+
+  const handleDeletePosition = (idx: number): void => {
+    const newPositionen = state.positionen.filter((_, i) => i !== idx)
+    const renumbered = renumberPosNr(newPositionen)
+    const newAktive =
+      state.aktivePositionIndex === idx
+        ? null
+        : idx < (state.aktivePositionIndex ?? -1)
+          ? (state.aktivePositionIndex ?? 0) - 1
+          : state.aktivePositionIndex
+    setState((prev) => ({
+      ...prev,
+      positionen: renumbered,
+      aktivePositionIndex: newAktive,
+    }))
+    if (state.aktivePositionIndex === idx) {
+      setCurrentPosition(emptyCurrentPosition(renumbered.length > 0 ? renumbered[renumbered.length - 1].posNr + 10 : 10))
+    }
+  }
+
+  const handleMovePositionUp = (idx: number): void => {
+    if (idx <= 0) return
+    const newPositionen = [...state.positionen]
+    ;[newPositionen[idx - 1], newPositionen[idx]] = [newPositionen[idx], newPositionen[idx - 1]]
+    const renumbered = renumberPosNr(newPositionen)
+    const newAktive =
+      state.aktivePositionIndex === idx ? idx - 1 : state.aktivePositionIndex === idx - 1 ? idx : state.aktivePositionIndex
+    setState((prev) => ({
+      ...prev,
+      positionen: renumbered,
+      aktivePositionIndex: newAktive,
+    }))
+  }
+
+  const handleMovePositionDown = (idx: number): void => {
+    if (idx >= state.positionen.length - 1) return
+    const newPositionen = [...state.positionen]
+    ;[newPositionen[idx], newPositionen[idx + 1]] = [newPositionen[idx + 1], newPositionen[idx]]
+    const renumbered = renumberPosNr(newPositionen)
+    const newAktive =
+      state.aktivePositionIndex === idx ? idx + 1 : state.aktivePositionIndex === idx + 1 ? idx : state.aktivePositionIndex
+    setState((prev) => ({
+      ...prev,
+      positionen: renumbered,
+      aktivePositionIndex: newAktive,
+    }))
   }
 
   // ── Speichern ──────────────────────────────────────────────────────────────
@@ -636,6 +719,37 @@ export default function SalesOrderEditorPage(): JSX.Element {
     navigate(`/verkauf/lieferschein-erfassung?auftrag=${id}`)
   }
 
+  const handleSofortRechnung = async () => {
+    let orderId = state.id
+    if (!orderId) {
+      try { orderId = await handleSave() } catch { return }
+    }
+    if (!orderId) return
+    try {
+      const res = await apiClient.post<{
+        command: string
+        target_doc_id?: string
+        status: string
+        payload?: { target_doc_number?: string; target_doc_type?: string }
+      }>(`/api/v1/docflow/${orderId}/convert`, {
+        target_doc_type: 'sales_invoice',
+        idempotency_key: crypto.randomUUID(),
+      })
+      const docNumber = res.payload?.target_doc_number
+      if (docNumber) {
+        push(`Rechnung ${docNumber} erstellt`)
+        const targetId = res.target_doc_id
+        if (targetId && typeof navigate === 'function') {
+          navigate(`/verkauf/rechnungen/${targetId}`, { replace: false })
+        }
+      } else {
+        push('Rechnung erstellt')
+      }
+    } catch (e: any) {
+      push(`Sofort-Rechnung fehlgeschlagen: ${e.response?.data?.detail ?? e.message}`)
+    }
+  }
+
   // ── Globale Shortcuts ──────────────────────────────────────────────────────
 
   useGlobalShortcuts({
@@ -661,23 +775,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
         push(`Fehler: ${error.response?.data?.detail || error.message}`)
       }
     },
-    'create-invoice': async () => {
-      // Sofort-Rechnung: Auftrag speichern, dann direkt Rechnung erstellen (Docflow)
-      let orderId = state.id
-      if (!orderId) {
-        try { orderId = await handleSave() } catch { return }
-      }
-      if (!orderId) return
-      try {
-        const res = await apiClient.post<{ invoice_id: string; invoice_number: string }>(
-          `/api/v1/sales/orders/${orderId}/create-invoice`
-        )
-        push(`Rechnung ${res.data.invoice_number} erstellt`)
-        navigate(`/sales/invoices/${res.data.invoice_id}`)
-      } catch (e: any) {
-        push(`Sofort-Rechnung fehlgeschlagen: ${e.response?.data?.detail ?? e.message}`)
-      }
-    },
+    'create-invoice': () => void handleSofortRechnung(),
     'open-attachments': () => setShowAttachmentDialog(true),
     'show-information': () => {
       if (state.customer) setShowInformationDialog(true)
@@ -738,13 +836,13 @@ export default function SalesOrderEditorPage(): JSX.Element {
                 <Label className="w-32 text-sm">Auftrags-Nr.:</Label>
                 <Input value={state.auftragNr} readOnly className="flex-1 h-8" />
                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0"
-                  onClick={() => setShowAuftragAuswahl(true)}>
+                  onClick={() => setShowAuftragAuswahl(true)} title="Auftrag suchen">
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={handleAuftragPrev} title="Vorheriger Auftrag">
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={handleAuftragNext} title="Nächster Auftrag">
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
@@ -824,14 +922,14 @@ export default function SalesOrderEditorPage(): JSX.Element {
                   onChange={(e) => setState((prev) => ({ ...prev, niederlassung: Number(e.target.value) }))}
                   className="flex-1 h-8"
                 />
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => void handleNiederlassungOpen()} title="Niederlassung auswählen">
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </div>
               <div className="flex items-center gap-2">
                 <Label className="w-32 text-sm">Vertreter:</Label>
                 <Input value={state.vertreter} readOnly className="flex-1 h-8" />
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={handleVertreterOpen} title="Vertreter eingeben">
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </div>
@@ -1160,6 +1258,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
                   <TableHead className="w-20">Zus.Beleg</TableHead>
                   <TableHead className="w-20">Anerken.</TableHead>
                   <TableHead className="w-24">Erlöskonto</TableHead>
+                  <TableHead className="w-28 text-right">Aktionen</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -1192,11 +1291,49 @@ export default function SalesOrderEditorPage(): JSX.Element {
                     <TableCell>{pos.zusBeleg}</TableCell>
                     <TableCell>{pos.anerken}</TableCell>
                     <TableCell>{pos.erloskonto}</TableCell>
+                    <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                      {isDraft && (
+                        <div className="flex items-center justify-end gap-0.5">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7"
+                            title="Hoch"
+                            onClick={() => handleMovePositionUp(idx)}
+                            disabled={idx <= 0}
+                          >
+                            <ChevronUp className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7"
+                            title="Runter"
+                            onClick={() => handleMovePositionDown(idx)}
+                            disabled={idx >= state.positionen.length - 1}
+                          >
+                            <ChevronDown className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-red-600 hover:text-red-700"
+                            title="Position löschen"
+                            onClick={() => handleDeletePosition(idx)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
+                    </TableCell>
                   </TableRow>
                 ))}
                 {state.positionen.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={23} className="text-center text-xs text-muted-foreground py-4">
+                    <TableCell colSpan={24} className="text-center text-xs text-muted-foreground py-4">
                       Noch keine Positionen — Artikel unten eingeben
                     </TableCell>
                   </TableRow>
@@ -1410,7 +1547,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
             <Folder className="h-4 w-4" />
             Dateien
           </Button>
-          <Button variant="outline" size="sm" className="gap-2">
+          <Button variant="outline" size="sm" className="gap-2" onClick={() => { const q = state.customer?.id ? `?customerId=${state.customer.id}` : ''; navigate(`/contracts${q}`); push('Kontrakte geöffnet.'); }} title="Kontrakte anzeigen/verknüpfen">
             <FileCheck className="h-4 w-4" />
             Kontrakte
           </Button>
@@ -1419,7 +1556,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
             <LinkIcon className="h-4 w-4" />
             In Lieferschein wandeln
           </Button>
-          <Button variant="outline" size="sm" className="gap-2">
+          <Button variant="outline" size="sm" className="gap-2" onClick={() => void handleSofortRechnung()} title="Direkt Rechnung aus Auftrag">
             <Receipt className="h-4 w-4" />
             Sofort-Rechnung
           </Button>
@@ -1626,6 +1763,56 @@ export default function SalesOrderEditorPage(): JSX.Element {
             <Button variant="outline" onClick={() => setShowInformationDialog(false)}>
               Schließen
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showNiederlassungDialog} onOpenChange={setShowNiederlassungDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Niederlassung auswählen</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2 max-h-60 overflow-auto">
+            {branchesList.map((b) => (
+              <div
+                key={b.id}
+                className="flex items-center justify-between p-2 rounded border cursor-pointer hover:bg-muted/50"
+                onClick={() => {
+                  setState((prev) => ({ ...prev, niederlassung: b.branch_number }))
+                  setShowNiederlassungDialog(false)
+                }}
+              >
+                <span className="font-medium">{b.branch_number}</span>
+                <span className="text-sm text-muted-foreground">{b.name}</span>
+              </div>
+            ))}
+            {branchesList.length === 0 && (
+              <p className="text-sm text-muted-foreground">Keine Niederlassungen geladen. Bitte manuell eintragen.</p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNiederlassungDialog(false)}>Schließen</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showVertreterDialog} onOpenChange={setShowVertreterDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Vertreter</DialogTitle>
+          </DialogHeader>
+          <div className="py-2">
+            <Label className="text-sm">Vertreter</Label>
+            <Input
+              value={vertreterInput}
+              onChange={(e) => setVertreterInput(e.target.value)}
+              className="mt-1"
+              placeholder="Name oder Nr."
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowVertreterDialog(false)}>Abbrechen</Button>
+            <Button onClick={handleVertreterConfirm}>Übernehmen</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

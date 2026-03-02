@@ -22,6 +22,8 @@ import { useToast } from '@/components/ui/toast-provider'
 import {
   ChevronLeft,
   ChevronRight,
+  ChevronUp,
+  ChevronDown,
   MoreHorizontal,
   Check,
   Printer,
@@ -238,6 +240,28 @@ export default function AngebotErstellenPage(): JSX.Element {
     setPositionen((prev) => renumberPositionen(prev.filter((_, i) => i !== idx)))
     setAktivePositionIndex(null)
     setCurrentPosition(emptyPosition(10))
+    setIsDirty(true)
+  }
+
+  function handleMovePositionUp(idx: number) {
+    if (idx <= 0) return
+    setPositionen((prev) => {
+      const next = [...prev]
+      ;[next[idx - 1], next[idx]] = [next[idx], next[idx - 1]]
+      return renumberPositionen(next)
+    })
+    setAktivePositionIndex((prev) => (prev === idx ? idx - 1 : prev === idx - 1 ? idx : prev))
+    setIsDirty(true)
+  }
+
+  function handleMovePositionDown(idx: number) {
+    if (idx >= positionen.length - 1) return
+    setPositionen((prev) => {
+      const next = [...prev]
+      ;[next[idx], next[idx + 1]] = [next[idx + 1], next[idx]]
+      return renumberPositionen(next)
+    })
+    setAktivePositionIndex((prev) => (prev === idx ? idx + 1 : prev === idx + 1 ? idx : prev))
     setIsDirty(true)
   }
 
@@ -593,6 +617,7 @@ export default function AngebotErstellenPage(): JSX.Element {
                   <TableHead className="w-24 text-right">Netto-Be.</TableHead>
                   <TableHead className="w-24 text-right">EK-Preis</TableHead>
                   <TableHead className="w-16 text-right">MwSt %</TableHead>
+                  <TableHead className="w-28 text-right">Aktionen</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -616,11 +641,47 @@ export default function AngebotErstellenPage(): JSX.Element {
                     <TableCell className="text-right">{pos.nettoBetrag.toFixed(2)}</TableCell>
                     <TableCell className="text-right">{pos.ekPreis.toFixed(2)}</TableCell>
                     <TableCell className="text-right">{pos.mwstProzent}</TableCell>
+                    <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center justify-end gap-0.5">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7"
+                          title="Hoch"
+                          onClick={() => handleMovePositionUp(idx)}
+                          disabled={idx <= 0}
+                        >
+                          <ChevronUp className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7"
+                          title="Runter"
+                          onClick={() => handleMovePositionDown(idx)}
+                          disabled={idx >= positionen.length - 1}
+                        >
+                          <ChevronDown className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-red-600 hover:text-red-700"
+                          title="Position löschen"
+                          onClick={() => handlePositionDelete(idx)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
                   </TableRow>
                 ))}
                 {positionen.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={13} className="text-center text-xs text-muted-foreground py-4">
+                    <TableCell colSpan={14} className="text-center text-xs text-muted-foreground py-4">
                       Noch keine Positionen — Artikel im Bereich unten eingeben
                     </TableCell>
                   </TableRow>

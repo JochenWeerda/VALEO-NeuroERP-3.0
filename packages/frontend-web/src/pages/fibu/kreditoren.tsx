@@ -9,10 +9,12 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { BackButton } from '@/components/BackButton'
 import { AlertCircle, Euro, FileDown, Search } from 'lucide-react'
 import { useKreditorenOP, type KreditOP } from '@/lib/api/fibu'
+import { useToast } from '@/hooks/use-toast'
 import { ErrorState } from '@/components/ErrorState'
 
 export default function KreditorenPage(): JSX.Element {
   const navigate = useNavigate()
+  const { toast } = useToast()
   const [searchTerm, setSearchTerm] = useState('')
   const { data: items, isLoading, isError, error, refetch } = useKreditorenOP()
 
@@ -158,7 +160,7 @@ export default function KreditorenPage(): JSX.Element {
               <Input placeholder="Suche..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
             </div>
             <Button onClick={() => navigate('/fibu/zahlungslaeufe')}>Zahlungslauf</Button>
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" onClick={() => { navigate('/fibu/kontenplan'); toast({ title: 'DATEV Export', description: 'Buchungsexport unter Kontenplan (DATEV-Export). Kreditoren-Stammexport folgt.' }); }}>
               <FileDown className="h-4 w-4" />
               DATEV Export
             </Button>

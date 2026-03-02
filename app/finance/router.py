@@ -739,7 +739,7 @@ async def execute_abstimmung(
         ).scalar() or 0
     )
 
-    # Hauptbuch: Summe über finance_journal_entries für die Periode (soft-fallback)
+    # Hauptbuch: Summe über journal_entries für die Periode (soft-fallback)
     hb_saldo = 0.0
     try:
         hb_saldo = float(

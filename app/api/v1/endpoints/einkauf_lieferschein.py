@@ -231,6 +231,30 @@ async def create_lieferschein(
     return Lieferschein(**dict(row), positionen=_list_positions(db, ls_id))
 
 
+@router.get("/lieferscheine/last", response_model=Optional[Lieferschein])
+async def get_last_lieferschein(
+    lieferant_id: Optional[str] = Query(None, description="Filter by supplier (last LS for this supplier)"),
+    tenant_id: str = Query("system"),
+    db: Session = Depends(get_db),
+):
+    """Last (most recent) Lieferschein for F11 'Wie vorheriger Beleg'."""
+    params: dict[str, object] = {"tenant_id": tenant_id}
+    where = "tenant_id = :tenant_id"
+    if lieferant_id:
+        where += " AND lieferant_id = :lieferant_id"
+        params["lieferant_id"] = lieferant_id
+    row = db.execute(
+        text(
+            f"SELECT * FROM einkauf_lieferscheine WHERE {where} ORDER BY created_at DESC LIMIT 1"
+        ),
+        params,
+    ).mappings().first()
+    if not row:
+        return None
+    ls_id = row["id"]
+    return Lieferschein(**dict(row), positionen=_list_positions(db, ls_id))
+
+
 @router.get("/lieferscheine/{ls_id}", response_model=Lieferschein)
 async def get_lieferschein(ls_id: str, tenant_id: str = Query("system"), db: Session = Depends(get_db)):
     row = _get_lieferschein_or_404(db, ls_id, tenant_id)

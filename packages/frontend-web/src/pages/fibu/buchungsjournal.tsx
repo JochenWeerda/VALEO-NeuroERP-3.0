@@ -47,11 +47,13 @@ function mapApiEntry(e: JournalEntryAPI): Buchung {
 
 export default function BuchungsjournalPage(): JSX.Element {
   const [searchTerm, setSearchTerm] = useState('')
+  const [referenceFilter, setReferenceFilter] = useState('')
 
   const { data, isLoading, isError, error, refetch } = useQuery({
-    queryKey: ['fibu', 'journal-entries'],
+    queryKey: ['fibu', 'journal-entries', referenceFilter || null],
     queryFn: async () => {
-      const res = await apiClient.get<unknown>('/api/v1/journal-entries')
+      const params = referenceFilter.trim() ? { reference: referenceFilter.trim() } : {}
+      const res = await apiClient.get<unknown>('/api/v1/journal-entries', { params })
       const payload = res.data as { items?: JournalEntryAPI[] } | JournalEntryAPI[]
 
       if (Array.isArray(payload)) {
@@ -147,10 +149,20 @@ export default function BuchungsjournalPage(): JSX.Element {
           <CardTitle>Suche & Filter</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input placeholder="Suche Belegnummer, Konto, Text..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
+            </div>
+            <div className="flex items-center gap-2 sm:w-64">
+              <label htmlFor="ref-filter" className="shrink-0 text-sm text-muted-foreground">Referenz / Importlauf</label>
+              <Input
+                id="ref-filter"
+                placeholder="z. B. run_id"
+                value={referenceFilter}
+                onChange={(e) => setReferenceFilter(e.target.value)}
+                className="font-mono text-sm"
+              />
             </div>
             <Button variant="outline" className="gap-2">
               <FileDown className="h-4 w-4" />

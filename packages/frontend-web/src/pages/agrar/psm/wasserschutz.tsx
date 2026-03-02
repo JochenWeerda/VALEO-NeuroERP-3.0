@@ -119,18 +119,27 @@ export default function PSMWasserschutzPruefungPage(): JSX.Element {
   }
 
   const sucheAdresse = async () => {
-    if (schlagAdresse.includes('Berlin')) {
-      setSchlagKoordinaten({ lat: 52.5200, lng: 13.4050 })
-      toast({
-        title: "Adresse gefunden",
-        description: "Koordinaten wurden aktualisiert.",
-      })
-    } else {
-      toast({
-        title: "Adresse nicht gefunden",
-        description: "Bitte geben Sie eine gültige Adresse ein.",
-        variant: "destructive",
-      })
+    const query = schlagAdresse.trim()
+    if (!query) {
+      toast({ title: "Adresse eingeben", description: "Bitte Adresse oder Ort eingeben.", variant: "destructive" })
+      return
+    }
+    try {
+      const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1`
+      const res = await fetch(url, { headers: { 'Accept-Language': 'de', 'User-Agent': 'VALEO-NeuroERP-Agrar/1.0' } })
+      const data = await res.json()
+      if (Array.isArray(data) && data.length > 0) {
+        const lat = parseFloat(data[0].lat)
+        const lon = parseFloat(data[0].lon)
+        if (!Number.isNaN(lat) && !Number.isNaN(lon)) {
+          setSchlagKoordinaten({ lat, lng: lon })
+          toast({ title: "Adresse gefunden", description: `Koordinaten: ${lat.toFixed(5)}, ${lon.toFixed(5)}` })
+          return
+        }
+      }
+      toast({ title: "Adresse nicht gefunden", description: "Bitte andere Suchbegriffe oder vollständige Adresse eingeben.", variant: "destructive" })
+    } catch {
+      toast({ title: "Geocoding fehlgeschlagen", description: "Dienst vorübergehend nicht erreichbar.", variant: "destructive" })
     }
   }
 

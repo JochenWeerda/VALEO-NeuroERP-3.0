@@ -11,6 +11,7 @@ import { ListReport } from '@/components/patterns/ListReport';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/hooks/use-toast';
 import { CheckCircle, XCircle, Edit, Eye } from 'lucide-react';
 
 // API Client
@@ -175,6 +176,7 @@ const buildColumns = (): ColumnDef<BiostimulanzienItem>[] => [
 
 const BiostimulanzienListePage: React.FC = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [search, setSearch] = useState<string>('');
 
   // Queries
@@ -225,16 +227,19 @@ const BiostimulanzienListePage: React.FC = () => {
           id: 'export-biostimulanzien',
           label: 'Export CSV',
           onClick: (): void => {
-            const header = 'Artikelnummer;Name;Typ;Hersteller;EU-Zulassung;Bestand;VK-Preis\n'
+            const header = 'Artikelnummer;Name;Typ;Hersteller;EU-Zulassung;Ablauf Zulassung;Bestand;Verfuegbar;VK-Preis\n'
+            const esc = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`
             const rows = filteredData.map((item) =>
-              `"${item.artikelnummer}";"${item.name}";"${item.typ}";"${item.hersteller ?? ''}";"${item.eu_zulassung ? 'Ja' : 'Nein'}";"${item.lagerbestand ?? 0}";"${item.vk_preis?.toFixed(2) ?? ''}"`
+              [item.artikelnummer, item.name, item.typ, item.hersteller ?? '', item.eu_zulassung ? 'Ja' : 'Nein', item.ablauf_zulassung ?? '', item.lagerbestand ?? 0, item.verfuegbar ?? 0, item.vk_preis?.toFixed(2) ?? ''].map(esc).join(';')
             ).join('\n')
-            const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8;' })
+            const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8' })
+            const url = URL.createObjectURL(blob)
             const a = document.createElement('a')
-            a.href = URL.createObjectURL(blob)
+            a.href = url
             a.download = `biostimulanzien-${new Date().toISOString().slice(0, 10)}.csv`
             a.click()
-            URL.revokeObjectURL(a.href)
+            URL.revokeObjectURL(url)
+            toast({ title: 'Export', description: `${filteredData.length} Einträge exportiert.` })
           },
         },
       ]}

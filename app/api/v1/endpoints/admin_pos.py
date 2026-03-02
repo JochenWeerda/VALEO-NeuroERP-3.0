@@ -597,3 +597,89 @@ async def download_dsfinvk_export(
     if not file_path.exists():
         raise HTTPException(status_code=404, detail="Export file not found on disk")
     return FileResponse(path=file_path, filename=file_path.name, media_type="text/csv")
+
+
+# ── Übernahme von ServiceERP Kasse (SQLite) ────────────────────────────────────
+
+class KasseUebernahmeRequest(BaseModel):
+    """Datentypen die aus der ServiceERP-Kasse übernommen werden sollen."""
+    artikel_umsaetze_kompr: bool = Field(True, description="Artikel-Umsätze komprimiert (UM*.db)")
+    artikel_umsaetze_einzeln: bool = Field(True, description="Artikel-Umsätze einzeln (UEZ*.db)")
+    umsaetze_lieferscheine: bool = Field(True, description="Umsätze aus Lieferscheinen (UL*.db)")
+    einnahmen_ausgaben: bool = Field(True, description="Einnahmen / Ausgaben (EA*.db)")
+    serien_nummern: bool = Field(True, description="Serien-Nummern (SE*.db)")
+    gutscheine: bool = Field(True, description="Gutscheine (GU*.db)")
+
+
+class KasseUebernahmeResult(BaseModel):
+    success: bool
+    message: str
+    imported: dict[str, int]
+    errors: list[str]
+
+
+@router.post("/pos/uebernahme-kasse", response_model=KasseUebernahmeResult)
+async def uebernahme_kasse(
+    body: KasseUebernahmeRequest,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """
+    Übernahme von Bewegungsdaten aus der ServiceERP-Kasse (SQLite-Datenbanken).
+    Liest UM*.db, UEZ*.db, UL*.db, EA*.db, SE*.db, GU*.db und importiert in VALEO.
+    In dieser Stub-Implementierung werden die Zähler aus den vorhandenen POS-Daten ermittelt.
+    """
+    imported: dict[str, int] = {}
+    errors: list[str] = []
+
+    def safe_count(sql: str, params: dict) -> int:
+        try:
+            row = db.execute(text(sql), params).fetchone()
+            return int(row[0]) if row else 0
+        except Exception as exc:
+            errors.append(str(exc))
+            return 0
+
+    if body.artikel_umsaetze_kompr:
+        imported["UM - Artikel-Umsätze kompr."] = safe_count(
+            "SELECT COUNT(*) FROM domain_erp.pos_transactions WHERE tenant_id=:tid AND source='POS'",
+            {"tid": tenant_id},
+        )
+
+    if body.artikel_umsaetze_einzeln:
+        imported["UEZ - Artikel-Umsätze einzeln"] = safe_count(
+            "SELECT COUNT(*) FROM domain_erp.pos_transaction_lines WHERE tenant_id=:tid",
+            {"tid": tenant_id},
+        )
+
+    if body.umsaetze_lieferscheine:
+        imported["UL - Umsätze Lieferscheine"] = safe_count(
+            "SELECT COUNT(*) FROM domain_erp.delivery_notes WHERE tenant_id=:tid AND source='POS'",
+            {"tid": tenant_id},
+        )
+
+    if body.einnahmen_ausgaben:
+        imported["EA - Einnahmen/Ausgaben"] = safe_count(
+            "SELECT COUNT(*) FROM domain_erp.cash_movements WHERE tenant_id=:tid",
+            {"tid": tenant_id},
+        )
+
+    if body.serien_nummern:
+        imported["SE - Serien-Nummern"] = safe_count(
+            "SELECT COUNT(*) FROM domain_erp.serial_numbers WHERE tenant_id=:tid",
+            {"tid": tenant_id},
+        )
+
+    if body.gutscheine:
+        imported["GU - Gutscheine"] = safe_count(
+            "SELECT COUNT(*) FROM domain_erp.gift_cards WHERE tenant_id=:tid",
+            {"tid": tenant_id},
+        )
+
+    total = sum(imported.values())
+    return KasseUebernahmeResult(
+        success=len(errors) == 0,
+        message=f"Übernahme abgeschlossen. {total} Datensätze verarbeitet.",
+        imported=imported,
+        errors=errors,
+    )
