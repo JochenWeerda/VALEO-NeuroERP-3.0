@@ -1,11 +1,14 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Wizard } from '@/components/patterns/Wizard'
+import { useKulturen } from '@/lib/api/agrar'
+import { useToast } from '@/components/ui/toast-provider'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { CheckCircle } from 'lucide-react'
+import { CheckCircle, FileDown, ClipboardList } from 'lucide-react'
 
 type BedarfData = {
   flaeche: number
@@ -25,6 +28,8 @@ type BedarfData = {
 
 export default function BedarfsrechnerPage(): JSX.Element {
   const navigate = useNavigate()
+  const { push } = useToast()
+  const { data: kulturenListe = [] } = useKulturen()
   const [bedarf, setBedarf] = useState<BedarfData>({
     flaeche: 0,
     kultur: '',
@@ -59,6 +64,27 @@ export default function BedarfsrechnerPage(): JSX.Element {
     }))
   }
 
+  const handleErgebnisSpeichern = (): void => {
+    const payload = {
+      ...bedarf,
+      exportiertAm: new Date().toISOString(),
+      quelle: 'Bedarfsrechner',
+    }
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `Duengebedarf_${bedarf.kultur || 'Kultur'}_${new Date().toISOString().slice(0, 10)}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+    push('Ergebnis als JSON gespeichert.')
+  }
+
+  const handleAlsDuengeplanUebernehmen = (): void => {
+    navigate('/agrar/duengung/planung', { state: { fromBedarfsrechner: bedarf } })
+    push('Empfehlung an Düngungsplanung übergeben.')
+  }
+
   const steps = [
     {
       id: 'grunddaten',
@@ -84,10 +110,18 @@ export default function BedarfsrechnerPage(): JSX.Element {
               className="w-full rounded-md border border-input bg-background px-3 py-2"
             >
               <option value="">-- Wählen --</option>
-              <option value="weizen">Weizen</option>
-              <option value="gerste">Gerste</option>
-              <option value="raps">Raps</option>
-              <option value="mais">Mais</option>
+              {kulturenListe.length > 0
+                ? kulturenListe.map(k => (
+                    <option key={k.id} value={k.name.toLowerCase()}>{k.name}</option>
+                  ))
+                : (
+                  <>
+                    <option value="weizen">Weizen</option>
+                    <option value="gerste">Gerste</option>
+                    <option value="raps">Raps</option>
+                    <option value="mais">Mais</option>
+                  </>
+                )}
             </select>
           </div>
         </div>
@@ -190,6 +224,16 @@ export default function BedarfsrechnerPage(): JSX.Element {
                   <div className="text-sm text-muted-foreground">{(bedarf.empfehlung.k * bedarf.flaeche).toFixed(0)} kg gesamt</div>
                 </div>
               </div>
+            </div>
+            <div className="flex flex-wrap gap-2 mt-6">
+              <Button variant="outline" className="gap-2" onClick={() => handleErgebnisSpeichern()}>
+                <FileDown className="h-4 w-4" />
+                Ergebnis speichern
+              </Button>
+              <Button variant="outline" className="gap-2" onClick={() => handleAlsDuengeplanUebernehmen()}>
+                <ClipboardList className="h-4 w-4" />
+                Als Düngeplan übernehmen
+              </Button>
             </div>
           </CardContent>
         </Card>

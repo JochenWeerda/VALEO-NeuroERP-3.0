@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { toast } from '@/hooks/use-toast'
 import { useQuery } from '@tanstack/react-query'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
@@ -710,7 +711,7 @@ export default function KundenStammPage(): JSX.Element {
     } else if (action === 'validate') {
       const isValid = validate(formData)
       if (isValid.isValid) {
-        alert(t('crud.messages.validationSuccess'))
+        toast({ title: t('crud.messages.validationSuccess', { defaultValue: 'Validierung erfolgreich' }), description: 'Alle Pflichtfelder sind korrekt ausgefüllt.' })
       } else {
         showValidationToast(isValid.errors)
       }
@@ -735,6 +736,7 @@ export default function KundenStammPage(): JSX.Element {
         data={data}
         onSave={handleSave}
         onCancel={handleCancel}
+        onAction={handleAction}
         isLoading={loading}
       />
       

@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { CreditCard, DollarSign, FileText, Scan, ShoppingCart, Smartphone, Grid3x3, Search } from 'lucide-react'
@@ -10,6 +12,7 @@ import { useFiskalyTSE, type PaymentType, type TSETransaction } from '@/lib/serv
 import { ChangeCalculator } from '@/components/pos/ChangeCalculator'
 import { ArticleSearch } from '@/components/pos/ArticleSearch'
 import { toast } from '@/hooks/use-toast'
+import { apiClient } from '@/lib/api-client'
 
 type CartItem = {
   artikelnr: string
@@ -38,24 +41,11 @@ export default function POSTerminalPage(): JSX.Element {
   // WebSocket für CustomerDisplay-Sync
   useEffect(() => {
     const ws = new WebSocket('ws://localhost:8000/api/v1/ws/pos/terminal-1')
-    
-    ws.onopen = () => {
-      console.log('✅ POS WebSocket connected')
-    }
-    
     ws.onerror = (error) => {
-      console.error('❌ POS WebSocket error:', error)
+      console.error('POS WebSocket error:', error)
     }
-    
-    ws.onclose = () => {
-      console.log('🔌 POS WebSocket disconnected')
-    }
-    
     wsRef.current = ws
-    
-    return () => {
-      ws.close()
-    }
+    return () => { ws.close() }
   }, [])
   
   // Broadcast cart changes
@@ -68,25 +58,49 @@ export default function POSTerminalPage(): JSX.Element {
     }
   }, [cart])
 
-  // Mock-Artikel-Datenbank
-  const articles = [
-    { artikelnr: 'A-1001', bezeichnung: 'Blumenerde 20L', ean: '4012345678901', preis: 12.99, image: '🌱' },
-    { artikelnr: 'A-1002', bezeichnung: 'Tomatensamen', ean: '4012345678902', preis: 2.99, image: '🍅' },
-    { artikelnr: 'A-1003', bezeichnung: 'Rasendünger 5kg', ean: '4012345678903', preis: 24.99, image: '🌿' },
-    { artikelnr: 'A-1004', bezeichnung: 'Gartenschere', ean: '4012345678904', preis: 19.99, image: '✂️' },
-    { artikelnr: 'A-1005', bezeichnung: 'Blumentopf 30cm', ean: '4012345678905', preis: 8.99, image: '🪴' },
-    { artikelnr: 'A-1006', bezeichnung: 'Gießkanne 10L', ean: '4012345678906', preis: 14.99, image: '💧' },
-  ]
+  const { data: articles = [], isLoading: articlesLoading } = useQuery({
+    queryKey: ['pos', 'articles'],
+    queryFn: async () => {
+      const response = await apiClient.get<{ items: Array<{ id: string; article_number: string; name: string; barcode?: string | null; sales_price: string | number }> }>(
+        '/api/v1/articles',
+        { params: { is_active: true, limit: 48 } },
+      )
+      return response.data.items.map(a => ({
+        artikelnr: a.article_number,
+        bezeichnung: a.name,
+        ean: a.barcode ?? '',
+        preis: Number(a.sales_price) || 0,
+        image: '📦',
+      }))
+    },
+    staleTime: 5 * 60 * 1000,
+  })
 
-  function handleBarcodeInput(ean: string): void {
-    const article = articles.find((a) => a.ean === ean)
-    if (article) {
-      addToCart(article)
+  async function handleBarcodeInput(ean: string): Promise<void> {
+    const cached = articles.find((a) => a.ean === ean)
+    if (cached) {
+      addToCart(cached)
       setBarcode('')
+      return
+    }
+    try {
+      const response = await apiClient.get<{ items: Array<{ article_number: string; name: string; barcode?: string | null; sales_price: string | number }> }>(
+        '/api/v1/articles',
+        { params: { search: ean, limit: 1 } },
+      )
+      const item = response.data.items[0]
+      if (item) {
+        addToCart({ artikelnr: item.article_number, bezeichnung: item.name, ean: item.barcode ?? ean, preis: Number(item.sales_price) || 0, image: '📦' })
+        setBarcode('')
+      } else {
+        toast({ variant: 'destructive', title: 'Artikel nicht gefunden', description: `EAN: ${ean}` })
+      }
+    } catch {
+      toast({ variant: 'destructive', title: 'Fehler beim Laden', description: 'Artikel konnte nicht gefunden werden.' })
     }
   }
 
-  function addToCart(article: typeof articles[0]): void {
+  function addToCart(article: Omit<CartItem, 'menge'>): void {
     const existing = cart.find((item) => item.ean === article.ean)
     if (existing) {
       setCart(cart.map((item) => (item.ean === article.ean ? { ...item, menge: item.menge + 1 } : item)))
@@ -164,27 +178,7 @@ export default function POSTerminalPage(): JSX.Element {
         total,
       )
 
-      console.log('✅ TSE-Signatur:', signedTx)
-
-      // 4. Hardware-Signale
-      if (selectedMethod === 'bar') {
-        console.log('🔓 Kassenladen geöffnet')
-      }
-
-      if (selectedMethod === 'ec') {
-        console.log('💳 EC-Terminal: Betrag', total.toFixed(2), '€')
-      }
-
-      // 5. Bon drucken mit echtem QR-Code
-      console.log('🧾 Bon gedruckt:', {
-        bonnummer: `BON-${Date.now()}`,
-        tseTransactionNumber: signedTx.number,
-        tseSignature: signedTx.signature?.value,
-        tseCounter: signedTx.signature?.counter,
-        qrCode: signedTx.qr_code_data,
-      })
-
-      // 6. TSE-Journal speichern (Backend-Call)
+      // 4. TSE-Journal speichern (Backend-Call)
       // TODO: await saveTSETransaction({ ... })
 
       const change = selectedMethod === 'bar' ? tendered - total : 0
@@ -363,22 +357,28 @@ export default function POSTerminalPage(): JSX.Element {
 
             {/* Artikel-Grid Tab (Touch-optimiert) */}
             <TabsContent value="grid" className="flex-1 overflow-auto">
-              <div className="grid grid-cols-3 gap-4">
-                {articles.map((article) => (
-                  <Card
-                    key={article.ean}
-                    className="cursor-pointer hover:shadow-lg transition-shadow"
-                    onClick={() => addToCart(article)}
-                  >
-                    <CardContent className="p-6 text-center">
-                      <div className="text-6xl mb-3">{article.image}</div>
-                      <div className="font-semibold mb-1">{article.bezeichnung}</div>
-                      <div className="text-2xl font-bold text-primary">{article.preis.toFixed(2)} €</div>
-                      <div className="text-xs text-muted-foreground mt-1 font-mono">{article.artikelnr}</div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+              {articlesLoading ? (
+                <div className="grid grid-cols-3 gap-4">
+                  {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-40" />)}
+                </div>
+              ) : (
+                <div className="grid grid-cols-3 gap-4">
+                  {articles.map((article) => (
+                    <Card
+                      key={article.artikelnr}
+                      className="cursor-pointer hover:shadow-lg transition-shadow"
+                      onClick={() => addToCart(article)}
+                    >
+                      <CardContent className="p-6 text-center">
+                        <div className="text-6xl mb-3">{article.image}</div>
+                        <div className="font-semibold mb-1">{article.bezeichnung}</div>
+                        <div className="text-2xl font-bold text-primary">{article.preis.toFixed(2)} €</div>
+                        <div className="text-xs text-muted-foreground mt-1 font-mono">{article.artikelnr}</div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </TabsContent>
 
             {/* Autocomplete-Suche Tab */}

@@ -3,7 +3,7 @@ VAT Tax Codes Admin API
 CRUD operations with full audit trail
 """
 
-from fastapi import APIRouter, HTTPException, Depends, Query
+from fastapi import APIRouter, HTTPException, Depends, Query, Request
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import datetime
@@ -19,6 +19,24 @@ from app.core.uuid7 import uuid7
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/finance/vat-codes", tags=["finance", "vat-codes"])
+
+
+def _get_user_id_from_request(request: Request | None) -> str | None:
+    if request is None:
+        return None
+    uid = request.headers.get("X-User-ID")
+    if uid:
+        return uid
+    auth = request.headers.get("Authorization", "")
+    if auth.startswith("Bearer "):
+        try:
+            import base64 as _b64, json as _json
+            payload = auth[7:].split(".")[1]
+            payload += "=" * (4 - len(payload) % 4)
+            return _json.loads(_b64.urlsafe_b64decode(payload)).get("sub")
+        except Exception:
+            pass
+    return None
 
 
 # ============= Schemas =============
@@ -171,9 +189,10 @@ async def create_vat_code(
     data: VatCodeCreate,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
-    current_user: str = "system"  # TODO: Get from auth
+    request: Request = None,
 ):
     """Create new VAT code (admin only)"""
+    current_user = _get_user_id_from_request(request) or "system"
     # Check if exists
     existing = db.query(VatCode).filter(VatCode.id == data.id).first()
     if existing:
@@ -228,9 +247,10 @@ async def update_vat_code(
     legal_reference: Optional[str] = Query(None, description="Legal reference (e.g., '§24 UStG neu ab 2025')"),
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
-    current_user: str = "system"  # TODO: Get from auth
+    request: Request = None,
 ):
     """Update VAT code (admin only) - creates audit trail"""
+    current_user = _get_user_id_from_request(request) or "system"
     vat_code = db.query(VatCode).filter(
         VatCode.id == vat_code_id,
         ((VatCode.tenant_id == tenant_id) | (VatCode.tenant_id == None))

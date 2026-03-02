@@ -1,10 +1,13 @@
-import { useMemo } from 'react'
+import { useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { ListReport } from '@/components/mask-builder'
+import { toast } from '@/hooks/use-toast'
 import { useMischfutter, type Mischfutter } from '@/lib/api/futter'
 import { formatCurrency, formatNumber } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
+import { api } from '@/lib/axios'
 
 // Konfiguration für Mischfuttermittel ListReport
 const mischfuttermittelListConfig: ListConfig = {
@@ -199,8 +202,26 @@ const mischfuttermittelListConfig: ListConfig = {
   actions: []
 }
 
+async function triggerMischExport(): Promise<void> {
+  try {
+    const res = await api.post('/api/v1/export/list', { entity: 'futtermittel_misch', format: 'csv' }, { responseType: 'blob' })
+    const blob = res.data as Blob
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `export_mischfuttermittel_${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast({ title: 'Export erstellt', description: 'Mischfuttermittel als CSV heruntergeladen.' })
+  } catch (e: any) {
+    toast({ title: 'Export fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+  }
+}
+
 export default function MischfuttermittelListePage(): JSX.Element {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const importInputRef = useRef<HTMLInputElement>(null)
   const { data: apiData = [], isLoading } = useMischfutter()
   const data = useMemo(() => apiData.map((item: Mischfutter) => ({
     id: item.id,
@@ -218,6 +239,47 @@ export default function MischfuttermittelListePage(): JSX.Element {
   })), [apiData])
   const total = data.length
 
+  const mischfuttermittelConfig: ListConfig = useMemo(() => ({
+    ...mischfuttermittelListConfig,
+    bulkActions: [
+      {
+        key: 'export',
+        label: 'Exportieren',
+        type: 'secondary' as const,
+        onClick: (_items: any[]) => { void triggerMischExport() }
+      },
+      {
+        key: 'recalculate',
+        label: 'Nährwerte neu berechnen',
+        type: 'secondary' as const,
+        onClick: async (items: any[]) => {
+          try {
+            await api.post('/api/v1/futter/mischfuttermittel/recalculate', { ids: items.map((i) => i.id) })
+            queryClient.invalidateQueries({ queryKey: ['futter', 'misch'] })
+            toast({ title: 'Nährwerte berechnet', description: `${items.length} Rezepturen neu berechnet.` })
+          } catch (e: any) {
+            toast({ title: 'Fehler', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+          }
+        }
+      },
+      {
+        key: 'delete',
+        label: 'Löschen',
+        type: 'danger' as const,
+        onClick: async (items: any[]) => {
+          if (!confirm(`${items.length} Mischfuttermittel wirklich löschen?`)) return
+          let ok = 0; let err = 0
+          for (const item of items) {
+            try { await api.delete(`/api/v1/futter/mischfuttermittel/${item.id}`); ok++ }
+            catch { err++ }
+          }
+          queryClient.invalidateQueries({ queryKey: ['futter', 'misch'] })
+          toast({ title: 'Bulk-Löschen', description: `${ok} gelöscht${err ? `, ${err} Fehler` : ''}.` })
+        }
+      }
+    ]
+  }), [queryClient])
+
   const handleCreate = () => {
     navigate('/futtermittel/mischfuttermittel/stamm/new')
   }
@@ -226,23 +288,64 @@ export default function MischfuttermittelListePage(): JSX.Element {
     if (item?.id) navigate(`/futtermittel/mischfuttermittel/stamm/${item.id}`)
   }
 
-  const handleDelete = (_item: any) => alert('Löschen wird in dieser Ansicht noch nicht unterstützt')
+  const handleDelete = async (item: any) => {
+    if (!item?.id) return
+    if (!confirm(`Mischfuttermittel "${item.name}" wirklich löschen?`)) return
+    try {
+      await api.delete(`/api/v1/futter/mischfuttermittel/${item.id}`)
+      toast({ title: 'Gelöscht', description: `${item.name} wurde gelöscht.` })
+      queryClient.invalidateQueries({ queryKey: ['futter', 'misch'] })
+    } catch (e: any) {
+      toast({ title: 'Löschen fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+    }
+  }
 
-  const handleExport = () => {
-    alert('Export-Funktion wird implementiert')
+  const handleExport = () => triggerMischExport()
+
+  const handleImport = () => {
+    if (importInputRef.current) importInputRef.current.click()
+  }
+
+  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const formData = new FormData()
+    formData.append('file', file)
+    try {
+      const res = await api.post('/api/v1/futter/import/mischfuttermittel', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      const { created = 0, updated = 0, errors = [] } = (res.data as any) ?? {}
+      toast({
+        title: 'Import abgeschlossen',
+        description: `${created} neu, ${updated} aktualisiert${errors.length ? `, ${errors.length} Fehler` : ''}.`,
+      })
+    } catch (e: any) {
+      toast({ title: 'Import fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+    }
+    e.target.value = ''
   }
 
   return (
-    <ListReport
-      config={mischfuttermittelListConfig}
-      data={data}
-      total={total}
-      onCreate={handleCreate}
-      onEdit={handleEdit}
-      onDelete={handleDelete}
-      onExport={handleExport}
-      onImport={() => alert('Import-Funktion wird implementiert')}
-      isLoading={isLoading}
-    />
+    <>
+      <input
+        ref={importInputRef}
+        type="file"
+        accept=".csv"
+        className="hidden"
+        onChange={handleImportFile}
+      />
+      <ListReport
+        config={mischfuttermittelConfig}
+        data={data}
+        total={total}
+        onCreate={handleCreate}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onExport={handleExport}
+        onImport={handleImport}
+        isLoading={isLoading}
+      />
+    </>
   )
 }

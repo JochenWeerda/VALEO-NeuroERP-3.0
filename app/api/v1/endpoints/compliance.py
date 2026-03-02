@@ -7,7 +7,7 @@ import csv
 import io
 
 from fastapi import APIRouter, Depends, Query
-from fastapi.responses import StreamingResponse
+from fastapi.responses import Response, StreamingResponse
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -366,6 +366,196 @@ async def list_vvvo(db: Session = Depends(get_db)) -> dict:
         ],
         "total": len(items),
     }
+
+
+def _pdf_escape(s: str) -> str:
+    """Escape ( ) \ for PDF literal strings."""
+    if s is None:
+        return ""
+    return str(s).replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)")
+
+
+def _pdf_text_line(x: float, y: float, text: str, font: str = "/F1", size: int = 10) -> bytes:
+    """One line of text at position (x, y) in PDF content stream."""
+    t = _pdf_escape(text)
+    return f"BT {font} {size} Tf {x:.1f} {y:.1f} Td ({t}) Tj ET\n".encode("latin-1", errors="replace")
+
+
+def _build_compliance_pdf_bytes(stats: dict, cross_items: list[dict]) -> bytes:
+    """Baut ein mehrseitiges PDF mit automatischen Längen, Seitenumbrüchen und Zwischensummen."""
+    buffer = io.BytesIO()
+    margin = 72
+    line_height = 14
+    font_size = 10
+    font_title = 14
+    page_width = 612
+    page_height = 792
+    lines_per_page = int((page_height - 2 * margin - 80) / line_height)  # Platz für Kopf/Fuss
+    max_data_lines = max(10, lines_per_page - 12)
+
+    # Inhalte pro Seite: Liste von (stream_body_bytes, zwischensumme_erfuellt, zwischensumme_offen)
+    pages_data: list[tuple[bytes, int, int]] = []
+    cumulative_erfuellt = 0
+    cumulative_offen = 0
+    row_start = 0
+    total_erfuellt = sum(1 for i in cross_items if i.get("erfuellt"))
+    total_offen = len(cross_items) - total_erfuellt
+
+    while row_start < len(cross_items) or (row_start == 0 and not cross_items):
+        stream_parts: list[bytes] = []
+        y = page_height - margin
+        page_erfuellt = 0
+        page_offen = 0
+
+        if row_start == 0:
+            # Titelseite: Überschrift + Summen
+            stream_parts.append(_pdf_text_line(margin, y, "Compliance-Report", size=font_title))
+            y -= line_height * 1.5
+            gen = stats.get("generated_at", "")[:19].replace("T", " ")
+            stream_parts.append(_pdf_text_line(margin, y, f"Stand: {gen}", size=font_size))
+            y -= line_height * 2
+            cc = stats.get("cross_compliance", {})
+            stream_parts.append(_pdf_text_line(margin, y, f"Cross-Compliance gesamt: {cc.get('quote', 0)}%"))
+            y -= line_height
+            stream_parts.append(_pdf_text_line(margin, y, f"Erfuellt: {cc.get('erfuellt', 0)}, Offen: {cc.get('offen', 0)}"))
+            y -= line_height
+            enni = stats.get("enni", {})
+            stream_parts.append(_pdf_text_line(margin, y, f"ENNI: {enni.get('bestaetigt', 0)}/{enni.get('total', 0)} bestaetigt"))
+            y -= line_height * 2
+        else:
+            # Folgeseite: Fortsetzung
+            stream_parts.append(_pdf_text_line(margin, y, f"Fortsetzung Cross-Compliance (Seite {len(pages_data) + 1})", size=font_size))
+            y -= line_height * 1.5
+
+        # Tabellenkopf (auf jeder Seite)
+        stream_parts.append(_pdf_text_line(margin, y, "Bereich", size=font_size))
+        stream_parts.append(_pdf_text_line(margin + 120, y, "Anforderung", size=font_size))
+        stream_parts.append(_pdf_text_line(margin + 320, y, "Status", size=font_size))
+        stream_parts.append(_pdf_text_line(margin + 400, y, "Frist", size=font_size))
+        y -= line_height
+        stream_parts.append(f"0.5 w {margin} {y:.1f} m {page_width - margin} {y:.1f} l S\n".encode("latin-1"))
+        y -= 4
+
+        # Zeilen (Positionen)
+        row_end = min(row_start + max_data_lines, len(cross_items))
+        for i in range(row_start, row_end):
+            item = cross_items[i]
+            bereich = (item.get("bereich") or "")[:18]
+            anforderung = (item.get("anforderung") or "")[:28]
+            status = "Erfuellt" if item.get("erfuellt") else "Offen"
+            frist = (item.get("frist") or "")[:10]
+            stream_parts.append(_pdf_text_line(margin, y, bereich, size=font_size))
+            stream_parts.append(_pdf_text_line(margin + 120, y, anforderung, size=font_size))
+            stream_parts.append(_pdf_text_line(margin + 320, y, status, size=font_size))
+            stream_parts.append(_pdf_text_line(margin + 400, y, frist, size=font_size))
+            if item.get("erfuellt"):
+                page_erfuellt += 1
+            else:
+                page_offen += 1
+            y -= line_height
+
+        cumulative_erfuellt += page_erfuellt
+        cumulative_offen += page_offen
+        y -= line_height
+        stream_parts.append(f"0.5 w {margin} {y:.1f} m {page_width - margin} {y:.1f} l S\n".encode("latin-1"))
+        y -= line_height
+        # Zwischensumme / Summe
+        if row_end < len(cross_items):
+            stream_parts.append(
+                _pdf_text_line(margin, y, f"Zwischensumme Seite {len(pages_data) + 1}: Erfuellt {cumulative_erfuellt}, Offen {cumulative_offen}")
+            )
+        else:
+            stream_parts.append(
+                _pdf_text_line(margin, y, f"Summe gesamt: Erfuellt {total_erfuellt}, Offen {total_offen}")
+            )
+        body = b"".join(stream_parts)
+        pages_data.append((body, cumulative_erfuellt, cumulative_offen))
+        row_start = row_end
+        if row_start >= len(cross_items):
+            break
+
+    if not pages_data:
+        # Leere Liste: eine Seite mit nur Überschrift und Summen
+        stream_parts = []
+        y = page_height - margin
+        stream_parts.append(_pdf_text_line(margin, y, "Compliance-Report", size=font_title))
+        y -= line_height * 2
+        cc = stats.get("cross_compliance", {})
+        stream_parts.append(_pdf_text_line(margin, y, f"Cross-Compliance: Erfuellt {cc.get('erfuellt', 0)}, Offen {cc.get('offen', 0)}"))
+        y -= line_height
+        stream_parts.append(_pdf_text_line(margin, y, "Keine Einzelpositionen."))
+        pages_data.append((b"".join(stream_parts), cc.get("erfuellt", 0), cc.get("offen", 0)))
+
+    npages = len(pages_data)
+    # Objekt-IDs: 1=Catalog, 2=Pages, 3..2+npages=Page, 3+npages..2+npages*2=Contents
+    obj_ids_pages = list(range(3, 3 + npages))
+    obj_ids_contents = list(range(3 + npages, 3 + npages * 2))
+    objects: list[tuple[int, str | bytes]] = []
+    # Catalog
+    objects.append((1, "<</Type/Catalog/Pages 2 0 R>>"))
+    # Pages
+    kids = " ".join(f"{i} 0 R" for i in obj_ids_pages)
+    objects.append((2, f"<< /Type /Pages /Kids [{kids}] /Count {npages} >>"))
+    # Page-Objekte
+    for p in range(npages):
+        contents_ref = obj_ids_contents[p]
+        objects.append((
+            3 + p,
+            f"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 {page_width} {page_height}] "
+            f"/Resources << /Font << /F1 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> >> >> "
+            f"/Contents {contents_ref} 0 R >>"
+        ))
+    # Content-Streams (Length muss gesetzt werden)
+    for p in range(npages):
+        body = pages_data[p][0]
+        length = len(body)
+        objects.append((obj_ids_contents[p], f"<< /Length {length} >>\nstream\n".encode() + body + b"\nendstream"))
+
+    # PDF in Buffer schreiben und Offsets sammeln
+    out = io.BytesIO()
+    out.write(b"%PDF-1.4\n")
+    xref_offsets: dict[int, int] = {}
+    for obj_id, obj_content in objects:
+        xref_offsets[obj_id] = out.tell()
+        out.write(f"{obj_id} 0 obj\n".encode())
+        if isinstance(obj_content, bytes):
+            out.write(obj_content)
+        else:
+            out.write(obj_content.encode("latin-1", errors="replace"))
+        out.write(b"\nendobj\n")
+
+    xref_start = out.tell()
+    out.write(b"xref\n")
+    max_id = max(xref_offsets)
+    out.write(f"0 {max_id + 1}\n".encode())
+    out.write(b"0000000000 65535 f \n")
+    for i in range(1, max_id + 1):
+        offset = xref_offsets.get(i, 0)
+        out.write(f"{offset:010d} 00000 n \n".encode())
+    out.write(b"trailer << /Size " + str(max_id + 1).encode() + b" /Root 1 0 R >>\n")
+    out.write(b"startxref\n")
+    out.write(str(xref_start).encode())
+    out.write(b"\n%%EOF\n")
+    return out.getvalue()
+
+
+@router.get("/report-pdf")
+async def get_compliance_report_pdf(
+    inline: bool = Query(False, description="Vorschau im Browser (inline) statt Download"),
+    db: Session = Depends(get_db),
+) -> Response:
+    """Liefert Compliance-Report als mehrseitiges PDF mit Zwischensummen und automatischen Seitenumbrüchen."""
+    _seed(db)
+    stats = await get_compliance_stats(db=db)
+    cross_payload = await list_cross_compliance(db=db)
+    cross_items = cross_payload.get("items", [])
+    pdf_bytes = _build_compliance_pdf_bytes(stats, cross_items)
+    disposition = "inline" if inline else "attachment"
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'{disposition}; filename="compliance-report.pdf"'},
+    )
 
 
 @router.get("/stats", response_model=dict)

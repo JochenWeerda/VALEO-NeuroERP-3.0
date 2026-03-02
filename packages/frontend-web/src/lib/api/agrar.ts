@@ -518,3 +518,191 @@ export function usePSMSachkundeRegister() {
     staleTime: 5 * 60 * 1000,
   })
 }
+
+// ────────────────────────────────────────────────────────────────────────────
+// Wetter (BrightSky DWD + Open-Meteo ICON-D2)
+// ────────────────────────────────────────────────────────────────────────────
+
+export type WetterAktuell = {
+  timestamp?: string
+  temperatur?: number           // °C
+  taupunkt?: number             // °C
+  relative_feuchte?: number     // %
+  niederschlag?: number         // mm/h
+  windgeschwindigkeit?: number  // km/h
+  windrichtung?: number         // Grad
+  windboee?: number             // km/h
+  bedeckungsgrad?: number       // %
+  sonnenscheindauer?: number    // min/h
+  strahlung?: number            // Wh/m²
+  luftdruck?: number            // hPa
+  sichtweite?: number           // m
+  bedingung?: string            // icon code (sunny, rainy, ...)
+  station_id?: string
+  station_name?: string
+  station_lat?: number
+  station_lon?: number
+}
+
+export type WetterWarnung = {
+  id: string
+  event: string
+  headline: string
+  description?: string
+  instruction?: string
+  severity: string    // Minor | Moderate | Severe | Extreme
+  urgency?: string
+  certainty?: string
+  gueltig_von?: string
+  gueltig_bis?: string
+  ausgabezeit?: string
+}
+
+export type PrognoseTag = {
+  datum: string
+  temperatur_max?: number
+  temperatur_min?: number
+  niederschlag_summe?: number    // mm
+  niederschlag_stunden?: number
+  et0_fao?: number               // mm (FAO Grasreferenz-ET₀)
+  wachstumsgradtage?: number     // Wachstumsgradtage base 0°C
+  sonnenscheindauer?: number     // Stunden
+  windgeschwindigkeit_max?: number  // km/h
+  uv_index_max?: number
+}
+
+export type Maschine = {
+  id: string
+  name: string
+  typ: string
+  hersteller?: string
+  modell?: string
+  baujahr?: number
+  kennzeichen?: string
+  fahrgestellnummer?: string
+  leistung_kw?: number
+  betriebsstunden: number
+  naechste_wartung_stunden?: number
+  naechste_wartung_datum?: string
+  status: 'verfuegbar' | 'im-einsatz' | 'werkstatt' | 'stillgelegt'
+  standort?: string
+  customer_id?: string
+  notiz?: string
+  ist_aktiv: boolean
+  wartung_faellig: boolean
+  auslastung?: number
+  created_at?: string
+  updated_at?: string
+}
+
+type WetterCoords = { lat: number; lon: number }
+
+export function useWetterAktuell(coords?: WetterCoords) {
+  return useQuery({
+    queryKey: [...agrarKeys.all, 'wetter-aktuell', coords],
+    queryFn: async () => {
+      const response = await apiClient.get<WetterAktuell>(
+        `/api/v1/agrar/wetter/aktuell?lat=${coords!.lat}&lon=${coords!.lon}`
+      )
+      return response.data
+    },
+    enabled: !!coords,
+    staleTime: 10 * 60 * 1000,   // 10 Min — Wetterdaten ändern sich nicht so schnell
+    retry: 1,
+  })
+}
+
+export function useWetterWarnungen(coords?: WetterCoords) {
+  return useQuery({
+    queryKey: [...agrarKeys.all, 'wetter-warnungen', coords],
+    queryFn: async () => {
+      const response = await apiClient.get<WetterWarnung[]>(
+        `/api/v1/agrar/wetter/warnungen?lat=${coords!.lat}&lon=${coords!.lon}`
+      )
+      return response.data
+    },
+    enabled: !!coords,
+    staleTime: 15 * 60 * 1000,
+    retry: 1,
+  })
+}
+
+export function useWetterPrognose(coords?: WetterCoords, tage = 7) {
+  return useQuery({
+    queryKey: [...agrarKeys.all, 'wetter-prognose', coords, tage],
+    queryFn: async () => {
+      const response = await apiClient.get<PrognoseTag[]>(
+        `/api/v1/agrar/wetter/prognose?lat=${coords!.lat}&lon=${coords!.lon}&tage=${tage}`
+      )
+      return response.data
+    },
+    enabled: !!coords,
+    staleTime: 30 * 60 * 1000,   // 30 Min
+    retry: 1,
+  })
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Maschinenpark
+// ────────────────────────────────────────────────────────────────────────────
+
+export function useMaschinen(filters?: { typ?: string; status?: string; customer_id?: string }) {
+  return useQuery({
+    queryKey: [...agrarKeys.all, 'maschinen', filters],
+    queryFn: async () => {
+      const params = new URLSearchParams()
+      if (filters?.typ) params.append('typ', filters.typ)
+      if (filters?.status) params.append('status', filters.status)
+      if (filters?.customer_id) params.append('customer_id', filters.customer_id)
+      const response = await apiClient.get<{ items: Maschine[]; total: number; stats: Record<string, number> }>(
+        `/api/v1/agrar/maschinen?${String(params)}`
+      )
+      return response.data
+    },
+    staleTime: 2 * 60 * 1000,
+  })
+}
+
+export function useCreateMaschine() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (data: Partial<Maschine>) => {
+      const response = await apiClient.post<Maschine>('/api/v1/agrar/maschinen', data)
+      return response.data
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: [...agrarKeys.all, 'maschinen'] }),
+  })
+}
+
+export function useUpdateMaschine() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: Partial<Maschine> }) => {
+      const response = await apiClient.patch<Maschine>(`/api/v1/agrar/maschinen/${id}`, data)
+      return response.data
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: [...agrarKeys.all, 'maschinen'] }),
+  })
+}
+
+export function useSetMaschineStatus() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      const response = await apiClient.patch<Maschine>(`/api/v1/agrar/maschinen/${id}/status`, { status })
+      return response.data
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: [...agrarKeys.all, 'maschinen'] }),
+  })
+}
+
+export function useBuchBetriebsstunden() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ id, stunden }: { id: string; stunden: number }) => {
+      const response = await apiClient.patch<Maschine>(`/api/v1/agrar/maschinen/${id}/stunden`, { stunden })
+      return response.data
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: [...agrarKeys.all, 'maschinen'] }),
+  })
+}

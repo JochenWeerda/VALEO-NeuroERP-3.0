@@ -4,9 +4,10 @@ Revisionssichere Buchhaltung, Audit-Logging, Hash-Chain, Systemintegrität
 """
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import Response as FastAPIResponse
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from enum import Enum
 import hashlib
 import json
@@ -195,7 +196,7 @@ async def get_buchungslog(
             belegnr=str(row.belegtyp) if row.belegtyp else "",
             aktion=str(row.aktion),
             vorher=row.vorher,
-            nachher=row.nacher,
+            nachher=row.nachher,
             benutzer_id=str(row.benutzer_id) if row.benutzer_id else "",
             benutzer_name=str(row.benutzer_name) if row.benutzer_name else "",
             ip_adresse=str(row.ip_adresse) if row.ip_adresse else "",
@@ -213,13 +214,17 @@ async def create_buchungslog_eintrag(
     vorher: Optional[Dict[str, Any]] = None,
     nachher: Optional[Dict[str, Any]] = None,
     tenant_id: str = Depends(get_tenant_id),
-    current_user=Depends(get_current_user)
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db)
 ):
     """
     Erstelle Eintrag im revisionssicheren Journal
-    
+
     Wird automatisch bei jeder Buchung aufgerufen.
     """
+    benutzer_id = current_user.get("sub") or ""
+    ts = datetime.utcnow()
+
     # Hash berechnen
     log_data = {
         "tenant_id": tenant_id,
@@ -227,20 +232,46 @@ async def create_buchungslog_eintrag(
         "aktion": aktion,
         "vorher": vorher,
         "nachher": nachher,
-        "benutzer_id": current_user.get("sub"),
-        "timestamp": datetime.utcnow().isoformat()
+        "benutzer_id": benutzer_id,
+        "timestamp": ts.isoformat()
     }
-    
+
     hash_sha256 = hashlib.sha256(
         json.dumps(log_data, sort_keys=True).encode()
     ).hexdigest()
-    
-    # TODO: In DB speichern
-    
+
+    log_id = str(uuid.uuid4())
+    try:
+        db.execute(text("""
+            INSERT INTO domain_shared.audit_logs
+                (id, tenant_id, entity_id, entity_type, action,
+                 old_values, new_values, user_id, user_email,
+                 ip_address, created_at, hash_value)
+            VALUES
+                (:id, :tenant_id, :entity_id, 'journal_entry', :action,
+                 :old_values::jsonb, :new_values::jsonb, :user_id, :user_id,
+                 NULL, :created_at, :hash_value)
+        """), {
+            "id": log_id,
+            "tenant_id": tenant_id,
+            "entity_id": buchungs_id,
+            "action": aktion,
+            "old_values": json.dumps(vorher) if vorher else None,
+            "new_values": json.dumps(nachher) if nachher else None,
+            "user_id": benutzer_id,
+            "created_at": ts,
+            "hash_value": hash_sha256,
+        })
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Audit-Log konnte nicht gespeichert werden: {e}")
+
     return {
+        "id": log_id,
         "message": "Log-Eintrag erstellt",
         "hash_sha256": hash_sha256,
-        "timestamp": datetime.utcnow()
+        "timestamp": ts
     }
 
 
@@ -290,7 +321,7 @@ async def verify_hash_chain(
             je.hash_current,
             je.sequence_number,
             je.created_at
-        FROM domain_erp.finance_journal_entries je
+        FROM domain_erp.journal_entries je
         WHERE je.tenant_id = :tenant_id
           AND je.created_at >= :von_datum
           AND je.created_at <= :bis_datum
@@ -386,7 +417,7 @@ async def get_belegnummern_kontrolle(
             je.entry_number as belegnr,
             je.document_type as belegart,
             je.created_at
-        FROM domain_erp.finance_journal_entries je
+        FROM domain_erp.journal_entries je
         WHERE je.tenant_id = :tenant_id
           AND EXTRACT(YEAR FROM je.created_at) = :jahr
           AND je.entry_number IS NOT NULL
@@ -459,48 +490,136 @@ class GoBDVerfahrensdokumentation(BaseModel):
 async def get_verfahrensdokumentation(
     format: Optional[str] = "json",
     tenant_id: str = Depends(get_tenant_id),
-    current_user=Depends(get_current_user)
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
     """
     Hole GoBD Verfahrensdokumentation
-    
+
     Für Steuerberater und Betriebsprüfer.
     Unterstützt JSON und PDF Export.
     """
-    # TODO: Implementiere vollständige Verfahrensdokumentation
-    
+    # Tenant-Daten aus DB holen (Fallback auf Konstanten)
+    firmenname = "VALEO Agrar GmbH"
+    steuernummer = "N/A"
+    try:
+        row = db.execute(
+            text("SELECT name, tax_id FROM domain_shared.tenants WHERE id = :tid LIMIT 1"),
+            {"tid": tenant_id},
+        ).fetchone()
+        if row:
+            firmenname = row.name or firmenname
+            steuernummer = row.tax_id or steuernummer
+    except Exception:
+        pass  # Fallback-Werte werden verwendet
+
+    # Audit-Statistik
+    audit_count = 0
+    try:
+        audit_row = db.execute(
+            text("SELECT COUNT(*) AS cnt FROM domain_shared.audit_logs WHERE tenant_id = :tid"),
+            {"tid": tenant_id},
+        ).fetchone()
+        if audit_row:
+            audit_count = int(audit_row.cnt)
+    except Exception:
+        pass
+
+    buchungsjahr = datetime.now().year
+
     doc = {
-        "export_datum": datetime.utcnow(),
+        "export_datum": datetime.utcnow().isoformat(),
         "software_name": "VALEO-NeuroERP",
         "software_version": "3.0.0",
-        "datenbank": "PostgreSQL",
+        "datenbank": "PostgreSQL 15",
         "betriebssystem": "Linux",
         "organisation": {
-            "firmenname": "VALEO Agrar GmbH",
-            "steuernummer": "123/456/78901",
-            "buchungsjahr": 2026
+            "firmenname": firmenname,
+            "steuernummer": steuernummer,
+            "buchungsjahr": buchungsjahr,
         },
         "anwenderbeschreibung": {
-            "buchungsworkflow": "Belege erfassen -> Kontierung -> Buchen -> Archivieren",
-            "kontrollen": "Summenabgleich, Plausibilitätsprüfung"
+            "buchungsworkflow": "Belege erfassen → Kontierung → Buchen → GoBD-Archivierung",
+            "kontrollen": "Summenabgleich, Plausibilitätsprüfung, Hash-Chain-Validierung",
+            "benutzergruppen": ["Administrator", "Buchhalter", "Steuerberater", "Betriebsprüfer"],
         },
         "technische_dokumentation": {
-            "datenbankstruktur": "Siehe ER-Diagramm",
-            "api_endpunkte": "/api/finance/*",
-            "sicherheit": "OIDC, RBAC, TLS"
+            "datenbankstruktur": "PostgreSQL 15 mit Multi-Schema-Architektur (domain_shared, domain_finance, …)",
+            "api_endpunkte": "/api/v1/finance/*",
+            "sicherheit": "OIDC (Keycloak), RBAC, TLS 1.3, Audit-Log mit SHA-256-Hash-Chain",
+            "backup": "Tägliche inkrementelle Sicherung, wöchentliche Vollsicherung",
         },
+        "pruefpfade": [
+            {"kategorie": "Buchungsänderungen", "audit_eintraege": audit_count},
+            {"kategorie": "Unveränderlichkeit", "methode": "SHA-256 Hash-Chain je Buchung"},
+        ],
         "aufbewahrungsfristen": {
-            "geschaeftsbriefe": 10,
-            "buchungsbelege": 10,
-            "jahresabschluesse": 10,
-            "steuerunterlagen": 10
-        }
+            "Buchungsbelege": 10,
+            "Jahresabschlüsse": 10,
+            "Geschäftsbriefe": 6,
+            "Rechnungen": 10,
+            "Lohnunterlagen": 10,
+        },
     }
-    
+
     if format == "pdf":
-        # TODO: PDF-Generierung
-        return {"message": "PDF-Export wird vorbereitet"}
-    
+        from io import BytesIO
+        from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle, Spacer
+        from reportlab.lib.pagesizes import A4
+        from reportlab.lib.styles import getSampleStyleSheet
+        from reportlab.lib import colors
+
+        buf = BytesIO()
+        styles = getSampleStyleSheet()
+        h1 = styles["Heading1"]
+        h2 = styles["Heading2"]
+        normal = styles["Normal"]
+
+        story = [
+            Paragraph("Verfahrensdokumentation gemäß GoBD", h1),
+            Paragraph(f"Erstellt am: {date.today().isoformat()}", normal),
+            Spacer(1, 12),
+
+            Paragraph("1. Organisation", h2),
+            Paragraph(f"Firmenname: {doc['organisation']['firmenname']}", normal),
+            Paragraph(f"Steuernummer: {doc['organisation']['steuernummer']}", normal),
+            Paragraph(f"Buchungsjahr: {doc['organisation']['buchungsjahr']}", normal),
+            Spacer(1, 8),
+
+            Paragraph("2. Anwenderbeschreibung", h2),
+            Paragraph(f"Buchungsworkflow: {doc['anwenderbeschreibung']['buchungsworkflow']}", normal),
+            Paragraph(f"Kontrollen: {doc['anwenderbeschreibung']['kontrollen']}", normal),
+            Spacer(1, 8),
+
+            Paragraph("3. Technische Dokumentation", h2),
+            Paragraph(f"Datenbank: {doc['technische_dokumentation']['datenbankstruktur']}", normal),
+            Paragraph(f"Sicherheit: {doc['technische_dokumentation']['sicherheit']}", normal),
+            Paragraph(f"Backup: {doc['technische_dokumentation']['backup']}", normal),
+            Spacer(1, 8),
+
+            Paragraph("4. Aufbewahrungsfristen", h2),
+        ]
+
+        fristen_data = [["Dokumenttyp", "Aufbewahrungsdauer"]] + [
+            [k, f"{v} Jahre"] for k, v in doc["aufbewahrungsfristen"].items()
+        ]
+        fristen_table = Table(fristen_data, colWidths=[300, 150])
+        fristen_table.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, 0), colors.grey),
+            ("TEXTCOLOR", (0, 0), (-1, 0), colors.whitesmoke),
+            ("GRID", (0, 0), (-1, -1), 0.5, colors.black),
+            ("FONTSIZE", (0, 0), (-1, -1), 10),
+        ]))
+        story.append(fristen_table)
+
+        SimpleDocTemplate(buf, pagesize=A4).build(story)
+
+        return FastAPIResponse(
+            content=buf.getvalue(),
+            media_type="application/pdf",
+            headers={"Content-Disposition": "attachment; filename=verfahrensdokumentation.pdf"},
+        )
+
     return doc
 
 
@@ -566,35 +685,154 @@ async def get_nachvollziehbarkeit(
 # ============================================================================
 
 class AufbewahrungsFrist(BaseModel):
+    id: str
     dokument_typ: str
+    gesetzliche_grundlage: Optional[str] = None
     aufbewahrungs_jahre: int
-    ablauf_datum: date
-    status: str  | "AKTIV" | "AUSSTEHEND" | "ABGELAUFEN"
+    aeltestes_dokument_datum: Optional[date] = None
+    anzahl_dokumente: int = 0
+    ablauf_datum: Optional[date] = None
+    status: str = "AKTIV"
+
+
+_STANDARD_FRISTEN = [
+    {"dokument_typ": "Buchungsbelege", "gesetzliche_grundlage": "§147 AO", "aufbewahrungs_jahre": 10},
+    {"dokument_typ": "Jahresabschlüsse", "gesetzliche_grundlage": "§147 AO", "aufbewahrungs_jahre": 10},
+    {"dokument_typ": "Geschäftsbriefe", "gesetzliche_grundlage": "§257 HGB", "aufbewahrungs_jahre": 6},
+    {"dokument_typ": "Rechnungen", "gesetzliche_grundlage": "§147 AO", "aufbewahrungs_jahre": 10},
+    {"dokument_typ": "Lohnunterlagen", "gesetzliche_grundlage": "§147 AO", "aufbewahrungs_jahre": 10},
+]
 
 
 @router.get("/aufbewahrung")
 async def get_aufbewahrungs_fristen(
     tenant_id: str = Depends(get_tenant_id),
-    current_user=Depends(get_current_user)
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
     """
     Liste aller Aufbewahrungsfristen
-    
-    Zeigt auslaufende Dokumente und Fristen.
+
+    Zeigt Fristen inkl. ältestem Dokument und Ablaufdatum aus DB.
+    Beim ersten Aufruf werden Standard-Datensätze angelegt.
     """
-    # TODO: Implementiere echte Fristen-Berechnung
-    
-    return [
-        AufbewahrungsFrist(
-            dokument_typ="Jahresabschluss 2025",
-            aufbewahrungs_jahre=10,
-            ablauf_datum=date(2035, 12, 31),
-            status="AKTIV"
-        ),
-        AufbewahrungsFrist(
-            dokument_typ="Buchungsbelege 2024",
-            aufbewahrungs_jahre=10,
-            ablauf_datum=date(2034, 12, 31),
-            status="AKTIV"
+    today = date.today()
+
+    # Vorhandene Einträge für diesen Tenant laden
+    try:
+        rows = db.execute(
+            text("""
+                SELECT id, dokument_typ, gesetzliche_grundlage, aufbewahrungs_jahre,
+                       aeltestes_dokument_datum, anzahl_dokumente, ablauf_datum, status
+                FROM domain_finance.aufbewahrungsfristen
+                WHERE tenant_id = :tid
+                ORDER BY dokument_typ
+            """),
+            {"tid": tenant_id},
+        ).fetchall()
+    except Exception:
+        rows = []
+
+    # Wenn noch keine tenant-spezifischen Einträge: Seed anlegen
+    if not rows:
+        try:
+            for frist in _STANDARD_FRISTEN:
+                # Ältestes Dokument ermitteln aus audit_logs
+                try:
+                    audit_row = db.execute(
+                        text("""
+                            SELECT MIN(created_at) AS aeltestes
+                            FROM domain_shared.audit_logs
+                            WHERE tenant_id = :tid
+                        """),
+                        {"tid": tenant_id},
+                    ).fetchone()
+                    aeltestes = audit_row.aeltestes.date() if audit_row and audit_row.aeltestes else today
+                except Exception:
+                    aeltestes = today
+
+                ablauf = aeltestes + timedelta(days=frist["aufbewahrungs_jahre"] * 365)
+                status_val = "ABGELAUFEN" if ablauf < today else "AKTIV"
+
+                db.execute(
+                    text("""
+                        INSERT INTO domain_finance.aufbewahrungsfristen
+                            (id, tenant_id, dokument_typ, gesetzliche_grundlage,
+                             aufbewahrungs_jahre, aeltestes_dokument_datum,
+                             anzahl_dokumente, ablauf_datum, status, created_at, updated_at)
+                        VALUES
+                            (:id, :tenant_id, :dokument_typ, :gesetzliche_grundlage,
+                             :aufbewahrungs_jahre, :aeltestes_dokument_datum,
+                             0, :ablauf_datum, :status, NOW(), NOW())
+                    """),
+                    {
+                        "id": str(uuid.uuid4()),
+                        "tenant_id": tenant_id,
+                        "dokument_typ": frist["dokument_typ"],
+                        "gesetzliche_grundlage": frist["gesetzliche_grundlage"],
+                        "aufbewahrungs_jahre": frist["aufbewahrungs_jahre"],
+                        "aeltestes_dokument_datum": aeltestes,
+                        "ablauf_datum": ablauf,
+                        "status": status_val,
+                    },
+                )
+            db.commit()
+
+            # Neu geladene Zeilen holen
+            rows = db.execute(
+                text("""
+                    SELECT id, dokument_typ, gesetzliche_grundlage, aufbewahrungs_jahre,
+                           aeltestes_dokument_datum, anzahl_dokumente, ablauf_datum, status
+                    FROM domain_finance.aufbewahrungsfristen
+                    WHERE tenant_id = :tid
+                    ORDER BY dokument_typ
+                """),
+                {"tid": tenant_id},
+            ).fetchall()
+        except Exception as exc:
+            db.rollback()
+            # Fallback: statische Daten
+            return [
+                AufbewahrungsFrist(
+                    id=str(uuid.uuid4()),
+                    dokument_typ=f["dokument_typ"],
+                    gesetzliche_grundlage=f["gesetzliche_grundlage"],
+                    aufbewahrungs_jahre=f["aufbewahrungs_jahre"],
+                    ablauf_datum=today + timedelta(days=f["aufbewahrungs_jahre"] * 365),
+                    status="AKTIV",
+                )
+                for f in _STANDARD_FRISTEN
+            ]
+
+    # Ablaufdatum + Status dynamisch aktualisieren
+    result = []
+    for row in rows:
+        ablauf = row.ablauf_datum
+        if ablauf is None and row.aeltestes_dokument_datum:
+            ablauf = row.aeltestes_dokument_datum + timedelta(days=row.aufbewahrungs_jahre * 365)
+        status_val = "ABGELAUFEN" if (ablauf and ablauf < today) else "AKTIV"
+
+        # Zähler aus audit_logs aktualisieren (best-effort)
+        try:
+            count_row = db.execute(
+                text("SELECT COUNT(*) AS cnt FROM domain_shared.audit_logs WHERE tenant_id = :tid"),
+                {"tid": tenant_id},
+            ).fetchone()
+            anzahl = int(count_row.cnt) if count_row else row.anzahl_dokumente
+        except Exception:
+            anzahl = row.anzahl_dokumente or 0
+
+        result.append(
+            AufbewahrungsFrist(
+                id=str(row.id),
+                dokument_typ=row.dokument_typ,
+                gesetzliche_grundlage=row.gesetzliche_grundlage,
+                aufbewahrungs_jahre=row.aufbewahrungs_jahre,
+                aeltestes_dokument_datum=row.aeltestes_dokument_datum,
+                anzahl_dokumente=anzahl,
+                ablauf_datum=ablauf,
+                status=status_val,
+            )
         )
-    ]
+
+    return result

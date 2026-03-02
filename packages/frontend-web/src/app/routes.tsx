@@ -2,6 +2,8 @@ import { type ComponentType, Suspense, lazy } from 'react'
 import { type RouteObject, createBrowserRouter } from 'react-router-dom'
 import AppLayout from '@/layouts/DashboardLayout'
 import CustomerPortalLayout from '@/layouts/CustomerPortalLayout'
+import FibuSuiteLayout from '@/layouts/FibuSuiteLayout'
+import { NAV_SECTIONS } from '@/app/navigation/manifest'
 import { ErrorBoundary } from '@/shared/errors/ErrorBoundary'
 import { PageLoader } from '@/app/PageLoader'
 import { ENABLE_PROSPECTING_UI } from '@/features/prospecting/feature-flags'
@@ -27,6 +29,34 @@ const AUTO_ROUTE_IGNORE_PATTERNS: RegExp[] = [
 ]
 
 const lazyComponentCache = new WeakMap<PageModuleFactory, ComponentType<unknown>>()
+
+const FibuSuiteDashboard = lazy(() =>
+  import('@/layouts/FibuSuiteDashboard').then((m) => ({ default: m.default })),
+)
+
+/** Suite-Pfad aus aufgelöster Nav-Path (z. B. /fibu/hauptbuch → hauptbuch, /finance/audit-trail → finance/audit-trail). */
+function getFibuSuitePath(resolvedPath: string | undefined): string | null {
+  if (!resolvedPath || resolvedPath === '/') return null
+  const p = resolvedPath.startsWith('/') ? resolvedPath.slice(1) : resolvedPath
+  if (p.startsWith('fibu/')) return p.replace('fibu/', '')
+  if (p.startsWith('finance/')) return p
+  if (p.startsWith('export/')) return p.replace('export/', '')
+  if (p.startsWith('pos/')) return p
+  return p
+}
+
+function buildFibuSuiteChildRoutes(): RouteObject[] {
+  const fibu = NAV_SECTIONS.find((s) => s.id === 'fibu')
+  const children = fibu?.children ?? []
+  return children
+    .filter((c): c is typeof c & { module: string } => Boolean(c.module))
+    .map((c) => {
+      const path = getFibuSuitePath(c.path)
+      if (!path) return null
+      return { path, element: createRouteElementByModule(c.module) }
+    })
+    .filter((x): x is RouteObject => x != null)
+}
 
 // Separate portal routes from main app routes
 function isPortalModule(modulePath: string): boolean {
@@ -63,6 +93,14 @@ const routerConfig: RouteObject[] = [
       <AppLayout />
     ),
     children: [
+      {
+        path: 'fibu-suite',
+        element: <FibuSuiteLayout />,
+        children: [
+          { index: true, element: <Suspense fallback={<PageLoader />}><FibuSuiteDashboard /></Suspense> },
+          ...buildFibuSuiteChildRoutes(),
+        ],
+      },
       ...buildAutoRoutes(),
       ...buildAliasRoutes(routeAliasData.aliases ?? []),
       { path: '*', element: createRouteElementByModule('@/pages/errors/NotFound') },

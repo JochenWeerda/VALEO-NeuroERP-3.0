@@ -9,6 +9,7 @@ import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { StornoDialog } from '@/components/finance/StornoDialog'
 import { financeService } from '@/lib/services/finance-service'
 import { toast } from '@/hooks/use-toast'
+import { apiClient } from '@/lib/axios'
 
 // Zod-Schema für Buchungserfassung (wird in Komponente mit i18n erstellt)
 const createBuchungSchema = (t: any) => z.object({
@@ -162,35 +163,19 @@ const createBuchungConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
     }
   ],
   actions: [
-    {
-      key: 'validate',
-      label: t('crud.actions.validate'),
-      type: 'secondary'
-    , onClick: () => {} },
-    {
-      key: 'save',
-      label: t('crud.actions.book'),
-      type: 'primary'
-    , onClick: () => {} },
-    {
-      key: 'storno',
-      label: t('crud.actions.reverse'),
-      type: 'danger'
-    , onClick: () => {} },
-    {
-      key: 'export',
-      label: t('crud.actions.datevExport'),
-      type: 'secondary'
-    , onClick: () => {} }
+    { key: 'validate', label: t('crud.actions.validate'), type: 'secondary' },
+    { key: 'save', label: t('crud.actions.book'), type: 'primary' },
+    { key: 'storno', label: t('crud.actions.reverse'), type: 'danger' },
+    { key: 'export', label: t('crud.actions.datevExport'), type: 'secondary' }
   ],
   api: {
-    baseUrl: '/api/finance/buchungen',
+    baseUrl: '/api/v1/journal-entries',
     endpoints: {
-      list: '/api/finance/buchungen',
-      get: '/api/finance/buchungen/{id}',
-      create: '/api/finance/buchungen',
-      update: '/api/finance/buchungen/{id}',
-      delete: '/api/finance/buchungen/{id}'
+      list: '/api/v1/journal-entries',
+      get: '/api/v1/journal-entries/{id}',
+      create: '/api/v1/journal-entries',
+      update: '/api/v1/journal-entries/{id}',
+      delete: '/api/v1/journal-entries/{id}'
     }
   } as any,
   validation: createBuchungSchema(t),
@@ -325,6 +310,7 @@ export default function BuchungserfassungPage(): JSX.Element {
   const [isDirty, setIsDirty] = useState(false)
   const [isStornoDialogOpen, setIsStornoDialogOpen] = useState(false)
   const [isStornoLoading, setIsStornoLoading] = useState(false)
+  const [actionLoadingKey, setActionLoadingKey] = useState<string | null>(null)
   const entityType = 'booking'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Buchungserfassung')
   const buchungConfig = createBuchungConfig(t, entityTypeLabel)
@@ -343,22 +329,30 @@ export default function BuchungserfassungPage(): JSX.Element {
         showValidationToast(isValid.errors)
         return
       }
-
+      setActionLoadingKey('save')
       try {
-        await saveData(formData)
+        await apiClient.post('/api/v1/finance/journal-entries/post', formData ?? {})
+        toast({ title: t('crud.messages.bookingValidationSuccess', { defaultValue: 'Buchung gebucht' }) })
         setIsDirty(false)
         navigate('/finance/buchungen')
-      } catch (error) {
-        // Error wird bereits in useMaskData behandelt
+      } catch (error: any) {
+        const msg = error.response?.data?.detail ?? error.message
+        toast({ variant: 'destructive', title: t('common.error'), description: msg })
+      } finally {
+        setActionLoadingKey(null)
       }
-    } else if (action === 'validate') {
+      return
+    }
+    if (action === 'validate') {
       const isValid = validate(formData)
       if (isValid.isValid) {
-        alert(t('crud.messages.bookingValidationSuccess'))
+        toast({ title: t('crud.messages.bookingValidationSuccess', { defaultValue: 'Validierung erfolgreich' }) })
       } else {
         showValidationToast(isValid.errors)
       }
-    } else if (action === 'storno') {
+      return
+    }
+    if (action === 'storno') {
       // Prüfe ob Buchung bereits gespeichert wurde
       if (!formData.id && !formData.belegnummer) {
         toast({
@@ -369,8 +363,19 @@ export default function BuchungserfassungPage(): JSX.Element {
         return
       }
       setIsStornoDialogOpen(true)
-    } else if (action === 'export') {
-      window.open('/api/finance/buchungen/export', '_blank')
+    }
+    if (action === 'export') {
+      setActionLoadingKey('export')
+      try {
+        const res = await apiClient.post<{ url?: string }>('/api/v1/export/list', { entity: 'journal_entries', format: 'datev' })
+        if (res?.url) window.open(res.url, '_blank')
+        toast({ title: t('crud.actions.datevExport'), description: t('crud.messages.exportCreated', { defaultValue: 'Export erstellt' }) })
+      } catch (error: any) {
+        const msg = error.response?.data?.detail ?? error.message
+        toast({ variant: 'destructive', title: t('common.error'), description: msg })
+      } finally {
+        setActionLoadingKey(null)
+      }
     }
   })
 
@@ -421,6 +426,8 @@ export default function BuchungserfassungPage(): JSX.Element {
         onSave={handleSave}
         onCancel={handleCancel}
         isLoading={loading}
+        onAction={(key, formData) => handleAction(key, formData)}
+        loadingActionKey={actionLoadingKey}
       />
       <StornoDialog
         open={isStornoDialogOpen}

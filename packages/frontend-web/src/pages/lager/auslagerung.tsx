@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Wizard } from '@/components/patterns/Wizard'
+import { api } from '@/lib/axios'
+import { useToast } from '@/hooks/use-toast'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -17,6 +19,7 @@ type AuslagerungData = {
 
 export default function AuslagerungPage(): JSX.Element {
   const navigate = useNavigate()
+  const { toast } = useToast()
   const [auslagerung, setAuslagerung] = useState<AuslagerungData>({
     artikel: '',
     menge: 0,
@@ -126,9 +129,25 @@ export default function AuslagerungPage(): JSX.Element {
     },
   ]
 
+  const handleFinish = async () => {
+    try {
+      await api.post('/api/v1/lager/auslagerung', {
+        artikel: auslagerung.artikel,
+        menge: auslagerung.menge,
+        strategie: auslagerung.strategie,
+        chargen_id: auslagerung.chargenId || undefined,
+        verwendungszweck: auslagerung.verwendungszweck || undefined,
+      })
+      toast({ title: 'Auslagerung gebucht', description: `${auslagerung.artikel}: ${auslagerung.menge} t` })
+      navigate('/lager/bestandsuebersicht')
+    } catch (e: any) {
+      toast({ title: 'Buchung fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+    }
+  }
+
   return (
     <div className="p-6">
-      <Wizard title="Auslagerung" steps={steps} onFinish={() => navigate('/lager/bestandsuebersicht')} onCancel={() => navigate('/lager/bestandsuebersicht')} />
+      <Wizard title="Auslagerung" steps={steps} onFinish={handleFinish} onCancel={() => navigate('/lager/bestandsuebersicht')} />
     </div>
   )
 }

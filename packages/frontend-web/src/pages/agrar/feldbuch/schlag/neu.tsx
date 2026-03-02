@@ -6,6 +6,7 @@
 
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useMutation } from '@tanstack/react-query'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -22,6 +23,8 @@ import {
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { ArrowLeft, Save, MapPin, Leaf, Info } from 'lucide-react'
 import { useKulturen } from '@/lib/api/agrar'
+import { apiClient } from '@/lib/api-client'
+import { useToast } from '@/hooks/use-toast'
 
 // Mock Bodenarten
 const BODENARTEN = [
@@ -38,6 +41,7 @@ const BODENARTEN = [
 export default function SchlagNeu() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
+  const { toast } = useToast()
 
   const { data: kulturenData, isLoading } = useKulturen()
 
@@ -49,6 +53,7 @@ export default function SchlagNeu() {
   // Vorbelegung aus URL-Parametern (z.B. von Feldblockfinder)
   const initialFlik = searchParams.get('flik') || ''
   const initialFlaeche = searchParams.get('flaeche') || ''
+  const customerId = searchParams.get('customer_id') || ''
 
   const [formData, setFormData] = useState({
     name: '',
@@ -60,29 +65,38 @@ export default function SchlagNeu() {
     bemerkungen: '',
   })
 
-  const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const handleChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const createMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiClient.post('/api/v1/agrar/schlaege', {
+        customer_id: customerId,
+        name: formData.name,
+        flik: formData.flik || null,
+        flaeche: parseFloat(formData.flaeche),
+        kultur: formData.kultur || null,
+        bodenart: formData.bodenart || null,
+        ackerzahl: formData.ackerzahl ? parseFloat(formData.ackerzahl) : null,
+      })
+      return response.data
+    },
+    onSuccess: () => {
+      toast({ title: 'Schlag angelegt', description: `"${formData.name}" wurde erfolgreich gespeichert.` })
+      navigate('/agrar/feldbuch/schlagkartei')
+    },
+    onError: () => {
+      setError('Fehler beim Speichern. Bitte versuchen Sie es erneut.')
+    },
+  })
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
-    setSaving(true)
-
-    try {
-      // TODO: API Call zum Speichern
-      await new Promise(resolve => setTimeout(resolve, 500))
-
-      // Zurück zur Übersicht
-      navigate('/agrar/feldbuch/schlagkartei')
-    } catch (err) {
-      setError('Fehler beim Speichern. Bitte versuchen Sie es erneut.')
-    } finally {
-      setSaving(false)
-    }
+    createMutation.mutate()
   }
 
   const isValid = formData.name && formData.flik && formData.flaeche && formData.kultur
@@ -259,9 +273,9 @@ export default function SchlagNeu() {
           <Button type="button" variant="outline" onClick={() => navigate(-1)}>
             Abbrechen
           </Button>
-          <Button type="submit" disabled={!isValid || saving} className="gap-2">
+          <Button type="submit" disabled={!isValid || createMutation.isPending} className="gap-2">
             <Save className="h-4 w-4" />
-            {saving ? 'Speichere...' : 'Schlag anlegen'}
+            {createMutation.isPending ? 'Speichere...' : 'Schlag anlegen'}
           </Button>
         </div>
       </form>

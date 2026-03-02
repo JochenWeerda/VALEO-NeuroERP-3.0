@@ -340,3 +340,41 @@ class FeldbuchMassnahme(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     schlag = relationship("FeldbuchSchlag", back_populates="massnahmen")
+
+
+# Maschinenpark
+
+class AgrarMaschine(Base):
+    """Maschinenpark — Traktoren, Mähdrescher, Anbaugeräte etc."""
+    __tablename__ = "agrar_maschinen"
+    __table_args__ = {"schema": "domain_agrar", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: uuid7())
+    tenant_id = Column(String, nullable=False, index=True)
+    customer_id = Column(String, nullable=True, index=True)
+    # None = eigene Maschine des Landhandels; gesetzt = Lohnmaschine eines Kunden
+
+    name = Column(String(200), nullable=False)
+    typ = Column(String(50), nullable=False)
+    # Traktor | Mähdrescher | Anhänger | Spritze | Grubber | Sämaschine | Sonstiges
+
+    hersteller = Column(String(100), nullable=True)
+    modell = Column(String(100), nullable=True)
+    baujahr = Column(Integer, nullable=True)
+    kennzeichen = Column(String(20), nullable=True)
+    fahrgestellnummer = Column(String(50), nullable=True)
+    leistung_kw = Column(Float, nullable=True)              # Motorleistung in kW
+
+    betriebsstunden = Column(Float, default=0.0)            # Aktuelle Betriebsstunden gesamt
+    naechste_wartung_stunden = Column(Float, nullable=True) # Betriebsstunden-Schwelle für nächste Wartung
+    naechste_wartung_datum = Column(DateTime(timezone=True), nullable=True)
+
+    status = Column(String(20), default='verfuegbar')
+    # verfuegbar | im-einsatz | werkstatt | stillgelegt
+
+    standort = Column(String(100), nullable=True)           # Lagerort / Einsatzort
+    notiz = Column(Text, nullable=True)
+
+    ist_aktiv = Column(Boolean, default=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())

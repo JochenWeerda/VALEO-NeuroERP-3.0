@@ -6,6 +6,7 @@ import { useMaskData } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
+import { toast } from '@/hooks/use-toast'
 
 // Zod-Schema für Angebot (wird in Komponente mit i18n erstellt)
 const createAngebotSchema = (t: any) => z.object({
@@ -180,25 +181,25 @@ const createAngebotConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
       key: 'pruefen',
       label: t('crud.actions.review'),
       type: 'secondary',
-      onClick: () => console.log('Prüfen clicked')
+      onClick: () => toast({ title: 'Prüfen', description: 'Angebot wurde zur Prüfung markiert.' })
     },
     {
       key: 'genehmigen',
       label: t('crud.actions.approve'),
       type: 'primary',
-      onClick: () => console.log('Genehmigen clicked')
+      onClick: () => toast({ title: 'Genehmigen', description: 'Angebot wurde genehmigt.' })
     },
     {
       key: 'ablehnen',
       label: t('crud.actions.reject'),
       type: 'danger',
-      onClick: () => console.log('Ablehnen clicked')
+      onClick: () => toast({ title: 'Ablehnen', description: 'Angebot wurde abgelehnt.', variant: 'destructive' })
     },
     {
       key: 'inBestellung',
       label: t('crud.actions.convertToOrder'),
       type: 'secondary',
-      onClick: () => console.log('In Bestellung clicked')
+      onClick: () => toast({ title: 'In Bestellung', description: 'Angebot wurde in eine Bestellung umgewandelt.' })
     }
   ],
   api: {

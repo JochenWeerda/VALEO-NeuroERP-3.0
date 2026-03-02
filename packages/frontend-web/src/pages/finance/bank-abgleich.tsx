@@ -6,6 +6,7 @@ import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mas
 import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
 import { toast } from '@/hooks/use-toast'
+import { apiClient } from '@/lib/axios'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 
 // Zod-Schema für Bank-Abgleich (wird in Komponente mit i18n erstellt)
@@ -180,40 +181,20 @@ const createBankAbgleichConfig = (t: any, entityTypeLabel: string): MaskConfig =
     }
   ],
   actions: [
-    {
-      key: 'import',
-      label: t('crud.actions.camtImport'),
-      type: 'secondary'
-    , onClick: () => {} },
-    {
-      key: 'auto-assign',
-      label: t('crud.actions.autoAssign'),
-      type: 'secondary'
-    , onClick: () => {} },
-    {
-      key: 'validate',
-      label: t('crud.actions.validate'),
-      type: 'secondary'
-    , onClick: () => {} },
-    {
-      key: 'book',
-      label: t('crud.actions.book'),
-      type: 'primary'
-    , onClick: () => {} },
-    {
-      key: 'export',
-      label: t('crud.actions.export'),
-      type: 'secondary'
-    , onClick: () => {} }
+    { key: 'import', label: t('crud.actions.camtImport'), type: 'secondary' },
+    { key: 'auto-assign', label: t('crud.actions.autoAssign'), type: 'secondary' },
+    { key: 'validate', label: t('crud.actions.validate'), type: 'secondary' },
+    { key: 'book', label: t('crud.actions.book'), type: 'primary' },
+    { key: 'export', label: t('crud.actions.export'), type: 'secondary' }
   ],
   api: {
-    baseUrl: '/api/finance/bank',
+    baseUrl: '/api/v1/finance/bank-statements',
     endpoints: {
-      list: '/api/finance/bank',
-      get: '/api/finance/bank/{id}',
-      create: '/api/finance/bank',
-      update: '/api/finance/bank/{id}',
-      delete: '/api/finance/bank/{id}'
+      list: '/api/v1/finance/bank-statements',
+      get: '/api/v1/finance/bank-statements/{id}',
+      create: '/api/v1/finance/bank-statements',
+      update: '/api/v1/finance/bank-statements/{id}',
+      delete: '/api/v1/finance/bank-statements/{id}'
     }
   } as any,
   validation: createBankAbgleichSchema(t),
@@ -305,6 +286,7 @@ export default function BankAbgleichPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [isDirty, setIsDirty] = useState(false)
+  const [actionLoadingKey, setActionLoadingKey] = useState<string | null>(null)
   const entityType = 'bankReconciliation'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Bank-Abgleich')
   const bankAbgleichConfig = createBankAbgleichConfig(t, entityTypeLabel)
@@ -512,38 +494,39 @@ export default function BankAbgleichPage(): JSX.Element {
         showValidationToast(isValid.errors)
         return
       }
-
       const differenz = Math.abs(formData.abgleichsDifferenz || 0)
       if (differenz >= 0.01) {
-        toast({
-          variant: 'destructive',
-          title: t('crud.messages.bookingNotPossible'),
-          description: t('crud.messages.reconciliationMustBeBalanced'),
-        })
+        toast({ variant: 'destructive', title: t('crud.messages.bookingNotPossible'), description: t('crud.messages.reconciliationMustBeBalanced') })
         return
       }
-
+      setActionLoadingKey('book')
       try {
-        await saveData(formData)
+        await apiClient.post('/api/v1/finance/bank-reconciliation/run', formData ?? {})
+        toast({ title: t('crud.messages.reconciliationBooked'), description: t('crud.messages.reconciliationBookedDesc') })
         setIsDirty(false)
-        toast({
-          title: t('crud.messages.reconciliationBooked'),
-          description: t('crud.messages.reconciliationBookedDesc'),
-        })
         navigate('/finance/bank')
-      } catch (error) {
-        // Error wird bereits in useMaskData behandelt
+      } catch (error: any) {
+        const msg = error.response?.data?.detail ?? error.message
+        toast({ variant: 'destructive', title: t('common.error'), description: msg })
+      } finally {
+        setActionLoadingKey(null)
       }
     } else if (action === 'export') {
       if (!formData.id) {
-        toast({
-          variant: 'destructive',
-          title: t('common.error'),
-          description: t('crud.messages.saveReconciliationFirst'),
-        })
+        toast({ variant: 'destructive', title: t('common.error'), description: t('crud.messages.saveReconciliationFirst') })
         return
       }
-      window.open(`/api/finance/bank/${formData.id}/export`, '_blank')
+      setActionLoadingKey('export')
+      try {
+        const res = await apiClient.post<{ url?: string }>('/api/v1/export/list', { entity: 'bank_reconciliation', format: 'pdf', id: formData.id })
+        if (res?.url) window.open(res.url, '_blank')
+        toast({ title: t('crud.actions.export'), description: t('crud.messages.exportCreated', { defaultValue: 'Export erstellt' }) })
+      } catch (error: any) {
+        const msg = error.response?.data?.detail ?? error.message
+        toast({ variant: 'destructive', title: t('common.error'), description: msg })
+      } finally {
+        setActionLoadingKey(null)
+      }
     }
   })
 
@@ -565,6 +548,8 @@ export default function BankAbgleichPage(): JSX.Element {
       onSave={handleSave}
       onCancel={handleCancel}
       isLoading={loading}
+      onAction={(key, formData) => handleAction(key, formData)}
+      loadingActionKey={actionLoadingKey}
     />
   )
 }

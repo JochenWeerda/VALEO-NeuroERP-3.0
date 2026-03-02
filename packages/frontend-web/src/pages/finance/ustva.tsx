@@ -6,6 +6,7 @@ import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mas
 import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
 import { toast } from '@/hooks/use-toast'
+import { apiClient } from '@/lib/axios'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 
 // Zod-Schema für UStVA (wird in Komponente mit i18n erstellt)
@@ -310,40 +311,20 @@ const createUstvaConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
     }
   ],
   actions: [
-    {
-      key: 'calculate',
-      label: t('crud.actions.recalculate'),
-      type: 'secondary'
-    , onClick: () => {} },
-    {
-      key: 'validate',
-      label: t('crud.actions.validate'),
-      type: 'secondary'
-    , onClick: () => {} },
-    {
-      key: 'approve',
-      label: t('crud.actions.approve'),
-      type: 'primary'
-    , onClick: () => {} },
-    {
-      key: 'submit',
-      label: t('crud.actions.submitToElster'),
-      type: 'primary'
-    , onClick: () => {} },
-    {
-      key: 'export',
-      label: t('crud.actions.xmlExport'),
-      type: 'secondary'
-    , onClick: () => {} }
+    { key: 'calculate', label: t('crud.actions.recalculate'), type: 'secondary' },
+    { key: 'validate', label: t('crud.actions.validate'), type: 'secondary' },
+    { key: 'approve', label: t('crud.actions.approve'), type: 'primary' },
+    { key: 'submit', label: t('crud.actions.submitToElster'), type: 'primary' },
+    { key: 'export', label: t('crud.actions.xmlExport'), type: 'secondary' }
   ],
   api: {
-    baseUrl: '/api/finance/ustva',
+    baseUrl: '/api/v1/finance/ustva',
     endpoints: {
-      list: '/api/finance/ustva',
-      get: '/api/finance/ustva/{id}',
-      create: '/api/finance/ustva',
-      update: '/api/finance/ustva/{id}',
-      delete: '/api/finance/ustva/{id}'
+      list: '/api/v1/finance/ustva',
+      get: '/api/v1/finance/ustva/{id}',
+      create: '/api/v1/finance/ustva',
+      update: '/api/v1/finance/ustva/{id}',
+      delete: '/api/v1/finance/ustva/{id}'
     }
   } as any,
   validation: createUstvaSchema(t),
@@ -455,6 +436,7 @@ export default function UStVAPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [isDirty, setIsDirty] = useState(false)
+  const [actionLoadingKey, setActionLoadingKey] = useState<string | null>(null)
   const entityType = 'ustva'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Umsatzsteuervoranmeldung')
   const ustvaConfig = createUstvaConfig(t, entityTypeLabel)
@@ -468,30 +450,22 @@ export default function UStVAPage(): JSX.Element {
 
   const { handleAction } = useMaskActions(async (action: string, formData: any) => {
     if (action === 'calculate') {
-      // Berechnung durchführen
-      const calculated = {
-        ...formData,
-        gesamtUmsatz: (formData.umsatz19 || 0) + (formData.umsatz7 || 0) + (formData.umsatz0 || 0) + (formData.umsatzSonstige || 0),
-        gesamtVorsteuer: (formData.vorsteuer19 || 0) + (formData.vorsteuer7 || 0) + (formData.vorsteuer0 || 0) + (formData.vorsteuerSonstige || 0),
-        ust19: (formData.umsatz19 || 0) * 0.19,
-        ust7: (formData.umsatz7 || 0) * 0.07,
-        ust0: 0,
-        ustSonstige: (formData.umsatzSonstige || 0) * 0.19, // Annahme 19% für sonstige
-        gesamtUst: ((formData.umsatz19 || 0) * 0.19) + ((formData.umsatz7 || 0) * 0.07) + ((formData.umsatzSonstige || 0) * 0.19) - ((formData.vorsteuer19 || 0) + (formData.vorsteuer7 || 0) + (formData.vorsteuer0 || 0) + (formData.vorsteuerSonstige || 0))
-      }
-
-      // Update form data with calculations
-      Object.keys(calculated).forEach(key => {
-        if (key !== 'formData') {
-          formData[key] = calculated[key as keyof typeof calculated]
+      setActionLoadingKey('calculate')
+      try {
+        const result = await apiClient.post<Record<string, unknown>>('/api/v1/finance/vat-return/calculate', formData ?? {})
+        toast({ title: t('crud.messages.calculationCompleted'), description: t('crud.messages.ustvaAmountsRecalculated') })
+        if (result && Object.keys(result).length) {
+          Object.assign(formData, result)
         }
-      })
-
-      toast({
-        title: t('crud.messages.calculationCompleted'),
-        description: t('crud.messages.ustvaAmountsRecalculated'),
-      })
-    } else if (action === 'validate') {
+      } catch (error: any) {
+        const msg = error.response?.data?.detail ?? error.message
+        toast({ variant: 'destructive', title: t('common.error'), description: msg })
+      } finally {
+        setActionLoadingKey(null)
+      }
+      return
+    }
+    if (action === 'validate') {
       const isValid = validate(formData)
       if (isValid.isValid) {
         toast({
@@ -513,7 +487,7 @@ export default function UStVAPage(): JSX.Element {
       }
 
       try {
-        const response = await fetch(`/api/finance/ustva/${formData.id}/approve`, {
+        const response = await fetch(`/api/v1/finance/ustva/${formData.id}/approve`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -561,16 +535,23 @@ export default function UStVAPage(): JSX.Element {
       } catch (error) {
         // Error wird bereits in useMaskData behandelt
       }
-    } else if (action === 'export') {
+    }
+    if (action === 'export') {
       if (!formData.id) {
-        toast({
-          variant: 'destructive',
-          title: t('common.error'),
-          description: t('crud.messages.saveUstvaFirst'),
-        })
+        toast({ variant: 'destructive', title: t('common.error'), description: t('crud.messages.saveUstvaFirst') })
         return
       }
-      window.open(`/api/finance/ustva/${formData.id}/export`, '_blank')
+      setActionLoadingKey('export')
+      try {
+        const res = await apiClient.post<{ url?: string }>('/api/v1/export/list', { entity: 'vat_return', format: 'xml', id: formData.id })
+        if (res?.url) window.open(res.url, '_blank')
+        toast({ title: t('crud.actions.xmlExport'), description: t('crud.messages.exportCreated', { defaultValue: 'Export erstellt' }) })
+      } catch (error: any) {
+        const msg = error.response?.data?.detail ?? error.message
+        toast({ variant: 'destructive', title: t('common.error'), description: msg })
+      } finally {
+        setActionLoadingKey(null)
+      }
     }
   })
 
@@ -592,6 +573,8 @@ export default function UStVAPage(): JSX.Element {
       onSave={handleSave}
       onCancel={handleCancel}
       isLoading={loading}
+      onAction={(key, formData) => handleAction(key, formData)}
+      loadingActionKey={actionLoadingKey}
     />
   )
 }

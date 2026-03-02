@@ -438,3 +438,7 @@ export function useDeleteAction() {
     },
   })
 }
+
+// Aliases for Kostenstellenrechnung page
+export const useKostenstellen = useControllingKpis
+export const useKostenstellenTimeseries = useKpiTimeseries

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
@@ -6,6 +6,12 @@ import { useMaskData } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
+import { toast } from '@/hooks/use-toast'
+import {
+  useRechnungseingangPruefen,
+  useRechnungseingangFreigeben,
+  useRechnungseingangVerbuchen,
+} from '@/lib/api/einkauf'
 
 // Zod-Schema für Rechnungseingang (wird in Komponente mit i18n erstellt)
 const createRechnungseingangSchema = (t: any) => z.object({
@@ -164,7 +170,7 @@ const createRechnungseingangConfig = (t: any, entityTypeLabel: string): MaskConf
           name: 'accountCode',
           label: t('crud.fields.accountCode'),
           type: 'lookup',
-          endpoint: '/api/finance/accounts',
+          endpoint: '/api/v1/chart-of-accounts',
           displayField: 'number',
           valueField: 'id',
           helpText: t('crud.tooltips.fields.accountCode')
@@ -173,7 +179,7 @@ const createRechnungseingangConfig = (t: any, entityTypeLabel: string): MaskConf
           name: 'costCenter',
           label: t('crud.fields.costCenter'),
           type: 'lookup',
-          endpoint: '/api/finance/cost-centers',
+          endpoint: '/api/v1/finance/cost-centers',
           displayField: 'name',
           valueField: 'id',
           helpText: t('crud.tooltips.fields.costCenter')
@@ -322,49 +328,22 @@ const createRechnungseingangConfig = (t: any, entityTypeLabel: string): MaskConf
       ]
     }
   ],
-  actions: [
-    {
-      key: 'pruefen',
-      label: t('crud.actions.review'),
-      type: 'secondary',
-      onClick: () => console.log('Prüfen clicked')
-    },
-    {
-      key: 'freigeben',
-      label: t('crud.actions.approve'),
-      type: 'primary',
-      onClick: () => console.log('Freigeben clicked')
-    },
-    {
-      key: 'verbuchen',
-      label: t('crud.actions.post'),
-      type: 'primary',
-      onClick: () => console.log('Verbuchen clicked')
-    },
-    {
-      key: 'abgleich',
-      label: t('crud.actions.match'),
-      type: 'secondary',
-      onClick: (data: any) => {
-        if (data.id) {
-          navigate(`/einkauf/rechnung-abgleich?invoiceId=${data.id}`)
-        }
-      }
-    }
-  ],
+  actions: [], // set dynamically in component with data + API
   api: {
-    baseUrl: '/api/einkauf/rechnungseingaenge',
+    baseUrl: '/api/v1/einkauf/rechnungseingaenge',
     endpoints: {
-      list: '/api/einkauf/rechnungseingaenge',
-      get: '/api/einkauf/rechnungseingaenge/{id}',
-      create: '/api/einkauf/rechnungseingaenge',
-      update: '/api/einkauf/rechnungseingaenge/{id}',
-      delete: '/api/einkauf/rechnungseingaenge/{id}'
+      list: '/api/v1/einkauf/rechnungseingaenge',
+      get: '/api/v1/einkauf/rechnungseingaenge/{id}',
+      create: '/api/v1/einkauf/rechnungseingaenge',
+      update: '/api/v1/einkauf/rechnungseingaenge/{id}',
+      delete: '/api/v1/einkauf/rechnungseingaenge/{id}'
     }
   },
   validation: createRechnungseingangSchema(t),
   permissions: ['einkauf.read', 'einkauf.write', 'finance.read']
 })
+
+const ENTWURF_STATUSES = ['ENTWURF', 'ERFASST', 'OFFEN']
 
 export default function RechnungseingangPage(): JSX.Element {
   const { t } = useTranslation()
@@ -373,12 +352,103 @@ export default function RechnungseingangPage(): JSX.Element {
   const [loading, setLoading] = useState(false)
   const entityType = 'invoiceReceipt'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Rechnungseingang')
-  const rechnungseingangConfig = createRechnungseingangConfig(t, entityTypeLabel)
+  const baseConfig = createRechnungseingangConfig(t, entityTypeLabel)
 
-  const { data, saveData } = useMaskData({
-    apiUrl: rechnungseingangConfig.api.baseUrl,
+  const { data, saveData, loadData } = useMaskData({
+    apiUrl: baseConfig.api.baseUrl,
     id: id || undefined
   })
+
+  const pruefenMutation = useRechnungseingangPruefen()
+  const freigebenMutation = useRechnungseingangFreigeben()
+  const verbuchenMutation = useRechnungseingangVerbuchen()
+
+  const status = (data?.status as string) || ''
+  const statusUpper = status.toUpperCase()
+
+  const rechnungseingangConfig: MaskConfig = useMemo(() => ({
+    ...baseConfig,
+    actions: [
+      {
+        key: 'pruefen',
+        label: t('crud.actions.review'),
+        type: 'secondary',
+        disabled: !data?.id || !ENTWURF_STATUSES.includes(statusUpper),
+        onClick: async () => {
+          if (!data?.id) return
+          try {
+            await pruefenMutation.mutateAsync(data.id)
+            toast({ title: t('crud.messages.success'), description: t('status.reviewed') })
+            await loadData()
+          } catch (err: any) {
+            toast({
+              variant: 'destructive',
+              title: t('crud.messages.error'),
+              description: err?.response?.data?.detail || err?.message,
+            })
+          }
+        },
+      },
+      {
+        key: 'freigeben',
+        label: t('crud.actions.approve'),
+        type: 'primary',
+        disabled: !data?.id || statusUpper !== 'GEPRUEFT',
+        onClick: async () => {
+          if (!data?.id) return
+          try {
+            await freigebenMutation.mutateAsync(data.id)
+            toast({ title: t('crud.messages.success'), description: t('status.approved') })
+            await loadData()
+          } catch (err: any) {
+            toast({
+              variant: 'destructive',
+              title: t('crud.messages.error'),
+              description: err?.response?.data?.detail || err?.message,
+            })
+          }
+        },
+      },
+      {
+        key: 'verbuchen',
+        label: t('crud.actions.post'),
+        type: 'primary',
+        disabled: !data?.id || statusUpper !== 'FREIGEGEBEN',
+        onClick: async () => {
+          if (!data?.id) return
+          try {
+            await verbuchenMutation.mutateAsync(data.id)
+            toast({ title: t('crud.messages.success'), description: t('status.posted') })
+            await loadData()
+          } catch (err: any) {
+            toast({
+              variant: 'destructive',
+              title: t('crud.messages.error'),
+              description: err?.response?.data?.detail || err?.message,
+            })
+          }
+        },
+      },
+      {
+        key: 'abgleich',
+        label: t('crud.actions.match'),
+        type: 'secondary',
+        onClick: () => {
+          if (data?.id) navigate(`/einkauf/rechnung-abgleich?invoiceId=${data.id}`)
+        },
+      },
+    ],
+  }), [
+    baseConfig,
+    t,
+    data?.id,
+    statusUpper,
+    loadData,
+    pruefenMutation,
+    freigebenMutation,
+    verbuchenMutation,
+    navigate,
+  ])
 
   const handleSave = async (formData: any) => {
     setLoading(true)

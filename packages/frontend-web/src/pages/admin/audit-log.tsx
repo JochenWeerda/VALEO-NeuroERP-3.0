@@ -7,10 +7,29 @@ import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { FileDown, FileText, Search } from 'lucide-react'
+import { api } from '@/lib/axios'
+import { useToast } from '@/hooks/use-toast'
 
 export default function AuditLogPage(): JSX.Element {
+  const { toast } = useToast()
   const { data: items, isLoading } = useAuditLog()
   const [searchTerm, setSearchTerm] = useState('')
+
+  const handleExport = async () => {
+    try {
+      const res = await api.post('/api/v1/export/list', { entity: 'audit_log', format: 'csv' }, { responseType: 'blob' })
+      const blob = res.data as Blob
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `export_audit_log_${new Date().toISOString().slice(0, 10)}.csv`
+      a.click()
+      URL.revokeObjectURL(url)
+      toast({ title: 'Export erstellt', description: 'Download gestartet.' })
+    } catch (e: any) {
+      toast({ title: 'Export fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+    }
+  }
 
   if (isLoading) return (
     <div className="p-3 md:p-6 space-y-4">
@@ -92,7 +111,7 @@ export default function AuditLogPage(): JSX.Element {
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input placeholder="Suche..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
             </div>
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" onClick={handleExport}>
               <FileDown className="h-4 w-4" />
               Export
             </Button>

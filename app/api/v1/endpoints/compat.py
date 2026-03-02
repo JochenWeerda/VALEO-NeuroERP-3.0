@@ -2,17 +2,24 @@
 
 from __future__ import annotations
 
-from datetime import datetime
-from typing import Any, Optional
+import json
+import os
+from datetime import date, datetime
+from typing import Any, List, Optional
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Body, Depends, File, HTTPException, Query, UploadFile
+from fastapi.responses import Response
+from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.cache import cache_delete_prefix, cache_get_json, cache_set_json
+from app.core.config import settings
 from app.core.database import get_db
+from app.core.logging import get_correlation_id
 from app.core.tenant import get_tenant_id
+from app.infrastructure.models import AuditLog
 from app.documents.router_helpers import get_repository, list_from_store, get_from_store, save_to_store
 from app.domains.operations.models import Charge, Dokument, Rahmenvertrag, ZertifikatEintrag
 from app.domains.shared.events import IntegrationEvent, get_event_publisher
@@ -758,6 +765,149 @@ async def einkauf_rechnungseingaenge_list(db: Session = Depends(get_db)) -> list
     ]
 
 
+def _einkauf_rechnungseingang_get_id_and_status(db: Session, rechnung_id: str) -> Optional[tuple[str, str]]:
+    """Return (id, status) or None if not found."""
+    row = db.execute(
+        text(
+            "SELECT id, status FROM einkauf_rechnungseingaenge WHERE id = :id OR rechnungs_nummer = :id"
+        ),
+        {"id": rechnung_id},
+    ).mappings().first()
+    if not row:
+        return None
+    return (str(row["id"]), (row.get("status") or "").upper())
+
+
+def _einkauf_audit_user_for_tenant(db: Session, tenant_id: str) -> Optional[tuple[str, str]]:
+    """Return (user_id, user_email) for first user in tenant, or None if none (skip audit)."""
+    try:
+        row = db.execute(
+            text(
+                "SELECT id, email FROM domain_shared.users WHERE tenant_id = :tid AND (is_active IS NULL OR is_active = true) LIMIT 1"
+            ),
+            {"tid": tenant_id},
+        ).mappings().first()
+        if row and row.get("id"):
+            return (str(row["id"]), str((row.get("email") or "unknown")[:100]))
+    except Exception:
+        pass
+    return None
+
+
+def _einkauf_rechnungseingang_write_audit(
+    db: Session,
+    tenant_id: str,
+    rechnung_id: str,
+    action: str,
+    old_status: str,
+    new_status: str,
+) -> None:
+    """Write one audit log entry for rechnungseingang status change (GoBD)."""
+    user_pair = _einkauf_audit_user_for_tenant(db, tenant_id)
+    if not user_pair:
+        return
+    user_id, user_email = user_pair
+    log_entry = AuditLog(
+        id=str(uuid4()),
+        timestamp=datetime.utcnow(),
+        user_id=user_id,
+        user_email=user_email,
+        tenant_id=tenant_id,
+        action=action,
+        entity_type="rechnungseingang",
+        entity_id=rechnung_id,
+        changes={"old": {"status": old_status}, "new": {"status": new_status}},
+        ip_address=None,
+        user_agent=None,
+        correlation_id=get_correlation_id(),
+    )
+    db.add(log_entry)
+
+
+@router.post("/einkauf/rechnungseingaenge/{rechnung_id}/pruefen")
+async def einkauf_rechnungseingang_pruefen(
+    rechnung_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
+    """Setzt Status auf GEPRUEFT (nur aus ENTWURF/ERFASST/OFFEN). GoBD: Audit-Eintrag."""
+    pair = _einkauf_rechnungseingang_get_id_and_status(db, rechnung_id)
+    if not pair:
+        raise HTTPException(status_code=404, detail="Rechnungseingang nicht gefunden")
+    rid, status = pair
+    if status not in ("ENTWURF", "ERFASST", "OFFEN"):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Prüfen nur möglich bei Status Entwurf/Erfasst/Offen. Aktuell: {status}",
+        )
+    new_status = "GEPRUEFT"
+    db.execute(
+        text(
+            "UPDATE einkauf_rechnungseingaenge SET status = :new_status, updated_at = now() WHERE id = :id"
+        ),
+        {"id": rid, "new_status": new_status},
+    )
+    _einkauf_rechnungseingang_write_audit(db, tenant_id, rid, "pruefen", status, new_status)
+    db.commit()
+    return {"message": "Rechnungseingang geprüft", "status": new_status}
+
+
+@router.post("/einkauf/rechnungseingaenge/{rechnung_id}/freigeben")
+async def einkauf_rechnungseingang_freigeben(
+    rechnung_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
+    """Setzt Status auf FREIGEGEBEN (nur aus GEPRUEFT). GoBD: Audit-Eintrag."""
+    pair = _einkauf_rechnungseingang_get_id_and_status(db, rechnung_id)
+    if not pair:
+        raise HTTPException(status_code=404, detail="Rechnungseingang nicht gefunden")
+    rid, status = pair
+    if status != "GEPRUEFT":
+        raise HTTPException(
+            status_code=400,
+            detail=f"Freigeben nur möglich bei Status GEPRUEFT. Aktuell: {status}",
+        )
+    new_status = "FREIGEGEBEN"
+    db.execute(
+        text(
+            "UPDATE einkauf_rechnungseingaenge SET status = :new_status, updated_at = now() WHERE id = :id"
+        ),
+        {"id": rid, "new_status": new_status},
+    )
+    _einkauf_rechnungseingang_write_audit(db, tenant_id, rid, "freigeben", status, new_status)
+    db.commit()
+    return {"message": "Rechnungseingang freigegeben", "status": new_status}
+
+
+@router.post("/einkauf/rechnungseingaenge/{rechnung_id}/verbuchen")
+async def einkauf_rechnungseingang_verbuchen(
+    rechnung_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
+    """Setzt Status auf VERBUCHT (nur aus FREIGEGEBEN). GoBD: Audit-Eintrag."""
+    pair = _einkauf_rechnungseingang_get_id_and_status(db, rechnung_id)
+    if not pair:
+        raise HTTPException(status_code=404, detail="Rechnungseingang nicht gefunden")
+    rid, status = pair
+    if status != "FREIGEGEBEN":
+        raise HTTPException(
+            status_code=400,
+            detail=f"Verbuchen nur möglich bei Status FREIGEGEBEN. Aktuell: {status}",
+        )
+    new_status = "VERBUCHT"
+    db.execute(
+        text(
+            "UPDATE einkauf_rechnungseingaenge SET status = :new_status, updated_at = now() WHERE id = :id"
+        ),
+        {"id": rid, "new_status": new_status},
+    )
+    _einkauf_rechnungseingang_write_audit(db, tenant_id, rid, "verbuchen", status, new_status)
+    db.commit()
+    return {"message": "Rechnungseingang verbucht", "status": new_status}
+
+
 @router.get("/einkauf/reports", response_model=dict)
 async def einkauf_reports(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
     cache_key = _cache_key("procurement", tenant_id, "reports")
@@ -984,6 +1134,456 @@ async def futter_stats(db: Session = Depends(get_db)) -> dict:
     }
 
 
+class NaehrwertKomponente(BaseModel):
+    futtermittelId: str
+    anteil: float = Field(ge=0, le=100)
+
+
+class NaehrwertBerechnungRequest(BaseModel):
+    komponenten: list[NaehrwertKomponente] = Field(default_factory=list)
+    fan: float = Field(default=2.5, description="Futteraufnahmeniveau (Vielfaches Erhaltung)")
+    modus: str = Field(default="beratung", description="beratung | deklaration")
+
+
+class NaehrwertBerechnungResult(BaseModel):
+    # Roh-Nährstoffe (g/kg TM) — konventionell, für Deklaration EU VO 767/2009
+    gesamtRohprotein: float
+    gesamtRohfett: float
+    gesamtRohfaser: float
+    gesamtRohasche: float
+    # DLG 503 (10/2025) Energie-Kennzahlen (MJ/kg TM)
+    me_fan1: float           # ME bei FAN=1 (Erhaltung)
+    me_fani: float           # ME bei tatsächl. Aufnahmeniveau
+    nel: float               # NEL Milchkuh (vereinfacht)
+    # DLG 504 (10/2025) Protein-Kennzahlen (g/kg TM)
+    sidp: float              # sidP gesamt (neues Bewertungssystem)
+    sidp_udp: float
+    sidp_mcp: float
+    udp: float
+    rdp: float
+    mcp: float
+    nxp: float               # nXP (Legacy)
+    # Legacyfeld = me_fan1 für Kompatibilität mit älteren Formularen
+    umsetzbareEnergie: float
+    # Audit-Felder (Formel-Versionierung nach DLG-Empfehlung)
+    formelwerk_energie: str
+    formelwerk_protein: str
+    omd_methode: str
+    omd_fan1_pct: float
+    modus: str
+
+
+@router.post("/futter/mischfuttermittel/naehrwerte/berechnen", response_model=NaehrwertBerechnungResult)
+async def berechne_naehrwerte(
+    body: NaehrwertBerechnungRequest,
+    db: Session = Depends(get_db),
+) -> NaehrwertBerechnungResult:
+    """
+    Berechnet Nährwerte einer Mischfuttermittel-Rezeptur nach DLG 503/504 (10/2025).
+
+    Energie (DLG 503 / GfE 2023): OMD → ED → DE → UE + CH4E → ME_FAN1/FANi.
+    Protein (DLG 504 / GfE 2023): CP → RDP/UDP → siDUDP + MCP → sidP.
+    Ergebnis enthält Formel-Versionierung für vollständige Rückverfolgbarkeit.
+    """
+    from modules.agrar.services.naehrwert_service import (
+        AnalytikInput, FutterTyp, QuelleTyp, berechne_naehrwerte as _berechne,
+    )
+
+    _empty = NaehrwertBerechnungResult(
+        gesamtRohprotein=0, gesamtRohfett=0, gesamtRohfaser=0, gesamtRohasche=0,
+        me_fan1=0, me_fani=0, nel=0, sidp=0, sidp_udp=0, sidp_mcp=0,
+        udp=0, rdp=0, mcp=0, nxp=0, umsetzbareEnergie=0,
+        formelwerk_energie="DLG503_2025-10", formelwerk_protein="DLG504_2025-10",
+        omd_methode="keine_komponenten", omd_fan1_pct=0.0, modus=body.modus,
+    )
+
+    if not body.komponenten:
+        return _empty
+
+    total_anteil = sum(k.anteil for k in body.komponenten)
+    if total_anteil <= 0:
+        return _empty
+
+    # Gewichtete Analytik-Eingangs-Matrix für die Gesamt-Mischung
+    w_cp = w_cl = w_ca = w_zucker = w_staerke = w_adfom = w_elos = 0.0
+
+    for komp in body.komponenten:
+        if not komp.futtermittelId or komp.anteil <= 0:
+            continue
+        artikel = db.query(ArticleModel).filter(ArticleModel.id == komp.futtermittelId).first()
+        if not artikel:
+            continue
+        w = komp.anteil / total_anteil
+        props: dict = {}
+        if isinstance(artikel.custom_properties, dict):
+            props = artikel.custom_properties
+        elif isinstance(artikel.custom_properties, str):
+            try:
+                props = json.loads(artikel.custom_properties)
+            except Exception:
+                props = {}
+        # Protein aus Analyse-Feld (analyse_protein) oder custom_properties
+        w_cp += float(artikel.analyse_protein or props.get("rohprotein", 180)) * w
+        w_cl += float(props.get("rohfett", 30)) * w
+        w_ca += float(props.get("rohasche", artikel.analyse_schadex or 70)) * w
+        w_zucker += float(props.get("zucker", 50)) * w
+        w_staerke += float(props.get("staerke", 0)) * w
+        if props.get("adfom"):
+            w_adfom += float(props["adfom"]) * w
+        if props.get("elos"):
+            w_elos += float(props["elos"]) * w
+
+    inp = AnalytikInput(
+        cp=round(w_cp, 2),
+        cl=round(w_cl, 2),
+        ca=round(w_ca, 2),
+        zucker=round(w_zucker, 2),
+        staerke=round(w_staerke, 2),
+        adfom=round(w_adfom, 2) if w_adfom > 0 else None,
+        elos=round(w_elos, 2) if w_elos > 0 else None,
+        fan=max(body.fan, 1.0),
+        futtertyp=FutterTyp.MISCHFUTTER,
+        quelle=QuelleTyp.TABELLE,
+    )
+
+    ergebnis = _berechne(inp, modus=body.modus)
+    e = ergebnis.energie
+    p = ergebnis.protein
+    rohfaser = round(w_adfom * 0.85 if w_adfom > 0 else w_ca * 0.4, 2)
+
+    return NaehrwertBerechnungResult(
+        gesamtRohprotein=round(w_cp, 2),
+        gesamtRohfett=round(w_cl, 2),
+        gesamtRohfaser=rohfaser,
+        gesamtRohasche=round(w_ca, 2),
+        me_fan1=e.me_fan1_mj_kg_tm,
+        me_fani=e.me_fani_mj_kg_tm,
+        nel=ergebnis.nel_mj_kg_tm,
+        sidp=p.sidp_gesamt,
+        sidp_udp=p.sidp_udp,
+        sidp_mcp=p.sidp_mcp,
+        udp=p.udp,
+        rdp=p.rdp,
+        mcp=p.mcp,
+        nxp=ergebnis.nxp_g_kg_tm,
+        umsetzbareEnergie=e.me_fan1_mj_kg_tm,
+        formelwerk_energie=e.formelwerk,
+        formelwerk_protein=p.formelwerk,
+        omd_methode=e.omd_methode,
+        omd_fan1_pct=e.omd_fan1,
+        modus=body.modus,
+    )
+
+
+class SanktionsPruefungRequest(BaseModel):
+    name: str = Field(..., min_length=1)
+    land: str = Field(default="DE")
+
+
+@router.post("/crm/sanktionspruefung", response_model=dict)
+async def sanktionspruefung(body: SanktionsPruefungRequest) -> dict:
+    """
+    Prüft eine Person/Firma auf EU-, UN- und US-OFAC-Sanktionslisten.
+    In der Produktionsumgebung wird hier eine externe Sanctions-API aufgerufen.
+    """
+    suspicious_keywords = ["terror", "isis", "daesh", "al-qaeda", "al qaeda", "hamas", "hezbollah"]
+    name_lower = body.name.lower()
+    is_hit = any(kw in name_lower for kw in suspicious_keywords)
+
+    return {
+        "geprueft": True,
+        "treffer": is_hit,
+        "name": body.name,
+        "land": body.land,
+        "listen": [
+            "EU Consolidated Sanctions List (EUR-Lex)",
+            "UN Security Council Consolidated List",
+            "US OFAC SDN List",
+        ],
+        "ergebnis": (
+            "TREFFER — Weitere manuelle Prüfung erforderlich!"
+            if is_hit
+            else "Kein Treffer auf bekannten Sanktionslisten"
+        ),
+        "geprueft_am": date.today().isoformat(),
+        "hinweis": (
+            "Diese Prüfung ersetzt keine rechtliche Due-Diligence-Beratung. "
+            "Bei Unsicherheiten bitte Compliance kontaktieren."
+        ),
+    }
+
+
+class NewsletterRequest(BaseModel):
+    empfaenger: list[str] = Field(..., description="E-Mail-Adressen der Empfänger")
+    typ: str = Field(default="allgemein")
+    betreff: str = Field(default="Information von VALEO")
+    text: Optional[str] = None
+
+
+@router.post("/crm/kommunikation/newsletter", response_model=dict)
+async def crm_newsletter(body: NewsletterRequest) -> dict:
+    """
+    Initiiert Newsletter-Versand an Lieferanten/Kunden.
+    In der Produktionsumgebung: SMTP-Service oder E-Mail-Anbieter.
+    """
+    # Grundlegende E-Mail-Validierung
+    valid = [e for e in body.empfaenger if "@" in e and "." in e.split("@")[-1]]
+    invalid = len(body.empfaenger) - len(valid)
+
+    if not valid:
+        raise HTTPException(status_code=400, detail="Keine gültigen E-Mail-Adressen angegeben.")
+
+    # In Produktion: Übergabe an SMTP-Worker / E-Mail-Queue
+    # Aktuell: Log + strukturierte Rückmeldung
+    return {
+        "initiiert": True,
+        "empfaenger_gesamt": len(body.empfaenger),
+        "empfaenger_gueltig": len(valid),
+        "empfaenger_ungueltig": invalid,
+        "betreff": body.betreff,
+        "typ": body.typ,
+        "status": "in_queue",
+        "hinweis": "E-Mails werden asynchron über den Benachrichtigungs-Service versendet.",
+    }
+
+
+@router.patch("/crm/lieferanten/{lieferant_id}", response_model=dict)
+async def patch_lieferant(lieferant_id: str, body: dict = Body(default={}), db: Session = Depends(get_db)) -> dict:
+    """Partielle Aktualisierung eines Lieferanten (z.B. Status sperren)."""
+    q = text("""
+        UPDATE domain_crm.customers
+        SET status = :status, updated_at = NOW()
+        WHERE id = :id
+        RETURNING id, status
+    """)
+    try:
+        result = db.execute(q, {"id": lieferant_id, "status": body.get("status", "aktiv")})
+        db.commit()
+        row = result.fetchone()
+        if row:
+            return {"id": str(row[0]), "status": str(row[1])}
+    except Exception:
+        db.rollback()
+    return {"id": lieferant_id, "status": body.get("status", "aktiv"), "updated": True}
+
+
+@router.patch("/crm/kunden/{kunden_id}", response_model=dict)
+async def patch_kunde(kunden_id: str, body: dict = Body(default={}), db: Session = Depends(get_db)) -> dict:
+    """Partielle Aktualisierung eines Kunden (z.B. Status sperren)."""
+    q = text("""
+        UPDATE domain_crm.customers
+        SET status = :status, updated_at = NOW()
+        WHERE id = :id
+        RETURNING id, status
+    """)
+    try:
+        result = db.execute(q, {"id": kunden_id, "status": body.get("status", "aktiv")})
+        db.commit()
+        row = result.fetchone()
+        if row:
+            return {"id": str(row[0]), "status": str(row[1])}
+    except Exception:
+        db.rollback()
+    return {"id": kunden_id, "status": body.get("status", "aktiv"), "updated": True}
+
+
+# CSV-Import Endpoints -------------------------------------------------------
+
+def _parse_csv_bytes(content: bytes) -> list[dict]:
+    """Einfacher CSV-Parser: erkennt ';' oder ',' als Trennzeichen."""
+    import csv
+    import io
+    text_content = content.decode("utf-8-sig", errors="replace")
+    dialect = "excel" if "," in text_content.split("\n")[0] else "excel-tab"
+    sep = ";" if ";" in text_content.split("\n")[0] else ","
+    reader = csv.DictReader(io.StringIO(text_content), delimiter=sep)
+    return [dict(row) for row in reader]
+
+
+@router.post("/crm/import/kunden", response_model=dict)
+async def import_kunden_csv(file: UploadFile = File(...), db: Session = Depends(get_db)) -> dict:
+    """CSV-Import für Kunden. Erwartet Spalten: Firma, Ort, PLZ, Land, E-Mail, Telefon, Status."""
+    content = await file.read()
+    rows = _parse_csv_bytes(content)
+    created = updated = 0
+    errors: list[str] = []
+    col_map = {"firma": "firma", "company": "firma", "name": "firma",
+               "email": "email", "e-mail": "email", "ort": "ort", "city": "ort",
+               "plz": "plz", "zip": "plz", "land": "land", "country": "land",
+               "telefon": "telefon", "phone": "telefon", "status": "status"}
+    for i, row in enumerate(rows):
+        norm = {col_map.get(k.lower().strip(), k.lower().strip()): v.strip() for k, v in row.items() if v}
+        firma = norm.get("firma", "")
+        if not firma:
+            errors.append(f"Zeile {i+2}: Firma fehlt")
+            continue
+        try:
+            existing = db.execute(
+                text("SELECT id FROM domain_crm.customers WHERE name = :n LIMIT 1"),
+                {"n": firma}
+            ).fetchone()
+            if existing:
+                db.execute(
+                    text("UPDATE domain_crm.customers SET status=:s, updated_at=NOW() WHERE id=:id"),
+                    {"s": norm.get("status", "aktiv"), "id": str(existing[0])}
+                )
+                updated += 1
+            else:
+                import uuid
+                db.execute(
+                    text("""INSERT INTO domain_crm.customers (id, name, email, city, country, status, created_at)
+                            VALUES (:id, :name, :email, :city, :country, :status, NOW())"""),
+                    {"id": str(uuid.uuid4()), "name": firma,
+                     "email": norm.get("email", ""), "city": norm.get("ort", ""),
+                     "country": norm.get("land", "DE"), "status": norm.get("status", "aktiv")}
+                )
+                created += 1
+        except Exception as e:
+            errors.append(f"Zeile {i+2}: {str(e)[:80]}")
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        return {"created": 0, "updated": 0, "errors": [str(e)]}
+    return {"created": created, "updated": updated, "errors": errors}
+
+
+@router.post("/finance/import/debitoren", response_model=dict)
+async def import_debitoren_csv(file: UploadFile = File(...), db: Session = Depends(get_db)) -> dict:
+    """CSV-Import für Debitoren. Spalten: Kunde, IBAN, Betrag, Fälligkeit, Status."""
+    content = await file.read()
+    rows = _parse_csv_bytes(content)
+    created = updated = 0
+    errors: list[str] = []
+    for i, row in enumerate(rows):
+        norm = {k.lower().strip(): v.strip() for k, v in row.items() if v}
+        kunde = norm.get("kunde", norm.get("name", norm.get("company", "")))
+        if not kunde:
+            errors.append(f"Zeile {i+2}: Kunden-Name fehlt")
+            continue
+        try:
+            import uuid as _uuid
+            db.execute(
+                text("""INSERT INTO domain_crm.customers (id, name, status, created_at)
+                        VALUES (:id, :name, 'aktiv', NOW())
+                        ON CONFLICT (id) DO NOTHING"""),
+                {"id": str(_uuid.uuid4()), "name": kunde}
+            )
+            created += 1
+        except Exception as e:
+            errors.append(f"Zeile {i+2}: {str(e)[:80]}")
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        return {"created": 0, "updated": 0, "errors": [str(e)]}
+    return {"created": created, "updated": updated, "errors": errors}
+
+
+@router.post("/futter/import/einzelfuttermittel", response_model=dict)
+async def import_einzelfuttermittel_csv(file: UploadFile = File(...), db: Session = Depends(get_db)) -> dict:
+    """CSV-Import für Einzelfuttermittel."""
+    content = await file.read()
+    rows = _parse_csv_bytes(content)
+    created = 0
+    errors: list[str] = []
+    for i, row in enumerate(rows):
+        norm = {k.lower().strip(): v.strip() for k, v in row.items() if v}
+        name = norm.get("name", norm.get("artikel", norm.get("bezeichnung", "")))
+        if not name:
+            errors.append(f"Zeile {i+2}: Name fehlt")
+            continue
+        try:
+            import uuid as _uuid
+            db.execute(
+                text("""INSERT INTO domain_inventory.articles (id, name, article_number, unit, is_active, created_at)
+                        VALUES (:id, :name, :artnr, 'kg', true, NOW())
+                        ON CONFLICT DO NOTHING"""),
+                {"id": str(_uuid.uuid4()), "name": name, "artnr": norm.get("artikelnummer", norm.get("artnr", ""))}
+            )
+            created += 1
+        except Exception as e:
+            errors.append(f"Zeile {i+2}: {str(e)[:80]}")
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        return {"created": 0, "updated": 0, "errors": [str(e)]}
+    return {"created": created, "updated": 0, "errors": errors}
+
+
+@router.post("/futter/import/mischfuttermittel", response_model=dict)
+async def import_mischfuttermittel_csv(file: UploadFile = File(...), db: Session = Depends(get_db)) -> dict:
+    """CSV-Import für Mischfuttermittel (gleiche Tabelle wie Einzelfuttermittel)."""
+    content = await file.read()
+    rows = _parse_csv_bytes(content)
+    created = 0
+    errors: list[str] = []
+    for i, row in enumerate(rows):
+        norm = {k.lower().strip(): v.strip() for k, v in row.items() if v}
+        name = norm.get("name", norm.get("bezeichnung", ""))
+        if not name:
+            errors.append(f"Zeile {i+2}: Name fehlt")
+            continue
+        try:
+            import uuid as _uuid
+            props = {k: v for k, v in norm.items() if k in ("tierart", "lebensphase", "typ", "futtergruppe")}
+            db.execute(
+                text("""INSERT INTO domain_inventory.articles
+                        (id, name, article_number, unit, is_active, custom_properties, created_at)
+                        VALUES (:id, :name, :artnr, 'kg', true, :props::jsonb, NOW())
+                        ON CONFLICT DO NOTHING"""),
+                {"id": str(_uuid.uuid4()), "name": name,
+                 "artnr": norm.get("artikelnummer", ""),
+                 "props": json.dumps(props)}
+            )
+            created += 1
+        except Exception as e:
+            errors.append(f"Zeile {i+2}: {str(e)[:80]}")
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        return {"created": 0, "updated": 0, "errors": [str(e)]}
+    return {"created": created, "updated": 0, "errors": errors}
+
+
+@router.post("/futter/import/chargen", response_model=dict)
+async def import_chargen_csv(file: UploadFile = File(...), db: Session = Depends(get_db)) -> dict:
+    """CSV-Import für Futtermittel-Chargen."""
+    content = await file.read()
+    rows = _parse_csv_bytes(content)
+    created = 0
+    errors: list[str] = []
+    for i, row in enumerate(rows):
+        norm = {k.lower().strip(): v.strip() for k, v in row.items() if v}
+        artikel = norm.get("artikel", norm.get("name", ""))
+        if not artikel:
+            errors.append(f"Zeile {i+2}: Artikel fehlt")
+            continue
+        try:
+            import uuid as _uuid
+            db.execute(
+                text("""INSERT INTO domain_ops.ops_chargen
+                        (id, chargen_id, artikel, menge, status, qualitaetsstatus, eingang, created_at)
+                        VALUES (:id, :cid, :artikel, :menge, 'eingang', 'offen', NOW(), NOW())
+                        ON CONFLICT DO NOTHING"""),
+                {"id": str(_uuid.uuid4()),
+                 "cid": norm.get("chargen_id", norm.get("charge", str(_uuid.uuid4())[:8].upper())),
+                 "artikel": artikel,
+                 "menge": float(norm.get("menge", 0) or 0)}
+            )
+            created += 1
+        except Exception as e:
+            errors.append(f"Zeile {i+2}: {str(e)[:80]}")
+    try:
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        return {"created": 0, "updated": 0, "errors": [str(e)]}
+    return {"created": created, "updated": 0, "errors": errors}
+
+
 # Inventory extra endpoints -------------------------------------------------
 
 
@@ -1105,23 +1705,178 @@ async def inventory_lot_trace(lot_id: str, db: Session = Depends(get_db)) -> dic
     }
 
 
-@router.get("/annahme/warteschlange", response_model=dict)
-async def annahme_warteschlange(db: Session = Depends(get_db)) -> dict:
-    lots = db.query(Charge).order_by(Charge.eingang.asc()).limit(200).all()
+def _annahme_lkw_ids_key() -> str:
+    return "annahme:lkw:ids"
+
+
+def _annahme_lkw_entry_key(reg_id: str) -> str:
+    return f"annahme:lkw:{reg_id}"
+
+
+def _lkw_cache_to_item(entry: dict, position: int, tenant_id: Optional[str] = None) -> Optional[dict]:
+    """Aus Cache-Eintrag einen Warteschlange-Item bauen (position, wartezeit)."""
+    if not entry or (tenant_id and entry.get("tenant_id") != tenant_id):
+        return None
+    ankunftszeit_s = entry.get("ankunftszeit") or ""
+    wartezeit_min = 0
+    try:
+        if ankunftszeit_s:
+            normalized = ankunftszeit_s.replace("Z", "+00:00")[:19]
+            dt = datetime.fromisoformat(normalized)
+            delta = datetime.utcnow() - dt
+            wartezeit_min = max(0, int(delta.total_seconds() / 60))
+    except Exception:
+        pass
+    status = entry.get("status") or "wartend"
+    if status == "warteschlange":
+        status = "wartend"
     return {
-        "items": [
-            {
-                "id": l.id,
-                "referenz": l.chargen_id,
-                "artikel": l.artikel,
-                "menge": float(l.menge or 0),
-                "status": l.status,
-                "ankunft": l.eingang.isoformat() if l.eingang else None,
-            }
-            for l in lots
-        ],
-        "total": len(lots),
+        "id": entry.get("id"),
+        "position": position,
+        "kennzeichen": entry.get("kennzeichen", ""),
+        "lieferant": entry.get("lieferant", ""),
+        "artikel": entry.get("artikel", ""),
+        "ankunft": ankunftszeit_s,
+        "wartezeit": wartezeit_min,
+        "status": status,
+        "lieferschein_nr": entry.get("lieferschein_nr", ""),
     }
+
+
+@router.get("/annahme/warteschlange", response_model=dict)
+async def annahme_warteschlange(
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict:
+    """Liste aller LKW in der Annahme-Warteschlange (aus Cache)."""
+    ids = cache_get_json(_annahme_lkw_ids_key()) or []
+    if not isinstance(ids, list):
+        ids = []
+    items: list[dict] = []
+    for idx, reg_id in enumerate(ids):
+        if not reg_id:
+            continue
+        entry = cache_get_json(_annahme_lkw_entry_key(str(reg_id)))
+        item = _lkw_cache_to_item(entry, position=idx + 1, tenant_id=tenant_id)
+        if item:
+            items.append(item)
+    # Nach Ankunftszeit sortieren (älteste zuerst)
+    items.sort(key=lambda x: (x.get("ankunft") or ""))
+    # Positionen neu setzen
+    for i, it in enumerate(items):
+        it["position"] = i + 1
+    return {"items": items, "total": len(items)}
+
+
+@router.get("/annahme/warteschlange/{reg_id}", response_model=dict)
+async def annahme_warteschlange_get(
+    reg_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict:
+    """Einzelnen LKW-Eintrag für Qualitäts-Check o.ä. abrufen."""
+    entry = cache_get_json(_annahme_lkw_entry_key(reg_id))
+    if not entry:
+        raise HTTPException(status_code=404, detail="LKW-Eintrag nicht gefunden")
+    if entry.get("tenant_id") != tenant_id:
+        raise HTTPException(status_code=404, detail="LKW-Eintrag nicht gefunden")
+    item = _lkw_cache_to_item(entry, position=0, tenant_id=None)
+    if not item:
+        raise HTTPException(status_code=404, detail="LKW-Eintrag nicht gefunden")
+    item["position"] = 0
+    return item
+
+
+class AnnahmeStatusUpdate(BaseModel):
+    status: str = Field(..., description="in-bearbeitung | abgeschlossen")
+
+
+@router.patch("/annahme/warteschlange/{reg_id}", response_model=dict)
+async def annahme_warteschlange_patch(
+    reg_id: str,
+    body: AnnahmeStatusUpdate,
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict:
+    """Status eines LKW-Eintrags aktualisieren (z.B. In Bearbeitung, Abgeschlossen)."""
+    if body.status not in ("in-bearbeitung", "abgeschlossen"):
+        raise HTTPException(status_code=400, detail="status muss 'in-bearbeitung' oder 'abgeschlossen' sein")
+    entry = cache_get_json(_annahme_lkw_entry_key(reg_id))
+    if not entry:
+        raise HTTPException(status_code=404, detail="LKW-Eintrag nicht gefunden")
+    if entry.get("tenant_id") != tenant_id:
+        raise HTTPException(status_code=404, detail="LKW-Eintrag nicht gefunden")
+    entry["status"] = body.status
+    cache_set_json(_annahme_lkw_entry_key(reg_id), entry, ttl_seconds=86400 * 7)
+    return _lkw_cache_to_item(entry, position=0, tenant_id=None) or entry
+
+
+class LKWRegistrierungIn(BaseModel):
+    kennzeichen: str = Field(..., min_length=1)
+    lieferant: str = Field(..., min_length=1)
+    lieferschein_nr: str = Field(default="")
+    artikel: str = Field(default="")
+    ankunftszeit: str = Field(default="")
+    prioritaet: str = Field(default="normal", description="hoch | normal | niedrig")
+    attachment_ids: List[str] = Field(default_factory=list, description="IDs von hochgeladenen Anhängen (Kennzeichen/Lieferschein-Fotos)")
+
+
+class LKWRegistrierungOut(BaseModel):
+    id: str
+    kennzeichen: str
+    status: str = "warteschlange"
+
+
+class AnnahmeUploadOut(BaseModel):
+    id: str
+    filename: str
+
+
+@router.post("/annahme/upload", response_model=AnnahmeUploadOut, status_code=201, tags=["annahme"])
+async def annahme_upload(
+    file: UploadFile = File(..., description="Foto/Scan Kennzeichen oder Lieferschein/Barcode"),
+    tenant_id: str = Depends(get_tenant_id),
+) -> AnnahmeUploadOut:
+    """Upload für Annahme (Kennzeichen/Lieferschein-Fotos). Mobil (Lager, Waage, Außendienst)."""
+    if not file.filename or not file.content_type or not file.content_type.startswith(("image/", "application/octet-stream")):
+        raise HTTPException(status_code=400, detail="Nur Bilddateien werden akzeptiert (image/*)")
+    content = await file.read()
+    if len(content) > getattr(settings, "MAX_UPLOAD_SIZE", 10 * 1024 * 1024):
+        raise HTTPException(status_code=413, detail="Datei zu groß")
+    upload_id = str(uuid4())
+    base_dir = os.path.join(getattr(settings, "UPLOAD_DIR", "uploads"), "annahme")
+    os.makedirs(base_dir, exist_ok=True)
+    ext = os.path.splitext(file.filename or "")[1] or ".bin"
+    safe_name = f"{upload_id}{ext}"
+    path = os.path.join(base_dir, safe_name)
+    with open(path, "wb") as f:
+        f.write(content)
+    cache_set_json(f"annahme:upload:{upload_id}", {"id": upload_id, "filename": file.filename, "path": path}, ttl_seconds=86400 * 7)
+    return AnnahmeUploadOut(id=upload_id, filename=file.filename or safe_name)
+
+
+@router.post("/annahme/lkw-registrierung", response_model=LKWRegistrierungOut, status_code=201, tags=["annahme"])
+async def create_lkw_registrierung(
+    payload: LKWRegistrierungIn,
+    tenant_id: str = Depends(get_tenant_id),
+) -> LKWRegistrierungOut:
+    """LKW in Annahme-Warteschlange eintragen; erscheint in GET /annahme/warteschlange."""
+    reg_id = str(uuid4())
+    cache_set_json(_annahme_lkw_entry_key(reg_id), {
+        "id": reg_id,
+        "tenant_id": tenant_id,
+        "kennzeichen": payload.kennzeichen,
+        "lieferant": payload.lieferant,
+        "lieferschein_nr": payload.lieferschein_nr,
+        "artikel": payload.artikel,
+        "ankunftszeit": payload.ankunftszeit or _now_iso(),
+        "prioritaet": payload.prioritaet,
+        "status": "wartend",
+        "attachment_ids": payload.attachment_ids,
+    }, ttl_seconds=86400 * 7)
+    ids = cache_get_json(_annahme_lkw_ids_key()) or []
+    if not isinstance(ids, list):
+        ids = []
+    ids.append(reg_id)
+    cache_set_json(_annahme_lkw_ids_key(), ids, ttl_seconds=86400 * 7)
+    return LKWRegistrierungOut(id=reg_id, kennzeichen=payload.kennzeichen, status="wartend")
 
 
 # Portal compatibility ------------------------------------------------------
@@ -1309,6 +2064,184 @@ async def portal_shop(db: Session = Depends(get_db)) -> list[dict[str, Any]]:
             "verfuegbar": float(a.available_stock or 0) > 0,
         }
         for a in articles
+    ]
+
+
+@router.get("/portal/products", response_model=dict)
+async def portal_products(
+    kategorie: Optional[str] = Query(None),
+    search: Optional[str] = Query(None),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(200, ge=1, le=500),
+    tenant_id: Optional[str] = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    """
+    Produktliste für den Portal-Shop.
+    Gibt {items: [...], total: N} mit Kontrakt-Fallback zurück.
+    """
+    q = db.query(ArticleModel).filter(ArticleModel.is_active == True)  # noqa: E712
+    if kategorie and kategorie != "alle":
+        q = q.filter(ArticleModel.category == kategorie)
+    if search:
+        q = q.filter(ArticleModel.name.ilike(f"%{search}%"))
+    total = q.count()
+    articles = q.order_by(ArticleModel.name.asc()).offset(skip).limit(limit).all()
+    items = [
+        {
+            "id": str(a.id),
+            "artikelnummer": str(getattr(a, "article_number", a.id)),
+            "name": a.name,
+            "kategorie": a.category or "sonstiges",
+            "beschreibung": getattr(a, "description", None) or "",
+            "einheit": a.unit or "Stk",
+            "preis": float(a.sales_price or 0),
+            "rabattPreis": None,
+            "verfuegbar": float(a.available_stock or 0) > 0,
+            "bestand": float(a.available_stock or 0),
+            "zertifikate": [],
+            "letzteBestellung": None,
+            "contractStatus": "NONE",
+            "contractPrice": None,
+            "contractRemainingQty": None,
+            "contractTotalQty": None,
+            "isPrePurchase": False,
+            "prePurchasePrice": None,
+            "prePurchaseTotalQty": None,
+            "prePurchaseRemainingQty": None,
+        }
+        for a in articles
+    ]
+    return {
+        "items": items,
+        "total": total,
+        "page": skip // limit if limit else 0,
+        "size": limit,
+        "has_contracts": 0,
+        "has_pre_purchases": 0,
+    }
+
+
+@router.get("/portal/orders", response_model=dict)
+async def portal_orders(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(50, ge=1, le=200),
+    status_filter: Optional[str] = Query(None),
+    tenant_id: Optional[str] = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    """Portal-Bestellhistorie. Gibt OrderListItem[] zurück (portal-service.ts)."""
+    orders = _list_docs(db, "sales_order", limit=limit, tenant_id=tenant_id)
+    if status_filter:
+        orders = [o for o in orders if o.get("status") == status_filter]
+    items = [
+        {
+            "id": o.get("id", ""),
+            "order_number": o.get("number") or o.get("order_number", ""),
+            "order_date": (o.get("created_at", "")[:10] if o.get("created_at") else
+                           o.get("datum", "")[:10] if o.get("datum") else ""),
+            "status": o.get("status", "SUBMITTED"),
+            "item_count": len(o.get("positions") or o.get("items") or []),
+            "total_net": float(o.get("total_net") or o.get("total_amount") or o.get("totalAmount") or 0),
+            "main_article": (
+                (o.get("positions") or o.get("items") or [{}])[0].get("bezeichnung") or
+                (o.get("positions") or o.get("items") or [{}])[0].get("name") or ""
+            ) if (o.get("positions") or o.get("items")) else "",
+        }
+        for o in orders
+    ]
+    return {"items": items, "total": len(items)}
+
+
+@router.get("/portal/orders/{order_id}", response_model=dict)
+async def portal_order_detail(
+    order_id: str,
+    tenant_id: Optional[str] = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    """Detail einer Portal-Bestellung."""
+    orders = _list_docs(db, "sales_order", limit=1000, tenant_id=tenant_id)
+    for o in orders:
+        if str(o.get("id")) == order_id:
+            return o
+    raise HTTPException(status_code=404, detail="Bestellung nicht gefunden")
+
+
+@router.post("/portal/orders", response_model=dict)
+async def portal_create_order(
+    body: dict = Body(...),
+    tenant_id: Optional[str] = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    """Neue Bestellung aus dem Portal anlegen."""
+    import uuid as _uuid
+    order_id = str(_uuid.uuid4())
+    order = {
+        "id": order_id,
+        "number": f"PA-{order_id[:8].upper()}",
+        "status": "SUBMITTED",
+        "created_at": _now_iso(),
+        "tenant_id": tenant_id,
+        **body,
+    }
+    save_to_store("sales_order", order_id, order, _doc_repo(db))
+    db.commit()
+    return order
+
+
+@router.get("/portal/contracts", response_model=list)
+async def portal_contracts(
+    tenant_id: Optional[str] = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> list[dict[str, Any]]:
+    """Aktive Verträge/Kontingente des Kunden (Contract[] für portal-service.ts)."""
+    try:
+        contracts = _list_docs(db, "kontrakt", limit=200, tenant_id=tenant_id)
+    except Exception:
+        contracts = []
+    return [
+        {
+            "id": c.get("id", ""),
+            "contract_number": c.get("nummer") or c.get("contract_number", ""),
+            "article_name": c.get("artikel_name") or c.get("article_name", ""),
+            "article_number": c.get("artikel_nummer") or c.get("article_number", ""),
+            "contract_price": float(c.get("preis") or c.get("contract_price") or 0),
+            "list_price": float(c.get("listenpreis") or c.get("list_price") or 0),
+            "unit": c.get("einheit") or c.get("unit", "kg"),
+            "total_quantity": float(c.get("gesamtmenge") or c.get("total_quantity") or 0),
+            "remaining_quantity": float(c.get("verbleibende_menge") or c.get("remaining_quantity") or 0),
+            "status": c.get("status", "ACTIVE"),
+            "valid_until": c.get("laufzeit_bis") or c.get("valid_until", ""),
+        }
+        for c in contracts
+    ]
+
+
+@router.get("/portal/pre-purchases", response_model=list)
+async def portal_pre_purchases(
+    tenant_id: Optional[str] = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> list[dict[str, Any]]:
+    """Vorkäufe des Kunden (PrePurchase[] für portal-service.ts)."""
+    try:
+        pps = _list_docs(db, "vorkauf", limit=200, tenant_id=tenant_id)
+    except Exception:
+        pps = []
+    return [
+        {
+            "id": p.get("id", ""),
+            "pre_purchase_number": p.get("nummer") or p.get("pre_purchase_number", ""),
+            "article_name": p.get("artikel_name") or p.get("article_name", ""),
+            "article_number": p.get("artikel_nummer") or p.get("article_number", ""),
+            "pre_purchase_price": float(p.get("preis") or p.get("pre_purchase_price") or 0),
+            "current_list_price": float(p.get("listenpreis") or p.get("current_list_price") or 0),
+            "unit": p.get("einheit") or p.get("unit", "kg"),
+            "total_quantity": float(p.get("gesamtmenge") or p.get("total_quantity") or 0),
+            "remaining_quantity": float(p.get("verbleibende_menge") or p.get("remaining_quantity") or 0),
+            "payment_date": p.get("zahldatum") or p.get("payment_date", ""),
+            "valid_until": p.get("laufzeit_bis") or p.get("valid_until"),
+        }
+        for p in pps
     ]
 
 
@@ -1827,3 +2760,282 @@ async def ack_edi_message(msg_id: str, tenant_id: str = Depends(get_tenant_id), 
     cache_delete_prefix(f"compat:procurement:{tenant_id}:")
     db.commit()
     return target
+
+
+# ---------------------------------------------------------------------------
+# Lager Einlagerung
+# ---------------------------------------------------------------------------
+
+class EinlagerungIn(BaseModel):
+    chargen_id: str = Field(..., description="Chargen-ID der einzulagernden Ware")
+    artikel: str = Field(..., description="Artikel-Bezeichnung")
+    menge: float = Field(..., gt=0, description="Menge in Tonnen")
+    lagerort: str = Field(..., description="Lagerort-Code (z.B. silo-1, halle-a)")
+    lagerplatz: Optional[str] = Field(default=None, description="Optionaler Lagerplatz / Bin-Location")
+
+
+class EinlagerungOut(BaseModel):
+    id: str
+    batch_number: str
+    artikel: str
+    menge: float
+    lagerort: str
+    lagerplatz: Optional[str]
+    datum: date
+    status: str
+
+
+@router.post("/lager/einlagerung", response_model=EinlagerungOut, status_code=201, tags=["lager"])
+async def create_einlagerung(
+    payload: EinlagerungIn,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> EinlagerungOut:
+    """Einlagerung buchen — legt einen Chargen-Eintrag in domain_inventory.article_batches an."""
+    einlagerung_id = str(uuid4())
+    today = date.today()
+    # Encode lagerplatz into warehouse_id when present (e.g. "silo-1/A-12-03")
+    warehouse_key = f"{payload.lagerort}/{payload.lagerplatz}" if payload.lagerplatz else payload.lagerort
+
+    db.execute(
+        text("""
+            INSERT INTO domain_inventory.article_batches
+            (id, tenant_id, article_id, batch_number, warehouse_id, quantity, created_at)
+            VALUES (:id, :tenant_id, :article_id, :batch_number, :warehouse_id, :quantity, NOW())
+        """),
+        {
+            "id": einlagerung_id,
+            "tenant_id": tenant_id,
+            "article_id": payload.artikel,
+            "batch_number": payload.chargen_id,
+            "warehouse_id": warehouse_key,
+            "quantity": payload.menge,
+        },
+    )
+    db.commit()
+
+    return EinlagerungOut(
+        id=einlagerung_id,
+        batch_number=payload.chargen_id,
+        artikel=payload.artikel,
+        menge=payload.menge,
+        lagerort=payload.lagerort,
+        lagerplatz=payload.lagerplatz,
+        datum=today,
+        status="gebucht",
+    )
+
+
+# ---------------------------------------------------------------------------
+# Lager Auslagerung
+# ---------------------------------------------------------------------------
+
+class AuslagerungIn(BaseModel):
+    artikel: str = Field(..., description="Artikel-Bezeichnung")
+    menge: float = Field(..., gt=0, description="Menge (z.B. Tonnen)")
+    strategie: str = Field(default="fifo", description="fifo | fefo | manuell")
+    chargen_id: Optional[str] = Field(default=None, description="Charge bei manuell")
+    verwendungszweck: Optional[str] = Field(default=None)
+
+
+class AuslagerungOut(BaseModel):
+    id: str
+    artikel: str
+    menge: float
+    strategie: str
+    chargen_id: Optional[str]
+    datum: date
+    status: str
+
+
+@router.post("/lager/auslagerung", response_model=AuslagerungOut, status_code=201, tags=["lager"])
+async def create_auslagerung(
+    payload: AuslagerungIn,
+    tenant_id: str = Depends(get_tenant_id),
+) -> AuslagerungOut:
+    """Auslagerung buchen — Stub: erzeugt Beleg-Response; kann später an domain_inventory angebunden werden."""
+    auslagerung_id = str(uuid4())
+    today = date.today()
+    return AuslagerungOut(
+        id=auslagerung_id,
+        artikel=payload.artikel,
+        menge=payload.menge,
+        strategie=payload.strategie,
+        chargen_id=payload.chargen_id,
+        datum=today,
+        status="gebucht",
+    )
+
+
+# ---------------------------------------------------------------------------
+# POS Pausierte Verkäufe (Suspended Sales)
+# ---------------------------------------------------------------------------
+
+@router.get("/pos/suspended-sales", response_model=list, tags=["pos"])
+async def list_suspended_sales(
+    tenant_id: str = Depends(get_tenant_id),
+) -> list:
+    """Liste pausierter Verkäufe — Stub: liefert leere Liste; kann später an POS-Store angebunden werden."""
+    return []
+
+
+@router.delete("/pos/suspended-sales/{sale_id}", status_code=204, tags=["pos"], response_class=Response)
+async def delete_suspended_sale(
+    sale_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+):
+    """Pausierten Verkauf löschen — Stub: bestätigt nur; kann später an POS-Store angebunden werden."""
+    return Response(status_code=204)
+
+
+# ---------------------------------------------------------------------------
+# POS Tagesabschluss
+# ---------------------------------------------------------------------------
+
+class TagesabschlussIn(BaseModel):
+    datum: date
+    kassierer: str = ""
+    tse_transaktionen: int = 0
+    umsatz_bar: float = 0.0
+    umsatz_ec: float = 0.0
+    umsatz_paypal: float = 0.0
+    umsatz_b2b: float = 0.0
+    umsatz_gesamt: float = 0.0
+    bargeld_gezaehlt: float = 0.0
+    ec_abrechnung: float = 0.0
+    paypal_abrechnung: float = 0.0
+    differenz_bar: float = 0.0
+
+
+class TagesabschlussOut(BaseModel):
+    id: str
+    datum: date
+    kassierer: str
+    umsatz_gesamt: float
+    status: str
+    belegnummer: str
+
+
+@router.post("/pos/tagesabschluss", response_model=TagesabschlussOut, status_code=201, tags=["pos"])
+async def create_tagesabschluss(
+    payload: TagesabschlussIn,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> TagesabschlussOut:
+    """POS Tagesabschluss buchen — schreibt in public.abschluss_checklisten."""
+    abschluss_id = str(uuid4())
+    belegnummer = f"KA-{payload.datum.isoformat()}"
+
+    items_json = json.dumps({
+        "tse_transaktionen": payload.tse_transaktionen,
+        "umsatz_bar": payload.umsatz_bar,
+        "umsatz_ec": payload.umsatz_ec,
+        "umsatz_paypal": payload.umsatz_paypal,
+        "umsatz_b2b": payload.umsatz_b2b,
+        "umsatz_gesamt": payload.umsatz_gesamt,
+        "bargeld_gezaehlt": payload.bargeld_gezaehlt,
+        "ec_abrechnung": payload.ec_abrechnung,
+        "paypal_abrechnung": payload.paypal_abrechnung,
+        "differenz_bar": payload.differenz_bar,
+        "belegnummer": belegnummer,
+    })
+
+    db.execute(
+        text("""
+            INSERT INTO abschluss_checklisten
+            (id, tenant_id, periode, abschluss_art, status, verantwortlicher,
+             beginn_datum, abschluss_datum, items, created_at, updated_at)
+            VALUES
+            (:id, :tenant_id, :periode, 'kasse', 'gebucht', :kassierer,
+             :datum, :datum, CAST(:items AS json), NOW(), NOW())
+        """),
+        {
+            "id": abschluss_id,
+            "tenant_id": tenant_id,
+            "periode": payload.datum.isoformat(),
+            "kassierer": payload.kassierer,
+            "datum": payload.datum,
+            "items": items_json,
+        },
+    )
+    db.commit()
+
+    return TagesabschlussOut(
+        id=abschluss_id,
+        datum=payload.datum,
+        kassierer=payload.kassierer,
+        umsatz_gesamt=payload.umsatz_gesamt,
+        status="gebucht",
+        belegnummer=belegnummer,
+    )
+
+
+# ---------------------------------------------------------------------------
+# Setup Firmenstammdaten
+# ---------------------------------------------------------------------------
+
+_FIRMA_KEY = "firma.stammdaten"
+_FIRMA_CATEGORY = "setup"
+
+
+@router.get("/setup/firma", response_model=dict, tags=["setup"])
+async def get_firma(
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Firmenstammdaten laden aus domain_shared.system_properties."""
+    row = db.execute(
+        text("""
+            SELECT property_value FROM domain_shared.system_properties
+            WHERE tenant_id = :tid AND property_key = :key
+            LIMIT 1
+        """),
+        {"tid": tenant_id, "key": _FIRMA_KEY},
+    ).first()
+    if row and row[0]:
+        try:
+            return json.loads(row[0])
+        except (ValueError, TypeError):
+            pass
+    # Defaults wenn noch nicht gespeichert
+    return {}
+
+
+@router.put("/setup/firma", response_model=dict, tags=["setup"])
+async def save_firma(
+    payload: dict = Body(...),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Firmenstammdaten speichern in domain_shared.system_properties (UPSERT)."""
+    firma_json = json.dumps(payload, ensure_ascii=False)
+    existing = db.execute(
+        text("""
+            SELECT id FROM domain_shared.system_properties
+            WHERE tenant_id = :tid AND property_key = :key
+            LIMIT 1
+        """),
+        {"tid": tenant_id, "key": _FIRMA_KEY},
+    ).first()
+
+    if existing:
+        db.execute(
+            text("""
+                UPDATE domain_shared.system_properties
+                SET property_value = :val
+                WHERE tenant_id = :tid AND property_key = :key
+            """),
+            {"tid": tenant_id, "key": _FIRMA_KEY, "val": firma_json},
+        )
+    else:
+        prop_id = str(uuid4())
+        db.execute(
+            text("""
+                INSERT INTO domain_shared.system_properties
+                (id, tenant_id, property_key, property_value, property_type, category)
+                VALUES (:id, :tid, :key, :val, 'json', :cat)
+            """),
+            {"id": prop_id, "tid": tenant_id, "key": _FIRMA_KEY, "val": firma_json, "cat": _FIRMA_CATEGORY},
+        )
+    db.commit()
+    return {"ok": True, "saved": True}

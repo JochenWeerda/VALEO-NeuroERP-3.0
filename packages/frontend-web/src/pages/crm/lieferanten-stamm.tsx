@@ -4,6 +4,7 @@ import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
+import { toast } from '@/hooks/use-toast'
 
 // Zod-Schema für Lieferanten
 const lieferantenSchema = z.object({
@@ -332,7 +333,7 @@ export default function LieferantenStammPage(): JSX.Element {
     } else if (action === 'validate') {
       const isValid = validate(formData)
       if (isValid.isValid) {
-        alert('Validierung erfolgreich!')
+        toast({ title: 'Validierung erfolgreich', description: 'Alle Pflichtfelder sind korrekt ausgefüllt.' })
       } else {
         showValidationToast(isValid.errors)
       }
@@ -356,6 +357,7 @@ export default function LieferantenStammPage(): JSX.Element {
       data={data}
       onSave={handleSave}
       onCancel={handleCancel}
+      onAction={handleAction}
       isLoading={loading}
     />
   )

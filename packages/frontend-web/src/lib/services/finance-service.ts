@@ -85,6 +85,119 @@ export interface JournalEntryLine {
   updated_at: string
 }
 
+// ─── Report-Typen ───────────────────────────────────────────────────────────
+
+export interface BalanceSheetItem {
+  account_number: string
+  account_name: string
+  account_type: string
+  balance: number
+  level: number
+}
+
+export interface BalanceSheet {
+  period: string
+  as_of_date: string
+  assets: BalanceSheetItem[]
+  liabilities: BalanceSheetItem[]
+  equity: BalanceSheetItem[]
+  total_assets: number
+  total_liabilities: number
+  total_equity: number
+  is_balanced: boolean
+}
+
+export interface ProfitLossItem {
+  account_number: string
+  account_name: string
+  account_type: string
+  amount: number
+  level: number
+}
+
+export interface ProfitLoss {
+  period: string
+  revenue: ProfitLossItem[]
+  expenses: ProfitLossItem[]
+  total_revenue: number
+  total_expenses: number
+  net_income: number
+}
+
+export interface BWAItem {
+  position: string
+  description: string
+  current_period: number
+  previous_period: number
+  year_to_date: number
+  percentage: number
+}
+
+export interface BWA {
+  period: string
+  items: BWAItem[]
+  total_revenue: number
+  total_costs: number
+  net_result: number
+}
+
+// ─── OP / Dunning / Zahlungen Typen ────────────────────────────────────────
+
+export interface OpenItem {
+  id: string
+  beleg_nummer: string
+  debitor_id?: string
+  kreditor_id?: string
+  partner_name?: string
+  betrag: number
+  offen: number
+  faellig_am: string
+  mahnstufe: number
+  waehrung: string
+  typ: 'rechnung' | 'gutschrift' | 'anzahlung'
+}
+
+export interface DunningNotice {
+  id: string
+  op_id: string
+  debitor_id: string
+  mahnstufe: number
+  mahn_datum: string
+  faelligkeit: string
+  betrag: number
+  mahngebuehr: number
+  status: 'erstellt' | 'versendet' | 'bezahlt' | 'inkasso'
+}
+
+export interface PaymentRunItem {
+  id: string
+  kreditor_id: string
+  kreditor_name: string
+  betrag: number
+  faellig_am: string
+  bank_iban: string
+  bank_bic: string
+  status: 'offen' | 'geplant' | 'ausgefuehrt' | 'storniert'
+}
+
+export interface PaymentRun {
+  id: string
+  lauf_nummer: string
+  ausfuehrungs_datum: string
+  gesamt_betrag: number
+  anzahl_zahlung: number
+  status: 'entwurf' | 'freigegeben' | 'ausgefuehrt' | 'storniert'
+  positionen: PaymentRunItem[]
+}
+
+export interface AccountingPeriod {
+  id: string
+  periode: string  // YYYY-MM
+  bezeichnung: string
+  status: 'offen' | 'geschlossen' | 'gesperrt'
+  abschluss_datum?: string
+}
+
 // API Functions
 export const financeService = {
   // Chart of Accounts
@@ -253,5 +366,90 @@ export const financeService = {
       isValid: errors.length === 0,
       errors
     }
-  }
+  },
+
+  // ─── Reports ─────────────────────────────────────────────────────────────
+
+  async getBilanz(params: { period: string; tenant_id?: string }): Promise<BalanceSheet> {
+    const p = new URLSearchParams({ period: params.period, tenant_id: params.tenant_id || 'system' })
+    const response = await apiClient.get<BalanceSheet>(`/api/v1/finance/financial-reports/balance-sheet?${p}`)
+    return response.data
+  },
+
+  async getGuV(params: { period: string; tenant_id?: string }): Promise<ProfitLoss> {
+    const p = new URLSearchParams({ period: params.period, tenant_id: params.tenant_id || 'system' })
+    const response = await apiClient.get<ProfitLoss>(`/api/v1/finance/financial-reports/profit-loss?${p}`)
+    return response.data
+  },
+
+  async getBwa(params: { period: string; tenant_id?: string }): Promise<BWA> {
+    const p = new URLSearchParams({ period: params.period, tenant_id: params.tenant_id || 'system' })
+    const response = await apiClient.get<BWA>(`/api/v1/finance/financial-reports/bwa?${p}`)
+    return response.data
+  },
+
+  // ─── Offene Posten ───────────────────────────────────────────────────────
+
+  async getOffenePostenDebitoren(params?: { tenant_id?: string; skip?: number; limit?: number }): Promise<{ items: OpenItem[]; total: number }> {
+    const response = await apiClient.get<{ items: OpenItem[]; total: number }>(
+      '/api/v1/finance/open-items', { params: { typ: 'debitor', ...(params || {}) } }
+    )
+    return response.data
+  },
+
+  async getOffenePostenKreditoren(params?: { tenant_id?: string; skip?: number; limit?: number }): Promise<{ items: OpenItem[]; total: number }> {
+    const response = await apiClient.get<{ items: OpenItem[]; total: number }>(
+      '/api/v1/finance/open-items', { params: { typ: 'kreditor', ...(params || {}) } }
+    )
+    return response.data
+  },
+
+  // ─── Mahnwesen ───────────────────────────────────────────────────────────
+
+  async getMahnungen(params?: { status?: string; skip?: number; limit?: number }): Promise<{ items: DunningNotice[]; total: number }> {
+    const response = await apiClient.get<{ items: DunningNotice[]; total: number }>(
+      '/api/v1/finance/dunning', { params }
+    )
+    return response.data
+  },
+
+  async createMahnung(data: Partial<DunningNotice>): Promise<DunningNotice> {
+    const response = await apiClient.post<DunningNotice>('/api/v1/finance/dunning', data)
+    return response.data
+  },
+
+  async sendMahnung(id: string): Promise<void> {
+    await apiClient.post(`/api/v1/finance/dunning/${id}/send`, null)
+  },
+
+  // ─── Zahlungsläufe ───────────────────────────────────────────────────────
+
+  async getZahlungslaeufe(params?: { status?: string; skip?: number; limit?: number }): Promise<{ items: PaymentRun[]; total: number }> {
+    const response = await apiClient.get<{ items: PaymentRun[]; total: number }>(
+      '/api/v1/finance/payment-runs', { params }
+    )
+    return response.data
+  },
+
+  async createZahlungslauf(data: Partial<PaymentRun>): Promise<PaymentRun> {
+    const response = await apiClient.post<PaymentRun>('/api/v1/finance/payment-runs', data)
+    return response.data
+  },
+
+  async executeZahlungslauf(id: string): Promise<PaymentRun> {
+    const response = await apiClient.post<PaymentRun>(`/api/v1/finance/payment-runs/${id}/execute`, null)
+    return response.data
+  },
+
+  // ─── Perioden ────────────────────────────────────────────────────────────
+
+  async getPerioden(params?: { status?: string }): Promise<AccountingPeriod[]> {
+    const response = await apiClient.get<AccountingPeriod[]>('/api/v1/finance/periods', { params })
+    return response.data
+  },
+
+  async closePeriode(id: string): Promise<AccountingPeriod> {
+    const response = await apiClient.post<AccountingPeriod>(`/api/v1/finance/periods/${id}/close`, null)
+    return response.data
+  },
 }

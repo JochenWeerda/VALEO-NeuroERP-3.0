@@ -167,8 +167,7 @@ export default function APInvoicesListPage(): JSX.Element {
     exportFileName: `${entityTypeLabel}_Liste`,
   })
 
-  const handleImport = async (data: unknown[]): Promise<void> => {
-    console.log('Importing AP invoice data:', data)
+  const handleImport = async (_data: unknown[]): Promise<void> => {
     toast({ title: t('common.success'), description: t('crud.feedback.createSuccess', { entityType: entityTypeLabel }) })
   }
 

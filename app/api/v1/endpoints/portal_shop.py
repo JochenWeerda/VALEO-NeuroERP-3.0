@@ -15,7 +15,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_, desc
 
 from app.core.database import get_db
-from app.infrastructure.models import Article as ArticleModel
+from app.infrastructure.models import Article as ArticleModel, Customer as CustomerModel
 from app.infrastructure.models.portal_models import (
     CustomerContract, CustomerPrePurchase, 
     CustomerOrder, CustomerOrderItem, CustomerOrderHistory,
@@ -173,10 +173,17 @@ async def get_portal_products(
             beschreibung=article.description,
             einheit=article.unit,
             preis=article.sales_price,
-            rabattPreis=None,  # TODO: Aktionspreise aus separater Tabelle
+            rabattPreis=round(
+                float(article.sales_price) * (1 - float(article.rabatt_auftrag_rechnung) / 100), 2
+            ) if getattr(article, "rabatt_auftrag_rechnung", None) and article.sales_price else None,
             verfuegbar=article.available_stock > 0,
             bestand=article.available_stock,
-            zertifikate=[],  # TODO: Zertifikate aus separater Tabelle
+            zertifikate=[c for c in [
+                "Bio" if getattr(article, "bio_kennzeichnung", False) else None,
+                "GMP+" if getattr(article, "gmp_plus_relevanz", False) else None,
+                "Vegan" if getattr(article, "kennzeichnung_vegan", None) == "Ja" else None,
+                "Vegetarisch" if getattr(article, "kennzeichnung_vegetarisch", None) == "Ja" else None,
+            ] if c],
             letzteBestellung=last_order,
             contractStatus=contract_status,
             contractPrice=contract_price,
@@ -230,10 +237,13 @@ async def create_order(
     """
     effective_customer = customer_id or get_customer_id_from_token(tenant_id)
     
-    # Lade Kundendaten
-    # TODO: Echte Kundenabfrage
-    customer_name = "Demo-Kunde"
-    customer_number = "K-DEMO-001"
+    # Lade Kundendaten aus CRM
+    customer = db.query(CustomerModel).filter(
+        CustomerModel.id == effective_customer,
+        CustomerModel.tenant_id == tenant_id,
+    ).first()
+    customer_name = customer.company_name if customer else "Unbekannter Kunde"
+    customer_number = customer.customer_number if customer else f"K-{effective_customer[:8].upper()}"
     
     # Generiere Bestellnummer
     order_number = f"PO-{datetime.utcnow().strftime('%Y%m%d')}-{uuid7()[:8].upper()}"

@@ -1,4 +1,4 @@
-﻿import { useState, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useWaagen, type Waage } from '@/lib/api/betrieb'
 import { Badge } from '@/components/ui/badge'
@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useToast } from '@/hooks/use-toast'
 import { AlertTriangle, FileDown, Plus, Scale, Search, WifiOff } from 'lucide-react'
 
 function LoadingSkeleton(): JSX.Element {
@@ -44,6 +45,7 @@ function ErrorState({ error, onRetry }: { error: Error | null; onRetry: () => vo
 
 export default function WaageListePage(): JSX.Element {
   const navigate = useNavigate()
+  const { toast } = useToast()
   const [searchTerm, setSearchTerm] = useState('')
   const { data: waagen = [], isLoading, isError, error, refetch } = useWaagen()
 
@@ -71,6 +73,22 @@ export default function WaageListePage(): JSX.Element {
     { key: 'naechsteEichung' as const, label: 'Naechste Eichung', render: (w: Waage) => new Date(w.naechsteEichung).toLocaleDateString('de-DE') },
     { key: 'status' as const, label: 'Status', render: (w: Waage) => <Badge variant={w.status === 'aktiv' || w.status === 'geeicht' ? 'outline' : 'secondary'}>{w.status === 'aktiv' ? 'Aktiv' : w.status === 'wartung' ? 'Wartung' : 'Geeicht'}</Badge> },
   ]
+
+  const handleExport = (): void => {
+    const header = 'ID;Standort;Typ;Max_Kapazitaet_t;Letzte_Eichung;Naechste_Eichung;Status\n'
+    const esc = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`
+    const rows = filteredWaagen.map((w) =>
+      [w.id, w.standort, w.typ, w.maxKapazitaet, w.letzteEichung, w.naechsteEichung, w.status].map(esc).join(';')
+    ).join('\n')
+    const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `Waagen_${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast({ title: 'Export', description: `${filteredWaagen.length} Waagen exportiert.` })
+  }
 
   return (
     <div className="space-y-4 p-6">
@@ -129,7 +147,7 @@ export default function WaageListePage(): JSX.Element {
                 className="pl-10" 
               />
             </div>
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" onClick={handleExport}>
               <FileDown className="h-4 w-4" />Export
             </Button>
           </div>

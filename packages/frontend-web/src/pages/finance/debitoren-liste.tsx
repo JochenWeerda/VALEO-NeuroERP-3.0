@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ListReport } from '@/components/mask-builder'
@@ -7,8 +7,10 @@ import { createApiClient } from '@/components/mask-builder/utils/api'
 import { formatCurrency, formatNumber } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
+import { toast } from '@/hooks/use-toast'
+import { api } from '@/lib/axios'
 
-// API Client für Debitoren
+// API Client für Debitoren (Liste)
 const apiClient = createApiClient('/api/finance')
 
 // Konfiguration für Debitoren ListReport (wird in Komponente mit i18n erstellt)
@@ -169,54 +171,51 @@ const createDebitorenListConfig = (t: any): ListConfig => ({
     }
   ],
   bulkActions: [
-    {
-      key: 'export',
-      label: t('crud.actions.export'),
-      type: 'secondary',
-      onClick: () => console.log('Export clicked')
-    },
-    {
-      key: 'reminder',
-      label: t('crud.actions.paymentReminder'),
-      type: 'secondary',
-      onClick: () => console.log('Reminder clicked')
-    },
-    {
-      key: 'dunning',
-      label: t('crud.actions.sendDunning'),
-      type: 'danger',
-      onClick: () => console.log('Dunning clicked')
-    },
-    {
-      key: 'block',
-      label: t('crud.actions.blockPayment'),
-      type: 'danger',
-      onClick: () => console.log('Block clicked')
-    }
+    { key: 'export', label: t('crud.actions.export'), type: 'secondary', onClick: () => {} },
+    { key: 'reminder', label: t('crud.actions.paymentReminder'), type: 'secondary', onClick: () => {} },
+    { key: 'dunning', label: t('crud.actions.sendDunning'), type: 'danger', onClick: () => {} },
+    { key: 'block', label: t('crud.actions.blockPayment'), type: 'danger', onClick: () => {} },
   ],
   defaultSort: { field: 'offenerBetrag', direction: 'desc' },
   pageSize: 25,
   api: {
-    baseUrl: '/api/finance/debitoren',
+    baseUrl: '/api/v1/finance/debtors',
     endpoints: {
-      list: '/api/finance/debitoren',
-      get: '/api/finance/debitoren/{id}',
-      create: '/api/finance/debitoren',
-      update: '/api/finance/debitoren/{id}',
-      delete: '/api/finance/debitoren/{id}'
+      list: '/api/v1/finance/debtors',
+      get: '/api/v1/finance/debtors/{id}',
+      create: '/api/v1/finance/debtors',
+      update: '/api/v1/finance/debtors/{id}',
+      delete: '/api/v1/finance/debtors/{id}'
     }
   },
   permissions: ['finance.read', 'debtor.read'],
   actions: []
 })
 
+async function triggerExportDownload(entity: string, format: string, toastFn: (opts: { title: string; description?: string; variant?: 'destructive' }) => void): Promise<void> {
+  try {
+    const res = await api.post('/api/v1/export/list', { entity, format }, { responseType: 'blob' })
+    const blob = res.data as Blob
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `export_${entity}_${new Date().toISOString().slice(0, 10)}.${format === 'xlsx' ? 'xlsx' : 'csv'}`
+    a.click()
+    URL.revokeObjectURL(url)
+    toastFn({ title: 'Export erstellt', description: 'Download gestartet.' })
+  } catch (e: any) {
+    toastFn({ title: 'Export fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+  }
+}
+
 export default function DebitorenListePage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const importInputRef = useRef<HTMLInputElement>(null)
   const [data, setData] = useState<any[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
-  const debitorenListConfig = createDebitorenListConfig(t)
+  const baseConfig = createDebitorenListConfig(t)
 
   const { handleAction } = useMaskActions(async (action: string, item: any) => {
     if (action === 'edit' && item) {
@@ -227,7 +226,7 @@ export default function DebitorenListePage(): JSX.Element {
           await apiClient.delete(`/debitoren/${item.id}`)
           loadData() // Liste neu laden
         } catch (error) {
-          alert(t('crud.messages.deleteError'))
+          toast({ title: t('common.error', { defaultValue: 'Fehler' }), description: t('crud.messages.deleteError', { defaultValue: 'Löschen fehlgeschlagen.' }), variant: 'destructive' })
         }
       }
     }
@@ -248,6 +247,47 @@ export default function DebitorenListePage(): JSX.Element {
     }
   }
 
+  const debitorenListConfig = useMemo(() => {
+    const onExportBulk = async () => {
+      await triggerExportDownload('debtors', 'csv', toast)
+    }
+    const onReminder = async (items: any[]) => {
+      if (items.length === 0) { toast({ title: t('crud.list.noSelection') ?? 'Keine Auswahl' }); return }
+      toast({ title: 'Zahlungserinnerung', description: `Für ${items.length} Debitoren wird Erinnerung erstellt.` })
+    }
+    const onDunning = async (items: any[]) => {
+      if (items.length === 0) { toast({ title: t('crud.list.noSelection') ?? 'Keine Auswahl' }); return }
+      try {
+        await api.post('/api/v1/finance/dunning/run', { as_of_date: new Date().toISOString().slice(0, 10) })
+        toast({ title: 'Mahnlauf gestartet', description: 'Mahnungen werden erstellt.' })
+        loadData()
+      } catch (e: any) {
+        toast({ title: 'Fehler', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+      }
+    }
+    const onBlock = async (items: any[]) => {
+      if (items.length === 0) { toast({ title: t('crud.list.noSelection') ?? 'Keine Auswahl' }); return }
+      try {
+        for (const item of items) {
+          if (item.id) await api.patch(`/api/v1/finance/debtors/${item.id}`, { is_active: false })
+        }
+        toast({ title: 'Gesperrt', description: `${items.length} Debitor(en) gesperrt.`, variant: 'destructive' })
+        loadData()
+      } catch (e: any) {
+        toast({ title: 'Fehler', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+      }
+    }
+    return {
+      ...baseConfig,
+      bulkActions: [
+        { ...baseConfig.bulkActions[0], onClick: onExportBulk },
+        { ...baseConfig.bulkActions[1], onClick: onReminder },
+        { ...baseConfig.bulkActions[2], onClick: onDunning },
+        { ...baseConfig.bulkActions[3], onClick: onBlock },
+      ],
+    }
+  }, [t])
+
   useEffect(() => {
     loadData()
   }, [])
@@ -264,21 +304,41 @@ export default function DebitorenListePage(): JSX.Element {
     handleAction('delete', item)
   }
 
-  const handleExport = () => {
-    alert(t('crud.messages.exportFunctionInfo'))
+  const handleExport = async () => {
+    await triggerExportDownload('debtors', 'csv', toast)
+  }
+
+  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const form = new FormData()
+    form.append('file', file)
+    try {
+      const res = await api.post('/api/v1/finance/import/debitoren', form, { headers: { 'Content-Type': 'multipart/form-data' } })
+      const { created, updated, errors } = res.data as { created: number; updated: number; errors: string[] }
+      toast({ title: 'Import abgeschlossen', description: `${created} neu, ${updated} aktualisiert${errors.length ? `, ${errors.length} Fehler` : ''}.` })
+      if (errors.length) console.warn('Import-Fehler:', errors)
+      loadData()
+    } catch (e: any) {
+      toast({ title: 'Import fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+    }
+    e.target.value = ''
   }
 
   return (
-    <ListReport
-      config={debitorenListConfig}
-      data={data}
-      total={total}
-      onCreate={handleCreate}
-      onEdit={handleEdit}
-      onDelete={handleDelete}
-      onExport={handleExport}
-      onImport={() => alert(t('crud.messages.importFunctionInfo'))}
-      isLoading={loading}
-    />
+    <>
+      <input ref={importInputRef} type="file" accept=".csv" style={{ display: 'none' }} onChange={handleImportFile} />
+      <ListReport
+        config={debitorenListConfig}
+        data={data}
+        total={total}
+        onCreate={handleCreate}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onExport={handleExport}
+        onImport={() => importInputRef.current?.click()}
+        isLoading={loading}
+      />
+    </>
   )
 }

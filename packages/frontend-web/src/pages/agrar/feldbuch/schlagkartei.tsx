@@ -67,6 +67,7 @@ type Schlag = {
 
 // API hooks from centralized agrar module
 import { useAgrarKunden, useSchlaege } from '@/lib/api/agrar'
+import { useToast } from '@/hooks/use-toast'
 
 // Skeleton-Komponente für Ladezustand
 function SchlagkarteiSkeleton() {
@@ -112,6 +113,7 @@ function SchlagkarteiSkeleton() {
 
 export default function SchlagkarteiPage(): JSX.Element {
   const navigate = useNavigate()
+  const { toast } = useToast()
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedKundeId, setSelectedKundeId] = useState<string>('all')
   const [activeTab, setActiveTab] = useState<string>('liste')
@@ -168,6 +170,21 @@ export default function SchlagkarteiPage(): JSX.Element {
   const selectedKunde = useMemo(() => {
     return kunden?.find(k => k.id === selectedKundeId)
   }, [kunden, selectedKundeId])
+
+  const handleExport = () => {
+    const header = 'Schlag;FLIK;Flaeche_ha;Kultur;Vorkultur;Kunde;Gemeinde;Status\n'
+    const rows = filteredSchlaege.map((s) =>
+      [s.name, s.flik ?? '', s.flaeche, s.kultur, s.vorkultur ?? '', s.kundeName, s.gemeinde, s.status].map((v) => `"${String(v).replace(/"/g, '""')}"`).join(';')
+    )
+    const blob = new Blob([header + rows.join('\n')], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `Schlagkartei_${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast({ title: 'Export', description: `${filteredSchlaege.length} Schläge exportiert.` })
+  }
 
   // Feldblockfinder Schlag-Übernahme
   const handleSchlagFromFeldblockfinder = (schlagData: SchlagData) => {
@@ -439,7 +456,7 @@ export default function SchlagkarteiPage(): JSX.Element {
                         className="pl-10" 
                       />
                     </div>
-                    <Button variant="outline" className="gap-2">
+                    <Button variant="outline" className="gap-2" onClick={handleExport}>
                       <FileDown className="h-4 w-4" />
                       Export
                     </Button>

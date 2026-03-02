@@ -5,6 +5,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { toast } from '@/hooks/use-toast';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -92,9 +93,8 @@ export default function FarmersPage(): JSX.Element {
   });
 
   // Cancel handler (if needed)
-  const handleCancel = async (id: string, reason: string) => {
-    // Implementation if farmers can be cancelled
-    console.log('Cancel farmer:', id, reason);
+  const handleCancel = async (_id: string, _reason: string) => {
+    // Farmers do not have a cancel workflow yet
   };
 
   const {
@@ -196,7 +196,7 @@ export default function FarmersPage(): JSX.Element {
 
       <Toolbar
         onSearch={setQuery}
-        onCopilot={() => window.alert('Copilot analyzing farmers...')}
+        onCopilot={() => toast({ title: 'Copilot', description: 'KI-Analyse für Landwirt-Stammdaten wird in Kürze verfügbar.' })}
       />
 
       <Card className="p-4">

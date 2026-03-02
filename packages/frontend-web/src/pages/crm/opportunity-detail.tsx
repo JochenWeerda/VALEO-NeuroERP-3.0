@@ -338,26 +338,25 @@ function OpportunityHistoryTab({ opportunityId }: { opportunityId: string }) {
 // Quotes Component
 function OpportunityQuotesTab({ opportunityId }: { opportunityId: string }) {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const [quotes, setQuotes] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const loadQuotes = async () => {
       try {
-        // TODO: Implement quotes API endpoint
-        // const response = await apiClient.get(`/opportunities/${opportunityId}/quotes`)
-        // if (response.success) {
-        //   setQuotes(response.data || [])
-        // }
-        setQuotes([]) // Placeholder
-      } catch (error) {
-        console.error('Fehler beim Laden der Quotes:', error)
+        const response = await apiClient.get(`/opportunities/${opportunityId}/quotes`)
+        if (response.success) {
+          setQuotes((response.data as any) || [])
+        }
+      } catch {
+        setQuotes([])
       } finally {
         setLoading(false)
       }
     }
     if (opportunityId) {
-      loadQuotes()
+      void loadQuotes()
     }
   }, [opportunityId])
 
@@ -370,13 +369,7 @@ function OpportunityQuotesTab({ opportunityId }: { opportunityId: string }) {
       <div className="p-4 text-center">
         <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-2" />
         <p className="text-muted-foreground">{t('crud.messages.noQuotes')}</p>
-        <Button className="mt-4" onClick={() => {
-          // TODO: Navigate to create quote page
-          toast({
-            title: t('crud.messages.comingSoon'),
-            description: t('crud.messages.quoteCreationComingSoon')
-          })
-        }}>
+        <Button className="mt-4" onClick={() => navigate(`/sales/angebot-erstellen?opportunityId=${opportunityId}`)}>
           {t('crud.actions.createQuote')}
         </Button>
       </div>
@@ -480,11 +473,12 @@ export default function OpportunityDetailPage(): JSX.Element {
 
   const handleAction = async (action: string, formData: any) => {
     if (action === 'convertToQuote') {
-      // TODO: Implement convert to quote
-      toast({
-        title: t('crud.messages.comingSoon'),
-        description: t('crud.messages.convertToQuoteComingSoon')
-      })
+      if (id && id !== 'neu' && id !== 'new') {
+        navigate(`/sales/angebot-erstellen?opportunityId=${id}`)
+      } else {
+        // Opportunity not saved yet — save first then redirect
+        await handleSave(formData)
+      }
     } else if (action === 'markAsWon' && id) {
       try {
         await apiClient.put(`/opportunities/${id}`, {
