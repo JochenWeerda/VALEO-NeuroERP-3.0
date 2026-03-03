@@ -12,7 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Card } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import { useToast } from '@/components/ui/toast-provider'
+import { useToast } from '@/hooks/use-toast'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { DmsAnhangDialog } from '@/components/dms/DmsAnhangDialog'
 import { ArtikelSuchDialog } from '@/components/sales/ArtikelSuchDialog'
@@ -169,7 +169,8 @@ function LieferantSuchDialog({
 
 export default function AnfrageErfassungPage(): JSX.Element {
   const navigate = useNavigate()
-  const { push } = useToast()
+  const { toast } = useToast()
+  const push = (msg: string) => toast({ title: msg })
   const { user } = useAuth()
   const { id: anfrageId } = useParams<{ id?: string }>()
 

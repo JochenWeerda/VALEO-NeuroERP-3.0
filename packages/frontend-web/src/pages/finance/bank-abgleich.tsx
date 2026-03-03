@@ -56,7 +56,7 @@ const createBankAbgleichConfig = (t: any, entityTypeLabel: string): MaskConfig =
           required: true,
           placeholder: t('crud.tooltips.placeholders.period'),
           pattern: '^\\d{4}-\\d{2}$'
-         } as any, {},
+         } as any,
         {
           name: 'camtFile',
           label: t('crud.fields.camtFile'),
@@ -130,7 +130,7 @@ const createBankAbgleichConfig = (t: any, entityTypeLabel: string): MaskConfig =
           name: 'regelAngewendet',
           label: t('crud.fields.appliedRules'),
           type: 'custom',
-           } as any, {          customRender: (value: any) => (
+          customRender: (value: any) => (
             <div className="space-y-2">
               {(value || []).map((regel: any, index: number) => (
                 <div key={index} className="flex justify-between p-2 bg-gray-50 rounded">

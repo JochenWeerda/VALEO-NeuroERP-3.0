@@ -76,14 +76,18 @@ export default function DmsIntegrationCard(): JSX.Element {
   const loadStatus = useCallback(async (): Promise<void> => {
     try {
       const response = await fetch('/api/admin/dms/status')
+      if (!response.ok || !response.headers.get('content-type')?.includes('application/json')) {
+        setStatus(null)
+        return
+      }
       const data = (await response.json()) as DmsStatus
-
       setStatus(data)
-      if (isNonEmptyString(data.base)) {
+      if (data && isNonEmptyString(data.base)) {
         setBaseUrl(data.base)
       }
     } catch (error) {
       console.error('Failed to load DMS status:', error)
+      setStatus(null)
     }
   }, [])
 

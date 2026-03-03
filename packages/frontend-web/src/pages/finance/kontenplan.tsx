@@ -76,7 +76,7 @@ const kontenplanConfig: MaskConfig = {
           required: true,
           placeholder: '2025-01',
           pattern: '^\\d{4}-\\d{2}$'
-         } as any, {}
+         } as any
       ],
       layout: 'grid',
       columns: 2

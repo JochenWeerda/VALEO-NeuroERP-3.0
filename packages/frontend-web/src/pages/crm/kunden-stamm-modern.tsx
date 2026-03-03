@@ -379,7 +379,7 @@ function LegacyKundenStammModern() {
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
-              {l3Config.ai?.intentBar?.actions.map((action) => (
+              {(l3Config.ai?.intentBar?.actions ?? []).map((action) => (
                 <Button
                   key={action.id}
                   variant="outline"

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Worklist } from '@/components/mask-builder'
 import { useMaskActions } from '@/components/mask-builder/hooks'
 import { WorklistConfig, WorklistItem } from '@/components/mask-builder/types'
@@ -81,10 +81,11 @@ export default function FuttermittelQualitaetskontrollePage(): JSX.Element {
   const apiItems = mapQualitaetToWorklistItems(qualitaetData)
   const [items, setItems] = useState<WorklistItem[]>([])
 
-  // Sync API data into local state when available
-  if (apiItems.length > 0 && items.length === 0) {
-    setItems(apiItems)
-  }
+  useEffect(() => {
+    if (apiItems.length > 0 && items.length === 0) {
+      setItems(apiItems)
+    }
+  }, [apiItems, items.length])
 
   const { handleAction } = useMaskActions(async (action: string, item: WorklistItem) => {
     if (!item) return

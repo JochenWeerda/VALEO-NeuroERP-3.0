@@ -12,6 +12,7 @@ import {
   FileText,
   Globe,
   LayoutDashboard,
+  LayoutGrid,
   Leaf,
   Package,
   RefreshCw,

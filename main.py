@@ -46,6 +46,8 @@ from app.routers.numbering_router import router as numbering_router  # Numbering
 from app.routers.admin_dms_router import router as admin_dms_router  # Admin DMS Integration
 from app.routers.dms_webhook_router import router as dms_webhook_router  # DMS Webhooks & Inbox
 from app.routers.fibu_router import router as fibu_router  # Finanzbuchhaltung (130 Masken)
+from app.routers.contracts_router import router as contracts_router  # Verträge (contracts-v2 Maske)
+from app.api.v1.endpoints import opportunities as opportunities_endpoints  # CRM-Sales (Frontend /api/crm-sales)
 
 # Import domain-specific routers with error handling
 try:
@@ -422,6 +424,12 @@ app.include_router(numbering_router)
 
 # Include Admin DMS Integration
 app.include_router(admin_dms_router)
+
+# Verträge-API für Frontend contracts-v2 (GET /api/contracts → { items: [] })
+app.include_router(contracts_router)
+
+# CRM Opportunities unter /api/crm-sales/opportunities (Frontend createApiClient('/api/crm-sales/opportunities'))
+app.include_router(opportunities_endpoints.router, prefix="/api/crm-sales/opportunities", tags=["crm-sales"])
 
 # Include DMS Webhooks & Inbox
 app.include_router(dms_webhook_router)
