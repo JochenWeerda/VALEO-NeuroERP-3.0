@@ -5,8 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Clock, Truck } from 'lucide-react'
-import { useWarteschlange } from '@/lib/api/inventory'
-import type { LKWEintrag } from '@/lib/api/inventory'
+import { useWarteschlange, type LKWEintrag } from '@/lib/api/inventory'
 
 export default function WarteschlangePage(): JSX.Element {
   const navigate = useNavigate()

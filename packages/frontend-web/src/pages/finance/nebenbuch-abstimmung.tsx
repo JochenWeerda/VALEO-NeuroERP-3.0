@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { apiClient } from '@/lib/api-client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -7,8 +8,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
 import { Loader2, CheckCircle2, XCircle, ChevronRight } from 'lucide-react'
-
-const entityType = 'subsidiaryLedgerReconciliation'
 
 export default function NebenbuchAbstimmungPage(): JSX.Element {
   const { t } = useTranslation()
@@ -33,13 +32,11 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
 
   const loadSummary = async () => {
     try {
-      const response = await fetch(
-        `/api/v1/finance/subsidiary-ledger-reconciliation/summary?period=${period}&tenant_id=00000000-0000-0000-0000-000000000001`
+      const { data } = await apiClient.get(
+        `/api/v1/finance/subsidiary-ledger-reconciliation/summary`,
+        { params: { period } },
       )
-      if (response.ok) {
-        const data = await response.json()
-        setSummary(data)
-      }
+      setSummary(data)
     } catch (error) {
       console.error('Error loading summary:', error)
     }
@@ -48,24 +45,16 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
   const loadReconciliation = async () => {
     setLoading(true)
     try {
-      const response = await fetch(
-        `/api/v1/finance/subsidiary-ledger-reconciliation/${ledgerType.toLowerCase()}?period=${period}&tenant_id=00000000-0000-0000-0000-000000000001`
+      const { data } = await apiClient.get(
+        `/api/v1/finance/subsidiary-ledger-reconciliation/${ledgerType.toLowerCase()}`,
+        { params: { period } },
       )
-      if (response.ok) {
-        const data = await response.json()
-        setReconciliationData(data)
-      } else {
-        toast({
-          variant: 'destructive',
-          title: t('crud.messages.error'),
-          description: t('crud.messages.loadError'),
-        })
-      }
+      setReconciliationData(data)
     } catch (error: any) {
       toast({
         variant: 'destructive',
         title: t('crud.messages.error'),
-        description: error.message || t('crud.messages.networkError'),
+        description: error?.response?.data?.detail || error.message || t('crud.messages.networkError'),
       })
     } finally {
       setLoading(false)
@@ -75,13 +64,11 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
   const loadDetails = async (accountNumber: string) => {
     setSelectedAccount(accountNumber)
     try {
-      const response = await fetch(
-        `/api/v1/finance/subsidiary-ledger-reconciliation/${ledgerType.toLowerCase()}/details?account_number=${accountNumber}&period=${period}&tenant_id=00000000-0000-0000-0000-000000000001`
+      const { data } = await apiClient.get(
+        `/api/v1/finance/subsidiary-ledger-reconciliation/${ledgerType.toLowerCase()}/details`,
+        { params: { account_number: accountNumber, period } },
       )
-      if (response.ok) {
-        const data = await response.json()
-        setDetails(data)
-      }
+      setDetails(data)
     } catch (error) {
       console.error('Error loading details:', error)
     }

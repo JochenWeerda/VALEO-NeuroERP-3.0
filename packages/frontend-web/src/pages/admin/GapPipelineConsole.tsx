@@ -9,6 +9,7 @@ import {
   runGapImport,
   runGapCommand,
   getGapPipelineStatus,
+  uploadGapCsv,
   type GapPipelineStatus,
 } from '@/api/gapPipeline'
 import { Button } from '@/components/ui/button'
@@ -23,8 +24,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Loader2, Play, RefreshCw, CheckCircle2, XCircle, AlertCircle, BarChart3, Upload } from 'lucide-react'
-import { uploadGapCsv } from '@/api/gapPipeline'
+import { Loader2, Play, RefreshCw, CheckCircle2, XCircle, AlertCircle } from 'lucide-react'
 
 export default function GapPipelineConsole() {
   const currentYear = new Date().getFullYear()

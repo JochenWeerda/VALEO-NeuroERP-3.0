@@ -108,7 +108,7 @@ export default function BestellvorschlagLagerPage(): JSX.Element {
       if (filterArtikelGruppe) p.set('artikelgruppe', filterArtikelGruppe)
       if (filterArtikelNr) p.set('artikelNr', filterArtikelNr)
       p.set('nur_unter_meldebestand', 'false')
-      const qs = p.toString() ? `?${p}` : ''
+      const qs = p.toString() ? `?${p.toString()}` : ''
       const data = await apiClient.get<any[]>(`/api/v1/einkauf/bestellvorschlaege/lager${qs}`)
       const rows = (data || []).map((r: any) => ({
         id: r.article_id,

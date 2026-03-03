@@ -46,7 +46,6 @@ export function VarietySelectionDialog({
   open,
   onClose,
   onSelect,
-  articleId,
 }: VarietySelectionDialogProps): JSX.Element {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedVariety, setSelectedVariety] = useState<Variety | null>(null)

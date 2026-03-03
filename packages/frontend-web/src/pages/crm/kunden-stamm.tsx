@@ -7,7 +7,7 @@ import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
-import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
+import { getEntityTypeLabel, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 import { crmService, type Contact } from '@/lib/services/crm-service'
 import { queryKeys } from '@/lib/query'
 import { Button } from '@/components/ui/button'
@@ -17,7 +17,7 @@ import { Badge } from '@/components/ui/badge'
 import { Plus, ExternalLink, Mail, Phone, ShieldCheck } from 'lucide-react'
 import { createApiClient } from '@/components/mask-builder/utils/api'
 import { formatDate } from '@/components/mask-builder/utils/formatting'
-import { getStatusLabel } from '@/features/crud/utils/i18n-helpers'
+import { useTenant } from '@/hooks/useTenant'
 
 // Zod-Schema für Kunden (wird in Komponente mit i18n erstellt)
 const createKundenSchema = (t: any) => z.object({
@@ -348,6 +348,7 @@ const createKundenConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
 function GDPRRequestsList({ contactId }: { contactId?: string }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const { tenantId } = useTenant()
   const [requests, setRequests] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const gdprApiClient = createApiClient('/api/crm-gdpr')
@@ -362,7 +363,7 @@ function GDPRRequestsList({ contactId }: { contactId?: string }) {
       try {
         const response = await gdprApiClient.get('/gdpr/requests', {
           params: {
-            tenant_id: '00000000-0000-0000-0000-000000000001', // TODO: Get from auth context
+            tenant_id: tenantId,
             contact_id: contactId
           }
         })
@@ -380,7 +381,7 @@ function GDPRRequestsList({ contactId }: { contactId?: string }) {
     }
 
     loadRequests()
-  }, [contactId])
+  }, [contactId, tenantId])
 
   if (loading) {
     return <div className="p-4">Lade GDPR-Requests...</div>
@@ -467,6 +468,7 @@ function GDPRRequestsList({ contactId }: { contactId?: string }) {
 function ConsentsList({ contactId }: { contactId?: string }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const { tenantId } = useTenant()
   const [consents, setConsents] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const consentApiClient = createApiClient('/api/crm-consent')
@@ -481,7 +483,7 @@ function ConsentsList({ contactId }: { contactId?: string }) {
       try {
         const response = await consentApiClient.get(`/consents/contact/${contactId}`, {
           params: {
-            tenant_id: '00000000-0000-0000-0000-000000000001' // TODO: Get from auth context
+            tenant_id: tenantId
           }
         })
         
@@ -496,7 +498,7 @@ function ConsentsList({ contactId }: { contactId?: string }) {
     }
 
     loadConsents()
-  }, [contactId])
+  }, [contactId, tenantId])
 
   if (loading) {
     return <div className="p-4">Lade Consents...</div>

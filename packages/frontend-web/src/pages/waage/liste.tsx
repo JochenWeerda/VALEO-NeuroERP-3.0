@@ -8,7 +8,7 @@ import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useToast } from '@/hooks/use-toast'
-import { AlertTriangle, FileDown, Plus, Scale, Search, WifiOff } from 'lucide-react'
+import { AlertTriangle, FileDown, Plus, Scale, Search } from 'lucide-react'
 
 function LoadingSkeleton(): JSX.Element {
   return (
@@ -49,13 +49,6 @@ export default function WaageListePage(): JSX.Element {
   const [searchTerm, setSearchTerm] = useState('')
   const { data: waagen = [], isLoading, isError, error, refetch } = useWaagen()
 
-  // Error State: Keine Mock-Daten als Fallback!
-  if (isError && !isLoading) {
-    return <ErrorState error={error} onRetry={refetch} />
-  }
-
-  if (isLoading) return <LoadingSkeleton />
-
   const filteredWaagen = useMemo(() => {
     if (!searchTerm) return waagen
     const term = searchTerm.toLowerCase()
@@ -65,6 +58,13 @@ export default function WaageListePage(): JSX.Element {
       w.typ.toLowerCase().includes(term)
     )
   }, [waagen, searchTerm])
+
+  // Error State: Keine Mock-Daten als Fallback!
+  if (isError && !isLoading) {
+    return <ErrorState error={error} onRetry={refetch} />
+  }
+
+  if (isLoading) return <LoadingSkeleton />
 
   const columns = [
     { key: 'standort' as const, label: 'Standort', render: (w: Waage) => <div><div className="font-medium">{w.standort}</div><div className="text-sm text-muted-foreground">{w.id}</div></div> },

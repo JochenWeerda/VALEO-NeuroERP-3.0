@@ -1,4 +1,4 @@
-/**
+﻿/**
  * API Client
  * Axios-basierter HTTP-Client mit Interceptors
  */
@@ -54,7 +54,6 @@ class APIClient {
             window.location.href = '/login'
           } else {
             // In dev mode without OIDC, just log the error
-            // eslint-disable-next-line no-console
             console.warn('API request returned 401 Unauthorized. In dev mode without OIDC, this might be expected.')
           }
         }

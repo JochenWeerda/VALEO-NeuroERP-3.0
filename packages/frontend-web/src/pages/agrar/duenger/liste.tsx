@@ -9,8 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { AlertTriangle, Plus, Filter, Eye, Edit, Trash2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
-import { useDuenger, useDeleteDuenger } from '@/lib/api/agrar'
-import type { Duenger } from '@/lib/api/agrar'
+import { useDuenger, useDeleteDuenger, type Duenger } from '@/lib/api/agrar'
 
 export default function DuengerListePage(): JSX.Element {
   const navigate = useNavigate()

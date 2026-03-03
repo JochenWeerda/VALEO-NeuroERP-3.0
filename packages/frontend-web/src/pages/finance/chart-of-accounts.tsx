@@ -20,6 +20,7 @@ import { queryKeys } from '@/lib/query'
 import { financeService, type Account, type AccountHierarchy } from '@/lib/services/finance-service'
 import { toast } from 'sonner'
 import { TreeView, type TreeNode } from '@/components/ui/tree-view'
+import { useTenant } from '@/hooks/useTenant'
 
 // Form schemas
 const accountCreateSchema = z.object({
@@ -46,6 +47,7 @@ export default function ChartOfAccountsPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const { tenantId } = useTenant()
   const [searchTerm, setSearchTerm] = useState('')
   const [typeFilter, setTypeFilter] = useState<string>('all')
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
@@ -94,7 +96,7 @@ export default function ChartOfAccountsPage(): JSX.Element {
   const createMutation = useMutation({
     mutationFn: (data: AccountCreateForm) => financeService.createAccount({
       ...data,
-      tenant_id: '00000000-0000-0000-0000-000000000001', // TODO: Get from context
+      tenant_id: tenantId,
     }),
     onSuccess: () => {
       toast.success('Konto erfolgreich erstellt')

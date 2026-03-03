@@ -23,7 +23,7 @@ import { useGlobalShortcuts } from '@/lib/shortcuts/global-shortcuts'
 import { ShortcutHintButton } from '@/components/shortcuts/ShortcutHelpPanel'
 import {
   ChevronLeft, ChevronRight, ChevronUp, ChevronDown, MoreHorizontal, Check, Printer, Save,
-  X, FileText, Folder, Trash2, Search,
+  FileText, Folder, Trash2, Search,
 } from 'lucide-react'
 
 // ==================== Types ====================
@@ -638,7 +638,7 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
         template: options.formatvorlage,
         copies: String(options.anzahlDrucke),
       })
-      await apiClient.post(`/api/v1/einkauf/lieferscheine/${id}/print?${params}`)
+      await apiClient.post(`/api/v1/einkauf/lieferscheine/${id}/print?${params.toString()}`)
       push('Lieferschein erfolgreich gedruckt')
       setShowPrintDialog(false)
     } catch (err: any) {
@@ -777,7 +777,7 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
                         '/api/v1/einkauf/lieferscheine/last',
                         { params }
                       )
-                      if (!data || !data.id) {
+                      if (!data?.id) {
                         push('Kein vorheriger Lieferschein gefunden.')
                         return
                       }

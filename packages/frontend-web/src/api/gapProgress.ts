@@ -54,7 +54,7 @@ export class PipelineProgressMonitor {
     this.onError = callbacks.onError
   }
 
-  start(intervalMs: number = 2000): void {
+  start(intervalMs = 2000): void {
     this.stop() // Stop existing polling
 
     const poll = async () => {

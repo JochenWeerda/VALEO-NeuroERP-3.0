@@ -11,13 +11,14 @@ import io
 from datetime import datetime
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, UploadFile
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
+from app.core.security import get_user_id_from_request
 from app.core.uuid7 import uuid7
 from app.infrastructure.models.agrar_models import FeldbuchMassnahme, FeldbuchSchlag
 from modules.agrar.services.feldbuch_service import import_csv
@@ -30,16 +31,19 @@ router = APIRouter(tags=["portal", "feldbuch"])
 # ────────────────────────────────────────────────────────────────────────────
 
 def _get_customer_id(
+    request: Request,
     customer_id: Optional[str] = Query(None),
 ) -> str:
     """
-    Im Production-Betrieb kommt customer_id aus dem JWT-Sub-Claim.
+    Im Production-Betrieb kommt customer_id aus dem JWT-Sub-Claim (token_claims).
     Im Dev-Mode kann sie als Query-Parameter übergeben werden.
     Wenn weder JWT noch Query-Param vorhanden → Fallback 'dev-customer'.
     """
     if customer_id:
         return customer_id
-    # TODO: In Production JWT-Sub-Claim auswerten
+    uid = get_user_id_from_request(request)
+    if uid and uid not in ("system", "dev-user"):
+        return uid
     return "dev-customer"
 
 

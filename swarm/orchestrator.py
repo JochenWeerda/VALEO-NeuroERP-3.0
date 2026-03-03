@@ -160,13 +160,25 @@ Keine Blockaden.
             self.create_dashboard()
             
     def check_dependencies(self):
-        """Prüft Dependencies zwischen Agenten"""
-        # TODO: Dependency-Check implementieren
+        """Prüft Dependencies zwischen Agenten: alle blockierten Agenten haben ihre Deps erfüllt."""
+        blocked = [aid for aid, a in self.agents.items() if a.get("status") == "blocked"]
+        for agent_id in blocked:
+            deps = self.agents[agent_id].get("dependencies", [])
+            if all(self.agents.get(dep, {}).get("status") == "completed" for dep in deps):
+                self.agents[agent_id]["status"] = "pending"
+                print(f"[ORCHESTRATOR] {agent_id} unblocked (dependencies satisfied)")
         print("[ORCHESTRATOR] Dependencies gepruft")
-        
+
     def resolve_conflicts(self):
-        """Löst Konflikte zwischen Agenten"""
-        # TODO: Conflict-Resolution implementieren
+        """Löst Konflikte zwischen Agenten: bei Ressourcen-Konflikt priorisiert nach Agent-Reihenfolge."""
+        in_progress = [aid for aid, a in self.agents.items() if a.get("status") == "in_progress"]
+        if len(in_progress) <= 1:
+            print("[ORCHESTRATOR] Konflikte gepruft")
+            return
+        # Einfache Strategie: nur der erste in_progress bleibt; Rest wird pending
+        for agent_id in in_progress[1:]:
+            self.agents[agent_id]["status"] = "pending"
+            print(f"[ORCHESTRATOR] {agent_id} zurueck auf pending (Conflict-Resolution)")
         print("[ORCHESTRATOR] Konflikte gepruft")
         
     def generate_report(self):

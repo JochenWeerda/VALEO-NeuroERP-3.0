@@ -601,8 +601,9 @@ export function useWetterAktuell(coords?: WetterCoords) {
   return useQuery({
     queryKey: [...agrarKeys.all, 'wetter-aktuell', coords],
     queryFn: async () => {
+      if (!coords) throw new Error('Wetterkoordinaten fehlen')
       const response = await apiClient.get<WetterAktuell>(
-        `/api/v1/agrar/wetter/aktuell?lat=${coords!.lat}&lon=${coords!.lon}`
+        `/api/v1/agrar/wetter/aktuell?lat=${coords.lat}&lon=${coords.lon}`
       )
       return response.data
     },
@@ -616,8 +617,9 @@ export function useWetterWarnungen(coords?: WetterCoords) {
   return useQuery({
     queryKey: [...agrarKeys.all, 'wetter-warnungen', coords],
     queryFn: async () => {
+      if (!coords) throw new Error('Wetterkoordinaten fehlen')
       const response = await apiClient.get<WetterWarnung[]>(
-        `/api/v1/agrar/wetter/warnungen?lat=${coords!.lat}&lon=${coords!.lon}`
+        `/api/v1/agrar/wetter/warnungen?lat=${coords.lat}&lon=${coords.lon}`
       )
       return response.data
     },
@@ -631,8 +633,9 @@ export function useWetterPrognose(coords?: WetterCoords, tage = 7) {
   return useQuery({
     queryKey: [...agrarKeys.all, 'wetter-prognose', coords, tage],
     queryFn: async () => {
+      if (!coords) throw new Error('Wetterkoordinaten fehlen')
       const response = await apiClient.get<PrognoseTag[]>(
-        `/api/v1/agrar/wetter/prognose?lat=${coords!.lat}&lon=${coords!.lon}&tage=${tage}`
+        `/api/v1/agrar/wetter/prognose?lat=${coords.lat}&lon=${coords.lon}&tage=${tage}`
       )
       return response.data
     },

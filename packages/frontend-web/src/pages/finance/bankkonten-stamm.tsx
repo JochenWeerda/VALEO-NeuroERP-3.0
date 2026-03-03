@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
@@ -9,6 +8,7 @@ import { z } from 'zod'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { validateIBAN, formatIBAN } from '@/lib/utils/iban-validator'
 import { useIbanLookup } from '@/hooks/useIbanLookup'
+import { useTenant } from '@/hooks/useTenant'
 import { apiClient } from '@/lib/axios'
 import { toast } from 'sonner'
 
@@ -117,7 +117,7 @@ const createBankKontenConfig = (t: any, entityTypeLabel: string): MaskConfig => 
 export default function BankKontenStammPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
+  const { tenantId } = useTenant()
   const [isDirty, setIsDirty] = useState(false)
   const [formData, setFormData] = useState<any>({})
   const [actionLoadingKey, setActionLoadingKey] = useState<string | null>(null)
@@ -223,7 +223,7 @@ export default function BankKontenStammPage(): JSX.Element {
 
         await saveData({
           ...formData,
-          tenant_id: '00000000-0000-0000-0000-000000000001' // TODO: Get from context
+          tenant_id: tenantId
         })
         setIsDirty(false)
         toast.success(t('crud.messages.saveSuccess', { entityType: entityTypeLabel }))
@@ -277,4 +277,3 @@ export default function BankKontenStammPage(): JSX.Element {
     />
   )
 }
-

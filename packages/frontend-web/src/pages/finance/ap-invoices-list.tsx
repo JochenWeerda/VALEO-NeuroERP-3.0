@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Accounts Payable (AP) Invoices List
  * FIBU-AP-02: Eingangsrechnungen
  */
@@ -63,10 +63,6 @@ export default function APInvoicesListPage(): JSX.Element {
     },
     staleTime: 2 * 60 * 1000,
   })
-
-  if (isError) {
-    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
-  }
 
   const columns = [
     {
@@ -167,7 +163,11 @@ export default function APInvoicesListPage(): JSX.Element {
     exportFileName: `${entityTypeLabel}_Liste`,
   })
 
-  const handleImport = async (_data: unknown[]): Promise<void> => {
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
+
+  const handleImport = async (): Promise<void> => {
     toast({ title: t('common.success'), description: t('crud.feedback.createSuccess', { entityType: entityTypeLabel }) })
   }
 
@@ -184,8 +184,8 @@ export default function APInvoicesListPage(): JSX.Element {
               className="max-w-sm"
               icon={<Search className="h-4 w-4 text-muted-foreground" />}
             />
-            <AdvancedFilters config={filterConfig} onFilterChange={setFilters} />
-            <CSVImport onImport={handleImport} />
+            <AdvancedFilters filters={filterConfig} values={filters} onChange={setFilters} onReset={() => setFilters({})} />
+            <CSVImport onImport={handleImport} entityName={entityTypeLabel} />
             <Button variant="outline" onClick={handleExport}><FileDown className="mr-2 h-4 w-4" /> {t('crud.actions.export')}</Button>
             <Button variant="outline" onClick={handlePrint}><FileText className="mr-2 h-4 w-4" /> {t('crud.actions.print')}</Button>
             <Button onClick={() => navigate('/finance/ap/invoices/new')}><Receipt className="mr-2 h-4 w-4" /> {t('crud.actions.new')} {entityTypeLabel}</Button>

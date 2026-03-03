@@ -10,11 +10,14 @@ from decimal import Decimal
 from typing import List, Optional
 from app.core.uuid7 import uuid7
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.orm import Session
+
+from app.core.security import get_user_id_from_request
 from sqlalchemy import and_, or_, desc
 
 from app.core.database import get_db
+from app.core.config import settings
 from app.infrastructure.models import Article as ArticleModel, Customer as CustomerModel
 from app.infrastructure.models.portal_models import (
     CustomerContract, CustomerPrePurchase, 
@@ -32,17 +35,20 @@ from app.api.v1.schemas.portal import (
 router = APIRouter()
 
 
-def get_customer_id_from_token(tenant_id: str) -> str:
+def get_customer_id_from_token(request: Request, tenant_id: str) -> str:
     """
-    Extrahiert Kunden-ID aus Token.
-    TODO: Echte Implementierung mit JWT/Auth
+    Extrahiert Kunden-ID aus JWT (token_claims.sub) oder X-User-ID.
+    Im Portal-Kontext ist sub bzw. X-User-ID oft die Kunden-/Partner-ID.
     """
-    # Placeholder - wird später durch echte Auth ersetzt
+    uid = get_user_id_from_request(request)
+    if uid and uid not in ("system", "dev-user"):
+        return uid
     return "customer-demo-001"
 
 
 @router.get("/products", response_model=PortalProductList)
 async def get_portal_products(
+    request: Request,
     tenant_id: str = Query(..., description="Mandanten-ID"),
     customer_id: Optional[str] = Query(None, description="Kunden-ID (falls nicht aus Token)"),
     kategorie: Optional[str] = Query(None, description="Filter nach Kategorie"),
@@ -59,7 +65,7 @@ async def get_portal_products(
     - Vorkauf-Guthaben falls vorhanden
     - Letzte Bestellung für "Erneut bestellen" Funktion
     """
-    effective_customer = customer_id or get_customer_id_from_token(tenant_id)
+    effective_customer = customer_id or get_customer_id_from_token(request, tenant_id)
     
     # Basis-Query für Artikel
     query = db.query(ArticleModel).filter(
@@ -222,6 +228,7 @@ async def get_portal_products(
 
 @router.post("/orders", response_model=OrderResponse, status_code=status.HTTP_201_CREATED)
 async def create_order(
+    request: Request,
     order_data: OrderCreate,
     tenant_id: str = Query(..., description="Mandanten-ID"),
     customer_id: Optional[str] = Query(None, description="Kunden-ID"),
@@ -235,7 +242,7 @@ async def create_order(
     - Kontrakt-Preise (falls verfügbar)
     - Listenpreise (als Fallback)
     """
-    effective_customer = customer_id or get_customer_id_from_token(tenant_id)
+    effective_customer = customer_id or get_customer_id_from_token(request, tenant_id)
     
     # Lade Kundendaten aus CRM
     customer = db.query(CustomerModel).filter(
@@ -392,7 +399,7 @@ async def create_order(
     
     # Bestellung finalisieren
     order.total_net = total_net
-    order.total_gross = total_net * Decimal("1.19")  # TODO: MwSt aus Config
+    order.total_gross = total_net * Decimal(str(1 + settings.DEFAULT_VAT_RATE))
     
     db.commit()
     db.refresh(order)
@@ -432,6 +439,7 @@ async def create_order(
 
 @router.get("/orders", response_model=OrderList)
 async def list_orders(
+    request: Request,
     tenant_id: str = Query(..., description="Mandanten-ID"),
     customer_id: Optional[str] = Query(None, description="Kunden-ID"),
     status_filter: Optional[OrderStatus] = Query(None, description="Filter nach Status"),
@@ -440,7 +448,7 @@ async def list_orders(
     db: Session = Depends(get_db)
 ):
     """Listet Bestellungen des Kunden"""
-    effective_customer = customer_id or get_customer_id_from_token(tenant_id)
+    effective_customer = customer_id or get_customer_id_from_token(request, tenant_id)
     
     query = db.query(CustomerOrder).filter(
         and_(
@@ -488,13 +496,14 @@ async def list_orders(
 
 @router.get("/orders/{order_id}", response_model=OrderResponse)
 async def get_order(
+    request: Request,
     order_id: str,
     tenant_id: str = Query(..., description="Mandanten-ID"),
     customer_id: Optional[str] = Query(None, description="Kunden-ID"),
     db: Session = Depends(get_db)
 ):
     """Liefert Details einer Bestellung"""
-    effective_customer = customer_id or get_customer_id_from_token(tenant_id)
+    effective_customer = customer_id or get_customer_id_from_token(request, tenant_id)
     
     order = db.query(CustomerOrder).filter(
         and_(
@@ -548,12 +557,13 @@ async def get_order(
 
 @router.get("/contracts", response_model=list)
 async def list_contracts(
+    request: Request,
     tenant_id: str = Query(..., description="Mandanten-ID"),
     customer_id: Optional[str] = Query(None, description="Kunden-ID"),
     db: Session = Depends(get_db)
 ):
     """Listet alle aktiven Kontrakte des Kunden"""
-    effective_customer = customer_id or get_customer_id_from_token(tenant_id)
+    effective_customer = customer_id or get_customer_id_from_token(request, tenant_id)
     
     contracts = db.query(CustomerContract).filter(
         and_(
@@ -583,12 +593,13 @@ async def list_contracts(
 
 @router.get("/pre-purchases", response_model=list)
 async def list_pre_purchases(
+    request: Request,
     tenant_id: str = Query(..., description="Mandanten-ID"),
     customer_id: Optional[str] = Query(None, description="Kunden-ID"),
     db: Session = Depends(get_db)
 ):
     """Listet alle aktiven Vorkäufe/Guthaben des Kunden"""
-    effective_customer = customer_id or get_customer_id_from_token(tenant_id)
+    effective_customer = customer_id or get_customer_id_from_token(request, tenant_id)
     
     pre_purchases = db.query(CustomerPrePurchase).filter(
         and_(

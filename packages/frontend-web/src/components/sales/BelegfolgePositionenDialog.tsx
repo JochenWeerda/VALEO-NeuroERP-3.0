@@ -166,7 +166,7 @@ export function BelegfolgePositionenDialog({ open, onClose, onConfirm, customerI
       if (beleg.typ === 'auftrag') {
         const r = await apiClient.get<any>(`/api/v1/sales/orders/${beleg.id}`)
         const items = r.items || []
-        positionen = items.map((item: any, idx: number) => ({
+        positionen = items.map((item: any) => ({
           artikelNr: item.article_number || '',
           artikelId: item.artikel_id || null,
           bezeichnung: item.description || '',

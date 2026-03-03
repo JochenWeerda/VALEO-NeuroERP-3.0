@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+﻿import { useState, useMemo, useEffect } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { apiClient } from '@/lib/axios'
 
@@ -110,7 +110,6 @@ export function CustomerSelectionDialog({
         setCustomers(mapped)
       })
       .catch((err) => {
-        // eslint-disable-next-line no-console
         console.error('[CustomerSelectionDialog] Fehler beim Laden:', err)
         setFetchError(err?.message || 'Unbekannter Fehler')
       })
@@ -214,7 +213,6 @@ export function CustomerSelectionDialog({
     // Sort alphabetically descending by name
     const sorted = result.sort((a, b) => b.name.localeCompare(a.name, 'de', { sensitivity: 'base' }))
     
-    // eslint-disable-next-line no-console
     console.log('[CustomerSelectionDialog] Filtered customers:', {
       inputCount: customers.length,
       afterTabFilter: result.length,
@@ -224,29 +222,6 @@ export function CustomerSelectionDialog({
     
     return sorted
   }, [customers, searchTerm, extendedSearch, activeTab])
-
-  const columns = [
-    {
-      key: 'customerNumber' as const,
-      label: 'Kunden-Nr.',
-    },
-    {
-      key: 'name' as const,
-      label: 'Name',
-    },
-    {
-      key: 'debitorAccount' as const,
-      label: 'Debitor-Kto.',
-    },
-    {
-      key: 'representative' as const,
-      label: 'Vertreter',
-    },
-    {
-      key: 'postalCode' as const,
-      label: 'Plz',
-    },
-  ]
 
   const handleSelect = (): void => {
     if (selectedCustomer) {
@@ -286,7 +261,7 @@ export function CustomerSelectionDialog({
                 htmlFor="extended-search"
                 className="text-sm font-normal cursor-pointer"
               >
-                Erweitert (Suche zusätzlich nach Vertreter, Plz, Ort, Kundengruppe)
+                Erweitert (Suche zusÃ¤tzlich nach Vertreter, Plz, Ort, Kundengruppe)
               </Label>
             </div>
           </div>
@@ -327,10 +302,10 @@ export function CustomerSelectionDialog({
                         ) : customers.length === 0 ? (
                           <p>Keine Kunden in der Datenbank gefunden.</p>
                         ) : searchTerm ? (
-                          `Keine Kunden gefunden für "${searchTerm}"`
+                          `Keine Kunden gefunden fÃ¼r "${searchTerm}"`
                         ) : (
                           <div>
-                            <p>Keine Kunden für diesen Filter gefunden.</p>
+                            <p>Keine Kunden fÃ¼r diesen Filter gefunden.</p>
                             <p className="text-xs mt-2">
                               Tab: {activeTab}, Total: {customers.length} Kunden
                             </p>

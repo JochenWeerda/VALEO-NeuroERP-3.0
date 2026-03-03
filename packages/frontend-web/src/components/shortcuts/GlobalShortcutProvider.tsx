@@ -35,7 +35,7 @@ export function GlobalShortcutProvider({ children }: GlobalShortcutProviderProps
       
       // Wenn auf 'always' gesetzt wird, Panel auch expandieren
       if (nextMode === 'always' && typeof (window as any).__expandShortcutHelpPanel === 'function') {
-        ;(window as any).__expandShortcutHelpPanel()
+        (window as any).__expandShortcutHelpPanel()
       }
       
       return nextMode
@@ -44,7 +44,7 @@ export function GlobalShortcutProvider({ children }: GlobalShortcutProviderProps
 
   // Exportiere Funktion für externen Zugriff (z.B. von AppShell)
   useEffect(() => {
-    ;(window as any).__cycleShortcutDisplayMode = cycleDisplayMode
+    (window as any).__cycleShortcutDisplayMode = cycleDisplayMode
     ;(window as any).__getShortcutDisplayMode = () => displayMode
     
     return () => {

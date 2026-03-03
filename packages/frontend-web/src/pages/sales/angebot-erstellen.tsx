@@ -1,6 +1,6 @@
-/**
+﻿/**
  * Angebot-Erfassung (Verkauf)
- * Im Stil der Lieferschein-Erfassung — einheitliches ERP-Look & Feel
+ * Im Stil der Lieferschein-Erfassung â€” einheitliches ERP-Look & Feel
  */
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
@@ -34,7 +34,7 @@ import {
   FileText,
 } from 'lucide-react'
 
-// ── Types ─────────────────────────────────────────────────────────────────────
+// â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 type AngebotPosition = {
   posNr: number
@@ -71,7 +71,7 @@ type CurrentPositionDetails = {
   gewicht: number
 }
 
-// ── Helper ────────────────────────────────────────────────────────────────────
+// â”€â”€ Helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function generateAngebotNr(): string {
   const year = new Date().getFullYear()
@@ -98,7 +98,7 @@ function emptyPosition(posNr: number): CurrentPositionDetails {
   }
 }
 
-// ── Component ─────────────────────────────────────────────────────────────────
+// â”€â”€ Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function AngebotErstellenPage(): JSX.Element {
   const { push } = useToast()
@@ -106,7 +106,7 @@ export default function AngebotErstellenPage(): JSX.Element {
   const [isDirty, setIsDirty] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
 
-  // ── Angebot-Kopf ──────────────────────────────────────────────────────────
+  // â”€â”€ Angebot-Kopf â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [angebotNr, setAngebotNr] = useState(() => generateAngebotNr())
   const [datum, setDatum] = useState(() => new Date().toISOString().split('T')[0])
   const [gueltigBis, setGueltigBis] = useState('')
@@ -115,8 +115,8 @@ export default function AngebotErstellenPage(): JSX.Element {
   const [kontakt, setKontakt] = useState('')
   const [customer, setCustomer] = useState<Customer | null>(null)
 
-  // ── Dialoge ───────────────────────────────────────────────────────────────
-  const [showAngebotAuswahl, setShowAngebotAuswahl] = useState(false) // öffnet nur per Button
+  // â”€â”€ Dialoge â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  const [showAngebotAuswahl, setShowAngebotAuswahl] = useState(false) // Ã¶ffnet nur per Button
   const [showCustomerDialog, setShowCustomerDialog] = useState(false)
   const [showArticleDialog, setShowArticleDialog] = useState(false)
   const [showPrintDialog, setShowPrintDialog] = useState(false)
@@ -124,14 +124,14 @@ export default function AngebotErstellenPage(): JSX.Element {
   const [angebotId, setAngebotId] = useState<string | null>(null)
   const [sucheText, setSucheText] = useState('')
 
-  // ── Positionen ────────────────────────────────────────────────────────────
+  // â”€â”€ Positionen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [positionen, setPositionen] = useState<AngebotPosition[]>([])
   const [aktivePositionIndex, setAktivePositionIndex] = useState<number | null>(null)
 
-  // ── Aktuelle Eingabe-Position ─────────────────────────────────────────────
+  // â”€â”€ Aktuelle Eingabe-Position â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [currentPosition, setCurrentPosition] = useState<CurrentPositionDetails>(() => emptyPosition(10))
 
-  // ── Angebote-Liste (Auswahl-Dialog) ──────────────────────────────────────
+  // â”€â”€ Angebote-Liste (Auswahl-Dialog) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const { data: angebote = [], isLoading } = useAngebote()
   const filteredAngebote = angebote.filter(
     (a) =>
@@ -139,15 +139,14 @@ export default function AngebotErstellenPage(): JSX.Element {
       a.kunde.toLowerCase().includes(sucheText.toLowerCase()),
   )
 
-  // ── Preis automatisch berechnen ───────────────────────────────────────────
+  // â”€â”€ Preis automatisch berechnen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   useEffect(() => {
     const einhPreis = currentPosition.listenpreis * (1 - currentPosition.rabatt / 100)
     const betrag = einhPreis * currentPosition.menge
     setCurrentPosition((prev) => ({ ...prev, einhPreis, betrag }))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPosition.listenpreis, currentPosition.rabatt, currentPosition.menge])
 
-  // ── Summen ────────────────────────────────────────────────────────────────
+  // â”€â”€ Summen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const summen = useMemo(() => {
     const netto = positionen.reduce((s, p) => s + p.nettoBetrag, 0)
     const mwst = positionen.reduce((s, p) => s + (p.nettoBetrag * p.mwstProzent) / 100, 0)
@@ -156,7 +155,7 @@ export default function AngebotErstellenPage(): JSX.Element {
     return { netto, mwst, brutto, gewicht }
   }, [positionen])
 
-  // ── Handler ───────────────────────────────────────────────────────────────
+  // â”€â”€ Handler â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   function handleAngebotAuswaehlen(angebot: Angebot) {
     setAngebotId(angebot.id)
@@ -265,7 +264,7 @@ export default function AngebotErstellenPage(): JSX.Element {
     setIsDirty(true)
   }
 
-  // ── Build API payload (header + items) ────────────────────────────────────
+  // â”€â”€ Build API payload (header + items) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function buildOfferPayload() {
     const items = positionen.map((p) => ({
       article_number: p.artikelNr,
@@ -346,7 +345,7 @@ export default function AngebotErstellenPage(): JSX.Element {
     }
     try {
       await apiClient.post(`/api/v1/sales/offers/${id}/convert-to-order`)
-      push('Angebot in Auftrag übernommen')
+      push('Angebot in Auftrag Ã¼bernommen')
       navigate(`/sales/order?fromOffer=${id}`)
     } catch (err: unknown) {
       const msg =
@@ -360,25 +359,25 @@ export default function AngebotErstellenPage(): JSX.Element {
   const handleDelete = useCallback(async () => {
     const id = angebotId
     if (!id) {
-      push('Kein gespeichertes Angebot zum Löschen')
+      push('Kein gespeichertes Angebot zum LÃ¶schen')
       return
     }
     try {
       await apiClient.delete(`/api/v1/sales/offers/${id}`)
-      push('Angebot gelöscht')
+      push('Angebot gelÃ¶scht')
       navigate('/sales/angebote')
     } catch (err: unknown) {
       const msg =
         err && typeof err === 'object' && 'response' in err && err.response && typeof err.response === 'object' && 'data' in err.response
           ? String((err.response as { data?: { detail?: string } }).data?.detail ?? (err as Error).message)
           : (err as Error).message
-      push(`Fehler beim Löschen: ${msg}`)
+      push(`Fehler beim LÃ¶schen: ${msg}`)
     }
   }, [angebotId, push, navigate])
 
   const handleBeenden = useCallback(() => {
     if (isDirty) {
-      if (window.confirm('Es gibt ungespeicherte Änderungen. Wirklich verlassen?')) {
+      if (window.confirm('Es gibt ungespeicherte Ã„nderungen. Wirklich verlassen?')) {
         navigate('/sales/angebote')
       }
     } else {
@@ -406,7 +405,7 @@ export default function AngebotErstellenPage(): JSX.Element {
     })
   }
 
-  // ── Druck ─────────────────────────────────────────────────────────────────
+  // â”€â”€ Druck â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   const handlePrint = async (options: PrintOptions): Promise<void> => {
     try {
@@ -448,7 +447,7 @@ export default function AngebotErstellenPage(): JSX.Element {
       push('Angebot erfolgreich gedruckt und gebucht')
       setShowPrintDialog(false)
 
-      // Formular zurücksetzen
+      // Formular zurÃ¼cksetzen
       setAngebotNr(generateAngebotNr())
       setDatum(new Date().toISOString().split('T')[0])
       setGueltigBis('')
@@ -465,7 +464,7 @@ export default function AngebotErstellenPage(): JSX.Element {
     }
   }
 
-  // ── JSX ──────────────────────────────────────────────────────────────────
+  // â”€â”€ JSX â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   return (
     <div className="h-screen flex flex-col bg-gray-50">
@@ -476,7 +475,7 @@ export default function AngebotErstellenPage(): JSX.Element {
 
       <div className="flex-1 overflow-auto p-4">
 
-        {/* ── Kopf-Bereich ─────────────────────────────────────────────── */}
+        {/* â”€â”€ Kopf-Bereich â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <Card className="mb-4 p-4">
           <div className="grid grid-cols-3 gap-6">
 
@@ -521,7 +520,7 @@ export default function AngebotErstellenPage(): JSX.Element {
                 />
               </div>
               <div className="flex items-center gap-2">
-                <Label className="w-28 text-sm whitespace-nowrap shrink-0">Gültig bis:</Label>
+                <Label className="w-28 text-sm whitespace-nowrap shrink-0">GÃ¼ltig bis:</Label>
                 <Input
                   type="date"
                   value={gueltigBis}
@@ -551,17 +550,17 @@ export default function AngebotErstellenPage(): JSX.Element {
               </div>
             </div>
 
-            {/* Mittlere Spalte — leer / für spätere Felder */}
+            {/* Mittlere Spalte â€” leer / fÃ¼r spÃ¤tere Felder */}
             <div />
 
-            {/* Rechte Spalte — Kunde */}
+            {/* Rechte Spalte â€” Kunde */}
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Label className="w-28 text-sm shrink-0">Kunde:</Label>
                 <Input
                   value={customer?.name || ''}
                   readOnly
-                  placeholder="Kein Kunde gewählt"
+                  placeholder="Kein Kunde gewÃ¤hlt"
                   className="flex-1 h-8 text-sm"
                 />
                 <Button
@@ -598,7 +597,7 @@ export default function AngebotErstellenPage(): JSX.Element {
           </div>
         </Card>
 
-        {/* ── Positionen-Grid ──────────────────────────────────────────── */}
+        {/* â”€â”€ Positionen-Grid â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <Card className="mb-4 p-4">
           <h2 className="mb-2 font-semibold text-sm">Positionen</h2>
           <div className="overflow-x-auto">
@@ -670,7 +669,7 @@ export default function AngebotErstellenPage(): JSX.Element {
                           variant="ghost"
                           size="icon"
                           className="h-7 w-7 text-red-600 hover:text-red-700"
-                          title="Position löschen"
+                          title="Position lÃ¶schen"
                           onClick={() => handlePositionDelete(idx)}
                         >
                           <Trash2 className="h-4 w-4" />
@@ -682,7 +681,7 @@ export default function AngebotErstellenPage(): JSX.Element {
                 {positionen.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={14} className="text-center text-xs text-muted-foreground py-4">
-                      Noch keine Positionen — Artikel im Bereich unten eingeben
+                      Noch keine Positionen â€” Artikel im Bereich unten eingeben
                     </TableCell>
                   </TableRow>
                 )}
@@ -691,7 +690,7 @@ export default function AngebotErstellenPage(): JSX.Element {
           </div>
         </Card>
 
-        {/* ── Positions-Details ────────────────────────────────────────── */}
+        {/* â”€â”€ Positions-Details â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <Card className="mb-4 p-4">
           <h2 className="mb-2 font-semibold text-sm">Positions-Details</h2>
           <div className="grid grid-cols-6 gap-4">
@@ -710,7 +709,7 @@ export default function AngebotErstellenPage(): JSX.Element {
                   value={currentPosition.artikelNr}
                   readOnly
                   className="flex-1 h-8 text-sm"
-                  placeholder="—"
+                  placeholder="â€”"
                 />
                 <Button
                   variant="ghost"
@@ -843,7 +842,7 @@ export default function AngebotErstellenPage(): JSX.Element {
           </div>
         </Card>
 
-        {/* ── Summen ──────────────────────────────────────────────────── */}
+        {/* â”€â”€ Summen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <Card className="mb-4 p-4">
           <div className="grid grid-cols-5 gap-4">
             <div className="space-y-1">
@@ -863,14 +862,14 @@ export default function AngebotErstellenPage(): JSX.Element {
               <Input value={summen.brutto.toFixed(2)} readOnly className="h-8 text-sm font-semibold" />
             </div>
             <div className="space-y-1">
-              <Label className="text-xs">Währung:</Label>
+              <Label className="text-xs">WÃ¤hrung:</Label>
               <Input value="EUR" readOnly className="h-8 text-sm" />
             </div>
           </div>
         </Card>
       </div>
 
-      {/* ── Bottom-Toolbar ─────────────────────────────────────────────── */}
+      {/* â”€â”€ Bottom-Toolbar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div className="border-t bg-white px-4 py-2 flex items-center justify-between">
         <div className="flex gap-2">
           <Button size="sm" className="h-7 text-xs gap-1" onClick={handleSave} disabled={isSaving}>
@@ -891,13 +890,13 @@ export default function AngebotErstellenPage(): JSX.Element {
             className="h-7 text-xs gap-1 text-destructive hover:text-destructive"
             onClick={() => {
               if (!angebotId) {
-                push('Kein gespeichertes Angebot zum Löschen')
+                push('Kein gespeichertes Angebot zum LÃ¶schen')
                 return
               }
-              if (window.confirm('Angebot wirklich löschen?')) void handleDelete()
+              if (window.confirm('Angebot wirklich lÃ¶schen?')) void handleDelete()
             }}
           >
-            <Trash2 className="h-3 w-3" /> Löschen
+            <Trash2 className="h-3 w-3" /> LÃ¶schen
           </Button>
         </div>
         <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={handleBeenden}>
@@ -905,9 +904,9 @@ export default function AngebotErstellenPage(): JSX.Element {
         </Button>
       </div>
 
-      {/* ── Dialoge ──────────────────────────────────────────────────────── */}
+      {/* â”€â”€ Dialoge â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
 
-      {/* Auswahl bestehendes Angebot — öffnet nur per ... Button */}
+      {/* Auswahl bestehendes Angebot â€” Ã¶ffnet nur per ... Button */}
       <Dialog open={showAngebotAuswahl} onOpenChange={setShowAngebotAuswahl}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
@@ -940,7 +939,7 @@ export default function AngebotErstellenPage(): JSX.Element {
                 {isLoading ? (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center text-sm text-muted-foreground py-6">
-                      Lade Angebote…
+                      Lade Angeboteâ€¦
                     </TableCell>
                   </TableRow>
                 ) : filteredAngebote.length === 0 ? (
@@ -962,7 +961,7 @@ export default function AngebotErstellenPage(): JSX.Element {
                       <TableCell className="py-1">{a.datum}</TableCell>
                       <TableCell className="py-1">{a.kunde}</TableCell>
                       <TableCell className="py-1 text-right">
-                        {a.betrag.toLocaleString('de-DE', { minimumFractionDigits: 2 })} €
+                        {a.betrag.toLocaleString('de-DE', { minimumFractionDigits: 2 })} â‚¬
                       </TableCell>
                       <TableCell className="py-1">{a.status}</TableCell>
                     </TableRow>
@@ -980,7 +979,7 @@ export default function AngebotErstellenPage(): JSX.Element {
               size="sm"
               onClick={() => filteredAngebote[0] && handleAngebotAuswaehlen(filteredAngebote[0])}
             >
-              Übernehmen
+              Ãœbernehmen
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1012,7 +1011,7 @@ export default function AngebotErstellenPage(): JSX.Element {
         onClose={() => setShowAttachmentDialog(false)}
         businessObjectType="quotation"
         businessObjectId={angebotId}
-        title="UNTERLAGEN / DATEIEN — ANGEBOT"
+        title="UNTERLAGEN / DATEIEN â€” ANGEBOT"
       />
     </div>
   )

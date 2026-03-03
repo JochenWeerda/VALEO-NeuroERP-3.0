@@ -148,7 +148,7 @@ export default function RfqBidsPage(): JSX.Element {
     })
   }
 
-  const handleImportBids = async (_file: File) => {
+  const handleImportBids = async () => {
     try {
       // Import parser wird als eigener Schritt angebunden
       toast({

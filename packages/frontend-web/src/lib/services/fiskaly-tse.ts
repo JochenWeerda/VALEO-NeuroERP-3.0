@@ -139,6 +139,7 @@ export class FiskalyTSE {
    * Transaction starten (beim Warenkorb-Start)
    */
   async startTransaction(_processData: string, _processType = 'Kassenbeleg-V1'): Promise<TSETransaction> {
+    void _processType
     if (!this.enabled) {
       // Mock für Development
       return {

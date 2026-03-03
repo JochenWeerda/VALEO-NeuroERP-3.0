@@ -12,11 +12,11 @@ export default function ENNIMeldungenPage(): JSX.Element {
   const navigate = useNavigate()
   const { data: meldungen = [], isError, error, refetch } = useENNIMeldungen()
 
+  const offen = useMemo(() => meldungen.filter((m) => m.status === 'entwurf').length, [meldungen])
+
   if (isError) {
     return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
   }
-
-  const offen = useMemo(() => meldungen.filter((m) => m.status === 'entwurf').length, [meldungen])
 
   const columns = [
     { key: 'typ' as const, label: 'Typ', render: (m: ENNIMeldung) => <Badge variant="outline">{m.typ}</Badge> },

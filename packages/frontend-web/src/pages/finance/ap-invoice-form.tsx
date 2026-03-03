@@ -12,10 +12,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
-import { FormBuilder, type FormSchema } from '@/features/forms/FormBuilder'
 import { BelegFlowPanel } from '@/features/flows/BelegFlowPanel'
 import ApprovalPanel from '@/features/workflow/ApprovalPanel'
-import invoiceSchema from '@/domain-schemas/sales_invoice.schema.json' // Reusing schema
 import { getEntityTypeLabel, getSuccessMessage, getErrorMessage } from '@/features/crud/utils/i18n-helpers'
 import { Save, X } from 'lucide-react'
 

@@ -3,6 +3,7 @@ Seed script for Price Adjustment Rules.
 Creates example rules for HL-weight, impurities, and mycotoxin adjustments.
 """
 
+import os
 import sys
 from pathlib import Path
 from datetime import date, datetime
@@ -14,6 +15,7 @@ sys.path.insert(0, str(project_root))
 from sqlalchemy.orm import Session
 from app.core.database import SessionLocal
 from app.core.uuid7 import uuid7
+from app.core.config import settings
 from app.infrastructure.models import PriceAdjustmentRule
 
 
@@ -27,13 +29,14 @@ def seed_price_adjustment_rules():
     - Mykotoxin Anpassungen
     """
     db: Session = SessionLocal()
-    
+    tenant_id = os.environ.get("TENANT_ID") or getattr(settings, "DEFAULT_TENANT_ID", "default")
+
     try:
         # Beispiel: HL-Gewicht Anpassung für Hafer
         # Regel: Zuschlag/Abschlag je 0,10 kg/hl über/unter Basis
         hl_weight_rule = PriceAdjustmentRule(
             id=uuid7(),
-            tenant_id="default",  # TODO: Aus Umgebung holen
+            tenant_id=tenant_id,
             article_id=None,  # Allgemein für Warengruppe
             warengruppe="HAFER",
             adjustment_type="hl_weight",
@@ -55,7 +58,7 @@ def seed_price_adjustment_rules():
         # Regel: "2% frei", darüber gestaffelte Preisabzüge
         impurity_rule_raps = PriceAdjustmentRule(
             id=uuid7(),
-            tenant_id="default",
+            tenant_id=tenant_id,
             article_id=None,
             warengruppe="RAPS",
             adjustment_type="impurity",
@@ -98,7 +101,7 @@ def seed_price_adjustment_rules():
         # Regel: Mengenabzug 1:1 (Besatz wirkt direkt als Mengenabzug)
         impurity_rule_getreide = PriceAdjustmentRule(
             id=uuid7(),
-            tenant_id="default",
+            tenant_id=tenant_id,
             article_id=None,
             warengruppe=None,  # Allgemein für alle Getreide
             adjustment_type="impurity",
@@ -119,7 +122,7 @@ def seed_price_adjustment_rules():
         # Regel: Abzug ab bestimmten Grenzwerten
         mycotoxin_rule = PriceAdjustmentRule(
             id=uuid7(),
-            tenant_id="default",
+            tenant_id=tenant_id,
             article_id=None,
             warengruppe=None,  # Allgemein
             adjustment_type="mycotoxin",

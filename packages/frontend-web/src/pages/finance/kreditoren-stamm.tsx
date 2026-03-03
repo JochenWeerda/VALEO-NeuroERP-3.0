@@ -6,7 +6,7 @@ import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mas
 import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
-import { validateIBAN, formatIBAN, lookupIBAN } from '@/lib/utils/iban-validator'
+import { validateIBAN } from '@/lib/utils/iban-validator'
 import { useIbanLookup } from '@/hooks/useIbanLookup'
 import { toast } from 'sonner'
 import { apiClient } from '@/lib/axios'

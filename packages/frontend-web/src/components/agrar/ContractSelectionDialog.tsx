@@ -1,5 +1,5 @@
-/**
- * Kontrakt-Auswahl-Dialog für Ernte-Annahme
+﻿/**
+ * Kontrakt-Auswahl-Dialog fÃ¼r Ernte-Annahme
  */
 
 import { useState, useMemo } from 'react'
@@ -56,7 +56,7 @@ export function ContractSelectionDialog({
       const params = new URLSearchParams()
       params.append('limit', '200')
       if (customerId) {
-        // TODO: Filter nach Kunde (partner_id), wenn API das unterstützt
+        // TODO: Filter nach Kunde (partner_id), wenn API das unterstÃ¼tzt
       }
       
       try {
@@ -92,7 +92,6 @@ export function ContractSelectionDialog({
           valid_until: c.valid_until || c.validUntil || null,
         }))
       } catch (err: any) {
-        // eslint-disable-next-line no-console
         console.error('[ContractSelectionDialog] Error fetching contracts:', err)
         return []
       }
@@ -132,7 +131,7 @@ export function ContractSelectionDialog({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-5xl max-h-[80vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>Kontrakt auswählen</DialogTitle>
+          <DialogTitle>Kontrakt auswÃ¤hlen</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 flex-1 overflow-hidden flex flex-col">
@@ -170,8 +169,8 @@ export function ContractSelectionDialog({
                     <TableHead className="w-32">Gesamtmenge (kg)</TableHead>
                     <TableHead className="w-32">Restmenge (kg)</TableHead>
                     <TableHead className="w-24">Status</TableHead>
-                    <TableHead className="w-32">Gültig ab</TableHead>
-                    <TableHead className="w-32">Gültig bis</TableHead>
+                    <TableHead className="w-32">GÃ¼ltig ab</TableHead>
+                    <TableHead className="w-32">GÃ¼ltig bis</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -216,7 +215,7 @@ export function ContractSelectionDialog({
             Abbrechen
           </Button>
           <Button onClick={handleSelect} disabled={!selectedContract}>
-            Auswählen
+            AuswÃ¤hlen
           </Button>
         </DialogFooter>
       </DialogContent>

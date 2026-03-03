@@ -10,7 +10,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Search, Filter, Plus, Download, Upload } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { ListConfig, ListColumn } from './types'
-import { getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 
 interface ListReportProps {
   config: ListConfig

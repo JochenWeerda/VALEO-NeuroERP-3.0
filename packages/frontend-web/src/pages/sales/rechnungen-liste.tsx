@@ -36,7 +36,7 @@ export default function RechnungenListePage(): JSX.Element {
   const [showImport, setShowImport] = useState(false)
   const [filterValues, setFilterValues] = useState<Record<string, any>>({})
 
-  const { data: rechnungen = [], isLoading: loading } = useRechnungen()
+  const { data: rechnungen = [] } = useRechnungen()
 
   // Filter-Konfiguration für AdvancedFilters
   const filterConfig: FilterConfig[] = [
@@ -215,7 +215,7 @@ export default function RechnungenListePage(): JSX.Element {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder={t('crud.actions.search') + '...'}
+                placeholder={`${t('crud.actions.search')  }...`}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"

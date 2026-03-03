@@ -66,7 +66,7 @@ export default function FoerderantraegeListePage(): JSX.Element {
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Bewilligte Summe</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-green-600">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(gesamtBetrag)}</span></CardContent></Card>
       </div>
       <Card><CardHeader><CardTitle>Suche</CardTitle></CardHeader><CardContent><div className="flex gap-4"><div className="relative flex-1"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><Input placeholder="Suche..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" /></div><Button variant="outline" className="gap-2"><FileDown className="h-4 w-4" />Export</Button></div></CardContent></Card>
-      <Card><CardContent className="pt-6"><DataTable data={antraege} columns={columns} /></CardContent></Card>
+      <Card><CardContent className="pt-6"><DataTable data={filteredAntraege} columns={columns} /></CardContent></Card>
     </div>
   )
 }

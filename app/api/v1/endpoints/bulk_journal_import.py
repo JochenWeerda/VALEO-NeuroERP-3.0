@@ -4,7 +4,7 @@ FIBU-GL-04: Sammel-/Massenbuchungen Import
 """
 
 from typing import List, Optional, Dict, Any
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query, Request
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from decimal import Decimal, InvalidOperation
@@ -16,6 +16,7 @@ import logging
 from app.core.uuid7 import uuid7
 
 from ....core.database import get_db
+from ....core.fibu_audit import log_fibu_audit
 
 logger = logging.getLogger(__name__)
 
@@ -175,7 +176,8 @@ async def import_journal_entries_csv(
     tenant_id: str = Query("system", description="Tenant ID"),
     delimiter: str = Query(",", description="CSV delimiter"),
     dry_run: bool = Query(False, description="Dry run mode (validate only, don't import)"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    request: Request = None,
 ):
     """
     Import journal entries from CSV file.
@@ -330,9 +332,14 @@ async def import_journal_entries_csv(
                         "profit_center": line.profit_center,
                         "reference": line.reference
                     })
-                
+                if not dry_run:
+                    log_fibu_audit(
+                        db, tenant_id, "create", "journal_entry", entry_id,
+                        {"source": "bulk_import", "entry_number": entry_number},
+                        request=request,
+                    )
                 created_entry_ids.append(entry_id)
-            
+
             if errors:
                 db.rollback()
             else:

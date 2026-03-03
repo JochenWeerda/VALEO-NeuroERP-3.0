@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Building2, Save, Plus, X, AlertTriangle, CheckCircle, XCircle, Archive, Lock } from 'lucide-react'
+import { Building2, Save, Plus, X, AlertTriangle, CheckCircle, Archive, Lock } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/api-client'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
@@ -416,7 +416,7 @@ export default function LieferantenStammPage(): JSX.Element {
           <div className="flex items-center gap-3">
             <Building2 className="h-8 w-8" />
             <div>
-              <h1 className="text-3xl font-bold">{lieferant.name || t('crud.actions.create') + ' ' + entityTypeLabel}</h1>
+              <h1 className="text-3xl font-bold">{lieferant.name || `${t('crud.actions.create')  } ${  entityTypeLabel}`}</h1>
               <p className="text-muted-foreground">{t('crud.fields.number')}: {lieferant.id || '-'}</p>
             </div>
             {lieferant.status && (
@@ -866,7 +866,7 @@ export default function LieferantenStammPage(): JSX.Element {
                                       const blob = new Blob([`Dokument: ${doc.titel}\nDateiname: ${doc.dateiname}\nTyp: ${doc.typ}\nGültig bis: ${doc.gueltigBis ?? '-'}`], { type: 'text/plain' })
                                       const a = document.createElement('a')
                                       a.href = URL.createObjectURL(blob)
-                                      a.download = (doc.dateiname || doc.titel || 'dokument').replace(/\.[^.]+$/, '') + '.txt'
+                                      a.download = `${(doc.dateiname || doc.titel || 'dokument').replace(/\.[^.]+$/, '')  }.txt`
                                       a.click()
                                       URL.revokeObjectURL(a.href)
                                       toast({ title: t('crud.messages.downloadInfo'), description: 'Info-Datei erstellt (Dokument in DMS hinterlegen für echten Download).' })

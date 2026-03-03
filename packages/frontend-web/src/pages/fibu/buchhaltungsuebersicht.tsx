@@ -5,7 +5,7 @@
  */
 
 import { useState, useMemo } from 'react'
-import { useQuery, useQueries } from '@tanstack/react-query'
+import { useQueries } from '@tanstack/react-query'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -104,7 +104,7 @@ export default function BuchhaltungsuebersichtPage(): JSX.Element {
   const navigate = useNavigate()
   const currentYear = new Date().getFullYear()
   const currentMonth = new Date().getMonth()
-  const [jahr, setJahr] = useState(String(currentYear))
+  const [jahr] = useState(String(currentYear))
   const [monatVon, setMonatVon] = useState('1')
   const [monatBis, setMonatBis] = useState('12')
   const [bilanzStichtag, setBilanzStichtag] = useState(() => {
@@ -122,7 +122,6 @@ export default function BuchhaltungsuebersichtPage(): JSX.Element {
     new Date().toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' })
   )
 
-  const period = `${jahr}-${String(currentMonth + 1).padStart(2, '0')}`
   const monthQueries = useQueries({
     queries: Array.from({ length: 12 }, (_, i) => ({
       queryKey: ['fibu', 'bilanz', jahr, String(i + 1).padStart(2, '0')],

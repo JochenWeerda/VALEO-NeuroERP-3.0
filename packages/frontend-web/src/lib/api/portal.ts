@@ -184,7 +184,7 @@ export function usePortalFeldbuchMassnahmen(params?: {
       if (params?.typ) p.set('typ', params.typ)
       if (params?.von) p.set('von', params.von)
       if (params?.bis) p.set('bis', params.bis)
-      const url = `/api/v1/portal/feldbuch/massnahmen${p.toString() ? '?' + p.toString() : ''}`
+      const url = `/api/v1/portal/feldbuch/massnahmen${p.toString() ? `?${  p.toString()}` : ''}`
       return (await apiClient.get<PortalMassnahme[]>(url)).data
     },
     staleTime: 2 * 60 * 1000,

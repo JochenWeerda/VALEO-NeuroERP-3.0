@@ -220,7 +220,7 @@ export default function ChargeVerfolgungPage(): JSX.Element {
         key: 'export',
         label: 'Exportieren',
         type: 'secondary' as const,
-        onClick: (_items: any[]) => { void triggerChargenExport() }
+        onClick: () => { void triggerChargenExport() }
       },
       {
         key: 'recall',

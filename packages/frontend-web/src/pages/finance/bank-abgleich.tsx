@@ -8,6 +8,7 @@ import { z } from 'zod'
 import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/axios'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
+import { useTenant } from '@/hooks/useTenant'
 
 // Zod-Schema für Bank-Abgleich (wird in Komponente mit i18n erstellt)
 const createBankAbgleichSchema = (t: any) => z.object({
@@ -44,9 +45,9 @@ const createBankAbgleichConfig = (t: any, entityTypeLabel: string): MaskConfig =
           type: 'select',
           required: true,
           options: [
-            { value: '1200', label: '1200 - ' + t('crud.fields.bankAccount') + ' Deutsche Bank' },
-            { value: '1300', label: '1300 - ' + t('crud.fields.bankAccount') + ' Commerzbank' },
-            { value: '1400', label: '1400 - ' + t('crud.fields.bankAccount') + ' Sparkasse' }
+            { value: '1200', label: `1200 - ${  t('crud.fields.bankAccount')  } Deutsche Bank` },
+            { value: '1300', label: `1300 - ${  t('crud.fields.bankAccount')  } Commerzbank` },
+            { value: '1400', label: `1400 - ${  t('crud.fields.bankAccount')  } Sparkasse` }
           ]
         },
         {
@@ -56,7 +57,7 @@ const createBankAbgleichConfig = (t: any, entityTypeLabel: string): MaskConfig =
           required: true,
           placeholder: t('crud.tooltips.placeholders.period'),
           pattern: '^\\d{4}-\\d{2}$'
-         } as any, {},
+         } as any,
         {
           name: 'camtFile',
           label: t('crud.fields.camtFile'),
@@ -130,7 +131,7 @@ const createBankAbgleichConfig = (t: any, entityTypeLabel: string): MaskConfig =
           name: 'regelAngewendet',
           label: t('crud.fields.appliedRules'),
           type: 'custom',
-           } as any, {          customRender: (value: any) => (
+          customRender: (value: any) => (
             <div className="space-y-2">
               {(value || []).map((regel: any, index: number) => (
                 <div key={index} className="flex justify-between p-2 bg-gray-50 rounded">
@@ -285,13 +286,14 @@ function BankZuordnungTable({ data: _data, onChange }: { data: any[], onChange: 
 export default function BankAbgleichPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const { tenantId } = useTenant()
   const [isDirty, setIsDirty] = useState(false)
   const [actionLoadingKey, setActionLoadingKey] = useState<string | null>(null)
   const entityType = 'bankReconciliation'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Bank-Abgleich')
   const bankAbgleichConfig = createBankAbgleichConfig(t, entityTypeLabel)
 
-  const { data, loading, saveData } = useMaskData({
+  const { data, loading } = useMaskData({
     apiUrl: bankAbgleichConfig.api.baseUrl,
     id: 'new'
   })
@@ -335,7 +337,7 @@ export default function BankAbgleichPage(): JSX.Element {
 
         // Call import API
         const response = await fetch(
-          `/api/v1/finance/bank-statements/import?format=${format}&bank_account_id=${formData.kontoId}&tenant_id=00000000-0000-0000-0000-000000000001`,
+          `/api/v1/finance/bank-statements/import?format=${format}&bank_account_id=${formData.kontoId}&tenant_id=${encodeURIComponent(tenantId)}`,
           {
             method: 'POST',
             body: uploadFormData,
@@ -447,7 +449,7 @@ export default function BankAbgleichPage(): JSX.Element {
 
       try {
         const response = await fetch(
-          `/api/v1/finance/bank-reconciliation/${formData.statementId}/reconcile?bank_account_id=${formData.kontoId}&tenant_id=00000000-0000-0000-0000-000000000001&auto_book=false`
+          `/api/v1/finance/bank-reconciliation/${formData.statementId}/reconcile?bank_account_id=${formData.kontoId}&tenant_id=${encodeURIComponent(tenantId)}&auto_book=false`
         )
 
         if (!response.ok) {

@@ -16,7 +16,6 @@ import {
   FileText,
   BarChart3,
   FileDown,
-  Printer,
   RefreshCw,
   Sigma,
   Calendar,

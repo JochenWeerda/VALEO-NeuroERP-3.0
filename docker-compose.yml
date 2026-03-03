@@ -210,6 +210,7 @@ services:
     volumes:
       - ./packages/frontend-web:/app
       - frontend_node_modules:/app/node_modules
+      - vite_cache:/app/node_modules/.vite
     networks:
       - valeo-network
 
@@ -250,6 +251,7 @@ services:
       start_period: 60s
     volumes:
       - ./app:/app/app
+      - ./modules:/app/modules
       - ./alembic:/app/alembic
       - ./alembic.ini:/app/alembic.ini
       - ./main.py:/app/main.py
@@ -687,6 +689,8 @@ volumes:
   root_node_modules:
     driver: local
   frontend_node_modules:
+    driver: local
+  vite_cache:
     driver: local
   pnpm_store:
     driver: local

@@ -136,7 +136,6 @@ export default function DuengungsplanungPage(): JSX.Element {
             ))}
             </div>
             )}
-          </div>
         </CardContent>
       </Card>
     </div>

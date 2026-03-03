@@ -1,6 +1,6 @@
-/**
- * VALEO Suite Anlagen (Asset Ledger) – Zentrale Anlagenbuchhaltung.
- * Bündelt: Anlagenverwaltung (Stammdaten, AfA, Buchwerte), Import-Wizard und Connector-Konfiguration.
+﻿/**
+ * VALEO Suite Anlagen (Asset Ledger) â€“ Zentrale Anlagenbuchhaltung.
+ * BÃ¼ndelt: Anlagenverwaltung (Stammdaten, AfA, Buchwerte), Import-Wizard und Connector-Konfiguration.
  */
 
 import { useState, useEffect, useRef } from 'react'
@@ -124,7 +124,7 @@ export default function AnlagenSuitePage(): JSX.Element {
     enabled: !!importRunId,
   })
 
-  const { data: runItems, refetch: refetchItems } = useQuery({
+  const { data: runItems } = useQuery({
     queryKey: ['finance', 'connectors', 'imports', importRunId, 'items'],
     queryFn: async () => {
       const res = await apiClient.get<ConnectorRunItem[]>(`${CONNECTOR_BASE}/imports/${importRunId}/items`, {
@@ -177,7 +177,7 @@ export default function AnlagenSuitePage(): JSX.Element {
     },
     onSuccess: () => {
       refetchRun()
-      toast({ title: 'Buchung', description: 'Buchungen wurden ins Journal übernommen.' })
+      toast({ title: 'Buchung', description: 'Buchungen wurden ins Journal Ã¼bernommen.' })
     },
     onError: (e: Error) => {
       toast({ title: 'Buchung fehlgeschlagen', description: e.message, variant: 'destructive' })
@@ -224,12 +224,12 @@ export default function AnlagenSuitePage(): JSX.Element {
         <div>
           <h1 className="text-2xl md:text-3xl font-bold">VALEO Suite Anlagen (Asset Ledger)</h1>
           <p className="text-muted-foreground text-sm mt-1">
-            Anlagenbuchhaltung: Stammdaten, Abschreibungen, Umbuchungen, Abgänge und Import von Anlagenbuchungen
+            Anlagenbuchhaltung: Stammdaten, Abschreibungen, Umbuchungen, AbgÃ¤nge und Import von Anlagenbuchungen
           </p>
         </div>
       </div>
 
-      {/* Anlagenverwaltung – zentrale Karte */}
+      {/* Anlagenverwaltung â€“ zentrale Karte */}
       <Card className="border-primary/20">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -237,7 +237,7 @@ export default function AnlagenSuitePage(): JSX.Element {
             Anlagenverwaltung
           </CardTitle>
           <CardDescription>
-            Anlagevermögen verwalten: Anlagennummer, Bezeichnung, Anschaffungskosten, AfA-Satz, kumulierte Abschreibungen, Buchwert. Neue Anlage anlegen oder bestehende bearbeiten.
+            AnlagevermÃ¶gen verwalten: Anlagennummer, Bezeichnung, Anschaffungskosten, AfA-Satz, kumulierte Abschreibungen, Buchwert. Neue Anlage anlegen oder bestehende bearbeiten.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-4">
@@ -252,7 +252,7 @@ export default function AnlagenSuitePage(): JSX.Element {
         </CardContent>
       </Card>
 
-      {/* Import-Wizard: Upload → Validieren → Buchen */}
+      {/* Import-Wizard: Upload â†’ Validieren â†’ Buchen */}
       <Card>
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
@@ -260,7 +260,7 @@ export default function AnlagenSuitePage(): JSX.Element {
             Import-Wizard (Anlagenbuchungen)
           </CardTitle>
           <CardDescription>
-            CSV-Datei hochladen, Ergebnis prüfen, validieren und ins Journal buchen. Ein Lauf kann bis nach der Validierung abgebrochen werden; nach dem Buchen nur Storno (Gegenbuchungen).
+            CSV-Datei hochladen, Ergebnis prÃ¼fen, validieren und ins Journal buchen. Ein Lauf kann bis nach der Validierung abgebrochen werden; nach dem Buchen nur Storno (Gegenbuchungen).
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -282,7 +282,7 @@ export default function AnlagenSuitePage(): JSX.Element {
               className="gap-2"
             >
               <FileUp className="h-4 w-4" />
-              Datei wählen
+              Datei wÃ¤hlen
             </Button>
             {selectedFile && (
               <span className="text-sm text-muted-foreground">{selectedFile.name}</span>
@@ -302,17 +302,17 @@ export default function AnlagenSuitePage(): JSX.Element {
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-sm font-medium">Lauf:</span>
                 <Badge variant="outline">{importRun.status}</Badge>
-                <span className="text-xs text-muted-foreground font-mono">{importRun.id.slice(0, 8)}…</span>
+                <span className="text-xs text-muted-foreground font-mono">{importRun.id.slice(0, 8)}â€¦</span>
               </div>
               {importRun.counts && (
                 <div className="text-sm text-muted-foreground">
                   Zeilen: {importRun.counts.lines_total ?? 0} gesamt, {importRun.counts.lines_ok ?? 0} OK, {importRun.counts.lines_err ?? 0} Fehler
-                  {importRun.counts.journal_entries_created != null && ` · Gebucht: ${importRun.counts.journal_entries_created} Belege`}
+                  {importRun.counts.journal_entries_created != null && ` Â· Gebucht: ${importRun.counts.journal_entries_created} Belege`}
                 </div>
               )}
               {importRun.totals && (
                 <div className="text-sm">
-                  Soll: {importRun.totals.debit ?? '–'} · Haben: {importRun.totals.credit ?? '–'}
+                  Soll: {importRun.totals.debit ?? 'â€“'} Â· Haben: {importRun.totals.credit ?? 'â€“'}
                 </div>
               )}
               {importRun.error_summary && (
@@ -327,7 +327,7 @@ export default function AnlagenSuitePage(): JSX.Element {
                         Zeile {it.line_no}: {it.validation_errors?.toString() ?? it.status}
                       </li>
                     ))}
-                    {runItems.length > 20 && <li>… und {runItems.length - 20} weitere</li>}
+                    {runItems.length > 20 && <li>â€¦ und {runItems.length - 20} weitere</li>}
                   </ul>
                 </details>
               )}
@@ -386,7 +386,7 @@ export default function AnlagenSuitePage(): JSX.Element {
         <CardHeader>
           <CardTitle className="text-base">Import & Connector (Konfiguration)</CardTitle>
           <CardDescription>
-            Konfiguration und Sync für den Import von Anlagen- und Abschreibungsbuchungen (z. B. aus externen Systemen). Nutzen Sie alternativ den einheitlichen FIBU-Connector-Workflow unter „Schnittstellen-Center“ für Upload → Prüfung → Buchung.
+            Konfiguration und Sync fuer den Import von Anlagen- und Abschreibungsbuchungen (z. B. aus externen Systemen). Nutzen Sie alternativ den einheitlichen FIBU-Connector-Workflow im Schnittstellen-Center fuer Upload, Pruefung und Buchung.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -396,7 +396,7 @@ export default function AnlagenSuitePage(): JSX.Element {
           </div>
           <div className="space-y-2">
             <Label>Endpoint-URL (optional)</Label>
-            <Input value={endpoint} onChange={(e) => setEndpoint(e.target.value)} placeholder="https://…" />
+            <Input value={endpoint} onChange={(e) => setEndpoint(e.target.value)} placeholder="https://â€¦" />
           </div>
           <div className="flex items-center justify-between">
             <Label>Connector aktiv</Label>
@@ -432,13 +432,13 @@ export default function AnlagenSuitePage(): JSX.Element {
           Buchungsjournal
         </Link>
         {importRunId && importRun?.status === 'POSTED' && (
-          <> (Filter: Referenz = <span className="font-mono">{importRunId.slice(0, 8)}…</span>)</>
+          <> (Filter: Referenz = <span className="font-mono">{importRunId.slice(0, 8)}â€¦</span>)</>
         )}.
       </p>
 
       {!config && !isLoading && (
         <p className="text-sm text-muted-foreground">
-          Noch keine Konfiguration vorhanden. Bezeichnung setzen und „Speichern“ klicken, um eine Konfiguration anzulegen.
+          Noch keine Konfiguration vorhanden. Bezeichnung setzen und â€žSpeichernâ€œ klicken, um eine Konfiguration anzulegen.
         </p>
       )}
     </div>

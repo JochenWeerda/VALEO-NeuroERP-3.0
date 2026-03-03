@@ -69,7 +69,7 @@ function detectBarcodeFormat(value: string): string {
   // UPC-A
   if (/^\d{12}$/.test(value)) return 'UPC-A'
   // Code 39 (alphanumerisch + spezielle Zeichen)
-  if (/^[A-Z0-9\-\.\ \$\/\+\%]+$/i.test(value)) return 'CODE-39'
+  if (/^[A-Z0-9.$/+% -]+$/i.test(value)) return 'CODE-39'
   // Code 128 (ASCII range)
   if ([...value].every((char) => char.charCodeAt(0) <= 127)) return 'CODE-128'
   // QR-Code (beliebiger Inhalt, oft URL oder JSON)
@@ -132,7 +132,7 @@ export function useBarcodeScan(options: UseBarcodeScanOptions): UseBarcodeScanRe
   useEffect(() => {
     const checkCamera = async () => {
       try {
-        const hasCamera = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)
+        const hasCamera = !!navigator.mediaDevices?.getUserMedia
         // Prüfe auch BarcodeDetector API (Chrome)
         const hasBarcodeDetector = 'BarcodeDetector' in window
         setCameraSupported(hasCamera && hasBarcodeDetector)

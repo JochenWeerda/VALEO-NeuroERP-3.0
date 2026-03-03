@@ -29,8 +29,7 @@ import {
 import { DropUpload } from '@/features/document/DropUpload'
 import { dmsService, type Document } from '@/lib/services/dms-service'
 import { useToast } from '@/components/ui/toast-provider'
-
-const TENANT_ID = import.meta.env.VITE_TENANT_ID ?? ''
+import { useTenant } from '@/hooks/useTenant'
 
 type DmsAnhangDialogProps = {
   open: boolean
@@ -129,6 +128,7 @@ export function DmsAnhangDialog({
   title = 'UNTERLAGEN / DATEIEN',
 }: DmsAnhangDialogProps): JSX.Element {
   const { push } = useToast()
+  const { tenantId } = useTenant()
 
   // Tab "Anhänge"
   const [documents, setDocuments] = useState<Document[]>([])
@@ -147,7 +147,7 @@ export function DmsAnhangDialog({
     setLoadingDocs(true)
     try {
       const docs = await dmsService.getDocumentsForObject(
-        TENANT_ID,
+        tenantId,
         businessObjectType,
         businessObjectId
       )
@@ -157,21 +157,21 @@ export function DmsAnhangDialog({
     } finally {
       setLoadingDocs(false)
     }
-  }, [businessObjectId, businessObjectType, push])
+  }, [businessObjectId, businessObjectType, push, tenantId])
 
   // ── Inbox laden ───────────────────────────────────────────────────────────
 
   const loadInbox = useCallback(async (): Promise<void> => {
     setLoadingInbox(true)
     try {
-      const result = await dmsService.getInbox(TENANT_ID)
+      const result = await dmsService.getInbox(tenantId)
       setInboxDocs(result.data)
     } catch {
       push('Paperless-Eingang konnte nicht geladen werden')
     } finally {
       setLoadingInbox(false)
     }
-  }, [push])
+  }, [push, tenantId])
 
   useEffect(() => {
     if (open) {
@@ -192,7 +192,7 @@ export function DmsAnhangDialog({
       for (const file of files) {
         await dmsService.uploadDocument({
           file,
-          tenantId: TENANT_ID,
+          tenantId,
           title: file.name,
           businessObjectType,
           businessObjectId,
@@ -211,7 +211,7 @@ export function DmsAnhangDialog({
 
   const handleDownload = async (doc: Document): Promise<void> => {
     try {
-      const blob = await dmsService.downloadDocument(doc.id, TENANT_ID)
+      const blob = await dmsService.downloadDocument(doc.id, tenantId)
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
@@ -227,7 +227,7 @@ export function DmsAnhangDialog({
 
   const handleDelete = async (doc: Document): Promise<void> => {
     try {
-      await dmsService.deleteDocument(doc.id, TENANT_ID)
+      await dmsService.deleteDocument(doc.id, tenantId)
       push('Dokument gelöscht')
       setDocuments((prev) => prev.filter((d) => d.id !== doc.id))
     } catch {
@@ -243,7 +243,7 @@ export function DmsAnhangDialog({
     try {
       await dmsService.linkDocument({
         paperlessId: doc.paperlessId,
-        tenantId: TENANT_ID,
+        tenantId,
         businessObjectType,
         businessObjectId,
       })
