@@ -43,8 +43,6 @@ export default function WetterPrognosePage(): JSX.Element {
   const { data: prognose = [], isLoading: loadPrognose, refetch: refetchPrognose } = useWetterPrognose(coords, 7)
   const { data: warnungen = [], isLoading: loadWarnungen } = useWetterWarnungen(coords)
 
-  const isLoading = loadAktuell || loadPrognose
-
   const handleApply = () => {
     const lat = parseFloat(latInput)
     const lon = parseFloat(lonInput)

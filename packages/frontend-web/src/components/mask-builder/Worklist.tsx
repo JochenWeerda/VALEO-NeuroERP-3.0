@@ -20,7 +20,6 @@ const Worklist: React.FC<WorklistProps> = ({
   config,
   items,
   onAction,
-  isLoading: _isLoading = false
 }) => {
   const { toast } = useToast()
   const [searchTerm, setSearchTerm] = useState('')

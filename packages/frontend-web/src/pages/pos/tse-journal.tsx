@@ -26,6 +26,7 @@ type TSETransaction = {
 
 export default function TSEJournalPage(): JSX.Element {
   const navigate = useNavigate()
+  const { toast } = useToast()
   const [searchTerm, setSearchTerm] = useState('')
   const [nurOffene, setNurOffene] = useState(false)
   const { data: apiTse = [], isError, error, refetch } = useTSEJournal()
@@ -125,7 +126,6 @@ export default function TSEJournalPage(): JSX.Element {
             String(t.tseTransactionNumber).includes(searchTerm)
         )
 
-  const { toast } = useToast()
   const handleDSFinVExport = async () => {
     try {
       const res = await api.get('/api/v1/pos/tse-journal/export/dsfinvk', { responseType: 'blob' })

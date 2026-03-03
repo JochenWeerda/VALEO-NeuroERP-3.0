@@ -44,7 +44,7 @@ export interface Contact {
 // Fetch opportunities with customer/contact resolution
 async function fetchOpportunities(params?: Record<string, string>): Promise<Opportunity[]> {
   const searchParams = new URLSearchParams(params)
-  const response = await authenticatedFetch(`/api/crm-sales/opportunities?${searchParams}`)
+  const response = await authenticatedFetch(`/api/crm-sales/opportunities?${searchParams.toString()}`)
 
   if (!response.ok) {
     throw new Error('Failed to fetch opportunities')

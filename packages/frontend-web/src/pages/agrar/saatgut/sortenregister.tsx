@@ -17,6 +17,15 @@ export default function SortenregisterPage(): JSX.Element {
   const [searchTerm, setSearchTerm] = useState('')
   const { data, isLoading, isError, error, refetch } = useSorten()
 
+  const sorten: Sorte[] = data ?? []
+
+  const filteredData = useMemo(
+    () => sorten.filter((s) =>
+      [s.name, s.art, s.zuechter].some((v) => (v ?? '').toLowerCase().includes(searchTerm.toLowerCase()))
+    ),
+    [sorten, searchTerm]
+  )
+
   if (isLoading) {
     return (
       <div className="p-6 space-y-4">
@@ -29,15 +38,6 @@ export default function SortenregisterPage(): JSX.Element {
   if (isError) {
     return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
   }
-
-  const sorten: Sorte[] = data ?? []
-
-  const filteredData = useMemo(
-    () => sorten.filter((s) =>
-      [s.name, s.art, s.zuechter].some((v) => (v ?? '').toLowerCase().includes(searchTerm.toLowerCase()))
-    ),
-    [sorten, searchTerm]
-  )
 
   const handleExport = () => {
     const header = 'Sorte;Art;Zuechter;Zulassung;Eigenschaften;Status\n'

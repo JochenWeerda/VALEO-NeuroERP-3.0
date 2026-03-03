@@ -312,6 +312,11 @@ def post_run(db: Session, run_id: str, tenant_id: str, request: Any = None) -> N
             )
 
         journal_entry_ids.append(entry_id)
+        log_fibu_audit(
+            db, tenant_id, "create", "journal_entry", entry_id,
+            {"source": "connector", "reference": run_id, "entry_number": document_no},
+            request=request,
+        )
         for item_id, _ in group:
             db.execute(
                 text("UPDATE domain_erp.fibu_connector_run_items SET posted_entity_id = :eid, status = 'POSTED' WHERE id = :id"),
@@ -404,6 +409,11 @@ def reverse_run(db: Session, run_id: str, tenant_id: str, request: Any = None) -
                     "description": desc,
                 },
             )
+        log_fibu_audit(
+            db, tenant_id, "create", "journal_entry", rev_id,
+            {"source": "connector", "reference": run_id, "reversed_entry_id": entry_id},
+            request=request,
+        )
 
     db.execute(
         text("UPDATE domain_erp.fibu_connector_runs SET status = 'REVERSED' WHERE id = :id AND tenant_id = :tid"),

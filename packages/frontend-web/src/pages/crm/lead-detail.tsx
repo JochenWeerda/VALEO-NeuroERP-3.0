@@ -40,7 +40,6 @@ function LeadMaskDetailPage(): JSX.Element {
   const isNew = !id || id === 'neu'
   const leadId = !isNew ? id ?? '' : ''
   const entityType = 'lead'
-  const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Lead')
 
   const { data: existingLead, isLoading, error } = useQuery({
     queryKey: queryKeys.crm.leads.detail(leadId),
@@ -318,7 +317,7 @@ function LegacyLeadDetailPage(): JSX.Element {
   const statusLabel = getStatusLabel(t, lead.status || 'new', lead.status || 'new')
 
   const pageTitle = isNew 
-    ? t('crud.actions.create') + ' ' + entityTypeLabel
+    ? `${t('crud.actions.create')  } ${  entityTypeLabel}`
     : lead.company 
       ? getDetailTitle(t, entityTypeLabel, lead.company)
       : entityTypeLabel

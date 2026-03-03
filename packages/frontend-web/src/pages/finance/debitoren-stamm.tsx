@@ -8,6 +8,7 @@ import { z } from 'zod'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { validateIBAN, formatIBAN } from '@/lib/utils/iban-validator'
 import { useIbanLookup } from '@/hooks/useIbanLookup'
+import { useTenant } from '@/hooks/useTenant'
 import { toast } from 'sonner'
 import { apiClient } from '@/lib/axios'
 
@@ -243,6 +244,7 @@ const createDebitorenConfig = (t: any, entityTypeLabel: string): MaskConfig => (
 export default function DebitorenStammPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const { tenantId } = useTenant()
   const [isDirty, setIsDirty] = useState(false)
   const [formData, setFormData] = useState<any>({})
   const [actionLoadingKey, setActionLoadingKey] = useState<string | null>(null)
@@ -348,7 +350,7 @@ export default function DebitorenStammPage(): JSX.Element {
 
         await saveData({
           ...formData,
-          tenant_id: '00000000-0000-0000-0000-000000000001' // TODO: Get from context
+          tenant_id: tenantId
         })
         setIsDirty(false)
         toast.success(t('crud.messages.saveSuccess', { entityType: entityTypeLabel }))

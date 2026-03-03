@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+﻿import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
@@ -118,7 +118,6 @@ export default function FuhrparkFahrzeugStammPage(): JSX.Element {
   useEffect(() => {
     if (!fahrzeugQuery.data) return
     patch(fahrzeugQuery.data)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fahrzeugQuery.data])
 
   const saveMutation = useMutation({
@@ -233,7 +232,7 @@ export default function FuhrparkFahrzeugStammPage(): JSX.Element {
           <div><Label>Naechster ASU-Termin</Label><Input type="date" value={dateOnly(form.naechster_asu_termin)} onChange={(e) => patch({ naechster_asu_termin: parseDate(e.target.value) })} /></div>
           <div><Label>Naechste Inspektion</Label><Input type="date" value={dateOnly(form.naechste_inspektion)} onChange={(e) => patch({ naechste_inspektion: parseDate(e.target.value) })} /></div>
           <div><Label>Km-Stand</Label><Input type="number" value={form.kilometerstand ?? 0} onChange={(e) => patch({ kilometerstand: Number(e.target.value) || 0 })} /></div>
-          <div className="mt-7 flex items-center gap-2"><Checkbox checked={!form.km_stand_alle_eintraege} onCheckedChange={(v) => patch({ km_stand_alle_eintraege: !Boolean(v) })} /><Label>Aktuelle Eintraege</Label></div>
+          <div className="mt-7 flex items-center gap-2"><Checkbox checked={!form.km_stand_alle_eintraege} onCheckedChange={(v) => patch({ km_stand_alle_eintraege: !v })} /><Label>Aktuelle Eintraege</Label></div>
           <div className="mt-7 flex items-center gap-2"><Checkbox checked={Boolean(form.km_stand_alle_eintraege)} onCheckedChange={(v) => patch({ km_stand_alle_eintraege: Boolean(v) })} /><Label>Alle Eintraege</Label></div>
           <div><Label>Leergewicht (kg)</Label><Input type="number" value={form.leergewicht_kg ?? ''} onChange={(e) => patch({ leergewicht_kg: Number(e.target.value) || undefined })} /></div>
           <div><Label>Nutzlast (kg)</Label><Input type="number" value={form.nutzlast_kg ?? ''} onChange={(e) => patch({ nutzlast_kg: Number(e.target.value) || undefined })} /></div>

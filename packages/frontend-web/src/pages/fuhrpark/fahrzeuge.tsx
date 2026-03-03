@@ -43,9 +43,6 @@ export default function FahrzeugePage(): JSX.Element {
     queryFn: listFuhrparkFahrzeuge,
   })
 
-  if (isError && !isLoading) return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
-  if (isLoading) return <LoadingSkeleton />
-
   const filteredFahrzeuge = useMemo(() => {
     if (!searchTerm) return fahrzeuge
     const term = searchTerm.toLowerCase()
@@ -60,6 +57,9 @@ export default function FahrzeugePage(): JSX.Element {
     if (!f.naechste_inspektion) return false
     return new Date(f.naechste_inspektion) < new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
   }).length
+
+  if (isError && !isLoading) return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  if (isLoading) return <LoadingSkeleton />
 
   const columns = [
     {

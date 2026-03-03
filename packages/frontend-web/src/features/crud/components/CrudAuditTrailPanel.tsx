@@ -48,6 +48,8 @@ export function CrudAuditTrailPanel({
   isLoading = false,
 }: CrudAuditTrailPanelProps) {
   const { t } = useTranslation();
+  void entityType;
+  void entityId;
 
   const getActionLabel = (action: string): string => {
     return t(`crud.audit.actions.${action.toLowerCase()}`, { defaultValue: action });

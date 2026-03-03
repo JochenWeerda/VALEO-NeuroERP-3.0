@@ -9,7 +9,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
 import { Upload, FileText, CheckCircle2, AlertCircle, ArrowRight, RotateCcw } from 'lucide-react'
 
 type ImportError = {
@@ -37,7 +36,7 @@ function useImportCsv() {
       const form = new FormData()
       form.append('file', file)
       const params = new URLSearchParams({ period, dry_run: String(dry_run) })
-      const res = await fetch(`/api/v1/bulk-journal-import/csv?${params}`, {
+      const res = await fetch(`/api/v1/bulk-journal-import/csv?${params.toString()}`, {
         method: 'POST',
         body: form,
         headers: {

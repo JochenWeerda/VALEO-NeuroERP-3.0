@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
-import { FileDown, Filter, CheckCircle2, AlertCircle, ArrowRight, FolderOpen } from 'lucide-react'
+import { FileDown, Filter, CheckCircle2, AlertCircle, FolderOpen } from 'lucide-react'
 
 // Standard-Buchungsarten die gefiltert werden können
 const ALLE_BUCHUNGSARTEN = [

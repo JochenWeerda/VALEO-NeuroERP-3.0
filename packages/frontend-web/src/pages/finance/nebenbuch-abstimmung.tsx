@@ -9,8 +9,6 @@ import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
 import { Loader2, CheckCircle2, XCircle, ChevronRight } from 'lucide-react'
 
-const entityType = 'subsidiaryLedgerReconciliation'
-
 export default function NebenbuchAbstimmungPage(): JSX.Element {
   const { t } = useTranslation()
   const { toast } = useToast()

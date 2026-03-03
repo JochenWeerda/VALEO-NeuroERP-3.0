@@ -62,7 +62,7 @@ function similarity(a: string, b: string): number {
 
 // Normalize phone number for comparison
 function normalizePhone(phone: string): string {
-  return phone.replace(/[\s\-\(\)\.\/]/g, '').replace(/^(\+49|0049|0)/, '')
+  return phone.replace(/[\s()./-]/g, '').replace(/^(\+49|0049|0)/, '')
 }
 
 // Normalize email for comparison

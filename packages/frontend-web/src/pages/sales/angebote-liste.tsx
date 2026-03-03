@@ -35,7 +35,7 @@ export default function AngeboteListePage(): JSX.Element {
   const entityType = 'offer'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Angebot')
 
-  const { data: angebote = [], isLoading: loading } = useAngebote()
+  const { data: angebote = [] } = useAngebote()
 
   // Filter-Konfiguration für AdvancedFilters
   const filterConfig: FilterConfig[] = [
@@ -189,7 +189,7 @@ export default function AngeboteListePage(): JSX.Element {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder={t('crud.actions.search') + '...'}
+                placeholder={`${t('crud.actions.search')  }...`}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"

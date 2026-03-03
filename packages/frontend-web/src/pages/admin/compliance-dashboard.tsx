@@ -126,7 +126,7 @@ export default function ComplianceDashboardPage(): JSX.Element {
 
   const crossScore = stats?.cross_compliance.quote ?? 0
   const enniScore = (stats?.enni.total ?? 0) > 0
-    ? Math.round((stats!.enni.bestaetigt / stats!.enni.total) * 100)
+    ? Math.round(((stats?.enni.bestaetigt ?? 0) / (stats?.enni.total ?? 1)) * 100)
     : 0
 
   const scores = [sachkundeScore, qsScore, zulScore, crossScore, enniScore].filter(s => s > 0)

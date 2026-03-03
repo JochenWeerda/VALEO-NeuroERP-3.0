@@ -23,6 +23,7 @@ export function useCrudCancel({
   onCancel,
   entityType = 'Entity',
 }: UseCrudCancelOptions): UseCrudCancelReturn {
+  void entityType;
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
   const [entityToCancel, setEntityToCancel] = useState<{

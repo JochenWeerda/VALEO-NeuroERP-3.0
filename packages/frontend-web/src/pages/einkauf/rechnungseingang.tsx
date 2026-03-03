@@ -133,23 +133,23 @@ const createRechnungseingangConfig = (t: any, entityTypeLabel: string): MaskConf
       fields: [
         {
           name: 'bruttoBetrag',
-          label: t('crud.fields.grossAmount') + ' (€)',
+          label: `${t('crud.fields.grossAmount')  } (€)`,
           type: 'number',
           required: true
         },
         {
           name: 'nettoBetrag',
-          label: t('crud.fields.netAmount') + ' (€)',
+          label: `${t('crud.fields.netAmount')  } (€)`,
           type: 'number'
         },
         {
           name: 'steuerBetrag',
-          label: t('crud.fields.taxAmount') + ' (€)',
+          label: `${t('crud.fields.taxAmount')  } (€)`,
           type: 'number'
         },
         {
           name: 'steuerSatz',
-          label: t('crud.fields.taxRate') + ' (%)',
+          label: `${t('crud.fields.taxRate')  } (%)`,
           type: 'number',
           helpText: t('crud.tooltips.fields.taxRate')
         },
@@ -201,12 +201,12 @@ const createRechnungseingangConfig = (t: any, entityTypeLabel: string): MaskConf
       fields: [
         {
           name: 'skonto.prozent',
-          label: t('crud.fields.discount') + ' (%)',
+          label: `${t('crud.fields.discount')  } (%)`,
           type: 'number'
         },
         {
           name: 'skonto.betrag',
-          label: t('crud.fields.discountAmount') + ' (€)',
+          label: `${t('crud.fields.discountAmount')  } (€)`,
           type: 'number'
         },
         {
@@ -253,7 +253,7 @@ const createRechnungseingangConfig = (t: any, entityTypeLabel: string): MaskConf
             },
             {
               key: 'steuerSatz',
-              label: t('crud.fields.taxRate') + ' %',
+              label: `${t('crud.fields.taxRate')  } %`,
               type: 'number'
             },
             {
@@ -294,7 +294,7 @@ const createRechnungseingangConfig = (t: any, entityTypeLabel: string): MaskConf
             },
             {
               key: 'betrag',
-              label: t('crud.fields.total') + ' (€)',
+              label: `${t('crud.fields.total')  } (€)`,
               type: 'number'
             }
           ] as any,

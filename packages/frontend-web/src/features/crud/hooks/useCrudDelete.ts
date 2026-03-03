@@ -23,6 +23,7 @@ export function useCrudDelete({
   onDelete,
   entityType = 'Entity',
 }: UseCrudDeleteOptions): UseCrudDeleteReturn {
+  void entityType;
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [entityToDelete, setEntityToDelete] = useState<{

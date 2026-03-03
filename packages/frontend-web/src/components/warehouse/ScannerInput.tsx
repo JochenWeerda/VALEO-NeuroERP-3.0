@@ -42,7 +42,7 @@ export const ScannerInput = forwardRef<HTMLInputElement, ScannerInputProps>(
     const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
     // Barcode-Scanner Hook
-    const { isScanning, lastScan } = useBarcodeScan({
+    const { isScanning } = useBarcodeScan({
       onScan: (result: BarcodeResult) => {
         handleScanSuccess(result.value, result.format)
       },

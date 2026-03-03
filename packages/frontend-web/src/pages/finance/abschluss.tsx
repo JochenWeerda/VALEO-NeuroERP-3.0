@@ -490,7 +490,7 @@ export default function AbschlussPage(): JSX.Element {
   const [isDirty, setIsDirty] = useState(false)
   const [actionLoadingKey, setActionLoadingKey] = useState<string | null>(null)
 
-  const { data, loading, saveData } = useMaskData({
+  const { data, loading } = useMaskData({
     apiUrl: abschlussConfig.api.baseUrl,
     id: 'new'
   })

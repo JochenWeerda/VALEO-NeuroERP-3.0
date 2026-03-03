@@ -1249,6 +1249,7 @@ from .l3c_models import (
     PriceAdjustmentRule,
     QualityProtocol,
     DailyPrice,
+    ArticlePriceThreshold,
     SelfBillingInvoice,
     DisputeRecord,
     NawaroPrintNotification,

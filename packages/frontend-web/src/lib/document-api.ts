@@ -33,8 +33,8 @@ export interface DocumentResponse {
  */
 export async function listDocuments(
   docType: DocumentType,
-  skip: number = 0,
-  limit: number = 100,
+  skip = 0,
+  limit = 100,
   filters?: Record<string, any>
 ): Promise<DocumentListResponse> {
   try {
@@ -44,7 +44,7 @@ export async function listDocuments(
       ...(filters?.status && { status: filters.status }),
     })
     
-    const response = await fetch(`/api/mcp/documents/${docType}?${params}`)
+    const response = await fetch(`/api/mcp/documents/${docType}?${params.toString()}`)
     
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`)
@@ -184,7 +184,7 @@ export async function bulkDeleteDocuments(
     const params = new URLSearchParams()
     docNumbers.forEach(num => params.append('numbers', num))
     
-    const response = await fetch(`/api/mcp/documents/${docType}?${params}`, {
+    const response = await fetch(`/api/mcp/documents/${docType}?${params.toString()}`, {
       method: 'DELETE',
     })
     

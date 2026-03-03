@@ -25,6 +25,7 @@ import {
   Calendar
 } from "lucide-react"
 import { dmsService, type Document as DmsDocument } from "@/lib/services/dms-service"
+import { useTenant } from "@/hooks/useTenant"
 
 const KB_PRECISION = 0
 
@@ -150,8 +151,7 @@ export default function DocumentPanel(): JSX.Element {
   const [dmsDocuments, setDmsDocuments] = React.useState<DmsDocument[]>([])
   const [dmsLoading, setDmsLoading] = React.useState(true)
   
-  // Tenant-ID (TODO: Aus Auth-Context holen)
-  const tenantId = "00000000-0000-0000-0000-000000000001"
+  const { tenantId } = useTenant()
   
   const apiRows: Doc[] = (data?.data ?? []) as Doc[]
   

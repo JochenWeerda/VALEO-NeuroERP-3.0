@@ -157,7 +157,6 @@ api.interceptors.response.use(
         handleUnauthorized()
       }
       // In dev mode, log the error but don't redirect
-      // eslint-disable-next-line no-console
       console.warn('API request returned 401 Unauthorized. In dev mode without OIDC, this might be expected.')
       throw error
     }

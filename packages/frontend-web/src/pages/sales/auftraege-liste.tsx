@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
@@ -36,7 +36,7 @@ export default function AuftraegeListePage(): JSX.Element {
   const [showImport, setShowImport] = useState(false)
   const [filterValues, setFilterValues] = useState<Record<string, any>>({})
 
-  const { data: auftraege = [], isLoading: loading } = useAuftraege()
+  const { data: auftraege = [] } = useAuftraege()
 
   // Filter-Konfiguration für AdvancedFilters
   const filterConfig: FilterConfig[] = [
@@ -198,7 +198,7 @@ export default function AuftraegeListePage(): JSX.Element {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder={t('crud.actions.search') + '...'}
+                placeholder={`${t('crud.actions.search')  }...`}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"

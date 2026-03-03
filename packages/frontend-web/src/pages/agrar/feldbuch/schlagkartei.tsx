@@ -36,15 +36,6 @@ import {
 import { FeldblockfinderIntegration, SchlagData } from '@/components/agrar/FeldblockfinderIntegration'
 
 // Types
-type Kunde = {
-  id: string
-  name: string
-  betriebsnummer: string
-  bundesland: string
-  schlagCount: number
-  gesamtflaeche: number
-}
-
 type Schlag = {
   id: string
   name: string

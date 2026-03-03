@@ -3,7 +3,7 @@
  * Provides robust data fetching with explicit error handling instead of silent mock fallbacks
  */
 
-import { useQuery, UseQueryOptions } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { apiClient, ApiError } from '../api-client'
 
 // ── Error State Types ─────────────────────────────────────────────────────────────
@@ -74,11 +74,11 @@ export function useApiData<T = unknown>(
     staleTime,
     queryFn: async () => {
       const urlParams = params 
-        ? '?' + new URLSearchParams(
+        ? `?${  new URLSearchParams(
             Object.entries(params)
               .filter(([, v]) => v !== undefined)
               .map(([k, v]) => [k, String(v)])
-          ).toString()
+          ).toString()}`
         : ''
       
       try {

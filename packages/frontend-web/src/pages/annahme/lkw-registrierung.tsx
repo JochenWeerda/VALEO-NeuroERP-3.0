@@ -111,6 +111,7 @@ export default function LKWRegistrierungPage(): JSX.Element {
 
   /** Scan-Button: Kamera/Barcode – Platzhalter bis API integriert ist. */
   function handleScan(field: 'kennzeichen' | 'lieferscheinNr'): void {
+    void field
     toast({
       title: 'Scan',
       description: 'Foto hier hochladen oder Kennzeichen bzw. Lieferschein-Nr. manuell eingeben.',

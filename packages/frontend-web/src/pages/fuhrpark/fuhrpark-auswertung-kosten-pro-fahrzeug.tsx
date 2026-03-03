@@ -60,7 +60,8 @@ export default function FuhrparkAuswertungKostenPage(): JSX.Element {
     for (const r of filtered) {
       const kz = r.fahrzeug_kennzeichen ?? 'Unbekannt'
       if (!byKz.has(kz)) byKz.set(kz, { kennzeichen: kz, steuer: 0, versicherung: 0, reparatur: 0, sonstige: 0, total: 0 })
-      const row = byKz.get(kz)!
+      const row = byKz.get(kz)
+      if (!row) continue
       const art = (r.kostenart ?? '').toLowerCase()
       const betrag = r.betrag_eur ?? 0
       if (art.includes('steuer')) row.steuer += betrag
@@ -77,7 +78,8 @@ export default function FuhrparkAuswertungKostenPage(): JSX.Element {
         if (!f.kfz_steuer_eur && !f.versicherung_satz_eur_monat) continue
         byKz.set(f.kennzeichen, { kennzeichen: f.kennzeichen, steuer: 0, versicherung: 0, reparatur: 0, sonstige: 0, total: 0 })
       }
-      const row = byKz.get(f.kennzeichen)!
+      const row = byKz.get(f.kennzeichen)
+      if (!row) continue
       if (row.steuer === 0 && f.kfz_steuer_eur) {
         row.steuer += f.kfz_steuer_eur
         row.total += f.kfz_steuer_eur

@@ -54,7 +54,9 @@ interface BiostimulanzienItem {
   ist_aktiv: boolean;
 }
 
-const buildColumns = (): ColumnDef<BiostimulanzienItem>[] => [
+const buildColumns = (
+  onOpenDetails: (itemId: string) => void,
+): ColumnDef<BiostimulanzienItem>[] => [
   {
     accessorKey: 'artikelnummer',
     header: 'Artikelnummer',
@@ -149,7 +151,6 @@ const buildColumns = (): ColumnDef<BiostimulanzienItem>[] => [
     accessorKey: 'actions',
     header: 'Aktionen',
     cell: ({ row }): JSX.Element => {
-      const navigate = useNavigate();
       const item = row.original;
 
       return (
@@ -157,14 +158,14 @@ const buildColumns = (): ColumnDef<BiostimulanzienItem>[] => [
           <Button
             variant="outline"
             size="sm"
-            onClick={() => navigate(`/agrar/biostimulanzien-stamm/${item.id}`)}
+            onClick={() => onOpenDetails(item.id)}
           >
             <Eye className="w-4 h-4" />
           </Button>
           <Button
             variant="outline"
             size="sm"
-            onClick={() => navigate(`/agrar/biostimulanzien-stamm/${item.id}`)}
+            onClick={() => onOpenDetails(item.id)}
           >
             <Edit className="w-4 h-4" />
           </Button>
@@ -185,7 +186,10 @@ const BiostimulanzienListePage: React.FC = () => {
     queryFn: () => apiClient.getBiostimulanzienList({ limit: 100 }),
   });
 
-  const columns = useMemo<ColumnDef<BiostimulanzienItem>[]>(() => buildColumns(), []);
+  const columns = useMemo<ColumnDef<BiostimulanzienItem>[]>(
+    () => buildColumns((itemId) => navigate(`/agrar/biostimulanzien-stamm/${itemId}`)),
+    [navigate],
+  );
 
   const filteredData = useMemo<BiostimulanzienItem[]>(() => {
     if (!Array.isArray(biostimulanzienList?.items)) return [];

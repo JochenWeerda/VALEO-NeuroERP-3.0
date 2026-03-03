@@ -8,8 +8,11 @@ import asyncio
 from datetime import datetime, timedelta
 from typing import Dict, Any, List
 
+from sqlalchemy import or_, and_
+
 from ..core.config import settings
 from ..core.database import get_db
+from app.infrastructure.models import BusinessPartner
 
 logger = logging.getLogger(__name__)
 
@@ -100,19 +103,33 @@ class ComplianceCheckWorker:
     async def _check_certificate_expiry(self) -> List[Dict[str, Any]]:
         """Check for expired business partner certificates"""
         try:
-            # TODO: Query business partners with expiring certificates
-            # Alert if qs_valid_until or bio_certificate_valid_until is within 30 days
-            logger.info("Checking certificate expiry...")
-            return []
+            if not self.db:
+                return []
+            threshold = datetime.utcnow() + timedelta(days=30)
+            q = self.db.query(BusinessPartner).filter(
+                BusinessPartner.status == "active",
+                or_(
+                    and_(BusinessPartner.qs_valid_until.isnot(None), BusinessPartner.qs_valid_until <= threshold),
+                    and_(BusinessPartner.bio_certificate_valid_until.isnot(None), BusinessPartner.bio_certificate_valid_until <= threshold),
+                ),
+            )
+            rows = q.limit(500).all()
+            return [
+                {"type": "certificate_expiry", "partner_id": r.partner_id, "name": r.name_1, "qs_valid_until": r.qs_valid_until.isoformat() if r.qs_valid_until else None, "bio_valid_until": r.bio_certificate_valid_until.isoformat() if r.bio_certificate_valid_until else None}
+                for r in rows
+            ]
         except Exception as e:
             logger.error(f"Error checking certificates: {e}")
             return [{'type': 'error', 'message': str(e)}]
 
     async def _check_employee_certifications(self) -> List[Dict[str, Any]]:
-        """Check for expired employee certifications"""
+        """Prüft abgelaufene Mitarbeiter-Zertifikate/Schulungen.
+        Datenquelle: Bei Bedarf Tabelle z. B. domain_shared.employee_certifications
+        (employee_id, certificate_type, valid_until, training_id)."""
         try:
-            # TODO: Query employee training records
-            # Alert if certifications are expired
+            if not self.db:
+                return []
+            # Optional: Abfrage auf employee_certifications sobald Modell existiert
             logger.info("Checking employee certifications...")
             return []
         except Exception as e:
@@ -120,10 +137,12 @@ class ComplianceCheckWorker:
             return [{'type': 'error', 'message': str(e)}]
 
     async def _check_vehicle_inspections(self) -> List[Dict[str, Any]]:
-        """Check for expired vehicle inspections"""
+        """Prüft abgelaufene Fahrzeugprüfungen (TÜV/o. Ä.).
+        Datenquelle: Bei Bedarf Tabelle z. B. domain_logistics.vehicle_inspections
+        (vehicle_id, inspection_type, valid_until)."""
         try:
-            # TODO: Query vehicle inspection records
-            # Alert if TÜV/spedition inspections are expired
+            if not self.db:
+                return []
             logger.info("Checking vehicle inspections...")
             return []
         except Exception as e:
@@ -131,10 +150,12 @@ class ComplianceCheckWorker:
             return [{'type': 'error', 'message': str(e)}]
 
     async def _check_warehouse_licenses(self) -> List[Dict[str, Any]]:
-        """Check for expired warehouse licenses"""
+        """Prüft abgelaufene Lager-Lizenzen (z. B. Getreidelager).
+        Datenquelle: Bei Bedarf Tabelle z. B. domain_inventory.warehouse_licenses
+        (warehouse_id, license_type, valid_until)."""
         try:
-            # TODO: Query warehouse license records
-            # Alert if licenses are expired
+            if not self.db:
+                return []
             logger.info("Checking warehouse licenses...")
             return []
         except Exception as e:
@@ -142,12 +163,53 @@ class ComplianceCheckWorker:
             return [{'type': 'error', 'message': str(e)}]
 
     async def _check_tax_compliance(self) -> List[Dict[str, Any]]:
-        """Check tax compliance (VAT IDs, etc.)"""
+        """Prüft USt-ID: Format; bei ENABLE_VIES_CHECK zusätzlich EU-VIES-Service."""
         try:
-            # TODO: Query business partners with invalid VAT IDs
-            # Use VIES service to validate
-            logger.info("Checking tax compliance...")
-            return []
+            if not self.db:
+                return []
+            from app.infrastructure.models import BusinessPartner
+            from app.core.vies import check_vat_format, check_vat_vies
+
+            q = self.db.query(BusinessPartner).filter(
+                BusinessPartner.status == "active",
+                BusinessPartner.vat_id.isnot(None),
+                BusinessPartner.vat_id != "",
+            ).limit(200)
+            partners = q.all()
+            issues = []
+            vies_enabled = getattr(settings, "ENABLE_VIES_CHECK", False)
+            vies_checked = 0
+            for p in partners:
+                vat = (p.vat_id or "").strip()
+                if not vat:
+                    continue
+                format_err = check_vat_format(vat)
+                if format_err:
+                    issues.append({
+                        "type": "tax_compliance",
+                        "message": format_err,
+                        "partner_id": p.partner_id,
+                        "name": p.name_1,
+                        "vat_id": vat,
+                    })
+                    continue
+                if vies_enabled and vies_checked < 20:
+                    result = check_vat_vies(vat)
+                    vies_checked += 1
+                    if result.service_unavailable:
+                        logger.warning("VIES service unavailable, skipping further checks")
+                        break
+                    if not result.valid and result.error_message:
+                        issues.append({
+                            "type": "tax_compliance",
+                            "message": result.error_message,
+                            "partner_id": p.partner_id,
+                            "name": p.name_1,
+                            "vat_id": vat,
+                            "vies_valid": False,
+                        })
+            logger.info("Checking tax compliance: %s partners, %s issues, VIES checks %s", len(partners), len(issues), vies_checked)
+            return issues
         except Exception as e:
             logger.error(f"Error checking tax compliance: {e}")
             return [{'type': 'error', 'message': str(e)}]

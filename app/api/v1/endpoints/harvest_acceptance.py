@@ -13,9 +13,11 @@ import re
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field, field_validator, model_validator
 from sqlalchemy.orm import Session
+from sqlalchemy import desc
 
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
+from app.core.security import get_user_id_from_request
 from app.infrastructure.models import (
     HarvestAcceptance,
     HarvestAcceptancePosition,
@@ -41,6 +43,8 @@ from modules.agrar.services.drying_rule_engine import (
 from app.api.v1.endpoints.agrar_settlements import _DbDryingRuleRepo
 from modules.agrar.services.quality_protocol_service import (
     get_latest_protocol,
+    create_quality_protocol,
+    QualityProtocolCreate,
 )
 from modules.agrar.repositories.quality_protocol_repo import QualityProtocolRepositoryImpl
 from modules.agrar.services.daily_price_service import (
@@ -502,7 +506,7 @@ class HarvestAcceptanceCreate(BaseModel):
             # Warnung, aber nicht zwingend (kann auch aus daily_prices Tabelle geladen werden)
             pass
         if self.pricing_mode == "exchange_fix_later":
-            # TODO: pricing_fixation_status + Referenz auf Börsen/Indexdaten prüfen
+            # Optional: pricing_fixation_status und Börsen/Index-Referenz prüfen (Preismodul)
             pass
         return self
 
@@ -637,14 +641,7 @@ def _harvest_acceptance_to_dict_with_positions(acceptance: HarvestAcceptance, db
 
 def _get_user_id_from_request(request: Request) -> Optional[str]:
     """Hilfsfunktion zum Extrahieren der User-ID aus Request (für Audit)."""
-    # TODO: Implementiere korrekte User-ID-Extraktion aus JWT/OIDC
-    # Fallback: Versuche aus request.state zu extrahieren
-    user_id = getattr(request.state, "user_id", None)
-    if not user_id:
-        # Fallback: Versuche aus Authorization Header zu extrahieren
-        # TODO: Implementiere korrekte JWT-Decodierung
-        user_id = "system"  # Placeholder
-    return user_id
+    return get_user_id_from_request(request) or "system"
 
 
 @router.post("/", response_model=HarvestAcceptanceOut, status_code=201)
@@ -957,8 +954,7 @@ async def calculate_harvest_settlement_endpoint(
     else:
         raise HTTPException(status_code=400, detail="Weighing ticket is required for calculation")
     
-    # Hole Laborwerte aus Positionen oder Wiegeschein
-    # TODO: Später aus quality_protocol_id laden
+    # Hole Laborwerte aus Positionen, Wiegeschein oder Qualitätsprotokoll
     windage_pct = None
     impurities_pct = None
     moisture_pct = None
@@ -996,7 +992,8 @@ async def calculate_harvest_settlement_endpoint(
             storage_shrinkage_pct = pos.lab_value_pct
         elif pos.position_number == 75 and pos.amount_eur:  # Lagergeld
             storage_fee_per_month = pos.amount_eur
-            # TODO: storage_months aus separatem Feld oder Berechnung
+            if storage_months is None:
+                storage_months = 1  # Default; kann später aus separatem Feld/Berechnung kommen
         elif pos.position_number == 78 and pos.amount_eur:  # Frachtkosten
             freight_costs = pos.amount_eur
         elif pos.position_number == 80 and pos.amount_eur:  # Wiegegebühren
@@ -1113,7 +1110,7 @@ async def calculate_harvest_settlement_endpoint(
         unit_price_eur_per_ton=Decimal(str(unit_price_eur_per_ton)) if unit_price_eur_per_ton else None,
         use_drying_rule_engine=use_drying_rule_engine,
         crop_code=crop_code,
-        site_id=None,  # TODO: Aus warehouse_id ableiten
+        site_id=acceptance.warehouse_id,  # Standort aus Lagerhalle
         contract_id=acceptance.contract_id,
         customer_id=acceptance.customer_id,
         calc_date=acceptance.delivery_date,
@@ -1280,6 +1277,20 @@ async def release_harvest_acceptance(
         if net_weight_kg <= 0:
             raise HTTPException(status_code=400, detail="Net weight must be > 0 to create stock movement")
         
+        # Aktuellen Bestand aus letztem StockMovement für Artikel+Lager ermitteln
+        last_movement = (
+            db.query(StockMovement)
+            .filter(
+                StockMovement.article_id == acceptance.article_id,
+                StockMovement.warehouse_id == acceptance.warehouse_id,
+                StockMovement.tenant_id == tenant_id,
+            )
+            .order_by(desc(StockMovement.movement_date), desc(StockMovement.created_at))
+            .first()
+        )
+        previous_stock = (last_movement.new_stock if last_movement else Decimal("0")) or Decimal("0")
+        new_stock = previous_stock + net_weight_kg
+
         # Erstelle Stock Movement (Wareneingang in Sperrbestand)
         stock_movement = StockMovement(
             id=uuid7(),
@@ -1299,8 +1310,8 @@ async def release_harvest_acceptance(
             agrar_contract_id=acceptance.contract_id,
             # Sperrbestand: ownership_type könnte "quarantine" sein, falls vorhanden
             ownership_type="owned",
-            previous_stock=Decimal("0"),  # TODO: Aktuellen Bestand ermitteln
-            new_stock=Decimal("0"),  # TODO: Aktuellen Bestand + Menge
+            previous_stock=previous_stock,
+            new_stock=new_stock,
             storage_fee_relevant=False,  # Wird später bei "endgültig" aktiviert
         )
         db.add(stock_movement)
@@ -1392,8 +1403,7 @@ async def create_qualitaetsprotokoll(
 ):
     """
     Erstelle Qualitätsprotokoll für Ernte-Annahme.
-    
-    Erfasst Qualitätsdaten und verknüpft sie mit der Ernte-Annahme.
+    Speichert Laborwerte in domain_inventory.quality_protocols und setzt quality_protocol_id.
     """
     from datetime import datetime
     
@@ -1405,46 +1415,76 @@ async def create_qualitaetsprotokoll(
     if not acceptance:
         raise HTTPException(status_code=404, detail="Ernte-Annahme nicht gefunden")
     
-    # Erstelle Qualitätsprotokoll als JSON
-    qualitaetsprotokoll = {
-        "id": uuid7(),
-        "acceptance_id": acceptance_id,
-        "erstellt_am": datetime.utcnow().isoformat(),
-        "qualitaetsdaten": {
-            "feuchte_prozent": data.get("feuchte_prozent"),
-            "protein_prozent": data.get("protein_prozent"),
-            "fallzahl": data.get("fallzahl"),
-            "sedimentation": data.get("sedimentation"),
-            "besatz": data.get("besatz"),
-            "mykotoxine": data.get("mykotoxine"),
-            "schadstoffe": data.get("schadstoffe"),
-            "keimzahl": data.get("keimzahl"),
-            "glasbruch": data.get("glasbruch"),
-            "sensorik": data.get("sensorik"),
-        },
-        "bewertung": data.get("bewertung", "none"),  # ok, warning, critical
-        "bemerkungen": data.get("bemerkungen"),
-        "labor_code": data.get("labor_code"),
-        "analysendatum": data.get("analysendatum"),
-    }
-    
-    # Speichere als JSON in HarvestAcceptance
-    acceptance.quality_protocol = qualitaetsprotokoll
-    
-    # Aktualisiere Qualitätsstatus basierend auf Bewertung
-    if data.get("bewertung") == "ok":
+    qd = data.get("qualitaetsdaten") or data
+    create_input = QualityProtocolCreate(
+        tenant_id=tenant_id,
+        harvest_acceptance_id=acceptance_id,
+        moisture_pct=Decimal(str(qd["feuchte_prozent"])) if qd.get("feuchte_prozent") is not None else None,
+        protein_pct=Decimal(str(qd["protein_prozent"])) if qd.get("protein_prozent") is not None else None,
+        impurities_pct=Decimal(str(qd["besatz"])) if qd.get("besatz") is not None else None,
+        mycotoxin_ppb=Decimal(str(qd["mykotoxine"])) if qd.get("mykotoxine") is not None else None,
+        hl_weight_kg_per_hl=Decimal(str(qd["hektolitergewicht_kg_hl"])) if qd.get("hektolitergewicht_kg_hl") is not None else None,
+        other_values={
+            "fallzahl": qd.get("fallzahl"),
+            "sedimentation": qd.get("sedimentation"),
+            "schadstoffe": qd.get("schadstoffe"),
+            "keimzahl": qd.get("keimzahl"),
+            "glasbruch": qd.get("glasbruch"),
+            "sensorik": qd.get("sensorik"),
+        } if any(qd.get(k) is not None for k in ("fallzahl", "sedimentation", "schadstoffe", "keimzahl", "glasbruch", "sensorik")) else None,
+        source_type="manual",
+        created_by=None,
+    )
+    quality_repo = QualityProtocolRepositoryImpl(db)
+    protocol = create_quality_protocol(quality_repo, create_input)
+    acceptance.quality_protocol_id = protocol.id
+    bewertung = data.get("bewertung", "none")
+    if bewertung == "ok":
         acceptance.quality_status = "approved"
-    elif data.get("bewertung") == "warning":
+    elif bewertung == "warning":
         acceptance.quality_status = "conditional"
-    elif data.get("bewertung") == "critical":
+    elif bewertung == "critical":
         acceptance.quality_status = "rejected"
-    
     db.commit()
     
+    qualitaetsprotokoll = _quality_protocol_to_qualitaetsprotokoll(protocol)
+    qualitaetsprotokoll["bewertung"] = bewertung
+    qualitaetsprotokoll["bemerkungen"] = data.get("bemerkungen")
+    qualitaetsprotokoll["labor_code"] = data.get("labor_code")
+    qualitaetsprotokoll["analysendatum"] = data.get("analysendatum")
     return {
         "message": "Qualitätsprotokoll erstellt",
         "qualitaetsprotokoll": qualitaetsprotokoll,
-        "quality_status": acceptance.quality_status,
+        "quality_status": getattr(acceptance, "quality_status", None),
+    }
+
+
+def _quality_protocol_to_qualitaetsprotokoll(protocol) -> dict:
+    """Mappt QualityProtocol (Service/DB) auf das API-Format Qualitätsprotokoll (Laborwerte)."""
+    ov = protocol.other_values or {}
+    return {
+        "id": protocol.id,
+        "acceptance_id": protocol.harvest_acceptance_id,
+        "protocol_number": protocol.protocol_number,
+        "version": protocol.version,
+        "erstellt_am": protocol.created_at.isoformat() if protocol.created_at else None,
+        "qualitaetsdaten": {
+            "feuchte_prozent": float(protocol.moisture_pct) if protocol.moisture_pct is not None else None,
+            "protein_prozent": float(protocol.protein_pct) if protocol.protein_pct is not None else None,
+            "fallzahl": ov.get("fallzahl"),
+            "sedimentation": ov.get("sedimentation"),
+            "besatz": float(protocol.impurities_pct) if protocol.impurities_pct is not None else ov.get("besatz"),
+            "mykotoxine": float(protocol.mycotoxin_ppb) if protocol.mycotoxin_ppb is not None else ov.get("mykotoxine"),
+            "schadstoffe": ov.get("schadstoffe"),
+            "keimzahl": ov.get("keimzahl"),
+            "glasbruch": ov.get("glasbruch"),
+            "sensorik": ov.get("sensorik"),
+            "hektolitergewicht_kg_hl": float(protocol.hl_weight_kg_per_hl) if protocol.hl_weight_kg_per_hl is not None else None,
+        },
+        "bewertung": "ok" if protocol.is_final else "none",
+        "bemerkungen": None,
+        "labor_code": None,
+        "analysendatum": protocol.approved_at.date().isoformat() if protocol.approved_at else None,
     }
 
 
@@ -1454,7 +1494,7 @@ async def get_qualitaetsprotokoll(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    """Hole Qualitätsprotokoll für Ernte-Annahme."""
+    """Hole Qualitätsprotokoll für Ernte-Annahme. Laborwerte aus quality_protocol_id (QualityProtocol) oder Legacy-JSON."""
     acceptance = db.query(HarvestAcceptance).filter(
         HarvestAcceptance.id == acceptance_id,
         HarvestAcceptance.tenant_id == tenant_id
@@ -1463,10 +1503,17 @@ async def get_qualitaetsprotokoll(
     if not acceptance:
         raise HTTPException(status_code=404, detail="Ernte-Annahme nicht gefunden")
     
-    if not acceptance.quality_protocol:
-        raise HTTPException(status_code=404, detail="Kein Qualitätsprotokoll vorhanden")
+    if acceptance.quality_protocol_id:
+        quality_repo = QualityProtocolRepositoryImpl(db)
+        protocol = quality_repo.get_by_id(acceptance.quality_protocol_id)
+        if protocol:
+            return _quality_protocol_to_qualitaetsprotokoll(protocol)
     
-    return acceptance.quality_protocol
+    legacy = getattr(acceptance, "quality_protocol", None)
+    if legacy:
+        return legacy
+    
+    raise HTTPException(status_code=404, detail="Kein Qualitätsprotokoll vorhanden")
 
 
 # ============================================================================

@@ -45,13 +45,6 @@ export default function DokumentenAblagePage(): JSX.Element {
   const [searchTerm, setSearchTerm] = useState('')
   const { data: dokumente = [], isLoading, isError, error, refetch } = useDokumenteAblage()
 
-  // Error State: Keine Mock-Daten als Fallback!
-  if (isError && !isLoading) {
-    return <ErrorState error={error} onRetry={refetch} />
-  }
-
-  if (isLoading) return <LoadingSkeleton />
-
   const filteredDokumente = useMemo(() => {
     if (!searchTerm) return dokumente
     const term = searchTerm.toLowerCase()
@@ -60,6 +53,13 @@ export default function DokumentenAblagePage(): JSX.Element {
       d.kategorie.toLowerCase().includes(term)
     )
   }, [dokumente, searchTerm])
+
+  // Error State: Keine Mock-Daten als Fallback!
+  if (isError && !isLoading) {
+    return <ErrorState error={error} onRetry={refetch} />
+  }
+
+  if (isLoading) return <LoadingSkeleton />
 
   const columns = [
     { key: 'name' as const, label: 'Dokument', render: (d: Dokument) => <div><div className="font-medium">{d.name}</div><Badge variant="outline" className="mt-1">{d.typ}</Badge></div> },

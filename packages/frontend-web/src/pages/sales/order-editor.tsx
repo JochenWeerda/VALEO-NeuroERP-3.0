@@ -1,6 +1,6 @@
-/**
+﻿/**
  * Auftrags-Erfassung (Verkauf)
- * 1:1 Struktur nach Lieferschein-Erfassung — Gewohnheits-Prinzip
+ * 1:1 Struktur nach Lieferschein-Erfassung â€” Gewohnheits-Prinzip
  */
 
 import { useState, useEffect, useMemo } from 'react'
@@ -30,7 +30,7 @@ import {
   FileText, Folder, FileCheck, Link as LinkIcon, Receipt, Trash2, Search,
 } from 'lucide-react'
 
-// ── API Response Type ──────────────────────────────────────────────────────────
+// â”€â”€ API Response Type â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 type AuftragResponse = {
   id: string
@@ -58,7 +58,7 @@ type AuftragResponse = {
   }>
 }
 
-// ── Types ──────────────────────────────────────────────────────────────────────
+// â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export type Position = {
   posNr: number
@@ -109,8 +109,8 @@ type AuftragState = {
   versandart: string
   angebotNrBezug: string
   statusGedruckt: boolean
-  statusBestätigt: boolean
-  lieferscheinNr: string   // readonly — wird nach LS-Erstellung gesetzt
+  statusBestaetigt: boolean
+  lieferscheinNr: string   // readonly â€” wird nach LS-Erstellung gesetzt
   selbstabholung: boolean
   pauschalAuftrag: boolean
   betreff: string
@@ -148,7 +148,7 @@ type Angebot = {
   datum: string
 }
 
-// ── Helpers ────────────────────────────────────────────────────────────────────
+// â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function generateAuftragNr(): string {
   const year = new Date().getFullYear()
@@ -199,7 +199,7 @@ function mapResponseItemsToPositionen(items: AuftragResponse['items']): Position
   })
 }
 
-// ── Component ──────────────────────────────────────────────────────────────────
+// â”€â”€ Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function SalesOrderEditorPage(): JSX.Element {
   const navigate = useNavigate()
@@ -214,7 +214,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
     return name.length > 2 ? name.substring(0, 2) : name
   }
 
-  // ── Haupt-State ────────────────────────────────────────────────────────────
+  // â”€â”€ Haupt-State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [state, setState] = useState<AuftragState>({
     id: null,
     auftragNr: generateAuftragNr(),
@@ -228,7 +228,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
     versandart: '',
     angebotNrBezug: '',
     statusGedruckt: false,
-    statusBestätigt: false,
+    statusBestaetigt: false,
     lieferscheinNr: '',
     selbstabholung: false,
     pauschalAuftrag: false,
@@ -329,7 +329,6 @@ export default function SalesOrderEditorPage(): JSX.Element {
     const einhPreis = currentPosition.listenpreis * (1 - currentPosition.rabatt / 100)
     const betrag = einhPreis * currentPosition.mengeGebinde
     setCurrentPosition((prev) => ({ ...prev, einhPreis, betrag }))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPosition.listenpreis, currentPosition.rabatt, currentPosition.mengeGebinde])
 
   // Summen
@@ -342,7 +341,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
     return { netto, mwst, brutto, gesamt: brutto, gewicht, gefahrgutPunkte }
   }, [state.positionen])
 
-  // ── Handler ────────────────────────────────────────────────────────────────
+  // â”€â”€ Handler â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   async function handleCustomerSelect(c: Customer): Promise<void> {
     setState((prev) => ({
@@ -350,7 +349,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
       customer: c,
       vertreter: c.representative || prev.vertreter,
     }))
-    // Angebote für Kunden laden
+    // Angebote fÃ¼r Kunden laden
     try {
       const offers = await apiClient.get<any[]>(`/api/v1/sales/quotes?customer_id=${c.id}`)
       const mapped = (offers || []).map((o) => ({
@@ -384,7 +383,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
     if (idx >= 0 && idx < auftraege.length - 1 && auftraege[idx + 1]) {
       navigate(`/sales/order-editor/${auftraege[idx + 1].id}`)
     } else {
-      push('Kein nächster Auftrag')
+      push('Kein nÃ¤chster Auftrag')
     }
   }
   const handleNiederlassungOpen = async (): Promise<void> => {
@@ -500,8 +499,8 @@ export default function SalesOrderEditorPage(): JSX.Element {
     })
   }
 
-  // Nur bei Entwurf (nicht bestätigt) Positionen löschen/verschieben erlauben
-  const isDraft = !state.statusBestätigt
+  // Nur bei Entwurf (nicht bestÃ¤tigt) Positionen lÃ¶schen/verschieben erlauben
+  const isDraft = !state.statusBestaetigt
 
   const renumberPosNr = (positionen: Position[]): Position[] =>
     positionen.map((p, i) => ({ ...p, posNr: (i + 1) * 10 }))
@@ -553,11 +552,11 @@ export default function SalesOrderEditorPage(): JSX.Element {
     }))
   }
 
-  // ── Speichern ──────────────────────────────────────────────────────────────
+  // â”€â”€ Speichern â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   const handleSave = async (): Promise<string | null> => {
     if (!state.customer) {
-      push('Bitte zuerst einen Kunden auswählen')
+      push('Bitte zuerst einen Kunden auswÃ¤hlen')
       return null
     }
     try {
@@ -568,7 +567,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
         description: state.notizen,
         total_amount: summen.netto,
         currency: 'EUR',
-        status: state.statusBestätigt ? 'confirmed' : 'open',
+        status: state.statusBestaetigt ? 'confirmed' : 'open',
         contact_person: state.vertreter || null,
         delivery_date: state.liefertermin ? new Date(state.liefertermin).toISOString() : null,
         delivery_address: state.customer.address
@@ -604,10 +603,10 @@ export default function SalesOrderEditorPage(): JSX.Element {
     }
   }
 
-  // ── Drucken ────────────────────────────────────────────────────────────────
+  // â”€â”€ Drucken â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   const handlePrint = async (options: PrintOptions): Promise<void> => {
-    if (state.statusGedruckt || state.statusBestätigt) {
+    if (state.statusGedruckt || state.statusBestaetigt) {
       setPendingPrintOptions(options)
       setPendingAction('print')
       setShowAttestationDialog(true)
@@ -652,7 +651,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
     }
   }
 
-  // ── Löschen ────────────────────────────────────────────────────────────────
+  // â”€â”€ LÃ¶schen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   const handleDelete = async (): Promise<void> => {
     if (!state.id) {
@@ -667,15 +666,15 @@ export default function SalesOrderEditorPage(): JSX.Element {
     }
     try {
       await apiClient.delete(`/api/v1/sales/orders/${state.id}`)
-      push('Auftrag gelöscht')
+      push('Auftrag gelÃ¶scht')
       setShowDeleteDialog(false)
       navigate('/verkauf')
     } catch (error: any) {
-      push(`Löschen fehlgeschlagen: ${error.response?.data?.detail || error.message}`)
+      push(`LÃ¶schen fehlgeschlagen: ${error.response?.data?.detail || error.message}`)
     }
   }
 
-  // ── Belegfolge-Positionsübernahme ──────────────────────────────────────────
+  // â”€â”€ Belegfolge-PositionsÃ¼bernahme â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   function handleBelegfolgePositionen(incoming: BelegfolgePosition[]): void {
     const baseNr =
@@ -708,10 +707,10 @@ export default function SalesOrderEditorPage(): JSX.Element {
       }
     })
     setState((prev) => ({ ...prev, positionen: [...prev.positionen, ...newPositionen] }))
-    push(`${newPositionen.length} Position${newPositionen.length !== 1 ? 'en' : ''} übernommen`)
+    push(`${newPositionen.length} Position${newPositionen.length !== 1 ? 'en' : ''} Ã¼bernommen`)
   }
 
-  // ── In Lieferschein wandeln ────────────────────────────────────────────────
+  // â”€â”€ In Lieferschein wandeln â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   const handleCreateLieferschein = async (): Promise<void> => {
     const id = state.id || (await handleSave())
@@ -750,7 +749,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
     }
   }
 
-  // ── Globale Shortcuts ──────────────────────────────────────────────────────
+  // â”€â”€ Globale Shortcuts â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   useGlobalShortcuts({
     'open-customer-selection': () => setShowCustomerDialog(true),
@@ -770,7 +769,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
           ...prev,
           positionen: mapResponseItemsToPositionen(response.items || []),
         }))
-        push('Daten vom vorherigen Auftrag übernommen')
+        push('Daten vom vorherigen Auftrag Ã¼bernommen')
       } catch (error: any) {
         push(`Fehler: ${error.response?.data?.detail || error.message}`)
       }
@@ -779,7 +778,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
     'open-attachments': () => setShowAttachmentDialog(true),
     'show-information': () => {
       if (state.customer) setShowInformationDialog(true)
-      else push('Bitte zuerst einen Kunden auswählen')
+      else push('Bitte zuerst einen Kunden auswÃ¤hlen')
     },
     cancel: () => {
       setShowCustomerDialog(false)
@@ -789,7 +788,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
     },
   })
 
-  // ── JSX ────────────────────────────────────────────────────────────────────
+  // â”€â”€ JSX â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   return (
     <div className="h-screen flex flex-col bg-gray-50">
@@ -802,7 +801,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
       {vorgaengerCount > 0 && state.customer && (
         <div className="bg-amber-50 border-b border-amber-300 px-4 py-1.5 flex items-center gap-3">
           <span className="text-amber-800 text-sm font-medium">
-            {vorgaengerCount} offene{vorgaengerCount !== 1 ? ' Angebote' : 's Angebot'} für{' '}
+            {vorgaengerCount} offene{vorgaengerCount !== 1 ? ' Angebote' : 's Angebot'} fÃ¼r{' '}
             <strong>{state.customer.name}</strong> vorhanden
           </span>
           <Button
@@ -811,7 +810,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
             className="h-6 text-xs border-amber-400 text-amber-800 hover:bg-amber-100"
             onClick={() => setShowBelegfolgeDialog(true)}
           >
-            Positionen übernehmen
+            Positionen Ã¼bernehmen
           </Button>
           <Button
             size="sm"
@@ -819,14 +818,14 @@ export default function SalesOrderEditorPage(): JSX.Element {
             className="h-6 w-6 p-0 text-amber-600 ml-auto"
             onClick={() => setVorgaengerCount(0)}
           >
-            ×
+            Ã—
           </Button>
         </div>
       )}
 
       <div className="flex-1 overflow-auto p-4">
 
-        {/* ── Kopf-Bereich (3 Spalten) ──────────────────────────────────────── */}
+        {/* â”€â”€ Kopf-Bereich (3 Spalten) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <Card className="mb-4 p-4">
           <div className="grid grid-cols-3 gap-4">
 
@@ -842,7 +841,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={handleAuftragPrev} title="Vorheriger Auftrag">
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={handleAuftragNext} title="Nächster Auftrag">
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={handleAuftragNext} title="NÃ¤chster Auftrag">
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
@@ -896,10 +895,10 @@ export default function SalesOrderEditorPage(): JSX.Element {
               </div>
               <div className="flex items-center gap-2">
                 <Checkbox
-                  checked={state.statusBestätigt}
-                  onCheckedChange={(c) => setState((prev) => ({ ...prev, statusBestätigt: c === true }))}
+                  checked={state.statusBestaetigt}
+                  onCheckedChange={(c) => setState((prev) => ({ ...prev, statusBestaetigt: c === true }))}
                 />
-                <Label className="text-sm">bestätigt</Label>
+                <Label className="text-sm">bestÃ¤tigt</Label>
               </div>
               <div className="flex items-center gap-2">
                 <Label className="w-32 text-sm whitespace-nowrap">in LS gewandelt:</Label>
@@ -922,7 +921,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
                   onChange={(e) => setState((prev) => ({ ...prev, niederlassung: Number(e.target.value) }))}
                   className="flex-1 h-8"
                 />
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => void handleNiederlassungOpen()} title="Niederlassung auswählen">
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => void handleNiederlassungOpen()} title="Niederlassung auswÃ¤hlen">
                   <MoreHorizontal className="h-4 w-4" />
                 </Button>
               </div>
@@ -973,7 +972,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
               </div>
             </div>
 
-            {/* Rechte Spalte — Kunden-Tabs */}
+            {/* Rechte Spalte â€” Kunden-Tabs */}
             <div className="space-y-2">
               <Tabs value={customerTab} onValueChange={(v) => setCustomerTab(v)}>
                 <TabsList className="grid w-full grid-cols-4 h-auto">
@@ -1008,7 +1007,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
                       )}
                     </div>
                   ) : (
-                    <div className="text-sm text-muted-foreground">Kein Kunde ausgewählt</div>
+                    <div className="text-sm text-muted-foreground">Kein Kunde ausgewÃ¤hlt</div>
                   )}
                 </TabsContent>
 
@@ -1032,7 +1031,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
                       )}
                     </div>
                   ) : (
-                    <div className="text-sm text-muted-foreground">Kein Kunde ausgewählt</div>
+                    <div className="text-sm text-muted-foreground">Kein Kunde ausgewÃ¤hlt</div>
                   )}
                 </TabsContent>
 
@@ -1059,7 +1058,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
                       )}
                     </div>
                   ) : (
-                    <div className="text-sm text-muted-foreground">Kein Kunde ausgewählt</div>
+                    <div className="text-sm text-muted-foreground">Kein Kunde ausgewÃ¤hlt</div>
                   )}
                 </TabsContent>
 
@@ -1084,14 +1083,14 @@ export default function SalesOrderEditorPage(): JSX.Element {
                             className="mt-2"
                             onClick={() => setShowBelegfolgeDialog(true)}
                           >
-                            Positionen aus Angebot übernehmen
+                            Positionen aus Angebot Ã¼bernehmen
                           </Button>
                         </>
                       ) : (
                         <div className="text-muted-foreground">Es liegt kein Angebot vor</div>
                       )
                     ) : (
-                      <div className="text-muted-foreground">Kein Kunde ausgewählt</div>
+                      <div className="text-muted-foreground">Kein Kunde ausgewÃ¤hlt</div>
                     )}
                   </div>
                 </TabsContent>
@@ -1103,22 +1102,22 @@ export default function SalesOrderEditorPage(): JSX.Element {
                         <span className="text-muted-foreground">Zahlungsziel:</span>
                         <span>
                           {state.customer.paymentTerms !== undefined
-                            ? `${state.customer.paymentTerms} Tage netto` : '—'}
+                            ? `${state.customer.paymentTerms} Tage netto` : 'â€”'}
                         </span>
                         <span className="text-muted-foreground">Kredit-Limit:</span>
                         <span>
                           {state.customer.creditLimit
                             ? Number(state.customer.creditLimit).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })
-                            : '—'}
+                            : 'â€”'}
                         </span>
                         <span className="text-muted-foreground">Debitor-Kto.:</span>
-                        <span>{state.customer.debitorAccount || '—'}</span>
+                        <span>{state.customer.debitorAccount || 'â€”'}</span>
                         <span className="text-muted-foreground">Kunden-Nr.:</span>
-                        <span>{state.customer.customerNumber || '—'}</span>
+                        <span>{state.customer.customerNumber || 'â€”'}</span>
                       </div>
                     </div>
                   ) : (
-                    <div className="text-sm text-muted-foreground">Kein Kunde ausgewählt</div>
+                    <div className="text-sm text-muted-foreground">Kein Kunde ausgewÃ¤hlt</div>
                   )}
                 </TabsContent>
 
@@ -1149,7 +1148,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
                       )}
                     </div>
                   ) : (
-                    <div className="text-sm text-muted-foreground">Kein Kunde ausgewählt</div>
+                    <div className="text-sm text-muted-foreground">Kein Kunde ausgewÃ¤hlt</div>
                   )}
                 </TabsContent>
 
@@ -1158,30 +1157,30 @@ export default function SalesOrderEditorPage(): JSX.Element {
                     <div className="text-sm space-y-1.5">
                       <div className="grid grid-cols-[140px_1fr] gap-1">
                         <span className="text-muted-foreground">Spediteur:</span>
-                        <span>—</span>
+                        <span>â€”</span>
                         <span className="text-muted-foreground">Versandart:</span>
-                        <span>{state.versandart || '—'}</span>
+                        <span>{state.versandart || 'â€”'}</span>
                         <span className="text-muted-foreground">Lieferadresse:</span>
                         <span>
                           {[
                             state.customer.address?.street,
                             state.customer.address?.postalCode,
                             state.customer.address?.city,
-                          ].filter(Boolean).join(', ') || '—'}
+                          ].filter(Boolean).join(', ') || 'â€”'}
                         </span>
                         <span className="text-muted-foreground">Telefon:</span>
-                        <span>{state.customer.address?.phone || state.customer.phone || '—'}</span>
+                        <span>{state.customer.address?.phone || state.customer.phone || 'â€”'}</span>
                       </div>
                     </div>
                   ) : (
-                    <div className="text-sm text-muted-foreground">Kein Kunde ausgewählt</div>
+                    <div className="text-sm text-muted-foreground">Kein Kunde ausgewÃ¤hlt</div>
                   )}
                 </TabsContent>
 
                 <TabsContent value="lieferung" className="mt-2 space-y-2">
                   <div className="text-sm space-y-2">
                     <div className="font-semibold">Lieferdaten</div>
-                    <div>Liefertermin: {state.liefertermin || '—'}</div>
+                    <div>Liefertermin: {state.liefertermin || 'â€”'}</div>
                     {state.selbstabholung && (
                       <div className="text-muted-foreground">Selbstabholung</div>
                     )}
@@ -1207,7 +1206,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
                 <div className="text-sm space-y-1 pl-32">
                   <div>{state.customer.name}</div>
                   <div className="text-muted-foreground">
-                    Kredit-Limit: {state.customer.creditLimit || '—'}
+                    Kredit-Limit: {state.customer.creditLimit || 'â€”'}
                   </div>
                 </div>
               )}
@@ -1218,7 +1217,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
                   onClick={(e) => {
                     e.preventDefault()
                     if (state.customer) setShowInformationDialog(true)
-                    else push('Bitte zuerst einen Kunden auswählen')
+                    else push('Bitte zuerst einen Kunden auswÃ¤hlen')
                   }}
                 >
                   Information
@@ -1228,7 +1227,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
           </div>
         </Card>
 
-        {/* ── Positionen-Grid ───────────────────────────────────────────────── */}
+        {/* â”€â”€ Positionen-Grid â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <Card className="mb-4 p-4">
           <h2 className="mb-2 font-semibold text-sm">Positionen</h2>
           <div className="overflow-x-auto">
@@ -1257,7 +1256,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
                   <TableHead className="w-20">Strecke</TableHead>
                   <TableHead className="w-20">Zus.Beleg</TableHead>
                   <TableHead className="w-20">Anerken.</TableHead>
-                  <TableHead className="w-24">Erlöskonto</TableHead>
+                  <TableHead className="w-24">ErlÃ¶skonto</TableHead>
                   <TableHead className="w-28 text-right">Aktionen</TableHead>
                 </TableRow>
               </TableHeader>
@@ -1321,7 +1320,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
                             variant="ghost"
                             size="icon"
                             className="h-7 w-7 text-red-600 hover:text-red-700"
-                            title="Position löschen"
+                            title="Position lÃ¶schen"
                             onClick={() => handleDeletePosition(idx)}
                           >
                             <Trash2 className="h-4 w-4" />
@@ -1334,7 +1333,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
                 {state.positionen.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={24} className="text-center text-xs text-muted-foreground py-4">
-                      Noch keine Positionen — Artikel unten eingeben
+                      Noch keine Positionen â€” Artikel unten eingeben
                     </TableCell>
                   </TableRow>
                 )}
@@ -1343,7 +1342,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
           </div>
         </Card>
 
-        {/* ── Positions-Details ─────────────────────────────────────────────── */}
+        {/* â”€â”€ Positions-Details â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <Card className="mb-4 p-4">
           <h2 className="mb-2 font-semibold text-sm">
             {state.aktivePositionIndex !== null
@@ -1422,7 +1421,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
               />
             </div>
             <div className="space-y-1">
-              <Label className="text-xs">verfügbar:</Label>
+              <Label className="text-xs">verfÃ¼gbar:</Label>
               <Input
                 value={`${currentPosition.verfuegbar} ${currentPosition.einheit}`}
                 readOnly className="h-8"
@@ -1489,7 +1488,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
           </div>
         </Card>
 
-        {/* ── Summen ────────────────────────────────────────────────────────── */}
+        {/* â”€â”€ Summen â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <Card className="mb-4 p-4">
           <div className="grid grid-cols-7 gap-4">
             <div className="space-y-1">
@@ -1530,7 +1529,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
 
       </div>
 
-      {/* ── Bottom-Toolbar ────────────────────────────────────────────────── */}
+      {/* â”€â”€ Bottom-Toolbar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div className="border-t bg-white px-4 py-2 flex items-center justify-between">
         <div className="flex gap-2 flex-wrap">
           <Button onClick={() => setShowPrintDialog(true)} variant="outline" size="sm" className="gap-2">
@@ -1547,7 +1546,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
             <Folder className="h-4 w-4" />
             Dateien
           </Button>
-          <Button variant="outline" size="sm" className="gap-2" onClick={() => { const q = state.customer?.id ? `?customerId=${state.customer.id}` : ''; navigate(`/contracts${q}`); push('Kontrakte geöffnet.'); }} title="Kontrakte anzeigen/verknüpfen">
+          <Button variant="outline" size="sm" className="gap-2" onClick={() => { const q = state.customer?.id ? `?customerId=${state.customer.id}` : ''; navigate(`/contracts${q}`); push('Kontrakte geÃ¶ffnet.'); }} title="Kontrakte anzeigen/verknÃ¼pfen">
             <FileCheck className="h-4 w-4" />
             Kontrakte
           </Button>
@@ -1563,7 +1562,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
           <Button variant="outline" size="sm" className="gap-2 text-red-600"
             onClick={() => setShowDeleteDialog(true)}>
             <Trash2 className="h-4 w-4" />
-            Auftrag löschen
+            Auftrag lÃ¶schen
           </Button>
         </div>
         <div className="flex gap-2">
@@ -1575,26 +1574,26 @@ export default function SalesOrderEditorPage(): JSX.Element {
           </ShortcutHintButton>
           <ShortcutHintButton shortcut="Strg+F7">
             <Button variant="outline" onClick={() => navigate('/verkauf')} size="sm">
-              Schließen
+              SchlieÃŸen
             </Button>
           </ShortcutHintButton>
         </div>
       </div>
 
-      {/* ── Dialoge ──────────────────────────────────────────────────────────── */}
+      {/* â”€â”€ Dialoge â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
 
       {/* Auftrag-Auswahl */}
       <Dialog open={showAuftragAuswahl} onOpenChange={setShowAuftragAuswahl}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Verkaufs-Aufträge</DialogTitle>
+            <DialogTitle>Verkaufs-AuftrÃ¤ge</DialogTitle>
           </DialogHeader>
           <div className="flex items-center gap-2 mb-3">
             <Search className="h-4 w-4 text-muted-foreground" />
             <Input
               value={sucheText}
               onChange={(e) => setSucheText(e.target.value)}
-              placeholder="Auftrag-Nr. oder Kunde suchen…"
+              placeholder="Auftrag-Nr. oder Kunde suchenâ€¦"
               className="h-8 text-sm"
               autoFocus
             />
@@ -1615,13 +1614,13 @@ export default function SalesOrderEditorPage(): JSX.Element {
                 {isLoading ? (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center text-sm text-muted-foreground py-6">
-                      Lade Aufträge…
+                      Lade AuftrÃ¤geâ€¦
                     </TableCell>
                   </TableRow>
                 ) : filteredAuftraege.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center text-sm text-muted-foreground py-6">
-                      Keine Aufträge gefunden
+                      Keine AuftrÃ¤ge gefunden
                     </TableCell>
                   </TableRow>
                 ) : filteredAuftraege.map((a, idx) => (
@@ -1635,7 +1634,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
                     <TableCell className="py-1">{a.kunde}</TableCell>
                     <TableCell className="py-1">{a.liefertermin}</TableCell>
                     <TableCell className="py-1 text-right">
-                      {a.betrag.toLocaleString('de-DE', { minimumFractionDigits: 2 })} €
+                      {a.betrag.toLocaleString('de-DE', { minimumFractionDigits: 2 })} â‚¬
                     </TableCell>
                     <TableCell className="py-1">{a.status}</TableCell>
                   </TableRow>
@@ -1660,7 +1659,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
             </Button>
             <Button size="sm"
               onClick={() => filteredAuftraege[0] && handleAuftragAuswaehlen(filteredAuftraege[0])}>
-              Übernehmen
+              Ãœbernehmen
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1691,22 +1690,22 @@ export default function SalesOrderEditorPage(): JSX.Element {
         onClose={() => setShowAttachmentDialog(false)}
         businessObjectType="sales_order"
         businessObjectId={state.id}
-        title="UNTERLAGEN / DATEIEN — AUFTRAG"
+        title="UNTERLAGEN / DATEIEN â€” AUFTRAG"
       />
 
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle>Auftrag löschen?</DialogTitle>
+            <DialogTitle>Auftrag lÃ¶schen?</DialogTitle>
           </DialogHeader>
           <div className="py-2 text-sm">
             {state.id
-              ? <><strong>{state.auftragNr}</strong> wird unwiderruflich gelöscht. Fortfahren?</>
+              ? <><strong>{state.auftragNr}</strong> wird unwiderruflich gelÃ¶scht. Fortfahren?</>
               : 'Das Formular wird geleert. Nicht gespeicherte Daten gehen verloren.'}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>Abbrechen</Button>
-            <Button variant="destructive" onClick={() => void handleDelete()}>Löschen</Button>
+            <Button variant="destructive" onClick={() => void handleDelete()}>LÃ¶schen</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -1752,7 +1751,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
                     </div>
                   ) : (
                     <p className="text-sm text-muted-foreground italic">
-                      Keine Chefanweisung für diesen Kunden hinterlegt.
+                      Keine Chefanweisung fÃ¼r diesen Kunden hinterlegt.
                     </p>
                   )}
                 </div>
@@ -1761,7 +1760,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowInformationDialog(false)}>
-              Schließen
+              SchlieÃŸen
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1770,7 +1769,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
       <Dialog open={showNiederlassungDialog} onOpenChange={setShowNiederlassungDialog}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Niederlassung auswählen</DialogTitle>
+            <DialogTitle>Niederlassung auswÃ¤hlen</DialogTitle>
           </DialogHeader>
           <div className="space-y-2 max-h-60 overflow-auto">
             {branchesList.map((b) => (
@@ -1791,7 +1790,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
             )}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowNiederlassungDialog(false)}>Schließen</Button>
+            <Button variant="outline" onClick={() => setShowNiederlassungDialog(false)}>SchlieÃŸen</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -1812,10 +1811,11 @@ export default function SalesOrderEditorPage(): JSX.Element {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowVertreterDialog(false)}>Abbrechen</Button>
-            <Button onClick={handleVertreterConfirm}>Übernehmen</Button>
+            <Button onClick={handleVertreterConfirm}>Ãœbernehmen</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
   )
 }
+

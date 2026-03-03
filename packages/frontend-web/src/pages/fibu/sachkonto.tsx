@@ -16,7 +16,7 @@ export default function SachkontoPage(): JSX.Element {
 
   const { data: account, isLoading: loadingAccount, refetch } = useQuery({
     queryKey: ['fibu', 'sachkonto', id],
-    queryFn: () => financeService.getAccount(id!),
+    queryFn: () => financeService.getAccount(String(id)),
     enabled: !!id && id !== 'neu',
     staleTime: 5 * 60 * 1000,
   })

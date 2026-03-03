@@ -13,7 +13,6 @@ import {
   TrendingUp,
   Users,
 } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import { queryKeys } from '@/lib/query'
@@ -357,4 +356,3 @@ export function getWidgetComponent(type: string) {
   const definition = widgetRegistry.find((w) => w.type === type)
   return definition?.component || KPIWidget
 }
-

@@ -17,6 +17,13 @@ export default function KulturpflanzenListePage(): JSX.Element {
   const [searchTerm, setSearchTerm] = useState('')
   const { data, isLoading, isError, error, refetch } = useKulturen()
 
+  const kulturen: Kultur[] = data ?? []
+
+  const filteredKulturen = useMemo(
+    () => kulturen.filter((k) => k.name.toLowerCase().includes(searchTerm.toLowerCase())),
+    [kulturen, searchTerm]
+  )
+
   if (isLoading) {
     return (
       <div className="p-6 space-y-4">
@@ -29,13 +36,6 @@ export default function KulturpflanzenListePage(): JSX.Element {
   if (isError) {
     return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
   }
-
-  const kulturen: Kultur[] = data ?? []
-
-  const filteredKulturen = useMemo(
-    () => kulturen.filter((k) => k.name.toLowerCase().includes(searchTerm.toLowerCase())),
-    [kulturen, searchTerm]
-  )
 
   const handleExport = (): void => {
     const header = 'Kulturpflanze;Kategorie;Flaeche_ha;Ertrag_t_ha;Preis_EUR_t;DB_EUR_ha\n'

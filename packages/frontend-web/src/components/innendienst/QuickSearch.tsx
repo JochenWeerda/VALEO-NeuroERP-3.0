@@ -117,14 +117,6 @@ const typeIcons: Record<SearchResult['type'], React.ReactNode> = {
   delivery: <Package className="h-4 w-4" />,
 }
 
-const typeLabels: Record<SearchResult['type'], string> = {
-  customer: 'Kunde',
-  order: 'Auftrag',
-  article: 'Artikel',
-  invoice: 'Rechnung',
-  delivery: 'Lieferung',
-}
-
 const typeColors: Record<SearchResult['type'], string> = {
   customer: 'text-blue-600 bg-blue-100',
   order: 'text-emerald-600 bg-emerald-100',

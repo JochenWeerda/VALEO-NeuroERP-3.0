@@ -16,7 +16,6 @@ import {
   Search,
   ArrowLeftRight,
   Truck,
-  BarChart3,
   Scan,
   MapPin,
 } from 'lucide-react'

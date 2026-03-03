@@ -372,19 +372,19 @@ export const financeService = {
 
   async getBilanz(params: { period: string; tenant_id?: string }): Promise<BalanceSheet> {
     const p = new URLSearchParams({ period: params.period, tenant_id: params.tenant_id || 'system' })
-    const response = await apiClient.get<BalanceSheet>(`/api/v1/finance/financial-reports/balance-sheet?${p}`)
+    const response = await apiClient.get<BalanceSheet>(`/api/v1/finance/financial-reports/balance-sheet?${p.toString()}`)
     return response.data
   },
 
   async getGuV(params: { period: string; tenant_id?: string }): Promise<ProfitLoss> {
     const p = new URLSearchParams({ period: params.period, tenant_id: params.tenant_id || 'system' })
-    const response = await apiClient.get<ProfitLoss>(`/api/v1/finance/financial-reports/profit-loss?${p}`)
+    const response = await apiClient.get<ProfitLoss>(`/api/v1/finance/financial-reports/profit-loss?${p.toString()}`)
     return response.data
   },
 
   async getBwa(params: { period: string; tenant_id?: string }): Promise<BWA> {
     const p = new URLSearchParams({ period: params.period, tenant_id: params.tenant_id || 'system' })
-    const response = await apiClient.get<BWA>(`/api/v1/finance/financial-reports/bwa?${p}`)
+    const response = await apiClient.get<BWA>(`/api/v1/finance/financial-reports/bwa?${p.toString()}`)
     return response.data
   },
 

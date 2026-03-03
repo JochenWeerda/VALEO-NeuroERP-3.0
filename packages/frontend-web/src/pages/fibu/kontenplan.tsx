@@ -56,15 +56,15 @@ export default function KontenplanPage(): JSX.Element {
     staleTime: 2 * 60 * 1000,
   })
 
-  if (isError) {
-    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
-  }
-
   const filteredKonten = useMemo(() => {
     if (!searchTerm.trim()) return konten
     const q = searchTerm.trim().toLowerCase()
     return konten.filter((k) => k.kontonummer.toLowerCase().includes(q) || k.bezeichnung.toLowerCase().includes(q))
   }, [konten, searchTerm])
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
 
   const handleExport = () => {
     try {
