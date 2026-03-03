@@ -315,7 +315,7 @@ OP_EDITABLE_STATUSES = {"offen", "teilweise"}
 
 
 @router.put("/{op_id}", response_model=OpenItem)
-async def update_open_item(op_id: str, payload: OpenItemCreate, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db), request: Optional[Request] = None):
+async def update_open_item(op_id: str, payload: OpenItemCreate, request: Request, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     _validate_op(payload)
     row = db.execute(
         text("SELECT id, op_status FROM offene_posten WHERE id = :id AND tenant_id = :tenant_id"),

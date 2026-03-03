@@ -225,11 +225,11 @@ async def post_journal_entry(
         raise HTTPException(status_code=500, detail=f"Failed to post journal entry: {str(e)}")
 
 
-@router.post("/{entry_id}/reverse", response_model=dict)
+@router.post("/{entry_id}/reverse", response_model=None)
 async def reverse_journal_entry(
     entry_id: str,
+    request: Request,
     reason: str = Query(..., description="Reason for reversal"),
-    request: Optional[Request] = None,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):

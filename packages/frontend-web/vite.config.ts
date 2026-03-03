@@ -12,7 +12,7 @@ export default defineConfig(({ mode }) => {
   const DEFAULT_SSE_PROXY = process.env.VITE_SSE_PROXY || env.VITE_SSE_PROXY || 'http://localhost:5174'
   // Im Container: backend (Docker-Service-Name), lokal: localhost
   const DEFAULT_BACKEND_PROXY = process.env.VITE_BACKEND_PROXY || env.VITE_BACKEND_PROXY || 'http://localhost:8000'
-  const DEV_PORT = Number(process.env.VITE_PORT || env.VITE_PORT || 3001)
+  const DEV_PORT = Number(process.env.VITE_PORT || env.VITE_PORT || 3000)
 
   return {
   plugins: [
@@ -41,10 +41,9 @@ export default defineConfig(({ mode }) => {
     exclude: [],
   },
   server: {
-    // 3000 is frequently occupied (Docker/other dev servers). Default to 3001 for stability.
     port: DEV_PORT,
     host: '0.0.0.0', // Alle Interfaces — lokal, LAN, Docker, Tunnel
-    strictPort: false,
+    strictPort: true, // Port 3000 erzwingen; bei Belegung Fehler statt Fallback
     // 'all' → localhost, LAN-IP, ngrok, Cloudflare-Tunnel, Cloud-Domain — alle erlaubt
     allowedHosts: 'all',
     hmr: {
@@ -80,6 +79,41 @@ export default defineConfig(({ mode }) => {
         target: DEFAULT_SSE_PROXY,
         changeOrigin: true,
         ws: true,
+      },
+      '/api/admin': {
+        target: DEFAULT_BACKEND_PROXY,
+        changeOrigin: true,
+        secure: false,
+      },
+      '/api/contracts': {
+        target: DEFAULT_BACKEND_PROXY,
+        changeOrigin: true,
+        secure: false,
+      },
+      '/api/agribusiness': {
+        target: DEFAULT_BACKEND_PROXY,
+        changeOrigin: true,
+        secure: false,
+      },
+      '/api/audit': {
+        target: DEFAULT_BACKEND_PROXY,
+        changeOrigin: true,
+        secure: false,
+      },
+      '/api/crm-sales': {
+        target: DEFAULT_BACKEND_PROXY,
+        changeOrigin: true,
+        secure: false,
+      },
+      '/api/crm': {
+        target: DEFAULT_BACKEND_PROXY,
+        changeOrigin: true,
+        secure: false,
+      },
+      '/api/finance': {
+        target: DEFAULT_BACKEND_PROXY,
+        changeOrigin: true,
+        secure: false,
       },
     },
   },

@@ -1,0 +1,4281 @@
+{
+  "generatedAt": "2026-03-03T07:07:38.084Z",
+  "totalTested": 494,
+  "passed": 484,
+  "failed": 10,
+  "byCategory": {
+    "OK": 484,
+    "CONSOLE_ERROR": 8,
+    "TIMEOUT": 1,
+    "RENDER_ERROR": 1
+  },
+  "failures": [
+    {
+      "path": "/agrar/aussaat",
+      "source": "static",
+      "category": "CONSOLE_ERROR",
+      "details": "Failed to load DMS status: TypeError: Failed to fetch\n    at http://localhost:3000/src/pages/admin/setup/dms-integration.tsx:62:30\n    at http://localhost:3000/src/pages/admin/setup/dms-integration.tsx:73:10\n    at commitHookEffectListMount (http://localhost:3000/node_modules/.vite/deps/chunk-RPCDYK",
+      "consoleErrors": [
+        "Failed to load DMS status: TypeError: Failed to fetch\n    at http://localhost:3000/src/pages/admin/setup/dms-integration.tsx:62:30\n    at http://localhost:3000/src/pages/admin/setup/dms-integration.tsx:73:10\n    at commitHookEffectListMount (http://localhost:3000/node_modules/.vite/deps/chunk-RPCDYK",
+        "Failed to load DMS status: TypeError: Failed to fetch\n    at http://localhost:3000/src/pages/admin/setup/dms-integration.tsx:62:30\n    at http://localhost:3000/src/pages/admin/setup/dms-integration.tsx:73:10\n    at commitHookEffectListMount (http://localhost:3000/node_modules/.vite/deps/chunk-RPCDYK"
+      ],
+      "durationMs": 5427
+    },
+    {
+      "path": "/controlling/dashboard-verwaltung",
+      "source": "static",
+      "category": "CONSOLE_ERROR",
+      "details": "Error fetching contracts: TypeError: Failed to fetch\n    at fetchContracts (http://localhost:3000/src/pages/contracts-v2.tsx?t=1772518854313:61:32)\n    at http://localhost:3000/src/pages/contracts-v2.tsx?t=1772518854313:79:5\n    at commitHookEffectListMount (http://localhost:3000/node_modules/.vite/",
+      "consoleErrors": [
+        "Error fetching contracts: TypeError: Failed to fetch\n    at fetchContracts (http://localhost:3000/src/pages/contracts-v2.tsx?t=1772518854313:61:32)\n    at http://localhost:3000/src/pages/contracts-v2.tsx?t=1772518854313:79:5\n    at commitHookEffectListMount (http://localhost:3000/node_modules/.vite/"
+      ],
+      "durationMs": 4671
+    },
+    {
+      "path": "/crm/opportunities",
+      "source": "static",
+      "category": "CONSOLE_ERROR",
+      "details": "ErrorBoundary caught error: TypeError: Cannot create property 'firma' on string '<!doctype html>\r\n<html lang=\"de\">\r\n  <head>\n    <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\";\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () => {};\nwindow.$RefreshSig$ = () => (ty",
+      "consoleErrors": [
+        "The above error occurred in the <Controller> component:\n\n    at Controller (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24997e04:379:35)\n    at div\n    at div\n    at div\n    at _c9 (http://localhost:3000/src/components/ui/card.tsx:56:12)\n    at div\n    at _c (http://localhost:3",
+        "ErrorBoundary caught error: TypeError: Cannot create property 'firma' on string '<!doctype html>\r\n<html lang=\"de\">\r\n  <head>\n    <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\";\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () => {};\nwindow.$RefreshSig$ = () => (ty",
+        "The above error occurred in the <Controller> component:\n\n    at Controller (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24997e04:379:35)\n    at div\n    at div\n    at div\n    at _c9 (http://localhost:3000/src/components/ui/card.tsx:56:12)\n    at div\n    at _c (http://localhost:3",
+        "ErrorBoundary caught error: TypeError: Cannot create property 'anrede' on string '<!doctype html>\r\n<html lang=\"de\">\r\n  <head>\n    <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\";\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () => {};\nwindow.$RefreshSig$ = () => (t",
+        "The above error occurred in the <Controller> component:\n\n    at Controller (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24997e04:379:35)\n    at div\n    at div\n    at div\n    at _c9 (http://localhost:3000/src/components/ui/card.tsx:56:12)\n    at div\n    at _c (http://localhost:3",
+        "ErrorBoundary caught error: TypeError: Cannot create property 'vorname' on string '<!doctype html>\r\n<html lang=\"de\">\r\n  <head>\n    <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\";\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () => {};\nwindow.$RefreshSig$ = () => (",
+        "The above error occurred in the <Controller> component:\n\n    at Controller (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24997e04:379:35)\n    at div\n    at div\n    at div\n    at _c9 (http://localhost:3000/src/components/ui/card.tsx:56:12)\n    at div\n    at _c (http://localhost:3",
+        "ErrorBoundary caught error: TypeError: Cannot create property 'nachname' on string '<!doctype html>\r\n<html lang=\"de\">\r\n  <head>\n    <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\";\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () => {};\nwindow.$RefreshSig$ = () => "
+      ],
+      "durationMs": 4654
+    },
+    {
+      "path": "/finance/bank-abgleich",
+      "source": "static",
+      "category": "CONSOLE_ERROR",
+      "details": "Error fetching audit stats: TypeError: Failed to fetch\n    at fetchStats (http://localhost:3000/src/pages/finance/audit-trail.tsx:66:32)\n    at http://localhost:3000/src/pages/finance/audit-trail.tsx:77:10\n    at commitHookEffectListMount (http://localhost:3000/node_modules/.vite/deps/chunk-RPCDYKBN",
+      "consoleErrors": [
+        "Error fetching audit stats: TypeError: Failed to fetch\n    at fetchStats (http://localhost:3000/src/pages/finance/audit-trail.tsx:66:32)\n    at http://localhost:3000/src/pages/finance/audit-trail.tsx:77:10\n    at commitHookEffectListMount (http://localhost:3000/node_modules/.vite/deps/chunk-RPCDYKBN",
+        "Error fetching audit stats: TypeError: Failed to fetch\n    at fetchStats (http://localhost:3000/src/pages/finance/audit-trail.tsx:66:32)\n    at http://localhost:3000/src/pages/finance/audit-trail.tsx:77:10\n    at commitHookEffectListMount (http://localhost:3000/node_modules/.vite/deps/chunk-RPCDYKBN",
+        "Error fetching audit logs: TypeError: Failed to fetch\n    at fetchAuditLogs (http://localhost:3000/src/pages/finance/audit-trail.tsx:47:32)\n    at http://localhost:3000/src/pages/finance/audit-trail.tsx:76:10\n    at commitHookEffectListMount (http://localhost:3000/node_modules/.vite/deps/chunk-RPCDY",
+        "Error fetching audit logs: TypeError: Failed to fetch\n    at fetchAuditLogs (http://localhost:3000/src/pages/finance/audit-trail.tsx:47:32)\n    at http://localhost:3000/src/pages/finance/audit-trail.tsx:76:10\n    at commitHookEffectListMount (http://localhost:3000/node_modules/.vite/deps/chunk-RPCDY"
+      ],
+      "durationMs": 3976
+    },
+    {
+      "path": "/finance/wechselkurse",
+      "source": "static",
+      "category": "CONSOLE_ERROR",
+      "details": "ErrorBoundary caught error: TypeError: Cannot read properties of undefined (reading 'substring')\n    at getNodeParentName (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24997e04:16:40)\n    at isNameInFieldArray (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24",
+      "consoleErrors": [
+        "Warning: Each child in a list should have a unique \"key\" prop.%s%s See https://reactjs.org/link/warning-keys for more information.%s \n\nCheck the render method of `ObjectPage`.  \n    at div\n    at ObjectPage (http://localhost:3000/src/components/mask-builder/ObjectPage.tsx:32:3)\n    at UStVAPage (htt",
+        "The above error occurred in the <Controller> component:\n\n    at Controller (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24997e04:379:35)\n    at div\n    at div\n    at div\n    at _c9 (http://localhost:3000/src/components/ui/card.tsx:56:12)\n    at div\n    at _c (http://localhost:3",
+        "ErrorBoundary caught error: TypeError: Cannot read properties of undefined (reading 'substring')\n    at getNodeParentName (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24997e04:16:40)\n    at isNameInFieldArray (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24"
+      ],
+      "durationMs": 3711
+    },
+    {
+      "path": "/futtermittel/futtermittel-bestellung",
+      "source": "static",
+      "category": "CONSOLE_ERROR",
+      "details": "ErrorBoundary caught error: TypeError: Cannot create property 'artikelnummer' on string '<!doctype html>\r\n<html lang=\"de\">\r\n  <head>\n    <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\";\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () => {};\nwindow.$RefreshSig$ = (",
+      "consoleErrors": [
+        "The above error occurred in the <Controller> component:\n\n    at Controller (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24997e04:379:35)\n    at div\n    at div\n    at div\n    at _c9 (http://localhost:3000/src/components/ui/card.tsx:56:12)\n    at div\n    at _c (http://localhost:3",
+        "ErrorBoundary caught error: TypeError: Cannot create property 'artikelnummer' on string '<!doctype html>\r\n<html lang=\"de\">\r\n  <head>\n    <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\";\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () => {};\nwindow.$RefreshSig$ = (",
+        "The above error occurred in the <Controller> component:\n\n    at Controller (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24997e04:379:35)\n    at div\n    at div\n    at div\n    at _c9 (http://localhost:3000/src/components/ui/card.tsx:56:12)\n    at div\n    at _c (http://localhost:3",
+        "ErrorBoundary caught error: TypeError: Cannot create property 'name' on string '<!doctype html>\r\n<html lang=\"de\">\r\n  <head>\n    <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\";\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () => {};\nwindow.$RefreshSig$ = () => (typ",
+        "The above error occurred in the <Controller> component:\n\n    at Controller (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24997e04:379:35)\n    at div\n    at div\n    at div\n    at _c9 (http://localhost:3000/src/components/ui/card.tsx:56:12)\n    at div\n    at _c (http://localhost:3",
+        "ErrorBoundary caught error: TypeError: Cannot create property 'typ' on string '<!doctype html>\r\n<html lang=\"de\">\r\n  <head>\n    <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\";\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () => {};\nwindow.$RefreshSig$ = () => (type",
+        "The above error occurred in the <Controller> component:\n\n    at Controller (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24997e04:379:35)\n    at div\n    at div\n    at div\n    at _c9 (http://localhost:3000/src/components/ui/card.tsx:56:12)\n    at div\n    at _c (http://localhost:3",
+        "ErrorBoundary caught error: TypeError: Cannot create property 'hersteller' on string '<!doctype html>\r\n<html lang=\"de\">\r\n  <head>\n    <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\";\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () => {};\nwindow.$RefreshSig$ = () ="
+      ],
+      "durationMs": 4464
+    },
+    {
+      "path": "/inbox",
+      "source": "static",
+      "category": "CONSOLE_ERROR",
+      "details": "ErrorBoundary caught error: TypeError: Cannot create property 'artikelnummer' on string '<!doctype html>\r\n<html lang=\"de\">\r\n  <head>\n    <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\";\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () => {};\nwindow.$RefreshSig$ = (",
+      "consoleErrors": [
+        "The above error occurred in the <Controller> component:\n\n    at Controller (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24997e04:379:35)\n    at div\n    at div\n    at div\n    at _c9 (http://localhost:3000/src/components/ui/card.tsx:56:12)\n    at div\n    at _c (http://localhost:3",
+        "ErrorBoundary caught error: TypeError: Cannot create property 'artikelnummer' on string '<!doctype html>\r\n<html lang=\"de\">\r\n  <head>\n    <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\";\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () => {};\nwindow.$RefreshSig$ = (",
+        "The above error occurred in the <Controller> component:\n\n    at Controller (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24997e04:379:35)\n    at div\n    at div\n    at div\n    at _c9 (http://localhost:3000/src/components/ui/card.tsx:56:12)\n    at div\n    at _c (http://localhost:3",
+        "ErrorBoundary caught error: TypeError: Cannot create property 'name' on string '<!doctype html>\r\n<html lang=\"de\">\r\n  <head>\n    <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\";\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () => {};\nwindow.$RefreshSig$ = () => (typ",
+        "The above error occurred in the <Controller> component:\n\n    at Controller (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24997e04:379:35)\n    at div\n    at div\n    at div\n    at _c9 (http://localhost:3000/src/components/ui/card.tsx:56:12)\n    at div\n    at _c (http://localhost:3",
+        "ErrorBoundary caught error: TypeError: Cannot create property 'typ' on string '<!doctype html>\r\n<html lang=\"de\">\r\n  <head>\n    <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\";\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () => {};\nwindow.$RefreshSig$ = () => (type",
+        "The above error occurred in the <Controller> component:\n\n    at Controller (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24997e04:379:35)\n    at div\n    at div\n    at div\n    at _c9 (http://localhost:3000/src/components/ui/card.tsx:56:12)\n    at div\n    at _c (http://localhost:3",
+        "ErrorBoundary caught error: TypeError: Cannot create property 'futtergruppe' on string '<!doctype html>\r\n<html lang=\"de\">\r\n  <head>\n    <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\";\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () => {};\nwindow.$RefreshSig$ = ()"
+      ],
+      "durationMs": 4047
+    },
+    {
+      "path": "/sales/deliveries/new",
+      "source": "static",
+      "category": "CONSOLE_ERROR",
+      "details": "ErrorBoundary caught error: TypeError: Cannot create property 'number' on string '<!doctype html>\r\n<html lang=\"de\">\r\n  <head>\n    <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\";\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () => {};\nwindow.$RefreshSig$ = () => (t",
+      "consoleErrors": [
+        "The above error occurred in the <Controller> component:\n\n    at Controller (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24997e04:379:35)\n    at div\n    at div\n    at div\n    at _c9 (http://localhost:3000/src/components/ui/card.tsx:56:12)\n    at div\n    at _c (http://localhost:3",
+        "ErrorBoundary caught error: TypeError: Cannot create property 'number' on string '<!doctype html>\r\n<html lang=\"de\">\r\n  <head>\n    <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\";\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () => {};\nwindow.$RefreshSig$ = () => (t",
+        "The above error occurred in the <Controller> component:\n\n    at Controller (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24997e04:379:35)\n    at div\n    at div\n    at div\n    at _c9 (http://localhost:3000/src/components/ui/card.tsx:56:12)\n    at div\n    at _c (http://localhost:3",
+        "ErrorBoundary caught error: TypeError: Cannot create property 'date' on string '<!doctype html>\r\n<html lang=\"de\">\r\n  <head>\n    <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\";\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () => {};\nwindow.$RefreshSig$ = () => (typ",
+        "The above error occurred in the <Controller> component:\n\n    at Controller (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24997e04:379:35)\n    at div\n    at div\n    at div\n    at _c9 (http://localhost:3000/src/components/ui/card.tsx:56:12)\n    at div\n    at _c (http://localhost:3",
+        "ErrorBoundary caught error: TypeError: Cannot create property 'customerId' on string '<!doctype html>\r\n<html lang=\"de\">\r\n  <head>\n    <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\";\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () => {};\nwindow.$RefreshSig$ = () =",
+        "The above error occurred in the <Controller> component:\n\n    at Controller (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24997e04:379:35)\n    at div\n    at div\n    at div\n    at _c9 (http://localhost:3000/src/components/ui/card.tsx:56:12)\n    at div\n    at _c (http://localhost:3",
+        "ErrorBoundary caught error: TypeError: Cannot create property 'sourceInvoice' on string '<!doctype html>\r\n<html lang=\"de\">\r\n  <head>\n    <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\";\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () => {};\nwindow.$RefreshSig$ = (",
+        "The above error occurred in the <Controller> component:\n\n    at Controller (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24997e04:379:35)\n    at div\n    at div\n    at div\n    at _c9 (http://localhost:3000/src/components/ui/card.tsx:56:12)\n    at div\n    at _c (http://localhost:3",
+        "ErrorBoundary caught error: TypeError: Cannot create property 'reason' on string '<!doctype html>\r\n<html lang=\"de\">\r\n  <head>\n    <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\";\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () => {};\nwindow.$RefreshSig$ = () => (t",
+        "The above error occurred in the <Controller> component:\n\n    at Controller (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24997e04:379:35)\n    at div\n    at div\n    at div\n    at _c9 (http://localhost:3000/src/components/ui/card.tsx:56:12)\n    at div\n    at _c (http://localhost:3",
+        "ErrorBoundary caught error: TypeError: Cannot create property 'reasonText' on string '<!doctype html>\r\n<html lang=\"de\">\r\n  <head>\n    <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\";\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () => {};\nwindow.$RefreshSig$ = () =",
+        "The above error occurred in the <Controller> component:\n\n    at Controller (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24997e04:379:35)\n    at div\n    at div\n    at div\n    at _c9 (http://localhost:3000/src/components/ui/card.tsx:56:12)\n    at div\n    at _c (http://localhost:3",
+        "ErrorBoundary caught error: TypeError: Cannot create property 'status' on string '<!doctype html>\r\n<html lang=\"de\">\r\n  <head>\n    <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\";\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () => {};\nwindow.$RefreshSig$ = () => (t"
+      ],
+      "durationMs": 4047
+    },
+    {
+      "path": "/termine/kalender",
+      "source": "static",
+      "category": "TIMEOUT",
+      "details": "page.goto: Timeout 20000ms exceeded.\nCall log:\n  \u001b[2m- navigating to \"http://localhost:3000/termine/kalender\", waiting until \"domcontentloaded\"\u001b[22m\n",
+      "consoleErrors": [],
+      "durationMs": 20010
+    },
+    {
+      "path": "/verkauf/kunde-neu",
+      "source": "static",
+      "category": "RENDER_ERROR",
+      "details": "ErrorBoundary ausgelöst",
+      "consoleErrors": [
+        "The above error occurred in one of your React components:\n\n    at Lazy\n    at Suspense\n    at ErrorBoundary (http://localhost:3000/src/shared/errors/ErrorBoundary.tsx:5:8)\n    at RenderedRoute (http://localhost:3000/node_modules/.vite/deps/react-router-dom.js?v=24997e04:4108:5)\n    at Outlet (http:/",
+        "ErrorBoundary caught error: TypeError: Cannot read properties of undefined (reading 'map')\n    at http://localhost:3000/src/features/crm-masks/customer-mask-support.ts:45:37\n    at Array.flatMap (<anonymous>)\n    at http://localhost:3000/src/features/crm-masks/customer-mask-support.ts:44:29\n    at A"
+      ],
+      "durationMs": 4152
+    }
+  ],
+  "all": [
+    {
+      "path": "/admin/audit-log",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 19936
+    },
+    {
+      "path": "/admin/benutzer",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 6101
+    },
+    {
+      "path": "/admin/benutzer-liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5782
+    },
+    {
+      "path": "/admin/compliance",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5306
+    },
+    {
+      "path": "/admin/compliance-dashboard",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5471
+    },
+    {
+      "path": "/admin/gap-pipeline",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 10763
+    },
+    {
+      "path": "/admin/GapPipelineConsole",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5396
+    },
+    {
+      "path": "/admin/integrationen-quarantaene",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5445
+    },
+    {
+      "path": "/admin/monitoring/alerts",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5570
+    },
+    {
+      "path": "/admin/monitoring/regeln",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 6116
+    },
+    {
+      "path": "/admin/report-berechtigungen",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5621
+    },
+    {
+      "path": "/admin/rollen-verwaltung",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5781
+    },
+    {
+      "path": "/admin/setup",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5744
+    },
+    {
+      "path": "/admin/setup/dms-integration",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5823
+    },
+    {
+      "path": "/agrar/aussaat",
+      "source": "static",
+      "category": "CONSOLE_ERROR",
+      "details": "Failed to load DMS status: TypeError: Failed to fetch\n    at http://localhost:3000/src/pages/admin/setup/dms-integration.tsx:62:30\n    at http://localhost:3000/src/pages/admin/setup/dms-integration.tsx:73:10\n    at commitHookEffectListMount (http://localhost:3000/node_modules/.vite/deps/chunk-RPCDYK",
+      "consoleErrors": [
+        "Failed to load DMS status: TypeError: Failed to fetch\n    at http://localhost:3000/src/pages/admin/setup/dms-integration.tsx:62:30\n    at http://localhost:3000/src/pages/admin/setup/dms-integration.tsx:73:10\n    at commitHookEffectListMount (http://localhost:3000/node_modules/.vite/deps/chunk-RPCDYK",
+        "Failed to load DMS status: TypeError: Failed to fetch\n    at http://localhost:3000/src/pages/admin/setup/dms-integration.tsx:62:30\n    at http://localhost:3000/src/pages/admin/setup/dms-integration.tsx:73:10\n    at commitHookEffectListMount (http://localhost:3000/node_modules/.vite/deps/chunk-RPCDYK"
+      ],
+      "durationMs": 5427
+    },
+    {
+      "path": "/agrar/aussaat/liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5358
+    },
+    {
+      "path": "/agrar/biostimulanzien",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 6049
+    },
+    {
+      "path": "/agrar/biostimulanzien-liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5584
+    },
+    {
+      "path": "/agrar/bodenproben",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5839
+    },
+    {
+      "path": "/agrar/bodenproben/liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5195
+    },
+    {
+      "path": "/agrar/duenger",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5654
+    },
+    {
+      "path": "/agrar/duenger-liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5837
+    },
+    {
+      "path": "/agrar/duenger-stamm",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 6513
+    },
+    {
+      "path": "/agrar/duenger-stamm/test-123",
+      "source": "param",
+      "original": "/agrar/duenger-stamm/:id",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 6382
+    },
+    {
+      "path": "/agrar/duenger/bedarfsrechner",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5691
+    },
+    {
+      "path": "/agrar/duenger/liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 6408
+    },
+    {
+      "path": "/agrar/duenger/mischungen",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 7944
+    },
+    {
+      "path": "/agrar/duenger/stamm",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 6952
+    },
+    {
+      "path": "/agrar/duenger/stamm/test-123",
+      "source": "param",
+      "original": "/agrar/duenger/stamm/:id",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 6631
+    },
+    {
+      "path": "/agrar/duengung/planung",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 7355
+    },
+    {
+      "path": "/agrar/ernte",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 6711
+    },
+    {
+      "path": "/agrar/ernte-annahme-erfassung",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 6672
+    },
+    {
+      "path": "/agrar/ernte-annahme-erfassung/test-123",
+      "source": "param",
+      "original": "/agrar/ernte-annahme-erfassung/:id",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 8096
+    },
+    {
+      "path": "/agrar/ernte/liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [
+        "HTTP request failed {requestId: 9c8a5c37-8ceb-4da5-ba54-bdd7c2941932, correlationId: 9c8a5c37-8ceb-4da5-ba54-bdd7c2941932, method: get, url: /api/v1/agrar/harvest-acceptance/test-123, status: 404}",
+        "Fehler beim Laden der Ernte-Annahme: AxiosError",
+        "HTTP request failed {requestId: 97c1e059-8038-4916-91d5-f37b1f5b85be, correlationId: 97c1e059-8038-4916-91d5-f37b1f5b85be, method: get, url: /api/v1/agrar/harvest-acceptance/test-123, status: 404}",
+        "Fehler beim Laden der Ernte-Annahme: AxiosError",
+        "HTTP request failed {requestId: cf5fd712-33a3-4c4b-b46c-95c7e38b7eea, correlationId: cf5fd712-33a3-4c4b-b46c-95c7e38b7eea, method: get, url: /api/v1/agrar/harvest-acceptance/test-123, status: 404}",
+        "Fehler beim Laden der Ernte-Annahme: AxiosError"
+      ],
+      "durationMs": 11024
+    },
+    {
+      "path": "/agrar/feldbuch/massnahmen",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 7148
+    },
+    {
+      "path": "/agrar/feldbuch/schlag/neu",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 6592
+    },
+    {
+      "path": "/agrar/feldbuch/schlagkartei",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 6747
+    },
+    {
+      "path": "/agrar/kulturpflanzen",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 7697
+    },
+    {
+      "path": "/agrar/kulturpflanzen/liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4803
+    },
+    {
+      "path": "/agrar/maschinenauslastung",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4476
+    },
+    {
+      "path": "/agrar/pflanzenschutz/applikation",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4792
+    },
+    {
+      "path": "/agrar/psm",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4347
+    },
+    {
+      "path": "/agrar/psm/abgabedokumentation",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3981
+    },
+    {
+      "path": "/agrar/psm/auflagen-manager",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4239
+    },
+    {
+      "path": "/agrar/psm/beratung",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4180
+    },
+    {
+      "path": "/agrar/psm/liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4450
+    },
+    {
+      "path": "/agrar/psm/resistenz",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5227
+    },
+    {
+      "path": "/agrar/psm/sachkunde-register",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 6366
+    },
+    {
+      "path": "/agrar/psm/stamm",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5887
+    },
+    {
+      "path": "/agrar/psm/stamm/test-123",
+      "source": "param",
+      "original": "/agrar/psm/stamm/:id",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 7299
+    },
+    {
+      "path": "/agrar/psm/wasserschutz",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 6218
+    },
+    {
+      "path": "/agrar/saatgut",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 6481
+    },
+    {
+      "path": "/agrar/saatgut-liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 6821
+    },
+    {
+      "path": "/agrar/saatgut-stamm",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 6505
+    },
+    {
+      "path": "/agrar/saatgut-stamm/test-123",
+      "source": "param",
+      "original": "/agrar/saatgut-stamm/:id",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5399
+    },
+    {
+      "path": "/agrar/saatgut/bestellung",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4290
+    },
+    {
+      "path": "/agrar/saatgut/liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4217
+    },
+    {
+      "path": "/agrar/saatgut/sortenregister",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4312
+    },
+    {
+      "path": "/agrar/saatgut/stamm",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4563
+    },
+    {
+      "path": "/agrar/saatgut/stamm/test-123",
+      "source": "param",
+      "original": "/agrar/saatgut/stamm/:id",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4241
+    },
+    {
+      "path": "/agrar/schlaege/karte",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5335
+    },
+    {
+      "path": "/agrar/wetter/prognose",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4083
+    },
+    {
+      "path": "/agrar/wetterwarnung",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4310
+    },
+    {
+      "path": "/agribusiness/farmers",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5318
+    },
+    {
+      "path": "/agribusiness/field-service-tasks",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 6216
+    },
+    {
+      "path": "/analytics",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 6217
+    },
+    {
+      "path": "/annahme/abrechnung",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 6639
+    },
+    {
+      "path": "/annahme/annahme-qr",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 7879
+    },
+    {
+      "path": "/annahme/lkw-registrierung",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 6280
+    },
+    {
+      "path": "/annahme/qr",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 6173
+    },
+    {
+      "path": "/annahme/qualitaets-check",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 6689
+    },
+    {
+      "path": "/annahme/warteschlange",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4810
+    },
+    {
+      "path": "/artikel",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4134
+    },
+    {
+      "path": "/artikel/liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4286
+    },
+    {
+      "path": "/artikel/neu",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4355
+    },
+    {
+      "path": "/artikel/stamm",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4180
+    },
+    {
+      "path": "/artikel/test-123",
+      "source": "param",
+      "original": "/artikel/:id",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4283
+    },
+    {
+      "path": "/banken/konten",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5844
+    },
+    {
+      "path": "/benachrichtigungen",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4301
+    },
+    {
+      "path": "/benachrichtigungen/liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4031
+    },
+    {
+      "path": "/charge/liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4706
+    },
+    {
+      "path": "/charge/rueckverfolgung",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4074
+    },
+    {
+      "path": "/charge/stamm",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4152
+    },
+    {
+      "path": "/charge/stamm/test-123",
+      "source": "param",
+      "original": "/charge/stamm/:id",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4280
+    },
+    {
+      "path": "/charge/wareneingang",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4309
+    },
+    {
+      "path": "/compliance/bvl-umsatzmeldung",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4604
+    },
+    {
+      "path": "/compliance/cross-compliance",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4772
+    },
+    {
+      "path": "/compliance/enni-meldungen",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5626
+    },
+    {
+      "path": "/compliance/export-pruefprotokoll",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5483
+    },
+    {
+      "path": "/compliance/meldewesen-konsole",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5837
+    },
+    {
+      "path": "/compliance/pcn-ufi",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5926
+    },
+    {
+      "path": "/compliance/qs-checkliste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5985
+    },
+    {
+      "path": "/compliance/saatgut-nachbau",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5949
+    },
+    {
+      "path": "/compliance/sachkunde-register",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 6396
+    },
+    {
+      "path": "/compliance/vvvo-register",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 7391
+    },
+    {
+      "path": "/compliance/zulassungen-register",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4179
+    },
+    {
+      "path": "/contracts",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4379
+    },
+    {
+      "path": "/contracts-v2",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4622
+    },
+    {
+      "path": "/controlling/dashboard-verwaltung",
+      "source": "static",
+      "category": "CONSOLE_ERROR",
+      "details": "Error fetching contracts: TypeError: Failed to fetch\n    at fetchContracts (http://localhost:3000/src/pages/contracts-v2.tsx?t=1772518854313:61:32)\n    at http://localhost:3000/src/pages/contracts-v2.tsx?t=1772518854313:79:5\n    at commitHookEffectListMount (http://localhost:3000/node_modules/.vite/",
+      "consoleErrors": [
+        "Error fetching contracts: TypeError: Failed to fetch\n    at fetchContracts (http://localhost:3000/src/pages/contracts-v2.tsx?t=1772518854313:61:32)\n    at http://localhost:3000/src/pages/contracts-v2.tsx?t=1772518854313:79:5\n    at commitHookEffectListMount (http://localhost:3000/node_modules/.vite/"
+      ],
+      "durationMs": 4671
+    },
+    {
+      "path": "/controlling/kpi-verwaltung",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4306
+    },
+    {
+      "path": "/controlling/massnahmen",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4596
+    },
+    {
+      "path": "/controlling/plan-ist",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4265
+    },
+    {
+      "path": "/controlling/timeseries-erfassung",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4167
+    },
+    {
+      "path": "/controlling/widget-verwaltung",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4358
+    },
+    {
+      "path": "/copilot",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4271
+    },
+    {
+      "path": "/crm/aktivitaet-detail",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4659
+    },
+    {
+      "path": "/crm/aktivitaet/test-123",
+      "source": "param",
+      "original": "/crm/aktivitaet/:id",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4179
+    },
+    {
+      "path": "/crm/aktivitaeten",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 6079
+    },
+    {
+      "path": "/crm/betriebsprofil-detail",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4336
+    },
+    {
+      "path": "/crm/betriebsprofil/test-123",
+      "source": "param",
+      "original": "/crm/betriebsprofil/:id",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4500
+    },
+    {
+      "path": "/crm/betriebsprofile",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4312
+    },
+    {
+      "path": "/crm/betriebsprofile-liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4343
+    },
+    {
+      "path": "/crm/campaign-builder",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4552
+    },
+    {
+      "path": "/crm/campaign-detail",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4790
+    },
+    {
+      "path": "/crm/campaign-performance",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4180
+    },
+    {
+      "path": "/crm/campaign-performance-dashboard",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4335
+    },
+    {
+      "path": "/crm/campaign-template-detail",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4412
+    },
+    {
+      "path": "/crm/campaign-template/new",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4165
+    },
+    {
+      "path": "/crm/campaign-template/test-123",
+      "source": "param",
+      "original": "/crm/campaign-template/:id",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4668
+    },
+    {
+      "path": "/crm/campaign-templates",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4301
+    },
+    {
+      "path": "/crm/campaign/new",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5086
+    },
+    {
+      "path": "/crm/campaign/test-123",
+      "source": "param",
+      "original": "/crm/campaign/:id",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4411
+    },
+    {
+      "path": "/crm/campaigns",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 7554
+    },
+    {
+      "path": "/crm/consent-confirm",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4265
+    },
+    {
+      "path": "/crm/consent-detail",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4621
+    },
+    {
+      "path": "/crm/consent-management",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4283
+    },
+    {
+      "path": "/crm/consent/confirm",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [
+        "Warning: Each child in a list should have a unique \"key\" prop.%s%s See https://reactjs.org/link/warning-keys for more information.%s \n\nCheck the render method of `ListReport`.  \n    at div\n    at ListReport (http://localhost:3000/src/components/mask-builder/ListReport.tsx:30:3)\n    at ConsentManagem"
+      ],
+      "durationMs": 4508
+    },
+    {
+      "path": "/crm/consent/new",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4385
+    },
+    {
+      "path": "/crm/consent/test-123",
+      "source": "param",
+      "original": "/crm/consent/:id",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4388
+    },
+    {
+      "path": "/crm/consents",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [
+        "Warning: Each child in a list should have a unique \"key\" prop.%s%s See https://reactjs.org/link/warning-keys for more information.%s \n\nCheck the render method of `ListReport`.  \n    at div\n    at ListReport (http://localhost:3000/src/components/mask-builder/ListReport.tsx:30:3)\n    at ConsentManagem"
+      ],
+      "durationMs": 4843
+    },
+    {
+      "path": "/crm/crm-dashboard",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4607
+    },
+    {
+      "path": "/crm/gdpr-request-detail",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4357
+    },
+    {
+      "path": "/crm/gdpr-request-public",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4298
+    },
+    {
+      "path": "/crm/gdpr-request/new",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4733
+    },
+    {
+      "path": "/crm/gdpr-request/test-123",
+      "source": "param",
+      "original": "/crm/gdpr-request/:id",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4849
+    },
+    {
+      "path": "/crm/gdpr-requests",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4535
+    },
+    {
+      "path": "/crm/kontakt-detail",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [
+        "Warning: Each child in a list should have a unique \"key\" prop.%s%s See https://reactjs.org/link/warning-keys for more information.%s \n\nCheck the render method of `ListReport`.  \n    at div\n    at ListReport (http://localhost:3000/src/components/mask-builder/ListReport.tsx:30:3)\n    at GDPRRequestsPa"
+      ],
+      "durationMs": 4456
+    },
+    {
+      "path": "/crm/kontakt-management",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4508
+    },
+    {
+      "path": "/crm/kontakt/test-123",
+      "source": "param",
+      "original": "/crm/kontakt/:id",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4399
+    },
+    {
+      "path": "/crm/kontakte",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4650
+    },
+    {
+      "path": "/crm/kontakte-liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4763
+    },
+    {
+      "path": "/crm/kunden",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4446
+    },
+    {
+      "path": "/crm/kunden-liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4311
+    },
+    {
+      "path": "/crm/kunden-stamm",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4158
+    },
+    {
+      "path": "/crm/kunden-stamm-modern",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5259
+    },
+    {
+      "path": "/crm/kunden/test-123",
+      "source": "param",
+      "original": "/crm/kunden/:id",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 16167
+    },
+    {
+      "path": "/crm/lead-detail",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 15710
+    },
+    {
+      "path": "/crm/lead/test-123",
+      "source": "param",
+      "original": "/crm/lead/:id",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4104
+    },
+    {
+      "path": "/crm/leads",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5059
+    },
+    {
+      "path": "/crm/lieferanten",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4171
+    },
+    {
+      "path": "/crm/lieferanten-liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4276
+    },
+    {
+      "path": "/crm/lieferanten-stamm",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4904
+    },
+    {
+      "path": "/crm/lieferanten/test-123",
+      "source": "param",
+      "original": "/crm/lieferanten/:id",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4313
+    },
+    {
+      "path": "/crm/opportunities",
+      "source": "static",
+      "category": "CONSOLE_ERROR",
+      "details": "ErrorBoundary caught error: TypeError: Cannot create property 'firma' on string '<!doctype html>\r\n<html lang=\"de\">\r\n  <head>\n    <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\";\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () => {};\nwindow.$RefreshSig$ = () => (ty",
+      "consoleErrors": [
+        "The above error occurred in the <Controller> component:\n\n    at Controller (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24997e04:379:35)\n    at div\n    at div\n    at div\n    at _c9 (http://localhost:3000/src/components/ui/card.tsx:56:12)\n    at div\n    at _c (http://localhost:3",
+        "ErrorBoundary caught error: TypeError: Cannot create property 'firma' on string '<!doctype html>\r\n<html lang=\"de\">\r\n  <head>\n    <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\";\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () => {};\nwindow.$RefreshSig$ = () => (ty",
+        "The above error occurred in the <Controller> component:\n\n    at Controller (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24997e04:379:35)\n    at div\n    at div\n    at div\n    at _c9 (http://localhost:3000/src/components/ui/card.tsx:56:12)\n    at div\n    at _c (http://localhost:3",
+        "ErrorBoundary caught error: TypeError: Cannot create property 'anrede' on string '<!doctype html>\r\n<html lang=\"de\">\r\n  <head>\n    <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\";\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () => {};\nwindow.$RefreshSig$ = () => (t",
+        "The above error occurred in the <Controller> component:\n\n    at Controller (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24997e04:379:35)\n    at div\n    at div\n    at div\n    at _c9 (http://localhost:3000/src/components/ui/card.tsx:56:12)\n    at div\n    at _c (http://localhost:3",
+        "ErrorBoundary caught error: TypeError: Cannot create property 'vorname' on string '<!doctype html>\r\n<html lang=\"de\">\r\n  <head>\n    <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\";\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () => {};\nwindow.$RefreshSig$ = () => (",
+        "The above error occurred in the <Controller> component:\n\n    at Controller (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24997e04:379:35)\n    at div\n    at div\n    at div\n    at _c9 (http://localhost:3000/src/components/ui/card.tsx:56:12)\n    at div\n    at _c (http://localhost:3",
+        "ErrorBoundary caught error: TypeError: Cannot create property 'nachname' on string '<!doctype html>\r\n<html lang=\"de\">\r\n  <head>\n    <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\";\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () => {};\nwindow.$RefreshSig$ = () => "
+      ],
+      "durationMs": 4654
+    },
+    {
+      "path": "/crm/opportunities-forecast",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4647
+    },
+    {
+      "path": "/crm/opportunities-kanban",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5086
+    },
+    {
+      "path": "/crm/opportunities-liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 18239
+    },
+    {
+      "path": "/crm/opportunity-detail",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4321
+    },
+    {
+      "path": "/crm/opportunity/new",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4860
+    },
+    {
+      "path": "/crm/opportunity/test-123",
+      "source": "param",
+      "original": "/crm/opportunity/:id",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4229
+    },
+    {
+      "path": "/crm/segment-detail",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4642
+    },
+    {
+      "path": "/crm/segment/new",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3967
+    },
+    {
+      "path": "/crm/segment/test-123",
+      "source": "param",
+      "original": "/crm/segment/:id",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4276
+    },
+    {
+      "path": "/crm/segments",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 8052
+    },
+    {
+      "path": "/dashboard/customizable",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [
+        "Warning: Each child in a list should have a unique \"key\" prop.%s%s See https://reactjs.org/link/warning-keys for more information.%s \n\nCheck the render method of `ListReport`.  \n    at div\n    at ListReport (http://localhost:3000/src/components/mask-builder/ListReport.tsx:30:3)\n    at SegmentsPage ("
+      ],
+      "durationMs": 4339
+    },
+    {
+      "path": "/dashboard/einkauf",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3863
+    },
+    {
+      "path": "/dashboard/einkauf-dashboard",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3950
+    },
+    {
+      "path": "/dashboard/sales",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4503
+    },
+    {
+      "path": "/dashboard/sales-dashboard",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4724
+    },
+    {
+      "path": "/dashboards/geschaeftsfuehrung",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5248
+    },
+    {
+      "path": "/disposition",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 6895
+    },
+    {
+      "path": "/disposition/liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 6018
+    },
+    {
+      "path": "/document",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 7195
+    },
+    {
+      "path": "/dokumente/ablage",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 6268
+    },
+    {
+      "path": "/einkauf/anfrage",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 6304
+    },
+    {
+      "path": "/einkauf/anfrage-erfassung",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 8614
+    },
+    {
+      "path": "/einkauf/anfrage-stamm",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 7524
+    },
+    {
+      "path": "/einkauf/anfragen",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4970
+    },
+    {
+      "path": "/einkauf/anfragen-liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5320
+    },
+    {
+      "path": "/einkauf/angebot",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 6075
+    },
+    {
+      "path": "/einkauf/angebot-stamm",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 6164
+    },
+    {
+      "path": "/einkauf/angebote",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5871
+    },
+    {
+      "path": "/einkauf/angebote-liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 6340
+    },
+    {
+      "path": "/einkauf/anlieferavis",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 6091
+    },
+    {
+      "path": "/einkauf/anlieferavis-liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 6937
+    },
+    {
+      "path": "/einkauf/anlieferavis/neu",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 6877
+    },
+    {
+      "path": "/einkauf/audit-drilldown",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 6277
+    },
+    {
+      "path": "/einkauf/auftragsbestaetigung",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 6378
+    },
+    {
+      "path": "/einkauf/auftragsbestaetigungen",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5946
+    },
+    {
+      "path": "/einkauf/auftragsbestaetigungen-liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 6278
+    },
+    {
+      "path": "/einkauf/bestellung-anlegen",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5559
+    },
+    {
+      "path": "/einkauf/bestellung-stamm",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 7076
+    },
+    {
+      "path": "/einkauf/bestellungen",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 7349
+    },
+    {
+      "path": "/einkauf/bestellungen-liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 6619
+    },
+    {
+      "path": "/einkauf/bestellungen/neu",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5894
+    },
+    {
+      "path": "/einkauf/bestellungen/test-123",
+      "source": "param",
+      "original": "/einkauf/bestellungen/:id",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5915
+    },
+    {
+      "path": "/einkauf/bestellvorschlaege",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 8400
+    },
+    {
+      "path": "/einkauf/bestellvorschlag-lager",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5453
+    },
+    {
+      "path": "/einkauf/bestellvorschlag-rohware",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3986
+    },
+    {
+      "path": "/einkauf/bestellvorschlag-verkauf",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3836
+    },
+    {
+      "path": "/einkauf/edi-portal",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3715
+    },
+    {
+      "path": "/einkauf/frachtauftraege-eingang",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4397
+    },
+    {
+      "path": "/einkauf/gutschriften-belastungen",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3501
+    },
+    {
+      "path": "/einkauf/lieferanten",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3775
+    },
+    {
+      "path": "/einkauf/lieferanten-dokumente",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4013
+    },
+    {
+      "path": "/einkauf/lieferanten-liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4087
+    },
+    {
+      "path": "/einkauf/lieferanten-stamm",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3943
+    },
+    {
+      "path": "/einkauf/lieferanten/test-123",
+      "source": "param",
+      "original": "/einkauf/lieferanten/:id",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3746
+    },
+    {
+      "path": "/einkauf/lieferantenbewertung",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3642
+    },
+    {
+      "path": "/einkauf/lieferschein-erfassung",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3835
+    },
+    {
+      "path": "/einkauf/lieferschein-frachtauftrag",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3723
+    },
+    {
+      "path": "/einkauf/rechnung-abgleich",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3603
+    },
+    {
+      "path": "/einkauf/rechnung-eingang-erfassung",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3936
+    },
+    {
+      "path": "/einkauf/rechnungseingaenge",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4170
+    },
+    {
+      "path": "/einkauf/rechnungseingaenge-liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4139
+    },
+    {
+      "path": "/einkauf/rechnungseingang",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4107
+    },
+    {
+      "path": "/einkauf/reports",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3703
+    },
+    {
+      "path": "/einkauf/retouren",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3634
+    },
+    {
+      "path": "/einkauf/rfq-bids",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3530
+    },
+    {
+      "path": "/einkauf/service-entry-sheets",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3572
+    },
+    {
+      "path": "/einkauf/wareneingang",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4175
+    },
+    {
+      "path": "/einkauf/warengruppen",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3776
+    },
+    {
+      "path": "/einstellungen/system",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3883
+    },
+    {
+      "path": "/energie/verbrauch",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3763
+    },
+    {
+      "path": "/etiketten/drucken",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3709
+    },
+    {
+      "path": "/export/umsatzsteuervoranmeldung",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3723
+    },
+    {
+      "path": "/export/ustva",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3602
+    },
+    {
+      "path": "/fibu/abschluss-cockpit",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3525
+    },
+    {
+      "path": "/fibu/anlagen",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4094
+    },
+    {
+      "path": "/fibu/anlagen-suite",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3714
+    },
+    {
+      "path": "/fibu/bilanz",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4105
+    },
+    {
+      "path": "/fibu/buchhaltungsuebersicht",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3949
+    },
+    {
+      "path": "/fibu/buchungsjournal",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3653
+    },
+    {
+      "path": "/fibu/bwa",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3568
+    },
+    {
+      "path": "/fibu/debitoren",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3554
+    },
+    {
+      "path": "/fibu/debitoren-api",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3755
+    },
+    {
+      "path": "/fibu/guv",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3791
+    },
+    {
+      "path": "/fibu/hauptbuch",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3985
+    },
+    {
+      "path": "/fibu/kontenplan",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3843
+    },
+    {
+      "path": "/fibu/kostenstellenrechnung",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3579
+    },
+    {
+      "path": "/fibu/kreditlinien",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3991
+    },
+    {
+      "path": "/fibu/kreditoren",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3676
+    },
+    {
+      "path": "/fibu/lohn-connector",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3516
+    },
+    {
+      "path": "/fibu/monatswerte",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3745
+    },
+    {
+      "path": "/fibu/offene-posten",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3671
+    },
+    {
+      "path": "/fibu/op-verwaltung",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4033
+    },
+    {
+      "path": "/fibu/quadriga-connector",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3800
+    },
+    {
+      "path": "/fibu/sachkonto",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4048
+    },
+    {
+      "path": "/fibu/sachkonto/test-123",
+      "source": "param",
+      "original": "/fibu/sachkonto/:id",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4043
+    },
+    {
+      "path": "/fibu/schnittstelle-fibu",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3777
+    },
+    {
+      "path": "/fibu/schnittstellen-center",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3699
+    },
+    {
+      "path": "/fibu/sicherheiten",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3681
+    },
+    {
+      "path": "/fibu/verbindlichkeiten",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3571
+    },
+    {
+      "path": "/fibu/zahlungseingaenge",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3847
+    },
+    {
+      "path": "/fibu/zahlungslaeufe",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3763
+    },
+    {
+      "path": "/fibu/zahlungsvorschlaege",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3785
+    },
+    {
+      "path": "/finance",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4007
+    },
+    {
+      "path": "/finance/abschluss",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4007
+    },
+    {
+      "path": "/finance/ap-invoice-form",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3876
+    },
+    {
+      "path": "/finance/ap-invoices-list",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3892
+    },
+    {
+      "path": "/finance/ap/invoices",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [
+        "Warning: Each child in a list should have a unique \"key\" prop.%s%s See https://reactjs.org/link/warning-keys for more information.%s \n\nCheck the render method of `AdvancedFilters`.  \n    at div\n    at AdvancedFilters (http://localhost:3000/src/components/list/AdvancedFilters.tsx:29:35)\n    at div\n  "
+      ],
+      "durationMs": 4538
+    },
+    {
+      "path": "/finance/ap/invoices/new",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4060
+    },
+    {
+      "path": "/finance/ap/invoices/test-123",
+      "source": "param",
+      "original": "/finance/ap/invoices/:id",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4036
+    },
+    {
+      "path": "/finance/audit-trail",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3523
+    },
+    {
+      "path": "/finance/bank-abgleich",
+      "source": "static",
+      "category": "CONSOLE_ERROR",
+      "details": "Error fetching audit stats: TypeError: Failed to fetch\n    at fetchStats (http://localhost:3000/src/pages/finance/audit-trail.tsx:66:32)\n    at http://localhost:3000/src/pages/finance/audit-trail.tsx:77:10\n    at commitHookEffectListMount (http://localhost:3000/node_modules/.vite/deps/chunk-RPCDYKBN",
+      "consoleErrors": [
+        "Error fetching audit stats: TypeError: Failed to fetch\n    at fetchStats (http://localhost:3000/src/pages/finance/audit-trail.tsx:66:32)\n    at http://localhost:3000/src/pages/finance/audit-trail.tsx:77:10\n    at commitHookEffectListMount (http://localhost:3000/node_modules/.vite/deps/chunk-RPCDYKBN",
+        "Error fetching audit stats: TypeError: Failed to fetch\n    at fetchStats (http://localhost:3000/src/pages/finance/audit-trail.tsx:66:32)\n    at http://localhost:3000/src/pages/finance/audit-trail.tsx:77:10\n    at commitHookEffectListMount (http://localhost:3000/node_modules/.vite/deps/chunk-RPCDYKBN",
+        "Error fetching audit logs: TypeError: Failed to fetch\n    at fetchAuditLogs (http://localhost:3000/src/pages/finance/audit-trail.tsx:47:32)\n    at http://localhost:3000/src/pages/finance/audit-trail.tsx:76:10\n    at commitHookEffectListMount (http://localhost:3000/node_modules/.vite/deps/chunk-RPCDY",
+        "Error fetching audit logs: TypeError: Failed to fetch\n    at fetchAuditLogs (http://localhost:3000/src/pages/finance/audit-trail.tsx:47:32)\n    at http://localhost:3000/src/pages/finance/audit-trail.tsx:76:10\n    at commitHookEffectListMount (http://localhost:3000/node_modules/.vite/deps/chunk-RPCDY"
+      ],
+      "durationMs": 3976
+    },
+    {
+      "path": "/finance/bankkonten",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4268
+    },
+    {
+      "path": "/finance/bankkonten-stamm",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3917
+    },
+    {
+      "path": "/finance/bankkonten/test-123",
+      "source": "param",
+      "original": "/finance/bankkonten/:id",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3835
+    },
+    {
+      "path": "/finance/bookings/new",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3899
+    },
+    {
+      "path": "/finance/buchungserfassung",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3779
+    },
+    {
+      "path": "/finance/buchungsimport",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3686
+    },
+    {
+      "path": "/finance/buchungsvorlagen",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3801
+    },
+    {
+      "path": "/finance/chart-of-accounts",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3727
+    },
+    {
+      "path": "/finance/debitoren",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3809
+    },
+    {
+      "path": "/finance/debitoren-liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3847
+    },
+    {
+      "path": "/finance/debitoren-stamm",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [
+        "Warning: Encountered two children with the same key, `%s`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.%s offenerBetrag \n    at d"
+      ],
+      "durationMs": 4093
+    },
+    {
+      "path": "/finance/debitoren/test-123",
+      "source": "param",
+      "original": "/finance/debitoren/:id",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4022
+    },
+    {
+      "path": "/finance/dunning-editor",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3765
+    },
+    {
+      "path": "/finance/invoice-form",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4029
+    },
+    {
+      "path": "/finance/invoices",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3936
+    },
+    {
+      "path": "/finance/invoices-list",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3741
+    },
+    {
+      "path": "/finance/invoices/new",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4086
+    },
+    {
+      "path": "/finance/kasse",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4187
+    },
+    {
+      "path": "/finance/kontenplan",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4108
+    },
+    {
+      "path": "/finance/kreditoren",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4271
+    },
+    {
+      "path": "/finance/kreditoren-stamm",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3833
+    },
+    {
+      "path": "/finance/lastschriften-debitoren",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3771
+    },
+    {
+      "path": "/finance/mahnwesen",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4033
+    },
+    {
+      "path": "/finance/nebenbuch-abstimmung",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3825
+    },
+    {
+      "path": "/finance/op-debitoren",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3837
+    },
+    {
+      "path": "/finance/op-kreditoren",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3731
+    },
+    {
+      "path": "/finance/payment-matching",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4317
+    },
+    {
+      "path": "/finance/payments",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3801
+    },
+    {
+      "path": "/finance/periods",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4413
+    },
+    {
+      "path": "/finance/steuerschluessel",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3827
+    },
+    {
+      "path": "/finance/ustva",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3726
+    },
+    {
+      "path": "/finance/wechselkurse",
+      "source": "static",
+      "category": "CONSOLE_ERROR",
+      "details": "ErrorBoundary caught error: TypeError: Cannot read properties of undefined (reading 'substring')\n    at getNodeParentName (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24997e04:16:40)\n    at isNameInFieldArray (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24",
+      "consoleErrors": [
+        "Warning: Each child in a list should have a unique \"key\" prop.%s%s See https://reactjs.org/link/warning-keys for more information.%s \n\nCheck the render method of `ObjectPage`.  \n    at div\n    at ObjectPage (http://localhost:3000/src/components/mask-builder/ObjectPage.tsx:32:3)\n    at UStVAPage (htt",
+        "The above error occurred in the <Controller> component:\n\n    at Controller (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24997e04:379:35)\n    at div\n    at div\n    at div\n    at _c9 (http://localhost:3000/src/components/ui/card.tsx:56:12)\n    at div\n    at _c (http://localhost:3",
+        "ErrorBoundary caught error: TypeError: Cannot read properties of undefined (reading 'substring')\n    at getNodeParentName (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24997e04:16:40)\n    at isNameInFieldArray (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24"
+      ],
+      "durationMs": 3711
+    },
+    {
+      "path": "/finance/zahlungslauf-kreditoren",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3619
+    },
+    {
+      "path": "/finanzplanung/liquiditaet",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3649
+    },
+    {
+      "path": "/foerderung",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4412
+    },
+    {
+      "path": "/foerderung/antrag",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3988
+    },
+    {
+      "path": "/foerderung/liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3842
+    },
+    {
+      "path": "/fuhrpark/ausgehende-belege-dokumente",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3884
+    },
+    {
+      "path": "/fuhrpark/fahrzeug-stamm",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3502
+    },
+    {
+      "path": "/fuhrpark/fahrzeug/neu",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3812
+    },
+    {
+      "path": "/fuhrpark/fahrzeug/test-123",
+      "source": "param",
+      "original": "/fuhrpark/fahrzeug/:id",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3716
+    },
+    {
+      "path": "/fuhrpark/fahrzeuge",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3519
+    },
+    {
+      "path": "/fuhrpark/fuhrpark-auswertung-kosten-pro-fahrzeug",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3807
+    },
+    {
+      "path": "/fuhrpark/fuhrpark-auswertungen-menu",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3972
+    },
+    {
+      "path": "/fuhrpark/fuhrpark-klassisch",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3584
+    },
+    {
+      "path": "/fuhrpark/fuhrpark-menue",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [
+        "Warning: Each child in a list should have a unique \"key\" prop.%s%s See https://reactjs.org/link/warning-keys for more information.%s \n\nCheck the render method of `FuhrparkKlassischPage`.  \n    at FuhrparkKlassischPage\n    at Suspense\n    at ErrorBoundary (http://localhost:3000/src/shared/errors/Erro"
+      ],
+      "durationMs": 3838
+    },
+    {
+      "path": "/fuhrpark/fuhrpark-rechnungen",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3505
+    },
+    {
+      "path": "/fuhrpark/fuhrpark-stammdaten",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3570
+    },
+    {
+      "path": "/fuhrpark/uebersicht",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3830
+    },
+    {
+      "path": "/futter/einzel",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3582
+    },
+    {
+      "path": "/futter/einzel/liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4153
+    },
+    {
+      "path": "/futter/einzel/stamm",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4275
+    },
+    {
+      "path": "/futter/einzel/test-123",
+      "source": "param",
+      "original": "/futter/einzel/:id",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4037
+    },
+    {
+      "path": "/futter/misch",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3760
+    },
+    {
+      "path": "/futter/misch/liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3479
+    },
+    {
+      "path": "/futter/misch/stamm",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4078
+    },
+    {
+      "path": "/futter/misch/test-123",
+      "source": "param",
+      "original": "/futter/misch/:id",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [
+        "Warning: You provided a `value` prop to a form field without an `onChange` handler. This will render a read-only field. If the field should be mutable use `defaultValue`. Otherwise, set either `onChange` or `readOnly`.%s \n    at input\n    at _c (http://localhost:3000/src/components/ui/input.tsx:20:1",
+        "Warning: You provided a `value` prop to a form field without an `onChange` handler. This will render a read-only field. If the field should be mutable use `defaultValue`. Otherwise, set either `onChange` or `readOnly`.%s \n    at input\n    at _c (http://localhost:3000/src/components/ui/input.tsx:20:1",
+        "Warning: You provided a `value` prop to a form field without an `onChange` handler. This will render a read-only field. If the field should be mutable use `defaultValue`. Otherwise, set either `onChange` or `readOnly`.%s \n    at input\n    at _c (http://localhost:3000/src/components/ui/input.tsx:20:1",
+        "Warning: You provided a `value` prop to a form field without an `onChange` handler. This will render a read-only field. If the field should be mutable use `defaultValue`. Otherwise, set either `onChange` or `readOnly`.%s \n    at input\n    at _c (http://localhost:3000/src/components/ui/input.tsx:20:1",
+        "Warning: You provided a `value` prop to a form field without an `onChange` handler. This will render a read-only field. If the field should be mutable use `defaultValue`. Otherwise, set either `onChange` or `readOnly`.%s \n    at input\n    at _c (http://localhost:3000/src/components/ui/input.tsx:20:1",
+        "Warning: You provided a `value` prop to a form field without an `onChange` handler. This will render a read-only field. If the field should be mutable use `defaultValue`. Otherwise, set either `onChange` or `readOnly`.%s \n    at input\n    at _c (http://localhost:3000/src/components/ui/input.tsx:20:1"
+      ],
+      "durationMs": 3566
+    },
+    {
+      "path": "/futtermittel/charge-verfolgung",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3584
+    },
+    {
+      "path": "/futtermittel/einzelfuttermittel-liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3696
+    },
+    {
+      "path": "/futtermittel/einzelfuttermittel-stamm",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3598
+    },
+    {
+      "path": "/futtermittel/einzelfuttermittel/test-123",
+      "source": "param",
+      "original": "/futtermittel/einzelfuttermittel/:id",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3610
+    },
+    {
+      "path": "/futtermittel/futtermittel-bestellung",
+      "source": "static",
+      "category": "CONSOLE_ERROR",
+      "details": "ErrorBoundary caught error: TypeError: Cannot create property 'artikelnummer' on string '<!doctype html>\r\n<html lang=\"de\">\r\n  <head>\n    <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\";\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () => {};\nwindow.$RefreshSig$ = (",
+      "consoleErrors": [
+        "The above error occurred in the <Controller> component:\n\n    at Controller (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24997e04:379:35)\n    at div\n    at div\n    at div\n    at _c9 (http://localhost:3000/src/components/ui/card.tsx:56:12)\n    at div\n    at _c (http://localhost:3",
+        "ErrorBoundary caught error: TypeError: Cannot create property 'artikelnummer' on string '<!doctype html>\r\n<html lang=\"de\">\r\n  <head>\n    <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\";\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () => {};\nwindow.$RefreshSig$ = (",
+        "The above error occurred in the <Controller> component:\n\n    at Controller (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24997e04:379:35)\n    at div\n    at div\n    at div\n    at _c9 (http://localhost:3000/src/components/ui/card.tsx:56:12)\n    at div\n    at _c (http://localhost:3",
+        "ErrorBoundary caught error: TypeError: Cannot create property 'name' on string '<!doctype html>\r\n<html lang=\"de\">\r\n  <head>\n    <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\";\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () => {};\nwindow.$RefreshSig$ = () => (typ",
+        "The above error occurred in the <Controller> component:\n\n    at Controller (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24997e04:379:35)\n    at div\n    at div\n    at div\n    at _c9 (http://localhost:3000/src/components/ui/card.tsx:56:12)\n    at div\n    at _c (http://localhost:3",
+        "ErrorBoundary caught error: TypeError: Cannot create property 'typ' on string '<!doctype html>\r\n<html lang=\"de\">\r\n  <head>\n    <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\";\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () => {};\nwindow.$RefreshSig$ = () => (type",
+        "The above error occurred in the <Controller> component:\n\n    at Controller (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24997e04:379:35)\n    at div\n    at div\n    at div\n    at _c9 (http://localhost:3000/src/components/ui/card.tsx:56:12)\n    at div\n    at _c (http://localhost:3",
+        "ErrorBoundary caught error: TypeError: Cannot create property 'hersteller' on string '<!doctype html>\r\n<html lang=\"de\">\r\n  <head>\n    <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\";\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () => {};\nwindow.$RefreshSig$ = () ="
+      ],
+      "durationMs": 4464
+    },
+    {
+      "path": "/futtermittel/futtermittel-qualitaetskontrolle",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3741
+    },
+    {
+      "path": "/futtermittel/futtermittel-statistik",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [
+        "The above error occurred in the <SelectItem> component:\n\n    at http://localhost:3000/node_modules/.vite/deps/@radix-ui_react-select.js?v=24997e04:942:7\n    at _c1 (http://localhost:3000/src/components/ui/select.tsx:195:12)\n    at div\n    at http://localhost:3000/node_modules/.vite/deps/chunk-P7HMO2",
+        "ErrorBoundary caught error: Error: A <Select.Item /> must have a value prop that is not an empty string. This is because the Select value can be set to an empty string to clear the selection and show the placeholder.\n    at http://localhost:3000/node_modules/.vite/deps/@radix-ui_react-select.js?v=24"
+      ],
+      "durationMs": 3751
+    },
+    {
+      "path": "/futtermittel/futtermittel-wareneingang",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3675
+    },
+    {
+      "path": "/futtermittel/mischfuttermittel-liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3612
+    },
+    {
+      "path": "/futtermittel/mischfuttermittel-stamm",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3755
+    },
+    {
+      "path": "/futtermittel/mischfuttermittel/test-123",
+      "source": "param",
+      "original": "/futtermittel/mischfuttermittel/:id",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3675
+    },
+    {
+      "path": "/inbox",
+      "source": "static",
+      "category": "CONSOLE_ERROR",
+      "details": "ErrorBoundary caught error: TypeError: Cannot create property 'artikelnummer' on string '<!doctype html>\r\n<html lang=\"de\">\r\n  <head>\n    <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\";\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () => {};\nwindow.$RefreshSig$ = (",
+      "consoleErrors": [
+        "The above error occurred in the <Controller> component:\n\n    at Controller (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24997e04:379:35)\n    at div\n    at div\n    at div\n    at _c9 (http://localhost:3000/src/components/ui/card.tsx:56:12)\n    at div\n    at _c (http://localhost:3",
+        "ErrorBoundary caught error: TypeError: Cannot create property 'artikelnummer' on string '<!doctype html>\r\n<html lang=\"de\">\r\n  <head>\n    <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\";\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () => {};\nwindow.$RefreshSig$ = (",
+        "The above error occurred in the <Controller> component:\n\n    at Controller (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24997e04:379:35)\n    at div\n    at div\n    at div\n    at _c9 (http://localhost:3000/src/components/ui/card.tsx:56:12)\n    at div\n    at _c (http://localhost:3",
+        "ErrorBoundary caught error: TypeError: Cannot create property 'name' on string '<!doctype html>\r\n<html lang=\"de\">\r\n  <head>\n    <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\";\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () => {};\nwindow.$RefreshSig$ = () => (typ",
+        "The above error occurred in the <Controller> component:\n\n    at Controller (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24997e04:379:35)\n    at div\n    at div\n    at div\n    at _c9 (http://localhost:3000/src/components/ui/card.tsx:56:12)\n    at div\n    at _c (http://localhost:3",
+        "ErrorBoundary caught error: TypeError: Cannot create property 'typ' on string '<!doctype html>\r\n<html lang=\"de\">\r\n  <head>\n    <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\";\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () => {};\nwindow.$RefreshSig$ = () => (type",
+        "The above error occurred in the <Controller> component:\n\n    at Controller (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24997e04:379:35)\n    at div\n    at div\n    at div\n    at _c9 (http://localhost:3000/src/components/ui/card.tsx:56:12)\n    at div\n    at _c (http://localhost:3",
+        "ErrorBoundary caught error: TypeError: Cannot create property 'futtergruppe' on string '<!doctype html>\r\n<html lang=\"de\">\r\n  <head>\n    <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\";\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () => {};\nwindow.$RefreshSig$ = ()"
+      ],
+      "durationMs": 4047
+    },
+    {
+      "path": "/inventory",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4090
+    },
+    {
+      "path": "/inventory-dashboard",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3972
+    },
+    {
+      "path": "/inventory-reports",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3789
+    },
+    {
+      "path": "/inventory/adjust",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3775
+    },
+    {
+      "path": "/inventory/epcis",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3906
+    },
+    {
+      "path": "/kasse/tagesabschluss",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3762
+    },
+    {
+      "path": "/labor/proben",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3687
+    },
+    {
+      "path": "/labor/proben-liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3854
+    },
+    {
+      "path": "/lager/auslagerung",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3850
+    },
+    {
+      "path": "/lager/bestandsuebersicht",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3807
+    },
+    {
+      "path": "/lager/einlagerung",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3968
+    },
+    {
+      "path": "/lager/inventur",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3922
+    },
+    {
+      "path": "/lager/lagerbewegungen",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4172
+    },
+    {
+      "path": "/lager/lagerplaetze",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4160
+    },
+    {
+      "path": "/lager/terminal",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3853
+    },
+    {
+      "path": "/logistik/frachtbriefe",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3864
+    },
+    {
+      "path": "/logistik/tourenplanung",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4063
+    },
+    {
+      "path": "/mahnwesen/mahnlauf",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4231
+    },
+    {
+      "path": "/management/executive-dashboard",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [
+        "Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.%s \n    at MahnlaufPage (http://localhost:3000/src/pages/mahnwesen/mahnlauf.tsx:32:20)\n  ",
+        "Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.%s \n    at MahnlaufPage (http://localhost:3000/src/pages/mahnwesen/mahnlauf.tsx:32:20)\n  ",
+        "Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.%s \n    at MahnlaufPage (http://localhost:3000/src/pages/mahnwesen/mahnlauf.tsx:32:20)\n  ",
+        "Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.%s \n    at MahnlaufPage (http://localhost:3000/src/pages/mahnwesen/mahnlauf.tsx:32:20)\n  ",
+        "Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.%s \n    at MahnlaufPage (http://localhost:3000/src/pages/mahnwesen/mahnlauf.tsx:32:20)\n  ",
+        "Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.%s \n    at MahnlaufPage (http://localhost:3000/src/pages/mahnwesen/mahnlauf.tsx:32:20)\n  ",
+        "Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.%s \n    at MahnlaufPage (http://localhost:3000/src/pages/mahnwesen/mahnlauf.tsx:32:20)\n  ",
+        "Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.%s \n    at MahnlaufPage (http://localhost:3000/src/pages/mahnwesen/mahnlauf.tsx:32:20)\n  ",
+        "Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.%s \n    at MahnlaufPage (http://localhost:3000/src/pages/mahnwesen/mahnlauf.tsx:32:20)\n  ",
+        "Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.%s \n    at MahnlaufPage (http://localhost:3000/src/pages/mahnwesen/mahnlauf.tsx:32:20)\n  ",
+        "Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.%s \n    at MahnlaufPage (http://localhost:3000/src/pages/mahnwesen/mahnlauf.tsx:32:20)\n  ",
+        "Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.%s \n    at MahnlaufPage (http://localhost:3000/src/pages/mahnwesen/mahnlauf.tsx:32:20)\n  ",
+        "Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.%s \n    at MahnlaufPage (http://localhost:3000/src/pages/mahnwesen/mahnlauf.tsx:32:20)\n  ",
+        "Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.%s \n    at MahnlaufPage (http://localhost:3000/src/pages/mahnwesen/mahnlauf.tsx:32:20)\n  ",
+        "Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.%s \n    at MahnlaufPage (http://localhost:3000/src/pages/mahnwesen/mahnlauf.tsx:32:20)\n  "
+      ],
+      "durationMs": 3916
+    },
+    {
+      "path": "/marketing/kampagnen",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3735
+    },
+    {
+      "path": "/mobile/scanner",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3786
+    },
+    {
+      "path": "/monitoring/alerts",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3625
+    },
+    {
+      "path": "/monitoring/regeln",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3716
+    },
+    {
+      "path": "/nachhaltigkeit/biodiversitaet",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4734
+    },
+    {
+      "path": "/nachhaltigkeit/co2-bilanz",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3846
+    },
+    {
+      "path": "/nachhaltigkeit/eudr-compliance",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3703
+    },
+    {
+      "path": "/nawaro/anbauflaechen",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4407
+    },
+    {
+      "path": "/nawaro/mitteilung-drucken",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4137
+    },
+    {
+      "path": "/nawaro/raps-profil",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3932
+    },
+    {
+      "path": "/nawaro/vertraege",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3938
+    },
+    {
+      "path": "/personal/mitarbeiter",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4200
+    },
+    {
+      "path": "/personal/mitarbeiter-liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3723
+    },
+    {
+      "path": "/personal/mitarbeiter-stamm",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4064
+    },
+    {
+      "path": "/personal/mitarbeiter/neu",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4276
+    },
+    {
+      "path": "/personal/mitarbeiter/test-123",
+      "source": "param",
+      "original": "/personal/mitarbeiter/:id",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4174
+    },
+    {
+      "path": "/personal/onboarding",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4053
+    },
+    {
+      "path": "/personal/qualifikationen",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3933
+    },
+    {
+      "path": "/personal/schulung-neu",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4090
+    },
+    {
+      "path": "/personal/schulungen",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3945
+    },
+    {
+      "path": "/personal/stundenzettel",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3922
+    },
+    {
+      "path": "/personal/stundenzettel-liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4324
+    },
+    {
+      "path": "/personal/stundenzettel/test-123",
+      "source": "param",
+      "original": "/personal/stundenzettel/:id",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3811
+    },
+    {
+      "path": "/personal/zeiterfassung",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4180
+    },
+    {
+      "path": "/policies",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3897
+    },
+    {
+      "path": "/policy-manager",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3928
+    },
+    {
+      "path": "/portal",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4206
+    },
+    {
+      "path": "/pos/customer-display",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3830
+    },
+    {
+      "path": "/pos/gift-cards",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [
+        "❌ WebSocket error: Event"
+      ],
+      "durationMs": 3789
+    },
+    {
+      "path": "/pos/rabatte",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3889
+    },
+    {
+      "path": "/pos/suspended-sales",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3828
+    },
+    {
+      "path": "/pos/tagesabschluss-enhanced",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4261
+    },
+    {
+      "path": "/pos/terminal",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3978
+    },
+    {
+      "path": "/pos/tse-journal",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4047
+    },
+    {
+      "path": "/pos/uebernahme-kasse",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3790
+    },
+    {
+      "path": "/preise/historie",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3607
+    },
+    {
+      "path": "/preise/konditionen",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3782
+    },
+    {
+      "path": "/pricing",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3929
+    },
+    {
+      "path": "/produktion/mischfutter",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4516
+    },
+    {
+      "path": "/produktion/mischfutter-produktion",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3655
+    },
+    {
+      "path": "/produktion/produktions-dokumente-drucken",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3409
+    },
+    {
+      "path": "/projekte",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3796
+    },
+    {
+      "path": "/projekte/liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3631
+    },
+    {
+      "path": "/prospecting/LeadExplorer",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3574
+    },
+    {
+      "path": "/prospecting/leads",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3720
+    },
+    {
+      "path": "/qualitaet/labor",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 6131
+    },
+    {
+      "path": "/qualitaet/labor-auftrag",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4075
+    },
+    {
+      "path": "/qualitaet/labor-liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4762
+    },
+    {
+      "path": "/qualitaet/reklamationen",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4655
+    },
+    {
+      "path": "/reports",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3698
+    },
+    {
+      "path": "/reports/deckungsbeitrag",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3838
+    },
+    {
+      "path": "/reports/lagerbestand",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3616
+    },
+    {
+      "path": "/reports/umsatz",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3560
+    },
+    {
+      "path": "/rezepte/editor",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [
+        "Warning: You provided a `value` prop to a form field without an `onChange` handler. This will render a read-only field. If the field should be mutable use `defaultValue`. Otherwise, set either `onChange` or `readOnly`.%s \n    at input\n    at _c (http://localhost:3000/src/components/ui/input.tsx:20:1",
+        "Warning: You provided a `value` prop to a form field without an `onChange` handler. This will render a read-only field. If the field should be mutable use `defaultValue`. Otherwise, set either `onChange` or `readOnly`.%s \n    at input\n    at _c (http://localhost:3000/src/components/ui/input.tsx:20:1",
+        "Warning: You provided a `value` prop to a form field without an `onChange` handler. This will render a read-only field. If the field should be mutable use `defaultValue`. Otherwise, set either `onChange` or `readOnly`.%s \n    at input\n    at _c (http://localhost:3000/src/components/ui/input.tsx:20:1",
+        "Warning: You provided a `value` prop to a form field without an `onChange` handler. This will render a read-only field. If the field should be mutable use `defaultValue`. Otherwise, set either `onChange` or `readOnly`.%s \n    at input\n    at _c (http://localhost:3000/src/components/ui/input.tsx:20:1",
+        "Warning: You provided a `value` prop to a form field without an `onChange` handler. This will render a read-only field. If the field should be mutable use `defaultValue`. Otherwise, set either `onChange` or `readOnly`.%s \n    at input\n    at _c (http://localhost:3000/src/components/ui/input.tsx:20:1",
+        "Warning: You provided a `value` prop to a form field without an `onChange` handler. This will render a read-only field. If the field should be mutable use `defaultValue`. Otherwise, set either `onChange` or `readOnly`.%s \n    at input\n    at _c (http://localhost:3000/src/components/ui/input.tsx:20:1",
+        "Warning: You provided a `value` prop to a form field without an `onChange` handler. This will render a read-only field. If the field should be mutable use `defaultValue`. Otherwise, set either `onChange` or `readOnly`.%s \n    at input\n    at _c (http://localhost:3000/src/components/ui/input.tsx:20:1",
+        "Warning: You provided a `value` prop to a form field without an `onChange` handler. This will render a read-only field. If the field should be mutable use `defaultValue`. Otherwise, set either `onChange` or `readOnly`.%s \n    at input\n    at _c (http://localhost:3000/src/components/ui/input.tsx:20:1",
+        "Warning: You provided a `value` prop to a form field without an `onChange` handler. This will render a read-only field. If the field should be mutable use `defaultValue`. Otherwise, set either `onChange` or `readOnly`.%s \n    at input\n    at _c (http://localhost:3000/src/components/ui/input.tsx:20:1",
+        "Warning: You provided a `value` prop to a form field without an `onChange` handler. This will render a read-only field. If the field should be mutable use `defaultValue`. Otherwise, set either `onChange` or `readOnly`.%s \n    at input\n    at _c (http://localhost:3000/src/components/ui/input.tsx:20:1"
+      ],
+      "durationMs": 4209
+    },
+    {
+      "path": "/sales/angebot-erstellen",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3709
+    },
+    {
+      "path": "/sales/angebot/neu",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4318
+    },
+    {
+      "path": "/sales/angebot/test-123",
+      "source": "param",
+      "original": "/sales/angebot/:id",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4200
+    },
+    {
+      "path": "/sales/angebote",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3731
+    },
+    {
+      "path": "/sales/angebote-liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3788
+    },
+    {
+      "path": "/sales/auftraege",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3700
+    },
+    {
+      "path": "/sales/auftraege-liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3600
+    },
+    {
+      "path": "/sales/credit-note-editor",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3924
+    },
+    {
+      "path": "/sales/deliveries/new",
+      "source": "static",
+      "category": "CONSOLE_ERROR",
+      "details": "ErrorBoundary caught error: TypeError: Cannot create property 'number' on string '<!doctype html>\r\n<html lang=\"de\">\r\n  <head>\n    <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\";\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () => {};\nwindow.$RefreshSig$ = () => (t",
+      "consoleErrors": [
+        "The above error occurred in the <Controller> component:\n\n    at Controller (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24997e04:379:35)\n    at div\n    at div\n    at div\n    at _c9 (http://localhost:3000/src/components/ui/card.tsx:56:12)\n    at div\n    at _c (http://localhost:3",
+        "ErrorBoundary caught error: TypeError: Cannot create property 'number' on string '<!doctype html>\r\n<html lang=\"de\">\r\n  <head>\n    <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\";\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () => {};\nwindow.$RefreshSig$ = () => (t",
+        "The above error occurred in the <Controller> component:\n\n    at Controller (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24997e04:379:35)\n    at div\n    at div\n    at div\n    at _c9 (http://localhost:3000/src/components/ui/card.tsx:56:12)\n    at div\n    at _c (http://localhost:3",
+        "ErrorBoundary caught error: TypeError: Cannot create property 'date' on string '<!doctype html>\r\n<html lang=\"de\">\r\n  <head>\n    <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\";\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () => {};\nwindow.$RefreshSig$ = () => (typ",
+        "The above error occurred in the <Controller> component:\n\n    at Controller (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24997e04:379:35)\n    at div\n    at div\n    at div\n    at _c9 (http://localhost:3000/src/components/ui/card.tsx:56:12)\n    at div\n    at _c (http://localhost:3",
+        "ErrorBoundary caught error: TypeError: Cannot create property 'customerId' on string '<!doctype html>\r\n<html lang=\"de\">\r\n  <head>\n    <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\";\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () => {};\nwindow.$RefreshSig$ = () =",
+        "The above error occurred in the <Controller> component:\n\n    at Controller (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24997e04:379:35)\n    at div\n    at div\n    at div\n    at _c9 (http://localhost:3000/src/components/ui/card.tsx:56:12)\n    at div\n    at _c (http://localhost:3",
+        "ErrorBoundary caught error: TypeError: Cannot create property 'sourceInvoice' on string '<!doctype html>\r\n<html lang=\"de\">\r\n  <head>\n    <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\";\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () => {};\nwindow.$RefreshSig$ = (",
+        "The above error occurred in the <Controller> component:\n\n    at Controller (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24997e04:379:35)\n    at div\n    at div\n    at div\n    at _c9 (http://localhost:3000/src/components/ui/card.tsx:56:12)\n    at div\n    at _c (http://localhost:3",
+        "ErrorBoundary caught error: TypeError: Cannot create property 'reason' on string '<!doctype html>\r\n<html lang=\"de\">\r\n  <head>\n    <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\";\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () => {};\nwindow.$RefreshSig$ = () => (t",
+        "The above error occurred in the <Controller> component:\n\n    at Controller (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24997e04:379:35)\n    at div\n    at div\n    at div\n    at _c9 (http://localhost:3000/src/components/ui/card.tsx:56:12)\n    at div\n    at _c (http://localhost:3",
+        "ErrorBoundary caught error: TypeError: Cannot create property 'reasonText' on string '<!doctype html>\r\n<html lang=\"de\">\r\n  <head>\n    <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\";\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () => {};\nwindow.$RefreshSig$ = () =",
+        "The above error occurred in the <Controller> component:\n\n    at Controller (http://localhost:3000/node_modules/.vite/deps/chunk-OLBDQLYC.js?v=24997e04:379:35)\n    at div\n    at div\n    at div\n    at _c9 (http://localhost:3000/src/components/ui/card.tsx:56:12)\n    at div\n    at _c (http://localhost:3",
+        "ErrorBoundary caught error: TypeError: Cannot create property 'status' on string '<!doctype html>\r\n<html lang=\"de\">\r\n  <head>\n    <script type=\"module\">import { injectIntoGlobalHook } from \"/@react-refresh\";\ninjectIntoGlobalHook(window);\nwindow.$RefreshReg$ = () => {};\nwindow.$RefreshSig$ = () => (t"
+      ],
+      "durationMs": 4047
+    },
+    {
+      "path": "/sales/delivery",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3777
+    },
+    {
+      "path": "/sales/delivery-editor",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [
+        "Warning: You provided a `value` prop to a form field without an `onChange` handler. This will render a read-only field. If the field should be mutable use `defaultValue`. Otherwise, set either `onChange` or `readOnly`.%s \n    at input\n    at _c (http://localhost:3000/src/components/ui/input.tsx:20:1",
+        "Warning: You provided a `value` prop to a form field without an `onChange` handler. This will render a read-only field. If the field should be mutable use `defaultValue`. Otherwise, set either `onChange` or `readOnly`.%s \n    at input\n    at _c (http://localhost:3000/src/components/ui/input.tsx:20:1",
+        "Warning: You provided a `value` prop to a form field without an `onChange` handler. This will render a read-only field. If the field should be mutable use `defaultValue`. Otherwise, set either `onChange` or `readOnly`.%s \n    at input\n    at _c (http://localhost:3000/src/components/ui/input.tsx:20:1"
+      ],
+      "durationMs": 4292
+    },
+    {
+      "path": "/sales/delivery-editor-new",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [
+        "Warning: You provided a `value` prop to a form field without an `onChange` handler. This will render a read-only field. If the field should be mutable use `defaultValue`. Otherwise, set either `onChange` or `readOnly`.%s \n    at input\n    at _c (http://localhost:3000/src/components/ui/input.tsx:20:1",
+        "Warning: You provided a `value` prop to a form field without an `onChange` handler. This will render a read-only field. If the field should be mutable use `defaultValue`. Otherwise, set either `onChange` or `readOnly`.%s \n    at input\n    at _c (http://localhost:3000/src/components/ui/input.tsx:20:1",
+        "Warning: You provided a `value` prop to a form field without an `onChange` handler. This will render a read-only field. If the field should be mutable use `defaultValue`. Otherwise, set either `onChange` or `readOnly`.%s \n    at input\n    at _c (http://localhost:3000/src/components/ui/input.tsx:20:1"
+      ],
+      "durationMs": 4146
+    },
+    {
+      "path": "/sales/invoice",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4412
+    },
+    {
+      "path": "/sales/invoice-editor",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3971
+    },
+    {
+      "path": "/sales/invoices/new",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3809
+    },
+    {
+      "path": "/sales/lieferungen",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3881
+    },
+    {
+      "path": "/sales/lieferungen-liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3689
+    },
+    {
+      "path": "/sales/order",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3913
+    },
+    {
+      "path": "/sales/order-editor",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3725
+    },
+    {
+      "path": "/sales/orders-modern",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4011
+    },
+    {
+      "path": "/sales/orders/new",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4148
+    },
+    {
+      "path": "/sales/rechnungen",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3678
+    },
+    {
+      "path": "/sales/rechnungen-liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3652
+    },
+    {
+      "path": "/schaeden",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4005
+    },
+    {
+      "path": "/schaeden/liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3957
+    },
+    {
+      "path": "/schaeden/meldung",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3866
+    },
+    {
+      "path": "/schichtplan",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3728
+    },
+    {
+      "path": "/schichtplan/liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3821
+    },
+    {
+      "path": "/service/anfragen",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4477
+    },
+    {
+      "path": "/setup/firma",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4446
+    },
+    {
+      "path": "/silo/kapazitaeten",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4043
+    },
+    {
+      "path": "/start-dashboard",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5044
+    },
+    {
+      "path": "/statistik/bewegungen",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [
+        "Query data cannot be undefined. Please make sure to return a value other than undefined from your query function. Affected query key: [\"analytics\",\"kpis\"]"
+      ],
+      "durationMs": 5960
+    },
+    {
+      "path": "/stock-management",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5039
+    },
+    {
+      "path": "/strecke/disposition",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4406
+    },
+    {
+      "path": "/strecke/dokumente-drucken",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4190
+    },
+    {
+      "path": "/strecke/menu",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4309
+    },
+    {
+      "path": "/strecke/nawaro-ernterklaerung-drucken",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4171
+    },
+    {
+      "path": "/strecke/nawaro-lieferungen",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5351
+    },
+    {
+      "path": "/strecke/nawaro-uebersicht",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4384
+    },
+    {
+      "path": "/strecke/nawaro-uebersicht-drucken",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5820
+    },
+    {
+      "path": "/strecke/nawaro-vertraege-pruefen",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5922
+    },
+    {
+      "path": "/strecke/qualitaets-abweichung",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4332
+    },
+    {
+      "path": "/strecke/speditionen-fracht-preise",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4163
+    },
+    {
+      "path": "/strecke/streckengeschaeft",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4624
+    },
+    {
+      "path": "/strecke/vorlaeufige-streckengeschaefte",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4477
+    },
+    {
+      "path": "/subventionen/dashboard",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4317
+    },
+    {
+      "path": "/system/live-monitor",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4483
+    },
+    {
+      "path": "/tankstelle/zapfungen",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4907
+    },
+    {
+      "path": "/termine/kalender",
+      "source": "static",
+      "category": "TIMEOUT",
+      "details": "page.goto: Timeout 20000ms exceeded.\nCall log:\n  \u001b[2m- navigating to \"http://localhost:3000/termine/kalender\", waiting until \"domcontentloaded\"\u001b[22m\n",
+      "consoleErrors": [],
+      "durationMs": 20010
+    },
+    {
+      "path": "/transporte/fahrer",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5013
+    },
+    {
+      "path": "/transporte/fahrer-liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4999
+    },
+    {
+      "path": "/verkauf/betriebs-auftraege",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4532
+    },
+    {
+      "path": "/verkauf/kommissions-auftraege",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5633
+    },
+    {
+      "path": "/verkauf/kunde-neu",
+      "source": "static",
+      "category": "RENDER_ERROR",
+      "details": "ErrorBoundary ausgelöst",
+      "consoleErrors": [
+        "The above error occurred in one of your React components:\n\n    at Lazy\n    at Suspense\n    at ErrorBoundary (http://localhost:3000/src/shared/errors/ErrorBoundary.tsx:5:8)\n    at RenderedRoute (http://localhost:3000/node_modules/.vite/deps/react-router-dom.js?v=24997e04:4108:5)\n    at Outlet (http:/",
+        "ErrorBoundary caught error: TypeError: Cannot read properties of undefined (reading 'map')\n    at http://localhost:3000/src/features/crm-masks/customer-mask-support.ts:45:37\n    at Array.flatMap (<anonymous>)\n    at http://localhost:3000/src/features/crm-masks/customer-mask-support.ts:44:29\n    at A"
+      ],
+      "durationMs": 4152
+    },
+    {
+      "path": "/verkauf/kunde/neu",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 3999
+    },
+    {
+      "path": "/verkauf/kunde/test-123",
+      "source": "param",
+      "original": "/verkauf/kunde/:id",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4495
+    },
+    {
+      "path": "/verkauf/kunden-liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 6356
+    },
+    {
+      "path": "/verkauf/kunden-stamm",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4597
+    },
+    {
+      "path": "/verkauf/kunden-stamm-enhanced",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4440
+    },
+    {
+      "path": "/verkauf/kunden-stamm-enhanced/test-123",
+      "source": "param",
+      "original": "/verkauf/kunden-stamm-enhanced/:id",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4728
+    },
+    {
+      "path": "/verkauf/kunden-stamm/test-123",
+      "source": "param",
+      "original": "/verkauf/kunden-stamm/:id",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5904
+    },
+    {
+      "path": "/verkauf/lieferschein-erfassung",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 6588
+    },
+    {
+      "path": "/verkauf/unerledigte-auftrags-positionen",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4355
+    },
+    {
+      "path": "/verladung",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4494
+    },
+    {
+      "path": "/verladung/liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4449
+    },
+    {
+      "path": "/verladung/lkw-beladung",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4378
+    },
+    {
+      "path": "/versand/frachtdokumente",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4731
+    },
+    {
+      "path": "/versand/paket-etikett",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4874
+    },
+    {
+      "path": "/versand/versand-avis",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4633
+    },
+    {
+      "path": "/versicherungen",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4596
+    },
+    {
+      "path": "/versicherungen/liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4680
+    },
+    {
+      "path": "/vertrag/rahmenvertraege",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4741
+    },
+    {
+      "path": "/vertrieb/kundenumsatz",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5207
+    },
+    {
+      "path": "/waage",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5334
+    },
+    {
+      "path": "/waage/hofliste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [
+        "Warning: React has detected a change in the order of Hooks called by %s. This will lead to bugs and errors if not fixed. For more information, read the Rules of Hooks: https://reactjs.org/link/rules-of-hooks\n\n   Previous render            Next render\n   ----------------------------------------------",
+        "The above error occurred in the <WaageListePage> component:\n\n    at WaageListePage (http://localhost:3000/src/pages/waage/liste.tsx:181:20)\n    at Suspense\n    at ErrorBoundary (http://localhost:3000/src/shared/errors/ErrorBoundary.tsx:5:8)\n    at RenderedRoute (http://localhost:3000/node_modules/.v",
+        "ErrorBoundary caught error: Error: Rendered more hooks than during the previous render.\n    at updateWorkInProgressHook (http://localhost:3000/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=24997e04:11678:21)\n    at updateMemo (http://localhost:3000/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=24997e04:"
+      ],
+      "durationMs": 4490
+    },
+    {
+      "path": "/waage/liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4946
+    },
+    {
+      "path": "/waage/wiegungen",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [
+        "Warning: React has detected a change in the order of Hooks called by %s. This will lead to bugs and errors if not fixed. For more information, read the Rules of Hooks: https://reactjs.org/link/rules-of-hooks\n\n   Previous render            Next render\n   ----------------------------------------------",
+        "The above error occurred in the <WaageListePage> component:\n\n    at WaageListePage (http://localhost:3000/src/pages/waage/liste.tsx:181:20)\n    at Suspense\n    at ErrorBoundary (http://localhost:3000/src/shared/errors/ErrorBoundary.tsx:5:8)\n    at RenderedRoute (http://localhost:3000/node_modules/.v",
+        "ErrorBoundary caught error: Error: Rendered more hooks than during the previous render.\n    at updateWorkInProgressHook (http://localhost:3000/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=24997e04:11678:21)\n    at updateMemo (http://localhost:3000/node_modules/.vite/deps/chunk-RPCDYKBN.js?v=24997e04:"
+      ],
+      "durationMs": 4448
+    },
+    {
+      "path": "/wartung/anlagen",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4438
+    },
+    {
+      "path": "/wartung/anlagen-liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4399
+    },
+    {
+      "path": "/weighing",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4485
+    },
+    {
+      "path": "/workflow/workflow-monitoring",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4238
+    },
+    {
+      "path": "/workflow/workflow-regeln",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4478
+    },
+    {
+      "path": "/workflows/approval",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 5326
+    },
+    {
+      "path": "/workflows/trigger",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4379
+    },
+    {
+      "path": "/zertifikate",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4660
+    },
+    {
+      "path": "/zertifikate/liste",
+      "source": "static",
+      "category": "OK",
+      "details": "",
+      "consoleErrors": [],
+      "durationMs": 4354
+    }
+  ]
+}

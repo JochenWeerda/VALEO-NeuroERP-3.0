@@ -227,16 +227,16 @@ export default function WechselkursePage(): JSX.Element {
                   {rates.map((r) => (
                     <tr key={r.id} className="border-b hover:bg-muted/50 transition-colors">
                       <td className="py-2 pr-4 font-mono font-semibold">
-                        {r.from_currency}/{r.to_currency}
+                        {(r.from_currency ?? '')}/{(r.to_currency ?? '')}
                       </td>
                       <td className="py-2 pr-4">
-                        {new Date(r.rate_date).toLocaleDateString('de-DE')}
+                        {new Date(r.rate_date ?? '').toLocaleDateString('de-DE')}
                       </td>
                       <td className="py-2 pr-4 text-right font-mono">
-                        {Number(r.rate).toFixed(6)}
+                        {Number(r.rate ?? 0).toFixed(6)}
                       </td>
                       <td className="py-2 pr-4">
-                        <Badge variant="outline">{r.rate_type}</Badge>
+                        <Badge variant="outline">{r.rate_type ?? 'SPOT'}</Badge>
                       </td>
                       <td className="py-2 pr-4 text-muted-foreground">{r.source ?? '–'}</td>
                       <td className="py-2 pr-4">

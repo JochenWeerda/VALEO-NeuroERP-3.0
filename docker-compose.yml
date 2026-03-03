@@ -250,6 +250,7 @@ services:
       start_period: 60s
     volumes:
       - ./app:/app/app
+      - ./modules:/app/modules
       - ./alembic:/app/alembic
       - ./alembic.ini:/app/alembic.ini
       - ./main.py:/app/main.py

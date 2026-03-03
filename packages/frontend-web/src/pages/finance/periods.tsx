@@ -6,6 +6,7 @@
 
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { apiClient } from '@/lib/api-client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Button } from '@/components/ui/button'
@@ -55,11 +56,10 @@ export default function PeriodsPage(): JSX.Element {
   async function fetchPeriods(): Promise<void> {
     setLoading(true)
     try {
-      const response = await fetch('/api/v1/finance/periods?limit=100')
-      if (!response.ok) {
-        throw new Error('Failed to fetch periods')
-      }
-      const data: AccountingPeriod[] = await response.json()
+      const { data } = await apiClient.get<AccountingPeriod[]>(
+        '/api/v1/finance/periods',
+        { params: { limit: 100 } },
+      )
       setPeriods(data)
     } catch (error) {
       console.error('Error fetching periods:', error)
@@ -75,16 +75,7 @@ export default function PeriodsPage(): JSX.Element {
 
   async function createPeriod(): Promise<void> {
     try {
-      const response = await fetch('/api/v1/finance/periods', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newPeriod),
-      })
-
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.detail || 'Failed to create period')
-      }
+      await apiClient.post('/api/v1/finance/periods', newPeriod)
 
       toast({
         title: t('common.success'),
@@ -97,7 +88,7 @@ export default function PeriodsPage(): JSX.Element {
       console.error('Error creating period:', error)
       toast({
         title: t('common.error'),
-        description: error.message || t('crud.feedback.createError', { entityType: 'Periode' }),
+        description: error?.response?.data?.detail || error.message || t('crud.feedback.createError', { entityType: 'Periode' }),
         variant: 'destructive',
       })
     }
@@ -107,19 +98,10 @@ export default function PeriodsPage(): JSX.Element {
     if (!selectedPeriod || !closeBy) return
 
     try {
-      const response = await fetch(`/api/v1/finance/periods/${selectedPeriod.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          status: 'CLOSED',
-          closed_by: closeBy,
-        }),
+      await apiClient.put(`/api/v1/finance/periods/${selectedPeriod.id}`, {
+        status: 'CLOSED',
+        closed_by: closeBy,
       })
-
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.detail || 'Failed to close period')
-      }
 
       toast({
         title: t('common.success'),
@@ -133,7 +115,7 @@ export default function PeriodsPage(): JSX.Element {
       console.error('Error closing period:', error)
       toast({
         title: t('common.error'),
-        description: error.message || t('finance.periods.closeError'),
+        description: error?.response?.data?.detail || error.message || t('finance.periods.closeError'),
         variant: 'destructive',
       })
     }

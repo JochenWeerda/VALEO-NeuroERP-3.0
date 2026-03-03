@@ -215,23 +215,11 @@ const createBestellungConfig = (t: any, entityTypeLabel: string): MaskConfig => 
       key: 'drucken',
       label: t('crud.actions.print'),
       type: 'secondary',
-      onClick: () => {
-        if (id || data?.nummer) {
-          window.open(`/api/mcp/documents/purchase_order/${id || data.nummer}/print?locale=${sendLanguage}`, '_blank')
-        }
-      }
     },
     {
       key: 'senden',
       label: t('crud.actions.send'),
       type: 'secondary',
-      onClick: () => {
-        if (data?.lieferantId) {
-          setSendRecipients([data.lieferantId])
-          setSendDialogOpen(true)
-        }
-      },
-      disabled: !data || data.status === 'ENTWURF' || data.status === 'STORNIERT'
     }
   ],
   api: {
@@ -260,7 +248,7 @@ export default function BestellungStammPage(): JSX.Element {
   const [sendDialogOpen, setSendDialogOpen] = useState(false)
   const [sendMethod, setSendMethod] = useState<'email' | 'portal'>('email')
   const [sendLanguage, setSendLanguage] = useState<'de' | 'en'>('de')
-  const [sendRecipients] = useState<string[]>([])
+  const [sendRecipients, setSendRecipients] = useState<string[]>([])
   const [sendMessage, setSendMessage] = useState('')
   const entityType = 'purchaseOrder'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Bestellung')
@@ -449,6 +437,17 @@ export default function BestellungStammPage(): JSX.Element {
         onSave={handleSave}
         onCancel={handleCancel}
         isLoading={loading}
+        onAction={(key) => {
+          if (key === 'drucken') {
+            if (id || data?.nummer) {
+              window.open(`/api/mcp/documents/purchase_order/${id || data?.nummer}/print?locale=${sendLanguage}`, '_blank')
+            }
+          } else if (key === 'senden') {
+            if (data?.lieferantId) {
+              setSendDialogOpen(true)
+            }
+          }
+        }}
       />
 
       {/* Change-Log Panel (wenn ID vorhanden) */}

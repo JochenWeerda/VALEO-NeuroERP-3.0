@@ -44,7 +44,15 @@ export class ApiClient {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`)
       }
 
+      const contentType = response.headers.get('content-type') ?? ''
+      if (!contentType.includes('application/json')) {
+        throw new Error('Response is not JSON')
+      }
+
       const data = await response.json()
+      if (typeof data === 'string') {
+        throw new Error('Invalid JSON response')
+      }
 
       return {
         data,

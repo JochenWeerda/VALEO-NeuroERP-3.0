@@ -204,10 +204,10 @@ async def delete_profile(
 @router.post("/{connector_type}/imports", response_model=ImportUploadResponse, status_code=201)
 async def create_import_run(
     connector_type: str,
+    request: Request,
     file: UploadFile = File(...),
     profile_id: Optional[str] = Query(None),
     idempotency_key: Optional[str] = Query(None),
-    request: Optional[Request] = None,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):

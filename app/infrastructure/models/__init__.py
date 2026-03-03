@@ -1233,6 +1233,8 @@ from .l3c_models import (
     WeighingTicket,
     WeighingTicketLine,
     WeighingMeasurement,
+    ContractAmendment,
+    AmendmentTemplate,
     AgrarContract,
     AgrarContractAllocation,
     AgrarSettlement,
