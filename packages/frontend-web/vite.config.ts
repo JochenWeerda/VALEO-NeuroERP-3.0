@@ -37,23 +37,49 @@ export default defineConfig(({ mode }) => {
     dedupe: ['react', 'react-dom'],
   },
   optimizeDeps: {
-    include: ['react', 'react-dom', 'react/jsx-runtime'],
-    exclude: [],
+    entries: ['index.html'],
+    include: [
+      'react', 'react-dom', 'react/jsx-runtime',
+      'react-router-dom',
+      '@tanstack/react-query',
+      'axios',
+      'i18next', 'react-i18next',
+      'zustand',
+      'react-hook-form', '@hookform/resolvers',
+      'zod',
+      'recharts',
+      'lucide-react',
+      'date-fns',
+      'clsx', 'tailwind-merge', 'class-variance-authority',
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-dropdown-menu',
+      '@radix-ui/react-select',
+      '@radix-ui/react-tabs',
+      '@radix-ui/react-toast',
+      '@radix-ui/react-tooltip',
+      '@radix-ui/react-popover',
+    ],
   },
   server: {
     port: DEV_PORT,
-    host: '0.0.0.0', // Alle Interfaces — lokal, LAN, Docker, Tunnel
-    strictPort: true, // Port 3000 erzwingen; bei Belegung Fehler statt Fallback
-    // 'all' → localhost, LAN-IP, ngrok, Cloudflare-Tunnel, Cloud-Domain — alle erlaubt
+    host: '0.0.0.0',
+    strictPort: true,
     allowedHosts: 'all',
+    warmup: {
+      clientFiles: [
+        'index.html',
+        './src/main.tsx',
+        './src/app/routes.tsx',
+        './src/layouts/DashboardLayout.tsx',
+      ],
+    },
     hmr: {
-      // HMR-Host aus Env überschreibbar (für ngrok/Tunnel: VITE_HMR_HOST=xxxx.ngrok.io)
       protocol: env.VITE_HMR_HOST ? 'wss' : 'ws',
       ...(env.VITE_HMR_HOST ? { host: env.VITE_HMR_HOST, port: 443 } : {}),
     },
     watch: {
-      usePolling: true, // Für Docker-Kompatibilität
-      interval: 1000,
+      usePolling: true,
+      interval: 500,
     },
     proxy: {
       '/api/v1': {
