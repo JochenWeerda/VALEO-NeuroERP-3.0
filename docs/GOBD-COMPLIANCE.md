@@ -47,8 +47,9 @@ This document maps VALEO NeuroERP FiBu (Financial Accounting) functions to Germa
 | Change history | Audit logs with old/new values |
 
 **Implemented in:**
-- `app/finance/gobd.py` - `/gobd/hash-chain/verify` endpoint
-- Hash fields in `domain_erp.finance_journal_entries`
+- `app/finance/gobd.py` – `/gobd/hash-chain/verify` endpoint
+- Hash-Felder in `domain_erp.journal_entries` (`hash_prev`, `hash_current`, `sequence_number`), automatisch befüllt durch DB-Trigger (Migration `gobd_journal_hash_chain_trigger_*`)
+- Siehe auch: `docs/compliance/BUCHUNGEN-AUDIT-PFAD.md` (zentraler Audit-Pfad für alle Buchungspfade)
 
 ### 3. Vollständigkeit / Completeness (§146 AO)
 
