@@ -13,7 +13,6 @@ import { Toolbar } from '@/components/ui/toolbar';
 import { DetailDrawer } from '@/components/ui/detail-drawer';
 import { CrudDeleteDialog, CrudCancelDialog, CrudAuditTrailPanel, CrudPrintButton } from '@/features/crud/components';
 import { useCrudDelete, useCrudCancel, useCrudAuditTrail } from '@/features/crud/hooks';
-import { crudPrintService } from '@/features/crud/services';
 import { Badge } from '@/components/ui/badge';
 import { getEntityTypeLabel, getListTitle, getDetailTitle, getStatusLabel } from '@/features/crud/utils/i18n-helpers';
 

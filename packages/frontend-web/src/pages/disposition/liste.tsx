@@ -1,6 +1,5 @@
 ﻿import { useNavigate } from 'react-router-dom'
-import { useDisposition } from '@/lib/api/betrieb'
-import type { DispoPosition } from '@/lib/api/betrieb'
+import { useDisposition, type DispoPosition } from '@/lib/api/betrieb'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'

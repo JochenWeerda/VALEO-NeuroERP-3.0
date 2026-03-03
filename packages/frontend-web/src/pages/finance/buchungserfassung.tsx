@@ -315,7 +315,7 @@ export default function BuchungserfassungPage(): JSX.Element {
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Buchungserfassung')
   const buchungConfig = createBuchungConfig(t, entityTypeLabel)
 
-  const { data, loading, saveData } = useMaskData({
+  const { data, loading } = useMaskData({
     apiUrl: buchungConfig.api.baseUrl,
     id: 'new'
   })

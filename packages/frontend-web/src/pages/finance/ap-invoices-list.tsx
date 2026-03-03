@@ -64,10 +64,6 @@ export default function APInvoicesListPage(): JSX.Element {
     staleTime: 2 * 60 * 1000,
   })
 
-  if (isError) {
-    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
-  }
-
   const columns = [
     {
       accessorKey: 'number',
@@ -167,7 +163,11 @@ export default function APInvoicesListPage(): JSX.Element {
     exportFileName: `${entityTypeLabel}_Liste`,
   })
 
-  const handleImport = async (_data: unknown[]): Promise<void> => {
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
+
+  const handleImport = async (): Promise<void> => {
     toast({ title: t('common.success'), description: t('crud.feedback.createSuccess', { entityType: entityTypeLabel }) })
   }
 

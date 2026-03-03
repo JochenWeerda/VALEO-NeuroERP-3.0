@@ -185,7 +185,7 @@ export default function RechnungseingaengeListePage(): JSX.Element {
           )
           queryClient.invalidateQueries({ queryKey: einkaufKeys.rechnungseingaenge() })
           if (err === 0 && ok > 0) {
-            toast({ title: t('crud.messages.success'), description: t('status.reviewed') + ` (${ok})` })
+            toast({ title: t('crud.messages.success'), description: `${t('status.reviewed')  } (${ok})` })
           } else if (ok > 0) {
             toast({ title: t('status.reviewed'), description: `${ok} OK, ${err} Fehler. ${messages.slice(0, 2).join(' ')}` })
           } else if (messages.length) {
@@ -210,7 +210,7 @@ export default function RechnungseingaengeListePage(): JSX.Element {
           )
           queryClient.invalidateQueries({ queryKey: einkaufKeys.rechnungseingaenge() })
           if (err === 0 && ok > 0) {
-            toast({ title: t('crud.messages.success'), description: t('status.approved') + ` (${ok})` })
+            toast({ title: t('crud.messages.success'), description: `${t('status.approved')  } (${ok})` })
           } else if (ok > 0) {
             toast({ title: t('status.approved'), description: `${ok} OK, ${err} Fehler. ${messages.slice(0, 2).join(' ')}` })
           } else if (messages.length) {
@@ -235,7 +235,7 @@ export default function RechnungseingaengeListePage(): JSX.Element {
           )
           queryClient.invalidateQueries({ queryKey: einkaufKeys.rechnungseingaenge() })
           if (err === 0 && ok > 0) {
-            toast({ title: t('crud.messages.success'), description: t('status.posted') + ` (${ok})` })
+            toast({ title: t('crud.messages.success'), description: `${t('status.posted')  } (${ok})` })
           } else if (ok > 0) {
             toast({ title: t('status.posted'), description: `${ok} OK, ${err} Fehler. ${messages.slice(0, 2).join(' ')}` })
           } else if (messages.length) {

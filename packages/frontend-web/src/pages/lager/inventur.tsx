@@ -7,8 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { CheckCircle, ClipboardList, Search } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
-import { useInventur, useCompleteInventurPositions } from '@/lib/api/inventory'
-import type { InventurPosition } from '@/lib/api/inventory'
+import { useInventur, useCompleteInventurPositions, type InventurPosition } from '@/lib/api/inventory'
 
 export default function InventurPage(): JSX.Element {
   const [searchTerm, setSearchTerm] = useState('')

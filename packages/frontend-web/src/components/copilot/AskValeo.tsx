@@ -387,7 +387,9 @@ export function useAskValeo(_context: AskValeoRuntimeContext): {
   ask: (_question: string) => Promise<{ answer: string; suggestions: AISuggestion[] }>
   getSuggestions: () => Promise<AISuggestion[]>
 } {
+  void _context;
   const ask = async (_question: string): Promise<{ answer: string; suggestions: AISuggestion[] }> => {
+    void _question;
     // return await mcp.ask(question, context);
     return { answer: 'Phase 3 Placeholder', suggestions: [] };
   };

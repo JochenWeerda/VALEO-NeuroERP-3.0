@@ -238,6 +238,7 @@ function _convertSectionsToTabs(view: L3View): Tab[] {
   }
   return []
 }
+void _convertSectionsToTabs
 
 // Konvertiert Actions
 function convertActions(l3Actions: Array<{ id: string; label: string; type: string }>): Action[] {

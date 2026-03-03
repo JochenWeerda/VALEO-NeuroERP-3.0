@@ -1,4 +1,3 @@
-﻿import { useState } from 'react'
 import { useBenachrichtigungen, type Benachrichtigung } from '@/lib/api/betrieb'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -7,9 +6,7 @@ import { DataTable } from '@/components/ui/data-table'
 import { Bell, CheckCircle } from 'lucide-react'
 import { ErrorState } from '@/components/ErrorState'
 
-export default function BenachrichtigungenPage(): JSX.Element {
-  const [_searchTerm, _setSearchTerm] = useState('')
-  const { data: benachrichtigungen = [], isError, error, refetch } = useBenachrichtigungen()
+export default function BenachrichtigungenPage(): JSX.Element {  const { data: benachrichtigungen = [], isError, error, refetch } = useBenachrichtigungen()
 
   if (isError) {
     return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
@@ -38,3 +35,4 @@ export default function BenachrichtigungenPage(): JSX.Element {
     </div>
   )
 }
+

@@ -495,7 +495,7 @@ export function useVorschlagLager(params?: {
       if (params?.artikel_nr) p.set('artikelNr', params.artikel_nr)
       if (params?.nur_unter_meldebestand !== undefined)
         p.set('nur_unter_meldebestand', String(params.nur_unter_meldebestand))
-      const qs = p.toString() ? `?${p}` : ''
+      const qs = p.toString() ? `?${p.toString()}` : ''
       return (await apiClient.get<BvPosition[]>(`/api/v1/einkauf/bestellvorschlaege/lager${qs}`)).data
     },
     staleTime: 60 * 1000,
@@ -516,7 +516,7 @@ export function useVorschlagVerkauf(params?: {
       if (params?.artikelgruppe) p.set('artikelgruppe', params.artikelgruppe)
       if (params?.von_datum) p.set('vonDatum', params.von_datum)
       if (params?.bis_datum) p.set('bisDatum', params.bis_datum)
-      const qs = p.toString() ? `?${p}` : ''
+      const qs = p.toString() ? `?${p.toString()}` : ''
       return (await apiClient.get<BvPosition[]>(`/api/v1/einkauf/bestellvorschlaege/verkauf${qs}`)).data
     },
     staleTime: 60 * 1000,
@@ -533,7 +533,7 @@ export function useVorschlagRohware(params?: {
       const p = new URLSearchParams()
       if (params?.stichtag) p.set('stichtag', params.stichtag)
       if (params?.niederlassung_id) p.set('niederlassung_id', params.niederlassung_id)
-      const qs = p.toString() ? `?${p}` : ''
+      const qs = p.toString() ? `?${p.toString()}` : ''
       return (await apiClient.get<BvPosition[]>(`/api/v1/einkauf/bestellvorschlaege/rohware${qs}`)).data
     },
     staleTime: 60 * 1000,
@@ -624,7 +624,7 @@ export function useEinkaufBestellungen(params?: { status?: string; von?: string;
       if (params?.status) p.set('status', params.status)
       if (params?.von) p.set('von', params.von)
       if (params?.bis) p.set('bis', params.bis)
-      const qs = p.toString() ? `?${p}` : ''
+      const qs = p.toString() ? `?${p.toString()}` : ''
       return (await apiClient.get<EinkaufBestellung[]>(`/api/v1/einkauf/bestellungen${qs}`)).data
     },
     staleTime: 60 * 1000,

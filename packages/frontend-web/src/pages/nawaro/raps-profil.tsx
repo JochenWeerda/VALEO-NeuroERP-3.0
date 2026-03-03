@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+﻿import { useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -74,7 +74,6 @@ export default function NawaroRapsProfilPage(): JSX.Element {
       return
     }
     loadProfile(profileQuery.data[0].id)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profileQuery.data, selectedId])
 
   const usageTotal = useMemo(() => {

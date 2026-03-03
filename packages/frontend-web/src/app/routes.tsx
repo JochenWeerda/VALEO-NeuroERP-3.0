@@ -48,14 +48,14 @@ function getFibuSuitePath(resolvedPath: string | undefined): string | null {
 function buildFibuSuiteChildRoutes(): RouteObject[] {
   const fibu = NAV_SECTIONS.find((s) => s.id === 'fibu')
   const children = fibu?.children ?? []
-  return children
-    .filter((c): c is typeof c & { module: string } => Boolean(c.module))
-    .map((c) => {
-      const path = getFibuSuitePath(c.path)
-      if (!path) return null
-      return { path, element: createRouteElementByModule(c.module) }
-    })
-    .filter((x): x is RouteObject => x != null)
+  const routes: RouteObject[] = []
+  for (const child of children) {
+    if (!child.module) continue
+    const path = getFibuSuitePath(child.path)
+    if (!path) continue
+    routes.push({ path, element: createRouteElementByModule(child.module) })
+  }
+  return routes
 }
 
 // Separate portal routes from main app routes

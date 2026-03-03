@@ -2,17 +2,17 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
-import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
+import { useMaskData, useMaskValidation } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
-import { getEntityTypeLabel, getDetailTitle, getSuccessMessage, getErrorMessage, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
+import { getEntityTypeLabel, getDetailTitle, getSuccessMessage, getErrorMessage } from '@/features/crud/utils/i18n-helpers'
 import { createApiClient } from '@/components/mask-builder/utils/api'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { formatDate, formatCurrency } from '@/components/mask-builder/utils/formatting'
 import { toast } from '@/hooks/use-toast'
-import { ArrowLeft, History, FileText, TrendingUp } from 'lucide-react'
+import { ArrowLeft, History, FileText } from 'lucide-react'
 
 // API Client
 const apiClient = createApiClient('/api/crm-sales')
@@ -409,7 +409,6 @@ export default function OpportunityDetailPage(): JSX.Element {
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
   const [loading, setLoading] = useState(false)
-  const [activeTab, setActiveTab] = useState('grundinformationen')
   const entityType = 'opportunity'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Opportunity')
   const opportunityConfig = createOpportunityConfig(t, entityTypeLabel)

@@ -91,10 +91,6 @@ export default function RetourenPage(): JSX.Element {
     staleTime: 2 * 60 * 1000,
   })
 
-  if (grError) {
-    return <ErrorState error={grErrorObj as Error} onRetry={() => { void refetchReceipts() }} />
-  }
-
   const {
     data: retouren = [],
     isLoading: retourenLoading,
@@ -104,9 +100,6 @@ export default function RetourenPage(): JSX.Element {
   } = useEinkaufRetouren()
   const updateRetoure = useUpdateEinkaufRetoure()
 
-  if (retourenError) {
-    return <ErrorState error={retourenErrorObj as Error} onRetry={() => { void refetchRetouren() }} />
-  }
 
   // Lade Wareneingang wenn ausgewählt
   useEffect(() => {
@@ -125,6 +118,14 @@ export default function RetourenPage(): JSX.Element {
       }
     }
   }, [selectedGrId, goodsReceipts])
+
+  if (grError) {
+    return <ErrorState error={grErrorObj as Error} onRetry={() => { void refetchReceipts() }} />
+  }
+
+  if (retourenError) {
+    return <ErrorState error={retourenErrorObj as Error} onRetry={() => { void refetchRetouren() }} />
+  }
 
   const handleCreateReturn = () => {
     if (!selectedGrId) {

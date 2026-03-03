@@ -126,8 +126,8 @@ const createCreditNoteConfig = (t: any, entityTypeLabel: string): MaskConfig => 
             { key: 'article', label: t('crud.fields.product'), type: 'lookup', required: true },
             { key: 'qty', label: t('crud.fields.quantity'), type: 'number', required: true },
             { key: 'price', label: t('crud.fields.price'), type: 'number', required: true },
-            { key: 'vatRate', label: t('crud.fields.taxRate') + ' %', type: 'number', required: true },
-            { key: 'discount', label: t('crud.fields.discount') + ' %', type: 'number' }
+            { key: 'vatRate', label: `${t('crud.fields.taxRate')  } %`, type: 'number', required: true },
+            { key: 'discount', label: `${t('crud.fields.discount')  } %`, type: 'number' }
           ],
           minRows: 1,
           helpText: t('crud.tooltips.fields.creditNoteItems')

@@ -50,10 +50,6 @@ export default function WiegungenPage(): JSX.Element {
   const updateMutation = useUpdateWeighingTicket()
   const allocateMutation = useAllocateContract()
 
-  if (ticketsQuery.isError) {
-    return <ErrorState error={ticketsQuery.error as Error} onRetry={() => { void ticketsQuery.refetch() }} />
-  }
-
   const tickets = ticketsQuery.data?.items ?? []
   const filteredTickets = useMemo(
     () =>
@@ -68,6 +64,10 @@ export default function WiegungenPage(): JSX.Element {
       }),
     [tickets, searchTerm],
   )
+
+  if (ticketsQuery.isError) {
+    return <ErrorState error={ticketsQuery.error as Error} onRetry={() => { void ticketsQuery.refetch() }} />
+  }
 
   const totalNetKg = tickets.reduce((sum, t) => sum + Number(t.net_weight ?? 0), 0)
   const totalBillingKg = tickets.reduce((sum, t) => sum + Number(t.billing_weight ?? t.net_weight ?? 0), 0)

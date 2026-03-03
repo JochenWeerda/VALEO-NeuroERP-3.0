@@ -5,7 +5,7 @@ Policy Manager API Endpoints
 from fastapi import APIRouter, HTTPException, Body
 from fastapi.responses import StreamingResponse
 from typing import List, Dict, Any
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 import logging
 
 from app.services.policy_service import (
@@ -48,8 +48,8 @@ class TestResponse(BaseModel):
 
 
 class RestoreRequest(BaseModel):
-    """Restore-Request"""
-    json: str
+    """Restore-Request (JSON-String der wiederherzustellenden Policies)."""
+    json_payload: str = Field(..., alias="json", description="JSON-String der Policy-Daten")
 
 
 # Endpoints
@@ -219,7 +219,7 @@ async def restore_policies(request: RestoreRequest) -> Dict[str, Any]:
         Dict mit ok=True
     """
     try:
-        policy_store.restore_json(request.json)
+        policy_store.restore_json(request.json_payload)
         logger.warning("Policies restored from JSON - all previous policies replaced")
         return {"ok": True}
     except Exception as e:

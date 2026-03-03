@@ -43,9 +43,6 @@ export function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProps): JSX.
   const { pinnedTileIds } = usePinnedTiles()
   const navItems: NavItem[] = NAV_SECTIONS
   const filteredNavItems = navItems.filter((item) => (item.featureKey === 'agrar' ? agrarEnabled : true))
-  const allGroupIds = filteredNavItems
-    .filter((item) => item.children && item.children.length > 0)
-    .map((item) => item.id)
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(
     new Set(), // Standardmäßig alle Gruppen eingeklappt
   )

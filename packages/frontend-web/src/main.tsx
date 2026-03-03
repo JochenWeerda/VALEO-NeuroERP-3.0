@@ -7,10 +7,8 @@ import { SSEProvider } from '@/app/providers/SSEProvider'
 import { router } from '@/app/routes'
 import { ToastProvider } from '@/components/ui/toast-provider'
 import { GlobalShortcutProvider } from '@/components/shortcuts/GlobalShortcutProvider'
-// Temporarily disabled - will be re-enabled later
-// import { CommandPalette } from '@/components/command/CommandPalette'
-// import { AskVALEO } from '@/components/ai/AskVALEO'
-// import { SemanticSearch } from '@/components/search/SemanticSearch'
+// CommandPalette is rendered inside AppShell (router context).
+// AskVALEO is rendered inside DashboardLayout (router context).
 import { auth } from '@/lib/auth'
 import { createQueryClient } from '@/lib/query'
 import { useFeature } from '@/hooks/useFeature'
@@ -48,10 +46,6 @@ function Application(): JSX.Element {
             router={router} 
             future={{ v7_startTransition: true }}
           />
-          {/* TODO: Diese Komponenten müssen in Router-Kontext verschoben werden */}
-          {/* <CommandPalette /> */}
-          {/* <AskVALEO /> */}
-          {/* <SemanticSearch /> */}
         </GlobalShortcutProvider>
       </ToastProvider>
     </SSEProvider>

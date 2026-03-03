@@ -12,7 +12,6 @@ import { Badge } from '@/components/ui/badge'
 import { ArrowLeft, ArrowRight, Check, Mail, Users, Calendar, BarChart3, Settings } from 'lucide-react'
 import { createApiClient } from '@/components/mask-builder/utils/api'
 import { toast } from '@/hooks/use-toast'
-import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 
 // API Client
 const apiClient = createApiClient('/api/crm-marketing')
@@ -111,7 +110,7 @@ export default function CampaignBuilderPage(): JSX.Element {
       toast({
         variant: 'destructive',
         title: t('crud.messages.validationError'),
-        description: t('crud.fields.name') + ' ist erforderlich'
+        description: `${t('crud.fields.name')  } ist erforderlich`
       })
       return
     }
@@ -120,7 +119,7 @@ export default function CampaignBuilderPage(): JSX.Element {
       toast({
         variant: 'destructive',
         title: t('crud.messages.validationError'),
-        description: t('crud.fields.subject') + ' ist erforderlich'
+        description: `${t('crud.fields.subject')  } ist erforderlich`
       })
       return
     }
@@ -129,7 +128,7 @@ export default function CampaignBuilderPage(): JSX.Element {
       toast({
         variant: 'destructive',
         title: t('crud.messages.validationError'),
-        description: t('crud.fields.segment') + ' ist erforderlich'
+        description: `${t('crud.fields.segment')  } ist erforderlich`
       })
       return
     }

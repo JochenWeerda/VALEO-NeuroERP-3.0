@@ -12,6 +12,7 @@ from pathlib import Path
 from ..core.config import settings
 from ..core.database import get_db
 from sqlalchemy import text
+from app.infrastructure.models import AuditLog
 
 logger = logging.getLogger(__name__)
 
@@ -68,9 +69,8 @@ class CleanupWorker:
         return results
 
     async def _cleanup_old_sessions(self) -> Dict[str, Any]:
-        """Clean expired sessions"""
+        """Clean expired sessions (no session table in schema; reserved for future Redis/DB sessions)."""
         try:
-            # TODO: Implement session cleanup
             logger.info("Cleaning old sessions...")
             return {'task': 'sessions', 'deleted': 0, 'success': True}
         except Exception as e:
@@ -80,13 +80,17 @@ class CleanupWorker:
     async def _cleanup_old_audit_logs(self) -> Dict[str, Any]:
         """Clean audit logs older than 1 year"""
         try:
-            cutoff_date = datetime.now() - timedelta(days=365)
-            
-            # Placeholder - implement actual audit log cleanup
-            logger.info(f"Cleaning audit logs older than {cutoff_date.date()}")
-            return {'task': 'audit_logs', 'deleted': 0, 'success': True}
+            if not self.db:
+                return {'task': 'audit_logs', 'deleted': 0, 'success': True}
+            cutoff = datetime.utcnow() - timedelta(days=365)
+            deleted = self.db.query(AuditLog).filter(AuditLog.timestamp < cutoff).delete()
+            self.db.commit()
+            logger.info(f"Cleaning audit logs older than {cutoff.date()}, deleted={deleted}")
+            return {'task': 'audit_logs', 'deleted': deleted, 'success': True}
         except Exception as e:
             logger.error(f"Error cleaning audit logs: {e}")
+            if self.db:
+                self.db.rollback()
             return {'task': 'audit_logs', 'success': False, 'error': str(e)}
 
     async def _cleanup_temp_files(self) -> Dict[str, Any]:

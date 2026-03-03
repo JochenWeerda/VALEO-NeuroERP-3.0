@@ -1,11 +1,16 @@
 """
 Unit-Tests für Finance Advanced Endpunkte
 Wechselkurse, Buchungsschemata, Kostenrechnung, Abschlusschecklisten, Nebenbuch-Abstimmung, Intercompany
+
+Diese Tests sind als Integrationstests vorgesehen (echte DB/App).
+Mit pytest -m integration ausführbar; ohne Markierung werden sie als Platzhalter übersprungen.
 """
 
 from fastapi.testclient import TestClient
 from datetime import date
 import pytest
+
+pytestmark = pytest.mark.integration
 
 # Hinweis: Importiere die App aus main
 # from main import app

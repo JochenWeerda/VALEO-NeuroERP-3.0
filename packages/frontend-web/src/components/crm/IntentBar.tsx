@@ -43,7 +43,6 @@ interface IntentBarProps {
 
 export function IntentBar({
   customerId,
-  customerName,
   customerEmail,
   customerPhone,
   className,

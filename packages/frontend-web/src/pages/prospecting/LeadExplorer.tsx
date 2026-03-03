@@ -34,7 +34,6 @@ import {
   RefreshCw,
   CheckCircle2,
   XCircle,
-  AlertCircle,
   FileUp,
   Search,
   Trash2,
@@ -128,7 +127,7 @@ export default function LeadExplorer(): JSX.Element {
     [leadCandidates, page],
   )
 
-  function handleCreateLead(_candidate: LeadCandidate): void {
+  function handleCreateLead(): void {
     navigate('/crm/leads/new')
   }
 
@@ -137,7 +136,7 @@ export default function LeadExplorer(): JSX.Element {
     navigate(`/crm/customers/${candidate.matched_customer_id}`)
   }
 
-  function handleAddTask(_candidate: LeadCandidate): void {
+  function handleAddTask(): void {
     navigate('/crm/leads')
   }
 

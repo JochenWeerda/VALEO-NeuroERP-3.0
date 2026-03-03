@@ -19,6 +19,8 @@ import { apiClient } from '@/lib/api-client'
 import { History, XCircle, AlertTriangle, Mail, Globe } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { usePoCommunications, useSendPoCommunication } from '@/lib/api/procurement-plus'
+import { useAuth } from '@/hooks/useAuth'
+import { useTenant } from '@/hooks/useTenant'
 
 // Zod-Schema für Bestellung (wird in Komponente mit i18n erstellt)
 const createBestellungSchema = (t: any) => z.object({
@@ -240,6 +242,8 @@ export default function BestellungStammPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
+  const { user } = useAuth()
+  const { tenantId } = useTenant()
   const [loading, setLoading] = useState(false)
   const [stornoDialogOpen, setStornoDialogOpen] = useState(false)
   const [stornoReason, setStornoReason] = useState('')
@@ -248,7 +252,7 @@ export default function BestellungStammPage(): JSX.Element {
   const [sendDialogOpen, setSendDialogOpen] = useState(false)
   const [sendMethod, setSendMethod] = useState<'email' | 'portal'>('email')
   const [sendLanguage, setSendLanguage] = useState<'de' | 'en'>('de')
-  const [sendRecipients, setSendRecipients] = useState<string[]>([])
+  const [sendRecipients] = useState<string[]>([])
   const [sendMessage, setSendMessage] = useState('')
   const entityType = 'purchaseOrder'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Bestellung')
@@ -306,9 +310,9 @@ export default function BestellungStammPage(): JSX.Element {
         // Erstelle Audit-Log für Änderung
         try {
           await apiClient.post('/api/v1/audit/log', {
-            user_id: 'current-user', // TODO: Get from auth context
-            user_email: 'user@example.com', // TODO: Get from auth context
-            tenant_id: 'default', // TODO: Get from tenant context
+            user_id: user?.sub ?? 'current-user',
+            user_email: user?.email ?? 'user@example.com',
+            tenant_id: tenantId,
             action: 'UPDATE',
             entity_type: 'purchaseOrder',
             entity_id: id || formData.id,
@@ -382,9 +386,9 @@ export default function BestellungStammPage(): JSX.Element {
       // Erstelle Audit-Log für Storno
       try {
         await apiClient.post('/api/v1/audit/log', {
-          user_id: 'current-user', // TODO: Get from auth context
-          user_email: 'user@example.com', // TODO: Get from auth context
-          tenant_id: 'default', // TODO: Get from tenant context
+          user_id: user?.sub ?? 'current-user',
+          user_email: user?.email ?? 'user@example.com',
+          tenant_id: tenantId,
           action: 'CANCEL',
           entity_type: 'purchaseOrder',
           entity_id: id || data?.id,

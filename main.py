@@ -54,25 +54,25 @@ try:
     from app.crm.router import router as crm_router  # CRM
 except ImportError:
     crm_router = None
-    logger.warning("CRM router not available")
+    logger.debug("CRM router not available (optional module)")
 
 try:
     from app.finance.router import router as finance_router  # Finance (DATEV, SEPA)
 except ImportError:
     finance_router = None
-    logger.warning("Finance router not available")
+    logger.debug("Finance router not available (optional module)")
 
 try:
     from app.einkauf.router import router as einkauf_router  # Einkauf/Beschaffung
 except ImportError:
     einkauf_router = None
-    logger.warning("Einkauf router not available")
+    logger.debug("Einkauf router not available (optional module)")
 
 try:
     from app.api.v1.endpoints.purchase_workflow import router as purchase_workflow_router
 except ImportError:
     purchase_workflow_router = None
-    logger.warning("Purchase workflow router not available")
+    logger.debug("Purchase workflow router not available (optional module)")
 
 from prometheus_client import make_asgi_app
 
@@ -102,6 +102,14 @@ async def lifespan(app: FastAPI):
         logger.error(f"Failed to initialize module registry: {e}")
         raise
 
+    # XRechnung: optional drafthorse (ZUGFeRD) als Generator registrieren (Open Source, kostenlos)
+    try:
+        from modules.agrar.services.xrechnung_drafthorse import register_as_xrechnung_generator
+        if register_as_xrechnung_generator():
+            logger.info("XRechnung generator: drafthorse (ZUGFeRD) registered")
+    except Exception as e:
+        logger.debug("XRechnung drafthorse not used: %s", e)
+
     # Create database tables
     try:
         create_tables()
@@ -121,6 +129,7 @@ async def lifespan(app: FastAPI):
         outbox_task = asyncio.create_task(start_outbox_worker())
         logger.info("Outbox worker started")
 
+    app.state.startup_done = True
     yield
 
     # Shutdown
@@ -310,6 +319,13 @@ async def root():
 app.include_router(api_router, prefix=settings.API_V1_STR)
 app.include_router(policies_v1.router, prefix='/api/mcp')
 
+# GoBD Compliance (/api/gobd/status, /api/gobd/hash-chain, …)
+try:
+    from app.finance.gobd import router as gobd_router
+    app.include_router(gobd_router, prefix="/api", tags=["GoBD"])
+except ImportError:
+    logger.debug("GoBD router not available (optional module)")
+
 # Include Domain routers (Phase 1 - Service-Kernel)
 # CRM
 if crm_router:
@@ -334,13 +350,13 @@ try:
     from app.domains.inventory.api import router as inventory_router
     app.include_router(inventory_router, prefix="/api/v1/inventory", tags=["Inventory"])
 except ImportError:
-    logger.warning("Inventory router not available")
+    logger.debug("Inventory router not available (optional module)")
 
 try:
     from app.domains.agrar.api import router as agrar_router
     app.include_router(agrar_router, prefix="/api/v1/agrar", tags=["Agrar"])
 except ImportError:
-    logger.warning("Agrar router not available")
+    logger.debug("Agrar router not available (optional module)")
 
 # Lightweight stubs for missing MCP/stream endpoints to avoid frontend 404s during development
 @app.post("/api/mcp/analytics/kpis")

@@ -30,6 +30,7 @@ type SuspendedSale = {
 
 export default function SuspendedSalesPage(): JSX.Element {
   const navigate = useNavigate()
+  const [removedSaleIds, setRemovedSaleIds] = useState<Set<string>>(new Set())
   const { data: apiSuspendedSales = [], isError, error, refetch } = useSuspendedSales()
   const suspendedSales: SuspendedSale[] = apiSuspendedSales.map((sale: ApiSuspendedSale) => ({
     id: sale.id,
@@ -43,7 +44,7 @@ export default function SuspendedSalesPage(): JSX.Element {
   if (isError) {
     return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
   }
-  const [removedSaleIds, setRemovedSaleIds] = useState<Set<string>>(new Set())
+
   const sales = suspendedSales.filter((sale) => !removedSaleIds.has(sale.id))
 
   const handleResume = (saleId: string): void => {

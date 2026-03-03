@@ -1,7 +1,7 @@
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { AlertTriangle, BarChart3, Euro, FileText, Loader2, ShoppingCart } from 'lucide-react'
+import { AlertTriangle, BarChart3, Euro, FileText, ShoppingCart } from 'lucide-react'
 import { useProcurementDashboard } from '@/lib/api/dashboard'
 
 function DashboardSkeleton() {

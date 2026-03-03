@@ -7,6 +7,7 @@ import { useFeature } from "@/hooks/useFeature"
 import { type McpRealtimeEvent, useMcpConnectionState, useMcpRealtime } from "@/lib/useMcpRealtime"
 import { GlobalButtonHandler } from "@/components/GlobalButtonHandler"
 import { Breadcrumbs } from "@/components/navigation/Breadcrumbs"
+import { AskVALEO } from "@/components/ai/AskVALEO"
 
 export default function AppLayout(): JSX.Element {
   const commandPaletteEnabled = useFeature('commandPalette')
@@ -73,6 +74,7 @@ export default function AppLayout(): JSX.Element {
       <GlobalButtonHandler />
       <AdvisorDock />
       <CallWidget />
+      <AskVALEO />
     </AppShell>
   )
 }

@@ -56,7 +56,7 @@ export function mapMaskToCustomer(data: MaskCustomerData): CustomerCreate {
   const name1 = data['customer.name1'] as string | undefined
   let searchKey = data['customer.search_key'] as string | undefined
 
-  if (!searchKey || !searchKey.trim()) {
+  if (!searchKey?.trim()) {
     searchKey = name1?.trim() ?? ''
   }
 

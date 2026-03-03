@@ -77,14 +77,15 @@ export async function authenticatedFetch(
     // Axios throws on non-2xx – map to a failed Response
     const axiosError = error as { response?: { status: number; statusText: string; data: unknown } }
     if (axiosError.response) {
+      const responseData = axiosError.response.data
       return {
         ok: false,
         status: axiosError.response.status,
         statusText: axiosError.response.statusText,
         headers: new Headers(),
-        json: async () => axiosError.response!.data,
-        text: async () => JSON.stringify(axiosError.response!.data),
-        clone: () => ({ json: async () => axiosError.response!.data } as unknown as Response),
+        json: async () => responseData,
+        text: async () => JSON.stringify(responseData),
+        clone: () => ({ json: async () => responseData } as unknown as Response),
       } as Response
     }
     // Network error

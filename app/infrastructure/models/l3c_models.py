@@ -601,6 +601,29 @@ class DailyPrice(Base):
     updated_by = Column(String(64), nullable=True)
 
 
+# ── Artikel-Preis-Schwellen (für Price-Monitoring-Worker) ─────────────────────────
+
+class ArticlePriceThreshold(Base):
+    """
+    Min/Max-Schwellen für Tagespreise (Monitoring-Alerts).
+    Pro Artikel/Warengruppe/Crop konfigurierbar; Worker meldet Überschreitungen.
+    """
+    __tablename__ = "article_price_thresholds"
+    __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=uuid7)
+    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
+    article_id = Column(String, ForeignKey("domain_inventory.articles.id", ondelete="CASCADE"), nullable=True)
+    warengruppe = Column(String(80), nullable=True)
+    crop_code = Column(String(20), nullable=True)
+    min_eur_per_ton = Column(DECIMAL(10, 2), nullable=True, comment="Untere Schwellen-Alert")
+    max_eur_per_ton = Column(DECIMAL(10, 2), nullable=True, comment="Obere Schwellen-Alert")
+    effective_from = Column(Date, nullable=False, server_default=func.current_date())
+    effective_to = Column(Date, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+
 # ── Self-Billing Invoices ─────────────────────────────────────────────────────────
 
 class SelfBillingInvoice(Base):

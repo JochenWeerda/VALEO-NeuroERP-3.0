@@ -79,7 +79,7 @@ export default function AnalyticsDashboard(): JSX.Element {
 
   const showEmptyState = rawKpis.length === 0 && rawTrends.length === 0
 
-  const handleSearch = (_value: string): void => {
+  const handleSearch = (): void => {
     // Search functionality to be implemented
   }
 

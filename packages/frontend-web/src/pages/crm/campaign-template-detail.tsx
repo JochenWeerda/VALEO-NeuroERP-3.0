@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
@@ -7,11 +7,10 @@ import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
 import { getEntityTypeLabel, getDetailTitle, getSuccessMessage, getErrorMessage } from '@/features/crud/utils/i18n-helpers'
 import { createApiClient } from '@/components/mask-builder/utils/api'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { formatDate } from '@/components/mask-builder/utils/formatting'
 import { toast } from '@/hooks/use-toast'
-import { ArrowLeft, FileText, Copy } from 'lucide-react'
+import { useTenant } from '@/hooks/useTenant'
+import { ArrowLeft, Copy } from 'lucide-react'
 
 // API Client
 const apiClient = createApiClient('/api/crm-marketing')
@@ -156,6 +155,7 @@ export default function CampaignTemplateDetailPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
+  const { tenantId } = useTenant()
   const [loading, setLoading] = useState(false)
   const entityType = 'campaignTemplate'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Kampagnen-Vorlage')
@@ -186,7 +186,7 @@ export default function CampaignTemplateDetailPage(): JSX.Element {
       }
 
       // Add tenant_id
-      formData.tenant_id = '00000000-0000-0000-0000-000000000001' // TODO: Get from auth context
+      formData.tenant_id = tenantId
 
       await saveData(formData)
       toast({

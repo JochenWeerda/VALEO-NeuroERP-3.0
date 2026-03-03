@@ -246,7 +246,7 @@ export default function MischfuttermittelListePage(): JSX.Element {
         key: 'export',
         label: 'Exportieren',
         type: 'secondary' as const,
-        onClick: (_items: any[]) => { void triggerMischExport() }
+        onClick: () => { void triggerMischExport() }
       },
       {
         key: 'recalculate',

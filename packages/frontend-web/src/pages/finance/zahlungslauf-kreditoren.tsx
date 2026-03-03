@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
@@ -7,8 +7,7 @@ import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
 import { toast } from 'sonner'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
-import { validateIBAN, formatIBAN } from '@/lib/utils/iban-validator'
-import { lookupIBAN } from '@/lib/utils/iban-validator'
+import { validateIBAN, formatIBAN, lookupIBAN } from '@/lib/utils/iban-validator'
 
 // Zod-Schema für Zahlungslauf Kreditoren (wird in Komponente mit i18n erstellt)
 const createZahlungslaufSchema = (t: any) => z.object({
@@ -614,30 +613,6 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
             defaultValue: 'BIC automatisch ausgefüllt',
             bankName: result.bank_name || 'Bank'
           }))
-        }
-      } catch (error) {
-        // Silent error for auto-lookup
-        console.warn('IBAN lookup failed:', error)
-      }
-    }
-  }
-
-  // IBAN Lookup for payment IBANs in table
-  const handlePaymentIbanChange = async (index: number, iban: string, currentPayments: any[]) => {
-    const normalized = iban.replace(/\s/g, '').replace(/-/g, '').toUpperCase()
-    if (normalized.length >= 15 && normalized.length <= 34 && validateIBAN(normalized)) {
-      try {
-        const result = await lookupIBAN(normalized)
-        if (result.valid && result.bic) {
-          const updatedPayments = [...currentPayments]
-          updatedPayments[index] = {
-            ...updatedPayments[index],
-            iban: formatIBAN(normalized),
-            bic: result.bic || updatedPayments[index].bic
-          }
-          const updatedData = { ...formData, ...data, zahlungen: updatedPayments }
-          setFormData(updatedData)
-          updateData?.(updatedData)
         }
       } catch (error) {
         // Silent error for auto-lookup

@@ -25,7 +25,8 @@ def get_current_user(
     creds: HTTPAuthorizationCredentials = Depends(bearer),
 ) -> User:
     """
-    Dependency: Validiert JWT Token und gibt User zurück
+    Dependency: Validiert JWT Token und gibt User zurück.
+    Akzeptiert im Dev-Betrieb API_DEV_TOKEN (konsistent mit require_bearer_token).
 
     Args:
         creds: Bearer-Token aus Authorization-Header
@@ -36,6 +37,10 @@ def get_current_user(
     Raises:
         HTTPException 401: Token ungültig oder abgelaufen
     """
+    token = (creds.credentials or "").strip()
+    if settings.API_DEV_TOKEN and token == settings.API_DEV_TOKEN:
+        return {"sub": "dev", "roles": []}
+
     try:
         claims = decode_token(creds.credentials)
     except Exception:

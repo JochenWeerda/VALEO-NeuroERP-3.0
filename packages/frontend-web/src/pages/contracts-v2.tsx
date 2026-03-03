@@ -13,7 +13,6 @@ import { Toolbar } from '@/components/ui/toolbar';
 import { DetailDrawer } from '@/components/ui/detail-drawer';
 import { CrudDeleteDialog, CrudCancelDialog, CrudAuditTrailPanel, CrudPrintButton } from '@/features/crud/components';
 import { useCrudDelete, useCrudCancel, useCrudAuditTrail } from '@/features/crud/hooks';
-import { crudPrintService } from '@/features/crud/services';
 import { Badge } from '@/components/ui/badge';
 import { getEntityTypeLabel, getListTitle, getDetailTitle, getStatusLabel } from '@/features/crud/utils/i18n-helpers';
 import {
@@ -26,8 +25,9 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useAuth } from '@/hooks/useAuth';
+import { useTenant } from '@/hooks/useTenant';
 
 interface Contract {
   id: string;
@@ -70,6 +70,8 @@ interface AmendmentTemplate {
 
 export default function ContractsPageV2(): JSX.Element {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const { tenantId } = useTenant();
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
   const [amendments, setAmendments] = useState<Amendment[]>([]);
@@ -161,7 +163,7 @@ export default function ContractsPageV2(): JSX.Element {
       const response = await fetch(`/api/contracts/${id}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason, tenantId: 'default' }),
+        body: JSON.stringify({ reason, tenantId }),
       });
       if (response.ok) {
         setContracts(contracts.filter(c => c.id !== id));
@@ -193,7 +195,7 @@ export default function ContractsPageV2(): JSX.Element {
       const response = await fetch(`/api/contracts/${id}/cancel`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason, tenantId: 'default', cancelledBy: 'current-user' }),
+        body: JSON.stringify({ reason, tenantId, cancelledBy: user?.sub ?? 'current-user' }),
       });
       if (response.ok) {
         const updated = await response.json();
@@ -233,11 +235,11 @@ export default function ContractsPageV2(): JSX.Element {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contractId: selectedContract.id,
-          tenantId: 'default',
+          tenantId,
           type: amendmentForm.type,
           reason: amendmentForm.reason,
           changes: amendmentForm.changes,
-          createdBy: 'current-user',
+          createdBy: user?.sub ?? 'current-user',
         }),
       });
       if (response.ok) {

@@ -55,7 +55,9 @@ interface SaatgutItem {
   verfuegbar: number;
 }
 
-const buildColumns = (): ColumnDef<SaatgutItem>[] => [
+const buildColumns = (
+  onOpenDetails: (itemId: string) => void,
+): ColumnDef<SaatgutItem>[] => [
   {
     accessorKey: 'artikelnummer',
     header: 'Artikelnummer',
@@ -140,7 +142,6 @@ const buildColumns = (): ColumnDef<SaatgutItem>[] => [
     accessorKey: 'actions',
     header: 'Aktionen',
     cell: ({ row }): JSX.Element => {
-      const navigate = useNavigate();
       const item = row.original;
 
       return (
@@ -148,14 +149,14 @@ const buildColumns = (): ColumnDef<SaatgutItem>[] => [
           <Button
             variant="outline"
             size="sm"
-            onClick={() => navigate(`/agrar/saatgut-stamm/${item.id}`)}
+            onClick={() => onOpenDetails(item.id)}
           >
             <Eye className="w-4 h-4" />
           </Button>
           <Button
             variant="outline"
             size="sm"
-            onClick={() => navigate(`/agrar/saatgut-stamm/${item.id}`)}
+            onClick={() => onOpenDetails(item.id)}
           >
             <Edit className="w-4 h-4" />
           </Button>
@@ -177,7 +178,10 @@ const SaatgutListePage: React.FC = () => {
   });
 
 
-  const columns = useMemo<ColumnDef<SaatgutItem>[]>(() => buildColumns(), []);
+  const columns = useMemo<ColumnDef<SaatgutItem>[]>(
+    () => buildColumns((itemId) => navigate(`/agrar/saatgut-stamm/${itemId}`)),
+    [navigate],
+  );
 
   const filteredData = useMemo<SaatgutItem[]>(() => {
     if (!Array.isArray(saatgutList?.items)) return [];

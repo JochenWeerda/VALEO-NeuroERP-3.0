@@ -14,16 +14,16 @@ export default function KampagnenPage(): JSX.Element {
   const [searchTerm, setSearchTerm] = useState('')
   const { data: kampagnen = [], isError, error, refetch } = useMarketingKampagnen()
 
-  if (isError) {
-    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
-  }
-
   const filteredData = useMemo(
     () => kampagnen.filter((k) =>
       [k.name, k.typ, k.zielgruppe].some((v) => v.toLowerCase().includes(searchTerm.toLowerCase()))
     ),
     [kampagnen, searchTerm]
   )
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
 
   const columns = [
     {

@@ -18,6 +18,7 @@ import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { Save, ArrowLeft, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTenant } from '@/hooks/useTenant';
 
 // API Client
 const apiClient = {
@@ -76,6 +77,7 @@ const SaatgutStammPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { tenantId } = useTenant();
   const isEditing = !!id;
 
   // Form State
@@ -213,7 +215,7 @@ const SaatgutStammPage: React.FC = () => {
     const submitData = {
       ...formData,
       ablauf_zulassung: formData.ablauf_zulassung?.toISOString().split('T')[0] || null,
-      tenant_id: '00000000-0000-0000-0000-000000000001', // TODO: Get from auth context
+      tenant_id: tenantId,
     };
 
     if (isEditing) {

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+﻿import { useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -65,7 +65,6 @@ export default function NaWaRoVertraegePage(): JSX.Element {
     }
     const latest = sheetsQuery.data[0]
     loadSheet(latest.id)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sheetsQuery.data, selectedId])
 
   const totalArea = useMemo(

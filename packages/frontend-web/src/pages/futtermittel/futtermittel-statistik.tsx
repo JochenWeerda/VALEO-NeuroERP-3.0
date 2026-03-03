@@ -23,10 +23,6 @@ const statistikConfig: OverviewConfig = {
 export default function FuttermittelStatistikPage(): JSX.Element {
   const { data, isLoading, isError, error, refetch } = useFutterStatistik()
 
-  if (isError) {
-    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
-  }
-
   const { kpiData, chartData } = useMemo(() => {
     const stats = (data ?? {
       gesamtProduktion: 0,
@@ -91,6 +87,10 @@ export default function FuttermittelStatistikPage(): JSX.Element {
 
     return { kpiData: cards, chartData: charts }
   }, [data])
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
 
   const currentConfig: OverviewConfig = {
     ...statistikConfig,

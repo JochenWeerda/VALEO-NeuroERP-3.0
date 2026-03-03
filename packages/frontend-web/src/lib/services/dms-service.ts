@@ -170,7 +170,7 @@ export const dmsService = {
       params.append('page_size', String(options.pageSize))
     }
 
-    const url = `${DMS_API_BASE}/api/dms/documents${params.toString() ? `?${params}` : ''}`
+    const url = `${DMS_API_BASE}/api/dms/documents${params.toString() ? `?${params.toString()}` : ''}`
     
     const response = await fetch(url, {
       headers: getHeaders(tenantId),
@@ -274,15 +274,15 @@ export const dmsService = {
    */
   async getInbox(
     tenantId: string,
-    page: number = 1,
-    pageSize: number = 25
+    page = 1,
+    pageSize = 25
   ): Promise<DocumentListResponse> {
     const params = new URLSearchParams({
       page: String(page),
       page_size: String(pageSize),
     })
 
-    const response = await fetch(`${DMS_API_BASE}/api/dms/inbox?${params}`, {
+    const response = await fetch(`${DMS_API_BASE}/api/dms/inbox?${params.toString()}`, {
       headers: getHeaders(tenantId),
     })
 
@@ -304,7 +304,7 @@ export const dmsService = {
       page_size: String(options.pageSize || 25),
     })
 
-    const response = await fetch(`${DMS_API_BASE}/api/dms/search?${params}`, {
+    const response = await fetch(`${DMS_API_BASE}/api/dms/search?${params.toString()}`, {
       headers: getHeaders(options.tenantId),
     })
 

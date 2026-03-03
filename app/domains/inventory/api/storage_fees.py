@@ -15,6 +15,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from ....core.database import engine, get_db
+from ....core.fibu_audit import log_fibu_audit
 from .inventory_auth import get_current_tenant_id, require_inventory_access, require_inventory_admin
 
 router = APIRouter()
@@ -308,6 +309,11 @@ def _post_storage_fee_journal(
             "line_number": line_number,
             "description": f"Lagergelderloese Fremdbestand {period}",
         },
+    )
+    log_fibu_audit(
+        db, tenant_id, "create", "journal_entry", entry_id,
+        {"source": "storage_fee", "entry_number": entry_number, "period": period},
+        request=None,
     )
     return entry_id
 

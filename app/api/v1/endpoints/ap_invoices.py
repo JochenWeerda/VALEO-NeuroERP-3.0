@@ -11,6 +11,7 @@ from decimal import Decimal
 import logging
 
 from app.core.database import get_db
+from app.core.fibu_audit import log_fibu_audit
 from app.documents.models import SalesInvoice  # Reusing model structure for now
 from app.documents.router_helpers import get_repository, save_to_store, get_from_store, list_from_store, delete_from_store
 
@@ -250,9 +251,14 @@ async def post_ap_invoice(
         entry_dict['total_credit'] = subtotal_net + total_tax
         
         journal_entry = await entry_repo.create(entry_dict, tenant_id)
-        
+        je_id = str(journal_entry.id) if hasattr(journal_entry, 'id') else str(journal_entry.get('id', ''))
+        log_fibu_audit(
+            db, tenant_id, "create", "journal_entry", je_id,
+            {"source": "ap_invoice", "invoice_id": invoice_id},
+            request=None,
+        )
         # Store journal entry ID in invoice
-        invoice["journalEntryId"] = str(journal_entry.id) if hasattr(journal_entry, 'id') else str(journal_entry.get('id', ''))
+        invoice["journalEntryId"] = je_id
         logger.info(f"Created GL journal entry {invoice.get('journalEntryId')} for AP invoice {invoice_id}")
         
     except Exception as e:

@@ -36,6 +36,7 @@ function ItemGroup({ title, items, total, colorClass }: {
 export default function BilanzPage(): JSX.Element {
   const currentPeriod = new Date().toISOString().substring(0, 7) // YYYY-MM
   const [period, setPeriod] = useState(currentPeriod)
+  const { toast } = useToast()
 
   const { data: bilanz, isLoading, isError, refetch } = useQuery({
     queryKey: ['fibu', 'bilanz', period],
@@ -97,7 +98,6 @@ export default function BilanzPage(): JSX.Element {
   const anlagevermoegen = bilanz.assets.filter(a => a.account_type === 'ASSET' && a.level === 0)
   const umlaufvermoegen = bilanz.assets.filter(a => a.account_type === 'ASSET' && a.level > 0)
 
-  const { toast } = useToast()
   const handleExport = (): void => {
     const rows = [
       ...bilanz.assets.map((a) => ({ typ: 'Aktiva', konto: a.account_name, saldo: a.balance })),

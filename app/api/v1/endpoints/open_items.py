@@ -16,6 +16,7 @@ from app.core.uuid7 import uuid7
 
 from ....core.database import get_db
 from ....core.tenant import get_tenant_id
+from ....core.config import settings
 from ....core.fibu_audit import log_fibu_audit
 from pydantic import BaseModel
 
@@ -551,7 +552,7 @@ async def settle_open_item(
         
         # Create journal entry lines
         # Line 1: Debit Bank/Cash
-        bank_account = "1000"  # Default bank account - TODO: Get from settlement
+        bank_account = settings.DEFAULT_BANK_ACCOUNT_ID
         journal_line1 = text("""
             INSERT INTO domain_erp.journal_entry_lines
             (id, tenant_id, journal_entry_id, account_id, debit_amount, credit_amount,
@@ -591,7 +592,11 @@ async def settle_open_item(
             "line_number": 2,
             "description": f"OP-Ausgleich {op_row[3] or ''}"
         })
-        
+        log_fibu_audit(
+            db, tenant_id, "create", "journal_entry", journal_entry_id,
+            {"source": "op_settlement", "entry_number": entry_number, "op_id": op_id, "settlement_amount": float(settlement_amount)},
+            request=request,
+        )
         db.commit()
         log_fibu_audit(
             db, tenant_id, "settle", "open_item", op_id,
