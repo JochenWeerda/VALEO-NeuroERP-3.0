@@ -12,7 +12,7 @@ export default defineConfig(({ mode }) => {
   const DEFAULT_SSE_PROXY = process.env.VITE_SSE_PROXY || env.VITE_SSE_PROXY || 'http://localhost:5174'
   // Im Container: backend (Docker-Service-Name), lokal: localhost
   const DEFAULT_BACKEND_PROXY = process.env.VITE_BACKEND_PROXY || env.VITE_BACKEND_PROXY || 'http://localhost:8000'
-  const DEV_PORT = Number(process.env.VITE_PORT || env.VITE_PORT || 3001)
+  const DEV_PORT = Number(process.env.VITE_PORT || env.VITE_PORT || 3000)
 
   return {
   plugins: [
@@ -37,24 +37,49 @@ export default defineConfig(({ mode }) => {
     dedupe: ['react', 'react-dom'],
   },
   optimizeDeps: {
-    include: ['react', 'react-dom', 'react/jsx-runtime'],
-    exclude: [],
+    entries: ['index.html'],
+    include: [
+      'react', 'react-dom', 'react/jsx-runtime',
+      'react-router-dom',
+      '@tanstack/react-query',
+      'axios',
+      'i18next', 'react-i18next',
+      'zustand',
+      'react-hook-form', '@hookform/resolvers',
+      'zod',
+      'recharts',
+      'lucide-react',
+      'date-fns',
+      'clsx', 'tailwind-merge', 'class-variance-authority',
+      '@radix-ui/react-dialog',
+      '@radix-ui/react-dropdown-menu',
+      '@radix-ui/react-select',
+      '@radix-ui/react-tabs',
+      '@radix-ui/react-toast',
+      '@radix-ui/react-tooltip',
+      '@radix-ui/react-popover',
+    ],
   },
   server: {
-    // 3000 is frequently occupied (Docker/other dev servers). Default to 3001 for stability.
     port: DEV_PORT,
-    host: '0.0.0.0', // Alle Interfaces — lokal, LAN, Docker, Tunnel
-    strictPort: false,
-    // 'all' → localhost, LAN-IP, ngrok, Cloudflare-Tunnel, Cloud-Domain — alle erlaubt
+    host: '0.0.0.0',
+    strictPort: true,
     allowedHosts: 'all',
+    warmup: {
+      clientFiles: [
+        'index.html',
+        './src/main.tsx',
+        './src/app/routes.tsx',
+        './src/layouts/DashboardLayout.tsx',
+      ],
+    },
     hmr: {
-      // HMR-Host aus Env überschreibbar (für ngrok/Tunnel: VITE_HMR_HOST=xxxx.ngrok.io)
       protocol: env.VITE_HMR_HOST ? 'wss' : 'ws',
       ...(env.VITE_HMR_HOST ? { host: env.VITE_HMR_HOST, port: 443 } : {}),
     },
     watch: {
-      usePolling: true, // Für Docker-Kompatibilität
-      interval: 1000,
+      usePolling: true,
+      interval: 500,
     },
     proxy: {
       '/api/v1': {
@@ -80,6 +105,41 @@ export default defineConfig(({ mode }) => {
         target: DEFAULT_SSE_PROXY,
         changeOrigin: true,
         ws: true,
+      },
+      '/api/admin': {
+        target: DEFAULT_BACKEND_PROXY,
+        changeOrigin: true,
+        secure: false,
+      },
+      '/api/contracts': {
+        target: DEFAULT_BACKEND_PROXY,
+        changeOrigin: true,
+        secure: false,
+      },
+      '/api/agribusiness': {
+        target: DEFAULT_BACKEND_PROXY,
+        changeOrigin: true,
+        secure: false,
+      },
+      '/api/audit': {
+        target: DEFAULT_BACKEND_PROXY,
+        changeOrigin: true,
+        secure: false,
+      },
+      '/api/crm-sales': {
+        target: DEFAULT_BACKEND_PROXY,
+        changeOrigin: true,
+        secure: false,
+      },
+      '/api/crm': {
+        target: DEFAULT_BACKEND_PROXY,
+        changeOrigin: true,
+        secure: false,
+      },
+      '/api/finance': {
+        target: DEFAULT_BACKEND_PROXY,
+        changeOrigin: true,
+        secure: false,
       },
     },
   },

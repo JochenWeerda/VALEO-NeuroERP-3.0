@@ -18,6 +18,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Zap, Send, Loader2, Sparkles, X } from 'lucide-react'
 import { askVALEO, isOpenAIConfigured, type VALEOMessage } from '@/lib/services/openai-service'
+import { useTenant } from '@/hooks/useTenant'
 
 type Message = {
   role: 'user' | 'assistant'
@@ -32,6 +33,7 @@ export function AskVALEO() {
   const [loading, setLoading] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const location = useLocation()
+  const { tenantId } = useTenant()
 
   // Listen for custom event to open dialog
   useEffect(() => {
@@ -62,7 +64,7 @@ export function AskVALEO() {
       // Build context from current page
       const context = {
         currentPage: location.pathname,
-        tenantId: 'demo-tenant', // TODO: Get from auth
+        tenantId,
       }
 
       // Convert to OpenAI format

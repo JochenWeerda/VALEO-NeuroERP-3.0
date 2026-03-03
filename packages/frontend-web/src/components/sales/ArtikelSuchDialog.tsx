@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Artikel-Suchmaske
  * 1:1 Nachbau der zvoove Artikel-Suchmaske
  */
@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { apiClient } from '@/lib/axios'
 
@@ -54,7 +54,6 @@ export function ArtikelSuchDialog({
   open,
   onClose,
   onSelect,
-  customerId,
 }: ArtikelSuchDialogProps): JSX.Element {
   const [searchTerm, setSearchTerm] = useState('')
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('')
@@ -87,12 +86,10 @@ export function ArtikelSuchDialog({
       const params = new URLSearchParams()
       params.append('limit', '200') // Get enough results for client-side filtering/sorting
       
-      // eslint-disable-next-line no-console
       console.log('[ArtikelSuchDialog] Fetching articles with params:', params.toString())
       
       try {
         const response = await apiClient.get<any>('/api/v1/articles', { params })
-        // eslint-disable-next-line no-console
         console.log('[ArtikelSuchDialog] API Response (raw):', response)
         
         let items: any[] = []
@@ -107,11 +104,9 @@ export function ArtikelSuchDialog({
         }
         
         if (items.length === 0 && response) {
-          // eslint-disable-next-line no-console
           console.warn('[ArtikelSuchDialog] No items found in expected structure, searching response:', Object.keys(response))
           for (const key of Object.keys(response)) {
             if (Array.isArray((response as any)[key])) {
-              // eslint-disable-next-line no-console
               console.warn(`[ArtikelSuchDialog] Found array in key "${key}":`, (response as any)[key])
               items = (response as any)[key]
               break
@@ -119,7 +114,6 @@ export function ArtikelSuchDialog({
           }
         }
         
-        // eslint-disable-next-line no-console
         console.log('[ArtikelSuchDialog] Extracted items:', {
           itemsCount: items.length,
           firstItem: items[0],
@@ -148,11 +142,9 @@ export function ArtikelSuchDialog({
           is_active: a.is_active ?? true,
         }))
         
-        // eslint-disable-next-line no-console
         console.log('[ArtikelSuchDialog] Mapped articles:', mapped.length, 'items', mapped.slice(0, 3))
         return mapped
       } catch (err) {
-        // eslint-disable-next-line no-console
         console.error('[ArtikelSuchDialog] Error fetching articles:', err)
         throw err
       }
@@ -284,7 +276,6 @@ export function ArtikelSuchDialog({
       a.description.localeCompare(b.description, 'de', { sensitivity: 'base' })
     )
     
-    // eslint-disable-next-line no-console
     console.log('[ArtikelSuchDialog] Filtered articles:', {
       total: articles.length,
       filtered: sorted.length,
@@ -474,7 +465,7 @@ export function ArtikelSuchDialog({
                 {articles.length === 0
                   ? 'Keine Artikel in der Datenbank gefunden.'
                   : debouncedSearchTerm
-                    ? `Keine Artikel gefunden für "${debouncedSearchTerm}"`
+                    ? `Keine Artikel gefunden fÃ¼r "${debouncedSearchTerm}"`
                     : 'Bitte geben Sie einen Suchbegriff ein...'}
               </div>
             ) : (

@@ -58,7 +58,7 @@ export function GlobalButtonHandler(): null {
       }
     }
 
-    const handleDeleteClick = (_button: HTMLElement) => {
+    const handleDeleteClick = () => {
       const confirmed = window.confirm('Möchten Sie diesen Eintrag wirklich löschen?')
       if (!confirmed) return
 

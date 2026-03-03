@@ -25,8 +25,6 @@ import {
   updateConnector,
   deleteConnector,
   createReportingUnit,
-  updateReportingUnit,
-  deleteReportingUnit,
   createSchedule,
   updateSchedule,
   deleteSchedule,
@@ -191,19 +189,6 @@ function unitToApiCreate(u: ReportingUnit): Parameters<typeof createReportingUni
   }
 }
 
-function unitToApiUpdate(u: ReportingUnit): Parameters<typeof updateReportingUnit>[1] {
-  return {
-    display_name: u.name,
-    config_json: {
-      countryIso2: u.countryIso2,
-      vatId: u.vatId,
-      intrastatEnabled: u.intrastatEnabled,
-      bleMvoEnabled: u.bleMvoEnabled,
-      eudrEnabled: u.eudrEnabled,
-    },
-  }
-}
-
 function scheduleFromApi(a: ScheduleApi): Schedule {
   const cfg = (a.config_json ?? {}) as Record<string, unknown>
   const fmts = a.output_format ? (a.output_format.split(",") as Array<"csv" | "xml" | "json">) : ["csv"]
@@ -298,7 +283,7 @@ export default function MeldewesenKonsole() {
     queryKey: ["meldewesen", "schedules"],
     queryFn: listSchedules,
   })
-  const { data: jobsApi = [], isLoading: loadingJ, isError: errJ, error: errJobs, refetch: refetchJ } = useQuery({
+  const { data: jobsApi = [], refetch: refetchJ } = useQuery({
     queryKey: ["meldewesen", "jobs"],
     queryFn: () => listJobs({ limit: 50 }),
   })
@@ -324,14 +309,6 @@ export default function MeldewesenKonsole() {
     mutationFn: createReportingUnit,
     onSuccess: () => qc.invalidateQueries({ queryKey: ["meldewesen", "reportingUnits"] }),
   })
-  const updateUnitMu = useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: Parameters<typeof updateReportingUnit>[1] }) => updateReportingUnit(id, payload),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["meldewesen", "reportingUnits"] }),
-  })
-  const deleteUnitMu = useMutation({
-    mutationFn: deleteReportingUnit,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["meldewesen", "reportingUnits"] }),
-  })
   const createScheduleMu = useMutation({
     mutationFn: createSchedule,
     onSuccess: () => qc.invalidateQueries({ queryKey: ["meldewesen", "schedules"] }),
@@ -351,8 +328,6 @@ export default function MeldewesenKonsole() {
 
   const activeConnector = useMemo(() => connectors.find((c) => c.id === activeConnectorId) ?? connectors[0] ?? null, [connectors, activeConnectorId])
   const activeSchedule = useMemo(() => schedules.find((s) => s.id === activeScheduleId) ?? schedules[0] ?? null, [schedules, activeScheduleId])
-  const activeUnit = useMemo(() => (activeSchedule ? units.find((u) => u.id === activeSchedule.reportingUnitId) ?? null : null), [activeSchedule, units])
-
   React.useEffect(() => {
     if (connectors.length && !activeConnectorId) setActiveConnectorId(connectors[0].id)
   }, [connectors, activeConnectorId])

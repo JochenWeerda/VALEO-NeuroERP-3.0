@@ -64,13 +64,18 @@ export default function InboxPage(): JSX.Element {
     try {
       setLoading(true)
       const response = await fetch(INBOX_ENDPOINT)
+      const contentType = response.headers.get('content-type') ?? ''
+      if (!response.ok || !contentType.includes('application/json')) {
+        setDocuments([])
+        return
+      }
       const data = (await response.json()) as InboxListResponse
 
-      if (data.ok && Array.isArray(data.items)) {
+      if (data?.ok && Array.isArray(data.items)) {
         setDocuments(data.items)
       } else {
         setDocuments([])
-        if (isNonEmptyString(data.message)) {
+        if (data && isNonEmptyString(data.message)) {
           toast({
             title: 'Keine Dokumente',
             description: data.message,
@@ -101,9 +106,17 @@ export default function InboxPage(): JSX.Element {
         body: JSON.stringify({}),
       })
 
+      if (!response.headers.get('content-type')?.includes('application/json')) {
+        toast({
+          title: 'Erstellen fehlgeschlagen',
+          description: 'Ungültige Server-Antwort',
+          variant: 'destructive',
+        })
+        return
+      }
       const data = (await response.json()) as InboxCreateResponse
 
-      if (data.ok) {
+      if (data?.ok) {
         toast({
           title: 'Beleg erstellt',
           description: isNonEmptyString(data.number) ? `Belegnummer: ${data.number}` : undefined,

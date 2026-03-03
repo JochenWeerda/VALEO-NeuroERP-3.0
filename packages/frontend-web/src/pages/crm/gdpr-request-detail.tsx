@@ -2,17 +2,16 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
-import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
+import { useMaskData, useMaskValidation } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
 import { getEntityTypeLabel, getDetailTitle, getSuccessMessage, getErrorMessage, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 import { createApiClient } from '@/components/mask-builder/utils/api'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { formatDate } from '@/components/mask-builder/utils/formatting'
 import { toast } from '@/hooks/use-toast'
-import { ArrowLeft, History, Download, CheckCircle2, XCircle, FileText } from 'lucide-react'
+import { ArrowLeft, History, Download, FileText } from 'lucide-react'
 
 // API Client
 const apiClient = createApiClient('/api/crm-gdpr')
@@ -354,7 +353,7 @@ export default function GDPRRequestDetailPage(): JSX.Element {
     }
   }
 
-  const handleAction = async (action: string, formData: any) => {
+  const handleAction = async (action: string) => {
     if (!id) return
 
     if (action === 'verify') {

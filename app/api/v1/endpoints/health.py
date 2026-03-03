@@ -3,7 +3,7 @@ Health Check & Readiness Endpoints
 For Load Balancers, Kubernetes, and AI Agents
 """
 
-from fastapi import APIRouter, status
+from fastapi import APIRouter, Request, status
 from fastapi.responses import JSONResponse
 from typing import Dict, Any
 from datetime import datetime
@@ -114,12 +114,13 @@ async def liveness_check() -> Dict[str, str]:
 
 
 @router.get("/health/startup", status_code=status.HTTP_200_OK)
-async def startup_check() -> Dict[str, Any]:
+async def startup_check(request: Request) -> Dict[str, Any]:
     """
     Kubernetes startup probe - has the service finished starting?
     """
-    # TODO: Add startup state tracking
+    started = getattr(request.app.state, "startup_done", False)
     return {
-        "status": "started",
+        "status": "started" if started else "starting",
+        "startup_done": started,
         "timestamp": datetime.utcnow().isoformat()
     }

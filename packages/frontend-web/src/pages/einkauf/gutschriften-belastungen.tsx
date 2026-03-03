@@ -13,8 +13,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/api-client'
-import { FileText, Plus, ArrowLeft, CheckCircle, XCircle, AlertTriangle } from 'lucide-react'
-import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
+import { Plus, ArrowLeft, XCircle } from 'lucide-react'
 import { formatDate, formatNumber } from '@/components/mask-builder/utils/formatting'
 
 type APInvoice = {
@@ -102,7 +101,6 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
   const [creditMemos, setCreditMemos] = useState<CreditMemo[]>([])
   const [debitMemos, setDebitMemos] = useState<DebitMemo[]>([])
   const [openInvoices, setOpenInvoices] = useState<APInvoice[]>([])
-  const [selectedInvoice, setSelectedInvoice] = useState<APInvoice | null>(null)
   const [memoDialogOpen, setMemoDialogOpen] = useState(false)
   const [settlementDialogOpen, setSettlementDialogOpen] = useState(false)
   const [selectedMemo, setSelectedMemo] = useState<CreditMemo | DebitMemo | null>(null)
@@ -126,7 +124,6 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
     if (invoiceId) {
       const invoice = openInvoices.find(inv => inv.id === invoiceId)
       if (invoice) {
-        setSelectedInvoice(invoice)
         setMemoData(prev => ({
           ...prev,
           supplierId: invoice.supplierId,
@@ -389,13 +386,6 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
       items: prev.items.filter((_, i) => i !== index),
     }))
   }
-
-  const entityType = activeTab === 'credit' ? 'creditMemo' : 'debitMemo'
-  const entityTypeLabel = getEntityTypeLabel(
-    t,
-    entityType,
-    activeTab === 'credit' ? 'Gutschrift' : 'Belastung'
-  )
 
   return (
     <div className="space-y-6 p-6">

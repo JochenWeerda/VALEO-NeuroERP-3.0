@@ -1,4 +1,4 @@
-import { type ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
+﻿import { type ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 import { CommandPalette } from './CommandPalette'
 import { Sidebar } from './Sidebar'
 import { TopBar } from './TopBar'
@@ -42,18 +42,17 @@ export function AppShell({ children, enableCommandPalette = true }: AppShellProp
   }, [])
 
   const handleToggleShortcuts = useCallback((): void => {
-    // Zyklische Schaltlogik: always → hover → hidden → always
+    // Zyklische Schaltlogik: always â†’ hover â†’ hidden â†’ always
     // Warte kurz, falls die Funktion noch nicht initialisiert ist
     const cycleMode = (): void => {
       if (typeof (window as any).__cycleShortcutDisplayMode === 'function') {
-        ;(window as any).__cycleShortcutDisplayMode()
+        (window as any).__cycleShortcutDisplayMode()
       } else {
-        // Retry nach kurzer Verzögerung
+        // Retry nach kurzer VerzÃ¶gerung
         setTimeout(() => {
           if (typeof (window as any).__cycleShortcutDisplayMode === 'function') {
-            ;(window as any).__cycleShortcutDisplayMode()
+            (window as any).__cycleShortcutDisplayMode()
           } else {
-            // eslint-disable-next-line no-console
             console.warn('ShortcutHelpPanel cycle function not found')
           }
         }, 100)
@@ -105,7 +104,7 @@ export function AppShell({ children, enableCommandPalette = true }: AppShellProp
         return
       }
 
-      // Strg+K: Command Palette (nur wenn verfügbar)
+      // Strg+K: Command Palette (nur wenn verfÃ¼gbar)
       if (commandPaletteAvailable && event.key.toLowerCase() === 'k' && (event.metaKey || event.ctrlKey) && !event.shiftKey && !event.altKey) {
         event.preventDefault()
         event.stopPropagation()
@@ -113,7 +112,7 @@ export function AppShell({ children, enableCommandPalette = true }: AppShellProp
       }
     }
 
-    // Verwende window mit capture phase für bessere Event-Capture
+    // Verwende window mit capture phase fÃ¼r bessere Event-Capture
     window.addEventListener('keydown', handleKeyDown, true)
     return () => {
       window.removeEventListener('keydown', handleKeyDown, true)

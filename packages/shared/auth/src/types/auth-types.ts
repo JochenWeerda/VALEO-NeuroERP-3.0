@@ -46,7 +46,7 @@ export const Permission = z.object({
   resource: z.string(), // e.g., "shipment", "order", "customer"
   action: z.enum(['create', 'read', 'update', 'delete', 'manage']),
   scope: z.string().optional(), // e.g., "own", "tenant", "all"
-  conditions: z.record(z.any()).optional() // Additional conditions
+  conditions: z.record(z.string(), z.any()).optional() // Additional conditions
 });
 
 export type Permission = z.infer<typeof Permission>;
@@ -55,7 +55,7 @@ export type Permission = z.infer<typeof Permission>;
 export const PolicyResult = z.object({
   allowed: z.boolean(),
   reason: z.string().optional(),
-  conditions: z.record(z.any()).optional()
+  conditions: z.record(z.string(), z.any()).optional()
 });
 
 export type PolicyResult = z.infer<typeof PolicyResult>;

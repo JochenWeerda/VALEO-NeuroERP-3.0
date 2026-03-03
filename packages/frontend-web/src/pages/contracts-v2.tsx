@@ -13,7 +13,6 @@ import { Toolbar } from '@/components/ui/toolbar';
 import { DetailDrawer } from '@/components/ui/detail-drawer';
 import { CrudDeleteDialog, CrudCancelDialog, CrudAuditTrailPanel, CrudPrintButton } from '@/features/crud/components';
 import { useCrudDelete, useCrudCancel, useCrudAuditTrail } from '@/features/crud/hooks';
-import { crudPrintService } from '@/features/crud/services';
 import { Badge } from '@/components/ui/badge';
 import { getEntityTypeLabel, getListTitle, getDetailTitle, getStatusLabel } from '@/features/crud/utils/i18n-helpers';
 import {
@@ -26,8 +25,9 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useAuth } from '@/hooks/useAuth';
+import { useTenant } from '@/hooks/useTenant';
 
 interface Contract {
   id: string;
@@ -58,14 +58,28 @@ interface Amendment {
   createdAt: string;
 }
 
+interface AmendmentTemplate {
+  id: string;
+  code: string;
+  name: string;
+  description: string;
+  bodyMarkdown?: string;
+  sectionsSchema?: Record<string, unknown>;
+  isActive: boolean;
+}
+
 export default function ContractsPageV2(): JSX.Element {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const { tenantId } = useTenant();
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
   const [amendments, setAmendments] = useState<Amendment[]>([]);
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [amendmentDialogOpen, setAmendmentDialogOpen] = useState(false);
+  const [amendmentTemplates, setAmendmentTemplates] = useState<AmendmentTemplate[]>([]);
+  const [selectedTemplate, setSelectedTemplate] = useState<AmendmentTemplate | null>(null);
   const [amendmentForm, setAmendmentForm] = useState({
     type: '',
     reason: '',
@@ -81,12 +95,19 @@ export default function ContractsPageV2(): JSX.Element {
       setIsLoading(true);
       try {
         const response = await fetch('/api/contracts');
-        if (response.ok) {
-          const data = await response.json();
-          setContracts(data.items || []);
+        if (response.ok && response.headers.get('content-type')?.includes('application/json')) {
+          try {
+            const data = await response.json();
+            setContracts((data?.items ?? []) as Contract[]);
+          } catch {
+            setContracts([]);
+          }
+        } else {
+          setContracts([]);
         }
       } catch (error) {
         console.error('Error fetching contracts:', error);
+        setContracts([]);
       } finally {
         setIsLoading(false);
       }
@@ -104,16 +125,37 @@ export default function ContractsPageV2(): JSX.Element {
     const fetchAmendments = async () => {
       try {
         const response = await fetch(`/api/contracts/${selectedContract.id}/amendments`);
-        if (response.ok) {
+        if (response.ok && response.headers.get('content-type')?.includes('application/json')) {
           const data = await response.json();
-          setAmendments(data.items || []);
+          setAmendments(data?.items ?? []);
+        } else {
+          setAmendments([]);
         }
-      } catch (error) {
-        console.error('Error fetching amendments:', error);
+      } catch {
+        setAmendments([]);
       }
     };
     fetchAmendments();
   }, [selectedContract]);
+
+  // Amendment-Vorlagen laden, wenn Dialog geöffnet wird
+  React.useEffect(() => {
+    if (!amendmentDialogOpen) return;
+    const fetchTemplates = async () => {
+      try {
+        const response = await fetch('/api/contracts/amendment-templates?activeOnly=true');
+        if (response.ok && response.headers.get('content-type')?.includes('application/json')) {
+          const data = await response.json();
+          setAmendmentTemplates(data?.items ?? []);
+        } else {
+          setAmendmentTemplates([]);
+        }
+      } catch {
+        setAmendmentTemplates([]);
+      }
+    };
+    fetchTemplates();
+  }, [amendmentDialogOpen]);
 
   // Delete handler
   const handleDelete = async (id: string, reason: string) => {
@@ -121,7 +163,7 @@ export default function ContractsPageV2(): JSX.Element {
       const response = await fetch(`/api/contracts/${id}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason, tenantId: 'default' }),
+        body: JSON.stringify({ reason, tenantId }),
       });
       if (response.ok) {
         setContracts(contracts.filter(c => c.id !== id));
@@ -153,7 +195,7 @@ export default function ContractsPageV2(): JSX.Element {
       const response = await fetch(`/api/contracts/${id}/cancel`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason, tenantId: 'default', cancelledBy: 'current-user' }),
+        body: JSON.stringify({ reason, tenantId, cancelledBy: user?.sub ?? 'current-user' }),
       });
       if (response.ok) {
         const updated = await response.json();
@@ -193,17 +235,18 @@ export default function ContractsPageV2(): JSX.Element {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contractId: selectedContract.id,
-          tenantId: 'default',
+          tenantId,
           type: amendmentForm.type,
           reason: amendmentForm.reason,
           changes: amendmentForm.changes,
-          createdBy: 'current-user',
+          createdBy: user?.sub ?? 'current-user',
         }),
       });
       if (response.ok) {
         const amendment = await response.json();
         setAmendments([...amendments, amendment]);
         setAmendmentDialogOpen(false);
+        setSelectedTemplate(null);
         setAmendmentForm({ type: '', reason: '', changes: {} });
       } else {
         throw new Error('Failed to create amendment');
@@ -415,12 +458,25 @@ export default function ContractsPageV2(): JSX.Element {
               </Label>
               <Select
                 value={amendmentForm.type}
-                onValueChange={(value) => setAmendmentForm({ ...amendmentForm, type: value })}
+                onValueChange={(value) => {
+                  const tpl = amendmentTemplates.find((x) => x.code === value) ?? null;
+                  setSelectedTemplate(tpl);
+                  const changes =
+                    value === 'EHBEB_NACHTRAG'
+                      ? { b1: {}, b2: {}, b3: {}, b4: {}, b5: {}, b6: {}, b7: {}, b8: {}, c: {} }
+                      : amendmentForm.changes;
+                  setAmendmentForm({ ...amendmentForm, type: value, changes });
+                }}
               >
                 <SelectTrigger>
                   <SelectValue placeholder={t('crud.dialogs.amend.typePlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
+                  {amendmentTemplates.map((tpl) => (
+                    <SelectItem key={tpl.id} value={tpl.code}>
+                      {tpl.name}
+                    </SelectItem>
+                  ))}
                   <SelectItem value="QtyChange">{t('crud.dialogs.amend.types.qtyChange')}</SelectItem>
                   <SelectItem value="WindowChange">{t('crud.dialogs.amend.types.windowChange')}</SelectItem>
                   <SelectItem value="PriceRuleChange">{t('crud.dialogs.amend.types.priceRuleChange')}</SelectItem>
@@ -430,6 +486,15 @@ export default function ContractsPageV2(): JSX.Element {
                 </SelectContent>
               </Select>
             </div>
+            {selectedTemplate?.bodyMarkdown && (
+              <div className="space-y-2 rounded-md border bg-muted/30 p-3">
+                <Label className="text-xs text-muted-foreground">Vorlagentext</Label>
+                <pre className="max-h-48 overflow-auto whitespace-pre-wrap break-words text-xs font-sans">
+                  {selectedTemplate.bodyMarkdown.slice(0, 2000)}
+                  {selectedTemplate.bodyMarkdown.length > 2000 ? '\n…' : ''}
+                </pre>
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="amendment-reason">
                 {t('crud.dialogs.amend.reasonRequired')}
@@ -469,6 +534,7 @@ export default function ContractsPageV2(): JSX.Element {
               variant="outline"
               onClick={() => {
                 setAmendmentDialogOpen(false);
+                setSelectedTemplate(null);
                 setAmendmentForm({ type: '', reason: '', changes: {} });
               }}
             >

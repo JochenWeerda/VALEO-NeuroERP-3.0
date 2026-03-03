@@ -28,7 +28,7 @@ import { CustomerSelectionDialog, type Customer } from '@/components/sales/Custo
 import { ArticleSearchDialog, type Article } from '@/components/sales/ArticleSearchDialog'
 import { LieferscheinDruckDialog, type PrintOptions } from '@/components/sales/LieferscheinDruckDialog'
 import { apiClient } from '@/lib/axios'
-import { MoreHorizontal, Check, X, Printer, Save } from 'lucide-react'
+import { MoreHorizontal, Check, Printer, Save } from 'lucide-react'
 
 type DeliveryNotePosition = {
   positionNumber: number

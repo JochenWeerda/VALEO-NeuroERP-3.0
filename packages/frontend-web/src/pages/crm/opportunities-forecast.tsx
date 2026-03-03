@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { createApiClient } from '@/components/mask-builder/utils/api'
-import { formatDate, formatCurrency } from '@/components/mask-builder/utils/formatting'
+import { formatCurrency } from '@/components/mask-builder/utils/formatting'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -15,8 +15,6 @@ import {
   RefreshCw, 
   TrendingUp, 
   DollarSign,
-  Calendar,
-  User,
   Download,
   Filter
 } from 'lucide-react'

@@ -13,7 +13,6 @@ import {
   MapPin,
   Clock,
   ArrowUpDown,
-  Filter,
   Navigation2,
   CheckCircle2,
   AlertCircle,
@@ -37,6 +36,7 @@ interface TourListProps {
 
 // Mock-API Funktion (später durch echte API ersetzen)
 async function fetchTourCustomers(date: Date): Promise<CustomerLocation[]> {
+  void date
   // Simuliere API-Aufruf
   await new Promise(resolve => setTimeout(resolve, 500))
 
@@ -160,13 +160,14 @@ export function TourList({
           if (!b.scheduledTime) return -1
           return a.scheduledTime.localeCompare(b.scheduledTime)
         })
-      case 'priority':
+      case 'priority': {
         const priorityOrder = { urgent: 0, high: 1, normal: 2, low: 3 }
         return sorted.sort((a, b) => {
           const pA = priorityOrder[a.priority ?? 'normal']
           const pB = priorityOrder[b.priority ?? 'normal']
           return pA - pB
         })
+      }
       case 'name':
         return sorted.sort((a, b) => a.name.localeCompare(b.name))
       default:

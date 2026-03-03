@@ -70,6 +70,18 @@ class DocumentService:
             return [tag_id]
         except Exception:
             return []
+
+    async def _ensure_document_belongs_to_tenant(self, document_id: int, tenant_id: str) -> dict:
+        """
+        Holt das Dokument und prüft, ob es dem Tenant zugeordnet ist (per Tag).
+        Wirft ValueError wenn nicht zugehörig. Gibt das Dokument-Dict zurück.
+        """
+        doc = await self.paperless.get_document(document_id)
+        tenant_tag_ids = await self._get_tag_ids_for_filter(tenant_id)
+        doc_tags = doc.get("tags") or []
+        if not tenant_tag_ids or not any(tid in doc_tags for tid in tenant_tag_ids):
+            raise ValueError(f"Document {document_id} does not belong to tenant {tenant_id}")
+        return doc
     
     # ==================== Dokument-Operationen ====================
     
@@ -212,10 +224,7 @@ class DocumentService:
     
     async def get_document(self, document_id: int, tenant_id: str) -> Optional[DocumentResponse]:
         """Einzelnes Dokument abrufen"""
-        doc = await self.paperless.get_document(document_id)
-        
-        # TODO: Tenant-Prüfung (Tags checken)
-        
+        doc = await self._ensure_document_belongs_to_tenant(document_id, tenant_id)
         return DocumentResponse(
             id=doc["id"],
             paperless_id=doc["id"],
@@ -231,12 +240,12 @@ class DocumentService:
     
     async def download_document(self, document_id: int, tenant_id: str) -> bytes:
         """Dokument herunterladen"""
-        # TODO: Tenant-Prüfung
+        await self._ensure_document_belongs_to_tenant(document_id, tenant_id)
         return await self.paperless.download_document(document_id)
     
     async def get_thumbnail(self, document_id: int, tenant_id: str) -> bytes:
         """Thumbnail abrufen"""
-        # TODO: Tenant-Prüfung
+        await self._ensure_document_belongs_to_tenant(document_id, tenant_id)
         return await self.paperless.get_thumbnail(document_id)
     
     async def link_document(
@@ -276,7 +285,7 @@ class DocumentService:
     
     async def delete_document(self, document_id: int, tenant_id: str) -> bool:
         """Dokument löschen"""
-        # TODO: Tenant-Prüfung
+        await self._ensure_document_belongs_to_tenant(document_id, tenant_id)
         return await self.paperless.delete_document(document_id)
     
     async def get_inbox(self, tenant_id: str, page: int = 1, page_size: int = 25) -> DocumentListResponse:

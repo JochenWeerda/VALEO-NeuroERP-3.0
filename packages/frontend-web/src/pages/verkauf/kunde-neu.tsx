@@ -17,7 +17,6 @@ import {
 } from '@/features/crm-masks/mappers'
 import {
   CUSTOMER_MASK_OBJECT_PAGE_CONFIG,
-  ENABLE_CUSTOMER_MASK_BUILDER_FORM,
   validateCustomerPayload,
 } from '@/features/crm-masks/customer-mask-support'
 import { type CustomerCreate, useCreateCustomer } from '@/lib/api/crm'

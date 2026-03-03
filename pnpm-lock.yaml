@@ -156,7 +156,7 @@ importers:
         version: 4.2.0
       '@valero-neuroerp/contracts':
         specifier: file:../shared/contracts
-        version: file:packages/shared/contracts
+        version: link:../shared/contracts
       '@valero-neuroerp/data-models':
         specifier: file:../data-models
         version: link:../data-models
@@ -307,7 +307,7 @@ importers:
         version: 1.37.0
       '@valero-neuroerp/contracts':
         specifier: file:../shared/contracts
-        version: file:packages/shared/contracts
+        version: link:../shared/contracts
       '@valero-neuroerp/data-models':
         specifier: file:../data-models
         version: link:../data-models
@@ -457,7 +457,7 @@ importers:
         version: 1.37.0
       '@valero-neuroerp/contracts':
         specifier: file:../shared/contracts
-        version: file:packages/shared/contracts
+        version: link:../shared/contracts
       '@valero-neuroerp/data-models':
         specifier: file:../data-models
         version: link:../data-models
@@ -551,7 +551,7 @@ importers:
         version: 0.51.1(@opentelemetry/api@1.9.0)
       '@valero-neuroerp/contracts':
         specifier: file:../shared/contracts
-        version: file:packages/shared/contracts
+        version: link:../shared/contracts
       '@valero-neuroerp/data-models':
         specifier: file:../data-models
         version: link:../data-models
@@ -693,7 +693,7 @@ importers:
         version: 1.37.0
       '@valero-neuroerp/contracts':
         specifier: file:../shared/contracts
-        version: file:packages/shared/contracts
+        version: link:../shared/contracts
       '@valero-neuroerp/data-models':
         specifier: file:../data-models
         version: link:../data-models
@@ -808,7 +808,7 @@ importers:
         version: 1.37.0
       '@valero-neuroerp/contracts':
         specifier: file:../shared/contracts
-        version: file:packages/shared/contracts
+        version: link:../shared/contracts
       '@valero-neuroerp/data-models':
         specifier: file:../data-models
         version: link:../data-models
@@ -1292,6 +1292,9 @@ importers:
       openai:
         specifier: ^6.3.0
         version: 6.3.0(ws@8.18.3)(zod@3.25.76)
+      qrcode.react:
+        specifier: ^4.2.0
+        version: 4.2.0(react@18.3.1)
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -2093,7 +2096,7 @@ importers:
         version: 1.37.0
       '@valero-neuroerp/contracts':
         specifier: file:../shared/contracts
-        version: file:packages/shared/contracts
+        version: link:../shared/contracts
       '@valero-neuroerp/data-models':
         specifier: file:../data-models
         version: link:../data-models
@@ -2235,7 +2238,7 @@ importers:
         version: 1.37.0
       '@valero-neuroerp/contracts':
         specifier: file:../shared/contracts
-        version: file:packages/shared/contracts
+        version: link:../shared/contracts
       '@valero-neuroerp/data-models':
         specifier: file:../data-models
         version: link:../data-models
@@ -2734,7 +2737,7 @@ importers:
         version: 1.37.0
       '@valero-neuroerp/contracts':
         specifier: file:../shared/contracts
-        version: file:packages/shared/contracts
+        version: link:../shared/contracts
       '@valero-neuroerp/data-models':
         specifier: file:../data-models
         version: link:../data-models
@@ -2846,7 +2849,7 @@ importers:
         version: 1.37.0
       '@valero-neuroerp/contracts':
         specifier: file:../shared/contracts
-        version: file:packages/shared/contracts
+        version: link:../shared/contracts
       '@valero-neuroerp/data-models':
         specifier: file:../data-models
         version: link:../data-models
@@ -2964,7 +2967,7 @@ importers:
         version: 1.37.0
       '@valero-neuroerp/contracts':
         specifier: file:../shared/contracts
-        version: file:packages/shared/contracts
+        version: link:../shared/contracts
       '@valero-neuroerp/data-models':
         specifier: file:../data-models
         version: link:../data-models
@@ -3058,7 +3061,7 @@ importers:
         version: 4.2.0
       '@valero-neuroerp/contracts':
         specifier: file:../shared/contracts
-        version: file:packages/shared/contracts
+        version: link:../shared/contracts
       '@valero-neuroerp/data-models':
         specifier: file:../data-models
         version: link:../data-models
@@ -3215,6 +3218,56 @@ importers:
         specifier: ^5.6.3
         version: 5.9.2
 
+  packages/shared/auth:
+    dependencies:
+      '@valero-neuroerp/contracts':
+        specifier: file:../contracts
+        version: link:../contracts
+      axios:
+        specifier: ^1.7.2
+        version: 1.12.2
+      express:
+        specifier: ^4.18.2
+        version: 4.21.2
+      jsonwebtoken:
+        specifier: ^9.0.2
+        version: 9.0.2
+      jwk-to-pem:
+        specifier: ^2.0.5
+        version: 2.0.7
+      zod:
+        specifier: ^3.23.8
+        version: 3.25.76
+    devDependencies:
+      '@types/express':
+        specifier: ^5.0.3
+        version: 5.0.3
+      '@types/jsonwebtoken':
+        specifier: ^9.0.10
+        version: 9.0.10
+      '@types/jwk-to-pem':
+        specifier: ^2.0.0
+        version: 2.0.3
+      '@types/node':
+        specifier: ^20.14.9
+        version: 20.19.17
+      typescript:
+        specifier: ^5.6.3
+        version: 5.9.2
+
+  packages/shared/contracts:
+    dependencies:
+      zod:
+        specifier: ^3.23.8
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^20.14.9
+        version: 20.19.17
+      typescript:
+        specifier: ^5.6.3
+        version: 5.9.2
+
   packages/ui-components:
     dependencies:
       react:
@@ -3322,7 +3375,7 @@ importers:
         version: 0.51.1(@opentelemetry/api@1.9.0)
       '@valero-neuroerp/contracts':
         specifier: file:../shared/contracts
-        version: file:packages/shared/contracts
+        version: link:../shared/contracts
       '@valero-neuroerp/data-models':
         specifier: file:../data-models
         version: link:../data-models
@@ -9427,6 +9480,9 @@ packages:
   '@types/jsonwebtoken@9.0.10':
     resolution: {integrity: sha512-asx5hIG9Qmf/1oStypjanR7iKTv0gXQ1Ov/jfrX6kS/EO0OFni8orbmGCn0672NHR3kXHwpAwR+B368ZGN/2rA==}
 
+  '@types/jwk-to-pem@2.0.3':
+    resolution: {integrity: sha512-I/WFyFgk5GrNbkpmt14auGO3yFK1Wt4jXzkLuI+fDBNtO5ZI2rbymyGd6bKzfSBEuyRdM64ZUwxU1+eDcPSOEQ==}
+
   '@types/keygrip@1.0.6':
     resolution: {integrity: sha512-lZuNAY9xeJt7Bx4t4dx0rYCDqGPW8RXhQZK1td7d4H6E9zYbLoOtjBvfwdTKpsyxQI/2jv+armjX/RW+ZNpXOQ==}
 
@@ -10271,6 +10327,9 @@ packages:
   asap@2.0.6:
     resolution: {integrity: sha512-BSHWgDSAiKs50o2Re8ppvp3seVHXSRM44cdSsT9FfNEUUZLOGWVCsiWaRPWM1Znn+mqZ1OfVZ3z3DWEzSp7hRA==}
 
+  asn1.js@5.4.1:
+    resolution: {integrity: sha512-+I//4cYPccV8LdmBLiX8CYvf9Sp3vQsrqu2QNXRcrbiWvcx/UdlFiqUJJzxRQxgsZmvhXhn4cSKeSmoFjVdupA==}
+
   asn1@0.2.6:
     resolution: {integrity: sha512-ix/FxPn0MDjeyJ7i/yoHGFt/EX6LyNbxSEhPPXODPL+KB0VPk86UYfL0lMdy+KCnv+fmvIzySwaK5COwqVbWTQ==}
 
@@ -10556,6 +10615,9 @@ packages:
   bmp-js@0.1.0:
     resolution: {integrity: sha512-vHdS19CnY3hwiNdkaqk93DvjVLfbEcI8mys4UjuWrlX1haDmroo8o4xCzh4wD6DGV6HxRCyauwhHRqMTfERtjw==}
 
+  bn.js@4.12.3:
+    resolution: {integrity: sha512-fGTi3gxV/23FTYdAoUtLYp6qySe2KE3teyZitipKNRuVYcBkoP/bB3guXN/XVKUe9mxCHXnc9C4ocyz8OmgN0g==}
+
   body-parser@1.20.3:
     resolution: {integrity: sha512-7rAxByjUMqQ3/bHJy7D6OGXvx/MMc4IqBn/X0fcM1QUcAItpZrBEYhWGem+tzXH90c+G01ypMcYJBO9Y30203g==}
     engines: {node: '>= 0.8', npm: 1.2.8000 || >= 1.4.16}
@@ -10594,6 +10656,9 @@ packages:
   braces@3.0.3:
     resolution: {integrity: sha512-yQbXgO/OSZVD2IsiLlro+7Hf6Q18EJrKSEsdoMzKePKXct3gvD8oLcOQdIzGupr5Fj+EDe8gO/lxc1BzfMpxvA==}
     engines: {node: '>=8'}
+
+  brorand@1.1.0:
+    resolution: {integrity: sha512-cKV8tMCEpQs4hK/ik71d6LrPOnpkpGBR0wzxqr68g2m/LB2GxVYQroAjMJZRVM1Y4BCjCKc3vAamxSzOY2RP+w==}
 
   brotli@1.3.3:
     resolution: {integrity: sha512-oTKjJdShmDuGW94SyyaoQvAjf30dZaHnjJ8uAF+u2/vGJkJbJPJAT1gDiOJP5v1Zb6f9KEyW/1HpuaWIXtGHPg==}
@@ -11882,6 +11947,9 @@ packages:
   electron-to-chromium@1.5.227:
     resolution: {integrity: sha512-ITxuoPfJu3lsNWUi2lBM2PaBPYgH3uqmxut5vmBxgYvyI4AlJ6P3Cai1O76mOrkJCBzq0IxWg/NtqOrpu/0gKA==}
 
+  elliptic@6.6.1:
+    resolution: {integrity: sha512-RaddvvMatK2LJHqFJ+YA4WysVN5Ita9E35botqIYspQ4TkRAlCicdzKOjlyv/1Za5RyTNn7di//eEV0uTAfe3g==}
+
   emittery@0.13.1:
     resolution: {integrity: sha512-DeWwawk6r5yR9jFgnDKYt4sLS0LmHJJi3ZOnb5/JdbYwj3nW+FxQnHIjhBKz8YLC7oRNPVM9NQ47I3CVx34eqQ==}
     engines: {node: '>=12'}
@@ -13035,6 +13103,9 @@ packages:
   has-unicode@2.0.1:
     resolution: {integrity: sha512-8Rf9Y83NBReMnx0gFzA8JImQACstCYWUplepDa9xprwwtmgEZUF0h/i5xSA625zB/I37EtrswSST6OXxwaaIJQ==}
 
+  hash.js@1.1.7:
+    resolution: {integrity: sha512-taOaskGt4z4SOANNseOviYDvjEJinIkRgmp7LbKP2YTTmVxWBl87s/uzK9r+44BclBSp2X7K1hqeNfz9JbBeXA==}
+
   hasown@2.0.2:
     resolution: {integrity: sha512-0hJU9SCPvmMzIBdZFqNPXWa6dqh7WdH0cII9y+CyS8rG3nL48Bclra9HmKhVVUHyPWNH5Y7xDwAB7bfgSjkUMQ==}
     engines: {node: '>= 0.4'}
@@ -13073,6 +13144,9 @@ packages:
     resolution: {integrity: sha512-dyrPC8KzBzUJ19QTIo1gXNqIISRXQ0NwteW6OeQHRN4ZuZeHkdODfj0zHBdOlHbRY8GqbqK57C9oWSvQZizFsg==}
     engines: {node: '>= 0.10.x'}
     hasBin: true
+
+  hmac-drbg@1.0.1:
+    resolution: {integrity: sha512-Tti3gMqLdZfhOQY1Mzf/AanLiqh1WTiJgEj26ZuYQ9fbkLomzGchCws4FyrSd4VkpBfiNhaE1On+lOz894jvXg==}
 
   hoist-non-react-statics@3.3.2:
     resolution: {integrity: sha512-/gGivxi8JPKWNm/W0jSmzcMPpfpPLc3dY/6GxhX2hQ9iGj3aDfklV4ET7NjKpSinLpJ5vafa9iiGIEZg10SfBw==}
@@ -14044,6 +14118,9 @@ packages:
   jwa@1.4.2:
     resolution: {integrity: sha512-eeH5JO+21J78qMvTIDdBXidBd6nG2kZjg5Ohz/1fpa28Z4CcsWUzJ1ZZyFq/3z3N17aZy+ZuBoHljASbL1WfOw==}
 
+  jwk-to-pem@2.0.7:
+    resolution: {integrity: sha512-cSVphrmWr6reVchuKQZdfSs4U9c5Y4hwZggPoz6cbVnTpAVgGRpEuQng86IyqLeGZlhTh+c4MAreB6KbdQDKHQ==}
+
   jws@3.2.2:
     resolution: {integrity: sha512-YHlZCB6lMTllWDtSPHz/ZXTsi8S00usEV6v1tjq8tOUZzw7DpSDWVXjXDre6ed1w/pd495ODpHZYSdkRTsa0HA==}
 
@@ -14581,6 +14658,12 @@ packages:
   min-indent@1.0.1:
     resolution: {integrity: sha512-I9jwMn07Sy/IwOj3zVkVik2JTvgpaykDZEigL6Rx6N9LbMywwUSMtxET+7lVoDLLd3O3IXwJwvuuns8UB/HeAg==}
     engines: {node: '>=4'}
+
+  minimalistic-assert@1.0.1:
+    resolution: {integrity: sha512-UtJcAD4yEaGtjPezWuO9wC4nwUnVH/8/Im3yEHQP4b67cXlD/Qr9hdITCU1xDbSEXg2XKNaP8jsReV7vQd00/A==}
+
+  minimalistic-crypto-utils@1.0.1:
+    resolution: {integrity: sha512-JIYlbt6g8i5jKfJ3xz7rF0LXmv2TkDxBLUkiBeZ7bAx4GnnNMr8xFpGnOxn6GhTEHx3SjRrZEoU+j04prX1ktg==}
 
   minimatch@10.0.3:
     resolution: {integrity: sha512-IPZ167aShDZZUMdRk66cyQAW3qr0WzbHkPdMYa8bzZhlHhO3jALbKdxcaak7W9FfT2rZNpQuUu4Od7ILEpXSaw==}
@@ -15652,6 +15735,11 @@ packages:
   qrcode-terminal@0.11.0:
     resolution: {integrity: sha512-Uu7ii+FQy4Qf82G4xu7ShHhjhGahEpCWc3x8UavY3CTcWV+ufmmCtwkr7ZKsX42jdL0kr1B5FKUeqJvAn51jzQ==}
     hasBin: true
+
+  qrcode.react@4.2.0:
+    resolution: {integrity: sha512-QpgqWi8rD9DsS9EP3z7BT+5lY5SFhsqGjpgW5DY/i3mK4M9DTBNz3ErMi8BWYEfI3L0d8GIbGmcdFAS1uIRGjA==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
   qrcode@1.5.4:
     resolution: {integrity: sha512-1ca71Zgiu6ORjHqFBDpnSMTR2ReToX4l1Au1VFLyVeBTFavzQnv5JxMFr3ukHVKpSrSA2MCk0lNJSykjUfz7Zg==}
@@ -26667,6 +26755,8 @@ snapshots:
       '@types/ms': 2.1.0
       '@types/node': 20.19.17
 
+  '@types/jwk-to-pem@2.0.3': {}
+
   '@types/keygrip@1.0.6': {}
 
   '@types/keyv@3.1.4':
@@ -28057,6 +28147,13 @@ snapshots:
 
   asap@2.0.6: {}
 
+  asn1.js@5.4.1:
+    dependencies:
+      bn.js: 4.12.3
+      inherits: 2.0.4
+      minimalistic-assert: 1.0.1
+      safer-buffer: 2.1.2
+
   asn1@0.2.6:
     dependencies:
       safer-buffer: 2.1.2
@@ -28427,6 +28524,8 @@ snapshots:
 
   bmp-js@0.1.0: {}
 
+  bn.js@4.12.3: {}
+
   body-parser@1.20.3:
     dependencies:
       bytes: 3.1.2
@@ -28488,6 +28587,8 @@ snapshots:
   braces@3.0.3:
     dependencies:
       fill-range: 7.1.1
+
+  brorand@1.1.0: {}
 
   brotli@1.3.3:
     dependencies:
@@ -29831,6 +29932,16 @@ snapshots:
       jake: 10.9.4
 
   electron-to-chromium@1.5.227: {}
+
+  elliptic@6.6.1:
+    dependencies:
+      bn.js: 4.12.3
+      brorand: 1.1.0
+      hash.js: 1.1.7
+      hmac-drbg: 1.0.1
+      inherits: 2.0.4
+      minimalistic-assert: 1.0.1
+      minimalistic-crypto-utils: 1.0.1
 
   emittery@0.13.1: {}
 
@@ -31492,6 +31603,11 @@ snapshots:
 
   has-unicode@2.0.1: {}
 
+  hash.js@1.1.7:
+    dependencies:
+      inherits: 2.0.4
+      minimalistic-assert: 1.0.1
+
   hasown@2.0.2:
     dependencies:
       function-bind: 1.1.2
@@ -31538,6 +31654,12 @@ snapshots:
       minimist: 1.2.8
       process: 0.10.1
       xtend: 4.0.2
+
+  hmac-drbg@1.0.1:
+    dependencies:
+      hash.js: 1.1.7
+      minimalistic-assert: 1.0.1
+      minimalistic-crypto-utils: 1.0.1
 
   hoist-non-react-statics@3.3.2:
     dependencies:
@@ -32930,6 +33052,12 @@ snapshots:
       ecdsa-sig-formatter: 1.0.11
       safe-buffer: 5.2.1
 
+  jwk-to-pem@2.0.7:
+    dependencies:
+      asn1.js: 5.4.1
+      elliptic: 6.6.1
+      safe-buffer: 5.2.1
+
   jws@3.2.2:
     dependencies:
       jwa: 1.4.2
@@ -33692,6 +33820,10 @@ snapshots:
   mimic-response@3.1.0: {}
 
   min-indent@1.0.1: {}
+
+  minimalistic-assert@1.0.1: {}
+
+  minimalistic-crypto-utils@1.0.1: {}
 
   minimatch@10.0.3:
     dependencies:
@@ -34782,6 +34914,10 @@ snapshots:
   pure-rand@6.1.0: {}
 
   qrcode-terminal@0.11.0: {}
+
+  qrcode.react@4.2.0(react@18.3.1):
+    dependencies:
+      react: 18.3.1
 
   qrcode@1.5.4:
     dependencies:

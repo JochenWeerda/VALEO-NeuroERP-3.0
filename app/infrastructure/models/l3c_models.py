@@ -100,6 +100,43 @@ class WeighingMeasurement(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 
+class ContractAmendment(Base):
+    """
+    Vertragsänderung (Amendment) zu einem beliebigen Vertrag.
+    contract_id verweist auf AgrarContract.id oder Rahmenvertrag.id (z. B. RV-xxx).
+    """
+    __tablename__ = "contract_amendments"
+    __table_args__ = {"schema": "domain_shared", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=uuid7)
+    contract_id = Column(String(64), nullable=False, index=True)
+    type = Column(String(50), nullable=False)
+    reason = Column(Text, nullable=False)
+    status = Column(String(30), nullable=False, default="pending")
+    changes = Column(JSONB, nullable=False, default=dict)
+    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
+    created_by = Column(String(255), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class AmendmentTemplate(Base):
+    """
+    Vorlage für Vertragsnachträge (z. B. EHB/EB-Nachtrag).
+    body_markdown = vollständiger Text der Vorlage, sections_schema = JSON-Definition der Felder für B.1–B.8.
+    """
+    __tablename__ = "amendment_templates"
+    __table_args__ = {"schema": "domain_shared", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=uuid7)
+    code = Column(String(64), nullable=False, unique=True)
+    name = Column(String(255), nullable=False)
+    description = Column(Text, nullable=True)
+    body_markdown = Column(Text, nullable=False)
+    sections_schema = Column(JSONB, nullable=False, default=dict)
+    is_active = Column(Boolean, nullable=False, default=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
 class AgrarContract(Base):
     """Agrar contract (buy/sell) with quantity tracking."""
     __tablename__ = "agrar_contracts"
@@ -562,6 +599,29 @@ class DailyPrice(Base):
     created_by = Column(String(64), nullable=True)
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     updated_by = Column(String(64), nullable=True)
+
+
+# ── Artikel-Preis-Schwellen (für Price-Monitoring-Worker) ─────────────────────────
+
+class ArticlePriceThreshold(Base):
+    """
+    Min/Max-Schwellen für Tagespreise (Monitoring-Alerts).
+    Pro Artikel/Warengruppe/Crop konfigurierbar; Worker meldet Überschreitungen.
+    """
+    __tablename__ = "article_price_thresholds"
+    __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=uuid7)
+    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
+    article_id = Column(String, ForeignKey("domain_inventory.articles.id", ondelete="CASCADE"), nullable=True)
+    warengruppe = Column(String(80), nullable=True)
+    crop_code = Column(String(20), nullable=True)
+    min_eur_per_ton = Column(DECIMAL(10, 2), nullable=True, comment="Untere Schwellen-Alert")
+    max_eur_per_ton = Column(DECIMAL(10, 2), nullable=True, comment="Obere Schwellen-Alert")
+    effective_from = Column(Date, nullable=False, server_default=func.current_date())
+    effective_to = Column(Date, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
 
 # ── Self-Billing Invoices ─────────────────────────────────────────────────────────

@@ -10,11 +10,12 @@ import { createApiClient } from '@/components/mask-builder/utils/api'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { formatDate, formatCurrency } from '@/components/mask-builder/utils/formatting'
+import { formatDate } from '@/components/mask-builder/utils/formatting'
 import { toast } from '@/hooks/use-toast'
-import { ArrowLeft, Users, BarChart3, Mail, Calendar, Play, Pause, X } from 'lucide-react'
+import { useTenant } from '@/hooks/useTenant'
+import { ArrowLeft, Users, BarChart3, Mail, Play, Pause, X } from 'lucide-react'
 import { DataTable } from '@/components/ui/data-table'
-import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 
 // API Client
 const apiClient = createApiClient('/api/crm-marketing')
@@ -484,6 +485,7 @@ export default function CampaignDetailPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
+  const { tenantId } = useTenant()
   const [loading, setLoading] = useState(false)
   const entityType = 'campaign'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Kampagne')
@@ -514,7 +516,7 @@ export default function CampaignDetailPage(): JSX.Element {
       }
 
       // Add tenant_id
-      formData.tenant_id = '00000000-0000-0000-0000-000000000001' // TODO: Get from auth context
+      formData.tenant_id = tenantId
 
       await saveData(formData)
       toast({

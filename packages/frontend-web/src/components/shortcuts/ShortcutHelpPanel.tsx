@@ -5,7 +5,7 @@
  */
 
 import { useState, useEffect } from 'react'
-import { ChevronLeft, Keyboard, X } from 'lucide-react'
+import { ChevronLeft, Keyboard } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'

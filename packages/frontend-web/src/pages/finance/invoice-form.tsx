@@ -7,7 +7,6 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -29,7 +28,6 @@ interface InvoiceLine {
 }
 
 export default function FinanceInvoiceFormPage(): JSX.Element {
-  const { t } = useTranslation();
   const navigate = useNavigate();
   const { toast } = useToast();
 

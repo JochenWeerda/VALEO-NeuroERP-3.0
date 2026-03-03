@@ -2,17 +2,17 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
-import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
+import { useMaskData, useMaskValidation } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
 import { getEntityTypeLabel, getDetailTitle, getSuccessMessage, getErrorMessage, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 import { createApiClient } from '@/components/mask-builder/utils/api'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { formatDate } from '@/components/mask-builder/utils/formatting'
 import { toast } from '@/hooks/use-toast'
-import { ArrowLeft, History, Mail, RefreshCw } from 'lucide-react'
+import { useTenant } from '@/hooks/useTenant'
+import { ArrowLeft, History } from 'lucide-react'
 
 // API Client
 const apiClient = createApiClient('/api/crm-consent')
@@ -255,6 +255,9 @@ export default function ConsentDetailPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
+  const [searchParams] = useSearchParams()
+  const contactIdFromQuery = searchParams.get('contact_id')
+  const { tenantId } = useTenant()
   const [loading, setLoading] = useState(false)
   const entityType = 'consent'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Consent')
@@ -285,7 +288,7 @@ export default function ConsentDetailPage(): JSX.Element {
       }
 
       // Add tenant_id
-      formData.tenant_id = '00000000-0000-0000-0000-000000000001' // TODO: Get from auth context
+      formData.tenant_id = tenantId
       
       // Set contact_id from query param if creating new
       if (isNew && contactIdFromQuery) {
@@ -315,7 +318,7 @@ export default function ConsentDetailPage(): JSX.Element {
     }
   }
 
-  const handleAction = async (action: string, formData: any) => {
+  const handleAction = async (action: string) => {
     if (action === 'revoke' && id) {
       try {
         await apiClient.post(`/consents/${id}/revoke`)

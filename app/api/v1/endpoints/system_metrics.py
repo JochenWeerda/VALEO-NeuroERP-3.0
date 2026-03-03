@@ -5,10 +5,11 @@ Provides real-time metrics for Auto-Scaling and Optimization
 
 from fastapi import APIRouter, Depends
 from typing import Dict, Any, List
-from datetime import datetime
+from datetime import datetime, timedelta
 import psutil
 import logging
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 
 from app.core.database import get_db
 
@@ -128,13 +129,24 @@ async def get_business_metrics(db: Session = Depends(get_db)) -> Dict[str, Any]:
             "pending_by_type": {et.event_type: et.count for et in event_types}
         }
         
-        # 3. Workflow Metrics (from Phase 3)
-        # TODO: Query workflow status from database
-        workflow_metrics = {
-            "active_workflows": 0,
-            "pending_approvals": 0,
-            "completed_today": 0
-        }
+        # 3. Workflow Metrics (AP Approval Workflow)
+        workflow_metrics = {"active_workflows": 0, "pending_approvals": 0, "completed_today": 0}
+        try:
+            pending = db.execute(
+                text("SELECT COUNT(*) FROM domain_erp.ap_approval_requests WHERE status = 'pending'")
+            ).scalar()
+            workflow_metrics["pending_approvals"] = pending or 0
+            workflow_metrics["active_workflows"] = pending or 0
+            completed_today = db.execute(
+                text(
+                    "SELECT COUNT(*) FROM domain_erp.ap_approvals "
+                    "WHERE approved_at >= :today"
+                ),
+                {"today": today_start},
+            ).scalar()
+            workflow_metrics["completed_today"] = completed_today or 0
+        except Exception:
+            pass
         
         # 4. Document Processing Queue
         document_metrics = {

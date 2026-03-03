@@ -33,8 +33,8 @@ export default function PricingPanel(): JSX.Element {
 
   const filtered: PriceItem[] = React.useMemo(
     (): PriceItem[] => rows.filter((r): boolean =>
-      r.name.toLowerCase().includes(q.toLowerCase()) ||
-      r.sku.toLowerCase().includes(q.toLowerCase())
+      (r.name ?? '').toLowerCase().includes(q.toLowerCase()) ||
+      (r.sku ?? '').toLowerCase().includes(q.toLowerCase())
     ),
     [rows, q]
   )

@@ -17,7 +17,7 @@ type MischfutterData = {
 }
 
 export default function MischfutterStammPage(): JSX.Element {
-  const [mischfutter, _setMischfutter] = useState<MischfutterData>({
+  const [mischfutter] = useState<MischfutterData>({
     id: 'MF-001',
     typ: 'Milchviehfutter Hochleistung',
     tierart: 'Rind (Milch)',

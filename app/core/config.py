@@ -25,6 +25,19 @@ class Settings(BaseSettings):
     PORT: int = 8000
     DEBUG: bool = True
 
+    @field_validator("DEBUG", mode="before")
+    @classmethod
+    def parse_debug_flag(cls, v: Any) -> bool:
+        if isinstance(v, bool):
+            return v
+        if isinstance(v, str):
+            normalized = v.strip().lower()
+            if normalized in {"1", "true", "yes", "on", "debug"}:
+                return True
+            if normalized in {"0", "false", "no", "off", "release", "prod", "production"}:
+                return False
+        return bool(v)
+
     # CORS Configuration
     BACKEND_CORS_ORIGINS: List[str] = [
         "http://localhost:3000",  # React dev server
@@ -99,6 +112,8 @@ class Settings(BaseSettings):
 
     # Multi-tenancy defaults
     DEFAULT_TENANT_ID: str = "00000000-0000-0000-0000-000000000001"
+    DEFAULT_BANK_ACCOUNT_ID: str = "1000"  # Kontonummer für OP-Ausgleich (Zahlungseingang)
+    DEFAULT_VAT_RATE: float = 0.19  # MwSt-Satz (19 %) für Portal-Shop
     INSTALLED_MODULES: List[str] = ["core", "agrar"]
     TENANT_MODULE_FLAGS: dict[str, list[str]] = {}
 
@@ -142,6 +157,9 @@ class Settings(BaseSettings):
     EMAIL_SMTP_PORT: Optional[int] = None
     EMAIL_USERNAME: Optional[str] = None
     EMAIL_PASSWORD: Optional[str] = None
+
+    # VIES (EU USt-ID-Prüfung) – bei True ruft der Compliance-Worker den VIES-Service auf
+    ENABLE_VIES_CHECK: bool = False
 
     # File Storage
     UPLOAD_DIR: str = "uploads"

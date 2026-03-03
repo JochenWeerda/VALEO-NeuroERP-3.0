@@ -218,7 +218,7 @@ function LegacyKundenStammModern() {
         break
       }
 
-      case 'validate_vat':
+      case 'validate_vat': {
         // VAT-Validierung via VIES
         const vatId = customerData['tax.vat_id']
         if (vatId) {
@@ -253,6 +253,7 @@ function LegacyKundenStammModern() {
           })
         }
         break
+      }
 
       case 'detect_duplicates':
         // TODO: Implementiere Duplicate-Detection
@@ -379,7 +380,7 @@ function LegacyKundenStammModern() {
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
-              {l3Config.ai?.intentBar?.actions.map((action) => (
+              {(l3Config.ai?.intentBar?.actions ?? []).map((action) => (
                 <Button
                   key={action.id}
                   variant="outline"
@@ -405,7 +406,7 @@ function LegacyKundenStammModern() {
             config={maskConfig}
             data={customerData}
             onChange={(data) => setCustomerData(data)}
-            onSave={async (_data) => {
+            onSave={async () => {
               toast({ title: 'Gespeichert', description: 'Kundendaten wurden gespeichert.' })
             }}
             onCancel={() => navigate('/crm/customers')}

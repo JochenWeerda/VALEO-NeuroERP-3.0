@@ -1,6 +1,5 @@
 import { useState, useCallback } from 'react'
 import { lookupIBAN, type IBANLookupResponse, formatIBAN } from '@/lib/utils/iban-validator'
-import { toast } from 'sonner'
 
 interface UseIbanLookupOptions {
   onSuccess?: (data: IBANLookupResponse) => void

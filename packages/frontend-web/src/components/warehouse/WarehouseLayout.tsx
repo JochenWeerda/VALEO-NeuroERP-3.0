@@ -8,7 +8,7 @@
  * - Vereinfachte Navigation
  */
 
-import { ReactNode, useEffect } from 'react'
+import { ReactNode } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import {

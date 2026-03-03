@@ -58,6 +58,7 @@ export function TrendChart({
   formatValue = (v) => v.toLocaleString('de-DE'),
   className,
 }: TrendChartProps) {
+  void showGrid
   // Berechne Trend
   const trend = useMemo(() => {
     if (data.length < 2) return null

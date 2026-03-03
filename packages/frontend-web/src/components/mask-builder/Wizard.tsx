@@ -124,7 +124,7 @@ const Wizard: React.FC<WizardProps> = ({
     setCurrentStep(stepIndex)
   }
 
-  const onSubmit = async (_stepData: any) => {
+  const onSubmit = async () => {
     if (!isLastStep) {
       handleNext()
       return

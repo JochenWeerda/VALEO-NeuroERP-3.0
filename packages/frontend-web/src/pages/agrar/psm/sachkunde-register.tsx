@@ -17,19 +17,6 @@ export default function PSMSachkundeRegisterPage(): JSX.Element {
   const [searchTerm, setSearchTerm] = useState('')
   const { data, isLoading, isError, error, refetch } = usePSMSachkundeRegister()
 
-  if (isLoading) {
-    return (
-      <div className="p-6 space-y-4">
-        <Skeleton className="h-8 w-64" />
-        <Skeleton className="h-[400px] w-full" />
-      </div>
-    )
-  }
-
-  if (isError) {
-    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
-  }
-
   const nachweise: PSMSachkundeNachweis[] = data ?? []
 
   const ablaufend = useMemo(() => {
@@ -52,6 +39,19 @@ export default function PSMSachkundeRegisterPage(): JSX.Element {
     ),
     [nachweise, searchTerm]
   )
+
+  if (isLoading) {
+    return (
+      <div className="p-6 space-y-4">
+        <Skeleton className="h-8 w-64" />
+        <Skeleton className="h-[400px] w-full" />
+      </div>
+    )
+  }
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
 
   const handleExport = (): void => {
     const header = 'Kunde;Kd-Nr;Nachweis-Nr;Gueltig bis;Ausstellende Stelle;Status;Compliance\n'

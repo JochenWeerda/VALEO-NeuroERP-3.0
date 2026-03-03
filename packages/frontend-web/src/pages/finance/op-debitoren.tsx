@@ -178,9 +178,9 @@ const createOpDebitorenConfig = (t: any, entityTypeLabel: string): MaskConfig =>
           type: 'select',
           options: [
             { value: 0, label: t('crud.fields.noDunning') },
-            { value: 1, label: '1. ' + t('crud.entities.dunning') },
-            { value: 2, label: '2. ' + t('crud.entities.dunning') },
-            { value: 3, label: '3. ' + t('crud.entities.dunning') }
+            { value: 1, label: `1. ${  t('crud.entities.dunning')}` },
+            { value: 2, label: `2. ${  t('crud.entities.dunning')}` },
+            { value: 3, label: `3. ${  t('crud.entities.dunning')}` }
           ]
         },
         {

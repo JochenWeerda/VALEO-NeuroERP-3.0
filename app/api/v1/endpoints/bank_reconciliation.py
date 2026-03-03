@@ -13,6 +13,7 @@ from pydantic import BaseModel
 import logging
 
 from ....core.database import get_db
+from ....core.fibu_audit import log_fibu_audit
 
 logger = logging.getLogger(__name__)
 
@@ -339,7 +340,11 @@ async def reconcile_bank_statement(
                             "line_id": suggestion["statement_line_id"],
                             "tenant_id": tenant_id
                         })
-                    
+                    log_fibu_audit(
+                        db, tenant_id, "create", "journal_entry", journal_entry_id,
+                        {"source": "bank_reconciliation", "entry_number": entry_number},
+                        request=None,
+                    )
                 except Exception as e:
                     logger.error(f"Error creating journal entry for suggestion: {e}")
                     continue

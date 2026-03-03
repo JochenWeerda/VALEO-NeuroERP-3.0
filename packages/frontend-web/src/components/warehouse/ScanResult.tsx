@@ -54,6 +54,7 @@ export function ScanResult({
   onAction,
   className,
 }: ScanResultProps) {
+  void format
   // Status-Farben
   const statusColors = {
     verfuegbar: 'bg-emerald-600',

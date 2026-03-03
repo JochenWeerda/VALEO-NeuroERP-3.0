@@ -47,13 +47,6 @@ export default function VerladungenListePage(): JSX.Element {
   const [searchTerm, setSearchTerm] = useState('')
   const { data: verladungen = [], isLoading, isError, error, refetch } = useVerladungen()
 
-  // Error State: Keine Mock-Daten als Fallback!
-  if (isError && !isLoading) {
-    return <ErrorState error={error} onRetry={refetch} />
-  }
-
-  if (isLoading) return <LoadingSkeleton />
-
   const filteredVerladungen = useMemo(() => {
     if (!searchTerm) return verladungen
     const term = searchTerm.toLowerCase()
@@ -63,6 +56,13 @@ export default function VerladungenListePage(): JSX.Element {
       v.lieferscheinNr.toLowerCase().includes(term)
     )
   }, [verladungen, searchTerm])
+
+  // Error State: Keine Mock-Daten als Fallback!
+  if (isError && !isLoading) {
+    return <ErrorState error={error} onRetry={refetch} />
+  }
+
+  if (isLoading) return <LoadingSkeleton />
 
   const columns = [
     { key: 'kennzeichen' as const, label: 'Kennzeichen', render: (v: VerladungItem) => <span className="font-mono font-bold">{v.kennzeichen}</span> },

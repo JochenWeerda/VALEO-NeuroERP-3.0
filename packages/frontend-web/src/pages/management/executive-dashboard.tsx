@@ -14,12 +14,9 @@ import {
   ShoppingCart,
   Users,
   Package,
-  TrendingUp,
   Calendar,
   Download,
   RefreshCw,
-  Filter,
-  ChevronDown,
 } from 'lucide-react'
 import { KPICard, KPIGrid } from '@/components/management/KPICard'
 import { AlertWidget, AlertItem } from '@/components/management/AlertWidget'

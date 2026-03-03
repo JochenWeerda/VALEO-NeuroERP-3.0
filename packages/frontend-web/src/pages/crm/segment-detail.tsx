@@ -2,17 +2,16 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
-import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
+import { useMaskData, useMaskValidation } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
-import { getEntityTypeLabel, getDetailTitle, getSuccessMessage, getErrorMessage, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
+import { getEntityTypeLabel, getDetailTitle, getSuccessMessage, getErrorMessage } from '@/features/crud/utils/i18n-helpers'
 import { createApiClient } from '@/components/mask-builder/utils/api'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { formatDate } from '@/components/mask-builder/utils/formatting'
 import { toast } from '@/hooks/use-toast'
-import { ArrowLeft, History, Users, BarChart3, Settings } from 'lucide-react'
+import { ArrowLeft, Users, BarChart3 } from 'lucide-react'
 import { DataTable } from '@/components/ui/data-table'
 
 // API Client
@@ -165,7 +164,7 @@ const createSegmentConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
 })
 
 // Members List Component
-function SegmentMembersList({ segmentId, segmentType }: { segmentId: string, segmentType: string }) {
+function SegmentMembersList({ segmentId }: { segmentId: string }) {
   const { t } = useTranslation()
   const [members, setMembers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -343,7 +342,7 @@ export default function SegmentDetailPage(): JSX.Element {
     }
   }
 
-  const handleAction = async (action: string, formData: any) => {
+  const handleAction = async (action: string) => {
     if (!id) return
 
     if (action === 'calculate') {
@@ -441,7 +440,7 @@ export default function SegmentDetailPage(): JSX.Element {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <SegmentMembersList segmentId={id} segmentType={data?.type || 'dynamic'} />
+                <SegmentMembersList segmentId={id} />
               </CardContent>
             </Card>
 

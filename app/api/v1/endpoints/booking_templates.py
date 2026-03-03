@@ -4,7 +4,7 @@ FIBU-GL-07: Automatische Buchungsschemata
 """
 
 from typing import List, Optional, Dict, Any
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from decimal import Decimal
@@ -14,6 +14,7 @@ import logging
 from app.core.uuid7 import uuid7
 
 from ....core.database import get_db
+from ....core.fibu_audit import log_fibu_audit
 
 logger = logging.getLogger(__name__)
 
@@ -323,7 +324,8 @@ async def apply_booking_template(
     template_id: str,
     request: ApplyTemplateRequest,
     tenant_id: str = Query("system", description="Tenant ID"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    http_request: Request = None,
 ):
     """
     Apply a booking template to create a journal entry.
@@ -463,9 +465,13 @@ async def apply_booking_template(
                 "profit_center": line.profit_center,
                 "reference": request.reference
             })
-        
+        log_fibu_audit(
+            db, tenant_id, "create", "journal_entry", str(entry_id),
+            {"source": "booking_template", "template_id": template_id, "entry_number": entry_number},
+            request=http_request,
+        )
         db.commit()
-        
+
         return ApplyTemplateResponse(
             journal_entry_id=entry_id,
             entry_number=entry_number,

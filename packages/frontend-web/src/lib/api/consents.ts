@@ -33,7 +33,7 @@ async function fetchConsents(params?: Record<string, string>): Promise<Consent[]
   const searchParams = new URLSearchParams(params)
 
   try {
-    const response = await authenticatedFetch(`/api/crm-sales/consents?${searchParams}`)
+    const response = await authenticatedFetch(`/api/crm-sales/consents?${searchParams.toString()}`)
 
     if (!response.ok) {
       return []

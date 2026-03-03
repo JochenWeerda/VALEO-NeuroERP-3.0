@@ -28,17 +28,14 @@ import {
   Settings,
   AlertTriangle,
   Thermometer,
-  Archive,
   TestTube,
   Leaf,
-  Scale,
   Warehouse,
   Plus,
   Trash2,
   Upload,
   Download,
   Edit,
-  X,
 } from 'lucide-react'
 import { useToast } from '@/components/ui/toast-provider'
 import { ErrorState } from '@/components/ErrorState'
@@ -58,14 +55,6 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -82,7 +71,6 @@ import {
   type ArticlePrice,
   type ArticleDocument,
 } from '@/lib/services/article-service'
-import { apiClient } from '@/lib/api-client'
 
 // ============================================================================
 // Type Definitions

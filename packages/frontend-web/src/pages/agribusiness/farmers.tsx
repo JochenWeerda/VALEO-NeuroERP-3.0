@@ -14,7 +14,7 @@ import { DetailDrawer } from '@/components/ui/detail-drawer';
 import { CrudDeleteDialog, CrudCancelDialog, CrudAuditTrailPanel, CrudPrintButton } from '@/features/crud/components';
 import { useCrudDelete, useCrudCancel, useCrudAuditTrail } from '@/features/crud/hooks';
 import { crudPrintService } from '@/features/crud/services';
-import { getEntityTypeLabel, getFieldLabel, getListTitle, getDetailTitle } from '@/features/crud/utils/i18n-helpers';
+import { getEntityTypeLabel, getListTitle, getDetailTitle } from '@/features/crud/utils/i18n-helpers';
 
 interface Farmer {
   id: string;
@@ -93,14 +93,13 @@ export default function FarmersPage(): JSX.Element {
   });
 
   // Cancel handler (if needed)
-  const handleCancel = async (_id: string, _reason: string) => {
+  const handleCancel = async () => {
     // Farmers do not have a cancel workflow yet
   };
 
   const {
     cancelDialogOpen,
     setCancelDialogOpen,
-    handleCancel: handleCancelClick,
     handleConfirmCancel,
     isCancelling,
   } = useCrudCancel({
