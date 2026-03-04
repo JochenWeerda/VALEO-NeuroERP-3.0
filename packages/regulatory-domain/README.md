@@ -330,7 +330,7 @@ x-tenant-id: <UUID>
 
 ## 📝 Lizenz
 
-Proprietary - VALEO GmbH
+MIT License – see root [LICENSE](../../LICENSE). Copyright (c) Jochen Weerda.
 
 ---
 

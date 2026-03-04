@@ -19,7 +19,7 @@ PDF_PAGE_SIZE=A4  # oder 'LETTER'
 PDF_LOGO_PATH=/app/data/branding/logo.png
 
 # Firmen-Informationen
-COMPANY_NAME="VALEO GmbH"
+COMPANY_NAME="VALEO NeuroERP"
 COMPANY_ADDRESS="Musterstraße 123"
 COMPANY_CITY="12345 Musterstadt"
 COMPANY_COUNTRY="Deutschland"

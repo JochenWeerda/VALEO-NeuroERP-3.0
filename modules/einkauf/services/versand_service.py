@@ -55,7 +55,7 @@ _EDI_SFTP_USER = os.getenv("EDI_SFTP_USER", "")
 _EDI_SFTP_KEY  = os.getenv("EDI_SFTP_KEY", "")
 _EDI_SFTP_PATH = os.getenv("EDI_SFTP_PATH", "/orders/in/")
 
-_VALEO_SENDER_NAME = os.getenv("VALEO_SENDER_NAME", "VALEO GmbH")
+_VALEO_SENDER_NAME = os.getenv("VALEO_SENDER_NAME", "VALEO NeuroERP")
 _VALEO_SENDER_ID   = os.getenv("VALEO_EDI_SENDER_ID", "4260000000001")  # GLN
 
 

@@ -73,7 +73,7 @@ curl -H "Authorization: Bearer $TOKEN" \
 PDF_LOGO_BASE64=iVBORw0KGgoAAAANSUhEUgAA...
 
 # Firmeninformationen
-COMPANY_NAME="VALEO GmbH"
+COMPANY_NAME="VALEO NeuroERP"
 COMPANY_STREET="Musterstraße 123"
 COMPANY_CITY="80331 München"
 COMPANY_COUNTRY="Deutschland"
@@ -121,7 +121,7 @@ LOGO_URL="/assets/valero-logo.svg"
 FAVICON_URL="/assets/valero-favicon.ico"
 
 # Footer Text
-FOOTER_TEXT="© 2025 VALEO GmbH - Alle Rechte vorbehalten"
+FOOTER_TEXT="© 2025 VALEO NeuroERP"
 ```
 
 ### 3. Policy Management

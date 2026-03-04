@@ -1051,7 +1051,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
             menge: psm_menge,
             einheit: psm_einheit,
             flaeche: psmFlaeche ? parseFloat(psmFlaeche) : 0,
-            anwender: 'VALEO GmbH',
+            anwender: 'VALEO NeuroERP',
           })
           push('MaÃŸnahme im Feldbuch angelegt')
         } catch {

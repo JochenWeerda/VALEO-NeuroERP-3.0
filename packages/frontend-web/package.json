@@ -34,7 +34,8 @@
     "test:e2e:smoke-all": "node scripts/harvest-routes.mjs && playwright test tests/e2e/all-routes-smoke.spec.ts --workers=1 && node scripts/smoke-report-html.mjs",
     "test:e2e:smoke-report": "node scripts/smoke-report-html.mjs",
     "test:e2e:ui": "playwright test --ui",
-    "test:e2e:report": "playwright show-report"
+    "test:e2e:report": "playwright show-report",
+    "screenshots:readme": "npx tsx scripts/capture-readme-screenshots.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
