@@ -10,6 +10,7 @@ from uuid import UUID, uuid4
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy import text
+from sqlalchemy.exc import OperationalError, ProgrammingError
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -33,7 +34,12 @@ def _clean(row: dict[str, Any]) -> dict[str, Any]:
 
 
 def _list(db: Session, sql: str, params: dict[str, Any]) -> list[dict[str, Any]]:
-    return [_clean(dict(r)) for r in db.execute(text(sql), params).mappings().all()]
+    try:
+        return [_clean(dict(r)) for r in db.execute(text(sql), params).mappings().all()]
+    except (OperationalError, ProgrammingError):
+        # In dev/staging setups the controlling schema may be absent; keep reads non-fatal.
+        db.rollback()
+        return []
 
 
 @router.get("/kpis", response_model=list[dict[str, Any]])

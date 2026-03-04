@@ -138,7 +138,7 @@ function KPIWidget({ widget }: { widget: WidgetLayout }) {
       const response = await apiClient.get<Record<string, number>>('/api/v1/analytics/kpis', {
         params: { start_date: currentRange.start, end_date: currentRange.end },
       })
-      return response.data
+      return response ?? {}
     },
     enabled: !!kpiConfig,
     staleTime: 30 * 1000,
@@ -152,7 +152,7 @@ function KPIWidget({ widget }: { widget: WidgetLayout }) {
       const response = await apiClient.get<Record<string, number>>('/api/v1/analytics/kpis', {
         params: { start_date: previousRange.start, end_date: previousRange.end },
       })
-      return response.data
+      return response ?? {}
     },
     enabled: !!kpiConfig,
     staleTime: 5 * 60 * 1000, // Vormonat aendert sich selten

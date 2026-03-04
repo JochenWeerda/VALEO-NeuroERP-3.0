@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Auftrags-Erfassung (Verkauf)
  * 1:1 Struktur nach Lieferschein-Erfassung â€” Gewohnheits-Prinzip
  */
@@ -23,7 +23,8 @@ import { BelegfolgePositionenDialog, type BelegfolgePosition } from '@/component
 import { useAuftraege, type Auftrag } from '@/lib/api/sales'
 import { apiClient } from '@/lib/axios'
 import { useAuth } from '@/hooks/useAuth'
-import { useGlobalShortcuts, globalShortcutManager } from '@/lib/shortcuts/global-shortcuts'
+import { globalShortcutManager } from '@/lib/shortcuts/global-shortcuts'
+import { useGlobalShortcutsWithVoice } from '@/features/ki-usability'
 import { ShortcutHintButton } from '@/components/shortcuts/ShortcutHelpPanel'
 import {
   ChevronLeft, ChevronRight, ChevronUp, ChevronDown, MoreHorizontal, Check, Printer, Save,
@@ -751,7 +752,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
 
   // â”€â”€ Globale Shortcuts â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-  useGlobalShortcuts({
+  useGlobalShortcutsWithVoice({
     'open-customer-selection': () => setShowCustomerDialog(true),
     'open-article-selection': () => setShowArticleDialog(true),
     'confirm-position': () => handlePositionOK(),

@@ -131,6 +131,12 @@ export function TopBar({
         </Button>
       )}
 
+      <img
+        src="/branding/valeo-erp-logo.png"
+        alt="VALEO ERP Logo"
+        className="h-8 w-auto max-w-[132px] object-contain md:hidden"
+      />
+
       <div className="flex-1 max-w-md">
         <Button
           variant="outline"

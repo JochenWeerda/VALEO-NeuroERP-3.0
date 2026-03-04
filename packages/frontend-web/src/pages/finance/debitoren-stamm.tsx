@@ -7,6 +7,7 @@ import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { validateIBAN, formatIBAN } from '@/lib/utils/iban-validator'
+import { validateVatIdFormat } from '@/lib/utils/vat-validator'
 import { useIbanLookup } from '@/hooks/useIbanLookup'
 import { useTenant } from '@/hooks/useTenant'
 import { toast } from 'sonner'
@@ -23,7 +24,12 @@ const createDebitorenSchema = (t: any) => z.object({
   country: z.string().default("DE"),
   phone: z.string().optional(),
   email: z.string().email().optional().or(z.literal("")),
-  vat_id: z.string().optional(),
+  vat_id: z.string()
+    .optional()
+    .or(z.literal(''))
+    .refine((val) => !val || val.trim() === '' || validateVatIdFormat(val).valid, {
+      message: 'USt-ID: ungültiges Format (z.B. DE123456789, ATU12345678)',
+    }),
   tax_number: z.string().optional(),
 
   // Bankverbindung

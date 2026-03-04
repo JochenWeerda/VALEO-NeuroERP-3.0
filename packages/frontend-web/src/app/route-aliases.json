@@ -329,6 +329,10 @@
       "path": "fibu/abschluss-cockpit"
     },
     {
+      "module": "@/pages/fibu/abschluss-checklist-detail",
+      "path": "fibu/abschluss-checklist-detail/:id"
+    },
+    {
       "module": "@/pages/inventory",
       "path": "inventory/adjust"
     },
@@ -715,6 +719,18 @@
     {
       "module": "@/pages/disposition/liste",
       "path": "disposition"
+    },
+    {
+      "module": "@/pages/disposition/LstCommodityPositionMatrix",
+      "path": "disposition/position-matrix"
+    },
+    {
+      "module": "@/pages/disposition/FrmPositionRules",
+      "path": "disposition/regeln"
+    },
+    {
+      "module": "@/pages/disposition/FrmCoverageMonitor",
+      "path": "disposition/coverage-monitor"
     },
     {
       "module": "@/pages/document",

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -8,6 +8,10 @@ import { useTriggerWorkflow } from '@/lib/api/workflows'
 
 export default function WorkflowTriggerPage(): JSX.Element {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const source = searchParams.get('source')
+  const count = searchParams.get('count')
+  const fromCoverage = source === 'position-coverage' && count
   const [lastWorkflowId, setLastWorkflowId] = useState<string | null>(null)
   const triggerWorkflow = useTriggerWorkflow()
   
@@ -30,6 +34,17 @@ export default function WorkflowTriggerPage(): JSX.Element {
           <h1 className="text-3xl font-bold">KI-Workflows</h1>
           <p className="text-muted-foreground">Automatisierte Geschäftsprozesse</p>
         </div>
+
+        {fromCoverage && (
+          <Card className="border-amber-200 bg-amber-50">
+            <CardContent className="pt-4 pb-4">
+              <p className="text-sm text-amber-800">
+                Sie wurden vom <strong>Coverage Monitor</strong> weitergeleitet ({count} Position(en) ausgewählt).
+                Starten Sie einen Workflow, um eine Aufgabe oder Freigabe für diese Positionen anzulegen.
+              </p>
+            </CardContent>
+          </Card>
+        )}
         
         {/* Workflow Cards */}
         <div className="grid gap-4 md:grid-cols-2">

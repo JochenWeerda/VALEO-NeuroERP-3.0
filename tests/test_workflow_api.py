@@ -2,14 +2,31 @@
 API tests for workflow endpoints.
 """
 
+import pytest
+from sqlalchemy import text
 from fastapi.testclient import TestClient
 from main import app
+from app.core.database import SessionLocal
+from app.models.documents import WorkflowAudit, WorkflowStatus
 
 client = TestClient(app)
 AUTH_HEADERS = {"Authorization": "Bearer dev-token"}
 SALES_USER = {"user_info": {"roles": ["sales"]}}
 PURCHASE_USER = {"user_info": {"roles": ["purchase"]}}
 APPROVER_USER = {"user_info": {"roles": ["admin"]}}
+
+
+@pytest.fixture(autouse=True)
+def _reset_workflow_tables():
+    """Keep workflow API tests deterministic across larger test runs."""
+    with SessionLocal() as db:
+        bind = db.get_bind()
+        WorkflowStatus.__table__.create(bind=bind, checkfirst=True)
+        WorkflowAudit.__table__.create(bind=bind, checkfirst=True)
+        db.execute(text("DELETE FROM workflow_audit"))
+        db.execute(text("DELETE FROM workflow_status"))
+        db.commit()
+    yield
 
 
 def _merge(*parts: dict) -> dict:

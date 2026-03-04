@@ -7,9 +7,11 @@ import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { validateIBAN } from '@/lib/utils/iban-validator'
+import { validateVatIdFormat } from '@/lib/utils/vat-validator'
 import { useIbanLookup } from '@/hooks/useIbanLookup'
 import { toast } from 'sonner'
 import { apiClient } from '@/lib/axios'
+import { useTenant } from '@/hooks/useTenant'
 
 // Zod-Schema für Kreditoren-Stammdaten (wird in Komponente mit i18n erstellt)
 const createKreditorenSchema = (t: any) => z.object({
@@ -22,7 +24,12 @@ const createKreditorenSchema = (t: any) => z.object({
   land: z.string().default("DE"),
   telefon: z.string().optional(),
   email: z.string().email().optional().or(z.literal("")),
-  ustId: z.string().optional(),
+  ustId: z.string()
+    .optional()
+    .or(z.literal(''))
+    .refine((val) => !val || val.trim() === '' || validateVatIdFormat(val).valid, {
+      message: 'USt-ID: ungültiges Format (z.B. DE123456789, ATU12345678)',
+    }),
   steuernummer: z.string().optional(),
 
   // Bankverbindung
@@ -282,6 +289,62 @@ const createKreditorenConfig = (t: any, entityTypeLabel: string): MaskConfig => 
   permissions: ['fibu.read', 'fibu.write']
 })
 
+/** Formular (camelCase) → API /api/v1/finance/creditors (snake_case) */
+function toApiCreditor(form: Record<string, unknown>, tenantId: string): Record<string, unknown> {
+  return {
+    tenant_id: tenantId,
+    creditor_number: form.kreditorNummer,
+    company_name: form.firma,
+    contact_person: form.ansprechpartner ?? undefined,
+    street: form.strasse ?? '',
+    postal_code: form.plz ?? '',
+    city: form.ort ?? '',
+    country: (form.land as string) ?? 'DE',
+    phone: form.telefon ?? undefined,
+    email: form.email || undefined,
+    vat_id: form.ustId || undefined,
+    tax_number: form.steuernummer ?? undefined,
+    iban: form.iban || undefined,
+    bic: form.bic ?? undefined,
+    bank_name: form.bankname ?? undefined,
+    account_holder: form.kontoinhaber ?? undefined,
+    payment_terms_days: Number(form.zahlungsziel) || 30,
+    discount_days: Number(form.skontoTage) || 0,
+    discount_percent: Number(form.skontoProzent) || 0,
+    credit_limit: Number(form.kreditlimit) || 0,
+    is_active: (form.vertragsstatus as string) === 'aktiv',
+    notes: form.notizen ?? undefined,
+  }
+}
+
+/** API-Antwort (snake_case) → Formular (camelCase) für Anzeige/Bearbeitung */
+export function fromApiCreditor(api: Record<string, unknown>): Record<string, unknown> {
+  return {
+    id: api.id,
+    kreditorNummer: api.creditor_number,
+    firma: api.company_name,
+    ansprechpartner: api.contact_person,
+    strasse: api.street ?? '',
+    plz: api.postal_code ?? '',
+    ort: api.city ?? '',
+    land: api.country ?? 'DE',
+    telefon: api.phone,
+    email: api.email,
+    ustId: api.vat_id,
+    steuernummer: api.tax_number,
+    iban: api.iban,
+    bic: api.bic,
+    bankname: api.bank_name,
+    kontoinhaber: api.account_holder,
+    zahlungsziel: Number(api.payment_terms_days) || 30,
+    skontoTage: Number(api.discount_days) || 0,
+    skontoProzent: Number(api.discount_percent) || 0,
+    kreditlimit: Number(api.credit_limit) || 0,
+    vertragsstatus: api.is_active === true ? 'aktiv' : (api.is_active === false ? 'gesperrt' : 'aktiv'),
+    notizen: api.notes,
+  }
+}
+
 export default function KreditorenStammPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -292,7 +355,8 @@ export default function KreditorenStammPage(): JSX.Element {
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Kreditor')
   const kreditorenConfig = createKreditorenConfig(t, entityTypeLabel)
 
-  const { data, loading, saveData, updateData } = useMaskData({
+  const { tenantId } = useTenant()
+  const { data, loading, saveData, setData } = useMaskData({
     apiUrl: kreditorenConfig.api.baseUrl,
     id: 'new'
   })
@@ -312,8 +376,7 @@ export default function KreditorenStammPage(): JSX.Element {
           updatedData.bic = result.bic
         }
         setFormData(updatedData)
-        updateData?.(updatedData)
-        
+        setData(updatedData as any)
         toast.success(t('crud.messages.ibanLookupSuccess', { 
           defaultValue: 'Bankinformationen automatisch ausgefüllt',
           bankName: result.bank_name 
@@ -352,7 +415,8 @@ export default function KreditorenStammPage(): JSX.Element {
       }
 
       try {
-        await saveData(formData)
+        const apiPayload = toApiCreditor(formData, tenantId ?? 'system')
+        await saveData(apiPayload)
         setIsDirty(false)
         navigate('/finance/kreditoren')
       } catch (error) {
@@ -436,9 +500,9 @@ export default function KreditorenStammPage(): JSX.Element {
         updatedData.bic = lookupData.bic
       }
       setFormData(updatedData)
-      updateData?.(updatedData)
+      setData(updatedData as any)
     }
-  }, [lookupData, formData, updateData])
+  }, [lookupData, formData, setData])
 
   const handleSave = async (formData: any) => {
     await handleAction('save', formData)
@@ -454,7 +518,7 @@ export default function KreditorenStammPage(): JSX.Element {
   return (
     <ObjectPage
       config={kreditorenConfig}
-      data={data || formData}
+      data={data ? fromApiCreditor(data as Record<string, unknown>) : formData}
       onChange={handleFormChange}
       onSave={handleSave}
       onCancel={handleCancel}

@@ -114,12 +114,18 @@ export default function FinanceIndexPage(): JSX.Element {
               Bankkonten und Zahlungen
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-2">
             <Link 
               to="/finance/bank" 
-              className="text-sm text-primary hover:underline flex items-center gap-1"
+              className="text-sm text-primary hover:underline flex items-center gap-1 block"
             >
               Bankabgleich <ArrowRight className="h-3 w-3" />
+            </Link>
+            <Link 
+              to="/finance/payments" 
+              className="text-sm text-primary hover:underline flex items-center gap-1 block"
+            >
+              Zahlungseingänge & Matching <ArrowRight className="h-3 w-3" />
             </Link>
           </CardContent>
         </Card>

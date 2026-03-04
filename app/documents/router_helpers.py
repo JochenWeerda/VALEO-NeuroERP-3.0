@@ -93,6 +93,7 @@ def list_from_store(
             "service_entry_sheet": ["SES-"],
             "edi_message": ["EDI-"],
             "supplier_rating": ["SUPR-"],
+            "ap_invoice": ["APINV-", "ER-", "RE-"],
         }
         
         prefixes = type_prefixes.get(doc_type, [])

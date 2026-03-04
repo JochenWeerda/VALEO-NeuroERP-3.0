@@ -18,6 +18,7 @@
 ### 2. GAP-Analysen
 
 - **[gaps.md](./gaps.md)** - Detaillierte GAP-Analyse Finance/FiBU (33 Capabilities)
+- **[finance-fiori-gap-analysis.md](./finance-fiori-gap-analysis.md)** - GAP-Analyse Finanz Suite vs. SAP Fiori Referenz (konsolidiert, P0-Schließung)
 - **[procurement-gaps.md](./procurement-gaps.md)** - Detaillierte GAP-Analyse Procurement/Einkauf (28 Capabilities)
 - **[gaps-sales.md](./gaps-sales.md)** - Detaillierte GAP-Analyse Sales/Order-to-Cash (31 Capabilities)
 - **[gaps-crm-marketing.md](./gaps-crm-marketing.md)** - Detaillierte GAP-Analyse CRM & Marketing (32 Capabilities)

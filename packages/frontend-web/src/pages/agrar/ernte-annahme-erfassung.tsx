@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Ernte-Annahme-Erfassung (Agrar)
  * 1:1 Nachbau der zvoove Ernte-Annahme-Maske
  * Basierend auf Lieferschein-Erfassung (Gewohnheits-Prinzip)
@@ -25,7 +25,7 @@ import { VarietySelectionDialog, type Variety } from '@/components/agrar/Variety
 import { DmsAnhangDialog } from '@/components/dms/DmsAnhangDialog'
 import { apiClient } from '@/lib/axios'
 import { useAuth } from '@/hooks/useAuth'
-import { useGlobalShortcuts } from '@/lib/shortcuts/global-shortcuts'
+import { useGlobalShortcutsWithVoice } from '@/features/ki-usability'
 import { ShortcutHintButton } from '@/components/shortcuts/ShortcutHelpPanel'
 import { ChevronLeft, ChevronRight, MoreHorizontal, Save, FileText, Folder, Calculator, Printer, Trash2, Download } from 'lucide-react'
 
@@ -389,7 +389,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
   const importAnalyseInputRef = useRef<HTMLInputElement | null>(null)
 
   // Keyboard Shortcuts
-  useGlobalShortcuts({
+  useGlobalShortcutsWithVoice({
     'copy-previous-full': () => {
       void handleCopyPreviousFull()
     },

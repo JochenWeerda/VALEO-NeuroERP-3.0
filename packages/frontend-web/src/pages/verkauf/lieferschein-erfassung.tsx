@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Lieferschein-Erfassung (Verkauf)
  * 1:1 Nachbau der zvoove Lieferschein-Erfassungsmaske
  */
@@ -23,7 +23,8 @@ import { BelegfolgePositionenDialog, type BelegfolgePosition } from '@/component
 import { apiClient } from '@/lib/axios'
 import { useAuth } from '@/hooks/useAuth'
 import { useSchlaege } from '@/lib/api/agrar'
-import { useGlobalShortcuts, globalShortcutManager } from '@/lib/shortcuts/global-shortcuts'
+import { globalShortcutManager } from '@/lib/shortcuts/global-shortcuts'
+import { useGlobalShortcutsWithVoice } from '@/features/ki-usability'
 import { ShortcutHintButton } from '@/components/shortcuts/ShortcutHelpPanel'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown, MoreHorizontal, Check, Printer, Save, X, FileText, Folder, FileCheck, Link as LinkIcon, Receipt, Trash2 } from 'lucide-react'
@@ -1175,7 +1176,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
   }, [currentPosition.listenpreis, currentPosition.rabatt, currentPosition.mengeGebinde])
 
   // Globale Shortcuts registrieren
-  useGlobalShortcuts({
+  useGlobalShortcutsWithVoice({
     'open-customer-selection': () => setShowCustomerDialog(true),
     'open-article-selection': () => setShowArticleDialog(true),
     'confirm-position': () => handlePositionOK(),
