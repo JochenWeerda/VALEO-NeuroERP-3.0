@@ -150,48 +150,60 @@ async def get_audit_stats(
     tenant_id: Optional[str] = Query(None),
     db: Session = Depends(get_db)
 ):
-    """Get audit statistics."""
+    """Get audit statistics. Returns default stats if table missing or error."""
     from app.infrastructure.models import AuditLog
-    from sqlalchemy import func, and_
-    
-    base_query = db.query(AuditLog)
-    
-    if tenant_id:
-        base_query = base_query.filter(AuditLog.tenant_id == tenant_id)
-    
-    total = base_query.count()
-    
-    actions_query = db.query(
-        AuditLog.action,
-        func.count(AuditLog.id).label('count')
-    )
-    if tenant_id:
-        actions_query = actions_query.filter(AuditLog.tenant_id == tenant_id)
-    actions = actions_query.group_by(AuditLog.action).all()
+    from sqlalchemy import func
 
-    entities_query = db.query(
-        AuditLog.entity_type,
-        func.count(AuditLog.id).label('count')
-    )
-    if tenant_id:
-        entities_query = entities_query.filter(AuditLog.tenant_id == tenant_id)
-    entities = entities_query.group_by(AuditLog.entity_type).all()
-
-    top_users_query = db.query(
-        AuditLog.user_email,
-        func.count(AuditLog.id).label('count')
-    )
-    if tenant_id:
-        top_users_query = top_users_query.filter(AuditLog.tenant_id == tenant_id)
-    top_users = top_users_query.group_by(AuditLog.user_email).order_by(
-        func.count(AuditLog.id).desc()
-    ).limit(10).all()
-    
-    return {
-        "total_entries": total,
-        "actions": [{"action": a, "count": c} for a, c in actions],
-        "entity_types": [{"type": e, "count": c} for e, c in entities],
-        "top_users": [{"user": u, "count": c} for u, c in top_users],
-        "timestamp": datetime.utcnow().isoformat()
+    default = {
+        "total_entries": 0,
+        "actions": [],
+        "entity_types": [],
+        "top_users": [],
+        "timestamp": datetime.utcnow().isoformat(),
     }
+    try:
+        base_query = db.query(AuditLog)
+        if tenant_id:
+            base_query = base_query.filter(AuditLog.tenant_id == tenant_id)
+        total = base_query.count()
+
+        actions_query = db.query(
+            AuditLog.action,
+            func.count(AuditLog.id).label("count"),
+        )
+        if tenant_id:
+            actions_query = actions_query.filter(AuditLog.tenant_id == tenant_id)
+        actions = actions_query.group_by(AuditLog.action).all()
+
+        entities_query = db.query(
+            AuditLog.entity_type,
+            func.count(AuditLog.id).label("count"),
+        )
+        if tenant_id:
+            entities_query = entities_query.filter(AuditLog.tenant_id == tenant_id)
+        entities = entities_query.group_by(AuditLog.entity_type).all()
+
+        top_users_query = db.query(
+            AuditLog.user_email,
+            func.count(AuditLog.id).label("count"),
+        )
+        if tenant_id:
+            top_users_query = top_users_query.filter(AuditLog.tenant_id == tenant_id)
+        top_users = (
+            top_users_query.group_by(AuditLog.user_email)
+            .order_by(func.count(AuditLog.id).desc())
+            .limit(10)
+            .all()
+        )
+
+        return {
+            "total_entries": total,
+            "actions": [{"action": a, "count": c} for a, c in actions],
+            "entity_types": [{"type": e, "count": c} for e, c in entities],
+            "top_users": [{"user": u or "", "count": c} for u, c in top_users],
+            "timestamp": datetime.utcnow().isoformat(),
+        }
+    except Exception as e:
+        logger.warning("get_audit_stats: %s", e)
+        return default
 
