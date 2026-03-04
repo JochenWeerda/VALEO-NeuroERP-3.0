@@ -331,7 +331,17 @@ export default function BuchungserfassungPage(): JSX.Element {
       }
       setActionLoadingKey('save')
       try {
-        await apiClient.post('/api/v1/finance/journal-entries/post', formData ?? {})
+        const period = String(formData?.periode ?? '').trim()
+        if (period) {
+          const periodCheck = await apiClient.get<{ is_open: boolean; message: string }>(`/api/v1/finance/periods/check/${period}`)
+          if (!periodCheck?.data?.is_open) {
+            throw new Error(periodCheck?.data?.message || `Periode ${period} ist gesperrt.`)
+          }
+        }
+        const postRes = await apiClient.post<{ success: boolean; message: string }>('/api/v1/finance/journal-entries/post', formData ?? {})
+        if (!postRes?.data?.success) {
+          throw new Error(postRes?.data?.message || 'Buchung konnte nicht verbucht werden')
+        }
         toast({ title: t('crud.messages.bookingValidationSuccess', { defaultValue: 'Buchung gebucht' }) })
         setIsDirty(false)
         navigate('/finance/buchungen')

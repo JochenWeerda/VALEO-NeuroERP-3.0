@@ -1,0 +1,27 @@
+﻿Bereich;Fiori_App;Business_Zweck;VALEO_vorhanden;Gap_Typ;Prioritaet;Empfohlenes_VALEO_Modul
+A Core Financials;Post General Journal Entries (F0717A);Manuelle GL-Buchung mit Validierung;Teilweise;Kritisch;P0;FiBu.Buchungserfassung2
+A Core Financials;Manage Journal Entries (F0718);Journalbearbeitung und Nachvollzug;Teilweise;Strategisch;P1;FiBu.Buchungsjournal2
+A Core Financials;Display G/L Account Balances (F2217);Salden- und Kontenmonitoring;Teilweise;Strategisch;P1;FiBu.GL-Saldenmonitor
+A Core Financials;Trial Balance (F0996);Abschlussnahe Saldenprüfung;Teilweise;Kritisch;P0;FiBu.Abschluss.TrialBalance
+A Core Financials;Manage Posting Periods (F2548);Perioden öffnen/schließen/sperren;Teilweise;Kritisch;P0;FiBu.Periodenverwaltung
+A Core Financials;Manage Supplier Line Items (F1060 family);Kreditorenposten prüfen/ausgleichen;Teilweise;Kritisch;P0;FiBu.OP.Kreditoren
+A Core Financials;Display Customer Line Items (F0764);Debitorenposten prüfen/ausgleichen;Teilweise;Strategisch;P1;FiBu.OP.Debitoren+Matching
+A Core Financials;Verify General Journal Entries (F0711);Freigabe-/Prüfworkflow;Teilweise;Strategisch;P1;FiBu.Buchungsfreigabe
+A Core Financials;Manage Fixed Assets (F3066);Anlagenstamm + Lebenszyklus;Teilweise;Strategisch;P1;FiBu.Anlagenbuchhaltung
+A Core Financials;Asset Accounting Jobs / Depreciation;AfA-Läufe und Abgänge;Teilweise;Strategisch;P1;FiBu.Anlagen.AfALauf
+A Core Financials;Reprocess Bank Statements (F1520);Bankimport und Fehlerbearbeitung;Teilweise;Kritisch;P0;FiBu.Bankabgleich2
+A Core Financials;Cash/Bank Position;Liquiditätssteuerung;Nein;Strategisch;P1;FiBu.Treasury.CashPosition
+A Core Financials;Credit Management Apps;Kreditlimitprüfung und Dispute;Teilweise;Strategisch;P1;FiBu.CreditManagement
+A Core Financials;Revenue Recognition / IFRS15;Periodengerechte Umsatzabgrenzung;Nein;Strategisch;P1;FiBu.RevenueAccounting
+B Controlling;Manage Cost Centers (F1600);Kostenstellenstamm und Verantwortung;Teilweise;Strategisch;P1;CO.Kostenstellen
+B Controlling;Manage Internal Orders;Auftragsbezogene Kostensteuerung;Nein;Strategisch;P1;CO.Innenauftraege
+B Controlling;Profit Center Accounting;Ergebnissteuerung nach Profit Centern;Nein;Strategisch;P1;CO.ProfitCenter
+B Controlling;Margin Analysis;Deckungsbeitragsanalyse;Nein;Strategisch;P1;CO.MarginAnalysis
+B Controlling;Product Cost Controlling;Herstellkosten und Kalkulation;Nein;Strategisch;P1;CO.ProductCosting
+C GRC;Audit Log Viewer;Revisionssichere Historie;Teilweise;Kritisch;P0;Compliance.AuditTrailWorkbench
+C GRC;Segregation of Duties / Access Review;Rollen- und Berechtigungsprüfung;Teilweise;Strategisch;P1;Compliance.AccessControlCenter
+C GRC;Financial Compliance Cockpit;Compliance-Status GoBD/HGB;Teilweise;Kritisch;P0;Compliance.FinancialCockpit
+D Reporting;Balance Sheet / P&L Apps;Bilanz und GuV;Teilweise;Strategisch;P1;FiBu.Reporting.FinStatements
+D Reporting;Cash Flow Reporting;Zahlungsstromdarstellung;Nein;Strategisch;P1;FiBu.Reporting.CashFlow
+D Reporting;KPI Dashboards;Management-KPI und Steuerung;Teilweise;Optional;P2;FiBu.Analytics.KPIHub
+D Reporting;Embedded Analytics / Drilldown;Drilldown bis Beleg;Teilweise;Strategisch;P1;FiBu.Analytics.Drilldown

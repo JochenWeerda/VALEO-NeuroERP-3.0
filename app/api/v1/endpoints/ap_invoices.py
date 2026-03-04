@@ -92,7 +92,8 @@ async def list_ap_invoices(
     """Listet Eingangsrechnungen auf, optional mit Filterung."""
     logger.info(f"Listing AP invoices with skip={skip}, limit={limit}, query={query}, status={status}, supplier_id={supplier_id}")
     repo = get_repository(db)
-    all_invoices = list_from_store("ap_invoice", repo)
+    result = list_from_store("ap_invoice", skip, limit, None, repo)
+    all_invoices = result.get("data", []) if isinstance(result, dict) else []
 
     filtered_invoices = []
     for inv in all_invoices:
@@ -174,6 +175,26 @@ async def post_ap_invoice(
                 status_code=400,
                 detail="Invoice must be approved before posting"
             )
+
+    # FIBU-GL-05: block posting in closed periods
+    invoice_date = invoice.get("date", datetime.now().isoformat()[:10])
+    period = str(invoice_date)[:7]
+    period_status = db.execute(
+        text(
+            """
+            SELECT status
+            FROM finance_accounting_periods
+            WHERE tenant_id = :tenant_id AND period = :period
+            LIMIT 1
+            """
+        ),
+        {"tenant_id": invoice.get("tenantId", "system"), "period": period},
+    ).fetchone()
+    if period_status and str(period_status[0]) != "OPEN":
+        raise HTTPException(
+            status_code=403,
+            detail=f"Period {period} is {period_status[0]}. Posting is blocked."
+        )
 
     # Update status to posted
     invoice["status"] = "VERBUCHT"
@@ -269,11 +290,14 @@ async def post_ap_invoice(
     # Create open item (OP) for AP invoice
     try:
         op_insert = text("""
-            INSERT INTO offene_posten
-            (id, tenant_id, rechnungsnr, datum, faelligkeit, betrag, offen, kunde_id, kunde_name, zahlbar, created_at, updated_at)
-            VALUES (:id, :tenant_id, :rechnungsnr, :datum, :faelligkeit, :betrag, :offen, :kunde_id, :kunde_name, :zahlbar, NOW(), NOW())
+            INSERT INTO domain_erp.offene_posten
+            (id, tenant_id, konto_typ, op_status, rechnungsnr, rechnungsdatum, datum, faelligkeit, op_betrag, betrag, offen,
+             lieferant_id, lieferant_name, waehrung, zahlbar, created_at, updated_at)
+            VALUES (:id, :tenant_id, 'kreditoren', 'offen', :rechnungsnr, :rechnungsdatum, :datum, :faelligkeit, :op_betrag, :betrag, :offen,
+                    :lieferant_id, :lieferant_name, :waehrung, :zahlbar, NOW(), NOW())
             ON CONFLICT (id) DO UPDATE SET
                 offen = EXCLUDED.offen,
+                op_status = EXCLUDED.op_status,
                 updated_at = NOW()
         """)
         
@@ -281,12 +305,15 @@ async def post_ap_invoice(
             "id": f"OP-AP-{invoice_id}",
             "tenant_id": invoice.get("tenantId", "system"),
             "rechnungsnr": invoice.get("number", invoice_id),
+            "rechnungsdatum": invoice.get("date", datetime.now().isoformat()[:10]),
             "datum": invoice.get("date", datetime.now().isoformat()[:10]),
             "faelligkeit": invoice.get("dueDate", (datetime.now() + timedelta(days=30)).isoformat()[:10]),
+            "op_betrag": invoice.get("totalGross", 0),
             "betrag": invoice.get("totalGross", 0),
             "offen": invoice.get("totalGross", 0),
-            "kunde_id": invoice.get("supplierId", ""),  # supplierId = creditor for AP
-            "kunde_name": invoice.get("supplierName", ""),
+            "lieferant_id": invoice.get("customerId", "") or invoice.get("supplierId", ""),
+            "lieferant_name": invoice.get("supplierName", "") or invoice.get("customerName", ""),
+            "waehrung": invoice.get("currency", "EUR"),
             "zahlbar": True
         })
         db.commit()

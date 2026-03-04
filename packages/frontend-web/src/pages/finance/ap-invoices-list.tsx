@@ -135,6 +135,25 @@ export default function APInvoicesListPage(): JSX.Element {
               {t('finance.apInvoices.approve')}
             </Button>
           )}
+          {row.original.status === 'FREIGEGEBEN' && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={async () => {
+                try {
+                  await apiClient.post(`/api/v1/finance/ap/invoices/${row.original.number}/post?posted_by=current_user`)
+                  toast({ title: t('common.success'), description: t('finance.apInvoices.postSuccess', { defaultValue: 'Eingangsrechnung verbucht' }) })
+                  await refetch()
+                } catch (e: any) {
+                  const msg = e?.response?.data?.detail || t('finance.apInvoices.postError', { defaultValue: 'Verbuchen fehlgeschlagen' })
+                  toast({ title: t('common.error'), description: msg, variant: 'destructive' })
+                }
+              }}
+            >
+              <CheckCircle2 className="h-4 w-4 mr-1" />
+              {t('crud.actions.post', { defaultValue: 'Verbuchen' })}
+            </Button>
+          )}
         </div>
       ),
     },
