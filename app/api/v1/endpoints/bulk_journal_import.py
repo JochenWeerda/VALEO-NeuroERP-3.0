@@ -306,31 +306,26 @@ async def import_journal_entries_csv(
                     
                     account_id = str(account_row[0])
                     
-                    # Insert journal entry line
+                    # Insert journal entry line (Schema: debit/credit, siehe ensure_chart_of_accounts_and_journal_entry_lines)
                     line_id = f"{entry_id}-L{line_idx}"
                     journal_line_insert = text("""
                         INSERT INTO domain_erp.journal_entry_lines
-                        (id, tenant_id, journal_entry_id, account_id, debit_amount, credit_amount,
-                         line_number, description, tax_code, cost_center, profit_center, reference,
-                         created_at, updated_at)
-                        VALUES (:id, :tenant_id, :journal_entry_id, :account_id, :debit_amount, :credit_amount,
-                                :line_number, :description, :tax_code, :cost_center, :profit_center, :reference,
-                                NOW(), NOW())
+                        (id, journal_entry_id, account_id, description, debit, credit,
+                         cost_center, project, line_number, created_at)
+                        VALUES (:id, :journal_entry_id, :account_id, :description, :debit, :credit,
+                                :cost_center, :project, :line_number, NOW())
                     """)
                     
                     db.execute(journal_line_insert, {
                         "id": line_id,
-                        "tenant_id": tenant_id,
                         "journal_entry_id": entry_id,
                         "account_id": account_id,
-                        "debit_amount": line.debit_amount,
-                        "credit_amount": line.credit_amount,
-                        "line_number": line_idx,
                         "description": line.description,
-                        "tax_code": line.tax_code,
+                        "debit": line.debit_amount,
+                        "credit": line.credit_amount,
                         "cost_center": line.cost_center,
-                        "profit_center": line.profit_center,
-                        "reference": line.reference
+                        "project": line.reference,
+                        "line_number": line_idx,
                     })
                 if not dry_run:
                     log_fibu_audit(

@@ -113,6 +113,18 @@
       "path": "contracts"
     },
     {
+      "module": "@/pages/kontrakte/LstKontraktUebersicht",
+      "path": "kontrakte"
+    },
+    {
+      "module": "@/pages/kontrakte/FrmKontraktDetail",
+      "path": "kontrakte/neu"
+    },
+    {
+      "module": "@/pages/kontrakte/FrmKontraktDetail",
+      "path": "kontrakte/:id"
+    },
+    {
       "module": "@/pages/crm/aktivitaet-detail",
       "path": "crm/aktivitaet/:id"
     },
@@ -1391,6 +1403,14 @@
     {
       "module": "@/pages/vertrag/rahmenvertraege",
       "path": "vertrag/rahmenvertraege"
+    },
+    {
+      "module": "@/pages/kontrakte/FrmKontraktDetail",
+      "path": "vertrag/neu"
+    },
+    {
+      "module": "@/pages/kontrakte/FrmKontraktDetail",
+      "path": "vertrag/:id"
     },
     {
       "module": "@/pages/vertrieb/kundenumsatz",
