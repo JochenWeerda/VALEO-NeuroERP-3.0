@@ -9,6 +9,8 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { NotificationCenter } from '@/components/ui/notification-center'
 import { Command as CommandIcon, HelpCircle, Keyboard, LogOut, Menu, Moon, PanelLeft, Search, Settings, Sparkles, Sun, User } from 'lucide-react'
+import { useFeature } from '@/hooks/useFeature'
+import { VoiceButton } from '@/features/ki-usability'
 import { useTheme } from '@/hooks/useTheme'
 import { createMCPMetadata } from '@/design/mcp-schemas/component-metadata'
 import { useEffect, useState } from 'react'
@@ -97,6 +99,7 @@ export function TopBar({
   onShortcutsToggle,
 }: TopBarProps): JSX.Element {
   const { isDark, toggleTheme } = useTheme()
+  const voiceControlEnabled = useFeature('voiceControl')
   const user = {
     name: 'Test Admin',
     email: 'test-admin@valeo.local',
@@ -174,6 +177,11 @@ export function TopBar({
       {/* Shortcuts Help Toggle (Strg+N) */}
       {onShortcutsToggle && (
         <ShortcutsToggleButton onToggle={onShortcutsToggle} />
+      )}
+
+      {/* Sprachsteuerung (KI Usability) – Feature-Flag: voiceControl */}
+      {voiceControlEnabled && (
+        <VoiceButton variant="ghost" size="icon" className="hidden sm:inline-flex" />
       )}
 
       <NotificationCenter />

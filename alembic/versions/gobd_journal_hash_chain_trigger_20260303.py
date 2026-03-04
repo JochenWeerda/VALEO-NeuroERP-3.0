@@ -20,6 +20,8 @@ depends_on = None
 
 
 def upgrade() -> None:
+    # pgcrypto für digest('sha256') – kompatibel mit allen unterstützten PG-Versionen
+    op.execute(text("CREATE EXTENSION IF NOT EXISTS pgcrypto"))
     op.execute(text("""
         CREATE OR REPLACE FUNCTION domain_erp.journal_entries_hash_chain()
         RETURNS TRIGGER AS $$
@@ -29,6 +31,9 @@ def upgrade() -> None:
             payload TEXT;
         BEGIN
             IF NEW.sequence_number IS NULL OR NEW.hash_current IS NULL THEN
+                -- Advisory Lock pro Tenant verhindert doppelte sequence_number bei parallelen INSERTs
+                PERFORM pg_advisory_xact_lock(hashtext(COALESCE(NEW.tenant_id, ''))::bigint);
+
                 SELECT sequence_number, hash_current INTO last_seq, last_hash
                 FROM domain_erp.journal_entries
                 WHERE tenant_id IS NOT DISTINCT FROM NEW.tenant_id
@@ -48,7 +53,8 @@ def upgrade() -> None:
                     '|', NEW.sequence_number::TEXT,
                     '|', COALESCE(NEW.created_at::TEXT, NOW()::TEXT)
                 );
-                NEW.hash_current := encode(sha256(payload::bytea), 'hex');
+                -- digest() aus pgcrypto (Schema public, damit Trigger bei beliebigem search_path funktioniert)
+                NEW.hash_current := encode(public.digest(convert_to(payload, 'UTF8'), 'sha256'), 'hex');
             END IF;
             RETURN NEW;
         END;
@@ -61,7 +67,7 @@ def upgrade() -> None:
         CREATE TRIGGER trg_journal_entries_hash_chain
         BEFORE INSERT ON domain_erp.journal_entries
         FOR EACH ROW
-        EXECUTE FUNCTION domain_erp.journal_entries_hash_chain()
+        EXECUTE PROCEDURE domain_erp.journal_entries_hash_chain()
     """))
 
 
