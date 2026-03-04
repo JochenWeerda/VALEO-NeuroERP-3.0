@@ -52,6 +52,7 @@ class ReconciliationResult(BaseModel):
     balance_comparison: BalanceComparison
     differences: List[DifferenceItem]
     total_differences: int
+    line_counts: dict
     can_be_booked: bool
     booking_suggestions: Optional[List[dict]] = None
 
@@ -89,8 +90,8 @@ async def get_balance_comparison(
         # Sum all journal entries for this bank account
         accounting_query = text("""
             SELECT 
-                COALESCE(SUM(CASE WHEN jel.debit_amount > 0 THEN jel.debit_amount ELSE 0 END), 0) as total_debit,
-                COALESCE(SUM(CASE WHEN jel.credit_amount > 0 THEN jel.credit_amount ELSE 0 END), 0) as total_credit
+                COALESCE(SUM(CASE WHEN jel.debit > 0 THEN jel.debit ELSE 0 END), 0) as total_debit,
+                COALESCE(SUM(CASE WHEN jel.credit > 0 THEN jel.credit ELSE 0 END), 0) as total_credit
             FROM domain_erp.journal_entry_lines jel
             JOIN domain_erp.journal_entries je ON jel.journal_entry_id = je.id
             JOIN domain_erp.chart_of_accounts coa ON jel.account_id = coa.id
@@ -217,6 +218,25 @@ async def reconcile_bank_statement(
         # Get differences
         differences = await get_reconciliation_differences(statement_id, bank_account_id, tenant_id, db)
         
+        # Current statement line stats
+        line_counts_query = text("""
+            SELECT 
+                COUNT(*) as total,
+                SUM(CASE WHEN status = 'MATCHED' THEN 1 ELSE 0 END) as matched,
+                SUM(CASE WHEN status = 'UNMATCHED' THEN 1 ELSE 0 END) as unmatched
+            FROM domain_erp.bank_statement_lines
+            WHERE statement_id = :statement_id AND tenant_id = :tenant_id
+        """)
+        line_counts_row = db.execute(
+            line_counts_query,
+            {"statement_id": statement_id, "tenant_id": tenant_id},
+        ).fetchone()
+        line_counts = {
+            "total": int(line_counts_row[0] or 0) if line_counts_row else 0,
+            "matched": int(line_counts_row[1] or 0) if line_counts_row else 0,
+            "unmatched": int(line_counts_row[2] or 0) if line_counts_row else 0,
+        }
+
         # Generate booking suggestions for unmatched items
         booking_suggestions = []
         
@@ -235,21 +255,21 @@ async def reconcile_bank_statement(
                 }
                 booking_suggestions.append(suggestion)
         
-        can_be_booked = balance_comp.is_balanced or len(differences) == 0
+        can_be_booked = len(booking_suggestions) > 0
         
         # Auto-book if requested and balanced
-        if auto_book and can_be_booked and booking_suggestions:
+        if auto_book and booking_suggestions:
             for suggestion in booking_suggestions:
                 try:
                     # Create journal entry
-                    journal_entry_id = f"JE-RECON-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
+                    journal_entry_id = f"JE-RECON-{datetime.now().strftime('%Y%m%d-%H%M%S')}-{suggestion['statement_line_id'][:8]}"
                     
                     journal_insert = text("""
                         INSERT INTO domain_erp.journal_entries
                         (id, tenant_id, entry_number, entry_date, posting_date, description,
-                         source, currency, status, total_debit, total_credit, created_at, updated_at)
+                         source, status, total_debit, total_credit, created_at, updated_at)
                         VALUES (:id, :tenant_id, :entry_number, :entry_date, :posting_date, :description,
-                                :source, :currency, :status, :total_debit, :total_credit, NOW(), NOW())
+                                :source, :status, :total_debit, :total_credit, NOW(), NOW())
                         RETURNING id
                     """)
                     
@@ -264,7 +284,6 @@ async def reconcile_bank_statement(
                         "posting_date": entry_date,
                         "description": suggestion["description"],
                         "source": "bank_reconciliation",
-                        "currency": "EUR",
                         "status": "posted",
                         "total_debit": Decimal(str(suggestion["amount"])),
                         "total_credit": Decimal(str(suggestion["amount"]))
@@ -285,19 +304,18 @@ async def reconcile_bank_statement(
                     if bank_account_row:
                         journal_line1 = text("""
                             INSERT INTO domain_erp.journal_entry_lines
-                            (id, tenant_id, journal_entry_id, account_id, debit_amount, credit_amount,
-                             line_number, description, created_at, updated_at)
-                            VALUES (:id, :tenant_id, :journal_entry_id, :account_id, :debit_amount, :credit_amount,
-                                    :line_number, :description, NOW(), NOW())
+                            (id, journal_entry_id, account_id, debit, credit,
+                             line_number, description, created_at)
+                            VALUES (:id, :journal_entry_id, :account_id, :debit, :credit,
+                                    :line_number, :description, NOW())
                         """)
                         
                         db.execute(journal_line1, {
                             "id": f"{journal_entry_id}-L1",
-                            "tenant_id": tenant_id,
                             "journal_entry_id": journal_entry_id,
                             "account_id": str(bank_account_row[0]),
-                            "debit_amount": Decimal(str(suggestion["amount"])),
-                            "credit_amount": Decimal("0.00"),
+                            "debit": Decimal(str(suggestion["amount"])),
+                            "credit": Decimal("0.00"),
                             "line_number": 1,
                             "description": suggestion["description"]
                         })
@@ -311,19 +329,18 @@ async def reconcile_bank_statement(
                     if credit_account_row:
                         journal_line2 = text("""
                             INSERT INTO domain_erp.journal_entry_lines
-                            (id, tenant_id, journal_entry_id, account_id, debit_amount, credit_amount,
-                             line_number, description, created_at, updated_at)
-                            VALUES (:id, :tenant_id, :journal_entry_id, :account_id, :debit_amount, :credit_amount,
-                                    :line_number, :description, NOW(), NOW())
+                            (id, journal_entry_id, account_id, debit, credit,
+                             line_number, description, created_at)
+                            VALUES (:id, :journal_entry_id, :account_id, :debit, :credit,
+                                    :line_number, :description, NOW())
                         """)
                         
                         db.execute(journal_line2, {
                             "id": f"{journal_entry_id}-L2",
-                            "tenant_id": tenant_id,
                             "journal_entry_id": journal_entry_id,
                             "account_id": str(credit_account_row[0]),
-                            "debit_amount": Decimal("0.00"),
-                            "credit_amount": Decimal(str(suggestion["amount"])),
+                            "debit": Decimal("0.00"),
+                            "credit": Decimal(str(suggestion["amount"])),
                             "line_number": 2,
                             "description": suggestion["description"]
                         })
@@ -350,6 +367,20 @@ async def reconcile_bank_statement(
                     continue
             
             db.commit()
+
+            # Refresh stats and comparison after auto-book
+            balance_comp = await get_balance_comparison(statement_id, bank_account_id, tenant_id, db)
+            line_counts_row = db.execute(
+                line_counts_query,
+                {"statement_id": statement_id, "tenant_id": tenant_id},
+            ).fetchone()
+            line_counts = {
+                "total": int(line_counts_row[0] or 0) if line_counts_row else 0,
+                "matched": int(line_counts_row[1] or 0) if line_counts_row else 0,
+                "unmatched": int(line_counts_row[2] or 0) if line_counts_row else 0,
+            }
+            differences = await get_reconciliation_differences(statement_id, bank_account_id, tenant_id, db)
+            can_be_booked = len(differences) > 0
         
         return ReconciliationResult(
             statement_id=statement_id,
@@ -357,6 +388,7 @@ async def reconcile_bank_statement(
             balance_comparison=balance_comp,
             differences=differences,
             total_differences=len(differences),
+            line_counts=line_counts,
             can_be_booked=can_be_booked,
             booking_suggestions=booking_suggestions if not auto_book else None
         )

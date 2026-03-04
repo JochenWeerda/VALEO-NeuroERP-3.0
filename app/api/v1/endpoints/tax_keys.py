@@ -46,6 +46,30 @@ class TaxKeyCreate(BaseModel):
             raise ValueError('Code must be 1-2 digits')
         return v
 
+    @field_validator('country')
+    @classmethod
+    def validate_country(cls, v: str):
+        v = (v or "").strip().upper()
+        if len(v) != 2 or not v.isalpha():
+            raise ValueError('country must be ISO 3166-1 alpha-2 (e.g. DE)')
+        return v
+
+    @field_validator('gueltig_bis')
+    @classmethod
+    def validate_valid_until(cls, v, info):
+        gueltig_von = info.data.get("gueltig_von")
+        if v is not None and gueltig_von is not None and v < gueltig_von:
+            raise ValueError('gueltig_bis must be >= gueltig_von')
+        return v
+
+    @field_validator('reverse_charge')
+    @classmethod
+    def validate_reverse_charge_rate(cls, v, info):
+        steuersatz = info.data.get("steuersatz")
+        if v and steuersatz is not None and Decimal(str(steuersatz)) != Decimal("0"):
+            raise ValueError('reverse_charge requires steuersatz = 0')
+        return v
+
 
 class TaxKeyUpdate(BaseModel):
     """Schema for updating a tax key"""
@@ -64,6 +88,16 @@ class TaxKeyUpdate(BaseModel):
     country: Optional[str] = Field(None, max_length=2)
     region: Optional[str] = Field(None, max_length=50)
     active: Optional[bool] = None
+
+    @field_validator('country')
+    @classmethod
+    def validate_country(cls, v: Optional[str]):
+        if v is None:
+            return v
+        v = v.strip().upper()
+        if len(v) != 2 or not v.isalpha():
+            raise ValueError('country must be ISO 3166-1 alpha-2 (e.g. DE)')
+        return v
 
 
 class TaxKeyResponse(BaseModel):
@@ -100,39 +134,26 @@ async def list_tax_keys(
     List all tax keys.
     """
     try:
-        query = text("""
+        where_clauses = ["tenant_id = :tenant_id"]
+        params = {"tenant_id": tenant_id}
+
+        if active_only:
+            where_clauses.append("active = true")
+        if country:
+            where_clauses.append("country = :country")
+            params["country"] = country.strip().upper()
+
+        query = text(
+            f"""
             SELECT id, code, bezeichnung, steuersatz, ustva_position, ustva_bezeichnung,
                    intracom, export, reverse_charge, gueltig_von, gueltig_bis, notizen,
                    debit_account, credit_account, country, region, active,
                    created_at, updated_at
             FROM domain_erp.tax_keys
-            WHERE tenant_id = :tenant_id
-        """)
-        
-        params = {"tenant_id": tenant_id}
-        
-        if active_only:
-            query = text("""
-                SELECT id, code, bezeichnung, steuersatz, ustva_position, ustva_bezeichnung,
-                       intracom, export, reverse_charge, gueltig_von, gueltig_bis, notizen,
-                       debit_account, credit_account, country, region, active,
-                       created_at, updated_at
-                FROM domain_erp.tax_keys
-                WHERE tenant_id = :tenant_id AND active = true
-            """)
-        
-        if country:
-            query = text("""
-                SELECT id, code, bezeichnung, steuersatz, ustva_position, ustva_bezeichnung,
-                       intracom, export, reverse_charge, gueltig_von, gueltig_bis, notizen,
-                       debit_account, credit_account, country, region, active,
-                       created_at, updated_at
-                FROM domain_erp.tax_keys
-                WHERE tenant_id = :tenant_id AND country = :country
-            """)
-            params["country"] = country
-        
-        query = text(str(query) + " ORDER BY code")
+            WHERE {' AND '.join(where_clauses)}
+            ORDER BY code
+            """
+        )
         
         rows = db.execute(query, params).fetchall()
         
@@ -415,6 +436,29 @@ async def update_tax_key(
     Update an existing tax key.
     """
     try:
+        current_row = db.execute(
+            text(
+                """
+                SELECT steuersatz, reverse_charge, gueltig_von
+                FROM domain_erp.tax_keys
+                WHERE id = :tax_key_id AND tenant_id = :tenant_id
+                """
+            ),
+            {"tax_key_id": tax_key_id, "tenant_id": tenant_id},
+        ).fetchone()
+        if not current_row:
+            raise HTTPException(status_code=404, detail="Tax key not found")
+
+        effective_rate = Decimal(str(tax_key.steuersatz if tax_key.steuersatz is not None else current_row[0]))
+        effective_reverse = bool(tax_key.reverse_charge if tax_key.reverse_charge is not None else current_row[1])
+        effective_from = tax_key.gueltig_von if tax_key.gueltig_von is not None else current_row[2]
+        effective_until = tax_key.gueltig_bis
+
+        if effective_reverse and effective_rate != Decimal("0"):
+            raise HTTPException(status_code=422, detail="reverse_charge requires steuersatz = 0")
+        if effective_until is not None and effective_from is not None and effective_until < effective_from:
+            raise HTTPException(status_code=422, detail="gueltig_bis must be >= gueltig_von")
+
         # Build update query dynamically
         update_fields = []
         params = {"tax_key_id": tax_key_id, "tenant_id": tenant_id}

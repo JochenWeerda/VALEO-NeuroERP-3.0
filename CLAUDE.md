@@ -34,7 +34,7 @@ pytest tests/test_drying_rule_engine.py
 pytest --cov=app --cov-report=term
 
 # Database migrations
-alembic upgrade head          # Apply all migrations
+alembic upgrade head          # Apply all migrations (bei Neuinstallation/Clone ausführen → alle Tabellen)
 alembic revision --autogenerate -m "description"  # Create migration
 ```
 

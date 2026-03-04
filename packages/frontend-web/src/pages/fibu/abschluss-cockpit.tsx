@@ -1,7 +1,9 @@
 import { useMemo } from 'react'
+import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { apiClient } from '@/lib/api-client'
 
 type CockpitChecklist = {
@@ -78,7 +80,12 @@ export default function AbschlussCockpitPage(): JSX.Element {
                   Pflicht: {item.completed_required_items}/{item.required_items} · Fortschritt: {item.progress_percentage.toFixed(1)}%
                 </div>
               </div>
-              <Badge variant={item.status === 'blocked' ? 'destructive' : 'outline'}>{item.status}</Badge>
+              <div className="flex items-center gap-2">
+                <Badge variant={item.status === 'blocked' ? 'destructive' : 'outline'}>{item.status}</Badge>
+                <Button variant="outline" size="sm" asChild>
+                  <Link to={`/fibu/abschluss-checklist-detail/${item.id}`}>Details</Link>
+                </Button>
+              </div>
             </div>
           ))}
         </CardContent>

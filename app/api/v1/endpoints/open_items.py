@@ -65,6 +65,25 @@ class SettlementResult(BaseModel):
     audit_trail_id: Optional[str] = None
 
 
+class BatchSettleRequest(BaseModel):
+    """Request for batch settlement (Sammelausgleich)"""
+    items: List[OpenItemSettlement]
+
+
+class BatchSettleError(BaseModel):
+    """Single error in batch settlement"""
+    op_id: str
+    detail: str
+
+
+class BatchSettleResponse(BaseModel):
+    """Result of batch settlement"""
+    results: List[SettlementResult]
+    success_count: int
+    error_count: int
+    errors: List[BatchSettleError]
+
+
 class OpenItemBase(BaseModel):
     konto_nr: Optional[str] = None
     konto_name: Optional[str] = None
@@ -406,6 +425,47 @@ async def delete_open_item(op_id: str, request: Request, tenant_id: str = Depend
     db.commit()
     log_fibu_audit(db, tenant_id, "delete", "open_item", op_id, {}, request=request)
     return None
+
+
+@router.post("/batch-settle", response_model=BatchSettleResponse)
+async def batch_settle_open_items(
+    body: BatchSettleRequest,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+    request: Request = None,
+):
+    """
+    Sammelausgleich: Mehrere offene Posten in einem Aufruf ausgleichen.
+    Jeder Eintrag wird einzeln gebucht; Fehler pro OP werden gesammelt, der Rest wird ausgeführt.
+    """
+    results: List[SettlementResult] = []
+    errors: List[BatchSettleError] = []
+    for item in body.items:
+        try:
+            r = await settle_open_item(
+                item.op_id,
+                OpenItemSettlement(
+                    payment_amount=item.payment_amount,
+                    payment_date=item.payment_date,
+                    payment_reference=item.payment_reference,
+                    payment_type=item.payment_type,
+                    notes=item.notes,
+                ),
+                tenant_id=tenant_id,
+                db=db,
+                request=request,
+            )
+            results.append(r)
+        except HTTPException as e:
+            errors.append(BatchSettleError(op_id=item.op_id, detail=str(e.detail)))
+        except Exception as e:
+            errors.append(BatchSettleError(op_id=item.op_id, detail=str(e)))
+    return BatchSettleResponse(
+        results=results,
+        success_count=len(results),
+        error_count=len(errors),
+        errors=errors,
+    )
 
 
 @router.post("/{op_id}/settle", response_model=SettlementResult)

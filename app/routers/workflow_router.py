@@ -14,10 +14,10 @@ from fastapi import APIRouter, Body, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.core.database_pg import get_db
+from app.core.database import get_db
 from app.core.metrics import workflow_transitions_total
 from app.core.sse import sse_hub
-from app.models.documents import WorkflowAudit
+from app.models.documents import WorkflowAudit, WorkflowStatus
 from app.repositories.workflow_repository import WorkflowRepository
 from app.services.workflow_service import workflow
 
@@ -27,6 +27,10 @@ router = APIRouter(prefix="/api/workflow", tags=["workflow"])
 
 
 def get_workflow_repo(db: Session = Depends(get_db)) -> WorkflowRepository:
+    # Ensure persisted workflow tables exist in environments without upfront migrations.
+    bind = db.get_bind()
+    WorkflowStatus.__table__.create(bind=bind, checkfirst=True)
+    WorkflowAudit.__table__.create(bind=bind, checkfirst=True)
     return WorkflowRepository(db)
 
 

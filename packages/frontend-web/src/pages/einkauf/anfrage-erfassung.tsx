@@ -18,7 +18,7 @@ import { DmsAnhangDialog } from '@/components/dms/DmsAnhangDialog'
 import { ArtikelSuchDialog } from '@/components/sales/ArtikelSuchDialog'
 import { apiClient } from '@/lib/axios'
 import { useAuth } from '@/hooks/useAuth'
-import { useGlobalShortcuts } from '@/lib/shortcuts/global-shortcuts'
+import { useGlobalShortcutsWithVoice } from '@/features/ki-usability'
 import { ShortcutHintButton } from '@/components/shortcuts/ShortcutHelpPanel'
 import {
   ChevronLeft, ChevronRight, MoreHorizontal, Check, Printer,
@@ -332,7 +332,7 @@ export default function AnfrageErfassungPage(): JSX.Element {
     }
   }
 
-  useGlobalShortcuts({
+  useGlobalShortcutsWithVoice({
     'open-customer-selection': () => setShowLieferantDialog(true),
     'open-article-selection': () => setShowArticleDialog(true),
     'confirm-position': () => handlePositionOK(),
