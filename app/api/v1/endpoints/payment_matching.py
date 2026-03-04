@@ -72,48 +72,97 @@ async def import_payments_csv(
     bank_account: str = Query(...),
     db: Session = Depends(get_db)
 ):
-    """Import payments from CSV file."""
+    """Import payments from CSV and persist to bank_statement_lines for matching."""
     try:
         content = await file.read()
-        text_content = content.decode('utf-8')
+        text_content = content.decode('utf-8-sig')
         csv_reader = csv.DictReader(io.StringIO(text_content))
         
-        payments = []
+        entries: list[dict] = []
         for row in csv_reader:
-            # Expected CSV format: date, amount, reference, remittance_info
             try:
-                booking_date = datetime.strptime(row.get('date', ''), '%Y-%m-%d').date()
+                booking_date = datetime.strptime(row.get('date', row.get('booking_date', '')), '%Y-%m-%d').date()
                 amount = Decimal(str(row.get('amount', '0')).replace(',', '.'))
                 reference = row.get('reference', '')
                 remittance_info = row.get('remittance_info', '')
-                
-                payment = PaymentEntry(
-                    tenant_id=tenant_id,
-                    bank_account=bank_account,
-                    booking_date=booking_date,
-                    value_date=booking_date,  # Use booking_date if value_date not provided
-                    amount=amount,
-                    reference=reference,
-                    remittance_info=remittance_info,
-                    match_status="UNMATCHED"
-                )
-                payments.append(payment)
+                entries.append({
+                    "booking_date": booking_date,
+                    "amount": amount,
+                    "reference": reference,
+                    "remittance_info": remittance_info,
+                })
             except Exception as e:
                 logger.warning(f"Skipping invalid CSV row: {e}")
                 continue
-        
-        # Store payments (simplified - in production, use proper table)
-        payment_ids = []
-        for payment in payments:
-            payment_id = f"PAY-{datetime.now().timestamp()}-{len(payment_ids)}"
-            payment.id = payment_id
-            payment_ids.append(payment_id)
-        
-        logger.info(f"Imported {len(payments)} payments from CSV")
-        return payments
-        
+
+        if not entries:
+            return []
+
+        statement_id = f"STMT-CSV-{datetime.now().strftime('%Y%m%d-%H%M%S')}-{bank_account[:8]}"
+        try:
+            stmt_ins = text("""
+                INSERT INTO domain_erp.bank_statements
+                (id, tenant_id, bank_account_id, account_iban, statement_date, opening_balance,
+                 closing_balance, format, total_lines, imported_lines, status, created_at, updated_at)
+                VALUES (:id, :tenant_id, :bank_account_id, :iban, :stmt_date, 0, 0, 'CSV', :total, :imported, 'imported', NOW(), NOW())
+            """)
+            db.execute(stmt_ins, {
+                "id": statement_id,
+                "tenant_id": tenant_id,
+                "bank_account_id": bank_account,
+                "iban": "",
+                "stmt_date": entries[0]["booking_date"] if entries else date.today(),
+                "total": len(entries),
+                "imported": len(entries),
+            })
+        except Exception as e:
+            logger.warning(f"bank_statements insert skipped: {e}")
+
+        line_ins = text("""
+            INSERT INTO domain_erp.bank_statement_lines
+            (id, tenant_id, statement_id, line_number, booking_date, value_date,
+             amount, currency, reference, remittance_info, creditor_name, creditor_iban,
+             debtor_name, debtor_iban, status, created_at, updated_at)
+            VALUES (:id, :tenant_id, :statement_id, :line_num, :book_date, :val_date,
+                    :amount, 'EUR', :reference, :remittance, NULL, NULL, NULL, NULL, 'UNMATCHED', NOW(), NOW())
+        """)
+        result_entries: list[PaymentEntry] = []
+        for idx, e in enumerate(entries):
+            line_id = f"{statement_id}-L{idx + 1}"
+            try:
+                db.execute(line_ins, {
+                    "id": line_id,
+                    "tenant_id": tenant_id,
+                    "statement_id": statement_id,
+                    "line_num": idx + 1,
+                    "book_date": e["booking_date"],
+                    "val_date": e["booking_date"],
+                    "amount": e["amount"],
+                    "reference": e["reference"],
+                    "remittance": e["remittance_info"],
+                })
+                result_entries.append(PaymentEntry(
+                    id=line_id,
+                    tenant_id=tenant_id,
+                    bank_account=bank_account,
+                    booking_date=e["booking_date"],
+                    value_date=e["booking_date"],
+                    amount=e["amount"],
+                    reference=e["reference"],
+                    remittance_info=e["remittance_info"],
+                    match_status="UNMATCHED",
+                ))
+            except Exception as ins_err:
+                logger.warning(f"Insert line {line_id}: {ins_err}")
+        db.commit()
+        logger.info(f"Imported {len(result_entries)} payments from CSV into bank_statement_lines")
+        return result_entries
+
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error importing CSV: {e}")
+        db.rollback()
         raise HTTPException(status_code=500, detail=f"Failed to import CSV: {str(e)}")
 
 
@@ -125,10 +174,45 @@ async def get_unmatched_payments(
     skip: int = Query(0, ge=0),
     db: Session = Depends(get_db)
 ):
-    """Get unmatched payment entries."""
-    # In production, query from payment_entries table
-    # For now, return empty list as placeholder
-    return []
+    """Get unmatched payment entries from bank_statement_lines (and optional CSV-import)."""
+    try:
+        # Query bank_statement_lines; join bank_statements for bank_account_id if present
+        query = text("""
+            SELECT bsl.id, bsl.tenant_id,
+                   COALESCE(bs.bank_account_id::text, bsl.statement_id) AS bank_account,
+                   bsl.booking_date, bsl.value_date, bsl.amount, bsl.currency,
+                   bsl.reference, bsl.remittance_info, bsl.creditor_name, bsl.debtor_name,
+                   COALESCE(bsl.status, 'UNMATCHED')
+            FROM domain_erp.bank_statement_lines bsl
+            LEFT JOIN domain_erp.bank_statements bs ON bsl.statement_id = bs.id AND bs.tenant_id = bsl.tenant_id
+            WHERE bsl.tenant_id = :tenant_id
+            AND (bsl.status = 'UNMATCHED' OR bsl.status IS NULL)
+            ORDER BY bsl.booking_date DESC, bsl.id
+            LIMIT :limit OFFSET :skip
+        """)
+        params: dict = {"tenant_id": tenant_id, "limit": limit, "skip": skip}
+        rows = db.execute(query, params).fetchall()
+        return [
+            PaymentEntry(
+                id=str(r[0]),
+                tenant_id=str(r[1]),
+                bank_account=str(r[2]) if r[2] else "",
+                booking_date=r[3],
+                value_date=r[4],
+                amount=Decimal(str(r[5])),
+                currency=str(r[6]) if r[6] else "EUR",
+                reference=r[7],
+                remittance_info=r[8],
+                creditor_name=r[9],
+                debtor_name=r[10],
+                matched_op_id=None,
+                match_status=str(r[11]) if r[11] else "UNMATCHED",
+            )
+            for r in rows
+        ]
+    except Exception as e:
+        logger.debug(f"get_unmatched_payments: {e}")
+        return []
 
 
 @router.get("/open-items/{customer_id}", response_model=List[OpenItemMatch])
@@ -137,19 +221,18 @@ async def get_open_items_for_matching(
     tenant_id: str = Query("default"),
     db: Session = Depends(get_db)
 ):
-    """Get open items for a customer for payment matching."""
+    """Get open AR items for a customer for payment matching."""
     try:
-        # Query open items from finance_open_items or offene_posten
-        # Using simplified query - in production, use proper ORM
         query = """
             SELECT 
-                id, document_number, customer_id, customer_name,
-                amount, amount as open_amount, due_date, currency, status
-            FROM finance_open_items
+                id, rechnungsnr, kunde_id, kunde_name,
+                op_betrag, offen, faelligkeit, waehrung, op_status
+            FROM domain_erp.offene_posten
             WHERE tenant_id = :tenant_id 
-            AND customer_id = :customer_id
-            AND status IN ('open', 'partial')
-            ORDER BY due_date ASC
+            AND konto_typ = 'debitoren'
+            AND kunde_id = :customer_id
+            AND op_status IN ('offen', 'teilweise')
+            ORDER BY faelligkeit ASC
         """
         
         results = db.execute(
@@ -161,13 +244,13 @@ async def get_open_items_for_matching(
             OpenItemMatch(
                 op_id=str(r[0]),
                 document_number=str(r[1]),
-                customer_id=str(r[2]),
-                customer_name=str(r[3]),
+                customer_id=str(r[2] or ""),
+                customer_name=str(r[3] or ""),
                 amount=Decimal(str(r[4])),
                 open_amount=Decimal(str(r[5])),
                 due_date=r[6],
-                currency=str(r[7]),
-                status=str(r[8])
+                currency=str(r[7] or "EUR"),
+                status=str(r[8] or "offen")
             )
             for r in results
         ]
@@ -196,10 +279,11 @@ async def match_payment(
         
         # Fetch OP
         op_query = """
-            SELECT id, document_number, customer_id, customer_name,
-                   amount, amount as open_amount, due_date, currency, status
-            FROM finance_open_items
+            SELECT id, rechnungsnr, kunde_id, kunde_name,
+                   op_betrag, offen, faelligkeit, waehrung, op_status
+            FROM domain_erp.offene_posten
             WHERE id = :op_id AND tenant_id = :tenant_id
+            AND konto_typ = 'debitoren'
         """
         op_result = db.execute(
             text(op_query),
@@ -209,7 +293,7 @@ async def match_payment(
         if not op_result:
             raise HTTPException(status_code=404, detail="Open item not found")
         
-        open_amount = Decimal(str(op_result[5]))
+        open_amount = Decimal(str(op_result[5] or 0))
         
         # In production, fetch payment amount and match
         # For now, assume full match
@@ -218,14 +302,15 @@ async def match_payment(
         
         # Update OP status
         if remaining_amount == 0:
-            new_status = "closed"
+            new_status = "geschlossen"
         else:
-            new_status = "partial"
+            new_status = "teilweise"
         
         update_query = """
-            UPDATE finance_open_items
-            SET status = :status,
-                amount = amount - :matched_amount
+            UPDATE domain_erp.offene_posten
+            SET op_status = :status,
+                offen = GREATEST(offen - :matched_amount, 0),
+                updated_at = NOW()
             WHERE id = :op_id AND tenant_id = :tenant_id
         """
         db.execute(
@@ -237,6 +322,21 @@ async def match_payment(
                 "tenant_id": tenant_id
             }
         )
+        # Mark bank statement line as matched (if payment_id is a bank_statement_lines.id)
+        try:
+            upd_line = text("""
+                UPDATE domain_erp.bank_statement_lines
+                SET status = :status, matched_op_id = :op_id
+                WHERE id = :payment_id AND tenant_id = :tenant_id
+            """)
+            db.execute(upd_line, {
+                "status": "MATCHED" if remaining_amount == 0 else "PARTIAL",
+                "op_id": op_id,
+                "payment_id": payment_id,
+                "tenant_id": tenant_id,
+            })
+        except Exception as line_err:
+            logger.warning(f"Update bank_statement_lines for match: {line_err}")
         db.commit()
         
         return MatchResult(
@@ -268,14 +368,15 @@ async def auto_match_payments(
         # Get unmatched payments (simplified - in production, query from payment_entries table)
         # For now, we'll match based on bank statement lines
         
-        # Get unmatched bank statement lines
+        # Get unmatched bank statement lines (filter by bank_account via join with bank_statements)
         unmatched_query = text("""
-            SELECT id, booking_date, amount, reference, remittance_info, creditor_name, debtor_name
-            FROM domain_erp.bank_statement_lines
-            WHERE tenant_id = :tenant_id 
-            AND status = 'UNMATCHED'
-            AND (bank_account_id = :bank_account OR :bank_account IS NULL)
-            ORDER BY booking_date DESC
+            SELECT bsl.id, bsl.booking_date, bsl.amount, bsl.reference, bsl.remittance_info, bsl.creditor_name, bsl.debtor_name
+            FROM domain_erp.bank_statement_lines bsl
+            LEFT JOIN domain_erp.bank_statements bs ON bsl.statement_id = bs.id AND bs.tenant_id = bsl.tenant_id
+            WHERE bsl.tenant_id = :tenant_id
+            AND (bsl.status = 'UNMATCHED' OR bsl.status IS NULL)
+            AND (:bank_account IS NULL OR bs.bank_account_id = :bank_account)
+            ORDER BY bsl.booking_date DESC
             LIMIT 100
         """)
         
@@ -307,34 +408,36 @@ async def auto_match_payments(
             
             # Rule 2: Match by amount and customer
             customer_id = None
-            if creditor_name:
+            partner_name = creditor_name or debtor_name
+            if partner_name:
                 # Try to find customer by name
                 customer_query = text("""
-                    SELECT id FROM domain_erp.customers
-                    WHERE tenant_id = :tenant_id 
-                    AND (name ILIKE :name OR company_name ILIKE :name)
+                    SELECT id FROM domain_crm.customers
+                    WHERE tenant_id = :tenant_id
+                    AND company_name ILIKE :name
                     LIMIT 1
                 """)
                 customer_row = db.execute(
                     customer_query,
-                    {"tenant_id": tenant_id, "name": f"%{creditor_name}%"}
+                    {"tenant_id": tenant_id, "name": f"%{partner_name}%"}
                 ).fetchone()
                 if customer_row:
                     customer_id = str(customer_row[0])
             
             # Find matching open item
             op_query = text("""
-                SELECT id, document_number, customer_id, customer_name, amount, amount as open_amount, due_date, currency, status
-                FROM finance_open_items
+                SELECT id, rechnungsnr, kunde_id, kunde_name, op_betrag, offen, faelligkeit, waehrung, op_status
+                FROM domain_erp.offene_posten
                 WHERE tenant_id = :tenant_id
-                AND status IN ('open', 'partial')
+                AND konto_typ = 'debitoren'
+                AND op_status IN ('offen', 'teilweise')
                 AND (
-                    (:reference IS NOT NULL AND document_number ILIKE :reference_pattern)
-                    OR (:customer_id IS NOT NULL AND customer_id = :customer_id AND ABS(amount - :amount) < 0.01)
+                    (:reference IS NOT NULL AND rechnungsnr ILIKE :reference_pattern)
+                    OR (:customer_id IS NOT NULL AND kunde_id = :customer_id AND ABS(offen - :amount) < 0.01)
                 )
                 ORDER BY 
-                    CASE WHEN document_number ILIKE :reference_pattern THEN 1 ELSE 2 END,
-                    ABS(amount - :amount) ASC
+                    CASE WHEN rechnungsnr ILIKE :reference_pattern THEN 1 ELSE 2 END,
+                    ABS(offen - :amount) ASC
                 LIMIT 5
             """)
             
@@ -355,7 +458,7 @@ async def auto_match_payments(
                 # Match to first (best) open item
                 best_op = op_results[0]
                 op_id = str(best_op[0])
-                open_amount = Decimal(str(best_op[5]))
+                open_amount = Decimal(str(best_op[5] or 0))
                 
                 # Calculate match
                 matched_amount = min(amount, open_amount)
@@ -382,9 +485,10 @@ async def auto_match_payments(
                 
                 # Update open item
                 update_op = text("""
-                    UPDATE finance_open_items
-                    SET status = CASE WHEN (amount - :matched) <= 0.01 THEN 'closed' ELSE 'partial' END,
-                        amount = amount - :matched
+                    UPDATE domain_erp.offene_posten
+                    SET op_status = CASE WHEN (offen - :matched) <= 0.01 THEN 'geschlossen' ELSE 'teilweise' END,
+                        offen = GREATEST(offen - :matched, 0),
+                        updated_at = NOW()
                     WHERE id = :op_id AND tenant_id = :tenant_id
                 """)
                 db.execute(
@@ -447,16 +551,17 @@ async def get_match_suggestions(
         
         # Find customer ID
         customer_id = None
-        if creditor_name:
+        partner_name = creditor_name or debtor_name
+        if partner_name:
             customer_query = text("""
-                SELECT id FROM domain_erp.customers
-                WHERE tenant_id = :tenant_id 
-                AND (name ILIKE :name OR company_name ILIKE :name)
+                SELECT id FROM domain_crm.customers
+                WHERE tenant_id = :tenant_id
+                AND company_name ILIKE :name
                 LIMIT 1
             """)
             customer_row = db.execute(
                 customer_query,
-                {"tenant_id": tenant_id, "name": f"%{creditor_name}%"}
+                {"tenant_id": tenant_id, "name": f"%{partner_name}%"}
             ).fetchone()
             if customer_row:
                 customer_id = str(customer_row[0])
@@ -472,18 +577,19 @@ async def get_match_suggestions(
         
         # Find matching open items
         op_query = text("""
-            SELECT id, document_number, customer_id, customer_name, amount, amount as open_amount, due_date, currency, status
-            FROM finance_open_items
+            SELECT id, rechnungsnr, kunde_id, kunde_name, op_betrag, offen, faelligkeit, waehrung, op_status
+            FROM domain_erp.offene_posten
             WHERE tenant_id = :tenant_id
-            AND status IN ('open', 'partial')
+            AND konto_typ = 'debitoren'
+            AND op_status IN ('offen', 'teilweise')
             AND (
-                (:reference_pattern IS NOT NULL AND document_number ILIKE :reference_pattern)
-                OR (:customer_id IS NOT NULL AND customer_id = :customer_id AND ABS(amount - :amount) < 10.00)
+                (:reference_pattern IS NOT NULL AND rechnungsnr ILIKE :reference_pattern)
+                OR (:customer_id IS NOT NULL AND kunde_id = :customer_id AND ABS(offen - :amount) < 10.00)
             )
             ORDER BY 
-                CASE WHEN document_number ILIKE :reference_pattern THEN 1 ELSE 2 END,
-                ABS(amount - :amount) ASC,
-                due_date ASC
+                CASE WHEN rechnungsnr ILIKE :reference_pattern THEN 1 ELSE 2 END,
+                ABS(offen - :amount) ASC,
+                faelligkeit ASC
             LIMIT 10
         """)
         
@@ -503,13 +609,13 @@ async def get_match_suggestions(
             OpenItemMatch(
                 op_id=str(r[0]),
                 document_number=str(r[1]),
-                customer_id=str(r[2]),
-                customer_name=str(r[3]),
+                customer_id=str(r[2] or ""),
+                customer_name=str(r[3] or ""),
                 amount=Decimal(str(r[4])),
                 open_amount=Decimal(str(r[5])),
                 due_date=r[6],
-                currency=str(r[7]),
-                status=str(r[8])
+                currency=str(r[7] or "EUR"),
+                status=str(r[8] or "offen")
             )
             for r in op_results
         ]

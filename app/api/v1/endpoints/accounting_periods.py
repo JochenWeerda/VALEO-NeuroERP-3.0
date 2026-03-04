@@ -13,6 +13,7 @@ import logging
 
 from app.core.database import get_db
 from app.core.fibu_audit import log_fibu_audit
+from app.core.tenant import get_tenant_id
 
 logger = logging.getLogger(__name__)
 
@@ -360,4 +361,14 @@ async def check_period_status(
     except Exception as e:
         logger.error(f"Error checking period status: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to check period status: {str(e)}")
+
+
+@router.get("/check/{period}", response_model=dict)
+async def check_period_status_for_current_tenant(
+    period: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Check if a period is open for bookings (current tenant from context)."""
+    return await check_period_status(tenant_id=tenant_id, period=period, db=db)
 

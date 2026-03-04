@@ -93,34 +93,56 @@ async def get_audit_logs(
     entity_id: Optional[str] = Query(None),
     user_id: Optional[str] = Query(None),
     action: Optional[str] = Query(None),
+    from_ts: Optional[datetime] = Query(None),
+    to_ts: Optional[datetime] = Query(None),
     limit: int = Query(100, le=1000),
     skip: int = Query(0, ge=0),
     db: Session = Depends(get_db)
 ):
-    """Query audit logs with filters."""
+    """Query audit logs with filters. Returns [] if table missing or error."""
     from app.infrastructure.models import AuditLog
     from sqlalchemy import and_
-    
-    query = db.query(AuditLog)
-    
-    filters = []
-    if tenant_id:
-        filters.append(AuditLog.tenant_id == tenant_id)
-    if entity_type:
-        filters.append(AuditLog.entity_type == entity_type)
-    if entity_id:
-        filters.append(AuditLog.entity_id == entity_id)
-    if user_id:
-        filters.append(AuditLog.user_id == user_id)
-    if action:
-        filters.append(AuditLog.action == action)
-    
-    if filters:
-        query = query.filter(and_(*filters))
-    
-    logs = query.order_by(AuditLog.timestamp.desc()).offset(skip).limit(limit).all()
-    
-    return logs
+
+    try:
+        query = db.query(AuditLog)
+        filters = []
+        if tenant_id:
+            filters.append(AuditLog.tenant_id == tenant_id)
+        if entity_type:
+            filters.append(AuditLog.entity_type == entity_type)
+        if entity_id:
+            filters.append(AuditLog.entity_id == entity_id)
+        if user_id:
+            filters.append(AuditLog.user_id == user_id)
+        if action:
+            filters.append(AuditLog.action == action)
+        if from_ts:
+            filters.append(AuditLog.timestamp >= from_ts)
+        if to_ts:
+            filters.append(AuditLog.timestamp <= to_ts)
+        if filters:
+            query = query.filter(and_(*filters))
+        logs = query.order_by(AuditLog.timestamp.desc()).offset(skip).limit(limit).all()
+        return [
+            AuditLogEntry(
+                id=log.id,
+                timestamp=log.timestamp,
+                user_id=log.user_id,
+                user_email=log.user_email or "",
+                tenant_id=log.tenant_id,
+                action=log.action,
+                entity_type=log.entity_type,
+                entity_id=log.entity_id,
+                changes=log.changes or {},
+                ip_address=log.ip_address,
+                user_agent=log.user_agent,
+                correlation_id=log.correlation_id,
+            )
+            for log in logs
+        ]
+    except Exception as e:
+        logger.warning("get_audit_logs: %s", e)
+        return []
 
 
 @router.get("/stats")
@@ -139,23 +161,29 @@ async def get_audit_stats(
     
     total = base_query.count()
     
-    # Actions breakdown
-    actions = db.query(
+    actions_query = db.query(
         AuditLog.action,
         func.count(AuditLog.id).label('count')
-    ).group_by(AuditLog.action).all()
-    
-    # Entity types breakdown
-    entities = db.query(
+    )
+    if tenant_id:
+        actions_query = actions_query.filter(AuditLog.tenant_id == tenant_id)
+    actions = actions_query.group_by(AuditLog.action).all()
+
+    entities_query = db.query(
         AuditLog.entity_type,
         func.count(AuditLog.id).label('count')
-    ).group_by(AuditLog.entity_type).all()
-    
-    # Top users
-    top_users = db.query(
+    )
+    if tenant_id:
+        entities_query = entities_query.filter(AuditLog.tenant_id == tenant_id)
+    entities = entities_query.group_by(AuditLog.entity_type).all()
+
+    top_users_query = db.query(
         AuditLog.user_email,
         func.count(AuditLog.id).label('count')
-    ).group_by(AuditLog.user_email).order_by(
+    )
+    if tenant_id:
+        top_users_query = top_users_query.filter(AuditLog.tenant_id == tenant_id)
+    top_users = top_users_query.group_by(AuditLog.user_email).order_by(
         func.count(AuditLog.id).desc()
     ).limit(10).all()
     
