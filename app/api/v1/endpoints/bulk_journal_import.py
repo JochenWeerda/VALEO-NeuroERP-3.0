@@ -195,6 +195,23 @@ async def import_journal_entries_csv(
     - reference (or beleg): Optional reference
     """
     try:
+        period_status = db.execute(
+            text(
+                """
+                SELECT status
+                FROM finance_accounting_periods
+                WHERE tenant_id = :tenant_id AND period = :period
+                LIMIT 1
+                """
+            ),
+            {"tenant_id": tenant_id, "period": period},
+        ).fetchone()
+        if period_status and str(period_status[0]) != "OPEN":
+            raise HTTPException(
+                status_code=403,
+                detail=f"Period {period} is {period_status[0]}. Import is blocked."
+            )
+
         # Read file content
         file_content = await file.read()
         

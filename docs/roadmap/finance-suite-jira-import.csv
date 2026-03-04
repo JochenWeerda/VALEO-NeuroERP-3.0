@@ -1,0 +1,71 @@
+﻿Issue ID,Issue Type,Summary,Description,Epic Name,Parent ID,Story Points,Priority,Labels,Sprint
+E1,Epic,"E1 Periodensteuerung Backend-Haertung","Periodenstatus-Logik zentralisieren und in Buchungspfade integrieren.","E1 Periodensteuerung Backend-Haertung",,16,Highest,"finance-suite,p0,fibu-gl-05,phase1",S1
+E1-S1,Story,"E1-S1 posting_guard Service","Zentraler Service fuer OPEN/CLOSED/ADJUSTING mit einheitlichem Fehlerbild.",,E1,8,Highest,"finance-suite,p0,backend,period-lock",S1
+E1-S2,Story,"E1-S2 Journal-Posting Integration","posting_guard in alle Journal-Posting-Endpunkte integrieren.",,E1,5,Highest,"finance-suite,p0,backend,journal",S1
+E1-S3,Story,"E1-S3 Unit-Tests Periodenstatus","Unit-Tests fuer OPEN/CLOSED/ADJUSTING inkl. Grenzfaelle.",,E1,3,High,"finance-suite,tests,p0",S1
+E2,Epic,"E2 AuditTrailWorkbench Backend-Basis","Audit API fuer Workbench und Prueferexport vorbereiten.","E2 AuditTrailWorkbench Backend-Basis",,14,Highest,"finance-suite,p0,fibu-comp-01,phase1",S1
+E2-S1,Story,"E2-S1 Audit API Filter","Filter nach Zeitraum, Entity, User, Action ergaenzen.",,E2,6,Highest,"finance-suite,p0,audit,backend",S1
+E2-S2,Story,"E2-S2 Audit CSV Export Endpoint","CSV-Export auf Basis der Filter bereitstellen.",,E2,5,High,"finance-suite,p0,audit,export",S1
+E2-S3,Story,"E2-S3 Audit Query Performance","Index-/Query-Review fuer skalierbare Audit-Abfragen.",,E2,3,High,"finance-suite,p0,audit,performance",S1
+E3,Epic,"E3 AP/AR Domain-Check","AP/AR Kernprozesse technisch/fachlich angleichen.","E3 AP/AR Domain-Check",,10,High,"finance-suite,p0,ap,ar,phase1",S1
+E3-S1,Story,"E3-S1 AP Prozesskette Gap-Liste","Ist-Prozess AP dokumentieren und Luecken als Tech-Backlog erfassen.",,E3,5,High,"finance-suite,ap,analysis",S1
+E3-S2,Story,"E3-S2 Matching DTO Abgleich","DTO/Schema fuer Matching-Flow konsolidieren.",,E3,5,High,"finance-suite,ar,matching",S1
+E4,Epic,"E4 QA und Compliance Guardrails","Test- und Compliance-Leitplanken fuer Phase 1 fixieren.","E4 QA und Compliance Guardrails",,8,High,"finance-suite,qa,compliance,phase1",S1
+E4-S1,Story,"E4-S1 Smoke-Test Set","Smoke-Test-Set fuer P0-Prozesse definieren.",,E4,4,High,"finance-suite,qa,smoke",S1
+E4-S2,Story,"E4-S2 Audit-Trace Checkliste","DoD um Audit-Trace Nachweis erweitern.",,E4,4,High,"finance-suite,qa,audit",S1
+E5,Epic,"E5 Periodenverwaltung UI E2E","Periodenverwaltung in UI inklusive Statuswechsel bereitstellen.","E5 Periodenverwaltung UI E2E",,22,Highest,"finance-suite,p0,fibu-gl-05,frontend",S2
+E5-S1,Story,"E5-S1 Periodenliste UI","Liste mit Statusfilter, Sortierung, Paging.",,E5,8,Highest,"finance-suite,p0,frontend,periods",S2
+E5-S2,Story,"E5-S2 Statuswechsel Dialog","Open/Close/Adjusting inkl. Begruendung und Audit-Hinweis.",,E5,8,Highest,"finance-suite,p0,frontend,periods",S2
+E5-S3,Story,"E5-S3 UI Precheck vor Buchen","Bei gesperrter Periode clientseitig blockieren und klar melden.",,E5,6,High,"finance-suite,p0,frontend,period-lock",S2
+E6,Epic,"E6 Integrationspfade Periodensperre","Periodensperre in Import/Bank/AP Pfade absichern.","E6 Integrationspfade Periodensperre",,18,Highest,"finance-suite,p0,backend,integration",S2
+E6-S1,Story,"E6-S1 Bulk-Import Sperrlogik","Import in gesperrter Periode serverseitig blockieren.",,E6,8,Highest,"finance-suite,p0,bulk-import",S2
+E6-S2,Story,"E6-S2 Bank/AP Posting Guard","Bank-/AP-Posting-Endpunkte an posting_guard anschliessen.",,E6,6,Highest,"finance-suite,p0,ap,bank",S2
+E6-S3,Story,"E6-S3 E2E Tests Periodensperre","End-to-End Tests fuer blockierte und offene Periode.",,E6,4,High,"finance-suite,p0,e2e",S2
+E7,Epic,"E7 Release Hardening","Fehlerbild und Observability fuer P0-Flows stabilisieren.","E7 Release Hardening",,10,High,"finance-suite,hardening,phase1",S2
+E7-S1,Story,"E7-S1 Fehlermeldungen standardisieren","DE/EN-kompatible Fehlermeldungen in P0-Flows.",,E7,5,High,"finance-suite,i18n,errors",S2
+E7-S2,Story,"E7-S2 Observability Audit+Error","Monitoring fuer Audit- und Fehlerpfade erweitern.",,E7,5,High,"finance-suite,observability",S2
+E8,Epic,"E8 AuditTrailWorkbench UI","Prueferfaehige Audit-Workbench im Frontend.","E8 AuditTrailWorkbench UI",,24,Highest,"finance-suite,p0,fibu-comp-01,frontend",S3
+E8-S1,Story,"E8-S1 Audit Listenmaske","Filterkopf, Paging, Sorting fuer Audit Logs.",,E8,8,Highest,"finance-suite,p0,audit,frontend",S3
+E8-S2,Story,"E8-S2 Audit Detail Vorher/Nachher","Feld-Diff je Audit-Eintrag anzeigen.",,E8,8,High,"finance-suite,p0,audit,frontend",S3
+E8-S3,Story,"E8-S3 Audit Export Dialog","CSV Export inkl. Zeitraum/Entity Scope.",,E8,8,High,"finance-suite,p0,audit,export",S3
+E9,Epic,"E9 Pruefermodus","Readonly-Zugriff und Nachvollzug fuer Prueferrollen.","E9 Pruefermodus",,13,High,"finance-suite,compliance,audit",S3
+E9-S1,Story,"E9-S1 Readonly Rolle/Routeguard","Routeguard fuer Audit-Zugriff mit Prueferrolle.",,E9,6,High,"finance-suite,security,roles",S3
+E9-S2,Story,"E9-S2 Download-Protokollierung","Audit-Export Downloads mitloggen.",,E9,4,High,"finance-suite,audit,logging",S3
+E9-S3,Story,"E9-S3 Accessibility Keyboard Pass","Tastatur-/A11y-Pass fuer Audit UI.",,E9,3,Medium,"finance-suite,a11y,frontend",S3
+E10,Epic,"E10 Testpaket Compliance","Integration und UI Smoke fuer Audit-Workbench.","E10 Testpaket Compliance",,10,High,"finance-suite,qa,compliance",S3
+E10-S1,Story,"E10-S1 API Tests Auditfilter Export","Integrationstests fuer Filter und CSV Export.",,E10,5,High,"finance-suite,tests,api",S3
+E10-S2,Story,"E10-S2 UI Smoke Audit Flow","UI Smoke: Filter, Detail, Export.",,E10,5,High,"finance-suite,tests,ui",S3
+E11,Epic,"E11 Eingangsrechnungen Prozessflow","Eingangsrechnungsprozess von Erfassung bis Buchung.","E11 Eingangsrechnungen Prozessflow",,28,Highest,"finance-suite,p0,fibu-ap-02,phase1",S4
+E11-S1,Story,"E11-S1 Erfassungsmaske AP Invoice","Kopf/Positionen/Pflichtvalidierung.",,E11,9,Highest,"finance-suite,p0,ap,frontend",S4
+E11-S2,Story,"E11-S2 Pruef/Freigabe Zustaende","Statusmaschine inkl. Rollenpruefung.",,E11,8,Highest,"finance-suite,p0,ap,workflow",S4
+E11-S3,Story,"E11-S3 Buchung und AP-OP Erzeugung","Buchung + offene Posten + Audit in einem konsistenten Flow.",,E11,11,Highest,"finance-suite,p0,ap,backend,audit",S4
+E12,Epic,"E12 AP Integration","Anbindung AP an OP und Zahlungslauf.","E12 AP Integration",,15,High,"finance-suite,ap,integration",S4
+E12-S1,Story,"E12-S1 OP-Kreditoren Sync","Synchronisierung AP Rechnungen in OP Kreditoren.",,E12,7,High,"finance-suite,ap,open-items",S4
+E12-S2,Story,"E12-S2 Zahlungslauf Vormerkung","Vormerklogik fuer faellige AP Positionen.",,E12,4,High,"finance-suite,ap,payment-runs",S4
+E12-S3,Story,"E12-S3 Fehler und Rollback Pfade","Technische Fehlerpfade und Rollback absichern.",,E12,4,High,"finance-suite,ap,reliability",S4
+E13,Epic,"E13 Qualitaet und UAT","Fachlicher UAT fuer AP End-to-End.","E13 Qualitaet und UAT",,10,High,"finance-suite,qa,uat",S4
+E13-S1,Story,"E13-S1 E2E Smoke AP Flow","Smoke-Test von Erfassung bis Buchung.",,E13,5,High,"finance-suite,tests,e2e,ap",S4
+E13-S2,Story,"E13-S2 UAT Workshop und Fixes","Fachworkshop und priorisierte Korrekturen.",,E13,5,High,"finance-suite,uat,ap",S4
+E14,Epic,"E14 Zahlungseingangs-Matching UI","AR Matching Worklist und Dialoge bereitstellen.","E14 Zahlungseingangs-Matching UI",,24,Highest,"finance-suite,p0,fibu-ar-03,phase1",S5
+E14-S1,Story,"E14-S1 Worklist Unzugeordnete Zahlungen","Liste der nicht zugeordneten Zahlungen mit Filtern.",,E14,8,Highest,"finance-suite,p0,ar,matching,frontend",S5
+E14-S2,Story,"E14-S2 Match Dialog","Vorschlagsbasiertes und manuelles Matching.",,E14,8,Highest,"finance-suite,p0,ar,matching",S5
+E14-S3,Story,"E14-S3 Clearing buchen mit Audit","Clearing buchen und revisionssicher protokollieren.",,E14,8,Highest,"finance-suite,p0,ar,clearing,audit",S5
+E15,Epic,"E15 Bankimport-Anbindung","Bankimport-Endpunkte in Matching integrieren.","E15 Bankimport-Anbindung",,17,High,"finance-suite,bank,matching",S5
+E15-S1,Story,"E15-S1 CAMT/MT940 Anbindung","Importpfad an Matching anbinden.",,E15,8,High,"finance-suite,bank,camt,mt940",S5
+E15-S2,Story,"E15-S2 Reprocess Flow","Fehlerhafte Importe neu verarbeiten.",,E15,5,High,"finance-suite,bank,reprocess",S5
+E15-S3,Story,"E15-S3 Importprotokoll Korrelation","Importprotokoll mit Correlation-ID.",,E15,4,Medium,"finance-suite,bank,logging",S5
+E16,Epic,"E16 Abschlussnahe Stabilisierung","Konfliktfaelle und Regression fuer AR/AP/GL.","E16 Abschlussnahe Stabilisierung",,10,High,"finance-suite,stabilization,phase1",S5
+E16-S1,Story,"E16-S1 Konfliktfaelle Teil/Ueberzahlung","Sonderfaelle fachlich korrekt behandeln.",,E16,5,High,"finance-suite,ar,edge-cases",S5
+E16-S2,Story,"E16-S2 Regressionstests AR AP GL","Regression ueber alle Kernprozesse.",,E16,5,High,"finance-suite,tests,regression",S5
+E17,Epic,"E17 Abschluss-Kernreports","Trial Balance, Journal, OP Konsistenz fuer Abschluss.","E17 Abschluss-Kernreports",,20,Highest,"finance-suite,p0,reporting,phase1",S6
+E17-S1,Story,"E17-S1 Trial Balance Konsolidierung","Trial Balance fachlich und technisch stabilisieren.",,E17,8,Highest,"finance-suite,p0,reporting,trial-balance",S6
+E17-S2,Story,"E17-S2 Journal OP Konsistenzcheck","Abgleich Journal und OP Reports.",,E17,6,High,"finance-suite,reporting,consistency",S6
+E17-S3,Story,"E17-S3 Drilldown Report zu Beleg","Drilldown von Bericht auf Belegdetail.",,E17,6,High,"finance-suite,reporting,drilldown",S6
+E18,Epic,"E18 GoBD Retention WORM Nachweis","Retention/WORM und Verfahrensdoku prueffest machen.","E18 GoBD Retention WORM Nachweis",,15,Highest,"finance-suite,p0,gobd,compliance",S6
+E18-S1,Story,"E18-S1 Technischer Retention WORM Nachweis","Nachweis und technische Konfiguration dokumentieren.",,E18,7,Highest,"finance-suite,p0,gobd,retention",S6
+E18-S2,Story,"E18-S2 Verfahrensdoku Finance Update","Verfahrensdokumentation fuer Finance aktualisieren.",,E18,4,High,"finance-suite,p0,gobd,documentation",S6
+E18-S3,Story,"E18-S3 Prueferpaket Abnahme-Set","Export- und Nachweispaket fuer Pruefer erstellen.",,E18,4,High,"finance-suite,p0,gobd,audit",S6
+E19,Epic,"E19 GoLive Readiness","Cutover, Monitoring und Hypercare fuer Phase-1-GoLive.","E19 GoLive Readiness",,14,High,"finance-suite,golive,phase1",S6
+E19-S1,Story,"E19-S1 Cutover und Rollback Plan","Durchfuehrbarer Cutover inkl. Rollback-Schritte.",,E19,5,High,"finance-suite,golive,operations",S6
+E19-S2,Story,"E19-S2 Monitoring Dashboard Kernprozesse","Monitoring fuer AP/AR/GL/Audit Kernmetriken.",,E19,5,High,"finance-suite,monitoring,operations",S6
+E19-S3,Story,"E19-S3 Hypercare Plan","2-Wochen Hypercare Setup und Incident-Routing.",,E19,4,Medium,"finance-suite,hypercare,operations",S6

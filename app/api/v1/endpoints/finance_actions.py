@@ -29,7 +29,8 @@ class ActionResponse(BaseModel):
 
 class JournalEntryPostRequest(BaseModel):
     """Request to post a journal entry by ID"""
-    journal_entry_id: str = Field(..., description="ID der zu buchenden Buchung")
+    journal_entry_id: Optional[str] = Field(None, description="ID der zu buchenden Buchung")
+    belegnummer: Optional[str] = Field(None, description="Alternative Belegnummer zur Ermittlung der Buchungs-ID")
 
 
 class BankReconciliationRunRequest(BaseModel):
@@ -69,8 +70,60 @@ async def post_journal_entry_action(
     Buchung buchen (Journal Entry von Entwurf auf gebucht setzen).
     """
     try:
+        entry_id = body.journal_entry_id
+        if not entry_id and body.belegnummer:
+            by_number = db.execute(
+                text(
+                    """
+                    SELECT id
+                    FROM domain_erp.journal_entries
+                    WHERE tenant_id = :tenant_id AND entry_number = :entry_number
+                    ORDER BY created_at DESC
+                    LIMIT 1
+                    """
+                ),
+                {"tenant_id": tenant_id, "entry_number": body.belegnummer},
+            ).fetchone()
+            if by_number:
+                entry_id = str(by_number[0])
+
+        if not entry_id:
+            return ActionResponse(success=False, message="journal_entry_id oder belegnummer erforderlich.")
+
+        entry_row = db.execute(
+            text(
+                """
+                SELECT TO_CHAR(entry_date::date, 'YYYY-MM') AS period
+                FROM domain_erp.journal_entries
+                WHERE id = :id AND tenant_id = :tenant_id
+                LIMIT 1
+                """
+            ),
+            {"id": entry_id, "tenant_id": tenant_id},
+        ).fetchone()
+        if not entry_row:
+            return ActionResponse(success=False, message="Buchung nicht gefunden.")
+
+        period = str(entry_row[0])
+        period_status = db.execute(
+            text(
+                """
+                SELECT status
+                FROM finance_accounting_periods
+                WHERE tenant_id = :tenant_id AND period = :period
+                LIMIT 1
+                """
+            ),
+            {"tenant_id": tenant_id, "period": period},
+        ).fetchone()
+        if period_status and str(period_status[0]) != "OPEN":
+            return ActionResponse(
+                success=False,
+                message=f"Periode {period} ist {period_status[0]}. Buchung gesperrt.",
+            )
+
         entry_repo = container.resolve(JournalEntryRepository)
-        success = await entry_repo.post_entry(body.journal_entry_id, tenant_id)
+        success = await entry_repo.post_entry(entry_id, tenant_id)
         if not success:
             return ActionResponse(success=False, message="Buchung konnte nicht gebucht werden.")
         return ActionResponse(success=True, message="Buchung erfolgreich gebucht.")

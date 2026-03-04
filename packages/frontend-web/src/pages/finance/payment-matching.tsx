@@ -17,6 +17,7 @@ import { Upload, CheckCircle2, Link2 } from 'lucide-react'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
 import { useToast } from '@/hooks/use-toast'
+import { apiClient } from '@/lib/api-client'
 
 type PaymentEntry = {
   id: string
@@ -75,11 +76,7 @@ export default function PaymentMatchingPage(): JSX.Element {
   async function fetchUnmatchedPayments(): Promise<void> {
     setLoading(true)
     try {
-      const response = await fetch('/api/v1/finance/payments/unmatched?limit=100')
-      if (!response.ok) {
-        throw new Error('Failed to fetch payments')
-      }
-      const data: PaymentEntry[] = await response.json()
+      const { data } = await apiClient.get<PaymentEntry[]>('/api/v1/finance/payments/unmatched', { params: { limit: 100 } })
       setPayments(data)
     } catch (_error) {
       // API nicht erreichbar - Benutzer wird per Toast benachrichtigt
@@ -106,20 +103,11 @@ export default function PaymentMatchingPage(): JSX.Element {
     try {
       const formData = new FormData()
       formData.append('file', csvFile)
-      
-      const response = await fetch(
+
+      const { data } = await apiClient.post<PaymentEntry[]>(
         `/api/v1/finance/payments/import/csv?bank_account=${encodeURIComponent(bankAccount)}`,
-        {
-          method: 'POST',
-          body: formData,
-        }
+        formData,
       )
-
-      if (!response.ok) {
-        throw new Error('Failed to import CSV')
-      }
-
-      const data: PaymentEntry[] = await response.json()
       toast({
         title: t('common.success'),
         description: t('finance.payments.importSuccess', { count: data.length }),
@@ -138,13 +126,9 @@ export default function PaymentMatchingPage(): JSX.Element {
     }
   }
 
-  async function fetchOpenItems(customerId: string): Promise<void> {
+  async function fetchMatchSuggestions(paymentId: string): Promise<void> {
     try {
-      const response = await fetch(`/api/v1/finance/payments/open-items/${customerId}`)
-      if (!response.ok) {
-        throw new Error('Failed to fetch open items')
-      }
-      const data: OpenItemMatch[] = await response.json()
+      const { data } = await apiClient.get<OpenItemMatch[]>(`/api/v1/finance/payments/match-suggestions/${paymentId}`)
       setOpenItems(data)
     } catch (_error) {
       // Keine offenen Posten gefunden oder API nicht erreichbar
@@ -156,15 +140,9 @@ export default function PaymentMatchingPage(): JSX.Element {
     if (!selectedPayment || !selectedOpId) return
 
     try {
-      const response = await fetch(
+      const { data: result } = await apiClient.post<MatchResult>(
         `/api/v1/finance/payments/match/${selectedPayment.id}?op_id=${selectedOpId}&match_type=MANUAL`
       )
-
-      if (!response.ok) {
-        throw new Error('Failed to match payment')
-      }
-
-      const result: MatchResult = await response.json()
       toast({
         title: t('common.success'),
         description: t('finance.payments.matchSuccess', { 
@@ -190,11 +168,7 @@ export default function PaymentMatchingPage(): JSX.Element {
 
   async function autoMatch(): Promise<void> {
     try {
-      const response = await fetch('/api/v1/finance/payments/auto-match')
-      if (!response.ok) {
-        throw new Error('Failed to auto-match')
-      }
-      const results: MatchResult[] = await response.json()
+      const { data: results } = await apiClient.post<MatchResult[]>('/api/v1/finance/payments/auto-match')
       toast({
         title: t('common.success'),
         description: t('finance.payments.autoMatchSuccess', { count: results.length }),
@@ -292,9 +266,7 @@ export default function PaymentMatchingPage(): JSX.Element {
           size="sm"
           onClick={() => {
             setSelectedPayment(row.original)
-            if (row.original.creditor_name) {
-              fetchOpenItems(row.original.creditor_name)
-            }
+            fetchMatchSuggestions(row.original.id)
             setIsMatchDialogOpen(true)
           }}
           disabled={row.original.match_status === 'MATCHED'}
