@@ -64,7 +64,7 @@ See [docs/AI-VISION.md](docs/AI-VISION.md) for the project’s AI and research v
 
 | Dashboard / Navigation | Finance – Open Items | Agrar – Ernteannahme |
 |------------------------|----------------------|----------------------|
-| ![Dashboard](docs/screenshots/dashboard.png) | ![Finance](docs/screenshots/finance.png) | ![Agrar](docs/screenshots/agrar.png) |
+| ![Dashboard](docs/screenshots/dashboard.png?v=2) | ![Finance](docs/screenshots/finance.png?v=2) | ![Agrar](docs/screenshots/agrar.png?v=2) |
 
 Screenshots are from staging or local. Add `dashboard.png`, `finance.png`, and `agrar.png` to [docs/screenshots/](docs/screenshots/) (see [docs/screenshots/README.md](docs/screenshots/README.md) for how to capture them).
 
