@@ -1,13 +1,16 @@
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
-import { BookOpen, FileDown, Loader2, Search } from 'lucide-react'
+import { BookOpen, FileDown, Loader2, Search, Undo2 } from 'lucide-react'
 import { apiClient } from '@/lib/api-client'
 import { ErrorState } from '@/components/ErrorState'
+import { StornoDialog } from '@/components/finance/StornoDialog'
+import { toast } from 'sonner'
 
 type Buchung = {
   id: string
@@ -46,8 +49,13 @@ function mapApiEntry(e: JournalEntryAPI): Buchung {
 }
 
 export default function BuchungsjournalPage(): JSX.Element {
+  const { t } = useTranslation()
+  const queryClient = useQueryClient()
   const [searchTerm, setSearchTerm] = useState('')
   const [referenceFilter, setReferenceFilter] = useState('')
+  const [stornoOpen, setStornoOpen] = useState(false)
+  const [stornoEntry, setStornoEntry] = useState<Buchung | null>(null)
+  const [stornoLoading, setStornoLoading] = useState(false)
 
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['fibu', 'journal-entries', referenceFilter || null],
@@ -75,6 +83,30 @@ export default function BuchungsjournalPage(): JSX.Element {
 
   const buchungen = data ?? []
 
+  const openStorno = (b: Buchung) => {
+    setStornoEntry(b)
+    setStornoOpen(true)
+  }
+
+  const handleStornoConfirm = async (reason: string) => {
+    if (!stornoEntry) return
+    setStornoLoading(true)
+    try {
+      await apiClient.post(`/api/v1/journal-entries/${stornoEntry.id}/reverse`, null, { params: { reason } })
+      await queryClient.invalidateQueries({ queryKey: ['fibu', 'journal-entries'] })
+      toast.success(t('crud.messages.stornoSuccess'))
+      setStornoOpen(false)
+      setStornoEntry(null)
+    } catch (err: unknown) {
+      const msg = err && typeof err === 'object' && 'response' in err && typeof (err as { response?: { data?: { detail?: string } } }).response?.data?.detail === 'string'
+        ? (err as { response: { data: { detail: string } } }).response.data.detail
+        : t('crud.messages.stornoError')
+      toast.error(msg)
+    } finally {
+      setStornoLoading(false)
+    }
+  }
+
   const columns = [
     { key: 'datum' as const, label: 'Datum', render: (b: Buchung) => new Date(b.datum).toLocaleDateString('de-DE') },
     { key: 'belegnr' as const, label: 'Belegnummer', render: (b: Buchung) => <span className="font-mono font-bold">{b.belegnr}</span> },
@@ -99,6 +131,16 @@ export default function BuchungsjournalPage(): JSX.Element {
       ),
     },
     { key: 'text' as const, label: 'Buchungstext' },
+    {
+      key: 'actions' as const,
+      label: t('crud.fields.actions'),
+      render: (b: Buchung) => (
+        <Button variant="outline" size="sm" onClick={() => openStorno(b)} className="gap-1">
+          <Undo2 className="h-3 w-3" />
+          {t('crud.actions.reverse')}
+        </Button>
+      ),
+    },
   ]
 
   const gesamtBetrag = buchungen.reduce((sum, b) => sum + b.betrag, 0)
@@ -184,6 +226,15 @@ export default function BuchungsjournalPage(): JSX.Element {
           )}
         </CardContent>
       </Card>
+
+      <StornoDialog
+        open={stornoOpen}
+        onOpenChange={(open) => { if (!open) { setStornoEntry(null) } setStornoOpen(open) }}
+        onConfirm={handleStornoConfirm}
+        entryNumber={stornoEntry?.belegnr}
+        entryDate={stornoEntry?.datum}
+        isLoading={stornoLoading}
+      />
     </div>
   )
 }

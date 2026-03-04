@@ -87,7 +87,8 @@ export interface Action {
   label: string
   type: 'primary' | 'secondary' | 'danger'
   icon?: string
-  onClick: () => void
+  /** Optional when ObjectPage/OverviewPage use onAction to dispatch by key */
+  onClick?: () => void
   disabled?: boolean
 }
 

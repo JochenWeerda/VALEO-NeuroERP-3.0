@@ -1,4 +1,4 @@
-﻿# GAP-Analyse VALEO NeuroERP Finanz Suite (SAP Fiori Referenz)
+# GAP-Analyse VALEO NeuroERP Finanz Suite (SAP Fiori Referenz)
 
 **Stand:** 2026-03-04  
 **Autor:** Codex-Analyse  
@@ -31,7 +31,7 @@ Diese Analyse verknüpft SAP-Fiori-Referenzfunktionen pro Functional Area mit de
 | A Core Financials | Manage Journal Entries (`F0718`) | Journalbearbeitung, Korrektur, Nachvollzug | Teilweise | Strategisch | P1 | `FiBu.Buchungsjournal2` |
 | A Core Financials | Display G/L Account Balances (`F2217`) | Salden-/Kontenmonitoring | Teilweise | Strategisch | P1 | `FiBu.GL-Saldenmonitor` |
 | A Core Financials | Trial Balance (`F0996`) | Abschlussnahe Saldenprüfung | Teilweise | Kritisch | P0 | `FiBu.Abschluss.TrialBalance` |
-| A Core Financials | Manage Posting Periods (`F2548`) | Perioden öffnen/schließen/sperren | Teilweise | Kritisch | P0 | `FiBu.Periodenverwaltung` |
+| A Core Financials | Manage Posting Periods (`F2548`) | Perioden öffnen/schließen/sperren | **Ja** (Tabelle + API + UI `/finance/periods`) | – | – | `FiBu.Periodenverwaltung` |
 | A Core Financials | Manage Supplier Line Items (`F1060` family) | Kreditorenposten prüfen/ausgleichen | Teilweise | Kritisch | P0 | `FiBu.OP.Kreditoren` |
 | A Core Financials | Manage Customer Line Items (`F0764`) | Debitorenposten prüfen/ausgleichen | Teilweise | Strategisch | P1 | `FiBu.OP.Debitoren+Matching` |
 | A Core Financials | Verify General Journal Entries (`F0711`) | Freigabe-/Prüfworkflow für Buchungen | Teilweise | Strategisch | P1 | `FiBu.Buchungsfreigabe` |
@@ -46,7 +46,7 @@ Diese Analyse verknüpft SAP-Fiori-Referenzfunktionen pro Functional Area mit de
 | B Controlling | Profit Center Accounting | Ergebnissteuerung nach Profit Centern | Nein | Strategisch | P1 | `CO.ProfitCenter` |
 | B Controlling | Margin Analysis | Deckungsbeitrags-/Margenanalyse | Nein | Strategisch | P1 | `CO.MarginAnalysis` |
 | B Controlling | Product Cost Controlling | Herstellkosten, Kalkulation, Abweichungen | Nein | Strategisch | P1 | `CO.ProductCosting` |
-| C GRC | Audit Log Viewer | revisionssichere Änderungs-/Prozesshistorie | Teilweise | Kritisch | P0 | `Compliance.AuditTrailWorkbench` |
+| C GRC | Audit Log Viewer | revisionssichere Änderungs-/Prozesshistorie | **Ja** (domain_shared.audit_logs + API `/audit/logs|stats` + UI `/finance/audit-trail`) | – | – | `Compliance.AuditTrailWorkbench` |
 | C GRC | Segregation of Duties / Access Review | Rollen-/Berechtigungsprüfung | Teilweise | Strategisch | P1 | `Compliance.AccessControlCenter` |
 | C GRC | Financial Compliance Cockpit | Compliance-Status (GoBD/HGB) | Teilweise | Kritisch | P0 | `Compliance.FinancialCockpit` |
 | D Reporting | Balance Sheet / P&L Apps | Bilanz, GuV, periodischer Abschlussblick | Teilweise | Strategisch | P1 | `FiBu.Reporting.FinStatements` |
@@ -156,10 +156,10 @@ Zuordnung gemäß `docs/FIBU-SUITE-TODO.md` und bestehendem Mask-Builder:
 ## 6) Priorisierte Roadmap (Phase 1–3)
 
 ### Phase 1 (0–12 Wochen) – Compliance + Kernprozesse
-- FIBU-GL-05: Periodensteuerung + Sperrlogik E2E
-- FIBU-COMP-01: AuditTrailWorkbench
-- FIBU-AR-03: Zahlungseingang/Matching-UI
-- FIBU-AP-02: Eingangsrechnungen durchgängiger Flow
+- ~~FIBU-GL-05: Periodensteuerung~~ ✅ (finance_accounting_periods + API + UI)
+- ~~FIBU-COMP-01: AuditTrailWorkbench~~ ✅ (audit_logs + API + Audit-Trail-UI)
+- ~~FIBU-AR-03: Zahlungseingang/Matching-UI~~ ✅ (bank_statement_lines + Payment-Matching)
+- ~~FIBU-AP-02: Eingangsrechnungen~~ ✅ (ap_invoices + List/Form/Post)
 - Abschlussnahe Kernreports (Trial Balance, Journal, OP-Listen) stabilisieren
 
 ### Phase 2 (12–24 Wochen) – Struktureller Ausbau

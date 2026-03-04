@@ -218,8 +218,9 @@ async def get_accounts_hierarchy(
         
         all_accounts = query.all()
         
-        # Build account map
+        # Build account map by id and by account_number (for prefix fallback)
         account_map: Dict[str, AccountHierarchy] = {}
+        number_to_node: Dict[str, AccountHierarchy] = {}
         root_accounts: List[AccountHierarchy] = []
         
         # First pass: create all account objects
@@ -243,16 +244,35 @@ async def get_accounts_hierarchy(
             }
             account_hierarchy = AccountHierarchy(**account_dict)
             account_map[str(acc.id)] = account_hierarchy
+            number_to_node[acc.account_number] = account_hierarchy
         
-        # Second pass: build hierarchy
+        # Second pass: build hierarchy (parent_account_id or fallback: longest account_number prefix)
         for acc in all_accounts:
             account_hierarchy = account_map[str(acc.id)]
+            parent = None
             if acc.parent_account_id:
                 parent_id = str(acc.parent_account_id)
                 if parent_id in account_map:
-                    account_map[parent_id].children.append(account_hierarchy)
+                    parent = account_map[parent_id]
+            if parent is None and acc.account_number:
+                # Fallback: find parent by longest existing prefix (e.g. 1400 -> 140, 14, 1)
+                num = acc.account_number.strip()
+                for length in range(max(1, len(num) - 1), 0, -1):
+                    prefix = num[:length]
+                    if prefix in number_to_node:
+                        parent = number_to_node[prefix]
+                        break
+            if parent:
+                parent.children.append(account_hierarchy)
             else:
                 root_accounts.append(account_hierarchy)
+        
+        # Sort roots and children by account_number for consistent display
+        def sort_children(nodes: List[AccountHierarchy]) -> None:
+            nodes.sort(key=lambda n: n.account_number)
+            for n in nodes:
+                sort_children(n.children)
+        sort_children(root_accounts)
         
         return root_accounts
     except Exception as e:

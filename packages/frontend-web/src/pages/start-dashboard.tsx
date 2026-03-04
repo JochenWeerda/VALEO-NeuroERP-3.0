@@ -147,8 +147,8 @@ export default function StartDashboardPage(): JSX.Element {
   const { data: kpis, isPending: kpiLoading } = useQuery({
     queryKey: queryKeys.analytics.kpis,
     queryFn: async () => {
-      const res = await apiClient.get<Record<string, number>>('/api/v1/analytics/kpis')
-      return res.data
+      const data = await apiClient.get<Record<string, number>>('/api/v1/analytics/kpis')
+      return data ?? {}
     },
     staleTime: 30_000,
     refetchInterval: 60_000,

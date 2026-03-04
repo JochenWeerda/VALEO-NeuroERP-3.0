@@ -11,6 +11,7 @@ from typing import Sequence, Union
 
 from alembic import op
 import sqlalchemy as sa
+from sqlalchemy import text
 from sqlalchemy.dialects import postgresql
 
 revision: str = "c1d2e3f4a5b6"
@@ -19,7 +20,20 @@ branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
 
+def _table_exists(conn, schema: str, table: str) -> bool:
+    r = conn.execute(
+        text(
+            "SELECT 1 FROM information_schema.tables WHERE table_schema = :schema AND table_name = :table"
+        ),
+        {"schema": schema, "table": table},
+    )
+    return r.scalar() is not None
+
+
 def upgrade() -> None:
+    conn = op.get_bind()
+    if _table_exists(conn, "domain_ops", "kon_contract"):
+        return  # Tabellen existieren bereits (z. B. manuell angelegt)
     op.create_table(
         "kon_contract",
         sa.Column("contract_id", sa.String(), nullable=False),

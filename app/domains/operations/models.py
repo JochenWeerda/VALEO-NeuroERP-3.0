@@ -3,7 +3,7 @@ Operations Domain Models - Waage und Fuhrpark
 Models fÃ¼r Waagen, Wiegungen, Fahrzeuge und Fahrer
 """
 
-from sqlalchemy import Column, String, Integer, Float, DateTime, Text, ForeignKey, DECIMAL, Enum, Boolean
+from sqlalchemy import Column, String, Integer, Float, DateTime, Date, Text, ForeignKey, DECIMAL, Enum, Boolean
 from sqlalchemy.dialects.postgresql import UUID as PGUUID, JSONB
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -688,6 +688,73 @@ class KonNumberRange(Base):
     padding = Column(Integer, nullable=False, default=6)
     updated_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now())
     tenant_id = Column(String, nullable=False, index=True)
+
+
+class PosPositionRule(Base):
+    """Commodity Position Rule (No-Speculation Guard) pro Artikel/Gruppe."""
+    __tablename__ = "pos_position_rule"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    rule_id = Column(String, primary_key=True, default=uuid7)
+    scope_type = Column(String(20), nullable=False)  # ARTICLE | GROUP
+    scope_id = Column(String(64), nullable=False)
+    neg_tolerance_qty = Column(DECIMAL(14, 3), nullable=False, default=0)
+    max_short_days = Column(Integer, nullable=False, default=0)
+    yellow_threshold = Column(DECIMAL(14, 3), nullable=True)
+    red_threshold = Column(DECIMAL(14, 3), nullable=True)
+    approval_required = Column(Boolean, nullable=False, default=False)
+    approval_role = Column(String(30), nullable=True)  # teamleiter | gf
+    active_from = Column(DateTime(timezone=True), nullable=True)
+    active_to = Column(DateTime(timezone=True), nullable=True)
+    tenant_id = Column(String, nullable=False, index=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_by = Column(String(100), nullable=True)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    updated_by = Column(String(100), nullable=True)
+
+
+class PosPositionOverride(Base):
+    """Freigabe/Audit fuer Short-Override (Commodity Position)."""
+    __tablename__ = "pos_position_override"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    override_id = Column(String, primary_key=True, default=uuid7)
+    branch_id = Column(String(64), nullable=True)
+    article_id = Column(String(64), nullable=False)
+    period_key = Column(String(20), nullable=False)
+    requested_by = Column(String(100), nullable=True)
+    requested_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=True)
+    reason = Column(Text, nullable=True)
+    status = Column(String(20), nullable=False, default="REQUESTED")  # REQUESTED | APPROVED | REJECTED
+    approved_by = Column(String(100), nullable=True)
+    approved_at = Column(DateTime(timezone=True), nullable=True)
+    valid_until = Column(DateTime(timezone=True), nullable=True)
+    comment = Column(Text, nullable=True)
+    related_doc_type = Column(String(50), nullable=True)
+    related_doc_id = Column(String(64), nullable=True)
+    tenant_id = Column(String, nullable=False, index=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class PosPositionSnapshot(Base):
+    """Optionaler Cache fuer Commodity Position Matrix (Performance)."""
+    __tablename__ = "pos_position_snapshot"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    snapshot_id = Column(String, primary_key=True, default=uuid7)
+    branch_id = Column(String(64), nullable=True)
+    as_of_date = Column(Date, nullable=False)
+    period_mode = Column(String(5), nullable=False)  # W | M | Q
+    article_id = Column(String(64), nullable=False)
+    period_key = Column(String(20), nullable=False)
+    qty_buy_open = Column(DECIMAL(14, 3), nullable=False, default=0)
+    qty_sell_open = Column(DECIMAL(14, 3), nullable=False, default=0)
+    qty_net = Column(DECIMAL(14, 3), nullable=False, default=0)
+    qty_tolerance = Column(DECIMAL(14, 3), nullable=True)
+    severity = Column(String(10), nullable=True)  # GREEN | YELLOW | RED
+    tenant_id = Column(String, nullable=False, index=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 
 class ComplianceEintrag(Base):

@@ -329,3 +329,70 @@ class Debtor(DebtorBase):
 
     class Config:
         from_attributes = True
+
+
+# Creditor (Kreditoren) Schemas – domain_erp.creditors
+class CreditorBase(BaseModel):
+    """Base creditor schema"""
+    creditor_number: str = Field(..., min_length=1, max_length=50, description="Creditor number")
+    company_name: str = Field(..., min_length=1, max_length=255, description="Company name")
+    contact_person: Optional[str] = Field(None, max_length=255)
+    street: str = Field(..., min_length=1, max_length=255)
+    postal_code: str = Field(..., min_length=1, max_length=10)
+    city: str = Field(..., min_length=1, max_length=100)
+    country: str = Field(default="DE", min_length=2, max_length=2)
+    phone: Optional[str] = Field(None, max_length=50)
+    email: Optional[str] = Field(None, max_length=255)
+    vat_id: Optional[str] = Field(None, max_length=50)
+    tax_number: Optional[str] = Field(None, max_length=50)
+    iban: Optional[str] = Field(None, max_length=34)
+    bic: Optional[str] = Field(None, max_length=11)
+    bank_name: Optional[str] = Field(None, max_length=255)
+    account_holder: Optional[str] = Field(None, max_length=255)
+    payment_terms_days: int = Field(default=30, ge=0)
+    discount_days: int = Field(default=0, ge=0)
+    discount_percent: Decimal = Field(default=Decimal("0.00"), ge=0, le=100)
+    credit_limit: Decimal = Field(default=Decimal("0.00"), ge=0)
+    is_active: bool = Field(default=True)
+    notes: Optional[str] = None
+
+
+class CreditorCreate(CreditorBase):
+    """Schema for creating creditors"""
+    tenant_id: str = Field(..., description="Tenant ID")
+
+
+class CreditorUpdate(BaseModel):
+    """Schema for updating creditors"""
+    company_name: Optional[str] = Field(None, min_length=1, max_length=255)
+    contact_person: Optional[str] = Field(None, max_length=255)
+    street: Optional[str] = Field(None, min_length=1, max_length=255)
+    postal_code: Optional[str] = Field(None, min_length=1, max_length=10)
+    city: Optional[str] = Field(None, min_length=1, max_length=100)
+    country: Optional[str] = Field(None, min_length=2, max_length=2)
+    phone: Optional[str] = Field(None, max_length=50)
+    email: Optional[str] = Field(None, max_length=255)
+    vat_id: Optional[str] = Field(None, max_length=50)
+    tax_number: Optional[str] = Field(None, max_length=50)
+    iban: Optional[str] = Field(None, max_length=34)
+    bic: Optional[str] = Field(None, max_length=11)
+    bank_name: Optional[str] = Field(None, max_length=255)
+    account_holder: Optional[str] = Field(None, max_length=255)
+    payment_terms_days: Optional[int] = Field(None, ge=0)
+    discount_days: Optional[int] = Field(None, ge=0)
+    discount_percent: Optional[Decimal] = Field(None, ge=0, le=100)
+    credit_limit: Optional[Decimal] = Field(None, ge=0)
+    is_active: Optional[bool] = None
+    notes: Optional[str] = None
+
+
+class Creditor(CreditorBase):
+    """Full creditor schema"""
+    id: str
+    tenant_id: str
+    current_balance: Optional[Decimal] = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True

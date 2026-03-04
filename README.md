@@ -77,6 +77,13 @@ python main.py  # Backend API
 cd packages/frontend-web && npm run dev  # Frontend
 ```
 
+3. **Datenbank-Migrationen ausführen (alle Tabellen anlegen):**
+```bash
+# Nach Neuinstallation oder Clone: Alle Schemas und Tabellen anlegen
+alembic upgrade head
+```
+Dabei werden alle im Repository enthaltenen Alembic-Migrationen nacheinander angewendet (domain_shared, domain_ops, domain_erp, domain_inventory, domain_crm, domain_finance, …). Ohne diesen Schritt fehlen Tabellen und die API kann fehlschlagen.
+
 ### Frontend Commands (pnpm)
 
 ```bash
@@ -89,7 +96,7 @@ pnpm lint         # ESLint (fails on warnings)
 pnpm storybook    # UI Workbench
 ```
 
-3. **Configure Authentication:**
+4. **Configure Authentication:**
 ```bash
 # Copy environment template
 cp .env.example .env
@@ -100,7 +107,7 @@ cp .env.example .env
 # API_DEV_TOKEN=dev-token  # Change for local security
 ```
 
-4. **Access the application:**
+5. **Access the application:**
 - **Frontend:** http://localhost:3000
 - **Backend Modul:** http://localhost:8000
 - **API Documentation:** http://localhost:8000/docs

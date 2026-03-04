@@ -5,6 +5,7 @@ Adapted to existing database schema (debitor_number, name, address JSONB)
 """
 
 from typing import Optional
+import re
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
@@ -12,6 +13,37 @@ from decimal import Decimal
 import json
 
 from ....core.database import get_db
+
+# EU/EWR USt-ID Format-Muster (optional; leeres Feld erlaubt)
+_VAT_PATTERNS = {
+    "DE": re.compile(r"^DE\d{9}$"),
+    "AT": re.compile(r"^ATU\d{8}$"),
+    "NL": re.compile(r"^NL\d{9}B\d{2}$"),
+    "FR": re.compile(r"^FR[A-HJ-NP-Z0-9]{2}\d{9}$"),
+    "BE": re.compile(r"^BE0?\d{9}$"),
+    "CH": re.compile(r"^CHE\d{9}$"),
+    "IT": re.compile(r"^IT\d{11}$"),
+    "ES": re.compile(r"^ES[A-Z0-9]\d{7}[A-Z0-9]$", re.IGNORECASE),
+    "PL": re.compile(r"^PL\d{10}$"),
+}
+
+
+def _validate_vat_id_format(vat_id: Optional[str]) -> None:
+    """Raises HTTPException 400 if vat_id is non-empty and format is invalid."""
+    if not vat_id or not (raw := vat_id.replace(" ", "").replace("-", "").strip().upper()):
+        return
+    prefix = raw[:2]
+    pattern = _VAT_PATTERNS.get(prefix)
+    if not pattern:
+        raise HTTPException(
+            status_code=400,
+            detail=f"USt-ID: unbekanntes Format für '{prefix}'. Erlaubt: DE, AT, NL, FR, BE, CH, IT, ES, PL.",
+        )
+    if not pattern.match(raw):
+        raise HTTPException(
+            status_code=400,
+            detail=f"USt-ID: ungültiges Format für {prefix} (z.B. DE123456789, ATU12345678).",
+        )
 from ..schemas.finance import Debtor, DebtorCreate, DebtorUpdate
 from ..schemas.base import PaginatedResponse
 
@@ -93,6 +125,7 @@ async def create_debtor(
     Create a new debtor.
     """
     try:
+        _validate_vat_id_format(debtor_data.vat_id)
         # Check if debtor number already exists
         check_query = text("""
             SELECT id FROM domain_erp.debitors 
@@ -248,9 +281,10 @@ async def update_debtor(
     Update debtor information.
     """
     try:
+        _validate_vat_id_format(debtor_data.vat_id)
         # Get existing debtor
         existing_query = text("""
-            SELECT id, tenant_id, debitor_number, name, address, payment_terms, credit_limit, 
+            SELECT id, tenant_id, debitor_number, name, address, payment_terms, credit_limit,
                    is_active, created_at, updated_at
             FROM domain_erp.debitors
             WHERE id = :debtor_id

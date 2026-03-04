@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+from collections import defaultdict
 from datetime import datetime
 from decimal import Decimal
 from typing import Any, Literal, Optional
+
+from app.services.position_guard_service import PositionGuardService
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
@@ -276,6 +279,36 @@ async def create_kontrakt(
     if db.query(KonContract).filter(KonContract.tenant_id == tenant_id, KonContract.contract_no == contract_no).first():
         raise HTTPException(status_code=409, detail="contract_no already exists")
 
+    if payload.contract_type == "VERKAUF" and payload.lines:
+        period_dt = payload.valid_to or payload.valid_from
+        if period_dt:
+            period_key = period_dt.strftime("%Y-%m") if hasattr(period_dt, "strftime") else None
+            if period_key:
+                guard = PositionGuardService(db)
+                by_article: dict[str, Decimal] = defaultdict(Decimal)
+                for line_in in payload.lines:
+                    by_article[line_in.article_id] += Decimal(str(line_in.qty_contract))
+                for aid, delta in by_article.items():
+                    result = guard.check_impact(
+                        tenant_id=tenant_id,
+                        branch_id=payload.branch_id,
+                        article_id=aid,
+                        period_key=period_key,
+                        delta_sell_qty=delta,
+                        user_roles=user.get("roles") or [],
+                    )
+                    if not result.allowed:
+                        raise HTTPException(
+                            status_code=409,
+                            detail={
+                                "guard": "short_violation",
+                                "article_id": result.article_id,
+                                "period_key": result.period_key,
+                                "net_after": float(result.net_after) if result.net_after is not None else None,
+                                "tolerance": float(result.tolerance) if result.tolerance is not None else None,
+                                "message": result.reason,
+                            },
+                        )
     contract = KonContract(
         contract_id=uuid7(),
         contract_no=contract_no,
@@ -383,6 +416,36 @@ async def update_kontrakt(
         setattr(contract, k, v)
     contract.updated_by = user.get("sub")
 
+    if payload.lines and contract.contract_type == "VERKAUF":
+        period_dt = contract.valid_to or contract.valid_from
+        if period_dt:
+            period_key = period_dt.strftime("%Y-%m") if hasattr(period_dt, "strftime") else None
+            if period_key:
+                guard = PositionGuardService(db)
+                by_article: dict[str, Decimal] = defaultdict(Decimal)
+                for line_in in payload.lines:
+                    by_article[line_in.article_id] += Decimal(str(line_in.qty_contract))
+                for aid, delta in by_article.items():
+                    result = guard.check_impact(
+                        tenant_id=tenant_id,
+                        branch_id=contract.branch_id,
+                        article_id=aid,
+                        period_key=period_key,
+                        delta_sell_qty=delta,
+                        user_roles=user.get("roles") or [],
+                    )
+                    if not result.allowed:
+                        raise HTTPException(
+                            status_code=409,
+                            detail={
+                                "guard": "short_violation",
+                                "article_id": result.article_id,
+                                "period_key": result.period_key,
+                                "net_after": float(result.net_after) if result.net_after is not None else None,
+                                "tolerance": float(result.tolerance) if result.tolerance is not None else None,
+                                "message": result.reason,
+                            },
+                        )
     if payload.lines:
         db.query(KonContractLine).filter(KonContractLine.tenant_id == tenant_id, KonContractLine.contract_id == contract_id).delete()
         for line_in in payload.lines:

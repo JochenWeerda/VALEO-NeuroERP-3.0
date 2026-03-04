@@ -25,6 +25,7 @@ from . import payment_matching
 from . import ap_invoices
 from . import bank_accounts
 from . import debtors
+from . import creditors
 from . import open_items
 from . import bank_statement_import
 from . import bank_reconciliation
@@ -95,3 +96,6 @@ from . import quadriga_connector
 from . import asset_ledger_connector
 from . import fibu_connectors
 from . import gobd_archiv
+from . import commodity_positions
+from . import position_rules
+from . import position_overrides

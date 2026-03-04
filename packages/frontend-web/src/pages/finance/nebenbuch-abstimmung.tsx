@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
-import { Loader2, CheckCircle2, XCircle, ChevronRight } from 'lucide-react'
+import { Loader2, CheckCircle2, XCircle, ChevronRight, Download } from 'lucide-react'
 
 export default function NebenbuchAbstimmungPage(): JSX.Element {
   const { t } = useTranslation()
@@ -19,6 +19,7 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
   const [summary, setSummary] = useState<any>(null)
   const [selectedAccount, setSelectedAccount] = useState<string | null>(null)
   const [details, setDetails] = useState<any[]>([])
+  const [exporting, setExporting] = useState(false)
 
   useEffect(() => {
     loadSummary()
@@ -87,6 +88,41 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
     }
   }
 
+  const exportCsv = async () => {
+    setExporting(true)
+    try {
+      const response = await fetch(
+        `/api/v1/finance/subsidiary-ledger-reconciliation/${ledgerType.toLowerCase()}/export?period=${encodeURIComponent(period)}`,
+      )
+      if (!response.ok) {
+        throw new Error('Export fehlgeschlagen')
+      }
+
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `nebenbuch-abstimmung-${ledgerType.toLowerCase()}-${period}.csv`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      window.URL.revokeObjectURL(url)
+
+      toast({
+        title: 'Export erstellt',
+        description: 'CSV wurde erfolgreich heruntergeladen.',
+      })
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: t('crud.messages.error'),
+        description: error?.message || t('crud.messages.networkError'),
+      })
+    } finally {
+      setExporting(false)
+    }
+  }
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex justify-between items-center">
@@ -96,6 +132,10 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
             {t('crud.tooltips.fields.subsidiaryLedgerReconciliation')}
           </p>
         </div>
+        <Button variant="outline" onClick={exportCsv} disabled={exporting}>
+          {exporting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
+          Export CSV
+        </Button>
       </div>
 
       {/* Summary Cards */}

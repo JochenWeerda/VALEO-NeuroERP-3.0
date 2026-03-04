@@ -11,8 +11,7 @@ import {
   type ReactNode,
 } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { globalShortcutManager } from '@/lib/shortcuts/global-shortcuts'
-import type { GlobalShortcutAction } from '@/lib/shortcuts/global-shortcuts'
+import { globalShortcutManager, type GlobalShortcutAction } from '@/lib/shortcuts/global-shortcuts'
 
 type ActionHandler = (params: Record<string, unknown>) => void | Promise<void>
 

@@ -102,7 +102,19 @@ export function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProps): JSX.
       data-mcp-collapsed={collapsed}
     >
       <div className="flex h-16 items-center justify-between border-b px-4">
-        {collapsed ? <span className="text-lg font-bold">V</span> : <h2 className="text-lg font-semibold">VALEO ERP</h2>}
+        {collapsed ? (
+          <img
+            src="/branding/valeo-erp-logo.png"
+            alt="VALEO ERP Logo"
+            className="h-8 w-8 rounded object-cover"
+          />
+        ) : (
+          <img
+            src="/branding/valeo-erp-logo.png"
+            alt="VALEO ERP Logo"
+            className="h-9 w-auto max-w-[170px] object-contain"
+          />
+        )}
         <Button
           variant="ghost"
           size="icon"

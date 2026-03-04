@@ -5,6 +5,7 @@ FIBU-AP-02: Eingangsrechnungen
 
 from fastapi import APIRouter, HTTPException, Depends, Query
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 from typing import List, Optional
 from datetime import datetime, timedelta
 from decimal import Decimal
@@ -14,6 +15,7 @@ from app.core.database import get_db
 from app.core.fibu_audit import log_fibu_audit
 from app.documents.models import SalesInvoice  # Reusing model structure for now
 from app.documents.router_helpers import get_repository, save_to_store, get_from_store, list_from_store, delete_from_store
+from app.finance.tax_resolver import resolve_partner_country, resolve_tax_key_accounts
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/ap/invoices", tags=["finance", "ap", "invoices"])
@@ -204,7 +206,6 @@ async def post_ap_invoice(
     # Create GL journal entry
     try:
         from app.api.v1.schemas.finance import JournalEntryCreate, JournalEntryLine
-        from sqlalchemy import text
         
         # Extract invoice data
         invoice_date = invoice.get("date", datetime.now().isoformat()[:10])
@@ -213,6 +214,20 @@ async def post_ap_invoice(
         subtotal_net = float(invoice.get("subtotalNet", 0))
         total_tax = float(invoice.get("totalTax", 0))
         tenant_id = invoice.get("tenantId", "system")
+        supplier_partner_id = invoice.get("customerId", "") or invoice.get("supplierId", "")
+        invoice_country = invoice.get("country") or resolve_partner_country(db, supplier_partner_id, "DE")
+        max_rate = Decimal("0.00")
+        line_rates = []
+        for line in (invoice.get("lines") or []):
+            try:
+                line_rates.append(Decimal(str(line.get("vatRate", 0) or 0)).quantize(Decimal("0.01")))
+            except Exception:
+                continue
+        if line_rates:
+            max_rate = max(line_rates)
+        tax_key_cfg = resolve_tax_key_accounts(db, tenant_id, max_rate, invoice_country)
+        input_tax_account = tax_key_cfg.get("debit_account") or "1576"
+        reverse_charge = bool(tax_key_cfg.get("reverse_charge"))
         
         # Determine period from invoice date
         period = invoice_date[:7]  # YYYY-MM format
@@ -241,11 +256,11 @@ async def post_ap_invoice(
         if total_tax > 0:
             journal_lines.append(
                 JournalEntryLine(
-                    account_id="1576",  # Vorsteuer
+                    account_id=input_tax_account,
                     debit_amount=Decimal("0.00"),
                     credit_amount=Decimal(str(total_tax)),
                     line_number=3,
-                    description="Vorsteuer"
+                    description="Vorsteuer (Reverse-Charge)" if reverse_charge else "Vorsteuer"
                 )
             )
         
