@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { toast } from '@/hooks/use-toast';
 import { Card } from '@/components/ui/card';
@@ -31,6 +32,7 @@ import { useTenant } from '@/hooks/useTenant';
 
 interface Contract {
   id: string;
+  sourceType?: 'agrar' | 'rahmen' | 'kon';
   contractNo: string;
   type: string;
   commodity: string;
@@ -69,6 +71,7 @@ interface AmendmentTemplate {
 }
 
 export default function ContractsPageV2(): JSX.Element {
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const { user } = useAuth();
   const { tenantId } = useTenant();
@@ -322,7 +325,7 @@ export default function ContractsPageV2(): JSX.Element {
             entityType={entityTypeLabel}
             printTitle={getListTitle(t, entityTypeLabel)}
           />
-          <Button onClick={() => {/* Navigate to create */}}>
+          <Button onClick={() => navigate('/kontrakte/neu')}>
             {t('crud.actions.createContract')}
           </Button>
         </div>
@@ -381,7 +384,16 @@ export default function ContractsPageV2(): JSX.Element {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => {/* Navigate to edit */}}
+                        onClick={() => {
+                          if (contract.sourceType === 'kon') {
+                            navigate(`/kontrakte/${contract.id}`);
+                            return;
+                          }
+                          toast({
+                            title: 'Hinweis',
+                            description: 'Direktes Editieren ist aktuell nur für das neue Kontraktmodul aktiv.',
+                          });
+                        }}
                       >
                         {t('crud.actions.edit')}
                       </Button>

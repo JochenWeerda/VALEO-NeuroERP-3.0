@@ -16,6 +16,7 @@ from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
 from app.infrastructure.models import AgrarContract, ContractAmendment, AmendmentTemplate
 from app.domains.operations.repository import RahmenvertragRepository
+from app.domains.operations.models import KonContract
 
 router = APIRouter(prefix="/api/contracts", tags=["contracts"])
 
@@ -43,6 +44,7 @@ def _agrar_to_item(c: AgrarContract) -> dict[str, Any]:
     valid_until = getattr(c, "valid_until", None)
     return {
         "id": c.id,
+        "sourceType": "agrar",
         "contractNo": c.contract_number,
         "type": getattr(c, "contract_type", "sell"),
         "commodity": getattr(c, "article_id", ""),
@@ -66,6 +68,7 @@ def _rahmen_to_item(v: Any) -> dict[str, Any]:
     laufzeit = getattr(v, "laufzeit_bis", None)
     return {
         "id": v.id,
+        "sourceType": "rahmen",
         "contractNo": v.nummer,
         "type": getattr(v, "typ", ""),
         "commodity": getattr(v, "artikel_id", "") or getattr(v, "artikel", ""),
@@ -138,6 +141,28 @@ async def get_amendment_template(
     return _template_to_item(t)
 
 
+def _kon_to_item(k: KonContract) -> dict[str, Any]:
+    return {
+        "id": k.contract_id,
+        "sourceType": "kon",
+        "contractNo": k.contract_no,
+        "type": k.contract_type,
+        "commodity": "",
+        "counterpartyId": k.party_id,
+        "status": (k.status or "OFFEN").lower(),
+        "qty": {
+            "contracted": float(k.total_quantity) if k.total_quantity is not None else 0,
+            "unit": k.unit or "kg",
+        },
+        "deliveryWindow": {
+            "from": _dt_iso(k.valid_from),
+            "to": _dt_iso(k.valid_to),
+        },
+        "createdAt": _dt_iso(getattr(k, "created_at", None)),
+        "updatedAt": _dt_iso(getattr(k, "updated_at", None)),
+    }
+
+
 @router.get("")
 async def list_contracts(
     status: Optional[str] = Query(None),
@@ -156,6 +181,13 @@ async def list_contracts(
         q = q.filter(AgrarContract.status == status)
     for c in q.order_by(AgrarContract.created_at.desc()).limit(limit).all():
         items.append(_agrar_to_item(c))
+
+    # Valeo Kontrakte (domain_ops)
+    kq = db.query(KonContract).filter(KonContract.tenant_id == tenant_id)
+    if status:
+        kq = kq.filter(KonContract.status == status.upper())
+    for k in kq.order_by(KonContract.updated_at.desc()).limit(limit).all():
+        items.append(_kon_to_item(k))
 
     # Rahmenverträge (domain_ops) – begrenzt hinzufügen, damit Gesamtlimit ungefähr eingehalten wird
     repo = RahmenvertragRepository(db)
@@ -184,6 +216,14 @@ async def get_contract(
         if not vertrag:
             raise HTTPException(status_code=404, detail="Contract not found")
         return _rahmen_to_item(vertrag)
+
+    kon = (
+        db.query(KonContract)
+        .filter(KonContract.contract_id == contract_id, KonContract.tenant_id == tenant_id)
+        .first()
+    )
+    if kon:
+        return _kon_to_item(kon)
 
     contract = (
         db.query(AgrarContract)

@@ -24,6 +24,11 @@ from app.domains.operations.models import (
     ChargeStatus,
     BankKonto,
     Rahmenvertrag,
+    KonContract,
+    KonContractLine,
+    KonContractMovement,
+    KonAuditLog,
+    KonNumberRange,
 )
 
 
@@ -749,3 +754,115 @@ class RahmenvertragRepository:
             self.db.commit()
             return True
         return False
+
+
+class KontraktRepository:
+    """Repository for valeo Kontrakte."""
+
+    def __init__(self, db: Session):
+        self.db = db
+
+    def list_contracts(
+        self,
+        tenant_id: str,
+        *,
+        skip: int = 0,
+        limit: int = 100,
+        status: Optional[str] = None,
+        contract_type: Optional[str] = None,
+        party_id: Optional[str] = None,
+        article_id: Optional[str] = None,
+        valid_from: Optional[datetime] = None,
+        valid_to: Optional[datetime] = None,
+        query: Optional[str] = None,
+        include_done: bool = True,
+    ) -> tuple[list[KonContract], int]:
+        q = self.db.query(KonContract).filter(KonContract.tenant_id == tenant_id)
+        if status:
+            q = q.filter(KonContract.status == status)
+        if contract_type:
+            q = q.filter(KonContract.contract_type == contract_type)
+        if party_id:
+            q = q.filter(KonContract.party_id == party_id)
+        if article_id:
+            q = q.join(KonContractLine, KonContractLine.contract_id == KonContract.contract_id).filter(
+                KonContractLine.article_id == article_id
+            )
+        if valid_from:
+            q = q.filter(KonContract.valid_to >= valid_from)
+        if valid_to:
+            q = q.filter(KonContract.valid_from <= valid_to)
+        if not include_done:
+            q = q.filter(KonContract.status != "ERLEDIGT")
+        if query:
+            like = f"%{query.strip()}%"
+            q = q.filter(
+                (KonContract.contract_no.ilike(like))
+                | (KonContract.party_id.ilike(like))
+            )
+        total = q.count()
+        items = q.order_by(desc(KonContract.updated_at), desc(KonContract.created_at)).offset(skip).limit(limit).all()
+        return items, total
+
+    def get_contract(self, tenant_id: str, contract_id: str) -> Optional[KonContract]:
+        return (
+            self.db.query(KonContract)
+            .filter(KonContract.tenant_id == tenant_id, KonContract.contract_id == contract_id)
+            .first()
+        )
+
+    def get_by_no(self, tenant_id: str, contract_no: str) -> Optional[KonContract]:
+        return (
+            self.db.query(KonContract)
+            .filter(KonContract.tenant_id == tenant_id, KonContract.contract_no == contract_no)
+            .first()
+        )
+
+    def get_lines(self, tenant_id: str, contract_id: str) -> list[KonContractLine]:
+        return (
+            self.db.query(KonContractLine)
+            .filter(KonContractLine.tenant_id == tenant_id, KonContractLine.contract_id == contract_id)
+            .order_by(KonContractLine.position_no.asc())
+            .all()
+        )
+
+    def get_movements(
+        self,
+        tenant_id: str,
+        contract_id: str,
+        *,
+        include_archived: bool = False,
+        only_invoiced: Optional[bool] = None,
+        article_id: Optional[str] = None,
+    ) -> list[KonContractMovement]:
+        q = (
+            self.db.query(KonContractMovement)
+            .outerjoin(KonContractLine, KonContractMovement.line_id == KonContractLine.line_id)
+            .filter(KonContractMovement.tenant_id == tenant_id, KonContractMovement.contract_id == contract_id)
+        )
+        if not include_archived:
+            q = q.filter(KonContractMovement.is_archived.is_(False))
+        if only_invoiced is not None:
+            q = q.filter(KonContractMovement.is_invoiced.is_(only_invoiced))
+        if article_id:
+            q = q.filter(KonContractLine.article_id == article_id)
+        return q.order_by(desc(KonContractMovement.movement_date)).all()
+
+    def get_audit_logs(self, tenant_id: str, entity_id: str) -> list[KonAuditLog]:
+        return (
+            self.db.query(KonAuditLog)
+            .filter(KonAuditLog.tenant_id == tenant_id, KonAuditLog.entity_id == entity_id)
+            .order_by(desc(KonAuditLog.changed_at))
+            .all()
+        )
+
+    def get_number_range(self, tenant_id: str, contract_type: str, branch_id: Optional[str]) -> Optional[KonNumberRange]:
+        return (
+            self.db.query(KonNumberRange)
+            .filter(
+                KonNumberRange.tenant_id == tenant_id,
+                KonNumberRange.contract_type == contract_type,
+                KonNumberRange.branch_id.is_(branch_id) if branch_id is None else KonNumberRange.branch_id == branch_id,
+            )
+            .first()
+        )
