@@ -88,13 +88,13 @@ function authenticateUser(credentials: LoginCredentials): Promise<User> {
 ## Data Protection and Security
 
 ### Input Restrictions
-- Only VALEO-internal code, documentation, and requirements may be used as AI input
-- No customer data, proprietary algorithms, or sensitive information
-- Training data must be anonymized and approved for AI use
+- Use only project code, documentation, and requirements (or publicly available data) as AI input
+- No customer data, unapproved sensitive information, or third-party proprietary material
+- Training data must be anonymized and approved for AI use where applicable
 
 ### Output Handling
-- AI-generated outputs remain VALEO proprietary
-- No external sharing or publication without approval
+- AI-generated outputs follow the project license (MIT); contributions are welcome under the same terms
+- Mark AI involvement in commits and PRs for transparency
 - Secure storage and version control of AI-generated assets
 
 ## Quality Assurance
@@ -163,4 +163,4 @@ For questions about this policy:
 
 ---
 
-**This policy aligns with industry standards from Siemens, Bosch, and Volkswagen for AI integration in proprietary software development.**
+This policy supports transparent, responsible use of AI in open-source development.

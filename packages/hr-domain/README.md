@@ -239,7 +239,7 @@ Nach dem Start verfügbar unter:
 
 ## 📄 License
 
-Proprietary - VALEO NeuroERP 3.0
+MIT License – see root [LICENSE](../../LICENSE). Copyright (c) Jochen Weerda.
 
 
 

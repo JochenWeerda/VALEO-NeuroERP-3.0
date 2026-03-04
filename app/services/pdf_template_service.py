@@ -30,7 +30,7 @@ class PDFTemplateConfig:
         self.secondary_color = os.environ.get("PDF_SECONDARY_COLOR", "#0066CC")
         
         # Company Info
-        self.company_name = os.environ.get("COMPANY_NAME", "VALEO GmbH")
+        self.company_name = os.environ.get("COMPANY_NAME", "VALEO NeuroERP")
         self.company_address = os.environ.get("COMPANY_ADDRESS", "Musterstraße 123")
         self.company_city = os.environ.get("COMPANY_CITY", "12345 Musterstadt")
         self.company_country = os.environ.get("COMPANY_COUNTRY", "Deutschland")

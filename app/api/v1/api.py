@@ -777,11 +777,6 @@ api_router.include_router(
     gobd_archiv.router
 )
 
-# Commodity Position Matrix (positions/rules, positions/overrides before positions for route precedence)
-api_router.include_router(position_rules.router)
-api_router.include_router(position_overrides.router)
-api_router.include_router(commodity_positions.router)
-
 # Commodity Position Matrix (rules/overrides before positions for route precedence)
 api_router.include_router(position_rules.router)
 api_router.include_router(position_overrides.router)

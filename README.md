@@ -1,17 +1,17 @@
 # VALEO NeuroERP 3.0 🚀
 
-## Production-Ready Enterprise Resource Planning System
+Experimental **open-source ERP and automation platform** combining classical enterprise resource planning with AI-assisted workflows. A modular research and development environment for AI agents, automation pipelines, and enterprise data.
 
 ![Deploy Staging](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/workflows/deploy-staging.yml/badge.svg)
 ![Security Scan](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions/workflows/security-scan.yml/badge.svg)
-![License](https://img.shields.io/badge/license-Proprietary-red)
+![License](https://img.shields.io/badge/license-MIT-blue)
 ![Version](https://img.shields.io/badge/version-3.0.0-blue)
 
 **Status:** 🚧 **In Development** | **Version:** 3.0.0-alpha | **Authentication:** ✅ OIDC Enabled
 
-> ⚠️ **Hinweis:** Das System befindet sich noch in aktiver Entwicklung. Es fehlen noch etliche Tests, GAP-Schließungen und Issue-Resolutionen, bevor es als production-ready eingestuft werden kann.
+*Maintained by a generalist in agricultural trading (field service) with a focus on AI automation – building an open, AI-friendly ERP experimentation platform.*
 
-A comprehensive ERP system in development with modern authentication, real-time capabilities, and enterprise-grade security foundations.
+> ⚠️ **Hinweis:** Das System befindet sich noch in aktiver Entwicklung. Es fehlen noch etliche Tests, GAP-Schließungen und Issue-Resolutionen, bevor es als production-ready eingestuft werden kann.
 
 ## 🌟 Key Features
 
@@ -50,6 +50,23 @@ A comprehensive ERP system in development with modern authentication, real-time 
 | **Quality** | ✅ Complete | CAPA management, non-conformities |
 | **Procurement** | ✅ Complete | Supplier risk management |
 | **Weighing** | ✅ Complete | Weighing ticket management |
+
+## 🤖 AI & Automation
+
+- **AI-assisted workflows** – Decision support, automation pipelines, and intelligent knowledge systems
+- **Event-driven architecture** – NATS JetStream, outbox pattern for reliable async events
+- **Extensibility** – Designed for AI agents, LLM integrations, and automation frameworks
+- **Voice/Intent & Command Palette** – See [docs/architecture/KI-USABILITY-MICROSERVICES.md](docs/architecture/KI-USABILITY-MICROSERVICES.md) for unified AI usability (voice-to-intent, shortcuts, actions)
+
+See [docs/AI-VISION.md](docs/AI-VISION.md) for the project’s AI and research vision.
+
+## 📸 Screenshots
+
+| Dashboard / Navigation | Finance – Open Items | Agrar – Ernteannahme |
+|------------------------|----------------------|----------------------|
+| ![Dashboard](docs/screenshots/dashboard.png) | ![Finance](docs/screenshots/finance.png) | ![Agrar](docs/screenshots/agrar.png) |
+
+Screenshots are from staging or local. Add `dashboard.png`, `finance.png`, and `agrar.png` to [docs/screenshots/](docs/screenshots/) (see [docs/screenshots/README.md](docs/screenshots/README.md) for how to capture them).
 
 ## 🚀 Quick Start
 
@@ -269,120 +286,33 @@ PYTHONPATH=. python -m app.seeds.inventory_seed
 
 ## 🤝 Contributing
 
-### Human Contributors
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
 4. Add tests for new functionality
 5. Submit a pull request
 
-### AI Contributors
-AI-powered tools are recognized as internal contributors to VALEO NeuroERP development:
-
-- **AI as Co-Developer**: AI assistants may generate code, documentation, and concepts
-- **Review Required**: All AI-generated contributions must pass the same review process as human contributions
-- **Transparency**: Clearly mark AI involvement in commit messages and pull request descriptions
-- **Internal Data Only**: Only VALEO-internal information may be used as AI input
-- **No External Sharing**: AI outputs remain VALEO proprietary and may not be distributed externally
-
-### Commit Message Guidelines
-- Use `[AI-Assisted]` for commits involving AI tool usage
-- Use `[AI-Generated]` for commits containing primarily AI-generated code
-- Include brief description of AI tool used (e.g., "using GitHub Copilot", "using Claude")
-- Example: `[AI-Assisted] Implement user authentication flow using GitHub Copilot`
+**AI-assisted development** is welcome. Please mark AI involvement in commit messages (e.g. `[AI-Assisted]` or `[AI-Generated]`) and in PR descriptions so that reviewers have full transparency.
 
 ## 📄 License
 
-Proprietary - VALEO Internal Use Only
-
-### AI Collaboration Policy
-
-VALEO NeuroERP 3.0 embraces AI-assisted development while maintaining strict internal control and transparency:
-
-- **AI Tools Permitted**: AI-powered development assistants are explicitly authorized for code analysis, generation, and documentation
-- **Internal Use Only**: All AI-generated content remains VALEO proprietary and may not be shared externally
-- **Review Process**: AI contributions follow the same pull request and code review workflows as human contributions
-- **Transparency**: All AI-assisted changes are documented with appropriate commit messages and PR descriptions
-- **Input Restrictions**: Only VALEO-internal data and code may be used as input for AI tools
-
-See [LICENSE](LICENSE) for complete terms regarding AI collaboration.
+MIT License – see [LICENSE](LICENSE). Copyright (c) 2024 Jochen Weerda.
 
 ## 🆘 Support
 
-For technical support or questions:
 - **Documentation:** See `/docs` folder
-- **API Documentation:** Visit `/docs` when running
-- **Health Check:** Use `/healthz` endpoint
+- **API Documentation:** http://localhost:8000/docs when running
+- **Health Check:** `/healthz` endpoint
 
 ---
 
-**🆕 Latest Updates:**
-- ✅ **Staging-Deployment vollständig automatisiert** (Docker Desktop + GitHub Actions)
-- ✅ **18 automatisierte Smoke-Tests** für Staging-Umgebung
-- ✅ **Production-ready authentication system** with OIDC
-- ✅ **Real API integration** (no more mocks)
-- ✅ **Complete frontend-backend integration**
-- ✅ **Enterprise security features**
-- ✅ **Docker and Kubernetes deployment ready**
-- ✅ **Auto-Deploy bei Push auf develop-Branch**
-- 🤖 **AI Collaboration Framework implemented** - AI tools now recognized as internal contributors with full transparency and compliance
+**🆕 Latest Updates**
 
-**VALEO NeuroERP 3.0 - Production Ready! 🚀**
-
-**Repository:** https://github.com/JochenWeerda/VALEO-NeuroERP-3.0
-
-- **Transparency**: Clearly mark AI involvement in commit messages and pull request descriptions
-- **Internal Data Only**: Only VALEO-internal information may be used as AI input
-- **No External Sharing**: AI outputs remain VALEO proprietary and may not be distributed externally
-
-### Commit Message Guidelines
-- Use `[AI-Assisted]` for commits involving AI tool usage
-- Use `[AI-Generated]` for commits containing primarily AI-generated code
-- Include brief description of AI tool used (e.g., "using GitHub Copilot", "using Claude")
-- Example: `[AI-Assisted] Implement user authentication flow using GitHub Copilot`
-
-## 📄 License
-
-Proprietary - VALEO Internal Use Only
-
-### AI Collaboration Policy
-
-VALEO NeuroERP 3.0 embraces AI-assisted development while maintaining strict internal control and transparency:
-
-- **AI Tools Permitted**: AI-powered development assistants are explicitly authorized for code analysis, generation, and documentation
-- **Internal Use Only**: All AI-generated content remains VALEO proprietary and may not be shared externally
-- **Review Process**: AI contributions follow the same pull request and code review workflows as human contributions
-- **Transparency**: All AI-assisted changes are documented with appropriate commit messages and PR descriptions
-- **Input Restrictions**: Only VALEO-internal data and code may be used as input for AI tools
-
-See [LICENSE](LICENSE) for complete terms regarding AI collaboration.
-
-## 🆘 Support
-
-For technical support or questions:
-- **Documentation:** See `/docs` folder
-- **API Documentation:** Visit `/docs` when running
-- **Health Check:** Use `/healthz` endpoint
-
----
-
-**🆕 Latest Updates:**
-- ✅ **Staging-Deployment vollständig automatisiert** (Docker Desktop + GitHub Actions)
-- ✅ **18 automatisierte Smoke-Tests** für Staging-Umgebung
-- ✅ **Authentication system** with OIDC (in development)
-- ✅ **Real API integration** (no more mocks)
-- ✅ **Complete frontend-backend integration**
-- ✅ **Enterprise security features** (foundation in place)
-- ✅ **Docker and Kubernetes deployment ready**
-- ✅ **Auto-Deploy bei Push auf develop-Branch**
-- 🤖 **AI Collaboration Framework implemented** - AI tools now recognized as internal contributors with full transparency and compliance
-- 🚧 **Finance-Modul** mit 23 Backend-APIs implementiert
-- 🚧 **IBAN-Lookup-Integration** mit openiban.com
-- 🚧 **Umfassende i18n-Integration** für deutsche Sprache
-
-**VALEO NeuroERP 3.0 - In Active Development 🚧**
-
-> ⚠️ **Status:** Das System befindet sich in aktiver Entwicklung. Vor einer Production-Freigabe müssen noch Tests vervollständigt, GAPs geschlossen und Issues behoben werden.
+- ✅ Staging deployment automated (Docker Desktop + GitHub Actions)
+- ✅ 18 automated smoke tests for staging
+- ✅ OIDC authentication, real API integration, frontend-backend integration
+- ✅ Finance module with 23+ backend APIs, IBAN lookup, i18n (German)
+- 🤖 AI & automation focus – event-driven architecture, extensible for agents and workflows
 
 **Repository:** https://github.com/JochenWeerda/VALEO-NeuroERP-3.0
 

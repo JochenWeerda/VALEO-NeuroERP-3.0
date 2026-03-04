@@ -108,7 +108,7 @@ class FromLieferscheinCreate(BaseModel):
     menge: float
     einheit: str
     flaeche: float
-    anwender: str = "VALEO GmbH"
+    anwender: str = "VALEO NeuroERP"
 
 
 # ────────────────────────────────────────────────────────────────────────────
