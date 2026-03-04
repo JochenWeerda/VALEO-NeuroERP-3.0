@@ -145,6 +145,14 @@ const createBankAbgleichConfig = (t: any, entityTypeLabel: string): MaskConfig =
       ]
     },
     {
+      key: 'import_protokoll',
+      label: t('crud.fields.importLog', { defaultValue: 'Import-Protokoll' }),
+      fields: [],
+      customRender: (_data: any) => (
+        <BankImportErrorList errors={_data.importErrors || []} />
+      )
+    } as any,
+    {
       key: 'abgleich',
       label: t('crud.fields.reconciliation'),
       fields: [
@@ -283,6 +291,34 @@ function BankZuordnungTable({ data: _data, onChange }: { data: any[], onChange: 
   )
 }
 
+function BankImportErrorList({ errors }: { errors: string[] }) {
+  const { t } = useTranslation()
+  if (!errors || errors.length === 0) {
+    return (
+      <div className="rounded border border-green-200 bg-green-50 p-3 text-sm text-green-800">
+        {t('crud.messages.noImportErrors', { defaultValue: 'Keine Importfehler.' })}
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-2">
+      <div className="text-sm font-medium text-red-700">
+        {t('crud.messages.importWarnings', { defaultValue: 'Import-Warnungen' })}: {errors.length}
+      </div>
+      <div className="max-h-56 overflow-auto rounded border">
+        <ul className="divide-y">
+          {errors.map((err, idx) => (
+            <li key={`${err}-${idx}`} className="px-3 py-2 text-sm text-red-700">
+              {err}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  )
+}
+
 export default function BankAbgleichPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -371,6 +407,7 @@ export default function BankAbgleichPage(): JSX.Element {
         formData.zugeordnet = umsaetze.filter((u: any) => u.zugeordnet).length
         formData.abgleichsDifferenz = Math.abs(formData.startSaldo + formData.gebuchteUmsaetze - formData.endSaldo)
         formData.statementId = result.statement_id
+        formData.importErrors = result.import_errors || []
 
         toast({
           title: t('crud.messages.camtFileImported'),
@@ -496,6 +533,10 @@ export default function BankAbgleichPage(): JSX.Element {
         showValidationToast(isValid.errors)
         return
       }
+      if (!formData.statementId || !formData.kontoId) {
+        toast({ variant: 'destructive', title: t('crud.messages.validationError'), description: t('crud.messages.importCamtFileFirst') })
+        return
+      }
       const differenz = Math.abs(formData.abgleichsDifferenz || 0)
       if (differenz >= 0.01) {
         toast({ variant: 'destructive', title: t('crud.messages.bookingNotPossible'), description: t('crud.messages.reconciliationMustBeBalanced') })
@@ -503,7 +544,18 @@ export default function BankAbgleichPage(): JSX.Element {
       }
       setActionLoadingKey('book')
       try {
-        await apiClient.post('/api/v1/finance/bank-reconciliation/run', formData ?? {})
+        const response = await fetch(
+          `/api/v1/finance/bank-reconciliation/${formData.statementId}/reconcile?bank_account_id=${formData.kontoId}&tenant_id=${encodeURIComponent(tenantId)}&auto_book=true`,
+          { method: 'POST' }
+        )
+        if (!response.ok) {
+          const error = await response.json().catch(() => ({}))
+          throw new Error(error?.detail || t('crud.messages.reconciliationError'))
+        }
+        const result = await response.json()
+        formData.zugeordnet = result.line_counts?.matched || formData.zugeordnet || 0
+        formData.nichtZugeordnet = result.line_counts?.unmatched || formData.nichtZugeordnet || 0
+        formData.abgleichsDifferenz = Math.abs(result.balance_comparison?.difference || 0)
         toast({ title: t('crud.messages.reconciliationBooked'), description: t('crud.messages.reconciliationBookedDesc') })
         setIsDirty(false)
         navigate('/finance/bank')

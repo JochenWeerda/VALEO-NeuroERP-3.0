@@ -39,6 +39,7 @@ from app.api.v1.endpoints import (
     ap_invoices,
     bank_accounts,
     debtors,
+    creditors,
     open_items,
     bank_statement_import,
     bank_reconciliation,
@@ -122,6 +123,9 @@ from app.api.v1.endpoints import (
     training,
     personal,
     analytics,
+    commodity_positions,
+    position_rules,
+    position_overrides,
 )
 
 # Import domain routers
@@ -355,6 +359,12 @@ api_router.include_router(
 )
 
 api_router.include_router(
+    creditors.router,
+    prefix="/finance",
+    tags=["finance", "creditors"]
+)
+
+api_router.include_router(
     open_items.router,
     prefix="/finance",
     tags=["finance", "open-items"]
@@ -370,6 +380,12 @@ api_router.include_router(
     bank_reconciliation.router,
     prefix="/finance",
     tags=["finance", "bank-reconciliation"]
+)
+
+api_router.include_router(
+    bank_accounts.router,
+    prefix="/finance",
+    tags=["finance", "bank-accounts"]
 )
 
 api_router.include_router(
@@ -760,6 +776,16 @@ api_router.include_router(
 api_router.include_router(
     gobd_archiv.router
 )
+
+# Commodity Position Matrix (positions/rules, positions/overrides before positions for route precedence)
+api_router.include_router(position_rules.router)
+api_router.include_router(position_overrides.router)
+api_router.include_router(commodity_positions.router)
+
+# Commodity Position Matrix (rules/overrides before positions for route precedence)
+api_router.include_router(position_rules.router)
+api_router.include_router(position_overrides.router)
+api_router.include_router(commodity_positions.router)
 
 # Disposition API
 api_router.include_router(

@@ -48,157 +48,155 @@
 - **Vergleich:** SAP/Odoo haben vollständige AP-Invoice-Funktionalität
 - **Owner:** Backend + Frontend
 
-### FIBU-GL-05: Periodensteuerung
-- **Status:** No (Missing)
+### FIBU-GL-05: Periodensteuerung ✅
+- **Status:** Ja (Tabelle + API + UI)
 - **Typ:** C (Neues Feature/Modul)
-- **Beschreibung:** Keine Perioden-Admin-Screen gefunden, keine Sperrlogik. Buchungen in gesperrter Periode werden nicht blockiert.
-- **Impact:** Hohe - GoBD-Compliance gefährdet
-- **Evidence:** Keine Screenshots/Flows
-- **Lösung:** Periodensteuerung + Sperrlogik implementieren
-- **Vergleich:** SAP/Odoo haben vollständige Periodensteuerung
+- **Beschreibung:** Tabelle `finance_accounting_periods`, API `/finance/periods` (CRUD, close), Frontend `periods.tsx`, Sperrprüfung in journal_entries/ap_invoices/bulk_journal_import.
+- **Impact:** GoBD-Compliance
+- **Evidence:** Migration add_audit_logs_and_accounting_periods_20260304, accounting_periods.py, periods.tsx
+- **Lösung:** Umgesetzt
 - **Owner:** Backend + Frontend
 
-### FIBU-COMP-01: GoBD / Audit Trail
-- **Status:** Partial
+### FIBU-COMP-01: GoBD / Audit Trail ✅
+- **Status:** Ja (Tabelle + API + UI)
 - **Typ:** B (Integration/Adapter)
-- **Beschreibung:** GoBDAuditTrail in services/finance vorhanden, aber Audit-View/Historie/Logs-UI fehlt. Jede Änderung ist nicht mit User+Zeit protokolliert sichtbar.
-- **Impact:** Hohe - GoBD-Compliance unvollständig
-- **Evidence:** Backend vorhanden, UI fehlt
-- **Lösung:** Audit-View-UI implementieren, Historie/Logs anzeigen
-- **Vergleich:** SAP/Odoo haben vollständige Audit-Trail-UI
-- **Owner:** Frontend
+- **Beschreibung:** domain_shared.audit_logs, log_fibu_audit, API /audit/logs und /audit/stats, Frontend audit-trail.tsx (Filter, Export CSV).
+- **Impact:** GoBD-Compliance
+- **Evidence:** Migration add_audit_logs_and_accounting_periods_20260304, audit.py, audit-trail.tsx
+- **Lösung:** Umgesetzt
+- **Owner:** Frontend + Backend
 
 ---
 
 ## P1 - Hoch (MUSS, Priorität 2)
 
 ### FIBU-GL-01: Kontenplan & Kontenstamm
-- **Status:** Partial
+- **Status:** Partial (Hierarchie umgesetzt)
 - **Typ:** D (UX/Edge-Case/Reifegrad)
-- **Beschreibung:** Kontenplan-Seite vorhanden (chart-of-accounts.tsx), aber Hierarchie/Hierarchieauswertung unklar. Konto kann möglicherweise angelegt werden, aber Hierarchieauswertung in Reports nicht sichtbar.
+- **Beschreibung:** Kontenplan-Seite (chart-of-accounts.tsx) mit Tabellen- und **Hierarchie-Tab**. API GET `/api/v1/accounts/hierarchy` baut Baum aus `parent_account_id`; Fallback: Parent aus längstem existierendem Kontonummern-Präfix (z. B. 1400 → 14 → 1). TreeView zeigt Hierarchie; Sortierung nach Kontonummer.
 - **Impact:** Mittel - Funktionalität vorhanden, aber unvollständig
-- **Evidence:** Screenshot: 20251124_095102_03_finance_module.png
-- **Lösung:** Hierarchie-Funktionalität prüfen und vervollständigen
+- **Evidence:** accounts.py (hierarchy), chart-of-accounts.tsx (Tab „Hierarchie“, TreeView)
+- **Lösung:** Hierarchie-API + Fallback und UI vorhanden; Reports mit Hierarchie-Summen optional
 - **Vergleich:** Odoo-ähnlich
 - **Owner:** Frontend
 
 ### FIBU-GL-02: Belegprinzip & Nummernkreise
-- **Status:** Partial
+- **Status:** Partial (Storno-Dialog umgesetzt)
 - **Typ:** C (Neues Feature/Modul)
-- **Beschreibung:** Nummernkreise in documents/router.py vorhanden, aber Belegprinzip/Storno-Dialog unklar. Belege sind möglicherweise nicht revisionssicher referenziert.
+- **Beschreibung:** Nummernkreise in documents/router.py. **Storno:** POST `/api/v1/journal-entries/{id}/reverse`, StornoDialog (Grund min. 10 Zeichen); in Buchungserfassung und **Buchungsjournal** (Storno-Button pro Zeile) integriert. Belegprinzip dokumentieren bleibt optional.
 - **Impact:** Mittel - Funktionalität teilweise vorhanden
-- **Evidence:** Backend vorhanden, UI unklar
-- **Lösung:** Storno-Dialog implementieren, Belegprinzip dokumentieren
+- **Evidence:** journal_entries.py (reverse), StornoDialog.tsx, buchungserfassung.tsx, buchungsjournal.tsx
+- **Lösung:** Storno-Dialog in Journal-Liste ergänzt; Belegprinzip-Doku optional
 - **Vergleich:** Basic
 - **Owner:** Backend + Frontend
 
 ### FIBU-AR-01: Debitorenstamm
-- **Status:** Partial
+- **Status:** Partial (Stammdaten + Dublettencheck umgesetzt)
 - **Typ:** D (UX/Edge-Case/Reifegrad)
-- **Beschreibung:** debitoren-liste.tsx vorhanden, aber Stammdaten/Adressen/USt-ID/Kreditlimit unklar. Pflichtfelder + Dublettencheck möglicherweise nicht vollständig.
-- **Impact:** Mittel - Funktionalität vorhanden, aber unvollständig
-- **Evidence:** Screenshot: 20251124_095105_04_invoices_list.png
-- **Lösung:** Stammdaten-Felder prüfen und vervollständigen
-- **Vergleich:** Basic
-- **Owner:** Frontend
+- **Beschreibung:** **debitoren-stamm.tsx**: Stammdaten (Debitorennummer, Firma, Ansprechpartner), Adresse (Straße, PLZ, Ort, Land), Kontakt (Telefon, E-Mail), **USt-ID (vat_id)**, Steuernummer, Bankverbindung (IBAN inkl. Validierung + optional IBAN-Lookup), **Kreditlimit** und Konditionen (Zahlungsziel, Skonto). Zod-Pflichtfelder; Backend **Dublettencheck** bei Create (debtor_number pro Tenant). API `/api/v1/finance/debtors` CRUD; debitoren-liste.tsx mit Kreditlimit/Auslastung/Mahnstufe.
+- **Impact:** Mittel - Stammdaten und Dublettencheck vorhanden
+- **Evidence:** debitoren-stamm.tsx, debitoren-liste.tsx, debtors.py (duplicate check, address JSONB, USt-ID-Format), lib/utils/vat-validator.ts
+- **Lösung:** Stammdaten, USt-ID, Kreditlimit und Dublettencheck implementiert; **USt-ID-Format-Validierung (EU)** in Frontend (vat-validator.ts, Debitoren-/Kreditoren-Stamm) und Backend (debtors.py) umgesetzt.
+- **Vergleich:** Basic+
+- **Owner:** Frontend + Backend
 
 ### FIBU-AR-02: Ausgangsrechnungen
 - **Status:** Partial
 - **Typ:** B (Integration/Adapter)
-- **Beschreibung:** Invoices-Liste und Create Invoice vorhanden, API finance_invoices.py erstellt, aber GL-Buchung/OP-Erzeugung unklar. Rechnung erzeugt möglicherweise keine GL-Buchung + OP.
-- **Impact:** Mittel - Formular vorhanden, Backend-Integration unvollständig
-- **Evidence:** Screenshots: 20251124_095105_04_invoices_list.png, 20251124_095108_05_create_invoice_form.png
-- **Lösung:** GL-Buchung + OP-Erzeugung bei Rechnungserstellung implementieren
+- **Beschreibung:** Invoices-Liste und Create Invoice vorhanden; `finance_invoices.py` erzeugt bei Status != `ENTWURF` jetzt GL-Buchung in `domain_erp.journal_entries` + `journal_entry_lines` sowie Debitoren-OP in `offene_posten` (idempotent, Periodenprüfung aktiv).
+- **Impact:** Mittel - Kernintegration vorhanden, weitere fachliche Vertiefung (z. B. Kontierungsregeln/Freigabeprozesse) offen
+- **Evidence:** Screenshots: 20251124_095105_04_invoices_list.png, 20251124_095108_05_create_invoice_form.png; Backend: `app/api/v1/endpoints/finance_invoices.py`
+- **Lösung:** Nächster Schritt: Kontierungs-/Steuerschlüssel-Mapping und engere Abstimmung mit Zahlungsabgleich
 - **Vergleich:** Odoo-ähnlich
 - **Owner:** Backend
 
 ### FIBU-AR-05: OP-Verwaltung & Ausgleich
-- **Status:** Partial
+- **Status:** Partial (Ausgleich + Audit-Trail vorhanden)
 - **Typ:** D (UX/Edge-Case/Reifegrad)
-- **Beschreibung:** op-debitoren.tsx vorhanden, aber Ausgleich/Verrechnung/Audit-Trail unklar. Vollständiger Audit Trail pro Ausgleich möglicherweise nicht vorhanden.
-- **Impact:** Mittel - Funktionalität vorhanden, aber unvollständig
-- **Evidence:** Screenshot: 20251124_095102_03_finance_module.png
-- **Lösung:** Ausgleich/Verrechnung-Funktionalität prüfen und vervollständigen
-- **Vergleich:** Basic
-- **Owner:** Frontend
+- **Beschreibung:** op-debitoren.tsx mit OP-Liste; Backend: Einzelausgleich POST `/{op_id}/settle`, Sammelausgleich (FIBU-AP-05) für Kreditoren. **Audit-Trail:** `log_fibu_audit` bei settle/reverse, optional `infrastructure.audit_log`, GET `/{op_id}/settlements` liefert Ausgleichshistorie. Storno: POST `/{op_id}/reverse-settlement`.
+- **Impact:** Mittel - Kernfunktion und Audit vorhanden, UI-Tiefe ausbaubar
+- **Evidence:** open_items.py (settle, reverse_settlement, get_settlements, log_fibu_audit), op-debitoren.tsx (Tab Ausgleichshistorie)
+- **Lösung:** Ausgleich und Audit-Trail implementiert; **OP Debitoren** zeigt Ausgleichshistorie (Tab „Ausgleichshistorie“, GET `/{op_id}/settlements`) in op-debitoren.tsx.
+- **Vergleich:** Basic+
+- **Owner:** Backend + Frontend
 
 ### FIBU-AP-01: Kreditorenstamm
-- **Status:** Partial
+- **Status:** Partial (API + IBAN + USt-ID + Dublettencheck)
 - **Typ:** D (UX/Edge-Case/Reifegrad)
-- **Beschreibung:** kreditoren-stamm.tsx vorhanden, aber Stammdaten/Bankdaten/IBAN-Validierung unklar. Bankdaten möglicherweise nicht validierbar (IBAN).
-- **Impact:** Mittel - Funktionalität vorhanden, aber unvollständig
-- **Evidence:** Screenshot: 20251124_095102_03_finance_module.png
-- **Lösung:** IBAN-Validierung implementieren, Stammdaten vervollständigen
-- **Vergleich:** Basic
-- **Owner:** Frontend
+- **Beschreibung:** **API** `/api/v1/finance/creditors` (CRUD): Create mit **Dublettencheck** (creditor_number pro Tenant), USt-ID- und IBAN-Format-Validierung. Frontend **kreditoren-stamm.tsx**: Stammdaten, IBAN (validateIBAN, useIbanLookup), USt-ID (validateVatIdFormat); **toApiCreditor/fromApiCreditor** mappen Formular ↔ API. Stammdaten-Felder und Dublettencheck umgesetzt.
+- **Impact:** Mittel - API und Validierung vorhanden
+- **Evidence:** creditors.py, kreditoren-stamm.tsx, lib/utils/iban-validator.ts, lib/utils/vat-validator.ts
+- **Lösung:** Kreditoren-API mit CRUD + Dublettencheck; Frontend-Mapping und Validierung implementiert
+- **Vergleich:** Basic+
+- **Owner:** Backend + Frontend
 
 ### FIBU-AP-05: OP-Verwaltung & Ausgleich
-- **Status:** No (Missing)
-- **Typ:** C (Neues Feature/Modul)
-- **Beschreibung:** Keine OP-Liste für Kreditoren gefunden. Kreditoren-OPs können nicht verwaltet werden.
-- **Impact:** Mittel - Erforderlich für AP
-- **Evidence:** Keine Screenshots/Flows
-- **Lösung:** OP-Liste für Kreditoren implementieren (ähnlich wie Debitoren)
-- **Vergleich:** SAP/Odoo haben OP-Verwaltung für beide Seiten
+- **Status:** Partial (Sammelausgleich umgesetzt)
+- **Typ:** D (UX/Edge-Case/Reifegrad)
+- **Beschreibung:** OP-Kreditoren-Maske mit Liste, Summen, Suche, CRUD und Einzelausgleich; **Sammelausgleich**: POST `/api/v1/finance/open-items/batch-settle`, UI Mehrfachauswahl + Dialog „Alle ausgleichen“. Offen: Zahlungsfreigaben, OP-Import/Abstimmung.
+- **Impact:** Mittel - Kernfunktion vorhanden, fachliche Tiefe ausbaufähig
+- **Evidence:** open_items.py (batch-settle), op-kreditoren.tsx (Checkboxen, Sammelausgleich-Button/Dialog)
+- **Lösung:** Sammelausgleich umgesetzt; weitere Workflow-Erweiterung optional
+- **Vergleich:** Basic+
 - **Owner:** Backend + Frontend
 
 ### FIBU-BNK-01: Bankkontenstamm
-- **Status:** Partial
+- **Status:** Partial (API + UI + IBAN-Validierung)
 - **Typ:** D (UX/Edge-Case/Reifegrad)
-- **Beschreibung:** Bankkonten in database/schema.sql vorhanden, aber Bankstamm-UI unklar. Bankkonto möglicherweise nicht mit Gegenkonto verknüpft.
-- **Impact:** Mittel - Schema vorhanden, UI fehlt
-- **Evidence:** Schema vorhanden
-- **Lösung:** Bankstamm-UI implementieren, Gegenkonto-Verknüpfung prüfen
+- **Beschreibung:** API `/api/v1/finance/bank-accounts` (List, Get, Create, Update). Beim Anlegen wird bei Bedarf ein Kontenplan-Eintrag (Gegenkonto) angelegt. UI `bank-stamm.tsx`: Liste, Anlegen, Bearbeiten (Kontonummer, Bankname, IBAN, BIC, Währung, Aktiv). **IBAN:** Frontend prüft vor Submit (validateIBAN, formatIBAN); Backend `_validate_iban` (Mod-97) bei Create/Update. Nav: „Bankkonten (Bankstamm)“.
+- **Impact:** Mittel - Schema, UI und IBAN-Validierung vorhanden
+- **Evidence:** bank_accounts.py (_validate_iban), bank-stamm.tsx (validateIBAN, formatIBAN), Nav „Bankkonten (Bankstamm)“
+- **Lösung:** Umgesetzt inkl. IBAN-Validierung (Frontend + Backend)
 - **Vergleich:** Basic
-- **Owner:** Frontend
+- **Owner:** Frontend + Backend
 
 ### FIBU-BNK-02: Kontoauszugsimport
 - **Status:** Partial
 - **Typ:** D (UX/Edge-Case/Reifegrad)
-- **Beschreibung:** bank-abgleich.tsx vorhanden, aber CAMT/MT940/CSV-Import unklar. Importfehler pro Zeile möglicherweise nicht sichtbar.
-- **Impact:** Mittel - Seite vorhanden, Import-Formate unklar
-- **Evidence:** Screenshot: 20251124_095102_03_finance_module.png
-- **Lösung:** Import-Formate (CAMT/MT940/CSV) implementieren, Import-Protokoll anzeigen
+- **Beschreibung:** Import für CAMT/MT940/CSV vorhanden (`bank_statement_import.py`) inkl. Rückgabe `import_errors`; UI `bank-abgleich.tsx` zeigt Import-Protokoll/Zeilenfehler jetzt explizit an.
+- **Impact:** Mittel - Formate und Fehlertransparenz vorhanden, weitere Parser-Robustheit bleibt ausbaubar
+- **Evidence:** Screenshot: 20251124_095102_03_finance_module.png; Backend: `app/api/v1/endpoints/bank_statement_import.py`; Frontend: `packages/frontend-web/src/pages/finance/bank-abgleich.tsx`
+- **Lösung:** Nächster Schritt: Parser-Validierung je Bankprofil und strukturierte Fehlercodes
 - **Vergleich:** Basic
 - **Owner:** Frontend + Backend
 
 ### FIBU-BNK-04: Bankabstimmung
 - **Status:** Partial
 - **Typ:** D (UX/Edge-Case/Reifegrad)
-- **Beschreibung:** bank-abgleich.tsx vorhanden, aber Saldoabgleich/Differenzliste unklar. Differenzen erzeugen möglicherweise keinen Buchungsvorschlag.
-- **Impact:** Mittel - Seite vorhanden, Funktionalität unklar
-- **Evidence:** Screenshot: 20251124_095102_03_finance_module.png
-- **Lösung:** Saldoabgleich/Differenzliste-Funktionalität prüfen und vervollständigen
+- **Beschreibung:** `bank_reconciliation.py` liefert Saldovergleich, Differenzliste, Buchungsvorschläge und `line_counts`; Auto-Book schreibt Journal + markiert Statement-Lines als `MATCHED`. Frontend `bank-abgleich.tsx` kann Reconcile-Daten inkl. `line_counts` jetzt korrekt verwerten.
+- **Impact:** Mittel - Kernabstimmung nutzbar, weitere Tiefe (Regelwerk, Bulk-Workflow, bessere Gegenkontovorschläge) offen
+- **Evidence:** Screenshot: 20251124_095102_03_finance_module.png; Backend: `app/api/v1/endpoints/bank_reconciliation.py`
+- **Lösung:** Nächster Schritt: Matching-Regeln ausbauen und manuelle Differenzbuchungen als Workflow-Maske ergänzen
 - **Vergleich:** Basic
 - **Owner:** Frontend
 
 ### FIBU-TAX-01: Steuerschlüssel-System
 - **Status:** Partial
 - **Typ:** D (UX/Edge-Case/Reifegrad)
-- **Beschreibung:** steuerschluessel.tsx vorhanden, aber Steuerarten/Sätze/Länderlogik/Reverse-Charge unklar. Steuer bestimmt möglicherweise nicht korrekte Konten + Meldelogik.
-- **Impact:** Mittel - Seite vorhanden, Vollständigkeit unklar
-- **Evidence:** Screenshot: 20251124_095102_03_finance_module.png
-- **Lösung:** Steuerarten/Sätze/Länderlogik/Reverse-Charge prüfen und vervollständigen
+- **Beschreibung:** Tax-Keys API mit CRUD, Länderfilter und zusätzlicher Validierung (ISO-Landcode, Gültigkeitszeitraum, Reverse-Charge nur bei 0%) aktiv. UI `steuerschluessel.tsx` zeigt Steuerart/Reverse-Charge transparent und erlaubt Neuanlage inkl. Intracom/Export/Reverse-Charge. AR/AP-Posting nutzt nun zentralen Tax-Resolver (`app/finance/tax_resolver.py`) mit Country-/EU-/Export-Kontext und Fallback auf DE.
+- **Impact:** Mittel - Stammdatenpflege belastbarer, tiefe Steuerlogik (z. B. automatische Kontierung je Belegkontext) bleibt ausbaubar
+- **Evidence:** Screenshot: 20251124_095102_03_finance_module.png; Backend: `app/api/v1/endpoints/tax_keys.py`; Frontend: `packages/frontend-web/src/pages/finance/steuerschluessel.tsx`
+- **Lösung:** Steuerfindung in AR/AP-Buchungsfluss je Land/Steuerart angebunden; nächster Schritt: tieferes Mapping je Beleg-/Steuerart (inkl. OSS/ZM)
 - **Vergleich:** Basic
 - **Owner:** Frontend
 
 ### FIBU-CLS-02: Nebenbuch-Abstimmung
-- **Status:** No (Missing)
+- **Status:** Partial (AR/AP/Bank umgesetzt, FA nicht in Scope)
 - **Typ:** C (Neues Feature/Modul)
-- **Beschreibung:** Keine Reconciliation-Reports gefunden. AR/AP/FA/Bank ↔ GL Abgleich nicht möglich. Differenzen sind nicht drilldown-fähig.
+- **Beschreibung:** API `/api/v1/finance/subsidiary-ledger-reconciliation` fachlich korrigiert (reales Schema für Journal/OP) mit Endpunkten für AR/AP/Bank, summary, details und CSV-Export je Ledger/Periode. UI `nebenbuch-abstimmung.tsx`: Perioden-/Ledger-Filter, Saldenvergleich, Drilldown und Export-Button.
 - **Impact:** Mittel - Erforderlich für Abschluss
-- **Evidence:** Keine Screenshots/Flows
-- **Lösung:** Reconciliation-Reports implementieren
+- **Evidence:** `app/api/v1/endpoints/subsidiary_ledger_reconciliation.py`, `packages/frontend-web/src/pages/finance/nebenbuch-abstimmung.tsx`, Nav „Nebenbuch-Abstimmung“
+- **Lösung:** Umgesetzt für AR/AP/Bank inkl. Export; FA bei Bedarf später
 - **Vergleich:** SAP/Odoo haben vollständige Nebenbuch-Abstimmung
 - **Owner:** Backend + Frontend
 
 ### FIBU-REP-01: Standardreports
-- **Status:** Partial
+- **Status:** Partial (Bilanz/GuV/BWA + Landingpage)
 - **Typ:** D (UX/Edge-Case/Reifegrad)
-- **Beschreibung:** Dashboard vorhanden, aber Bilanz/GuV/BWA/Saldenliste/Journal/OP-Listen unklar. Export (PDF/Excel) möglicherweise nicht verfügbar.
-- **Impact:** Mittel - Dashboard vorhanden, Reports unklar
-- **Evidence:** Screenshot: 20251124_095059_02_dashboard.png
-- **Lösung:** Standardreports (Bilanz/GuV/BWA) implementieren, Export-Funktionalität prüfen
+- **Beschreibung:** API `/api/v1/finance/financial-reports`: balance-sheet, profit-loss, bwa, **export/{report_type}?format=pdf|excel|json**. Export liefert PDF (reportlab) oder Excel (openpyxl) als Download; JSON unverändert. Frontend: fibu/bilanz, fibu/guv, fibu/bwa; **finance/reports.tsx** als Landingpage.
+- **Impact:** Mittel - Dashboard und Report-Export (PDF/Excel) nutzbar
+- **Evidence:** financial_reports.py (export_report, _report_to_rows), finance/reports.tsx
+- **Lösung:** PDF- und Excel-Export für Bilanz/GuV/BWA umgesetzt
 - **Vergleich:** Basic
 - **Owner:** Frontend + Backend
 
@@ -207,13 +205,13 @@
 ## P2 - Mittel (SOLL, Priorität 3)
 
 ### FIBU-GL-04: Sammel-/Massenbuchungen
-- **Status:** No (Missing)
+- **Status:** Partial (CSV-Import + Fehler pro Zeile)
 - **Typ:** C (Neues Feature/Modul)
-- **Beschreibung:** Kein Import-Screen für CSV/Excel/API gefunden. Import zeigt keine Fehler pro Zeile nachvollziehbar.
-- **Impact:** Niedrig - Nice-to-have
-- **Evidence:** Keine Screenshots/Flows
-- **Lösung:** Import-Screen + Stapel-Postenliste implementieren
-- **Vergleich:** SAP/Odoo haben vollständige Import-Funktionalität
+- **Beschreibung:** API POST `/api/v1/bulk-journal-import/csv` mit Dry-Run und Import; Rückgabe `ImportResult` inkl. `errors[]` (row_number, field, error_message, row_data). Frontend **buchungsimport.tsx**: 3 Schritte (Datei wählen → Vorschau → Ergebnis), Fehlertabelle pro Zeile in Vorschau und Ergebnis. Excel/API-Stapel optional.
+- **Impact:** Niedrig - CSV-Import nutzbar, Excel/API ausbaubar
+- **Evidence:** bulk_journal_import.py (ImportError, ImportResult), buchungsimport.tsx, Nav/Schnittstellen-Center „Buchungsimport“
+- **Lösung:** CSV-Import-Screen und Fehler pro Zeile umgesetzt; Excel/weitere Formate optional
+- **Vergleich:** Basic
 - **Owner:** Backend + Frontend
 
 ### FIBU-AR-04: Mahnwesen / Dunning
@@ -267,12 +265,12 @@
 - **Owner:** Frontend + Backend
 
 ### FIBU-CLS-01: Abschlusschecklisten
-- **Status:** No (Missing)
+- **Status:** Partial (API + Cockpit-UI)
 - **Typ:** C (Neues Feature/Modul)
-- **Beschreibung:** Keine Closing-Checklist gefunden. Aufgaben je Periode/Status/Verantwortliche nicht verfügbar. Checklist steuert Abschlussprozess nicht.
+- **Beschreibung:** API `/api/v1/finance/closing-checklists`: Templates, CRUD, cockpit/summary, GET `/{checklist_id}`, POST `/{checklist_id}/items/{item_code}/complete`. Frontend **abschluss-cockpit.tsx**: Übersicht, Link „Details“ pro Checkliste. **abschluss-checklist-detail.tsx**: Detail-UI mit Aufgabenliste und „Erledigen“-Button pro Aufgabe.
 - **Impact:** Niedrig - Nice-to-have
-- **Evidence:** Keine Screenshots/Flows
-- **Lösung:** Closing-Checklist implementieren
+- **Evidence:** closing_checklists.py, abschluss-cockpit.tsx, abschluss-checklist-detail.tsx, Route fibu/abschluss-checklist-detail/:id
+- **Lösung:** API + Cockpit + Detail-UI mit Aufgaben-Erledigen umgesetzt
 - **Vergleich:** SAP/Odoo haben vollständige Checklist-Funktionalität
 - **Owner:** Backend + Frontend
 
@@ -371,9 +369,8 @@
 ### Typ A (Konfig/Verdrahtung): 0 GAPs
 - Keine reinen Konfigurations-GAPs identifiziert
 
-### Typ B (Integration/Adapter): 2 GAPs
+### Typ B (Integration/Adapter): 1 GAP
 - FIBU-AR-02: Ausgangsrechnungen (GL-Buchung/OP-Erzeugung)
-- FIBU-COMP-01: GoBD / Audit Trail (UI fehlt)
 
 ### Typ C (Neues Feature/Modul): 21 GAPs
 - Die meisten fehlenden Features erfordern neue Module
@@ -383,16 +380,16 @@
 
 ## Nächste Schritte
 
-1. **P0-GAPs beheben (Priorität 1):**
-   - FIBU-AR-03: Zahlungseingänge & Matching
-   - FIBU-AP-02: Eingangsrechnungen
-   - FIBU-GL-05: Periodensteuerung
-   - FIBU-COMP-01: GoBD / Audit Trail (UI)
+1. **P0-Status: abgeschlossen (Priorität 1):**
+   - FIBU-AR-03: Zahlungseingänge & Matching ✅
+   - FIBU-AP-02: Eingangsrechnungen ✅
+   - FIBU-GL-05: Periodensteuerung ✅
+   - FIBU-COMP-01: GoBD / Audit Trail ✅
 
 2. **P1-GAPs beheben (Priorität 2):**
    - Alle Partial-Status GAPs prüfen und vervollständigen
    - FIBU-AP-05: OP-Verwaltung & Ausgleich (Kreditoren)
-   - FIBU-CLS-02: Nebenbuch-Abstimmung
+   - FIBU-CLS-02: Nebenbuch-Abstimmung (AR/AP/Bank + Drilldown umgesetzt; FA optional)
 
 3. **P2-GAPs beheben (Priorität 3):**
    - SOLL-Features nach Bedarf implementieren

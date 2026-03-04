@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useQuery } from '@tanstack/react-query'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
@@ -192,6 +193,12 @@ const createOpDebitorenConfig = (t: any, entityTypeLabel: string): MaskConfig =>
       ]
     },
     {
+      key: 'ausgleichshistorie',
+      label: t('crud.fields.settlementHistory') ?? 'Ausgleichshistorie',
+      fields: [],
+      customRender: (tabData: any) => tabData?.id ? <SettlementsList opId={tabData.id} t={t} /> : <p className="text-sm text-muted-foreground">{t('crud.fields.settlementHistoryEmpty') ?? 'OP speichern, um die Ausgleichshistorie zu sehen.'}</p>
+    } as any,
+    {
       key: 'notizen',
       label: t('crud.fields.notes'),
       fields: [
@@ -334,6 +341,52 @@ function ZahlungenTable({ data: _data, gesamtBetrag, onChange, t }: {
           </tbody>
         </table>
       </div>
+    </div>
+  )
+}
+
+function SettlementsList({ opId, t }: { opId: string; t: (key: string) => string }) {
+  const { data: settlements, isLoading } = useQuery({
+    queryKey: ['finance', 'open-items', 'settlements', opId],
+    queryFn: async () => {
+      const res = await apiClient.get<Array<{ id: string; payment_amount: number; payment_date: string | null; payment_reference: string; created_at: string | null }>>(
+        `/api/v1/finance/open-items/${opId}/settlements`
+      )
+      return res.data
+    },
+    enabled: !!opId,
+  })
+  if (!opId) return null
+  if (isLoading) return <p className="text-sm text-muted-foreground">{t('common.loading') ?? 'Laden…'}</p>
+  const list = settlements ?? []
+  const label = t('crud.fields.settlementHistory') ?? 'Ausgleichshistorie'
+  return (
+    <div className="space-y-2">
+      <h3 className="text-sm font-semibold">{label}</h3>
+      {list.length === 0 ? (
+        <p className="text-sm text-muted-foreground">{t('crud.fields.settlementHistoryEmpty') ?? 'Bisher keine gebuchten Ausgleiche.'}</p>
+      ) : (
+        <div className="overflow-x-auto rounded border">
+          <table className="min-w-full text-sm">
+            <thead className="bg-muted/50">
+              <tr>
+                <th className="px-3 py-2 text-left">{t('crud.fields.date')}</th>
+                <th className="px-3 py-2 text-left">{t('crud.fields.reference')}</th>
+                <th className="px-3 py-2 text-right">{t('crud.fields.amount')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {list.map((s) => (
+                <tr key={s.id} className="border-t">
+                  <td className="px-3 py-2">{s.payment_date ? new Date(s.payment_date).toLocaleDateString('de-DE') : '–'}</td>
+                  <td className="px-3 py-2">{s.payment_reference ?? '–'}</td>
+                  <td className="px-3 py-2 text-right">{Number(s.payment_amount).toLocaleString('de-DE', { minimumFractionDigits: 2 })} €</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   )
 }

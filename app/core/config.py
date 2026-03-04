@@ -58,7 +58,7 @@ class Settings(BaseSettings):
         raise ValueError(v)
 
     # Trusted Hosts
-    ALLOWED_HOSTS: List[str] = ["localhost", "127.0.0.1"]
+    ALLOWED_HOSTS: List[str] = ["localhost", "127.0.0.1", "testserver"]
 
     # Database Configuration
     # HINWEIS: In Docker-Umgebung muss host="postgres" sein (Service-Name aus docker-compose.yml)

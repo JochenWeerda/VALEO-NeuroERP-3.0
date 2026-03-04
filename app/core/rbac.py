@@ -19,6 +19,7 @@ class Role(str, Enum):
     FINANCE_MANAGER = "finance_manager"
     INVENTORY_MANAGER = "inventory_manager"
     CRM_MANAGER = "crm_manager"
+    POSITION_MANAGER = "position_manager"
 
 
 class Permission(str, Enum):
@@ -44,6 +45,13 @@ class Permission(str, Enum):
     VIEW_CUSTOMERS = "view_customers"
     CREATE_CUSTOMERS = "create_customers"
     MANAGE_LEADS = "manage_leads"
+
+    # Commodity Position (Commodity Position Matrix) permissions
+    POS_READ = "pos_read"
+    POS_EDIT_RULES = "pos_edit_rules"
+    POS_REQUEST_OVERRIDE = "pos_request_override"
+    POS_APPROVE_OVERRIDE = "pos_approve_override"
+    POS_ADMIN = "pos_admin"
 
 
 # Role -> Permissions mapping
@@ -80,6 +88,11 @@ ROLE_PERMISSIONS: dict[Role, List[Permission]] = {
         Permission.VIEW_CUSTOMERS,
         Permission.CREATE_CUSTOMERS,
         Permission.MANAGE_LEADS,
+    ],
+
+    Role.POSITION_MANAGER: [
+        Permission.POS_READ,
+        Permission.POS_REQUEST_OVERRIDE,
     ],
 }
 
