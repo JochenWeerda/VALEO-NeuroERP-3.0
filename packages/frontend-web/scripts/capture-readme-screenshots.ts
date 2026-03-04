@@ -20,10 +20,29 @@ const HEADLESS = process.env.HEADLESS !== 'false'
 // From repo root: docs/screenshots (when run from packages/frontend-web, cwd is frontend-web)
 const OUTPUT_DIR = process.env.SCREENSHOTS_OUTPUT_DIR ?? path.resolve(process.cwd(), '../../docs/screenshots')
 
-const CAPTURES: { path: string; file: string }[] = [
-  { path: '/', file: 'dashboard.png' },
-  { path: '/finance/op-kreditoren', file: 'finance.png' },
-  { path: '/agrar/ernte-annahme-erfassung', file: 'agrar.png' },
+const CAPTURES: {
+  path: string
+  file: string
+  /** Selector or text to wait for before screenshot (so we don't capture loading state) */
+  waitFor?: string
+  /** Extra ms after navigation before waiting for content */
+  waitAfterNav?: number
+  /** Capture full scrollable page (e.g. entire dashboard) */
+  fullPage?: boolean
+}[] = [
+  { path: '/', file: 'dashboard.png', waitAfterNav: 2000, fullPage: true },
+  {
+    path: '/finance/op-kreditoren',
+    file: 'finance.png',
+    waitFor: 'text=Offene Posten',
+    waitAfterNav: 3000,
+  },
+  {
+    path: '/agrar/ernte-annahme-erfassung',
+    file: 'agrar.png',
+    waitFor: "h1:has-text('Ernte-Annahme-Erfassung')",
+    waitAfterNav: 1000,
+  },
 ]
 
 async function main() {
@@ -49,14 +68,20 @@ async function main() {
 
   const page = await context.newPage()
 
-  for (const { path: routePath, file } of CAPTURES) {
+  const contentTimeout = 25_000
+
+  for (const { path: routePath, file, waitFor, waitAfterNav = 1500, fullPage = false } of CAPTURES) {
     const url = `${BASE_URL}${routePath}`
     console.log(`Opening ${url} -> ${file}`)
     try {
-      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 25_000 })
-      await page.waitForTimeout(1500)
+      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: contentTimeout })
+      await page.waitForTimeout(waitAfterNav)
+      if (waitFor) {
+        await page.locator(waitFor).first().waitFor({ state: 'visible', timeout: contentTimeout })
+        await page.waitForTimeout(500)
+      }
       const outPath = path.join(OUTPUT_DIR, file)
-      await page.screenshot({ path: outPath, fullPage: false })
+      await page.screenshot({ path: outPath, fullPage })
       console.log(`  -> ${outPath}`)
     } catch (e) {
       console.error(`  Failed: ${e}`)
