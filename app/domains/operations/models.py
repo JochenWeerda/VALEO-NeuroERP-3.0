@@ -569,6 +569,127 @@ class Rahmenvertrag(Base):
     updated_by = Column(String(100))
 
 
+class KonContract(Base):
+    """Valeo Kontrakt-Kopf."""
+    __tablename__ = "kon_contract"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    contract_id = Column(String, primary_key=True, default=uuid7)
+    contract_no = Column(String(50), nullable=False, unique=True, index=True)
+    contract_type = Column(String(20), nullable=False)  # EINKAUF|ZUKAUF|VERKAUF
+    branch_id = Column(String(64), nullable=True)
+    clerk_id = Column(String(64), nullable=True)
+    party_id = Column(String(64), nullable=False, index=True)
+    debitor_kto = Column(String(64), nullable=True)
+    kreditor_kto = Column(String(64), nullable=True)
+    contract_date = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    valid_from = Column(DateTime(timezone=True), nullable=True)
+    valid_to = Column(DateTime(timezone=True), nullable=True)
+    quantity_type = Column(String(20), nullable=False, default="GESAMTKONTRAKT")
+    total_quantity = Column(DECIMAL(14, 3), nullable=False, default=0)
+    unit = Column(String(20), nullable=False, default="kg")
+    allow_overdelivery = Column(Boolean, nullable=False, default=False)
+    status = Column(String(20), nullable=False, default="OFFEN")
+    notes = Column(Text, nullable=True)
+    payment_terms = Column(Text, nullable=True)
+    conditions_json = Column(JSONB, nullable=True)
+
+    # Preis-/Marktvorbereitung
+    pricing_model = Column(String(30), nullable=True)
+    min_price = Column(DECIMAL(14, 4), nullable=True)
+    premium_type = Column(String(30), nullable=True)
+    premium_value = Column(DECIMAL(14, 4), nullable=True)
+    basis_reference = Column(String(120), nullable=True)
+    pricing_window_from = Column(DateTime(timezone=True), nullable=True)
+    pricing_window_to = Column(DateTime(timezone=True), nullable=True)
+
+    tenant_id = Column(String, nullable=False, index=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_by = Column(String(100), nullable=True)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    updated_by = Column(String(100), nullable=True)
+
+
+class KonContractLine(Base):
+    """Valeo Kontrakt-Position."""
+    __tablename__ = "kon_contract_line"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    line_id = Column(String, primary_key=True, default=uuid7)
+    contract_id = Column(String, ForeignKey("domain_ops.kon_contract.contract_id", ondelete="CASCADE"), nullable=False, index=True)
+    position_no = Column(Integer, nullable=False)
+    article_id = Column(String(64), nullable=False, index=True)
+    description1 = Column(String(255), nullable=True)
+    description2 = Column(String(255), nullable=True)
+    qty_contract = Column(DECIMAL(14, 3), nullable=False, default=0)
+    price_unit = Column(String(20), nullable=True)
+    unit_price = Column(DECIMAL(14, 4), nullable=True)
+    discount_pct = Column(DECIMAL(8, 4), nullable=True)
+    surcharge = Column(DECIMAL(14, 4), nullable=True)
+    rebate_type = Column(String(30), nullable=True)
+    is_bio = Column(Boolean, nullable=False, default=False)
+    is_matif = Column(Boolean, nullable=False, default=False)
+    tenant_id = Column(String, nullable=False, index=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_by = Column(String(100), nullable=True)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    updated_by = Column(String(100), nullable=True)
+
+
+class KonContractMovement(Base):
+    """Valeo Kontrakt-Umsatzbewegung."""
+    __tablename__ = "kon_contract_movement"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    movement_id = Column(String, primary_key=True, default=uuid7)
+    contract_id = Column(String, ForeignKey("domain_ops.kon_contract.contract_id", ondelete="CASCADE"), nullable=False, index=True)
+    line_id = Column(String, ForeignKey("domain_ops.kon_contract_line.line_id", ondelete="SET NULL"), nullable=True, index=True)
+    order_no = Column(String(64), nullable=True)
+    delivery_note_no = Column(String(64), nullable=True)
+    invoice_no = Column(String(64), nullable=True)
+    movement_date = Column(DateTime(timezone=True), nullable=False, server_default=func.now(), index=True)
+    quantity = Column(DECIMAL(14, 3), nullable=False, default=0)
+    unit_price = Column(DECIMAL(14, 4), nullable=True)
+    route_no = Column(String(64), nullable=True)
+    is_invoiced = Column(Boolean, nullable=False, default=False)
+    is_archived = Column(Boolean, nullable=False, default=False)
+    tenant_id = Column(String, nullable=False, index=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_by = Column(String(100), nullable=True)
+
+
+class KonAuditLog(Base):
+    """Valeo Kontrakt-Auditlog."""
+    __tablename__ = "kon_audit_log"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    audit_id = Column(String, primary_key=True, default=uuid7)
+    entity_type = Column(String(50), nullable=False)
+    entity_id = Column(String(64), nullable=False, index=True)
+    field_name = Column(String(120), nullable=False)
+    old_value = Column(Text, nullable=True)
+    new_value = Column(Text, nullable=True)
+    action = Column(String(30), nullable=False)
+    changed_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now(), index=True)
+    changed_by = Column(String(100), nullable=True)
+    tenant_id = Column(String, nullable=False, index=True)
+
+
+class KonNumberRange(Base):
+    """Nummernkreis für Kontrakte."""
+    __tablename__ = "kon_number_range"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=uuid7)
+    contract_type = Column(String(20), nullable=False, index=True)
+    branch_id = Column(String(64), nullable=True, index=True)
+    prefix = Column(String(20), nullable=False, default="KON")
+    next_number = Column(Integer, nullable=False, default=1)
+    padding = Column(Integer, nullable=False, default=6)
+    updated_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now())
+    tenant_id = Column(String, nullable=False, index=True)
+
+
 class ComplianceEintrag(Base):
     __tablename__ = "ops_compliance_items"
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}

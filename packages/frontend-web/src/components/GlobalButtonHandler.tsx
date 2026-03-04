@@ -52,7 +52,7 @@ export function GlobalButtonHandler(): null {
           event.stopPropagation()
           const pageName = window.location.pathname.split('/').pop() || 'unknown'
           console.info(`FB:LEVEL=3 PAGE=${pageName} ACTION=delete`)
-          handleDeleteClick(button)
+          handleDeleteClick()
           return
         }
       }
