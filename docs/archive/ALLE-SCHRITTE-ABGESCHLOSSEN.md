@@ -127,7 +127,7 @@ curl -X POST "http://localhost:8000/finance/export/sepa" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "initiator_name": "VALEO GmbH",
+    "initiator_name": "Jochen Weerda",
     "initiator_iban": "DE89370400440532013000",
     "initiator_bic": "COBADEFFXXX",
     "transactions": [

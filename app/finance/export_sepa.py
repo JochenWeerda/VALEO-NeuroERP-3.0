@@ -188,7 +188,7 @@ class SEPAExporter:
 if __name__ == "__main__":
     # SEPA-Exporter initialisieren
     exporter = SEPAExporter(
-        initiator_name="VALEO GmbH",
+        initiator_name="VALEO NeuroERP",
         initiator_iban="DE89370400440532013000",
         initiator_bic="COBADEFFXXX"
     )
