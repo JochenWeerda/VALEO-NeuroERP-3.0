@@ -11,10 +11,12 @@ import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Search, FileText, Shield, CheckCircle2, XCircle, AlertTriangle } from 'lucide-react'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
 import { useToast } from '@/hooks/use-toast'
+import { apiClient } from '@/lib/api-client'
 
 type AuditLogEntry = {
   id: string
@@ -48,21 +50,19 @@ export default function AuditTrailPage(): JSX.Element {
   const [searchTerm, setSearchTerm] = useState('')
   const [entityTypeFilter, setEntityTypeFilter] = useState<string>('all')
   const [actionFilter, setActionFilter] = useState<string>('all')
+  const [fromDate, setFromDate] = useState('')
+  const [toDate, setToDate] = useState('')
 
   useEffect(() => {
     async function fetchAuditLogs(): Promise<void> {
       setLoading(true)
       try {
-        const params = new URLSearchParams()
-        if (entityTypeFilter !== 'all') params.append('entity_type', entityTypeFilter)
-        if (actionFilter !== 'all') params.append('action', actionFilter)
-        params.append('limit', '100')
-
-        const response = await fetch(`/api/v1/audit/logs?${params.toString()}`)
-        if (!response.ok) {
-          throw new Error('Failed to fetch audit logs')
-        }
-        const data: AuditLogEntry[] = await response.json()
+        const params: Record<string, string | number> = { limit: 200 }
+        if (entityTypeFilter !== 'all') params.entity_type = entityTypeFilter
+        if (actionFilter !== 'all') params.action = actionFilter
+        if (fromDate) params.from_ts = `${fromDate}T00:00:00`
+        if (toDate) params.to_ts = `${toDate}T23:59:59`
+        const { data } = await apiClient.get<AuditLogEntry[]>('/api/v1/audit/logs', { params })
         setLogs(data)
       } catch (error) {
         console.error('Error fetching audit logs:', error)
@@ -78,11 +78,7 @@ export default function AuditTrailPage(): JSX.Element {
 
     async function fetchStats(): Promise<void> {
       try {
-        const response = await fetch('/api/v1/audit/stats')
-        if (!response.ok) {
-          throw new Error('Failed to fetch audit stats')
-        }
-        const data: AuditStats = await response.json()
+        const { data } = await apiClient.get<AuditStats>('/api/v1/audit/stats')
         setStats(data)
       } catch (error) {
         console.error('Error fetching audit stats:', error)
@@ -91,7 +87,30 @@ export default function AuditTrailPage(): JSX.Element {
 
     void fetchAuditLogs()
     void fetchStats()
-  }, [entityTypeFilter, actionFilter, t, toast])
+  }, [entityTypeFilter, actionFilter, fromDate, toDate, t, toast])
+
+  const exportCsv = (): void => {
+    const header = ['timestamp', 'user_email', 'action', 'entity_type', 'entity_id', 'ip_address', 'correlation_id']
+    const rows = filteredLogs.map((log) => [
+      log.timestamp,
+      log.user_email,
+      log.action,
+      log.entity_type,
+      log.entity_id,
+      log.ip_address ?? '',
+      log.correlation_id ?? '',
+    ])
+    const csv = [header, ...rows]
+      .map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(';'))
+      .join('\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `audit-trail-${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
 
   const filteredLogs = logs.filter((log) => {
     if (searchTerm) {
@@ -291,6 +310,9 @@ export default function AuditTrailPage(): JSX.Element {
                 ))}
               </SelectContent>
             </Select>
+            <Input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} />
+            <Input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} />
+            <Button variant="outline" onClick={exportCsv}>CSV Export</Button>
           </div>
         </CardContent>
       </Card>

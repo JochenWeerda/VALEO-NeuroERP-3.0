@@ -4,7 +4,7 @@
  * Formular zum Erstellen/Bearbeiten von Eingangsrechnungen
  */
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Card } from '@/components/ui/card'
@@ -16,6 +16,7 @@ import { BelegFlowPanel } from '@/features/flows/BelegFlowPanel'
 import ApprovalPanel from '@/features/workflow/ApprovalPanel'
 import { getEntityTypeLabel, getSuccessMessage, getErrorMessage } from '@/features/crud/utils/i18n-helpers'
 import { Save, X } from 'lucide-react'
+import { apiClient } from '@/lib/api-client'
 
 const ISO_DATE_LENGTH = 10
 const DAYS_IN_MS = 24 * 60 * 60 * 1000
@@ -70,22 +71,38 @@ export default function APInvoiceFormPage(): JSX.Element {
 
   const [loading, setLoading] = useState(false)
 
+  useEffect(() => {
+    let active = true
+    async function load(): Promise<void> {
+      if (!id) return
+      setLoading(true)
+      try {
+        const { data } = await apiClient.get<APInvoice>(`/api/v1/finance/ap/invoices/${id}`)
+        if (active && data) {
+          setInvoice((prev) => ({ ...prev, ...data }))
+        }
+      } catch {
+        push(getErrorMessage(t, 'load', entityType))
+      } finally {
+        if (active) setLoading(false)
+      }
+    }
+    void load()
+    return () => {
+      active = false
+    }
+  }, [id, push, t, entityType])
+
   async function save(v: APInvoice): Promise<void> {
     setLoading(true)
     try {
       const url = id
         ? `/api/v1/finance/ap/invoices/${id}`
         : '/api/v1/finance/ap/invoices'
-      const method = id ? 'PUT' : 'POST'
-
-      const response = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(v),
-      })
-
-      if (!response.ok) {
-        throw new Error('Save failed')
+      if (id) {
+        await apiClient.put(url, v)
+      } else {
+        await apiClient.post(url, v)
       }
 
       push(getSuccessMessage(t, id ? 'update' : 'create', entityType))
