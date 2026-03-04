@@ -547,6 +547,21 @@ services:
       - ./services/ai/main.py:/app/main.py
       - ai_data:/app/data
 
+  # KI Usability API (Action Registry, Voice-to-Intent / Sprachsteuerung)
+  ki-usability:
+    build:
+      context: ./services/ki-usability
+      dockerfile: Dockerfile
+    container_name: valeo-neuro-erp-ki-usability
+    restart: unless-stopped
+    environment:
+      KI_USABILITY_HOST: "0.0.0.0"
+      KI_USABILITY_PORT: "5200"
+    ports:
+      - "5200:5200"
+    networks:
+      - valeo-network
+
   # ===========================================
   # DMS (Document Management System)
   # Paperless-ngx als Slave-Backend

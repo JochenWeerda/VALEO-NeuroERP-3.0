@@ -6,6 +6,12 @@ Tests für revisionssichere Buchhaltung, Hash-Chain, Audit-Trail
 from fastapi.testclient import TestClient
 from main import app
 import pytest
+from sqlalchemy import text
+
+from app.core.database import SessionLocal
+from app.core.fibu_audit import SYSTEM_USER_ID
+from app.core.uuid7 import uuid7
+from app.infrastructure.models import Tenant, User
 
 _client = TestClient(app, raise_server_exceptions=False)
 
@@ -13,6 +19,62 @@ _client = TestClient(app, raise_server_exceptions=False)
 @pytest.fixture
 def client():
     return _client
+
+
+@pytest.fixture
+def db():
+    """DB-Session für Integrationstests (Tenant/Konten anlegen)."""
+    session = SessionLocal()
+    try:
+        yield session
+    finally:
+        session.close()
+
+
+def _ensure_system_tenant_and_accounts(db_session):
+    """Legt Tenant 'system', System-User für Audit-Log-FK und Konten 1400/8400 an, falls fehlend."""
+    tenant = db_session.query(Tenant).filter(Tenant.id == "system").first()
+    if not tenant:
+        tenant = Tenant(
+            id="system",
+            name="System",
+            domain="system.local",
+            is_active=True,
+        )
+        db_session.add(tenant)
+        db_session.flush()
+    # System-User für log_fibu_audit (audit_logs.user_id FK auf domain_shared.users)
+    user = db_session.query(User).filter(User.id == SYSTEM_USER_ID).first()
+    if not user:
+        user = User(
+            id=SYSTEM_USER_ID,
+            username="system",
+            email="system@internal",
+            first_name="System",
+            last_name="User",
+            tenant_id="system",
+            is_active=True,
+        )
+        db_session.add(user)
+        db_session.flush()
+    # Konten 1400 / 8400 für Bulk-Import (UNIQUE(account_number) → nur anlegen wenn noch nicht vorhanden)
+    for account_number, account_name in [("1400", "Debitoren"), ("8400", "Erlöse 19% USt")]:
+        row = db_session.execute(
+            text("SELECT tenant_id FROM domain_erp.chart_of_accounts WHERE account_number = :num LIMIT 1"),
+            {"num": account_number},
+        ).fetchone()
+        if row is None:
+            db_session.execute(
+                text("""
+                    INSERT INTO domain_erp.chart_of_accounts
+                    (id, tenant_id, account_number, account_name, account_type, category, is_active)
+                    VALUES (:id, 'system', :num, :name, 'balance_sheet', 'Forderungen/Erlöse', true)
+                """),
+                {"id": uuid7(), "num": account_number, "name": account_name},
+            )
+        elif row[0] != "system":
+            pytest.skip(f"Konto {account_number} gehört anderem Tenant – Audit-Integrationstest übersprungen")
+    db_session.commit()
 
 
 class TestGoBDStatus:
@@ -172,8 +234,9 @@ class TestAuditIntegration:
         assert response.status_code == 200
         assert isinstance(response.json(), list)
 
-    def test_audit_log_after_bulk_import(self, client):
+    def test_audit_log_after_bulk_import(self, client, db):
         """Nach Bulk-Import (CSV) existiert ein Audit-Eintrag für die erstellte Buchung."""
+        _ensure_system_tenant_and_accounts(db)
         import io
         csv_content = "entry_date,account_number,description,debit_amount,credit_amount,entry_number\n"
         csv_content += "2026-03-01,1400,Integrationstest Buchung,100.00,0.00,IMP-AUDIT-001\n"
@@ -201,8 +264,9 @@ class TestAuditIntegration:
         assert logs[0]["entity_type"] == "journal_entry"
         assert logs[0]["entity_id"] == entry_id
 
-    def test_audit_log_after_booking_template_apply(self, client):
+    def test_audit_log_after_booking_template_apply(self, client, db):
         """Nach Anwenden einer Buchungsvorlage existiert ein Audit-Eintrag für die Buchung."""
+        _ensure_system_tenant_and_accounts(db)
         list_resp = client.get(
             "/api/v1/finance/booking-templates?tenant_id=system",
             headers=self._headers,

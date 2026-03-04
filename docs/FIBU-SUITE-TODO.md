@@ -18,10 +18,44 @@
 
 ---
 
+## 0.1) Ribbon-Band: Zeitgemäßheit und Empfehlung
+
+**Frage:** Passt das Ribbon-Band in der FIBU Suite noch (noch zeitgemäß)?
+
+### Aktueller Einsatz (zwei Ebenen)
+
+1. **Suite-Ebene** (`FibuSuiteLayout.tsx`): Ein **horizontaler Navigationsstreifen** mit „START“ + Links zu allen FiBu-Masken (Hauptbuch, Debitoren, Kreditoren, Buchungsjournal, …). Das ist faktisch eine **Tab- bzw. Modul-Navigation**, kein klassisches Office-Ribbon.
+2. **Masken-Ebene** (z. B. `buchhaltungsuebersicht.tsx`, `monatswerte.tsx`): **Office-artiges Ribbon** mit Registerkarten (DATEI, ALLGEMEIN, POSTBEARBEITUNG, SCHNITTSTELLEN, ABSCHLUSS, AUSWERTUNGEN, FENSTER/REGISTER). Pro Register Buttons (Drucken, Export, BWA, Bilanz/GuV, Umbuchen, …). Entspricht der WinFibu-Referenz.
+
+### Bewertung
+
+| Aspekt | Ribbon (mask-level) | Moderne Alternative (PageToolbar + Command Palette) |
+|--------|----------------------|-----------------------------------------------------|
+| **Zeitgemäßheit** | Office-Ribbon (ca. 2007+) ist in Web-ERP kaum noch Standard; SAP Fiori setzt auf **kontextuelle Page Toolbar** + Overflow, keine Registerbänder. | Fiori, moderne SaaS: eine schlanke Toolbar pro Seite, wenige Primäraktionen, Rest im ⋯-Menü oder per Ctrl+K. |
+| **Platz** | Zwei Zeilen (Register + Gruppen) pro Maske kosten vertikalen Platz; auf kleinen Viewports starker Druck. | Eine kompakte Toolbar-Zeile, mehr Platz für Inhalt und Grid. |
+| **Kontext** | Viele Register zeigen immer dieselben oder ähnlichen Aktionen (Export, BWA, Bilanz) – **redundant** über Masken. | Aktionen nur für die aktuelle Maske/kontextabhängig; weniger Wiederholung. |
+| **Mobile / Responsive** | Ribbon mit vielen Tabs ist auf schmalen Screens schwer nutzbar (Overflow, Verstecktes). | PageToolbar + Overflow + Command Palette (Ctrl+K) ist responsive bereits im Projekt vorgesehen (`orders-modern.tsx`). |
+| **Konsistenz im Produkt** | Andere Bereiche (z. B. Sales „modern“) nutzen ausdrücklich **kein Ribbon** (`PageToolbar`, „KEIN Ribbon“, spart Platz). | Ein einheitliches Pattern (PageToolbar + Sidebar + Command Palette) über alle Domänen. |
+
+**Fazit:** Das Ribbon auf **Masken-Ebene** (DATEI/ALLGEMEIN/AUSWERTUNGEN/…) ist **nicht mehr zeitgemäß** im Sinne von Fiori/modernem Web-ERP: Es kostet Platz, wirkt redundant und weicht vom bereits eingeführten Pattern (PageToolbar, Command Palette) ab. Die **Suite-Navigation** (START + Masken-Links) ist dagegen ein klares, nützliches Navigationspattern und kann beibehalten werden (evtl. als „Tab Bar“ oder „Suite-Nav“ bezeichnen, um Verwechslung mit Office-Ribbon zu vermeiden).
+
+### Empfehlung
+
+- **Suite-Ebene:** Beibehalten. Optional: Begrifflichkeit „Ribbon“ durch „Suite-Navigation“ oder „Tab-Leiste“ ersetzen, um Klarheit zu schaffen.
+- **Masken-Ebene:** Für **neue und neu zu bauende** FiBu-Masken **kein** Office-Ribbon mehr; stattdessen:
+  - **PageToolbar** mit 2–4 Primäraktionen (z. B. Drucken, Export, Aktualisieren) + Overflow-Menü (⋯) für weitere Aktionen,
+  - **Command Palette** (Ctrl+K) für Befehle und Navigation,
+  - Filter/Parameter in einer **Filterzeile** unter der Toolbar (unverändert sinnvoll).
+- **Bestehende Masken** (Buchhaltungsübersicht, Monatswerte, …): Ribbon nicht sofort entfernen (Akzeptanz, Schulung), aber bei **Rebuild oder größeren Refactorings** auf PageToolbar umstellen und in der Design-System-Dokumentation festhalten, dass neuer Standard „PageToolbar + Overflow + Command Palette“ ist.
+
+Damit bleibt die FIBU Suite konsistent mit dem Rest von VALEO (z. B. Sales modern) und mit aktuellen UX-Standards (Fiori, Enterprise Web).
+
+---
+
 ## 1) Globale UX/Design-System TODOs
 
 - [ ] **Design System** definieren (Typografie, Abstände, Icons, Tabellenstil, Zustände: hover/selected/disabled)
-- [ ] **Ribbon-Komponente** (gruppenweise Buttons, Tooltips, Shortcuts, Overflow)
+- [ ] **Ribbon-Komponente** (gruppenweise Buttons, Tooltips, Shortcuts, Overflow) – nur für Legacy-Masken; **Neustandard:** PageToolbar + Overflow + Command Palette (siehe Abschnitt 0.1)
 - [ ] **Filterbar-Komponente** (Dropdowns, Zeitraum-Picker, Mandant, Suchfeld, „Aktualisieren“)
 - [ ] **Tree/Nav-Komponente** für Konten/BWA-Struktur (expand/collapse, search, select)
 - [ ] **DataGrid-Komponente** (frozen columns, sticky header, column resize, export)

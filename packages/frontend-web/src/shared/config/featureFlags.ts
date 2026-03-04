@@ -6,6 +6,7 @@ const flagEnvMap: Record<FeatureKey, string> = {
   sse: `${FLAG_ENV_PREFIX}SSE`,
   commandPalette: `${FLAG_ENV_PREFIX}COMMAND_PALETTE`,
   agrar: `${FLAG_ENV_PREFIX}AGRAR`,
+  voiceControl: `${FLAG_ENV_PREFIX}VOICE_CONTROL`,
 }
 
 const remoteFlagsUrlEnv = 'VITE_FLAGS_URL'
@@ -14,6 +15,7 @@ export const defaultFlags: FeatureFlags = {
   sse: true,
   commandPalette: true,
   agrar: true,
+  voiceControl: true,
 }
 
 const toBool = (value: unknown, fallback: boolean): boolean => {

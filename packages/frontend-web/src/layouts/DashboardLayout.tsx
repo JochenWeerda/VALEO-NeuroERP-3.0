@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { Outlet } from "react-router-dom"
+import { ActionDispatchProvider } from "@/features/ki-usability"
 import { AppShell } from "@/components/navigation/AppShell"
 import { AdvisorDock } from "@/features/copilot/AdvisorDock"
 import { CallWidget } from "@/components/cti/CallWidget"
@@ -54,6 +55,7 @@ export default function AppLayout(): JSX.Element {
   }, [connectionState, realtimeEnabled])
 
   return (
+    <ActionDispatchProvider>
     <AppShell enableCommandPalette={commandPaletteEnabled}>
       <div className="flex h-full flex-col">
         <Breadcrumbs />
@@ -76,5 +78,6 @@ export default function AppLayout(): JSX.Element {
       <CallWidget />
       <AskVALEO />
     </AppShell>
+    </ActionDispatchProvider>
   )
 }
