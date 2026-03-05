@@ -8,20 +8,31 @@ from __future__ import annotations
 
 import csv
 import io
+import logging
 from datetime import datetime
 from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, UploadFile
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
+from sqlalchemy.exc import ProgrammingError
 from sqlalchemy.orm import Session
+
+from sqlalchemy.orm import selectinload
 
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.core.security import get_user_id_from_request
 from app.core.uuid7 import uuid7
 from app.infrastructure.models.agrar_models import FeldbuchMassnahme, FeldbuchSchlag
-from modules.agrar.services.feldbuch_service import import_csv
+
+logger = logging.getLogger(__name__)
+
+try:
+    from modules.agrar.services.feldbuch_service import import_csv
+except ImportError as e:
+    import_csv = None  # type: ignore[assignment]
+    logger.warning("Portal Feldbuch: import_csv nicht verfügbar (%s)", e)
 
 router = APIRouter(tags=["portal", "feldbuch"])
 
@@ -177,16 +188,26 @@ async def portal_list_schlaege(
     tenant_id: str = Depends(get_tenant_id),
     customer_id: str = Depends(_get_customer_id),
 ) -> list[dict[str, Any]]:
-    schlaege = (
-        db.query(FeldbuchSchlag)
-        .filter(
-            FeldbuchSchlag.tenant_id == tenant_id,
-            FeldbuchSchlag.customer_id == customer_id,
+    try:
+        schlaege = (
+            db.query(FeldbuchSchlag)
+            .filter(
+                FeldbuchSchlag.tenant_id == tenant_id,
+                FeldbuchSchlag.customer_id == customer_id,
+            )
+            .order_by(FeldbuchSchlag.name)
+            .all()
         )
-        .order_by(FeldbuchSchlag.name)
-        .all()
-    )
-    return [_schlag_to_dict(s) for s in schlaege]
+        return [_schlag_to_dict(s) for s in schlaege]
+    except ProgrammingError as e:
+        logger.exception("Portal Feldbuch Schläge: Schema/Tabelle fehlt")
+        raise HTTPException(
+            status_code=503,
+            detail="Feldbuch-Schema nicht initialisiert. Bitte Migrationen ausführen: alembic upgrade head",
+        ) from e
+    except Exception as e:
+        logger.exception("Portal Feldbuch Schläge: %s", e)
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("/feldbuch/schlaege", status_code=201)
@@ -249,23 +270,37 @@ async def portal_list_massnahmen(
     tenant_id: str = Depends(get_tenant_id),
     customer_id: str = Depends(_get_customer_id),
 ) -> list[dict[str, Any]]:
-    q = (
-        db.query(FeldbuchMassnahme)
-        .filter(
-            FeldbuchMassnahme.tenant_id == tenant_id,
-            FeldbuchMassnahme.customer_id == customer_id,
+    try:
+        q = (
+            db.query(FeldbuchMassnahme)
+            .filter(
+                FeldbuchMassnahme.tenant_id == tenant_id,
+                FeldbuchMassnahme.customer_id == customer_id,
+            )
         )
-    )
-    if schlag_id:
-        q = q.filter(FeldbuchMassnahme.schlag_id == schlag_id)
-    if typ:
-        q = q.filter(FeldbuchMassnahme.typ == typ)
-    if von:
-        q = q.filter(FeldbuchMassnahme.datum >= datetime.fromisoformat(von))
-    if bis:
-        q = q.filter(FeldbuchMassnahme.datum <= datetime.fromisoformat(bis))
-    massnahmen = q.order_by(FeldbuchMassnahme.datum.desc()).all()
-    return [_massnahme_to_dict(m) for m in massnahmen]
+        if schlag_id:
+            q = q.filter(FeldbuchMassnahme.schlag_id == schlag_id)
+        if typ:
+            q = q.filter(FeldbuchMassnahme.typ == typ)
+        if von:
+            q = q.filter(FeldbuchMassnahme.datum >= datetime.fromisoformat(von))
+        if bis:
+            q = q.filter(FeldbuchMassnahme.datum <= datetime.fromisoformat(bis))
+        massnahmen = (
+            q.options(selectinload(FeldbuchMassnahme.schlag))
+            .order_by(FeldbuchMassnahme.datum.desc())
+            .all()
+        )
+        return [_massnahme_to_dict(m) for m in massnahmen]
+    except ProgrammingError as e:
+        logger.exception("Portal Feldbuch Massnahmen: Schema/Tabelle fehlt")
+        raise HTTPException(
+            status_code=503,
+            detail="Feldbuch-Schema nicht initialisiert. Bitte Migrationen ausführen: alembic upgrade head",
+        ) from e
+    except Exception as e:
+        logger.exception("Portal Feldbuch Massnahmen: %s", e)
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("/feldbuch/massnahmen", status_code=201)
@@ -320,31 +355,41 @@ async def portal_feldbuch_stats(
     tenant_id: str = Depends(get_tenant_id),
     customer_id: str = Depends(_get_customer_id),
 ) -> dict[str, Any]:
-    schlaege = (
-        db.query(FeldbuchSchlag)
-        .filter(
-            FeldbuchSchlag.tenant_id == tenant_id,
-            FeldbuchSchlag.customer_id == customer_id,
-            FeldbuchSchlag.status == "aktiv",
+    try:
+        schlaege = (
+            db.query(FeldbuchSchlag)
+            .filter(
+                FeldbuchSchlag.tenant_id == tenant_id,
+                FeldbuchSchlag.customer_id == customer_id,
+                FeldbuchSchlag.status == "aktiv",
+            )
+            .all()
         )
-        .all()
-    )
-    massnahmen = (
-        db.query(FeldbuchMassnahme)
-        .filter(
-            FeldbuchMassnahme.tenant_id == tenant_id,
-            FeldbuchMassnahme.customer_id == customer_id,
+        massnahmen = (
+            db.query(FeldbuchMassnahme)
+            .filter(
+                FeldbuchMassnahme.tenant_id == tenant_id,
+                FeldbuchMassnahme.customer_id == customer_id,
+            )
+            .all()
         )
-        .all()
-    )
-    valeo_dienste = sum(1 for m in massnahmen if m.quelle in ("erp_service", "erp_lieferschein"))
-    gesamt_flaeche = sum(s.flaeche for s in schlaege if s.flaeche)
-    return {
-        "schlaege": len(schlaege),
-        "gesamtFlaeche": round(gesamt_flaeche, 2),
-        "massnahmen": len(massnahmen),
-        "valeoDienste": valeo_dienste,
-    }
+        valeo_dienste = sum(1 for m in massnahmen if m.quelle in ("erp_service", "erp_lieferschein"))
+        gesamt_flaeche = sum(s.flaeche for s in schlaege if s.flaeche)
+        return {
+            "schlaege": len(schlaege),
+            "gesamtFlaeche": round(gesamt_flaeche, 2),
+            "massnahmen": len(massnahmen),
+            "valeoDienste": valeo_dienste,
+        }
+    except ProgrammingError as e:
+        logger.exception("Portal Feldbuch Stats: Schema/Tabelle fehlt")
+        raise HTTPException(
+            status_code=503,
+            detail="Feldbuch-Schema nicht initialisiert. Bitte Migrationen ausführen: alembic upgrade head",
+        ) from e
+    except Exception as e:
+        logger.exception("Portal Feldbuch Stats: %s", e)
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -375,7 +420,11 @@ async def portal_export(
         q = q.filter(FeldbuchMassnahme.datum >= datetime.fromisoformat(von))
     if bis:
         q = q.filter(FeldbuchMassnahme.datum <= datetime.fromisoformat(bis))
-    massnahmen = q.order_by(FeldbuchMassnahme.datum.desc()).all()
+    massnahmen = (
+        q.options(selectinload(FeldbuchMassnahme.schlag))
+        .order_by(FeldbuchMassnahme.datum.desc())
+        .all()
+    )
 
     output = io.StringIO()
     today = datetime.now().strftime("%Y%m%d")
@@ -480,6 +529,11 @@ async def portal_import(
     """
     if not file.filename or not file.filename.lower().endswith(".csv"):
         raise HTTPException(status_code=400, detail="Nur CSV-Dateien werden unterstützt")
+    if import_csv is None:
+        raise HTTPException(
+            status_code=503,
+            detail="Feldbuch-Import (modules.agrar) nicht verfügbar",
+        )
     content = await file.read()
     result = import_csv(db, file_content=content, tenant_id=tenant_id, customer_id=customer_id)
     db.commit()
