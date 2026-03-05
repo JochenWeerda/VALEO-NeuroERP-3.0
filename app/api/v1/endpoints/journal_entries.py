@@ -1,24 +1,46 @@
 """
 Finance Journal Entry management endpoints
-RESTful API for journal entry management with clean architecture
+RESTful API for journal entry management with clean architecture.
+
+Supports OData query parameters ($filter, $orderby, $top, $skip) on the
+list endpoint for server-side filtering and sorting.
 """
 
-from typing import Optional, List
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
-from sqlalchemy.orm import Session
+from typing import Optional, List, Any
 from datetime import datetime
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi.responses import JSONResponse
+from sqlalchemy.orm import Session
 
 from ....core.database import get_db
 from ....core.tenant import get_tenant_id
 from ....core.fibu_audit import log_fibu_audit
 from ....infrastructure.repositories import JournalEntryRepository
+from ....infrastructure.models import JournalEntry as JournalEntryModel
 from ....core.dependency_container import container
+from ....middleware.odata_adapter import apply_odata
 from ..schemas.finance import (
     JournalEntryCreate, JournalEntryUpdate, JournalEntry, JournalEntryLine
 )
 from ..schemas.base import PaginatedResponse
 
 router = APIRouter()
+
+JOURNAL_ENTRY_ODATA_FIELDS = {
+    "id", "entry_number", "entry_date", "posting_date",
+    "description", "reference", "source", "status",
+    "total_debit", "total_credit", "posted_at",
+    "created_at", "updated_at",
+}
+
+
+def _serialize_value(v: Any) -> Any:
+    """Make OData projected row values JSON-serializable."""
+    if hasattr(v, "isoformat"):
+        return v.isoformat()
+    if hasattr(v, "__float__") and not isinstance(v, (bool, int)):
+        return float(v)
+    return v
 
 
 @router.get("/new", response_model=dict)
@@ -104,6 +126,7 @@ async def create_journal_entry(
 
 @router.get("/", response_model=PaginatedResponse[JournalEntry])
 async def list_journal_entries(
+    request: Request,
     tenant_id: str = Depends(get_tenant_id),
     status: Optional[str] = Query(None, description="Filter by status"),
     start_date: Optional[str] = Query(None, description="Start date (YYYY-MM-DD)"),
@@ -116,31 +139,85 @@ async def list_journal_entries(
     """
     List journal entries with pagination and filtering.
 
-    Retrieve a paginated list of journal entries with optional filtering.
+    Supports OData query parameters ($filter, $orderby, $top, $skip)
+    for server-side data shaping.
     """
     try:
+        has_odata = any(k.startswith("$") for k in request.query_params.keys())
+
+        if has_odata:
+            count_q = db.query(JournalEntryModel).filter(
+                JournalEntryModel.tenant_id == tenant_id
+            )
+            count_q, _ = apply_odata(
+                count_q, JournalEntryModel, request.query_params,
+                allowed_fields=JOURNAL_ENTRY_ODATA_FIELDS,
+            )
+            total = count_q.count()
+
+            q = db.query(JournalEntryModel).filter(
+                JournalEntryModel.tenant_id == tenant_id
+            )
+            q, meta = apply_odata(
+                q, JournalEntryModel, request.query_params,
+                allowed_fields=JOURNAL_ENTRY_ODATA_FIELDS,
+            )
+            if "odata_top" not in meta:
+                q = q.limit(limit)
+            if "odata_skip" not in meta:
+                q = q.offset(skip)
+            entries = q.all()
+
+            if meta.get("odata_projected"):
+                selected = meta["odata_select"]
+                items_out = [
+                    {k: _serialize_value(v) for k, v in zip(selected, row)}
+                    for row in entries
+                ]
+                return JSONResponse(
+                    content={
+                        "items": items_out,
+                        "total": total,
+                        "page": (skip // limit) + 1,
+                        "size": limit,
+                        "pages": (total + limit - 1) // limit,
+                        "has_next": (skip + limit) < total,
+                        "has_prev": skip > 0,
+                    }
+                )
+            items_out = [JournalEntry.model_validate(e) for e in entries]
+            return PaginatedResponse[JournalEntry](
+                items=items_out,
+                total=total,
+                page=(skip // limit) + 1,
+                size=limit,
+                pages=(total + limit - 1) // limit,
+                has_next=(skip + limit) < total,
+                has_prev=skip > 0,
+            )
+
         entry_repo = container.resolve(JournalEntryRepository)
 
-        # Convert date strings to datetime if provided
-        start_dt = datetime.fromisoformat(start_date) if start_date else None
-        end_dt = datetime.fromisoformat(end_date) if end_date else None
-
-        entries = await entry_repo.get_entries_by_date_range(
-            start_date, end_date, tenant_id, reference=reference
-        ) if start_date and end_date else await entry_repo.get_all(
-            tenant_id, skip, limit, reference=reference
+        q_base = db.query(JournalEntryModel).filter(
+            JournalEntryModel.tenant_id == tenant_id
         )
-
-        # Apply status filter if provided
+        if start_date and end_date:
+            start_dt = datetime.fromisoformat(start_date)
+            end_dt = datetime.fromisoformat(end_date)
+            q_base = q_base.filter(
+                JournalEntryModel.entry_date >= start_dt,
+                JournalEntryModel.entry_date <= end_dt,
+            )
+        if reference:
+            q_base = q_base.filter(JournalEntryModel.reference == reference)
         if status:
-            entries = [e for e in entries if e.status == status]
+            q_base = q_base.filter(JournalEntryModel.status == status)
 
-        # Apply pagination
-        total = len(entries)
-        paginated_entries = entries[skip:skip + limit]
+        total = q_base.count()
+        entries = q_base.order_by(JournalEntryModel.entry_date.desc()).offset(skip).limit(limit).all()
 
         return PaginatedResponse[JournalEntry](
-            items=[JournalEntry.model_validate(entry) for entry in paginated_entries],
+            items=[JournalEntry.model_validate(entry) for entry in entries],
             total=total,
             page=(skip // limit) + 1,
             size=limit,

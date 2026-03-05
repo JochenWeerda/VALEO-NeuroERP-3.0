@@ -22,6 +22,34 @@ type RouteAliasEntry = {
 const pageModules = import.meta.glob<PageModule>('../pages/**/*.tsx')
 const AUTH_REQUIRED = String((import.meta.env as Record<string, string | undefined>).VITE_AUTH_REQUIRED ?? '').toLowerCase() === 'true'
 
+const HIGH_PRIORITY_MODULES = [
+  '../pages/dashboard/index.tsx',
+  '../pages/finance/buchungserfassung.tsx',
+  '../pages/crm/kontakt-detail.tsx',
+  '../pages/einkauf/bestellungen-liste.tsx',
+  '../pages/lager/bestand-liste.tsx',
+] as const
+
+/**
+ * Prefetch high-priority route chunks during browser idle time.
+ * Respects Save-Data header and only runs on fast connections.
+ */
+export function prefetchPriorityRoutes(): void {
+  const nav = navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }
+  if (nav.connection?.saveData) return
+
+  const schedule = typeof requestIdleCallback === 'function'
+    ? requestIdleCallback
+    : (cb: () => void) => setTimeout(cb, 2000)
+
+  schedule(() => {
+    for (const key of HIGH_PRIORITY_MODULES) {
+      const loader = pageModules[key]
+      if (loader) loader()
+    }
+  })
+}
+
 const AUTO_ROUTE_IGNORE_PATTERNS: RegExp[] = [
   /\/__tests__\//,
   /\.spec\.tsx$/,

@@ -7,6 +7,7 @@ Main entry point for the ERP system API
 import uvicorn
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
 from prometheus_client import make_asgi_app
@@ -174,6 +175,8 @@ else:
     cors_kwargs.update(allow_origins=["*"], allow_origin_regex=".*")
 
 app.add_middleware(CORSMiddleware, **cors_kwargs)
+
+app.add_middleware(GZipMiddleware, minimum_size=500)
 
 # Add trusted host middleware
 if not settings.DEBUG:

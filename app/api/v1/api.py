@@ -127,6 +127,7 @@ from app.api.v1.endpoints import (
     commodity_positions,
     position_rules,
     position_overrides,
+    batch,
 )
 
 # Import domain routers
@@ -146,6 +147,11 @@ async def api_status():
     return {"status": "ok"}
 
 # Include domain routers
+api_router.include_router(
+    batch.router,
+    tags=["batch"],
+)
+
 api_router.include_router(
     health,
     prefix="/health",

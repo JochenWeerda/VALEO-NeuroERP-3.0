@@ -1,18 +1,29 @@
 """
 Charges API - Lot/Batch Management (SQLAlchemy)
+
+Supports OData query parameters ($filter, $orderby, $top, $skip) on the
+list endpoint for server-side filtering and sorting.
 """
 
 from datetime import datetime
 from typing import Optional
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.domains.operations.repository import ChargeRepository
 from app.domains.operations.models import ChargeStatus
+from app.middleware.odata_adapter import apply_odata
 
 router = APIRouter(prefix="/chargen", tags=["Charges"])
+
+CHARGE_ODATA_FIELDS = {
+    "id", "chargen_id", "losnummer", "artikel", "artikel_id",
+    "menge", "lagerort", "status", "qualitaetsstatus",
+    "eingang", "herstellungsdatum", "mhd", "freigabe_datum",
+    "herkunft", "bemerkungen", "created_at", "updated_at",
+}
 
 
 def _parse_iso_datetime(value: str) -> datetime:
@@ -113,6 +124,7 @@ def _to_dict(charge) -> dict:
 
 @router.get("", response_model=dict)
 async def list_charges(
+    request: Request,
     search: Optional[str] = Query(None, description="Search term"),
     status: Optional[str] = Query(None, description="Filter by status"),
     lagerort: Optional[str] = Query(None, description="Filter by storage location"),
@@ -120,6 +132,38 @@ async def list_charges(
     offset: int = Query(0, ge=0),
     db: Session = Depends(get_db),
 ) -> dict:
+    from app.domains.operations.models import Charge as ChargeModel
+
+    has_odata = any(
+        k.startswith("$") for k in request.query_params.keys()
+    )
+
+    if has_odata:
+        count_q = db.query(ChargeModel)
+        count_q, _ = apply_odata(
+            count_q, ChargeModel, request.query_params,
+            allowed_fields=CHARGE_ODATA_FIELDS,
+        )
+        total = count_q.count()
+
+        q = db.query(ChargeModel)
+        q, meta = apply_odata(
+            q, ChargeModel, request.query_params,
+            allowed_fields=CHARGE_ODATA_FIELDS,
+        )
+        if "odata_top" not in meta:
+            q = q.limit(limit)
+        if "odata_skip" not in meta:
+            q = q.offset(offset)
+        rows = q.all()
+
+        if meta.get("odata_projected"):
+            selected = meta["odata_select"]
+            items_out = [dict(zip(selected, row)) for row in rows]
+        else:
+            items_out = [_to_dict(i) for i in rows]
+        return {"items": items_out, "total": total, "limit": limit, "offset": offset}
+
     repo = ChargeRepository(db)
     items = repo.get_all(skip=offset, limit=limit, search=search, status=status, lagerort=lagerort)
     total = repo.count(search=search, status=status, lagerort=lagerort)

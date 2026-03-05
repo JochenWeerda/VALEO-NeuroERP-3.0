@@ -5,7 +5,7 @@ SQLAlchemy-based implementations of repository interfaces
 
 from datetime import datetime
 from typing import Optional
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 from sqlalchemy import and_, func, or_
 
 from .base_repository import BaseRepositoryImpl
@@ -433,7 +433,11 @@ class JournalEntryRepositoryImpl(BaseRepositoryImpl[JournalEntry, dict, dict], J
         from sqlalchemy.exc import SQLAlchemyError
         from ..repositories.base_repository import logger
         try:
-            query = self.session.query(JournalEntry).filter(JournalEntry.tenant_id == tenant_id)
+            query = (
+                self.session.query(JournalEntry)
+                .options(selectinload(JournalEntry.lines))
+                .filter(JournalEntry.tenant_id == tenant_id)
+            )
             ref = kwargs.pop("reference", None)
             if ref is not None:
                 query = query.filter(JournalEntry.reference == ref)
@@ -460,22 +464,32 @@ class JournalEntryRepositoryImpl(BaseRepositoryImpl[JournalEntry, dict, dict], J
             return False
 
     async def get_entries_by_date_range(
-        self, start_date: str, end_date: str, tenant_id: str, reference: Optional[str] = None
+        self,
+        start_date: str,
+        end_date: str,
+        tenant_id: str,
+        reference: Optional[str] = None,
+        skip: int = 0,
+        limit: int = 100,
     ):
-        """Get journal entries by date range, optionally by reference (e.g. Importlauf run_id)."""
+        """Get journal entries by date range with DB-level pagination."""
         from datetime import datetime
         start = datetime.fromisoformat(start_date)
         end = datetime.fromisoformat(end_date)
-        query = self.session.query(JournalEntry).filter(
-            and_(
-                JournalEntry.tenant_id == tenant_id,
-                JournalEntry.entry_date >= start,
-                JournalEntry.entry_date <= end,
+        query = (
+            self.session.query(JournalEntry)
+            .options(selectinload(JournalEntry.lines))
+            .filter(
+                and_(
+                    JournalEntry.tenant_id == tenant_id,
+                    JournalEntry.entry_date >= start,
+                    JournalEntry.entry_date <= end,
+                )
             )
         )
         if reference is not None:
             query = query.filter(JournalEntry.reference == reference)
-        return query.order_by(JournalEntry.entry_date.desc()).all()
+        return query.order_by(JournalEntry.entry_date.desc()).offset(skip).limit(limit).all()
 
     async def get_entries_by_account(
         self,
@@ -487,6 +501,7 @@ class JournalEntryRepositoryImpl(BaseRepositoryImpl[JournalEntry, dict, dict], J
         """Get journal entries that contain at least one line for the given account."""
         query = (
             self.session.query(JournalEntry)
+            .options(selectinload(JournalEntry.lines))
             .join(JournalEntryLine, JournalEntryLine.journal_entry_id == JournalEntry.id)
             .filter(
                 and_(

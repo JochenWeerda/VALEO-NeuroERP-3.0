@@ -5,7 +5,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { RouterProvider } from 'react-router-dom'
 import { FeatureFlagProvider } from '@/app/providers/FeatureFlagProvider'
 import { SSEProvider } from '@/app/providers/SSEProvider'
-import { router } from '@/app/routes'
+import { router, prefetchPriorityRoutes } from '@/app/routes'
 import { ToastProvider } from '@/components/ui/toast-provider'
 import { GlobalShortcutProvider } from '@/components/shortcuts/GlobalShortcutProvider'
 // CommandPalette is rendered inside AppShell (router context).
@@ -69,4 +69,15 @@ if (rootElement instanceof HTMLElement) {
       </QueryClientProvider>
     </StrictMode>,
   )
+
+  prefetchPriorityRoutes()
+
+  if ('serviceWorker' in navigator && import.meta.env.PROD) {
+    const swEnabled = (import.meta.env as Record<string, string | undefined>).VITE_ENABLE_SERVICE_WORKER === 'true'
+    if (swEnabled) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {
+        // SW registration failed -- non-critical, app works without it
+      })
+    }
+  }
 }

@@ -1,6 +1,8 @@
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
+import compression from 'vite-plugin-compression'
 import path from 'path'
+import fs from 'fs'
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
@@ -28,6 +30,22 @@ export default defineConfig(({ mode }) => {
           res.statusCode = 200;
           res.end('ok');
         });
+      },
+    },
+    ...(mode === 'production' ? [
+      compression({ algorithm: 'gzip', ext: '.gz' }),
+      compression({ algorithm: 'brotliCompress', ext: '.br' }),
+    ] : []),
+    {
+      name: 'sw-version',
+      closeBundle() {
+        if (mode !== 'production') return
+        const swPath = path.resolve(__dirname, 'dist/sw.js')
+        if (!fs.existsSync(swPath)) return
+        const version = String(Date.now())
+        let content = fs.readFileSync(swPath, 'utf-8')
+        content = content.replace(/__SW_VERSION__/g, version)
+        fs.writeFileSync(swPath, content)
       },
     },
   ],
@@ -153,12 +171,20 @@ export default defineConfig(({ mode }) => {
   },
   build: {
     outDir: 'dist',
-    sourcemap: true,
+    sourcemap: mode === 'production' ? 'hidden' : true,
     chunkSizeWarningLimit: 500,
-    // Performance: Module-Preload nur für kritische Chunks
     modulePreload: { polyfill: false },
+    minify: mode === 'production' ? 'terser' : 'esbuild',
+    ...(mode === 'production' ? {
+      terserOptions: {
+        compress: { drop_console: true, drop_debugger: true },
+      },
+    } : {}),
     rollupOptions: {
       output: {
+        chunkFileNames: 'assets/js/[name]-[hash].js',
+        entryFileNames: 'assets/js/[name]-[hash].js',
+        assetFileNames: 'assets/[ext]/[name]-[hash].[ext]',
         manualChunks: {
           // Vendor-Chunk: React Core
           vendor: ['react', 'react-dom', 'react-router-dom'],

@@ -12,7 +12,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { AlertTriangle, Loader2, Save, X } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
-import { MaskConfig, Field } from './types'
+import { MaskConfig, Tab as MaskTab, Field } from './types'
 
 interface ObjectPageProps {
   config: MaskConfig
@@ -39,8 +39,21 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
 }) => {
   const { toast } = useToast()
   const [activeTab, setActiveTab] = useState(config.tabs[0]?.key || '')
+  const [activatedTabs, setActivatedTabs] = useState<Set<string>>(
+    () => new Set(config.tabs[0]?.key ? [config.tabs[0].key] : []),
+  )
   const [isDirty, setIsDirty] = useState(false)
   const isInternalUpdateRef = useRef(false)
+
+  const handleTabChange = (tabKey: string) => {
+    setActiveTab(tabKey)
+    setActivatedTabs((prev) => {
+      if (prev.has(tabKey)) return prev
+      const next = new Set(prev)
+      next.add(tabKey)
+      return next
+    })
+  }
 
   // Create dynamic Zod schema from config
   const createSchema = (tabs: MaskConfig['tabs']) => {
@@ -376,7 +389,7 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
 
       {/* Form */}
       <form onSubmit={handleSubmit(onSubmit)}>
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={activeTab} onValueChange={handleTabChange}>
           <TabsList className="grid w-full grid-cols-4">
             {config.tabs.map(tab => (
               <TabsTrigger key={tab.key} value={tab.key}>
@@ -387,14 +400,22 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
 
           {config.tabs.map(tab => (
             <TabsContent key={tab.key} value={tab.key} className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>{tab.label}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {renderTabContent(tab)}
-                </CardContent>
-              </Card>
+              {activatedTabs.has(tab.key) ? (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>{tab.label}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {renderTabContent(tab)}
+                  </CardContent>
+                </Card>
+              ) : (
+                <Card>
+                  <CardContent className="flex items-center justify-center py-12">
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  </CardContent>
+                </Card>
+              )}
             </TabsContent>
           ))}
         </Tabs>
