@@ -10,7 +10,8 @@ Usage:
     @router.get("/items")
     async def list_items(request: Request, db: Session = Depends(get_db)):
         q = db.query(ItemModel)
-        q, meta = apply_odata(q, ItemModel, request.query_params)
+        q, meta = apply_odata(q, ItemModel, request.query_params,
+                              allowed_fields={"name", "status", "amount"})
         return {"items": q.all(), **meta}
 """
 
@@ -32,15 +33,20 @@ _OPS = {
     "le": operator.le,
 }
 
+# Fields that must never be exposed via $filter/$select/$orderby
+_BLOCKED_FIELDS = frozenset({
+    "tenant_id", "deleted_at", "password_hash", "secret",
+    "token", "api_key", "internal_notes",
+})
 
-def _parse_filter(model: Any, raw: str) -> list:
+
+def _parse_filter(model: Any, raw: str, allowed_fields: set[str] | None = None) -> list:
     """Parse a simple $filter expression into SQLAlchemy filter clauses.
 
     Supports:  field eq value, field ne value, etc.
     Does NOT support nested any()/all() – those require a full OData parser.
     """
     clauses = []
-    # Split on ' and ' (case-insensitive)
     parts = raw.split(" and ")
     for part in parts:
         part = part.strip()
@@ -48,6 +54,10 @@ def _parse_filter(model: Any, raw: str) -> list:
         if len(tokens) < 3:
             continue
         field_name, op_str, *value_parts = tokens
+        if field_name in _BLOCKED_FIELDS:
+            continue
+        if allowed_fields is not None and field_name not in allowed_fields:
+            continue
         value_raw = " ".join(value_parts).strip("'\"")
         op_func = _OPS.get(op_str.lower())
         if op_func is None:
@@ -55,7 +65,6 @@ def _parse_filter(model: Any, raw: str) -> list:
         col = getattr(model, field_name, None)
         if col is None:
             continue
-        # Attempt numeric conversion
         try:
             value: Any = int(value_raw)
         except ValueError:
@@ -67,13 +76,17 @@ def _parse_filter(model: Any, raw: str) -> list:
     return clauses
 
 
-def _parse_orderby(model: Any, raw: str) -> list:
+def _parse_orderby(model: Any, raw: str, allowed_fields: set[str] | None = None) -> list:
     """Parse $orderby into SQLAlchemy order_by clauses."""
     clauses = []
     for segment in raw.split(","):
         segment = segment.strip()
         parts = segment.split()
         field_name = parts[0]
+        if field_name in _BLOCKED_FIELDS:
+            continue
+        if allowed_fields is not None and field_name not in allowed_fields:
+            continue
         direction = parts[1].lower() if len(parts) > 1 else "asc"
         col = getattr(model, field_name, None)
         if col is None:
@@ -86,11 +99,17 @@ def apply_odata(
     query: SAQuery,
     model: Any,
     params: dict[str, str] | Any,
+    *,
+    allowed_fields: set[str] | None = None,
 ) -> tuple[SAQuery, dict[str, Any]]:
     """Apply OData v4 query parameters to a SQLAlchemy query.
 
     Returns (modified_query, metadata_dict).
     metadata_dict contains keys like 'odata_top', 'odata_skip' for the caller.
+
+    If *allowed_fields* is given, only those columns may be used in
+    $filter, $orderby, and $select.  Fields in ``_BLOCKED_FIELDS``
+    (e.g. ``tenant_id``) are always rejected regardless.
     """
     meta: dict[str, Any] = {}
 
@@ -103,14 +122,14 @@ def apply_odata(
     # $filter
     raw_filter = get("$filter") or get("filter")
     if raw_filter:
-        clauses = _parse_filter(model, raw_filter)
+        clauses = _parse_filter(model, raw_filter, allowed_fields)
         for clause in clauses:
             query = query.filter(clause)
 
     # $orderby
     raw_order = get("$orderby") or get("orderby")
     if raw_order:
-        clauses_order = _parse_orderby(model, raw_order)
+        clauses_order = _parse_orderby(model, raw_order, allowed_fields)
         for clause in clauses_order:
             query = query.order_by(clause)
 
@@ -134,10 +153,29 @@ def apply_odata(
         except ValueError:
             pass
 
-    # $select – we return the column names so the caller can project
+    # $select – return validated column names so the caller can project
     raw_select = get("$select") or get("select")
     if raw_select:
-        meta["odata_select"] = [s.strip() for s in raw_select.split(",")]
+        requested = [s.strip() for s in raw_select.split(",")]
+        validated = [
+            f for f in requested
+            if f not in _BLOCKED_FIELDS
+            and (allowed_fields is None or f in allowed_fields)
+            and hasattr(model, f)
+        ]
+        if validated:
+            meta["odata_select"] = validated
+
+    # $select – apply projection if the caller requests it
+    if meta.get("odata_select"):
+        cols = []
+        for field_name in meta["odata_select"]:
+            col = getattr(model, field_name, None)
+            if col is not None:
+                cols.append(col)
+        if cols:
+            query = query.with_entities(*cols)
+            meta["odata_projected"] = True
 
     # $expand – informational only (caller must handle joins)
     raw_expand = get("$expand") or get("expand")

@@ -1160,6 +1160,8 @@ class JournalEntry(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
+    lines = relationship("JournalEntryLine", back_populates="journal_entry", lazy="select")
+
 
 class JournalEntryLine(Base):
     """Journal entry line model – nutzt domain_erp.journal_entry_lines (chart_of_accounts)."""
@@ -1174,6 +1176,8 @@ class JournalEntryLine(Base):
     credit = Column(DECIMAL(15, 2), default=0)
     description = Column(String(200), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    journal_entry = relationship("JournalEntry", back_populates="lines")
 
 
 # Policy Engine Models

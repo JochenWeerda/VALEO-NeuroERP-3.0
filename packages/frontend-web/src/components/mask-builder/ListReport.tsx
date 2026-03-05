@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -10,6 +10,15 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Search, Filter, Plus, Download, Upload } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { ListConfig, ListColumn } from './types'
+
+export interface ServerPaginationParams {
+  page: number
+  pageSize: number
+  sortField?: string
+  sortDirection?: 'asc' | 'desc'
+  search?: string
+  filters?: Record<string, unknown>
+}
 
 interface ListReportProps {
   config: ListConfig
@@ -24,6 +33,8 @@ interface ListReportProps {
   onAction?: (_actionKey: string, _item: any) => void
   /** Generic bulk action: (actionKey, selectedItems). Called when bulk action has no onClick. */
   onBulkAction?: (_actionKey: string, _items: any[]) => void
+  /** Called when config.serverPagination is true and page/sort/filter changes. */
+  onPageChange?: (_params: ServerPaginationParams) => void
   isLoading?: boolean
 }
 
@@ -38,6 +49,7 @@ const ListReport: React.FC<ListReportProps> = ({
   onImport,
   onAction,
   onBulkAction,
+  onPageChange,
   isLoading = false
 }) => {
   const { t } = useTranslation()
@@ -51,6 +63,22 @@ const ListReport: React.FC<ListReportProps> = ({
 
   const pageSize = config.pageSize || 25
   const totalPages = Math.ceil(total / pageSize)
+  const isServerPaginated = config.serverPagination === true && !!onPageChange
+
+  const notifyServer = useRef(onPageChange)
+  notifyServer.current = onPageChange
+
+  useEffect(() => {
+    if (!isServerPaginated) return
+    notifyServer.current?.({
+      page: currentPage,
+      pageSize,
+      sortField: sortField || undefined,
+      sortDirection: sortField ? sortDirection : undefined,
+      search: searchTerm || undefined,
+      filters: Object.keys(filters).length > 0 ? filters : undefined,
+    })
+  }, [isServerPaginated, currentPage, pageSize, sortField, sortDirection, searchTerm, filters])
 
   // i18n-Helper für Titel und Untertitel
   const displayTitle = config.titleKey ? t(config.titleKey, { entityType: config.title }) : config.title
@@ -88,50 +116,47 @@ const ListReport: React.FC<ListReportProps> = ({
     return action.label
   }
 
-  // Filter data based on search and filters
-  const filteredData = data.filter(item => {
-    // Search filter
-    if (searchTerm) {
-      const searchLower = searchTerm.toLowerCase()
-      const searchableFields = config.columns
-        .filter(col => col.filterable !== false)
-        .map(col => col.key)
+  // When server-paginated, data is already filtered/sorted/paged by the backend.
+  const filteredData = isServerPaginated
+    ? data
+    : data.filter(item => {
+        if (searchTerm) {
+          const searchLower = searchTerm.toLowerCase()
+          const searchableFields = config.columns
+            .filter(col => col.filterable !== false)
+            .map(col => col.key)
 
-      const matchesSearch = searchableFields.some(field => {
-        const value = item[field]
-        return value?.toString().toLowerCase().includes(searchLower)
+          const matchesSearch = searchableFields.some(field => {
+            const value = item[field]
+            return value?.toString().toLowerCase().includes(searchLower)
+          })
+
+          if (!matchesSearch) return false
+        }
+
+        for (const [field, value] of Object.entries(filters)) {
+          if (value && item[field] !== value) {
+            return false
+          }
+        }
+
+        return true
       })
 
-      if (!matchesSearch) return false
-    }
+  const sortedData = isServerPaginated
+    ? filteredData
+    : [...filteredData].sort((a, b) => {
+        if (!sortField) return 0
+        const aValue = a[sortField]
+        const bValue = b[sortField]
+        if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1
+        if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1
+        return 0
+      })
 
-    // Custom filters
-    for (const [field, value] of Object.entries(filters)) {
-      if (value && item[field] !== value) {
-        return false
-      }
-    }
-
-    return true
-  })
-
-  // Sort data
-  const sortedData = [...filteredData].sort((a, b) => {
-    if (!sortField) return 0
-
-    const aValue = a[sortField]
-    const bValue = b[sortField]
-
-    if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1
-    if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1
-    return 0
-  })
-
-  // Paginate data
-  const paginatedData = sortedData.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
-  )
+  const paginatedData = isServerPaginated
+    ? sortedData
+    : sortedData.slice((currentPage - 1) * pageSize, currentPage * pageSize)
 
   const handleSort = (field: string) => {
     if (sortField === field) {

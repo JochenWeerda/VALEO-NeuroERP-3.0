@@ -10,9 +10,47 @@ import {
 } from 'lucide-react'
 import { useFeature } from '@/hooks/useFeature'
 import { usePinnedTiles } from '@/hooks/usePinnedTiles'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { NAV_LINKS, NAV_SECTIONS, type NavItem } from '@/app/navigation/manifest'
 import { resolveRoutePathFromModule } from '@/app/navigation/route-paths'
+
+const pageModules = import.meta.glob<{ default: React.ComponentType }>('../../pages/**/*.tsx')
+
+/**
+ * Collect module paths from visible nav items, then prefetch the
+ * first N route chunks during idle time (Fiori Launchpad principle).
+ */
+function prefetchVisibleModules(items: NavItem[], maxPrefetch = 8): void {
+  const nav = navigator as Navigator & { connection?: { saveData?: boolean } }
+  if (nav.connection?.saveData) return
+
+  const modulePaths: string[] = []
+  const stack = [...items]
+  while (stack.length > 0 && modulePaths.length < maxPrefetch) {
+    const item = stack.pop()
+    if (!item) continue
+    if (item.module) {
+      const key = item.module
+        .replace(/^@\//, '../../')
+        .replace(/^\.\//, '../../')
+      const suffixed = key.endsWith('.tsx') ? key : `${key}.tsx`
+      if (pageModules[suffixed]) {
+        modulePaths.push(suffixed)
+      }
+    }
+    if (item.children) stack.push(...item.children)
+  }
+
+  const schedule = typeof requestIdleCallback === 'function'
+    ? requestIdleCallback
+    : (cb: () => void) => setTimeout(cb, 3000)
+
+  schedule(() => {
+    for (const path of modulePaths) {
+      pageModules[path]?.()
+    }
+  })
+}
 
 interface SidebarProps {
   collapsed: boolean
@@ -26,6 +64,14 @@ export function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProps): JSX.
   const { pinnedTileIds } = usePinnedTiles()
   const navItems: NavItem[] = NAV_SECTIONS
   const filteredNavItems = navItems.filter((item) => (item.featureKey === 'agrar' ? agrarEnabled : true))
+
+  const prefetchedRef = useRef(false)
+  useEffect(() => {
+    if (prefetchedRef.current) return
+    prefetchedRef.current = true
+    prefetchVisibleModules(filteredNavItems)
+  }, [filteredNavItems])
+
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(
     new Set(), // Standardmäßig alle Gruppen eingeklappt
   )

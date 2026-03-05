@@ -145,6 +145,8 @@ export interface ListConfig extends Omit<MaskConfig, 'tabs' | 'type'> {
   bulkActions?: Array<Action & { labelKey?: string }>
   defaultSort?: { field: string; direction: 'asc' | 'desc' }
   pageSize?: number
+  /** When true, pagination/sort/filter are delegated to the server via onPageChange. */
+  serverPagination?: boolean
 }
 
 export interface WorklistItem {
