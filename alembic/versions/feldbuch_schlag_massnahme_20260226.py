@@ -23,21 +23,12 @@ def _table_exists(inspector, tablename: str, schema: str = "domain_agrar") -> bo
     return tablename in inspector.get_table_names(schema=schema)
 
 
-def _schema_exists(bind, schema: str) -> bool:
-    result = bind.execute(
-        sa.text("SELECT schema_name FROM information_schema.schemata WHERE schema_name = :s"),
-        {"s": schema},
-    )
-    return result.fetchone() is not None
-
-
 def upgrade() -> None:
     bind = op.get_bind()
     inspector = inspect(bind)
 
-    # Sicherstellen dass domain_agrar schema existiert
-    if not _schema_exists(bind, "domain_agrar"):
-        op.execute("CREATE SCHEMA domain_agrar")
+    # Sicherstellen dass domain_agrar schema existiert (idempotent)
+    op.execute("CREATE SCHEMA IF NOT EXISTS domain_agrar")
 
     # ── domain_agrar.feldbuch_schlaege ────────────────────────────────────
     if not _table_exists(inspector, "feldbuch_schlaege"):

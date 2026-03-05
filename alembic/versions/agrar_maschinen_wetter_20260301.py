@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from alembic import op
 import sqlalchemy as sa
-from sqlalchemy import inspect, text
+from sqlalchemy import inspect
 
 revision = "agrar_maschinen_wetter_20260301"
 down_revision = "feldbuch_schlag_massnahme_20260226"
@@ -24,12 +24,8 @@ def upgrade() -> None:
     bind = op.get_bind()
     inspector = inspect(bind)
 
-    # Schema sicherstellen
-    result = bind.execute(
-        text("SELECT schema_name FROM information_schema.schemata WHERE schema_name = 'domain_agrar'")
-    )
-    if not result.fetchone():
-        op.execute("CREATE SCHEMA domain_agrar")
+    # Schema sicherstellen (idempotent)
+    op.execute("CREATE SCHEMA IF NOT EXISTS domain_agrar")
 
     if not _table_exists(inspector, "agrar_maschinen"):
         op.create_table(
