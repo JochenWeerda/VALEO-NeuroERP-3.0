@@ -11,7 +11,7 @@ const MINUTES_TO_MS = 60
 const SECONDS_TO_MS = 1000
 
 // Backend API URL - verwendet Backend-Port wenn verfügbar
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || ''
 const MCP_BASE_PATH = '/api/mcp'
 const DEV_TOKEN = import.meta.env.VITE_API_DEV_TOKEN || 'dev-token'
 const DEFAULT_TENANT_ID = import.meta.env.VITE_TENANT_ID || '00000000-0000-0000-0000-000000000001'

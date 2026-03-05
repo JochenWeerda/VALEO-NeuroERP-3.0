@@ -9,9 +9,12 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { AlertTriangle, CreditCard, Plus, Search, TrendingDown } from 'lucide-react'
 import { useKreditlinien, type Kreditlinie } from '@/lib/api/fibu'
 
+type FilterMode = 'alle' | 'ueberzogen' | 'bonitaet_cd'
+
 export default function KreditlinienPage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
+  const [filterMode, setFilterMode] = useState<FilterMode>('alle')
   const { data: items, isLoading } = useKreditlinien()
 
   if (isLoading) return (
@@ -22,6 +25,13 @@ export default function KreditlinienPage(): JSX.Element {
   )
 
   const list = items ?? []
+  const filteredList = list.filter((k) => {
+    const matchSearch = !searchTerm || k.kunde.toLowerCase().includes(searchTerm.toLowerCase()) || (k.kundennr ?? '').toLowerCase().includes(searchTerm.toLowerCase())
+    if (!matchSearch) return false
+    if (filterMode === 'ueberzogen') return k.status === 'ueberzogen'
+    if (filterMode === 'bonitaet_cd') return k.bonitaet === 'C' || k.bonitaet === 'D'
+    return true
+  })
 
   const columns = [
     {
@@ -100,10 +110,10 @@ export default function KreditlinienPage(): JSX.Element {
     },
   ]
 
-  const ueberzogen = list.filter((k) => k.status === 'ueberzogen').length
-  const gesamtLimit = list.reduce((sum, k) => sum + k.limit, 0)
-  const gesamtAusgenutzt = list.reduce((sum, k) => sum + k.ausgenutzt, 0)
-  const gesamtVerfuegbar = list.reduce((sum, k) => sum + k.verfuegbar, 0)
+  const ueberzogen = filteredList.filter((k) => k.status === 'ueberzogen').length
+  const gesamtLimit = filteredList.reduce((sum, k) => sum + k.limit, 0)
+  const gesamtAusgenutzt = filteredList.reduce((sum, k) => sum + k.ausgenutzt, 0)
+  const gesamtVerfuegbar = filteredList.reduce((sum, k) => sum + k.verfuegbar, 0)
 
   return (
     <div className="space-y-4 p-3 md:p-6">
@@ -149,7 +159,7 @@ export default function KreditlinienPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Kreditlinien Gesamt</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold">{list.length}</span>
+            <span className="text-2xl font-bold">{filteredList.length}</span>
           </CardContent>
         </Card>
 
@@ -191,15 +201,19 @@ export default function KreditlinienPage(): JSX.Element {
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input placeholder="Suche Kunde..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
             </div>
-            <Button variant="outline">Nur Überzogene</Button>
-            <Button variant="outline">Nur Bonität C/D</Button>
+            <Button variant={filterMode === 'ueberzogen' ? 'default' : 'outline'} onClick={() => setFilterMode((m) => (m === 'ueberzogen' ? 'alle' : 'ueberzogen'))}>
+              Nur Überzogene
+            </Button>
+            <Button variant={filterMode === 'bonitaet_cd' ? 'default' : 'outline'} onClick={() => setFilterMode((m) => (m === 'bonitaet_cd' ? 'alle' : 'bonitaet_cd'))}>
+              Nur Bonität C/D
+            </Button>
           </div>
         </CardContent>
       </Card>
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={list} columns={columns} />
+          <DataTable data={filteredList} columns={columns} />
         </CardContent>
       </Card>
     </div>

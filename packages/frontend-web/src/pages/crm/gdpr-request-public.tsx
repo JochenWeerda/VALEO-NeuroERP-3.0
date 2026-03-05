@@ -10,12 +10,14 @@ import { Textarea } from '@/components/ui/textarea'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { CheckCircle2, XCircle, Loader2, FileText, ShieldCheck } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
+import { useTenant } from '@/hooks/useTenant'
 
 // API Client
 const apiClient = createApiClient('/api/crm-gdpr')
 
 export default function GDPRRequestPublicPage(): JSX.Element {
   const { t } = useTranslation()
+  const { tenantId } = useTenant()
   const [step, setStep] = useState<'request' | 'status' | 'download'>('request')
   const [loading, setLoading] = useState(false)
   const [requestId, setRequestId] = useState<string>('')
@@ -34,7 +36,7 @@ export default function GDPRRequestPublicPage(): JSX.Element {
 
     try {
       const response = await apiClient.post('/gdpr/requests', {
-        tenant_id: '00000000-0000-0000-0000-000000000001', // TODO: Get from context
+        tenant_id: tenantId,
         request_type: formData.request_type,
         contact_id: formData.contact_id,
         requested_by: formData.email,

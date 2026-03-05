@@ -16,7 +16,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useToast } from '@/components/ui/toast-provider'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { CustomerSelectionDialog, type Customer } from '@/components/sales/CustomerSelectionDialog'
 import { ArtikelSuchDialog } from '@/components/sales/ArtikelSuchDialog'
 import { WeighingTicketSelectionDialog, type WeighingTicket } from '@/components/agrar/WeighingTicketSelectionDialog'
@@ -27,6 +27,7 @@ import { apiClient } from '@/lib/axios'
 import { useAuth } from '@/hooks/useAuth'
 import { useGlobalShortcutsWithVoice } from '@/features/ki-usability'
 import { ShortcutHintButton } from '@/components/shortcuts/ShortcutHelpPanel'
+import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { ChevronLeft, ChevronRight, MoreHorizontal, Save, FileText, Folder, Calculator, Printer, Trash2, Download } from 'lucide-react'
 
 // API Response Types
@@ -80,6 +81,7 @@ type HarvestAcceptanceResponse = {
   created_by: string | null
   updated_at: string | null
   updated_by: string | null
+  article_name?: string | null
   positions?: Array<{
     id: string
     harvest_acceptance_id: string
@@ -267,7 +269,11 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
 
       try {
         const response = await apiClient.get<HarvestAcceptanceResponse>(`/api/v1/agrar/harvest-acceptance/${acceptanceId}`)
-        
+        const positions = response.positions ?? []
+        const pos15 = positions.find((p: { position_number: number }) => p.position_number === 15)
+        const pos20 = positions.find((p: { position_number: number }) => p.position_number === 20)
+        const pos40 = positions.find((p: { position_number: number }) => p.position_number === 40)
+
         // Lade Kunde
         let customer: Customer | null = null
         if (response.customer_id) {
@@ -338,8 +344,8 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
           totalVatAmountEur: response.total_vat_amount_eur,
           totalGrossAmountEur: response.total_gross_amount_eur,
           vatRatePercent: response.vat_rate_percent,
-          articleName: '', // TODO: Aus Artikel laden
-          positions: response.positions?.map(pos => ({
+          articleName: response.article_name ?? '',
+          positions: positions.map((pos: { id: string; position_number: number; description: string; is_printable: boolean; is_calculable: boolean; lab_value_pct: number | null; quantity_kg: number | null; unit: string | null; price_per_unit_eur: number | null; amount_eur: number | null }) => ({
             id: pos.id,
             positionNumber: pos.position_number,
             description: pos.description,
@@ -350,11 +356,11 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
             unit: pos.unit,
             pricePerUnitEur: pos.price_per_unit_eur,
             amountEur: pos.amount_eur,
-          })) || [],
+          })),
           labValues: {
-            windabgang: null, // TODO: Aus Positionen extrahieren
-            besatz: null,
-            feuchte: null,
+            windabgang: pos15?.lab_value_pct ?? null,
+            besatz: pos20?.lab_value_pct ?? null,
+            feuchte: pos40?.lab_value_pct ?? null,
             hektolitergewicht: null,
             lagerschwund: null,
             lagergeld: null,
@@ -386,6 +392,8 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
   const [showIntermediateDealerDialog, setShowIntermediateDealerDialog] = useState(false)
   const [intermediateDealerName, setIntermediateDealerName] = useState('')
   const [showZusFelderDialog, setShowZusFelderDialog] = useState(false)
+  const [showUstIdDialog, setShowUstIdDialog] = useState(false)
+  const [ustIdDialogValue, setUstIdDialogValue] = useState('')
   const importAnalyseInputRef = useRef<HTMLInputElement | null>(null)
 
   // Keyboard Shortcuts
@@ -834,7 +842,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
         totalVatAmountEur: null,
         totalGrossAmountEur: null,
         vatRatePercent: response.vat_rate_percent,
-        articleName: '', // TODO: Aus Artikel laden
+        articleName: response.article_name ?? '',
         positions,
         labValues,
       }))
@@ -913,6 +921,11 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
 
   return (
     <div className="space-y-4 p-4">
+      <ModuleToolbar
+        backTarget="/agrar/ernte"
+        closeTarget="/agrar/ernte"
+        title="Ernte-Annahme-Erfassung"
+      />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Ernte-Annahme-Erfassung</h1>
@@ -926,7 +939,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
             </Button>
           </ShortcutHintButton>
           <Button variant="outline" onClick={() => navigate('/agrar/ernte')} size="sm">
-            SchlieÃŸen
+            Schließen
           </Button>
         </div>
       </div>
@@ -1095,18 +1108,25 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                     checked={!!state.deviatingVatId}
                     onCheckedChange={(checked) => {
                       if (checked) {
-                        const ustId = prompt('Abweichende USt-ID eingeben (z.B. DE123456789):')
-                        if (ustId?.trim()) {
-                          setState((prev) => ({ ...prev, deviatingVatId: ustId.trim() }))
-                          push(`Abweichende USt-ID hinterlegt: ${ustId.trim()}`)
-                        }
+                        setUstIdDialogValue(state.deviatingVatId || '')
+                        setShowUstIdDialog(true)
                       } else {
                         setState((prev) => ({ ...prev, deviatingVatId: null }))
                       }
                     }}
                   />
-                  <Label htmlFor="abweichende-ustid" className="text-sm cursor-pointer">
+                  <Label
+                    htmlFor="abweichende-ustid"
+                    className="text-sm cursor-pointer"
+                    onClick={() => {
+                      setUstIdDialogValue(state.deviatingVatId || '')
+                      setShowUstIdDialog(true)
+                    }}
+                  >
                     Abweichende USTID
+                    {state.deviatingVatId && (
+                      <span className="ml-2 text-muted-foreground font-normal">({state.deviatingVatId})</span>
+                    )}
                   </Label>
                 </div>
               </TabsContent>
@@ -1978,6 +1998,40 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowZusFelderDialog(false)}>SchlieÃŸen</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showUstIdDialog} onOpenChange={setShowUstIdDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Abweichende USt-ID</DialogTitle>
+            <DialogDescription>USt-Identifikationsnummer des EmpfÃ¤ngers (z. B. bei innergemeinschaftlichem Erwerb).</DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <Label htmlFor="ustid-input" className="text-sm">USt-ID</Label>
+            <Input
+              id="ustid-input"
+              value={ustIdDialogValue}
+              onChange={(e) => setUstIdDialogValue(e.target.value)}
+              placeholder="z. B. DE123456789"
+              className="mt-2"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowUstIdDialog(false)}>
+              Abbrechen
+            </Button>
+            <Button
+              onClick={() => {
+                const trimmed = ustIdDialogValue.trim()
+                setState((prev) => ({ ...prev, deviatingVatId: trimmed || null }))
+                if (trimmed) push(`Abweichende USt-ID hinterlegt: ${trimmed}`)
+                setShowUstIdDialog(false)
+              }}
+            >
+              Ãœbernehmen
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

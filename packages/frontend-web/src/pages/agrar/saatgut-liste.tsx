@@ -56,7 +56,8 @@ interface SaatgutItem {
 }
 
 const buildColumns = (
-  onOpenDetails: (itemId: string) => void,
+  onView: (itemId: string) => void,
+  onEdit: (itemId: string) => void,
 ): ColumnDef<SaatgutItem>[] => [
   {
     accessorKey: 'artikelnummer',
@@ -149,14 +150,16 @@ const buildColumns = (
           <Button
             variant="outline"
             size="sm"
-            onClick={() => onOpenDetails(item.id)}
+            onClick={() => onView(item.id)}
+            title="Anzeigen"
           >
             <Eye className="w-4 h-4" />
           </Button>
           <Button
             variant="outline"
             size="sm"
-            onClick={() => onOpenDetails(item.id)}
+            onClick={() => onEdit(item.id)}
+            title="Bearbeiten"
           >
             <Edit className="w-4 h-4" />
           </Button>
@@ -179,7 +182,10 @@ const SaatgutListePage: React.FC = () => {
 
 
   const columns = useMemo<ColumnDef<SaatgutItem>[]>(
-    () => buildColumns((itemId) => navigate(`/agrar/saatgut-stamm/${itemId}`)),
+    () => buildColumns(
+      (itemId) => navigate(`/agrar/saatgut-stamm/${itemId}?mode=view`),
+      (itemId) => navigate(`/agrar/saatgut-stamm/${itemId}`),
+    ),
     [navigate],
   );
 

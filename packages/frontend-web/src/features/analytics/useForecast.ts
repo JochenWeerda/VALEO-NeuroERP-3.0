@@ -66,7 +66,7 @@ export function useForecast(): {
 
     setLoading(true)
 
-    const apiBaseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || ''
 
     fetch(`${apiBaseUrl}/api/mcp/copilot/forecast`, {
       method: "POST",

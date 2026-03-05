@@ -3,6 +3,8 @@ import { useEffect, useRef } from 'react'
 type SSEStatus = 'open' | 'closed' | 'error'
 
 const RECONNECT_DELAY_MS = 1_500
+const DEFAULT_SSE_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://host.docker.internal:8000'
 
 interface UseSSEOptions {
   onStatus?: (_status: SSEStatus) => void
@@ -42,7 +44,17 @@ export function useSSE(channel: string, onMessage: (_data: unknown) => void, opt
         return
       }
 
-      eventSource = new EventSource(`/api/stream/${channel}`)
+      // EventSource cannot send Authorization headers; without a user token this
+      // would create persistent 401 noise in dev tools.
+      const accessToken =
+        window.localStorage.getItem('access_token') ||
+        window.localStorage.getItem('token')
+      if (!accessToken) {
+        opts?.onStatus?.('closed')
+        return
+      }
+
+      eventSource = new EventSource(`${DEFAULT_SSE_BASE_URL}/api/stream/${channel}`)
       opts?.onStatus?.('open')
 
       eventSource.onmessage = (event): void => {

@@ -28,6 +28,7 @@ import { CustomerSelectionDialog, type Customer } from '@/components/sales/Custo
 import { ArticleSearchDialog, type Article } from '@/components/sales/ArticleSearchDialog'
 import { LieferscheinDruckDialog, type PrintOptions } from '@/components/sales/LieferscheinDruckDialog'
 import { apiClient } from '@/lib/axios'
+import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { MoreHorizontal, Check, Printer, Save } from 'lucide-react'
 
 type DeliveryNotePosition = {
@@ -216,6 +217,7 @@ export default function DeliveryEditorNewPage(): JSX.Element {
 
   return (
     <div className="space-y-4 p-4">
+      <ModuleToolbar backTarget="/sales" closeTarget="/sales" title="Lieferschein-Erfassung" />
       <div className="border-b-2 border-green-600 pb-2">
         <h1 className="text-xl font-bold text-green-700">LIEFERSCHEIN-ERFASSUNG</h1>
       </div>

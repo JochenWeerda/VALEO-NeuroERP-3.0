@@ -34,9 +34,11 @@ import {
   Clock,
   User,
   FileText,
-  Info
+  Info,
+  Pencil,
+  Trash2
 } from 'lucide-react'
-import { useMassnahmen, useAgrarKunden } from '@/lib/api/agrar'
+import { useMassnahmen, useAgrarKunden, useDeleteMassnahme } from '@/lib/api/agrar'
 import { useToast } from '@/hooks/use-toast'
 
 // Types
@@ -126,6 +128,7 @@ export default function MassnahmenPage(): JSX.Element {
   // Daten laden via TanStack Query hooks
   const { data: massnahmenData, isLoading: isLoadingMassnahmen } = useMassnahmen()
   const { data: kundenData, isLoading: isLoadingKunden } = useAgrarKunden()
+  const deleteMassnahme = useDeleteMassnahme()
 
   const massnahmen: Massnahme[] = (massnahmenData ?? []) as Massnahme[]
   const kunden = kundenData ?? []
@@ -265,6 +268,33 @@ export default function MassnahmenPage(): JSX.Element {
             <AlertTriangle className="h-4 w-4 text-amber-600" />
           )}
           {m.exportiert && <FileText className="h-4 w-4 text-blue-600" aria-label="Exportiert" />}
+        </div>
+      )
+    },
+    {
+      key: 'aktionen' as const,
+      label: 'Aktionen',
+      render: (m: Massnahme) => (
+        <div className="flex items-center gap-1">
+          <Button variant="ghost" size="icon" onClick={() => navigate(`/agrar/feldbuch/massnahme/${m.id}`)} title="Bearbeiten">
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => {
+              if (confirm('Maßnahme wirklich löschen?')) {
+                deleteMassnahme.mutate(m.id, {
+                  onSuccess: () => toast({ title: 'Maßnahme gelöscht' }),
+                  onError: () => toast({ variant: 'destructive', title: 'Löschen fehlgeschlagen' })
+                })
+              }
+            }}
+            disabled={deleteMassnahme.isPending}
+            title="Löschen"
+          >
+            <Trash2 className="h-4 w-4 text-destructive" />
+          </Button>
         </div>
       )
     }

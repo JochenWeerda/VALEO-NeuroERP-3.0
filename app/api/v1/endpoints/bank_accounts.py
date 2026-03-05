@@ -42,6 +42,22 @@ def _validate_iban(iban: Optional[str]) -> None:
 router = APIRouter(prefix="/bank-accounts", tags=["finance", "bank-accounts"])
 
 
+@router.get("/new", response_model=dict)
+async def get_new_bank_account_template(tenant_id: str = Depends(get_tenant_id)):
+    """Return default values for bank account create forms."""
+    return {
+        "id": None,
+        "tenant_id": tenant_id,
+        "account_number": "",
+        "bank_name": "",
+        "iban": "",
+        "bic": "",
+        "currency": "EUR",
+        "gl_account_number": "",
+        "is_active": True,
+    }
+
+
 class BankAccountBase(BaseModel):
     account_number: str
     bank_name: str

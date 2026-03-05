@@ -175,6 +175,14 @@ export function useCompleteInventurPositions() {
   })
 }
 
+export function useStornierenInventurPosition() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => apiClient.delete(`/api/v1/inventory/inventur/${id}`),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: inventoryExtraKeys.inventur() }),
+  })
+}
+
 export function useMhdItems() {
   return useQuery({
     queryKey: inventoryExtraKeys.mhd(),

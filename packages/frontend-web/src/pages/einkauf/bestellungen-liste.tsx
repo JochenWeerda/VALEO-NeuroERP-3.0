@@ -1,13 +1,19 @@
+import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ListReport } from '@/components/mask-builder'
 import { useMaskActions } from '@/components/mask-builder/hooks'
 import { formatDate, formatNumber } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { ListConfig } from '@/components/mask-builder/types'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { toast } from '@/hooks/use-toast'
 import { getEntityTypeLabel, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 import { usePurchaseOrders, useApprovePurchaseOrder, useCancelPurchaseOrder, INCOTERM_OPTIONS } from '@/lib/api/purchase-orders'
+import { apiClient } from '@/lib/api-client'
 
 // Konfiguration für Bestellungen ListReport (wird in Komponente mit i18n erstellt)
 const createBestellungenConfig = (
@@ -204,7 +210,7 @@ export default function BestellungenListePage(): JSX.Element {
   }
   const bestellungenConfig = createBestellungenConfig(t, entityTypeLabel, handleBulkPrint, handleBulkApprove, handleBulkCancel)
 
-  const { data: orders, isLoading } = usePurchaseOrders()
+  const { data: orders, isLoading, refetch } = usePurchaseOrders()
   const approveMutation = useApprovePurchaseOrder()
   const cancelMutation = useCancelPurchaseOrder()
 
@@ -241,6 +247,45 @@ export default function BestellungenListePage(): JSX.Element {
     handleAction('edit', item)
   }
 
+  const [importOpen, setImportOpen] = useState(false)
+  const [importFile, setImportFile] = useState<File | null>(null)
+  const [importSubmitting, setImportSubmitting] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleImportClick = () => setImportOpen(true)
+
+  const handleImportSubmit = async () => {
+    if (!importFile) {
+      toast({ variant: 'destructive', title: t('crud.messages.importInfo'), description: 'Bitte eine Datei wählen.' })
+      return
+    }
+    setImportSubmitting(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', importFile)
+      const res = await apiClient.post<{ received: number; message?: string }>(
+        '/api/v1/einkauf/bestellungen/import',
+        formData,
+      )
+      const received = res?.data?.received ?? 0
+      toast({
+        title: t('crud.messages.importInfo'),
+        description: res?.data?.message ?? `${received} Zeilen empfangen. Import in Verarbeitung.`,
+      })
+      setImportOpen(false)
+      setImportFile(null)
+      refetch()
+    } catch (err: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Import fehlgeschlagen',
+        description: err?.response?.data?.detail ?? err?.message ?? String(err),
+      })
+    } finally {
+      setImportSubmitting(false)
+    }
+  }
+
   const handleExport = () => {
     try {
       const csvHeader = `Bestellnr.;Betreff;Status;Incoterms;Liefertermin;Gesamtbetrag;Ext. Referenz\n`
@@ -268,21 +313,43 @@ export default function BestellungenListePage(): JSX.Element {
   }
 
   return (
-    <ListReport
-      config={bestellungenConfig}
-      data={data}
-      total={data.length}
-      onCreate={handleCreate}
-      onEdit={handleEdit}
-      onExport={handleExport}
-      onImport={() => {
-        toast({
-          title: t('crud.messages.importInfo'),
-          description: t('crud.messages.importComingSoon'),
-        })
-      }}
-      isLoading={isLoading}
-    />
+    <>
+      <ListReport
+        config={bestellungenConfig}
+        data={data}
+        total={data.length}
+        onCreate={handleCreate}
+        onEdit={handleEdit}
+        onExport={handleExport}
+        onImport={handleImportClick}
+        isLoading={isLoading}
+      />
+      <Dialog open={importOpen} onOpenChange={setImportOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t('crud.messages.importInfo')}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>CSV/Excel (Bestellungen)</Label>
+              <Input
+                type="file"
+                accept=".csv,.xlsx,.xls"
+                ref={fileInputRef}
+                onChange={(e) => setImportFile(e.target.files?.[0] ?? null)}
+                className="mt-1"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setImportOpen(false)}>Abbrechen</Button>
+            <Button onClick={handleImportSubmit} disabled={importSubmitting || !importFile}>
+              {importSubmitting ? 'Importiere…' : 'Import starten'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }
 

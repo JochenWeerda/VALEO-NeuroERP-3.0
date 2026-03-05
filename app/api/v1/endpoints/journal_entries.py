@@ -21,6 +21,26 @@ from ..schemas.base import PaginatedResponse
 router = APIRouter()
 
 
+@router.get("/new", response_model=dict)
+async def get_new_journal_entry_template(tenant_id: str = Depends(get_tenant_id)):
+    """Return default values for the manual booking form."""
+    now = datetime.utcnow()
+    return {
+        "id": None,
+        "tenant_id": tenant_id,
+        "belegart": "BANK",
+        "belegnummer": f"NEW-{now.strftime('%Y%m%d%H%M%S')}",
+        "buchungsdatum": now.date().isoformat(),
+        "periode": now.strftime("%Y-%m"),
+        "buchungstext": "",
+        "gesamtSoll": 0,
+        "gesamtHaben": 0,
+        "differenz": 0,
+        "buchungszeilen": [],
+        "status": "draft",
+    }
+
+
 @router.post("/", response_model=JournalEntry, status_code=201)
 async def create_journal_entry(
     entry_data: JournalEntryCreate,

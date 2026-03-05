@@ -443,12 +443,12 @@ async def apply_booking_template(
             line_id = f"{entry_id}-L{line.line_number}"
             journal_line_insert = text("""
                 INSERT INTO domain_erp.journal_entry_lines
-                (id, tenant_id, journal_entry_id, account_id, debit_amount, credit_amount,
+                (id, tenant_id, journal_entry_id, account_id, debit, credit,
                  line_number, description, tax_code, cost_center, profit_center, reference,
-                 created_at, updated_at)
-                VALUES (:id, :tenant_id, :journal_entry_id, :account_id, :debit_amount, :credit_amount,
+                 created_at)
+                VALUES (:id, :tenant_id, :journal_entry_id, :account_id, :debit, :credit,
                         :line_number, :description, :tax_code, :cost_center, :profit_center, :reference,
-                        NOW(), NOW())
+                        NOW())
             """)
             
             db.execute(journal_line_insert, {
@@ -456,8 +456,8 @@ async def apply_booking_template(
                 "tenant_id": tenant_id,
                 "journal_entry_id": entry_id,
                 "account_id": account_id,
-                "debit_amount": line_debit,
-                "credit_amount": line_credit,
+                "debit": line_debit,
+                "credit": line_credit,
                 "line_number": line.line_number,
                 "description": line_description,
                 "tax_code": line.tax_code,

@@ -11,6 +11,7 @@ import { ArrowLeft, TrendingUp, Mail, Target, BarChart3, Info } from 'lucide-rea
 import { createApiClient } from '@/components/mask-builder/utils/api'
 import { formatDate, formatCurrency } from '@/components/mask-builder/utils/formatting'
 import { toast } from '@/hooks/use-toast'
+import { useTenant } from '@/hooks/useTenant'
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import { DataTable } from '@/components/ui/data-table'
 
@@ -22,6 +23,7 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'
 export default function CampaignPerformanceDashboardPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const { tenantId } = useTenant()
   const [loading, setLoading] = useState(true)
   const [timeRange, setTimeRange] = useState('30d')
   const [campaigns, setCampaigns] = useState<any[]>([])
@@ -38,13 +40,13 @@ export default function CampaignPerformanceDashboardPage(): JSX.Element {
       const [campaignsRes, performanceRes] = await Promise.all([
         apiClient.get('/campaigns', {
           params: {
-            tenant_id: '00000000-0000-0000-0000-000000000001',
+            tenant_id: tenantId,
             status: 'completed'
           }
         }),
         apiClient.get('/campaigns/performance', {
           params: {
-            tenant_id: '00000000-0000-0000-0000-000000000001',
+            tenant_id: tenantId,
             time_range: timeRange
           }
         })

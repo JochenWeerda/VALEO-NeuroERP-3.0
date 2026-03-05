@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { BackButton } from '@/components/BackButton'
+import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { AlertTriangle, FileText, Save, User, Calendar, CheckCircle, XCircle } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 
@@ -41,41 +42,39 @@ type PSMAbgabeData = {
   updatedAt: string
 }
 
+function getInitialAbgabe(routeId: string | undefined): PSMAbgabeData {
+  const now = new Date().toISOString()
+  return {
+    id: routeId && routeId !== 'neu' ? routeId : '',
+    psmId: '',
+    psmName: '',
+    wirkstoff: '',
+    menge: 0,
+    einheit: 'Liter',
+    kundeId: '',
+    kundeName: '',
+    landwirtName: '',
+    sachkundeNummer: '',
+    sachkundeGueltigBis: '',
+    verwendungszweck: '',
+    auflagen: [],
+    wasserschutzgebiet: false,
+    bienenschutz: false,
+    erklaerungLandwirt: false,
+    erklaerungStatus: 'ausstehend',
+    dokumente: [],
+    status: 'entwurf',
+    createdAt: now,
+    updatedAt: now
+  }
+}
+
 export default function PSMAbgabeDokumentationPage(): JSX.Element {
   const navigate = useNavigate()
   const { id } = useParams()
   const { toast } = useToast()
 
-  const [abgabe, setAbgabe] = useState<PSMAbgabeData>({
-    id: id || 'PSM-ABG-001',
-    psmId: 'PSM-001',
-    psmName: 'Roundup PowerFlex',
-    wirkstoff: 'Glyphosat 480 g/l',
-    menge: 5,
-    einheit: 'Liter',
-    kundeId: 'KUN-001',
-    kundeName: 'Musterhof GmbH',
-    landwirtName: 'Max Mustermann',
-    sachkundeNummer: 'SK-2024-001',
-    sachkundeGueltigBis: '2026-12-31',
-    verwendungszweck: 'Herbizid zur Unkrautbekämpfung in Winterweizen',
-    auflagen: ['NT101', 'NW468', 'B4'],
-    wasserschutzgebiet: true,
-    bienenschutz: false,
-    erklaerungLandwirt: true,
-    erklaerungStatus: 'ausstehend',
-    dokumente: [
-      {
-        id: 'DOC-001',
-        name: 'Sachkunde-Nachweis.pdf',
-        type: 'pdf',
-        uploadedAt: '2024-10-15T10:00:00Z'
-      }
-    ],
-    status: 'entwurf',
-    createdAt: '2024-10-15T09:00:00Z',
-    updatedAt: '2024-10-15T10:30:00Z'
-  })
+  const [abgabe, setAbgabe] = useState<PSMAbgabeData>(() => getInitialAbgabe(id))
 
   const { data: abgabeApiData } = useQuery({
     queryKey: ['agrar', 'psm-abgabe', id],
@@ -87,8 +86,12 @@ export default function PSMAbgabeDokumentationPage(): JSX.Element {
   })
 
   useEffect(() => {
+    if (id === 'neu' || !id) {
+      setAbgabe(getInitialAbgabe(id))
+      return
+    }
     if (abgabeApiData) setAbgabe(abgabeApiData)
-  }, [abgabeApiData])
+  }, [id, abgabeApiData])
 
   const saveMutation = useMutation({
     mutationFn: async (data: PSMAbgabeData) => {
@@ -143,10 +146,15 @@ export default function PSMAbgabeDokumentationPage(): JSX.Element {
 
   return (
     <div className="space-y-6 p-6">
+      <ModuleToolbar backTarget="/agrar/psm/liste" closeTarget="/agrar/psm/liste" title="PSM-Abgabe-Dokumentation" />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">PSM-Abgabe-Dokumentation</h1>
-          <p className="text-muted-foreground">Abgabe von {abgabe.psmName} an {abgabe.kundeName}</p>
+          <p className="text-muted-foreground">
+            {abgabe.psmName || abgabe.kundeName
+              ? `Abgabe von ${abgabe.psmName || '—'} an ${abgabe.kundeName || '—'}`
+              : 'Neue PSM-Abgabe erfassen'}
+          </p>
         </div>
         <div className="flex gap-2">
           <BackButton to="/agrar/psm" label="Zurück zu PSM-Übersicht" />

@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { Save, Loader2, ArrowLeft, Calendar, Mail, Phone, Users, Trash2, Plus, Minus } from 'lucide-react'
+import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { queryKeys, mutationKeys } from '@/lib/query'
 import { crmService, type Activity } from '@/lib/services/crm-service'
 import { useToast } from '@/components/ui/toast-provider'
@@ -187,6 +188,7 @@ export default function AktivitaetDetailPage(): JSX.Element {
 
   return (
     <div className="space-y-6 p-6">
+      <ModuleToolbar backTarget="/crm/aktivitaeten" closeTarget="/crm/aktivitaeten" title={pageTitle} />
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button variant="outline" size="sm" onClick={() => navigate('/crm/aktivitaeten')}>

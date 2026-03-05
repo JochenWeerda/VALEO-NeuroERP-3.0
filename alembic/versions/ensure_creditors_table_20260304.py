@@ -1,7 +1,7 @@
 """ensure creditors table exists after multi-head merges
 
 Revision ID: b7c8d9e0f1a2
-Revises: d1e2f3a4b5c6, missing_ops_20260304
+Revises: merge_heads_20260304
 Create Date: 2026-03-04 19:35:00
 """
 

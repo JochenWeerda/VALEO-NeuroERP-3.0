@@ -72,11 +72,11 @@ export function AdvancedFilters({ filters, values, onChange, onReset }: Advanced
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            {filters.map((filter) => {
+            {filters.map((filter, filterIndex) => {
               const value = values[filter.key]
               
               return (
-                <div key={filter.key} className="space-y-2">
+                <div key={`${filter.key}-${filterIndex}`} className="space-y-2">
                   <label className="text-sm font-medium">{filter.label}</label>
                   
                   {filter.type === 'text' && (
@@ -93,8 +93,8 @@ export function AdvancedFilters({ filters, values, onChange, onReset }: Advanced
                         <SelectValue placeholder={t('common.optional')} />
                       </SelectTrigger>
                       <SelectContent>
-                        {filter.options.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
+                        {filter.options.map((option, optionIndex) => (
+                          <SelectItem key={`${option.value}-${optionIndex}`} value={option.value}>
                             {option.label}
                           </SelectItem>
                         ))}

@@ -340,10 +340,14 @@ async def delete_lieferschein_position(ls_id: str, pos_id: str, tenant_id: str =
 
 @router.get("/frachtauftraege", response_model=list[Frachtauftrag])
 async def list_frachtauftraege(tenant_id: str = Query("system"), db: Session = Depends(get_db)):
-    rows = db.execute(
-        text("SELECT * FROM einkauf_frachtauftraege WHERE tenant_id = :tenant_id ORDER BY created_at DESC LIMIT 500"),
-        {"tenant_id": tenant_id},
-    ).mappings().all()
+    try:
+        rows = db.execute(
+            text("SELECT * FROM einkauf_frachtauftraege WHERE tenant_id = :tenant_id ORDER BY created_at DESC LIMIT 500"),
+            {"tenant_id": tenant_id},
+        ).mappings().all()
+    except Exception:
+        # Fallback for environments where table is not migrated yet.
+        return []
     return [Frachtauftrag(**dict(r)) for r in rows]
 
 

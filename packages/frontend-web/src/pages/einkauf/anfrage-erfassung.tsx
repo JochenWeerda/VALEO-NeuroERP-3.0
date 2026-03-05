@@ -20,6 +20,7 @@ import { apiClient } from '@/lib/axios'
 import { useAuth } from '@/hooks/useAuth'
 import { useGlobalShortcutsWithVoice } from '@/features/ki-usability'
 import { ShortcutHintButton } from '@/components/shortcuts/ShortcutHelpPanel'
+import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import {
   ChevronLeft, ChevronRight, MoreHorizontal, Check, Printer,
   Save, Trash2, FileText, Folder, Search, Send,
@@ -347,7 +348,7 @@ export default function AnfrageErfassungPage(): JSX.Element {
       <div className="bg-green-600 text-white px-4 py-2">
         <h1 className="text-lg font-bold">ANFRAGE</h1>
       </div>
-
+      <ModuleToolbar backTarget="/einkauf" closeTarget="/einkauf" title="Anfrage" />
       <div className="flex-1 overflow-auto p-4">
         {/* Header-Bereich */}
         <Card className="mb-4 p-4">
@@ -557,7 +558,7 @@ export default function AnfrageErfassungPage(): JSX.Element {
 
             <TabsContent value="angebot">
               <div className="py-4 space-y-3 text-sm">
-                {positionen.length === 0 ? (
+                {state.positionen.length === 0 ? (
                   <p className="text-muted-foreground">Noch keine Positionen erfasst — Angebots-Vergleich wird nach Positionserfassung verfügbar.</p>
                 ) : (
                   <>
@@ -584,7 +585,7 @@ export default function AnfrageErfassungPage(): JSX.Element {
                       <th className="border px-2 py-1 text-right">Einh.-Preis</th>
                       <th className="border px-2 py-1 text-right">Gesamt</th>
                     </tr></thead>
-                    <tbody>{positionen.map((p) => (
+                    <tbody>{state.positionen.map((p) => (
                       <tr key={p.id}>
                         <td className="border px-2 py-1">{p.posNr}</td>
                         <td className="border px-2 py-1">{p.artikelBezeichnung || p.artikelNr}</td>
@@ -754,12 +755,12 @@ export default function AnfrageErfassungPage(): JSX.Element {
           <Button variant="outline" size="sm" className="gap-2"
             onClick={async () => {
               if (!state.lieferant) { push('Bitte zuerst einen Lieferanten auswählen.'); return }
-              if (positionen.length === 0) { push('Bitte zuerst Positionen erfassen.'); return }
+              if (state.positionen.length === 0) { push('Bitte zuerst Positionen erfassen.'); return }
               try {
                 const payload = {
                   lieferant_id: state.lieferant.id,
                   lieferant_name: state.lieferant.name,
-                  positionen: positionen.map((p) => ({ artikel_nr: p.artikelNr, bezeichnung: p.artikelBezeichnung, menge: p.menge, einheit: p.einheit })),
+                  positionen: state.positionen.map((p) => ({ artikel_nr: p.artikelNr, bezeichnung: p.artikelBezeichnung, menge: p.menge, einheit: p.einheit })),
                   anfragedatum: state.anfrageDate,
                 }
                 const resp = state.id

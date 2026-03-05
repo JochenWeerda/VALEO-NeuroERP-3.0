@@ -11,7 +11,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { formatDate } from '@/components/mask-builder/utils/formatting'
 import { toast } from '@/hooks/use-toast'
+import { useTenant } from '@/hooks/useTenant'
 import { ArrowLeft, Users, BarChart3 } from 'lucide-react'
+import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { DataTable } from '@/components/ui/data-table'
 
 // API Client
@@ -287,6 +289,7 @@ export default function SegmentDetailPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
+  const { tenantId } = useTenant()
   const [loading, setLoading] = useState(false)
   const entityType = 'segment'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Segment')
@@ -316,8 +319,7 @@ export default function SegmentDetailPage(): JSX.Element {
         return
       }
 
-      // Add tenant_id
-      formData.tenant_id = '00000000-0000-0000-0000-000000000001' // TODO: Get from auth context
+      formData.tenant_id = tenantId
 
       await saveData(formData)
       toast({
@@ -403,6 +405,7 @@ export default function SegmentDetailPage(): JSX.Element {
 
   return (
     <div className="space-y-4">
+      <ModuleToolbar backTarget="/crm/segments" closeTarget="/crm/segments" title={isNew ? t('crud.actions.create', { entityType: entityTypeLabel }) : getDetailTitle(t, entityTypeLabel, id || '')} />
       <div className="flex items-center justify-between">
         <div>
           <Button variant="ghost" onClick={() => navigate('/crm/segments')} className="mb-2">

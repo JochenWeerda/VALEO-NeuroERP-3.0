@@ -1,8 +1,7 @@
-﻿import { type ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
+import { type ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
 import { CommandPalette } from './CommandPalette'
 import { Sidebar } from './Sidebar'
 import { TopBar } from './TopBar'
-import { createMCPMetadata } from '@/design/mcp-schemas/component-metadata'
 import { useFeature } from '@/hooks/useFeature'
 
 interface AppShellProps {
@@ -10,25 +9,6 @@ interface AppShellProps {
   enableCommandPalette?: boolean
 }
 
-export const appShellMCP = createMCPMetadata('AppShell', 'navigation', {
-  accessibility: {
-    role: 'application',
-    ariaLabel: 'VALEO NeuroERP Main Application',
-    focusable: false,
-    keyboardShortcuts: ['Ctrl+K', 'Ctrl+B', '/'],
-  },
-  intent: {
-    purpose: 'Main application navigation and layout',
-    userActions: ['navigate', 'search', 'command'],
-    businessDomain: 'core',
-  },
-  mcpHints: {
-    autoFillable: false,
-    explainable: true,
-    testable: true,
-    contextAware: true,
-  },
-})
 
 export function AppShell({ children, enableCommandPalette = true }: AppShellProps): JSX.Element {
   const commandPaletteFeatureEnabled = useFeature('commandPalette')
@@ -42,13 +22,13 @@ export function AppShell({ children, enableCommandPalette = true }: AppShellProp
   }, [])
 
   const handleToggleShortcuts = useCallback((): void => {
-    // Zyklische Schaltlogik: always â†’ hover â†’ hidden â†’ always
+    // Zyklische Schaltlogik: always → hover → hidden → always
     // Warte kurz, falls die Funktion noch nicht initialisiert ist
     const cycleMode = (): void => {
       if (typeof (window as any).__cycleShortcutDisplayMode === 'function') {
         (window as any).__cycleShortcutDisplayMode()
       } else {
-        // Retry nach kurzer VerzÃ¶gerung
+        // Retry nach kurzer Verzögerung
         setTimeout(() => {
           if (typeof (window as any).__cycleShortcutDisplayMode === 'function') {
             (window as any).__cycleShortcutDisplayMode()
@@ -104,7 +84,7 @@ export function AppShell({ children, enableCommandPalette = true }: AppShellProp
         return
       }
 
-      // Strg+K: Command Palette (nur wenn verfÃ¼gbar)
+      // Strg+K: Command Palette (nur wenn verfügbar)
       if (commandPaletteAvailable && event.key.toLowerCase() === 'k' && (event.metaKey || event.ctrlKey) && !event.shiftKey && !event.altKey) {
         event.preventDefault()
         event.stopPropagation()
@@ -112,7 +92,7 @@ export function AppShell({ children, enableCommandPalette = true }: AppShellProp
       }
     }
 
-    // Verwende window mit capture phase fÃ¼r bessere Event-Capture
+    // Verwende window mit capture phase für bessere Event-Capture
     window.addEventListener('keydown', handleKeyDown, true)
     return () => {
       window.removeEventListener('keydown', handleKeyDown, true)
@@ -174,3 +154,4 @@ export function AppShell({ children, enableCommandPalette = true }: AppShellProp
     </div>
   )
 }
+

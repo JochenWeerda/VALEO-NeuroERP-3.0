@@ -103,7 +103,7 @@ export default function VerbindlichkeitenPage(): JSX.Element {
           <h1 className="text-3xl font-bold">Verbindlichkeiten</h1>
           <p className="text-muted-foreground">Übersicht aller offenen Lieferantenrechnungen</p>
         </div>
-        <Button variant="outline">Zahlungslauf planen</Button>
+        <Button variant="outline" onClick={() => navigate('/fibu/zahlungslaeufe')}>Zahlungslauf planen</Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">

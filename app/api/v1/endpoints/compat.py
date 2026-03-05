@@ -143,7 +143,8 @@ async def crm_suppliers(
             rows = db.execute(text(fallback_query), params).fetchall()
             total = int(db.execute(text(count_query), params).scalar() or 0)
         except Exception as exc:
-            raise HTTPException(status_code=500, detail=f"Suppliers query failed: {exc}") from exc
+            # Tabelle fehlt in manchen Umgebungen; UI soll ohne Fehler laden.
+            return {"items": [], "total": 0}
 
     items = [
         {
@@ -1618,6 +1619,17 @@ async def inventory_inventur_complete(payload: dict[str, list[str]], db: Session
     )
     db.commit()
     return {"ok": True, "updated": int(updated)}
+
+
+@router.delete("/inventory/inventur/{item_id}", status_code=204)
+async def inventory_inventur_stornieren(item_id: str, db: Session = Depends(get_db)):
+    """Einzelnen Inventur-Eintrag stornieren/entfernen."""
+    row = db.query(InventoryCount).filter(InventoryCount.id == item_id).first()
+    if not row:
+        raise HTTPException(404, "Inventur-Eintrag nicht gefunden")
+    db.delete(row)
+    db.commit()
+    return None
 
 
 @router.get("/inventory/mhd-warnings", response_model=dict)

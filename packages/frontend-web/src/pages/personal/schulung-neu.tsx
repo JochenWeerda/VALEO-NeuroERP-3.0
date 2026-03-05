@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { useToast } from '@/components/ui/toast-provider'
 
 type Course = {
@@ -70,6 +71,7 @@ export default function SchulungNeuPage(): JSX.Element {
 
   return (
     <div className="space-y-4 p-3 md:p-6">
+      <ModuleToolbar backTarget="/personal/schulungen" closeTarget="/personal/schulungen" title="Schulung erfassen" />
       <div>
         <h1 className="text-3xl font-bold">Schulung erfassen</h1>
         <p className="text-muted-foreground">Neue Schulungszuweisung anlegen</p>

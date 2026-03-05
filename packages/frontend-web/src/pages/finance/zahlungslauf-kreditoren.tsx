@@ -7,6 +7,9 @@ import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
 import { toast } from 'sonner'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
+import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
+import { LeaveConfirmDialog } from '@/components/LeaveConfirmDialog'
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import { validateIBAN, formatIBAN, lookupIBAN } from '@/lib/utils/iban-validator'
 
 // Zod-Schema für Zahlungslauf Kreditoren (wird in Komponente mit i18n erstellt)
@@ -735,20 +738,23 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
   }
 
   const handleCancel = () => {
-    if (isDirty && !confirm(t('crud.messages.unsavedChanges'))) {
-      return
-    }
     navigate('/finance/zahlungslauf-kreditoren')
   }
 
+  const blocker = useUnsavedChanges(isDirty)
+
   return (
-    <ObjectPage
-      config={zahlungslaufConfig}
-      data={data || formData}
-      onChange={handleFormChange}
-      onSave={handleSave}
-      onCancel={handleCancel}
-      isLoading={loading}
-    />
+    <>
+      <ModuleToolbar backTarget="/finance/zahlungslauf-kreditoren" closeTarget="/finance/zahlungslauf-kreditoren" title={entityTypeLabel} />
+      <LeaveConfirmDialog blocker={blocker} onSave={() => handleSave(formData)} title={t('crud.messages.unsavedChanges', { defaultValue: 'Ungespeicherte Änderungen' })} description={t('crud.messages.unsavedChangesDescription', { defaultValue: 'Möchten Sie speichern, verwerfen oder hier bleiben?' })} />
+      <ObjectPage
+        config={zahlungslaufConfig}
+        data={data || formData}
+        onChange={handleFormChange}
+        onSave={handleSave}
+        onCancel={handleCancel}
+        isLoading={loading}
+      />
+    </>
   )
 }

@@ -9,6 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
 import { Package, Save, Trash2 } from 'lucide-react'
+import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { useToast } from '@/hooks/use-toast'
 import { useCharge, useChargeQsReadiness, useDeleteCharge, useUpdateCharge, type ChargeStatus } from '@/lib/api/charges'
 
@@ -175,6 +176,7 @@ export default function ChargenStammPage(): JSX.Element {
 
   return (
     <div className="space-y-6 p-3 md:p-6">
+      <ModuleToolbar backTarget="/charge/liste" closeTarget="/charge/liste" title={charge.chargenId} />
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-3">

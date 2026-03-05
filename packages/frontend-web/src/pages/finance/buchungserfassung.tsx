@@ -7,6 +7,9 @@ import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { StornoDialog } from '@/components/finance/StornoDialog'
+import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
+import { LeaveConfirmDialog } from '@/components/LeaveConfirmDialog'
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import { financeService } from '@/lib/services/finance-service'
 import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/axios'
@@ -319,6 +322,19 @@ export default function BuchungserfassungPage(): JSX.Element {
     apiUrl: buchungConfig.api.baseUrl,
     id: 'new'
   })
+  const initialFormData = {
+    belegart: 'BANK',
+    belegnummer: '',
+    buchungsdatum: new Date().toISOString().slice(0, 10),
+    periode: new Date().toISOString().slice(0, 7),
+    buchungstext: '',
+    gesamtSoll: 0,
+    gesamtHaben: 0,
+    differenz: 0,
+    buchungszeilen: [],
+  }
+  const [latestFormData, setLatestFormData] = useState<any>(null)
+  const formData = { ...initialFormData, ...(data ?? {}) }
 
   const { validate, showValidationToast } = useMaskValidation(buchungConfig.validation)
 
@@ -394,11 +410,10 @@ export default function BuchungserfassungPage(): JSX.Element {
   }
 
   const handleCancel = () => {
-    if (isDirty && !confirm(t('crud.messages.unsavedChanges'))) {
-      return
-    }
     navigate('/finance/buchungen')
   }
+
+  const blocker = useUnsavedChanges(isDirty)
 
   const handleStornoConfirm = async (reason: string) => {
     setIsStornoLoading(true)
@@ -430,9 +445,21 @@ export default function BuchungserfassungPage(): JSX.Element {
 
   return (
     <>
+      <ModuleToolbar
+        backTarget="/finance/buchungen"
+        closeTarget="/finance/buchungen"
+        title={entityTypeLabel}
+      />
+      <LeaveConfirmDialog
+        blocker={blocker}
+        onSave={() => handleSave(latestFormData ?? formData)}
+        title={t('crud.messages.unsavedChanges', { defaultValue: 'Ungespeicherte Änderungen' })}
+        description={t('crud.messages.unsavedChangesDescription', { defaultValue: 'Möchten Sie speichern, verwerfen oder hier bleiben?' })}
+      />
       <ObjectPage
         config={buchungConfig}
-        data={data}
+        data={formData}
+        onChange={(value) => { setLatestFormData(value); setIsDirty(true) }}
         onSave={handleSave}
         onCancel={handleCancel}
         isLoading={loading}

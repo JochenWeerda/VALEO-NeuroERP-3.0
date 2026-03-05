@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom'
+import { Link, NavLink } from 'react-router-dom'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
@@ -8,7 +8,6 @@ import {
   ChevronUp,
   Settings,
 } from 'lucide-react'
-import { createMCPMetadata } from '@/design/mcp-schemas/component-metadata'
 import { useFeature } from '@/hooks/useFeature'
 import { usePinnedTiles } from '@/hooks/usePinnedTiles'
 import { useMemo, useState } from 'react'
@@ -21,22 +20,6 @@ interface SidebarProps {
   onNavigate?: () => void
 }
 
-export const sidebarMCP = createMCPMetadata('Sidebar', 'navigation', {
-  accessibility: {
-    role: 'navigation',
-    ariaLabel: 'Main navigation',
-    focusable: true,
-  },
-  intent: {
-    purpose: 'Navigate between ERP domains',
-    userActions: ['navigate', 'collapse', 'expand'],
-    businessDomain: 'core',
-  },
-  mcpHints: {
-    explainable: true,
-    contextAware: true,
-  },
-})
 
 export function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProps): JSX.Element {
   const agrarEnabled = useFeature('agrar')
@@ -102,19 +85,21 @@ export function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProps): JSX.
       data-mcp-collapsed={collapsed}
     >
       <div className="flex h-16 items-center justify-between border-b px-4">
-        {collapsed ? (
-          <img
-            src="/branding/valeo-erp-logo.png"
-            alt="VALEO ERP Logo"
-            className="h-8 w-8 rounded object-cover"
-          />
-        ) : (
-          <img
-            src="/branding/valeo-erp-logo.png"
-            alt="VALEO ERP Logo"
-            className="h-9 w-auto max-w-[170px] object-contain"
-          />
-        )}
+        <Link to="/" className="flex items-center focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded" aria-label="Zur Startseite">
+          {collapsed ? (
+            <img
+              src="/branding/valeo-erp-logo.png"
+              alt="VALEO ERP Logo"
+              className="h-8 w-8 rounded object-cover"
+            />
+          ) : (
+            <img
+              src="/branding/valeo-erp-logo.png"
+              alt="VALEO ERP Logo"
+              className="h-9 w-auto max-w-[170px] object-contain"
+            />
+          )}
+        </Link>
         <Button
           variant="ghost"
           size="icon"
@@ -275,3 +260,4 @@ export function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProps): JSX.
     return null
   }
 }
+

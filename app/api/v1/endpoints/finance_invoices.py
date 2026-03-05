@@ -1,4 +1,4 @@
-﻿"""
+"""
 Finance Invoices API Endpoints
 Spezifische Endpoints für Finance-Modul Invoices
 """
@@ -206,12 +206,13 @@ async def _create_gl_booking_and_op(db: Session, invoice: SalesInvoice, tenant_i
             text(
                 """
                 INSERT INTO domain_erp.journal_entry_lines
-                (id, journal_entry_id, account_id, description, debit, credit, line_number, created_at)
-                VALUES (:id, :journal_entry_id, :account_id, :description, :debit, :credit, :line_number, NOW())
+                (id, tenant_id, journal_entry_id, account_id, description, debit, credit, line_number, created_at)
+                VALUES (:id, :tenant_id, :journal_entry_id, :account_id, :description, :debit, :credit, :line_number, NOW())
                 """
             ),
             {
                 "id": uuid7(),
+                "tenant_id": tenant_id,
                 "journal_entry_id": je_id,
                 "account_id": debtor_account_id,
                 "description": f"Forderung {invoice.customerId}",
@@ -226,12 +227,13 @@ async def _create_gl_booking_and_op(db: Session, invoice: SalesInvoice, tenant_i
             text(
                 """
                 INSERT INTO domain_erp.journal_entry_lines
-                (id, journal_entry_id, account_id, description, debit, credit, line_number, created_at)
-                VALUES (:id, :journal_entry_id, :account_id, :description, :debit, :credit, :line_number, NOW())
+                (id, tenant_id, journal_entry_id, account_id, description, debit, credit, line_number, created_at)
+                VALUES (:id, :tenant_id, :journal_entry_id, :account_id, :description, :debit, :credit, :line_number, NOW())
                 """
             ),
             {
                 "id": uuid7(),
+                "tenant_id": tenant_id,
                 "journal_entry_id": je_id,
                 "account_id": revenue_account_id,
                 "description": "Umsatzerlöse",
@@ -260,12 +262,13 @@ async def _create_gl_booking_and_op(db: Session, invoice: SalesInvoice, tenant_i
                 text(
                     """
                     INSERT INTO domain_erp.journal_entry_lines
-                    (id, journal_entry_id, account_id, description, debit, credit, line_number, created_at)
-                    VALUES (:id, :journal_entry_id, :account_id, :description, :debit, :credit, :line_number, NOW())
+                    (id, tenant_id, journal_entry_id, account_id, description, debit, credit, line_number, created_at)
+                    VALUES (:id, :tenant_id, :journal_entry_id, :account_id, :description, :debit, :credit, :line_number, NOW())
                     """
                 ),
                 {
                     "id": uuid7(),
+                    "tenant_id": tenant_id,
                     "journal_entry_id": je_id,
                     "account_id": vat_account_id,
                     "description": "Umsatzsteuer (Reverse-Charge)" if reverse_charge else "Umsatzsteuer",

@@ -182,43 +182,12 @@ export default function LieferantenStammPage(): JSX.Element {
         try {
           response = await apiClient.get(`/api/einkauf/lieferanten/${id}`)
         } catch (e2) {
-          // Fallback: Mock-Daten
-          setLieferant({
-            id: id || 'L-001',
-            name: 'Saatgut AG',
-            legalName: 'Saatgut AG GmbH',
-            typ: 'Saatgut-Lieferant',
-            kategorie: 'Saatgut',
-            gruppe: 'Premium',
-            strasse: 'Industriestr. 15',
-            plz: '54321',
-            ort: 'Südhausen',
-            land: 'DE',
-            email: 'info@saatgut-ag.de',
-            telefon: '+49 987 654321',
-            website: 'https://www.saatgut-ag.de',
-            vatId: 'DE123456789',
-            steuernummer: '123/456/78901',
-            iban: 'DE89370400440532013000',
-            bic: 'DEUTDEDBBER',
-            bankName: 'Deutsche Bank',
-            kontoinhaber: 'Saatgut AG',
-            zahlungsbedingungen: '30 Tage netto',
-            kreditlimit: 100000,
-            qsNummer: 'QS-12345',
-            bewertung: 4.5,
-            status: 'aktiv',
-            ansprechpartner: [
-              { id: '1', name: 'Max Mustermann', email: 'max@saatgut-ag.de', telefon: '+49 987 654321', funktion: 'Einkauf' },
-            ],
-            bankkonten: [
-              { id: '1', iban: 'DE89370400440532013000', bic: 'DEUTDEDBBER', bankName: 'Deutsche Bank', kontoinhaber: 'Saatgut AG', isDefault: true },
-            ],
-            klassifikationen: [
-              { id: '1', typ: 'Branche', wert: 'Landwirtschaft' },
-              { id: '2', typ: 'Zertifizierung', wert: 'Bio' },
-            ],
+          toast({
+            variant: 'destructive',
+            title: 'Lieferant konnte nicht geladen werden',
+            description: 'Bitte prüfen Sie die Verbindung oder ob der Lieferant existiert.',
           })
+          setLieferant((prev) => ({ ...prev, id: id || '', name: '', legalName: '' }))
           setLoading(false)
           return
         }

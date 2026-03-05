@@ -5,6 +5,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { apiClient } from '../api-client'
+import { useTenant } from '@/hooks/useTenant'
 
 // Types
 export type WorkflowProposal = {
@@ -62,11 +63,13 @@ export function useWorkflowStatus(workflowId: string) {
 
 export function useTriggerWorkflow() {
   const queryClient = useQueryClient()
-  
+  const { tenantId } = useTenant()
+
   return useMutation({
-    mutationFn: async (tenant_id = '00000000-0000-0000-0000-000000000001') => {
+    mutationFn: async (overrideTenantId?: string) => {
+      const tid = overrideTenantId ?? tenantId
       const response = await apiClient.post('/api/v1/agents/bestellvorschlag/trigger', {
-        tenant_id,
+        tenant_id: tid,
         parameters: {}
       })
       return response.data

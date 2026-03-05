@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
-import { useKulturen, useSorten } from '@/lib/api/agrar'
+import { useKulturen, useSorten, useKunden, useSchlaege } from '@/lib/api/agrar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -39,7 +39,7 @@ export default function SaatgutBestellungPage(): JSX.Element {
   const { toast } = useToast()
 
   const [bestellung, setBestellung] = useState<SaatgutBestellungData>({
-    id: 'SB-001',
+    id: '',
     kulturArt: '',
     sorte: '',
     saatgutId: '',
@@ -49,11 +49,11 @@ export default function SaatgutBestellungPage(): JSX.Element {
     liefertermin: '',
     prioritaet: 'normal',
     bemerkungen: '',
-    kundeId: 'KUN-001',
-    kundeName: 'Musterhof GmbH',
-    schlagId: 'SCH-001',
-    schlagName: 'Schlag Nord 2024',
-    flaeche: 25.5,
+    kundeId: '',
+    kundeName: '',
+    schlagId: '',
+    schlagName: '',
+    flaeche: 0,
     status: 'entwurf',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
@@ -61,6 +61,8 @@ export default function SaatgutBestellungPage(): JSX.Element {
 
   const [step, setStep] = useState(1)
 
+  const { data: kundenListe = [] } = useKunden()
+  const { data: schlaegeListe = [] } = useSchlaege(bestellung.kundeId || undefined)
   const { data: kulturenListe = [] } = useKulturen()
   const { data: sortenListe = [] } = useSorten()
 
@@ -118,6 +120,30 @@ export default function SaatgutBestellungPage(): JSX.Element {
 
   const isLoading = saveMutation.isPending || submitMutation.isPending
 
+  const handleKundeChange = (kundeId: string) => {
+    const kunde = kundenListe.find(k => k.id === kundeId)
+    setBestellung(prev => ({
+      ...prev,
+      kundeId: kundeId || '',
+      kundeName: kunde ? kunde.name : '',
+      schlagId: '',
+      schlagName: '',
+      flaeche: 0
+    }))
+  }
+
+  const handleSchlagChange = (schlagId: string) => {
+    const schlag = schlaegeListe.find(s => s.id === schlagId)
+    if (schlag) {
+      setBestellung(prev => ({
+        ...prev,
+        schlagId: schlag.id,
+        schlagName: schlag.name,
+        flaeche: schlag.flaeche ?? 0
+      }))
+    }
+  }
+
   const handleKulturArtChange = (kulturArt: string) => {
     setBestellung(prev => ({
       ...prev,
@@ -166,10 +192,38 @@ export default function SaatgutBestellungPage(): JSX.Element {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <MapPin className="h-5 w-5" />
-                Schritt 1: Kulturart wählen
+                Schritt 1: Kunde, Schlag & Kulturart
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div>
+                <Label>Kunde</Label>
+                <Select value={bestellung.kundeId || undefined} onValueChange={handleKundeChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Kunde auswählen" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {kundenListe.map(k => (
+                      <SelectItem key={k.id} value={k.id}>{k.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {bestellung.kundeId && (
+                <div>
+                  <Label>Schlag</Label>
+                  <Select value={bestellung.schlagId || undefined} onValueChange={handleSchlagChange}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Schlag auswählen" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {schlaegeListe.map(s => (
+                        <SelectItem key={s.id} value={s.id}>{s.name} ({s.flaeche} ha)</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
               <div>
                 <Label>Kulturart</Label>
                 <Select value={bestellung.kulturArt} onValueChange={handleKulturArtChange}>

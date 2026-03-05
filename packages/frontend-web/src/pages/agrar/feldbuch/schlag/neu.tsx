@@ -26,7 +26,7 @@ import { useKulturen } from '@/lib/api/agrar'
 import { apiClient } from '@/lib/api-client'
 import { useToast } from '@/hooks/use-toast'
 
-// Mock Bodenarten
+// Bodenarten (Stammdaten; optional später aus API/Masterdaten)
 const BODENARTEN = [
   { value: 'sand', label: 'Sand' },
   { value: 'lehmiger_sand', label: 'Lehmiger Sand' },

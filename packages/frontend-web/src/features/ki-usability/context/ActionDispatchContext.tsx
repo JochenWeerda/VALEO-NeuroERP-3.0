@@ -6,7 +6,6 @@
 import {
   createContext,
   useCallback,
-  useContext,
   useMemo,
   type ReactNode,
 } from 'react'
@@ -20,7 +19,7 @@ type ActionDispatchContextValue = {
   dispatch: (actionId: string, params?: Record<string, unknown>) => Promise<boolean>
 }
 
-const ActionDispatchContext = createContext<ActionDispatchContextValue | null>(null)
+export const ActionDispatchContext = createContext<ActionDispatchContextValue | null>(null)
 
 const NAV_ACTIONS: Record<string, string> = {
   'nav-dashboard': '/',
@@ -98,14 +97,4 @@ export function ActionDispatchProvider({ children }: { children: ReactNode }): J
   )
 }
 
-export function useActionDispatch(): ActionDispatchContextValue {
-  const ctx = useContext(ActionDispatchContext)
-  if (!ctx) {
-    throw new Error('useActionDispatch must be used within ActionDispatchProvider')
-  }
-  return ctx
-}
-
-export function useActionDispatchOptional(): ActionDispatchContextValue | null {
-  return useContext(ActionDispatchContext)
-}
+export type { ActionDispatchContextValue }

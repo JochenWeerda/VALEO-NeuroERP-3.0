@@ -145,8 +145,8 @@ async def get_balance_sheet(
                 coa.name,
                 coa.account_type,
                 coa.parent_account_id,
-                COALESCE(SUM(CASE WHEN jel.debit_amount > 0 THEN jel.debit_amount ELSE 0 END), 0) as total_debit,
-                COALESCE(SUM(CASE WHEN jel.credit_amount > 0 THEN jel.credit_amount ELSE 0 END), 0) as total_credit
+                COALESCE(SUM(CASE WHEN jel.debit > 0 THEN jel.debit ELSE 0 END), 0) as total_debit,
+                COALESCE(SUM(CASE WHEN jel.credit > 0 THEN jel.credit ELSE 0 END), 0) as total_credit
             FROM domain_erp.chart_of_accounts coa
             LEFT JOIN domain_erp.journal_entry_lines jel ON coa.id = jel.account_id
             LEFT JOIN domain_erp.journal_entries je ON jel.journal_entry_id = je.id
@@ -255,8 +255,8 @@ async def get_profit_loss(
                 coa.account_number,
                 coa.name,
                 'REVENUE' as account_type,
-                COALESCE(SUM(CASE WHEN jel.credit_amount > 0 THEN jel.credit_amount ELSE 0 END), 0) as total_credit,
-                COALESCE(SUM(CASE WHEN jel.debit_amount > 0 THEN jel.debit_amount ELSE 0 END), 0) as total_debit
+                COALESCE(SUM(CASE WHEN jel.credit > 0 THEN jel.credit ELSE 0 END), 0) as total_credit,
+                COALESCE(SUM(CASE WHEN jel.debit > 0 THEN jel.debit ELSE 0 END), 0) as total_debit
             FROM domain_erp.chart_of_accounts coa
             LEFT JOIN domain_erp.journal_entry_lines jel ON coa.id = jel.account_id
             LEFT JOIN domain_erp.journal_entries je ON jel.journal_entry_id = je.id
@@ -266,8 +266,8 @@ async def get_profit_loss(
             AND (je.status = 'posted' OR je.status IS NULL)
             AND TO_CHAR(je.entry_date, 'YYYY-MM') = :period
             GROUP BY coa.id, coa.account_number, coa.name
-            HAVING ABS(COALESCE(SUM(CASE WHEN jel.credit_amount > 0 THEN jel.credit_amount ELSE 0 END), 0) - 
-                       COALESCE(SUM(CASE WHEN jel.debit_amount > 0 THEN jel.debit_amount ELSE 0 END), 0)) >= 0.01
+            HAVING ABS(COALESCE(SUM(CASE WHEN jel.credit > 0 THEN jel.credit ELSE 0 END), 0) - 
+                       COALESCE(SUM(CASE WHEN jel.debit > 0 THEN jel.debit ELSE 0 END), 0)) >= 0.01
             ORDER BY coa.account_number
         """)
         
@@ -297,8 +297,8 @@ async def get_profit_loss(
                 coa.account_number,
                 coa.name,
                 'EXPENSE' as account_type,
-                COALESCE(SUM(CASE WHEN jel.debit_amount > 0 THEN jel.debit_amount ELSE 0 END), 0) as total_debit,
-                COALESCE(SUM(CASE WHEN jel.credit_amount > 0 THEN jel.credit_amount ELSE 0 END), 0) as total_credit
+                COALESCE(SUM(CASE WHEN jel.debit > 0 THEN jel.debit ELSE 0 END), 0) as total_debit,
+                COALESCE(SUM(CASE WHEN jel.credit > 0 THEN jel.credit ELSE 0 END), 0) as total_credit
             FROM domain_erp.chart_of_accounts coa
             LEFT JOIN domain_erp.journal_entry_lines jel ON coa.id = jel.account_id
             LEFT JOIN domain_erp.journal_entries je ON jel.journal_entry_id = je.id
@@ -309,8 +309,8 @@ async def get_profit_loss(
             AND (je.status = 'posted' OR je.status IS NULL)
             AND TO_CHAR(je.entry_date, 'YYYY-MM') = :period
             GROUP BY coa.id, coa.account_number, coa.name
-            HAVING ABS(COALESCE(SUM(CASE WHEN jel.debit_amount > 0 THEN jel.debit_amount ELSE 0 END), 0) - 
-                       COALESCE(SUM(CASE WHEN jel.credit_amount > 0 THEN jel.credit_amount ELSE 0 END), 0)) >= 0.01
+            HAVING ABS(COALESCE(SUM(CASE WHEN jel.debit > 0 THEN jel.debit ELSE 0 END), 0) - 
+                       COALESCE(SUM(CASE WHEN jel.credit > 0 THEN jel.credit ELSE 0 END), 0)) >= 0.01
             ORDER BY coa.account_number
         """)
         

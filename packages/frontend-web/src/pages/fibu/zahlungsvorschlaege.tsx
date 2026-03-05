@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -21,9 +22,15 @@ const vorschlagLabelMap: Record<Zahlungsvorschlag['vorschlag'], string> = {
 }
 
 export default function ZahlungsvorschlaegePage(): JSX.Element {
+  const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const { data: items, isLoading } = useZahlungsvorschlaege()
+
+  const handleZahlungslaufErstellen = () => {
+    if (selected.size === 0) return
+    navigate('/fibu/zahlungslaeufe')
+  }
 
   if (isLoading) return (
     <div className="p-3 md:p-6 space-y-4">
@@ -155,7 +162,7 @@ export default function ZahlungsvorschlaegePage(): JSX.Element {
           <h1 className="text-3xl font-bold">Zahlungsvorschläge</h1>
           <p className="text-muted-foreground">Skonto-optimierte Zahlungsplanung</p>
         </div>
-        <Button disabled={selected.size === 0}>
+        <Button disabled={selected.size === 0} onClick={handleZahlungslaufErstellen}>
           Zahlungslauf erstellen ({selected.size})
         </Button>
       </div>

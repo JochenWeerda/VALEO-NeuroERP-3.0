@@ -174,12 +174,28 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
   const loadOpenInvoices = async () => {
     try {
       const response = await apiClient.get('/api/v1/ap/invoices?status=APPROVED')
-      if (response.data) {
-        // Transform API response to match our type
-        const invoices: APInvoice[] = response.data.map((inv: any) => ({
+      const data = (response as any)?.data ?? response
+      const rawList = Array.isArray(data) ? data : []
+      let openItemsMap: Record<string, number> = {}
+      try {
+        const opRes = await apiClient.get<{ items?: Array<{ rechnungsnr?: string; offen?: number }> }>(
+          '/api/v1/finance/open-items?konto_typ=kreditoren&limit=500'
+        )
+        const opBody = (opRes as any)?.data ?? opRes
+        const items = opBody?.items ?? []
+        items.forEach((op: { rechnungsnr?: string; offen?: number }) => {
+          if (op.rechnungsnr != null) openItemsMap[op.rechnungsnr] = Number(op.offen ?? 0)
+        })
+      } catch {
+        // Fallback: openAmount bleibt aus Rechnung
+      }
+      const invoices: APInvoice[] = rawList.map((inv: any) => {
+        const nr = inv.number ?? inv.id ?? ''
+        const openFromOp = openItemsMap[nr]
+        return {
           id: inv.id || inv.number,
-          number: inv.number,
-          supplierId: inv.customerId || inv.supplierId, // AP invoices use customerId for supplier
+          number: nr,
+          supplierId: inv.customerId || inv.supplierId,
           supplierName: inv.customerName || inv.supplierName || '',
           invoiceDate: inv.date || inv.invoiceDate,
           dueDate: inv.dueDate,
@@ -187,10 +203,10 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
           taxAmount: inv.totalTax || inv.taxAmount || 0,
           grossAmount: inv.totalGross || inv.grossAmount || 0,
           status: inv.status,
-          openAmount: inv.openAmount ?? inv.open_amount ?? inv.totalGross ?? inv.grossAmount ?? 0,
-        }))
-        setOpenInvoices(invoices)
-      }
+          openAmount: openFromOp !== undefined ? openFromOp : (inv.openAmount ?? inv.open_amount ?? inv.totalGross ?? inv.grossAmount ?? 0),
+        }
+      })
+      setOpenInvoices(invoices)
     } catch (error) {
       console.error('Fehler beim Laden der offenen Rechnungen:', error)
     }

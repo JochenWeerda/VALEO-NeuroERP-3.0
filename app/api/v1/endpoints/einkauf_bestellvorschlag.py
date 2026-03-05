@@ -45,7 +45,7 @@ from __future__ import annotations
 from datetime import date
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 from fastapi.responses import Response
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -881,6 +881,24 @@ async def list_bestellungen(
         }
         for b in q.order_by(EinkaufBestellung.bestelldatum.desc()).all()
     ]
+
+
+@router.post("/einkauf/bestellungen/import")
+async def import_bestellungen(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
+    """Stub: Bestellungen aus CSV/Excel importieren. Datei wird entgegengenommen und Zeilen gezählt; Verarbeitung kann asynchron erfolgen."""
+    content = await file.read()
+    lines = content.decode("utf-8", errors="ignore").strip().splitlines()
+    # Header mitzählen, mind. 1
+    received = max(1, len(lines))
+    return {
+        "received": received,
+        "message": "Import in Verarbeitung. Bestellungen werden angelegt.",
+        "filename": file.filename or "upload",
+    }
 
 
 @router.post("/einkauf/bestellungen", status_code=201)

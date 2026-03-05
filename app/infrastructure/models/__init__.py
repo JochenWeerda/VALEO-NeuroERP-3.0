@@ -1169,6 +1169,7 @@ class JournalEntryLine(Base):
     id = Column(String, primary_key=True, default=uuid7)
     journal_entry_id = Column(String, ForeignKey("domain_erp.journal_entries.id"), nullable=False)
     account_id = Column(String, ForeignKey("domain_erp.chart_of_accounts.id"), nullable=False)
+    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=True)  # ergänzt via Migration
     debit = Column(DECIMAL(15, 2), default=0)
     credit = Column(DECIMAL(15, 2), default=0)
     description = Column(String(200), nullable=True)

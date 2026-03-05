@@ -476,3 +476,93 @@ class JournalEntryRepositoryImpl(BaseRepositoryImpl[JournalEntry, dict, dict], J
         if reference is not None:
             query = query.filter(JournalEntry.reference == reference)
         return query.order_by(JournalEntry.entry_date.desc()).all()
+
+    async def get_entries_by_account(
+        self,
+        account_id: str,
+        tenant_id: str,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None,
+    ):
+        """Get journal entries that contain at least one line for the given account."""
+        query = (
+            self.session.query(JournalEntry)
+            .join(JournalEntryLine, JournalEntryLine.journal_entry_id == JournalEntry.id)
+            .filter(
+                and_(
+                    JournalEntry.tenant_id == tenant_id,
+                    JournalEntryLine.account_id == account_id,
+                )
+            )
+        )
+
+        if start_date:
+            query = query.filter(JournalEntry.entry_date >= datetime.fromisoformat(start_date))
+        if end_date:
+            query = query.filter(JournalEntry.entry_date <= datetime.fromisoformat(end_date))
+
+        return query.order_by(JournalEntry.entry_date.desc()).all()
+
+    async def reverse_entry(self, entry_id: str, reason: str, tenant_id: str):
+        """Create and persist a reversal entry by swapping debit/credit on all lines."""
+        original = await self.get_by_id(entry_id, tenant_id)
+        if not original or original.status != "posted":
+            return None
+
+        # Prevent duplicate reversal entries for the same source entry.
+        existing_reversal = (
+            self.session.query(JournalEntry)
+            .filter(
+                and_(
+                    JournalEntry.tenant_id == tenant_id,
+                    JournalEntry.reversed_entry_id == entry_id,
+                )
+            )
+            .first()
+        )
+        if existing_reversal:
+            return existing_reversal
+
+        try:
+            now = datetime.utcnow()
+            reversal = JournalEntry(
+                entry_number=f"{original.entry_number}-REV",
+                entry_date=now,
+                posting_date=now,
+                description=f"Storno zu {original.entry_number}: {reason}",
+                reference=original.reference,
+                source=original.source or "manual",
+                status="posted",
+                total_debit=original.total_credit,
+                total_credit=original.total_debit,
+                posted_by=original.posted_by,
+                posted_at=now,
+                reversed_entry_id=entry_id,
+                tenant_id=tenant_id,
+            )
+            self.session.add(reversal)
+            self.session.flush()
+
+            lines = (
+                self.session.query(JournalEntryLine)
+                .filter(JournalEntryLine.journal_entry_id == entry_id)
+                .all()
+            )
+            for line in lines:
+                reversal_line = JournalEntryLine(
+                    journal_entry_id=reversal.id,
+                    account_id=line.account_id,
+                    tenant_id=tenant_id,
+                    debit=line.credit,
+                    credit=line.debit,
+                    description=f"Storno: {line.description}" if line.description else "Storno",
+                )
+                self.session.add(reversal_line)
+
+            original.status = "reversed"
+            self.session.commit()
+            self.session.refresh(reversal)
+            return reversal
+        except Exception:
+            self.session.rollback()
+            return None

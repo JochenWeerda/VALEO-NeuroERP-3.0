@@ -4,6 +4,7 @@ import { Wizard } from '@/components/patterns/Wizard'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { Truck } from 'lucide-react'
 
 type BeladungData = {
@@ -152,6 +153,7 @@ export default function LKWBeladungPage(): JSX.Element {
 
   return (
     <div className="p-3 md:p-6">
+      <ModuleToolbar backTarget="/logistik/verladungen" closeTarget="/logistik/verladungen" title="LKW-Beladung" />
       <Wizard
         title="LKW-Beladung"
         steps={steps}

@@ -185,7 +185,7 @@ export default function PSMWasserschutzPruefungPage(): JSX.Element {
                 <Input
                   value={schlagAdresse}
                   onChange={(e) => setSchlagAdresse(e.target.value)}
-                  placeholder="z.B. Musterstraße 123, 12345 Berlin"
+                  placeholder="Adresse oder Ort eingeben"
                   className="flex-1"
                 />
                 <Button onClick={sucheAdresse} size="sm">

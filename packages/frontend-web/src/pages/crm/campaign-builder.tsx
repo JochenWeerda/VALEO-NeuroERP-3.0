@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge'
 import { ArrowLeft, ArrowRight, Check, Mail, Users, Calendar, BarChart3, Settings } from 'lucide-react'
 import { createApiClient } from '@/components/mask-builder/utils/api'
 import { toast } from '@/hooks/use-toast'
+import { useTenant } from '@/hooks/useTenant'
 
 // API Client
 const apiClient = createApiClient('/api/crm-marketing')
@@ -40,6 +41,7 @@ interface CampaignData {
 export default function CampaignBuilderPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const { tenantId } = useTenant()
   const [currentStep, setCurrentStep] = useState<CampaignBuilderStep>('type')
   const [loading, setLoading] = useState(false)
   const [campaignData, setCampaignData] = useState<CampaignData>({
@@ -81,10 +83,10 @@ export default function CampaignBuilderPage(): JSX.Element {
       try {
         const [templatesRes, segmentsRes] = await Promise.all([
           apiClient.get('/campaigns/templates', {
-            params: { tenant_id: '00000000-0000-0000-0000-000000000001' }
+            params: { tenant_id: tenantId }
           }),
           apiClient.get('/segments', {
-            params: { tenant_id: '00000000-0000-0000-0000-000000000001' }
+            params: { tenant_id: tenantId }
           })
         ])
         
@@ -150,7 +152,7 @@ export default function CampaignBuilderPage(): JSX.Element {
     setLoading(true)
     try {
       const payload: any = {
-        tenant_id: '00000000-0000-0000-0000-000000000001',
+        tenant_id: tenantId,
         name: campaignData.name,
         description: campaignData.description,
         type: campaignData.type,

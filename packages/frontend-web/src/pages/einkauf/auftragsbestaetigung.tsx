@@ -6,6 +6,7 @@ import { useMaskData } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
+import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { toast } from '@/hooks/use-toast'
 
 // Zod-Schema für Auftragsbestätigung (wird in Komponente mit i18n erstellt)
@@ -207,12 +208,15 @@ export default function AuftragsbestaetigungPage(): JSX.Element {
   }
 
   return (
-    <ObjectPage
-      config={auftragsbestaetigungConfig}
-      data={data}
-      onSave={handleSave}
-      onCancel={handleCancel}
-      isLoading={loading}
-    />
+    <>
+      <ModuleToolbar backTarget="/einkauf/auftragsbestaetigungen" closeTarget="/einkauf/auftragsbestaetigungen" title={entityTypeLabel} />
+      <ObjectPage
+        config={auftragsbestaetigungConfig}
+        data={data}
+        onSave={handleSave}
+        onCancel={handleCancel}
+        isLoading={loading}
+      />
+    </>
   )
 }

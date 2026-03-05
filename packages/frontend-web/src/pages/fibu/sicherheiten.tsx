@@ -9,9 +9,12 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { AlertTriangle, FileText, Plus, Search, Shield } from 'lucide-react'
 import { useSicherheiten, type Sicherheit } from '@/lib/api/fibu'
 
+type FilterMode = 'alle' | 'nur_aktive' | 'nur_ueberlastet'
+
 export default function SicherheitenPage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
+  const [filterMode, setFilterMode] = useState<FilterMode>('alle')
   const { data: items, isLoading } = useSicherheiten()
 
   if (isLoading) return (
@@ -22,6 +25,13 @@ export default function SicherheitenPage(): JSX.Element {
   )
 
   const list = items ?? []
+  const filteredList = list.filter((s) => {
+    const matchSearch = !searchTerm || s.kunde.toLowerCase().includes(searchTerm.toLowerCase()) || (s.gegenstand ?? '').toLowerCase().includes(searchTerm.toLowerCase())
+    if (!matchSearch) return false
+    if (filterMode === 'nur_aktive') return s.status === 'aktiv'
+    if (filterMode === 'nur_ueberlastet') return s.kreditlinie > 0 && (s.ausgenutzt / s.kreditlinie) * 100 > 80
+    return true
+  })
 
   const columns = [
     {
@@ -87,9 +97,9 @@ export default function SicherheitenPage(): JSX.Element {
     },
   ]
 
-  const gesamtwert = list.reduce((sum, s) => sum + s.wert, 0)
-  const gesamtKreditlinie = list.reduce((sum, s) => sum + s.kreditlinie, 0)
-  const gesamtAusgenutzt = list.reduce((sum, s) => sum + s.ausgenutzt, 0)
+  const gesamtwert = filteredList.reduce((sum, s) => sum + s.wert, 0)
+  const gesamtKreditlinie = filteredList.reduce((sum, s) => sum + s.kreditlinie, 0)
+  const gesamtAusgenutzt = filteredList.reduce((sum, s) => sum + s.ausgenutzt, 0)
   const auslastung = gesamtKreditlinie > 0 ? (gesamtAusgenutzt / gesamtKreditlinie) * 100 : 0
 
   return (
@@ -136,7 +146,7 @@ export default function SicherheitenPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Sicherheiten Gesamt</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold">{list.length}</span>
+            <span className="text-2xl font-bold">{filteredList.length}</span>
           </CardContent>
         </Card>
 
@@ -182,15 +192,19 @@ export default function SicherheitenPage(): JSX.Element {
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input placeholder="Suche Kunde oder Gegenstand..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
             </div>
-            <Button variant="outline">Nur Aktive</Button>
-            <Button variant="outline">Nur Überlastet (&gt;80%)</Button>
+            <Button variant={filterMode === 'nur_aktive' ? 'default' : 'outline'} onClick={() => setFilterMode((m) => (m === 'nur_aktive' ? 'alle' : 'nur_aktive'))}>
+              Nur Aktive
+            </Button>
+            <Button variant={filterMode === 'nur_ueberlastet' ? 'default' : 'outline'} onClick={() => setFilterMode((m) => (m === 'nur_ueberlastet' ? 'alle' : 'nur_ueberlastet'))}>
+              Nur Überlastet (&gt;80%)
+            </Button>
           </div>
         </CardContent>
       </Card>
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={list} columns={columns} />
+          <DataTable data={filteredList} columns={columns} />
         </CardContent>
       </Card>
     </div>

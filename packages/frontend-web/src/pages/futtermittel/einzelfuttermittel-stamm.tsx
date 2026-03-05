@@ -5,6 +5,9 @@ import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mas
 import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
 import { toast } from '@/hooks/use-toast'
+import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
+import { LeaveConfirmDialog } from '@/components/LeaveConfirmDialog'
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 
 // Zod-Schema für Validierung
 const futtermittelSchema = z.object({
@@ -250,19 +253,22 @@ export default function EinzelfuttermittelStammPage(): JSX.Element {
   }
 
   const handleCancel = () => {
-    if (isDirty && !confirm('Ungespeicherte Änderungen gehen verloren. Wirklich abbrechen?')) {
-      return
-    }
     navigate('/futtermittel/einzelfuttermittel/liste')
   }
 
+  const blocker = useUnsavedChanges(isDirty)
+
   return (
-    <ObjectPage
-      config={futtermittelConfig}
-      data={data}
-      onSave={handleSave}
-      onCancel={handleCancel}
-      isLoading={loading}
-    />
+    <>
+      <ModuleToolbar backTarget="/futtermittel/einzelfuttermittel/liste" closeTarget="/futtermittel/einzelfuttermittel/liste" title="Einzelfuttermittel-Stamm" />
+      <LeaveConfirmDialog blocker={blocker} onSave={() => handleSave(data)} title="Ungespeicherte Änderungen" description="Möchten Sie speichern, verwerfen oder hier bleiben?" />
+      <ObjectPage
+        config={futtermittelConfig}
+        data={data}
+        onSave={handleSave}
+        onCancel={handleCancel}
+        isLoading={loading}
+      />
+    </>
   )
 }

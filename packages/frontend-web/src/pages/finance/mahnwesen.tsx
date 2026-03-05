@@ -7,6 +7,9 @@ import { MaskConfig } from '@/components/mask-builder/types'
 import { z } from 'zod'
 import { toast } from '@/hooks/use-toast'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
+import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
+import { LeaveConfirmDialog } from '@/components/LeaveConfirmDialog'
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 
 // Zod-Schema für Mahnwesen (wird in Komponente mit i18n erstellt)
 const createMahnwesenSchema = (t: any) => z.object({
@@ -369,21 +372,24 @@ export default function MahnwesenPage(): JSX.Element {
   }
 
   const handleCancel = () => {
-    if (isDirty && !confirm(t('crud.messages.unsavedChanges'))) {
-      return
-    }
     navigate('/finance/mahnwesen')
   }
 
+  const blocker = useUnsavedChanges(isDirty)
+
   return (
-    <ObjectPage
-      config={mahnwesenConfig}
-      data={data}
-      onSave={handleSave}
-      onCancel={handleCancel}
-      isLoading={loading}
-      onAction={(key, formData) => handleAction(key, formData)}
-      loadingActionKey={actionLoadingKey}
-    />
+    <>
+      <ModuleToolbar backTarget="/finance/mahnwesen" closeTarget="/finance/mahnwesen" title={entityTypeLabel} />
+      <LeaveConfirmDialog blocker={blocker} onSave={() => handleSave(data)} title={t('crud.messages.unsavedChanges', { defaultValue: 'Ungespeicherte Änderungen' })} description={t('crud.messages.unsavedChangesDescription', { defaultValue: 'Möchten Sie speichern, verwerfen oder hier bleiben?' })} />
+      <ObjectPage
+        config={mahnwesenConfig}
+        data={data}
+        onSave={handleSave}
+        onCancel={handleCancel}
+        isLoading={loading}
+        onAction={(key, formData) => handleAction(key, formData)}
+        loadingActionKey={actionLoadingKey}
+      />
+    </>
   )
 }

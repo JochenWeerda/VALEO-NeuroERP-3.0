@@ -3,9 +3,10 @@
  * Formular zum Erstellen/Bearbeiten von Rechnungen im Finance-Modul
  * 
  * Basierend auf sales/invoice-editor.tsx, aber für Finance-Modul angepasst
+ * M18: Echte Kunden-Suche über CRM Customers API
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,8 +14,25 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Trash2, Save, X } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { Plus, Trash2, Save, X, Check, ChevronsUpDown } from "lucide-react";
+import { ModuleToolbar } from "@/components/navigation/ModuleToolbar";
 import { useToast } from "@/hooks/use-toast";
+import { apiClient } from "@/lib/api-client";
+import { cn } from "@/lib/utils";
+
+const CUSTOMER_SEARCH_DEBOUNCE_MS = 300;
+const MIN_SEARCH_LENGTH = 2;
+
+type CustomerOption = { id: string; company_name: string; customer_number?: string; email?: string };
 
 interface InvoiceLine {
   article: string;
@@ -42,6 +60,48 @@ export default function FinanceInvoiceFormPage(): JSX.Element {
   const [totalTax, setTotalTax] = useState(0);
   const [totalGross, setTotalGross] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [customerPopoverOpen, setCustomerPopoverOpen] = useState(false);
+  const [customerSearchQuery, setCustomerSearchQuery] = useState("");
+  const [customerSearchResults, setCustomerSearchResults] = useState<CustomerOption[]>([]);
+  const [customerSearchLoading, setCustomerSearchLoading] = useState(false);
+  const [customerSearchDebounce, setCustomerSearchDebounce] = useState("");
+
+  useEffect(() => {
+    const t = setTimeout(() => setCustomerSearchDebounce(customerSearchQuery), CUSTOMER_SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(t);
+  }, [customerSearchQuery]);
+
+  const fetchCustomers = useCallback(async (search: string) => {
+    if (search.trim().length < MIN_SEARCH_LENGTH) {
+      setCustomerSearchResults([]);
+      return;
+    }
+    setCustomerSearchLoading(true);
+    try {
+      const res = await apiClient.get<{ items?: CustomerOption[] }>(
+        `/api/v1/crm/customers?search=${encodeURIComponent(search.trim())}&limit=20`
+      );
+      const body = res.data ?? (res as unknown as { data?: { items?: CustomerOption[] } }).data;
+      const items = body?.items ?? [];
+      setCustomerSearchResults(Array.isArray(items) ? items : []);
+    } catch {
+      setCustomerSearchResults([]);
+    } finally {
+      setCustomerSearchLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchCustomers(customerSearchDebounce);
+  }, [customerSearchDebounce, fetchCustomers]);
+
+  const selectCustomer = (c: CustomerOption) => {
+    setCustomerId(c.id);
+    setCustomerName(c.company_name || c.customer_number || c.id);
+    setCustomerPopoverOpen(false);
+    setCustomerSearchQuery("");
+    setCustomerSearchResults([]);
+  };
 
   // Berechne Beträge bei Änderungen
   useEffect(() => {
@@ -179,6 +239,7 @@ export default function FinanceInvoiceFormPage(): JSX.Element {
 
   return (
     <div className="container mx-auto p-6 max-w-6xl">
+      <ModuleToolbar backTarget="/finance/invoices" closeTarget="/finance/invoices" title="Rechnung erstellen" />
       <div className="mb-6">
         <h1 className="text-3xl font-bold">Rechnung erstellen</h1>
         <p className="text-muted-foreground mt-2">
@@ -217,15 +278,47 @@ export default function FinanceInvoiceFormPage(): JSX.Element {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="customer">Kunde *</Label>
-                <Input
-                  id="customer"
-                  value={customerName}
-                  onChange={(e) => {
-                    setCustomerName(e.target.value);
-                    setCustomerId(e.target.value); // TODO: Echte Kunden-Suche
-                  }}
-                  placeholder="Kunde suchen..."
-                />
+                <Popover open={customerPopoverOpen} onOpenChange={setCustomerPopoverOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      id="customer"
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={customerPopoverOpen}
+                      className="w-full justify-between font-normal"
+                    >
+                      {customerName || "Kunde suchen..."}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+                    <Command shouldFilter={false}>
+                      <CommandInput
+                        placeholder="Name, Nr. oder E-Mail eingeben..."
+                        value={customerSearchQuery}
+                        onValueChange={setCustomerSearchQuery}
+                      />
+                      <CommandList>
+                        <CommandEmpty>
+                          {customerSearchLoading ? "Suche..." : customerSearchQuery.length < MIN_SEARCH_LENGTH ? "Mind. 2 Zeichen eingeben" : "Keine Kunden gefunden"}
+                        </CommandEmpty>
+                        <CommandGroup>
+                          {customerSearchResults.map((c) => (
+                            <CommandItem
+                              key={c.id}
+                              value={c.id}
+                              onSelect={() => selectCustomer(c)}
+                            >
+                              <Check className={cn("mr-2 h-4 w-4", customerId === c.id ? "opacity-100" : "opacity-0")} />
+                              {c.company_name}
+                              {c.customer_number ? ` (${c.customer_number})` : ""}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               </div>
               <div>
                 <Label htmlFor="paymentTerms">Zahlungsbedingungen</Label>
