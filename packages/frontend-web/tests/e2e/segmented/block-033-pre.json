@@ -1,0 +1,79 @@
+{
+  "block": 33,
+  "start": 321,
+  "end": 330,
+  "total": 10,
+  "failed": 0,
+  "results": [
+    {
+      "route": "/fuhrpark/fahrzeug/test-123",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/fuhrpark/fahrzeuge",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/fuhrpark/fuhrpark-auswertung-kosten-pro-fahrzeug",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/fuhrpark/fuhrpark-auswertungen-menu",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/fuhrpark/fuhrpark-klassisch",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/fuhrpark/fuhrpark-menue",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/fuhrpark/fuhrpark-rechnungen",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/fuhrpark/fuhrpark-stammdaten",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/fuhrpark/uebersicht",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/futter/einzel",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    }
+  ]
+}

@@ -65,14 +65,13 @@ test.describe('Auth and NotFound routes', () => {
 
     // Login-Seite: Titel/Beschreibung/Button (oder Redirect zu / bei bereits gültiger Session)
     const loginContent = page.getByText(/valeo neuroerp|melden sie sich|sso anmelden|weiterleitung/i).first()
-    const redirectedToHome = page.url().then((u) => !u.includes('/login') && (u.endsWith('/') || u.endsWith('/login') === false))
     await Promise.race([
       expect(loginContent).toBeVisible({ timeout: 12_000 }),
-      page.waitForURL(/\/(?!login)/, { timeout: 12_000 }).then(() => expect(redirectedToHome).resolves.toBe(true)),
+      page.waitForURL(/\/(?!login)/, { timeout: 12_000 }),
     ]).catch(async () => {
       const onLogin = await loginContent.isVisible().catch(() => false)
       const url = page.url()
-      expect(onLogin || (!url.includes('/login') && url.includes(page.context().pages()[0]?.url() ? true : true)).toBe(true)
+      expect(onLogin || !url.includes('/login')).toBe(true)
     })
     if (await loginContent.isVisible().catch(() => false)) {
       await expect(page.getByRole('button', { name: /sso anmelden|weiterleitung/i })).toBeVisible({ timeout: 5000 }).catch(() => {})

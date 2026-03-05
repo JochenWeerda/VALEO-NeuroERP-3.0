@@ -59,7 +59,7 @@ function convertCustomerMaskToObjectPageConfig(config: CustomerMaskConfig): Mask
       columns: resolveTabColumns(tab),
       fields:
         tab.sections?.flatMap((section) =>
-          section.fields.map((field) => convertCustomerMaskField(field, section.label)),
+          (section.fields ?? []).map((field) => convertCustomerMaskField(field, section.label)),
         ) ?? [],
     })),
     actions: [],
