@@ -1,0 +1,79 @@
+{
+  "block": 22,
+  "start": 211,
+  "end": 220,
+  "total": 10,
+  "failed": 0,
+  "results": [
+    {
+      "route": "/einkauf/lieferanten",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/einkauf/lieferanten-dokumente",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/einkauf/lieferanten-liste",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/einkauf/lieferanten-stamm",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/einkauf/lieferanten/test-123",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/einkauf/lieferantenbewertung",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/einkauf/lieferschein-erfassung",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/einkauf/lieferschein-frachtauftrag",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/einkauf/rechnung-abgleich",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/einkauf/rechnung-eingang-erfassung",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    }
+  ]
+}

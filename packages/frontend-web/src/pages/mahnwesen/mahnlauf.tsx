@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
+import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { CheckCircle } from 'lucide-react'
 import { ErrorState } from '@/components/ErrorState'
 
@@ -29,7 +30,7 @@ type MahnlaufData = {
 export default function MahnlaufPage(): JSX.Element {
   const navigate = useNavigate()
 
-  const { data: postenData = [], isLoading, isError, error, refetch } = useQuery({
+  const { data: postenData, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['mahnwesen', 'faellige-posten'],
     queryFn: async () => {
       const r = await apiClient.get<FaelligerPosten[]>('/api/v1/mahnwesen/faellige-posten')
@@ -45,7 +46,11 @@ export default function MahnlaufPage(): JSX.Element {
   })
 
   useEffect(() => {
-    setMahnlauf((prev) => ({ ...prev, faelligePosten: postenData }))
+    if (!Array.isArray(postenData)) return
+    setMahnlauf((prev) => {
+      if (prev.faelligePosten === postenData) return prev
+      return { ...prev, faelligePosten: postenData }
+    })
   }, [postenData])
 
   if (isLoading) {
@@ -178,6 +183,7 @@ export default function MahnlaufPage(): JSX.Element {
 
   return (
     <div className="p-3 md:p-6">
+      <ModuleToolbar backTarget="/fibu/offene-posten" closeTarget="/fibu/offene-posten" title="Mahnlauf erstellen" />
       <Wizard
         title="Mahnlauf erstellen"
         steps={steps}

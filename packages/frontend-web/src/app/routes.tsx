@@ -1,3 +1,4 @@
+/* @refresh reload */
 import { type ComponentType, Suspense, lazy } from 'react'
 import { type RouteObject, createBrowserRouter } from 'react-router-dom'
 import AppLayout from '@/layouts/DashboardLayout'
@@ -26,6 +27,8 @@ const AUTO_ROUTE_IGNORE_PATTERNS: RegExp[] = [
   /\.spec\.tsx$/,
   /\.test\.tsx$/,
   /\.stories\.tsx$/,
+  /\/finance\/reports\/[^/]+\.tsx$/,
+  /\/Dlg[A-Z][^/]*\.tsx$/,
 ]
 
 const lazyComponentCache = new WeakMap<PageModuleFactory, ComponentType<unknown>>()

@@ -1,0 +1,79 @@
+{
+  "block": 5,
+  "start": 41,
+  "end": 50,
+  "total": 10,
+  "failed": 0,
+  "results": [
+    {
+      "route": "/agrar/pflanzenschutz/applikation",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/agrar/psm",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/agrar/psm/abgabedokumentation",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/agrar/psm/auflagen-manager",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/agrar/psm/beratung",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/agrar/psm/liste",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/agrar/psm/resistenz",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/agrar/psm/sachkunde-register",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/agrar/psm/stamm",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/agrar/psm/stamm/test-123",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    }
+  ]
+}

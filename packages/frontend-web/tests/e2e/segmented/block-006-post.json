@@ -1,0 +1,79 @@
+{
+  "block": 6,
+  "start": 51,
+  "end": 60,
+  "total": 10,
+  "failed": 0,
+  "results": [
+    {
+      "route": "/agrar/psm/wasserschutz",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/agrar/saatgut",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/agrar/saatgut-liste",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/agrar/saatgut-stamm",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/agrar/saatgut-stamm/test-123",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/agrar/saatgut/bestellung",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/agrar/saatgut/liste",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/agrar/saatgut/sortenregister",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/agrar/saatgut/stamm",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/agrar/saatgut/stamm/test-123",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    }
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "block": 8,
+  "start": 71,
+  "end": 80,
+  "total": 10,
+  "failed": 0,
+  "results": [
+    {
+      "route": "/annahme/qualitaets-check",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/annahme/warteschlange",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/artikel",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/artikel/liste",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/artikel/neu",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/artikel/stamm",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/artikel/test-123",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/banken/konten",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/benachrichtigungen",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/benachrichtigungen/liste",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    }
+  ]
+}

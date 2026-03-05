@@ -1,0 +1,79 @@
+{
+  "block": 51,
+  "start": 501,
+  "end": 510,
+  "total": 10,
+  "failed": 0,
+  "results": [
+    {
+      "route": "/versicherungen",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/versicherungen/liste",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/vertrag/neu",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/vertrag/rahmenvertraege",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/vertrag/test-123",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/vertrieb/kundenumsatz",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/waage",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/waage/hofliste",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/waage/liste",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/waage/wiegungen",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    }
+  ]
+}

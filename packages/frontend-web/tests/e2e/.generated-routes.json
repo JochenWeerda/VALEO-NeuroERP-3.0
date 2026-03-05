@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-03-03T05:13:51.093Z",
-  "totalRoutes": 494,
+  "generatedAt": "2026-03-05T09:55:55.899Z",
+  "totalRoutes": 519,
   "routes": [
     {
       "path": "/admin/audit-log",
@@ -707,7 +707,35 @@
       "source": "static"
     },
     {
+      "path": "/disposition/coverage-monitor",
+      "source": "static"
+    },
+    {
+      "path": "/disposition/DlgPositionDetails",
+      "source": "static"
+    },
+    {
+      "path": "/disposition/FrmCoverageMonitor",
+      "source": "static"
+    },
+    {
+      "path": "/disposition/FrmPositionRules",
+      "source": "static"
+    },
+    {
       "path": "/disposition/liste",
+      "source": "static"
+    },
+    {
+      "path": "/disposition/LstCommodityPositionMatrix",
+      "source": "static"
+    },
+    {
+      "path": "/disposition/position-matrix",
+      "source": "static"
+    },
+    {
+      "path": "/disposition/regeln",
       "source": "static"
     },
     {
@@ -933,6 +961,15 @@
       "source": "static"
     },
     {
+      "path": "/fibu/abschluss-checklist-detail",
+      "source": "static"
+    },
+    {
+      "path": "/fibu/abschluss-checklist-detail/test-123",
+      "source": "param",
+      "original": "/fibu/abschluss-checklist-detail/:id"
+    },
+    {
       "path": "/fibu/abschluss-cockpit",
       "source": "static"
     },
@@ -1087,6 +1124,10 @@
       "source": "static"
     },
     {
+      "path": "/finance/bank-stamm",
+      "source": "static"
+    },
+    {
       "path": "/finance/bankkonten",
       "source": "static"
     },
@@ -1202,6 +1243,26 @@
     },
     {
       "path": "/finance/periods",
+      "source": "static"
+    },
+    {
+      "path": "/finance/reports",
+      "source": "static"
+    },
+    {
+      "path": "/finance/reports/AnalyticsChart",
+      "source": "static"
+    },
+    {
+      "path": "/finance/reports/FinancialCard",
+      "source": "static"
+    },
+    {
+      "path": "/finance/reports/ProfitLossTable",
+      "source": "static"
+    },
+    {
+      "path": "/finance/reports/Sidebar",
       "source": "static"
     },
     {
@@ -1392,6 +1453,39 @@
     {
       "path": "/kasse/tagesabschluss",
       "source": "static"
+    },
+    {
+      "path": "/kontrakte",
+      "source": "static"
+    },
+    {
+      "path": "/kontrakte/DlgAuswahlVerkaufKontrakte",
+      "source": "static"
+    },
+    {
+      "path": "/kontrakte/DlgKontraktUmSaetze",
+      "source": "static"
+    },
+    {
+      "path": "/kontrakte/FrmKontraktDetail",
+      "source": "static"
+    },
+    {
+      "path": "/kontrakte/FrmKontraktProtokoll",
+      "source": "static"
+    },
+    {
+      "path": "/kontrakte/LstKontraktUebersicht",
+      "source": "static"
+    },
+    {
+      "path": "/kontrakte/neu",
+      "source": "static"
+    },
+    {
+      "path": "/kontrakte/test-123",
+      "source": "param",
+      "original": "/kontrakte/:id"
     },
     {
       "path": "/labor/proben",
@@ -1956,8 +2050,17 @@
       "source": "static"
     },
     {
+      "path": "/vertrag/neu",
+      "source": "static"
+    },
+    {
       "path": "/vertrag/rahmenvertraege",
       "source": "static"
+    },
+    {
+      "path": "/vertrag/test-123",
+      "source": "param",
+      "original": "/vertrag/:id"
     },
     {
       "path": "/vertrieb/kundenumsatz",

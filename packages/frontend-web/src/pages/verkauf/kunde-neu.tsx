@@ -2,6 +2,7 @@ import { FormEvent, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, Loader2, Save } from 'lucide-react'
 import { ObjectPage } from '@/components/mask-builder'
+import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -17,6 +18,7 @@ import {
 } from '@/features/crm-masks/mappers'
 import {
   CUSTOMER_MASK_OBJECT_PAGE_CONFIG,
+  ENABLE_CUSTOMER_MASK_BUILDER_FORM,
   validateCustomerPayload,
 } from '@/features/crm-masks/customer-mask-support'
 import { type CustomerCreate, useCreateCustomer } from '@/lib/api/crm'
@@ -51,7 +53,7 @@ export default function KundeNeuPage(): JSX.Element {
   const navigate = useNavigate()
   const { toast } = useToast()
   const { mutateAsync: createCustomer, isPending } = useCreateCustomer()
-  const enableMaskBuilder = ENABLE_MASK_BUILDER_CUSTOMER_FORM
+  const enableMaskBuilder = ENABLE_CUSTOMER_MASK_BUILDER_FORM
   const [maskData, setMaskData] = useState<MaskCustomerData>(() => mapCustomerToMask(undefined))
   const [formState, setFormState] = useState<FormState>(() => ({
     ...DEFAULT_STATE,
@@ -126,6 +128,7 @@ export default function KundeNeuPage(): JSX.Element {
   if (enableMaskBuilder) {
     return (
       <div className="space-y-4 p-6">
+        <ModuleToolbar backTarget="/verkauf/kunden-liste" closeTarget="/verkauf/kunden-liste" title="Neuer Kunde" />
         {error ? (
           <Alert variant="destructive">
             <AlertTitle>Speichern fehlgeschlagen</AlertTitle>
@@ -137,7 +140,7 @@ export default function KundeNeuPage(): JSX.Element {
           data={maskData}
           onChange={setMaskData}
           onSave={handleMaskSave}
-          onCancel={() => navigate(-1)}
+          onCancel={() => navigate('/verkauf/kunden-liste')}
         />
       </div>
     )
@@ -145,6 +148,7 @@ export default function KundeNeuPage(): JSX.Element {
 
   return (
     <div className="p-6 space-y-6">
+      <ModuleToolbar backTarget="/verkauf/kunden-liste" closeTarget="/verkauf/kunden-liste" title="Neuer Kunde" />
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm text-muted-foreground mb-1">Vertrieb &gt; Kunden</p>

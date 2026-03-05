@@ -16,6 +16,8 @@ interface WorklistProps {
   isLoading?: boolean
 }
 
+const NO_GROUP_VALUE = '__none__'
+
 const Worklist: React.FC<WorklistProps> = ({
   config,
   items,
@@ -25,7 +27,7 @@ const Worklist: React.FC<WorklistProps> = ({
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [priorityFilter, setPriorityFilter] = useState<string>('all')
-  const [groupBy, setGroupBy] = useState<string>(config.groupBy || '')
+  const [groupBy, setGroupBy] = useState<string>(config.groupBy || NO_GROUP_VALUE)
 
   // Filter items
   const filteredItems = items.filter(item => {
@@ -38,7 +40,7 @@ const Worklist: React.FC<WorklistProps> = ({
   })
 
   // Group items if groupBy is specified
-  const groupedItems = groupBy ? filteredItems.reduce((groups, item) => {
+  const groupedItems = groupBy !== NO_GROUP_VALUE ? filteredItems.reduce((groups, item) => {
     const key = item[groupBy as keyof WorklistItem] as string || 'Unbekannt'
     if (!groups[key]) groups[key] = []
     groups[key].push(item)
@@ -230,7 +232,7 @@ const Worklist: React.FC<WorklistProps> = ({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Nicht gruppieren</SelectItem>
+                    <SelectItem value={NO_GROUP_VALUE}>Nicht gruppieren</SelectItem>
                     <SelectItem value={config.groupBy}>{config.groupBy}</SelectItem>
                   </SelectContent>
                 </Select>
@@ -244,7 +246,7 @@ const Worklist: React.FC<WorklistProps> = ({
       <div className="space-y-6">
         {Object.entries(groupedItems).map(([groupName, groupItems]) => (
           <div key={groupName}>
-            {groupBy && (
+            {groupBy !== NO_GROUP_VALUE && (
               <h2 className="text-xl font-semibold mb-4">{groupName}</h2>
             )}
 

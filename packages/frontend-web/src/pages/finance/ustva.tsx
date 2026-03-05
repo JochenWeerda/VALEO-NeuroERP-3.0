@@ -72,7 +72,7 @@ const createUstvaConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
           required: true,
           placeholder: t('crud.tooltips.placeholders.period'),
           pattern: '^\\d{4}-\\d{2}$'
-         } as any, {},
+         } as any,
         {
           name: 'voranmeldungszeitraum',
           label: t('crud.fields.declarationPeriod'),

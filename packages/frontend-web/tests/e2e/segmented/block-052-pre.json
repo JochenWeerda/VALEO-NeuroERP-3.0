@@ -1,0 +1,72 @@
+{
+  "block": 52,
+  "start": 511,
+  "end": 519,
+  "total": 9,
+  "failed": 1,
+  "results": [
+    {
+      "route": "/wartung/anlagen",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/wartung/anlagen-liste",
+      "ok": false,
+      "navError": "TimeoutError: page.goto: Timeout 30000ms exceeded.\nCall log:\n  \u001b[2m- navigating to \"http://127.0.0.1:3000/wartung/anlagen-liste\", waiting until \"domcontentloaded\"\u001b[22m\n",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/weighing",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/workflow/workflow-monitoring",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/workflow/workflow-regeln",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/workflows/approval",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/workflows/trigger",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/zertifikate",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/zertifikate/liste",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    }
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "block": 21,
+  "start": 201,
+  "end": 210,
+  "total": 10,
+  "failed": 0,
+  "results": [
+    {
+      "route": "/einkauf/bestellungen-liste",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/einkauf/bestellungen/neu",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/einkauf/bestellungen/test-123",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/einkauf/bestellvorschlaege",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/einkauf/bestellvorschlag-lager",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/einkauf/bestellvorschlag-rohware",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/einkauf/bestellvorschlag-verkauf",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/einkauf/edi-portal",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/einkauf/frachtauftraege-eingang",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/einkauf/gutschriften-belastungen",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    }
+  ]
+}

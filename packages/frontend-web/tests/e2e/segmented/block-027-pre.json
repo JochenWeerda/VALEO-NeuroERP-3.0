@@ -1,0 +1,81 @@
+{
+  "block": 27,
+  "start": 261,
+  "end": 270,
+  "total": 10,
+  "failed": 1,
+  "results": [
+    {
+      "route": "/fibu/sicherheiten",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/fibu/verbindlichkeiten",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/fibu/zahlungseingaenge",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/fibu/zahlungslaeufe",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/fibu/zahlungsvorschlaege",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/finance",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/finance/abschluss",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/finance/ap-invoice-form",
+      "ok": false,
+      "navError": "",
+      "critical": [],
+      "req": [
+        "401 http://host.docker.internal:8000/api/stream/workflow"
+      ]
+    },
+    {
+      "route": "/finance/ap-invoices-list",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    },
+    {
+      "route": "/finance/ap/invoices",
+      "ok": true,
+      "navError": "",
+      "critical": [],
+      "req": []
+    }
+  ]
+}
