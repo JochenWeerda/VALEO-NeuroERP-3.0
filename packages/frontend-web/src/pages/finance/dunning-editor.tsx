@@ -8,6 +8,9 @@ import { z } from 'zod'
 import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/axios'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
+import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
+import { LeaveConfirmDialog } from '@/components/LeaveConfirmDialog'
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 
 // Zod-Schema für Dunning (wird in Komponente mit i18n erstellt)
 const createDunningSchema = (t: any) => z.object({
@@ -383,21 +386,24 @@ export default function DunningEditorPage(): JSX.Element {
   }
 
   const handleCancel = () => {
-    if (isDirty && !confirm(t('crud.messages.unsavedChanges'))) {
-      return
-    }
     navigate('/finance/dunning')
   }
 
+  const blocker = useUnsavedChanges(isDirty)
+
   return (
-    <ObjectPage
-      config={dunningConfig}
-      data={data}
-      onSave={handleSave}
-      onCancel={handleCancel}
-      isLoading={loading}
-      onAction={(key, formData) => handleAction(key, formData)}
-      loadingActionKey={actionLoadingKey}
-    />
+    <>
+      <ModuleToolbar backTarget="/finance/dunning" closeTarget="/finance/dunning" title={entityTypeLabel} />
+      <LeaveConfirmDialog blocker={blocker} onSave={() => handleSave(data ?? {})} title={t('crud.messages.unsavedChanges', { defaultValue: 'Ungespeicherte Änderungen' })} description={t('crud.messages.unsavedChangesDescription', { defaultValue: 'Möchten Sie speichern, verwerfen oder hier bleiben?' })} />
+      <ObjectPage
+        config={dunningConfig}
+        data={data}
+        onSave={handleSave}
+        onCancel={handleCancel}
+        isLoading={loading}
+        onAction={(key, formData) => handleAction(key, formData)}
+        loadingActionKey={actionLoadingKey}
+      />
+    </>
   )
 }

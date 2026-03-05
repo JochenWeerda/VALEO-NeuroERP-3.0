@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,9 +16,10 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
-import { Save, ArrowLeft, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
+import { Save, ArrowLeft, CheckCircle, XCircle, AlertTriangle, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTenant } from '@/hooks/useTenant';
+import { ModuleToolbar } from '@/components/navigation/ModuleToolbar';
 
 // API Client
 const apiClient = {
@@ -75,10 +76,12 @@ interface SaatgutFormData {
 
 const SaatgutStammPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { tenantId } = useTenant();
   const isEditing = !!id;
+  const readOnlyMode = searchParams.get('mode') === 'view' && !!id;
 
   // Form State
   const [formData, setFormData] = useState<SaatgutFormData>({
@@ -235,6 +238,11 @@ const SaatgutStammPage: React.FC = () => {
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
+      <ModuleToolbar
+        backTarget="/agrar/saatgut-liste"
+        closeTarget="/agrar/saatgut-liste"
+        title={readOnlyMode ? 'Saatgut anzeigen' : isEditing ? 'Saatgut bearbeiten' : 'Neues Saatgut'}
+      />
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
@@ -244,7 +252,7 @@ const SaatgutStammPage: React.FC = () => {
           </Button>
           <div>
             <h1 className="text-2xl font-bold">
-              {isEditing ? 'Saatgut bearbeiten' : 'Neues Saatgut'}
+              {readOnlyMode ? 'Saatgut anzeigen' : isEditing ? 'Saatgut bearbeiten' : 'Neues Saatgut'}
             </h1>
             <p className="text-muted-foreground">
               {isEditing ? `Artikel: ${formData.artikelnummer}` : 'Stammdaten für Saatgut anlegen'}
@@ -252,13 +260,22 @@ const SaatgutStammPage: React.FC = () => {
           </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={handleCancel}>
-            Abbrechen
-          </Button>
-          <Button onClick={handleSave} disabled={createMutation.isPending || updateMutation.isPending}>
-            <Save className="w-4 h-4 mr-2" />
-            {createMutation.isPending || updateMutation.isPending ? 'Speichern...' : 'Speichern'}
-          </Button>
+          {readOnlyMode ? (
+            <Button onClick={() => navigate(`/agrar/saatgut-stamm/${id}`)}>
+              <Pencil className="w-4 h-4 mr-2" />
+              Bearbeiten
+            </Button>
+          ) : (
+            <>
+              <Button variant="outline" onClick={handleCancel}>
+                Abbrechen
+              </Button>
+              <Button onClick={handleSave} disabled={createMutation.isPending || updateMutation.isPending}>
+                <Save className="w-4 h-4 mr-2" />
+                {createMutation.isPending || updateMutation.isPending ? 'Speichern...' : 'Speichern'}
+              </Button>
+            </>
+          )}
         </div>
       </div>
 
@@ -290,7 +307,8 @@ const SaatgutStammPage: React.FC = () => {
                     id="artikelnummer"
                     value={formData.artikelnummer}
                     onChange={(e) => handleInputChange('artikelnummer', e.target.value)}
-                    className={errors.artikelnummer ? 'border-red-500' : ''}
+                    readOnly={readOnlyMode}
+                    className={errors.artikelnummer ? 'border-red-500' : readOnlyMode ? 'bg-muted' : ''}
                   />
                   {errors.artikelnummer && (
                     <p className="text-sm text-red-500">{errors.artikelnummer}</p>
@@ -303,7 +321,8 @@ const SaatgutStammPage: React.FC = () => {
                     id="name"
                     value={formData.name}
                     onChange={(e) => handleInputChange('name', e.target.value)}
-                    className={errors.name ? 'border-red-500' : ''}
+                    readOnly={readOnlyMode}
+                    className={errors.name ? 'border-red-500' : readOnlyMode ? 'bg-muted' : ''}
                   />
                   {errors.name && (
                     <p className="text-sm text-red-500">{errors.name}</p>
@@ -316,7 +335,8 @@ const SaatgutStammPage: React.FC = () => {
                     id="sorte"
                     value={formData.sorte}
                     onChange={(e) => handleInputChange('sorte', e.target.value)}
-                    className={errors.sorte ? 'border-red-500' : ''}
+                    readOnly={readOnlyMode}
+                    className={errors.sorte ? 'border-red-500' : readOnlyMode ? 'bg-muted' : ''}
                   />
                   {errors.sorte && (
                     <p className="text-sm text-red-500">{errors.sorte}</p>
@@ -325,8 +345,8 @@ const SaatgutStammPage: React.FC = () => {
 
                 <div className="space-y-2">
                   <Label htmlFor="art">Art *</Label>
-                  <Select value={formData.art} onValueChange={(value) => handleInputChange('art', value)}>
-                    <SelectTrigger className={errors.art ? 'border-red-500' : ''}>
+                  <Select value={formData.art} onValueChange={(value) => handleInputChange('art', value)} disabled={readOnlyMode}>
+                    <SelectTrigger className={errors.art ? 'border-red-500' : readOnlyMode ? 'bg-muted' : ''}>
                       <SelectValue placeholder="Art auswählen" />
                     </SelectTrigger>
                     <SelectContent>
@@ -350,6 +370,8 @@ const SaatgutStammPage: React.FC = () => {
                     id="zuechter"
                     value={formData.zuechter}
                     onChange={(e) => handleInputChange('zuechter', e.target.value)}
+                    readOnly={readOnlyMode}
+                    className={readOnlyMode ? 'bg-muted' : ''}
                   />
                 </div>
 
@@ -359,6 +381,8 @@ const SaatgutStammPage: React.FC = () => {
                     id="zulassungsnummer"
                     value={formData.zulassungsnummer}
                     onChange={(e) => handleInputChange('zulassungsnummer', e.target.value)}
+                    readOnly={readOnlyMode}
+                    className={readOnlyMode ? 'bg-muted' : ''}
                   />
                 </div>
               </div>
@@ -374,6 +398,7 @@ const SaatgutStammPage: React.FC = () => {
                       id="bsa_zulassung"
                       checked={formData.bsa_zulassung}
                       onChange={(e) => handleInputChange('bsa_zulassung', e.target.checked)}
+                      disabled={readOnlyMode}
                       className="rounded"
                     />
                     <Label htmlFor="bsa_zulassung" className="flex items-center gap-2">
@@ -392,6 +417,7 @@ const SaatgutStammPage: React.FC = () => {
                       id="eu_zulassung"
                       checked={formData.eu_zulassung}
                       onChange={(e) => handleInputChange('eu_zulassung', e.target.checked)}
+                      disabled={readOnlyMode}
                       className="rounded"
                     />
                     <Label htmlFor="eu_zulassung" className="flex items-center gap-2">
@@ -412,7 +438,8 @@ const SaatgutStammPage: React.FC = () => {
                     type="date"
                     value={formData.ablauf_zulassung ? formData.ablauf_zulassung.toISOString().split('T')[0] : ''}
                     onChange={(e) => handleInputChange('ablauf_zulassung', e.target.value ? new Date(e.target.value) : null)}
-                    className={errors.ablauf_zulassung ? 'border-red-500' : ''}
+                    readOnly={readOnlyMode}
+                    className={errors.ablauf_zulassung ? 'border-red-500' : readOnlyMode ? 'bg-muted' : ''}
                   />
                   {errors.ablauf_zulassung && (
                     <p className="text-sm text-red-500">{errors.ablauf_zulassung}</p>
@@ -455,6 +482,8 @@ const SaatgutStammPage: React.FC = () => {
                     step="0.1"
                     value={formData.tkm || ''}
                     onChange={(e) => handleInputChange('tkm', e.target.value ? parseFloat(e.target.value) : null)}
+                    readOnly={readOnlyMode}
+                    className={readOnlyMode ? 'bg-muted' : ''}
                   />
                 </div>
 
@@ -468,7 +497,8 @@ const SaatgutStammPage: React.FC = () => {
                     step="0.1"
                     value={formData.keimfaehigkeit || ''}
                     onChange={(e) => handleInputChange('keimfaehigkeit', e.target.value ? parseFloat(e.target.value) : null)}
-                    className={errors.keimfaehigkeit ? 'border-red-500' : ''}
+                    readOnly={readOnlyMode}
+                    className={errors.keimfaehigkeit ? 'border-red-500' : readOnlyMode ? 'bg-muted' : ''}
                   />
                   {errors.keimfaehigkeit && (
                     <p className="text-sm text-red-500">{errors.keimfaehigkeit}</p>
@@ -483,6 +513,8 @@ const SaatgutStammPage: React.FC = () => {
                     step="0.1"
                     value={formData.aussaatstaerke || ''}
                     onChange={(e) => handleInputChange('aussaatstaerke', e.target.value ? parseFloat(e.target.value) : null)}
+                    readOnly={readOnlyMode}
+                    className={readOnlyMode ? 'bg-muted' : ''}
                   />
                 </div>
               </div>
@@ -499,6 +531,8 @@ const SaatgutStammPage: React.FC = () => {
                     step="0.01"
                     value={formData.lagerbestand}
                     onChange={(e) => handleInputChange('lagerbestand', parseFloat(e.target.value) || 0)}
+                    readOnly={readOnlyMode}
+                    className={readOnlyMode ? 'bg-muted' : ''}
                   />
                 </div>
 
@@ -510,6 +544,8 @@ const SaatgutStammPage: React.FC = () => {
                     step="0.01"
                     value={formData.reserviert}
                     onChange={(e) => handleInputChange('reserviert', parseFloat(e.target.value) || 0)}
+                    readOnly={readOnlyMode}
+                    className={readOnlyMode ? 'bg-muted' : ''}
                   />
                 </div>
 
@@ -518,7 +554,7 @@ const SaatgutStammPage: React.FC = () => {
                   <Input
                     value={(formData.lagerbestand - formData.reserviert).toFixed(2)}
                     readOnly
-                    className="bg-gray-50"
+                    className={readOnlyMode ? 'bg-muted' : 'bg-gray-50'}
                   />
                 </div>
 
@@ -528,6 +564,8 @@ const SaatgutStammPage: React.FC = () => {
                     id="lagerort"
                     value={formData.lagerort}
                     onChange={(e) => handleInputChange('lagerort', e.target.value)}
+                    readOnly={readOnlyMode}
+                    className={readOnlyMode ? 'bg-muted' : ''}
                   />
                 </div>
               </div>
@@ -541,6 +579,8 @@ const SaatgutStammPage: React.FC = () => {
                     step="0.01"
                     value={formData.ek_preis || ''}
                     onChange={(e) => handleInputChange('ek_preis', e.target.value ? parseFloat(e.target.value) : null)}
+                    readOnly={readOnlyMode}
+                    className={readOnlyMode ? 'bg-muted' : ''}
                   />
                 </div>
 
@@ -552,6 +592,8 @@ const SaatgutStammPage: React.FC = () => {
                     step="0.01"
                     value={formData.vk_preis || ''}
                     onChange={(e) => handleInputChange('vk_preis', e.target.value ? parseFloat(e.target.value) : null)}
+                    readOnly={readOnlyMode}
+                    className={readOnlyMode ? 'bg-muted' : ''}
                   />
                 </div>
 
@@ -563,6 +605,8 @@ const SaatgutStammPage: React.FC = () => {
                     step="0.01"
                     value={formData.mindestabnahme || ''}
                     onChange={(e) => handleInputChange('mindestabnahme', e.target.value ? parseFloat(e.target.value) : null)}
+                    readOnly={readOnlyMode}
+                    className={readOnlyMode ? 'bg-muted' : ''}
                   />
                 </div>
               </div>

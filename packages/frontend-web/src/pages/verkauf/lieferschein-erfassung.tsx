@@ -26,6 +26,7 @@ import { useSchlaege } from '@/lib/api/agrar'
 import { globalShortcutManager } from '@/lib/shortcuts/global-shortcuts'
 import { useGlobalShortcutsWithVoice } from '@/features/ki-usability'
 import { ShortcutHintButton } from '@/components/shortcuts/ShortcutHelpPanel'
+import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown, MoreHorizontal, Check, Printer, Save, X, FileText, Folder, FileCheck, Link as LinkIcon, Receipt, Trash2 } from 'lucide-react'
 
@@ -789,10 +790,11 @@ export default function LieferscheinErfassungPage(): JSX.Element {
       const [hours, minutes] = state.uhrzeit.split(':')
       const deliveryTime = `${hours}:${minutes}:00`
 
+      const branch = branchesList.find((b) => b.branch_number === state.niederlassung)
       const payload = {
         customer_id: state.customer.id,
-        branch_id: null, // TODO: Map niederlassung to branch_id
-        sales_rep_id: null, // TODO: Map vertreter to sales_rep_id
+        branch_id: branch?.id ?? null,
+        sales_rep_id: null,
         operator_id: user?.sub || null,
         delivery_date: state.lieferDatum,
         delivery_time: deliveryTime,
@@ -904,9 +906,22 @@ export default function LieferscheinErfassungPage(): JSX.Element {
       push(`Fehler: ${e.response?.data?.detail ?? e.message}`)
     }
   }
+  // Branches beim Mount laden, damit branch_id beim Speichern aus niederlassung gemappt werden kann
+  useEffect(() => {
+    let cancelled = false
+    apiClient.get<Array<{ id: string; branch_number: number; name: string }>>('/api/v1/admin/branches', { params: { active_only: true } })
+      .then((res) => {
+        const list = (res as any)?.data ?? res
+        if (!cancelled && Array.isArray(list)) setBranchesList(list)
+      })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [])
+
   const handleNiederlassungOpen = async (): Promise<void> => {
     try {
-      const list = await apiClient.get<Array<{ id: string; branch_number: number; name: string }>>('/api/v1/admin/branches', { params: { active_only: true } })
+      const res = await apiClient.get<Array<{ id: string; branch_number: number; name: string }>>('/api/v1/admin/branches', { params: { active_only: true } })
+      const list = (res as any)?.data ?? res
       setBranchesList(Array.isArray(list) ? list : [])
       setShowNiederlassungDialog(true)
     } catch (e: any) {
@@ -1435,7 +1450,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
       <div className="bg-green-600 text-white px-4 py-2">
         <h1 className="text-lg font-bold">LIEFERSCHEIN-ERFASSUNG</h1>
       </div>
-
+      <ModuleToolbar backTarget="/verkauf" closeTarget="/verkauf" title="Lieferschein-Erfassung" />
       {/* Belegfolge-Hinweis */}
       {vorgaengerCount > 0 && state.customer && (
         <div className="bg-amber-50 border-b border-amber-300 px-4 py-1.5 flex items-center gap-3">

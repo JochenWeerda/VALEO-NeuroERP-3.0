@@ -9,6 +9,9 @@ import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { validateIBAN, formatIBAN } from '@/lib/utils/iban-validator'
 import { useIbanLookup } from '@/hooks/useIbanLookup'
 import { useTenant } from '@/hooks/useTenant'
+import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
+import { LeaveConfirmDialog } from '@/components/LeaveConfirmDialog'
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import { apiClient } from '@/lib/axios'
 import { toast } from 'sonner'
 
@@ -129,6 +132,17 @@ export default function BankKontenStammPage(): JSX.Element {
     apiUrl: bankKontenConfig.api.baseUrl,
     id: 'new'
   })
+  const initialFormData = {
+    account_number: '',
+    bank_name: '',
+    iban: '',
+    bic: '',
+    currency: 'EUR',
+    balance: 0,
+    is_active: true,
+    gl_account_number: '',
+  }
+  const safeFormData = { ...initialFormData, ...(data ?? formData ?? {}) }
 
   const { validate, showValidationToast } = useMaskValidation(bankKontenConfig.validation)
 
@@ -258,22 +272,34 @@ export default function BankKontenStammPage(): JSX.Element {
   }
 
   const handleCancel = () => {
-    if (isDirty && !confirm(t('crud.messages.unsavedChanges'))) {
-      return
-    }
     navigate('/finance/bankkonten')
   }
 
+  const blocker = useUnsavedChanges(isDirty)
+
   return (
-    <ObjectPage
-      config={bankKontenConfig}
-      data={data || formData}
-      onChange={handleFormChange}
-      onSave={handleSave}
-      onCancel={handleCancel}
-      isLoading={loading || isIbanLoading}
-      onAction={(key, fd) => handleAction(key, fd ?? formData)}
-      loadingActionKey={actionLoadingKey}
-    />
+    <>
+      <ModuleToolbar
+        backTarget="/finance/bankkonten"
+        closeTarget="/finance/bankkonten"
+        title={entityTypeLabel}
+      />
+      <LeaveConfirmDialog
+        blocker={blocker}
+        onSave={() => handleSave(safeFormData)}
+        title={t('crud.messages.unsavedChanges', { defaultValue: 'Ungespeicherte Änderungen' })}
+        description={t('crud.messages.unsavedChangesDescription', { defaultValue: 'Möchten Sie speichern, verwerfen oder hier bleiben?' })}
+      />
+      <ObjectPage
+        config={bankKontenConfig}
+        data={safeFormData}
+        onChange={handleFormChange}
+        onSave={handleSave}
+        onCancel={handleCancel}
+        isLoading={loading || isIbanLoading}
+        onAction={(key, fd) => handleAction(key, fd ?? safeFormData)}
+        loadingActionKey={actionLoadingKey}
+      />
+    </>
   )
 }

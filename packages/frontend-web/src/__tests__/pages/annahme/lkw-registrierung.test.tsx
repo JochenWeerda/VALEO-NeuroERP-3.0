@@ -1,0 +1,59 @@
+/**
+ * Tests für LKW-Registrierung (Annahme) – inkl. Scan-Dialog (F18).
+ */
+import { describe, it, expect, vi } from 'vitest'
+import { render, screen, fireEvent } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
+import LKWRegistrierungPage from '@/pages/annahme/lkw-registrierung'
+
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom')
+  return {
+    ...actual,
+    useNavigate: () => vi.fn(),
+  }
+})
+
+vi.mock('@/hooks/use-toast', () => ({
+  useToast: () => ({ toast: vi.fn() }),
+}))
+
+vi.mock('react-dropzone', () => ({
+  useDropzone: () => ({
+    getRootProps: () => ({}),
+    getInputProps: () => ({}),
+    isDragActive: false,
+  }),
+}))
+
+vi.mock('@/lib/axios', () => ({
+  api: {
+    post: vi.fn().mockResolvedValue({ data: { id: 'att-1' } }),
+  },
+}))
+
+describe('LKWRegistrierungPage', () => {
+  it('sollte LKW-Registrierung und Kennzeichen anzeigen', () => {
+    render(
+      <MemoryRouter>
+        <LKWRegistrierungPage />
+      </MemoryRouter>,
+    )
+    expect(screen.getByText('LKW-Registrierung')).toBeInTheDocument()
+    expect(screen.getByLabelText(/Kennzeichen \*/i)).toBeInTheDocument()
+  })
+
+  it('sollte Scan-Button anzeigen und bei Klick Scan-Dialog öffnen (F18)', () => {
+    render(
+      <MemoryRouter>
+        <LKWRegistrierungPage />
+      </MemoryRouter>,
+    )
+    const scanButtons = screen.getAllByRole('button', { name: /Scan/i })
+    expect(scanButtons.length).toBeGreaterThanOrEqual(1)
+    fireEvent.click(scanButtons[0])
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    expect(screen.getByText('Scan – Kennzeichen / Lieferschein')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Schließen' })).toBeInTheDocument()
+  })
+})

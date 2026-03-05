@@ -4,7 +4,7 @@
 
 import { useCallback, useState } from 'react'
 import { resolveVoice } from '../api/voice'
-import { useActionDispatchOptional } from '../context/ActionDispatchContext'
+import { useActionDispatchOptional } from '../context/ActionDispatchHooks'
 
 export interface UseVoiceIntentOptions {
   /** Min confidence to dispatch (default 0.7) */
@@ -73,3 +73,4 @@ export function useVoiceIntent(options: UseVoiceIntentOptions = {}) {
 
   return { startListening, listening, transcript, resolvedAction, reset }
 }
+

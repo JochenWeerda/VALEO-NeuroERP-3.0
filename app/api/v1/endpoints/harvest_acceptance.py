@@ -611,12 +611,19 @@ class HarvestAcceptanceOut(BaseModel):
 # ── API Endpoints ────────────────────────────────────────────────────────────
 
 def _harvest_acceptance_to_dict_with_positions(acceptance: HarvestAcceptance, db: Session) -> dict:
-    """Konvertiert HarvestAcceptance zu dict mit Positionen."""
+    """Konvertiert HarvestAcceptance zu dict mit Positionen und optional article_name."""
     # Lade Positionen
     positions = db.query(HarvestAcceptancePosition).filter(
         HarvestAcceptancePosition.harvest_acceptance_id == acceptance.id
     ).order_by(HarvestAcceptancePosition.position_number).all()
-    
+
+    # Optional: Artikelnamen für Frontend mitschicken
+    article_name: Optional[str] = None
+    if acceptance.article_id:
+        article = db.query(Article).filter(Article.id == acceptance.article_id).first()
+        if article:
+            article_name = article.name or (article.description[:100] if article.description else None)
+
     # Erstelle Response mit Positionen
     result = HarvestAcceptanceOut.model_validate(acceptance)
     result_dict = result.model_dump()
@@ -637,6 +644,8 @@ def _harvest_acceptance_to_dict_with_positions(acceptance: HarvestAcceptance, db
         }
         for pos in positions
     ]
+    if article_name is not None:
+        result_dict["article_name"] = article_name
     return result_dict
 
 def _get_user_id_from_request(request: Request) -> Optional[str]:

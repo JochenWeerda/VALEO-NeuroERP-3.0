@@ -157,38 +157,78 @@ class OpenItemListResponse(BaseModel):
     summary: dict
 
 
-def _normalize_open_item(row) -> OpenItem:
-    op_amount = Decimal(str(row.op_betrag if row.op_betrag is not None else row.betrag))
+def _val(row: dict, key: str, default=None):
+    return row.get(key, default)
+
+
+def _get_open_items_relation(db: Session) -> tuple[str, set[str]]:
+    rel = db.execute(
+        text(
+            """
+            SELECT n.nspname
+            FROM pg_class c
+            JOIN pg_namespace n ON n.oid = c.relnamespace
+            WHERE c.oid = to_regclass('offene_posten')
+            """
+        )
+    ).scalar()
+    schema = str(rel or "public")
+    table_ref = f"{schema}.offene_posten"
+
+    rows = db.execute(
+        text(
+            """
+            SELECT column_name
+            FROM information_schema.columns
+            WHERE table_name = 'offene_posten'
+              AND table_schema = :table_schema
+            """
+        ),
+        {"table_schema": schema},
+    ).fetchall()
+    return table_ref, {str(r[0]) for r in rows}
+
+
+def _expr(cols: set[str], primary: str, fallback: str | None = None, default_sql: str = "NULL") -> str:
+    if primary in cols:
+        return primary
+    if fallback and fallback in cols:
+        return fallback
+    return default_sql
+
+
+def _normalize_open_item(row: dict) -> OpenItem:
+    op_amount = Decimal(str(_val(row, "op_betrag") if _val(row, "op_betrag") is not None else _val(row, "betrag", 0)))
     return OpenItem(
-        id=str(row.id),
-        tenant_id=str(row.tenant_id),
-        konto_nr=row.konto_nr,
-        konto_name=row.konto_name,
-        konto_typ=row.konto_typ or "debitoren",
-        op_status=row.op_status or "offen",
-        rechnungsnr=row.rechnungsnr,
-        rechnungsdatum=row.rechnungsdatum or row.datum,
-        faelligkeit=row.faelligkeit,
-        valuta=row.valuta,
+        id=str(_val(row, "id")),
+        tenant_id=str(_val(row, "tenant_id")),
+        konto_nr=_val(row, "konto_nr"),
+        konto_name=_val(row, "konto_name"),
+        konto_typ=_val(row, "konto_typ", "debitoren") or "debitoren",
+        op_status=_val(row, "op_status", "offen") or "offen",
+        rechnungsnr=_val(row, "rechnungsnr"),
+        rechnungsdatum=_val(row, "rechnungsdatum") or _val(row, "datum"),
+        faelligkeit=_val(row, "faelligkeit"),
+        valuta=_val(row, "valuta"),
         op_betrag=op_amount,
-        saldo=Decimal(str(row.saldo if row.saldo is not None else 0)),
-        offen=Decimal(str(row.offen)),
-        op_text=row.op_text,
-        waehrung=row.waehrung or "EUR",
-        kunde_id=row.kunde_id,
-        kunde_name=row.kunde_name,
-        lieferant_id=row.lieferant_id,
-        lieferant_name=row.lieferant_name,
-        skonto_prozent=Decimal(str(row.skonto_prozent)) if row.skonto_prozent is not None else None,
-        skonto_bis=row.skonto_bis,
-        mahn_stufe=int(row.mahn_stufe or 0),
-        zahlbar=bool(row.zahlbar),
-        letzte_bewegung_am=row.letzte_bewegung_am,
-        kredit_limit=Decimal(str(row.kredit_limit)) if row.kredit_limit is not None else None,
-        kv_limit=Decimal(str(row.kv_limit)) if row.kv_limit is not None else None,
-        sperre_grund=row.sperre_grund,
-        created_at=row.created_at,
-        updated_at=row.updated_at,
+        saldo=Decimal(str(_val(row, "saldo", 0) if _val(row, "saldo") is not None else 0)),
+        offen=Decimal(str(_val(row, "offen", 0))),
+        op_text=_val(row, "op_text"),
+        waehrung=_val(row, "waehrung", "EUR") or "EUR",
+        kunde_id=_val(row, "kunde_id"),
+        kunde_name=_val(row, "kunde_name"),
+        lieferant_id=_val(row, "lieferant_id"),
+        lieferant_name=_val(row, "lieferant_name"),
+        skonto_prozent=Decimal(str(_val(row, "skonto_prozent"))) if _val(row, "skonto_prozent") is not None else None,
+        skonto_bis=_val(row, "skonto_bis"),
+        mahn_stufe=int(_val(row, "mahn_stufe", 0) or 0),
+        zahlbar=bool(_val(row, "zahlbar", True)),
+        letzte_bewegung_am=_val(row, "letzte_bewegung_am"),
+        kredit_limit=Decimal(str(_val(row, "kredit_limit"))) if _val(row, "kredit_limit") is not None else None,
+        kv_limit=Decimal(str(_val(row, "kv_limit"))) if _val(row, "kv_limit") is not None else None,
+        sperre_grund=_val(row, "sperre_grund"),
+        created_at=_val(row, "created_at"),
+        updated_at=_val(row, "updated_at"),
     )
 
 
@@ -213,36 +253,67 @@ async def list_open_items(
     limit: int = Query(500, ge=1, le=5000),
     db: Session = Depends(get_db),
 ):
+    table_ref, cols = _get_open_items_relation(db)
     where_clauses = ["tenant_id = :tenant_id"]
     params = {"tenant_id": tenant_id, "limit": limit}
-    if konto_typ:
+    if konto_typ and "konto_typ" in cols:
         where_clauses.append("konto_typ = :konto_typ")
         params["konto_typ"] = konto_typ
-    if op_status:
+    if op_status and "op_status" in cols:
         where_clauses.append("op_status = :op_status")
         params["op_status"] = op_status
-    if konto_nr:
+    if konto_nr and "konto_nr" in cols:
         where_clauses.append("konto_nr = :konto_nr")
         params["konto_nr"] = konto_nr
     if search:
         where_clauses.append("(rechnungsnr ILIKE :search OR COALESCE(kunde_name,'') ILIKE :search OR COALESCE(konto_name,'') ILIKE :search)")
         params["search"] = f"%{search}%"
 
-    rows = db.execute(
-        text(
-            f"""
-            SELECT id, tenant_id, konto_nr, konto_name, konto_typ, op_status, rechnungsnr, rechnungsdatum, datum, faelligkeit, valuta,
-                   op_betrag, betrag, saldo, offen, op_text, waehrung, kunde_id, kunde_name, lieferant_id, lieferant_name,
-                   skonto_prozent, skonto_bis, mahn_stufe, zahlbar, letzte_bewegung_am, kredit_limit, kv_limit, sperre_grund,
-                   created_at, updated_at
-            FROM offene_posten
+    select_sql = f"""
+            SELECT
+                id,
+                tenant_id,
+                {_expr(cols, "konto_nr")} AS konto_nr,
+                {_expr(cols, "konto_name")} AS konto_name,
+                {_expr(cols, "konto_typ")} AS konto_typ,
+                {_expr(cols, "op_status")} AS op_status,
+                {_expr(cols, "rechnungsnr")} AS rechnungsnr,
+                {_expr(cols, "rechnungsdatum", "datum")} AS rechnungsdatum,
+                {_expr(cols, "datum", "rechnungsdatum")} AS datum,
+                {_expr(cols, "faelligkeit", "due_date")} AS faelligkeit,
+                {_expr(cols, "valuta")} AS valuta,
+                {_expr(cols, "op_betrag", "betrag")} AS op_betrag,
+                {_expr(cols, "betrag", "op_betrag")} AS betrag,
+                {_expr(cols, "saldo", default_sql="0")} AS saldo,
+                {_expr(cols, "offen", "open_amount", default_sql="0")} AS offen,
+                {_expr(cols, "op_text")} AS op_text,
+                {_expr(cols, "waehrung", default_sql="'EUR'")} AS waehrung,
+                {_expr(cols, "kunde_id", "debtor_id")} AS kunde_id,
+                {_expr(cols, "kunde_name")} AS kunde_name,
+                {_expr(cols, "lieferant_id", "creditor_id")} AS lieferant_id,
+                {_expr(cols, "lieferant_name")} AS lieferant_name,
+                {_expr(cols, "skonto_prozent")} AS skonto_prozent,
+                {_expr(cols, "skonto_bis")} AS skonto_bis,
+                {_expr(cols, "mahn_stufe", "dunning_level", default_sql="0")} AS mahn_stufe,
+                {_expr(cols, "zahlbar", default_sql="TRUE")} AS zahlbar,
+                {_expr(cols, "letzte_bewegung_am")} AS letzte_bewegung_am,
+                {_expr(cols, "kredit_limit")} AS kredit_limit,
+                {_expr(cols, "kv_limit")} AS kv_limit,
+                {_expr(cols, "sperre_grund")} AS sperre_grund,
+                {_expr(cols, "created_at")} AS created_at,
+                {_expr(cols, "updated_at")} AS updated_at
+            FROM {table_ref}
             WHERE {' AND '.join(where_clauses)}
-            ORDER BY faelligkeit ASC, rechnungsnr ASC
+            ORDER BY {_expr(cols, "faelligkeit", "due_date")} ASC, rechnungsnr ASC
             LIMIT :limit
             """
+
+    rows = db.execute(
+        text(
+            select_sql
         ),
         params,
-    ).fetchall()
+    ).mappings().all()
     items = [_normalize_open_item(r) for r in rows]
     summary = {
         "count": len(items),
@@ -256,18 +327,48 @@ async def list_open_items(
 
 @router.get("/{op_id}", response_model=OpenItem)
 async def get_open_item(op_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+    table_ref, cols = _get_open_items_relation(db)
+    select_sql = f"""
+            SELECT
+                id,
+                tenant_id,
+                {_expr(cols, "konto_nr")} AS konto_nr,
+                {_expr(cols, "konto_name")} AS konto_name,
+                {_expr(cols, "konto_typ")} AS konto_typ,
+                {_expr(cols, "op_status")} AS op_status,
+                {_expr(cols, "rechnungsnr")} AS rechnungsnr,
+                {_expr(cols, "rechnungsdatum", "datum")} AS rechnungsdatum,
+                {_expr(cols, "datum", "rechnungsdatum")} AS datum,
+                {_expr(cols, "faelligkeit", "due_date")} AS faelligkeit,
+                {_expr(cols, "valuta")} AS valuta,
+                {_expr(cols, "op_betrag", "betrag")} AS op_betrag,
+                {_expr(cols, "betrag", "op_betrag")} AS betrag,
+                {_expr(cols, "saldo", default_sql="0")} AS saldo,
+                {_expr(cols, "offen", "open_amount", default_sql="0")} AS offen,
+                {_expr(cols, "op_text")} AS op_text,
+                {_expr(cols, "waehrung", default_sql="'EUR'")} AS waehrung,
+                {_expr(cols, "kunde_id", "debtor_id")} AS kunde_id,
+                {_expr(cols, "kunde_name")} AS kunde_name,
+                {_expr(cols, "lieferant_id", "creditor_id")} AS lieferant_id,
+                {_expr(cols, "lieferant_name")} AS lieferant_name,
+                {_expr(cols, "skonto_prozent")} AS skonto_prozent,
+                {_expr(cols, "skonto_bis")} AS skonto_bis,
+                {_expr(cols, "mahn_stufe", "dunning_level", default_sql="0")} AS mahn_stufe,
+                {_expr(cols, "zahlbar", default_sql="TRUE")} AS zahlbar,
+                {_expr(cols, "letzte_bewegung_am")} AS letzte_bewegung_am,
+                {_expr(cols, "kredit_limit")} AS kredit_limit,
+                {_expr(cols, "kv_limit")} AS kv_limit,
+                {_expr(cols, "sperre_grund")} AS sperre_grund,
+                {_expr(cols, "created_at")} AS created_at,
+                {_expr(cols, "updated_at")} AS updated_at
+            FROM {table_ref} WHERE id = :id AND tenant_id = :tenant_id
+            """
     row = db.execute(
         text(
-            """
-            SELECT id, tenant_id, konto_nr, konto_name, konto_typ, op_status, rechnungsnr, rechnungsdatum, datum, faelligkeit, valuta,
-                   op_betrag, betrag, saldo, offen, op_text, waehrung, kunde_id, kunde_name, lieferant_id, lieferant_name,
-                   skonto_prozent, skonto_bis, mahn_stufe, zahlbar, letzte_bewegung_am, kredit_limit, kv_limit, sperre_grund,
-                   created_at, updated_at
-            FROM offene_posten WHERE id = :id AND tenant_id = :tenant_id
-            """
+            select_sql
         ),
         {"id": op_id, "tenant_id": tenant_id},
-    ).fetchone()
+    ).mappings().first()
     if not row:
         raise HTTPException(status_code=404, detail="Open item not found")
     return _normalize_open_item(row)
@@ -615,10 +716,10 @@ async def settle_open_item(
         bank_account = settings.DEFAULT_BANK_ACCOUNT_ID
         journal_line1 = text("""
             INSERT INTO domain_erp.journal_entry_lines
-            (id, tenant_id, journal_entry_id, account_id, debit_amount, credit_amount,
-             line_number, description, created_at, updated_at)
-            VALUES (:id, :tenant_id, :journal_entry_id, :account_id, :debit_amount, :credit_amount,
-                    :line_number, :description, NOW(), NOW())
+            (id, tenant_id, journal_entry_id, account_id, debit, credit,
+             line_number, description, created_at)
+            VALUES (:id, :tenant_id, :journal_entry_id, :account_id, :debit, :credit,
+                    :line_number, :description, NOW())
         """)
         
         db.execute(journal_line1, {
@@ -626,8 +727,8 @@ async def settle_open_item(
             "tenant_id": tenant_id,
             "journal_entry_id": journal_entry_id,
             "account_id": bank_account,
-            "debit_amount": settlement_amount,
-            "credit_amount": Decimal("0.00"),
+            "debit": settlement_amount,
+            "credit": Decimal("0.00"),
             "line_number": 1,
             "description": f"Zahlungseingang {settlement.payment_reference or ''}"
         })
@@ -636,10 +737,10 @@ async def settle_open_item(
         ar_account = "1200"  # Forderungen aus Lieferungen und Leistungen
         journal_line2 = text("""
             INSERT INTO domain_erp.journal_entry_lines
-            (id, tenant_id, journal_entry_id, account_id, debit_amount, credit_amount,
-             line_number, description, created_at, updated_at)
-            VALUES (:id, :tenant_id, :journal_entry_id, :account_id, :debit_amount, :credit_amount,
-                    :line_number, :description, NOW(), NOW())
+            (id, tenant_id, journal_entry_id, account_id, debit, credit,
+             line_number, description, created_at)
+            VALUES (:id, :tenant_id, :journal_entry_id, :account_id, :debit, :credit,
+                    :line_number, :description, NOW())
         """)
         
         db.execute(journal_line2, {
@@ -647,8 +748,8 @@ async def settle_open_item(
             "tenant_id": tenant_id,
             "journal_entry_id": journal_entry_id,
             "account_id": ar_account,
-            "debit_amount": Decimal("0.00"),
-            "credit_amount": settlement_amount,
+            "debit": Decimal("0.00"),
+            "credit": settlement_amount,
             "line_number": 2,
             "description": f"OP-Ausgleich {op_row[3] or ''}"
         })
@@ -844,4 +945,3 @@ async def reverse_settlement(
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Failed to reverse settlement: {str(e)}")
-

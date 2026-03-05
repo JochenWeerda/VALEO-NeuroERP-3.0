@@ -55,7 +55,8 @@ interface BiostimulanzienItem {
 }
 
 const buildColumns = (
-  onOpenDetails: (itemId: string) => void,
+  onView: (itemId: string) => void,
+  onEdit: (itemId: string) => void,
 ): ColumnDef<BiostimulanzienItem>[] => [
   {
     accessorKey: 'artikelnummer',
@@ -158,14 +159,16 @@ const buildColumns = (
           <Button
             variant="outline"
             size="sm"
-            onClick={() => onOpenDetails(item.id)}
+            onClick={() => onView(item.id)}
+            title="Anzeigen"
           >
             <Eye className="w-4 h-4" />
           </Button>
           <Button
             variant="outline"
             size="sm"
-            onClick={() => onOpenDetails(item.id)}
+            onClick={() => onEdit(item.id)}
+            title="Bearbeiten"
           >
             <Edit className="w-4 h-4" />
           </Button>
@@ -187,7 +190,10 @@ const BiostimulanzienListePage: React.FC = () => {
   });
 
   const columns = useMemo<ColumnDef<BiostimulanzienItem>[]>(
-    () => buildColumns((itemId) => navigate(`/agrar/biostimulanzien-stamm/${itemId}`)),
+    () => buildColumns(
+      (itemId) => navigate(`/agrar/biostimulanzien-stamm/${itemId}?mode=view`),
+      (itemId) => navigate(`/agrar/biostimulanzien-stamm/${itemId}`),
+    ),
     [navigate],
   );
 

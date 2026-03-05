@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { AlertTriangle, CheckCircle, XCircle } from 'lucide-react'
 import { apiClient } from '@/lib/api-client'
 import { useToast } from '@/hooks/use-toast'
@@ -347,6 +348,7 @@ export default function QualitaetsCheckPage(): JSX.Element {
 
   return (
     <div className="p-6">
+      <ModuleToolbar backTarget="/annahme/warteschlange" closeTarget="/annahme/warteschlange" title="Qualitätsprüfung" />
       <Wizard
         title="Schnell-Qualitätsprüfung"
         steps={steps}

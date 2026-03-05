@@ -23,3 +23,7 @@ The platform is intended as a **modular research and development environment** w
 - Documentation and architecture support both human and AI-assisted development (e.g. [CLAUDE.md](../CLAUDE.md) for repository context).
 
 Claude and other AI tools would be valuable for code generation, refactoring, documentation, architectural planning, and designing AI-assisted workflows and knowledge systems. This vision aligns with the project’s use as a foundation for experimenting with AI-driven enterprise tools.
+
+## For AI and ML teams
+
+If you’re building agents, RAG, or automation on top of enterprise data, VALEO NeuroERP can work as an open testbed. Use cases and collaborations are welcome – open a [GitHub Discussion](https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/discussions) or an issue to get in touch.

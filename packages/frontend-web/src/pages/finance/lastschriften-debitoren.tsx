@@ -9,6 +9,9 @@ import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { lookupIBAN, formatIBAN, validateIBAN } from '@/lib/utils/iban-validator'
 import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/axios'
+import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
+import { LeaveConfirmDialog } from '@/components/LeaveConfirmDialog'
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 
 // Zod-Schema für Lastschriften Debitoren (wird in Komponente mit i18n erstellt)
 const createLastschriftenSchema = (t: any) => z.object({
@@ -424,6 +427,22 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
     apiUrl: lastschriftenConfig.api.baseUrl,
     id: 'new'
   })
+  const initialFormData = {
+    laufNummer: '',
+    ausfuehrungsDatum: new Date().toISOString().slice(0, 10),
+    gesamtBetrag: 0,
+    anzahlLastschriften: 0,
+    status: 'entwurf',
+    freigegebenAm: '',
+    freigegebenDurch: '',
+    ausgefuehrtAm: '',
+    creditorId: '',
+    auftraggeberName: '',
+    auftraggeberIban: '',
+    lastschriften: [],
+    notizen: '',
+  }
+  const safeFormData = { ...initialFormData, ...(data ?? formData ?? {}) }
 
   const { validate, showValidationToast } = useMaskValidation(lastschriftenConfig.validation)
 
@@ -535,22 +554,25 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
   }
 
   const handleCancel = () => {
-    if (isDirty && !confirm(t('crud.messages.unsavedChanges'))) {
-      return
-    }
     navigate('/finance/lastschriften-debitoren')
   }
 
+  const blocker = useUnsavedChanges(isDirty)
+
   return (
-    <ObjectPage
-      config={lastschriftenConfig}
-      data={data || formData}
-      onChange={handleFormChange}
-      onSave={handleSave}
-      onCancel={handleCancel}
-      isLoading={loading}
-      onAction={(key, fd) => handleAction(key, fd ?? formData)}
-      loadingActionKey={actionLoadingKey}
-    />
+    <>
+      <ModuleToolbar backTarget="/finance/lastschriften-debitoren" closeTarget="/finance/lastschriften-debitoren" title={entityTypeLabel} />
+      <LeaveConfirmDialog blocker={blocker} onSave={() => handleSave(safeFormData)} title={t('crud.messages.unsavedChanges', { defaultValue: 'Ungespeicherte Änderungen' })} description={t('crud.messages.unsavedChangesDescription', { defaultValue: 'Möchten Sie speichern, verwerfen oder hier bleiben?' })} />
+      <ObjectPage
+        config={lastschriftenConfig}
+        data={safeFormData}
+        onChange={handleFormChange}
+        onSave={handleSave}
+        onCancel={handleCancel}
+        isLoading={loading}
+        onAction={(key, fd) => handleAction(key, fd ?? safeFormData)}
+        loadingActionKey={actionLoadingKey}
+      />
+    </>
   )
 }

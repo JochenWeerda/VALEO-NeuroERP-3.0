@@ -9,7 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
 import { AlertTriangle, Brain, CheckCircle, Leaf, Search, Sparkles, Target, Zap } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
-import { useSchadbilder, useKulturen } from '@/lib/api/agrar'
+import { useSchadbilder, useKulturen, usePSM } from '@/lib/api/agrar'
 
 type Schadbild = {
   id: string
@@ -48,6 +48,7 @@ export default function PSMBeratungPage(): JSX.Element {
 
   const { data: schadbilderData, isLoading: isLoadingSchadbilder } = useSchadbilder()
   const { data: kulturenData, isLoading: isLoadingKulturen } = useKulturen()
+  const { data: psmResponse } = usePSM()
 
   const [schritt, setSchritt] = useState(1)
   const [kultur, setKultur] = useState('')
@@ -63,55 +64,44 @@ export default function PSMBeratungPage(): JSX.Element {
   const verfuegbareKulturen = kulturen.map(k => k.name)
   const isLoading = isLoadingSchadbilder || isLoadingKulturen
 
+  /** Empfehlungen aus PSM-Stammdaten (usePSM) mappen; falls API leer, Demo-Fallback nutzen. */
   const generateEmpfehlungen = (schadbild: Schadbild): PSMEmpfehlung[] => {
-    const basisEmpfehlungen: PSMEmpfehlung[] = [
-      {
-        id: 'PSM-001',
-        name: 'Amistar Opti',
-        wirkstoff: 'Azoxystrobin + Difenoconazol',
-        wirkstoffGruppe: 'Strobilurine + Triazole',
-        dosierung: '1.0 l/ha',
-        wartezeit: 35,
-        effektivitaet: 92,
-        umweltscore: 75,
-        kosten: 145.00,
-        verfuegbar: true,
-        begruendung: 'Hoch effektive Kombination gegen Rostpilze mit systemischer Wirkung'
-      },
-      {
-        id: 'PSM-002',
-        name: 'Folicur Solo',
-        wirkstoff: 'Tebuconazol',
-        wirkstoffGruppe: 'Triazole',
-        dosierung: '1.5 l/ha',
-        wartezeit: 28,
-        effektivitaet: 88,
-        umweltscore: 82,
-        kosten: 98.00,
-        verfuegbar: true,
-        begruendung: 'Kostengünstige Alternative mit guter Umweltverträglichkeit'
-      },
-      {
-        id: 'PSM-003',
-        name: 'Nativo',
-        wirkstoff: 'Trifloxystrobin + Tebuconazol',
-        wirkstoffGruppe: 'Strobilurine + Triazole',
-        dosierung: '0.8 l/ha',
-        wartezeit: 35,
-        effektivitaet: 95,
-        umweltscore: 78,
-        kosten: 165.00,
-        verfuegbar: false,
-        begruendung: 'Höchste Effektivität, aber aktuell nicht verfügbar'
+    const psmItems = psmResponse?.items ?? []
+    const fromStammdaten: PSMEmpfehlung[] = psmItems.map((p) => {
+      const ext = p as unknown as Record<string, unknown>
+      return {
+        id: p.id,
+        name: p.mittel,
+        wirkstoff: p.wirkstoff,
+        wirkstoffGruppe: String(ext.wirkstoffGruppe ?? ext.gruppe ?? ''),
+        dosierung: String(ext.dosierung ?? ext.max_dosierung ?? '—'),
+        wartezeit: Number(ext.wartezeit ?? ext.wartezeit_tage ?? 0),
+        effektivitaet: Number(ext.effektivitaet ?? 85),
+        umweltscore: Number(ext.umweltscore ?? 75),
+        kosten: Number(ext.kosten ?? 0),
+        verfuegbar: p.status === 'aktiv',
+        begruendung: String(ext.begruendung ?? `PSM-Stammdaten: ${p.mittel}`)
       }
-    ]
-
-    return basisEmpfehlungen.filter(psm => {
-      if (schadbild.name.includes('Rost') && psm.wirkstoffGruppe.includes('Strobilurine')) return true
-      if (schadbild.name.includes('Mehltau') && psm.wirkstoffGruppe.includes('Triazole')) return true
-      if (schadbild.name.includes('Rapserdfloh')) return psm.wirkstoff.includes('Azoxystrobin')
-      return true
     })
+
+    const filterRelevant = (list: PSMEmpfehlung[]) =>
+      list.filter(psm => {
+        if (schadbild.name.includes('Rost') && (psm.wirkstoffGruppe.includes('Strobilurine') || psm.wirkstoff.toLowerCase().includes('strobilurin'))) return true
+        if (schadbild.name.includes('Mehltau') && (psm.wirkstoffGruppe.includes('Triazole') || psm.wirkstoff.toLowerCase().includes('triazol'))) return true
+        if (schadbild.name.includes('Rapserdfloh') && psm.wirkstoff.includes('Azoxystrobin')) return true
+        return true
+      })
+
+    const gefiltert = filterRelevant(fromStammdaten)
+    if (gefiltert.length > 0) return gefiltert
+
+    // Demo-Fallback, wenn API keine oder zu wenige Einträge liefert
+    const demoFallback: PSMEmpfehlung[] = [
+      { id: 'PSM-001', name: 'Amistar Opti', wirkstoff: 'Azoxystrobin + Difenoconazol', wirkstoffGruppe: 'Strobilurine + Triazole', dosierung: '1.0 l/ha', wartezeit: 35, effektivitaet: 92, umweltscore: 75, kosten: 145.00, verfuegbar: true, begruendung: 'Hoch effektive Kombination gegen Rostpilze mit systemischer Wirkung' },
+      { id: 'PSM-002', name: 'Folicur Solo', wirkstoff: 'Tebuconazol', wirkstoffGruppe: 'Triazole', dosierung: '1.5 l/ha', wartezeit: 28, effektivitaet: 88, umweltscore: 82, kosten: 98.00, verfuegbar: true, begruendung: 'Kostengünstige Alternative mit guter Umweltverträglichkeit' },
+      { id: 'PSM-003', name: 'Nativo', wirkstoff: 'Trifloxystrobin + Tebuconazol', wirkstoffGruppe: 'Strobilurine + Triazole', dosierung: '0.8 l/ha', wartezeit: 35, effektivitaet: 95, umweltscore: 78, kosten: 165.00, verfuegbar: false, begruendung: 'Höchste Effektivität, aber aktuell nicht verfügbar' }
+    ]
+    return filterRelevant(demoFallback)
   }
 
   const analysiereSchadbild = async () => {

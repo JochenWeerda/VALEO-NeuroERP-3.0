@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
 import { getEntityTypeLabel, getStatusLabel, getSuccessMessage, getErrorMessage } from '@/features/crud/utils/i18n-helpers'
 import { toast } from '@/hooks/use-toast'
+import { useTenant } from '@/hooks/useTenant'
 
 // API Client
 const apiClient = createApiClient('/api/crm-marketing')
@@ -83,7 +84,7 @@ const createSegmentsConfig = (t: any, entityTypeLabel: string): ListConfig => ({
   ],
   filters: [
     {
-      key: 'type',
+      name: 'type',
       label: t('crud.fields.type'),
       type: 'select',
       options: [
@@ -93,7 +94,7 @@ const createSegmentsConfig = (t: any, entityTypeLabel: string): ListConfig => ({
       ]
     },
     {
-      key: 'status',
+      name: 'status',
       label: t('crud.fields.status'),
       type: 'select',
       options: [
@@ -104,38 +105,14 @@ const createSegmentsConfig = (t: any, entityTypeLabel: string): ListConfig => ({
     }
   ],
   bulkActions: [
-    {
-      key: 'calculate',
-      label: t('crud.actions.calculate'),
-      action: 'calculate'
-    },
-    {
-      key: 'export',
-      label: t('crud.actions.export'),
-      action: 'export'
-    },
-    {
-      key: 'archive',
-      label: t('crud.actions.archive'),
-      action: 'archive'
-    }
+    { key: 'calculate', label: t('crud.actions.calculate'), type: 'primary' },
+    { key: 'export', label: t('crud.actions.export'), type: 'secondary' },
+    { key: 'archive', label: t('crud.actions.archive'), type: 'danger' }
   ],
   actions: [
-    {
-      key: 'create',
-      label: t('crud.actions.create'),
-      type: 'primary'
-    },
-    {
-      key: 'edit',
-      label: t('crud.actions.edit'),
-      type: 'default'
-    },
-    {
-      key: 'delete',
-      label: t('crud.actions.delete'),
-      type: 'destructive'
-    }
+    { key: 'create', label: t('crud.actions.create'), type: 'primary' },
+    { key: 'edit', label: t('crud.actions.edit'), type: 'secondary' },
+    { key: 'delete', label: t('crud.actions.delete'), type: 'danger' }
   ],
   api: {
     baseUrl: '/api/crm-marketing/segments',
@@ -153,6 +130,7 @@ const createSegmentsConfig = (t: any, entityTypeLabel: string): ListConfig => ({
 export default function SegmentsPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const { tenantId } = useTenant()
   const [data, setData] = useState<any[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
@@ -198,15 +176,15 @@ export default function SegmentsPage(): JSX.Element {
     setLoading(true)
     try {
       const response = await apiClient.get('/segments', {
-        params: {
-          tenant_id: '00000000-0000-0000-0000-000000000001' // TODO: Get from auth context
-        }
+        params: { tenant_id: tenantId }
       })
       
       if (response.success) {
-        const items = response.data || []
+        const raw = response.data
+        const items = Array.isArray(raw) ? raw : (raw && typeof raw === 'object' && Array.isArray((raw as { items?: unknown[] }).items) ? (raw as { items: any[] }).items : [])
+        const totalCount = Array.isArray(raw) ? raw.length : (raw && typeof raw === 'object' && typeof (raw as { total?: number }).total === 'number' ? (raw as { total: number }).total : items.length)
         setData(items)
-        setTotal(items.length)
+        setTotal(totalCount)
       }
     } catch (error) {
       console.error('Fehler beim Laden der Segmente:', error)
@@ -221,7 +199,7 @@ export default function SegmentsPage(): JSX.Element {
 
   useEffect(() => {
     loadData()
-  }, [])
+  }, [tenantId])
 
   const handleCreate = () => {
     navigate('/crm/segment/new')
@@ -262,8 +240,23 @@ export default function SegmentsPage(): JSX.Element {
       config={segmentsConfig}
       data={data}
       total={total}
-      loading={loading}
+      isLoading={loading}
       onAction={handleAction}
+      onBulkAction={async (key: string, items: any[]) => {
+        if (key === 'calculate' && items.length) {
+          try {
+            for (const item of items) {
+              await apiClient.post(`/segments/${item.id}/calculate`, { force_full: false })
+            }
+            toast({ title: t('crud.messages.segmentCalculated') })
+            loadData()
+          } catch {
+            toast({ variant: 'destructive', title: t('crud.messages.segmentCalculationError') })
+          }
+        } else if (key === 'export') {
+          handleExport()
+        }
+      }}
       onCreate={handleCreate}
       onExport={handleExport}
     />

@@ -20,6 +20,10 @@ interface ListReportProps {
   onDelete?: (_item: any) => void
   onExport?: () => void
   onImport?: () => void
+  /** Generic row action: (actionKey, item). When set, row buttons use config.actions and call this. */
+  onAction?: (_actionKey: string, _item: any) => void
+  /** Generic bulk action: (actionKey, selectedItems). Called when bulk action has no onClick. */
+  onBulkAction?: (_actionKey: string, _items: any[]) => void
   isLoading?: boolean
 }
 
@@ -32,6 +36,8 @@ const ListReport: React.FC<ListReportProps> = ({
   onDelete,
   onExport,
   onImport,
+  onAction,
+  onBulkAction,
   isLoading = false
 }) => {
   const { t } = useTranslation()
@@ -154,9 +160,10 @@ const ListReport: React.FC<ListReportProps> = ({
       return
     }
 
-    // Handle bulk actions
     if (action.onClick) {
       action.onClick(selectedItems)
+    } else if (onBulkAction) {
+      onBulkAction(action.key, selectedItems)
     }
   }
 
@@ -412,25 +419,39 @@ const ListReport: React.FC<ListReportProps> = ({
                       ))}
                       <TableCell>
                         <div className="flex gap-1">
-                          {onEdit && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => onEdit(item)}
-                            >
-                              {t('crud.actions.edit')}
-                            </Button>
-                          )}
-                          {onDelete && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => onDelete(item)}
-                              className="text-red-600 hover:text-red-700"
-                            >
-                              {t('crud.actions.delete')}
-                            </Button>
-                          )}
+                          {onAction
+                            ? config.actions
+                                .filter(a => a.key !== 'create')
+                                .map(action => (
+                                  <Button
+                                    key={action.key}
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => onAction(action.key, item)}
+                                    className={action.type === 'danger' ? 'text-red-600 hover:text-red-700' : undefined}
+                                  >
+                                    {action.labelKey ? t(action.labelKey) : action.label}
+                                  </Button>
+                                ))
+                            : (
+                              <>
+                                {onEdit && (
+                                  <Button variant="ghost" size="sm" onClick={() => onEdit(item)}>
+                                    {t('crud.actions.edit')}
+                                  </Button>
+                                )}
+                                {onDelete && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => onDelete(item)}
+                                    className="text-red-600 hover:text-red-700"
+                                  >
+                                    {t('crud.actions.delete')}
+                                  </Button>
+                                )}
+                              </>
+                            )}
                         </div>
                       </TableCell>
                     </TableRow>

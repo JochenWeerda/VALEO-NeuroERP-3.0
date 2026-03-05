@@ -1,22 +1,30 @@
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AlertTriangle, MapPin, Package, Warehouse } from 'lucide-react'
+import { useWarehouses } from '@/lib/api/inventory'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export default function LagerplaetzePage(): JSX.Element {
-  const lager = {
-    plaetze: 42,
-    belegt: 35,
-    frei: 7,
-    auslastung: 83.3,
-    bereiche: [
-      { name: 'Silo 1', plaetze: 8, belegt: 8, kapazitaet: 450, bestand: 445 },
-      { name: 'Silo 2', plaetze: 8, belegt: 6, kapazitaet: 400, bestand: 280 },
-      { name: 'Halle A', plaetze: 12, belegt: 10, kapazitaet: 250, bestand: 220 },
-      { name: 'Halle B', plaetze: 14, belegt: 11, kapazitaet: 300, bestand: 245 },
-    ],
-  }
+  const { data: warehousesData, isLoading } = useWarehouses()
+  const items = warehousesData?.items ?? []
+  const lager = (() => {
+    const bereiche = items.map((w) => ({
+      name: w.name || w.code || w.id,
+      plaetze: 1,
+      belegt: 0,
+      kapazitaet: w.capacity ?? 0,
+      bestand: 0,
+    }))
+    const plaetze = bereiche.length
+    const belegt = 0
+    const frei = plaetze - belegt
+    const auslastung = plaetze > 0 ? (belegt / plaetze) * 100 : 0
+    return { plaetze, belegt, frei, auslastung, bereiche }
+  })()
 
-  const kritisch = lager.bereiche.filter((b) => b.belegt / b.plaetze > 0.95).length
+  const kritisch = lager.bereiche.length > 0
+    ? lager.bereiche.filter((b) => b.plaetze > 0 && b.belegt / b.plaetze > 0.95).length
+    : 0
 
   return (
     <div className="space-y-6 p-6">
@@ -24,6 +32,22 @@ export default function LagerplaetzePage(): JSX.Element {
         <h1 className="text-3xl font-bold">Lagerplätze</h1>
         <p className="text-muted-foreground">Lagerverwaltung & Auslastung</p>
       </div>
+
+      {isLoading && (
+        <div className="grid gap-4 md:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-24" />
+          ))}
+        </div>
+      )}
+
+      {!isLoading && lager.bereiche.length === 0 && (
+        <Card>
+          <CardContent className="pt-6">
+            <p className="text-muted-foreground">Keine Lagerbereiche erfasst. Erfassen Sie Lagerplätze unter Lager &gt; Stammdaten.</p>
+          </CardContent>
+        </Card>
+      )}
 
       {kritisch > 0 && (
         <Card className="border-orange-500 bg-orange-50">
@@ -36,6 +60,7 @@ export default function LagerplaetzePage(): JSX.Element {
         </Card>
       )}
 
+      {!isLoading && (
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
@@ -90,8 +115,8 @@ export default function LagerplaetzePage(): JSX.Element {
         <CardContent>
           <div className="space-y-3">
             {lager.bereiche.map((bereich, i) => {
-              const auslastung = (bereich.belegt / bereich.plaetze) * 100
-              const fuellstand = (bereich.bestand / bereich.kapazitaet) * 100
+              const auslastung = bereich.plaetze > 0 ? (bereich.belegt / bereich.plaetze) * 100 : 0
+              const fuellstand = (bereich.kapazitaet ?? 0) > 0 ? ((bereich.bestand ?? 0) / (bereich.kapazitaet ?? 1)) * 100 : 0
               return (
                 <div key={i} className="rounded-lg border p-4">
                   <div className="flex items-center justify-between mb-3">
@@ -132,6 +157,7 @@ export default function LagerplaetzePage(): JSX.Element {
           </div>
         </CardContent>
       </Card>
+      )}
     </div>
   )
 }

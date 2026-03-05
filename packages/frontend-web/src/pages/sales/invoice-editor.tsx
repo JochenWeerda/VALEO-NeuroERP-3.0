@@ -49,7 +49,7 @@ export default function SalesInvoiceEditorPage(): JSX.Element {
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Rechnung')
   const [docId, setDocId] = useState<string | null>(editId)
   const [invoice, setInvoice] = useState<SalesInvoice>({
-    number: "INV-2025-0001",
+    number: "",
     date: new Date().toISOString().slice(0, ISO_DATE_LENGTH),
     customerId: "",
     paymentTerms: "net30",

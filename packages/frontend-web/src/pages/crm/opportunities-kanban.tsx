@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { getEntityTypeLabel, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 import { toast } from '@/hooks/use-toast'
+import { useAuth } from '@/hooks/useAuth'
 import { 
   ArrowLeft, 
   Filter, 
@@ -52,6 +53,7 @@ interface StageColumn {
 export default function OpportunitiesKanbanPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [opportunities, setOpportunities] = useState<Opportunity[]>([])
   const [stages, setStages] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -177,7 +179,7 @@ export default function OpportunitiesKanbanPage(): JSX.Element {
         stage: targetStage
       }, {
         params: {
-          changed_by: 'current_user' // TODO: Get from auth context
+          changed_by: user?.email || user?.sub || 'current_user'
         }
       })
 

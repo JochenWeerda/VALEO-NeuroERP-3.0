@@ -327,14 +327,15 @@ async def import_journal_entries_csv(
                     line_id = f"{entry_id}-L{line_idx}"
                     journal_line_insert = text("""
                         INSERT INTO domain_erp.journal_entry_lines
-                        (id, journal_entry_id, account_id, description, debit, credit,
+                        (id, tenant_id, journal_entry_id, account_id, description, debit, credit,
                          cost_center, project, line_number, created_at)
-                        VALUES (:id, :journal_entry_id, :account_id, :description, :debit, :credit,
+                        VALUES (:id, :tenant_id, :journal_entry_id, :account_id, :description, :debit, :credit,
                                 :cost_center, :project, :line_number, NOW())
                     """)
                     
                     db.execute(journal_line_insert, {
                         "id": line_id,
+                        "tenant_id": tenant_id,
                         "journal_entry_id": entry_id,
                         "account_id": account_id,
                         "description": line.description,

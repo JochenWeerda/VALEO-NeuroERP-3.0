@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+import { Label } from '@/components/ui/label'
 import { DataTable } from '@/components/ui/data-table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -11,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { AlertTriangle, CheckCircle, Search, Upload, Link2, Sparkles } from 'lucide-react'
 import { getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 import { toast } from '@/hooks/use-toast'
+import { useTenant } from '@/hooks/useTenant'
 import { apiClient } from '@/lib/api-client'
 import { ErrorState } from '@/components/ErrorState'
 
@@ -59,12 +61,19 @@ const statusIconMap: Record<Zahlungseingang['match_status'], JSX.Element> = {
 
 export default function ZahlungseingangsPage(): JSX.Element {
   const { t } = useTranslation()
+  const { tenantId } = useTenant()
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<Zahlungseingang['match_status'] | 'alle'>('alle')
   const [selectedPayment, setSelectedPayment] = useState<Zahlungseingang | null>(null)
   const [openItems, setOpenItems] = useState<OpenItem[]>([])
   const [matchDialogOpen, setMatchDialogOpen] = useState(false)
   const [autoMatching, setAutoMatching] = useState(false)
+  const [bankImportOpen, setBankImportOpen] = useState(false)
+  const [bankImportFile, setBankImportFile] = useState<File | null>(null)
+  const [bankImportFormat, setBankImportFormat] = useState<'CAMT' | 'MT940' | 'CSV'>('CAMT')
+  const [bankImportAccountId, setBankImportAccountId] = useState<string>('')
+  const [bankImportSubmitting, setBankImportSubmitting] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const {
     data: zahlungen = [],
@@ -73,15 +82,62 @@ export default function ZahlungseingangsPage(): JSX.Element {
     error,
     refetch,
   } = useQuery({
-    queryKey: ['finance', 'payment-matching', 'unmatched'],
+    queryKey: ['finance', 'payment-matching', 'unmatched', tenantId],
     queryFn: async () => {
       const response = await apiClient.get<Zahlungseingang[]>(
-        '/api/v1/finance/payments/unmatched?tenant_id=00000000-0000-0000-0000-000000000001&limit=100',
+        `/api/v1/finance/payments/unmatched?tenant_id=${tenantId}&limit=100`,
       )
       return response.data
     },
     staleTime: 60 * 1000,
   })
+
+  const { data: bankAccounts = [] } = useQuery({
+    queryKey: ['finance', 'bank-accounts'],
+    queryFn: async () => {
+      const response = await apiClient.get<{ id: string; account_number?: string; account_name?: string }[]>(
+        '/api/v1/finance/bank-accounts',
+      )
+      return Array.isArray(response.data) ? response.data : []
+    },
+    enabled: bankImportOpen,
+  })
+  useEffect(() => {
+    if (bankImportOpen && bankAccounts.length > 0 && !bankImportAccountId) {
+      setBankImportAccountId(bankAccounts[0].id)
+    }
+  }, [bankImportOpen, bankAccounts, bankImportAccountId])
+
+  const handleBankImportClick = () => setBankImportOpen(true)
+
+  const handleBankImportSubmit = async () => {
+    if (!bankImportFile || !bankImportAccountId) {
+      toast({ variant: 'destructive', title: t('crud.messages.paymentMatching.bankImport'), description: 'Bitte Datei und Konto auswählen.' })
+      return
+    }
+    setBankImportSubmitting(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', bankImportFile)
+      await apiClient.post(
+        `/api/v1/finance/bank-statements/import?format=${bankImportFormat}&bank_account_id=${encodeURIComponent(bankImportAccountId)}&tenant_id=${tenantId}&auto_match=false`,
+        formData,
+      )
+      toast({ title: t('crud.messages.paymentMatching.bankImport'), description: 'Kontoauszug importiert. Liste wird aktualisiert.' })
+      setBankImportOpen(false)
+      setBankImportFile(null)
+      setBankImportAccountId('')
+      void refetch()
+    } catch (err) {
+      toast({
+        variant: 'destructive',
+        title: 'Bank-Import fehlgeschlagen',
+        description: err instanceof Error ? err.message : String(err),
+      })
+    } finally {
+      setBankImportSubmitting(false)
+    }
+  }
 
   if (isError) {
     return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
@@ -105,7 +161,7 @@ export default function ZahlungseingangsPage(): JSX.Element {
     setAutoMatching(true)
     try {
       const response = await apiClient.post<unknown[]>(
-        '/api/v1/finance/payments/auto-match?tenant_id=00000000-0000-0000-0000-000000000001',
+        `/api/v1/finance/payments/auto-match?tenant_id=${tenantId}`,
       )
       const results = Array.isArray(response.data) ? response.data : []
       toast({
@@ -130,7 +186,7 @@ export default function ZahlungseingangsPage(): JSX.Element {
     try {
       // Extract customer ID from payment (would need to be determined from creditor/debtor)
       const response = await apiClient.get<OpenItem[]>(
-        `/api/v1/finance/payments/match-suggestions/${payment.id}?tenant_id=00000000-0000-0000-0000-000000000001`,
+        `/api/v1/finance/payments/match-suggestions/${payment.id}?tenant_id=${tenantId}`,
       )
       setOpenItems(response.data)
       setMatchDialogOpen(true)
@@ -148,7 +204,7 @@ export default function ZahlungseingangsPage(): JSX.Element {
 
     try {
       await apiClient.post(
-        `/api/v1/finance/payments/match/${selectedPayment.id}?op_id=${opId}&match_type=MANUAL&tenant_id=00000000-0000-0000-0000-000000000001`,
+        `/api/v1/finance/payments/match/${selectedPayment.id}?op_id=${opId}&match_type=MANUAL&tenant_id=${tenantId}`,
       )
       toast({
         title: t('crud.messages.matchSuccess'),
@@ -255,11 +311,62 @@ export default function ZahlungseingangsPage(): JSX.Element {
           <h1 className="text-3xl font-bold">{t('crud.messages.paymentMatching.title')}</h1>
           <p className="text-muted-foreground">{t('crud.messages.paymentMatching.subtitle')}</p>
         </div>
-        <Button className="gap-2">
+        <Button className="gap-2" onClick={handleBankImportClick}>
           <Upload className="h-4 w-4" />
           {t('crud.messages.paymentMatching.bankImport')}
         </Button>
       </div>
+
+      <Dialog open={bankImportOpen} onOpenChange={setBankImportOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t('crud.messages.paymentMatching.bankImport')}</DialogTitle>
+            <DialogDescription>CAMT.053, MT940 oder CSV. Nach dem Import können Sie die Zuordnung prüfen.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>Datei</Label>
+              <Input
+                type="file"
+                accept=".xml,.csv,.940,.sta"
+                ref={fileInputRef}
+                onChange={(e) => setBankImportFile(e.target.files?.[0] ?? null)}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label>Format</Label>
+              <Select value={bankImportFormat} onValueChange={(v) => setBankImportFormat(v as 'CAMT' | 'MT940' | 'CSV')}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="CAMT">CAMT.053 (XML)</SelectItem>
+                  <SelectItem value="MT940">MT940</SelectItem>
+                  <SelectItem value="CSV">CSV</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Bankkonto</Label>
+              <Select value={bankImportAccountId || (bankAccounts[0]?.id ?? '')} onValueChange={setBankImportAccountId}>
+                <SelectTrigger><SelectValue placeholder="Konto wählen" /></SelectTrigger>
+                <SelectContent>
+                  {bankAccounts.map((acc) => (
+                    <SelectItem key={acc.id} value={acc.id}>
+                      {acc.account_name || acc.account_number || acc.id}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setBankImportOpen(false)}>Abbrechen</Button>
+            <Button onClick={handleBankImportSubmit} disabled={bankImportSubmitting || !bankImportFile || !bankImportAccountId}>
+              {bankImportSubmitting ? 'Importiere…' : 'Importieren'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card>

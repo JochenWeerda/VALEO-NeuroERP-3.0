@@ -17,6 +17,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Save, ArrowLeft, CheckCircle, XCircle, AlertTriangle, Droplets, Shield } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTenant } from '@/hooks/useTenant';
+import { ModuleToolbar } from '@/components/navigation/ModuleToolbar';
 
 // API Client
 const apiClient = {
@@ -270,6 +271,7 @@ const DuengerStammPage: React.FC = () => {
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
+      <ModuleToolbar backTarget="/agrar/duenger-liste" closeTarget="/agrar/duenger-liste" title={isEditing ? 'Dünger bearbeiten' : 'Neuer Dünger'} />
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">

@@ -292,7 +292,7 @@ PYTHONPATH=. python -m app.seeds.inventory_seed
 4. Add tests for new functionality
 5. Submit a pull request
 
-**AI-assisted development** is welcome. Please mark AI involvement in commit messages (e.g. `[AI-Assisted]` or `[AI-Generated]`) and in PR descriptions so that reviewers have full transparency.
+We use the [good first issue](.github/ISSUE_TEMPLATE/good_first_issue.md) template for small, contributor-friendly tasks. AI-assisted development is welcome. Please mark AI involvement in commit messages (e.g. `[AI-Assisted]` or `[AI-Generated]`) and in PR descriptions so that reviewers have full transparency.
 
 ## 📄 License
 

@@ -26,9 +26,11 @@ export type UseSSEOptions = {
 }
 
 export function useSSE(options: UseSSEOptions) {
+  const defaultBaseUrl =
+    import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://host.docker.internal:8000'
   const {
     channel,
-    baseUrl = 'http://localhost:8000',
+    baseUrl = defaultBaseUrl,
     autoConnect = true,
     reconnectInterval = 3000,
     maxReconnectAttempts = 10,

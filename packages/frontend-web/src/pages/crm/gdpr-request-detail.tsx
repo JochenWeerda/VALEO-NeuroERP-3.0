@@ -11,6 +11,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { formatDate } from '@/components/mask-builder/utils/formatting'
 import { toast } from '@/hooks/use-toast'
+import { useTenant } from '@/hooks/useTenant'
+import { useAuth } from '@/hooks/useAuth'
 import { ArrowLeft, History, Download, FileText } from 'lucide-react'
 
 // API Client
@@ -297,6 +299,8 @@ export default function GDPRRequestDetailPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
+  const { tenantId } = useTenant()
+  const { user } = useAuth()
   const [loading, setLoading] = useState(false)
   const entityType = 'gdprRequest'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'DSGVO-Anfrage')
@@ -326,9 +330,8 @@ export default function GDPRRequestDetailPage(): JSX.Element {
         return
       }
 
-      // Add tenant_id
-      formData.tenant_id = '00000000-0000-0000-0000-000000000001' // TODO: Get from auth context
-      formData.requested_by = formData.requested_by || 'system' // TODO: Get from auth context
+      formData.tenant_id = tenantId
+      formData.requested_by = formData.requested_by || user?.email || user?.sub || 'system'
 
       await saveData(formData)
       toast({

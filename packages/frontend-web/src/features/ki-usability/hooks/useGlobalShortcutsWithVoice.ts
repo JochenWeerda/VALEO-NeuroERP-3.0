@@ -10,7 +10,7 @@ import {
   type GlobalShortcutAction,
   type ShortcutHandler,
 } from '@/lib/shortcuts/global-shortcuts'
-import { useActionDispatchOptional } from '../context/ActionDispatchContext'
+import { useActionDispatchOptional } from '../context/ActionDispatchHooks'
 
 export function useGlobalShortcutsWithVoice(
   handlers: Partial<Record<GlobalShortcutAction, ShortcutHandler>>
@@ -34,3 +34,4 @@ export function useGlobalShortcutsWithVoice(
     }
   }, [dispatchContext, handlers])
 }
+

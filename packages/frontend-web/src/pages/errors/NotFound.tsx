@@ -10,10 +10,10 @@ export default function NotFoundPage(): JSX.Element {
           Die angeforderte Seite existiert nicht oder wurde verschoben.
         </p>
         <div className="flex items-center justify-center gap-2">
-          <Button asChild variant="outline">
-            <Link to="/">Zum Dashboard</Link>
+          <Button asChild variant="default">
+            <Link to="/">Zur Startseite</Link>
           </Button>
-          <Button asChild>
+          <Button asChild variant="outline">
             <Link to="/verkauf/kunden-liste">Zu Kunden</Link>
           </Button>
         </div>

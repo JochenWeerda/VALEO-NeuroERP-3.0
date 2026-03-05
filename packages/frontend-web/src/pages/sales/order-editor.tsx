@@ -278,45 +278,47 @@ export default function SalesOrderEditorPage(): JSX.Element {
     if (user) setState((prev) => ({ ...prev, bediener: getUserShortName() }))
   }, [user])
 
-  // Bestehenden Auftrag laden wenn ID in URL
+  // Bestehenden Auftrag laden wenn ID in URL (Kunde per customer_id aus API)
   useEffect(() => {
     if (!routeId) return
     const load = async (): Promise<void> => {
       try {
-        const response = await apiClient.get<AuftragResponse>(`/api/v1/sales/orders/${routeId}`)
+        const res = await apiClient.get<AuftragResponse>(`/api/v1/sales/orders/${routeId}`)
+        const response = (res as any)?.data ?? res
         let customer: Customer | null = null
-        if (response.customer_id) {
+        if (response?.customer_id) {
           try {
-            const cd = await apiClient.get<any>(`/api/v1/crm/customers/${response.customer_id}`)
+            const cr = await apiClient.get<any>(`/api/v1/crm/customers/${response.customer_id}`)
+            const cd = (cr as any)?.data ?? cr
             customer = {
               id: cd.id,
-              customerNumber: cd.customer_number || cd.customerNumber || '',
-              name: cd.company_name || cd.name || '',
-              debitorAccount: cd.customer_number || cd.customerNumber || '',
-              representative: cd.contact_person || cd.representative,
-              postalCode: cd.postal_code || cd.postalCode,
+              customerNumber: cd.customer_number ?? cd.customerNumber ?? '',
+              name: cd.company_name ?? cd.name ?? '',
+              debitorAccount: cd.customer_number ?? cd.customerNumber ?? '',
+              representative: cd.contact_person ?? cd.representative,
+              postalCode: cd.postal_code ?? cd.postalCode,
               city: cd.city,
               creditLimit: cd.credit_limit?.toString(),
               address: cd.address,
               phone: cd.phone,
               email: cd.email,
-              chefanweisung: cd.chefanweisung || cd.executive_note,
+              chefanweisung: cd.chefanweisung ?? cd.executive_note,
               paymentTerms: cd.payment_terms,
             }
           } catch { /* ignore */ }
         }
         setState((prev) => ({
           ...prev,
-          id: response.id,
-          auftragNr: response.order_number,
-          auftragDatum: response.created_at?.split('T')[0] || formatDateForInput(new Date()),
-          liefertermin: response.delivery_date?.split('T')[0] || '',
-          versandart: response.shipping_method || '',
-          betreff: response.subject || '',
-          notizen: response.description || '',
-          vertreter: response.contact_person || '',
+          id: response?.id,
+          auftragNr: response?.order_number ?? prev.auftragNr,
+          auftragDatum: response?.created_at?.split('T')[0] ?? formatDateForInput(new Date()),
+          liefertermin: response?.delivery_date?.split('T')[0] ?? '',
+          versandart: response?.shipping_method ?? '',
+          betreff: response?.subject ?? '',
+          notizen: response?.description ?? '',
+          vertreter: response?.contact_person ?? '',
           customer,
-          positionen: mapResponseItemsToPositionen(response.items || []),
+          positionen: mapResponseItemsToPositionen(response?.items ?? []),
         }))
       } catch (error: any) {
         push(`Fehler beim Laden: ${error.response?.data?.detail || error.message}`)

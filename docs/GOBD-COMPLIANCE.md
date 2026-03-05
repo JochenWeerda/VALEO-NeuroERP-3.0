@@ -64,6 +64,8 @@ This document maps VALEO NeuroERP FiBu (Financial Accounting) functions to Germa
 - `app/finance/gobd.py` - `/gobd/belegnummern` endpoint
 - `app/api/v1/endpoints/accounting_periods.py` - Period control
 
+**Belegnummer bei abgebrochener Erfassung:** Siehe `docs/compliance/GOBD-BELEGNUMMER-ABBRUCH.md` (Vergabe beim Speichern vs. Reservierung, Rückgabe, GoBD-Konformität).
+
 ### 4. Zeitnahme / Timeliness (§146 AO)
 
 | Requirement | VALEO NeuroERP Implementation |

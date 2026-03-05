@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { CheckCircle } from 'lucide-react'
 
 type FoerderungData = {
@@ -166,6 +167,7 @@ export default function FoerderantragPage(): JSX.Element {
 
   return (
     <div className="p-6">
+      <ModuleToolbar backTarget="/foerderung/liste" closeTarget="/foerderung/liste" title="Förderantrag stellen" />
       <Wizard
         title="Förderantrag stellen"
         steps={steps}

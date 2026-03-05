@@ -304,14 +304,15 @@ async def reconcile_bank_statement(
                     if bank_account_row:
                         journal_line1 = text("""
                             INSERT INTO domain_erp.journal_entry_lines
-                            (id, journal_entry_id, account_id, debit, credit,
+                            (id, tenant_id, journal_entry_id, account_id, debit, credit,
                              line_number, description, created_at)
-                            VALUES (:id, :journal_entry_id, :account_id, :debit, :credit,
+                            VALUES (:id, :tenant_id, :journal_entry_id, :account_id, :debit, :credit,
                                     :line_number, :description, NOW())
                         """)
                         
                         db.execute(journal_line1, {
                             "id": f"{journal_entry_id}-L1",
+                            "tenant_id": tenant_id,
                             "journal_entry_id": journal_entry_id,
                             "account_id": str(bank_account_row[0]),
                             "debit": Decimal(str(suggestion["amount"])),
@@ -329,14 +330,15 @@ async def reconcile_bank_statement(
                     if credit_account_row:
                         journal_line2 = text("""
                             INSERT INTO domain_erp.journal_entry_lines
-                            (id, journal_entry_id, account_id, debit, credit,
+                            (id, tenant_id, journal_entry_id, account_id, debit, credit,
                              line_number, description, created_at)
-                            VALUES (:id, :journal_entry_id, :account_id, :debit, :credit,
+                            VALUES (:id, :tenant_id, :journal_entry_id, :account_id, :debit, :credit,
                                     :line_number, :description, NOW())
                         """)
                         
                         db.execute(journal_line2, {
                             "id": f"{journal_entry_id}-L2",
+                            "tenant_id": tenant_id,
                             "journal_entry_id": journal_entry_id,
                             "account_id": str(credit_account_row[0]),
                             "debit": Decimal("0.00"),

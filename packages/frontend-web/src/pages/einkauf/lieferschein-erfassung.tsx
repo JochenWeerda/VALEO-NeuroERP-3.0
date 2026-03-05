@@ -21,6 +21,7 @@ import { apiClient } from '@/lib/axios'
 import { useAuth } from '@/hooks/useAuth'
 import { useGlobalShortcutsWithVoice } from '@/features/ki-usability'
 import { ShortcutHintButton } from '@/components/shortcuts/ShortcutHelpPanel'
+import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import {
   ChevronLeft, ChevronRight, ChevronUp, ChevronDown, MoreHorizontal, Check, Printer, Save,
   FileText, Folder, Trash2, Search,
@@ -332,6 +333,10 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
   const [showChargenSerienDialog, setShowChargenSerienDialog] = useState(false)
   const [branchesList, setBranchesList] = useState<Array<{ id: string; branch_number: number; name: string }>>([])
   const [lieferantTab, setLieferantTab] = useState<'lieferant' | 'zahlungsbed' | 'texte' | 'zwhaendler'>('lieferant')
+  const [showImportBestellungDialog, setShowImportBestellungDialog] = useState(false)
+  const [bestellungenList, setBestellungenList] = useState<Array<{ id: string; bestellnummer: string; bestelldatum: string | null; status: string; positionen_anz: number }>>([])
+  const [selectedBestellungId, setSelectedBestellungId] = useState<string | null>(null)
+  const [loadingBestellungen, setLoadingBestellungen] = useState(false)
 
   // Bediener aus Session aktualisieren
   useEffect(() => {
@@ -349,6 +354,29 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
       .catch(() => { if (!cancelled) setBranchesList([]) })
     return () => { cancelled = true }
   }, [showNiederlassungDialog])
+
+  // Bestellungen des Lieferanten laden wenn Import-Dialog geöffnet
+  useEffect(() => {
+    if (!showImportBestellungDialog || !state.lieferant) {
+      setBestellungenList([])
+      setSelectedBestellungId(null)
+      return
+    }
+    let cancelled = false
+    setLoadingBestellungen(true)
+    apiClient.get<Array<{ id: string; bestellnummer: string; bestelldatum: string | null; status: string; positionen_anz?: number }>>('/api/v1/einkauf/bestellungen', {
+      params: { lieferant_id: state.lieferant.id },
+    })
+      .then((list) => {
+        if (cancelled) return
+        const items = Array.isArray(list) ? list : []
+        setBestellungenList(items.map((b) => ({ id: b.id, bestellnummer: b.bestellnummer, bestelldatum: b.bestelldatum ?? null, status: b.status, positionen_anz: b.positionen_anz ?? 0 })))
+        setSelectedBestellungId(null)
+      })
+      .catch(() => { if (!cancelled) setBestellungenList([]) })
+      .finally(() => { if (!cancelled) setLoadingBestellungen(false) })
+    return () => { cancelled = true }
+  }, [showImportBestellungDialog, state.lieferant?.id])
 
   // Bestehenden Lieferschein laden
   useEffect(() => {
@@ -561,6 +589,66 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
     }))
   }
 
+  const handleImportBestellungPositionen = async (): Promise<void> => {
+    if (!selectedBestellungId) {
+      push('Bitte wählen Sie eine Bestellung aus.')
+      return
+    }
+    try {
+      const data = await apiClient.get<{ positionen: Array<{
+        pos_nr: number
+        artikel_nr: string | null
+        lieferanten_artnr: string | null
+        artikel_bezeichnung: string | null
+        menge: number
+        einheit: string | null
+        einzelpreis: number | null
+        netto_betrag: number | null
+      }> }>(`/api/v1/einkauf/bestellungen/${selectedBestellungId}`)
+      const posList = data.positionen || []
+      const mwst = 19
+      const mapped: EinkaufPosition[] = posList.map((p) => {
+        const ep = p.einzelpreis ?? 0
+        const menge = p.menge ?? 0
+        const bruttoPreis = ep * (1 + mwst / 100)
+        return {
+          posNr: 0,
+          artikelNr: p.artikel_nr ?? '',
+          artikelId: null,
+          lieferantArtikelNr: p.lieferanten_artnr ?? '',
+          bezeichnung: p.artikel_bezeichnung ?? '',
+          bezeichnung2: '',
+          gebindeNr: '',
+          gebinde: 0,
+          menge,
+          einheit: p.einheit ?? '',
+          einzelpreis: ep,
+          nettoBetrag: p.netto_betrag ?? ep * menge,
+          mwstProzent: mwst,
+          bruttoPreis,
+          bruttoBetrag: bruttoPreis * menge,
+          niederlassung: '',
+          lagerhalle: '',
+          lagerfach: '',
+          charge: '',
+          serienNr: '',
+          kontraktNr: '',
+          streckeNr: '',
+          naBio: '',
+          musterNr: '',
+          prozent: 0,
+          skontierf: false,
+        }
+      })
+      const combined = renumberPosNr([...state.positionen, ...mapped])
+      setState((prev) => ({ ...prev, positionen: combined }))
+      setShowImportBestellungDialog(false)
+      push(`${mapped.length} Position(en) aus Bestellung übernommen.`)
+    } catch (err: any) {
+      push(`Fehler beim Laden der Bestellung: ${err.response?.data?.detail ?? err.message}`)
+    }
+  }
+
   // Lieferschein speichern
   const handleSave = async (): Promise<string | null> => {
     if (!state.lieferant) {
@@ -687,6 +775,11 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
       <div className="bg-green-600 text-white px-4 py-2">
         <h1 className="text-lg font-bold">EINKAUF-LIEFERSCHEIN</h1>
       </div>
+      <ModuleToolbar
+        backTarget="/einkauf"
+        closeTarget="/einkauf"
+        title="Einkauf Lieferschein"
+      />
 
       <div className="flex-1 overflow-auto p-4">
         {/* Header-Bereich (3 Spalten) */}
@@ -990,20 +1083,13 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
 
         {/* → Bestellung(en) importieren */}
         <div className="mb-2 flex items-center gap-2">
-          <a
-            href="#"
-            className="text-sm text-blue-600 underline hover:text-blue-800 font-medium"
-            onClick={(e) => {
-              e.preventDefault()
-              if (state.lieferant) {
-                push(`Offene Bestellungen von ${state.lieferant.name} können hier bald als Positionen übernommen werden.`)
-              } else {
-                push('Bitte zuerst einen Lieferanten auswählen. Anschließend können Bestellpositionen importiert werden.')
-              }
-            }}
+          <Button
+            variant="link"
+            className="text-sm text-blue-600 underline hover:text-blue-800 p-0 h-auto font-medium"
+            onClick={() => setShowImportBestellungDialog(true)}
           >
             → Bestellung(en) importieren
-          </a>
+          </Button>
           {state.lieferant && (
             <span className="text-muted-foreground text-xs">
               für {state.lieferant.name}
@@ -1398,6 +1484,74 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
         businessObjectId={state.id}
         title="UNTERLAGEN / DATEIEN — EINKAUFS-LIEFERSCHEIN"
       />
+
+      <Dialog open={showImportBestellungDialog} onOpenChange={setShowImportBestellungDialog}>
+        <DialogContent className="sm:max-w-xl">
+          <DialogHeader>
+            <DialogTitle>Bestellung(en) importieren</DialogTitle>
+          </DialogHeader>
+          {!state.lieferant ? (
+            <p className="text-sm text-muted-foreground py-4">
+              Bitte wählen Sie zuerst einen Lieferanten aus. Anschließend können Sie offene Bestellungen dieses Lieferanten als Lieferschein-Positionen übernehmen.
+            </p>
+          ) : (
+            <>
+              <p className="text-sm text-muted-foreground mb-3">
+                Bestellung auswählen — Positionen werden an die bestehende Positionsliste angehängt.
+              </p>
+              {loadingBestellungen ? (
+                <p className="text-sm py-4">Bestellungen werden geladen…</p>
+              ) : bestellungenList.length === 0 ? (
+                <p className="text-sm text-muted-foreground py-4">Keine Bestellungen für diesen Lieferanten gefunden.</p>
+              ) : (
+                <div className="max-h-64 overflow-y-auto border rounded">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-12"></TableHead>
+                        <TableHead>Bestellnr.</TableHead>
+                        <TableHead>Datum</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Positionen</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {bestellungenList.map((b) => (
+                        <TableRow
+                          key={b.id}
+                          className={selectedBestellungId === b.id ? 'bg-muted' : ''}
+                          onClick={() => setSelectedBestellungId(b.id)}
+                        >
+                          <TableCell>
+                            <input
+                              type="radio"
+                              name="bestellung"
+                              checked={selectedBestellungId === b.id}
+                              onChange={() => setSelectedBestellungId(b.id)}
+                            />
+                          </TableCell>
+                          <TableCell className="font-mono">{b.bestellnummer}</TableCell>
+                          <TableCell>{b.bestelldatum ? new Date(b.bestelldatum).toLocaleDateString('de-DE') : '–'}</TableCell>
+                          <TableCell>{b.status}</TableCell>
+                          <TableCell className="text-right">{b.positionen_anz}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowImportBestellungDialog(false)}>Schließen</Button>
+            {state.lieferant && bestellungenList.length > 0 && (
+              <Button onClick={() => void handleImportBestellungPositionen()} disabled={!selectedBestellungId}>
+                Positionen übernehmen
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={showPopUpDialog} onOpenChange={setShowPopUpDialog}>
         <DialogContent className="sm:max-w-md">

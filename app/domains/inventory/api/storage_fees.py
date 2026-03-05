@@ -276,12 +276,13 @@ def _post_storage_fee_journal(
             text(
                 """
                 INSERT INTO domain_erp.journal_entry_lines
-                (id, journal_entry_id, account_id, description, debit, credit, line_number, created_at)
-                VALUES (:id, :journal_entry_id, :account_id, :description, :debit, :credit, :line_number, NOW())
+                (id, tenant_id, journal_entry_id, account_id, description, debit, credit, line_number, created_at)
+                VALUES (:id, :tenant_id, :journal_entry_id, :account_id, :description, :debit, :credit, :line_number, NOW())
                 """
             ),
             {
                 "id": str(uuid4()),
+                "tenant_id": tenant_id,
                 "journal_entry_id": entry_id,
                 "account_id": ar_account_id,
                 "debit": _round_money(amount),
@@ -296,12 +297,13 @@ def _post_storage_fee_journal(
         text(
             """
             INSERT INTO domain_erp.journal_entry_lines
-            (id, journal_entry_id, account_id, description, debit, credit, line_number, created_at)
-            VALUES (:id, :journal_entry_id, :account_id, :description, :debit, :credit, :line_number, NOW())
+            (id, tenant_id, journal_entry_id, account_id, description, debit, credit, line_number, created_at)
+            VALUES (:id, :tenant_id, :journal_entry_id, :account_id, :description, :debit, :credit, :line_number, NOW())
             """
         ),
         {
             "id": str(uuid4()),
+            "tenant_id": tenant_id,
             "journal_entry_id": entry_id,
             "account_id": revenue_account_id,
             "debit": Decimal("0.00"),

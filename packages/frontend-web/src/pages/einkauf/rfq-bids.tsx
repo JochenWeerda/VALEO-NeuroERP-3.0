@@ -67,7 +67,7 @@ export default function RfqBidsPage(): JSX.Element {
     totalValue: 0, currency: 'EUR', paymentTerms: '', deliveryTerms: '', notes: '',
   })
   const [availableSuppliers, setAvailableSuppliers] = useState<any[]>([])
-  const { data: bidsData = [], isLoading: bidsLoading, isError: bidsError, error: bidsErrorObj, refetch: refetchBids } = useQuery({
+  const { data: bidsData, isLoading: bidsLoading, isError: bidsError, error: bidsErrorObj, refetch: refetchBids } = useQuery({
     queryKey: ['einkauf', 'rfq-bids', rfqId],
     queryFn: async () => (await apiClient.get<Bid[]>(`/api/v1/einkauf/anfragen/${rfqId}/bids`)).data,
     enabled: !!rfqId,
@@ -75,7 +75,9 @@ export default function RfqBidsPage(): JSX.Element {
   })
 
   useEffect(() => {
-    setBids(bidsData)
+    if (Array.isArray(bidsData)) {
+      setBids(bidsData)
+    }
   }, [bidsData])
 
   useEffect(() => {

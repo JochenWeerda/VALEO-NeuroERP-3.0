@@ -23,9 +23,12 @@ type Rabatt = {
   status: 'aktiv' | 'inaktiv' | 'abgelaufen'
 }
 
+type FilterMode = 'alle' | 'nur_aktive' | 'nur_prozent'
+
 export default function RabattePage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
+  const [filterMode, setFilterMode] = useState<FilterMode>('alle')
   const { data: apiRabatte = [], isError, error, refetch } = useRabatte()
   const rabatte: Rabatt[] = apiRabatte.map((r: ApiRabatt) => ({
     id: r.id,
@@ -41,6 +44,14 @@ export default function RabattePage(): JSX.Element {
   if (isError) {
     return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
   }
+
+  const filteredRabatte = rabatte.filter((r) => {
+    const matchSearch = !searchTerm || r.name.toLowerCase().includes(searchTerm.toLowerCase())
+    if (!matchSearch) return false
+    if (filterMode === 'nur_aktive') return r.status === 'aktiv'
+    if (filterMode === 'nur_prozent') return r.typ === 'prozent'
+    return true
+  })
 
   const columns = [
     {
@@ -179,15 +190,19 @@ export default function RabattePage(): JSX.Element {
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input placeholder="Suche Rabatt-Name..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
             </div>
-            <Button variant="outline">Nur Aktive</Button>
-            <Button variant="outline">Nur Prozent-Rabatte</Button>
+            <Button variant={filterMode === 'nur_aktive' ? 'default' : 'outline'} onClick={() => setFilterMode((m) => (m === 'nur_aktive' ? 'alle' : 'nur_aktive'))}>
+              Nur Aktive
+            </Button>
+            <Button variant={filterMode === 'nur_prozent' ? 'default' : 'outline'} onClick={() => setFilterMode((m) => (m === 'nur_prozent' ? 'alle' : 'nur_prozent'))}>
+              Nur Prozent-Rabatte
+            </Button>
           </div>
         </CardContent>
       </Card>
 
       <Card>
         <CardContent className="pt-6">
-          <DataTable data={rabatte} columns={columns} />
+          <DataTable data={filteredRabatte} columns={columns} />
         </CardContent>
       </Card>
     </div>

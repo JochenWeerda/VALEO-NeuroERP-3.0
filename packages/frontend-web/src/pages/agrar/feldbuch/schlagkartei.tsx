@@ -31,7 +31,9 @@ import {
   Info,
   Filter,
   Building2,
-  Calendar
+  Calendar,
+  Pencil,
+  Trash2
 } from 'lucide-react'
 import { FeldblockfinderIntegration, SchlagData } from '@/components/agrar/FeldblockfinderIntegration'
 
@@ -57,7 +59,7 @@ type Schlag = {
 }
 
 // API hooks from centralized agrar module
-import { useAgrarKunden, useSchlaege } from '@/lib/api/agrar'
+import { useAgrarKunden, useSchlaege, useDeleteSchlag } from '@/lib/api/agrar'
 import { useToast } from '@/hooks/use-toast'
 
 // Skeleton-Komponente für Ladezustand
@@ -115,6 +117,7 @@ export default function SchlagkarteiPage(): JSX.Element {
   const { data: kunden, isLoading: kundenLoading } = useAgrarKunden()
 
   const { data: schlaege, isLoading: schlaegeLoading } = useSchlaege(selectedKundeId)
+  const deleteSchlag = useDeleteSchlag()
 
   // Gefilterte Schläge
   const filteredSchlaege = useMemo(() => {
@@ -261,6 +264,35 @@ export default function SchlagkarteiPage(): JSX.Element {
           <div className="text-muted-foreground">{s.letzteMassnahme.typ}</div>
         </div>
       ) : '-'
+    },
+    {
+      key: 'aktionen' as const,
+      label: 'Aktionen',
+      render: (s: Schlag) => (
+        <div className="flex items-center gap-1">
+          <Button variant="ghost" size="icon" onClick={() => navigate(`/agrar/feldbuch/schlag/${s.id}`)} title="Bearbeiten">
+            <Pencil className="h-4 w-4" />
+          </Button>
+          {s.status === 'aktiv' && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                if (confirm('Schlag stilllegen? (Status wird auf „stillgelegt“ gesetzt)')) {
+                  deleteSchlag.mutate(s.id, {
+                    onSuccess: () => toast({ title: 'Schlag stillgelegt' }),
+                    onError: () => toast({ variant: 'destructive', title: 'Stilllegen fehlgeschlagen' })
+                  })
+                }
+              }}
+              disabled={deleteSchlag.isPending}
+              title="Stilllegen"
+            >
+              <Trash2 className="h-4 w-4 text-destructive" />
+            </Button>
+          )}
+        </div>
+      )
     },
   ]
 

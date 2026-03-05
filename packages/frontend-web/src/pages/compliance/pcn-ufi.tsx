@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { CheckCircle, AlertTriangle } from 'lucide-react'
+import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { Button } from '@/components/ui/button'
 
 type PCNData = {
@@ -167,6 +168,7 @@ export default function PCNUFIPage(): JSX.Element {
 
   return (
     <div className="p-3 md:p-6">
+      <ModuleToolbar backTarget="/compliance/pcn-liste" closeTarget="/compliance/pcn-liste" title="PCN/UFI Generator" />
       <Wizard
         title="PCN/UFI Generator"
         subtitle="Poison Centre Notification (ECHA Annex VIII)"

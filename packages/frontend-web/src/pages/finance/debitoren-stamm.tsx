@@ -10,6 +10,9 @@ import { validateIBAN, formatIBAN } from '@/lib/utils/iban-validator'
 import { validateVatIdFormat } from '@/lib/utils/vat-validator'
 import { useIbanLookup } from '@/hooks/useIbanLookup'
 import { useTenant } from '@/hooks/useTenant'
+import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
+import { LeaveConfirmDialog } from '@/components/LeaveConfirmDialog'
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import { toast } from 'sonner'
 import { apiClient } from '@/lib/axios'
 
@@ -391,23 +394,31 @@ export default function DebitorenStammPage(): JSX.Element {
   }
 
   const handleCancel = () => {
-    if (isDirty && !confirm(t('crud.messages.unsavedChanges'))) {
-      return
-    }
     navigate('/finance/debitoren')
   }
 
+  const blocker = useUnsavedChanges(isDirty)
+
   return (
-    <ObjectPage
-      config={debitorenConfig}
-      data={data || formData}
-      onChange={handleFormChange}
-      onSave={handleSave}
-      onCancel={handleCancel}
-      isLoading={loading || isIbanLoading}
-      onAction={(key, fd) => handleAction(key, fd ?? formData)}
-      loadingActionKey={actionLoadingKey}
-    />
+    <>
+      <ModuleToolbar backTarget="/finance/debitoren" closeTarget="/finance/debitoren" title={entityTypeLabel} />
+      <LeaveConfirmDialog
+        blocker={blocker}
+        onSave={() => handleSave(formData)}
+        title={t('crud.messages.unsavedChanges', { defaultValue: 'Ungespeicherte Änderungen' })}
+        description={t('crud.messages.unsavedChangesDescription', { defaultValue: 'Möchten Sie speichern, verwerfen oder hier bleiben?' })}
+      />
+      <ObjectPage
+        config={debitorenConfig}
+        data={data || formData}
+        onChange={handleFormChange}
+        onSave={handleSave}
+        onCancel={handleCancel}
+        isLoading={loading || isIbanLoading}
+        onAction={(key, fd) => handleAction(key, fd ?? formData)}
+        loadingActionKey={actionLoadingKey}
+      />
+    </>
   )
 }
 

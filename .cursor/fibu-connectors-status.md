@@ -24,7 +24,7 @@
 ### Frontend
 | Komponente | Status |
 |------------|--------|
-| Lohn-Connector Seite | ✅ `pages/fibu/lohn-connector.tsx` – Periode, Trockenlauf, Runs-Tabelle, Trigger, Delete (pending) |
+| Lohn-Connector Seite | ✅ `pages/fibu/lohn-connector.tsx` – Periode, Trockenlauf, Runs-Tabelle, Trigger, Delete (implementiert: handleDelete + deleteRun.mutate, Stand 2025-03-05) |
 | VALEO Suite Anlagen | ✅ `pages/fibu/anlagen-suite.tsx` – Anlagenverwaltung + Import/Connector; `/fibu/quadriga-connector` → Weiterleitung auf Suite |
 | Schnittstellen-Center | ✅ Lohn + VALEO Suite Anlagen (Asset Ledger) als „Aktiv“, Link `/fibu/anlagen-suite` |
 | Navigation | ✅ Lohn-Connector, VALEO Suite Anlagen (Asset Ledger) unter FIBU |

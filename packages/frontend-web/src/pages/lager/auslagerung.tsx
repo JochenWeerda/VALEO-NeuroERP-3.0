@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Wizard } from '@/components/patterns/Wizard'
+import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { api } from '@/lib/axios'
 import { useToast } from '@/hooks/use-toast'
 import { Badge } from '@/components/ui/badge'
@@ -30,7 +31,7 @@ export default function AuslagerungPage(): JSX.Element {
 
   function updateField<K extends keyof AuslagerungData>(key: K, value: AuslagerungData[K]): void {
     if (key === 'strategie' && value === 'fifo') {
-      setAuslagerung((prev) => ({ ...prev, [key]: value, chargenId: '251001-WEI-001 (älteste)' }))
+      setAuslagerung((prev) => ({ ...prev, [key]: value, chargenId: '' }))
     } else {
       setAuslagerung((prev) => ({ ...prev, [key]: value }))
     }
@@ -147,6 +148,7 @@ export default function AuslagerungPage(): JSX.Element {
 
   return (
     <div className="p-6">
+      <ModuleToolbar backTarget="/lager/bestandsuebersicht" closeTarget="/lager/bestandsuebersicht" title="Auslagerung" />
       <Wizard title="Auslagerung" steps={steps} onFinish={handleFinish} onCancel={() => navigate('/lager/bestandsuebersicht')} />
     </div>
   )

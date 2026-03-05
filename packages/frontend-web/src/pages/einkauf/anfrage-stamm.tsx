@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from '@/hooks/use-toast'
+import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { CheckCircle, XCircle, ShoppingCart, Send, Mail } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -439,6 +440,7 @@ export default function AnfrageStammPage(): JSX.Element {
 
   return (
     <div className="space-y-6">
+      <ModuleToolbar backTarget="/einkauf/anfragen" closeTarget="/einkauf/anfragen" title={entityTypeLabel} />
       <ObjectPage
         config={anfrageConfig}
         data={data}

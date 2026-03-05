@@ -5,9 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
-import { CheckCircle, ClipboardList, Search } from 'lucide-react'
+import { CheckCircle, ClipboardList, Search, Trash2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
-import { useInventur, useCompleteInventurPositions, type InventurPosition } from '@/lib/api/inventory'
+import { useInventur, useCompleteInventurPositions, useStornierenInventurPosition, type InventurPosition } from '@/lib/api/inventory'
 
 export default function InventurPage(): JSX.Element {
   const [searchTerm, setSearchTerm] = useState('')
@@ -16,6 +16,7 @@ export default function InventurPage(): JSX.Element {
 
   const { data, isLoading } = useInventur({ search: searchTerm || undefined })
   const completeMutation = useCompleteInventurPositions()
+  const stornierenMutation = useStornierenInventurPosition()
   const positionen = data?.items ?? []
 
   const handleComplete = async () => {
@@ -62,6 +63,28 @@ export default function InventurPage(): JSX.Element {
         <Badge variant={pos.status === 'abgeschlossen' ? 'outline' : 'default'}>
           {pos.status === 'offen' ? 'Offen' : pos.status === 'gezaehlt' ? 'Gezählt' : 'Abgeschlossen'}
         </Badge>
+      ),
+    },
+    {
+      key: 'aktionen' as const,
+      label: '',
+      render: (pos: InventurPosition) => (
+        <Button
+          variant="ghost"
+          size="icon"
+          title="Position stornieren"
+          onClick={() => {
+            if (confirm('Diese Inventur-Position wirklich stornieren/entfernen?')) {
+              stornierenMutation.mutate(pos.id, {
+                onSuccess: () => toast({ title: 'Position storniert' }),
+                onError: () => toast({ variant: 'destructive', title: 'Stornieren fehlgeschlagen' })
+              })
+            }
+          }}
+          disabled={stornierenMutation.isPending}
+        >
+          <Trash2 className="h-4 w-4 text-destructive" />
+        </Button>
       ),
     },
   ]

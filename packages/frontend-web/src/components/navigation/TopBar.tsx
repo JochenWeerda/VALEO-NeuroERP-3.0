@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -8,11 +9,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { NotificationCenter } from '@/components/ui/notification-center'
-import { Command as CommandIcon, HelpCircle, Keyboard, LogOut, Menu, Moon, PanelLeft, Search, Settings, Sparkles, Sun, User } from 'lucide-react'
+import { Command as CommandIcon, HelpCircle, Home, Keyboard, LogOut, Menu, Moon, PanelLeft, Search, Settings, Sparkles, Sun, User } from 'lucide-react'
 import { useFeature } from '@/hooks/useFeature'
 import { VoiceButton } from '@/features/ki-usability'
 import { useTheme } from '@/hooks/useTheme'
-import { createMCPMetadata } from '@/design/mcp-schemas/component-metadata'
 import { useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
 
@@ -24,22 +24,6 @@ interface TopBarProps {
   onShortcutsToggle?: () => void
 }
 
-export const topBarMCP = createMCPMetadata('TopBar', 'navigation', {
-  accessibility: {
-    role: 'banner',
-    ariaLabel: 'Top navigation bar',
-    keyboardShortcuts: ['Ctrl+K', '/'],
-  },
-  intent: {
-    purpose: 'Global search and user actions',
-    userActions: ['search', 'open-command-palette', 'user-menu'],
-    businessDomain: 'core',
-  },
-  mcpHints: {
-    explainable: true,
-    contextAware: true,
-  },
-})
 
 // Komponente für Shortcuts-Toggle-Button mit dynamischem Tooltip
 function ShortcutsToggleButton({ onToggle }: { onToggle: () => void }): JSX.Element {
@@ -131,11 +115,18 @@ export function TopBar({
         </Button>
       )}
 
-      <img
-        src="/branding/valeo-erp-logo.png"
-        alt="VALEO ERP Logo"
-        className="h-8 w-auto max-w-[132px] object-contain md:hidden"
-      />
+      <Link to="/" className="md:hidden flex items-center" aria-label="Zur Startseite">
+        <img
+          src="/branding/valeo-erp-logo.png"
+          alt="VALEO ERP Logo"
+          className="h-8 w-auto max-w-[132px] object-contain"
+        />
+      </Link>
+      <Button variant="ghost" size="icon" className="hidden md:inline-flex" title="Zur Startseite" aria-label="Zur Startseite" asChild>
+        <Link to="/">
+          <Home className="h-5 w-5" />
+        </Link>
+      </Button>
 
       <div className="flex-1 max-w-md">
         <Button
@@ -241,3 +232,4 @@ export function TopBar({
     </header>
   )
 }
+

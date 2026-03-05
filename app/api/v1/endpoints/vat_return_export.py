@@ -115,7 +115,7 @@ async def calculate_vat_return(
         
         # Get journal entry lines with tax codes
         journal_query = text("""
-            SELECT jel.account_id, jel.debit_amount, jel.credit_amount, jel.tax_code,
+            SELECT jel.account_id, jel.debit, jel.credit, jel.tax_code,
                    jel.description, jel.reference, je.entry_date, je.document_type
             FROM domain_erp.journal_entry_lines jel
             JOIN domain_erp.journal_entries je ON jel.journal_entry_id = je.id
@@ -434,9 +434,9 @@ async def validate_vat_return(
         gl_query = text("""
             SELECT 
                 SUM(CASE WHEN jel.tax_code IS NOT NULL AND je.document_type LIKE 'AR%' 
-                    THEN jel.credit_amount ELSE 0 END) as sales_total,
+                    THEN jel.credit ELSE 0 END) as sales_total,
                 SUM(CASE WHEN jel.tax_code IS NOT NULL AND je.document_type LIKE 'AP%' 
-                    THEN jel.debit_amount ELSE 0 END) as purchase_total
+                    THEN jel.debit ELSE 0 END) as purchase_total
             FROM domain_erp.journal_entry_lines jel
             JOIN domain_erp.journal_entries je ON jel.journal_entry_id = je.id
             WHERE je.tenant_id = :tenant_id

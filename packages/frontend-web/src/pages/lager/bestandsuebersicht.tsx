@@ -78,7 +78,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
                 <span className="text-2xl font-bold text-green-600">
                   {hasData 
                     ? new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(bestand.totalValue)
-                    : '€ 2.450.000'}
+                    : '0 €'}
                 </span>              </div>
             )}
           </CardContent>
@@ -116,7 +116,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
             ) : (
               <div className="flex items-center gap-2">
                 <span className="text-2xl font-bold text-orange-600">
-                  {hasData ? `${bestand.totalArticles} Tage` : '32 Tage'}
+                  {hasData ? `${bestand.totalArticles} Tage` : '0 Tage'}
                 </span>              </div>
             )}
           </CardContent>

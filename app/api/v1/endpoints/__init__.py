@@ -24,6 +24,7 @@ from . import accounting_periods
 from . import payment_matching
 from . import ap_invoices
 from . import bank_accounts
+from . import direct_debits
 from . import debtors
 from . import creditors
 from . import open_items

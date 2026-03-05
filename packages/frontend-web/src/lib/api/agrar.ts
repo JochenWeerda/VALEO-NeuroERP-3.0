@@ -476,6 +476,14 @@ export function useMassnahmen() {
   })
 }
 
+export function useDeleteMassnahme() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) => apiClient.delete(`/api/v1/agrar/feldbuch/massnahmen/${id}`),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: [...agrarKeys.all, 'massnahmen'] }),
+  })
+}
+
 export function usePSMAuflagen() {
   return useQuery({
     queryKey: [...agrarKeys.all, 'psm-auflagen'],

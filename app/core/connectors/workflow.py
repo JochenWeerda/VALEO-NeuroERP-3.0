@@ -297,11 +297,12 @@ def post_run(db: Session, run_id: str, tenant_id: str, request: Any = None) -> N
             db.execute(
                 text("""
                     INSERT INTO domain_erp.journal_entry_lines
-                    (id, journal_entry_id, account_id, debit, credit, line_number, description, created_at)
-                    VALUES (:id, :journal_entry_id, :account_id, :debit, :credit, :line_number, :description, NOW())
+                    (id, tenant_id, journal_entry_id, account_id, debit, credit, line_number, description, created_at)
+                    VALUES (:id, :tenant_id, :journal_entry_id, :account_id, :debit, :credit, :line_number, :description, NOW())
                 """),
                 {
                     "id": line_id,
+                    "tenant_id": tenant_id,
                     "journal_entry_id": entry_id,
                     "account_id": acc_row[0],
                     "debit": debit,
@@ -396,11 +397,12 @@ def reverse_run(db: Session, run_id: str, tenant_id: str, request: Any = None) -
             db.execute(
                 text("""
                     INSERT INTO domain_erp.journal_entry_lines
-                    (id, journal_entry_id, account_id, debit, credit, line_number, description, created_at)
-                    VALUES (:id, :journal_entry_id, :account_id, :debit, :credit, :line_number, :description, NOW())
+                    (id, tenant_id, journal_entry_id, account_id, debit, credit, line_number, description, created_at)
+                    VALUES (:id, :tenant_id, :journal_entry_id, :account_id, :debit, :credit, :line_number, :description, NOW())
                 """),
                 {
                     "id": f"{rev_id}-L{line_no}",
+                    "tenant_id": tenant_id,
                     "journal_entry_id": rev_id,
                     "account_id": acc_id,
                     "debit": cred,

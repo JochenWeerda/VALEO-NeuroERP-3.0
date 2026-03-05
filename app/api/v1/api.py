@@ -38,6 +38,7 @@ from app.api.v1.endpoints import (
     payment_matching,
     ap_invoices,
     bank_accounts,
+    direct_debits,
     debtors,
     creditors,
     open_items,
@@ -386,6 +387,12 @@ api_router.include_router(
     bank_accounts.router,
     prefix="/finance",
     tags=["finance", "bank-accounts"]
+)
+
+api_router.include_router(
+    direct_debits.router,
+    prefix="/finance",
+    tags=["finance", "direct-debits"]
 )
 
 api_router.include_router(

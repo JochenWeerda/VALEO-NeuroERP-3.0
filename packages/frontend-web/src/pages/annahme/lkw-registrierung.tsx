@@ -9,6 +9,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { Camera, Clock, Truck, Upload, X } from 'lucide-react'
 
 type LKWData = {
@@ -33,6 +35,7 @@ export default function LKWRegistrierungPage(): JSX.Element {
   })
   const [attachmentIds, setAttachmentIds] = useState<string[]>([])
   const [uploading, setUploading] = useState(false)
+  const [scanDialogField, setScanDialogField] = useState<'kennzeichen' | 'lieferscheinNr' | null>(null)
 
   function updateField<K extends keyof LKWData>(key: K, value: LKWData[K]): void {
     setLKW((prev) => ({ ...prev, [key]: value }))
@@ -109,13 +112,9 @@ export default function LKWRegistrierungPage(): JSX.Element {
     onDrop: onDropLieferschein,
   })
 
-  /** Scan-Button: Kamera/Barcode – Platzhalter bis API integriert ist. */
+  /** Scan-Button: öffnet Info-Dialog (Foto-Upload nutzen oder manuell eingeben; Barcode-Scanner in Planung). */
   function handleScan(field: 'kennzeichen' | 'lieferscheinNr'): void {
-    void field
-    toast({
-      title: 'Scan',
-      description: 'Foto hier hochladen oder Kennzeichen bzw. Lieferschein-Nr. manuell eingeben.',
-    })
+    setScanDialogField(field)
   }
 
   function removeAttachment(index: number): void {
@@ -361,12 +360,28 @@ export default function LKWRegistrierungPage(): JSX.Element {
 
   return (
     <div className="p-6">
+      <ModuleToolbar backTarget="/annahme/warteschlange" closeTarget="/annahme/warteschlange" title="LKW-Registrierung" />
       <Wizard
         title="LKW-Registrierung"
         steps={steps}
         onFinish={handleSubmit}
         onCancel={() => navigate('/annahme/warteschlange')}
       />
+      <Dialog open={!!scanDialogField} onOpenChange={(open) => !open && setScanDialogField(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Scan – Kennzeichen / Lieferschein</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground py-2">
+            {scanDialogField === 'kennzeichen'
+              ? 'Nutzen Sie das Foto-Upload-Feld unter dem Kennzeichen-Eingabefeld, um ein Bild hochzuladen, oder geben Sie das Kennzeichen manuell ein. Barcode-Scanner-Anbindung ist in Planung.'
+              : 'Nutzen Sie das Foto-Upload-Feld unter der Lieferschein-Nr., um ein Bild hochzuladen, oder geben Sie die Nummer manuell ein. Barcode-Scanner-Anbindung ist in Planung.'}
+          </p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setScanDialogField(null)}>Schließen</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
