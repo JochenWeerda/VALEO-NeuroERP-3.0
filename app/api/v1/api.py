@@ -56,6 +56,7 @@ from app.api.v1.endpoints import (
     auto_matching,
     vat_return_export,
     closing_checklists,
+    accruals_provisions,
     chart_of_accounts,
     finance_actions,
     lohn_connector,
@@ -231,6 +232,11 @@ api_router.include_router(
 )
 
 api_router.include_router(
+    crm_reports.router,
+    tags=["crm", "reports"]
+)
+
+api_router.include_router(
     sales_orders.router,
     prefix="/sales/orders",
     tags=["sales", "orders"]
@@ -242,7 +248,7 @@ api_router.include_router(
     tags=["sales", "offers"]
 )
 
-from .endpoints import sales_delivery_notes, branches, pricing
+from .endpoints import sales_delivery_notes, branches, pricing, price_lists, sales_credit_notes, sales_reports, crm_reports
 
 api_router.include_router(
     sales_delivery_notes.router,
@@ -257,6 +263,21 @@ api_router.include_router(
 api_router.include_router(
     pricing.router,
     tags=["pricing"]
+)
+
+api_router.include_router(
+    price_lists.router,
+    tags=["sales", "pricing", "price-lists"]
+)
+
+api_router.include_router(
+    sales_credit_notes.router,
+    tags=["sales", "credit-notes", "returns"]
+)
+
+api_router.include_router(
+    sales_reports.router,
+    tags=["sales", "reports", "dashboard"]
 )
 
 api_router.include_router(
@@ -355,7 +376,6 @@ api_router.include_router(
 
 api_router.include_router(
     credit_debit_memos.router,
-    prefix="/v1",
     tags=["procurement", "ap", "memos"]
 )
 
@@ -471,6 +491,12 @@ api_router.include_router(
     closing_checklists.router,
     prefix="/finance",
     tags=["finance", "closing"]
+)
+
+api_router.include_router(
+    accruals_provisions.router,
+    prefix="/finance",
+    tags=["finance", "closing", "accruals"]
 )
 
 api_router.include_router(

@@ -55,29 +55,7 @@ def derive_nuts2_from_postal_code(
     
     if nuts2_entry:
         return nuts2_entry.nuts2_code
-    
-    # Fallback: Vereinfachte Zuordnung für Deutschland (wenn Tabelle nicht gefüllt)
-    if country_code == "DE" and len(postal_code_clean) == 5 and postal_code_clean.isdigit():
-        plz_int = int(postal_code_clean)
-        
-        # Beispiel-Zuordnungen (vereinfacht, sollte durch vollständige Tabelle ersetzt werden)
-        # Sachsen (01xxx - 04xxx)
-        if 1000 <= plz_int <= 4999:
-            return "DE12"
-        # Sachsen-Anhalt (06xxx - 06xxx)
-        elif 6000 <= plz_int <= 6999:
-            return "DE14"
-        # Thüringen (07xxx - 09xxx)
-        elif 7000 <= plz_int <= 9999:
-            return "DE16"
-        # Brandenburg (01xxx - 03xxx)
-        elif 1000 <= plz_int <= 3999:
-            return "DE40"
-        # Mecklenburg-Vorpommern (17xxx - 19xxx)
-        elif 17000 <= plz_int <= 19999:
-            return "DE80"
-        # TODO: Weitere Bundesländer...
-    
+
     return None
 
 

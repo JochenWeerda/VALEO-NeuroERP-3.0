@@ -7,8 +7,8 @@ import logging
 from typing import List, Optional
 from sqlalchemy.orm import Session
 
-from ...infrastructure.models import Article, Customer
-from ...domains.shared.domain_events import ArticleCreated, CustomerCreated
+from app.infrastructure.models import Article, Customer
+from app.domains.shared.domain_events import ArticleCreated, CustomerCreated
 from .vector_store import get_vector_store
 
 logger = logging.getLogger(__name__)

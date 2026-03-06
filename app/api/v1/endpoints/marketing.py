@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Optional
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -78,4 +78,25 @@ async def get_marketing_stats(db: Session = Depends(get_db)) -> dict:
         "geplant": sum(1 for k in items if k.status == "geplant"),
         "beendet": sum(1 for k in items if k.status == "beendet"),
         "budget_aktiv": sum(float(k.budget or 0) for k in items if k.status == "aktiv"),
+    }
+
+
+@router.get("/kampagnen/{kampagne_id}/kpis", response_model=dict)
+async def get_kampagne_kpis(kampagne_id: int, db: Session = Depends(get_db)) -> dict:
+    """MKT-CAM-01: Kampagnen-KPIs (Budget Plan vs. Ist, Open-Rate, ROI-Stub)."""
+    _seed(db)
+    k = db.query(MarketingKampagneEntry).filter(MarketingKampagneEntry.id == kampagne_id).first()
+    if not k:
+        raise HTTPException(status_code=404, detail="Kampagne nicht gefunden")
+    budget_plan = float(k.budget or 0)
+    return {
+        "id": k.id,
+        "name": k.name,
+        "status": k.status,
+        "budget_plan": budget_plan,
+        "budget_ist": budget_plan * 0.0,
+        "open_rate": None,
+        "click_rate": None,
+        "conversion_rate": None,
+        "roi": None,
     }

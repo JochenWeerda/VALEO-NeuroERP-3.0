@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field
 from app.core.dependency_container import container
 from app.finance.repositories import OffenerPostenRepository, BuchungRepository, KontoRepository, AnlageRepository
 
-router = APIRouter(prefix="/api/fibu", tags=["fibu"])
+router = APIRouter(prefix="/fibu", tags=["fibu"])
 
 # ========== MODELS ==========
 
@@ -226,18 +226,49 @@ async def get_bilanz(stichtag: str = Query(default="2024-12-31"), tenant_id: str
 
 # GuV
 @router.get("/guv")
-async def get_guv(periode: str = Query(default="2024"), tenant_id: str = Query("system", description="Tenant ID")):
-    """Gewinn- und Verlustrechnung abrufen"""
-    # TODO: Calculate from real booking data - requires complex P&L logic
-    # For now, return placeholder indicating real calculation needed
+async def get_guv(
+    periode: str = Query(default="2024"),
+    tenant_id: str = Query("system", description="Tenant ID"),
+):
+    """Gewinn- und Verlustrechnung aus Buchungsdaten berechnen (SKR-basiert)."""
+    from datetime import date
+
+    buchung_repo = container.resolve(BuchungRepository)
+    year = int(periode)
+    start = date(year, 1, 1)
+    end = date(year, 12, 31)
+    bookings = buchung_repo.get_by_filters(tenant_id, start, end)
+
+    ertraege: dict[str, float] = {}
+    aufwendungen: dict[str, float] = {}
+
+    for b in bookings:
+        konto = str(getattr(b, "konto_nr", "") or "")
+        betrag = float(getattr(b, "betrag", 0) or 0)
+        bezeichnung = getattr(b, "buchungstext", konto) or konto
+
+        if konto.startswith("4"):
+            ertraege[bezeichnung] = ertraege.get(bezeichnung, 0) + betrag
+        elif konto.startswith(("5", "6", "7")):
+            aufwendungen[bezeichnung] = aufwendungen.get(bezeichnung, 0) + abs(betrag)
+
+    sum_ertraege = sum(ertraege.values())
+    sum_aufwendungen = sum(aufwendungen.values())
+    jahresueberschuss = sum_ertraege - sum_aufwendungen
+    umsatzrendite = round((jahresueberschuss / sum_ertraege * 100) if sum_ertraege else 0, 1)
+
     return {
         "periode": periode,
-        "status": "placeholder",
-        "message": "GuV calculation from real booking data not yet implemented",
-        "ertraege": {"positionen": [], "gesamt": 0},
-        "aufwendungen": {"positionen": [], "gesamt": 0},
-        "jahresueberschuss": 0,
-        "umsatzrendite": 0,
+        "ertraege": {
+            "positionen": [{"bezeichnung": k, "betrag": round(v, 2)} for k, v in ertraege.items()],
+            "gesamt": round(sum_ertraege, 2),
+        },
+        "aufwendungen": {
+            "positionen": [{"bezeichnung": k, "betrag": round(v, 2)} for k, v in aufwendungen.items()],
+            "gesamt": round(sum_aufwendungen, 2),
+        },
+        "jahresueberschuss": round(jahresueberschuss, 2),
+        "umsatzrendite": umsatzrendite,
     }
 
 # BWA

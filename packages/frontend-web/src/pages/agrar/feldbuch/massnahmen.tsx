@@ -557,18 +557,29 @@ export default function MassnahmenPage(): JSX.Element {
         <TabsContent value="spritztagebuch" className="space-y-4">
           <Alert>
             <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Spritztagebuch gemäß Paragraph 11 PflSchG</AlertTitle>
+            <AlertTitle>Spritztagebuch gemäß §11 PflSchG</AlertTitle>
             <AlertDescription>
               Dokumentation aller Pflanzenschutzmaßnahmen gemäß Pflanzenschutzgesetz.
               Alle PSM-Anwendungen müssen innerhalb von 30 Tagen dokumentiert werden.
+              Pflichtfelder: Datum, Mittel, Aufwandmenge, Einheit, Fläche, Anwender.
             </AlertDescription>
           </Alert>
+
+          {psmMassnahmen.filter(m => !m.compliant).length > 0 && (
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Compliance-Verstöße</AlertTitle>
+              <AlertDescription>
+                {psmMassnahmen.filter(m => !m.compliant).length} von {psmMassnahmen.length} PSM-Anwendungen sind nicht vollständig dokumentiert. Bitte ergänzen Sie die fehlenden Pflichtangaben.
+              </AlertDescription>
+            </Alert>
+          )}
 
           <Card>
             <CardHeader>
               <CardTitle>PSM-Anwendungen</CardTitle>
               <CardDescription>
-                {psmMassnahmen.length} Pflanzenschutzmaßnahmen dokumentiert
+                {psmMassnahmen.length} Pflanzenschutzmaßnahmen dokumentiert — {psmMassnahmen.filter(m => m.compliant).length} compliant
               </CardDescription>
             </CardHeader>
             <CardContent>

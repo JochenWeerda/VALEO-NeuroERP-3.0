@@ -42,7 +42,7 @@ from app.routers.export_router import router as export_router  # Export CSV/XLSX
 from app.routers.workflow_router import router as workflow_router  # Workflow & Approval
 from app.routers.sse_router import router as sse_router  # SSE Streams
 from app.routers.verify_router import router as verify_router  # Document Verification
-from app.routers.gdpr_router import router as gdpr_router  # GDPR Compliance
+# Legacy GDPR router removed — consolidated into app.api.v1.endpoints.gdpr
 from app.routers.numbering_router import router as numbering_router  # Numbering Service
 from app.routers.admin_dms_router import router as admin_dms_router  # Admin DMS Integration
 from app.routers.dms_webhook_router import router as dms_webhook_router  # DMS Webhooks & Inbox
@@ -147,6 +147,11 @@ async def lifespan(app: FastAPI):
     await shutdown_event_publisher()
     logger.info("Shutting down VALEO-NeuroERP API server...")
 
+# SlowAPI Rate Limiter (Export 10/min, Restore 5/min pro SECURITY-FOUNDATION-AUDIT)
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from app.middleware.rate_limit import limiter
+
 # Create FastAPI application
 app = FastAPI(
     title="VALEO-NeuroERP API",
@@ -173,6 +178,9 @@ elif settings.BACKEND_CORS_ORIGINS:
     )
 else:
     cors_kwargs.update(allow_origins=["*"], allow_origin_regex=".*")
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.add_middleware(CORSMiddleware, **cors_kwargs)
 
@@ -276,10 +284,11 @@ async def log_requests(request: Request, call_next):
 async def global_exception_handler(request: Request, exc: Exception):
     """Global exception handler for unhandled errors"""
     logger.error(f"Unhandled exception: {exc}", exc_info=True)
-    return JSONResponse(
-        status_code=500,
-        content={"detail": "Internal server error", "type": "internal_error"}
-    )
+    content = {"detail": "Internal server error", "type": "internal_error"}
+    if getattr(settings, "DEBUG", False):
+        content["detail"] = str(exc)
+        content["exception_type"] = type(exc).__name__
+    return JSONResponse(status_code=500, content=content)
 
 # Health check endpoint (liveness)
 @app.get("/healthz")
@@ -321,6 +330,14 @@ async def root():
 
 # Include API routers
 app.include_router(api_router, prefix=settings.API_V1_STR)
+
+# KI-Usability (Sprachsteuerung, Action Registry) — integriert für Single-Process-Dev
+# Frontend /api/ki-usability → Proxy sendet /api/v1/actions (Rewrite)
+try:
+    from app.api.v1.endpoints.ki_usability import router as ki_usability_router
+    app.include_router(ki_usability_router, prefix="/api/v1", tags=["ki-usability"])
+except ImportError as e:
+    logger.debug("KI-Usability router not available: %s", e)
 app.include_router(policies_v1.router, prefix='/api/mcp')
 
 # GoBD Compliance (/api/gobd/status, /api/gobd/hash-chain, …)
@@ -335,14 +352,12 @@ except ImportError:
 if crm_router:
     app.include_router(crm_router, prefix="/api/v1", tags=["CRM"])
 
-# Finance (DATEV, SEPA)
+# Finance (DATEV, SEPA) – canonical mount at /api/v1/finance
 if finance_router:
-    app.include_router(finance_router, tags=["Finance"])
+    app.include_router(finance_router, prefix="/api/v1", tags=["Finance"])
 
-# Einkauf/Beschaffung (mounted at both /einkauf and /api/einkauf for compatibility)
+# Einkauf/Beschaffung – canonical mount at /api/v1/einkauf
 if einkauf_router:
-    app.include_router(einkauf_router, tags=["Einkauf"])
-    app.include_router(einkauf_router, prefix="/api", tags=["Einkauf"])
     app.include_router(einkauf_router, prefix="/api/v1", tags=["Einkauf"])
 
 # Purchase Workflow (Wareneingang, Abgleich, PO-Storno)
@@ -436,8 +451,7 @@ app.include_router(sse_router)
 # Include Document Verification (Phase Q - Document Integrity)
 app.include_router(verify_router)
 
-# Include GDPR Compliance
-app.include_router(gdpr_router)
+# Legacy GDPR duplicate mount removed (already at /api/v1/gdpr above)
 
 # Include Numbering Service (PostgreSQL)
 app.include_router(numbering_router)
@@ -447,7 +461,7 @@ app.include_router(admin_dms_router)
 
 # Verträge-API für Frontend contracts-v2 (GET /api/contracts → { items: [] })
 app.include_router(contracts_router)
-app.include_router(kontrakte_router)
+app.include_router(kontrakte_router, prefix="/api/v1")
 
 # CRM Opportunities unter /api/crm-sales/opportunities (Frontend createApiClient('/api/crm-sales/opportunities'))
 app.include_router(opportunities_endpoints.router, prefix="/api/crm-sales/opportunities", tags=["crm-sales"])
@@ -456,7 +470,7 @@ app.include_router(opportunities_endpoints.router, prefix="/api/crm-sales/opport
 app.include_router(dms_webhook_router)
 
 # Include Finanzbuchhaltung (130 Masken Integration)
-app.include_router(fibu_router)
+app.include_router(fibu_router, prefix="/api/v1")
 
 # Mount Prometheus metrics endpoint
 metrics_app = make_asgi_app()

@@ -6,7 +6,7 @@ Accepted – 2025-11-14
 ## Kontext
 - Es existiert ein umfangreicher React-Client mit Mask Builder, React Query und `financeService` (Axios) gegen `/api/v1/*` (Finance-Routen).
 - Die neuen FiBu-Microservices werden in mehrere Bounded Contexts zerlegt (`fibu-core`, `fibu-master-data`, `fibu-op`, `fibu-ar`, …) und sollten größtenteils Event-Driven / service-spezifische APIs bereitstellen.
-- Um andere Domains (Workflow, Inventory, Sales) nicht massiv umzubauen, ist ein `fibu-gateway` (Anti-Corruption Layer) geplant.
+- Um andere Domains (Workflow, Inventory, Sales) nicht massiv umzubauen, ist ein `fibu-gateway` (Anti-Corruption Layer) **implementiert** (`services/finance/fibu-gateway/`).
 
 ## Entscheidung
 1. **Der bestehende monolithische Axios-Client `financeService` wird ersetzt** durch ein modulares API-Layer:

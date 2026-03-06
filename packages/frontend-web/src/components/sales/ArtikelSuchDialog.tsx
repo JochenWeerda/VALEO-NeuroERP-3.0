@@ -465,7 +465,7 @@ export function ArtikelSuchDialog({
                 {articles.length === 0
                   ? 'Keine Artikel in der Datenbank gefunden.'
                   : debouncedSearchTerm
-                    ? `Keine Artikel gefunden fÃ¼r "${debouncedSearchTerm}"`
+                    ? `Keine Artikel gefunden für "${debouncedSearchTerm}"`
                     : 'Bitte geben Sie einen Suchbegriff ein...'}
               </div>
             ) : (

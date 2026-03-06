@@ -16,10 +16,12 @@ from fastapi import (
     WebSocketDisconnect,
     Body,
     BackgroundTasks,
+    Request,
 )
 from fastapi.responses import JSONResponse
 import logging
 
+from app.middleware.rate_limit import limiter
 from .models import Rule, RulesEnvelope, Alert, Decision
 from .store import PolicyStore, DEFAULT_DB
 from .engine import decide
@@ -170,8 +172,11 @@ async def test_decision(
 
 
 @router.get("/export", dependencies=[Depends(require_roles("admin"))])
+@limiter.limit("10/minute")
 async def export_json(
-    store: PolicyStore = Depends(get_store), user: User = Depends(get_current_user)
+    request: Request,
+    store: PolicyStore = Depends(get_store),
+    user: User = Depends(get_current_user),
 ) -> JSONResponse:
     """Exportiert alle Policies als JSON-Download"""
     try:
@@ -227,7 +232,9 @@ async def list_backups(user: User = Depends(get_current_user)) -> dict:
 
 
 @router.post("/restore", dependencies=[Depends(require_roles("admin"))])
+@limiter.limit("5/minute")
 async def restore_db(
+    request: Request,
     file: str = Body(..., embed=True),
     bg: BackgroundTasks = BackgroundTasks(),
     user: User = Depends(get_current_user),

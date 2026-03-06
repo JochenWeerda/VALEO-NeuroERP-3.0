@@ -12,7 +12,7 @@ from datetime import datetime
 from decimal import Decimal
 from app.core.uuid7 import uuid7
 
-from app.core.database_pg import SessionLocal
+from app.core.database import SessionLocal
 from app.infrastructure.models import Article, Customer
 
 def seed_customers(db, tenant_id: str = "default"):

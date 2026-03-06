@@ -78,8 +78,8 @@
   )
   ```
 - ✅ Global: 100/min
-- ✅ Export: 10/min (geplant)
-- ✅ Restore: 5/min (geplant)
+- ✅ Export: 10/min (implementiert über SlowAPI/Dekorator, Konfiguration in `RATE_LIMIT_EXPORT`)
+- ✅ Restore: 5/min (implementiert über SlowAPI/Dekorator, Konfiguration in `RATE_LIMIT_RESTORE`)
 
 **Container-Hardening:**
 - ✅ `Dockerfile` - Multi-stage Build

@@ -241,7 +241,7 @@ class PDFGenerator:
 
             if doc_type == "sales_delivery":
                 story.append(Spacer(1, 6 * mm))
-                story.append(Paragraph("<b>Bilanzrelevante NÃ¤hrstoff- und CO2-Werte</b>", self.styles["Normal"]))
+                story.append(Paragraph("<b>Bilanzrelevante Nährstoff- und CO2-Werte</b>", self.styles["Normal"]))
                 story.append(Spacer(1, 2 * mm))
 
                 total_n = payload.get("totalNutrientNKg")

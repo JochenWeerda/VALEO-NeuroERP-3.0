@@ -137,46 +137,8 @@ async def list_exchange_rates(
         return result
         
     except Exception as e:
-        logger.error(f"Error listing exchange rates: {e}")
-        # Return mock data if table doesn't exist
-        return [
-            ExchangeRateResponse(
-                id="1",
-                from_currency="USD",
-                to_currency="EUR",
-                rate=Decimal("0.92"),
-                rate_date=date.today(),
-                rate_type="SPOT",
-                source="ECB",
-                active=True,
-                created_at=datetime.now(),
-                updated_at=datetime.now()
-            ),
-            ExchangeRateResponse(
-                id="2",
-                from_currency="GBP",
-                to_currency="EUR",
-                rate=Decimal("1.17"),
-                rate_date=date.today(),
-                rate_type="SPOT",
-                source="ECB",
-                active=True,
-                created_at=datetime.now(),
-                updated_at=datetime.now()
-            ),
-            ExchangeRateResponse(
-                id="3",
-                from_currency="CHF",
-                to_currency="EUR",
-                rate=Decimal("1.05"),
-                rate_date=date.today(),
-                rate_type="SPOT",
-                source="ECB",
-                active=True,
-                created_at=datetime.now(),
-                updated_at=datetime.now()
-            )
-        ]
+        logger.error("Error listing exchange rates: %s", e, exc_info=True)
+        return []
 
 
 @router.get("/{rate_id}", response_model=ExchangeRateResponse)

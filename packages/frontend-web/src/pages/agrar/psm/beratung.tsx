@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { AlertTriangle, Brain, CheckCircle, Leaf, Search, Sparkles, Target, Zap } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { useSchadbilder, useKulturen, usePSM } from '@/lib/api/agrar'
@@ -92,16 +93,7 @@ export default function PSMBeratungPage(): JSX.Element {
         return true
       })
 
-    const gefiltert = filterRelevant(fromStammdaten)
-    if (gefiltert.length > 0) return gefiltert
-
-    // Demo-Fallback, wenn API keine oder zu wenige Einträge liefert
-    const demoFallback: PSMEmpfehlung[] = [
-      { id: 'PSM-001', name: 'Amistar Opti', wirkstoff: 'Azoxystrobin + Difenoconazol', wirkstoffGruppe: 'Strobilurine + Triazole', dosierung: '1.0 l/ha', wartezeit: 35, effektivitaet: 92, umweltscore: 75, kosten: 145.00, verfuegbar: true, begruendung: 'Hoch effektive Kombination gegen Rostpilze mit systemischer Wirkung' },
-      { id: 'PSM-002', name: 'Folicur Solo', wirkstoff: 'Tebuconazol', wirkstoffGruppe: 'Triazole', dosierung: '1.5 l/ha', wartezeit: 28, effektivitaet: 88, umweltscore: 82, kosten: 98.00, verfuegbar: true, begruendung: 'Kostengünstige Alternative mit guter Umweltverträglichkeit' },
-      { id: 'PSM-003', name: 'Nativo', wirkstoff: 'Trifloxystrobin + Tebuconazol', wirkstoffGruppe: 'Strobilurine + Triazole', dosierung: '0.8 l/ha', wartezeit: 35, effektivitaet: 95, umweltscore: 78, kosten: 165.00, verfuegbar: false, begruendung: 'Höchste Effektivität, aber aktuell nicht verfügbar' }
-    ]
-    return filterRelevant(demoFallback)
+    return filterRelevant(fromStammdaten)
   }
 
   const analysiereSchadbild = async () => {
@@ -288,6 +280,15 @@ export default function PSMBeratungPage(): JSX.Element {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
+            {beratungsErgebnis?.empfehlungen.length === 0 && (
+              <Alert>
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>Keine PSM-Empfehlungen verfügbar</AlertTitle>
+                <AlertDescription>
+                  Für das beschriebene Schadbild liegen aktuell keine passenden PSM-Stammdaten vor. Bitte prüfen Sie die PSM-Datenbank oder wenden Sie sich an Ihren Berater.
+                </AlertDescription>
+              </Alert>
+            )}
             {beratungsErgebnis?.empfehlungen.map((psm, index) => (
               <div key={psm.id} className="p-4 border rounded-lg">
                 <div className="flex items-center justify-between mb-3">

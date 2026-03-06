@@ -11,9 +11,7 @@ from decimal import Decimal
 from datetime import date, datetime
 from pydantic import BaseModel, Field
 import logging
-import xml.etree.ElementTree as ET
 from app.core.uuid7 import uuid7
-from xml.dom import minidom
 
 from ....core.database import get_db
 
@@ -351,63 +349,35 @@ async def export_elster_xml(
     db: Session = Depends(get_db)
 ):
     """
-    Export VAT return as ELSTER XML format.
+    Export VAT return as ELSTER XML (Anmeldungssteuern, UStVA).
+    Format nach offiziellem ERiC-Schema, Encoding ISO-8859-15.
+    Referenz: https://www.elster.de, JuryOberst/Elster (GitHub).
     """
     try:
+        from app.elster import build_ustva_elster_xml
+
         vat_return = await get_vat_return(return_id, tenant_id, db)
-        
-        # Generate ELSTER XML (simplified format - actual ELSTER format is more complex)
-        # This is a basic structure that can be extended
-        ET.register_namespace('', 'http://www.elster.de/2002/XML-Schema')
-        
-        root = ET.Element("Elster", xmlns="http://www.elster.de/2002/XML-Schema")
-        
-        # Header
-        header = ET.SubElement(root, "Header")
-        ET.SubElement(header, "Version").text = "1.0"
-        ET.SubElement(header, "CreatedAt").text = datetime.now().isoformat()
-        
-        # VAT Return Data
-        vat_data = ET.SubElement(root, "VATReturn")
-        ET.SubElement(vat_data, "Period").text = vat_return.period
-        ET.SubElement(vat_data, "ReturnType").text = vat_return.return_type
-        ET.SubElement(vat_data, "TaxpayerName").text = vat_return.taxpayer_name
-        
-        if vat_return.tax_id:
-            ET.SubElement(vat_data, "TaxID").text = vat_return.tax_id
-        if vat_return.vat_id:
-            ET.SubElement(vat_data, "VATID").text = vat_return.vat_id
-        
-        # Summary
-        summary = ET.SubElement(vat_data, "Summary")
-        ET.SubElement(summary, "TotalSalesNet").text = str(vat_return.total_sales_net)
-        ET.SubElement(summary, "TotalInputTax").text = str(vat_return.total_input_tax)
-        ET.SubElement(summary, "TotalOutputTax").text = str(vat_return.total_output_tax)
-        ET.SubElement(summary, "VATPayable").text = str(vat_return.vat_payable)
-        
-        # Positions
-        positions_elem = ET.SubElement(vat_data, "Positions")
-        for pos in vat_return.positions:
-            pos_elem = ET.SubElement(positions_elem, "Position")
-            ET.SubElement(pos_elem, "Code").text = str(pos.get("position_code", ""))
-            ET.SubElement(pos_elem, "Description").text = str(pos.get("description", ""))
-            ET.SubElement(pos_elem, "NetAmount").text = str(pos.get("net_amount", "0.00"))
-            ET.SubElement(pos_elem, "TaxAmount").text = str(pos.get("tax_amount", "0.00"))
-            ET.SubElement(pos_elem, "TaxRate").text = str(pos.get("tax_rate", "0.00"))
-        
-        # Convert to string
-        rough_string = ET.tostring(root, encoding='utf-8')
-        reparsed = minidom.parseString(rough_string)
-        xml_content = reparsed.toprettyxml(indent="  ", encoding='utf-8').decode('utf-8')
-        
+
+        xml_bytes = build_ustva_elster_xml(
+            period=vat_return.period,
+            taxpayer_name=vat_return.taxpayer_name,
+            tax_id=vat_return.tax_id,
+            vat_id=vat_return.vat_id,
+            positions=vat_return.positions,
+            total_sales_net=vat_return.total_sales_net,
+            total_input_tax=vat_return.total_input_tax,
+            total_output_tax=vat_return.total_output_tax,
+            vat_payable=vat_return.vat_payable,
+        )
+
         return Response(
-            content=xml_content,
-            media_type="application/xml",
+            content=xml_bytes,
+            media_type="application/xml; charset=ISO-8859-15",
             headers={
                 "Content-Disposition": f'attachment; filename="UStVA_{vat_return.period}_ELSTER.xml"'
             }
         )
-        
+
     except HTTPException:
         raise
     except Exception as e:

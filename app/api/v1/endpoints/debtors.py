@@ -339,9 +339,10 @@ async def update_debtor(
         update_fields = []
         params = {"debtor_id": debtor_id}
         
-        # Note: We can't update company_name directly as it's stored in 'name' column
-        # For now, we'll keep it as-is unless explicitly needed
-        
+        if debtor_data.company_name is not None:
+            update_fields.append("name = :company_name")
+            params["company_name"] = debtor_data.company_name
+
         if debtor_data.credit_limit is not None:
             update_fields.append("credit_limit = :credit_limit")
             params["credit_limit"] = Decimal(str(debtor_data.credit_limit))
@@ -378,6 +379,41 @@ async def update_debtor(
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Failed to update debtor: {str(e)}")
+
+
+@router.get("/{debtor_id}/balance", response_model=dict)
+async def get_debtor_balance(
+    debtor_id: str,
+    db: Session = Depends(get_db)
+):
+    """OP-Saldo eines Debitors: offener Betrag, Anzahl OPs, ältester OP."""
+    try:
+        existing = db.execute(
+            text("SELECT id FROM domain_erp.debitors WHERE id = :debtor_id"),
+            {"debtor_id": debtor_id}
+        ).fetchone()
+        if not existing:
+            raise HTTPException(status_code=404, detail="Debtor not found")
+
+        balance_query = text("""
+            SELECT
+                COALESCE(SUM(amount - COALESCE(paid_amount, 0)), 0) AS open_balance,
+                COUNT(*) AS open_item_count,
+                MIN(due_date) AS oldest_due_date
+            FROM domain_erp.offene_posten
+            WHERE debtor_id = :debtor_id AND status = 'open'
+        """)
+        row = db.execute(balance_query, {"debtor_id": debtor_id}).fetchone()
+        return {
+            "debtor_id": debtor_id,
+            "open_balance": float(row[0]) if row else 0.0,
+            "open_item_count": row[1] if row else 0,
+            "oldest_due_date": row[2].isoformat() if row and row[2] else None,
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get debtor balance: {str(e)}")
 
 
 @router.delete("/{debtor_id}", status_code=204)

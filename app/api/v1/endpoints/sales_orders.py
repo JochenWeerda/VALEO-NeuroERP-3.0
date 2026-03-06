@@ -468,6 +468,72 @@ async def update_sales_order(
     return _row_to_order(dict(row), _fetch_items(db, order_id))
 
 
+@router.post("/{order_id}/create-delivery-note", response_model=dict, status_code=201)
+async def create_delivery_from_order(
+    order_id: str,
+    tenant_id: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+):
+    """Create a delivery note from a sales order (document flow)."""
+    effective_tenant = tenant_id or DEFAULT_TENANT
+    order_row = db.execute(
+        text("SELECT * FROM domain_crm.sales_orders WHERE id = :id AND tenant_id = :tid AND deleted_at IS NULL"),
+        {"id": order_id, "tid": effective_tenant},
+    ).mappings().first()
+    if not order_row:
+        raise HTTPException(status_code=404, detail="Sales order not found")
+    if order_row["status"] in ("cancelled", "completed"):
+        raise HTTPException(status_code=400, detail=f"Auftrag hat Status '{order_row['status']}' und kann nicht geliefert werden")
+
+    from app.core.uuid7 import uuid7
+    dn_id = uuid7()
+    dn_nr = f"LS-{order_row['order_number']}"
+
+    db.execute(text("CREATE SCHEMA IF NOT EXISTS domain_sales"))
+    db.execute(
+        text("""
+            INSERT INTO domain_sales.delivery_notes
+            (id, tenant_id, ls_nummer, status, lieferdatum, kunde_nr, kunde_name,
+             auftrags_nr, notizen, versandart, created_at, updated_at)
+            VALUES (:id, :tid, :ls, 'offen', NOW()::date, :kid, :kname,
+                    :anr, :notizen, :versand, NOW(), NOW())
+        """),
+        {
+            "id": dn_id, "tid": effective_tenant, "ls": dn_nr,
+            "kid": order_row["customer_id"], "kname": order_row.get("subject", ""),
+            "anr": order_row["order_number"],
+            "notizen": order_row.get("notes", ""),
+            "versand": order_row.get("shipping_method", ""),
+        },
+    )
+
+    items = _fetch_items(db, order_id)
+    for i, item in enumerate(items, 1):
+        pos_id = uuid7()
+        db.execute(
+            text("""
+                INSERT INTO domain_sales.delivery_note_positions
+                (id, delivery_note_id, pos_nr, artikel_nr, bezeichnung,
+                 menge, einheit, listenpreis, netto_preis, netto_betrag, created_at, updated_at)
+                VALUES (:id, :dnid, :pos, :anr, :desc,
+                        :menge, 'Stk', :lp, :np, :nb, NOW(), NOW())
+            """),
+            {
+                "id": pos_id, "dnid": dn_id, "pos": i,
+                "anr": item.article_number, "desc": item.description or "",
+                "menge": item.quantity, "lp": item.unit_price,
+                "np": item.unit_price, "nb": item.line_total,
+            },
+        )
+
+    db.execute(
+        text("UPDATE domain_crm.sales_orders SET status = 'in_delivery', updated_at = NOW() WHERE id = :id"),
+        {"id": order_id},
+    )
+    db.commit()
+    return {"ok": True, "delivery_note_id": dn_id, "delivery_note_number": dn_nr, "order_id": order_id}
+
+
 @router.delete("/{order_id}", status_code=status.HTTP_204_NO_CONTENT, response_class=Response)
 async def delete_sales_order(order_id: str, tenant_id: Optional[str] = Query(None), db: Session = Depends(get_db)) -> Response:
     effective_tenant = tenant_id or DEFAULT_TENANT

@@ -6,7 +6,7 @@ Data erasure and privacy endpoints
 from fastapi import APIRouter, HTTPException, Depends
 from typing import Annotated
 from sqlalchemy import text
-from app.core.database_pg import get_db
+from app.core.database import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
 import logging
 

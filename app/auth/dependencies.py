@@ -10,7 +10,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import jwt, JWTError
 from sqlalchemy.orm import Session
 
-from ..core.database import get_db
+from app.core.database import get_db
 from ..core.config import settings
 from ..infrastructure.repositories import UserRepository
 from ..core.dependency_container import container

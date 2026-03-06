@@ -8,14 +8,15 @@ from __future__ import annotations
 
 import csv
 import io
+import json
 import logging
 from datetime import datetime
 from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, UploadFile
-from fastapi.responses import StreamingResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel
-from sqlalchemy.exc import ProgrammingError
+from sqlalchemy.exc import OperationalError, ProgrammingError
 from sqlalchemy.orm import Session
 
 from sqlalchemy.orm import selectinload
@@ -122,39 +123,43 @@ class PortalMassnahmeUpdate(BaseModel):
 
 def _schlag_to_dict(s: FeldbuchSchlag) -> dict[str, Any]:
     return {
-        "id": s.id,
-        "name": s.name,
-        "flik": s.flik,
-        "flaeche": s.flaeche,
-        "kultur": s.kultur or "",
-        "vorkultur": s.vorkultur,
-        "gemeinde": s.gemeinde or "",
-        "gemarkung": s.gemarkung,
-        "bodenart": s.bodenart,
-        "ackerzahl": s.ackerzahl,
-        "status": s.status,
+        "id": str(s.id) if s.id else None,
+        "name": str(s.name) if s.name else "",
+        "flik": str(s.flik) if s.flik else None,
+        "flaeche": float(s.flaeche) if s.flaeche is not None else 0.0,
+        "kultur": str(s.kultur) if s.kultur else "",
+        "vorkultur": str(s.vorkultur) if s.vorkultur else None,
+        "gemeinde": str(s.gemeinde) if s.gemeinde else "",
+        "gemarkung": str(s.gemarkung) if s.gemarkung else None,
+        "bodenart": str(s.bodenart) if s.bodenart else None,
+        "ackerzahl": float(s.ackerzahl) if s.ackerzahl is not None else None,
+        "status": str(s.status) if s.status else "aktiv",
     }
 
 
 def _massnahme_to_dict(m: FeldbuchMassnahme) -> dict[str, Any]:
-    schlag_name = m.schlag.name if m.schlag else None
+    schlag_name = str(m.schlag.name) if m.schlag and m.schlag.name else None
+    # JSON-sicher: auflagen als Liste oder None (JSONB kann list/dict sein)
+    auflagen = m.auflagen
+    if auflagen is not None and not isinstance(auflagen, list):
+        auflagen = list(auflagen) if hasattr(auflagen, "__iter__") and not isinstance(auflagen, str) else [str(auflagen)]
     return {
-        "id": m.id,
-        "schlagId": m.schlag_id,
+        "id": str(m.id) if m.id else None,
+        "schlagId": str(m.schlag_id) if m.schlag_id else None,
         "schlagName": schlag_name,
         "datum": m.datum.date().isoformat() if m.datum else None,
-        "typ": m.typ,
-        "bezeichnung": m.bezeichnung,
-        "mittel": m.mittel,
-        "menge": m.menge,
-        "einheit": m.einheit,
-        "flaeche": m.flaeche,
-        "anwender": m.anwender,
-        "quelle": m.quelle,
-        "auflagen": m.auflagen,
-        "compliant": m.compliant,
-        "exportiert": m.exportiert,
-        "bemerkung": m.bemerkung,
+        "typ": str(m.typ) if m.typ else "",
+        "bezeichnung": str(m.bezeichnung) if m.bezeichnung else None,
+        "mittel": str(m.mittel) if m.mittel else None,
+        "menge": float(m.menge) if m.menge is not None else None,
+        "einheit": str(m.einheit) if m.einheit else None,
+        "flaeche": float(m.flaeche) if m.flaeche is not None else None,
+        "anwender": str(m.anwender) if m.anwender else None,
+        "quelle": str(m.quelle) if m.quelle else "portal",
+        "auflagen": auflagen,
+        "compliant": bool(m.compliant) if m.compliant is not None else True,
+        "exportiert": bool(m.exportiert) if m.exportiert is not None else False,
+        "bemerkung": str(m.bemerkung) if m.bemerkung else None,
     }
 
 
@@ -198,9 +203,10 @@ async def portal_list_schlaege(
             .order_by(FeldbuchSchlag.name)
             .all()
         )
-        return [_schlag_to_dict(s) for s in schlaege]
-    except ProgrammingError as e:
-        logger.exception("Portal Feldbuch Schläge: Schema/Tabelle fehlt")
+        data = [_schlag_to_dict(s) for s in schlaege]
+        return JSONResponse(content=json.loads(json.dumps(data, default=str)))
+    except (ProgrammingError, OperationalError) as e:
+        logger.exception("Portal Feldbuch Schläge: Schema/Tabelle fehlt (%s)", e)
         raise HTTPException(
             status_code=503,
             detail="Feldbuch-Schema nicht initialisiert. Bitte Migrationen ausführen: alembic upgrade head",
@@ -291,9 +297,10 @@ async def portal_list_massnahmen(
             .order_by(FeldbuchMassnahme.datum.desc())
             .all()
         )
-        return [_massnahme_to_dict(m) for m in massnahmen]
-    except ProgrammingError as e:
-        logger.exception("Portal Feldbuch Massnahmen: Schema/Tabelle fehlt")
+        data = [_massnahme_to_dict(m) for m in massnahmen]
+        return JSONResponse(content=json.loads(json.dumps(data, default=str)))
+    except (ProgrammingError, OperationalError) as e:
+        logger.exception("Portal Feldbuch Massnahmen: Schema/Tabelle fehlt (%s)", e)
         raise HTTPException(
             status_code=503,
             detail="Feldbuch-Schema nicht initialisiert. Bitte Migrationen ausführen: alembic upgrade head",
@@ -375,14 +382,15 @@ async def portal_feldbuch_stats(
         )
         valeo_dienste = sum(1 for m in massnahmen if m.quelle in ("erp_service", "erp_lieferschein"))
         gesamt_flaeche = sum(s.flaeche for s in schlaege if s.flaeche)
-        return {
+        data = {
             "schlaege": len(schlaege),
-            "gesamtFlaeche": round(gesamt_flaeche, 2),
+            "gesamtFlaeche": round(float(gesamt_flaeche), 2),
             "massnahmen": len(massnahmen),
             "valeoDienste": valeo_dienste,
         }
-    except ProgrammingError as e:
-        logger.exception("Portal Feldbuch Stats: Schema/Tabelle fehlt")
+        return JSONResponse(content=json.loads(json.dumps(data, default=str)))
+    except (ProgrammingError, OperationalError) as e:
+        logger.exception("Portal Feldbuch Stats: Schema/Tabelle fehlt (%s)", e)
         raise HTTPException(
             status_code=503,
             detail="Feldbuch-Schema nicht initialisiert. Bitte Migrationen ausführen: alembic upgrade head",

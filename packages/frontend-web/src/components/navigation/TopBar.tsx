@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -9,12 +10,13 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { NotificationCenter } from '@/components/ui/notification-center'
-import { Command as CommandIcon, HelpCircle, Home, Keyboard, LogOut, Menu, Moon, PanelLeft, Search, Settings, Sparkles, Sun, User } from 'lucide-react'
+import { Command as CommandIcon, Check, HelpCircle, Home, Keyboard, LogOut, Menu, Moon, PanelLeft, Search, Settings, Sparkles, Sun, User } from 'lucide-react'
 import { useFeature } from '@/hooks/useFeature'
 import { VoiceButton } from '@/features/ki-usability'
 import { useTheme } from '@/hooks/useTheme'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { cn } from '@/lib/utils'
+import { availableLanguages, loadLanguage } from '@/i18n/config'
 
 interface TopBarProps {
   onCommandOpen?: () => void
@@ -72,6 +74,59 @@ function ShortcutsToggleButton({ onToggle }: { onToggle: () => void }): JSX.Elem
       )} />
       <span className="sr-only">Shortcuts</span>
     </Button>
+  )
+}
+
+function LanguageSelector(): JSX.Element {
+  const { i18n } = useTranslation()
+  const [switching, setSwitching] = useState(false)
+  const activeLangs = availableLanguages.filter(l => l.available)
+  const currentLang = availableLanguages.find(l => l.code === i18n.language)
+
+  const handleSwitch = useCallback(async (code: string) => {
+    if (code === i18n.language) return
+    setSwitching(true)
+    try {
+      await loadLanguage(code)
+    } finally {
+      setSwitching(false)
+    }
+  }, [i18n.language])
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="hidden sm:inline-flex text-base"
+          title={currentLang?.name ?? 'Language'}
+          disabled={switching}
+        >
+          {switching ? (
+            <span className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          ) : (
+            <span className="text-sm font-medium">{(currentLang?.code ?? 'de').toUpperCase()}</span>
+          )}
+          <span className="sr-only">Language</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-44">
+        <DropdownMenuLabel className="text-xs text-muted-foreground">Sprache / Language</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {activeLangs.map((lang) => (
+          <DropdownMenuItem
+            key={lang.code}
+            onClick={() => handleSwitch(lang.code)}
+            className="gap-2 cursor-pointer"
+          >
+            <span>{lang.flag}</span>
+            <span className="flex-1">{lang.name}</span>
+            {lang.code === i18n.language && <Check className="h-4 w-4 text-primary" />}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
 
@@ -182,6 +237,8 @@ export function TopBar({
       )}
 
       <NotificationCenter />
+
+      <LanguageSelector />
 
       <Button
         variant="ghost"

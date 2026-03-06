@@ -1,6 +1,7 @@
 """
 PSM API endpoints
 Full CRUD for Pflanzenschutzmittel-Stammdaten management
++ Wasserschutz-Zonen-API (A1) mit TTL-Cache und bbox-Validierung
 """
 
 from typing import Optional, List, Literal
@@ -9,6 +10,8 @@ from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, desc
 import logging
+import time
+import math
 
 from ....core.config import settings
 from ....core.database import get_db
@@ -16,7 +19,7 @@ from ....infrastructure.models import PSM as PSMModel
 from ....api.v1.schemas.base import PaginatedResponse
 from ....api.v1.schemas.agrar import PSM, PSMCreate, PSMUpdate
 from ....integrations.dms_client import upload_document, is_configured as dms_configured
-from ....integrations.bvl_psm_client import BVLPSMClient, map_bvl_mittel_to_psm_payload
+from ....integrations.bvl_psm_client import BVLPSMClient, map_bvl_mittel_to_psm_payload, psm_api_metrics
 from ....services.sync_scheduler import sync_scheduler
 from ....services.competitor_monitor import competitor_monitor
 
@@ -25,6 +28,131 @@ router = APIRouter()
 DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 logger = logging.getLogger(__name__)
 bvl_client = BVLPSMClient()
+
+
+# ────────────────────────────────────────────────────────────────────────────
+# A1: Wasserschutz-Zonen — TTL-Cache + bbox-Validierung
+# ────────────────────────────────────────────────────────────────────────────
+
+_WSZ_CACHE: dict[str, dict] = {}
+_WSZ_CACHE_TTL = 3600  # 1 Stunde
+
+_DE_BBOX = {"min_lat": 47.27, "max_lat": 55.06, "min_lng": 5.87, "max_lng": 15.04}
+
+
+def _bbox_valid(lat: float, lng: float) -> bool:
+    return (
+        _DE_BBOX["min_lat"] <= lat <= _DE_BBOX["max_lat"]
+        and _DE_BBOX["min_lng"] <= lng <= _DE_BBOX["max_lng"]
+    )
+
+
+def _haversine_km(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
+    R = 6371.0
+    d_lat = math.radians(lat2 - lat1)
+    d_lng = math.radians(lng2 - lng1)
+    a = math.sin(d_lat / 2) ** 2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(d_lng / 2) ** 2
+    return R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+
+_WSZ_TELEMETRY: dict[str, int] = {"hits": 0, "misses": 0, "api_calls": 0, "seed_calls": 0}
+
+
+def _get_wasserschutz_zonen_data() -> list[dict]:
+    """
+    Returns cached Wasserschutz zone master data.
+    If AGRAR_ZONEN_FROM_API=True, would query WFS/PostGIS (future).
+    Falls back to seed data with TTL-cache.
+    """
+    cache_key = "wsz_all"
+    entry = _WSZ_CACHE.get(cache_key)
+    if entry and (time.time() - entry["ts"]) < _WSZ_CACHE_TTL:
+        _WSZ_TELEMETRY["hits"] += 1
+        return entry["data"]
+
+    _WSZ_TELEMETRY["misses"] += 1
+
+    if settings.AGRAR_ZONEN_FROM_API:
+        _WSZ_TELEMETRY["api_calls"] += 1
+        logger.info("AGRAR_ZONEN_FROM_API=True — WFS-Abfrage (Stub, nutzt Seed-Daten)")
+
+    _WSZ_TELEMETRY["seed_calls"] += 1
+
+    zones = [
+        {"id": "WSG-001", "name": "Wasserschutzgebiet Halle-Ost", "typ": "Trinkwasser", "zone": "III", "restriktionsgrad": "mittel", "koordinaten": {"lat": 51.48, "lng": 11.97}, "radius": 3.5},
+        {"id": "WSG-002", "name": "WSG Elbaue Dessau", "typ": "Trinkwasser", "zone": "II", "restriktionsgrad": "hoch", "koordinaten": {"lat": 51.83, "lng": 12.24}, "radius": 2.0},
+        {"id": "WSG-003", "name": "WSG Saale-Unstrut", "typ": "Grundwasser", "zone": "IIIA", "restriktionsgrad": "mittel", "koordinaten": {"lat": 51.21, "lng": 11.77}, "radius": 5.0},
+        {"id": "WSG-004", "name": "WSG Mulde-Eilenburg", "typ": "Trinkwasser", "zone": "III", "restriktionsgrad": "niedrig", "koordinaten": {"lat": 51.46, "lng": 12.63}, "radius": 4.0},
+        {"id": "WSG-005", "name": "WSG Thüringer Becken", "typ": "Grundwasser", "zone": "II", "restriktionsgrad": "hoch", "koordinaten": {"lat": 51.02, "lng": 11.03}, "radius": 3.0},
+        {"id": "WSG-006", "name": "WSG Harz-Vorland", "typ": "Quellschutz", "zone": "I", "restriktionsgrad": "hoch", "koordinaten": {"lat": 51.75, "lng": 10.85}, "radius": 1.5},
+        {"id": "WSG-007", "name": "WSG Magdeburger Börde", "typ": "Grundwasser", "zone": "III", "restriktionsgrad": "niedrig", "koordinaten": {"lat": 52.13, "lng": 11.62}, "radius": 6.0},
+        {"id": "WSG-008", "name": "WSG Lausitz-Spreewald", "typ": "Trinkwasser", "zone": "IIIA", "restriktionsgrad": "mittel", "koordinaten": {"lat": 51.76, "lng": 14.33}, "radius": 4.5},
+    ]
+    _WSZ_CACHE[cache_key] = {"ts": time.time(), "data": zones}
+    return zones
+
+
+@router.get("/wasserschutz-zonen")
+async def list_wasserschutz_zonen(
+    lat: Optional[float] = Query(None, description="Breitengrad des Schlags"),
+    lng: Optional[float] = Query(None, description="Längengrad des Schlags"),
+    radius_km: float = Query(10.0, ge=0.1, le=50.0, description="Suchradius in km"),
+    tenant_id: Optional[str] = Query(None),
+):
+    """
+    Wasserschutz-Zonen abfragen (mit optionaler Nähe-Filterung).
+    Ergebnisse werden für 1h gecacht (TTL). Koordinaten werden gegen die
+    Deutschland-BoundingBox validiert.
+    """
+    zones = _get_wasserschutz_zonen_data()
+
+    if lat is not None and lng is not None:
+        if not _bbox_valid(lat, lng):
+            raise HTTPException(
+                status_code=400,
+                detail=f"Koordinaten ({lat}, {lng}) liegen außerhalb Deutschlands",
+            )
+        filtered = []
+        for z in zones:
+            dist = _haversine_km(lat, lng, z["koordinaten"]["lat"], z["koordinaten"]["lng"])
+            if dist <= radius_km:
+                filtered.append({**z, "entfernung_km": round(dist, 2)})
+        filtered.sort(key=lambda x: x["entfernung_km"])
+        return filtered
+
+    return zones
+
+
+@router.get("/wasserschutz-zonen/{zone_id}")
+async def get_wasserschutz_zone(zone_id: str):
+    """Einzelne Wasserschutz-Zone abrufen."""
+    zones = _get_wasserschutz_zonen_data()
+    for z in zones:
+        if z["id"] == zone_id:
+            return z
+    raise HTTPException(status_code=404, detail="Wasserschutz-Zone nicht gefunden")
+
+
+@router.get("/wasserschutz-zonen-telemetry")
+async def get_wasserschutz_telemetry():
+    """Telemetrie für Wasserschutz-Zonen-Cache (A3)."""
+    return {
+        "feature_flag": settings.AGRAR_ZONEN_FROM_API,
+        "cache_ttl_seconds": _WSZ_CACHE_TTL,
+        "cache_entries": len(_WSZ_CACHE),
+        "telemetry": _WSZ_TELEMETRY,
+    }
+
+
+@router.get("/monitoring")
+async def get_psm_monitoring():
+    """B4: PSM-API Monitoring — Anfragen, Cache-Hits, Retries, Fehler."""
+    return {
+        "bvl_api": psm_api_metrics,
+        "bvl_cache_entries": len(bvl_client._cache),
+        "bvl_cache_ttl_seconds": bvl_client.ttl_seconds,
+        "wasserschutz_zonen": _WSZ_TELEMETRY,
+    }
 
 
 @router.get("/", response_model=PaginatedResponse[PSM])

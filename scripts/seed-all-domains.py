@@ -11,7 +11,7 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from sqlalchemy.orm import Session
-from app.core.database_pg import SessionLocal, engine
+from app.core.database import SessionLocal, engine
 from app.crm.seed import seed_crm_data
 from app.crm.models import Base as CRMBase
 

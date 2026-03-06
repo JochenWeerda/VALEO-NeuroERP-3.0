@@ -2,12 +2,13 @@
 Policy Manager API Endpoints
 """
 
-from fastapi import APIRouter, HTTPException, Body
+from fastapi import APIRouter, HTTPException, Body, Request
 from fastapi.responses import StreamingResponse
 from typing import List, Dict, Any
 from pydantic import BaseModel, Field
 import logging
 
+from app.middleware.rate_limit import limiter
 from app.services.policy_service import (
     PolicyStore,
     PolicyEngine,
@@ -184,7 +185,8 @@ async def test_policy(request: TestRequest) -> TestResponse:
 
 
 @router.get("/policy/export")
-async def export_policies():
+@limiter.limit("10/minute")
+async def export_policies(request: Request):
     """
     Exportiert alle Policies als JSON-Download
 
@@ -208,7 +210,8 @@ async def export_policies():
 
 
 @router.post("/policy/restore")
-async def restore_policies(request: RestoreRequest) -> Dict[str, Any]:
+@limiter.limit("5/minute")
+async def restore_policies(request: Request, request_body: RestoreRequest) -> Dict[str, Any]:
     """
     Importiert Policies aus JSON (ACHTUNG: ersetzt alle!)
 
@@ -219,7 +222,7 @@ async def restore_policies(request: RestoreRequest) -> Dict[str, Any]:
         Dict mit ok=True
     """
     try:
-        policy_store.restore_json(request.json_payload)
+        policy_store.restore_json(request_body.json_payload)
         logger.warning("Policies restored from JSON - all previous policies replaced")
         return {"ok": True}
     except Exception as e:

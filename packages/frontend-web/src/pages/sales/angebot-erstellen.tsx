@@ -1,6 +1,6 @@
 ﻿/**
  * Angebot-Erfassung (Verkauf)
- * Im Stil der Lieferschein-Erfassung â€” einheitliches ERP-Look & Feel
+ * Im Stil der Lieferschein-Erfassung — einheitliches ERP-Look & Feel
  */
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
@@ -116,7 +116,7 @@ export default function AngebotErstellenPage(): JSX.Element {
   const [customer, setCustomer] = useState<Customer | null>(null)
 
   // â”€â”€ Dialoge â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-  const [showAngebotAuswahl, setShowAngebotAuswahl] = useState(false) // Ã¶ffnet nur per Button
+  const [showAngebotAuswahl, setShowAngebotAuswahl] = useState(false) // öffnet nur per Button
   const [showCustomerDialog, setShowCustomerDialog] = useState(false)
   const [showArticleDialog, setShowArticleDialog] = useState(false)
   const [showPrintDialog, setShowPrintDialog] = useState(false)
@@ -345,7 +345,7 @@ export default function AngebotErstellenPage(): JSX.Element {
     }
     try {
       await apiClient.post(`/api/v1/sales/offers/${id}/convert-to-order`)
-      push('Angebot in Auftrag Ã¼bernommen')
+      push('Angebot in Auftrag übernommen')
       navigate(`/sales/order?fromOffer=${id}`)
     } catch (err: unknown) {
       const msg =
@@ -359,25 +359,25 @@ export default function AngebotErstellenPage(): JSX.Element {
   const handleDelete = useCallback(async () => {
     const id = angebotId
     if (!id) {
-      push('Kein gespeichertes Angebot zum LÃ¶schen')
+      push('Kein gespeichertes Angebot zum Löschen')
       return
     }
     try {
       await apiClient.delete(`/api/v1/sales/offers/${id}`)
-      push('Angebot gelÃ¶scht')
+      push('Angebot gelöscht')
       navigate('/sales/angebote')
     } catch (err: unknown) {
       const msg =
         err && typeof err === 'object' && 'response' in err && err.response && typeof err.response === 'object' && 'data' in err.response
           ? String((err.response as { data?: { detail?: string } }).data?.detail ?? (err as Error).message)
           : (err as Error).message
-      push(`Fehler beim LÃ¶schen: ${msg}`)
+      push(`Fehler beim Löschen: ${msg}`)
     }
   }, [angebotId, push, navigate])
 
   const handleBeenden = useCallback(() => {
     if (isDirty) {
-      if (window.confirm('Es gibt ungespeicherte Ã„nderungen. Wirklich verlassen?')) {
+      if (window.confirm('Es gibt ungespeicherte Änderungen. Wirklich verlassen?')) {
         navigate('/sales/angebote')
       }
     } else {
@@ -447,7 +447,7 @@ export default function AngebotErstellenPage(): JSX.Element {
       push('Angebot erfolgreich gedruckt und gebucht')
       setShowPrintDialog(false)
 
-      // Formular zurÃ¼cksetzen
+      // Formular zurücksetzen
       setAngebotNr(generateAngebotNr())
       setDatum(new Date().toISOString().split('T')[0])
       setGueltigBis('')
@@ -520,7 +520,7 @@ export default function AngebotErstellenPage(): JSX.Element {
                 />
               </div>
               <div className="flex items-center gap-2">
-                <Label className="w-28 text-sm whitespace-nowrap shrink-0">GÃ¼ltig bis:</Label>
+                <Label className="w-28 text-sm whitespace-nowrap shrink-0">Gültig bis:</Label>
                 <Input
                   type="date"
                   value={gueltigBis}
@@ -550,17 +550,17 @@ export default function AngebotErstellenPage(): JSX.Element {
               </div>
             </div>
 
-            {/* Mittlere Spalte â€” leer / fÃ¼r spÃ¤tere Felder */}
+            {/* Mittlere Spalte — leer / für spätere Felder */}
             <div />
 
-            {/* Rechte Spalte â€” Kunde */}
+            {/* Rechte Spalte — Kunde */}
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Label className="w-28 text-sm shrink-0">Kunde:</Label>
                 <Input
                   value={customer?.name || ''}
                   readOnly
-                  placeholder="Kein Kunde gewÃ¤hlt"
+                  placeholder="Kein Kunde gewählt"
                   className="flex-1 h-8 text-sm"
                 />
                 <Button
@@ -669,7 +669,7 @@ export default function AngebotErstellenPage(): JSX.Element {
                           variant="ghost"
                           size="icon"
                           className="h-7 w-7 text-red-600 hover:text-red-700"
-                          title="Position lÃ¶schen"
+                          title="Position löschen"
                           onClick={() => handlePositionDelete(idx)}
                         >
                           <Trash2 className="h-4 w-4" />
@@ -681,7 +681,7 @@ export default function AngebotErstellenPage(): JSX.Element {
                 {positionen.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={14} className="text-center text-xs text-muted-foreground py-4">
-                      Noch keine Positionen â€” Artikel im Bereich unten eingeben
+                      Noch keine Positionen — Artikel im Bereich unten eingeben
                     </TableCell>
                   </TableRow>
                 )}
@@ -709,7 +709,7 @@ export default function AngebotErstellenPage(): JSX.Element {
                   value={currentPosition.artikelNr}
                   readOnly
                   className="flex-1 h-8 text-sm"
-                  placeholder="â€”"
+                  placeholder="—"
                 />
                 <Button
                   variant="ghost"
@@ -862,7 +862,7 @@ export default function AngebotErstellenPage(): JSX.Element {
               <Input value={summen.brutto.toFixed(2)} readOnly className="h-8 text-sm font-semibold" />
             </div>
             <div className="space-y-1">
-              <Label className="text-xs">WÃ¤hrung:</Label>
+              <Label className="text-xs">Währung:</Label>
               <Input value="EUR" readOnly className="h-8 text-sm" />
             </div>
           </div>
@@ -890,13 +890,13 @@ export default function AngebotErstellenPage(): JSX.Element {
             className="h-7 text-xs gap-1 text-destructive hover:text-destructive"
             onClick={() => {
               if (!angebotId) {
-                push('Kein gespeichertes Angebot zum LÃ¶schen')
+                push('Kein gespeichertes Angebot zum Löschen')
                 return
               }
-              if (window.confirm('Angebot wirklich lÃ¶schen?')) void handleDelete()
+              if (window.confirm('Angebot wirklich löschen?')) void handleDelete()
             }}
           >
-            <Trash2 className="h-3 w-3" /> LÃ¶schen
+            <Trash2 className="h-3 w-3" /> Löschen
           </Button>
         </div>
         <Button variant="ghost" size="sm" className="h-7 text-xs gap-1" onClick={handleBeenden}>
@@ -906,7 +906,7 @@ export default function AngebotErstellenPage(): JSX.Element {
 
       {/* â”€â”€ Dialoge â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
 
-      {/* Auswahl bestehendes Angebot â€” Ã¶ffnet nur per ... Button */}
+      {/* Auswahl bestehendes Angebot — öffnet nur per ... Button */}
       <Dialog open={showAngebotAuswahl} onOpenChange={setShowAngebotAuswahl}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
@@ -939,7 +939,7 @@ export default function AngebotErstellenPage(): JSX.Element {
                 {isLoading ? (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center text-sm text-muted-foreground py-6">
-                      Lade Angeboteâ€¦
+                      Lade Angebote…
                     </TableCell>
                   </TableRow>
                 ) : filteredAngebote.length === 0 ? (
@@ -979,7 +979,7 @@ export default function AngebotErstellenPage(): JSX.Element {
               size="sm"
               onClick={() => filteredAngebote[0] && handleAngebotAuswaehlen(filteredAngebote[0])}
             >
-              Ãœbernehmen
+              Übernehmen
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1011,7 +1011,7 @@ export default function AngebotErstellenPage(): JSX.Element {
         onClose={() => setShowAttachmentDialog(false)}
         businessObjectType="quotation"
         businessObjectId={angebotId}
-        title="UNTERLAGEN / DATEIEN â€” ANGEBOT"
+        title="UNTERLAGEN / DATEIEN — ANGEBOT"
       />
     </div>
   )

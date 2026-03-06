@@ -5,10 +5,13 @@ Stellt Produkte mit Kontrakt- und Vorkauf-Informationen
 für das Kundenportal bereit.
 """
 
+import logging
 from datetime import datetime, timedelta
 from decimal import Decimal
 from typing import List, Optional
 from app.core.uuid7 import uuid7
+
+logger = logging.getLogger(__name__)
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.orm import Session
@@ -22,7 +25,8 @@ from app.infrastructure.models import Article as ArticleModel, Customer as Custo
 from app.infrastructure.models.portal_models import (
     CustomerContract, CustomerPrePurchase, 
     CustomerOrder, CustomerOrderItem, CustomerOrderHistory,
-    ContractStatus as DBContractStatus, OrderStatus as DBOrderStatus
+    ContractStatus as DBContractStatus, OrderStatus as DBOrderStatus,
+    ORDER_STATUS_TRANSITIONS, validate_order_transition,
 )
 from app.api.v1.schemas.portal import (
     PortalProduct, PortalProductList, LastOrderInfo,
@@ -241,9 +245,62 @@ async def create_order(
     - Vorkauf-Guthaben (wird zuerst verwendet)
     - Kontrakt-Preise (falls verfügbar)
     - Listenpreise (als Fallback)
+    
+    Idempotency: Header X-Idempotency-Key verhindert doppelte Bestellungen.
     """
     effective_customer = customer_id or get_customer_id_from_token(request, tenant_id)
-    
+
+    # C3: Idempotency — gleicher Key liefert die vorhandene Bestellung zurück
+    idempotency_key = request.headers.get("X-Idempotency-Key")
+    if idempotency_key:
+        existing_order = db.query(CustomerOrder).filter(
+            and_(
+                CustomerOrder.tenant_id == tenant_id,
+                CustomerOrder.customer_id == effective_customer,
+                CustomerOrder.idempotency_key == idempotency_key,
+            )
+        ).first()
+        if existing_order:
+            items = db.query(CustomerOrderItem).filter(
+                CustomerOrderItem.order_id == existing_order.id
+            ).all()
+            return OrderResponse(
+                id=existing_order.id,
+                order_number=existing_order.order_number,
+                order_date=existing_order.order_date,
+                status=OrderStatus(existing_order.status.value),
+                customer_id=existing_order.customer_id,
+                customer_name=existing_order.customer_name,
+                items=[
+                    OrderItemResponse(
+                        id=item.id,
+                        article_id=item.article_id,
+                        artikel_nummer=item.article_number,
+                        name=item.article_name,
+                        quantity=item.quantity,
+                        einheit=item.unit,
+                        unit_price=item.unit_price,
+                        total_price=item.total_price,
+                        price_source=PriceSource(item.price_source),
+                        quantity_from_credit=item.quantity_from_credit,
+                        quantity_at_list_price=item.quantity_at_list_price
+                    )
+                    for item in items
+                ],
+                total_net=existing_order.total_net,
+                total_gross=existing_order.total_gross,
+                delivery_address=existing_order.delivery_address,
+                delivery_date_requested=existing_order.delivery_date_requested,
+                customer_notes=existing_order.customer_notes,
+                created_at=existing_order.created_at
+            )
+
+    if not order_data.items:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Bestellung enthält keine Positionen"
+        )
+
     # Lade Kundendaten aus CRM
     customer = db.query(CustomerModel).filter(
         CustomerModel.id == effective_customer,
@@ -265,7 +322,8 @@ async def create_order(
         status=DBOrderStatus.SUBMITTED,
         delivery_address=order_data.delivery_address,
         delivery_date_requested=order_data.delivery_date_requested,
-        customer_notes=order_data.customer_notes
+        customer_notes=order_data.customer_notes,
+        idempotency_key=idempotency_key,
     )
     
     db.add(order)
@@ -400,9 +458,17 @@ async def create_order(
     # Bestellung finalisieren
     order.total_net = total_net
     order.total_gross = total_net * Decimal(str(1 + settings.DEFAULT_VAT_RATE))
-    
-    db.commit()
-    db.refresh(order)
+
+    # C1: Expliziter Rollback bei Fehler — kein Success-Response ohne erfolgreichen Commit
+    try:
+        db.commit()
+        db.refresh(order)
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Bestellung konnte nicht gespeichert werden: {exc}",
+        ) from exc
     
     # Response bauen
     return OrderResponse(
@@ -626,4 +692,182 @@ async def list_pre_purchases(
         }
         for pp in pre_purchases
     ]
+
+
+@router.patch("/orders/{order_id}/status")
+async def update_order_status(
+    request: Request,
+    order_id: str,
+    new_status: str = Query(..., description="Neuer Status"),
+    tenant_id: str = Query(..., description="Mandanten-ID"),
+    internal_notes: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+):
+    """
+    C2: Ändert den Bestellstatus mit validiertem Zustandsübergang.
+    Erlaubte Übergänge: DRAFT→SUBMITTED→CONFIRMED→IN_PROGRESS→SHIPPED→DELIVERED.
+    CANCELLED ist von jedem aktiven Status aus erreichbar (außer DELIVERED/CANCELLED).
+    """
+    order = db.query(CustomerOrder).filter(
+        and_(
+            CustomerOrder.id == order_id,
+            CustomerOrder.tenant_id == tenant_id,
+        )
+    ).first()
+
+    if not order:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bestellung nicht gefunden")
+
+    try:
+        target = DBOrderStatus(new_status)
+    except ValueError:
+        valid = [s.value for s in DBOrderStatus]
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Ungültiger Status '{new_status}'. Erlaubt: {valid}",
+        )
+
+    if not validate_order_transition(order.status, target):
+        allowed = [s.value for s in ORDER_STATUS_TRANSITIONS.get(order.status, [])]
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Übergang {order.status.value} → {target.value} nicht erlaubt. Erlaubt: {allowed}",
+        )
+
+    old_status = order.status.value
+    order.status = target
+    if internal_notes:
+        order.internal_notes = (order.internal_notes or "") + f"\n[{old_status}→{target.value}] {internal_notes}"
+
+    db.commit()
+    db.refresh(order)
+
+    return {
+        "id": order.id,
+        "order_number": order.order_number,
+        "old_status": old_status,
+        "new_status": order.status.value,
+        "allowed_next": [s.value for s in ORDER_STATUS_TRANSITIONS.get(order.status, [])],
+    }
+
+
+@router.get("/orders/reconciliation")
+async def reconcile_orders(
+    tenant_id: str = Query(..., description="Mandanten-ID"),
+    stale_hours: int = Query(48, ge=1, le=720, description="Stunden ohne Statusänderung"),
+    db: Session = Depends(get_db),
+):
+    """
+    C4: Reconciliation — findet Bestellungen in inkonsistentem Zustand.
+    - SUBMITTED seit > stale_hours ohne Bestätigung
+    - CONFIRMED seit > stale_hours ohne Bearbeitung
+    - Orders ohne Positionen
+    """
+    from sqlalchemy import func
+
+    cutoff = datetime.utcnow() - timedelta(hours=stale_hours)
+
+    stale_submitted = db.query(CustomerOrder).filter(
+        and_(
+            CustomerOrder.tenant_id == tenant_id,
+            CustomerOrder.status == DBOrderStatus.SUBMITTED,
+            CustomerOrder.created_at < cutoff,
+        )
+    ).count()
+
+    stale_confirmed = db.query(CustomerOrder).filter(
+        and_(
+            CustomerOrder.tenant_id == tenant_id,
+            CustomerOrder.status == DBOrderStatus.CONFIRMED,
+            CustomerOrder.created_at < cutoff,
+        )
+    ).count()
+
+    empty_orders = (
+        db.query(CustomerOrder)
+        .outerjoin(CustomerOrderItem)
+        .filter(
+            CustomerOrder.tenant_id == tenant_id,
+            CustomerOrderItem.id.is_(None),
+        )
+        .count()
+    )
+
+    issues = []
+    if stale_submitted > 0:
+        issues.append({"type": "stale_submitted", "count": stale_submitted, "severity": "warning"})
+    if stale_confirmed > 0:
+        issues.append({"type": "stale_confirmed", "count": stale_confirmed, "severity": "warning"})
+    if empty_orders > 0:
+        issues.append({"type": "empty_orders", "count": empty_orders, "severity": "error"})
+
+    return {
+        "tenant_id": tenant_id,
+        "stale_threshold_hours": stale_hours,
+        "issues": issues,
+        "total_issues": sum(i["count"] for i in issues),
+        "healthy": len(issues) == 0,
+        "checked_at": datetime.utcnow().isoformat(),
+    }
+
+
+@router.get("/orders/observability")
+async def get_orders_observability(
+    tenant_id: str = Query(..., description="Mandanten-ID"),
+    db: Session = Depends(get_db),
+):
+    """
+    C5: Observability — KPI-Übersicht für Portal-Bestellungen.
+    """
+    from sqlalchemy import func
+
+    status_counts = (
+        db.query(CustomerOrder.status, func.count(CustomerOrder.id))
+        .filter(CustomerOrder.tenant_id == tenant_id)
+        .group_by(CustomerOrder.status)
+        .all()
+    )
+
+    by_status = {s.value: c for s, c in status_counts}
+    total = sum(by_status.values())
+
+    today = datetime.utcnow().date()
+    today_count = db.query(CustomerOrder).filter(
+        and_(
+            CustomerOrder.tenant_id == tenant_id,
+            func.date(CustomerOrder.created_at) == today,
+        )
+    ).count()
+
+    week_ago = datetime.utcnow() - timedelta(days=7)
+    week_count = db.query(CustomerOrder).filter(
+        and_(
+            CustomerOrder.tenant_id == tenant_id,
+            CustomerOrder.created_at >= week_ago,
+        )
+    ).count()
+
+    avg_items = db.query(func.avg(
+        db.query(func.count(CustomerOrderItem.id))
+        .filter(CustomerOrderItem.order_id == CustomerOrder.id)
+        .correlate(CustomerOrder)
+        .scalar_subquery()
+    )).filter(CustomerOrder.tenant_id == tenant_id).scalar()
+
+    return {
+        "tenant_id": tenant_id,
+        "total_orders": total,
+        "by_status": by_status,
+        "today": today_count,
+        "last_7_days": week_count,
+        "avg_items_per_order": round(float(avg_items or 0), 1),
+        "funnel": {
+            "submitted": by_status.get("SUBMITTED", 0),
+            "confirmed": by_status.get("CONFIRMED", 0),
+            "in_progress": by_status.get("IN_PROGRESS", 0),
+            "shipped": by_status.get("SHIPPED", 0),
+            "delivered": by_status.get("DELIVERED", 0),
+            "cancelled": by_status.get("CANCELLED", 0),
+        },
+    }
 

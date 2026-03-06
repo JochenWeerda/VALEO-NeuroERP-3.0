@@ -1,7 +1,7 @@
 /**
- * Kundenportal - NÃ¤hrstoffbilanzen
+ * Kundenportal - Nährstoffbilanzen
  * 
- * JahresÃ¼bersichten der NÃ¤hrstoffbilanzen zum Download als PDF
+ * Jahresübersichten der Nährstoffbilanzen zum Download als PDF
  */
 
 import { useState } from 'react'
@@ -160,12 +160,12 @@ export default function PortalNaehrstoffbilanzen() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold">NÃ¤hrstoffbilanzen</h1>
-          <p className="text-muted-foreground">JahresÃ¼bersichten gemÃ¤ÃŸ DÃ¼ngeverordnung</p>
+          <h1 className="text-2xl font-bold">Nährstoffbilanzen</h1>
+          <p className="text-muted-foreground">Jahresübersichten gemäß Düngeverordnung</p>
         </div>
         <Select value={selectedJahr} onValueChange={setSelectedJahr}>
           <SelectTrigger className="w-[150px]">
-            <SelectValue placeholder="Jahr wÃ¤hlen" />
+            <SelectValue placeholder="Jahr wählen" />
           </SelectTrigger>
           <SelectContent>
             {bilanzen.map((b) => (
@@ -242,10 +242,10 @@ export default function PortalNaehrstoffbilanzen() {
       {dreiJahresDurchschnittN > N_GRENZWERT || dreiJahresDurchschnittP > P_GRENZWERT ? (
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
-          <AlertTitle>GrenzwertÃ¼berschreitung</AlertTitle>
+          <AlertTitle>Grenzwertüberschreitung</AlertTitle>
           <AlertDescription>
-            Der 3-Jahres-Durchschnitt Ã¼berschreitet die gesetzlichen Grenzwerte. 
-            Bitte beachten Sie die DÃ¼ngeverordnung.
+            Der 3-Jahres-Durchschnitt überschreitet die gesetzlichen Grenzwerte. 
+            Bitte beachten Sie die Düngeverordnung.
           </AlertDescription>
         </Alert>
       ) : (
@@ -306,7 +306,7 @@ export default function PortalNaehrstoffbilanzen() {
                   <BarChart3 className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">3-J. Ã˜ Stickstoff</p>
+                  <p className="text-sm text-muted-foreground">3-J. Ø Stickstoff</p>
                   <p className={`text-2xl font-bold ${getSaldoColor(dreiJahresDurchschnittN, N_GRENZWERT)}`}>
                     {dreiJahresDurchschnittN > 0 ? '+' : ''}{dreiJahresDurchschnittN.toFixed(1)} kg/ha
                   </p>
@@ -327,14 +327,14 @@ export default function PortalNaehrstoffbilanzen() {
                   <Calendar className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">FlÃ¤che {selectedJahr}</p>
+                  <p className="text-sm text-muted-foreground">Fläche {selectedJahr}</p>
                   <p className="text-2xl font-bold">{currentBilanz.flaeche} ha</p>
                 </div>
               </div>
               <Badge 
                 className={`mt-2 ${currentBilanz.status === 'abgeschlossen' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}
               >
-                {currentBilanz.status === 'abgeschlossen' ? 'Abgeschlossen' : 'VorlÃ¤ufig'}
+                {currentBilanz.status === 'abgeschlossen' ? 'Abgeschlossen' : 'Vorläufig'}
               </Badge>
             </CardContent>
           </Card>
@@ -346,8 +346,8 @@ export default function PortalNaehrstoffbilanzen() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle>NÃ¤hrstoffbilanz {selectedJahr}</CardTitle>
-              <CardDescription>Detaillierte Ãœbersicht in kg/ha</CardDescription>
+              <CardTitle>Nährstoffbilanz {selectedJahr}</CardTitle>
+              <CardDescription>Detaillierte Übersicht in kg/ha</CardDescription>
             </div>
             <div className="flex items-center gap-2">
               <Button
@@ -373,7 +373,7 @@ export default function PortalNaehrstoffbilanzen() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>NÃ¤hrstoff</TableHead>
+                  <TableHead>Nährstoff</TableHead>
                   <TableHead className="text-right">Zugang</TableHead>
                   <TableHead className="text-right">Abgang</TableHead>
                   <TableHead className="text-right">Saldo</TableHead>
@@ -388,7 +388,7 @@ export default function PortalNaehrstoffbilanzen() {
                   <TableCell className={`text-right font-bold ${getSaldoColor(currentBilanz.stickstoff.saldo, N_GRENZWERT)}`}>
                     {currentBilanz.stickstoff.saldo > 0 ? '+' : ''}{currentBilanz.stickstoff.saldo} kg/ha
                   </TableCell>
-                  <TableCell className="text-right">{N_GRENZWERT} kg/ha (3-J.Ã˜)</TableCell>
+                  <TableCell className="text-right">{N_GRENZWERT} kg/ha (3-J.Ø)</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="font-medium">Phosphor (Pâ‚‚Oâ‚…)</TableCell>
@@ -397,7 +397,7 @@ export default function PortalNaehrstoffbilanzen() {
                   <TableCell className={`text-right font-bold ${getSaldoColor(currentBilanz.phosphor.saldo, P_GRENZWERT)}`}>
                     {currentBilanz.phosphor.saldo > 0 ? '+' : ''}{currentBilanz.phosphor.saldo} kg/ha
                   </TableCell>
-                  <TableCell className="text-right">{P_GRENZWERT} kg/ha (3-J.Ã˜)</TableCell>
+                  <TableCell className="text-right">{P_GRENZWERT} kg/ha (3-J.Ø)</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="font-medium">Kalium (Kâ‚‚O)</TableCell>
@@ -417,8 +417,8 @@ export default function PortalNaehrstoffbilanzen() {
       {/* Schlagbezogene Bilanz */}
       <Card>
         <CardHeader>
-          <CardTitle>Schlagbezogene Ãœbersicht {selectedJahr}</CardTitle>
-          <CardDescription>NÃ¤hrstoffsalden je Schlag in kg/ha</CardDescription>
+          <CardTitle>Schlagbezogene Übersicht {selectedJahr}</CardTitle>
+          <CardDescription>Nährstoffsalden je Schlag in kg/ha</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
@@ -426,7 +426,7 @@ export default function PortalNaehrstoffbilanzen() {
               <TableRow>
                 <TableHead>Schlag</TableHead>
                 <TableHead>Kultur</TableHead>
-                <TableHead className="text-right">FlÃ¤che</TableHead>
+                <TableHead className="text-right">Fläche</TableHead>
                 <TableHead className="text-right">N-Saldo</TableHead>
                 <TableHead className="text-right">P-Saldo</TableHead>
               </TableRow>
@@ -456,7 +456,7 @@ export default function PortalNaehrstoffbilanzen() {
       <Card>
         <CardHeader>
           <CardTitle>Historische Bilanzen</CardTitle>
-          <CardDescription>Alle verfÃ¼gbaren Jahresbilanzen</CardDescription>
+          <CardDescription>Alle verfügbaren Jahresbilanzen</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-3 md:grid-cols-3">
@@ -468,7 +468,7 @@ export default function PortalNaehrstoffbilanzen() {
                     <Badge 
                       className={bilanz.status === 'abgeschlossen' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}
                     >
-                      {bilanz.status === 'abgeschlossen' ? 'Abgeschlossen' : 'VorlÃ¤ufig'}
+                      {bilanz.status === 'abgeschlossen' ? 'Abgeschlossen' : 'Vorläufig'}
                     </Badge>
                   </div>
                   <div className="space-y-1 text-sm">
@@ -485,7 +485,7 @@ export default function PortalNaehrstoffbilanzen() {
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">FlÃ¤che:</span>
+                      <span className="text-muted-foreground">Fläche:</span>
                       <span className="font-medium">{bilanz.flaeche} ha</span>
                     </div>
                   </div>
@@ -512,10 +512,10 @@ export default function PortalNaehrstoffbilanzen() {
       {/* Info */}
       <Alert>
         <Info className="h-4 w-4" />
-        <AlertTitle>Hinweis zur DÃ¼ngeverordnung</AlertTitle>
+        <AlertTitle>Hinweis zur Düngeverordnung</AlertTitle>
         <AlertDescription>
-          Die NÃ¤hrstoffbilanzen werden gemÃ¤ÃŸ DÃ¼V erstellt. Der 3-Jahres-Durchschnitt fÃ¼r Stickstoff 
-          darf 50 kg N/ha und fÃ¼r Phosphor 10 kg Pâ‚‚Oâ‚…/ha nicht Ã¼berschreiten.
+          Die Nährstoffbilanzen werden gemäß DüV erstellt. Der 3-Jahres-Durchschnitt für Stickstoff 
+          darf 50 kg N/ha und für Phosphor 10 kg Pâ‚‚Oâ‚…/ha nicht überschreiten.
         </AlertDescription>
       </Alert>
     </div>

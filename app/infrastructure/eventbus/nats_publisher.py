@@ -1,121 +1,106 @@
 """
 NATS Event Publisher
-Production event bus using NATS Streaming
+Production event bus using NATS JetStream.
 """
 
-import logging
 import json
-from typing import Optional
+import logging
 from datetime import datetime
+from typing import Optional
 
-from ...domains.shared.events import DomainEvent, IEventPublisher
+from app.domains.shared.events import DomainEvent, IEventPublisher
 
 logger = logging.getLogger(__name__)
 
 
 class NATSEventPublisher(IEventPublisher):
     """
-    NATS-based event publisher for Phase 3.
-    
-    Publishes domain events to NATS Streaming for distributed consumption.
-    Falls back to logging if NATS is unavailable.
+    NATS JetStream-based event publisher.
+
+    Falls back to logging if NATS is unavailable or disabled.
     """
-    
+
     def __init__(self, nats_url: str = "nats://localhost:4222", enabled: bool = False):
         self.nats_url = nats_url
         self.enabled = enabled
-        self._client: Optional[any] = None
+        self._nc: Optional[object] = None
+        self._js: Optional[object] = None
         self._connected: bool = False
-        
+
         if enabled:
-            logger.info(f"NATS Publisher initialized (URL: {nats_url})")
+            logger.info("NATS Publisher initialized (URL: %s)", nats_url)
         else:
-            logger.info("NATS Publisher disabled - using in-memory fallback")
-    
+            logger.info("NATS Publisher disabled — using log-only fallback")
+
     async def publish(self, event: DomainEvent) -> None:
-        """Publish event to NATS or fallback to logging."""
-        
-        if not self.enabled:
-            # Fallback: Just log
+        """Publish event to NATS JetStream or fallback to logging."""
+
+        event_data = {
+            "event_type": event.__class__.__name__,
+            "event_id": event.event_id,
+            "aggregate_id": event.aggregate_id,
+            "timestamp": event.timestamp.isoformat(),
+            "payload": self._serialize_event(event),
+        }
+
+        if not self._connected or self._js is None:
             logger.info(
-                f"Event (fallback): {event.__class__.__name__}",
-                extra={
-                    "event_id": event.event_id,
-                    "aggregate_id": event.aggregate_id,
-                    "timestamp": event.timestamp.isoformat()
-                }
+                "Event (fallback): %s id=%s",
+                event.__class__.__name__,
+                event.event_id,
             )
             return
-        
+
+        subject = f"domain.{event.__class__.__module__.split('.')[-2]}.{event.__class__.__name__}"
+
         try:
-            # Serialize event
-            event_data = {
-                "event_type": event.__class__.__name__,
-                "event_id": event.event_id,
-                "aggregate_id": event.aggregate_id,
-                "timestamp": event.timestamp.isoformat(),
-                "payload": self._serialize_event(event)
-            }
-            
-            # Publish to NATS
-            subject = f"domain.{event.__class__.__module__.split('.')[-2]}.{event.__class__.__name__}"
-            
-            # TODO: Actual NATS publish
-            # await self._client.publish(subject, json.dumps(event_data).encode())
-            
+            ack = await self._js.publish(subject, json.dumps(event_data).encode())
             logger.info(
-                f"Event published to NATS: {subject}",
-                extra={
-                    "event_id": event.event_id,
-                    "aggregate_id": event.aggregate_id,
-                    "subject": subject
-                }
+                "Event published to NATS: %s (stream=%s, seq=%s)",
+                subject,
+                ack.stream,
+                ack.seq,
             )
-            
         except Exception as e:
-            logger.error(f"Failed to publish event to NATS: {e}", exc_info=True)
-            # Fallback: at least log the event
-            logger.warning(f"Event fallback-logged: {event.__class__.__name__}")
-    
+            logger.error("Failed to publish event to NATS: %s", e, exc_info=True)
+            logger.warning("Event fallback-logged: %s", event.__class__.__name__)
+
     def _serialize_event(self, event: DomainEvent) -> dict:
-        """Serialize event to dict."""
         from dataclasses import asdict
+
         data = asdict(event)
-        
-        # Convert datetime to ISO string
         for key, value in data.items():
             if isinstance(value, datetime):
                 data[key] = value.isoformat()
-        
         return data
-    
+
     async def connect(self) -> None:
-        """Connect to NATS server."""
+        """Connect to NATS server and obtain JetStream context."""
         if not self.enabled:
             self._connected = False
             return
-        
+
         try:
-            # TODO: Actual NATS connection
-            # from nats.aio.client import Client as NATS
-            # self._client = NATS()
-            # await self._client.connect(self.nats_url)
+            import nats  # nats-py package
+
+            self._nc = await nats.connect(self.nats_url)
+            self._js = self._nc.jetstream()
             self._connected = True
-            logger.info("NATS connection established")
+            logger.info("NATS JetStream connection established")
         except Exception as e:
-            logger.error(f"Failed to connect to NATS: {e}")
+            logger.error("Failed to connect to NATS: %s", e)
             self._connected = False
             self.enabled = False
-    
+
     async def disconnect(self) -> None:
         """Disconnect from NATS server."""
-        if self._client:
-            # TODO: Actual disconnect
-            # await self._client.close()
+        if self._nc:
+            try:
+                await self._nc.close()
+            except Exception:
+                pass
             logger.info("NATS connection closed")
         self._connected = False
 
 
-# Global publisher instance for health checks and lightweight wiring.
 nats_publisher = NATSEventPublisher()
-

@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_, desc, asc
 from sqlalchemy.exc import SQLAlchemyError
 
-from ...core.database import Base
+from app.core.database import Base
 
 logger = logging.getLogger(__name__)
 

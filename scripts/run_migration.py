@@ -40,14 +40,15 @@ def run_migration():
     # Datenbankverbindung herstellen
     print("🔌 Verbinde zur Datenbank...")
     
+    _db_cfg = {
+        "host": os.environ.get("PGHOST", "localhost"),
+        "database": os.environ.get("PGDATABASE", "valeo_neuro_erp"),
+        "user": os.environ.get("PGUSER", "valeo_dev"),
+        "password": os.environ.get("PGPASSWORD", "valeo_dev_2024"),
+        "port": int(os.environ.get("PGPORT", "5432")),
+    }
     try:
-        conn = psycopg2.connect(
-            host='localhost',
-            database='valeo_neuroerp',
-            user='valeo_user',
-            password='valeo_password',
-            port=5432
-        )
+        conn = psycopg2.connect(**_db_cfg)
         conn.autocommit = True
         print("✅ Datenbankverbindung erfolgreich")
     except Exception as e:
@@ -96,13 +97,7 @@ def verify_migration():
     print("\n🔍 Verifiziere Migration...")
     
     try:
-        conn = psycopg2.connect(
-            host='localhost',
-            database='valeo_neuroerp',
-            user='valeo_user',
-            password='valeo_password',
-            port=5432
-        )
+        conn = psycopg2.connect(**_db_cfg)
         cursor = conn.cursor()
         
         # Prüfe neue Schemas

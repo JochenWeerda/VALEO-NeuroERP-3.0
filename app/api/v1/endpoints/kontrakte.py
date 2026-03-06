@@ -26,7 +26,7 @@ from app.services.kontrakte_service import (
     KontraktValidationService,
 )
 
-router = APIRouter(prefix="/api/v1/kontrakte", tags=["kontrakte"])
+router = APIRouter(prefix="/kontrakte", tags=["kontrakte"])
 
 ContractType = Literal["EINKAUF", "ZUKAUF", "VERKAUF"]
 StatusType = Literal["OFFEN", "ERLEDIGT", "STORNIERT"]

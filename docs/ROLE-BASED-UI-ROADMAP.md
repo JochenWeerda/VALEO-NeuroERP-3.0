@@ -207,6 +207,7 @@ packages/frontend-web/src/
 - `QuickReorderCards` - 1-Tap Nachbestellung
 - `PendingOrdersBanner` - Offline-Bestellungen Sync-Status
 - `VoiceOrderButton` - Sprachbestellung mit Parser
+- **CustomerPortalLayout:** "Zur Startseite"-Button für Anwender (admin/user/manager) – siehe `docs/portal-layout.md`
 
 ### Warehouse (Lagerist)
 - `WarehouseLayout` - Layout mit Theme & Navigation

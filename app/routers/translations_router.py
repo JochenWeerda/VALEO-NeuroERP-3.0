@@ -9,7 +9,7 @@ from sqlalchemy import and_, func
 from typing import Dict, List, Optional
 from pydantic import BaseModel
 
-from app.database import get_db
+from app.core.database import get_db
 from app.models.translation import Translation, TranslationValue, create_translation
 
 

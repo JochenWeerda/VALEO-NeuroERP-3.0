@@ -32,7 +32,7 @@ class ContractStatus(str, enum.Enum):
 
 
 class OrderStatus(str, enum.Enum):
-    """Bestellstatus"""
+    """Bestellstatus mit definiertem Übergangsmodell (C2)"""
     DRAFT = "DRAFT"
     SUBMITTED = "SUBMITTED"
     CONFIRMED = "CONFIRMED"
@@ -40,6 +40,23 @@ class OrderStatus(str, enum.Enum):
     SHIPPED = "SHIPPED"
     DELIVERED = "DELIVERED"
     CANCELLED = "CANCELLED"
+
+
+# C2: Erlaubte Statusübergänge
+ORDER_STATUS_TRANSITIONS: dict[OrderStatus, list[OrderStatus]] = {
+    OrderStatus.DRAFT: [OrderStatus.SUBMITTED, OrderStatus.CANCELLED],
+    OrderStatus.SUBMITTED: [OrderStatus.CONFIRMED, OrderStatus.CANCELLED],
+    OrderStatus.CONFIRMED: [OrderStatus.IN_PROGRESS, OrderStatus.CANCELLED],
+    OrderStatus.IN_PROGRESS: [OrderStatus.SHIPPED, OrderStatus.CANCELLED],
+    OrderStatus.SHIPPED: [OrderStatus.DELIVERED],
+    OrderStatus.DELIVERED: [],
+    OrderStatus.CANCELLED: [],
+}
+
+
+def validate_order_transition(current: OrderStatus, target: OrderStatus) -> bool:
+    """Prüft ob ein Statusübergang erlaubt ist."""
+    return target in ORDER_STATUS_TRANSITIONS.get(current, [])
 
 
 class CustomerContract(Base):
@@ -182,7 +199,10 @@ class CustomerOrder(Base):
     # Notizen
     customer_notes = Column(Text, nullable=True)
     internal_notes = Column(Text, nullable=True)
-    
+
+    # Idempotency (C3): verhindert doppelte Bestellungen bei Retry
+    idempotency_key = Column(String(128), nullable=True, unique=True, index=True)
+
     # Metadaten
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

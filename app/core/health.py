@@ -5,7 +5,7 @@ Health & Readiness Checks
 import asyncio
 from typing import Dict, Any
 from sqlalchemy import text
-from app.core.database_pg import engine
+from app.core.database import engine
 from app.core.sse import sse_hub
 
 

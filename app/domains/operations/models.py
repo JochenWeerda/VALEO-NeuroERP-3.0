@@ -1,6 +1,6 @@
 """
 Operations Domain Models - Waage und Fuhrpark
-Models fÃ¼r Waagen, Wiegungen, Fahrzeuge und Fahrer
+Models für Waagen, Wiegungen, Fahrzeuge und Fahrer
 """
 
 from sqlalchemy import Column, String, Integer, Float, DateTime, Date, Text, ForeignKey, DECIMAL, Enum, Boolean
@@ -9,7 +9,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 import enum
 
-from ...core.database import Base
+from app.core.database import Base
 from app.core.uuid7 import uuid7
 
 
@@ -40,7 +40,7 @@ class FahrerStatus(str, enum.Enum):
 
 class Waage(Base):
     """
-    Waage Model fÃ¼r Waagen-Management
+    Waage Model für Waagen-Management
     """
     __tablename__ = "ops_waagen"
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
@@ -76,7 +76,7 @@ class Waage(Base):
 
 class Wiegung(Base):
     """
-    Wiegung Model fÃ¼r Waagen-Wiegungen
+    Wiegung Model für Waagen-Wiegungen
     """
     __tablename__ = "ops_wiegungen"
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
@@ -87,7 +87,7 @@ class Wiegung(Base):
     kennzeichen = Column(String(20), nullable=False)
     fahrer_name = Column(String(100))
     
-    # WÃ¤gedaten
+    # Wägedaten
     artikel = Column(String(100), nullable=False)
     brutto = Column(Float, nullable=False)
     tara = Column(Float, nullable=False)
@@ -219,7 +219,7 @@ class Fahrzeug(Base):
 
 class Fahrer(Base):
     """
-    Fahrer Model fÃ¼r Fuhrpark
+    Fahrer Model für Fuhrpark
     """
     __tablename__ = "ops_fahrer"
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
@@ -236,7 +236,7 @@ class Fahrer(Base):
     telefon = Column(String(50))
     email = Column(String(200))
     
-    # FÃ¼hrerschein
+    # Führerschein
     fuehrerschein = Column(String(10), nullable=False)  # B, C, CE, etc.
     fuehrerschein_gueltig_bis = Column(DateTime(timezone=True))
     
@@ -255,7 +255,7 @@ class Fahrer(Base):
     touren_woche = Column(Integer, default=0)
     kilometer_heute = Column(Float, default=0)
     
-    # VerfÃ¼gbarkeit
+    # Verfügbarkeit
     verfuegbar_ab = Column(DateTime(timezone=True))
     
     # Audit
@@ -396,15 +396,15 @@ class DokumentKategorie(str, enum.Enum):
     """Dokument Kategorie Enum"""
     LIEFERSCHEINE = "Lieferscheine"
     RECHNUNGEN = "Rechnungen"
-    QUALITAET = "QualitÃ¤t"
-    VERTRAG = "VertrÃ¤ge"
+    QUALITAET = "Qualität"
+    VERTRAG = "Verträge"
     ZERTIFIKATE = "Zertifikate"
     SONSTIGE = "Sonstige"
 
 
 class Dokument(Base):
     """
-    Dokument Model fÃ¼r Dokumentenverwaltung
+    Dokument Model für Dokumentenverwaltung
     """
     __tablename__ = "ops_dokumente"
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
@@ -446,7 +446,7 @@ class Dokument(Base):
 
 class DokumentVersion(Base):
     """
-    Dokument Version Model fÃ¼r Versionierung
+    Dokument Version Model für Versionierung
     """
     __tablename__ = "ops_dokument_versionen"
     __table_args__ = {"schema": "domain_ops", "extend_existing": True}
@@ -462,7 +462,7 @@ class DokumentVersion(Base):
     groesse = Column(Integer, default=0)
     speicherpfad = Column(String(500))
     
-    # Ã„nderungen
+    # Änderungen
     aenderungsbemerkung = Column(Text)
     
     # Audit

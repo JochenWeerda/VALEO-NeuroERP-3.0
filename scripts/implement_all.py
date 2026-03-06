@@ -195,9 +195,9 @@ async def implement_all():
                         "ports": ["8000:8000"],
                         "depends_on": ["postgres", "mongodb", "redis"],
                         "environment": {
-                            "MONGODB_URI": "mongodb://mongodb:27017/",
-                            "POSTGRES_URI": "postgresql://postgres:postgres@postgres:5432/valeo_neuroerp",
-                            "REDIS_URI": "redis://redis:6379/0"
+                            "MONGODB_URI": "${MONGODB_URI:-mongodb://mongodb:27017/}",
+                            "POSTGRES_URI": "${DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/valeo_neuro_erp}",
+                            "REDIS_URI": "${REDIS_URL:-redis://redis:6379/0}"
                         }
                     }
                 elif resource_type == "server" and "frontend" in name.lower():
@@ -401,7 +401,7 @@ jobs:
         pytest backend/tests/
       env:
         MONGODB_URI: mongodb://localhost:27017/
-        POSTGRES_URI: postgresql://postgres:postgres@localhost:5432/test_db
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/valeo_neuro_erp_test
   
   build:
     runs-on: ubuntu-latest

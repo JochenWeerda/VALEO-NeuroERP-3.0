@@ -1,17 +1,21 @@
 """
-Feldbuch Service — Maßnahmen aus Lieferscheinen erzeugen, Import-Logik
+Feldbuch Service — Maßnahmen aus Lieferscheinen erzeugen, Import-Logik,
+PSM-Compliance-Prüfung (AGR-COM-02)
 """
 from __future__ import annotations
 
 import csv
 import io
+import logging
 from datetime import date, datetime
-from typing import Any
+from typing import Any, Optional
 
 from sqlalchemy.orm import Session
 
 from app.core.uuid7 import uuid7
 from app.infrastructure.models.agrar_models import FeldbuchMassnahme, FeldbuchSchlag
+
+logger = logging.getLogger(__name__)
 
 
 # ---------------------------------------------------------------------------
@@ -48,6 +52,81 @@ def _get_or_create_schlag_by_name(
         db.add(schlag)
         db.flush()
     return schlag
+
+
+# ---------------------------------------------------------------------------
+# AGR-COM-02: PSM-Compliance-Prüfung
+# ---------------------------------------------------------------------------
+
+# Pflanzenschutzgesetz (PflSchG) Pflichtfelder für Spritztagebuch §11
+_PSM_PFLICHTFELDER = ("datum", "mittel", "menge", "einheit", "flaeche", "anwender")
+
+# NW-Auflagen = Gewässerabstände, NT-Auflagen = Abdriftminderung
+_KNOWN_AUFLAGE_PREFIXES = ("NW", "NT", "NB", "NG", "WW", "WH", "WP", "WR", "WA", "SF")
+
+
+def validate_psm_compliance(
+    *,
+    typ: str,
+    datum: Optional[datetime],
+    mittel: Optional[str],
+    menge: Optional[float],
+    einheit: Optional[str],
+    flaeche: Optional[float],
+    anwender: Optional[str],
+    auflagen: Optional[list[str]],
+    wartezeit_tage: Optional[int],
+    windgeschwindigkeit: Optional[float],
+    temperatur: Optional[float],
+) -> dict[str, Any]:
+    """
+    Prüft eine Maßnahme auf PflSchG-Konformität.
+    Returns dict mit 'compliant' (bool), 'violations' (list[str]), 'warnings' (list[str]).
+    """
+    if typ != "psm":
+        return {"compliant": True, "violations": [], "warnings": []}
+
+    violations: list[str] = []
+    warnings: list[str] = []
+
+    # §11 PflSchG: Pflichtangaben im Spritztagebuch
+    if not datum:
+        violations.append("Datum der Anwendung fehlt (§11 PflSchG)")
+    if not mittel:
+        violations.append("Bezeichnung des PSM fehlt (§11 PflSchG)")
+    if menge is None or menge <= 0:
+        violations.append("Aufwandmenge fehlt oder ungültig (§11 PflSchG)")
+    if not einheit:
+        violations.append("Einheit der Aufwandmenge fehlt (§11 PflSchG)")
+    if not flaeche or flaeche <= 0:
+        violations.append("Behandelte Fläche fehlt (§11 PflSchG)")
+    if not anwender:
+        violations.append("Name des Anwenders fehlt (§11 PflSchG)")
+
+    # Auflagen-Validierung
+    if auflagen:
+        for a in auflagen:
+            prefix = a[:2].upper() if len(a) >= 2 else a
+            if prefix not in _KNOWN_AUFLAGE_PREFIXES:
+                warnings.append(f"Unbekanntes Auflagen-Kürzel: {a}")
+
+    # Wartezeit-Prüfung
+    if wartezeit_tage is not None and wartezeit_tage < 0:
+        violations.append("Wartezeit darf nicht negativ sein")
+
+    # Witterungsbedingungen nach guter fachlicher Praxis
+    if windgeschwindigkeit is not None and windgeschwindigkeit > 25:
+        warnings.append(f"Windgeschwindigkeit {windgeschwindigkeit} km/h — Abdriftgefahr, Anwendung nicht empfohlen")
+    if temperatur is not None and temperatur > 35:
+        warnings.append(f"Temperatur {temperatur}°C — Verdunstungsgefahr, reduzierte Wirksamkeit möglich")
+    if temperatur is not None and temperatur < 5:
+        warnings.append(f"Temperatur {temperatur}°C — eingeschränkte PSM-Wirksamkeit möglich")
+
+    compliant = len(violations) == 0
+    if violations:
+        logger.warning("PSM-Compliance-Verstoß: %s", violations)
+
+    return {"compliant": compliant, "violations": violations, "warnings": warnings}
 
 
 # ---------------------------------------------------------------------------

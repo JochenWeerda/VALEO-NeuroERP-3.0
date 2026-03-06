@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 from typing import List, Optional
 
-from app.core.database_pg import get_db
+from app.core.database import get_db
 from app.einkauf import schemas
 
 logger = logging.getLogger(__name__)
@@ -589,8 +589,8 @@ async def import_rechnung_pdf(
     - Optional: Match mit Bestellung für 3-Wege-Abgleich
     """
     try:
-        # Simulierte OCR-Extraktion (in Produktion: pdfplumber, tesseract, oder Cloud-OCR)
-        # Hier: Mock-Daten basierend auf Datei-ID
+        # OCR-Stub: Liefert Platzhalter-Struktur zurück.
+        # TODO(phase-4): Echte Extraktion via pdfplumber / tesseract / Cloud-OCR einbauen
         ocr_result = {
             "extracted_data": {
                 "rechnungs_nummer": f"OCR-{file_id[-8:]}",

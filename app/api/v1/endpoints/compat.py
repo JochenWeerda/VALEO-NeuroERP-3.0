@@ -17,6 +17,7 @@ from sqlalchemy.orm import Session
 from app.core.cache import cache_delete_prefix, cache_get_json, cache_set_json
 from app.core.config import settings
 from app.core.database import get_db
+from app.core.uuid7 import uuid7
 from app.core.logging import get_correlation_id
 from app.core.tenant import get_tenant_id
 from app.infrastructure.models import AuditLog
@@ -2928,13 +2929,36 @@ class TagesabschlussOut(BaseModel):
     belegnummer: str
 
 
+def _ensure_chart_account(db: Session, tenant_id: str, account_number: str, account_name: str) -> str:
+    """Hole oder erstelle Kontenplan-Eintrag, return chart_of_accounts.id."""
+    row = db.execute(
+        text("""
+            SELECT id FROM domain_erp.chart_of_accounts
+            WHERE tenant_id = :tid AND account_number = :num LIMIT 1
+        """),
+        {"tid": tenant_id, "num": account_number},
+    ).fetchone()
+    if row:
+        return str(row[0])
+    acc_id = uuid7()
+    db.execute(
+        text("""
+            INSERT INTO domain_erp.chart_of_accounts
+            (id, tenant_id, account_number, account_name, account_type, category, is_active, created_at, updated_at)
+            VALUES (:id, :tid, :num, :name, 'ASSET', 'general', TRUE, NOW(), NOW())
+        """),
+        {"id": acc_id, "tid": tenant_id, "num": account_number, "name": account_name},
+    )
+    return acc_id
+
+
 @router.post("/pos/tagesabschluss", response_model=TagesabschlussOut, status_code=201, tags=["pos"])
 async def create_tagesabschluss(
     payload: TagesabschlussIn,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> TagesabschlussOut:
-    """POS Tagesabschluss buchen — schreibt in public.abschluss_checklisten."""
+    """POS Tagesabschluss buchen — schreibt in abschluss_checklisten UND erzeugt FiBu-Journal-Einträge."""
     abschluss_id = str(uuid4())
     belegnummer = f"KA-{payload.datum.isoformat()}"
 
@@ -2970,6 +2994,85 @@ async def create_tagesabschluss(
             "items": items_json,
         },
     )
+
+    # Verdrahtung zur FiBu: Journal-Eintrag erstellen (SKR03)
+    period = payload.datum.strftime("%Y-%m")
+    umsatz_bar = float(payload.umsatz_bar or 0)
+    umsatz_ec = float(payload.umsatz_ec or 0)
+    umsatz_paypal = float(payload.umsatz_paypal or 0)
+    umsatz_b2b = float(payload.umsatz_b2b or 0)
+    umsatz_gesamt = float(payload.umsatz_gesamt or 0)
+    differenz_bar = float(payload.differenz_bar or 0)
+
+    if umsatz_gesamt > 0:
+        entry_id = uuid7()
+        desc = f"Tagesabschluss POS {payload.datum.isoformat()} ({payload.kassierer or 'Kassierer'})"
+
+        acc_1000 = _ensure_chart_account(db, tenant_id, "1000", "Kasse")
+        acc_1200 = _ensure_chart_account(db, tenant_id, "1200", "Bank")
+        acc_1210 = _ensure_chart_account(db, tenant_id, "1210", "PayPal / Verrechnung")
+        acc_8400 = _ensure_chart_account(db, tenant_id, "8400", "Umsatzerlöse")
+        acc_2150 = _ensure_chart_account(db, tenant_id, "2150", "Kassenfehlbeträge")
+
+        db.execute(
+            text("""
+                INSERT INTO domain_erp.journal_entries
+                (id, tenant_id, entry_number, entry_date, posting_date, description,
+                 source, reference, period, status, total_debit, total_credit, created_at, updated_at)
+                VALUES (:id, :tid, :entry_number, :edate, :pdate, :desc,
+                        'POS', :ref, :period, 'posted', :total_d, :total_c, NOW(), NOW())
+            """),
+            {
+                "id": entry_id,
+                "tid": tenant_id,
+                "entry_number": belegnummer,
+                "edate": payload.datum,
+                "pdate": payload.datum,
+                "desc": desc,
+                "ref": belegnummer,
+                "period": period,
+                "total_d": umsatz_gesamt + abs(differenz_bar),
+                "total_c": umsatz_gesamt + abs(differenz_bar),
+            },
+        )
+
+        lines: list[tuple[str, float, float, str]] = []
+        if umsatz_bar > 0:
+            lines.append((acc_1000, umsatz_bar, 0.0, "Kasseneinnahmen Bar"))
+        if umsatz_ec > 0:
+            lines.append((acc_1200, umsatz_ec, 0.0, "EC-Zahlungen"))
+        if umsatz_paypal > 0:
+            lines.append((acc_1210, umsatz_paypal, 0.0, "PayPal"))
+        if umsatz_b2b > 0:
+            lines.append((acc_1200, umsatz_b2b, 0.0, "B2B-Verbuchung"))
+        if differenz_bar > 0:
+            lines.append((acc_2150, differenz_bar, 0.0, "Kassenfehlbetrag"))
+        lines.append((acc_8400, 0.0, umsatz_gesamt, "Umsatzerlöse POS"))
+        if differenz_bar < 0:
+            lines.append((acc_2150, 0.0, abs(differenz_bar), "Kassenüberbetrag"))
+        if differenz_bar > 0:
+            lines.append((acc_1000, 0.0, differenz_bar, "Kassenfehlbetrag Abgang"))
+
+        for ln, (acc_id, debit, credit, line_desc) in enumerate(lines, start=1):
+            line_id = f"{entry_id}-L{ln}"
+            db.execute(
+                text("""
+                    INSERT INTO domain_erp.journal_entry_lines
+                    (id, tenant_id, journal_entry_id, account_id, debit, credit, line_number, description, created_at)
+                    VALUES (:id, :tid, :je_id, :acc_id, :debit, :credit, :ln, :desc, NOW())
+                """),
+                {
+                    "id": line_id,
+                    "tid": tenant_id,
+                    "je_id": entry_id,
+                    "acc_id": acc_id,
+                    "debit": debit,
+                    "credit": credit,
+                    "ln": ln,
+                    "desc": line_desc,
+                },
+            )
+
     db.commit()
 
     return TagesabschlussOut(

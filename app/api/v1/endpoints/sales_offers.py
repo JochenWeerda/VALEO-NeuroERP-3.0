@@ -500,19 +500,60 @@ async def convert_offer_to_order(
 
     now = datetime.now(timezone.utc)
     db.execute(
-        text(
-            """
-            UPDATE domain_crm.sales_offers
-            SET status = 'angenommen', updated_at = :now
-            WHERE id = :id
-            """
-        ),
+        text("UPDATE domain_crm.sales_offers SET status = 'angenommen', updated_at = :now WHERE id = :id"),
         {"now": now, "id": offer_id},
     )
+
+    order_id = str(uuid4())
+    order_number = f"SO-{row['offer_number']}"
+    offer_items = _fetch_items(db, offer_id)
+    total = sum(Decimal(str(i.line_total)) for i in offer_items)
+
+    db.execute(
+        text("""
+            INSERT INTO domain_crm.sales_orders
+            (id, tenant_id, sales_offer_id, customer_id, order_number, subject,
+             description, total_amount, currency, status, contact_person, notes,
+             created_at, updated_at, version)
+            VALUES (:id, :tid, :offer_id, :cid, :on, :subj, :desc, :total,
+                    :cur, 'open', :cp, :notes, :now, :now, 1)
+        """),
+        {
+            "id": order_id, "tid": effective_tenant, "offer_id": offer_id,
+            "cid": row.get("customer_id") or "", "on": order_number,
+            "subj": row["subject"], "desc": row.get("description") or "",
+            "total": float(total), "cur": row.get("currency") or "EUR",
+            "cp": row.get("contact_person"), "notes": row.get("notes"),
+            "now": now,
+        },
+    )
+
+    for item in offer_items:
+        db.execute(
+            text("""
+                INSERT INTO domain_crm.sales_order_items
+                (id, tenant_id, order_id, line_number, article_number, description,
+                 quantity, unit_price, discount_percent, line_total, created_at, updated_at)
+                VALUES (:id, :tid, :oid, :ln, :an, :desc, :qty, :up, :dp, :lt, :now, :now)
+            """),
+            {
+                "id": str(uuid4()), "tid": effective_tenant, "oid": order_id,
+                "ln": item.line_number, "an": item.article_number,
+                "desc": item.description, "qty": item.quantity,
+                "up": item.unit_price, "dp": item.discount_percent,
+                "lt": item.line_total, "now": now,
+            },
+        )
+
     db.commit()
 
     updated = db.execute(
         text("SELECT * FROM domain_crm.sales_offers WHERE id = :id"),
         {"id": offer_id},
     ).mappings().first()
-    return _row_to_offer(dict(updated), _fetch_items(db, offer_id))
+    offer_out = _row_to_offer(dict(updated), offer_items)
+    return {
+        "offer": offer_out.model_dump() if hasattr(offer_out, "model_dump") else offer_out,
+        "created_order_id": order_id,
+        "created_order_number": order_number,
+    }

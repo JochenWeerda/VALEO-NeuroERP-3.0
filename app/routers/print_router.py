@@ -15,7 +15,7 @@ from app.services.archive_service import archive
 from app.integrations.dms_client import upload_document, is_configured as is_dms_configured
 from app.repositories.document_repository import DocumentRepository
 from app.repositories.workflow_repository import WorkflowRepository
-from app.core.database_pg import SessionLocal
+from app.core.database import SessionLocal
 from app.core.dependency_container import container
 
 logger = logging.getLogger(__name__)

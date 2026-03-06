@@ -1,10 +1,12 @@
-﻿"""
+"""
 BVL PSM API client
-Runtime fetch from BVL ORDS API with in-memory TTL cache.
+Runtime fetch from BVL ORDS API with in-memory TTL cache,
+retry logic (B3), and monitoring counters (B4).
 """
 
 from __future__ import annotations
 
+import logging
 import os
 import time
 from datetime import datetime, timezone
@@ -12,8 +14,22 @@ from typing import Any, Dict, Optional, Tuple
 
 import httpx
 
+logger = logging.getLogger(__name__)
+
+# B4: Monitoring-Zähler
+psm_api_metrics: dict[str, int] = {
+    "requests": 0,
+    "cache_hits": 0,
+    "retries": 0,
+    "failures": 0,
+    "success": 0,
+}
+
 
 class BVLPSMClient:
+    MAX_RETRIES = 3
+    RETRY_BACKOFF = (0.5, 1.0, 2.0)
+
     def __init__(self) -> None:
         base_url = os.getenv("BVL_PSM_API_BASE_URL", "https://psm-api.bvl.bund.de/ords/psm/api-v1")
         self.base_url = base_url.rstrip("/")
@@ -29,6 +45,7 @@ class BVLPSMClient:
         if (time.time() - ts) > self.ttl_seconds:
             self._cache.pop(key, None)
             return None
+        psm_api_metrics["cache_hits"] += 1
         return data
 
     def _cache_set(self, key: str, value: Any) -> None:
@@ -41,14 +58,33 @@ class BVLPSMClient:
         if cached is not None:
             return cached
 
+        psm_api_metrics["requests"] += 1
         url = f"{self.base_url}{path}"
-        async with httpx.AsyncClient(timeout=self.timeout, follow_redirects=True) as client:
-            resp = await client.get(url, params=params)
-            resp.raise_for_status()
-            data = resp.json()
+        last_exc: Optional[Exception] = None
 
-        self._cache_set(cache_key, data)
-        return data
+        for attempt in range(self.MAX_RETRIES):
+            try:
+                async with httpx.AsyncClient(timeout=self.timeout, follow_redirects=True) as client:
+                    resp = await client.get(url, params=params)
+                    resp.raise_for_status()
+                    data = resp.json()
+                psm_api_metrics["success"] += 1
+                self._cache_set(cache_key, data)
+                return data
+            except (httpx.TimeoutException, httpx.HTTPStatusError, httpx.ConnectError) as exc:
+                last_exc = exc
+                psm_api_metrics["retries"] += 1
+                wait = self.RETRY_BACKOFF[min(attempt, len(self.RETRY_BACKOFF) - 1)]
+                logger.warning(
+                    "BVL PSM API attempt %d/%d failed (%s), retrying in %.1fs",
+                    attempt + 1, self.MAX_RETRIES, exc, wait,
+                )
+                import asyncio
+                await asyncio.sleep(wait)
+
+        psm_api_metrics["failures"] += 1
+        logger.error("BVL PSM API exhausted %d retries: %s", self.MAX_RETRIES, last_exc)
+        raise last_exc  # type: ignore[misc]
 
     async def list_mittel(self, *, search: Optional[str], skip: int, limit: int) -> dict[str, Any]:
         params: dict[str, Any] = {
