@@ -2,7 +2,7 @@
 
 **Zweck:** Einheitlicher Einstieg für alle Gap-, Todo- und Plan-Dokumente. Vermeidung von Dopplungen; klare Zuordnung, was aktuell und was archiviert ist.
 
-**Zuletzt geprüft:** 2025-03-05. **Geschlossen (Implementierung):** Button-UX-Audit vollständig abgearbeitet: F1–F19, E2, E4, W10, W14, W15, M1–M21, M23 (inkl. M9, M11–M15 Agrar; E4 Bestellung→Lieferschein; F18 Scan-Dialog; A6/A12 Auge/Stift). TSE/Offline: Konzept in docs/AUTH-AND-TENANT-CONCEPT.md (M22).
+**Zuletzt geprüft:** 2026-03-05. **Geschlossen (Implementierung):** Button-UX-Audit vollständig abgearbeitet: F1–F19, E2, E4, W10, W14, W15, M1–M21, M23. TSE/Offline: Konzept in docs/AUTH-AND-TENANT-CONCEPT.md (M22). **Phase 1–6:** Abgeschlossen. Phase 6 (Agriculture Backend) siehe `docs/PHASE-6-COMPLETION-REPORT.md`.
 
 ---
 
@@ -17,8 +17,15 @@
 | **FiBu-Suite (Design)** | [`docs/FIBU-SUITE-TODO.md`](FIBU-SUITE-TODO.md) | UX/Design-System, Maskenliste P0/P1, Ribbon vs. PageToolbar |
 | **FiBu-Connectors** | [`.cursor/fibu-connectors-status.md`](../.cursor/fibu-connectors-status.md) | Lohn, Asset Ledger, Connector-Framework; **Lohn-Connector Delete: im Code implementiert** |
 | **Gap-Closure-Plan** | [`.cursor/plans/gap-closure_master_plan_ab0cb3b1.plan.md`](../.cursor/plans/gap-closure_master_plan_ab0cb3b1.plan.md) | Phasenplan (Phase 1–6), Todo-Status pro Phase |
+| **Phase-2-Report** | [`docs/PHASE-2-COMPLETION-REPORT.md`](PHASE-2-COMPLETION-REPORT.md) | Finance P1 (12 Cap.), CRM P0/P1 (4 Cap.) — Abschluss 2026-03-05 |
+| **Phase-3-Report** | [`docs/PHASE-3-COMPLETION-REPORT.md`](PHASE-3-COMPLETION-REPORT.md) | Sales Domain (15+ Cap.), Procurement Konsolidierung — Abschluss 2026-03-05 |
+| **Phase-4-Report** | [`docs/PHASE-4-COMPLETION-REPORT.md`](PHASE-4-COMPLETION-REPORT.md) | CRM/Marketing Erweiterung (7 Cap.) — Abschluss 2026-03-05 |
+| **Phase-5-Report** | [`docs/PHASE-5-COMPLETION-REPORT.md`](PHASE-5-COMPLETION-REPORT.md) | Finance + Procurement P2/P3 — Abschluss 2026-03-05 |
+| **Phase-6-Report** | [`docs/PHASE-6-COMPLETION-REPORT.md`](PHASE-6-COMPLETION-REPORT.md) | Agriculture Backend + Erweiterung — Abschluss 2026-03-05 |
+| **GAP-Closure Summary** | [`docs/GAP-CLOSURE-SUMMARY.md`](GAP-CLOSURE-SUMMARY.md) | Konsolidierte Übersicht Phasen 1–6, Stand 2026-03-05 |
 | **GoBD/Audit-Gaps** | [`.cursor/plans/gaps-schliessen-audit-gobd.plan.md`](../.cursor/plans/gaps-schliessen-audit-gobd.plan.md) | GoBD-Konformität, Risiko-Maßnahmen, Datenmodell/APIs (kein Todo-Array, inhaltlicher Plan) |
 | **Auth/Tenant/TSE/Offline** | [`docs/AUTH-AND-TENANT-CONCEPT.md`](AUTH-AND-TENANT-CONCEPT.md) | Backend/Frontend Tenant & User; Kunden-Suche; TSE- und Offline-Queue-Konzept (Mock/TODO M22, M23) |
+| **Geplant-Index** | [`docs/GEPLANT-INDEX.md`](GEPLANT-INDEX.md) | Überall wo „geplant“ vorkommt — Umsetzungspotenzial und Priorisierung |
 
 ---
 
@@ -66,6 +73,7 @@ Für **tagesaktuellen Gap-Stand** die kanonischen Dokumente in Abschnitt 1 nutze
 1. **Button-UX-Audit:** Bei Abarbeitung Eintrag auf „Erledigt“ setzen und ggf. kurze Code-Referenz (Datei/Zeile) ergänzen.
 2. **Gap-Closure-Plan:** Phasen-Status (pending/in_progress/completed) in der Plan-Datei halten; große Meilensteine ggf. in `gap/implementation-roadmap.md` spiegeln.
 3. **Neue Gaps/TODOs:** Primär in `gap/*.md` (fachliche Gaps) bzw. `.cursor/button-ux-audit-todo.md` (UI/Button/Mock) eintragen.
+4. **Geplant-Index:** Bei Abarbeitung von „geplant“-Stellen: `docs/GEPLANT-INDEX.md` pflegen, Status aktualisieren.
 4. **Archiv:** Abgelöste oder historische Analysen nach `docs/archive/` verschieben und im Index mit „(archiv)“ kennzeichnen.
 
 ---

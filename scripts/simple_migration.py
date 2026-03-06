@@ -6,9 +6,17 @@ Vereinfachte Migration für NeuroFlow-Erweiterungen
 Erstellt: 2025-07-23
 """
 
+import os
 import psycopg2
 import time
 from pathlib import Path
+
+_DB_CFG = {
+    "host": os.environ.get("PGHOST", "localhost"),
+    "user": os.environ.get("PGUSER", "valeo_dev"),
+    "password": os.environ.get("PGPASSWORD", "valeo_dev_2024"),
+    "port": int(os.environ.get("PGPORT", "5432")),
+}
 
 def wait_for_postgres():
     """Wartet auf PostgreSQL-Verfügbarkeit"""
@@ -16,13 +24,7 @@ def wait_for_postgres():
     
     for attempt in range(30):  # 30 Versuche
         try:
-            conn = psycopg2.connect(
-                host='localhost',
-                database='postgres',  # Standard-DB
-                user='valeo_user',
-                password='valeo_password',
-                port=5432
-            )
+            conn = psycopg2.connect(database="postgres", **_DB_CFG)
             conn.close()
             print("✅ PostgreSQL ist verfügbar")
             return True
@@ -37,27 +39,20 @@ def create_database():
     """Erstellt die Datenbank falls sie nicht existiert"""
     print("🗄️ Erstelle Datenbank...")
     
+    _dbname = os.environ.get("PGDATABASE", "valeo_neuro_erp")
     try:
-        # Verbinde zur Standard-DB
-        conn = psycopg2.connect(
-            host='localhost',
-            database='postgres',
-            user='valeo_user',
-            password='valeo_password',
-            port=5432
-        )
+        conn = psycopg2.connect(database="postgres", **_DB_CFG)
         conn.autocommit = True
         cursor = conn.cursor()
         
-        # Prüfe ob Datenbank existiert
-        cursor.execute("SELECT 1 FROM pg_database WHERE datname = 'valeo_neuroerp'")
+        cursor.execute("SELECT 1 FROM pg_database WHERE datname = %s", (_dbname,))
         exists = cursor.fetchone()
         
         if not exists:
-            cursor.execute("CREATE DATABASE valeo_neuroerp")
-            print("✅ Datenbank 'valeo_neuroerp' erstellt")
+            cursor.execute(f'CREATE DATABASE "{_dbname}"')
+            print(f"✅ Datenbank '{_dbname}' erstellt")
         else:
-            print("✅ Datenbank 'valeo_neuroerp' existiert bereits")
+            print(f"✅ Datenbank '{_dbname}' existiert bereits")
         
         cursor.close()
         conn.close()
@@ -71,14 +66,9 @@ def run_migration():
     """Führt die Migration aus"""
     print("🚀 Führe NeuroFlow-Migration aus...")
     
+    _dbname = os.environ.get("PGDATABASE", "valeo_neuro_erp")
     try:
-        conn = psycopg2.connect(
-            host='localhost',
-            database='valeo_neuroerp',
-            user='valeo_user',
-            password='valeo_password',
-            port=5432
-        )
+        conn = psycopg2.connect(database=_dbname, **_DB_CFG)
         conn.autocommit = True
         cursor = conn.cursor()
         
@@ -257,14 +247,9 @@ def verify_migration():
     """Verifiziert die Migration"""
     print("\n🔍 Verifiziere Migration...")
     
+    _dbname = os.environ.get("PGDATABASE", "valeo_neuro_erp")
     try:
-        conn = psycopg2.connect(
-            host='localhost',
-            database='valeo_neuroerp',
-            user='valeo_user',
-            password='valeo_password',
-            port=5432
-        )
+        conn = psycopg2.connect(database=_dbname, **_DB_CFG)
         cursor = conn.cursor()
         
         # Prüfe Schemas

@@ -9,7 +9,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.core.uuid7 import uuid7
 
-from ...core.database import Base
+from app.core.database import Base
 
 
 # Saatgut Models

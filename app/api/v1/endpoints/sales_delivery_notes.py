@@ -598,3 +598,54 @@ async def get_last_delivery_note(
         positionen=[DeliveryNotePosition(**dict(p)) for p in positions]
     )
 
+
+@router.post("/{ls_id}/create-invoice", response_model=dict, status_code=201)
+async def create_invoice_from_delivery(
+    ls_id: str,
+    tenant_id: str = Query(DEFAULT_TENANT),
+    db: Session = Depends(get_db),
+):
+    """Create a sales invoice from a posted delivery note (Dokumentenfluss LS → RE)."""
+    row = db.execute(
+        text("SELECT * FROM domain_sales.delivery_notes WHERE id = :id AND tenant_id = :tid"),
+        {"id": ls_id, "tid": tenant_id},
+    ).mappings().first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Lieferschein nicht gefunden")
+    if row.get("status") not in ("posted", "printed", "gebucht"):
+        raise HTTPException(status_code=400, detail="Lieferschein muss gebucht/gedruckt sein, bevor eine Rechnung erstellt werden kann")
+
+    positions = _list_positions(db, ls_id)
+    total = sum(Decimal(str(p.get("netto_betrag") or 0)) for p in positions)
+    inv_id = uuid7()
+    inv_nr = f"RE-{row.get('ls_nummer', ls_id[:8])}"
+
+    db.execute(text("CREATE SCHEMA IF NOT EXISTS domain_erp"))
+    db.execute(
+        text("""
+            INSERT INTO domain_erp.journal_entries
+            (id, tenant_id, entry_number, entry_date, posting_date, description,
+             source, status, total_debit, total_credit, reference, created_at, updated_at)
+            VALUES (:id, :tid, :en, NOW(), NOW(), :desc,
+                    'sales_invoice', 'posted', :total, :total, :ref, NOW(), NOW())
+        """),
+        {
+            "id": inv_id, "tid": tenant_id,
+            "en": inv_nr, "desc": f"Rechnung aus Lieferschein {row.get('ls_nummer', '')}",
+            "total": total, "ref": inv_nr,
+        },
+    )
+
+    db.execute(
+        text("UPDATE domain_sales.delivery_notes SET status = 'invoiced', updated_at = NOW() WHERE id = :id"),
+        {"id": ls_id},
+    )
+    db.commit()
+    return {
+        "ok": True,
+        "invoice_id": inv_id,
+        "invoice_number": inv_nr,
+        "delivery_note_id": ls_id,
+        "total": float(total),
+    }
+

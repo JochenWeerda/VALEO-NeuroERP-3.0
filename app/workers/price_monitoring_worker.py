@@ -9,7 +9,7 @@ from datetime import datetime, date, timedelta
 from typing import Dict, Any, List
 
 from ..core.config import settings
-from ..core.database import get_db
+from app.core.database import get_db
 from sqlalchemy import text
 from app.infrastructure.models import DailyPrice, ArticlePriceThreshold
 

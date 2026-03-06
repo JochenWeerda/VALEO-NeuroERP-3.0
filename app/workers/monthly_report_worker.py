@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from typing import Dict, Any
 from calendar import monthrange
 
-from ..core.database import get_db
+from app.core.database import get_db
 
 logger = logging.getLogger(__name__)
 

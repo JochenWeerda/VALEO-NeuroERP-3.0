@@ -10,7 +10,7 @@ from typing import Dict, Any
 from pathlib import Path
 
 from ..core.config import settings
-from ..core.database import get_db
+from app.core.database import get_db
 from sqlalchemy import text
 from app.infrastructure.models import AuditLog
 

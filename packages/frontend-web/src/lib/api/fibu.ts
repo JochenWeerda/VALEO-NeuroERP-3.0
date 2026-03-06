@@ -504,3 +504,81 @@ export function useZahlungsvorschlaege() {
     staleTime: 2 * 60 * 1000,
   })
 }
+
+// ── UStVA / ELSTER (VAT Return) ────────────────────────────────────────────
+
+export type VATReturn = {
+  id: string
+  period: string
+  return_type: string
+  taxpayer_name: string
+  tax_id?: string
+  vat_id?: string
+  total_sales_net: number
+  total_input_tax: number
+  total_output_tax: number
+  vat_payable: number
+  positions: Array<{
+    position_code: string
+    description: string
+    net_amount: number
+    tax_amount: number
+    tax_rate: number
+  }>
+  status: 'draft' | 'calculated' | 'validated' | 'submitted'
+  calculated_at?: string
+  validated_at?: string
+  submitted_at?: string
+  notes?: string
+  created_at: string
+  updated_at: string
+}
+
+export const vatReturnKeys = {
+  all: ['fibu', 'vat-return'] as const,
+  list: (period?: string) => [...vatReturnKeys.all, period ?? 'all'] as const,
+}
+
+export function useVATReturns(period?: string, tenantId = 'system') {
+  return useQuery({
+    queryKey: vatReturnKeys.list(period),
+    queryFn: async () => {
+      const params = new URLSearchParams({ tenant_id: tenantId })
+      if (period) params.append('period', period)
+      const response = await apiClient.get<VATReturn[]>(
+        `/api/v1/finance/vat-return?${params.toString()}`
+      )
+      return Array.isArray(response.data) ? response.data : []
+    },
+  })
+}
+
+export function useCalculateVATReturn() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (params: { period: string; tenant_id?: string }) => {
+      const response = await apiClient.post<VATReturn>(
+        '/api/v1/finance/vat-return/calculate',
+        { period: params.period, tenant_id: params.tenant_id ?? 'system' }
+      )
+      return response.data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: vatReturnKeys.all })
+    },
+  })
+}
+
+/** ELSTER-XML herunterladen (nutzt apiClient → Auth wird automatisch mitgesendet). */
+export async function downloadELSTERXml(returnId: string, period: string, tenantId = 'system'): Promise<void> {
+  const url = `/api/v1/finance/vat-return/${returnId}/elster-xml?tenant_id=${tenantId}`
+  const res = await apiClient.get<Blob>(url, { responseType: 'blob' } as Record<string, unknown>)
+  const blob = res.data as unknown as Blob
+  const disposition = (res as { headers?: Record<string, string> }).headers?.['content-disposition']
+  const filename = disposition?.match(/filename="?([^";\n]+)"?/)?.[1] ?? `UStVA_${period}_ELSTER.xml`
+  const a = document.createElement('a')
+  a.href = URL.createObjectURL(blob)
+  a.download = filename
+  a.click()
+  URL.revokeObjectURL(a.href)
+}

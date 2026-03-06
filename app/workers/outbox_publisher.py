@@ -8,7 +8,7 @@ import logging
 from typing import Optional
 from sqlalchemy.orm import Session
 
-from ..core.database import SessionLocal
+from app.core.database import SessionLocal
 from ..core.config import settings
 from ..infrastructure.eventbus.outbox import OutboxPublisher
 from ..domains.shared.events import get_event_publisher

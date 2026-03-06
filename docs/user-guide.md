@@ -258,6 +258,21 @@ Entwurf → Eingereicht → Freigegeben → Gebucht
 - Automatische Synchronisation bei Wiederherstellung
 - Konfliktlösung bei parallelen Änderungen
 
+### 5. Kundenportal (für Anwender)
+
+**Navigation**: `/portal` – Shop, Bestellungen, Ackerschlagkartei, Nährstoffbilanzen, etc.
+
+**Anwender (Mitarbeiter mit ERP-Zugang)**:
+- Können im Kundenportal die Kundenansicht prüfen oder testen.
+- Sehen einen **"Zur Startseite"**-Button im Header (und im mobilen Menü).
+- Der Button führt zurück zur Hauptanwendung (`/`).
+
+**Kunden (reine Portal-Nutzer)**:
+- Sehen den "Zur Startseite"-Button nicht.
+- Bleiben im Portal-Kontext.
+
+Details: `docs/portal-layout.md`
+
 ### 6. Berichte und Analysen (Reports & Analytics)
 
 #### 6.1 Standard-Berichte

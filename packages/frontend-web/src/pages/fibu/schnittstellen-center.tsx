@@ -102,6 +102,33 @@ const CONNECTORS: Connector[] = [
     status: 'active',
     category: 'both',
   },
+  {
+    id: 'atlas',
+    name: 'ATLAS (Zoll)',
+    description: 'Zollanmeldungen, Ausfuhr, EU-Übermittlung',
+    path: '/fibu/atlas',
+    icon: FileDown,
+    status: 'planned',
+    category: 'export',
+  },
+  {
+    id: 'elster-online',
+    name: 'ELSTER (Online)',
+    description: 'Direkte Übermittlung UStVA, Lohnsteuer, Einkommensteuer',
+    path: '/fibu/elster-online',
+    icon: FileText,
+    status: 'planned',
+    category: 'export',
+  },
+  {
+    id: 'asset-import',
+    name: 'Anlagen-Import (CSV/DATEV)',
+    description: 'Massenimport Anlagendaten aus DATEV oder CSV',
+    path: '/fibu/anlagen-suite',
+    icon: FileUp,
+    status: 'planned',
+    category: 'import',
+  },
 ]
 
 function statusLabel(s: Connector['status']): string {
@@ -129,7 +156,7 @@ export default function SchnittstellenCenterPage(): JSX.Element {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {CONNECTORS.map((conn) => {
           const Icon = conn.icon
-          const isPlaceholder = conn.status === 'planned' || conn.path === '/fibu/schnittstellen-center'
+          const isPlaceholder = conn.status === 'planned' && conn.path === '/fibu/schnittstellen-center'
           return (
             <Card key={conn.id} className="flex flex-col">
               <CardHeader className="pb-2">

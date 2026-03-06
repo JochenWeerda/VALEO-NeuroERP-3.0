@@ -12,7 +12,7 @@ from typing import Annotated
 from fastapi import Depends
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.core.database_pg import get_db
+from app.core.database import get_db
 
 logger = logging.getLogger(__name__)
 

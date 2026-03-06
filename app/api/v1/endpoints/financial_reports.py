@@ -475,6 +475,58 @@ async def get_bwa(
         return _empty_bwa(period)
 
 
+@router.get("/drilldown", response_model=List[Dict[str, Any]])
+async def get_report_drilldown(
+    account_number: str = Query(..., description="Account number to drill into"),
+    period: str = Query(..., description="Accounting period (YYYY-MM)"),
+    tenant_id: str = Query("system", description="Tenant ID"),
+    limit: int = Query(100, ge=1, le=500),
+    db: Session = Depends(get_db),
+):
+    """
+    FIBU-REP-02: Drilldown — list journal entry lines for an account in a period.
+    """
+    try:
+        rows = db.execute(
+            text("""
+                SELECT jel.id, jel.journal_entry_id, jel.account_id, jel.debit, jel.credit,
+                       jel.description, jel.reference, je.entry_number, je.entry_date,
+                       je.description AS entry_description
+                FROM domain_erp.journal_entry_lines jel
+                JOIN domain_erp.journal_entries je ON je.id = jel.journal_entry_id
+                JOIN domain_erp.chart_of_accounts coa ON coa.id = jel.account_id
+                WHERE coa.tenant_id = :tenant_id AND coa.account_number = :account
+                  AND je.tenant_id = :tenant_id AND je.status = 'posted'
+                  AND TO_CHAR(je.entry_date, 'YYYY-MM') = :period
+                ORDER BY je.entry_date DESC, je.entry_number
+                LIMIT :lim
+            """),
+            {
+                "tenant_id": tenant_id,
+                "account": account_number,
+                "period": period,
+                "lim": limit,
+            },
+        ).fetchall()
+        return [
+            {
+                "line_id": str(r[0]),
+                "journal_entry_id": str(r[1]),
+                "debit": float(r[3]) if r[3] else 0,
+                "credit": float(r[4]) if r[4] else 0,
+                "description": r[5],
+                "reference": r[6],
+                "entry_number": r[7],
+                "entry_date": r[8].isoformat() if r[8] else None,
+                "entry_description": r[9],
+            }
+            for r in rows
+        ]
+    except (OperationalError, ProgrammingError) as e:
+        logger.warning("Drilldown query failed: %s", e)
+        return []
+
+
 def _report_to_rows(report_type: str, data: Any) -> List[List[str]]:
     """Flatten report data to rows for Excel/PDF table."""
     rows = [[f"Bericht: {report_type}", f"Periode: {getattr(data, 'period', '')}"]]

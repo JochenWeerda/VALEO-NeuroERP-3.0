@@ -9,11 +9,11 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.core.uuid7 import uuid7
 
-from ...core.database import Base
+from app.core.database import Base
 
 
-class Customer(Base):
-    """Customer master data"""
+class CrmCustomer(Base):
+    """Customer master data (domain_crm schema)"""
     __tablename__ = "crm_customers"
     __table_args__ = {"schema": "domain_crm", "extend_existing": True}
 
@@ -62,12 +62,12 @@ class Customer(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     # Relationships
-    contacts = relationship("Contact", back_populates="customer", cascade="all, delete-orphan")
-    activities = relationship("Activity", back_populates="customer", cascade="all, delete-orphan")
+    contacts = relationship("CrmContact", back_populates="customer", cascade="all, delete-orphan")
+    activities = relationship("CrmActivity", back_populates="customer", cascade="all, delete-orphan")
 
 
-class Contact(Base):
-    """Contact persons for customers/suppliers"""
+class CrmContact(Base):
+    """Contact persons for customers/suppliers (domain_crm schema)"""
     __tablename__ = "crm_contacts"
     __table_args__ = {"schema": "domain_crm", "extend_existing": True}
 
@@ -103,11 +103,11 @@ class Contact(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     # Relationships
-    customer = relationship("Customer", back_populates="contacts")
+    customer = relationship("CrmCustomer", back_populates="contacts")
 
 
-class Activity(Base):
-    """Customer activities and interactions"""
+class CrmActivity(Base):
+    """Customer activities and interactions (domain_crm schema)"""
     __tablename__ = "crm_activities"
     __table_args__ = {"schema": "domain_crm", "extend_existing": True}
 
@@ -138,7 +138,7 @@ class Activity(Base):
     longitude = Column(DECIMAL(11, 8))
 
     # Additional data
-    metadata = Column(JSONB)  # Flexible storage for type-specific data
+    extra_data = Column("metadata", JSONB)  # renamed attr to avoid clash with Base.metadata
 
     # Metadata
     tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
@@ -146,7 +146,7 @@ class Activity(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     # Relationships
-    customer = relationship("Customer", back_populates="activities")
+    customer = relationship("CrmCustomer", back_populates="activities")
 
 
 class VisitReport(Base):
@@ -197,7 +197,7 @@ class VisitReport(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     # Relationships
-    customer = relationship("Customer")
+    customer = relationship("CrmCustomer")
 
 
 class Opportunity(Base):
@@ -233,6 +233,11 @@ class Opportunity(Base):
 
     # Competition
     competitors = Column(JSONB)  # Array of competitor information
+    loss_reason = Column(String(200))  # Win/Loss: reason when closed_lost
+
+    # CRM-OPP-04: Document links (Belegkette)
+    sales_offer_id = Column(String(64))
+    sales_order_id = Column(String(64))
 
     # Metadata
     tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
@@ -240,4 +245,4 @@ class Opportunity(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     # Relationships
-    customer = relationship("Customer")
+    customer = relationship("CrmCustomer")

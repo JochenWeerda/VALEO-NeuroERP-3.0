@@ -9,8 +9,8 @@ from sqlalchemy.dialects import postgresql
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.sql import func
 
-from ...core.database import Base
-from ...core.uuid7 import uuid7
+from app.core.database import Base
+from app.core.uuid7 import uuid7
 
 
 # ── Inventory Count Lines ────────────────────────────────────────

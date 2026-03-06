@@ -10,7 +10,7 @@ import { getEntityTypeLabel, getStatusLabel, getSuccessMessage, getErrorMessage 
 import { toast } from '@/hooks/use-toast'
 import { ErrorState } from '@/components/ErrorState'
 
-// Konfiguration fÃ¼r Campaigns ListReport
+// Konfiguration für Campaigns ListReport
 const createCampaignsConfig = (t: any, entityTypeLabel: string): ListConfig => ({
   title: entityTypeLabel,
   titleKey: 'crud.list.title',

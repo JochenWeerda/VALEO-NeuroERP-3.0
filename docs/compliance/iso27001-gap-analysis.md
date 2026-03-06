@@ -77,7 +77,7 @@
   - Auto-Deactivation bei Austritt
   
 - [x] **Access-Review**
-  - Quarterly (geplant)
+  - Quarterly (Prozess: [iso27001-quarterly-review-process.md](iso27001-quarterly-review-process.md))
   - Audit-Log für Zugriffe
 
 - [ ] **Privileged-Access-Management** (PAM)

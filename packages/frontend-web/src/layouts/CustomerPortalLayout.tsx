@@ -1,8 +1,17 @@
 /**
  * Customer Portal Layout
- * 
- * Separates Layout für Kunden-Zugang via Handy/Tablet
- * Optimiert für mobile Nutzung mit Touch-freundlicher Navigation
+ *
+ * Separates Layout für Kunden-Zugang via Handy/Tablet (Kundenportal unter /portal).
+ * Optimiert für mobile Nutzung mit Touch-freundlicher Navigation.
+ *
+ * ## Anwender vs. Kunde
+ *
+ * - **Anwender** (Rolllen: admin, user, manager): Sehen einen "Zur Startseite"-Button,
+ *   um zur Hauptanwendung (/) zurückzukehren. Hilfreich, wenn sie im Portal testen
+ *   oder Kundenansicht prüfen.
+ * - **Kunden** (reine Portal-Nutzer ohne ERP-Rollen): Sehen den Button nicht.
+ *
+ * Siehe: docs/portal-layout.md
  */
 
 import { useState } from 'react'
@@ -43,7 +52,9 @@ import {
   Award,
   FileSpreadsheet,
   BarChart3,
+  ArrowLeft,
 } from 'lucide-react'
+import { useAuth } from '@/hooks/useAuth'
 
 interface NavItem {
   label: string
@@ -77,8 +88,12 @@ const mockCustomer = {
 export default function CustomerPortalLayout() {
   const location = useLocation()
   const navigate = useNavigate()
+  const { hasRole } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [notifications] = useState(3) // Mock notifications
+
+  // Anwender (nicht reine Kunden): admin, user, manager → dürfen zurück zur Hauptanwendung
+  const isAnwender = hasRole('admin') || hasRole('user') || hasRole('manager')
 
   const isActivePath = (path: string) => {
     if (path === '/portal') {
@@ -113,6 +128,19 @@ export default function CustomerPortalLayout() {
                   </SheetTitle>
                 </SheetHeader>
                 <nav className="mt-6 flex flex-col gap-1">
+                  {isAnwender && (
+                    <Link
+                      to="/"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center justify-between rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800 transition-colors hover:bg-emerald-100"
+                    >
+                      <span className="flex items-center gap-3">
+                        <ArrowLeft className="h-5 w-5" />
+                        Zur Startseite
+                      </span>
+                      <ChevronRight className="h-4 w-4 text-emerald-600" />
+                    </Link>
+                  )}
                   {customerNavItems.map((item) => (
                     <Link
                       key={item.path}
@@ -151,6 +179,16 @@ export default function CustomerPortalLayout() {
                 VALEO <span className="text-emerald-600">Portal</span>
               </span>
             </Link>
+
+            {isAnwender && (
+              <Link
+                to="/"
+                className="ml-2 flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 hover:text-emerald-700"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                <span className="hidden sm:inline">Zur Startseite</span>
+              </Link>
+            )}
           </div>
 
           {/* Desktop Navigation */}

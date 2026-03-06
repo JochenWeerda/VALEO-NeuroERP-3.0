@@ -12,8 +12,11 @@ sys.path.insert(0, str(project_root))
 from sqlalchemy import create_engine, text
 from app.infrastructure.models import Base
 
-# Verwende die korrekte DB-URL
-DATABASE_URL = "postgresql://valeo_dev:REDACTED_PASSWORD@localhost:5432/valeo_neuro_erp"
+import os
+DATABASE_URL = os.environ.get(
+    "DATABASE_URL",
+    "postgresql://valeo_dev:valeo_dev_2024@127.0.0.1:5432/valeo_neuro_erp",
+)
 
 print("=" * 80)
 print("Erstelle Tabellen mit SQLAlchemy")

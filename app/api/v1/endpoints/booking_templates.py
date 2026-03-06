@@ -155,39 +155,8 @@ async def list_booking_templates(
         return result
         
     except Exception as e:
-        logger.error(f"Error listing booking templates: {e}")
-        # Return mock data if table doesn't exist
-        return [
-            BookingTemplateResponse(
-                id="1",
-                name="Miete monatlich",
-                description="Monatliche Mietzahlung",
-                category="RECURRING",
-                trigger_type="SCHEDULED",
-                trigger_config={"cron": "0 0 1 * *"},
-                lines=[
-                    BookingTemplateLine(
-                        account_number="5000",
-                        debit_percentage=Decimal("100.00"),
-                        credit_percentage=Decimal("0.00"),
-                        description_template="Miete {{month}}/{{year}}",
-                        line_number=1
-                    ),
-                    BookingTemplateLine(
-                        account_number="1400",
-                        debit_percentage=Decimal("0.00"),
-                        credit_percentage=Decimal("100.00"),
-                        description_template="Miete {{month}}/{{year}}",
-                        line_number=2
-                    )
-                ],
-                default_amount=Decimal("2000.00"),
-                currency="EUR",
-                active=True,
-                created_at=datetime.now(),
-                updated_at=datetime.now()
-            )
-        ]
+        logger.error("Error listing booking templates: %s", e, exc_info=True)
+        return []
 
 
 @router.get("/{template_id}", response_model=BookingTemplateResponse)

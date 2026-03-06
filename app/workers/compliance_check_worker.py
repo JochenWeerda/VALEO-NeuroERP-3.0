@@ -11,7 +11,7 @@ from typing import Dict, Any, List
 from sqlalchemy import or_, and_
 
 from ..core.config import settings
-from ..core.database import get_db
+from app.core.database import get_db
 from app.infrastructure.models import BusinessPartner
 
 logger = logging.getLogger(__name__)

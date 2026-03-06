@@ -94,8 +94,10 @@ async def export_user_data(
         
         return data
         
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"GDPR data-export failed: {e}", exc_info=True)
+        logger.error("GDPR data-export failed: %s", e, exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=str(e)

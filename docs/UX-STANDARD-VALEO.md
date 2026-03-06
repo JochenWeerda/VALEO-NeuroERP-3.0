@@ -45,7 +45,7 @@ Neue Masken: Alle wichtigen Aktionen mit Shortcut definieren und in PageToolbar/
 ## 4. Sprachsteuerung
 
 - **Ziel:** Dieselben Aktionen wie in PageToolbar und Command Palette per Sprache auslösbar („Neue Rechnung“, „Speichern“, „Aufträge öffnen“).
-- **Umsetzung:** Geplant als **KI-Usability-Microservices** (Backend + Frontend). Siehe **[docs/architecture/KI-USABILITY-MICROSERVICES.md](architecture/KI-USABILITY-MICROSERVICES.md)**.
+- **Umsetzung:** **Implementiert** — KI-Usability integriert im Haupt-Backend (`/api/v1/actions`, `/api/v1/voice/resolve`) sowie als Microservice (`services/ki-usability/`). Siehe [docs/architecture/KI-USABILITY-MICROSERVICES.md](architecture/KI-USABILITY-MICROSERVICES.md).
   - Einheitliche Intents/Befehle (gleiche Action-IDs wie Toolbar und Command Palette)
   - Backend: Microservice **ki-usability-api** (Action Registry, Voice-to-Intent, optional STT/TTS)
   - Frontend: Feature **ki-usability** (VoiceButton, useVoiceIntent, Action-Dispatcher), Anbindung Web Speech API und/oder Backend

@@ -81,10 +81,16 @@ async def create_journal_entry(
         total_debit = sum(line.debit_amount for line in entry_data.lines)
         total_credit = sum(line.credit_amount for line in entry_data.lines)
 
-        if abs(total_debit - total_credit) > 0.01:  # Allow for small rounding differences
+        if abs(total_debit - total_credit) > 0.01:
             raise HTTPException(
                 status_code=400,
                 detail=f"Journal entry does not balance. Debit: {total_debit}, Credit: {total_credit}"
+            )
+
+        if not entry_data.reference or not entry_data.reference.strip():
+            raise HTTPException(
+                status_code=400,
+                detail="Belegprinzip: Jede Buchung muss eine Belegreferenz haben (reference-Feld)"
             )
 
         # FIBU-GL-05: Check if period is open for bookings

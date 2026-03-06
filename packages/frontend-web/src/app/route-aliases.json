@@ -937,6 +937,14 @@
       "path": "fibu/anlagen-suite"
     },
     {
+      "module": "@/pages/fibu/atlas",
+      "path": "fibu/atlas"
+    },
+    {
+      "module": "@/pages/fibu/elster-online",
+      "path": "fibu/elster-online"
+    },
+    {
       "module": "@/pages/fibu/anlagen-suite",
       "path": "fibu/quadriga-connector"
     },

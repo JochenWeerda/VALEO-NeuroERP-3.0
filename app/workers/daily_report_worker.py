@@ -9,7 +9,7 @@ from datetime import datetime, time
 from typing import Dict, Any
 
 from ..core.config import settings
-from ..core.database import get_db
+from app.core.database import get_db
 from ..domains.crm.services.daily_report_service import DailyReportService
 
 logger = logging.getLogger(__name__)

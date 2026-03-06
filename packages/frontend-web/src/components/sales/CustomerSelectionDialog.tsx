@@ -261,7 +261,7 @@ export function CustomerSelectionDialog({
                 htmlFor="extended-search"
                 className="text-sm font-normal cursor-pointer"
               >
-                Erweitert (Suche zusÃ¤tzlich nach Vertreter, Plz, Ort, Kundengruppe)
+                Erweitert (Suche zusätzlich nach Vertreter, Plz, Ort, Kundengruppe)
               </Label>
             </div>
           </div>
@@ -302,10 +302,10 @@ export function CustomerSelectionDialog({
                         ) : customers.length === 0 ? (
                           <p>Keine Kunden in der Datenbank gefunden.</p>
                         ) : searchTerm ? (
-                          `Keine Kunden gefunden fÃ¼r "${searchTerm}"`
+                          `Keine Kunden gefunden für "${searchTerm}"`
                         ) : (
                           <div>
-                            <p>Keine Kunden fÃ¼r diesen Filter gefunden.</p>
+                            <p>Keine Kunden für diesen Filter gefunden.</p>
                             <p className="text-xs mt-2">
                               Tab: {activeTab}, Total: {customers.length} Kunden
                             </p>

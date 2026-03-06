@@ -1,7 +1,7 @@
-﻿/**
+/**
  * Kundenportal Dashboard
  * 
- * Ãœbersichtsseite fÃ¼r Kunden mit wichtigen KPIs und Schnellzugriffen
+ * Übersichtsseite für Kunden mit wichtigen KPIs und Schnellzugriffen
  */
 
 import { Link } from 'react-router-dom'
@@ -152,7 +152,7 @@ export default function PortalDashboard() {
           color="blue"
         />
         <KPICard
-          title="Laufende VertrÃ¤ge"
+          title="Laufende Verträge"
           value={data.kpis.laufendeVertraege}
           icon={<FileText className="h-5 w-5" />}
           link="/portal/vertraege"
@@ -225,7 +225,7 @@ export default function PortalDashboard() {
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <div>
               <CardTitle className="text-lg">Neue Dokumente</CardTitle>
-              <CardDescription>KÃ¼rzlich bereitgestellt</CardDescription>
+              <CardDescription>Kürzlich bereitgestellt</CardDescription>
             </div>
             <Link to="/portal/dokumente">
               <Button variant="ghost" size="sm" className="gap-1">
@@ -263,7 +263,7 @@ export default function PortalDashboard() {
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">Schnellzugriff</CardTitle>
-          <CardDescription>HÃ¤ufig verwendete Funktionen</CardDescription>
+          <CardDescription>Häufig verwendete Funktionen</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -275,8 +275,8 @@ export default function PortalDashboard() {
               color="emerald"
             />
             <QuickAccessCard
-              title="NÃ¤hrstoffbilanzen"
-              description="JahresÃ¼bersichten"
+              title="Nährstoffbilanzen"
+              description="Jahresübersichten"
               icon={<TrendingUp className="h-6 w-6" />}
               link="/portal/naehrstoffbilanzen"
               color="blue"

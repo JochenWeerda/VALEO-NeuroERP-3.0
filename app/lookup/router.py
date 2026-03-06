@@ -4,70 +4,67 @@ Autocomplete-API für Kunden, Artikel, etc.
 """
 
 from __future__ import annotations
-from fastapi import APIRouter, Query
-from typing import List, Dict, Any
+from fastapi import APIRouter, Query, Depends
+from sqlalchemy.orm import Session
+from typing import Dict, Any
 import logging
+
+from app.core.database import get_db
+from app.infrastructure.models import Customer, Article
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/mcp/lookup", tags=["lookup"])
 
-# Mock-Daten (TODO: durch echte DB-Suche ersetzen)
-_FAKE_CUSTOMERS = [
-    {"id": "CUST-001", "label": "Landhandel Meyer GmbH", "hint": "Emden"},
-    {"id": "CUST-002", "label": "AGRAR Nord GmbH", "hint": "Oldenburg"},
-    {"id": "CUST-003", "label": "Müller Agrar KG", "hint": "Bremen"},
-    {"id": "CUST-004", "label": "Schmidt Landtechnik", "hint": "Leer"},
-    {"id": "CUST-005", "label": "Weber Großhandel", "hint": "Wilhelmshaven"},
-]
-
-_FAKE_ARTICLES = [
-    {"id": "WHEAT-11", "label": "Weizen A", "hint": "25kg Sack", "cost": 2.1, "price": 2.8},
-    {"id": "CORN-07", "label": "Mais B", "hint": "25kg Sack", "cost": 1.8, "price": 2.4},
-    {"id": "APPL-01", "label": "Apfel Gala", "hint": "Kiste 10kg", "cost": 1.2, "price": 1.8},
-    {"id": "PEAR-03", "label": "Birne Conference", "hint": "Kiste 10kg", "cost": 1.5, "price": 2.2},
-    {"id": "POTATO-05", "label": "Kartoffel festkochend", "hint": "25kg Sack", "cost": 0.8, "price": 1.2},
-]
-
 
 @router.get("/customers")
-async def lookup_customers(q: str = Query("")) -> Dict[str, Any]:
-    """
-    Sucht Kunden (Autocomplete)
-
-    Args:
-        q: Suchbegriff
-
-    Returns:
-        Liste von Kunden mit id, label, hint
-    """
-    ql = q.lower()
+async def lookup_customers(
+    q: str = Query(""),
+    db: Session = Depends(get_db),
+) -> Dict[str, Any]:
+    """Sucht Kunden (Autocomplete). Liefert bis zu 20 Treffer."""
+    query = db.query(Customer).filter(Customer.is_active == True)  # noqa: E712
+    if q:
+        pattern = f"%{q}%"
+        query = query.filter(
+            (Customer.company_name.ilike(pattern))
+            | (Customer.customer_number.ilike(pattern))
+            | (Customer.last_name.ilike(pattern))
+        )
+    rows = query.limit(20).all()
     data = [
-        c
-        for c in _FAKE_CUSTOMERS
-        if ql in c["id"].lower() or ql in c["label"].lower()
+        {
+            "id": c.customer_number or c.id,
+            "label": c.company_name or f"{c.last_name}",
+            "hint": getattr(c, "city", "") or "",
+        }
+        for c in rows
     ]
-    logger.debug(f"Customer lookup: '{q}' → {len(data)} results")
+    logger.debug("Customer lookup: '%s' → %d results", q, len(data))
     return {"ok": True, "data": data}
 
 
 @router.get("/articles")
-async def lookup_articles(q: str = Query("")) -> Dict[str, Any]:
-    """
-    Sucht Artikel (Autocomplete)
-
-    Args:
-        q: Suchbegriff
-
-    Returns:
-        Liste von Artikeln mit id, label, hint, cost
-    """
-    ql = q.lower()
+async def lookup_articles(
+    q: str = Query(""),
+    db: Session = Depends(get_db),
+) -> Dict[str, Any]:
+    """Sucht Artikel (Autocomplete). Liefert bis zu 20 Treffer."""
+    query = db.query(Article).filter(Article.is_active == True)  # noqa: E712
+    if q:
+        pattern = f"%{q}%"
+        query = query.filter(
+            (Article.name.ilike(pattern))
+            | (Article.article_number.ilike(pattern))
+        )
+    rows = query.limit(20).all()
     data = [
-        a
-        for a in _FAKE_ARTICLES
-        if ql in a["id"].lower() or ql in a["label"].lower()
+        {
+            "id": a.article_number or a.id,
+            "label": a.name,
+            "hint": getattr(a, "unit", "") or "",
+        }
+        for a in rows
     ]
-    logger.debug(f"Article lookup: '{q}' → {len(data)} results")
+    logger.debug("Article lookup: '%s' → %d results", q, len(data))
     return {"ok": True, "data": data}
-

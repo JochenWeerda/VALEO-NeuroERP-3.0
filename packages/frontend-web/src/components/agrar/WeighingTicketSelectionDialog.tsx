@@ -1,5 +1,5 @@
 ﻿/**
- * Wiegeschein-Auswahl-Dialog fÃ¼r Ernte-Annahme
+ * Wiegeschein-Auswahl-Dialog für Ernte-Annahme
  */
 
 import { useState, useMemo } from 'react'
@@ -61,7 +61,7 @@ export function WeighingTicketSelectionDialog({
       const params = new URLSearchParams()
       params.append('limit', '200')
       if (customerId) {
-        // TODO: Filter nach Kunde, wenn API das unterstÃ¼tzt
+        // TODO: Filter nach Kunde, wenn API das unterstützt
       }
       
       try {
@@ -142,7 +142,7 @@ export function WeighingTicketSelectionDialog({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-4xl max-h-[80vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>Wiegeschein auswÃ¤hlen</DialogTitle>
+          <DialogTitle>Wiegeschein auswählen</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 flex-1 overflow-hidden flex flex-col">
@@ -228,7 +228,7 @@ export function WeighingTicketSelectionDialog({
             Abbrechen
           </Button>
           <Button onClick={handleSelect} disabled={!selectedTicket}>
-            AuswÃ¤hlen
+            Auswählen
           </Button>
         </DialogFooter>
       </DialogContent>

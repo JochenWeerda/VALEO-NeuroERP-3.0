@@ -297,21 +297,21 @@ async def update_creditor(
         if payload.notes is not None:
             address["notes"] = payload.notes
         payment_terms_days = address.get("payment_terms_days", 30)
+        set_parts = ["address = :address::jsonb", "payment_terms = :payment_terms", "updated_at = NOW()"]
+        params_update: dict = {
+            "id": creditor_id,
+            "address": json.dumps(address),
+            "payment_terms": f"{payment_terms_days}_days",
+        }
+        if payload.company_name is not None:
+            set_parts.append("name = :company_name")
+            params_update["company_name"] = payload.company_name
+        if payload.is_active is not None:
+            set_parts.append("is_active = :is_active")
+            params_update["is_active"] = payload.is_active
         db.execute(
-            text(
-                """
-                UPDATE domain_erp.creditors
-                SET address = :address::jsonb, payment_terms = :payment_terms, updated_at = NOW()
-                """ + (", is_active = :is_active" if payload.is_active is not None else "") + """
-                WHERE id = :id
-                """
-            ),
-            {
-                "id": creditor_id,
-                "address": json.dumps(address),
-                "payment_terms": f"{payment_terms_days}_days",
-                **({"is_active": payload.is_active} if payload.is_active is not None else {}),
-            },
+            text(f"UPDATE domain_erp.creditors SET {', '.join(set_parts)} WHERE id = :id"),
+            params_update,
         )
         db.commit()
         row = db.execute(
@@ -326,6 +326,39 @@ async def update_creditor(
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/{creditor_id}/balance", response_model=dict)
+async def get_creditor_balance(
+    creditor_id: str,
+    db: Session = Depends(get_db),
+):
+    """OP-Saldo eines Kreditors: offener Betrag, Anzahl OPs, ältester OP."""
+    existing = db.execute(
+        text("SELECT id FROM domain_erp.creditors WHERE id = :id"), {"id": creditor_id}
+    ).fetchone()
+    if not existing:
+        raise HTTPException(status_code=404, detail="Kreditor nicht gefunden")
+    try:
+        row = db.execute(
+            text("""
+                SELECT
+                    COALESCE(SUM(amount - COALESCE(paid_amount, 0)), 0) AS open_balance,
+                    COUNT(*) AS open_item_count,
+                    MIN(due_date) AS oldest_due_date
+                FROM domain_erp.offene_posten
+                WHERE creditor_id = :creditor_id AND status = 'open'
+            """),
+            {"creditor_id": creditor_id},
+        ).fetchone()
+        return {
+            "creditor_id": creditor_id,
+            "open_balance": float(row[0]) if row else 0.0,
+            "open_item_count": row[1] if row else 0,
+            "oldest_due_date": row[2].isoformat() if row and row[2] else None,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"OP-Saldo konnte nicht ermittelt werden: {str(e)}")
 
 
 @router.delete("/{creditor_id}", status_code=204)

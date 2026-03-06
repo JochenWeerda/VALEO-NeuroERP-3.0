@@ -4,15 +4,20 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { CreditCard, DollarSign, FileText, Scan, ShoppingCart, Smartphone, Grid3x3, Search } from 'lucide-react'
+import { CreditCard, DollarSign, FileText, Scan, ShoppingCart, Smartphone, Grid3x3, Search, Keyboard } from 'lucide-react'
 import { useFiskalyTSE, type PaymentType, type TSETransaction } from '@/lib/services/fiskaly-tse'
 import { ChangeCalculator } from '@/components/pos/ChangeCalculator'
 import { ArticleSearch } from '@/components/pos/ArticleSearch'
+import { TouchBedienfeld, type TouchBedienfeldAction } from '@/components/pos/TouchBedienfeld'
 import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/api-client'
+
+const POS_TOUCH_PANEL_KEY = 'pos-touch-bedienfeld'
 
 type CartItem = {
   artikelnr: string
@@ -33,7 +38,17 @@ export default function POSTerminalPage(): JSX.Element {
   const [activeTx, setActiveTx] = useState<TSETransaction | null>(null)
   const [showChangeCalculator, setShowChangeCalculator] = useState(false)
   const [tendered, setTendered] = useState<number>(0)
+  const [showTouchBedienfeld, setShowTouchBedienfeld] = useState(() => {
+    try {
+      return localStorage.getItem(POS_TOUCH_PANEL_KEY) !== 'false'
+    } catch {
+      return true
+    }
+  })
+  const [numpadBuffer, setNumpadBuffer] = useState('')
+  const [articleTab, setArticleTab] = useState<'scanner' | 'grid' | 'search'>('grid')
   const wsRef = useRef<WebSocket | null>(null)
+  const barcodeInputRef = useRef<HTMLInputElement>(null)
   
   // fiskaly TSE Integration
   const { isInitialized, startTransaction, updateTransaction, finishTransaction } = useFiskalyTSE()
@@ -57,6 +72,15 @@ export default function POSTerminalPage(): JSX.Element {
       }))
     }
   }, [cart])
+
+  // Numpad-Buffer zurücksetzen wenn Wechselgeld-Dialog öffnet
+  const prevShowCalc = useRef(false)
+  useEffect(() => {
+    if (showChangeCalculator && !prevShowCalc.current) {
+      setNumpadBuffer(tendered > 0 ? String(tendered).replace('.', ',') : '0')
+    }
+    prevShowCalc.current = showChangeCalculator
+  }, [showChangeCalculator, tendered])
 
   const { data: articles = [], isLoading: articlesLoading } = useQuery({
     queryKey: ['pos', 'articles'],
@@ -118,6 +142,79 @@ export default function POSTerminalPage(): JSX.Element {
       removeFromCart(ean)
     } else {
       setCart(cart.map((item) => (item.ean === ean ? { ...item, menge } : item)))
+    }
+  }
+
+  function handleTouchBedienfeldChange(checked: boolean): void {
+    setShowTouchBedienfeld(checked)
+    try {
+      localStorage.setItem(POS_TOUCH_PANEL_KEY, String(checked))
+    } catch {
+      /* ignore */
+    }
+  }
+
+  function handleTouchBedienfeldAction(action: TouchBedienfeldAction): void {
+    switch (action.type) {
+      case 'artikelcode':
+        setArticleTab('scanner')
+        setTimeout(() => barcodeInputRef.current?.focus(), 100)
+        break
+      case 'storno':
+        if (cart.length > 0) {
+          const last = cart[cart.length - 1]
+          removeFromCart(last.ean)
+          toast({ title: 'Storno', description: `Position "${last.bezeichnung}" entfernt` })
+        } else {
+          toast({ variant: 'destructive', title: 'Warenkorb leer', description: 'Keine Position zum Stornieren' })
+        }
+        break
+      case 'tara':
+        toast({ title: 'TARA', description: 'Waage tariert (Hardware-Signal bei angeschlossener Waage)' })
+        break
+      case 'kassenschublade':
+        toast({ title: 'Kassenschublade', description: 'Schublade geöffnet (Hardware-Signal bei angeschlossener Kasse)' })
+        break
+      case 'bareinlage':
+      case 'barentnahme':
+        toast({ title: action.type === 'bareinlage' ? 'Bareinlage' : 'Barentnahme', description: 'Buchung über Tagesabschluss erfassen' })
+        break
+      case 'digit':
+        if (showChangeCalculator) {
+          const nextBuf = (numpadBuffer === '0' ? '' : numpadBuffer) + action.digit
+          const newBuf = nextBuf || '0'
+          setNumpadBuffer(newBuf)
+          setTendered(parseFloat(newBuf.replace(',', '.')) || 0)
+        } else {
+          setBarcode((b) => b + action.digit)
+        }
+        break
+      case 'comma':
+        if (showChangeCalculator) {
+          if (!numpadBuffer.includes(',') && !numpadBuffer.includes('.')) {
+            const newBuf = numpadBuffer + ','
+            setNumpadBuffer(newBuf)
+            setTendered(parseFloat(newBuf.replace(',', '.')) || 0)
+          }
+        } else {
+          setBarcode((b) => b + ',')
+        }
+        break
+      case 'clear':
+        if (showChangeCalculator) {
+          setNumpadBuffer('0')
+          setTendered(0)
+        } else {
+          setBarcode('')
+        }
+        break
+      case 'enter':
+        if (showChangeCalculator) {
+          handleCheckout()
+        } else if (barcode) {
+          handleBarcodeInput(barcode)
+        }
+        break
     }
   }
 
@@ -220,6 +317,17 @@ export default function POSTerminalPage(): JSX.Element {
           </div>
         </div>
         <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Switch
+              id="touch-bedienfeld"
+              checked={showTouchBedienfeld}
+              onCheckedChange={handleTouchBedienfeldChange}
+            />
+            <Label htmlFor="touch-bedienfeld" className="flex items-center gap-2 cursor-pointer text-sm">
+              <Keyboard className="h-4 w-4" />
+              Touch-Bedienfeld
+            </Label>
+          </div>
           <Badge variant="secondary" className="text-lg px-4 py-2">
             {customerId ? `B2B: ${customerId}` : 'B2C'}
           </Badge>
@@ -315,11 +423,11 @@ export default function POSTerminalPage(): JSX.Element {
           </div>
         </div>
 
-        {/* Artikelauswahl (Rechts) */}
-        <div className="flex-1 p-4 flex flex-col">
+        {/* Artikelauswahl (Mitte) */}
+        <div className="flex-1 p-4 flex flex-col min-w-0">
           <h2 className="text-xl font-bold mb-4">Artikel</h2>
 
-          <Tabs defaultValue="grid" className="flex-1 flex flex-col">
+          <Tabs value={articleTab} onValueChange={(v) => setArticleTab(v as typeof articleTab)} className="flex-1 flex flex-col">
             <TabsList className="grid w-full grid-cols-3 mb-4">
               <TabsTrigger value="scanner" className="gap-2">
                 <Scan className="h-4 w-4" />
@@ -340,6 +448,7 @@ export default function POSTerminalPage(): JSX.Element {
               <div className="relative">
                 <Scan className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
+                  ref={barcodeInputRef}
                   placeholder="Barcode scannen oder eingeben..."
                   value={barcode}
                   onChange={(e) => setBarcode(e.target.value)}
@@ -397,6 +506,20 @@ export default function POSTerminalPage(): JSX.Element {
             </TabsContent>
           </Tabs>
         </div>
+
+        {/* Touch-Bedienfeld (rechts, einblendbar) */}
+        {showTouchBedienfeld && (
+          <div className="w-72 p-3 border-l bg-slate-50 flex-shrink-0 overflow-auto">
+            <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
+              <Keyboard className="h-4 w-4" />
+              Bedienfeld
+            </h3>
+            <TouchBedienfeld
+              onAction={handleTouchBedienfeldAction}
+              disabled={false}
+            />
+          </div>
+        )}
       </div>
 
       {/* Wechselgeld-Rechner Dialog */}

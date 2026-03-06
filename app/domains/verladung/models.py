@@ -8,7 +8,7 @@ from sqlalchemy.sql import func
 import enum
 from app.core.uuid7 import uuid7
 
-from ...core.database import Base
+from app.core.database import Base
 
 
 class TourStatus(str, enum.Enum):

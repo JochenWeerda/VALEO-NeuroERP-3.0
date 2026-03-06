@@ -14,7 +14,8 @@ export default defineConfig(({ mode }) => {
   const DEFAULT_SSE_PROXY = process.env.VITE_SSE_PROXY || env.VITE_SSE_PROXY || 'http://localhost:5174'
   // Im Container: backend (Docker-Service-Name), lokal: localhost
   const DEFAULT_BACKEND_PROXY = process.env.VITE_BACKEND_PROXY || env.VITE_BACKEND_PROXY || 'http://localhost:8000'
-  const DEFAULT_KI_USABILITY_PROXY = process.env.VITE_KI_USABILITY_PROXY || env.VITE_KI_USABILITY_PROXY || 'http://localhost:5200'
+  // Standard: Haupt-Backend (ki-usability integriert); separater Service: VITE_KI_USABILITY_PROXY=http://localhost:5200
+  const DEFAULT_KI_USABILITY_PROXY = process.env.VITE_KI_USABILITY_PROXY || env.VITE_KI_USABILITY_PROXY || 'http://localhost:8000'
   const DEV_PORT = Number(process.env.VITE_PORT || env.VITE_PORT || 3000)
 
   return {

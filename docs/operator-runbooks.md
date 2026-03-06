@@ -265,6 +265,21 @@ Bei dringenden Fragen: emergency@valero.com
 VALEO NeuroERP Team
 ```
 
+### 6a. Export/Restore Rate Limits (Security)
+
+**Konfiguration (Umgebungsvariablen / Helm):**
+- `RATE_LIMIT_EXPORT`: 10/minute (Policy-Export, GDPR-Export, Report-Export)
+- `RATE_LIMIT_RESTORE`: 5/minute (Policy-Restore, Backup-Restore)
+
+**Verifizierung:**
+```bash
+# Prüfen, ob Rate-Limits aktiv (HTTP 429 bei Überschreitung)
+for i in {1..12}; do curl -s -o /dev/null -w "%{http_code}\n" -H "Authorization: Bearer $TOKEN" https://erp.valero.com/api/mcp/policy/export; sleep 1; done
+# Erwartung: Nach 10 erfolgreichen Requests → 429
+```
+
+---
+
 ### 7. On-Call Schedule
 
 #### Rotation

@@ -183,7 +183,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
     return `${year}-${month}-${day}`
   }
 
-  // Helper: Extrahiere User-KÃ¼rzel aus User-Objekt
+  // Helper: Extrahiere User-Kürzel aus User-Objekt
   const getUserShortName = (): string => {
     if (!user) return 'SYSTEM'
     const shortName = user.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 
@@ -419,7 +419,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
   const handleSave = async (): Promise<string | null> => {
     try {
       if (!state.customer) {
-        push('Bitte wÃ¤hlen Sie einen Kunden aus')
+        push('Bitte wählen Sie einen Kunden aus')
         return null
       }
 
@@ -504,7 +504,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
 
     try {
       await apiClient.post(`/api/v1/agrar/harvest-acceptance/${state.id}/calculate`)
-      push('Berechnung erfolgreich durchgefÃ¼hrt')
+      push('Berechnung erfolgreich durchgeführt')
       
       // Lade aktualisierte Daten
       const response = await apiClient.get<HarvestAcceptanceResponse>(`/api/v1/agrar/harvest-acceptance/${state.id}`)
@@ -571,7 +571,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
       try {
         const text = String(reader.result ?? '')
         const lines = text.split(/\r?\n/).filter(Boolean)
-        if (lines.length < 2) { push('Datei enthÃ¤lt keine Daten (mind. Kopfzeile + eine Zeile).'); return }
+        if (lines.length < 2) { push('Datei enthält keine Daten (mind. Kopfzeile + eine Zeile).'); return }
         const sep = text.includes(';') ? ';' : ','
         const headers = lines[0].split(sep).map(h => h.trim().toLowerCase().replace(/\s+/g, ''))
         const valIdx = headers.findIndex(h => h === 'wert' || h === 'value' || h === 'laborwert')
@@ -609,7 +609,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
           return p
         })
         setState(prev => ({ ...prev, labValues: updatedLabValues, positions: updatedPositions }))
-        push('Laborwerte aus Datei Ã¼bernommen.')
+        push('Laborwerte aus Datei übernommen.')
       } catch (err) {
         push('Import fehlgeschlagen. Erwartet: CSV mit Kopfzeile (z. B. Parameter;Wert oder Bezeichnung;Wert).')
       }
@@ -644,7 +644,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
     }
   }
 
-  // Kunde auswÃ¤hlen
+  // Kunde auswählen
   const handleCustomerSelect = (customer: Customer): void => {
     setState((prev) => ({
       ...prev,
@@ -654,7 +654,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
     setShowCustomerDialog(false)
   }
 
-  // Artikel auswÃ¤hlen
+  // Artikel auswählen
   const handleArticleSelect = (article: any): void => {
     setState((prev) => ({
       ...prev,
@@ -665,16 +665,16 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
     setShowArticleDialog(false)
   }
 
-  // Wiegeschein auswÃ¤hlen
+  // Wiegeschein auswählen
   const handleWeighingTicketSelect = (ticket: WeighingTicket): void => {
-    // Ãœbernehme Netto-Gewicht in Position 10 (Angelieferte Menge)
+    // Übernehme Netto-Gewicht in Position 10 (Angelieferte Menge)
     const updatedPositions = [...state.positions]
     const pos10Index = updatedPositions.findIndex(p => p.positionNumber === 10)
     if (pos10Index >= 0 && ticket.net_weight) {
       updatedPositions[pos10Index].quantityKg = ticket.net_weight
     }
 
-    // Ãœbernehme Laborwerte
+    // Übernehme Laborwerte
     const updatedLabValues = { ...state.labValues }
     if (ticket.moisture_pct !== null) {
       updatedLabValues.feuchte = ticket.moisture_pct
@@ -711,7 +711,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
     setShowWeighingTicketDialog(false)
   }
 
-  // Kontrakt auswÃ¤hlen
+  // Kontrakt auswählen
   const handleContractSelect = (contract: AgrarContract): void => {
     setState((prev) => ({
       ...prev,
@@ -721,7 +721,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
     setShowContractDialog(false)
   }
 
-  // Sorte auswÃ¤hlen
+  // Sorte auswählen
   const handleVarietySelect = (variety: Variety): void => {
     setState((prev) => ({
       ...prev,
@@ -809,7 +809,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
         deliveryTime,
         salesRepId: response.sales_rep_id,
         operatorId: response.operator_id || getUserShortName(),
-        weighingTicketId: null, // Nicht Ã¼bernehmen
+        weighingTicketId: null, // Nicht übernehmen
         costCenterId: response.cost_center_id,
         customer,
         contractId: response.contract_id,
@@ -825,7 +825,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
         originCity: response.origin_city || '',
         originCountryCode: response.origin_country_code || 'DE',
         isSustainableBiomass: response.is_sustainable_biomass,
-        releaseStatus: 'draft', // Immer Draft fÃ¼r neue Ernte-Annahme
+        releaseStatus: 'draft', // Immer Draft für neue Ernte-Annahme
         pricingMode: response.pricing_mode as HarvestAcceptanceState['pricingMode'],
         priceSourceId: response.price_source_id,
         acceptanceMode: response.acceptance_mode || 'PURCHASE_AT_DELIVERY_PTBF',
@@ -847,33 +847,33 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
         labValues,
       }))
 
-      push('Daten vom vorherigen Annahmeschein Ã¼bernommen')
+      push('Daten vom vorherigen Annahmeschein übernommen')
     } catch (error: any) {
       console.error('Fehler beim Laden des vorherigen Annahmescheins:', error)
       push(`Fehler: ${error.response?.data?.detail || error.message}`)
     }
   }
 
-  // LÃ¶schen
+  // Löschen
   const handleDelete = async (): Promise<void> => {
     if (!state.id) {
-      push('Keine Ernte-Annahme zum LÃ¶schen vorhanden')
+      push('Keine Ernte-Annahme zum Löschen vorhanden')
       return
     }
 
     if (state.releaseStatus !== 'draft') {
-      push(`Ernte-Annahme kann nicht gelÃ¶scht werden. Status: ${state.releaseStatus}. Nur 'draft' kann gelÃ¶scht werden.`)
+      push(`Ernte-Annahme kann nicht gelöscht werden. Status: ${state.releaseStatus}. Nur 'draft' kann gelöscht werden.`)
       return
     }
 
     try {
       await apiClient.delete(`/api/v1/agrar/harvest-acceptance/${state.id}`)
-      push('Ernte-Annahme erfolgreich gelÃ¶scht')
+      push('Ernte-Annahme erfolgreich gelöscht')
       setShowDeleteDialog(false)
       navigate('/agrar/ernte')
     } catch (error: any) {
       console.error('Delete error:', error)
-      push(`Fehler beim LÃ¶schen: ${error.response?.data?.detail || error.message}`)
+      push(`Fehler beim Löschen: ${error.response?.data?.detail || error.message}`)
     }
   }
 
@@ -892,7 +892,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
       { positionNumber: 70, description: 'Feuchtigkeitsabzug', isPrintable: true, isCalculable: false, unit: 'kg' },
       { positionNumber: 75, description: 'Lagergeld', isPrintable: false, isCalculable: false, unit: 'Mon.' },
       { positionNumber: 78, description: 'Frachtkosten', isPrintable: false, isCalculable: true, unit: 'kg' },
-      { positionNumber: 80, description: 'WiegegebÃ¼hren', isPrintable: false, isCalculable: false, unit: 'Euro/St' },
+      { positionNumber: 80, description: 'Wiegegebühren', isPrintable: false, isCalculable: false, unit: 'Euro/St' },
       { positionNumber: 110, description: 'Gutschriftsbetrag', isPrintable: true, isCalculable: true, unit: 'kg' },
     ]
 
@@ -1057,7 +1057,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                 <TabsTrigger value="kontrakt" className="text-xs py-1">KONTRAKT</TabsTrigger>
                 <TabsTrigger value="spediteur" className="text-xs py-1">SPEDITEUR</TabsTrigger>
                 <TabsTrigger value="nawaro" className="text-xs py-1">NAWARO</TabsTrigger>
-                <TabsTrigger value="zw-haendler" className="text-xs py-1">ZW-HÃ„NDLER</TabsTrigger>
+                <TabsTrigger value="zw-haendler" className="text-xs py-1">ZW-HÄNDLER</TabsTrigger>
               </TabsList>
 
               <TabsContent value="kunde" className="mt-4 space-y-2">
@@ -1140,12 +1140,12 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                       onValueChange={(v) => setState((prev) => ({ ...prev, pricingMode: v as HarvestAcceptanceState['pricingMode'] }))}
                     >
                       <SelectTrigger className="flex-1 h-8">
-                        <SelectValue placeholder="Preismodell wÃ¤hlen" />
+                        <SelectValue placeholder="Preismodell wählen" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="fixed_contract">Festpreis Vertrag</SelectItem>
                         <SelectItem value="spot_daily">Tagespreis</SelectItem>
-                        <SelectItem value="exchange_fix_later">BÃ¶rse / spÃ¤ter festlegen</SelectItem>
+                        <SelectItem value="exchange_fix_later">Börse / später festlegen</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -1159,10 +1159,10 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                     />
                   </div>
                   <div className="flex items-center gap-2">
-                    <Label className="w-40 text-sm">GeschÃ¤ftsmodell:</Label>
+                    <Label className="w-40 text-sm">Geschäftsmodell:</Label>
                     <Select value={state.acceptanceMode} onValueChange={(v) => setState((prev) => ({ ...prev, acceptanceMode: v }))}>
                       <SelectTrigger className="flex-1 h-8">
-                        <SelectValue placeholder="GeschÃ¤ftsmodell wÃ¤hlen" />
+                        <SelectValue placeholder="Geschäftsmodell wählen" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="STORAGE_ONLY">Nur Lagerung (Fremdware)</SelectItem>
@@ -1172,10 +1172,10 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                     </Select>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Label className="w-40 text-sm">EigentumsverhÃ¤ltnis:</Label>
+                    <Label className="w-40 text-sm">Eigentumsverhältnis:</Label>
                     <Select value={state.ownershipType} onValueChange={(v) => setState((prev) => ({ ...prev, ownershipType: v }))}>
                       <SelectTrigger className="flex-1 h-8">
-                        <SelectValue placeholder="EigentumsverhÃ¤ltnis wÃ¤hlen" />
+                        <SelectValue placeholder="Eigentumsverhältnis wählen" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="THIRD_PARTY_STOCK">Fremdware</SelectItem>
@@ -1187,12 +1187,12 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                     <Label className="w-40 text-sm">USt-Ereignis:</Label>
                     <Select value={state.vatEvent} onValueChange={(v) => setState((prev) => ({ ...prev, vatEvent: v }))}>
                       <SelectTrigger className="flex-1 h-8">
-                        <SelectValue placeholder="USt-Ereignis wÃ¤hlen" />
+                        <SelectValue placeholder="USt-Ereignis wählen" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="NO_INVOICE">Keine Rechnung</SelectItem>
-                        <SelectItem value="PROVISIONAL_CREDIT_NOTE_CREATED">VorlÃ¤ufige Gutschrift</SelectItem>
-                        <SelectItem value="FINAL_CREDIT_NOTE_CREATED">EndgÃ¼ltige Gutschrift</SelectItem>
+                        <SelectItem value="PROVISIONAL_CREDIT_NOTE_CREATED">Vorläufige Gutschrift</SelectItem>
+                        <SelectItem value="FINAL_CREDIT_NOTE_CREATED">Endgültige Gutschrift</SelectItem>
                         <SelectItem value="CORRECTION_ISSUED">Korrektur erstellt</SelectItem>
                       </SelectContent>
                     </Select>
@@ -1209,7 +1209,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                         advancePaymentAmountEur: e.target.value ? parseFloat(e.target.value) : null,
                       }))}
                       className="flex-1 h-8"
-                      placeholder="FÃ¼r Einlagerung + Anzahlung"
+                      placeholder="Für Einlagerung + Anzahlung"
                     />
                   </div>
                   <div className="flex items-center gap-2">
@@ -1301,7 +1301,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                         value={state.nawaroZweck || ''}
                         onChange={(e) => setState((prev) => ({ ...prev, nawaroZweck: e.target.value }))}
                         className="flex-1 h-8 border rounded px-2">
-                        <option value="">-- bitte wÃ¤hlen --</option>
+                        <option value="">-- bitte wählen --</option>
                         <option value="biogas">Biogas</option>
                         <option value="bioethanol">Bioethanol</option>
                         <option value="biodiesel">Biodiesel</option>
@@ -1341,7 +1341,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
 
               <TabsContent value="zw-haendler" className="mt-4 space-y-2">
                 <div className="flex items-center gap-2">
-                  <Label className="w-32 text-sm">Zw-HÃ¤ndler-Kto.:</Label>
+                  <Label className="w-32 text-sm">Zw-Händler-Kto.:</Label>
                   <Input
                     value={state.intermediateDealerId || ''}
                     onChange={(e) => setState((prev) => ({ ...prev, intermediateDealerId: e.target.value || null }))}
@@ -1575,7 +1575,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                 <ShortcutHintButton shortcut="Strg+F5">
                   <Button variant="outline" onClick={() => void handleCalculate()} size="sm" className="gap-2">
                     <Calculator className="h-4 w-4" />
-                    â†’ Berechnung neu
+                    → Berechnung neu
                   </Button>
                 </ShortcutHintButton>
                 <Button variant="outline" size="sm" className="gap-2" onClick={() => void handleAbschlagrechnung()} title="Abschlagrechnung">
@@ -1612,7 +1612,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                       onChange={(e) => setState((prev) => ({ ...prev, releaseStatus: e.target.value as HarvestAcceptanceState['releaseStatus'] }))}
                       className="h-4 w-4"
                     />
-                    <Label htmlFor="release-provisional" className="text-sm cursor-pointer">vorlÃ¤ufig</Label>
+                    <Label htmlFor="release-provisional" className="text-sm cursor-pointer">vorläufig</Label>
                   </div>
                   <div className="flex items-center gap-2">
                     <input
@@ -1624,7 +1624,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                       onChange={(e) => setState((prev) => ({ ...prev, releaseStatus: e.target.value as HarvestAcceptanceState['releaseStatus'] }))}
                       className="h-4 w-4"
                     />
-                    <Label htmlFor="release-final" className="text-sm cursor-pointer">endgÃ¼ltig</Label>
+                    <Label htmlFor="release-final" className="text-sm cursor-pointer">endgültig</Label>
                   </div>
                 </div>
                 <Button variant="outline" size="sm" className="gap-2">
@@ -1643,11 +1643,11 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                 className="gap-2 text-red-600"
                 onClick={() => {
                   if (!state.id) {
-                    push('Keine Ernte-Annahme zum LÃ¶schen vorhanden')
+                    push('Keine Ernte-Annahme zum Löschen vorhanden')
                     return
                   }
                   if (state.releaseStatus !== 'draft') {
-                    push(`Ernte-Annahme kann nicht gelÃ¶scht werden. Status: ${state.releaseStatus}. Nur 'draft' kann gelÃ¶scht werden.`)
+                    push(`Ernte-Annahme kann nicht gelöscht werden. Status: ${state.releaseStatus}. Nur 'draft' kann gelöscht werden.`)
                     return
                   }
                   setShowDeleteDialog(true)
@@ -1655,7 +1655,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                 disabled={!state.id || state.releaseStatus !== 'draft'}
               >
                 <Trash2 className="h-4 w-4" />
-                Annahmeschein lÃ¶schen
+                Annahmeschein löschen
               </Button>
               <Button variant="outline" size="sm" className="gap-2">
                 <FileText className="h-4 w-4" />
@@ -1683,22 +1683,22 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
             <CardHeader>
               <CardTitle className="text-sm">Labor-Werte</CardTitle>
               <CardDescription className="text-xs mt-1">
-                Analyse-Bon (Druck): CSV/Export importieren. GerÃ¤t ohne Export: Werte unten manuell eintragen. Raps: Analyse per Schriftform oder E-Mail mit PDF-Anhang (Ã–lgehalte) â†’ PDF unter â€žUnterlagenâ€œ anhÃ¤ngen.
+                Analyse-Bon (Druck): CSV/Export importieren. Gerät ohne Export: Werte unten manuell eintragen. Raps: Analyse per Schriftform oder E-Mail mit PDF-Anhang (Ölgehalte) → PDF unter „Unterlagen“ anhängen.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex flex-col gap-2">
                 <input type="file" accept=".csv,.txt" className="hidden" ref={importAnalyseInputRef} onChange={handleImportAnalyse} />
-                <Button variant="outline" size="sm" className="w-full" onClick={() => importAnalyseInputRef?.current?.click()} title="CSV/Text mit Parametern (z. B. Parameter;Wert) von GerÃ¤ten mit Datenexport oder Analyse-Bon">
+                <Button variant="outline" size="sm" className="w-full" onClick={() => importAnalyseInputRef?.current?.click()} title="CSV/Text mit Parametern (z. B. Parameter;Wert) von Geräten mit Datenexport oder Analyse-Bon">
                   <Download className="h-4 w-4 mr-2" />
-                  Import CSV (Analyse-Bon / GerÃ¤t-Export)
+                  Import CSV (Analyse-Bon / Gerät-Export)
                 </Button>
-                <Button variant="outline" size="sm" className="w-full" onClick={() => { setShowAttachmentDialog(true); push('Raps-Analyse-PDF (Ã–lgehalte) unter Unterlagen anhÃ¤ngen. Automatische Auswertung ist in Vorbereitung.'); }} title="Raps: Analyse-Ergebnisse als PDF (z. B. aus E-Mail) anhÃ¤ngen">
+                <Button variant="outline" size="sm" className="w-full" onClick={() => { setShowAttachmentDialog(true); push('Raps-Analyse-PDF (Ölgehalte) unter Unterlagen anhängen. Automatische Auswertung ist in Vorbereitung.'); }} title="Raps: Analyse-Ergebnisse als PDF (z. B. aus E-Mail) anhängen">
                   <FileText className="h-4 w-4 mr-2" />
-                  PDF anhÃ¤ngen (Raps Ã–lgehalte)
+                  PDF anhängen (Raps Ölgehalte)
                 </Button>
               </div>
-              <p className="text-xs text-muted-foreground">Manuelle Eingabe (vom GerÃ¤t ablesen):</p>
+              <p className="text-xs text-muted-foreground">Manuelle Eingabe (vom Gerät ablesen):</p>
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -1805,7 +1805,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                     <TableCell>Mon.</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell>WiegegebÃ¼hren</TableCell>
+                    <TableCell>Wiegegebühren</TableCell>
                     <TableCell>
                       <Input
                         type="number"
@@ -1914,7 +1914,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
           setForwarderName(customer.name)
           setShowForwarderDialog(false)
         }}
-        title="SPEDITEUR AUSWÃ„HLEN"
+        title="SPEDITEUR AUSWÄHLEN"
       />
       <CustomerSelectionDialog
         open={showIntermediateDealerDialog}
@@ -1924,14 +1924,14 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
           setIntermediateDealerName(customer.name)
           setShowIntermediateDealerDialog(false)
         }}
-        title="ZWISCHENHÃ„NDLER AUSWÃ„HLEN"
+        title="ZWISCHENHÄNDLER AUSWÄHLEN"
       />
       <DmsAnhangDialog
         open={showAttachmentDialog}
         onClose={() => setShowAttachmentDialog(false)}
         businessObjectType="harvest_reception"
         businessObjectId={state.id}
-        title="UNTERLAGEN / DATEIEN â€” ERNTE-ANNAHME"
+        title="UNTERLAGEN / DATEIEN — ERNTE-ANNAHME"
       />
       <CustomerSelectionDialog
         open={showCustomerDialog}
@@ -1966,7 +1966,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
       <Dialog open={showZusFelderDialog} onOpenChange={setShowZusFelderDialog}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>ZusÃ¤tzliche Felder</DialogTitle>
+            <DialogTitle>Zusätzliche Felder</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div>
@@ -1997,7 +1997,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowZusFelderDialog(false)}>SchlieÃŸen</Button>
+            <Button variant="outline" onClick={() => setShowZusFelderDialog(false)}>Schließen</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -2006,7 +2006,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Abweichende USt-ID</DialogTitle>
-            <DialogDescription>USt-Identifikationsnummer des EmpfÃ¤ngers (z. B. bei innergemeinschaftlichem Erwerb).</DialogDescription>
+            <DialogDescription>USt-Identifikationsnummer des Empfängers (z. B. bei innergemeinschaftlichem Erwerb).</DialogDescription>
           </DialogHeader>
           <div className="py-4">
             <Label htmlFor="ustid-input" className="text-sm">USt-ID</Label>
@@ -2030,7 +2030,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                 setShowUstIdDialog(false)
               }}
             >
-              Ãœbernehmen
+              Übernehmen
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -2040,14 +2040,14 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Ernte-Annahme lÃ¶schen</DialogTitle>
+            <DialogTitle>Ernte-Annahme löschen</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <p className="text-sm">
-              MÃ¶chten Sie die Ernte-Annahme <strong>{state.acceptanceNumber}</strong> wirklich lÃ¶schen?
+              Möchten Sie die Ernte-Annahme <strong>{state.acceptanceNumber}</strong> wirklich löschen?
             </p>
             <p className="text-xs text-muted-foreground">
-              Diese Aktion kann nicht rÃ¼ckgÃ¤ngig gemacht werden. Nur Ernte-Annahmen im Status 'draft' kÃ¶nnen gelÃ¶scht werden.
+              Diese Aktion kann nicht rückgängig gemacht werden. Nur Ernte-Annahmen im Status 'draft' können gelöscht werden.
             </p>
           </div>
           <DialogFooter>
@@ -2055,7 +2055,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
               Abbrechen
             </Button>
             <Button variant="destructive" onClick={() => void handleDelete()}>
-              LÃ¶schen
+              Löschen
             </Button>
           </DialogFooter>
         </DialogContent>

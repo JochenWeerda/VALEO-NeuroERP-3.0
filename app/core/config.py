@@ -161,6 +161,9 @@ class Settings(BaseSettings):
     # VIES (EU USt-ID-Prüfung) – bei True ruft der Compliance-Worker den VIES-Service auf
     ENABLE_VIES_CHECK: bool = False
 
+    # Agrar Feature-Flags
+    AGRAR_ZONEN_FROM_API: bool = False  # True = Zonen via WFS/PostGIS statt Seed-Daten
+
     # File Storage
     UPLOAD_DIR: str = "uploads"
     MAX_UPLOAD_SIZE: int = 10 * 1024 * 1024  # 10MB

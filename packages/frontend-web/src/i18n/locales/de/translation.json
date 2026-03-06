@@ -1609,5 +1609,47 @@
       "2": "2. Mahnung",
       "3": "3. Mahnung"
     }
+  },
+  "admin": {
+    "settings": {
+      "title": "System-Einstellungen",
+      "subtitle": "Konfiguration",
+      "save": "Speichern",
+      "general": "Allgemein",
+      "companyData": "Firmendaten",
+      "integrations": "Integrationen",
+      "language": "Sprache",
+      "languagePackages": "Sprachpakete",
+      "timezone": "Zeitzone",
+      "currency": "W\u00e4hrung",
+      "companyName": "Firmenname",
+      "taxNumber": "Steuernummer",
+      "commercialRegister": "Handelsregister",
+      "address": "Adresse",
+      "connected": "Verbunden",
+      "notConnected": "Nicht verbunden",
+      "saved": "Einstellungen gespeichert"
+    },
+    "languagePackage": {
+      "title": "Sprachpaket-Verwaltung",
+      "subtitle": "Verwalten Sie die Sprachpakete f\u00fcr das ERP-System. Das Umstellen der Systemsprache kann einen Moment dauern, da alle \u00dcbersetzungen geladen werden m\u00fcssen.",
+      "currentLanguage": "Aktuelle Systemsprache",
+      "availablePackages": "Verf\u00fcgbare Sprachpakete",
+      "status": "Status",
+      "active": "Aktiv",
+      "available": "Verf\u00fcgbar",
+      "generating": "Wird generiert\u2026",
+      "notAvailable": "Nicht verf\u00fcgbar",
+      "activate": "Aktivieren",
+      "generate": "Paket generieren",
+      "generatingHint": "Das \u00dcbersetzungsprogramm generiert das Sprachpaket. Dies kann je nach Umfang einige Minuten dauern.",
+      "switchWarning": "Das Umstellen der Systemsprache l\u00e4dt die Oberfl\u00e4che neu. Nicht gespeicherte \u00c4nderungen k\u00f6nnen verloren gehen.",
+      "switchConfirm": "Sprache wechseln",
+      "switchCancel": "Abbrechen",
+      "coverage": "\u00dcbersetzungsabdeckung",
+      "keys": "Schl\u00fcssel",
+      "lastUpdated": "Zuletzt aktualisiert",
+      "generatedBy": "Generiert durch KI-\u00dcbersetzungs-Engine"
+    }
   }
 }
