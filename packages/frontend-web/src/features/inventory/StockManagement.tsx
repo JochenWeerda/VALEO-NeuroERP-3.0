@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { NativeSelect } from '@/components/ui/native-select';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Search, Edit, ArrowUpDown } from 'lucide-react';
 
@@ -88,6 +88,10 @@ export function StockManagement() {
 
   // Get unique categories
   const categories = Array.from(new Set(articles?.map(a => a.category) || []));
+  const categoryOptions = [
+    { value: 'all', label: 'All Categories' },
+    ...categories.map((category) => ({ value: category, label: category })),
+  ];
 
   const getStockStatus = (article: Article) => {
     if (article.current_stock <= 0) return { status: 'out_of_stock', color: 'destructive' };
@@ -120,17 +124,13 @@ export function StockManagement() {
                 />
               </div>
             </div>
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="w-48">
-                <SelectValue placeholder="All Categories" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                {categories.map(category => (
-                  <SelectItem key={category} value={category}>{category}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <NativeSelect
+              className="w-48"
+              value={selectedCategory}
+              onValueChange={setSelectedCategory}
+              options={categoryOptions}
+              placeholder="All Categories"
+            />
           </div>
         </CardContent>
       </Card>
@@ -171,7 +171,7 @@ export function StockManagement() {
                       <TableCell className="text-right">{article.available_stock}</TableCell>
                       <TableCell className="text-right">{article.reserved_stock}</TableCell>
                       <TableCell className="text-right">{article.min_stock || '-'}</TableCell>
-                      <TableCell className="text-right">€{article.sales_price.toFixed(2)}</TableCell>
+                      <TableCell className="text-right">â‚¬{article.sales_price.toFixed(2)}</TableCell>
                       <TableCell>
                         <Badge variant={stockStatus.color as any}>
                           {stockStatus.status.replace('_', ' ')}
@@ -240,6 +240,16 @@ function StockMovementFormDialog({ article, warehouses, onSubmit, isSubmitting, 
     reference_number: '',
     notes: ''
   });
+  const movementTypeOptions = [
+    { value: 'in', label: 'Stock In' },
+    { value: 'out', label: 'Stock Out' },
+    { value: 'transfer', label: 'Transfer' },
+    { value: 'adjustment', label: 'Adjustment' },
+  ];
+  const warehouseOptions = warehouses.map((warehouse) => ({
+    value: warehouse.id,
+    label: warehouse.name,
+  }));
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -250,39 +260,20 @@ function StockMovementFormDialog({ article, warehouses, onSubmit, isSubmitting, 
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <label className="block text-sm font-medium mb-1">Movement Type</label>
-        <Select
+        <NativeSelect
           value={formData.movement_type}
-          onValueChange={(value: any) => setFormData(prev => ({ ...prev, movement_type: value }))}
-        >
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="in">Stock In</SelectItem>
-            <SelectItem value="out">Stock Out</SelectItem>
-            <SelectItem value="transfer">Transfer</SelectItem>
-            <SelectItem value="adjustment">Adjustment</SelectItem>
-          </SelectContent>
-        </Select>
+          onValueChange={(value) => setFormData(prev => ({ ...prev, movement_type: value as StockMovementForm['movement_type'] }))}
+          options={movementTypeOptions}
+        />
       </div>
 
       <div>
         <label className="block text-sm font-medium mb-1">Warehouse</label>
-        <Select
+        <NativeSelect
           value={formData.warehouse_id}
           onValueChange={(value) => setFormData(prev => ({ ...prev, warehouse_id: value }))}
-        >
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {warehouses.map(warehouse => (
-              <SelectItem key={warehouse.id} value={warehouse.id}>
-                {warehouse.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          options={warehouseOptions}
+        />
       </div>
 
       <div>

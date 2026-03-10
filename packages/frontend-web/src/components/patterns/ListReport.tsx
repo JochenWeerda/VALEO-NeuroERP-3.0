@@ -12,7 +12,7 @@
  * - MCP-Metadaten
  */
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PageToolbar, ToolbarAction } from '@/components/navigation/PageToolbar';
 import { ColumnDef, DataTable } from '@/components/ui/data-table';
@@ -20,6 +20,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search, SlidersHorizontal } from 'lucide-react';
 import { createMCPMetadata } from '@/design/mcp-schemas/component-metadata';
+import { useActionsForMask, useActionDispatchOptional } from '@/features/ki-usability';
 
 export interface ListReportProps<T> {
   // Titel & Beschreibung
@@ -94,14 +95,49 @@ export function ListReport<T>({
   mcpContext,
 }: ListReportProps<T>): JSX.Element {
   const { t } = useTranslation();
+  const actionDispatch = useActionDispatchOptional();
+  const { data: actionResponse } = useActionsForMask(mcpContext?.pageDomain, mcpContext?.currentDocument);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [showFilters, setShowFilters] = useState<boolean>(false);
 
   const displayTitle = typeof titleKey === 'string' && titleKey.length > 0 ? t(titleKey) : title;
   const displaySubtitle = typeof subtitleKey === 'string' && subtitleKey.length > 0 ? t(subtitleKey) : subtitle;
+  const quickActions = useMemo<ToolbarAction[]>(() => {
+    return (actionResponse?.actions ?? []).map((action) => ({
+      id: action.id,
+      label: action.label,
+      shortcut: action.shortcut,
+      onClick: () => {
+        if (actionDispatch) {
+          void actionDispatch.dispatch(action.id);
+        }
+      },
+      variant: action.category === 'danger' ? 'destructive' : 'outline',
+      mcp: { intent: action.id, requiredData: action.required_data },
+    }));
+  }, [actionDispatch, actionResponse?.actions]);
+
+  const mergedPrimaryActions = useMemo<ToolbarAction[]>(() => {
+    if (Array.isArray(primaryActions) && primaryActions.length > 0) {
+      return primaryActions;
+    }
+    return quickActions.slice(0, 2);
+  }, [primaryActions, quickActions]);
+
+  const mergedOverflowActions = useMemo<ToolbarAction[]>(() => {
+    const fromProps = overflowActions ?? [];
+    const quickOverflow = Array.isArray(primaryActions) && primaryActions.length > 0
+      ? quickActions
+      : quickActions.slice(2);
+    const byId = new Map<string, ToolbarAction>();
+    for (const action of [...fromProps, ...quickOverflow]) {
+      byId.set(action.id, action);
+    }
+    return Array.from(byId.values());
+  }, [overflowActions, primaryActions, quickActions]);
   const availableActions = [
-    ...(primaryActions?.map((action) => action.id) ?? []),
-    ...(overflowActions?.map((action) => action.id) ?? []),
+    ...(mergedPrimaryActions.map((action) => action.id)),
+    ...(mergedOverflowActions.map((action) => action.id)),
   ];
   const toolbarContext = mcpContext
     ? {
@@ -127,8 +163,8 @@ export function ListReport<T>({
       <PageToolbar
         title={displayTitle}
         subtitle={displaySubtitle}
-        primaryActions={primaryActions}
-        overflowActions={overflowActions}
+        primaryActions={mergedPrimaryActions}
+        overflowActions={mergedOverflowActions}
         mcpContext={toolbarContext}
       />
 
@@ -199,4 +235,3 @@ export function ListReport<T>({
     </div>
   );
 }
-

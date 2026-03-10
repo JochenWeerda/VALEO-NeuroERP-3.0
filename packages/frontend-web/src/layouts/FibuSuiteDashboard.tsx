@@ -4,8 +4,8 @@
  */
 
 import { Link } from 'react-router-dom'
+import { FIBU_SUITE_ITEMS } from '@/app/navigation/fibu-suite'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { NAV_SECTIONS } from '@/app/navigation/manifest'
 import { Euro } from 'lucide-react'
 
 const MAX_CARDS = 24
@@ -21,11 +21,9 @@ function getSuitePath(child: { path?: string; module?: string }): string | null 
 }
 
 export default function FibuSuiteDashboard(): JSX.Element {
-  const fibuSection = NAV_SECTIONS.find((s) => s.id === 'fibu')
-  const children = fibuSection?.children ?? []
   const suiteBase = '/fibu-suite'
 
-  const cards = children
+  const cards = FIBU_SUITE_ITEMS
     .map((child) => {
       const path = getSuitePath(child)
       if (!path) return null

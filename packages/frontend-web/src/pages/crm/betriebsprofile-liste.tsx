@@ -14,6 +14,11 @@ import { queryKeys } from '@/lib/query'
 import { crmService, type FarmProfile } from '@/lib/services/crm-service'
 import { getEntityTypeLabel, getListTitle } from '@/features/crud/utils/i18n-helpers'
 
+const EMPTY_FARM_PROFILES_RESPONSE: { data: FarmProfile[]; total: number } = {
+  data: [],
+  total: 0,
+}
+
 export default function BetriebsprofileListePage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -24,10 +29,11 @@ export default function BetriebsprofileListePage(): JSX.Element {
   const { data: profilesData, isLoading, error } = useQuery({
     queryKey: queryKeys.crm.farmProfiles.list(),
     queryFn: () => crmService.getFarmProfiles({ search: searchTerm || undefined }),
+    initialData: EMPTY_FARM_PROFILES_RESPONSE,
   })
 
-  const profiles = profilesData?.data || []
-  const totalProfiles = profilesData?.total || 0
+  const profiles = profilesData.data
+  const totalProfiles = profilesData.total
   const totalArea = profiles.reduce((sum, p) => sum + (p.totalArea || 0), 0)
   const avgArea = totalProfiles > 0 ? totalArea / totalProfiles : 0
   const bioProfiles = profiles.filter(p => p.certifications?.includes('Bio')).length

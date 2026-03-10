@@ -6,9 +6,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Badge } from '@/components/ui/badge'
+import { NativeSelect } from '@/components/ui/native-select'
 import { ArrowLeft, ArrowRight, Check, Mail, Users, Calendar, BarChart3, Settings } from 'lucide-react'
 import { createApiClient } from '@/components/mask-builder/utils/api'
 import { toast } from '@/hooks/use-toast'
@@ -215,17 +215,16 @@ export default function CampaignBuilderPage(): JSX.Element {
             </div>
             <div>
               <Label htmlFor="type">{t('crud.fields.type')} *</Label>
-              <Select value={campaignData.type} onValueChange={(value) => updateField('type', value)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="email">{t('crud.campaigns.types.email')}</SelectItem>
-                  <SelectItem value="sms">{t('crud.campaigns.types.sms')}</SelectItem>
-                  <SelectItem value="push">{t('crud.campaigns.types.push')}</SelectItem>
-                  <SelectItem value="social">{t('crud.campaigns.types.social')}</SelectItem>
-                </SelectContent>
-              </Select>
+              <NativeSelect
+                value={campaignData.type}
+                onValueChange={(value) => updateField('type', value)}
+                options={[
+                  { value: 'email', label: t('crud.campaigns.types.email') },
+                  { value: 'sms', label: t('crud.campaigns.types.sms') },
+                  { value: 'push', label: t('crud.campaigns.types.push') },
+                  { value: 'social', label: t('crud.campaigns.types.social') },
+                ]}
+              />
             </div>
           </div>
         )
@@ -235,22 +234,17 @@ export default function CampaignBuilderPage(): JSX.Element {
           <div className="space-y-6">
             <div>
               <Label htmlFor="template_id">{t('crud.fields.template')}</Label>
-              <Select 
-                value={campaignData.template_id || ''} 
+              <NativeSelect
+                value={campaignData.template_id || ''}
                 onValueChange={(value) => updateField('template_id', value || null)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={t('crud.campaigns.builder.selectTemplate')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">{t('crud.campaigns.builder.noTemplate')}</SelectItem>
-                  {templates.map((template) => (
-                    <SelectItem key={template.id} value={template.id}>
-                      {template.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                options={[
+                  { value: '', label: t('crud.campaigns.builder.noTemplate') },
+                  ...templates.map((template) => ({
+                    value: template.id,
+                    label: template.name,
+                  })),
+                ]}
+              />
             </div>
             {campaignData.type === 'email' && (
               <>
@@ -292,21 +286,15 @@ export default function CampaignBuilderPage(): JSX.Element {
           <div className="space-y-6">
             <div>
               <Label htmlFor="segment_id">{t('crud.fields.segment')} *</Label>
-              <Select 
-                value={campaignData.segment_id || ''} 
+              <NativeSelect
+                value={campaignData.segment_id || ''}
                 onValueChange={(value) => updateField('segment_id', value || null)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={t('crud.campaigns.builder.selectSegment')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {segments.map((segment) => (
-                    <SelectItem key={segment.id} value={segment.id}>
-                      {segment.name} ({segment.member_count || 0} {t('crud.campaigns.builder.members')})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                placeholder={t('crud.campaigns.builder.selectSegment')}
+                options={segments.map((segment) => ({
+                  value: segment.id,
+                  label: `${segment.name} (${segment.member_count || 0} ${t('crud.campaigns.builder.members')})`,
+                }))}
+              />
             </div>
             {campaignData.segment_id && (
               <div className="p-4 bg-muted rounded-lg">

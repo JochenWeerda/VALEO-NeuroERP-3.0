@@ -2,9 +2,9 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
-import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
+import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
-import { z } from 'zod'
+import { getFieldsFromMaskConfig, validateFields } from '@/components/mask-builder/validation'
 import { toast } from 'sonner'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
@@ -12,39 +12,6 @@ import { LeaveConfirmDialog } from '@/components/LeaveConfirmDialog'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import { validateIBAN, formatIBAN, lookupIBAN } from '@/lib/utils/iban-validator'
 
-// Zod-Schema für Zahlungslauf Kreditoren (wird in Komponente mit i18n erstellt)
-const createZahlungslaufSchema = (t: any) => z.object({
-  laufNummer: z.string().min(1, t('crud.messages.validationError')),
-  ausfuehrungsDatum: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t('crud.messages.validationError')),
-  gesamtBetrag: z.number().positive(t('crud.messages.validationError')),
-  anzahlZahlungen: z.number().min(1, t('crud.messages.validationError')),
-  status: z.enum(['entwurf', 'freigegeben', 'ausgefuehrt', 'storniert']),
-  freigegebenAm: z.string().optional(),
-  freigegebenDurch: z.string().optional(),
-  ausgefuehrtAm: z.string().optional(),
-
-  // SEPA-Details
-  auftraggeberName: z.string().min(1, t('crud.messages.validationError')),
-  auftraggeberIban: z.string().regex(/^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/, t('crud.messages.validationError')),
-  auftraggeberBic: z.string().min(1, t('crud.messages.validationError')),
-
-  // Zahlungen
-  zahlungen: z.array(z.object({
-    kreditorId: z.string().min(1, t('crud.messages.validationError')),
-    kreditorName: z.string().min(1, t('crud.messages.validationError')),
-    iban: z.string().regex(/^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/, t('crud.messages.validationError')),
-    bic: z.string().min(1, t('crud.messages.validationError')),
-    betrag: z.number().positive(t('crud.messages.validationError')),
-    verwendungszweck: z.string().min(1, t('crud.messages.validationError')),
-    skontoGenutzt: z.boolean().default(false),
-    skontoBetrag: z.number().min(0).default(0),
-    opReferenz: z.string().optional()
-  })).min(1, t('crud.messages.validationError')),
-
-  notizen: z.string().optional()
-})
-
-// Konfiguration für Zahlungslauf Kreditoren ObjectPage (wird in Komponente mit i18n erstellt)
 const createZahlungslaufConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
   subtitle: t('crud.fields.createAndApproveSepaPayments'),
@@ -368,7 +335,6 @@ const createZahlungslaufConfig = (t: any, entityTypeLabel: string): MaskConfig =
       delete: '/api/v1/finance/payment-runs/{id}'
     }
   } as any,
-  validation: createZahlungslaufSchema(t),
   permissions: ['fibu.read', 'fibu.write', 'fibu.admin']
 })
 
@@ -596,7 +562,10 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
     }
   })
 
-  const { validate, showValidationToast } = useMaskValidation(zahlungslaufConfig.validation)
+  const validate = (formData: any) => validateFields(getFieldsFromMaskConfig(zahlungslaufConfig), formData ?? {})
+  const showValidationToast = (errors: Record<string, string>) => {
+    toast.error(`${Object.keys(errors).length} Feld(er) muessen korrigiert werden.`)
+  }
 
   // IBAN Lookup for Auftraggeber-IBAN
   const handleAuftraggeberIbanChange = async (iban: string) => {
@@ -644,14 +613,14 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
       // Dieser Button ist redundant, da die Tabelle ihren eigenen Button hat
       return
     } else if (action === 'validate') {
-      const isValid = validate(formData)
-      if (isValid.isValid) {
+      const errors = validate(formData)
+      if (Object.keys(errors).length === 0) {
         toast({
           title: t('crud.messages.validationSuccess'),
           description: t('crud.messages.allDataCorrect'),
         })
       } else {
-        showValidationToast(isValid.errors)
+        showValidationToast(errors)
       }
     } else if (action === 'preview') {
       // SEPA-Vorschau
@@ -707,9 +676,9 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
         })
       }
     } else if (action === 'execute') {
-      const isValid = validate(formData)
-      if (!isValid.isValid) {
-        showValidationToast(isValid.errors)
+      const errors = validate(formData)
+      if (Object.keys(errors).length > 0) {
+        showValidationToast(errors)
         return
       }
 

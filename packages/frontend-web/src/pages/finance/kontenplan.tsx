@@ -1,9 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ObjectPage } from '@/components/mask-builder'
-import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
+import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
-import { z } from 'zod'
 import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/axios'
 
@@ -177,7 +176,6 @@ const kontenplanConfig: MaskConfig = {
       delete: '/api/v1/chart-of-accounts/{id}'
     }
   } as any,
-  validation: kontenplanSchema,
   permissions: ['fibu.read', 'fibu.write']
 }
 
@@ -191,13 +189,12 @@ export default function KontenplanPage(): JSX.Element {
     id: 'new'
   })
 
-  const { validate, showValidationToast } = useMaskValidation(kontenplanConfig.validation)
 
   const { handleAction } = useMaskActions(async (action: string, formData: any) => {
     if (action === 'save') {
-      const isValid = validate(formData)
+      const isValid = validateKontenplanForm(formData)
       if (!isValid.isValid) {
-        showValidationToast(isValid.errors)
+        toast({ variant: 'destructive', title: 'Validierung fehlgeschlagen', description: Object.values(isValid.errors).join(', ') })
         return
       }
       try {

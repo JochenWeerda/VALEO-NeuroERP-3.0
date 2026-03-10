@@ -12,7 +12,7 @@ from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import Response
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -118,6 +118,22 @@ class FromLieferscheinCreate(BaseModel):
     einheit: str
     flaeche: float
     anwender: str = "VALEO NeuroERP"
+
+
+class MassnahmeBulkDeleteIn(BaseModel):
+    ids: list[str] = Field(default_factory=list, min_length=1, max_length=100)
+
+
+class MassnahmeBulkDeleteErrorOut(BaseModel):
+    id: str
+    detail: str
+
+
+class MassnahmeBulkDeleteOut(BaseModel):
+    requested: int
+    deleted: int
+    missing_ids: list[str] = Field(default_factory=list)
+    errors: list[MassnahmeBulkDeleteErrorOut] = Field(default_factory=list)
 
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -395,6 +411,49 @@ async def delete_massnahme(
     db.delete(massnahme)
     db.commit()
     return Response(status_code=204)
+
+
+@router.post("/feldbuch/massnahmen/bulk-delete", response_model=MassnahmeBulkDeleteOut)
+async def bulk_delete_massnahmen(
+    payload: MassnahmeBulkDeleteIn,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> MassnahmeBulkDeleteOut:
+    ids = [massnahme_id for massnahme_id in payload.ids if massnahme_id]
+    if not ids:
+        raise HTTPException(status_code=400, detail="Keine Maßnahmen-IDs übergeben")
+
+    found_massnahmen = (
+        db.query(FeldbuchMassnahme)
+        .filter(FeldbuchMassnahme.tenant_id == tenant_id, FeldbuchMassnahme.id.in_(ids))
+        .all()
+    )
+    found_by_id = {str(massnahme.id): massnahme for massnahme in found_massnahmen}
+    deleted = 0
+    errors: list[MassnahmeBulkDeleteErrorOut] = []
+
+    for massnahme_id in ids:
+        massnahme = found_by_id.get(massnahme_id)
+        if massnahme is None:
+            continue
+        try:
+            db.delete(massnahme)
+            deleted += 1
+        except Exception as exc:
+            errors.append(MassnahmeBulkDeleteErrorOut(id=massnahme_id, detail=str(exc)))
+
+    if deleted > 0:
+        db.commit()
+    else:
+        db.rollback()
+
+    missing_ids = [massnahme_id for massnahme_id in ids if massnahme_id not in found_by_id]
+    return MassnahmeBulkDeleteOut(
+        requested=len(ids),
+        deleted=deleted,
+        missing_ids=missing_ids,
+        errors=errors,
+    )
 
 
 @router.post("/feldbuch/massnahmen/from-lieferschein", status_code=201)

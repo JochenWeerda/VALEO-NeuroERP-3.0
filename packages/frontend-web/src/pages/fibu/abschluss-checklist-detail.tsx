@@ -36,6 +36,20 @@ type Checklist = {
   updated_at?: string | null
 }
 
+const EMPTY_CHECKLIST: Checklist = {
+  id: '',
+  period: '',
+  closing_type: '',
+  status: '',
+  progress_percentage: 0,
+  total_items: 0,
+  completed_items: 0,
+  required_items: 0,
+  completed_required_items: 0,
+  items: [],
+  updated_at: null,
+}
+
 export default function AbschlussChecklistDetailPage(): JSX.Element {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
@@ -47,6 +61,7 @@ export default function AbschlussChecklistDetailPage(): JSX.Element {
     queryKey: ['finance', 'closing-checklist', id],
     queryFn: async () => (await apiClient.get<Checklist>(`/api/v1/finance/closing-checklists/${id}`)).data,
     enabled: !!id && isValidChecklistId,
+    initialData: EMPTY_CHECKLIST,
   })
 
   const completeMutation = useMutation({
@@ -76,7 +91,7 @@ export default function AbschlussChecklistDetailPage(): JSX.Element {
   }
 
   if (isLoading) return <div className="p-6 text-sm text-muted-foreground">Lade Checkliste…</div>
-  if (error || !checklist) return <div className="p-6 text-sm text-red-600">Checkliste konnte nicht geladen werden.</div>
+  if (error) return <div className="p-6 text-sm text-red-600">Checkliste konnte nicht geladen werden.</div>
 
   return (
     <div className="space-y-6 p-6">

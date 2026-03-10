@@ -1,5 +1,5 @@
 import { type DragEvent, type ReactNode, useCallback, useRef, useState } from 'react'
-import { cn } from '@/lib/utils'
+import { clsx } from 'clsx'
 import { type WidgetLayout } from '@/hooks/useDashboardLayout'
 import { GripVertical, X, Maximize2, Minimize2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -56,7 +56,7 @@ function WidgetWrapper({
 
   return (
     <div
-      className={cn(
+      className={clsx(
         'relative rounded-xl border bg-card text-card-foreground shadow-sm transition-all',
         isEditing && 'cursor-move ring-2 ring-primary/20',
         isDragOver && isEditing && 'ring-4 ring-primary/50 scale-[1.02]',
@@ -105,7 +105,7 @@ function WidgetWrapper({
           <GripVertical className="h-4 w-4 text-muted-foreground" />
         </div>
       )}
-      <div className={cn('h-full', isEditing && 'pointer-events-none')}>
+      <div className={clsx('h-full', isEditing && 'pointer-events-none')}>
         {children}
       </div>
     </div>
@@ -154,7 +154,7 @@ export function DashboardGrid({
 
   return (
     <div
-      className={cn(
+      className={clsx(
         'grid gap-4 auto-rows-[minmax(120px,auto)]',
         columns === 2 && 'grid-cols-2',
         columns === 3 && 'grid-cols-3',

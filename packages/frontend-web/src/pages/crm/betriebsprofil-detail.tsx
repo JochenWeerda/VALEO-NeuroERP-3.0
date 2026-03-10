@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Save, Tractor, Plus, Minus, Loader2, ArrowLeft, MapPin } from 'lucide-react'
 import { queryKeys } from '@/lib/query'
 import { crmService, type FarmProfile } from '@/lib/services/crm-service'
@@ -327,7 +327,7 @@ export default function BetriebsprofilePage(): JSX.Element {
                   </div>
                   {farmProfile.totalArea && totalCropArea > farmProfile.totalArea && (
                     <p className="text-sm text-red-600 mt-2">
-                      ⚠️ {t('crud.messages.cropAreaExceedsTotal')}
+                      âš ï¸ {t('crud.messages.cropAreaExceedsTotal')}
                     </p>
                   )}
                 </div>
@@ -351,24 +351,21 @@ export default function BetriebsprofilePage(): JSX.Element {
                   <div key={index} className="flex items-center gap-4 p-4 border rounded-lg">
                     <div className="flex-1">
                       <Label>{t('crud.fields.animalType')}</Label>
-                      <Select
+                      <NativeSelect
                         value={animal.type}
                         onValueChange={(value) => updateLivestock(index, 'type', value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder={t('crud.tooltips.placeholders.selectAnimalType')} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Milchkühe">{t('livestock.dairyCows')}</SelectItem>
-                          <SelectItem value="Mastbullen">{t('livestock.beefCattle')}</SelectItem>
-                          <SelectItem value="Kälber">{t('livestock.calves')}</SelectItem>
-                          <SelectItem value="Schweine">{t('livestock.pigs')}</SelectItem>
-                          <SelectItem value="Schafe">{t('livestock.sheep')}</SelectItem>
-                          <SelectItem value="Geflügel">{t('livestock.poultry')}</SelectItem>
-                          <SelectItem value="Pferde">{t('livestock.horses')}</SelectItem>
-                          <SelectItem value="Sonstige">{t('common.other')}</SelectItem>
-                        </SelectContent>
-                      </Select>
+                        options={[
+                          { value: 'Milchk?he', label: t('livestock.dairyCows') },
+                          { value: 'Mastbullen', label: t('livestock.beefCattle') },
+                          { value: 'K?lber', label: t('livestock.calves') },
+                          { value: 'Schweine', label: t('livestock.pigs') },
+                          { value: 'Schafe', label: t('livestock.sheep') },
+                          { value: 'Gefl?gel', label: t('livestock.poultry') },
+                          { value: 'Pferde', label: t('livestock.horses') },
+                          { value: 'Sonstige', label: t('common.other') },
+                        ]}
+                        placeholder={t('crud.tooltips.placeholders.selectAnimalType')}
+                      />
                     </div>
                     <div className="w-32">
                       <Label>{t('crud.fields.count')}</Label>
@@ -421,7 +418,7 @@ export default function BetriebsprofilePage(): JSX.Element {
                     ...farmProfile.location,
                     address: e.target.value
                   })}
-                  placeholder="Straße, PLZ, Ort, Land"
+                  placeholder="StraÃŸe, PLZ, Ort, Land"
                   rows={3}
                 />
               </div>
@@ -442,7 +439,7 @@ export default function BetriebsprofilePage(): JSX.Element {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="longitude">Längengrad</Label>
+                  <Label htmlFor="longitude">LÃ¤ngengrad</Label>
                   <Input
                     id="longitude"
                     type="number"
@@ -458,7 +455,7 @@ export default function BetriebsprofilePage(): JSX.Element {
               </div>
 
               <div className="text-sm text-muted-foreground">
-                <p>Koordinaten können automatisch aus der Adresse ermittelt werden oder manuell eingetragen werden.</p>
+                <p>Koordinaten kÃ¶nnen automatisch aus der Adresse ermittelt werden oder manuell eingetragen werden.</p>
               </div>
             </CardContent>
           </Card>
@@ -513,3 +510,5 @@ export default function BetriebsprofilePage(): JSX.Element {
     </div>
   )
 }
+
+

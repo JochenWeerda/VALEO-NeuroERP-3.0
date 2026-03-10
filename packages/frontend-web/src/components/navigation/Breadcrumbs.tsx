@@ -7,7 +7,8 @@
 
 import { Link, useLocation } from 'react-router-dom'
 import { ChevronRight, Home } from 'lucide-react'
-import { NAV_SECTIONS, type NavItem } from '@/app/navigation/manifest'
+import { useNavSections } from '@/app/navigation/nav-runtime'
+import type { NavItem } from '@/app/navigation/types'
 
 type BreadcrumbItem = {
   label: string
@@ -57,6 +58,7 @@ function findLabelInManifest(
 
 export function Breadcrumbs() {
   const location = useLocation()
+  const navSections = useNavSections()
   const pathname = location.pathname.replace(/^\//, '')
 
   // Don't render on root/dashboard
@@ -68,7 +70,7 @@ export function Breadcrumbs() {
   const crumbs: BreadcrumbItem[] = [{ label: 'Home', path: '/' }]
 
   // Try manifest lookup for the full path
-  const { sectionLabel, itemLabel } = findLabelInManifest(NAV_SECTIONS, pathname)
+  const { sectionLabel, itemLabel } = findLabelInManifest(navSections, pathname)
 
   if (sectionLabel) {
     // We found a parent section

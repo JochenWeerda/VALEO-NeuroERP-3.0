@@ -3,30 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
-import { z } from 'zod'
 import { toast } from '@/hooks/use-toast'
 
-// Zod-Schema für Anlieferavis
-const anlieferavisSchema = z.object({
-  bestellungId: z.string().min(1, "Bestellung ist erforderlich"),
-  avisNummer: z.string().min(1, "Avis-Nummer ist erforderlich"),
-  status: z.enum(['GESENDET', 'BESTAETIGT', 'STORNIERT']),
-  geplantesAnlieferDatum: z.string().min(1, "Anlieferdatum ist erforderlich"),
-  fahrzeug: z.object({
-    kennzeichen: z.string().min(1, "Kennzeichen ist erforderlich"),
-    fahrer: z.string().min(1, "Fahrer ist erforderlich"),
-    telefon: z.string().optional()
-  }),
-  positionen: z.array(z.object({
-    positionId: z.string(),
-    menge: z.number().min(0.1, "Menge muss > 0 sein"),
-    chargenNummer: z.string().optional(),
-    verpackung: z.string().optional()
-  })),
-  bemerkungen: z.string().optional()
-})
-
-// Konfiguration für Anlieferavis ObjectPage
 const anlieferavisConfig: MaskConfig = {
   title: 'Anlieferavis',
   subtitle: 'Lieferavis für Wareneingangsvorbereitung',
@@ -173,7 +151,6 @@ const anlieferavisConfig: MaskConfig = {
       delete: '/api/v1/einkauf/anlieferavis/{id}'
     }
   },
-  validation: anlieferavisSchema,
   permissions: ['einkauf.read', 'einkauf.write', 'warehouse.read']
 }
 

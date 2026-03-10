@@ -1,4 +1,5 @@
 import { type ReactNode } from 'react'
+import { clsx } from 'clsx'
 import { useQuery } from '@tanstack/react-query'
 import { type WidgetLayout } from '@/hooks/useDashboardLayout'
 import {
@@ -14,7 +15,6 @@ import {
   Users,
 } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
-import { cn } from '@/lib/utils'
 import { queryKeys } from '@/lib/query'
 import { apiClient } from '@/lib/axios'
 
@@ -135,10 +135,15 @@ function KPIWidget({ widget }: { widget: WidgetLayout }) {
   const { data: kpiData, isPending } = useQuery({
     queryKey: queryKeys.analytics.kpis,
     queryFn: async () => {
-      const response = await apiClient.get<Record<string, number>>('/api/v1/analytics/kpis', {
-        params: { start_date: currentRange.start, end_date: currentRange.end },
-      })
-      return response ?? {}
+      try {
+        const response = await apiClient.get<Record<string, number>>('/api/v1/analytics/kpis', {
+          params: { start_date: currentRange.start, end_date: currentRange.end },
+        })
+        const data = response?.data
+        return typeof data === 'object' && data !== null ? data : {}
+      } catch {
+        return {}
+      }
     },
     enabled: !!kpiConfig,
     staleTime: 30 * 1000,
@@ -149,10 +154,15 @@ function KPIWidget({ widget }: { widget: WidgetLayout }) {
   const { data: prevKpiData } = useQuery({
     queryKey: queryKeys.analytics.kpisPrevious,
     queryFn: async () => {
-      const response = await apiClient.get<Record<string, number>>('/api/v1/analytics/kpis', {
-        params: { start_date: previousRange.start, end_date: previousRange.end },
-      })
-      return response ?? {}
+      try {
+        const response = await apiClient.get<Record<string, number>>('/api/v1/analytics/kpis', {
+          params: { start_date: previousRange.start, end_date: previousRange.end },
+        })
+        const data = response?.data
+        return typeof data === 'object' && data !== null ? data : {}
+      } catch {
+        return {}
+      }
     },
     enabled: !!kpiConfig,
     staleTime: 5 * 60 * 1000, // Vormonat aendert sich selten
@@ -199,7 +209,7 @@ function KPIWidget({ widget }: { widget: WidgetLayout }) {
         )}
         {displayData.delta !== 0 && (
           <div
-            className={cn(
+            className={clsx(
               'flex items-center text-xs mt-1',
               isPositive ? 'text-green-600' : 'text-red-600'
             )}
@@ -309,7 +319,7 @@ function ListWidget({ widget }: { widget: WidgetLayout }) {
           >
             <span className="truncate flex-1">{item.label}</span>
             <span
-              className={cn(
+              className={clsx(
                 'ml-2 px-2 py-0.5 rounded text-xs font-medium',
                 item.status && statusColors[item.status]
               )}

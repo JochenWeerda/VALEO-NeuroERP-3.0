@@ -21,13 +21,7 @@ import {
 import { KPICard, KPIGrid } from '@/components/management/KPICard'
 import { AlertWidget, AlertItem } from '@/components/management/AlertWidget'
 import { TrendChart, TrendDataPoint } from '@/components/management/TrendChart'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 
@@ -119,6 +113,7 @@ export default function ExecutiveDashboardPage(): JSX.Element {
     '365d': 'Letztes Jahr',
     'ytd': 'Jahr bis heute',
   }
+  const timeRangeOptions = Object.entries(timeRangeLabels).map(([value, label]) => ({ value, label }))
 
   return (
     <div className="space-y-6 p-6">
@@ -132,19 +127,15 @@ export default function ExecutiveDashboardPage(): JSX.Element {
         </div>
 
         <div className="flex items-center gap-2">
-          <Select value={timeRange} onValueChange={(v) => setTimeRange(v as TimeRange)}>
-            <SelectTrigger className="w-[180px]">
-              <Calendar className="h-4 w-4 mr-2" />
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {Object.entries(timeRangeLabels).map(([value, label]) => (
-                <SelectItem key={value} value={value}>
-                  {label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="relative">
+            <Calendar className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <NativeSelect
+              value={timeRange}
+              onValueChange={(value) => setTimeRange(value as TimeRange)}
+              options={timeRangeOptions}
+              className="w-[180px] pl-9"
+            />
+          </div>
 
           <Button
             variant="outline"

@@ -4,7 +4,7 @@
  * Basierend auf Lieferschein-Erfassung (Gewohnheits-Prinzip)
  */
 
-import { useState, useEffect, useRef } from 'react'
+import { lazy, Suspense, useState, useEffect, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -14,21 +14,44 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import { useToast } from '@/components/ui/toast-provider'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
-import { CustomerSelectionDialog, type Customer } from '@/components/sales/CustomerSelectionDialog'
-import { ArtikelSuchDialog } from '@/components/sales/ArtikelSuchDialog'
-import { WeighingTicketSelectionDialog, type WeighingTicket } from '@/components/agrar/WeighingTicketSelectionDialog'
-import { ContractSelectionDialog, type AgrarContract } from '@/components/agrar/ContractSelectionDialog'
-import { VarietySelectionDialog, type Variety } from '@/components/agrar/VarietySelectionDialog'
-import { DmsAnhangDialog } from '@/components/dms/DmsAnhangDialog'
+import type { Customer } from '@/components/sales/CustomerSelectionDialog'
+
+import type { WeighingTicket } from '@/components/agrar/WeighingTicketSelectionDialog'
+import type { AgrarContract } from '@/components/agrar/ContractSelectionDialog'
+import type { Variety } from '@/components/agrar/VarietySelectionDialog'
+
 import { apiClient } from '@/lib/axios'
 import { useAuth } from '@/hooks/useAuth'
 import { useGlobalShortcutsWithVoice } from '@/features/ki-usability'
 import { ShortcutHintButton } from '@/components/shortcuts/ShortcutHelpPanel'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { ChevronLeft, ChevronRight, MoreHorizontal, Save, FileText, Folder, Calculator, Printer, Trash2, Download } from 'lucide-react'
+
+const CustomerSelectionDialog = lazy(() =>
+  import('@/components/sales/CustomerSelectionDialog').then((m) => ({ default: m.CustomerSelectionDialog }))
+)
+const ArtikelSuchDialog = lazy(() =>
+  import('@/components/sales/ArtikelSuchDialog').then((m) => ({ default: m.ArtikelSuchDialog }))
+)
+const WeighingTicketSelectionDialog = lazy(() =>
+  import('@/components/agrar/WeighingTicketSelectionDialog').then((m) => ({ default: m.WeighingTicketSelectionDialog }))
+)
+const ContractSelectionDialog = lazy(() =>
+  import('@/components/agrar/ContractSelectionDialog').then((m) => ({ default: m.ContractSelectionDialog }))
+)
+const VarietySelectionDialog = lazy(() =>
+  import('@/components/agrar/VarietySelectionDialog').then((m) => ({ default: m.VarietySelectionDialog }))
+)
+const DmsAnhangDialog = lazy(() =>
+  import('@/components/dms/DmsAnhangDialog').then((m) => ({ default: m.DmsAnhangDialog }))
+)
+
+function LazyDialogBoundary({ children }: { children: JSX.Element }) {
+  return <Suspense fallback={null}>{children}</Suspense>
+}
 
 // API Response Types
 type HarvestAcceptanceResponse = {
@@ -1135,19 +1158,17 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <Label className="w-40 text-sm">Preismodell:</Label>
-                    <Select
+                    <NativeSelect
                       value={state.pricingMode}
                       onValueChange={(v) => setState((prev) => ({ ...prev, pricingMode: v as HarvestAcceptanceState['pricingMode'] }))}
-                    >
-                      <SelectTrigger className="flex-1 h-8">
-                        <SelectValue placeholder="Preismodell wählen" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="fixed_contract">Festpreis Vertrag</SelectItem>
-                        <SelectItem value="spot_daily">Tagespreis</SelectItem>
-                        <SelectItem value="exchange_fix_later">Börse / später festlegen</SelectItem>
-                      </SelectContent>
-                    </Select>
+                      options={[
+                        { value: 'fixed_contract', label: 'Festpreis Vertrag' },
+                        { value: 'spot_daily', label: 'Tagespreis' },
+                        { value: 'exchange_fix_later', label: 'Börse / später festlegen' },
+                      ]}
+                      placeholder="Preismodell wählen"
+                      className="flex-1 h-8"
+                    />
                   </div>
                   <div className="flex items-center gap-2">
                     <Label className="w-40 text-sm">Preisquelle:</Label>
@@ -1160,42 +1181,45 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
                   </div>
                   <div className="flex items-center gap-2">
                     <Label className="w-40 text-sm">Geschäftsmodell:</Label>
-                    <Select value={state.acceptanceMode} onValueChange={(v) => setState((prev) => ({ ...prev, acceptanceMode: v }))}>
-                      <SelectTrigger className="flex-1 h-8">
-                        <SelectValue placeholder="Geschäftsmodell wählen" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="STORAGE_ONLY">Nur Lagerung (Fremdware)</SelectItem>
-                        <SelectItem value="PURCHASE_AT_DELIVERY_PTBF">Ankauf bei Lieferung</SelectItem>
-                        <SelectItem value="ADVANCE_ON_STORAGE">Einlagerung + Anzahlung</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <NativeSelect
+                      value={state.acceptanceMode}
+                      onValueChange={(v) => setState((prev) => ({ ...prev, acceptanceMode: v }))}
+                      options={[
+                        { value: 'STORAGE_ONLY', label: 'Nur Lagerung (Fremdware)' },
+                        { value: 'PURCHASE_AT_DELIVERY_PTBF', label: 'Ankauf bei Lieferung' },
+                        { value: 'ADVANCE_ON_STORAGE', label: 'Einlagerung + Anzahlung' },
+                      ]}
+                      placeholder="Geschäftsmodell wählen"
+                      className="flex-1 h-8"
+                    />
                   </div>
                   <div className="flex items-center gap-2">
                     <Label className="w-40 text-sm">Eigentumsverhältnis:</Label>
-                    <Select value={state.ownershipType} onValueChange={(v) => setState((prev) => ({ ...prev, ownershipType: v }))}>
-                      <SelectTrigger className="flex-1 h-8">
-                        <SelectValue placeholder="Eigentumsverhältnis wählen" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="THIRD_PARTY_STOCK">Fremdware</SelectItem>
-                        <SelectItem value="OWN_STOCK">Eigene Ware</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <NativeSelect
+                      value={state.ownershipType}
+                      onValueChange={(v) => setState((prev) => ({ ...prev, ownershipType: v }))}
+                      options={[
+                        { value: 'THIRD_PARTY_STOCK', label: 'Fremdware' },
+                        { value: 'OWN_STOCK', label: 'Eigene Ware' },
+                      ]}
+                      placeholder="Eigentumsverhältnis wählen"
+                      className="flex-1 h-8"
+                    />
                   </div>
                   <div className="flex items-center gap-2">
                     <Label className="w-40 text-sm">USt-Ereignis:</Label>
-                    <Select value={state.vatEvent} onValueChange={(v) => setState((prev) => ({ ...prev, vatEvent: v }))}>
-                      <SelectTrigger className="flex-1 h-8">
-                        <SelectValue placeholder="USt-Ereignis wählen" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="NO_INVOICE">Keine Rechnung</SelectItem>
-                        <SelectItem value="PROVISIONAL_CREDIT_NOTE_CREATED">Vorläufige Gutschrift</SelectItem>
-                        <SelectItem value="FINAL_CREDIT_NOTE_CREATED">Endgültige Gutschrift</SelectItem>
-                        <SelectItem value="CORRECTION_ISSUED">Korrektur erstellt</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <NativeSelect
+                      value={state.vatEvent}
+                      onValueChange={(v) => setState((prev) => ({ ...prev, vatEvent: v }))}
+                      options={[
+                        { value: 'NO_INVOICE', label: 'Keine Rechnung' },
+                        { value: 'PROVISIONAL_CREDIT_NOTE_CREATED', label: 'Vorläufige Gutschrift' },
+                        { value: 'FINAL_CREDIT_NOTE_CREATED', label: 'Endgültige Gutschrift' },
+                        { value: 'CORRECTION_ISSUED', label: 'Korrektur erstellt' },
+                      ]}
+                      placeholder="USt-Ereignis wählen"
+                      className="flex-1 h-8"
+                    />
                   </div>
                   <div className="flex items-center gap-2">
                     <Label className="w-40 text-sm">Anzahlungsbetrag (EUR):</Label>
@@ -1906,62 +1930,75 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
       </div>
 
       {/* Dialoge */}
-      <CustomerSelectionDialog
-        open={showForwarderDialog}
-        onClose={() => setShowForwarderDialog(false)}
-        onSelect={(customer) => {
-          setState((prev) => ({ ...prev, forwarderId: customer.id }))
-          setForwarderName(customer.name)
-          setShowForwarderDialog(false)
-        }}
-        title="SPEDITEUR AUSWÄHLEN"
-      />
-      <CustomerSelectionDialog
-        open={showIntermediateDealerDialog}
-        onClose={() => setShowIntermediateDealerDialog(false)}
-        onSelect={(customer) => {
-          setState((prev) => ({ ...prev, intermediateDealerId: customer.id }))
-          setIntermediateDealerName(customer.name)
-          setShowIntermediateDealerDialog(false)
-        }}
-        title="ZWISCHENHÄNDLER AUSWÄHLEN"
-      />
-      <DmsAnhangDialog
-        open={showAttachmentDialog}
-        onClose={() => setShowAttachmentDialog(false)}
-        businessObjectType="harvest_reception"
-        businessObjectId={state.id}
-        title="UNTERLAGEN / DATEIEN — ERNTE-ANNAHME"
-      />
-      <CustomerSelectionDialog
-        open={showCustomerDialog}
-        onClose={() => setShowCustomerDialog(false)}
-        onSelect={handleCustomerSelect}
-      />
-      <ArtikelSuchDialog
-        open={showArticleDialog}
-        onClose={() => setShowArticleDialog(false)}
-        onSelect={handleArticleSelect}
-        customerId={state.customer?.id}
-      />
-      <WeighingTicketSelectionDialog
-        open={showWeighingTicketDialog}
-        onClose={() => setShowWeighingTicketDialog(false)}
-        onSelect={handleWeighingTicketSelect}
-        customerId={state.customer?.id}
-      />
-      <ContractSelectionDialog
-        open={showContractDialog}
-        onClose={() => setShowContractDialog(false)}
-        onSelect={handleContractSelect}
-        customerId={state.customer?.id}
-      />
-      <VarietySelectionDialog
-        open={showVarietyDialog}
-        onClose={() => setShowVarietyDialog(false)}
-        onSelect={handleVarietySelect}
-        articleId={state.articleId}
-      />
+      {(showForwarderDialog ||
+        showIntermediateDealerDialog ||
+        showAttachmentDialog ||
+        showCustomerDialog ||
+        showArticleDialog ||
+        showWeighingTicketDialog ||
+        showContractDialog ||
+        showVarietyDialog) && (
+        <LazyDialogBoundary>
+          <>
+            <CustomerSelectionDialog
+              open={showForwarderDialog}
+              onClose={() => setShowForwarderDialog(false)}
+              onSelect={(customer) => {
+                setState((prev) => ({ ...prev, forwarderId: customer.id }))
+                setForwarderName(customer.name)
+                setShowForwarderDialog(false)
+              }}
+              title="SPEDITEUR AUSW?HLEN"
+            />
+            <CustomerSelectionDialog
+              open={showIntermediateDealerDialog}
+              onClose={() => setShowIntermediateDealerDialog(false)}
+              onSelect={(customer) => {
+                setState((prev) => ({ ...prev, intermediateDealerId: customer.id }))
+                setIntermediateDealerName(customer.name)
+                setShowIntermediateDealerDialog(false)
+              }}
+              title="ZWISCHENH?NDLER AUSW?HLEN"
+            />
+            <DmsAnhangDialog
+              open={showAttachmentDialog}
+              onClose={() => setShowAttachmentDialog(false)}
+              businessObjectType="harvest_reception"
+              businessObjectId={state.id}
+              title="UNTERLAGEN / DATEIEN ??? ERNTE-ANNAHME"
+            />
+            <CustomerSelectionDialog
+              open={showCustomerDialog}
+              onClose={() => setShowCustomerDialog(false)}
+              onSelect={handleCustomerSelect}
+            />
+            <ArtikelSuchDialog
+              open={showArticleDialog}
+              onClose={() => setShowArticleDialog(false)}
+              onSelect={handleArticleSelect}
+              customerId={state.customer?.id}
+            />
+            <WeighingTicketSelectionDialog
+              open={showWeighingTicketDialog}
+              onClose={() => setShowWeighingTicketDialog(false)}
+              onSelect={handleWeighingTicketSelect}
+              customerId={state.customer?.id}
+            />
+            <ContractSelectionDialog
+              open={showContractDialog}
+              onClose={() => setShowContractDialog(false)}
+              onSelect={handleContractSelect}
+              customerId={state.customer?.id}
+            />
+            <VarietySelectionDialog
+              open={showVarietyDialog}
+              onClose={() => setShowVarietyDialog(false)}
+              onSelect={handleVarietySelect}
+              articleId={state.articleId}
+            />
+          </>
+        </LazyDialogBoundary>
+      )}
 
       <Dialog open={showZusFelderDialog} onOpenChange={setShowZusFelderDialog}>
         <DialogContent className="sm:max-w-lg">

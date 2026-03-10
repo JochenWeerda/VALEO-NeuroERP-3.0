@@ -2,9 +2,9 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
-import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
+import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
-import { z } from 'zod'
+import { getFieldsFromMaskConfig, validateFields } from '@/components/mask-builder/validation'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { StornoDialog } from '@/components/finance/StornoDialog'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
@@ -14,31 +14,6 @@ import { financeService } from '@/lib/services/finance-service'
 import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/axios'
 
-// Zod-Schema für Buchungserfassung (wird in Komponente mit i18n erstellt)
-const createBuchungSchema = (t: any) => z.object({
-  belegart: z.enum(['RE', 'GUT', 'STORNO', 'KASSE', 'BANK'], {
-    errorMap: () => ({ message: t('crud.messages.validationError') })
-  }),
-  belegnummer: z.string().min(1, t('crud.messages.validationError')),
-  buchungsdatum: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t('crud.messages.validationError')),
-  periode: z.string().regex(/^\d{4}-\d{2}$/, t('crud.messages.validationError')),
-  buchungstext: z.string().min(1, t('crud.messages.validationError')),
-  gesamtSoll: z.number().min(0, t('crud.messages.validationError')),
-  gesamtHaben: z.number().min(0, t('crud.messages.validationError')),
-  differenz: z.number().max(0.01, t('crud.messages.validationError')).min(-0.01),
-  buchungszeilen: z.array(z.object({
-    konto: z.string().min(1, t('crud.messages.validationError')),
-    soll: z.number().min(0),
-    haben: z.number().min(0),
-    steuerschluessel: z.string().optional(),
-    kostenstelle: z.string().optional(),
-    kostentraeger: z.string().optional(),
-    beleg: z.string().optional()
-  })).min(1, t('crud.messages.validationError'))
-}).refine((data) => Math.abs(data.gesamtSoll - data.gesamtHaben) < 0.01, {
-  message: t('crud.messages.debitCreditMustBalance'),
-  path: ["differenz"]
-})
 
 // Konfiguration für Buchungserfassung ObjectPage (wird in Komponente mit i18n erstellt)
 const createBuchungConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
@@ -181,7 +156,6 @@ const createBuchungConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
       delete: '/api/v1/journal-entries/{id}'
     }
   } as any,
-  validation: createBuchungSchema(t),
   permissions: ['fibu.read', 'fibu.write']
 })
 
@@ -336,13 +310,33 @@ export default function BuchungserfassungPage(): JSX.Element {
   const [latestFormData, setLatestFormData] = useState<any>(null)
   const formData = { ...initialFormData, ...(data ?? {}) }
 
-  const { validate, showValidationToast } = useMaskValidation(buchungConfig.validation)
+  const validate = (formData: any) => {
+    const errors = validateFields(getFieldsFromMaskConfig(buchungConfig), formData ?? {})
+    const buchungszeilen = Array.isArray(formData?.buchungszeilen) ? formData.buchungszeilen : []
+
+    if (buchungszeilen.length === 0) {
+      errors.buchungszeilen = t('crud.messages.validationError')
+    }
+
+    if (Math.abs((formData?.gesamtSoll ?? 0) - (formData?.gesamtHaben ?? 0)) >= 0.01) {
+      errors.differenz = t('crud.messages.debitCreditMustBalance')
+    }
+
+    return errors
+  }
+  const showValidationToast = (errors: Record<string, string>) => {
+    toast({
+      variant: 'destructive',
+      title: t('crud.messages.validationError'),
+      description: `${Object.keys(errors).length} Feld(er) muessen korrigiert werden.`,
+    })
+  }
 
   const { handleAction } = useMaskActions(async (action: string, formData: any) => {
     if (action === 'save') {
       const isValid = validate(formData)
       if (!isValid.isValid) {
-        showValidationToast(isValid.errors)
+        showValidationToast(errors)
         return
       }
       setActionLoadingKey('save')
@@ -370,11 +364,11 @@ export default function BuchungserfassungPage(): JSX.Element {
       return
     }
     if (action === 'validate') {
-      const isValid = validate(formData)
-      if (isValid.isValid) {
+      const errors = validate(formData)
+      if (Object.keys(errors).length === 0) {
         toast({ title: t('crud.messages.bookingValidationSuccess', { defaultValue: 'Validierung erfolgreich' }) })
       } else {
-        showValidationToast(isValid.errors)
+        showValidationToast(errors)
       }
       return
     }

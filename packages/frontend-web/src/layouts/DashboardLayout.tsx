@@ -1,14 +1,29 @@
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from "react"
 import { Outlet } from "react-router-dom"
 import { ActionDispatchProvider } from "@/features/ki-usability"
 import { AppShell } from "@/components/navigation/AppShell"
-import { AdvisorDock } from "@/features/copilot/AdvisorDock"
-import { CallWidget } from "@/components/cti/CallWidget"
 import { useFeature } from "@/hooks/useFeature"
 import { type McpRealtimeEvent, useMcpConnectionState, useMcpRealtime } from "@/lib/useMcpRealtime"
-import { GlobalButtonHandler } from "@/components/GlobalButtonHandler"
-import { Breadcrumbs } from "@/components/navigation/Breadcrumbs"
-import { AskVALEO } from "@/components/ai/AskVALEO"
+
+const AdvisorDock = lazy(() =>
+  import("@/features/copilot/AdvisorDock").then((module) => ({ default: module.AdvisorDock })),
+)
+
+const AskVALEO = lazy(() =>
+  import("@/components/ai/AskVALEO").then((module) => ({ default: module.AskVALEO })),
+)
+
+const Breadcrumbs = lazy(() =>
+  import("@/components/navigation/Breadcrumbs").then((module) => ({ default: module.Breadcrumbs })),
+)
+
+const GlobalButtonHandler = lazy(() =>
+  import("@/components/GlobalButtonHandler").then((module) => ({ default: module.GlobalButtonHandler })),
+)
+
+const CallWidget = lazy(() =>
+  import("@/components/cti/CallWidget").then((module) => ({ default: module.CallWidget })),
+)
 
 export default function AppLayout(): JSX.Element {
   const commandPaletteEnabled = useFeature('commandPalette')
@@ -58,7 +73,9 @@ export default function AppLayout(): JSX.Element {
     <ActionDispatchProvider>
     <AppShell enableCommandPalette={commandPaletteEnabled}>
       <div className="flex h-full flex-col">
-        <Breadcrumbs />
+        <Suspense fallback={<div className="h-11 border-b bg-background/60" />}>
+          <Breadcrumbs />
+        </Suspense>
         <div className="flex-1 overflow-y-auto bg-background p-3 md:p-6">
           <Outlet />
         </div>
@@ -73,10 +90,18 @@ export default function AppLayout(): JSX.Element {
           </footer>
         ) : null}
       </div>
-      <GlobalButtonHandler />
-      <AdvisorDock />
-      <CallWidget />
-      <AskVALEO />
+      <Suspense fallback={null}>
+        <GlobalButtonHandler />
+      </Suspense>
+      <Suspense fallback={null}>
+        <AdvisorDock />
+      </Suspense>
+      <Suspense fallback={null}>
+        <CallWidget />
+      </Suspense>
+      <Suspense fallback={null}>
+        <AskVALEO />
+      </Suspense>
     </AppShell>
     </ActionDispatchProvider>
   )

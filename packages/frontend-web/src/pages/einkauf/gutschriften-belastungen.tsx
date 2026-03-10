@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -567,45 +567,35 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="supplierId">{t('crud.entities.supplier')} *</Label>
-                <Select
+                <NativeSelect
                   value={memoData.supplierId}
                   onValueChange={(value) => setMemoData(prev => ({ ...prev, supplierId: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t('crud.tooltips.placeholders.selectSupplier')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Array.from(new Set(openInvoices.map(inv => inv.supplierId))).map(supplierId => {
-                      const supplier = openInvoices.find(inv => inv.supplierId === supplierId)
-                      return (
-                        <SelectItem key={supplierId} value={supplierId}>
-                          {supplier?.supplierName || supplierId}
-                        </SelectItem>
-                      )
-                    })}
-                  </SelectContent>
-                </Select>
+                  placeholder={t('crud.tooltips.placeholders.selectSupplier')}
+                  options={Array.from(new Set(openInvoices.map((inv) => inv.supplierId))).map((supplierId) => {
+                    const supplier = openInvoices.find((inv) => inv.supplierId === supplierId)
+                    return {
+                      value: supplierId,
+                      label: supplier?.supplierName || supplierId,
+                    }
+                  })}
+                />
               </div>
               <div>
                 <Label htmlFor="invoiceId">{t('crud.fields.invoiceNumber')}</Label>
-                <Select
-                  value={memoData.invoiceId}
+                <NativeSelect
+                  value={memoData.invoiceId ?? ''}
                   onValueChange={(value) => setMemoData(prev => ({ ...prev, invoiceId: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t('crud.tooltips.placeholders.selectInvoice')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">-</SelectItem>
-                    {openInvoices
-                      .filter(inv => inv.supplierId === memoData.supplierId)
-                      .map(inv => (
-                        <SelectItem key={inv.id} value={inv.id}>
-                          {inv.number} ({formatNumber(inv.openAmount, 2)} €)
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
+                  placeholder={t('crud.tooltips.placeholders.selectInvoice')}
+                  options={[
+                    { value: '', label: '-' },
+                    ...openInvoices
+                      .filter((inv) => inv.supplierId === memoData.supplierId)
+                      .map((inv) => ({
+                        value: inv.id,
+                        label: `${inv.number} (${formatNumber(inv.openAmount, 2)} EUR)`,
+                      })),
+                  ]}
+                />
               </div>
               <div>
                 <Label htmlFor="memoDate">{t('crud.fields.date')} *</Label>

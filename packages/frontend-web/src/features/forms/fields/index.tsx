@@ -1,7 +1,7 @@
-﻿import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Input } from '@/components/ui/input'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 
@@ -171,18 +171,13 @@ export function FieldRenderer({ field, value, onChange }: FieldRendererProps): J
       )
     case 'select':
       return (
-        <Select value={String(value ?? '')} onValueChange={(selected) => onChange(selected)}>
-          <SelectTrigger id={field.name}>
-            <SelectValue placeholder={field.placeholder ?? 'Bitte waehlen'} />
-          </SelectTrigger>
-          <SelectContent>
-            {field.options?.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <NativeSelect
+          id={field.name}
+          value={String(value ?? '')}
+          onValueChange={(selected) => onChange(selected)}
+          options={field.options ?? []}
+          placeholder={field.placeholder ?? 'Bitte waehlen'}
+        />
       )
     case 'lookup':
       return (
@@ -204,3 +199,5 @@ export function FieldRenderer({ field, value, onChange }: FieldRendererProps): J
       )
   }
 }
+
+

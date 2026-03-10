@@ -135,6 +135,32 @@ type PaginatedResponse = {
   totalPages: number
 }
 
+const EMPTY_PURCHASE_ORDER_LIST: PurchaseOrder[] = []
+const EMPTY_PURCHASE_ORDER_CHANGELOG: Array<{
+  id: string
+  changeType: string
+  changedBy: string
+  changedAt: string
+  fieldChanges: Array<{ field: string; oldValue: string; newValue: string }>
+}> = []
+
+const EMPTY_PURCHASE_ORDER_STATISTICS: {
+  totalOrders: number
+  totalValue: number
+  byStatus: Record<PurchaseOrderStatus, number>
+} = {
+  totalOrders: 0,
+  totalValue: 0,
+  byStatus: {
+    ENTWURF: 0,
+    FREIGEGEBEN: 0,
+    BESTELLT: 0,
+    TEILGELIEFERT: 0,
+    GELIEFERT: 0,
+    STORNIERT: 0,
+  },
+}
+
 // Query Keys
 
 export const purchaseOrderKeys = {
@@ -165,6 +191,7 @@ export function usePurchaseOrders(filters?: {
       const response = await apiClient.get<PaginatedResponse>(`/api/v1/purchase-orders?${String(params)}`)
       return response.data.data
     },
+    initialData: EMPTY_PURCHASE_ORDER_LIST,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -177,6 +204,7 @@ export function usePurchaseOrder(id: string) {
       return response.data
     },
     enabled: !!id,
+    initialData: null,
   })
 }
 
@@ -247,6 +275,7 @@ export function usePurchaseOrderStatistics() {
       }>('/api/v1/purchase-orders/statistics')
       return response.data
     },
+    initialData: EMPTY_PURCHASE_ORDER_STATISTICS,
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -267,5 +296,6 @@ export function usePurchaseOrderChangelog(id: string) {
       return response.data
     },
     enabled: !!id,
+    initialData: EMPTY_PURCHASE_ORDER_CHANGELOG,
   })
 }

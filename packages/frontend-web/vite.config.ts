@@ -4,6 +4,42 @@ import compression from 'vite-plugin-compression'
 import path from 'path'
 import fs from 'fs'
 
+function getPackageName(id: string): string | null {
+  const normalizedId = id.replace(/\\/g, '/')
+  const parts = normalizedId.split('node_modules/')
+  const dependencyPath = parts.at(-1)
+  if (!dependencyPath) return null
+
+  const segments = dependencyPath.split('/')
+  if (segments[0]?.startsWith('@') && segments[1]) {
+    return `${segments[0]}/${segments[1]}`
+  }
+
+  return segments[0] ?? null
+}
+
+function getVendorChunk(id: string): string | undefined {
+  if (!id.includes('node_modules')) return undefined
+
+  const pkg = getPackageName(id)
+  if (!pkg) return 'vendor-misc'
+
+  if (['react', 'react-dom', 'react-router-dom'].includes(pkg)) return 'vendor-react'
+  if (pkg.startsWith('@radix-ui/')) return 'vendor-radix'
+  if (['lucide-react', '@radix-ui/react-icons'].includes(pkg)) return 'vendor-icons'
+  if (['@tanstack/react-query', 'axios'].includes(pkg)) return 'vendor-data'
+  if (['react-hook-form', '@hookform/resolvers', 'zod'].includes(pkg)) return 'vendor-forms'
+  if (['i18next', 'react-i18next', 'i18next-browser-languagedetector', 'i18next-http-backend'].includes(pkg)) return 'vendor-i18n'
+  if (['recharts', 'victory-vendor'].includes(pkg) || pkg.startsWith('d3-')) return 'vendor-charts'
+  if (['date-fns', 'react-day-picker'].includes(pkg)) return 'vendor-dates'
+  if (['framer-motion'].includes(pkg)) return 'vendor-motion'
+  if (['oidc-client-ts', 'jwt-decode'].includes(pkg)) return 'vendor-auth'
+  if (['openai'].includes(pkg)) return 'vendor-openai'
+  if (['zustand', 'cmdk', 'qrcode.react', 'sonner', 'clsx', 'tailwind-merge', 'class-variance-authority'].includes(pkg)) return 'vendor-utils'
+
+  return `vendor-${pkg.replace('@', '').replace(/[\/.]/g, '-')}`
+}
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   // Lade Umgebungsvariablen - zuerst aus loadEnv, dann process.env als Fallback
@@ -186,30 +222,8 @@ export default defineConfig(({ mode }) => {
         chunkFileNames: 'assets/js/[name]-[hash].js',
         entryFileNames: 'assets/js/[name]-[hash].js',
         assetFileNames: 'assets/[ext]/[name]-[hash].[ext]',
-        manualChunks: {
-          // Vendor-Chunk: React Core
-          vendor: ['react', 'react-dom', 'react-router-dom'],
-          // UI-Chunk: Radix UI Komponenten
-          ui: [
-            '@radix-ui/react-dialog',
-            '@radix-ui/react-dropdown-menu',
-            '@radix-ui/react-select',
-            '@radix-ui/react-tabs',
-            '@radix-ui/react-toast',
-            '@radix-ui/react-tooltip',
-            '@radix-ui/react-popover',
-            'lucide-react',
-          ],
-          // Charts-Chunk: Recharts (schwer)
-          charts: ['recharts'],
-          // Forms-Chunk: Formular-Bibliotheken
-          forms: ['react-hook-form', 'zod', '@hookform/resolvers'],
-          // Query-Chunk: Data-Fetching
-          query: ['@tanstack/react-query', 'axios'],
-          // Utils-Chunk: Hilfsfunktionen
-          utils: ['date-fns', 'clsx', 'tailwind-merge', 'class-variance-authority'],
-          // i18n-Chunk: Internationalisierung
-          i18n: ['i18next', 'react-i18next', 'i18next-browser-languagedetector'],
+        manualChunks(id) {
+          return getVendorChunk(id)
         },
       },
     },

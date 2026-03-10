@@ -2,9 +2,9 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
-import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
+import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
-import { z } from 'zod'
+import { getFieldsFromMaskConfig, validateFields } from '@/components/mask-builder/validation'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { lookupIBAN, formatIBAN, validateIBAN } from '@/lib/utils/iban-validator'
 import { toast } from '@/hooks/use-toast'
@@ -13,42 +13,6 @@ import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { LeaveConfirmDialog } from '@/components/LeaveConfirmDialog'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 
-// Zod-Schema für Lastschriften Debitoren (wird in Komponente mit i18n erstellt)
-const createLastschriftenSchema = (t: any) => z.object({
-  laufNummer: z.string().min(1, t('crud.messages.validationError')),
-  ausfuehrungsDatum: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t('crud.messages.validationError')),
-  gesamtBetrag: z.number().positive(t('crud.messages.validationError')),
-  anzahlLastschriften: z.number().min(1, t('crud.messages.validationError')),
-  status: z.enum(['entwurf', 'freigegeben', 'ausgefuehrt', 'storniert']),
-  freigegebenAm: z.string().optional(),
-  freigegebenDurch: z.string().optional(),
-  ausgefuehrtAm: z.string().optional(),
-
-  // SEPA-Details
-  creditorId: z.string().min(1, t('crud.messages.validationError')),
-  auftraggeberName: z.string().min(1, t('crud.messages.validationError')),
-  auftraggeberIban: z.string().regex(/^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/, t('crud.messages.validationError')),
-
-  // Lastschriften
-  lastschriften: z.array(z.object({
-    debitorId: z.string().min(1, t('crud.messages.validationError')),
-    debitorName: z.string().min(1, t('crud.messages.validationError')),
-    iban: z.string().regex(/^[A-Z]{2}\d{2}[A-Z0-9]{11,30}$/, t('crud.messages.validationError')),
-    bic: z.string().optional(),
-    betrag: z.number().positive(t('crud.messages.validationError')),
-    mandatReferenz: z.string().min(1, t('crud.messages.validationError')),
-    mandatDatum: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t('crud.messages.validationError')),
-    verwendungszweck: z.string().min(1, t('crud.messages.validationError')),
-    sequenzTyp: z.enum(['FRST', 'RCUR', 'FNAL', 'OOFF'], {
-      errorMap: () => ({ message: t('crud.messages.validationError') })
-    }),
-    opReferenz: z.string().optional()
-  })).min(1, t('crud.messages.validationError')),
-
-  notizen: z.string().optional()
-})
-
-// Konfiguration für Lastschriften Debitoren ObjectPage (wird in Komponente mit i18n erstellt)
 const createLastschriftenConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
   subtitle: t('crud.fields.collectSepaDirectDebits'),
@@ -123,6 +87,7 @@ const createLastschriftenConfig = (t: any, entityTypeLabel: string): MaskConfig 
           label: t('crud.fields.originatorIban'),
           type: 'text',
           required: true,
+          pattern: '^[A-Z]{2}\\d{2}[A-Z0-9]{11,30}$',
           placeholder: t('crud.tooltips.placeholders.iban')
         }
       ]
@@ -208,7 +173,6 @@ const createLastschriftenConfig = (t: any, entityTypeLabel: string): MaskConfig 
       delete: '/api/v1/finance/direct-debits/{id}'
     }
   } as any,
-  validation: createLastschriftenSchema(t),
   permissions: ['fibu.read', 'fibu.write', 'fibu.admin']
 })
 
@@ -444,7 +408,10 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
   }
   const safeFormData = { ...initialFormData, ...(data ?? formData ?? {}) }
 
-  const { validate, showValidationToast } = useMaskValidation(lastschriftenConfig.validation)
+  const validate = (formData: any) => validateFields(getFieldsFromMaskConfig(lastschriftenConfig), formData ?? {})
+  const showValidationToast = (errors: Record<string, string>) => {
+    toast({ variant: 'destructive', title: t('crud.messages.validationError'), description: `${Object.keys(errors).length} Feld(er) muessen korrigiert werden.` })
+  }
 
   // Handle form data changes for IBAN lookup
   const handleFormChange = (newData: any) => {
@@ -500,9 +467,9 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
       // SEPA-Vorschau
       window.open('/api/v1/finance/direct-debits/preview', '_blank')
     } else if (action === 'approve') {
-      const isValid = validate(formData)
-      if (!isValid.isValid) {
-        showValidationToast(isValid.errors)
+      const errors = validate(formData)
+      if (Object.keys(errors).length > 0) {
+        showValidationToast(errors)
         return
       }
       setActionLoadingKey('approve')
@@ -517,9 +484,9 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
         setActionLoadingKey(null)
       }
     } else if (action === 'execute') {
-      const isValid = validate(formData)
-      if (!isValid.isValid) {
-        showValidationToast(isValid.errors)
+      const errors = validate(formData)
+      if (Object.keys(errors).length > 0) {
+        showValidationToast(errors)
         return
       }
       setActionLoadingKey('execute')

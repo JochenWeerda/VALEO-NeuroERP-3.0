@@ -1,20 +1,14 @@
 import * as React from "react"
 import { useState } from "react"
-import { AnimatePresence, motion } from "framer-motion"
 import { useCopilotChat } from "./useCopilotChat"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
-const DOCK_WIDTH = 384 // w-96 = 384px
-const ANIMATION_STIFFNESS = 90
-const BUTTON_SIZE = 48 // h-12 w-12
-const BUTTON_BOTTOM_OFFSET = 24 // bottom-6
-const BUTTON_RIGHT_OFFSET = 24 // right-6
+const DOCK_WIDTH = 384
+const BUTTON_SIZE = 48
+const BUTTON_BOTTOM_OFFSET = 24
+const BUTTON_RIGHT_OFFSET = 24
 
-/**
- * Copilot Advisor Dock - Interaktives Chat-Fenster
- * Animiertes Panel am rechten Bildschirmrand für Live-Chat mit KI-Copilot
- */
 export function AdvisorDock(): JSX.Element {
   const { messages, sendMessage, loading } = useCopilotChat()
   const [open, setOpen] = useState<boolean>(false)
@@ -34,100 +28,69 @@ export function AdvisorDock(): JSX.Element {
     setText(e.target.value)
   }
 
-  const toggleOpen = (): void => {
-    setOpen((prev) => !prev)
-  }
-
-  const handleClose = (): void => {
-    setOpen(false)
-  }
-
   return (
     <>
-      {/* Toggle-Button */}
       <Button
-        onClick={toggleOpen}
-        className="fixed z-40 rounded-full shadow-lg bg-emerald-600 hover:bg-emerald-700"
+        onClick={() => setOpen((prev) => !prev)}
+        className="fixed z-40 rounded-full bg-emerald-600 shadow-lg hover:bg-emerald-700"
         style={{
           bottom: `${BUTTON_BOTTOM_OFFSET}px`,
           right: `${BUTTON_RIGHT_OFFSET}px`,
           height: `${BUTTON_SIZE}px`,
           width: `${BUTTON_SIZE}px`,
         }}
-        aria-label="Copilot Chat öffnen"
+        aria-label="Copilot Chat oeffnen"
       >
-        💬
+        Chat
       </Button>
 
-      {/* Dock-Panel */}
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ x: DOCK_WIDTH }}
-            animate={{ x: 0 }}
-            exit={{ x: DOCK_WIDTH }}
-            transition={{ type: "spring", stiffness: ANIMATION_STIFFNESS }}
-            className="fixed right-0 top-0 h-full bg-white border-l border-emerald-200 shadow-2xl flex flex-col z-50"
-            style={{ width: `${DOCK_WIDTH}px` }}
-          >
-            {/* Header */}
-            <div className="p-3 border-b bg-emerald-50 flex items-center justify-between">
-              <span className="font-semibold text-emerald-700">
-                Copilot Advisor
-              </span>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={handleClose}
-                aria-label="Chat schließen"
-              >
-                ×
-              </Button>
-            </div>
+      <div
+        className={`fixed right-0 top-0 z-50 flex h-full flex-col border-l border-emerald-200 bg-white shadow-2xl transition-transform duration-300 ease-out ${
+          open ? "translate-x-0" : "translate-x-full"
+        }`}
+        style={{ width: `${DOCK_WIDTH}px` }}
+        aria-hidden={!open}
+      >
+        <div className="flex items-center justify-between border-b bg-emerald-50 p-3">
+          <span className="font-semibold text-emerald-700">Copilot Advisor</span>
+          <Button size="sm" variant="ghost" onClick={() => setOpen(false)} aria-label="Chat schliessen">
+            x
+          </Button>
+        </div>
 
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-3 space-y-2">
-              {messages.length === 0 && (
-                <div className="text-sm text-gray-500 text-center mt-8">
-                  Stelle eine Frage zu KPIs, Lager, Preisen oder Prognosen.
-                </div>
-              )}
-              {messages.map((msg, index): JSX.Element => (
-                <div
-                  key={index}
-                  className={`p-2 rounded-xl max-w-[85%] ${
-                    msg.role === "user"
-                      ? "bg-emerald-600 text-white ml-auto"
-                      : "bg-emerald-100 text-gray-800"
-                  }`}
-                >
-                  {msg.content}
-                </div>
-              ))}
-              {loading && (
-                <div className="text-sm text-gray-500 italic">
-                  Copilot denkt …
-                </div>
-              )}
+        <div className="flex-1 space-y-2 overflow-y-auto p-3">
+          {messages.length === 0 ? (
+            <div className="mt-8 text-center text-sm text-gray-500">
+              Stelle eine Frage zu KPIs, Lager, Preisen oder Prognosen.
             </div>
+          ) : null}
+          {messages.map((msg, index): JSX.Element => (
+            <div
+              key={index}
+              className={`max-w-[85%] rounded-xl p-2 ${
+                msg.role === "user" ? "ml-auto bg-emerald-600 text-white" : "bg-emerald-100 text-gray-800"
+              }`}
+            >
+              {msg.content}
+            </div>
+          ))}
+          {loading ? <div className="text-sm italic text-gray-500">Copilot denkt ...</div> : null}
+        </div>
 
-            {/* Input Form */}
-            <form className="p-3 border-t flex gap-2" onSubmit={handleSubmit}>
-              <Input
-                value={text}
-                onChange={handleInputChange}
-                placeholder="Frage stellen …"
-                className="flex-1"
-                disabled={loading}
-                aria-label="Chat-Nachricht eingeben"
-              />
-              <Button type="submit" disabled={loading || text.trim().length === 0}>
-                Senden
-              </Button>
-            </form>
-          </motion.div>
-        )}
-      </AnimatePresence>
+        <form className="flex gap-2 border-t p-3" onSubmit={handleSubmit}>
+          <Input
+            value={text}
+            onChange={handleInputChange}
+            placeholder="Frage stellen ..."
+            className="flex-1"
+            disabled={loading}
+            aria-label="Chat-Nachricht eingeben"
+          />
+          <Button type="submit" disabled={loading || text.trim().length === 0}>
+            Senden
+          </Button>
+        </form>
+      </div>
     </>
   )
 }

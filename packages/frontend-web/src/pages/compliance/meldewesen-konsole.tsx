@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from "react"
+﻿import React, { useCallback, useMemo, useState } from "react"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { NativeSelect } from "@/components/ui/native-select"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -124,7 +124,7 @@ function nextRunsPreview(s: Schedule) {
   return out
 }
 
-// ── API ↔ Frontend Mappers ────────────────────────────────────────────────────
+// â”€â”€ API â†” Frontend Mappers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function connectorFromApi(a: ConnectorApi): Connector {
   const cfg = (a.config_json ?? {}) as Record<string, unknown>
@@ -447,7 +447,7 @@ export default function MeldewesenKonsole() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Meldewesen-Konsole</h1>
           <p className="text-sm text-muted-foreground">
-            Konfiguration für Meldestellen/Übertragungswege, Stichtags-Jobs, Artefakte (CSV/XML/JSON) und Audit-Logs.
+            Konfiguration fÃ¼r Meldestellen/Ãœbertragungswege, Stichtags-Jobs, Artefakte (CSV/XML/JSON) und Audit-Logs.
           </p>
         </div>
         <div className="flex gap-2">
@@ -477,16 +477,16 @@ export default function MeldewesenKonsole() {
         <ShieldAlert className="h-4 w-4" />
         <AlertTitle>Hinweis (Produktivbetrieb)</AlertTitle>
         <AlertDescription>
-          API-Keys/Zertifikate sollten serverseitig verschlüsselt gespeichert werden (Vault/KMS). Das Frontend sollte nur maskiert anzeigen.
+          API-Keys/Zertifikate sollten serverseitig verschlÃ¼sselt gespeichert werden (Vault/KMS). Das Frontend sollte nur maskiert anzeigen.
         </AlertDescription>
       </Alert>
 
       <Tabs defaultValue="schedules" className="w-full">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="schedules">Zeitpläne</TabsTrigger>
-          <TabsTrigger value="connectors">Übertragungswege</TabsTrigger>
+          <TabsTrigger value="schedules">ZeitplÃ¤ne</TabsTrigger>
+          <TabsTrigger value="connectors">Ãœbertragungswege</TabsTrigger>
           <TabsTrigger value="units">Firmen/Konzern</TabsTrigger>
-          <TabsTrigger value="jobs">Läufe &amp; Logs</TabsTrigger>
+          <TabsTrigger value="jobs">LÃ¤ufe &amp; Logs</TabsTrigger>
         </TabsList>
 
         <TabsContent value="connectors" className="mt-4">
@@ -549,7 +549,7 @@ export default function MeldewesenKonsole() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {!activeConnector ? (
-                  <div className="text-sm text-muted-foreground">Wähle links einen Connector aus.</div>
+                  <div className="text-sm text-muted-foreground">WÃ¤hle links einen Connector aus.</div>
                 ) : (
                   <>
                     <div className="flex items-center justify-between gap-3">
@@ -566,25 +566,22 @@ export default function MeldewesenKonsole() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div>
                         <Label>Transport</Label>
-                        <Select
+                        <NativeSelect
                           value={activeConnector.transport}
                           onValueChange={(v) => upsertConnector({ ...activeConnector, transport: v as TransportKind })}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Transport wählen" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="file-drop">file-drop (Outbox)</SelectItem>
-                            <SelectItem value="https">https (API)</SelectItem>
-                            <SelectItem value="sftp">sftp</SelectItem>
-                            <SelectItem value="email">email</SelectItem>
-                            <SelectItem value="provider">provider (Zoll)</SelectItem>
-                          </SelectContent>
-                        </Select>
+                          options={[
+                            { value: "file-drop", label: "file-drop (Outbox)" },
+                            { value: "https", label: "https (API)" },
+                            { value: "sftp", label: "sftp" },
+                            { value: "email", label: "email" },
+                            { value: "provider", label: "provider (Zoll)" },
+                          ]}
+                          placeholder="Transport wÃ¤hlen"
+                        />
                       </div>
 
                       <div>
-                        <Label>Unterstützte Meldungen</Label>
+                        <Label>UnterstÃ¼tzte Meldungen</Label>
                         <div className="flex flex-wrap gap-2 mt-2">
                           {(["INTRASTAT_DE", "BLE_MVO", "ZOLL_ATLAS_PROVIDER", "EUDR_DDS"] as ReportType[]).map((t) => {
                             const on = activeConnector.supportedReportTypes.includes(t)
@@ -612,7 +609,7 @@ export default function MeldewesenKonsole() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div>
-                        <Label>Base URL (für https/provider)</Label>
+                        <Label>Base URL (fÃ¼r https/provider)</Label>
                         <Input
                           value={activeConnector.secrets.baseUrl ?? ""}
                           onChange={(e) =>
@@ -634,7 +631,7 @@ export default function MeldewesenKonsole() {
                               secrets: { ...activeConnector.secrets, apiKey: e.target.value },
                             })
                           }
-                          placeholder="••••••"
+                          placeholder="â€¢â€¢â€¢â€¢â€¢â€¢"
                         />
                       </div>
                       <div>
@@ -657,7 +654,7 @@ export default function MeldewesenKonsole() {
                       <Textarea
                         value={activeConnector.notes ?? ""}
                         onChange={(e) => upsertConnector({ ...activeConnector, notes: e.target.value })}
-                        placeholder="z. B. Upload-Maske, Ansprechpartner, Formatvorgaben…"
+                        placeholder="z. B. Upload-Maske, Ansprechpartner, Formatvorgabenâ€¦"
                       />
                     </div>
 
@@ -669,7 +666,7 @@ export default function MeldewesenKonsole() {
                           setActiveConnectorId(connectors.find((x) => x.id !== activeConnector.id)?.id ?? connectors[0]?.id ?? "")
                         }}
                       >
-                        <Trash2 className="h-4 w-4 mr-2" /> Löschen
+                        <Trash2 className="h-4 w-4 mr-2" /> LÃ¶schen
                       </Button>
                       <Button onClick={() => upsertConnector(activeConnector)}>
                         <Save className="h-4 w-4 mr-2" /> Speichern
@@ -713,7 +710,7 @@ export default function MeldewesenKonsole() {
                     <div key={u.id} className="p-3 rounded-lg border">
                       <div className="font-medium">{u.name}</div>
                       <div className="text-xs text-muted-foreground">
-                        {u.countryIso2} · {u.vatId ?? "(keine USt-ID)"}
+                        {u.countryIso2} Â· {u.vatId ?? "(keine USt-ID)"}
                       </div>
                       <div className="flex gap-2 mt-2 flex-wrap">
                         {u.intrastatEnabled && <Badge>Intrastat</Badge>}
@@ -767,7 +764,7 @@ export default function MeldewesenKonsole() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <Card className="lg:col-span-1">
               <CardHeader>
-                <CardTitle>Zeitpläne</CardTitle>
+                <CardTitle>ZeitplÃ¤ne</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
                 <Button
@@ -810,7 +807,7 @@ export default function MeldewesenKonsole() {
                           <Badge variant={s.enabled ? "default" : "secondary"}>{s.reportType}</Badge>
                         </div>
                         <div className="text-xs text-muted-foreground mt-1">
-                          {s.cadence} · {String(s.dayOfMonth).padStart(2, "0")} · {s.timeHHmm} · lead {s.leadDays}d
+                          {s.cadence} Â· {String(s.dayOfMonth).padStart(2, "0")} Â· {s.timeHHmm} Â· lead {s.leadDays}d
                         </div>
                       </button>
                     ))}
@@ -825,7 +822,7 @@ export default function MeldewesenKonsole() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {!activeSchedule ? (
-                  <div className="text-sm text-muted-foreground">Wähle links einen Zeitplan aus.</div>
+                  <div className="text-sm text-muted-foreground">WÃ¤hle links einen Zeitplan aus.</div>
                 ) : (
                   <>
                     <div className="flex items-center justify-between gap-3">
@@ -842,49 +839,34 @@ export default function MeldewesenKonsole() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div>
                         <Label>Meldungstyp</Label>
-                        <Select value={activeSchedule.reportType} onValueChange={(v) => upsertSchedule({ ...activeSchedule, reportType: v as ReportType })}>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="INTRASTAT_DE">INTRASTAT_DE</SelectItem>
-                            <SelectItem value="BLE_MVO">BLE_MVO</SelectItem>
-                            <SelectItem value="ZOLL_ATLAS_PROVIDER">ZOLL_ATLAS_PROVIDER</SelectItem>
-                            <SelectItem value="EUDR_DDS">EUDR_DDS</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <NativeSelect
+                          value={activeSchedule.reportType}
+                          onValueChange={(v) => upsertSchedule({ ...activeSchedule, reportType: v as ReportType })}
+                          options={[
+                            { value: "INTRASTAT_DE", label: "INTRASTAT_DE" },
+                            { value: "BLE_MVO", label: "BLE_MVO" },
+                            { value: "ZOLL_ATLAS_PROVIDER", label: "ZOLL_ATLAS_PROVIDER" },
+                            { value: "EUDR_DDS", label: "EUDR_DDS" },
+                          ]}
+                        />
                       </div>
 
                       <div>
                         <Label>Firma (Reporting Unit)</Label>
-                        <Select value={activeSchedule.reportingUnitId} onValueChange={(v) => upsertSchedule({ ...activeSchedule, reportingUnitId: v })}>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {units.map((u) => (
-                              <SelectItem key={u.id} value={u.id}>
-                                {u.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <NativeSelect
+                          value={activeSchedule.reportingUnitId}
+                          onValueChange={(v) => upsertSchedule({ ...activeSchedule, reportingUnitId: v })}
+                          options={units.map((u) => ({ value: u.id, label: u.name }))}
+                        />
                       </div>
 
                       <div>
-                        <Label>Übertragungsweg (Connector)</Label>
-                        <Select value={activeSchedule.connectorId} onValueChange={(v) => upsertSchedule({ ...activeSchedule, connectorId: v })}>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {connectors.map((c) => (
-                              <SelectItem key={c.id} value={c.id}>
-                                {c.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <Label>Ãœbertragungsweg (Connector)</Label>
+                        <NativeSelect
+                          value={activeSchedule.connectorId}
+                          onValueChange={(v) => upsertSchedule({ ...activeSchedule, connectorId: v })}
+                          options={connectors.map((c) => ({ value: c.id, label: c.name }))}
+                        />
                       </div>
 
                       <div>
@@ -917,16 +899,15 @@ export default function MeldewesenKonsole() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div>
                         <Label>Takt</Label>
-                        <Select value={activeSchedule.cadence} onValueChange={(v) => upsertSchedule({ ...activeSchedule, cadence: v as Schedule["cadence"] })}>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="monthly">monatlich</SelectItem>
-                            <SelectItem value="quarterly">quartalsweise</SelectItem>
-                            <SelectItem value="yearly">jährlich</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <NativeSelect
+                          value={activeSchedule.cadence}
+                          onValueChange={(v) => upsertSchedule({ ...activeSchedule, cadence: v as Schedule["cadence"] })}
+                          options={[
+                            { value: "monthly", label: "monatlich" },
+                            { value: "quarterly", label: "quartalsweise" },
+                            { value: "yearly", label: "j?hrlich" },
+                          ]}
+                        />
                       </div>
                       <div>
                         <Label>Stichtag (Tag im Monat)</Label>
@@ -943,7 +924,7 @@ export default function MeldewesenKonsole() {
                         <Input value={activeSchedule.timeHHmm} onChange={(e) => upsertSchedule({ ...activeSchedule, timeHHmm: e.target.value })} placeholder="09:00" />
                       </div>
                       <div>
-                        <Label>Auslösen vorher (leadDays)</Label>
+                        <Label>AuslÃ¶sen vorher (leadDays)</Label>
                         <Input
                           type="number"
                           min={0}
@@ -964,19 +945,15 @@ export default function MeldewesenKonsole() {
                     </div>
                     {activeSchedule.gateByThreshold && (
                       <div>
-                        <Label>Schwellen-Schlüssel</Label>
-                        <Select
+                        <Label>Schwellen-SchlÃ¼ssel</Label>
+                        <NativeSelect
                           value={activeSchedule.thresholdKey ?? "INTRASTAT_ARRIVAL"}
                           onValueChange={(v) => upsertSchedule({ ...activeSchedule, thresholdKey: v as Schedule["thresholdKey"] })}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="INTRASTAT_ARRIVAL">INTRASTAT_ARRIVAL</SelectItem>
-                            <SelectItem value="INTRASTAT_DISPATCH">INTRASTAT_DISPATCH</SelectItem>
-                          </SelectContent>
-                        </Select>
+                          options={[
+                            { value: "INTRASTAT_ARRIVAL", label: "INTRASTAT_ARRIVAL" },
+                            { value: "INTRASTAT_DISPATCH", label: "INTRASTAT_DISPATCH" },
+                          ]}
+                        />
                       </div>
                     )}
 
@@ -994,7 +971,7 @@ export default function MeldewesenKonsole() {
                       <Card>
                         <CardHeader className="pb-2">
                           <CardTitle className="text-base flex items-center gap-2">
-                            <CalendarDays className="h-4 w-4" /> Nächste Ausführungen
+                            <CalendarDays className="h-4 w-4" /> NÃ¤chste AusfÃ¼hrungen
                           </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-1 text-sm">
@@ -1016,13 +993,13 @@ export default function MeldewesenKonsole() {
                             onClick={() => runScheduleNow(activeSchedule)}
                             disabled={runJobMu.isPending}
                           >
-                            <Play className="h-4 w-4 mr-2" /> Jetzt ausführen
+                            <Play className="h-4 w-4 mr-2" /> Jetzt ausfÃ¼hren
                           </Button>
                           <Button variant="outline" className="w-full" onClick={() => upsertSchedule(activeSchedule)}>
                             <Save className="h-4 w-4 mr-2" /> Speichern
                           </Button>
                           <Button variant="destructive" className="w-full" onClick={() => removeSchedule(activeSchedule.id)}>
-                            <Trash2 className="h-4 w-4 mr-2" /> Löschen
+                            <Trash2 className="h-4 w-4 mr-2" /> LÃ¶schen
                           </Button>
                         </CardContent>
                       </Card>
@@ -1038,10 +1015,10 @@ export default function MeldewesenKonsole() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <Card className="lg:col-span-2">
               <CardHeader>
-                <CardTitle>Läufe</CardTitle>
+                <CardTitle>LÃ¤ufe</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="text-sm text-muted-foreground">Job-Läufe aus dem Backend (DB).</div>
+                <div className="text-sm text-muted-foreground">Job-LÃ¤ufe aus dem Backend (DB).</div>
                 <div className="space-y-2">
                   {jobs.slice(0, 12).map((j) => (
                     <div key={j.id} className="p-3 rounded-lg border">
@@ -1050,12 +1027,12 @@ export default function MeldewesenKonsole() {
                         <Badge variant={j.status === "success" ? "default" : j.status === "failed" ? "destructive" : "secondary"}>{j.status}</Badge>
                       </div>
                       <div className="text-xs text-muted-foreground mt-1">
-                        {new Date(j.createdAt).toLocaleString()} · {j.scheduleId ?? "ad-hoc"}
+                        {new Date(j.createdAt).toLocaleString()} Â· {j.scheduleId ?? "ad-hoc"}
                       </div>
                       {j.message && <div className="text-sm mt-2">{j.message}</div>}
                     </div>
                   ))}
-                  {jobs.length === 0 && <div className="text-sm text-muted-foreground">Noch keine Läufe.</div>}
+                  {jobs.length === 0 && <div className="text-sm text-muted-foreground">Noch keine LÃ¤ufe.</div>}
                 </div>
               </CardContent>
             </Card>
@@ -1083,7 +1060,7 @@ export default function MeldewesenKonsole() {
                   </DialogContent>
                 </Dialog>
                 <Button variant="outline" className="w-full" onClick={() => void refetchJ()}>
-                  Läufe aktualisieren
+                  LÃ¤ufe aktualisieren
                 </Button>
               </CardContent>
             </Card>
@@ -1099,16 +1076,16 @@ export default function MeldewesenKonsole() {
           <div>Dieses UI ist an die APIs /api/v1/config und /api/v1/jobs angebunden. Daten werden in der Datenbank gespeichert.</div>
           <ul className="list-disc ml-5 space-y-1">
             <li>
-              <span className="font-mono">GET/PUT/PATCH/DELETE /api/v1/config/connectors</span> – Connectoren
+              <span className="font-mono">GET/PUT/PATCH/DELETE /api/v1/config/connectors</span> â€“ Connectoren
             </li>
             <li>
-              <span className="font-mono">GET/PUT/PATCH/DELETE /api/v1/config/schedules</span> – Zeitpläne
+              <span className="font-mono">GET/PUT/PATCH/DELETE /api/v1/config/schedules</span> â€“ ZeitplÃ¤ne
             </li>
             <li>
-              <span className="font-mono">POST /api/v1/jobs/run</span> – Job sofort starten
+              <span className="font-mono">POST /api/v1/jobs/run</span> â€“ Job sofort starten
             </li>
             <li>
-              <span className="font-mono">GET /api/v1/jobs</span> – Läufe/Status/Logs
+              <span className="font-mono">GET /api/v1/jobs</span> â€“ LÃ¤ufe/Status/Logs
             </li>
           </ul>
         </CardContent>

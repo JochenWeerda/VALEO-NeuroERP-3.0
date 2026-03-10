@@ -1,5 +1,4 @@
-import { useEffect, useRef, useState, type JSX } from 'react'
-import { ResponsiveContainer, Line, LineChart } from 'recharts'
+import { Suspense, lazy, useEffect, useRef, useState, type JSX } from 'react'
 import { TrendingDown, TrendingUp } from 'lucide-react'
 import styles from '../reports.module.css'
 
@@ -20,6 +19,8 @@ const currencyFormatter = new Intl.NumberFormat('de-DE', {
 const numberFormatter = new Intl.NumberFormat('de-DE', {
   maximumFractionDigits: 2,
 })
+
+const FinancialCardSparkline = lazy(() => import('./FinancialCardSparkline'))
 
 export function FinancialCard(props: FinancialCardProps): JSX.Element {
   const { label, value, deltaPercent, sparkline, format = 'currency' } = props
@@ -64,17 +65,9 @@ export function FinancialCard(props: FinancialCardProps): JSX.Element {
       </p>
 
       <div className={styles.sparklineWrap}>
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={sparkline}>
-            <Line
-              dataKey="value"
-              type="monotone"
-              stroke={deltaPositive ? '#0EA870' : '#D94A66'}
-              strokeWidth={2}
-              dot={false}
-            />
-          </LineChart>
-        </ResponsiveContainer>
+        <Suspense fallback={null}>
+          <FinancialCardSparkline sparkline={sparkline} deltaPositive={deltaPositive} />
+        </Suspense>
       </div>
     </article>
   )

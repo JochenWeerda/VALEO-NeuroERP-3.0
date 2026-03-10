@@ -1,17 +1,16 @@
 import React, { useState } from 'react'
 import { useForm, Controller } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
 // Badge import removed - not used
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { AlertTriangle, CheckCircle, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { WizardConfig, WizardStep, Field } from './types'
+import { createMaskResolver, getFieldsFromWizardStep } from './validation'
 
 interface WizardProps {
   config: WizardConfig
@@ -34,55 +33,6 @@ const Wizard: React.FC<WizardProps> = ({
   const isLastStep = currentStep === config.steps.length - 1
   const isFirstStep = currentStep === 0
 
-  // Create schema for current step
-  const createStepSchema = (step: WizardStep) => {
-    const schema: any = {}
-
-    step.fields.forEach(field => {
-      let fieldSchema: any
-
-      switch (field.type) {
-        case 'text':
-          fieldSchema = z.string()
-          if ((field as any).minLength) fieldSchema = fieldSchema.min((field as any).minLength)
-          if ((field as any).maxLength) fieldSchema = fieldSchema.max((field as any).maxLength)
-          break
-        case 'number':
-          fieldSchema = z.number()
-          if ((field as any).min !== undefined) fieldSchema = fieldSchema.min((field as any).min)
-          if ((field as any).max !== undefined) fieldSchema = fieldSchema.max((field as any).max)
-          break
-        case 'boolean':
-          fieldSchema = z.boolean()
-          break
-        case 'date':
-        case 'datetime':
-          fieldSchema = z.string()
-          break
-        case 'select':
-          fieldSchema = z.string()
-          break
-        case 'multiselect':
-          fieldSchema = z.array(z.string())
-          break
-        case 'textarea':
-          fieldSchema = z.string()
-          break
-        default:
-          fieldSchema = z.any()
-      }
-
-      if (!field.required) {
-        fieldSchema = fieldSchema.optional()
-      }
-
-      schema[field.name] = fieldSchema
-    })
-
-    return z.object(schema)
-  }
-
-  const stepSchema = createStepSchema(currentStepConfig)
   const {
     control,
     handleSubmit,
@@ -90,7 +40,7 @@ const Wizard: React.FC<WizardProps> = ({
     trigger,
     getValues
   } = useForm({
-    resolver: zodResolver(stepSchema),
+    resolver: createMaskResolver(getFieldsFromWizardStep(currentStepConfig)),
     mode: 'onChange'
   })
 
@@ -204,21 +154,14 @@ const Wizard: React.FC<WizardProps> = ({
               case 'select': {
                 const selectField = field as any
                 return (
-                  <Select
-                    value={controllerField.value}
+                  <NativeSelect
+                    id={field.name}
+                    value={String(controllerField.value ?? '')}
                     onValueChange={controllerField.onChange}
-                  >
-                    <SelectTrigger className={error ? 'border-red-500' : ''}>
-                      <SelectValue placeholder={field.placeholder} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {selectField.options?.map((option: any) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    options={selectField.options ?? []}
+                    placeholder={field.placeholder}
+                    className={error ? 'border-red-500' : ''}
+                  />
                 )
               }
 

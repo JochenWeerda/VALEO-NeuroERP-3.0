@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import os
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from typing import Any, List, Optional
 from uuid import uuid4
 
@@ -20,7 +20,7 @@ from app.core.database import get_db
 from app.core.uuid7 import uuid7
 from app.core.logging import get_correlation_id
 from app.core.tenant import get_tenant_id
-from app.infrastructure.models import AuditLog
+from app.infrastructure.models import AuditLog, LkwAnnahmeQueue
 from app.documents.router_helpers import get_repository, list_from_store, get_from_store, save_to_store
 from app.domains.operations.models import Charge, Dokument, Rahmenvertrag, ZertifikatEintrag
 from app.domains.shared.events import IntegrationEvent, get_event_publisher
@@ -1091,6 +1091,48 @@ async def futter_misch(db: Session = Depends(get_db)) -> list[dict[str, Any]]:
     ]
 
 
+@router.delete("/futter/einzelfuttermittel/{item_id}", status_code=204, response_class=Response)
+async def delete_futter_einzel_item(
+    item_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> Response:
+    result = _soft_delete_futter_articles(db, ids=[item_id], tenant_id=tenant_id)
+    if result.deleted == 0:
+        raise HTTPException(status_code=404, detail="Einzelfuttermittel nicht gefunden")
+    return Response(status_code=204)
+
+
+@router.post("/futter/einzelfuttermittel/bulk-delete", response_model=FutterBulkDeleteOut)
+async def bulk_delete_futter_einzel(
+    payload: FutterBulkDeleteIn,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> FutterBulkDeleteOut:
+    return _soft_delete_futter_articles(db, ids=payload.ids, tenant_id=tenant_id)
+
+
+@router.delete("/futter/mischfuttermittel/{item_id}", status_code=204, response_class=Response)
+async def delete_futter_misch_item(
+    item_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> Response:
+    result = _soft_delete_futter_articles(db, ids=[item_id], tenant_id=tenant_id)
+    if result.deleted == 0:
+        raise HTTPException(status_code=404, detail="Mischfuttermittel nicht gefunden")
+    return Response(status_code=204)
+
+
+@router.post("/futter/mischfuttermittel/bulk-delete", response_model=FutterBulkDeleteOut)
+async def bulk_delete_futter_misch(
+    payload: FutterBulkDeleteIn,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> FutterBulkDeleteOut:
+    return _soft_delete_futter_articles(db, ids=payload.ids, tenant_id=tenant_id)
+
+
 @router.get("/futter/chargen", response_model=list)
 async def futter_chargen(db: Session = Depends(get_db)) -> list[dict[str, Any]]:
     lots = db.query(Charge).order_by(Charge.eingang.desc()).limit(500).all()
@@ -1173,6 +1215,64 @@ class NaehrwertBerechnungResult(BaseModel):
     omd_methode: str
     omd_fan1_pct: float
     modus: str
+
+
+class FutterBulkDeleteIn(BaseModel):
+    ids: list[str] = Field(default_factory=list, min_length=1, max_length=100)
+
+
+class FutterBulkDeleteErrorOut(BaseModel):
+    id: str
+    detail: str
+
+
+class FutterBulkDeleteOut(BaseModel):
+    requested: int
+    deleted: int
+    missing_ids: list[str] = Field(default_factory=list)
+    errors: list[FutterBulkDeleteErrorOut] = Field(default_factory=list)
+
+
+def _soft_delete_futter_articles(
+    db: Session,
+    *,
+    ids: list[str],
+    tenant_id: str | None,
+) -> FutterBulkDeleteOut:
+    filtered_ids = [item_id for item_id in ids if item_id]
+    if not filtered_ids:
+        raise HTTPException(status_code=400, detail="Keine Futtermittel-IDs übergeben")
+
+    query = db.query(ArticleModel).filter(ArticleModel.id.in_(filtered_ids))
+    if hasattr(ArticleModel, "tenant_id") and tenant_id:
+        query = query.filter((ArticleModel.tenant_id == tenant_id) | (ArticleModel.tenant_id.is_(None)))
+    articles = query.all()
+    articles_by_id = {str(article.id): article for article in articles}
+
+    deleted = 0
+    errors: list[FutterBulkDeleteErrorOut] = []
+    for item_id in filtered_ids:
+        article = articles_by_id.get(item_id)
+        if article is None:
+            continue
+        try:
+            article.is_active = False
+            deleted += 1
+        except Exception as exc:
+            errors.append(FutterBulkDeleteErrorOut(id=item_id, detail=str(exc)))
+
+    if deleted > 0:
+        db.commit()
+    else:
+        db.rollback()
+
+    missing_ids = [item_id for item_id in filtered_ids if item_id not in articles_by_id]
+    return FutterBulkDeleteOut(
+        requested=len(filtered_ids),
+        deleted=deleted,
+        missing_ids=missing_ids,
+        errors=errors,
+    )
 
 
 @router.post("/futter/mischfuttermittel/naehrwerte/berechnen", response_model=NaehrwertBerechnungResult)
@@ -1718,65 +1818,48 @@ async def inventory_lot_trace(lot_id: str, db: Session = Depends(get_db)) -> dic
     }
 
 
-def _annahme_lkw_ids_key() -> str:
-    return "annahme:lkw:ids"
-
-
-def _annahme_lkw_entry_key(reg_id: str) -> str:
-    return f"annahme:lkw:{reg_id}"
-
-
-def _lkw_cache_to_item(entry: dict, position: int, tenant_id: Optional[str] = None) -> Optional[dict]:
-    """Aus Cache-Eintrag einen Warteschlange-Item bauen (position, wartezeit)."""
-    if not entry or (tenant_id and entry.get("tenant_id") != tenant_id):
-        return None
-    ankunftszeit_s = entry.get("ankunftszeit") or ""
+def _lkw_db_to_item(row: LkwAnnahmeQueue, position: int) -> dict:
+    """Aus DB-Row einen Warteschlange-Item bauen (position, wartezeit)."""
+    ankunftszeit = row.ankunftszeit
+    ankunftszeit_s = ankunftszeit.isoformat() if ankunftszeit else ""
     wartezeit_min = 0
-    try:
-        if ankunftszeit_s:
-            normalized = ankunftszeit_s.replace("Z", "+00:00")[:19]
-            dt = datetime.fromisoformat(normalized)
-            delta = datetime.utcnow() - dt
-            wartezeit_min = max(0, int(delta.total_seconds() / 60))
-    except Exception:
-        pass
-    status = entry.get("status") or "wartend"
+    if ankunftszeit:
+        now_utc = datetime.now(timezone.utc)
+        arr_utc = ankunftszeit.astimezone(timezone.utc) if ankunftszeit.tzinfo else ankunftszeit.replace(tzinfo=timezone.utc)
+        delta = now_utc - arr_utc
+        wartezeit_min = max(0, int(delta.total_seconds() / 60))
+    status = row.status or "wartend"
     if status == "warteschlange":
         status = "wartend"
     return {
-        "id": entry.get("id"),
+        "id": row.id,
         "position": position,
-        "kennzeichen": entry.get("kennzeichen", ""),
-        "lieferant": entry.get("lieferant", ""),
-        "artikel": entry.get("artikel", ""),
+        "kennzeichen": row.kennzeichen or "",
+        "lieferant": row.lieferant or "",
+        "artikel": row.artikel or "",
         "ankunft": ankunftszeit_s,
         "wartezeit": wartezeit_min,
         "status": status,
-        "lieferschein_nr": entry.get("lieferschein_nr", ""),
+        "lieferschein_nr": row.lieferschein_nr or "",
     }
 
 
 @router.get("/annahme/warteschlange", response_model=dict)
 async def annahme_warteschlange(
     tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
 ) -> dict:
-    """Liste aller LKW in der Annahme-Warteschlange (aus Cache)."""
-    ids = cache_get_json(_annahme_lkw_ids_key()) or []
-    if not isinstance(ids, list):
-        ids = []
-    items: list[dict] = []
-    for idx, reg_id in enumerate(ids):
-        if not reg_id:
-            continue
-        entry = cache_get_json(_annahme_lkw_entry_key(str(reg_id)))
-        item = _lkw_cache_to_item(entry, position=idx + 1, tenant_id=tenant_id)
-        if item:
-            items.append(item)
-    # Nach Ankunftszeit sortieren (älteste zuerst)
-    items.sort(key=lambda x: (x.get("ankunft") or ""))
-    # Positionen neu setzen
-    for i, it in enumerate(items):
-        it["position"] = i + 1
+    """Liste aller LKW in der Annahme-Warteschlange (aus DB, Gap 002)."""
+    try:
+        rows = (
+            db.query(LkwAnnahmeQueue)
+            .filter(LkwAnnahmeQueue.tenant_id == tenant_id)
+            .order_by(LkwAnnahmeQueue.ankunftszeit.asc())
+            .all()
+        )
+    except Exception:
+        return {"items": [], "total": 0}
+    items = [_lkw_db_to_item(r, position=i + 1) for i, r in enumerate(rows)]
     return {"items": items, "total": len(items)}
 
 
@@ -1784,17 +1867,17 @@ async def annahme_warteschlange(
 async def annahme_warteschlange_get(
     reg_id: str,
     tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
 ) -> dict:
     """Einzelnen LKW-Eintrag für Qualitäts-Check o.ä. abrufen."""
-    entry = cache_get_json(_annahme_lkw_entry_key(reg_id))
-    if not entry:
+    row = (
+        db.query(LkwAnnahmeQueue)
+        .filter(LkwAnnahmeQueue.id == reg_id, LkwAnnahmeQueue.tenant_id == tenant_id)
+        .first()
+    )
+    if not row:
         raise HTTPException(status_code=404, detail="LKW-Eintrag nicht gefunden")
-    if entry.get("tenant_id") != tenant_id:
-        raise HTTPException(status_code=404, detail="LKW-Eintrag nicht gefunden")
-    item = _lkw_cache_to_item(entry, position=0, tenant_id=None)
-    if not item:
-        raise HTTPException(status_code=404, detail="LKW-Eintrag nicht gefunden")
-    item["position"] = 0
+    item = _lkw_db_to_item(row, position=0)
     return item
 
 
@@ -1807,18 +1890,22 @@ async def annahme_warteschlange_patch(
     reg_id: str,
     body: AnnahmeStatusUpdate,
     tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
 ) -> dict:
     """Status eines LKW-Eintrags aktualisieren (z.B. In Bearbeitung, Abgeschlossen)."""
     if body.status not in ("in-bearbeitung", "abgeschlossen"):
         raise HTTPException(status_code=400, detail="status muss 'in-bearbeitung' oder 'abgeschlossen' sein")
-    entry = cache_get_json(_annahme_lkw_entry_key(reg_id))
-    if not entry:
+    row = (
+        db.query(LkwAnnahmeQueue)
+        .filter(LkwAnnahmeQueue.id == reg_id, LkwAnnahmeQueue.tenant_id == tenant_id)
+        .first()
+    )
+    if not row:
         raise HTTPException(status_code=404, detail="LKW-Eintrag nicht gefunden")
-    if entry.get("tenant_id") != tenant_id:
-        raise HTTPException(status_code=404, detail="LKW-Eintrag nicht gefunden")
-    entry["status"] = body.status
-    cache_set_json(_annahme_lkw_entry_key(reg_id), entry, ttl_seconds=86400 * 7)
-    return _lkw_cache_to_item(entry, position=0, tenant_id=None) or entry
+    row.status = body.status
+    db.commit()
+    db.refresh(row)
+    return _lkw_db_to_item(row, position=0)
 
 
 class LKWRegistrierungIn(BaseModel):
@@ -1869,26 +1956,34 @@ async def annahme_upload(
 async def create_lkw_registrierung(
     payload: LKWRegistrierungIn,
     tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
 ) -> LKWRegistrierungOut:
-    """LKW in Annahme-Warteschlange eintragen; erscheint in GET /annahme/warteschlange."""
-    reg_id = str(uuid4())
-    cache_set_json(_annahme_lkw_entry_key(reg_id), {
-        "id": reg_id,
-        "tenant_id": tenant_id,
-        "kennzeichen": payload.kennzeichen,
-        "lieferant": payload.lieferant,
-        "lieferschein_nr": payload.lieferschein_nr,
-        "artikel": payload.artikel,
-        "ankunftszeit": payload.ankunftszeit or _now_iso(),
-        "prioritaet": payload.prioritaet,
-        "status": "wartend",
-        "attachment_ids": payload.attachment_ids,
-    }, ttl_seconds=86400 * 7)
-    ids = cache_get_json(_annahme_lkw_ids_key()) or []
-    if not isinstance(ids, list):
-        ids = []
-    ids.append(reg_id)
-    cache_set_json(_annahme_lkw_ids_key(), ids, ttl_seconds=86400 * 7)
+    """LKW in Annahme-Warteschlange eintragen; erscheint in GET /annahme/warteschlange (DB, Gap 002)."""
+    reg_id = uuid7()
+    ankunft_dt = None
+    if payload.ankunftszeit:
+        try:
+            normalized = payload.ankunftszeit.replace("Z", "+00:00")[:19]
+            ankunft_dt = datetime.fromisoformat(normalized)
+            if ankunft_dt.tzinfo is None:
+                ankunft_dt = ankunft_dt.replace(tzinfo=timezone.utc)
+        except Exception:
+            pass
+    row = LkwAnnahmeQueue(
+        id=reg_id,
+        tenant_id=tenant_id,
+        kennzeichen=payload.kennzeichen,
+        lieferant=payload.lieferant,
+        lieferschein_nr=payload.lieferschein_nr or "",
+        artikel=payload.artikel or "",
+        ankunftszeit=ankunft_dt,
+        prioritaet=payload.prioritaet,
+        status="wartend",
+        attachment_ids=payload.attachment_ids or [],
+    )
+    db.add(row)
+    db.commit()
+    db.refresh(row)
     return LKWRegistrierungOut(id=reg_id, kennzeichen=payload.kennzeichen, status="wartend")
 
 

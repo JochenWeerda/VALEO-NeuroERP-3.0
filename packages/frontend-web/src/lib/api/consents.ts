@@ -150,6 +150,7 @@ export function useConsents(params?: Record<string, string>) {
   return useQuery({
     queryKey: ['consents', params],
     queryFn: () => fetchConsents(params),
+    initialData: [],
     staleTime: 2 * 60 * 1000, // 2 minutes
   })
 }
@@ -159,6 +160,7 @@ export function useConsent(id: string) {
     queryKey: ['consent', id],
     queryFn: () => fetchConsent(id),
     enabled: !!id,
+    initialData: null,
   })
 }
 
@@ -166,6 +168,7 @@ export function useContactsForConsentSelect() {
   return useQuery({
     queryKey: ['contacts-consent-select'],
     queryFn: fetchContacts,
+    initialData: [],
     staleTime: 5 * 60 * 1000, // 5 minutes
     select: (data) => data.map((c) => ({
       value: c.id,
@@ -236,11 +239,12 @@ export function useContactLookup() {
   const { data: contacts } = useQuery({
     queryKey: ['contacts-lookup'],
     queryFn: fetchContacts,
+    initialData: [],
     staleTime: 5 * 60 * 1000,
   })
 
   const lookup = new Map<string, Contact>()
-  contacts?.forEach((c) => lookup.set(c.id, c))
+  contacts.forEach((c) => lookup.set(c.id, c))
 
   return {
     getContactName: (id: string) => lookup.get(id)?.name || id,

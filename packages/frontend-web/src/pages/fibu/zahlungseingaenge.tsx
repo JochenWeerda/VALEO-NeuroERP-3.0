@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label'
 import { DataTable } from '@/components/ui/data-table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import { AlertTriangle, CheckCircle, Search, Upload, Link2, Sparkles } from 'lucide-react'
 import { getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 import { toast } from '@/hooks/use-toast'
@@ -336,27 +336,27 @@ export default function ZahlungseingangsPage(): JSX.Element {
             </div>
             <div>
               <Label>Format</Label>
-              <Select value={bankImportFormat} onValueChange={(v) => setBankImportFormat(v as 'CAMT' | 'MT940' | 'CSV')}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="CAMT">CAMT.053 (XML)</SelectItem>
-                  <SelectItem value="MT940">MT940</SelectItem>
-                  <SelectItem value="CSV">CSV</SelectItem>
-                </SelectContent>
-              </Select>
+              <NativeSelect
+                value={bankImportFormat}
+                onValueChange={(v) => setBankImportFormat(v as 'CAMT' | 'MT940' | 'CSV')}
+                options={[
+                  { value: 'CAMT', label: 'CAMT.053 (XML)' },
+                  { value: 'MT940', label: 'MT940' },
+                  { value: 'CSV', label: 'CSV' },
+                ]}
+              />
             </div>
             <div>
               <Label>Bankkonto</Label>
-              <Select value={bankImportAccountId || (bankAccounts[0]?.id ?? '')} onValueChange={setBankImportAccountId}>
-                <SelectTrigger><SelectValue placeholder="Konto wählen" /></SelectTrigger>
-                <SelectContent>
-                  {bankAccounts.map((acc) => (
-                    <SelectItem key={acc.id} value={acc.id}>
-                      {acc.account_name || acc.account_number || acc.id}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <NativeSelect
+                value={bankImportAccountId || (bankAccounts[0]?.id ?? '')}
+                onValueChange={setBankImportAccountId}
+                placeholder="Konto waehlen"
+                options={bankAccounts.map((acc) => ({
+                  value: acc.id,
+                  label: acc.account_name || acc.account_number || acc.id,
+                }))}
+              />
             </div>
           </div>
           <DialogFooter>
@@ -420,18 +420,19 @@ export default function ZahlungseingangsPage(): JSX.Element {
                 className="pl-10"
               />
             </div>
-            <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as Zahlungseingang['match_status'] | 'alle')}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder={t('crud.messages.paymentMatching.columns.status')} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="alle">{t('crud.messages.paymentMatching.allStatus')}</SelectItem>
-                <SelectItem value="MATCHED">{t('crud.messages.paymentMatching.matched')}</SelectItem>
-                <SelectItem value="UNMATCHED">{t('crud.messages.paymentMatching.unmatched')}</SelectItem>
-                <SelectItem value="PARTIAL">{t('crud.messages.paymentMatching.partial')}</SelectItem>
-                <SelectItem value="MANUAL">{t('crud.messages.paymentMatching.manual')}</SelectItem>
-              </SelectContent>
-            </Select>
+            <NativeSelect
+              className="w-[180px]"
+              value={statusFilter}
+              onValueChange={(value) => setStatusFilter(value as Zahlungseingang['match_status'] | 'alle')}
+              placeholder={t('crud.messages.paymentMatching.columns.status')}
+              options={[
+                { value: 'alle', label: t('crud.messages.paymentMatching.allStatus') },
+                { value: 'MATCHED', label: t('crud.messages.paymentMatching.matched') },
+                { value: 'UNMATCHED', label: t('crud.messages.paymentMatching.unmatched') },
+                { value: 'PARTIAL', label: t('crud.messages.paymentMatching.partial') },
+                { value: 'MANUAL', label: t('crud.messages.paymentMatching.manual') },
+              ]}
+            />
             <Button variant="outline" onClick={handleAutoMatch} disabled={autoMatching}>
               <Sparkles className="h-4 w-4 mr-2" />
               {autoMatching ? t('crud.messages.paymentMatching.matching') : t('crud.messages.paymentMatching.startAutoMatch')}

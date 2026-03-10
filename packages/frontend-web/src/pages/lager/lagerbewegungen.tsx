@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { useToast } from '@/hooks/use-toast'
@@ -223,18 +223,18 @@ export default function LagerbewegungenPage(): JSX.Element {
               <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Suche (Beleg, Notiz, Charge, Benutzer)" className="pl-9" />
             </div>
-            <Select value={movementTypeFilter} onValueChange={setMovementTypeFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Bewegungstyp" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Alle Typen</SelectItem>
-                <SelectItem value="in">Zugang</SelectItem>
-                <SelectItem value="out">Abgang</SelectItem>
-                <SelectItem value="transfer">Umbuchung</SelectItem>
-                <SelectItem value="adjustment">Korrektur</SelectItem>
-              </SelectContent>
-            </Select>
+            <NativeSelect
+              value={movementTypeFilter}
+              onValueChange={setMovementTypeFilter}
+              placeholder="Bewegungstyp"
+              options={[
+                { value: 'all', label: 'Alle Typen' },
+                { value: 'in', label: 'Zugang' },
+                { value: 'out', label: 'Abgang' },
+                { value: 'transfer', label: 'Umbuchung' },
+                { value: 'adjustment', label: 'Korrektur' },
+              ]}
+            />
           </div>
         </CardContent>
       </Card>
@@ -309,47 +309,47 @@ export default function LagerbewegungenPage(): JSX.Element {
           <form onSubmit={onSubmit} className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label>Artikel</Label>
-              <Select value={form.article_id} onValueChange={(value) => setForm((prev) => ({ ...prev, article_id: value }))} disabled={Boolean(editing)}>
-                <SelectTrigger><SelectValue placeholder="Artikel waehlen" /></SelectTrigger>
-                <SelectContent>
-                  {articles.map((article) => (
-                    <SelectItem key={article.id} value={article.id}>
-                      {article.article_number} - {article.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <NativeSelect
+                value={form.article_id}
+                onValueChange={(value) => setForm((prev) => ({ ...prev, article_id: value }))}
+                disabled={Boolean(editing)}
+                placeholder="Artikel waehlen"
+                options={articles.map((article) => ({
+                  value: article.id,
+                  label: `${article.article_number} - ${article.name}`,
+                }))}
+              />
             </div>
 
             <div className="space-y-2">
               <Label>Lager</Label>
-              <Select value={form.warehouse_id} onValueChange={(value) => setForm((prev) => ({ ...prev, warehouse_id: value }))} disabled={Boolean(editing)}>
-                <SelectTrigger><SelectValue placeholder="Lager waehlen" /></SelectTrigger>
-                <SelectContent>
-                  {warehouses.map((warehouse) => (
-                    <SelectItem key={warehouse.id} value={warehouse.id}>
-                      {warehouse.warehouse_code} - {warehouse.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <NativeSelect
+                value={form.warehouse_id}
+                onValueChange={(value) => setForm((prev) => ({ ...prev, warehouse_id: value }))}
+                disabled={Boolean(editing)}
+                placeholder="Lager waehlen"
+                options={warehouses.map((warehouse) => ({
+                  value: warehouse.id,
+                  label: `${warehouse.warehouse_code} - ${warehouse.name}`,
+                }))}
+              />
             </div>
 
             <div className="space-y-2">
               <Label>Bewegungstyp</Label>
-              <Select
+              <NativeSelect
                 value={form.movement_type}
-                onValueChange={(value: 'in' | 'out' | 'transfer' | 'adjustment') => setForm((prev) => ({ ...prev, movement_type: value }))}
+                onValueChange={(value) =>
+                  setForm((prev) => ({ ...prev, movement_type: value as MovementFormState['movement_type'] }))
+                }
                 disabled={Boolean(editing)}
-              >
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="in">Zugang</SelectItem>
-                  <SelectItem value="out">Abgang</SelectItem>
-                  <SelectItem value="transfer">Umbuchung</SelectItem>
-                  <SelectItem value="adjustment">Korrektur</SelectItem>
-                </SelectContent>
-              </Select>
+                options={[
+                  { value: 'in', label: 'Zugang' },
+                  { value: 'out', label: 'Abgang' },
+                  { value: 'transfer', label: 'Umbuchung' },
+                  { value: 'adjustment', label: 'Korrektur' },
+                ]}
+              />
             </div>
 
             <div className="space-y-2">

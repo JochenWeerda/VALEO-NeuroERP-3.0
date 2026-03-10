@@ -1,37 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ObjectPage } from '@/components/mask-builder'
-import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
+import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
-import { z } from 'zod'
 import { toast } from '@/hooks/use-toast'
 import { api } from '@/lib/axios'
 
-// Zod-Schema für Mischfuttermittel
-const mischfuttermittelSchema = z.object({
-  artikelnummer: z.string().min(1, "Artikelnummer ist erforderlich"),
-  name: z.string().min(1, "Name ist erforderlich"),
-  typ: z.string().min(1, "Typ ist erforderlich"),
-  futtergruppe: z.string().min(1, "Futtergruppe ist erforderlich"),
-  tierart: z.string().min(1, "Tierart ist erforderlich"),
-  lebensphase: z.string().min(1, "Lebensphase ist erforderlich"),
-  komponenten: z.array(z.object({
-    futtermittelId: z.string(),
-    anteil: z.number().min(0).max(100)
-  })).min(1, "Mindestens eine Komponente erforderlich"),
-  gesamtRohprotein: z.number().min(0).max(100),
-  gesamtRohfett: z.number().min(0).max(100),
-  gesamtRohfaser: z.number().min(0).max(100),
-  gesamtRohasche: z.number().min(0).max(100),
-  umsetzbareEnergie: z.number().min(0),
-  qsZertifikat: z.string().optional(),
-  gueltigBis: z.string().optional(),
-  lagerbestand: z.number().min(0).default(0),
-  ekPreis: z.number().min(0).optional(),
-  vkPreis: z.number().min(0).optional(),
-})
-
-// Konfiguration für Mischfuttermittel ObjectPage
 const mischfuttermittelConfig: MaskConfig = {
   title: 'Mischfuttermittel-Stammdaten',
   subtitle: 'Verwaltung von Mischfuttermitteln nach EU 767/2009',
@@ -259,7 +233,6 @@ const mischfuttermittelConfig: MaskConfig = {
       delete: '/api/futtermittel/mischfuttermittel/{id}'
     }
   },
-  validation: mischfuttermittelSchema,
   permissions: ['futtermittel.write', 'futtermittel.admin']
 }
 
@@ -272,13 +245,16 @@ export default function MischfuttermittelStammPage(): JSX.Element {
     id: 'new'
   })
 
-  const { validate, showValidationToast } = useMaskValidation(mischfuttermittelConfig.validation)
+  const validate = (formData: any) => validateFields(getFieldsFromMaskConfig(mischfuttermittelConfig), formData ?? {})
+  const showValidationToast = (errors: Record<string, string>) => {
+    toast({ variant: 'destructive', title: 'Validierungsfehler', description: `${Object.keys(errors).length} Feld(er) muessen korrigiert werden.` })
+  }
 
   const { handleAction } = useMaskActions(async (action: string, formData: any) => {
     if (action === 'save') {
-      const isValid = validate(formData)
-      if (!isValid.isValid) {
-        showValidationToast(isValid.errors)
+      const errors = validate(formData)
+      if (Object.keys(errors).length > 0) {
+        showValidationToast(errors)
         return
       }
 
@@ -329,11 +305,11 @@ export default function MischfuttermittelStammPage(): JSX.Element {
         toast({ title: 'Berechnung fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
       }
     } else if (action === 'validate') {
-      const isValid = validate(formData)
-      if (isValid.isValid) {
+      const errors = validate(formData)
+      if (Object.keys(errors).length === 0) {
         toast({ title: 'Validierung erfolgreich', description: 'Alle Pflichtfelder sind korrekt ausgefüllt.' })
       } else {
-        showValidationToast(isValid.errors)
+        showValidationToast(errors)
       }
     }
   })

@@ -8,7 +8,7 @@
 import { useState, useCallback } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ExternalLink, MapPin, AlertTriangle, Maximize2, RefreshCw } from 'lucide-react'
@@ -249,18 +249,15 @@ export function FeldblockfinderIntegration({
         <div className="flex gap-4 items-end">
           <div className="flex-1">
             <label className="text-sm font-medium mb-2 block">Bundesland auswählen</label>
-            <Select value={selectedBundesland} onValueChange={handleBundeslandChange}>
-              <SelectTrigger>
-                <SelectValue placeholder="Bitte Bundesland wählen..." />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.entries(BUNDESLAENDER).map(([key, { name }]) => (
-                  <SelectItem key={key} value={key}>
-                    {name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <NativeSelect
+              value={selectedBundesland}
+              onValueChange={handleBundeslandChange}
+              options={Object.entries(BUNDESLAENDER).map(([key, { name }]) => ({
+                value: key,
+                label: name,
+              }))}
+              placeholder="Bitte Bundesland wählen..."
+            />
           </div>
           {bundeslandInfo && (
             <Button variant="outline" onClick={openExternalLink}>

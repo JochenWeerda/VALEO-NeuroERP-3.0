@@ -43,6 +43,36 @@ type CrossComplianceList = {
   offen: number
 }
 
+const EMPTY_COMPLIANCE_STATS: ComplianceStats = {
+  cross_compliance: { total: 0, erfuellt: 0, offen: 0, quote: 0 },
+  enni: { total: 0, bestaetigt: 0, in_bearbeitung: 0, durchschnitt_n: 0 },
+  generated_at: '',
+}
+
+const EMPTY_SACHKUNDE_REGISTER: SachkundeRegister = {
+  items: [],
+  total: 0,
+}
+
+const EMPTY_QS_CHECKLISTE: QsCheckliste = {
+  items: [],
+  total: 0,
+  erfuellt: 0,
+  offen: 0,
+}
+
+const EMPTY_ZULASSUNGEN_REGISTER: ZulassungenRegister = {
+  items: [],
+  total: 0,
+}
+
+const EMPTY_CROSS_COMPLIANCE_LIST: CrossComplianceList = {
+  items: [],
+  total: 0,
+  erfuellt: 0,
+  offen: 0,
+}
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const statusBadge = (status: 'compliant' | 'warning' | 'pending' | 'error') => {
@@ -68,26 +98,31 @@ export default function ComplianceDashboardPage(): JSX.Element {
   const { data: stats, isLoading: loadStats } = useQuery({
     queryKey: ['compliance', 'stats'],
     queryFn: async () => (await apiClient.get<ComplianceStats>('/api/v1/compliance/stats')).data,
+    initialData: EMPTY_COMPLIANCE_STATS,
   })
 
   const { data: sachkunde, isLoading: loadSachkunde } = useQuery({
     queryKey: ['compliance', 'sachkunde'],
     queryFn: async () => (await apiClient.get<SachkundeRegister>('/api/v1/compliance/sachkunde-register')).data,
+    initialData: EMPTY_SACHKUNDE_REGISTER,
   })
 
   const { data: qs, isLoading: loadQs } = useQuery({
     queryKey: ['compliance', 'qs'],
     queryFn: async () => (await apiClient.get<QsCheckliste>('/api/v1/compliance/qs-checkliste')).data,
+    initialData: EMPTY_QS_CHECKLISTE,
   })
 
   const { data: zulassungen, isLoading: loadZulassungen } = useQuery({
     queryKey: ['compliance', 'zulassungen'],
     queryFn: async () => (await apiClient.get<ZulassungenRegister>('/api/v1/compliance/zulassungen-register')).data,
+    initialData: EMPTY_ZULASSUNGEN_REGISTER,
   })
 
   const { data: crossList, isLoading: loadCross } = useQuery({
     queryKey: ['compliance', 'cross-list'],
     queryFn: async () => (await apiClient.get<CrossComplianceList>('/api/v1/compliance/cross-compliance')).data,
+    initialData: EMPTY_CROSS_COMPLIANCE_LIST,
   })
 
   const isLoading = loadStats || loadSachkunde || loadQs || loadZulassungen || loadCross

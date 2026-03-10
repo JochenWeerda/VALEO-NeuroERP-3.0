@@ -1,27 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Wizard } from '@/components/mask-builder'
-import { useMaskData, useMaskValidation } from '@/components/mask-builder/hooks'
+import { useMaskData } from '@/components/mask-builder/hooks'
 import { WizardConfig } from '@/components/mask-builder/types'
-import { z } from 'zod'
+import { validateFields } from '@/components/mask-builder/validation'
 import { toast } from '@/hooks/use-toast'
 
-// Zod-Schema für Bestellung
-const bestellungSchema = z.object({
-  lieferantId: z.string().min(1, "Lieferant ist erforderlich"),
-  bestellpositionen: z.array(z.object({
-    futtermittelId: z.string(),
-    menge: z.number().min(0.1, "Menge muss größer 0 sein"),
-    einheit: z.string(),
-    preisProEinheit: z.number().min(0),
-    wunschtermin: z.string().optional()
-  })).min(1, "Mindestens eine Position erforderlich"),
-  liefertermin: z.string().min(1, "Liefertermin ist erforderlich"),
-  zahlungsbedingungen: z.string().optional(),
-  bemerkungen: z.string().optional()
-})
-
-// Konfiguration für Bestellung Wizard
 const bestellungWizardConfig: WizardConfig = {
   title: 'Futtermittel-Bestellung',
   subtitle: 'Neue Bestellung bei Lieferanten aufgeben',
@@ -59,11 +43,7 @@ const bestellungWizardConfig: WizardConfig = {
             { value: '60tage', label: '60 Tage' }
           ]
         }
-      ],
-      validation: z.object({
-        lieferantId: z.string().min(1),
-        liefertermin: z.string().min(1)
-      })
+      ]
     },
     {
       key: 'positionen',
@@ -107,14 +87,7 @@ const bestellungWizardConfig: WizardConfig = {
           ] as any,
           helpText: 'Fügen Sie alle gewünschten Futtermittel hinzu'
         }
-      ],
-      validation: z.object({
-        bestellpositionen: z.array(z.object({
-          futtermittelId: z.string().min(1),
-          menge: z.number().min(0.1),
-          einheit: z.string().min(1)
-        })).min(1)
-      })
+      ]
     },
     {
       key: 'zusammenfassung',
@@ -151,7 +124,6 @@ const bestellungWizardConfig: WizardConfig = {
       update: '/api/futtermittel/bestellungen/{id}'
     }
   },
-  validation: bestellungSchema,
   permissions: ['futtermittel.order', 'supplier.read'],
   onComplete: () => {} // Wird über Wizard-Props überschrieben
 }
@@ -164,12 +136,15 @@ export default function FuttermittelBestellungPage(): JSX.Element {
     apiUrl: bestellungWizardConfig.api.baseUrl
   })
 
-  const { validate, showValidationToast } = useMaskValidation(bestellungWizardConfig.validation)
+  const validate = (formData: any) => validateFields(bestellungWizardConfig.steps.flatMap((step) => step.fields), formData ?? {})
+  const showValidationToast = (errors: Record<string, string>) => {
+    toast({ variant: 'destructive', title: 'Validierungsfehler', description: `${Object.keys(errors).length} Feld(er) muessen korrigiert werden.` })
+  }
 
   const handleComplete = async (formData: any) => {
-    const isValid = validate(formData)
-    if (!isValid.isValid) {
-      showValidationToast(isValid.errors)
+    const errors = validate(formData)
+    if (Object.keys(errors).length > 0) {
+      showValidationToast(errors)
       return
     }
 

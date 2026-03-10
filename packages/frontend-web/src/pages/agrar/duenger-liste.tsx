@@ -1,223 +1,232 @@
-/**
- * Dünger-Liste Maske
- * ListReport für Dünger-Übersicht mit Filter und Suche
+﻿/**
+ * Duenger-Liste Maske
+ * ListReport fuer Duenger-Uebersicht mit Filter und Suche
  */
 
-import React, { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, Search, Filter, Shield, Droplets, AlertTriangle, Edit, Eye, CheckCircle, XCircle, Info } from 'lucide-react';
+import React, { useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { NativeSelect } from '@/components/ui/native-select'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import {
+  AlertTriangle,
+  CheckCircle,
+  Droplets,
+  Edit,
+  Eye,
+  Filter,
+  Info,
+  Plus,
+  Search,
+  Shield,
+  XCircle,
+} from 'lucide-react'
 
-// API Client mit Fehlerbehandlung
+const TYP_OPTIONS = [
+  { value: 'all-types', label: 'Alle Typen' },
+  { value: 'Mineralduenger', label: 'Mineralduenger' },
+  { value: 'Organischer Duenger', label: 'Organischer Duenger' },
+  { value: 'Organisch-Mineralischer Duenger', label: 'Organisch-Mineralischer Duenger' },
+  { value: 'Kalkduenger', label: 'Kalkduenger' },
+]
+
+const KULTUR_OPTIONS = [
+  { value: 'all-kultur', label: 'Alle Kulturtypen' },
+  { value: 'Getreide', label: 'Getreide' },
+  { value: 'Mais', label: 'Mais' },
+  { value: 'Raps', label: 'Raps' },
+  { value: 'Gruenland', label: 'Gruenland' },
+  { value: 'Gemuese', label: 'Gemuese' },
+  { value: 'Obst', label: 'Obst' },
+]
+
+const SAFETY_OPTIONS = [
+  { value: 'all-safety', label: 'Alle Sicherheitsstufen' },
+  { value: 'safe', label: 'Sicher' },
+  { value: 'wassergefaehrdend', label: 'Wassergefaehrdend' },
+  { value: 'gefahrstoff', label: 'Gefahrstoff' },
+]
+
 const apiClient = {
-  async getDuengerList(params: any = {}) {
+  async getDuengerList(params: Record<string, string | number | undefined> = {}) {
     try {
-      const queryString = new URLSearchParams(params).toString();
-      const response = await fetch(`/api/v1/agrar/duenger?${queryString}`);
-      if (!response.ok) return { items: [], total: 0 };
-      return response.json();
-    } catch (_error) {
-      // API nicht erreichbar - leere Liste zurückgeben
-      return { items: [], total: 0 };
+      const queryString = new URLSearchParams(
+        Object.entries(params).reduce<Record<string, string>>((acc, [key, value]) => {
+          if (value !== undefined) {
+            acc[key] = String(value)
+          }
+          return acc
+        }, {}),
+      ).toString()
+      const response = await fetch(`/api/v1/agrar/duenger?${queryString}`)
+      if (!response.ok) return { items: [], total: 0 }
+      return response.json()
+    } catch {
+      return { items: [], total: 0 }
     }
   },
 
   async getDuengerStats() {
     try {
-      const response = await fetch('/api/v1/agrar/duenger/stats/overview');
-      if (!response.ok) return null;
-      return response.json();
-    } catch (_error) {
-      // API nicht erreichbar - null zurückgeben
-      return null;
+      const response = await fetch('/api/v1/agrar/duenger/stats/overview')
+      if (!response.ok) return null
+      return response.json()
+    } catch {
+      return null
     }
   },
-};
+}
 
-const DuengerListePage: React.FC = () => {
-  const navigate = useNavigate();
+export default function DuengerListePage(): JSX.Element {
+  const navigate = useNavigate()
+  const [searchTerm, setSearchTerm] = useState('')
+  const [typFilter, setTypFilter] = useState('all-types')
+  const [herstellerFilter, setHerstellerFilter] = useState('')
+  const [kulturTypFilter, setKulturTypFilter] = useState('all-kultur')
+  const [safetyFilter, setSafetyFilter] = useState('all-safety')
 
-  // Filter State
-  const [searchTerm, setSearchTerm] = useState('');
-  const [typFilter, setTypFilter] = useState('');
-  const [herstellerFilter, setHerstellerFilter] = useState('');
-  const [kulturTypFilter, setKulturTypFilter] = useState('');
-  const [safetyFilter, setSafetyFilter] = useState('');
-
-  // Queries
   const { data: duengerList, isLoading } = useQuery({
     queryKey: ['duenger-list', searchTerm, typFilter, herstellerFilter, kulturTypFilter, safetyFilter],
-    queryFn: () => apiClient.getDuengerList({
-      search: searchTerm || undefined,
-      typ: typFilter && typFilter !== 'all-types' ? typFilter : undefined,
-      hersteller: herstellerFilter || undefined,
-      kultur_typ: kulturTypFilter && kulturTypFilter !== 'all-kultur' ? kulturTypFilter : undefined,
-      limit: 100,
-    }),
-  });
+    queryFn: () =>
+      apiClient.getDuengerList({
+        search: searchTerm || undefined,
+        typ: typFilter !== 'all-types' ? typFilter : undefined,
+        hersteller: herstellerFilter || undefined,
+        kultur_typ: kulturTypFilter !== 'all-kultur' ? kulturTypFilter : undefined,
+        limit: 100,
+      }),
+  })
 
   const { data: stats } = useQuery({
     queryKey: ['duenger-stats'],
     queryFn: apiClient.getDuengerStats,
-  });
+  })
 
-  // Filtered data
   const filteredData = useMemo(() => {
-    if (!duengerList?.items) return [];
+    if (!duengerList?.items) return []
 
-    let filtered = duengerList.items;
+    let filtered = duengerList.items
 
-    // Additional client-side filtering for safety
-    if (safetyFilter && safetyFilter !== 'all-safety') {
+    if (safetyFilter !== 'all-safety') {
       filtered = filtered.filter((item: any) => {
-        if (safetyFilter === 'wassergefaehrdend') {
-          return item.wassergefaehrdend;
-        } else if (safetyFilter === 'gefahrstoff') {
-          return item.gefahrstoff_klasse;
-        } else if (safetyFilter === 'safe') {
-          return !item.wassergefaehrdend && !item.gefahrstoff_klasse;
-        }
-        return true;
-      });
+        if (safetyFilter === 'wassergefaehrdend') return item.wassergefaehrdend
+        if (safetyFilter === 'gefahrstoff') return item.gefahrstoff_klasse
+        if (safetyFilter === 'safe') return !item.wassergefaehrdend && !item.gefahrstoff_klasse
+        return true
+      })
     }
 
-    return filtered;
-  }, [duengerList, safetyFilter]);
-
-  const handleNewDuenger = () => {
-    navigate('/agrar/duenger-stamm');
-  };
-
-  const handleEditDuenger = (id: string) => {
-    navigate(`/agrar/duenger-stamm/${id}`);
-  };
-
-  const handleViewDuenger = (id: string) => {
-    navigate(`/agrar/duenger-stamm/${id}`);
-  };
+    return filtered
+  }, [duengerList, safetyFilter])
 
   const getSafetyBadges = (item: any) => {
-    const badges = [];
+    const badges = []
 
     if (item.gefahrstoff_klasse) {
       badges.push(
         <Badge key="danger" variant="destructive" className="flex items-center gap-1">
-          <Shield className="w-3 h-3" />
+          <Shield className="h-3 w-3" />
           {item.gefahrstoff_klasse}
-        </Badge>
-      );
+        </Badge>,
+      )
     }
 
     if (item.wassergefaehrdend) {
       badges.push(
-        <Badge key="water" variant="secondary" className="bg-blue-100 text-blue-800 flex items-center gap-1">
-          <Droplets className="w-3 h-3" />
+        <Badge key="water" variant="secondary" className="flex items-center gap-1 bg-blue-100 text-blue-800">
+          <Droplets className="h-3 w-3" />
           WG
-        </Badge>
-      );
+        </Badge>,
+      )
     }
 
     if (item.lagerklasse) {
       badges.push(
         <Badge key="storage" variant="outline" className="flex items-center gap-1">
-          <AlertTriangle className="w-3 h-3" />
+          <AlertTriangle className="h-3 w-3" />
           {item.lagerklasse}
-        </Badge>
-      );
+        </Badge>,
+      )
     }
 
     if (badges.length === 0) {
       badges.push(
         <Badge key="safe" variant="secondary" className="bg-green-100 text-green-800">
           Sicher
-        </Badge>
-      );
+        </Badge>,
+      )
     }
 
-    return badges;
-  };
+    return badges
+  }
 
   const getApprovalStatus = (item: any) => {
-    const hasDmv = item.dmv_nummer;
-    const hasEu = item.eu_zulassung;
-    const expiryDate = item.ablauf_zulassung ? new Date(item.ablauf_zulassung) : null;
-    const isExpired = expiryDate && expiryDate < new Date();
+    const hasDmv = item.dmv_nummer
+    const hasEu = item.eu_zulassung
+    const expiryDate = item.ablauf_zulassung ? new Date(item.ablauf_zulassung) : null
+    const isExpired = expiryDate ? expiryDate < new Date() : false
 
     if (isExpired) {
       return (
         <Badge variant="destructive" className="flex items-center gap-1">
-          <XCircle className="w-3 h-3" />
+          <XCircle className="h-3 w-3" />
           Abgelaufen
         </Badge>
-      );
+      )
     }
 
     if (hasDmv || hasEu) {
       return (
-        <Badge variant="secondary" className="bg-green-100 text-green-800 flex items-center gap-1">
-          <CheckCircle className="w-3 h-3" />
-          {hasDmv && hasEu ? 'DüMV + EU' : hasDmv ? 'DüMV' : 'EU'}
+        <Badge variant="secondary" className="flex items-center gap-1 bg-green-100 text-green-800">
+          <CheckCircle className="h-3 w-3" />
+          {hasDmv && hasEu ? 'DuMV + EU' : hasDmv ? 'DuMV' : 'EU'}
         </Badge>
-      );
+      )
     }
 
-    return (
-      <Badge variant="secondary" className="bg-gray-100 text-gray-600">
-        Keine Zulassung
-      </Badge>
-    );
-  };
+    return <Badge variant="secondary" className="bg-gray-100 text-gray-600">Keine Zulassung</Badge>
+  }
 
-  const getNPKDisplay = (item: any) => {
-    const n = item.n_gehalt || 0;
-    const p = item.p_gehalt || 0;
-    const k = item.k_gehalt || 0;
+  const getNpkDisplay = (item: any) => {
+    const n = item.n_gehalt || 0
+    const p = item.p_gehalt || 0
+    const k = item.k_gehalt || 0
 
-    if (n === 0 && p === 0 && k === 0) {
-      return '-';
-    }
-
-    return `${n}-${p}-${k}`;
-  };
+    if (n === 0 && p === 0 && k === 0) return '-'
+    return `${n}-${p}-${k}`
+  }
 
   const clearFilters = () => {
-    setSearchTerm('');
-    setTypFilter('');
-    setHerstellerFilter('');
-    setKulturTypFilter('');
-    setSafetyFilter('');
-  };
+    setSearchTerm('')
+    setTypFilter('all-types')
+    setHerstellerFilter('')
+    setKulturTypFilter('all-kultur')
+    setSafetyFilter('all-safety')
+  }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+    <div className="mx-auto max-w-7xl p-6">
+      <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Dünger-Verwaltung</h1>
-          <p className="text-muted-foreground">
-            Übersicht aller Dünger und deren Eigenschaften
-          </p>
+          <h1 className="text-2xl font-bold">Duenger-Verwaltung</h1>
+          <p className="text-muted-foreground">Uebersicht aller Duenger und deren Eigenschaften</p>
         </div>
-        <Button onClick={handleNewDuenger}>
-          <Plus className="w-4 h-4 mr-2" />
-          Neuer Dünger
+        <Button onClick={() => navigate('/agrar/duenger-stamm')}>
+          <Plus className="mr-2 h-4 w-4" />
+          Neuer Duenger
         </Button>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-4">
         {isLoading ? (
-          // Skeleton-Loading für KPI-Karten
-          [...Array(4)].map((_, i) => (
-            <Card key={i}>
+          [...Array(4)].map((_, index) => (
+            <Card key={index}>
               <CardHeader className="pb-2">
                 <Skeleton className="h-4 w-1/2" />
               </CardHeader>
@@ -230,42 +239,35 @@ const DuengerListePage: React.FC = () => {
           <>
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Gesamt Dünger</CardTitle>
+                <CardTitle className="text-sm font-medium">Gesamt Duenger</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stats?.total_duenger || 0}</div>
               </CardContent>
             </Card>
-
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Wassergefährdend</CardTitle>
+                <CardTitle className="text-sm font-medium">Wassergefaehrdend</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-blue-600">
-                  {stats?.by_safety?.['WG'] || 0}
-                </div>
+                <div className="text-2xl font-bold text-blue-600">{stats?.by_safety?.WG || 0}</div>
               </CardContent>
             </Card>
-
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium">Gefahrstoffe</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-red-600">
-                  {stats?.by_safety?.['GHS+GHS'] || 0}
-                </div>
+                <div className="text-2xl font-bold text-red-600">{stats?.by_safety?.['GHS+GHS'] || 0}</div>
               </CardContent>
             </Card>
-
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium">Gesamtlagerwert</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  €{(stats?.stock_summary?.total_stock || 0).toLocaleString('de-DE', { minimumFractionDigits: 2 })}
+                  EUR {(stats?.stock_summary?.total_stock || 0).toLocaleString('de-DE', { minimumFractionDigits: 2 })}
                 </div>
               </CardContent>
             </Card>
@@ -273,103 +275,61 @@ const DuengerListePage: React.FC = () => {
         )}
       </div>
 
-      {/* Info wenn keine Daten vorhanden */}
-      {!isLoading && filteredData.length === 0 && (
+      {!isLoading && filteredData.length === 0 ? (
         <Alert className="mb-6">
           <Info className="h-4 w-4" />
           <AlertTitle>Vorschau-Modus</AlertTitle>
           <AlertDescription>
-            Es sind noch keine Dünger-Daten verfügbar. Legen Sie Dünger-Artikel an, um die Übersicht zu füllen.
+            Es sind noch keine Duenger-Daten verfuegbar. Legen Sie Duenger-Artikel an, um die Uebersicht zu fuellen.
           </AlertDescription>
         </Alert>
-      )}
+      ) : null}
 
-      {/* Filters */}
       <Card className="mb-6">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Filter className="w-4 h-4" />
+            <Filter className="h-4 w-4" />
             Filter
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
             <div className="relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Suche..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(event) => setSearchTerm(event.target.value)}
                 className="pl-9"
               />
             </div>
-
-            <Select value={typFilter} onValueChange={setTypFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Typ" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all-types">Alle</SelectItem>
-                <SelectItem value="Mineraldünger">Mineraldünger</SelectItem>
-                <SelectItem value="Organischer Dünger">Organischer Dünger</SelectItem>
-                <SelectItem value="Organisch-Mineralischer Dünger">Organisch-Mineralischer Dünger</SelectItem>
-                <SelectItem value="Kalkdünger">Kalkdünger</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={kulturTypFilter} onValueChange={setKulturTypFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Kulturtyp" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all-kultur">Alle</SelectItem>
-                <SelectItem value="Getreide">Getreide</SelectItem>
-                <SelectItem value="Mais">Mais</SelectItem>
-                <SelectItem value="Raps">Raps</SelectItem>
-                <SelectItem value="Grünland">Grünland</SelectItem>
-                <SelectItem value="Gemüse">Gemüse</SelectItem>
-                <SelectItem value="Obst">Obst</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={safetyFilter} onValueChange={setSafetyFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Sicherheit" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all-safety">Alle</SelectItem>
-                <SelectItem value="safe">Sicher</SelectItem>
-                <SelectItem value="wassergefaehrdend">Wassergefährdend</SelectItem>
-                <SelectItem value="gefahrstoff">Gefahrstoff</SelectItem>
-              </SelectContent>
-            </Select>
-
+            <NativeSelect value={typFilter} onValueChange={setTypFilter} options={TYP_OPTIONS} />
+            <NativeSelect value={kulturTypFilter} onValueChange={setKulturTypFilter} options={KULTUR_OPTIONS} />
+            <NativeSelect value={safetyFilter} onValueChange={setSafetyFilter} options={SAFETY_OPTIONS} />
             <Button variant="outline" onClick={clearFilters}>
-              Filter löschen
+              Filter loeschen
             </Button>
           </div>
         </CardContent>
       </Card>
 
-      {/* Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Dünger-Liste</CardTitle>
+          <CardTitle>Duenger-Liste</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            // Skeleton-Loading für Tabelle
             <div className="space-y-4">
-              {[...Array(5)].map((_, i) => (
-                <Skeleton key={i} className="h-12 w-full" />
+              {[...Array(5)].map((_, index) => (
+                <Skeleton key={index} className="h-12 w-full" />
               ))}
             </div>
           ) : filteredData.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <p className="mb-4">Keine Dünger-Einträge gefunden</p>
-              <Button onClick={handleNewDuenger}>
-                <Plus className="w-4 h-4 mr-2" />
-                Ersten Dünger anlegen
+            <div className="py-8 text-center text-muted-foreground">
+              <p className="mb-4">Keine Duenger-Eintraege gefunden</p>
+              <Button onClick={() => navigate('/agrar/duenger-stamm')}>
+                <Plus className="mr-2 h-4 w-4" />
+                Ersten Duenger anlegen
               </Button>
             </div>
           ) : (
@@ -396,34 +356,22 @@ const DuengerListePage: React.FC = () => {
                       <TableCell>{item.name}</TableCell>
                       <TableCell>{item.typ}</TableCell>
                       <TableCell>{item.hersteller}</TableCell>
-                      <TableCell className="font-mono">{getNPKDisplay(item)}</TableCell>
+                      <TableCell className="font-mono">{getNpkDisplay(item)}</TableCell>
                       <TableCell>{getApprovalStatus(item)}</TableCell>
                       <TableCell>
-                        <div className="flex gap-1 flex-wrap">
-                          {getSafetyBadges(item)}
-                        </div>
+                        <div className="flex flex-wrap gap-1">{getSafetyBadges(item)}</div>
                       </TableCell>
                       <TableCell className="text-right">
                         {item.lagerbestand?.toLocaleString('de-DE', { minimumFractionDigits: 2 }) || '0.00'} kg
                       </TableCell>
-                      <TableCell>
-                        {item.vk_preis ? `€${item.vk_preis.toFixed(2)}` : '-'}
-                      </TableCell>
+                      <TableCell>{item.vk_preis ? `EUR ${item.vk_preis.toFixed(2)}` : '-'}</TableCell>
                       <TableCell>
                         <div className="flex gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleViewDuenger(item.id)}
-                          >
-                            <Eye className="w-4 h-4" />
+                          <Button variant="outline" size="sm" onClick={() => navigate(`/agrar/duenger-stamm/${item.id}`)}>
+                            <Eye className="h-4 w-4" />
                           </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleEditDuenger(item.id)}
-                          >
-                            <Edit className="w-4 h-4" />
+                          <Button variant="outline" size="sm" onClick={() => navigate(`/agrar/duenger-stamm/${item.id}`)}>
+                            <Edit className="h-4 w-4" />
                           </Button>
                         </div>
                       </TableCell>
@@ -436,7 +384,5 @@ const DuengerListePage: React.FC = () => {
         </CardContent>
       </Card>
     </div>
-  );
-};
-
-export default DuengerListePage;
+  )
+}

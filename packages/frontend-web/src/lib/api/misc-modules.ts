@@ -16,6 +16,14 @@ export type PlanIstData = {
   periode: string
 }
 
+const EMPTY_PLAN_IST: PlanIstData = {
+  umsatz: { plan: 0, ist: 0, abweichung: 0 },
+  kosten: { plan: 0, ist: 0, abweichung: 0 },
+  ertrag: { plan: 0, ist: 0, abweichung: 0 },
+  bereiche: [{ bereich: 'Allgemein', plan: 0, ist: 0, abweichung: 0 }],
+  periode: '',
+}
+
 export function usePlanIst(periode?: string) {
   type Kpi = { id: string; kpi_code?: string; name?: string }
   type TimeSeries = {
@@ -104,6 +112,7 @@ export function usePlanIst(periode?: string) {
         periode: periode || new Date().toISOString().slice(0, 7),
       } satisfies PlanIstData
     },
+    initialData: { ...EMPTY_PLAN_IST, periode: periode || '' },
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -117,10 +126,19 @@ export type TourenData = {
   tourenListe: Tour[]
 }
 
+const EMPTY_TOUREN: TourenData = {
+  heute: 0,
+  offen: 0,
+  unterwegs: 0,
+  abgeschlossen: 0,
+  tourenListe: [],
+}
+
 export function useTouren() {
   return useQuery({
     queryKey: ['logistik', 'touren'],
     queryFn: async () => (await apiClient.get<TourenData>('/api/v1/logistik/touren')).data,
+    initialData: EMPTY_TOUREN,
     staleTime: 30 * 1000,
   })
 }
@@ -141,6 +159,7 @@ export function useFrachtbriefe() {
   return useQuery({
     queryKey: ['logistik', 'frachtbriefe'],
     queryFn: async () => (await apiClient.get<Frachtbrief[]>('/api/v1/logistik/frachtbriefe')).data,
+    initialData: [],
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -160,6 +179,7 @@ export function useReklamationen() {
   return useQuery({
     queryKey: ['qualitaet', 'reklamationen'],
     queryFn: async () => (await apiClient.get<Reklamation[]>('/api/v1/qualitaet/reklamationen')).data,
+    initialData: [],
     staleTime: 2 * 60 * 1000,
   })
 }

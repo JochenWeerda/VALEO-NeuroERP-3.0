@@ -1,7 +1,7 @@
 /**
  * Payment Matching UI
- * FIBU-AR-03: Zahlungseingänge & Matching
- * Payment-Match-UI für Bankimport und OP-Zuordnung
+ * FIBU-AR-03: ZahlungseingÃ¤nge & Matching
+ * Payment-Match-UI fÃ¼r Bankimport und OP-Zuordnung
  */
 
 import { useState, useEffect } from 'react'
@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Upload, CheckCircle2, Link2 } from 'lucide-react'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
@@ -277,6 +277,13 @@ export default function PaymentMatchingPage(): JSX.Element {
       ),
     },
   ]
+  const openItemOptions = openItems.map((op) => ({
+    value: op.op_id,
+    label: `${op.document_number} - ${op.customer_name} - ${new Intl.NumberFormat('de-DE', {
+      style: 'currency',
+      currency: op.currency,
+    }).format(op.open_amount)} offen`,
+  }))
 
   return (
     <div className="space-y-6 p-6">
@@ -378,22 +385,12 @@ export default function PaymentMatchingPage(): JSX.Element {
             )}
             <div>
               <label className="text-sm font-medium">{t('finance.payments.selectOpenItem')}</label>
-              <Select value={selectedOpId} onValueChange={setSelectedOpId}>
-                <SelectTrigger>
-                  <SelectValue placeholder={t('finance.payments.selectOpenItemPlaceholder')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {openItems.map((op) => (
-                    <SelectItem key={op.op_id} value={op.op_id}>
-                      {op.document_number} - {op.customer_name} -{' '}
-                      {new Intl.NumberFormat('de-DE', { 
-                        style: 'currency', 
-                        currency: op.currency 
-                      }).format(op.open_amount)} offen
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <NativeSelect
+                value={selectedOpId}
+                onValueChange={setSelectedOpId}
+                options={openItemOptions}
+                placeholder={t('finance.payments.selectOpenItemPlaceholder')}
+              />
             </div>
           </div>
           <DialogFooter>

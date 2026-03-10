@@ -4,31 +4,10 @@ import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
-import { z } from 'zod'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { toast } from '@/hooks/use-toast'
 
-// Zod-Schema für Auftragsbestätigung (wird in Komponente mit i18n erstellt)
-const createAuftragsbestaetigungSchema = (t: any) => z.object({
-  bestellungId: z.string().min(1, t('crud.messages.validationError')),
-  bestaetigungsNummer: z.string().min(1, t('crud.messages.validationError')),
-  status: z.enum(['OFFEN', 'GEPRUEFT', 'BESTAETIGT']),
-  bestaetigteTermine: z.array(z.object({
-    positionId: z.string(),
-    bestaetigterTermin: z.string().min(1, t('crud.messages.validationError')),
-    abweichung: z.string().optional()
-  })),
-  preisabweichungen: z.array(z.object({
-    positionId: z.string(),
-    urspruenglicherPreis: z.number(),
-    neuerPreis: z.number(),
-    begruendung: z.string().optional()
-  })),
-  bemerkungen: z.string().optional()
-})
-
-// Konfiguration für Auftragsbestätigung ObjectPage (wird in Komponente mit i18n erstellt)
 const createAuftragsbestaetigungConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
   subtitle: t('crud.tooltips.fields.orderConfirmation'),
@@ -171,7 +150,6 @@ const createAuftragsbestaetigungConfig = (t: any, entityTypeLabel: string): Mask
       delete: '/api/v1/einkauf/auftragsbestaetigungen/{id}'
     }
   },
-  validation: createAuftragsbestaetigungSchema(t),
   permissions: ['einkauf.read', 'einkauf.write']
 })
 

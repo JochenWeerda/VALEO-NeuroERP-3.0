@@ -1,39 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ObjectPage } from '@/components/mask-builder'
-import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
+import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
-import { z } from 'zod'
+import { getFieldsFromMaskConfig, validateFields } from '@/components/mask-builder/validation'
 import { toast } from '@/hooks/use-toast'
 
-// Zod-Schema für Lieferanten
-const lieferantenSchema = z.object({
-  firma: z.string().min(1, "Firmenname ist erforderlich"),
-  anrede: z.string().optional(),
-  vorname: z.string().optional(),
-  nachname: z.string().min(1, "Nachname ist erforderlich"),
-  strasse: z.string().min(1, "Straße ist erforderlich"),
-  plz: z.string().regex(/^\d{5}$/, "PLZ muss 5-stellig sein"),
-  ort: z.string().min(1, "Ort ist erforderlich"),
-  land: z.string().default("DE"),
-  telefon: z.string().optional(),
-  email: z.string().email("Ungültige E-Mail-Adresse").optional().or(z.literal("")),
-  ustId: z.string().optional(),
-  steuernummer: z.string().optional(),
-  zahlungsbedingungen: z.string().default("30 Tage"),
-  rabatt: z.number().min(0).max(100).default(0),
-  mindestbestellwert: z.number().min(0).default(0),
-  lieferzeit: z.number().min(0).default(7),
-  qualitaetszertifikat: z.boolean().default(false),
-  bioZertifiziert: z.boolean().default(false),
-  letzteLieferung: z.string().optional(),
-  umsatzGesamt: z.number().min(0).default(0),
-  status: z.string().default("aktiv"),
-  produkte: z.array(z.string()).default([]),
-  bemerkungen: z.string().optional()
-})
-
-// Konfiguration für Lieferanten ObjectPage
 const lieferantenConfig: MaskConfig = {
   title: 'Lieferanten-Stammdaten',
   subtitle: 'Verwaltung von Lieferanten-Stammdaten und Konditionen',
@@ -94,6 +66,7 @@ const lieferantenConfig: MaskConfig = {
           type: 'text',
           required: true,
           maxLength: 5,
+          pattern: '^\\d{5}$',
           placeholder: '54321'
         },
         {
@@ -137,6 +110,7 @@ const lieferantenConfig: MaskConfig = {
           name: 'email',
           label: 'E-Mail',
           type: 'text',
+          pattern: '^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$',
           placeholder: 'max.schmidt@agrar-gmbh.de'
         }
       ]
@@ -300,7 +274,6 @@ const lieferantenConfig: MaskConfig = {
       delete: '/api/crm/lieferanten/{id}'
     }
   },
-  validation: lieferantenSchema,
   permissions: ['crm.write', 'supplier.admin']
 }
 
@@ -313,13 +286,16 @@ export default function LieferantenStammPage(): JSX.Element {
     id: 'new'
   })
 
-  const { validate, showValidationToast } = useMaskValidation(lieferantenConfig.validation)
+  const validate = (formData: any) => validateFields(getFieldsFromMaskConfig(lieferantenConfig), formData ?? {})
+  const showValidationToast = (errors: Record<string, string>) => {
+    toast({ variant: 'destructive', title: 'Validierungsfehler', description: `${Object.keys(errors).length} Feld(er) muessen korrigiert werden.` })
+  }
 
   const { handleAction } = useMaskActions(async (action: string, formData: any) => {
     if (action === 'save') {
-      const isValid = validate(formData)
-      if (!isValid.isValid) {
-        showValidationToast(isValid.errors)
+      const errors = validate(formData)
+      if (Object.keys(errors).length > 0) {
+        showValidationToast(errors)
         return
       }
 
@@ -331,11 +307,11 @@ export default function LieferantenStammPage(): JSX.Element {
         // Error wird bereits in useMaskData behandelt
       }
     } else if (action === 'validate') {
-      const isValid = validate(formData)
-      if (isValid.isValid) {
+      const errors = validate(formData)
+      if (Object.keys(errors).length === 0) {
         toast({ title: 'Validierung erfolgreich', description: 'Alle Pflichtfelder sind korrekt ausgefüllt.' })
       } else {
-        showValidationToast(isValid.errors)
+        showValidationToast(errors)
       }
     }
   })

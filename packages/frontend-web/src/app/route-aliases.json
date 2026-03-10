@@ -5,6 +5,18 @@
       "path": "admin/compliance"
     },
     {
+      "module": "@/pages/admin/data-quality",
+      "path": "admin/data-quality"
+    },
+    {
+      "module": "@/pages/admin/agenten-integration",
+      "path": "admin/agenten-integration"
+    },
+    {
+      "module": "@/pages/admin/ai-approvals",
+      "path": "admin/ai-approvals"
+    },
+    {
       "module": "@/pages/admin/GapPipelineConsole",
       "path": "admin/gap-pipeline"
     },
@@ -657,6 +669,10 @@
       "path": "controlling/plan-ist"
     },
     {
+      "module": "@/pages/controlling/benchmark-cockpit",
+      "path": "controlling/benchmark-cockpit"
+    },
+    {
       "module": "@/pages/controlling/timeseries-erfassung",
       "path": "controlling/timeseries-erfassung"
     },
@@ -1167,6 +1183,10 @@
     {
       "module": "@/pages/nachhaltigkeit/eudr-compliance",
       "path": "nachhaltigkeit/eudr-compliance"
+    },
+    {
+      "module": "@/pages/nachhaltigkeit/esg-report",
+      "path": "nachhaltigkeit/esg-report"
     },
     {
       "module": "@/pages/nawaro/anbauflaechen",

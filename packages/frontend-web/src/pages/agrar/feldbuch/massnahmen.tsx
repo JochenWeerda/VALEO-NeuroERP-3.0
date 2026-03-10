@@ -11,10 +11,11 @@ import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -38,7 +39,7 @@ import {
   Pencil,
   Trash2
 } from 'lucide-react'
-import { useMassnahmen, useAgrarKunden, useDeleteMassnahme } from '@/lib/api/agrar'
+import { useMassnahmen, useAgrarKunden, useBulkDeleteMassnahmen, useDeleteMassnahme, type BulkDeleteResult } from '@/lib/api/agrar'
 import { useToast } from '@/hooks/use-toast'
 
 // Types
@@ -124,11 +125,14 @@ export default function MassnahmenPage(): JSX.Element {
   const [selectedKundeId, setSelectedKundeId] = useState<string>('all')
   const [filterTyp, setFilterTyp] = useState<string>('alle')
   const [activeTab, setActiveTab] = useState<string>('liste')
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const [bulkDeleteResult, setBulkDeleteResult] = useState<BulkDeleteResult | null>(null)
 
   // Daten laden via TanStack Query hooks
   const { data: massnahmenData, isLoading: isLoadingMassnahmen } = useMassnahmen()
   const { data: kundenData, isLoading: isLoadingKunden } = useAgrarKunden()
   const deleteMassnahme = useDeleteMassnahme()
+  const bulkDeleteMassnahmen = useBulkDeleteMassnahmen()
 
   const massnahmen: Massnahme[] = (massnahmenData ?? []) as Massnahme[]
   const kunden = kundenData ?? []
@@ -200,8 +204,73 @@ export default function MassnahmenPage(): JSX.Element {
     return filteredMassnahmen.filter(m => m.typ === 'PSM' || m.typ === 'PSM-Behandlung')
   }, [filteredMassnahmen])
 
+  const allVisibleSelected = filteredMassnahmen.length > 0 && filteredMassnahmen.every((m) => selectedIds.includes(m.id))
+  const selectedCount = selectedIds.length
+
+  const toggleSelection = (massnahmeId: string, checked: boolean): void => {
+    setSelectedIds((prev) => {
+      if (checked) {
+        return prev.includes(massnahmeId) ? prev : [...prev, massnahmeId]
+      }
+      return prev.filter((id) => id !== massnahmeId)
+    })
+  }
+
+  const toggleSelectAllVisible = (checked: boolean): void => {
+    setSelectedIds((prev) => {
+      if (!checked) {
+        return prev.filter((id) => !filteredMassnahmen.some((massnahme) => massnahme.id === id))
+      }
+      const next = new Set(prev)
+      filteredMassnahmen.forEach((massnahme) => next.add(massnahme.id))
+      return Array.from(next)
+    })
+  }
+
+  const handleBulkDelete = (): void => {
+    if (selectedIds.length === 0) {
+      return
+    }
+    if (!confirm(`${selectedIds.length} Maßnahmen wirklich löschen?`)) {
+      return
+    }
+    setBulkDeleteResult(null)
+    bulkDeleteMassnahmen.mutate(selectedIds, {
+      onSuccess: (result) => {
+        setSelectedIds([])
+        setBulkDeleteResult(result)
+        if (result.errors.length === 0 && result.missing_ids.length === 0) {
+          toast({
+            title: 'Massenlöschung abgeschlossen',
+            description: `${result.deleted} Maßnahmen gelöscht.`,
+          })
+          return
+        }
+        toast({
+          variant: 'destructive',
+          title: 'Massenlöschung teilweise abgeschlossen',
+          description: `${result.deleted} gelöscht, ${result.missing_ids.length + result.errors.length} nicht verarbeitet.`,
+        })
+      },
+      onError: () => {
+        toast({ variant: 'destructive', title: 'Massenlöschung fehlgeschlagen' })
+      },
+    })
+  }
+
   // Spalten-Definition
   const columns = [
+    {
+      key: 'auswahl' as const,
+      label: 'Auswahl',
+      render: (m: Massnahme) => (
+        <Checkbox
+          checked={selectedIds.includes(m.id)}
+          onCheckedChange={(checked) => toggleSelection(m.id, checked === true)}
+          aria-label={`Maßnahme ${m.schlagName} auswählen`}
+        />
+      ),
+    },
     {
       key: 'datum' as const,
       label: 'Datum',
@@ -481,36 +550,31 @@ export default function MassnahmenPage(): JSX.Element {
                 {/* Kundenauswahl */}
                 <div>
                   <label className="text-sm font-medium mb-2 block">Kunde</label>
-                  <Select value={selectedKundeId} onValueChange={setSelectedKundeId}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Kunde wählen..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {kunden.map(kunde => (
-                        <SelectItem key={kunde.id} value={kunde.id}>
-                          {kunde.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <NativeSelect
+                    value={selectedKundeId}
+                    onValueChange={setSelectedKundeId}
+                    options={kunden.map((kunde) => ({
+                      value: kunde.id,
+                      label: kunde.name,
+                    }))}
+                  />
                 </div>
 
                 {/* Typfilter */}
                 <div>
                   <label className="text-sm font-medium mb-2 block">Maßnahmentyp</label>
-                  <Select value={filterTyp} onValueChange={setFilterTyp}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="alle">Alle Typen</SelectItem>
-                      <SelectItem value="Düngung">Düngung</SelectItem>
-                      <SelectItem value="PSM">PSM</SelectItem>
-                      <SelectItem value="Aussaat">Aussaat</SelectItem>
-                      <SelectItem value="Ernte">Ernte</SelectItem>
-                      <SelectItem value="Bodenbearbeitung">Bodenbearbeitung</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <NativeSelect
+                    value={filterTyp}
+                    onValueChange={setFilterTyp}
+                    options={[
+                      { value: 'alle', label: 'Alle Typen' },
+                      { value: 'D?ngung', label: 'D?ngung' },
+                      { value: 'PSM', label: 'PSM' },
+                      { value: 'Aussaat', label: 'Aussaat' },
+                      { value: 'Ernte', label: 'Ernte' },
+                      { value: 'Bodenbearbeitung', label: 'Bodenbearbeitung' },
+                    ]}
+                  />
                 </div>
 
                 {/* Suchfeld */}
@@ -530,11 +594,55 @@ export default function MassnahmenPage(): JSX.Element {
                       <FileDown className="h-4 w-4" />
                       Export
                     </Button>
+                    <Button
+                      variant="outline"
+                      className="gap-2"
+                      onClick={() => toggleSelectAllVisible(!allVisibleSelected)}
+                      disabled={filteredMassnahmen.length === 0}
+                    >
+                      {allVisibleSelected ? 'Auswahl aufheben' : 'Sichtbare auswählen'}
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      className="gap-2"
+                      onClick={handleBulkDelete}
+                      disabled={selectedCount === 0 || bulkDeleteMassnahmen.isPending}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      {bulkDeleteMassnahmen.isPending ? 'Lösche...' : `Auswahl löschen (${selectedCount})`}
+                    </Button>
                   </div>
                 </div>
               </div>
             </CardContent>
           </Card>
+
+          {bulkDeleteResult ? (
+            <Alert variant={bulkDeleteResult.errors.length > 0 || bulkDeleteResult.missing_ids.length > 0 ? 'destructive' : 'default'}>
+              <Info className="h-4 w-4" />
+              <AlertTitle>Ergebnis der Massenlöschung</AlertTitle>
+              <AlertDescription>
+                <div className="space-y-2 text-sm">
+                  <p>
+                    Angefordert: {bulkDeleteResult.requested}, gelöscht: {bulkDeleteResult.deleted}
+                  </p>
+                  {bulkDeleteResult.missing_ids.length > 0 ? (
+                    <p>Fehlende IDs: {bulkDeleteResult.missing_ids.join(', ')}</p>
+                  ) : null}
+                  {bulkDeleteResult.errors.length > 0 ? (
+                    <div>
+                      <p>Fehler:</p>
+                      {bulkDeleteResult.errors.map((error) => (
+                        <p key={error.id}>
+                          {error.id}: {error.detail}
+                        </p>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              </AlertDescription>
+            </Alert>
+          ) : null}
 
           {/* Datentabelle */}
           <Card>

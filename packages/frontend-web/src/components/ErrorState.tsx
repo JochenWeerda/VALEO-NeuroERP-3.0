@@ -1,11 +1,7 @@
-/**
- * Error State Component
- * Displays errors with retry option instead of silent fallback
- */
-
 import React from 'react'
-
-// ── Types ─────────────────────────────────────────────────────────────
+import { AlertTriangle, Home, RefreshCcw, RotateCw } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
 
 export type ErrorStateProps = {
   error: {
@@ -14,159 +10,95 @@ export type ErrorStateProps = {
     statusText?: string
   } | null
   onRetry?: () => void
+  onReload?: () => void
+  onHome?: () => void
   title?: string
   message?: string
+  recoveryHint?: string
+  compact?: boolean
 }
-
-// ── ErrorState Component ───────────────────────────────────────────
 
 export function ErrorState({
   error,
   onRetry,
+  onReload,
+  onHome,
   title = 'Fehler beim Laden der Daten',
-  message
-}: ErrorStateProps) {
+  message,
+  recoveryHint = 'Sie können den Vorgang erneut ausführen oder die Seite neu laden.',
+  compact = false,
+}: ErrorStateProps): JSX.Element {
   const errorMessage = message || error?.message || 'Ein unbekannter Fehler ist aufgetreten.'
-  const statusText = error?.statusText || (error?.status ? `${error.status} Error` : null)
+  const statusText = error?.statusText || (typeof error?.status === 'number' ? `HTTP ${error.status}` : null)
 
   return (
-    <div
-      style={{
-        padding: '2rem',
-        textAlign: 'center',
-        border: '1px solid #ef4444',
-        borderRadius: '8px',
-        backgroundColor: '#fef2f2',
-        color: '#991b1b'
-      }}
+    <Card
+      className={`border-red-300 bg-red-50 ${compact ? 'p-4' : 'p-6'} text-red-950 shadow-sm`}
+      role="alert"
     >
-      <div style={{ marginBottom: '1rem' }}>
-        <svg
-          width="48"
-          height="48"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          style={{ margin: '0 auto', display: 'block' }}
-        >
-          <circle cx="12" cy="12" r="10" />
-          <line x1="12" y1="8" x2="12" y2="12" />
-          <line x1="12" y1="16" x2="12.01" y2="16" />
-        </svg>
+      <div className={`mx-auto flex max-w-2xl ${compact ? 'gap-3' : 'gap-4'} ${compact ? 'items-start' : 'items-center'}`}>
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-red-100">
+          <AlertTriangle className="h-5 w-5 text-red-700" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <h3 className={`${compact ? 'text-base' : 'text-lg'} font-semibold`}>{title}</h3>
+          <p className="mt-1 text-sm text-red-800">{errorMessage}</p>
+          {statusText ? (
+            <p className="mt-1 text-xs uppercase tracking-wide text-red-700/80">{statusText}</p>
+          ) : null}
+          <p className="mt-3 text-sm text-red-900/80">{recoveryHint}</p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {onRetry ? (
+              <Button type="button" variant="outline" className="border-red-300 bg-white" onClick={onRetry}>
+                <RotateCw className="mr-2 h-4 w-4" />
+                Erneut versuchen
+              </Button>
+            ) : null}
+            {onReload ? (
+              <Button type="button" variant="outline" className="border-red-300 bg-white" onClick={onReload}>
+                <RefreshCcw className="mr-2 h-4 w-4" />
+                Seite neu laden
+              </Button>
+            ) : null}
+            {onHome ? (
+              <Button type="button" variant="ghost" onClick={onHome}>
+                <Home className="mr-2 h-4 w-4" />
+                Zur Startseite
+              </Button>
+            ) : null}
+          </div>
+        </div>
       </div>
-
-      <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.125rem', fontWeight: 600 }}>
-        {title}
-      </h3>
-
-      <p style={{ margin: '0 0 1rem 0', color: '#b91c1c' }}>
-        {errorMessage}
-        {statusText && (
-          <span style={{ display: 'block', fontSize: '0.875rem', marginTop: '0.25rem' }}>
-            ({statusText})
-          </span>
-        )}
-      </p>
-
-      {onRetry && (
-        <button
-          onClick={onRetry}
-          style={{
-            padding: '0.5rem 1.5rem',
-            backgroundColor: '#dc2626',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            fontWeight: 500,
-            transition: 'background-color 0.2s'
-          }}
-          onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#b91c1c')}
-          onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#dc2626')}
-        >
-          Erneut versuchen
-        </button>
-      )}
-    </div>
+    </Card>
   )
 }
 
-// ── Loading State Component ─────────────────────────────────────────
-
-export function LoadingState({ message = 'Daten werden geladen...' }: { message?: string }) {
+export function LoadingState({ message = 'Daten werden geladen...' }: { message?: string }): JSX.Element {
   return (
-    <div
-      style={{
-        padding: '2rem',
-        textAlign: 'center',
-        color: '#6b7280'
-      }}
-    >
-      <div
-        style={{
-          width: '32px',
-          height: '32px',
-          border: '3px solid #e5e7eb',
-          borderTopColor: '#3b82f6',
-          borderRadius: '50%',
-          animation: 'spin 1s linear infinite',
-          margin: '0 auto 1rem'
-        }}
-      />
-      <p style={{ margin: 0 }}>{message}</p>
-      <style>{`
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
+    <div className="flex flex-col items-center justify-center gap-3 p-8 text-muted-foreground">
+      <div className="h-8 w-8 animate-spin rounded-full border-4 border-muted border-t-primary" />
+      <p className="text-sm">{message}</p>
     </div>
   )
 }
-
-// ── Empty State Component ───────────────────────────────────────────
 
 export function EmptyState({
   title = 'Keine Daten gefunden',
   message,
-  action
+  action,
 }: {
   title?: string
   message?: string
   action?: React.ReactNode
-}) {
+}): JSX.Element {
   return (
-    <div
-      style={{
-        padding: '3rem',
-        textAlign: 'center',
-        border: '1px dashed #d1d5db',
-        borderRadius: '8px',
-        backgroundColor: '#f9fafb'
-      }}
-    >
-      <div style={{ marginBottom: '1rem' }}>
-        <svg
-          width="48"
-          height="48"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          style={{ margin: '0 auto', display: 'block', color: '#9ca3af' }}
-        >
-          <path d="M20 6L9 17l-5-5" />
-        </svg>
+    <Card className="border-dashed p-8 text-center">
+      <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-muted">
+        <Home className="h-5 w-5 text-muted-foreground" />
       </div>
-      <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1rem', fontWeight: 500, color: '#374151' }}>
-        {title}
-      </h3>
-      {message && (
-        <p style={{ margin: '0 0 1rem 0', color: '#6b7280', fontSize: '0.875rem' }}>
-          {message}
-        </p>
-      )}
-      {action}
-    </div>
+      <h3 className="mt-4 text-base font-semibold text-foreground">{title}</h3>
+      {message ? <p className="mt-2 text-sm text-muted-foreground">{message}</p> : null}
+      {action ? <div className="mt-4">{action}</div> : null}
+    </Card>
   )
 }

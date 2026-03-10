@@ -3,7 +3,8 @@
  * Wird unter /fibu-suite und allen Kind-Routen gerendert.
  */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, type ReactNode } from 'react'
+import { clsx } from 'clsx'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import {
@@ -14,8 +15,7 @@ import {
   Monitor,
   Home,
 } from 'lucide-react'
-import { NAV_SECTIONS } from '@/app/navigation/manifest'
-import { cn } from '@/lib/utils'
+import { FIBU_SUITE_ITEMS } from '@/app/navigation/fibu-suite'
 
 const FIBU_SUITE_STORAGE_VIEW = 'fibu-suite-view'
 const FIBU_SUITE_STORAGE_THEME = 'fibu-suite-theme'
@@ -53,13 +53,15 @@ function getSuitePath(child: { path?: string; module?: string }): string | null 
   return p
 }
 
-export default function FibuSuiteLayout(): JSX.Element {
+interface FibuSuiteLayoutProps {
+  children?: ReactNode
+}
+
+export default function FibuSuiteLayout({ children }: FibuSuiteLayoutProps): JSX.Element {
   const [viewMode, setViewMode] = useState<ViewMode>(getStoredView)
   const [theme, setTheme] = useState<ThemeMode>(getStoredTheme)
   const location = useLocation()
 
-  const fibuSection = NAV_SECTIONS.find((s) => s.id === 'fibu')
-  const children = fibuSection?.children ?? []
   const suiteBase = '/fibu-suite'
 
   useEffect(() => {
@@ -81,7 +83,7 @@ export default function FibuSuiteLayout(): JSX.Element {
   const setView = (v: ViewMode): void => setViewMode(v)
   const setThemeMode = (t: ThemeMode): void => setTheme(t)
 
-  const ribbonLinks = children
+  const ribbonLinks = FIBU_SUITE_ITEMS
     .map((child) => {
       const path = getSuitePath(child)
       if (!path) return null
@@ -92,7 +94,7 @@ export default function FibuSuiteLayout(): JSX.Element {
 
   return (
     <div
-      className={cn(
+      className={clsx(
         'flex h-full flex-col min-h-0',
         theme === 'dark' && 'dark bg-slate-950 text-slate-100',
       )}
@@ -173,7 +175,7 @@ export default function FibuSuiteLayout(): JSX.Element {
 
       {/* Content */}
       <div className="flex-1 min-h-0 overflow-auto">
-        <Outlet />
+        {children ?? <Outlet />}
       </div>
     </div>
   )

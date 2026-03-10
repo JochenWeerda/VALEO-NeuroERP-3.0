@@ -2,60 +2,13 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
-import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
+import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
-import { z } from 'zod'
+import { getFieldsFromMaskConfig, validateFields } from '@/components/mask-builder/validation'
 import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/axios'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 
-// Zod-Schema für UStVA (wird in Komponente mit i18n erstellt)
-const createUstvaSchema = (t: any) => z.object({
-  periode: z.string().regex(/^\d{4}-\d{2}$/, t('crud.messages.validationError')),
-  voranmeldungszeitraum: z.enum(['monatlich', 'quartalsweise']),
-  steuerpflichtiger: z.string().min(1, t('crud.messages.validationError')),
-  ustId: z.string().optional(),
-  steuerberater: z.string().optional(),
-
-  // Umsätze
-  umsatz19: z.number().default(0),
-  umsatz7: z.number().default(0),
-  umsatz0: z.number().default(0),
-  umsatzSonstige: z.number().default(0),
-  gesamtUmsatz: z.number().default(0),
-
-  // Vorsteuer
-  vorsteuer19: z.number().default(0),
-  vorsteuer7: z.number().default(0),
-  vorsteuer0: z.number().default(0),
-  vorsteuerSonstige: z.number().default(0),
-  gesamtVorsteuer: z.number().default(0),
-
-  // Berechnung
-  ust19: z.number().default(0),
-  ust7: z.number().default(0),
-  ust0: z.number().default(0),
-  ustSonstige: z.number().default(0),
-  gesamtUst: z.number().default(0),
-
-  // Abweichungen
-  abweichungen: z.array(z.object({
-    position: z.string(),
-    beschreibung: z.string(),
-    betrag: z.number(),
-    grund: z.string()
-  })).optional(),
-
-  // Status
-  status: z.enum(['entwurf', 'pruefung', 'freigegeben', 'abgegeben']),
-  freigegebenAm: z.string().optional(),
-  freigegebenDurch: z.string().optional(),
-  abgegebenAm: z.string().optional(),
-  elsterReferenz: z.string().optional(),
-  notizen: z.string().optional()
-})
-
-// Konfiguration für UStVA ObjectPage (wird in Komponente mit i18n erstellt)
 const createUstvaConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
   subtitle: t('crud.fields.createAndSubmitUstva'),
@@ -327,7 +280,6 @@ const createUstvaConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
       delete: '/api/v1/finance/ustva/{id}'
     }
   } as any,
-  validation: createUstvaSchema(t),
   permissions: ['fibu.read', 'fibu.write', 'fibu.admin']
 })
 
@@ -446,7 +398,10 @@ export default function UStVAPage(): JSX.Element {
     id: 'new'
   })
 
-  const { validate, showValidationToast } = useMaskValidation(ustvaConfig.validation)
+  const validate = (formData: any) => validateFields(getFieldsFromMaskConfig(ustvaConfig), formData ?? {})
+  const showValidationToast = (errors: Record<string, string>) => {
+    toast({ variant: 'destructive', title: t('crud.messages.validationError'), description: `${Object.keys(errors).length} Feld(er) muessen korrigiert werden.` })
+  }
 
   const { handleAction } = useMaskActions(async (action: string, formData: any) => {
     if (action === 'calculate') {
@@ -466,14 +421,14 @@ export default function UStVAPage(): JSX.Element {
       return
     }
     if (action === 'validate') {
-      const isValid = validate(formData)
-      if (isValid.isValid) {
+      const errors = validate(formData)
+      if (Object.keys(errors).length === 0) {
         toast({
           title: t('crud.messages.validationSuccess'),
           description: t('crud.messages.ustvaDataCorrect'),
         })
       } else {
-        showValidationToast(isValid.errors)
+        showValidationToast(errors)
       }
     } else if (action === 'approve') {
       // Freigeben
@@ -518,9 +473,9 @@ export default function UStVAPage(): JSX.Element {
         })
       }
     } else if (action === 'submit') {
-      const isValid = validate(formData)
-      if (!isValid.isValid) {
-        showValidationToast(isValid.errors)
+      const errors = validate(formData)
+      if (Object.keys(errors).length > 0) {
+        showValidationToast(errors)
         return
       }
 

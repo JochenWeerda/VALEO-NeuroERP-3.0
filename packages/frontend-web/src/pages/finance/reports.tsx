@@ -75,6 +75,37 @@ interface JournalListResponse {
   items: JournalEntry[]
 }
 
+const EMPTY_BALANCE_SHEET: BalanceSheet = {
+  period: '',
+  total_assets: 0,
+  total_liabilities: 0,
+  total_equity: 0,
+  assets: [],
+  liabilities: [],
+  equity: [],
+}
+
+const EMPTY_PROFIT_LOSS: ProfitLoss = {
+  period: '',
+  total_revenue: 0,
+  total_expenses: 0,
+  net_income: 0,
+  revenue: [],
+  expenses: [],
+}
+
+const EMPTY_BWA: Bwa = {
+  period: '',
+  total_revenue: 0,
+  total_costs: 0,
+  net_result: 0,
+  items: [],
+}
+
+const EMPTY_PROFIT_LOSS_SERIES: Array<{ period: string; pl: ProfitLoss }> = []
+
+const EMPTY_JOURNAL_ENTRIES: JournalEntry[] = []
+
 const periodFormatter = new Intl.DateTimeFormat('de-DE', { month: 'short' })
 
 function toNumber(value: number | string | undefined): number {
@@ -155,27 +186,33 @@ export default function FinanceReportsPage(): JSX.Element {
   const balanceQuery = useQuery({
     queryKey: ['finance', 'balance-sheet', period],
     queryFn: () => fetchBalanceSheet(period),
+    initialData: EMPTY_BALANCE_SHEET,
   })
   const profitLossQuery = useQuery({
     queryKey: ['finance', 'profit-loss', period],
     queryFn: () => fetchProfitLoss(period),
+    initialData: EMPTY_PROFIT_LOSS,
   })
   const previousYearProfitLossQuery = useQuery({
     queryKey: ['finance', 'profit-loss', `${Number(period.slice(0, 4)) - 1}-${period.slice(5)}`],
     queryFn: () => fetchProfitLoss(`${Number(period.slice(0, 4)) - 1}-${period.slice(5)}`),
+    initialData: EMPTY_PROFIT_LOSS,
   })
   const bwaQuery = useQuery({
     queryKey: ['finance', 'bwa', period],
     queryFn: () => fetchBwa(period),
+    initialData: EMPTY_BWA,
   })
   const seriesQuery = useQuery({
     queryKey: ['finance', 'profit-loss-series', period],
     queryFn: () => fetchProfitLossSeries(period),
+    initialData: EMPTY_PROFIT_LOSS_SERIES,
   })
   const journalQuery = useQuery({
     queryKey: ['finance', 'journal-entries', period],
     queryFn: () => fetchJournalEntries(period),
     enabled: isJournalOpen,
+    initialData: EMPTY_JOURNAL_ENTRIES,
   })
 
   const isLoading =
@@ -185,7 +222,7 @@ export default function FinanceReportsPage(): JSX.Element {
   const profitLoss = profitLossQuery.data
   const previousYearProfitLoss = previousYearProfitLossQuery.data
   const bwa = bwaQuery.data
-  const series = seriesQuery.data ?? []
+  const series = seriesQuery.data
 
   const liquidity = toNumber(balanceSheet?.total_assets) - toNumber(balanceSheet?.total_liabilities)
   const ebitda = toNumber(profitLoss?.net_income)

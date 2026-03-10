@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -85,18 +85,82 @@ const initialForm: FormState = {
   freightFixed: 0,
 }
 
+/** Artikel/Erntegut → crop_code für Drying Rule Engine (regelbasiert, versioniert) */
+const ARTICLE_TO_CROP: Record<string, string> = {
+  WEIZEN: 'WHEAT',
+  WEIZEN_WEICH: 'WHEAT',
+  WEIZEN_HART: 'WHEAT',
+  WEIZE: 'WHEAT',
+  WHEAT: 'WHEAT',
+  MAIS: 'MAIZE',
+  KÖRNERMAIS: 'MAIZE',
+  MAIZE: 'MAIZE',
+  RAPS: 'RAPESEED',
+  RAPESEED: 'RAPESEED',
+  GERSTE: 'BARLEY',
+  BARLEY: 'BARLEY',
+  HAFER: 'OATS',
+  OATS: 'OATS',
+  ERBSEN: 'PEAS',
+  PEAS: 'PEAS',
+  Ackerbohnen: 'FIELD_BEANS',
+  AECKERBOHNE: 'FIELD_BEANS',
+  ERBSE: 'PEAS',
+  LUPINE: 'LUPINS',
+  Lupinen: 'LUPINS',
+  FIELD_BEANS: 'FIELD_BEANS',
+  LUPINS: 'LUPINS',
+}
+
+function toCropCode(articleId: string): string {
+  const normalized = articleId.trim().toUpperCase().replace(/[ÄÖÜ]/g, (c) => ({ Ä: 'A', Ö: 'O', Ü: 'U' }[c] ?? c))
+  return ARTICLE_TO_CROP[normalized] ?? normalized
+}
+
+type DryingComputeResult = {
+  invoice_weight_kg: number
+  loss_kg: number
+  loss_pct: number
+  drying_fee_eur: number | null
+  used_rule_set_id: string
+  used_rule_version: number
+  warnings: string[]
+}
+
 function money(value: number): string {
   return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(value)
 }
 
+type QualitaetsCheckState = {
+  fromQualitaetsCheck?: boolean
+  artikel?: string
+  feuchtigkeit?: number
+  verunreinigung?: number
+  lieferscheinNr?: string
+}
+
 export default function AnnahmeAbrechnungPage(): JSX.Element {
   const navigate = useNavigate()
+  const location = useLocation()
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const [form, setForm] = useState<FormState>(initialForm)
 
+  useEffect(() => {
+    const state = location.state as QualitaetsCheckState | null
+    if (state?.fromQualitaetsCheck && (state.artikel ?? state.feuchtigkeit ?? state.verunreinigung)) {
+      setForm((prev) => ({
+        ...prev,
+        ...(state.artikel != null && { articleId: state.artikel }),
+        ...(state.feuchtigkeit != null && { feuchtigkeit: state.feuchtigkeit }),
+        ...(state.verunreinigung != null && { verunreinigung: state.verunreinigung }),
+      }))
+    }
+  }, [location.state])
+
   const nettoGewicht = useMemo(() => Math.max(0, form.bruttoGewicht - form.taraGewicht), [form.bruttoGewicht, form.taraGewicht])
 
+  /** Abzüge inkl. manueller Trocknung (Fallback wenn keine Drying Rule existiert) */
   const deductions = useMemo(() => {
     const items: Array<{
       deduction_type: DeductionType
@@ -132,6 +196,33 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
     return items
   }, [form.feuchtigkeit, form.verunreinigung, form.dryingRate, form.cleaningRate, form.freightFixed])
 
+  /** Abzüge ohne Trocknung (nur Reinigung + Fracht) – bei Nutzung der Drying Rule Engine */
+  const deductionsWithoutDrying = useMemo(() => {
+    const items: Array<{
+      deduction_type: DeductionType
+      mode: DeductionMode
+      rate_per_ton_eur?: number
+      fixed_amount_eur?: number
+      note?: string
+    }> = []
+    if (form.verunreinigung > 2) {
+      items.push({
+        deduction_type: 'cleaning',
+        mode: 'per_ton',
+        rate_per_ton_eur: form.cleaningRate,
+        note: `Impurities ${form.verunreinigung.toFixed(1)}%`,
+      })
+    }
+    if (form.freightFixed > 0) {
+      items.push({
+        deduction_type: 'freight',
+        mode: 'fixed',
+        fixed_amount_eur: form.freightFixed,
+      })
+    }
+    return items
+  }, [form.verunreinigung, form.cleaningRate, form.freightFixed])
+
   const { data: settlements, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['agrar', 'settlements'],
     queryFn: async () => (await apiClient.get<Settlement[]>('/api/v1/agrar/settlements')).data,
@@ -152,32 +243,47 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
     },
   })
 
+  const dryingCompute = useMutation({
+    mutationFn: async () => {
+      const cropCode = toCropCode(form.articleId)
+      const payload = {
+        crop_code: cropCode,
+        net_weight_kg: nettoGewicht,
+        moisture_pct: form.feuchtigkeit,
+      }
+      return (await apiClient.post<DryingComputeResult>('/api/v1/agrar/settlements/drying/compute', payload)).data
+    },
+  })
+
   const settlementPreview = useMutation({
-    mutationFn: async (billingWeightKg: number) => {
+    mutationFn: async (opts: { billingWeightKg: number; deductions: typeof deductions }) => {
       const payload = {
         settlement_number: form.settlementNumber || undefined,
         supplier_id: form.supplierId,
         article_id: form.articleId,
         gross_quantity_kg: nettoGewicht,
-        billing_quantity_kg: billingWeightKg,
+        billing_quantity_kg: opts.billingWeightKg,
         unit_price_eur_per_ton: form.basisPreis,
-        deductions,
+        deductions: opts.deductions,
       }
       return (await apiClient.post<SettlementPreview>('/api/v1/agrar/settlements/preview', payload)).data
     },
   })
 
   const createSettlement = useMutation({
-    mutationFn: async (billingWeightKg: number) => {
-      const payload = {
+    mutationFn: async (opts: { billingWeightKg: number; drying?: { crop_code: string; moisture_pct: number }; deductions: typeof deductions }) => {
+      const payload: Record<string, unknown> = {
         settlement_number: form.settlementNumber || undefined,
         supplier_id: form.supplierId,
         article_id: form.articleId,
         gross_quantity_kg: nettoGewicht,
-        billing_quantity_kg: billingWeightKg,
+        billing_quantity_kg: opts.billingWeightKg,
         unit_price_eur_per_ton: form.basisPreis,
-        deductions,
+        deductions: opts.deductions,
         note: 'Created from annahme/abrechnung UI',
+      }
+      if (opts.drying) {
+        payload.drying = opts.drying
       }
       return (await apiClient.post<Settlement>('/api/v1/agrar/settlements', payload)).data
     },
@@ -215,8 +321,17 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
       toast({ title: 'Lieferant fehlt', description: 'Bitte supplier_id eingeben.', variant: 'destructive' })
       return
     }
-    const billing = await billingPreview.mutateAsync()
-    await settlementPreview.mutateAsync(billing.billing_weight_kg)
+    let billingWeightKg: number
+    let useDeductions = deductions
+    try {
+      const drying = await dryingCompute.mutateAsync()
+      billingWeightKg = drying.invoice_weight_kg
+      useDeductions = deductionsWithoutDrying
+    } catch {
+      const billing = await billingPreview.mutateAsync()
+      billingWeightKg = billing.billing_weight_kg
+    }
+    await settlementPreview.mutateAsync({ billingWeightKg, deductions: useDeductions })
   }
 
   async function saveSettlement(): Promise<void> {
@@ -224,8 +339,19 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
       toast({ title: 'Lieferant fehlt', description: 'Bitte supplier_id eingeben.', variant: 'destructive' })
       return
     }
-    const billing = billingPreview.data ?? (await billingPreview.mutateAsync())
-    await createSettlement.mutateAsync(billing.billing_weight_kg)
+    let billingWeightKg: number
+    let useDrying: { crop_code: string; moisture_pct: number } | undefined
+    let useDeductions = deductions
+    try {
+      const drying = await dryingCompute.mutateAsync()
+      billingWeightKg = drying.invoice_weight_kg
+      useDrying = { crop_code: toCropCode(form.articleId), moisture_pct: form.feuchtigkeit }
+      useDeductions = deductionsWithoutDrying
+    } catch {
+      const billing = billingPreview.data ?? (await billingPreview.mutateAsync())
+      billingWeightKg = billing.billing_weight_kg
+    }
+    await createSettlement.mutateAsync({ billingWeightKg, drying: useDrying, deductions: useDeductions })
   }
 
   const previewData = settlementPreview.data
@@ -322,10 +448,10 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
             </div>
           </div>
 
-          {billingData && (
+          {(billingData || previewData || dryingCompute.data) && (
             <div className="rounded border p-3 text-sm">
-              Abrechnungsgewicht: <span className="font-semibold">{billingData.billing_weight_kg.toLocaleString('de-DE')} kg</span>
-              {' | '}Abzug: <span className="font-semibold">{billingData.deduction_kg.toLocaleString('de-DE')} kg</span>
+              Abrechnungsgewicht: <span className="font-semibold">{(previewData?.billing_quantity_kg ?? dryingCompute.data?.invoice_weight_kg ?? billingData?.billing_weight_kg ?? 0).toLocaleString('de-DE')} kg</span>
+              {' | '}Abzug: <span className="font-semibold">{(dryingCompute.data?.loss_kg ?? billingData?.deduction_kg ?? (nettoGewicht - (previewData?.billing_quantity_kg ?? nettoGewicht))).toLocaleString('de-DE')} kg</span>
             </div>
           )}
 

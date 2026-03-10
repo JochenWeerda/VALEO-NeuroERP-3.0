@@ -17,8 +17,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Zap, Send, Loader2, Sparkles, X } from 'lucide-react'
-import { askVALEO, isOpenAIConfigured, type VALEOMessage } from '@/lib/services/openai-service'
 import { useTenant } from '@/hooks/useTenant'
+import type { VALEOMessage } from '@/lib/services/openai-service'
 
 type Message = {
   role: 'user' | 'assistant'
@@ -34,6 +34,7 @@ export function AskVALEO() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const location = useLocation()
   const { tenantId } = useTenant()
+  const isConfigured = Boolean(import.meta.env.VITE_OPENAI_API_KEY)
 
   // Listen for custom event to open dialog
   useEffect(() => {
@@ -72,6 +73,8 @@ export function AskVALEO() {
         role: m.role === 'user' ? 'user' : 'assistant',
         content: m.content
       }))
+
+      const { askVALEO } = await import('@/lib/services/openai-service')
 
       // Call OpenAI
       const response = await askVALEO(input, context, conversationHistory)
@@ -114,8 +117,6 @@ export function AskVALEO() {
     'Was ist der Belegfluss?',
     'Compliance-Check für Kunde Schmidt',
   ]
-
-  const isConfigured = isOpenAIConfigured()
 
   return (
     <>

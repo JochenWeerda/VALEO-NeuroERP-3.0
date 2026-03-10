@@ -26,20 +26,30 @@ type ClosingCockpitSummary = {
   latest_checklists: CockpitChecklist[]
 }
 
+const EMPTY_CLOSING_COCKPIT_SUMMARY: ClosingCockpitSummary = {
+  tenant_id: '',
+  period: null,
+  periods: { open: 0, closed: 0, adjusting: 0 },
+  checklists: { total: 0, completed: 0, in_progress: 0, blocked: 0, avg_progress: 0 },
+  blockers: [],
+  latest_checklists: [],
+}
+
 export default function AbschlussCockpitPage(): JSX.Element {
   const { data, isLoading, error } = useQuery({
     queryKey: ['finance', 'closing-cockpit-summary'],
     queryFn: async () => (await apiClient.get<ClosingCockpitSummary>('/api/v1/finance/closing-checklists/cockpit/summary')).data,
+    initialData: EMPTY_CLOSING_COCKPIT_SUMMARY,
     staleTime: 30_000,
   })
 
-  const blockers = useMemo(() => data?.blockers ?? [], [data])
+  const blockers = useMemo(() => data.blockers, [data])
 
   if (isLoading) {
     return <div className="p-6 text-sm text-muted-foreground">Lade Abschluss-Cockpit...</div>
   }
 
-  if (error || !data) {
+  if (error) {
     return <div className="p-6 text-sm text-red-600">Abschluss-Cockpit konnte nicht geladen werden.</div>
   }
 

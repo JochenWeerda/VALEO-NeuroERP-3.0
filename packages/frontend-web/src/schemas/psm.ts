@@ -1,5 +1,3 @@
-import { z } from 'zod';
-
 // GHS Piktogramme (Stand: CLP-VO 2025)
 export const GHS_PIKTOGRAMME = [
   'GHS01', 'GHS02', 'GHS03', 'GHS04', 'GHS05',
@@ -82,95 +80,77 @@ export const WIRKSTOFF_EINHEITEN = [
   'g/l', 'g/kg', '%'
 ] as const;
 
-// PSM Zod Schema
-export const WirkstoffSchema = z.object({
-  name: z.string().min(1, "Wirkstoffname ist erforderlich"),
-  gehalt: z.number().positive("Gehalt muss positiv sein"),
-  einheit: z.enum(WIRKSTOFF_EINHEITEN).default("g/l"),
-  cas: z.string().optional(),
-  echa_subst_id: z.string().optional(),
-  ghs: z.array(z.enum(GHS_PIKTOGRAMME)).optional().default([]),
-  h_saetze: z.array(z.enum(H_SAETZE)).optional().default([]),
-  p_saetze: z.array(z.enum(P_SAETZE)).optional().default([]),
-  euh_saetze: z.array(z.enum(EUH_SAETZE)).optional().default([]),
-});
+export type GhsPiktogramm = typeof GHS_PIKTOGRAMME[number];
+export type HSatz = typeof H_SAETZE[number];
+export type PSatz = typeof P_SAETZE[number];
+export type EuhSatz = typeof EUH_SAETZE[number];
+export type AuflagenKategorie = typeof AUFLAGEN_KATEGORIEN[number];
+export type ZulassungsStatus = typeof ZULASSUNGS_STATUS[number];
+export type BienenschutzKlasse = typeof BIENENSCHUTZ_KLASSEN[number];
+export type Anwendungszweck = typeof ANWENDUNGSZWECKE[number];
+export type WirkstoffEinheit = typeof WIRKSTOFF_EINHEITEN[number];
 
-export const KulturAnwendungSchema = z.object({
-  kulturCode: z.string().min(1, "Kultur-Code ist erforderlich"),
-  kulturName: z.string().min(1, "Kultur-Name ist erforderlich"),
-  zielorganismus: z.string().min(1, "Zielorganismus ist erforderlich"),
-  anwendungszweck: z.enum(ANWENDUNGSZWECKE),
-  bbchVon: z.string().regex(/^\d{1,3}$/, "BBCH-Code muss 1-3 Ziffern haben"),
-  bbchBis: z.string().regex(/^\d{1,3}$/, "BBCH-Code muss 1-3 Ziffern haben"),
-  aufwandmenge: z.string().min(1, "Aufwandmenge ist erforderlich"),
-  maxAnzahlAnwendungen: z.number().int().min(0).default(1),
-  wartezeit: z.string().optional(),
-  bienenschutz: z.enum(BIENENSCHUTZ_KLASSEN).optional(),
-}).refine((data) => {
-  const von = parseInt(data.bbchVon);
-  const bis = parseInt(data.bbchBis);
-  return von <= bis;
-}, {
-  message: "BBCH 'von' muss kleiner oder gleich 'bis' sein",
-  path: ["bbchVon"]
-});
+export interface WirkstoffDto {
+  name: string;
+  gehalt: number;
+  einheit: WirkstoffEinheit;
+  cas?: string;
+  echa_subst_id?: string;
+  ghs?: GhsPiktogramm[];
+  h_saetze?: HSatz[];
+  p_saetze?: PSatz[];
+  euh_saetze?: EuhSatz[];
+}
 
-export const SicherheitSchema = z.object({
-  psa: z.array(z.string()).optional().default([]),
-  anwenderschutz: z.array(z.string()).optional().default([]),
-  abstand_gewaesser: z.string().optional(),
-  abstand_saumbiotop: z.string().optional(),
-});
+export interface KulturAnwendungDto {
+  kulturCode: string;
+  kulturName: string;
+  zielorganismus: string;
+  anwendungszweck: Anwendungszweck;
+  bbchVon: string;
+  bbchBis: string;
+  aufwandmenge: string;
+  maxAnzahlAnwendungen?: number;
+  wartezeit?: string;
+  bienenschutz?: BienenschutzKlasse;
+}
 
-export const AuflageSchema = z.object({
-  code: z.string().min(1, "Auflagen-Code ist erforderlich"),
-  kategorie: z.enum(AUFLAGEN_KATEGORIEN).optional(),
-  text: z.string().min(1, "Auflagen-Text ist erforderlich"),
-  version: z.string().optional(),
-});
+export interface SicherheitDto {
+  psa?: string[];
+  anwenderschutz?: string[];
+  abstand_gewaesser?: string;
+  abstand_saumbiotop?: string;
+}
 
-export const ZulassungSchema = z.object({
-  status: z.enum(ZULASSUNGS_STATUS).default("zugelassen"),
-  statusSeit: z.string().optional(),
-  gueltigBis: z.string().optional(),
-  bvl_psm_id: z.string().optional(),
-  letztePruefung: z.string().optional(),
-});
+export interface AuflageDto {
+  code: string;
+  kategorie?: AuflagenKategorie;
+  text: string;
+  version?: string;
+}
 
-export const PsmSchema = z.object({
-  id: z.string().uuid().optional(),
-  handelsname: z.string().min(2, "Handelsname muss mindestens 2 Zeichen haben"),
-  zulassungsnummer: z.string().min(3, "Zulassungsnummer muss mindestens 3 Zeichen haben"),
-  hersteller: z.string().min(2, "Hersteller muss mindestens 2 Zeichen haben"),
-  formulierung: z.string().optional(),
+export interface ZulassungDto {
+  status?: ZulassungsStatus;
+  statusSeit?: string;
+  gueltigBis?: string;
+  bvl_psm_id?: string;
+  letztePruefung?: string;
+}
 
-  // Wirkstoffe & CLP
-  wirkstoffe: z.array(WirkstoffSchema).min(1, "Mindestens ein Wirkstoff ist erforderlich"),
+export interface PsmDto {
+  id?: string;
+  handelsname: string;
+  zulassungsnummer: string;
+  hersteller: string;
+  formulierung?: string;
+  wirkstoffe: WirkstoffDto[];
+  kulturen: KulturAnwendungDto[];
+  sicherheit?: SicherheitDto;
+  auflagen?: AuflageDto[];
+  zulassung?: ZulassungDto;
+  datenquelle?: string;
+}
 
-  // Kulturen & Anwendung
-  kulturen: z.array(KulturAnwendungSchema).min(1, "Mindestens eine Kultur-Anwendung ist erforderlich"),
-
-  // Sicherheit
-  sicherheit: SicherheitSchema.default({}),
-
-  // Auflagen
-  auflagen: z.array(AuflageSchema).default([]),
-
-  // Zulassung
-  zulassung: ZulassungSchema.default({}),
-
-  // Metadaten
-  datenquelle: z.string().optional(),
-});
-
-export type PsmDto = z.infer<typeof PsmSchema>;
-export type WirkstoffDto = z.infer<typeof WirkstoffSchema>;
-export type KulturAnwendungDto = z.infer<typeof KulturAnwendungSchema>;
-export type SicherheitDto = z.infer<typeof SicherheitSchema>;
-export type AuflageDto = z.infer<typeof AuflageSchema>;
-export type ZulassungDto = z.infer<typeof ZulassungSchema>;
-
-// Codelisten für UI
 export const GHS_LABELS: Record<string, string> = {
   GHS01: "Explosiv",
   GHS02: "Entzündbar",
