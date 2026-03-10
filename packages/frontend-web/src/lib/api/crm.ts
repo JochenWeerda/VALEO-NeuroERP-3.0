@@ -85,6 +85,32 @@ type PaginatedResponse<T> = {
   size: number
 }
 
+const EMPTY_CUSTOMER_LIST: PaginatedResponse<Customer> = {
+  items: [],
+  total: 0,
+  page: 1,
+  pages: 0,
+  size: 0,
+}
+
+const EMPTY_LEAD_LIST: PaginatedResponse<Lead> = {
+  items: [],
+  total: 0,
+  page: 1,
+  pages: 0,
+  size: 0,
+}
+
+const EMPTY_CRM_DASHBOARD: { kpis: CRMDashboardKPI[]; charts: CRMDashboardChart[] } = {
+  kpis: [],
+  charts: [],
+}
+
+const EMPTY_SUPPLIER_LIST: SupplierListResponse = {
+  items: [],
+  total: 0,
+}
+
 // Query Keys
 export const crmKeys = {
   all: ['crm'] as const,
@@ -108,6 +134,7 @@ export function useCustomers(filters?: { search?: string; is_active?: boolean })
       )
       return response.data
     },
+    initialData: EMPTY_CUSTOMER_LIST,
   })
 }
 
@@ -119,6 +146,7 @@ export function useCustomer(id: string) {
       return response.data
     },
     enabled: !!id,
+    initialData: null,
   })
 }
 
@@ -176,6 +204,7 @@ export function useLeads(filters?: { search?: string; status?: string }) {
       const response = await apiClient.get<PaginatedResponse<Lead>>(`/api/v1/crm/leads?${String(params)}`)
       return response.data
     },
+    initialData: EMPTY_LEAD_LIST,
   })
 }
 
@@ -187,6 +216,7 @@ export function useLead(id: string) {
       return response.data
     },
     enabled: !!id,
+    initialData: null,
   })
 }
 
@@ -257,6 +287,7 @@ export function useCRMDashboard() {
       )
       return response.data
     },
+    initialData: EMPTY_CRM_DASHBOARD,
     staleTime: 5 * 60 * 1000,
     refetchInterval: 5 * 60 * 1000,
   })
@@ -297,6 +328,7 @@ export function useSuppliers(params?: { search?: string; is_active?: boolean }) 
       })
       return response.data
     },
+    initialData: EMPTY_SUPPLIER_LIST,
     staleTime: 2 * 60 * 1000,
   })
 }

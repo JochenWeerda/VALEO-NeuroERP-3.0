@@ -1,10 +1,10 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import { clsx } from 'clsx'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, ChevronLeft, ChevronRight, Home, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
 
 export interface ModuleToolbarProps {
   /** Ziel beim Klick auf "Zurück" (z. B. Modul-Liste). */
@@ -73,7 +73,7 @@ export function ModuleToolbar({
 
   return (
     <div
-      className={cn(
+      className={clsx(
         'flex h-11 shrink-0 items-center gap-2 border-b bg-background px-3 transition-transform duration-200',
         autohide && !visible && '-translate-y-full',
         className,

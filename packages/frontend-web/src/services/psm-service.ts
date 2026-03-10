@@ -1,4 +1,4 @@
-import { PsmDto } from '@/schemas/psm';
+import type { PsmDto } from '@/schemas/psm';
 
 // API Client für PSM
 class PsmService {

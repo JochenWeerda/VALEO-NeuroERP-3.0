@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { ListReport } from '@/components/mask-builder'
 import { toast } from '@/hooks/use-toast'
-import { useMischfutter, type Mischfutter } from '@/lib/api/futter'
+import { bulkDeleteFutterItems, useMischfutter, type Mischfutter } from '@/lib/api/futter'
 import { formatCurrency, formatNumber } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
 import { api } from '@/lib/axios'
+import { apiClient } from '@/lib/api-client'
 
 // Konfiguration für Mischfuttermittel ListReport
 const mischfuttermittelListConfig: ListConfig = {
@@ -268,13 +269,13 @@ export default function MischfuttermittelListePage(): JSX.Element {
         type: 'danger' as const,
         onClick: async (items: any[]) => {
           if (!confirm(`${items.length} Mischfuttermittel wirklich löschen?`)) return
-          let ok = 0; let err = 0
-          for (const item of items) {
-            try { await api.delete(`/api/v1/futter/mischfuttermittel/${item.id}`); ok++ }
-            catch { err++ }
-          }
+          const result = await bulkDeleteFutterItems('mischfuttermittel', items.map((item) => item.id))
           queryClient.invalidateQueries({ queryKey: ['futter', 'misch'] })
-          toast({ title: 'Bulk-Löschen', description: `${ok} gelöscht${err ? `, ${err} Fehler` : ''}.` })
+          toast({
+            title: 'Bulk-Löschen',
+            description: `${result.deleted} gelöscht${result.errors.length || result.missing_ids.length ? `, ${result.errors.length + result.missing_ids.length} Probleme` : ''}.`,
+            variant: result.errors.length || result.missing_ids.length ? 'destructive' : 'default',
+          })
         }
       }
     ]
@@ -292,7 +293,7 @@ export default function MischfuttermittelListePage(): JSX.Element {
     if (!item?.id) return
     if (!confirm(`Mischfuttermittel "${item.name}" wirklich löschen?`)) return
     try {
-      await api.delete(`/api/v1/futter/mischfuttermittel/${item.id}`)
+      await apiClient.delete(`/api/v1/futter/mischfuttermittel/${item.id}`)
       toast({ title: 'Gelöscht', description: `${item.name} wurde gelöscht.` })
       queryClient.invalidateQueries({ queryKey: ['futter', 'misch'] })
     } catch (e: any) {

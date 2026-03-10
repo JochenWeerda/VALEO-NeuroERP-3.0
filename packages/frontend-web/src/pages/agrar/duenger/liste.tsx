@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { AlertTriangle, Plus, Filter, Eye, Edit, Trash2 } from 'lucide-react'
@@ -128,43 +128,36 @@ export default function DuengerListePage(): JSX.Element {
               />
             </div>
             <div>
-              <Select value={typFilter || 'all'} onValueChange={(v) => setTypFilter(v === 'all' ? '' : v)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Typ" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Alle Typen</SelectItem>
-                  {uniqueTypes.map(type => (
-                    <SelectItem key={type} value={type}>{type}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <NativeSelect
+                value={typFilter || 'all'}
+                onValueChange={(value) => setTypFilter(value === 'all' ? '' : value)}
+                options={[
+                  { value: 'all', label: 'Alle Typen' },
+                  ...uniqueTypes.map((type) => ({ value: type, label: type })),
+                ]}
+              />
             </div>
             <div>
-              <Select value={herstellerFilter || 'all'} onValueChange={(v) => setHerstellerFilter(v === 'all' ? '' : v)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Hersteller" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Alle Hersteller</SelectItem>
-                  {uniqueHersteller.map(hersteller => (
-                    <SelectItem key={hersteller} value={hersteller}>{hersteller}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <NativeSelect
+                value={herstellerFilter || 'all'}
+                onValueChange={(value) => setHerstellerFilter(value === 'all' ? '' : value)}
+                options={[
+                  { value: 'all', label: 'Alle Hersteller' },
+                  ...uniqueHersteller.map((hersteller) => ({ value: hersteller, label: hersteller })),
+                ]}
+              />
             </div>
             <div>
-              <Select value={erklaerungFilter || 'all'} onValueChange={(v) => setErklaerungFilter(v === 'all' ? '' : v)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Erklärung" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Alle</SelectItem>
-                  <SelectItem value="erforderlich">Erklärung erforderlich</SelectItem>
-                  <SelectItem value="ausstehend">Ausstehend</SelectItem>
-                  <SelectItem value="geprueft">Geprüft</SelectItem>
-                </SelectContent>
-              </Select>
+              <NativeSelect
+                value={erklaerungFilter || 'all'}
+                onValueChange={(value) => setErklaerungFilter(value === 'all' ? '' : value)}
+                options={[
+                  { value: 'all', label: 'Alle' },
+                  { value: 'erforderlich', label: 'Erklaerung erforderlich' },
+                  { value: 'ausstehend', label: 'Ausstehend' },
+                  { value: 'geprueft', label: 'Geprueft' },
+                ]}
+              />
             </div>
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => {

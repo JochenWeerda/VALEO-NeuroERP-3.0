@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -228,18 +228,15 @@ export default function RetourenPage(): JSX.Element {
           <div className="space-y-4">
             <div>
               <Label htmlFor="goodsReceipt">{t('crud.fields.goodsReceipt')}</Label>
-              <Select value={selectedGrId} onValueChange={setSelectedGrId}>
-                <SelectTrigger>
-                  <SelectValue placeholder={t('crud.tooltips.placeholders.selectGoodsReceipt')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {goodsReceipts.map(gr => (
-                    <SelectItem key={gr.id} value={gr.id}>
-                      {gr.number} - {gr.supplierName} ({formatDate(gr.receivedDate)})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <NativeSelect
+                value={selectedGrId}
+                onValueChange={setSelectedGrId}
+                options={goodsReceipts.map((gr) => ({
+                  value: gr.id,
+                  label: `${gr.number} - ${gr.supplierName} (${formatDate(gr.receivedDate)})`,
+                }))}
+                placeholder={t('crud.tooltips.placeholders.selectGoodsReceipt')}
+              />
             </div>
           </div>
         </CardContent>
@@ -349,22 +346,19 @@ export default function RetourenPage(): JSX.Element {
                       <Badge variant={retoure.status === 'abgeschlossen' ? 'default' : 'secondary'}>{retoure.status}</Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Select
+                      <NativeSelect
                         value={retoure.status}
                         onValueChange={(status) => {
                           void updateRetoure.mutateAsync({ id: retoure.id, status })
                         }}
-                      >
-                        <SelectTrigger className="ml-auto w-[170px]">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="offen">offen</SelectItem>
-                          <SelectItem value="in_pruefung">in_pruefung</SelectItem>
-                          <SelectItem value="abgeschlossen">abgeschlossen</SelectItem>
-                          <SelectItem value="storniert">storniert</SelectItem>
-                        </SelectContent>
-                      </Select>
+                        options={[
+                          { value: 'offen', label: 'offen' },
+                          { value: 'in_pruefung', label: 'in_pruefung' },
+                          { value: 'abgeschlossen', label: 'abgeschlossen' },
+                          { value: 'storniert', label: 'storniert' },
+                        ]}
+                        className="ml-auto w-[170px]"
+                      />
                     </TableCell>
                   </TableRow>
                 ))}
@@ -397,39 +391,32 @@ export default function RetourenPage(): JSX.Element {
               </div>
               <div>
                 <Label htmlFor="creditMemoRequested">{t('crud.fields.creditMemoRequested')}</Label>
-                <Select
+                <NativeSelect
                   value={returnData.creditMemoRequested ? 'yes' : 'no'}
                   onValueChange={(value) => setReturnData(prev => ({ ...prev, creditMemoRequested: value === 'yes' }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="yes">{t('common.yes')}</SelectItem>
-                    <SelectItem value="no">{t('common.no')}</SelectItem>
-                  </SelectContent>
-                </Select>
+                  options={[
+                    { value: 'yes', label: t('common.yes') },
+                    { value: 'no', label: t('common.no') },
+                  ]}
+                />
               </div>
             </div>
 
             <div>
               <Label htmlFor="returnReason">{t('crud.fields.returnReason')} *</Label>
-              <Select
+              <NativeSelect
                 value={returnData.returnReason}
                 onValueChange={(value) => setReturnData(prev => ({ ...prev, returnReason: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={t('crud.tooltips.placeholders.selectReturnReason')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="DEFECTIVE">{t('crud.fields.returnReasonDefective')}</SelectItem>
-                  <SelectItem value="WRONG_ITEM">{t('crud.fields.returnReasonWrongItem')}</SelectItem>
-                  <SelectItem value="DAMAGED">{t('crud.fields.returnReasonDamaged')}</SelectItem>
-                  <SelectItem value="OVER_DELIVERY">{t('crud.fields.returnReasonOverDelivery')}</SelectItem>
-                  <SelectItem value="QUALITY_ISSUE">{t('crud.fields.returnReasonQualityIssue')}</SelectItem>
-                  <SelectItem value="OTHER">{t('crud.fields.returnReasonOther')}</SelectItem>
-                </SelectContent>
-              </Select>
+                options={[
+                  { value: 'DEFECTIVE', label: t('crud.fields.returnReasonDefective') },
+                  { value: 'WRONG_ITEM', label: t('crud.fields.returnReasonWrongItem') },
+                  { value: 'DAMAGED', label: t('crud.fields.returnReasonDamaged') },
+                  { value: 'OVER_DELIVERY', label: t('crud.fields.returnReasonOverDelivery') },
+                  { value: 'QUALITY_ISSUE', label: t('crud.fields.returnReasonQualityIssue') },
+                  { value: 'OTHER', label: t('crud.fields.returnReasonOther') },
+                ]}
+                placeholder={t('crud.tooltips.placeholders.selectReturnReason')}
+              />
             </div>
 
             <div>
@@ -497,22 +484,19 @@ export default function RetourenPage(): JSX.Element {
                           />
                         </TableCell>
                         <TableCell>
-                          <Select
+                          <NativeSelect
                             value={item.creditMemoRequested ? 'yes' : 'no'}
                             onValueChange={(value) => {
                               const updatedItems = [...returnData.items]
                               updatedItems[index].creditMemoRequested = value === 'yes'
                               setReturnData(prev => ({ ...prev, items: updatedItems }))
                             }}
-                          >
-                            <SelectTrigger className="w-20">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="yes">{t('common.yes')}</SelectItem>
-                              <SelectItem value="no">{t('common.no')}</SelectItem>
-                            </SelectContent>
-                          </Select>
+                            options={[
+                              { value: 'yes', label: t('common.yes') },
+                              { value: 'no', label: t('common.no') },
+                            ]}
+                            className="w-20"
+                          />
                         </TableCell>
                       </TableRow>
                     )

@@ -1,6 +1,5 @@
 ﻿import { type ReactElement, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { z } from 'zod'
 import {
   Alert,
   AlertDescription,
@@ -22,25 +21,67 @@ import { AlertTriangle, CheckCircle, Clock } from 'lucide-react'
 const QUALITY_STATES = ['good', 'blocked', 'pending'] as const
 const SKELETON_ROWS = 4
 
-const inventoryLotSchema = z.object({
-  id: z.string().min(1),
-  lotNumber: z.string().min(1),
-  commodity: z.string().min(1),
-  quantity: z.number().nonnegative(),
-  unit: z.string().min(1),
-  location: z.string().min(1),
-  qualityStatus: z.enum(QUALITY_STATES).default('pending'),
-  expiryDate: z.string().datetime({ offset: true }).or(z.string().min(1)),
-  supplier: z.string().min(1).optional().default('unbekannt'),
-})
+type InventoryLot = {
+  id: string
+  lotNumber: string
+  commodity: string
+  quantity: number
+  unit: string
+  location: string
+  qualityStatus: (typeof QUALITY_STATES)[number]
+  expiryDate: string
+  supplier: string
+}
 
-const inventoryResponseSchema = z
-  .object({
-    data: z.array(inventoryLotSchema).optional(),
-    items: z.array(inventoryLotSchema).optional(),
-    results: z.array(inventoryLotSchema).optional(),
-  })
-  .transform((payload) => payload.data ?? payload.items ?? payload.results ?? [])
+type InventorySummary = {
+  totalQuantity: number
+  blockedQuantity: number
+  goodQuantity: number
+}
+
+const asRecord = (value: unknown): Record<string, unknown> | null =>
+  value !== null && typeof value === 'object' ? (value as Record<string, unknown>) : null
+
+const asString = (value: unknown, fallback = ''): string => (typeof value === 'string' && value.length > 0 ? value : fallback)
+const asNumber = (value: unknown): number => (typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : 0)
+const asArray = (value: unknown): unknown[] => (Array.isArray(value) ? value : [])
+
+const isQualityState = (value: unknown): value is InventoryLot['qualityStatus'] =>
+  typeof value === 'string' && QUALITY_STATES.includes(value as InventoryLot['qualityStatus'])
+
+const normalizeInventoryLot = (value: unknown): InventoryLot | null => {
+  const record = asRecord(value)
+  if (!record) {
+    return null
+  }
+
+  const id = asString(record.id)
+  const lotNumber = asString(record.lotNumber)
+  if (!id || !lotNumber) {
+    return null
+  }
+
+  return {
+    id,
+    lotNumber,
+    commodity: asString(record.commodity, 'Unbekannt'),
+    quantity: asNumber(record.quantity),
+    unit: asString(record.unit, 't'),
+    location: asString(record.location, 'Unbekannt'),
+    qualityStatus: isQualityState(record.qualityStatus) ? record.qualityStatus : 'pending',
+    expiryDate: asString(record.expiryDate, new Date(0).toISOString()),
+    supplier: asString(record.supplier, 'unbekannt'),
+  }
+}
+
+const extractList = (payload: unknown): unknown[] => {
+  const record = asRecord(payload)
+  if (!record) {
+    return []
+  }
+
+  return asArray(record.data ?? record.items ?? record.results)
+}
 
 const quantityFormatter = new Intl.NumberFormat('de-DE', {
   minimumFractionDigits: 0,
@@ -69,19 +110,7 @@ const qualityConfig: Record<(typeof QUALITY_STATES)[number], { label: string; ba
 
 const fetchInventory = async (): Promise<InventoryLot[]> => {
   const payload = await apiClient.get<unknown>('/inventory/api/v1/lots')
-  const parsed = inventoryResponseSchema.safeParse(payload)
-  if (parsed.success) {
-    return parsed.data
-  }
-  return []
-}
-
-type InventoryLot = z.infer<typeof inventoryLotSchema>
-
-type InventorySummary = {
-  totalQuantity: number
-  blockedQuantity: number
-  goodQuantity: number
+  return extractList(payload.data).map(normalizeInventoryLot).filter((value): value is InventoryLot => value !== null)
 }
 
 const reduceSummary = (lots: InventoryLot[]): InventorySummary => {
@@ -277,5 +306,3 @@ export default function Inventory(): ReactElement {
     </div>
   )
 }
-
-

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Admin API Hooks
  * Error-first fetching without mock fallback data.
  */
@@ -107,10 +107,19 @@ export type ConnectorEvent = {
   payload: Record<string, unknown>
 }
 
+const EMPTY_MONITORING_ALERTS: MonitoringAlertsResponse = {
+  active: 0,
+  critical: 0,
+  warning: 0,
+  system_status: 'online',
+  items: [],
+}
+
 export function useAuditLog() {
   return useQuery({
     queryKey: ['admin', 'audit-log'],
     queryFn: async () => (await apiClient.get<AuditEntry[]>('/api/v1/admin/audit-log')).data,
+    initialData: [],
     staleTime: 30 * 1000,
   })
 }
@@ -119,6 +128,7 @@ export function useBenutzer() {
   return useQuery({
     queryKey: ['admin', 'benutzer'],
     queryFn: async () => (await apiClient.get<Benutzer[]>('/api/v1/admin/benutzer')).data,
+    initialData: [],
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -127,6 +137,7 @@ export function useRollen() {
   return useQuery({
     queryKey: ['admin', 'rollen'],
     queryFn: async () => (await apiClient.get<Rolle[]>('/api/v1/admin/rollen')).data,
+    initialData: [],
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -135,6 +146,7 @@ export function useMonitoringAlerts() {
   return useQuery({
     queryKey: ['admin', 'monitoring', 'alerts'],
     queryFn: async () => (await apiClient.get<MonitoringAlertsResponse>('/api/v1/admin/monitoring/alerts')).data,
+    initialData: EMPTY_MONITORING_ALERTS,
     staleTime: 30 * 1000,
   })
 }
@@ -143,6 +155,7 @@ export function useMonitoringRules() {
   return useQuery({
     queryKey: ['admin', 'monitoring', 'rules'],
     queryFn: async () => (await apiClient.get<MonitoringRule[]>('/api/v1/admin/monitoring/rules')).data,
+    initialData: [],
     staleTime: 60 * 1000,
   })
 }
@@ -151,6 +164,7 @@ export function useMonitoringChannels() {
   return useQuery({
     queryKey: ['admin', 'monitoring', 'channels'],
     queryFn: async () => (await apiClient.get<MonitoringChannel[]>('/api/v1/admin/monitoring/channels')).data,
+    initialData: [],
     staleTime: 60 * 1000,
   })
 }
@@ -159,6 +173,7 @@ export function useSchedulerJobs() {
   return useQuery({
     queryKey: ['admin', 'monitoring', 'scheduler-jobs'],
     queryFn: async () => (await apiClient.get<SchedulerJob[]>('/api/v1/admin/monitoring/scheduler-jobs')).data,
+    initialData: [],
     staleTime: 60 * 1000,
   })
 }
@@ -273,6 +288,7 @@ export function useReportPermissions(params?: { roleId?: string; reportKey?: str
       const url = search.size > 0 ? `/api/v1/admin/report-permissions?${search.toString()}` : '/api/v1/admin/report-permissions'
       return (await apiClient.get<ReportPermission[]>(url)).data
     },
+    initialData: [],
     staleTime: 60 * 1000,
   })
 }
@@ -321,6 +337,7 @@ export function useConnectorEventQuarantine(params?: { connectorId?: string; lim
       const suffix = search.size > 0 ? `?${search.toString()}` : ''
       return (await apiClient.get<ConnectorEvent[]>(`/api/v1/admin/mobile/connector-events/quarantine${suffix}`)).data
     },
+    initialData: [],
     staleTime: 15 * 1000,
   })
 }
@@ -344,3 +361,57 @@ export function useResolveConnectorEvent() {
     },
   })
 }
+
+// ─── Datenqualität (Gap 040) ───────────────────────────────────────────────
+
+export type DataQualityRule = {
+  id: string
+  entity_type: string
+  label: string
+  rule_type: 'duplicate' | 'required' | 'reference'
+}
+
+export type DataQualityViolation = {
+  rule_id: string
+  entity_type: string
+  entity_id: string | null
+  detail: string
+  severity: string
+}
+
+export type DataQualityValidationResult = {
+  entity_type: string
+  violations: DataQualityViolation[]
+  total_count: number
+}
+
+export function useDataQualityRules(entityType?: string) {
+  return useQuery({
+    queryKey: ['admin', 'data-quality', 'rules', entityType ?? 'all'],
+    queryFn: async () => {
+      const params = entityType ? `?entity_type=${encodeURIComponent(entityType)}` : ''
+      return (await apiClient.get<DataQualityRule[]>(`/api/v1/admin/data-quality/rules${params}`)).data
+    },
+    initialData: [],
+  })
+}
+
+export function useDataQualityEntityTypes() {
+  return useQuery({
+    queryKey: ['admin', 'data-quality', 'entity-types'],
+    queryFn: async () => (await apiClient.get<string[]>('/api/v1/admin/data-quality/entity-types')).data,
+    initialData: [],
+  })
+}
+
+export function useValidateDataQuality() {
+  return useMutation({
+    mutationFn: async (entityTypes?: string[]) =>
+      (
+        await apiClient.post<DataQualityValidationResult[]>('/api/v1/admin/data-quality/validate', {
+          entity_types: entityTypes ?? null,
+        })
+      ).data,
+  })
+}
+

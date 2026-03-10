@@ -1,111 +1,49 @@
-/**
- * Lazy-loaded Chart-Komponenten für bessere Performance
- * 
- * Diese Wrapper laden recharts erst wenn tatsächlich benötigt,
- * wodurch der initiale Bundle-Size reduziert wird.
- * 
- * Verwendung:
- * import { LazyLineChart, LazyBarChart, LazyPieChart } from '@/components/ui/lazy-charts'
- */
+import { lazy, Suspense, type JSX } from 'react'
 
-import { lazy, Suspense, type ComponentProps, type ComponentType } from 'react'
-import type {
-  AreaChart,
-  BarChart,
-  ComposedChart,
-  LineChart,
-  PieChart,
-  ResponsiveContainer,
-} from 'recharts'
+interface BaseLazyChartProps {
+  data: Array<{ name: string; value: number }>
+  dataKey: string
+  height?: number
+}
 
-// Lazy imports für recharts Komponenten
-const LineChartLazy = lazy(() =>
-  import('recharts').then((module) => ({ default: module.LineChart }))
-)
+interface LazyAreaChartProps extends BaseLazyChartProps {
+  stroke: string
+  fill: string
+}
 
-const BarChartLazy = lazy(() =>
-  import('recharts').then((module) => ({ default: module.BarChart }))
-)
+interface LazyBarChartProps extends BaseLazyChartProps {
+  fill: string
+}
 
-const PieChartLazy = lazy(() =>
-  import('recharts').then((module) => ({ default: module.PieChart }))
-)
+const AreaTrendChart = lazy(() => import('./lazy-charts/AreaTrendChart'))
+const BarTrendChart = lazy(() => import('./lazy-charts/BarTrendChart'))
 
-const AreaChartLazy = lazy(() =>
-  import('recharts').then((module) => ({ default: module.AreaChart }))
-)
-
-const ComposedChartLazy = lazy(() =>
-  import('recharts').then((module) => ({ default: module.ComposedChart }))
-)
-
-const ResponsiveContainerLazy = lazy(() =>
-  import('recharts').then((module) => ({ default: module.ResponsiveContainer }))
-)
-
-type LineChartProps = ComponentProps<typeof LineChart>
-type BarChartProps = ComponentProps<typeof BarChart>
-type PieChartProps = ComponentProps<typeof PieChart>
-type AreaChartProps = ComponentProps<typeof AreaChart>
-type ComposedChartProps = ComponentProps<typeof ComposedChart>
-type ResponsiveContainerProps = ComponentProps<typeof ResponsiveContainer>
-
-// Chart Loading Skeleton
-function ChartSkeleton(): JSX.Element {
+function ChartSkeleton({ height = 200 }: { height?: number }): JSX.Element {
   return (
-    <div className="flex h-full w-full items-center justify-center bg-muted/20 rounded-md animate-pulse">
-      <div className="text-muted-foreground text-sm">Diagramm wird geladen...</div>
+    <div style={{ height, width: '100%' }}>
+      <div className="flex h-full w-full animate-pulse items-center justify-center rounded-md bg-muted/20">
+        <div className="text-sm text-muted-foreground">Diagramm wird geladen...</div>
+      </div>
     </div>
   )
 }
 
-// Wrapper HOC für Lazy Charts
-function withLazySuspense<P extends object>(
-  Component: ComponentType<P>,
-  fallbackHeight = '200px'
-): ComponentType<P> {
-  return function LazyWrapper(props: P) {
-    return (
-      <Suspense
-        fallback={
-          <div style={{ height: fallbackHeight, width: '100%' }}>
-            <ChartSkeleton />
-          </div>
-        }
-      >
-        <Component {...props} />
-      </Suspense>
-    )
-  }
+export function LazyAreaChart({ height = 200, ...props }: LazyAreaChartProps): JSX.Element {
+  return (
+    <Suspense fallback={<ChartSkeleton height={height} />}>
+      <div style={{ height, width: '100%' }}>
+        <AreaTrendChart {...props} />
+      </div>
+    </Suspense>
+  )
 }
 
-// Exportierte Lazy-Chart-Komponenten
-export const LazyLineChart = withLazySuspense(LineChartLazy as ComponentType<LineChartProps>)
-export const LazyBarChart = withLazySuspense(BarChartLazy as ComponentType<BarChartProps>)
-export const LazyPieChart = withLazySuspense(PieChartLazy as ComponentType<PieChartProps>)
-export const LazyAreaChart = withLazySuspense(AreaChartLazy as ComponentType<AreaChartProps>)
-export const LazyComposedChart = withLazySuspense(ComposedChartLazy as ComponentType<ComposedChartProps>)
-export const LazyResponsiveContainer = withLazySuspense(
-  ResponsiveContainerLazy as ComponentType<ResponsiveContainerProps>,
-  '100%'
-)
-
-// Re-export der anderen recharts Komponenten für Convenience
-// Diese können normal importiert werden da sie leichtgewichtig sind
-export {
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  Line,
-  Bar,
-  Pie,
-  Area,
-  Cell,
-  ReferenceLine,
-  ReferenceArea,
-  Brush,
-  Scatter,
-} from 'recharts'
-
+export function LazyBarChart({ height = 200, ...props }: LazyBarChartProps): JSX.Element {
+  return (
+    <Suspense fallback={<ChartSkeleton height={height} />}>
+      <div style={{ height, width: '100%' }}>
+        <BarTrendChart {...props} />
+      </div>
+    </Suspense>
+  )
+}

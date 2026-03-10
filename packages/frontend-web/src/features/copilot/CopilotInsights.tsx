@@ -1,5 +1,4 @@
 import { useState } from "react"
-import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { useCopilotInsight } from "./useCopilotInsight"
 
@@ -33,11 +32,7 @@ export function CopilotInsights(): JSX.Element {
   }
 
   return (
-    <motion.div
-      className="border rounded-xl p-4 bg-gradient-to-r from-emerald-50 to-teal-50 shadow space-y-2"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-    >
+    <div className="animate-in fade-in-0 border rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50 p-4 shadow duration-200 space-y-2">
       <div className="font-semibold text-emerald-700">🤖 Copilot-Analyse</div>
       <p className="text-sm text-gray-800">{insight.summary}</p>
 
@@ -81,14 +76,10 @@ export function CopilotInsights(): JSX.Element {
       </div>
 
       {response !== null && (
-        <motion.div
-          className="mt-3 text-sm border-t pt-2 italic text-gray-700"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-        >
+        <div className="animate-in fade-in-0 mt-3 border-t pt-2 text-sm italic text-gray-700 duration-200">
           {response}
-        </motion.div>
+        </div>
       )}
-    </motion.div>
+    </div>
   )
 }

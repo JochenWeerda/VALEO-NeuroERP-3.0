@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { AlertTriangle, BarChart3, RotateCcw, TrendingUp, Zap } from 'lucide-react'
 import { useWirkstoffGruppen } from '@/lib/api/agrar'
@@ -130,30 +130,28 @@ export default function PSMResistenzManagementPage(): JSX.Element {
           <div className="grid gap-4 md:grid-cols-2">
             <div>
               <label className="text-sm font-medium">Kultur</label>
-              <Select value={selectedKultur} onValueChange={setSelectedKultur}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="weizen">Weizen</SelectItem>
-                  <SelectItem value="gerste">Gerste</SelectItem>
-                  <SelectItem value="raps">Raps</SelectItem>
-                  <SelectItem value="mais">Mais</SelectItem>
-                </SelectContent>
-              </Select>
+              <NativeSelect
+                value={selectedKultur}
+                onValueChange={setSelectedKultur}
+                options={[
+                  { value: 'weizen', label: 'Weizen' },
+                  { value: 'gerste', label: 'Gerste' },
+                  { value: 'raps', label: 'Raps' },
+                  { value: 'mais', label: 'Mais' },
+                ]}
+              />
             </div>
             <div>
               <label className="text-sm font-medium">Saison</label>
-              <Select value={selectedSaison} onValueChange={setSelectedSaison}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="2024/2025">2024/2025</SelectItem>
-                  <SelectItem value="2023/2024">2023/2024</SelectItem>
-                  <SelectItem value="2022/2023">2022/2023</SelectItem>
-                </SelectContent>
-              </Select>
+              <NativeSelect
+                value={selectedSaison}
+                onValueChange={setSelectedSaison}
+                options={[
+                  { value: '2024/2025', label: '2024/2025' },
+                  { value: '2023/2024', label: '2023/2024' },
+                  { value: '2022/2023', label: '2022/2023' },
+                ]}
+              />
             </div>
           </div>
         </CardContent>

@@ -2,9 +2,9 @@ import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
-import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
+import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
-import { z } from 'zod'
+import { getFieldsFromMaskConfig, validateFields } from '@/components/mask-builder/validation'
 import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/axios'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
@@ -12,28 +12,6 @@ import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { LeaveConfirmDialog } from '@/components/LeaveConfirmDialog'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 
-// Zod-Schema für Dunning (wird in Komponente mit i18n erstellt)
-const createDunningSchema = (t: any) => z.object({
-  opId: z.string().min(1, t('crud.messages.validationError')),
-  debitorId: z.string().min(1, t('crud.messages.validationError')),
-  dunningLevel: z.number().min(1).max(3, t('crud.messages.validationError')),
-  dunningDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t('crud.messages.validationError')),
-  dueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t('crud.messages.validationError')),
-  amount: z.number().positive(t('crud.messages.validationError')),
-  dunningFee: z.number().min(0, t('crud.messages.validationError')).default(0),
-  interest: z.number().min(0, t('crud.messages.validationError')).default(0),
-  totalAmount: z.number().positive(t('crud.messages.validationError')),
-  text: z.string().min(1, t('crud.messages.validationError')),
-  paymentDeadline: z.string().optional(),
-  status: z.enum(['created', 'sent', 'paid', 'escalated', 'collection']),
-  sentDate: z.string().optional(),
-  paymentDate: z.string().optional(),
-  notes: z.string().optional(),
-  reminderCount: z.number().min(0).default(0),
-  lastReminderDate: z.string().optional()
-})
-
-// Konfiguration für Dunning ObjectPage (wird in Komponente mit i18n erstellt)
 const createDunningConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
   subtitle: t('crud.actions.edit'),
@@ -223,7 +201,6 @@ const createDunningConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
       delete: '/api/v1/finance/dunning/{id}'
     }
   },
-  validation: createDunningSchema(t),
   permissions: ['finance.write', 'finance.dunning']
 })
 
@@ -242,7 +219,10 @@ export default function DunningEditorPage(): JSX.Element {
     id: id ?? 'new'
   })
 
-  const { validate, showValidationToast } = useMaskValidation(dunningConfig.validation)
+  const validate = (formData: any) => validateFields(getFieldsFromMaskConfig(dunningConfig), formData ?? {})
+  const showValidationToast = (errors: Record<string, string>) => {
+    toast({ variant: 'destructive', title: t('crud.messages.validationError'), description: `${Object.keys(errors).length} Feld(er) muessen korrigiert werden.` })
+  }
 
   const { handleAction } = useMaskActions(async (action: string, formData: Record<string, unknown>) => {
     if (action === 'generate') {
@@ -270,9 +250,9 @@ export default function DunningEditorPage(): JSX.Element {
       }
       window.open(`/api/v1/finance/dunning/${id}/export`, '_blank')
     } else if (action === 'send') {
-      const isValid = validate(formData)
-      if (!isValid.isValid) {
-        showValidationToast(isValid.errors)
+      const errors = validate(formData)
+      if (Object.keys(errors).length > 0) {
+        showValidationToast(errors)
         return
       }
 

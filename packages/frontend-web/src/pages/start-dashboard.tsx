@@ -10,11 +10,9 @@ import {
   ShoppingCart,
   Users,
 } from 'lucide-react'
-import {
-  ACTION_SHORTCUTS,
-  NAV_SECTIONS,
-  type NavItem,
-} from '@/app/navigation/manifest'
+import { ACTION_SHORTCUTS } from '@/app/navigation/action-shortcuts'
+import { useNavSections } from '@/app/navigation/nav-runtime'
+import type { NavItem } from '@/app/navigation/types'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -46,6 +44,8 @@ interface KpiTile {
   format: (v: number) => string
   icon: JSX.Element
 }
+
+const EMPTY_START_KPIS: Record<string, number> = {}
 
 const KPI_TILES: KpiTile[] = [
   { key: 'revenue', label: 'Umsatz', path: '/dashboard/sales', format: (v) => `\u20AC ${NUM_DE.format(v)}`, icon: <DollarSign className="h-4 w-4" /> },
@@ -116,12 +116,13 @@ function flattenStarterTiles(sections: NavItem[]): StarterTile[] {
 
 export default function StartDashboardPage(): JSX.Element {
   const agrarEnabled = useFeature('agrar')
+  const navSections = useNavSections()
   const [query, setQuery] = useState<string>('')
   const { isPinned, pinnedTileIds, togglePin } = usePinnedTiles()
 
   const sections = useMemo(
-    () => NAV_SECTIONS.filter((section) => (section.featureKey === 'agrar' ? agrarEnabled : true)),
-    [agrarEnabled],
+    () => navSections.filter((section) => (section.featureKey === 'agrar' ? agrarEnabled : true)),
+    [agrarEnabled, navSections],
   )
 
   const allTiles = useMemo(() => flattenStarterTiles(sections), [sections])
@@ -150,6 +151,7 @@ export default function StartDashboardPage(): JSX.Element {
       const data = await apiClient.get<Record<string, number>>('/api/v1/analytics/kpis')
       return data ?? {}
     },
+    initialData: EMPTY_START_KPIS,
     staleTime: 30_000,
     refetchInterval: 60_000,
   })

@@ -1,21 +1,12 @@
+import { Suspense, lazy } from 'react'
+import { clsx } from 'clsx'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { NotificationCenter } from '@/components/ui/notification-center'
 import { Command as CommandIcon, Check, HelpCircle, Home, Keyboard, LogOut, Menu, Moon, PanelLeft, Search, Settings, Sparkles, Sun, User } from 'lucide-react'
 import { useFeature } from '@/hooks/useFeature'
-import { VoiceButton } from '@/features/ki-usability'
 import { useTheme } from '@/hooks/useTheme'
-import { useEffect, useState, useCallback } from 'react'
-import { cn } from '@/lib/utils'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { availableLanguages, loadLanguage } from '@/i18n/config'
 
 interface TopBarProps {
@@ -25,6 +16,14 @@ interface TopBarProps {
   onSidebarToggle?: () => void
   onShortcutsToggle?: () => void
 }
+
+const NotificationCenter = lazy(() =>
+  import('@/components/ui/notification-center').then((module) => ({ default: module.NotificationCenter })),
+)
+
+const VoiceButton = lazy(() =>
+  import('@/features/ki-usability').then((module) => ({ default: module.VoiceButton })),
+)
 
 
 // Komponente für Shortcuts-Toggle-Button mit dynamischem Tooltip
@@ -67,7 +66,7 @@ function ShortcutsToggleButton({ onToggle }: { onToggle: () => void }): JSX.Elem
       title={tooltip}
       aria-label="Shortcuts-Liste"
     >
-      <Keyboard className={cn(
+      <Keyboard className={clsx(
         'h-5 w-5',
         displayMode === 'hidden' && 'opacity-50',
         displayMode === 'hover' && 'opacity-75'
@@ -80,53 +79,69 @@ function ShortcutsToggleButton({ onToggle }: { onToggle: () => void }): JSX.Elem
 function LanguageSelector(): JSX.Element {
   const { i18n } = useTranslation()
   const [switching, setSwitching] = useState(false)
+  const [open, setOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
   const activeLangs = availableLanguages.filter(l => l.available)
   const currentLang = availableLanguages.find(l => l.code === i18n.language)
+
+  useEffect(() => {
+    const handleOutsideClick = (event: MouseEvent): void => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleOutsideClick)
+    return () => document.removeEventListener('mousedown', handleOutsideClick)
+  }, [])
 
   const handleSwitch = useCallback(async (code: string) => {
     if (code === i18n.language) return
     setSwitching(true)
     try {
       await loadLanguage(code)
+      setOpen(false)
     } finally {
       setSwitching(false)
     }
   }, [i18n.language])
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="hidden sm:inline-flex text-base"
-          title={currentLang?.name ?? 'Language'}
-          disabled={switching}
-        >
-          {switching ? (
-            <span className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-          ) : (
-            <span className="text-sm font-medium">{(currentLang?.code ?? 'de').toUpperCase()}</span>
-          )}
-          <span className="sr-only">Language</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-44">
-        <DropdownMenuLabel className="text-xs text-muted-foreground">Sprache / Language</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        {activeLangs.map((lang) => (
-          <DropdownMenuItem
-            key={lang.code}
-            onClick={() => handleSwitch(lang.code)}
-            className="gap-2 cursor-pointer"
-          >
-            <span>{lang.flag}</span>
-            <span className="flex-1">{lang.name}</span>
-            {lang.code === i18n.language && <Check className="h-4 w-4 text-primary" />}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <div className="relative hidden sm:block" ref={menuRef}>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="text-base"
+        title={currentLang?.name ?? 'Language'}
+        disabled={switching}
+        onClick={() => setOpen((current) => !current)}
+      >
+        {switching ? (
+          <span className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+        ) : (
+          <span className="text-sm font-medium">{(currentLang?.code ?? 'de').toUpperCase()}</span>
+        )}
+        <span className="sr-only">Language</span>
+      </Button>
+      {open && (
+        <div className="absolute right-0 top-full z-50 mt-2 w-44 rounded-lg border bg-popover p-1 shadow-lg">
+          <div className="px-2 py-1 text-xs text-muted-foreground">Sprache / Language</div>
+          <div className="my-1 h-px bg-border" />
+          {activeLangs.map((lang) => (
+            <button
+              key={lang.code}
+              type="button"
+              onClick={() => void handleSwitch(lang.code)}
+              className="flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm hover:bg-accent"
+            >
+              <span>{lang.flag}</span>
+              <span className="flex-1">{lang.name}</span>
+              {lang.code === i18n.language && <Check className="h-4 w-4 text-primary" />}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -139,10 +154,23 @@ export function TopBar({
 }: TopBarProps): JSX.Element {
   const { isDark, toggleTheme } = useTheme()
   const voiceControlEnabled = useFeature('voiceControl')
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const userMenuRef = useRef<HTMLDivElement>(null)
   const user = {
     name: 'Test Admin',
     email: 'test-admin@valeo.local',
   }
+
+  useEffect(() => {
+    const handleOutsideClick = (event: MouseEvent): void => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setUserMenuOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleOutsideClick)
+    return () => document.removeEventListener('mousedown', handleOutsideClick)
+  }, [])
 
   const handleSearchClick = (): void => {
     if (!commandPaletteEnabled) {
@@ -233,10 +261,14 @@ export function TopBar({
 
       {/* Sprachsteuerung (KI Usability) – Feature-Flag: voiceControl */}
       {voiceControlEnabled && (
-        <VoiceButton variant="ghost" size="icon" className="hidden sm:inline-flex" />
+        <Suspense fallback={null}>
+          <VoiceButton variant="ghost" size="icon" className="hidden sm:inline-flex" />
+        </Suspense>
       )}
 
-      <NotificationCenter />
+      <Suspense fallback={null}>
+        <NotificationCenter />
+      </Suspense>
 
       <LanguageSelector />
 
@@ -256,36 +288,39 @@ export function TopBar({
         <span className="sr-only">Hilfe</span>
       </Button>
 
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="rounded-full">
-            <User className="h-5 w-5" />
-            <span className="sr-only">User menu</span>
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56">
-          <DropdownMenuLabel>
-            <div className="flex flex-col space-y-1">
+      <div className="relative" ref={userMenuRef}>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="rounded-full"
+          onClick={() => setUserMenuOpen((current) => !current)}
+        >
+          <User className="h-5 w-5" />
+          <span className="sr-only">User menu</span>
+        </Button>
+        {userMenuOpen && (
+          <div className="absolute right-0 top-full z-50 mt-2 w-56 rounded-lg border bg-popover p-1 shadow-lg">
+            <div className="px-3 py-2">
               <p className="text-sm font-medium">{user.name}</p>
               <p className="text-xs text-muted-foreground">{user.email}</p>
             </div>
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem>
-            <User className="mr-2 h-4 w-4" />
-            <span>Profil</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Settings className="mr-2 h-4 w-4" />
-            <span>Einstellungen</span>
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem className="text-destructive">
-            <LogOut className="mr-2 h-4 w-4" />
-            <span>Abmelden</span>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+            <div className="my-1 h-px bg-border" />
+            <button type="button" className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-accent">
+              <User className="h-4 w-4" />
+              <span>Profil</span>
+            </button>
+            <button type="button" className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-accent">
+              <Settings className="h-4 w-4" />
+              <span>Einstellungen</span>
+            </button>
+            <div className="my-1 h-px bg-border" />
+            <button type="button" className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-destructive hover:bg-accent">
+              <LogOut className="h-4 w-4" />
+              <span>Abmelden</span>
+            </button>
+          </div>
+        )}
+      </div>
     </header>
   )
 }

@@ -6,8 +6,8 @@
  */
 
 import { ReactNode } from 'react'
+import { clsx } from 'clsx'
 import { Link } from 'react-router-dom'
-import { cn } from '@/lib/utils'
 import {
   PackagePlus,
   PackageMinus,
@@ -126,7 +126,7 @@ export function QuickActionGrid({
   const gridCols = columns === 3 ? 'grid-cols-3' : 'grid-cols-2'
 
   return (
-    <div className={cn('grid gap-3', gridCols, className)}>
+    <div className={clsx('grid gap-3', gridCols, className)}>
       {actions.map((action) => {
         const content = (
           <>
@@ -150,7 +150,7 @@ export function QuickActionGrid({
           </>
         )
 
-        const baseStyles = cn(
+        const baseStyles = clsx(
           'relative flex flex-col items-center justify-center',
           'min-h-[140px] p-4 rounded-xl',
           'text-white text-center',
@@ -192,7 +192,7 @@ export function QuickActionStrip({
   className?: string
 }) {
   return (
-    <div className={cn('flex gap-2 overflow-x-auto pb-2', className)}>
+    <div className={clsx('flex gap-2 overflow-x-auto pb-2', className)}>
       {actions.map((action) => {
         const content = (
           <>
@@ -201,7 +201,7 @@ export function QuickActionStrip({
           </>
         )
 
-        const baseStyles = cn(
+        const baseStyles = clsx(
           'flex-shrink-0 flex flex-col items-center justify-center gap-1',
           'min-h-[80px] min-w-[90px] p-3 rounded-lg',
           'text-white',

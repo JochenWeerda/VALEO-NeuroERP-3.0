@@ -13,13 +13,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { ArrowLeft, Save, MapPin, Leaf, Info } from 'lucide-react'
 import { useKulturen } from '@/lib/api/agrar'
@@ -189,16 +183,12 @@ export default function SchlagNeu() {
 
               <div className="space-y-2">
                 <Label htmlFor="kultur">Aktuelle Kultur *</Label>
-                <Select value={formData.kultur} onValueChange={(v) => handleChange('kultur', v)}>
-                  <SelectTrigger id="kultur">
-                    <SelectValue placeholder="Kultur wählen..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {kulturen.map((k) => (
-                      <SelectItem key={k.value} value={k.value}>{k.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <NativeSelect
+                  value={formData.kultur}
+                  onValueChange={(v) => handleChange('kultur', v)}
+                  placeholder="Kultur waehlen..."
+                  options={kulturen}
+                />
               </div>
             </CardContent>
           </Card>
@@ -215,16 +205,12 @@ export default function SchlagNeu() {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="bodenart">Bodenart</Label>
-                <Select value={formData.bodenart} onValueChange={(v) => handleChange('bodenart', v)}>
-                  <SelectTrigger id="bodenart">
-                    <SelectValue placeholder="Bodenart wählen..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {BODENARTEN.map((b) => (
-                      <SelectItem key={b.value} value={b.value}>{b.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <NativeSelect
+                  value={formData.bodenart}
+                  onValueChange={(v) => handleChange('bodenart', v)}
+                  placeholder="Bodenart waehlen..."
+                  options={BODENARTEN}
+                />
               </div>
 
               <div className="space-y-2">

@@ -14,7 +14,9 @@ import {
   CommandList,
   CommandSeparator,
 } from '@/components/ui/command'
-import { NAVIGATION_SHORTCUTS, ACTION_SHORTCUTS, AI_SHORTCUTS } from '@/app/navigation/manifest'
+import { ACTION_SHORTCUTS } from '@/app/navigation/action-shortcuts'
+import { AI_SHORTCUTS } from '@/app/navigation/ai-shortcuts'
+import { useNavigationShortcuts } from '@/app/navigation/nav-runtime'
 
 type CommandAction = {
   id: string
@@ -28,6 +30,7 @@ type CommandAction = {
 export function CommandPalette() {
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
+  const navigationShortcuts = useNavigationShortcuts()
 
   // Keyboard shortcut: Cmd+K / Ctrl+K
   useEffect(() => {
@@ -44,7 +47,7 @@ export function CommandPalette() {
 
   const navigationCommands = useMemo<CommandAction[]>(
     () =>
-      NAVIGATION_SHORTCUTS.map((shortcut) => {
+      navigationShortcuts.map((shortcut) => {
         const Icon = shortcut.icon
         return {
           id: `nav-${shortcut.id}`,
@@ -55,7 +58,7 @@ export function CommandPalette() {
           keywords: shortcut.keywords,
         }
       }),
-    [navigate],
+    [navigate, navigationShortcuts],
   )
 
   const actionCommands = useMemo<CommandAction[]>(

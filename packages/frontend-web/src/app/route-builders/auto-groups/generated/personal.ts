@@ -1,0 +1,40 @@
+import type { AutoGroupRouteEntry } from '@/app/route-builders/types'
+
+export const entries: AutoGroupRouteEntry[] = [
+  {
+    "module": "@/pages/personal/mitarbeiter-liste",
+    "path": "mitarbeiter-liste"
+  },
+  {
+    "module": "@/pages/personal/mitarbeiter-stamm",
+    "path": "mitarbeiter-stamm"
+  },
+  {
+    "module": "@/pages/personal/onboarding",
+    "path": "onboarding"
+  },
+  {
+    "module": "@/pages/personal/qualifikationen",
+    "path": "qualifikationen"
+  },
+  {
+    "module": "@/pages/personal/schulung-neu",
+    "path": "schulung-neu"
+  },
+  {
+    "module": "@/pages/personal/schulungen",
+    "path": "schulungen"
+  },
+  {
+    "module": "@/pages/personal/stundenzettel",
+    "path": "stundenzettel"
+  },
+  {
+    "module": "@/pages/personal/stundenzettel-liste",
+    "path": "stundenzettel-liste"
+  },
+  {
+    "module": "@/pages/personal/zeiterfassung",
+    "path": "zeiterfassung"
+  }
+]

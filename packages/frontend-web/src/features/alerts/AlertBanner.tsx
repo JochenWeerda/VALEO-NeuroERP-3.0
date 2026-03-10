@@ -1,4 +1,3 @@
-import { motion } from "framer-motion"
 import type { Alert } from "./rules"
 import { AlertActions } from "./AlertActions"
 import { PolicyBadge } from "@/policy/PolicyBadge"
@@ -33,14 +32,12 @@ export function AlertBanner({ items }: AlertBannerProps): JSX.Element | null {
         : "bg-emerald-50 border-emerald-300 text-emerald-800"
 
   return (
-    <motion.div
-      className={`border rounded-xl p-3 ${bgClass}`}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
+    <div
+      className={`animate-in fade-in-0 border rounded-xl p-3 duration-200 ${bgClass}`}
     >
       <div className="font-semibold">{topAlert.title}</div>
       <div className="text-sm">{topAlert.message}</div>
-    </motion.div>
+    </div>
   )
 }
 

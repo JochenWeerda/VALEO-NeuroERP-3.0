@@ -2,9 +2,9 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
-import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
+import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
-import { z } from 'zod'
+import { getFieldsFromMaskConfig, validateFields } from '@/components/mask-builder/validation'
 import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/axios'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
@@ -12,42 +12,6 @@ import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { LeaveConfirmDialog } from '@/components/LeaveConfirmDialog'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 
-// Zod-Schema für Kasse (wird in Komponente mit i18n erstellt)
-const createKasseSchema = (t: any) => z.object({
-  datum: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t('crud.messages.validationError')),
-  kassenbuchNummer: z.string().min(1, t('crud.messages.validationError')),
-  anfangsbestand: z.number().min(0, t('crud.messages.validationError')),
-  sollEinlagen: z.number().min(0, t('crud.messages.validationError')),
-  sollAuszahlungen: z.number().min(0, t('crud.messages.validationError')),
-  istEinlagen: z.number().min(0, t('crud.messages.validationError')),
-  istAuszahlungen: z.number().min(0, t('crud.messages.validationError')),
-  endbestand: z.number().min(0, t('crud.messages.validationError')),
-  differenz: z.number().max(0.01, t('crud.messages.validationError')),
-  status: z.enum(['offen', 'geschlossen', 'freigegeben']),
-  freigegebenAm: z.string().optional(),
-  freigegebenDurch: z.string().optional(),
-
-  // Kassenbewegungen
-  bewegungen: z.array(z.object({
-    typ: z.enum(['einlage', 'auszahlung']),
-    betrag: z.number().positive(t('crud.messages.validationError')),
-    verwendungszweck: z.string().min(1, t('crud.messages.validationError')),
-    belegNummer: z.string().optional(),
-    konto: z.string().optional()
-  })).optional(),
-
-  // Kassensturz
-  kassensturz: z.object({
-    scheine: z.record(z.string(), z.number().min(0)),
-    muenzen: z.record(z.string(), z.number().min(0)),
-    gesamtGezaehlt: z.number().min(0),
-    differenzKassensturz: z.number().max(0.01, t('crud.messages.validationError'))
-  }).optional(),
-
-  notizen: z.string().optional()
-})
-
-// Konfiguration für Kasse ObjectPage (wird in Komponente mit i18n erstellt)
 const createKasseConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
   subtitle: t('crud.fields.dailyClosing'),
@@ -259,7 +223,6 @@ const createKasseConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
       delete: '/api/v1/finance/cash/{id}'
     }
   } as any,
-  validation: createKasseSchema(t),
   permissions: ['fibu.read', 'fibu.write']
 })
 
@@ -495,7 +458,14 @@ export default function KassePage(): JSX.Element {
     id: 'new'
   })
 
-  const { validate, showValidationToast } = useMaskValidation(kasseConfig.validation)
+  const validate = (formData: any) => validateFields(getFieldsFromMaskConfig(kasseConfig), formData ?? {})
+  const showValidationToast = (errors: Record<string, string>) => {
+    toast({
+      variant: 'destructive',
+      title: t('crud.messages.validationError'),
+      description: `${Object.keys(errors).length} Feld(er) muessen korrigiert werden.`,
+    })
+  }
 
   const { handleAction } = useMaskActions(async (action: string, formData: any) => {
     if (action === 'add-movement') {
@@ -511,8 +481,8 @@ export default function KassePage(): JSX.Element {
         description: t('crud.messages.performCashCountInTab'),
       })
     } else if (action === 'validate') {
-      const isValid = validate(formData)
-      if (isValid.isValid) {
+      const errors = validate(formData)
+      if (Object.keys(errors).length === 0) {
         const differenz = Math.abs(formData.differenz || 0)
         const kassensturzDifferenz = Math.abs(formData.kassensturz?.differenzKassensturz || 0)
 
@@ -532,7 +502,7 @@ export default function KassePage(): JSX.Element {
           })
         }
       } else {
-        showValidationToast(isValid.errors)
+        showValidationToast(errors)
       }
     } else if (action === 'close') {
       if (!formData.id) {
@@ -554,7 +524,7 @@ export default function KassePage(): JSX.Element {
     } else if (action === 'approve') {
       const isValid = validate(formData)
       if (!isValid.isValid) {
-        showValidationToast(isValid.errors)
+        showValidationToast(errors)
         return
       }
 

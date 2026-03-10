@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { AlertTriangle, CheckCircle, FileText, Filter, Search, Shield, XCircle } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
@@ -313,48 +313,45 @@ export default function PSMAuflagenManagerPage(): JSX.Element {
 
             <div>
               <Label>Auflagen-Typ</Label>
-              <Select value={filterTyp} onValueChange={setFilterTyp}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="alle">Alle Typen</SelectItem>
-                  <SelectItem value="NT">NT (Naturschutz)</SelectItem>
-                  <SelectItem value="NW">NW (Wasserschutz)</SelectItem>
-                  <SelectItem value="B">B (Bienenschutz)</SelectItem>
-                  <SelectItem value="Sonstige">Sonstige</SelectItem>
-                </SelectContent>
-              </Select>
+              <NativeSelect
+                value={filterTyp}
+                onValueChange={setFilterTyp}
+                options={[
+                  { value: 'alle', label: 'Alle Typen' },
+                  { value: 'NT', label: 'NT (Naturschutz)' },
+                  { value: 'NW', label: 'NW (Wasserschutz)' },
+                  { value: 'B', label: 'B (Bienenschutz)' },
+                  { value: 'Sonstige', label: 'Sonstige' },
+                ]}
+              />
             </div>
 
             <div>
               <Label>Status</Label>
-              <Select value={filterStatus} onValueChange={setFilterStatus}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="alle">Alle Status</SelectItem>
-                  <SelectItem value="offen">Offen</SelectItem>
-                  <SelectItem value="erfuellt">Erfüllt</SelectItem>
-                  <SelectItem value="ueberfaellig">Überfällig</SelectItem>
-                </SelectContent>
-              </Select>
+              <NativeSelect
+                value={filterStatus}
+                onValueChange={setFilterStatus}
+                options={[
+                  { value: 'alle', label: 'Alle Status' },
+                  { value: 'offen', label: 'Offen' },
+                  { value: 'erfuellt', label: 'Erfuellt' },
+                  { value: 'ueberfaellig', label: 'Ueberfaellig' },
+                ]}
+              />
             </div>
 
             <div>
               <Label>Priorität</Label>
-              <Select value={filterPrioritaet} onValueChange={setFilterPrioritaet}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="alle">Alle Prioritäten</SelectItem>
-                  <SelectItem value="hoch">Hoch</SelectItem>
-                  <SelectItem value="mittel">Mittel</SelectItem>
-                  <SelectItem value="niedrig">Niedrig</SelectItem>
-                </SelectContent>
-              </Select>
+              <NativeSelect
+                value={filterPrioritaet}
+                onValueChange={setFilterPrioritaet}
+                options={[
+                  { value: 'alle', label: 'Alle Prioritaeten' },
+                  { value: 'hoch', label: 'Hoch' },
+                  { value: 'mittel', label: 'Mittel' },
+                  { value: 'niedrig', label: 'Niedrig' },
+                ]}
+              />
             </div>
           </div>
         </CardContent>

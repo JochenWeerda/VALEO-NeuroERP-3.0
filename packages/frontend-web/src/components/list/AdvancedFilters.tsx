@@ -7,13 +7,10 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { CalendarIcon, Filter, X } from 'lucide-react'
-import { format } from 'date-fns'
-import { de } from 'date-fns/locale'
+import { Filter, X } from 'lucide-react'
 
 export interface FilterConfig {
   key: string
@@ -88,37 +85,20 @@ export function AdvancedFilters({ filters, values, onChange, onReset }: Advanced
                   )}
                   
                   {filter.type === 'select' && filter.options && (
-                    <Select value={value || ''} onValueChange={(val) => handleChange(filter.key, val)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder={t('common.optional')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {filter.options.map((option, optionIndex) => (
-                          <SelectItem key={`${option.value}-${optionIndex}`} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <NativeSelect
+                      value={value || ''}
+                      onValueChange={(val) => handleChange(filter.key, val)}
+                      options={filter.options}
+                      placeholder={t('common.optional')}
+                    />
                   )}
                   
                   {filter.type === 'date' && (
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button variant="outline" className="w-full justify-start text-left font-normal">
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {value ? format(new Date(value), 'PPP', { locale: de }) : t('common.optional')}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0">
-                        <Calendar
-                          mode="single"
-                          selected={value ? new Date(value) : undefined}
-                          onSelect={(date) => handleChange(filter.key, date?.toISOString().split('T')[0])}
-                          locale={de}
-                        />
-                      </PopoverContent>
-                    </Popover>
+                    <Input
+                      type="date"
+                      value={value || ''}
+                      onChange={(e) => handleChange(filter.key, e.target.value || null)}
+                    />
                   )}
                   
                   {filter.type === 'number' && (

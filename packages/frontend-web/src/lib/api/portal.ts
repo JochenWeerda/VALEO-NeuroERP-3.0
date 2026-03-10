@@ -109,10 +109,24 @@ export type PortalZertifikat = {
   id: string; art: string; nummer: string; gueltigBis: string; status: 'gueltig' | 'ablaufend' | 'abgelaufen'
 }
 
+const EMPTY_PORTAL_DASHBOARD: PortalDashboard = {
+  kpis: [],
+  letzteBestellungen: [],
+  neueDokumente: [],
+}
+
+const EMPTY_PORTAL_FELDBUCH_STATS: PortalFeldbuchStats = {
+  schlaege: 0,
+  gesamtFlaeche: 0,
+  massnahmen: 0,
+  valeoDienste: 0,
+}
+
 export function usePortalDashboard() {
   return useQuery({
     queryKey: ['portal', 'dashboard'],
     queryFn: async () => (await apiClient.get<PortalDashboard>('/api/v1/portal/dashboard')).data,
+    initialData: EMPTY_PORTAL_DASHBOARD,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -121,6 +135,7 @@ export function usePortalAnfragen() {
   return useQuery({
     queryKey: ['portal', 'anfragen'],
     queryFn: async () => (await apiClient.get<PortalAnfrage[]>('/api/v1/portal/anfragen')).data,
+    initialData: [],
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -129,6 +144,7 @@ export function usePortalBestellungen() {
   return useQuery({
     queryKey: ['portal', 'bestellungen'],
     queryFn: async () => (await apiClient.get<PortalBestellung[]>('/api/v1/portal/bestellungen')).data,
+    initialData: [],
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -137,6 +153,7 @@ export function usePortalDokumente() {
   return useQuery({
     queryKey: ['portal', 'dokumente'],
     queryFn: async () => (await apiClient.get<PortalDokument[]>('/api/v1/portal/dokumente')).data,
+    initialData: [],
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -148,6 +165,7 @@ export function usePortalLieferscheinCompliance() {
       const resp = await apiClient.get<{ ok: boolean; data: PortalLieferscheinCompliance[] }>('/api/mcp/documents/sales_delivery?skip=0&limit=100')
       return resp.data?.data ?? []
     },
+    initialData: [],
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -156,6 +174,7 @@ export function usePortalFeldbuch() {
   return useQuery({
     queryKey: ['portal', 'feldbuch'],
     queryFn: async () => (await apiClient.get<PortalFeldbuch[]>('/api/v1/portal/feldbuch')).data,
+    initialData: [],
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -166,6 +185,7 @@ export function usePortalFeldbuchSchlaege() {
   return useQuery({
     queryKey: ['portal', 'feldbuch', 'schlaege'],
     queryFn: async () => (await apiClient.get<PortalSchlag[]>('/api/v1/portal/feldbuch/schlaege')).data,
+    initialData: [],
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -187,6 +207,7 @@ export function usePortalFeldbuchMassnahmen(params?: {
       const url = `/api/v1/portal/feldbuch/massnahmen${p.toString() ? `?${  p.toString()}` : ''}`
       return (await apiClient.get<PortalMassnahme[]>(url)).data
     },
+    initialData: [],
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -195,6 +216,7 @@ export function usePortalFeldbuchStats() {
   return useQuery({
     queryKey: ['portal', 'feldbuch', 'stats'],
     queryFn: async () => (await apiClient.get<PortalFeldbuchStats>('/api/v1/portal/feldbuch/stats')).data,
+    initialData: EMPTY_PORTAL_FELDBUCH_STATS,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -278,6 +300,7 @@ export function usePortalNaehrstoffbilanzen() {
   return useQuery({
     queryKey: ['portal', 'bilanzen'],
     queryFn: async () => (await apiClient.get<PortalNaehrstoffbilanz[]>('/api/v1/portal/naehrstoffbilanzen')).data,
+    initialData: [],
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -286,6 +309,7 @@ export function usePortalRechnungen() {
   return useQuery({
     queryKey: ['portal', 'rechnungen'],
     queryFn: async () => (await apiClient.get<PortalRechnung[]>('/api/v1/portal/rechnungen')).data,
+    initialData: [],
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -294,6 +318,7 @@ export function usePortalShop() {
   return useQuery({
     queryKey: ['portal', 'shop'],
     queryFn: async () => (await apiClient.get<PortalShopProdukt[]>('/api/v1/portal/shop')).data,
+    initialData: [],
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -302,6 +327,7 @@ export function usePortalVertraege() {
   return useQuery({
     queryKey: ['portal', 'vertraege'],
     queryFn: async () => (await apiClient.get<PortalVertrag[]>('/api/v1/portal/vertraege')).data,
+    initialData: [],
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -310,6 +336,7 @@ export function usePortalZertifikate() {
   return useQuery({
     queryKey: ['portal', 'zertifikate'],
     queryFn: async () => (await apiClient.get<PortalZertifikat[]>('/api/v1/portal/zertifikate')).data,
+    initialData: [],
     staleTime: 5 * 60 * 1000,
   })
 }

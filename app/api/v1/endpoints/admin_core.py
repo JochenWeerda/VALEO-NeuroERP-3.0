@@ -1,4 +1,4 @@
-"""Core admin endpoints used by the settings/admin frontend."""
+﻿"""Core admin endpoints used by the settings/admin frontend."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ import hashlib
 import json
 import re
 import secrets
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any
 from uuid import NAMESPACE_URL, UUID, uuid4, uuid5
 
@@ -17,6 +17,7 @@ from sqlalchemy.orm import Session
 
 from app.auth.scopes import ROLE_SCOPES
 from app.core.database import get_db
+from app.core.process_config import DEFAULT_ERNTEFENSTER_TEMPLATES, DEFAULT_PROCESS_VARIANTS
 from app.core.tenant import get_tenant_id
 
 router = APIRouter()
@@ -115,6 +116,31 @@ class AdminApiKeySecretOut(BaseModel):
     key_prefix: str
     token: str
     created_at: str
+
+
+class AgentManifestLinkOut(BaseModel):
+    rel: str
+    href: str
+    method: str = "GET"
+    description: str
+
+
+class AgentManifestExampleOut(BaseModel):
+    name: str
+    description: str
+    method: str
+    path: str
+    required_headers: list[str] = Field(default_factory=list)
+
+
+class AgentManifestOut(BaseModel):
+    version: str
+    generated_at: str
+    auth: dict[str, Any]
+    headers: list[str] = Field(default_factory=list)
+    links: list[AgentManifestLinkOut] = Field(default_factory=list)
+    examples: list[AgentManifestExampleOut] = Field(default_factory=list)
+    notes: list[str] = Field(default_factory=list)
 
 
 ROLE_DESCRIPTIONS: dict[str, str] = {
@@ -779,6 +805,87 @@ async def list_admin_api_keys(
     return [_to_api_key_out(dict(row)) for row in rows]
 
 
+@router.get("/agent-manifest", response_model=AgentManifestOut)
+async def get_agent_manifest() -> AgentManifestOut:
+    """
+    Maschinenlesbarer Einstiegspunkt fuer externe Agenten (Gap 048).
+    Beschreibt Auth, zentrale Links und Beispiel-Endpunkte fuer OpenAPI-/REST-/MCP-Nutzung.
+    """
+    return AgentManifestOut(
+        version="2026-03-08",
+        generated_at=datetime.utcnow().isoformat() + "Z",
+        auth={
+            "scheme": "bearer",
+            "oidc": True,
+            "tenant_header": "X-Tenant-ID",
+            "dev_token_supported": True,
+            "api_keys": "planned_in_mainline",
+        },
+        headers=[
+            "Authorization: Bearer <access_token>",
+            "X-Tenant-ID: <tenant-uuid>",
+            "Content-Type: application/json",
+        ],
+        links=[
+            AgentManifestLinkOut(
+                rel="openapi",
+                href="/api/v1/openapi.json",
+                description="OpenAPI JSON fuer Codegen und Agent-Tools",
+            ),
+            AgentManifestLinkOut(
+                rel="swagger",
+                href="/docs",
+                description="Interaktive Swagger-UI",
+            ),
+            AgentManifestLinkOut(
+                rel="redoc",
+                href="/redoc",
+                description="Alternative API-Dokumentation",
+            ),
+            AgentManifestLinkOut(
+                rel="agent-docs",
+                href="/docs/AGENT-INTEGRATION.md",
+                description="Projektinterne Integrationsanleitung",
+            ),
+        ],
+        examples=[
+            AgentManifestExampleOut(
+                name="benchmark",
+                description="Branchenbenchmark je Genossenschaft",
+                method="GET",
+                path="/api/v1/analytics/benchmark",
+                required_headers=["Authorization", "X-Tenant-ID"],
+            ),
+            AgentManifestExampleOut(
+                name="esg_report",
+                description="ESG-Report fuer Nachhaltigkeitsauswertungen",
+                method="GET",
+                path="/api/v1/sustainability/esg-report?year=2025",
+                required_headers=["Authorization", "X-Tenant-ID"],
+            ),
+            AgentManifestExampleOut(
+                name="data_quality_validate",
+                description="Datenqualitaetsregeln gegen eine Entity pruefen",
+                method="POST",
+                path="/api/v1/admin/data-quality/validate",
+                required_headers=["Authorization", "X-Tenant-ID", "Content-Type"],
+            ),
+            AgentManifestExampleOut(
+                name="mcp_analytics_kpis",
+                description="MCP-BFF fuer Copilot-/Agenten-Queries",
+                method="POST",
+                path="/api/mcp/analytics/kpis",
+                required_headers=["Authorization", "X-Tenant-ID", "Content-Type"],
+            ),
+        ],
+        notes=[
+            "Jede Anfrage muss tenant-isoliert ueber X-Tenant-ID erfolgen.",
+            "Dedizierte Agent-API-Keys und produktives Rate-Limiting liegen im Hauptstrang.",
+            "OpenAPI ist die bevorzugte Quelle fuer Codegen; MCP ergaenzt interaktive Copilot-Pfade.",
+        ],
+    )
+
+
 @router.post("/api-keys", response_model=AdminApiKeySecretOut, status_code=201)
 async def create_admin_api_key(
     payload: AdminApiKeyCreate,
@@ -1014,3 +1121,375 @@ async def revoke_admin_api_key(
     if actor_user_id:
         _write_admin_audit(db, actor_user_id, "admin.api_key.revoked", "api_key", key_id)
     db.commit()
+
+
+# ---------------------------------------------------------------------------
+# Prozessvarianten (Gap 009: Rollenbasierte Prozessvarianten je Genossenschaft)
+# ---------------------------------------------------------------------------
+
+
+class ProcessVariantsOut(BaseModel):
+    """Prozessvarianten-Konfiguration pro Tenant (Gap 009)."""
+
+    variants: dict[str, dict[str, Any]] = Field(
+        default_factory=dict,
+        description="SchlÃ¼ssel = Prozess-Code (z.B. annahme, settlement), Wert = { steps, required_roles?, description? }",
+    )
+
+
+@router.get("/process-variants", response_model=ProcessVariantsOut)
+async def get_process_variants(
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """
+    Prozessvarianten fÃ¼r den Tenant abrufen (Gap 009).
+    Liefert Tenant-Overrides oder Defaults. Keine Hardcoded-Schritte in der Logik â€“
+    Prozessschritte kommen aus dieser Konfiguration.
+    """
+    settings = _load_tenant_settings(db, tenant_id)
+    custom = settings.get("process_variants")
+    if isinstance(custom, dict):
+        # Merge mit Defaults: Tenant-Overrides ersetzen Defaults
+        merged = dict(DEFAULT_PROCESS_VARIANTS)
+        for k, v in custom.items():
+            if isinstance(v, dict):
+                merged[k] = {**merged.get(k, {}), **v}
+        return ProcessVariantsOut(variants=merged)
+    return ProcessVariantsOut(variants=DEFAULT_PROCESS_VARIANTS)
+
+
+@router.put("/process-variants", response_model=ProcessVariantsOut)
+async def put_process_variants(
+    payload: ProcessVariantsOut,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """
+    Prozessvarianten fÃ¼r den Tenant speichern (Gap 009).
+    Ãœberschreibt nur die Ã¼bergebenen Prozesse; andere bleiben unverÃ¤ndert.
+    """
+    settings = _load_tenant_settings(db, tenant_id)
+    existing = settings.get("process_variants")
+    if not isinstance(existing, dict):
+        existing = {}
+    updated = {**existing, **payload.variants}
+    settings["process_variants"] = updated
+    _save_tenant_settings(db, tenant_id, settings)
+    db.commit()
+    return ProcessVariantsOut(variants={**DEFAULT_PROCESS_VARIANTS, **updated})
+
+
+# ---------------------------------------------------------------------------
+# Policy-Overrides (Gap 014: Policy-as-Code mit Tenant Overrides)
+# ---------------------------------------------------------------------------
+
+class PolicyOverridesOut(BaseModel):
+    """Policy-Overrides pro Tenant (Gap 014). Ausnahmen regelbasiert dokumentiert."""
+
+    overrides: dict[str, dict[str, Any]] = Field(
+        default_factory=dict,
+        description="SchlÃ¼ssel = rule_id, Wert = { enabled?, reason, valid_until?, params_override? }",
+    )
+
+
+@router.get("/policy-overrides", response_model=PolicyOverridesOut)
+async def get_policy_overrides(
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """
+    Policy-Overrides fÃ¼r den Tenant abrufen (Gap 014).
+    Dokumentiert Ausnahmen zu Standard-Policies (reason, valid_until).
+    """
+    settings = _load_tenant_settings(db, tenant_id)
+    overrides = settings.get("policy_overrides")
+    if isinstance(overrides, dict):
+        return PolicyOverridesOut(overrides=overrides)
+    return PolicyOverridesOut(overrides={})
+
+
+@router.put("/policy-overrides", response_model=PolicyOverridesOut)
+async def put_policy_overrides(
+    payload: PolicyOverridesOut,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """
+    Policy-Overrides fÃ¼r den Tenant speichern (Gap 014).
+    Jede Ausnahme muss reason enthalten (regelbasiert dokumentiert).
+    """
+    for rule_id, ov in (payload.overrides or {}).items():
+        if isinstance(ov, dict) and not ov.get("reason"):
+            raise HTTPException(
+                status_code=400,
+                detail=f"policy_overrides.{rule_id}: 'reason' ist Pflichtfeld (Gap 014)",
+            )
+    settings = _load_tenant_settings(db, tenant_id)
+    settings["policy_overrides"] = payload.overrides or {}
+    _save_tenant_settings(db, tenant_id, settings)
+    db.commit()
+    return PolicyOverridesOut(overrides=settings.get("policy_overrides", {}))
+
+
+# ---------------------------------------------------------------------------
+# Erntefenster (Gap 005: Saisonale Kampagnenprozesse als Vorlagen)
+# ---------------------------------------------------------------------------
+
+
+class ErntefensterTemplateOut(BaseModel):
+    """Eine Erntefenster-Vorlage (Raps, Weizen, Mais, etc.)."""
+
+    id: str
+    name: str
+    description: str
+    process_key: str
+    default_start_mmdd: str
+    default_end_mmdd: str
+    product_groups: list[str]
+
+
+class ErntefensterCampaignOut(BaseModel):
+    """Eine aus Vorlage erstellte Erntefenster-Kampagne."""
+
+    id: str
+    template_id: str
+    name: str
+    start_date: str
+    end_date: str
+    process_key: str
+    product_groups: list[str]
+    created_at: str
+
+
+class ErntefensterFromTemplateIn(BaseModel):
+    """Payload zum Erstellen einer Kampagne aus Vorlage."""
+
+    template_id: str = Field(..., min_length=1)
+    name: str = Field(..., min_length=1, max_length=120)
+    year: int = Field(..., ge=2020, le=2030)
+    start_mmdd: str | None = Field(default=None, pattern=r"^\d{2}-\d{2}$")
+    end_mmdd: str | None = Field(default=None, pattern=r"^\d{2}-\d{2}$")
+
+
+class WorkflowSandboxPreviewIn(BaseModel):
+    """Preview eines effektiven Prozessablaufs fuer Simulation/Sandbox (Gap 012)."""
+
+    process_key: str = Field(..., min_length=1)
+    simulation_date: date | None = None
+    campaign_id: str | None = None
+    product_group: str | None = Field(default=None, max_length=80)
+
+
+class WorkflowSandboxCampaignMatchOut(BaseModel):
+    id: str
+    name: str
+    start_date: str
+    end_date: str
+    process_key: str
+    product_groups: list[str]
+    in_window: bool
+    product_group_match: bool
+
+
+class WorkflowSandboxPreviewOut(BaseModel):
+    process_key: str
+    simulation_date: str
+    steps: list[str]
+    required_roles: dict[str, list[str]] = Field(default_factory=dict)
+    step_sla: dict[str, dict[str, Any]] = Field(default_factory=dict)
+    description: str | None = None
+    matched_campaigns: list[WorkflowSandboxCampaignMatchOut] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
+
+
+def _campaign_matches_preview(
+    campaign: dict[str, Any],
+    *,
+    simulation_date: date,
+    process_key: str,
+    campaign_id: str | None,
+    product_group: str | None,
+) -> WorkflowSandboxCampaignMatchOut | None:
+    if campaign_id and str(campaign.get("id")) != campaign_id:
+        return None
+    if str(campaign.get("process_key")) != process_key:
+        return None
+
+    try:
+        start_date = date.fromisoformat(str(campaign.get("start_date")))
+        end_date = date.fromisoformat(str(campaign.get("end_date")))
+    except Exception:
+        return None
+
+    normalized_product_group = (product_group or "").strip().lower()
+    campaign_product_groups = [str(group) for group in campaign.get("product_groups") or []]
+    product_group_match = not normalized_product_group or normalized_product_group in {
+        group.lower() for group in campaign_product_groups
+    }
+
+    in_window = start_date <= simulation_date <= end_date
+    return WorkflowSandboxCampaignMatchOut(
+        id=str(campaign.get("id")),
+        name=str(campaign.get("name") or ""),
+        start_date=start_date.isoformat(),
+        end_date=end_date.isoformat(),
+        process_key=process_key,
+        product_groups=campaign_product_groups,
+        in_window=in_window,
+        product_group_match=product_group_match,
+    )
+
+
+@router.get("/erntefenster-templates", response_model=list[ErntefensterTemplateOut])
+async def get_erntefenster_templates():
+    """
+    Erntefenster-Vorlagen abrufen (Gap 005).
+    Liefert die vordefinierten Vorlagen (Raps, Weizen, Gerste, Mais, ZuckerrÃ¼be).
+    """
+    return [
+        ErntefensterTemplateOut(
+            id=t["id"],
+            name=t["name"],
+            description=t["description"],
+            process_key=t["process_key"],
+            default_start_mmdd=t["default_start_mmdd"],
+            default_end_mmdd=t["default_end_mmdd"],
+            product_groups=t.get("product_groups", []),
+        )
+        for t in DEFAULT_ERNTEFENSTER_TEMPLATES
+    ]
+
+
+@router.get("/erntefenster-campaigns", response_model=list[ErntefensterCampaignOut])
+async def get_erntefenster_campaigns(
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Vom Tenant erstellte Erntefenster-Kampagnen abrufen."""
+    settings = _load_tenant_settings(db, tenant_id)
+    campaigns = settings.get("erntefenster_campaigns")
+    if not isinstance(campaigns, list):
+        return []
+    return [ErntefensterCampaignOut(**c) for c in campaigns if isinstance(c, dict)]
+
+
+@router.post("/erntefenster-from-template", response_model=ErntefensterCampaignOut, status_code=201)
+async def create_erntefenster_from_template(
+    payload: ErntefensterFromTemplateIn,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """
+    Neue Erntefenster-Kampagne aus Vorlage erstellen (Gap 005).
+    Setup-Zeit <30 min: Vorlage wÃ¤hlen, Zeitfenster anpassen, speichern.
+    """
+    template = next((t for t in DEFAULT_ERNTEFENSTER_TEMPLATES if t["id"] == payload.template_id), None)
+    if not template:
+        raise HTTPException(status_code=404, detail=f"Vorlage '{payload.template_id}' nicht gefunden")
+
+    start_mmdd = payload.start_mmdd or template["default_start_mmdd"]
+    end_mmdd = payload.end_mmdd or template["default_end_mmdd"]
+    start_date = f"{payload.year}-{start_mmdd}"
+    end_date = f"{payload.year}-{end_mmdd}"
+
+    campaign = {
+        "id": str(uuid4()),
+        "template_id": payload.template_id,
+        "name": payload.name,
+        "start_date": start_date,
+        "end_date": end_date,
+        "process_key": template["process_key"],
+        "product_groups": template.get("product_groups", []),
+        "created_at": datetime.utcnow().isoformat() + "Z",
+    }
+
+    settings = _load_tenant_settings(db, tenant_id)
+    campaigns = settings.get("erntefenster_campaigns")
+    if not isinstance(campaigns, list):
+        campaigns = []
+    campaigns.append(campaign)
+    settings["erntefenster_campaigns"] = campaigns
+    _save_tenant_settings(db, tenant_id, settings)
+    db.commit()
+
+    return ErntefensterCampaignOut(**campaign)
+
+
+@router.post("/workflow-sandbox/preview", response_model=WorkflowSandboxPreviewOut)
+async def preview_workflow_sandbox(
+    payload: WorkflowSandboxPreviewIn,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """
+    Effektiven Prozessablauf fuer einen Stichtag simulieren (Gap 012).
+    Nutzt Tenant-Prozessvarianten und saisonale Kampagnen als Sandbox-Preview,
+    ohne produktive Workflows auszufuehren.
+    """
+    settings = _load_tenant_settings(db, tenant_id)
+    variants = settings.get("process_variants")
+    merged_variants = dict(DEFAULT_PROCESS_VARIANTS)
+    if isinstance(variants, dict):
+        for key, value in variants.items():
+            if isinstance(value, dict):
+                merged_variants[key] = {**merged_variants.get(key, {}), **value}
+
+    process_variant = merged_variants.get(payload.process_key)
+    if not isinstance(process_variant, dict):
+        raise HTTPException(status_code=404, detail=f"Prozess '{payload.process_key}' nicht gefunden")
+
+    simulation_date = payload.simulation_date or date.today()
+    campaigns = settings.get("erntefenster_campaigns")
+    matches: list[WorkflowSandboxCampaignMatchOut] = []
+    if isinstance(campaigns, list):
+        for campaign in campaigns:
+            if not isinstance(campaign, dict):
+                continue
+            preview_match = _campaign_matches_preview(
+                campaign,
+                simulation_date=simulation_date,
+                process_key=payload.process_key,
+                campaign_id=payload.campaign_id,
+                product_group=payload.product_group,
+            )
+            if preview_match is not None:
+                matches.append(preview_match)
+
+    warnings: list[str] = []
+    if payload.campaign_id and not matches:
+        warnings.append("Die ausgewaehlte Kampagne passt nicht zum gewaehlten Prozess oder existiert nicht mehr.")
+    if matches and not any(match.in_window for match in matches):
+        warnings.append("Es gibt eine passende Kampagne, aber das Simulationsdatum liegt ausserhalb des Erntefensters.")
+    if payload.product_group and matches and not any(match.product_group_match for match in matches):
+        warnings.append("Keine passende Kampagne deckt die gewaehlte Produktgruppe ab.")
+    if not matches:
+        warnings.append("Keine saisonale Kampagne aktiv. Die Vorschau basiert nur auf der Prozessvariante.")
+
+    steps = process_variant.get("steps")
+    required_roles = process_variant.get("required_roles")
+    step_sla = process_variant.get("step_sla")
+
+    return WorkflowSandboxPreviewOut(
+        process_key=payload.process_key,
+        simulation_date=simulation_date.isoformat(),
+        steps=[str(step) for step in steps] if isinstance(steps, list) else [],
+        required_roles={
+            str(step): [str(role) for role in roles]
+            for step, roles in (required_roles or {}).items()
+            if isinstance(roles, list)
+        }
+        if isinstance(required_roles, dict)
+        else {},
+        step_sla={
+            str(step): value
+            for step, value in (step_sla or {}).items()
+            if isinstance(value, dict)
+        }
+        if isinstance(step_sla, dict)
+        else {},
+        description=str(process_variant.get("description") or "") or None,
+        matched_campaigns=matches,
+        warnings=warnings,
+    )
+

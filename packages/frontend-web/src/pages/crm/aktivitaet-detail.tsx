@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Badge } from '@/components/ui/badge'
 import { Save, Loader2, ArrowLeft, Calendar, Mail, Phone, Users, Trash2, Plus, Minus } from 'lucide-react'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
@@ -250,17 +250,17 @@ export default function AktivitaetDetailPage(): JSX.Element {
           <CardContent className="space-y-4">
             <div>
               <Label htmlFor="type">{t('crud.fields.type')} *</Label>
-              <Select value={activity.type || 'meeting'} onValueChange={(value) => updateField('type', value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder={t('crud.tooltips.placeholders.selectType')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="meeting">{t('crud.fields.meeting')}</SelectItem>
-                  <SelectItem value="call">{t('crud.fields.call')}</SelectItem>
-                  <SelectItem value="email">{t('crud.fields.email')}</SelectItem>
-                  <SelectItem value="note">{t('crud.fields.note')}</SelectItem>
-                </SelectContent>
-              </Select>
+              <NativeSelect
+                value={activity.type || 'meeting'}
+                onValueChange={(value) => updateField('type', value)}
+                options={[
+                  { value: 'meeting', label: t('crud.fields.meeting') },
+                  { value: 'call', label: t('crud.fields.call') },
+                  { value: 'email', label: t('crud.fields.email') },
+                  { value: 'note', label: t('crud.fields.note') },
+                ]}
+                placeholder={t('crud.tooltips.placeholders.selectType')}
+              />
             </div>
             <div>
               <Label htmlFor="title">{t('crud.fields.title')} *</Label>
@@ -308,16 +308,16 @@ export default function AktivitaetDetailPage(): JSX.Element {
             </div>
             <div>
               <Label htmlFor="status">{t('crud.fields.status')}</Label>
-              <Select value={activity.status || 'planned'} onValueChange={(value) => updateField('status', value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder={t('crud.tooltips.placeholders.selectStatus')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="planned">{t('status.planned')}</SelectItem>
-                  <SelectItem value="completed">{t('status.completed')}</SelectItem>
-                  <SelectItem value="overdue">{t('status.overdue')}</SelectItem>
-                </SelectContent>
-              </Select>
+              <NativeSelect
+                value={activity.status || 'planned'}
+                onValueChange={(value) => updateField('status', value)}
+                options={[
+                  { value: 'planned', label: t('status.planned') },
+                  { value: 'completed', label: t('status.completed') },
+                  { value: 'overdue', label: t('status.overdue') },
+                ]}
+                placeholder={t('crud.tooltips.placeholders.selectStatus')}
+              />
             </div>
             <div>
               <Label htmlFor="assignedTo">{t('crud.fields.assignedTo')} *</Label>

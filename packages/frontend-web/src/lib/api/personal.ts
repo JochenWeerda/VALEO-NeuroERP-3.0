@@ -120,6 +120,14 @@ export const personalKeys = {
   stundenzettelListe: (filters?: Record<string, unknown>) => [...personalKeys.all, 'stundenzettel-liste', filters] as const,
 }
 
+const EMPTY_MITARBEITER_LIST: Mitarbeiter[] = []
+const EMPTY_ZEITERFASSUNG_LIST: ZeitEintrag[] = []
+const EMPTY_SCHULUNGEN_LIST: Schulung[] = []
+const EMPTY_STUNDENZETTEL_LIST: StundenzettelEintrag[] = []
+const EMPTY_QUALIFIKATIONEN_LIST: Qualifikation[] = []
+const EMPTY_ONBOARDING_RUNS_LIST: OnboardingRun[] = []
+const EMPTY_ONBOARDING_CHECKLISTS: OnboardingChecklistApi[] = []
+
 export function useMitarbeiter(filters?: { search?: string; status?: MitarbeiterStatus }) {
   return useQuery({
     queryKey: personalKeys.mitarbeiter(filters),
@@ -129,6 +137,7 @@ export function useMitarbeiter(filters?: { search?: string; status?: Mitarbeiter
       if (filters?.status) params.append('status', filters.status)
       return (await apiClient.get<Mitarbeiter[]>(`/api/v1/personal/mitarbeiter?${String(params)}`)).data
     },
+    initialData: EMPTY_MITARBEITER_LIST,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -140,6 +149,7 @@ export function useZeiterfassung(datum?: string) {
       const params = datum ? `?datum=${datum}` : ''
       return (await apiClient.get<ZeitEintrag[]>(`/api/v1/personal/zeiterfassung${params}`)).data
     },
+    initialData: EMPTY_ZEITERFASSUNG_LIST,
     staleTime: 30 * 1000,
   })
 }
@@ -215,6 +225,7 @@ export function useSchulungen(filters?: { typ?: SchulungTyp; status?: SchulungSt
       }
       return mapped
     },
+    initialData: EMPTY_SCHULUNGEN_LIST,
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -226,6 +237,7 @@ export function useMitarbeiterDetail(id?: string) {
     queryFn: async () => {
       return (await apiClient.get<Mitarbeiter>(`/api/v1/personal/mitarbeiter/${id}`)).data
     },
+    initialData: null,
     staleTime: 60_000,
   })
 }
@@ -270,6 +282,7 @@ export function useStundenzettelListe(filters?: { datumVon?: string; datumBis?: 
       if (filters?.datumBis) params.append('datum_bis', filters.datumBis)
       return (await apiClient.get<StundenzettelEintrag[]>(`/api/v1/personal/stundenzettel?${String(params)}`)).data
     },
+    initialData: EMPTY_STUNDENZETTEL_LIST,
     staleTime: 30_000,
   })
 }
@@ -337,6 +350,7 @@ export function useQualifikationen(filters?: { employeeRef?: string }) {
       const rows = (await apiClient.get<QualificationApi[]>(`/api/v1/training/qualifications?${String(params)}`)).data
       return rows.map(toQualification)
     },
+    initialData: EMPTY_QUALIFIKATIONEN_LIST,
     staleTime: 60_000,
   })
 }
@@ -368,6 +382,7 @@ export function useOnboardingChecklists() {
     queryFn: async () => {
       return (await apiClient.get<OnboardingChecklistApi[]>('/api/v1/training/onboarding/checklists')).data
     },
+    initialData: EMPTY_ONBOARDING_CHECKLISTS,
     staleTime: 60_000,
   })
 }
@@ -382,6 +397,7 @@ export function useOnboardingRuns(filters?: { employeeRef?: string; status?: Onb
       const rows = (await apiClient.get<OnboardingRunApi[]>(`/api/v1/training/onboarding/runs?${String(params)}`)).data
       return rows.map(toOnboardingRun)
     },
+    initialData: EMPTY_ONBOARDING_RUNS_LIST,
     staleTime: 60_000,
   })
 }

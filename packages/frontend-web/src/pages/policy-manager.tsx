@@ -1,14 +1,19 @@
 import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/components/ui/toast-provider"
 import { useMcpMutation, useMcpQuery } from "@/lib/mcp"
-import { type AlertInput, AlertInputSchema, type Rule, RuleSchema } from "@/policy/schema"
+import { buildDecisionView } from "@/policy/decision-view"
+import { type AlertInput, type Rule } from "@/policy/schema"
 
 const TEXTAREA_ROWS = 12
 
@@ -30,17 +35,26 @@ type TestResponse = {
   decision: unknown
 }
 
-/**
- * Formatiert JSON für Anzeige
- */
 function prettyJson(obj: unknown): string {
   return JSON.stringify(obj, null, 2)
 }
 
-/**
- * Policy-Manager Admin-Page
- * CRUD für Policy-Regeln mit Import/Export und Test-Simulator
- */
+function validateAlertInput(input: AlertInput): string | null {
+  if (input.id.trim().length === 0) return "ID ist erforderlich"
+  if (input.title.trim().length === 0) return "Titel ist erforderlich"
+  if (input.message.trim().length === 0) return "Nachricht ist erforderlich"
+  if (input.severity !== "ok" && input.severity !== "warn" && input.severity !== "crit") {
+    return "Severity ist ungueltig"
+  }
+  if (input.kpiId !== undefined && input.kpiId.trim().length === 0) {
+    return "KPI darf nicht leer sein"
+  }
+  if (input.delta !== undefined && !Number.isFinite(input.delta)) {
+    return "Delta ist ungueltig"
+  }
+  return null
+}
+
 export default function PolicyManagerPage(): JSX.Element {
   const { data: rulesData } = useMcpQuery<RulesResponse>("policy", "list", [])
   const deleteMutation = useMcpMutation<{ id: string }, DeleteResponse>("policy", "delete")
@@ -49,15 +63,15 @@ export default function PolicyManagerPage(): JSX.Element {
   const rules = rulesData?.data?.data ?? []
 
   const handleDelete = (id: string): void => {
-    if (typeof window !== 'undefined' && window.confirm(`Policy "${id}" wirklich löschen?`)) {
+    if (typeof window !== "undefined" && window.confirm(`Policy "${id}" wirklich loeschen?`)) {
       deleteMutation.mutate(
         { id },
         {
           onSuccess: (): void => {
-            push("✔ Policy gelöscht")
+            push("Policy geloescht")
           },
           onError: (): void => {
-            push("❌ Löschen fehlgeschlagen")
+            push("Loeschen fehlgeschlagen")
           },
         }
       )
@@ -68,12 +82,12 @@ export default function PolicyManagerPage(): JSX.Element {
     const json = prettyJson({ rules })
     const blob = new Blob([json], { type: "application/json" })
     const url = URL.createObjectURL(blob)
-    const a = document.createElement("a")
-    a.href = url
-    a.download = "policies-export.json"
-    a.click()
+    const anchor = document.createElement("a")
+    anchor.href = url
+    anchor.download = "policies-export.json"
+    anchor.click()
     URL.revokeObjectURL(url)
-    push("✔ Export gestartet")
+    push("Export gestartet")
   }
 
   return (
@@ -88,32 +102,26 @@ export default function PolicyManagerPage(): JSX.Element {
         </div>
       </div>
 
-      {/* Rules-Liste */}
       <Card className="p-4">
-        <h3 className="font-semibold mb-3">Aktive Policies ({rules.length})</h3>
-        {rules.length === 0 && (
+        <h3 className="mb-3 font-semibold">Aktive Policies ({rules.length})</h3>
+        {rules.length === 0 ? (
           <p className="text-sm opacity-70">Keine Policies vorhanden.</p>
-        )}
+        ) : null}
         <ul className="space-y-2">
           {rules.map((rule): JSX.Element => (
             <li
               key={rule.id}
-              className="border rounded-lg p-3 flex items-start justify-between"
+              className="flex items-start justify-between rounded-lg border p-3"
             >
               <div className="flex-1">
                 <div className="font-medium">{rule.id}</div>
                 <div className="text-sm opacity-70">
-                  {rule.action} | KPI: {rule.when.kpiId} | Severity:{" "}
-                  {rule.when.severity.join(", ")}
+                  {rule.action} | KPI: {rule.when.kpiId} | Severity: {rule.when.severity.join(", ")}
                 </div>
-                <div className="text-xs mt-1">
-                  {rule.autoExecute === true ? "✅ Auto-Execute" : ""}
-                  {rule.approval?.required === true
-                    ? " | 🔐 Approval required"
-                    : ""}
-                  {rule.window !== undefined
-                    ? ` | ⏰ Zeitfenster`
-                    : ""}
+                <div className="mt-1 text-xs">
+                  {rule.autoExecute === true ? "Auto-Execute" : "Manuelle Ausfuehrung"}
+                  {rule.approval?.required === true ? " | Approval required" : ""}
+                  {rule.window !== undefined ? " | Zeitfenster aktiv" : ""}
                 </div>
               </div>
               <Button
@@ -123,57 +131,53 @@ export default function PolicyManagerPage(): JSX.Element {
                   handleDelete(rule.id)
                 }}
               >
-                Löschen
+                Loeschen
               </Button>
             </li>
           ))}
         </ul>
       </Card>
 
-      {/* Simulator */}
       <SimulatorPanel />
     </div>
   )
 }
 
-/**
- * Import-Dialog Komponente
- */
 function ImportDialog(): JSX.Element {
   const [open, setOpen] = useState<boolean>(false)
   const [text, setText] = useState<string>("")
   const upsert = useMcpMutation<{ rules: Rule[] }, UpsertResponse>("policy", "upsert")
   const { push } = useToast()
 
-  const handleImport = (): void => {
+  const handleImport = async (): Promise<void> => {
     try {
       const parsed = JSON.parse(text) as { rules?: unknown }
       if (!Array.isArray(parsed.rules)) {
         throw new Error("rules[] fehlt")
       }
 
+      const { RuleSchema } = await import("@/policy/schema")
       const validRules: Rule[] = []
-      for (const r of parsed.rules) {
-        const validatedRule = RuleSchema.parse(r)
-        validRules.push(validatedRule)
+      for (const rule of parsed.rules) {
+        validRules.push(RuleSchema.parse(rule))
       }
 
       upsert.mutate(
         { rules: validRules },
         {
           onSuccess: (): void => {
-            push("✔ Import erfolgreich")
+            push("Import erfolgreich")
             setOpen(false)
             setText("")
           },
           onError: (): void => {
-            push("❌ Import fehlgeschlagen")
+            push("Import fehlgeschlagen")
           },
         }
       )
-    } catch (e) {
-      const errorMessage = e instanceof Error ? e.message : String(e)
-      push(`❌ JSON ungültig: ${errorMessage}`)
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      push(`JSON ungueltig: ${errorMessage}`)
     }
   }
 
@@ -192,16 +196,16 @@ function ImportDialog(): JSX.Element {
           <DialogHeader>
             <DialogTitle>Policies importieren</DialogTitle>
             <DialogDescription>
-              Füge JSON ein (Format: {`{ "rules": Rule[] }`}).
+              Fuege JSON ein (Format: {`{ "rules": Rule[] }`}).
             </DialogDescription>
           </DialogHeader>
           <textarea
             rows={TEXTAREA_ROWS}
             value={text}
-            onChange={(e): void => {
-              setText(e.target.value)
+            onChange={(event): void => {
+              setText(event.target.value)
             }}
-            className="w-full border rounded-md p-2 font-mono text-sm"
+            className="w-full rounded-md border p-2 font-mono text-sm"
           />
           <div className="text-right">
             <Button onClick={handleImport}>Importieren</Button>
@@ -212,9 +216,6 @@ function ImportDialog(): JSX.Element {
   )
 }
 
-/**
- * Simulator-Panel Komponente
- */
 function SimulatorPanel(): JSX.Element {
   const test = useMcpMutation<
     { alert: AlertInput; roles: string[] },
@@ -222,96 +223,143 @@ function SimulatorPanel(): JSX.Element {
   >("policy", "test")
   const { push } = useToast()
   const [roles, setRoles] = useState<string>("manager")
-
-  const form = useForm<AlertInput>({
-    resolver: zodResolver(AlertInputSchema),
-    defaultValues: {
-      id: "sim-1",
-      kpiId: "margin",
-      title: "Marge unter Ziel",
-      message: "Marge 14,2%",
-      severity: "warn",
-      delta: -3,
-    },
+  const [values, setValues] = useState<AlertInput>({
+    id: "sim-1",
+    kpiId: "margin",
+    title: "Marge unter Ziel",
+    message: "Marge 14,2%",
+    severity: "warn",
+    delta: -3,
   })
+  const [formError, setFormError] = useState<string | null>(null)
+  const decisionView = buildDecisionView(test.data?.data?.decision)
 
-  const handleSubmit = (values: AlertInput): void => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
+    event.preventDefault()
+    const validationError = validateAlertInput(values)
+    if (validationError !== null) {
+      setFormError(validationError)
+      return
+    }
+
+    setFormError(null)
     const roleArray = roles
       .split(",")
-      .map((s) => s.trim())
-      .filter((s) => s.length > 0)
+      .map((value) => value.trim())
+      .filter((value) => value.length > 0)
 
     test.mutate(
       { alert: values, roles: roleArray },
       {
         onError: (): void => {
-          push("❌ Test fehlgeschlagen")
+          push("Test fehlgeschlagen")
         },
       }
     )
   }
 
   return (
-    <Card className="p-4 space-y-3">
+    <Card className="space-y-3 p-4">
       <h3 className="font-semibold">Policy-Test-Simulator</h3>
       <form
-        className="grid grid-cols-2 md:grid-cols-3 gap-3"
-        onSubmit={form.handleSubmit(handleSubmit)}
+        className="grid grid-cols-2 gap-3 md:grid-cols-3"
+        onSubmit={handleSubmit}
       >
         <div>
           <Label>KPI</Label>
-          <Input {...form.register("kpiId")} />
+          <Input value={values.kpiId ?? ""} onChange={(event) => setValues((current) => ({ ...current, kpiId: event.target.value }))} />
         </div>
         <div>
           <Label>Severity</Label>
           <select
-            className="w-full border rounded-md h-9 px-3"
-            {...form.register("severity")}
+            className="h-9 w-full rounded-md border px-3"
+            value={values.severity}
+            onChange={(event) => setValues((current) => ({ ...current, severity: event.target.value as AlertInput["severity"] }))}
           >
             <option value="warn">warn</option>
             <option value="crit">crit</option>
           </select>
         </div>
         <div>
-          <Label>Δ (optional)</Label>
+          <Label>Delta (optional)</Label>
           <Input
             type="number"
             step="0.1"
-            {...form.register("delta", { valueAsNumber: true })}
+            value={values.delta ?? ""}
+            onChange={(event) =>
+              setValues((current) => ({
+                ...current,
+                delta: event.target.value === "" ? undefined : Number(event.target.value),
+              }))
+            }
           />
+        </div>
+        <div>
+          <Label>ID</Label>
+          <Input value={values.id} onChange={(event) => setValues((current) => ({ ...current, id: event.target.value }))} />
+        </div>
+        <div>
+          <Label>Titel</Label>
+          <Input value={values.title} onChange={(event) => setValues((current) => ({ ...current, title: event.target.value }))} />
+        </div>
+        <div>
+          <Label>Nachricht</Label>
+          <Input value={values.message} onChange={(event) => setValues((current) => ({ ...current, message: event.target.value }))} />
         </div>
         <div className="md:col-span-3">
           <Label>Rollen (CSV)</Label>
           <Input
             value={roles}
-            onChange={(e): void => {
-              setRoles(e.target.value)
+            onChange={(event): void => {
+              setRoles(event.target.value)
             }}
           />
         </div>
-        <div className="md:col-span-3 text-right">
+        {formError !== null ? (
+          <div className="md:col-span-3 text-sm text-red-600">{formError}</div>
+        ) : null}
+        <div className="text-right md:col-span-3">
           <Button type="submit">Entscheidung simulieren</Button>
         </div>
       </form>
 
-      {test.data?.data?.decision !== undefined && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+      {test.data?.data?.decision !== undefined ? (
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           <Card className="p-3">
-            <div className="text-sm opacity-70">Decision</div>
+            <div className="mb-2 text-sm opacity-70">Policy-Erklaerung</div>
+            {decisionView !== null ? (
+              <div className={`rounded-md border px-3 py-2 ${decisionView.statusClassName}`}>
+                <div className="text-sm font-semibold">{decisionView.statusLabel}</div>
+                <p className="mt-1 text-sm">{decisionView.summary}</p>
+                <ul className="mt-2 list-disc pl-4 text-xs">
+                  {decisionView.details.map((detail) => (
+                    <li key={detail}>{detail}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Antwortformat unbekannt, nur Raw-Decision verfuegbar.
+              </p>
+            )}
+          </Card>
+
+          <Card className="p-3">
+            <div className="mb-2 text-sm opacity-70">Decision JSON</div>
             <pre className="text-xs whitespace-pre-wrap">
               {prettyJson(test.data.data.decision)}
             </pre>
           </Card>
-          <Card className="p-3">
+
+          <Card className="p-3 md:col-span-2">
             <div className="text-sm opacity-70">Hinweis</div>
             <p className="text-sm">
-              "allow" → Aktion erlaubt; "execute:true" → Auto-Execute;
-              "needsApproval" → Vier Augen nötig.
+              "allow" bedeutet erlaubt. "execute:true" bedeutet Auto-Execute.
+              "needsApproval" bedeutet Freigabe im Vier-Augen-Prinzip.
             </p>
           </Card>
         </div>
-      )}
+      ) : null}
     </Card>
   )
 }
-

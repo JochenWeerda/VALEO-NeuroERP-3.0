@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
-import { z } from 'zod'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { toast } from '@/hooks/use-toast'
 import {
@@ -13,40 +12,6 @@ import {
   useRechnungseingangVerbuchen,
 } from '@/lib/api/einkauf'
 
-// Zod-Schema für Rechnungseingang (wird in Komponente mit i18n erstellt)
-const createRechnungseingangSchema = (t: any) => z.object({
-  lieferantId: z.string().min(1, t('crud.messages.validationError')),
-  bestellungId: z.string().optional(),
-  wareneingangId: z.string().optional(),
-  rechnungsNummer: z.string().min(1, t('crud.messages.validationError')),
-  rechnungsDatum: z.string().min(1, t('crud.messages.validationError')),
-  status: z.enum(['ERFASST', 'GEPRUEFT', 'FREIGEGEBEN', 'VERBUCHT', 'BEZAHLT']),
-  bruttoBetrag: z.number().min(0.01, t('crud.messages.validationError')),
-  nettoBetrag: z.number().min(0),
-  steuerBetrag: z.number().min(0),
-  steuerSatz: z.number().min(0),
-  skonto: z.object({
-    prozent: z.number().min(0),
-    betrag: z.number().min(0),
-    frist: z.string().optional()
-  }),
-  zahlungsziel: z.string().min(1, t('crud.messages.validationError')),
-  positionen: z.array(z.object({
-    artikelId: z.string(),
-    menge: z.number(),
-    preis: z.number(),
-    steuerSatz: z.number(),
-    gesamt: z.number()
-  })),
-  abweichungen: z.array(z.object({
-    typ: z.enum(['MENGE', 'PREIS', 'QUALITAET']),
-    beschreibung: z.string(),
-    betrag: z.number().optional()
-  })),
-  bemerkungen: z.string().optional()
-})
-
-// Konfiguration für Rechnungseingang ObjectPage (wird in Komponente mit i18n erstellt)
 const createRechnungseingangConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
   subtitle: t('crud.actions.process'),
@@ -339,7 +304,6 @@ const createRechnungseingangConfig = (t: any, entityTypeLabel: string): MaskConf
       delete: '/api/v1/einkauf/rechnungseingaenge/{id}'
     }
   },
-  validation: createRechnungseingangSchema(t),
   permissions: ['einkauf.read', 'einkauf.write', 'finance.read']
 })
 

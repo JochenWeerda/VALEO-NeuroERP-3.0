@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import { AlertTriangle, CheckCircle, Clock, Filter, Search, XCircle } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { WorklistConfig, WorklistItem } from './types'
@@ -192,50 +192,47 @@ const Worklist: React.FC<WorklistProps> = ({
             {/* Status Filter */}
             <div>
               <Label>Status</Label>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Alle Status</SelectItem>
-                  <SelectItem value="pending">Ausstehend</SelectItem>
-                  <SelectItem value="in-progress">In Bearbeitung</SelectItem>
-                  <SelectItem value="completed">Abgeschlossen</SelectItem>
-                  <SelectItem value="overdue">Überfällig</SelectItem>
-                </SelectContent>
-              </Select>
+              <NativeSelect
+                value={statusFilter}
+                onValueChange={setStatusFilter}
+                options={[
+                  { value: 'all', label: 'Alle Status' },
+                  { value: 'pending', label: 'Ausstehend' },
+                  { value: 'in-progress', label: 'In Bearbeitung' },
+                  { value: 'completed', label: 'Abgeschlossen' },
+                  { value: 'overdue', label: 'Überfällig' },
+                ]}
+              />
             </div>
 
             {/* Priority Filter */}
             <div>
               <Label>Priorität</Label>
-              <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Alle Prioritäten</SelectItem>
-                  <SelectItem value="low">Niedrig</SelectItem>
-                  <SelectItem value="medium">Mittel</SelectItem>
-                  <SelectItem value="high">Hoch</SelectItem>
-                  <SelectItem value="urgent">Dringend</SelectItem>
-                </SelectContent>
-              </Select>
+              <NativeSelect
+                value={priorityFilter}
+                onValueChange={setPriorityFilter}
+                options={[
+                  { value: 'all', label: 'Alle Prioritäten' },
+                  { value: 'low', label: 'Niedrig' },
+                  { value: 'medium', label: 'Mittel' },
+                  { value: 'high', label: 'Hoch' },
+                  { value: 'urgent', label: 'Dringend' },
+                ]}
+              />
             </div>
 
             {/* Group By */}
             {config.groupBy && (
               <div>
                 <Label>Gruppieren nach</Label>
-                <Select value={groupBy} onValueChange={setGroupBy}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={NO_GROUP_VALUE}>Nicht gruppieren</SelectItem>
-                    <SelectItem value={config.groupBy}>{config.groupBy}</SelectItem>
-                  </SelectContent>
-                </Select>
+                <NativeSelect
+                  value={groupBy}
+                  onValueChange={setGroupBy}
+                  options={[
+                    { value: NO_GROUP_VALUE, label: 'Nicht gruppieren' },
+                    { value: config.groupBy, label: config.groupBy },
+                  ]}
+                />
               </div>
             )}
           </div>

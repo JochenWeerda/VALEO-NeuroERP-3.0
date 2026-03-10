@@ -12,6 +12,11 @@ import { queryKeys } from '@/lib/query'
 import { crmService, type Lead } from '@/lib/services/crm-service'
 import { getEntityTypeLabel, getListTitle, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 
+const EMPTY_LEADS_RESPONSE: { data: Lead[]; total: number } = {
+  data: [],
+  total: 0,
+}
+
 export default function LeadsPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -22,10 +27,11 @@ export default function LeadsPage(): JSX.Element {
   const { data: leadsData, isLoading, error } = useQuery({
     queryKey: queryKeys.crm.leads.listFiltered({ search: searchTerm || undefined }),
     queryFn: () => crmService.getLeads({ search: searchTerm || undefined }),
+    initialData: EMPTY_LEADS_RESPONSE,
   })
 
-  const leads = leadsData?.data || []
-  const totalLeads = leadsData?.total || 0
+  const leads = leadsData.data
+  const totalLeads = leadsData.total
   const totalPotential = leads.reduce((sum, lead) => sum + lead.potential, 0)
   const qualifiedLeads = leads.filter(lead => lead.status === 'qualified').length
   const highPriorityLeads = leads.filter(lead => lead.priority === 'high').length

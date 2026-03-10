@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import { getEntityTypeLabel, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 import { toast } from '@/hooks/use-toast'
 import { useAuth } from '@/hooks/useAuth'
@@ -336,20 +336,20 @@ export default function OpportunitiesKanbanPage(): JSX.Element {
             </div>
             <div>
               <label className="text-sm font-medium mb-2 block">{t('crud.fields.status')}</label>
-              <Select value={filterStatus} onValueChange={setFilterStatus}>
-                <SelectTrigger>
-                  <SelectValue placeholder={t('crud.actions.filter')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">{t('common.all')}</SelectItem>
-                  <SelectItem value="prospecting">{t('status.prospecting')}</SelectItem>
-                  <SelectItem value="qualification">{t('status.qualification')}</SelectItem>
-                  <SelectItem value="proposal">{t('status.proposal')}</SelectItem>
-                  <SelectItem value="negotiation">{t('status.negotiation')}</SelectItem>
-                  <SelectItem value="closed_won">{t('status.closedWon')}</SelectItem>
-                  <SelectItem value="closed_lost">{t('status.closedLost')}</SelectItem>
-                </SelectContent>
-              </Select>
+              <NativeSelect
+                value={filterStatus}
+                onValueChange={setFilterStatus}
+                options={[
+                  { value: '', label: t('common.all') },
+                  { value: 'prospecting', label: t('status.prospecting') },
+                  { value: 'qualification', label: t('status.qualification') },
+                  { value: 'proposal', label: t('status.proposal') },
+                  { value: 'negotiation', label: t('status.negotiation') },
+                  { value: 'closed_won', label: t('status.closedWon') },
+                  { value: 'closed_lost', label: t('status.closedLost') },
+                ]}
+                placeholder={t('crud.actions.filter')}
+              />
             </div>
           </div>
         </CardContent>

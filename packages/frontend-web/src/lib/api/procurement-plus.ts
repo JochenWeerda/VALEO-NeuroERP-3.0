@@ -67,6 +67,12 @@ export type EinkaufAuditTrail = {
   total: number
 }
 
+const EMPTY_SUPPLIER_RATINGS: SupplierRating[] = []
+const EMPTY_SUPPLIER_DOCUMENTS: SupplierDocument[] = []
+const EMPTY_PO_COMMUNICATIONS: PoCommunication[] = []
+const EMPTY_SERVICE_ENTRY_SHEETS: ServiceEntrySheet[] = []
+const EMPTY_EDI_MESSAGES: EdiMessage[] = []
+
 export const procurementPlusKeys = {
   all: ['procurement-plus'] as const,
   supplierRatings: () => [...procurementPlusKeys.all, 'supplier-ratings'] as const,
@@ -81,6 +87,7 @@ export function useSupplierRatings() {
   return useQuery({
     queryKey: procurementPlusKeys.supplierRatings(),
     queryFn: async () => (await apiClient.get<{ items: SupplierRating[] }>('/api/v1/einkauf/supplier-ratings')).data.items,
+    initialData: EMPTY_SUPPLIER_RATINGS,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -100,6 +107,7 @@ export function useSupplierDocuments(supplierId: string) {
     queryFn: async () =>
       (await apiClient.get<SupplierDocument[]>(`/api/v1/einkauf/suppliers/${encodeURIComponent(supplierId)}/documents`)).data,
     enabled: !!supplierId,
+    initialData: EMPTY_SUPPLIER_DOCUMENTS,
     staleTime: 30 * 1000,
   })
 }
@@ -128,6 +136,7 @@ export function usePoCommunications(poId: string) {
     queryFn: async () =>
       (await apiClient.get<PoCommunication[]>(`/api/v1/purchase-orders/${encodeURIComponent(poId)}/communications`)).data,
     enabled: !!poId,
+    initialData: EMPTY_PO_COMMUNICATIONS,
     staleTime: 10 * 1000,
   })
 }
@@ -152,6 +161,7 @@ export function useEinkaufAuditTrail(docType: string, docId: string) {
     queryFn: async () =>
       (await apiClient.get<EinkaufAuditTrail>(`/api/v1/einkauf/audit-trail/${encodeURIComponent(docType)}/${encodeURIComponent(docId)}`)).data,
     enabled: !!docType && !!docId,
+    initialData: null,
     staleTime: 10 * 1000,
   })
 }
@@ -161,6 +171,7 @@ export function useServiceEntrySheets() {
     queryKey: procurementPlusKeys.serviceEntrySheets(),
     queryFn: async () =>
       (await apiClient.get<{ items: ServiceEntrySheet[] }>('/api/v1/einkauf/service-entry-sheets')).data.items,
+    initialData: EMPTY_SERVICE_ENTRY_SHEETS,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -187,6 +198,7 @@ export function useEdiMessages() {
   return useQuery({
     queryKey: procurementPlusKeys.ediMessages(),
     queryFn: async () => (await apiClient.get<{ items: EdiMessage[] }>('/api/v1/einkauf/edi/messages')).data.items,
+    initialData: EMPTY_EDI_MESSAGES,
     staleTime: 30 * 1000,
   })
 }

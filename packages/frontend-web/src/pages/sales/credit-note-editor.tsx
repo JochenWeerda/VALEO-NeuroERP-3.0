@@ -2,41 +2,12 @@ import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
-import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
+import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
+import { getFieldsFromMaskConfig, validateFields } from '@/components/mask-builder/validation'
 import { toast } from '@/hooks/use-toast'
-import { z } from 'zod'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 
-// Zod-Schema für CreditNote (wird in Komponente mit i18n erstellt)
-const createCreditNoteSchema = (t: any) => z.object({
-  number: z.string().min(1, t('crud.messages.validationError')),
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t('crud.messages.validationError')),
-  customerId: z.string().min(1, t('crud.messages.validationError')),
-  sourceInvoice: z.string().optional(),
-  sourceOrder: z.string().optional(),
-  reason: z.enum(['return', 'discount', 'error', 'complaint', 'other'], {
-    errorMap: () => ({ message: t('crud.messages.validationError') })
-  }),
-  reasonText: z.string().optional(),
-  paymentTerms: z.string().min(1, t('crud.messages.validationError')),
-  dueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t('crud.messages.validationError')),
-  status: z.enum(['draft', 'approved', 'sent', 'paid', 'cancelled']),
-  notes: z.string().optional(),
-  lines: z.array(z.object({
-    article: z.string().min(1, t('crud.messages.validationError')),
-    qty: z.number().positive(t('crud.messages.validationError')),
-    price: z.number().positive(t('crud.messages.validationError')),
-    vatRate: z.number().min(0).max(100, t('crud.messages.validationError')),
-    discount: z.number().min(0).max(100, t('crud.messages.validationError')).default(0)
-  })).min(1, t('crud.messages.validationError')),
-  subtotalNet: z.number().min(0),
-  totalTax: z.number().min(0),
-  totalDiscount: z.number().min(0),
-  totalGross: z.number().min(0)
-})
-
-// Konfiguration für CreditNote ObjectPage (wird in Komponente mit i18n erstellt)
 const createCreditNoteConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
   title: `${t('crud.actions.create')}/${t('crud.actions.edit')} ${entityTypeLabel}`,
   subtitle: t('crud.tooltips.fields.creditNote'),
@@ -262,7 +233,6 @@ const createCreditNoteConfig = (t: any, entityTypeLabel: string): MaskConfig => 
       delete: '/api/sales/credit-notes/{id}'
     }
   },
-  validation: createCreditNoteSchema(t),
   permissions: ['sales.write', 'sales.credit_notes']
 })
 
@@ -280,7 +250,10 @@ export default function CreditNoteEditorPage(): JSX.Element {
     id: id ?? 'new'
   })
 
-  const { validate, showValidationToast } = useMaskValidation(creditNoteConfig.validation)
+  const validate = (formData: any) => validateFields(getFieldsFromMaskConfig(creditNoteConfig), formData ?? {})
+  const showValidationToast = (errors: Record<string, string>) => {
+    toast({ variant: 'destructive', title: t('crud.messages.validationError'), description: `${Object.keys(errors).length} Feld(er) muessen korrigiert werden.` })
+  }
 
   const { handleAction } = useMaskActions(async (action: string, formData: Record<string, unknown>) => {
     if (action === 'calculate') {
@@ -289,9 +262,9 @@ export default function CreditNoteEditorPage(): JSX.Element {
       // Vorschau anzeigen
       window.open('/api/sales/credit-notes/preview', '_blank')
     } else if (action === 'approve') {
-      const isValid = validate(formData)
-      if (!isValid.isValid) {
-        showValidationToast(isValid.errors)
+      const errors = validate(formData)
+      if (Object.keys(errors).length > 0) {
+        showValidationToast(errors)
         return
       }
 
@@ -303,9 +276,9 @@ export default function CreditNoteEditorPage(): JSX.Element {
         // Error wird bereits in useMaskData behandelt
       }
     } else if (action === 'send') {
-      const isValid = validate(formData)
-      if (!isValid.isValid) {
-        showValidationToast(isValid.errors)
+      const errors = validate(formData)
+      if (Object.keys(errors).length > 0) {
+        showValidationToast(errors)
         return
       }
 

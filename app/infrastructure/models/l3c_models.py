@@ -100,6 +100,28 @@ class WeighingMeasurement(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 
+class LkwAnnahmeQueue(Base):
+    """
+    LKW-Annahme-Warteschlange (persistent, Gap 002).
+    Ersetzt Redis-Cache für LKW-Registrierung; Daten überleben Restarts.
+    """
+    __tablename__ = "lkw_annahme_queue"
+    __table_args__ = {"schema": "domain_inventory", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=uuid7)
+    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
+    kennzeichen = Column(String(20), nullable=False)
+    lieferant = Column(String(200), nullable=False)
+    lieferschein_nr = Column(String(100), nullable=True, default="")
+    artikel = Column(String(200), nullable=True, default="")
+    ankunftszeit = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    prioritaet = Column(String(20), nullable=False, default="normal")  # hoch | normal | niedrig
+    status = Column(String(30), nullable=False, default="wartend")  # wartend | in-bearbeitung | abgeschlossen
+    attachment_ids = Column(JSONB, nullable=True, default=list)  # Liste von Upload-IDs
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+
 class ContractAmendment(Base):
     """
     Vertragsänderung (Amendment) zu einem beliebigen Vertrag.

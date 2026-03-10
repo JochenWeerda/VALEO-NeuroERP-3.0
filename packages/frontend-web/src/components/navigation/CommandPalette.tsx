@@ -24,6 +24,9 @@ import { useNavigate } from 'react-router-dom'
 import { Calculator, FileText, HelpCircle, Package, Settings, ShoppingCart, Sprout, Warehouse, Users, Target, Calendar, Tractor } from 'lucide-react'
 import { createMCPMetadata } from '@/design/mcp-schemas/component-metadata'
 import { useFeature } from '@/hooks/useFeature'
+import { ACTION_SHORTCUTS } from '@/app/navigation/action-shortcuts'
+import { AI_SHORTCUTS } from '@/app/navigation/ai-shortcuts'
+import { useNavigationShortcuts } from '@/app/navigation/nav-runtime'
 
 interface CommandPaletteProps {
   open: boolean
@@ -37,6 +40,7 @@ interface PaletteCommand {
   icon: ComponentType<{ className?: string }>
   action: () => void
   category: string
+  shortcut?: string
   mcp?: {
     intent: string
     businessDomain: string
@@ -64,7 +68,27 @@ export const commandPaletteMCP = createMCPMetadata('CommandPalette', 'navigation
   },
 })
 
-const createCommands = (navigate: ReturnType<typeof useNavigate>, agrarEnabled: boolean): PaletteCommand[] => {
+const appendUniqueCommands = (target: PaletteCommand[], incoming: PaletteCommand[]): void => {
+  const existingIds = new Set(target.map((item) => item.id))
+  for (const item of incoming) {
+    if (!existingIds.has(item.id)) {
+      target.push(item)
+      existingIds.add(item.id)
+    }
+  }
+}
+
+const createCommands = (
+  navigate: ReturnType<typeof useNavigate>,
+  agrarEnabled: boolean,
+  navigationShortcuts: Array<{
+    id: string
+    label: string
+    keywords?: string[]
+    icon: ComponentType<{ className?: string }>
+    path: string
+  }>,
+): PaletteCommand[] => {
   const commands: PaletteCommand[] = [
     {
       id: 'sales-order-new',
@@ -268,18 +292,75 @@ const createCommands = (navigate: ReturnType<typeof useNavigate>, agrarEnabled: 
     },
   );
 
+  // Ergänzt zentrale Navigation/Action/AI-Shortcuts aus dem Manifest,
+  // damit die Palette stets den aktuellen Routing-Stand widerspiegelt.
+  const navigationCommands: PaletteCommand[] = navigationShortcuts
+    .filter((shortcut) => (agrarEnabled ? true : !shortcut.path.startsWith('/agrar')))
+    .map((shortcut) => ({
+      id: `nav-${shortcut.id}`,
+      label: shortcut.label,
+      keywords: shortcut.keywords ?? [],
+      icon: shortcut.icon,
+      category: 'Navigation',
+      action: (): void => navigate(shortcut.path),
+      mcp: {
+        intent: 'navigate',
+        businessDomain: 'core',
+      },
+    }))
+
+  const actionCommands: PaletteCommand[] = ACTION_SHORTCUTS
+    .filter((shortcut) => (agrarEnabled ? true : !shortcut.path.startsWith('/agrar')))
+    .map((shortcut) => ({
+      id: shortcut.id,
+      label: shortcut.label,
+      keywords: shortcut.keywords ?? [],
+      icon: shortcut.icon,
+      category: 'Aktionen',
+      shortcut: shortcut.shortcut,
+      action: (): void => navigate(shortcut.path),
+      mcp: {
+        intent: 'quick-action',
+        businessDomain: 'core',
+      },
+    }))
+
+  const aiCommands: PaletteCommand[] = AI_SHORTCUTS.map((shortcut) => ({
+    id: shortcut.id,
+    label: shortcut.label,
+    keywords: shortcut.keywords ?? [],
+    icon: shortcut.icon,
+    category: 'KI',
+    action: (): void => {
+      if (shortcut.type === 'navigate') {
+        navigate(shortcut.path)
+        return
+      }
+      window.dispatchEvent(new CustomEvent(shortcut.eventName))
+    },
+    mcp: {
+      intent: 'ai-action',
+      businessDomain: 'ai',
+    },
+  }))
+
+  appendUniqueCommands(commands, navigationCommands)
+  appendUniqueCommands(commands, actionCommands)
+  appendUniqueCommands(commands, aiCommands)
+
   return commands;
 };
 
 export function CommandPalette({ open, onOpenChange }: CommandPaletteProps): JSX.Element {
   const navigate = useNavigate()
   const agrarEnabled = useFeature('agrar')
+  const navigationShortcuts = useNavigationShortcuts()
   const [search, setSearch] = useState<string>('')
 
   const commands = useMemo<PaletteCommand[]>(() => {
-    const baseCommands = createCommands(navigate, agrarEnabled)
+    const baseCommands = createCommands(navigate, agrarEnabled, navigationShortcuts)
     return agrarEnabled ? baseCommands : baseCommands.filter((cmd) => cmd.category !== 'Agrar')
-  }, [agrarEnabled, navigate])
+  }, [agrarEnabled, navigate, navigationShortcuts])
 
   const filteredCommands = useMemo(() => {
     const searchLower = search.trim().toLowerCase()
@@ -345,8 +426,13 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps): JSX
                   >
                     <Icon className="mr-2 h-4 w-4" />
                     <span>{cmd.label}</span>
+                    {cmd.shortcut && (
+                      <kbd className="ml-auto rounded bg-muted px-1 text-xs text-muted-foreground">
+                        {cmd.shortcut}
+                      </kbd>
+                    )}
                     {cmd.mcp?.requiredScopes && (
-                      <span className="ml-auto text-xs text-muted-foreground">{cmd.mcp.requiredScopes[0]}</span>
+                      <span className="ml-2 text-xs text-muted-foreground">{cmd.mcp.requiredScopes[0]}</span>
                     )}
                   </CommandItem>
                 )

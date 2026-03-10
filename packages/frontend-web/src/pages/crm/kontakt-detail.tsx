@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Save, Loader2, ArrowLeft, User, Trash2 } from 'lucide-react'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { queryKeys, mutationKeys } from '@/lib/query'
@@ -231,16 +231,16 @@ export default function KontaktDetailPage(): JSX.Element {
             </div>
             <div>
               <Label htmlFor="type">{t('crud.fields.type')}</Label>
-              <Select value={contact.type || 'customer'} onValueChange={(value) => updateField('type', value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder={t('crud.tooltips.placeholders.selectType')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="customer">{getEntityTypeLabel(t, 'customer', 'Kunde')}</SelectItem>
-                  <SelectItem value="supplier">{getEntityTypeLabel(t, 'supplier', 'Lieferant')}</SelectItem>
-                  <SelectItem value="farmer">{getEntityTypeLabel(t, 'farmer', 'Landwirt')}</SelectItem>
-                </SelectContent>
-              </Select>
+              <NativeSelect
+                value={contact.type || 'customer'}
+                onValueChange={(value) => updateField('type', value)}
+                options={[
+                  { value: 'customer', label: getEntityTypeLabel(t, 'customer', 'Kunde') },
+                  { value: 'supplier', label: getEntityTypeLabel(t, 'supplier', 'Lieferant') },
+                  { value: 'farmer', label: getEntityTypeLabel(t, 'farmer', 'Landwirt') },
+                ]}
+                placeholder={t('crud.tooltips.placeholders.selectType')}
+              />
             </div>
           </CardContent>
         </Card>

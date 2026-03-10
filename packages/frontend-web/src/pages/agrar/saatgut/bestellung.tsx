@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Textarea } from '@/components/ui/textarea'
 import { AlertTriangle, Calendar, CheckCircle, MapPin, Package, Save, ShoppingCart } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
@@ -198,46 +198,32 @@ export default function SaatgutBestellungPage(): JSX.Element {
             <CardContent className="space-y-4">
               <div>
                 <Label>Kunde</Label>
-                <Select value={bestellung.kundeId || undefined} onValueChange={handleKundeChange}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Kunde auswählen" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {kundenListe.map(k => (
-                      <SelectItem key={k.id} value={k.id}>{k.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <NativeSelect
+                value={bestellung.kundeId}
+                onValueChange={handleKundeChange}
+                placeholder="Kunde auswaehlen"
+                options={kundenListe.map((k) => ({ value: k.id, label: k.name }))}
+              />
               </div>
               {bestellung.kundeId && (
                 <div>
                   <Label>Schlag</Label>
-                  <Select value={bestellung.schlagId || undefined} onValueChange={handleSchlagChange}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Schlag auswählen" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {schlaegeListe.map(s => (
-                        <SelectItem key={s.id} value={s.id}>{s.name} ({s.flaeche} ha)</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <NativeSelect
+                  value={bestellung.schlagId}
+                  onValueChange={handleSchlagChange}
+                  placeholder="Schlag auswaehlen"
+                  options={schlaegeListe.map((s) => ({ value: s.id, label: `${s.name} (${s.flaeche} ha)` }))}
+                />
                 </div>
               )}
               <div>
                 <Label>Kulturart</Label>
-                <Select value={bestellung.kulturArt} onValueChange={handleKulturArtChange}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Kulturart auswählen" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {kulturArten.map(kultur => (
-                      <SelectItem key={kultur.value} value={kultur.value}>
-                        {kultur.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <NativeSelect
+                value={bestellung.kulturArt}
+                onValueChange={handleKulturArtChange}
+                placeholder="Kulturart auswaehlen"
+                options={kulturArten}
+              />
               </div>
               {bestellung.kulturArt && (
                 <div className="p-4 bg-blue-50 rounded-lg">
@@ -263,20 +249,17 @@ export default function SaatgutBestellungPage(): JSX.Element {
             <CardContent className="space-y-4">
               <div>
                 <Label>Verfügbare Sorten für {kulturArten.find(k => k.value === bestellung.kulturArt)?.label}</Label>
-                <Select value={bestellung.sorte} onValueChange={handleSorteChange}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sorte auswählen" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {saatgutOptionen
-                      .filter(s => s.kultur === bestellung.kulturArt)
-                      .map(saatgut => (
-                        <SelectItem key={saatgut.id} value={saatgut.sorte}>
-                          {saatgut.name} - {saatgut.verfuegbar} kg verfügbar - €{saatgut.preis}/kg
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
+                <NativeSelect
+                value={bestellung.sorte}
+                onValueChange={handleSorteChange}
+                placeholder="Sorte auswaehlen"
+                options={saatgutOptionen
+                  .filter((s) => s.kultur === bestellung.kulturArt)
+                  .map((saatgut) => ({
+                    value: saatgut.sorte,
+                    label: `${saatgut.name} - ${saatgut.verfuegbar} kg verfuegbar - EUR${saatgut.preis}/kg`,
+                  }))}
+              />
               </div>
               {bestellung.saatgutName && (
                 <div className="p-4 bg-green-50 rounded-lg">
@@ -331,15 +314,14 @@ export default function SaatgutBestellungPage(): JSX.Element {
                 </div>
                 <div>
                   <Label>Einheit</Label>
-                  <Select value={bestellung.einheit} onValueChange={(value) => setBestellung(prev => ({ ...prev, einheit: value }))}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="kg">kg</SelectItem>
-                      <SelectItem value="t">t</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <NativeSelect
+                    value={bestellung.einheit}
+                    onValueChange={(value) => setBestellung(prev => ({ ...prev, einheit: value }))}
+                    options={[
+                      { value: 'kg', label: 'kg' },
+                      { value: 't', label: 't' },
+                    ]}
+                  />
                 </div>
               </div>
               </CardContent>
@@ -368,16 +350,15 @@ export default function SaatgutBestellungPage(): JSX.Element {
                 </div>
                 <div>
                   <Label>Priorität</Label>
-                  <Select value={bestellung.prioritaet} onValueChange={(value: any) => setBestellung(prev => ({ ...prev, prioritaet: value }))}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="normal">Normal</SelectItem>
-                      <SelectItem value="hoch">Hoch</SelectItem>
-                      <SelectItem value="dringend">Dringend</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <NativeSelect
+                  value={bestellung.prioritaet}
+                  onValueChange={(value) => setBestellung(prev => ({ ...prev, prioritaet: value as SaatgutBestellungData['prioritaet'] }))}
+                  options={[
+                    { value: 'normal', label: 'Normal' },
+                    { value: 'hoch', label: 'Hoch' },
+                    { value: 'dringend', label: 'Dringend' },
+                  ]}
+                />
                 </div>
               </div>
               <div>

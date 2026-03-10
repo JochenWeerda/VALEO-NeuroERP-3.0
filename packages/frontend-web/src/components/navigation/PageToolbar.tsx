@@ -1,14 +1,8 @@
-import { ReactNode } from 'react'
+import { ReactNode, useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import { MoreHorizontal } from 'lucide-react'
 import { createMCPMetadata } from '@/design/mcp-schemas/component-metadata'
+import { useActionDispatchOptional } from '@/features/ki-usability'
 
 export interface ToolbarAction {
   id: string
@@ -65,8 +59,39 @@ export function PageToolbar({
   rightSlot,
   mcpContext,
 }: PageToolbarProps): JSX.Element {
+  const dispatchContext = useActionDispatchOptional()
+  const [overflowOpen, setOverflowOpen] = useState(false)
+  const overflowRef = useRef<HTMLDivElement>(null)
   const hasSubtitle = typeof subtitle === 'string' && subtitle.length > 0
   const hasRightSlot = rightSlot !== undefined && rightSlot !== null
+  const allActions = [...primaryActions, ...overflowActions]
+
+  useEffect(() => {
+    const handleOutsideClick = (event: MouseEvent): void => {
+      if (overflowRef.current && !overflowRef.current.contains(event.target as Node)) {
+        setOverflowOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleOutsideClick)
+    return () => document.removeEventListener('mousedown', handleOutsideClick)
+  }, [])
+
+  useEffect(() => {
+    if (!dispatchContext || allActions.length === 0) {
+      return
+    }
+
+    const unregisterHandlers = allActions.map((action) =>
+      dispatchContext.registerHandler(action.id, async () => {
+        await action.onClick()
+      })
+    )
+
+    return () => {
+      unregisterHandlers.forEach((unregister) => unregister())
+    }
+  }, [allActions, dispatchContext])
 
   return (
     <div
@@ -114,37 +139,46 @@ export function PageToolbar({
         )}
 
         {overflowActions.length > 0 && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" aria-label="More actions">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
-              {overflowActions.map((action, idx) => {
-                const hasShortcut = typeof action.shortcut === 'string' && action.shortcut.length > 0
-                const iconNode = action.icon ?? null
-                const iconMargin = iconNode !== null ? 'ml-2' : undefined
+          <div className="relative" ref={overflowRef}>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="More actions"
+              onClick={() => setOverflowOpen((current) => !current)}
+            >
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+            {overflowOpen && (
+              <div className="absolute right-0 top-full z-50 mt-2 w-56 rounded-lg border bg-popover p-1 shadow-lg">
+                {overflowActions.map((action, idx) => {
+                  const hasShortcut = typeof action.shortcut === 'string' && action.shortcut.length > 0
+                  const iconNode = action.icon ?? null
+                  const destructive = action.variant === 'destructive'
 
-                return (
-                  <div key={action.id}>
-                    {idx > 0 && action.variant === 'destructive' && <DropdownMenuSeparator />}
-                    <DropdownMenuItem
-                      onClick={action.onClick}
-                      disabled={action.disabled === true}
-                      className={action.variant === 'destructive' ? 'text-destructive' : ''}
-                      data-mcp-action={action.id}
-                      data-mcp-intent={action.mcp?.intent}
-                    >
-                      {iconNode}
-                      <span className={iconMargin}>{action.label}</span>
-                      {hasShortcut && <kbd className="ml-auto text-xs">{action.shortcut}</kbd>}
-                    </DropdownMenuItem>
-                  </div>
-                )
-              })}
-            </DropdownMenuContent>
-          </DropdownMenu>
+                  return (
+                    <div key={action.id}>
+                      {idx > 0 && destructive && <div className="my-1 h-px bg-border" />}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          action.onClick()
+                          setOverflowOpen(false)
+                        }}
+                        disabled={action.disabled === true}
+                        className={`flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-accent disabled:pointer-events-none disabled:opacity-50 ${destructive ? 'text-destructive' : ''}`}
+                        data-mcp-action={action.id}
+                        data-mcp-intent={action.mcp?.intent}
+                      >
+                        {iconNode}
+                        <span className="flex-1">{action.label}</span>
+                        {hasShortcut && <kbd className="text-xs">{action.shortcut}</kbd>}
+                      </button>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
         )}
 
         {hasRightSlot && <div className="flex items-center">{rightSlot}</div>}

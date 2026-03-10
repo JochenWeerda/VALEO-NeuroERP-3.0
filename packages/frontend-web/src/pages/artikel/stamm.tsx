@@ -54,13 +54,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import {
   articleService,
   type Article,
@@ -213,6 +207,60 @@ const DEFAULT_ARTIKEL: ArtikelData = {
 }
 
 const DEFAULT_TENANT_ID = import.meta.env.VITE_TENANT_ID ?? '00000000-0000-0000-0000-000000000001'
+
+const statusOptions = [
+  { value: 'aktiv', label: 'Aktiv' },
+  { value: 'auslaufend', label: 'Auslaufend' },
+]
+
+const kategorieOptions = [
+  { value: 'Saatgut', label: 'Saatgut' },
+  { value: 'Duenger', label: 'Duenger' },
+  { value: 'PSM', label: 'Pflanzenschutzmittel' },
+  { value: 'Biostimulanzien', label: 'Biostimulanzien' },
+  { value: 'Futtermittel', label: 'Futtermittel' },
+  { value: 'Silo', label: 'Silo' },
+  { value: 'Sonstige', label: 'Sonstige' },
+]
+
+const einheitOptions = [
+  { value: 't', label: 'Tonne (t)' },
+  { value: 'kg', label: 'Kilogramm (kg)' },
+  { value: 'l', label: 'Liter (l)' },
+  { value: 'Stk', label: 'Stueck (Stk)' },
+  { value: 'ha', label: 'Hektar (ha)' },
+]
+
+const gefahrgutKlasseOptions = [
+  { value: 'Klasse 1', label: 'Klasse 1 - Explosivstoffe' },
+  { value: 'Klasse 2', label: 'Klasse 2 - Gase' },
+  { value: 'Klasse 3', label: 'Klasse 3 - Entzuendbare Fluessigkeiten' },
+  { value: 'Klasse 4', label: 'Klasse 4 - Entzuendbare Feststoffe' },
+  { value: 'Klasse 5', label: 'Klasse 5 - Oxidierende Mittel' },
+  { value: 'Klasse 6', label: 'Klasse 6 - Giftige Stoffe' },
+  { value: 'Klasse 7', label: 'Klasse 7 - Radioaktive Stoffe' },
+  { value: 'Klasse 8', label: 'Klasse 8 - Aetzende Stoffe' },
+  { value: 'Klasse 9', label: 'Klasse 9 - Verschiedene gefaehrliche Stoffe' },
+]
+
+const verpackungsgruppeOptions = [
+  { value: 'I', label: 'I - Grosser Gefahr' },
+  { value: 'II', label: 'II - Mittlerer Gefahr' },
+  { value: 'III', label: 'III - Geringer Gefahr' },
+]
+
+const bioKennzeichnungOptions = [
+  { value: 'EU-Bio', label: 'EU-Bio' },
+  { value: 'Demo', label: 'Demo' },
+  { value: 'Bio', label: 'Bio' },
+  { value: 'Konventionell', label: 'Konventionell' },
+]
+
+const jaNeinUnbekanntOptions = [
+  { value: 'Ja', label: 'Ja' },
+  { value: 'Nein', label: 'Nein' },
+  { value: 'Unbekannt', label: 'Unbekannt' },
+]
 
 // ============================================================================
 // Helper Functions
@@ -534,20 +582,13 @@ export default function ArtikelStammPage(): JSX.Element {
                   </div>
                   <div>
                     <Label>Status</Label>
-                    <Select
+                    <NativeSelect
                       value={artikel.status}
-                      onValueChange={(value: 'aktiv' | 'auslaufend') =>
-                        setArtikel((prev) => ({ ...prev, status: value }))
+                      onValueChange={(value) =>
+                        setArtikel((prev) => ({ ...prev, status: value as ArtikelData['status'] }))
                       }
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="aktiv">Aktiv</SelectItem>
-                        <SelectItem value="auslaufend">Auslaufend</SelectItem>
-                      </SelectContent>
-                    </Select>
+                      options={statusOptions}
+                    />
                   </div>
                 </div>
                 <div>
@@ -599,23 +640,11 @@ export default function ArtikelStammPage(): JSX.Element {
                   </div>
                   <div>
                     <Label>Kategorie</Label>
-                    <Select
+                    <NativeSelect
                       value={artikel.kategorie}
                       onValueChange={(value) => setArtikel((prev) => ({ ...prev, kategorie: value }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Saatgut">Saatgut</SelectItem>
-                        <SelectItem value="Duenger">Duenger</SelectItem>
-                        <SelectItem value="PSM">Pflanzenschutzmittel</SelectItem>
-                        <SelectItem value="Biostimulanzien">Biostimulanzien</SelectItem>
-                        <SelectItem value="Futtermittel">Futtermittel</SelectItem>
-                        <SelectItem value="Silo">Silo</SelectItem>
-                        <SelectItem value="Sonstige">Sonstige</SelectItem>
-                      </SelectContent>
-                    </Select>
+                      options={kategorieOptions}
+                    />
                   </div>
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
@@ -628,21 +657,11 @@ export default function ArtikelStammPage(): JSX.Element {
                   </div>
                   <div>
                     <Label>Einheit</Label>
-                    <Select
+                    <NativeSelect
                       value={artikel.einheit}
                       onValueChange={(value) => setArtikel((prev) => ({ ...prev, einheit: value }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="t">Tonne (t)</SelectItem>
-                        <SelectItem value="kg">Kilogramm (kg)</SelectItem>
-                        <SelectItem value="l">Liter (l)</SelectItem>
-                        <SelectItem value="Stk">Stueck (Stk)</SelectItem>
-                        <SelectItem value="ha">Hektar (ha)</SelectItem>
-                      </SelectContent>
-                    </Select>
+                      options={einheitOptions}
+                    />
                   </div>
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
@@ -838,26 +857,12 @@ export default function ArtikelStammPage(): JSX.Element {
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
                   <Label>Gefahrgutklasse</Label>
-                  <Select
+                  <NativeSelect
                     value={artikel.gefahrgutklasse}
                     onValueChange={(value) => setArtikel((prev) => ({ ...prev, gefahrgutklasse: value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Auswaehlen..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">Keine</SelectItem>
-                      <SelectItem value="Klasse 1">Klasse 1 - Explosivstoffe</SelectItem>
-                      <SelectItem value="Klasse 2">Klasse 2 - Gase</SelectItem>
-                      <SelectItem value="Klasse 3">Klasse 3 - Entzuendbare Flüssigkeiten</SelectItem>
-                      <SelectItem value="Klasse 4">Klasse 4 - Entzuendbare Feststoffe</SelectItem>
-                      <SelectItem value="Klasse 5">Klasse 5 - Oxidierende Mittel</SelectItem>
-                      <SelectItem value="Klasse 6">Klasse 6 - Giftige Stoffe</SelectItem>
-                      <SelectItem value="Klasse 7">Klasse 7 - Radioaktive Stoffe</SelectItem>
-                      <SelectItem value="Klasse 8">Klasse 8 - Aetzende Stoffe</SelectItem>
-                      <SelectItem value="Klasse 9">Klasse 9 - Verschiedene gefaehrliche Stoffe</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    placeholder="Auswaehlen..."
+                    options={gefahrgutKlasseOptions}
+                  />
                 </div>
                 <div>
                   <Label>UN-Nummer</Label>
@@ -869,22 +874,14 @@ export default function ArtikelStammPage(): JSX.Element {
                 </div>
                 <div>
                   <Label>Verpackungsgruppe</Label>
-                  <Select
+                  <NativeSelect
                     value={artikel.gefahrgutVerpackungsgruppe}
                     onValueChange={(value) =>
                       setArtikel((prev) => ({ ...prev, gefahrgutVerpackungsgruppe: value }))
                     }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Auswaehlen..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">Keine</SelectItem>
-                      <SelectItem value="I">I - Grosser Gefahr</SelectItem>
-                      <SelectItem value="II">II - Mittlerer Gefahr</SelectItem>
-                      <SelectItem value="III">III - Geringer Gefahr</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    placeholder="Auswaehlen..."
+                    options={verpackungsgruppeOptions}
+                  />
                 </div>
                 <div>
                   <Label>Gefahrgut-Anhaenge</Label>
@@ -927,21 +924,12 @@ export default function ArtikelStammPage(): JSX.Element {
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
                   <Label>Bio-Kennzeichnung</Label>
-                  <Select
+                  <NativeSelect
                     value={artikel.kennzeichnungBio}
                     onValueChange={(value) => setArtikel((prev) => ({ ...prev, kennzeichnungBio: value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Auswaehlen..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="">Keine</SelectItem>
-                      <SelectItem value="EU-Bio">EU-Bio</SelectItem>
-                      <SelectItem value="Demo">Demo</SelectItem>
-                      <SelectItem value="Bio">Bio</SelectItem>
-                      <SelectItem value="Konventionell">Konventionell</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    placeholder="Auswaehlen..."
+                    options={bioKennzeichnungOptions}
+                  />
                 </div>
                 <div className="flex items-center pt-6">
                   <label className="flex items-center gap-2">
@@ -955,37 +943,23 @@ export default function ArtikelStammPage(): JSX.Element {
                 </div>
                 <div>
                   <Label>Vegan</Label>
-                  <Select
+                  <NativeSelect
                     value={artikel.kennzeichnungVegan}
                     onValueChange={(value) => setArtikel((prev) => ({ ...prev, kennzeichnungVegan: value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Auswaehlen..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Ja">Ja</SelectItem>
-                      <SelectItem value="Nein">Nein</SelectItem>
-                      <SelectItem value="Unbekannt">Unbekannt</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    placeholder="Auswaehlen..."
+                    options={jaNeinUnbekanntOptions}
+                  />
                 </div>
                 <div>
                   <Label>Vegetarisch</Label>
-                  <Select
+                  <NativeSelect
                     value={artikel.kennzeichnungVegetarisch}
                     onValueChange={(value) =>
                       setArtikel((prev) => ({ ...prev, kennzeichnungVegetarisch: value }))
                     }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Auswaehlen..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Ja">Ja</SelectItem>
-                      <SelectItem value="Nein">Nein</SelectItem>
-                      <SelectItem value="Unbekannt">Unbekannt</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    placeholder="Auswaehlen..."
+                    options={jaNeinUnbekanntOptions}
+                  />
                 </div>
                 <div>
                   <Label>Herkunftskennzeichnung</Label>
