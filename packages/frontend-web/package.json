@@ -29,6 +29,7 @@
     "storybook:smoke": "storybook dev -p 6006 --ci --smoke-test",
     "build-storybook": "storybook build",
     "typecheck": "pnpm run type-check",
+    "check:routing-integrity": "node scripts/check-routing-integrity.mjs",
     "test:e2e": "playwright test",
     "test:e2e:routing-smoke": "playwright test tests/e2e/main-routes-smoke.spec.ts",
     "test:e2e:smoke-all": "node scripts/harvest-routes.mjs && playwright test tests/e2e/all-routes-smoke.spec.ts --workers=1 && node scripts/smoke-report-html.mjs",
