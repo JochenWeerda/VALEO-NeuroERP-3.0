@@ -22,4 +22,8 @@
 - [ADR-020 Cross-Domain-Referenzmodell für Kontrakt, Charge, Qualität und Settlement](adr-020-cross-domain-referenzmodell-kontrakt-charge-qualitaet-settlement.md)
 - [ADR-021 Tenant-weite Datenresidenz- und Exportregeln](adr-021-tenant-weite-datenresidenz-und-exportregeln.md)
 - [ADR-022 Regelmodell für Reklamation, Abzug und Ausnahmebehandlung](adr-022-regelmodell-reklamation-abzug-ausnahmebehandlung.md)
+- [ADR-023 Governance für Rollen- und Berechtigungsvererbung](adr-023-governance-rollen-berechtigungsvererbung.md)
+- [ADR-024 Datenprodukt-Strategie für Sustainability- und Compliance-Reporting](adr-024-datenprodukt-strategie-sustainability-compliance-reporting.md)
+- [ADR-025 Standard für konfliktarme Parallelbearbeitung in Kernprozessen](adr-025-standard-konfliktarme-parallelbearbeitung.md)
+- [ADR-026 Modell für Import-/Staging-/Prüfpipelines](adr-026-modell-import-staging-pruefpipelines.md)
 - [ADR-CRM-001](ADR-CRM-001.md)

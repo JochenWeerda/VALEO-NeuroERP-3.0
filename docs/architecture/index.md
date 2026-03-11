@@ -29,6 +29,10 @@
 | [ADR-020](../adr/adr-020-cross-domain-referenzmodell-kontrakt-charge-qualitaet-settlement.md) | Cross-Domain-Referenzmodell Kontrakt / Charge / Qualität / Settlement | Accepted | Domain Core |
 | [ADR-021](../adr/adr-021-tenant-weite-datenresidenz-und-exportregeln.md) | Tenant-weite Datenresidenz- und Exportregeln | Accepted | Tenant & Governance |
 | [ADR-022](../adr/adr-022-regelmodell-reklamation-abzug-ausnahmebehandlung.md) | Regelmodell für Reklamation, Abzug und Ausnahmebehandlung | Accepted | Quality & Exception Handling |
+| [ADR-023](../adr/adr-023-governance-rollen-berechtigungsvererbung.md) | Governance für Rollen- und Berechtigungsvererbung | Accepted | Tenant & Governance |
+| [ADR-024](../adr/adr-024-datenprodukt-strategie-sustainability-compliance-reporting.md) | Datenprodukt-Strategie für Sustainability- und Compliance-Reporting | Accepted | Data & Analytics |
+| [ADR-025](../adr/adr-025-standard-konfliktarme-parallelbearbeitung.md) | Standard für konfliktarme Parallelbearbeitung in Kernprozessen | Accepted | Process Reliability |
+| [ADR-026](../adr/adr-026-modell-import-staging-pruefpipelines.md) | Modell für Import-/Staging-/Prüfpipelines | Accepted | Data Intake |
 
 ## Themencluster
 
@@ -50,6 +54,7 @@
 - [ADR-006 Read-Model / Query-Contract-Prinzip](../adr/adr-006-read-model-query-contract-prinzip.md)
 - [ADR-008 Eventing-/Outbox-Standard](../adr/adr-008-eventing-outbox-standard.md)
 - [ADR-015 Analytics-/Benchmark-Datenproduktmodell](../adr/adr-015-analytics-benchmark-datenproduktmodell.md)
+- [ADR-024 Datenprodukt-Strategie für Sustainability- und Compliance-Reporting](../adr/adr-024-datenprodukt-strategie-sustainability-compliance-reporting.md)
 - [Module Resolution Architecture](module-resolution-architecture.md)
 - [React Lifecycle Architecture](react-lifecycle-architecture.md)
 
@@ -73,6 +78,15 @@
 ### Tenant & Governance
 - [ADR-021 Tenant-weite Datenresidenz- und Exportregeln](../adr/adr-021-tenant-weite-datenresidenz-und-exportregeln.md)
 - [ADR-013 Tenant-/Genossenschaftsmodell](../adr/adr-013-tenant-genossenschaftsmodell.md)
+- [ADR-023 Governance für Rollen- und Berechtigungsvererbung](../adr/adr-023-governance-rollen-berechtigungsvererbung.md)
+
+### Process Reliability
+- [ADR-025 Standard für konfliktarme Parallelbearbeitung in Kernprozessen](../adr/adr-025-standard-konfliktarme-parallelbearbeitung.md)
+- [ADR-006 Read-Model / Query-Contract-Prinzip](../adr/adr-006-read-model-query-contract-prinzip.md)
+
+### Data Intake
+- [ADR-026 Modell für Import-/Staging-/Prüfpipelines](../adr/adr-026-modell-import-staging-pruefpipelines.md)
+- [ADR-012 Dokument-/Audit-Evidence-Modell](../adr/adr-012-dokument-audit-evidence-modell.md)
 
 ### UX & Process UI
 - [ADR-011 UI-Maskenstrategie](../adr/adr-011-ui-maskenstrategie.md)
@@ -104,9 +118,9 @@
 
 ## Nächste ADR-Kandidaten
 
-Die nächsten sinnvollen Entscheidungen leiten sich direkt aus dem Zielbild ab:
+Die nächste sinnvolle ADR-Pipeline verschiebt sich jetzt von Grundsatzarchitektur zu tieferer Domänenausprägung:
 
-1. Governance für Rollen- und Berechtigungsvererbung im Verbundmodell
-2. Datenprodukt-Strategie für Sustainability- und Compliance-Reporting
-3. Standard für konfliktarme Parallelbearbeitung in Kernprozessen
-4. Modell für Import-/Staging-/Prüfpipelines
+1. Lifecycle-Modell für Kontraktänderungen, Amendments und Versionen
+2. Referenzmodell für Chargen-/Partienverschneidung über Lager, Qualität und Settlement
+3. Standards für Explainability von KI- und Policy-Entscheidungen
+4. Governance für Simulationsdaten und Sandbox-Isolation
