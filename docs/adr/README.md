@@ -15,4 +15,7 @@
 - [ADR-013 Tenant-/Genossenschaftsmodell](adr-013-tenant-genossenschaftsmodell.md)
 - [ADR-014 Integrationsgrenzen API / EDI / MCP / Partneradapter](adr-014-integrationsgrenzen-api-edi-mcp-partneradapter.md)
 - [ADR-015 Analytics-/Benchmark-Datenproduktmodell](adr-015-analytics-benchmark-datenproduktmodell.md)
+- [ADR-016 IoT-/Telemetrie-Modell](adr-016-iot-telemetrie-modell.md)
+- [ADR-017 Governance für Pricing-/Marktdatenquellen](adr-017-governance-pricing-marktdatenquellen.md)
+- [ADR-018 Qualitäts-/Labordatenmodell](adr-018-qualitaets-labordatenmodell.md)
 - [ADR-CRM-001](ADR-CRM-001.md)
