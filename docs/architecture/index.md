@@ -25,11 +25,16 @@
 | [ADR-016](../adr/adr-016-iot-telemetrie-modell.md) | IoT-/Telemetrie-Modell | Accepted | Operations & Telemetry |
 | [ADR-017](../adr/adr-017-governance-pricing-marktdatenquellen.md) | Governance für Pricing-/Marktdatenquellen | Accepted | Pricing & Market Data |
 | [ADR-018](../adr/adr-018-qualitaets-labordatenmodell.md) | Qualitäts-/Labordatenmodell | Accepted | Quality Core |
+| [ADR-019](../adr/adr-019-sicherheitsmodell-externe-agenten-delegierte-aktionen.md) | Sicherheitsmodell für externe Agenten und delegierte Aktionen | Accepted | Agent Security |
+| [ADR-020](../adr/adr-020-cross-domain-referenzmodell-kontrakt-charge-qualitaet-settlement.md) | Cross-Domain-Referenzmodell Kontrakt / Charge / Qualität / Settlement | Accepted | Domain Core |
+| [ADR-021](../adr/adr-021-tenant-weite-datenresidenz-und-exportregeln.md) | Tenant-weite Datenresidenz- und Exportregeln | Accepted | Tenant & Governance |
+| [ADR-022](../adr/adr-022-regelmodell-reklamation-abzug-ausnahmebehandlung.md) | Regelmodell für Reklamation, Abzug und Ausnahmebehandlung | Accepted | Quality & Exception Handling |
 
 ## Themencluster
 
 ### Domain Core
 - [ADR-003 Canonical Domain Model](../adr/adr-003-canonical-domain-model.md)
+- [ADR-020 Cross-Domain-Referenzmodell für Kontrakt, Charge, Qualität und Settlement](../adr/adr-020-cross-domain-referenzmodell-kontrakt-charge-qualitaet-settlement.md)
 - [Business Logic Architecture](business-logic-architecture.md)
 - [Fundamental Architecture Principles](fundamental-architecture-principles.md)
 
@@ -54,11 +59,20 @@
 
 ### Quality Core
 - [ADR-018 Qualitäts-/Labordatenmodell](../adr/adr-018-qualitaets-labordatenmodell.md)
+- [ADR-022 Regelmodell für Reklamation, Abzug und Ausnahmebehandlung](../adr/adr-022-regelmodell-reklamation-abzug-ausnahmebehandlung.md)
 - [ADR-012 Dokument-/Audit-Evidence-Modell](../adr/adr-012-dokument-audit-evidence-modell.md)
 
 ### Operations & Telemetry
 - [ADR-016 IoT-/Telemetrie-Modell](../adr/adr-016-iot-telemetrie-modell.md)
 - [ADR-008 Eventing-/Outbox-Standard](../adr/adr-008-eventing-outbox-standard.md)
+
+### Agent Security
+- [ADR-019 Sicherheitsmodell für externe Agenten und delegierte Aktionen](../adr/adr-019-sicherheitsmodell-externe-agenten-delegierte-aktionen.md)
+- [ADR-007 Agent-/Tool-Contract-Governance](../adr/adr-007-agent-tool-contract-governance.md)
+
+### Tenant & Governance
+- [ADR-021 Tenant-weite Datenresidenz- und Exportregeln](../adr/adr-021-tenant-weite-datenresidenz-und-exportregeln.md)
+- [ADR-013 Tenant-/Genossenschaftsmodell](../adr/adr-013-tenant-genossenschaftsmodell.md)
 
 ### UX & Process UI
 - [ADR-011 UI-Maskenstrategie](../adr/adr-011-ui-maskenstrategie.md)
@@ -92,7 +106,7 @@
 
 Die nächsten sinnvollen Entscheidungen leiten sich direkt aus dem Zielbild ab:
 
-1. Sicherheitsmodell für externe Agenten und delegierte Aktionen
-2. Cross-Domain-Referenzmodell für Kontrakt, Charge, Qualität und Settlement
-3. Tenant-weite Datenresidenz- und Exportregeln
-4. Regelmodell für Reklamation, Abzug und Ausnahmebehandlung
+1. Governance für Rollen- und Berechtigungsvererbung im Verbundmodell
+2. Datenprodukt-Strategie für Sustainability- und Compliance-Reporting
+3. Standard für konfliktarme Parallelbearbeitung in Kernprozessen
+4. Modell für Import-/Staging-/Prüfpipelines
