@@ -10,4 +10,6 @@
 - [ADR-008 Eventing-/Outbox-Standard](adr-008-eventing-outbox-standard.md)
 - [ADR-009 Workflow-Versionierung und Migration](adr-009-workflow-versionierung-und-migration.md)
 - [ADR-010 Policy-Override-Modell](adr-010-policy-override-modell.md)
+- [ADR-011 UI-Maskenstrategie](adr-011-ui-maskenstrategie.md)
+- [ADR-012 Dokument-/Audit-Evidence-Modell](adr-012-dokument-audit-evidence-modell.md)
 - [ADR-CRM-001](ADR-CRM-001.md)
