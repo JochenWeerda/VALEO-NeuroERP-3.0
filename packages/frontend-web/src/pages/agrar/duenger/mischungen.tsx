@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
 import { AlertTriangle, Calculator, ChevronDown, ChevronUp, FlaskConical, Plus, Save, Trash2 } from 'lucide-react'
@@ -341,21 +341,15 @@ export default function DuengerMischungenPage(): JSX.Element {
                   <div className="grid gap-4 md:grid-cols-3">
                     <div>
                       <Label>Dünger-Komponente</Label>
-                      <Select
+                      <NativeSelect
                         value={komp.komponente_id}
                         onValueChange={(value) => updateKomponente(index, 'komponente_id', value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Komponente auswählen" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {verfuegbareKomponenten.map(k => (
-                            <SelectItem key={k.id} value={k.id}>
-                              {k.name} (N:{k.n_gehalt} P:{k.p_gehalt} K:{k.k_gehalt})
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                        placeholder="Komponente auswaehlen"
+                        options={verfuegbareKomponenten.map((komponente) => ({
+                          value: komponente.id,
+                          label: `${komponente.name} (N:${komponente.n_gehalt} P:${komponente.p_gehalt} K:${komponente.k_gehalt})`,
+                        }))}
+                      />
                     </div>
                     <div>
                       <Label>Anteil (%)</Label>

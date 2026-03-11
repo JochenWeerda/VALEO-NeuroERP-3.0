@@ -1,4 +1,5 @@
 import { type ComponentType, type FormEvent, type ReactNode, type SVGProps, useState } from 'react'
+import { clsx } from 'clsx'
 import { useMutation } from '@tanstack/react-query'
 import { NavLink } from 'react-router-dom'
 import {
@@ -15,7 +16,6 @@ import {
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { cn } from '@/lib/utils'
 import { toast } from '@/hooks/use-toast'
 import {
   type GlobalSearchSummary,
@@ -254,14 +254,14 @@ export default function AppShell({ children }: AppShellProps): ReactNode {
 
       <div className="lg:hidden" aria-hidden={!sidebarOpen}>
         <div
-          className={cn(
+          className={clsx(
             'fixed inset-0 z-40 bg-slate-900/60 transition-opacity',
             sidebarOpen ? 'pointer-events-auto opacity-100' : 'pointer-events-none opacity-0'
           )}
           onClick={closeSidebar}
         />
         <nav
-          className={cn(
+          className={clsx(
             'fixed inset-y-0 left-0 z-50 flex w-72 max-w-full flex-col bg-white shadow-xl transition-transform duration-200',
             sidebarOpen ? 'translate-x-0' : '-translate-x-full'
           )}
@@ -289,7 +289,7 @@ export default function AppShell({ children }: AppShellProps): ReactNode {
                     to={item.to}
                     end={item.end}
                     className={({ isActive }): string =>
-                      cn(
+                      clsx(
                         'flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors',
                         isActive
                           ? 'bg-primary/10 text-primary'
@@ -327,7 +327,7 @@ export default function AppShell({ children }: AppShellProps): ReactNode {
                     to={item.to}
                     end={item.end}
                     className={({ isActive }): string =>
-                      cn(
+                      clsx(
                         'flex items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium transition-colors',
                         isActive
                           ? 'bg-primary/10 text-primary'

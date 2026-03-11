@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -435,35 +435,29 @@ export default function SchlagkarteiPage(): JSX.Element {
                 {/* Kundenauswahl (Multi-Tenant) */}
                 <div>
                   <label className="text-sm font-medium mb-2 block">Kunde/Landwirt</label>
-                  <Select value={selectedKundeId} onValueChange={setSelectedKundeId}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Kunde auswählen..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {kunden?.map(kunde => (
-                        <SelectItem key={kunde.id} value={kunde.id}>
-                          {kunde.name}
-                          {kunde.id !== 'all' && ` (${kunde.schlagCount} Schläge)`}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <NativeSelect
+                    value={selectedKundeId}
+                    onValueChange={setSelectedKundeId}
+                    options={(kunden ?? []).map((kunde) => ({
+                      value: kunde.id,
+                      label: kunde.id !== 'all' ? `${kunde.name} (${kunde.schlagCount} Schlaege)` : kunde.name,
+                    }))}
+                  />
                 </div>
 
                 {/* Statusfilter */}
                 <div>
                   <label className="text-sm font-medium mb-2 block">Status</label>
-                  <Select value={filterStatus} onValueChange={setFilterStatus}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="alle">Alle Status</SelectItem>
-                      <SelectItem value="aktiv">Aktiv</SelectItem>
-                      <SelectItem value="stillgelegt">Stillgelegt</SelectItem>
-                      <SelectItem value="brache">Brache</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <NativeSelect
+                    value={filterStatus}
+                    onValueChange={setFilterStatus}
+                    options={[
+                      { value: 'alle', label: 'Alle Status' },
+                      { value: 'aktiv', label: 'Aktiv' },
+                      { value: 'stillgelegt', label: 'Stillgelegt' },
+                      { value: 'brache', label: 'Brache' },
+                    ]}
+                  />
                 </div>
 
                 {/* Suchfeld */}

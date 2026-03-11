@@ -38,6 +38,22 @@ export type NutrientExportResponse = {
   generated_at: string
 }
 
+const EMPTY_HAZARD_EXPORT: HazardExportResponse = {
+  year: null,
+  rows: [],
+  total: 0,
+  generated_at: '',
+}
+
+const EMPTY_NUTRIENT_EXPORT: NutrientExportResponse = {
+  year: 0,
+  deliveryCount: 0,
+  totalNutrientNKg: 0,
+  totalNutrientP2o5Kg: 0,
+  byMonth: {},
+  generated_at: '',
+}
+
 export type LotTraceResponse = {
   lot?: {
     id: string
@@ -73,6 +89,7 @@ export function useGefahrstoffExport(year?: number): ReturnType<typeof useQuery<
       const path = params.size > 0 ? `/api/v1/compliance/exports/gefahrstoffdoku?${params.toString()}` : '/api/v1/compliance/exports/gefahrstoffdoku'
       return (await apiClient.get<HazardExportResponse>(path)).data
     },
+    initialData: EMPTY_HAZARD_EXPORT,
     staleTime: 60 * 1000,
   })
 }
@@ -84,6 +101,7 @@ export function useNaehrstoffExport(year: number): ReturnType<typeof useQuery<Nu
       return (await apiClient.get<NutrientExportResponse>(`/api/v1/compliance/exports/naehrstoffstrom?year=${encodeURIComponent(String(year))}`)).data
     },
     enabled: Number.isInteger(year) && year >= 2000 && year <= 2100,
+    initialData: EMPTY_NUTRIENT_EXPORT,
     staleTime: 60 * 1000,
   })
 }

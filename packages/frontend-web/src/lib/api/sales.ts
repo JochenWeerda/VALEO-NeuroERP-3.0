@@ -89,6 +89,13 @@ type PaginatedResponse<T> = {
   has_prev: boolean
 }
 
+const EMPTY_SALES_ORDERS: SalesOrder[] = []
+const EMPTY_SALES_OFFERS: SalesOffer[] = []
+const EMPTY_AUFTRAEGE: Auftrag[] = []
+const EMPTY_ANGEBOTE: Angebot[] = []
+const EMPTY_LIEFERUNGEN: Lieferung[] = []
+const EMPTY_RECHNUNGEN: Rechnung[] = []
+
 // ── Legacy UI types (kept for backward compat) ────────────────────────────────
 
 export type LieferungStatus = 'geplant' | 'unterwegs' | 'zugestellt' | 'storniert'
@@ -212,6 +219,7 @@ export function useSalesOrders(filters?: { status?: string; search?: string; cus
   return useQuery({
     queryKey: salesKeys.orders(filters),
     queryFn: () => fetchOrders(filters ?? {}),
+    initialData: EMPTY_SALES_ORDERS,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -221,6 +229,7 @@ export function useAuftraege(filters?: { status?: AuftragStatus; search?: string
   return useQuery({
     queryKey: salesKeys.auftraege(filters),
     queryFn: () => fetchOrders(filters ?? {}),
+    initialData: EMPTY_AUFTRAEGE,
     staleTime: 2 * 60 * 1000,
     select: (data) => {
       let items = data.map(orderToAuftrag)
@@ -240,6 +249,7 @@ export function useSalesOffers(filters?: { status?: string; search?: string; cus
   return useQuery({
     queryKey: salesKeys.offers(filters),
     queryFn: () => fetchOffers(filters ?? {}),
+    initialData: EMPTY_SALES_OFFERS,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -249,6 +259,7 @@ export function useAngebote(filters?: { status?: AngebotStatus; search?: string 
   return useQuery({
     queryKey: salesKeys.angebote(filters),
     queryFn: () => fetchOffers(filters ?? {}),
+    initialData: EMPTY_ANGEBOTE,
     staleTime: 2 * 60 * 1000,
     select: (data) => {
       let items = data.map(offerToAngebot)
@@ -323,6 +334,7 @@ export function useLieferungen() {
         return []
       }
     },
+    initialData: EMPTY_LIEFERUNGEN,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -340,6 +352,7 @@ export function useRechnungen() {
         return []
       }
     },
+    initialData: EMPTY_RECHNUNGEN,
     staleTime: 2 * 60 * 1000,
   })
 }

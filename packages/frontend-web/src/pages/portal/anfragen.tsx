@@ -31,13 +31,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import {
   Search,
   Plus,
@@ -78,6 +72,13 @@ const typConfig: Record<string, { label: string; icon: React.ReactNode; color: s
   'dienstleistung': { label: 'Dienstleistung', icon: <Wrench className="h-4 w-4" />, color: 'bg-amber-100 text-amber-800' },
   'sonstiges': { label: 'Sonstiges', icon: <HelpCircle className="h-4 w-4" />, color: 'bg-gray-100 text-gray-800' },
 }
+
+const anfrageTypOptions = [
+  { value: 'angebot', label: 'Angebotsanfrage' },
+  { value: 'bestellung', label: 'Bestellanfrage' },
+  { value: 'dienstleistung', label: 'Dienstleistung' },
+  { value: 'sonstiges', label: 'Sonstiges' },
+]
 
 export default function PortalAnfragen() {
   const [searchTerm, setSearchTerm] = useState('')
@@ -355,17 +356,13 @@ export default function PortalAnfragen() {
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="anfrage-typ">Art der Anfrage</Label>
-                  <Select value={neueAnfrageTyp} onValueChange={setNeueAnfrageTyp}>
-                    <SelectTrigger id="anfrage-typ">
-                      <SelectValue placeholder="Bitte wählen..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="angebot">Angebotsanfrage</SelectItem>
-                      <SelectItem value="bestellung">Bestellanfrage</SelectItem>
-                      <SelectItem value="dienstleistung">Dienstleistung</SelectItem>
-                      <SelectItem value="sonstiges">Sonstiges</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <NativeSelect
+                    id="anfrage-typ"
+                    value={neueAnfrageTyp}
+                    onValueChange={setNeueAnfrageTyp}
+                    placeholder="Bitte waehlen..."
+                    options={anfrageTypOptions}
+                  />
                 </div>
 
                 <div className="space-y-2">

@@ -12,6 +12,11 @@ import { queryKeys } from '@/lib/query'
 import { crmService, type Contact } from '@/lib/services/crm-service'
 import { getEntityTypeLabel, getListTitle } from '@/features/crud/utils/i18n-helpers'
 
+const EMPTY_CONTACTS_RESPONSE: { data: Contact[]; total: number } = {
+  data: [],
+  total: 0,
+}
+
 export default function KontakteListePage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -22,10 +27,11 @@ export default function KontakteListePage(): JSX.Element {
   const { data: contactsData, isLoading, error } = useQuery({
     queryKey: queryKeys.crm.contacts.listFiltered({ search: searchTerm || undefined }),
     queryFn: () => crmService.getContacts({ search: searchTerm || undefined }),
+    initialData: EMPTY_CONTACTS_RESPONSE,
   })
 
-  const contacts = contactsData?.data || []
-  const totalContacts = contactsData?.total || 0
+  const contacts = contactsData.data
+  const totalContacts = contactsData.total
 
   const columns = [
     {

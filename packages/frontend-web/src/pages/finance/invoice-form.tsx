@@ -13,7 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { NativeSelect } from "@/components/ui/native-select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Command,
@@ -322,17 +322,16 @@ export default function FinanceInvoiceFormPage(): JSX.Element {
               </div>
               <div>
                 <Label htmlFor="paymentTerms">Zahlungsbedingungen</Label>
-                <Select value={paymentTerms} onValueChange={setPaymentTerms}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="net7">7 Tage netto</SelectItem>
-                    <SelectItem value="net14">14 Tage netto</SelectItem>
-                    <SelectItem value="net30">30 Tage netto</SelectItem>
-                    <SelectItem value="net60">60 Tage netto</SelectItem>
-                  </SelectContent>
-                </Select>
+                <NativeSelect
+                  value={paymentTerms}
+                  onValueChange={setPaymentTerms}
+                  options={[
+                    { value: "net7", label: "7 Tage netto" },
+                    { value: "net14", label: "14 Tage netto" },
+                    { value: "net30", label: "30 Tage netto" },
+                    { value: "net60", label: "60 Tage netto" },
+                  ]}
+                />
               </div>
             </div>
 

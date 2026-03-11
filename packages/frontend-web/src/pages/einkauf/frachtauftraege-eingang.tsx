@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import { useToast } from '@/components/ui/toast-provider'
 import { apiClient } from '@/lib/axios'
 import { MoreHorizontal, RefreshCw, Truck, Eye, Calculator } from 'lucide-react'
@@ -101,30 +101,28 @@ export default function FrachtauftraegeEingangPage(): JSX.Element {
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Label className="w-44 text-sm shrink-0">Filter:</Label>
-                <Select value={filterStatus} onValueChange={setFilterStatus}>
-                  <SelectTrigger className="flex-1 h-8">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="nicht-erzeugt">Lieferschein nicht erzeugt</SelectItem>
-                    <SelectItem value="alle-offen">Alle offenen</SelectItem>
-                    <SelectItem value="erledigt">Erledigt</SelectItem>
-                    <SelectItem value="alle">Alle</SelectItem>
-                  </SelectContent>
-                </Select>
+                <NativeSelect
+                  value={filterStatus}
+                  onValueChange={setFilterStatus}
+                  options={[
+                    { value: 'nicht-erzeugt', label: 'Lieferschein nicht erzeugt' },
+                    { value: 'alle-offen', label: 'Alle offenen' },
+                    { value: 'erledigt', label: 'Erledigt' },
+                    { value: 'alle', label: 'Alle' },
+                  ]}
+                />
               </div>
               <div className="flex items-center gap-2">
                 <Label className="w-44 text-sm shrink-0">Belegart:</Label>
-                <Select value={filterBelegart} onValueChange={setFilterBelegart}>
-                  <SelectTrigger className="flex-1 h-8">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="alle">Alle Belege</SelectItem>
-                    <SelectItem value="lieferschein">Lieferschein</SelectItem>
-                    <SelectItem value="bestellung">Bestellung</SelectItem>
-                  </SelectContent>
-                </Select>
+                <NativeSelect
+                  value={filterBelegart}
+                  onValueChange={setFilterBelegart}
+                  options={[
+                    { value: 'alle', label: 'Alle Belege' },
+                    { value: 'lieferschein', label: 'Lieferschein' },
+                    { value: 'bestellung', label: 'Bestellung' },
+                  ]}
+                />
               </div>
               <div className="flex items-center gap-2">
                 <Label className="w-44 text-sm shrink-0">Niederlassung:</Label>

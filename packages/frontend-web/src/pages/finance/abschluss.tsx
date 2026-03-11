@@ -1,61 +1,12 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ObjectPage } from '@/components/mask-builder'
-import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
+import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
-import { z } from 'zod'
+import { getFieldsFromMaskConfig, validateFields } from '@/components/mask-builder/validation'
 import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/axios'
 
-// Zod-Schema für Monats-/Jahresabschluss
-const abschlussSchema = z.object({
-  periode: z.string().regex(/^\d{4}-\d{2}$/, "Periode muss YYYY-MM Format haben"),
-  abschlussTyp: z.enum(['monatsabschluss', 'quartalsabschluss', 'jahresabschluss']),
-  status: z.enum(['offen', 'in_bearbeitung', 'freigegeben', 'abgeschlossen', 'gesperrt']),
-  freigegebenAm: z.string().optional(),
-  freigegebenDurch: z.string().optional(),
-  abgeschlossenAm: z.string().optional(),
-  abgeschlossenDurch: z.string().optional(),
-
-  // Salden
-  eroeffnungsbilanz: z.number().default(0),
-  schlussbilanz: z.number().default(0),
-  gewinnVerlust: z.number().default(0),
-
-  // GuV-Positionen
-  umsatzErloese: z.number().default(0),
-  bestandsveraenderungen: z.number().default(0),
-  aktivierteEigenleistungen: z.number().default(0),
-  sonstigeBetrieblicheErtraege: z.number().default(0),
-  materialaufwand: z.number().default(0),
-  personalaufwand: z.number().default(0),
-  abschreibungen: z.number().default(0),
-  sonstigeBetrieblicheAufwendungen: z.number().default(0),
-
-  // Abgrenzungen
-  rechnungsabgrenzungsposten: z.array(z.object({
-    beschreibung: z.string(),
-    betrag: z.number(),
-    typ: z.enum(['aktiv', 'passiv'])
-  })).optional(),
-
-  // Rückstellungen
-  rueckstellungen: z.array(z.object({
-    beschreibung: z.string(),
-    betrag: z.number(),
-    zweck: z.string()
-  })).optional(),
-
-  // Prüfungen
-  saldenListeGeprueft: z.boolean().default(false),
-  kontenabstimmungDurchgefuehrt: z.boolean().default(false),
-  inventurAbgeschlossen: z.boolean().default(false),
-  steuerlichePruefungOk: z.boolean().default(false),
-
-  notizen: z.string().optional()
-})
-
-// Konfiguration für Monats-/Jahresabschluss ObjectPage
 const abschlussConfig: MaskConfig = {
   title: 'Monats-/Jahresabschluss',
   subtitle: 'Periodenabschluss durchführen und Buchungen sperren',
@@ -302,7 +253,6 @@ const abschlussConfig: MaskConfig = {
       delete: '/api/v1/finance/abschluss/{id}'
     }
   } as any,
-  validation: abschlussSchema,
   permissions: ['fibu.read', 'fibu.write', 'fibu.admin']
 }
 
@@ -495,7 +445,14 @@ export default function AbschlussPage(): JSX.Element {
     id: 'new'
   })
 
-  const { validate, showValidationToast } = useMaskValidation(abschlussConfig.validation)
+  const validate = (formData: any) => validateFields(getFieldsFromMaskConfig(abschlussConfig), formData ?? {})
+  const showValidationToast = (errors: Record<string, string>) => {
+    toast({
+      variant: 'destructive',
+      title: 'Validierungsfehler',
+      description: `${Object.keys(errors).length} Feld(er) muessen korrigiert werden.`,
+    })
+  }
 
   const { handleAction } = useMaskActions(async (action: string, formData: any) => {
     if (action === 'calculate') {
@@ -529,9 +486,9 @@ export default function AbschlussPage(): JSX.Element {
       return
     }
     if (action === 'close') {
-      const isValid = validate(formData)
-      if (!isValid.isValid) {
-        showValidationToast(isValid.errors)
+      const errors = validate(formData)
+      if (Object.keys(errors).length > 0) {
+        showValidationToast(errors)
         return
       }
       setActionLoadingKey('close')

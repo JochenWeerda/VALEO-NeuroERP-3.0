@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -398,18 +398,15 @@ export default function RechnungAbgleichPage(): JSX.Element {
           <div className="grid gap-4 md:grid-cols-2">
             <div>
               <Label htmlFor="invoice">{t('crud.entities.invoiceReceipt')} *</Label>
-              <Select value={selectedInvoiceId} onValueChange={setSelectedInvoiceId}>
-                <SelectTrigger>
-                  <SelectValue placeholder={t('crud.fields.selectInvoice')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {invoices.map(inv => (
-                    <SelectItem key={inv.id} value={inv.id}>
-                      {inv.rechnungsNummer} - {inv.lieferantName || ''}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <NativeSelect
+                value={selectedInvoiceId}
+                onValueChange={setSelectedInvoiceId}
+                options={invoices.map((inv) => ({
+                  value: inv.id,
+                  label: `${inv.rechnungsNummer} - ${inv.lieferantName || ''}`,
+                }))}
+                placeholder={t('crud.fields.selectInvoice')}
+              />
             </div>
 
             <div className="flex items-end gap-2">

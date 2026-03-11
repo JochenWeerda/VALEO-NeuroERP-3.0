@@ -42,6 +42,8 @@ def _list(db: Session, sql: str, params: dict[str, Any]) -> list[dict[str, Any]]
         return []
 
 
+
+
 @router.get("/kpis", response_model=list[dict[str, Any]])
 async def list_kpis(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     return _list(
@@ -49,6 +51,16 @@ async def list_kpis(tenant_id: str = Depends(get_tenant_id), db: Session = Depen
         "SELECT * FROM domain_controlling.kpi_definitions WHERE tenant_id=:tenant_id ORDER BY kpi_code ASC",
         {"tenant_id": tenant_id},
     )
+
+
+def _handle_controlling_db_error(exc: Exception) -> None:
+    """Raise 503 when controlling schema/tables are missing."""
+    if isinstance(exc, (OperationalError, ProgrammingError)):
+        raise HTTPException(
+            status_code=503,
+            detail="Controlling module not initialized. Run: alembic upgrade head",
+        ) from exc
+    raise exc
 
 
 @router.post("/kpis", response_model=dict, status_code=201)
@@ -81,7 +93,11 @@ async def create_kpi(payload: Payload, tenant_id: str = Depends(get_tenant_id), 
                 "is_active": bool(d.get("is_active", True)),
             },
         )
+    except (OperationalError, ProgrammingError) as exc:
+        db.rollback()
+        _handle_controlling_db_error(exc)
     except Exception as exc:
+        db.rollback()
         raise HTTPException(status_code=409, detail=f"KPI conflict: {exc}") from exc
     db.commit()
     row = db.execute(text("SELECT * FROM domain_controlling.kpi_definitions WHERE tenant_id=:tenant_id AND id=:id"), {"tenant_id": tenant_id, "id": item_id}).mappings().first()
@@ -93,29 +109,33 @@ async def update_kpi(item_id: str, payload: Payload, tenant_id: str = Depends(ge
     d = payload.data
     if not d.get("kpi_code") or not d.get("name"):
         raise HTTPException(status_code=400, detail="kpi_code and name are required")
-    updated = db.execute(
-        text(
-            """
-            UPDATE domain_controlling.kpi_definitions
-            SET kpi_code=:kpi_code, name=:name, description=:description, formula=:formula, target_value=:target_value, unit=:unit,
-                ampel_logic=CAST(:ampel_logic AS jsonb), filters=CAST(:filters AS jsonb), is_active=:is_active, updated_at=NOW()
-            WHERE tenant_id=:tenant_id AND id=:id
-            """
-        ),
-        {
-            "tenant_id": tenant_id,
-            "id": item_id,
-            "kpi_code": d["kpi_code"],
-            "name": d["name"],
-            "description": d.get("description"),
-            "formula": d.get("formula"),
-            "target_value": d.get("target_value"),
-            "unit": d.get("unit"),
-            "ampel_logic": json.dumps(d.get("ampel_logic", {})),
-            "filters": json.dumps(d.get("filters", {})),
-            "is_active": bool(d.get("is_active", True)),
-        },
-    ).rowcount
+    try:
+        updated = db.execute(
+            text(
+                """
+                UPDATE domain_controlling.kpi_definitions
+                SET kpi_code=:kpi_code, name=:name, description=:description, formula=:formula, target_value=:target_value, unit=:unit,
+                    ampel_logic=CAST(:ampel_logic AS jsonb), filters=CAST(:filters AS jsonb), is_active=:is_active, updated_at=NOW()
+                WHERE tenant_id=:tenant_id AND id=:id
+                """
+            ),
+            {
+                "tenant_id": tenant_id,
+                "id": item_id,
+                "kpi_code": d["kpi_code"],
+                "name": d["name"],
+                "description": d.get("description"),
+                "formula": d.get("formula"),
+                "target_value": d.get("target_value"),
+                "unit": d.get("unit"),
+                "ampel_logic": json.dumps(d.get("ampel_logic", {})),
+                "filters": json.dumps(d.get("filters", {})),
+                "is_active": bool(d.get("is_active", True)),
+            },
+        ).rowcount
+    except (OperationalError, ProgrammingError) as exc:
+        db.rollback()
+        _handle_controlling_db_error(exc)
     if not updated:
         raise HTTPException(status_code=404, detail="KPI not found")
     db.commit()
@@ -125,7 +145,11 @@ async def update_kpi(item_id: str, payload: Payload, tenant_id: str = Depends(ge
 
 @router.delete("/kpis/{item_id}", status_code=204)
 async def delete_kpi(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
-    deleted = db.execute(text("DELETE FROM domain_controlling.kpi_definitions WHERE tenant_id=:tenant_id AND id=:id"), {"tenant_id": tenant_id, "id": item_id}).rowcount
+    try:
+        deleted = db.execute(text("DELETE FROM domain_controlling.kpi_definitions WHERE tenant_id=:tenant_id AND id=:id"), {"tenant_id": tenant_id, "id": item_id}).rowcount
+    except (OperationalError, ProgrammingError) as exc:
+        db.rollback()
+        _handle_controlling_db_error(exc)
     if not deleted:
         raise HTTPException(status_code=404, detail="KPI not found")
     db.commit()
@@ -165,7 +189,11 @@ async def create_dashboard(payload: Payload, tenant_id: str = Depends(get_tenant
                 "is_active": bool(d.get("is_active", True)),
             },
         )
+    except (OperationalError, ProgrammingError) as exc:
+        db.rollback()
+        _handle_controlling_db_error(exc)
     except Exception as exc:
+        db.rollback()
         raise HTTPException(status_code=409, detail=f"Dashboard conflict: {exc}") from exc
     db.commit()
     row = db.execute(text("SELECT * FROM domain_controlling.dashboard_configs WHERE tenant_id=:tenant_id AND id=:id"), {"tenant_id": tenant_id, "id": item_id}).mappings().first()
@@ -177,27 +205,31 @@ async def update_dashboard(item_id: str, payload: Payload, tenant_id: str = Depe
     d = payload.data
     if not d.get("dashboard_code") or not d.get("name"):
         raise HTTPException(status_code=400, detail="dashboard_code and name are required")
-    updated = db.execute(
-        text(
-            """
-            UPDATE domain_controlling.dashboard_configs
-            SET dashboard_code=:dashboard_code, name=:name, description=:description, layout=CAST(:layout AS jsonb),
-                default_filters=CAST(:default_filters AS jsonb), role_scope=CAST(:role_scope AS jsonb), is_active=:is_active, updated_at=NOW()
-            WHERE tenant_id=:tenant_id AND id=:id
-            """
-        ),
-        {
-            "tenant_id": tenant_id,
-            "id": item_id,
-            "dashboard_code": d["dashboard_code"],
-            "name": d["name"],
-            "description": d.get("description"),
-            "layout": json.dumps(d.get("layout", {})),
-            "default_filters": json.dumps(d.get("default_filters", {})),
-            "role_scope": json.dumps(d.get("role_scope", [])),
-            "is_active": bool(d.get("is_active", True)),
-        },
-    ).rowcount
+    try:
+        updated = db.execute(
+            text(
+                """
+                UPDATE domain_controlling.dashboard_configs
+                SET dashboard_code=:dashboard_code, name=:name, description=:description, layout=CAST(:layout AS jsonb),
+                    default_filters=CAST(:default_filters AS jsonb), role_scope=CAST(:role_scope AS jsonb), is_active=:is_active, updated_at=NOW()
+                WHERE tenant_id=:tenant_id AND id=:id
+                """
+            ),
+            {
+                "tenant_id": tenant_id,
+                "id": item_id,
+                "dashboard_code": d["dashboard_code"],
+                "name": d["name"],
+                "description": d.get("description"),
+                "layout": json.dumps(d.get("layout", {})),
+                "default_filters": json.dumps(d.get("default_filters", {})),
+                "role_scope": json.dumps(d.get("role_scope", [])),
+                "is_active": bool(d.get("is_active", True)),
+            },
+        ).rowcount
+    except (OperationalError, ProgrammingError) as exc:
+        db.rollback()
+        _handle_controlling_db_error(exc)
     if not updated:
         raise HTTPException(status_code=404, detail="Dashboard not found")
     db.commit()
@@ -207,7 +239,11 @@ async def update_dashboard(item_id: str, payload: Payload, tenant_id: str = Depe
 
 @router.delete("/dashboards/{item_id}", status_code=204)
 async def delete_dashboard(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
-    deleted = db.execute(text("DELETE FROM domain_controlling.dashboard_configs WHERE tenant_id=:tenant_id AND id=:id"), {"tenant_id": tenant_id, "id": item_id}).rowcount
+    try:
+        deleted = db.execute(text("DELETE FROM domain_controlling.dashboard_configs WHERE tenant_id=:tenant_id AND id=:id"), {"tenant_id": tenant_id, "id": item_id}).rowcount
+    except (OperationalError, ProgrammingError) as exc:
+        db.rollback()
+        _handle_controlling_db_error(exc)
     if not deleted:
         raise HTTPException(status_code=404, detail="Dashboard not found")
     db.commit()
@@ -225,29 +261,33 @@ async def create_widget(dashboard_id: str, payload: Payload, tenant_id: str = De
     if not d.get("widget_type") or not d.get("title"):
         raise HTTPException(status_code=400, detail="widget_type and title are required")
     item_id = str(uuid4())
-    db.execute(
-        text(
-            """
-            INSERT INTO domain_controlling.dashboard_widgets
-            (id, tenant_id, dashboard_id, widget_type, title, kpi_id, position_x, position_y, size_w, size_h, settings, created_at, updated_at)
-            VALUES
-            (:id, :tenant_id, :dashboard_id, :widget_type, :title, :kpi_id, :position_x, :position_y, :size_w, :size_h, CAST(:settings AS jsonb), NOW(), NOW())
-            """
-        ),
-        {
-            "id": item_id,
-            "tenant_id": tenant_id,
-            "dashboard_id": dashboard_id,
-            "widget_type": d["widget_type"],
-            "title": d["title"],
-            "kpi_id": d.get("kpi_id"),
-            "position_x": int(d.get("position_x", 0)),
-            "position_y": int(d.get("position_y", 0)),
-            "size_w": int(d.get("size_w", 4)),
-            "size_h": int(d.get("size_h", 3)),
-            "settings": json.dumps(d.get("settings", {})),
-        },
-    )
+    try:
+        db.execute(
+            text(
+                """
+                INSERT INTO domain_controlling.dashboard_widgets
+                (id, tenant_id, dashboard_id, widget_type, title, kpi_id, position_x, position_y, size_w, size_h, settings, created_at, updated_at)
+                VALUES
+                (:id, :tenant_id, :dashboard_id, :widget_type, :title, :kpi_id, :position_x, :position_y, :size_w, :size_h, CAST(:settings AS jsonb), NOW(), NOW())
+                """
+            ),
+            {
+                "id": item_id,
+                "tenant_id": tenant_id,
+                "dashboard_id": dashboard_id,
+                "widget_type": d["widget_type"],
+                "title": d["title"],
+                "kpi_id": d.get("kpi_id"),
+                "position_x": int(d.get("position_x", 0)),
+                "position_y": int(d.get("position_y", 0)),
+                "size_w": int(d.get("size_w", 4)),
+                "size_h": int(d.get("size_h", 3)),
+                "settings": json.dumps(d.get("settings", {})),
+            },
+        )
+    except (OperationalError, ProgrammingError) as exc:
+        db.rollback()
+        _handle_controlling_db_error(exc)
     db.commit()
     row = db.execute(text("SELECT * FROM domain_controlling.dashboard_widgets WHERE tenant_id=:tenant_id AND id=:id"), {"tenant_id": tenant_id, "id": item_id}).mappings().first()
     return _clean(dict(row))
@@ -258,28 +298,32 @@ async def update_widget(item_id: str, payload: Payload, tenant_id: str = Depends
     d = payload.data
     if not d.get("widget_type") or not d.get("title"):
         raise HTTPException(status_code=400, detail="widget_type and title are required")
-    updated = db.execute(
-        text(
-            """
-            UPDATE domain_controlling.dashboard_widgets
-            SET widget_type=:widget_type, title=:title, kpi_id=:kpi_id, position_x=:position_x, position_y=:position_y, size_w=:size_w, size_h=:size_h,
-                settings=CAST(:settings AS jsonb), updated_at=NOW()
-            WHERE tenant_id=:tenant_id AND id=:id
-            """
-        ),
-        {
-            "tenant_id": tenant_id,
-            "id": item_id,
-            "widget_type": d["widget_type"],
-            "title": d["title"],
-            "kpi_id": d.get("kpi_id"),
-            "position_x": int(d.get("position_x", 0)),
-            "position_y": int(d.get("position_y", 0)),
-            "size_w": int(d.get("size_w", 4)),
-            "size_h": int(d.get("size_h", 3)),
-            "settings": json.dumps(d.get("settings", {})),
-        },
-    ).rowcount
+    try:
+        updated = db.execute(
+            text(
+                """
+                UPDATE domain_controlling.dashboard_widgets
+                SET widget_type=:widget_type, title=:title, kpi_id=:kpi_id, position_x=:position_x, position_y=:position_y, size_w=:size_w, size_h=:size_h,
+                    settings=CAST(:settings AS jsonb), updated_at=NOW()
+                WHERE tenant_id=:tenant_id AND id=:id
+                """
+            ),
+            {
+                "tenant_id": tenant_id,
+                "id": item_id,
+                "widget_type": d["widget_type"],
+                "title": d["title"],
+                "kpi_id": d.get("kpi_id"),
+                "position_x": int(d.get("position_x", 0)),
+                "position_y": int(d.get("position_y", 0)),
+                "size_w": int(d.get("size_w", 4)),
+                "size_h": int(d.get("size_h", 3)),
+                "settings": json.dumps(d.get("settings", {})),
+            },
+        ).rowcount
+    except (OperationalError, ProgrammingError) as exc:
+        db.rollback()
+        _handle_controlling_db_error(exc)
     if not updated:
         raise HTTPException(status_code=404, detail="Widget not found")
     db.commit()
@@ -289,7 +333,11 @@ async def update_widget(item_id: str, payload: Payload, tenant_id: str = Depends
 
 @router.delete("/widgets/{item_id}", status_code=204)
 async def delete_widget(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
-    deleted = db.execute(text("DELETE FROM domain_controlling.dashboard_widgets WHERE tenant_id=:tenant_id AND id=:id"), {"tenant_id": tenant_id, "id": item_id}).rowcount
+    try:
+        deleted = db.execute(text("DELETE FROM domain_controlling.dashboard_widgets WHERE tenant_id=:tenant_id AND id=:id"), {"tenant_id": tenant_id, "id": item_id}).rowcount
+    except (OperationalError, ProgrammingError) as exc:
+        db.rollback()
+        _handle_controlling_db_error(exc)
     if not deleted:
         raise HTTPException(status_code=404, detail="Widget not found")
     db.commit()
@@ -313,26 +361,30 @@ async def create_timeseries(payload: Payload, tenant_id: str = Depends(get_tenan
         if d.get(k) in (None, ""):
             raise HTTPException(status_code=400, detail=f"{k} is required")
     item_id = str(uuid4())
-    db.execute(
-        text(
-            """
-            INSERT INTO domain_controlling.kpi_timeseries
-            (id, tenant_id, kpi_id, period_start, period_end, value, dimensions, source, created_at)
-            VALUES
-            (:id, :tenant_id, :kpi_id, :period_start, :period_end, :value, CAST(:dimensions AS jsonb), :source, NOW())
-            """
-        ),
-        {
-            "id": item_id,
-            "tenant_id": tenant_id,
-            "kpi_id": d["kpi_id"],
-            "period_start": d["period_start"],
-            "period_end": d["period_end"],
-            "value": d["value"],
-            "dimensions": json.dumps(d.get("dimensions", {})),
-            "source": d.get("source"),
-        },
-    )
+    try:
+        db.execute(
+            text(
+                """
+                INSERT INTO domain_controlling.kpi_timeseries
+                (id, tenant_id, kpi_id, period_start, period_end, value, dimensions, source, created_at)
+                VALUES
+                (:id, :tenant_id, :kpi_id, :period_start, :period_end, :value, CAST(:dimensions AS jsonb), :source, NOW())
+                """
+            ),
+            {
+                "id": item_id,
+                "tenant_id": tenant_id,
+                "kpi_id": d["kpi_id"],
+                "period_start": d["period_start"],
+                "period_end": d["period_end"],
+                "value": d["value"],
+                "dimensions": json.dumps(d.get("dimensions", {})),
+                "source": d.get("source"),
+            },
+        )
+    except (OperationalError, ProgrammingError) as exc:
+        db.rollback()
+        _handle_controlling_db_error(exc)
     db.commit()
     row = db.execute(text("SELECT * FROM domain_controlling.kpi_timeseries WHERE tenant_id=:tenant_id AND id=:id"), {"tenant_id": tenant_id, "id": item_id}).mappings().first()
     return _clean(dict(row))
@@ -340,7 +392,11 @@ async def create_timeseries(payload: Payload, tenant_id: str = Depends(get_tenan
 
 @router.delete("/timeseries/{item_id}", status_code=204)
 async def delete_timeseries(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
-    deleted = db.execute(text("DELETE FROM domain_controlling.kpi_timeseries WHERE tenant_id=:tenant_id AND id=:id"), {"tenant_id": tenant_id, "id": item_id}).rowcount
+    try:
+        deleted = db.execute(text("DELETE FROM domain_controlling.kpi_timeseries WHERE tenant_id=:tenant_id AND id=:id"), {"tenant_id": tenant_id, "id": item_id}).rowcount
+    except (OperationalError, ProgrammingError) as exc:
+        db.rollback()
+        _handle_controlling_db_error(exc)
     if not deleted:
         raise HTTPException(status_code=404, detail="Timeseries item not found")
     db.commit()
@@ -363,27 +419,31 @@ async def create_action(payload: Payload, tenant_id: str = Depends(get_tenant_id
     if not d.get("title"):
         raise HTTPException(status_code=400, detail="title is required")
     item_id = str(uuid4())
-    db.execute(
-        text(
-            """
-            INSERT INTO domain_controlling.controlling_actions
-            (id, tenant_id, kpi_id, dashboard_id, title, description, owner_user_id, status, due_date, created_at, updated_at)
-            VALUES
-            (:id, :tenant_id, :kpi_id, :dashboard_id, :title, :description, :owner_user_id, :status, :due_date, NOW(), NOW())
-            """
-        ),
-        {
-            "id": item_id,
-            "tenant_id": tenant_id,
-            "kpi_id": d.get("kpi_id"),
-            "dashboard_id": d.get("dashboard_id"),
-            "title": d["title"],
-            "description": d.get("description"),
-            "owner_user_id": d.get("owner_user_id"),
-            "status": d.get("status", "open"),
-            "due_date": d.get("due_date"),
-        },
-    )
+    try:
+        db.execute(
+            text(
+                """
+                INSERT INTO domain_controlling.controlling_actions
+                (id, tenant_id, kpi_id, dashboard_id, title, description, owner_user_id, status, due_date, created_at, updated_at)
+                VALUES
+                (:id, :tenant_id, :kpi_id, :dashboard_id, :title, :description, :owner_user_id, :status, :due_date, NOW(), NOW())
+                """
+            ),
+            {
+                "id": item_id,
+                "tenant_id": tenant_id,
+                "kpi_id": d.get("kpi_id"),
+                "dashboard_id": d.get("dashboard_id"),
+                "title": d["title"],
+                "description": d.get("description"),
+                "owner_user_id": d.get("owner_user_id"),
+                "status": d.get("status", "open"),
+                "due_date": d.get("due_date"),
+            },
+        )
+    except (OperationalError, ProgrammingError) as exc:
+        db.rollback()
+        _handle_controlling_db_error(exc)
     db.commit()
     row = db.execute(text("SELECT * FROM domain_controlling.controlling_actions WHERE tenant_id=:tenant_id AND id=:id"), {"tenant_id": tenant_id, "id": item_id}).mappings().first()
     return _clean(dict(row))
@@ -394,27 +454,31 @@ async def update_action(item_id: str, payload: Payload, tenant_id: str = Depends
     d = payload.data
     if not d.get("title"):
         raise HTTPException(status_code=400, detail="title is required")
-    updated = db.execute(
-        text(
-            """
-            UPDATE domain_controlling.controlling_actions
-            SET kpi_id=:kpi_id, dashboard_id=:dashboard_id, title=:title, description=:description, owner_user_id=:owner_user_id,
-                status=:status, due_date=:due_date, updated_at=NOW()
-            WHERE tenant_id=:tenant_id AND id=:id
-            """
-        ),
-        {
-            "tenant_id": tenant_id,
-            "id": item_id,
-            "kpi_id": d.get("kpi_id"),
-            "dashboard_id": d.get("dashboard_id"),
-            "title": d["title"],
-            "description": d.get("description"),
-            "owner_user_id": d.get("owner_user_id"),
-            "status": d.get("status", "open"),
-            "due_date": d.get("due_date"),
-        },
-    ).rowcount
+    try:
+        updated = db.execute(
+            text(
+                """
+                UPDATE domain_controlling.controlling_actions
+                SET kpi_id=:kpi_id, dashboard_id=:dashboard_id, title=:title, description=:description, owner_user_id=:owner_user_id,
+                    status=:status, due_date=:due_date, updated_at=NOW()
+                WHERE tenant_id=:tenant_id AND id=:id
+                """
+            ),
+            {
+                "tenant_id": tenant_id,
+                "id": item_id,
+                "kpi_id": d.get("kpi_id"),
+                "dashboard_id": d.get("dashboard_id"),
+                "title": d["title"],
+                "description": d.get("description"),
+                "owner_user_id": d.get("owner_user_id"),
+                "status": d.get("status", "open"),
+                "due_date": d.get("due_date"),
+            },
+        ).rowcount
+    except (OperationalError, ProgrammingError) as exc:
+        db.rollback()
+        _handle_controlling_db_error(exc)
     if not updated:
         raise HTTPException(status_code=404, detail="Action not found")
     db.commit()
@@ -424,7 +488,11 @@ async def update_action(item_id: str, payload: Payload, tenant_id: str = Depends
 
 @router.delete("/actions/{item_id}", status_code=204)
 async def delete_action(item_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
-    deleted = db.execute(text("DELETE FROM domain_controlling.controlling_actions WHERE tenant_id=:tenant_id AND id=:id"), {"tenant_id": tenant_id, "id": item_id}).rowcount
+    try:
+        deleted = db.execute(text("DELETE FROM domain_controlling.controlling_actions WHERE tenant_id=:tenant_id AND id=:id"), {"tenant_id": tenant_id, "id": item_id}).rowcount
+    except (OperationalError, ProgrammingError) as exc:
+        db.rollback()
+        _handle_controlling_db_error(exc)
     if not deleted:
         raise HTTPException(status_code=404, detail="Action not found")
     db.commit()

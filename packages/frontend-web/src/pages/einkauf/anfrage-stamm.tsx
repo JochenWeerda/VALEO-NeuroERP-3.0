@@ -4,36 +4,17 @@ import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
-import { z } from 'zod'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from '@/hooks/use-toast'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { CheckCircle, XCircle, ShoppingCart, Send, Mail } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
-// Zod-Schema für Anfrage (wird in Komponente mit i18n erstellt)
-const createAnfrageSchema = (t: any) => z.object({
-  anfrageNummer: z.string().min(1, t('crud.messages.validationError')),
-  typ: z.enum(['BANF', 'ANF']),
-  anforderer: z.string().min(1, t('crud.messages.validationError')),
-  artikel: z.string().min(1, t('crud.messages.validationError')),
-  menge: z.number().min(0.1, t('crud.messages.validationError')),
-  einheit: z.string().min(1, t('crud.messages.validationError')),
-  prioritaet: z.enum(['niedrig', 'normal', 'hoch', 'dringend']),
-  faelligkeit: z.string().min(1, t('crud.messages.validationError')),
-  status: z.enum(['ENTWURF', 'FREIGEGEBEN', 'ANGEBOTSPHASE', 'BESTELLT', 'ABGELEHNT']),
-  begruendung: z.string().min(1, t('crud.messages.validationError')),
-  kostenstelle: z.string().optional(),
-  projekt: z.string().optional(),
-  bemerkungen: z.string().optional()
-})
-
-// Konfiguration für Anfrage ObjectPage (wird in Komponente mit i18n erstellt)
 const createAnfrageConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
   subtitle: t('crud.actions.create'),
@@ -180,7 +161,6 @@ const createAnfrageConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
       delete: '/api/v1/einkauf/anfragen/{id}'
     }
   },
-  validation: createAnfrageSchema(t),
   permissions: ['einkauf.read', 'einkauf.write']
 })
 
@@ -591,15 +571,14 @@ export default function AnfrageStammPage(): JSX.Element {
           <div className="space-y-4">
             <div>
               <Label>{t('crud.fields.sendMethod')}</Label>
-              <Select value={sendMethod} onValueChange={(value: 'email' | 'portal') => setSendMethod(value)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="email">{t('crud.fields.email')}</SelectItem>
-                  <SelectItem value="portal">{t('crud.fields.portal')}</SelectItem>
-                </SelectContent>
-              </Select>
+              <NativeSelect
+                value={sendMethod}
+                onValueChange={(value) => setSendMethod(value as 'email' | 'portal')}
+                options={[
+                  { value: 'email', label: t('crud.fields.email') },
+                  { value: 'portal', label: t('crud.fields.portal') },
+                ]}
+              />
             </div>
             <div>
               <Label>{t('crud.fields.selectSuppliers')}</Label>

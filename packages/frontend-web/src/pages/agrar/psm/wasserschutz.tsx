@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { CheckCircle, MapPin, Shield, XCircle, Search } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
@@ -224,17 +224,17 @@ export default function PSMWasserschutzPruefungPage(): JSX.Element {
             </div>
             <div>
               <Label>Gewässertyp</Label>
-              <Select value={gewaesserTyp} onValueChange={setGewaesserTyp}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Gewässertyp auswählen" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="fluss">Fluss</SelectItem>
-                  <SelectItem value="see">See</SelectItem>
-                  <SelectItem value="bach">Bach</SelectItem>
-                  <SelectItem value="grundwasser">Grundwasser</SelectItem>
-                </SelectContent>
-              </Select>
+              <NativeSelect
+                value={gewaesserTyp}
+                onValueChange={setGewaesserTyp}
+                placeholder="Gewaessertyp auswaehlen"
+                options={[
+                  { value: 'fluss', label: 'Fluss' },
+                  { value: 'see', label: 'See' },
+                  { value: 'bach', label: 'Bach' },
+                  { value: 'grundwasser', label: 'Grundwasser' },
+                ]}
+              />
             </div>
           </div>
         </CardContent>
@@ -274,22 +274,19 @@ export default function PSMWasserschutzPruefungPage(): JSX.Element {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <Select onValueChange={(value) => {
-              const psm = verfuegbarePSM.find(p => p.id === value)
-              setAusgewaehltesPSM(psm || null)
-              setPruefErgebnis(null)
-            }}>
-              <SelectTrigger>
-                <SelectValue placeholder="PSM auswählen" />
-              </SelectTrigger>
-              <SelectContent>
-                {verfuegbarePSM.map((psm) => (
-                  <SelectItem key={psm.id} value={psm.id}>
-                    {psm.name} ({psm.wirkstoff}) - {psm.wasserschutz_zulassung ? 'WSG-zugelassen' : 'Nicht WSG-zugelassen'}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <NativeSelect
+              value={ausgewaehltesPSM?.id || ''}
+              onValueChange={(value) => {
+                const psm = verfuegbarePSM.find((item) => item.id === value)
+                setAusgewaehltesPSM(psm || null)
+                setPruefErgebnis(null)
+              }}
+              placeholder="PSM auswaehlen"
+              options={verfuegbarePSM.map((psm) => ({
+                value: psm.id,
+                label: `${psm.name} (${psm.wirkstoff}) - ${psm.wasserschutz_zulassung ? 'WSG-zugelassen' : 'Nicht WSG-zugelassen'}`,
+              }))}
+            />
 
             {ausgewaehltesPSM && (
               <div className="p-4 bg-gray-50 rounded-lg">

@@ -4,30 +4,9 @@ import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
-import { z } from 'zod'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { toast } from '@/hooks/use-toast'
 
-// Zod-Schema für Angebot (wird in Komponente mit i18n erstellt)
-const createAngebotSchema = (t: any) => z.object({
-  angebotNummer: z.string().min(1, t('crud.messages.validationError')),
-  anfrageId: z.string().optional(),
-  lieferantId: z.string().min(1, t('crud.messages.validationError')),
-  artikel: z.string().min(1, t('crud.messages.validationError')),
-  menge: z.number().min(0.1, t('crud.messages.validationError')),
-  einheit: z.string().min(1, t('crud.messages.validationError')),
-  preis: z.number().min(0, t('crud.messages.validationError')),
-  waehrung: z.string().default('EUR'),
-  lieferzeit: z.number().min(1, t('crud.messages.validationError')),
-  gueltigBis: z.string().min(1, t('crud.messages.validationError')),
-  status: z.enum(['ERFASST', 'GEPRUEFT', 'GENEHMIGT', 'ABGELEHNT']),
-  mindestabnahme: z.number().optional(),
-  zahlungsbedingungen: z.string().optional(),
-  incoterms: z.string().optional(),
-  bemerkungen: z.string().optional()
-})
-
-// Konfiguration für Angebot ObjectPage (wird in Komponente mit i18n erstellt)
 const createAngebotConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
   subtitle: t('crud.actions.edit'),
@@ -212,7 +191,6 @@ const createAngebotConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
       delete: '/api/einkauf/angebote/{id}'
     }
   },
-  validation: createAngebotSchema(t),
   permissions: ['einkauf.read', 'einkauf.write']
 })
 

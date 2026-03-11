@@ -4,12 +4,12 @@ import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
-import { z } from 'zod'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { CrudAuditTrailPanel } from '@/features/crud/components'
 import { useCrudAuditTrail } from '@/features/crud/hooks'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -17,29 +17,10 @@ import { Badge } from '@/components/ui/badge'
 import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/api-client'
 import { History, XCircle, AlertTriangle, Mail, Globe } from 'lucide-react'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { usePoCommunications, useSendPoCommunication } from '@/lib/api/procurement-plus'
 import { useAuth } from '@/hooks/useAuth'
 import { useTenant } from '@/hooks/useTenant'
 
-// Zod-Schema für Bestellung (wird in Komponente mit i18n erstellt)
-const createBestellungSchema = (t: any) => z.object({
-  nummer: z.string().min(1, t('crud.messages.validationError')),
-  lieferantId: z.string().min(1, t('crud.messages.validationError')),
-  status: z.enum(['ENTWURF', 'FREIGEGEBEN', 'TEILGELIEFERT', 'VOLLGELIEFERT', 'STORNIERT']),
-  liefertermin: z.string().min(1, t('crud.messages.validationError')),
-  zahlungsbedingungen: z.string().optional(),
-  positionen: z.array(z.object({
-    artikelId: z.string().min(1, t('crud.messages.validationError')),
-    menge: z.number().min(0.1, t('crud.messages.validationError')),
-    einheit: z.string().min(1, t('crud.messages.validationError')),
-    preis: z.number().min(0, t('crud.messages.validationError')),
-    wunschtermin: z.string().optional()
-  })).min(1, t('crud.messages.validationError')),
-  bemerkungen: z.string().optional()
-})
-
-// Konfiguration für Bestellung ObjectPage (wird in Komponente mit i18n erstellt)
 const createBestellungConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
   subtitle: t('crud.actions.edit'),
@@ -234,7 +215,6 @@ const createBestellungConfig = (t: any, entityTypeLabel: string): MaskConfig => 
       delete: '/api/v1/purchase-orders/{id}'
     }
   },
-  validation: createBestellungSchema(t),
   permissions: ['einkauf.read', 'einkauf.write']
 })
 
@@ -576,28 +556,26 @@ export default function BestellungStammPage(): JSX.Element {
           <div className="space-y-4">
             <div>
               <Label>{t('crud.fields.sendMethod')}</Label>
-              <Select value={sendMethod} onValueChange={(value: 'email' | 'portal') => setSendMethod(value)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="email">{t('crud.fields.email')}</SelectItem>
-                  <SelectItem value="portal">{t('crud.fields.portal')}</SelectItem>
-                </SelectContent>
-              </Select>
+              <NativeSelect
+                value={sendMethod}
+                onValueChange={(value) => setSendMethod(value as 'email' | 'portal')}
+                options={[
+                  { value: 'email', label: t('crud.fields.email') },
+                  { value: 'portal', label: t('crud.fields.portal') },
+                ]}
+              />
             </div>
 
             <div>
               <Label>{t('crud.fields.language')}</Label>
-              <Select value={sendLanguage} onValueChange={(value: 'de' | 'en') => setSendLanguage(value)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="de">{t('crud.fields.german')}</SelectItem>
-                  <SelectItem value="en">{t('crud.fields.english')}</SelectItem>
-                </SelectContent>
-              </Select>
+              <NativeSelect
+                value={sendLanguage}
+                onValueChange={(value) => setSendLanguage(value as 'de' | 'en')}
+                options={[
+                  { value: 'de', label: t('crud.fields.german') },
+                  { value: 'en', label: t('crud.fields.english') },
+                ]}
+              />
             </div>
 
             {sendMethod === 'email' && (

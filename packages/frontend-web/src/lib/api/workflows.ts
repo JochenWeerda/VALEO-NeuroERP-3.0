@@ -50,6 +50,7 @@ export function useWorkflowStatus(workflowId: string) {
       return response.data
     },
     enabled: !!workflowId,
+    initialData: null,
     refetchInterval: (query) => {
       // Stop polling if workflow is completed or rejected
       const data = query.state.data as any

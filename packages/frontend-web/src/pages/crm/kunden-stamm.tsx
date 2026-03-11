@@ -4,9 +4,9 @@ import { useTranslation } from 'react-i18next'
 import { toast } from '@/hooks/use-toast'
 import { useQuery } from '@tanstack/react-query'
 import { ObjectPage } from '@/components/mask-builder'
-import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
+import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
-import { z } from 'zod'
+import { getFieldsFromMaskConfig, validateFields } from '@/components/mask-builder/validation'
 import { getEntityTypeLabel, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 import { crmService, type Contact } from '@/lib/services/crm-service'
 import { queryKeys } from '@/lib/query'
@@ -19,39 +19,6 @@ import { createApiClient } from '@/components/mask-builder/utils/api'
 import { formatDate } from '@/components/mask-builder/utils/formatting'
 import { useTenant } from '@/hooks/useTenant'
 
-// Zod-Schema für Kunden (wird in Komponente mit i18n erstellt)
-const createKundenSchema = (t: any) => z.object({
-  firma: z.string().min(1, t('crud.messages.validationError')),
-  anrede: z.string().optional(),
-  vorname: z.string().optional(),
-  nachname: z.string().min(1, t('crud.messages.validationError')),
-  strasse: z.string().min(1, t('crud.messages.validationError')),
-  plz: z.string().regex(/^\d{5}$/, t('crud.messages.validationError')),
-  ort: z.string().min(1, t('crud.messages.validationError')),
-  land: z.string().default("DE"),
-  telefon: z.string().optional(),
-  email: z.string().email(t('crud.messages.validationError')).optional().or(z.literal("")),
-  ustId: z.string().optional(),
-  steuernummer: z.string().optional(),
-  steuerstatus: z.string().optional(),
-  kreditlimit: z.number().min(0).default(0),
-  zahlungsbedingungen: z.string().default("14 Tage"),
-  rabatt: z.number().min(0).max(100).default(0),
-  bonitaet: z.string().default("gut"),
-  letzteBestellung: z.string().optional(),
-  umsatzGesamt: z.number().min(0).default(0),
-  status: z.string().default("aktiv"),
-  bemerkungen: z.string().optional(),
-  // Sales-spezifische Felder (nur neue, bestehende werden über bestehende Struktur verwendet)
-  preisgruppe: z.string().optional(),  // NEU: sales.price_group
-  steuerkategorie: z.string().optional()  // NEU: tax.category
-  // Entfernt: kundensegment → verwende analytics.segment (bestehend in potential Tab)
-  // Entfernt: branche → verwende profile.industry_code (bestehend in marketing Tab)
-  // Entfernt: region → verwende region (bestehend in crm-core)
-  // Entfernt: kundenpreisliste → verwende customer.price_list_id (bestehend in valeo-modern)
-})
-
-// Konfiguration für Kunden ObjectPage (wird in Komponente mit i18n erstellt)
 const createKundenConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
   subtitle: t('crud.detail.manage', { entityType: entityTypeLabel }),
@@ -113,6 +80,7 @@ const createKundenConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
           type: 'text',
           required: true,
           maxLength: 5,
+          pattern: '^\\d{5}$',
           placeholder: t('crud.tooltips.placeholders.postalCode')
         },
         {
@@ -154,6 +122,7 @@ const createKundenConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
           name: 'email',
           label: t('crud.fields.email'),
           type: 'text',
+          pattern: '^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$',
           placeholder: t('crud.tooltips.placeholders.email')
         }
       ]
@@ -340,7 +309,6 @@ const createKundenConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
       delete: '/api/crm/kunden/{id}'
     }
   },
-  validation: createKundenSchema(t),
   permissions: ['crm.write', 'customer.admin']
 })
 
@@ -693,13 +661,16 @@ export default function KundenStammPage(): JSX.Element {
     id: id || 'new'
   })
 
-  const { validate, showValidationToast } = useMaskValidation(kundenConfig.validation)
+  const validate = (formData: any) => validateFields(getFieldsFromMaskConfig(kundenConfig), formData ?? {})
+  const showValidationToast = (errors: Record<string, string>) => {
+    toast({ variant: 'destructive', title: t('crud.messages.validationError'), description: `${Object.keys(errors).length} Feld(er) muessen korrigiert werden.` })
+  }
 
   const { handleAction } = useMaskActions(async (action: string, formData: any) => {
     if (action === 'save') {
-      const isValid = validate(formData)
-      if (!isValid.isValid) {
-        showValidationToast(isValid.errors)
+      const errors = validate(formData)
+      if (Object.keys(errors).length > 0) {
+        showValidationToast(errors)
         return
       }
 
@@ -711,11 +682,11 @@ export default function KundenStammPage(): JSX.Element {
         // Error wird bereits in useMaskData behandelt
       }
     } else if (action === 'validate') {
-      const isValid = validate(formData)
-      if (isValid.isValid) {
+      const errors = validate(formData)
+      if (Object.keys(errors).length === 0) {
         toast({ title: t('crud.messages.validationSuccess', { defaultValue: 'Validierung erfolgreich' }), description: 'Alle Pflichtfelder sind korrekt ausgefüllt.' })
       } else {
-        showValidationToast(isValid.errors)
+        showValidationToast(errors)
       }
     }
   })

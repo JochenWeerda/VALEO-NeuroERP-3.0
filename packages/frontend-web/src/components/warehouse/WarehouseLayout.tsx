@@ -9,8 +9,8 @@
  */
 
 import { ReactNode } from 'react'
+import { clsx } from 'clsx'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { cn } from '@/lib/utils'
 import {
   ArrowLeft,
   Home,
@@ -162,7 +162,7 @@ export function WarehouseLayout({
               <Link
                 key={item.path}
                 to={item.path}
-                className={cn(
+                className={clsx(
                   'flex flex-col items-center justify-center min-h-[70px] min-w-[70px] px-3 py-2 rounded-lg transition-colors',
                   isActive
                     ? 'bg-primary text-primary-foreground'

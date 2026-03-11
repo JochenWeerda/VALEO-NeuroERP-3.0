@@ -14,13 +14,7 @@ import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ErrorState } from '@/components/ErrorState'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import {
   Search,
   Download,
@@ -197,19 +191,12 @@ export default function PortalDokumente() {
             className="pl-9"
           />
         </div>
-        <Select value={selectedJahr} onValueChange={setSelectedJahr}>
-          <SelectTrigger className="w-[150px]">
-            <SelectValue placeholder="Jahr wählen" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="alle">Alle Jahre</SelectItem>
-            {availableYears.map((jahr) => (
-              <SelectItem key={jahr} value={jahr?.toString() || ''}>
-                {jahr}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <NativeSelect
+          value={selectedJahr}
+          onValueChange={setSelectedJahr}
+          placeholder="Jahr waehlen"
+          options={[{ value: 'alle', label: 'Alle Jahre' }, ...availableYears.map((jahr) => ({ value: jahr?.toString() || '', label: String(jahr) }))]}
+        />
       </div>
 
       {/* Tabs */}

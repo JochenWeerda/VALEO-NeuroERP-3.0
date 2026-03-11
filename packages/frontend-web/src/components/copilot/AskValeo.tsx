@@ -34,6 +34,7 @@ import {
   Wand2,
 } from 'lucide-react';
 import { createMCPMetadata } from '@/design/mcp-schemas/component-metadata';
+import { useActionDispatchOptional } from '@/features/ki-usability';
 
 // MCP-Metadaten für Ask VALEO
 export const askValeoMCP = createMCPMetadata('AskValeo', 'dialog', {
@@ -74,6 +75,24 @@ export interface AISuggestion {
   action?: () => void;
   actionLabel?: string;
 }
+
+type AIAnswerSource = {
+  label: string;
+  detail: string;
+};
+
+type AIAnswerAction = {
+  id: string;
+  label: string;
+  description: string;
+};
+
+type AIAnswerPayload = {
+  summary: string;
+  confidence: number;
+  sources: AIAnswerSource[];
+  nextAction?: AIAnswerAction;
+};
 
 export interface AskValeoRuntimeContext {
   domain?: string;
@@ -119,9 +138,10 @@ const DOMAIN_SUGGESTIONS: Record<string, AISuggestion[]> = {
 };
 
 export function AskValeo({ open, onOpenChange, pageContext }: AskValeoProps): JSX.Element {
+  const actionDispatch = useActionDispatchOptional();
   const [prompt, setPrompt] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
-  const [response, setResponse] = useState<string | null>(null);
+  const [response, setResponse] = useState<AIAnswerPayload | null>(null);
   const [suggestions, setSuggestions] = useState<AISuggestion[]>([]);
   const [error, setError] = useState<string | null>(null);
 
@@ -152,16 +172,7 @@ export function AskValeo({ open, onOpenChange, pageContext }: AskValeoProps): JS
       await new Promise((resolve) => setTimeout(resolve, AI_RESPONSE_DELAY_MS));
 
       setResponse(
-        [
-          '💡 VALEO-Antwort (Phase 3 Simulation):',
-          '',
-          `Deine Frage: "${trimmedPrompt}"`,
-          '',
-          `Kontext: ${pageContext?.domain ?? 'unbekannt'}`,
-          '',
-          'In Phase 3 wird hier die echte AI-Antwort via MCP-Browser erscheinen.',
-          'Die Metadaten sind bereits vorbereitet!',
-        ].join('\n'),
+        buildMockAnswer(trimmedPrompt, pageContext),
       );
     } catch (err) {
       setError('Fehler bei der AI-Anfrage. Bitte versuche es erneut.');
@@ -179,8 +190,23 @@ export function AskValeo({ open, onOpenChange, pageContext }: AskValeoProps): JS
     void processPrompt(question);
   };
 
+  const handleNextAction = async (): Promise<void> => {
+    if (!response?.nextAction || !actionDispatch) {
+      return;
+    }
+
+    const ok = await actionDispatch.dispatch(response.nextAction.id);
+    if (!ok) {
+      setError(`Aktion ${response.nextAction.label} konnte nicht ausgeführt werden.`);
+      return;
+    }
+
+    onOpenChange(false);
+  };
+
   const hasResponse = response !== null;
   const hasError = error !== null;
+  const confidenceLabel = response !== null ? getConfidenceLabel(response.confidence) : null;
 
   return (
     <Dialog
@@ -287,7 +313,51 @@ export function AskValeo({ open, onOpenChange, pageContext }: AskValeoProps): JS
               <div className="flex items-start gap-2">
                 <CheckCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-primary" />
                 <div className="flex-1">
-                  <p className="whitespace-pre-wrap text-sm">{response}</p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge variant="outline">Agent-Antwort</Badge>
+                    {confidenceLabel !== null && (
+                      <Badge variant={confidenceLabel.variant}>
+                        Konfidenz {Math.round(response.confidence * 100)}%
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="mt-3 whitespace-pre-wrap text-sm">{response.summary}</p>
+                  <div className="mt-4 grid gap-3 md:grid-cols-2">
+                    <div className="rounded-md border bg-background p-3">
+                      <p className="text-xs font-semibold uppercase text-muted-foreground">Quellen</p>
+                      <ul className="mt-2 space-y-2 text-sm">
+                        {response.sources.map((source) => (
+                          <li key={`${source.label}-${source.detail}`} className="rounded border bg-muted/40 p-2">
+                            <p className="font-medium">{source.label}</p>
+                            <p className="text-muted-foreground">{source.detail}</p>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div className="rounded-md border bg-background p-3">
+                      <p className="text-xs font-semibold uppercase text-muted-foreground">Nächste Aktion</p>
+                      {response.nextAction ? (
+                        <div className="mt-2 space-y-3">
+                          <div>
+                            <p className="font-medium">{response.nextAction.label}</p>
+                            <p className="text-sm text-muted-foreground">{response.nextAction.description}</p>
+                          </div>
+                          <Button
+                            size="sm"
+                            onClick={() => {
+                              void handleNextAction();
+                            }}
+                          >
+                            {response.nextAction.label}
+                          </Button>
+                        </div>
+                      ) : (
+                        <p className="mt-2 text-sm text-muted-foreground">
+                          Keine direkte Folgeaktion verfügbar.
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -337,6 +407,48 @@ export function AskValeo({ open, onOpenChange, pageContext }: AskValeoProps): JS
       </DialogContent>
     </Dialog>
   );
+}
+
+function buildMockAnswer(prompt: string, pageContext?: AskValeoPageContext): AIAnswerPayload {
+  const domain = pageContext?.domain ?? DEFAULT_DOMAIN;
+  const availableActions = pageContext?.availableActions ?? [];
+  const preferredAction = availableActions[0];
+
+  return {
+    summary: [
+      `Ich habe die Anfrage "${prompt}" im Kontext ${domain} bewertet.`,
+      'Die Antwort basiert auf dem aktuellen Seitenkontext und den für diese Maske verfügbaren Aktionen.',
+      'In der echten Agent-Integration werden hier Laufzeitdaten, Regeln und Belegdaten einfließen.',
+    ].join(' '),
+    confidence: preferredAction ? 0.86 : 0.68,
+    sources: [
+      {
+        label: 'Seitenkontext',
+        detail: `Domain: ${domain}${pageContext?.currentDocument ? `, Dokument: ${pageContext.currentDocument}` : ''}`,
+      },
+      {
+        label: 'Verfügbare Aktionen',
+        detail: availableActions.length > 0 ? availableActions.join(', ') : 'Keine Aktions-ID im Kontext vorhanden',
+      },
+    ],
+    nextAction: preferredAction
+      ? {
+          id: preferredAction,
+          label: 'Empfohlene Aktion ausführen',
+          description: `Die Aktion ${preferredAction} ist im aktuellen Kontext verfügbar und wäre der nächste sinnvolle Schritt.`,
+        }
+      : undefined,
+  };
+}
+
+function getConfidenceLabel(confidence: number): { variant: 'default' | 'secondary' | 'destructive' } {
+  if (confidence >= 0.85) {
+    return { variant: 'default' };
+  }
+  if (confidence >= 0.65) {
+    return { variant: 'secondary' };
+  }
+  return { variant: 'destructive' };
 }
 
 /**

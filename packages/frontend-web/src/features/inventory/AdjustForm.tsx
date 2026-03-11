@@ -1,6 +1,5 @@
-﻿import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { type AdjustInput, AdjustSchema } from "./schema"
+import { useState } from "react"
+import { type AdjustInput } from "./schema"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
@@ -11,29 +10,41 @@ export function AdjustForm({ sku, onSubmit, submitting }: {
   onSubmit: (_value: AdjustInput) => void
   submitting?: boolean
 }): JSX.Element {
-  const { register, handleSubmit, setValue, formState: { errors } } = useForm<AdjustInput>({
-    resolver: zodResolver(AdjustSchema),
-    defaultValues: { sku, delta: 0, reason: "counting" }
-  })
+  const [deltaInput, setDeltaInput] = useState("0")
+  const [reason, setReason] = useState<AdjustInput["reason"]>("counting")
+  const [error, setError] = useState<string | null>(null)
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>): void => {
+    event.preventDefault()
+    const delta = parseDE(deltaInput)
+
+    if (!Number.isFinite(delta) || delta === 0) {
+      setError("Delta darf nicht 0 sein")
+      return
+    }
+
+    setError(null)
+    onSubmit({ sku, delta, reason })
+  }
 
   return (
-    <form className="space-y-3" onSubmit={handleSubmit(onSubmit)}>
+    <form className="space-y-3" onSubmit={handleSubmit}>
       <div>
         <Label>SKU</Label>
         <Input value={sku} readOnly />
       </div>
       <div>
-        <Label>Delta (±)</Label>
+        <Label>Delta (�)</Label>
         <Input
           placeholder="z. B. -5,5"
-          {...register("delta", { setValueAs: (value) => parseDE(String(value)) })}
-          onBlur={(event) => setValue("delta", parseDE(event.target.value))}
+          value={deltaInput}
+          onChange={(event) => setDeltaInput(event.target.value)}
         />
-        {errors.delta ? <p className="text-sm text-red-600">{errors.delta.message}</p> : null}
+        {error ? <p className="text-sm text-red-600">{error}</p> : null}
       </div>
       <div>
         <Label>Grund</Label>
-        <select className="w-full rounded-md border px-3 h-9" {...register("reason")}>
+        <select className="h-9 w-full rounded-md border px-3" value={reason} onChange={(event) => setReason(event.target.value as AdjustInput["reason"])}>
           <option value="counting">Inventur</option>
           <option value="damage">Beschaedigung</option>
           <option value="shrinkage">Schwund</option>

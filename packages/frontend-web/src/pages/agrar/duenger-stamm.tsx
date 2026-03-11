@@ -1,6 +1,6 @@
-/**
- * Dünger-Stammdaten Maske
- * ObjectPage für Dünger-Verwaltung mit vollständiger CRUD-Funktionalität
+﻿/**
+ * DÃ¼nger-Stammdaten Maske
+ * ObjectPage fÃ¼r DÃ¼nger-Verwaltung mit vollstÃ¤ndiger CRUD-FunktionalitÃ¤t
  */
 
 import React, { useState, useEffect } from 'react';
@@ -10,7 +10,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { NativeSelect } from '@/components/ui/native-select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -23,7 +23,7 @@ import { ModuleToolbar } from '@/components/navigation/ModuleToolbar';
 const apiClient = {
   async getDuenger(id: string) {
     const response = await fetch(`/api/v1/agrar/duenger/${id}`);
-    if (!response.ok) throw new Error('Failed to fetch Dünger');
+    if (!response.ok) throw new Error('Failed to fetch DÃ¼nger');
     return response.json();
   },
 
@@ -33,7 +33,7 @@ const apiClient = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
-    if (!response.ok) throw new Error('Failed to create Dünger');
+    if (!response.ok) throw new Error('Failed to create DÃ¼nger');
     return response.json();
   },
 
@@ -43,7 +43,7 @@ const apiClient = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
-    if (!response.ok) throw new Error('Failed to update Dünger');
+    if (!response.ok) throw new Error('Failed to update DÃ¼nger');
     return response.json();
   },
 };
@@ -73,11 +73,59 @@ interface DuengerFormData {
   vk_preis: number | null;
   waehrung: string;
   lagerbestand: number;
-  // Compliance - Erklärung des Landwirts für Ausgangsstoffe für Explosivstoffe
+  // Compliance - ErklÃ¤rung des Landwirts fÃ¼r Ausgangsstoffe fÃ¼r Explosivstoffe
   ausgangsstoff_explosivstoffe: boolean;
   erklaerung_landwirt_erforderlich: boolean;
   erklaerung_landwirt_status: string;
 }
+
+const duengerTypOptions = [
+  { value: 'Mineraldünger', label: 'Mineraldünger' },
+  { value: 'Organischer Dünger', label: 'Organischer Dünger' },
+  { value: 'Organisch-Mineralischer Dünger', label: 'Organisch-Mineralischer Dünger' },
+  { value: 'Kalkdünger', label: 'Kalkdünger' },
+  { value: 'Sonstige', label: 'Sonstige' },
+]
+
+const gefahrstoffOptions = [
+  { value: '', label: 'Keine' },
+  { value: 'GHS05', label: 'GHS05 - Ätzend' },
+  { value: 'GHS07', label: 'GHS07 - Reizend' },
+  { value: 'GHS08', label: 'GHS08 - Gesundheitsschädlich' },
+  { value: 'GHS09', label: 'GHS09 - Umweltgefährlich' },
+]
+
+const lagerklasseOptions = [
+  { value: '1A', label: '1A - Nicht brennbare Flüssigkeiten' },
+  { value: '2', label: '2 - Schwach brennbare Flüssigkeiten' },
+  { value: '3', label: '3 - Normale brennbare Flüssigkeiten' },
+  { value: '4.1', label: '4.1 - Entzündbare Feststoffe' },
+  { value: '4.2', label: '4.2 - Selbstentzündliche Stoffe' },
+  { value: '4.3', label: '4.3 - Stoffe die mit Wasser reagieren' },
+  { value: '5.1', label: '5.1 - Entzündend wirkende Stoffe' },
+  { value: '5.2', label: '5.2 - Organische Peroxide' },
+  { value: '6.1', label: '6.1 - Giftige Stoffe' },
+  { value: '6.2', label: '6.2 - Ansteckungsgefährliche Stoffe' },
+  { value: '8', label: '8 - Ätzende Stoffe' },
+  { value: '9', label: '9 - Verschiedene gefährliche Stoffe' },
+]
+
+const erklaerungStatusOptions = [
+  { value: '', label: 'Nicht eingereicht' },
+  { value: 'eingegangen', label: 'Eingegangen' },
+  { value: 'geprueft', label: 'Geprüft' },
+  { value: 'abgelehnt', label: 'Abgelehnt' },
+]
+
+const kulturTypOptions = [
+  { value: 'Getreide', label: 'Getreide' },
+  { value: 'Mais', label: 'Mais' },
+  { value: 'Raps', label: 'Raps' },
+  { value: 'Grünland', label: 'Grünland' },
+  { value: 'Gemüse', label: 'Gemüse' },
+  { value: 'Obst', label: 'Obst' },
+  { value: 'Alle Kulturen', label: 'Alle Kulturen' },
+]
 
 const DuengerStammPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -111,7 +159,7 @@ const DuengerStammPage: React.FC = () => {
     vk_preis: null,
     waehrung: 'EUR',
     lagerbestand: 0,
-    // Compliance - Erklärung des Landwirts für Ausgangsstoffe für Explosivstoffe
+    // Compliance - ErklÃ¤rung des Landwirts fÃ¼r Ausgangsstoffe fÃ¼r Explosivstoffe
     ausgangsstoff_explosivstoffe: false,
     erklaerung_landwirt_erforderlich: false,
     erklaerung_landwirt_status: '',
@@ -130,7 +178,7 @@ const DuengerStammPage: React.FC = () => {
   const createMutation = useMutation({
     mutationFn: apiClient.createDuenger,
     onSuccess: () => {
-      toast.success('Dünger erfolgreich erstellt');
+      toast.success('DÃ¼nger erfolgreich erstellt');
       queryClient.invalidateQueries({ queryKey: ['duenger'] });
       navigate('/agrar/duenger-liste');
     },
@@ -145,7 +193,7 @@ const DuengerStammPage: React.FC = () => {
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: any }) => apiClient.updateDuenger(id, data),
     onSuccess: () => {
-      toast.success('Dünger erfolgreich aktualisiert');
+      toast.success('DÃ¼nger erfolgreich aktualisiert');
       queryClient.invalidateQueries({ queryKey: ['duenger', id] });
     },
     onError: (error: any) => {
@@ -180,7 +228,7 @@ const DuengerStammPage: React.FC = () => {
         vk_preis: duenger.vk_preis || null,
         waehrung: duenger.waehrung || 'EUR',
         lagerbestand: duenger.lagerbestand || 0,
-        // Compliance - Erklärung des Landwirts für Ausgangsstoffe für Explosivstoffe
+        // Compliance - ErklÃ¤rung des Landwirts fÃ¼r Ausgangsstoffe fÃ¼r Explosivstoffe
         ausgangsstoff_explosivstoffe: duenger.ausgangsstoff_explosivstoffe || false,
         erklaerung_landwirt_erforderlich: duenger.erklaerung_landwirt_erforderlich || false,
         erklaerung_landwirt_status: duenger.erklaerung_landwirt_status || '',
@@ -226,16 +274,16 @@ const DuengerStammPage: React.FC = () => {
     // Dosierung validation
     if (formData.dosierung_min !== null && formData.dosierung_max !== null &&
         formData.dosierung_min > formData.dosierung_max) {
-      newErrors.dosierung_min = 'Mindestdosierung darf nicht größer als Höchstdosierung sein';
+      newErrors.dosierung_min = 'Mindestdosierung darf nicht grÃ¶ÃŸer als HÃ¶chstdosierung sein';
     }
 
-    // Compliance validation - Ausgangsstoffe für Explosivstoffe
+    // Compliance validation - Ausgangsstoffe fÃ¼r Explosivstoffe
     if (formData.ausgangsstoff_explosivstoffe && !formData.erklaerung_landwirt_erforderlich) {
-      newErrors.erklaerung_landwirt_erforderlich = 'Bei Ausgangsstoffen für Explosivstoffe ist eine Landwirt-Erklärung erforderlich';
+      newErrors.erklaerung_landwirt_erforderlich = 'Bei Ausgangsstoffen fÃ¼r Explosivstoffe ist eine Landwirt-ErklÃ¤rung erforderlich';
     }
 
     if (formData.erklaerung_landwirt_erforderlich && !formData.erklaerung_landwirt_status) {
-      newErrors.erklaerung_landwirt_status = 'Status der Landwirt-Erklärung muss angegeben werden';
+      newErrors.erklaerung_landwirt_status = 'Status der Landwirt-ErklÃ¤rung muss angegeben werden';
     }
 
     setErrors(newErrors);
@@ -271,20 +319,20 @@ const DuengerStammPage: React.FC = () => {
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
-      <ModuleToolbar backTarget="/agrar/duenger-liste" closeTarget="/agrar/duenger-liste" title={isEditing ? 'Dünger bearbeiten' : 'Neuer Dünger'} />
+      <ModuleToolbar backTarget="/agrar/duenger-liste" closeTarget="/agrar/duenger-liste" title={isEditing ? 'DÃ¼nger bearbeiten' : 'Neuer DÃ¼nger'} />
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
           <Button variant="outline" size="sm" onClick={handleCancel}>
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Zurück
+            ZurÃ¼ck
           </Button>
           <div>
             <h1 className="text-2xl font-bold">
-              {isEditing ? 'Dünger bearbeiten' : 'Neuer Dünger'}
+              {isEditing ? 'DÃ¼nger bearbeiten' : 'Neuer DÃ¼nger'}
             </h1>
             <p className="text-muted-foreground">
-              {isEditing ? `Artikel: ${formData.artikelnummer}` : 'Stammdaten für Dünger anlegen'}
+              {isEditing ? `Artikel: ${formData.artikelnummer}` : 'Stammdaten fÃ¼r DÃ¼nger anlegen'}
             </p>
           </div>
         </div>
@@ -349,18 +397,14 @@ const DuengerStammPage: React.FC = () => {
 
                 <div className="space-y-2">
                   <Label htmlFor="typ">Typ *</Label>
-                  <Select value={formData.typ} onValueChange={(value) => handleInputChange('typ', value)}>
-                    <SelectTrigger className={errors.typ ? 'border-red-500' : ''}>
-                      <SelectValue placeholder="Dünger-Typ auswählen" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Mineraldünger">Mineraldünger</SelectItem>
-                      <SelectItem value="Organischer Dünger">Organischer Dünger</SelectItem>
-                      <SelectItem value="Organisch-Mineralischer Dünger">Organisch-Mineralischer Dünger</SelectItem>
-                      <SelectItem value="Kalkdünger">Kalkdünger</SelectItem>
-                      <SelectItem value="Sonstige">Sonstige</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <NativeSelect
+                    id="typ"
+                    value={formData.typ}
+                    onValueChange={(value) => handleInputChange('typ', value)}
+                    options={duengerTypOptions}
+                    placeholder="Duenger-Typ auswaehlen"
+                    className={errors.typ ? 'border-red-500' : ''}
+                  />
                   {errors.typ && (
                     <p className="text-sm text-red-500">{errors.typ}</p>
                   )}
@@ -398,7 +442,7 @@ const DuengerStammPage: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="p_gehalt">Phosphor (P₂O₅) %</Label>
+                  <Label htmlFor="p_gehalt">Phosphor (Pâ‚‚Oâ‚…) %</Label>
                   <Input
                     id="p_gehalt"
                     type="number"
@@ -415,7 +459,7 @@ const DuengerStammPage: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="k_gehalt">Kalium (K₂O) %</Label>
+                  <Label htmlFor="k_gehalt">Kalium (Kâ‚‚O) %</Label>
                   <Input
                     id="k_gehalt"
                     type="number"
@@ -486,7 +530,7 @@ const DuengerStammPage: React.FC = () => {
             <TabsContent value="zulassungen" className="space-y-6">
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="dmv_nummer">DüMV-Nummer</Label>
+                  <Label htmlFor="dmv_nummer">DÃ¼MV-Nummer</Label>
                   <Input
                     id="dmv_nummer"
                     value={formData.dmv_nummer}
@@ -524,41 +568,22 @@ const DuengerStammPage: React.FC = () => {
                 <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="gefahrstoff_klasse">Gefahrstoffklasse</Label>
-                    <Select value={formData.gefahrstoff_klasse} onValueChange={(value) => handleInputChange('gefahrstoff_klasse', value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Gefahrstoffklasse" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="">Keine</SelectItem>
-                        <SelectItem value="GHS05">GHS05 - Ätzend</SelectItem>
-                        <SelectItem value="GHS07">GHS07 - Reizend</SelectItem>
-                        <SelectItem value="GHS08">GHS08 - Gesundheitsschädlich</SelectItem>
-                        <SelectItem value="GHS09">GHS09 - Umweltgefährlich</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <NativeSelect
+                      id="gefahrstoff_klasse"
+                      value={formData.gefahrstoff_klasse}
+                      onValueChange={(value) => handleInputChange('gefahrstoff_klasse', value)}
+                      options={gefahrstoffOptions}
+                    />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="lagerklasse">Lagerklasse</Label>
-                    <Select value={formData.lagerklasse} onValueChange={(value) => handleInputChange('lagerklasse', value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Lagerklasse" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="1A">1A - Nicht brennbare Flüssigkeiten</SelectItem>
-                        <SelectItem value="2">2 - Schwach brennbare Flüssigkeiten</SelectItem>
-                        <SelectItem value="3">3 - Normale brennbare Flüssigkeiten</SelectItem>
-                        <SelectItem value="4.1">4.1 - Entzündbare Feststoffe</SelectItem>
-                        <SelectItem value="4.2">4.2 - Selbstentzündliche Stoffe</SelectItem>
-                        <SelectItem value="4.3">4.3 - Stoffe die mit Wasser reagieren</SelectItem>
-                        <SelectItem value="5.1">5.1 - Entzündend wirkende Stoffe</SelectItem>
-                        <SelectItem value="5.2">5.2 - Organische Peroxide</SelectItem>
-                        <SelectItem value="6.1">6.1 - Giftige Stoffe</SelectItem>
-                        <SelectItem value="6.2">6.2 - Ansteckungsgefährliche Stoffe</SelectItem>
-                        <SelectItem value="8">8 - Ätzende Stoffe</SelectItem>
-                        <SelectItem value="9">9 - Verschiedene gefährliche Stoffe</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <NativeSelect
+                      id="lagerklasse"
+                      value={formData.lagerklasse}
+                      onValueChange={(value) => handleInputChange('lagerklasse', value)}
+                      options={lagerklasseOptions}
+                    />
                   </div>
                 </div>
 
@@ -576,7 +601,7 @@ const DuengerStammPage: React.FC = () => {
                     ) : (
                       <Droplets className="w-4 h-4 text-gray-400" />
                     )}
-                    Wassergefährdend
+                    WassergefÃ¤hrdend
                   </Label>
                 </div>
               </div>
@@ -592,7 +617,7 @@ const DuengerStammPage: React.FC = () => {
                {formData.wassergefaehrdend && (
                  <Badge variant="secondary" className="bg-blue-100 text-blue-800 flex items-center gap-1">
                    <Droplets className="w-3 h-3" />
-                   Wassergefährdend
+                   WassergefÃ¤hrdend
                  </Badge>
                )}
                {formData.lagerklasse && (
@@ -602,9 +627,9 @@ const DuengerStammPage: React.FC = () => {
                )}
              </div>
 
-             {/* Compliance Section - Erklärung des Landwirts für Ausgangsstoffe für Explosivstoffe */}
+             {/* Compliance Section - ErklÃ¤rung des Landwirts fÃ¼r Ausgangsstoffe fÃ¼r Explosivstoffe */}
              <div className="space-y-4 border-t pt-4">
-               <h4 className="font-semibold">Compliance - Ausgangsstoffe für Explosivstoffe</h4>
+               <h4 className="font-semibold">Compliance - Ausgangsstoffe fÃ¼r Explosivstoffe</h4>
                <div className="grid grid-cols-1 gap-4">
                  <div className="flex items-center space-x-2">
                    <input
@@ -620,7 +645,7 @@ const DuengerStammPage: React.FC = () => {
                      ) : (
                        <AlertTriangle className="w-4 h-4 text-gray-400" />
                      )}
-                     Enthält Ausgangsstoffe für Explosivstoffe
+                     EnthÃ¤lt Ausgangsstoffe fÃ¼r Explosivstoffe
                    </Label>
                  </div>
 
@@ -640,27 +665,19 @@ const DuengerStammPage: React.FC = () => {
                          ) : (
                            <XCircle className="w-4 h-4 text-gray-400" />
                          )}
-                         Erklärung des Landwirts erforderlich
+                         ErklÃ¤rung des Landwirts erforderlich
                        </Label>
                      </div>
 
                      {formData.erklaerung_landwirt_erforderlich && (
                        <div className="space-y-2">
-                         <Label htmlFor="erklaerung_landwirt_status">Status der Erklärung</Label>
-                         <Select
+                         <Label htmlFor="erklaerung_landwirt_status">Status der ErklÃ¤rung</Label>
+                         <NativeSelect
+                           id="erklaerung_landwirt_status"
                            value={formData.erklaerung_landwirt_status}
                            onValueChange={(value) => handleInputChange('erklaerung_landwirt_status', value)}
-                         >
-                           <SelectTrigger>
-                             <SelectValue placeholder="Status auswählen" />
-                           </SelectTrigger>
-                           <SelectContent>
-                             <SelectItem value="">Nicht eingereicht</SelectItem>
-                             <SelectItem value="eingegangen">Eingegangen</SelectItem>
-                             <SelectItem value="geprueft">Geprüft</SelectItem>
-                             <SelectItem value="abgelehnt">Abgelehnt</SelectItem>
-                           </SelectContent>
-                         </Select>
+                           options={erklaerungStatusOptions}
+                         />
                        </div>
                      )}
                    </>
@@ -687,9 +704,9 @@ const DuengerStammPage: React.FC = () => {
                        ) : (
                          <AlertTriangle className="w-3 h-3" />
                        )}
-                       Landwirt-Erklärung: {
+                       Landwirt-ErklÃ¤rung: {
                          formData.erklaerung_landwirt_status === 'eingegangen' ? 'Eingegangen' :
-                         formData.erklaerung_landwirt_status === 'geprueft' ? 'Geprüft' :
+                         formData.erklaerung_landwirt_status === 'geprueft' ? 'GeprÃ¼ft' :
                          formData.erklaerung_landwirt_status === 'abgelehnt' ? 'Abgelehnt' :
                          'Nicht eingereicht'
                        }
@@ -705,20 +722,13 @@ const DuengerStammPage: React.FC = () => {
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="kultur_typ">Kulturtyp</Label>
-                  <Select value={formData.kultur_typ} onValueChange={(value) => handleInputChange('kultur_typ', value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Kulturtyp auswählen" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Getreide">Getreide</SelectItem>
-                      <SelectItem value="Mais">Mais</SelectItem>
-                      <SelectItem value="Raps">Raps</SelectItem>
-                      <SelectItem value="Grünland">Grünland</SelectItem>
-                      <SelectItem value="Gemüse">Gemüse</SelectItem>
-                      <SelectItem value="Obst">Obst</SelectItem>
-                      <SelectItem value="Alle Kulturen">Alle Kulturen</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <NativeSelect
+                    id="kultur_typ"
+                    value={formData.kultur_typ}
+                    onValueChange={(value) => handleInputChange('kultur_typ', value)}
+                    options={kulturTypOptions}
+                    placeholder="Kulturtyp auswaehlen"
+                  />
                 </div>
 
                 <div className="space-y-2">
@@ -727,7 +737,7 @@ const DuengerStammPage: React.FC = () => {
                     id="zeitpunkt"
                     value={formData.zeitpunkt}
                     onChange={(e) => handleInputChange('zeitpunkt', e.target.value)}
-                    placeholder="z.B. Herbst, Frühjahr, vor Aussaat"
+                    placeholder="z.B. Herbst, FrÃ¼hjahr, vor Aussaat"
                   />
                 </div>
 
@@ -747,7 +757,7 @@ const DuengerStammPage: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="dosierung_max">Höchstdosierung (kg/ha)</Label>
+                  <Label htmlFor="dosierung_max">HÃ¶chstdosierung (kg/ha)</Label>
                   <Input
                     id="dosierung_max"
                     type="number"
@@ -802,3 +812,4 @@ const DuengerStammPage: React.FC = () => {
 };
 
 export default DuengerStammPage;
+

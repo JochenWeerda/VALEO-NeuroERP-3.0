@@ -3,7 +3,7 @@
  * 1:1 Struktur nach Lieferschein-Erfassung — Gewohnheits-Prinzip
  */
 
-import { useState, useEffect, useMemo } from 'react'
+import { lazy, Suspense, useState, useEffect, useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -14,12 +14,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { useToast } from '@/components/ui/toast-provider'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
-import { CustomerSelectionDialog, type Customer } from '@/components/sales/CustomerSelectionDialog'
-import { ArtikelSuchDialog } from '@/components/sales/ArtikelSuchDialog'
-import { LieferscheinDruckDialog, type PrintOptions } from '@/components/sales/LieferscheinDruckDialog'
-import { DmsAnhangDialog } from '@/components/dms/DmsAnhangDialog'
-import { AttestationDialog } from '@/components/sales/AttestationDialog'
-import { BelegfolgePositionenDialog, type BelegfolgePosition } from '@/components/sales/BelegfolgePositionenDialog'
+import type { Customer } from '@/components/sales/CustomerSelectionDialog'
+import type { PrintOptions } from '@/components/sales/LieferscheinDruckDialog'
+import type { BelegfolgePosition } from '@/components/sales/BelegfolgePositionenDialog'
 import { useAuftraege, type Auftrag } from '@/lib/api/sales'
 import { apiClient } from '@/lib/axios'
 import { useAuth } from '@/hooks/useAuth'
@@ -30,6 +27,29 @@ import {
   ChevronLeft, ChevronRight, ChevronUp, ChevronDown, MoreHorizontal, Check, Printer, Save,
   FileText, Folder, FileCheck, Link as LinkIcon, Receipt, Trash2, Search,
 } from 'lucide-react'
+
+const CustomerSelectionDialog = lazy(() =>
+  import('@/components/sales/CustomerSelectionDialog').then((m) => ({ default: m.CustomerSelectionDialog }))
+)
+const ArtikelSuchDialog = lazy(() =>
+  import('@/components/sales/ArtikelSuchDialog').then((m) => ({ default: m.ArtikelSuchDialog }))
+)
+const LieferscheinDruckDialog = lazy(() =>
+  import('@/components/sales/LieferscheinDruckDialog').then((m) => ({ default: m.LieferscheinDruckDialog }))
+)
+const DmsAnhangDialog = lazy(() =>
+  import('@/components/dms/DmsAnhangDialog').then((m) => ({ default: m.DmsAnhangDialog }))
+)
+const AttestationDialog = lazy(() =>
+  import('@/components/sales/AttestationDialog').then((m) => ({ default: m.AttestationDialog }))
+)
+const BelegfolgePositionenDialog = lazy(() =>
+  import('@/components/sales/BelegfolgePositionenDialog').then((m) => ({ default: m.BelegfolgePositionenDialog }))
+)
+
+function LazyDialogBoundary({ children }: { children: JSX.Element }) {
+  return <Suspense fallback={null}>{children}</Suspense>
+}
 
 // â”€â”€ API Response Type â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
@@ -1668,33 +1688,49 @@ export default function SalesOrderEditorPage(): JSX.Element {
         </DialogContent>
       </Dialog>
 
-      <CustomerSelectionDialog
-        open={showCustomerDialog}
-        onClose={() => setShowCustomerDialog(false)}
-        onSelect={(c) => { void handleCustomerSelect(c); setShowCustomerDialog(false) }}
-      />
+      {showCustomerDialog && (
+        <LazyDialogBoundary>
+          <CustomerSelectionDialog
+            open={showCustomerDialog}
+            onClose={() => setShowCustomerDialog(false)}
+            onSelect={(c) => { void handleCustomerSelect(c); setShowCustomerDialog(false) }}
+          />
+        </LazyDialogBoundary>
+      )}
 
-      <ArtikelSuchDialog
-        open={showArticleDialog}
-        onClose={() => setShowArticleDialog(false)}
-        onSelect={(a) => { handleArticleSelect(a); setShowArticleDialog(false) }}
-        customerId={state.customer?.id}
-      />
+      {showArticleDialog && (
+        <LazyDialogBoundary>
+          <ArtikelSuchDialog
+            open={showArticleDialog}
+            onClose={() => setShowArticleDialog(false)}
+            onSelect={(a) => { handleArticleSelect(a); setShowArticleDialog(false) }}
+            customerId={state.customer?.id}
+          />
+        </LazyDialogBoundary>
+      )}
 
-      <LieferscheinDruckDialog
-        open={showPrintDialog}
-        onClose={() => setShowPrintDialog(false)}
-        onConfirm={handlePrint}
-        title="AUFTRAG DRUCKEN"
-      />
+      {showPrintDialog && (
+        <LazyDialogBoundary>
+          <LieferscheinDruckDialog
+            open={showPrintDialog}
+            onClose={() => setShowPrintDialog(false)}
+            onConfirm={handlePrint}
+            title="AUFTRAG DRUCKEN"
+          />
+        </LazyDialogBoundary>
+      )}
 
-      <DmsAnhangDialog
-        open={showAttachmentDialog}
-        onClose={() => setShowAttachmentDialog(false)}
-        businessObjectType="sales_order"
-        businessObjectId={state.id}
-        title="UNTERLAGEN / DATEIEN — AUFTRAG"
-      />
+      {showAttachmentDialog && (
+        <LazyDialogBoundary>
+          <DmsAnhangDialog
+            open={showAttachmentDialog}
+            onClose={() => setShowAttachmentDialog(false)}
+            businessObjectType="sales_order"
+            businessObjectId={state.id}
+            title="UNTERLAGEN / DATEIEN — AUFTRAG"
+          />
+        </LazyDialogBoundary>
+      )}
 
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent className="max-w-sm">
@@ -1713,23 +1749,29 @@ export default function SalesOrderEditorPage(): JSX.Element {
         </DialogContent>
       </Dialog>
 
-      <AttestationDialog
-        open={showAttestationDialog}
-        onClose={() => { setShowAttestationDialog(false); setPendingAction(null) }}
-        onConfirm={handleAttestationConfirm}
-        action={pendingAction || 'print'}
-        entityType="Auftrag"
-        entityNumber={state.auftragNr}
-      />
+      {showAttestationDialog && (
+        <LazyDialogBoundary>
+          <AttestationDialog
+            open={showAttestationDialog}
+            onClose={() => { setShowAttestationDialog(false); setPendingAction(null) }}
+            onConfirm={handleAttestationConfirm}
+            action={pendingAction || 'print'}
+            entityType="Auftrag"
+            entityNumber={state.auftragNr}
+          />
+        </LazyDialogBoundary>
+      )}
 
-      {state.customer && (
-        <BelegfolgePositionenDialog
-          open={showBelegfolgeDialog}
-          onClose={() => setShowBelegfolgeDialog(false)}
-          onConfirm={handleBelegfolgePositionen}
-          customerId={state.customer.id}
-          targetDocType="auftrag"
-        />
+      {state.customer && showBelegfolgeDialog && (
+        <LazyDialogBoundary>
+          <BelegfolgePositionenDialog
+            open={showBelegfolgeDialog}
+            onClose={() => setShowBelegfolgeDialog(false)}
+            onConfirm={handleBelegfolgePositionen}
+            customerId={state.customer.id}
+            targetDocType="auftrag"
+          />
+        </LazyDialogBoundary>
       )}
 
       <Dialog open={showInformationDialog} onOpenChange={setShowInformationDialog}>

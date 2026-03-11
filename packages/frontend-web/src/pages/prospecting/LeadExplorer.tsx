@@ -16,13 +16,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Slider } from '@/components/ui/slider'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -629,29 +623,24 @@ export default function LeadExplorer(): JSX.Element {
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             <FilterBlock label="Jahr & Quelle">
               <div className="flex gap-2">
-                <Select value={String(refYear)} onValueChange={(v) => setRefYear(parseInt(v, 10))}>
-                  <SelectTrigger className="w-24">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {yearOptions.map((y) => (
-                      <SelectItem key={y} value={String(y)}>
-                        {y}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Select value={source} onValueChange={setSource}>
-                  <SelectTrigger className="flex-1">
-                    <SelectValue placeholder="Quelle wählen" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="gap_de">GAP (DE)</SelectItem>
-                    <SelectItem value="bvk_bio">Bio-Register</SelectItem>
-                    <SelectItem value="qs">QS / QM-Milch</SelectItem>
-                    <SelectItem value="other">Weitere</SelectItem>
-                  </SelectContent>
-                </Select>
+                <NativeSelect
+                  className="w-24"
+                  value={String(refYear)}
+                  onValueChange={(v) => setRefYear(parseInt(v, 10))}
+                  options={yearOptions.map((y) => ({ value: String(y), label: String(y) }))}
+                />
+                <NativeSelect
+                  className="flex-1"
+                  value={source}
+                  onValueChange={setSource}
+                  placeholder="Quelle auswaehlen"
+                  options={[
+                    { value: 'gap_de', label: 'GAP (DE)' },
+                    { value: 'bvk_bio', label: 'Bio-Register' },
+                    { value: 'qs', label: 'QS / QM-Milch' },
+                    { value: 'other', label: 'Weitere' },
+                  ]}
+                />
               </div>
             </FilterBlock>
 
@@ -676,17 +665,16 @@ export default function LeadExplorer(): JSX.Element {
             </FilterBlock>
 
             <FilterBlock label="Segment">
-              <Select value={segment} onValueChange={(v) => setSegment(v as 'all' | LeadSegment)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Alle" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Alle</SelectItem>
-                  <SelectItem value="A">A</SelectItem>
-                  <SelectItem value="B">B</SelectItem>
-                  <SelectItem value="C">C</SelectItem>
-                </SelectContent>
-              </Select>
+              <NativeSelect
+                value={segment}
+                onValueChange={(v) => setSegment(v as 'all' | LeadSegment)}
+                options={[
+                  { value: 'all', label: 'Alle' },
+                  { value: 'A', label: 'A' },
+                  { value: 'B', label: 'B' },
+                  { value: 'C', label: 'C' },
+                ]}
+              />
             </FilterBlock>
 
             <FilterBlock label="Mindestpotenzial (EUR)">

@@ -206,10 +206,26 @@ export const einkaufKeys = {
   frachtauftraege: () => [...einkaufKeys.all, 'frachtauftraege'] as const,
 }
 
+const EMPTY_EINKAUF_REPORTS: { spend: EinkaufSpendItem[]; performance: EinkaufPerformance[] } = {
+  spend: [],
+  performance: [],
+}
+
+const EMPTY_EINKAUF_REPORTS_STANDARD: {
+  openOrders: EinkaufOpenOrder[]
+  supplierPerformance: EinkaufSupplierPerformance[]
+  toleranceReports: EinkaufToleranceReport[]
+} = {
+  openOrders: [],
+  supplierPerformance: [],
+  toleranceReports: [],
+}
+
 export function useBestellvorschlaege() {
   return useQuery({
     queryKey: einkaufKeys.vorschlaege(),
     queryFn: async () => (await apiClient.get<Bestellvorschlag[]>('/api/v1/einkauf/bestellvorschlaege')).data,
+    initialData: [],
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -218,6 +234,7 @@ export function useWarengruppen() {
   return useQuery({
     queryKey: einkaufKeys.warengruppen(),
     queryFn: async () => (await apiClient.get<Warengruppe[]>('/api/v1/einkauf/warengruppen')).data,
+    initialData: [],
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -226,6 +243,7 @@ export function useEinkaufAnfragen() {
   return useQuery({
     queryKey: einkaufKeys.anfragen(),
     queryFn: async () => (await apiClient.get<EinkaufAnfrage[]>('/api/v1/einkauf/anfragen')).data,
+    initialData: [],
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -234,6 +252,7 @@ export function useEinkaufAngebote() {
   return useQuery({
     queryKey: einkaufKeys.angebote(),
     queryFn: async () => (await apiClient.get<EinkaufAngebot[]>('/api/v1/einkauf/angebote')).data,
+    initialData: [],
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -242,6 +261,7 @@ export function useAnlieferavis() {
   return useQuery({
     queryKey: einkaufKeys.anlieferavis(),
     queryFn: async () => (await apiClient.get<Anlieferavis[]>('/api/v1/einkauf/anlieferavis')).data,
+    initialData: [],
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -250,6 +270,7 @@ export function useAuftragsbestaetigungen() {
   return useQuery({
     queryKey: einkaufKeys.bestaetigungen(),
     queryFn: async () => (await apiClient.get<Auftragsbestaetigung[]>('/api/v1/einkauf/auftragsbestaetigungen')).data,
+    initialData: [],
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -258,6 +279,7 @@ export function useRechnungseingaenge() {
   return useQuery({
     queryKey: einkaufKeys.rechnungseingaenge(),
     queryFn: async () => (await apiClient.get<Rechnungseingang[]>('/api/v1/einkauf/rechnungseingaenge')).data,
+    initialData: [],
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -296,6 +318,7 @@ export function useEinkaufReports() {
   return useQuery({
     queryKey: einkaufKeys.reports(),
     queryFn: async () => (await apiClient.get<{ spend: EinkaufSpendItem[]; performance: EinkaufPerformance[] }>('/api/v1/einkauf/reports')).data,
+    initialData: EMPTY_EINKAUF_REPORTS,
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -311,6 +334,7 @@ export function useEinkaufReportsStandard() {
           toleranceReports: EinkaufToleranceReport[]
         }>('/api/v1/einkauf/reports/standard')
       ).data,
+    initialData: EMPTY_EINKAUF_REPORTS_STANDARD,
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -319,6 +343,7 @@ export function useEinkaufRetouren() {
   return useQuery({
     queryKey: einkaufKeys.retouren(),
     queryFn: async () => (await apiClient.get<EinkaufRetoure[]>('/api/v1/einkauf/retouren')).data,
+    initialData: [],
     staleTime: 60 * 1000,
   })
 }
@@ -336,6 +361,7 @@ export function useEinkaufLieferscheine() {
   return useQuery({
     queryKey: einkaufKeys.lieferscheine(),
     queryFn: async () => (await apiClient.get<EinkaufLieferschein[]>('/api/v1/einkauf/lieferscheine')).data,
+    initialData: [],
     staleTime: 60 * 1000,
   })
 }
@@ -361,6 +387,7 @@ export function useEinkaufFrachtauftraege() {
   return useQuery({
     queryKey: einkaufKeys.frachtauftraege(),
     queryFn: async () => (await apiClient.get<EinkaufFrachtauftrag[]>('/api/v1/einkauf/frachtauftraege')).data,
+    initialData: [],
     staleTime: 60 * 1000,
   })
 }
@@ -498,6 +525,7 @@ export function useVorschlagLager(params?: {
       const qs = p.toString() ? `?${p.toString()}` : ''
       return (await apiClient.get<BvPosition[]>(`/api/v1/einkauf/bestellvorschlaege/lager${qs}`)).data
     },
+    initialData: [],
     staleTime: 60 * 1000,
   })
 }
@@ -519,6 +547,7 @@ export function useVorschlagVerkauf(params?: {
       const qs = p.toString() ? `?${p.toString()}` : ''
       return (await apiClient.get<BvPosition[]>(`/api/v1/einkauf/bestellvorschlaege/verkauf${qs}`)).data
     },
+    initialData: [],
     staleTime: 60 * 1000,
   })
 }
@@ -536,6 +565,7 @@ export function useVorschlagRohware(params?: {
       const qs = p.toString() ? `?${p.toString()}` : ''
       return (await apiClient.get<BvPosition[]>(`/api/v1/einkauf/bestellvorschlaege/rohware${qs}`)).data
     },
+    initialData: [],
     staleTime: 60 * 1000,
   })
 }
@@ -574,6 +604,7 @@ export function useArtikelLagerParameter(article_id?: string) {
       const qs = article_id ? `?article_id=${encodeURIComponent(article_id)}` : ''
       return (await apiClient.get<ArtikelLagerParam[]>(`/api/v1/einkauf/artikel-lager-parameter${qs}`)).data
     },
+    initialData: [],
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -599,6 +630,7 @@ export function useEinkaufLieferanten(aktiv?: boolean) {
       const qs = aktiv !== undefined ? `?aktiv=${aktiv}` : ''
       return (await apiClient.get<EinkaufLieferant[]>(`/api/v1/einkauf/lieferanten${qs}`)).data
     },
+    initialData: [],
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -611,6 +643,7 @@ export function useEinkaufKontrakte(lieferant_id?: string) {
       const qs = lieferant_id ? `?lieferant_id=${encodeURIComponent(lieferant_id)}` : ''
       return (await apiClient.get<EinkaufKontrakt[]>(`/api/v1/einkauf/kontrakte${qs}`)).data
     },
+    initialData: [],
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -627,6 +660,7 @@ export function useEinkaufBestellungen(params?: { status?: string; von?: string;
       const qs = p.toString() ? `?${p.toString()}` : ''
       return (await apiClient.get<EinkaufBestellung[]>(`/api/v1/einkauf/bestellungen${qs}`)).data
     },
+    initialData: [],
     staleTime: 60 * 1000,
   })
 }

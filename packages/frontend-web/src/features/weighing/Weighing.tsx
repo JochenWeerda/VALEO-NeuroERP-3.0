@@ -1,6 +1,5 @@
 ﻿import { type ReactElement, useMemo } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { z } from 'zod'
 import {
   Alert,
   AlertDescription,
@@ -21,21 +20,61 @@ import { apiClient } from '@/lib/axios'
 const TICKET_STATUSES = ['Draft', 'InProgress', 'Completed', 'Cancelled'] as const
 const SKELETON_ROWS = 4
 
-const weighingTicketSchema = z.object({
-  id: z.string().min(1),
-  ticketNumber: z.string().min(1),
-  status: z.enum(TICKET_STATUSES),
-  contractId: z.string().optional(),
-  netWeight: z.number().nonnegative().optional().default(0),
-  createdAt: z.string().datetime({ offset: true }).or(z.string().min(1)),
-})
+type WeighingTicket = {
+  id: string
+  ticketNumber: string
+  status: (typeof TICKET_STATUSES)[number]
+  contractId?: string
+  netWeight: number
+  createdAt: string
+}
 
-const ticketsResponseSchema = z
-  .object({
-    data: z.array(weighingTicketSchema).optional(),
-    items: z.array(weighingTicketSchema).optional(),
-  })
-  .transform((payload) => payload.data ?? payload.items ?? [])
+type TicketSummary = {
+  total: number
+  completed: number
+  inProgress: number
+}
+
+const asRecord = (value: unknown): Record<string, unknown> | null =>
+  value !== null && typeof value === 'object' ? (value as Record<string, unknown>) : null
+
+const asString = (value: unknown, fallback = ''): string => (typeof value === 'string' && value.length > 0 ? value : fallback)
+const asNumber = (value: unknown): number => (typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : 0)
+const asArray = (value: unknown): unknown[] => (Array.isArray(value) ? value : [])
+
+const isTicketStatus = (value: unknown): value is WeighingTicket['status'] =>
+  typeof value === 'string' && TICKET_STATUSES.includes(value as WeighingTicket['status'])
+
+const extractList = (payload: unknown): unknown[] => {
+  const record = asRecord(payload)
+  if (!record) {
+    return []
+  }
+
+  return asArray(record.data ?? record.items)
+}
+
+const normalizeTicket = (value: unknown): WeighingTicket | null => {
+  const record = asRecord(value)
+  if (!record) {
+    return null
+  }
+
+  const id = asString(record.id)
+  const ticketNumber = asString(record.ticketNumber)
+  if (!id || !ticketNumber) {
+    return null
+  }
+
+  return {
+    id,
+    ticketNumber,
+    status: isTicketStatus(record.status) ? record.status : 'Draft',
+    contractId: asString(record.contractId) || undefined,
+    netWeight: asNumber(record.netWeight),
+    createdAt: asString(record.createdAt, new Date(0).toISOString()),
+  }
+}
 
 const fetchTodayTickets = async (): Promise<WeighingTicket[]> => {
   const now = new Date()
@@ -49,23 +88,11 @@ const fetchTodayTickets = async (): Promise<WeighingTicket[]> => {
     },
   })
 
-  const parsed = ticketsResponseSchema.safeParse(payload)
-  if (parsed.success) {
-    return parsed.data
-  }
-  return []
+  return extractList(payload.data).map(normalizeTicket).filter((value): value is WeighingTicket => value !== null)
 }
 
 const approveTicket = async (ticketId: string): Promise<void> => {
   await apiClient.post(`/weighing/api/v1/tickets/${ticketId}/approve`)
-}
-
-type WeighingTicket = z.infer<typeof weighingTicketSchema>
-
-type TicketSummary = {
-  total: number
-  completed: number
-  inProgress: number
 }
 
 const reduceSummary = (tickets: WeighingTicket[]): TicketSummary => {
@@ -243,8 +270,3 @@ export default function Weighing(): ReactElement {
     </div>
   )
 }
-
-
-
-
-

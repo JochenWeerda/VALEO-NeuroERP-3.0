@@ -2,34 +2,14 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
-import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
+import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
-import { z } from 'zod'
+import { getFieldsFromMaskConfig, validateFields } from '@/components/mask-builder/validation'
 import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/axios'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { useTenant } from '@/hooks/useTenant'
 
-// Zod-Schema für Bank-Abgleich (wird in Komponente mit i18n erstellt)
-const createBankAbgleichSchema = (t: any) => z.object({
-  kontoId: z.string().min(1, t('crud.messages.validationError')),
-  periode: z.string().regex(/^\d{4}-\d{2}$/, t('crud.messages.validationError')),
-  camtFile: z.string().optional(),
-  startSaldo: z.number(),
-  endSaldo: z.number(),
-  gebuchteUmsaetze: z.number(),
-  nichtZugeordnet: z.number(),
-  zugeordnet: z.number(),
-  abgleichsDifferenz: z.number().max(0.01, t('crud.messages.validationError')),
-  abgleichsDatum: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t('crud.messages.validationError')),
-  regelAngewendet: z.array(z.object({
-    regelName: z.string(),
-    treffer: z.number(),
-    zugeordnet: z.number()
-  })).optional()
-})
-
-// Konfiguration für Bank-Abgleich ObjectPage (wird in Komponente mit i18n erstellt)
 const createBankAbgleichConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
   subtitle: t('crud.fields.bankReconciliation'),
@@ -206,7 +186,6 @@ const createBankAbgleichConfig = (t: any, entityTypeLabel: string): MaskConfig =
       delete: '/api/v1/finance/bank-statements/{id}'
     }
   } as any,
-  validation: createBankAbgleichSchema(t),
   permissions: ['fibu.read', 'fibu.write']
 })
 
@@ -334,7 +313,14 @@ export default function BankAbgleichPage(): JSX.Element {
     id: 'new'
   })
 
-  const { validate, showValidationToast } = useMaskValidation(bankAbgleichConfig.validation)
+  const validate = (formData: any) => validateFields(getFieldsFromMaskConfig(bankAbgleichConfig), formData ?? {})
+  const showValidationToast = (errors: Record<string, string>) => {
+    toast({
+      variant: 'destructive',
+      title: t('crud.messages.validationError'),
+      description: `${Object.keys(errors).length} Feld(er) muessen korrigiert werden.`,
+    })
+  }
 
   const { handleAction } = useMaskActions(async (action: string, formData: any) => {
     if (action === 'import') {
@@ -530,7 +516,7 @@ export default function BankAbgleichPage(): JSX.Element {
     } else if (action === 'book') {
       const isValid = validate(formData)
       if (!isValid.isValid) {
-        showValidationToast(isValid.errors)
+        showValidationToast(errors)
         return
       }
       if (!formData.statementId || !formData.kontoId) {

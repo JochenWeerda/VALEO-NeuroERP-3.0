@@ -1,6 +1,5 @@
 ﻿import type { ReactElement } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { z } from 'zod'
 import {
   Alert,
   AlertDescription,
@@ -20,39 +19,87 @@ import { apiClient } from '@/lib/axios'
 
 const LIST_SKELETON_ROWS = 4
 
-const orderSchema = z.object({
-  id: z.string().min(1),
-  orderNumber: z.string().min(1),
-  customer: z.string().min(1),
-  amount: z.number().nonnegative(),
-  currency: z.string().min(1).default('EUR'),
-  status: z.string().min(1),
-  createdAt: z.string().datetime({ offset: true }).or(z.string().min(1)),
-})
+type SalesOrder = {
+  id: string
+  orderNumber: string
+  customer: string
+  amount: number
+  currency: string
+  status: string
+  createdAt: string
+}
 
-const invoiceSchema = z.object({
-  id: z.string().min(1),
-  invoiceNumber: z.string().min(1),
-  customer: z.string().min(1),
-  amount: z.number().nonnegative(),
-  currency: z.string().min(1).default('EUR'),
-  status: z.string().min(1),
-  issuedAt: z.string().datetime({ offset: true }).or(z.string().min(1)),
-})
+type SalesInvoice = {
+  id: string
+  invoiceNumber: string
+  customer: string
+  amount: number
+  currency: string
+  status: string
+  issuedAt: string
+}
 
-const ordersResponseSchema = z
-  .object({
-    data: z.array(orderSchema).optional(),
-    items: z.array(orderSchema).optional(),
-  })
-  .transform((payload) => payload.data ?? payload.items ?? [])
+const asRecord = (value: unknown): Record<string, unknown> | null =>
+  value !== null && typeof value === 'object' ? (value as Record<string, unknown>) : null
 
-const invoicesResponseSchema = z
-  .object({
-    data: z.array(invoiceSchema).optional(),
-    items: z.array(invoiceSchema).optional(),
-  })
-  .transform((payload) => payload.data ?? payload.items ?? [])
+const asString = (value: unknown, fallback = ''): string => (typeof value === 'string' && value.length > 0 ? value : fallback)
+const asNumber = (value: unknown): number => (typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : 0)
+const asArray = (value: unknown): unknown[] => (Array.isArray(value) ? value : [])
+
+const extractList = (payload: unknown): unknown[] => {
+  const record = asRecord(payload)
+  if (!record) {
+    return []
+  }
+
+  return asArray(record.data ?? record.items)
+}
+
+const normalizeOrder = (value: unknown): SalesOrder | null => {
+  const record = asRecord(value)
+  if (!record) {
+    return null
+  }
+
+  const id = asString(record.id)
+  const orderNumber = asString(record.orderNumber)
+  if (!id || !orderNumber) {
+    return null
+  }
+
+  return {
+    id,
+    orderNumber,
+    customer: asString(record.customer, 'Unbekannt'),
+    amount: asNumber(record.amount),
+    currency: asString(record.currency, 'EUR'),
+    status: asString(record.status, 'open'),
+    createdAt: asString(record.createdAt, new Date(0).toISOString()),
+  }
+}
+
+const normalizeInvoice = (value: unknown): SalesInvoice | null => {
+  const record = asRecord(value)
+  if (!record) {
+    return null
+  }
+
+  const id = asString(record.id)
+  const invoiceNumber = asString(record.invoiceNumber)
+  if (!id || !invoiceNumber) {
+    return null
+  }
+
+  return {
+    id,
+    invoiceNumber,
+    customer: asString(record.customer, 'Unbekannt'),
+    amount: asNumber(record.amount),
+    currency: asString(record.currency, 'EUR'),
+    status: asString(record.status, 'open'),
+    issuedAt: asString(record.issuedAt, new Date(0).toISOString()),
+  }
+}
 
 const currencyFormatter = new Intl.NumberFormat('de-DE', {
   style: 'currency',
@@ -65,24 +112,13 @@ const dateFormatter = new Intl.DateTimeFormat('de-DE')
 
 const fetchOrders = async (): Promise<SalesOrder[]> => {
   const payload = await apiClient.get<unknown>('/sales/api/v1/orders')
-  const parsed = ordersResponseSchema.safeParse(payload)
-  if (parsed.success) {
-    return parsed.data
-  }
-  return []
+  return extractList(payload.data).map(normalizeOrder).filter((value): value is SalesOrder => value !== null)
 }
 
 const fetchInvoices = async (): Promise<SalesInvoice[]> => {
   const payload = await apiClient.get<unknown>('/sales/api/v1/invoices')
-  const parsed = invoicesResponseSchema.safeParse(payload)
-  if (parsed.success) {
-    return parsed.data
-  }
-  return []
+  return extractList(payload.data).map(normalizeInvoice).filter((value): value is SalesInvoice => value !== null)
 }
-
-type SalesOrder = z.infer<typeof orderSchema>
-type SalesInvoice = z.infer<typeof invoiceSchema>
 
 export default function Sales(): ReactElement {
   const {
@@ -273,4 +309,3 @@ export default function Sales(): ReactElement {
     </div>
   )
 }
-

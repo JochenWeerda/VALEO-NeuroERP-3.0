@@ -1,9 +1,10 @@
-import { type ReactNode } from 'react'
+import { type ReactNode, useMemo } from 'react'
 import { PageToolbar, type ToolbarAction } from '@/components/navigation/PageToolbar'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import { TrendingDown, TrendingUp } from 'lucide-react'
 import { createMCPMetadata } from '@/design/mcp-schemas/component-metadata'
+import { useActionsForMask, useActionDispatchOptional } from '@/features/ki-usability'
 
 export interface OverviewKpi {
   label: string
@@ -72,6 +73,41 @@ export function OverviewPage({
   overflowActions,
   mcpContext,
 }: OverviewPageProps): JSX.Element {
+  const actionDispatch = useActionDispatchOptional()
+  const { data: actionResponse } = useActionsForMask(mcpContext?.pageDomain, mcpContext?.analyticsContext)
+  const quickActions = useMemo<ToolbarAction[]>(() => {
+    return (actionResponse?.actions ?? []).map((action) => ({
+      id: action.id,
+      label: action.label,
+      shortcut: action.shortcut,
+      onClick: () => {
+        if (actionDispatch) {
+          void actionDispatch.dispatch(action.id)
+        }
+      },
+      variant: action.category === 'danger' ? 'destructive' : 'outline',
+      mcp: { intent: action.id, requiredData: action.required_data },
+    }))
+  }, [actionDispatch, actionResponse?.actions])
+
+  const mergedPrimaryActions = useMemo<ToolbarAction[]>(() => {
+    if (Array.isArray(primaryActions) && primaryActions.length > 0) {
+      return primaryActions
+    }
+    return quickActions.slice(0, 2)
+  }, [primaryActions, quickActions])
+
+  const mergedOverflowActions = useMemo<ToolbarAction[]>(() => {
+    const fromProps = overflowActions ?? []
+    const hasPrimaryFromProps = Array.isArray(primaryActions) && primaryActions.length > 0
+    const quickOverflow = hasPrimaryFromProps ? quickActions : quickActions.slice(2)
+    const byId = new Map<string, ToolbarAction>()
+    for (const action of [...fromProps, ...quickOverflow]) {
+      byId.set(action.id, action)
+    }
+    return Array.from(byId.values())
+  }, [overflowActions, primaryActions, quickActions])
+
   return (
     <div
       className="flex h-full flex-col"
@@ -81,16 +117,16 @@ export function OverviewPage({
       <PageToolbar
         title={title}
         subtitle={subtitle}
-        primaryActions={primaryActions}
-        overflowActions={overflowActions}
+        primaryActions={mergedPrimaryActions}
+        overflowActions={mergedOverflowActions}
         mcpContext={
           mcpContext
             ? {
                 pageDomain: mcpContext.pageDomain,
                 currentDocument: mcpContext.analyticsContext,
                 availableActions: [
-                  ...(primaryActions?.map((action) => action.id) ?? []),
-                  ...(overflowActions?.map((action) => action.id) ?? []),
+                  ...mergedPrimaryActions.map((action) => action.id),
+                  ...mergedOverflowActions.map((action) => action.id),
                 ],
               }
             : undefined

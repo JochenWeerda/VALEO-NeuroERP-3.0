@@ -1,23 +1,35 @@
-import { type ReactNode, createContext, useContext, useState } from "react"
-import * as Toast from "@radix-ui/react-toast"
+import { Suspense, lazy, type ReactNode, createContext, useContext, useMemo, useRef, useState } from 'react'
 
 type Ctx = { push: (_msg: string) => void }
 const ToastCtx = createContext<Ctx>({ push: () => undefined })
 export const useToast = (): Ctx => useContext(ToastCtx)
 
+const ToastHost = lazy(() =>
+  import('./ToastHost').then((module) => ({ default: module.default })),
+)
+
 export function ToastProvider({ children }: { children: ReactNode }): JSX.Element {
   const [open, setOpen] = useState(false)
-  const [msg, setMsg] = useState("")
+  const [msg, setMsg] = useState('')
+  const openTimer = useRef<number | null>(null)
+
+  const contextValue = useMemo<Ctx>(() => ({
+    push: (message): void => {
+      setMsg(message)
+      setOpen(false)
+      if (openTimer.current !== null) {
+        window.clearTimeout(openTimer.current)
+      }
+      openTimer.current = window.setTimeout((): void => setOpen(true), 0)
+    },
+  }), [])
+
   return (
-    <ToastCtx.Provider value={{ push: (m): void => { setMsg(m); setOpen(false); setTimeout(():void => setOpen(true),0) } }}>
-      <Toast.Provider swipeDirection="right">
-        {children}
-        <Toast.Root open={open} onOpenChange={setOpen} className="rounded-xl border bg-background p-3 shadow">
-          <Toast.Title className="font-medium">Notification</Toast.Title>
-          <Toast.Description className="opacity-80">{msg}</Toast.Description>
-        </Toast.Root>
-        <Toast.Viewport className="fixed bottom-4 right-4 w-96" />
-      </Toast.Provider>
+    <ToastCtx.Provider value={contextValue}>
+      {children}
+      <Suspense fallback={null}>
+        <ToastHost open={open} message={msg} onOpenChange={setOpen} />
+      </Suspense>
     </ToastCtx.Provider>
   )
 }

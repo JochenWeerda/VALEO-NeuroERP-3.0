@@ -1,56 +1,23 @@
+import { Suspense, lazy, useEffect, useMemo, useState } from 'react'
+import { clsx } from 'clsx'
 import { Link, NavLink } from 'react-router-dom'
-import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import {
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  ChevronUp,
-  Settings,
-} from 'lucide-react'
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp } from 'lucide-react'
 import { useFeature } from '@/hooks/useFeature'
 import { usePinnedTiles } from '@/hooks/usePinnedTiles'
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { NAV_LINKS, NAV_SECTIONS, type NavItem } from '@/app/navigation/manifest'
+import { useNavSections } from '@/app/navigation/nav-runtime'
+import type { NavItem } from '@/app/navigation/types'
 import { resolveRoutePathFromModule } from '@/app/navigation/route-paths'
 
-const pageModules = import.meta.glob<{ default: React.ComponentType }>('../../pages/**/*.tsx')
+const SidebarFavorites = lazy(() =>
+  import('./SidebarFavorites').then((module) => ({ default: module.default })),
+)
 
-/**
- * Collect module paths from visible nav items, then prefetch the
- * first N route chunks during idle time (Fiori Launchpad principle).
- */
-function prefetchVisibleModules(items: NavItem[], maxPrefetch = 8): void {
-  const nav = navigator as Navigator & { connection?: { saveData?: boolean } }
-  if (nav.connection?.saveData) return
+const SidebarSettingsLink = lazy(() =>
+  import('./SidebarSettingsLink').then((module) => ({ default: module.default })),
+)
 
-  const modulePaths: string[] = []
-  const stack = [...items]
-  while (stack.length > 0 && modulePaths.length < maxPrefetch) {
-    const item = stack.pop()
-    if (!item) continue
-    if (item.module) {
-      const key = item.module
-        .replace(/^@\//, '../../')
-        .replace(/^\.\//, '../../')
-      const suffixed = key.endsWith('.tsx') ? key : `${key}.tsx`
-      if (pageModules[suffixed]) {
-        modulePaths.push(suffixed)
-      }
-    }
-    if (item.children) stack.push(...item.children)
-  }
-
-  const schedule = typeof requestIdleCallback === 'function'
-    ? requestIdleCallback
-    : (cb: () => void) => setTimeout(cb, 3000)
-
-  schedule(() => {
-    for (const path of modulePaths) {
-      pageModules[path]?.()
-    }
-  })
-}
+const SETTINGS_PATH = resolveRoutePathFromModule('@/pages/einstellungen/system', 'einstellungen/system')
 
 interface SidebarProps {
   collapsed: boolean
@@ -58,54 +25,61 @@ interface SidebarProps {
   onNavigate?: () => void
 }
 
-
 export function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProps): JSX.Element {
   const agrarEnabled = useFeature('agrar')
   const { pinnedTileIds } = usePinnedTiles()
-  const navItems: NavItem[] = NAV_SECTIONS
-  const filteredNavItems = navItems.filter((item) => (item.featureKey === 'agrar' ? agrarEnabled : true))
+  const navSections = useNavSections()
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set())
 
-  const prefetchedRef = useRef(false)
-  useEffect(() => {
-    if (prefetchedRef.current) return
-    prefetchedRef.current = true
-    prefetchVisibleModules(filteredNavItems)
-  }, [filteredNavItems])
+  const filteredNavItems = useMemo(
+    () => navSections.filter((item) => (item.featureKey === 'agrar' ? agrarEnabled : true)),
+    [agrarEnabled, navSections],
+  )
 
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(
-    new Set(), // Standardmäßig alle Gruppen eingeklappt
-  )
-  const settingsPath = useMemo(
-    () =>
-      NAV_LINKS.find((entry) => entry.id === 'system-einstellungen')?.path ??
-      resolveRoutePathFromModule('@/pages/einstellungen/system', 'einstellungen/system'),
-    [],
-  )
-  const favoriteLinks = useMemo(() => {
-    if (pinnedTileIds.length === 0) {
-      return []
+  const visiblePrefetchItems = useMemo(() => {
+    const visibleItems: NavItem[] = []
+
+    const collectVisibleItems = (items: NavItem[]): void => {
+      for (const item of items) {
+        visibleItems.push(item)
+        if (!collapsed && expandedGroups.has(item.id) && item.children) {
+          collectVisibleItems(item.children)
+        }
+      }
     }
 
-    const navById = new Map<string, NavItem>()
+    collectVisibleItems(filteredNavItems)
+    return visibleItems
+  }, [collapsed, expandedGroups, filteredNavItems])
+
+  useEffect(() => {
+    void import('./sidebar-prefetch').then((module) => {
+      module.prefetchVisibleModules(visiblePrefetchItems)
+    })
+  }, [visiblePrefetchItems])
+
+  const navById = useMemo(() => {
+    const index = new Map<string, NavItem>()
     const stack = [...filteredNavItems]
     while (stack.length > 0) {
       const current = stack.pop()
-      if (!current) {
-        continue
-      }
-      navById.set(current.id, current)
+      if (!current) continue
+      index.set(current.id, current)
       if (current.children && current.children.length > 0) {
         stack.push(...current.children)
       }
     }
+    return index
+  }, [filteredNavItems])
 
+  const favoriteLinks = useMemo(() => {
     return pinnedTileIds
       .map((id) => navById.get(id))
       .filter((item): item is NavItem => Boolean(item))
       .map((item) => ({ item, path: resolveEffectivePath(item) }))
       .filter((entry): entry is { item: NavItem; path: string } => Boolean(entry.path))
       .slice(0, 6)
-  }, [filteredNavItems, pinnedTileIds])
+  }, [navById, pinnedTileIds])
 
   function toggleGroup(id: string): void {
     setExpandedGroups((prev) => {
@@ -119,9 +93,102 @@ export function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProps): JSX.
     })
   }
 
+  function resolveEffectivePath(item: NavItem): string | null {
+    if (item.path && !item.path.includes(':')) {
+      return item.path
+    }
+    if (!item.children || item.children.length === 0) {
+      return null
+    }
+    for (const child of item.children) {
+      const found = resolveEffectivePath(child)
+      if (found) {
+        return found
+      }
+    }
+    return null
+  }
+
+  function renderNavItem(item: NavItem, depth: number): JSX.Element {
+    const Icon = item.icon
+    const hasChildren = Boolean(item.children && item.children.length > 0)
+    const isExpanded = expandedGroups.has(item.id)
+    const canNavigate = Boolean(item.path)
+
+    if (!hasChildren && canNavigate) {
+      return (
+        <NavLink
+          key={item.id}
+          to={item.path ?? '/'}
+          onClick={onNavigate}
+          className={({ isActive }) =>
+            clsx(
+              'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+              depth > 0 && 'ml-2 text-xs',
+              'hover:bg-accent hover:text-accent-foreground',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+              isActive ? 'bg-accent text-accent-foreground' : 'text-muted-foreground',
+            )
+          }
+          title={collapsed ? item.label : undefined}
+          data-mcp-nav-item={item.id}
+          data-mcp-domain={item.mcp.businessDomain}
+        >
+          <Icon className={clsx('h-5 w-5 flex-shrink-0', depth > 0 && 'h-4 w-4')} />
+          {!collapsed && <span>{item.label}</span>}
+        </NavLink>
+      )
+    }
+
+    return (
+      <div key={item.id}>
+        <button
+          onClick={() => toggleGroup(item.id)}
+          className={clsx(
+            'flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
+            depth > 0 && 'ml-2 text-xs',
+            'hover:bg-accent hover:text-accent-foreground',
+            'text-muted-foreground',
+          )}
+          title={collapsed ? item.label : undefined}
+        >
+          <Icon className={clsx('h-5 w-5 flex-shrink-0', depth > 0 && 'h-4 w-4')} />
+          {!collapsed && (
+            <>
+              <span className="flex-1 text-left">{item.label}</span>
+              {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            </>
+          )}
+        </button>
+
+        {!collapsed && isExpanded && item.children ? (
+          <div className={clsx('ml-4 mt-1 space-y-1 border-l pl-2', depth > 0 && 'ml-6')}>
+            {item.children.map((child) => renderNavItem(child, depth + 1))}
+            {canNavigate ? (
+              <NavLink
+                to={item.path ?? '/'}
+                onClick={onNavigate}
+                className={({ isActive }) =>
+                  clsx(
+                    'flex items-center gap-2 rounded-md px-2 py-1.5 text-xs font-medium transition-colors',
+                    'hover:bg-accent hover:text-accent-foreground',
+                    isActive ? 'bg-accent text-accent-foreground' : 'text-muted-foreground',
+                  )
+                }
+              >
+                <Icon className="h-4 w-4 flex-shrink-0" />
+                <span>{item.label} oeffnen</span>
+              </NavLink>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
+    )
+  }
+
   return (
     <aside
-      className={cn(
+      className={clsx(
         'relative flex flex-col border-r bg-background transition-all duration-300',
         collapsed ? 'w-16' : 'w-64',
       )}
@@ -131,7 +198,11 @@ export function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProps): JSX.
       data-mcp-collapsed={collapsed}
     >
       <div className="flex h-16 items-center justify-between border-b px-4">
-        <Link to="/" className="flex items-center focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded" aria-label="Zur Startseite">
+        <Link
+          to="/"
+          className="flex items-center rounded focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+          aria-label="Zur Startseite"
+        >
           {collapsed ? (
             <img
               src="/branding/valeo-erp-logo.png"
@@ -154,11 +225,7 @@ export function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProps): JSX.
           aria-label={collapsed ? 'Sidebar erweitern' : 'Sidebar einklappen'}
           title={collapsed ? 'Erweitern (Strg+B)' : 'Einklappen (Strg+B)'}
         >
-          {collapsed ? (
-            <ChevronRight className="h-4 w-4" />
-          ) : (
-            <ChevronLeft className="h-4 w-4" />
-          )}
+          {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </Button>
       </div>
 
@@ -167,143 +234,16 @@ export function Sidebar({ collapsed, onToggle, onNavigate }: SidebarProps): JSX.
       </nav>
 
       <div className="border-t p-2">
-        {!collapsed && favoriteLinks.length > 0 && (
-          <div className="mb-3 rounded-md border bg-muted/30 p-2">
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Favoriten</p>
-            <div className="space-y-1">
-              {favoriteLinks.map((favorite) => {
-                const FavoriteIcon = favorite.item.icon
-                return (
-                  <NavLink
-                    key={`fav-${favorite.item.id}`}
-                    to={favorite.path}
-                    onClick={onNavigate}
-                    className={({ isActive }) =>
-                      cn(
-                        'flex items-center gap-2 rounded-md px-2 py-1.5 text-xs font-medium transition-colors',
-                        'hover:bg-accent hover:text-accent-foreground',
-                        isActive ? 'bg-accent text-accent-foreground' : 'text-muted-foreground',
-                      )
-                    }
-                  >
-                    <FavoriteIcon className="h-3.5 w-3.5 flex-shrink-0" />
-                    <span className="truncate">{favorite.item.label}</span>
-                  </NavLink>
-                )
-              })}
-            </div>
-          </div>
-        )}
+        {!collapsed ? (
+          <Suspense fallback={null}>
+            <SidebarFavorites favorites={favoriteLinks} onNavigate={onNavigate} />
+          </Suspense>
+        ) : null}
 
-        <NavLink
-          to={settingsPath}
-          className={({ isActive }) =>
-            cn(
-              'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
-              'hover:bg-accent hover:text-accent-foreground',
-              isActive ? 'bg-accent' : 'text-muted-foreground',
-            )
-          }
-          title={collapsed ? 'Einstellungen' : undefined}
-        >
-          <Settings className="h-5 w-5" />
-          {!collapsed && <span>Einstellungen</span>}
-        </NavLink>
+        <Suspense fallback={null}>
+          <SidebarSettingsLink collapsed={collapsed} path={SETTINGS_PATH} />
+        </Suspense>
       </div>
     </aside>
   )
-
-  function renderNavItem(item: NavItem, depth: number): JSX.Element {
-    const Icon = item.icon
-    const hasChildren = Boolean(item.children && item.children.length > 0)
-    const isExpanded = expandedGroups.has(item.id)
-    const canNavigate = Boolean(item.path)
-
-    if (!hasChildren && canNavigate) {
-      return (
-        <NavLink
-          key={item.id}
-          to={item.path ?? '/'}
-          onClick={onNavigate}
-          className={({ isActive }) =>
-            cn(
-              'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
-              depth > 0 && 'ml-2 text-xs',
-              'hover:bg-accent hover:text-accent-foreground',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-              isActive ? 'bg-accent text-accent-foreground' : 'text-muted-foreground',
-            )
-          }
-          title={collapsed ? item.label : undefined}
-          data-mcp-nav-item={item.id}
-          data-mcp-domain={item.mcp.businessDomain}
-        >
-          <Icon className={cn('h-5 w-5 flex-shrink-0', depth > 0 && 'h-4 w-4')} />
-          {!collapsed && <span>{item.label}</span>}
-        </NavLink>
-      )
-    }
-
-    return (
-      <div key={item.id}>
-        <button
-          onClick={() => toggleGroup(item.id)}
-          className={cn(
-            'flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
-            depth > 0 && 'ml-2 text-xs',
-            'hover:bg-accent hover:text-accent-foreground',
-            'text-muted-foreground',
-          )}
-          title={collapsed ? item.label : undefined}
-        >
-          <Icon className={cn('h-5 w-5 flex-shrink-0', depth > 0 && 'h-4 w-4')} />
-          {!collapsed && (
-            <>
-              <span className="flex-1 text-left">{item.label}</span>
-              {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-            </>
-          )}
-        </button>
-
-        {!collapsed && isExpanded && item.children && (
-          <div className={cn('ml-4 mt-1 space-y-1 border-l pl-2', depth > 0 && 'ml-6')}>
-            {item.children.map((child) => renderNavItem(child, depth + 1))}
-            {canNavigate && (
-              <NavLink
-                to={item.path ?? '/'}
-                onClick={onNavigate}
-                className={({ isActive }) =>
-                  cn(
-                    'flex items-center gap-2 rounded-md px-2 py-1.5 text-xs font-medium transition-colors',
-                    'hover:bg-accent hover:text-accent-foreground',
-                    isActive ? 'bg-accent text-accent-foreground' : 'text-muted-foreground',
-                  )
-                }
-              >
-                <Icon className="h-4 w-4 flex-shrink-0" />
-                <span>{item.label} oeffnen</span>
-              </NavLink>
-            )}
-          </div>
-        )}
-      </div>
-    )
-  }
-
-  function resolveEffectivePath(item: NavItem): string | null {
-    if (item.path && !item.path.includes(':')) {
-      return item.path
-    }
-    if (!item.children || item.children.length === 0) {
-      return null
-    }
-    for (const child of item.children) {
-      const found = resolveEffectivePath(child)
-      if (found) {
-        return found
-      }
-    }
-    return null
-  }
 }
-

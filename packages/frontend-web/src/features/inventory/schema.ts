@@ -1,25 +1,22 @@
-﻿import { z } from "zod"
+export interface Stock {
+  sku: string
+  name: string
+  qty: number
+  uom: string
+  location?: string
+}
 
-export const StockSchema = z.object({
-  sku: z.string().min(1),
-  name: z.string().min(1),
-  qty: z.number().nonnegative(),
-  uom: z.string().min(1),
-  location: z.string().optional()
-})
-export type Stock = z.infer<typeof StockSchema>
+export type AdjustReason = "counting" | "damage" | "shrinkage" | "other"
 
-export const AdjustSchema = z.object({
-  sku: z.string().min(1),
-  delta: z.number().refine(v => v !== 0, { message: "Delta darf nicht 0 sein" }),
-  reason: z.enum(["counting", "damage", "shrinkage", "other"])
-})
-export type AdjustInput = z.infer<typeof AdjustSchema>
+export interface AdjustInput {
+  sku: string
+  delta: number
+  reason: AdjustReason
+}
 
-export const PutawaySchema = z.object({
-  sku: z.string().min(1),
-  qty: z.number().positive(),
-  fromLocation: z.string().min(1),
-  toLocation: z.string().min(1)
-})
-export type PutawayInput = z.infer<typeof PutawaySchema>
+export interface PutawayInput {
+  sku: string
+  qty: number
+  fromLocation: string
+  toLocation: string
+}

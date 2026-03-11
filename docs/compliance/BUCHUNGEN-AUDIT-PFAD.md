@@ -39,6 +39,8 @@ Neue Buchungspfade (neue Features, neue Connector, neue Importe) **müssen** unm
 
 Zusätzlich zur Nachvollziehbarkeit über `audit_logs` wird die **Hash-Kette** in `journal_entries` geführt (`hash_prev`, `hash_current`, `sequence_number`). Diese wird durch einen **DB-Trigger** beim INSERT befüllt (siehe Migration `gobd_journal_hash_chain_trigger_*`), so dass alle Buchungspfade automatisch in die Kette aufgenommen werden.
 
+**Betriebsprüfungsfeste Prozessjournalisierung (Gap 010):** Die Tabelle `domain_shared.audit_logs` hat ebenfalls eine Hash-Kette (`prev_hash`, `hash`). Ein DB-Trigger befüllt diese beim INSERT automatisch – pro Tenant wird jeder Eintrag mit dem Hash des vorherigen verkettet. Migration: `add_audit_logs_hash_chain_20260306`.
+
 ---
 
 ## Siehe auch

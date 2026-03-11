@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Upload, Plus, FileText } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
@@ -67,6 +67,7 @@ export default function RfqBidsPage(): JSX.Element {
     totalValue: 0, currency: 'EUR', paymentTerms: '', deliveryTerms: '', notes: '',
   })
   const [availableSuppliers, setAvailableSuppliers] = useState<any[]>([])
+  const supplierOptions = availableSuppliers.map((supplier) => ({ value: supplier.id, label: supplier.name }))
   const { data: bidsData, isLoading: bidsLoading, isError: bidsError, error: bidsErrorObj, refetch: refetchBids } = useQuery({
     queryKey: ['einkauf', 'rfq-bids', rfqId],
     queryFn: async () => (await apiClient.get<Bid[]>(`/api/v1/einkauf/anfragen/${rfqId}/bids`)).data,
@@ -436,7 +437,8 @@ export default function RfqBidsPage(): JSX.Element {
           <div className="space-y-4">
             <div>
               <Label htmlFor="supplier">{t('crud.entities.supplier')} *</Label>
-              <Select
+              <NativeSelect
+                id="supplier"
                 value={newBid.supplierId}
                 onValueChange={(value) => {
                   const supplier = availableSuppliers.find(s => s.id === value)
@@ -447,18 +449,9 @@ export default function RfqBidsPage(): JSX.Element {
                   }))
                 }}
                 disabled={!!selectedBid}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={t('crud.tooltips.placeholders.selectSupplier')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableSuppliers.map((supplier) => (
-                    <SelectItem key={supplier.id} value={supplier.id}>
-                      {supplier.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                options={supplierOptions}
+                placeholder={t('crud.tooltips.placeholders.selectSupplier')}
+              />
             </div>
 
             <div>

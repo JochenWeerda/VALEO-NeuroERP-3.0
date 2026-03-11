@@ -1,44 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Wizard } from '@/components/mask-builder'
-import { useMaskData, useMaskValidation } from '@/components/mask-builder/hooks'
+import { useMaskData } from '@/components/mask-builder/hooks'
 import { WizardConfig } from '@/components/mask-builder/types'
-import { z } from 'zod'
+import { validateFields } from '@/components/mask-builder/validation'
 import { toast } from '@/hooks/use-toast'
 
-// Zod-Schema für Wareneingang
-const wareneingangSchema = z.object({
-  lieferantId: z.string().min(1, "Lieferant ist erforderlich"),
-  bestellungId: z.string().optional(),
-  positionen: z.array(z.object({
-    futtermittelId: z.string(),
-    erwarteteMenge: z.number().min(0),
-    gelieferteMenge: z.number().min(0),
-    einheit: z.string(),
-    chargenNummer: z.string().min(1, "Chargennummer ist erforderlich"),
-    produktionsdatum: z.string().min(1, "Produktionsdatum ist erforderlich"),
-    verfallsdatum: z.string().min(1, "Verfallsdatum ist erforderlich"),
-    temperatur: z.number().optional(),
-    phWert: z.number().optional(),
-    visuellerEindruck: z.string().optional(),
-    geruch: z.string().optional(),
-    qsFreigabe: z.boolean().default(false)
-  })).min(1, "Mindestens eine Position erforderlich"),
-  transportDokumente: z.array(z.string()).optional(),
-  qualitaetspruefung: z.object({
-    aflatoxin: z.number().optional(),
-    feuchtigkeit: z.number().optional(),
-    rohprotein: z.number().optional(),
-    rohfett: z.number().optional(),
-    rohfaser: z.number().optional(),
-    rohasche: z.number().optional(),
-    freigabe: z.boolean().default(false)
-  }),
-  lagerort: z.string().min(1, "Lagerort ist erforderlich"),
-  bemerkungen: z.string().optional()
-})
-
-// Konfiguration für Wareneingang Wizard
 const wareneingangWizardConfig: WizardConfig = {
   title: 'Futtermittel-Wareneingang',
   subtitle: 'QS-konforme Annahme und Chargenbildung nach EU 767/2009',
@@ -79,11 +46,7 @@ const wareneingangWizardConfig: WizardConfig = {
             { value: 'kuehl-04', label: 'Kühlhaus 04 - Proteine' }
           ]
         }
-      ],
-      validation: z.object({
-        lieferantId: z.string().min(1),
-        lagerort: z.string().min(1)
-      })
+      ]
     },
     {
       key: 'chargen',
@@ -165,17 +128,7 @@ const wareneingangWizardConfig: WizardConfig = {
           ] as any,
           helpText: 'Erfassen Sie jede Charge separat mit Qualitätsdaten'
         }
-      ],
-      validation: z.object({
-        positionen: z.array(z.object({
-          futtermittelId: z.string().min(1),
-          gelieferteMenge: z.number().min(0.1),
-          einheit: z.string().min(1),
-          chargenNummer: z.string().min(1),
-          produktionsdatum: z.string().min(1),
-          verfallsdatum: z.string().min(1)
-        })).min(1)
-      })
+      ]
     },
     {
       key: 'labor',
@@ -269,7 +222,6 @@ const wareneingangWizardConfig: WizardConfig = {
       update: '/api/futtermittel/wareneingang/{id}'
     }
   },
-  validation: wareneingangSchema,
   permissions: ['futtermittel.receive', 'quality.check', 'warehouse.manage'],
   onComplete: () => {} // Wird über Wizard-Props überschrieben
 }
@@ -282,12 +234,15 @@ export default function FuttermittelWareneingangPage(): JSX.Element {
     apiUrl: wareneingangWizardConfig.api.baseUrl
   })
 
-  const { validate, showValidationToast } = useMaskValidation(wareneingangWizardConfig.validation)
+  const validate = (formData: any) => validateFields(wareneingangWizardConfig.steps.flatMap((step) => step.fields), formData ?? {})
+  const showValidationToast = (errors: Record<string, string>) => {
+    toast({ variant: 'destructive', title: 'Validierungsfehler', description: `${Object.keys(errors).length} Feld(er) muessen korrigiert werden.` })
+  }
 
   const handleComplete = async (formData: any) => {
-    const isValid = validate(formData)
-    if (!isValid.isValid) {
-      showValidationToast(isValid.errors)
+    const errors = validate(formData)
+    if (Object.keys(errors).length > 0) {
+      showValidationToast(errors)
       return
     }
 

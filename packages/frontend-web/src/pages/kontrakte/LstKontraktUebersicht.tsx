@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { listKontrakte } from '@/lib/api/kontrakte'
 
@@ -57,14 +57,16 @@ export default function LstKontraktUebersicht(): JSX.Element {
           <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
             <div className="space-y-1">
               <Label>Kontrakt-Art</Label>
-              <Select value={contractType} onValueChange={setContractType}>
-                <SelectTrigger><SelectValue placeholder="Alle" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="VERKAUF">Verkaufs-Kontrakte</SelectItem>
-                  <SelectItem value="ZUKAUF">Zukauf</SelectItem>
-                  <SelectItem value="EINKAUF">Einkauf</SelectItem>
-                </SelectContent>
-              </Select>
+              <NativeSelect
+                value={contractType}
+                onValueChange={setContractType}
+                options={[
+                  { value: 'VERKAUF', label: 'Verkaufs-Kontrakte' },
+                  { value: 'ZUKAUF', label: 'Zukauf' },
+                  { value: 'EINKAUF', label: 'Einkauf' },
+                ]}
+                placeholder="Alle"
+              />
             </div>
             <div className="space-y-1">
               <Label>Datum von</Label>
@@ -76,13 +78,14 @@ export default function LstKontraktUebersicht(): JSX.Element {
             </div>
             <div className="space-y-1">
               <Label>Sortierung</Label>
-              <Select value={sortDir} onValueChange={(v: any) => setSortDir(v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="desc">Kontrakt-Nr. absteigend</SelectItem>
-                  <SelectItem value="asc">Kontrakt-Nr. aufsteigend</SelectItem>
-                </SelectContent>
-              </Select>
+              <NativeSelect
+                value={sortDir}
+                onValueChange={(v) => setSortDir(v as 'asc' | 'desc')}
+                options={[
+                  { value: 'desc', label: 'Kontrakt-Nr. absteigend' },
+                  { value: 'asc', label: 'Kontrakt-Nr. aufsteigend' },
+                ]}
+              />
             </div>
             <div className="space-y-1">
               <Label>von Kontrakt-Nr.</Label>

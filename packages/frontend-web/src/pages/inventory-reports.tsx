@@ -7,40 +7,99 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useQuery } from '@tanstack/react-query';
 import { Download, TrendingUp, AlertTriangle, Package, DollarSign } from 'lucide-react';
 
+type StockLevelsResponse = {
+  total_articles: number;
+  total_value: number;
+  low_stock_count: number;
+  out_of_stock_count: number;
+  categories: Record<string, { count: number; total_stock: number; total_value: number }>;
+};
+
+type AlertsResponse = {
+  alerts: Array<{
+    article_id: string;
+    article_number: string;
+    name: string;
+    current_stock: number;
+    min_stock: number;
+    deficit: number;
+  }>;
+};
+
+type ReplenishmentResponse = {
+  suggestions: Array<{
+    article_id: string;
+    article_number: string;
+    name: string;
+    current_stock: number;
+    suggested_quantity: number;
+    estimated_cost?: number;
+    priority: number;
+  }>;
+};
+
+type TurnoverResponse = {
+  turnover_ratio?: number;
+  turnover_days?: number;
+  total_inventory_value?: number;
+};
+
+const EMPTY_STOCK_LEVELS: StockLevelsResponse = {
+  total_articles: 0,
+  total_value: 0,
+  low_stock_count: 0,
+  out_of_stock_count: 0,
+  categories: {},
+};
+
+const EMPTY_ALERTS: AlertsResponse = {
+  alerts: [],
+};
+
+const EMPTY_REPLENISHMENT: ReplenishmentResponse = {
+  suggestions: [],
+};
+
+const EMPTY_TURNOVER: TurnoverResponse = {};
+
 export default function InventoryReportsPage() {
   const [activeTab, setActiveTab] = useState('overview');
 
   // Fetch various report data
   const { data: stockLevels } = useQuery({
     queryKey: ['inventory', 'stock-levels'],
-    queryFn: async () => {
+    queryFn: async (): Promise<StockLevelsResponse> => {
       const response = await fetch('/api/v1/inventory/reports/stock-levels');
       return response.json();
-    }
+    },
+    initialData: EMPTY_STOCK_LEVELS,
   });
 
   const { data: alerts } = useQuery({
     queryKey: ['inventory', 'alerts'],
-    queryFn: async () => {
+    queryFn: async (): Promise<AlertsResponse> => {
       const response = await fetch('/api/v1/inventory/reports/stock-alerts');
       return response.json();
-    }
+    },
+    initialData: EMPTY_ALERTS,
   });
 
   const { data: replenishment } = useQuery({
     queryKey: ['inventory', 'replenishment'],
-    queryFn: async () => {
+    queryFn: async (): Promise<ReplenishmentResponse> => {
       const response = await fetch('/api/v1/inventory/reports/replenishment-suggestions');
       return response.json();
-    }
+    },
+    initialData: EMPTY_REPLENISHMENT,
   });
 
   const { data: turnover } = useQuery({
     queryKey: ['inventory', 'turnover'],
-    queryFn: async () => {
+    queryFn: async (): Promise<TurnoverResponse> => {
       const response = await fetch('/api/v1/inventory/reports/turnover-analysis');
       return response.json();
-    }
+    },
+    initialData: EMPTY_TURNOVER,
   });
 
   return (

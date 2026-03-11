@@ -29,6 +29,24 @@ type PaginatedResponse<T> = {
   size: number
 }
 
+const EMPTY_WAREHOUSE_LIST: PaginatedResponse<Warehouse> = {
+  items: [],
+  total: 0,
+  page: 1,
+  pages: 0,
+  size: 0,
+}
+
+const EMPTY_INVENTUR_LIST: { items: InventurPosition[]; total: number } = {
+  items: [],
+  total: 0,
+}
+
+const EMPTY_WARTESCHLANGE: { items: LKWEintrag[]; total: number } = {
+  items: [],
+  total: 0,
+}
+
 export type LotTrace = {
   lot_id: string
   sku: string
@@ -59,6 +77,7 @@ export function useWarehouses(filters?: { is_active?: boolean }) {
       if (filters?.is_active !== undefined) params.append('is_active', String(filters.is_active))
       return (await apiClient.get<PaginatedResponse<Warehouse>>(`/api/v1/inventory/warehouses?${String(params)}`)).data
     },
+    initialData: EMPTY_WAREHOUSE_LIST,
   })
 }
 
@@ -67,6 +86,7 @@ export function useWarehouse(id: string) {
     queryKey: inventoryKeys.warehouse(id),
     queryFn: async () => (await apiClient.get<Warehouse>(`/api/v1/inventory/warehouses/${id}`)).data,
     enabled: !!id,
+    initialData: null,
   })
 }
 
@@ -104,6 +124,7 @@ export function useLotTrace(lotId?: string) {
     queryKey: inventoryKeys.lotTrace(lotId),
     queryFn: async () => (await apiClient.get<LotTrace>(`/api/v1/inventory/lots/${lotId}`)).data,
     enabled: Boolean(lotId),
+    initialData: null,
     staleTime: 30_000,
   })
 }
@@ -161,6 +182,7 @@ export function useInventur(filters?: { search?: string }) {
       const items = payload.items.filter((p) => p.artikel.toLowerCase().includes(s) || p.lagerort.toLowerCase().includes(s))
       return { items, total: items.length }
     },
+    initialData: EMPTY_INVENTUR_LIST,
     staleTime: 30 * 1000,
   })
 }
@@ -187,6 +209,7 @@ export function useMhdItems() {
   return useQuery({
     queryKey: inventoryExtraKeys.mhd(),
     queryFn: async () => (await apiClient.get<{ items: MhdItem[] }>('/api/v1/inventory/mhd-warnings')).data.items,
+    initialData: [],
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -195,6 +218,7 @@ export function useRennerItems() {
   return useQuery({
     queryKey: inventoryExtraKeys.renner(),
     queryFn: async () => (await apiClient.get<{ items: RennerPennerItem[] }>('/api/v1/inventory/top-sellers')).data.items,
+    initialData: [],
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -203,6 +227,7 @@ export function usePennerItems() {
   return useQuery({
     queryKey: inventoryExtraKeys.penner(),
     queryFn: async () => (await apiClient.get<{ items: RennerPennerItem[] }>('/api/v1/inventory/slow-movers')).data.items,
+    initialData: [],
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -211,6 +236,7 @@ export function useWarteschlange() {
   return useQuery({
     queryKey: inventoryExtraKeys.warteschlange(),
     queryFn: async () => (await apiClient.get<{ items: LKWEintrag[]; total: number }>('/api/v1/annahme/warteschlange')).data,
+    initialData: EMPTY_WARTESCHLANGE,
     staleTime: 15 * 1000,
     refetchInterval: 30 * 1000,
   })
@@ -221,6 +247,7 @@ export function useWarteschlangeEintrag(id: string | undefined) {
     queryKey: [...inventoryExtraKeys.warteschlange(), id],
     queryFn: async () => (await apiClient.get<LKWEintrag>(`/api/v1/annahme/warteschlange/${id}`)).data,
     enabled: !!id,
+    initialData: null,
     staleTime: 30 * 1000,
   })
 }

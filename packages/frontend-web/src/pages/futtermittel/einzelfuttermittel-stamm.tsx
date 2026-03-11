@@ -1,34 +1,13 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ObjectPage } from '@/components/mask-builder'
-import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
+import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
-import { z } from 'zod'
 import { toast } from '@/hooks/use-toast'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { LeaveConfirmDialog } from '@/components/LeaveConfirmDialog'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 
-// Zod-Schema für Validierung
-const futtermittelSchema = z.object({
-  artikelnummer: z.string().min(1, "Artikelnummer ist erforderlich"),
-  name: z.string().min(1, "Name ist erforderlich"),
-  typ: z.string().min(1, "Typ ist erforderlich"),
-  hersteller: z.string().optional(),
-  rohprotein: z.number().min(0).max(100).optional(),
-  rohfett: z.number().min(0).max(100).optional(),
-  rohfaser: z.number().min(0).max(100).optional(),
-  rohasche: z.number().min(0).max(100).optional(),
-  feuchte: z.number().min(0).max(100).optional(),
-  euKennzeichnung: z.boolean().default(false),
-  qsZertifikat: z.string().optional(),
-  gueltigBis: z.string().optional(),
-  lagerbestand: z.number().min(0).default(0),
-  ekPreis: z.number().min(0).optional(),
-  vkPreis: z.number().min(0).optional(),
-})
-
-// Konfiguration für die ObjectPage
 const futtermittelConfig: MaskConfig = {
   title: 'Einzelfuttermittel-Stammdaten',
   subtitle: 'Verwaltung von Einzelfuttermitteln nach EU 68/2013',
@@ -207,7 +186,6 @@ const futtermittelConfig: MaskConfig = {
       delete: '/api/futtermittel/einzelfuttermittel/{id}'
     }
   },
-  validation: futtermittelSchema,
   permissions: ['futtermittel.write', 'futtermittel.admin']
 }
 
@@ -221,13 +199,16 @@ export default function EinzelfuttermittelStammPage(): JSX.Element {
     id: 'new' // Für neue Datensätze
   })
 
-  const { validate, showValidationToast } = useMaskValidation(futtermittelConfig.validation)
+  const validate = (formData: any) => validateFields(getFieldsFromMaskConfig(futtermittelConfig), formData ?? {})
+  const showValidationToast = (errors: Record<string, string>) => {
+    toast({ variant: 'destructive', title: 'Validierungsfehler', description: `${Object.keys(errors).length} Feld(er) muessen korrigiert werden.` })
+  }
 
   const { handleAction } = useMaskActions(async (action: string, formData: any) => {
     if (action === 'save') {
-      const isValid = validate(formData)
-      if (!isValid.isValid) {
-        showValidationToast(isValid.errors)
+      const errors = validate(formData)
+      if (Object.keys(errors).length > 0) {
+        showValidationToast(errors)
         return
       }
 
@@ -239,11 +220,11 @@ export default function EinzelfuttermittelStammPage(): JSX.Element {
         // Error wird bereits in useMaskData behandelt
       }
     } else if (action === 'validate') {
-      const isValid = validate(formData)
-      if (isValid.isValid) {
+      const errors = validate(formData)
+      if (Object.keys(errors).length === 0) {
         toast({ title: 'Validierung erfolgreich', description: 'Alle Felder sind korrekt ausgefüllt.' })
       } else {
-        showValidationToast(isValid.errors)
+        showValidationToast(errors)
       }
     }
   })

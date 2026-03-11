@@ -1,11 +1,11 @@
 import * as React from "react"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/components/ui/toast-provider"
-import { buildZodFromSchema, validateValues } from "@/features/forms/validator"
+import { validateValues } from "@/features/forms/validator"
 import { FieldRenderer } from "@/features/forms/fields"
 
 export type FormSchema = {
@@ -52,8 +52,8 @@ export function FormBuilder<T extends Record<string, unknown>>({
 }: Props<T>): JSX.Element {
   const { push } = useToast()
   const [values, setValues] = useState<Record<string, unknown>>(data)
-  const zodSchema = useMemo(() => buildZodFromSchema(schema), [schema])
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [validationSummary, setValidationSummary] = useState<string[]>([])
   const [policy, setPolicy] = useState<{
     level: "allow" | "warn" | "block"
     message?: string
@@ -66,16 +66,24 @@ export function FormBuilder<T extends Record<string, unknown>>({
   function setField(name: string, value: unknown): void {
     const next = { ...values, [name]: value }
     setValues(next)
+    setErrors((prev) => {
+      if (prev[name] === undefined) {
+        return prev
+      }
+      const nextErrors = { ...prev }
+      delete nextErrors[name]
+      return nextErrors
+    })
+    setValidationSummary([])
     onChange?.({ [name]: value } as Partial<T>)
     void runPolicy(next)
   }
 
   async function runPolicy(v: Record<string, unknown>): Promise<void> {
     try {
-      // Einfache Heuristik: block bei negativen Mengen, warn bei Preis < cost
       const lines = (v as { lines?: unknown[] }).lines ?? []
-      for (const L of lines) {
-        const line = L as { qty?: number; price?: number; cost?: number }
+      for (const entry of lines) {
+        const line = entry as { qty?: number; price?: number; cost?: number }
         if (typeof line.qty === "number" && line.qty < 0) {
           setPolicy({
             level: "block",
@@ -101,19 +109,21 @@ export function FormBuilder<T extends Record<string, unknown>>({
     }
   }
 
-  async function handleSubmit(e: React.FormEvent): Promise<void> {
-    e.preventDefault()
-    const { ok, errs, parsed } = validateValues(zodSchema, values)
+  async function handleSubmit(event: React.FormEvent): Promise<void> {
+    event.preventDefault()
+    const { ok, errs, parsed, summary } = validateValues(schema, values)
     if (!ok) {
       setErrors(errs)
-      push("⚠️ Bitte Eingaben prüfen")
+      setValidationSummary(summary)
+      push("Bitte Eingaben prüfen")
       return
     }
     if (policy.level === "block") {
-      push(`❌ Speichern blockiert: ${policy.message ?? "Policy-Verstoß"}`)
+      push(`Speichern blockiert: ${policy.message ?? "Policy-Verstoß"}`)
       return
     }
     setErrors({})
+    setValidationSummary([])
     await onSubmit(parsed as T)
   }
 
@@ -121,58 +131,73 @@ export function FormBuilder<T extends Record<string, unknown>>({
     <form onSubmit={handleSubmit} className="space-y-4">
       <h2 className="text-xl font-semibold">{schema.title}</h2>
 
-      {policy.level !== "allow" && (
+      {policy.level !== "allow" ? (
         <Card
-          className={`p-3 border ${
+          className={`border p-3 ${
             policy.level === "warn"
-              ? "bg-amber-50 border-amber-300"
-              : "bg-red-50 border-red-300"
+              ? "border-amber-300 bg-amber-50"
+              : "border-red-300 bg-red-50"
           }`}
         >
           <div className="text-sm">
-            {policy.message ??
-              (policy.level === "warn" ? "Bitte prüfen" : "Aktion blockiert")}
+            {policy.message ?? (policy.level === "warn" ? "Bitte prüfen" : "Aktion blockiert")}
           </div>
         </Card>
-      )}
+      ) : null}
 
-      <Card className="p-4 space-y-3">
-        {schema.fields.map(
-          (f): JSX.Element => (
-            <div key={f.name} className="grid gap-1">
-              <Label htmlFor={f.name}>
-                {f.label}
-                {f.required === true ? " *" : ""}
-              </Label>
-              <FieldRenderer
-                field={f}
-                value={values[f.name]}
-                onChange={(v): void => {
-                  setField(f.name, v)
-                }}
-              />
-              {errors[f.name] !== undefined && (
-                <span className="text-sm text-red-600">{errors[f.name]}</span>
-              )}
-            </div>
-          )
-        )}
+      {validationSummary.length > 0 ? (
+        <Card className="border border-red-300 bg-red-50 p-3">
+          <div className="text-sm font-medium text-red-800">
+            Validierung noch nicht abgeschlossen
+          </div>
+          <ul className="mt-2 list-disc pl-5 text-sm text-red-700">
+            {validationSummary.slice(0, 4).map((entry) => (
+              <li key={entry}>{entry}</li>
+            ))}
+          </ul>
+        </Card>
+      ) : null}
+
+      <Card className="space-y-3 p-4">
+        {schema.fields.map((field): JSX.Element => (
+          <div key={field.name} className="grid gap-1">
+            <Label htmlFor={field.name}>
+              {field.label}
+              {field.required === true ? " *" : ""}
+            </Label>
+            <FieldRenderer
+              field={field}
+              value={values[field.name]}
+              onChange={(nextValue): void => {
+                setField(field.name, nextValue)
+              }}
+            />
+            {errors[field.name] !== undefined ? (
+              <span className="text-sm text-red-600">{errors[field.name]}</span>
+            ) : null}
+          </div>
+        ))}
       </Card>
 
-      {schema.lines !== undefined && (
-        <Card className="p-4 space-y-2">
+      {schema.lines !== undefined ? (
+        <Card className="space-y-2 p-4">
           <Label>{schema.lines.label}</Label>
           <LinesEditor
             columns={schema.lines.columns}
             value={(values[schema.lines.name] as unknown[]) ?? []}
             onChange={(rows): void => {
-              if (schema.lines !== undefined) {
-                setField(schema.lines.name, rows)
-              }
+              setField(schema.lines!.name, rows)
             }}
           />
+          {Object.entries(errors)
+            .filter(([path]) => path.startsWith(`${schema.lines?.name}.`))
+            .map(([path, message]) => (
+              <div key={path} className="text-sm text-red-600">
+                {message}
+              </div>
+            ))}
         </Card>
-      )}
+      ) : null}
 
       <div className="text-right">
         <Button type="submit" disabled={policy.level === "block"}>
@@ -202,33 +227,33 @@ function LinesEditor({
 }): JSX.Element {
   const rows = value as Record<string, unknown>[]
 
-  async function setCell(i: number, name: string, v: unknown): Promise<void> {
-    let next = rows.map((r, idx) => (idx === i ? { ...r, [name]: v } : r))
+  async function setCell(index: number, name: string, nextValue: unknown): Promise<void> {
+    let next = rows.map((row, rowIndex) =>
+      rowIndex === index ? { ...row, [name]: nextValue } : row
+    )
 
-    // Auto-Fill: Wenn Artikel ausgewählt, hole Metadaten
-    if (name === "article" && typeof v === "string" && v.length > 0) {
+    if (name === "article" && typeof nextValue === "string" && nextValue.length > 0) {
       try {
-        const response = await fetch(`/api/mcp/lookup/articles?q=${encodeURIComponent(v)}`)
+        const response = await fetch(`/api/mcp/lookup/articles?q=${encodeURIComponent(nextValue)}`)
         const data = (await response.json()) as {
           ok: boolean
           data: Array<{ id: string; cost?: number; price?: number }>
         }
-        const article = data.data?.find((a) => a.id === v)
+        const article = data.data?.find((entry) => entry.id === nextValue)
         if (article !== undefined) {
-          // Auto-Fill price und cost
-          next = rows.map((r, idx) =>
-            idx === i
+          next = rows.map((row, rowIndex) =>
+            rowIndex === index
               ? {
-                  ...r,
-                  [name]: v,
-                  price: article.price ?? article.cost ?? r.price ?? 0,
-                  cost: article.cost ?? r.cost ?? 0,
+                  ...row,
+                  [name]: nextValue,
+                  price: article.price ?? article.cost ?? row.price ?? 0,
+                  cost: article.cost ?? row.cost ?? 0,
                 }
-              : r
+              : row
           )
         }
       } catch {
-        // Silent fail
+        // Ignore optional lookup failures.
       }
     }
 
@@ -238,14 +263,12 @@ function LinesEditor({
   function addRow(): void {
     onChange([
       ...(rows ?? []),
-      Object.fromEntries(
-        columns.map((c) => [c.name, c.type === "number" ? 0 : ""])
-      ),
+      Object.fromEntries(columns.map((column) => [column.name, column.type === "number" ? 0 : ""])),
     ])
   }
 
-  function delRow(i: number): void {
-    onChange((rows ?? []).filter((_, idx) => idx !== i))
+  function deleteRow(index: number): void {
+    onChange((rows ?? []).filter((_, rowIndex) => rowIndex !== index))
   }
 
   return (
@@ -257,45 +280,41 @@ function LinesEditor({
         }}
       >
         <div className="text-xs opacity-70">#</div>
-        {columns.map(
-          (c): JSX.Element => (
-            <div key={c.name} className="text-xs opacity-70">
-              {c.label}
-            </div>
-          )
-        )}
+        {columns.map((column): JSX.Element => (
+          <div key={column.name} className="text-xs opacity-70">
+            {column.label}
+          </div>
+        ))}
         <div />
-        {(rows ?? []).map((r, i) => (
-          <React.Fragment key={i}>
-            <div className="text-sm opacity-70">{i + 1}</div>
-            {columns.map(
-              (c): JSX.Element => (
-                <div key={c.name}>
-                  {c.type === "number" ? (
-                    <Input
-                      type="number"
-                      value={Number(r[c.name] ?? 0)}
-                      onChange={(e): void => {
-                        void setCell(i, c.name, Number(e.target.value))
-                      }}
-                    />
-                  ) : (
-                    <Input
-                      value={String(r[c.name] ?? "")}
-                      onChange={(e): void => {
-                        void setCell(i, c.name, e.target.value)
-                      }}
-                    />
-                  )}
-                </div>
-              )
-            )}
+        {(rows ?? []).map((row, index) => (
+          <React.Fragment key={index}>
+            <div className="text-sm opacity-70">{index + 1}</div>
+            {columns.map((column): JSX.Element => (
+              <div key={column.name}>
+                {column.type === "number" ? (
+                  <Input
+                    type="number"
+                    value={Number(row[column.name] ?? 0)}
+                    onChange={(event): void => {
+                      void setCell(index, column.name, Number(event.target.value))
+                    }}
+                  />
+                ) : (
+                  <Input
+                    value={String(row[column.name] ?? "")}
+                    onChange={(event): void => {
+                      void setCell(index, column.name, event.target.value)
+                    }}
+                  />
+                )}
+              </div>
+            ))}
             <div className="text-right">
               <Button
                 type="button"
                 variant="ghost"
                 onClick={(): void => {
-                  delRow(i)
+                  deleteRow(index)
                 }}
               >
                 Löschen
@@ -310,5 +329,3 @@ function LinesEditor({
     </div>
   )
 }
-
-

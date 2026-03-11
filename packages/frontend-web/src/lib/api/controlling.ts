@@ -43,9 +43,11 @@ export function useControllingKpis() {
   return useQuery({
     queryKey: controllingKeys.kpis(),
     queryFn: async () => {
-      const rows = (await apiClient.get<Record<string, unknown>[]>('/api/v1/controlling/kpis')).data
+      const res = await apiClient.get<Record<string, unknown>[]>('/api/v1/controlling/kpis')
+      const rows = Array.isArray(res?.data) ? res.data : []
       return rows.map(normalize)
     },
+    initialData: [],
     staleTime: 60_000,
   })
 }
@@ -128,6 +130,7 @@ export function useControllingDashboards() {
       const rows = (await apiClient.get<Record<string, unknown>[]>('/api/v1/controlling/dashboards')).data
       return rows.map(normalizeDashboard)
     },
+    initialData: [],
     staleTime: 60_000,
   })
 }
@@ -226,6 +229,7 @@ export function useDashboardWidgets(dashboardId?: string) {
       const rows = (await apiClient.get<Record<string, unknown>[]>(`/api/v1/controlling/dashboards/${dashboardId}/widgets`)).data
       return rows.map(normalizeWidget)
     },
+    initialData: [],
     staleTime: 60_000,
   })
 }
@@ -322,6 +326,7 @@ export function useKpiTimeseries(kpiId?: string) {
       const rows = (await apiClient.get<Record<string, unknown>[]>(`/api/v1/controlling/timeseries?${String(params)}`)).data
       return rows.map(normalizeTimeseries)
     },
+    initialData: [],
     staleTime: 60_000,
   })
 }
@@ -397,6 +402,7 @@ export function useControllingActions(status?: string) {
       const rows = (await apiClient.get<Record<string, unknown>[]>(`/api/v1/controlling/actions?${String(params)}`)).data
       return rows.map(normalizeAction)
     },
+    initialData: [],
     staleTime: 60_000,
   })
 }
@@ -442,3 +448,27 @@ export function useDeleteAction() {
 // Aliases for Kostenstellenrechnung page
 export const useKostenstellen = useControllingKpis
 export const useKostenstellenTimeseries = useKpiTimeseries
+
+// ─── Branchenbenchmark (Gap 047) ───────────────────────────────────────────
+
+export type BenchmarkData = {
+  period: { start_date: string | null; end_date: string | null }
+  own: Record<string, number>
+  branch: Record<string, number>
+  comparison: Record<string, { own: number; branch: number | null; deviation_pct: number | null }>
+}
+
+export function useBenchmark(startDate?: string | null, endDate?: string | null) {
+  return useQuery({
+    queryKey: ['analytics', 'benchmark', startDate ?? '', endDate ?? ''],
+    queryFn: async () => {
+      const params = new URLSearchParams()
+      if (startDate) params.set('start_date', startDate)
+      if (endDate) params.set('end_date', endDate)
+      const suffix = params.toString() ? `?${params.toString()}` : ''
+      const res = await apiClient.get<BenchmarkData>(`/api/v1/analytics/benchmark${suffix}`)
+      return res.data
+    },
+    staleTime: 60 * 1000,
+  })
+}

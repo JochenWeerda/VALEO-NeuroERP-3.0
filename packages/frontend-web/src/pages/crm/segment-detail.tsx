@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
-import { useMaskData, useMaskValidation } from '@/components/mask-builder/hooks'
+import { useMaskData } from '@/components/mask-builder/hooks'
+
 import { MaskConfig } from '@/components/mask-builder/types'
-import { z } from 'zod'
 import { getEntityTypeLabel, getDetailTitle, getSuccessMessage, getErrorMessage } from '@/features/crud/utils/i18n-helpers'
 import { createApiClient } from '@/components/mask-builder/utils/api'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -301,15 +301,12 @@ export default function SegmentDetailPage(): JSX.Element {
     id: id || undefined
   })
 
-  const { validate } = useMaskValidation({
-    schema: createSegmentSchema(t)
-  })
 
   const handleSave = async (formData: any) => {
     setLoading(true)
     try {
       // Validate
-      const validationResult = validate(formData)
+      const validationResult = validateSegmentForm(formData, t)
       if (!validationResult.valid) {
         toast({
           variant: 'destructive',

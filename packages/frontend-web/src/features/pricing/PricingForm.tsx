@@ -1,12 +1,9 @@
-ï»¿import * as React from "react"
-import { z } from "zod"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
+import * as React from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { parseDE } from "@/lib/number-de"
-import { type PriceItem, PriceItemSchema, type PriceTier } from "./schema"
+import { type PriceItem, type PriceTier } from "./schema"
 import { TierRow } from "./TierRow"
 
 interface PricingFormProps {
@@ -18,23 +15,46 @@ interface PricingFormProps {
 const INITIAL_TIER_MIN_QTY = 0
 const INITIAL_TIER_NET = 0
 
-type PriceFormValues = z.input<typeof PriceItemSchema>
-
 export function PricingForm({
   defaultValues,
   submitting,
   onSubmit,
 }: PricingFormProps): JSX.Element {
-  const { register, handleSubmit, setValue, formState: { errors } } = useForm<PriceFormValues>({
-    resolver: zodResolver(PriceItemSchema),
-    defaultValues,
+  const [values, setValues] = React.useState({
+    sku: defaultValues.sku,
+    name: defaultValues.name,
+    currency: defaultValues.currency,
+    unit: defaultValues.unit,
+    baseNet: String(defaultValues.baseNet),
   })
-
   const [tiers, setTiers] = React.useState<PriceTier[]>(defaultValues.tiers ?? [])
+  const [errors, setErrors] = React.useState<Partial<Record<'sku' | 'name' | 'currency' | 'unit' | 'baseNet', string>>>({})
 
-  const apply = (data: PriceFormValues): void => {
-    const parsed = PriceItemSchema.parse({ ...data, tiers })
-    onSubmit(parsed)
+  const apply = (event: React.FormEvent<HTMLFormElement>): void => {
+    event.preventDefault()
+
+    const nextErrors: Partial<Record<'sku' | 'name' | 'currency' | 'unit' | 'baseNet', string>> = {}
+    const baseNet = parseDE(values.baseNet)
+
+    if (values.sku.trim().length === 0) nextErrors.sku = 'SKU ist erforderlich'
+    if (values.name.trim().length === 0) nextErrors.name = 'Artikel ist erforderlich'
+    if (values.currency.trim().length === 0) nextErrors.currency = 'Waehrung ist erforderlich'
+    if (values.unit.trim().length === 0) nextErrors.unit = 'Einheit ist erforderlich'
+    if (!Number.isFinite(baseNet) || baseNet < 0) nextErrors.baseNet = 'Basis-Netto muss >= 0 sein'
+
+    setErrors(nextErrors)
+    if (Object.keys(nextErrors).length > 0) {
+      return
+    }
+
+    onSubmit({
+      sku: values.sku.trim(),
+      name: values.name.trim(),
+      currency: values.currency.trim(),
+      unit: values.unit.trim(),
+      baseNet,
+      tiers,
+    })
   }
 
   const addTier = (): void => {
@@ -49,56 +69,36 @@ export function PricingForm({
     setTiers((prev) => prev.filter((_, i) => i !== idx))
   }
 
-  const handleBaseNetBlur = (e: React.FocusEvent<HTMLInputElement>): void => {
-    setValue("baseNet", parseDE(e.target.value), { shouldValidate: true })
-  }
-
   return (
-    <form className="space-y-4" onSubmit={handleSubmit(apply)}>
+    <form className="space-y-4" onSubmit={apply}>
       <div className="grid grid-cols-2 gap-3">
         <div>
           <Label>SKU</Label>
-          <Input {...register("sku")} readOnly />
-          {errors.sku !== undefined ? (
-            <p className="text-sm text-red-600">{errors.sku.message}</p>
-          ) : null}
+          <Input value={values.sku} readOnly />
+          {errors.sku !== undefined ? <p className="text-sm text-red-600">{errors.sku}</p> : null}
         </div>
         <div>
           <Label>Artikel</Label>
-          <Input {...register("name")} />
-          {errors.name !== undefined ? (
-            <p className="text-sm text-red-600">{errors.name.message}</p>
-          ) : null}
+          <Input value={values.name} onChange={(event) => setValues((current) => ({ ...current, name: event.target.value }))} />
+          {errors.name !== undefined ? <p className="text-sm text-red-600">{errors.name}</p> : null}
         </div>
       </div>
 
       <div className="grid grid-cols-3 gap-3">
         <div>
-          <Label>WÃ¤hrung</Label>
-          <Input {...register("currency")} />
-          {errors.currency !== undefined ? (
-            <p className="text-sm text-red-600">{errors.currency.message}</p>
-          ) : null}
+          <Label>Währung</Label>
+          <Input value={values.currency} onChange={(event) => setValues((current) => ({ ...current, currency: event.target.value }))} />
+          {errors.currency !== undefined ? <p className="text-sm text-red-600">{errors.currency}</p> : null}
         </div>
         <div>
           <Label>Einheit</Label>
-          <Input {...register("unit")} />
-          {errors.unit !== undefined ? (
-            <p className="text-sm text-red-600">{errors.unit.message}</p>
-          ) : null}
+          <Input value={values.unit} onChange={(event) => setValues((current) => ({ ...current, unit: event.target.value }))} />
+          {errors.unit !== undefined ? <p className="text-sm text-red-600">{errors.unit}</p> : null}
         </div>
         <div>
           <Label>Basis-Netto</Label>
-          <Input
-            defaultValue={String(defaultValues.baseNet)}
-            {...register("baseNet", {
-              setValueAs: (v): number => parseDE(String(v)),
-            })}
-            onBlur={handleBaseNetBlur}
-          />
-          {errors.baseNet !== undefined ? (
-            <p className="text-sm text-red-600">{errors.baseNet.message}</p>
-          ) : null}
+          <Input value={values.baseNet} onChange={(event) => setValues((current) => ({ ...current, baseNet: event.target.value }))} />
+          {errors.baseNet !== undefined ? <p className="text-sm text-red-600">{errors.baseNet}</p> : null}
         </div>
       </div>
 
@@ -106,13 +106,11 @@ export function PricingForm({
         <div className="flex items-center justify-between">
           <h4 className="font-semibold">Staffelpreise</h4>
           <Button type="button" size="sm" onClick={addTier}>
-            Tier hinzufÃ¼gen
+            Tier hinzufügen
           </Button>
         </div>
         <div className="space-y-2">
-          {tiers.length === 0 ? (
-            <p className="opacity-70 text-sm">Keine Tiers definiert.</p>
-          ) : null}
+          {tiers.length === 0 ? <p className="text-sm opacity-70">Keine Tiers definiert.</p> : null}
           {tiers.map((t, i): JSX.Element => (
             <TierRow
               key={i}
@@ -133,5 +131,3 @@ export function PricingForm({
     </form>
   )
 }
-
-

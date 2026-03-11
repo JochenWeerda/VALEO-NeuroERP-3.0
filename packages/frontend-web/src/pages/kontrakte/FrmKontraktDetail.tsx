@@ -6,10 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/hooks/useAuth'
 import { CustomerSelectionDialog, type Customer } from '@/components/sales/CustomerSelectionDialog'
@@ -225,14 +225,16 @@ export default function FrmKontraktDetail(): JSX.Element {
             </div>
             <div className="space-y-1">
               <Label>Kontrakt-Typ</Label>
-              <Select value={state.contract_type} onValueChange={(v: any) => setState((s) => ({ ...s, contract_type: v }))} disabled={!isDraftEditable}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="VERKAUF">VERKAUF</SelectItem>
-                  <SelectItem value="ZUKAUF">ZUKAUF</SelectItem>
-                  <SelectItem value="EINKAUF">EINKAUF</SelectItem>
-                </SelectContent>
-              </Select>
+              <NativeSelect
+                value={state.contract_type}
+                onValueChange={(v) => setState((s) => ({ ...s, contract_type: v as FormState['contract_type'] }))}
+                options={[
+                  { value: 'VERKAUF', label: 'VERKAUF' },
+                  { value: 'ZUKAUF', label: 'ZUKAUF' },
+                  { value: 'EINKAUF', label: 'EINKAUF' },
+                ]}
+                disabled={!isDraftEditable}
+              />
             </div>
             <div className="space-y-1">
               <Label>Niederlassung</Label>
@@ -264,13 +266,15 @@ export default function FrmKontraktDetail(): JSX.Element {
             </div>
             <div className="space-y-1">
               <Label>Mengen-Art</Label>
-              <Select value={state.quantity_type} onValueChange={(v: any) => setState((s) => ({ ...s, quantity_type: v }))} disabled={!isDraftEditable}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="GESAMTKONTRAKT">Gesamtkontrakt</SelectItem>
-                  <SelectItem value="EINZELMENGEN">Einzelmengen</SelectItem>
-                </SelectContent>
-              </Select>
+              <NativeSelect
+                value={state.quantity_type}
+                onValueChange={(v) => setState((s) => ({ ...s, quantity_type: v as FormState['quantity_type'] }))}
+                options={[
+                  { value: 'GESAMTKONTRAKT', label: 'Gesamtkontrakt' },
+                  { value: 'EINZELMENGEN', label: 'Einzelmengen' },
+                ]}
+                disabled={!isDraftEditable}
+              />
             </div>
             <div className="space-y-1">
               <Label>Gesamt-Menge</Label>

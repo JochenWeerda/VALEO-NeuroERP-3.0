@@ -150,6 +150,7 @@ export function useOpportunities(params?: Record<string, string>) {
   return useQuery({
     queryKey: ['opportunities', params],
     queryFn: () => fetchOpportunities(params),
+    initialData: [],
     staleTime: 2 * 60 * 1000, // 2 minutes
   })
 }
@@ -159,6 +160,7 @@ export function useOpportunity(id: string) {
     queryKey: ['opportunity', id],
     queryFn: () => fetchOpportunity(id),
     enabled: !!id,
+    initialData: null,
   })
 }
 
@@ -166,6 +168,7 @@ export function useCustomersForSelect() {
   return useQuery({
     queryKey: ['customers-select'],
     queryFn: fetchCustomers,
+    initialData: [],
     staleTime: 5 * 60 * 1000, // 5 minutes
     select: (data) => data.map((c) => ({
       value: c.id,
@@ -178,6 +181,7 @@ export function useContactsForSelect(customerId?: string) {
   return useQuery({
     queryKey: ['contacts-select', customerId],
     queryFn: () => fetchContacts(customerId),
+    initialData: [],
     staleTime: 5 * 60 * 1000, // 5 minutes
     select: (data) => data.map((c) => ({
       value: c.id,
@@ -226,11 +230,12 @@ export function useCustomerLookup() {
   const { data: customers } = useQuery({
     queryKey: ['customers-lookup'],
     queryFn: fetchCustomers,
+    initialData: [],
     staleTime: 5 * 60 * 1000,
   })
 
   const lookup = new Map<string, Customer>()
-  customers?.forEach((c) => lookup.set(c.id, c))
+  customers.forEach((c) => lookup.set(c.id, c))
 
   return {
     getCustomerName: (id: string) => lookup.get(id)?.name || lookup.get(id)?.company || id,

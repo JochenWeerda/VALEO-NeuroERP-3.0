@@ -1,4 +1,4 @@
-import { memo } from 'react'
+import { memo, useEffect, useRef, useState } from 'react'
 import { formatDistanceToNow } from 'date-fns'
 import { de } from 'date-fns/locale'
 import {
@@ -12,14 +12,6 @@ import {
 } from 'lucide-react'
 import { type Notification, useNotifications } from '@/hooks/useNotifications'
 import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
@@ -69,7 +61,7 @@ const NotificationItem = memo(function NotificationItem({ notification, onMarkAs
       <div className={cn('mt-0.5 flex-shrink-0', typeColors[notification.type])}>
         <Icon className="h-4 w-4" />
       </div>
-      <div className="flex-1 min-w-0">
+      <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
           <p className="text-sm font-medium text-foreground">{notification.title}</p>
           <button
@@ -83,10 +75,10 @@ const NotificationItem = memo(function NotificationItem({ notification, onMarkAs
             <Trash2 className="h-3 w-3" />
           </button>
         </div>
-        <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">
+        <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">
           {notification.message}
         </p>
-        <div className="flex items-center gap-2 mt-1">
+        <div className="mt-1 flex items-center gap-2">
           <span className="text-xs text-muted-foreground">{timeAgo}</span>
           {!notification.read && (
             <button
@@ -103,7 +95,7 @@ const NotificationItem = memo(function NotificationItem({ notification, onMarkAs
         {notification.action && (
           <a
             href={notification.action.href}
-            className="text-xs text-primary hover:underline mt-1 inline-block"
+            className="mt-1 inline-block text-xs text-primary hover:underline"
             onClick={() => onMarkAsRead(notification.id)}
           >
             {notification.action.label}
@@ -129,80 +121,95 @@ export function NotificationCenter() {
     clearNotification,
     clearAll,
   } = useNotifications()
+  const [open, setOpen] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handleOutsideClick = (event: MouseEvent): void => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleOutsideClick)
+    return () => document.removeEventListener('mousedown', handleOutsideClick)
+  }, [])
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="relative"
-          title={`${unreadCount} ungelesene Benachrichtigungen`}
-        >
-          <Bell className="h-5 w-5" />
-          {unreadCount > 0 && (
-            <Badge
-              variant="destructive"
-              className="absolute -right-1 -top-1 h-5 min-w-[1.25rem] px-1 text-xs"
-            >
-              {unreadCount > 99 ? '99+' : unreadCount}
-            </Badge>
-          )}
-          <span className="sr-only">Benachrichtigungen</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-80">
-        <DropdownMenuLabel className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span>Benachrichtigungen</span>
-            {!isConnected && (
-              <span className="h-2 w-2 rounded-full bg-amber-500" title="Verbindung getrennt" />
+    <div className="relative" ref={containerRef}>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="relative"
+        title={`${unreadCount} ungelesene Benachrichtigungen`}
+        onClick={() => setOpen((current) => !current)}
+      >
+        <Bell className="h-5 w-5" />
+        {unreadCount > 0 && (
+          <Badge
+            variant="destructive"
+            className="absolute -right-1 -top-1 h-5 min-w-[1.25rem] px-1 text-xs"
+          >
+            {unreadCount > 99 ? '99+' : unreadCount}
+          </Badge>
+        )}
+        <span className="sr-only">Benachrichtigungen</span>
+      </Button>
+      {open && (
+        <div className="absolute right-0 top-full z-50 mt-2 w-80 rounded-lg border bg-popover shadow-lg">
+          <div className="flex items-center justify-between px-3 py-2">
+            <div className="flex items-center gap-2">
+              <span className="font-medium">Benachrichtigungen</span>
+              {!isConnected && (
+                <span className="h-2 w-2 rounded-full bg-amber-500" title="Verbindung getrennt" />
+              )}
+            </div>
+            {unreadCount > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-auto p-1 text-xs"
+                onClick={markAllAsRead}
+              >
+                <CheckCheck className="mr-1 h-3 w-3" />
+                Alle lesen
+              </Button>
             )}
           </div>
-          {unreadCount > 0 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-auto p-1 text-xs"
-              onClick={markAllAsRead}
-            >
-              <CheckCheck className="h-3 w-3 mr-1" />
-              Alle lesen
-            </Button>
-          )}
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
+          <div className="h-px bg-border" />
 
-        {notifications.length === 0 ? (
-          <div className="py-8 text-center">
-            <Bell className="h-8 w-8 mx-auto text-muted-foreground/50 mb-2" />
-            <p className="text-sm text-muted-foreground">Keine Benachrichtigungen</p>
-          </div>
-        ) : (
-          <>
-            <ScrollArea className="h-[300px]">
-              <div className="divide-y">
-                {notifications.map((notification) => (
-                  <NotificationItem
-                    key={notification.id}
-                    notification={notification}
-                    onMarkAsRead={markAsRead}
-                    onClear={clearNotification}
-                  />
-                ))}
-              </div>
-            </ScrollArea>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              className="justify-center text-destructive"
-              onClick={clearAll}
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Alle löschen
-            </DropdownMenuItem>
-          </>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
+          {notifications.length === 0 ? (
+            <div className="py-8 text-center">
+              <Bell className="mx-auto mb-2 h-8 w-8 text-muted-foreground/50" />
+              <p className="text-sm text-muted-foreground">Keine Benachrichtigungen</p>
+            </div>
+          ) : (
+            <>
+              <ScrollArea className="h-[300px]">
+                <div className="divide-y">
+                  {notifications.map((notification) => (
+                    <NotificationItem
+                      key={notification.id}
+                      notification={notification}
+                      onMarkAsRead={markAsRead}
+                      onClear={clearNotification}
+                    />
+                  ))}
+                </div>
+              </ScrollArea>
+              <div className="h-px bg-border" />
+              <button
+                type="button"
+                className="flex w-full items-center justify-center gap-2 px-3 py-2 text-sm text-destructive hover:bg-accent"
+                onClick={clearAll}
+              >
+                <Trash2 className="h-4 w-4" />
+                Alle loeschen
+              </button>
+            </>
+          )}
+        </div>
+      )}
+    </div>
   )
 }
