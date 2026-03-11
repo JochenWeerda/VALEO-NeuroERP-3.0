@@ -157,20 +157,18 @@ Die folgenden ADRs sollten als nächste Entscheidungen vorbereitet werden, weil 
 
 ### A. Hohe Priorität
 
-1. Governance für Rollen- und Berechtigungsvererbung
-- Wie Verbundstrukturen Berechtigungen, Delegation und Verantwortlichkeit sauber vererben
-- Wie lokale Abweichungen kontrolliert bleiben
+1. Lifecycle-Modell für Kontraktänderungen
+- Wie Amendments, Nachträge, Versionen und Freigaben entlang des Kontrakts modelliert werden
+- Wie Prozess- und Auditbezug dabei erhalten bleiben
 
 ### B. Mittlere Priorität
 
-2. Datenprodukt-Strategie für Sustainability- und Compliance-Reporting
-- Wie ESG-, CO2-, Audit- und Meldeprodukte fachlich definiert und versioniert werden
-- Wie operative Daten und regulatorische Datenprodukte getrennt bleiben
+2. Referenzmodell für Chargen-/Partienverschneidung
+- Wie Mischungen, Umbuchungen und Qualitätsbezüge über Lager und Settlement sauber referenziert werden
 
-3. Standard für konfliktarme Parallelbearbeitung
-- Wie konkurrierende Bearbeitung in Kernprozessen modelliert und aufgelöst wird
-- Wie Optimistic Locking, Konflikthinweise und Freigaben zusammenwirken
+3. Standards für Explainability von KI- und Policy-Entscheidungen
+- Wie Begründung, Confidence, Quellen und Freigabehinweise modelliert werden
 
 ### C. Spätere Kandidaten
 
-4. Modell für Import-/Staging-/Prüfpipelines
+4. Governance für Simulationsdaten und Sandbox-Isolation
