@@ -4,6 +4,8 @@
 
 **Arbeitsaufteilung:** [2026-03-06-arbeitsaufteilung-codex-hauptstrang.md](2026-03-06-arbeitsaufteilung-codex-hauptstrang.md) – 30 % Codex (Parallel Chat), 70 % Hauptstrang, einheitliche Statuskontrolle
 
+**Zielbild:** [target-state-landhandel-erp.md](../../architecture/target-state-landhandel-erp.md) – verbindliche Leitplanke für Produktkern, Architektur und Priorisierung.
+
 ## Ziel
 Dieses Backlog priorisiert die fehlenden Faehigkeiten, um VALEO NeuroERP auf Spitzenniveau gegenueber ServiceERP, a.amic, Odoo, SAP und Oracle zu bringen. Fokus: End-to-End Prozessabdeckung, AI-first Workflows, Agent-Interoperabilitaet, UUIX, Performance, Parallelverarbeitung.
 
@@ -98,6 +100,12 @@ Dieses Backlog priorisiert die fehlenden Faehigkeiten, um VALEO NeuroERP auf Spi
   - Delivery: % abgeschlossene P0/P1 Items pro Wave
   - Quality: Error Rate, Reopen Rate, SLA-Erfuellung
   - Adoption: aktive Nutzer in Kernprozessen, AI-Aktionsquote mit Approval
+
+## Architekturleitplanken
+- [Target State Landhandel ERP](../../architecture/target-state-landhandel-erp.md)
+- [ADR-003 Canonical Domain Model](../../adr/adr-003-canonical-domain-model.md)
+- [ADR-004 Command-/Action-Layer](../../adr/adr-004-command-action-layer.md)
+- [ADR-005 Workflow-/Policy-Kern](../../adr/adr-005-workflow-policy-kern.md)
 
 ## Referenz auf Ist-Quellen im Repo
 - [docs/architecture/current-processes.md](../../architecture/current-processes.md)

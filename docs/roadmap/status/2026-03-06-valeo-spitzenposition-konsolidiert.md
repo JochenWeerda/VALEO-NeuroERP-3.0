@@ -7,6 +7,8 @@
 
 ## Kurzfazit
 
+**Zielbild-Referenz:** [target-state-landhandel-erp.md](../../architecture/target-state-landhandel-erp.md) - strategisches Zielbild, Architekturleitplanken und Canonical Domain Model.
+
 Das System ist für einen Landhandel-/Genossenschafts-ERP-Ansatz bereits ungewöhnlich breit, aber noch nicht auf Spitzenniveau. Drei zentrale Hebel entscheiden über den Aufstieg:
 
 1. **Prozessdurchgängige Produktivität** – Keine Medienbrüche, keine Mock-Daten in kritischen Cockpits
