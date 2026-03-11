@@ -14,6 +14,8 @@
 
 **Einheitliches Steuerungsdokument:** Dieses Dokument. Beide Stränge aktualisieren hier den Status.
 
+**Strategische Leitplanke:** [target-state-landhandel-erp.md](../../architecture/target-state-landhandel-erp.md) – Zielbild für Domänenmodell, Action-Layer und Workflow-/Policy-Kern.
+
 ---
 
 ## Codex-Strang (30 % – 15 Aufgaben)
@@ -141,3 +143,7 @@ Kernprozesse, Workflow-Engine, Backend-Architektur, Compliance, Performance-Kern
 |----------|------|
 | Top-50 Gap Backlog | [2026-03-06-top-50-gap-backlog-landhandel.md](2026-03-06-top-50-gap-backlog-landhandel.md) |
 | Konsolidierte Strategie | [2026-03-06-valeo-spitzenposition-konsolidiert.md](2026-03-06-valeo-spitzenposition-konsolidiert.md) |
+| Target State Landhandel ERP | [../../architecture/target-state-landhandel-erp.md](../../architecture/target-state-landhandel-erp.md) |
+| ADR-003 Canonical Domain Model | [../../adr/adr-003-canonical-domain-model.md](../../adr/adr-003-canonical-domain-model.md) |
+| ADR-004 Command-/Action-Layer | [../../adr/adr-004-command-action-layer.md](../../adr/adr-004-command-action-layer.md) |
+| ADR-005 Workflow-/Policy-Kern | [../../adr/adr-005-workflow-policy-kern.md](../../adr/adr-005-workflow-policy-kern.md) |

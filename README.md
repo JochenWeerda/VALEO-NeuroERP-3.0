@@ -60,6 +60,16 @@ Experimental **open-source ERP and automation platform** combining classical ent
 
 See [docs/AI-VISION.md](docs/AI-VISION.md) for the project’s AI and research vision.
 
+## Architecture Guidance
+
+- [Architecture Index](docs/architecture/index.md)
+- [Target State Landhandel ERP](docs/architecture/target-state-landhandel-erp.md)
+- [ADR-003 Canonical Domain Model](docs/adr/adr-003-canonical-domain-model.md)
+- [ADR-004 Command-/Action-Layer](docs/adr/adr-004-command-action-layer.md)
+- [ADR-005 Workflow-/Policy-Kern](docs/adr/adr-005-workflow-policy-kern.md)
+- [ADR-006 Read-Model / Query-Contract-Prinzip](docs/adr/adr-006-read-model-query-contract-prinzip.md)
+- [ADR-007 Agent-/Tool-Contract-Governance](docs/adr/adr-007-agent-tool-contract-governance.md)
+
 ## 📸 Screenshots
 
 | Dashboard / Navigation | Finance – Open Items | Agrar – Ernteannahme |
