@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -174,45 +174,40 @@ export default function PSMBeratungPage(): JSX.Element {
         <div className="grid gap-4 md:grid-cols-2">
           <div>
             <Label>Kultur</Label>
-            <Select value={kultur} onValueChange={setKultur}>
-              <SelectTrigger>
-                <SelectValue placeholder="Kultur auswählen" />
-              </SelectTrigger>
-              <SelectContent>
-                {verfuegbareKulturen.map(k => (
-                  <SelectItem key={k} value={k}>{k}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <NativeSelect
+              value={kultur}
+              onValueChange={setKultur}
+              placeholder="Kultur auswaehlen"
+              options={verfuegbareKulturen.map((kulturName) => ({ value: kulturName, label: kulturName }))}
+            />
           </div>
           <div>
             <Label>Saison</Label>
-            <Select value={saison} onValueChange={setSaison}>
-              <SelectTrigger>
-                <SelectValue placeholder="Saison auswählen" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Frühjahr">Frühjahr</SelectItem>
-                <SelectItem value="Sommer">Sommer</SelectItem>
-                <SelectItem value="Herbst">Herbst</SelectItem>
-                <SelectItem value="Winter">Winter</SelectItem>
-              </SelectContent>
-            </Select>
+            <NativeSelect
+              value={saison}
+              onValueChange={setSaison}
+              placeholder="Saison auswaehlen"
+              options={[
+                { value: 'Fr?hjahr', label: 'Fr?hjahr' },
+                { value: 'Sommer', label: 'Sommer' },
+                { value: 'Herbst', label: 'Herbst' },
+                { value: 'Winter', label: 'Winter' },
+              ]}
+            />
           </div>
         </div>
 
         <div>
           <Label>Schweregrad</Label>
-          <Select value={schweregrad} onValueChange={(value: any) => setSchweregrad(value)}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="leicht">Leicht (unter 10% Befall)</SelectItem>
-              <SelectItem value="mittel">Mittel (10-30% Befall)</SelectItem>
-              <SelectItem value="schwer">Schwer (über 30% Befall)</SelectItem>
-            </SelectContent>
-          </Select>
+          <NativeSelect
+          value={schweregrad}
+          onValueChange={(value) => setSchweregrad(value as 'leicht' | 'mittel' | 'schwer')}
+          options={[
+            { value: 'leicht', label: 'Leicht (unter 10% Befall)' },
+            { value: 'mittel', label: 'Mittel (10-30% Befall)' },
+            { value: 'schwer', label: 'Schwer (ueber 30% Befall)' },
+          ]}
+        />
         </div>
 
         <div>

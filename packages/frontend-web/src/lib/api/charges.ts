@@ -119,6 +119,7 @@ export function useCharges() {
   return useQuery({
     queryKey: chargeKeys.all,
     queryFn: listCharges,
+    initialData: [],
   })
 }
 
@@ -127,6 +128,7 @@ export function useCharge(id: string | undefined) {
     queryKey: id ? chargeKeys.detail(id) : ['chargen', 'none'],
     queryFn: () => getCharge(id as string),
     enabled: Boolean(id),
+    initialData: null,
   })
 }
 
@@ -135,6 +137,7 @@ export function useChargeQsReadiness(id: string | undefined) {
     queryKey: id ? chargeKeys.readiness(id) : ['chargen', 'none', 'qs-readiness'],
     queryFn: () => getChargeQsReadiness(id as string),
     enabled: Boolean(id),
+    initialData: null,
   })
 }
 

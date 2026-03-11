@@ -3,6 +3,7 @@ import { PageToolbar, type ToolbarAction } from '@/components/navigation/PageToo
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { cn } from '@/lib/utils'
 import { createMCPMetadata } from '@/design/mcp-schemas/component-metadata'
+import { useActionsForMask, useActionDispatchOptional } from '@/features/ki-usability'
 
 export interface ObjectPageSection {
   id: string
@@ -108,6 +109,8 @@ export function ObjectPage({
   onCancel,
   mcpContext,
 }: ObjectPageProps): JSX.Element {
+  const actionDispatch = useActionDispatchOptional()
+  const { data: actionResponse } = useActionsForMask(mcpContext?.pageDomain, mcpContext?.entityType)
   const safeSections = useMemo(() => sections.filter((section) => section != null), [sections])
 
   const initialSection = useMemo(() => {
@@ -129,6 +132,42 @@ export function ObjectPage({
     return defaultActions(editMode, onEdit, onSave, onCancel)
   }, [editMode, onCancel, onEdit, onSave, primaryActions])
 
+  const quickActions = useMemo<ToolbarAction[]>(() => {
+    return (actionResponse?.actions ?? []).map((action) => ({
+      id: action.id,
+      label: action.label,
+      shortcut: action.shortcut,
+      onClick: () => {
+        if (actionDispatch) {
+          void actionDispatch.dispatch(action.id)
+        }
+      },
+      variant: action.category === 'danger' ? 'destructive' : 'outline',
+      mcp: { intent: action.id, requiredData: action.required_data },
+    }))
+  }, [actionDispatch, actionResponse?.actions])
+
+  const mergedPrimaryActions = useMemo<ToolbarAction[]>(() => {
+    if (Array.isArray(primaryActions) && primaryActions.length > 0) {
+      return primaryActions
+    }
+    if (computedActions.length > 0) {
+      return computedActions
+    }
+    return quickActions.slice(0, 2)
+  }, [computedActions, primaryActions, quickActions])
+
+  const mergedOverflowActions = useMemo<ToolbarAction[]>(() => {
+    const fromProps = overflowActions ?? []
+    const hasPrimaryFromProps = Array.isArray(primaryActions) && primaryActions.length > 0
+    const quickOverflow = hasPrimaryFromProps ? quickActions : quickActions.slice(2)
+    const byId = new Map<string, ToolbarAction>()
+    for (const action of [...fromProps, ...quickOverflow]) {
+      byId.set(action.id, action)
+    }
+    return Array.from(byId.values())
+  }, [overflowActions, primaryActions, quickActions])
+
   const handleSectionChange = (value: string): void => {
     setActiveSection(value)
     if (typeof onSectionChange === 'function') {
@@ -146,14 +185,17 @@ export function ObjectPage({
       <PageToolbar
         title={title}
         subtitle={subtitle}
-        primaryActions={computedActions}
-        overflowActions={overflowActions}
+        primaryActions={mergedPrimaryActions}
+        overflowActions={mergedOverflowActions}
         mcpContext={
           mcpContext
             ? {
                 pageDomain: mcpContext.pageDomain,
                 currentDocument: mcpContext.documentId,
-                availableActions: computedActions.map((action) => action.id),
+                availableActions: [
+                  ...mergedPrimaryActions.map((action) => action.id),
+                  ...mergedOverflowActions.map((action) => action.id),
+                ],
               }
             : undefined
         }

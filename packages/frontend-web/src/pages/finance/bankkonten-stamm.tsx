@@ -2,9 +2,8 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
-import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
+import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
-import { z } from 'zod'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { validateIBAN, formatIBAN } from '@/lib/utils/iban-validator'
 import { useIbanLookup } from '@/hooks/useIbanLookup'
@@ -113,7 +112,6 @@ const createBankKontenConfig = (t: any, entityTypeLabel: string): MaskConfig => 
       delete: '/api/v1/finance/bank-accounts/{id}'
     }
   } as any,
-  validation: createBankKontenSchema(t),
   permissions: ['fibu.read', 'fibu.write']
 })
 
@@ -144,7 +142,6 @@ export default function BankKontenStammPage(): JSX.Element {
   }
   const safeFormData = { ...initialFormData, ...(data ?? formData ?? {}) }
 
-  const { validate, showValidationToast } = useMaskValidation(bankKontenConfig.validation)
 
   // IBAN Lookup Hook
   const { performLookup, isLoading: isIbanLoading, lookupData } = useIbanLookup({
@@ -223,9 +220,9 @@ export default function BankKontenStammPage(): JSX.Element {
 
   const { handleAction } = useMaskActions(async (action: string, formData: any) => {
     if (action === 'save') {
-      const isValid = validate(formData)
+      const isValid = validateBankKontenForm(formData, t)
       if (!isValid.isValid) {
-        showValidationToast(isValid.errors)
+        toast.error(Object.values(isValid.errors).join(', '))
         return
       }
 
@@ -246,11 +243,11 @@ export default function BankKontenStammPage(): JSX.Element {
         // Error wird bereits in useMaskData behandelt
       }
     } else if (action === 'validate') {
-      const isValid = validate(formData)
+      const isValid = validateBankKontenForm(formData, t)
       if (isValid.isValid) {
         toast.success(t('crud.messages.validationSuccess'))
       } else {
-        showValidationToast(isValid.errors)
+        toast.error(Object.values(isValid.errors).join(', '))
       }
     } else if (action === 'export') {
       setActionLoadingKey('export')

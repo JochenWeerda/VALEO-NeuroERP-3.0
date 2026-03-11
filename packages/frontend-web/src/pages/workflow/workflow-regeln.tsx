@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Plus } from 'lucide-react'
 import { ErrorState } from '@/components/ErrorState'
@@ -112,9 +112,9 @@ function WorkflowRuleForm({ rule, onSave, onCancel }: WorkflowRuleFormProps): JS
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid gap-4 md:grid-cols-2">
-        <div><Label>Ausloeser-Entitaet</Label><Select value={formData.triggerEntity} onValueChange={(value) => setFormData((prev) => ({ ...prev, triggerEntity: value }))}><SelectTrigger><SelectValue placeholder="Entitaet auswaehlen" /></SelectTrigger><SelectContent>{entityOptions.map((entity) => <SelectItem key={entity} value={entity}>{entity}</SelectItem>)}</SelectContent></Select></div>
-        <div><Label>Ausloeser-Aktion</Label><Select value={formData.triggerAction} onValueChange={(value) => setFormData((prev) => ({ ...prev, triggerAction: value }))}><SelectTrigger><SelectValue placeholder="Aktion auswaehlen" /></SelectTrigger><SelectContent>{actionOptions.map((action) => <SelectItem key={action} value={action}>{action}</SelectItem>)}</SelectContent></Select></div>
-        <div><Label>Ziel-Entitaet</Label><Select value={formData.targetEntity} onValueChange={(value) => setFormData((prev) => ({ ...prev, targetEntity: value }))}><SelectTrigger><SelectValue placeholder="Entitaet auswaehlen" /></SelectTrigger><SelectContent>{entityOptions.map((entity) => <SelectItem key={entity} value={entity}>{entity}</SelectItem>)}</SelectContent></Select></div>
+        <div><Label>Ausloeser-Entitaet</Label><NativeSelect value={formData.triggerEntity} onValueChange={(value) => setFormData((prev) => ({ ...prev, triggerEntity: value }))} placeholder="Entitaet auswaehlen" options={entityOptions.map((entity) => ({ value: entity, label: entity }))} /></div>
+        <div><Label>Ausloeser-Aktion</Label><NativeSelect value={formData.triggerAction} onValueChange={(value) => setFormData((prev) => ({ ...prev, triggerAction: value }))} placeholder="Aktion auswaehlen" options={actionOptions.map((action) => ({ value: action, label: action }))} /></div>
+        <div><Label>Ziel-Entitaet</Label><NativeSelect value={formData.targetEntity} onValueChange={(value) => setFormData((prev) => ({ ...prev, targetEntity: value }))} placeholder="Entitaet auswaehlen" options={entityOptions.map((entity) => ({ value: entity, label: entity }))} /></div>
         <div><Label>Ziel-Aktion</Label><Input value={formData.targetAction} onChange={(e) => setFormData((prev) => ({ ...prev, targetAction: e.target.value }))} placeholder="z.B. CREATE_FROM_..." /></div>
       </div>
       <div><Label>Bedingung (optional)</Label><Input value={formData.condition} onChange={(e) => setFormData((prev) => ({ ...prev, condition: e.target.value }))} placeholder="z.B. status === 'GEBUCHT'" /></div>

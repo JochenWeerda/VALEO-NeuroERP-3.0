@@ -61,6 +61,7 @@ export default function LagerplaetzePage(): JSX.Element {
       )}
 
       {!isLoading && (
+      <>
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
@@ -123,10 +124,10 @@ export default function LagerplaetzePage(): JSX.Element {
                     <div className="font-semibold text-lg">{bereich.name}</div>
                     <div className="text-right">
                       <div className="text-sm text-muted-foreground">
-                        {bereich.belegt} / {bereich.plaetze} Plätze
+                        {`${bereich.belegt} / ${bereich.plaetze} Plätze`}
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        {bereich.bestand} / {bereich.kapazitaet} t
+                        {`${bereich.bestand} / ${bereich.kapazitaet} t`}
                       </div>
                     </div>
                   </div>
@@ -140,7 +141,7 @@ export default function LagerplaetzePage(): JSX.Element {
                         />
                       </div>
                       <Badge variant={auslastung > 95 ? 'destructive' : 'outline'}>
-                        {auslastung.toFixed(0)}%
+                        {`${auslastung.toFixed(0)}%`}
                       </Badge>
                     </div>
                     <div className="flex items-center gap-2">
@@ -148,7 +149,7 @@ export default function LagerplaetzePage(): JSX.Element {
                       <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
                         <div className="h-full bg-blue-600" style={{ width: `${fuellstand}%` }} />
                       </div>
-                      <Badge variant="outline">{fuellstand.toFixed(0)}%</Badge>
+                      <Badge variant="outline">{`${fuellstand.toFixed(0)}%`}</Badge>
                     </div>
                   </div>
                 </div>
@@ -157,6 +158,7 @@ export default function LagerplaetzePage(): JSX.Element {
           </div>
         </CardContent>
       </Card>
+      </>
       )}
     </div>
   )

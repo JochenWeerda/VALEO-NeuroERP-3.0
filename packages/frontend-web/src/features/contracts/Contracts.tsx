@@ -1,6 +1,5 @@
 ﻿import { type ReactElement, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { z } from 'zod'
 import {
   Alert,
   AlertDescription,
@@ -22,27 +21,68 @@ const CONTRACT_STATUSES = ['active', 'pending', 'completed', 'cancelled'] as con
 const POSITION_TYPES = ['long', 'short'] as const
 const SKELETON_ROWS = 3
 
-const contractSchema = z.object({
-  id: z.string().min(1),
-  contractNumber: z.string().min(1),
-  customer: z.string().min(1),
-  commodity: z.string().min(1),
-  quantity: z.number().nonnegative(),
-  unit: z.string().min(1),
-  price: z.number().nonnegative(),
-  currency: z.string().min(1).default('EUR'),
-  deliveryDate: z.string().datetime({ offset: true }).or(z.string().min(1)),
-  status: z.enum(CONTRACT_STATUSES).default('pending'),
-  type: z.enum(POSITION_TYPES).default('long'),
-})
+type Contract = {
+  id: string
+  contractNumber: string
+  customer: string
+  commodity: string
+  quantity: number
+  unit: string
+  price: number
+  currency: string
+  deliveryDate: string
+  status: (typeof CONTRACT_STATUSES)[number]
+  type: (typeof POSITION_TYPES)[number]
+}
 
-const contractsResponseSchema = z
-  .object({
-    data: z.array(contractSchema).optional(),
-    items: z.array(contractSchema).optional(),
-    results: z.array(contractSchema).optional(),
-  })
-  .transform((payload) => payload.data ?? payload.items ?? payload.results ?? [])
+const asRecord = (value: unknown): Record<string, unknown> | null =>
+  value !== null && typeof value === 'object' ? (value as Record<string, unknown>) : null
+
+const asString = (value: unknown, fallback = ''): string => (typeof value === 'string' && value.length > 0 ? value : fallback)
+const asNumber = (value: unknown): number => (typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : 0)
+const asArray = (value: unknown): unknown[] => (Array.isArray(value) ? value : [])
+
+const isContractStatus = (value: unknown): value is Contract['status'] =>
+  typeof value === 'string' && CONTRACT_STATUSES.includes(value as Contract['status'])
+
+const isPositionType = (value: unknown): value is Contract['type'] =>
+  typeof value === 'string' && POSITION_TYPES.includes(value as Contract['type'])
+
+const normalizeContract = (value: unknown): Contract | null => {
+  const record = asRecord(value)
+  if (!record) {
+    return null
+  }
+
+  const id = asString(record.id)
+  const contractNumber = asString(record.contractNumber)
+  if (!id || !contractNumber) {
+    return null
+  }
+
+  return {
+    id,
+    contractNumber,
+    customer: asString(record.customer, 'Unbekannt'),
+    commodity: asString(record.commodity, 'Unbekannt'),
+    quantity: asNumber(record.quantity),
+    unit: asString(record.unit, 't'),
+    price: asNumber(record.price),
+    currency: asString(record.currency, 'EUR'),
+    deliveryDate: asString(record.deliveryDate, new Date(0).toISOString()),
+    status: isContractStatus(record.status) ? record.status : 'pending',
+    type: isPositionType(record.type) ? record.type : 'long',
+  }
+}
+
+const extractList = (payload: unknown): unknown[] => {
+  const record = asRecord(payload)
+  if (!record) {
+    return []
+  }
+
+  return asArray(record.data ?? record.items ?? record.results)
+}
 
 const monetaryFormatter = new Intl.NumberFormat('de-DE', {
   style: 'currency',
@@ -60,14 +100,8 @@ const dateFormatter = new Intl.DateTimeFormat('de-DE')
 
 const fetchContracts = async (): Promise<Contract[]> => {
   const payload = await apiClient.get<unknown>('/contracts/api/v1/contracts')
-  const parsed = contractsResponseSchema.safeParse(payload)
-  if (parsed.success) {
-    return parsed.data
-  }
-  return []
+  return extractList(payload.data).map(normalizeContract).filter((value): value is Contract => value !== null)
 }
-
-type Contract = z.infer<typeof contractSchema>
 
 const computeTotals = (contracts: Contract[]): { total: number; long: number; short: number } => {
   return contracts.reduce(
@@ -269,4 +303,3 @@ export default function Contracts(): ReactElement {
     </div>
   )
 }
-

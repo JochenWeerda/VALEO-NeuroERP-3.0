@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { clsx } from 'clsx'
 import { useNavigate } from 'react-router-dom'
 import {
   Calculator,
@@ -22,7 +23,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
-import { cn } from '@/lib/utils'
 
 interface IntentAction {
   id: string
@@ -159,7 +159,7 @@ export function IntentBar({
 
   return (
     <div
-      className={cn(
+      className={clsx(
         'flex items-center gap-2 p-3 bg-muted/50 rounded-lg border',
         className
       )}
@@ -197,7 +197,7 @@ export function IntentBar({
           <Button
             key={action.id}
             size="sm"
-            className={cn('gap-1', action.color, 'text-white')}
+            className={clsx('gap-1', action.color, 'text-white')}
             onClick={action.action}
             title={action.shortcut ? `${action.label} (${action.shortcut})` : action.label}
           >
@@ -234,7 +234,7 @@ export function IntentBar({
             <Plus className="h-4 w-4" />
             <span className="hidden sm:inline">Mehr</span>
             <ChevronRight
-              className={cn('h-4 w-4 transition-transform', showMore && 'rotate-90')}
+              className={clsx('h-4 w-4 transition-transform', showMore && 'rotate-90')}
             />
           </Button>
         </PopoverTrigger>

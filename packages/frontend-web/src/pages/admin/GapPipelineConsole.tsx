@@ -14,13 +14,7 @@ import {
 } from '@/api/gapPipeline'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -154,24 +148,17 @@ export default function GapPipelineConsole() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Jahr</label>
-                  <Select
+                  <NativeSelect
                     value={String(year)}
                     onValueChange={(v) => {
                       setYear(parseInt(v, 10))
                       setCsvPath(`data/gap/impdata${v}.csv`)
                     }}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {[currentYear - 2, currentYear - 1, currentYear].map((y) => (
-                        <SelectItem key={y} value={String(y)}>
-                          {y}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    options={[currentYear - 2, currentYear - 1, currentYear].map((y) => ({
+                      value: String(y),
+                      label: String(y),
+                    }))}
+                  />
                 </div>
 
                 <div className="space-y-2">

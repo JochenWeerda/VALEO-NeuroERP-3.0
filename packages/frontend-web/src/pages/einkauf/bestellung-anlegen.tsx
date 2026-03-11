@@ -5,10 +5,10 @@ import { toast } from '@/hooks/use-toast'
 import { Wizard } from '@/components/patterns/Wizard'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Plus, Trash2 } from 'lucide-react'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { apiClient } from '@/lib/api-client'
@@ -235,20 +235,20 @@ export default function BestellungAnlegenPage(): JSX.Element {
           </div>
           <div>
             <Label htmlFor="incoterms">{t('crud.fields.incoterms')}</Label>
-            <Select value={bestellung.incoterms || ''} onValueChange={(value) => updateField('incoterms', value)}>
-              <SelectTrigger>
-                <SelectValue placeholder={t('crud.tooltips.placeholders.incoterms')} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="EXW">{t('crud.fields.incotermsEXW')}</SelectItem>
-                <SelectItem value="FCA">{t('crud.fields.incotermsFCA')}</SelectItem>
-                <SelectItem value="CPT">{t('crud.fields.incotermsCPT')}</SelectItem>
-                <SelectItem value="CIP">{t('crud.fields.incotermsCIP')}</SelectItem>
-                <SelectItem value="DAT">{t('crud.fields.incotermsDAT')}</SelectItem>
-                <SelectItem value="DAP">{t('crud.fields.incotermsDAP')}</SelectItem>
-                <SelectItem value="DDP">{t('crud.fields.incotermsDDP')}</SelectItem>
-              </SelectContent>
-            </Select>
+            <NativeSelect
+              value={bestellung.incoterms || ''}
+              onValueChange={(value) => updateField('incoterms', value)}
+              options={[
+                { value: 'EXW', label: t('crud.fields.incotermsEXW') },
+                { value: 'FCA', label: t('crud.fields.incotermsFCA') },
+                { value: 'CPT', label: t('crud.fields.incotermsCPT') },
+                { value: 'CIP', label: t('crud.fields.incotermsCIP') },
+                { value: 'DAT', label: t('crud.fields.incotermsDAT') },
+                { value: 'DAP', label: t('crud.fields.incotermsDAP') },
+                { value: 'DDP', label: t('crud.fields.incotermsDDP') },
+              ]}
+              placeholder={t('crud.tooltips.placeholders.incoterms')}
+            />
           </div>
           <div>
             <Label htmlFor="lieferadresse">{t('crud.fields.deliveryAddress')}</Label>

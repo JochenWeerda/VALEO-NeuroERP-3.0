@@ -7,11 +7,16 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Calendar, Mail, Phone, Plus, Search, Users, Loader2, Filter } from 'lucide-react'
 import { queryKeys } from '@/lib/query'
 import { crmService, type Activity } from '@/lib/services/crm-service'
 import { getEntityTypeLabel, getListTitle, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
+
+const EMPTY_ACTIVITIES_RESPONSE: { data: Activity[]; total: number } = {
+  data: [],
+  total: 0,
+}
 
 export default function AktivitaetenPage(): JSX.Element {
   const { t } = useTranslation()
@@ -33,10 +38,11 @@ export default function AktivitaetenPage(): JSX.Element {
       search: searchTerm || undefined,
       type: typeFilter !== 'all' ? typeFilter : undefined,
     }),
+    initialData: EMPTY_ACTIVITIES_RESPONSE,
   })
 
-  const activities = activitiesData?.data || []
-  const totalActivities = activitiesData?.total || 0
+  const activities = activitiesData.data
+  const totalActivities = activitiesData.total
 
   // Filter activities based on status and assignment
   const filteredActivities = activities.filter(activity => {
@@ -206,39 +212,43 @@ export default function AktivitaetenPage(): JSX.Element {
                   className="pl-10"
                 />
               </div>
-              <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger className="w-40">
-                  <Filter className="h-4 w-4 mr-2" />
-                  <SelectValue placeholder={t('crud.fields.type')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">{t('crud.list.allTypes')}</SelectItem>
-                  <SelectItem value="meeting">{t('crud.fields.meeting')}</SelectItem>
-                  <SelectItem value="call">{t('crud.fields.call')}</SelectItem>
-                  <SelectItem value="email">{t('crud.fields.email')}</SelectItem>
-                  <SelectItem value="note">{t('crud.fields.note')}</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder={t('crud.fields.status')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">{t('crud.list.allStatus', { defaultValue: 'Alle Status' })}</SelectItem>
-                  <SelectItem value="planned">{t('status.planned')}</SelectItem>
-                  <SelectItem value="completed">{t('status.completed')}</SelectItem>
-                  <SelectItem value="overdue">{t('status.overdue')}</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={assignedFilter} onValueChange={setAssignedFilter}>
-                <SelectTrigger className="w-40">
-                  <SelectValue placeholder={t('crud.fields.assignedTo')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">{t('crud.list.all')}</SelectItem>
-                  <SelectItem value="mine">{t('crud.list.mineOnly')}</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="relative w-40">
+                <Filter className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <NativeSelect
+                  value={typeFilter}
+                  onValueChange={setTypeFilter}
+                  options={[
+                    { value: 'all', label: t('crud.list.allTypes') },
+                    { value: 'meeting', label: t('crud.fields.meeting') },
+                    { value: 'call', label: t('crud.fields.call') },
+                    { value: 'email', label: t('crud.fields.email') },
+                    { value: 'note', label: t('crud.fields.note') },
+                  ]}
+                  className="pl-9"
+                />
+              </div>
+              <div className="w-40">
+                <NativeSelect
+                  value={statusFilter}
+                  onValueChange={setStatusFilter}
+                  options={[
+                    { value: 'all', label: t('crud.list.allStatus', { defaultValue: 'Alle Status' }) },
+                    { value: 'planned', label: t('status.planned') },
+                    { value: 'completed', label: t('status.completed') },
+                    { value: 'overdue', label: t('status.overdue') },
+                  ]}
+                />
+              </div>
+              <div className="w-40">
+                <NativeSelect
+                  value={assignedFilter}
+                  onValueChange={setAssignedFilter}
+                  options={[
+                    { value: 'all', label: t('crud.list.all') },
+                    { value: 'mine', label: t('crud.list.mineOnly') },
+                  ]}
+                />
+              </div>
             </div>
             <div className="flex gap-2">
               <Button variant="outline" size="sm">

@@ -3,7 +3,7 @@
  * 1:1 Nachbau der zvoove Lieferschein-Erfassungsmaske
  */
 
-import { useState, useEffect, useMemo } from 'react'
+import { lazy, Suspense, useState, useEffect, useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -14,12 +14,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { useToast } from '@/components/ui/toast-provider'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
-import { CustomerSelectionDialog, type Customer } from '@/components/sales/CustomerSelectionDialog'
-import { ArtikelSuchDialog } from '@/components/sales/ArtikelSuchDialog'
-import { LieferscheinDruckDialog, type PrintOptions } from '@/components/sales/LieferscheinDruckDialog'
-import { DmsAnhangDialog } from '@/components/dms/DmsAnhangDialog'
-import { AttestationDialog } from '@/components/sales/AttestationDialog'
-import { BelegfolgePositionenDialog, type BelegfolgePosition } from '@/components/sales/BelegfolgePositionenDialog'
+import type { Customer } from '@/components/sales/CustomerSelectionDialog'
+import type { PrintOptions } from '@/components/sales/LieferscheinDruckDialog'
+import type { BelegfolgePosition } from '@/components/sales/BelegfolgePositionenDialog'
 import { apiClient } from '@/lib/axios'
 import { useAuth } from '@/hooks/useAuth'
 import { useSchlaege } from '@/lib/api/agrar'
@@ -27,8 +24,31 @@ import { globalShortcutManager } from '@/lib/shortcuts/global-shortcuts'
 import { useGlobalShortcutsWithVoice } from '@/features/ki-usability'
 import { ShortcutHintButton } from '@/components/shortcuts/ShortcutHelpPanel'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown, MoreHorizontal, Check, Printer, Save, X, FileText, Folder, FileCheck, Link as LinkIcon, Receipt, Trash2 } from 'lucide-react'
+
+const CustomerSelectionDialog = lazy(() =>
+  import('@/components/sales/CustomerSelectionDialog').then((m) => ({ default: m.CustomerSelectionDialog }))
+)
+const ArtikelSuchDialog = lazy(() =>
+  import('@/components/sales/ArtikelSuchDialog').then((m) => ({ default: m.ArtikelSuchDialog }))
+)
+const LieferscheinDruckDialog = lazy(() =>
+  import('@/components/sales/LieferscheinDruckDialog').then((m) => ({ default: m.LieferscheinDruckDialog }))
+)
+const DmsAnhangDialog = lazy(() =>
+  import('@/components/dms/DmsAnhangDialog').then((m) => ({ default: m.DmsAnhangDialog }))
+)
+const AttestationDialog = lazy(() =>
+  import('@/components/sales/AttestationDialog').then((m) => ({ default: m.AttestationDialog }))
+)
+const BelegfolgePositionenDialog = lazy(() =>
+  import('@/components/sales/BelegfolgePositionenDialog').then((m) => ({ default: m.BelegfolgePositionenDialog }))
+)
+
+function LazyDialogBoundary({ children }: { children: JSX.Element }) {
+  return <Suspense fallback={null}>{children}</Suspense>
+}
 
 // API Response Type
 type DeliveryNoteResponse = {
@@ -2277,22 +2297,28 @@ export default function LieferscheinErfassungPage(): JSX.Element {
       </div>
 
       {/* Dialoge */}
-      <CustomerSelectionDialog
-        open={showCustomerDialog}
-        onClose={() => setShowCustomerDialog(false)}
-        onSelect={handleCustomerSelect}
-      />
-      <ArtikelSuchDialog
-        open={showArticleDialog}
-        onClose={() => setShowArticleDialog(false)}
-        onSelect={handleArticleSelect}
-        customerId={state.customer?.id}
-      />
-      <LieferscheinDruckDialog
-        open={showPrintDialog}
-        onClose={() => setShowPrintDialog(false)}
-        onConfirm={handlePrint}
-      />
+      {(showCustomerDialog || showArticleDialog || showPrintDialog) && (
+        <LazyDialogBoundary>
+          <>
+            <CustomerSelectionDialog
+              open={showCustomerDialog}
+              onClose={() => setShowCustomerDialog(false)}
+              onSelect={handleCustomerSelect}
+            />
+            <ArtikelSuchDialog
+              open={showArticleDialog}
+              onClose={() => setShowArticleDialog(false)}
+              onSelect={handleArticleSelect}
+              customerId={state.customer?.id}
+            />
+            <LieferscheinDruckDialog
+              open={showPrintDialog}
+              onClose={() => setShowPrintDialog(false)}
+              onConfirm={handlePrint}
+            />
+          </>
+        </LazyDialogBoundary>
+      )}
       {/* Löschen-Bestätigung */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent className="max-w-sm">
@@ -2410,26 +2436,32 @@ export default function LieferscheinErfassungPage(): JSX.Element {
         </DialogContent>
       </Dialog>
 
-      {state.customer && (
-        <BelegfolgePositionenDialog
-          open={showBelegfolgeDialog}
-          onClose={() => setShowBelegfolgeDialog(false)}
-          onConfirm={handleBelegfolgePositionen}
-          customerId={state.customer.id}
-          targetDocType="lieferschein"
-        />
+      {(showBelegfolgeDialog || showAttestationDialog) && (
+        <LazyDialogBoundary>
+          <>
+            {state.customer && (
+              <BelegfolgePositionenDialog
+                open={showBelegfolgeDialog}
+                onClose={() => setShowBelegfolgeDialog(false)}
+                onConfirm={handleBelegfolgePositionen}
+                customerId={state.customer.id}
+                targetDocType="lieferschein"
+              />
+            )}
+            <AttestationDialog
+              open={showAttestationDialog}
+              onClose={() => {
+                setShowAttestationDialog(false)
+                setPendingAction(null)
+              }}
+              onConfirm={handleAttestationConfirm}
+              action={pendingAction || 'print'}
+              entityType="Lieferschein"
+              entityNumber={state.lieferscheinNr}
+            />
+          </>
+        </LazyDialogBoundary>
       )}
-      <AttestationDialog
-        open={showAttestationDialog}
-        onClose={() => {
-          setShowAttestationDialog(false)
-          setPendingAction(null)
-        }}
-        onConfirm={handleAttestationConfirm}
-        action={pendingAction || 'print'}
-        entityType="Lieferschein"
-        entityNumber={state.lieferscheinNr}
-      />
 
       {/* Information Dialog für Chefanweisung */}
       <Dialog open={showInformationDialog} onOpenChange={setShowInformationDialog}>

@@ -13,13 +13,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Textarea } from '@/components/ui/textarea'
 import { ErrorState } from '@/components/ErrorState'
 import { useToast } from '@/hooks/use-toast'
@@ -327,39 +321,30 @@ export default function HoflistePage(): JSX.Element {
             {/* Warengruppe */}
             <div className="grid gap-1.5">
               <Label>Warengruppe</Label>
-              <Select value={formArticleGroup} onValueChange={setFormArticleGroup}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Warengruppe wählen..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {(articleGroupsQuery.data ?? []).map((g) => (
-                    <SelectItem key={g.warengruppe} value={g.warengruppe}>
-                      {g.warengruppe} ({g.count})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <NativeSelect
+                value={formArticleGroup}
+                onValueChange={setFormArticleGroup}
+                placeholder="Warengruppe auswaehlen..."
+                options={(articleGroupsQuery.data ?? []).map((g) => ({
+                  value: g.warengruppe,
+                  label: `${g.warengruppe} (${g.count})`,
+                }))}
+              />
             </div>
 
             {/* Artikel (abhängig von Gruppe) */}
             <div className="grid gap-1.5">
               <Label>Ware</Label>
-              <Select
+              <NativeSelect
                 value={formArticleId}
                 onValueChange={setFormArticleId}
                 disabled={!formArticleGroup}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={formArticleGroup ? 'Ware wählen...' : 'Zuerst Warengruppe wählen'} />
-                </SelectTrigger>
-                <SelectContent>
-                  {(articlesByGroupQuery.data ?? []).map((a) => (
-                    <SelectItem key={a.id} value={a.id}>
-                      {a.article_number} - {a.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                placeholder={formArticleGroup ? 'Ware auswaehlen...' : 'Zuerst Warengruppe auswaehlen'}
+                options={(articlesByGroupQuery.data ?? []).map((a) => ({
+                  value: a.id,
+                  label: `${a.article_number} - ${a.name}`,
+                }))}
+              />
             </div>
 
             {/* Notizen */}

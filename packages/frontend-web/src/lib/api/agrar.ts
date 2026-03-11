@@ -153,6 +153,13 @@ export type Massnahme = {
   exportiert: boolean
 }
 
+export type BulkDeleteResult = {
+  requested: number
+  deleted: number
+  missing_ids: string[]
+  errors: Array<{ id: string; detail: string }>
+}
+
 export type PSMAuflage = {
   id: string
   psm_id: string
@@ -214,6 +221,22 @@ export const agrarKeys = {
   schlaege: (kundeId?: string) => [...agrarKeys.all, 'schlaege', kundeId] as const,
 }
 
+const EMPTY_DUENGER_RESULT: { items: Duenger[]; total: number } = {
+  items: [],
+  total: 0,
+}
+
+const EMPTY_PSM_RESULT: { items: PSM[]; total: number } = {
+  items: [],
+  total: 0,
+}
+
+const EMPTY_MASCHINEN_RESULT: { items: Maschine[]; total: number; stats: Record<string, number> } = {
+  items: [],
+  total: 0,
+  stats: {},
+}
+
 function extractList<T>(payload: unknown, endpoint: string): T[] {
   if (Array.isArray(payload)) return payload as T[]
   if (payload && typeof payload === 'object') {
@@ -245,6 +268,7 @@ export function useDuenger(filters?: { search?: string; typ?: string; hersteller
       const total = (response.data as { total?: number })?.total ?? items.length
       return { items, total }
     },
+    initialData: EMPTY_DUENGER_RESULT,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -257,6 +281,7 @@ export function useDuengerItem(id: string) {
       return response.data
     },
     enabled: !!id,
+    initialData: null,
   })
 }
 
@@ -315,6 +340,7 @@ export function usePSM(filters?: { search?: string; source?: 'local' | 'bvl' }) 
       const total = (response.data as { total?: number })?.total ?? items.length
       return { items, total }
     },
+    initialData: EMPTY_PSM_RESULT,
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -327,6 +353,7 @@ export function usePSMItem(id: string) {
       return response.data
     },
     enabled: !!id,
+    initialData: null,
   })
 }
 
@@ -337,6 +364,7 @@ export function useKunden() {
       const response = await apiClient.get<unknown>('/api/v1/agrar/kunden')
       return extractList<Kunde>(response.data, '/api/v1/agrar/kunden')
     },
+    initialData: [],
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -353,6 +381,7 @@ export function useKundeItem(id: string) {
       return response.data
     },
     enabled: !!id,
+    initialData: null,
   })
 }
 
@@ -364,6 +393,7 @@ export function useSchlaege(kundeId?: string) {
       const response = await apiClient.get<unknown>(`/api/v1/agrar/schlaege${params}`)
       return extractList<Schlag>(response.data, '/api/v1/agrar/schlaege')
     },
+    initialData: [],
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -376,6 +406,7 @@ export function useSchlagItem(id: string) {
       return response.data
     },
     enabled: !!id,
+    initialData: null,
   })
 }
 
@@ -424,6 +455,7 @@ export function useAussaaten() {
   return useQuery({
     queryKey: [...agrarKeys.all, 'aussaaten'],
     queryFn: () => fetchList<Aussaat>('/api/v1/agrar/aussaaten'),
+    initialData: [],
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -432,6 +464,7 @@ export function useBodenproben() {
   return useQuery({
     queryKey: [...agrarKeys.all, 'bodenproben'],
     queryFn: () => fetchList<Bodenprobe>('/api/v1/agrar/bodenproben'),
+    initialData: [],
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -440,6 +473,7 @@ export function useKulturen() {
   return useQuery({
     queryKey: [...agrarKeys.all, 'kulturen'],
     queryFn: () => fetchList<Kultur>('/api/v1/agrar/kulturen'),
+    initialData: [],
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -448,6 +482,7 @@ export function useErnten() {
   return useQuery({
     queryKey: [...agrarKeys.all, 'ernten'],
     queryFn: () => fetchList<Ernte>('/api/v1/agrar/ernte'),
+    initialData: [],
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -456,6 +491,7 @@ export function useSorten() {
   return useQuery({
     queryKey: [...agrarKeys.all, 'sorten'],
     queryFn: () => fetchList<Sorte>('/api/v1/agrar/saatgut/sortenregister'),
+    initialData: [],
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -464,6 +500,7 @@ export function useDuengerKomponenten() {
   return useQuery({
     queryKey: [...agrarKeys.all, 'duenger-komponenten'],
     queryFn: () => fetchList<DuengerKomponente>('/api/v1/agrar/duenger/komponenten'),
+    initialData: [],
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -472,6 +509,7 @@ export function useMassnahmen() {
   return useQuery({
     queryKey: [...agrarKeys.all, 'massnahmen'],
     queryFn: () => fetchList<Massnahme>('/api/v1/agrar/feldbuch/massnahmen'),
+    initialData: [],
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -484,10 +522,40 @@ export function useDeleteMassnahme() {
   })
 }
 
+export function useBulkDeleteMassnahmen() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (ids: string[]) => {
+      const chunks: string[][] = []
+      for (let index = 0; index < ids.length; index += 50) {
+        chunks.push(ids.slice(index, index + 50))
+      }
+
+      const result: BulkDeleteResult = {
+        requested: ids.length,
+        deleted: 0,
+        missing_ids: [],
+        errors: [],
+      }
+
+      for (const chunk of chunks) {
+        const response = await apiClient.post<BulkDeleteResult>('/api/v1/agrar/feldbuch/massnahmen/bulk-delete', { ids: chunk })
+        result.deleted += response.data.deleted
+        result.missing_ids.push(...response.data.missing_ids)
+        result.errors.push(...response.data.errors)
+      }
+
+      return result
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: [...agrarKeys.all, 'massnahmen'] }),
+  })
+}
+
 export function usePSMAuflagen() {
   return useQuery({
     queryKey: [...agrarKeys.all, 'psm-auflagen'],
     queryFn: () => fetchList<PSMAuflage>('/api/v1/agrar/psm/auflagen'),
+    initialData: [],
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -496,6 +564,7 @@ export function useSchadbilder() {
   return useQuery({
     queryKey: [...agrarKeys.all, 'schadbilder'],
     queryFn: () => fetchList<Schadbild>('/api/v1/agrar/psm/schadbilder'),
+    initialData: [],
     staleTime: 10 * 60 * 1000,
   })
 }
@@ -504,6 +573,7 @@ export function useWirkstoffGruppen() {
   return useQuery({
     queryKey: [...agrarKeys.all, 'wirkstoffgruppen'],
     queryFn: () => fetchList<WirkstoffGruppe>('/api/v1/agrar/psm/wirkstoffgruppen'),
+    initialData: [],
     staleTime: 10 * 60 * 1000,
   })
 }
@@ -512,6 +582,7 @@ export function useWasserschutzZonen() {
   return useQuery({
     queryKey: [...agrarKeys.all, 'wasserschutz-zonen'],
     queryFn: () => fetchList<WasserschutzZone>('/api/v1/agrar/psm/wasserschutz-zonen'),
+    initialData: [],
     staleTime: 10 * 60 * 1000,
   })
 }
@@ -523,6 +594,7 @@ export function usePSMSachkundeRegister() {
       const response = await apiClient.get<unknown>('/api/v1/compliance/sachkunde-register')
       return extractList<PSMSachkundeNachweis>(response.data, '/api/v1/compliance/sachkunde-register')
     },
+    initialData: [],
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -616,6 +688,7 @@ export function useWetterAktuell(coords?: WetterCoords) {
       return response.data
     },
     enabled: !!coords,
+    initialData: null,
     staleTime: 10 * 60 * 1000,   // 10 Min — Wetterdaten ändern sich nicht so schnell
     retry: 1,
   })
@@ -632,6 +705,7 @@ export function useWetterWarnungen(coords?: WetterCoords) {
       return response.data
     },
     enabled: !!coords,
+    initialData: [],
     staleTime: 15 * 60 * 1000,
     retry: 1,
   })
@@ -648,6 +722,7 @@ export function useWetterPrognose(coords?: WetterCoords, tage = 7) {
       return response.data
     },
     enabled: !!coords,
+    initialData: [],
     staleTime: 30 * 60 * 1000,   // 30 Min
     retry: 1,
   })
@@ -670,6 +745,7 @@ export function useMaschinen(filters?: { typ?: string; status?: string; customer
       )
       return response.data
     },
+    initialData: EMPTY_MASCHINEN_RESULT,
     staleTime: 2 * 60 * 1000,
   })
 }

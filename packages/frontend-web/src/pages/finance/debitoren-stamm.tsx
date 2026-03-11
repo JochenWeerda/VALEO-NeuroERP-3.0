@@ -2,9 +2,8 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
-import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
+import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
-import { z } from 'zod'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { validateIBAN, formatIBAN } from '@/lib/utils/iban-validator'
 import { validateVatIdFormat } from '@/lib/utils/vat-validator'
@@ -246,7 +245,6 @@ const createDebitorenConfig = (t: any, entityTypeLabel: string): MaskConfig => (
       delete: '/api/v1/finance/debtors/{id}'
     }
   } as any,
-  validation: createDebitorenSchema(t),
   permissions: ['fibu.read', 'fibu.write']
 })
 
@@ -266,7 +264,6 @@ export default function DebitorenStammPage(): JSX.Element {
     id: 'new'
   })
 
-  const { validate, showValidationToast } = useMaskValidation(debitorenConfig.validation)
 
   // IBAN Lookup Hook
   const { performLookup, isLoading: isIbanLoading, lookupData } = useIbanLookup({
@@ -345,9 +342,9 @@ export default function DebitorenStammPage(): JSX.Element {
 
   const { handleAction } = useMaskActions(async (action: string, formData: any) => {
     if (action === 'save') {
-      const isValid = validate(formData)
+      const isValid = validateDebitorenForm(formData, t)
       if (!isValid.isValid) {
-        showValidationToast(isValid.errors)
+        toast.error(Object.values(isValid.errors).join(', '))
         return
       }
 
@@ -368,11 +365,11 @@ export default function DebitorenStammPage(): JSX.Element {
         // Error wird bereits in useMaskData behandelt
       }
     } else if (action === 'validate') {
-      const isValid = validate(formData)
+      const isValid = validateDebitorenForm(formData, t)
       if (isValid.isValid) {
         toast.success(t('crud.messages.validationSuccess'))
       } else {
-        showValidationToast(isValid.errors)
+        toast.error(Object.values(isValid.errors).join(', '))
       }
     } else if (action === 'export') {
       setActionLoadingKey('export')

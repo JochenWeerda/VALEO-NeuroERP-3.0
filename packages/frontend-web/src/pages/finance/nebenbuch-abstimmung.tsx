@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { apiClient } from '@/lib/api-client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
@@ -122,6 +122,11 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
       setExporting(false)
     }
   }
+  const ledgerTypeOptions = [
+    { value: 'AR', label: `${t('crud.entities.debtor')} (AR)` },
+    { value: 'AP', label: `${t('crud.entities.creditor')} (AP)` },
+    { value: 'BANK', label: t('crud.fields.bankAccount') },
+  ]
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -187,16 +192,11 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
               <label className="text-sm font-medium mb-2 block">
                 {t('crud.fields.ledgerType')}
               </label>
-              <Select value={ledgerType} onValueChange={setLedgerType}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="AR">{t('crud.entities.debtor')} (AR)</SelectItem>
-                  <SelectItem value="AP">{t('crud.entities.creditor')} (AP)</SelectItem>
-                  <SelectItem value="BANK">{t('crud.fields.bankAccount')}</SelectItem>
-                </SelectContent>
-              </Select>
+              <NativeSelect
+                value={ledgerType}
+                onValueChange={setLedgerType}
+                options={ledgerTypeOptions}
+              />
             </div>
             <div>
               <label className="text-sm font-medium mb-2 block">
@@ -249,13 +249,13 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
                     <TableCell className="font-medium">{entry.account_number}</TableCell>
                     <TableCell>{entry.account_name}</TableCell>
                     <TableCell className="text-right">
-                      {parseFloat(entry.subsidiary_balance).toFixed(2)} €
+                      {parseFloat(entry.subsidiary_balance).toFixed(2)} â‚¬
                     </TableCell>
                     <TableCell className="text-right">
-                      {parseFloat(entry.general_ledger_balance).toFixed(2)} €
+                      {parseFloat(entry.general_ledger_balance).toFixed(2)} â‚¬
                     </TableCell>
                     <TableCell className={`text-right ${Math.abs(parseFloat(entry.difference)) >= 0.01 ? 'text-red-600 font-bold' : ''}`}>
-                      {parseFloat(entry.difference).toFixed(2)} €
+                      {parseFloat(entry.difference).toFixed(2)} â‚¬
                     </TableCell>
                     <TableCell>
                       {entry.is_balanced ? (
@@ -314,7 +314,7 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
                     <TableCell>{detail.entry_date}</TableCell>
                     <TableCell>{detail.description}</TableCell>
                     <TableCell className="text-right">
-                      {parseFloat(detail.amount).toFixed(2)} €
+                      {parseFloat(detail.amount).toFixed(2)} â‚¬
                     </TableCell>
                     <TableCell>{detail.source}</TableCell>
                     <TableCell>

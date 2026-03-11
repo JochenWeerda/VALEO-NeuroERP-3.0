@@ -1,18 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useForm, Controller } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
 // Badge import removed - not used
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { AlertTriangle, Loader2, Save, X } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { MaskConfig, Tab as MaskTab, Field } from './types'
+import { createMaskResolver, getFieldsFromMaskConfig } from './validation'
 
 interface ObjectPageProps {
   config: MaskConfig
@@ -55,57 +54,6 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
     })
   }
 
-  // Create dynamic Zod schema from config
-  const createSchema = (tabs: MaskConfig['tabs']) => {
-    const schema: any = {}
-
-    tabs.forEach(tab => {
-      tab.fields.forEach(field => {
-        let fieldSchema: any
-
-        switch (field.type) {
-          case 'text':
-            fieldSchema = z.string()
-            if ((field as any).minLength) fieldSchema = fieldSchema.min((field as any).minLength)
-            if ((field as any).maxLength) fieldSchema = fieldSchema.max((field as any).maxLength)
-            break
-          case 'number':
-            fieldSchema = z.number()
-            if ((field as any).min !== undefined) fieldSchema = fieldSchema.min((field as any).min)
-            if ((field as any).max !== undefined) fieldSchema = fieldSchema.max((field as any).max)
-            break
-          case 'boolean':
-            fieldSchema = z.boolean()
-            break
-          case 'date':
-          case 'datetime':
-            fieldSchema = z.string()
-            break
-          case 'select':
-            fieldSchema = z.string()
-            break
-          case 'multiselect':
-            fieldSchema = z.array(z.string())
-            break
-          case 'textarea':
-            fieldSchema = z.string()
-            break
-          default:
-            fieldSchema = z.any()
-        }
-
-        if (!field.required) {
-          fieldSchema = fieldSchema.optional()
-        }
-
-        schema[field.name] = fieldSchema
-      })
-    })
-
-    return z.object(schema)
-  }
-
-  const schema = createSchema(config.tabs)
   const {
     control,
     handleSubmit,
@@ -113,7 +61,7 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
     watch,
     reset
   } = useForm({
-    resolver: zodResolver(schema),
+    resolver: createMaskResolver(getFieldsFromMaskConfig(config)),
     defaultValues: data || {}
   })
 
@@ -218,27 +166,15 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
               case 'select': {
                 const selectField = field as any
                 return (
-                  <Select
-                    value={controllerField.value}
+                  <NativeSelect
+                    id={field.name}
+                    value={String(controllerField.value ?? '')}
                     onValueChange={controllerField.onChange}
+                    options={selectField.options ?? []}
+                    placeholder={field.placeholder}
                     disabled={field.readonly}
-                  >
-                    <SelectTrigger
-                      id={field.name}
-                      aria-label={field.label}
-                      type="select"
-                      className={error ? 'border-red-500' : ''}
-                    >
-                      <SelectValue placeholder={field.placeholder} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {selectField.options?.map((option: any) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    className={error ? 'border-red-500' : ''}
+                  />
                 )
               }
 

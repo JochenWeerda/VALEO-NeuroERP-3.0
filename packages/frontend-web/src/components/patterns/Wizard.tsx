@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { createMCPMetadata } from '@/design/mcp-schemas/component-metadata'
 import { Check, Loader2 } from 'lucide-react'
+import { useActionsForMask, useActionDispatchOptional } from '@/features/ki-usability'
 
 interface WizardLabels {
   back: string
@@ -83,6 +84,8 @@ export function Wizard({
   overflowActions,
   mcpContext,
 }: WizardProps): JSX.Element {
+  const actionDispatch = useActionDispatchOptional()
+  const { data: actionResponse } = useActionsForMask(mcpContext?.process, mcpContext?.entityType)
   const mergedLabels = { ...DEFAULT_LABELS, ...labels }
 
   const safeSteps = useMemo(() => steps.filter((step) => step != null), [steps])
@@ -106,6 +109,38 @@ export function Wizard({
   }, [activeStepId, safeSteps])
 
   const activeStep = safeSteps[activeIndex]
+  const quickActions = useMemo<ToolbarAction[]>(() => {
+    return (actionResponse?.actions ?? []).map((action) => ({
+      id: action.id,
+      label: action.label,
+      shortcut: action.shortcut,
+      onClick: () => {
+        if (actionDispatch) {
+          void actionDispatch.dispatch(action.id)
+        }
+      },
+      variant: action.category === 'danger' ? 'destructive' : 'outline',
+      mcp: { intent: action.id, requiredData: action.required_data },
+    }))
+  }, [actionDispatch, actionResponse?.actions])
+
+  const mergedPrimaryActions = useMemo<ToolbarAction[]>(() => {
+    if (Array.isArray(primaryActions) && primaryActions.length > 0) {
+      return primaryActions
+    }
+    return quickActions.slice(0, 2)
+  }, [primaryActions, quickActions])
+
+  const mergedOverflowActions = useMemo<ToolbarAction[]>(() => {
+    const fromProps = overflowActions ?? []
+    const hasPrimaryFromProps = Array.isArray(primaryActions) && primaryActions.length > 0
+    const quickOverflow = hasPrimaryFromProps ? quickActions : quickActions.slice(2)
+    const byId = new Map<string, ToolbarAction>()
+    for (const action of [...fromProps, ...quickOverflow]) {
+      byId.set(action.id, action)
+    }
+    return Array.from(byId.values())
+  }, [overflowActions, primaryActions, quickActions])
 
   const handleGoToStep = (stepId: string, index: number): void => {
     if (allowStepNavigation === false && index > activeIndex) {
@@ -146,16 +181,16 @@ export function Wizard({
       <PageToolbar
         title={title}
         subtitle={subtitle}
-        primaryActions={primaryActions}
-        overflowActions={overflowActions}
+        primaryActions={mergedPrimaryActions}
+        overflowActions={mergedOverflowActions}
         mcpContext={
           mcpContext
             ? {
                 pageDomain: mcpContext.process,
                 currentDocument: mcpContext.currentDocument,
                 availableActions: [
-                  ...(primaryActions?.map((action) => action.id) ?? []),
-                  ...(overflowActions?.map((action) => action.id) ?? []),
+                  ...mergedPrimaryActions.map((action) => action.id),
+                  ...mergedOverflowActions.map((action) => action.id),
                 ],
               }
             : undefined

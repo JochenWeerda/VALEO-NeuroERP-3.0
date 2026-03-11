@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
-import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
+import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
-import { z } from 'zod'
+import { getFieldsFromMaskConfig, validateFields } from '@/components/mask-builder/validation'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { validateIBAN } from '@/lib/utils/iban-validator'
 import { validateVatIdFormat } from '@/lib/utils/vat-validator'
@@ -13,51 +13,6 @@ import { toast } from 'sonner'
 import { apiClient } from '@/lib/axios'
 import { useTenant } from '@/hooks/useTenant'
 
-// Zod-Schema für Kreditoren-Stammdaten (wird in Komponente mit i18n erstellt)
-const createKreditorenSchema = (t: any) => z.object({
-  kreditorNummer: z.string().regex(/^\d{6,8}$/, t('crud.messages.validationError')),
-  firma: z.string().min(1, t('crud.messages.validationError')),
-  ansprechpartner: z.string().optional(),
-  strasse: z.string().min(1, t('crud.messages.validationError')),
-  plz: z.string().regex(/^\d{5}$/, t('crud.messages.validationError')),
-  ort: z.string().min(1, t('crud.messages.validationError')),
-  land: z.string().default("DE"),
-  telefon: z.string().optional(),
-  email: z.string().email().optional().or(z.literal("")),
-  ustId: z.string()
-    .optional()
-    .or(z.literal(''))
-    .refine((val) => !val || val.trim() === '' || validateVatIdFormat(val).valid, {
-      message: 'USt-ID: ungültiges Format (z.B. DE123456789, ATU12345678)',
-    }),
-  steuernummer: z.string().optional(),
-
-  // Bankverbindung
-  iban: z.string()
-    .optional()
-    .or(z.literal(""))
-    .refine((val) => !val || val.trim() === "" || validateIBAN(val), {
-      message: t('crud.messages.invalidIban'),
-    }),
-  bic: z.string().optional(),
-  bankname: z.string().optional(),
-  kontoinhaber: z.string().optional(),
-
-  // Konditionen
-  zahlungsziel: z.number().min(0, t('crud.messages.validationError')).default(30),
-  skontoTage: z.number().min(0).default(0),
-  skontoProzent: z.number().min(0).max(100).default(0),
-  kreditlimit: z.number().min(0).default(0),
-
-  // Compliance
-  sanktionslisteGeprueft: z.boolean().default(false),
-  sanktionslisteGeprueftAm: z.string().optional(),
-  vertragsstatus: z.enum(['aktiv', 'gekündigt', 'gesperrt']),
-  letzteLieferung: z.string().optional(),
-  notizen: z.string().optional()
-})
-
-// Konfiguration für Kreditoren-Stammdaten ObjectPage (wird in Komponente mit i18n erstellt)
 const createKreditorenConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
   subtitle: t('crud.actions.edit'),
@@ -73,7 +28,8 @@ const createKreditorenConfig = (t: any, entityTypeLabel: string): MaskConfig => 
           type: 'text',
           required: true,
           placeholder: t('crud.tooltips.placeholders.creditorNumber'),
-          maxLength: 8
+          maxLength: 8,
+          pattern: '^\\d{6,8}$'
         },
         {
           name: 'firma',
@@ -101,7 +57,8 @@ const createKreditorenConfig = (t: any, entityTypeLabel: string): MaskConfig => 
           type: 'text',
           required: true,
           placeholder: t('crud.tooltips.placeholders.postalCode'),
-          maxLength: 5
+          maxLength: 5,
+          pattern: '^\\d{5}$'
         },
         {
           name: 'ort',
@@ -140,6 +97,7 @@ const createKreditorenConfig = (t: any, entityTypeLabel: string): MaskConfig => 
           name: 'email',
           label: t('crud.fields.email'),
           type: 'text',
+          pattern: '^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$',
           placeholder: t('crud.tooltips.placeholders.email')
         },
         {
@@ -166,6 +124,7 @@ const createKreditorenConfig = (t: any, entityTypeLabel: string): MaskConfig => 
           name: 'iban',
           label: t('crud.fields.iban'),
           type: 'text',
+          pattern: '^[A-Z]{2}\\d{2}[A-Z0-9]{11,30}$',
           placeholder: t('crud.tooltips.placeholders.iban')
         },
         {
@@ -285,7 +244,6 @@ const createKreditorenConfig = (t: any, entityTypeLabel: string): MaskConfig => 
       // export: '/api/v1/finance/creditors/export'
     }
   },
-  validation: createKreditorenSchema(t),
   permissions: ['fibu.read', 'fibu.write']
 })
 
@@ -361,7 +319,10 @@ export default function KreditorenStammPage(): JSX.Element {
     id: 'new'
   })
 
-  const { validate, showValidationToast } = useMaskValidation(kreditorenConfig.validation)
+  const validate = (formData: any) => validateFields(getFieldsFromMaskConfig(kreditorenConfig), formData ?? {})
+  const showValidationToast = (errors: Record<string, string>) => {
+    toast.error(Object.values(errors).join(', '))
+  }
 
   // IBAN Lookup Hook
   const { performLookup, isLoading: isIbanLoading, lookupData } = useIbanLookup({
@@ -408,9 +369,9 @@ export default function KreditorenStammPage(): JSX.Element {
 
   const { handleAction } = useMaskActions(async (action: string, formData: any) => {
     if (action === 'save') {
-      const isValid = validate(formData)
-      if (!isValid.isValid) {
-        showValidationToast(isValid.errors)
+      const errors = validate(formData)
+      if (Object.keys(errors).length > 0) {
+        showValidationToast(errors)
         return
       }
 
@@ -423,11 +384,11 @@ export default function KreditorenStammPage(): JSX.Element {
         // Error wird bereits in useMaskData behandelt
       }
     } else if (action === 'validate') {
-      const isValid = validate(formData)
-      if (isValid.isValid) {
+      const errors = validate(formData)
+      if (Object.keys(errors).length === 0) {
         toast.success(t('crud.messages.validationSuccess', { defaultValue: 'Validierung erfolgreich' }))
       } else {
-        showValidationToast(isValid.errors)
+        showValidationToast(errors)
       }
     } else if (action === 'sanktionspruefung') {
       const name = formData?.firma || formData?.name || ''

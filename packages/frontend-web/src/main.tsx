@@ -1,57 +1,11 @@
 /* @refresh reload */
-import { StrictMode, useMemo } from 'react'
+import { StrictMode, Suspense, lazy } from 'react'
 import ReactDOM from 'react-dom/client'
-import { QueryClientProvider } from '@tanstack/react-query'
-import { RouterProvider } from 'react-router-dom'
-import { FeatureFlagProvider } from '@/app/providers/FeatureFlagProvider'
-import { SSEProvider } from '@/app/providers/SSEProvider'
-import { router, prefetchPriorityRoutes } from '@/app/routes'
-import { ToastProvider } from '@/components/ui/toast-provider'
-import { GlobalShortcutProvider } from '@/components/shortcuts/GlobalShortcutProvider'
-// CommandPalette is rendered inside AppShell (router context).
-// AskVALEO is rendered inside DashboardLayout (router context).
-import { auth } from '@/lib/auth'
-import { createQueryClient } from '@/lib/query'
-import { useFeature } from '@/hooks/useFeature'
-import '@/i18n/config' // Initialize i18n
 import './index.css'
 
-const queryClient = createQueryClient()
-
-const resolveSseToken = (): string | undefined => {
-  return auth.getAccessToken() ?? undefined
-}
-
-function Application(): JSX.Element {
-  // useFeature kann nur innerhalb von FeatureFlagProvider verwendet werden
-  // Da Application innerhalb von FeatureFlagProvider ist, sollte es funktionieren
-  const sseUrl =
-    (import.meta.env as Record<string, string | undefined>).VITE_MCP_EVENTS_URL ||
-    '/api/events?stream=mcp'
-  const sseEnabled = useFeature('sse') && Boolean(sseUrl)
-
-  const providerConfig = useMemo(
-    () => ({
-      url: sseUrl,
-      enabled: sseEnabled,
-      withCredentials: true,
-    }),
-    [sseEnabled],
-  )
-
-  return (
-    <SSEProvider {...providerConfig} tokenResolver={resolveSseToken}>
-      <ToastProvider>
-        <GlobalShortcutProvider>
-          <RouterProvider 
-            router={router} 
-            future={{ v7_startTransition: true }}
-          />
-        </GlobalShortcutProvider>
-      </ToastProvider>
-    </SSEProvider>
-  )
-}
+const AppRuntime = lazy(() =>
+  import('@/app/AppRuntime').then((module) => ({ default: module.default })),
+)
 
 const rootElement = document.getElementById('root')
 
@@ -62,15 +16,11 @@ if (rootElement instanceof HTMLElement) {
 
   root.render(
     <StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <FeatureFlagProvider>
-          <Application />
-        </FeatureFlagProvider>
-      </QueryClientProvider>
+      <Suspense fallback={<div className="min-h-screen bg-background" />}>
+        <AppRuntime />
+      </Suspense>
     </StrictMode>,
   )
-
-  prefetchPriorityRoutes()
 
   if ('serviceWorker' in navigator && import.meta.env.PROD) {
     const swEnabled = (import.meta.env as Record<string, string | undefined>).VITE_ENABLE_SERVICE_WORKER === 'true'

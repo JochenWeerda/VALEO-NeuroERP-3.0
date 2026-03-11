@@ -10,7 +10,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { NativeSelect } from '@/components/ui/native-select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -345,20 +345,22 @@ const SaatgutStammPage: React.FC = () => {
 
                 <div className="space-y-2">
                   <Label htmlFor="art">Art *</Label>
-                  <Select value={formData.art} onValueChange={(value) => handleInputChange('art', value)} disabled={readOnlyMode}>
-                    <SelectTrigger className={errors.art ? 'border-red-500' : readOnlyMode ? 'bg-muted' : ''}>
-                      <SelectValue placeholder="Art auswählen" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Weizen">Weizen</SelectItem>
-                      <SelectItem value="Gerste">Gerste</SelectItem>
-                      <SelectItem value="Roggen">Roggen</SelectItem>
-                      <SelectItem value="Hafer">Hafer</SelectItem>
-                      <SelectItem value="Mais">Mais</SelectItem>
-                      <SelectItem value="Raps">Raps</SelectItem>
-                      <SelectItem value="Sonstige">Sonstige</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <NativeSelect
+                    value={formData.art}
+                    onValueChange={(value) => handleInputChange('art', value)}
+                    placeholder="Art auswaehlen"
+                    disabled={readOnlyMode}
+                    className={errors.art ? 'border-red-500' : readOnlyMode ? 'bg-muted' : ''}
+                    options={[
+                      { value: 'Weizen', label: 'Weizen' },
+                      { value: 'Gerste', label: 'Gerste' },
+                      { value: 'Roggen', label: 'Roggen' },
+                      { value: 'Hafer', label: 'Hafer' },
+                      { value: 'Mais', label: 'Mais' },
+                      { value: 'Raps', label: 'Raps' },
+                      { value: 'Sonstige', label: 'Sonstige' },
+                    ]}
+                  />
                   {errors.art && (
                     <p className="text-sm text-red-500">{errors.art}</p>
                   )}

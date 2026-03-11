@@ -196,7 +196,7 @@ const fb = {
 
 // ── Helper ─────────────────────────────────────────────────────────────
 
-function makeHook<T>(key: string[], endpoint: string, _fallback: T, stale = 2 * 60 * 1000) {
+function makeHook<T>(key: string[], endpoint: string, fallback: T, stale = 2 * 60 * 1000) {
   return () => useQuery({
     queryKey: key,
     queryFn: async () => {
@@ -210,6 +210,7 @@ function makeHook<T>(key: string[], endpoint: string, _fallback: T, stale = 2 * 
       }
       return data as T
     },
+    initialData: fallback,
     staleTime: stale,
   })
 }

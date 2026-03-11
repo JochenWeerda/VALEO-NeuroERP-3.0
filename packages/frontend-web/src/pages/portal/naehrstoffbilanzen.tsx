@@ -16,13 +16,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ErrorState } from '@/components/ErrorState'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import {
   Table,
   TableBody,
@@ -163,18 +157,12 @@ export default function PortalNaehrstoffbilanzen() {
           <h1 className="text-2xl font-bold">Nährstoffbilanzen</h1>
           <p className="text-muted-foreground">Jahresübersichten gemäß Düngeverordnung</p>
         </div>
-        <Select value={selectedJahr} onValueChange={setSelectedJahr}>
-          <SelectTrigger className="w-[150px]">
-            <SelectValue placeholder="Jahr wählen" />
-          </SelectTrigger>
-          <SelectContent>
-            {bilanzen.map((b) => (
-              <SelectItem key={b.jahr} value={b.jahr.toString()}>
-                {b.jahr}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <NativeSelect
+          value={selectedJahr}
+          onValueChange={setSelectedJahr}
+          placeholder="Jahr waehlen"
+          options={bilanzen.map((b) => ({ value: b.jahr.toString(), label: String(b.jahr) }))}
+        />
       </div>
 
       <Card>

@@ -2,12 +2,13 @@ import { useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { ListReport } from '@/components/mask-builder'
-import { useEinzelfutter, type Einzelfutter } from '@/lib/api/futter'
+import { bulkDeleteFutterItems, useEinzelfutter, type Einzelfutter } from '@/lib/api/futter'
 import { toast } from '@/hooks/use-toast'
 import { formatCurrency, formatNumber } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
 import { api } from '@/lib/axios'
+import { apiClient } from '@/lib/api-client'
 
 // Konfiguration für die ListReport
 const futtermittelListConfig: ListConfig = {
@@ -191,13 +192,13 @@ export default function EinzelfuttermittelListePage(): JSX.Element {
         type: 'danger' as const,
         onClick: async (items: any[]) => {
           if (!confirm(`${items.length} Einzelfuttermittel wirklich löschen?`)) return
-          let ok = 0; let err = 0
-          for (const item of items) {
-            try { await api.delete(`/api/v1/futter/einzelfuttermittel/${item.id}`); ok++ }
-            catch { err++ }
-          }
+          const result = await bulkDeleteFutterItems('einzelfuttermittel', items.map((item) => item.id))
           queryClient.invalidateQueries({ queryKey: ['futter', 'einzel'] })
-          toast({ title: 'Bulk-Löschen', description: `${ok} gelöscht${err ? `, ${err} Fehler` : ''}.` })
+          toast({
+            title: 'Bulk-Löschen',
+            description: `${result.deleted} gelöscht${result.errors.length || result.missing_ids.length ? `, ${result.errors.length + result.missing_ids.length} Probleme` : ''}.`,
+            variant: result.errors.length || result.missing_ids.length ? 'destructive' : 'default',
+          })
         }
       }
     ]
@@ -215,7 +216,7 @@ export default function EinzelfuttermittelListePage(): JSX.Element {
     if (!item?.id) return
     if (!confirm(`Einzelfuttermittel "${item.name}" wirklich löschen?`)) return
     try {
-      await api.delete(`/api/v1/futter/einzelfuttermittel/${item.id}`)
+      await apiClient.delete(`/api/v1/futter/einzelfuttermittel/${item.id}`)
       toast({ title: 'Gelöscht', description: `${item.name} wurde gelöscht.` })
       queryClient.invalidateQueries({ queryKey: ['futter', 'einzel'] })
     } catch (e: any) {
@@ -272,3 +273,5 @@ export default function EinzelfuttermittelListePage(): JSX.Element {
     </>
   )
 }
+
+

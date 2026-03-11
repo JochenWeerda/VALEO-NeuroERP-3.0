@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Textarea } from '@/components/ui/textarea'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -463,43 +463,42 @@ export default function LieferantenStammPage(): JSX.Element {
                 </div>
                 <div>
                   <Label htmlFor="kategorie">{t('crud.fields.category')}</Label>
-                  <Select value={lieferant.kategorie || ''} onValueChange={(value) => setLieferant(prev => ({ ...prev, kategorie: value }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder={t('crud.fields.selectCategory')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Saatgut">{t('crud.fields.categorySeed')}</SelectItem>
-                      <SelectItem value="Düngemittel">{t('crud.fields.categoryFertilizer')}</SelectItem>
-                      <SelectItem value="Landtechnik">{t('crud.fields.categoryMachinery')}</SelectItem>
-                      <SelectItem value="Sonstiges">{t('common.other')}</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <NativeSelect
+                    value={lieferant.kategorie || ''}
+                    onValueChange={(value) => setLieferant(prev => ({ ...prev, kategorie: value }))}
+                    options={[
+                      { value: 'Saatgut', label: t('crud.fields.categorySeed') },
+                      { value: 'Düngemittel', label: t('crud.fields.categoryFertilizer') },
+                      { value: 'Landtechnik', label: t('crud.fields.categoryMachinery') },
+                      { value: 'Sonstiges', label: t('common.other') },
+                    ]}
+                    placeholder={t('crud.fields.selectCategory')}
+                  />
                 </div>
                 <div>
                   <Label htmlFor="gruppe">{t('crud.fields.group')}</Label>
-                  <Select value={lieferant.gruppe || ''} onValueChange={(value) => setLieferant(prev => ({ ...prev, gruppe: value }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder={t('crud.fields.selectGroup')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Premium">{t('crud.fields.groupPremium')}</SelectItem>
-                      <SelectItem value="Standard">{t('crud.fields.groupStandard')}</SelectItem>
-                      <SelectItem value="Basis">{t('crud.fields.groupBasic')}</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <NativeSelect
+                    value={lieferant.gruppe || ''}
+                    onValueChange={(value) => setLieferant(prev => ({ ...prev, gruppe: value }))}
+                    options={[
+                      { value: 'Premium', label: t('crud.fields.groupPremium') },
+                      { value: 'Standard', label: t('crud.fields.groupStandard') },
+                      { value: 'Basis', label: t('crud.fields.groupBasic') },
+                    ]}
+                    placeholder={t('crud.fields.selectGroup')}
+                  />
                 </div>
                 <div>
                   <Label htmlFor="status">{t('crud.fields.status')}</Label>
-                  <Select value={lieferant.status} onValueChange={(value: any) => setLieferant(prev => ({ ...prev, status: value }))}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="aktiv">{t('status.active')}</SelectItem>
-                      <SelectItem value="gesperrt">{t('status.blocked')}</SelectItem>
-                      <SelectItem value="archiviert">{t('status.inactive')}</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <NativeSelect
+                    value={lieferant.status}
+                    onValueChange={(value) => setLieferant(prev => ({ ...prev, status: value as LieferantData['status'] }))}
+                    options={[
+                      { value: 'aktiv', label: t('status.active') },
+                      { value: 'gesperrt', label: t('status.blocked') },
+                      { value: 'archiviert', label: t('status.inactive') },
+                    ]}
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -537,18 +536,17 @@ export default function LieferantenStammPage(): JSX.Element {
                 </div>
                 <div>
                   <Label htmlFor="land">{t('crud.fields.country')}</Label>
-                  <Select value={lieferant.land} onValueChange={(value) => setLieferant(prev => ({ ...prev, land: value }))}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="DE">{t('crud.fields.countryDE')}</SelectItem>
-                      <SelectItem value="AT">{t('crud.fields.countryAT')}</SelectItem>
-                      <SelectItem value="CH">{t('crud.fields.countryCH')}</SelectItem>
-                      <SelectItem value="NL">{t('crud.fields.countryNL')}</SelectItem>
-                      <SelectItem value="FR">{t('crud.fields.countryFR')}</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <NativeSelect
+                    value={lieferant.land}
+                    onValueChange={(value) => setLieferant(prev => ({ ...prev, land: value }))}
+                    options={[
+                      { value: 'DE', label: t('crud.fields.countryDE') },
+                      { value: 'AT', label: t('crud.fields.countryAT') },
+                      { value: 'CH', label: t('crud.fields.countryCH') },
+                      { value: 'NL', label: t('crud.fields.countryNL') },
+                      { value: 'FR', label: t('crud.fields.countryFR') },
+                    ]}
+                  />
                 </div>
                 <div>
                   <Label htmlFor="website">{t('crud.fields.website')}</Label>
@@ -928,17 +926,17 @@ export default function LieferantenStammPage(): JSX.Element {
                 </div>
                 <div>
                   <Label htmlFor="zahlungsbedingungen">{t('crud.fields.paymentTerms')}</Label>
-                  <Select value={lieferant.zahlungsbedingungen || ''} onValueChange={(value) => setLieferant(prev => ({ ...prev, zahlungsbedingungen: value }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder={t('crud.tooltips.placeholders.paymentTerms')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="sofort">{t('crud.fields.paymentTermsImmediate')}</SelectItem>
-                      <SelectItem value="14tage">{t('crud.fields.paymentTermsNet14')}</SelectItem>
-                      <SelectItem value="30tage">{t('crud.fields.paymentTermsNet30')}</SelectItem>
-                      <SelectItem value="60tage">{t('crud.fields.paymentTermsNet60')}</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <NativeSelect
+                    value={lieferant.zahlungsbedingungen || ''}
+                    onValueChange={(value) => setLieferant(prev => ({ ...prev, zahlungsbedingungen: value }))}
+                    options={[
+                      { value: 'sofort', label: t('crud.fields.paymentTermsImmediate') },
+                      { value: '14tage', label: t('crud.fields.paymentTermsNet14') },
+                      { value: '30tage', label: t('crud.fields.paymentTermsNet30') },
+                      { value: '60tage', label: t('crud.fields.paymentTermsNet60') },
+                    ]}
+                    placeholder={t('crud.tooltips.placeholders.paymentTerms')}
+                  />
                 </div>
                 <div>
                   <Label htmlFor="kreditlimit">{t('crud.fields.creditLimit')} (€)</Label>
@@ -1245,21 +1243,17 @@ export default function LieferantenStammPage(): JSX.Element {
           <div className="space-y-4">
             <div>
               <Label htmlFor="docType">{t('crud.fields.type')} *</Label>
-              <Select
+              <NativeSelect
                 value={newDocument.typ}
-                onValueChange={(value: DokumentTyp) =>
+                onValueChange={(value) =>
                   setNewDocument(prev => ({ ...prev, typ: value }))
                 }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Dokumenttyp wählen" />
-                </SelectTrigger>
-                <SelectContent>
-                  {(Object.keys(DOKUMENT_TYP_LABELS) as DokumentTyp[]).map((typ) => (
-                    <SelectItem key={typ} value={typ}>{DOKUMENT_TYP_LABELS[typ]}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                options={(Object.keys(DOKUMENT_TYP_LABELS) as DokumentTyp[]).map((typ) => ({
+                  value: typ,
+                  label: DOKUMENT_TYP_LABELS[typ],
+                }))}
+                placeholder="Dokumenttyp wählen"
+              />
             </div>
             <div>
               <Label htmlFor="docTitle">{t('crud.fields.title')} *</Label>
@@ -1492,17 +1486,17 @@ function NewClassificationForm({ onSave, onCancel }: { onSave: (klass: any) => v
       <div className="space-y-4">
         <div>
           <Label htmlFor="classType">{t('crud.fields.type')} *</Label>
-          <Select value={klass.typ} onValueChange={(value) => setKlass(prev => ({ ...prev, typ: value }))}>
-            <SelectTrigger>
-              <SelectValue placeholder={t('crud.fields.selectType')} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Branche">{t('crud.fields.industry')}</SelectItem>
-              <SelectItem value="Zertifizierung">{t('crud.fields.certification')}</SelectItem>
-              <SelectItem value="Risiko">{t('crud.fields.risk')}</SelectItem>
-              <SelectItem value="Größe">{t('crud.fields.size')}</SelectItem>
-            </SelectContent>
-          </Select>
+          <NativeSelect
+            value={klass.typ}
+            onValueChange={(value) => setKlass(prev => ({ ...prev, typ: value }))}
+            options={[
+              { value: 'Branche', label: t('crud.fields.industry') },
+              { value: 'Zertifizierung', label: t('crud.fields.certification') },
+              { value: 'Risiko', label: t('crud.fields.risk') },
+              { value: 'Größe', label: t('crud.fields.size') },
+            ]}
+            placeholder={t('crud.fields.selectType')}
+          />
         </div>
         <div>
           <Label htmlFor="classValue">{t('crud.fields.value')} *</Label>

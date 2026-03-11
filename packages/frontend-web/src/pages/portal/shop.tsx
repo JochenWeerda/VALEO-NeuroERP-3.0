@@ -22,13 +22,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { ErrorState } from '@/components/ErrorState'
 import {
@@ -114,6 +108,15 @@ const DELIVERY_PARITY_OPTIONS: { value: DeliveryParity; label: string; requiresS
   { value: 'frei_hof_gekippt', label: 'Frei Hof gekippt', requiresSilo: false, hasFreight: true },
   { value: 'auf_palette', label: 'Auf Palette', requiresSilo: false, hasFreight: true },
   { value: 'ab_lager', label: 'Ab Lager (Selbstabholung)', requiresSilo: false, hasFreight: false },
+]
+
+const portalAnfrageProduktOptions = [
+  { value: 'saatgut', label: 'Saatgut' },
+  { value: 'duenger', label: 'Duengemittel' },
+  { value: 'psm', label: 'Pflanzenschutzmittel' },
+  { value: 'futtermittel', label: 'Futtermittel' },
+  { value: 'dienstleistung', label: 'Dienstleistung' },
+  { value: 'sonstiges', label: 'Sonstiges' },
 ]
 
 // Kategorien die als "lose Ware" gelten
@@ -676,21 +679,15 @@ export default function PortalShop() {
                         {/* Parität (für alle Produkte) */}
                         <div className="space-y-1.5">
                           <Label className="text-xs text-muted-foreground">Parität / Lieferung</Label>
-                          <Select
+                          <NativeSelect
                             value={item.deliveryParity}
                             onValueChange={(value) => updateCartParity(item.id, value as DeliveryParity)}
-                          >
-                            <SelectTrigger className="h-9">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {DELIVERY_PARITY_OPTIONS.map((option) => (
-                                <SelectItem key={option.value} value={option.value}>
-                                  {option.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                            className="h-9"
+                            options={DELIVERY_PARITY_OPTIONS.map((option) => ({
+                              value: option.value,
+                              label: option.label,
+                            }))}
+                          />
                         </div>
 
                         {/* Silo-Nummer (nur bei lose Ware + frei Silo) */}
@@ -903,19 +900,13 @@ export default function PortalShop() {
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="anfrage-produkt">Produkt / Kategorie</Label>
-                  <Select value={anfrageProdukt} onValueChange={setAnfrageProdukt}>
-                    <SelectTrigger id="anfrage-produkt">
-                      <SelectValue placeholder="Wählen Sie eine Kategorie..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="saatgut">Saatgut</SelectItem>
-                      <SelectItem value="duenger">Düngemittel</SelectItem>
-                      <SelectItem value="psm">Pflanzenschutzmittel</SelectItem>
-                      <SelectItem value="futtermittel">Futtermittel</SelectItem>
-                      <SelectItem value="dienstleistung">Dienstleistung</SelectItem>
-                      <SelectItem value="sonstiges">Sonstiges</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <NativeSelect
+                    id="anfrage-produkt"
+                    value={anfrageProdukt}
+                    onValueChange={setAnfrageProdukt}
+                    placeholder="Waehlen Sie eine Kategorie..."
+                    options={portalAnfrageProduktOptions}
+                  />
                 </div>
 
                 <div className="space-y-2">

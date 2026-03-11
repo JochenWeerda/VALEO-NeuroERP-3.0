@@ -58,6 +58,40 @@ export type ExecutiveDashboardData = {
   bereiche: Array<{ name: string; umsatz: number; anteil: number }>
 }
 
+const EMPTY_SALES_DASHBOARD: SalesDashboardData = {
+  totalRevenue: 0,
+  totalOrders: 0,
+  avgOrderValue: 0,
+  topCustomers: [],
+  revenueByMonth: [],
+}
+
+const EMPTY_INVENTORY_DASHBOARD: InventoryDashboardData = {
+  totalArticles: 0,
+  totalValue: 0,
+  lowStockCount: 0,
+  topArticles: [],
+}
+
+const EMPTY_EXECUTIVE_DASHBOARD: ExecutiveDashboardData = {
+  umsatz: 0,
+  ertrag: 0,
+  wachstum: 0,
+  kunden: 0,
+  mitarbeiter: 0,
+  kennzahlen: [],
+  bereiche: [],
+}
+
+const EMPTY_PROCUREMENT_DASHBOARD: ProcurementDashboardData = {
+  bestellungenOffen: 0,
+  einkaufsvolumen: 0,
+  lieferantenAktiv: 0,
+  offenePosten: 0,
+  ueberfaellig: 0,
+  bestellungen: [],
+}
+
 // Query Keys
 export const dashboardKeys = {
   all: ['dashboard'] as const,
@@ -89,6 +123,7 @@ export function useSalesDashboard() {
         revenueByMonth: []
       } as SalesDashboardData
     },
+    initialData: EMPTY_SALES_DASHBOARD,
   })
 }
 
@@ -112,6 +147,7 @@ export function useInventoryDashboard() {
         }))
       } as InventoryDashboardData
     },
+    initialData: EMPTY_INVENTORY_DASHBOARD,
   })
 }
 
@@ -190,6 +226,7 @@ export function useExecutiveDashboard() {
         } as ExecutiveDashboardData
       }
     },
+    initialData: EMPTY_EXECUTIVE_DASHBOARD,
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -243,6 +280,7 @@ export function useProcurementDashboard() {
         } as ProcurementDashboardData
       }
     },
+    initialData: EMPTY_PROCUREMENT_DASHBOARD,
     staleTime: 5 * 60 * 1000,
   })
 }

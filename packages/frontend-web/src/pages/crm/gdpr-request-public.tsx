@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Textarea } from '@/components/ui/textarea'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { CheckCircle2, XCircle, Loader2, FileText, ShieldCheck } from 'lucide-react'
@@ -161,21 +161,17 @@ export default function GDPRRequestPublicPage(): JSX.Element {
 
               <div>
                 <Label htmlFor="request_type">{t('crud.fields.requestType')} *</Label>
-                <Select
+                <NativeSelect
                   value={formData.request_type}
                   onValueChange={(value) => setFormData({ ...formData, request_type: value })}
-                  required
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t('crud.tooltips.placeholders.selectRequestType')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="access">{t('crud.gdpr.requestTypes.access')}</SelectItem>
-                    <SelectItem value="deletion">{t('crud.gdpr.requestTypes.deletion')}</SelectItem>
-                    <SelectItem value="portability">{t('crud.gdpr.requestTypes.portability')}</SelectItem>
-                    <SelectItem value="objection">{t('crud.gdpr.requestTypes.objection')}</SelectItem>
-                  </SelectContent>
-                </Select>
+                  placeholder={t('crud.tooltips.placeholders.selectRequestType')}
+                  options={[
+                    { value: 'access', label: t('crud.gdpr.requestTypes.access') },
+                    { value: 'deletion', label: t('crud.gdpr.requestTypes.deletion') },
+                    { value: 'portability', label: t('crud.gdpr.requestTypes.portability') },
+                    { value: 'objection', label: t('crud.gdpr.requestTypes.objection') },
+                  ]}
+                />
               </div>
 
               <div>

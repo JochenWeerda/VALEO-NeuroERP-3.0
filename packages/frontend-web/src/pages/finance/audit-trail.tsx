@@ -1,6 +1,6 @@
 /**
  * GoBD Audit Trail View
- * Zeigt alle Audit-Trail-Einträge mit Hash-Chain-Validierung
+ * Zeigt alle Audit-Trail-EintrÃ¤ge mit Hash-Chain-Validierung
  * FIBU-COMP-01: GoBD / Audit Trail UI
  */
 
@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Search, FileText, Shield, CheckCircle2, XCircle, AlertTriangle } from 'lucide-react'
@@ -214,6 +214,14 @@ export default function AuditTrailPage(): JSX.Element {
 
   const uniqueEntityTypes = Array.from(new Set(logs.map((log) => log.entity_type)))
   const uniqueActions = Array.from(new Set(logs.map((log) => log.action)))
+  const entityTypeOptions = [
+    { value: 'all', label: t('common.all') },
+    ...uniqueEntityTypes.map((type) => ({ value: type, label: type })),
+  ]
+  const actionOptions = [
+    { value: 'all', label: t('common.all') },
+    ...uniqueActions.map((action) => ({ value: action, label: action })),
+  ]
 
   return (
     <div className="space-y-6 p-6">
@@ -284,32 +292,20 @@ export default function AuditTrailPage(): JSX.Element {
                 icon={<Search className="h-4 w-4 text-muted-foreground" />}
               />
             </div>
-            <Select value={entityTypeFilter} onValueChange={setEntityTypeFilter}>
-              <SelectTrigger className="w-full md:w-[200px]">
-                <SelectValue placeholder={t('crud.fields.entityType')} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t('common.all')}</SelectItem>
-                {uniqueEntityTypes.map((type) => (
-                  <SelectItem key={type} value={type}>
-                    {type}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={actionFilter} onValueChange={setActionFilter}>
-              <SelectTrigger className="w-full md:w-[200px]">
-                <SelectValue placeholder={t('crud.fields.action')} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t('common.all')}</SelectItem>
-                {uniqueActions.map((action) => (
-                  <SelectItem key={action} value={action}>
-                    {action}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <NativeSelect
+              className="w-full md:w-[200px]"
+              value={entityTypeFilter}
+              onValueChange={setEntityTypeFilter}
+              options={entityTypeOptions}
+              placeholder={t('crud.fields.entityType')}
+            />
+            <NativeSelect
+              className="w-full md:w-[200px]"
+              value={actionFilter}
+              onValueChange={setActionFilter}
+              options={actionOptions}
+              placeholder={t('crud.fields.action')}
+            />
             <Input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} />
             <Input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} />
             <Button variant="outline" onClick={exportCsv}>CSV Export</Button>

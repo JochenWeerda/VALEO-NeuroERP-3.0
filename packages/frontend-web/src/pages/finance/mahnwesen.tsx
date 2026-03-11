@@ -2,35 +2,15 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
-import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
+import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
-import { z } from 'zod'
+import { getFieldsFromMaskConfig, validateFields } from '@/components/mask-builder/validation'
 import { toast } from '@/hooks/use-toast'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { LeaveConfirmDialog } from '@/components/LeaveConfirmDialog'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 
-// Zod-Schema für Mahnwesen (wird in Komponente mit i18n erstellt)
-const createMahnwesenSchema = (t: any) => z.object({
-  opId: z.string().min(1, t('crud.messages.validationError')),
-  debitorId: z.string().min(1, t('crud.messages.validationError')),
-  mahnstufe: z.number().min(1).max(3, t('crud.messages.validationError')),
-  mahnDatum: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t('crud.messages.validationError')),
-  faelligkeit: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t('crud.messages.validationError')),
-  betrag: z.number().positive(t('crud.messages.validationError')),
-  mahngebuehr: z.number().min(0, t('crud.messages.validationError')).default(0),
-  zinsen: z.number().min(0, t('crud.messages.validationError')).default(0),
-  gesamtForderung: z.number().positive(t('crud.messages.validationError')),
-  text: z.string().min(1, t('crud.messages.validationError')),
-  frist: z.string().optional(),
-  status: z.enum(['erstellt', 'versendet', 'bezahlt', 'inkasso']),
-  versandDatum: z.string().optional(),
-  zahlungEingang: z.string().optional(),
-  notizen: z.string().optional()
-})
-
-// Konfiguration für Mahnwesen ObjectPage (wird in Komponente mit i18n erstellt)
 const createMahnwesenConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
   subtitle: t('crud.actions.edit'),
@@ -205,7 +185,6 @@ const createMahnwesenConfig = (t: any, entityTypeLabel: string): MaskConfig => (
       delete: '/api/v1/finance/dunning/{id}'
     }
   } as any,
-  validation: createMahnwesenSchema(t),
   permissions: ['fibu.read', 'fibu.write']
 })
 
@@ -223,7 +202,14 @@ export default function MahnwesenPage(): JSX.Element {
     id: 'new'
   })
 
-  const { validate, showValidationToast } = useMaskValidation(mahnwesenConfig.validation)
+  const validate = (formData: any) => validateFields(getFieldsFromMaskConfig(mahnwesenConfig), formData ?? {})
+  const showValidationToast = (errors: Record<string, string>) => {
+    toast({
+      variant: 'destructive',
+      title: t('crud.messages.validationError'),
+      description: `${Object.keys(errors).length} Feld(er) muessen korrigiert werden.`,
+    })
+  }
 
   const { handleAction } = useMaskActions(async (action: string, formData: any) => {
     if (action === 'generate') {
@@ -251,9 +237,9 @@ export default function MahnwesenPage(): JSX.Element {
       }
       window.open(`/api/v1/finance/dunning/${formData.id}/export`, '_blank')
     } else if (action === 'send') {
-      const isValid = validate(formData)
-      if (!isValid.isValid) {
-        showValidationToast(isValid.errors)
+      const errors = validate(formData)
+      if (Object.keys(errors).length > 0) {
+        showValidationToast(errors)
         return
       }
 

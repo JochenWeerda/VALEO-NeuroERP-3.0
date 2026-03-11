@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Contracts Page V2
  * CRUD interface for managing contracts with Amendment support
  */
@@ -26,7 +26,7 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { NativeSelect } from '@/components/ui/native-select';
 import { useAuth } from '@/hooks/useAuth';
 import { useTenant } from '@/hooks/useTenant';
 
@@ -141,7 +141,7 @@ export default function ContractsPageV2(): JSX.Element {
     fetchAmendments();
   }, [selectedContract]);
 
-  // Amendment-Vorlagen laden, wenn Dialog geöffnet wird
+  // Amendment-Vorlagen laden, wenn Dialog geÃ¶ffnet wird
   React.useEffect(() => {
     if (!amendmentDialogOpen) return;
     const fetchTemplates = async () => {
@@ -228,7 +228,7 @@ export default function ContractsPageV2(): JSX.Element {
   // Create amendment handler
   const handleCreateAmendment = async () => {
     if (!selectedContract || !amendmentForm.reason || amendmentForm.reason.trim().length < 10) {
-      toast({ title: 'Pflichtfeld', description: t('crud.dialogs.amend.errorRequired', { defaultValue: 'Bitte geben Sie einen Änderungsgrund mit mindestens 10 Zeichen an.' }), variant: 'destructive' });
+      toast({ title: 'Pflichtfeld', description: t('crud.dialogs.amend.errorRequired', { defaultValue: 'Bitte geben Sie einen Ã„nderungsgrund mit mindestens 10 Zeichen an.' }), variant: 'destructive' });
       return;
     }
 
@@ -256,7 +256,7 @@ export default function ContractsPageV2(): JSX.Element {
       }
     } catch (error) {
       console.error('Error creating amendment:', error);
-      toast({ title: 'Fehler', description: t('crud.messages.createError', { entityType: t('crud.entities.amendment', { defaultValue: 'Änderung' }), defaultValue: 'Erstellen fehlgeschlagen.' }), variant: 'destructive' });
+      toast({ title: 'Fehler', description: t('crud.messages.createError', { entityType: t('crud.entities.amendment', { defaultValue: 'Ã„nderung' }), defaultValue: 'Erstellen fehlgeschlagen.' }), variant: 'destructive' });
     }
   };
 
@@ -333,7 +333,7 @@ export default function ContractsPageV2(): JSX.Element {
 
       <Toolbar
         onSearch={setQuery}
-        onCopilot={() => toast({ title: 'Copilot', description: 'KI-Analyse für Verträge wird in Kürze verfügbar.' })}
+        onCopilot={() => toast({ title: 'Copilot', description: 'KI-Analyse fÃ¼r VertrÃ¤ge wird in KÃ¼rze verfÃ¼gbar.' })}
       />
 
       <Card className="p-4">
@@ -391,7 +391,7 @@ export default function ContractsPageV2(): JSX.Element {
                           }
                           toast({
                             title: 'Hinweis',
-                            description: 'Direktes Editieren ist aktuell nur für das neue Kontraktmodul aktiv.',
+                            description: 'Direktes Editieren ist aktuell nur fÃ¼r das neue Kontraktmodul aktiv.',
                           });
                         }}
                       >
@@ -468,7 +468,7 @@ export default function ContractsPageV2(): JSX.Element {
               <Label htmlFor="amendment-type">
                 {t('crud.dialogs.amend.typeRequired')}
               </Label>
-              <Select
+              <NativeSelect
                 value={amendmentForm.type}
                 onValueChange={(value) => {
                   const tpl = amendmentTemplates.find((x) => x.code === value) ?? null;
@@ -479,31 +479,24 @@ export default function ContractsPageV2(): JSX.Element {
                       : amendmentForm.changes;
                   setAmendmentForm({ ...amendmentForm, type: value, changes });
                 }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={t('crud.dialogs.amend.typePlaceholder')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {amendmentTemplates.map((tpl) => (
-                    <SelectItem key={tpl.id} value={tpl.code}>
-                      {tpl.name}
-                    </SelectItem>
-                  ))}
-                  <SelectItem value="QtyChange">{t('crud.dialogs.amend.types.qtyChange')}</SelectItem>
-                  <SelectItem value="WindowChange">{t('crud.dialogs.amend.types.windowChange')}</SelectItem>
-                  <SelectItem value="PriceRuleChange">{t('crud.dialogs.amend.types.priceRuleChange')}</SelectItem>
-                  <SelectItem value="CounterpartyChange">{t('crud.dialogs.amend.types.counterpartyChange')}</SelectItem>
-                  <SelectItem value="DeliveryTermsChange">{t('crud.dialogs.amend.types.deliveryTermsChange')}</SelectItem>
-                  <SelectItem value="Other">{t('crud.dialogs.amend.types.other')}</SelectItem>
-                </SelectContent>
-              </Select>
+                options={[
+                  ...amendmentTemplates.map((tpl) => ({ value: tpl.code, label: tpl.name })),
+                  { value: 'QtyChange', label: t('crud.dialogs.amend.types.qtyChange') },
+                  { value: 'WindowChange', label: t('crud.dialogs.amend.types.windowChange') },
+                  { value: 'PriceRuleChange', label: t('crud.dialogs.amend.types.priceRuleChange') },
+                  { value: 'CounterpartyChange', label: t('crud.dialogs.amend.types.counterpartyChange') },
+                  { value: 'DeliveryTermsChange', label: t('crud.dialogs.amend.types.deliveryTermsChange') },
+                  { value: 'Other', label: t('crud.dialogs.amend.types.other') },
+                ]}
+                placeholder={t('crud.dialogs.amend.typePlaceholder')}
+              />
             </div>
             {selectedTemplate?.bodyMarkdown && (
               <div className="space-y-2 rounded-md border bg-muted/30 p-3">
                 <Label className="text-xs text-muted-foreground">Vorlagentext</Label>
                 <pre className="max-h-48 overflow-auto whitespace-pre-wrap break-words text-xs font-sans">
                   {selectedTemplate.bodyMarkdown.slice(0, 2000)}
-                  {selectedTemplate.bodyMarkdown.length > 2000 ? '\n…' : ''}
+                  {selectedTemplate.bodyMarkdown.length > 2000 ? '\nâ€¦' : ''}
                 </pre>
               </div>
             )}
@@ -617,4 +610,6 @@ export default function ContractsPageV2(): JSX.Element {
     </div>
   );
 }
+
+
 

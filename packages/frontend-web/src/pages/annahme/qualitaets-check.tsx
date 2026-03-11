@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { AlertTriangle, CheckCircle, XCircle } from 'lucide-react'
 import { apiClient } from '@/lib/api-client'
@@ -346,9 +347,30 @@ export default function QualitaetsCheckPage(): JSX.Element {
     },
   ]
 
+  const goToAbrechnung = (): void => {
+    navigate('/annahme/abrechnung', {
+      state: {
+        fromQualitaetsCheck: true,
+        artikel: qualitaet.artikel,
+        feuchtigkeit: qualitaet.feuchtigkeit,
+        verunreinigung: qualitaet.verunreinigung,
+        lieferscheinNr: qualitaet.lieferscheinNr,
+      },
+    })
+  }
+
   return (
     <div className="p-6">
-      <ModuleToolbar backTarget="/annahme/warteschlange" closeTarget="/annahme/warteschlange" title="Qualitätsprüfung" />
+      <ModuleToolbar
+        backTarget="/annahme/warteschlange"
+        closeTarget="/annahme/warteschlange"
+        title="Qualitätsprüfung"
+        actions={
+          <Button variant="outline" size="sm" onClick={goToAbrechnung}>
+            Zur Abrechnung
+          </Button>
+        }
+      />
       <Wizard
         title="Schnell-Qualitätsprüfung"
         steps={steps}

@@ -1180,6 +1180,8 @@ class AuditLog(Base):
     ip_address = Column(String(50), nullable=True)
     user_agent = Column(String(200), nullable=True)
     correlation_id = Column(String(50), nullable=True)
+    prev_hash = Column(String(64), nullable=True, default="")  # Gap 010: Hash-Kette
+    hash = Column(String(64), nullable=True)  # SHA-256, per Trigger befüllt
 
 
 # Import Agrar models
@@ -1199,6 +1201,7 @@ from .l3c_models import (
     WeighingTicket,
     WeighingTicketLine,
     WeighingMeasurement,
+    LkwAnnahmeQueue,
     ContractAmendment,
     AmendmentTemplate,
     AgrarContract,

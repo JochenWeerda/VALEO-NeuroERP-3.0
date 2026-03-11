@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Search, Filter, Plus, Download, Upload } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
@@ -286,21 +286,15 @@ const ListReport: React.FC<ListReportProps> = ({
               <div key={filter.name}>
                 <Label>{getFilterLabel(filter)}</Label>
                 {filter.type === 'select' ? (
-                  <Select
+                  <NativeSelect
                     value={filters[filter.name] || ''}
                     onValueChange={(value) => handleFilterChange(filter.name, value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={getFilterPlaceholder(filter)} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {(filter as any).options?.map((option: any) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.labelKey ? t(option.labelKey) : option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    options={((filter as any).options ?? []).map((option: any) => ({
+                      value: option.value,
+                      label: option.labelKey ? t(option.labelKey) : option.label,
+                    }))}
+                    placeholder={getFilterPlaceholder(filter)}
+                  />
                 ) : filter.type === 'number' ? (
                   <div className="relative">
                     <Input

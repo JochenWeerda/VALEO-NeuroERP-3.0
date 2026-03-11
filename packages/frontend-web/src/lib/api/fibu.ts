@@ -72,6 +72,8 @@ export const fibuKeys = {
   stats: () => [...fibuKeys.all, 'stats'] as const,
 }
 
+const EMPTY_RECORD: Record<string, unknown> = {}
+
 // ========== HOOKS ==========
 
 // Debitoren Offene Posten
@@ -86,6 +88,7 @@ export function useDebitoren(filters?: { ueberfaellig?: boolean; mahn_stufe?: nu
       )
       return response.data.items ?? []
     },
+    initialData: [],
   })
 }
 
@@ -115,6 +118,7 @@ export function useKreditoren(filters?: { zahlbar?: boolean }) {
       )
       return response.data.items ?? []
     },
+    initialData: [],
   })
 }
 
@@ -155,6 +159,7 @@ export function useBuchungen(filters?: { datum_von?: string; datum_bis?: string;
         belegart: e.source || 'MAN',
       }))
     },
+    initialData: [],
   })
 }
 
@@ -191,6 +196,7 @@ export function useKonten(filters?: { typ?: string }) {
         saldo: Number(a.balance ?? 0),
       }))
     },
+    initialData: [],
   })
 }
 
@@ -207,6 +213,7 @@ export function useKonto(kontonummer: string) {
         kontoart: a.category ?? '', typ: a.account_type, saldo: Number(a.balance ?? 0) } as Konto
     },
     enabled: !!kontonummer,
+    initialData: null,
   })
 }
 
@@ -218,6 +225,7 @@ export function useAnlagen() {
       const response = await apiClient.get<Anlage[]>('/api/v1/finance/fixed-assets')
       return response.data
     },
+    initialData: [],
   })
 }
 
@@ -242,6 +250,7 @@ export function useAfaBerechnung(id: string, jahr = 2025) {
       return response.data
     },
     enabled: !!id,
+    initialData: null,
   })
 }
 
@@ -256,6 +265,7 @@ export function useBilanz(stichtag = '2024-12-31') {
       )
       return response.data
     },
+    initialData: EMPTY_RECORD,
   })
 }
 
@@ -269,6 +279,7 @@ export function useGuV(periode = '2024') {
       )
       return response.data
     },
+    initialData: EMPTY_RECORD,
   })
 }
 
@@ -283,6 +294,7 @@ export function useBWA(monat = 10, jahr = 2025) {
       )
       return response.data
     },
+    initialData: EMPTY_RECORD,
   })
 }
 
@@ -296,6 +308,7 @@ export function useOPVerwaltung() {
       )
       return response.data.items ?? []
     },
+    initialData: [],
   })
 }
 
@@ -307,6 +320,7 @@ export function useFibuStats() {
       const response = await apiClient.get('/api/v1/finance/stats')
       return response.data
     },
+    initialData: EMPTY_RECORD,
   })
 }
 
@@ -376,6 +390,7 @@ export function useAnlagenDetail() {
       const response = await apiClient.get<AnlageDetail[]>('/api/v1/finance/fixed-assets/detail')
       return response.data
     },
+    initialData: [],
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -400,6 +415,7 @@ export function useDebitorenOP() {
         mahnStufe: Number(item.mahnstufe ?? 0),
       }))
     },
+    initialData: [],
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -425,6 +441,7 @@ export function useKreditorenOP() {
         zahlbar: true,
       }))
     },
+    initialData: [],
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -446,6 +463,7 @@ export function useHauptbuchBuchungen() {
         haben: Number(e.total_credit ?? 0),
       }))
     },
+    initialData: [],
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -457,6 +475,7 @@ export function useKreditlinien() {
       const response = await apiClient.get<Kreditlinie[]>('/api/v1/finance/credit-limits')
       return response.data
     },
+    initialData: [],
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -468,6 +487,7 @@ export function useSicherheiten() {
       const response = await apiClient.get<Sicherheit[]>('/api/v1/finance/collaterals')
       return response.data
     },
+    initialData: [],
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -490,6 +510,7 @@ export function useVerbindlichkeiten() {
         status: Number(item.offen ?? 0) === 0 ? 'bezahlt' : 'offen',
       }))
     },
+    initialData: [],
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -501,6 +522,7 @@ export function useZahlungsvorschlaege() {
       const response = await apiClient.get<Zahlungsvorschlag[]>('/api/v1/finance/payment-suggestions')
       return response.data
     },
+    initialData: [],
     staleTime: 2 * 60 * 1000,
   })
 }
@@ -550,6 +572,7 @@ export function useVATReturns(period?: string, tenantId = 'system') {
       )
       return Array.isArray(response.data) ? response.data : []
     },
+    initialData: [],
   })
 }
 

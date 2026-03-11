@@ -3,38 +3,13 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { ObjectPage } from '@/components/mask-builder'
-import { useMaskData, useMaskValidation, useMaskActions } from '@/components/mask-builder/hooks'
+import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
-import { z } from 'zod'
+import { getFieldsFromMaskConfig, validateFields } from '@/components/mask-builder/validation'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { toast } from 'sonner'
 import { apiClient } from '@/lib/axios'
 
-// Zod-Schema für OP-Debitoren (wird in Komponente mit i18n erstellt)
-const createOpDebitorenSchema = (t: any) => z.object({
-  debitorId: z.string().min(1, t('crud.messages.validationError')),
-  opNummer: z.string().min(1, t('crud.messages.validationError')),
-  rechnungId: z.string().optional(),
-  buchungsdatum: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t('crud.messages.validationError')),
-  faelligkeit: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, t('crud.messages.validationError')),
-  betrag: z.number().positive(t('crud.messages.validationError')),
-  waehrung: z.string().default("EUR"),
-  offen: z.number().min(0, t('crud.messages.validationError')),
-  skontoBetrag: z.number().min(0).optional(),
-  skontoDatum: z.string().optional(),
-  zahlungen: z.array(z.object({
-    datum: z.string(),
-    betrag: z.number(),
-    typ: z.enum(['zahlung', 'skonto', 'gutschrift', 'storno']),
-    referenz: z.string().optional()
-  })).optional(),
-  status: z.enum(['offen', 'teilbezahlt', 'ausgeglichen', 'mahnung', 'inkasso']),
-  letzteZahlung: z.string().optional(),
-  mahnstufe: z.number().min(0).max(3).default(0),
-  notizen: z.string().optional()
-})
-
-// Konfiguration für OP-Debitoren ObjectPage (wird in Komponente mit i18n erstellt)
 const createOpDebitorenConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
   subtitle: t('crud.fields.opKreditoren.subtitle'),
@@ -228,7 +203,6 @@ const createOpDebitorenConfig = (t: any, entityTypeLabel: string): MaskConfig =>
       delete: '/api/v1/finance/open-items/{id}'
     }
   } as any,
-  validation: createOpDebitorenSchema(t),
   permissions: ['fibu.read', 'fibu.write']
 })
 
@@ -405,7 +379,10 @@ export default function OPDebitorenPage(): JSX.Element {
     id: 'new'
   })
 
-  const { validate, showValidationToast } = useMaskValidation(opDebitorenConfig.validation)
+  const validate = (formData: any) => validateFields(getFieldsFromMaskConfig(opDebitorenConfig), formData ?? {})
+  const showValidationToast = (errors: Record<string, string>) => {
+    toast.error(`${Object.keys(errors).length} Feld(er) muessen korrigiert werden.`)
+  }
 
   const { handleAction } = useMaskActions(async (action: string, formData: any) => {
     if (action === 'zahlung') {
@@ -448,9 +425,9 @@ export default function OPDebitorenPage(): JSX.Element {
 
       toast.success(t('crud.messages.discountUsed', { amount: skontoZahlung.betrag.toFixed(2) }))
     } else if (action === 'ausgleich') {
-      const isValid = validate(formData)
-      if (!isValid.isValid) {
-        showValidationToast(isValid.errors)
+      const errors = validate(formData)
+      if (Object.keys(errors).length > 0) {
+        showValidationToast(errors)
         return
       }
 

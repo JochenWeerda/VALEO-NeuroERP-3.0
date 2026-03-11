@@ -38,6 +38,16 @@ type PageResponse<T> = {
   has_prev: boolean
 }
 
+const EMPTY_WEIGHING_TICKET_PAGE: PageResponse<WeighingTicket> = {
+  items: [],
+  total: 0,
+  page: 1,
+  size: 0,
+  pages: 0,
+  has_next: false,
+  has_prev: false,
+}
+
 export type WeighingTicketCreateInput = {
   ticket_number: string
   scale_id?: string
@@ -108,6 +118,7 @@ export function useWeighingTickets(params?: { skip?: number; limit?: number; ten
       const endpoint = q.size > 0 ? `/api/v1/weighing-tickets?${q.toString()}` : '/api/v1/weighing-tickets'
       return (await apiClient.get<PageResponse<WeighingTicket>>(endpoint)).data
     },
+    initialData: EMPTY_WEIGHING_TICKET_PAGE,
     staleTime: 30 * 1000,
   })
 }
@@ -141,6 +152,7 @@ export function useOpenContracts() {
       const data = (await apiClient.get<PageResponse<AgrarContract>>('/api/v1/agrar/contracts?status=open&limit=100')).data
       return data.items
     },
+    initialData: [],
     staleTime: 60 * 1000,
   })
 }
@@ -167,6 +179,7 @@ export function useArticleGroups() {
     queryKey: ['weighing-tickets', 'article-groups'],
     queryFn: async () =>
       (await apiClient.get<ArticleGroup[]>('/api/v1/weighing-tickets/article-groups')).data,
+    initialData: [],
     staleTime: 5 * 60 * 1000,
   })
 }
@@ -184,6 +197,7 @@ export function useArticlesByGroup(group: string | null) {
       return data.items.filter((a) => a.warengruppe === group)
     },
     enabled: !!group,
+    initialData: [],
     staleTime: 5 * 60 * 1000,
   })
 }

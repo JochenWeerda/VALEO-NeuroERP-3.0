@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { toast } from '@/hooks/use-toast'
@@ -58,6 +58,19 @@ export default function WareneingangPage(): JSX.Element {
   const { poId } = useParams<{ poId?: string }>()
   const entityType = 'goodsReceipt'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Wareneingang')
+  const purchaseOrderOptions = purchaseOrders.map((po) => ({ value: po.id, label: `${po.number} - ${po.supplierName}` }))
+  const qualityInspectionOptions = [
+    { value: 'PENDING', label: t('status.pending') },
+    { value: 'PASSED', label: t('status.approved') },
+    { value: 'FAILED', label: t('status.rejected') },
+    { value: 'CONDITIONAL', label: t('status.partial') },
+  ]
+  const conditionOptions = [
+    { value: 'PERFECT', label: t('crud.fields.conditionPerfect') },
+    { value: 'GOOD', label: t('crud.fields.conditionGood') },
+    { value: 'DAMAGED', label: t('crud.fields.conditionDamaged') },
+    { value: 'DEFECTIVE', label: t('crud.fields.conditionDefective') },
+  ]
 
   const [loading, setLoading] = useState(false)
   const [purchaseOrder, setPurchaseOrder] = useState<PurchaseOrder | null>(null)
@@ -258,18 +271,13 @@ export default function WareneingangPage(): JSX.Element {
           <div className="grid gap-4 md:grid-cols-2">
             <div>
               <Label htmlFor="purchaseOrder">{t('crud.entities.purchaseOrder')} *</Label>
-              <Select value={selectedPoId} onValueChange={setSelectedPoId}>
-                <SelectTrigger>
-                  <SelectValue placeholder={t('crud.fields.selectPurchaseOrder')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {purchaseOrders.map(po => (
-                    <SelectItem key={po.id} value={po.id}>
-                      {po.number} - {po.supplierName}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <NativeSelect
+                id="purchaseOrder"
+                value={selectedPoId}
+                onValueChange={setSelectedPoId}
+                options={purchaseOrderOptions}
+                placeholder={t('crud.fields.selectPurchaseOrder')}
+              />
             </div>
 
             <div>
@@ -317,20 +325,14 @@ export default function WareneingangPage(): JSX.Element {
 
             <div>
               <Label htmlFor="qualityInspectionStatus">{t('crud.fields.qualityInspectionStatus')}</Label>
-              <Select
+              <NativeSelect
+                id="qualityInspectionStatus"
                 value={receiptData.qualityInspectionStatus}
-                onValueChange={(value: any) => setReceiptData(prev => ({ ...prev, qualityInspectionStatus: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="PENDING">{t('status.pending')}</SelectItem>
-                  <SelectItem value="PASSED">{t('status.approved')}</SelectItem>
-                  <SelectItem value="FAILED">{t('status.rejected')}</SelectItem>
-                  <SelectItem value="CONDITIONAL">{t('status.partial')}</SelectItem>
-                </SelectContent>
-              </Select>
+                onValueChange={(value) =>
+                  setReceiptData((prev) => ({ ...prev, qualityInspectionStatus: value as GoodsReceiptData['qualityInspectionStatus'] }))
+                }
+                options={qualityInspectionOptions}
+              />
             </div>
           </div>
         </CardContent>
@@ -413,20 +415,12 @@ export default function WareneingangPage(): JSX.Element {
                         />
                       </TableCell>
                       <TableCell>
-                        <Select
+                        <NativeSelect
                           value={receiptItem.condition}
-                          onValueChange={(value: any) => updateReceiptItem(index, 'condition', value)}
-                        >
-                          <SelectTrigger className="w-32">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="PERFECT">{t('crud.fields.conditionPerfect')}</SelectItem>
-                            <SelectItem value="GOOD">{t('crud.fields.conditionGood')}</SelectItem>
-                            <SelectItem value="DAMAGED">{t('crud.fields.conditionDamaged')}</SelectItem>
-                            <SelectItem value="DEFECTIVE">{t('crud.fields.conditionDefective')}</SelectItem>
-                          </SelectContent>
-                        </Select>
+                          onValueChange={(value) => updateReceiptItem(index, 'condition', value as GoodsReceiptItem['condition'])}
+                          options={conditionOptions}
+                          className="w-32"
+                        />
                       </TableCell>
                     </TableRow>
                   )

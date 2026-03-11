@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import { BackButton } from '@/components/BackButton'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { AlertTriangle, FileText, Save, User, Calendar, CheckCircle, XCircle } from 'lucide-react'
@@ -219,16 +219,15 @@ export default function PSMAbgabeDokumentationPage(): JSX.Element {
             </div>
             <div>
               <Label>Einheit</Label>
-              <Select value={abgabe.einheit} onValueChange={(value) => setAbgabe(prev => ({ ...prev, einheit: value }))}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Liter">Liter</SelectItem>
-                  <SelectItem value="kg">kg</SelectItem>
-                  <SelectItem value="Stück">Stück</SelectItem>
-                </SelectContent>
-              </Select>
+              <NativeSelect
+                value={abgabe.einheit}
+                onValueChange={(value) => setAbgabe(prev => ({ ...prev, einheit: value }))}
+                options={[
+                  { value: 'Liter', label: 'Liter' },
+                  { value: 'kg', label: 'kg' },
+                  { value: 'Stueck', label: 'Stueck' },
+                ]}
+              />
             </div>
             <div>
               <Label>Verwendungszweck</Label>

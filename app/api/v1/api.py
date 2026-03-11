@@ -115,6 +115,7 @@ from app.api.v1.endpoints import (
     einkauf_bestellvorschlag,
     admin_monitoring,
     admin_core,
+    data_quality,
     admin_pos,
     admin_devices,
     admin_mobile,
@@ -175,6 +176,12 @@ api_router.include_router(
     admin_core.router,
     prefix="/admin",
     tags=["admin"]
+)
+
+api_router.include_router(
+    data_quality.router,
+    prefix="/admin",
+    tags=["admin", "data-quality"]
 )
 
 api_router.include_router(

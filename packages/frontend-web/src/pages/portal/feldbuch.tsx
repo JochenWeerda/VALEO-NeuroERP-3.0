@@ -36,13 +36,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
   Table,
@@ -237,15 +231,7 @@ function MassnahmeDialog({
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
               <Label>Schlag</Label>
-              <Select value={form.schlagId} onValueChange={v => setForm(p => ({ ...p, schlagId: v }))}>
-                <SelectTrigger><SelectValue placeholder="Schlag wählen" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">Kein Schlag</SelectItem>
-                  {schlaege.map(s => (
-                    <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <NativeSelect value={form.schlagId} onValueChange={v => setForm(p => ({ ...p, schlagId: v }))} placeholder="Schlag waehlen" options={[{ value: '', label: 'Kein Schlag' }, ...schlaege.map((s) => ({ value: s.id, label: s.name }))]} />
             </div>
             <div className="space-y-1">
               <Label>Datum *</Label>
@@ -255,14 +241,7 @@ function MassnahmeDialog({
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
               <Label>Maßnahme-Typ *</Label>
-              <Select value={form.typ} onValueChange={v => setForm(p => ({ ...p, typ: v }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {Object.entries(typConfig).map(([key, cfg]) => (
-                    <SelectItem key={key} value={key}>{cfg.label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <NativeSelect value={form.typ} onValueChange={v => setForm(p => ({ ...p, typ: v }))} options={Object.entries(typConfig).map(([key, cfg]) => ({ value: key, label: cfg.label }))} />
             </div>
             <div className="space-y-1">
               <Label>Mittel / Produkt</Label>
@@ -276,14 +255,7 @@ function MassnahmeDialog({
             </div>
             <div className="space-y-1">
               <Label>Einheit</Label>
-              <Select value={form.einheit} onValueChange={v => setForm(p => ({ ...p, einheit: v }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {['l/ha', 'kg/ha', 'ml/ha', 'g/ha', 't/ha', 'Stück/ha'].map(e => (
-                    <SelectItem key={e} value={e}>{e}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <NativeSelect value={form.einheit} onValueChange={v => setForm(p => ({ ...p, einheit: v }))} options={['l/ha', 'kg/ha', 'ml/ha', 'g/ha', 't/ha', 'Stueck/ha'].map((e) => ({ value: e, label: e }))} />
             </div>
             <div className="space-y-1">
               <Label>Fläche (ha)</Label>
@@ -367,27 +339,11 @@ function ExportDialog({
         <div className="grid gap-3">
           <div className="space-y-1">
             <Label>Format</Label>
-            <Select value={format} onValueChange={v => setFormat(v as 'csv' | 'ackerschlagkartei')}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ackerschlagkartei">Ackerschlagkartei-CSV (proPlant, 365FarmNet)</SelectItem>
-                <SelectItem value="csv">Generisches CSV (alle Felder)</SelectItem>
-              </SelectContent>
-            </Select>
+            <NativeSelect value={format} onValueChange={v => setFormat(v as 'csv' | 'ackerschlagkartei')} options={[{ value: 'ackerschlagkartei', label: 'Ackerschlagkartei-CSV (proPlant, 365FarmNet)' }, { value: 'csv', label: 'Generisches CSV (alle Felder)' }]} />
           </div>
           <div className="space-y-1">
             <Label>Schlag (optional)</Label>
-            <Select value={schlagId} onValueChange={setSchlagId}>
-              <SelectTrigger><SelectValue placeholder="Alle Schläge" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="">Alle Schläge</SelectItem>
-                {schlaege.map(s => (
-                  <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <NativeSelect value={schlagId} onValueChange={setSchlagId} placeholder="Alle Schlaege" options={[{ value: '', label: 'Alle Schlaege' }, ...schlaege.map((s) => ({ value: s.id, label: s.name }))]} />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
@@ -689,17 +645,7 @@ export default function PortalFeldbuch() {
           />
         </div>
         {activeTab === 'massnahmen' && (
-          <Select value={selectedSchlag} onValueChange={setSelectedSchlag}>
-            <SelectTrigger className="w-[220px]">
-              <SelectValue placeholder="Schlag wählen" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="alle">Alle Schläge</SelectItem>
-              {schlaege.map(s => (
-                <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <NativeSelect value={selectedSchlag} onValueChange={setSelectedSchlag} placeholder="Schlag waehlen" options={[{ value: 'alle', label: 'Alle Schlaege' }, ...schlaege.map((s) => ({ value: s.id, label: s.name }))]} />
         )}
       </div>
 

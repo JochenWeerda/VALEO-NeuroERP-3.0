@@ -5,10 +5,10 @@
  */
 
 import { useState, useEffect } from 'react'
+import { clsx } from 'clsx'
 import { ChevronLeft, Keyboard } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { cn } from '@/lib/utils'
 
 export type ShortcutDefinition = {
   key: string
@@ -86,7 +86,7 @@ export function ShortcutHelpPanel({
 
   return (
     <div
-      className={cn(
+      className={clsx(
         'fixed right-0 top-1/2 -translate-y-1/2 z-50 transition-all duration-300',
         shouldShow ? 'translate-x-0' : 'translate-x-full',
         !isExpanded && 'translate-x-full', // Komplett ausblenden wenn collapsed
@@ -96,7 +96,7 @@ export function ShortcutHelpPanel({
       onMouseLeave={() => setIsHovering(false)}
     >
       <Card
-        className={cn(
+        className={clsx(
           'w-80 max-h-[80vh] overflow-hidden flex flex-col shadow-lg',
           'bg-white/95 backdrop-blur-sm border-r-0 rounded-l-lg',
           displayMode === 'hover' && 'opacity-90'
@@ -203,7 +203,7 @@ export function ShortcutHintButton({
 
   return (
     <div
-      className={cn('relative', className)}
+      className={clsx('relative', className)}
       onMouseEnter={() => displayMode === 'hover' && setShowHint(true)}
       onMouseLeave={() => setShowHint(false)}
       onContextMenu={(e) => {

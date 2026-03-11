@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import { Checkbox } from '@/components/ui/checkbox'
 import { useToast } from '@/hooks/use-toast'
 import { Eye, Printer, Save, Trash2 } from 'lucide-react'
@@ -183,16 +183,11 @@ export default function NaWaRoMitteilungDruckenPage(): JSX.Element {
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="document">Dokument</Label>
-              <Select value={documentName} onValueChange={setDocumentName}>
-                <SelectTrigger id="document">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {documentOptions.map((item) => (
-                    <SelectItem key={item} value={item}>{item}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <NativeSelect
+                value={documentName}
+                onValueChange={(value) => setDocumentName(value as (typeof documentOptions)[number])}
+                options={documentOptions.map((item) => ({ value: item, label: item }))}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="ernteJahr">Ernte-Jahr</Label>
