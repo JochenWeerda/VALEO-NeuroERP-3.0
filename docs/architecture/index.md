@@ -22,6 +22,9 @@
 | [ADR-013](../adr/adr-013-tenant-genossenschaftsmodell.md) | Tenant-/Genossenschaftsmodell | Accepted | Tenant & Organization |
 | [ADR-014](../adr/adr-014-integrationsgrenzen-api-edi-mcp-partneradapter.md) | Integrationsgrenzen API / EDI / MCP / Partneradapter | Accepted | Agent & Integration |
 | [ADR-015](../adr/adr-015-analytics-benchmark-datenproduktmodell.md) | Analytics-/Benchmark-Datenproduktmodell | Accepted | Data & Analytics |
+| [ADR-016](../adr/adr-016-iot-telemetrie-modell.md) | IoT-/Telemetrie-Modell | Accepted | Operations & Telemetry |
+| [ADR-017](../adr/adr-017-governance-pricing-marktdatenquellen.md) | Governance für Pricing-/Marktdatenquellen | Accepted | Pricing & Market Data |
+| [ADR-018](../adr/adr-018-qualitaets-labordatenmodell.md) | Qualitäts-/Labordatenmodell | Accepted | Quality Core |
 
 ## Themencluster
 
@@ -44,6 +47,18 @@
 - [ADR-015 Analytics-/Benchmark-Datenproduktmodell](../adr/adr-015-analytics-benchmark-datenproduktmodell.md)
 - [Module Resolution Architecture](module-resolution-architecture.md)
 - [React Lifecycle Architecture](react-lifecycle-architecture.md)
+
+### Pricing & Market Data
+- [ADR-017 Governance für Pricing-/Marktdatenquellen](../adr/adr-017-governance-pricing-marktdatenquellen.md)
+- [ADR-015 Analytics-/Benchmark-Datenproduktmodell](../adr/adr-015-analytics-benchmark-datenproduktmodell.md)
+
+### Quality Core
+- [ADR-018 Qualitäts-/Labordatenmodell](../adr/adr-018-qualitaets-labordatenmodell.md)
+- [ADR-012 Dokument-/Audit-Evidence-Modell](../adr/adr-012-dokument-audit-evidence-modell.md)
+
+### Operations & Telemetry
+- [ADR-016 IoT-/Telemetrie-Modell](../adr/adr-016-iot-telemetrie-modell.md)
+- [ADR-008 Eventing-/Outbox-Standard](../adr/adr-008-eventing-outbox-standard.md)
 
 ### UX & Process UI
 - [ADR-011 UI-Maskenstrategie](../adr/adr-011-ui-maskenstrategie.md)
@@ -77,7 +92,7 @@
 
 Die nächsten sinnvollen Entscheidungen leiten sich direkt aus dem Zielbild ab:
 
-1. IoT-/Telemetrie-Modell für Silo, Waage und Lager
-2. Governance für Pricing-/Marktdatenquellen
-3. Qualitäts-/Labordatenmodell für Regel- und Freigabepfade
-4. Sicherheitsmodell für externe Agenten und delegierte Aktionen
+1. Sicherheitsmodell für externe Agenten und delegierte Aktionen
+2. Cross-Domain-Referenzmodell für Kontrakt, Charge, Qualität und Settlement
+3. Tenant-weite Datenresidenz- und Exportregeln
+4. Regelmodell für Reklamation, Abzug und Ausnahmebehandlung
