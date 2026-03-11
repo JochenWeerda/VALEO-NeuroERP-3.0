@@ -157,22 +157,20 @@ Die folgenden ADRs sollten als nächste Entscheidungen vorbereitet werden, weil 
 
 ### A. Hohe Priorität
 
-1. UI-Maskenstrategie
-- Wann generischer Mask-/Process-Builder Pflicht ist
-- Wann fachliche Spezialmasken zulässig oder erforderlich sind
+1. Tenant-/Genossenschaftsmodell
+- Wie Verbundstrukturen, Mandantengruppen und gemeinsame Services sauber modelliert werden
+- Wie Stammdaten-, Rollen- und Prozessvererbung entlang dieser Struktur funktioniert
 
 ### B. Mittlere Priorität
 
-2. Dokument- und Audit-Evidence-Modell
-- Einheitliches Modell für Belege, Anhänge, OCR-Ergebnisse und Prüfnachweise
-- Bezug auf GoBD-, DMS- und Freigabepfade
-
-3. Integrationsgrenzen für externe Partner
+2. Integrationsgrenzen für externe Partner
 - Abgrenzung API, EDI, MCP und spezifische Partneradapter
 - Stabilitäts- und Sicherheitsregeln pro Integrationsklasse
+
+3. Analytics-/Benchmark-Datenproduktmodell
+- Wie Benchmark-, Cockpit- und KPI-Produkte fachlich geschnitten und versioniert werden
+- Wie Read-Models, Historisierung und Vergleichslogik zusammenhängen
 
 ### C. Spätere Kandidaten
 
 4. IoT-/Telemetrie-Modell für Silo, Waage und Lager
-5. Tenant-/Genossenschaftsmodell für Verbundstrukturen
-6. Analytics-/Benchmark-Datenproduktmodell

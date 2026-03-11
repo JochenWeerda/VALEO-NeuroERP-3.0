@@ -17,6 +17,8 @@
 | [ADR-008](../adr/adr-008-eventing-outbox-standard.md) | Eventing-/Outbox-Standard | Accepted | Data & Query |
 | [ADR-009](../adr/adr-009-workflow-versionierung-und-migration.md) | Workflow-Versionierung und Migration | Accepted | Process Core |
 | [ADR-010](../adr/adr-010-policy-override-modell.md) | Policy-Override-Modell | Accepted | Process Core |
+| [ADR-011](../adr/adr-011-ui-maskenstrategie.md) | UI-Maskenstrategie | Accepted | UX & Process UI |
+| [ADR-012](../adr/adr-012-dokument-audit-evidence-modell.md) | Dokument-/Audit-Evidence-Modell | Accepted | Audit & Document |
 
 ## Themencluster
 
@@ -39,6 +41,15 @@
 - [Module Resolution Architecture](module-resolution-architecture.md)
 - [React Lifecycle Architecture](react-lifecycle-architecture.md)
 
+### UX & Process UI
+- [ADR-011 UI-Maskenstrategie](../adr/adr-011-ui-maskenstrategie.md)
+- [Current Processes](current-processes.md)
+- [Target Processes](target-processes.md)
+
+### Audit & Document
+- [ADR-012 Dokument-/Audit-Evidence-Modell](../adr/adr-012-dokument-audit-evidence-modell.md)
+- [DMS Paperless Integration](dms-paperless-integration.md)
+
 ### Agent & Integration
 - [ADR-007 Agent-/Tool-Contract-Governance](../adr/adr-007-agent-tool-contract-governance.md)
 - [KI Usability Microservices](KI-USABILITY-MICROSERVICES.md)
@@ -57,8 +68,7 @@
 
 Die nächsten sinnvollen Entscheidungen leiten sich direkt aus dem Zielbild ab:
 
-1. UI-Maskenstrategie: generische Builder vs. fachliche Spezialmasken
-2. Document/Audit-Evidence-Modell für GoBD-, DMS- und Freigabepfade
-3. Tenant-/Genossenschaftsmodell für Verbundstrukturen
-4. Integrationsgrenzen API vs. EDI vs. MCP vs. Partneradapter
-5. Analytics-/Benchmark-Datenproduktmodell
+1. Tenant-/Genossenschaftsmodell für Verbundstrukturen
+2. Integrationsgrenzen API vs. EDI vs. MCP vs. Partneradapter
+3. Analytics-/Benchmark-Datenproduktmodell
+4. IoT-/Telemetrie-Modell für Silo, Waage und Lager
