@@ -4,6 +4,8 @@
 - [Target State Landhandel ERP](target-state-landhandel-erp.md)
 - [Target Processes](target-processes.md)
 - [Current Processes](current-processes.md)
+- [Architecture Decision Map](architecture-decision-map.md)
+- [ADR Clusters and Epics](adr-clusters-and-epics.md)
 
 ## Decision Status
 
