@@ -150,3 +150,29 @@ Ein Prozess gilt erst dann als „fertig“, wenn er:
 - [2026-03-06-valeo-spitzenposition-konsolidiert.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/roadmap/status/2026-03-06-valeo-spitzenposition-konsolidiert.md)
 - [2026-03-06-top-50-gap-backlog-landhandel.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/roadmap/status/2026-03-06-top-50-gap-backlog-landhandel.md)
 - [2026-03-06-arbeitsaufteilung-codex-hauptstrang.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/roadmap/status/2026-03-06-arbeitsaufteilung-codex-hauptstrang.md)
+
+## 10. Offene ADR-Kandidaten
+
+Die folgenden ADRs sollten als nächste Entscheidungen vorbereitet werden, weil sie direkt aus Produktkern und Roadmap folgen.
+
+### A. Hohe Priorität
+
+1. UI-Maskenstrategie
+- Wann generischer Mask-/Process-Builder Pflicht ist
+- Wann fachliche Spezialmasken zulässig oder erforderlich sind
+
+### B. Mittlere Priorität
+
+2. Dokument- und Audit-Evidence-Modell
+- Einheitliches Modell für Belege, Anhänge, OCR-Ergebnisse und Prüfnachweise
+- Bezug auf GoBD-, DMS- und Freigabepfade
+
+3. Integrationsgrenzen für externe Partner
+- Abgrenzung API, EDI, MCP und spezifische Partneradapter
+- Stabilitäts- und Sicherheitsregeln pro Integrationsklasse
+
+### C. Spätere Kandidaten
+
+4. IoT-/Telemetrie-Modell für Silo, Waage und Lager
+5. Tenant-/Genossenschaftsmodell für Verbundstrukturen
+6. Analytics-/Benchmark-Datenproduktmodell
