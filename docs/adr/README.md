@@ -12,4 +12,7 @@
 - [ADR-010 Policy-Override-Modell](adr-010-policy-override-modell.md)
 - [ADR-011 UI-Maskenstrategie](adr-011-ui-maskenstrategie.md)
 - [ADR-012 Dokument-/Audit-Evidence-Modell](adr-012-dokument-audit-evidence-modell.md)
+- [ADR-013 Tenant-/Genossenschaftsmodell](adr-013-tenant-genossenschaftsmodell.md)
+- [ADR-014 Integrationsgrenzen API / EDI / MCP / Partneradapter](adr-014-integrationsgrenzen-api-edi-mcp-partneradapter.md)
+- [ADR-015 Analytics-/Benchmark-Datenproduktmodell](adr-015-analytics-benchmark-datenproduktmodell.md)
 - [ADR-CRM-001](ADR-CRM-001.md)

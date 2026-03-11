@@ -157,20 +157,20 @@ Die folgenden ADRs sollten als nächste Entscheidungen vorbereitet werden, weil 
 
 ### A. Hohe Priorität
 
-1. Tenant-/Genossenschaftsmodell
-- Wie Verbundstrukturen, Mandantengruppen und gemeinsame Services sauber modelliert werden
-- Wie Stammdaten-, Rollen- und Prozessvererbung entlang dieser Struktur funktioniert
+1. IoT-/Telemetrie-Modell
+- Wie Silo-, Waage-, Lager- und Sensordaten fachlich angebunden werden
+- Wie Events, Commands und Audit darauf aufbauen
 
 ### B. Mittlere Priorität
 
-2. Integrationsgrenzen für externe Partner
-- Abgrenzung API, EDI, MCP und spezifische Partneradapter
-- Stabilitäts- und Sicherheitsregeln pro Integrationsklasse
+2. Governance für Pricing-/Marktdatenquellen
+- Wie externe Markt-, Kurs- und Preisquellen klassifiziert und versioniert werden
+- Wie Preislogik, Audit und Nachvollziehbarkeit sichergestellt werden
 
-3. Analytics-/Benchmark-Datenproduktmodell
-- Wie Benchmark-, Cockpit- und KPI-Produkte fachlich geschnitten und versioniert werden
-- Wie Read-Models, Historisierung und Vergleichslogik zusammenhängen
+3. Qualitäts-/Labordatenmodell
+- Einheitliche Modellierung von Qualitätswerten, Laborergebnissen und Freigaberegeln
+- Bezug zu Charge, Partie, Annahme und Settlement
 
 ### C. Spätere Kandidaten
 
-4. IoT-/Telemetrie-Modell für Silo, Waage und Lager
+4. Sicherheitsmodell für externe Agenten und delegierte Aktionen
