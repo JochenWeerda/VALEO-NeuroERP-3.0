@@ -19,6 +19,9 @@
 | [ADR-010](../adr/adr-010-policy-override-modell.md) | Policy-Override-Modell | Accepted | Process Core |
 | [ADR-011](../adr/adr-011-ui-maskenstrategie.md) | UI-Maskenstrategie | Accepted | UX & Process UI |
 | [ADR-012](../adr/adr-012-dokument-audit-evidence-modell.md) | Dokument-/Audit-Evidence-Modell | Accepted | Audit & Document |
+| [ADR-013](../adr/adr-013-tenant-genossenschaftsmodell.md) | Tenant-/Genossenschaftsmodell | Accepted | Tenant & Organization |
+| [ADR-014](../adr/adr-014-integrationsgrenzen-api-edi-mcp-partneradapter.md) | Integrationsgrenzen API / EDI / MCP / Partneradapter | Accepted | Agent & Integration |
+| [ADR-015](../adr/adr-015-analytics-benchmark-datenproduktmodell.md) | Analytics-/Benchmark-Datenproduktmodell | Accepted | Data & Analytics |
 
 ## Themencluster
 
@@ -38,6 +41,7 @@
 ### Data & Query
 - [ADR-006 Read-Model / Query-Contract-Prinzip](../adr/adr-006-read-model-query-contract-prinzip.md)
 - [ADR-008 Eventing-/Outbox-Standard](../adr/adr-008-eventing-outbox-standard.md)
+- [ADR-015 Analytics-/Benchmark-Datenproduktmodell](../adr/adr-015-analytics-benchmark-datenproduktmodell.md)
 - [Module Resolution Architecture](module-resolution-architecture.md)
 - [React Lifecycle Architecture](react-lifecycle-architecture.md)
 
@@ -50,8 +54,13 @@
 - [ADR-012 Dokument-/Audit-Evidence-Modell](../adr/adr-012-dokument-audit-evidence-modell.md)
 - [DMS Paperless Integration](dms-paperless-integration.md)
 
+### Tenant & Organization
+- [ADR-013 Tenant-/Genossenschaftsmodell](../adr/adr-013-tenant-genossenschaftsmodell.md)
+- [ADR-010 Policy-Override-Modell](../adr/adr-010-policy-override-modell.md)
+
 ### Agent & Integration
 - [ADR-007 Agent-/Tool-Contract-Governance](../adr/adr-007-agent-tool-contract-governance.md)
+- [ADR-014 Integrationsgrenzen API / EDI / MCP / Partneradapter](../adr/adr-014-integrationsgrenzen-api-edi-mcp-partneradapter.md)
 - [KI Usability Microservices](KI-USABILITY-MICROSERVICES.md)
 - [Agrar Event Hook Contracts](agrar-event-hook-contracts.md)
 - [DMS Paperless Integration](dms-paperless-integration.md)
@@ -68,7 +77,7 @@
 
 Die nächsten sinnvollen Entscheidungen leiten sich direkt aus dem Zielbild ab:
 
-1. Tenant-/Genossenschaftsmodell für Verbundstrukturen
-2. Integrationsgrenzen API vs. EDI vs. MCP vs. Partneradapter
-3. Analytics-/Benchmark-Datenproduktmodell
-4. IoT-/Telemetrie-Modell für Silo, Waage und Lager
+1. IoT-/Telemetrie-Modell für Silo, Waage und Lager
+2. Governance für Pricing-/Marktdatenquellen
+3. Qualitäts-/Labordatenmodell für Regel- und Freigabepfade
+4. Sicherheitsmodell für externe Agenten und delegierte Aktionen
