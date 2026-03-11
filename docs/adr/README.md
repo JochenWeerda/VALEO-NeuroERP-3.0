@@ -18,4 +18,8 @@
 - [ADR-016 IoT-/Telemetrie-Modell](adr-016-iot-telemetrie-modell.md)
 - [ADR-017 Governance für Pricing-/Marktdatenquellen](adr-017-governance-pricing-marktdatenquellen.md)
 - [ADR-018 Qualitäts-/Labordatenmodell](adr-018-qualitaets-labordatenmodell.md)
+- [ADR-019 Sicherheitsmodell für externe Agenten und delegierte Aktionen](adr-019-sicherheitsmodell-externe-agenten-delegierte-aktionen.md)
+- [ADR-020 Cross-Domain-Referenzmodell für Kontrakt, Charge, Qualität und Settlement](adr-020-cross-domain-referenzmodell-kontrakt-charge-qualitaet-settlement.md)
+- [ADR-021 Tenant-weite Datenresidenz- und Exportregeln](adr-021-tenant-weite-datenresidenz-und-exportregeln.md)
+- [ADR-022 Regelmodell für Reklamation, Abzug und Ausnahmebehandlung](adr-022-regelmodell-reklamation-abzug-ausnahmebehandlung.md)
 - [ADR-CRM-001](ADR-CRM-001.md)

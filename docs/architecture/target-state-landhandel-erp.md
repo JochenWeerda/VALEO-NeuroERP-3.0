@@ -157,20 +157,20 @@ Die folgenden ADRs sollten als nächste Entscheidungen vorbereitet werden, weil 
 
 ### A. Hohe Priorität
 
-1. Sicherheitsmodell für externe Agenten und delegierte Aktionen
-- Wie externe Agenten freigeschaltet, begrenzt und auditiert werden
-- Wie Delegation, Freigabe und Policy zusammenwirken
+1. Governance für Rollen- und Berechtigungsvererbung
+- Wie Verbundstrukturen Berechtigungen, Delegation und Verantwortlichkeit sauber vererben
+- Wie lokale Abweichungen kontrolliert bleiben
 
 ### B. Mittlere Priorität
 
-2. Cross-Domain-Referenzmodell
-- Wie Kontrakt, Charge, Qualität, Lieferung und Settlement referenziell zusammenhängen
-- Wie Querbezüge ohne Schattenmodelle aufgebaut werden
+2. Datenprodukt-Strategie für Sustainability- und Compliance-Reporting
+- Wie ESG-, CO2-, Audit- und Meldeprodukte fachlich definiert und versioniert werden
+- Wie operative Daten und regulatorische Datenprodukte getrennt bleiben
 
-3. Tenant-weite Datenresidenz- und Exportregeln
-- Wie Datenhaltungs- und Exportpflichten pro Tenant oder Verbund modelliert werden
-- Wie Audit und technische Isolation darauf aufbauen
+3. Standard für konfliktarme Parallelbearbeitung
+- Wie konkurrierende Bearbeitung in Kernprozessen modelliert und aufgelöst wird
+- Wie Optimistic Locking, Konflikthinweise und Freigaben zusammenwirken
 
 ### C. Spätere Kandidaten
 
-4. Regelmodell für Reklamation, Abzug und Ausnahmebehandlung
+4. Modell für Import-/Staging-/Prüfpipelines
