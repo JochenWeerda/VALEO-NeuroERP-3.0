@@ -52,11 +52,12 @@
 
 ## Naechster Schritt
 - Wave 1 ist abgeschlossen; weitere UI-Erweiterungen nur noch als Wave-2/3-Folgearbeit aufsetzen
-- `finance/mahnwesen` Preview/Export/Inkasso erst nach expliziter Backend-Erweiterung wieder aktivieren
-- `finance/lastschriften-debitoren` Preview/Export erst nach expliziter Backend-Erweiterung wieder aktivieren
 
 ## Post-Wave-1-Nachbesserung (2026-03-14)
 - `ProcessStatusPanel.tsx` als generischer Wrapper extrahiert — alle 9 Masken nutzen jetzt dieselbe Komponente
 - `children`-Prop ermoeglicht gemischte Layouts (farbiger Status-Block + Domain-Grid)
 - Commit: `4e3fa372` — kein fachlicher Scope-Change, reines DRY-Refactoring
 - Kontraktdetail: client-seitige ExplainabilityView-Synthese aus Vertragsstatus ohne neuen Backend-Endpoint
+- `finance/mahnwesen` Preview+Export an `GET/POST /api/v1/finance/followup/mahnwesen/...` angebunden (Commit: `ca028e27`)
+- `finance/mahnwesen` payment+inkasso von raw-fetch (localStorage-Token-Leak) auf `apiClient.put` umgestellt
+- `finance/lastschriften-debitoren` Preview+Export an `GET/POST /api/v1/finance/followup/lastschriften/{id}/...` angebunden
