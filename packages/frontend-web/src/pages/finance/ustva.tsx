@@ -8,6 +8,8 @@ import { getFieldsFromMaskConfig, validateFields } from '@/components/mask-build
 import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/axios'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
+import { buildDecisionView } from '@/policy/decision-view'
+import { ProcessStatusPanel } from '@/components/workflow/ProcessStatusPanel'
 
 const createUstvaConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
@@ -61,10 +63,10 @@ const createUstvaConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
           type: 'select',
           required: true,
           options: [
-            { value: 'entwurf', label: t('status.draft') },
-            { value: 'pruefung', label: t('crud.fields.inReview') },
-            { value: 'freigegeben', label: t('status.approved') },
-            { value: 'abgegeben', label: t('crud.fields.submitted') }
+            { value: 'draft', label: t('status.draft') },
+            { value: 'validated', label: t('crud.fields.inReview') },
+            { value: 'approved', label: t('status.approved') },
+            { value: 'submitted', label: t('crud.fields.submitted') }
           ]
         }
       ],
@@ -271,13 +273,13 @@ const createUstvaConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
     { key: 'export', label: t('crud.actions.xmlExport'), type: 'secondary' }
   ],
   api: {
-    baseUrl: '/api/v1/finance/ustva',
+    baseUrl: '/api/v1/finance/vat-return',
     endpoints: {
-      list: '/api/v1/finance/ustva',
-      get: '/api/v1/finance/ustva/{id}',
-      create: '/api/v1/finance/ustva',
-      update: '/api/v1/finance/ustva/{id}',
-      delete: '/api/v1/finance/ustva/{id}'
+      list: '/api/v1/finance/vat-return',
+      get: '/api/v1/finance/vat-return/{id}',
+      create: '/api/v1/finance/vat-return',
+      update: '/api/v1/finance/vat-return/{id}',
+      delete: '/api/v1/finance/vat-return/{id}'
     }
   } as any,
   permissions: ['fibu.read', 'fibu.write', 'fibu.admin']
@@ -389,13 +391,39 @@ export default function UStVAPage(): JSX.Element {
   const navigate = useNavigate()
   const [isDirty, setIsDirty] = useState(false)
   const [actionLoadingKey, setActionLoadingKey] = useState<string | null>(null)
+  const [workspaceData, setWorkspaceData] = useState<any>({})
   const entityType = 'ustva'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Umsatzsteuervoranmeldung')
   const ustvaConfig = createUstvaConfig(t, entityTypeLabel)
+  const currentActor = localStorage.getItem('userEmail') || localStorage.getItem('username') || 'api'
 
-  const { data, loading, saveData } = useMaskData({
+  const { data, loading } = useMaskData({
     apiUrl: ustvaConfig.api.baseUrl,
-    id: 'new'
+    id: 'new',
+    transformResponse: (response: any) => {
+      if (response?.data) {
+        return {
+          ...response.data,
+          periode: response.data.period,
+          voranmeldungszeitraum: response.data.return_type === 'quarterly' ? 'quartalsweise' : 'monatlich',
+          steuerpflichtiger: response.data.taxpayer_name,
+          ustId: response.data.vat_id,
+          gesamtUmsatz: response.data.total_sales_net,
+          gesamtVorsteuer: response.data.total_input_tax,
+          gesamtUst: response.data.vat_payable,
+          status: response.data.status,
+          freigegebenAm: response.data.approved_at,
+          freigegebenDurch: response.data.approved_by,
+          abgegebenAm: response.data.submitted_at,
+          elsterReferenz: response.data.elster_reference,
+          approval_status: response.data.approval_status,
+          approval_can_submit: response.data.approval_can_submit,
+          approval_override_resolution: response.data.approval_override_resolution,
+          approval_explainability: response.data.approval_explainability,
+        }
+      }
+      return response
+    }
   })
 
   const validate = (formData: any) => validateFields(getFieldsFromMaskConfig(ustvaConfig), formData ?? {})
@@ -403,15 +431,41 @@ export default function UStVAPage(): JSX.Element {
     toast({ variant: 'destructive', title: t('crud.messages.validationError'), description: `${Object.keys(errors).length} Feld(er) muessen korrigiert werden.` })
   }
 
+  const applyVATReturnResponse = (response: any) => {
+    const payload = response?.data ?? response
+    if (!payload) {
+      return
+    }
+    setWorkspaceData({
+      ...payload,
+      periode: payload.period,
+      voranmeldungszeitraum: payload.return_type === 'quarterly' ? 'quartalsweise' : 'monatlich',
+      steuerpflichtiger: payload.taxpayer_name,
+      ustId: payload.vat_id,
+      gesamtUmsatz: payload.total_sales_net,
+      gesamtVorsteuer: payload.total_input_tax,
+      gesamtUst: payload.vat_payable,
+      status: payload.status,
+      freigegebenAm: payload.approved_at,
+      freigegebenDurch: payload.approved_by,
+      abgegebenAm: payload.submitted_at,
+      elsterReferenz: payload.elster_reference,
+      approval_status: payload.approval_status,
+      approval_can_submit: payload.approval_can_submit,
+      approval_override_resolution: payload.approval_override_resolution,
+      approval_explainability: payload.approval_explainability,
+    })
+  }
+
   const { handleAction } = useMaskActions(async (action: string, formData: any) => {
     if (action === 'calculate') {
       setActionLoadingKey('calculate')
       try {
-        const result = await apiClient.post<Record<string, unknown>>('/api/v1/finance/vat-return/calculate', formData ?? {})
+        const result = await apiClient.post<Record<string, unknown>>('/api/v1/finance/vat-return/calculate', {
+          period: formData?.periode,
+        })
         toast({ title: t('crud.messages.calculationCompleted'), description: t('crud.messages.ustvaAmountsRecalculated') })
-        if (result && Object.keys(result).length) {
-          Object.assign(formData, result)
-        }
+        applyVATReturnResponse(result)
       } catch (error: any) {
         const msg = error.response?.data?.detail ?? error.message
         toast({ variant: 'destructive', title: t('common.error'), description: msg })
@@ -442,34 +496,19 @@ export default function UStVAPage(): JSX.Element {
       }
 
       try {
-        const response = await fetch(`/api/v1/finance/ustva/${formData.id}/approve`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          },
+        const response = await apiClient.post(`/api/v1/finance/vat-return/${formData.id}/approve`, {
+          approved_by: currentActor,
         })
-
-        if (response.ok) {
-          toast({
-            title: t('crud.messages.approvalSuccess'),
-            description: t('crud.messages.ustvaApproved'),
-          })
-          // Refresh data
-          window.location.reload()
-        } else {
-          const error = await response.json()
-          toast({
-            variant: 'destructive',
-            title: t('crud.messages.approvalError'),
-            description: error.detail || t('common.unknownError'),
-          })
-        }
-      } catch (error) {
+        applyVATReturnResponse(response)
+        toast({
+          title: t('crud.messages.approvalSuccess'),
+          description: t('crud.messages.ustvaApproved'),
+        })
+      } catch (error: any) {
         toast({
           variant: 'destructive',
           title: t('crud.messages.networkError'),
-          description: t('crud.messages.networkErrorDesc'),
+          description: error.response?.data?.detail ?? t('crud.messages.networkErrorDesc'),
         })
       }
     } else if (action === 'submit') {
@@ -478,9 +517,28 @@ export default function UStVAPage(): JSX.Element {
         showValidationToast(errors)
         return
       }
+      if (!formData.id) {
+        toast({
+          variant: 'destructive',
+          title: t('common.error'),
+          description: t('crud.messages.saveUstvaFirst'),
+        })
+        return
+      }
+      if (formData.approval_can_submit !== true) {
+        toast({
+          variant: 'destructive',
+          title: t('crud.messages.validationError'),
+          description: t('crud.messages.ustvaApproved'),
+        })
+        return
+      }
 
       try {
-        await saveData(formData)
+        const response = await apiClient.post(`/api/v1/finance/vat-return/${formData.id}/submit`, {
+          submitted_by: currentActor,
+        })
+        applyVATReturnResponse(response)
         setIsDirty(false)
         toast({
           title: t('crud.messages.ustvaSubmitted'),
@@ -521,15 +579,38 @@ export default function UStVAPage(): JSX.Element {
     navigate('/finance/ustva')
   }
 
+  const effectiveData = Object.keys(workspaceData).length > 0 ? workspaceData : data
+  const approvalDecisionView = buildDecisionView(effectiveData?.approval_explainability)
+
   return (
-    <ObjectPage
-      config={ustvaConfig}
-      data={data}
-      onSave={handleSave}
-      onCancel={handleCancel}
-      isLoading={loading}
-      onAction={(key, formData) => handleAction(key, formData)}
-      loadingActionKey={actionLoadingKey}
-    />
+    <>
+      {effectiveData?.id && approvalDecisionView !== null ? (
+        <ProcessStatusPanel view={approvalDecisionView} className="mb-4 px-4 py-3">
+          <div className="mt-3 grid gap-3 md:grid-cols-3">
+            <div>
+              <div className="text-xs uppercase tracking-wide text-current/70">Workflowstatus</div>
+              <div className="mt-1 font-medium">{effectiveData.approval_status || effectiveData.status || '-'}</div>
+            </div>
+            <div>
+              <div className="text-xs uppercase tracking-wide text-current/70">Abgabefaehig</div>
+              <div className="mt-1 font-medium">{effectiveData.approval_can_submit ? 'Ja' : 'Nein'}</div>
+            </div>
+            <div>
+              <div className="text-xs uppercase tracking-wide text-current/70">Regel</div>
+              <div className="mt-1 font-medium">{effectiveData.approval_override_resolution?.rule_id || '-'}</div>
+            </div>
+          </div>
+        </ProcessStatusPanel>
+      ) : null}
+      <ObjectPage
+        config={ustvaConfig}
+        data={effectiveData}
+        onSave={handleSave}
+        onCancel={handleCancel}
+        isLoading={loading}
+        onAction={(key, formData) => handleAction(key, formData)}
+        loadingActionKey={actionLoadingKey}
+      />
+    </>
   )
 }

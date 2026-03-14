@@ -6,6 +6,8 @@ import { MaskConfig } from '@/components/mask-builder/types'
 import { getFieldsFromMaskConfig, validateFields } from '@/components/mask-builder/validation'
 import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/axios'
+import { buildDecisionView } from '@/policy/decision-view'
+import { ProcessStatusPanel } from '@/components/workflow/ProcessStatusPanel'
 
 const abschlussConfig: MaskConfig = {
   title: 'Monats-/Jahresabschluss',
@@ -244,13 +246,13 @@ const abschlussConfig: MaskConfig = {
     { key: 'export', label: 'Export', type: 'secondary' }
   ],
   api: {
-    baseUrl: '/api/v1/finance/abschluss',
+    baseUrl: '/api/v1/finance/closing-checklists',
     endpoints: {
-      list: '/api/v1/finance/abschluss',
-      get: '/api/v1/finance/abschluss/{id}',
-      create: '/api/v1/finance/abschluss',
-      update: '/api/v1/finance/abschluss/{id}',
-      delete: '/api/v1/finance/abschluss/{id}'
+      list: '/api/v1/finance/closing-checklists',
+      get: '/api/v1/finance/closing-checklists/{id}',
+      create: '/api/v1/finance/closing-checklists',
+      update: '/api/v1/finance/closing-checklists/{id}',
+      delete: '/api/v1/finance/closing-checklists/{id}'
     }
   } as any,
   permissions: ['fibu.read', 'fibu.write', 'fibu.admin']
@@ -275,6 +277,9 @@ function AbgrenzungenTable({ data: _data, onChange }: { data: any[], onChange: (
   const removePosten = (index: number) => {
     onChange(_data.filter((_, i) => i !== index))
   }
+
+  const effectiveData = Object.keys(workspaceData).length > 0 ? workspaceData : data
+  const approvalDecisionView = buildDecisionView(effectiveData?.approval_explainability)
 
   return (
     <div className="space-y-4">
@@ -439,10 +444,35 @@ export default function AbschlussPage(): JSX.Element {
   const navigate = useNavigate()
   const [isDirty, setIsDirty] = useState(false)
   const [actionLoadingKey, setActionLoadingKey] = useState<string | null>(null)
+  const [workspaceData, setWorkspaceData] = useState<any>({})
+  const currentActor = localStorage.getItem('userEmail') || localStorage.getItem('username') || 'api'
 
   const { data, loading } = useMaskData({
     apiUrl: abschlussConfig.api.baseUrl,
-    id: 'new'
+    id: 'new',
+    transformResponse: (response: any) => {
+      if (response?.data) {
+        return {
+          ...response.data,
+          id: response.data.id,
+          periode: response.data.period,
+          abschlussTyp:
+            response.data.closing_type === 'yearly'
+              ? 'jahresabschluss'
+              : response.data.closing_type === 'quarterly'
+                ? 'quartalsabschluss'
+                : 'monatsabschluss',
+          status: response.data.status,
+          abgeschlossenAm: response.data.completed_at,
+          abgeschlossenDurch: response.data.completed_by,
+          approval_status: response.data.approval_status,
+          approval_can_close: response.data.approval_can_close,
+          approval_override_resolution: response.data.approval_override_resolution,
+          approval_explainability: response.data.approval_explainability,
+        }
+      }
+      return response
+    }
   })
 
   const validate = (formData: any) => validateFields(getFieldsFromMaskConfig(abschlussConfig), formData ?? {})
@@ -454,11 +484,44 @@ export default function AbschlussPage(): JSX.Element {
     })
   }
 
+  const buildClosingActionPayload = (formData: any) => ({
+    checklist_id: formData?.id || undefined,
+    period: formData?.periode,
+    closing_type: formData?.abschlussTyp,
+    actor: currentActor,
+  })
+
+  const applyWorkspaceResponse = (response: any) => {
+    const payload = response?.data ?? response
+    if (!payload) {
+      return
+    }
+    setWorkspaceData({
+      ...payload,
+      id: payload.id,
+      periode: payload.period,
+      abschlussTyp:
+        payload.closing_type === 'yearly'
+          ? 'jahresabschluss'
+          : payload.closing_type === 'quarterly'
+            ? 'quartalsabschluss'
+            : 'monatsabschluss',
+      status: payload.status,
+      abgeschlossenAm: payload.completed_at,
+      abgeschlossenDurch: payload.completed_by,
+      approval_status: payload.approval_status,
+      approval_can_close: payload.approval_can_close,
+      approval_override_resolution: payload.approval_override_resolution,
+      approval_explainability: payload.approval_explainability,
+    })
+  }
+
   const { handleAction } = useMaskActions(async (action: string, formData: any) => {
     if (action === 'calculate') {
       setActionLoadingKey('calculate')
       try {
-        await apiClient.post('/api/v1/finance/closing/calculate', formData ?? {})
+        const response = await apiClient.post('/api/v1/finance/closing/calculate', buildClosingActionPayload(formData))
+        applyWorkspaceResponse(response)
         toast({ title: 'Berechnung abgeschlossen', description: 'Abschlusszahlen wurden berechnet.' })
       } catch (error: any) {
         toast({ variant: 'destructive', title: 'Fehler', description: error.response?.data?.detail ?? error.message })
@@ -476,7 +539,8 @@ export default function AbschlussPage(): JSX.Element {
     if (action === 'approve') {
       setActionLoadingKey('approve')
       try {
-        await apiClient.post('/api/v1/finance/closing/approve', formData ?? {})
+        const response = await apiClient.post('/api/v1/finance/closing/approve', buildClosingActionPayload(formData))
+        applyWorkspaceResponse(response)
         toast({ title: 'Abschluss freigegeben', description: 'Abschlussgenehmigung wurde erteilt.' })
       } catch (error: any) {
         toast({ variant: 'destructive', title: 'Fehler', description: error.response?.data?.detail ?? error.message })
@@ -493,7 +557,8 @@ export default function AbschlussPage(): JSX.Element {
       }
       setActionLoadingKey('close')
       try {
-        await apiClient.post('/api/v1/finance/closing/run', formData ?? {})
+        const response = await apiClient.post('/api/v1/finance/closing/run', buildClosingActionPayload(formData))
+        applyWorkspaceResponse(response)
         toast({ title: 'Abschluss durchgeführt' })
         setIsDirty(false)
         navigate('/finance/abschluss')
@@ -509,7 +574,8 @@ export default function AbschlussPage(): JSX.Element {
       if (!confirm('Abschluss sperren? Diese Aktion kann nicht rückgängig gemacht werden.')) return
       setActionLoadingKey('lock')
       try {
-        await apiClient.post('/api/v1/finance/closing/lock', formData ?? {})
+        const response = await apiClient.post('/api/v1/finance/closing/lock', buildClosingActionPayload(formData))
+        applyWorkspaceResponse(response)
         toast({ title: 'Abschluss gesperrt', description: 'Die Periode wurde endgültig gesperrt.' })
         navigate('/finance/abschluss')
       } catch (error: any) {
@@ -546,14 +612,34 @@ export default function AbschlussPage(): JSX.Element {
   }
 
   return (
-    <ObjectPage
-      config={abschlussConfig}
-      data={data}
-      onSave={handleSave}
-      onCancel={handleCancel}
-      isLoading={loading}
-      onAction={(key, formData) => handleAction(key, formData)}
-      loadingActionKey={actionLoadingKey}
-    />
+    <>
+      {effectiveData?.id && approvalDecisionView !== null ? (
+        <ProcessStatusPanel view={approvalDecisionView} className="mb-4 px-4 py-3">
+          <div className="mt-3 grid gap-3 md:grid-cols-3">
+            <div>
+              <div className="text-xs uppercase tracking-wide text-current/70">Checklistenstatus</div>
+              <div className="mt-1 font-medium">{effectiveData.status || '-'}</div>
+            </div>
+            <div>
+              <div className="text-xs uppercase tracking-wide text-current/70">Freigabestatus</div>
+              <div className="mt-1 font-medium">{effectiveData.approval_status || '-'}</div>
+            </div>
+            <div>
+              <div className="text-xs uppercase tracking-wide text-current/70">Abschliessbar</div>
+              <div className="mt-1 font-medium">{effectiveData.approval_can_close ? 'Ja' : 'Nein'}</div>
+            </div>
+          </div>
+        </ProcessStatusPanel>
+      ) : null}
+      <ObjectPage
+        config={abschlussConfig}
+        data={effectiveData}
+        onSave={handleSave}
+        onCancel={handleCancel}
+        isLoading={loading}
+        onAction={(key, formData) => handleAction(key, formData)}
+        loadingActionKey={actionLoadingKey}
+      />
+    </>
   )
 }

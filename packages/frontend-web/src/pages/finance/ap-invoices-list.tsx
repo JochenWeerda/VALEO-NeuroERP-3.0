@@ -21,6 +21,7 @@ import { useListActions } from '@/hooks/useListActions'
 import { formatDateForExport, formatCurrencyForExport } from '@/lib/export-utils'
 import { apiClient } from '@/lib/api-client'
 import { ErrorState } from '@/components/ErrorState'
+import { buildDecisionView } from '@/policy/decision-view'
 
 type APInvoice = {
   number: string
@@ -29,8 +30,14 @@ type APInvoice = {
   totalGross: number
   dueDate: string
   status: string
+  semantic_status?: string
   approvedBy?: string
   approvedAt?: string
+  approval_status?: string
+  approval_current_approvals?: number
+  approval_required_approvals?: number
+  approval_can_post?: boolean
+  approval_explainability?: unknown
 }
 
 export default function APInvoicesListPage(): JSX.Element {
@@ -93,9 +100,29 @@ export default function APInvoicesListPage(): JSX.Element {
     {
       accessorKey: 'status',
       header: t('crud.fields.status'),
-      cell: ({ row }: { row: { original: APInvoice } }) => (
-        <Badge variant="outline">{getStatusLabel(t, row.original.status, row.original.status)}</Badge>
-      ),
+      cell: ({ row }: { row: { original: APInvoice } }) => {
+        const invoice = row.original
+        const displayStatus = invoice.semantic_status ?? invoice.status
+        const decisionView = buildDecisionView(invoice.approval_explainability)
+        return (
+          <div className="space-y-1">
+            <Badge variant="outline">{getStatusLabel(t, displayStatus, displayStatus)}</Badge>
+            {typeof invoice.approval_current_approvals === 'number' &&
+            typeof invoice.approval_required_approvals === 'number' &&
+            invoice.approval_required_approvals > 0 ? (
+              <div className="text-xs text-muted-foreground">
+                {invoice.approval_current_approvals}/{invoice.approval_required_approvals} Freigaben
+              </div>
+            ) : null}
+            {decisionView !== null ? (
+              <div className={`rounded border px-2 py-1 text-xs ${decisionView.statusClassName}`}>
+                <div className="font-medium">{decisionView.statusLabel}</div>
+                <div>{decisionView.summary}</div>
+              </div>
+            ) : null}
+          </div>
+        )
+      },
     },
     {
       accessorKey: 'approvedBy',
@@ -117,25 +144,38 @@ export default function APInvoicesListPage(): JSX.Element {
           <Button variant="ghost" size="sm" onClick={() => navigate(`/finance/ap/invoices/${row.original.number}`)}>
             {t('crud.actions.view')}
           </Button>
-          {row.original.status === 'ENTWURF' && (
+          {(row.original.semantic_status ?? row.original.status) === 'ENTWURF' && (
             <Button
               variant="outline"
               size="sm"
               onClick={async () => {
                 try {
-                  await apiClient.post(`/api/v1/finance/ap/invoices/${row.original.number}/approve?approved_by=current_user`)
-                  toast({ title: t('common.success'), description: t('finance.apInvoices.approveSuccess') })
+                  await apiClient.post('/api/v1/ap/approval-workflow/request', {
+                    invoice_id: row.original.number,
+                    requested_by: 'current_user',
+                  })
+                  toast({
+                    title: t('common.success'),
+                    description: t('finance.apInvoices.requestApprovalSuccess', {
+                      defaultValue: 'Freigabe wurde angefordert',
+                    }),
+                  })
                   await refetch()
-                } catch {
-                  toast({ title: t('common.error'), description: t('finance.apInvoices.approveError'), variant: 'destructive' })
+                } catch (e: any) {
+                  const msg =
+                    e?.response?.data?.detail ||
+                    t('finance.apInvoices.requestApprovalError', {
+                      defaultValue: 'Freigabeanforderung fehlgeschlagen',
+                    })
+                  toast({ title: t('common.error'), description: msg, variant: 'destructive' })
                 }
               }}
             >
               <CheckCircle2 className="h-4 w-4 mr-1" />
-              {t('finance.apInvoices.approve')}
+              {t('finance.apInvoices.requestApproval', { defaultValue: 'Freigabe anfordern' })}
             </Button>
           )}
-          {row.original.status === 'FREIGEGEBEN' && (
+          {row.original.approval_can_post === true && (
             <Button
               variant="outline"
               size="sm"
@@ -166,6 +206,10 @@ export default function APInvoicesListPage(): JSX.Element {
       type: 'select',
       options: [
         { value: 'ENTWURF', label: t('status.draft') },
+        {
+          value: 'ZUR_FREIGABE',
+          label: t('finance.apInvoices.pendingApproval', { defaultValue: 'Zur Freigabe' }),
+        },
         { value: 'FREIGEGEBEN', label: t('status.approved') },
         { value: 'VERBUCHT', label: t('status.posted') },
         { value: 'BEZAHLT', label: t('status.paid') },
