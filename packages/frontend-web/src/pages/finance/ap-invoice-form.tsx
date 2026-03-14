@@ -13,10 +13,12 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
 import { BelegFlowPanel } from '@/features/flows/BelegFlowPanel'
-import ApprovalPanel from '@/features/workflow/ApprovalPanel'
+import APInvoiceApprovalPanel from '@/features/workflow/APInvoiceApprovalPanel'
 import { getEntityTypeLabel, getSuccessMessage, getErrorMessage } from '@/features/crud/utils/i18n-helpers'
 import { Save, X } from 'lucide-react'
 import { apiClient } from '@/lib/api-client'
+import { buildDecisionView } from '@/policy/decision-view'
+import { ProcessStatusPanel } from '@/components/workflow/ProcessStatusPanel'
 
 const ISO_DATE_LENGTH = 10
 const DAYS_IN_MS = 24 * 60 * 60 * 1000
@@ -32,6 +34,11 @@ type APInvoice = {
   dueDate: string
   status: string
   notes?: string
+  approval_status?: string
+  approval_current_approvals?: number
+  approval_required_approvals?: number
+  approval_can_post?: boolean
+  approval_explainability?: unknown
   lines: Array<{
     article: string
     qty: number
@@ -70,22 +77,27 @@ export default function APInvoiceFormPage(): JSX.Element {
   })
 
   const [loading, setLoading] = useState(false)
+  const approvalDecisionView = buildDecisionView(invoice.approval_explainability)
+
+  async function loadInvoice(invoiceId: string, showErrorToast = true): Promise<void> {
+    setLoading(true)
+    try {
+      const { data } = await apiClient.get<APInvoice>(`/api/v1/finance/ap/invoices/${invoiceId}`)
+      setInvoice((prev) => ({ ...prev, ...data }))
+    } catch {
+      if (showErrorToast) {
+        push(getErrorMessage(t, 'load', entityType))
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
     let active = true
     async function load(): Promise<void> {
-      if (!id) return
-      setLoading(true)
-      try {
-        const { data } = await apiClient.get<APInvoice>(`/api/v1/finance/ap/invoices/${id}`)
-        if (active && data) {
-          setInvoice((prev) => ({ ...prev, ...data }))
-        }
-      } catch {
-        push(getErrorMessage(t, 'load', entityType))
-      } finally {
-        if (active) setLoading(false)
-      }
+      if (!id || !active) return
+      await loadInvoice(id)
     }
     void load()
     return () => {
@@ -116,6 +128,23 @@ export default function APInvoiceFormPage(): JSX.Element {
     }
   }
 
+  async function postInvoice(): Promise<void> {
+    if (!id) return
+    setLoading(true)
+    try {
+      await apiClient.post(`/api/v1/finance/ap/invoices/${id}/post?posted_by=current_user`)
+      push(t('finance.apInvoices.postSuccess', { defaultValue: 'Eingangsrechnung verbucht' }))
+      await loadInvoice(id, false)
+    } catch (error: any) {
+      push(
+        error?.response?.data?.detail ||
+          t('finance.apInvoices.postError', { defaultValue: 'Verbuchen fehlgeschlagen' })
+      )
+    } finally {
+      setLoading(false)
+    }
+  }
+
   // Eingangsrechnung ist End-Beleg, keine Folgebelege
   const nextTypes: Array<{ to: string; label: string }> = []
 
@@ -126,7 +155,7 @@ export default function APInvoiceFormPage(): JSX.Element {
           id: invoice.number,
           type: entityTypeLabel,
           number: invoice.number,
-          status: t('status.draft'),
+          status: invoice.approval_status || invoice.status || t('status.draft'),
         }}
         nextTypes={nextTypes}
         onCreateFollowUp={(): void => {
@@ -134,7 +163,44 @@ export default function APInvoiceFormPage(): JSX.Element {
         }}
       />
 
-      <ApprovalPanel domain="finance" doc={invoice} />
+      {id ? (
+        <APInvoiceApprovalPanel
+          invoiceId={id}
+          canRequestApproval={invoice.status === 'ENTWURF'}
+          canPost={invoice.status !== 'VERBUCHT'}
+          onPosted={postInvoice}
+          onStatusChanged={async () => {
+            await loadInvoice(id, false)
+          }}
+        />
+      ) : null}
+
+      {id && invoice.approval_status ? (
+        <Card className="p-4">
+          <div className="grid gap-3 md:grid-cols-3">
+            <div className="rounded-md border p-3">
+              <div className="text-xs uppercase text-muted-foreground">Workflow-Status</div>
+              <div className="mt-1 font-medium">{invoice.approval_status}</div>
+            </div>
+            <div className="rounded-md border p-3">
+              <div className="text-xs uppercase text-muted-foreground">Freigaben</div>
+              <div className="mt-1 font-medium">
+                {typeof invoice.approval_current_approvals === 'number' &&
+                typeof invoice.approval_required_approvals === 'number'
+                  ? `${invoice.approval_current_approvals}/${invoice.approval_required_approvals}`
+                  : '-'}
+              </div>
+            </div>
+            <div className="rounded-md border p-3">
+              <div className="text-xs uppercase text-muted-foreground">Buchbar</div>
+              <div className="mt-1 font-medium">{invoice.approval_can_post ? 'Ja' : 'Nein'}</div>
+            </div>
+          </div>
+          {approvalDecisionView !== null ? (
+            <ProcessStatusPanel view={approvalDecisionView} className="mt-4" />
+          ) : null}
+        </Card>
+      ) : null}
 
       <Card className="p-4">
         <div className="space-y-4">

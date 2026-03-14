@@ -11,6 +11,8 @@ import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { LeaveConfirmDialog } from '@/components/LeaveConfirmDialog'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import { validateIBAN, formatIBAN, lookupIBAN } from '@/lib/utils/iban-validator'
+import { buildDecisionView } from '@/policy/decision-view'
+import { ProcessStatusPanel } from '@/components/workflow/ProcessStatusPanel'
 
 const createZahlungslaufConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
@@ -40,10 +42,10 @@ const createZahlungslaufConfig = (t: any, entityTypeLabel: string): MaskConfig =
           type: 'select',
           required: true,
           options: [
-            { value: 'entwurf', label: t('status.draft') },
-            { value: 'freigegeben', label: t('status.approved') },
-            { value: 'ausgefuehrt', label: t('crud.fields.executed') },
-            { value: 'storniert', label: t('crud.fields.cancelled') }
+            { value: 'draft', label: t('status.draft') },
+            { value: 'approved', label: t('status.approved') },
+            { value: 'executed', label: t('crud.fields.executed') },
+            { value: 'cancelled', label: t('crud.fields.cancelled') }
           ]
         },
         {
@@ -172,11 +174,20 @@ const createZahlungslaufConfig = (t: any, entityTypeLabel: string): MaskConfig =
           })
           return
         }
+        if (data.approval_status !== 'executed') {
+          toast({
+            variant: 'destructive',
+            title: t('crud.messages.validationError'),
+            description: t('crud.messages.paymentRunMustBeApproved')
+          })
+          return
+        }
         try {
+          const actor = localStorage.getItem('userEmail') || localStorage.getItem('username') || 'api'
           const response = await fetch(`/api/v1/finance/payment-runs/${data.id}/approve`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({})
+            body: JSON.stringify({ approved_by: actor })
           })
           if (response.ok) {
             toast({
@@ -239,7 +250,7 @@ const createZahlungslaufConfig = (t: any, entityTypeLabel: string): MaskConfig =
           })
           return
         }
-        if (data.status !== 'freigegeben' && data.status !== 'approved') {
+        if (data.approval_can_execute !== true) {
           toast({
             variant: 'destructive',
             title: t('crud.messages.validationError'),
@@ -249,10 +260,11 @@ const createZahlungslaufConfig = (t: any, entityTypeLabel: string): MaskConfig =
         }
         try {
           // Execute payment run (generates SEPA XML and updates status)
+          const actor = localStorage.getItem('userEmail') || localStorage.getItem('username') || 'api'
           const executeResponse = await fetch(`/api/v1/finance/payment-runs/${data.id}/execute`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({})
+            body: JSON.stringify({ executed_by: actor })
           })
           if (!executeResponse.ok) {
             throw new Error(await executeResponse.text())
@@ -531,6 +543,7 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
   const navigate = useNavigate()
   const [isDirty, setIsDirty] = useState(false)
   const [formData, setFormData] = useState<any>({})
+  const currentActor = localStorage.getItem('userEmail') || localStorage.getItem('username') || 'api'
   const entityType = 'paymentRun'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Zahlungslauf Kreditoren')
   const zahlungslaufConfig = createZahlungslaufConfig(t, entityTypeLabel)
@@ -555,7 +568,11 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
           freigegebenAm: response.data.approved_at,
           freigegebenDurch: response.data.approved_by,
           ausgefuehrtAm: response.data.executed_at,
-          notizen: response.data.notes
+          notizen: response.data.notes,
+          approval_status: response.data.approval_status,
+          approval_can_execute: response.data.approval_can_execute,
+          approval_override_resolution: response.data.approval_override_resolution,
+          approval_explainability: response.data.approval_explainability
         }
       }
       return response
@@ -651,6 +668,7 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
           },
+          body: JSON.stringify({ approved_by: currentActor }),
         })
 
         if (response.ok) {
@@ -698,6 +716,14 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
         })
         return
       }
+      if (formData.approval_status !== 'executed') {
+        toast({
+          variant: 'destructive',
+          title: t('crud.messages.validationError'),
+          description: t('crud.messages.paymentRunMustBeApproved'),
+        })
+        return
+      }
       window.open(`/api/v1/finance/payment-runs/${formData.id}/sepa-xml`, '_blank')
     }
   })
@@ -711,14 +737,34 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
   }
 
   const blocker = useUnsavedChanges(isDirty)
+  const effectiveData = data || formData
+  const approvalDecisionView = buildDecisionView(effectiveData?.approval_explainability)
 
   return (
     <>
       <ModuleToolbar backTarget="/finance/zahlungslauf-kreditoren" closeTarget="/finance/zahlungslauf-kreditoren" title={entityTypeLabel} />
       <LeaveConfirmDialog blocker={blocker} onSave={() => handleSave(formData)} title={t('crud.messages.unsavedChanges', { defaultValue: 'Ungespeicherte Änderungen' })} description={t('crud.messages.unsavedChangesDescription', { defaultValue: 'Möchten Sie speichern, verwerfen oder hier bleiben?' })} />
+      {effectiveData?.id && approvalDecisionView !== null ? (
+        <ProcessStatusPanel view={approvalDecisionView} className="mb-4 px-4 py-3">
+          <div className="mt-3 grid gap-3 md:grid-cols-3">
+            <div>
+              <div className="text-xs uppercase tracking-wide text-current/70">Workflowstatus</div>
+              <div className="mt-1 font-medium">{effectiveData.approval_status || effectiveData.status || '-'}</div>
+            </div>
+            <div>
+              <div className="text-xs uppercase tracking-wide text-current/70">Ausfuehrbar</div>
+              <div className="mt-1 font-medium">{effectiveData.approval_can_execute ? 'Ja' : 'Nein'}</div>
+            </div>
+            <div>
+              <div className="text-xs uppercase tracking-wide text-current/70">Regel</div>
+              <div className="mt-1 font-medium">{effectiveData.approval_override_resolution?.rule_id || '-'}</div>
+            </div>
+          </div>
+        </ProcessStatusPanel>
+      ) : null}
       <ObjectPage
         config={zahlungslaufConfig}
-        data={data || formData}
+        data={effectiveData}
         onChange={handleFormChange}
         onSave={handleSave}
         onCancel={handleCancel}

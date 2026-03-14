@@ -8,10 +8,13 @@ import { getFieldsFromMaskConfig, validateFields } from '@/components/mask-build
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { lookupIBAN, formatIBAN, validateIBAN } from '@/lib/utils/iban-validator'
 import { toast } from '@/hooks/use-toast'
-import { apiClient } from '@/lib/axios'
+import { apiClient } from '@/lib/api-client'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { LeaveConfirmDialog } from '@/components/LeaveConfirmDialog'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
+import { Card } from '@/components/ui/card'
+import { buildDecisionView } from '@/policy/decision-view'
+import { ProcessStatusPanel } from '@/components/workflow/ProcessStatusPanel'
 
 const createLastschriftenConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
@@ -27,13 +30,13 @@ const createLastschriftenConfig = (t: any, entityTypeLabel: string): MaskConfig 
           label: t('crud.fields.runNumber'),
           type: 'text',
           required: true,
-          placeholder: t('crud.tooltips.placeholders.directDebitRunNumber')
+          placeholder: t('crud.tooltips.placeholders.directDebitRunNumber'),
         },
         {
           name: 'ausfuehrungsDatum',
           label: t('crud.fields.executionDate'),
           type: 'date',
-          required: true
+          required: true,
         },
         {
           name: 'status',
@@ -42,27 +45,28 @@ const createLastschriftenConfig = (t: any, entityTypeLabel: string): MaskConfig 
           required: true,
           options: [
             { value: 'entwurf', label: t('status.draft') },
+            { value: 'zur_freigabe', label: t('finance.apInvoices.pendingApproval', { defaultValue: 'Zur Freigabe' }) },
             { value: 'freigegeben', label: t('status.approved') },
             { value: 'ausgefuehrt', label: t('crud.fields.executed') },
-            { value: 'storniert', label: t('crud.fields.cancelled') }
-          ]
+            { value: 'storniert', label: t('crud.fields.cancelled') },
+          ],
         },
         {
           name: 'gesamtBetrag',
           label: t('crud.fields.totalAmount'),
           type: 'number',
           readonly: true,
-          step: 0.01
+          step: 0.01,
         },
         {
           name: 'anzahlLastschriften',
           label: t('crud.fields.numberOfDirectDebits'),
           type: 'number',
-          readonly: true
-        }
+          readonly: true,
+        },
       ],
       layout: 'grid',
-      columns: 2
+      columns: 2,
     },
     {
       key: 'creditor',
@@ -73,14 +77,14 @@ const createLastschriftenConfig = (t: any, entityTypeLabel: string): MaskConfig 
           label: t('crud.fields.creditorId'),
           type: 'text',
           required: true,
-          placeholder: t('crud.tooltips.placeholders.creditorId')
+          placeholder: t('crud.tooltips.placeholders.creditorId'),
         },
         {
           name: 'auftraggeberName',
           label: t('crud.fields.originatorName'),
           type: 'text',
           required: true,
-          placeholder: t('crud.tooltips.placeholders.companyName')
+          placeholder: t('crud.tooltips.placeholders.companyName'),
         },
         {
           name: 'auftraggeberIban',
@@ -88,14 +92,14 @@ const createLastschriftenConfig = (t: any, entityTypeLabel: string): MaskConfig 
           type: 'text',
           required: true,
           pattern: '^[A-Z]{2}\\d{2}[A-Z0-9]{11,30}$',
-          placeholder: t('crud.tooltips.placeholders.iban')
-        }
-      ]
+          placeholder: t('crud.tooltips.placeholders.iban'),
+        },
+      ],
     },
     {
       key: 'lastschriften',
       label: t('crud.fields.directDebits'),
-      fields: []
+      fields: [],
     } as any,
     {
       key: 'lastschriften_custom',
@@ -110,11 +114,11 @@ const createLastschriftenConfig = (t: any, entityTypeLabel: string): MaskConfig 
               ..._data,
               lastschriften,
               gesamtBetrag,
-              anzahlLastschriften: lastschriften.length
+              anzahlLastschriften: lastschriften.length,
             })
           }}
         />
-      )
+      ),
     },
     {
       key: 'freigabe',
@@ -124,23 +128,23 @@ const createLastschriftenConfig = (t: any, entityTypeLabel: string): MaskConfig 
           name: 'freigegebenAm',
           label: t('crud.fields.approvedOn'),
           type: 'date',
-          readonly: true
+          readonly: true,
         },
         {
           name: 'freigegebenDurch',
           label: t('crud.fields.approvedBy'),
           type: 'text',
-          readonly: true
+          readonly: true,
         },
         {
           name: 'ausgefuehrtAm',
           label: t('crud.fields.executedOn'),
           type: 'date',
-          readonly: true
-        }
+          readonly: true,
+        },
       ],
       layout: 'grid',
-      columns: 2
+      columns: 2,
     },
     {
       key: 'notizen',
@@ -150,10 +154,10 @@ const createLastschriftenConfig = (t: any, entityTypeLabel: string): MaskConfig 
           name: 'notizen',
           label: t('crud.fields.internalNotes'),
           type: 'textarea',
-          placeholder: t('crud.tooltips.placeholders.directDebitRunNotes')
-        }
-      ]
-    }
+          placeholder: t('crud.tooltips.placeholders.directDebitRunNotes'),
+        },
+      ],
+    },
   ],
   actions: [
     { key: 'add-direct-debit', label: t('crud.actions.addDirectDebit'), type: 'secondary' },
@@ -161,7 +165,7 @@ const createLastschriftenConfig = (t: any, entityTypeLabel: string): MaskConfig 
     { key: 'preview', label: t('crud.actions.sepaPreview'), type: 'secondary' },
     { key: 'approve', label: t('crud.actions.approve'), type: 'primary' },
     { key: 'execute', label: t('crud.actions.execute'), type: 'primary' },
-    { key: 'export', label: t('crud.actions.sepaExport'), type: 'secondary' }
+    { key: 'export', label: t('crud.actions.sepaExport'), type: 'secondary' },
   ],
   api: {
     baseUrl: '/api/v1/finance/direct-debits',
@@ -170,42 +174,42 @@ const createLastschriftenConfig = (t: any, entityTypeLabel: string): MaskConfig 
       get: '/api/v1/finance/direct-debits/{id}',
       create: '/api/v1/finance/direct-debits',
       update: '/api/v1/finance/direct-debits/{id}',
-      delete: '/api/v1/finance/direct-debits/{id}'
-    }
+      delete: '/api/v1/finance/direct-debits/{id}',
+    },
   } as any,
-  permissions: ['fibu.read', 'fibu.write', 'fibu.admin']
+  permissions: ['fibu.read', 'fibu.write', 'fibu.admin'],
 })
 
-// Lastschriften-Tabelle Komponente
-function LastschriftenTable({ data: _data, onChange }: { data: any[], onChange: (_data: any[]) => void }) {
+function LastschriftenTable({ data: _data, onChange }: { data: any[]; onChange: (_data: any[]) => void }) {
   const { t } = useTranslation()
+
   const addLastschrift = () => {
-    onChange([..._data, {
-      debitorId: '',
-      debitorName: '',
-      iban: '',
-      bic: '',
-      betrag: 0,
-      mandatReferenz: '',
-      mandatDatum: '',
-      verwendungszweck: '',
-      sequenzTyp: 'FRST',
-      opReferenz: ''
-    }])
+    onChange([
+      ..._data,
+      {
+        debitorId: '',
+        debitorName: '',
+        iban: '',
+        bic: '',
+        betrag: 0,
+        mandatReferenz: '',
+        mandatDatum: '',
+        verwendungszweck: '',
+        sequenzTyp: 'FRST',
+        opReferenz: '',
+      },
+    ])
   }
 
   const updateLastschrift = async (index: number, field: string, value: any) => {
     const newData = [..._data]
-    
-    // Format IBAN if field is iban
+
     if (field === 'iban' && value) {
       const normalized = value.replace(/\s/g, '').replace(/-/g, '').toUpperCase()
       const formatted = formatIBAN(normalized)
       newData[index] = { ...newData[index], [field]: formatted }
-      
-      // Auto-lookup IBAN when it changes and seems complete
+
       if (normalized.length >= 15 && normalized.length <= 34 && validateIBAN(normalized)) {
-        // Debounce IBAN lookup
         setTimeout(async () => {
           try {
             const result = await lookupIBAN(normalized)
@@ -214,16 +218,17 @@ function LastschriftenTable({ data: _data, onChange }: { data: any[], onChange: 
               updatedData[index] = {
                 ...updatedData[index],
                 iban: formatted,
-                bic: result.bic || updatedData[index].bic
+                bic: result.bic || updatedData[index].bic,
               }
               onChange(updatedData)
-              toast.success(t('crud.messages.ibanLookupSuccess', {
-                defaultValue: 'BIC automatisch ausgefüllt',
-                bankName: result.bank_name || ''
-              }))
+              toast.success(
+                t('crud.messages.ibanLookupSuccess', {
+                  defaultValue: 'BIC automatisch ausgefuellt',
+                  bankName: result.bank_name || '',
+                }),
+              )
             }
           } catch (error) {
-            // Silent error for auto-lookup
             console.warn('IBAN lookup failed:', error)
           }
         }, 1000)
@@ -231,7 +236,7 @@ function LastschriftenTable({ data: _data, onChange }: { data: any[], onChange: 
     } else {
       newData[index] = { ...newData[index], [field]: value }
     }
-    
+
     onChange(newData)
   }
 
@@ -243,10 +248,7 @@ function LastschriftenTable({ data: _data, onChange }: { data: any[], onChange: 
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">{t('crud.fields.directDebits')}</h3>
-        <button
-          onClick={addLastschrift}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
+        <button onClick={addLastschrift} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
           + {t('crud.actions.addDirectDebit')}
         </button>
       </div>
@@ -361,11 +363,8 @@ function LastschriftenTable({ data: _data, onChange }: { data: any[], onChange: 
                   />
                 </td>
                 <td className="px-4 py-2 border">
-                  <button
-                    onClick={() => removeLastschrift(index)}
-                    className="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700"
-                  >
-                    ✕
+                  <button onClick={() => removeLastschrift(index)} className="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700">
+                    x
                   </button>
                 </td>
               </tr>
@@ -387,16 +386,21 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Lastschriften Debitoren')
   const lastschriftenConfig = createLastschriftenConfig(t, entityTypeLabel)
 
-  const { data, loading, saveData, updateData } = useMaskData({
+  const { data, loading, saveData, setData } = useMaskData({
     apiUrl: lastschriftenConfig.api.baseUrl,
-    id: 'new'
+    id: 'new',
   })
+
   const initialFormData = {
     laufNummer: '',
     ausfuehrungsDatum: new Date().toISOString().slice(0, 10),
     gesamtBetrag: 0,
     anzahlLastschriften: 0,
     status: 'entwurf',
+    approval_status: 'draft',
+    approval_can_execute: false,
+    approval_override_resolution: null,
+    approval_explainability: null,
     freigegebenAm: '',
     freigegebenDurch: '',
     ausgefuehrtAm: '',
@@ -407,18 +411,17 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
     notizen: '',
   }
   const safeFormData = { ...initialFormData, ...(data ?? formData ?? {}) }
+  const approvalDecisionView = buildDecisionView(safeFormData.approval_explainability)
 
-  const validate = (formData: any) => validateFields(getFieldsFromMaskConfig(lastschriftenConfig), formData ?? {})
+  const validate = (currentFormData: any) => validateFields(getFieldsFromMaskConfig(lastschriftenConfig), currentFormData ?? {})
   const showValidationToast = (errors: Record<string, string>) => {
     toast({ variant: 'destructive', title: t('crud.messages.validationError'), description: `${Object.keys(errors).length} Feld(er) muessen korrigiert werden.` })
   }
 
-  // Handle form data changes for IBAN lookup
   const handleFormChange = (newData: any) => {
     setFormData(newData)
     setIsDirty(true)
-    
-    // Auto-lookup Auftraggeber-IBAN when it changes
+
     const auftraggeberIban = newData?.auftraggeberIban
     if (auftraggeberIban && auftraggeberIban.replace(/\s/g, '').length >= 15) {
       const normalized = auftraggeberIban.replace(/\s/g, '').replace(/-/g, '').toUpperCase()
@@ -429,52 +432,82 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
             if (result.valid && result.bic) {
               const updatedData = { ...newData, auftraggeberIban: formatIBAN(normalized) }
               setFormData(updatedData)
-              updateData?.(updatedData)
-              toast.success(t('crud.messages.ibanLookupSuccess', {
-                defaultValue: 'BIC automatisch ausgefüllt',
-                bankName: result.bank_name || ''
-              }))
+              setData(updatedData)
+              toast.success(
+                t('crud.messages.ibanLookupSuccess', {
+                  defaultValue: 'BIC automatisch ausgefuellt',
+                  bankName: result.bank_name || '',
+                }),
+              )
             }
           } catch (error) {
             console.warn('IBAN lookup failed:', error)
           }
-        }, 1000) // 1 second debounce
+        }, 1000)
       }
     }
   }
 
-  const { handleAction } = useMaskActions(async (action: string, formData: any) => {
+  const { handleAction } = useMaskActions(async (action: string, currentFormData: any) => {
     if (action === 'add-direct-debit') {
-      toast({ title: 'Hinweis', description: 'Lastschriften werden direkt in der Tabelle hinzugefügt.' })
-    } else if (action === 'validate-mandates') {
-      const lastschriften: any[] = formData?.lastschriften ?? []
+      toast({ title: 'Hinweis', description: 'Lastschriften werden direkt in der Tabelle hinzugefuegt.' })
+      return
+    }
+
+    if (action === 'validate-mandates') {
+      const lastschriften: any[] = currentFormData?.lastschriften ?? []
       const errors: string[] = []
       lastschriften.forEach((ls: any, idx: number) => {
         if (!ls.iban) errors.push(`Zeile ${idx + 1}: IBAN fehlt`)
         if (!ls.bic) errors.push(`Zeile ${idx + 1}: BIC fehlt`)
         if (!ls.mandatReferenz) errors.push(`Zeile ${idx + 1}: Mandat-Referenz fehlt`)
         if (!ls.mandatDatum) errors.push(`Zeile ${idx + 1}: Mandat-Datum fehlt`)
-        if (!ls.debitor) errors.push(`Zeile ${idx + 1}: Debitor fehlt`)
+        if (!ls.debitorId) errors.push(`Zeile ${idx + 1}: Debitor fehlt`)
       })
       if (lastschriften.length === 0) {
-        toast({ title: 'Mandatsprüfung', description: 'Keine Lastschriften vorhanden.', variant: 'destructive' })
+        toast({ title: 'Mandatspruefung', description: 'Keine Lastschriften vorhanden.', variant: 'destructive' })
       } else if (errors.length > 0) {
-        toast({ title: `Mandatsprüfung: ${errors.length} Fehler`, description: errors.slice(0, 3).join(' | '), variant: 'destructive' })
+        toast({ title: `Mandatspruefung: ${errors.length} Fehler`, description: errors.slice(0, 3).join(' | '), variant: 'destructive' })
       } else {
-        toast({ title: 'Mandatsprüfung erfolgreich', description: `${lastschriften.length} Mandate geprüft — alle vollständig.` })
+        toast({ title: 'Mandatspruefung erfolgreich', description: `${lastschriften.length} Mandate geprueft - alle vollstaendig.` })
       }
-    } else if (action === 'preview') {
-      // SEPA-Vorschau
-      window.open('/api/v1/finance/direct-debits/preview', '_blank')
-    } else if (action === 'approve') {
-      const errors = validate(formData)
+      return
+    }
+
+    if (action === 'preview') {
+      toast({
+        title: 'Hinweis',
+        description: 'Fuer Direct Debits existiert im Wave-1-Contract kein separater Preview-Endpoint.',
+      })
+      return
+    }
+
+    if (action === 'approve') {
+      const errors = validate(currentFormData)
       if (Object.keys(errors).length > 0) {
         showValidationToast(errors)
         return
       }
+
       setActionLoadingKey('approve')
       try {
-        await saveData({ ...formData, status: 'freigegeben', freigegebenAm: new Date().toISOString() })
+        const runId = currentFormData?.id
+        if (runId) {
+          const response = await apiClient.post(`/api/v1/finance/direct-debits/${runId}/approve`, {
+            approved_by: currentFormData?.freigegebenDurch ?? 'current-user',
+          })
+          setData(response.data)
+        } else {
+          const created = await saveData({ ...currentFormData, status: 'zur_freigabe' })
+          const createdId = created?.id
+          if (!createdId) {
+            throw new Error('Direct debit run could not be created')
+          }
+          const response = await apiClient.post(`/api/v1/finance/direct-debits/${createdId}/approve`, {
+            approved_by: currentFormData?.freigegebenDurch ?? 'current-user',
+          })
+          setData(response.data)
+        }
         setIsDirty(false)
         toast({ title: 'Freigegeben', description: 'Lastschriftlauf wurde freigegeben.' })
       } catch (error: any) {
@@ -483,41 +516,62 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
       } finally {
         setActionLoadingKey(null)
       }
-    } else if (action === 'execute') {
-      const errors = validate(formData)
+      return
+    }
+
+    if (action === 'execute') {
+      const errors = validate(currentFormData)
       if (Object.keys(errors).length > 0) {
         showValidationToast(errors)
         return
       }
+
       setActionLoadingKey('execute')
       try {
-        await apiClient.post('/api/v1/finance/direct-debit/run', formData ?? {})
-        toast({ title: t('crud.messages.executed', { defaultValue: 'Zahlungslauf ausgeführt' }) })
+        const runId = currentFormData?.id
+        if (runId) {
+          const response = await apiClient.post(`/api/v1/finance/direct-debits/${runId}/execute`, {})
+          setData(response.data)
+        } else {
+          const created = await saveData({ ...currentFormData, status: 'zur_freigabe' })
+          const createdId = created?.id
+          if (!createdId) {
+            throw new Error('Direct debit run could not be created')
+          }
+          await apiClient.post(`/api/v1/finance/direct-debits/${createdId}/approve`, {
+            approved_by: currentFormData?.freigegebenDurch ?? 'current-user',
+          })
+          const response = await apiClient.post(`/api/v1/finance/direct-debits/${createdId}/execute`, {})
+          setData(response.data)
+        }
+        toast({ title: t('crud.messages.executed', { defaultValue: 'Zahlungslauf ausgefuehrt' }) })
         setIsDirty(false)
-        navigate('/finance/lastschriften-debitoren')
       } catch (error: any) {
         const msg = error.response?.data?.detail ?? error.message
         toast({ variant: 'destructive', title: t('common.error'), description: msg })
       } finally {
         setActionLoadingKey(null)
       }
-    } else if (action === 'export') {
-      setActionLoadingKey('export')
-      try {
-        const res = await apiClient.post<{ url?: string }>('/api/v1/export/list', { entity: 'direct_debit', format: 'sepa' })
-        if (res?.url) window.open(res.url, '_blank')
-        toast({ title: t('crud.actions.sepaExport'), description: t('crud.messages.exportCreated', { defaultValue: 'Export erstellt' }) })
-      } catch (error: any) {
-        const msg = error.response?.data?.detail ?? error.message
-        toast({ variant: 'destructive', title: t('common.error'), description: msg })
-      } finally {
-        setActionLoadingKey(null)
-      }
+      return
+    }
+
+    if (action === 'export') {
+      toast({
+        title: 'Hinweis',
+        description: 'Ein SEPA-Export ist fuer Direct Debits im Wave-1-Contract noch nicht vorhanden.',
+      })
     }
   })
 
-  const handleSave = async (formData: any) => {
-    await handleAction('execute', formData)
+  const handleSave = async (currentFormData: any) => {
+    const errors = validate(currentFormData)
+    if (Object.keys(errors).length > 0) {
+      showValidationToast(errors)
+      return
+    }
+
+    await saveData({ ...currentFormData, status: currentFormData?.status ?? 'entwurf' })
+    setIsDirty(false)
   }
 
   const handleCancel = () => {
@@ -529,7 +583,25 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
   return (
     <>
       <ModuleToolbar backTarget="/finance/lastschriften-debitoren" closeTarget="/finance/lastschriften-debitoren" title={entityTypeLabel} />
-      <LeaveConfirmDialog blocker={blocker} onSave={() => handleSave(safeFormData)} title={t('crud.messages.unsavedChanges', { defaultValue: 'Ungespeicherte Änderungen' })} description={t('crud.messages.unsavedChangesDescription', { defaultValue: 'Möchten Sie speichern, verwerfen oder hier bleiben?' })} />
+      <LeaveConfirmDialog blocker={blocker} onSave={() => handleSave(safeFormData)} title={t('crud.messages.unsavedChanges', { defaultValue: 'Ungespeicherte Aenderungen' })} description={t('crud.messages.unsavedChangesDescription', { defaultValue: 'Moechten Sie speichern, verwerfen oder hier bleiben?' })} />
+      {approvalDecisionView !== null ? (
+        <ProcessStatusPanel view={approvalDecisionView} className="mx-4 mt-4 px-4 py-3">
+          <div className="mt-3 grid gap-3 md:grid-cols-3">
+            <div className="rounded-md border bg-white/50 p-3">
+              <div className="text-xs uppercase tracking-wide text-current/70">Workflowstatus</div>
+              <div className="mt-1 font-medium">{safeFormData.approval_status || '-'}</div>
+            </div>
+            <div className="rounded-md border bg-white/50 p-3">
+              <div className="text-xs uppercase tracking-wide text-current/70">Ausfuehrbar</div>
+              <div className="mt-1 font-medium">{safeFormData.approval_can_execute ? 'Ja' : 'Nein'}</div>
+            </div>
+            <div className="rounded-md border bg-white/50 p-3">
+              <div className="text-xs uppercase tracking-wide text-current/70">Regel</div>
+              <div className="mt-1 font-medium">{safeFormData.approval_override_resolution?.rule_id || '-'}</div>
+            </div>
+          </div>
+        </ProcessStatusPanel>
+      ) : null}
       <ObjectPage
         config={lastschriftenConfig}
         data={safeFormData}
