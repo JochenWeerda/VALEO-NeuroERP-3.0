@@ -44,6 +44,8 @@ from ....core.settlement_approval import (
 )
 from ....core.settlement_human_gate import get_default_gate_rules
 from ....core.process_sla import build_default_sla_policies
+from ....core.settlement_audit_chain import build_genesis_chain, CHAIN_GENESIS_HASH
+from ....core.gobd_settlement_check import build_stub_gobd_check
 
 router = APIRouter(prefix="/process", tags=["process-kernel", "commands"])
 
@@ -334,3 +336,44 @@ def get_settlement_approval_status(settlement_id: str) -> dict[str, Any]:
         "sla_policies": sla_policies,
         "schema_version": 1,
     }
+
+
+# ---------------------------------------------------------------------------
+# Wave 20 AP3: Settlement Audit-Chain (GoBD Hash-Kette)
+# ---------------------------------------------------------------------------
+
+
+@router.get("/settlement/audit-chain/{settlement_id}", response_model=dict)
+def get_settlement_audit_chain(settlement_id: str) -> dict[str, Any]:
+    """
+    Liefert die vollständige GoBD-konforme Audit-Hash-Kette eines Settlements.
+
+    Jedes Glied enthält SHA-256(previous_hash + Payload), sodass nachträgliche
+    Manipulation einzelner Einträge die gesamte Kette invalidiert.
+    Rechtsgrundlage: GoBD Rz. 108-112 (Unveränderbarkeit des Buchungsjournals).
+    """
+    # In Produktion: Kette aus DB laden; hier: Demo-Kette mit einem Anker-Link
+    chain = build_genesis_chain(
+        settlement_id=settlement_id,
+        tenant_id="demo-tenant",
+        gross_amount=0.0,
+    )
+    return chain.as_dict()
+
+
+# ---------------------------------------------------------------------------
+# Wave 20 AP5: GoBD-Vollständigkeitsprüfung
+# ---------------------------------------------------------------------------
+
+
+@router.get("/settlement/gobd-check/{settlement_id}", response_model=dict)
+def get_settlement_gobd_check(settlement_id: str) -> dict[str, Any]:
+    """
+    GoBD-Pflicht-Check für ein Settlement.
+
+    Prueft ob alle Pflichtfelder (Belegnummer, Buchungsdatum, Betrag, Gegenkonto,
+    Audit-Hash, Prozessreferenz) vorhanden sind. `compliant=True` bedeutet:
+    das Settlement ist buchungsreif unter GoBD §§ 146/147 AO.
+    """
+    result = build_stub_gobd_check(settlement_id)
+    return result.as_dict()

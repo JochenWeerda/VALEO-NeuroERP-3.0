@@ -6,7 +6,7 @@ RESTful API for Tours with Stops, Delivery Notes, and Events
 from typing import Optional, List
 from fastapi import APIRouter, Depends, HTTPException, Query, Body
 from sqlalchemy.orm import Session
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 
 from app.core.database import get_db
@@ -26,91 +26,84 @@ router = APIRouter(prefix="/tours", tags=["Verladung", "Tours"])
 # === Pydantic Schemas ===
 
 class DriverInfo(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: Optional[str] = None
     name: Optional[str] = None
-    
-    class Config:
-        from_attributes = True
 
 
 class VehicleInfo(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: Optional[str] = None
     plate: Optional[str] = None
     type: Optional[str] = None
-    
-    class Config:
-        from_attributes = True
 
 
 class CustomerInfo(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: Optional[str] = None
     name: Optional[str] = None
-    
-    class Config:
-        from_attributes = True
 
 
 class DropoffInfo(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     address_id: Optional[str] = None
     label: Optional[str] = None
     street: Optional[str] = None
     zip: Optional[str] = None
     city: Optional[str] = None
     country: Optional[str] = None
-    
-    class Config:
-        from_attributes = True
 
 
 class TimeWindow(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     from_: Optional[datetime] = None
     to: Optional[datetime] = None
-    
-    class Config:
-        from_attributes = True
 
 
 class DeliveryNoteReference(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     order_id: Optional[str] = None
     customer_ref: Optional[str] = None
-    
-    class Config:
-        from_attributes = True
 
 
 class ItemsSummary(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     lines: Optional[int] = None
     pieces: Optional[int] = None
     weight_kg: Optional[float] = None
     volume_m3: Optional[float] = None
-    
-    class Config:
-        from_attributes = True
 
 
 class DeliveryNoteResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     dn_no: str
     status: str
     created_at: Optional[datetime] = None
     reference: Optional[DeliveryNoteReference] = None
     items_summary: Optional[ItemsSummary] = None
-    
-    class Config:
-        from_attributes = True
 
 
 class StopTotals(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     delivery_notes: int = 0
     pieces: int = 0
     weight_kg: float = 0
     volume_m3: float = 0
-    
-    class Config:
-        from_attributes = True
 
 
 class StopResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     sequence: int
     status: str
@@ -119,27 +112,22 @@ class StopResponse(BaseModel):
     time_window: Optional[TimeWindow] = None
     delivery_notes: List[DeliveryNoteResponse] = []
     totals: StopTotals = StopTotals()
-    
-    class Config:
-        from_attributes = True
 
 
 class UserInfo(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     user_id: Optional[str] = None
     name: Optional[str] = None
-    
-    class Config:
-        from_attributes = True
 
 
 class EventResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     at: datetime
     type: str
     by: Optional[UserInfo] = None
-    
-    class Config:
-        from_attributes = True
 
 
 class TourTotals(BaseModel):
@@ -151,6 +139,8 @@ class TourTotals(BaseModel):
 
 
 class TourResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     tour_no: str
     date: datetime
@@ -165,10 +155,6 @@ class TourResponse(BaseModel):
     stops: List[StopResponse] = []
     totals: TourTotals = TourTotals()
     events: List[EventResponse] = []
-    
-    class Config:
-        from_attributes = True
-
 
 class CreateTourRequest(BaseModel):
     date: datetime

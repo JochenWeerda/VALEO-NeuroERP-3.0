@@ -2,7 +2,7 @@
 CRM Pydantic Schemas
 """
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, ConfigDict
 from typing import Optional
 from datetime import datetime
 from enum import Enum
@@ -73,12 +73,11 @@ class ContactUpdate(BaseModel):
 
 
 class Contact(ContactBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     created_at: datetime
     updated_at: datetime
-
-    class Config:
-        from_attributes = True
 
 
 # --- Lead Schemas ---
@@ -120,12 +119,11 @@ class LeadUpdate(BaseModel):
 
 
 class Lead(LeadBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     created_at: datetime
     updated_at: datetime
-
-    class Config:
-        from_attributes = True
 
 
 # --- Activity Schemas ---
@@ -154,11 +152,10 @@ class ActivityUpdate(BaseModel):
 
 
 class Activity(ActivityBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     created_at: datetime
-
-    class Config:
-        from_attributes = True
 
 
 # --- BetriebsProfil Schemas ---
@@ -186,11 +183,10 @@ class BetriebsProfilUpdate(BaseModel):
 
 
 class BetriebsProfil(BetriebsProfilBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     created_at: datetime
-
-    class Config:
-        from_attributes = True
 
 
 # --- Opportunity Schemas ---
@@ -265,6 +261,8 @@ class OpportunityUpdate(BaseModel):
 
 
 class Opportunity(OpportunityBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     tenant_id: str
     status: str = "aktiv"
@@ -272,8 +270,6 @@ class Opportunity(OpportunityBase):
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
 
 
 class PipelineStageInfo(BaseModel):
@@ -308,14 +304,14 @@ class ConsentCreate(ConsentBase):
 
 
 class ConsentResponse(ConsentBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     tenant_id: str
     granted_at: Optional[datetime] = None
     revoked_at: Optional[datetime] = None
     created_at: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
 
 
 # --- Segment Schemas ---
@@ -339,12 +335,12 @@ class SegmentUpdate(BaseModel):
 
 
 class Segment(SegmentBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     tenant_id: str
     member_count: int = 0
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
 

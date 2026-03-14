@@ -9,7 +9,7 @@ from datetime import datetime
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -21,6 +21,8 @@ router = APIRouter()
 # ── Connectors ──────────────────────────────────────────────────────────────────
 
 class ConnectorOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     tenant_id: str
     connector_key: str
@@ -30,9 +32,6 @@ class ConnectorOut(BaseModel):
     is_active: bool
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
-
-    class Config:
-        from_attributes = True
 
 
 class ConnectorCreateIn(BaseModel):
@@ -196,6 +195,8 @@ async def delete_connector(
 # ── Reporting Units ─────────────────────────────────────────────────────────────
 
 class ReportingUnitOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     tenant_id: str
     unit_key: str
@@ -205,9 +206,6 @@ class ReportingUnitOut(BaseModel):
     is_active: bool
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
-
-    class Config:
-        from_attributes = True
 
 
 class ReportingUnitCreateIn(BaseModel):
@@ -377,6 +375,8 @@ async def delete_reporting_unit(
 # ── Schedules ───────────────────────────────────────────────────────────────────
 
 class ScheduleOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     tenant_id: str
     schedule_key: str
@@ -390,9 +390,6 @@ class ScheduleOut(BaseModel):
     is_active: bool
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
-
-    class Config:
-        from_attributes = True
 
 
 class ScheduleCreateIn(BaseModel):

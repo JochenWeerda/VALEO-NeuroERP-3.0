@@ -10,7 +10,7 @@ from decimal import Decimal
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -34,6 +34,8 @@ router = APIRouter()
 # ── Pydantic Models ───────────────────────────────────────────────────────────────
 
 class SelfBillingInvoiceOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     """Output-Model für Self-Billing Gutschrift."""
     id: str
     tenant_id: str
@@ -56,9 +58,6 @@ class SelfBillingInvoiceOut(BaseModel):
     created_by: Optional[str] = None
     updated_at: Optional[datetime] = None
     updated_by: Optional[str] = None
-
-    class Config:
-        from_attributes = True
 
 
 class CreditNoteCreateIn(BaseModel):

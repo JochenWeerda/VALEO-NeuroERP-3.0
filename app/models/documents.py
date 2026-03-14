@@ -3,8 +3,7 @@ SQLAlchemy Models für Dokumente
 """
 
 from sqlalchemy import Column, String, Integer, Numeric, Date, DateTime, ForeignKey, JSON, func
-from sqlalchemy.orm import relationship
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship, declarative_base
 
 Base = declarative_base()
 

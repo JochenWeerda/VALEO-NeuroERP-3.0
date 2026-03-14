@@ -4,7 +4,7 @@ Pydantic models for request/response validation
 """
 
 from typing import Optional, List
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, Field, EmailStr, ConfigDict
 from datetime import datetime
 from uuid import UUID
 
@@ -14,6 +14,8 @@ from .base import BaseSchema, PaginatedResponse
 # Tenant Schemas
 class Tenant(BaseSchema):
     """Tenant schema"""
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     name: str = Field(..., max_length=100, description="Tenant name")
     domain: str = Field(..., max_length=100, description="Tenant domain")
@@ -21,9 +23,6 @@ class Tenant(BaseSchema):
     is_active: bool
     created_at: datetime
     updated_at: Optional[datetime]
-
-    class Config:
-        from_attributes = True
 
 
 class TenantCreate(BaseSchema):
@@ -43,6 +42,8 @@ class TenantUpdate(BaseSchema):
 # User Schemas
 class User(BaseSchema):
     """User schema"""
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     username: str = Field(..., max_length=50, description="Unique username")
     email: EmailStr = Field(..., description="User email address")
@@ -55,9 +56,6 @@ class User(BaseSchema):
     last_login: Optional[datetime]
     created_at: datetime
     updated_at: Optional[datetime]
-
-    class Config:
-        from_attributes = True
 
 
 class UserCreate(BaseSchema):

@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Callable, Dict, List, Optional
+from pydantic import BaseModel, Field
 
 from app.services.workflow_guards import (
     guard_total_positive,
@@ -112,3 +113,61 @@ def register_definition(wf: WorkflowDef) -> None:
     """Registriert eine zusätzliche Workflow-Definition (z.B. aus DB/Config)."""
     _build_registry()
     _REGISTRY[(wf.domain, wf.version)] = wf
+
+
+class WorkflowStepSla(BaseModel):
+    timeout_hours: int | None = Field(default=None, ge=0)
+    escalation_roles: list[str] = Field(default_factory=list)
+
+
+class WorkflowDefinition(BaseModel):
+    process_key: str | None = Field(default=None, min_length=1)
+    version: int = Field(default=1, ge=1)
+    origin: str = Field(default="default", min_length=1)
+    tenant_id: str | None = None
+    status: str = "active"
+    steps: list[str] = Field(default_factory=list)
+    required_roles: dict[str, list[str]] = Field(default_factory=dict)
+    step_sla: dict[str, WorkflowStepSla] = Field(default_factory=dict)
+    description: str | None = None
+
+
+class WorkflowVariantsPayload(BaseModel):
+    variants: dict[str, WorkflowDefinition] = Field(default_factory=dict)
+
+
+def merge_workflow_variants(
+    defaults: dict[str, dict],
+    custom: object,
+    *,
+    tenant_id: str | None = None,
+) -> dict[str, WorkflowDefinition]:
+    merged: dict[str, WorkflowDefinition] = {}
+
+    for process_key, definition in defaults.items():
+        merged[process_key] = WorkflowDefinition.model_validate(
+            {
+                **definition,
+                "process_key": process_key,
+                "origin": "default",
+                "tenant_id": tenant_id,
+            }
+        )
+
+    if isinstance(custom, dict):
+        for process_key, definition in custom.items():
+            if not isinstance(definition, dict):
+                continue
+            base = merged.get(process_key)
+            merged[process_key] = WorkflowDefinition.model_validate(
+                {
+                    **(base.model_dump() if base else {}),
+                    **definition,
+                    "process_key": process_key,
+                    "origin": definition.get("origin")
+                    or ("tenant-override" if tenant_id else "custom"),
+                    "tenant_id": tenant_id,
+                }
+            )
+
+    return merged

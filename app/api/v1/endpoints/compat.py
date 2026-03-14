@@ -1057,6 +1057,22 @@ async def einkauf_retouren_create(payload: dict[str, Any], db: Session = Depends
 # Futter -------------------------------------------------------------------
 
 
+class FutterBulkDeleteIn(BaseModel):
+    ids: list[str] = Field(default_factory=list, min_length=1, max_length=100)
+
+
+class FutterBulkDeleteErrorOut(BaseModel):
+    id: str
+    detail: str
+
+
+class FutterBulkDeleteOut(BaseModel):
+    requested: int
+    deleted: int
+    missing_ids: list[str] = Field(default_factory=list)
+    errors: list[FutterBulkDeleteErrorOut] = Field(default_factory=list)
+
+
 @router.get("/futter/einzelfuttermittel", response_model=list)
 async def futter_einzel(db: Session = Depends(get_db)) -> list[dict[str, Any]]:
     items = db.query(ArticleModel).filter(ArticleModel.is_active == True).limit(500).all()  # noqa: E712
@@ -1215,22 +1231,6 @@ class NaehrwertBerechnungResult(BaseModel):
     omd_methode: str
     omd_fan1_pct: float
     modus: str
-
-
-class FutterBulkDeleteIn(BaseModel):
-    ids: list[str] = Field(default_factory=list, min_length=1, max_length=100)
-
-
-class FutterBulkDeleteErrorOut(BaseModel):
-    id: str
-    detail: str
-
-
-class FutterBulkDeleteOut(BaseModel):
-    requested: int
-    deleted: int
-    missing_ids: list[str] = Field(default_factory=list)
-    errors: list[FutterBulkDeleteErrorOut] = Field(default_factory=list)
 
 
 def _soft_delete_futter_articles(
@@ -3169,6 +3169,20 @@ async def create_tagesabschluss(
             )
 
     db.commit()
+
+    await _enqueue_event(
+        db,
+        event_type="cash_closing.posted",
+        aggregate_id=abschluss_id,
+        payload={
+            "cash_closing_id": abschluss_id,
+            "belegnummer": belegnummer,
+            "datum": payload.datum.isoformat(),
+            "kassierer": payload.kassierer,
+            "umsatz_gesamt": payload.umsatz_gesamt,
+        },
+        tenant_id=tenant_id,
+    )
 
     return TagesabschlussOut(
         id=abschluss_id,

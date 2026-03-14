@@ -6,20 +6,13 @@ Common Pydantic models used across all API endpoints
 from datetime import datetime
 from typing import Optional, Any, Dict, TypeVar, Generic
 from pydantic import BaseModel, Field, ConfigDict
-from uuid import UUID
 
 T = TypeVar('T')
 
 
 class BaseSchema(BaseModel):
     """Base schema with common configuration"""
-    model_config = ConfigDict(
-        from_attributes=True,
-        json_encoders={
-            datetime: lambda v: v.isoformat(),
-            UUID: str
-        }
-    )
+    model_config = ConfigDict(from_attributes=True)
 
 
 class TimestampMixin(BaseSchema):

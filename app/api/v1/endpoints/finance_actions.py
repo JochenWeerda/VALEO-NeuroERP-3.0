@@ -13,6 +13,7 @@ from sqlalchemy import text
 from pydantic import BaseModel, Field
 
 from ....core.database import get_db
+from ....core import endpoint_gateways
 from ....core.tenant import get_tenant_id
 from ....core.dependency_container import container
 from ....core.gobd_artifact import register_artifact, sha256_hex
@@ -37,6 +38,12 @@ class BankReconciliationRunRequest(BaseModel):
     """Request to run bank reconciliation"""
     bank_account_id: str = Field(..., description="Bankkonto-ID")
     statement_id: Optional[str] = Field(None, description="Optional: Kontoauszug-ID")
+
+
+class ClosingActionRequest(BaseModel):
+    period: str = Field(..., min_length=1)
+    closing_type: str = Field(..., min_length=1)
+    actor: str = Field(..., min_length=1)
 
 
 # ── Bank reconciliation run ─────────────────────────────────────────────────────
@@ -171,6 +178,30 @@ async def run_closing(
     """
     # Stub: can be extended to run period closing, close periods, etc.
     return ActionResponse(success=True, message="Abschluss angestoßen.")
+
+
+@router.post("/closing/approve", response_model=dict)
+async def approve_closing(
+    body: ClosingActionRequest,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    gateway = endpoint_gateways.get_closing_workspace_gateway()
+    if gateway is None:
+        return {
+            "status": "pending",
+            "approval_status": "pending",
+            "message": "Kein Closing-Workspace-Gateway registriert.",
+        }
+    from app.api.v1.endpoints.closing_checklists import ClosingWorkspaceRequest
+
+    request = ClosingWorkspaceRequest(
+        tenant_id=tenant_id,
+        period=body.period,
+        closing_type=body.closing_type,
+        actor=body.actor,
+    )
+    return await gateway.approve(request, db)
 
 
 # ── Credit limits ─────────────────────────────────────────────────────────────

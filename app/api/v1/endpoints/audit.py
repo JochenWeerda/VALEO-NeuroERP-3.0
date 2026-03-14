@@ -6,7 +6,7 @@ Extended audit trail for compliance (GDPR, GoBD, etc.)
 from fastapi import APIRouter, Depends, Query
 from typing import List, Optional
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from sqlalchemy.orm import Session
 import logging
 
@@ -19,6 +19,8 @@ router = APIRouter()
 
 class AuditLogEntry(BaseModel):
     """Audit log entry model."""
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     timestamp: datetime
     user_id: str
@@ -32,9 +34,6 @@ class AuditLogEntry(BaseModel):
     user_agent: Optional[str] = None
     correlation_id: Optional[str] = None
     
-    class Config:
-        from_attributes = True
-
 
 class AuditLogCreate(BaseModel):
     """Create audit log entry."""

@@ -11,7 +11,7 @@ from typing import List, Optional
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
@@ -28,6 +28,8 @@ class LohnImportRunCreate(BaseModel):
 
 
 class LohnImportRun(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     tenant_id: str
     period: str
@@ -40,9 +42,6 @@ class LohnImportRun(BaseModel):
     created_at: datetime
     updated_at: datetime
     created_by: Optional[str] = None
-
-    class Config:
-        from_attributes = True
 
 
 class LohnImportTrigger(BaseModel):

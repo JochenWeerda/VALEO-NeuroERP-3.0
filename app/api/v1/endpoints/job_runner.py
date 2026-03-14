@@ -9,7 +9,7 @@ from datetime import datetime
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -21,6 +21,8 @@ router = APIRouter()
 # ── Pydantic Models ─────────────────────────────────────────────────────────────
 
 class JobOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     tenant_id: str
     schedule_id: Optional[str] = None
@@ -32,9 +34,6 @@ class JobOut(BaseModel):
     dry_run: bool
     created_at: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
-
 
 class JobRunIn(BaseModel):
     schedule_id: Optional[str] = None
@@ -43,6 +42,8 @@ class JobRunIn(BaseModel):
 
 
 class JobArtifactOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     job_id: str
     artifact_key: str
@@ -51,9 +52,6 @@ class JobArtifactOut(BaseModel):
     file_size_bytes: Optional[int] = None
     checksum_sha256: Optional[str] = None
     created_at: Optional[datetime] = None
-
-    class Config:
-        from_attributes = True
 
 
 # ── Endpoints ───────────────────────────────────────────────────────────────────

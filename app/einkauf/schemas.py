@@ -63,12 +63,11 @@ class LieferantUpdate(BaseModel):
 
 
 class Lieferant(LieferantBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     created_at: datetime
     updated_at: datetime
-    
-    class Config:
-        from_attributes = True
 
 
 # ============================================================================
@@ -102,12 +101,11 @@ class BestellungUpdate(BaseModel):
 
 
 class Bestellung(BestellungBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     created_at: datetime
     updated_at: datetime
-    
-    class Config:
-        from_attributes = True
 
 
 # ============================================================================
@@ -176,12 +174,11 @@ class AnfragePositionCreate(BaseModel):
 
 
 class AnfragePositionResponse(AnfragePositionCreate):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     anfrage_id: str
     created_at: datetime
-
-    class Config:
-        from_attributes = True
 
 
 class AnfrageBase(BaseModel):
@@ -224,13 +221,13 @@ class AnfrageUpdate(BaseModel):
 
 
 class AnfrageResponse(AnfrageBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     positionen: List[AnfragePositionResponse] = []
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
 
 
 # ============================================================================
@@ -247,11 +244,10 @@ class RechnungseingangPositionCreate(BaseModel):
 
 
 class RechnungseingangPositionResponse(RechnungseingangPositionCreate):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     rechnungseingang_id: str
-
-    class Config:
-        from_attributes = True
 
 
 class RechnungseingangBase(BaseModel):
@@ -296,13 +292,13 @@ class RechnungseingangUpdate(BaseModel):
 
 
 class RechnungseingangResponse(RechnungseingangBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     positionen: List[RechnungseingangPositionResponse] = []
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
 
 
 # ============================================================================
@@ -350,4 +346,3 @@ class MatchResponse(CamelModel):
     variance_percentage: Decimal
     exceptions_count: int
     auto_approval_eligible: bool
-

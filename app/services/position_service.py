@@ -241,6 +241,8 @@ class PositionCalculationService:
             return SEVERITY_RED
         if qty_net < tol:
             return SEVERITY_RED
+        if qty_net < 0:
+            return SEVERITY_YELLOW
         if yellow_thr is not None and qty_net < (yellow_thr if yellow_thr else 0):
             return SEVERITY_YELLOW
         return SEVERITY_GREEN

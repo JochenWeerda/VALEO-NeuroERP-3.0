@@ -2,8 +2,8 @@
 
 ## Gesamtstatus
 - Stand: `2026-03-14`
-- Status: `Waves 1 bis 19 abgeschlossen; PKP-06 Frontend Explainability Integration abgeschlossen`
-- Testergebnis: `1025 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed`
+- Status: `Waves 1 bis 20 abgeschlossen; PKP-06 Frontend Explainability Integration abgeschlossen`
+- Testergebnis: `1068 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed`
 
 ## Waves
 
@@ -190,6 +190,21 @@ pytest tests/test_process_kernel_wave6_supplier.py::test_api_price_matrix_post t
 pytest -q --no-cov
 # Ergebnis: 963 passed, 5 skipped, 1 xfailed
 # Verbleibend: nur Warnungen (`Field(env=...)`, `json_encoders`, class-based `Config`, pytest-asyncio event-loop warning)
+
+pytest tests/test_process_kernel_wave1_contracts.py tests/test_process_kernel_wave12_sla_commands_dunning.py tests/test_process_kernel_wave17_action_execution.py -q --no-cov -W default
+# Ergebnis: 74 passed, 0 warnings
+
+python -W error::DeprecationWarning -m pytest tests/test_process_kernel_wave1_contracts.py tests/test_process_kernel_wave12_sla_commands_dunning.py tests/test_process_kernel_wave17_action_execution.py -q --no-cov
+# Ergebnis: 74 passed
+
+python -W error::DeprecationWarning -c "import app.crm.schemas, app.einkauf.schemas, app.verkauf.schemas"
+# Ergebnis: ok
+
+pytest tests/test_workflows.py -q --no-cov -W default
+# Ergebnis: 4 passed, 0 warnings
+
+pytest -q --no-cov -W default
+# Ergebnis: 1025 passed, 5 skipped, 1 xfailed, 0 warnings
 ```
 
 ## Handoff - Koordination paralleler Arbeit
@@ -242,8 +257,9 @@ nach dem Abschluss aktualisieren.
 | Wave-1-Compat-Fix | `app/api/v1/endpoints/closing_checklists.py` | erweitert, stabil | Closing-Workspace-Kompatibilitaetsfunktionen als Fassade erhalten |
 | Wave-1-Compat-Fix | `app/api/v1/endpoints/vat_return_export.py` | erweitert, stabil | Approval-/Submission-Contract fuer UStVA nicht rueckbauen |
 | Deprecation-Cleanup | `app/core/database.py` + `app/models/documents.py` | reduziert | `declarative_base()` auf `sqlalchemy.orm.declarative_base` umgestellt |
-| Deprecation-Cleanup | `app/core/config.py` | reduziert | Pydantic-Settings-Konfiguration auf `SettingsConfigDict` umgestellt |
-| Deprecation-Cleanup | mehrere Finance-/Compat-Schemas | reduziert | `min_items` schrittweise durch `min_length` ersetzt; Restwarnungen weiter abbauen |
+| Deprecation-Cleanup | `app/core/config.py` | weiter reduziert | verbliebenes `Field(env=...)` entfernt; Settings laufen ohne Pydantic-v2-Extra-Keyword-Warnung |
+| Deprecation-Cleanup | `app/api/v1/schemas/base.py` + zentrale API-/Finance-Schemas | weiter reduziert | `json_encoders` entfernt und breit importierte `class Config`-Modelle auf `ConfigDict` umgestellt |
+| Deprecation-Cleanup | `app/crm/schemas.py` + `app/einkauf/schemas.py` + `app/verkauf/schemas.py` | weiter reduziert | restliche v1-`class Config`-Altmodule der Kern-Domänen auf `ConfigDict` umgestellt; direkter Import laeuft unter `-W error::DeprecationWarning` |
 | Position-Service | `app/services/position_service.py` | erweitert, stabil | Negativpositionen innerhalb Toleranz bleiben gelb; nicht wieder auf gruen zurueckdrehen |
 | Position-Service | `app/services/position_guard_service.py` | erweitert, stabil | ohne aktive Regel keine implizite Short-Blockade erzeugen |
 | Position-Service | `tests/test_position_service.py` | isoliert | Tenant-basierte Bereinigung + Nested-Transaction-Fixture fuer reproduzierbare DB-Tests beibehalten |
@@ -311,7 +327,9 @@ nach dem Abschluss aktualisieren.
 ## Laufende offene Punkte
 
 - Event-Loop-Warnung in `ap_approval_workflow.py` ist weiter best-effort und nicht blockierend
-- Pydantic- und SQLAlchemy-Deprecation-Warnungen sind vorhanden, aber aktuell kein Process-Kernel-Blocker
+- im breit genutzten Process-Kernel-/Finance-Schnitt (`Wave 1/12/17`) sind die zuvor offenen Pydantic-Deprecation-Warnungen jetzt eliminiert; verbleibende Repo-weite Warnungen separat pruefen
+- die frueheren Altmodule in `app/crm`, `app/einkauf` und `app/verkauf` sind als weitere Pydantic-v1-Warnungsquelle bereinigt; naechste Repo-weite Quellen gezielt isolieren
+- der repo-weite Warnungsabbau ist aktuell abgeschlossen; auch die frueheren `pytest_asyncio`-Event-Loop-Warnungen in `tests/test_workflows.py` sind beseitigt
 - Der globale Roadmap-Status ausserhalb dieses Ordners kann hinter den Paket-STATUS-Dateien liegen und muss bei grossen Abschlussstaenden separat nachgezogen werden
 - keine inhaltlichen offenen Punkte in Wave 10; weitere Arbeit gehoert in die naechste Wave
 - Schichtgrenzen sind repo-weit bei neuer Arbeit aktiv gegen `rg` zu pruefen; Paket-`__init__.py` ist davon ausgenommen

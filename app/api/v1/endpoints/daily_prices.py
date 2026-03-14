@@ -10,7 +10,7 @@ from decimal import Decimal
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, UploadFile, File
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -32,6 +32,8 @@ router = APIRouter()
 # ── Pydantic Models ───────────────────────────────────────────────────────────────
 
 class DailyPriceOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     """Output-Model für Tagespreis."""
     id: str
     tenant_id: str
@@ -51,9 +53,6 @@ class DailyPriceOut(BaseModel):
     updated_at: Optional[datetime] = None
     updated_by: Optional[str] = None
 
-    class Config:
-        from_attributes = True
-
 
 class DailyPriceCreateIn(BaseModel):
     """Input-Model für Preis-Erstellung."""
@@ -72,7 +71,7 @@ class DailyPriceCreateIn(BaseModel):
 
 class DailyPriceBulkCreateIn(BaseModel):
     """Input-Model für Bulk-Import."""
-    prices: list[DailyPriceCreateIn] = Field(..., min_items=1)
+    prices: list[DailyPriceCreateIn] = Field(..., min_length=1)
 
 
 # ── Helper Functions ────────────────────────────────────────────────────────────

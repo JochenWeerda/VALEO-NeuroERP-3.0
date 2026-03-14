@@ -100,7 +100,10 @@ class PositionGuardService:
             cell = next((c for c in matrix.rows[0].cells if c.period_key == period_key), None)
             net_after = (cell.qty_net - delta_sell_qty) if cell else -delta_sell_qty
 
-        tolerance = (rule.neg_tolerance_qty if rule else None) or Decimal("0")
+        if rule is None:
+            return GuardResult(allowed=True, reason="Keine Positionsregel aktiv")
+
+        tolerance = rule.neg_tolerance_qty or Decimal("0")
         if net_after >= tolerance:
             return GuardResult(allowed=True, reason="Position innerhalb Toleranz")
 

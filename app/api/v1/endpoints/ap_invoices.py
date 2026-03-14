@@ -6,19 +6,94 @@ FIBU-AP-02: Eingangsrechnungen
 from fastapi import APIRouter, HTTPException, Depends, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
-from typing import List, Optional
+from typing import List, Optional, Any
 from datetime import datetime, timedelta
 from decimal import Decimal
+import asyncio
 import logging
 
 from app.core.database import get_db
+from app.core import endpoint_gateways
 from app.core.fibu_audit import log_fibu_audit
+from app.core.ap_approval_status import APPROVAL_STATUS_TO_DOCUMENT_STATUS
 from app.documents.models import SalesInvoice  # Reusing model structure for now
 from app.documents.router_helpers import get_repository, save_to_store, get_from_store, list_from_store, delete_from_store
+from app.domains.shared.events import get_event_publisher
+from app.domains.shared.process_events import APInvoicePosted
+from app.infrastructure.eventbus.outbox import OutboxPublisher
 from app.finance.tax_resolver import resolve_partner_country, resolve_tax_key_accounts
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/ap/invoices", tags=["finance", "ap", "invoices"])
+
+
+def _compute_ap_invoice_semantic_status(invoice: dict[str, Any]) -> str:
+    document_status = str(invoice.get("status") or "ENTWURF")
+    approval_status = invoice.get("approval_status")
+
+    if document_status in {"VERBUCHT", "BEZAHLT", "TEILWEISE_FREIGEGEBEN"}:
+        return document_status
+    if approval_status == "pending":
+        return "ZUR_FREIGABE"
+    if approval_status == "partially_approved":
+        return "TEILWEISE_FREIGEGEBEN"
+    if approval_status == "approved":
+        return "FREIGEGEBEN"
+    if approval_status == "rejected":
+        return "ABGELEHNT"
+    return document_status
+
+
+def _serialize_approval_snapshot(response) -> dict[str, Any]:
+    return {
+        "approval_status": response.status,
+        "approval_required_approvals": response.required_approvals,
+        "approval_current_approvals": response.current_approvals,
+        "approval_override_resolution": response.override_resolution.model_dump(exclude_none=True),
+        "approval_explainability": response.explainability.model_dump(exclude_none=True),
+    }
+
+
+async def _load_invoice_approval_status(invoice: dict[str, Any], db: Session):
+    gateway = endpoint_gateways.get_approval_workflow_gateway()
+    if gateway is None:
+        from app.api.v1.endpoints.ap_approval_workflow import get_approval_status
+
+        return await get_approval_status(
+            invoice["number"],
+            tenant_id=invoice.get("tenantId", "system"),
+            db=db,
+        )
+    return await gateway.get_status(invoice["number"], invoice.get("tenantId", "system"), db)
+
+
+async def _enrich_invoice_with_approval(invoice: dict[str, Any], db: Session) -> dict[str, Any]:
+    enriched = dict(invoice)
+    response = await _load_invoice_approval_status(enriched, db)
+    enriched.update(_serialize_approval_snapshot(response))
+    enriched["semantic_status"] = _compute_ap_invoice_semantic_status(enriched)
+    return enriched
+
+
+async def _store_ap_invoice_posted_event_in_outbox(
+    db,
+    *,
+    tenant_id: str,
+    invoice_id: str,
+    posted_by: str,
+    journal_entry_id: str | None,
+) -> None:
+    event = APInvoicePosted(
+        aggregate_id=invoice_id,
+        timestamp=datetime.utcnow(),
+        tenant_id=tenant_id,
+        workflow_instance_id=f"wf-ap-{invoice_id}",
+        invoice_id=invoice_id,
+        posted_by=posted_by,
+        journal_entry_id=journal_entry_id,
+    )
+    outbox = OutboxPublisher(db, get_event_publisher())
+    await outbox.store_event(event, tenant_id=tenant_id)
 
 
 # Helper to calculate totals (same as AR invoices)
@@ -63,7 +138,7 @@ async def get_ap_invoice(invoice_id: str, db: Session = Depends(get_db)) -> dict
     invoice = get_from_store("ap_invoice", invoice_id, repo)
     if not invoice:
         raise HTTPException(status_code=404, detail="AP Invoice not found")
-    return invoice
+    return await _enrich_invoice_with_approval(invoice, db)
 
 
 @router.put("/{invoice_id}")
@@ -99,17 +174,18 @@ async def list_ap_invoices(
 
     filtered_invoices = []
     for inv in all_invoices:
+        enriched = await _enrich_invoice_with_approval(inv, db)
         match = True
-        if query and not (query.lower() in inv.get("number", "").lower() or
-                         query.lower() in inv.get("customerId", "").lower() or  # customerId = supplier_id for AP
-                         query.lower() in inv.get("notes", "").lower()):
+        if query and not (query.lower() in enriched.get("number", "").lower() or
+                         query.lower() in enriched.get("customerId", "").lower() or
+                         query.lower() in enriched.get("notes", "").lower()):
             match = False
-        if status and inv.get("status", "").lower() != status.lower():
+        if status and enriched.get("semantic_status", enriched.get("status", "")).lower() != status.lower():
             match = False
-        if supplier_id and inv.get("customerId", "").lower() != supplier_id.lower():
+        if supplier_id and enriched.get("customerId", "").lower() != supplier_id.lower():
             match = False
         if match:
-            filtered_invoices.append(inv)
+            filtered_invoices.append(enriched)
 
     return filtered_invoices[skip : skip + limit]
 
@@ -138,13 +214,36 @@ async def approve_ap_invoice(
     if not invoice:
         raise HTTPException(status_code=404, detail="AP Invoice not found")
 
-    # Update status to approved
-    invoice["status"] = "FREIGEGEBEN"
+    tenant_id = invoice.get("tenantId", "system")
+    gateway = endpoint_gateways.get_approval_workflow_gateway()
+    if gateway is None:
+        from app.api.v1.endpoints.ap_approval_workflow import approve_invoice
+
+        response = await approve_invoice(
+            type("ApprovalActionCompat", (), {
+                "invoice_id": invoice_id,
+                "approved_by": approved_by,
+                "action": "approve",
+                "comment": None,
+            })(),
+            tenant_id=tenant_id,
+            db=db,
+        )
+    else:
+        current_status = await gateway.get_status(invoice_id, tenant_id, db)
+        if current_status.status == "not_requested":
+            await gateway.request_approval(invoice_id, tenant_id, approved_by, None, db)
+        response = await gateway.approve_invoice(invoice_id, tenant_id, approved_by, "approve", None, db)
+
+    invoice["status"] = APPROVAL_STATUS_TO_DOCUMENT_STATUS.get(response.status, invoice.get("status", "ENTWURF"))
     invoice["approvedBy"] = approved_by
     invoice["approvedAt"] = datetime.now().isoformat()
-
-    result = save_to_store("ap_invoice", invoice_id, invoice, repo)
-    return {"status": "ok", "message": "AP Invoice approved", "data": result}
+    save_to_store("ap_invoice", invoice_id, invoice, repo)
+    return {
+        "status": "ok",
+        "message": "AP Invoice approved",
+        "data": response.model_dump(exclude_none=True),
+    }
 
 
 @router.post("/{invoice_id}/post")
@@ -340,5 +439,17 @@ async def post_ap_invoice(
         # Continue without OP for now
 
     result = save_to_store("ap_invoice", invoice_id, invoice, repo)
+    journal_entry_id = invoice.get("journalEntryId")
+    if journal_entry_id:
+        try:
+            await _store_ap_invoice_posted_event_in_outbox(
+                db,
+                tenant_id=invoice.get("tenantId", "system"),
+                invoice_id=invoice_id,
+                posted_by=posted_by,
+                journal_entry_id=journal_entry_id,
+            )
+        except Exception as exc:
+            logger.warning("Could not store AP invoice posted outbox event: %s", exc)
     return {"status": "ok", "message": "AP Invoice posted", "data": result}
 

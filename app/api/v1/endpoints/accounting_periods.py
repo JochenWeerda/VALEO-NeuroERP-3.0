@@ -6,7 +6,7 @@ FIBU-GL-05: Periodensteuerung
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from typing import List, Optional
 from datetime import datetime, date
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 import logging
@@ -22,6 +22,8 @@ router = APIRouter()
 
 class AccountingPeriod(BaseModel):
     """Accounting period model."""
+    model_config = ConfigDict(from_attributes=True)
+
     id: Optional[str] = None
     tenant_id: str
     period: str  # YYYY-MM format
@@ -31,9 +33,6 @@ class AccountingPeriod(BaseModel):
     closed_at: Optional[datetime] = None
     closed_by: Optional[str] = None
     metadata: dict = {}
-
-    class Config:
-        from_attributes = True
 
 
 class PeriodCreate(BaseModel):

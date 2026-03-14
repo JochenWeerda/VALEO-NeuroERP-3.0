@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from decimal import Decimal
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 import logging
 
 from ....core.database import get_db
@@ -82,12 +82,11 @@ class BankAccountUpdate(BaseModel):
 
 
 class BankAccountResponse(BankAccountBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     tenant_id: Optional[str] = None
     balance: Optional[Decimal] = None
-
-    class Config:
-        from_attributes = True
 
 
 def _ensure_gl_account(

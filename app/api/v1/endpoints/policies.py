@@ -2,13 +2,16 @@
 Policy Manager API Endpoints
 """
 
-from fastapi import APIRouter, HTTPException, Body, Request
+from fastapi import APIRouter, HTTPException, Body, Request, Query, Depends
 from fastapi.responses import StreamingResponse
 from typing import List, Dict, Any
 from pydantic import BaseModel, Field
 import logging
 
 from app.middleware.rate_limit import limiter
+from app.core.database import get_db
+from app.core.explainability import ExplainabilityView, build_policy_explainability_view
+from app.core.policy_decisions import PolicyOverrideResolution
 from app.services.policy_service import (
     PolicyStore,
     PolicyEngine,
@@ -46,11 +49,31 @@ class TestResponse(BaseModel):
     """Test-Response"""
     ok: bool
     decision: Decision
+    override_resolution: PolicyOverrideResolution
+    explainability: ExplainabilityView
 
 
 class RestoreRequest(BaseModel):
     """Restore-Request (JSON-String der wiederherzustellenden Policies)."""
     json_payload: str = Field(..., alias="json", description="JSON-String der Policy-Daten")
+
+
+def resolve_tenant_policy_override(
+    db,
+    tenant_id: str,
+    rule_id: str | None,
+    base_params: dict[str, Any] | None = None,
+) -> PolicyOverrideResolution:
+    resolved_rule_id = str(rule_id or "policy.default")
+    return PolicyOverrideResolution(
+        rule_id=resolved_rule_id,
+        effective_scope="global",
+        effective_scope_key="policy-engine",
+        effective_enabled=True,
+        effective_params=dict(base_params or {}),
+        applied_reason="policy default",
+        applied_source="policy-engine",
+    )
 
 
 # Endpoints
@@ -164,7 +187,11 @@ async def delete_policy(request: DeleteRequest) -> Dict[str, Any]:
 
 
 @router.post("/policy/test", response_model=TestResponse)
-async def test_policy(request: TestRequest) -> TestResponse:
+async def test_policy(
+    request: TestRequest,
+    tenant_id: str = Query("system", description="Tenant ID"),
+    db=Depends(get_db),
+) -> TestResponse:
     """
     Test-Simulator - testet Policy-Entscheidung gegen Alert
 
@@ -177,8 +204,33 @@ async def test_policy(request: TestRequest) -> TestResponse:
     try:
         rules = policy_store.list()
         decision = PolicyEngine.decide(request.roles, request.alert, rules)
+        resolution = resolve_tenant_policy_override(
+            db,
+            tenant_id,
+            decision.ruleId,
+            base_params=decision.resolvedParams or {},
+        )
+        effective_enabled = resolution.effective_enabled
+        blocked = effective_enabled is False or decision.type == "deny"
+        needs_approval = bool(decision.needsApproval) and not blocked
+        effective_decision = decision.model_copy(
+            update={
+                "type": "deny" if blocked else decision.type,
+                "resolvedParams": dict(resolution.effective_params or decision.resolvedParams or {}),
+            }
+        )
+        explainability = build_policy_explainability_view(
+            resolution,
+            blocked=blocked,
+            needs_approval=needs_approval,
+        )
         logger.info(f"Policy test: {request.alert.kpiId} -> {decision.type}")
-        return TestResponse(ok=True, decision=decision)
+        return TestResponse(
+            ok=True,
+            decision=effective_decision,
+            override_resolution=resolution,
+            explainability=explainability,
+        )
     except Exception as e:
         logger.error(f"Failed to test policy: {e}")
         raise HTTPException(status_code=400, detail=str(e))
