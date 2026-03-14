@@ -475,10 +475,31 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
     }
 
     if (action === 'preview') {
-      toast({
-        title: 'Hinweis',
-        description: 'Fuer Direct Debits existiert im Wave-1-Contract kein separater Preview-Endpoint.',
-      })
+      const runId = currentFormData?.id
+      if (!runId) {
+        toast({ variant: 'destructive', title: t('common.error'), description: t('crud.messages.saveFirst') })
+        return
+      }
+      setActionLoadingKey('preview')
+      try {
+        const response = await apiClient.get<{
+          total_amount: number
+          debitor_count: number
+          mandate_valid_count: number
+          mandate_expired_count: number
+          sepa_ready: boolean
+        }>(`/api/v1/finance/followup/lastschriften/${runId}/preview`)
+        const preview = response.data
+        toast({
+          title: t('crud.actions.sepaPreview', { defaultValue: 'SEPA-Vorschau' }),
+          description: `${preview.debitor_count} Debitoren · ${preview.total_amount.toFixed(2)} € · ${preview.mandate_expired_count} abgelaufene Mandate`,
+        })
+      } catch (error: any) {
+        const msg = error.response?.data?.detail ?? error.message
+        toast({ variant: 'destructive', title: t('common.error'), description: msg })
+      } finally {
+        setActionLoadingKey(null)
+      }
       return
     }
 
@@ -556,10 +577,32 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
     }
 
     if (action === 'export') {
-      toast({
-        title: 'Hinweis',
-        description: 'Ein SEPA-Export ist fuer Direct Debits im Wave-1-Contract noch nicht vorhanden.',
-      })
+      const runId = currentFormData?.id
+      if (!runId) {
+        toast({ variant: 'destructive', title: t('common.error'), description: t('crud.messages.saveFirst') })
+        return
+      }
+      setActionLoadingKey('export')
+      try {
+        const response = await apiClient.post<{ export_id: string; download_url: string | null }>(
+          `/api/v1/finance/followup/lastschriften/${runId}/export`,
+          { format: 'sepa_xml' },
+        )
+        const result = response.data
+        if (result.download_url) {
+          window.open(result.download_url, '_blank')
+        } else {
+          toast({
+            title: t('crud.actions.sepaExport', { defaultValue: 'SEPA-Export gestartet' }),
+            description: `Export-ID: ${result.export_id}`,
+          })
+        }
+      } catch (error: any) {
+        const msg = error.response?.data?.detail ?? error.message
+        toast({ variant: 'destructive', title: t('common.error'), description: msg })
+      } finally {
+        setActionLoadingKey(null)
+      }
     }
   })
 

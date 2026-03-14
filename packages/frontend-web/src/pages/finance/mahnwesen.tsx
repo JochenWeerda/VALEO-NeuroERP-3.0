@@ -10,6 +10,7 @@ import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { LeaveConfirmDialog } from '@/components/LeaveConfirmDialog'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
+import { apiClient } from '@/lib/api-client'
 
 const createMahnwesenConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
@@ -226,16 +227,26 @@ export default function MahnwesenPage(): JSX.Element {
       return
     }
     if (action === 'preview') {
-      // Vorschau
-      if (!formData.id) {
+      setActionLoadingKey('preview')
+      try {
+        const response = await apiClient.get<{
+          open_items_count: number
+          total_overdue_amount: number
+          dunning_level_counts: Record<string, number>
+          export_ready: boolean
+        }>('/api/v1/finance/followup/mahnwesen/preview')
+        const preview = response.data
         toast({
-          variant: 'destructive',
-          title: t('common.error'),
-          description: t('crud.messages.saveFirst'),
+          title: t('crud.messages.dunningPreview', { defaultValue: 'Mahnwesen-Vorschau' }),
+          description: `${preview.open_items_count} offene Posten, Gesamtrückstand: ${preview.total_overdue_amount.toFixed(2)} €`,
         })
-        return
+      } catch (error: any) {
+        const msg = error.response?.data?.detail ?? error.message
+        toast({ variant: 'destructive', title: t('common.error'), description: msg })
+      } finally {
+        setActionLoadingKey(null)
       }
-      window.open(`/api/v1/finance/dunning/${formData.id}/export`, '_blank')
+      return
     } else if (action === 'send') {
       const errors = validate(formData)
       if (Object.keys(errors).length > 0) {
@@ -255,101 +266,60 @@ export default function MahnwesenPage(): JSX.Element {
         // Error wird bereits in useMaskData behandelt
       }
     } else if (action === 'payment') {
-      // Zahlung buchen
       if (!formData.id) {
-        toast({
-          variant: 'destructive',
-          title: t('common.error'),
-          description: t('crud.messages.saveFirst'),
-        })
+        toast({ variant: 'destructive', title: t('common.error'), description: t('crud.messages.saveFirst') })
         return
       }
-
+      setActionLoadingKey('payment')
       try {
-        const response = await fetch(`/api/v1/finance/dunning/${formData.id}/payment`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          },
-          body: JSON.stringify({
-            betrag: formData.gesamtForderung || 0,
-            datum: new Date().toISOString().split('T')[0]
-          })
+        await apiClient.put(`/api/v1/finance/dunning/${formData.id}/paid`, {
+          betrag: formData.gesamtForderung || 0,
+          datum: new Date().toISOString().split('T')[0],
         })
-
-        if (response.ok) {
-          formData.status = 'bezahlt'
-          formData.zahlungEingang = new Date().toISOString().split('T')[0]
-          toast({
-            title: t('crud.messages.paymentBooked'),
-            description: t('crud.messages.paymentBookedDesc'),
-          })
-        } else {
-          const error = await response.json()
-          toast({
-            variant: 'destructive',
-            title: t('crud.messages.paymentError'),
-            description: error.detail || t('crud.messages.paymentErrorDesc'),
-          })
-        }
-      } catch (error) {
-        toast({
-          variant: 'destructive',
-          title: t('crud.messages.networkError'),
-          description: t('crud.messages.networkErrorDesc'),
-        })
+        toast({ title: t('crud.messages.paymentBooked'), description: t('crud.messages.paymentBookedDesc') })
+      } catch (error: any) {
+        const msg = error.response?.data?.detail ?? error.message
+        toast({ variant: 'destructive', title: t('crud.messages.paymentError'), description: msg })
+      } finally {
+        setActionLoadingKey(null)
       }
     } else if (action === 'inkasso') {
-      // Inkasso übergeben
       if (!formData.id) {
-        toast({
-          variant: 'destructive',
-          title: t('common.error'),
-          description: t('crud.messages.saveFirst'),
-        })
+        toast({ variant: 'destructive', title: t('common.error'), description: t('crud.messages.saveFirst') })
         return
       }
-
+      setActionLoadingKey('inkasso')
       try {
-        const response = await fetch(`/api/v1/finance/dunning/${formData.id}/send`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        })
-
-        if (response.ok) {
-          formData.status = 'inkasso'
-          toast({
-            title: t('crud.messages.collectionHandedOver'),
-            description: t('crud.messages.collectionHandedOverDesc'),
-          })
-        } else {
-          const error = await response.json()
-          toast({
-            variant: 'destructive',
-            title: t('crud.messages.collectionError'),
-            description: error.detail || t('crud.messages.collectionErrorDesc'),
-          })
-        }
-      } catch (error) {
-        toast({
-          variant: 'destructive',
-          title: t('crud.messages.networkError'),
-          description: t('crud.messages.networkErrorDesc'),
-        })
+        await apiClient.put(`/api/v1/finance/dunning/${formData.id}/send`)
+        toast({ title: t('crud.messages.collectionHandedOver'), description: t('crud.messages.collectionHandedOverDesc') })
+      } catch (error: any) {
+        const msg = error.response?.data?.detail ?? error.message
+        toast({ variant: 'destructive', title: t('crud.messages.collectionError'), description: msg })
+      } finally {
+        setActionLoadingKey(null)
       }
     } else if (action === 'export') {
-      if (!formData.id) {
-        toast({
-          variant: 'destructive',
-          title: t('common.error'),
-          description: t('crud.messages.saveFirst'),
-        })
-        return
+      setActionLoadingKey('export')
+      try {
+        const response = await apiClient.post<{ export_id: string; download_url: string | null }>(
+          '/api/v1/finance/followup/mahnwesen/export',
+          { format: 'pdf', requested_by: 'current_user' },
+        )
+        const result = response.data
+        if (result.download_url) {
+          window.open(result.download_url, '_blank')
+        } else {
+          toast({
+            title: t('crud.messages.exportStarted', { defaultValue: 'Export gestartet' }),
+            description: `Export-ID: ${result.export_id}`,
+          })
+        }
+      } catch (error: any) {
+        const msg = error.response?.data?.detail ?? error.message
+        toast({ variant: 'destructive', title: t('common.error'), description: msg })
+      } finally {
+        setActionLoadingKey(null)
       }
-      window.open(`/api/v1/finance/dunning/${formData.id}/export`, '_blank')
     }
   })
 
