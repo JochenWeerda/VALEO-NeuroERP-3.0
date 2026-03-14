@@ -59,7 +59,7 @@ class CreditMemoCreate(BaseModel):
     memoDate: str = Field(..., description="Gutschriftsdatum (YYYY-MM-DD)")
     reason: str = Field(..., min_length=10, description="Grund für Gutschrift (min. 10 Zeichen)")
     notes: Optional[str] = None
-    items: List[MemoItem] = Field(..., min_items=1, description="Gutschrifts-Positionen")
+    items: List[MemoItem] = Field(..., min_length=1, description="Gutschrifts-Positionen")
 
 
 class DebitMemoCreate(BaseModel):
@@ -69,12 +69,12 @@ class DebitMemoCreate(BaseModel):
     memoDate: str = Field(..., description="Belastungsdatum (YYYY-MM-DD)")
     reason: str = Field(..., min_length=10, description="Grund für Belastung (min. 10 Zeichen)")
     notes: Optional[str] = None
-    items: List[MemoItem] = Field(..., min_items=1, description="Belastungs-Positionen")
+    items: List[MemoItem] = Field(..., min_length=1, description="Belastungs-Positionen")
 
 
 class SettlementRequest(BaseModel):
     """Request-Modell für Verrechnung"""
-    invoiceIds: List[str] = Field(..., min_items=1, description="Rechnungs-IDs zur Verrechnung")
+    invoiceIds: List[str] = Field(..., min_length=1, description="Rechnungs-IDs zur Verrechnung")
 
 
 class CreditMemoResponse(BaseModel):

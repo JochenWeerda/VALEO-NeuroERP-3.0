@@ -11,7 +11,7 @@ from typing import Optional
 import base64
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Request
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -35,6 +35,8 @@ router = APIRouter()
 # ── Pydantic Models ───────────────────────────────────────────────────────────────
 
 class QualityProtocolOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     """Output-Model für Qualitätsprotokoll."""
     id: str
     tenant_id: str
@@ -57,9 +59,6 @@ class QualityProtocolOut(BaseModel):
     created_by: Optional[str] = None
     updated_at: Optional[datetime] = None
     updated_by: Optional[str] = None
-
-    class Config:
-        from_attributes = True
 
 
 class QualityProtocolCreateIn(BaseModel):

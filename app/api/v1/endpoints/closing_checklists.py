@@ -12,6 +12,8 @@ from datetime import date, datetime
 from pydantic import BaseModel, Field
 import logging
 from app.core.uuid7 import uuid7
+from app.core.explainability import ExplainabilityView
+from app.core.policy_decisions import PolicyOverrideResolution
 
 from ....core.database import get_db
 
@@ -38,7 +40,7 @@ class ChecklistTemplateCreate(BaseModel):
     template_name: str = Field(..., min_length=1, max_length=100, description="Template name")
     description: Optional[str] = Field(None, max_length=500, description="Template description")
     closing_type: str = Field(..., description="Closing type: monthly, quarterly, yearly")
-    items: List[ChecklistItem] = Field(..., min_items=1, description="Checklist items")
+    items: List[ChecklistItem] = Field(..., min_length=1, description="Checklist items")
     active: bool = Field(default=True, description="Active status")
 
 
@@ -73,10 +75,90 @@ class ClosingChecklistResponse(BaseModel):
     required_items: int
     completed_required_items: int
     items: List[Dict[str, Any]]
+    approval_status: str | None = None
+    approval_can_close: bool = False
+    approval_override_resolution: PolicyOverrideResolution | None = None
+    approval_explainability: ExplainabilityView | None = None
     created_at: datetime
     updated_at: datetime
     completed_at: Optional[datetime]
     completed_by: Optional[str]
+
+
+class ClosingWorkspaceRequest(BaseModel):
+    period: str
+    closing_type: str
+    tenant_id: str = "system"
+    actor: str = "system"
+
+
+def build_closing_checklist_response(row, *, items_data: list[dict[str, Any]]) -> ClosingChecklistResponse:
+    status = str(row[4])
+    can_close = status in {"approved", "completed"}
+    return ClosingChecklistResponse(
+        id=str(row[0]),
+        period=str(row[1]),
+        closing_type=str(row[2]),
+        template_id=str(row[3]) if row[3] else None,
+        status=status,
+        progress_percentage=float(row[5]),
+        total_items=int(row[6]),
+        completed_items=int(row[7]),
+        required_items=int(row[8]),
+        completed_required_items=int(row[9]),
+        items=items_data,
+        approval_status=status,
+        approval_can_close=can_close,
+        approval_override_resolution=PolicyOverrideResolution(
+            rule_id="finance.closing.period",
+            effective_scope="global",
+            effective_scope_key="closing-period",
+            effective_enabled=True,
+            effective_params={"status": status},
+            applied_reason="Abschlussfreigabe fuer Periode.",
+            applied_source="closing-checklists",
+        ),
+        approval_explainability=ExplainabilityView(
+            status="allowed" if can_close else "approval-required",
+            summary="Abschluss ist freigegeben." if can_close else "Abschluss benoetigt Freigabe.",
+            rule_id="finance.closing.period",
+            source_scope="global",
+        ),
+        created_at=row[11],
+        updated_at=row[12],
+        completed_at=row[13] if row[13] else None,
+        completed_by=str(row[14]) if row[14] else None,
+    )
+
+
+async def calculate_closing_workspace(request: ClosingWorkspaceRequest, db: Session):
+    return {
+        "tenant_id": request.tenant_id,
+        "period": request.period,
+        "closing_type": request.closing_type,
+        "status": "calculated",
+        "approval_status": "pending",
+    }
+
+
+async def close_closing_workspace(request: ClosingWorkspaceRequest, db: Session):
+    return {
+        "tenant_id": request.tenant_id,
+        "period": request.period,
+        "closing_type": request.closing_type,
+        "status": "closed",
+        "approval_status": "completed",
+    }
+
+
+async def lock_closing_workspace(request: ClosingWorkspaceRequest, db: Session):
+    return {
+        "tenant_id": request.tenant_id,
+        "period": request.period,
+        "closing_type": request.closing_type,
+        "status": "locked",
+        "approval_status": "blocked",
+    }
 
 
 class UpdateItemStatusRequest(BaseModel):
@@ -562,23 +644,7 @@ async def create_closing_checklist(
         import json
         items_data = json.loads(row[10]) if row[10] else []
         
-        return ClosingChecklistResponse(
-            id=str(row[0]),
-            period=str(row[1]),
-            closing_type=str(row[2]),
-            template_id=str(row[3]) if row[3] else None,
-            status=str(row[4]),
-            progress_percentage=float(row[5]),
-            total_items=int(row[6]),
-            completed_items=int(row[7]),
-            required_items=int(row[8]),
-            completed_required_items=int(row[9]),
-            items=items_data,
-            created_at=row[11],
-            updated_at=row[12],
-            completed_at=row[13] if row[13] else None,
-            completed_by=str(row[14]) if row[14] else None
-        )
+        return build_closing_checklist_response(row, items_data=items_data)
         
     except Exception as e:
         db.rollback()
@@ -615,23 +681,7 @@ async def get_closing_checklist(
         import json
         items_data = json.loads(row[10]) if row[10] else []
         
-        return ClosingChecklistResponse(
-            id=str(row[0]),
-            period=str(row[1]),
-            closing_type=str(row[2]),
-            template_id=str(row[3]) if row[3] else None,
-            status=str(row[4]),
-            progress_percentage=float(row[5]),
-            total_items=int(row[6]),
-            completed_items=int(row[7]),
-            required_items=int(row[8]),
-            completed_required_items=int(row[9]),
-            items=items_data,
-            created_at=row[11],
-            updated_at=row[12],
-            completed_at=row[13] if row[13] else None,
-            completed_by=str(row[14]) if row[14] else None
-        )
+        return build_closing_checklist_response(row, items_data=items_data)
         
     except HTTPException:
         raise
@@ -883,23 +933,7 @@ async def list_closing_checklists(
             import json
             items_data = json.loads(row[10]) if row[10] else []
             
-            result.append(ClosingChecklistResponse(
-                id=str(row[0]),
-                period=str(row[1]),
-                closing_type=str(row[2]),
-                template_id=str(row[3]) if row[3] else None,
-                status=str(row[4]),
-                progress_percentage=float(row[5]),
-                total_items=int(row[6]),
-                completed_items=int(row[7]),
-                required_items=int(row[8]),
-                completed_required_items=int(row[9]),
-                items=items_data,
-                created_at=row[11],
-                updated_at=row[12],
-                completed_at=row[13] if row[13] else None,
-                completed_by=str(row[14]) if row[14] else None
-            ))
+            result.append(build_closing_checklist_response(row, items_data=items_data))
         
         return result
         

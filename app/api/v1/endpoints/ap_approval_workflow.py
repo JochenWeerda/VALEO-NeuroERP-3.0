@@ -14,6 +14,12 @@ import logging
 from app.core.uuid7 import uuid7
 
 from ....core.database import get_db
+from app.core.ap_approval_status import (
+    APPROVAL_STATUS_TO_DOCUMENT_STATUS,
+    DOCUMENT_STATUS_TO_APPROVAL_STATUS,
+    build_approval_status_response,
+)
+from app.infrastructure.models import AuditLog
 
 logger = logging.getLogger(__name__)
 
@@ -31,9 +37,9 @@ class ApprovalRuleCreate(BaseModel):
     """Schema for creating an approval rule"""
     name: str = Field(..., min_length=1, max_length=100, description="Rule name")
     description: Optional[str] = Field(None, max_length=500, description="Rule description")
-    conditions: List[ApprovalRuleCondition] = Field(..., min_items=1, description="Conditions that trigger this rule")
+    conditions: List[ApprovalRuleCondition] = Field(..., min_length=1, description="Conditions that trigger this rule")
     required_approvals: int = Field(..., ge=1, le=4, description="Number of required approvals (2/3/4-eyes)")
-    approval_roles: List[str] = Field(..., min_items=1, description="Roles that can approve (e.g., ['manager', 'finance'])")
+    approval_roles: List[str] = Field(..., min_length=1, description="Roles that can approve (e.g., ['manager', 'finance'])")
     priority: int = Field(default=0, description="Rule priority (higher = checked first)")
     active: bool = Field(default=True, description="Active status")
 
@@ -78,6 +84,86 @@ class ApprovalStatusResponse(BaseModel):
     applicable_rule: Optional[Dict[str, Any]]
     can_post: bool
     can_pay: bool
+
+
+class WorkflowBusinessReference(BaseModel):
+    reference_type: str
+    reference_id: str
+
+
+class WorkflowInstanceReference(BaseModel):
+    process_key: str
+    workflow_instance_id: str
+    definition_origin: str
+    status: str
+    current_step: str
+    business_reference: WorkflowBusinessReference
+
+
+APPROVAL_STATUS_TO_INSTANCE_STATUS = {
+    "not_requested": "running",
+    "pending": "waiting",
+    "partially_approved": "waiting",
+    "approved": "completed",
+    "rejected": "failed",
+}
+
+
+def _build_workflow_instance_reference(
+    *,
+    invoice_id: str,
+    tenant_id: str,
+    approval_status: str,
+    action: str,
+    applicable_rule: dict[str, Any] | None,
+) -> WorkflowInstanceReference:
+    return WorkflowInstanceReference(
+        process_key="ap_approval",
+        workflow_instance_id=f"wf-ap-{invoice_id}",
+        definition_origin="tenant-override" if applicable_rule else "default",
+        status=APPROVAL_STATUS_TO_INSTANCE_STATUS.get(approval_status, "running"),
+        current_step=action,
+        business_reference=WorkflowBusinessReference(
+            reference_type="ap_invoice",
+            reference_id=invoice_id,
+        ),
+    )
+
+
+def _write_approval_audit_log(
+    db,
+    *,
+    tenant_id: str,
+    user_id: str,
+    user_email: str,
+    action: str,
+    invoice_id: str,
+    response,
+    comment: str | None = None,
+) -> None:
+    entry = AuditLog(
+        id=str(uuid7()),
+        timestamp=datetime.utcnow(),
+        user_id=user_id,
+        user_email=user_email,
+        tenant_id=tenant_id,
+        action=action,
+        entity_type="ap_invoice_approval",
+        entity_id=invoice_id,
+        changes={
+            "override_resolution": response.override_resolution.model_dump(exclude_none=True),
+            "explainability": response.explainability.model_dump(exclude_none=True),
+            "workflow_instance_ref": _build_workflow_instance_reference(
+                invoice_id=invoice_id,
+                tenant_id=tenant_id,
+                approval_status=response.status,
+                action=action,
+                applicable_rule=response.applicable_rule,
+            ).model_dump(exclude_none=True),
+            "comment": comment,
+        },
+    )
+    db.add(entry)
 
 
 @router.get("/rules", response_model=List[ApprovalRuleResponse])
@@ -350,16 +436,14 @@ async def request_approval(
         
         db.commit()
         
-        return ApprovalStatusResponse(
+        return build_approval_status_response(
             invoice_id=request.invoice_id,
+            tenant_id=tenant_id,
             status="pending",
             required_approvals=required_approvals,
-            current_approvals=0,
             approvals=[],
             rejections=[],
             applicable_rule=rule_data,
-            can_post=False,
-            can_pay=False
         )
         
     except HTTPException:
@@ -479,13 +563,13 @@ async def approve_invoice(
             "approval_request_id": approval_request_id
         })
         
-        # Update invoice status if fully approved
-        if update_status == "approved":
+        # Keep the document status in sync with workflow semantics.
+        if update_status in {"approved", "rejected"}:
             from app.documents.router_helpers import get_repository, get_from_store, save_to_store
             repo = get_repository(db)
             invoice = get_from_store("ap_invoice", action.invoice_id, repo)
             if invoice:
-                invoice["status"] = "FREIGEGEBEN"
+                invoice["status"] = APPROVAL_STATUS_TO_DOCUMENT_STATUS.get(update_status, invoice.get("status", "ENTWURF"))
                 invoice["approvedBy"] = action.approved_by
                 invoice["approvedAt"] = datetime.now().isoformat()
                 save_to_store("ap_invoice", action.invoice_id, invoice, repo)
@@ -519,16 +603,14 @@ async def approve_invoice(
             for row in rejections_rows
         ]
         
-        return ApprovalStatusResponse(
+        return build_approval_status_response(
             invoice_id=action.invoice_id,
+            tenant_id=tenant_id,
             status=update_status,
             required_approvals=required_approvals,
-            current_approvals=len(approvals),
             approvals=approvals,
             rejections=rejections,
             applicable_rule=applicable_rule,
-            can_post=(update_status == "approved"),
-            can_pay=(update_status == "approved")
         )
         
     except HTTPException:
@@ -572,17 +654,16 @@ async def get_approval_status(
             if not invoice:
                 raise HTTPException(status_code=404, detail="AP Invoice not found")
             
-            invoice_status = invoice.get("status", "ENTWURF")
-            return ApprovalStatusResponse(
+            invoice_status = str(invoice.get("status", "ENTWURF"))
+            derived_status = DOCUMENT_STATUS_TO_APPROVAL_STATUS.get(invoice_status, "approved")
+            return build_approval_status_response(
                 invoice_id=invoice_id,
-                status="not_requested" if invoice_status == "ENTWURF" else "approved",
+                tenant_id=tenant_id,
+                status=derived_status,
                 required_approvals=0,
-                current_approvals=0,
                 approvals=[],
                 rejections=[],
                 applicable_rule=None,
-                can_post=(invoice_status == "FREIGEGEBEN"),
-                can_pay=(invoice_status == "FREIGEGEBEN")
             )
         
         approval_request_id = str(row[0])
@@ -632,16 +713,14 @@ async def get_approval_status(
             for row in rejections_rows
         ]
         
-        return ApprovalStatusResponse(
+        return build_approval_status_response(
             invoice_id=invoice_id,
+            tenant_id=tenant_id,
             status=current_status,
             required_approvals=required_approvals,
-            current_approvals=len(approvals),
             approvals=approvals,
             rejections=rejections,
             applicable_rule=applicable_rule,
-            can_post=(current_status == "approved"),
-            can_pay=(current_status == "approved")
         )
         
     except HTTPException:

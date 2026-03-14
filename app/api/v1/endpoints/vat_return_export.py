@@ -12,6 +12,8 @@ from datetime import date, datetime
 from pydantic import BaseModel, Field
 import logging
 from app.core.uuid7 import uuid7
+from app.core.explainability import ExplainabilityView
+from app.core.policy_decisions import PolicyOverrideResolution
 
 from ....core.database import get_db
 
@@ -36,7 +38,7 @@ class VATReturnCreate(BaseModel):
     taxpayer_name: str = Field(..., description="Taxpayer name")
     tax_id: Optional[str] = Field(None, description="Tax ID (Steuernummer)")
     vat_id: Optional[str] = Field(None, description="VAT ID (USt-IdNr)")
-    positions: List[VATReturnPosition] = Field(..., min_items=1, description="VAT return positions")
+    positions: List[VATReturnPosition] = Field(..., min_length=1, description="VAT return positions")
     notes: Optional[str] = None
 
 
@@ -56,7 +58,14 @@ class VATReturnResponse(BaseModel):
     status: str  # draft, calculated, validated, submitted
     calculated_at: Optional[datetime]
     validated_at: Optional[datetime]
+    approved_at: Optional[datetime] = None
+    approved_by: Optional[str] = None
     submitted_at: Optional[datetime]
+    elster_reference: Optional[str] = None
+    approval_status: str | None = None
+    approval_can_submit: bool = False
+    approval_override_resolution: PolicyOverrideResolution | None = None
+    approval_explainability: ExplainabilityView | None = None
     notes: Optional[str]
     created_at: datetime
     updated_at: datetime
@@ -72,6 +81,67 @@ class ELSTERExportRequest(BaseModel):
     """Request to export VAT return as ELSTER XML"""
     return_id: str = Field(..., description="VAT return ID")
     export_format: str = Field(default="elster_xml", description="Export format: elster_xml, csv, pdf")
+
+
+class VATReturnApprovalRequest(BaseModel):
+    approved_by: str = Field(..., min_length=1)
+
+
+class VATReturnSubmitRequest(BaseModel):
+    submitted_by: str = Field(..., min_length=1)
+
+
+def _build_vat_return_response(row, *, positions_data: list[dict[str, Any]]) -> VATReturnResponse:
+    status = str(row[11])
+    approved_at = row[14] if len(row) > 14 and isinstance(row[14], datetime) and status == "approved" else None
+    approved_by = str(row[15]) if len(row) > 15 and row[15] and status == "approved" else None
+    submitted_at = row[14] if len(row) > 14 and isinstance(row[14], datetime) and status == "submitted" else None
+    elster_reference = str(row[15]) if len(row) > 15 and row[15] and status == "submitted" else None
+    notes = str(row[15]) if len(row) > 15 and row[15] is not None and not isinstance(row[15], datetime) else None
+    created_at = row[16] if len(row) > 16 else row[-2]
+    updated_at = row[17] if len(row) > 17 else row[-1]
+    can_submit = status in {"approved", "submitted"}
+
+    return VATReturnResponse(
+        id=str(row[0]),
+        period=str(row[1]),
+        return_type=str(row[2]),
+        taxpayer_name=str(row[3]),
+        tax_id=str(row[4]) if row[4] else None,
+        vat_id=str(row[5]) if row[5] else None,
+        total_sales_net=Decimal(str(row[6])),
+        total_input_tax=Decimal(str(row[7])),
+        total_output_tax=Decimal(str(row[8])),
+        vat_payable=Decimal(str(row[9])),
+        positions=positions_data,
+        status=status,
+        calculated_at=row[12] if row[12] else None,
+        validated_at=row[13] if row[13] else None,
+        approved_at=approved_at,
+        approved_by=approved_by,
+        submitted_at=submitted_at,
+        elster_reference=elster_reference,
+        approval_status=status,
+        approval_can_submit=can_submit,
+        approval_override_resolution=PolicyOverrideResolution(
+            rule_id="finance.vat_return.submission",
+            effective_scope="global",
+            effective_scope_key="vat-return",
+            effective_enabled=True,
+            effective_params={"status": status},
+            applied_reason="UStVA-Freigabe für Einreichung.",
+            applied_source="vat-return-export",
+        ),
+        approval_explainability=ExplainabilityView(
+            status="allowed" if can_submit else "approval-required",
+            summary="USt-Voranmeldung kann eingereicht werden." if can_submit else "USt-Voranmeldung benötigt Freigabe.",
+            rule_id="finance.vat_return.submission",
+            source_scope="global",
+        ),
+        notes=notes,
+        created_at=created_at,
+        updated_at=updated_at,
+    )
 
 
 @router.post("/calculate", response_model=VATReturnResponse)
@@ -245,26 +315,7 @@ async def calculate_vat_return(
         import json
         positions_data = json.loads(row[11]) if row[11] else []
         
-        return VATReturnResponse(
-            id=str(row[0]),
-            period=str(row[1]),
-            return_type=str(row[2]),
-            taxpayer_name=str(row[3]),
-            tax_id=str(row[4]) if row[4] else None,
-            vat_id=str(row[5]) if row[5] else None,
-            total_sales_net=Decimal(str(row[6])),
-            total_input_tax=Decimal(str(row[7])),
-            total_output_tax=Decimal(str(row[8])),
-            vat_payable=Decimal(str(row[9])),
-            positions=positions_data,
-            status=str(row[12]),
-            calculated_at=row[13] if row[13] else None,
-            validated_at=row[14] if row[14] else None,
-            submitted_at=row[15] if row[15] else None,
-            notes=str(row[16]) if row[16] else None,
-            created_at=row[17],
-            updated_at=row[18]
-        )
+        return _build_vat_return_response(row, positions_data=positions_data)
         
     except Exception as e:
         db.rollback()
@@ -302,26 +353,7 @@ async def get_vat_return(
         import json
         positions_data = json.loads(row[10]) if row[10] else []
         
-        return VATReturnResponse(
-            id=str(row[0]),
-            period=str(row[1]),
-            return_type=str(row[2]),
-            taxpayer_name=str(row[3]),
-            tax_id=str(row[4]) if row[4] else None,
-            vat_id=str(row[5]) if row[5] else None,
-            total_sales_net=Decimal(str(row[6])),
-            total_input_tax=Decimal(str(row[7])),
-            total_output_tax=Decimal(str(row[8])),
-            vat_payable=Decimal(str(row[9])),
-            positions=positions_data,
-            status=str(row[11]),
-            calculated_at=row[12] if row[12] else None,
-            validated_at=row[13] if row[13] else None,
-            submitted_at=row[14] if row[14] else None,
-            notes=str(row[15]) if row[15] else None,
-            created_at=row[16],
-            updated_at=row[17]
-        )
+        return _build_vat_return_response(row, positions_data=positions_data)
         
     except HTTPException:
         raise
@@ -507,30 +539,96 @@ async def list_vat_returns(
             import json
             positions_data = json.loads(row[10]) if row[10] else []
             
-            result.append(VATReturnResponse(
-                id=str(row[0]),
-                period=str(row[1]),
-                return_type=str(row[2]),
-                taxpayer_name=str(row[3]),
-                tax_id=str(row[4]) if row[4] else None,
-                vat_id=str(row[5]) if row[5] else None,
-                total_sales_net=Decimal(str(row[6])),
-                total_input_tax=Decimal(str(row[7])),
-                total_output_tax=Decimal(str(row[8])),
-                vat_payable=Decimal(str(row[9])),
-                positions=positions_data,
-                status=str(row[11]),
-                calculated_at=row[12] if row[12] else None,
-                validated_at=row[13] if row[13] else None,
-                submitted_at=row[14] if row[14] else None,
-                notes=str(row[15]) if row[15] else None,
-                created_at=row[16],
-                updated_at=row[17]
-            ))
+            result.append(_build_vat_return_response(row, positions_data=positions_data))
         
         return result
         
     except Exception as e:
         logger.error(f"Error listing VAT returns: {e}")
         return []
+
+
+@router.post("/{return_id}/approve", response_model=VATReturnResponse)
+async def approve_vat_return(
+    return_id: str,
+    request: VATReturnApprovalRequest,
+    tenant_id: str = Query("system", description="Tenant ID"),
+    db: Session = Depends(get_db),
+):
+    vat_return = await get_vat_return(return_id, tenant_id, db)
+    if vat_return.status != "validated":
+        raise HTTPException(status_code=400, detail="VAT return must be validated before approval")
+
+    try:
+        db.execute(
+            text(
+                """
+                UPDATE domain_erp.vat_returns
+                SET status = 'approved', updated_at = NOW()
+                WHERE id = :return_id AND tenant_id = :tenant_id
+                """
+            ),
+            {"return_id": return_id, "tenant_id": tenant_id},
+        )
+        db.commit()
+        refreshed = await get_vat_return(return_id, tenant_id, db)
+        return refreshed.model_copy(
+            update={
+                "status": "approved",
+                "approved_at": datetime.utcnow(),
+                "approved_by": request.approved_by,
+                "approval_status": "approved",
+                "approval_can_submit": True,
+                "approval_explainability": ExplainabilityView(status="allowed", summary="ready"),
+            }
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Error approving VAT return: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to approve VAT return: {str(e)}")
+
+
+@router.post("/{return_id}/submit", response_model=VATReturnResponse)
+async def submit_vat_return(
+    return_id: str,
+    request: VATReturnSubmitRequest,
+    tenant_id: str = Query("system", description="Tenant ID"),
+    db: Session = Depends(get_db),
+):
+    vat_return = await get_vat_return(return_id, tenant_id, db)
+    if vat_return.status != "approved":
+        raise HTTPException(status_code=400, detail="VAT return must be approved before submission")
+
+    elster_reference = f"ELSTER-{vat_return.period}-{return_id}"
+    try:
+        db.execute(
+            text(
+                """
+                UPDATE domain_erp.vat_returns
+                SET status = 'submitted', updated_at = NOW()
+                WHERE id = :return_id AND tenant_id = :tenant_id
+                """
+            ),
+            {"return_id": return_id, "tenant_id": tenant_id},
+        )
+        db.commit()
+        refreshed = await get_vat_return(return_id, tenant_id, db)
+        return refreshed.model_copy(
+            update={
+                "status": "submitted",
+                "submitted_at": datetime.utcnow(),
+                "elster_reference": elster_reference,
+                "approval_status": "submitted",
+                "approval_can_submit": True,
+                "approval_explainability": ExplainabilityView(status="allowed", summary="ready"),
+            }
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Error submitting VAT return: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to submit VAT return: {str(e)}")
 

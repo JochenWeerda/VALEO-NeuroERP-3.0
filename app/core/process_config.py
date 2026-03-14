@@ -13,6 +13,11 @@ from typing import Any, Optional
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.core.settlement_compatibility import (
+    CANONICAL_SETTLEMENT_AGGREGATE,
+    CANONICAL_SETTLEMENT_PROCESS_DEFINITION_KEY,
+)
+
 # Default-Prozessschritte + SLA/Eskalation (Gap 009, 013)
 DEFAULT_PROCESS_VARIANTS: dict[str, dict[str, Any]] = {
     "annahme": {
@@ -31,6 +36,8 @@ DEFAULT_PROCESS_VARIANTS: dict[str, dict[str, Any]] = {
     },
     "settlement": {
         "steps": ["erfassung", "trocknung", "abzuege", "freigabe", "buchung"],
+        "canonical_aggregate_type": CANONICAL_SETTLEMENT_AGGREGATE,
+        "canonical_process_definition_key": CANONICAL_SETTLEMENT_PROCESS_DEFINITION_KEY,
         "required_roles": {"freigabe": ["fibu", "leitung"], "buchung": ["fibu"]},
         "step_sla": {
             "freigabe": {"timeout_hours": 48, "escalation_roles": ["leitung", "fibu"]},

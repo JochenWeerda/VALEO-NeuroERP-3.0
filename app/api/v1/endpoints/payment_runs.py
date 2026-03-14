@@ -16,6 +16,10 @@ from app.core.uuid7 import uuid7
 from xml.dom import minidom
 
 from ....core.database import get_db
+from app.core.explainability import ExplainabilityView
+from app.core.policy_decisions import PolicyOverrideResolution
+from app.domains.shared.events import IntegrationEvent, get_event_publisher
+from app.infrastructure.eventbus.outbox import OutboxPublisher
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +48,7 @@ class PaymentRunCreate(BaseModel):
     initiator_name: str = Field(..., min_length=1, description="Initiator name")
     initiator_iban: str = Field(..., description="Initiator IBAN")
     initiator_bic: str = Field(..., description="Initiator BIC")
-    payments: List[PaymentItem] = Field(..., min_items=1, description="Payment items")
+    payments: List[PaymentItem] = Field(..., min_length=1, description="Payment items")
     notes: Optional[str] = Field(None, description="Notes")
 
 
@@ -65,13 +69,75 @@ class PaymentRunResponse(BaseModel):
     sepa_file_id: Optional[str]
     notes: Optional[str]
     payments: List[Dict[str, Any]]
+    approval_status: str | None = None
+    approval_can_execute: bool = False
+    approval_override_resolution: PolicyOverrideResolution | None = None
+    approval_explainability: ExplainabilityView | None = None
     created_at: datetime
     updated_at: datetime
 
 
 class ApprovePaymentRunRequest(BaseModel):
     """Request to approve a payment run"""
-    approved_by: str = Field(..., description="User approving the run")
+    approved_by: str = Field(default="api", description="User approving the run")
+
+
+def _build_payment_run_response(row, *, payments: list[dict[str, Any]]) -> PaymentRunResponse:
+    status = str(row[8])
+    return PaymentRunResponse(
+        id=str(row[0]),
+        run_number=str(row[1]),
+        execution_date=row[2],
+        initiator_name=str(row[3]),
+        initiator_iban=str(row[4]),
+        initiator_bic=str(row[5]),
+        total_amount=Decimal(str(row[6])),
+        payment_count=int(row[7]),
+        status=status,
+        approved_at=row[9] if row[9] else None,
+        approved_by=str(row[10]) if row[10] else None,
+        executed_at=row[11] if row[11] else None,
+        sepa_file_id=str(row[12]) if row[12] else None,
+        notes=str(row[13]) if row[13] else None,
+        payments=payments,
+        approval_status=status,
+        approval_can_execute=status in {"approved", "executed"},
+        approval_override_resolution=PolicyOverrideResolution(
+            rule_id="finance.payment_run.execution",
+            effective_scope="global",
+            effective_scope_key="payment-run",
+            effective_enabled=True,
+            effective_params={"status": status},
+            applied_reason="Standardfreigabe fuer Zahlungslauf.",
+            applied_source="payment-runs",
+        ),
+        approval_explainability=ExplainabilityView(
+            status="allowed" if status in {"approved", "executed"} else "approval-required",
+            summary="Zahlungslauf ist freigegeben." if status in {"approved", "executed"} else "Zahlungslauf muss freigegeben werden.",
+            rule_id="finance.payment_run.execution",
+            source_scope="global",
+        ),
+        created_at=row[14],
+        updated_at=row[15],
+    )
+
+
+async def _store_payment_run_event_in_outbox(
+    db,
+    *,
+    tenant_id: str,
+    event_type: str,
+    run_id: str,
+    payload: dict[str, Any],
+) -> None:
+    event = IntegrationEvent(
+        aggregate_id=run_id,
+        timestamp=datetime.utcnow(),
+        event_type=event_type,
+        payload=payload,
+    )
+    outbox = OutboxPublisher(db, get_event_publisher())
+    await outbox.store_event(event, tenant_id=tenant_id)
 
 
 class ExecutePaymentRunRequest(BaseModel):
@@ -409,25 +475,7 @@ async def create_payment_run(
             for row in payments_rows
         ]
         
-        return PaymentRunResponse(
-            id=str(row[0]),
-            run_number=str(row[1]),
-            execution_date=row[2],
-            initiator_name=str(row[3]),
-            initiator_iban=str(row[4]),
-            initiator_bic=str(row[5]),
-            total_amount=Decimal(str(row[6])),
-            payment_count=int(row[7]),
-            status=str(row[8]),
-            approved_at=row[9] if row[9] else None,
-            approved_by=str(row[10]) if row[10] else None,
-            executed_at=row[11] if row[11] else None,
-            sepa_file_id=str(row[12]) if row[12] else None,
-            notes=str(row[13]) if row[13] else None,
-            payments=payments,
-            created_at=row[14],
-            updated_at=row[15]
-        )
+        return _build_payment_run_response(row, payments=payments)
         
     except Exception as e:
         db.rollback()
@@ -494,25 +542,7 @@ async def list_payment_runs(
                 for p_row in payments_rows
             ]
             
-            result.append(PaymentRunResponse(
-                id=str(row[0]),
-                run_number=str(row[1]),
-                execution_date=row[2],
-                initiator_name=str(row[3]),
-                initiator_iban=str(row[4]),
-                initiator_bic=str(row[5]),
-                total_amount=Decimal(str(row[6])),
-                payment_count=int(row[7]),
-                status=str(row[8]),
-                approved_at=row[9] if row[9] else None,
-                approved_by=str(row[10]) if row[10] else None,
-                executed_at=row[11] if row[11] else None,
-                sepa_file_id=str(row[12]) if row[12] else None,
-                notes=str(row[13]) if row[13] else None,
-                payments=payments,
-                created_at=row[14],
-                updated_at=row[15]
-            ))
+            result.append(_build_payment_run_response(row, payments=payments))
         
         return result
         
@@ -576,25 +606,7 @@ async def get_payment_run(
             for p_row in payments_rows
         ]
         
-        return PaymentRunResponse(
-            id=str(row[0]),
-            run_number=str(row[1]),
-            execution_date=row[2],
-            initiator_name=str(row[3]),
-            initiator_iban=str(row[4]),
-            initiator_bic=str(row[5]),
-            total_amount=Decimal(str(row[6])),
-            payment_count=int(row[7]),
-            status=str(row[8]),
-            approved_at=row[9] if row[9] else None,
-            approved_by=str(row[10]) if row[10] else None,
-            executed_at=row[11] if row[11] else None,
-            sepa_file_id=str(row[12]) if row[12] else None,
-            notes=str(row[13]) if row[13] else None,
-            payments=payments,
-            created_at=row[14],
-            updated_at=row[15]
-        )
+        return _build_payment_run_response(row, payments=payments)
         
     except HTTPException:
         raise
@@ -631,7 +643,7 @@ async def approve_payment_run(
             raise HTTPException(status_code=404, detail="Payment run not found or cannot be approved")
         
         db.commit()
-        
+
         return await get_payment_run(run_id, tenant_id, db)
         
     except HTTPException:
@@ -872,6 +884,18 @@ async def return_payment(
         })
         
         db.commit()
+        await _store_payment_run_event_in_outbox(
+            db,
+            tenant_id=tenant_id,
+            event_type="payment_run.returned",
+            run_id=run_id,
+            payload={
+                "return_id": return_id,
+                "payment_id": request.payment_id,
+                "return_reason": request.return_reason,
+                "return_date": request.return_date.isoformat(),
+            },
+        )
         
         return {
             "status": "ok",

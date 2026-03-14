@@ -5,7 +5,7 @@ Pydantic Schemas für den Verkauf / Kundenstamm
 from datetime import date, datetime
 from typing import List, Optional
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, ConfigDict
 
 
 class KundeBase(BaseModel):
@@ -48,14 +48,13 @@ class KundeUpdate(BaseModel):
 
 
 class KundeResponse(KundeBase):
+    model_config = ConfigDict(from_attributes=True)
+
     """Antwortschema für Kunden"""
 
     erstellt_am: Optional[datetime] = None
     geaendert_am: Optional[datetime] = None
     geloescht: bool = False
-
-    class Config:
-        from_attributes = True
 
 
 class KundenAnsprechpartnerBase(BaseModel):
@@ -79,13 +78,12 @@ class KundenAnsprechpartnerCreate(KundenAnsprechpartnerBase):
 
 
 class KundenAnsprechpartnerResponse(KundenAnsprechpartnerBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     kunden_nr: str
     erstanlage: Optional[date] = None
     datenschutzbeauftragter: bool = False
-
-    class Config:
-        from_attributes = True
 
 
 class KundenProfilBase(BaseModel):
@@ -109,15 +107,16 @@ class KundenProfilCreate(KundenProfilBase):
 
 
 class KundenProfilResponse(KundenProfilBase):
+    model_config = ConfigDict(from_attributes=True)
+
     kunden_nr: str
     erstellt_am: Optional[datetime] = None
     geaendert_am: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
-
 
 class KundenVersandResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     kunden_nr: str
     versandart_rechnung: Optional[str] = None
     versandart_mahnung: Optional[str] = None
@@ -128,11 +127,10 @@ class KundenVersandResponse(BaseModel):
     erstellt_am: Optional[datetime] = None
     geaendert_am: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
-
 
 class KundenLieferungZahlungResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     kunden_nr: str
     lieferbedingung: Optional[str] = None
     zahlungsbedingung: Optional[str] = None
@@ -144,11 +142,10 @@ class KundenLieferungZahlungResponse(BaseModel):
     erstellt_am: Optional[datetime] = None
     geaendert_am: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
-
 
 class KundenDatenschutzResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     kunden_nr: str
     einwilligung: bool = False
     anlagedatum: Optional[date] = None
@@ -157,11 +154,10 @@ class KundenDatenschutzResponse(BaseModel):
     erstellt_am: Optional[datetime] = None
     geaendert_am: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
-
 
 class KundenGenossenschaftResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     kunden_nr: str
     geschaeftsguthaben_konto: Optional[str] = None
     mitgliedschaft_gekuendigt: bool = False
@@ -174,11 +170,10 @@ class KundenGenossenschaftResponse(BaseModel):
     erstellt_am: Optional[datetime] = None
     geaendert_am: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
-
 
 class KundenFreitextResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     kunden_nr: str
     chef_anweisung: Optional[str] = None
     langtext: Optional[str] = None
@@ -186,11 +181,10 @@ class KundenFreitextResponse(BaseModel):
     erstellt_am: Optional[datetime] = None
     geaendert_am: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
-
 
 class KundenAllgemeinErweitertResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     kunden_nr: str
     staat: Optional[str] = None
     bundesland: Optional[str] = None
@@ -212,11 +206,10 @@ class KundenAllgemeinErweitertResponse(BaseModel):
     erstellt_am: Optional[datetime] = None
     geaendert_am: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
-
 
 class KundenEmailVerteilerResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     kunden_nr: str
     verteilername: Optional[str] = None
@@ -224,11 +217,10 @@ class KundenEmailVerteilerResponse(BaseModel):
     email: Optional[EmailStr] = None
     erstellt_am: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
-
 
 class KundenBetriebsgemeinschaftResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     kunden_nr: str
     verbundnummer: Optional[str] = None
@@ -236,11 +228,10 @@ class KundenBetriebsgemeinschaftResponse(BaseModel):
     anteil_prozent: Optional[float] = None
     erstellt_am: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
-
 
 class KundenCpdKontoResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     kunden_nr: str
     debitoren_konto: Optional[str] = None
@@ -256,11 +247,10 @@ class KundenCpdKontoResponse(BaseModel):
     zahlungsbedingungen: Optional[str] = None
     erstellt_am: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
-
 
 class KundenRabatteDetailResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     kunden_nr: str
     artikel_nr: Optional[str] = None
@@ -270,11 +260,10 @@ class KundenRabatteDetailResponse(BaseModel):
     rabatt_liste_id: Optional[int] = None
     erstellt_am: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
-
 
 class KundenPreiseDetailResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     kunden_nr: str
     artikel_nr: Optional[str] = None
@@ -289,11 +278,10 @@ class KundenPreiseDetailResponse(BaseModel):
     bediener: Optional[str] = None
     erstellt_am: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
-
 
 class KundenStammAggregatedResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     """Aggregierter Kundenstamm (alle Tabellen)"""
 
     kunde: KundeResponse
@@ -311,5 +299,3 @@ class KundenStammAggregatedResponse(BaseModel):
     rabatte_detail: List[KundenRabatteDetailResponse] = Field(default_factory=list)
     preise_detail: List[KundenPreiseDetailResponse] = Field(default_factory=list)
 
-    class Config:
-        from_attributes = True

@@ -7,7 +7,7 @@ import json
 import secrets
 from typing import Any, List, Optional, Union
 from pydantic import Field, field_validator, ValidationInfo
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -64,8 +64,7 @@ class Settings(BaseSettings):
     # HINWEIS: In Docker-Umgebung muss host="postgres" sein (Service-Name aus docker-compose.yml)
     # In lokalen Umgebung ohne Docker kann 127.0.0.1 verwendet werden
     DATABASE_URL: str = Field(
-        default="postgresql://valeo_dev:valeo_dev_2024@postgres:5432/valeo_neuro_erp",
-        env="DATABASE_URL"
+        default="postgresql://valeo_dev:valeo_dev_2024@postgres:5432/valeo_neuro_erp"
     )
     DATABASE_CONNECT_ARGS: dict = {}
 
@@ -182,11 +181,12 @@ class Settings(BaseSettings):
         "/api/v1/gap/pipeline/status",  # GAP Pipeline Status (für Admin-UI)
     ]
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        case_sensitive = True
-        extra = "ignore"  # Allow extra fields from environment
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=True,
+        extra="ignore",
+    )
 
 
 # Global settings instance

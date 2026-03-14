@@ -19,6 +19,7 @@ from app.auth.scopes import ROLE_SCOPES
 from app.core.database import get_db
 from app.core.process_config import DEFAULT_ERNTEFENSTER_TEMPLATES, DEFAULT_PROCESS_VARIANTS
 from app.core.tenant import get_tenant_id
+from app.core.workflow_definitions import merge_workflow_variants
 
 router = APIRouter()
 
@@ -1295,6 +1296,9 @@ class WorkflowSandboxCampaignMatchOut(BaseModel):
 class WorkflowSandboxPreviewOut(BaseModel):
     process_key: str
     simulation_date: str
+    definition_version: int = 1
+    definition_origin: str = "default"
+    definition_status: str = "active"
     steps: list[str]
     required_roles: dict[str, list[str]] = Field(default_factory=dict)
     step_sla: dict[str, dict[str, Any]] = Field(default_factory=dict)
@@ -1429,14 +1433,14 @@ async def preview_workflow_sandbox(
     """
     settings = _load_tenant_settings(db, tenant_id)
     variants = settings.get("process_variants")
-    merged_variants = dict(DEFAULT_PROCESS_VARIANTS)
-    if isinstance(variants, dict):
-        for key, value in variants.items():
-            if isinstance(value, dict):
-                merged_variants[key] = {**merged_variants.get(key, {}), **value}
+    merged_variants = merge_workflow_variants(
+        DEFAULT_PROCESS_VARIANTS,
+        variants,
+        tenant_id=tenant_id,
+    )
 
     process_variant = merged_variants.get(payload.process_key)
-    if not isinstance(process_variant, dict):
+    if process_variant is None:
         raise HTTPException(status_code=404, detail=f"Prozess '{payload.process_key}' nicht gefunden")
 
     simulation_date = payload.simulation_date or date.today()
@@ -1466,13 +1470,17 @@ async def preview_workflow_sandbox(
     if not matches:
         warnings.append("Keine saisonale Kampagne aktiv. Die Vorschau basiert nur auf der Prozessvariante.")
 
-    steps = process_variant.get("steps")
-    required_roles = process_variant.get("required_roles")
-    step_sla = process_variant.get("step_sla")
+    definition_dump = process_variant.model_dump()
+    steps = definition_dump.get("steps")
+    required_roles = definition_dump.get("required_roles")
+    step_sla = definition_dump.get("step_sla")
 
     return WorkflowSandboxPreviewOut(
         process_key=payload.process_key,
         simulation_date=simulation_date.isoformat(),
+        definition_version=process_variant.version,
+        definition_origin=process_variant.origin,
+        definition_status=process_variant.status,
         steps=[str(step) for step in steps] if isinstance(steps, list) else [],
         required_roles={
             str(step): [str(role) for role in roles]
@@ -1488,7 +1496,7 @@ async def preview_workflow_sandbox(
         }
         if isinstance(step_sla, dict)
         else {},
-        description=str(process_variant.get("description") or "") or None,
+        description=str(definition_dump.get("description") or "") or None,
         matched_campaigns=matches,
         warnings=warnings,
     )

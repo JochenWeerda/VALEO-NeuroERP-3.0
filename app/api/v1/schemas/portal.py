@@ -12,7 +12,7 @@ from decimal import Decimal
 from typing import List, Optional
 from enum import Enum
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class ContractStatus(str, Enum):
@@ -76,6 +76,8 @@ class PrePurchaseInfo(BaseModel):
 
 
 class PortalProduct(BaseModel):
+    model_config = ConfigDict(populate_by_name=True, from_attributes=True)
+
     """
     Vollständiges Produkt für Portal-Shop-Kachel
     Enthält alle Informationen für die Darstellung inkl. Kontrakt/Vorkauf
@@ -113,10 +115,6 @@ class PortalProduct(BaseModel):
     pre_purchase_total_qty: Optional[Decimal] = Field(None, alias="prePurchaseTotalQty")
     pre_purchase_remaining_qty: Optional[Decimal] = Field(None, alias="prePurchaseRemainingQty")
     
-    class Config:
-        populate_by_name = True
-        from_attributes = True
-
 
 class PortalProductList(BaseModel):
     """Liste von Portal-Produkten mit Metadaten"""

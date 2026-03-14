@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class ConnectorProfileBase(BaseModel):
@@ -29,6 +29,8 @@ class ConnectorProfileUpdate(BaseModel):
 
 
 class ConnectorProfile(ConnectorProfileBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     tenant_id: str
     version: int = 1
@@ -37,11 +39,10 @@ class ConnectorProfile(ConnectorProfileBase):
     created_by: Optional[str] = None
     updated_by: Optional[str] = None
 
-    class Config:
-        from_attributes = True
-
 
 class ConnectorRunSummary(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     tenant_id: str
     connector_type: str
@@ -57,11 +58,10 @@ class ConnectorRunSummary(BaseModel):
     created_at: datetime
     created_by: Optional[str] = None
 
-    class Config:
-        from_attributes = True
-
 
 class ConnectorRunItem(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     run_id: str
     line_no: int
@@ -70,9 +70,6 @@ class ConnectorRunItem(BaseModel):
     validation_errors: Optional[List[Any]] = None
     posted_entity_id: Optional[str] = None
     status: str
-
-    class Config:
-        from_attributes = True
 
 
 class ImportUploadResponse(BaseModel):

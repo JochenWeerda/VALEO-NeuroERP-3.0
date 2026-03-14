@@ -6,7 +6,7 @@ Data validation and serialization schemas for finance domain
 from datetime import datetime
 from decimal import Decimal
 from typing import Optional, List
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 from uuid import UUID
 
 
@@ -59,6 +59,8 @@ class AccountUpdate(BaseModel):
 
 class Account(AccountBase):
     """Full account schema"""
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     tenant_id: str
     balance: Decimal = Field(default=Decimal('0.00'), description="Current balance")
@@ -66,9 +68,6 @@ class Account(AccountBase):
     parent_account_id: Optional[str] = Field(None, description="Parent account ID for hierarchy")
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
-
-    class Config:
-        from_attributes = True
 
 
 class AccountHierarchy(Account):
@@ -120,14 +119,13 @@ class JournalEntryLineCreate(JournalEntryLineBase):
 
 class JournalEntryLine(JournalEntryLineBase):
     """Full journal entry line schema"""
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     tenant_id: str
     journal_entry_id: str
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
-
-    class Config:
-        from_attributes = True
 
 
 # Journal Entry Schemas
@@ -140,7 +138,7 @@ class JournalEntryBase(BaseModel):
     reference: Optional[str] = Field(None, max_length=100, description="Reference document")
     source: str = Field(default="manual", description="Entry source (manual, system, integration)")
     currency: str = Field(default="EUR", min_length=3, max_length=3, description="Currency code")
-    lines: List[JournalEntryLineCreate] = Field(..., min_items=2, description="Journal entry lines")
+    lines: List[JournalEntryLineCreate] = Field(..., min_length=2, description="Journal entry lines")
 
     @field_validator('source')
     @classmethod
@@ -174,6 +172,8 @@ class JournalEntryUpdate(BaseModel):
 
 class JournalEntry(JournalEntryBase):
     """Full journal entry schema"""
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     tenant_id: str
     status: str = Field(default="draft", description="Entry status")
@@ -186,9 +186,6 @@ class JournalEntry(JournalEntryBase):
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     lines: List[JournalEntryLine] = []
-
-    class Config:
-        from_attributes = True
 
 
 # Financial Reporting Schemas
@@ -256,13 +253,12 @@ class BankAccountUpdate(BaseModel):
 
 class BankAccount(BankAccountBase):
     """Full bank account schema"""
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     tenant_id: str
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
-
-    class Config:
-        from_attributes = True
 
 
 # Debtor Schemas
@@ -322,13 +318,12 @@ class DebtorUpdate(BaseModel):
 
 class Debtor(DebtorBase):
     """Full debtor schema"""
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     tenant_id: str
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
-
-    class Config:
-        from_attributes = True
 
 
 # Creditor (Kreditoren) Schemas – domain_erp.creditors
@@ -388,11 +383,11 @@ class CreditorUpdate(BaseModel):
 
 class Creditor(CreditorBase):
     """Full creditor schema"""
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     tenant_id: str
     current_balance: Optional[Decimal] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True

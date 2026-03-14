@@ -8,9 +8,10 @@ from decimal import Decimal
 
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy import event
 from sqlalchemy.orm import Session
 
-from app.core.database import SessionLocal
+from app.core.database import SessionLocal, engine
 from app.services.position_service import (
     PositionCalculationService,
     _period_key,
@@ -22,6 +23,7 @@ from app.services.position_service import (
 )
 from app.services.position_guard_service import PositionGuardService
 from app.domains.operations.models import PosPositionRule, PosPositionOverride, KonContract, KonContractLine
+from app.domains.operations.models import KonContractMovement, PosPositionSnapshot
 
 try:
     from main import app
@@ -37,12 +39,34 @@ BRANCH = "NL-TEST"
 
 @pytest.fixture
 def db() -> Session:
-    session = SessionLocal()
+    connection = engine.connect()
+    outer_tx = connection.begin()
+    session = SessionLocal(bind=connection)
+
+    # The position-service tests share a fixed tenant id and call commit() inside the
+    # test body. Clean that tenant deterministically so persisted leftovers from
+    # earlier runs cannot leak back through the real database.
+    session.query(PosPositionSnapshot).filter(PosPositionSnapshot.tenant_id == TENANT).delete(synchronize_session=False)
+    session.query(PosPositionOverride).filter(PosPositionOverride.tenant_id == TENANT).delete(synchronize_session=False)
+    session.query(PosPositionRule).filter(PosPositionRule.tenant_id == TENANT).delete(synchronize_session=False)
+    session.query(KonContractMovement).filter(KonContractMovement.tenant_id == TENANT).delete(synchronize_session=False)
+    session.query(KonContractLine).filter(KonContractLine.tenant_id == TENANT).delete(synchronize_session=False)
+    session.query(KonContract).filter(KonContract.tenant_id == TENANT).delete(synchronize_session=False)
+    session.flush()
+
+    session.begin_nested()
+
+    @event.listens_for(session, "after_transaction_end")
+    def _restart_savepoint(sess, trans):
+        if trans.nested and not trans._parent.nested:
+            sess.begin_nested()
+
     try:
         yield session
     finally:
-        session.rollback()
         session.close()
+        outer_tx.rollback()
+        connection.close()
 
 
 class TestPeriodHelpers:

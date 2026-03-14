@@ -5,7 +5,7 @@ Strukturierte Daten für Abschnitte B.1–B.8 und C, gespeichert in ContractAmen
 
 from typing import Any, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 # --- B.1 Liefermodell / Lieferweg ---
@@ -101,6 +101,8 @@ class SectionC(BaseModel):
 
 
 class EHBEBNachtragChanges(BaseModel):
+    model_config = ConfigDict(extra="allow")
+
     """Struktur für ContractAmendment.changes bei type=EHBEB_NACHTRAG."""
     b1: Optional[SectionB1] = Field(None, description="Liefermodell / Lieferweg")
     b2: Optional[SectionB2] = Field(None, description="Transport / Fracht / Wartezeit")
@@ -111,9 +113,6 @@ class EHBEBNachtragChanges(BaseModel):
     b7: Optional[SectionB7] = Field(None, description="Abrechnung / Zahlung")
     b8: Optional[SectionB8] = Field(None, description="Dokumente")
     c: Optional[SectionC] = Field(None, description="Schluss")
-
-    class Config:
-        extra = "allow"
 
 
 def validate_ehbeb_changes(data: dict[str, Any]) -> dict[str, Any]:

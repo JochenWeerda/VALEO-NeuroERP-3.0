@@ -3,7 +3,7 @@ Finance Schemas
 Pydantic schemas for finance operations, E-Invoicing (ZUGFeRD/XRechnung), and advanced features
 """
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 from typing import List, Optional, Dict, Any
 from datetime import datetime, date
 from decimal import Decimal
@@ -14,6 +14,8 @@ from decimal import Decimal
 # ============================================================================
 
 class Wechselkurs(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     """Wechselkurs für Fremdwährungen"""
     id: str
     tenant_id: str
@@ -25,9 +27,6 @@ class Wechselkurs(BaseModel):
     gueltig_von: Optional[date] = None
     gueltig_bis: Optional[date] = None
     created_at: datetime
-
-    class Config:
-        from_attributes = True
 
 
 class WechselkursCreate(BaseModel):
@@ -56,6 +55,8 @@ class Fremdwaehrungsbetrag(BaseModel):
 # ============================================================================
 
 class Buchungsschema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     """Automatisches Buchungsschema"""
     id: str
     tenant_id: str
@@ -78,9 +79,6 @@ class Buchungsschema(BaseModel):
     priorität: int = 100
     created_at: datetime
     updated_at: datetime
-
-    class Config:
-        from_attributes = True
 
 
 class BuchungsschemaCreate(BaseModel):
@@ -121,6 +119,8 @@ class Buchungsvorschlag(BaseModel):
 # ============================================================================
 
 class Kostenstelle(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     """Kostenstelle"""
     id: str
     tenant_id: str
@@ -134,9 +134,6 @@ class Kostenstelle(BaseModel):
     aktiv: bool = True
     created_at: datetime
     updated_at: datetime
-
-    class Config:
-        from_attributes = True
 
 
 class KostenstelleCreate(BaseModel):
@@ -192,6 +189,8 @@ class KostenstellenReport(BaseModel):
 # ============================================================================
 
 class AbschlussCheckliste(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     """Monats-/Jahresabschluss Checkliste"""
     id: str
     tenant_id: str
@@ -208,9 +207,6 @@ class AbschlussCheckliste(BaseModel):
     abschluss_datum: Optional[date] = None
     created_at: datetime
     updated_at: datetime
-
-    class Config:
-        from_attributes = True
 
 
 class AbschlussChecklisteCreate(BaseModel):
@@ -247,6 +243,8 @@ class ChecklistenItemUpdate(BaseModel):
 # ============================================================================
 
 class NebenbuchAbstimmung(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     """Abstimmung Nebenbuch ↔ Hauptbuch"""
     id: str
     tenant_id: str
@@ -271,9 +269,6 @@ class NebenbuchAbstimmung(BaseModel):
     abgestimmt_durch: Optional[str] = None
     created_at: datetime
     updated_at: datetime
-
-    class Config:
-        from_attributes = True
 
 
 class NebenbuchAbstimmungCreate(BaseModel):
@@ -315,6 +310,8 @@ class KreditorenAbstimmung(BaseModel):
 # ============================================================================
 
 class IntercompanyBuchung(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     """Intercompany Buchung zwischen Gesellschaften"""
     id: str
     tenant_id: str
@@ -346,9 +343,6 @@ class IntercompanyBuchung(BaseModel):
     referenz: Optional[str] = None
     created_at: datetime
     updated_at: datetime
-
-    class Config:
-        from_attributes = True
 
 
 class IntercompanyBuchungCreate(BaseModel):
@@ -443,13 +437,12 @@ class ZahlungslaufUpdate(BaseModel):
 
 
 class Zahlungslauf(ZahlungslaufBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     tenant_id: str
     created_at: datetime
     updated_at: datetime
-
-    class Config:
-        from_attributes = True
 
 
 # ============================================================================
@@ -527,14 +520,13 @@ class ERechnungCreate(ERechnungBase):
 
 
 class ERechnungResponse(ERechnungBase):
+    model_config = ConfigDict(from_attributes=True)
+
     """E-Rechnung mit generierten Metadaten"""
     id: str
     created_at: datetime
     zugeordneter_auftrag: Optional[str] = None
     zugeordneter_lieferschein: Optional[str] = None
-
-    class Config:
-        from_attributes = True
 
 
 class ZUGFeRDExportResponse(BaseModel):

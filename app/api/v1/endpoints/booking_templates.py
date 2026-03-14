@@ -42,7 +42,7 @@ class BookingTemplateCreate(BaseModel):
     category: str = Field(default="GENERAL", description="Template category")
     trigger_type: str = Field(default="MANUAL", description="Trigger type: MANUAL, SCHEDULED, EVENT")
     trigger_config: Optional[Dict[str, Any]] = Field(None, description="Trigger configuration (cron, event type, etc.)")
-    lines: List[BookingTemplateLine] = Field(..., min_items=2, description="Template lines")
+    lines: List[BookingTemplateLine] = Field(..., min_length=2, description="Template lines")
     default_amount: Optional[Decimal] = Field(None, ge=0, description="Default amount for percentage-based calculations")
     currency: str = Field(default="EUR", min_length=3, max_length=3, description="Currency code")
     active: bool = Field(default=True, description="Active status")
