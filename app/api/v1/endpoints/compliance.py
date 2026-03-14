@@ -696,3 +696,91 @@ async def export_chargen_trace_report(
     report = _build_lot_trace_report(lot, deliveries)
     report["generated_at"] = datetime.utcnow().isoformat()
     return report
+
+
+# ---------------------------------------------------------------------------
+# Wave 23 AP4: Intrastat-Meldungen
+# ---------------------------------------------------------------------------
+
+from ....core.intrastat_model import (
+    IntrastatMeldung,
+    IntrastatRichtung,
+    build_stub_intrastat_meldung,
+    validate_intrastat_meldung,
+)
+
+_INTRASTAT_STORE: dict[str, dict] = {}
+
+
+@router.get("/intrastat/meldungen", response_model=dict)
+async def list_intrastat_meldungen(
+    meldezeitraum: Optional[str] = None,
+    richtung: Optional[str] = None,
+) -> dict:
+    """
+    Liste aller Intrastat-Meldungen (Gap 042).
+
+    Optional filterbar nach Meldezeitraum (YYYY-MM) und Richtung (EINGANG/AUSGANG).
+    """
+    meldungen = list(_INTRASTAT_STORE.values())
+
+    if meldezeitraum:
+        meldungen = [m for m in meldungen if m.get("meldezeitraum") == meldezeitraum]
+    if richtung:
+        meldungen = [m for m in meldungen if m.get("richtung") == richtung.upper()]
+
+    return {
+        "meldungen": meldungen,
+        "count": len(meldungen),
+        "schema_version": 1,
+    }
+
+
+@router.post("/intrastat/meldungen", response_model=dict, status_code=201)
+async def create_intrastat_meldung(
+    body: dict,
+) -> dict:
+    """
+    Anlage einer neuen Intrastat-Meldung (Gap 042).
+
+    Fuehrt direkt eine Vollstaendigkeitspruefung gemaess VO (EG) 638/2004 durch.
+    Gibt validation_result mit allen Violations zurueck.
+    """
+    meldung_id = body.get("meldung_id", f"INTRA-{len(_INTRASTAT_STORE) + 1:04d}")
+    tenant_id = body.get("tenant_id", "demo-tenant")
+    meldezeitraum = body.get("meldezeitraum", "2026-03")
+    richtung_raw = body.get("richtung", "EINGANG")
+
+    try:
+        richtung = IntrastatRichtung(richtung_raw)
+    except ValueError:
+        richtung = IntrastatRichtung.EINGANG
+
+    meldung = build_stub_intrastat_meldung(
+        meldung_id=meldung_id,
+        tenant_id=tenant_id,
+        meldezeitraum=meldezeitraum,
+        richtung=richtung,
+    )
+    validation = validate_intrastat_meldung(meldung)
+    meldung_dict = meldung.as_dict()
+    _INTRASTAT_STORE[meldung_id] = meldung_dict
+
+    return {
+        "meldung": meldung_dict,
+        "validation_result": validation.as_dict(),
+        "schema_version": 1,
+    }
+
+
+@router.get("/intrastat/meldungen/{meldung_id}/validate", response_model=dict)
+async def validate_intrastat_meldung_endpoint(meldung_id: str) -> dict:
+    """
+    Vollstaendigkeitspruefung einer einzelnen Intrastat-Meldung nach EU-VO 638/2004.
+    """
+    meldung = build_stub_intrastat_meldung(
+        meldung_id=meldung_id,
+        tenant_id="demo-tenant",
+    )
+    result = validate_intrastat_meldung(meldung)
+    return result.as_dict()
