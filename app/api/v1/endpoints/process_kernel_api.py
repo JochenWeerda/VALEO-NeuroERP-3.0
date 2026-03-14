@@ -55,6 +55,11 @@ from ....core.price_formula_engine import (
 )
 from ....core.settlement_journal_bridge import build_settlement_journal_draft
 from ....core.settlement_e2e_reference import build_e2e_reference, validate_e2e_reference
+from ....core.nebenkosten_engine import (
+    NebenkostenInput,
+    compute_nebenkosten,
+    get_default_nebenkosten_rules,
+)
 
 router = APIRouter(prefix="/process", tags=["process-kernel", "commands"])
 
@@ -457,5 +462,39 @@ def get_settlement_journal_preview(settlement_id: str) -> dict[str, Any]:
         "journal_draft": draft.as_dict(),
         "e2e_reference": e2e_ref.as_dict(),
         "e2e_validation": e2e_validation.as_dict(),
+        "schema_version": 1,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Wave 23 AP3: Nebenkosten-Vorschau
+# ---------------------------------------------------------------------------
+
+
+@router.get("/settlement/nebenkosten-preview/{settlement_id}", response_model=dict)
+def get_settlement_nebenkosten_preview(settlement_id: str) -> dict[str, Any]:
+    """
+    Nebenkosten-Vorschau fuer ein Settlement (Gap 007).
+
+    Liefert vollstaendigen NebenkostenBreakdown auf Basis der
+    Standard-Regelsets. In Produktion: Mengen/Strecken aus Settlement laden.
+    """
+    from decimal import Decimal
+
+    inp = NebenkostenInput(
+        settlement_id=settlement_id,
+        tenant_id="demo-tenant",
+        billing_qty_tons=Decimal("50.0"),
+        transport_km=Decimal("120.0"),
+        storage_days=Decimal("14"),
+        weighing_count=2,
+    )
+    rules = get_default_nebenkosten_rules()
+    breakdown = compute_nebenkosten(inp, rules)
+
+    return {
+        "settlement_id": settlement_id,
+        "nebenkosten": breakdown.as_dict(),
+        "rule_count": len(rules),
         "schema_version": 1,
     }
