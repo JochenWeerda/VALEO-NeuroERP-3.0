@@ -13,6 +13,8 @@ import { AlertTriangle, CheckCircle, XCircle } from 'lucide-react'
 import { apiClient } from '@/lib/api-client'
 import { useToast } from '@/hooks/use-toast'
 import { useWarteschlangeEintrag, usePatchWarteschlangeStatus } from '@/lib/api/inventory'
+import { buildDecisionView } from '@/policy/decision-view'
+import { ProcessStatusPanel } from '@/components/workflow/ProcessStatusPanel'
 
 type QualitaetsData = {
   lieferscheinNr: string
@@ -27,14 +29,28 @@ type QualitaetsData = {
   ergebnis: 'freigegeben' | 'bedingt' | 'gesperrt'
 }
 
+type QualityProtocolResponse = {
+  id: string
+  harvest_acceptance_id?: string | null
+  reference_context?: {
+    process_key: string
+    anchor_entity: string
+    anchor_id: string
+    chain?: Record<string, string | null | undefined>
+  } | null
+}
+
 export default function QualitaetsCheckPage(): JSX.Element {
   const navigate = useNavigate()
   const location = useLocation()
   const { toast } = useToast()
-  const eintragId = (location.state as { eintragId?: string } | null)?.eintragId
+  const routeState = (location.state as { eintragId?: string; harvestAcceptanceId?: string; referenceContext?: QualityProtocolResponse['reference_context'] } | null) ?? null
+  const eintragId = routeState?.eintragId
+  const harvestAcceptanceId = routeState?.harvestAcceptanceId
   const { data: lkwEintrag } = useWarteschlangeEintrag(eintragId)
   const patchStatus = usePatchWarteschlangeStatus()
   const statusSetToInBearbeitung = useRef(false)
+  const [savedReferenceContext, setSavedReferenceContext] = useState<QualityProtocolResponse['reference_context']>(routeState?.referenceContext ?? null)
 
   const [qualitaet, setQualitaet] = useState<QualitaetsData>({
     lieferscheinNr: '',
@@ -92,7 +108,8 @@ export default function QualitaetsCheckPage(): JSX.Element {
 
   const saveMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiClient.post('/api/v1/agrar/quality-protocols', {
+      const response = await apiClient.post<QualityProtocolResponse>('/api/v1/agrar/quality-protocols', {
+        harvest_acceptance_id: harvestAcceptanceId ?? null,
         moisture_pct: qualitaet.feuchtigkeit || null,
         protein_pct: qualitaet.protein || null,
         impurities_pct: qualitaet.verunreinigung || null,
@@ -109,7 +126,8 @@ export default function QualitaetsCheckPage(): JSX.Element {
       })
       return response.data
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      setSavedReferenceContext(data.reference_context ?? null)
       toast({ title: 'Qualitätsprüfung gespeichert', description: `Ergebnis: ${qualitaet.ergebnis}` })
       if (eintragId) {
         patchStatus.mutate({ id: eintragId, status: 'abgeschlossen' })
@@ -124,6 +142,28 @@ export default function QualitaetsCheckPage(): JSX.Element {
   async function handleSubmit(): Promise<void> {
     saveMutation.mutate()
   }
+
+  const qualityDecisionView = buildDecisionView({
+    status:
+      qualitaet.ergebnis === 'gesperrt'
+        ? 'blocked'
+        : qualitaet.ergebnis === 'bedingt'
+          ? 'approval-required'
+          : 'allowed',
+    summary:
+      qualitaet.ergebnis === 'gesperrt'
+        ? 'Qualitaetspruefung blockiert die weitere Verarbeitung.'
+        : qualitaet.ergebnis === 'bedingt'
+          ? 'Qualitaetspruefung erlaubt die Verarbeitung nur mit Freigabe.'
+          : 'Qualitaetspruefung gibt die Verarbeitung frei.',
+    source_scope: 'quality-protocol',
+    details: [
+      { label: 'Ergebnis', value: qualitaet.ergebnis },
+      ...(savedReferenceContext?.anchor_id
+        ? [{ label: 'Referenzanker', value: `${savedReferenceContext.anchor_entity}:${savedReferenceContext.anchor_id}` }]
+        : []),
+    ],
+  })
 
   const steps = [
     {
@@ -355,6 +395,8 @@ export default function QualitaetsCheckPage(): JSX.Element {
         feuchtigkeit: qualitaet.feuchtigkeit,
         verunreinigung: qualitaet.verunreinigung,
         lieferscheinNr: qualitaet.lieferscheinNr,
+        harvestAcceptanceId,
+        referenceContext: savedReferenceContext,
       },
     })
   }
@@ -371,6 +413,29 @@ export default function QualitaetsCheckPage(): JSX.Element {
           </Button>
         }
       />
+      <div className="mb-6 grid gap-4 lg:grid-cols-2">
+        {qualityDecisionView ? (
+          <Card>
+            <CardContent className="pt-6">
+              <div className="mb-2 text-sm text-muted-foreground">Entscheidungsstatus</div>
+              <ProcessStatusPanel view={qualityDecisionView} />
+            </CardContent>
+          </Card>
+        ) : null}
+        {savedReferenceContext ? (
+          <Card>
+            <CardContent className="pt-6">
+              <div className="mb-2 text-sm text-muted-foreground">Prozessreferenz</div>
+              <div className="text-sm font-medium">
+                {savedReferenceContext.process_key} | {savedReferenceContext.anchor_entity}: {savedReferenceContext.anchor_id}
+              </div>
+              {savedReferenceContext.chain ? (
+                <pre className="mt-3 whitespace-pre-wrap text-xs">{JSON.stringify(savedReferenceContext.chain, null, 2)}</pre>
+              ) : null}
+            </CardContent>
+          </Card>
+        ) : null}
+      </div>
       <Wizard
         title="Schnell-Qualitätsprüfung"
         steps={steps}

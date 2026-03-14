@@ -26,6 +26,8 @@ import {
 import DlgAuswahlVerkaufKontrakte from '@/pages/kontrakte/DlgAuswahlVerkaufKontrakte'
 import DlgKontraktUmSaetze from '@/pages/kontrakte/DlgKontraktUmSaetze'
 import FrmKontraktProtokoll from '@/pages/kontrakte/FrmKontraktProtokoll'
+import { buildDecisionView } from '@/policy/decision-view'
+import { ProcessStatusPanel } from '@/components/workflow/ProcessStatusPanel'
 
 type FormState = Omit<Kontrakt, 'contract_id' | 'rest_quantity'>
 
@@ -172,6 +174,34 @@ export default function FrmKontraktDetail(): JSX.Element {
     return Number(state.total_quantity || total)
   }, [state.lines, state.total_quantity])
 
+  const kontraktStatusView = useMemo(() => {
+    const explainability = {
+      status:
+        state.status === 'STORNIERT'
+          ? ('blocked' as const)
+          : state.status === 'ERLEDIGT'
+            ? ('allowed' as const)
+            : state.pricing_model === 'matif'
+              ? ('approval-required' as const)
+              : ('allowed' as const),
+      summary:
+        state.status === 'STORNIERT'
+          ? 'Kontrakt wurde storniert und ist gesperrt.'
+          : state.status === 'ERLEDIGT'
+            ? 'Kontrakt ist vollstaendig erfuellt.'
+            : state.pricing_model === 'matif'
+              ? 'MATIF-Preisfestsetzung offen – Kontrakt wartet auf Preisbestaetigung.'
+              : 'Kontrakt ist aktiv und kann bearbeitet werden.',
+      source_scope: 'contract',
+      details: [
+        { label: 'Status', value: state.status },
+        ...(state.pricing_model ? [{ label: 'Preismodell', value: state.pricing_model }] : []),
+        ...(state.valid_to ? [{ label: 'Gueltig bis', value: state.valid_to.slice(0, 10) }] : []),
+      ],
+    }
+    return buildDecisionView(explainability)
+  }, [state.status, state.pricing_model, state.valid_to])
+
   const updateLine = (index: number, patch: Partial<KontraktLine>): void => {
     setState((prev) => {
       const lines = [...prev.lines]
@@ -217,6 +247,10 @@ export default function FrmKontraktDetail(): JSX.Element {
             <Button variant="outline" onClick={() => navigate('/dokumente/ablage')}>Unterlagen/Dateien</Button>
             <Button variant="outline" disabled={!isEdit || !canEdit || cancelMutation.isPending} onClick={() => cancelMutation.mutate()}>Workflow erledigt/stornieren</Button>
           </div>
+
+          {isEdit && kontraktStatusView ? (
+            <ProcessStatusPanel view={kontraktStatusView} title="Prozessstatus" />
+          ) : null}
 
           <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
             <div className="space-y-1">
