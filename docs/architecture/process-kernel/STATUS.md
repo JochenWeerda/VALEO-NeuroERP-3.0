@@ -28,6 +28,7 @@
 | Wave 17 | abgeschlossen | 17 | `wave-17/STATUS.md` |
 | Wave 18 | abgeschlossen | 55 | `wave-18/STATUS.md` |
 | Wave 19 | abgeschlossen | 62 | `wave-19/STATUS.md` |
+| Wave 20 | abgeschlossen | 43 | `wave-20/STATUS.md` |
 
 ## PKP-06 Frontend Explainability Integration (2026-03-14)
 
