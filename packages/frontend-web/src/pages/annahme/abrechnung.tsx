@@ -10,6 +10,8 @@ import { ErrorState } from '@/components/ErrorState'
 import { apiClient } from '@/lib/api-client'
 import { useToast } from '@/hooks/use-toast'
 import { Calculator, FileText, Save, Truck } from 'lucide-react'
+import { buildDecisionView } from '@/policy/decision-view'
+import { ProcessStatusPanel } from '@/components/workflow/ProcessStatusPanel'
 
 type DeductionType = 'drying' | 'cleaning' | 'freight' | 'other'
 type DeductionMode = 'per_ton' | 'fixed'
@@ -38,6 +40,21 @@ type Settlement = {
   net_amount_eur: number
   status: 'draft' | 'posted' | 'cancelled'
   posted_journal_ref?: string | null
+  reference_context?: {
+    process_key: string
+    anchor_entity: string
+    anchor_id: string
+    chain: Record<string, string>
+  } | null
+  exception_hints?: Array<{
+    rule_id: string
+    category: string
+    decision_mode: string
+    requires_approval: boolean
+    approver_roles: string[]
+    description: string
+  }>
+  explainability?: unknown
   deductions: SettlementDeduction[]
 }
 
@@ -55,6 +72,21 @@ type SettlementPreview = {
   gross_amount_eur: number
   total_deductions_eur: number
   net_amount_eur: number
+  reference_context?: {
+    process_key: string
+    anchor_entity: string
+    anchor_id: string
+    chain: Record<string, string>
+  } | null
+  exception_hints?: Array<{
+    rule_id: string
+    category: string
+    decision_mode: string
+    requires_approval: boolean
+    approver_roles: string[]
+    description: string
+  }>
+  explainability?: unknown
 }
 
 type FormState = {
@@ -357,6 +389,7 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
   const previewData = settlementPreview.data
   const billingData = billingPreview.data
   const qualityOk = form.feuchtigkeit <= 14.5 && form.verunreinigung <= 2
+  const previewDecisionView = buildDecisionView(previewData?.explainability)
 
   return (
     <div className="space-y-6 p-6">
@@ -462,6 +495,37 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
               <div className="mt-2 flex justify-between border-t pt-2 text-lg"><span className="font-bold">Nettobetrag</span><span className="font-bold">{money(previewData.net_amount_eur)}</span></div>
             </div>
           )}
+
+          {previewDecisionView ? (
+            <ProcessStatusPanel view={previewDecisionView} />
+          ) : null}
+
+          {previewData?.exception_hints && previewData.exception_hints.length > 0 ? (
+            <div className="rounded-md border border-amber-300 bg-amber-50 p-3">
+              <div className="text-sm font-semibold text-amber-900">Ausnahmehinweise</div>
+              <ul className="mt-2 space-y-2 text-sm text-amber-900">
+                {previewData.exception_hints.map((hint) => (
+                  <li key={hint.rule_id}>
+                    <div className="font-medium">{hint.description}</div>
+                    <div className="text-xs">
+                      {hint.category} | {hint.decision_mode}
+                      {hint.requires_approval ? ` | Freigabe: ${hint.approver_roles.join(', ')}` : ''}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          {previewData?.reference_context ? (
+            <div className="rounded-md border p-3">
+              <div className="text-sm font-semibold">Prozessreferenz</div>
+              <div className="mt-2 text-xs text-muted-foreground">
+                {previewData.reference_context.process_key} | {previewData.reference_context.anchor_entity}: {previewData.reference_context.anchor_id}
+              </div>
+              <pre className="mt-2 whitespace-pre-wrap text-xs">{JSON.stringify(previewData.reference_context.chain, null, 2)}</pre>
+            </div>
+          ) : null}
         </CardContent>
       </Card>
 
@@ -502,6 +566,17 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
                   {s.posted_journal_ref && (
                     <div className="mt-2 text-xs text-muted-foreground">Journal: {s.posted_journal_ref}</div>
                   )}
+                  {s.explainability ? (
+                    (() => {
+                      const view = buildDecisionView(s.explainability)
+                      return view ? (
+                        <div className="mt-3 rounded-md border p-2">
+                          <div className={`inline-flex rounded border px-2 py-1 text-xs ${view.statusClassName}`}>{view.statusLabel}</div>
+                          <div className="mt-2 text-sm">{view.summary}</div>
+                        </div>
+                      ) : null
+                    })()
+                  ) : null}
                 </div>
               ))}
             </div>
