@@ -46,6 +46,15 @@ from ....core.settlement_human_gate import get_default_gate_rules
 from ....core.process_sla import build_default_sla_policies
 from ....core.settlement_audit_chain import build_genesis_chain, CHAIN_GENESIS_HASH
 from ....core.gobd_settlement_check import build_stub_gobd_check
+from ....core.price_formula_engine import (
+    FixedPriceSpec,
+    FormulaPriceSpec,
+    TerminmarktPriceSpec,
+    evaluate_price,
+    build_deviation_alert,
+)
+from ....core.settlement_journal_bridge import build_settlement_journal_draft
+from ....core.settlement_e2e_reference import build_e2e_reference, validate_e2e_reference
 
 router = APIRouter(prefix="/process", tags=["process-kernel", "commands"])
 
@@ -377,3 +386,76 @@ def get_settlement_gobd_check(settlement_id: str) -> dict[str, Any]:
     """
     result = build_stub_gobd_check(settlement_id)
     return result.as_dict()
+
+
+# ---------------------------------------------------------------------------
+# Wave 21 AP3: Preis-Preview
+# ---------------------------------------------------------------------------
+
+
+@router.get("/settlement/price-preview/{settlement_id}", response_model=dict)
+def get_settlement_price_preview(settlement_id: str) -> dict[str, Any]:
+    """
+    Preis-Preview fuer ein Settlement mit vollstaendiger Audit-Spur.
+
+    Demonstriert alle drei Preistypen (FIXED, FORMULA, TERMINMARKT).
+    In Produktion: Preisspezifikation aus Kontrakt-Stammdaten laden.
+    """
+    from decimal import Decimal
+
+    # Demo: Terminmarkt-Preis (MATIF) mit Basis-Spread
+    spec = TerminmarktPriceSpec(
+        market_reference_id="MATIF_WEIZEN_MAR26",
+        settlement_price_eur_per_ton=Decimal("225.50"),
+        basis_spread_eur_per_ton=Decimal("-3.00"),
+    )
+    reference = Decimal("220.00")
+    evaluation = evaluate_price(spec, reference_price=reference)
+    alert = build_deviation_alert(settlement_id, evaluation)
+
+    return {
+        "settlement_id": settlement_id,
+        "price_evaluation": evaluation.as_dict(),
+        "deviation_alert": alert.as_dict() if alert else None,
+        "schema_version": 1,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Wave 21 AP4: Journal-Preview
+# ---------------------------------------------------------------------------
+
+
+@router.get("/settlement/journal-preview/{settlement_id}", response_model=dict)
+def get_settlement_journal_preview(settlement_id: str) -> dict[str, Any]:
+    """
+    Buchungsvorschau (JournalEntryDraft) fuer ein genehmigtes Settlement.
+
+    In Produktion: Betraege aus Settlement-DB laden.
+    Liefert Soll/Haben-Saetze, Gegenkonto und Prozessreferenz.
+    """
+    from decimal import Decimal
+
+    draft = build_settlement_journal_draft(
+        settlement_id=settlement_id,
+        tenant_id="demo-tenant",
+        gross_amount=Decimal("5000.00"),
+        total_deductions=Decimal("250.00"),
+        net_amount=Decimal("4750.00"),
+    )
+
+    e2e_ref = build_e2e_reference(
+        settlement_id=settlement_id,
+        tenant_id="demo-tenant",
+        kontrakt_id=f"KNT-{settlement_id}",
+        annahme_id=f"ANH-{settlement_id}",
+    )
+    e2e_validation = validate_e2e_reference(e2e_ref)
+
+    return {
+        "settlement_id": settlement_id,
+        "journal_draft": draft.as_dict(),
+        "e2e_reference": e2e_ref.as_dict(),
+        "e2e_validation": e2e_validation.as_dict(),
+        "schema_version": 1,
+    }

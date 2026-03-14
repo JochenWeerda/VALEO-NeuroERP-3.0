@@ -2,8 +2,8 @@
 
 ## Gesamtstatus
 - Stand: `2026-03-14`
-- Status: `Waves 1 bis 20 abgeschlossen; PKP-06 Frontend Explainability Integration abgeschlossen`
-- Testergebnis: `1068 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed`
+- Status: `Waves 1 bis 21 abgeschlossen; PKP-06 Frontend Explainability Integration abgeschlossen`
+- Testergebnis: `1105 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed`
 
 ## Waves
 
@@ -29,6 +29,7 @@
 | Wave 18 | abgeschlossen | 55 | `wave-18/STATUS.md` |
 | Wave 19 | abgeschlossen | 62 | `wave-19/STATUS.md` |
 | Wave 20 | abgeschlossen | 43 | `wave-20/STATUS.md` |
+| Wave 21 | abgeschlossen | 37 | `wave-21/STATUS.md` |
 
 ## PKP-06 Frontend Explainability Integration (2026-03-14)
 
