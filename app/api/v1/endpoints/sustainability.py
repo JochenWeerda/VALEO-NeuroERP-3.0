@@ -337,3 +337,7 @@ async def export_esg_report_pdf(
         filename = f"esg-report-{year}-{customer_id}.pdf"
 
     return StreamingResponse(
+        buf,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )

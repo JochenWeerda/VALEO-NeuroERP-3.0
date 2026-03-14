@@ -68,8 +68,8 @@ async def test_compliance_copilot_no_violations():
 def test_bestellvorschlag_workflow_build():
     """Test that bestellvorschlag workflow can be built."""
     workflow = build_bestellvorschlag_workflow()
-    
+
     assert workflow is not None
-    # Workflow compiled successfully
-    assert callable(workflow)
+    # CompiledStateGraph exposes invoke/ainvoke rather than __call__
+    assert hasattr(workflow, "invoke") or hasattr(workflow, "ainvoke")
 
