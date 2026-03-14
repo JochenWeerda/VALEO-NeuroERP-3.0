@@ -15,6 +15,7 @@ from app.api.v1.endpoints import (
     tenants,
     users,
     customers,
+    crm_reports,
     leads,
     contacts,
     activities,
@@ -130,6 +131,19 @@ from app.api.v1.endpoints import (
     position_rules,
     position_overrides,
     batch,
+)
+
+# Wave 6-9 Process-Kernel-Endpoints (agrar-p0, supplier, wave-7, wave-9)
+from app.api.v1.endpoints import (
+    agrar_p0,
+    supplier_portal,
+    reklamation_api,
+    price_hedge_api,
+    silo_operations_api,
+    read_model_snapshots,
+    edi_api,
+    zertifikate_api,
+    ernte_kampagne_api,
 )
 
 # Import domain routers
@@ -255,7 +269,7 @@ api_router.include_router(
     tags=["sales", "offers"]
 )
 
-from .endpoints import sales_delivery_notes, branches, pricing, price_lists, sales_credit_notes, sales_reports, crm_reports
+from .endpoints import sales_delivery_notes, branches, pricing, price_lists, sales_credit_notes, sales_reports
 
 api_router.include_router(
     sales_delivery_notes.router,
@@ -916,3 +930,20 @@ api_router.include_router(
     personal.router,
     tags=["personal", "hr"]
 )
+
+# Wave 6 — Agrar-P0, Supplier-Portal, Silo-Operations, Contract-Pricing
+from app.api.v1.endpoints import contract_pricing_api
+api_router.include_router(agrar_p0.router)
+api_router.include_router(supplier_portal.router)
+api_router.include_router(silo_operations_api.router)
+api_router.include_router(contract_pricing_api.router)
+
+# Wave 7 — Reklamation, Price-Hedge, Read-Model-Snapshots
+api_router.include_router(reklamation_api.router)
+api_router.include_router(price_hedge_api.router)
+api_router.include_router(read_model_snapshots.router)
+
+# Wave 9 — EDI, Zertifikate, Ernte-Kampagne
+api_router.include_router(edi_api.router)
+api_router.include_router(zertifikate_api.router)
+api_router.include_router(ernte_kampagne_api.router)
