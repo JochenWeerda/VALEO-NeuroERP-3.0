@@ -145,6 +145,8 @@ from app.api.v1.endpoints import (
     zertifikate_api,
     ernte_kampagne_api,
 )
+# Wave 2-19 Process-Kernel Read-Models + Commands
+from app.api.v1.endpoints import finance_read_models, process_kernel_api
 
 # Import domain routers
 from app.domains.agrar.api import psm, psm_proplanta
@@ -947,3 +949,7 @@ api_router.include_router(read_model_snapshots.router)
 api_router.include_router(edi_api.router)
 api_router.include_router(zertifikate_api.router)
 api_router.include_router(ernte_kampagne_api.router)
+
+# Wave 2-19 — Process-Kernel Finance Read-Models + Commands/Surfacing
+api_router.include_router(finance_read_models.router)
+api_router.include_router(process_kernel_api.router)
