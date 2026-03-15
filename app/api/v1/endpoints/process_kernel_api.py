@@ -121,6 +121,20 @@ from ....core.background_jobs import (
     evaluate_job_routing,
     get_default_job_types,
 )
+from ....core.tenant_rate_limits import (
+    RateLimitRequest,
+    evaluate_rate_limit,
+    get_default_cache_configs,
+    get_default_rate_limit_policies,
+)
+from ....core.security_hardening_contracts import (
+    RBACPermission,
+    RBACPermissionCheck,
+    evaluate_rbac_permission,
+    evaluate_security_posture,
+    get_default_secret_classifications,
+    get_default_security_controls,
+)
 from ....core.dashboard_snapshots import (
     SnapshotTyp,
     SnapshotRebuildRequest,
@@ -1462,3 +1476,168 @@ def enqueue_job(body: dict = None) -> dict[str, Any]:
         "meldung": f"Job {job.job_id} eingereiht ({job.typ.value} / {job.prioritaet.value}).",
         "schema_version": 1,
     }
+
+
+# ---------------------------------------------------------------------------
+# Wave 34 — AP3: GET /process/rate-limits + POST /process/rate-limits/check
+# ---------------------------------------------------------------------------
+
+@router.get("/rate-limits", response_model=dict)
+def get_rate_limit_policies(domain: str = "") -> dict[str, Any]:
+    """
+    Gibt konfigurierte Rate-Limit-Policies zurueck.
+
+    Query-Parameter:
+    - domain: Filtert auf eine Domain (leer = alle).
+    """
+    policies = get_default_rate_limit_policies()
+    if domain:
+        gefiltert = [p for p in policies if p.domain == domain]
+        if not gefiltert:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Keine Rate-Limit-Policies fuer Domain '{domain}' konfiguriert. "                       f"Globale Wildcard-Policies (domain=*) gelten immer zusaetzlich.",
+            )
+        return {
+            "domain_filter": domain,
+            "policy_count": len(gefiltert),
+            "policies": [p.as_dict() for p in gefiltert],
+            "schema_version": 1,
+        }
+    cache_configs = get_default_cache_configs()
+    return {
+        "policy_count": len(policies),
+        "domains": sorted({p.domain for p in policies}),
+        "policies": [p.as_dict() for p in policies],
+        "cache_configs": [c.as_dict() for c in cache_configs],
+        "schema_version": 1,
+    }
+
+
+@router.post("/rate-limits/check", response_model=dict)
+def check_rate_limit(body: dict = None) -> dict[str, Any]:
+    """
+    Prueft ob ein Request das Rate-Limit ueberschreitet.
+
+    Body-Felder:
+    - tenant_id: Tenant-ID
+    - user_id: User-ID
+    - endpoint: API-Endpunkt (z.B. "/api/v1/agrar/contracts")
+    - domain: Domain (z.B. "agrar")
+    - aktuelle_zaehlung: Bisherige Anfragen im Zeitfenster
+    - zeitfenster_sekunden: Zeitfenster (default 60)
+    """
+    if body is None:
+        body = {}
+
+    tenant_id = body.get("tenant_id", "")
+    user_id = body.get("user_id", "")
+    endpoint = body.get("endpoint", "")
+    domain = body.get("domain", "")
+
+    if not tenant_id or not endpoint or not domain:
+        raise HTTPException(
+            status_code=422,
+            detail="tenant_id, endpoint und domain sind erforderlich",
+        )
+
+    try:
+        zaehlung = int(body.get("aktuelle_zaehlung", 0))
+    except (TypeError, ValueError):
+        raise HTTPException(status_code=422, detail="aktuelle_zaehlung muss eine Ganzzahl sein")
+
+    req = RateLimitRequest(
+        tenant_id=tenant_id,
+        user_id=user_id,
+        endpoint=endpoint,
+        domain=domain,
+        aktuelle_zaehlung=zaehlung,
+        zeitfenster_sekunden=int(body.get("zeitfenster_sekunden", 60)),
+    )
+    policies = get_default_rate_limit_policies()
+    result = evaluate_rate_limit(req, policies)
+    return result.as_dict()
+
+
+# ---------------------------------------------------------------------------
+# Wave 34 — AP6: GET /process/security/controls + POST /process/security/rbac-check
+# ---------------------------------------------------------------------------
+
+@router.get("/security/controls", response_model=dict)
+def get_security_controls(kategorie: str = "") -> dict[str, Any]:
+    """
+    Gibt den Security-Controls-Katalog zurueck.
+
+    Query-Parameter:
+    - kategorie: Filtert auf eine Kontrollkategorie (leer = alle).
+    """
+    controls = get_default_security_controls()
+    secrets = get_default_secret_classifications()
+
+    if kategorie:
+        controls = [c for c in controls if c.kategorie.value == kategorie.upper()]
+        if not controls:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Keine Controls fuer Kategorie '{kategorie}' gefunden.",
+            )
+        return {
+            "kategorie_filter": kategorie.upper(),
+            "control_count": len(controls),
+            "controls": [c.as_dict() for c in controls],
+            "schema_version": 1,
+        }
+
+    posture = evaluate_security_posture(controls)
+    return {
+        "control_count": len(controls),
+        "posture": posture.as_dict(),
+        "controls": [c.as_dict() for c in controls],
+        "secret_classifications": [s.as_dict() for s in secrets],
+        "schema_version": 1,
+    }
+
+
+@router.post("/security/rbac-check", response_model=dict)
+def check_rbac_permission(body: dict = None) -> dict[str, Any]:
+    """
+    Prueft eine RBAC-Permission fuer eine Rolle.
+
+    Body-Felder:
+    - user_id: User-ID
+    - tenant_id: Tenant-ID
+    - rolle: Rollenname (z.B. "sachbearbeiter", "buchhaltung", "leiter", "admin")
+    - permission: Berechtigungsname (z.B. "SETTLEMENT_FREIGEBEN")
+    - ressource_id: Optionale Ressourcen-ID (Row-Level-Security)
+    """
+    if body is None:
+        body = {}
+
+    user_id = body.get("user_id", "")
+    tenant_id = body.get("tenant_id", "")
+    rolle = body.get("rolle", "")
+    permission_str = body.get("permission", "")
+
+    if not user_id or not rolle or not permission_str:
+        raise HTTPException(
+            status_code=422,
+            detail="user_id, rolle und permission sind erforderlich",
+        )
+
+    try:
+        permission = RBACPermission(permission_str)
+    except ValueError:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Unbekannte Permission '{permission_str}'. "                   f"Erlaubt: {[p.value for p in RBACPermission][:10]} ...",
+        )
+
+    check = RBACPermissionCheck(
+        user_id=user_id,
+        tenant_id=tenant_id,
+        rolle=rolle,
+        permission=permission,
+        ressource_id=body.get("ressource_id", ""),
+    )
+    result = evaluate_rbac_permission(check)
+    return result.as_dict()
