@@ -139,6 +139,21 @@ from ....core.canonical_process_audit_trail import (
     baue_beispiel_audit_kette,
     erstelle_audit_eintrag,
 )
+from ....core.process_capacity_contracts import (
+    AuslastungsStatus,
+    EngpassStufe,
+    KapazitaetsTyp,
+    get_default_kapazitaets_einheiten,
+    pruefe_workflow_kapazitaet,
+)
+from ....core.event_replay_contracts import (
+    ReplayModus,
+    ReplayStatus,
+    SnapshotTyp,
+    erstelle_replay_auftrag,
+    get_default_replay_auftraege,
+    pruefe_replay_konsistenz,
+)
 from ....core.command_surfacing_contracts import (
     CommandPrioritaet,
     DichteStufe,
@@ -2794,3 +2809,100 @@ def pruefe_audit_integritaet(body: dict = None) -> dict[str, Any]:
         "integritaets_stati": [s.value for s in integritaets_stati],
         "schema_version": 1,
     }
+
+
+# ---------------------------------------------------------------------------
+# Wave 41 — Process Capacity Contracts
+# ---------------------------------------------------------------------------
+
+@router.get("/capacity/einheiten")
+def get_kapazitaets_einheiten(
+    tenant_id: str = "TENANT-001",
+    domain: str = "",
+):
+    """
+    Gibt alle Kapazitätseinheiten zurück (optional gefiltert nach Domain).
+    """
+    einheiten = get_default_kapazitaets_einheiten(tenant_id=tenant_id)
+    if domain:
+        einheiten = [e for e in einheiten if e.domain == domain or e.domain == ""]
+    return {
+        "einheiten": [e.as_dict() for e in einheiten],
+        "anzahl": len(einheiten),
+        "ueberlastete": sum(1 for e in einheiten if e.ist_engpass),
+        "schema_version": 1,
+    }
+
+
+@router.post("/capacity/pruefe-workflow")
+def pruefe_workflow_kapazitaet_endpoint(body: dict | None = None):
+    """
+    Prüft ob für eine Workflow-Instanz ausreichend Kapazität vorhanden ist.
+
+    Body-Parameter:
+    - workflow_instanz_id: ID der Instanz
+    - domain: Domain des Workflows
+    - tenant_id: Tenant
+    """
+    if body is None:
+        body = {}
+
+    workflow_instanz_id: str = body.get("workflow_instanz_id", "WF-INST-001")
+    domain: str = body.get("domain", "agrar")
+    tenant_id: str = body.get("tenant_id", "TENANT-001")
+
+    einheiten = get_default_kapazitaets_einheiten(tenant_id=tenant_id)
+    ergebnis = pruefe_workflow_kapazitaet(
+        workflow_instanz_id=workflow_instanz_id,
+        domain=domain,
+        verfuegbare_einheiten=einheiten,
+    )
+    return ergebnis.as_dict()
+
+
+# ---------------------------------------------------------------------------
+# Wave 41 — Event Replay Contracts
+# ---------------------------------------------------------------------------
+
+@router.get("/event-replay/auftraege")
+def get_replay_auftraege(
+    tenant_id: str = "TENANT-001",
+    status: str = "",
+):
+    """
+    Gibt Replay-Aufträge zurück (optional gefiltert nach Status).
+    """
+    auftraege = get_default_replay_auftraege(tenant_id=tenant_id)
+    if status:
+        auftraege = [a for a in auftraege if a.status.value == status.upper()]
+    return {
+        "auftraege": [a.as_dict() for a in auftraege],
+        "anzahl": len(auftraege),
+        "laufende": sum(1 for a in auftraege if a.status == ReplayStatus.LAUFEND),
+        "schema_version": 1,
+    }
+
+
+@router.post("/event-replay/konsistenz-pruefen")
+def pruefe_event_stream_konsistenz(body: dict | None = None):
+    """
+    Prüft die Konsistenz eines Event-Streams (Lücken und Duplikate).
+
+    Body-Parameter:
+    - pruefung_id: ID der Prüfung
+    - stream_id: Event-Stream-Bezeichner
+    - positionen: Liste der vorhandenen Event-Positionen (int)
+    """
+    if body is None:
+        body = {}
+
+    pruefung_id: str = body.get("pruefung_id", "KP-001")
+    stream_id: str = body.get("stream_id", "kontrakt-annahme-stream")
+    positionen: list[int] = [int(p) for p in body.get("positionen", list(range(0, 10)))]
+
+    ergebnis = pruefe_replay_konsistenz(
+        pruefung_id=pruefung_id,
+        stream_id=stream_id,
+        positionen=positionen,
+    )
+    return ergebnis.as_dict()
