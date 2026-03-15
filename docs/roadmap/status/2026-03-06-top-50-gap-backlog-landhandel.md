@@ -62,7 +62,7 @@ Hinweise:
 | 011 | Versionierte Workflow Engine mit Migrationen | 0 ungeplante Workflow-Brueche bei Releases | L | Workflow Service | P0 | H1 |
 | 012 | Simulation/Sandbox fuer neue Workflows | 80% weniger Fehler nach Go-Live | M | Testdaten, Rule Engine | P1 | H1 |
 | 013 | SLA/Timeout/Eskalationsknoten standardisiert | >=95% SLA-Einhaltung Kernprozesse | M | Notification, RBAC | P0 | H1 | **GESCHLOSSEN Wave 28** — `sla_eskalation_engine.py`: evaluate_sla_breach(), validate_sla_policy(), 6 Default-Policies; API GET /process/sla/eskalationen |
-| 014 | Policy-as-Code mit Tenant Overrides | 100% Ausnahmen regelbasiert dokumentiert | M | Policy Store | P0 | H1 |
+| 014 | Policy-as-Code mit Tenant Overrides | 100% Ausnahmen regelbasiert dokumentiert | M | Policy Store | P0 | H1 | **GESCHLOSSEN Wave 29** — `policy_code_engine.py`: evaluate_policy_set(), apply_tenant_overrides() (Pflichtregeln geschuetzt), Default-PolicySets; API GET+POST /process/policy-rules |
 | 015 | Human-in-the-loop Freigaben fuer AI Aktionen | 100% AI-Aktionen mit Approval-Trail | M | Agent Layer, Audit | P0 | H1 |
 | 016 | Idempotente Business-Commands statt UI-CRUD fuer Agenten | >=99.9% sichere Retries ohne Duplikate | L | API Refactor | P0 | H2 |
 | 017 | MCP/OpenAPI Tool Contracts fuer externe Agenten | 20 produktive Agent-Tools freigeschaltet | M | API Governance | P1 | H2 |
@@ -89,7 +89,7 @@ Hinweise:
 
 | ID | Gap | KPI-Ziel | Aufwand | Abhaengigkeit | Prioritaet | Horizon |
 |---|---|---|---|---|---|---|
-| 031 | Query-Vertraege haerten (nie undefined fuer Query Data) | 0 React Query undefined Laufzeitfehler | S | API Client, Schemas | P0 | H1 |
+| 031 | Query-Vertraege haerten (nie undefined fuer Query Data) | 0 React Query undefined Laufzeitfehler | S | API Client, Schemas | P0 | H1 | **GESCHLOSSEN Wave 29** — `query_contracts.py`: QueryContract + validate_query_result() (strict/non-strict, Enum+Nullable+Typ-Checks), 6 Process-Kernel-Contracts; API GET /process/query-registry |
 | 032 | 500er bei controlling/kpis/timeseries eliminieren | Error Rate <0.5% | S | DB Schema, Migrations | P0 | H1 |
 | 033 | Read-Models fuer Dashboards statt teurer Live-Joins | p95 Dashboard API <250ms | M | Data Pipeline | P0 | H1 |
 | 034 | API-Bulk-Operationen fuer Massenvorgaenge | 3x Throughput bei Batch-Import | M | API Layer | P1 | H2 |

@@ -3,12 +3,13 @@
 ## Gesamtstatus
 
 - Stand: `2026-03-15`
-- Status: `Waves 1 bis 28 abgeschlossen`
-- Gesamtsuite: `1282 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed`
+- Status: `Waves 1 bis 29 abgeschlossen`
+- Gesamtsuite: `1334 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed`
 - Letzte abgeschlossene Waves:
   - `Wave 26`: Trocknungsabrechnung Audit-Contract, Migrations-Guard (Gap 003, Gap 011)
-  - `Wave 27`: Konsistente Informationsdichte je Rolle mit Tenant-/Prozess-Kontext fuer Frontend-Patterns (Gap 027)
+  - `Wave 27`: Konsistente Informationsdichte je Rolle mit Tenant-/Prozess-Kontext und backend-gespeisten Dichtehinweisen (Gap 027)
   - `Wave 28`: SLA-Eskalations-Engine + OTel Span-Contracts (Gap 013, Gap 039)
+  - `Wave 29`: Policy-as-Code Engine + Query-Vertrags-Registry (Gap 014, Gap 031)
 
 ## Wave-Uebersicht
 
@@ -40,8 +41,9 @@
 | Wave 24 | abgeschlossen | 41 | `wave-24/STATUS.md` |
 | Wave 25 | abgeschlossen | 10 | `wave-25/STATUS.md` |
 | Wave 26 | abgeschlossen | 37 | `wave-26/STATUS.md` |
-| Wave 27 | abgeschlossen | 14 | `wave-27/STATUS.md` |
+| Wave 27 | abgeschlossen | 18 | `wave-27/STATUS.md` |
 | Wave 28 | abgeschlossen | 47 | `wave-28/STATUS.md` |
+| Wave 29 | abgeschlossen | 52 | `wave-29/STATUS.md` |
 
 ## Aktuell relevante Lieferungen
 
@@ -99,9 +101,12 @@
   - `packages/frontend-web/src/components/patterns/ListReport.tsx`
   - `packages/frontend-web/src/components/patterns/Wizard.tsx`
   - `packages/frontend-web/src/components/workflow/ProcessStatusPanel.tsx`
+  - `app/core/ui_density_manifest.py`
+  - `app/api/v1/endpoints/command_catalog.py`
 - Ergebnis:
   - Rollen werden auf fokussierte, standardisierte oder verdichtete Informationsdichte aufgeloest
   - Tenant-, Domain-, Action- und Approval-Kontext duerfen die Dichte kontrolliert anheben
+  - Produktive Backend-Command-Contracts speisen ueber `ui-density-manifest` das Mindestniveau fuer die UI-Dichte
   - Toolbar, Listen-/Detail-Pattern, Wizard und Explainability nutzen denselben Dichte-Contract
   - Sichtbare Informationsmenge wird konsistent nach Rolle und Prozesskontext reduziert oder erweitert statt pro Seite separat
 
@@ -167,6 +172,11 @@
 - `app/core/sla_eskalation_engine.py`
 - `app/core/otel_span_contracts.py`
 
+### Wave-29 Policy-as-Code + Query-Contracts
+
+- `app/core/policy_code_engine.py`
+- `app/core/query_contracts.py`
+
 ### Frontend-Power-User-Schicht
 
 - `packages/frontend-web/src/features/ki-usability/context/ActionDispatchContext.tsx`
@@ -177,7 +187,9 @@
 - `app/api/v1/endpoints/ki_usability.py`
 - `packages/frontend-web/src/features/ki-usability/toolbar-actions.ts`
 - `packages/frontend-web/src/features/role-density/role-density.ts`
+- `packages/frontend-web/src/lib/api/ui-density-manifest.ts`
 - `packages/frontend-web/src/components/workflow/ProcessStatusPanel.tsx`
+- `app/core/ui_density_manifest.py`
 
 ## Architekturregeln
 
@@ -214,10 +226,13 @@ pytest tests/test_process_kernel_wave25_quick_actions.py -q --no-cov
 npm run test:run -- src/__tests__/features/ki-usability/toolbar-actions.test.ts src/__tests__/components/patterns/Wizard.test.tsx
 # Ergebnis: 6 passed
 
-npm run test:run -- src/__tests__/features/role-density/role-density.test.ts src/__tests__/components/navigation/PageToolbar.role-density.test.tsx src/__tests__/components/workflow/ProcessStatusPanel.test.tsx src/__tests__/components/patterns/Wizard.test.tsx
-# Ergebnis: 14 passed
-
 npm run test:run -- src/__tests__/components/navigation/CommandPalette.test.tsx src/__tests__/features/ki-usability/toolbar-actions.test.ts
+# Ergebnis: 3 passed
+
+npm run test:run -- src/__tests__/features/role-density/role-density.test.ts src/__tests__/components/navigation/PageToolbar.role-density.test.tsx src/__tests__/components/workflow/ProcessStatusPanel.test.tsx src/__tests__/components/patterns/Wizard.test.tsx
+# Ergebnis: 15 passed
+
+pytest tests/test_process_kernel_wave27_ui_density_manifest.py -q --no-cov
 # Ergebnis: 3 passed
 
 npm run type-check
@@ -237,7 +252,7 @@ npm run type-check
 
 - Rollen- und prozessbezogene Command-Manifest-Sichten fuer Wave 22, Wave 25 und Wave 27 weiter aus produktiven Backend-Manifesten speisen
 - Explainability- und Berechtigungs-Hinweise direkt im Command-Surfacing
-- Rollen-Density kuenftig tenant- und prozessbezogen aus produktiven Command-/Policy-Manifests statt nur aus Frontend-Kontextsignalen ableiten
+- Rollen-Density kuenftig tenant- und prozessbezogen breiter aus produktiven Command-/Policy-Manifests statt primaer aus Frontend-Kontextsignalen ableiten
 
 ## Referenzen
 

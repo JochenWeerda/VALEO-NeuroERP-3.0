@@ -81,6 +81,12 @@ from ....core.sla_eskalation_engine import (
     validate_sla_policy,
 )
 from ....core.otel_span_contracts import get_process_kernel_spans
+from ....core.policy_code_engine import (
+    evaluate_policy_set,
+    get_default_agrar_policy_sets,
+    validate_policy_set,
+)
+from ....core.query_contracts import get_process_kernel_queries
 
 router = APIRouter(prefix="/process", tags=["process-kernel", "commands"])
 
@@ -839,6 +845,83 @@ def get_otel_span_registry(domain: str = "") -> dict[str, Any]:
             "convention_violations": [
                 c.span_name for c in contracts if not c.validate_name()
             ],
+            "contracts": [c.as_dict() for c in contracts],
+            "schema_version": 1,
+        }
+    return registry.as_dict()
+
+
+# ---------------------------------------------------------------------------
+# Wave 29 AP3: Policy-as-Code Endpoints
+# ---------------------------------------------------------------------------
+
+@router.get("/policy-rules/{prozess_key}", response_model=dict)
+def get_policy_rules(prozess_key: str) -> dict[str, Any]:
+    """
+    Gibt alle PolicySets fuer einen Prozess-Key zurueck.
+
+    Gibt 404 wenn kein PolicySet fuer den prozess_key bekannt.
+    """
+    all_sets = get_default_agrar_policy_sets()
+    matched = [ps for ps in all_sets if ps.prozess_key == prozess_key]
+    if not matched:
+        raise HTTPException(status_code=404, detail=f"Kein PolicySet fuer prozess_key={prozess_key!r}")
+    return {
+        "prozess_key": prozess_key,
+        "policy_set_count": len(matched),
+        "policy_sets": [ps.as_dict() for ps in matched],
+        "schema_version": 1,
+    }
+
+
+@router.post("/policy-rules/evaluate", response_model=dict)
+def evaluate_policy_rules(body: dict) -> dict[str, Any]:
+    """
+    Wertet PolicySet gegen einen Kontext aus.
+
+    Body: { "prozess_key": str, "policy_set_id": str (optional), "kontext": dict }
+    Gibt PolicyEvaluationResult zurueck.
+    """
+    prozess_key: str = body.get("prozess_key", "")
+    policy_set_id: str = body.get("policy_set_id", "")
+    kontext: dict = body.get("kontext", {})
+
+    if not prozess_key:
+        raise HTTPException(status_code=422, detail="prozess_key ist erforderlich")
+
+    all_sets = get_default_agrar_policy_sets()
+
+    if policy_set_id:
+        matched = [ps for ps in all_sets if ps.policy_set_id == policy_set_id]
+    else:
+        matched = [ps for ps in all_sets if ps.prozess_key == prozess_key]
+
+    if not matched:
+        raise HTTPException(status_code=404, detail=f"Kein PolicySet gefunden fuer prozess_key={prozess_key!r}")
+
+    # Ersten passenden PolicySet auswerten
+    policy_set = matched[0]
+    result = evaluate_policy_set(policy_set, kontext)
+    return result.as_dict()
+
+
+# ---------------------------------------------------------------------------
+# Wave 29 AP6: Query-Registry Endpoint
+# ---------------------------------------------------------------------------
+
+@router.get("/query-registry", response_model=dict)
+def get_query_registry(prozess_key: str = "") -> dict[str, Any]:
+    """
+    Gibt registrierte Query-Contracts zurueck.
+
+    ?prozess_key= — Optional: Filtert nach Prozess-Key.
+    """
+    registry = get_process_kernel_queries()
+    if prozess_key:
+        contracts = registry.by_prozess_key(prozess_key)
+        return {
+            "prozess_key_filter": prozess_key,
+            "contract_count": len(contracts),
             "contracts": [c.as_dict() for c in contracts],
             "schema_version": 1,
         }
