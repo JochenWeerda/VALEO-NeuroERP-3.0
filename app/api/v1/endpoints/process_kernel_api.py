@@ -87,6 +87,18 @@ from ....core.policy_code_engine import (
     validate_policy_set,
 )
 from ....core.query_contracts import get_process_kernel_queries
+from ....core.human_approval_gate import (
+    evaluate_approval_requirement,
+    get_default_approval_rules,
+    record_approval_decision,
+    ApprovalDecision,
+    ApprovalRisikostufe,
+)
+from ....core.slo_definitions import (
+    check_slo_compliance,
+    get_process_kernel_slos,
+    validate_slo_definition,
+)
 
 router = APIRouter(prefix="/process", tags=["process-kernel", "commands"])
 
@@ -926,3 +938,76 @@ def get_query_registry(prozess_key: str = "") -> dict[str, Any]:
             "schema_version": 1,
         }
     return registry.as_dict()
+
+
+# ---------------------------------------------------------------------------
+# Wave 30 AP3: Human-Approval-Gate Endpoints
+# ---------------------------------------------------------------------------
+
+@router.get("/agent/approval-rules", response_model=dict)
+def get_agent_approval_rules() -> dict[str, Any]:
+    """Gibt alle Default-Approval-Regeln fuer Agent-Aktionen zurueck."""
+    regeln = get_default_approval_rules()
+    return {
+        "regel_count": len(regeln),
+        "regeln": [r.as_dict() for r in regeln],
+        "schema_version": 1,
+    }
+
+
+@router.post("/agent/approval-evaluate", response_model=dict)
+def evaluate_agent_approval(body: dict) -> dict[str, Any]:
+    """
+    Bewertet ob eine Agent-Aktion menschliche Freigabe erfordert.
+
+    Body: { "aktions_typ": str, "kontext": dict }
+    """
+    aktions_typ: str = body.get("aktions_typ", "")
+    kontext: dict = body.get("kontext", {})
+    if not aktions_typ:
+        raise HTTPException(status_code=422, detail="aktions_typ ist erforderlich")
+    regeln = get_default_approval_rules()
+    result = evaluate_approval_requirement(aktions_typ, kontext, regeln)
+    return result.as_dict()
+
+
+# ---------------------------------------------------------------------------
+# Wave 30 AP6: SLO-Registry Endpoints
+# ---------------------------------------------------------------------------
+
+@router.get("/slo/registry", response_model=dict)
+def get_slo_registry(dienst: str = "") -> dict[str, Any]:
+    """
+    Gibt registrierte SLO-Definitionen zurueck.
+
+    ?dienst= — Optional: Filtert nach Dienst.
+    """
+    registry = get_process_kernel_slos()
+    if dienst:
+        slos = registry.by_dienst(dienst)
+        return {
+            "dienst_filter": dienst,
+            "slo_count": len(slos),
+            "slos": [s.as_dict() for s in slos],
+            "schema_version": 1,
+        }
+    return registry.as_dict()
+
+
+@router.post("/slo/check", response_model=dict)
+def check_slo(body: dict) -> dict[str, Any]:
+    """
+    Prueft ob ein Ist-Wert ein SLO erfuellt.
+
+    Body: { "slo_id": str, "ist_wert": float | null }
+    """
+    slo_id: str = body.get("slo_id", "")
+    ist_wert = body.get("ist_wert")
+    if not slo_id:
+        raise HTTPException(status_code=422, detail="slo_id ist erforderlich")
+    registry = get_process_kernel_slos()
+    slo = registry.by_slo_id(slo_id)
+    if slo is None:
+        raise HTTPException(status_code=404, detail=f"SLO {slo_id!r} nicht gefunden")
+    result = check_slo_compliance(slo, float(ist_wert) if ist_wert is not None else None)
+    return result.as_dict()
