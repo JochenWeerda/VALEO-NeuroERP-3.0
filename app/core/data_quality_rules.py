@@ -194,9 +194,13 @@ def get_all_entity_types() -> list[str]:
 # Wave-31 Contract Layer: DQRegelTyp, DQRegel, DQRuleSet, validate_datensatz
 # ============================================================================
 
+import math
 import re
 from enum import Enum
 from typing import Any
+
+# Maximale Eingabelaenge fuer Format-Regex-Pruefungen (ReDoS-Schutz)
+_DQ_FORMAT_MAX_LEN = 200
 
 
 class DQRegelTyp(str, Enum):
@@ -332,6 +336,19 @@ def _dq_check_format(regel: DQRegel, datensatz: dict) -> DQViolation | None:
     if wert is None:
         return None
     wert_str = str(wert)
+    # ReDoS-Schutz: Eingabe auf _DQ_FORMAT_MAX_LEN Zeichen begrenzen
+    if len(wert_str) > _DQ_FORMAT_MAX_LEN:
+        return DQViolation(
+            regel_id=regel.regel_id,
+            typ=DQRegelTyp.FORMAT_VERLETZUNG,
+            feld=regel.feld,
+            severity=regel.severity,
+            meldung=(
+                f"Feld '{regel.feld}' ueberschreitet maximale Laenge "
+                f"({_DQ_FORMAT_MAX_LEN} Zeichen) fuer Format-Pruefung."
+            ),
+            wert=wert_str[:50] + "...",
+        )
     if not re.fullmatch(regel.format_regex, wert_str):
         return DQViolation(
             regel_id=regel.regel_id,
@@ -357,6 +374,16 @@ def _dq_check_bereich(regel: DQRegel, datensatz: dict) -> DQViolation | None:
             feld=regel.feld,
             severity=regel.severity,
             meldung=f"Feld '{regel.feld}' ist kein numerischer Wert: '{wert}'",
+            wert=wert,
+        )
+    # NaN und Inf sind keine gueltigen Feldwerte fuer Bereichspruefungen
+    if math.isnan(wert_num) or math.isinf(wert_num):
+        return DQViolation(
+            regel_id=regel.regel_id,
+            typ=DQRegelTyp.BEREICH_VERLETZUNG,
+            feld=regel.feld,
+            severity=regel.severity,
+            meldung=f"Feld '{regel.feld}' enthaelt ungültigen numerischen Wert: '{wert}'",
             wert=wert,
         )
     if regel.min_wert is not None and wert_num < regel.min_wert:

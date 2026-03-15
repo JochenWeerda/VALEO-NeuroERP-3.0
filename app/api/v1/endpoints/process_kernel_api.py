@@ -1031,6 +1031,8 @@ def get_mcp_tool_registry(domain: str = "") -> dict[str, Any]:
     ?domain= — Optional: Filtert nach Domain (agrar, finance, workflow, ...).
     """
     registry = get_process_kernel_mcp_tools()
+    # as_mcp_tool() gibt nur name/description/inputSchema zurueck —
+    # kein api_endpoint oder interne Felder (Informationsminimierung).
     if domain:
         tools = registry.by_domain(domain)
         return {
@@ -1039,12 +1041,32 @@ def get_mcp_tool_registry(domain: str = "") -> dict[str, Any]:
             "tools": [t.as_mcp_tool() for t in tools],
             "schema_version": 1,
         }
-    return registry.as_dict()
+    all_tools = registry.tools
+    return {
+        "tool_count": len(all_tools),
+        "domains": sorted({t.domain for t in all_tools}),
+        "convention_violations": [
+            t.tool_name for t in all_tools if not t.validate_name()
+        ],
+        "tools": [t.as_mcp_tool() for t in all_tools],
+        "schema_version": 1,
+    }
 
 
 # ---------------------------------------------------------------------------
 # Wave 31 AP6: Datenqualitaets-Endpoints
 # ---------------------------------------------------------------------------
+
+def _dq_ruleset_public(ruleset: "DQRuleSet") -> dict:
+    """Serialisiert ein DQRuleSet ohne interne Implementierungsdetails."""
+    d = ruleset.as_dict()
+    for regel in d.get("regeln", []):
+        # format_regex und unique_felder sind Implementierungsdetails,
+        # nicht fuer externe Konsumenten bestimmt.
+        regel.pop("format_regex", None)
+        regel.pop("unique_felder", None)
+    return d
+
 
 @router.get("/data-quality/rulesets", response_model=dict)
 def get_dq_rulesets() -> dict[str, Any]:
@@ -1054,7 +1076,7 @@ def get_dq_rulesets() -> dict[str, Any]:
     rulesets = get_default_dq_rulesets()
     return {
         "ruleset_count": len(rulesets),
-        "rulesets": {k: v.as_dict() for k, v in rulesets.items()},
+        "rulesets": {k: _dq_ruleset_public(v) for k, v in rulesets.items()},
         "schema_version": 1,
     }
 
@@ -1075,6 +1097,22 @@ def validate_dq(body: dict) -> dict[str, Any]:
         raise HTTPException(status_code=422, detail="entity_typ ist erforderlich")
     if not isinstance(datensatz, dict):
         raise HTTPException(status_code=422, detail="datensatz muss ein Objekt sein")
+
+    # Eingabegrenzen: DoS-Schutz
+    _MAX_FELDER = 50
+    _MAX_FELDWERT_LEN = 1000
+    _MAX_KONTEXT = 100
+    if len(datensatz) > _MAX_FELDER:
+        raise HTTPException(status_code=422, detail=f"datensatz darf maximal {_MAX_FELDER} Felder enthalten")
+    for k, v in datensatz.items():
+        if isinstance(v, str) and len(v) > _MAX_FELDWERT_LEN:
+            raise HTTPException(
+                status_code=422,
+                detail=f"Feldwert '{k}' ueberschreitet maximale Laenge ({_MAX_FELDWERT_LEN} Zeichen)",
+            )
+    if kontext is not None:
+        if not isinstance(kontext, list) or len(kontext) > _MAX_KONTEXT:
+            raise HTTPException(status_code=422, detail=f"kontext_datensaetze darf maximal {_MAX_KONTEXT} Eintraege enthalten")
 
     rulesets = get_default_dq_rulesets()
     ruleset = rulesets.get(entity_typ)
