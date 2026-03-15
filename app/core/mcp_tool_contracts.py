@@ -242,7 +242,7 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
             operation="settlement_list",
             beschreibung="Listet Agrar-Settlement-Instanzen mit optionalem Status-Filter",
             kategorie=MCPToolKategorie.LESEN,
-            api_endpoint="GET /api/v1/agrar/settlements",
+            api_endpoint="GET /api/v1/agrar/settlements/",
             output_beschreibung="Liste von Settlement-Summaries (id, status, betrag, menge)",
             parameter=[
                 _p_enum("status", "Filter nach Prozessstatus",
@@ -267,18 +267,18 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
         ),
 
         MCPToolContract(
-            tool_name="valeo_agrar_settlement_approve",
+            tool_name="valeo_agrar_settlement_post_fibu",
             domain="agrar",
-            operation="settlement_approve",
-            beschreibung="Erteilt Freigabe fuer ein Settlement (4-Augen-Prinzip)",
+            operation="settlement_post_fibu",
+            beschreibung="Fuehrt ein Settlement in die FiBu-Weiterverarbeitung ueber",
             kategorie=MCPToolKategorie.SCHREIBEN,
             requires_approval=True,
-            api_endpoint="POST /api/v1/agrar/settlements/{settlement_id}/approve",
-            output_beschreibung="Aktualisierter Settlement-Status + Freigabe-Timestamp",
+            api_endpoint="POST /api/v1/agrar/settlements/{settlement_id}/post-fibu",
+            output_beschreibung="Posting-Ergebnis fuer Settlement inkl. Status und Folgebelegreferenz",
             parameter=[
                 _p_str("settlement_id", "Settlement-ID", True),
-                _p_str("begruendung", "Freigabe-Begruendung fuer Audit-Trail", True),
-                _p_num("betrag_eur", "Erwarteter Bruttobetrag zur Verifikation", True, minimum=0),
+                _p_str("debit_account", "Sollkonto fuer Posting", False, "5000"),
+                _p_str("credit_account_supplier", "Kreditorenkonto", False, "3300"),
             ],
         ),
 
@@ -312,18 +312,16 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
         ),
 
         MCPToolContract(
-            tool_name="valeo_agrar_qualitaet_validate",
+            tool_name="valeo_agrar_quality_protocol_approve",
             domain="agrar",
-            operation="qualitaet_validate",
-            beschreibung="Prueft Qualitaetsparameter gegen Kampagnen-Schwellenwerte",
+            operation="quality_protocol_approve",
+            beschreibung="Finalisiert ein Qualitaetsprotokoll fuer den weiteren Prozesslauf",
             kategorie=MCPToolKategorie.VALIDIEREN,
-            api_endpoint="POST /api/v1/agrar/qualitaet/validate",
-            output_beschreibung="Validierungsergebnis: ok/warning/reject pro Parameter",
+            api_endpoint="POST /api/v1/agrar/quality-protocols/{protocol_id}/approve",
+            output_beschreibung="Finalisiertes Qualitaetsprotokoll mit Freigabedaten",
             parameter=[
-                _p_str("fruchtart", "Fruchtart-Code", True, "WW"),
-                _p_num("feuchte_pct", "Feuchtegehalt in %", True, minimum=0, maximum=50),
-                _p_num("hl_gewicht", "Hektolitergewicht kg/hl", False, minimum=50, maximum=90),
-                _p_num("protein_pct", "Proteingehalt in %", False, minimum=0, maximum=25),
+                _p_str("protocol_id", "Qualitaetsprotokoll-ID", True, "QP-2026-0001"),
+                _p_str("approved_by", "Freigebender Benutzer", True, "lab.user"),
             ],
         ),
 
@@ -336,7 +334,7 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
             operation="ap_invoice_list",
             beschreibung="Listet Kreditorenrechnungen mit Status-Filter fuer Genehmigungsworkflow",
             kategorie=MCPToolKategorie.LESEN,
-            api_endpoint="GET /api/v1/finance/ap-invoices",
+            api_endpoint="GET /api/v1/finance/ap/invoices/",
             output_beschreibung="Liste Kreditorenrechnungen (id, lieferant, betrag, status, faellig)",
             parameter=[
                 _p_enum("status", "Genehmigungsstatus-Filter",
@@ -380,16 +378,16 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
         ),
 
         MCPToolContract(
-            tool_name="valeo_finance_dunning_generate",
+            tool_name="valeo_finance_dunning_run",
             domain="finance",
-            operation="dunning_generate",
-            beschreibung="Erzeugt Mahnvorschlag fuer offene Debitoren-Posten",
+            operation="dunning_run",
+            beschreibung="Startet einen Mahnlauf fuer ueberfaellige Posten",
             kategorie=MCPToolKategorie.BERECHNEN,
-            api_endpoint="POST /api/v1/finance/dunning/generate",
-            output_beschreibung="Mahnvorschlag: betroffene Positionen, Mahnstufen, Gesamtbetrag",
+            api_endpoint="POST /api/v1/finance/dunning/run",
+            output_beschreibung="Run-ID und Anzahl erzeugter Mahnungen fuer den Stichtag",
             parameter=[
-                _p_str("debitor_id", "Debitor-ID (leer = alle faelligen)", False),
-                _p_int("mahnstufe_max", "Maximale Mahnstufe (1-3)", False, 3),
+                _p_str("as_of_date", "Stichtag des Mahnlaufs (YYYY-MM-DD)", True, "2026-03-15"),
+                _p_str("tenant_id", "Mandant", False, "system"),
             ],
         ),
 
@@ -416,26 +414,26 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
             operation="instance_status",
             beschreibung="Ruft aktuellen Status einer Workflow-Instanz ab",
             kategorie=MCPToolKategorie.LESEN,
-            api_endpoint="GET /api/v1/workflow/instances/{instanz_id}",
+            api_endpoint="GET /api/v1/process/workflows",
             output_beschreibung="Instanz-Status, aktueller Schritt, SLA-Stufe, History",
             parameter=[
-                _p_str("instanz_id", "Workflow-Instanz-ID", True, "inst-20240901-0042"),
+                _p_str("instance_id", "Workflow-Instanz-ID", True, "inst-20240901-0042"),
             ],
         ),
 
         MCPToolContract(
-            tool_name="valeo_workflow_step_transition",
+            tool_name="valeo_workflow_checkpoint_create",
             domain="workflow",
-            operation="step_transition",
-            beschreibung="Fuehrt Zustandsuebergang in einer Workflow-Instanz aus",
+            operation="checkpoint_create",
+            beschreibung="Schreibt einen Workflow-Checkpoint fuer eine laufende Instanz",
             kategorie=MCPToolKategorie.SCHREIBEN,
             requires_approval=False,
-            api_endpoint="POST /api/v1/workflow/instances/{instanz_id}/transition",
-            output_beschreibung="Neuer Schritt-Status, naechste erlaubte Transitionen",
+            api_endpoint="POST /api/v1/process/actions/execute",
+            output_beschreibung="Persistierter Checkpoint mit Schrittname und Snapshot",
             parameter=[
-                _p_str("instanz_id", "Workflow-Instanz-ID", True),
-                _p_str("zu_schritt_id", "Ziel-Schritt-ID", True, "AS-04-PREISFESTSTELLUNG"),
-                _p_str("begruendung", "Uebergangs-Begruendung fuer Audit", False),
+                _p_str("instance_id", "Workflow-Instanz-ID", True),
+                _p_str("step_name", "Aktueller Schrittname", True, "AS-04-PREISFESTSTELLUNG"),
+                _p_str("state_snapshot", "JSON-serialisierter Zustands-Snapshot", True),
             ],
         ),
 
@@ -502,16 +500,15 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
         ),
 
         MCPToolContract(
-            tool_name="valeo_compliance_audit_hash_verify",
+            tool_name="valeo_compliance_lot_trace_export",
             domain="compliance",
-            operation="audit_hash_verify",
-            beschreibung="Verifiziert SHA-256 Audit-Hash eines Abrechnungsdokuments",
+            operation="lot_trace_export",
+            beschreibung="Erzeugt einen Compliance-Trace fuer Charge oder Lot",
             kategorie=MCPToolKategorie.VALIDIEREN,
-            api_endpoint="POST /api/v1/compliance/audit/verify",
-            output_beschreibung="hash_ok: bool, Dokument-ID, Verifikationszeitpunkt",
+            api_endpoint="GET /api/v1/compliance/exports/chargen-trace/{lot_id}",
+            output_beschreibung="Lot-Trace mit Ereignissen, Lieferungen und Compliance-Kontext",
             parameter=[
-                _p_str("dokument_id", "Dokument-/Datensatz-ID", True),
-                _p_str("erwarteter_hash", "Erwarteter SHA-256 Hash (64 Hex-Zeichen)", True),
+                _p_str("lot_id", "Charge- oder Lot-ID", True),
             ],
         ),
 
@@ -519,14 +516,14 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
         # Domain: process (3 Tools)
         # ---------------------------------------------------------------
         MCPToolContract(
-            tool_name="valeo_process_command_dispatch",
+            tool_name="valeo_process_action_execute",
             domain="process",
-            operation="command_dispatch",
-            beschreibung="Dispatcht einen Business-Command an den zustaendigen Handler",
+            operation="action_execute",
+            beschreibung="Fuehrt einen Process-Kernel-Command ueber den Action-Layer aus",
             kategorie=MCPToolKategorie.SCHREIBEN,
             requires_approval=False,
-            api_endpoint="POST /api/v1/process/commands/dispatch",
-            output_beschreibung="Command-Ergebnis: success, aggregat_id, idempotency_key",
+            api_endpoint="POST /api/v1/process/actions/execute",
+            output_beschreibung="Action-Ergebnis mit execution_id, Status und Audit-Metadaten",
             parameter=[
                 _p_str("command_typ", "Command-Typ aus dem Katalog", True, "FREIGABE_ERTEILEN"),
                 _p_str("aggregat_id", "Ziel-Aggregat-ID", True),
@@ -567,30 +564,28 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
         # Domain: inventory (2 Tools)
         # ---------------------------------------------------------------
         MCPToolContract(
-            tool_name="valeo_inventory_silo_status",
+            tool_name="valeo_inventory_silo_details_get",
             domain="inventory",
-            operation="silo_status",
-            beschreibung="Ruft aktuellen Silo-Bestand und Qualitaets-Snapshot ab",
+            operation="silo_details_get",
+            beschreibung="Ruft Silo-Details inklusive Lots und Restmengen ab",
             kategorie=MCPToolKategorie.LESEN,
-            api_endpoint="GET /api/v1/silo/{silo_id}/status",
-            output_beschreibung="Silo-Bestand: menge_tonnen, fruchtart, feuchte_avg, letzte_Messung",
+            api_endpoint="GET /api/v1/silo/silos/{silo_id}/details",
+            output_beschreibung="Silo-Details mit belegten Lots, Mengen und Restkapazitaet",
             parameter=[
                 _p_str("silo_id", "Silo-ID", True, "SILO-A1"),
-                _p_bool("mit_qualitaet", "Qualitaets-Snapshot einschliessen"),
             ],
         ),
 
         MCPToolContract(
-            tool_name="valeo_inventory_bestand_check",
+            tool_name="valeo_inventory_bestand_get",
             domain="inventory",
-            operation="bestand_check",
-            beschreibung="Prueft verfuegbaren Lagerbestand fuer eine Fruchtart",
+            operation="bestand_get",
+            beschreibung="Liefert aggregierten Lagerbestand fuer einen Tenant",
             kategorie=MCPToolKategorie.BERECHNEN,
-            api_endpoint="GET /api/v1/lager/bestand",
-            output_beschreibung="Verfuegbarer Bestand in Tonnen, reservierte Menge, freie Kapazitaet",
+            api_endpoint="GET /api/v1/silo/bestand/{tenant_id}",
+            output_beschreibung="Gesamtbestand je Tenant aus den Silo-Operationen",
             parameter=[
-                _p_str("fruchtart", "Fruchtart-Code", True, "WW"),
-                _p_str("standort_id", "Standort-ID (leer = alle Standorte)", False),
+                _p_str("tenant_id", "Mandant", True, "demo-tenant"),
             ],
         ),
     ]
