@@ -121,6 +121,21 @@ from ....core.background_jobs import (
     evaluate_job_routing,
     get_default_job_types,
 )
+from ....core.dms_ocr_contracts import (
+    BelegErkennungsRegel,
+    DokumentTyp,
+    OCREngine,
+    bewerte_ocr_ergebnis,
+    get_default_erkennungsregeln,
+    klassifiziere_dokument,
+)
+from ....core.agent_integration_contracts import (
+    AgentKategorie,
+    AgentAutorisierungsStufe,
+    get_default_agent_tools,
+    get_default_agent_use_cases,
+    match_capabilities,
+)
 from ....core.edi_hub_contracts import (
     EDIPartnerTyp,
     EDIStandard,
@@ -2040,3 +2055,145 @@ def bewerte_supply_chain_status(body: dict = None) -> dict[str, Any]:
         alarme=alarme,
     )
     return status.as_dict()
+
+
+# ---------------------------------------------------------------------------
+# Wave 37 — AP1: GET /process/dms/erkennungsregeln
+# ---------------------------------------------------------------------------
+
+@router.get("/dms/erkennungsregeln", response_model=dict)
+def get_dms_erkennungsregeln(dokument_typ: str = "") -> dict[str, Any]:
+    """
+    Gibt DMS-Erkennungsregeln zurück.
+
+    Query-Parameter:
+    - dokument_typ: Filtert auf einen bestimmten DokumentTyp (z.B. EINGANGSRECHNUNG)
+    """
+    regeln = get_default_erkennungsregeln()
+
+    if dokument_typ:
+        try:
+            dt = DokumentTyp(dokument_typ)
+            regeln = [r for r in regeln if r.dokument_typ == dt]
+        except ValueError:
+            raise HTTPException(
+                status_code=422,
+                detail=f"Unbekannter DokumentTyp '{dokument_typ}'. "
+                       f"Erlaubt: {[e.value for e in DokumentTyp]}",
+            )
+
+    return {
+        "regel_count": len(regeln),
+        "regeln": [r.as_dict() for r in regeln],
+        "schema_version": 1,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Wave 37 — AP2: POST /process/dms/classify
+# ---------------------------------------------------------------------------
+
+@router.post("/dms/classify", response_model=dict)
+def classify_dokument(body: dict = None) -> dict[str, Any]:
+    """
+    Klassifiziert ein Dokument automatisch anhand seines Volltexts.
+
+    Pflichtfelder:
+    - dokument_id: DMS-interne Dokument-ID
+    - volltext:    OCR-Volltext des Dokuments
+
+    Rückgabe: erkannter DokumentTyp, Confidence, gematchte Schlagwörter,
+    Alternativen, Hinweis ob manuelle Prüfung erforderlich.
+    """
+    if body is None:
+        body = {}
+
+    dokument_id: str = body.get("dokument_id", "")
+    volltext: str = body.get("volltext", "")
+
+    if not dokument_id or not volltext:
+        raise HTTPException(
+            status_code=422,
+            detail="dokument_id und volltext sind erforderlich",
+        )
+
+    ergebnis = klassifiziere_dokument(dokument_id, volltext)
+    return ergebnis.as_dict()
+
+
+# ---------------------------------------------------------------------------
+# Wave 37 — AP3: GET /process/agent-tools
+# ---------------------------------------------------------------------------
+
+@router.get("/agent-tools", response_model=dict)
+def get_agent_tools(
+    kategorie: str = "",
+    autorisierung: str = "",
+) -> dict[str, Any]:
+    """
+    Gibt registrierte Agent-Tools zurück.
+
+    Query-Parameter:
+    - kategorie:    Filtert nach AgentKategorie (z.B. RECHERCHE, TRANSAKTION)
+    - autorisierung: Filtert nach Autorisierungsstufe (z.B. AUTHENTIFIZIERT)
+    """
+    tools = get_default_agent_tools()
+
+    if kategorie:
+        try:
+            kat = AgentKategorie(kategorie)
+            tools = [t for t in tools if t.kategorie == kat]
+        except ValueError:
+            raise HTTPException(
+                status_code=422,
+                detail=f"Unbekannte Kategorie '{kategorie}'. "
+                       f"Erlaubt: {[e.value for e in AgentKategorie]}",
+            )
+
+    if autorisierung:
+        try:
+            auth = AgentAutorisierungsStufe(autorisierung)
+            tools = [t for t in tools if t.autorisierung == auth]
+        except ValueError:
+            raise HTTPException(
+                status_code=422,
+                detail=f"Unbekannte Autorisierungsstufe '{autorisierung}'. "
+                       f"Erlaubt: {[e.value for e in AgentAutorisierungsStufe]}",
+            )
+
+    use_cases = get_default_agent_use_cases()
+
+    return {
+        "tool_count": len(tools),
+        "tools": [t.as_dict() for t in tools],
+        "use_case_count": len(use_cases),
+        "use_cases": [u.as_dict() for u in use_cases],
+        "schema_version": 1,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Wave 37 — AP4: POST /process/agent-tools/match
+# ---------------------------------------------------------------------------
+
+@router.post("/agent-tools/match", response_model=dict)
+def match_agent_capabilities(body: dict = None) -> dict[str, Any]:
+    """
+    Findet Agent-Tools, die eine Liste angefragter Capabilities abdecken.
+
+    Body-Felder:
+    - capabilities: Liste von Capability-Strings (z.B. ["kontrakt_lesen", "preis_ermitteln"])
+    """
+    if body is None:
+        body = {}
+
+    capabilities = body.get("capabilities", [])
+
+    if not capabilities or not isinstance(capabilities, list):
+        raise HTTPException(
+            status_code=422,
+            detail="'capabilities' muss eine nicht-leere Liste von Strings sein",
+        )
+
+    ergebnis = match_capabilities(capabilities)
+    return ergebnis.as_dict()
