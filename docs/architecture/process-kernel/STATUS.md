@@ -3,14 +3,14 @@
 ## Gesamtstatus
 
 - Stand: `2026-03-15`
-- Status: `Waves 1 bis 37 abgeschlossen`
-- Gesamtsuite: `1822 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed`
+- Status: `Waves 1 bis 38 abgeschlossen — Top-50-Backlog vollstaendig geschlossen`
+- Gesamtsuite: `1896 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed`
 - Letzte abgeschlossene Waves:
-  - `Wave 33`: API-Bulk-Operationen + Queue-basierte Hintergrundjobs (Gap 034, Gap 036)
   - `Wave 34`: Tenant-Rate-Limits + Security-Hardening-Contracts (Gap 038, Gap 049)
   - `Wave 35`: Inline-Validierung + Error-Guidance / Leitsystem (Gap 026, Gap 028)
   - `Wave 36`: EDI/API-Hub + Lieferketten-Tracking (Gap 043, Gap 044)
   - `Wave 37`: DMS + OCR-Extraktion + Agenten-Integration (Gap 045, Gap 048)
+  - `Wave 38`: Nachhaltigkeit/CO2-Reporting + Branchenbenchmarking (Gap 046, Gap 047)
 
 ## Wave-Uebersicht
 
@@ -53,6 +53,7 @@
 | Wave 35 | abgeschlossen | 54 | `wave-35/STATUS.md` |
 | Wave 36 | abgeschlossen | 60 | `wave-36/STATUS.md` |
 | Wave 37 | abgeschlossen | 60 | `wave-37/STATUS.md` |
+| Wave 38 | abgeschlossen | 60 | `wave-38/STATUS.md` |
 
 ## Aktuell relevante Lieferungen
 
@@ -276,6 +277,15 @@ pytest tests/test_process_kernel_wave27_ui_density_manifest.py -q --no-cov
 
 npm run test:run -- src/__tests__/features/role-density/role-density.test.ts src/__tests__/components/workflow/ProcessStatusPanel.test.tsx
 # Ergebnis: 9 passed
+
+pytest tests/l3_import/test_import_l3.py tests/l3_import/test_validate_mapping.py -q --no-cov
+# Ergebnis: 16 passed
+
+pytest tests/test_reflect_archive_loader.py tests/l3_import/test_import_l3.py tests/l3_import/test_validate_mapping.py -q --no-cov
+# Ergebnis: 21 passed
+
+pytest tests/test_apm_pipeline_contract.py tests/test_reflect_archive_loader.py tests/l3_import/test_import_l3.py tests/l3_import/test_validate_mapping.py -q --no-cov
+# Ergebnis: 25 passed
 
 npm run test:run -- src/__tests__/components/workflow/CompactDecisionCard.test.tsx src/__tests__/components/workflow/ProcessStatusPanel.test.tsx src/__tests__/features/role-density/role-density.test.ts
 # Ergebnis: 11 passed

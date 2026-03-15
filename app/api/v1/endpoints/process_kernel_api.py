@@ -121,6 +121,22 @@ from ....core.background_jobs import (
     evaluate_job_routing,
     get_default_job_types,
 )
+from ....core.sustainability_reporting import (
+    BerichtsTyp,
+    EmissionsKategorie,
+    EmissionsScope,
+    berechne_energie_co2e,
+    berechne_transport_co2e,
+    erstelle_beispiel_co2_bilanz,
+    erstelle_beispiel_esg_bericht,
+)
+from ....core.benchmark_cockpit import (
+    BenchmarkKategorie,
+    ReportFrequenz,
+    berechne_branchenperzentile,
+    berechne_trend,
+    get_example_benchmark_report,
+)
 from ....core.dms_ocr_contracts import (
     BelegErkennungsRegel,
     DokumentTyp,
@@ -2197,3 +2213,188 @@ def match_agent_capabilities(body: dict = None) -> dict[str, Any]:
 
     ergebnis = match_capabilities(capabilities)
     return ergebnis.as_dict()
+
+
+# ---------------------------------------------------------------------------
+# Wave 38 — AP1: GET /process/sustainability/esg-bericht
+# ---------------------------------------------------------------------------
+
+@router.get("/sustainability/esg-bericht", response_model=dict)
+def get_esg_bericht(
+    tenant_id: str = "TENANT-001",
+    jahr: int = 2026,
+) -> dict[str, Any]:
+    """
+    Gibt einen ESG-Bericht mit CO2-Bilanz und Nachhaltigkeitskennzahlen zurück.
+
+    Query-Parameter:
+    - tenant_id: Tenant-ID (default: TENANT-001)
+    - jahr:      Berichtsjahr (default: 2026)
+    """
+    if jahr < 2000 or jahr > 2100:
+        raise HTTPException(
+            status_code=422,
+            detail="jahr muss zwischen 2000 und 2100 liegen",
+        )
+    bericht = erstelle_beispiel_esg_bericht(tenant_id=tenant_id, jahr=jahr)
+    return bericht.as_dict()
+
+
+# ---------------------------------------------------------------------------
+# Wave 38 — AP2: POST /process/sustainability/co2-berechnen
+# ---------------------------------------------------------------------------
+
+@router.post("/sustainability/co2-berechnen", response_model=dict)
+def berechne_co2_position(body: dict = None) -> dict[str, Any]:
+    """
+    Berechnet CO2e für eine einzelne Transport- oder Energieposition.
+
+    Transport-Body:
+    - positions_id: ID der Position
+    - typ:          "TRANSPORT" | "ENERGIE"
+    - kategorie:    EmissionsKategorie (z.B. TRANSPORT_LKW, ENERGIE_STROM)
+    - menge:        Menge (für Transport: Tonnen; für Energie: kWh)
+    - distanz_km:   Nur für Transport: Streckenlänge in km
+
+    Energie-Body:
+    - positions_id, typ="ENERGIE", kategorie, menge (kWh)
+    """
+    if body is None:
+        body = {}
+
+    positions_id: str = body.get("positions_id", "")
+    typ: str = body.get("typ", "").upper()
+    kategorie_str: str = body.get("kategorie", "")
+
+    if not positions_id or not typ or not kategorie_str:
+        raise HTTPException(
+            status_code=422,
+            detail="positions_id, typ und kategorie sind erforderlich",
+        )
+
+    if typ not in ("TRANSPORT", "ENERGIE"):
+        raise HTTPException(
+            status_code=422,
+            detail=f"typ muss 'TRANSPORT' oder 'ENERGIE' sein, nicht '{typ}'",
+        )
+
+    try:
+        kategorie = EmissionsKategorie(kategorie_str)
+    except ValueError:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Unbekannte Kategorie '{kategorie_str}'. "
+                   f"Erlaubt: {[e.value for e in EmissionsKategorie]}",
+        )
+
+    try:
+        menge = float(body.get("menge", 0))
+    except (TypeError, ValueError):
+        raise HTTPException(status_code=422, detail="menge muss eine Zahl sein")
+
+    try:
+        if typ == "TRANSPORT":
+            distanz_km = float(body.get("distanz_km", 0))
+            position = berechne_transport_co2e(positions_id, kategorie, menge, distanz_km)
+        else:
+            position = berechne_energie_co2e(positions_id, kategorie, menge)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+
+    return position.as_dict()
+
+
+# ---------------------------------------------------------------------------
+# Wave 38 — AP3: GET /process/benchmark/report
+# ---------------------------------------------------------------------------
+
+@router.get("/benchmark/report", response_model=dict)
+def get_benchmark_report(
+    tenant_id: str = "TENANT-001",
+    kategorie: str = "",
+) -> dict[str, Any]:
+    """
+    Gibt den Benchmark-Report einer Genossenschaft zurück.
+
+    Query-Parameter:
+    - tenant_id: Tenant-ID (default: TENANT-001)
+    - kategorie: Filtert Kennzahlen nach BenchmarkKategorie (z.B. LOGISTIK)
+    """
+    report = get_example_benchmark_report(tenant_id=tenant_id)
+
+    if kategorie:
+        try:
+            kat = BenchmarkKategorie(kategorie)
+            report.kennzahlen = [k for k in report.kennzahlen if k.kategorie == kat]
+        except ValueError:
+            raise HTTPException(
+                status_code=422,
+                detail=f"Unbekannte Kategorie '{kategorie}'. "
+                       f"Erlaubt: {[e.value for e in BenchmarkKategorie]}",
+            )
+
+    return report.as_dict()
+
+
+# ---------------------------------------------------------------------------
+# Wave 38 — AP4: POST /process/benchmark/perzentile
+# ---------------------------------------------------------------------------
+
+@router.post("/benchmark/perzentile", response_model=dict)
+def berechne_perzentile(body: dict = None) -> dict[str, Any]:
+    """
+    Berechnet Branchenperzentile aus einer Werteverteilung.
+
+    Body-Felder:
+    - werte:        Liste von Zahlen (Branchenverteilung)
+    - eigenwert:    Eigener Wert zum Einordnen (optional)
+    - kennzahl_id:  Bezeichner (optional, für Rückgabe)
+    """
+    if body is None:
+        body = {}
+
+    werte_raw = body.get("werte", [])
+    if not isinstance(werte_raw, list) or len(werte_raw) < 2:
+        raise HTTPException(
+            status_code=422,
+            detail="'werte' muss eine Liste mit mindestens 2 Zahlen sein",
+        )
+
+    try:
+        werte = [float(v) for v in werte_raw]
+    except (TypeError, ValueError):
+        raise HTTPException(status_code=422, detail="Alle Werte müssen Zahlen sein")
+
+    try:
+        perzentile = berechne_branchenperzentile(werte)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+
+    result: dict[str, Any] = {
+        "kennzahl_id": body.get("kennzahl_id", ""),
+        "anzahl_werte": len(werte),
+        **perzentile,
+    }
+
+    eigenwert_raw = body.get("eigenwert")
+    if eigenwert_raw is not None:
+        try:
+            eigenwert = float(eigenwert_raw)
+        except (TypeError, ValueError):
+            raise HTTPException(status_code=422, detail="eigenwert muss eine Zahl sein")
+        # Trend-Berechnung: prüfe wo der Eigenwert im Feld steht
+        p25 = perzentile["p25"]
+        p75 = perzentile["p75"]
+        p90 = perzentile["p90"]
+        if eigenwert >= p90:
+            einordnung = "TOP_10"
+        elif eigenwert >= p75:
+            einordnung = "TOP_25"
+        elif eigenwert >= p25:
+            einordnung = "MITTELFELD"
+        else:
+            einordnung = "UNTERES_VIERTEL"
+        result["eigenwert"] = eigenwert
+        result["einordnung"] = einordnung
+
+    return result
