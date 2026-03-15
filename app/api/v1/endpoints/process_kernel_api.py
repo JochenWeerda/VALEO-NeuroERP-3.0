@@ -105,6 +105,22 @@ from ....core.data_quality_rules import (
     validate_datensatz,
     get_default_dq_rulesets,
 )
+from ....core.bulk_operations import (
+    BulkItem,
+    BulkOperationTyp,
+    BulkRequest,
+    get_bulk_limit_by_domain,
+    get_default_bulk_limits,
+    validate_bulk_request,
+)
+from ....core.background_jobs import (
+    JobEnqueueRequest,
+    JobStatus,
+    JobTyp,
+    create_job_from_request,
+    evaluate_job_routing,
+    get_default_job_types,
+)
 from ....core.dashboard_snapshots import (
     SnapshotTyp,
     SnapshotRebuildRequest,
@@ -1083,7 +1099,7 @@ def _dq_ruleset_public(ruleset: "DQRuleSet") -> dict:
 @router.get("/data-quality/rulesets", response_model=dict)
 def get_dq_rulesets() -> dict[str, Any]:
     """
-    Gibt alle Default-DQ-Regelsets zurueck (Lieferant, Kontrakt, Wiegeschein, Artikel).
+    Gibt alle Default-DQ-Regelsets zurueck (Debitor, Lieferant, Kontrakt, Wiegeschein, Artikel, APRechnung, Abrechnung).
     """
     rulesets = get_default_dq_rulesets()
     return {
@@ -1251,3 +1267,198 @@ def evaluate_query_fallback(body: dict) -> dict[str, Any]:
     regeln = get_default_fallback_rules()
     result = evaluate_fallback(fehler_klasse, domain, query_name, regeln)
     return result.as_dict()
+
+
+# ---------------------------------------------------------------------------
+# Wave 33 — AP3: GET /process/bulk-limits + POST /process/bulk-operations/validate
+# ---------------------------------------------------------------------------
+
+@router.get("/bulk-limits", response_model=dict)
+def get_bulk_limits(domain: str = "") -> dict[str, Any]:
+    """
+    Gibt Bulk-Operationen-Limits zurueck.
+
+    Query-Parameter:
+    - domain: Filtert auf eine Domain (leer = alle).
+    """
+    limits = get_default_bulk_limits()
+    if domain:
+        lim = get_bulk_limit_by_domain(domain, limits)
+        if lim is None:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Keine Bulk-Limits fuer Domain '{domain}' konfiguriert.",
+            )
+        return {"domain": domain, "limit": lim.as_dict(), "schema_version": 1}
+    return {
+        "limit_count": len(limits),
+        "domains": [lim.domain for lim in limits],
+        "limits": [lim.as_dict() for lim in limits],
+        "schema_version": 1,
+    }
+
+
+@router.post("/bulk-operations/validate", response_model=dict)
+def validate_bulk_operation(body: dict = None) -> dict[str, Any]:
+    """
+    Validiert eine Bulk-Request strukturell gegen Domain-Limits.
+
+    Body-Felder:
+    - operation_typ: z.B. "CREATE"
+    - domain: z.B. "agrar"
+    - ressource: z.B. "wiegescheine"
+    - items: Liste von {item_id, payload}
+    - trocken_lauf: bool (optional, default false)
+    """
+    if body is None:
+        body = {}
+
+    op_str: str = body.get("operation_typ", "")
+    domain: str = body.get("domain", "")
+    ressource: str = body.get("ressource", "")
+    items_raw: list = body.get("items", [])
+
+    if not op_str or not domain or not ressource:
+        raise HTTPException(
+            status_code=422,
+            detail="operation_typ, domain und ressource sind erforderlich",
+        )
+
+    if not isinstance(items_raw, list):
+        raise HTTPException(status_code=422, detail="items muss eine Liste sein")
+
+    try:
+        op_typ = BulkOperationTyp(op_str)
+    except ValueError:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Unbekannter operation_typ '{op_str}'. Erlaubt: {[e.value for e in BulkOperationTyp]}",
+        )
+
+    items = [
+        BulkItem(
+            item_id=str(it.get("item_id", "")),
+            payload=it.get("payload", {}),
+        )
+        for it in items_raw
+        if isinstance(it, dict)
+    ]
+
+    request = BulkRequest(
+        operation_typ=op_typ,
+        domain=domain,
+        ressource=ressource,
+        items=items,
+        trocken_lauf=bool(body.get("trocken_lauf", False)),
+    )
+
+    limit = get_bulk_limit_by_domain(domain)
+    result = validate_bulk_request(request, limit)
+    return result.as_dict()
+
+
+# ---------------------------------------------------------------------------
+# Wave 33 — AP6: GET /process/jobs + POST /process/jobs/enqueue
+# ---------------------------------------------------------------------------
+
+@router.get("/jobs", response_model=dict)
+def list_job_types(
+    typ: str = "",
+    status: str = "",
+) -> dict[str, Any]:
+    """
+    Gibt den Katalog der unterstuetzten Job-Typen mit Routing-Informationen zurueck.
+
+    Query-Parameter:
+    - typ: Filtert auf einen Job-Typ (leer = alle).
+    - status: reserviert fuer kuenftige Queue-Status-Abfrage.
+    """
+    job_defs = get_default_job_types()
+    if typ:
+        try:
+            job_typ = JobTyp(typ)
+        except ValueError:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Unbekannter Job-Typ '{typ}'. Erlaubt: {[e.value for e in JobTyp]}",
+            )
+        matches = [d for d in job_defs if d.typ == job_typ]
+        if not matches:
+            raise HTTPException(status_code=404, detail=f"Job-Typ '{typ}' nicht gefunden.")
+        jd = matches[0]
+        routing = evaluate_job_routing(job_typ)
+        return {
+            "typ": jd.typ.value,
+            "definition": jd.as_dict(),
+            "routing": routing.as_dict(),
+            "schema_version": 1,
+        }
+    return {
+        "job_type_count": len(job_defs),
+        "typen": [jd.typ.value for jd in job_defs],
+        "definitions": [jd.as_dict() for jd in job_defs],
+        "schema_version": 1,
+    }
+
+
+@router.post("/jobs/enqueue", response_model=dict)
+def enqueue_job(body: dict = None) -> dict[str, Any]:
+    """
+    Reiht einen Hintergrund-Job in die Queue ein (Contract-Ebene).
+
+    Body-Felder:
+    - typ: Job-Typ (z.B. "SETTLEMENT_BATCH")
+    - angefordert_von: User-/System-ID
+    - parameter: optionale Job-Parameter (dict)
+    - prioritaet_override: optionale Prioritaet (KRITISCH/HOCH/MITTEL/NIEDRIG)
+    - tenant_id: optionale Tenant-ID
+    """
+    if body is None:
+        body = {}
+
+    typ_str: str = body.get("typ", "")
+    angefordert_von: str = body.get("angefordert_von", "")
+
+    if not typ_str or not angefordert_von:
+        raise HTTPException(
+            status_code=422,
+            detail="typ und angefordert_von sind erforderlich",
+        )
+
+    try:
+        job_typ = JobTyp(typ_str)
+    except ValueError:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Unbekannter Job-Typ '{typ_str}'. Erlaubt: {[e.value for e in JobTyp]}",
+        )
+
+    from ....core.background_jobs import JobPrioritaet
+    prio_override = None
+    if body.get("prioritaet_override"):
+        try:
+            prio_override = JobPrioritaet(body["prioritaet_override"])
+        except ValueError:
+            raise HTTPException(
+                status_code=422,
+                detail=f"Unbekannte Prioritaet '{body['prioritaet_override']}'. "                       f"Erlaubt: {[e.value for e in JobPrioritaet]}",
+            )
+
+    req = JobEnqueueRequest(
+        typ=job_typ,
+        angefordert_von=angefordert_von,
+        parameter=body.get("parameter", {}),
+        prioritaet_override=prio_override,
+        tenant_id=body.get("tenant_id", ""),
+    )
+    job, routing = create_job_from_request(req)
+    return {
+        "job_id": job.job_id,
+        "typ": job.typ.value,
+        "status": job.status.value,
+        "prioritaet": job.prioritaet.value,
+        "worker_klasse": routing.worker_klasse.value,
+        "timeout_sekunden": routing.timeout_sekunden,
+        "meldung": f"Job {job.job_id} eingereiht ({job.typ.value} / {job.prioritaet.value}).",
+        "schema_version": 1,
+    }
