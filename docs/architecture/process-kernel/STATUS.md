@@ -3,14 +3,14 @@
 ## Gesamtstatus
 
 - Stand: `2026-03-15`
-- Status: `Waves 1 bis 40 abgeschlossen`
-- Gesamtsuite: `2028 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed`
+- Status: `Waves 1 bis 41 abgeschlossen`
+- Gesamtsuite: `2120 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed`
 - Letzte abgeschlossene Waves:
-  - `Wave 36`: EDI/API-Hub + Lieferketten-Tracking (Gap 043, Gap 044)
   - `Wave 37`: DMS + OCR-Extraktion + Agenten-Integration (Gap 045, Gap 048)
   - `Wave 38`: Nachhaltigkeit/CO2-Reporting + Branchenbenchmarking (Gap 046, Gap 047)
   - `Wave 39`: Command-Surfacing-Contracts + Prozess-Benachrichtigungs-Contracts
   - `Wave 40`: Workflow-Versionierungs-Contracts + Canonical Process Audit Trail (PKP-02, PKP-03)
+  - `Wave 41`: Process Capacity Contracts + Event Replay Contracts
 
 ## Wave-Uebersicht
 
@@ -56,6 +56,7 @@
 | Wave 38 | abgeschlossen | 60 | `wave-38/STATUS.md` |
 | Wave 39 | abgeschlossen | 60 | `wave-39/STATUS.md` |
 | Wave 40 | abgeschlossen | 60 | `wave-40/STATUS.md` |
+| Wave 41 | abgeschlossen | 82 | `wave-41/STATUS.md` |
 
 ## Aktuell relevante Lieferungen
 
