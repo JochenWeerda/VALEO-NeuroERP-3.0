@@ -3,14 +3,14 @@
 ## Gesamtstatus
 
 - Stand: `2026-03-15`
-- Status: `Waves 1 bis 30 abgeschlossen`
-- Gesamtsuite: `1378 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed`
+- Status: `Waves 1 bis 31 abgeschlossen`
+- Gesamtsuite: `1429 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed`
 - Letzte abgeschlossene Waves:
-  - `Wave 26`: Trocknungsabrechnung Audit-Contract, Migrations-Guard (Gap 003, Gap 011)
   - `Wave 27`: Konsistente Informationsdichte je Rolle mit Tenant-/Prozess-Kontext und backend-gespeisten Dichtehinweisen (Gap 027)
   - `Wave 28`: SLA-Eskalations-Engine + OTel Span-Contracts (Gap 013, Gap 039)
   - `Wave 29`: Policy-as-Code Engine + Query-Vertrags-Registry (Gap 014, Gap 031)
   - `Wave 30`: Human-in-the-loop AI-Freigaben + SLO/SLI-Definitionen (Gap 015, Gap 050)
+  - `Wave 31`: MCP/OpenAPI Tool Contracts + Datenqualitaetsregeln (Gap 017, Gap 040)
 
 ## Wave-Uebersicht
 
@@ -42,10 +42,11 @@
 | Wave 24 | abgeschlossen | 41 | `wave-24/STATUS.md` |
 | Wave 25 | abgeschlossen | 10 | `wave-25/STATUS.md` |
 | Wave 26 | abgeschlossen | 37 | `wave-26/STATUS.md` |
-| Wave 27 | abgeschlossen | 18 | `wave-27/STATUS.md` |
+| Wave 27 | abgeschlossen | 21 | `wave-27/STATUS.md` |
 | Wave 28 | abgeschlossen | 47 | `wave-28/STATUS.md` |
 | Wave 29 | abgeschlossen | 52 | `wave-29/STATUS.md` |
 | Wave 30 | abgeschlossen | 44 | `wave-30/STATUS.md` |
+| Wave 31 | abgeschlossen | 49 | `wave-31/STATUS.md` |
 
 ## Aktuell relevante Lieferungen
 
@@ -109,7 +110,7 @@
   - Rollen werden auf fokussierte, standardisierte oder verdichtete Informationsdichte aufgeloest
   - Tenant-, Domain-, Action- und Approval-Kontext duerfen die Dichte kontrolliert anheben
   - Produktive Backend-Command- sowie Policy-/Approval-Contracts speisen ueber `ui-density-manifest` das Mindestniveau fuer die UI-Dichte
-  - Toolbar, Listen-/Detail-Pattern, Wizard und AP-/Explainability-Panels nutzen denselben Dichte-Contract
+  - Toolbar, Listen-/Detail-Pattern, Wizard sowie AP-, Closing-, USTVA-, Zahlungslauf-, Lastschrift-, Settlement- und kompakte Listen-/Badge-Explainability nutzen denselben Dichte-Contract
   - Sichtbare Informationsmenge wird konsistent nach Rolle und Prozesskontext reduziert oder erweitert statt pro Seite separat
 
 ### PKP-06 Frontend Explainability
@@ -240,10 +241,13 @@ npm run test:run -- src/__tests__/features/role-density/role-density.test.ts src
 # Ergebnis: 15 passed
 
 pytest tests/test_process_kernel_wave27_ui_density_manifest.py -q --no-cov
-# Ergebnis: 3 passed
+# Ergebnis: 4 passed
 
 npm run test:run -- src/__tests__/features/role-density/role-density.test.ts src/__tests__/components/workflow/ProcessStatusPanel.test.tsx
 # Ergebnis: 9 passed
+
+npm run test:run -- src/__tests__/components/workflow/CompactDecisionCard.test.tsx src/__tests__/components/workflow/ProcessStatusPanel.test.tsx src/__tests__/features/role-density/role-density.test.ts
+# Ergebnis: 11 passed
 
 npm run type-check
 # Ergebnis: gruen

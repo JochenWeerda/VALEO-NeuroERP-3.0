@@ -99,6 +99,12 @@ from ....core.slo_definitions import (
     get_process_kernel_slos,
     validate_slo_definition,
 )
+from ....core.mcp_tool_contracts import get_process_kernel_mcp_tools
+from ....core.data_quality_rules import (
+    DQRuleSet,
+    validate_datensatz,
+    get_default_dq_rulesets,
+)
 
 router = APIRouter(prefix="/process", tags=["process-kernel", "commands"])
 
@@ -1010,4 +1016,73 @@ def check_slo(body: dict) -> dict[str, Any]:
     if slo is None:
         raise HTTPException(status_code=404, detail=f"SLO {slo_id!r} nicht gefunden")
     result = check_slo_compliance(slo, float(ist_wert) if ist_wert is not None else None)
+    return result.as_dict()
+
+
+# ---------------------------------------------------------------------------
+# Wave 31 AP3: MCP Tool-Registry Endpoint
+# ---------------------------------------------------------------------------
+
+@router.get("/agent/tool-registry", response_model=dict)
+def get_mcp_tool_registry(domain: str = "") -> dict[str, Any]:
+    """
+    Gibt MCP/OpenAPI Tool-Contracts fuer externe Agenten zurueck.
+
+    ?domain= — Optional: Filtert nach Domain (agrar, finance, workflow, ...).
+    """
+    registry = get_process_kernel_mcp_tools()
+    if domain:
+        tools = registry.by_domain(domain)
+        return {
+            "domain_filter": domain,
+            "tool_count": len(tools),
+            "tools": [t.as_mcp_tool() for t in tools],
+            "schema_version": 1,
+        }
+    return registry.as_dict()
+
+
+# ---------------------------------------------------------------------------
+# Wave 31 AP6: Datenqualitaets-Endpoints
+# ---------------------------------------------------------------------------
+
+@router.get("/data-quality/rulesets", response_model=dict)
+def get_dq_rulesets() -> dict[str, Any]:
+    """
+    Gibt alle Default-DQ-Regelsets zurueck (Lieferant, Kontrakt, Wiegeschein, Artikel).
+    """
+    rulesets = get_default_dq_rulesets()
+    return {
+        "ruleset_count": len(rulesets),
+        "rulesets": {k: v.as_dict() for k, v in rulesets.items()},
+        "schema_version": 1,
+    }
+
+
+@router.post("/data-quality/validate", response_model=dict)
+def validate_dq(body: dict) -> dict[str, Any]:
+    """
+    Validiert einen Datensatz gegen ein DQ-Regelset.
+
+    Body: { "entity_typ": str, "datensatz": dict, "kontext_datensaetze": list[dict] | null }
+    Optional: "ruleset_id" zum expliziten Regelset-Lookup (wird ignoriert, wenn entity_typ passt).
+    """
+    entity_typ: str = body.get("entity_typ", "")
+    datensatz: dict = body.get("datensatz", {})
+    kontext: list[dict] | None = body.get("kontext_datensaetze")
+
+    if not entity_typ:
+        raise HTTPException(status_code=422, detail="entity_typ ist erforderlich")
+    if not isinstance(datensatz, dict):
+        raise HTTPException(status_code=422, detail="datensatz muss ein Objekt sein")
+
+    rulesets = get_default_dq_rulesets()
+    ruleset = rulesets.get(entity_typ)
+    if ruleset is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Kein Regelset fuer entity_typ '{entity_typ}'. Bekannt: {list(rulesets.keys())}",
+        )
+
+    result = validate_datensatz(ruleset, datensatz, kontext)
     return result.as_dict()
