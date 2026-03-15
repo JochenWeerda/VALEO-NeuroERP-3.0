@@ -3,14 +3,14 @@
 ## Gesamtstatus
 
 - Stand: `2026-03-15`
-- Status: `Waves 1 bis 39 abgeschlossen`
-- Gesamtsuite: `1960 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed`
+- Status: `Waves 1 bis 40 abgeschlossen`
+- Gesamtsuite: `2028 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed`
 - Letzte abgeschlossene Waves:
-  - `Wave 35`: Inline-Validierung + Error-Guidance / Leitsystem (Gap 026, Gap 028)
   - `Wave 36`: EDI/API-Hub + Lieferketten-Tracking (Gap 043, Gap 044)
   - `Wave 37`: DMS + OCR-Extraktion + Agenten-Integration (Gap 045, Gap 048)
   - `Wave 38`: Nachhaltigkeit/CO2-Reporting + Branchenbenchmarking (Gap 046, Gap 047)
   - `Wave 39`: Command-Surfacing-Contracts + Prozess-Benachrichtigungs-Contracts
+  - `Wave 40`: Workflow-Versionierungs-Contracts + Canonical Process Audit Trail (PKP-02, PKP-03)
 
 ## Wave-Uebersicht
 
@@ -55,6 +55,7 @@
 | Wave 37 | abgeschlossen | 60 | `wave-37/STATUS.md` |
 | Wave 38 | abgeschlossen | 60 | `wave-38/STATUS.md` |
 | Wave 39 | abgeschlossen | 60 | `wave-39/STATUS.md` |
+| Wave 40 | abgeschlossen | 60 | `wave-40/STATUS.md` |
 
 ## Aktuell relevante Lieferungen
 
@@ -290,6 +291,9 @@ pytest tests/test_apm_pipeline_contract.py tests/test_reflect_archive_loader.py 
 
 pytest tests/test_json_state_contract.py tests/test_apm_pipeline_contract.py tests/test_reflect_archive_loader.py tests/l3_import/test_import_l3.py tests/l3_import/test_validate_mapping.py -q --no-cov
 # Ergebnis: 29 passed
+
+pytest tests/test_genxais_cycle_contract.py tests/test_dashboard_prompt_module_contracts.py tests/test_json_state_contract.py tests/test_apm_pipeline_contract.py tests/test_reflect_archive_loader.py tests/l3_import/test_import_l3.py tests/l3_import/test_validate_mapping.py -q --no-cov
+# Ergebnis: 37 passed
 
 npm run test:run -- src/__tests__/components/workflow/CompactDecisionCard.test.tsx src/__tests__/components/workflow/ProcessStatusPanel.test.tsx src/__tests__/features/role-density/role-density.test.ts
 # Ergebnis: 11 passed
