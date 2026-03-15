@@ -60,6 +60,21 @@ from ....core.nebenkosten_engine import (
     compute_nebenkosten,
     get_default_nebenkosten_rules,
 )
+from ....core.kampagnen_vorlage import (
+    KampagnenTyp,
+    get_default_kampagnen_vorlagen,
+    get_vorlage_by_typ,
+    instantiate_from_vorlage,
+)
+from ....core.tenant_prozess_variante import (
+    SchrittOverride,
+    SchrittStatus,
+    TenantProzessVariante,
+    build_default_tenant_variante,
+    get_default_agrar_settlement_schritte,
+    resolve_process_steps,
+    validate_prozess_variante,
+)
 
 router = APIRouter(prefix="/process", tags=["process-kernel", "commands"])
 
@@ -496,5 +511,108 @@ def get_settlement_nebenkosten_preview(settlement_id: str) -> dict[str, Any]:
         "settlement_id": settlement_id,
         "nebenkosten": breakdown.as_dict(),
         "rule_count": len(rules),
+        "schema_version": 1,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Wave 24 AP3: Kampagnenvorlagen
+# ---------------------------------------------------------------------------
+
+
+@router.get("/kampagnen/vorlagen", response_model=dict)
+def list_kampagnen_vorlagen() -> dict[str, Any]:
+    """
+    Alle verfuegbaren Standard-Kampagnenvorlagen (Gap 005).
+
+    Liefert Metadaten + Qualitaetsschwellen fuer alle 5 Ernte-Typen.
+    """
+    vorlagen = get_default_kampagnen_vorlagen()
+    return {
+        "vorlagen": [v.as_dict() for v in vorlagen],
+        "count": len(vorlagen),
+        "schema_version": 1,
+    }
+
+
+@router.get("/kampagnen/vorlagen/{typ}/instantiate", response_model=dict)
+def instantiate_kampagnen_vorlage(typ: str) -> dict[str, Any]:
+    """
+    Instantiiert eine Kampagne aus der Standard-Vorlage fuer den angegebenen Typ.
+
+    Typ-Werte: WINTERWEIZEN, SOMMERGERSTE, RAPS, KOERNERMAIS, ZUCKERRUEBEN
+    """
+    try:
+        kampagnen_typ = KampagnenTyp(typ.upper())
+    except ValueError:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unbekannter Kampagnentyp: '{typ}'. Gueltig: {[t.value for t in KampagnenTyp]}",
+        )
+
+    vorlage = get_vorlage_by_typ(kampagnen_typ)
+    if vorlage is None:
+        raise HTTPException(status_code=404, detail=f"Keine Vorlage fuer Typ '{typ}' gefunden")
+
+    instanz = instantiate_from_vorlage(
+        vorlage,
+        instanz_id=f"KI-{typ.upper()}-DEMO",
+        tenant_id="demo-tenant",
+        wirtschaftsjahr=2026,
+    )
+    return {
+        "instanz": instanz.as_dict(),
+        "vorlage_id": vorlage.vorlage_id,
+        "schema_version": 1,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Wave 24 AP4: Tenant-Prozessvarianten
+# ---------------------------------------------------------------------------
+
+
+@router.get("/tenant/prozess-varianten", response_model=dict)
+def list_tenant_prozess_varianten() -> dict[str, Any]:
+    """
+    Verfuegbare Prozessvarianten-Registry (Gap 009).
+
+    Liefert alle unterstuetzten Prozesse mit Default-Schritten.
+    """
+    schritte = get_default_agrar_settlement_schritte()
+    return {
+        "prozesse": [
+            {
+                "prozess_key": "agrar_settlement",
+                "bezeichnung": "Agrar Settlement-Prozess",
+                "schritt_count": len(schritte),
+                "pflichtschritte": sum(1 for s in schritte if s.pflicht),
+                "optionale_schritte": sum(1 for s in schritte if not s.pflicht),
+            }
+        ],
+        "schema_version": 1,
+    }
+
+
+@router.get("/tenant/prozess-varianten/{prozess_key}/steps", response_model=dict)
+def get_tenant_prozess_steps(prozess_key: str) -> dict[str, Any]:
+    """
+    Aufgeloeste Prozessschritte fuer einen Prozess (Default + keine Overrides).
+
+    In Produktion: Tenant-Overrides aus Konfiguration laden.
+    """
+    variante = build_default_tenant_variante(
+        tenant_id="demo-tenant",
+        prozess_key=prozess_key,
+    )
+    steps = resolve_process_steps(variante)
+    validation = validate_prozess_variante(variante)
+
+    return {
+        "prozess_key": prozess_key,
+        "variante_id": variante.variante_id,
+        "steps": [s.as_dict() for s in steps],
+        "step_count": len(steps),
+        "validation": validation.as_dict(),
         "schema_version": 1,
     }

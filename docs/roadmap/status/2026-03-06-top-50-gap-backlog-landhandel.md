@@ -9,6 +9,29 @@
 ## Ziel
 Dieses Backlog priorisiert die fehlenden Faehigkeiten, um VALEO NeuroERP auf Spitzenniveau gegenueber ServiceERP, a.amic, Odoo, SAP und Oracle zu bringen. Fokus: End-to-End Prozessabdeckung, AI-first Workflows, Agent-Interoperabilitaet, UUIX, Performance, Parallelverarbeitung.
 
+## Statusabgleich 2026-03-14
+
+Abgleich gegen den operativen Lieferstand in `docs/architecture/process-kernel/STATUS.md`
+und den zugehoerigen `wave-*/STATUS.md`-Dateien:
+
+| Gap-ID | Status | Beleg |
+|---|---|---|
+| 006 | abgeschlossen | `docs/architecture/process-kernel/wave-21/STATUS.md` |
+| 010 | abgeschlossen | `docs/architecture/process-kernel/wave-20/STATUS.md` |
+| 022 | abgeschlossen | `docs/architecture/process-kernel/wave-22/STATUS.md` |
+| 035 | abgeschlossen | `docs/architecture/process-kernel/wave-20/STATUS.md` |
+| 041 | abgeschlossen | `docs/architecture/process-kernel/wave-20/STATUS.md` |
+| 001 | teilweise abgeschlossen | `docs/architecture/process-kernel/wave-21/STATUS.md` |
+| 005 | abgeschlossen | `docs/architecture/process-kernel/wave-24/STATUS.md` |
+| 007 | abgeschlossen | `docs/architecture/process-kernel/wave-23/STATUS.md` |
+| 009 | abgeschlossen | `docs/architecture/process-kernel/wave-24/STATUS.md` |
+| 042 | abgeschlossen | `docs/architecture/process-kernel/wave-23/STATUS.md` |
+
+Hinweise:
+- Dieses Dokument bleibt die strategische Priorisierung und kein feingranulares Delivery-Log.
+- Der aktuelle Wahrheitsstand fuer Process-Kernel-Lieferungen liegt in `docs/architecture/process-kernel/STATUS.md`.
+- Weitere Gaps werden hier nur dann als abgeschlossen eingeordnet, wenn der Abschluss explizit in einer Wave-STATUS-Datei belegt ist.
+
 ## Bewertungslogik
 - Prioritaet: P0 (kritisch), P1 (hoch), P2 (mittel)
 - Aufwand: S (1-2 Wochen), M (2-4 Wochen), L (4-8 Wochen), XL (8+ Wochen)
@@ -94,6 +117,16 @@ Dieses Backlog priorisiert die fehlenden Faehigkeiten, um VALEO NeuroERP auf Spi
 1. Wave A (Wochen 1-4): 001, 002, 003, 009, 010, 011, 013, 014, 031, 032
 2. Wave B (Wochen 5-8): 004, 015, 019, 021, 022, 024, 025, 033, 035, 039
 3. Wave C (Wochen 9-12): 036, 041, 042, 049, 050 sowie Vorbereitung 016, 037, 043
+
+### Einordnung zum Ist-Stand
+
+- Teile von Wave B sind inzwischen umgesetzt, insbesondere `022` und `035`.
+- Teile von Wave C sind inzwischen umgesetzt, insbesondere `041`, `042` (Wave 23).
+- Gap `005` (Saisonale Kampagnenvorlagen) ist mit Wave 24 abgeschlossen.
+- Gap `007` (Nebenkosten-Automatik) ist mit Wave 23 abgeschlossen.
+- Gap `009` (Tenant-Prozessvarianten) ist mit Wave 24 abgeschlossen.
+- Gap `042` (Intrastat-Meldungsmodell) ist mit Wave 23 abgeschlossen.
+- Die Reihenfolge oben bleibt als historische 90-Tage-Planung erhalten und ist nicht der laufende Ist-Status.
 
 ## Governance
 - Woechentliches Steering mit drei Pflicht-KPIs:
