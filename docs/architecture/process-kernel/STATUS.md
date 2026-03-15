@@ -3,14 +3,14 @@
 ## Gesamtstatus
 
 - Stand: `2026-03-15`
-- Status: `Waves 1 bis 33 abgeschlossen`
-- Gesamtsuite: `1556 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed`
+- Status: `Waves 1 bis 34 abgeschlossen`
+- Gesamtsuite: `1628 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed`
 - Letzte abgeschlossene Waves:
-  - `Wave 29`: Policy-as-Code Engine + Query-Vertrags-Registry (Gap 014, Gap 031)
   - `Wave 30`: Human-in-the-loop AI-Freigaben + SLO/SLI-Definitionen (Gap 015, Gap 050)
   - `Wave 31`: MCP/OpenAPI Tool Contracts + Datenqualitaetsregeln (Gap 017, Gap 040)
   - `Wave 32`: Dashboard Read-Model Snapshots + Query-Fallback-Contracts (Gap 033, Gap 032)
   - `Wave 33`: API-Bulk-Operationen + Queue-basierte Hintergrundjobs (Gap 034, Gap 036)
+  - `Wave 34`: Tenant-Rate-Limits + Security-Hardening-Contracts (Gap 038, Gap 049)
 
 ## Wave-Uebersicht
 
@@ -46,9 +46,10 @@
 | Wave 28 | abgeschlossen | 47 | `wave-28/STATUS.md` |
 | Wave 29 | abgeschlossen | 52 | `wave-29/STATUS.md` |
 | Wave 30 | abgeschlossen | 44 | `wave-30/STATUS.md` |
-| Wave 31 | abgeschlossen | 70 | `wave-31/STATUS.md` |
+| Wave 31 | abgeschlossen | 87 | `wave-31/STATUS.md` |
 | Wave 32 | abgeschlossen | 47 | `wave-32/STATUS.md` |
 | Wave 33 | abgeschlossen | 59 | `wave-33/STATUS.md` |
+| Wave 34 | abgeschlossen | 55 | `wave-34/STATUS.md` |
 
 ## Aktuell relevante Lieferungen
 
@@ -202,6 +203,11 @@
 - `app/core/bulk_operations.py`
 - `app/core/background_jobs.py`
 
+### Wave-34 Tenant-Rate-Limits + Security-Hardening
+
+- `app/core/tenant_rate_limits.py`
+- `app/core/security_hardening_contracts.py`
+
 ### Frontend-Power-User-Schicht
 
 - `packages/frontend-web/src/features/ki-usability/context/ActionDispatchContext.tsx`
@@ -233,7 +239,7 @@
 
 ```bash
 pytest -q --no-cov
-# Ergebnis: 1556 passed, 5 skipped, 1 xfailed (2026-03-15, nach Wave 33)
+# Ergebnis: 1628 passed, 5 skipped, 1 xfailed (2026-03-15, nach Wave 34)
 ```
 
 ### Zusaetzliche aktuelle Belege
