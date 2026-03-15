@@ -121,6 +121,24 @@ from ....core.background_jobs import (
     evaluate_job_routing,
     get_default_job_types,
 )
+from ....core.workflow_versioning_contracts import (
+    MigrationsTyp,
+    SandboxModus,
+    WorkflowDefinitionsStatus,
+    WorkflowInstanzStatus,
+    ermittle_aktive_definition,
+    get_default_migrationsregeln,
+    get_default_sandbox_regeln,
+    get_default_workflow_definitionen,
+    pruefe_migration,
+)
+from ....core.canonical_process_audit_trail import (
+    AuditKategorie,
+    GoBDRelevanz,
+    AuditEreignisTyp,
+    baue_beispiel_audit_kette,
+    erstelle_audit_eintrag,
+)
 from ....core.command_surfacing_contracts import (
     CommandPrioritaet,
     DichteStufe,
@@ -2618,3 +2636,161 @@ def route_notification(body: dict = None) -> dict[str, Any]:
         result["nachricht"] = nachricht.as_dict()
 
     return result
+
+
+# ---------------------------------------------------------------------------
+# Wave 40 — AP1: GET /process/workflow-versioning/definitionen
+# ---------------------------------------------------------------------------
+
+@router.get("/workflow-versioning/definitionen", response_model=dict)
+def get_workflow_definitionen(
+    workflow_typ: str = "",
+    status: str = "",
+) -> dict[str, Any]:
+    """
+    Gibt Workflow-Definitionen zurück.
+
+    Query-Parameter:
+    - workflow_typ: Filtert nach Workflow-Typ (z.B. kontrakt_annahme)
+    - status:       Filtert nach Status (ENTWURF|AKTIV|VERALTET|ARCHIVIERT)
+    """
+    definitionen = get_default_workflow_definitionen()
+
+    if workflow_typ:
+        definitionen = [d for d in definitionen if d.workflow_typ == workflow_typ]
+
+    if status:
+        try:
+            st = WorkflowDefinitionsStatus(status)
+            definitionen = [d for d in definitionen if d.status == st]
+        except ValueError:
+            raise HTTPException(
+                status_code=422,
+                detail=f"Unbekannter Status '{status}'. "
+                       f"Erlaubt: {[e.value for e in WorkflowDefinitionsStatus]}",
+            )
+
+    sandbox_regeln = get_default_sandbox_regeln()
+
+    return {
+        "definition_count": len(definitionen),
+        "definitionen": [d.as_dict() for d in definitionen],
+        "sandbox_regeln": [r.as_dict() for r in sandbox_regeln],
+        "schema_version": 1,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Wave 40 — AP2: POST /process/workflow-versioning/migration-pruefen
+# ---------------------------------------------------------------------------
+
+@router.post("/workflow-versioning/migration-pruefen", response_model=dict)
+def pruefe_workflow_migration(body: dict = None) -> dict[str, Any]:
+    """
+    Prüft ob eine Workflow-Instanz auf eine Ziel-Definition migriert werden kann.
+
+    Pflichtfelder:
+    - instanz_id:       ID der laufenden Instanz
+    - definition_id:    Aktuelle Definition-ID der Instanz
+    - ziel_definition_id: Ziel-Definition-ID
+
+    Optionale Felder:
+    - versions_snapshot: Hash der Startversion (default: "")
+    """
+    if body is None:
+        body = {}
+
+    instanz_id: str = body.get("instanz_id", "")
+    definition_id: str = body.get("definition_id", "")
+    ziel_def_id: str = body.get("ziel_definition_id", "")
+
+    if not instanz_id or not definition_id or not ziel_def_id:
+        raise HTTPException(
+            status_code=422,
+            detail="instanz_id, definition_id und ziel_definition_id sind erforderlich",
+        )
+
+    definitionen = get_default_workflow_definitionen()
+    ziel_def = next((d for d in definitionen if d.definition_id == ziel_def_id), None)
+    if ziel_def is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Ziel-Definition '{ziel_def_id}' nicht gefunden",
+        )
+
+    from ....core.workflow_versioning_contracts import WorkflowInstanzReferenz
+    from datetime import datetime as _dt
+    instanz = WorkflowInstanzReferenz(
+        instanz_id=instanz_id,
+        definition_id=definition_id,
+        versions_snapshot=body.get("versions_snapshot", ""),
+        gestartet_am=_dt.utcnow(),
+        instanz_status=WorkflowInstanzStatus.LAUFEND,
+    )
+
+    ergebnis = pruefe_migration(instanz, ziel_def)
+    return ergebnis.as_dict()
+
+
+# ---------------------------------------------------------------------------
+# Wave 40 — AP3: GET /process/audit-trail/beispiel
+# ---------------------------------------------------------------------------
+
+@router.get("/audit-trail/beispiel", response_model=dict)
+def get_audit_trail_beispiel(
+    tenant_id: str = "TENANT-001",
+    kontrakt_id: str = "KT-2026-0042",
+) -> dict[str, Any]:
+    """
+    Gibt eine Beispiel-Audit-Kette mit Hash-Verkettung zurück.
+
+    Query-Parameter:
+    - tenant_id:    Tenant-ID (default: TENANT-001)
+    - kontrakt_id:  Kontrakt-ID (default: KT-2026-0042)
+    """
+    kette = baue_beispiel_audit_kette(tenant_id=tenant_id, kontrakt_id=kontrakt_id)
+    return kette.as_dict()
+
+
+# ---------------------------------------------------------------------------
+# Wave 40 — AP4: POST /process/audit-trail/integritaet-pruefen
+# ---------------------------------------------------------------------------
+
+@router.post("/audit-trail/integritaet-pruefen", response_model=dict)
+def pruefe_audit_integritaet(body: dict = None) -> dict[str, Any]:
+    """
+    Prüft die Integrität einer Audit-Kette (Hash-Verkettung + GoBD-Vollständigkeit).
+
+    Body-Felder:
+    - tenant_id:    Tenant-ID
+    - kontrakt_id:  Kontrakt-ID für die Beispielkette (optional)
+    - min_gobd_pflicht: Mindestanzahl GoBD-Pflichteinträge (default: 0)
+    """
+    if body is None:
+        body = {}
+
+    tenant_id: str = body.get("tenant_id", "TENANT-001")
+    kontrakt_id: str = body.get("kontrakt_id", "KT-2026-0042")
+    min_gobd: int = int(body.get("min_gobd_pflicht", 0))
+
+    kette = baue_beispiel_audit_kette(tenant_id=tenant_id, kontrakt_id=kontrakt_id)
+    integritaets_stati = kette.pruefe_kettenintegritaet()
+
+    hash_fehler = [
+        i for i, s in enumerate(integritaets_stati)
+        if s.value != "UNVERAENDERT"
+    ]
+    gobd_anzahl = len(kette.gobd_pflichtige_eintraege)
+    gobd_erfuellt = gobd_anzahl >= min_gobd
+
+    return {
+        "kette_id": kette.kette_id,
+        "tenant_id": tenant_id,
+        "eintrag_anzahl": len(kette.eintraege),
+        "ist_integer": kette.ist_integer,
+        "hash_fehler_positionen": hash_fehler,
+        "gobd_pflicht_anzahl": gobd_anzahl,
+        "gobd_mindestanforderung_erfuellt": gobd_erfuellt,
+        "integritaets_stati": [s.value for s in integritaets_stati],
+        "schema_version": 1,
+    }
