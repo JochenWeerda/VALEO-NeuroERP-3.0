@@ -8,8 +8,11 @@ Wave-31 Tests: MCP Tool Contracts (Gap 017) + Datenqualitaetsregeln (Gap 040)
 """
 from __future__ import annotations
 
+import re
+
 import pytest
 from fastapi.testclient import TestClient
+from starlette.routing import Route
 
 from app.core.mcp_tool_contracts import (
     MCPParameterTyp,
@@ -207,6 +210,30 @@ class TestMCPToolRegistry:
             kategorie=MCPToolKategorie.LESEN,
         )
         assert t.validate_name() is False
+
+    def test_all_tool_endpoints_map_to_real_fastapi_routes(self):
+        from app.main import app
+
+        def _normalize_path(path: str) -> str:
+            normalized = re.sub(r"\{[^}]+\}", "{param}", path.rstrip("/"))
+            return normalized or "/"
+
+        route_index = {
+            (method.upper(), _normalize_path(route.path))
+            for route in app.routes
+            if isinstance(route, Route)
+            for method in route.methods or set()
+            if method.upper() not in {"HEAD", "OPTIONS"}
+        }
+
+        missing = []
+        for tool in self.registry.tools:
+            assert tool.api_endpoint is not None
+            method, path = tool.api_endpoint.split(" ", 1)
+            if (method.upper(), _normalize_path(path)) not in route_index:
+                missing.append(tool.api_endpoint)
+
+        assert missing == []
 
 
 # ---------------------------------------------------------------------------
