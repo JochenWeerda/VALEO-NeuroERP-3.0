@@ -126,3 +126,18 @@ Die nächste sinnvolle ADR-Pipeline verschiebt sich jetzt von Grundsatzarchitekt
 2. Referenzmodell für Chargen-/Partienverschneidung über Lager, Qualität und Settlement
 3. Standards für Explainability von KI- und Policy-Entscheidungen
 4. Governance für Simulationsdaten und Sandbox-Isolation
+
+## Process Kernel Delivery
+
+- [Process Kernel Status (Waves 1–27)](process-kernel/STATUS.md)
+- [Delivery Map (Wave→Gap)](process-kernel/DELIVERY-MAP.md)
+
+### Abgeschlossene Waves (Kernmodule)
+
+| Wave | Scope | Core-Module |
+|------|-------|-------------|
+| 19–20 | Settlement, Audit, OCC | settlement_approval, settlement_audit_chain, optimistic_lock_contracts |
+| 21 | Preislogik, Journal | price_formula_engine, settlement_journal_bridge |
+| 23 | Nebenkosten, Intrastat | nebenkosten_engine, intrastat_model |
+| 24 | Prozessvarianten, Kampagnen | tenant_prozess_variante, kampagnen_vorlage |
+| 26 | Trocknung, Migration | trocknungs_abrechnung, workflow_migrations_guard |
