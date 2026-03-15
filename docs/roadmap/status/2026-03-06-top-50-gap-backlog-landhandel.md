@@ -63,7 +63,7 @@ Hinweise:
 | 012 | Simulation/Sandbox fuer neue Workflows | 80% weniger Fehler nach Go-Live | M | Testdaten, Rule Engine | P1 | H1 |
 | 013 | SLA/Timeout/Eskalationsknoten standardisiert | >=95% SLA-Einhaltung Kernprozesse | M | Notification, RBAC | P0 | H1 | **GESCHLOSSEN Wave 28** — `sla_eskalation_engine.py`: evaluate_sla_breach(), validate_sla_policy(), 6 Default-Policies; API GET /process/sla/eskalationen |
 | 014 | Policy-as-Code mit Tenant Overrides | 100% Ausnahmen regelbasiert dokumentiert | M | Policy Store | P0 | H1 | **GESCHLOSSEN Wave 29** — `policy_code_engine.py`: evaluate_policy_set(), apply_tenant_overrides() (Pflichtregeln geschuetzt), Default-PolicySets; API GET+POST /process/policy-rules |
-| 015 | Human-in-the-loop Freigaben fuer AI Aktionen | 100% AI-Aktionen mit Approval-Trail | M | Agent Layer, Audit | P0 | H1 |
+| 015 | Human-in-the-loop Freigaben fuer AI Aktionen | 100% AI-Aktionen mit Approval-Trail | M | Agent Layer, Audit | P0 | H1 | **GESCHLOSSEN Wave 30** — `human_approval_gate.py`: evaluate_approval_requirement() (NIEDRIG/MITTEL/HOCH/KRITISCH), record_approval_decision() (frozen + SHA-256 Audit-Trail), 8 Default-Regeln; API GET/POST /process/agent/approval-* |
 | 016 | Idempotente Business-Commands statt UI-CRUD fuer Agenten | >=99.9% sichere Retries ohne Duplikate | L | API Refactor | P0 | H2 |
 | 017 | MCP/OpenAPI Tool Contracts fuer externe Agenten | 20 produktive Agent-Tools freigeschaltet | M | API Governance | P1 | H2 |
 | 018 | Ereignisbasierte Prozessbeobachtung (Process Mining Lite) | Durchlaufzeit-Drilldown fuer Top-10 Prozesse | L | Event Bus, Data Mart | P1 | H2 |
@@ -113,7 +113,7 @@ Hinweise:
 | 047 | Branchenbenchmarking Cockpit je Genossenschaft | Monatlicher Benchmarkreport automatisch | M | Analytics Mart | P2 | H3 |
 | 048 | Offene Integrationsfaehigkeit fuer Agenten (Perplexity etc.) | 10 externe Agent-Use-Cases live | M | Tooling, Security | P1 | H2 |
 | 049 | Security-Hardening (OIDC, RBAC fein, Secrets, Audit) | 0 kritische Findings in Pentest | L | IAM, DevSecOps | P0 | H1 |
-| 050 | Produktive Betriebsfuehrung mit SLO/SLI und Runbooks | Verfuegbarkeit >=99.9% | M | Observability, On-call | P0 | H1 |
+| 050 | Produktive Betriebsfuehrung mit SLO/SLI und Runbooks | Verfuegbarkeit >=99.9% | M | Observability, On-call | P0 | H1 | **GESCHLOSSEN Wave 30** — `slo_definitions.py`: SLODefinition+SLIDefinition, check_slo_compliance() (ERFUELLT/TOLERANZBEREICH/VERLETZT/UNBEKANNT), 9 Default-SLOs fuer 5 Dienste; API GET/POST /process/slo/* |
 
 ## 90-Tage Ausfuehrungsreihenfolge (empfohlen)
 1. Wave A (Wochen 1-4): 001, 002, 003, 009, 010, 011, 013, 014, 031, 032
