@@ -26,6 +26,7 @@ und den zugehoerigen `wave-*/STATUS.md`-Dateien:
 | 007 | abgeschlossen | `docs/architecture/process-kernel/wave-23/STATUS.md` |
 | 009 | abgeschlossen | `docs/architecture/process-kernel/wave-24/STATUS.md` |
 | 025 | abgeschlossen | `docs/architecture/process-kernel/wave-25/STATUS.md` |
+| 027 | abgeschlossen | `docs/architecture/process-kernel/wave-27/STATUS.md` |
 | 042 | abgeschlossen | `docs/architecture/process-kernel/wave-23/STATUS.md` |
 
 Hinweise:
@@ -60,7 +61,7 @@ Hinweise:
 |---|---|---|---|---|---|---|
 | 011 | Versionierte Workflow Engine mit Migrationen | 0 ungeplante Workflow-Brueche bei Releases | L | Workflow Service | P0 | H1 |
 | 012 | Simulation/Sandbox fuer neue Workflows | 80% weniger Fehler nach Go-Live | M | Testdaten, Rule Engine | P1 | H1 |
-| 013 | SLA/Timeout/Eskalationsknoten standardisiert | >=95% SLA-Einhaltung Kernprozesse | M | Notification, RBAC | P0 | H1 |
+| 013 | SLA/Timeout/Eskalationsknoten standardisiert | >=95% SLA-Einhaltung Kernprozesse | M | Notification, RBAC | P0 | H1 | **GESCHLOSSEN Wave 28** — `sla_eskalation_engine.py`: evaluate_sla_breach(), validate_sla_policy(), 6 Default-Policies; API GET /process/sla/eskalationen |
 | 014 | Policy-as-Code mit Tenant Overrides | 100% Ausnahmen regelbasiert dokumentiert | M | Policy Store | P0 | H1 |
 | 015 | Human-in-the-loop Freigaben fuer AI Aktionen | 100% AI-Aktionen mit Approval-Trail | M | Agent Layer, Audit | P0 | H1 |
 | 016 | Idempotente Business-Commands statt UI-CRUD fuer Agenten | >=99.9% sichere Retries ohne Duplikate | L | API Refactor | P0 | H2 |
@@ -96,7 +97,7 @@ Hinweise:
 | 036 | Queue-basierte Hintergrundjobs fuer schwere Prozesse | p95 UI-Response <300ms unter Last | M | Job Runner | P1 | H1 |
 | 037 | Lasttests Erntepeak (mehrere Standorte, parallel) | 500 gleichzeitige User stabil | L | Load Test Harness | P0 | H2 |
 | 038 | Tenant-isolierte Caches/Rate Limits | 0 Cross-tenant Performance-Kollisionen | M | API Gateway | P1 | H2 |
-| 039 | End-to-End Tracing (UI->API->DB->Worker) | MTTR -40% bei Produktionsfehlern | M | OpenTelemetry | P1 | H1 |
+| 039 | End-to-End Tracing (UI->API->DB->Worker) | MTTR -40% bei Produktionsfehlern | M | OpenTelemetry | P1 | H1 | **GESCHLOSSEN Wave 28** — `otel_span_contracts.py`: 14 SpanContracts (5 Domains), valeo.{domain}.{operation}-Konvention, kein OTel-Import in app/core/; API GET /process/otel/span-registry |
 | 040 | Datenqualitaetsregeln (Dublette, Pflichtfeld, Referenz) | Stammdatenfehler -50% | M | MDM Rules | P1 | H2 |
 
 ## Block 041-050: Compliance, Integrationen, Markt-Differenzierung
@@ -127,6 +128,7 @@ Hinweise:
 - Gap `007` (Nebenkosten-Automatik) ist mit Wave 23 abgeschlossen.
 - Gap `009` (Tenant-Prozessvarianten) ist mit Wave 24 abgeschlossen.
 - Gap `025` (Kontextsensitive Quick Actions) ist mit Wave 25 abgeschlossen.
+- Gap `027` (Konsistente Informationsdichte je Rolle) ist mit Wave 27 abgeschlossen.
 - Gap `042` (Intrastat-Meldungsmodell) ist mit Wave 23 abgeschlossen.
 - Die Reihenfolge oben bleibt als historische 90-Tage-Planung erhalten und ist nicht der laufende Ist-Status.
 

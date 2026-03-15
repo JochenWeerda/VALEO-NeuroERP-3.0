@@ -75,6 +75,12 @@ from ....core.tenant_prozess_variante import (
     resolve_process_steps,
     validate_prozess_variante,
 )
+from ....core.sla_eskalation_engine import (
+    evaluate_sla_breach,
+    get_default_sla_eskalations_policies,
+    validate_sla_policy,
+)
+from ....core.otel_span_contracts import get_process_kernel_spans
 
 router = APIRouter(prefix="/process", tags=["process-kernel", "commands"])
 
@@ -755,3 +761,85 @@ def check_workflow_migration(body: dict) -> dict[str, Any]:
     )
     result = validate_workflow_migration(alt_snap, neu_snap)
     return result.as_dict()
+
+
+# ---------------------------------------------------------------------------
+# Wave 28 AP3: SLA-Eskalationen
+# ---------------------------------------------------------------------------
+
+@router.get("/sla/eskalationen", response_model=dict)
+def get_sla_eskalationen(
+    ist_dauer_stunden: float = 0.0,
+) -> dict[str, Any]:
+    """
+    Wertet alle Default-SLA-Policies fuer eine gegebene Ist-Dauer aus.
+
+    ?ist_dauer_stunden=  — Anzahl vergangener Stunden (fuer Demo-/Test-Zwecke).
+    """
+    from decimal import Decimal
+    policies = get_default_sla_eskalations_policies()
+    dauer = Decimal(str(ist_dauer_stunden))
+    auswertungen = [
+        evaluate_sla_breach(p, instanz_id=f"demo-{p.policy_id}", ist_dauer_stunden=dauer).as_dict()
+        for p in policies
+    ]
+    return {
+        "ist_dauer_stunden": str(dauer),
+        "policy_count": len(policies),
+        "auswertungen": auswertungen,
+        "schema_version": 1,
+    }
+
+
+@router.get("/sla/eskalationen/{prozess_key}", response_model=dict)
+def get_sla_eskalationen_by_prozess(
+    prozess_key: str,
+    ist_dauer_stunden: float = 0.0,
+) -> dict[str, Any]:
+    """
+    Wertet SLA-Policies fuer einen spezifischen Prozess aus.
+
+    Gibt 404 wenn kein Policy fuer den Prozess bekannt.
+    """
+    from decimal import Decimal
+    policies = [p for p in get_default_sla_eskalations_policies() if p.prozess_key == prozess_key]
+    if not policies:
+        raise HTTPException(status_code=404, detail=f"Kein SLA-Policy fuer prozess_key={prozess_key!r}")
+    dauer = Decimal(str(ist_dauer_stunden))
+    auswertungen = [
+        evaluate_sla_breach(p, instanz_id=f"demo-{p.policy_id}", ist_dauer_stunden=dauer).as_dict()
+        for p in policies
+    ]
+    return {
+        "prozess_key": prozess_key,
+        "ist_dauer_stunden": str(dauer),
+        "policy_count": len(policies),
+        "auswertungen": auswertungen,
+        "schema_version": 1,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Wave 28 AP4: OTel Span-Registry
+# ---------------------------------------------------------------------------
+
+@router.get("/otel/span-registry", response_model=dict)
+def get_otel_span_registry(domain: str = "") -> dict[str, Any]:
+    """
+    Gibt registrierte OpenTelemetry Span-Contracts zurueck.
+
+    ?domain=  — Optional: Filtert nach Domain (agrar, finance, workflow, compliance, process).
+    """
+    registry = get_process_kernel_spans()
+    if domain:
+        contracts = registry.by_domain(domain)
+        return {
+            "domain_filter": domain,
+            "contract_count": len(contracts),
+            "convention_violations": [
+                c.span_name for c in contracts if not c.validate_name()
+            ],
+            "contracts": [c.as_dict() for c in contracts],
+            "schema_version": 1,
+        }
+    return registry.as_dict()

@@ -3,12 +3,12 @@
 ## Gesamtstatus
 
 - Stand: `2026-03-15`
-- Status: `Waves 1 bis 25 abgeschlossen`
-- Gesamtsuite: `1192 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed`
+- Status: `Waves 1 bis 28 abgeschlossen`
+- Gesamtsuite: `1282 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed`
 - Letzte abgeschlossene Waves:
-  - `Wave 23`: Nebenkosten-Automatik + Intrastat-Meldungsmodell (Gap 007, Gap 042)
-  - `Wave 24`: Tenant-Prozessvarianten + Kampagnenvorlagen (Gap 009, Gap 005)
-  - `Wave 25`: Kontextsensitive Quick Actions als Backend-/Frontend-Contract (Gap 025)
+  - `Wave 26`: Trocknungsabrechnung Audit-Contract, Migrations-Guard (Gap 003, Gap 011)
+  - `Wave 27`: Konsistente Informationsdichte je Rolle mit Tenant-/Prozess-Kontext fuer Frontend-Patterns (Gap 027)
+  - `Wave 28`: SLA-Eskalations-Engine + OTel Span-Contracts (Gap 013, Gap 039)
 
 ## Wave-Uebersicht
 
@@ -39,6 +39,9 @@
 | Wave 23 | abgeschlossen | 46 | `wave-23/STATUS.md` |
 | Wave 24 | abgeschlossen | 41 | `wave-24/STATUS.md` |
 | Wave 25 | abgeschlossen | 10 | `wave-25/STATUS.md` |
+| Wave 26 | abgeschlossen | 37 | `wave-26/STATUS.md` |
+| Wave 27 | abgeschlossen | 14 | `wave-27/STATUS.md` |
+| Wave 28 | abgeschlossen | 47 | `wave-28/STATUS.md` |
 
 ## Aktuell relevante Lieferungen
 
@@ -84,6 +87,23 @@
   - Quick Actions werden kontextsensitiv nach Maske, Domain und Global-Fallback aufgeloest
   - Toolbar-Primary/Overflow, Palette und Voice teilen sich denselben Action-Contract
   - Pattern-Komponenten nutzen denselben Mapper statt lokaler Button-Sonderpfade
+
+### Wave 27
+
+- Referenz: `wave-27/STATUS.md`
+- Scope:
+  - `packages/frontend-web/src/features/role-density/role-density.ts`
+  - `packages/frontend-web/src/components/navigation/PageToolbar.tsx`
+  - `packages/frontend-web/src/components/patterns/OverviewPage.tsx`
+  - `packages/frontend-web/src/components/patterns/ObjectPage.tsx`
+  - `packages/frontend-web/src/components/patterns/ListReport.tsx`
+  - `packages/frontend-web/src/components/patterns/Wizard.tsx`
+  - `packages/frontend-web/src/components/workflow/ProcessStatusPanel.tsx`
+- Ergebnis:
+  - Rollen werden auf fokussierte, standardisierte oder verdichtete Informationsdichte aufgeloest
+  - Tenant-, Domain-, Action- und Approval-Kontext duerfen die Dichte kontrolliert anheben
+  - Toolbar, Listen-/Detail-Pattern, Wizard und Explainability nutzen denselben Dichte-Contract
+  - Sichtbare Informationsmenge wird konsistent nach Rolle und Prozesskontext reduziert oder erweitert statt pro Seite separat
 
 ### PKP-06 Frontend Explainability
 
@@ -137,6 +157,16 @@
 - `app/core/tenant_prozess_variante.py`
 - `app/core/kampagnen_vorlage.py`
 
+### Wave-26 Observability-Fundament
+
+- `app/core/trocknungs_abrechnung.py`
+- `app/core/workflow_migrations_guard.py`
+
+### Wave-28 SLA + OTel
+
+- `app/core/sla_eskalation_engine.py`
+- `app/core/otel_span_contracts.py`
+
 ### Frontend-Power-User-Schicht
 
 - `packages/frontend-web/src/features/ki-usability/context/ActionDispatchContext.tsx`
@@ -146,6 +176,8 @@
 - `app/core/ki_action_registry.py`
 - `app/api/v1/endpoints/ki_usability.py`
 - `packages/frontend-web/src/features/ki-usability/toolbar-actions.ts`
+- `packages/frontend-web/src/features/role-density/role-density.ts`
+- `packages/frontend-web/src/components/workflow/ProcessStatusPanel.tsx`
 
 ## Architekturregeln
 
@@ -182,6 +214,12 @@ pytest tests/test_process_kernel_wave25_quick_actions.py -q --no-cov
 npm run test:run -- src/__tests__/features/ki-usability/toolbar-actions.test.ts src/__tests__/components/patterns/Wizard.test.tsx
 # Ergebnis: 6 passed
 
+npm run test:run -- src/__tests__/features/role-density/role-density.test.ts src/__tests__/components/navigation/PageToolbar.role-density.test.tsx src/__tests__/components/workflow/ProcessStatusPanel.test.tsx src/__tests__/components/patterns/Wizard.test.tsx
+# Ergebnis: 14 passed
+
+npm run test:run -- src/__tests__/components/navigation/CommandPalette.test.tsx src/__tests__/features/ki-usability/toolbar-actions.test.ts
+# Ergebnis: 3 passed
+
 npm run type-check
 # Ergebnis: gruen
 ```
@@ -189,7 +227,7 @@ npm run type-check
 ## Offene Punkte
 
 - Der globale Roadmap-Status ausserhalb von `docs/architecture/process-kernel/STATUS.md` ist nicht automatisch synchron und muss bei groesseren Wave-Abschluessen separat nachgezogen werden.
-- Neue Frontend- und Integrationsarbeit hat auf den bestehenden Bausteinen aus Wave 9 bis Wave 25 aufzusetzen; keine neuen Parallelpfade fuer Routing, Dispatch, Audit, SLA oder Prozesssurfacing.
+- Neue Frontend- und Integrationsarbeit hat auf den bestehenden Bausteinen aus Wave 9 bis Wave 27 aufzusetzen; keine neuen Parallelpfade fuer Routing, Dispatch, Audit, SLA oder Prozesssurfacing.
 - Bei jeder neuen Lieferung sind Schichtgrenzen aktiv zu verifizieren:
   - kein Import von `app/api/` aus `app/core/`
   - keine Endpoint-Querimporte
@@ -197,9 +235,9 @@ npm run type-check
 
 ## Naechster sinnvoller Ausbau
 
-- Rollen- und prozessbezogene Command-Manifest-Sichten fuer Wave 22 und Wave 25
+- Rollen- und prozessbezogene Command-Manifest-Sichten fuer Wave 22, Wave 25 und Wave 27 weiter aus produktiven Backend-Manifesten speisen
 - Explainability- und Berechtigungs-Hinweise direkt im Command-Surfacing
-- Weitere Power-User-Shortcuts nur ueber denselben Dispatcher-Contract, nicht als lokale UI-Ausnahmen
+- Rollen-Density kuenftig tenant- und prozessbezogen aus produktiven Command-/Policy-Manifests statt nur aus Frontend-Kontextsignalen ableiten
 
 ## Referenzen
 
