@@ -121,6 +121,23 @@ from ....core.background_jobs import (
     evaluate_job_routing,
     get_default_job_types,
 )
+from ....core.command_surfacing_contracts import (
+    CommandPrioritaet,
+    DichteStufe,
+    SurfacingAnfrage,
+    SurfacingKontext,
+    berechne_surfacing,
+    get_default_surfacing_regeln,
+)
+from ....core.process_notification_contracts import (
+    NotifikationsAusloeser,
+    NotifikationsKanal,
+    berechne_prioritaet,
+    erstelle_benachrichtigung,
+    get_default_abonnements,
+    get_default_eskalationsregeln,
+    route_benachrichtigung,
+)
 from ....core.sustainability_reporting import (
     BerichtsTyp,
     EmissionsKategorie,
@@ -2396,5 +2413,208 @@ def berechne_perzentile(body: dict = None) -> dict[str, Any]:
             einordnung = "UNTERES_VIERTEL"
         result["eigenwert"] = eigenwert
         result["einordnung"] = einordnung
+
+    return result
+
+
+# ---------------------------------------------------------------------------
+# Wave 39 — AP1: GET /process/surfacing/regeln
+# ---------------------------------------------------------------------------
+
+@router.get("/surfacing/regeln", response_model=dict)
+def get_surfacing_regeln(
+    domain: str = "",
+    kontext: str = "",
+) -> dict[str, Any]:
+    """
+    Gibt Command-Surfacing-Regeln zurück.
+
+    Query-Parameter:
+    - domain:   Filtert nach Domain (z.B. agrar, finance)
+    - kontext:  Filtert nach SurfacingKontext (z.B. TOOLBAR_PRIMARY, COMMAND_PALETTE)
+    """
+    regeln = get_default_surfacing_regeln()
+
+    if domain:
+        regeln = [r for r in regeln if r.domain == "" or r.domain == domain]
+
+    if kontext:
+        try:
+            kontext_enum = SurfacingKontext(kontext)
+            regeln = [r for r in regeln if kontext_enum in r.sichtbar_in]
+        except ValueError:
+            raise HTTPException(
+                status_code=422,
+                detail=f"Unbekannter Kontext '{kontext}'. "
+                       f"Erlaubt: {[e.value for e in SurfacingKontext]}",
+            )
+
+    return {
+        "regel_count": len(regeln),
+        "regeln": [r.as_dict() for r in regeln],
+        "schema_version": 1,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Wave 39 — AP2: POST /process/surfacing/manifest
+# ---------------------------------------------------------------------------
+
+@router.post("/surfacing/manifest", response_model=dict)
+def berechne_surfacing_manifest(body: dict = None) -> dict[str, Any]:
+    """
+    Berechnet das Command-Surfacing-Manifest für einen User/Kontext.
+
+    Pflichtfelder:
+    - rolle:    Benutzerrolle (z.B. sachbearbeiter, leiter, admin)
+    - dichte:   FOKUSSIERT | STANDARD | VERDICHTET
+    - kontext:  SurfacingKontext (z.B. TOOLBAR_PRIMARY, COMMAND_PALETTE)
+
+    Optionale Felder:
+    - domain:      Domain-Filter (z.B. agrar, finance)
+    - command_id:  Prüft nur diesen einen Command
+    """
+    if body is None:
+        body = {}
+
+    rolle: str = body.get("rolle", "")
+    dichte_str: str = body.get("dichte", "")
+    kontext_str: str = body.get("kontext", "")
+
+    if not rolle or not dichte_str or not kontext_str:
+        raise HTTPException(
+            status_code=422,
+            detail="rolle, dichte und kontext sind erforderlich",
+        )
+
+    try:
+        dichte = DichteStufe(dichte_str)
+    except ValueError:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Unbekannte dichte '{dichte_str}'. "
+                   f"Erlaubt: {[e.value for e in DichteStufe]}",
+        )
+
+    try:
+        kontext = SurfacingKontext(kontext_str)
+    except ValueError:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Unbekannter kontext '{kontext_str}'. "
+                   f"Erlaubt: {[e.value for e in SurfacingKontext]}",
+        )
+
+    anfrage = SurfacingAnfrage(
+        rolle=rolle,
+        dichte=dichte,
+        kontext=kontext,
+        domain=body.get("domain", ""),
+        command_id=body.get("command_id", ""),
+    )
+    manifest = berechne_surfacing(anfrage)
+    return manifest.as_dict()
+
+
+# ---------------------------------------------------------------------------
+# Wave 39 — AP3: GET /process/notifications/abonnements
+# ---------------------------------------------------------------------------
+
+@router.get("/notifications/abonnements", response_model=dict)
+def get_notification_abonnements(
+    rolle: str = "",
+    ausloeser: str = "",
+) -> dict[str, Any]:
+    """
+    Gibt Benachrichtigungs-Abonnements zurück.
+
+    Query-Parameter:
+    - rolle:     Filtert nach Empfänger-Rolle
+    - ausloeser: Filtert nach NotifikationsAusloeser (z.B. FREIGABE_ERFORDERLICH)
+    """
+    abos = get_default_abonnements()
+
+    if rolle:
+        abos = [a for a in abos if a.empfaenger_rolle == rolle]
+
+    if ausloeser:
+        try:
+            asl = NotifikationsAusloeser(ausloeser)
+            abos = [a for a in abos if asl in a.ausloeser]
+        except ValueError:
+            raise HTTPException(
+                status_code=422,
+                detail=f"Unbekannter Auslöser '{ausloeser}'. "
+                       f"Erlaubt: {[e.value for e in NotifikationsAusloeser]}",
+            )
+
+    eskalationsregeln = get_default_eskalationsregeln()
+
+    return {
+        "abo_count": len(abos),
+        "abonnements": [a.as_dict() for a in abos],
+        "eskalationsregel_count": len(eskalationsregeln),
+        "eskalationsregeln": [e.as_dict() for e in eskalationsregeln],
+        "schema_version": 1,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Wave 39 — AP4: POST /process/notifications/route
+# ---------------------------------------------------------------------------
+
+@router.post("/notifications/route", response_model=dict)
+def route_notification(body: dict = None) -> dict[str, Any]:
+    """
+    Berechnet Routing für eine Benachrichtigung (Empfänger + Kanäle).
+
+    Pflichtfelder:
+    - ausloeser: NotifikationsAusloeser (z.B. FREIGABE_ERFORDERLICH)
+
+    Optionale Felder:
+    - domain:       Domain-Filter
+    - prozess_typ:  Prozesstyp-Filter
+    - nachricht_id: ID für die erzeugte Nachricht
+    - titel:        Nachrichtentitel
+    - inhalt:       Nachrichteninhalt
+    """
+    if body is None:
+        body = {}
+
+    ausloeser_str: str = body.get("ausloeser", "")
+    if not ausloeser_str:
+        raise HTTPException(status_code=422, detail="ausloeser ist erforderlich")
+
+    try:
+        ausloeser = NotifikationsAusloeser(ausloeser_str)
+    except ValueError:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Unbekannter Auslöser '{ausloeser_str}'. "
+                   f"Erlaubt: {[e.value for e in NotifikationsAusloeser]}",
+        )
+
+    routing = route_benachrichtigung(
+        ausloeser=ausloeser,
+        domain=body.get("domain", ""),
+        prozess_typ=body.get("prozess_typ", ""),
+    )
+
+    result: dict[str, Any] = routing.as_dict()
+
+    # Optional: vollständige Nachricht erzeugen
+    titel = body.get("titel", "")
+    inhalt = body.get("inhalt", "")
+    nachricht_id = body.get("nachricht_id", "")
+    if titel and inhalt and nachricht_id:
+        nachricht = erstelle_benachrichtigung(
+            nachricht_id=nachricht_id,
+            ausloeser=ausloeser,
+            titel=titel,
+            inhalt=inhalt,
+            prozess_id=body.get("prozess_id", ""),
+            routing=routing,
+        )
+        result["nachricht"] = nachricht.as_dict()
 
     return result
