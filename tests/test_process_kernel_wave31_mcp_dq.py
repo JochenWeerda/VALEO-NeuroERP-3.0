@@ -470,3 +470,82 @@ class TestWave31Endpoints:
         }
         r = client.post("/api/v1/process/data-quality/validate", json=payload)
         assert r.status_code == 404
+
+    # ------------------------------------------------------------------
+    # Sicherheitstests
+    # ------------------------------------------------------------------
+
+    def test_tool_registry_no_api_endpoint_in_response(self, client):
+        """api_endpoint darf im Public-Response nicht erscheinen (Informationsminimierung)."""
+        r = client.get("/api/v1/process/agent/tool-registry")
+        assert r.status_code == 200
+        body = r.json()
+        for tool in body["tools"]:
+            assert "api_endpoint" not in tool
+
+    def test_dq_rulesets_no_format_regex_in_response(self, client):
+        """format_regex ist Implementierungsdetail und darf nicht im API-Response erscheinen."""
+        r = client.get("/api/v1/process/data-quality/rulesets")
+        assert r.status_code == 200
+        body = r.json()
+        for ruleset in body["rulesets"].values():
+            for regel in ruleset["regeln"]:
+                assert "format_regex" not in regel
+
+    def test_dq_validate_payload_too_many_fields(self, client):
+        """Mehr als 50 Felder im datensatz werden mit 422 abgelehnt (DoS-Schutz)."""
+        payload = {
+            "entity_typ": "Lieferant",
+            "datensatz": {f"feld_{i}": f"wert_{i}" for i in range(51)},
+        }
+        r = client.post("/api/v1/process/data-quality/validate", json=payload)
+        assert r.status_code == 422
+
+    def test_dq_validate_feldwert_zu_lang(self, client):
+        """Feldwert > 1000 Zeichen wird mit 422 abgelehnt (DoS-Schutz)."""
+        payload = {
+            "entity_typ": "Lieferant",
+            "datensatz": {"lieferant_nr": "X" * 1001},
+        }
+        r = client.post("/api/v1/process/data-quality/validate", json=payload)
+        assert r.status_code == 422
+
+    def test_dq_format_redos_schutz(self):
+        """Sehr langer Eingabewert loest keine ReDoS aus — wird sofort abgelehnt."""
+        import time
+        from app.core.data_quality_rules import DQRegel, DQRegelTyp, DQRuleSet, validate_datensatz
+
+        r = DQRegel("WS-X", DQRegelTyp.FORMAT_VERLETZUNG, "fahrzeug_kennzeichen",
+                    "Kennzeichen", format_regex=r"[A-ZÄÖÜ]{1,3}-[A-Z]{1,2}\s?\d{1,4}[EH]?")
+        rs = DQRuleSet("RS-X", "Test", "Test", regeln=[r])
+        langer_wert = "A" * 500 + "-" + "B" * 500 + " " + "1" * 500
+
+        start = time.monotonic()
+        result = validate_datensatz(rs, {"fahrzeug_kennzeichen": langer_wert})
+        elapsed = time.monotonic() - start
+
+        assert result.bestanden is False
+        assert any(v.typ == DQRegelTyp.FORMAT_VERLETZUNG for v in result.verletzungen)
+        # Muss in deutlich unter 1 Sekunde abgeschlossen sein
+        assert elapsed < 1.0, f"Format-Check dauerte {elapsed:.3f}s — ReDoS-Schutz hat nicht gegriffen"
+
+    def test_dq_bereich_nan_abgelehnt(self):
+        """NaN als Feldwert wird als BEREICH_VERLETZUNG erkannt, nicht still ignoriert."""
+        from app.core.data_quality_rules import DQRegel, DQRegelTyp, DQRuleSet, validate_datensatz
+
+        r = DQRegel("K-NaN", DQRegelTyp.BEREICH_VERLETZUNG, "menge", "Menge",
+                    min_wert=0.0, max_wert=100.0)
+        rs = DQRuleSet("RS-NaN", "Test", "Test", regeln=[r])
+        result = validate_datensatz(rs, {"menge": float("nan")})
+        assert result.bestanden is False
+        assert any(v.typ == DQRegelTyp.BEREICH_VERLETZUNG for v in result.verletzungen)
+
+    def test_dq_bereich_inf_abgelehnt(self):
+        """Inf als Feldwert wird als BEREICH_VERLETZUNG erkannt."""
+        from app.core.data_quality_rules import DQRegel, DQRegelTyp, DQRuleSet, validate_datensatz
+
+        r = DQRegel("K-Inf", DQRegelTyp.BEREICH_VERLETZUNG, "menge", "Menge",
+                    min_wert=0.0, max_wert=100.0)
+        rs = DQRuleSet("RS-Inf", "Test", "Test", regeln=[r])
+        result = validate_datensatz(rs, {"menge": float("inf")})
+        assert result.bestanden is False
