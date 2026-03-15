@@ -146,6 +146,20 @@ from ....core.process_capacity_contracts import (
     get_default_kapazitaets_einheiten,
     pruefe_workflow_kapazitaet,
 )
+from ....core.domain_event_schema_registry import (
+    EventSchemaStatus,
+    KompatibilitaetsTyp,
+    finde_aktives_schema,
+    get_default_event_schemas,
+    pruefe_schema_kompatibilitaet,
+)
+from ....core.process_compensation_contracts import (
+    KompensationsStatus,
+    KompensationsTyp,
+    SagaStatus,
+    erstelle_kompensations_kette,
+    get_default_saga_definitionen,
+)
 from ....core.event_replay_contracts import (
     ReplayModus,
     ReplayStatus,
@@ -2906,3 +2920,118 @@ def pruefe_event_stream_konsistenz(body: dict | None = None):
         positionen=positionen,
     )
     return ergebnis.as_dict()
+
+
+# ---------------------------------------------------------------------------
+# Wave 42 — Domain Event Schema Registry
+# ---------------------------------------------------------------------------
+
+@router.get("/event-schema/schemata")
+def get_event_schemata(
+    event_typ: str = "",
+    status: str = "",
+):
+    """
+    Gibt alle Event-Schemata zurück (optional gefiltert nach event_typ und status).
+    """
+    schemata = get_default_event_schemas()
+    if event_typ:
+        schemata = [s for s in schemata if s.event_typ == event_typ]
+    if status:
+        schemata = [s for s in schemata if s.status.value == status.upper()]
+    return {
+        "schemata": [s.as_dict() for s in schemata],
+        "anzahl": len(schemata),
+        "aktive": sum(1 for s in schemata if s.ist_aktiv),
+        "schema_version": 1,
+    }
+
+
+@router.post("/event-schema/validiere-payload")
+def validiere_event_payload(body: dict | None = None):
+    """
+    Validiert einen Payload gegen das aktive Schema eines Event-Typs.
+
+    Body-Parameter:
+    - event_typ: Event-Typ (z.B. "kontrakt.erstellt")
+    - payload: dict mit den zu prüfenden Feldern
+    - tenant_id: optional
+    """
+    if body is None:
+        body = {}
+
+    event_typ: str = body.get("event_typ", "kontrakt.erstellt")
+    payload: dict = body.get("payload", {})
+    tenant_id: str = body.get("tenant_id", "")
+
+    schemata = get_default_event_schemas()
+    schema = finde_aktives_schema(event_typ=event_typ, schemata=schemata, tenant_id=tenant_id)
+
+    if schema is None:
+        return {
+            "event_typ": event_typ,
+            "schema_gefunden": False,
+            "gueltig": False,
+            "fehlende_felder": [],
+            "nachricht": f"Kein aktives Schema für Event-Typ '{event_typ}' gefunden.",
+            "schema_version": 1,
+        }
+
+    gueltig, fehlend = schema.validiere_payload(payload)
+    return {
+        "event_typ": event_typ,
+        "schema_id": schema.schema_id,
+        "schema_version_str": schema.version,
+        "schema_gefunden": True,
+        "gueltig": gueltig,
+        "fehlende_felder": fehlend,
+        "nachricht": "Payload gültig." if gueltig else f"{len(fehlend)} Pflichtfeld(er) fehlen.",
+        "schema_version": 1,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Wave 42 — Process Compensation Contracts
+# ---------------------------------------------------------------------------
+
+@router.get("/compensation/saga-definitionen")
+def get_saga_definitionen(workflow_typ: str = ""):
+    """
+    Gibt alle Saga-Definitionen zurück (optional gefiltert nach workflow_typ).
+    """
+    sagas = get_default_saga_definitionen()
+    if workflow_typ:
+        sagas = [s for s in sagas if s.workflow_typ == workflow_typ]
+    return {
+        "saga_definitionen": [s.as_dict() for s in sagas],
+        "anzahl": len(sagas),
+        "schema_version": 1,
+    }
+
+
+@router.post("/compensation/erstelle-kette")
+def erstelle_kompensationskette_endpoint(body: dict | None = None):
+    """
+    Erstellt eine Kompensationskette für eine Workflow-Instanz.
+
+    Body-Parameter:
+    - workflow_instanz_id: ID der fehlgeschlagenen Instanz
+    - saga_id: ID der Saga-Definition (SAGA-001/002/003)
+    - tenant_id: Tenant
+    """
+    if body is None:
+        body = {}
+
+    workflow_instanz_id: str = body.get("workflow_instanz_id", "WF-INST-FAIL-001")
+    saga_id: str = body.get("saga_id", "SAGA-001")
+    tenant_id: str = body.get("tenant_id", "TENANT-001")
+
+    sagas = get_default_saga_definitionen()
+    saga = next((s for s in sagas if s.saga_id == saga_id), sagas[0])
+
+    kette = erstelle_kompensations_kette(
+        workflow_instanz_id=workflow_instanz_id,
+        saga=saga,
+        tenant_id=tenant_id,
+    )
+    return kette.as_dict()
