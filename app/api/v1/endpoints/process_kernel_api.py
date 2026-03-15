@@ -121,6 +121,23 @@ from ....core.background_jobs import (
     evaluate_job_routing,
     get_default_job_types,
 )
+from ....core.edi_hub_contracts import (
+    EDIPartnerTyp,
+    EDIStandard,
+    EDIUebertragungsKanal,
+    get_default_edi_partners,
+    get_edi_nachrichtentyp_katalog,
+)
+from ....core.supply_chain_tracking import (
+    ETABerechnungsRequest,
+    LieferkettenPhase,
+    TransportModus,
+    berechne_eta,
+    bewerte_lieferkettenstatus,
+    bewerte_mengenabweichung,
+    bewerte_zeitliche_abweichung,
+    get_example_tracking_events,
+)
 from ....core.inline_validation_contracts import (
     FeldTyp,
     InlineValidierungsFeld,
@@ -1800,3 +1817,226 @@ def evaluate_error_guidance_endpoint(body: dict = None) -> dict[str, Any]:
     regeln = get_default_error_guidance_rules()
     result = evaluate_error_guidance(http_status, kategorie, kontext, regeln)
     return result.as_dict()
+
+
+# ---------------------------------------------------------------------------
+# Wave 36 — AP1: GET /process/edi/partners
+# ---------------------------------------------------------------------------
+
+@router.get("/edi/partners", response_model=dict)
+def get_edi_partners(
+    typ: str = "",
+    standard: str = "",
+) -> dict[str, Any]:
+    """
+    Gibt EDI-Partner zurück.
+
+    Query-Parameter:
+    - typ:      Filtert nach EDIPartnerTyp (z.B. LIEFERANT, KUNDE)
+    - standard: Filtert nach EDIStandard   (z.B. EDIFACT, JSON_API)
+    """
+    partner = get_default_edi_partners()
+
+    if typ:
+        try:
+            partner_typ = EDIPartnerTyp(typ)
+            partner = [p for p in partner if p.typ == partner_typ]
+        except ValueError:
+            raise HTTPException(
+                status_code=422,
+                detail=f"Unbekannter Partner-Typ '{typ}'. "
+                       f"Erlaubt: {[e.value for e in EDIPartnerTyp]}",
+            )
+
+    if standard:
+        try:
+            edi_std = EDIStandard(standard)
+            partner = [p for p in partner if p.edi_standard == edi_std]
+        except ValueError:
+            raise HTTPException(
+                status_code=422,
+                detail=f"Unbekannter EDI-Standard '{standard}'. "
+                       f"Erlaubt: {[e.value for e in EDIStandard]}",
+            )
+
+    return {
+        "partner_count": len(partner),
+        "partner": [p.as_dict() for p in partner],
+        "schema_version": 1,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Wave 36 — AP2: GET /process/edi/nachrichtentypen
+# ---------------------------------------------------------------------------
+
+@router.get("/edi/nachrichtentypen", response_model=dict)
+def get_edi_nachrichtentypen() -> dict[str, Any]:
+    """Gibt den EDI-Nachrichtentyp-Katalog zurück."""
+    katalog = get_edi_nachrichtentyp_katalog()
+    return {
+        "typ_count": len(katalog),
+        "nachrichtentypen": [k.as_dict() for k in katalog],
+        "schema_version": 1,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Wave 36 — AP3: POST /process/supply-chain/eta
+# ---------------------------------------------------------------------------
+
+@router.post("/supply-chain/eta", response_model=dict)
+def berechne_lieferung_eta(body: dict = None) -> dict[str, Any]:
+    """
+    Berechnet die ETA (voraussichtliche Ankunftszeit) einer Lieferung.
+
+    Pflichtfelder:
+    - lieferung_id:      Interne Lieferungs-ID
+    - transport_modus:   LKW | BAHN | SCHIFF | FLUGZEUG | MULTIMODAL
+    - ursprungsort:      Abgangsort
+    - zielort:           Zielort
+    - geplante_abfahrt:  ISO-8601 Datetime
+    - distanz_km:        Streckendistanz in Kilometern
+
+    Optionale Felder:
+    - zwischenstopps:    Anzahl Zwischenstopps (default 0)
+    - zoll_erforderlich: Boolean (default false)
+    - priorisiert:       Boolean — reduzierter Zeitpuffer (default false)
+    """
+    if body is None:
+        body = {}
+
+    pflicht = ["lieferung_id", "transport_modus", "ursprungsort", "zielort",
+               "geplante_abfahrt", "distanz_km"]
+    fehlend = [f for f in pflicht if not body.get(f)]
+    if fehlend:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Pflichtfelder fehlen: {fehlend}",
+        )
+
+    try:
+        modus = TransportModus(body["transport_modus"])
+    except ValueError:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Unbekannter transport_modus '{body['transport_modus']}'. "
+                   f"Erlaubt: {[e.value for e in TransportModus]}",
+        )
+
+    try:
+        from datetime import datetime as _dt
+        abfahrt = _dt.fromisoformat(body["geplante_abfahrt"])
+    except (ValueError, TypeError):
+        raise HTTPException(
+            status_code=422,
+            detail="geplante_abfahrt muss ISO-8601 sein (z.B. '2026-03-20T08:00:00')",
+        )
+
+    try:
+        distanz = float(body["distanz_km"])
+    except (ValueError, TypeError):
+        raise HTTPException(status_code=422, detail="distanz_km muss eine Zahl sein")
+
+    req = ETABerechnungsRequest(
+        lieferung_id=body["lieferung_id"],
+        transport_modus=modus,
+        ursprungsort=body["ursprungsort"],
+        zielort=body["zielort"],
+        geplante_abfahrt=abfahrt,
+        distanz_km=distanz,
+        zwischenstopps=int(body.get("zwischenstopps", 0)),
+        zoll_erforderlich=bool(body.get("zoll_erforderlich", False)),
+        priorisiert=bool(body.get("priorisiert", False)),
+    )
+
+    try:
+        ergebnis = berechne_eta(req)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+
+    return ergebnis.as_dict()
+
+
+# ---------------------------------------------------------------------------
+# Wave 36 — AP4: POST /process/supply-chain/status
+# ---------------------------------------------------------------------------
+
+@router.post("/supply-chain/status", response_model=dict)
+def bewerte_supply_chain_status(body: dict = None) -> dict[str, Any]:
+    """
+    Bewertet den Gesamtstatus einer Lieferkette und erkennt Abweichungen.
+
+    Pflichtfelder:
+    - lieferung_id:   Interne Lieferungs-ID
+    - aktuelle_phase: LieferkettenPhase (z.B. TRANSPORT_EINGEHEND)
+
+    Optionale Felder:
+    - verzoegerung_stunden: Zeitliche Verzögerung → erzeugt Abweichungsalarm
+    - soll_menge / ist_menge: Mengenangaben → erzeugt Mengenabweichungsalarm
+    """
+    if body is None:
+        body = {}
+
+    lieferung_id: str = body.get("lieferung_id", "")
+    phase_str: str = body.get("aktuelle_phase", "")
+
+    if not lieferung_id or not phase_str:
+        raise HTTPException(
+            status_code=422,
+            detail="lieferung_id und aktuelle_phase sind erforderlich",
+        )
+
+    try:
+        aktuelle_phase = LieferkettenPhase(phase_str)
+    except ValueError:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Unbekannte Phase '{phase_str}'. "
+                   f"Erlaubt: {[e.value for e in LieferkettenPhase]}",
+        )
+
+    events = get_example_tracking_events(lieferung_id)
+    alarme = []
+
+    # Zeitliche Abweichung
+    verzoegerung = body.get("verzoegerung_stunden")
+    if verzoegerung is not None:
+        try:
+            verzoegerung_h = float(verzoegerung)
+        except (TypeError, ValueError):
+            raise HTTPException(status_code=422, detail="verzoegerung_stunden muss eine Zahl sein")
+        alarm = bewerte_zeitliche_abweichung(
+            lieferung_id=lieferung_id,
+            alarm_id=f"ALM-ZEIT-{lieferung_id}",
+            verzoegerung_stunden=verzoegerung_h,
+        )
+        alarme.append(alarm)
+
+    # Mengenabweichung
+    soll = body.get("soll_menge")
+    ist = body.get("ist_menge")
+    if soll is not None and ist is not None:
+        try:
+            soll_f = float(soll)
+            ist_f = float(ist)
+        except (TypeError, ValueError):
+            raise HTTPException(status_code=422, detail="soll_menge und ist_menge müssen Zahlen sein")
+        try:
+            alarm = bewerte_mengenabweichung(
+                lieferung_id=lieferung_id,
+                alarm_id=f"ALM-MENGE-{lieferung_id}",
+                soll_menge=soll_f,
+                ist_menge=ist_f,
+            )
+            alarme.append(alarm)
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc))
+
+    status = bewerte_lieferkettenstatus(
+        lieferung_id=lieferung_id,
+        aktuelle_phase=aktuelle_phase,
+        events=events,
+        alarme=alarme,
+    )
+    return status.as_dict()
