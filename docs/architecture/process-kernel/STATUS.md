@@ -3,12 +3,12 @@
 ## Gesamtstatus
 
 - Stand: `2026-03-15`
-- Status: `Waves 1 bis 24 abgeschlossen`
+- Status: `Waves 1 bis 25 abgeschlossen`
 - Gesamtsuite: `1192 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed`
 - Letzte abgeschlossene Waves:
-  - `Wave 22`: Command Palette + zentraler Action-Dispatch + Mask-Registry-Surfacing (Gap 022)
   - `Wave 23`: Nebenkosten-Automatik + Intrastat-Meldungsmodell (Gap 007, Gap 042)
   - `Wave 24`: Tenant-Prozessvarianten + Kampagnenvorlagen (Gap 009, Gap 005)
+  - `Wave 25`: Kontextsensitive Quick Actions als Backend-/Frontend-Contract (Gap 025)
 
 ## Wave-Uebersicht
 
@@ -38,6 +38,7 @@
 | Wave 22 | abgeschlossen | 8 | `wave-22/STATUS.md` |
 | Wave 23 | abgeschlossen | 46 | `wave-23/STATUS.md` |
 | Wave 24 | abgeschlossen | 41 | `wave-24/STATUS.md` |
+| Wave 25 | abgeschlossen | 10 | `wave-25/STATUS.md` |
 
 ## Aktuell relevante Lieferungen
 
@@ -67,6 +68,22 @@
   - Command Palette nutzt denselben Dispatch-Contract wie Toolbar, Shortcut und Voice
   - Prozessmasken aus `/api/v1/ui/mask-registry` werden in der Palette surfacet
   - Navigation-Wiring erkennt auch Verzeichnis-Module mit `index.tsx` korrekt
+
+### Wave 25
+
+- Referenz: `wave-25/STATUS.md`
+- Scope:
+  - `app/core/ki_action_registry.py`
+  - `app/api/v1/endpoints/ki_usability.py`
+  - `packages/frontend-web/src/features/ki-usability/toolbar-actions.ts`
+  - `packages/frontend-web/src/components/patterns/OverviewPage.tsx`
+  - `packages/frontend-web/src/components/patterns/ObjectPage.tsx`
+  - `packages/frontend-web/src/components/patterns/ListReport.tsx`
+  - `packages/frontend-web/src/components/patterns/Wizard.tsx`
+- Ergebnis:
+  - Quick Actions werden kontextsensitiv nach Maske, Domain und Global-Fallback aufgeloest
+  - Toolbar-Primary/Overflow, Palette und Voice teilen sich denselben Action-Contract
+  - Pattern-Komponenten nutzen denselben Mapper statt lokaler Button-Sonderpfade
 
 ### PKP-06 Frontend Explainability
 
@@ -126,6 +143,9 @@
 - `packages/frontend-web/src/components/navigation/CommandPalette.tsx`
 - `packages/frontend-web/src/components/navigation/command-palette-model.ts`
 - `packages/frontend-web/src/lib/api/mask-registry.ts`
+- `app/core/ki_action_registry.py`
+- `app/api/v1/endpoints/ki_usability.py`
+- `packages/frontend-web/src/features/ki-usability/toolbar-actions.ts`
 
 ## Architekturregeln
 
@@ -156,6 +176,12 @@ pytest tests/test_process_kernel_wave21_price_journal.py -q --no-cov
 npm run test:run -- src/__tests__/components/navigation/command-palette-model.test.ts src/__tests__/components/navigation/CommandPalette.test.tsx src/__tests__/features/ki-usability/ActionDispatchContext.test.tsx src/__tests__/navigation-wiring.test.ts
 # Ergebnis: 8 passed
 
+pytest tests/test_process_kernel_wave25_quick_actions.py -q --no-cov
+# Ergebnis: 4 passed
+
+npm run test:run -- src/__tests__/features/ki-usability/toolbar-actions.test.ts src/__tests__/components/patterns/Wizard.test.tsx
+# Ergebnis: 6 passed
+
 npm run type-check
 # Ergebnis: gruen
 ```
@@ -163,7 +189,7 @@ npm run type-check
 ## Offene Punkte
 
 - Der globale Roadmap-Status ausserhalb von `docs/architecture/process-kernel/STATUS.md` ist nicht automatisch synchron und muss bei groesseren Wave-Abschluessen separat nachgezogen werden.
-- Neue Frontend- und Integrationsarbeit hat auf den bestehenden Bausteinen aus Wave 9 bis Wave 22 aufzusetzen; keine neuen Parallelpfade fuer Routing, Dispatch, Audit, SLA oder Prozesssurfacing.
+- Neue Frontend- und Integrationsarbeit hat auf den bestehenden Bausteinen aus Wave 9 bis Wave 25 aufzusetzen; keine neuen Parallelpfade fuer Routing, Dispatch, Audit, SLA oder Prozesssurfacing.
 - Bei jeder neuen Lieferung sind Schichtgrenzen aktiv zu verifizieren:
   - kein Import von `app/api/` aus `app/core/`
   - keine Endpoint-Querimporte
@@ -171,7 +197,7 @@ npm run type-check
 
 ## Naechster sinnvoller Ausbau
 
-- Rollen- und prozessbezogene Command-Manifest-Sichten fuer die Wave-22-Palette
+- Rollen- und prozessbezogene Command-Manifest-Sichten fuer Wave 22 und Wave 25
 - Explainability- und Berechtigungs-Hinweise direkt im Command-Surfacing
 - Weitere Power-User-Shortcuts nur ueber denselben Dispatcher-Contract, nicht als lokale UI-Ausnahmen
 
