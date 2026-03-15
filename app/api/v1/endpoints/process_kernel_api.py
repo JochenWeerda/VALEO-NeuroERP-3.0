@@ -105,6 +105,18 @@ from ....core.data_quality_rules import (
     validate_datensatz,
     get_default_dq_rulesets,
 )
+from ....core.dashboard_snapshots import (
+    SnapshotTyp,
+    SnapshotRebuildRequest,
+    SnapshotRebuildResult,
+    get_default_dashboard_snapshots,
+    validate_snapshot,
+)
+from ....core.query_fallback_contracts import (
+    QueryFehlerKlasse,
+    evaluate_fallback,
+    get_default_fallback_rules,
+)
 
 router = APIRouter(prefix="/process", tags=["process-kernel", "commands"])
 
@@ -1123,4 +1135,119 @@ def validate_dq(body: dict) -> dict[str, Any]:
         )
 
     result = validate_datensatz(ruleset, datensatz, kontext)
+    return result.as_dict()
+
+
+# ---------------------------------------------------------------------------
+# Wave 32 AP3: Dashboard-Snapshot-Endpoints
+# ---------------------------------------------------------------------------
+
+@router.get("/dashboards/snapshots", response_model=dict)
+def get_dashboard_snapshots(typ: str = "") -> dict[str, Any]:
+    """
+    Gibt Dashboard-Snapshot-Definitionen zurueck.
+
+    ?typ= — Optional: Filtert nach SnapshotTyp (z.B. FINANCE_KPIS).
+    """
+    registry = get_default_dashboard_snapshots()
+    if typ:
+        snapshot = registry.by_typ_str(typ)
+        if snapshot is None:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Snapshot-Typ '{typ}' nicht gefunden. Bekannt: {[s.snapshot_typ.value for s in registry.snapshots]}",
+            )
+        return snapshot.as_dict()
+    return registry.as_dict()
+
+
+@router.post("/dashboards/rebuild", response_model=dict)
+def trigger_dashboard_rebuild(body: dict) -> dict[str, Any]:
+    """
+    Loest einen manuellen Snapshot-Rebuild aus.
+
+    Body: { "snapshot_typ": str, "angefordert_von": str, "begruendung": str }
+    """
+    typ_str: str = body.get("snapshot_typ", "")
+    angefordert_von: str = body.get("angefordert_von", "")
+
+    if not typ_str:
+        raise HTTPException(status_code=422, detail="snapshot_typ ist erforderlich")
+    if not angefordert_von:
+        raise HTTPException(status_code=422, detail="angefordert_von ist erforderlich")
+
+    registry = get_default_dashboard_snapshots()
+    snapshot = registry.by_typ_str(typ_str)
+    if snapshot is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Snapshot-Typ '{typ_str}' nicht gefunden.",
+        )
+
+    result = SnapshotRebuildResult(
+        snapshot_typ=snapshot.snapshot_typ,
+        ausgeloest=True,
+        meldung=(
+            f"Rebuild fuer '{typ_str}' von '{angefordert_von}' angefordert. "
+            f"Rebuild-Endpunkt: {snapshot.rebuild_endpoint}"
+        ),
+    )
+    return result.as_dict()
+
+
+# ---------------------------------------------------------------------------
+# Wave 32 AP6: Query-Fallback-Endpoints
+# ---------------------------------------------------------------------------
+
+@router.get("/query-fallbacks", response_model=dict)
+def get_query_fallbacks(domain: str = "") -> dict[str, Any]:
+    """
+    Gibt Query-Fallback-Regeln zurueck.
+
+    ?domain= — Optional: Filtert nach Domain (finance, agrar, compliance, workflow).
+    """
+    regeln = get_default_fallback_rules()
+    if domain:
+        gefiltert = [r for r in regeln if r.domain == domain or r.domain == "*"]
+        return {
+            "domain_filter": domain,
+            "regel_count": len(gefiltert),
+            "regeln": [r.as_dict() for r in gefiltert],
+            "schema_version": 1,
+        }
+    return {
+        "regel_count": len(regeln),
+        "domains": sorted({r.domain for r in regeln}),
+        "regeln": [r.as_dict() for r in regeln],
+        "schema_version": 1,
+    }
+
+
+@router.post("/query-fallbacks/evaluate", response_model=dict)
+def evaluate_query_fallback(body: dict) -> dict[str, Any]:
+    """
+    Bestimmt den Fallback fuer einen fehlgeschlagenen Query.
+
+    Body: { "fehler_klasse": str, "domain": str, "query_name": str }
+    """
+    fehler_str: str = body.get("fehler_klasse", "")
+    domain: str = body.get("domain", "")
+    query_name: str = body.get("query_name", "")
+
+    if not fehler_str or not domain or not query_name:
+        raise HTTPException(
+            status_code=422,
+            detail="fehler_klasse, domain und query_name sind erforderlich",
+        )
+
+    try:
+        fehler_klasse = QueryFehlerKlasse(fehler_str)
+    except ValueError:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Unbekannte fehler_klasse '{fehler_str}'. Erlaubt: {[e.value for e in QueryFehlerKlasse]}",
+        )
+
+    regeln = get_default_fallback_rules()
+    result = evaluate_fallback(fehler_klasse, domain, query_name, regeln)
     return result.as_dict()
