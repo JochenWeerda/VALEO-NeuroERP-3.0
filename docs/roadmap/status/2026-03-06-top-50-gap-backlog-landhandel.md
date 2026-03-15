@@ -9,7 +9,7 @@
 ## Ziel
 Dieses Backlog priorisiert die fehlenden Faehigkeiten, um VALEO NeuroERP auf Spitzenniveau gegenueber ServiceERP, a.amic, Odoo, SAP und Oracle zu bringen. Fokus: End-to-End Prozessabdeckung, AI-first Workflows, Agent-Interoperabilitaet, UUIX, Performance, Parallelverarbeitung.
 
-## Statusabgleich 2026-03-14
+## Statusabgleich 2026-03-15
 
 Abgleich gegen den operativen Lieferstand in `docs/architecture/process-kernel/STATUS.md`
 und den zugehoerigen `wave-*/STATUS.md`-Dateien:
@@ -25,6 +25,7 @@ und den zugehoerigen `wave-*/STATUS.md`-Dateien:
 | 005 | abgeschlossen | `docs/architecture/process-kernel/wave-24/STATUS.md` |
 | 007 | abgeschlossen | `docs/architecture/process-kernel/wave-23/STATUS.md` |
 | 009 | abgeschlossen | `docs/architecture/process-kernel/wave-24/STATUS.md` |
+| 025 | abgeschlossen | `docs/architecture/process-kernel/wave-25/STATUS.md` |
 | 042 | abgeschlossen | `docs/architecture/process-kernel/wave-23/STATUS.md` |
 
 Hinweise:
@@ -125,6 +126,7 @@ Hinweise:
 - Gap `005` (Saisonale Kampagnenvorlagen) ist mit Wave 24 abgeschlossen.
 - Gap `007` (Nebenkosten-Automatik) ist mit Wave 23 abgeschlossen.
 - Gap `009` (Tenant-Prozessvarianten) ist mit Wave 24 abgeschlossen.
+- Gap `025` (Kontextsensitive Quick Actions) ist mit Wave 25 abgeschlossen.
 - Gap `042` (Intrastat-Meldungsmodell) ist mit Wave 23 abgeschlossen.
 - Die Reihenfolge oben bleibt als historische 90-Tage-Planung erhalten und ist nicht der laufende Ist-Status.
 

@@ -616,3 +616,142 @@ def get_tenant_prozess_steps(prozess_key: str) -> dict[str, Any]:
         "validation": validation.as_dict(),
         "schema_version": 1,
     }
+
+
+# ---------------------------------------------------------------------------
+# Wave 26 AP3: Trocknungsabrechnung-Vorschau
+# ---------------------------------------------------------------------------
+
+from ....core.trocknungs_abrechnung import (
+    TrocknungsInput,
+    TrocknungsMethode,
+    TrocknungsRegelParametrierung,
+    compute_trocknungs_abrechnung,
+    get_default_trocknungsregeln,
+    validate_trocknungs_ergebnis,
+)
+from ....core.workflow_migrations_guard import (
+    WorkflowDefinitionSnapshot,
+    WorkflowSchrittSnapshot,
+    validate_workflow_migration,
+)
+
+
+@router.get("/trocknungs-abrechnung/preview/{settlement_id}", response_model=dict)
+def get_trocknungs_preview(settlement_id: str) -> dict[str, Any]:
+    """
+    Trocknungsabrechnung-Vorschau fuer ein Settlement (Gap 003).
+
+    Deterministisch: gleicher Input => gleicher SHA-256 Audit-Hash.
+    In Produktion: Messwerte aus Annahmeprozess laden.
+    """
+    from decimal import Decimal
+
+    crop_code = "WW"
+    params_map = get_default_trocknungsregeln()
+    params = params_map.get(crop_code, TrocknungsRegelParametrierung())
+
+    inp = TrocknungsInput(
+        settlement_id=settlement_id,
+        tenant_id="demo-tenant",
+        crop_code=crop_code,
+        rule_set_id="RS-WW-2024",
+        rule_set_version=1,
+        brutto_gewicht_kg=Decimal("50000"),
+        eingangs_feuchte_pct=Decimal("17.2"),
+        ziel_feuchte_pct=Decimal("14.5"),
+        methode=TrocknungsMethode.FAKTOR_STUFUNG,
+    )
+    ergebnis = compute_trocknungs_abrechnung(inp, params)
+    validation = validate_trocknungs_ergebnis(ergebnis)
+
+    return {
+        "settlement_id": settlement_id,
+        "trocknungs_ergebnis": ergebnis.as_dict(),
+        "validation": validation.as_dict(),
+        "schema_version": 1,
+    }
+
+
+@router.get("/trocknungs-abrechnung/regelsets", response_model=dict)
+def get_trocknungs_regelsets() -> dict[str, Any]:
+    """Verfuegbare Default-Trocknungsregelsets (WW/SG/RA/KM/ZR)."""
+    params_map = get_default_trocknungsregeln()
+    return {
+        "regelsets": {
+            code: {
+                "crop_code": code,
+                "start_threshold_pct": str(p.start_threshold_pct),
+                "trocknungskosten_eur_per_pct_per_t": str(p.trocknungskosten_eur_per_pct_per_t),
+                "schwund_faktor": str(p.schwund_faktor),
+                "max_abzug_pct": str(p.max_abzug_pct) if p.max_abzug_pct else None,
+            }
+            for code, p in params_map.items()
+        },
+        "count": len(params_map),
+        "schema_version": 1,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Wave 26 AP4: Workflow-Migrations-Guard
+# ---------------------------------------------------------------------------
+
+
+@router.post("/workflow-migration/check", response_model=dict)
+def check_workflow_migration(body: dict) -> dict[str, Any]:
+    """
+    Prueft ob eine Workflow-Migrations-Definition sicher ist (Gap 011).
+
+    Body: { "prozess_key": str, "von_version": str, "zu_version": str,
+            "alt_schritte": [...], "neu_schritte": [...] }
+    """
+    prozess_key = body.get("prozess_key", "agrar_settlement")
+    von_version = body.get("von_version", "1.0")
+    zu_version = body.get("zu_version", "1.1")
+
+    def _parse_schritte(raw: list) -> list[WorkflowSchrittSnapshot]:
+        return [
+            WorkflowSchrittSnapshot(
+                schritt_id=s.get("schritt_id", ""),
+                pflicht=bool(s.get("pflicht", True)),
+                reihenfolge=int(s.get("reihenfolge", 0)),
+                terminal=bool(s.get("terminal", False)),
+                rolle=s.get("rolle", ""),
+            )
+            for s in raw
+            if s.get("schritt_id")
+        ]
+
+    alt_schritte = _parse_schritte(body.get("alt_schritte", []))
+    neu_schritte = _parse_schritte(body.get("neu_schritte", []))
+
+    # Defaults wenn keine Schritte uebergeben: agrar_settlement Demo
+    if not alt_schritte:
+        schritte = get_default_agrar_settlement_schritte()
+        alt_schritte = [
+            WorkflowSchrittSnapshot(
+                schritt_id=s.schritt_id,
+                pflicht=s.pflicht,
+                reihenfolge=s.reihenfolge,
+                terminal=(s.schritt_id == "AS-06-VERBUCHUNG"),
+                rolle=s.rolle,
+            )
+            for s in schritte
+        ]
+        neu_schritte = alt_schritte[:]  # identisch → SAFE
+
+    alt_snap = WorkflowDefinitionSnapshot(
+        prozess_key=prozess_key,
+        version=von_version,
+        schema_version=1,
+        schritte=alt_schritte,
+    )
+    neu_snap = WorkflowDefinitionSnapshot(
+        prozess_key=prozess_key,
+        version=zu_version,
+        schema_version=1,
+        schritte=neu_schritte,
+    )
+    result = validate_workflow_migration(alt_snap, neu_snap)
+    return result.as_dict()
