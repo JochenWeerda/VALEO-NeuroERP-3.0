@@ -121,6 +121,22 @@ from ....core.background_jobs import (
     evaluate_job_routing,
     get_default_job_types,
 )
+from ....core.inline_validation_contracts import (
+    FeldTyp,
+    InlineValidierungsFeld,
+    InlineValidierungsRegel,
+    ValidierungsRegelTyp,
+    get_default_field_validations,
+    get_field_by_id,
+    validate_inline_field,
+)
+from ....core.error_guidance_contracts import (
+    ErrorGuidanceResult,
+    FehlerKategorie,
+    FehlerKontext,
+    evaluate_error_guidance,
+    get_default_error_guidance_rules,
+)
 from ....core.tenant_rate_limits import (
     RateLimitRequest,
     evaluate_rate_limit,
@@ -1640,4 +1656,147 @@ def check_rbac_permission(body: dict = None) -> dict[str, Any]:
         ressource_id=body.get("ressource_id", ""),
     )
     result = evaluate_rbac_permission(check)
+    return result.as_dict()
+
+
+# ---------------------------------------------------------------------------
+# Wave 35 — AP3: GET /process/inline-validations + POST /process/inline-validations/validate
+# ---------------------------------------------------------------------------
+
+@router.get("/inline-validations", response_model=dict)
+def get_inline_validations(domain: str = "") -> dict[str, Any]:
+    """
+    Gibt Inline-Validierungsdefinitionen fuer Felder zurueck.
+
+    Query-Parameter:
+    - domain: Filtert auf eine Domain (leer = alle).
+    """
+    felder = get_default_field_validations()
+    if domain:
+        gefiltert = [f for f in felder if f.domain == domain]
+        if not gefiltert:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Keine Inline-Validierungen fuer Domain '{domain}' konfiguriert.",
+            )
+        return {
+            "domain_filter": domain,
+            "feld_count": len(gefiltert),
+            "felder": [f.as_dict() for f in gefiltert],
+            "schema_version": 1,
+        }
+    return {
+        "feld_count": len(felder),
+        "domains": sorted({f.domain for f in felder}),
+        "felder": [f.as_dict() for f in felder],
+        "schema_version": 1,
+    }
+
+
+@router.post("/inline-validations/validate", response_model=dict)
+def run_inline_validation(body: dict = None) -> dict[str, Any]:
+    """
+    Validiert einen Eingabewert gegen die Regeln eines Feldes.
+
+    Body-Felder:
+    - feld_id: ID des Feldes (z.B. "ws-bruttogewicht")
+    - wert: Der zu pruefende Eingabewert (als String)
+    """
+    if body is None:
+        body = {}
+
+    feld_id: str = body.get("feld_id", "")
+    wert = body.get("wert", "")
+
+    if not feld_id:
+        raise HTTPException(status_code=422, detail="feld_id ist erforderlich")
+
+    feld = get_field_by_id(feld_id)
+    if feld is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Feld '{feld_id}' nicht gefunden. Verfuegbare Felder: "                   f"{[f.feld_id for f in get_default_field_validations()]}",
+        )
+
+    ergebnis = validate_inline_field(feld, wert)
+    return ergebnis.as_dict()
+
+
+# ---------------------------------------------------------------------------
+# Wave 35 — AP6: GET /process/error-guidance + POST /process/error-guidance/evaluate
+# ---------------------------------------------------------------------------
+
+@router.get("/error-guidance", response_model=dict)
+def get_error_guidance_rules(http_status: int = 0) -> dict[str, Any]:
+    """
+    Gibt Error-Guidance-Regeln zurueck.
+
+    Query-Parameter:
+    - http_status: Filtert auf einen HTTP-Statuscode (0 = alle).
+    """
+    regeln = get_default_error_guidance_rules()
+    if http_status:
+        gefiltert = [r for r in regeln if r.http_status == http_status]
+        if not gefiltert:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Keine Guidance-Regeln fuer HTTP-Status {http_status} konfiguriert.",
+            )
+        return {
+            "http_status_filter": http_status,
+            "regel_count": len(gefiltert),
+            "regeln": [r.as_dict() for r in gefiltert],
+            "schema_version": 1,
+        }
+    return {
+        "regel_count": len(regeln),
+        "abgedeckte_status": sorted({r.http_status for r in regeln}),
+        "regeln": [r.as_dict() for r in regeln],
+        "schema_version": 1,
+    }
+
+
+@router.post("/error-guidance/evaluate", response_model=dict)
+def evaluate_error_guidance_endpoint(body: dict = None) -> dict[str, Any]:
+    """
+    Wertet Error-Guidance fuer einen aufgetretenen Fehler aus.
+
+    Body-Felder:
+    - http_status: HTTP-Statuscode des Fehlers (z.B. 422, 403, 503)
+    - fehler_kategorie: Fehlerklasse (z.B. "BENUTZER_FEHLER", "SYSTEM_FEHLER")
+    - kontext: Prozesskontext (z.B. "WARENEINGANG", "ZAHLUNGSLAUF", "ALLGEMEIN")
+    """
+    if body is None:
+        body = {}
+
+    status_raw = body.get("http_status", 0)
+    kategorie_str: str = body.get("fehler_kategorie", "")
+    kontext_str: str = body.get("kontext", "ALLGEMEIN")
+
+    try:
+        http_status = int(status_raw)
+    except (TypeError, ValueError):
+        raise HTTPException(status_code=422, detail="http_status muss eine Ganzzahl sein")
+
+    if not http_status or not kategorie_str:
+        raise HTTPException(
+            status_code=422,
+            detail="http_status und fehler_kategorie sind erforderlich",
+        )
+
+    try:
+        kategorie = FehlerKategorie(kategorie_str)
+    except ValueError:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Unbekannte fehler_kategorie '{kategorie_str}'. "                   f"Erlaubt: {[e.value for e in FehlerKategorie]}",
+        )
+
+    try:
+        kontext = FehlerKontext(kontext_str)
+    except ValueError:
+        kontext = FehlerKontext.ALLGEMEIN
+
+    regeln = get_default_error_guidance_rules()
+    result = evaluate_error_guidance(http_status, kategorie, kontext, regeln)
     return result.as_dict()
