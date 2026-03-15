@@ -3,14 +3,14 @@
 ## Gesamtstatus
 
 - Stand: `2026-03-15`
-- Status: `Waves 1 bis 31 abgeschlossen`
-- Gesamtsuite: `1429 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed`
+- Status: `Waves 1 bis 32 abgeschlossen`
+- Gesamtsuite: `1490 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed`
 - Letzte abgeschlossene Waves:
-  - `Wave 27`: Konsistente Informationsdichte je Rolle mit Tenant-/Prozess-Kontext und backend-gespeisten Dichtehinweisen (Gap 027)
   - `Wave 28`: SLA-Eskalations-Engine + OTel Span-Contracts (Gap 013, Gap 039)
   - `Wave 29`: Policy-as-Code Engine + Query-Vertrags-Registry (Gap 014, Gap 031)
   - `Wave 30`: Human-in-the-loop AI-Freigaben + SLO/SLI-Definitionen (Gap 015, Gap 050)
   - `Wave 31`: MCP/OpenAPI Tool Contracts + Datenqualitaetsregeln (Gap 017, Gap 040)
+  - `Wave 32`: Dashboard Read-Model Snapshots + Query-Fallback-Contracts (Gap 033, Gap 032)
 
 ## Wave-Uebersicht
 
@@ -46,7 +46,8 @@
 | Wave 28 | abgeschlossen | 47 | `wave-28/STATUS.md` |
 | Wave 29 | abgeschlossen | 52 | `wave-29/STATUS.md` |
 | Wave 30 | abgeschlossen | 44 | `wave-30/STATUS.md` |
-| Wave 31 | abgeschlossen | 49 | `wave-31/STATUS.md` |
+| Wave 31 | abgeschlossen | 63 | `wave-31/STATUS.md` |
+| Wave 32 | abgeschlossen | 47 | `wave-32/STATUS.md` |
 
 ## Aktuell relevante Lieferungen
 
@@ -185,6 +186,16 @@
 - `app/core/human_approval_gate.py`
 - `app/core/slo_definitions.py`
 
+### Wave-31 MCP Tool Contracts + Datenqualitaet
+
+- `app/core/mcp_tool_contracts.py`
+- `app/core/data_quality_rules.py` (Wave-31-Contract-Schicht)
+
+### Wave-32 Dashboard Snapshots + Query-Fallbacks
+
+- `app/core/dashboard_snapshots.py`
+- `app/core/query_fallback_contracts.py`
+
 ### Frontend-Power-User-Schicht
 
 - `packages/frontend-web/src/features/ki-usability/context/ActionDispatchContext.tsx`
@@ -215,8 +226,8 @@
 ### Letzter Vollbeleg
 
 ```bash
-pytest -q --no-cov -W default
-# Ergebnis: 1025 passed, 5 skipped, 1 xfailed, 0 warnings
+pytest -q --no-cov
+# Ergebnis: 1490 passed, 5 skipped, 1 xfailed (2026-03-15, nach Wave 32)
 ```
 
 ### Zusaetzliche aktuelle Belege
