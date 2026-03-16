@@ -1,172 +1,342 @@
 """
 Bestellvorschlag Agent Workflow
-Analyzes stock levels and generates purchase order proposals using LangGraph and OpenAI
+
+Produktiver Einkaufs-Workflow mit echtem Approval- und Command-Contract.
+Kein localhost-Loopback, keine Fallback-Bestellnummern und keine Auto-Freigabe.
 """
 
+from __future__ import annotations
+
 import logging
-from typing import TypedDict, Annotated, Dict, Any
-from datetime import datetime
-import httpx
+from datetime import date, datetime, timezone
+from decimal import Decimal
+from typing import Annotated, Any, TypedDict
 
-from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
-from langgraph.graph import StateGraph, END
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
+from langgraph.graph import END, StateGraph
 
+from app.core.business_commands import BusinessCommand, CommandStatus
+from app.core.command_dispatcher import CommandDispatcher
+from app.core.database import SessionLocal
 from app.core.dependency_container import container
+from app.core.human_approval_gate import evaluate_approval_requirement, get_default_approval_rules
+from app.core.uuid7 import uuid7
+from app.infrastructure.models.einkauf_models import EinkaufBestellung, EinkaufBestellungPosition
 from app.infrastructure.repositories import ArticleRepository, StockMovementRepository
+from app.services.numbering_service import get_numbering
 
 logger = logging.getLogger(__name__)
 
+BESTELLVORSCHLAG_AKTIONSTYP = "BESTELLUNG_ANLEGEN"
+GENXAIS_ISSUER = "genxais.bestellvorschlag"
+GENXAIS_ISSUER_ROLE = "buyer"
+GENXAIS_WORKFLOW_KEY = "bestellvorschlag"
 
-# Workflow State
+
+class BestellvorschlagWorkflowError(RuntimeError):
+    """Workflow contract violation."""
+
+
 class BestellvorschlagState(TypedDict):
     """State for Bestellvorschlag workflow."""
+
     messages: Annotated[list[BaseMessage], lambda x, y: x + y]
     correlation_id: str
     tenant_id: str
 
-    # Analysis results
-    low_stock_articles: list[dict]
-    sales_history: list[dict]
-    supplier_recommendations: list[dict]
+    low_stock_articles: list[dict[str, Any]]
+    sales_history: list[dict[str, Any]]
+    supplier_recommendations: list[dict[str, Any]]
 
-    # AI Analysis
-    ai_insights: Dict[str, Any]
+    ai_insights: dict[str, Any]
     ai_recommendations: list[str]
 
-    # Proposal
-    proposal: dict | None
+    proposal: dict[str, Any] | None
+    approval_requirement: dict[str, Any] | None
+    approval_record: dict[str, Any] | None
     approved: bool
     rejection_reason: str | None
 
-    # Output
+    command_result: dict[str, Any] | None
     order_id: str | None
     created_at: datetime | None
 
 
-# Workflow Nodes
-async def analyze_stock_levels(state: BestellvorschlagState) -> BestellvorschlagState:
-    """
-    Step 1: Analyze current stock levels and identify low stock.
-    """
-    logger.info(f"Analyzing stock levels (tenant: {state['tenant_id']})")
+def _safe_decimal(value: Any, default: str = "0") -> Decimal:
+    try:
+        if value is None:
+            return Decimal(default)
+        return Decimal(str(value))
+    except Exception:
+        return Decimal(default)
 
+
+def _coerce_optional_decimal(value: Decimal) -> Decimal | None:
+    return None if value == Decimal("0") else value
+
+
+def _resolve_supplier_id(article: Any) -> str | None:
+    for field in ("preferred_supplier_id", "supplier_id", "lieferant_id", "std_lieferant_id"):
+        value = getattr(article, field, None)
+        if value:
+            return str(value)
+    return None
+
+
+def _build_approval_requirement(proposal: dict[str, Any]) -> dict[str, Any]:
+    total_estimated_cost = _safe_decimal(proposal.get("total_estimated_cost"))
+    context = {
+        "betrag_eur": float(total_estimated_cost),
+        "datensaetze_count": len(proposal.get("items", [])),
+    }
+    return evaluate_approval_requirement(
+        BESTELLVORSCHLAG_AKTIONSTYP,
+        context,
+        get_default_approval_rules(),
+    ).as_dict()
+
+
+async def _collect_purchase_order_items(
+    tenant_id: str,
+    proposal_items: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], str]:
+    article_repo = container.resolve(ArticleRepository)
+    items: list[dict[str, Any]] = []
+    supplier_ids: set[str] = set()
+
+    for proposal_item in proposal_items:
+        article_id = proposal_item["article_id"]
+        article = await article_repo.get_by_id(article_id, tenant_id)
+        if article is None:
+            raise BestellvorschlagWorkflowError(
+                f"Article '{article_id}' not found for tenant '{tenant_id}'"
+            )
+
+        supplier_id = _resolve_supplier_id(article)
+        if not supplier_id:
+            raise BestellvorschlagWorkflowError(
+                f"Article '{article_id}' has no resolvable supplier contract"
+            )
+        supplier_ids.add(supplier_id)
+
+        items.append(
+            {
+                "article_id": article_id,
+                "artikel_nr": str(
+                    getattr(article, "article_number", None)
+                    or getattr(article, "artikel_nr", None)
+                    or article_id
+                ),
+                "artikel_bezeichnung": str(
+                    getattr(article, "name", None)
+                    or proposal_item.get("article_name")
+                    or article_id
+                ),
+                "menge": float(proposal_item["order_quantity"]),
+                "einheit": getattr(article, "unit", None) or "Stk",
+                "einzelpreis": _coerce_optional_decimal(
+                    _safe_decimal(getattr(article, "purchase_price", None))
+                ),
+                "preis_einheit": "1",
+            }
+        )
+
+    if len(supplier_ids) != 1:
+        raise BestellvorschlagWorkflowError(
+            "Bestellvorschlag enthaelt Positionen mit mehreren Lieferanten; "
+            "ein Workflow erzeugt genau eine Bestellung"
+        )
+
+    return items, next(iter(supplier_ids))
+
+
+def _dispatch_purchase_order_command(state: BestellvorschlagState) -> dict[str, Any]:
+    dispatcher = CommandDispatcher()
+    command = BusinessCommand(
+        command_id=str(uuid7()),
+        tenant_id=state["tenant_id"],
+        aggregate_type="purchase_order",
+        aggregate_id=state["correlation_id"],
+        command_name="CreatePurchaseOrder",
+        workflow_key=GENXAIS_WORKFLOW_KEY,
+        issued_by=GENXAIS_ISSUER,
+        idempotency_key=state["correlation_id"],
+        payload={
+            "proposal_created_at": state["proposal"]["created_at"] if state["proposal"] else None,
+            "approval_requirement": state.get("approval_requirement"),
+            "approval_record": state.get("approval_record"),
+        },
+    )
+    result = dispatcher.dispatch(
+        command,
+        aggregate_state={"approval_status": "approved" if state.get("approved") else "pending"},
+        issuer_role=GENXAIS_ISSUER_ROLE,
+    )
+    if result.status != CommandStatus.ACCEPTED:
+        raise BestellvorschlagWorkflowError(
+            f"CreatePurchaseOrder rejected: {result.error.code if result.error else 'UNKNOWN'}"
+        )
+    return result.model_dump(mode="json")
+
+
+def _persist_purchase_order(
+    *,
+    tenant_id: str,
+    supplier_id: str,
+    items: list[dict[str, Any]],
+    correlation_id: str,
+    ai_recommendations: list[str],
+) -> str:
+    session = SessionLocal()
+    try:
+        bestellung = EinkaufBestellung(
+            id=uuid7(),
+            tenant_id=tenant_id,
+            bestellnummer=get_numbering().next_number("purchase_order"),
+            lieferant_id=supplier_id,
+            bestelldatum=date.today(),
+            status="entwurf",
+            versand_art="email",
+            notiz=(
+                "GENXAIS Bestellvorschlag "
+                f"({correlation_id}). Empfehlungen: {', '.join(ai_recommendations) or 'keine'}"
+            ),
+            erstellt_von=GENXAIS_ISSUER,
+        )
+        session.add(bestellung)
+        session.flush()
+
+        for pos_nr, item in enumerate(items, start=1):
+            session.add(
+                EinkaufBestellungPosition(
+                    id=uuid7(),
+                    bestellung_id=bestellung.id,
+                    pos_nr=pos_nr,
+                    article_id=item["article_id"],
+                    artikel_nr=item["artikel_nr"],
+                    artikel_bezeichnung=item["artikel_bezeichnung"],
+                    menge=item["menge"],
+                    menge_geliefert=0,
+                    menge_offen=item["menge"],
+                    einheit=item["einheit"],
+                    einzelpreis=item["einzelpreis"],
+                    preis_einheit=item["preis_einheit"],
+                )
+            )
+
+        session.commit()
+        return str(bestellung.id)
+    except Exception:
+        session.rollback()
+        raise
+    finally:
+        session.close()
+
+
+async def analyze_stock_levels(state: BestellvorschlagState) -> BestellvorschlagState:
+    """Step 1: Analyze current stock levels and identify low stock."""
+
+    logger.info("Analyzing stock levels (tenant: %s)", state["tenant_id"])
     try:
         article_repo = container.resolve(ArticleRepository)
-
-        # Get all articles for the tenant
-        articles = await article_repo.get_all(state['tenant_id'], limit=1000)
-
-        # Filter for low stock articles (current_stock < min_stock_level)
-        low_stock_articles = []
+        articles = await article_repo.get_all(state["tenant_id"], limit=1000)
+        low_stock_articles: list[dict[str, Any]] = []
         for article in articles:
             if article.min_stock_level and article.current_stock < article.min_stock_level:
                 shortage = article.min_stock_level - article.current_stock
-                low_stock_articles.append({
-                    "article_id": str(article.id),
-                    "name": article.name,
-                    "current": float(article.current_stock or 0),
-                    "min": float(article.min_stock_level or 0),
-                    "shortage": float(shortage),
-                    "unit": article.unit or "Stk"
-                })
-
+                low_stock_articles.append(
+                    {
+                        "article_id": str(article.id),
+                        "name": article.name,
+                        "current": float(article.current_stock or 0),
+                        "min": float(article.min_stock_level or 0),
+                        "shortage": float(shortage),
+                        "unit": article.unit or "Stk",
+                    }
+                )
         state["low_stock_articles"] = low_stock_articles
-        logger.info(f"Found {len(low_stock_articles)} low stock articles")
-
-    except Exception as e:
-        logger.error(f"Failed to analyze stock levels: {e}")
-        # Fallback to empty list if database query fails
+    except Exception as exc:
+        logger.error("Failed to analyze stock levels: %s", exc)
         state["low_stock_articles"] = []
-
     return state
 
 
 async def check_sales_history(state: BestellvorschlagState) -> BestellvorschlagState:
-    """
-    Step 2: Check historical sales data to predict demand.
-    """
-    logger.info("Checking sales history")
+    """Step 2: Check historical sales data to predict demand."""
 
+    logger.info("Checking sales history")
     try:
         stock_movement_repo = container.resolve(StockMovementRepository)
-
-        # Get sales history for each low stock article
-        sales_history = []
+        sales_history: list[dict[str, Any]] = []
 
         for article in state["low_stock_articles"]:
-            article_id = article["article_id"]
-
-            # Get stock movements for this article (outbound movements = sales)
-            # This is a simplified approach - in production, you'd filter by movement_type = 'outbound'
             movements = await stock_movement_repo.get_all(
-                state['tenant_id'],
+                state["tenant_id"],
                 limit=1000,
-                article_id=article_id  # Assuming the repo supports this filter
+                article_id=article["article_id"],
+            )
+            if not movements:
+                continue
+
+            monthly_sales: dict[str, float] = {}
+            for movement in movements:
+                if getattr(movement, "movement_type", None) != "outbound":
+                    continue
+                month_key = (
+                    movement.created_at.strftime("%Y-%m")
+                    if getattr(movement, "created_at", None)
+                    else "unknown"
+                )
+                monthly_sales[month_key] = monthly_sales.get(month_key, 0.0) + abs(
+                    float(getattr(movement, "quantity", 0) or 0)
+                )
+
+            if not monthly_sales:
+                continue
+
+            avg_monthly_sales = sum(monthly_sales.values()) / len(monthly_sales)
+            sorted_months = sorted(monthly_sales.keys())
+            trend = "stable"
+            if len(sorted_months) >= 3:
+                recent_sales = [monthly_sales[m] for m in sorted_months[-3:]]
+                if recent_sales[-1] > recent_sales[0] * 1.1:
+                    trend = "increasing"
+                elif recent_sales[-1] < recent_sales[0] * 0.9:
+                    trend = "decreasing"
+
+            sales_history.append(
+                {
+                    "article_id": article["article_id"],
+                    "avg_monthly_sales": float(avg_monthly_sales),
+                    "trend": trend,
+                    "total_movements": len(movements),
+                }
             )
 
-            if movements:
-                # Calculate monthly sales averages
-                # Group by month and calculate totals
-                monthly_sales = {}
-                for movement in movements:
-                    if hasattr(movement, 'movement_type') and movement.movement_type == 'outbound':
-                        month_key = movement.created_at.strftime('%Y-%m') if movement.created_at else 'unknown'
-                        if month_key not in monthly_sales:
-                            monthly_sales[month_key] = 0
-                        monthly_sales[month_key] += abs(movement.quantity or 0)
-
-                # Calculate average monthly sales
-                if monthly_sales:
-                    avg_monthly_sales = sum(monthly_sales.values()) / len(monthly_sales)
-
-                    # Determine trend (simplified: compare last 3 months)
-                    sorted_months = sorted(monthly_sales.keys())
-                    if len(sorted_months) >= 3:
-                        recent_months = sorted_months[-3:]
-                        recent_sales = [monthly_sales[m] for m in recent_months]
-                        if recent_sales[-1] > recent_sales[0] * 1.1:  # 10% increase
-                            trend = "increasing"
-                        elif recent_sales[-1] < recent_sales[0] * 0.9:  # 10% decrease
-                            trend = "decreasing"
-                        else:
-                            trend = "stable"
-                    else:
-                        trend = "stable"
-
-                    sales_history.append({
-                        "article_id": article_id,
-                        "avg_monthly_sales": float(avg_monthly_sales),
-                        "trend": trend,
-                        "total_movements": len(movements)
-                    })
-
         state["sales_history"] = sales_history
-        logger.info(f"Analyzed sales history for {len(sales_history)} articles")
-
-    except Exception as e:
-        logger.error(f"Failed to check sales history: {e}")
-        # Fallback to empty list if database query fails
+    except Exception as exc:
+        logger.error("Failed to check sales history: %s", exc)
         state["sales_history"] = []
-
     return state
 
 
 async def generate_order_proposal(state: BestellvorschlagState) -> BestellvorschlagState:
-    """
-    Step 3: Generate purchase order proposal based on analysis using AI insights.
-    """
-    logger.info("Generating AI-enhanced order proposal")
+    """Step 3: Generate purchase order proposal based on analysis and approval contract."""
 
-    # Prepare data for AI analysis
-    stock_data = "\n".join([
-        f"- {article['name']}: Current {article['current']}, Min {article['min']}, Shortage {article['shortage']}"
-        for article in state["low_stock_articles"]
-    ])
+    logger.info("Generating order proposal")
 
-    sales_data = "\n".join([
-        f"- {history['article_id']}: {history['avg_monthly_sales']} units/month, Trend: {history['trend']}"
-        for history in state["sales_history"]
-    ])
+    stock_data = "\n".join(
+        [
+            f"- {article['name']}: Current {article['current']}, Min {article['min']}, Shortage {article['shortage']}"
+            for article in state["low_stock_articles"]
+        ]
+    )
+    sales_data = "\n".join(
+        [
+            f"- {history['article_id']}: {history['avg_monthly_sales']} units/month, Trend: {history['trend']}"
+            for history in state["sales_history"]
+        ]
+    )
 
     context = f"""
 Current Stock Levels:
@@ -180,232 +350,177 @@ Consider seasonal patterns, supplier lead times, and optimal order quantities.
 """
 
     try:
-        # Import here to avoid circular imports
         from services.ai.app.services.openai_service import analyze_text
 
         ai_analysis = await analyze_text(
             text=context,
             task="Analyze inventory levels and sales data to generate optimal purchase order recommendations for agricultural products",
-            context={"domain": "agricultural_procurement", "tenant_id": state["tenant_id"]}
+            context={"domain": "agricultural_procurement", "tenant_id": state["tenant_id"]},
         )
-
         state["ai_insights"] = ai_analysis
         state["ai_recommendations"] = ai_analysis.get("recommendations", [])
-
-        # Add AI insights to messages
-        state["messages"].append(AIMessage(
-            content=f"AI Analysis Complete: {ai_analysis.get('insights', [])}",
-            additional_kwargs={"analysis": ai_analysis}
-        ))
-
-    except Exception as e:
-        logger.warning(f"AI analysis failed, falling back to simple algorithm: {e}")
-        state["ai_insights"] = {"error": str(e)}
+        state["messages"].append(
+            AIMessage(
+                content=f"AI Analysis Complete: {ai_analysis.get('insights', [])}",
+                additional_kwargs={"analysis": ai_analysis},
+            )
+        )
+    except Exception as exc:
+        logger.warning("AI analysis failed, falling back to deterministic algorithm: %s", exc)
+        state["ai_insights"] = {"error": str(exc)}
         state["ai_recommendations"] = []
 
-    # Enhanced algorithm with AI insights
-    proposals = []
-
+    proposals: list[dict[str, Any]] = []
     for article in state["low_stock_articles"]:
-        # Find sales history
         history = next(
             (h for h in state["sales_history"] if h["article_id"] == article["article_id"]),
-            None
+            None,
         )
+        if not history:
+            continue
 
-        if history:
-            # Base calculation: shortage + 1 month safety stock
-            base_qty = article["shortage"] + history["avg_monthly_sales"]
+        base_qty = article["shortage"] + history["avg_monthly_sales"]
+        if history["trend"] == "increasing":
+            adjusted_qty = base_qty * 1.2
+        elif history["trend"] == "stable":
+            adjusted_qty = base_qty * 1.1
+        else:
+            adjusted_qty = base_qty * 0.9
 
-            # AI-enhanced adjustment based on trend
-            if history["trend"] == "increasing":
-                adjusted_qty = base_qty * 1.2  # 20% increase for growth
-            elif history["trend"] == "stable":
-                adjusted_qty = base_qty * 1.1  # 10% safety buffer
-            else:
-                adjusted_qty = base_qty * 0.9  # Conservative for declining
-
-            order_qty = max(adjusted_qty, article["shortage"])  # Never go below shortage
-
-            proposals.append({
+        order_qty = max(adjusted_qty, article["shortage"])
+        proposals.append(
+            {
                 "article_id": article["article_id"],
                 "article_name": article["name"],
                 "order_quantity": round(order_qty, 2),
-                "reason": f"AI-optimized: Low stock ({article['current']}/{article['min']}) + trend-adjusted safety stock",
-                "estimated_cost": order_qty * 50,  # Mock price
-                "ai_factors": [f"Trend: {history['trend']}", f"Base qty: {base_qty}"]
-            })
+                "reason": (
+                    "Contract-based: Low stock plus trend-adjusted safety stock"
+                ),
+                "estimated_cost": round(order_qty * 50, 2),
+                "ai_factors": [f"Trend: {history['trend']}", f"Base qty: {base_qty}"],
+            }
+        )
 
-    state["proposal"] = {
-        "created_at": datetime.utcnow().isoformat(),
+    proposal = {
+        "created_at": datetime.now(timezone.utc).isoformat(),
         "items": proposals,
-        "total_estimated_cost": sum(p["estimated_cost"] for p in proposals),
+        "total_estimated_cost": round(sum(p["estimated_cost"] for p in proposals), 2),
         "ai_insights": state["ai_insights"],
-        "ai_recommendations": state["ai_recommendations"]
+        "ai_recommendations": state["ai_recommendations"],
     }
+    approval_requirement = _build_approval_requirement(proposal)
 
-    logger.info(f"Generated AI-enhanced proposal with {len(proposals)} items")
+    state["proposal"] = proposal
+    state["approval_requirement"] = approval_requirement
+    state["approval_record"] = None
+    state["command_result"] = None
+    state["approved"] = not approval_requirement["requires_human_approval"]
+    logger.info(
+        "Generated proposal with %s items; approval required=%s",
+        len(proposals),
+        approval_requirement["requires_human_approval"],
+    )
     return state
 
 
 async def wait_for_human_approval(state: BestellvorschlagState) -> BestellvorschlagState:
-    """
-    Step 4: Wait for human approval (interrupt point).
-    """
-    logger.info("Waiting for human approval...")
-    
-    # This is a checkpoint - workflow pauses here
-    # User must call /approve or /reject endpoint
-    
-    # For prototype, auto-approve after logging
-    logger.warning("AUTO-APPROVING for prototype (TODO: Real approval UI)")
-    state["approved"] = True
-    
-    return state
+    """Step 4: Human approval checkpoint."""
+
+    requirement = state.get("approval_requirement") or {}
+    if not requirement.get("requires_human_approval"):
+        return state
+    if state.get("approved") or state.get("approval_record"):
+        return state
+    raise BestellvorschlagWorkflowError("Human approval decision missing for bestellvorschlag")
 
 
 async def create_purchase_order(state: BestellvorschlagState) -> BestellvorschlagState:
-    """
-    Step 5: Create purchase order if approved.
-    """
-    if not state["approved"]:
-        logger.info("Proposal rejected, skipping order creation")
+    """Step 5: Create purchase order if approved."""
+
+    if not state.get("approved"):
+        logger.info("Proposal rejected, skipping purchase order creation")
         return state
+    if not state.get("proposal"):
+        raise BestellvorschlagWorkflowError("Proposal missing before purchase order creation")
 
-    logger.info("Creating purchase order")
+    logger.info("Creating purchase order via command contract")
+    items, supplier_id = await _collect_purchase_order_items(
+        state["tenant_id"],
+        state["proposal"]["items"],
+    )
+    command_result = _dispatch_purchase_order_command(state)
+    order_id = _persist_purchase_order(
+        tenant_id=state["tenant_id"],
+        supplier_id=supplier_id,
+        items=items,
+        correlation_id=state["correlation_id"],
+        ai_recommendations=state.get("ai_recommendations", []),
+    )
 
-    try:
-        # Prepare purchase order data from proposal
-        proposal = state["proposal"]
-        items = []
-
-        for item in proposal["items"]:
-            # Get article details for proper item creation
-            article_repo = container.resolve(ArticleRepository)
-            article = await article_repo.get_by_id(item["article_id"], state["tenant_id"])
-
-            if article:
-                items.append({
-                    "article_id": item["article_id"],
-                    "qty": item["order_quantity"],
-                    "price": article.purchase_price or 0,  # Use purchase price if available
-                    "uom": article.unit or "Stk"
-                })
-
-        # Bestimme Lieferant: aus dem ersten Artikel mit Lieferanten-ID, sonst Fallback
-        supplier_id = "default-supplier"
-        for item in proposal["items"]:
-            art_repo = container.resolve(ArticleRepository)
-            art = await art_repo.get_by_id(item["article_id"], state["tenant_id"])
-            if art:
-                sid = (
-                    getattr(art, "preferred_supplier_id", None)
-                    or getattr(art, "supplier_id", None)
-                    or getattr(art, "lieferant_id", None)
-                )
-                if sid:
-                    supplier_id = sid
-                    break
-
-        # Create purchase order payload
-        po_data = {
-            "supplier_id": supplier_id,
-            "items": items,
-            "currency": "EUR",
-            "notes": f"Auto-generated from AI procurement proposal. {proposal.get('ai_recommendations', [])}"
-        }
-
-        # Call purchase order API
-        async with httpx.AsyncClient() as client:
-            # Assuming the API is running locally - in production this would be configurable
-            api_url = "http://localhost:8000/api/einkauf/bestellungen"  # Adjust based on actual API endpoint
-            headers = {
-                "Content-Type": "application/json",
-                "X-Tenant-ID": state["tenant_id"]
-            }
-
-            response = await client.post(api_url, json=po_data, headers=headers)
-
-            if response.status_code == 201:
-                result = response.json()
-                state["order_id"] = result.get("id", f"PO-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}")
-                state["created_at"] = datetime.utcnow()
-                logger.info(f"Purchase order created successfully: {state['order_id']}")
-            else:
-                logger.error(f"Failed to create purchase order: {response.status_code} - {response.text}")
-                # Fallback: generate ID anyway for workflow continuity
-                state["order_id"] = f"PO-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}"
-                state["created_at"] = datetime.utcnow()
-                logger.warning("Using fallback order ID due to API failure")
-
-    except Exception as e:
-        logger.error(f"Error creating purchase order: {e}")
-        # Fallback: generate ID anyway for workflow continuity
-        state["order_id"] = f"PO-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}"
-        state["created_at"] = datetime.utcnow()
-        logger.warning("Using fallback order ID due to exception")
-
+    command_result["status"] = CommandStatus.EXECUTED.value
+    command_result["aggregate_id"] = order_id
+    state["command_result"] = command_result
+    state["order_id"] = order_id
+    state["created_at"] = datetime.now(timezone.utc)
+    logger.info("Purchase order created successfully: %s", order_id)
     return state
 
 
-# Workflow-Builder with LangGraph
 def build_bestellvorschlag_workflow():
-    """
-    Build the Bestellvorschlag workflow graph using LangGraph.
-    """
-    workflow = StateGraph(BestellvorschlagState)
+    """Build the Bestellvorschlag workflow graph using LangGraph."""
 
-    # Add nodes
+    workflow = StateGraph(BestellvorschlagState)
     workflow.add_node("analyze_stock", analyze_stock_levels)
     workflow.add_node("check_history", check_sales_history)
     workflow.add_node("generate_proposal", generate_order_proposal)
     workflow.add_node("wait_approval", wait_for_human_approval)
     workflow.add_node("create_order", create_purchase_order)
 
-    # Set entry point
     workflow.set_entry_point("analyze_stock")
-
-    # Add edges
     workflow.add_edge("analyze_stock", "check_history")
     workflow.add_edge("check_history", "generate_proposal")
-    workflow.add_edge("generate_proposal", "wait_approval")
 
-    # Conditional edge from approval
-    def should_create_order(state: BestellvorschlagState) -> str:
-        """Decide if order should be created based on approval."""
-        if state.get("approved"):
-            return "create_order"
-        return END
+    def next_after_proposal(state: BestellvorschlagState) -> str:
+        requirement = state.get("approval_requirement") or {}
+        if requirement.get("requires_human_approval"):
+            return "wait_approval"
+        return "create_order"
+
+    workflow.add_conditional_edges(
+        "generate_proposal",
+        next_after_proposal,
+        {
+            "wait_approval": "wait_approval",
+            "create_order": "create_order",
+        },
+    )
+
+    def after_approval(state: BestellvorschlagState) -> str:
+        return "create_order" if state.get("approved") else END
 
     workflow.add_conditional_edges(
         "wait_approval",
-        should_create_order,
+        after_approval,
         {
             "create_order": "create_order",
-            END: END
-        }
+            END: END,
+        },
     )
-
     workflow.add_edge("create_order", END)
 
-    # Compile with checkpointer
     from langgraph.checkpoint.sqlite import SqliteSaver
+
     checkpointer = SqliteSaver.from_conn_string("data/bestellvorschlag_workflows.db")
-
-    app = workflow.compile(
+    return workflow.compile(
         checkpointer=checkpointer,
-        interrupt_before=["wait_approval"]  # Human-in-the-Loop checkpoint
+        interrupt_before=["wait_approval"],
     )
-
-    return app
 
 
 async def run_bestellvorschlag_workflow(tenant_id: str, correlation_id: str) -> BestellvorschlagState:
-    """
-    Execute Bestellvorschlag workflow using LangGraph.
-    """
-    workflow = build_bestellvorschlag_workflow()
+    """Execute Bestellvorschlag workflow using LangGraph."""
 
+    workflow = build_bestellvorschlag_workflow()
     initial_state: BestellvorschlagState = {
         "messages": [HumanMessage(content="Generate purchase order proposal")],
         "correlation_id": correlation_id,
@@ -416,17 +531,17 @@ async def run_bestellvorschlag_workflow(tenant_id: str, correlation_id: str) -> 
         "ai_insights": {},
         "ai_recommendations": [],
         "proposal": None,
+        "approval_requirement": None,
+        "approval_record": None,
         "approved": False,
         "rejection_reason": None,
+        "command_result": None,
         "order_id": None,
         "created_at": None,
     }
-
-    config = {"configurable": {"thread_id": correlation_id}}
-
-    # Run until checkpoint
-    result = await workflow.ainvoke(initial_state, config)
-
-    logger.info(f"Bestellvorschlag workflow paused at approval checkpoint: {correlation_id}")
+    result = await workflow.ainvoke(
+        initial_state,
+        {"configurable": {"thread_id": correlation_id}},
+    )
+    logger.info("Bestellvorschlag workflow reached state for correlation_id=%s", correlation_id)
     return result
-

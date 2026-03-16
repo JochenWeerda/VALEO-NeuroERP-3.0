@@ -18,6 +18,7 @@ from app.core.business_commands import (
 )
 from app.core.command_dispatcher import CommandDispatcher
 from app.core.agent_command_manifest import build_agent_command_manifest
+from app.core.ui_density_manifest import build_ui_density_manifest
 
 router = APIRouter(prefix="/commands", tags=["commands", "process-kernel"])
 
@@ -42,6 +43,14 @@ def get_agent_manifest(
 ) -> dict:
     """Gibt das AgentCommandManifest zurueck (welche Commands Agenten ausfuehren duerfen)."""
     manifest = build_agent_command_manifest()
+    return manifest.model_dump()
+
+
+@router.get("/ui-density-manifest", summary="UI-Density-Manifest aus produktiven Command-Contracts")
+def get_ui_density_manifest(
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict:
+    manifest = build_ui_density_manifest()
     return manifest.model_dump()
 
 

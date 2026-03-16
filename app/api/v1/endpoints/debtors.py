@@ -12,6 +12,7 @@ from sqlalchemy import text
 from decimal import Decimal
 import json
 
+from ....core.data_quality_enforcement import build_dq_error_detail, evaluate_debtor_datensatz
 from ....core.database import get_db
 
 # EU/EWR USt-ID Format-Muster (optional; leeres Feld erlaubt)
@@ -48,6 +49,14 @@ from ..schemas.finance import Debtor, DebtorCreate, DebtorUpdate
 from ..schemas.base import PaginatedResponse
 
 router = APIRouter(prefix="/debtors", tags=["finance", "debtors"])
+
+
+def _build_debtor_dq_datensatz(data: dict) -> dict[str, object]:
+    return {
+        "debitor_nr": data.get("debtor_number"),
+        "name": data.get("company_name"),
+        "land": data.get("country"),
+    }
 
 
 def _parse_address_jsonb(address_jsonb) -> dict:
@@ -126,6 +135,9 @@ async def create_debtor(
     """
     try:
         _validate_vat_id_format(debtor_data.vat_id)
+        dq_result = evaluate_debtor_datensatz(_build_debtor_dq_datensatz(debtor_data.model_dump()))
+        if not dq_result.bestanden:
+            raise HTTPException(status_code=422, detail=build_dq_error_detail("Debitor", dq_result))
         # Check if debtor number already exists
         check_query = text("""
             SELECT id FROM domain_erp.debitors 
@@ -297,7 +309,15 @@ async def update_debtor(
         # Parse existing address
         existing_debtor = _row_to_debtor(existing_row)
         existing_address = _parse_address_jsonb(existing_row[4])
-        
+        effective_data = {
+            "debtor_number": existing_debtor.debtor_number,
+            "company_name": debtor_data.company_name if debtor_data.company_name is not None else existing_debtor.company_name,
+            "country": debtor_data.country if debtor_data.country is not None else existing_debtor.country,
+        }
+        dq_result = evaluate_debtor_datensatz(_build_debtor_dq_datensatz(effective_data))
+        if not dq_result.bestanden:
+            raise HTTPException(status_code=422, detail=build_dq_error_detail("Debitor", dq_result))
+
         # Merge updates
         updated_address = existing_address.copy()
         if debtor_data.contact_person is not None:

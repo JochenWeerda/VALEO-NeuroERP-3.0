@@ -12,6 +12,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy.orm import Session
 
 from ....core.config import settings
+from ....core.data_quality_enforcement import build_dq_error_detail, evaluate_customer_datensatz
 from ....core.database import get_db
 from ....integrations.crm_core_client import (
     CRMCoreCustomer,
@@ -29,9 +30,20 @@ router = APIRouter()
 DEFAULT_TENANT = "00000000-0000-0000-0000-000000000001"
 
 
+def _build_customer_dq_datensatz(data: dict[str, object]) -> dict[str, object]:
+    return {
+        "debitor_nr": data.get("customer_number"),
+        "name": data.get("company_name"),
+        "land": data.get("country") or "DE",
+    }
+
+
 @router.post("/", response_model=Customer, status_code=status.HTTP_201_CREATED)
 async def create_customer(customer_data: CustomerCreate) -> Customer:
     """Create a new customer via crm-core."""
+    dq_result = evaluate_customer_datensatz(_build_customer_dq_datensatz(customer_data.model_dump(mode="python")))
+    if not dq_result.bestanden:
+        raise HTTPException(status_code=422, detail=build_dq_error_detail("Debitor", dq_result))
     payload = _map_create_payload(customer_data)
     try:
         created = await crm_create_customer(payload)
@@ -242,6 +254,19 @@ async def get_customer(
 @router.put("/{customer_id}", response_model=Customer)
 async def update_customer(customer_id: str, customer_data: CustomerUpdate) -> Customer:
     """Update customer details by delegating to crm-core."""
+    data = customer_data.model_dump(exclude_unset=True, mode="python")
+    if {"customer_number", "company_name", "country"} & data.keys():
+        dq_result = evaluate_customer_datensatz(
+            _build_customer_dq_datensatz(
+                {
+                    "customer_number": data.get("customer_number") or customer_id,
+                    "company_name": data.get("company_name") or customer_id,
+                    "country": data.get("country") or "DE",
+                }
+            )
+        )
+        if not dq_result.bestanden:
+            raise HTTPException(status_code=422, detail=build_dq_error_detail("Debitor", dq_result))
     payload = _map_update_payload(customer_data)
     try:
         updated = await crm_update_customer(customer_id, payload)

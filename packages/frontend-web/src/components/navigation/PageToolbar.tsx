@@ -3,6 +3,9 @@ import { Button } from '@/components/ui/button'
 import { MoreHorizontal } from 'lucide-react'
 import { createMCPMetadata } from '@/design/mcp-schemas/component-metadata'
 import { useActionDispatchOptional } from '@/features/ki-usability'
+import { auth } from '@/lib/auth'
+import { mergeToolbarActionsForDensity, resolveRoleDensityProfile } from '@/features/role-density'
+import { useTenant } from '@/hooks/useTenant'
 
 export interface ToolbarAction {
   id: string
@@ -25,6 +28,7 @@ interface PageToolbarProps {
   primaryActions?: ToolbarAction[]
   overflowActions?: ToolbarAction[]
   rightSlot?: ReactNode
+  densityProfileOverride?: import('@/features/role-density').RoleDensityProfile
   mcpContext?: {
     pageDomain: string
     currentDocument?: string
@@ -57,14 +61,24 @@ export function PageToolbar({
   primaryActions = [],
   overflowActions = [],
   rightSlot,
+  densityProfileOverride,
   mcpContext,
 }: PageToolbarProps): JSX.Element {
   const dispatchContext = useActionDispatchOptional()
+  const { tenantId } = useTenant()
   const [overflowOpen, setOverflowOpen] = useState(false)
   const overflowRef = useRef<HTMLDivElement>(null)
   const hasSubtitle = typeof subtitle === 'string' && subtitle.length > 0
   const hasRightSlot = rightSlot !== undefined && rightSlot !== null
-  const allActions = [...primaryActions, ...overflowActions]
+  const roleDensityProfile = densityProfileOverride ?? resolveRoleDensityProfile(auth.getUser()?.roles, {
+    tenantId,
+    pageDomain: mcpContext?.pageDomain,
+    availableActionIds: [...primaryActions.map((action) => action.id), ...overflowActions.map((action) => action.id)],
+  })
+  const densityScopedActions = mergeToolbarActionsForDensity(primaryActions, overflowActions, roleDensityProfile)
+  const scopedPrimaryActions = densityScopedActions.primaryActions
+  const scopedOverflowActions = densityScopedActions.overflowActions
+  const allActions = [...scopedPrimaryActions, ...scopedOverflowActions]
 
   useEffect(() => {
     const handleOutsideClick = (event: MouseEvent): void => {
@@ -107,9 +121,9 @@ export function PageToolbar({
           {hasSubtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
         </div>
 
-        {primaryActions.length > 0 && (
+        {scopedPrimaryActions.length > 0 && (
           <div className="flex items-center gap-2">
-            {primaryActions.map((action) => {
+            {scopedPrimaryActions.map((action) => {
               const hasShortcut = typeof action.shortcut === 'string' && action.shortcut.length > 0
               const iconNode = action.icon ?? null
               const iconMargin = iconNode !== null ? 'ml-2' : undefined
@@ -138,7 +152,7 @@ export function PageToolbar({
           </div>
         )}
 
-        {overflowActions.length > 0 && (
+        {scopedOverflowActions.length > 0 && (
           <div className="relative" ref={overflowRef}>
             <Button
               variant="ghost"
@@ -150,7 +164,7 @@ export function PageToolbar({
             </Button>
             {overflowOpen && (
               <div className="absolute right-0 top-full z-50 mt-2 w-56 rounded-lg border bg-popover p-1 shadow-lg">
-                {overflowActions.map((action, idx) => {
+                {scopedOverflowActions.map((action, idx) => {
                   const hasShortcut = typeof action.shortcut === 'string' && action.shortcut.length > 0
                   const iconNode = action.icon ?? null
                   const destructive = action.variant === 'destructive'

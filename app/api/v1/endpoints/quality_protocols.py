@@ -14,6 +14,7 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, R
 from pydantic import BaseModel, Field, ConfigDict
 from sqlalchemy.orm import Session
 
+from app.core.data_quality_enforcement import build_dq_error_detail, evaluate_quality_protocol_datensatz
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.domains.inventory.api.inventory_auth import require_inventory_admin
@@ -30,6 +31,16 @@ from modules.agrar.services.quality_protocol_service import (
 from modules.agrar.repositories.quality_protocol_repo import QualityProtocolRepositoryImpl
 
 router = APIRouter()
+
+
+def _build_quality_protocol_dq_datensatz(data: dict[str, object]) -> dict[str, object]:
+    return {
+        "ernteannahme_id": data.get("harvest_acceptance_id"),
+        "quelle": data.get("source_type"),
+        "feuchte_pct": data.get("moisture_pct"),
+        "protein_pct": data.get("protein_pct"),
+        "hl_gewicht": data.get("hl_weight_kg_per_hl"),
+    }
 
 
 # ── Pydantic Models ───────────────────────────────────────────────────────────────
@@ -149,7 +160,12 @@ async def create_protocol(
 ):
     """Erstellt ein neues Qualitätsprotokoll."""
     user_id = _get_user_id_from_request(request)
-    
+    dq_result = evaluate_quality_protocol_datensatz(
+        _build_quality_protocol_dq_datensatz(payload.model_dump(mode="python"))
+    )
+    if not dq_result.bestanden:
+        raise HTTPException(status_code=422, detail=build_dq_error_detail("Qualitaetsprotokoll", dq_result))
+
     create_input = QualityProtocolCreate(
         tenant_id=tenant_id,
         harvest_acceptance_id=payload.harvest_acceptance_id,
@@ -295,7 +311,32 @@ async def import_protocol_from_csv(
     # Lese Dateiinhalt
     content = await file.read()
     csv_content = content.decode("utf-8")
-    
+    import csv
+    from io import StringIO
+
+    row = next(csv.DictReader(StringIO(csv_content)), None)
+    if row is None:
+        raise HTTPException(status_code=422, detail="CSV file is empty")
+
+    def _parse_float(value: Optional[str]) -> float | None:
+        if value is None or value.strip() == "":
+            return None
+        return float(value.replace(",", "."))
+
+    dq_result = evaluate_quality_protocol_datensatz(
+        _build_quality_protocol_dq_datensatz(
+            {
+                "harvest_acceptance_id": harvest_acceptance_id,
+                "source_type": "import",
+                "moisture_pct": _parse_float(row.get("moisture_pct")),
+                "protein_pct": _parse_float(row.get("protein_pct")),
+                "hl_weight_kg_per_hl": _parse_float(row.get("hl_weight_kg_per_hl")),
+            }
+        )
+    )
+    if not dq_result.bestanden:
+        raise HTTPException(status_code=422, detail=build_dq_error_detail("Qualitaetsprotokoll", dq_result))
+
     repo = QualityProtocolRepositoryImpl(db)
     protocol = import_from_csv(
         repo,
@@ -323,7 +364,23 @@ async def import_protocol_from_json(
     # Lese Dateiinhalt
     content = await file.read()
     json_content = content.decode("utf-8")
-    
+    import json
+
+    data = json.loads(json_content)
+    dq_result = evaluate_quality_protocol_datensatz(
+        _build_quality_protocol_dq_datensatz(
+            {
+                "harvest_acceptance_id": harvest_acceptance_id,
+                "source_type": "import",
+                "moisture_pct": data.get("moisture_pct"),
+                "protein_pct": data.get("protein_pct"),
+                "hl_weight_kg_per_hl": data.get("hl_weight_kg_per_hl"),
+            }
+        )
+    )
+    if not dq_result.bestanden:
+        raise HTTPException(status_code=422, detail=build_dq_error_detail("Qualitaetsprotokoll", dq_result))
+
     repo = QualityProtocolRepositoryImpl(db)
     protocol = import_from_json(
         repo,

@@ -3,6 +3,25 @@
 **Zweck:** Umsetzung der ADR-basierten Architekturarbeit in konkrete Epics, Arbeitspakete und Delivery-Waves  
 **Quelle:** [ADR Clusters and Epics](../../architecture/adr-clusters-and-epics.md), [Top-50 Gap Backlog Landhandel](2026-03-06-top-50-gap-backlog-landhandel.md)
 
+## Statusabgleich 2026-03-14
+
+Dieses Dokument bleibt die Architektur- und Delivery-Zerlegung der Waves.
+Der operative Wahrheitsstand fuer bereits umgesetzte Waves liegt in
+`docs/architecture/process-kernel/STATUS.md`.
+
+Standabgleich:
+
+- Waves `1` bis `22` sind im Process-Kernel-Status als abgeschlossen dokumentiert
+- besonders relevante neuere Abschluesse:
+  - `Wave 20`: Audit-Hash-Kette, GoBD-Vollstaendigkeit, Optimistic Locking
+  - `Wave 21`: Preisformel-Engine, Settlement-Journal-Bridge, E2E-Referenz bis Journal
+  - `Wave 22`: Command Palette, zentraler Action-Dispatch, Mask-Registry-Surfacing
+
+Hinweis:
+- Dieses Dokument ist kein feingranulares Fortschrittsprotokoll je Commit.
+- Fuer belastbare Aussagen zu Teststand und Lieferstatus immer die jeweiligen
+  `wave-*/STATUS.md`-Dateien gegenpruefen.
+
 ## Annahmen zu Owners
 
 Da noch kein verbindliches Delivery-Board mit Teamzuordnung im Repo existiert, arbeitet dieses Dokument mit Rollen-Ownern:

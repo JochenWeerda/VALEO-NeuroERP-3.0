@@ -1,6 +1,6 @@
 # VALEO Spitzenposition – Arbeitsaufteilung Codex vs. Hauptstrang
 
-**Stand:** 2026-03-08  
+**Stand:** 2026-03-14  
 **Zweck:** Gegenseitige Kontrolle, Vermeidung von Doppelarbeit, klare Verantwortlichkeiten
 
 ---
@@ -47,9 +47,10 @@ Tasks mit geringerer Abhängigkeit vom Kern-Architektur-Pfad, überwiegend Front
 | 005 | erledigt (Erntefenster-Vorlagen in `process_config`; API `/admin/erntefenster-templates`; Konfig-UI `agrar/erntefenster-konfig`) | 2026-03-07 |
 | 012 | erledigt (Sandbox-Preview fuer Prozessvarianten + saisonale Kampagnen via `/admin/workflow-sandbox/preview`; UI `workflow/workflow-sandbox`; Deep-Link aus `agrar/erntefenster-konfig`; JSON-Export fuer Review/Audit) | 2026-03-07 |
 | 019 | erledigt (Policy-Explainability in `PolicyBadge`: Status + Begründung + Regel/Freigabe-Details via `buildDecisionView`) | 2026-03-07 |
-| 022 | erledigt (Manifest-Shortcuts + Action-Hotkeys `Ctrl+Alt+N/R/B/E` + Anzeige in Palette) | 2026-03-07 |
-| 025 | erledigt (Quick-Action-Integration in `ListReport`/`ObjectPage`/`OverviewPage`/`Wizard`; `PageToolbar` + `ActionDispatchContext` fuer Voice/Palette/Agent) | 2026-03-07 |
+| 022 | erledigt (Palette auf zentralen `ActionDispatchContext` gehoben; Mask Registry `/api/v1/ui/mask-registry`; Dispatcher-Fallbacks und Navigation-Wiring abgesichert) | 2026-03-14 |
+| 025 | erledigt (kontextsensitive Quick-Action-Registry mit `context_scope`/`relevance_score`/`surfaces`; gemeinsame Toolbar-Aufloesung fuer `ListReport`/`ObjectPage`/`OverviewPage`/`Wizard`; KI-Usability-API auf denselben Contract gezogen) | 2026-03-15 |
 | 026 | erledigt (`FormBuilder`/`validator`: Pflichtfeldpruefung + fachliche Validierungshinweise) | 2026-03-07 |
+| 027 | erledigt (gemeinsamer Rollen-Density-Contract fuer `PageToolbar`, `OverviewPage`, `ObjectPage`, `ListReport`, `Wizard`, `ProcessStatusPanel` und `CompactDecisionCard`; tenant-/prozessbezogene Anhebung ueber `tenantId`, Domain, Approval- und Action-Kontext; backend-gespeiste Dichtehinweise aus Command- plus Policy-/Approval-Contracts; Manifest-Anbindung auch fuer AP, Closing, USTVA, Zahlungslauf, Lastschriften, Settlement-Preview sowie kompakte Listen-/Badge-Surfacings) | 2026-03-15 |
 | 028 | erledigt (zentrale Recovery-UI in `ErrorState` + `ErrorBoundary` + Router-Fallbacks mit Retry/Reload/Home) | 2026-03-07 |
 | 029 | erledigt (`AskValeo`: Konfidenz, Quellen, Folgeaktion via `ActionDispatchContext`) | 2026-03-07 |
 | 030 | erledigt (Terminologie in Shared-UX: `ErrorState`, `FormBuilder`, `policy/decision-view`) | 2026-03-07 |
@@ -59,6 +60,15 @@ Tasks mit geringerer Abhängigkeit vom Kern-Architektur-Pfad, überwiegend Front
 | 046 | erledigt (ESG-Report: Backend `sustainability.py` mit N/P2O5/CO2e-Aggregation; Frontend `esg-report.tsx` + API-Hooks; CSV/PDF-Export; Nav unter Compliance) | 2026-03-07 |
 | 047 | erledigt (Benchmark-Cockpit: API `/analytics/benchmark` mit eigenen KPIs + Branchenreferenz; UI `controlling/benchmark-cockpit` unter Controlling) | 2026-03-07 |
 | 048 | teilweise (Admin-Seite `admin/agenten-integration`, docs/AGENT-INTEGRATION.md, Agent-Manifest `/api/v1/admin/agent-manifest`; MCP-Server/Security Hauptstrang) | 2026-03-08 |
+
+### Statusabgleich 2026-03-14
+
+- Der fruehere Eintrag zu `022` war zu eng auf Hotkeys und Palette-Anzeige beschrieben.
+- Der tatsaechliche Endstand umfasst jetzt auch:
+  - zentrale Dispatcher-Anbindung
+  - Mask-Registry-Surfacing fuer Prozessmasken
+  - Testabdeckung fuer Palette, Dispatcher-Fallbacks und Navigation-Wiring
+- Operative Referenz fuer den Detailstand: `docs/architecture/process-kernel/wave-22/STATUS.md`
 
 ---
 

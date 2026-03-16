@@ -10,6 +10,10 @@ from decimal import Decimal, InvalidOperation
 from typing import Any, Dict, List
 
 from .base import ConnectorParser, NormalizedItem, NormalizedLine
+from app.core.data_quality_enforcement import (
+    DQValidationException,
+    evaluate_asset_ledger_connector_datensatz,
+)
 
 
 class AssetLedgerParser(ConnectorParser):
@@ -43,7 +47,7 @@ class AssetLedgerParser(ConnectorParser):
             return []
 
         items: List[NormalizedItem] = []
-        for row in rows:
+        for row_number, row in enumerate(rows, start=2):
             row = {k.strip().strip("\ufeff"): (v.strip() if v else "") for k, v in row.items()}
             date_str = row.get(date_fmt) or row.get("buchungsdatum") or row.get("entry_date", "")
             doc_no_val = row.get(doc_no) or row.get("belegnummer") or ""
@@ -53,19 +57,27 @@ class AssetLedgerParser(ConnectorParser):
             asset_no = row.get(asset_no_col) or row.get("anlagennr")
             posting_type = row.get(posting_type_col) or row.get("buchungsart")
 
-            if not date_str or not account:
-                continue
+            dc_col = mapping.get("dc_column") or "soll_haben"
+            dc_val = (row.get(dc_col) or row.get("soll_haben") or "S").strip().upper()[:1]
+            dq_result = evaluate_asset_ledger_connector_datensatz(
+                {
+                    "booking_date": date_str,
+                    "account": account,
+                    "amount": str(amt_str).replace(",", "."),
+                    "dc": dc_val,
+                }
+            )
+            if not dq_result.bestanden:
+                raise DQValidationException(
+                    "AssetLedgerConnectorImport",
+                    dq_result,
+                ) from ValueError(f"Invalid asset-ledger connector row {row_number}")
 
             try:
                 amount = Decimal(str(amt_str).replace(",", "."))
             except (InvalidOperation, ValueError):
-                amount = Decimal("0")
+                raise ValueError(f"Invalid asset-ledger amount in row {row_number}: {amt_str}")
 
-            if amount <= 0:
-                continue
-
-            dc_col = mapping.get("dc_column") or "soll_haben"
-            dc_val = (row.get(dc_col) or row.get("soll_haben") or "S").strip().upper()[:1]
             dc = "D" if dc_val in ("S", "D", "1") else "C"
             line = NormalizedLine(account=account, dc=dc, amount=amount)
             line.cost_center = row.get("kostenstelle") or row.get("cost_center")

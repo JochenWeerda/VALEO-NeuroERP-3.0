@@ -9,6 +9,7 @@ import pytest
 from app.core.connectors.base import NormalizedItem, NormalizedLine, validate_item_balance
 from app.core.connectors.payroll_parser import PayrollParser
 from app.core.connectors.asset_ledger_parser import AssetLedgerParser
+from app.core.data_quality_enforcement import DQValidationException
 
 
 class TestValidateItemBalance:
@@ -66,6 +67,15 @@ class TestPayrollParser:
         assert len(items[0].lines) == 2
         assert validate_item_balance(items[0]) is None
 
+    def test_parse_rejects_missing_account_via_dq(self, parser):
+        raw = (
+            b"buchungsdatum;konto;betrag;soll_haben;buchungstext\n"
+            b"2026-01-15;;100,50;S;Lohn\n"
+        )
+        with pytest.raises(DQValidationException) as exc:
+            parser.parse(raw, {"delimiter": ";", "encoding": "utf-8"}, {})
+        assert exc.value.entity_typ == "PayrollConnectorImport"
+
 
 class TestAssetLedgerParser:
     """Asset-Ledger-Parser: CSV mit Anlagenbuchungen."""
@@ -91,3 +101,12 @@ class TestAssetLedgerParser:
         assert items[0].booking_date == "2026-01-15"
         err = validate_item_balance(items[0])
         assert err is None, err
+
+    def test_parse_rejects_non_positive_amount_via_dq(self, parser):
+        raw = (
+            b"buchungsdatum;konto;betrag;soll_haben;gegenkonto;buchungstext\n"
+            b"2026-01-15;0840;0;S;4800;Abschreibung\n"
+        )
+        with pytest.raises(DQValidationException) as exc:
+            parser.parse(raw, {"delimiter": ";", "encoding": "utf-8"}, {})
+        assert exc.value.entity_typ == "AssetLedgerConnectorImport"

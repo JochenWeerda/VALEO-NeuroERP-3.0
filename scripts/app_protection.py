@@ -72,13 +72,11 @@ class AppProtection:
         """Lädt die Konfiguration aus der YAML-Datei."""
         default_config = {
             "protected_files": [
-                "scripts/streamlit_app_mcp_integration.py",
                 "scripts/cursor_prompt_integration.py",
                 "scripts/error_handler.py",
                 "scripts/app_protection.py",
                 "scripts/genxais_prompt_generator.py",
                 "scripts/launch_genxais_prompt_generator.py",
-                "scripts/streamlit_dashboard.py",
                 "config/version.yaml",
                 "start_app.sh",
                 "start_app.bat",

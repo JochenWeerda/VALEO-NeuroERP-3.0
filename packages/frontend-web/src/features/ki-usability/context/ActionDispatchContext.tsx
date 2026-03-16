@@ -76,6 +76,17 @@ export function ActionDispatchProvider({ children }: { children: ReactNode }): J
         navigate(path)
         return true
       }
+      const dynamicPath = typeof params?.path === 'string' ? params.path : null
+      if (dynamicPath) {
+        navigate(dynamicPath)
+        return true
+      }
+      const eventName = typeof params?.eventName === 'string' ? params.eventName : null
+      if (eventName) {
+        const detail = params?.eventDetail
+        window.dispatchEvent(new CustomEvent(eventName, { detail }))
+        return true
+      }
       if (GLOBAL_SHORTCUT_ACTION_IDS.has(actionId)) {
         await globalShortcutManager.execute(actionId as GlobalShortcutAction)
         return true

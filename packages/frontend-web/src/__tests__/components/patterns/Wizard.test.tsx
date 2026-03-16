@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Wizard } from '@/components/patterns/Wizard'
 
 describe('Wizard', () => {
@@ -16,67 +17,60 @@ describe('Wizard', () => {
     },
   ]
 
-  it('sollte rendern', () => {
-    render(
-      <Wizard
-        title="Test Wizard"
-        steps={mockSteps}
-        onFinish={vi.fn()}
-        onCancel={vi.fn()}
-      />,
+  function renderWizard(onFinish = vi.fn()) {
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+        },
+      },
+    })
+
+    return render(
+      <QueryClientProvider client={queryClient}>
+        <Wizard
+          title="Test Wizard"
+          steps={mockSteps}
+          onFinish={onFinish}
+          onCancel={vi.fn()}
+        />
+      </QueryClientProvider>,
     )
-    
+  }
+
+  it('sollte rendern', () => {
+    renderWizard()
+
     expect(screen.getByText('Test Wizard')).toBeInTheDocument()
     expect(screen.getByText('Schritt 1')).toBeInTheDocument()
   })
 
   it('sollte ersten Schritt-Inhalt anzeigen', () => {
-    render(
-      <Wizard
-        title="Test Wizard"
-        steps={mockSteps}
-        onFinish={vi.fn()}
-        onCancel={vi.fn()}
-      />,
-    )
-    
+    renderWizard()
+
     expect(screen.getByText('Inhalt Schritt 1')).toBeInTheDocument()
   })
 
   it('sollte Weiter-Button haben', () => {
-    render(
-      <Wizard
-        title="Test Wizard"
-        steps={mockSteps}
-        onFinish={vi.fn()}
-        onCancel={vi.fn()}
-      />,
-    )
-    
+    renderWizard()
+
     const weiterButton = screen.getByRole('button', { name: /weiter/i })
     expect(weiterButton).toBeInTheDocument()
   })
 
   it('sollte onFinish aufrufen im letzten Schritt', () => {
     const onFinish = vi.fn()
-    
-    render(
-      <Wizard
-        title="Test Wizard"
-        steps={mockSteps}
-        onFinish={onFinish}
-        onCancel={vi.fn()}
-      />,
-    )
-    
+
+    renderWizard(onFinish)
+
     // Navigiere zum letzten Schritt
     const weiterButton = screen.getByRole('button', { name: /weiter/i })
     fireEvent.click(weiterButton)
-    
+
     // Im letzten Schritt sollte der "Abschliessen"-Button erscheinen
     const abschliessenButton = screen.getByRole('button', { name: /abschliessen/i })
     fireEvent.click(abschliessenButton)
-    
+
     expect(onFinish).toHaveBeenCalled()
   })
 })

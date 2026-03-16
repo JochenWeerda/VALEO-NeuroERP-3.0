@@ -21,7 +21,9 @@ from sqlalchemy.orm import Session
 
 from sqlalchemy.orm import selectinload
 
+from app.core.data_quality_enforcement import evaluate_feldbuch_massnahme_datensatz
 from app.core.database import get_db
+from app.core.data_quality_enforcement import DQValidationException
 from app.core.tenant import get_tenant_id
 from app.core.security import get_user_id_from_request
 from app.core.uuid7 import uuid7
@@ -36,6 +38,76 @@ except ImportError as e:
     logger.warning("Portal Feldbuch: import_csv nicht verfügbar (%s)", e)
 
 router = APIRouter(tags=["portal", "feldbuch"])
+
+
+def _validate_portal_feldbuch_csv(content: bytes) -> None:
+    text = content.decode("utf-8-sig", errors="replace")
+    delimiter = ";" if ";" in text.split("\n")[0] else ","
+    reader = csv.DictReader(io.StringIO(text), delimiter=delimiter)
+    column_map = {
+        "datum": "datum",
+        "date": "datum",
+        "schlag": "schlag_name",
+        "field": "schlag_name",
+        "schlag_name": "schlag_name",
+        "typ": "typ",
+        "type": "typ",
+        "flaeche": "flaeche_ha",
+        "fläche": "flaeche_ha",
+        "area": "flaeche_ha",
+        "menge": "menge",
+        "quantity": "menge",
+    }
+    typ_map = {
+        "psm": "psm",
+        "pflanzenschutz": "psm",
+        "pflanzenschutzmittel": "psm",
+        "herbizid": "psm",
+        "fungizid": "psm",
+        "insektizid": "psm",
+        "düngung": "duengung",
+        "duengung": "duengung",
+        "dünger": "duengung",
+        "duenger": "duengung",
+        "fertilizer": "duengung",
+        "aussaat": "aussaat",
+        "sowing": "aussaat",
+        "seeding": "aussaat",
+        "ernte": "ernte",
+        "harvest": "ernte",
+        "bodenbearbeitung": "bodenbearbeitung",
+        "tillage": "bodenbearbeitung",
+        "soil": "bodenbearbeitung",
+    }
+    for row_num, row in enumerate(reader, start=2):
+        normalized: dict[str, str] = {}
+        for key, value in row.items():
+            if key is None:
+                continue
+            mapped = column_map.get(key.strip().lower().replace(" ", "_"))
+            if mapped:
+                normalized[mapped] = (value or "").strip()
+
+        def _parse_float(value: Optional[str]) -> float | str | None:
+            if value is None or value == "":
+                return None
+            try:
+                return float(value.replace(",", "."))
+            except ValueError:
+                return value
+
+        dq_result = evaluate_feldbuch_massnahme_datensatz(
+            {
+                "datum": normalized.get("datum"),
+                "schlag_name": normalized.get("schlag_name"),
+                "typ": typ_map.get(normalized.get("typ", "").lower(), "sonstiges"),
+                "flaeche_ha": _parse_float(normalized.get("flaeche_ha")),
+                "menge": _parse_float(normalized.get("menge")),
+            }
+        )
+        if not dq_result.bestanden:
+            detail = "; ".join(v.meldung for v in dq_result.verletzungen if v.severity == "FEHLER")
+            raise HTTPException(status_code=422, detail=f"Zeile {row_num}: {detail}")
 
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -543,6 +615,10 @@ async def portal_import(
             detail="Feldbuch-Import (modules.agrar) nicht verfügbar",
         )
     content = await file.read()
-    result = import_csv(db, file_content=content, tenant_id=tenant_id, customer_id=customer_id)
+    _validate_portal_feldbuch_csv(content)
+    try:
+        result = import_csv(db, file_content=content, tenant_id=tenant_id, customer_id=customer_id)
+    except DQValidationException as exc:
+        raise HTTPException(status_code=422, detail=exc.detail) from exc
     db.commit()
     return result

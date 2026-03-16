@@ -78,13 +78,17 @@ function collectNavItems(items: NavItem[]): NavItem[] {
 function resolveModuleToFile(moduleSpecifier: string): string | undefined {
   const normalized = normalizeModule(moduleSpecifier)
   const relativePath = normalized.replace(/^@\//, '')
-  const tsxPath = path.join(SRC_DIR, `${relativePath}.tsx`)
-  if (fs.existsSync(tsxPath)) {
-    return tsxPath
-  }
-  const tsPath = path.join(SRC_DIR, `${relativePath}.ts`)
-  if (fs.existsSync(tsPath)) {
-    return tsPath
+  const candidates = [
+    path.join(SRC_DIR, `${relativePath}.tsx`),
+    path.join(SRC_DIR, `${relativePath}.ts`),
+    path.join(SRC_DIR, relativePath, 'index.tsx'),
+    path.join(SRC_DIR, relativePath, 'index.ts'),
+  ]
+
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) {
+      return candidate
+    }
   }
   return undefined
 }

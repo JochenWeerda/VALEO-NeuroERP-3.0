@@ -15,6 +15,10 @@ import csv
 import io
 
 from app.core.database import get_db
+from app.core.data_quality_enforcement import (
+    build_dq_error_detail,
+    evaluate_payment_import_datensatz,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -65,6 +69,14 @@ class MatchResult(BaseModel):
     match_reason: str
 
 
+def _build_payment_import_datensatz(booking_date: object, amount: object, currency: object = "EUR") -> dict:
+    return {
+        "booking_date": booking_date,
+        "amount": amount,
+        "currency": currency or "EUR",
+    }
+
+
 @router.post("/import/csv", response_model=List[PaymentEntry])
 async def import_payments_csv(
     file: UploadFile = File(...),
@@ -79,21 +91,37 @@ async def import_payments_csv(
         csv_reader = csv.DictReader(io.StringIO(text_content))
         
         entries: list[dict] = []
-        for row in csv_reader:
+        for row_number, row in enumerate(csv_reader, start=2):
+            booking_date_raw = row.get('date', row.get('booking_date', ''))
+            amount_raw = str(row.get('amount', '0')).replace(',', '.')
+            currency = row.get('currency', row.get('waehrung', 'EUR'))
+            dq_result = evaluate_payment_import_datensatz(
+                _build_payment_import_datensatz(
+                    booking_date=booking_date_raw,
+                    amount=amount_raw,
+                    currency=currency,
+                )
+            )
+            if not dq_result.bestanden:
+                raise HTTPException(
+                    status_code=422,
+                    detail=build_dq_error_detail("Zahlungsimport", dq_result),
+                )
+
             try:
-                booking_date = datetime.strptime(row.get('date', row.get('booking_date', '')), '%Y-%m-%d').date()
-                amount = Decimal(str(row.get('amount', '0')).replace(',', '.'))
-                reference = row.get('reference', '')
-                remittance_info = row.get('remittance_info', '')
-                entries.append({
-                    "booking_date": booking_date,
-                    "amount": amount,
-                    "reference": reference,
-                    "remittance_info": remittance_info,
-                })
+                booking_date = datetime.strptime(booking_date_raw, '%Y-%m-%d').date()
+                amount = Decimal(amount_raw)
             except Exception as e:
-                logger.warning(f"Skipping invalid CSV row: {e}")
-                continue
+                raise HTTPException(status_code=422, detail=f"Failed to parse CSV row {row_number}: {str(e)}") from e
+
+            reference = row.get('reference', '')
+            remittance_info = row.get('remittance_info', '')
+            entries.append({
+                "booking_date": booking_date,
+                "amount": amount,
+                "reference": reference,
+                "remittance_info": remittance_info,
+            })
 
         if not entries:
             return []

@@ -15,6 +15,7 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 
+from app.core.data_quality_enforcement import build_dq_error_detail, evaluate_harvest_acceptance_datensatz
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.core.security import get_user_id_from_request
@@ -68,6 +69,17 @@ PricingMode = Literal["fixed_contract", "spot_daily", "exchange_fix_later"]
 AcceptanceMode = Literal["STORAGE_ONLY", "PURCHASE_AT_DELIVERY_PTBF", "ADVANCE_ON_STORAGE"]
 OwnershipType = Literal["THIRD_PARTY_STOCK", "OWN_STOCK"]
 VatEvent = Literal["NO_INVOICE", "PROVISIONAL_CREDIT_NOTE_CREATED", "FINAL_CREDIT_NOTE_CREATED", "CORRECTION_ISSUED"]
+
+
+def _build_harvest_acceptance_dq_datensatz(data: dict[str, object]) -> dict[str, object]:
+    return {
+        "annahme_nr": data.get("acceptance_number"),
+        "kunde_id": data.get("customer_id"),
+        "lieferdatum": str(data.get("delivery_date") or ""),
+        "preismodell": data.get("pricing_mode") or "spot_daily",
+        "annahmemodus": data.get("acceptance_mode") or "PURCHASE_AT_DELIVERY_PTBF",
+        "land": data.get("origin_country_code") or "DE",
+    }
 
 
 # ── NUTS-2 Validation & Helper ──────────────────────────────────────────────
@@ -661,6 +673,25 @@ async def create_harvest_acceptance(
     db: Session = Depends(get_db),
 ):
     """Ernte-Annahme anlegen."""
+    acceptance_number = payload.acceptance_number
+    if not acceptance_number:
+        timestamp = datetime.utcnow()
+        acceptance_number = f"HA-{timestamp.strftime('%Y%m%d')}-{uuid7()[:8].upper()}"
+
+    dq_result = evaluate_harvest_acceptance_datensatz(
+        _build_harvest_acceptance_dq_datensatz(
+            {
+                "acceptance_number": acceptance_number,
+                "customer_id": payload.customer_id,
+                "delivery_date": payload.delivery_date,
+                "pricing_mode": payload.pricing_mode,
+                "acceptance_mode": payload.acceptance_mode,
+                "origin_country_code": payload.origin_country_code,
+            }
+        )
+    )
+    if not dq_result.bestanden:
+        raise HTTPException(status_code=422, detail=build_dq_error_detail("ErnteAnnahme", dq_result))
     # Prüfe Kunde
     customer = db.query(Customer).filter(Customer.id == payload.customer_id, Customer.tenant_id == tenant_id).first()
     if not customer:
@@ -696,6 +727,21 @@ async def create_harvest_acceptance(
         # Format: HA-YYYY-MMDD-HHMMSS oder HA-YYYY-XXXXX
         timestamp = datetime.utcnow()
         acceptance_number = f"HA-{timestamp.strftime('%Y%m%d')}-{uuid7()[:8].upper()}"
+
+    dq_result = evaluate_harvest_acceptance_datensatz(
+        _build_harvest_acceptance_dq_datensatz(
+            {
+                "acceptance_number": acceptance_number,
+                "customer_id": payload.customer_id,
+                "delivery_date": payload.delivery_date,
+                "pricing_mode": payload.pricing_mode,
+                "acceptance_mode": payload.acceptance_mode,
+                "origin_country_code": payload.origin_country_code,
+            }
+        )
+    )
+    if not dq_result.bestanden:
+        raise HTTPException(status_code=422, detail=build_dq_error_detail("ErnteAnnahme", dq_result))
     
     # Prüfe auf Duplikat
     duplicate = (
@@ -895,10 +941,22 @@ async def update_harvest_acceptance(
     if acceptance.release_status not in ("draft", "provisional"):
         raise HTTPException(status_code=400, detail=f"Cannot update harvest acceptance in status '{acceptance.release_status}'. Only 'draft' or 'provisional' can be updated.")
     
-    user_id = _get_user_id_from_request(request)
-    
-    # Aktualisiere Felder
     update_data = payload.model_dump(exclude_unset=True)
+    effective_data = {
+        "acceptance_number": acceptance.acceptance_number,
+        "customer_id": acceptance.customer_id,
+        "delivery_date": update_data.get("delivery_date", acceptance.delivery_date),
+        "pricing_mode": update_data.get("pricing_mode", acceptance.pricing_mode),
+        "acceptance_mode": update_data.get("acceptance_mode", acceptance.acceptance_mode),
+        "origin_country_code": update_data.get("origin_country_code", acceptance.origin_country_code),
+    }
+    dq_result = evaluate_harvest_acceptance_datensatz(_build_harvest_acceptance_dq_datensatz(effective_data))
+    if not dq_result.bestanden:
+        raise HTTPException(status_code=422, detail=build_dq_error_detail("ErnteAnnahme", dq_result))
+
+    user_id = _get_user_id_from_request(request)
+
+    # Aktualisiere Felder
     for key, value in update_data.items():
         if hasattr(acceptance, key):
             setattr(acceptance, key, value)

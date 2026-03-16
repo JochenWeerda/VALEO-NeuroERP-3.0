@@ -10,6 +10,7 @@ import { apiClient } from '@/lib/axios'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { buildDecisionView } from '@/policy/decision-view'
 import { ProcessStatusPanel } from '@/components/workflow/ProcessStatusPanel'
+import { useApprovalDensityProfile } from '@/features/workflow/useApprovalDensityProfile'
 
 const createUstvaConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
@@ -581,11 +582,12 @@ export default function UStVAPage(): JSX.Element {
 
   const effectiveData = Object.keys(workspaceData).length > 0 ? workspaceData : data
   const approvalDecisionView = buildDecisionView(effectiveData?.approval_explainability)
+  const approvalDensityProfile = useApprovalDensityProfile('finance-vat', approvalDecisionView)
 
   return (
     <>
       {effectiveData?.id && approvalDecisionView !== null ? (
-        <ProcessStatusPanel view={approvalDecisionView} className="mb-4 px-4 py-3">
+        <ProcessStatusPanel view={approvalDecisionView} className="mb-4 px-4 py-3" densityProfileOverride={approvalDensityProfile}>
           <div className="mt-3 grid gap-3 md:grid-cols-3">
             <div>
               <div className="text-xs uppercase tracking-wide text-current/70">Workflowstatus</div>

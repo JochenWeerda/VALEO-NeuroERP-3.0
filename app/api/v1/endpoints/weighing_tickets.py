@@ -11,6 +11,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from ....core.config import settings
+from ....core.data_quality_enforcement import build_dq_error_detail, evaluate_weighing_ticket_datensatz
 from ....core.database import get_db
 from ....domains.shared.events import IntegrationEvent, get_event_publisher
 from ....infrastructure.eventbus.outbox import OutboxPublisher
@@ -26,6 +27,16 @@ from app.core.uuid7 import uuid7
 
 router = APIRouter()
 DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
+
+
+def _build_weighing_ticket_dq_datensatz(data: dict[str, Any]) -> dict[str, object]:
+    return {
+        "wiegeschein_nr": data.get("ticket_number"),
+        "kontrakt_nr": data.get("reference_doc"),
+        "fahrzeug_kennzeichen": data.get("vehicle_plate"),
+        "brutto_gewicht_kg": data.get("gross_weight"),
+        "netto_gewicht_kg": data.get("net_weight"),
+    }
 
 
 class WeighingTicketOut(BaseSchema):
@@ -194,6 +205,20 @@ async def create_weighing_ticket(
 ):
     """POST Wiegescheine anlegen"""
     tid = tenant_id or DEFAULT_TENANT
+    net_weight = _validate_and_compute_weights(payload.gross_weight, payload.tare_weight, payload.net_weight)
+    dq_result = evaluate_weighing_ticket_datensatz(
+        _build_weighing_ticket_dq_datensatz(
+            {
+                "ticket_number": payload.ticket_number,
+                "reference_doc": payload.reference_doc,
+                "vehicle_plate": payload.vehicle_plate,
+                "gross_weight": payload.gross_weight,
+                "net_weight": net_weight,
+            }
+        )
+    )
+    if not dq_result.bestanden:
+        raise HTTPException(status_code=422, detail=build_dq_error_detail("Wiegeschein", dq_result))
     ticket = WeighingTicket(
         id=uuid7(),
         ticket_number=payload.ticket_number,
@@ -201,7 +226,7 @@ async def create_weighing_ticket(
         vehicle_plate=payload.vehicle_plate,
         gross_weight=payload.gross_weight,
         tare_weight=payload.tare_weight,
-        net_weight=_validate_and_compute_weights(payload.gross_weight, payload.tare_weight, payload.net_weight),
+        net_weight=net_weight,
         first_weighing_at=payload.first_weighing_at,
         second_weighing_at=payload.second_weighing_at,
         moisture_pct=payload.moisture_pct,
@@ -209,7 +234,7 @@ async def create_weighing_ticket(
         impurities_pct=payload.impurities_pct,
         hl_weight=payload.hl_weight,
         billing_weight=_derive_billing_weight(
-            net_weight=_validate_and_compute_weights(payload.gross_weight, payload.tare_weight, payload.net_weight),
+            net_weight=net_weight,
             billing_weight=payload.billing_weight,
             moisture_pct=payload.moisture_pct,
             impurities_pct=payload.impurities_pct,
@@ -251,6 +276,19 @@ async def update_weighing_ticket(
         impurities_pct=data.get("impurities_pct", ticket.impurities_pct),
         quality_data=data.get("quality_data", ticket.quality_data),
     )
+    dq_result = evaluate_weighing_ticket_datensatz(
+        _build_weighing_ticket_dq_datensatz(
+            {
+                "ticket_number": ticket.ticket_number,
+                "reference_doc": data.get("reference_doc", ticket.reference_doc),
+                "vehicle_plate": data.get("vehicle_plate", ticket.vehicle_plate),
+                "gross_weight": gross_weight,
+                "net_weight": data.get("net_weight"),
+            }
+        )
+    )
+    if not dq_result.bestanden:
+        raise HTTPException(status_code=422, detail=build_dq_error_detail("Wiegeschein", dq_result))
 
     for field, val in data.items():
         setattr(ticket, field, val)

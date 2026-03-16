@@ -231,4 +231,19 @@ def build_core_command_catalog() -> list[CommandDefinition]:
             requires_human_confirmation=True,
             post_event="DirectDebitExecuted",
         ),
+        CommandDefinition(
+            command_name="CreatePurchaseOrder",
+            aggregate_type="purchase_order",
+            preconditions=[
+                CommandPrecondition(
+                    field="approval_status",
+                    operator="eq",
+                    expected="approved",
+                    error_code="NOT_APPROVED",
+                ),
+            ],
+            allowed_roles=["buyer", "einkauf_manager"],
+            allowed_agent_types=["procurement_agent"],
+            post_event="PurchaseOrderCreated",
+        ),
     ]

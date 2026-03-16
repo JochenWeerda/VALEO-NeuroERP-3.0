@@ -8,6 +8,7 @@ import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/axios'
 import { buildDecisionView } from '@/policy/decision-view'
 import { ProcessStatusPanel } from '@/components/workflow/ProcessStatusPanel'
+import { useApprovalDensityProfile } from '@/features/workflow/useApprovalDensityProfile'
 
 const abschlussConfig: MaskConfig = {
   title: 'Monats-/Jahresabschluss',
@@ -611,10 +612,12 @@ export default function AbschlussPage(): JSX.Element {
     navigate('/finance/abschluss')
   }
 
+  const approvalDensityProfile = useApprovalDensityProfile('finance-closing', approvalDecisionView)
+
   return (
     <>
       {effectiveData?.id && approvalDecisionView !== null ? (
-        <ProcessStatusPanel view={approvalDecisionView} className="mb-4 px-4 py-3">
+        <ProcessStatusPanel view={approvalDecisionView} className="mb-4 px-4 py-3" densityProfileOverride={approvalDensityProfile}>
           <div className="mt-3 grid gap-3 md:grid-cols-3">
             <div>
               <div className="text-xs uppercase tracking-wide text-current/70">Checklistenstatus</div>

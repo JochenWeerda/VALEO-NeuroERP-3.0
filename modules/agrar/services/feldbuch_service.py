@@ -12,6 +12,10 @@ from typing import Any, Optional
 
 from sqlalchemy.orm import Session
 
+from app.core.data_quality_enforcement import (
+    DQValidationException,
+    evaluate_feldbuch_massnahme_datensatz,
+)
 from app.core.uuid7 import uuid7
 from app.infrastructure.models.agrar_models import FeldbuchMassnahme, FeldbuchSchlag
 
@@ -284,11 +288,20 @@ def import_csv(
             if mapped:
                 normalized[mapped] = (value or "").strip()
 
-        # Pflichtfeld: Datum
         datum_raw = normalized.get("datum", "")
-        if not datum_raw:
-            errors.append(f"Zeile {row_num}: Datum fehlt, Zeile übersprungen")
-            continue
+        dq_result = evaluate_feldbuch_massnahme_datensatz(
+            {
+                "datum": datum_raw,
+                "schlag_name": normalized.get("schlag_name"),
+                "typ": _TYP_MAP.get(normalized.get("typ", "sonstiges").lower().strip(), "sonstiges"),
+                "flaeche_ha": (normalized.get("flaeche") or "").replace(",", "."),
+                "menge": (normalized.get("menge") or "").replace(",", "."),
+            }
+        )
+        if not dq_result.bestanden:
+            raise DQValidationException("FeldbuchMassnahme", dq_result) from ValueError(
+                f"Invalid feldbuch CSV row {row_num}"
+            )
 
         try:
             # Verschiedene Datumsformate versuchen
@@ -301,14 +314,10 @@ def import_csv(
             else:
                 raise ValueError(f"Unbekanntes Datumsformat: {datum_raw}")
         except ValueError as e:
-            errors.append(f"Zeile {row_num}: {e}")
-            continue
+            raise ValueError(f"Zeile {row_num}: {e}") from e
 
         # Schlag ermitteln oder anlegen
         schlag_name = normalized.get("schlag_name", "").strip()
-        if not schlag_name:
-            errors.append(f"Zeile {row_num}: Schlag-Name fehlt, Zeile übersprungen")
-            continue
 
         try:
             schlag = _get_or_create_schlag_by_name(
@@ -328,8 +337,7 @@ def import_csv(
                 except ValueError:
                     pass
         except Exception as e:
-            errors.append(f"Zeile {row_num}: Schlag-Fehler: {e}")
-            continue
+            raise ValueError(f"Zeile {row_num}: Schlag-Fehler: {e}") from e
 
         # Typ normalisieren
         typ_raw = normalized.get("typ", "sonstiges").lower().strip()

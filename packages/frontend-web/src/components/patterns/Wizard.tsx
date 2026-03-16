@@ -4,7 +4,11 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { createMCPMetadata } from '@/design/mcp-schemas/component-metadata'
 import { Check, Loader2 } from 'lucide-react'
-import { useActionsForMask, useActionDispatchOptional } from '@/features/ki-usability'
+import { buildToolbarActionsFromRegistry, useActionsForMask, useActionDispatchOptional } from '@/features/ki-usability'
+import { auth } from '@/lib/auth'
+import { resolveRoleDensityProfile } from '@/features/role-density'
+import { useTenant } from '@/hooks/useTenant'
+import { useUIDensityManifest } from '@/lib/api/ui-density-manifest'
 
 interface WizardLabels {
   back: string
@@ -85,8 +89,20 @@ export function Wizard({
   mcpContext,
 }: WizardProps): JSX.Element {
   const actionDispatch = useActionDispatchOptional()
+  const { tenantId } = useTenant()
   const { data: actionResponse } = useActionsForMask(mcpContext?.process, mcpContext?.entityType)
   const mergedLabels = { ...DEFAULT_LABELS, ...labels }
+  const densityManifestQuery = useUIDensityManifest(mcpContext?.process)
+  const roleDensityProfile = useMemo(
+    () =>
+      resolveRoleDensityProfile(auth.getUser()?.roles, {
+        tenantId,
+        pageDomain: mcpContext?.process,
+        availableActionIds: actionResponse?.actions?.map((action) => action.id) ?? [],
+        backendDensity: densityManifestQuery.data?.entry?.recommended_density,
+      }),
+    [actionResponse?.actions, densityManifestQuery.data?.entry?.recommended_density, mcpContext?.process, tenantId],
+  )
 
   const safeSteps = useMemo(() => steps.filter((step) => step != null), [steps])
 
@@ -109,38 +125,28 @@ export function Wizard({
   }, [activeStepId, safeSteps])
 
   const activeStep = safeSteps[activeIndex]
-  const quickActions = useMemo<ToolbarAction[]>(() => {
-    return (actionResponse?.actions ?? []).map((action) => ({
-      id: action.id,
-      label: action.label,
-      shortcut: action.shortcut,
-      onClick: () => {
-        if (actionDispatch) {
-          void actionDispatch.dispatch(action.id)
-        }
-      },
-      variant: action.category === 'danger' ? 'destructive' : 'outline',
-      mcp: { intent: action.id, requiredData: action.required_data },
-    }))
-  }, [actionDispatch, actionResponse?.actions])
+  const contextualToolbarActions = useMemo(
+    () => buildToolbarActionsFromRegistry(actionResponse?.actions, actionDispatch),
+    [actionDispatch, actionResponse?.actions],
+  )
 
   const mergedPrimaryActions = useMemo<ToolbarAction[]>(() => {
     if (Array.isArray(primaryActions) && primaryActions.length > 0) {
       return primaryActions
     }
-    return quickActions.slice(0, 2)
-  }, [primaryActions, quickActions])
+    return contextualToolbarActions.primary
+  }, [contextualToolbarActions.primary, primaryActions])
 
   const mergedOverflowActions = useMemo<ToolbarAction[]>(() => {
     const fromProps = overflowActions ?? []
     const hasPrimaryFromProps = Array.isArray(primaryActions) && primaryActions.length > 0
-    const quickOverflow = hasPrimaryFromProps ? quickActions : quickActions.slice(2)
+    const quickOverflow = hasPrimaryFromProps ? contextualToolbarActions.overflow : contextualToolbarActions.overflow
     const byId = new Map<string, ToolbarAction>()
     for (const action of [...fromProps, ...quickOverflow]) {
       byId.set(action.id, action)
     }
     return Array.from(byId.values())
-  }, [overflowActions, primaryActions, quickActions])
+  }, [contextualToolbarActions.overflow, overflowActions, primaryActions])
 
   const handleGoToStep = (stepId: string, index: number): void => {
     if (allowStepNavigation === false && index > activeIndex) {
@@ -183,6 +189,7 @@ export function Wizard({
         subtitle={subtitle}
         primaryActions={mergedPrimaryActions}
         overflowActions={mergedOverflowActions}
+        densityProfileOverride={roleDensityProfile}
         mcpContext={
           mcpContext
             ? {
@@ -232,7 +239,9 @@ export function Wizard({
         <div className="h-px bg-border" role="presentation" />
 
         <div className="rounded-lg border bg-card p-6 shadow-sm" data-mcp-step={activeStep?.id}>
-          {typeof activeStep?.description === 'string' && activeStep.description.length > 0 ? (
+          {roleDensityProfile.density !== 'focused' &&
+          typeof activeStep?.description === 'string' &&
+          activeStep.description.length > 0 ? (
             <p className="mb-4 text-sm text-muted-foreground">{activeStep.description}</p>
           ) : null}
           {activeStep?.content ?? (

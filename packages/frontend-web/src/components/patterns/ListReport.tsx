@@ -20,7 +20,11 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search, SlidersHorizontal } from 'lucide-react';
 import { createMCPMetadata } from '@/design/mcp-schemas/component-metadata';
-import { useActionsForMask, useActionDispatchOptional } from '@/features/ki-usability';
+import { buildToolbarActionsFromRegistry, useActionsForMask, useActionDispatchOptional } from '@/features/ki-usability';
+import { auth } from '@/lib/auth';
+import { resolveRoleDensityProfile } from '@/features/role-density';
+import { useTenant } from '@/hooks/useTenant';
+import { useUIDensityManifest } from '@/lib/api/ui-density-manifest';
 
 export interface ListReportProps<T> {
   // Titel & Beschreibung
@@ -96,45 +100,47 @@ export function ListReport<T>({
 }: ListReportProps<T>): JSX.Element {
   const { t } = useTranslation();
   const actionDispatch = useActionDispatchOptional();
+  const { tenantId } = useTenant();
   const { data: actionResponse } = useActionsForMask(mcpContext?.pageDomain, mcpContext?.currentDocument);
+  const densityManifestQuery = useUIDensityManifest(mcpContext?.pageDomain);
+  const roleDensityProfile = useMemo(
+    () =>
+      resolveRoleDensityProfile(auth.getUser()?.roles, {
+        tenantId,
+        pageDomain: mcpContext?.pageDomain,
+        availableActionIds: actionResponse?.actions?.map((action) => action.id) ?? [],
+        backendDensity: densityManifestQuery.data?.entry?.recommended_density,
+      }),
+    [actionResponse?.actions, densityManifestQuery.data?.entry?.recommended_density, mcpContext?.pageDomain, tenantId],
+  );
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [showFilters, setShowFilters] = useState<boolean>(false);
 
   const displayTitle = typeof titleKey === 'string' && titleKey.length > 0 ? t(titleKey) : title;
   const displaySubtitle = typeof subtitleKey === 'string' && subtitleKey.length > 0 ? t(subtitleKey) : subtitle;
-  const quickActions = useMemo<ToolbarAction[]>(() => {
-    return (actionResponse?.actions ?? []).map((action) => ({
-      id: action.id,
-      label: action.label,
-      shortcut: action.shortcut,
-      onClick: () => {
-        if (actionDispatch) {
-          void actionDispatch.dispatch(action.id);
-        }
-      },
-      variant: action.category === 'danger' ? 'destructive' : 'outline',
-      mcp: { intent: action.id, requiredData: action.required_data },
-    }));
-  }, [actionDispatch, actionResponse?.actions]);
+  const contextualToolbarActions = useMemo(
+    () => buildToolbarActionsFromRegistry(actionResponse?.actions, actionDispatch),
+    [actionDispatch, actionResponse?.actions],
+  );
 
   const mergedPrimaryActions = useMemo<ToolbarAction[]>(() => {
     if (Array.isArray(primaryActions) && primaryActions.length > 0) {
       return primaryActions;
     }
-    return quickActions.slice(0, 2);
-  }, [primaryActions, quickActions]);
+    return contextualToolbarActions.primary;
+  }, [contextualToolbarActions.primary, primaryActions]);
 
   const mergedOverflowActions = useMemo<ToolbarAction[]>(() => {
     const fromProps = overflowActions ?? [];
     const quickOverflow = Array.isArray(primaryActions) && primaryActions.length > 0
-      ? quickActions
-      : quickActions.slice(2);
+      ? contextualToolbarActions.overflow
+      : contextualToolbarActions.overflow;
     const byId = new Map<string, ToolbarAction>();
     for (const action of [...fromProps, ...quickOverflow]) {
       byId.set(action.id, action);
     }
     return Array.from(byId.values());
-  }, [overflowActions, primaryActions, quickActions]);
+  }, [contextualToolbarActions.overflow, overflowActions, primaryActions]);
   const availableActions = [
     ...(mergedPrimaryActions.map((action) => action.id)),
     ...(mergedOverflowActions.map((action) => action.id)),
@@ -165,6 +171,7 @@ export function ListReport<T>({
         subtitle={displaySubtitle}
         primaryActions={mergedPrimaryActions}
         overflowActions={mergedOverflowActions}
+        densityProfileOverride={roleDensityProfile}
         mcpContext={toolbarContext}
       />
 
@@ -185,7 +192,7 @@ export function ListReport<T>({
           )}
 
           {/* Filter-Toggle */}
-          {Array.isArray(filterOptions) && filterOptions.length > 0 && (
+          {roleDensityProfile.density !== 'focused' && Array.isArray(filterOptions) && filterOptions.length > 0 && (
             <Button
               variant="outline"
               onClick={() => setShowFilters((prev) => !prev)}
@@ -197,7 +204,7 @@ export function ListReport<T>({
         </div>
 
         {/* Filter-Panel (SAP Fiori Pattern - collapsible) */}
-        {showFilters && Array.isArray(filterOptions) && (
+        {roleDensityProfile.density !== 'focused' && showFilters && Array.isArray(filterOptions) && (
           <div className="p-4 border rounded-lg bg-muted/50">
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {filterOptions.map((filter) => (

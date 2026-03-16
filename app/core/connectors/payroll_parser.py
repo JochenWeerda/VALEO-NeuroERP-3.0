@@ -10,6 +10,10 @@ from decimal import Decimal, InvalidOperation
 from typing import Any, Dict, List
 
 from .base import ConnectorParser, NormalizedItem, NormalizedLine
+from app.core.data_quality_enforcement import (
+    DQValidationException,
+    evaluate_payroll_connector_datensatz,
+)
 
 
 class PayrollParser(ConnectorParser):
@@ -47,7 +51,7 @@ class PayrollParser(ConnectorParser):
         current_doc: Dict[str, Any] = {}
         current_lines: List[NormalizedLine] = []
 
-        for row in rows:
+        for row_number, row in enumerate(rows, start=2):
             row = {k.strip().strip("\ufeff"): (v.strip() if v else "") for k, v in row.items()}
             date_str = row.get(date_fmt) or row.get("buchungsdatum") or row.get("entry_date", "")
             doc_no_val = row.get(doc_no) or row.get("belegnummer") or ""
@@ -56,16 +60,24 @@ class PayrollParser(ConnectorParser):
             amt_str = row.get(amount_col) or row.get("betrag") or row.get("debit_amount") or row.get("credit_amount") or "0"
             dc_val = (row.get(dc_col) or row.get("soll_haben") or "S").strip().upper()[:1]
 
-            if not date_str or not account:
-                continue
+            dq_result = evaluate_payroll_connector_datensatz(
+                {
+                    "booking_date": date_str,
+                    "account": account,
+                    "amount": str(amt_str).replace(",", "."),
+                    "dc": dc_val,
+                }
+            )
+            if not dq_result.bestanden:
+                raise DQValidationException(
+                    "PayrollConnectorImport",
+                    dq_result,
+                ) from ValueError(f"Invalid payroll connector row {row_number}")
 
             try:
                 amount = Decimal(str(amt_str).replace(",", "."))
             except (InvalidOperation, ValueError):
-                amount = Decimal("0")
-
-            if amount <= 0:
-                continue
+                raise ValueError(f"Invalid payroll amount in row {row_number}: {amt_str}")
 
             dc = "D" if dc_val in ("S", "D", "1") else "C"
             line = NormalizedLine(account=account, dc=dc, amount=amount)

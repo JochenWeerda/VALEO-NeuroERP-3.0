@@ -16,6 +16,10 @@ export type DecisionView = {
   statusClassName: string
   summary: string
   details: string[]
+  requiresApproval?: boolean
+  context?: {
+    pageDomain?: string
+  }
 }
 
 const denyReasonLabel: Record<string, string> = {
@@ -44,6 +48,7 @@ export function buildDecisionView(decision: unknown): DecisionView | null {
       statusClassName: "bg-red-50 text-red-800 border-red-300",
       summary: "Aktion durch Policy blockiert.",
       details: [`Grund: ${readableReason}`],
+      requiresApproval: false,
     }
   }
 
@@ -72,6 +77,7 @@ export function buildDecisionView(decision: unknown): DecisionView | null {
       statusClassName: "bg-emerald-50 text-emerald-800 border-emerald-300",
       summary: "Aktion wird automatisch ausgeführt.",
       details: detailLines,
+      requiresApproval: decision.needsApproval === true,
     }
   }
 
@@ -83,5 +89,6 @@ export function buildDecisionView(decision: unknown): DecisionView | null {
         ? "Aktion ist zulässig, wartet aber auf Freigabe."
         : "Aktion ist zulässig.",
     details: detailLines,
+    requiresApproval: decision.needsApproval === true,
   }
 }

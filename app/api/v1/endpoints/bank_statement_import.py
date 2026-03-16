@@ -17,6 +17,10 @@ import re
 import logging
 
 from ....core.database import get_db
+from ....core.data_quality_enforcement import (
+    build_dq_error_detail,
+    evaluate_bank_statement_import_datensatz,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -51,6 +55,29 @@ class BankStatementImportResult(BaseModel):
     error_lines: int
     lines: List[BankStatementLine]
     import_errors: Optional[List[str]] = None
+
+
+def _build_bank_statement_import_datensatz(
+    booking_date: object,
+    value_date: object,
+    amount: object,
+    currency: object = "EUR",
+) -> dict:
+    return {
+        "booking_date": booking_date,
+        "value_date": value_date,
+        "amount": amount,
+        "currency": currency or "EUR",
+    }
+
+
+def _validate_bank_statement_import_datensatz(datensatz: dict) -> None:
+    result = evaluate_bank_statement_import_datensatz(datensatz)
+    if not result.bestanden:
+        raise HTTPException(
+            status_code=422,
+            detail=build_dq_error_detail("KontoauszugImport", result),
+        )
 
 
 def parse_camt053(content: bytes) -> dict:
@@ -145,8 +172,7 @@ def parse_camt053(content: bytes) -> dict:
                     'debtor_iban': debtor_iban
                 })
             except Exception as e:
-                logger.warning(f"Error parsing CAMT entry {idx}: {e}")
-                continue
+                raise ValueError(f"Failed to parse CAMT entry {idx + 1}: {str(e)}") from e
         
         # Calculate closing balance
         closing_balance = opening_balance + sum(entry['amount'] for entry in entries)
@@ -231,8 +257,7 @@ def parse_mt940(content: bytes) -> dict:
                                 'remittance_info': None
                             }
                     except Exception as e:
-                        logger.warning(f"Error parsing MT940 line: {e}")
-                        continue
+                        raise ValueError(f"Failed to parse MT940 line '{line}': {str(e)}") from e
             
             # Transaction details
             elif line.startswith(':86:') and current_entry:
@@ -268,42 +293,44 @@ def parse_csv(content: bytes) -> dict:
         opening_balance = Decimal("0.00")
         closing_balance = Decimal("0.00")
         
-        for idx, row in enumerate(csv_reader):
+        for idx, row in enumerate(csv_reader, start=2):
+            date_str = row.get('date', row.get('datum', ''))
+            value_date_str = row.get('value_date', row.get('valutadatum', date_str))
+            amount_str = str(row.get('amount', row.get('betrag', '0'))).replace(',', '.')
+            currency = row.get('currency', row.get('waehrung', 'EUR'))
+            _validate_bank_statement_import_datensatz(
+                _build_bank_statement_import_datensatz(
+                    booking_date=date_str,
+                    value_date=value_date_str,
+                    amount=amount_str,
+                    currency=currency,
+                )
+            )
+
             try:
-                # Date
-                date_str = row.get('date', row.get('datum', ''))
                 booking_date = datetime.strptime(date_str, '%Y-%m-%d').date()
-                value_date = booking_date
-                
-                # Amount
-                amount_str = str(row.get('amount', row.get('betrag', '0'))).replace(',', '.')
+                value_date = datetime.strptime(value_date_str, '%Y-%m-%d').date()
                 amount = Decimal(amount_str)
-                
-                # Reference
-                reference = row.get('reference', row.get('referenz', ''))
-                
-                # Remittance info
-                remittance_info = row.get('remittance_info', row.get('verwendungszweck', ''))
-                
-                # Creditor/Debtor
-                creditor_name = row.get('creditor_name', row.get('empfaenger', ''))
-                debtor_name = row.get('debtor_name', row.get('auftraggeber', ''))
-                
-                entries.append({
-                    'line_number': idx + 1,
-                    'booking_date': booking_date,
-                    'value_date': value_date,
-                    'amount': amount,
-                    'reference': reference,
-                    'remittance_info': remittance_info,
-                    'creditor_name': creditor_name,
-                    'debtor_iban': None,
-                    'debtor_name': debtor_name,
-                    'creditor_iban': None
-                })
             except Exception as e:
-                logger.warning(f"Error parsing CSV row {idx}: {e}")
-                continue
+                raise ValueError(f"Failed to parse CSV row {idx}: {str(e)}") from e
+
+            reference = row.get('reference', row.get('referenz', ''))
+            remittance_info = row.get('remittance_info', row.get('verwendungszweck', ''))
+            creditor_name = row.get('creditor_name', row.get('empfaenger', ''))
+            debtor_name = row.get('debtor_name', row.get('auftraggeber', ''))
+
+            entries.append({
+                'line_number': idx - 1,
+                'booking_date': booking_date,
+                'value_date': value_date,
+                'amount': amount,
+                'reference': reference,
+                'remittance_info': remittance_info,
+                'creditor_name': creditor_name,
+                'debtor_iban': None,
+                'debtor_name': debtor_name,
+                'creditor_iban': None
+            })
         
         # Calculate closing balance (if opening balance provided)
         if entries:
@@ -315,6 +342,8 @@ def parse_csv(content: bytes) -> dict:
             'closing_balance': closing_balance,
             'entries': entries
         }
+    except HTTPException:
+        raise
     except Exception as e:
         raise ValueError(f"Failed to parse CSV: {str(e)}")
 
@@ -343,6 +372,16 @@ async def import_bank_statement(
             parsed = parse_csv(content)
         else:
             raise HTTPException(status_code=400, detail=f"Unsupported format: {format}")
+
+        for entry in parsed['entries']:
+            _validate_bank_statement_import_datensatz(
+                _build_bank_statement_import_datensatz(
+                    booking_date=entry.get('booking_date').isoformat() if hasattr(entry.get('booking_date'), 'isoformat') else entry.get('booking_date'),
+                    value_date=entry.get('value_date').isoformat() if hasattr(entry.get('value_date'), 'isoformat') else entry.get('value_date'),
+                    amount=entry.get('amount'),
+                    currency=entry.get('currency', 'EUR'),
+                )
+            )
         
         # Get bank account IBAN if not provided
         if not parsed['account_iban']:

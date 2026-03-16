@@ -13,6 +13,11 @@ export interface Action {
   mask?: string
   intent_phrases: string[]
   required_data: string[]
+  surfaces?: string[]
+  context_scope?: 'mask' | 'domain' | 'global'
+  relevance_score?: number
+  priority?: number
+  default_params?: Record<string, unknown>
 }
 
 export interface ActionListResponse {

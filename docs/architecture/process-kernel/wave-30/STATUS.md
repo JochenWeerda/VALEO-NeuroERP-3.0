@@ -18,12 +18,12 @@ alle Kernprozesse sowie pruefbare Compliance-Auswertung.
 
 | AP | Zielmodul | Beschreibung | Status |
 |----|-----------|--------------|--------|
-| AP1 | `app/core/human_approval_gate.py` | `ApprovalRisikostufe`, `HumanApprovalRequirement`, `evaluate_approval_requirement()` — klassifiziert Agent-Aktionen nach Risiko | geplant |
-| AP2 | `app/core/human_approval_gate.py` | `ApprovalDecision`, `ApprovalRecord`, `record_approval_decision()`; `get_default_approval_rules()` — Default-Regeln fuer Agrar-Commands | geplant |
-| AP3 | `app/api/v1/endpoints/process_kernel_api.py` | `POST /process/agent/approval-evaluate` + `GET /process/agent/approval-rules` | geplant |
-| AP4 | `app/core/slo_definitions.py` | `SLOTyp`, `SLODefinition`, `SLIDefinition`, `get_process_kernel_slos()` — Default-SLOs fuer Kern-Dienste | geplant |
-| AP5 | `app/core/slo_definitions.py` | `check_slo_compliance(slo, ist_wert)` → `SLOComplianceResult`; `validate_slo_definition()` | geplant |
-| AP6 | `app/api/v1/endpoints/process_kernel_api.py` | `GET /process/slo/registry[?dienst=]` + `POST /process/slo/check` | geplant |
+| AP1 | `app/core/human_approval_gate.py` | `ApprovalRisikostufe`, `HumanApprovalRequirement`, `evaluate_approval_requirement()` — klassifiziert Agent-Aktionen nach Risiko | abgeschlossen |
+| AP2 | `app/core/human_approval_gate.py` | `ApprovalDecision`, `ApprovalRecord`, `record_approval_decision()`; `get_default_approval_rules()` — Default-Regeln fuer Agrar-Commands | abgeschlossen |
+| AP3 | `app/api/v1/endpoints/process_kernel_api.py` | `POST /process/agent/approval-evaluate` + `GET /process/agent/approval-rules` | abgeschlossen |
+| AP4 | `app/core/slo_definitions.py` | `SLOTyp`, `SLODefinition`, `SLIDefinition`, `get_process_kernel_slos()` — Default-SLOs fuer Kern-Dienste | abgeschlossen |
+| AP5 | `app/core/slo_definitions.py` | `check_slo_compliance(slo, ist_wert)` → `SLOComplianceResult`; `validate_slo_definition()` | abgeschlossen |
+| AP6 | `app/api/v1/endpoints/process_kernel_api.py` | `GET /process/slo/registry[?dienst=]` + `POST /process/slo/check` | abgeschlossen |
 
 ## Abnahmekriterien
 

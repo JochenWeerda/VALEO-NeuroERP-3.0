@@ -14,6 +14,10 @@ import json
 import csv
 from io import StringIO
 
+from app.core.data_quality_enforcement import (
+    DQValidationException,
+    evaluate_quality_protocol_datensatz,
+)
 
 SourceType = Literal["manual", "import", "lims", "device"]
 
@@ -138,6 +142,18 @@ def create_quality_protocol(
     Wenn harvest_acceptance_id vorhanden ist, wird die Versionsnummer automatisch
     basierend auf bestehenden Protokollen erhöht.
     """
+    dq_result = evaluate_quality_protocol_datensatz(
+        {
+            "ernteannahme_id": create_input.harvest_acceptance_id,
+            "quelle": create_input.source_type,
+            "feuchte_pct": create_input.moisture_pct,
+            "protein_pct": create_input.protein_pct,
+            "hl_gewicht": create_input.hl_weight_kg_per_hl,
+        }
+    )
+    if not dq_result.bestanden:
+        raise DQValidationException("Qualitaetsprotokoll", dq_result)
+
     # Prüfe bestehende Protokolle für Versionsnummer
     version = 1
     if create_input.harvest_acceptance_id:
@@ -242,15 +258,21 @@ def import_from_csv(
         # Ersetze Komma durch Punkt
         value = value.replace(",", ".")
         return Decimal(value)
+
+    moisture_pct = _parse_decimal(row.get("moisture_pct"))
+    impurities_pct = _parse_decimal(row.get("impurities_pct"))
+    hl_weight = _parse_decimal(row.get("hl_weight_kg_per_hl"))
+    protein_pct = _parse_decimal(row.get("protein_pct"))
+    mycotoxin_ppb = _parse_decimal(row.get("mycotoxin_ppb"))
     
     create_input = QualityProtocolCreate(
         tenant_id=tenant_id,
         harvest_acceptance_id=harvest_acceptance_id,
-        moisture_pct=_parse_decimal(row.get("moisture_pct")),
-        impurities_pct=_parse_decimal(row.get("impurities_pct")),
-        hl_weight_kg_per_hl=_parse_decimal(row.get("hl_weight_kg_per_hl")),
-        protein_pct=_parse_decimal(row.get("protein_pct")),
-        mycotoxin_ppb=_parse_decimal(row.get("mycotoxin_ppb")),
+        moisture_pct=moisture_pct,
+        impurities_pct=impurities_pct,
+        hl_weight_kg_per_hl=hl_weight,
+        protein_pct=protein_pct,
+        mycotoxin_ppb=mycotoxin_ppb,
         source_type="import",
         source_file_name=file_name,
         source_file_content=csv_content,
@@ -287,15 +309,21 @@ def import_from_json(
         if value is None:
             return None
         return Decimal(str(value))
+
+    moisture_pct = _parse_decimal(data.get("moisture_pct"))
+    impurities_pct = _parse_decimal(data.get("impurities_pct"))
+    hl_weight = _parse_decimal(data.get("hl_weight_kg_per_hl"))
+    protein_pct = _parse_decimal(data.get("protein_pct"))
+    mycotoxin_ppb = _parse_decimal(data.get("mycotoxin_ppb"))
     
     create_input = QualityProtocolCreate(
         tenant_id=tenant_id,
         harvest_acceptance_id=harvest_acceptance_id,
-        moisture_pct=_parse_decimal(data.get("moisture_pct")),
-        impurities_pct=_parse_decimal(data.get("impurities_pct")),
-        hl_weight_kg_per_hl=_parse_decimal(data.get("hl_weight_kg_per_hl")),
-        protein_pct=_parse_decimal(data.get("protein_pct")),
-        mycotoxin_ppb=_parse_decimal(data.get("mycotoxin_ppb")),
+        moisture_pct=moisture_pct,
+        impurities_pct=impurities_pct,
+        hl_weight_kg_per_hl=hl_weight,
+        protein_pct=protein_pct,
+        mycotoxin_ppb=mycotoxin_ppb,
         other_values=data.get("other_values"),
         source_type="import",
         source_file_name=file_name,

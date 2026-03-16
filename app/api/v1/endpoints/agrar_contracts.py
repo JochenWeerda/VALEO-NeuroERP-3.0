@@ -11,6 +11,10 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.database import get_db
+from app.core.data_quality_enforcement import (
+    build_dq_error_detail,
+    evaluate_contract_datensatz,
+)
 from app.core.tenant import get_tenant_id
 from app.infrastructure.models import AgrarContract, AgrarContractAllocation
 from app.api.v1.schemas.base import BaseSchema, PaginatedResponse
@@ -22,6 +26,22 @@ DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 ContractStatus = Literal["open", "partially_allocated", "fulfilled", "cancelled"]
 PricingModel = Literal["fixed", "follow", "pool"]
 ContractType = Literal["buy", "sell"]
+
+
+def _build_contract_dq_datensatz(data: dict) -> dict:
+    return {
+        "kontrakt_nr": data.get("contract_number"),
+        "lieferant_nr": data.get("partner_id"),
+        "ware": data.get("article_id"),
+        "menge_tonnen": (
+            float(data["total_quantity_kg"]) / 1000.0
+            if data.get("total_quantity_kg") is not None
+            else None
+        ),
+        "preis_eur_pro_t": data.get("fixed_price"),
+        "kontrakt_status": str(data.get("status") or "AKTIV").upper(),
+        "preismodell": data.get("pricing_model"),
+    }
 
 
 def _compute_status(total_quantity: Decimal, remaining_quantity: Decimal, current_status: str) -> str:
@@ -159,6 +179,12 @@ async def create_agrar_contract(
     db: Session = Depends(get_db),
 ):
     tid = tenant_id or DEFAULT_TENANT
+    dq_result = evaluate_contract_datensatz(_build_contract_dq_datensatz({
+        **payload.model_dump(),
+        "status": "AKTIV",
+    }))
+    if not dq_result.bestanden:
+        raise HTTPException(status_code=422, detail=build_dq_error_detail("Kontrakt", dq_result))
     exists = (
         db.query(AgrarContract)
         .filter(AgrarContract.tenant_id == tid, AgrarContract.contract_number == payload.contract_number)
@@ -202,6 +228,18 @@ async def update_agrar_contract(
         raise HTTPException(status_code=404, detail="Contract not found")
 
     data = payload.model_dump(exclude_unset=True)
+    effective_data = {
+        "contract_number": contract.contract_number,
+        "partner_id": data.get("partner_id", contract.partner_id),
+        "article_id": data.get("article_id", contract.article_id),
+        "total_quantity_kg": float(contract.total_quantity_kg),
+        "fixed_price": data.get("fixed_price", float(contract.fixed_price) if contract.fixed_price is not None else None),
+        "status": data.get("status", contract.status),
+        "pricing_model": data.get("pricing_model", contract.pricing_model),
+    }
+    dq_result = evaluate_contract_datensatz(_build_contract_dq_datensatz(effective_data))
+    if not dq_result.bestanden:
+        raise HTTPException(status_code=422, detail=build_dq_error_detail("Kontrakt", dq_result))
     if "status" in data and data["status"] == "cancelled":
         contract.status = "cancelled"
         db.commit()

@@ -4,7 +4,7 @@ Wave-14 Contract Tests: Business-Command-Dispatcher und Agent-Command-Manifest
 AP1: CommandPrecondition.evaluate() — alle 5 Operatoren
 AP2: CommandDispatcher.check_role() + check_preconditions()
 AP3: CommandDispatcher.dispatch() — accept, reject (role/precond/human)
-AP4: build_core_command_catalog() — 9 Commands, Preconditions, Rollen
+AP4: build_core_command_catalog() — 10 Commands, Preconditions, Rollen
 AP5: AgentCommandManifest — restricted + blocked lists
 AP6: Agent-sicheres Dispatch — agent_types + human_confirmation
 """
@@ -182,9 +182,9 @@ def test_dispatch_accepted_with_human_confirmation_set():
 # AP4: build_core_command_catalog
 # ---------------------------------------------------------------------------
 
-def test_core_command_catalog_has_nine_commands():
+def test_core_command_catalog_has_ten_commands():
     catalog = build_core_command_catalog()
-    assert len(catalog) == 9
+    assert len(catalog) == 10
 
 
 def test_core_command_catalog_includes_all_aggregate_types():
@@ -203,6 +203,14 @@ def test_execute_payment_run_requires_human_confirmation():
     cmd = next(c for c in catalog if c.command_name == "ExecutePaymentRun")
     assert cmd.requires_human_confirmation is True
     assert cmd.idempotent is True
+
+
+def test_create_purchase_order_requires_approved_state():
+    catalog = build_core_command_catalog()
+    cmd = next(c for c in catalog if c.command_name == "CreatePurchaseOrder")
+    assert cmd.aggregate_type == "purchase_order"
+    assert cmd.preconditions[0].field == "approval_status"
+    assert cmd.allowed_agent_types == ["procurement_agent"]
 
 
 def test_approve_ap_invoice_has_post_event():

@@ -12,6 +12,7 @@ from ....core.database import get_db
 from ....integrations.proplanta_psm_client import (
     ProplantaPSMClient,
     PSMData,
+    ProplantaPSMContractError,
     sync_psm_data,
     search_psm,
     get_psm_details,
@@ -57,6 +58,9 @@ async def sync_proplanta_psm_data(
             "status": "running"
         }
 
+    except ProplantaPSMContractError as e:
+        logger.error(f"Failed to start PSM sync: {e}")
+        raise HTTPException(status_code=503, detail=str(e))
     except Exception as e:
         logger.error(f"Failed to start PSM sync: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -121,6 +125,9 @@ async def list_proplanta_psm(
 
         return [psm.to_dict() for psm in limited_psm]
 
+    except ProplantaPSMContractError as e:
+        logger.error(f"Failed to list PSM data: {e}")
+        raise HTTPException(status_code=503, detail=str(e))
     except Exception as e:
         logger.error(f"Failed to list PSM data: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -142,6 +149,9 @@ async def search_proplanta_psm(
         psm_results = psm_client.search_psm(q, limit)
         return [psm.to_dict() for psm in psm_results]
 
+    except ProplantaPSMContractError as e:
+        logger.error(f"Failed to search PSM data: {e}")
+        raise HTTPException(status_code=503, detail=str(e))
     except Exception as e:
         logger.error(f"Failed to search PSM data: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -166,6 +176,9 @@ async def get_proplanta_psm_details(psm_id: str):
 
     except HTTPException:
         raise
+    except ProplantaPSMContractError as e:
+        logger.error(f"Failed to get PSM details: {e}")
+        raise HTTPException(status_code=503, detail=str(e))
     except Exception as e:
         logger.error(f"Failed to get PSM details: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -211,6 +224,9 @@ async def get_proplanta_psm_stats():
             "last_updated": psm_client._last_sync.isoformat() if psm_client._last_sync else None
         }
 
+    except ProplantaPSMContractError as e:
+        logger.error(f"Failed to get PSM stats: {e}")
+        raise HTTPException(status_code=503, detail=str(e))
     except Exception as e:
         logger.error(f"Failed to get PSM stats: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -239,6 +255,9 @@ async def import_proplanta_psm_to_local(
             "status": "running"
         }
 
+    except ProplantaPSMContractError as e:
+        logger.error(f"Failed to start PSM import: {e}")
+        raise HTTPException(status_code=503, detail=str(e))
     except Exception as e:
         logger.error(f"Failed to start PSM import: {e}")
         raise HTTPException(status_code=500, detail=str(e))

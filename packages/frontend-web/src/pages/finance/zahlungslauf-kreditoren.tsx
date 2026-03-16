@@ -13,6 +13,7 @@ import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import { validateIBAN, formatIBAN, lookupIBAN } from '@/lib/utils/iban-validator'
 import { buildDecisionView } from '@/policy/decision-view'
 import { ProcessStatusPanel } from '@/components/workflow/ProcessStatusPanel'
+import { useApprovalDensityProfile } from '@/features/workflow/useApprovalDensityProfile'
 
 const createZahlungslaufConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
@@ -739,13 +740,14 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
   const blocker = useUnsavedChanges(isDirty)
   const effectiveData = data || formData
   const approvalDecisionView = buildDecisionView(effectiveData?.approval_explainability)
+  const approvalDensityProfile = useApprovalDensityProfile('finance-payment-run', approvalDecisionView)
 
   return (
     <>
       <ModuleToolbar backTarget="/finance/zahlungslauf-kreditoren" closeTarget="/finance/zahlungslauf-kreditoren" title={entityTypeLabel} />
       <LeaveConfirmDialog blocker={blocker} onSave={() => handleSave(formData)} title={t('crud.messages.unsavedChanges', { defaultValue: 'Ungespeicherte Änderungen' })} description={t('crud.messages.unsavedChangesDescription', { defaultValue: 'Möchten Sie speichern, verwerfen oder hier bleiben?' })} />
       {effectiveData?.id && approvalDecisionView !== null ? (
-        <ProcessStatusPanel view={approvalDecisionView} className="mb-4 px-4 py-3">
+        <ProcessStatusPanel view={approvalDecisionView} className="mb-4 px-4 py-3" densityProfileOverride={approvalDensityProfile}>
           <div className="mt-3 grid gap-3 md:grid-cols-3">
             <div>
               <div className="text-xs uppercase tracking-wide text-current/70">Workflowstatus</div>

@@ -13,6 +13,10 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 
 from ....core.database import get_db
+from ....core.data_quality_enforcement import (
+    build_dq_error_detail,
+    evaluate_creditor_datensatz,
+)
 from ....core.uuid7 import uuid7
 from ..schemas.finance import Creditor, CreditorCreate, CreditorUpdate
 from ..schemas.base import PaginatedResponse
@@ -91,6 +95,16 @@ def _build_address_jsonb(data) -> str:
     return json.dumps(address_data)
 
 
+def _build_creditor_dq_datensatz(data: dict) -> dict:
+    return {
+        "lieferant_nr": data.get("creditor_number"),
+        "name": data.get("company_name"),
+        "land": data.get("country"),
+        "iban": data.get("iban"),
+        "steuernummer": data.get("tax_number"),
+    }
+
+
 def _row_to_creditor(row) -> Creditor:
     address_data = _parse_address_jsonb(row[4])
     return Creditor(
@@ -132,6 +146,9 @@ async def create_creditor(
     try:
         _validate_vat_id_format(payload.vat_id)
         _validate_iban(payload.iban)
+        dq_result = evaluate_creditor_datensatz(_build_creditor_dq_datensatz(payload.model_dump()))
+        if not dq_result.bestanden:
+            raise HTTPException(status_code=422, detail=build_dq_error_detail("Lieferant", dq_result))
         check = db.execute(
             text(
                 "SELECT id FROM domain_erp.creditors WHERE creditor_number = :cn AND (tenant_id = :tid OR (tenant_id IS NULL AND :tid = 'system'))"
@@ -260,6 +277,18 @@ async def update_creditor(
         if not existing:
             raise HTTPException(status_code=404, detail="Kreditor nicht gefunden")
         address = _parse_address_jsonb(existing[2])
+        effective_data = {
+            "creditor_number": None,
+            "company_name": payload.company_name if payload.company_name is not None else existing[1],
+            "country": address.get("country", "DE"),
+            "iban": address.get("iban"),
+            "tax_number": address.get("tax_number"),
+        }
+        creditor_number_row = db.execute(
+            text("SELECT creditor_number FROM domain_erp.creditors WHERE id = :id"),
+            {"id": creditor_id},
+        ).fetchone()
+        effective_data["creditor_number"] = creditor_number_row[0] if creditor_number_row else None
         if payload.contact_person is not None:
             address["contact_person"] = payload.contact_person
         if payload.street is not None:
@@ -270,6 +299,7 @@ async def update_creditor(
             address["city"] = payload.city
         if payload.country is not None:
             address["country"] = payload.country
+            effective_data["country"] = payload.country
         if payload.phone is not None:
             address["phone"] = payload.phone
         if payload.email is not None:
@@ -278,8 +308,10 @@ async def update_creditor(
             address["vat_id"] = payload.vat_id
         if payload.tax_number is not None:
             address["tax_number"] = payload.tax_number
+            effective_data["tax_number"] = payload.tax_number
         if payload.iban is not None:
             address["iban"] = payload.iban
+            effective_data["iban"] = payload.iban
         if payload.bic is not None:
             address["bic"] = payload.bic
         if payload.bank_name is not None:
@@ -296,6 +328,9 @@ async def update_creditor(
             address["credit_limit"] = float(payload.credit_limit)
         if payload.notes is not None:
             address["notes"] = payload.notes
+        dq_result = evaluate_creditor_datensatz(_build_creditor_dq_datensatz(effective_data))
+        if not dq_result.bestanden:
+            raise HTTPException(status_code=422, detail=build_dq_error_detail("Lieferant", dq_result))
         payment_terms_days = address.get("payment_terms_days", 30)
         set_parts = ["address = :address::jsonb", "payment_terms = :payment_terms", "updated_at = NOW()"]
         params_update: dict = {

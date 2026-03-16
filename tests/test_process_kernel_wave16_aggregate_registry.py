@@ -94,8 +94,8 @@ def test_journal_entry_is_registered_under_finance():
     assert defn.business_domain == "finance"
 
 
-def test_registry_has_eight_aggregates():
-    assert len(get_aggregate_registry()) == 8
+def test_registry_has_nine_aggregates():
+    assert len(get_aggregate_registry()) == 9
 
 
 # ---------------------------------------------------------------------------
@@ -133,6 +133,12 @@ def test_execute_payment_run_owner_is_payment_run():
     assert owner is not None
     assert owner.aggregate_type == "payment_run"
     assert owner.agent_tools == []  # blockiert
+
+
+def test_create_purchase_order_owner_is_purchase_order():
+    owner = get_command_owner("CreatePurchaseOrder")
+    assert owner is not None
+    assert owner.aggregate_type == "purchase_order"
 
 
 def test_unknown_command_owner_returns_none():
