@@ -35,6 +35,9 @@
 | [ADR-024](../adr/adr-024-datenprodukt-strategie-sustainability-compliance-reporting.md) | Datenprodukt-Strategie für Sustainability- und Compliance-Reporting | Accepted | Data & Analytics |
 | [ADR-025](../adr/adr-025-standard-konfliktarme-parallelbearbeitung.md) | Standard für konfliktarme Parallelbearbeitung in Kernprozessen | Accepted | Process Reliability |
 | [ADR-026](../adr/adr-026-modell-import-staging-pruefpipelines.md) | Modell für Import-/Staging-/Prüfpipelines | Accepted | Data Intake |
+| [ADR-027](../adr/adr-027-process-kernel-event-namenskonvention.md) | Process-Kernel Event-Namenskonvention | Accepted | Process Core |
+| [ADR-028](../adr/adr-028-workflow-access-control-und-delegation.md) | Workflow Access Control und Delegation | Accepted | Process Reliability |
+| [ADR-029](../adr/adr-029-process-betrieb-timeout-batch-archiv-metriken.md) | Process-Betrieb — Timeout, Batch, Archiv und Metriken | Accepted | Process Reliability |
 
 ## Themencluster
 
@@ -84,6 +87,8 @@
 
 ### Process Reliability
 - [ADR-025 Standard für konfliktarme Parallelbearbeitung in Kernprozessen](../adr/adr-025-standard-konfliktarme-parallelbearbeitung.md)
+- [ADR-028 Workflow Access Control und Delegation](../adr/adr-028-workflow-access-control-und-delegation.md)
+- [ADR-029 Process-Betrieb — Timeout, Batch, Archiv und Metriken](../adr/adr-029-process-betrieb-timeout-batch-archiv-metriken.md)
 - [ADR-006 Read-Model / Query-Contract-Prinzip](../adr/adr-006-read-model-query-contract-prinzip.md)
 
 ### Data Intake
@@ -129,7 +134,7 @@ Die nächste sinnvolle ADR-Pipeline verschiebt sich jetzt von Grundsatzarchitekt
 
 ## Process Kernel Delivery
 
-- [Process Kernel Status (Waves 1–27)](process-kernel/STATUS.md)
+- [Process Kernel Status (Waves 1–50)](process-kernel/STATUS.md)
 - [Delivery Map (Wave→Gap)](process-kernel/DELIVERY-MAP.md)
 
 ### Abgeschlossene Waves (Kernmodule)
@@ -141,3 +146,8 @@ Die nächste sinnvolle ADR-Pipeline verschiebt sich jetzt von Grundsatzarchitekt
 | 23 | Nebenkosten, Intrastat | nebenkosten_engine, intrastat_model |
 | 24 | Prozessvarianten, Kampagnen | tenant_prozess_variante, kampagnen_vorlage |
 | 26 | Trocknung, Migration | trocknungs_abrechnung, workflow_migrations_guard |
+| 46 | ACL, Quarantäne | workflow_acl_contracts, process_quarantine_contracts |
+| 47 | State Machine, Delegation | process_state_machine_contracts, workflow_delegation_contracts |
+| 48 | Timeout, Batch | process_timeout_contracts, workflow_batch_contracts |
+| 49 | Notification, Lock | process_notification_contracts_wave49, workflow_lock_contracts |
+| 50 | Archiv, Metriken | process_archive_contracts, workflow_metrics_contracts |
