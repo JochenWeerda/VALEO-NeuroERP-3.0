@@ -4029,3 +4029,86 @@ def erstelle_kompensations_plan_endpoint(payload: dict):
             for s in saga.schritte
         ],
     }
+
+
+# === Wave 52: Circuit Breaker + Event Sourcing ===
+from app.core.process_circuit_breaker_contracts import (
+    get_default_circuit_breaker_konfigurationen,
+    CircuitBreakerKonfiguration, CircuitBreakerZustandsRecord,
+    CircuitBreakerZustand, AufrufErgebnis,
+)
+from app.core.workflow_event_sourcing_contracts import (
+    get_default_ereignis_streams, rekonstruiere_zustand,
+    EreignisStream, WorkflowEreignis, EreignisTyp, ReplayModus,
+)
+
+
+@router.get("/circuit-breaker/konfigurationen", tags=["process-kernel"])
+def get_circuit_breaker_konfigurationen():
+    return [
+        {
+            "breaker_id": c.breaker_id,
+            "service_name": c.service_name,
+            "fehler_schwellwert": c.fehler_schwellwert,
+            "wiederherstellungs_timeout_sekunden": c.wiederherstellungs_timeout_sekunden,
+            "halb_offen_max_anfragen": c.halb_offen_max_anfragen,
+            "beschreibung": c.beschreibung,
+        }
+        for c in get_default_circuit_breaker_konfigurationen()
+    ]
+
+
+@router.post("/circuit-breaker/pruefe-zustand", tags=["process-kernel"])
+def pruefe_circuit_breaker_zustand(payload: dict):
+    """
+    Payload: {"fehler_schwellwert": int, "wiederherstellungs_timeout_sekunden": int,
+              "halb_offen_max_anfragen": int, "fehler_zaehler": int,
+              "zustand": str, "letzter_fehler_vor_sekunden": Optional[int]}
+    """
+    from datetime import datetime, timedelta
+    jetzt = datetime.utcnow()
+    config = CircuitBreakerKonfiguration(
+        breaker_id="TEMP",
+        service_name="test",
+        fehler_schwellwert=int(payload.get("fehler_schwellwert", 5)),
+        wiederherstellungs_timeout_sekunden=int(payload.get("wiederherstellungs_timeout_sekunden", 60)),
+        halb_offen_max_anfragen=int(payload.get("halb_offen_max_anfragen", 3)),
+    )
+    letzter_fehler_vor = payload.get("letzter_fehler_vor_sekunden")
+    letzter_fehler_am = jetzt - timedelta(seconds=int(letzter_fehler_vor)) if letzter_fehler_vor is not None else None
+    rec = CircuitBreakerZustandsRecord(
+        breaker_id="TEMP",
+        zustand=CircuitBreakerZustand(payload.get("zustand", "GESCHLOSSEN")),
+        fehler_zaehler=int(payload.get("fehler_zaehler", 0)),
+        letzter_fehler_am=letzter_fehler_am,
+    )
+    kann_durch = rec.kann_anfrage_durchlassen(config, jetzt)
+    return {"zustand": rec.zustand, "kann_anfrage_durchlassen": kann_durch}
+
+
+@router.get("/event-sourcing/streams", tags=["process-kernel"])
+def get_ereignis_streams():
+    streams = get_default_ereignis_streams()
+    return [
+        {
+            "stream_id": s.stream_id,
+            "aktuelle_version": s.aktuelle_version(),
+            "ereignis_anzahl": len(s.ereignisse),
+        }
+        for s in streams
+    ]
+
+
+@router.post("/event-sourcing/rekonstruiere", tags=["process-kernel"])
+def rekonstruiere_workflow_zustand(payload: dict):
+    """
+    Payload: {"stream_id": str} - reconstructs state from default streams.
+    Returns reconstructed state dict.
+    """
+    stream_id = payload.get("stream_id", "")
+    streams = {s.stream_id: s for s in get_default_ereignis_streams()}
+    if stream_id not in streams:
+        return {"fehler": f"Stream {stream_id!r} nicht gefunden"}
+    stream = streams[stream_id]
+    zustand = rekonstruiere_zustand(stream.replay(ReplayModus.VOLLSTAENDIG))
+    return zustand
