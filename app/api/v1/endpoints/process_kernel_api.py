@@ -122,7 +122,10 @@ from ....core.background_jobs import (
     evaluate_job_routing,
     get_default_job_types,
 )
-from ....core.scheduler_recovery import build_scheduler_recovery_plan
+from ....core.scheduler_recovery import (
+    build_scheduler_recovery_notification,
+    build_scheduler_recovery_plan,
+)
 from ....services.scheduler_service import get_scheduler_status
 from ....core.workflow_versioning_contracts import (
     MigrationsTyp,
@@ -1774,11 +1777,16 @@ def get_jobs_heartbeat_recovery() -> dict[str, Any]:
             degrade_after_seconds=int(health["degrade_after_seconds"]),
         )
     )
+    recovery_notification = build_scheduler_recovery_notification(
+        recovery_plan,
+        worker_id=status.get("worker_id", ""),
+    )
     return {
         "scheduler_id": status.get("scheduler_id", ""),
         "worker_id": status.get("worker_id", ""),
         "heartbeat_status": health["status"],
         "recovery_plan": recovery_plan.as_dict(),
+        "notification_preview": recovery_notification.as_dict(),
         "schema_version": 1,
     }
 
@@ -4316,3 +4324,79 @@ def get_wiederherstellungspunkt(payload: dict):
     if cp is None:
         return {"checkpoint": None}
     return {"checkpoint": {"checkpoint_id": cp.checkpoint_id, "schritt_nummer": cp.schritt_nummer, "status": cp.status}}
+
+# === Wave 55: Priority Queue + Rollback ===
+from app.core.process_priority_contracts import (
+    get_default_warteschlangen, PrioritaetsWarteschlange,
+    PrioritaetsAufgabe, AufgabenPrioritaet, WarteschlangenStatus,
+)
+from app.core.workflow_rollback_contracts import (
+    get_default_rollback_plaene, RollbackPlan, RollbackSchritt,
+    RollbackTyp, RollbackStatus, UmkehrbarkeitsGrad,
+)
+
+@router.get("/prioritaet/warteschlangen", tags=["process-kernel"])
+def get_warteschlangen():
+    return [
+        {
+            "schlange_id": q.schlange_id,
+            "gesamt_aufgaben": len(q.aufgaben),
+            "naechste_aufgabe_id": (q.naechste_aufgabe().aufgabe_id if q.naechste_aufgabe() else None),
+            "tiefe": {k.value: v for k, v in q.warteschlangen_tiefe().items()},
+        }
+        for q in get_default_warteschlangen()
+    ]
+
+@router.post("/prioritaet/sortiere", tags=["process-kernel"])
+def sortiere_aufgaben(payload: dict):
+    """
+    Payload: {"aufgaben": [{"aufgabe_id": str, "prioritaet": str, "erstellt_am": str}]}
+    Returns sorted list by priority then erstellt_am.
+    """
+    from datetime import datetime
+    aufgaben = []
+    for a in payload.get("aufgaben", []):
+        erstellt = datetime.fromisoformat(a.get("erstellt_am", "2026-01-01T00:00:00"))
+        aufgaben.append(PrioritaetsAufgabe(
+            aufgabe_id=a["aufgabe_id"],
+            aufgabe_typ="generic",
+            prioritaet=AufgabenPrioritaet(a["prioritaet"]),
+            tenant_id="TENANT-TEST",
+            erstellt_am=erstellt,
+        ))
+    q = PrioritaetsWarteschlange("TEMP", aufgaben)
+    sortiert = q.aufgaben_nach_prioritaet()
+    return [{"aufgabe_id": a.aufgabe_id, "prioritaet": a.prioritaet} for a in sortiert]
+
+@router.get("/rollback/plaene", tags=["process-kernel"])
+def get_rollback_plaene():
+    return [
+        {
+            "plan_id": p.plan_id,
+            "workflow_instanz_id": p.workflow_instanz_id,
+            "rollback_typ": p.rollback_typ,
+            "schritte_gesamt": len(p.schritte),
+            "ausfuehrbare_schritte": len(p.ausfuehrbare_schritte()),
+            "ist_vollstaendig_ausfuehrbar": p.ist_vollstaendig_ausfuehrbar(),
+            "fortschritt_pct": p.rollback_fortschritt_pct(),
+        }
+        for p in get_default_rollback_plaene()
+    ]
+
+@router.post("/rollback/pruefe-ausfuehrbarkeit", tags=["process-kernel"])
+def pruefe_rollback_ausfuehrbarkeit(payload: dict):
+    """
+    Payload: {"plan_id": str}
+    Checks against default plans.
+    """
+    plan_id = payload.get("plan_id", "")
+    plaene = {p.plan_id: p for p in get_default_rollback_plaene()}
+    if plan_id not in plaene:
+        return {"fehler": f"Plan {plan_id!r} nicht gefunden"}
+    p = plaene[plan_id]
+    return {
+        "plan_id": p.plan_id,
+        "ist_vollstaendig_ausfuehrbar": p.ist_vollstaendig_ausfuehrbar(),
+        "ausfuehrbare_schritte": len(p.ausfuehrbare_schritte()),
+        "fortschritt_pct": p.rollback_fortschritt_pct(),
+    }
