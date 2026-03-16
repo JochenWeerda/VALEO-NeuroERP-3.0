@@ -3,13 +3,13 @@
 ## Gesamtstatus
 
 - Stand: `2026-03-16`
-- Status: `Waves 1 bis 49 abgeschlossen`
-- Gesamtsuite: `2871 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed`
+- Status: `Waves 1 bis 50 abgeschlossen`
+- Gesamtsuite: `3002 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed`
 - Letzte abgeschlossene Waves:
-  - `Wave 46`: Process Quarantine Contracts + Workflow ACL Contracts
   - `Wave 47`: Process State Machine Contracts + Workflow Delegation Contracts
   - `Wave 48`: Process Timeout Contracts + Workflow Batch Processing Contracts
   - `Wave 49`: Process Notification Contracts (W49) + Workflow Lock Contracts
+  - `Wave 50`: Process Archive Contracts + Workflow Metrics Contracts
 
 ## Wave-Uebersicht
 
@@ -64,6 +64,7 @@
 | Wave 47 | abgeschlossen | 128 | `wave-47/STATUS.md` |
 | Wave 48 | abgeschlossen | 147 | `wave-48/STATUS.md` |
 | Wave 49 | abgeschlossen | 115 | `wave-49/STATUS.md` |
+| Wave 50 | abgeschlossen | 129 | `wave-50/STATUS.md` |
 
 ## Aktuell relevante Lieferungen
 
