@@ -197,6 +197,20 @@ from ....core.process_cost_contracts import (
     get_default_budget_ueberwachungen,
     pruefe_budget,
 )
+from ....core.process_quarantine_contracts import (
+    QuarantaeneGrund,
+    QuarantaeneStatus,
+    RetryStrategie,
+    berechne_quarantaene_statistik,
+    get_default_quarantaene_eintraege,
+)
+from ....core.workflow_acl_contracts import (
+    AclAktion,
+    AclEffekt,
+    AclVererbung,
+    get_default_acl_regeln,
+    pruefe_acl,
+)
 from ....core.cross_domain_projection_contracts import (
     KonsistenzLevel,
     ProjectionLagStufe,
@@ -3382,3 +3396,111 @@ def erstelle_prozess_kostenerfassung(body: dict | None = None):
         positionen=positionen,
     )
     return erfassung.as_dict()
+
+
+# ---------------------------------------------------------------------------
+# Wave 46 — Process Quarantine Contracts
+# ---------------------------------------------------------------------------
+
+@router.get("/quarantine/eintraege")
+def get_quarantaene_eintraege(
+    tenant_id: str = "TENANT-001",
+    status: str = "",
+):
+    """
+    Gibt Quarantäne-Einträge zurück (optional gefiltert nach Status).
+    """
+    eintraege = get_default_quarantaene_eintraege(tenant_id=tenant_id)
+    if status:
+        eintraege = [e for e in eintraege if e.status.value == status.upper()]
+    statistik = berechne_quarantaene_statistik(
+        get_default_quarantaene_eintraege(tenant_id=tenant_id), tenant_id
+    )
+    return {
+        "eintraege": [e.as_dict() for e in eintraege],
+        "anzahl": len(eintraege),
+        "statistik": statistik.as_dict(),
+        "schema_version": 1,
+    }
+
+
+@router.post("/quarantine/retry-zeitpunkt")
+def berechne_retry_zeitpunkt(body: dict | None = None):
+    """
+    Berechnet den nächsten Retry-Zeitpunkt für einen Quarantäne-Eintrag.
+
+    Body-Parameter:
+    - eintrag_id: ID des Eintrags (QE-001 bis QE-005)
+    - basis_intervall_sekunden: Basisintervall in Sekunden (default: 60)
+    """
+    if body is None:
+        body = {}
+
+    eintrag_id: str = body.get("eintrag_id", "QE-001")
+    basis: float = float(body.get("basis_intervall_sekunden", 60.0))
+    tenant_id: str = body.get("tenant_id", "TENANT-001")
+
+    eintraege = get_default_quarantaene_eintraege(tenant_id=tenant_id)
+    eintrag = next((e for e in eintraege if e.eintrag_id == eintrag_id), eintraege[0])
+
+    naechster = eintrag.berechne_naechsten_versuch(basis_intervall_sekunden=basis)
+    return {
+        "eintrag_id": eintrag.eintrag_id,
+        "retry_strategie": eintrag.retry_strategie.value,
+        "versuch_anzahl": eintrag.versuch_anzahl,
+        "kann_wiederholt_werden": eintrag.kann_wiederholt_werden,
+        "naechster_versuch": naechster.isoformat() if naechster else None,
+        "schema_version": 1,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Wave 46 — Workflow ACL Contracts
+# ---------------------------------------------------------------------------
+
+@router.get("/acl/regeln")
+def get_acl_regeln(ressource_id: str = "", subjekt_id: str = ""):
+    """
+    Gibt ACL-Regeln zurück (optional gefiltert nach Ressource und Subjekt).
+    """
+    regeln = get_default_acl_regeln()
+    if ressource_id:
+        regeln = [r for r in regeln if r.ressource_id in {ressource_id, "*"}]
+    if subjekt_id:
+        regeln = [r for r in regeln if r.subjekt_id in {subjekt_id, "*"}]
+    return {
+        "regeln": [r.as_dict() for r in regeln],
+        "anzahl": len(regeln),
+        "schema_version": 1,
+    }
+
+
+@router.post("/acl/pruefe")
+def pruefe_acl_zugang(body: dict | None = None):
+    """
+    Prüft ob ein Subjekt eine Aktion auf einer Ressource ausführen darf.
+
+    Body-Parameter:
+    - ressource_id: Ressource (z.B. "workflow:kontrakt_annahme")
+    - subjekt_id: Subjekt (z.B. "sachbearbeiter", "leiter", "admin")
+    - aktion: Aktion (LESEN/SCHREIBEN/AUSFUEHREN/FREIGEBEN/ADMINISTRIEREN)
+    """
+    if body is None:
+        body = {}
+
+    ressource_id: str = body.get("ressource_id", "workflow:kontrakt_annahme")
+    subjekt_id: str = body.get("subjekt_id", "sachbearbeiter")
+    aktion_str: str = body.get("aktion", "AUSFUEHREN")
+
+    try:
+        aktion = AclAktion(aktion_str.upper())
+    except ValueError:
+        aktion = AclAktion.LESEN
+
+    entscheidung = pruefe_acl(
+        ressource_id=ressource_id,
+        subjekt_id=subjekt_id,
+        aktion=aktion,
+        regeln=get_default_acl_regeln(),
+    )
+    return entscheidung.as_dict()
