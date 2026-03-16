@@ -3945,3 +3945,87 @@ def aggregiere_workflow_messpunkte(body: dict | None = None):
         "aggregation": aggregation.value,
         "ergebnis": ergebnis,
     }
+
+
+# === Wave 51: Process Capacity + Workflow Compensation ===
+from app.core.process_capacity_contracts_wave51 import (
+    get_default_kapazitaets_regeln, KapazitaetsRegel, KapazitaetsMessung,
+    KapazitaetsPlan, KapazitaetsStatus, KapazitaetsTyp, SkalierungsStrategie,
+)
+from app.core.workflow_compensation_contracts import (
+    get_default_saga_instanzen, erstelle_kompensations_plan,
+    SagaInstanz, KompensationsStatus, SagaStatus, KompensationsTyp,
+)
+
+
+@router.get("/kapazitaet/regeln", tags=["process-kernel"])
+def get_kapazitaets_regeln():
+    return [
+        {
+            "regel_id": r.regel_id,
+            "kapazitaets_typ": r.kapazitaets_typ,
+            "max_kapazitaet": r.max_kapazitaet,
+            "warnschwelle_pct": r.warnschwelle_pct,
+            "kritisch_schwelle_pct": r.kritisch_schwelle_pct,
+            "skalierungs_strategie": r.skalierungs_strategie,
+            "beschreibung": r.beschreibung,
+        }
+        for r in get_default_kapazitaets_regeln()
+    ]
+
+
+@router.post("/kapazitaet/pruefe-auslastung", tags=["process-kernel"])
+def pruefe_kapazitaets_auslastung(payload: dict):
+    """
+    Payload: {"max_kapazitaet": float, "warnschwelle_pct": float, "kritisch_schwelle_pct": float, "aktuelle_auslastung": float}
+    """
+    from datetime import datetime
+    regel = KapazitaetsRegel(
+        regel_id="TEMP",
+        kapazitaets_typ=KapazitaetsTyp.CPU,
+        max_kapazitaet=float(payload.get("max_kapazitaet", 100.0)),
+        warnschwelle_pct=float(payload.get("warnschwelle_pct", 70.0)),
+        kritisch_schwelle_pct=float(payload.get("kritisch_schwelle_pct", 90.0)),
+        skalierungs_strategie=SkalierungsStrategie.MANUELL,
+    )
+    status = regel.berechne_status(float(payload.get("aktuelle_auslastung", 0.0)))
+    return {"status": status, "max_kapazitaet": regel.max_kapazitaet}
+
+
+@router.get("/kompensation/sagas", tags=["process-kernel"])
+def get_default_sagas():
+    sagas = get_default_saga_instanzen()
+    return [
+        {
+            "saga_id": s.saga_id,
+            "saga_typ": s.saga_typ,
+            "tenant_id": s.tenant_id,
+            "status": s.status,
+            "schritte_anzahl": len(s.schritte),
+            "offene_kompensationen": len(s.offene_kompensationen()),
+        }
+        for s in sagas
+    ]
+
+
+@router.post("/kompensation/erstelle-plan", tags=["process-kernel"])
+def erstelle_kompensations_plan_endpoint(payload: dict):
+    """
+    Payload: {"saga_id": str, "saga_typ": str, "tenant_id": str, "schritt_definitionen": list}
+    """
+    saga = erstelle_kompensations_plan(
+        saga_id=payload.get("saga_id", "SAGA-NEW"),
+        saga_typ=payload.get("saga_typ", "generic"),
+        tenant_id=payload.get("tenant_id", "TENANT-TEST"),
+        schritt_definitionen=payload.get("schritt_definitionen", []),
+    )
+    return {
+        "saga_id": saga.saga_id,
+        "saga_typ": saga.saga_typ,
+        "status": saga.status,
+        "berechneter_status": saga.berechne_saga_status(),
+        "schritte": [
+            {"schritt_id": s.schritt_id, "schritt_name": s.schritt_name, "kompensations_typ": s.kompensations_typ, "status": s.status}
+            for s in saga.schritte
+        ],
+    }
