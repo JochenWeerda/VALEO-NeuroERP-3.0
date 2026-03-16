@@ -4473,3 +4473,76 @@ def verarbeite_signal_endpoint(payload: dict):
         "erfolgreich": ergebnis.erfolgreich,
         "nachricht": ergebnis.nachricht,
     }
+
+
+# === Wave 57: Observability + Workflow Versioning ===
+from app.core.process_observability_contracts import (
+    get_default_traces, get_default_health_report,
+    Trace, ObservabilitySpan, SystemHealthReport, HealthCheck,
+    SpanStatus, HealthStatus,
+)
+from app.core.workflow_versioning_contracts_wave57 import (
+    get_default_migrations_guards, MigrationsGuard,
+    WorkflowSchemaVersion, MigrationsSchritt,
+    VersionsStatus, KompatibilitaetsTyp, MigrationsTyp,
+)
+
+
+@router.get("/observability/traces", tags=["process-kernel"])
+def get_traces():
+    return [
+        {
+            "trace_id": t.trace_id,
+            "span_anzahl": len(t.spans),
+            "root_span_id": (t.root_span().span_id if t.root_span() else None),
+            "gesamtdauer_ms": t.gesamtdauer_ms(),
+            "fehlerhafte_spans": len(t.fehlerhafte_spans()),
+            "erfolgsrate_pct": t.erfolgsrate_pct(),
+        }
+        for t in get_default_traces()
+    ]
+
+
+@router.get("/observability/health", tags=["process-kernel"])
+def get_health_report():
+    report = get_default_health_report()
+    return {
+        "report_id": report.report_id,
+        "gesamtstatus": report.gesamtstatus(),
+        "checks_gesamt": len(report.checks),
+        "gesunde_komponenten": len(report.gesunde_komponenten()),
+        "checks": [
+            {"check_id": c.check_id, "komponente": c.komponente,
+             "status": c.status, "antwortzeit_ms": c.antwortzeit_ms}
+            for c in report.checks
+        ],
+    }
+
+
+@router.get("/versioning/guards", tags=["process-kernel"])
+def get_migrations_guards():
+    return [
+        {
+            "guard_id": g.guard_id,
+            "workflow_typ": g.workflow_typ,
+            "versionen_anzahl": len(g.versionen),
+            "aktive_version": (g.aktive_version().version if g.aktive_version() else None),
+            "neueste_version": (g.neueste_version().version if g.neueste_version() else None),
+        }
+        for g in get_default_migrations_guards()
+    ]
+
+
+@router.post("/versioning/pruefe-brechend", tags=["process-kernel"])
+def pruefe_brechende_aenderung(payload: dict):
+    """
+    Payload: {"guard_id": str, "von_version": str, "zu_version": str}
+    """
+    guard_id = payload.get("guard_id", "")
+    guards = {g.guard_id: g for g in get_default_migrations_guards()}
+    if guard_id not in guards:
+        return {"fehler": f"Guard {guard_id!r} nicht gefunden"}
+    g = guards[guard_id]
+    hat_brechend = g.hat_brechende_aenderung(
+        payload.get("von_version", ""), payload.get("zu_version", ""))
+    return {"guard_id": guard_id, "hat_brechende_aenderung": hat_brechend}
