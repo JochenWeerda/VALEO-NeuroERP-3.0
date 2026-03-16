@@ -168,6 +168,19 @@ from ....core.workflow_checkpoint_contracts import (
     get_default_checkpoint_regeln,
     stelle_checkpoint_wieder_her,
 )
+from ....core.process_routing_contracts import (
+    RoutingBedingungsTyp,
+    RoutingErgebnis,
+    RoutingZielTyp,
+    get_default_routing_regeln,
+    route_nachricht,
+)
+from ....core.data_lineage_contracts import (
+    LineageKnotenTyp,
+    LineageStatus,
+    TransformationsTyp,
+    get_default_lineage_graph,
+)
 from ....core.cross_domain_projection_contracts import (
     KonsistenzLevel,
     ProjectionLagStufe,
@@ -3139,5 +3152,94 @@ def pruefe_projektions_lag(body: dict | None = None):
         "lag_sekunden": lag_sekunden,
         "lag_stufe": lag_stufe.value,
         "ist_kritisch": lag_stufe == ProjectionLagStufe.KRITISCH,
+        "schema_version": 1,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Wave 44 — Process Routing Contracts
+# ---------------------------------------------------------------------------
+
+@router.get("/routing/regeln")
+def get_routing_regeln(workflow_typ: str = ""):
+    """
+    Gibt Routing-Regeln zurück (optional gefiltert nach workflow_typ).
+    """
+    regeln = get_default_routing_regeln()
+    if workflow_typ:
+        regeln = [r for r in regeln if r.workflow_typ == workflow_typ]
+    return {
+        "regeln": [r.as_dict() for r in regeln],
+        "anzahl": len(regeln),
+        "workflow_typen": sorted({r.workflow_typ for r in get_default_routing_regeln()}),
+        "schema_version": 1,
+    }
+
+
+@router.post("/routing/route")
+def route_workflow_nachricht(body: dict | None = None):
+    """
+    Routet eine Nachricht anhand der priorisierten Routing-Regeln.
+
+    Body-Parameter:
+    - workflow_typ: Typ des Workflows (z.B. "kontrakt_annahme")
+    - kontext: dict mit Nachrichtenkontext (Felder, Werte, Rolle)
+    - entscheidung_id: optional
+    """
+    if body is None:
+        body = {}
+
+    workflow_typ: str = body.get("workflow_typ", "kontrakt_annahme")
+    kontext: dict = body.get("kontext", {})
+    entscheidung_id: str | None = body.get("entscheidung_id")
+
+    entscheidung = route_nachricht(
+        workflow_typ=workflow_typ,
+        kontext=kontext,
+        entscheidung_id=entscheidung_id,
+    )
+    return entscheidung.as_dict()
+
+
+# ---------------------------------------------------------------------------
+# Wave 44 — Data Lineage Contracts
+# ---------------------------------------------------------------------------
+
+@router.get("/lineage/graph")
+def get_lineage_graph(tenant_id: str = "TENANT-001"):
+    """
+    Gibt den Standard-Lineage-Graphen für den Agrar-Settlement-Prozess zurück.
+    """
+    graph = get_default_lineage_graph(tenant_id=tenant_id)
+    return graph.as_dict()
+
+
+@router.post("/lineage/pfad")
+def finde_lineage_pfad(body: dict | None = None):
+    """
+    Findet den Pfad zwischen zwei Knoten im Lineage-Graphen (BFS).
+
+    Body-Parameter:
+    - von_knoten_id: Start-Knoten-ID
+    - zu_knoten_id: Ziel-Knoten-ID
+    - tenant_id: optional
+    """
+    if body is None:
+        body = {}
+
+    von: str = body.get("von_knoten_id", "LK-001")
+    zu: str = body.get("zu_knoten_id", "LK-004")
+    tenant_id: str = body.get("tenant_id", "TENANT-001")
+
+    graph = get_default_lineage_graph(tenant_id=tenant_id)
+    pfad = graph.finde_pfad(von, zu)
+
+    return {
+        "von_knoten_id": von,
+        "zu_knoten_id": zu,
+        "pfad": pfad,
+        "pfad_laenge": len(pfad),
+        "pfad_gefunden": len(pfad) > 0,
+        "hat_zyklus": graph.hat_zyklus,
         "schema_version": 1,
     }

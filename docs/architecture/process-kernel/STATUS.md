@@ -3,14 +3,14 @@
 ## Gesamtstatus
 
 - Stand: `2026-03-16`
-- Status: `Waves 1 bis 43 abgeschlossen`
-- Gesamtsuite: `2263 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed`
+- Status: `Waves 1 bis 44 abgeschlossen`
+- Gesamtsuite: `2309 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed`
 - Letzte abgeschlossene Waves:
-  - `Wave 39`: Command-Surfacing-Contracts + Prozess-Benachrichtigungs-Contracts
   - `Wave 40`: Workflow-Versionierungs-Contracts + Canonical Process Audit Trail (PKP-02, PKP-03)
   - `Wave 41`: Process Capacity Contracts + Event Replay Contracts
   - `Wave 42`: Domain Event Schema Registry + Process Compensation Contracts
   - `Wave 43`: Workflow Checkpoint Contracts + Cross-Domain Projection Contracts
+  - `Wave 44`: Process Routing Contracts + Data Lineage Contracts
 
 ## Wave-Uebersicht
 
@@ -59,6 +59,7 @@
 | Wave 41 | abgeschlossen | 82 | `wave-41/STATUS.md` |
 | Wave 42 | abgeschlossen | 60 | `wave-42/STATUS.md` |
 | Wave 43 | abgeschlossen | 73 | `wave-43/STATUS.md` |
+| Wave 44 | abgeschlossen | 60 | `wave-44/STATUS.md` |
 
 ## Aktuell relevante Lieferungen
 
@@ -240,7 +241,6 @@
 
 - `app/agents/genxais.py`
 - `app/agents/genxais_service.py`
-- `app/agents/genxais_legacy.py`
 - `app/agents/langgraph_server.py`
 - `app/agents/workflows/bestellvorschlag.py`
 - `app/agents/workflows/skonto_optimizer.py`
@@ -252,7 +252,8 @@ Ergebnis:
 - `GENXAISService` ist die neue Anwendungsschicht ueber den agentischen Fach-Workflows; die bestehende LangGraph-Schicht bleibt technische Ausfuehrungsengine.
 - Der semantische Produktanker liegt kuenftig in `app/agents`, nicht in den alten `scripts/start_genxais_*`- und Dashboard-Pfaden.
 - Produktiv anschlussfaehige GENXAIS-Capabilities sind aktuell Bestellvorschlag, Finance-Skonto und Compliance-Copilot; technische oder rein experimentelle Pfade werden davon getrennt bewertet.
-- Legacy-Pfade wie `scripts/start_genxais_*`, `scripts/start_langgraph_cycle.py`, `scripts/streamlit_dashboard.py` und `scripts/dashboard_prompt_module.py` sind jetzt in einer expliziten Deprecation-/Removal-Registry erfasst statt implizit weiterzuleben.
+- Die alte GENXAIS-Script- und Dashboard-Nebenwelt ist aus dem Anwendungskern entfernt; der fachliche Pfad liegt jetzt ausschliesslich unter `app/agents`.
+- `app/agents/workflows/bestellvorschlag.py` nutzt jetzt echte Approval- und Command-Contracts sowie direkte Persistenz ueber die Einkaufsmodelle statt Auto-Approval, Loopback-HTTP und Fallback-Bestellnummern.
 
 ## Architekturregeln
 
@@ -313,7 +314,7 @@ pytest tests/test_apm_pipeline_contract.py tests/test_reflect_archive_loader.py 
 pytest tests/test_json_state_contract.py tests/test_apm_pipeline_contract.py tests/test_reflect_archive_loader.py tests/l3_import/test_import_l3.py tests/l3_import/test_validate_mapping.py -q --no-cov
 # Ergebnis: 29 passed
 
-pytest tests/test_genxais_cycle_contract.py tests/test_dashboard_prompt_module_contracts.py tests/test_json_state_contract.py tests/test_apm_pipeline_contract.py tests/test_reflect_archive_loader.py tests/l3_import/test_import_l3.py tests/l3_import/test_validate_mapping.py -q --no-cov
+pytest tests/test_genxais_capability_registry.py tests/test_genxais_service.py tests/test_agents_genxais_api.py tests/test_genxais_bestellvorschlag_contract.py tests/test_workflows.py tests/test_process_kernel_wave14_command_dispatcher.py tests/test_process_kernel_wave16_aggregate_registry.py -q --no-cov
 # Ergebnis: 37 passed
 
 pytest tests/test_genxais_capability_registry.py -q --no-cov
