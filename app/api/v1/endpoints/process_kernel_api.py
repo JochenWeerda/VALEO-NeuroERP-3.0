@@ -4112,3 +4112,91 @@ def rekonstruiere_workflow_zustand(payload: dict):
     stream = streams[stream_id]
     zustand = rekonstruiere_zustand(stream.replay(ReplayModus.VOLLSTAENDIG))
     return zustand
+
+
+# === Wave 53: Rate Limiting + Idempotency ===
+from app.core.process_rate_limit_contracts import (
+    get_default_rate_limit_regeln,
+    RateLimitRegel, RateLimitZaehler, RateLimitErgebnis,
+    RateLimitFenster, RateLimitGranularitaet,
+)
+from app.core.workflow_idempotency_contracts import (
+    get_default_idempotenz_eintraege, pruefe_idempotenz,
+    IdempotenzEintrag, IdempotenzStatus, DeduplizierungsStrategie,
+)
+
+@router.get("/rate-limit/regeln", tags=["process-kernel"])
+def get_rate_limit_regeln():
+    return [
+        {
+            "regel_id": r.regel_id,
+            "granularitaet": r.granularitaet,
+            "fenster": r.fenster,
+            "max_anfragen": r.max_anfragen,
+            "weich_limit": r.weich_limit,
+            "fenster_sekunden": r.fenster_sekunden(),
+            "beschreibung": r.beschreibung,
+        }
+        for r in get_default_rate_limit_regeln()
+    ]
+
+@router.post("/rate-limit/pruefe", tags=["process-kernel"])
+def pruefe_rate_limit(payload: dict):
+    """
+    Payload: {"max_anfragen": int, "weich_limit": int, "fenster": str, "anfragen_im_fenster": int, "fenster_abgelaufen": bool}
+    """
+    from datetime import datetime, timedelta
+    fenster_str = payload.get("fenster", "MINUTE")
+    regel = RateLimitRegel(
+        regel_id="TEMP",
+        granularitaet=RateLimitGranularitaet.TENANT,
+        fenster=RateLimitFenster(fenster_str),
+        max_anfragen=int(payload.get("max_anfragen", 100)),
+        weich_limit=int(payload.get("weich_limit", 80)),
+    )
+    jetzt = datetime.utcnow()
+    fenster_abgelaufen = bool(payload.get("fenster_abgelaufen", False))
+    fenster_beginn = jetzt - timedelta(seconds=regel.fenster_sekunden() + 1) if fenster_abgelaufen else jetzt
+    zaehler = RateLimitZaehler(
+        zaehler_id="TEMP",
+        regel_id="TEMP",
+        anfragen_im_fenster=int(payload.get("anfragen_im_fenster", 0)),
+        fenster_beginn=fenster_beginn,
+    )
+    ergebnis, _ = zaehler.pruefe_und_inkrementiere(regel, jetzt)
+    return {"ergebnis": ergebnis}
+
+@router.get("/idempotenz/eintraege", tags=["process-kernel"])
+def get_idempotenz_eintraege():
+    from datetime import datetime
+    jetzt = datetime(2026, 3, 16, 10, 0, 0)
+    return [
+        {
+            "schluessel": e.schluessel,
+            "befehl_typ": e.befehl_typ,
+            "tenant_id": e.tenant_id,
+            "status": e.status,
+            "aktueller_status": e.aktueller_status(jetzt),
+            "ttl_sekunden": e.ttl_sekunden,
+        }
+        for e in get_default_idempotenz_eintraege()
+    ]
+
+@router.post("/idempotenz/pruefe", tags=["process-kernel"])
+def pruefe_idempotenz_endpoint(payload: dict):
+    """
+    Payload: {"schluessel": str, "strategie": str}
+    Checks against default entries.
+    """
+    from datetime import datetime
+    jetzt = datetime(2026, 3, 16, 10, 0, 0)
+    schluessel = payload.get("schluessel", "")
+    strategie = DeduplizierungsStrategie(payload.get("strategie", "STRIKTE_EINMALIGKEIT"))
+    eintraege = get_default_idempotenz_eintraege()
+    pruefung = pruefe_idempotenz(schluessel, eintraege, strategie, jetzt)
+    return {
+        "schluessel": pruefung.schluessel,
+        "soll_verarbeiten": pruefung.soll_verarbeiten,
+        "status": pruefung.status,
+        "gespeichertes_ergebnis": pruefung.gespeichertes_ergebnis,
+    }
