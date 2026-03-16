@@ -181,6 +181,22 @@ from ....core.data_lineage_contracts import (
     TransformationsTyp,
     get_default_lineage_graph,
 )
+from ....core.feature_flag_contracts import (
+    FeatureFlagStatus,
+    FlagVariante,
+    RolloutStrategie,
+    evaluiere_flags,
+    get_aktive_flag_ids,
+    get_default_feature_flags,
+)
+from ....core.process_cost_contracts import (
+    AbrechnungsEinheit,
+    BudgetStatus,
+    KostenTyp,
+    erstelle_kosten_erfassung,
+    get_default_budget_ueberwachungen,
+    pruefe_budget,
+)
 from ....core.cross_domain_projection_contracts import (
     KonsistenzLevel,
     ProjectionLagStufe,
@@ -3243,3 +3259,126 @@ def finde_lineage_pfad(body: dict | None = None):
         "hat_zyklus": graph.hat_zyklus,
         "schema_version": 1,
     }
+
+
+# ---------------------------------------------------------------------------
+# Wave 45 — Feature Flag Contracts
+# ---------------------------------------------------------------------------
+
+@router.get("/feature-flags")
+def get_feature_flags(
+    tenant_id: str = "TENANT-001",
+    rolle: str = "",
+):
+    """
+    Gibt alle Feature-Flags mit Zugangsauswertung für Tenant/Rolle zurück.
+    """
+    flags = get_default_feature_flags()
+    aktive_ids = get_aktive_flag_ids(tenant_id=tenant_id, rolle=rolle, flags=flags)
+    return {
+        "flags": [f.as_dict() for f in flags],
+        "anzahl": len(flags),
+        "aktive_flag_ids": aktive_ids,
+        "aktive_anzahl": len(aktive_ids),
+        "schema_version": 1,
+    }
+
+
+@router.post("/feature-flags/evaluiere")
+def evaluiere_feature_flags(body: dict | None = None):
+    """
+    Evaluiert alle Feature-Flags für einen Tenant und eine Rolle.
+
+    Body-Parameter:
+    - tenant_id: Tenant-ID
+    - rolle: Rolle des Nutzers (optional)
+    """
+    if body is None:
+        body = {}
+
+    tenant_id: str = body.get("tenant_id", "TENANT-001")
+    rolle: str = body.get("rolle", "")
+
+    flags = get_default_feature_flags()
+    evaluierungen = evaluiere_flags(
+        tenant_id=tenant_id,
+        rolle=rolle,
+        flags=flags,
+    )
+    return {
+        "tenant_id": tenant_id,
+        "rolle": rolle,
+        "evaluierungen": [e.as_dict() for e in evaluierungen],
+        "zugang_anzahl": sum(1 for e in evaluierungen if e.hat_zugang),
+        "schema_version": 1,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Wave 45 — Process Cost Contracts
+# ---------------------------------------------------------------------------
+
+@router.get("/costs/budget-ueberwachung")
+def get_budget_ueberwachung(
+    tenant_id: str = "TENANT-001",
+    domain: str = "",
+):
+    """
+    Gibt Budget-Überwachungsstatus zurück (optional gefiltert nach Domain).
+    """
+    budgets = get_default_budget_ueberwachungen(tenant_id=tenant_id)
+    if domain:
+        budgets = [b for b in budgets if b.domain == domain]
+    kritisch = [b for b in budgets
+                if b.budget_status in {BudgetStatus.GESPERRT, BudgetStatus.UEBERSCHRITTEN}]
+    return {
+        "budgets": [b.as_dict() for b in budgets],
+        "anzahl": len(budgets),
+        "kritische_anzahl": len(kritisch),
+        "schema_version": 1,
+    }
+
+
+@router.post("/costs/erstelle-erfassung")
+def erstelle_prozess_kostenerfassung(body: dict | None = None):
+    """
+    Erstellt eine Kostenerfassung für eine Workflow-Instanz.
+
+    Body-Parameter:
+    - erfassung_id: Erfassungs-ID
+    - workflow_instanz_id: Instanz-ID
+    - tenant_id: Tenant
+    - positionen: Liste von {position_id, kosten_typ, menge, einheit_preis_eur, abrechnungs_einheit}
+    """
+    if body is None:
+        body = {}
+
+    from ....core.process_cost_contracts import KostenPosition
+
+    rohe_positionen = body.get("positionen", [
+        {"position_id": "P-001", "kosten_typ": "CPU",
+         "menge": 2.5, "einheit_preis_eur": 0.01,
+         "abrechnungs_einheit": "PRO_SEKUNDE"},
+    ])
+
+    positionen = [
+        KostenPosition(
+            position_id=p.get("position_id", f"P-{i}"),
+            kosten_typ=KostenTyp(p.get("kosten_typ", "MANUELL")),
+            menge=float(p.get("menge", 1)),
+            einheit_preis_eur=float(p.get("einheit_preis_eur", 0)),
+            abrechnungs_einheit=AbrechnungsEinheit(
+                p.get("abrechnungs_einheit", "PRO_AUSFUEHRUNG")
+            ),
+            beschreibung=p.get("beschreibung", ""),
+        )
+        for i, p in enumerate(rohe_positionen, 1)
+    ]
+
+    erfassung = erstelle_kosten_erfassung(
+        erfassung_id=body.get("erfassung_id", "KE-001"),
+        workflow_instanz_id=body.get("workflow_instanz_id", "WF-INST-001"),
+        tenant_id=body.get("tenant_id", "TENANT-001"),
+        positionen=positionen,
+    )
+    return erfassung.as_dict()
