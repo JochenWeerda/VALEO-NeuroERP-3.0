@@ -4546,3 +4546,73 @@ def pruefe_brechende_aenderung(payload: dict):
     hat_brechend = g.hat_brechende_aenderung(
         payload.get("von_version", ""), payload.get("zu_version", ""))
     return {"guard_id": guard_id, "hat_brechende_aenderung": hat_brechend}
+
+
+# === Wave 58: Cost Allocation + Audit Trail ===
+from app.core.process_cost_allocation_contracts import (
+    get_default_kosten_allokationen, verteile_kosten,
+    KostenAllokation, KostenPosition, KostenTyp,
+    AllokationsMethode, KostenStatus,
+)
+from app.core.workflow_audit_trail_contracts import (
+    get_default_audit_trail, erstelle_audit_eintrag,
+    AuditTrail, AuditEintrag, AuditAktionsTyp,
+    AuditIntegritaetsStatus,
+)
+
+
+@router.get("/kosten/allokationen", tags=["process-kernel"])
+def get_kosten_allokationen():
+    return [
+        {
+            "allokation_id": a.allokation_id,
+            "workflow_instanz_id": a.workflow_instanz_id,
+            "kostenstelle_id": a.kostenstelle_id,
+            "methode": a.methode,
+            "allokations_anteil": a.allokations_anteil,
+            "gesamtkosten": a.gesamtkosten(),
+            "kosten_nach_typ": {k.value: v for k, v in a.kosten_nach_typ().items()},
+        }
+        for a in get_default_kosten_allokationen()
+    ]
+
+
+@router.post("/kosten/verteile", tags=["process-kernel"])
+def verteile_kosten_endpoint(payload: dict):
+    """
+    Payload: {"gesamt_betrag": float, "methode": str,
+              "kostenstellen": [{"kostenstelle_id": str, "gewicht": float}]}
+    """
+    ergebnis = verteile_kosten(
+        float(payload.get("gesamt_betrag", 0.0)),
+        payload.get("kostenstellen", []),
+        AllokationsMethode(payload.get("methode", "GLEICH")),
+    )
+    return {"verteilung": ergebnis}
+
+
+@router.get("/audit-trail/trail", tags=["process-kernel"])
+def get_audit_trail():
+    trail = get_default_audit_trail()
+    return {
+        "trail_id": trail.trail_id,
+        "eintraege_anzahl": len(trail.eintraege),
+        "integritaet": trail.pruefe_integritaet(),
+        "letzter_eintrag_id": (trail.letzter_eintrag().eintrag_id if trail.letzter_eintrag() else None),
+    }
+
+
+@router.post("/audit-trail/pruefe-integritaet", tags=["process-kernel"])
+def pruefe_audit_integritaet(payload: dict):
+    """
+    Payload: {"trail_id": str, "manipuliert": bool}
+    If manipuliert=True, tampers with first entry hash to simulate corruption.
+    """
+    trail = get_default_audit_trail()
+    if payload.get("manipuliert", False) and trail.eintraege:
+        import dataclasses
+        trail.eintraege[0] = dataclasses.replace(trail.eintraege[0], eintrag_hash="0000manipuliert")
+    return {
+        "trail_id": trail.trail_id,
+        "integritaet": trail.pruefe_integritaet(),
+    }
