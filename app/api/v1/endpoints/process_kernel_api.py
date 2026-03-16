@@ -4616,3 +4616,83 @@ def pruefe_audit_integritaet(payload: dict):
         "trail_id": trail.trail_id,
         "integritaet": trail.pruefe_integritaet(),
     }
+
+
+# === Wave 59: Consent Management + Workflow Triggers ===
+from app.core.process_consent_contracts import (
+    get_default_einwilligungs_register,
+    EinwilligungsRegister, Einwilligung,
+    EinwilligungsTyp, EinwilligungsStatus, RechtsgrundlageTyp,
+)
+from app.core.workflow_trigger_contracts import (
+    get_default_workflow_trigger, WorkflowTrigger, TriggerBedingung,
+    TriggerTyp, TriggerStatus, BedingungsOperator,
+)
+
+
+@router.get("/consent/register", tags=["process-kernel"])
+def get_consent_register():
+    from datetime import datetime
+    jetzt = datetime(2026, 3, 16, 10, 0, 0)
+    register = get_default_einwilligungs_register()
+    return {
+        "register_id": register.register_id,
+        "tenant_id": register.tenant_id,
+        "gesamt_einwilligungen": len(register.einwilligungen),
+        "aktive_einwilligungen": len(register.aktive_einwilligungen(jetzt)),
+        "einwilligungen": [
+            {
+                "einwilligungs_id": e.einwilligungs_id,
+                "subjekt_id": e.subjekt_id,
+                "typ": e.typ,
+                "status": e.status,
+                "aktueller_status": e.aktueller_status(jetzt),
+                "ist_aktiv": e.ist_aktiv(jetzt),
+            }
+            for e in register.einwilligungen
+        ],
+    }
+
+
+@router.post("/consent/pruefe", tags=["process-kernel"])
+def pruefe_einwilligung(payload: dict):
+    """
+    Payload: {"subjekt_id": str, "typ": str}
+    """
+    from datetime import datetime
+    jetzt = datetime(2026, 3, 16, 10, 0, 0)
+    register = get_default_einwilligungs_register()
+    subjekt_id = payload.get("subjekt_id", "")
+    typ = EinwilligungsTyp(payload.get("typ", "DATENVERARBEITUNG"))
+    hat_einwilligung = register.hat_gueltige_einwilligung(subjekt_id, typ, jetzt)
+    return {"subjekt_id": subjekt_id, "typ": typ, "hat_gueltige_einwilligung": hat_einwilligung}
+
+
+@router.get("/trigger/regeln", tags=["process-kernel"])
+def get_trigger_regeln():
+    return [
+        {
+            "trigger_id": t.trigger_id,
+            "workflow_typ": t.workflow_typ,
+            "trigger_typ": t.trigger_typ,
+            "status": t.status,
+            "bedingungen_anzahl": len(t.bedingungen),
+            "beschreibung": t.beschreibung,
+        }
+        for t in get_default_workflow_trigger()
+    ]
+
+
+@router.post("/trigger/pruefe-bedingungen", tags=["process-kernel"])
+def pruefe_trigger_bedingungen(payload: dict):
+    """
+    Payload: {"trigger_id": str, "kontext": dict}
+    """
+    trigger_id = payload.get("trigger_id", "")
+    kontext = payload.get("kontext", {})
+    trigger_map = {t.trigger_id: t for t in get_default_workflow_trigger()}
+    if trigger_id not in trigger_map:
+        return {"fehler": f"Trigger {trigger_id!r} nicht gefunden"}
+    t = trigger_map[trigger_id]
+    erfuellt = t.pruefe_bedingungen(kontext)
+    return {"trigger_id": trigger_id, "bedingungen_erfuellt": erfuellt, "status": t.status}
