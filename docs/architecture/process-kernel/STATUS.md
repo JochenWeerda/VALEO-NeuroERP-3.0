@@ -3,13 +3,13 @@
 ## Gesamtstatus
 
 - Stand: `2026-03-16`
-- Status: `Waves 1 bis 47 abgeschlossen`
-- Gesamtsuite: `2609 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed`
+- Status: `Waves 1 bis 48 abgeschlossen`
+- Gesamtsuite: `2756 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed`
 - Letzte abgeschlossene Waves:
-  - `Wave 44`: Process Routing Contracts + Data Lineage Contracts
   - `Wave 45`: Feature Flag Contracts + Process Cost Contracts
   - `Wave 46`: Process Quarantine Contracts + Workflow ACL Contracts
   - `Wave 47`: Process State Machine Contracts + Workflow Delegation Contracts
+  - `Wave 48`: Process Timeout Contracts + Workflow Batch Processing Contracts
 
 ## Wave-Uebersicht
 
@@ -62,6 +62,7 @@
 | Wave 45 | abgeschlossen | 78 | `wave-45/STATUS.md` |
 | Wave 46 | abgeschlossen | 68 | `wave-46/STATUS.md` |
 | Wave 47 | abgeschlossen | 128 | `wave-47/STATUS.md` |
+| Wave 48 | abgeschlossen | 147 | `wave-48/STATUS.md` |
 
 ## Aktuell relevante Lieferungen
 
@@ -263,7 +264,11 @@ Ergebnis:
 - Die generische Run-Registry in `GENXAISService` traegt jetzt auch den Statuspfad; `GET /neuroassist/runs/{run_id}` ist die primaere Statusoberflaeche, waehrend `bestellvorschlag/trigger` und `bestellvorschlag/status/{workflow_id}` nur noch Compat-Wrapper ueber denselben Run-/Status-Contract sind.
 - Approval laeuft jetzt ebenfalls ueber den generischen Gate-Contract `POST /neuroassist/runs/{run_id}/gates`; `bestellvorschlag/approve/{workflow_id}` ist nur noch eine Compat-Huelle ueber dieselbe `run_id`-/`gate_type`-/`decision`-Aktion.
 - Die Frontend-Client-Schicht in `packages/frontend-web/src/lib/api/workflows.ts` nutzt jetzt die generischen Endpunkte `POST /neuroassist/runs`, `GET /neuroassist/runs/{run_id}` und `POST /neuroassist/runs/{run_id}/gates`; die alten Bestellvorschlag-Endpunkte sind im API-Layer explizit als `deprecated` markiert.
-- `GENXAISService` ist die neue Anwendungsschicht ueber den agentischen Fach-Workflows; die bestehende LangGraph-Schicht bleibt technische Ausfuehrungsengine.
+- Die kanonischen Anwendungskern-Module heissen jetzt `app/agents/neuroassist.py` und `app/agents/neuroassist_service.py`; `genxais.py` und `genxais_service.py` bleiben nur noch als Compat-Wrapper mit Alias-Exports fuer den schrittweisen Uebergang bestehen.
+- `NeuroAssistService` ist die kanonische Anwendungsschicht ueber den agentischen Fach-Workflows; `GENXAISService` bleibt nur noch Alias fuer Kompatibilitaet, waehrend die bestehende LangGraph-Schicht technische Ausfuehrungsengine bleibt.
+- Interne Konstanten, API-Funktionsnamen und die kanonischen Testbezeichner sind jetzt ebenfalls auf `NeuroASSIST` gezogen; verbleibende `GENXAIS`-Strings sind auf explizite Compat-Aliase und deprecated API-Routen begrenzt.
+- Die Rest-Compat-Schicht ist jetzt explizit getaktet in [neuroassist-compat-deprecation-plan.md](C:/Users/Jochen/VALEO-NeuroERP-3.0/docs/architecture/neuroassist-compat-deprecation-plan.md): Phase 2 fuer interne Restimporte und Phase 3 fuer die komplette Entfernung von Alias-Exports und deprecated Routen.
+- Phase 2 ist im Anwendungskern und in den betroffenen Tests jetzt praktisch durchgezogen: interne Imports und kanonische Verweise laufen ueber `neuroassist`-/`NeuroAssist*`; verblieben sind nur noch die bewusst gehaltenen Alias-Exports in `app/agents/__init__.py`, `app/agents/neuroassist.py`, `app/agents/neuroassist_service.py` sowie die deprecated Compat-Routen im Agents-API-Layer.
 - Der semantische Produktanker liegt kuenftig in `app/agents`, nicht in den alten `scripts/start_genxais_*`- und Dashboard-Pfaden.
 - Produktiv anschlussfaehige GENXAIS-Capabilities sind aktuell Bestellvorschlag, Finance-Skonto und Compliance-Copilot; technische oder rein experimentelle Pfade werden davon getrennt bewertet.
 - Die alte GENXAIS-Script- und Dashboard-Nebenwelt ist aus dem Anwendungskern entfernt; der fachliche Pfad liegt jetzt ausschliesslich unter `app/agents`.

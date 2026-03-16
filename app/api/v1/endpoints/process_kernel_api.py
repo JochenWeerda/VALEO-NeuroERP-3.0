@@ -225,6 +225,21 @@ from ....core.workflow_delegation_contracts import (
     get_default_delegations_regeln,
     loeseauf_delegation,
 )
+from ....core.process_timeout_contracts import (
+    TimeoutAktion,
+    TimeoutStatus,
+    TimeoutTyp,
+    get_default_timeout_regeln,
+    pruefe_timeout,
+)
+from ....core.workflow_batch_contracts import (
+    BatchStatus,
+    BatchTyp,
+    ChunkStatus,
+    berechne_batch_status,
+    erstelle_chunks,
+    get_default_batch_jobs,
+)
 from ....core.cross_domain_projection_contracts import (
     KonsistenzLevel,
     ProjectionLagStufe,
@@ -3594,3 +3609,96 @@ def loeseauf_delegations_verantwortung(body: dict | None = None):
         regeln=get_default_delegations_regeln(),
     )
     return entscheidung.as_dict()
+
+
+# ---------------------------------------------------------------------------
+# Wave 48 — Process Timeout Contracts
+# ---------------------------------------------------------------------------
+
+@router.get("/timeouts/regeln")
+def get_timeout_regeln():
+    """Gibt alle Standard-Timeout-Regeln zurück."""
+    regeln = get_default_timeout_regeln()
+    return {
+        "anzahl": len(regeln),
+        "regeln": [r.as_dict() for r in regeln],
+    }
+
+
+@router.post("/timeouts/pruefe")
+def pruefe_timeout_instanz(body: dict | None = None):
+    """
+    Prüft den Timeout-Status einer Workflow-Instanz.
+
+    Body-Parameter:
+    - instanz_id: Instanz-ID (default: "WF-INST-TEST")
+    - schritt_id: Schritt-ID — wird gegen Standard-Regeln gemappt (default: "kontrakt_freigabe")
+    - erstellt_vor_minuten: Minuten seit Erstellung (default: 100)
+    """
+    if body is None:
+        body = {}
+
+    from datetime import datetime, timedelta as _td
+    instanz_id: str = body.get("instanz_id", "WF-INST-TEST")
+    schritt_id: str = body.get("schritt_id", "kontrakt_freigabe")
+    erstellt_vor: int = int(body.get("erstellt_vor_minuten", 100))
+
+    regeln = get_default_timeout_regeln()
+    regel = next((r for r in regeln if r.schritt_id == schritt_id), regeln[-1])
+
+    jetzt = datetime.utcnow()
+    erstellt_am = jetzt - _td(minutes=erstellt_vor)
+
+    pruefung = pruefe_timeout(
+        instanz_id=instanz_id,
+        schritt_id=schritt_id,
+        regel=regel,
+        erstellt_am=erstellt_am,
+        jetzt=jetzt,
+    )
+    return pruefung.as_dict()
+
+
+# ---------------------------------------------------------------------------
+# Wave 48 — Workflow Batch Processing Contracts
+# ---------------------------------------------------------------------------
+
+@router.get("/batch/jobs")
+def get_batch_jobs():
+    """Gibt alle Standard-Batch-Jobs zurück."""
+    jobs = get_default_batch_jobs()
+    return {
+        "anzahl": len(jobs),
+        "jobs": [j.as_dict() for j in jobs],
+        "status_verteilung": {
+            s.value: sum(1 for j in jobs if j.status == s)
+            for s in BatchStatus
+        },
+    }
+
+
+@router.post("/batch/erstelle-chunks")
+def erstelle_batch_chunks(body: dict | None = None):
+    """
+    Berechnet die Chunk-Aufteilung für einen Batch-Job.
+
+    Body-Parameter:
+    - batch_id: Batch-ID (default: "BJ-NEW")
+    - gesamt_datensaetze: Gesamtanzahl Datensätze (default: 1000)
+    - chunk_groesse: Datensätze je Chunk (default: 250)
+    """
+    if body is None:
+        body = {}
+
+    batch_id: str = body.get("batch_id", "BJ-NEW")
+    gesamt: int = int(body.get("gesamt_datensaetze", 1000))
+    chunk_groesse: int = int(body.get("chunk_groesse", 250))
+
+    chunks = erstelle_chunks(batch_id, gesamt, chunk_groesse)
+    return {
+        "batch_id": batch_id,
+        "gesamt_datensaetze": gesamt,
+        "chunk_groesse": chunk_groesse,
+        "anzahl_chunks": len(chunks),
+        "chunks": [c.as_dict() for c in chunks],
+    }
