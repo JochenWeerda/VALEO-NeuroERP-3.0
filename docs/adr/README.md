@@ -26,4 +26,7 @@
 - [ADR-024 Datenprodukt-Strategie für Sustainability- und Compliance-Reporting](adr-024-datenprodukt-strategie-sustainability-compliance-reporting.md)
 - [ADR-025 Standard für konfliktarme Parallelbearbeitung in Kernprozessen](adr-025-standard-konfliktarme-parallelbearbeitung.md)
 - [ADR-026 Modell für Import-/Staging-/Prüfpipelines](adr-026-modell-import-staging-pruefpipelines.md)
+- [ADR-027 Process-Kernel Event-Namenskonvention](adr-027-process-kernel-event-namenskonvention.md)
+- [ADR-028 Workflow Access Control und Delegation](adr-028-workflow-access-control-und-delegation.md)
+- [ADR-029 Process-Betrieb — Timeout, Batch, Archiv und Metriken](adr-029-process-betrieb-timeout-batch-archiv-metriken.md)
 - [ADR-CRM-001](ADR-CRM-001.md)

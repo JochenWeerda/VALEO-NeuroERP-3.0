@@ -1,6 +1,6 @@
 # Process Kernel — Delivery Map
 
-Stand: 2026-03-15 | Waves 1–27 abgeschlossen | 1235 Tests gruen
+Stand: 2026-03-16 | Waves 1–50 abgeschlossen | 3002 Tests gruen
 
 ## Wave → Gap Mapping
 
@@ -33,6 +33,29 @@ Stand: 2026-03-15 | Waves 1–27 abgeschlossen | 1235 Tests gruen
 | 25 | 2026-03 | Gap 025 | 10 | Kontextsensitive Quick Actions |
 | 26 | 2026-03 | Gap 003, Gap 011 | 37 | Trocknungsabrechnung Audit-Contract, Migrations-Guard |
 | 27 | 2026-03 | Gap 027 | 6 | Role Density Contract (Frontend) |
+| 28 | 2026-03 | Gap 013, Gap 039 | 11 | SLA-Eskalations-Engine, OpenTelemetry Span-Contracts |
+| 29 | 2026-03 | Gap 014, Gap 031 | 10 | Policy-as-Code Engine, Query-Vertrags-Registry |
+| 30 | 2026-03 | Gap 015, Gap 050 | 10 | Human-in-the-loop AI-Freigaben, SLO/SLI-Definitionen |
+| 31 | 2026-03 | Gap 017, Gap 040 | 105 | MCP/OpenAPI Tool Contracts, Datenqualitaetsregeln |
+| 32 | 2026-03 | Gap 032, Gap 033 (vertieft) | 47 | Dashboard Read-Model Snapshots, Query-Fallback-Contracts |
+| 33 | 2026-03 | Gap 034, Gap 036 | 59 | API-Bulk-Operationen, Queue-basierte Hintergrundjobs |
+| 34 | 2026-03 | Gap 038, Gap 049 | 55 | Tenant-isolierte Caches/Rate-Limits, Security-Hardening |
+| 35 | 2026-03 | Gap 026, Gap 028 | 54 | Inline-Validierung mit Erklaerungen, Error-UX-Leitsystem |
+| 36 | 2026-03 | Gap 043, Gap 044 | 60 | EDI/API-Hub, Lieferketten-Tracking |
+| 37 | 2026-03 | Gap 045, Gap 048 | 60 | DMS+OCR+Extraktion, Agenten-Integrationsklassen |
+| 38 | 2026-03 | Gap 046, Gap 047 | 60 | Nachhaltigkeit/CO2-Reporting, Branchenbenchmarking |
+| 39 | 2026-03 | – | 60 | Command-Surfacing-Contracts, Prozess-Benachrichtigung |
+| 40 | 2026-03 | PKP-02, PKP-03 | 60 | Workflow-Versionierung, Canonical Audit Trail (SHA256) |
+| 41 | 2026-03 | – | 82 | Process Capacity Contracts, Event Replay Contracts |
+| 42 | 2026-03 | – | 60 | Domain Event Schema Registry, Process Compensation |
+| 43 | 2026-03 | – | 73 | Workflow Checkpoint Contracts, Cross-Domain Projection |
+| 44 | 2026-03 | – | 60 | Process Routing Contracts, Data Lineage Contracts |
+| 45 | 2026-03 | – | 78 | Feature Flag Contracts, Process Cost Contracts |
+| 46 | 2026-03 | – | 68 | Process Quarantine Contracts, Workflow ACL Contracts |
+| 47 | 2026-03 | – | 128 | Process State Machine Contracts, Workflow Delegation |
+| 48 | 2026-03 | – | 147 | Process Timeout Contracts, Workflow Batch Processing |
+| 49 | 2026-03 | – | 115 | Process Notification Contracts (W49), Workflow Lock |
+| 50 | 2026-03 | – | 129 | Process Archive Contracts, Workflow Metrics Contracts |
 
 ## Gap → Wave Mapping (nur abgeschlossene Gaps)
 
@@ -47,27 +70,79 @@ Stand: 2026-03-15 | Waves 1–27 abgeschlossen | 1235 Tests gruen
 | Gap 009 | Rollenbasierte Prozessvarianten | 24 | 41 |
 | Gap 010 | Betriebsprüfungsfeste Prozessjournalisierung | 20 | 43 |
 | Gap 011 | Versionierte Workflow Engine, Migrations-Guard | 26 | 37 |
+| Gap 013 | SLA/Timeout/Eskalationsknoten | 28 | 11 |
+| Gap 014 | Policy-as-Code mit Tenant Overrides | 29 | 10 |
+| Gap 015 | Human-in-the-loop Freigaben für AI | 30 | 10 |
+| Gap 017 | MCP/OpenAPI Tool Contracts | 31 | 105 |
 | Gap 022 | Command Palette (Ctrl+K) Power User | 22 | 8 |
 | Gap 025 | Kontextsensitive Quick Actions | 25 | 10 |
+| Gap 026 | Inline-Validierung mit Erklärungen | 35 | 54 |
 | Gap 027 | Konsistente Informationsdichte je Rolle | 27 | 6 |
-| Gap 033 | Read-Models für Dashboards | 19 | 62 |
+| Gap 028 | Leitsystem für Ausnahmefälle / Error UX | 35 | 54 |
+| Gap 031 | Query-Verträge (keine undefined) | 29 | 10 |
+| Gap 032 | 500er bei controlling/kpis eliminieren | 32 | 47 |
+| Gap 033 | Read-Models für Dashboards | 32 | 47 |
+| Gap 034 | API-Bulk-Operationen | 33 | 59 |
 | Gap 035 | Optimistic Locking | 20 | 43 |
+| Gap 036 | Queue-basierte Hintergrundjobs | 33 | 59 |
+| Gap 038 | Tenant-isolierte Caches/Rate Limits | 34 | 55 |
+| Gap 039 | End-to-End Tracing UI→API→DB | 28 | 11 |
+| Gap 040 | Datenqualitätsregeln Schreibpfade | 31 | 105 |
 | Gap 041 | GoBD Belegkette | 20 | 43 |
 | Gap 042 | Intrastat/Zoll produktiv | 23 | 46 |
+| Gap 043 | EDI/API-Hub | 36 | 60 |
+| Gap 044 | Lieferketten-Tracking | 36 | 60 |
+| Gap 045 | DMS + OCR + strukturierte Extraktion | 37 | 60 |
+| Gap 046 | Nachhaltigkeit/CO2-Reporting | 38 | 60 |
+| Gap 047 | Branchenbenchmarking-Cockpit | 38 | 60 |
+| Gap 048 | Offene Integrationsfähigkeit Agenten | 37 | 60 |
+| Gap 049 | Security-Hardening OIDC/RBAC/Audit | 34 | 55 |
+| Gap 050 | SLO/SLI Runbooks | 30 | 10 |
 
-## Offene P0-Gaps (Stand 2026-03-15)
+## Offene Gaps (Stand 2026-03-16)
 
 | Gap-ID | Beschreibung | Priorität | Horizon |
 |--------|-------------|-----------|---------|
 | Gap 002 | Vollständige Waage/Annahme-Masken | P0 | H1 |
-| Gap 013 | SLA/Timeout/Eskalationsknoten | P0 | H1 |
-| Gap 014 | Policy-as-Code mit Tenant Overrides | P0 | H1 |
-| Gap 015 | Human-in-the-loop Freigaben für AI | P0 | H1 |
-| Gap 031 | Query-Verträge (keine undefined) | P0 | H1 |
-| Gap 032 | 500er bei controlling/kpis eliminieren | P0 | H1 |
+| Gap 008 | Landhandel-spezifische Reklamationsprozesse E2E | P1 | H2 |
+| Gap 012 | Silo-Management vollständig | P1 | H2 |
+| Gap 016 | Mobile-Erfassung (Fahrer, Waage) | P2 | H2 |
+| Gap 018 | Disposition + Logistikplanung | P1 | H2 |
+| Gap 019 | Fuhrpark + Kosten-Controlling | P2 | H2 |
+| Gap 020 | Lieferantenportal (Self-Service) | P1 | H2 |
+| Gap 021 | Kundenportal (Self-Service) | P2 | H3 |
+| Gap 023 | Cross-Mandanten-Kontrakte (Verbund) | P1 | H2 |
+| Gap 024 | Warenterminmarkt-Integration | P1 | H2 |
+| Gap 029 | Dokumenten-OCR vollständig (Rechnungen) | P1 | H2 |
+| Gap 030 | Lieferanten-Qualitäts-Scoring | P2 | H3 |
 | Gap 037 | Lasttests Erntepeak | P0 | H2 |
-| Gap 049 | Security-Hardening | P0 | H1 |
-| Gap 050 | SLO/SLI Runbooks | P0 | H1 |
+
+## NeuroASSIST Delta zum Zielbild
+
+Der Process-Kernel-nahe NeuroASSIST-Vertragsstand ist im Kern hergestellt:
+
+- `StageDefinition`
+- `GateDecision`
+- `RoleContract`
+- `CapabilityPack`
+- `WorkflowSchema`
+- `CaseRun`
+- `CaseStageTransition`
+
+Offen ist damit primaer nicht mehr das Vertragsmodell, sondern die generische Runtime-Ausfuehrung:
+
+1. `NeuroAssistService` dispatcht noch capability-spezifisch statt ueber eine generische Runner-/Schema-Registry.
+2. PromptPack-/ExecutionPack-Vertraege fehlen noch als echte Modelle.
+3. Ein generischer Audit-/Explainability-Sink fuer alle NeuroASSIST-Runs fehlt noch.
+4. `data_quality_assistant` und `operations_exception_assistant` sind noch nicht als produktive Runtime-Capabilities angebunden.
+5. `exception`- und `ingestion`-Workflows sind als `WorkflowSchema` modelliert, aber noch nicht als echte NeuroASSIST-Run-Familien operationalisiert.
+
+Prioritaet fuer die naechste Liefersequenz:
+
+- generische NeuroASSIST-Runner-Registry
+- PromptPack-/ExecutionPack-Vertraege
+- Audit-Sink
+- produktive `exception`-/`ingestion`-Runs
 
 ## Architekturregeln (verbindlich)
 
