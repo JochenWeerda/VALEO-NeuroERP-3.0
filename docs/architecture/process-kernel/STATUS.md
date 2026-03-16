@@ -3,13 +3,13 @@
 ## Gesamtstatus
 
 - Stand: `2026-03-16`
-- Status: `Waves 1 bis 46 abgeschlossen`
-- Gesamtsuite: `2470 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed`
+- Status: `Waves 1 bis 47 abgeschlossen`
+- Gesamtsuite: `2609 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed`
 - Letzte abgeschlossene Waves:
-  - `Wave 43`: Workflow Checkpoint Contracts + Cross-Domain Projection Contracts
   - `Wave 44`: Process Routing Contracts + Data Lineage Contracts
   - `Wave 45`: Feature Flag Contracts + Process Cost Contracts
   - `Wave 46`: Process Quarantine Contracts + Workflow ACL Contracts
+  - `Wave 47`: Process State Machine Contracts + Workflow Delegation Contracts
 
 ## Wave-Uebersicht
 
@@ -61,6 +61,7 @@
 | Wave 44 | abgeschlossen | 60 | `wave-44/STATUS.md` |
 | Wave 45 | abgeschlossen | 78 | `wave-45/STATUS.md` |
 | Wave 46 | abgeschlossen | 68 | `wave-46/STATUS.md` |
+| Wave 47 | abgeschlossen | 128 | `wave-47/STATUS.md` |
 
 ## Aktuell relevante Lieferungen
 
@@ -258,6 +259,10 @@ Ergebnis:
 - Der Runtime-Pfad in `GENXAISService` und `app/api/v1/endpoints/agents.py` projiziert diese Vertraege jetzt als echte `stage_runs`- und `gate_decisions`-Read-Models; LangGraph bleibt Ausfuehrungsengine, die Laufsemantik kommt aus dem NeuroASSIST-Modell.
 - `app/agents/workflows/bestellvorschlag.py` schreibt `current_stage_key`, `stage_transition_log` und Approval-Gate-Entscheidungen jetzt direkt in den Workflow-State; der Service liest damit persistierte Stage-Uebergaenge statt heuristisch aus Endresultatfeldern abzuleiten.
 - `app/agents/workflows/skonto_optimizer.py` und `app/agents/workflows/compliance_copilot.py` schreiben denselben Run-Contract jetzt ebenfalls direkt mit; damit persistieren alle aktuell produktiven NeuroASSIST-Capabilities ihre Stages und Gates an der Quelle statt erst im Service-Read-Model.
+- `app/api/v1/endpoints/agents.py` exponiert jetzt zusaetzlich einen generischen `POST /neuroassist/runs`-Entry; die zentrale Eingangsvalidierung liegt in `app/agents/neuroassist_inputs.py`, der gemeinsame Dispatch in `GENXAISService.run_capability(...)`.
+- Die generische Run-Registry in `GENXAISService` traegt jetzt auch den Statuspfad; `GET /neuroassist/runs/{run_id}` ist die primaere Statusoberflaeche, waehrend `bestellvorschlag/trigger` und `bestellvorschlag/status/{workflow_id}` nur noch Compat-Wrapper ueber denselben Run-/Status-Contract sind.
+- Approval laeuft jetzt ebenfalls ueber den generischen Gate-Contract `POST /neuroassist/runs/{run_id}/gates`; `bestellvorschlag/approve/{workflow_id}` ist nur noch eine Compat-Huelle ueber dieselbe `run_id`-/`gate_type`-/`decision`-Aktion.
+- Die Frontend-Client-Schicht in `packages/frontend-web/src/lib/api/workflows.ts` nutzt jetzt die generischen Endpunkte `POST /neuroassist/runs`, `GET /neuroassist/runs/{run_id}` und `POST /neuroassist/runs/{run_id}/gates`; die alten Bestellvorschlag-Endpunkte sind im API-Layer explizit als `deprecated` markiert.
 - `GENXAISService` ist die neue Anwendungsschicht ueber den agentischen Fach-Workflows; die bestehende LangGraph-Schicht bleibt technische Ausfuehrungsengine.
 - Der semantische Produktanker liegt kuenftig in `app/agents`, nicht in den alten `scripts/start_genxais_*`- und Dashboard-Pfaden.
 - Produktiv anschlussfaehige GENXAIS-Capabilities sind aktuell Bestellvorschlag, Finance-Skonto und Compliance-Copilot; technische oder rein experimentelle Pfade werden davon getrennt bewertet.
