@@ -6,6 +6,7 @@ Prozessreferenz-Kontext und Explainability.
 """
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Any
 
 from fastapi import APIRouter, HTTPException
@@ -121,6 +122,8 @@ from ....core.background_jobs import (
     evaluate_job_routing,
     get_default_job_types,
 )
+from ....core.scheduler_recovery import build_scheduler_recovery_plan
+from ....services.scheduler_service import get_scheduler_status
 from ....core.workflow_versioning_contracts import (
     MigrationsTyp,
     SandboxModus,
@@ -1719,6 +1722,63 @@ def enqueue_job(body: dict = None) -> dict[str, Any]:
         "worker_klasse": routing.worker_klasse.value,
         "timeout_sekunden": routing.timeout_sekunden,
         "meldung": f"Job {job.job_id} eingereiht ({job.typ.value} / {job.prioritaet.value}).",
+        "schema_version": 1,
+    }
+
+
+@router.get("/jobs/heartbeat", response_model=dict)
+def get_jobs_heartbeat() -> dict[str, Any]:
+    """
+    Gibt den aktuellen Scheduler-/Worker-Heartbeat fuer die Job-Schicht zurueck.
+
+    Liefert:
+    - Scheduler-ID / Worker-ID
+    - Heartbeat-Status ACTIVE / DEGRADED / STALE
+    - zuletzt bekannte Lease-/Heartbeat-Daten
+    - aktive Job-Tags des Schedulers
+    """
+    status = get_scheduler_status()
+    heartbeat = status.get("heartbeat") or {}
+    return {
+        "running": status.get("running", False),
+        "scheduler_id": status.get("scheduler_id", ""),
+        "worker_id": status.get("worker_id", ""),
+        "heartbeat": heartbeat,
+        "total_jobs": status.get("total_jobs", 0),
+        "schema_version": 1,
+    }
+
+
+@router.get("/jobs/heartbeat/recovery", response_model=dict)
+def get_jobs_heartbeat_recovery() -> dict[str, Any]:
+    """
+    Liefert den standardisierten Recovery-/Eskalationsplan fuer den aktuellen Scheduler-Heartbeat.
+    """
+    status = get_scheduler_status()
+    heartbeat = status.get("heartbeat") or {}
+    if not heartbeat:
+        raise HTTPException(status_code=503, detail="Kein Scheduler-Heartbeat verfuegbar")
+    health = heartbeat.copy()
+    from ....core.scheduler_heartbeat import HeartbeatHealthResult, SchedulerNodeStatus
+
+    recovery_plan = build_scheduler_recovery_plan(
+        HeartbeatHealthResult(
+            scheduler_id=health["scheduler_id"],
+            status=SchedulerNodeStatus(health["status"]),
+            active_worker_ids=tuple(health.get("active_worker_ids", [])),
+            degraded_worker_ids=tuple(health.get("degraded_worker_ids", [])),
+            stale_worker_ids=tuple(health.get("stale_worker_ids", [])),
+            running_job_ids=tuple(health.get("running_job_ids", [])),
+            evaluated_at=datetime.fromisoformat(health["evaluated_at"]),
+            stale_after_seconds=int(health["stale_after_seconds"]),
+            degrade_after_seconds=int(health["degrade_after_seconds"]),
+        )
+    )
+    return {
+        "scheduler_id": status.get("scheduler_id", ""),
+        "worker_id": status.get("worker_id", ""),
+        "heartbeat_status": health["status"],
+        "recovery_plan": recovery_plan.as_dict(),
         "schema_version": 1,
     }
 
@@ -4200,3 +4260,59 @@ def pruefe_idempotenz_endpoint(payload: dict):
         "status": pruefung.status,
         "gespeichertes_ergebnis": pruefung.gespeichertes_ergebnis,
     }
+
+# === Wave 54: Retry Policies + Workflow Checkpoints ===
+from app.core.process_retry_contracts import (
+    get_default_retry_regeln, RetryRegel, RetryZustand,
+    RetryStrategie, RetryStatus,
+)
+from app.core.workflow_checkpoint_contracts_wave54 import (
+    get_default_checkpoint_sequenzen, WorkflowCheckpoint,
+    CheckpointSequenz, CheckpointTyp, CheckpointStatus,
+)
+
+@router.get("/retry/regeln", tags=["process-kernel"])
+def get_retry_regeln():
+    return [
+        {"regel_id": r.regel_id, "strategie": r.strategie, "max_versuche": r.max_versuche,
+         "basis_sekunden": r.basis_sekunden, "max_verzoegerung_sekunden": r.max_verzoegerung_sekunden,
+         "beschreibung": r.beschreibung}
+        for r in get_default_retry_regeln()
+    ]
+
+@router.post("/retry/berechne-verzoegerung", tags=["process-kernel"])
+def berechne_retry_verzoegerung(payload: dict):
+    """
+    Payload: {"strategie": str, "basis_sekunden": float, "max_verzoegerung_sekunden": float, "versuch_nummer": int}
+    """
+    regel = RetryRegel(
+        regel_id="TEMP", strategie=RetryStrategie(payload.get("strategie", "FESTER_INTERVALL")),
+        max_versuche=3, basis_sekunden=float(payload.get("basis_sekunden", 5.0)),
+        max_verzoegerung_sekunden=float(payload.get("max_verzoegerung_sekunden", 300.0)),
+    )
+    versuch = int(payload.get("versuch_nummer", 1))
+    verzoegerung = regel.berechne_verzoegerung(versuch)
+    return {"strategie": regel.strategie, "versuch_nummer": versuch, "verzoegerung_sekunden": verzoegerung}
+
+@router.get("/checkpoint/sequenzen", tags=["process-kernel"])
+def get_checkpoint_sequenzen():
+    return [
+        {"instanz_id": s.instanz_id, "checkpoint_anzahl": len(s.checkpoints),
+         "aktuellster_schritt": (s.aktuellster_checkpoint().schritt_nummer if s.aktuellster_checkpoint() else None)}
+        for s in get_default_checkpoint_sequenzen()
+    ]
+
+@router.post("/checkpoint/wiederherstellungspunkt", tags=["process-kernel"])
+def get_wiederherstellungspunkt(payload: dict):
+    """
+    Payload: {"instanz_id": str, "ab_schritt": int}
+    """
+    instanz_id = payload.get("instanz_id", "")
+    ab_schritt = int(payload.get("ab_schritt", 999))
+    sequenzen = {s.instanz_id: s for s in get_default_checkpoint_sequenzen()}
+    if instanz_id not in sequenzen:
+        return {"fehler": f"Sequenz {instanz_id!r} nicht gefunden"}
+    cp = sequenzen[instanz_id].wiederherstellungs_punkt(ab_schritt)
+    if cp is None:
+        return {"checkpoint": None}
+    return {"checkpoint": {"checkpoint_id": cp.checkpoint_id, "schritt_nummer": cp.schritt_nummer, "status": cp.status}}
