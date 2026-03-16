@@ -4773,3 +4773,79 @@ def pruefe_offene_handover(payload: dict):
         "offene_anfragen": [{"anfrage_id": a.anfrage_id, "uebergabe_typ": a.uebergabe_typ, "dringlichkeit": a.dringlichkeit} for a in p.offene_anfragen()],
         "eskalations_quote_pct": p.eskalations_quote_pct(),
     }
+
+
+# === Wave 61: Quota Management + Workflow Pause ===
+from app.core.process_quota_contracts import (
+    get_default_quota_uebersicht, QuotaUebersicht,
+    QuotaRegel, TenantQuotaVerbrauch, QuotaTyp, QuotaStatus, QuotaAktionsBei,
+)
+from app.core.workflow_pause_contracts import (
+    get_default_pause_verlaeufe, PauseVerlauf, WorkflowPause,
+    PauseGrund, PauseStatus, ResumeAusloeser,
+)
+
+
+@router.get("/quota/uebersicht", tags=["process-kernel"])
+def get_quota_uebersicht():
+    u = get_default_quota_uebersicht()
+    return {
+        "uebersicht_id": u.uebersicht_id,
+        "tenant_id": u.tenant_id,
+        "status_pro_typ": {qt.value: u.status_fuer_typ(qt) for qt in QuotaTyp},
+        "kritische_quotas": [qt.value for qt in u.kritische_quotas()],
+    }
+
+
+@router.post("/quota/pruefe-verbrauch", tags=["process-kernel"])
+def pruefe_quota_verbrauch(payload: dict):
+    """
+    Payload: {"limit": float, "warnung_schwelle_pct": float,
+              "kritisch_schwelle_pct": float, "verbrauch": float}
+    """
+    regel = QuotaRegel(
+        regel_id="TEMP", quota_typ=QuotaTyp.API_ANFRAGEN,
+        limit=float(payload.get("limit", 100.0)),
+        warnung_schwelle_pct=float(payload.get("warnung_schwelle_pct", 80.0)),
+        kritisch_schwelle_pct=float(payload.get("kritisch_schwelle_pct", 95.0)),
+    )
+    verbrauch = float(payload.get("verbrauch", 0.0))
+    status = regel.berechne_status(verbrauch)
+    verfuegbar = regel.verfuegbar(verbrauch)
+    return {"status": status, "verfuegbar": verfuegbar}
+
+
+@router.get("/pause/verlaeufe", tags=["process-kernel"])
+def get_pause_verlaeufe():
+    from datetime import datetime
+    jetzt = datetime(2026, 3, 16, 10, 0, 0)
+    return [
+        {
+            "verlauf_id": v.verlauf_id,
+            "workflow_instanz_id": v.workflow_instanz_id,
+            "pausen_anzahl": len(v.pausen),
+            "aktive_pause_id": (v.aktive_pause().pause_id if v.aktive_pause() else None),
+            "gesamt_pause_minuten": v.gesamt_pause_minuten(jetzt),
+            "ueberfaellige_pausen": len(v.ueberfaellige_pausen(jetzt)),
+        }
+        for v in get_default_pause_verlaeufe()
+    ]
+
+
+@router.post("/pause/pruefe-ueberfaellig", tags=["process-kernel"])
+def pruefe_pause_ueberfaellig(payload: dict):
+    """Payload: {"verlauf_id": str}"""
+    from datetime import datetime
+    jetzt = datetime(2026, 3, 16, 10, 0, 0)
+    verlauf_id = payload.get("verlauf_id", "")
+    verlaeufe = {v.verlauf_id: v for v in get_default_pause_verlaeufe()}
+    if verlauf_id not in verlaeufe:
+        return {"fehler": f"Verlauf {verlauf_id!r} nicht gefunden"}
+    v = verlaeufe[verlauf_id]
+    return {
+        "verlauf_id": v.verlauf_id,
+        "ueberfaellige_pausen": [
+            {"pause_id": p.pause_id, "pause_dauer_minuten": p.pause_dauer_minuten(jetzt)}
+            for p in v.ueberfaellige_pausen(jetzt)
+        ],
+    }
