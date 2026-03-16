@@ -255,6 +255,20 @@ from ....core.workflow_lock_contracts import (
     akquiriere_lock,
     get_default_locks,
 )
+from ....core.process_archive_contracts import (
+    ArchivStatus,
+    ArchivierungsGrund,
+    AufbewahrungsKlasse,
+    berechne_archiv_statistik,
+    get_default_archiv_eintraege,
+)
+from ....core.workflow_metrics_contracts import (
+    MetrikAggregation,
+    MetrikTyp,
+    PerformanzBewertung,
+    aggregiere_messpunkte,
+    get_default_kpi_summaries,
+)
 from ....core.cross_domain_projection_contracts import (
     KonsistenzLevel,
     ProjectionLagStufe,
@@ -3821,3 +3835,113 @@ def akquiriere_workflow_lock(body: dict | None = None):
         bestehende_locks=get_default_locks(),
     )
     return ergebnis.as_dict()
+
+
+# ---------------------------------------------------------------------------
+# Wave 50 -- Process Archive Contracts
+# ---------------------------------------------------------------------------
+
+@router.get("/archiv/eintraege")
+def get_archiv_eintraege():
+    """Gibt alle Standard-Archiv-Eintraege zurueck."""
+    eintraege = get_default_archiv_eintraege()
+    statistik = berechne_archiv_statistik(eintraege, "TENANT-001")
+    return {
+        "anzahl": len(eintraege),
+        "eintraege": [e.as_dict() for e in eintraege],
+        "statistik": statistik.as_dict(),
+    }
+
+
+@router.post("/archiv/statistik")
+def get_archiv_statistik(body: dict | None = None):
+    """
+    Gibt Archiv-Statistik fuer einen Tenant zurueck.
+
+    Body-Parameter:
+    - tenant_id: Tenant-ID (default: TENANT-001)
+    """
+    if body is None:
+        body = {}
+    tenant_id: str = body.get("tenant_id", "TENANT-001")
+    eintraege = get_default_archiv_eintraege(tenant_id=tenant_id)
+    statistik = berechne_archiv_statistik(eintraege, tenant_id)
+    return statistik.as_dict()
+
+
+# ---------------------------------------------------------------------------
+# Wave 50 -- Workflow Metrics Contracts
+# ---------------------------------------------------------------------------
+
+@router.get("/metrics/kpi-summaries")
+def get_kpi_summaries():
+    """Gibt alle Standard-KPI-Zusammenfassungen zurueck."""
+    summaries = get_default_kpi_summaries()
+    return {
+        "anzahl": len(summaries),
+        "summaries": [s.as_dict() for s in summaries],
+        "bewertungen": {
+            b.value: sum(1 for s in summaries if s.performanz_bewertung == b)
+            for b in PerformanzBewertung
+        },
+    }
+
+
+@router.post("/metrics/aggregiere")
+def aggregiere_workflow_messpunkte(body: dict | None = None):
+    """
+    Aggregiert Messpunkte aus den KPI-Summaries.
+
+    Body-Parameter:
+    - workflow_typ: Workflow-Typ (default: kontrakt_freigabe)
+    - metrik_typ: DURCHLAUFZEIT/SLA_EINHALTUNG/FEHLERRATE/DURCHSATZ/WARTEZEIT
+    - aggregation: MINIMUM/MAXIMUM/DURCHSCHNITT/MEDIAN/SUMME (default: DURCHSCHNITT)
+    """
+    if body is None:
+        body = {}
+
+    from datetime import datetime as _dt
+    workflow_typ: str = body.get("workflow_typ", "kontrakt_freigabe")
+    metrik_str: str = body.get("metrik_typ", "SLA_EINHALTUNG")
+    agg_str: str = body.get("aggregation", "DURCHSCHNITT")
+
+    try:
+        metrik = MetrikTyp(metrik_str.upper())
+    except ValueError:
+        metrik = MetrikTyp.SLA_EINHALTUNG
+    try:
+        aggregation = MetrikAggregation(agg_str.upper())
+    except ValueError:
+        aggregation = MetrikAggregation.DURCHSCHNITT
+
+    from app.core.workflow_metrics_contracts import MetrikMesspunkt
+    summaries = get_default_kpi_summaries()
+    messpunkte = []
+    for i, s in enumerate(summaries):
+        if metrik == MetrikTyp.SLA_EINHALTUNG:
+            wert = s.sla_einhaltung_pct
+        elif metrik == MetrikTyp.DURCHLAUFZEIT:
+            wert = s.durchlaufzeit_avg_min
+        elif metrik == MetrikTyp.FEHLERRATE:
+            wert = s.fehlerrate_pct
+        elif metrik == MetrikTyp.DURCHSATZ:
+            wert = s.durchsatz_pro_stunde
+        else:
+            wert = 0.0
+        messpunkte.append(MetrikMesspunkt(
+            messpunkt_id=f"MP-{i+1:03d}",
+            workflow_typ=s.workflow_typ,
+            metrik_typ=metrik,
+            wert=wert,
+            einheit="Prozent" if metrik in (MetrikTyp.SLA_EINHALTUNG, MetrikTyp.FEHLERRATE) else "Minuten",
+            gemessen_am=s.berechnet_am,
+            tenant_id=s.tenant_id,
+        ))
+
+    ergebnis = aggregiere_messpunkte(messpunkte, workflow_typ, metrik, aggregation)
+    return {
+        "workflow_typ": workflow_typ,
+        "metrik_typ": metrik.value,
+        "aggregation": aggregation.value,
+        "ergebnis": ergebnis,
+    }
