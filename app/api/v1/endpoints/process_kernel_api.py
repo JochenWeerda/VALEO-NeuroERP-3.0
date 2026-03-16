@@ -4400,3 +4400,76 @@ def pruefe_rollback_ausfuehrbarkeit(payload: dict):
         "ausfuehrbare_schritte": len(p.ausfuehrbare_schritte()),
         "fortschritt_pct": p.rollback_fortschritt_pct(),
     }
+
+# === Wave 56: Process Dependencies + Workflow Signals ===
+from app.core.process_dependency_contracts import (
+    get_default_prozess_graphen, ProzessGraph, ProzessSchritt,
+    AbhaengigkeitsKante, AbhaengigkeitsTyp, SchrittStatus,
+)
+from app.core.workflow_signal_contracts import (
+    get_default_signale, get_default_signal_regeln, verarbeite_signal,
+    WorkflowSignal, SignalRegel, SignalTyp, SignalStatus, TriggerAktion,
+)
+
+@router.get("/abhaengigkeit/graphen", tags=["process-kernel"])
+def get_prozess_graphen():
+    return [
+        {
+            "graph_id": g.graph_id,
+            "schritte_anzahl": len(g.schritte),
+            "kanten_anzahl": len(g.kanten),
+            "bereite_schritte": [s.schritt_id for s in g.bereite_schritte()],
+            "topologische_reihenfolge": g.topologische_reihenfolge(),
+        }
+        for g in get_default_prozess_graphen()
+    ]
+
+@router.post("/abhaengigkeit/bereite-schritte", tags=["process-kernel"])
+def berechne_bereite_schritte(payload: dict):
+    """
+    Payload: {"schritte": [{"schritt_id": str, "status": str}],
+              "kanten": [{"von": str, "zu": str, "typ": str}]}
+    """
+    schritte = [ProzessSchritt(s["schritt_id"], s.get("name", s["schritt_id"]),
+                               SchrittStatus(s.get("status", "AUSSTEHEND")))
+                for s in payload.get("schritte", [])]
+    kanten = [AbhaengigkeitsKante(k["von"], k["zu"], AbhaengigkeitsTyp(k.get("typ", "SEQUENZIELL")))
+              for k in payload.get("kanten", [])]
+    g = ProzessGraph("TEMP", schritte, kanten)
+    return {"bereite_schritte": [s.schritt_id for s in g.bereite_schritte()]}
+
+@router.get("/signal/signale", tags=["process-kernel"])
+def get_signale():
+    from datetime import datetime
+    jetzt = datetime(2026, 3, 16, 10, 0, 0)
+    return [
+        {
+            "signal_id": s.signal_id,
+            "workflow_instanz_id": s.workflow_instanz_id,
+            "signal_typ": s.signal_typ,
+            "status": s.status,
+            "aktueller_status": s.aktueller_status(jetzt),
+            "quelle": s.quelle,
+        }
+        for s in get_default_signale()
+    ]
+
+@router.post("/signal/verarbeite", tags=["process-kernel"])
+def verarbeite_signal_endpoint(payload: dict):
+    """
+    Payload: {"signal_id": str}
+    Processes signal from default list against default rules.
+    """
+    from datetime import datetime
+    jetzt = datetime(2026, 3, 16, 10, 0, 0)
+    signal_id = payload.get("signal_id", "")
+    signale = {s.signal_id: s for s in get_default_signale()}
+    if signal_id not in signale:
+        return {"fehler": f"Signal {signal_id!r} nicht gefunden"}
+    ergebnis = verarbeite_signal(signale[signal_id], get_default_signal_regeln(), jetzt)
+    return {
+        "signal_id": ergebnis.signal_id,
+        "trigger_aktion": ergebnis.trigger_aktion,
+        "erfolgreich": ergebnis.erfolgreich,
+        "nachricht": ergebnis.nachricht,
+    }
