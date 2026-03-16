@@ -3,15 +3,13 @@
 ## Gesamtstatus
 
 - Stand: `2026-03-16`
-- Status: `Waves 1 bis 45 abgeschlossen`
-- Gesamtsuite: `2397 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed`
+- Status: `Waves 1 bis 46 abgeschlossen`
+- Gesamtsuite: `2470 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed`
 - Letzte abgeschlossene Waves:
-  - `Wave 40`: Workflow-Versionierungs-Contracts + Canonical Process Audit Trail (PKP-02, PKP-03)
-  - `Wave 41`: Process Capacity Contracts + Event Replay Contracts
-  - `Wave 45`: Feature Flag Contracts + Process Cost Contracts
-  - `Wave 42`: Domain Event Schema Registry + Process Compensation Contracts
   - `Wave 43`: Workflow Checkpoint Contracts + Cross-Domain Projection Contracts
   - `Wave 44`: Process Routing Contracts + Data Lineage Contracts
+  - `Wave 45`: Feature Flag Contracts + Process Cost Contracts
+  - `Wave 46`: Process Quarantine Contracts + Workflow ACL Contracts
 
 ## Wave-Uebersicht
 
@@ -62,6 +60,7 @@
 | Wave 43 | abgeschlossen | 73 | `wave-43/STATUS.md` |
 | Wave 44 | abgeschlossen | 60 | `wave-44/STATUS.md` |
 | Wave 45 | abgeschlossen | 78 | `wave-45/STATUS.md` |
+| Wave 46 | abgeschlossen | 68 | `wave-46/STATUS.md` |
 
 ## Aktuell relevante Lieferungen
 
@@ -256,6 +255,9 @@ Ergebnis:
 - `GENXAIS` ist der aktuelle technische Zwischenstand auf dem Weg dorthin.
 - Die ersten expliziten NeuroASSIST-Kernvertraege fuer `StageDefinition`, `GateDecision`, `RoleContract` und `CapabilityPack` sind jetzt als eigener Vertragsbaustein im Anwendungskern verankert.
 - Die laufende Capability-Registry in `app/agents/genxais.py` liest `role_key`, `orchestration_pattern` und `default_stage_sequence` jetzt direkt aus den NeuroASSIST-`CapabilityPack`-/`RoleContract`-Vertraegen statt diese Metadaten parallel zu duplizieren.
+- Der Runtime-Pfad in `GENXAISService` und `app/api/v1/endpoints/agents.py` projiziert diese Vertraege jetzt als echte `stage_runs`- und `gate_decisions`-Read-Models; LangGraph bleibt Ausfuehrungsengine, die Laufsemantik kommt aus dem NeuroASSIST-Modell.
+- `app/agents/workflows/bestellvorschlag.py` schreibt `current_stage_key`, `stage_transition_log` und Approval-Gate-Entscheidungen jetzt direkt in den Workflow-State; der Service liest damit persistierte Stage-Uebergaenge statt heuristisch aus Endresultatfeldern abzuleiten.
+- `app/agents/workflows/skonto_optimizer.py` und `app/agents/workflows/compliance_copilot.py` schreiben denselben Run-Contract jetzt ebenfalls direkt mit; damit persistieren alle aktuell produktiven NeuroASSIST-Capabilities ihre Stages und Gates an der Quelle statt erst im Service-Read-Model.
 - `GENXAISService` ist die neue Anwendungsschicht ueber den agentischen Fach-Workflows; die bestehende LangGraph-Schicht bleibt technische Ausfuehrungsengine.
 - Der semantische Produktanker liegt kuenftig in `app/agents`, nicht in den alten `scripts/start_genxais_*`- und Dashboard-Pfaden.
 - Produktiv anschlussfaehige GENXAIS-Capabilities sind aktuell Bestellvorschlag, Finance-Skonto und Compliance-Copilot; technische oder rein experimentelle Pfade werden davon getrennt bewertet.
