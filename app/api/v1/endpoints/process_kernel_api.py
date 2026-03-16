@@ -4696,3 +4696,80 @@ def pruefe_trigger_bedingungen(payload: dict):
     t = trigger_map[trigger_id]
     erfuellt = t.pruefe_bedingungen(kontext)
     return {"trigger_id": trigger_id, "bedingungen_erfuellt": erfuellt, "status": t.status}
+
+
+# === Wave 60: Process Forecasting + Workflow Handover ===
+from app.core.process_forecast_contracts import (
+    get_default_prognosen, erstelle_prognose,
+    PrognoseErgebnis, Datenpunkt, PrognoseTyp, PrognoseMethode,
+    KonfidenzNiveau, berechne_gleitenden_durchschnitt, berechne_gewichteten_durchschnitt,
+)
+from app.core.workflow_handover_contracts import (
+    get_default_uebergabe_protokolle, UebergabeProtokoll, UebergabeAnfrage,
+    UebergabeTyp, UebergabeStatus, DringlichkeitsStufe,
+)
+
+
+@router.get("/prognose/ergebnisse", tags=["process-kernel"])
+def get_prognose_ergebnisse():
+    return [
+        {
+            "prognose_id": p.prognose_id,
+            "prognose_typ": p.prognose_typ,
+            "methode": p.methode,
+            "prognostizierter_wert": p.prognostizierter_wert,
+            "konfidenz_pct": p.konfidenz_pct,
+            "konfidenz_niveau": p.konfidenz_niveau,
+            "prognose_zeitraum_stunden": p.prognose_zeitraum_stunden,
+        }
+        for p in get_default_prognosen()
+    ]
+
+
+@router.post("/prognose/berechne", tags=["process-kernel"])
+def berechne_prognose(payload: dict):
+    """
+    Payload: {"methode": str, "werte": [float], "fenster": int}
+    Computes moving or weighted average.
+    """
+    from datetime import datetime, timedelta
+    methode_str = payload.get("methode", "GLEITENDER_DURCHSCHNITT")
+    werte = payload.get("werte", [])
+    fenster = int(payload.get("fenster", 3))
+    now = datetime.utcnow()
+    punkte = [Datenpunkt(now - timedelta(hours=len(werte) - i), float(w)) for i, w in enumerate(werte)]
+    if methode_str == "GEWICHTETER_DURCHSCHNITT":
+        ergebnis = berechne_gewichteten_durchschnitt(punkte)
+    else:
+        ergebnis = berechne_gleitenden_durchschnitt(punkte, fenster)
+    return {"methode": methode_str, "ergebnis": ergebnis, "datenpunkte": len(punkte)}
+
+
+@router.get("/handover/protokolle", tags=["process-kernel"])
+def get_uebergabe_protokolle():
+    return [
+        {
+            "protokoll_id": p.protokoll_id,
+            "workflow_instanz_id": p.workflow_instanz_id,
+            "anfragen_gesamt": len(p.anfragen),
+            "offene_anfragen": len(p.offene_anfragen()),
+            "eskalations_quote_pct": p.eskalations_quote_pct(),
+            "durchschnittliche_reaktionszeit_minuten": p.durchschnittliche_reaktionszeit_minuten(),
+        }
+        for p in get_default_uebergabe_protokolle()
+    ]
+
+
+@router.post("/handover/pruefe-offen", tags=["process-kernel"])
+def pruefe_offene_handover(payload: dict):
+    """Payload: {"protokoll_id": str}"""
+    protokoll_id = payload.get("protokoll_id", "")
+    protokolle = {p.protokoll_id: p for p in get_default_uebergabe_protokolle()}
+    if protokoll_id not in protokolle:
+        return {"fehler": f"Protokoll {protokoll_id!r} nicht gefunden"}
+    p = protokolle[protokoll_id]
+    return {
+        "protokoll_id": p.protokoll_id,
+        "offene_anfragen": [{"anfrage_id": a.anfrage_id, "uebergabe_typ": a.uebergabe_typ, "dringlichkeit": a.dringlichkeit} for a in p.offene_anfragen()],
+        "eskalations_quote_pct": p.eskalations_quote_pct(),
+    }
