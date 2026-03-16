@@ -3,13 +3,13 @@
 ## Gesamtstatus
 
 - Stand: `2026-03-16`
-- Status: `Waves 1 bis 48 abgeschlossen`
-- Gesamtsuite: `2756 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed`
+- Status: `Waves 1 bis 49 abgeschlossen`
+- Gesamtsuite: `2871 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed`
 - Letzte abgeschlossene Waves:
-  - `Wave 45`: Feature Flag Contracts + Process Cost Contracts
   - `Wave 46`: Process Quarantine Contracts + Workflow ACL Contracts
   - `Wave 47`: Process State Machine Contracts + Workflow Delegation Contracts
   - `Wave 48`: Process Timeout Contracts + Workflow Batch Processing Contracts
+  - `Wave 49`: Process Notification Contracts (W49) + Workflow Lock Contracts
 
 ## Wave-Uebersicht
 
@@ -63,6 +63,7 @@
 | Wave 46 | abgeschlossen | 68 | `wave-46/STATUS.md` |
 | Wave 47 | abgeschlossen | 128 | `wave-47/STATUS.md` |
 | Wave 48 | abgeschlossen | 147 | `wave-48/STATUS.md` |
+| Wave 49 | abgeschlossen | 115 | `wave-49/STATUS.md` |
 
 ## Aktuell relevante Lieferungen
 
@@ -240,12 +241,13 @@
 - `packages/frontend-web/src/components/workflow/ProcessStatusPanel.tsx`
 - `app/core/ui_density_manifest.py`
 
-### GENXAIS Fach-Workflow- und Assistenten-Schicht
+### NeuroASSIST Fach-Workflow- und Assistenten-Schicht
 
 - Zielarchitektur: `docs/architecture/neuroassist-target-architecture.md`
 - Kernvertraege: `app/agents/neuroassist_contracts.py`
-- `app/agents/genxais.py`
-- `app/agents/genxais_service.py`
+- Deprecation-Plan: `docs/architecture/neuroassist-compat-deprecation-plan.md`
+- `app/agents/neuroassist.py`
+- `app/agents/neuroassist_service.py`
 - `app/agents/langgraph_server.py`
 - `app/agents/workflows/bestellvorschlag.py`
 - `app/agents/workflows/skonto_optimizer.py`
@@ -254,24 +256,23 @@
 
 Ergebnis:
 - `NeuroASSIST` ist als Zielbegriff fuer den kuenftigen fachlichen Orchestrierungs- und Assistenten-Layer definiert.
-- `GENXAIS` ist der aktuelle technische Zwischenstand auf dem Weg dorthin.
+- `NeuroASSIST` ist der kanonische Laufzeit- und Architekturbegriff fuer den fachlichen Orchestrierungs- und Assistenten-Layer.
 - Die ersten expliziten NeuroASSIST-Kernvertraege fuer `StageDefinition`, `GateDecision`, `RoleContract` und `CapabilityPack` sind jetzt als eigener Vertragsbaustein im Anwendungskern verankert.
-- Die laufende Capability-Registry in `app/agents/genxais.py` liest `role_key`, `orchestration_pattern` und `default_stage_sequence` jetzt direkt aus den NeuroASSIST-`CapabilityPack`-/`RoleContract`-Vertraegen statt diese Metadaten parallel zu duplizieren.
-- Der Runtime-Pfad in `GENXAISService` und `app/api/v1/endpoints/agents.py` projiziert diese Vertraege jetzt als echte `stage_runs`- und `gate_decisions`-Read-Models; LangGraph bleibt Ausfuehrungsengine, die Laufsemantik kommt aus dem NeuroASSIST-Modell.
+- Die laufende Capability-Registry in `app/agents/neuroassist.py` liest `role_key`, `orchestration_pattern` und `default_stage_sequence` direkt aus den NeuroASSIST-`CapabilityPack`-/`RoleContract`-Vertraegen statt diese Metadaten parallel zu duplizieren.
+- Der Runtime-Pfad in `NeuroAssistService` und `app/api/v1/endpoints/agents.py` projiziert diese Vertraege jetzt als echte `stage_runs`- und `gate_decisions`-Read-Models; LangGraph bleibt Ausfuehrungsengine, die Laufsemantik kommt aus dem NeuroASSIST-Modell.
 - `app/agents/workflows/bestellvorschlag.py` schreibt `current_stage_key`, `stage_transition_log` und Approval-Gate-Entscheidungen jetzt direkt in den Workflow-State; der Service liest damit persistierte Stage-Uebergaenge statt heuristisch aus Endresultatfeldern abzuleiten.
 - `app/agents/workflows/skonto_optimizer.py` und `app/agents/workflows/compliance_copilot.py` schreiben denselben Run-Contract jetzt ebenfalls direkt mit; damit persistieren alle aktuell produktiven NeuroASSIST-Capabilities ihre Stages und Gates an der Quelle statt erst im Service-Read-Model.
-- `app/api/v1/endpoints/agents.py` exponiert jetzt zusaetzlich einen generischen `POST /neuroassist/runs`-Entry; die zentrale Eingangsvalidierung liegt in `app/agents/neuroassist_inputs.py`, der gemeinsame Dispatch in `GENXAISService.run_capability(...)`.
-- Die generische Run-Registry in `GENXAISService` traegt jetzt auch den Statuspfad; `GET /neuroassist/runs/{run_id}` ist die primaere Statusoberflaeche, waehrend `bestellvorschlag/trigger` und `bestellvorschlag/status/{workflow_id}` nur noch Compat-Wrapper ueber denselben Run-/Status-Contract sind.
-- Approval laeuft jetzt ebenfalls ueber den generischen Gate-Contract `POST /neuroassist/runs/{run_id}/gates`; `bestellvorschlag/approve/{workflow_id}` ist nur noch eine Compat-Huelle ueber dieselbe `run_id`-/`gate_type`-/`decision`-Aktion.
-- Die Frontend-Client-Schicht in `packages/frontend-web/src/lib/api/workflows.ts` nutzt jetzt die generischen Endpunkte `POST /neuroassist/runs`, `GET /neuroassist/runs/{run_id}` und `POST /neuroassist/runs/{run_id}/gates`; die alten Bestellvorschlag-Endpunkte sind im API-Layer explizit als `deprecated` markiert.
-- Die kanonischen Anwendungskern-Module heissen jetzt `app/agents/neuroassist.py` und `app/agents/neuroassist_service.py`; `genxais.py` und `genxais_service.py` bleiben nur noch als Compat-Wrapper mit Alias-Exports fuer den schrittweisen Uebergang bestehen.
-- `NeuroAssistService` ist die kanonische Anwendungsschicht ueber den agentischen Fach-Workflows; `GENXAISService` bleibt nur noch Alias fuer Kompatibilitaet, waehrend die bestehende LangGraph-Schicht technische Ausfuehrungsengine bleibt.
-- Interne Konstanten, API-Funktionsnamen und die kanonischen Testbezeichner sind jetzt ebenfalls auf `NeuroASSIST` gezogen; verbleibende `GENXAIS`-Strings sind auf explizite Compat-Aliase und deprecated API-Routen begrenzt.
-- Die Rest-Compat-Schicht ist jetzt explizit getaktet in [neuroassist-compat-deprecation-plan.md](C:/Users/Jochen/VALEO-NeuroERP-3.0/docs/architecture/neuroassist-compat-deprecation-plan.md): Phase 2 fuer interne Restimporte und Phase 3 fuer die komplette Entfernung von Alias-Exports und deprecated Routen.
-- Phase 2 ist im Anwendungskern und in den betroffenen Tests jetzt praktisch durchgezogen: interne Imports und kanonische Verweise laufen ueber `neuroassist`-/`NeuroAssist*`; verblieben sind nur noch die bewusst gehaltenen Alias-Exports in `app/agents/__init__.py`, `app/agents/neuroassist.py`, `app/agents/neuroassist_service.py` sowie die deprecated Compat-Routen im Agents-API-Layer.
+- `app/api/v1/endpoints/agents.py` exponiert jetzt zusaetzlich einen generischen `POST /neuroassist/runs`-Entry; die zentrale Eingangsvalidierung liegt in `app/agents/neuroassist_inputs.py`, der gemeinsame Dispatch in `NeuroAssistService.run_capability(...)`.
+- Die generische Run-Registry in `NeuroAssistService` traegt jetzt auch den Statuspfad; `GET /neuroassist/runs/{run_id}` ist die primaere und einzige Statusoberflaeche fuer NeuroASSIST-Runs.
+- Approval laeuft jetzt ausschliesslich ueber den generischen Gate-Contract `POST /neuroassist/runs/{run_id}/gates`; capability-spezifische Approval-Endpunkte sind entfernt.
+- Die Frontend-Client-Schicht in `packages/frontend-web/src/lib/api/workflows.ts` nutzt ausschliesslich die generischen Endpunkte `POST /neuroassist/runs`, `GET /neuroassist/runs/{run_id}` und `POST /neuroassist/runs/{run_id}/gates`.
+- Die kanonischen Anwendungskern-Module heissen jetzt `app/agents/neuroassist.py` und `app/agents/neuroassist_service.py`; die frueheren Wrapper `genxais.py` und `genxais_service.py` sind entfernt.
+- `NeuroAssistService` ist die kanonische Anwendungsschicht ueber den agentischen Fach-Workflows; die fruehere Alias-Schicht ist entfernt.
+- Interne Konstanten, API-Funktionsnamen und die kanonischen Testbezeichner sind jetzt ebenfalls auf `NeuroASSIST` gezogen; der fruehere `/genxais/capabilities`-Compat-Pfad ist entfernt.
+- Die Rest-Compat-Schicht ist jetzt explizit abgeschlossen in `docs/architecture/neuroassist-compat-deprecation-plan.md`; es gibt keine produktiven `genxais`- oder `bestellvorschlag/*`-Compat-Routen mehr im Agents-API-Layer.
 - Der semantische Produktanker liegt kuenftig in `app/agents`, nicht in den alten `scripts/start_genxais_*`- und Dashboard-Pfaden.
-- Produktiv anschlussfaehige GENXAIS-Capabilities sind aktuell Bestellvorschlag, Finance-Skonto und Compliance-Copilot; technische oder rein experimentelle Pfade werden davon getrennt bewertet.
-- Die alte GENXAIS-Script- und Dashboard-Nebenwelt ist aus dem Anwendungskern entfernt; der fachliche Pfad liegt jetzt ausschliesslich unter `app/agents`.
+- Produktiv anschlussfaehige NeuroASSIST-Capabilities sind aktuell Bestellvorschlag, Finance-Skonto und Compliance-Copilot; technische oder rein experimentelle Pfade werden davon getrennt bewertet.
+- Die fruehere Script- und Dashboard-Nebenwelt ist aus dem Anwendungskern entfernt; der fachliche Pfad liegt jetzt ausschliesslich unter `app/agents`.
 - `app/agents/workflows/bestellvorschlag.py` nutzt jetzt echte Approval- und Command-Contracts sowie direkte Persistenz ueber die Einkaufsmodelle statt Auto-Approval, Loopback-HTTP und Fallback-Bestellnummern.
 
 ## Architekturregeln
@@ -333,13 +334,13 @@ pytest tests/test_apm_pipeline_contract.py tests/test_reflect_archive_loader.py 
 pytest tests/test_json_state_contract.py tests/test_apm_pipeline_contract.py tests/test_reflect_archive_loader.py tests/l3_import/test_import_l3.py tests/l3_import/test_validate_mapping.py -q --no-cov
 # Ergebnis: 29 passed
 
-pytest tests/test_genxais_capability_registry.py tests/test_genxais_service.py tests/test_agents_genxais_api.py tests/test_genxais_bestellvorschlag_contract.py tests/test_workflows.py tests/test_process_kernel_wave14_command_dispatcher.py tests/test_process_kernel_wave16_aggregate_registry.py -q --no-cov
+pytest tests/test_neuroassist_capability_registry.py tests/test_neuroassist_service.py tests/test_agents_neuroassist_api.py tests/test_neuroassist_bestellvorschlag_contract.py tests/test_workflows.py tests/test_process_kernel_wave14_command_dispatcher.py tests/test_process_kernel_wave16_aggregate_registry.py -q --no-cov
 # Ergebnis: 37 passed
 
-pytest tests/test_genxais_capability_registry.py -q --no-cov
+pytest tests/test_neuroassist_capability_registry.py -q --no-cov
 # Ergebnis: 4 passed
 
-pytest tests/test_genxais_service.py tests/test_agents_genxais_api.py -q --no-cov
+pytest tests/test_neuroassist_service.py tests/test_agents_neuroassist_api.py -q --no-cov
 # Ergebnis: 6 passed
 
 npm run test:run -- src/__tests__/components/workflow/CompactDecisionCard.test.tsx src/__tests__/components/workflow/ProcessStatusPanel.test.tsx src/__tests__/features/role-density/role-density.test.ts
