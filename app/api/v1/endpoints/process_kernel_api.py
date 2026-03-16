@@ -211,6 +211,20 @@ from ....core.workflow_acl_contracts import (
     get_default_acl_regeln,
     pruefe_acl,
 )
+from ....core.process_state_machine_contracts import (
+    AutomatStatus,
+    UebergangsBedingung,
+    ZustandTyp,
+    fuehre_uebergang_aus,
+    get_default_zustandsautomat,
+)
+from ....core.workflow_delegation_contracts import (
+    DelegationsStatus,
+    DelegationsTyp,
+    EskalationsStufe,
+    get_default_delegations_regeln,
+    loeseauf_delegation,
+)
 from ....core.cross_domain_projection_contracts import (
     KonsistenzLevel,
     ProjectionLagStufe,
@@ -3502,5 +3516,81 @@ def pruefe_acl_zugang(body: dict | None = None):
         subjekt_id=subjekt_id,
         aktion=aktion,
         regeln=get_default_acl_regeln(),
+    )
+    return entscheidung.as_dict()
+
+
+# ---------------------------------------------------------------------------
+# Wave 47 — Process State Machine Contracts
+# ---------------------------------------------------------------------------
+
+@router.get("/state-machine/definition")
+def get_state_machine_definition():
+    """Gibt den Standard-Zustandsautomaten für Kontrakt-Freigabe zurück."""
+    automat = get_default_zustandsautomat()
+    return automat.as_dict()
+
+
+@router.post("/state-machine/uebergang")
+def fuehre_zustandsuebergang_aus(body: dict | None = None):
+    """
+    Führt einen Zustandsübergang im Automaten aus.
+
+    Body-Parameter:
+    - instanz_id: Instanz-ID (default: "WF-INST-TEST")
+    - aktueller_zustand_id: Aktueller Zustand (default: "Z-01")
+    - kontext: Dict mit Kontextfeldern (default: {})
+    """
+    if body is None:
+        body = {}
+
+    instanz_id: str = body.get("instanz_id", "WF-INST-TEST")
+    aktueller_zustand_id: str = body.get("aktueller_zustand_id", "Z-01")
+    kontext: dict = body.get("kontext", {})
+
+    automat = get_default_zustandsautomat()
+    ergebnis = fuehre_uebergang_aus(
+        instanz_id=instanz_id,
+        automat=automat,
+        aktueller_zustand_id=aktueller_zustand_id,
+        kontext=kontext,
+    )
+    return ergebnis.as_dict()
+
+
+# ---------------------------------------------------------------------------
+# Wave 47 — Workflow Delegation Contracts
+# ---------------------------------------------------------------------------
+
+@router.get("/delegation/regeln")
+def get_delegations_regeln():
+    """Gibt alle Standard-Delegationsregeln zurück."""
+    regeln = get_default_delegations_regeln()
+    return {
+        "anzahl": len(regeln),
+        "regeln": [r.as_dict() for r in regeln],
+        "typen": list({r.delegations_typ.value for r in regeln}),
+    }
+
+
+@router.post("/delegation/loeseauf")
+def loeseauf_delegations_verantwortung(body: dict | None = None):
+    """
+    Löst die Delegation für ein Subjekt und einen Aufgabentyp auf.
+
+    Body-Parameter:
+    - subjekt_id: Subjekt (default: "sachbearbeiter")
+    - aufgaben_typ: Aufgabentyp (default: "kontrakt_freigabe")
+    """
+    if body is None:
+        body = {}
+
+    subjekt_id: str = body.get("subjekt_id", "sachbearbeiter")
+    aufgaben_typ: str = body.get("aufgaben_typ", "kontrakt_freigabe")
+
+    entscheidung = loeseauf_delegation(
+        subjekt_id=subjekt_id,
+        aufgaben_typ=aufgaben_typ,
+        regeln=get_default_delegations_regeln(),
     )
     return entscheidung.as_dict()
