@@ -240,6 +240,21 @@ from ....core.workflow_batch_contracts import (
     erstelle_chunks,
     get_default_batch_jobs,
 )
+from ....core.process_notification_contracts_wave49 import (
+    NotifikationsKanal as NotifikationsKanalW49,
+    NotifikationsPrioritaet,
+    ZustellStatus,
+    berechne_zustellstatistik,
+    erstelle_zustellung,
+    get_default_notifikations_vorlagen,
+)
+from ....core.workflow_lock_contracts import (
+    KonfliktTyp,
+    LockStatus,
+    LockTyp,
+    akquiriere_lock,
+    get_default_locks,
+)
 from ....core.cross_domain_projection_contracts import (
     KonsistenzLevel,
     ProjectionLagStufe,
@@ -3702,3 +3717,107 @@ def erstelle_batch_chunks(body: dict | None = None):
         "anzahl_chunks": len(chunks),
         "chunks": [c.as_dict() for c in chunks],
     }
+
+
+# ---------------------------------------------------------------------------
+# Wave 49 -- Process Notification Contracts
+# ---------------------------------------------------------------------------
+
+@router.get("/notifications/vorlagen")
+def get_notifikations_vorlagen():
+    """Gibt alle Standard-Benachrichtigungsvorlagen zurueck."""
+    vorlagen = get_default_notifikations_vorlagen()
+    return {
+        "anzahl": len(vorlagen),
+        "vorlagen": [v.as_dict() for v in vorlagen],
+        "kanaele": list({v.kanal.value for v in vorlagen}),
+    }
+
+
+@router.post("/notifications/erstelle-zustellung")
+def erstelle_notifikations_zustellung(body: dict | None = None):
+    """
+    Erstellt eine Zustellung aus einer Vorlage.
+
+    Body-Parameter:
+    - vorlage_id: Vorlage-ID (default: NV-001)
+    - empfaenger_id: Empfaenger (default: mueller)
+    - kontext: Platzhalter-Werte (default: {})
+    """
+    if body is None:
+        body = {}
+
+    vorlage_id: str = body.get("vorlage_id", "NV-001")
+    empfaenger_id: str = body.get("empfaenger_id", "mueller")
+    kontext: dict = body.get("kontext", {})
+
+    vorlagen = get_default_notifikations_vorlagen()
+    vorlage = next((v for v in vorlagen if v.vorlage_id == vorlage_id), vorlagen[0])
+
+    from datetime import datetime as _dt
+    zustellung = erstelle_zustellung(
+        zustellung_id=f"ZST-{vorlage_id}-{empfaenger_id}",
+        vorlage=vorlage,
+        empfaenger_id=empfaenger_id,
+        kontext=kontext,
+        erstellt_am=_dt.utcnow(),
+    )
+    return zustellung.as_dict()
+
+
+# ---------------------------------------------------------------------------
+# Wave 49 -- Workflow Lock Contracts
+# ---------------------------------------------------------------------------
+
+@router.get("/locks/aktive")
+def get_aktive_locks():
+    """Gibt alle Standard-Locks zurueck."""
+    locks = get_default_locks()
+    return {
+        "anzahl": len(locks),
+        "locks": [l.as_dict() for l in locks],
+        "status_verteilung": {
+            s.value: sum(1 for l in locks if l.status == s)
+            for s in LockStatus
+        },
+    }
+
+
+@router.post("/locks/akquiriere")
+def akquiriere_workflow_lock(body: dict | None = None):
+    """
+    Versucht einen Lock zu akquirieren.
+
+    Body-Parameter:
+    - lock_id: Lock-ID (default: LK-NEW)
+    - ressource_id: Ressource (default: kontrakt:K-2026-999)
+    - inhaber_id: Inhaber (default: testuser)
+    - lock_typ: LESEN/SCHREIBEN/OPTIMISTISCH (default: SCHREIBEN)
+    - version: Ressourcen-Version (default: 1)
+    - ttl_sekunden: TTL (default: 300)
+    """
+    if body is None:
+        body = {}
+
+    lock_id: str = body.get("lock_id", "LK-NEW")
+    ressource_id: str = body.get("ressource_id", "kontrakt:K-2026-999")
+    inhaber_id: str = body.get("inhaber_id", "testuser")
+    typ_str: str = body.get("lock_typ", "SCHREIBEN")
+    version: int = int(body.get("version", 1))
+    ttl: int = int(body.get("ttl_sekunden", 300))
+
+    try:
+        lock_typ = LockTyp(typ_str.upper())
+    except ValueError:
+        lock_typ = LockTyp.SCHREIBEN
+
+    ergebnis = akquiriere_lock(
+        lock_id=lock_id,
+        ressource_id=ressource_id,
+        inhaber_id=inhaber_id,
+        lock_typ=lock_typ,
+        version=version,
+        ttl_sekunden=ttl,
+        bestehende_locks=get_default_locks(),
+    )
+    return ergebnis.as_dict()
