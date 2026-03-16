@@ -160,6 +160,22 @@ from ....core.process_compensation_contracts import (
     erstelle_kompensations_kette,
     get_default_saga_definitionen,
 )
+from ....core.workflow_checkpoint_contracts import (
+    CheckpointIntervall,
+    CheckpointStatus,
+    WiederherstellungsErgebnis,
+    erstelle_checkpoint,
+    get_default_checkpoint_regeln,
+    stelle_checkpoint_wieder_her,
+)
+from ....core.cross_domain_projection_contracts import (
+    KonsistenzLevel,
+    ProjectionLagStufe,
+    ProjectionStatus,
+    berechne_lag_stufe,
+    erstelle_projektions_gesundheit,
+    get_default_projektionen,
+)
 from ....core.event_replay_contracts import (
     ReplayModus,
     ReplayStatus,
@@ -3035,3 +3051,93 @@ def erstelle_kompensationskette_endpoint(body: dict | None = None):
         tenant_id=tenant_id,
     )
     return kette.as_dict()
+
+
+# ---------------------------------------------------------------------------
+# Wave 43 — Workflow Checkpoint Contracts
+# ---------------------------------------------------------------------------
+
+@router.get("/checkpoints/regeln")
+def get_checkpoint_regeln(workflow_typ: str = ""):
+    """
+    Gibt Checkpoint-Regeln zurück (optional gefiltert nach workflow_typ).
+    """
+    regeln = get_default_checkpoint_regeln()
+    if workflow_typ:
+        regeln = [r for r in regeln if r.workflow_typ == workflow_typ]
+    return {
+        "regeln": [r.as_dict() for r in regeln],
+        "anzahl": len(regeln),
+        "schema_version": 1,
+    }
+
+
+@router.post("/checkpoints/erstelle")
+def erstelle_workflow_checkpoint(body: dict | None = None):
+    """
+    Erstellt einen Checkpoint für eine Workflow-Instanz.
+
+    Body-Parameter:
+    - checkpoint_id: Checkpoint-ID
+    - workflow_instanz_id: Instanz-ID
+    - schritt_id: Aktueller Schritt
+    - tenant_id: Tenant
+    - schritte_ausgefuehrt: Anzahl bisher ausgeführter Schritte
+    - zustand: dict mit aktuellem Workflow-Zustand
+    """
+    if body is None:
+        body = {}
+
+    checkpoint = erstelle_checkpoint(
+        checkpoint_id=body.get("checkpoint_id", "CP-001"),
+        workflow_instanz_id=body.get("workflow_instanz_id", "WF-INST-001"),
+        schritt_id=body.get("schritt_id", "SCHRITT-03"),
+        tenant_id=body.get("tenant_id", "TENANT-001"),
+        zustand=body.get("zustand", {}),
+        schritte_ausgefuehrt=int(body.get("schritte_ausgefuehrt", 0)),
+    )
+    return checkpoint.as_dict()
+
+
+# ---------------------------------------------------------------------------
+# Wave 43 — Cross-Domain Projection Contracts
+# ---------------------------------------------------------------------------
+
+@router.get("/projections/gesundheit")
+def get_projektions_gesundheit(tenant_id: str = "TENANT-001"):
+    """
+    Gibt den aggregierten Gesundheitsstatus aller Projektionen zurück.
+    """
+    from datetime import datetime as _dt
+    projektionen = get_default_projektionen(tenant_id=tenant_id)
+    gesundheit = erstelle_projektions_gesundheit(
+        gesundheits_id="PG-AKTUELL",
+        projektionen=projektionen,
+        geprueft_am=_dt.utcnow(),
+    )
+    return gesundheit.as_dict()
+
+
+@router.post("/projections/pruefe-lag")
+def pruefe_projektions_lag(body: dict | None = None):
+    """
+    Berechnet die Lag-Stufe für einen gegebenen Lag-Wert in Sekunden.
+
+    Body-Parameter:
+    - lag_sekunden: Lag-Wert in Sekunden (float)
+    - projection_id: optional, für Kontext
+    """
+    if body is None:
+        body = {}
+
+    lag_sekunden: float = float(body.get("lag_sekunden", 0.0))
+    projection_id: str = body.get("projection_id", "")
+
+    lag_stufe = berechne_lag_stufe(lag_sekunden)
+    return {
+        "projection_id": projection_id,
+        "lag_sekunden": lag_sekunden,
+        "lag_stufe": lag_stufe.value,
+        "ist_kritisch": lag_stufe == ProjectionLagStufe.KRITISCH,
+        "schema_version": 1,
+    }

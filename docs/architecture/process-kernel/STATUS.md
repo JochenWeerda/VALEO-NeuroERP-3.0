@@ -2,15 +2,15 @@
 
 ## Gesamtstatus
 
-- Stand: `2026-03-15`
-- Status: `Waves 1 bis 42 abgeschlossen`
-- Gesamtsuite: `2184 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed`
+- Stand: `2026-03-16`
+- Status: `Waves 1 bis 43 abgeschlossen`
+- Gesamtsuite: `2263 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed`
 - Letzte abgeschlossene Waves:
-  - `Wave 38`: Nachhaltigkeit/CO2-Reporting + Branchenbenchmarking (Gap 046, Gap 047)
   - `Wave 39`: Command-Surfacing-Contracts + Prozess-Benachrichtigungs-Contracts
   - `Wave 40`: Workflow-Versionierungs-Contracts + Canonical Process Audit Trail (PKP-02, PKP-03)
   - `Wave 41`: Process Capacity Contracts + Event Replay Contracts
   - `Wave 42`: Domain Event Schema Registry + Process Compensation Contracts
+  - `Wave 43`: Workflow Checkpoint Contracts + Cross-Domain Projection Contracts
 
 ## Wave-Uebersicht
 
@@ -58,6 +58,7 @@
 | Wave 40 | abgeschlossen | 60 | `wave-40/STATUS.md` |
 | Wave 41 | abgeschlossen | 82 | `wave-41/STATUS.md` |
 | Wave 42 | abgeschlossen | 60 | `wave-42/STATUS.md` |
+| Wave 43 | abgeschlossen | 73 | `wave-43/STATUS.md` |
 
 ## Aktuell relevante Lieferungen
 
@@ -238,15 +239,20 @@
 ### GENXAIS Fach-Workflow- und Assistenten-Schicht
 
 - `app/agents/genxais.py`
+- `app/agents/genxais_service.py`
+- `app/agents/genxais_legacy.py`
 - `app/agents/langgraph_server.py`
 - `app/agents/workflows/bestellvorschlag.py`
 - `app/agents/workflows/skonto_optimizer.py`
 - `app/agents/workflows/compliance_copilot.py`
+- `app/api/v1/endpoints/agents.py`
 
 Ergebnis:
 - `GENXAIS` ist als fachlicher Capability-Layer fuer produktive Business-Workflows und praxisnahe Assistenten neu verankert.
-- Die bestehende LangGraph-Schicht bleibt technische Ausfuehrungsengine; der semantische Produktanker liegt kuenftig in `app/agents`, nicht in den alten `scripts/start_genxais_*`- und Dashboard-Pfaden.
+- `GENXAISService` ist die neue Anwendungsschicht ueber den agentischen Fach-Workflows; die bestehende LangGraph-Schicht bleibt technische Ausfuehrungsengine.
+- Der semantische Produktanker liegt kuenftig in `app/agents`, nicht in den alten `scripts/start_genxais_*`- und Dashboard-Pfaden.
 - Produktiv anschlussfaehige GENXAIS-Capabilities sind aktuell Bestellvorschlag, Finance-Skonto und Compliance-Copilot; technische oder rein experimentelle Pfade werden davon getrennt bewertet.
+- Legacy-Pfade wie `scripts/start_genxais_*`, `scripts/start_langgraph_cycle.py`, `scripts/streamlit_dashboard.py` und `scripts/dashboard_prompt_module.py` sind jetzt in einer expliziten Deprecation-/Removal-Registry erfasst statt implizit weiterzuleben.
 
 ## Architekturregeln
 
@@ -312,6 +318,9 @@ pytest tests/test_genxais_cycle_contract.py tests/test_dashboard_prompt_module_c
 
 pytest tests/test_genxais_capability_registry.py -q --no-cov
 # Ergebnis: 4 passed
+
+pytest tests/test_genxais_service.py tests/test_agents_genxais_api.py -q --no-cov
+# Ergebnis: 6 passed
 
 npm run test:run -- src/__tests__/components/workflow/CompactDecisionCard.test.tsx src/__tests__/components/workflow/ProcessStatusPanel.test.tsx src/__tests__/features/role-density/role-density.test.ts
 # Ergebnis: 11 passed
