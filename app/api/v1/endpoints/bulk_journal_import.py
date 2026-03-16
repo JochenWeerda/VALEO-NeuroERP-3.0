@@ -16,6 +16,10 @@ import logging
 from app.core.uuid7 import uuid7
 
 from ....core.database import get_db
+from ....core.data_quality_enforcement import (
+    build_dq_error_detail,
+    evaluate_journal_import_datensatz,
+)
 from ....core.fibu_audit import log_fibu_audit
 
 logger = logging.getLogger(__name__)
@@ -79,37 +83,30 @@ def parse_csv_file(file_content: bytes, delimiter: str = ',') -> List[Dict[str, 
         raise HTTPException(status_code=400, detail=f"Failed to parse CSV: {str(e)}")
 
 
+def _build_journal_import_datensatz(row_data: Dict[str, Any]) -> Dict[str, Any]:
+    return {
+        "entry_date": row_data.get("entry_date") or row_data.get("buchungsdatum", ""),
+        "account_number": row_data.get("account_number") or row_data.get("konto", ""),
+        "description": row_data.get("description") or row_data.get("buchungstext", ""),
+        "debit_amount": row_data.get("debit_amount") or row_data.get("soll", "0"),
+        "credit_amount": row_data.get("credit_amount") or row_data.get("haben", "0"),
+    }
+
+
 def validate_and_parse_row(row_data: Dict[str, Any], row_number: int) -> tuple[Optional[JournalEntryImportRow], Optional[ImportError]]:
     """Validate and parse a single import row"""
-    errors = []
-    
-    # Required fields
-    if 'entry_date' not in row_data and 'buchungsdatum' not in row_data:
+    dq_datensatz = _build_journal_import_datensatz(row_data)
+    dq_result = evaluate_journal_import_datensatz(dq_datensatz)
+    if not dq_result.bestanden:
         return None, ImportError(
             row_number=row_number,
-            field='entry_date',
-            error_message='Missing required field: entry_date or buchungsdatum',
-            row_data=row_data
+            field=dq_result.verletzungen[0].feld if dq_result.verletzungen else None,
+            error_message=dq_result.verletzungen[0].meldung if dq_result.verletzungen else "DQ validation failed",
+            row_data=row_data,
         )
-    
-    if 'account_number' not in row_data and 'konto' not in row_data:
-        return None, ImportError(
-            row_number=row_number,
-            field='account_number',
-            error_message='Missing required field: account_number or konto',
-            row_data=row_data
-        )
-    
-    if 'description' not in row_data and 'buchungstext' not in row_data:
-        return None, ImportError(
-            row_number=row_number,
-            field='description',
-            error_message='Missing required field: description or buchungstext',
-            row_data=row_data
-        )
-    
+
     # Parse date
-    date_str = row_data.get('entry_date') or row_data.get('buchungsdatum', '')
+    date_str = dq_datensatz["entry_date"]
     try:
         # Try different date formats
         if len(date_str) == 10:
@@ -127,8 +124,8 @@ def validate_and_parse_row(row_data: Dict[str, Any], row_number: int) -> tuple[O
         )
     
     # Parse amounts
-    debit_str = row_data.get('debit_amount') or row_data.get('soll', '0')
-    credit_str = row_data.get('credit_amount') or row_data.get('haben', '0')
+    debit_str = dq_datensatz["debit_amount"]
+    credit_str = dq_datensatz["credit_amount"]
     
     try:
         debit_amount = Decimal(str(debit_str).replace(',', '.')) if debit_str else Decimal("0.00")
@@ -141,17 +138,8 @@ def validate_and_parse_row(row_data: Dict[str, Any], row_number: int) -> tuple[O
             row_data=row_data
         )
     
-    # At least one amount must be > 0
-    if debit_amount == Decimal("0.00") and credit_amount == Decimal("0.00"):
-        return None, ImportError(
-            row_number=row_number,
-            field='amount',
-            error_message='Either debit_amount or credit_amount must be greater than 0',
-            row_data=row_data
-        )
-    
-    account_number = row_data.get('account_number') or row_data.get('konto', '')
-    description = row_data.get('description') or row_data.get('buchungstext', '')
+    account_number = dq_datensatz["account_number"]
+    description = dq_datensatz["description"]
     
     entry = JournalEntryImportRow(
         entry_date=entry_date,
@@ -195,23 +183,6 @@ async def import_journal_entries_csv(
     - reference (or beleg): Optional reference
     """
     try:
-        period_status = db.execute(
-            text(
-                """
-                SELECT status
-                FROM finance_accounting_periods
-                WHERE tenant_id = :tenant_id AND period = :period
-                LIMIT 1
-                """
-            ),
-            {"tenant_id": tenant_id, "period": period},
-        ).fetchone()
-        if period_status and str(period_status[0]) != "OPEN":
-            raise HTTPException(
-                status_code=403,
-                detail=f"Period {period} is {period_status[0]}. Import is blocked."
-            )
-
         # Read file content
         file_content = await file.read()
         
@@ -232,8 +203,13 @@ async def import_journal_entries_csv(
             entry, error = validate_and_parse_row(row_data, idx)
             
             if error:
-                errors.append(error)
-                continue
+                raise HTTPException(
+                    status_code=422,
+                    detail=build_dq_error_detail(
+                        "JournalImport",
+                        evaluate_journal_import_datensatz(_build_journal_import_datensatz(row_data)),
+                    ),
+                )
             
             if entry:
                 # Group by entry_date and entry_number
@@ -242,8 +218,25 @@ async def import_journal_entries_csv(
                     entries_dict[key] = []
                 entries_dict[key].append(entry)
                 successful_entries.append(entry)
-        
+
         if not dry_run:
+            period_status = db.execute(
+                text(
+                    """
+                    SELECT status
+                    FROM finance_accounting_periods
+                    WHERE tenant_id = :tenant_id AND period = :period
+                    LIMIT 1
+                    """
+                ),
+                {"tenant_id": tenant_id, "period": period},
+            ).fetchone()
+            if period_status and str(period_status[0]) != "OPEN":
+                raise HTTPException(
+                    status_code=403,
+                    detail=f"Period {period} is {period_status[0]}. Import is blocked."
+                )
+
             # Create journal entries
             for entry_key, entry_lines in entries_dict.items():
                 if not entry_lines:

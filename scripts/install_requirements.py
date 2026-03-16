@@ -98,16 +98,16 @@ def create_startup_script():
     if platform.system() == "Windows":
         with open("start_app.bat", "w") as file:
             file.write("@echo off\n")
-            file.write("echo Starte VALEO-NeuroERP Streamlit-App...\n")
+            file.write("echo Starte VALEO-NeuroERP Frontend- und Backend-Hilfsskripte...\n")
             file.write("start \"Cursor Prompt Integration\" python scripts/cursor_prompt_integration.py\n")
-            file.write("start \"VALEO-NeuroERP App\" streamlit run scripts/streamlit_app_mcp_integration.py\n")
+            file.write("start \"VALEO-NeuroERP Dashboard\" python scripts/start_dashboard.py\n")
         print("Windows-Startskript start_app.bat erstellt.")
     else:
         with open("start_app.sh", "w") as file:
             file.write("#!/bin/bash\n")
-            file.write("echo \"Starte VALEO-NeuroERP Streamlit-App...\"\n")
+            file.write("echo \"Starte VALEO-NeuroERP Frontend- und Backend-Hilfsskripte...\"\n")
             file.write("python scripts/cursor_prompt_integration.py &\n")
-            file.write("streamlit run scripts/streamlit_app_mcp_integration.py\n")
+            file.write("python scripts/start_dashboard.py\n")
         os.chmod("start_app.sh", 0o755)
         print("Unix-Startskript start_app.sh erstellt.")
 

@@ -11,6 +11,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/components/ui/toast-provider"
+import { CompactDecisionCard } from "@/components/workflow/CompactDecisionCard"
 import { useMcpMutation, useMcpQuery } from "@/lib/mcp"
 import { buildDecisionView } from "@/policy/decision-view"
 import { type AlertInput, type Rule } from "@/policy/schema"
@@ -328,15 +329,7 @@ function SimulatorPanel(): JSX.Element {
           <Card className="p-3">
             <div className="mb-2 text-sm opacity-70">Policy-Erklaerung</div>
             {decisionView !== null ? (
-              <div className={`rounded-md border px-3 py-2 ${decisionView.statusClassName}`}>
-                <div className="text-sm font-semibold">{decisionView.statusLabel}</div>
-                <p className="mt-1 text-sm">{decisionView.summary}</p>
-                <ul className="mt-2 list-disc pl-4 text-xs">
-                  {decisionView.details.map((detail) => (
-                    <li key={detail}>{detail}</li>
-                  ))}
-                </ul>
-              </div>
+              <CompactDecisionCard view={decisionView} title="Policy" />
             ) : (
               <p className="text-sm text-muted-foreground">
                 Antwortformat unbekannt, nur Raw-Decision verfuegbar.

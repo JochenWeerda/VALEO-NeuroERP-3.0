@@ -354,11 +354,158 @@ class TestValidateDatensatz:
         result = validate_datensatz(rs, {})
         assert result.bestanden is True
 
-    def test_default_rulesets_alle_vier(self):
+    def test_default_rulesets_alle_siebzehn(self):
+        assert "Debitor" in self.rulesets
         assert "Lieferant" in self.rulesets
         assert "Kontrakt" in self.rulesets
         assert "Wiegeschein" in self.rulesets
         assert "Artikel" in self.rulesets
+        assert "APRechnung" in self.rulesets
+        assert "Abrechnung" in self.rulesets
+        assert "ErnteAnnahme" in self.rulesets
+        assert "Qualitaetsprotokoll" in self.rulesets
+        assert "SelfBilling" in self.rulesets
+        assert "FeldbuchMassnahme" in self.rulesets
+        assert "KontoauszugImport" in self.rulesets
+        assert "JournalImport" in self.rulesets
+        assert "Zahlungsimport" in self.rulesets
+        assert "PayrollConnectorImport" in self.rulesets
+        assert "AssetLedgerConnectorImport" in self.rulesets
+        assert "DailyPriceImport" in self.rulesets
+
+    def test_debitor_valid(self):
+        ds = {"debitor_nr": "DB-001", "name": "Kunde AG", "land": "DE"}
+        result = validate_datensatz(self.rulesets["Debitor"], ds)
+        assert result.bestanden is True
+
+    def test_ap_rechnung_valid(self):
+        ds = {
+            "rechnungsnummer": "RE-001",
+            "lieferant_id": "L-001",
+            "faelligkeit": "2026-04-30",
+            "brutto_betrag_eur": 1250.0,
+            "waehrung": "EUR",
+        }
+        result = validate_datensatz(self.rulesets["APRechnung"], ds)
+        assert result.bestanden is True
+
+    def test_abrechnung_valid(self):
+        ds = {
+            "abrechnungsnummer": "SET-001",
+            "lieferant_id": "L-001",
+            "brutto_gewicht_kg": 50000.0,
+            "abrechnungsgewicht_kg": 48250.0,
+            "preis_eur_pro_t": 235.0,
+            "waehrung": "EUR",
+        }
+        result = validate_datensatz(self.rulesets["Abrechnung"], ds)
+        assert result.bestanden is True
+
+    def test_ernte_annahme_valid(self):
+        ds = {
+            "annahme_nr": "HA-001",
+            "kunde_id": "C-001",
+            "lieferdatum": "2026-03-15",
+            "preismodell": "spot_daily",
+            "annahmemodus": "PURCHASE_AT_DELIVERY_PTBF",
+            "land": "DE",
+        }
+        result = validate_datensatz(self.rulesets["ErnteAnnahme"], ds)
+        assert result.bestanden is True
+
+    def test_qualitaetsprotokoll_valid(self):
+        ds = {
+            "ernteannahme_id": "HA-001",
+            "quelle": "import",
+            "feuchte_pct": 15.5,
+            "protein_pct": 12.3,
+            "hl_gewicht": 72.0,
+        }
+        result = validate_datensatz(self.rulesets["Qualitaetsprotokoll"], ds)
+        assert result.bestanden is True
+
+    def test_self_billing_valid(self):
+        ds = {
+            "ernteannahme_id": "HA-001",
+            "netto_eur": 1000.0,
+            "brutto_eur": 1190.0,
+            "ust_satz_pct": 19.0,
+            "besteuerung": "regular",
+        }
+        result = validate_datensatz(self.rulesets["SelfBilling"], ds)
+        assert result.bestanden is True
+
+    def test_feldbuch_massnahme_valid(self):
+        ds = {
+            "datum": "2026-03-15",
+            "schlag_name": "Nordfeld",
+            "typ": "duengung",
+            "flaeche_ha": 12.5,
+            "menge": 500.0,
+        }
+        result = validate_datensatz(self.rulesets["FeldbuchMassnahme"], ds)
+        assert result.bestanden is True
+
+    def test_kontoauszug_import_valid(self):
+        ds = {
+            "booking_date": "2026-03-15",
+            "value_date": "2026-03-15",
+            "amount": 150.0,
+            "currency": "EUR",
+        }
+        result = validate_datensatz(self.rulesets["KontoauszugImport"], ds)
+        assert result.bestanden is True
+
+    def test_journal_import_valid(self):
+        ds = {
+            "entry_date": "2026-03-15",
+            "account_number": "8400",
+            "description": "Sammelbuchung",
+            "debit_amount": 150.0,
+            "credit_amount": 0.0,
+        }
+        result = validate_datensatz(self.rulesets["JournalImport"], ds)
+        assert result.bestanden is True
+
+    def test_zahlungsimport_valid(self):
+        ds = {
+            "booking_date": "2026-03-15",
+            "amount": 150.0,
+            "currency": "EUR",
+        }
+        result = validate_datensatz(self.rulesets["Zahlungsimport"], ds)
+        assert result.bestanden is True
+
+    def test_payroll_connector_import_valid(self):
+        ds = {
+            "booking_date": "2026-03-15",
+            "account": "6000",
+            "amount": 150.0,
+            "dc": "S",
+        }
+        result = validate_datensatz(self.rulesets["PayrollConnectorImport"], ds)
+        assert result.bestanden is True
+
+    def test_asset_ledger_connector_import_valid(self):
+        ds = {
+            "booking_date": "2026-03-15",
+            "account": "0840",
+            "amount": 500.0,
+            "dc": "S",
+        }
+        result = validate_datensatz(self.rulesets["AssetLedgerConnectorImport"], ds)
+        assert result.bestanden is True
+
+    def test_daily_price_import_valid(self):
+        ds = {
+            "article_id": "ART-1",
+            "price_eur_per_ton": 240.0,
+            "currency": "EUR",
+            "price_date": "2026-03-15",
+            "source_type": "manual",
+        }
+        result = validate_datensatz(self.rulesets["DailyPriceImport"], ds)
+        assert result.bestanden is True
 
     def test_wiegeschein_valid(self):
         ds = {
@@ -439,8 +586,20 @@ class TestWave31Endpoints:
         r = client.get("/api/v1/process/data-quality/rulesets")
         assert r.status_code == 200
         body = r.json()
-        assert body["ruleset_count"] == 4
+        assert body["ruleset_count"] == 17
+        assert "Debitor" in body["rulesets"]
         assert "Lieferant" in body["rulesets"]
+        assert "APRechnung" in body["rulesets"]
+        assert "ErnteAnnahme" in body["rulesets"]
+        assert "Qualitaetsprotokoll" in body["rulesets"]
+        assert "SelfBilling" in body["rulesets"]
+        assert "FeldbuchMassnahme" in body["rulesets"]
+        assert "KontoauszugImport" in body["rulesets"]
+        assert "JournalImport" in body["rulesets"]
+        assert "Zahlungsimport" in body["rulesets"]
+        assert "PayrollConnectorImport" in body["rulesets"]
+        assert "AssetLedgerConnectorImport" in body["rulesets"]
+        assert "DailyPriceImport" in body["rulesets"]
 
     def test_dq_validate_valid(self, client):
         payload = {

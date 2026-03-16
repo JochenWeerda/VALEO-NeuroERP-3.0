@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.core.connectors import workflow
+from app.core.data_quality_enforcement import DQValidationException
 from app.api.v1.schemas.fibu_connectors import (
     ConnectorProfile,
     ConnectorProfileCreate,
@@ -220,7 +221,10 @@ async def create_import_run(
     run_id = workflow.create_run(db, tenant_id, connector_type, profile_id, idempotency_key, created_by)
     storage_key = f"fibu/connectors/{connector_type.lower()}/{run_id}"
     workflow.set_run_artifact(db, run_id, tenant_id, content, file.filename, storage_key)
-    workflow.parse_run(db, run_id, tenant_id, content)
+    try:
+        workflow.parse_run(db, run_id, tenant_id, content)
+    except DQValidationException as exc:
+        raise HTTPException(status_code=422, detail=exc.detail) from exc
     return ImportUploadResponse(run_id=run_id, status="PARSED", message="Upload und Parse erfolgreich.")
 
 

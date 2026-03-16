@@ -12,6 +12,8 @@ import { useToast } from '@/hooks/use-toast'
 import { Calculator, FileText, Save, Truck } from 'lucide-react'
 import { buildDecisionView } from '@/policy/decision-view'
 import { ProcessStatusPanel } from '@/components/workflow/ProcessStatusPanel'
+import { useApprovalDensityProfile } from '@/features/workflow/useApprovalDensityProfile'
+import { CompactDecisionCard } from '@/components/workflow/CompactDecisionCard'
 
 type DeductionType = 'drying' | 'cleaning' | 'freight' | 'other'
 type DeductionMode = 'per_ton' | 'fixed'
@@ -390,6 +392,7 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
   const billingData = billingPreview.data
   const qualityOk = form.feuchtigkeit <= 14.5 && form.verunreinigung <= 2
   const previewDecisionView = buildDecisionView(previewData?.explainability)
+  const previewDensityProfile = useApprovalDensityProfile('agrar-settlement', previewDecisionView)
 
   return (
     <div className="space-y-6 p-6">
@@ -497,7 +500,7 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
           )}
 
           {previewDecisionView ? (
-            <ProcessStatusPanel view={previewDecisionView} />
+            <ProcessStatusPanel view={previewDecisionView} densityProfileOverride={previewDensityProfile} />
           ) : null}
 
           {previewData?.exception_hints && previewData.exception_hints.length > 0 ? (
@@ -570,10 +573,7 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
                     (() => {
                       const view = buildDecisionView(s.explainability)
                       return view ? (
-                        <div className="mt-3 rounded-md border p-2">
-                          <div className={`inline-flex rounded border px-2 py-1 text-xs ${view.statusClassName}`}>{view.statusLabel}</div>
-                          <div className="mt-2 text-sm">{view.summary}</div>
-                        </div>
+                        <CompactDecisionCard view={view} pageDomain="agrar-settlement" className="mt-3" showDetails={false} />
                       ) : null
                     })()
                   ) : null}

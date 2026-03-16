@@ -238,7 +238,6 @@ class ErrorHandler:
         
         # Standardmäßig zu schützende Dateien
         self.critical_files = [
-            "scripts/streamlit_app_mcp_integration.py",
             "scripts/cursor_prompt_integration.py",
             "scripts/error_handler.py",
             "config/version.yaml",

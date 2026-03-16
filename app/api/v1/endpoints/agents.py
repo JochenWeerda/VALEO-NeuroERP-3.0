@@ -7,17 +7,14 @@ import logging
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from datetime import datetime
-from uuid import uuid4
 
-from ....agents.langgraph_server import (
-    invoke_bestellvorschlag,
-    resume_bestellvorschlag
-)
+from ....agents import get_genxais_service
 from ....core.logging import set_correlation_id
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+genxais_service = get_genxais_service()
 
 
 class WorkflowTriggerRequest(BaseModel):
@@ -32,6 +29,40 @@ class WorkflowTriggerResponse(BaseModel):
     correlation_id: str
     status: str
     started_at: str
+    capability_key: str
+
+
+class CapabilityResponse(BaseModel):
+    capability_key: str
+    title: str
+    kind: str
+    domain: str
+    readiness: str
+    workflow_module: str
+    workflow_builder: str
+    workflow_entrypoint: str
+    description: str
+    process_scopes: list[str]
+
+
+@router.get("/genxais/capabilities", response_model=list[CapabilityResponse])
+async def list_genxais_capabilities(productive_only: bool = True):
+    capabilities = genxais_service.list_capabilities(productive_only=productive_only)
+    return [
+        CapabilityResponse(
+            capability_key=cap.capability_key,
+            title=cap.title,
+            kind=cap.kind,
+            domain=cap.domain,
+            readiness=cap.readiness,
+            workflow_module=cap.workflow_module,
+            workflow_builder=cap.workflow_builder,
+            workflow_entrypoint=cap.workflow_entrypoint,
+            description=cap.description,
+            process_scopes=list(cap.process_scopes),
+        )
+        for cap in capabilities
+    ]
 
 
 @router.post("/bestellvorschlag/trigger", response_model=WorkflowTriggerResponse)
@@ -46,21 +77,12 @@ async def trigger_bestellvorschlag(request: WorkflowTriggerRequest):
     4. Waits for approval
     5. Creates purchase order if approved
     """
-    correlation_id = str(uuid4())
-    set_correlation_id(correlation_id)
-    
     logger.info(f"Triggering Bestellvorschlag workflow (tenant: {request.tenant_id})")
     
     try:
-        # Invoke LangGraph workflow (pauses at approval checkpoint)
-        result = await invoke_bestellvorschlag(request.tenant_id, correlation_id)
-        
-        return WorkflowTriggerResponse(
-            workflow_id=correlation_id,
-            correlation_id=correlation_id,
-            status="pending_approval",  # Always pauses at checkpoint
-            started_at=datetime.utcnow().isoformat()
-        )
+        result = await genxais_service.trigger_bestellvorschlag(request.tenant_id)
+        set_correlation_id(result["correlation_id"])
+        return WorkflowTriggerResponse(**result)
     
     except Exception as e:
         logger.error(f"Workflow execution failed: {e}", exc_info=True)
@@ -84,18 +106,12 @@ async def approve_workflow(workflow_id: str, request: ApprovalRequest):
     logger.info(f"Processing approval for workflow {workflow_id}: approved={request.approved}")
     
     try:
-        result = await resume_bestellvorschlag(
+        result = await genxais_service.approve_bestellvorschlag(
             workflow_id,
             request.approved,
-            request.rejection_reason
+            request.rejection_reason,
         )
-        
-        return {
-            "workflow_id": workflow_id,
-            "approved": request.approved,
-            "order_id": result.get("order_id"),
-            "status": "completed" if result.get("order_id") else "rejected"
-        }
+        return result
     
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
@@ -109,25 +125,10 @@ async def get_workflow_status(workflow_id: str):
     """
     Get status of a running workflow from LangGraph checkpointer.
     """
-    from ....agents.langgraph_server import get_bestellvorschlag_workflow
-    
-    workflow = get_bestellvorschlag_workflow()
-    config = {"configurable": {"thread_id": workflow_id}}
-    
     try:
-        state = await workflow.aget_state(config)
-        
-        if state is None:
-            raise HTTPException(status_code=404, detail="Workflow not found")
-        
-        return {
-            "workflow_id": workflow_id,
-            "status": "pending_approval" if not state.values.get("approved") else "completed",
-            "proposal": state.values.get("proposal"),
-            "order_id": state.values.get("order_id"),
-            "created_at": state.values.get("created_at")
-        }
-    
+        return await genxais_service.get_bestellvorschlag_status(workflow_id)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
         logger.error(f"Failed to get workflow status: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))

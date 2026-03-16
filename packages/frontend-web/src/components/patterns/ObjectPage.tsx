@@ -3,7 +3,11 @@ import { PageToolbar, type ToolbarAction } from '@/components/navigation/PageToo
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { cn } from '@/lib/utils'
 import { createMCPMetadata } from '@/design/mcp-schemas/component-metadata'
-import { useActionsForMask, useActionDispatchOptional } from '@/features/ki-usability'
+import { buildToolbarActionsFromRegistry, useActionsForMask, useActionDispatchOptional } from '@/features/ki-usability'
+import { auth } from '@/lib/auth'
+import { resolveRoleDensityProfile } from '@/features/role-density'
+import { useTenant } from '@/hooks/useTenant'
+import { useUIDensityManifest } from '@/lib/api/ui-density-manifest'
 
 export interface ObjectPageSection {
   id: string
@@ -110,7 +114,19 @@ export function ObjectPage({
   mcpContext,
 }: ObjectPageProps): JSX.Element {
   const actionDispatch = useActionDispatchOptional()
+  const { tenantId } = useTenant()
   const { data: actionResponse } = useActionsForMask(mcpContext?.pageDomain, mcpContext?.entityType)
+  const densityManifestQuery = useUIDensityManifest(mcpContext?.pageDomain)
+  const roleDensityProfile = useMemo(
+    () =>
+      resolveRoleDensityProfile(auth.getUser()?.roles, {
+        tenantId,
+        pageDomain: mcpContext?.pageDomain,
+        availableActionIds: actionResponse?.actions?.map((action) => action.id) ?? [],
+        backendDensity: densityManifestQuery.data?.entry?.recommended_density,
+      }),
+    [actionResponse?.actions, densityManifestQuery.data?.entry?.recommended_density, mcpContext?.pageDomain, tenantId],
+  )
   const safeSections = useMemo(() => sections.filter((section) => section != null), [sections])
 
   const initialSection = useMemo(() => {
@@ -132,20 +148,10 @@ export function ObjectPage({
     return defaultActions(editMode, onEdit, onSave, onCancel)
   }, [editMode, onCancel, onEdit, onSave, primaryActions])
 
-  const quickActions = useMemo<ToolbarAction[]>(() => {
-    return (actionResponse?.actions ?? []).map((action) => ({
-      id: action.id,
-      label: action.label,
-      shortcut: action.shortcut,
-      onClick: () => {
-        if (actionDispatch) {
-          void actionDispatch.dispatch(action.id)
-        }
-      },
-      variant: action.category === 'danger' ? 'destructive' : 'outline',
-      mcp: { intent: action.id, requiredData: action.required_data },
-    }))
-  }, [actionDispatch, actionResponse?.actions])
+  const contextualToolbarActions = useMemo(
+    () => buildToolbarActionsFromRegistry(actionResponse?.actions, actionDispatch),
+    [actionDispatch, actionResponse?.actions],
+  )
 
   const mergedPrimaryActions = useMemo<ToolbarAction[]>(() => {
     if (Array.isArray(primaryActions) && primaryActions.length > 0) {
@@ -154,19 +160,19 @@ export function ObjectPage({
     if (computedActions.length > 0) {
       return computedActions
     }
-    return quickActions.slice(0, 2)
-  }, [computedActions, primaryActions, quickActions])
+    return contextualToolbarActions.primary
+  }, [computedActions, contextualToolbarActions.primary, primaryActions])
 
   const mergedOverflowActions = useMemo<ToolbarAction[]>(() => {
     const fromProps = overflowActions ?? []
     const hasPrimaryFromProps = Array.isArray(primaryActions) && primaryActions.length > 0
-    const quickOverflow = hasPrimaryFromProps ? quickActions : quickActions.slice(2)
+    const quickOverflow = hasPrimaryFromProps ? contextualToolbarActions.overflow : contextualToolbarActions.overflow
     const byId = new Map<string, ToolbarAction>()
     for (const action of [...fromProps, ...quickOverflow]) {
       byId.set(action.id, action)
     }
     return Array.from(byId.values())
-  }, [overflowActions, primaryActions, quickActions])
+  }, [contextualToolbarActions.overflow, overflowActions, primaryActions])
 
   const handleSectionChange = (value: string): void => {
     setActiveSection(value)
@@ -187,6 +193,7 @@ export function ObjectPage({
         subtitle={subtitle}
         primaryActions={mergedPrimaryActions}
         overflowActions={mergedOverflowActions}
+        densityProfileOverride={roleDensityProfile}
         mcpContext={
           mcpContext
             ? {
@@ -202,7 +209,7 @@ export function ObjectPage({
       />
 
       <div className="flex-1 space-y-6 overflow-y-auto p-6">
-        {keyInfo !== undefined && keyInfo !== null ? (
+        {roleDensityProfile.showKeyInfo && keyInfo !== undefined && keyInfo !== null ? (
           <div className="rounded-lg border bg-muted/40 p-4" data-mcp-slot="key-info">
             {keyInfo}
           </div>
@@ -221,7 +228,7 @@ export function ObjectPage({
                     <span className="mr-2 inline-flex h-4 w-4 items-center">{section.icon}</span>
                   ) : null}
                   <span>{section.label}</span>
-                  {section.badge !== undefined && section.badge !== null ? (
+                  {roleDensityProfile.showSectionBadges && section.badge !== undefined && section.badge !== null ? (
                     <span className="ml-2 text-xs text-muted-foreground">{section.badge}</span>
                   ) : null}
                 </TabsTrigger>

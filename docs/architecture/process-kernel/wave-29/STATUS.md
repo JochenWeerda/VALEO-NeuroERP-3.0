@@ -19,12 +19,12 @@ undefinierte Felder erhalten.
 
 | AP | Zielmodul | Beschreibung | Status |
 |----|-----------|--------------|--------|
-| AP1 | `app/core/policy_code_engine.py` | `PolicyBedingungsTyp`, `PolicyRegel`, `PolicySet`; `evaluate_policy_set(policy_set, kontext)` → `PolicyEvaluationResult` | geplant |
-| AP2 | `app/core/policy_code_engine.py` | `TenantPolicyOverride`; `apply_tenant_overrides(base, override)` → merged `PolicySet`; `validate_policy_set()` | geplant |
-| AP3 | `app/api/v1/endpoints/process_kernel_api.py` | `GET /process/policy-rules/{prozess_key}` + `POST /process/policy-rules/evaluate` | geplant |
-| AP4 | `app/core/query_contracts.py` | `QueryResultFeld`, `QueryContract`, `QueryRegistry`; `get_process_kernel_queries()` | geplant |
-| AP5 | `app/core/query_contracts.py` | `validate_query_result(contract, result)` → `QueryValidationResult` | geplant |
-| AP6 | `app/api/v1/endpoints/process_kernel_api.py` | `GET /process/query-registry[?prozess_key=]` | geplant |
+| AP1 | `app/core/policy_code_engine.py` | `PolicyBedingungsTyp`, `PolicyRegel`, `PolicySet`; `evaluate_policy_set(policy_set, kontext)` → `PolicyEvaluationResult` | abgeschlossen |
+| AP2 | `app/core/policy_code_engine.py` | `TenantPolicyOverride`; `apply_tenant_overrides(base, override)` → merged `PolicySet`; `validate_policy_set()` | abgeschlossen |
+| AP3 | `app/api/v1/endpoints/process_kernel_api.py` | `GET /process/policy-rules/{prozess_key}` + `POST /process/policy-rules/evaluate` | abgeschlossen |
+| AP4 | `app/core/query_contracts.py` | `QueryResultFeld`, `QueryContract`, `QueryRegistry`; `get_process_kernel_queries()` | abgeschlossen |
+| AP5 | `app/core/query_contracts.py` | `validate_query_result(contract, result)` → `QueryValidationResult` | abgeschlossen |
+| AP6 | `app/api/v1/endpoints/process_kernel_api.py` | `GET /process/query-registry[?prozess_key=]` | abgeschlossen |
 
 ## Abnahmekriterien
 

@@ -15,6 +15,7 @@ import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import { Card } from '@/components/ui/card'
 import { buildDecisionView } from '@/policy/decision-view'
 import { ProcessStatusPanel } from '@/components/workflow/ProcessStatusPanel'
+import { useApprovalDensityProfile } from '@/features/workflow/useApprovalDensityProfile'
 
 const createLastschriftenConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
@@ -412,6 +413,7 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
   }
   const safeFormData = { ...initialFormData, ...(data ?? formData ?? {}) }
   const approvalDecisionView = buildDecisionView(safeFormData.approval_explainability)
+  const approvalDensityProfile = useApprovalDensityProfile('finance-direct-debit', approvalDecisionView)
 
   const validate = (currentFormData: any) => validateFields(getFieldsFromMaskConfig(lastschriftenConfig), currentFormData ?? {})
   const showValidationToast = (errors: Record<string, string>) => {
@@ -628,7 +630,7 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
       <ModuleToolbar backTarget="/finance/lastschriften-debitoren" closeTarget="/finance/lastschriften-debitoren" title={entityTypeLabel} />
       <LeaveConfirmDialog blocker={blocker} onSave={() => handleSave(safeFormData)} title={t('crud.messages.unsavedChanges', { defaultValue: 'Ungespeicherte Aenderungen' })} description={t('crud.messages.unsavedChangesDescription', { defaultValue: 'Moechten Sie speichern, verwerfen oder hier bleiben?' })} />
       {approvalDecisionView !== null ? (
-        <ProcessStatusPanel view={approvalDecisionView} className="mx-4 mt-4 px-4 py-3">
+        <ProcessStatusPanel view={approvalDecisionView} className="mx-4 mt-4 px-4 py-3" densityProfileOverride={approvalDensityProfile}>
           <div className="mt-3 grid gap-3 md:grid-cols-3">
             <div className="rounded-md border bg-white/50 p-3">
               <div className="text-xs uppercase tracking-wide text-current/70">Workflowstatus</div>

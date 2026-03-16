@@ -22,6 +22,7 @@ import { formatDateForExport, formatCurrencyForExport } from '@/lib/export-utils
 import { apiClient } from '@/lib/api-client'
 import { ErrorState } from '@/components/ErrorState'
 import { buildDecisionView } from '@/policy/decision-view'
+import { CompactDecisionCard } from '@/components/workflow/CompactDecisionCard'
 
 type APInvoice = {
   number: string
@@ -115,10 +116,7 @@ export default function APInvoicesListPage(): JSX.Element {
               </div>
             ) : null}
             {decisionView !== null ? (
-              <div className={`rounded border px-2 py-1 text-xs ${decisionView.statusClassName}`}>
-                <div className="font-medium">{decisionView.statusLabel}</div>
-                <div>{decisionView.summary}</div>
-              </div>
+              <CompactDecisionCard view={decisionView} pageDomain="finance-approval" showDetails={false} />
             ) : null}
           </div>
         )

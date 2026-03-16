@@ -10,6 +10,7 @@ import {
   useAPApprovalStatus,
   useRequestAPApproval,
 } from '@/lib/api/ap-approval-workflow'
+import { useApprovalDensityProfile } from '@/features/workflow/useApprovalDensityProfile'
 
 type APInvoiceApprovalPanelProps = {
   invoiceId: string
@@ -35,6 +36,7 @@ export default function APInvoiceApprovalPanel({
 
   const approval = statusQuery.data
   const decisionView = buildDecisionView(approval?.explainability)
+  const densityProfile = useApprovalDensityProfile('finance-approval', decisionView)
   const isBusy = statusQuery.isLoading || requestApproval.isPending || actOnApproval.isPending
 
   const handleRequestApproval = async (): Promise<void> => {
@@ -69,7 +71,7 @@ export default function APInvoiceApprovalPanel({
       </div>
 
       {decisionView !== null ? (
-        <ProcessStatusPanel view={decisionView} />
+        <ProcessStatusPanel view={decisionView} densityProfileOverride={densityProfile} />
       ) : (
         <p className="text-sm text-muted-foreground">
           Noch keine strukturierte Freigabeentscheidung verfuegbar.

@@ -374,6 +374,16 @@ def get_default_approval_rules() -> list[ApprovalRegel]:
             prioritaet=140,
             aktions_typen=["INTRASTAT_EINREICHEN", "ELSTER_UEBERTRAGEN"],
         ),
+        ApprovalRegel(
+            regel_id="AG-H-004",
+            bezeichnung="Bestellung anlegen ab 25k EUR",
+            risiko_stufe=ApprovalRisikostufe.HOCH,
+            ausloser_typ=ApprovalAusloserTyp.BETRAG_SCHWELLE,
+            begruendung="Groessere Einkaufsbestellungen erfordern Teamleiter-Freigabe",
+            prioritaet=155,
+            aktions_typen=["BESTELLUNG_ANLEGEN"],
+            betrag_schwelle_eur=25_000.0,
+        ),
 
         # ---------------------------------------------------------------
         # MITTEL — Schreibend, kleiner Betrag oder interne Aktion
@@ -396,6 +406,16 @@ def get_default_approval_rules() -> list[ApprovalRegel]:
             begruendung="Preisaenderungen am Kontrakt wirken auf laufende Berechnungen",
             prioritaet=80,
             aktions_typen=["KONTRAKT_PREIS_AENDERN"],
+        ),
+        ApprovalRegel(
+            regel_id="AG-M-003",
+            bezeichnung="Bestellung anlegen (Standard)",
+            risiko_stufe=ApprovalRisikostufe.MITTEL,
+            ausloser_typ=ApprovalAusloserTyp.BETRAG_SCHWELLE,
+            begruendung="Einkaufsbestellungen sind schreibende Fremdparteiauftraege und werden mindestens mittel eingestuft",
+            prioritaet=85,
+            aktions_typen=["BESTELLUNG_ANLEGEN"],
+            betrag_schwelle_eur=1.0,
         ),
 
         # ---------------------------------------------------------------

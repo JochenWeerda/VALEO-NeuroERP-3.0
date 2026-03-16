@@ -1,16 +1,11 @@
 /**
- * Command Palette - Herzstück der modernen Navigation
- * Ersetzt Ribbon-Overload durch beschreibbare Aktionen
- *
- * Features:
- * - Ctrl/Cmd+K zum Öffnen
- * - Fuzzy-Search über alle Aktionen
- * - Kategorisiert nach Domäne
- * - Keyboard-Navigation
- * - MCP-Ready für AI-Integration
+ * Command Palette - Herzstueck der modernen Navigation
+ * Ersetzt Ribbon-Overload durch beschreibbare Aktionen.
  */
 
-import { type ComponentType, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { HelpCircle } from 'lucide-react'
 import {
   CommandDialog,
   CommandEmpty,
@@ -20,32 +15,16 @@ import {
   CommandList,
   CommandSeparator,
 } from '@/components/ui/command'
-import { useNavigate } from 'react-router-dom'
-import { Calculator, FileText, HelpCircle, Package, Settings, ShoppingCart, Sprout, Warehouse, Users, Target, Calendar, Tractor } from 'lucide-react'
 import { createMCPMetadata } from '@/design/mcp-schemas/component-metadata'
+import { useActionDispatch } from '@/features/ki-usability/context/ActionDispatchHooks'
 import { useFeature } from '@/hooks/useFeature'
-import { ACTION_SHORTCUTS } from '@/app/navigation/action-shortcuts'
-import { AI_SHORTCUTS } from '@/app/navigation/ai-shortcuts'
+import { fetchMaskRegistry } from '@/lib/api/mask-registry'
 import { useNavigationShortcuts } from '@/app/navigation/nav-runtime'
+import { buildPaletteCommands, type PaletteCommand } from './command-palette-model'
 
 interface CommandPaletteProps {
   open: boolean
   onOpenChange: (_open: boolean) => void
-}
-
-interface PaletteCommand {
-  id: string
-  label: string
-  keywords: string[]
-  icon: ComponentType<{ className?: string }>
-  action: () => void
-  category: string
-  shortcut?: string
-  mcp?: {
-    intent: string
-    businessDomain: string
-    requiredScopes?: string[]
-  }
 }
 
 export const commandPaletteMCP = createMCPMetadata('CommandPalette', 'navigation', {
@@ -68,299 +47,26 @@ export const commandPaletteMCP = createMCPMetadata('CommandPalette', 'navigation
   },
 })
 
-const appendUniqueCommands = (target: PaletteCommand[], incoming: PaletteCommand[]): void => {
-  const existingIds = new Set(target.map((item) => item.id))
-  for (const item of incoming) {
-    if (!existingIds.has(item.id)) {
-      target.push(item)
-      existingIds.add(item.id)
-    }
-  }
-}
-
-const createCommands = (
-  navigate: ReturnType<typeof useNavigate>,
-  agrarEnabled: boolean,
-  navigationShortcuts: Array<{
-    id: string
-    label: string
-    keywords?: string[]
-    icon: ComponentType<{ className?: string }>
-    path: string
-  }>,
-): PaletteCommand[] => {
-  const commands: PaletteCommand[] = [
-    {
-      id: 'sales-order-new',
-      label: 'Neuer Verkaufsauftrag',
-      keywords: ['sales', 'order', 'so', 'auftrag', 'neu'],
-      icon: ShoppingCart,
-      category: 'Sales',
-      action: (): void => navigate('/sales/orders/new'),
-      mcp: {
-        intent: 'create-sales-order',
-        businessDomain: 'sales',
-        requiredScopes: ['sales:write'],
-      },
-    },
-    {
-      id: 'sales-delivery-new',
-      label: 'Neue Lieferung',
-      keywords: ['sales', 'delivery', 'lieferung', 'versand'],
-      icon: Package,
-      category: 'Sales',
-      action: (): void => navigate('/sales/deliveries/new'),
-      mcp: {
-        intent: 'create-delivery',
-        businessDomain: 'sales',
-        requiredScopes: ['sales:write'],
-      },
-    },
-    {
-      id: 'sales-invoice-new',
-      label: 'Neue Rechnung',
-      keywords: ['sales', 'invoice', 'rechnung', 'faktura'],
-      icon: FileText,
-      category: 'Sales',
-      action: (): void => navigate('/sales/invoices/new'),
-      mcp: {
-        intent: 'create-invoice',
-        businessDomain: 'sales',
-        requiredScopes: ['sales:write'],
-      },
-    },
-    {
-      id: 'crm-contacts-list',
-      label: 'Kontakte anzeigen',
-      keywords: ['crm', 'kontakte', 'contacts', 'liste'],
-      icon: Users,
-      category: 'CRM',
-      action: (): void => navigate('/crm/kontakte-liste'),
-      mcp: {
-        intent: 'view-contacts',
-        businessDomain: 'crm',
-        requiredScopes: ['crm:read'],
-      },
-    },
-    {
-      id: 'crm-leads-list',
-      label: 'Leads anzeigen',
-      keywords: ['crm', 'leads', 'verkaufschancen', 'opportunities'],
-      icon: Target,
-      category: 'CRM',
-      action: (): void => navigate('/crm/leads'),
-      mcp: {
-        intent: 'view-leads',
-        businessDomain: 'crm',
-        requiredScopes: ['crm:read'],
-      },
-    },
-    {
-      id: 'crm-activities-list',
-      label: 'Aktivitäten anzeigen',
-      keywords: ['crm', 'aktivitäten', 'activities', 'termine'],
-      icon: Calendar,
-      category: 'CRM',
-      action: (): void => navigate('/crm/aktivitaeten'),
-      mcp: {
-        intent: 'view-activities',
-        businessDomain: 'crm',
-        requiredScopes: ['crm:read'],
-      },
-    },
-    {
-      id: 'crm-farmprofiles-list',
-      label: 'Betriebsprofile anzeigen',
-      keywords: ['crm', 'betriebsprofile', 'farm', 'landwirt'],
-      icon: Tractor,
-      category: 'CRM',
-      action: (): void => navigate('/crm/betriebsprofile'),
-      mcp: {
-        intent: 'view-farm-profiles',
-        businessDomain: 'crm',
-        requiredScopes: ['crm:read'],
-      },
-    },
-    {
-      id: 'inventory-adjust',
-      label: 'Bestandskorrektur',
-      keywords: ['inventory', 'bestand', 'korrektur', 'adjust'],
-      icon: Package,
-      category: 'Lager',
-      action: (): void => navigate('/inventory/adjust'),
-      mcp: {
-        intent: 'adjust-inventory',
-        businessDomain: 'inventory',
-      },
-    },
-    {
-      id: 'finance-booking',
-      label: 'Buchung erfassen',
-      keywords: ['finance', 'buchung', 'fibu', 'booking'],
-      icon: Calculator,
-      category: 'Finanzen',
-      action: (): void => navigate('/finance/bookings/new'),
-      mcp: {
-        intent: 'create-booking',
-        businessDomain: 'finance',
-      },
-    },
-  ];
-
-  if (agrarEnabled) {
-    commands.push(
-      {
-        id: 'agrar-seed-list',
-        label: 'Saatgut-Liste oeffnen',
-        keywords: ['agrar', 'saatgut', 'liste', 'seed'],
-        icon: Sprout,
-        category: 'Agrar',
-        action: (): void => navigate('/agrar/saatgut'),
-        mcp: {
-          intent: 'open-seed-list',
-          businessDomain: 'agrar',
-        },
-      },
-      {
-        id: 'agrar-seed-master',
-        label: 'Saatgut Stammdaten',
-        keywords: ['agrar', 'saatgut', 'stamm', 'detail'],
-        icon: Sprout,
-        category: 'Agrar',
-        action: (): void => navigate('/agrar/saatgut/stamm?id=SEED-00123'),
-        mcp: {
-          intent: 'open-seed-master',
-          businessDomain: 'agrar',
-        },
-      },
-      {
-        id: 'agrar-seed-order',
-        label: 'Saatgut-Bestellung anlegen',
-        keywords: ['agrar', 'saatgut', 'bestellung', 'wizard'],
-        icon: ShoppingCart,
-        category: 'Agrar',
-        action: (): void => navigate('/agrar/saatgut/bestellung'),
-        mcp: {
-          intent: 'create-seed-order',
-          businessDomain: 'agrar',
-        },
-      },
-      {
-        id: 'agrar-fertilizer-list',
-        label: 'Duenger-Liste oeffnen',
-        keywords: ['agrar', 'duenger', 'fertilizer', 'liste'],
-        icon: Warehouse,
-        category: 'Agrar',
-        action: (): void => navigate('/agrar/duenger'),
-        mcp: {
-          intent: 'open-fertilizer-list',
-          businessDomain: 'agrar',
-        },
-      },
-    );
-  }
-
-  commands.push(
-    {
-      id: 'settings',
-      label: 'Systemeinstellungen',
-      keywords: ['system', 'settings', 'einstellungen'],
-      icon: Settings,
-      category: 'System',
-      action: (): void => navigate('/settings'),
-      mcp: {
-        intent: 'configure-system',
-        businessDomain: 'admin',
-        requiredScopes: ['admin:all'],
-      },
-    },
-    {
-      id: 'help-ai',
-      label: 'Ask VALEO (AI-Hilfe)',
-      keywords: ['help', 'hilfe', 'ai', 'ask', 'frage'],
-      icon: HelpCircle,
-      category: 'Hilfe',
-      action: (): void => {
-        if (import.meta.env.DEV) {
-          console.info('AI-Hilfe wird in Phase 3 aktiviert (MCP-Browser)');
-        }
-      },
-      mcp: {
-        intent: 'ai-assistance',
-        businessDomain: 'help',
-      },
-    },
-  );
-
-  // Ergänzt zentrale Navigation/Action/AI-Shortcuts aus dem Manifest,
-  // damit die Palette stets den aktuellen Routing-Stand widerspiegelt.
-  const navigationCommands: PaletteCommand[] = navigationShortcuts
-    .filter((shortcut) => (agrarEnabled ? true : !shortcut.path.startsWith('/agrar')))
-    .map((shortcut) => ({
-      id: `nav-${shortcut.id}`,
-      label: shortcut.label,
-      keywords: shortcut.keywords ?? [],
-      icon: shortcut.icon,
-      category: 'Navigation',
-      action: (): void => navigate(shortcut.path),
-      mcp: {
-        intent: 'navigate',
-        businessDomain: 'core',
-      },
-    }))
-
-  const actionCommands: PaletteCommand[] = ACTION_SHORTCUTS
-    .filter((shortcut) => (agrarEnabled ? true : !shortcut.path.startsWith('/agrar')))
-    .map((shortcut) => ({
-      id: shortcut.id,
-      label: shortcut.label,
-      keywords: shortcut.keywords ?? [],
-      icon: shortcut.icon,
-      category: 'Aktionen',
-      shortcut: shortcut.shortcut,
-      action: (): void => navigate(shortcut.path),
-      mcp: {
-        intent: 'quick-action',
-        businessDomain: 'core',
-      },
-    }))
-
-  const aiCommands: PaletteCommand[] = AI_SHORTCUTS.map((shortcut) => ({
-    id: shortcut.id,
-    label: shortcut.label,
-    keywords: shortcut.keywords ?? [],
-    icon: shortcut.icon,
-    category: 'KI',
-    action: (): void => {
-      if (shortcut.type === 'navigate') {
-        navigate(shortcut.path)
-        return
-      }
-      window.dispatchEvent(new CustomEvent(shortcut.eventName))
-    },
-    mcp: {
-      intent: 'ai-action',
-      businessDomain: 'ai',
-    },
-  }))
-
-  appendUniqueCommands(commands, navigationCommands)
-  appendUniqueCommands(commands, actionCommands)
-  appendUniqueCommands(commands, aiCommands)
-
-  return commands;
-};
-
 export function CommandPalette({ open, onOpenChange }: CommandPaletteProps): JSX.Element {
-  const navigate = useNavigate()
   const agrarEnabled = useFeature('agrar')
   const navigationShortcuts = useNavigationShortcuts()
+  const { dispatch } = useActionDispatch()
   const [search, setSearch] = useState<string>('')
 
+  const maskRegistryQuery = useQuery({
+    queryKey: ['ui', 'mask-registry', 'command-palette'],
+    queryFn: fetchMaskRegistry,
+    enabled: open,
+    staleTime: 5 * 60 * 1000,
+  })
+
   const commands = useMemo<PaletteCommand[]>(() => {
-    const baseCommands = createCommands(navigate, agrarEnabled, navigationShortcuts)
-    return agrarEnabled ? baseCommands : baseCommands.filter((cmd) => cmd.category !== 'Agrar')
-  }, [agrarEnabled, navigate, navigationShortcuts])
+    return buildPaletteCommands({
+      agrarEnabled,
+      navigationShortcuts,
+      maskRegistry: maskRegistryQuery.data?.masks,
+    })
+  }, [agrarEnabled, maskRegistryQuery.data?.masks, navigationShortcuts])
 
   const filteredCommands = useMemo(() => {
     const searchLower = search.trim().toLowerCase()
@@ -417,8 +123,11 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps): JSX
                     value={cmd.label}
                     keywords={cmd.keywords}
                     onSelect={() => {
-                      cmd.action()
-                      onOpenChange(false)
+                      void dispatch(cmd.actionId, cmd.actionParams).then((ok) => {
+                        if (ok) {
+                          onOpenChange(false)
+                        }
+                      })
                     }}
                     data-mcp-action={cmd.id}
                     data-mcp-intent={cmd.mcp?.intent}
@@ -426,6 +135,9 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps): JSX
                   >
                     <Icon className="mr-2 h-4 w-4" />
                     <span>{cmd.label}</span>
+                    {cmd.hint && (
+                      <span className="ml-2 text-xs text-muted-foreground">{cmd.hint}</span>
+                    )}
                     {cmd.shortcut && (
                       <kbd className="ml-auto rounded bg-muted px-1 text-xs text-muted-foreground">
                         {cmd.shortcut}
@@ -448,12 +160,15 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps): JSX
               <CommandItem
                 value="Ask VALEO"
                 onSelect={() => {
-                  navigate('/copilot')
-                  onOpenChange(false)
+                  void dispatch('ai-ask-valeo', { eventName: 'open-ask-valeo' }).then((ok) => {
+                    if (ok) {
+                      onOpenChange(false)
+                    }
+                  })
                 }}
               >
                 <HelpCircle className="mr-2 h-4 w-4" />
-                Ask VALEO öffnen
+                Ask VALEO oeffnen
               </CommandItem>
             </CommandGroup>
           </>
@@ -462,4 +177,3 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps): JSX
     </CommandDialog>
   )
 }
-

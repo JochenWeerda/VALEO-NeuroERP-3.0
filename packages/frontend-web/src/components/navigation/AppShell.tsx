@@ -1,6 +1,6 @@
 import { Suspense, lazy, type ReactNode, useCallback, useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { ACTION_SHORTCUTS } from '@/app/navigation/action-shortcuts'
+import { useActionDispatch } from '@/features/ki-usability/context/ActionDispatchHooks'
 import { useFeature } from '@/hooks/useFeature'
 
 interface AppShellProps {
@@ -21,7 +21,7 @@ const TopBar = lazy(() =>
 )
 
 export function AppShell({ children, enableCommandPalette = true }: AppShellProps): JSX.Element {
-  const navigate = useNavigate()
+  const actionDispatch = useActionDispatch()
   const commandPaletteFeatureEnabled = useFeature('commandPalette')
   const commandPaletteAvailable = enableCommandPalette && commandPaletteFeatureEnabled
   const [commandOpen, setCommandOpen] = useState<boolean>(false)
@@ -78,10 +78,10 @@ export function AppShell({ children, enableCommandPalette = true }: AppShellProp
   )
 
   const actionShortcutMap = useMemo(() => {
-    const map = new Map<string, string>()
+    const map = new Map<string, { id: string; path: string }>()
     for (const shortcut of ACTION_SHORTCUTS) {
       if (shortcut.shortcut) {
-        map.set(shortcut.shortcut.toLowerCase(), shortcut.path)
+        map.set(shortcut.shortcut.toLowerCase(), { id: shortcut.id, path: shortcut.path })
       }
     }
     return map
@@ -90,11 +90,11 @@ export function AppShell({ children, enableCommandPalette = true }: AppShellProp
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent): void => {
       const shortcut = eventToShortcut(event)
-      const shortcutPath = actionShortcutMap.get(shortcut)
-      if (shortcutPath) {
+      const shortcutAction = actionShortcutMap.get(shortcut)
+      if (shortcutAction) {
         event.preventDefault()
         event.stopPropagation()
-        navigate(shortcutPath)
+        void actionDispatch.dispatch(shortcutAction.id, { path: shortcutAction.path })
         return
       }
 
@@ -127,7 +127,7 @@ export function AppShell({ children, enableCommandPalette = true }: AppShellProp
     return () => {
       window.removeEventListener('keydown', handleKeyDown, true)
     }
-  }, [actionShortcutMap, commandPaletteAvailable, handleToggleSidebar, handleToggleShortcuts, navigate])
+  }, [actionDispatch, actionShortcutMap, commandPaletteAvailable, handleToggleSidebar, handleToggleShortcuts])
 
   const commandPaletteProps = useMemo(() => {
     if (!commandPaletteAvailable) {

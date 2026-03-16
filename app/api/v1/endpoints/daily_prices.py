@@ -14,6 +14,10 @@ from pydantic import BaseModel, Field, ConfigDict
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.data_quality_enforcement import (
+    build_dq_error_detail,
+    evaluate_daily_price_import_datensatz,
+)
 from app.core.tenant import get_tenant_id
 from app.domains.inventory.api.inventory_auth import require_inventory_admin
 from modules.agrar.services.daily_price_service import (
@@ -72,6 +76,27 @@ class DailyPriceCreateIn(BaseModel):
 class DailyPriceBulkCreateIn(BaseModel):
     """Input-Model für Bulk-Import."""
     prices: list[DailyPriceCreateIn] = Field(..., min_length=1)
+
+
+def _build_daily_price_dq_datensatz(payload: dict) -> dict:
+    return {
+        "article_id": payload.get("article_id") or payload.get("articleId"),
+        "warengruppe": payload.get("warengruppe"),
+        "crop_code": payload.get("crop_code") or payload.get("cropCode"),
+        "price_eur_per_ton": payload.get("price_eur_per_ton") or payload.get("priceEurPerTon"),
+        "currency": payload.get("currency", "EUR"),
+        "price_date": payload.get("price_date") or payload.get("priceDate"),
+        "source_type": payload.get("source_type") or payload.get("sourceType") or "manual",
+    }
+
+
+def _validate_daily_price_dq_datensatz(payload: dict) -> None:
+    result = evaluate_daily_price_import_datensatz(_build_daily_price_dq_datensatz(payload))
+    if not result.bestanden:
+        raise HTTPException(
+            status_code=422,
+            detail=build_dq_error_detail("DailyPriceImport", result),
+        )
 
 
 # ── Helper Functions ────────────────────────────────────────────────────────────
@@ -216,6 +241,7 @@ async def bulk_import_prices_endpoint(
     
     create_inputs = []
     for p in payload.prices:
+        _validate_daily_price_dq_datensatz(p.model_dump(mode="json"))
         create_inputs.append(DailyPriceCreate(
             tenant_id=tenant_id,
             article_id=p.article_id,
@@ -268,6 +294,7 @@ async def import_prices_file(
     create_inputs = []
     for p in prices_list:
         d = p if isinstance(p, dict) else {}
+        _validate_daily_price_dq_datensatz(d)
         price_date = d.get("price_date") or d.get("priceDate")
         if isinstance(price_date, str):
             price_date = date.fromisoformat(price_date[:10])

@@ -17,6 +17,7 @@ from sqlalchemy.orm import Session
 from app.core.connectors.base import NormalizedItem, NormalizedLine, validate_item_balance
 from app.core.connectors.payroll_parser import PayrollParser
 from app.core.connectors.asset_ledger_parser import AssetLedgerParser
+from app.core.data_quality_enforcement import DQValidationException
 from app.core.gobd_artifact import sha256_hex
 from app.core.fibu_audit import log_fibu_audit
 
@@ -131,7 +132,38 @@ def parse_run(db: Session, run_id: str, tenant_id: str, file_content: bytes) -> 
             mapping = pr[1] or {}
 
     parser = get_parser(connector_type)
-    items = parser.parse(file_content, settings, mapping)
+    try:
+        items = parser.parse(file_content, settings, mapping)
+    except DQValidationException as exc:
+        db.execute(
+            text("""
+                UPDATE domain_erp.fibu_connector_runs
+                SET status = 'FAILED', error_summary = :err, finished_at = NOW()
+                WHERE id = :id AND tenant_id = :tenant_id
+            """),
+            {
+                "id": run_id,
+                "tenant_id": tenant_id,
+                "err": json.dumps(exc.detail),
+            },
+        )
+        db.commit()
+        raise
+    except Exception as exc:
+        db.execute(
+            text("""
+                UPDATE domain_erp.fibu_connector_runs
+                SET status = 'FAILED', error_summary = :err, finished_at = NOW()
+                WHERE id = :id AND tenant_id = :tenant_id
+            """),
+            {
+                "id": run_id,
+                "tenant_id": tenant_id,
+                "err": str(exc),
+            },
+        )
+        db.commit()
+        raise
 
     # Run-Items anlegen
     for i, item in enumerate(items, start=1):

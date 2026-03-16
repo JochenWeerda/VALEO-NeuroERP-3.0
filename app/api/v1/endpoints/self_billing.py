@@ -13,6 +13,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field, ConfigDict
 from sqlalchemy.orm import Session
 
+from app.core.data_quality_enforcement import build_dq_error_detail, evaluate_self_billing_datensatz
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.domains.inventory.api.inventory_auth import require_inventory_admin
@@ -29,6 +30,23 @@ from modules.agrar.services.self_billing_service import (
 from modules.agrar.repositories.self_billing_repo import SelfBillingRepositoryImpl
 
 router = APIRouter()
+
+
+def _build_self_billing_dq_datensatz(
+    *,
+    harvest_acceptance_id: str,
+    net_amount: float,
+    gross_amount: float,
+    vat_rate: float,
+    taxation_type: str,
+) -> dict[str, object]:
+    return {
+        "ernteannahme_id": harvest_acceptance_id,
+        "netto_eur": net_amount,
+        "brutto_eur": gross_amount,
+        "ust_satz_pct": vat_rate,
+        "besteuerung": taxation_type,
+    }
 
 
 # ── Pydantic Models ───────────────────────────────────────────────────────────────
@@ -148,7 +166,18 @@ async def create_credit_note_endpoint(
 ):
     """Erstellt eine Self-Billing Gutschrift für eine Ernte-Annahme."""
     user_id = _get_user_id_from_request(request)
-    
+    dq_result = evaluate_self_billing_datensatz(
+        _build_self_billing_dq_datensatz(
+            harvest_acceptance_id=harvest_acceptance_id,
+            net_amount=payload.total_net_amount_eur,
+            gross_amount=payload.total_gross_amount_eur,
+            vat_rate=payload.vat_rate_percent,
+            taxation_type=payload.taxation_type,
+        )
+    )
+    if not dq_result.bestanden:
+        raise HTTPException(status_code=422, detail=build_dq_error_detail("SelfBilling", dq_result))
+
     create_input = CreditNoteCreate(
         tenant_id=tenant_id,
         harvest_acceptance_id=harvest_acceptance_id,
@@ -324,6 +353,10 @@ async def create_dispute_endpoint(
 
 class PreviewIn(BaseModel):
     harvest_acceptance_id: str
+    total_net_amount_eur: float = Field(0, ge=0)
+    total_gross_amount_eur: float = Field(0, ge=0)
+    vat_rate_percent: float = Field(0, ge=0, le=100)
+    taxation_type: str = "regular"
 
 
 @router.post("/preview", response_model=dict)
@@ -336,16 +369,28 @@ async def preview_self_billing(
     Preview Self-Billing für Ernte-Annahme.
     Liefert Draft mit Beträgen, MwSt, Positionen ohne Persistierung.
     """
+    dq_result = evaluate_self_billing_datensatz(
+        _build_self_billing_dq_datensatz(
+            harvest_acceptance_id=payload.harvest_acceptance_id,
+            net_amount=payload.total_net_amount_eur,
+            gross_amount=payload.total_gross_amount_eur,
+            vat_rate=payload.vat_rate_percent,
+            taxation_type=payload.taxation_type,
+        )
+    )
+    if not dq_result.bestanden:
+        raise HTTPException(status_code=422, detail=build_dq_error_detail("SelfBilling", dq_result))
+
     from modules.agrar.services.self_billing_service import create_credit_note, CreditNoteCreate
     # Placeholder: Berechne aus harvest_acceptance (Positionen, Preise, Qualität)
     # Hier: Minimal-Draft basierend auf Annahme-Summen
     return {
         "harvest_acceptance_id": payload.harvest_acceptance_id,
         "status": "draft",
-        "total_net_amount_eur": 0,
-        "total_vat_amount_eur": 0,
-        "total_gross_amount_eur": 0,
-        "vat_rate_percent": 0,
+        "total_net_amount_eur": payload.total_net_amount_eur,
+        "total_vat_amount_eur": max(payload.total_gross_amount_eur - payload.total_net_amount_eur, 0),
+        "total_gross_amount_eur": payload.total_gross_amount_eur,
+        "vat_rate_percent": payload.vat_rate_percent,
         "line_items": [],
         "note": "Preview: Beträge aus Ernte-Annahme-Positionen berechnen (TODO: Vollimplementierung)",
     }

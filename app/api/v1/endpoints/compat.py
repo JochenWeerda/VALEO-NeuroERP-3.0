@@ -16,6 +16,10 @@ from sqlalchemy.orm import Session
 
 from app.core.cache import cache_delete_prefix, cache_get_json, cache_set_json
 from app.core.config import settings
+from app.core.data_quality_enforcement import (
+    evaluate_article_datensatz,
+    evaluate_customer_datensatz,
+)
 from app.core.database import get_db
 from app.core.uuid7 import uuid7
 from app.core.logging import get_correlation_id
@@ -1502,6 +1506,43 @@ def _parse_csv_bytes(content: bytes) -> list[dict]:
     return [dict(row) for row in reader]
 
 
+def _csv_error_prefix(row_number: int) -> str:
+    return f"Zeile {row_number}:"
+
+
+def _validate_csv_customer_row(norm: dict[str, str]) -> str | None:
+    result = evaluate_customer_datensatz(
+        {
+            "debitor_nr": norm.get("kundennummer") or norm.get("debitorennummer") or norm.get("firma"),
+            "name": norm.get("firma"),
+            "land": norm.get("land", "DE"),
+        }
+    )
+    if result.bestanden:
+        return None
+    return "; ".join(v.meldung for v in result.verletzungen if v.severity == "FEHLER")
+
+
+def _validate_csv_article_row(norm: dict[str, str]) -> str | None:
+    vat_raw = norm.get("mwst") or norm.get("mehrwertsteuer") or norm.get("vat")
+    try:
+        vat_value = float(vat_raw) if vat_raw not in (None, "") else None
+    except ValueError:
+        vat_value = vat_raw
+    result = evaluate_article_datensatz(
+        {
+            "artikel_nr": norm.get("artikelnummer") or norm.get("artnr") or norm.get("name") or norm.get("bezeichnung"),
+            "bezeichnung": norm.get("name") or norm.get("artikel") or norm.get("bezeichnung"),
+            "einheit": (norm.get("einheit") or norm.get("unit") or "KG").upper(),
+            "mehrwertsteuersatz_pct": vat_value,
+            "ean_code": norm.get("ean"),
+        }
+    )
+    if result.bestanden:
+        return None
+    return "; ".join(v.meldung for v in result.verletzungen if v.severity == "FEHLER")
+
+
 @router.post("/crm/import/kunden", response_model=dict)
 async def import_kunden_csv(file: UploadFile = File(...), db: Session = Depends(get_db)) -> dict:
     """CSV-Import für Kunden. Erwartet Spalten: Firma, Ort, PLZ, Land, E-Mail, Telefon, Status."""
@@ -1515,10 +1556,11 @@ async def import_kunden_csv(file: UploadFile = File(...), db: Session = Depends(
                "telefon": "telefon", "phone": "telefon", "status": "status"}
     for i, row in enumerate(rows):
         norm = {col_map.get(k.lower().strip(), k.lower().strip()): v.strip() for k, v in row.items() if v}
-        firma = norm.get("firma", "")
-        if not firma:
-            errors.append(f"Zeile {i+2}: Firma fehlt")
+        dq_error = _validate_csv_customer_row(norm)
+        if dq_error:
+            errors.append(f"{_csv_error_prefix(i+2)} {dq_error}")
             continue
+        firma = norm.get("firma", "")
         try:
             existing = db.execute(
                 text("SELECT id FROM domain_crm.customers WHERE name = :n LIMIT 1"),
@@ -1560,8 +1602,15 @@ async def import_debitoren_csv(file: UploadFile = File(...), db: Session = Depen
     for i, row in enumerate(rows):
         norm = {k.lower().strip(): v.strip() for k, v in row.items() if v}
         kunde = norm.get("kunde", norm.get("name", norm.get("company", "")))
-        if not kunde:
-            errors.append(f"Zeile {i+2}: Kunden-Name fehlt")
+        dq_error = _validate_csv_customer_row(
+            {
+                "firma": kunde,
+                "land": norm.get("land", "DE"),
+                "debitorennummer": norm.get("debitorennummer", kunde),
+            }
+        )
+        if dq_error:
+            errors.append(f"{_csv_error_prefix(i+2)} {dq_error}")
             continue
         try:
             import uuid as _uuid
@@ -1591,10 +1640,11 @@ async def import_einzelfuttermittel_csv(file: UploadFile = File(...), db: Sessio
     errors: list[str] = []
     for i, row in enumerate(rows):
         norm = {k.lower().strip(): v.strip() for k, v in row.items() if v}
-        name = norm.get("name", norm.get("artikel", norm.get("bezeichnung", "")))
-        if not name:
-            errors.append(f"Zeile {i+2}: Name fehlt")
+        dq_error = _validate_csv_article_row(norm)
+        if dq_error:
+            errors.append(f"{_csv_error_prefix(i+2)} {dq_error}")
             continue
+        name = norm.get("name", norm.get("artikel", norm.get("bezeichnung", "")))
         try:
             import uuid as _uuid
             db.execute(
@@ -1623,10 +1673,11 @@ async def import_mischfuttermittel_csv(file: UploadFile = File(...), db: Session
     errors: list[str] = []
     for i, row in enumerate(rows):
         norm = {k.lower().strip(): v.strip() for k, v in row.items() if v}
-        name = norm.get("name", norm.get("bezeichnung", ""))
-        if not name:
-            errors.append(f"Zeile {i+2}: Name fehlt")
+        dq_error = _validate_csv_article_row(norm)
+        if dq_error:
+            errors.append(f"{_csv_error_prefix(i+2)} {dq_error}")
             continue
+        name = norm.get("name", norm.get("bezeichnung", ""))
         try:
             import uuid as _uuid
             props = {k: v for k, v in norm.items() if k in ("tierart", "lebensphase", "typ", "futtergruppe")}

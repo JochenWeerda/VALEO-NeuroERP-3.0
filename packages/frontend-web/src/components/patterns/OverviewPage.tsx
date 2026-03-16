@@ -4,7 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import { TrendingDown, TrendingUp } from 'lucide-react'
 import { createMCPMetadata } from '@/design/mcp-schemas/component-metadata'
-import { useActionsForMask, useActionDispatchOptional } from '@/features/ki-usability'
+import { buildToolbarActionsFromRegistry, useActionsForMask, useActionDispatchOptional } from '@/features/ki-usability'
+import { auth } from '@/lib/auth'
+import { limitItemsForDensity, resolveRoleDensityProfile } from '@/features/role-density'
+import { useTenant } from '@/hooks/useTenant'
+import { useUIDensityManifest } from '@/lib/api/ui-density-manifest'
 
 export interface OverviewKpi {
   label: string
@@ -74,39 +78,47 @@ export function OverviewPage({
   mcpContext,
 }: OverviewPageProps): JSX.Element {
   const actionDispatch = useActionDispatchOptional()
+  const { tenantId } = useTenant()
   const { data: actionResponse } = useActionsForMask(mcpContext?.pageDomain, mcpContext?.analyticsContext)
-  const quickActions = useMemo<ToolbarAction[]>(() => {
-    return (actionResponse?.actions ?? []).map((action) => ({
-      id: action.id,
-      label: action.label,
-      shortcut: action.shortcut,
-      onClick: () => {
-        if (actionDispatch) {
-          void actionDispatch.dispatch(action.id)
-        }
-      },
-      variant: action.category === 'danger' ? 'destructive' : 'outline',
-      mcp: { intent: action.id, requiredData: action.required_data },
-    }))
-  }, [actionDispatch, actionResponse?.actions])
+  const densityManifestQuery = useUIDensityManifest(mcpContext?.pageDomain)
+  const roleDensityProfile = useMemo(
+    () =>
+      resolveRoleDensityProfile(auth.getUser()?.roles, {
+        tenantId,
+        pageDomain: mcpContext?.pageDomain,
+        availableActionIds: actionResponse?.actions?.map((action) => action.id) ?? [],
+        backendDensity: densityManifestQuery.data?.entry?.recommended_density,
+      }),
+    [actionResponse?.actions, densityManifestQuery.data?.entry?.recommended_density, mcpContext?.pageDomain, tenantId],
+  )
+  const contextualToolbarActions = useMemo(
+    () => buildToolbarActionsFromRegistry(actionResponse?.actions, actionDispatch),
+    [actionDispatch, actionResponse?.actions],
+  )
+  const visibleKpis = useMemo(() => limitItemsForDensity(kpis, roleDensityProfile.maxKpis), [kpis, roleDensityProfile.maxKpis])
+  const visibleCharts = useMemo(
+    () => limitItemsForDensity(charts, roleDensityProfile.maxCharts),
+    [charts, roleDensityProfile.maxCharts],
+  )
+  const visibleLists = useMemo(() => limitItemsForDensity(lists, roleDensityProfile.maxLists), [lists, roleDensityProfile.maxLists])
 
   const mergedPrimaryActions = useMemo<ToolbarAction[]>(() => {
     if (Array.isArray(primaryActions) && primaryActions.length > 0) {
       return primaryActions
     }
-    return quickActions.slice(0, 2)
-  }, [primaryActions, quickActions])
+    return contextualToolbarActions.primary
+  }, [contextualToolbarActions.primary, primaryActions])
 
   const mergedOverflowActions = useMemo<ToolbarAction[]>(() => {
     const fromProps = overflowActions ?? []
     const hasPrimaryFromProps = Array.isArray(primaryActions) && primaryActions.length > 0
-    const quickOverflow = hasPrimaryFromProps ? quickActions : quickActions.slice(2)
+    const quickOverflow = hasPrimaryFromProps ? contextualToolbarActions.overflow : contextualToolbarActions.overflow
     const byId = new Map<string, ToolbarAction>()
     for (const action of [...fromProps, ...quickOverflow]) {
       byId.set(action.id, action)
     }
     return Array.from(byId.values())
-  }, [overflowActions, primaryActions, quickActions])
+  }, [contextualToolbarActions.overflow, overflowActions, primaryActions])
 
   return (
     <div
@@ -119,6 +131,7 @@ export function OverviewPage({
         subtitle={subtitle}
         primaryActions={mergedPrimaryActions}
         overflowActions={mergedOverflowActions}
+        densityProfileOverride={roleDensityProfile}
         mcpContext={
           mcpContext
             ? {
@@ -135,7 +148,7 @@ export function OverviewPage({
 
       <div className="flex-1 space-y-6 overflow-y-auto p-6">
         <section aria-label="KPI cards" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {kpis.map((kpi) => {
+          {visibleKpis.map((kpi) => {
             const hasClickHandler = typeof kpi.onClick === 'function'
             const cardOnClick = hasClickHandler ? kpi.onClick : undefined
             const iconDefined = kpi.icon !== undefined && kpi.icon !== null
@@ -162,9 +175,9 @@ export function OverviewPage({
           })}
         </section>
 
-        {Array.isArray(charts) && charts.length > 0 ? (
+        {visibleCharts.length > 0 ? (
           <section aria-label="Charts" className="grid gap-6 lg:grid-cols-2">
-            {charts.map((chart, index) => (
+            {visibleCharts.map((chart, index) => (
               <Card key={index} className="shadow-sm">
                 <CardContent className="pt-6">{chart}</CardContent>
               </Card>
@@ -172,9 +185,9 @@ export function OverviewPage({
           </section>
         ) : null}
 
-        {Array.isArray(lists) && lists.length > 0 ? (
+        {visibleLists.length > 0 ? (
           <section aria-label="Analytic lists" className="space-y-4">
-            {lists.map((list, index) => (
+            {visibleLists.map((list, index) => (
               <Card key={index} className="shadow-sm">
                 <CardContent className="pt-6">{list}</CardContent>
               </Card>

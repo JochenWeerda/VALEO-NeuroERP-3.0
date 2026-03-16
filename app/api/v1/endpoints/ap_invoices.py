@@ -13,6 +13,10 @@ import asyncio
 import logging
 
 from app.core.database import get_db
+from app.core.data_quality_enforcement import (
+    build_dq_error_detail,
+    evaluate_ap_invoice_datensatz,
+)
 from app.core import endpoint_gateways
 from app.core.fibu_audit import log_fibu_audit
 from app.core.ap_approval_status import APPROVAL_STATUS_TO_DOCUMENT_STATUS
@@ -25,6 +29,16 @@ from app.finance.tax_resolver import resolve_partner_country, resolve_tax_key_ac
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/ap/invoices", tags=["finance", "ap", "invoices"])
+
+
+def _build_ap_invoice_dq_datensatz(invoice: SalesInvoice) -> dict[str, Any]:
+    return {
+        "rechnungsnummer": invoice.number,
+        "lieferant_id": invoice.customerId,
+        "faelligkeit": invoice.dueDate,
+        "brutto_betrag_eur": invoice.totalGross,
+        "waehrung": "EUR",
+    }
 
 
 def _compute_ap_invoice_semantic_status(invoice: dict[str, Any]) -> str:
@@ -116,15 +130,20 @@ async def create_ap_invoice(doc: SalesInvoice, db: Session = Depends(get_db)) ->
     """Erstellt eine neue Eingangsrechnung (Kreditoren)."""
     logger.info(f"Creating AP invoice: {doc.number}")
     try:
-        repo = get_repository(db)
         doc.date = datetime.now().isoformat()[:10]  # Set current date
         doc.dueDate = (datetime.now() + timedelta(days=30)).isoformat()[:10]  # Default 30 days due
         doc.status = "ENTWURF"  # Initial status
 
         doc = calculate_invoice_totals(doc)  # Calculate totals
+        dq_result = evaluate_ap_invoice_datensatz(_build_ap_invoice_dq_datensatz(doc))
+        if not dq_result.bestanden:
+            raise HTTPException(status_code=422, detail=build_dq_error_detail("APRechnung", dq_result))
 
+        repo = get_repository(db)
         result = save_to_store("ap_invoice", doc.number, doc.model_dump(), repo)
         return {"status": "ok", "message": "AP Invoice created", "data": result}
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error creating AP invoice: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to create AP invoice: {str(e)}")
@@ -152,6 +171,9 @@ async def update_ap_invoice(invoice_id: str, doc: SalesInvoice, db: Session = De
 
     doc.number = invoice_id  # Ensure number matches ID
     doc = calculate_invoice_totals(doc)  # Recalculate totals
+    dq_result = evaluate_ap_invoice_datensatz(_build_ap_invoice_dq_datensatz(doc))
+    if not dq_result.bestanden:
+        raise HTTPException(status_code=422, detail=build_dq_error_detail("APRechnung", dq_result))
 
     result = save_to_store("ap_invoice", doc.number, doc.model_dump(), repo)
     return {"status": "ok", "message": "AP Invoice updated", "data": result}

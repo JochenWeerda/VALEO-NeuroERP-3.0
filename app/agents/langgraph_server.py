@@ -4,75 +4,29 @@ Real workflow execution with state persistence and checkpoints
 """
 
 import logging
-from typing import Literal
-from langgraph.graph import StateGraph, END
-from langgraph.checkpoint.sqlite import SqliteSaver
+
+from app.core.human_approval_gate import (
+    ApprovalDecision,
+    ApprovalRisikostufe,
+    record_approval_decision,
+)
 
 from .workflows.bestellvorschlag import (
     BestellvorschlagState,
-    analyze_stock_levels,
-    check_sales_history,
-    generate_order_proposal,
-    wait_for_human_approval,
-    create_purchase_order,
+    BESTELLVORSCHLAG_AKTIONSTYP,
+    build_bestellvorschlag_workflow,
     run_bestellvorschlag_workflow
 )
 
 logger = logging.getLogger(__name__)
 
 
-def build_bestellvorschlag_graph() -> StateGraph:
+def build_bestellvorschlag_graph():
     """
-    Build the Bestellvorschlag workflow as LangGraph.
-    
-    Returns:
-        Compiled workflow with SQLite checkpointer
+    Build the productive Bestellvorschlag workflow.
     """
-    workflow = StateGraph(BestellvorschlagState)
-    
-    # Add nodes
-    workflow.add_node("analyze", analyze_stock_levels)
-    workflow.add_node("history", check_sales_history)
-    workflow.add_node("proposal", generate_order_proposal)
-    workflow.add_node("approval", wait_for_human_approval)
-    workflow.add_node("create_order", create_purchase_order)
-    
-    # Set entry point
-    workflow.set_entry_point("analyze")
-    
-    # Add edges
-    workflow.add_edge("analyze", "history")
-    workflow.add_edge("history", "proposal")
-    workflow.add_edge("proposal", "approval")
-    
-    # Conditional edge from approval
-    def should_create_order(state: BestellvorschlagState) -> Literal["create_order", "__end__"]:
-        """Decide if order should be created based on approval."""
-        if state.get("approved"):
-            return "create_order"
-        return "__end__"
-    
-    workflow.add_conditional_edges(
-        "approval",
-        should_create_order,
-        {
-            "create_order": "create_order",
-            "__end__": END
-        }
-    )
-    
-    workflow.add_edge("create_order", END)
-    
-    # Compile with checkpointer and interrupt before approval
-    checkpointer = SqliteSaver.from_conn_string("data/workflows.db")
-    
-    app = workflow.compile(
-        checkpointer=checkpointer,
-        interrupt_before=["approval"]  # Human-in-the-Loop checkpoint
-    )
-    
-    logger.info("Bestellvorschlag workflow compiled with LangGraph")
-    return app
+    logger.info("Bestellvorschlag workflow compiled with shared builder")
+    return build_bestellvorschlag_workflow()
 
 
 # Global workflow instance
@@ -117,12 +71,28 @@ async def resume_bestellvorschlag(
     
     if state is None:
         raise ValueError(f"Workflow {workflow_id} not found")
-    
+
+    approval_requirement = state.values.get("approval_requirement") or {}
     # Update state with approval decision
     state.values["approved"] = approved
-    if rejection_reason:
-        state.values["rejection_reason"] = rejection_reason
-    
+    state.values["rejection_reason"] = rejection_reason
+    if approval_requirement.get("requires_human_approval"):
+        record = record_approval_decision(
+            aktions_typ=approval_requirement.get("aktions_typ", BESTELLVORSCHLAG_AKTIONSTYP),
+            instanz_id=workflow_id,
+            agent_id="genxais.bestellvorschlag",
+            risiko_stufe=ApprovalRisikostufe(approval_requirement["risiko_stufe"]),
+            decision=ApprovalDecision.GENEHMIGT if approved else ApprovalDecision.ABGELEHNT,
+            entschieden_von="human_operator",
+            begruendung=rejection_reason or ("Human approval granted" if approved else "Human approval rejected"),
+            kontext={
+                "tenant_id": state.values.get("tenant_id"),
+                "proposal": state.values.get("proposal"),
+                "approval_requirement": approval_requirement,
+            },
+        )
+        state.values["approval_record"] = record.as_dict()
+
     # Resume from checkpoint
     result = await workflow.ainvoke(None, config)
     

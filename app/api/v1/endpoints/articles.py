@@ -8,6 +8,7 @@ from sqlalchemy import or_, func, text
 from sqlalchemy.orm import Session
 
 from ....core.config import settings
+from ....core.data_quality_enforcement import build_dq_error_detail, evaluate_article_datensatz
 from ....core.database import get_db
 from ....infrastructure.models import Article as ArticleModel
 from ....infrastructure.models import BusinessPartnerDiscountItem, BusinessPartnerPriceAgreement, ArticleSupplier, ArticleDocument
@@ -18,6 +19,16 @@ from ..schemas.inventory import Article, ArticleCreate, ArticleUpdate
 router = APIRouter()
 
 DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
+
+
+def _build_article_dq_datensatz(data: dict) -> dict[str, object]:
+    return {
+        "artikel_nr": data.get("article_number"),
+        "bezeichnung": data.get("name"),
+        "einheit": data.get("unit"),
+        "mehrwertsteuersatz_pct": float(data["mehrwertsteuer_prozent"]) if data.get("mehrwertsteuer_prozent") is not None else None,
+        "ean_code": data.get("ean_code") or data.get("barcode"),
+    }
 
 
 def _fulltext_filter(query, search_term: str):
@@ -240,6 +251,10 @@ async def get_article(
 @router.post("/", response_model=Article, status_code=status.HTTP_201_CREATED)
 async def create_article(article_data: ArticleCreate, db: Session = Depends(get_db)):
     """Create a new article."""
+    dq_result = evaluate_article_datensatz(_build_article_dq_datensatz(article_data.model_dump()))
+    if not dq_result.bestanden:
+        raise HTTPException(status_code=422, detail=build_dq_error_detail("Artikel", dq_result))
+
     duplicate = (
         db.query(ArticleModel)
         .filter(
@@ -379,6 +394,18 @@ async def update_article(
         )
         if duplicate:
             raise HTTPException(status_code=409, detail="Article number already exists")
+
+    effective_payload = {
+        "article_number": payload.get("article_number", article.article_number),
+        "name": payload.get("name", article.name),
+        "unit": payload.get("unit", article.unit),
+        "mehrwertsteuer_prozent": payload.get("mehrwertsteuer_prozent", article.mehrwertsteuer_prozent),
+        "ean_code": payload.get("ean_code", getattr(article, "ean_code", None)),
+        "barcode": payload.get("barcode", article.barcode),
+    }
+    dq_result = evaluate_article_datensatz(_build_article_dq_datensatz(effective_payload))
+    if not dq_result.bestanden:
+        raise HTTPException(status_code=422, detail=build_dq_error_detail("Artikel", dq_result))
 
     for key, value in payload.items():
         setattr(article, key, value)
@@ -711,4 +738,3 @@ async def get_article_stock_movements(
         "page": (skip // limit) + 1,
         "size": limit,
     }
-

@@ -11,6 +11,14 @@ export { useActionsForMask } from './hooks/useActionsForMask'
 export { useGlobalShortcutsWithVoice } from './hooks/useGlobalShortcutsWithVoice'
 export { fetchActions, fetchAction } from './api/actions'
 export type { Action, ActionListResponse } from './api/actions'
+export { buildToolbarActionsFromRegistry } from './toolbar-actions'
 export { resolveVoice } from './api/voice'
 export type { VoiceResolveRequest, VoiceResolveResponse } from './api/voice'
+export {
+  limitItemsForDensity,
+  limitProcessDetails,
+  mergeToolbarActionsForDensity,
+  resolveRoleDensityProfile,
+} from '@/features/role-density'
+export type { InformationDensity, RoleDensityProfile } from '@/features/role-density'
 

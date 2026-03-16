@@ -13,6 +13,10 @@ from sqlalchemy.orm import Session
 from datetime import date
 
 from app.core.database import get_db
+from app.core.data_quality_enforcement import (
+    build_dq_error_detail,
+    evaluate_settlement_datensatz,
+)
 from app.core.tenant import get_tenant_id
 from app.documents.router_helpers import get_repository, save_to_store
 from app.infrastructure.models import AgrarSettlement, AgrarSettlementDeduction
@@ -39,6 +43,17 @@ router = APIRouter()
 DeductionType = Literal["drying", "cleaning", "freight", "other"]
 DeductionMode = Literal["per_ton", "fixed"]
 SettlementStatus = Literal["draft", "posted", "cancelled"]
+
+
+def _build_settlement_dq_datensatz(payload: "SettlementCreate", settlement_number: str) -> dict:
+    return {
+        "abrechnungsnummer": settlement_number,
+        "lieferant_id": payload.supplier_id,
+        "brutto_gewicht_kg": payload.gross_quantity_kg,
+        "abrechnungsgewicht_kg": payload.billing_quantity_kg if payload.billing_quantity_kg is not None else payload.gross_quantity_kg,
+        "preis_eur_pro_t": payload.unit_price_eur_per_ton,
+        "waehrung": "EUR",
+    }
 
 
 def _round_money(value: Decimal | float | int) -> Decimal:
@@ -445,6 +460,9 @@ async def create_settlement(
     db: Session = Depends(get_db),
 ):
     settlement_number = payload.settlement_number or f"SET-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}"
+    dq_result = evaluate_settlement_datensatz(_build_settlement_dq_datensatz(payload, settlement_number))
+    if not dq_result.bestanden:
+        raise HTTPException(status_code=422, detail=build_dq_error_detail("Abrechnung", dq_result))
     duplicate = (
         db.query(AgrarSettlement)
         .filter(AgrarSettlement.tenant_id == tenant_id, AgrarSettlement.settlement_number == settlement_number)

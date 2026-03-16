@@ -90,6 +90,15 @@ _AGGREGATE_REGISTRY: list[AggregateDefinition] = [
         e2e_chain_position=None,
     ),
     AggregateDefinition(
+        aggregate_type="purchase_order",
+        business_domain="einkauf",
+        description="Einkaufsbestellung aus dispositionellem Bestellvorschlag oder manueller Beschaffung",
+        allowed_commands=["CreatePurchaseOrder"],
+        read_model_keys=[],
+        agent_tools=["purchase_order_lookup"],
+        e2e_chain_position=None,
+    ),
+    AggregateDefinition(
         aggregate_type="contract",
         business_domain="agrar",
         description="Agrar-Kontrakt — Wurzelbeleg der E2E-Prozesskette",
