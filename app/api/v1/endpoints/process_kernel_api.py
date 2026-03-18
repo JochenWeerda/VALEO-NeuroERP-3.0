@@ -4943,3 +4943,263 @@ def pruefe_deadline_eskalation(payload: dict):
         "verbleibende_minuten": dl.verbleibende_minuten(jetzt),
         "eskalations_stufe": dl.berechne_eskalations_stufe(jetzt),
     }
+
+
+# === Wave 63: Process Validation + Workflow Collaboration ===
+from app.core.process_validation_contracts import (
+    get_default_validierungs_regeln, validiere_daten,
+    ValidierungsRegel, ValidierungsErgebnis,
+    ValidierungsSchwere, RegelTyp, ValidierungsStatus,
+)
+from app.core.workflow_collaboration_contracts import (
+    get_default_entscheidungen, KollaborationsEntscheidung, Stimme,
+    AbstimmungsTyp, StimmeTyp, KollaborationsStatus,
+)
+
+
+@router.get("/validierung/regeln", tags=["process-kernel"])
+def get_validierungs_regeln():
+    return [
+        {"regel_id": r.regel_id, "name": r.name, "regel_typ": r.regel_typ,
+         "schwere": r.schwere, "feld": r.feld, "beschreibung": r.beschreibung}
+        for r in get_default_validierungs_regeln()
+    ]
+
+
+@router.post("/validierung/pruefe", tags=["process-kernel"])
+def pruefe_validierung(payload: dict):
+    """Payload: {"daten": dict}"""
+    ergebnis = validiere_daten(payload.get("daten", {}), get_default_validierungs_regeln())
+    return {
+        "status": ergebnis.status,
+        "ist_gueltig": ergebnis.ist_gueltig,
+        "fehler_anzahl": len(ergebnis.fehler),
+        "warnungs_anzahl": len(ergebnis.warnungen),
+        "hinweis_anzahl": len(ergebnis.hinweise),
+        "fehler": [{"regel_id": f.regel_id, "feld": f.feld, "schwere": f.schwere, "nachricht": f.nachricht} for f in ergebnis.fehler],
+    }
+
+
+@router.get("/kollaboration/entscheidungen", tags=["process-kernel"])
+def get_kollaborations_entscheidungen():
+    return [
+        {
+            "entscheidung_id": e.entscheidung_id,
+            "workflow_instanz_id": e.workflow_instanz_id,
+            "abstimmungs_typ": e.abstimmungs_typ,
+            "status": e.status,
+            "berechnetes_ergebnis": e.berechne_ergebnis(),
+            "ausstehende_stimmer": e.ausstehende_stimmer(),
+            "beteiligung_pct": e.beteiligung_pct(),
+            "ja_stimmen": e.ja_stimmen(),
+            "nein_stimmen": e.nein_stimmen(),
+        }
+        for e in get_default_entscheidungen()
+    ]
+
+
+@router.post("/kollaboration/pruefe-ergebnis", tags=["process-kernel"])
+def pruefe_kollaborations_ergebnis(payload: dict):
+    """Payload: {"entscheidung_id": str}"""
+    entscheidung_id = payload.get("entscheidung_id", "")
+    entscheidungen = {e.entscheidung_id: e for e in get_default_entscheidungen()}
+    if entscheidung_id not in entscheidungen:
+        return {"fehler": f"Entscheidung {entscheidung_id!r} nicht gefunden"}
+    e = entscheidungen[entscheidung_id]
+    return {
+        "entscheidung_id": e.entscheidung_id,
+        "berechnetes_ergebnis": e.berechne_ergebnis(),
+        "beteiligung_pct": e.beteiligung_pct(),
+        "ausstehende_stimmer": e.ausstehende_stimmer(),
+    }
+
+
+# === Wave 64: Data Lineage + Process Simulation ===
+from app.core.process_lineage_contracts import (
+    get_default_lineage_graph, LineageGraph, LineageKnoten,
+    LineageKante, LineageKnotenTyp, LineageOperationTyp,
+)
+from app.core.workflow_simulation_contracts_wave64 import (
+    get_default_simulations_laeufe, SimulationsLauf, SimulationsErgebnis,
+    SimulationsParameter, SimulationsTyp, SimulationsStatus,
+)
+
+
+@router.get("/lineage/w64/graph", tags=["process-kernel"])
+def get_lineage_graph_w64():
+    g = get_default_lineage_graph()
+    return {
+        "graph_id": g.graph_id,
+        "knoten_anzahl": len(g.knoten),
+        "kanten_anzahl": len(g.kanten),
+        "quell_knoten": [k.knoten_id for k in g.quell_knoten()],
+        "ziel_knoten": [k.knoten_id for k in g.ziel_knoten()],
+        "gesamt_datenmenge_bytes": g.gesamt_datenmenge_bytes(),
+    }
+
+
+@router.post("/lineage/w64/upstream", tags=["process-kernel"])
+def get_upstream_w64(payload: dict):
+    """Payload: {"knoten_id": str}"""
+    knoten_id = payload.get("knoten_id", "")
+    g = get_default_lineage_graph()
+    upstream = g.upstream_knoten(knoten_id)
+    return {"knoten_id": knoten_id, "upstream": [k.knoten_id for k in upstream]}
+
+
+@router.get("/simulation/w64/laeufe", tags=["process-kernel"])
+def get_simulations_laeufe_w64():
+    return [
+        {
+            "lauf_id": l.lauf_id,
+            "workflow_typ": l.workflow_typ,
+            "simulations_typ": l.simulations_typ,
+            "status": l.status,
+            "laufzeit_sekunden": l.laufzeit_sekunden(),
+            "hat_ergebnis": l.ergebnis is not None,
+        }
+        for l in get_default_simulations_laeufe()
+    ]
+
+
+@router.post("/simulation/w64/ergebnis", tags=["process-kernel"])
+def get_simulations_ergebnis_w64(payload: dict):
+    """Payload: {"lauf_id": str}"""
+    lauf_id = payload.get("lauf_id", "")
+    laeufe = {l.lauf_id: l for l in get_default_simulations_laeufe()}
+    if lauf_id not in laeufe:
+        return {"fehler": f"Lauf {lauf_id!r} nicht gefunden"}
+    l = laeufe[lauf_id]
+    if l.ergebnis is None:
+        return {"lauf_id": lauf_id, "ergebnis": None}
+    e = l.ergebnis
+    groesste = e.groesste_abweichung
+    return {
+        "lauf_id": lauf_id,
+        "prognostizierte_dauer_minuten": e.prognostizierte_dauer_minuten,
+        "engpass_schritt": e.engpass_schritt,
+        "empfehlung": e.empfehlung,
+        "konfidenz_pct": e.konfidenz_pct,
+        "groesste_abweichung_parameter": (groesste.name if groesste else None),
+        "groesste_abweichung_pct": (groesste.abweichung_pct if groesste else None),
+    }
+
+
+# === Wave 65: Exception Patterns + Remediation ===
+from app.core.process_exception_pattern_contracts import (
+    get_default_ausnahme_signaturen, klassifiziere_ausnahme,
+    AusnahmeSignatur, KlassifizierungsErgebnis,
+    AusnahmeMuster, AusnahmeSchwere, MusterErkennungsKonfidenz,
+)
+from app.core.workflow_remediation_contracts import (
+    get_default_playbooks, RemediationsPlaybook, RemediationsSchritt,
+    RemediationsTyp, RemediationsStatus, RemediationsAktion,
+)
+
+@router.get("/exception/signaturen", tags=["process-kernel"])
+def get_ausnahme_signaturen():
+    return [
+        {"signatur_id": s.signatur_id, "muster": s.muster, "schwere": s.schwere,
+         "schluessel_woerter": s.schluessel_woerter, "beschreibung": s.beschreibung}
+        for s in get_default_ausnahme_signaturen()
+    ]
+
+@router.post("/exception/klassifiziere", tags=["process-kernel"])
+def klassifiziere_ausnahme_endpoint(payload: dict):
+    """Payload: {"fehler_text": str, "fehler_code": str}"""
+    ergebnis = klassifiziere_ausnahme(
+        payload.get("fehler_text", ""),
+        payload.get("fehler_code", ""),
+        get_default_ausnahme_signaturen(),
+    )
+    return {"muster": ergebnis.muster, "konfidenz": ergebnis.konfidenz,
+            "signatur_id": ergebnis.signatur_id, "schwere": ergebnis.schwere}
+
+@router.get("/remediation/playbooks", tags=["process-kernel"])
+def get_remediation_playbooks():
+    return [
+        {"playbook_id": p.playbook_id, "ausnahme_muster": p.ausnahme_muster,
+         "typ": p.typ, "schritte_anzahl": len(p.schritte),
+         "erfolgsrate_pct": p.erfolgsrate_pct(),
+         "automatische_schritte": len(p.automatische_schritte())}
+        for p in get_default_playbooks()
+    ]
+
+@router.post("/remediation/pruefe-playbook", tags=["process-kernel"])
+def pruefe_remediation_playbook(payload: dict):
+    """Payload: {"playbook_id": str}"""
+    playbook_id = payload.get("playbook_id", "")
+    playbooks = {p.playbook_id: p for p in get_default_playbooks()}
+    if playbook_id not in playbooks:
+        return {"fehler": f"Playbook {playbook_id!r} nicht gefunden"}
+    p = playbooks[playbook_id]
+    return {
+        "playbook_id": p.playbook_id, "erfolgsrate_pct": p.erfolgsrate_pct(),
+        "automatische_schritte": [s.schritt_id for s in p.automatische_schritte()],
+        "schritte": [{"schritt_id": s.schritt_id, "aktion": s.aktion, "automatisch": s.automatisch} for s in p.schritte],
+    }
+
+# === Wave 66: Concurrency + Resource Locks ===
+from app.core.process_concurrency_contracts import (
+    get_default_konkurrenz_waechter, KonkurrenzWaechter, AusfuehrungsSlot,
+    KonkurrenzModus, AusfuehrungsSlotStatus,
+)
+from app.core.workflow_resource_lock_contracts import (
+    get_default_resource_locks, pruefe_lock_kompatibilitaet, erkenne_deadlock,
+    RessourceLock, RessourceLockTyp, DeadlockStatus,
+)
+
+@router.get("/konkurrenz/waechter", tags=["process-kernel"])
+def get_konkurrenz_waechter():
+    from datetime import datetime
+    jetzt = datetime(2026, 3, 16, 10, 0, 0)
+    return [
+        {
+            "waechter_id": w.waechter_id,
+            "ressource_typ": w.regel.ressource_typ,
+            "modus": w.regel.modus,
+            "effektives_limit": w.regel.effektives_limit(),
+            "belegte_slots": len(w.belegte_slots(jetzt)),
+            "kann_ausfuehren": w.kann_ausfuehren(jetzt),
+            "auslastung_pct": w.auslastung_pct(jetzt),
+        }
+        for w in get_default_konkurrenz_waechter()
+    ]
+
+@router.post("/konkurrenz/pruefe-ausfuehrbarkeit", tags=["process-kernel"])
+def pruefe_ausfuehrbarkeit(payload: dict):
+    """Payload: {"modus": str, "max_gleichzeitig": int, "aktive_ausfuehrungen": int}"""
+    from datetime import datetime
+    from app.core.process_concurrency_contracts import KonkurrenzRegel
+    jetzt = datetime(2026, 3, 16, 10, 0, 0)
+    regel = KonkurrenzRegel("TEMP", "generic", KonkurrenzModus(payload.get("modus", "MUTEX")),
+                             int(payload.get("max_gleichzeitig", 1)))
+    aktive = int(payload.get("aktive_ausfuehrungen", 0))
+    limit = regel.effektives_limit()
+    kann = aktive < limit
+    return {"kann_ausfuehren": kann, "effektives_limit": limit, "aktive": aktive}
+
+@router.get("/resource-lock/locks", tags=["process-kernel"])
+def get_resource_locks():
+    from datetime import datetime
+    jetzt = datetime(2026, 3, 16, 10, 0, 0)
+    return [
+        {
+            "lock_id": l.lock_id,
+            "ressource_id": l.ressource_id,
+            "inhaber_id": l.inhaber_id,
+            "lock_typ": l.lock_typ,
+            "ist_aktiv": l.ist_aktiv(jetzt),
+        }
+        for l in get_default_resource_locks()
+    ]
+
+@router.post("/resource-lock/erkenne-deadlock", tags=["process-kernel"])
+def erkenne_deadlock_endpoint(payload: dict):
+    """Payload: {"warte_relationen": [{"wartet": str, "auf": str}]}"""
+    analyse = erkenne_deadlock(payload.get("warte_relationen", []))
+    return {
+        "status": analyse.status,
+        "beteiligte_inhaber": analyse.beteiligte_inhaber,
+        "aufloesungs_vorschlag": analyse.aufloesungs_vorschlag,
+    }
