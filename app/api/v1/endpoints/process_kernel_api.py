@@ -4849,3 +4849,97 @@ def pruefe_pause_ueberfaellig(payload: dict):
             for p in v.ueberfaellige_pausen(jetzt)
         ],
     }
+
+
+# === Wave 62: Process Templates + Workflow Deadlines ===
+from app.core.process_template_contracts import (
+    get_default_templates, instanziere_template,
+    ProzessTemplate, ProzessSchritt_Template,
+    TemplateTyp, TemplateStatus, InstanzierungsStatus,
+)
+from app.core.workflow_deadline_contracts import (
+    get_default_deadline_monitor, DeadlineMonitor, WorkflowDeadline,
+    DeadlineTyp, DeadlineStatus, EskalationsStufe,
+)
+
+
+@router.get("/template/vorlagen", tags=["process-kernel"])
+def get_prozess_templates():
+    return [
+        {
+            "template_id": t.template_id,
+            "name": t.name,
+            "workflow_typ": t.workflow_typ,
+            "status": t.status,
+            "ist_verwendbar": t.ist_verwendbar(),
+            "pflicht_schritte_anzahl": len(t.pflicht_schritte()),
+            "geschaetzte_gesamtdauer_minuten": t.geschaetzte_gesamtdauer_minuten(),
+        }
+        for t in get_default_templates()
+    ]
+
+
+@router.post("/template/instanziere", tags=["process-kernel"])
+def instanziere_template_endpoint(payload: dict):
+    """
+    Payload: {"template_id": str, "parameter": dict, "neue_instanz_id": str}
+    """
+    template_id = payload.get("template_id", "")
+    templates = {t.template_id: t for t in get_default_templates()}
+    if template_id not in templates:
+        return {"fehler": f"Template {template_id!r} nicht gefunden"}
+    ergebnis = instanziere_template(
+        templates[template_id],
+        payload.get("parameter", {}),
+        payload.get("neue_instanz_id", "WI-NEW-001"),
+    )
+    return {
+        "template_id": ergebnis.template_id,
+        "status": ergebnis.status,
+        "workflow_instanz_id": ergebnis.workflow_instanz_id,
+        "fehler_nachricht": ergebnis.fehler_nachricht,
+        "fehlende_parameter": ergebnis.fehlende_parameter,
+    }
+
+
+@router.get("/deadline/monitor", tags=["process-kernel"])
+def get_deadline_monitor():
+    from datetime import datetime
+    jetzt = datetime(2026, 3, 16, 10, 0, 0)
+    monitor = get_default_deadline_monitor()
+    return {
+        "monitor_id": monitor.monitor_id,
+        "deadlines_gesamt": len(monitor.deadlines),
+        "verletzte_deadlines": len(monitor.verletzte_deadlines(jetzt)),
+        "kritische_deadlines": len(monitor.kritische_deadlines(jetzt)),
+        "sla_einhaltungs_rate_pct": monitor.sla_einhaltungs_rate_pct(),
+        "deadlines": [
+            {
+                "deadline_id": d.deadline_id,
+                "deadline_typ": d.deadline_typ,
+                "status": d.status,
+                "ist_verletzt": d.ist_verletzt(jetzt),
+                "verbleibende_minuten": d.verbleibende_minuten(jetzt),
+                "eskalations_stufe": d.berechne_eskalations_stufe(jetzt),
+            }
+            for d in monitor.deadlines
+        ],
+    }
+
+
+@router.post("/deadline/pruefe-eskalation", tags=["process-kernel"])
+def pruefe_deadline_eskalation(payload: dict):
+    """Payload: {"deadline_id": str}"""
+    from datetime import datetime
+    jetzt = datetime(2026, 3, 16, 10, 0, 0)
+    deadline_id = payload.get("deadline_id", "")
+    monitor = get_default_deadline_monitor()
+    dl = next((d for d in monitor.deadlines if d.deadline_id == deadline_id), None)
+    if dl is None:
+        return {"fehler": f"Deadline {deadline_id!r} nicht gefunden"}
+    return {
+        "deadline_id": dl.deadline_id,
+        "ist_verletzt": dl.ist_verletzt(jetzt),
+        "verbleibende_minuten": dl.verbleibende_minuten(jetzt),
+        "eskalations_stufe": dl.berechne_eskalations_stufe(jetzt),
+    }
