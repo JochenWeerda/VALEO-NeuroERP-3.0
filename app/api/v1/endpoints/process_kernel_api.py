@@ -5203,3 +5203,59 @@ def erkenne_deadlock_endpoint(payload: dict):
         "beteiligte_inhaber": analyse.beteiligte_inhaber,
         "aufloesungs_vorschlag": analyse.aufloesungs_vorschlag,
     }
+
+# Wave 67 — Process Cache + Schema Migration
+@router.get("/cache/konfigurationen")
+def liste_cache_konfigurationen():
+    from app.core.process_cache_contracts import CACHE_REGELN
+    return [{"name": r.name, "max_eintraege": r.max_eintraege,
+             "default_ttl_sekunden": r.default_ttl_sekunden,
+             "strategie": r.strategie.value} for r in CACHE_REGELN]
+
+@router.post("/cache/pruefe-status")
+def pruefe_cache_status(payload: dict):
+    from app.core.process_cache_contracts import CacheEintrag, CacheStatus
+    from datetime import datetime
+    erstellt = datetime.fromisoformat(payload.get("erstellt_am", datetime.now().isoformat()))
+    ttl = payload.get("ttl_sekunden")
+    jetzt = datetime.fromisoformat(payload.get("jetzt", datetime.now().isoformat()))
+    eintrag = CacheEintrag(
+        schluessel=payload.get("schluessel", "k"),
+        wert=payload.get("wert", None),
+        erstellt_am=erstellt,
+        letzter_zugriff=erstellt,
+        ttl_sekunden=ttl,
+    )
+    status = eintrag.status(jetzt)
+    return {"status": status.value}
+
+@router.get("/schema/versionen")
+def liste_schema_versionen():
+    from app.core.workflow_schema_migration_contracts import SCHEMA_VERSIONEN
+    return [{"schema_id": v.schema_id, "version": v.version,
+             "felder": v.felder, "kompatibilitaet": v.berechne_kompatibilitaet().value}
+            for v in SCHEMA_VERSIONEN]
+
+@router.post("/schema/pruefe-kompatibilitaet")
+def pruefe_schema_kompatibilitaet(payload: dict):
+    from app.core.workflow_schema_migration_contracts import (
+        SchemaVersion, FeldAenderung, FeldAenderungsTyp, SchemaKompatibilitaet
+    )
+    from datetime import datetime
+    aenderungen_raw = payload.get("aenderungen", [])
+    aenderungen = [
+        FeldAenderung(
+            feld_name=a["feld_name"],
+            aenderungs_typ=FeldAenderungsTyp(a["typ"]),
+        )
+        for a in aenderungen_raw
+    ]
+    version = SchemaVersion(
+        schema_id=payload.get("schema_id", "test"),
+        version=payload.get("version", "1.0.0"),
+        felder=payload.get("felder", []),
+        erstellt_am=datetime.now(),
+        aenderungen=aenderungen,
+    )
+    compat = version.berechne_kompatibilitaet()
+    return {"kompatibilitaet": compat.value, "hat_brechende_aenderungen": compat == SchemaKompatibilitaet.KEINE}
