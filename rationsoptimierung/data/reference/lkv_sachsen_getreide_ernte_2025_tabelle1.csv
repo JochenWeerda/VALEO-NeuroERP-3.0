@@ -1,0 +1,6 @@
+id,name,quelle,tm_g_kg_fm,ra_g_kg_tm,rp_g_kg_tm,rf_g_kg_tm,starch_g_kg_tm,sugar_g_kg_tm,andfom_g_kg_tm,ge_mj_kg_tm,me_mj_kg_tm
+weizen_ernte2025,Weizen,LKV Sachsen Getreideernte 2025 Tabelle 1,864,17,128,19,652,35,121,18.5,13.2
+gerste_ernte2025,Gerste,LKV Sachsen Getreideernte 2025 Tabelle 1,863,23,108,21,611,28,183,18.4,13.1
+roggen_ernte2025,Roggen,LKV Sachsen Getreideernte 2025 Tabelle 1,855,18,91,14,649,62,140,18.1,13.4
+triticale_ernte2025,Triticale,LKV Sachsen Getreideernte 2025 Tabelle 1,860,18,112,17,699,44,119,18.2,13.2
+hafer_ernte2025,Hafer,LKV Sachsen Getreideernte 2025 Tabelle 1,872,31,107,35,446,18,363,18.8,11.2

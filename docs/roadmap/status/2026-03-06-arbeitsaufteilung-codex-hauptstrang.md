@@ -1,6 +1,6 @@
 # VALEO Spitzenposition – Arbeitsaufteilung Codex vs. Hauptstrang
 
-**Stand:** 2026-03-14  
+**Stand:** 2026-03-14
 **Zweck:** Gegenseitige Kontrolle, Vermeidung von Doppelarbeit, klare Verantwortlichkeiten
 
 ---
@@ -87,7 +87,7 @@ Kernprozesse, Workflow-Engine, Backend-Architektur, Compliance, Performance-Kern
 
 | Wave | Hauptstrang-IDs (Implementierung) | Codex-IDs (Parallel) | Status |
 |------|----------------------------------|----------------------|--------|
-| A | 001, 002, 003, 009, 010, 011, 013, 014, 032 | 031 | 001 E2E Qualitäts-Check→Abrechnung erledigt (2026-03-07), 032 erledigt (2026-03-06), 002 LKW-DB erledigt (2026-03-06), 003 Drying-Integration erledigt (2026-03-07), 009 Prozessvarianten-API erledigt (2026-03-07), 010 Audit-Hash-Kette erledigt (2026-03-07), 013 SLA/Timeout/Eskalation in process_config erledigt (2026-03-07), 014 Policy-Overrides (Tenant) erledigt (2026-03-07) |
+| A | 001, 002, 003, 009, 010, 011, 013, 014, 032 | 031 | 001 E2E erledigt (2026-03-07), 002 LKW-DB erledigt (2026-03-06), 003 Drying erledigt (2026-03-07), 009 Prozessvarianten erledigt (2026-03-07), 010 Audit-Hash-Kette erledigt (2026-03-07), 011 Versionierte Workflow Engine erledigt (2026-03-07), 013 SLA/Timeout erledigt (2026-03-07), 014 Policy-Overrides erledigt (2026-03-07), 032 erledigt (2026-03-06) |
 | B | 004, 015, 021, 024, 033, 035, 039 | 019, 022, 025 | offen |
 | C | 036, 041, 042, 049, 050 + Vorbereitung 016, 037, 043 | – | offen |
 

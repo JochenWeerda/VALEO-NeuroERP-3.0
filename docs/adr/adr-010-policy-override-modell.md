@@ -1,6 +1,6 @@
 # ADR-010 Policy-Override-Modell
 
-**Status:** Accepted  
+**Status:** Accepted
 **Date:** 2026-03-11
 
 ## Context

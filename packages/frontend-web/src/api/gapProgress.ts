@@ -26,7 +26,7 @@ export interface PipelineProgress {
  * Holt den aktuellen Fortschritt einer Pipeline-Ausführung
  */
 export async function getPipelineProgress(jobId: string): Promise<PipelineProgress> {
-  const response = await apiClient.get(`/api/v1/gap/pipeline/progress/${jobId}`)
+  const response = await apiClient.get<PipelineProgress>(`/api/v1/gap/pipeline/progress/${jobId}`)
   return response.data
 }
 

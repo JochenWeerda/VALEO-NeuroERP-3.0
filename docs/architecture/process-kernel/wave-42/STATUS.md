@@ -51,3 +51,4 @@ pytest tests/test_process_kernel_wave42_schema_compensation.py -q --no-cov
 
 ## Status
 `abgeschlossen`
+Stand: 2026-03-19

@@ -1,6 +1,6 @@
 # ADR-007 Agent-/Tool-Contract-Governance
 
-**Status:** Accepted  
+**Status:** Accepted
 **Date:** 2026-03-11
 
 ## Context

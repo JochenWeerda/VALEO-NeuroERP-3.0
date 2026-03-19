@@ -1,0 +1,38 @@
+name: Docs Governance
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - "**/*.md"
+      - "scripts/docs-*.cjs"
+      - ".github/workflows/docs-governance.yml"
+      - "package.json"
+  pull_request:
+    paths:
+      - "**/*.md"
+      - "scripts/docs-*.cjs"
+      - ".github/workflows/docs-governance.yml"
+      - "package.json"
+  workflow_dispatch:
+
+jobs:
+  docs-governance:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Markdown hygiene check
+        run: node scripts/docs-markdown-check.cjs
+
+      - name: Governance check
+        run: node scripts/docs-governance-check.cjs

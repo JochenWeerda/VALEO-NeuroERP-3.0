@@ -107,6 +107,7 @@ from app.api.v1.endpoints import (
     silo,
     agrar_settlements,
     harvest_acceptance,
+    rations_optimization,
     quality_protocols,
     daily_prices,
     self_billing,
@@ -146,7 +147,7 @@ from app.api.v1.endpoints import (
     ernte_kampagne_api,
 )
 # Wave 2-19 Process-Kernel Read-Models + Commands
-from app.api.v1.endpoints import finance_read_models, process_kernel_api
+from app.api.v1.endpoints import agent_context_api, finance_read_models, process_kernel_api
 
 # Import domain routers
 from app.domains.agrar.api import psm, psm_proplanta
@@ -722,6 +723,13 @@ api_router.include_router(
     tags=["agrar", "maschinen"]
 )
 
+# Rationsoptimierung (Proxy zu Microservice)
+api_router.include_router(
+    rations_optimization.router,
+    prefix="/agrar/rations-optimization",
+    tags=["agrar", "futtermittel", "rations-optimization"]
+)
+
 # ── L3-Connect Gap Closure Routers ──────────────────────────────
 
 api_router.include_router(
@@ -953,3 +961,4 @@ api_router.include_router(ernte_kampagne_api.router)
 # Wave 2-19 — Process-Kernel Finance Read-Models + Commands/Surfacing
 api_router.include_router(finance_read_models.router)
 api_router.include_router(process_kernel_api.router)
+api_router.include_router(agent_context_api.router)

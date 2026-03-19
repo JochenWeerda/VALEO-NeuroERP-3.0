@@ -1,47 +1,58 @@
-# Wave 64 — Data Lineage + Process Simulation Contracts
+# Wave 64 - Data Lineage + Process Simulation Contracts
 
-**Status:** ABGESCHLOSSEN
+**Status:** abgeschlossen
 **Datum:** 2026-03-18
-**Tests:** 173 grün, 0 Fehler
+**Tests:** 173 gruen, 0 Fehler
 
-## Module
+## Scope
+
+Wave 64 fuehrt Data-Lineage-Contracts fuer Datenflussbeziehungen und Simulations-Contracts fuer Prozessszenarien ein.
+
+## Zielbild
+
+Datenherkunft und Prozesssimulation sollen als standardisierte, API-faehige Kernel-Bausteine verfuegbar sein.
+
+## Lieferumfang
 
 ### `app/core/process_lineage_contracts.py`
-- `LineageKnotenTyp` (QUELLE, TRANSFORMATION, ZIEL, ZWISCHENSPEICHER)
-- `LineageOperationTyp` (LESEN, SCHREIBEN, TRANSFORMIEREN, KOPIEREN, LOESCHEN)
-- `LineageKnoten`, `LineageKante`, `LineageGraph`
-- `LineageGraph.quell_knoten()`, `ziel_knoten()`, `upstream_knoten()`, `downstream_knoten()`, `gesamt_datenmenge_bytes()`
-- `get_default_lineage_graph()` — 6 Knoten, 5 Kanten, 6144 Bytes
+
+- `LineageKnotenTyp`
+- `LineageOperationTyp`
+- `LineageKnoten`
+- `LineageKante`
+- `LineageGraph`
+- `get_default_lineage_graph()`
 
 ### `app/core/workflow_simulation_contracts_wave64.py`
-- `SimulationsTyp` (LAST_TEST, PFAD_ANALYSE, ENGPASS_ANALYSE, WHAT_IF)
-- `SimulationsStatus` (AUSSTEHEND, LAUFEND, ABGESCHLOSSEN, FEHLGESCHLAGEN)
-- `SimulationsParameter` mit `abweichung_pct` Property
-- `SimulationsErgebnis` mit `groesste_abweichung` Property
-- `SimulationsLauf` mit `laufzeit_sekunden()` Methode
-- `get_default_simulations_laeufe()` — 3 Läufe (SL-001 ABGESCHLOSSEN, SL-002 LAUFEND, SL-003 AUSSTEHEND)
 
-## Endpoints (append to `process_kernel_api.py`, Prefix `/process`)
+- `SimulationsTyp`
+- `SimulationsStatus`
+- `SimulationsParameter`
+- `SimulationsErgebnis`
+- `SimulationsLauf`
+- `get_default_simulations_laeufe()`
+
+### FastAPI-Endpunkte
 
 | Methode | Pfad | Beschreibung |
 |---------|------|--------------|
-| GET | `/process/lineage/w64/graph` | Lineage-Graph Übersicht |
-| POST | `/process/lineage/w64/upstream` | Upstream-Knoten für gegebene Knoten-ID |
-| GET | `/process/simulation/w64/laeufe` | Liste aller Simulations-Läufe |
-| POST | `/process/simulation/w64/ergebnis` | Simulations-Ergebnis für Lauf-ID |
+| GET | `/process/lineage/w64/graph` | Lineage-Graph-Uebersicht |
+| POST | `/process/lineage/w64/upstream` | Upstream-Knoten fuer gegebene Knoten-ID |
+| GET | `/process/simulation/w64/laeufe` | Liste aller Simulationslaeufe |
+| POST | `/process/simulation/w64/ergebnis` | Simulations-Ergebnis fuer Lauf-ID |
 
-Note: Pfade mit `/w64/` Infix um Konflikte mit Wave 44 (`/lineage/graph`) zu vermeiden.
+## Abnahmekriterien
 
-## Testabdeckung
+- Lineage-Graphen liefern Quelle, Ziel, Upstream, Downstream und Datenmenge korrekt.
+- Simulationslaeufe bilden Status, Laufzeit und Ergebnisabweichungen korrekt ab.
+- Ein Default-Lineage-Graph und drei Default-Simulationslaeufe stehen bereit.
+- Die vier API-Endpunkte liefern Lineage- und Simulationsfunktionen.
 
-- Enum-Tests: 16
-- LineageKnoten/Kante: 10
-- LineageGraph leer: 9
-- LineageGraph Logik: 16
-- Default-Graph: 30
-- SimulationsParameter: 9
-- SimulationsErgebnis: 7
-- SimulationsLauf: 8
-- Default-Läufe: 33
-- Endpoint-Tests: 25 (11 Lineage + 14 Simulation)
-- **Gesamt: 173 Tests**
+## Tests
+
+**Anzahl:** 173
+
+## Status
+
+`abgeschlossen`
+Stand: 2026-03-18

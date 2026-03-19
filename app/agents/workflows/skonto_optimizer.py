@@ -26,12 +26,42 @@ class SkontoOptimizerState(TypedDict):
     optimized_payment_plan: List[dict]
     total_discount: Decimal
     recommendations: List[str]
+    current_stage_key: str
+    stage_transition_log: List[dict]
+    gate_decisions: List[dict]
+
+
+def _mark_stage(state: SkontoOptimizerState, stage_key: str, detail: str) -> None:
+    state["current_stage_key"] = stage_key
+    state["stage_transition_log"].append(
+        {
+            "stage_key": stage_key,
+            "timestamp": datetime.utcnow().isoformat(),
+            "detail": detail,
+        }
+    )
+
+
+def _set_policy_gate(state: SkontoOptimizerState, status: str, reason: str) -> None:
+    state["gate_decisions"] = [
+        decision for decision in state.get("gate_decisions", []) if decision.get("gate_type") != "policy_gate"
+    ]
+    state["gate_decisions"].append(
+        {
+            "gate_type": "policy_gate",
+            "status": status,
+            "reason": reason,
+            "required_role": None,
+            "schema_version": 1,
+        }
+    )
 
 
 # Workflow Nodes
 def fetch_open_invoices(state: SkontoOptimizerState) -> dict:
     """Fetch all open invoices with skonto opportunities."""
     logger.info("Fetching open invoices...")
+    _mark_stage(state, "analysis", "Fetch open invoices")
     
     # TODO: Real database query
     # For now, mock data
@@ -56,12 +86,17 @@ def fetch_open_invoices(state: SkontoOptimizerState) -> dict:
         },
     ]
     
-    return {"invoices": mock_invoices}
+    return {
+        "invoices": mock_invoices,
+        "current_stage_key": state["current_stage_key"],
+        "stage_transition_log": state["stage_transition_log"],
+    }
 
 
 def calculate_optimal_plan(state: SkontoOptimizerState) -> dict:
     """Calculate optimal payment plan to maximize discounts."""
     logger.info("Calculating optimal payment plan...")
+    _mark_stage(state, "proposal", "Calculate skonto payment proposal")
     
     invoices = state["invoices"]
     available = state["available_cash"]
@@ -101,14 +136,31 @@ def calculate_optimal_plan(state: SkontoOptimizerState) -> dict:
                 remaining_cash -= discounted_amount
                 total_discount += invoice["potential_saving"]
     
+    if payment_plan:
+        _set_policy_gate(
+            state,
+            "allowed",
+            "Finance review can proceed with the proposed skonto plan.",
+        )
+    else:
+        _set_policy_gate(
+            state,
+            "allowed",
+            "No blocking finance policy issue; no skonto opportunity selected.",
+        )
+
     return {
         "optimized_payment_plan": payment_plan,
-        "total_discount": total_discount
+        "total_discount": total_discount,
+        "current_stage_key": state["current_stage_key"],
+        "stage_transition_log": state["stage_transition_log"],
+        "gate_decisions": state["gate_decisions"],
     }
 
 
 def generate_recommendations(state: SkontoOptimizerState) -> dict:
     """Generate actionable recommendations."""
+    _mark_stage(state, "closure", "Generate skonto recommendations and close run")
     recommendations = []
     
     total_discount = state["total_discount"]
@@ -127,7 +179,12 @@ def generate_recommendations(state: SkontoOptimizerState) -> dict:
             f"bezahlt werden (Liquidität erhöhen?)"
         )
     
-    return {"recommendations": recommendations}
+    return {
+        "recommendations": recommendations,
+        "current_stage_key": state["current_stage_key"],
+        "stage_transition_log": state["stage_transition_log"],
+        "gate_decisions": state["gate_decisions"],
+    }
 
 
 # Build Workflow
@@ -162,7 +219,16 @@ async def optimize_skonto(
         available_cash=available_cash,
         optimized_payment_plan=[],
         total_discount=Decimal("0.00"),
-        recommendations=[]
+        recommendations=[],
+        current_stage_key="intake",
+        stage_transition_log=[
+            {
+                "stage_key": "intake",
+                "timestamp": datetime.utcnow().isoformat(),
+                "detail": "Skonto workflow run created",
+            }
+        ],
+        gate_decisions=[],
     )
     
     result = workflow.invoke(initial_state)
@@ -170,6 +236,9 @@ async def optimize_skonto(
     return {
         "payment_plan": result["optimized_payment_plan"],
         "total_discount": float(result["total_discount"]),
-        "recommendations": result["recommendations"]
+        "recommendations": result["recommendations"],
+        "current_stage_key": result["current_stage_key"],
+        "stage_transition_log": result["stage_transition_log"],
+        "gate_decisions": result["gate_decisions"],
     }
 

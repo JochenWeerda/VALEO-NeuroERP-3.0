@@ -123,3 +123,4 @@ Kernel-Contracts fuer die Landhandel-Kernprozesse:
 
 ## Status
 `abgeschlossen`
+Stand: 2026-03-14

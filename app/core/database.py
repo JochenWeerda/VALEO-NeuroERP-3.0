@@ -54,6 +54,18 @@ def create_tables():
         except Exception as e:
             logger.warning(f"CRM models import failed: {e}")
 
+        try:
+            from app.infrastructure import models as shared_models  # noqa: F401
+            logger.info("Shared infrastructure models imported")
+        except Exception as e:
+            logger.warning(f"Shared infrastructure models import failed: {e}")
+
+        try:
+            from app.models import knowledge as knowledge_models  # noqa: F401
+            logger.info("Knowledge models imported")
+        except Exception as e:
+            logger.warning(f"Knowledge models import failed: {e}")
+
         # Ensure outbox table is part of metadata
         try:
             from app.infrastructure.eventbus import outbox as outbox_models  # noqa: F401

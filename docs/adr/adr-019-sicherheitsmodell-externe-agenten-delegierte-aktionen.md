@@ -1,6 +1,6 @@
 # ADR-019 Sicherheitsmodell für externe Agenten und delegierte Aktionen
 
-**Status:** Accepted  
+**Status:** Accepted
 **Date:** 2026-03-11
 
 ## Context

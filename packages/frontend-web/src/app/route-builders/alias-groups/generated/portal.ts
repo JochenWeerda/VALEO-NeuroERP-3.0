@@ -26,6 +26,10 @@ export const entries: AliasGroupRouteEntry[] = [
     "path": "naehrstoffbilanzen"
   },
   {
+    "module": "@/pages/portal/rationsoptimierung",
+    "path": "rationsoptimierung"
+  },
+  {
     "module": "@/pages/portal/rechnungen",
     "path": "rechnungen"
   },

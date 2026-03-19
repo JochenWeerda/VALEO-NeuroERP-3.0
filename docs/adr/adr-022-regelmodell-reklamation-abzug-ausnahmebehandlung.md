@@ -1,6 +1,6 @@
 # ADR-022 Regelmodell für Reklamation, Abzug und Ausnahmebehandlung
 
-**Status:** Accepted  
+**Status:** Accepted
 **Date:** 2026-03-11
 
 ## Context

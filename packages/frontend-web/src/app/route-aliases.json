@@ -1097,6 +1097,10 @@
       "path": "futtermittel/mischfuttermittel/:id"
     },
     {
+      "module": "@/pages/futtermittel/rationsoptimierung",
+      "path": "futtermittel/rationsoptimierung"
+    },
+    {
       "module": "@/pages/inbox/index",
       "path": "inbox"
     },

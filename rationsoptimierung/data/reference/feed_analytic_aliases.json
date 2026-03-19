@@ -1,0 +1,23 @@
+{
+  "comment": "feed_id (lp_import_filled) -> analytische Zeilen-id in lkv_* / dlg_2025_kraftfutter_* CSVs",
+  "ernte2025_cereals": ["weizen", "gerste", "roggen", "triticale", "hafer"],
+  "explicit": {
+    "koernermais": "koernermais_dlg2025",
+    "ackerbohnen": "ackerbohnen_dlg2025",
+    "erbsen": "erbsen_dlg2025",
+    "melasseschnitzel": "melasseschnitzel_dlg2025",
+    "melasse_zuckerruebe": "melasse_zuckerruebe_dlg2025",
+    "rapsextraktionsschrot_unbehandelt": "raps_extraktionsschrot_dlg2025",
+    "sojaextraktionsschrot_unbehandelt": "soja_extraktionsschrot_dlg2025",
+    "sojaextraktionsschrot_aus_geschaelter_saat": "soja_extraktionsschrot_hp_dlg2025",
+    "weizenkleie": "weizenkleie_staerkerich_dlg2025"
+  },
+  "raps_variants_use_base_dlg_row": [
+    "rapsextraktionsschrot_unbehandelt_hoch_pansenstabil",
+    "rapsextraktionsschrot_unbehandelt_mittel_pansenstabil",
+    "rapsextraktionsschrot_unbehandelt_wenig_pansenstabil",
+    "rapsextraktionsschrot_gezielt_therm_behandelt",
+    "rapsextraktionsschrot_gezielt_therm_behandelt_hoch_pansenstabil",
+    "rapsextraktionsschrot_gezielt_therm_behandelt_wenig_pansenstabil"
+  ]
+}

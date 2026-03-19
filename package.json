@@ -16,6 +16,9 @@
     "build": "pnpm -r run build",
     "lint": "pnpm -r run lint",
     "lint:fix": "pnpm -r run lint:fix",
+    "docs:lint": "node scripts/docs-markdown-check.cjs",
+    "docs:governance": "node scripts/docs-governance-check.cjs",
+    "docs:check": "pnpm run docs:lint && pnpm run docs:governance",
     "test": "pnpm -r run test",
     "check:dupes": "node scripts/check-dupes.cjs",
     "guard:paths:staged": "node scripts/guard-forbidden-paths.cjs --staged",
@@ -61,7 +64,11 @@
       "eslint --fix",
       "eslint"
     ],
-    "*.{json,md}": []
+    "*.md": [
+      "node scripts/docs-markdown-check.cjs",
+      "node scripts/docs-governance-check.cjs"
+    ],
+    "*.json": []
   },
   "dependencies": {
     "better-sqlite3": "^12.4.1",

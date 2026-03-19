@@ -108,7 +108,7 @@ def build_core_command_catalog() -> list[CommandDefinition]:
             allowed_roles=["finance_manager", "ap_approver"],
             allowed_agent_types=["audit_agent"],
             requires_human_confirmation=False,
-            idempotent=False,
+            idempotent=True,
             post_event="APInvoiceApproved",
         ),
         CommandDefinition(
@@ -125,6 +125,7 @@ def build_core_command_catalog() -> list[CommandDefinition]:
             allowed_roles=["finance_manager", "ap_approver"],
             allowed_agent_types=[],
             requires_human_confirmation=False,
+            idempotent=True,
             post_event="APInvoiceRejected",
         ),
         CommandDefinition(
@@ -158,6 +159,7 @@ def build_core_command_catalog() -> list[CommandDefinition]:
             allowed_roles=["acceptance_manager", "warehouse_manager"],
             allowed_agent_types=["acceptance_agent"],
             post_event="HarvestAcceptanceCompleted",
+            idempotent=True,
         ),
         CommandDefinition(
             command_name="ReleaseQualityProtocol",
@@ -173,6 +175,7 @@ def build_core_command_catalog() -> list[CommandDefinition]:
             allowed_roles=["quality_manager", "lab_manager"],
             allowed_agent_types=["quality_agent"],
             post_event="QualityProtocolCompleted",
+            idempotent=True,
         ),
         CommandDefinition(
             command_name="CreateAgrarSettlement",
@@ -181,6 +184,7 @@ def build_core_command_catalog() -> list[CommandDefinition]:
             allowed_roles=["settlement_manager", "agrar_manager"],
             allowed_agent_types=["settlement_agent"],
             post_event="AgrarSettlementCreated",
+            idempotent=True,
         ),
         CommandDefinition(
             command_name="FinalizeAgrarSettlement",
@@ -196,6 +200,7 @@ def build_core_command_catalog() -> list[CommandDefinition]:
             allowed_roles=["settlement_manager"],
             allowed_agent_types=[],
             requires_human_confirmation=True,
+            idempotent=True,
             post_event="AgrarSettlementFinalized",
         ),
         CommandDefinition(
@@ -229,6 +234,7 @@ def build_core_command_catalog() -> list[CommandDefinition]:
             allowed_roles=["treasury_manager"],
             allowed_agent_types=[],
             requires_human_confirmation=True,
+            idempotent=True,
             post_event="DirectDebitExecuted",
         ),
         CommandDefinition(

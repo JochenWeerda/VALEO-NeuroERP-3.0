@@ -28,9 +28,9 @@ from app.services.numbering_service import get_numbering
 logger = logging.getLogger(__name__)
 
 BESTELLVORSCHLAG_AKTIONSTYP = "BESTELLUNG_ANLEGEN"
-GENXAIS_ISSUER = "genxais.bestellvorschlag"
-GENXAIS_ISSUER_ROLE = "buyer"
-GENXAIS_WORKFLOW_KEY = "bestellvorschlag"
+NEUROASSIST_ISSUER = "neuroassist.bestellvorschlag"
+NEUROASSIST_ISSUER_ROLE = "buyer"
+NEUROASSIST_WORKFLOW_KEY = "bestellvorschlag"
 
 
 class BestellvorschlagWorkflowError(RuntimeError):
@@ -54,12 +54,15 @@ class BestellvorschlagState(TypedDict):
     proposal: dict[str, Any] | None
     approval_requirement: dict[str, Any] | None
     approval_record: dict[str, Any] | None
+    gate_decisions: list[dict[str, Any]]
     approved: bool
     rejection_reason: str | None
 
     command_result: dict[str, Any] | None
     order_id: str | None
     created_at: datetime | None
+    current_stage_key: str
+    stage_transition_log: list[dict[str, Any]]
 
 
 def _safe_decimal(value: Any, default: str = "0") -> Decimal:
@@ -94,6 +97,45 @@ def _build_approval_requirement(proposal: dict[str, Any]) -> dict[str, Any]:
         context,
         get_default_approval_rules(),
     ).as_dict()
+
+
+def _mark_stage(
+    state: BestellvorschlagState,
+    stage_key: str,
+    *,
+    detail: str | None = None,
+) -> BestellvorschlagState:
+    state["current_stage_key"] = stage_key
+    transition = {
+        "stage_key": stage_key,
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    }
+    if detail:
+        transition["detail"] = detail
+    state["stage_transition_log"].append(transition)
+    return state
+
+
+def _record_gate_decision(
+    state: BestellvorschlagState,
+    *,
+    gate_type: str,
+    status: str,
+    reason: str,
+    required_role: str | None = None,
+) -> BestellvorschlagState:
+    decision = {
+        "gate_type": gate_type,
+        "status": status,
+        "reason": reason,
+        "required_role": required_role,
+        "schema_version": 1,
+    }
+    state["gate_decisions"] = [
+        entry for entry in state.get("gate_decisions", []) if entry.get("gate_type") != gate_type
+    ]
+    state["gate_decisions"].append(decision)
+    return state
 
 
 async def _collect_purchase_order_items(
@@ -158,8 +200,8 @@ def _dispatch_purchase_order_command(state: BestellvorschlagState) -> dict[str, 
         aggregate_type="purchase_order",
         aggregate_id=state["correlation_id"],
         command_name="CreatePurchaseOrder",
-        workflow_key=GENXAIS_WORKFLOW_KEY,
-        issued_by=GENXAIS_ISSUER,
+        workflow_key=NEUROASSIST_WORKFLOW_KEY,
+        issued_by=NEUROASSIST_ISSUER,
         idempotency_key=state["correlation_id"],
         payload={
             "proposal_created_at": state["proposal"]["created_at"] if state["proposal"] else None,
@@ -170,7 +212,7 @@ def _dispatch_purchase_order_command(state: BestellvorschlagState) -> dict[str, 
     result = dispatcher.dispatch(
         command,
         aggregate_state={"approval_status": "approved" if state.get("approved") else "pending"},
-        issuer_role=GENXAIS_ISSUER_ROLE,
+        issuer_role=NEUROASSIST_ISSUER_ROLE,
     )
     if result.status != CommandStatus.ACCEPTED:
         raise BestellvorschlagWorkflowError(
@@ -198,10 +240,10 @@ def _persist_purchase_order(
             status="entwurf",
             versand_art="email",
             notiz=(
-                "GENXAIS Bestellvorschlag "
+                "NeuroASSIST Bestellvorschlag "
                 f"({correlation_id}). Empfehlungen: {', '.join(ai_recommendations) or 'keine'}"
             ),
-            erstellt_von=GENXAIS_ISSUER,
+            erstellt_von=NEUROASSIST_ISSUER,
         )
         session.add(bestellung)
         session.flush()
@@ -236,6 +278,7 @@ def _persist_purchase_order(
 async def analyze_stock_levels(state: BestellvorschlagState) -> BestellvorschlagState:
     """Step 1: Analyze current stock levels and identify low stock."""
 
+    _mark_stage(state, "analysis", detail="Analyze stock levels")
     logger.info("Analyzing stock levels (tenant: %s)", state["tenant_id"])
     try:
         article_repo = container.resolve(ArticleRepository)
@@ -264,6 +307,7 @@ async def analyze_stock_levels(state: BestellvorschlagState) -> Bestellvorschlag
 async def check_sales_history(state: BestellvorschlagState) -> BestellvorschlagState:
     """Step 2: Check historical sales data to predict demand."""
 
+    _mark_stage(state, "analysis", detail="Check sales history")
     logger.info("Checking sales history")
     try:
         stock_movement_repo = container.resolve(StockMovementRepository)
@@ -323,6 +367,7 @@ async def check_sales_history(state: BestellvorschlagState) -> BestellvorschlagS
 async def generate_order_proposal(state: BestellvorschlagState) -> BestellvorschlagState:
     """Step 3: Generate purchase order proposal based on analysis and approval contract."""
 
+    _mark_stage(state, "proposal", detail="Generate proposal")
     logger.info("Generating order proposal")
 
     stock_data = "\n".join(
@@ -415,6 +460,24 @@ Consider seasonal patterns, supplier lead times, and optimal order quantities.
     state["approval_record"] = None
     state["command_result"] = None
     state["approved"] = not approval_requirement["requires_human_approval"]
+    if approval_requirement["requires_human_approval"]:
+        _mark_stage(state, "approval", detail="Human approval required")
+        _record_gate_decision(
+            state,
+            gate_type="approval_gate",
+            status="deferred",
+            reason="Human approval is still pending before execution.",
+            required_role="human_operator",
+        )
+    else:
+        _mark_stage(state, "execution", detail="Approval gate resolved automatically")
+        _record_gate_decision(
+            state,
+            gate_type="approval_gate",
+            status="allowed",
+            reason="No explicit human approval required for this run.",
+            required_role=None,
+        )
     logger.info(
         "Generated proposal with %s items; approval required=%s",
         len(proposals),
@@ -426,6 +489,7 @@ Consider seasonal patterns, supplier lead times, and optimal order quantities.
 async def wait_for_human_approval(state: BestellvorschlagState) -> BestellvorschlagState:
     """Step 4: Human approval checkpoint."""
 
+    _mark_stage(state, "approval", detail="Await human approval")
     requirement = state.get("approval_requirement") or {}
     if not requirement.get("requires_human_approval"):
         return state
@@ -438,11 +502,20 @@ async def create_purchase_order(state: BestellvorschlagState) -> Bestellvorschla
     """Step 5: Create purchase order if approved."""
 
     if not state.get("approved"):
+        _record_gate_decision(
+            state,
+            gate_type="approval_gate",
+            status="blocked",
+            reason="Human approval rejected the proposed action.",
+            required_role="human_operator",
+        )
+        _mark_stage(state, "closure", detail="Workflow closed after rejected approval")
         logger.info("Proposal rejected, skipping purchase order creation")
         return state
     if not state.get("proposal"):
         raise BestellvorschlagWorkflowError("Proposal missing before purchase order creation")
 
+    _mark_stage(state, "execution", detail="Execute purchase-order creation")
     logger.info("Creating purchase order via command contract")
     items, supplier_id = await _collect_purchase_order_items(
         state["tenant_id"],
@@ -462,6 +535,8 @@ async def create_purchase_order(state: BestellvorschlagState) -> Bestellvorschla
     state["command_result"] = command_result
     state["order_id"] = order_id
     state["created_at"] = datetime.now(timezone.utc)
+    _mark_stage(state, "verification", detail="Verify purchase-order creation")
+    _mark_stage(state, "closure", detail="Workflow closed after verified execution")
     logger.info("Purchase order created successfully: %s", order_id)
     return state
 
@@ -533,11 +608,20 @@ async def run_bestellvorschlag_workflow(tenant_id: str, correlation_id: str) -> 
         "proposal": None,
         "approval_requirement": None,
         "approval_record": None,
+        "gate_decisions": [],
         "approved": False,
         "rejection_reason": None,
         "command_result": None,
         "order_id": None,
         "created_at": None,
+        "current_stage_key": "intake",
+        "stage_transition_log": [
+            {
+                "stage_key": "intake",
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "detail": "Workflow run created",
+            }
+        ],
     }
     result = await workflow.ainvoke(
         initial_state,

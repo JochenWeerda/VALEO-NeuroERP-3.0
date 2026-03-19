@@ -70,6 +70,7 @@ from . import agrar_varieties
 from . import silo
 from . import agrar_settlements
 from . import harvest_acceptance
+from . import rations_optimization
 from . import quality_protocols
 from . import daily_prices
 from . import self_billing

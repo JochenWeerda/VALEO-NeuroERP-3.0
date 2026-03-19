@@ -1,4 +1,5 @@
 import type { ToolbarAction } from '@/components/navigation/PageToolbar'
+import { useUIDensityManifest, fetchUIDensityManifest } from '@/lib/api/ui-density-manifest'
 
 export type InformationDensity = 'focused' | 'standard' | 'dense'
 
@@ -22,17 +23,6 @@ export interface RoleDensityProfile {
   showSectionBadges: boolean
   showKeyInfo: boolean
 }
-
-const ROLE_PRIORITY: Array<{ density: InformationDensity; matches: string[] }> = [
-  {
-    density: 'dense',
-    matches: ['admin', 'manager', 'fibu.admin', 'agrar.manager', 'controlling.admin'],
-  },
-  {
-    density: 'standard',
-    matches: ['approver', 'fibu.write', 'sales.write', 'crm.write', 'disponent', 'operator'],
-  },
-]
 
 const DENSITY_PROFILES: Record<InformationDensity, RoleDensityProfile> = {
   focused: {
@@ -86,16 +76,107 @@ function bumpDensity(density: InformationDensity): InformationDensity {
   return DENSITY_ORDER[Math.min(index + 1, DENSITY_ORDER.length - 1)]
 }
 
-function resolveRoleBaseDensity(roles: string[] | undefined): InformationDensity {
-  const normalizedRoles = (roles ?? []).map(normalizeRole)
-
-  for (const candidate of ROLE_PRIORITY) {
-    if (candidate.matches.some((role) => normalizedRoles.includes(role))) {
-      return candidate.density
+/**
+ * Enhanced role density resolution that utilizes more data from the backend manifest
+ * beyond just recommended_density, making it more dynamic and context-aware
+ */
+export async function resolveRoleDensityProfileFromManifest(
+  roles: string[] | undefined,
+  context?: DensityContext,
+  pageDomain?: string
+): Promise<RoleDensityProfile> {
+  // Fetch the whole manifest
+  const manifest = await fetchUIDensityManifest()
+  
+  // Find the entry for the pageDomain
+  const normalizedPageDomain = normalizeDomain(pageDomain)
+  const entry = manifest.entries.find((candidate) => candidate.page_domain === normalizedPageDomain) ?? null
+  
+  // Start with backend recommended density or fallback to focused
+  let baseDensity: InformationDensity = entry?.recommended_density ?? 'focused'
+  
+  // Enhance base density with additional manifest data
+  if (entry) {
+    // Adjust density based on policy complexity
+    if (entry.policy_rule_ids && entry.policy_rule_ids.length > 3) {
+      baseDensity = bumpDensity(baseDensity)
+    }
+    
+    // Adjust density based on explainability requirements
+    if (entry.requires_explainability || (entry.explainability_statuses && entry.explainability_statuses.length > 0)) {
+      baseDensity = bumpDensity(baseDensity)
+    }
+    
+    // Adjust density based on approval complexity
+    if (entry.requires_human_confirmation || 
+        (entry.approval_roles && entry.approval_roles.length > 2) ||
+        (entry.approval_statuses && entry.approval_statuses.length > 1)) {
+      baseDensity = bumpDensity(baseDensity)
+    }
+    
+    // Adjust density based on command restrictions
+    if (entry.restricted_command_count && entry.restricted_command_count > 5) {
+      baseDensity = bumpDensity(baseDensity)
+    }
+    
+    // Adjust density based on aggregate type complexity
+    if (entry.aggregate_types && entry.aggregate_types.length > 3) {
+      baseDensity = bumpDensity(baseDensity)
+    }
+    
+    // Adjust density based on source contract diversity
+    if (entry.source_contracts && entry.source_contracts.length > 4) {
+      baseDensity = bumpDensity(baseDensity)
     }
   }
-
-  return 'focused'
+  
+  // Resolve role-based density as fallback/adjustment
+  let roleBasedDensity: InformationDensity = 'focused'
+  try {
+    const normalizedRoles = (roles ?? []).map(normalizeRole)
+    
+    // Dynamic role-based mapping that could be enhanced to come from manifest in future
+    const roleDensityMap: Record<string, InformationDensity> = {
+      'admin': 'dense',
+      'manager': 'dense',
+      'fibu.admin': 'dense',
+      'agrar.manager': 'dense',
+      'controlling.admin': 'dense',
+      'approver': 'standard',
+      'fibu.write': 'standard',
+      'sales.write': 'standard',
+      'crm.write': 'standard',
+      'disponent': 'standard',
+      'operator': 'standard',
+      'viewer': 'focused',
+      'guest': 'focused'
+    }
+    
+    // Find highest density role
+    for (const role of normalizedRoles) {
+      const roleDensity = roleDensityMap[role]
+      if (roleDensity) {
+        const currentIndex = DENSITY_ORDER.indexOf(roleBasedDensity)
+        const roleIndex = DENSITY_ORDER.indexOf(roleDensity)
+        if (roleIndex > currentIndex) {
+          roleBasedDensity = roleDensity
+        }
+      }
+    }
+  } catch (error) {
+    // Fallback to focused if role resolution fails
+    roleBasedDensity = 'focused'
+  }
+  
+  // Use the more restrictive density between manifest-based and role-based
+  const finalBaseDensity = 
+    DENSITY_ORDER.indexOf(baseDensity) > DENSITY_ORDER.indexOf(roleBasedDensity)
+      ? baseDensity
+      : roleBasedDensity
+  
+  // Apply context adjustments
+  const adjustedDensity = applyContextAdjustments(finalBaseDensity, context)
+  return DENSITY_PROFILES[adjustedDensity]
 }
 
 function applyContextAdjustments(baseDensity: InformationDensity, context?: DensityContext): InformationDensity {
@@ -136,11 +217,43 @@ function applyContextAdjustments(baseDensity: InformationDensity, context?: Dens
   return density
 }
 
+// Keep the original function for backward compatibility
 export function resolveRoleDensityProfile(
   roles: string[] | undefined,
   context?: DensityContext,
 ): RoleDensityProfile {
-  const baseDensity = resolveRoleBaseDensity(roles)
+  // Synchronous fallback - use role-based resolution only
+  const normalizedRoles = (roles ?? []).map(normalizeRole)
+  
+  // Simple role-based mapping
+  const roleDensityMap: Record<string, InformationDensity> = {
+    'admin': 'dense',
+    'manager': 'dense',
+    'fibu.admin': 'dense',
+    'agrar.manager': 'dense',
+    'controlling.admin': 'dense',
+    'approver': 'standard',
+    'fibu.write': 'standard',
+    'sales.write': 'standard',
+    'crm.write': 'standard',
+    'disponent': 'standard',
+    'operator': 'standard',
+  }
+  
+  let baseDensity: InformationDensity = 'focused'
+  
+  // Find highest density role
+  for (const role of normalizedRoles) {
+    const roleDensity = roleDensityMap[role]
+    if (roleDensity) {
+      const currentIndex = DENSITY_ORDER.indexOf(baseDensity)
+      const roleIndex = DENSITY_ORDER.indexOf(roleDensity)
+      if (roleIndex > currentIndex) {
+        baseDensity = roleDensity
+      }
+    }
+  }
+  
   return DENSITY_PROFILES[applyContextAdjustments(baseDensity, context)]
 }
 

@@ -50,3 +50,4 @@ pytest tests/test_process_kernel_wave43_checkpoints_projections.py -q --no-cov
 
 ## Status
 `abgeschlossen`
+Stand: 2026-03-19

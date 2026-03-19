@@ -350,6 +350,10 @@ def test_runtime_health_endpoint_includes_finance_projection_component():
         component for component in body["components"]
         if component["component_id"] == "finance-projections-01"
     )
+    scheduler_component = next(
+        component for component in body["components"]
+        if component["component_type"] == "scheduler_worker"
+    )
     assert body["overall_health"] == "healthy"
     assert finance_component["metrics"]["projection_count"] >= 6
     assert finance_component["metrics"]["persisted_snapshot_count"] == 0
@@ -358,6 +362,7 @@ def test_runtime_health_endpoint_includes_finance_projection_component():
     assert finance_component["metrics"]["last_snapshot_at"] is None
     assert finance_component["metrics"]["last_cursor_advanced_at"] is None
     assert finance_component["metrics"]["last_event_processed"] is None
+    assert scheduler_component["metrics"]["scheduler_status"] in {"ACTIVE", "DEGRADED", "STALE"}
     assert finance_component["metrics"]["projection_cursors"] == []
 
 

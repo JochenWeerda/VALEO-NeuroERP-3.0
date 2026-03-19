@@ -1,22 +1,43 @@
 """
-Gap 011: Versionierte Workflow-Definitionen mit Migrations-Registry.
+Gap 011: Versionierte Workflow-Definitionen und Migrations-Registry.
 Ziel: 0 ungeplante Workflow-Brüche bei Releases.
+
+Enthält außerdem merge_workflow_variants für Prozess-Varianten (process_config).
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Callable, Dict, List, Optional
-from pydantic import BaseModel, Field
+from typing import Any, Callable, Dict, List, Optional
 
 from app.services.workflow_guards import (
-    guard_total_positive,
-    guard_price_not_below_cost,
     guard_has_approval_role,
     guard_has_submit_role,
+    guard_price_not_below_cost,
+    guard_total_positive,
 )
 
 TransitionGuard = Callable[[dict], tuple[bool, str]]
+
+
+@dataclass
+class WorkflowDefinition:
+    """Tenant-spezifische oder globale Workflow-Definition (Process-Kernel-Kontrakt)."""
+
+    process_key: str
+    version: int
+    status: str = "active"
+    origin: str = "default"
+    tenant_id: Optional[str] = None
+    steps: List[str] = None
+    required_roles: Dict[str, List[str]] = None
+    description: str = ""
+
+    def __post_init__(self) -> None:
+        if self.steps is None:
+            self.steps = []
+        if self.required_roles is None:
+            self.required_roles = {}
 
 
 @dataclass
@@ -36,31 +57,15 @@ class WorkflowDef:
     description: str = ""
 
 
-# State-Migration: (from_version, to_version) -> (old_state -> new_state)
-MigrationFn = Callable[[str], str]
-MIGRATIONS: Dict[tuple[str, str], MigrationFn] = {}
+# Registry: (domain, version) -> WorkflowDef
+_REGISTRY: Dict[tuple[str, str], WorkflowDef] = {}
+
+# Migrationen: (domain, from_version, to_version) -> Callable[[str], str]
+_MIGRATIONS: Dict[tuple[str, str, str], Callable[[str], str]] = {}
 
 
-def register_migration(domain: str, from_ver: str, to_ver: str, fn: MigrationFn) -> None:
-    """Registriert eine Migrationsfunktion für Workflow-Upgrades."""
-    MIGRATIONS[(domain, f"{from_ver}->{to_ver}")] = fn
-
-
-def migrate_state(domain: str, from_ver: str, to_ver: str, state: str) -> str:
-    """
-    Migriert einen State von alter zu neuer Workflow-Version.
-    Falls keine Migration registriert: 1:1 übernehmen (state unverändert).
-    """
-    key = (domain, f"{from_ver}->{to_ver}")
-    fn = MIGRATIONS.get(key)
-    if fn:
-        return fn(state)
-    return state
-
-
-# Default-Definitionen (Version 1) – kompatibel mit bisherigem Verhalten
-DEFAULT_DEFINITIONS: List[WorkflowDef] = [
-    WorkflowDef(
+def _register_sales_v1() -> None:
+    _REGISTRY[("sales", "1")] = WorkflowDef(
         domain="sales",
         version="1",
         states=["draft", "pending", "approved", "posted", "rejected"],
@@ -71,8 +76,11 @@ DEFAULT_DEFINITIONS: List[WorkflowDef] = [
             TransitionDef("post", "approved", "posted", guard_total_positive),
         ],
         description="Sales Order Workflow v1",
-    ),
-    WorkflowDef(
+    )
+
+
+def _register_purchase_v1() -> None:
+    _REGISTRY[("purchase", "1")] = WorkflowDef(
         domain="purchase",
         version="1",
         states=["draft", "pending", "approved", "posted", "rejected"],
@@ -83,91 +91,74 @@ DEFAULT_DEFINITIONS: List[WorkflowDef] = [
             TransitionDef("post", "approved", "posted", guard_total_positive),
         ],
         description="Purchase Order Workflow v1",
-    ),
-]
-
-_REGISTRY: Dict[tuple[str, str], WorkflowDef] = {}
+    )
 
 
-def _build_registry() -> Dict[tuple[str, str], WorkflowDef]:
+def _bootstrap() -> None:
     if not _REGISTRY:
-        for wf in DEFAULT_DEFINITIONS:
-            _REGISTRY[(wf.domain, wf.version)] = wf
-    return _REGISTRY
+        _register_sales_v1()
+        _register_purchase_v1()
 
 
 def get_workflow_def(domain: str, version: str = "1") -> Optional[WorkflowDef]:
-    """Holt Workflow-Definition für Domain und Version."""
-    reg = _build_registry()
-    return reg.get((domain, version))
+    """Workflow-Definition für Domain und Version abrufen."""
+    _bootstrap()
+    return _REGISTRY.get((domain, version))
 
 
 def get_latest_version(domain: str) -> str:
-    """Holt die neueste Version für eine Domain."""
-    reg = _build_registry()
-    versions = [v for (d, v) in reg if d == domain]
+    """Aktuelle Version für eine Domain (für neue Instanzen)."""
+    _bootstrap()
+    versions = [v for (d, v) in _REGISTRY if d == domain]
     return max(versions) if versions else "1"
 
 
-def register_definition(wf: WorkflowDef) -> None:
-    """Registriert eine zusätzliche Workflow-Definition (z.B. aus DB/Config)."""
-    _build_registry()
-    _REGISTRY[(wf.domain, wf.version)] = wf
+def migrate_state(
+    domain: str, from_version: str, to_version: str, current_state: str
+) -> str:
+    """
+    Migriert einen State von alter auf neue Workflow-Version.
+    Bei unbekannter Migration: State unverändert, wenn in neuer Def vorhanden.
+    """
+    _bootstrap()
+    if from_version == to_version:
+        return current_state
+    key = (domain, from_version, to_version)
+    fn = _MIGRATIONS.get(key)
+    if fn:
+        return fn(current_state)
+    new_def = get_workflow_def(domain, to_version)
+    if new_def and current_state in new_def.states:
+        return current_state
+    return new_def.states[0] if new_def and new_def.states else current_state
 
 
-class WorkflowStepSla(BaseModel):
-    timeout_hours: int | None = Field(default=None, ge=0)
-    escalation_roles: list[str] = Field(default_factory=list)
+def register_definition(defn: WorkflowDef) -> None:
+    """Registriert eine Workflow-Definition (Tests/Erweiterungen)."""
+    _REGISTRY[(defn.domain, defn.version)] = defn
 
 
-class WorkflowDefinition(BaseModel):
-    process_key: str | None = Field(default=None, min_length=1)
-    version: int = Field(default=1, ge=1)
-    origin: str = Field(default="default", min_length=1)
-    tenant_id: str | None = None
-    status: str = "active"
-    steps: list[str] = Field(default_factory=list)
-    required_roles: dict[str, list[str]] = Field(default_factory=dict)
-    step_sla: dict[str, WorkflowStepSla] = Field(default_factory=dict)
-    description: str | None = None
-
-
-class WorkflowVariantsPayload(BaseModel):
-    variants: dict[str, WorkflowDefinition] = Field(default_factory=dict)
+def register_migration(
+    domain: str, from_version: str, to_version: str, fn: Callable[[str], str]
+) -> None:
+    """Registriert eine Migrationsfunktion."""
+    _MIGRATIONS[(domain, from_version, to_version)] = fn
 
 
 def merge_workflow_variants(
-    defaults: dict[str, dict],
-    custom: object,
-    *,
+    default_variants: dict[str, dict[str, Any]],
+    custom_variants: dict[str, dict[str, Any]] | None,
     tenant_id: str | None = None,
-) -> dict[str, WorkflowDefinition]:
-    merged: dict[str, WorkflowDefinition] = {}
-
-    for process_key, definition in defaults.items():
-        merged[process_key] = WorkflowDefinition.model_validate(
-            {
-                **definition,
-                "process_key": process_key,
-                "origin": "default",
-                "tenant_id": tenant_id,
-            }
-        )
-
-    if isinstance(custom, dict):
-        for process_key, definition in custom.items():
-            if not isinstance(definition, dict):
-                continue
-            base = merged.get(process_key)
-            merged[process_key] = WorkflowDefinition.model_validate(
-                {
-                    **(base.model_dump() if base else {}),
-                    **definition,
-                    "process_key": process_key,
-                    "origin": definition.get("origin")
-                    or ("tenant-override" if tenant_id else "custom"),
-                    "tenant_id": tenant_id,
-                }
-            )
-
-    return merged
+) -> dict[str, dict[str, Any]]:
+    """
+    Merge der Standard-Prozessvarianten mit tenant-spezifischen Overrides.
+    Verwendet von finance_read_models und admin_core.
+    """
+    result = dict(default_variants)
+    if custom_variants and isinstance(custom_variants, dict):
+        for key, override in custom_variants.items():
+            if isinstance(override, dict) and key in result:
+                result[key] = {**result[key], **override}
+            elif isinstance(override, dict):
+                result[key] = dict(override)
+    return result

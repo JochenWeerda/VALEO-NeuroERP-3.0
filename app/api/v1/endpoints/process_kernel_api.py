@@ -9,7 +9,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
 from ....core.action_execution import (
     ActionExecutionRequest,
@@ -261,6 +261,7 @@ from ....core.workflow_lock_contracts import (
     akquiriere_lock,
     get_default_locks,
 )
+from ....core.database import get_db
 from ....core.process_archive_contracts import (
     ArchivStatus,
     ArchivierungsGrund,
@@ -5349,3 +5350,173 @@ def liste_knoten_typen():
         "knoten_typen": [t.value for t in KnotenTyp],
         "kanten_stile": [s.value for s in KantenStil],
     }
+
+
+# Wave 69 - Central Knowledge Core
+@router.get("/knowledge/objekte", tags=["process-kernel"])
+def liste_knowledge_objekte(db=Depends(get_db)):
+    from app.core.knowledge_runtime import load_runtime_knowledge_objects
+
+    return [obj.as_dict() for obj in load_runtime_knowledge_objects(db)]
+
+
+@router.get("/knowledge/objekte/{knowledge_id}", tags=["process-kernel"])
+def hole_knowledge_objekt(knowledge_id: str, version: int | None = None, db=Depends(get_db)):
+    from app.core.knowledge_runtime import load_runtime_knowledge_object
+
+    try:
+        obj = load_runtime_knowledge_object(db, knowledge_id)
+        if obj is None:
+            raise ValueError(f"KnowledgeObject {knowledge_id!r} nicht gefunden")
+        return obj.as_dict(version=version)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@router.post("/knowledge/retrieve", tags=["process-kernel"])
+def retrieve_knowledge(payload: dict, db=Depends(get_db)):
+    from app.core.knowledge_core_contracts import (
+        KnowledgeObjectTyp,
+        KnowledgeRetrievalRequest,
+        KnowledgeStatus,
+    )
+    from app.core.knowledge_runtime import retrieve_runtime_knowledge
+
+    status = KnowledgeStatus.FREIGEGEBEN
+    if "status" in payload:
+        status = KnowledgeStatus(payload["status"]) if payload["status"] is not None else None
+
+    request = KnowledgeRetrievalRequest(
+        query=payload.get("query", ""),
+        typen=[KnowledgeObjectTyp(typ) for typ in payload.get("typen", [])],
+        tags=list(payload.get("tags", [])),
+        tenant_id=payload.get("tenant_id"),
+        status=status,
+        nur_agentenfaehig=bool(payload.get("nur_agentenfaehig", False)),
+        rolle=payload.get("rolle"),
+        limit=int(payload.get("limit", 10)),
+    )
+    ergebnisse = retrieve_runtime_knowledge(db, request)
+    return {
+        "query": request.query,
+        "anzahl": len(ergebnisse),
+        "ergebnisse": ergebnisse,
+    }
+
+
+@router.post("/knowledge/onboarding-bundle", tags=["process-kernel"])
+def knowledge_onboarding_bundle(payload: dict, db=Depends(get_db)):
+    from app.core.knowledge_runtime import build_runtime_onboarding_bundle
+
+    rolle = payload.get("rolle")
+    if not rolle:
+        raise HTTPException(status_code=400, detail="Feld 'rolle' ist erforderlich")
+    return build_runtime_onboarding_bundle(
+        db=db,
+        rolle=rolle,
+        tenant_id=payload.get("tenant_id"),
+        limit=int(payload.get("limit", 5)),
+    )
+
+
+@router.post("/knowledge/context-pack", tags=["process-kernel"])
+def knowledge_context_pack(payload: dict, db=Depends(get_db)):
+    from app.core.knowledge_core_contracts import KnowledgeChannel
+    from app.core.knowledge_runtime import build_runtime_context_pack
+
+    rolle = payload.get("rolle")
+    if not rolle:
+        raise HTTPException(status_code=400, detail="Feld 'rolle' ist erforderlich")
+
+    kanal = KnowledgeChannel(payload.get("kanal", KnowledgeChannel.CHAT.value))
+    pack = build_runtime_context_pack(
+        db=db,
+        rolle=rolle,
+        kanal=kanal,
+        tenant_id=payload.get("tenant_id"),
+        capability_key=payload.get("capability_key"),
+        query=payload.get("query", ""),
+        limit=int(payload.get("limit", 4)),
+    )
+    return pack.as_dict()
+
+
+@router.get("/knowledge/store/objekte", tags=["process-kernel"])
+def liste_persistente_knowledge_objekte(db=Depends(get_db)):
+    from app.repositories.knowledge_repository import KnowledgeRepository
+
+    repo = KnowledgeRepository(db)
+    return [obj.as_dict() for obj in repo.list_domain_objects()]
+
+
+@router.get("/knowledge/store/objekte/{knowledge_id}", tags=["process-kernel"])
+def hole_persistentes_knowledge_objekt(knowledge_id: str, version: int | None = None, db=Depends(get_db)):
+    from app.repositories.knowledge_repository import KnowledgeRepository
+
+    repo = KnowledgeRepository(db)
+    record = repo.get_object(knowledge_id)
+    if record is None:
+        raise HTTPException(status_code=404, detail=f"KnowledgeObject {knowledge_id!r} nicht gefunden")
+    return repo.to_domain_object(record).as_dict(version=version)
+
+
+@router.post("/knowledge/store/objekte", status_code=201, tags=["process-kernel"])
+def erstelle_persistentes_knowledge_objekt(payload: dict, db=Depends(get_db)):
+    from app.repositories.knowledge_repository import KnowledgeRepository
+
+    version_payload = payload.get("version")
+    if not version_payload:
+        raise HTTPException(status_code=400, detail="Feld 'version' ist erforderlich")
+
+    repo = KnowledgeRepository(db)
+    if repo.get_object(payload["knowledge_id"]) is not None:
+        raise HTTPException(status_code=409, detail=f"KnowledgeObject {payload['knowledge_id']!r} existiert bereits")
+
+    record = repo.create_object(
+        knowledge_id=payload["knowledge_id"],
+        titel=payload["titel"],
+        typ=payload["typ"],
+        status=payload.get("status", "ENTWURF"),
+        tenant_id=payload.get("tenant_id", "system"),
+        beschreibung=payload.get("beschreibung", ""),
+        tags=list(payload.get("tags", [])),
+        zielrollen=list(payload.get("zielrollen", [])),
+        agentenfreigabe=bool(payload.get("agentenfreigabe", True)),
+        version_payload=version_payload,
+    )
+    return repo.to_domain_object(record).as_dict()
+
+
+@router.post("/knowledge/store/objekte/{knowledge_id}/versionen", tags=["process-kernel"])
+def fuege_persistente_knowledge_version_hinzu(knowledge_id: str, payload: dict, db=Depends(get_db)):
+    from app.repositories.knowledge_repository import KnowledgeRepository
+
+    repo = KnowledgeRepository(db)
+    record = repo.add_version(knowledge_id, payload)
+    if record is None:
+        raise HTTPException(status_code=404, detail=f"KnowledgeObject {knowledge_id!r} nicht gefunden")
+    return repo.to_domain_object(record).as_dict()
+
+
+@router.post("/knowledge/store/retrieve", tags=["process-kernel"])
+def retrieve_persisted_knowledge(payload: dict, db=Depends(get_db)):
+    from app.core.knowledge_core_contracts import KnowledgeObjectTyp, KnowledgeRetrievalRequest, KnowledgeStatus
+    from app.repositories.knowledge_repository import KnowledgeRepository
+
+    status = KnowledgeStatus.FREIGEGEBEN
+    if "status" in payload:
+        status = KnowledgeStatus(payload["status"]) if payload["status"] is not None else None
+
+    request = KnowledgeRetrievalRequest(
+        query=payload.get("query", ""),
+        typen=[KnowledgeObjectTyp(typ) for typ in payload.get("typen", [])],
+        tags=list(payload.get("tags", [])),
+        tenant_id=payload.get("tenant_id"),
+        status=status,
+        nur_agentenfaehig=bool(payload.get("nur_agentenfaehig", False)),
+        rolle=payload.get("rolle"),
+        limit=int(payload.get("limit", 10)),
+    )
+    repo = KnowledgeRepository(db)
+    ergebnisse = repo.retrieve(request)
+    return {"query": request.query, "anzahl": len(ergebnisse), "ergebnisse": ergebnisse}

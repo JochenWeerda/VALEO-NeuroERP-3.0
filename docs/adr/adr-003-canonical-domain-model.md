@@ -1,5 +1,5 @@
 # ADR-003 Canonical Domain Model
-**Status:** Accepted  
+**Status:** Accepted
 **Date:** 2026-03-11
 ## Context
 VALEO NeuroERP deckt bereits viele Fachbereiche ab. Mit wachsender Prozessbreite steigt aber das Risiko konkurrierender Fachmodelle in UI, API, Read-Models, Agent-Contracts und Integrationen. Ohne verbindliches Referenzmodell entstehen Schattenmodelle, doppelte Transformationen und inkonsistente Prozesslogik.

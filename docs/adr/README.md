@@ -1,5 +1,11 @@
 # ADR Index
 
+**Zweck:** `Referenzdokument` fuer den ADR-Bestand. Nicht der operative Lieferstand.
+
+## Einordnung
+
+Diese Datei ist eine `abgeleitete Sicht` auf die Architecture Decision Records. Operative Architektur- und Delivery-Sichten liegen in [Architecture Index](../architecture/index.md) und [Process Kernel Status](../architecture/process-kernel/STATUS.md).
+
 - [ADR-001 FiBu Domain Reuse vs Rewrite](adr-001-fibu-domain-reuse-vs-rewrite.md)
 - [ADR-002 FiBu Frontend API Layer](adr-002-fibu-frontend-api-layer.md)
 - [ADR-003 Canonical Domain Model](adr-003-canonical-domain-model.md)
@@ -30,3 +36,8 @@
 - [ADR-028 Workflow Access Control und Delegation](adr-028-workflow-access-control-und-delegation.md)
 - [ADR-029 Process-Betrieb — Timeout, Batch, Archiv und Metriken](adr-029-process-betrieb-timeout-batch-archiv-metriken.md)
 - [ADR-CRM-001](ADR-CRM-001.md)
+
+## Referenzen
+
+- [Architecture Index](../architecture/index.md)
+- [Process Kernel Status](../architecture/process-kernel/STATUS.md)

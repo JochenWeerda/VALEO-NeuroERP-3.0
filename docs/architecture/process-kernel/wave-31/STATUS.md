@@ -62,4 +62,4 @@ Pflichtfelder, Duplikate, Referenzwerte und Wertebereiche.
 - Der gemeinsame Contract prueft Top-Level- und Feldtypen fuer `pipeline_integration`, `pipelines` und `apm_phases`; Schema-Drift fuehrt zu einem harten `PipelineConfigContractError`.
 - Verifiziert ueber `tests/test_apm_pipeline_contract.py` mit `4` grünen Tests.
 - `scripts/activate_pipeline_mode.py` verwendet jetzt denselben JSON-State-Contract statt auf beliebige Loaderfehler mit einem stillen `{\"pipelines\": {}}`-Fallback zu reagieren.
-- Die fruehere GENXAIS-Script- und Dashboard-Nebenwelt ist inzwischen aus dem produktiven Anwendungspfad entfernt; die fachliche Orchestrierung liegt unter `app/agents`.
+- Die fruehere Script- und Dashboard-Nebenwelt ist inzwischen aus dem produktiven Anwendungspfad entfernt; die fachliche Orchestrierung liegt unter `app/agents`.

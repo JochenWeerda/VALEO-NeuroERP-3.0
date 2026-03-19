@@ -1,4 +1,4 @@
-﻿"""Core admin endpoints used by the settings/admin frontend."""
+"""Core admin endpoints used by the settings/admin frontend."""
 
 from __future__ import annotations
 
@@ -1470,7 +1470,15 @@ async def preview_workflow_sandbox(
     if not matches:
         warnings.append("Keine saisonale Kampagne aktiv. Die Vorschau basiert nur auf der Prozessvariante.")
 
-    definition_dump = process_variant.model_dump()
+    import dataclasses as _dc
+    if isinstance(process_variant, dict):
+        definition_dump = process_variant
+    elif hasattr(process_variant, "model_dump"):
+        definition_dump = process_variant.model_dump()
+    elif _dc.is_dataclass(process_variant):
+        definition_dump = _dc.asdict(process_variant)
+    else:
+        definition_dump = {}
     steps = definition_dump.get("steps")
     required_roles = definition_dump.get("required_roles")
     step_sla = definition_dump.get("step_sla")
@@ -1478,9 +1486,9 @@ async def preview_workflow_sandbox(
     return WorkflowSandboxPreviewOut(
         process_key=payload.process_key,
         simulation_date=simulation_date.isoformat(),
-        definition_version=process_variant.version,
-        definition_origin=process_variant.origin,
-        definition_status=process_variant.status,
+        definition_version=definition_dump.get("version", 1),
+        definition_origin=definition_dump.get("origin", "default"),
+        definition_status=definition_dump.get("status", "active"),
         steps=[str(step) for step in steps] if isinstance(steps, list) else [],
         required_roles={
             str(step): [str(role) for role in roles]

@@ -1,49 +1,69 @@
-# Wave 54 — Retry Policies + Workflow Checkpoint Contracts
+# Wave 54 - Retry Policies + Workflow Checkpoint Contracts
 
-**Status:** ABGESCHLOSSEN
+**Status:** abgeschlossen
 **Datum:** 2026-03-16
-**Tests:** 150 grün, 0 Fehler
+**Tests:** 150 gruen, 0 Fehler
 
-## Module
+## Scope
+
+Wave 54 liefert Retry-Strategien fuer fehlertolerante Verarbeitung und Checkpoint-Contracts fuer Wiederherstellungspunkte in Workflows.
+
+## Zielbild
+
+Der Kernel stellt Wiederholungslogik und Recovery-Punkte als standardisierte, testbare Domain-Bausteine bereit.
+
+## Lieferumfang
 
 ### `app/core/process_retry_contracts.py`
-- `RetryStrategie` (5 Werte): KEIN_RETRY, FESTER_INTERVALL, LINEARES_BACKOFF, EXPONENTIELLES_BACKOFF, JITTER
-- `RetryStatus` (5 Werte): AUSSTEHEND, LAUFEND, ERFOLGREICH, ERSCHOEPFT, AUFGEGEBEN
-- `RetryRegel.berechne_verzoegerung(versuch_nummer)` — backoff-Berechnung für alle Strategien mit Cap
-- `RetryZustand.kann_nochmal_versuchen(regel)` — Prüfung ob Retry möglich
-- `RetryZustand.naechsten_versuch_planen(regel, jetzt)` — immutable Zustandsübergang
-- `get_default_retry_regeln()` — 5 vordefinierte Regeln (RR-001..RR-005)
+
+- `RetryStrategie` mit fuenf Strategien
+- `RetryStatus` mit fuenf Statuswerten
+- `RetryRegel.berechne_verzoegerung()`
+- `RetryZustand.kann_nochmal_versuchen()`
+- `RetryZustand.naechsten_versuch_planen()`
+- `get_default_retry_regeln()` mit fuenf Regeln
 
 ### `app/core/workflow_checkpoint_contracts_wave54.py`
-- `CheckpointTyp` (4 Werte): AUTOMATISCH, MANUELL, VOR_KRITISCHEM_SCHRITT, NACH_FEHLER
-- `CheckpointStatus` (4 Werte): AKTUELL, VERALTET, WIEDERHERGESTELLT, KORRUPT
-- `WorkflowCheckpoint.ist_verwendbar()` — True für AKTUELL und WIEDERHERGESTELLT
-- `CheckpointSequenz.aktuellster_checkpoint()` — höchster verwendbarer Schritt
-- `CheckpointSequenz.wiederherstellungs_punkt(ab_schritt)` — Recovery-Punkt <= ab_schritt
-- `get_default_checkpoint_sequenzen()` — 3 Demo-Sequenzen (Kontrakt, Settlement, leer)
 
-## FastAPI Endpoints (appended to `process_kernel_api.py`)
-- `GET /api/v1/process-kernel/retry/regeln` — alle 5 Retry-Regeln
-- `POST /api/v1/process-kernel/retry/berechne-verzoegerung` — Verzögerung für Strategie+Versuch
-- `GET /api/v1/process-kernel/checkpoint/sequenzen` — Checkpoint-Sequenzen mit aktuellem Schritt
-- `POST /api/v1/process-kernel/checkpoint/wiederherstellungspunkt` — Recovery-Checkpoint für Instanz+Schritt
+- `CheckpointTyp` mit vier Werten
+- `CheckpointStatus` mit vier Werten
+- `WorkflowCheckpoint.ist_verwendbar()`
+- `CheckpointSequenz.aktuellster_checkpoint()`
+- `CheckpointSequenz.wiederherstellungs_punkt()`
+- `get_default_checkpoint_sequenzen()` mit drei Demo-Sequenzen
 
-## Testabdeckung (150 Tests)
+### FastAPI-Endpunkte
+
+- `GET /api/v1/process-kernel/retry/regeln`
+- `POST /api/v1/process-kernel/retry/berechne-verzoegerung`
+- `GET /api/v1/process-kernel/checkpoint/sequenzen`
+- `POST /api/v1/process-kernel/checkpoint/wiederherstellungspunkt`
+
+## Abnahmekriterien
+
+- Alle fuenf Retry-Strategien berechnen reproduzierbare Verzoegerungen mit Cap-Verhalten.
+- Checkpoints liefern den aktuellsten verwendbaren Stand sowie gueltige Wiederherstellungspunkte.
+- Fuenf Retry-Regeln und drei Demo-Sequenzen sind als Default verfuegbar.
+- Die vier API-Endpunkte stellen Retry- und Checkpoint-Funktionen bereit.
+
+## Tests
+
 | Bereich | Tests |
 |---------|-------|
 | RetryStrategie/Status Enums | 13 |
-| berechne_verzoegerung KEIN_RETRY | 5 |
-| berechne_verzoegerung FESTER_INTERVALL | 6 |
-| berechne_verzoegerung LINEARES_BACKOFF | 7 |
-| berechne_verzoegerung EXPONENTIELLES_BACKOFF | 8 |
-| berechne_verzoegerung JITTER | 7 |
-| kann_nochmal_versuchen | 9 |
-| naechsten_versuch_planen | 13 |
-| get_default_retry_regeln | 15 |
+| `berechne_verzoegerung()` | 33 |
+| `kann_nochmal_versuchen()` | 9 |
+| `naechsten_versuch_planen()` | 13 |
+| `get_default_retry_regeln()` | 15 |
 | CheckpointTyp/Status Enums | 10 |
-| ist_verwendbar | 6 |
-| aktuellster_checkpoint | 8 |
-| wiederherstellungs_punkt | 10 |
-| get_default_checkpoint_sequenzen | 19 |
-| Edge cases + Integration | 14 |
-| **Gesamt** | **150** |
+| `ist_verwendbar()` | 6 |
+| `aktuellster_checkpoint()` | 8 |
+| `wiederherstellungs_punkt()` | 10 |
+| `get_default_checkpoint_sequenzen()` | 19 |
+| Edge Cases + Integration | 14 |
+| Gesamt | 150 |
+
+## Status
+
+`abgeschlossen`
+Stand: 2026-03-16

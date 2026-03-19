@@ -85,6 +85,7 @@ export interface Tab {
 export interface Action {
   key: string
   label: string
+  labelKey?: string // i18n-Key für Label
   type: 'primary' | 'secondary' | 'danger'
   icon?: string
   /** Optional when ObjectPage/OverviewPage use onAction to dispatch by key */

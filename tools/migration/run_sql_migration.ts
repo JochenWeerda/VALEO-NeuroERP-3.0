@@ -4,8 +4,11 @@
  * Accepts either a single --file or a --dir containing *.sql files.
  */
 import { promises as fs } from 'fs';
-import path from 'path';
+import * as path from 'path';
 import { Pool } from 'pg';
+import { config as loadEnv } from 'dotenv';
+
+loadEnv();
 
 interface CliOptions {
   connectionString: string;

@@ -26,6 +26,9 @@ def test_skonto_optimizer():
     assert "payment_plan" in result
     assert "total_discount" in result
     assert "recommendations" in result
+    assert result["current_stage_key"] == "closure"
+    assert result["stage_transition_log"][0]["stage_key"] == "intake"
+    assert result["gate_decisions"][0]["gate_type"] == "policy_gate"
     assert isinstance(result["total_discount"], float)
     assert result["total_discount"] >= 0
 
@@ -46,6 +49,8 @@ def test_compliance_copilot_customer():
     assert "violations" in result
     assert "risk_score" in result
     assert "recommendations" in result
+    assert result["current_stage_key"] == "closure"
+    assert result["gate_decisions"][0]["status"] == "blocked"
     
     # Should have violation for missing PSM-Nachweis
     assert len(result["violations"]) > 0
@@ -67,6 +72,7 @@ def test_compliance_copilot_no_violations():
     
     assert result["risk_score"] == 0.0
     assert len(result["violations"]) == 0
+    assert result["gate_decisions"][0]["status"] == "allowed"
 
 
 def test_bestellvorschlag_workflow_build():

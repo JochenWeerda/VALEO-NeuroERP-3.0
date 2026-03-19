@@ -1,6 +1,6 @@
 # ADR-023 Governance für Rollen- und Berechtigungsvererbung
 
-**Status:** Accepted  
+**Status:** Accepted
 **Date:** 2026-03-11
 
 ## Context

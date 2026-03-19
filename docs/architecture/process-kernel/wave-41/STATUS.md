@@ -47,3 +47,4 @@ pytest tests/test_process_kernel_wave41_capacity_replay.py -q --no-cov
 
 ## Status
 `abgeschlossen`
+Stand: 2026-03-19

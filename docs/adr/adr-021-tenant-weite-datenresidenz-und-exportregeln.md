@@ -1,6 +1,6 @@
 # ADR-021 Tenant-weite Datenresidenz- und Exportregeln
 
-**Status:** Accepted  
+**Status:** Accepted
 **Date:** 2026-03-11
 
 ## Context

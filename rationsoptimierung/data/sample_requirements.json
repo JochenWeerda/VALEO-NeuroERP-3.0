@@ -1,0 +1,14 @@
+{
+  "dmi_kg": 22.0,
+  "me_min_mj": 220.0,
+  "sidp_min_g": 3200,
+  "andfom_min_g": 5500,
+  "andfom_max_g": 7500,
+  "starch_max_g": 4000,
+  "sugar_max_g": 1000,
+  "fat_max_g": 1200,
+  "ca_min_g": 100,
+  "p_min_g": 60,
+  "na_min_g": 8,
+  "forage_share_min": 0.4
+}

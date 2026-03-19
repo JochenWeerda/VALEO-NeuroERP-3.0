@@ -1,5 +1,5 @@
 # ADR-004 Command-/Action-Layer
-**Status:** Accepted  
+**Status:** Accepted
 **Date:** 2026-03-11
 ## Context
 Das Produkt besitzt bereits UI-Masken, Toolbar-Aktionen, Quick Actions, Command Palette, Voice- und Agent-Ansatzpunkte. Fuer prozessrelevante Fachlogik reicht ein page-zentriertes CRUD-Modell jedoch nicht aus. Agenten, Policies, Workflows, Retries, Audit und Explainability benoetigen stabile Business-Aktionen mit klarer Semantik.

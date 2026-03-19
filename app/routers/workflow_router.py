@@ -1,5 +1,5 @@
 """
-Workflow Router
+Workflow Router (Gap 011: versionierte Workflow-Engine).
 Persisted workflow endpoints (no in-memory runtime state).
 """
 
@@ -41,10 +41,28 @@ async def get_status(
     repo: WorkflowRepository = Depends(get_workflow_repo),
 ):
     try:
-        return {"ok": True, "state": repo.get_status(domain, number)}
+        state, version = repo.get_status_with_version(domain, number)
+        return {"ok": True, "state": state, "workflow_version": version}
     except Exception as exc:
         logger.error("Failed to get workflow status: %s", exc)
         raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+@router.post("/{domain}/{number}/migrate")
+async def migrate_workflow(
+    domain: Literal["sales", "purchase"],
+    number: str,
+    payload: dict = Body(...),
+    repo: WorkflowRepository = Depends(get_workflow_repo),
+):
+    """Migriert Workflow-Instanz auf neue Version (Gap 011)."""
+    target_version = payload.get("target_version") or payload.get("version")
+    if not target_version:
+        raise HTTPException(status_code=400, detail="target_version required")
+    if not repo.migrate_to_version(domain, number, str(target_version)):
+        raise HTTPException(status_code=404, detail="Workflow instance not found")
+    state, version = repo.get_status_with_version(domain, number)
+    return {"ok": True, "state": state, "workflow_version": version}
 
 
 @router.post("/{domain}/{number}/transition")
@@ -59,13 +77,13 @@ async def do_transition(
         resolved_action = action or payload.get("action")
         if resolved_action not in {"submit", "approve", "reject", "post"}:
             raise HTTPException(status_code=400, detail="Invalid action")
-        cur = repo.get_status(domain, number)
-        ok, nxt, msg = workflow.next(domain, cur, resolved_action, payload)
+        cur, version = repo.get_status_with_version(domain, number)
+        ok, nxt, msg = workflow.next(domain, cur, resolved_action, payload, version=version)
         if not ok:
             raise HTTPException(status_code=400, detail=msg)
 
         reason = payload.get("reason") if isinstance(payload.get("reason"), str) else None
-        repo.set_status(domain, number, nxt, user=None)
+        repo.set_status(domain, number, nxt, user=None, workflow_version=version)
         repo.add_audit(domain, number, cur, nxt, resolved_action, user=None, reason=reason)
 
         workflow_transitions_total.labels(domain=domain, action=resolved_action, status=nxt).inc()

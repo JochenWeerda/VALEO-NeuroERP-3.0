@@ -6,6 +6,7 @@ Betriebsmetriken, Rebuild und Replay für den Process Kernel.
 from __future__ import annotations
 
 import uuid
+from datetime import datetime
 from typing import Any
 
 from fastapi import APIRouter, Depends
@@ -21,6 +22,9 @@ from ....core.runtime_operations import (
     RebuildRequest,
     ComponentHealth,
 )
+from ....core.scheduler_heartbeat import HeartbeatHealthResult, SchedulerNodeStatus
+from ....core.scheduler_recovery import build_scheduler_runtime_component
+from ....services.scheduler_service import get_scheduler_status
 router = APIRouter(prefix="/runtime", tags=["runtime", "operations"])
 
 _replay_requests: list[ReplayRequest] = []
@@ -74,6 +78,29 @@ def _build_runtime_report(tenant_id: str, db: Any = None) -> RuntimeHealthReport
         1 for r in _rebuild_requests
         if r.tenant_id == tenant_id and r.status == "pending"
     )
+    scheduler_status = get_scheduler_status()
+    heartbeat = scheduler_status.get("heartbeat") or {}
+    if heartbeat:
+        scheduler_component = build_scheduler_runtime_component(
+            HeartbeatHealthResult(
+                scheduler_id=heartbeat["scheduler_id"],
+                status=SchedulerNodeStatus(heartbeat["status"]),
+                active_worker_ids=tuple(heartbeat.get("active_worker_ids", [])),
+                degraded_worker_ids=tuple(heartbeat.get("degraded_worker_ids", [])),
+                stale_worker_ids=tuple(heartbeat.get("stale_worker_ids", [])),
+                running_job_ids=tuple(heartbeat.get("running_job_ids", [])),
+                evaluated_at=datetime.fromisoformat(heartbeat["evaluated_at"]),
+                stale_after_seconds=int(heartbeat["stale_after_seconds"]),
+                degrade_after_seconds=int(heartbeat["degrade_after_seconds"]),
+            ),
+            worker_id=scheduler_status.get("worker_id", "scheduler-worker"),
+            last_heartbeat_at=(
+                datetime.fromisoformat(heartbeat["last_heartbeat"]["heartbeat_at"])
+                if heartbeat.get("last_heartbeat")
+                else None
+            ),
+        )
+        report.components.append(scheduler_component)
     report.overall_health = report.compute_overall_health()
     return report
 

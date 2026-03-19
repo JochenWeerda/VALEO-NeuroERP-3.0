@@ -176,7 +176,7 @@ function convertField(l3Field: L3Field): Field {
       ...(l3Field.options && {
         options: l3Field.options.map(opt => ({ value: opt, label: opt }))
       })
-    } as SelectField
+    } as unknown as SelectField
   }
 
   if (l3Field.comp === 'Toggle' || l3Field.comp === 'AddressMirrorToggle') {

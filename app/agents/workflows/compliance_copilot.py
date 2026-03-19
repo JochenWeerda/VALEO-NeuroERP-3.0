@@ -26,6 +26,35 @@ class ComplianceCopilotState(TypedDict):
     violations: List[Dict[str, Any]]
     recommendations: List[str]
     risk_score: float  # 0-1
+    current_stage_key: str
+    stage_transition_log: List[Dict[str, Any]]
+    gate_decisions: List[Dict[str, Any]]
+
+
+def _mark_stage(state: ComplianceCopilotState, stage_key: str, detail: str) -> None:
+    state["current_stage_key"] = stage_key
+    state["stage_transition_log"].append(
+        {
+            "stage_key": stage_key,
+            "timestamp": datetime.utcnow().isoformat(),
+            "detail": detail,
+        }
+    )
+
+
+def _set_policy_gate(state: ComplianceCopilotState, status: str, reason: str) -> None:
+    state["gate_decisions"] = [
+        decision for decision in state.get("gate_decisions", []) if decision.get("gate_type") != "policy_gate"
+    ]
+    state["gate_decisions"].append(
+        {
+            "gate_type": "policy_gate",
+            "status": status,
+            "reason": reason,
+            "required_role": None,
+            "schema_version": 1,
+        }
+    )
 
 
 # Compliance Check Definitions
@@ -72,6 +101,7 @@ COMPLIANCE_RULES = {
 # Workflow Nodes
 def identify_applicable_rules(state: ComplianceCopilotState) -> dict:
     """Identify which compliance rules apply to this entity."""
+    _mark_stage(state, "analysis", "Identify applicable compliance rules")
     logger.info(
         f"Identifying compliance rules for {state['entity_type']}..."
     )
@@ -88,12 +118,17 @@ def identify_applicable_rules(state: ComplianceCopilotState) -> dict:
     
     logger.info(f"Found {len(applicable_checks)} applicable rule sets")
     
-    return {"compliance_checks": applicable_checks}
+    return {
+        "compliance_checks": applicable_checks,
+        "current_stage_key": state["current_stage_key"],
+        "stage_transition_log": state["stage_transition_log"],
+    }
 
 
 def run_compliance_checks(state: ComplianceCopilotState) -> dict:
     """Execute compliance checks."""
     logger.info("Running compliance checks...")
+    _mark_stage(state, "analysis", "Run compliance checks")
     
     violations = []
     entity_data = state["entity_data"]
@@ -139,19 +174,35 @@ def run_compliance_checks(state: ComplianceCopilotState) -> dict:
     
     logger.info(f"Found {len(violations)} violations (risk: {risk_score})")
     
+    _mark_stage(state, "proposal", "Build compliance findings and risk proposal")
+    _set_policy_gate(
+        state,
+        "blocked" if violations else "allowed",
+        "Policy findings require follow-up before approval." if violations else "No blocking compliance findings detected.",
+    )
+
     return {
         "violations": violations,
-        "risk_score": risk_score
+        "risk_score": risk_score,
+        "current_stage_key": state["current_stage_key"],
+        "stage_transition_log": state["stage_transition_log"],
+        "gate_decisions": state["gate_decisions"],
     }
 
 
 def generate_recommendations(state: ComplianceCopilotState) -> dict:
     """Generate recommendations based on violations."""
+    _mark_stage(state, "closure", "Generate compliance recommendations and close run")
     recommendations = []
     
     if not state["violations"]:
         recommendations.append("✅ Keine Compliance-Verstöße gefunden")
-        return {"recommendations": recommendations}
+        return {
+            "recommendations": recommendations,
+            "current_stage_key": state["current_stage_key"],
+            "stage_transition_log": state["stage_transition_log"],
+            "gate_decisions": state["gate_decisions"],
+        }
     
     critical = [v for v in state["violations"] if v["severity"] == "critical"]
     high = [v for v in state["violations"] if v["severity"] == "high"]
@@ -172,7 +223,12 @@ def generate_recommendations(state: ComplianceCopilotState) -> dict:
     for violation in state["violations"]:
         recommendations.append(f"• {violation['rule']}: {violation['action']}")
     
-    return {"recommendations": recommendations}
+    return {
+        "recommendations": recommendations,
+        "current_stage_key": state["current_stage_key"],
+        "stage_transition_log": state["stage_transition_log"],
+        "gate_decisions": state["gate_decisions"],
+    }
 
 
 # Build Workflow
@@ -209,7 +265,16 @@ async def check_compliance(
         compliance_checks=[],
         violations=[],
         recommendations=[],
-        risk_score=0.0
+        risk_score=0.0,
+        current_stage_key="intake",
+        stage_transition_log=[
+            {
+                "stage_key": "intake",
+                "timestamp": datetime.utcnow().isoformat(),
+                "detail": "Compliance workflow run created",
+            }
+        ],
+        gate_decisions=[],
     )
     
     result = workflow.invoke(initial_state)
@@ -220,6 +285,9 @@ async def check_compliance(
         "violations": result["violations"],
         "risk_score": result["risk_score"],
         "recommendations": result["recommendations"],
-        "checked_at": datetime.utcnow().isoformat()
+        "checked_at": datetime.utcnow().isoformat(),
+        "current_stage_key": result["current_stage_key"],
+        "stage_transition_log": result["stage_transition_log"],
+        "gate_decisions": result["gate_decisions"],
     }
 

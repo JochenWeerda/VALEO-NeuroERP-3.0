@@ -21,6 +21,7 @@ import {
   Award,
   FileSpreadsheet,
   BarChart3,
+  Calculator,
   ArrowLeft,
   X,
 } from 'lucide-react'
@@ -45,6 +46,7 @@ const customerNavItems: NavItem[] = [
   { label: 'Zertifikate', path: '/portal/zertifikate', icon: Award },
   { label: 'Ackerschlagkartei', path: '/portal/feldbuch', icon: Leaf },
   { label: 'Naehrstoffbilanzen', path: '/portal/naehrstoffbilanzen', icon: BarChart3 },
+  { label: 'Rationsoptimierung', path: '/portal/rationsoptimierung', icon: Calculator },
 ]
 
 const mockCustomer = {

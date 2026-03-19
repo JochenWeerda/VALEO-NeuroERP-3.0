@@ -24,7 +24,7 @@ ein Worker (Celery, NATS, ARQ) angebunden wird.
 | AP3 | `app/api/v1/endpoints/process_kernel_api.py` | `GET /process/bulk-limits[?domain=]` + `POST /process/bulk-operations/validate` | abgeschlossen |
 | AP4 | `app/core/background_jobs.py` | `JobTyp`, `JobStatus`, `BackgroundJob`, `JobPrioritaet`, `JobQueueEntry`, `JobQueue` | abgeschlossen |
 | AP5 | `app/core/background_jobs.py` | `evaluate_job_routing()`, `get_default_job_types()` | abgeschlossen |
-| AP6 | `app/api/v1/endpoints/process_kernel_api.py` | `GET /process/jobs[?typ=][?status=]` + `POST /process/jobs/enqueue` | abgeschlossen |
+| AP6 | `app/api/v1/endpoints/process_kernel_api.py` | `GET /process/jobs[?typ=][?status=]` + `POST /process/jobs/enqueue` + `GET /process/jobs/heartbeat` + `GET /process/jobs/heartbeat/recovery` | abgeschlossen |
 
 ## Abnahmekriterien
 
@@ -33,6 +33,8 @@ ein Worker (Celery, NATS, ARQ) angebunden wird.
 - `BackgroundJob` traegt Typ, Status, Zeitstempel und Ergebnis-Summary
 - `JobQueue.enqueue()` / `dequeue()` arbeiten prioritaetsbasiert (KRITISCH > HOCH > MITTEL > NIEDRIG)
 - `evaluate_job_routing()` weist Jobs deterministisch Worker-Klassen zu
+- `GET /process/jobs/heartbeat` liefert eine explizite Scheduler-/Worker-Liveness-Sicht mit Lease-/Stale-Status
+- `GET /process/jobs/heartbeat/recovery` liefert einen standardisierten Recovery-/Eskalationsplan fuer `ACTIVE`, `DEGRADED` und `STALE`
 - Kein Import von `app/api/` in `app/core/`
 
 ## Tests
@@ -46,3 +48,4 @@ pytest tests/test_process_kernel_wave33_bulk_jobs.py -q --no-cov
 
 ## Status
 `abgeschlossen`
+Stand: 2026-03-19

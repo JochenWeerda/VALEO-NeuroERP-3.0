@@ -5,18 +5,17 @@ Manages scheduled tasks for VALEO NeuroERP
 
 import logging
 import asyncio
-from datetime import datetime, time
+from datetime import datetime, time, timezone
 from typing import Dict, List, Any, Callable, Optional
 import schedule
 import threading
 import time as time_module
+from uuid import uuid4
 
-from ..workers.daily_report_worker import execute_daily_reports
-from ..workers.weekly_report_worker import execute_weekly_reports
-from ..workers.monthly_report_worker import execute_monthly_reports
-from ..workers.cleanup_worker import execute_cleanup
-from ..workers.price_monitoring_worker import execute_price_monitoring
-from ..workers.compliance_check_worker import execute_compliance_checks
+from ..core.scheduler_heartbeat import (
+    evaluate_scheduler_heartbeats,
+    record_worker_heartbeat,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +27,13 @@ class SchedulerService:
         self.jobs: Dict[str, schedule.Job] = {}
         self.running = False
         self.thread: Optional[threading.Thread] = None
+        self.scheduler_id = "default_scheduler"
+        self.worker_id = f"scheduler-worker-{uuid4()}"
+        self.heartbeat_lease_seconds = 90
+        self.heartbeat_degrade_seconds = 75
+        self.heartbeat_stale_seconds = 180
+        self._last_heartbeat = None
+        self._active_job_tags: set[str] = set()
 
     def start(self):
         """Start the scheduler service"""
@@ -42,6 +48,7 @@ class SchedulerService:
 
         # Start scheduler in background thread
         self.running = True
+        self._record_heartbeat()
         self.thread = threading.Thread(target=self._run_scheduler, daemon=True)
         self.thread.start()
 
@@ -87,95 +94,92 @@ class SchedulerService:
         """Run the scheduler loop"""
         while self.running:
             try:
+                self._record_heartbeat()
                 schedule.run_pending()
                 time_module.sleep(60)  # Check every minute
             except Exception as e:
                 logger.error(f"Error in scheduler loop: {e}")
+                self._record_heartbeat()
                 time_module.sleep(60)  # Wait before retrying
+
+    def _record_heartbeat(self):
+        self._last_heartbeat = record_worker_heartbeat(
+            scheduler_id=self.scheduler_id,
+            worker_id=self.worker_id,
+            worker_klasse="SCHEDULER",
+            running_job_ids=sorted(self._active_job_tags),
+            lease_duration_seconds=self.heartbeat_lease_seconds,
+            metadata={"service": "SchedulerService"},
+        )
+
+    def get_heartbeat_status(self) -> Dict[str, Any]:
+        heartbeats = [self._last_heartbeat] if self._last_heartbeat is not None else []
+        health = evaluate_scheduler_heartbeats(
+            heartbeats,
+            scheduler_id=self.scheduler_id,
+            stale_after_seconds=self.heartbeat_stale_seconds,
+            degrade_after_seconds=self.heartbeat_degrade_seconds,
+        )
+        payload = health.as_dict()
+        payload["last_heartbeat"] = (
+            self._last_heartbeat.as_dict() if self._last_heartbeat is not None else None
+        )
+        return payload
+
+    def _execute_job(self, job_tag: str, action: Callable[[], Dict[str, Any]], label: str):
+        self._active_job_tags.add(job_tag)
+        self._record_heartbeat()
+        try:
+            logger.info("Executing %s job...", label)
+            result = action()
+
+            if result.get('success'):
+                logger.info("%s completed: %s", label, result)
+            else:
+                logger.error("%s failed: %s", label, result)
+            return result
+        except Exception as e:
+            logger.error("Error executing %s: %s", label, e)
+            return {"success": False, "error": str(e), "job_tag": job_tag}
+        finally:
+            self._active_job_tags.discard(job_tag)
+            self._record_heartbeat()
 
     def _execute_daily_reports_job(self):
         """Execute daily reports job"""
-        try:
-            logger.info("Executing daily reports job...")
-            result = execute_daily_reports()
+        from ..workers.daily_report_worker import execute_daily_reports
 
-            if result.get('success'):
-                logger.info(f"Daily reports completed: {result}")
-            else:
-                logger.error(f"Daily reports failed: {result}")
-
-        except Exception as e:
-            logger.error(f"Error executing daily reports: {e}")
+        return self._execute_job("daily-reports", execute_daily_reports, "daily reports")
 
     def _execute_weekly_reports_job(self):
         """Execute weekly reports job"""
-        try:
-            logger.info("Executing weekly reports job...")
-            result = execute_weekly_reports()
+        from ..workers.weekly_report_worker import execute_weekly_reports
 
-            if result.get('success'):
-                logger.info(f"Weekly reports completed: {result}")
-            else:
-                logger.error(f"Weekly reports failed: {result}")
-
-        except Exception as e:
-            logger.error(f"Error executing weekly reports: {e}")
+        return self._execute_job("weekly-reports", execute_weekly_reports, "weekly reports")
 
     def _execute_monthly_reports_job(self):
         """Execute monthly reports job"""
-        try:
-            logger.info("Executing monthly reports job...")
-            result = execute_monthly_reports()
+        from ..workers.monthly_report_worker import execute_monthly_reports
 
-            if result.get('success'):
-                logger.info(f"Monthly reports completed: {result}")
-            else:
-                logger.error(f"Monthly reports failed: {result}")
-
-        except Exception as e:
-            logger.error(f"Error executing monthly reports: {e}")
+        return self._execute_job("monthly-reports", execute_monthly_reports, "monthly reports")
 
     def _execute_cleanup_job(self):
         """Execute data cleanup job"""
-        try:
-            logger.info("Executing cleanup job...")
-            result = execute_cleanup()
+        from ..workers.cleanup_worker import execute_cleanup
 
-            if result.get('success'):
-                logger.info(f"Cleanup completed: {result}")
-            else:
-                logger.error(f"Cleanup failed: {result}")
-
-        except Exception as e:
-            logger.error(f"Error executing cleanup job: {e}")
+        return self._execute_job("cleanup", execute_cleanup, "cleanup")
 
     def _execute_price_monitoring_job(self):
         """Execute price monitoring job"""
-        try:
-            logger.info("Executing price monitoring job...")
-            result = execute_price_monitoring()
+        from ..workers.price_monitoring_worker import execute_price_monitoring
 
-            if result.get('success'):
-                logger.info(f"Price monitoring completed: {result}")
-            else:
-                logger.error(f"Price monitoring failed: {result}")
-
-        except Exception as e:
-            logger.error(f"Error executing price monitoring: {e}")
+        return self._execute_job("price-monitoring", execute_price_monitoring, "price monitoring")
 
     def _execute_compliance_checks_job(self):
         """Execute compliance checks job"""
-        try:
-            logger.info("Executing compliance checks job...")
-            result = execute_compliance_checks()
+        from ..workers.compliance_check_worker import execute_compliance_checks
 
-            if result.get('success'):
-                logger.info(f"Compliance checks completed: {result}")
-            else:
-                logger.error(f"Compliance checks failed: {result}")
-
-        except Exception as e:
-            logger.error(f"Error executing compliance checks: {e}")
+        return self._execute_job("compliance", execute_compliance_checks, "compliance checks")
 
     def get_job_status(self) -> Dict[str, Any]:
         """Get status of all scheduled jobs"""
@@ -192,6 +196,9 @@ class SchedulerService:
 
         return {
             'running': self.running,
+            'scheduler_id': self.scheduler_id,
+            'worker_id': self.worker_id,
+            'heartbeat': self.get_heartbeat_status(),
             'jobs': jobs_status,
             'total_jobs': len(schedule.jobs)
         }

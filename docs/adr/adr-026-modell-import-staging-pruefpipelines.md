@@ -1,6 +1,6 @@
 # ADR-026 Modell für Import-/Staging-/Prüfpipelines
 
-**Status:** Accepted  
+**Status:** Accepted
 **Date:** 2026-03-11
 
 ## Context
