@@ -18,6 +18,14 @@ export const entries: AutoGroupRouteEntry[] = [
     "path": "qualitaets-check"
   },
   {
+    "module": "@/pages/annahme/qr-scanner",
+    "path": "qr-scanner"
+  },
+  {
+    "module": "@/pages/annahme/rohware",
+    "path": "rohware"
+  },
+  {
     "module": "@/pages/annahme/warteschlange",
     "path": "warteschlange"
   }
