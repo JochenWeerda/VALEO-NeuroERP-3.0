@@ -81,6 +81,7 @@ from app.api.v1.endpoints import (
     customer_extensions,
     business_partners,
     messages,
+    channel_work_surfaces,
     dms_images,
     sales_shipping_ext,
     master_data,
@@ -169,6 +170,10 @@ async def api_status():
 api_router.include_router(
     batch.router,
     tags=["batch"],
+)
+
+api_router.include_router(
+    channel_work_surfaces.router,
 )
 
 api_router.include_router(

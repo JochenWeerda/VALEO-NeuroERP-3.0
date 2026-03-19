@@ -12,6 +12,8 @@ from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.core.knowledge_core_contracts import KnowledgeChannel
+from app.core.onboarding_workspaces import build_onboarding_workspace
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 
@@ -20,6 +22,17 @@ router = APIRouter(prefix="/training", tags=["training", "hr"])
 
 class Payload(BaseModel):
     data: dict[str, Any] = Field(default_factory=dict)
+
+
+class OnboardingWorkspaceRequest(BaseModel):
+    rolle: str
+    employee_ref: str | None = None
+    checklist_id: str | None = None
+    run_id: str | None = None
+    kanal: str = KnowledgeChannel.TEAMS.value
+    capability_key: str | None = "onboarding_assistant"
+    query: str = ""
+    limit: int = 5
 
 
 def _clean(row: dict[str, Any]) -> dict[str, Any]:
@@ -34,6 +47,19 @@ def _clean(row: dict[str, Any]) -> dict[str, Any]:
 
 def _list(db: Session, sql: str, params: dict[str, Any]) -> list[dict[str, Any]]:
     return [_clean(dict(r)) for r in db.execute(text(sql), params).mappings().all()]
+
+
+def _load_optional_row(
+    db: Session,
+    sql: str,
+    params: dict[str, Any],
+    *,
+    not_found_detail: str,
+) -> dict[str, Any] | None:
+    row = db.execute(text(sql), params).mappings().first()
+    if not row:
+        raise HTTPException(status_code=404, detail=not_found_detail)
+    return _clean(dict(row))
 
 
 @router.get("/courses", response_model=list[dict[str, Any]])
@@ -706,3 +732,53 @@ async def delete_run(item_id: str, tenant_id: str = Depends(get_tenant_id), db: 
         raise HTTPException(status_code=404, detail="Onboarding run not found")
     db.commit()
     return None
+
+
+@router.post("/onboarding/workspaces", response_model=dict[str, Any])
+async def create_onboarding_workspace(
+    payload: OnboardingWorkspaceRequest,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    if not payload.rolle.strip():
+        raise HTTPException(status_code=400, detail="rolle is required")
+
+    checklist: dict[str, Any] | None = None
+    onboarding_run: dict[str, Any] | None = None
+
+    if payload.checklist_id:
+        checklist = _load_optional_row(
+            db,
+            "SELECT * FROM domain_hr.onboarding_checklists WHERE tenant_id=:tenant_id AND id=:id",
+            {"tenant_id": tenant_id, "id": payload.checklist_id},
+            not_found_detail="Checklist not found",
+        )
+
+    if payload.run_id:
+        onboarding_run = _load_optional_row(
+            db,
+            "SELECT * FROM domain_hr.onboarding_runs WHERE tenant_id=:tenant_id AND id=:id",
+            {"tenant_id": tenant_id, "id": payload.run_id},
+            not_found_detail="Onboarding run not found",
+        )
+        if not checklist:
+            checklist = _load_optional_row(
+                db,
+                "SELECT * FROM domain_hr.onboarding_checklists WHERE tenant_id=:tenant_id AND id=:id",
+                {"tenant_id": tenant_id, "id": onboarding_run["checklist_id"]},
+                not_found_detail="Checklist not found",
+            )
+
+    workspace = build_onboarding_workspace(
+        db=db,
+        rolle=payload.rolle,
+        kanal=payload.kanal,
+        tenant_id=tenant_id,
+        employee_ref=payload.employee_ref,
+        capability_key=payload.capability_key,
+        query=payload.query,
+        limit=payload.limit,
+        checklist=checklist,
+        onboarding_run=onboarding_run,
+    )
+    return workspace.as_dict()
