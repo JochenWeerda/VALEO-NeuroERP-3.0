@@ -1,6 +1,6 @@
 # ADR-017 Governance für Pricing-/Marktdatenquellen
 
-**Status:** Accepted  
+**Status:** Accepted
 **Date:** 2026-03-11
 
 ## Context

@@ -1,6 +1,6 @@
 # ADR-009 Workflow-Versionierung und Migration
 
-**Status:** Accepted  
+**Status:** Accepted
 **Date:** 2026-03-11
 
 ## Context

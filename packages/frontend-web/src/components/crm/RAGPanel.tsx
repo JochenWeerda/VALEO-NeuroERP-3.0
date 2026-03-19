@@ -100,16 +100,16 @@ function generateMockContext(customerId: string, customerName?: string): Custome
 export function RAGPanel({ customerId, customerName, className }: RAGPanelProps) {
   const [isExpanded, setIsExpanded] = useState(true)
 
-  const { data: context, isLoading, refetch, isRefetching } = useQuery({
+  const { data: context, isLoading, refetch, isRefetching } = useQuery<CustomerContext>({
     queryKey: ['customer-rag-context', customerId],
-    queryFn: async () => {
+    queryFn: async (): Promise<CustomerContext> => {
       // Try to fetch from AI service
       try {
         const response = await authenticatedFetch(
           `/api/v1/ai/customer-context/${customerId}`
         )
         if (response.ok) {
-          return response.json()
+          return response.json() as Promise<CustomerContext>
         }
       } catch {
         // Fallback to mock data

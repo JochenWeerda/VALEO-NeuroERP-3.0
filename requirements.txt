@@ -47,6 +47,7 @@ isort==5.13.2
 flake8==7.3.0
 mypy==1.16.1
 apscheduler==3.10.4
+schedule==1.2.2
 nats-py==2.6.0
 
 # Code quality and utilities

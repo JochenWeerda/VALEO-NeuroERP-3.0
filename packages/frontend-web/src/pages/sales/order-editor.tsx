@@ -3,7 +3,7 @@
  * 1:1 Struktur nach Lieferschein-Erfassung — Gewohnheits-Prinzip
  */
 
-import { lazy, Suspense, useState, useEffect, useMemo } from 'react'
+import { lazy, Suspense, useState, useEffect, useMemo, useRef, KeyboardEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -227,6 +227,12 @@ export default function SalesOrderEditorPage(): JSX.Element {
   const { id: routeId } = useParams<{ id?: string }>()
   const { push } = useToast()
   const { user } = useAuth()
+  
+  // Refs for focus management
+  const customerInputRef = useRef<HTMLInputElement>(null)
+  const articleInputRef = useRef<HTMLInputElement>(null)
+  const quantityInputRef = useRef<HTMLInputElement>(null)
+  const positionTableRef = useRef<HTMLTableElement>(null)
 
   const getUserShortName = (): string => {
     if (!user) return 'SYS'
@@ -363,6 +369,44 @@ export default function SalesOrderEditorPage(): JSX.Element {
     const gefahrgutPunkte = state.positionen.reduce((s, p) => s + p.gesamtGefahrgutPunkte, 0)
     return { netto, mwst, brutto, gesamt: brutto, gewicht, gefahrgutPunkte }
   }, [state.positionen])
+
+  // Keyboard event handler for global shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Prevent form submission on Enter in certain contexts
+      if (e.key === 'Enter' && e.target instanceof HTMLInputElement) {
+        const targetName = e.target.getAttribute('name');
+        // Allow Enter in textareas and specific inputs
+        if (targetName !== 'customerSearch' && targetName !== 'articleSearch' && targetName !== 'quantityInput') {
+          e.preventDefault();
+        }
+      }
+      
+      // Handle Escape key to clear search or close dialogs
+      if (e.key === 'Escape') {
+        if (sucheText) {
+          setSucheText('');
+          e.preventDefault();
+        }
+        // Close any open dialogs with Escape
+        if (showCustomerDialog || showArticleDialog || showPrintDialog || 
+            showAttachmentDialog || showDeleteDialog || showAttestationDialog ||
+            showInformationDialog || showNiederlassungDialog || showVertreterDialog ||
+            showBelegfolgeDialog) {
+          // Dialog closing logic would be handled by individual dialog components
+          e.preventDefault();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [sucheText, showCustomerDialog, showArticleDialog, showPrintDialog, 
+      showAttachmentDialog, showDeleteDialog, showAttestationDialog,
+      showInformationDialog, showNiederlassungDialog, showVertreterDialog,
+      showBelegfolgeDialog]);
 
   // â”€â”€ Handler â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 

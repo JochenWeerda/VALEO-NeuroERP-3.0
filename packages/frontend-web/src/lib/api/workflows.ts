@@ -33,6 +33,26 @@ export type ApprovalRequest = {
   rejection_reason?: string
 }
 
+type NeuroAssistRunResponse = {
+  run_id: string
+  correlation_id: string
+  capability_key: string
+  status: 'pending_approval' | 'completed' | 'rejected'
+  started_at: string
+  runtime: Record<string, unknown>
+  result: Record<string, unknown>
+}
+
+type NeuroAssistGateResponse = {
+  run_id: string
+  correlation_id: string
+  capability_key: string
+  started_at: string
+  status: 'pending_approval' | 'completed' | 'rejected'
+  runtime: Record<string, unknown>
+  result: Record<string, unknown>
+}
+
 // Query Keys
 export const workflowKeys = {
   all: ['workflows'] as const,
@@ -44,10 +64,18 @@ export function useWorkflowStatus(workflowId: string) {
   return useQuery({
     queryKey: workflowKeys.status(workflowId),
     queryFn: async () => {
-      const response = await apiClient.get<WorkflowStatus>(
-        `/api/v1/agents/bestellvorschlag/status/${workflowId}`
+      const response = await apiClient.get<NeuroAssistRunResponse>(
+        `/api/v1/agents/neuroassist/runs/${workflowId}`
       )
-      return response.data
+      const payload = response.data
+      const result = payload.result ?? {}
+      return {
+        workflow_id: payload.run_id,
+        status: payload.status,
+        proposal: result.proposal as WorkflowProposal | undefined,
+        order_id: result.order_id as string | undefined,
+        created_at: (result.created_at as string | undefined) ?? payload.started_at,
+      } satisfies WorkflowStatus
     },
     enabled: !!workflowId,
     initialData: null,
@@ -69,11 +97,19 @@ export function useTriggerWorkflow() {
   return useMutation({
     mutationFn: async (overrideTenantId?: string) => {
       const tid = overrideTenantId ?? tenantId
-      const response = await apiClient.post('/api/v1/agents/bestellvorschlag/trigger', {
+      const response = await apiClient.post<NeuroAssistRunResponse>('/api/v1/agents/neuroassist/runs', {
+        capability_key: 'bestellvorschlag_assistant',
         tenant_id: tid,
-        parameters: {}
+        parameters: {},
       })
-      return response.data
+      return {
+        workflow_id: response.data.run_id,
+        correlation_id: response.data.correlation_id,
+        status: response.data.status,
+        started_at: response.data.started_at,
+        capability_key: response.data.capability_key,
+        runtime: response.data.runtime,
+      }
     },
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: workflowKeys.status(data.workflow_id) })
@@ -94,11 +130,22 @@ export function useApproveWorkflow() {
       approved: boolean
       rejection_reason?: string
     }) => {
-      const response = await apiClient.post(
-        `/api/v1/agents/bestellvorschlag/approve/${workflowId}`,
-        { approved, rejection_reason }
+      const response = await apiClient.post<NeuroAssistGateResponse>(
+        `/api/v1/agents/neuroassist/runs/${workflowId}/gates`,
+        {
+          gate_type: 'approval_gate',
+          decision: approved ? 'approve' : 'reject',
+          rejection_reason,
+        }
       )
-      return response.data
+      return {
+        workflow_id: response.data.run_id,
+        approved,
+        order_id: response.data.result.order_id as string | undefined,
+        status: response.data.status,
+        capability_key: response.data.capability_key,
+        runtime: response.data.runtime,
+      }
     },
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: workflowKeys.status(variables.workflowId) })

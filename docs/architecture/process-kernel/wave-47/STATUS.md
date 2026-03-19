@@ -56,3 +56,4 @@ pytest tests/test_process_kernel_wave47_state_machine_delegation.py -q --no-cov
 
 ## Status
 `abgeschlossen`
+Stand: 2026-03-19

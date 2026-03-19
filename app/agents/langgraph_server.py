@@ -80,7 +80,7 @@ async def resume_bestellvorschlag(
         record = record_approval_decision(
             aktions_typ=approval_requirement.get("aktions_typ", BESTELLVORSCHLAG_AKTIONSTYP),
             instanz_id=workflow_id,
-            agent_id="genxais.bestellvorschlag",
+            agent_id="neuroassist.bestellvorschlag",
             risiko_stufe=ApprovalRisikostufe(approval_requirement["risiko_stufe"]),
             decision=ApprovalDecision.GENEHMIGT if approved else ApprovalDecision.ABGELEHNT,
             entschieden_von="human_operator",
@@ -92,6 +92,33 @@ async def resume_bestellvorschlag(
             },
         )
         state.values["approval_record"] = record.as_dict()
+        existing_gate_decisions = [
+            entry
+            for entry in state.values.get("gate_decisions", [])
+            if entry.get("gate_type") != "approval_gate"
+        ]
+        existing_gate_decisions.append(
+            {
+                "gate_type": "approval_gate",
+                "status": "allowed" if approved else "blocked",
+                "reason": (
+                    "Human approval granted for the proposed action."
+                    if approved
+                    else "Human approval rejected the proposed action."
+                ),
+                "required_role": "human_operator",
+                "schema_version": 1,
+            }
+        )
+        state.values["gate_decisions"] = existing_gate_decisions
+        state.values["current_stage_key"] = "execution" if approved else "closure"
+        state.values.setdefault("stage_transition_log", []).append(
+            {
+                "stage_key": state.values["current_stage_key"],
+                "timestamp": record.entschieden_am.isoformat() if approval_requirement.get("requires_human_approval") and record else None,
+                "detail": "Approval decision applied",
+            }
+        )
 
     # Resume from checkpoint
     result = await workflow.ainvoke(None, config)

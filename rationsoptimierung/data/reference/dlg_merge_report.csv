@@ -1,0 +1,62 @@
+﻿feed_id,status,analytic_id,note
+ackerbohnen,merged,ackerbohnen_dlg2025,
+ackerbohnenschalen,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
+erbsen,merged,erbsen_dlg2025,
+erbsenproteinkonzentrat,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
+erbsenschalen,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
+gerste,merged,gerste_ernte2025,Analytik = LKV Ernte 2025
+getreidetrockenschlempe_ohne_mais,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
+hafer,merged,hafer_ernte2025,Analytik = LKV Ernte 2025
+haferschaelkleie,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
+kartoffelprotein,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
+kokospresskuchen,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
+koernermais,merged,koernermais_dlg2025,
+leinsamen,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
+leinextraktionsschrot_aufgefettet,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
+leinkuchen,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
+maiskleberfutter,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
+malzkeime,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
+melasseschnitzel,merged,melasseschnitzel_dlg2025,
+palmkernkuchen,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
+rapssaat,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
+rapsextraktionsschrot_unbehandelt,merged,raps_extraktionsschrot_dlg2025,
+rapsextraktionsschrot_unbehandelt_hoch_pansenstabil,merged,raps_extraktionsschrot_dlg2025,Analytik = Basis-Rapsextraktionsschrot DLG (Variante)
+rapsextraktionsschrot_unbehandelt_mittel_pansenstabil,merged,raps_extraktionsschrot_dlg2025,Analytik = Basis-Rapsextraktionsschrot DLG (Variante)
+rapsextraktionsschrot_unbehandelt_wenig_pansenstabil,merged,raps_extraktionsschrot_dlg2025,Analytik = Basis-Rapsextraktionsschrot DLG (Variante)
+rapsextraktionsschrot_gezielt_therm_behandelt,merged,raps_extraktionsschrot_dlg2025,Analytik = Basis-Rapsextraktionsschrot DLG (Variante)
+rapsextraktionsschrot_gezielt_therm_behandelt_hoch_pansenstabil,merged,raps_extraktionsschrot_dlg2025,Analytik = Basis-Rapsextraktionsschrot DLG (Variante)
+rapsextraktionsschrot_gezielt_therm_behandelt_wenig_pansenstabil,merged,raps_extraktionsschrot_dlg2025,Analytik = Basis-Rapsextraktionsschrot DLG (Variante)
+rapskuchen,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
+roggen,merged,roggen_ernte2025,Analytik = LKV Ernte 2025
+roggenkleie,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
+schokomehl,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
+sojabohne,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
+sojabohnenschalen,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
+sojabohnenpresskuchen,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
+sojaextraktionsschrot_unbehandelt,merged,soja_extraktionsschrot_dlg2025,
+sojaextraktionsschrot_aus_geschaelter_saat,merged,soja_extraktionsschrot_hp_dlg2025,
+sojaextraktionsschrot_gezielt_behandelt_pansenstabil,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
+sonnenblumenextraktionsschrot_geschaelte_saat,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
+sonnenblumenextraktionsschrot_teilgeschaelte_saat,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
+sonnenblumenextraktionsschrot_schalenreich,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
+sonnenblumenpresskuchen,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
+suesslupinen_blau,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
+suesslupinen_weiss,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
+triticale,merged,triticale_ernte2025,Analytik = LKV Ernte 2025
+weizen,merged,weizen_ernte2025,Analytik = LKV Ernte 2025
+weizenkleberfutter,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
+weizenkleie,merged,weizenkleie_staerkerich_dlg2025,"DLG 2025 führt zwei Varianten: stärkereich (sidP 86; Ca 1,8; P 13,0; Na 0,5) und faserreich (sidP 86; Ca 1,4; P 13,0; Na 0,1). Werte nicht automatisch zusammengeführt."
+weizengriesskleie,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
+zitrustrester,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
+feuchtmais_ccm,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
+maiskleberfutter_siliert,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
+maiskolben_mit_lieschen_lks,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
+melasse_zuckerrohr,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
+melasse_zuckerruebe,merged,melasse_zuckerruebe_dlg2025,
+zuckerruebenvinasse,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
+maissilage,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
+grassilage_1_schnitt,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
+grascobs_heissluftheu_1_schnitt,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
+grascobs_heissluftheu_folgeschnitte,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
+wiesen_belueftungsheu_1_schnitt,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
+wiesen_belueftungsheu_folgeschnitte,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV

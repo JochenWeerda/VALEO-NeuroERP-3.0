@@ -1,6 +1,6 @@
 # ADR-024 Datenprodukt-Strategie für Sustainability- und Compliance-Reporting
 
-**Status:** Accepted  
+**Status:** Accepted
 **Date:** 2026-03-11
 
 ## Context

@@ -1,6 +1,6 @@
 # ADR-020 Cross-Domain-Referenzmodell für Kontrakt, Charge, Qualität und Settlement
 
-**Status:** Accepted  
+**Status:** Accepted
 **Date:** 2026-03-11
 
 ## Context

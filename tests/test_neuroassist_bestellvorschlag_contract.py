@@ -48,11 +48,14 @@ def _base_state() -> workflow.BestellvorschlagState:
         "proposal": None,
         "approval_requirement": None,
         "approval_record": None,
+        "gate_decisions": [],
         "approved": False,
         "rejection_reason": None,
         "command_result": None,
         "order_id": None,
         "created_at": None,
+        "current_stage_key": "intake",
+        "stage_transition_log": [],
     }
 
 
@@ -82,6 +85,8 @@ def test_generate_order_proposal_sets_human_approval_for_high_value():
     assert result["approval_requirement"]["aktions_typ"] == "BESTELLUNG_ANLEGEN"
     assert result["approval_requirement"]["requires_human_approval"] is True
     assert result["approved"] is False
+    assert result["current_stage_key"] == "approval"
+    assert result["gate_decisions"][0]["status"] == "deferred"
 
 
 def test_wait_for_human_approval_requires_explicit_decision():
@@ -143,5 +148,11 @@ def test_create_purchase_order_dispatches_and_persists_via_contracts(
 
     assert result["order_id"] == "PO-1"
     assert result["command_result"]["status"] == "executed"
+    assert result["current_stage_key"] == "closure"
+    assert [entry["stage_key"] for entry in result["stage_transition_log"][-3:]] == [
+        "execution",
+        "verification",
+        "closure",
+    ]
     assert captured["supplier_id"] == "SUP-1"
     assert captured["tenant_id"] == "tenant-1"

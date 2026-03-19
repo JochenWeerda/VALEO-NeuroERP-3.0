@@ -1,6 +1,6 @@
 # ADR-018 Qualitäts-/Labordatenmodell
 
-**Status:** Accepted  
+**Status:** Accepted
 **Date:** 2026-03-11
 
 ## Context

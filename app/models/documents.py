@@ -60,13 +60,14 @@ class DocumentFlow(Base):
 
 
 class WorkflowStatus(Base):
-    """Workflow-Status"""
+    """Workflow-Status (Gap 011: versioniert)."""
     __tablename__ = 'workflow_status'
 
     id = Column(String(36), primary_key=True)
     domain = Column(String(50), nullable=False)
     doc_number = Column(String(50), nullable=False)
     state = Column(String(20), nullable=False, server_default='draft')
+    workflow_version = Column(String(20), nullable=True, server_default='1')
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
     updated_by = Column(String(100), nullable=True)
 

@@ -1,55 +1,58 @@
-# Wave 63 — Process Validation + Workflow Collaboration Contracts
+# Wave 63 - Process Validation + Workflow Collaboration Contracts
 
-**Status:** ABGESCHLOSSEN
+**Status:** abgeschlossen
 **Datum:** 2026-03-18
 **Tests:** 150 passed, 0 failed
 
-## Neue Module
+## Scope
+
+Wave 63 erweitert den Kernel um Validierungs-Contracts fuer Geschaeftsregeln und Kollaborations-Contracts fuer gemeinsame Entscheidungen.
+
+## Zielbild
+
+Datenvalidierung und teamuebergreifende Entscheidungslogik sollen als standardisierte Kernel-Contracts verfuegbar sein.
+
+## Lieferumfang
 
 ### `app/core/process_validation_contracts.py`
-Business Rule Validation Engine mit:
-- `ValidierungsSchwere`: FEHLER / WARNUNG / HINWEIS
-- `RegelTyp`: PFLICHTFELD / WERTEBEREICH / FORMAT / QUERVERWEIS / GESCHAEFTSREGEL
-- `ValidierungsStatus`: GUELTIG / UNGUELTIG / WARNUNG
-- `ValidierungsRegel.pruefe()`: Regelauswertung pro Datensatz
-- `validiere_daten()`: Batch-Auswertung mit Fehlerklassifizierung
-- 5 Default-Regeln (VR-001..VR-005) für Lieferant, Menge, Preis, Querverweis, Kommentar
+
+- `ValidierungsSchwere`
+- `RegelTyp`
+- `ValidierungsStatus`
+- `ValidierungsRegel.pruefe()`
+- `validiere_daten()`
+- fuenf Default-Regeln
 
 ### `app/core/workflow_collaboration_contracts.py`
-Multi-User Collaborative Decisions mit:
-- `AbstimmungsTyp`: EINFACHE_MEHRHEIT / QUALIFIZIERTE_MEHRHEIT / EINSTIMMIGKEIT / VETO
-- `StimmeTyp`: JA / NEIN / ENTHALTEN
-- `KollaborationsEntscheidung.berechne_ergebnis()`: Abstimmungslogik nach Typ
-- `KollaborationsEntscheidung.ausstehende_stimmer()`: Differenz ausstehender Stimmer
-- `KollaborationsEntscheidung.beteiligung_pct()`: Beteiligungsquote
-- 3 Default-Entscheidungen (E-001..E-003)
 
-## Neue API-Endpunkte (an `process_kernel_api.py` angehängt)
+- `AbstimmungsTyp`
+- `StimmeTyp`
+- `KollaborationsEntscheidung.berechne_ergebnis()`
+- `KollaborationsEntscheidung.ausstehende_stimmer()`
+- `KollaborationsEntscheidung.beteiligung_pct()`
+- drei Default-Entscheidungen
+
+### FastAPI-Endpunkte
 
 | Methode | Pfad | Beschreibung |
 |---------|------|--------------|
 | GET | `/api/v1/process/validierung/regeln` | Alle Validierungsregeln |
-| POST | `/api/v1/process/validierung/pruefe` | Datensatz gegen Regeln prüfen |
+| POST | `/api/v1/process/validierung/pruefe` | Datensatz gegen Regeln pruefen |
 | GET | `/api/v1/process/kollaboration/entscheidungen` | Alle Kollaborationsentscheidungen |
 | POST | `/api/v1/process/kollaboration/pruefe-ergebnis` | Einzelentscheidung berechnen |
 
-## Testabdeckung
+## Abnahmekriterien
 
-| Bereich | Tests |
-|---------|-------|
-| Enum-Smoke | 10 |
-| ValidierungsRegel.pruefe() PFLICHTFELD | 9 |
-| ValidierungsRegel.pruefe() WERTEBEREICH | 14 |
-| ValidierungsRegel.pruefe() QUERVERWEIS | 6 |
-| ValidierungsRegel.pruefe() FORMAT/GESCHAEFTSREGEL | 4 |
-| validiere_daten() | 10 |
-| Default-Regeln VR-001..VR-005 | 14 |
-| KollaborationsEntscheidung helpers | 15 |
-| berechne_ergebnis() VETO | 6 |
-| berechne_ergebnis() EINSTIMMIGKEIT | 5 |
-| berechne_ergebnis() EINFACHE_MEHRHEIT | 7 |
-| berechne_ergebnis() QUALIFIZIERTE_MEHRHEIT | 6 |
-| Default-Entscheidungen E-001..E-003 | 18 |
-| Stimme / ValidierungsErgebnis Dataclass | 6 |
-| FastAPI Endpoints (4 Endpunkte) | 20 |
-| **Gesamt** | **150** |
+- Validierungsregeln koennen Pflichtfeld-, Wertebereich-, Format-, Querverweis- und Geschaeftsregeln auswerten.
+- Kollaborationsentscheidungen berechnen Ergebnisse fuer Mehrheit, Einstimmigkeit und Veto korrekt.
+- Default-Regeln und Default-Entscheidungen stehen bereit.
+- Die vier API-Endpunkte liefern Validierungs- und Kollaborationsfunktionen.
+
+## Tests
+
+**Anzahl:** 150
+
+## Status
+
+`abgeschlossen`
+Stand: 2026-03-18

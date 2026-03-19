@@ -184,7 +184,6 @@ def seed() -> None:
                     requested_by="seed_user",
                     reason="Seed: Freigabe angefordert für Raps Mai",
                     status="REQUESTED",
-                    tenant_id=TENANT_ID,
                     created_by="seed_commodity_positions",
                     updated_by="seed_commodity_positions",
                 )

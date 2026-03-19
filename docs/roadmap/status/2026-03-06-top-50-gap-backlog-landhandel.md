@@ -130,6 +130,7 @@ Hinweise:
 - Gap `025` (Kontextsensitive Quick Actions) ist mit Wave 25 abgeschlossen.
 - Gap `027` (Konsistente Informationsdichte je Rolle) ist mit Wave 27 abgeschlossen.
 - Gap `042` (Intrastat-Meldungsmodell) ist mit Wave 23 abgeschlossen.
+- Gap `050` (Produktive Betriebsfuehrung mit SLO/SLI und Runbooks) ist mit Wave 30 abgeschlossen.
 - Die Reihenfolge oben bleibt als historische 90-Tage-Planung erhalten und ist nicht der laufende Ist-Status.
 
 ## Governance

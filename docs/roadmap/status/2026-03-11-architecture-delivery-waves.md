@@ -1,6 +1,6 @@
 # Architecture Delivery Waves 2026-03-11
 
-**Zweck:** Umsetzung der ADR-basierten Architekturarbeit in konkrete Epics, Arbeitspakete und Delivery-Waves  
+**Zweck:** Umsetzung der ADR-basierten Architekturarbeit in konkrete Epics, Arbeitspakete und Delivery-Waves
 **Quelle:** [ADR Clusters and Epics](../../architecture/adr-clusters-and-epics.md), [Top-50 Gap Backlog Landhandel](2026-03-06-top-50-gap-backlog-landhandel.md)
 
 ## Statusabgleich 2026-03-14

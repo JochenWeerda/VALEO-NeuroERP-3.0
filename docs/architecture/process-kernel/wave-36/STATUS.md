@@ -46,3 +46,4 @@ pytest tests/test_process_kernel_wave36_edi_supplychain.py -q --no-cov
 
 ## Status
 `abgeschlossen`
+Stand: 2026-03-19

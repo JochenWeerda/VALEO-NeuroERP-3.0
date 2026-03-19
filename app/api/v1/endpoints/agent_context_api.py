@@ -3,10 +3,11 @@ from __future__ import annotations
 from datetime import datetime, timedelta
 import uuid
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import Response
 from pydantic import BaseModel
 
+from app.core.database import get_db
 from app.core.multi_context_agent import AgentContext, AgentContextStore, tenantbewusst_dispatch
 from app.core.tenant_isolation_guard import TenantIsolationGuard
 
@@ -27,6 +28,14 @@ class AgentDispatchRequest(BaseModel):
     resource_tenant_id: str
     resource_type: str = "agent_command"
     issuer_role: str = "agent"
+
+
+class AgentKnowledgePackRequest(BaseModel):
+    rolle: str
+    kanal: str = "CHAT"
+    capability_key: str | None = None
+    query: str = ""
+    limit: int = 4
 
 
 @router.post("", status_code=201)
@@ -64,3 +73,29 @@ def dispatch(context_id: str, req: AgentDispatchRequest):
         issuer_role=req.issuer_role,
         isolation_guard=_guard,
     )
+
+
+@router.post("/{context_id}/knowledge-pack")
+def knowledge_pack(context_id: str, req: AgentKnowledgePackRequest, db=Depends(get_db)):
+    from app.core.knowledge_core_contracts import KnowledgeChannel
+    from app.core.knowledge_runtime import build_runtime_context_pack
+
+    context = _store.get(context_id)
+    if context is None:
+        raise HTTPException(status_code=404, detail="Kontext nicht gefunden")
+
+    pack = build_runtime_context_pack(
+        db=db,
+        rolle=req.rolle,
+        kanal=KnowledgeChannel(req.kanal),
+        tenant_id=context.tenant_id,
+        capability_key=req.capability_key,
+        query=req.query,
+        limit=req.limit,
+    )
+    return {
+        "context_id": context.context_id,
+        "agent_id": context.agent_id,
+        "tenant_id": context.tenant_id,
+        "knowledge_pack": pack.as_dict(),
+    }

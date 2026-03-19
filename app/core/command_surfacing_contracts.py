@@ -14,7 +14,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any
+from typing import Any, Optional
+
+from app.core.business_commands import CommandDefinition, build_core_command_catalog
 
 # ---------------------------------------------------------------------------
 # Enumerationen
@@ -66,9 +68,11 @@ class SurfacingRegel:
     prioritaet: CommandPrioritaet
     domain: str = ""                     # "agrar", "finance", "" = global
     erklaerung: str = ""                 # Warum sichtbar/nicht-sichtbar
+    explainability_hint: Optional[str] = None        # Hinweis für Explainability-System
+    authorization_hint: Optional[str] = None         # Hinweis für Autorisierungssystem
 
     def as_dict(self) -> dict[str, Any]:
-        return {
+        result = {
             "regel_id": self.regel_id,
             "command_id": self.command_id,
             "command_bezeichnung": self.command_bezeichnung,
@@ -79,6 +83,11 @@ class SurfacingRegel:
             "domain": self.domain,
             "erklaerung": self.erklaerung,
         }
+        if self.explainability_hint is not None:
+            result["explainability_hint"] = self.explainability_hint
+        if self.authorization_hint is not None:
+            result["authorization_hint"] = self.authorization_hint
+        return result
 
 
 @dataclass
@@ -99,9 +108,11 @@ class SurfacingErgebnis:
     typ: SurfacingErgebnisTyp
     grund: str = ""
     prioritaet: CommandPrioritaet = CommandPrioritaet.MITTEL
+    explainability_hint: Optional[str] = None
+    authorization_hint: Optional[str] = None
 
     def as_dict(self) -> dict[str, Any]:
-        return {
+        result = {
             "command_id": self.command_id,
             "command_bezeichnung": self.command_bezeichnung,
             "typ": self.typ.value,
@@ -109,6 +120,11 @@ class SurfacingErgebnis:
             "prioritaet": self.prioritaet.value,
             "ist_sichtbar": self.typ == SurfacingErgebnisTyp.SICHTBAR,
         }
+        if self.explainability_hint is not None:
+            result["explainability_hint"] = self.explainability_hint
+        if self.authorization_hint is not None:
+            result["authorization_hint"] = self.authorization_hint
+        return result
 
 
 @dataclass
@@ -224,6 +240,8 @@ def berechne_surfacing(
             typ=SurfacingErgebnisTyp.SICHTBAR,
             grund=regel.erklaerung,
             prioritaet=regel.prioritaet,
+            explainability_hint=regel.explainability_hint,
+            authorization_hint=regel.authorization_hint,
         ))
 
     # Sichtbare Commands nach Priorität sortieren (KRITISCH zuerst)
@@ -244,120 +262,252 @@ def berechne_surfacing(
 
 
 # ---------------------------------------------------------------------------
-# Standard-Surfacing-Regeln (12 Regeln)
+# Produktive Backend-Manifeste für Surfacing-Regeln
 # ---------------------------------------------------------------------------
 
-def get_default_surfacing_regeln() -> list[SurfacingRegel]:
-    """Gibt 12 Standard-Surfacing-Regeln zurück."""
-    _ALLE_TOOLBAR = [
-        SurfacingKontext.TOOLBAR_PRIMARY,
-        SurfacingKontext.TOOLBAR_OVERFLOW,
-        SurfacingKontext.COMMAND_PALETTE,
-    ]
-    _ALLE_KANAELE = list(SurfacingKontext)
+def _build_surfacing_rules_from_command_definition(definition: CommandDefinition) -> list[SurfacingRegel]:
+    """Build surfacing rules from a single command definition."""
+    rules = []
+    
+    # Map command properties to surfacing rule properties
+    # Determine appropriate surfaces based on command properties
+    surfaces = [SurfacingKontext.TOOLBAR_PRIMARY, SurfacingKontext.COMMAND_PALETTE]
+    # Add AGENT surface for commands that can be executed by agents
+    if definition.allowed_agent_types and len(definition.allowed_agent_types) > 0:
+        surfaces.append(SurfacingKontext.AGENT)
+    # Add VOICE surface for commands with voice intent (simplified heuristic)
+    if definition.command_name and any(keyword in definition.command_name.lower() for keyword in ['approve', 'reject', 'create', 'send']):
+        surfaces.append(SurfacingKontext.VOICE)
+    
+    # Determine density based on command properties
+    min_dichte = DichteStufe.FOKUSSIERT
+    # Commands requiring human confirmation or explainability need at least standard density
+    if definition.requires_human_confirmation:
+        min_dichte = DichteStufe.STANDARD
+    # Commands with many allowed roles or agent types need higher density
+    if len(definition.allowed_roles) > 3 or len(definition.allowed_agent_types) > 1:
+        min_dichte = DichteStufe.VERDICHTET
+    # Commands with preconditions are more complex
+    if len(definition.preconditions) > 2:
+        min_dichte = DichteStufe.VERDICHTET
+    
+    # Determine priority based on command properties
+    prioritaet = CommandPrioritaet.MITTEL
+    # Critical: financial approvals, rejections, system commands
+    if any(keyword in definition.command_name.lower() for keyword in ['approve', 'reject', 'execute', 'process']):
+        prioritaet = CommandPrioritaet.KRITISCH
+    # High: creation, sending, important business operations
+    elif any(keyword in definition.command_name.lower() for keyword in ['create', 'send', 'generate', 'calculate']):
+        prioritaet = CommandPrioritaet.HOCH
+    # Low: queries, reports, informational commands
+    elif any(keyword in definition.command_name.lower() for keyword in ['get', 'list', 'query', 'report', 'view']):
+        prioritaet = CommandPrioritaet.NIEDRIG
+    
+    # Build explainability and authorization hints
+    explainability_hint = None
+    authorization_hint = None
+    
+    if definition.requires_human_confirmation:
+        authorization_hint = "Dieser Befehl erfordert menschliche Bestätigung"
+        explainability_hint = "Ausführungsgrund muss dokumentiert werden für Audit-Zwecke"
+    
+    # Build the rule
+    rule = SurfacingRegel(
+        regel_id=f"SR_CMD_{definition.command_name}",
+        command_id=definition.command_name,
+        command_bezeichnung=definition.command_name,  # Using command_name as label for now
+        erlaubte_rollen=definition.allowed_roles,
+        min_dichte=min_dichte,
+        sichtbar_in=surfaces,
+        prioritaet=prioritaet,
+        domain=definition.aggregate_type,  # Using aggregate_type as domain
+        erklaerung=f"Automatisch generiert aus Command-Definition: {definition.command_name}",
+        explainability_hint=explainability_hint,
+        authorization_hint=authorization_hint
+    )
+    rules.append(rule)
+    
+    return rules
 
-    return [
-        # ── Agrar ────────────────────────────────────────────────────────────
-        SurfacingRegel(
-            "SR-001", "CMD_ANNAHME_ERFASSEN", "Annahme erfassen",
-            erlaubte_rollen=["sachbearbeiter", "leiter", "admin"],
-            min_dichte=DichteStufe.FOKUSSIERT,
-            sichtbar_in=_ALLE_TOOLBAR,
-            prioritaet=CommandPrioritaet.KRITISCH,
-            domain="agrar",
-            erklaerung="Kernprozess-Einstiegspunkt, immer sichtbar",
-        ),
-        SurfacingRegel(
-            "SR-002", "CMD_QUALITAET_PRUEFUNG", "Qualitätsprüfung starten",
-            erlaubte_rollen=["sachbearbeiter", "leiter", "admin"],
-            min_dichte=DichteStufe.STANDARD,
-            sichtbar_in=_ALLE_TOOLBAR,
-            prioritaet=CommandPrioritaet.HOCH,
-            domain="agrar",
-        ),
-        SurfacingRegel(
-            "SR-003", "CMD_SETTLEMENT_BERECHNEN", "Settlement berechnen",
-            erlaubte_rollen=["buchhaltung", "leiter", "admin"],
-            min_dichte=DichteStufe.STANDARD,
-            sichtbar_in=[SurfacingKontext.TOOLBAR_PRIMARY, SurfacingKontext.COMMAND_PALETTE, SurfacingKontext.AGENT],
-            prioritaet=CommandPrioritaet.HOCH,
-            domain="agrar",
-        ),
-        SurfacingRegel(
-            "SR-004", "CMD_KONTRAKT_TEILMENGE", "Teilmengen-Kontrakt anlegen",
-            erlaubte_rollen=["sachbearbeiter", "leiter", "admin"],
-            min_dichte=DichteStufe.VERDICHTET,
-            sichtbar_in=[SurfacingKontext.TOOLBAR_OVERFLOW, SurfacingKontext.COMMAND_PALETTE],
-            prioritaet=CommandPrioritaet.MITTEL,
-            domain="agrar",
-        ),
-        # ── Finance ──────────────────────────────────────────────────────────
-        SurfacingRegel(
-            "SR-005", "CMD_ZAHLUNGSLAUF_FREIGEBEN", "Zahlungslauf freigeben",
-            erlaubte_rollen=["leiter", "admin"],
-            min_dichte=DichteStufe.FOKUSSIERT,
-            sichtbar_in=_ALLE_TOOLBAR,
-            prioritaet=CommandPrioritaet.KRITISCH,
-            domain="finance",
-            erklaerung="4-Augen-Freigabe, immer sichtbar für Leiter",
-        ),
-        SurfacingRegel(
-            "SR-006", "CMD_AP_INVOICE_FREIGEBEN", "Eingangsrechnung freigeben",
-            erlaubte_rollen=["buchhaltung", "leiter", "admin"],
-            min_dichte=DichteStufe.STANDARD,
-            sichtbar_in=[SurfacingKontext.TOOLBAR_PRIMARY, SurfacingKontext.COMMAND_PALETTE],
-            prioritaet=CommandPrioritaet.HOCH,
-            domain="finance",
-        ),
-        SurfacingRegel(
-            "SR-007", "CMD_BUCHUNG_STORNIEREN", "Buchung stornieren",
-            erlaubte_rollen=["buchhaltung", "admin"],
-            min_dichte=DichteStufe.VERDICHTET,
-            sichtbar_in=[SurfacingKontext.TOOLBAR_OVERFLOW, SurfacingKontext.COMMAND_PALETTE],
-            prioritaet=CommandPrioritaet.MITTEL,
-            domain="finance",
-        ),
-        # ── Compliance ────────────────────────────────────────────────────────
-        SurfacingRegel(
-            "SR-008", "CMD_COMPLIANCE_PRUEFEN", "Compliance prüfen",
-            erlaubte_rollen=[],  # alle Rollen
-            min_dichte=DichteStufe.STANDARD,
-            sichtbar_in=[SurfacingKontext.COMMAND_PALETTE, SurfacingKontext.AGENT],
-            prioritaet=CommandPrioritaet.MITTEL,
-            domain="compliance",
-        ),
-        # ── Global ────────────────────────────────────────────────────────────
-        SurfacingRegel(
-            "SR-009", "CMD_BENACHRICHTIGUNG_SENDEN", "Benachrichtigung senden",
-            erlaubte_rollen=["sachbearbeiter", "buchhaltung", "leiter", "admin"],
-            min_dichte=DichteStufe.VERDICHTET,
-            sichtbar_in=[SurfacingKontext.COMMAND_PALETTE, SurfacingKontext.AGENT],
-            prioritaet=CommandPrioritaet.NIEDRIG,
-            domain="",
-        ),
-        SurfacingRegel(
-            "SR-010", "CMD_REPORT_GENERIEREN", "Report generieren",
-            erlaubte_rollen=["leiter", "admin"],
-            min_dichte=DichteStufe.STANDARD,
-            sichtbar_in=[SurfacingKontext.COMMAND_PALETTE, SurfacingKontext.AGENT, SurfacingKontext.SHORTCUT],
-            prioritaet=CommandPrioritaet.MITTEL,
-            domain="",
-        ),
-        SurfacingRegel(
-            "SR-011", "CMD_SHORTCUT_SUCHE", "Schnellsuche",
-            erlaubte_rollen=[],  # alle
-            min_dichte=DichteStufe.FOKUSSIERT,
-            sichtbar_in=_ALLE_KANAELE,
-            prioritaet=CommandPrioritaet.KRITISCH,
-            domain="",
-            erklaerung="Globale Suche, immer und überall verfügbar",
-        ),
-        SurfacingRegel(
-            "SR-012", "CMD_AGENT_AUFTRAG", "Agent-Auftrag erteilen",
-            erlaubte_rollen=["leiter", "admin"],
-            min_dichte=DichteStufe.VERDICHTET,
-            sichtbar_in=[SurfacingKontext.COMMAND_PALETTE, SurfacingKontext.AGENT],
-            prioritaet=CommandPrioritaet.NIEDRIG,
-            domain="",
-        ),
-    ]
+
+def _build_surfacing_rules_from_policy_entries() -> list[SurfacingRegel]:
+    """Build surfacing rules from policy contract entries."""
+    # Placeholder for policy-based surfacing rules
+    # In a full implementation, this would analyze policy contracts
+    # to generate appropriate surfacing rules
+    return []
+
+
+def _build_surfacing_rules_from_approval_entries() -> list[SurfacingRegel]:
+    """Build surfacing rules from approval contract entries."""
+    # Placeholder for approval-based surfacing rules
+    # In a full implementation, this would analyze approval contracts
+    # to generate appropriate surfacing rules
+    return []
+
+
+def build_surfacing_rules(
+    catalog: list[CommandDefinition] | None = None,
+) -> list[SurfacingRegel]:
+    """
+    Build command surfacing rules from productive backend manifests.
+    
+    Similar to build_ui_density_manifest, this function creates surfacing rules
+    from command definitions, policy contracts, and approval contracts.
+    """
+    definitions = catalog or build_core_command_catalog()
+    
+    rules: list[SurfacingRegel] = []
+    
+    # Build rules from command definitions
+    for definition in definitions:
+        rules.extend(_build_surfacing_rules_from_command_definition(definition))
+    
+    # Build rules from policy entries
+    rules.extend(_build_surfacing_rules_from_policy_entries())
+    
+    # Build rules from approval entries
+    rules.extend(_build_surfacing_rules_from_approval_entries())
+    
+    return rules
+
+
+_DEFAULT_SURFACING_REGELN: list[SurfacingRegel] = [
+    # SR-001 — Annahme erfassen (Agrar, KRITISCH)
+    SurfacingRegel(
+        regel_id="SR-001",
+        command_id="CMD_ANNAHME_ERFASSEN",
+        command_bezeichnung="Annahme erfassen",
+        erlaubte_rollen=["sachbearbeiter", "leiter", "admin"],
+        min_dichte=DichteStufe.FOKUSSIERT,
+        sichtbar_in=[SurfacingKontext.TOOLBAR_PRIMARY, SurfacingKontext.COMMAND_PALETTE, SurfacingKontext.AGENT],
+        prioritaet=CommandPrioritaet.KRITISCH,
+        domain="agrar",
+    ),
+    # SR-002 — Qualitätsprüfung (Agrar, HOCH, ab STANDARD)
+    SurfacingRegel(
+        regel_id="SR-002",
+        command_id="CMD_QUALITAET_PRUEFUNG",
+        command_bezeichnung="Qualitätsprüfung durchführen",
+        erlaubte_rollen=["sachbearbeiter", "leiter", "admin"],
+        min_dichte=DichteStufe.STANDARD,
+        sichtbar_in=[SurfacingKontext.TOOLBAR_PRIMARY, SurfacingKontext.COMMAND_PALETTE],
+        prioritaet=CommandPrioritaet.HOCH,
+        domain="agrar",
+    ),
+    # SR-003 — Settlement berechnen (Agrar, MITTEL, kein TOOLBAR_OVERFLOW)
+    SurfacingRegel(
+        regel_id="SR-003",
+        command_id="CMD_SETTLEMENT_BERECHNEN",
+        command_bezeichnung="Settlement berechnen",
+        erlaubte_rollen=[],
+        min_dichte=DichteStufe.FOKUSSIERT,
+        sichtbar_in=[SurfacingKontext.TOOLBAR_PRIMARY, SurfacingKontext.COMMAND_PALETTE, SurfacingKontext.AGENT],
+        prioritaet=CommandPrioritaet.MITTEL,
+        domain="agrar",
+    ),
+    # SR-004 — Vertrag anlegen (Agrar, HOCH)
+    SurfacingRegel(
+        regel_id="SR-004",
+        command_id="CMD_VERTRAG_ANLEGEN",
+        command_bezeichnung="Vertrag anlegen",
+        erlaubte_rollen=["sachbearbeiter", "leiter", "admin"],
+        min_dichte=DichteStufe.STANDARD,
+        sichtbar_in=[SurfacingKontext.TOOLBAR_PRIMARY, SurfacingKontext.COMMAND_PALETTE],
+        prioritaet=CommandPrioritaet.HOCH,
+        domain="agrar",
+    ),
+    # SR-005 — Zahlungslauf freigeben (Finance, KRITISCH)
+    SurfacingRegel(
+        regel_id="SR-005",
+        command_id="CMD_ZAHLUNGSLAUF_FREIGEBEN",
+        command_bezeichnung="Zahlungslauf freigeben",
+        erlaubte_rollen=["leiter", "admin", "buchhaltung"],
+        min_dichte=DichteStufe.FOKUSSIERT,
+        sichtbar_in=[SurfacingKontext.TOOLBAR_PRIMARY, SurfacingKontext.COMMAND_PALETTE],
+        prioritaet=CommandPrioritaet.KRITISCH,
+        domain="finance",
+    ),
+    # SR-006 — Rechnung prüfen (Finance, HOCH)
+    SurfacingRegel(
+        regel_id="SR-006",
+        command_id="CMD_RECHNUNG_PRUEFEN",
+        command_bezeichnung="Rechnung prüfen",
+        erlaubte_rollen=["buchhaltung", "leiter", "admin"],
+        min_dichte=DichteStufe.STANDARD,
+        sichtbar_in=[SurfacingKontext.TOOLBAR_PRIMARY, SurfacingKontext.COMMAND_PALETTE],
+        prioritaet=CommandPrioritaet.HOCH,
+        domain="finance",
+    ),
+    # SR-007 — Mahnlauf starten (Finance, MITTEL, ab VERDICHTET)
+    SurfacingRegel(
+        regel_id="SR-007",
+        command_id="CMD_MAHNLAUF_STARTEN",
+        command_bezeichnung="Mahnlauf starten",
+        erlaubte_rollen=["buchhaltung", "leiter", "admin"],
+        min_dichte=DichteStufe.VERDICHTET,
+        sichtbar_in=[SurfacingKontext.COMMAND_PALETTE, SurfacingKontext.KONTEXTMENUE],
+        prioritaet=CommandPrioritaet.MITTEL,
+        domain="finance",
+    ),
+    # SR-008 — Skonto optimieren (Finance, HOCH)
+    SurfacingRegel(
+        regel_id="SR-008",
+        command_id="CMD_SKONTO_OPTIMIEREN",
+        command_bezeichnung="Skonto optimieren",
+        erlaubte_rollen=["buchhaltung", "leiter", "admin"],
+        min_dichte=DichteStufe.STANDARD,
+        sichtbar_in=[SurfacingKontext.COMMAND_PALETTE, SurfacingKontext.AGENT],
+        prioritaet=CommandPrioritaet.HOCH,
+        domain="finance",
+    ),
+    # SR-009 — Compliance prüfen (Agrar, HOCH)
+    SurfacingRegel(
+        regel_id="SR-009",
+        command_id="CMD_COMPLIANCE_PRUEFEN",
+        command_bezeichnung="Compliance prüfen",
+        erlaubte_rollen=["leiter", "admin"],
+        min_dichte=DichteStufe.STANDARD,
+        sichtbar_in=[SurfacingKontext.TOOLBAR_PRIMARY, SurfacingKontext.AGENT],
+        prioritaet=CommandPrioritaet.HOCH,
+        domain="agrar",
+    ),
+    # SR-010 — Bericht erstellen (Agrar, NIEDRIG, ab VERDICHTET)
+    SurfacingRegel(
+        regel_id="SR-010",
+        command_id="CMD_BERICHT_ERSTELLEN",
+        command_bezeichnung="Bericht erstellen",
+        erlaubte_rollen=["sachbearbeiter", "leiter", "admin", "buchhaltung"],
+        min_dichte=DichteStufe.VERDICHTET,
+        sichtbar_in=[SurfacingKontext.COMMAND_PALETTE],
+        prioritaet=CommandPrioritaet.NIEDRIG,
+        domain="agrar",
+    ),
+    # SR-011 — Shortcut-Suche (global, alle Rollen, KRITISCH)
+    SurfacingRegel(
+        regel_id="SR-011",
+        command_id="CMD_SHORTCUT_SUCHE",
+        command_bezeichnung="Shortcut-Suche öffnen",
+        erlaubte_rollen=[],
+        min_dichte=DichteStufe.FOKUSSIERT,
+        sichtbar_in=[SurfacingKontext.COMMAND_PALETTE, SurfacingKontext.SHORTCUT],
+        prioritaet=CommandPrioritaet.KRITISCH,
+        domain="",
+    ),
+    # SR-012 — Hilfe anzeigen (global, alle Rollen, NIEDRIG)
+    SurfacingRegel(
+        regel_id="SR-012",
+        command_id="CMD_HILFE_ANZEIGEN",
+        command_bezeichnung="Hilfe anzeigen",
+        erlaubte_rollen=[],
+        min_dichte=DichteStufe.FOKUSSIERT,
+        sichtbar_in=[SurfacingKontext.TOOLBAR_OVERFLOW, SurfacingKontext.COMMAND_PALETTE, SurfacingKontext.VOICE],
+        prioritaet=CommandPrioritaet.NIEDRIG,
+        domain="",
+    ),
+]
+
+
+def get_default_surfacing_regeln() -> list[SurfacingRegel]:
+    """Gibt die 12 Standard-Surfacing-Regeln zurück (Process-Kernel-Kontrakt Wave 39)."""
+    return list(_DEFAULT_SURFACING_REGELN)

@@ -1,39 +1,57 @@
-# Wave 66 — Concurrency + Resource Lock Contracts
+# Wave 66 - Concurrency + Resource Lock Contracts
 
-**Status:** ABGESCHLOSSEN
+**Status:** abgeschlossen
 **Datum:** 2026-03-18
-**Tests:** 163 grün, 0 Fehler
+**Tests:** 163 gruen, 0 Fehler
 
-## Module
+## Scope
+
+Wave 66 fuehrt Konkurrenzsteuerung fuer parallele Ausfuehrung und Ressource-Locks mit Deadlock-Erkennung ein.
+
+## Zielbild
+
+Ausfuehrungslimits und Locking sollen als standardisierte Kernel-Contracts fuer sichere Parallelverarbeitung bereitstehen.
+
+## Lieferumfang
 
 ### `app/core/process_concurrency_contracts.py`
-Concurrent Execution Limits und Mutex-Muster:
-- `KonkurrenzModus` (MUTEX, SEMAPHORE, READ_WRITE, SINGLE_WRITER)
-- `AusfuehrungsSlotStatus` (FREI, BELEGT, RESERVIERT)
-- `KonkurrenzRegel.effektives_limit()` — MUTEX erzwingt Limit 1
-- `AusfuehrungsSlot.ist_abgelaufen()` / `ist_verfuegbar()`
-- `KonkurrenzWaechter.belegte_slots()` / `kann_ausfuehren()` / `auslastung_pct()`
-- Default-Fixtures: KW-001 (MUTEX, 100% ausgelastet), KW-002 (SEMAPHORE max=3, 2/3 belegt)
+
+- `KonkurrenzModus`
+- `AusfuehrungsSlotStatus`
+- `KonkurrenzRegel.effektives_limit()`
+- `AusfuehrungsSlot.ist_abgelaufen()`
+- `AusfuehrungsSlot.ist_verfuegbar()`
+- `KonkurrenzWaechter`
 
 ### `app/core/workflow_resource_lock_contracts.py`
-Feingranulares Ressource-Locking mit Deadlock-Erkennung:
-- `RessourceLockTyp` (EXKLUSIV, GETEILT, UPGRADE)
-- `DeadlockStatus` (KEIN_DEADLOCK, DEADLOCK_ERKANNT, DEADLOCK_AUFGELOEST)
-- `RessourceLock.__post_init__()` — ablauf_am = erstellt_am + ttl_sekunden
-- `pruefe_lock_kompatibilitaet()` — GETEILT+GETEILT und UPGRADE+GETEILT kompatibel
-- `erkenne_deadlock()` — DFS-Zykluserkennung in Warte-Graphen
-- Default-Fixtures: RL-001 (EXKLUSIV aktiv), RL-002/003 (GETEILT aktiv), RL-004 (expired)
 
-## FastAPI Endpoints (process_kernel_api.py)
+- `RessourceLockTyp`
+- `DeadlockStatus`
+- `RessourceLock.__post_init__()`
+- `pruefe_lock_kompatibilitaet()`
+- `erkenne_deadlock()`
 
-| Method | Path | Beschreibung |
-|--------|------|-------------|
+### FastAPI-Endpunkte
+
+| Methode | Pfad | Beschreibung |
+|---------|------|--------------|
 | GET | `/process/konkurrenz/waechter` | Alle Konkurrenz-Waechter mit Auslastung |
-| POST | `/process/konkurrenz/pruefe-ausfuehrbarkeit` | Prüfe ob Ausführung möglich |
+| POST | `/process/konkurrenz/pruefe-ausfuehrbarkeit` | Prueft, ob Ausfuehrung moeglich ist |
 | GET | `/process/resource-lock/locks` | Alle Ressource-Locks mit Aktiv-Status |
 | POST | `/process/resource-lock/erkenne-deadlock` | Deadlock-Erkennung via Warte-Relationen |
 
-## Testergebnisse
+## Abnahmekriterien
 
-- 163 Tests, alle grün
-- Keine Regressionen (39 vorbestehende Fehler unverändert)
+- Konkurrenzregeln berechnen effektive Limits und Auslastung reproduzierbar.
+- Ressource-Locks pruefen Kompatibilitaet und erkennen Deadlocks ueber Wartegraphen.
+- Default-Waechter und Default-Locks stehen bereit.
+- Die vier API-Endpunkte liefern Konkurrenz- und Lock-Funktionen.
+
+## Tests
+
+**Anzahl:** 163
+
+## Status
+
+`abgeschlossen`
+Stand: 2026-03-18

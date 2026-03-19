@@ -1,91 +1,40 @@
-# Wave 7 Status
+# Wave 7 - Read-Model-Persistenz, Reklamation und Preisabsicherung
 
-## Wave
-- Name: `Read-Model-Persistenz, Reklamation und Preisabsicherung`
-- Epics: `Epic 2 Read, Event and Data Product Platform`, `Epic 1 Process Kernel Platform`
-- Status: `abgeschlossen`
-- Startbedingung: Wave 6 abgeschlossen (Agrar-P0, Supplier Portal, Silo Ops)
-
-## Ziel
-
-Wave-2-Read-Models erhalten echte Snapshot-Persistenz und NATS-Consumer-Wiring.
-Reklamations-, Ausnahme-, Preisabsicherungs- und Silo-Protokollpfade werden
-als formale Kernbausteine in den Process Kernel ueberfuehrt.
-
-## Arbeitspakete
-
-| AP | Thema | Status |
-|----|-------|--------|
-| AP1 | Read-Model-Persistenz: Snapshots fuer Wave-2-Projektionen | umgesetzt |
-| AP2 | Event-Consumer-Wiring: NATS-Subjects an ProjectionConsumer koppeln | umgesetzt |
-| AP3 | Reklamations-Aggregat mit Zustandsmaschine | umgesetzt |
-| AP4 | Ausnahmepfade als Workflow-Extension (Exception Rules) | umgesetzt |
-| AP5 | Preisabsicherung: HedgeReference fuer MATIF-Futures-Bindung | umgesetzt |
-| AP6 | Silo-Reinigungsprotokoll und Trocknungsprotokoll (GoBD) | umgesetzt |
+**Status:** abgeschlossen
+**Datum:** 2026-03-19
 
 ## Scope
 
-### AP1: Read-Model-Persistenz
+Wave 7 fuehrt Snapshot-Persistenz, Event-Consumer-Wiring sowie Domain-Bausteine fuer Reklamation, Ausnahmefaelle, Preisabsicherung und Silo-Protokolle ein.
 
-Neue Dateien:
-- `app/core/read_model_persistence.py`
-- `app/infrastructure/models/read_model_snapshots.py`
+## Zielbild
 
-Geliefert:
-- `ReadModelSnapshot` mit Hash-basierter Integritaetspruefung
-- `SnapshotCursor` fuer stabile Paginierung
-- `ReadModelSnapshotStore` mit SQLAlchemy-gestuetzter DB-Persistenz
-- In-Memory-Fallback fuer isolierte Contract-Tests
-- API-Endpunkte in `app/api/v1/endpoints/read_model_snapshots.py`
+Read-Models sollen dauerhaft speicherbar und Event-getrieben sein, waehrend neue Domain-Contracts Fachpfade auf Kernniveau absichern.
 
-### AP2: Event-Consumer-Wiring
+## Lieferumfang
 
-Neue Datei: `app/core/event_consumer_wiring.py`
+| AP | Thema | Status |
+|----|-------|--------|
+| AP1 | Read-Model-Persistenz | abgeschlossen |
+| AP2 | Event-Consumer-Wiring | abgeschlossen |
+| AP3 | Reklamations-Aggregat | abgeschlossen |
+| AP4 | Ausnahmepfade als Workflow-Extension | abgeschlossen |
+| AP5 | Preisabsicherung | abgeschlossen |
+| AP6 | Silo-Reinigungs- und Trocknungsprotokolle | abgeschlossen |
 
-Geliefert:
-- `NatsSubjectMapping`
-- `ConsumerWiringRegistry`
-- `build_default_wiring()` fuer Wave-1 bis Wave-6-Subjects
-- `WiringHealthReport`
+## Abnahmekriterien
 
-### AP3 bis AP6: Domain-Bausteine
+- Snapshots sind persistent, integritaetsgeprueft und paginierbar.
+- Consumer-Wiring deckt die relevanten Event-Subjects der Waves 1 bis 6 ab.
+- Reklamation, Ausnahmeantrag und HedgeReference sind formal modelliert.
+- GoBD-relevante Silo-Protokolle sind pruefbar.
 
-Geliefert:
-- `app/core/reklamation.py`
-- `app/core/exception_workflow_extension.py`
-- `app/core/price_hedge.py`
-- `app/core/silo_protokolle.py`
+## Tests
 
-## Pakete
+- `tests/test_process_kernel_wave7_read_models.py`
+- `tests/test_process_kernel_wave7_domain.py`
 
-### Paket A: Read-Model Persistenz und Event-Wiring
-- Artefakt: `package-a/STATUS.md`
-- Tests: `tests/test_process_kernel_wave7_read_models.py`
+## Status
 
-### Paket B: Reklamation, Ausnahmen, Preisabsicherung, Silo
-- Artefakt: `package-b/STATUS.md`
-- Tests: `tests/test_process_kernel_wave7_domain.py`
-
-## Exit-Kriterien
-
-- [x] `ReadModelSnapshot` kann erzeugt, gespeichert und per Cursor paginiert werden
-- [x] `ConsumerWiringRegistry` kennt die relevanten Wave-1 bis Wave-6-Event-Subjects
-- [x] `Reklamation` durchlaeuft eine gueltige Zustandsmaschine
-- [x] `AusnahmeAntrag` wird ueber den Dispatcher korrekt ausgeloest
-- [x] `HedgeReference` berechnet Absicherungsquote korrekt
-- [x] `SiloReinigungsprotokoll` und `TrocknungsProtokoll` sind GoBD-vollstaendig pruefbar
-- [x] Wave-7-Tests sind gruen
-
-## Verifikation
-
-```bash
-pytest tests/test_process_kernel_wave7_read_models.py \
-       tests/test_process_kernel_wave7_domain.py -q --no-cov
-# Ergebnis: 56 passed
-```
-
-## Startpunkte fuer Folgearbeit
-
-- `app/core/read_model_persistence.py` ist jetzt DB-faehige Basis fuer Wave-8-Datenprodukte
-- `app/core/event_consumer_wiring.py` bleibt die zentrale Subject-zu-Consumer-Registry
-- `app/core/command_dispatcher.py` und `app/core/agent_command_manifest.py` sind Ankerpunkte fuer Wave 8
+`abgeschlossen`
+Stand: 2026-03-19

@@ -53,7 +53,7 @@ Nachweislich umgesetzt:
   - dieselbe Manifest-Anbindung nun auch in AP, Closing, USTVA, Zahlungslauf, Lastschriften und Settlement-Preview
 
 Nachweislich geschlossene Gaps:
-
+ 
 | Gap-ID | Status | Beleg |
 |--------|--------|-------|
 | 006 | abgeschlossen | `wave-21/STATUS.md` |
@@ -67,6 +67,7 @@ Nachweislich geschlossene Gaps:
 | 007 | abgeschlossen | `wave-23/STATUS.md` |
 | 009 | abgeschlossen | `wave-24/STATUS.md` |
 | 042 | abgeschlossen | `wave-23/STATUS.md` |
+| 050 | abgeschlossen | `wave-30/STATUS.md` |
 
 ---
 

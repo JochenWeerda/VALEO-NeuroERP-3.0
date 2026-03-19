@@ -55,3 +55,4 @@ pytest tests/test_process_kernel_wave50_archive_metrics.py -q --no-cov
 
 ## Status
 `abgeschlossen`
+Stand: 2026-03-19

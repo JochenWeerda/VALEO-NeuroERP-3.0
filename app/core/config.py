@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     # Server Configuration
     HOST: str = "0.0.0.0"
     PORT: int = 8000
+    APP_ENV: str = "development"
     DEBUG: bool = True
 
     @field_validator("DEBUG", mode="before")
@@ -162,6 +163,10 @@ class Settings(BaseSettings):
 
     # Agrar Feature-Flags
     AGRAR_ZONEN_FROM_API: bool = False  # True = Zonen via WFS/PostGIS statt Seed-Daten
+
+    # Rationsoptimierung Microservice
+    RATIONS_OPTIMIZATION_URL: Optional[str] = None  # z.B. http://rations-optimization:8000
+    RATIONS_OPTIMIZATION_API_KEY: str = "dev-api-key-change-in-production"
 
     # File Storage
     UPLOAD_DIR: str = "uploads"

@@ -949,13 +949,15 @@ def _build_sla_profiles(tenant_id: str, db: Session | None) -> list[WorkflowSlaP
 
     profiles: list[WorkflowSlaProfile] = []
     for process_key, definition in sorted(merged_variants.items()):
+        sla_defs = definition.get("step_sla") or {}
         step_sla = [
             WorkflowStepSlaSummary(
                 step_key=step_key,
-                timeout_hours=sla.timeout_hours,
-                escalation_roles=list(sla.escalation_roles),
+                timeout_hours=(sla.get("timeout_hours") or 0),
+                escalation_roles=list(sla.get("escalation_roles") or []),
             )
-            for step_key, sla in sorted(definition.step_sla.items())
+            for step_key, sla in sorted(sla_defs.items())
+            if isinstance(sla, dict)
         ]
         profiles.append(
             WorkflowSlaProfile(

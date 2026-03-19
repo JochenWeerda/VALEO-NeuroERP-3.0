@@ -665,3 +665,24 @@ class TestJobsEndpoints:
         assert resp.status_code == 200
         data = resp.json()
         assert data["routing"]["worker_klasse"] == "FINANCE"
+
+    def test_get_jobs_heartbeat(self, client):
+        resp = client.get("/api/v1/process/jobs/heartbeat")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert "scheduler_id" in data
+        assert "worker_id" in data
+        assert "heartbeat" in data
+        assert data["heartbeat"]["status"] in {"ACTIVE", "DEGRADED", "STALE"}
+        assert data["schema_version"] == 1
+
+    def test_get_jobs_heartbeat_recovery(self, client):
+        resp = client.get("/api/v1/process/jobs/heartbeat/recovery")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["heartbeat_status"] in {"ACTIVE", "DEGRADED", "STALE"}
+        assert "recovery_plan" in data
+        assert "notification_preview" in data
+        assert data["recovery_plan"]["scheduler_id"] == data["scheduler_id"]
+        assert data["recovery_plan"]["actions"]
+        assert data["notification_preview"]["ausloeser"] == "ESKALATION"

@@ -132,9 +132,9 @@ function KPIWidget({ widget }: { widget: WidgetLayout }) {
   const previousRange = getDateRange(-1)
 
   // Lade aktuelle KPI-Daten
-  const { data: kpiData, isPending } = useQuery({
+  const { data: kpiData, isPending } = useQuery<Record<string, number>>({
     queryKey: queryKeys.analytics.kpis,
-    queryFn: async () => {
+    queryFn: async (): Promise<Record<string, number>> => {
       try {
         const response = await apiClient.get<Record<string, number>>('/api/v1/analytics/kpis', {
           params: { start_date: currentRange.start, end_date: currentRange.end },
@@ -151,9 +151,9 @@ function KPIWidget({ widget }: { widget: WidgetLayout }) {
   })
 
   // Lade Vormonatsdaten fuer Trend-Berechnung
-  const { data: prevKpiData } = useQuery({
+  const { data: prevKpiData } = useQuery<Record<string, number>>({
     queryKey: queryKeys.analytics.kpisPrevious,
-    queryFn: async () => {
+    queryFn: async (): Promise<Record<string, number>> => {
       try {
         const response = await apiClient.get<Record<string, number>>('/api/v1/analytics/kpis', {
           params: { start_date: previousRange.start, end_date: previousRange.end },

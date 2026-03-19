@@ -1,0 +1,19 @@
+id,name,group,dm_frac,price_eur_kgdm,me_mj_kgdm,sidp_g_kgdm,andfom_g_kgdm,starch_g_kgdm,sugar_g_kgdm,fat_g_kgdm,ca_g_kgdm,p_g_kgdm,na_g_kgdm,min_kgdm,max_kgdm,active
+grassilage,Grassilage,forage,0.35,0.15,10.5,180,450,20,15,30,6,3,1,0.0,15.0,true
+maissilage,Maissilage,forage,0.35,0.12,11.0,80,220,350,20,25,2,2,1,0.0,10.0,true
+kartoffelpulpe,Kartoffelpülpe,concentrate,0.12,0.08,12.5,60,100,200,300,10,1,1,1,0.0,5.0,true
+weizen,Weizen,concentrate,0.88,0.20,13.0,110,25,600,20,20,0.5,3.5,0.5,0.0,3.0,true
+gerste,Gerste,concentrate,0.86,0.18,11.5,95,45,500,25,15,0.6,3.2,0.4,0.0,2.5,true
+roggen,Roggen,concentrate,0.85,0.16,10.8,85,35,400,20,12,0.4,2.8,0.3,0.0,2.0,true
+maismehl_fein,Maismehl fein,concentrate,0.87,0.22,13.5,100,15,650,10,22,0.3,3.0,0.2,0.0,2.0,true
+sojaschrot,Sojaschrot NON GMO,protein,0.88,0.45,12.0,380,120,30,10,20,3,6,0.5,0.0,4.0,true
+rapsschrot,Rapsschrot,protein,0.88,0.35,10.5,220,140,25,8,22,4,5,0.3,0.0,3.0,true
+trockenschnitzel,Trockenschnitzel,concentrate,0.90,0.25,12.8,150,80,300,50,15,0.8,2.5,0.2,0.0,4.0,true
+mineralfutter,Mineralfutter,mineral,0.90,0.50,0.0,0,0,0,0,0,250,120,100,0.1,0.5,true
+futterkalk,Futterkalk,mineral,0.95,0.10,0.0,0,0,0,0,0,380,0,0,0.0,0.3,true
+nacl,NaCl,mineral,1.00,0.15,0.0,0,0,0,0,0,0,0,393,0.0,0.1,true
+natriumbicarbonat,Natriumbicarbonat,mineral,1.00,0.20,0.0,0,0,0,0,0,0,0,274,0.0,0.2,true
+snoepsirup,SnoepSirup,concentrate,0.75,0.30,13.2,0,0,500,600,5,0,0,0,0.0,2.0,true
+beispray_futterfett,BeiSpray Futterfett 99M,concentrate,0.99,1.20,35.0,0,0,0,0,990,0,0,0,0.0,0.5,true
+rapsstroh,Rapsstroh,forage,0.90,0.05,6.0,35,480,15,10,15,4,2,1,0.0,3.0,true
+heu,Heu,forage,0.88,0.18,8.2,160,480,30,25,35,6,2,2,0.0,20.0,true

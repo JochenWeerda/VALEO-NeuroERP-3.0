@@ -1,6 +1,6 @@
 # ADR-011 UI-Maskenstrategie
 
-**Status:** Accepted  
+**Status:** Accepted
 **Date:** 2026-03-11
 
 ## Context

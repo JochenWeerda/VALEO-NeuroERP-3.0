@@ -4,7 +4,13 @@
  */
 
 import { useQuery } from '@tanstack/react-query'
-import { apiClient, ApiError } from '../api-client'
+import { apiClient } from '@/lib/api-client'
+
+export type ApiError = {
+  message: string
+  status?: number
+  code?: string
+}
 
 // ── Error State Types ─────────────────────────────────────────────────────────────
 
@@ -100,9 +106,10 @@ export function useApiData<T = unknown>(
     }
   })
 
+  const { data, ...rest } = query
   return {
-    data: query.data,
-    ...query,
+    data,
+    ...rest,
   }
 }
 

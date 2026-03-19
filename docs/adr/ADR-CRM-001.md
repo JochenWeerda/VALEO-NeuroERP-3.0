@@ -1,8 +1,7 @@
 # ADR-CRM-001 – CRM as Independent AI-First Bounded Context
 
-| Status | Accepted |
-|--------|----------|
-| Date   | 2025-11-13 |
+**Status:** Accepted
+**Date:** 2025-11-13
 
 ## Context
 - Existing monolithic backend mixes CRM-lite logic with ERP domains; limited events, inconsistent schemas, difficult to evolve.

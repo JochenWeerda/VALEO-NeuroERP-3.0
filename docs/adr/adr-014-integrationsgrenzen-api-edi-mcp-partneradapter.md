@@ -1,6 +1,6 @@
 # ADR-014 Integrationsgrenzen API / EDI / MCP / Partneradapter
 
-**Status:** Accepted  
+**Status:** Accepted
 **Date:** 2026-03-11
 
 ## Context

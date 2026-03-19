@@ -1,6 +1,6 @@
 # ADR-006 Read-Model / Query-Contract-Prinzip
 
-**Status:** Accepted  
+**Status:** Accepted
 **Date:** 2026-03-11
 
 ## Context

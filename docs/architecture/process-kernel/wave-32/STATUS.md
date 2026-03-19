@@ -46,3 +46,4 @@ pytest tests/test_process_kernel_wave32_snapshots_fallback.py -q --no-cov
 
 ## Status
 `abgeschlossen`
+Stand: 2026-03-19
