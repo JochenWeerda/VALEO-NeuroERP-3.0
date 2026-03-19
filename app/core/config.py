@@ -45,6 +45,8 @@ class Settings(BaseSettings):
         "http://localhost:3001",  # Vite dev server (Fallback)
         "http://localhost:8080",  # Vue dev server
         "http://localhost:5173",  # Vite dev server (Primary)
+        "/api/v1/channels/slack/events",
+        "/api/v1/channels/teams/events",
     ]
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
@@ -178,11 +180,17 @@ class Settings(BaseSettings):
 
     # API Authentication
     API_DEV_TOKEN: Optional[str] = "dev-token"
+    CHANNEL_SLACK_SIGNING_SECRET: Optional[str] = None
+    CHANNEL_SLACK_BOT_TOKEN: Optional[str] = None
+    CHANNEL_TEAMS_WEBHOOK_SECRET: Optional[str] = None
+    CHANNEL_INGRESS_MAX_AGE_SECONDS: int = 300
     API_AUTH_EXEMPT_PATHS: List[str] = [
         "/api/v1/health",
         "/api/v1/health/ready",
         "/api/v1/health/live",
         "/api/v1/health/database",
+        "/api/v1/channels/slack/events",
+        "/api/v1/channels/teams/events",
         "/api/v1/gap/pipeline/status",  # GAP Pipeline Status (für Admin-UI)
     ]
 

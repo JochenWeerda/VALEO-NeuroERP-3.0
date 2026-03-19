@@ -1,0 +1,33 @@
+_metadata:
+  major_version: 2
+  minor_version: 1
+display_information:
+  name: __APP_NAME__
+  description: Channel-native access to VALEO NeuroERP knowledge and process actions.
+  long_description: Slack app for VALEO NeuroERP. Supports knowledge queries via app mentions and posts threaded replies back into Slack.
+  background_color: "#0F172A"
+features:
+  app_home:
+    home_tab_enabled: true
+    messages_tab_enabled: true
+    messages_tab_read_only_enabled: false
+  bot_user:
+    display_name: __BOT_DISPLAY_NAME__
+    always_online: false
+oauth_config:
+  scopes:
+    bot:
+      - app_mentions:read
+      - chat:write
+      - im:history
+settings:
+  socket_mode_enabled: false
+  interactivity:
+    is_enabled: false
+  org_deploy_enabled: false
+  event_subscriptions:
+    request_url: __REQUEST_URL__
+    bot_events:
+      - app_mention
+      - message.im
+      - app_home_opened

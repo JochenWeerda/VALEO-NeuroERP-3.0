@@ -1,13 +1,22 @@
+/**
+ * Einlagerung — Touch-optimierter Feldworkflow (Gap 024, Wave 76)
+ * Touch-Targets >= 44px, Lagerort-Auswahl via TouchCard statt <select>
+ */
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import { Wizard } from '@/components/patterns/Wizard'
-import { Card, CardContent } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { CheckCircle } from 'lucide-react'
 import { apiClient } from '@/lib/api-client'
 import { useToast } from '@/hooks/use-toast'
+import {
+  TouchSection,
+  TouchTextInput,
+  TouchNumericInput,
+  TouchCard,
+  TouchCardGroup,
+  TouchConfirmCard,
+} from '@/components/touch/TouchFieldLayout'
 
 type EinlagerungData = {
   chargenId: string
@@ -16,6 +25,15 @@ type EinlagerungData = {
   lagerort: string
   lagerplatz: string
 }
+
+const LAGERORTE = [
+  { id: 'silo-1', label: 'Silo 1', description: 'Weizen / Roggen' },
+  { id: 'silo-2', label: 'Silo 2', description: 'Gerste / Hafer' },
+  { id: 'halle-a', label: 'Halle A', description: 'Schüttgut allgemein' },
+  { id: 'halle-b', label: 'Halle B', description: 'Säcke / Paletten' },
+]
+
+const ARTIKEL = ['Weizen', 'Gerste', 'Raps', 'Mais', 'Roggen', 'Hafer', 'Sonnenblumen']
 
 export default function EinlagerungPage(): JSX.Element {
   const navigate = useNavigate()
@@ -28,7 +46,7 @@ export default function EinlagerungPage(): JSX.Element {
     lagerplatz: '',
   })
 
-  function updateField<K extends keyof EinlagerungData>(key: K, value: EinlagerungData[K]): void {
+  function set<K extends keyof EinlagerungData>(key: K, value: EinlagerungData[K]): void {
     setEinlagerung((prev) => ({ ...prev, [key]: value }))
   }
 
@@ -44,7 +62,10 @@ export default function EinlagerungPage(): JSX.Element {
       return response.data
     },
     onSuccess: () => {
-      toast({ title: 'Einlagerung gebucht', description: `${einlagerung.artikel} (${einlagerung.chargenId}) — ${einlagerung.menge} t → ${einlagerung.lagerort}` })
+      toast({
+        title: 'Einlagerung gebucht',
+        description: `${einlagerung.artikel} (${einlagerung.chargenId}) — ${einlagerung.menge} t → ${einlagerung.lagerort}`,
+      })
       navigate('/lager/bestandsuebersicht')
     },
     onError: () => {
@@ -52,100 +73,105 @@ export default function EinlagerungPage(): JSX.Element {
     },
   })
 
-  async function handleSubmit(): Promise<void> {
-    buchungMutation.mutate()
-  }
+  const lagerLabel = LAGERORTE.find((l) => l.id === einlagerung.lagerort)?.label ?? einlagerung.lagerort
 
   const steps = [
     {
       id: 'charge',
       title: 'Charge',
       content: (
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="chargenId">Chargen-ID *</Label>
-            <Input
-              id="chargenId"
-              value={einlagerung.chargenId}
-              onChange={(e) => updateField('chargenId', e.target.value)}
-              placeholder="z.B. 251011-WEI-001"
-              className="font-mono"
-            />
-          </div>
-          <div>
-            <Label htmlFor="artikel">Artikel</Label>
-            <Input id="artikel" value={einlagerung.artikel} onChange={(e) => updateField('artikel', e.target.value)} />
-          </div>
-          <div>
-            <Label htmlFor="menge">Menge (t)</Label>
-            <Input id="menge" type="number" value={einlagerung.menge} onChange={(e) => updateField('menge', Number(e.target.value))} step="0.001" />
-          </div>
-        </div>
+        <TouchSection title="Charge & Artikel">
+          <TouchTextInput
+            label="Chargen-ID"
+            value={einlagerung.chargenId}
+            onChange={(v) => set('chargenId', v)}
+            placeholder="z.B. 251011-WEI-001"
+            autoCapitalize="characters"
+            required
+          />
+          <TouchCardGroup label="Artikel" required>
+            {ARTIKEL.map((art) => (
+              <TouchCard
+                key={art}
+                selected={einlagerung.artikel === art}
+                onSelect={() => set('artikel', art)}
+              >
+                {art}
+              </TouchCard>
+            ))}
+          </TouchCardGroup>
+          <TouchNumericInput
+            label="Menge"
+            value={einlagerung.menge}
+            onChange={(v) => set('menge', Number(v))}
+            unit="t"
+            min={0}
+            step={0.001}
+            required
+          />
+        </TouchSection>
       ),
     },
     {
       id: 'lagerort',
       title: 'Lagerort',
       content: (
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="lagerort">Lagerort *</Label>
-            <select
-              id="lagerort"
-              value={einlagerung.lagerort}
-              onChange={(e) => updateField('lagerort', e.target.value)}
-              className="w-full rounded-md border border-input bg-background px-3 py-2"
-            >
-              <option value="">-- Wählen --</option>
-              <option value="silo-1">Silo 1 (Weizen)</option>
-              <option value="silo-2">Silo 2 (Gerste)</option>
-              <option value="halle-a">Halle A</option>
-            </select>
-          </div>
-          <div>
-            <Label htmlFor="lagerplatz">Lagerplatz</Label>
-            <Input id="lagerplatz" value={einlagerung.lagerplatz} onChange={(e) => updateField('lagerplatz', e.target.value)} placeholder="z.B. A-12-03" />
-          </div>
-        </div>
+        <TouchSection title="Lagerort wählen">
+          <TouchCardGroup label="Lagerort" required>
+            {LAGERORTE.map((lo) => (
+              <TouchCard
+                key={lo.id}
+                selected={einlagerung.lagerort === lo.id}
+                onSelect={() => set('lagerort', lo.id)}
+                description={lo.description}
+              >
+                {lo.label}
+              </TouchCard>
+            ))}
+          </TouchCardGroup>
+          <TouchTextInput
+            label="Lagerplatz (optional)"
+            value={einlagerung.lagerplatz}
+            onChange={(v) => set('lagerplatz', v)}
+            placeholder="z.B. A-12-03"
+            hint="Leer lassen für automatische Zuweisung"
+          />
+        </TouchSection>
       ),
     },
     {
       id: 'bestaetigung',
       title: 'Bestätigung',
       content: (
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-center mb-6">
-              <CheckCircle className="h-20 w-20 text-green-600" />
-            </div>
-            <h3 className="text-center text-2xl font-bold mb-6">Einlagerung bereit</h3>
-            <dl className="grid gap-3">
-              <div className="flex justify-between border-b pb-2">
-                <dt className="text-sm font-medium text-muted-foreground">Charge</dt>
-                <dd className="text-sm font-semibold font-mono">{einlagerung.chargenId}</dd>
-              </div>
-              <div className="flex justify-between border-b pb-2">
-                <dt className="text-sm font-medium text-muted-foreground">Artikel</dt>
-                <dd className="text-sm font-semibold">{einlagerung.artikel}</dd>
-              </div>
-              <div className="flex justify-between border-b pb-2">
-                <dt className="text-sm font-medium text-muted-foreground">Menge</dt>
-                <dd className="text-sm font-semibold">{einlagerung.menge} t</dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-sm font-medium text-muted-foreground">Lagerort</dt>
-                <dd className="text-sm font-semibold">{einlagerung.lagerort} / {einlagerung.lagerplatz || 'Auto'}</dd>
-              </div>
-            </dl>
-          </CardContent>
-        </Card>
+        <div className="space-y-6">
+          <div className="flex flex-col items-center gap-2 py-2">
+            <CheckCircle className="h-16 w-16 text-emerald-500" />
+            <h3 className="text-xl font-bold text-slate-800">Einlagerung prüfen</h3>
+            <p className="text-sm text-slate-500">Bitte alle Angaben bestätigen</p>
+          </div>
+          <TouchConfirmCard
+            title="Zusammenfassung"
+            fields={[
+              { label: 'Charge', value: einlagerung.chargenId || '—' },
+              { label: 'Artikel', value: einlagerung.artikel || '—', highlight: true },
+              { label: 'Menge', value: `${einlagerung.menge} t`, highlight: true },
+              { label: 'Lagerort', value: lagerLabel || '—' },
+              { label: 'Lagerplatz', value: einlagerung.lagerplatz || 'Auto' },
+            ]}
+          />
+        </div>
       ),
     },
   ]
 
   return (
-    <div className="p-6">
-      <Wizard title="Einlagerung" steps={steps} onFinish={handleSubmit} onCancel={() => navigate('/lager/bestandsuebersicht')} />
+    <div className="p-4 sm:p-6">
+      <Wizard
+        title="Einlagerung"
+        steps={steps}
+        onFinish={() => buchungMutation.mutate()}
+        onCancel={() => navigate('/lager/bestandsuebersicht')}
+      />
     </div>
   )
 }

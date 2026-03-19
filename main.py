@@ -89,6 +89,13 @@ async def lifespan(app: FastAPI):
     # Startup
     logger.info("Starting VALEO-NeuroERP API server...")
 
+    # SC-AUTH-002: Dev-Token in Produktion blockiert (Wave 75 / Gap 049)
+    if settings.APP_ENV == "production" and settings.API_DEV_TOKEN is not None:
+        raise RuntimeError(
+            "SECURITY: API_DEV_TOKEN must not be set in production environment! "
+            "Unset API_DEV_TOKEN or set APP_ENV != 'production'."
+        )
+
     # Configure dependency injection container
     try:
         configure_container()
@@ -185,6 +192,10 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(CORSMiddleware, **cors_kwargs)
 
 app.add_middleware(GZipMiddleware, minimum_size=500)
+
+# Security Headers Middleware (Wave 75 / Gap 049)
+from app.middleware.security_headers import SecurityHeadersMiddleware
+app.add_middleware(SecurityHeadersMiddleware)
 
 # Add trusted host middleware
 if not settings.DEBUG:

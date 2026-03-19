@@ -4,6 +4,7 @@ Repository for persistent knowledge core objects.
 
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from typing import Any
 
 from sqlalchemy import func, select
@@ -18,7 +19,15 @@ from app.core.knowledge_core_contracts import (
     KnowledgeVersion,
     retrieve_knowledge_objects,
 )
-from app.models.knowledge import KnowledgeObjectRecord, KnowledgeVersionRecord
+from app.models.knowledge import (
+    KnowledgeImprovementProposalRecord,
+    KnowledgeObjectRecord,
+    KnowledgeVersionRecord,
+)
+
+
+def _utcnow() -> datetime:
+    return datetime.now(timezone.utc)
 
 
 class KnowledgeRepository:
@@ -135,3 +144,162 @@ class KnowledgeRepository:
 
     def retrieve(self, request: KnowledgeRetrievalRequest) -> list[dict[str, Any]]:
         return retrieve_knowledge_objects(request, objects=self.list_domain_objects())
+
+    def list_proposals(self) -> list[KnowledgeImprovementProposalRecord]:
+        stmt = select(KnowledgeImprovementProposalRecord).order_by(KnowledgeImprovementProposalRecord.created_at.desc())
+        return list(self.db.execute(stmt).scalars().all())
+
+    def get_proposal(self, proposal_id: str) -> KnowledgeImprovementProposalRecord | None:
+        stmt = select(KnowledgeImprovementProposalRecord).where(
+            KnowledgeImprovementProposalRecord.proposal_id == proposal_id
+        )
+        return self.db.execute(stmt).scalar_one_or_none()
+
+    def create_proposal(
+        self,
+        *,
+        tenant_id: str,
+        titel: str,
+        typ: str,
+        format: str,
+        inhalt: str,
+        target_knowledge_id: str | None = None,
+        beschreibung: str = "",
+        tags: list[str] | None = None,
+        zielrollen: list[str] | None = None,
+        strukturierte_daten: dict[str, Any] | None = None,
+        quelle: str = "improvement-workflow",
+        vorgeschlagen_von_typ: str = "human",
+        vorgeschlagen_von_ref: str = "unknown",
+        vorgeschlagen_von_rolle: str | None = None,
+        kanal: str | None = None,
+        begruendung: str = "",
+    ) -> KnowledgeImprovementProposalRecord:
+        record = KnowledgeImprovementProposalRecord(
+            tenant_id=tenant_id,
+            target_knowledge_id=target_knowledge_id,
+            titel=titel,
+            typ=typ,
+            status="EINGEREICHT",
+            beschreibung=beschreibung,
+            tags=list(tags or []),
+            zielrollen=list(zielrollen or []),
+            format=format,
+            inhalt=inhalt,
+            strukturierte_daten=dict(strukturierte_daten or {}),
+            quelle=quelle,
+            vorgeschlagen_von_typ=vorgeschlagen_von_typ,
+            vorgeschlagen_von_ref=vorgeschlagen_von_ref,
+            vorgeschlagen_von_rolle=vorgeschlagen_von_rolle,
+            kanal=kanal,
+            begruendung=begruendung,
+        )
+        self.db.add(record)
+        self.db.commit()
+        self.db.refresh(record)
+        return record
+
+    def review_proposal(
+        self,
+        proposal_id: str,
+        *,
+        entscheidung: str,
+        reviewer_ref: str,
+        reviewer_rolle: str | None = None,
+        review_notiz: str | None = None,
+    ) -> tuple[KnowledgeImprovementProposalRecord | None, KnowledgeObjectRecord | None]:
+        proposal = self.get_proposal(proposal_id)
+        if proposal is None:
+            return None, None
+
+        normalized = entscheidung.strip().upper()
+        proposal.reviewer_ref = reviewer_ref
+        proposal.reviewer_rolle = reviewer_rolle
+        proposal.review_notiz = review_notiz
+        proposal.reviewed_at = _utcnow()
+
+        if normalized == "ABGELEHNT":
+            proposal.status = "ABGELEHNT"
+            self.db.commit()
+            self.db.refresh(proposal)
+            return proposal, None
+
+        if normalized != "GENEHMIGT":
+            raise ValueError("Ungueltige Entscheidung")
+
+        applied_record: KnowledgeObjectRecord | None = None
+        if proposal.target_knowledge_id:
+            applied_record = self.add_version(
+                proposal.target_knowledge_id,
+                {
+                    "format": proposal.format,
+                    "inhalt": proposal.inhalt,
+                    "strukturierte_daten": dict(proposal.strukturierte_daten or {}),
+                    "quelle": proposal.quelle,
+                    "status": KnowledgeStatus.FREIGEGEBEN.value,
+                },
+            )
+        else:
+            knowledge_id = f"KNW-IMP-{proposal.proposal_id[-8:].upper()}"
+            applied_record = self.create_object(
+                knowledge_id=knowledge_id,
+                titel=proposal.titel,
+                typ=proposal.typ,
+                status=KnowledgeStatus.FREIGEGEBEN.value,
+                tenant_id=proposal.tenant_id,
+                beschreibung=proposal.beschreibung or proposal.begruendung or "",
+                tags=list(proposal.tags or []),
+                zielrollen=list(proposal.zielrollen or []),
+                agentenfreigabe=True,
+                version_payload={
+                    "version": 1,
+                    "format": proposal.format,
+                    "inhalt": proposal.inhalt,
+                    "strukturierte_daten": dict(proposal.strukturierte_daten or {}),
+                    "quelle": proposal.quelle,
+                },
+            )
+
+        if applied_record is None:
+            raise ValueError("Ziel-Wissensobjekt konnte nicht angewendet werden")
+
+        proposal.status = "UEBERNOMMEN"
+        proposal.applied_knowledge_id = applied_record.knowledge_id
+        proposal.applied_version = max(
+            (version.version for version in applied_record.versionen),
+            default=1,
+        )
+        self.db.add(proposal)
+        self.db.commit()
+        self.db.refresh(proposal)
+        self.db.refresh(applied_record)
+        return proposal, applied_record
+
+    def proposal_as_dict(self, proposal: KnowledgeImprovementProposalRecord) -> dict[str, Any]:
+        return {
+            "proposal_id": proposal.proposal_id,
+            "tenant_id": proposal.tenant_id,
+            "target_knowledge_id": proposal.target_knowledge_id,
+            "titel": proposal.titel,
+            "typ": proposal.typ,
+            "status": proposal.status,
+            "beschreibung": proposal.beschreibung or "",
+            "tags": list(proposal.tags or []),
+            "zielrollen": list(proposal.zielrollen or []),
+            "format": proposal.format,
+            "inhalt": proposal.inhalt,
+            "strukturierte_daten": dict(proposal.strukturierte_daten or {}),
+            "quelle": proposal.quelle,
+            "vorgeschlagen_von_typ": proposal.vorgeschlagen_von_typ,
+            "vorgeschlagen_von_ref": proposal.vorgeschlagen_von_ref,
+            "vorgeschlagen_von_rolle": proposal.vorgeschlagen_von_rolle,
+            "kanal": proposal.kanal,
+            "begruendung": proposal.begruendung or "",
+            "reviewer_ref": proposal.reviewer_ref,
+            "reviewer_rolle": proposal.reviewer_rolle,
+            "review_notiz": proposal.review_notiz,
+            "reviewed_at": proposal.reviewed_at.isoformat() if proposal.reviewed_at else None,
+            "applied_knowledge_id": proposal.applied_knowledge_id,
+            "applied_version": proposal.applied_version,
+            "created_at": proposal.created_at.isoformat() if proposal.created_at else None,
+        }

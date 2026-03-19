@@ -1,8 +1,20 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 
+from app.core.channel_ingress import (
+    build_slack_url_verification_response,
+    dispatch_channel_ingress,
+    is_slack_url_verification,
+    is_slack_ignorable_event,
+    maybe_post_slack_response,
+    normalize_slack_event,
+    normalize_teams_event,
+    parse_json_body,
+    verify_slack_signature,
+    verify_teams_signature,
+)
 from app.core.channel_process_actions import (
     decide_channel_process_action,
     execute_channel_process_action,
@@ -161,3 +173,42 @@ def get_knowledge_graph_path(payload: KnowledgeGraphPathRequest, db=Depends(get_
         "path": path,
         "found": bool(path),
     }
+
+
+@router.post("/slack/events")
+async def slack_events(request: Request, db=Depends(get_db)):
+    raw_body = await request.body()
+    timestamp = request.headers.get("X-Slack-Request-Timestamp")
+    signature = request.headers.get("X-Slack-Signature")
+    if not verify_slack_signature(raw_body, timestamp, signature):
+        raise HTTPException(status_code=401, detail="Slack-Signatur ungueltig")
+    payload = parse_json_body(raw_body)
+    if is_slack_url_verification(payload):
+        return build_slack_url_verification_response(payload)
+    if is_slack_ignorable_event(payload):
+        return {"ignored": True, "reason": "bot_or_non_user_event"}
+    envelope = normalize_slack_event(payload)
+    try:
+        result = dispatch_channel_ingress(db, envelope)
+        await maybe_post_slack_response(payload, result)
+        return result
+    except KeyError as exc:
+        raise HTTPException(status_code=400, detail=f"Pflichtfeld fehlt: {exc}") from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@router.post("/teams/events")
+async def teams_events(request: Request, db=Depends(get_db)):
+    raw_body = await request.body()
+    signature = request.headers.get("X-Teams-Signature")
+    if not verify_teams_signature(raw_body, signature):
+        raise HTTPException(status_code=401, detail="Teams-Signatur ungueltig")
+    payload = parse_json_body(raw_body)
+    envelope = normalize_teams_event(payload)
+    try:
+        return dispatch_channel_ingress(db, envelope)
+    except KeyError as exc:
+        raise HTTPException(status_code=400, detail=f"Pflichtfeld fehlt: {exc}") from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc

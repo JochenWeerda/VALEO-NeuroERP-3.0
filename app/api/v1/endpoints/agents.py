@@ -9,13 +9,11 @@ import logging
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
-from ....agents import get_neuroassist_service
 from ....core.logging import set_correlation_id
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
-neuroassist_service = get_neuroassist_service()
 
 
 class CapabilityResponse(BaseModel):
@@ -66,7 +64,20 @@ class NeuroAssistGateActionResponse(BaseModel):
     result: dict = Field(default_factory=dict)
 
 
+def _get_neuroassist_service():
+    try:
+        from ....agents import get_neuroassist_service
+    except ModuleNotFoundError as exc:
+        logger.error("NeuroASSIST dependencies are not available: %s", exc)
+        raise HTTPException(
+            status_code=503,
+            detail="NeuroASSIST runtime dependencies are not installed on this backend",
+        ) from exc
+    return get_neuroassist_service()
+
+
 def _list_capability_responses(productive_only: bool) -> list[CapabilityResponse]:
+    neuroassist_service = _get_neuroassist_service()
     capabilities = neuroassist_service.list_capabilities(productive_only=productive_only)
     return [
         CapabilityResponse(
@@ -95,6 +106,7 @@ async def list_neuroassist_capabilities(productive_only: bool = True):
 
 @router.post("/neuroassist/runs", response_model=NeuroAssistRunResponse)
 async def run_neuroassist_capability(request: NeuroAssistRunRequest):
+    neuroassist_service = _get_neuroassist_service()
     logger.info(
         "Running NeuroASSIST capability '%s' (tenant: %s)",
         request.capability_key,
@@ -118,6 +130,7 @@ async def run_neuroassist_capability(request: NeuroAssistRunRequest):
 
 @router.get("/neuroassist/runs/{run_id}", response_model=NeuroAssistRunResponse)
 async def get_neuroassist_run_status(run_id: str):
+    neuroassist_service = _get_neuroassist_service()
     try:
         return NeuroAssistRunResponse(**(await neuroassist_service.get_run_status(run_id)))
     except KeyError as exc:
@@ -129,6 +142,7 @@ async def get_neuroassist_run_status(run_id: str):
 
 @router.post("/neuroassist/runs/{run_id}/gates", response_model=NeuroAssistGateActionResponse)
 async def apply_neuroassist_gate_action(run_id: str, request: NeuroAssistGateActionRequest):
+    neuroassist_service = _get_neuroassist_service()
     try:
         return NeuroAssistGateActionResponse(
             **(

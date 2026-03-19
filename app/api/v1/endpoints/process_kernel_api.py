@@ -5520,3 +5520,179 @@ def retrieve_persisted_knowledge(payload: dict, db=Depends(get_db)):
     repo = KnowledgeRepository(db)
     ergebnisse = repo.retrieve(request)
     return {"query": request.query, "anzahl": len(ergebnisse), "ergebnisse": ergebnisse}
+
+
+@router.get("/knowledge/store/proposals", tags=["process-kernel"])
+def liste_knowledge_improvement_proposals(db=Depends(get_db)):
+    from app.repositories.knowledge_repository import KnowledgeRepository
+
+    repo = KnowledgeRepository(db)
+    return [repo.proposal_as_dict(proposal) for proposal in repo.list_proposals()]
+
+
+@router.get("/knowledge/store/proposals/{proposal_id}", tags=["process-kernel"])
+def hole_knowledge_improvement_proposal(proposal_id: str, db=Depends(get_db)):
+    from app.repositories.knowledge_repository import KnowledgeRepository
+
+    repo = KnowledgeRepository(db)
+    proposal = repo.get_proposal(proposal_id)
+    if proposal is None:
+        raise HTTPException(status_code=404, detail=f"Proposal {proposal_id!r} nicht gefunden")
+    return repo.proposal_as_dict(proposal)
+
+
+@router.post("/knowledge/store/proposals", status_code=201, tags=["process-kernel"])
+def erstelle_knowledge_improvement_proposal(payload: dict, db=Depends(get_db)):
+    from app.repositories.knowledge_repository import KnowledgeRepository
+
+    for field in ("tenant_id", "titel", "typ", "format", "inhalt", "vorgeschlagen_von_ref"):
+        if not payload.get(field):
+            raise HTTPException(status_code=400, detail=f"Feld '{field}' ist erforderlich")
+
+    repo = KnowledgeRepository(db)
+    proposal = repo.create_proposal(
+        tenant_id=payload["tenant_id"],
+        titel=payload["titel"],
+        typ=payload["typ"],
+        format=payload["format"],
+        inhalt=payload["inhalt"],
+        target_knowledge_id=payload.get("target_knowledge_id"),
+        beschreibung=payload.get("beschreibung", ""),
+        tags=list(payload.get("tags", [])),
+        zielrollen=list(payload.get("zielrollen", [])),
+        strukturierte_daten=dict(payload.get("strukturierte_daten", {})),
+        quelle=payload.get("quelle", "improvement-workflow"),
+        vorgeschlagen_von_typ=payload.get("vorgeschlagen_von_typ", "human"),
+        vorgeschlagen_von_ref=payload["vorgeschlagen_von_ref"],
+        vorgeschlagen_von_rolle=payload.get("vorgeschlagen_von_rolle"),
+        kanal=payload.get("kanal"),
+        begruendung=payload.get("begruendung", ""),
+    )
+    return repo.proposal_as_dict(proposal)
+
+
+@router.post("/knowledge/store/proposals/from-neuroassist-run", status_code=201, tags=["process-kernel"])
+async def erstelle_knowledge_improvement_proposal_aus_neuroassist_run(payload: dict, db=Depends(get_db)):
+    from app.repositories.knowledge_repository import KnowledgeRepository
+
+    for field in ("run_id", "tenant_id", "titel", "vorgeschlagen_von_ref"):
+        if not payload.get(field):
+            raise HTTPException(status_code=400, detail=f"Feld '{field}' ist erforderlich")
+
+    try:
+        from app.agents import get_neuroassist_service
+    except ModuleNotFoundError as exc:
+        raise HTTPException(
+            status_code=503,
+            detail="NeuroASSIST runtime dependencies are not installed on this backend",
+        ) from exc
+
+    service = get_neuroassist_service()
+    try:
+        run = await service.get_run_status(payload["run_id"])
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    capability_key = run.get("capability_key")
+    workflow_schema_key = run.get("runtime", {}).get("workflow_schema_key")
+    result = dict(run.get("result", {}))
+    runtime = dict(run.get("runtime", {}))
+    result_refs = list(runtime.get("result_refs", []))
+    tags = list(payload.get("tags", []))
+    if capability_key and capability_key not in tags:
+        tags.append(capability_key)
+    if workflow_schema_key and workflow_schema_key not in tags:
+        tags.append(workflow_schema_key)
+    if "neuroassist" not in tags:
+        tags.append("neuroassist")
+
+    beschreibung = payload.get("beschreibung") or (
+        f"Verbesserungsvorschlag aus NeuroASSIST-Run {payload['run_id']}"
+    )
+    inhalt = payload.get("inhalt") or "\n".join(
+        [
+            f"# Improvement Proposal from NeuroASSIST Run {payload['run_id']}",
+            "",
+            f"- Capability: {capability_key or 'unbekannt'}",
+            f"- Workflow Schema: {workflow_schema_key or 'unbekannt'}",
+            f"- Status: {run.get('status', 'unbekannt')}",
+            f"- Started At: {run.get('started_at', 'unbekannt')}",
+            "",
+            "## Result",
+            result.get("summary") or result.get("answer") or "Kein strukturierter Summary-Text vorhanden.",
+            "",
+            "## Evidence",
+            ", ".join(result_refs) if result_refs else "Keine result_refs vorhanden.",
+        ]
+    )
+    strukturierte_daten = dict(payload.get("strukturierte_daten", {}))
+    strukturierte_daten.update(
+        {
+            "source": "neuroassist-run",
+            "run_id": payload["run_id"],
+            "capability_key": capability_key,
+            "workflow_schema_key": workflow_schema_key,
+            "run_status": run.get("status"),
+            "started_at": run.get("started_at"),
+            "correlation_id": run.get("correlation_id"),
+            "result_refs": result_refs,
+            "runtime": runtime,
+            "result": result,
+        }
+    )
+
+    repo = KnowledgeRepository(db)
+    proposal = repo.create_proposal(
+        tenant_id=payload["tenant_id"],
+        titel=payload["titel"],
+        typ=payload.get("typ", "PROZESSDEFINITION"),
+        format=payload.get("format", "MARKDOWN"),
+        inhalt=inhalt,
+        target_knowledge_id=payload.get("target_knowledge_id"),
+        beschreibung=beschreibung,
+        tags=tags,
+        zielrollen=list(payload.get("zielrollen", [])),
+        strukturierte_daten=strukturierte_daten,
+        quelle=payload.get("quelle", "neuroassist-run-feedback"),
+        vorgeschlagen_von_typ=payload.get("vorgeschlagen_von_typ", "agent"),
+        vorgeschlagen_von_ref=payload["vorgeschlagen_von_ref"],
+        vorgeschlagen_von_rolle=payload.get("vorgeschlagen_von_rolle"),
+        kanal=payload.get("kanal", "system"),
+        begruendung=payload.get(
+            "begruendung",
+            "Verbesserung aus NeuroASSIST-Orchestrierung in den Wissensstandard rueckfuehren.",
+        ),
+    )
+    return repo.proposal_as_dict(proposal)
+
+
+@router.post("/knowledge/store/proposals/{proposal_id}/review", tags=["process-kernel"])
+def review_knowledge_improvement_proposal(proposal_id: str, payload: dict, db=Depends(get_db)):
+    from app.repositories.knowledge_repository import KnowledgeRepository
+
+    if not payload.get("entscheidung"):
+        raise HTTPException(status_code=400, detail="Feld 'entscheidung' ist erforderlich")
+    if not payload.get("reviewer_ref"):
+        raise HTTPException(status_code=400, detail="Feld 'reviewer_ref' ist erforderlich")
+
+    repo = KnowledgeRepository(db)
+    try:
+        proposal, applied_record = repo.review_proposal(
+            proposal_id,
+            entscheidung=payload["entscheidung"],
+            reviewer_ref=payload["reviewer_ref"],
+            reviewer_rolle=payload.get("reviewer_rolle"),
+            review_notiz=payload.get("review_notiz"),
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    if proposal is None:
+        raise HTTPException(status_code=404, detail=f"Proposal {proposal_id!r} nicht gefunden")
+
+    return {
+        "proposal": repo.proposal_as_dict(proposal),
+        "applied_knowledge_object": (
+            repo.to_domain_object(applied_record).as_dict() if applied_record is not None else None
+        ),
+    }
