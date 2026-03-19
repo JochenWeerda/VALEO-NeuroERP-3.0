@@ -248,17 +248,38 @@ class ActionExecutionService:
                 error=agent_error,
             )
 
+        # Check idempotency store for duplicate requests
+        from app.core.action_idempotency import get_action_idempotency_store  # lazy to avoid circular import
+        idempotency_store = get_action_idempotency_store()
+        existing_record = idempotency_store.get_by_key(
+            request.tenant_id, request.idempotency_key
+        )
+        if existing_record is not None:
+            # Return idempotent replay of previous execution
+            return existing_record.result.as_idempotent_replay()
+
         dispatch = self._dispatcher.dispatch(
             command,
             aggregate_state=aggregate_state or request.payload,
             issuer_role=self._resolve_dispatch_role(request, command_definition),
         )
-        return ActionExecutionResult.from_dispatch(
+        result = ActionExecutionResult.from_dispatch(
             command=command,
             aggregate_definition=aggregate_definition,
             dispatch_status=dispatch.status,
             error=dispatch.error,
         )
+        
+        # Store the result for future idempotency checks
+        if dispatch.status in (CommandStatus.ACCEPTED, CommandStatus.REJECTED, CommandStatus.PENDING_APPROVAL):
+            idempotency_store.remember(
+                tenant_id=request.tenant_id,
+                idempotency_key=request.idempotency_key,
+                request_fingerprint=request.request_fingerprint(),
+                result=result,
+            )
+        
+        return result
 
     def _resolve_process_contract(
         self,
