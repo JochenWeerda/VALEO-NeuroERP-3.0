@@ -61,6 +61,7 @@ from . import customer_extensions
 from . import business_partners
 from . import messages
 from . import dms_images
+from . import channel_work_surfaces
 from . import sales_shipping_ext
 from . import master_data
 from . import compat
