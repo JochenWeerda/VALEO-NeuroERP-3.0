@@ -1,5 +1,11 @@
 # Architecture Index
 
+**Zweck:** `Referenzdokument` fuer Architektur-Navigation, ADR-Zuordnung und Zielbild-Querverweise. Nicht der operative Lieferstand.
+
+## Einordnung
+
+Diese Datei ist eine `abgeleitete Sicht` auf die Architektur. Der operative Delivery-Stand liegt in [STATUS.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/architecture/process-kernel/STATUS.md) und den jeweiligen `wave-*/STATUS.md`.
+
 ## Zielbild
 - [Target State Landhandel ERP](target-state-landhandel-erp.md)
 - [Target Processes](target-processes.md)
@@ -58,6 +64,12 @@
 ### Data & Query
 - [ADR-006 Read-Model / Query-Contract-Prinzip](../adr/adr-006-read-model-query-contract-prinzip.md)
 - [ADR-008 Eventing-/Outbox-Standard](../adr/adr-008-eventing-outbox-standard.md)
+
+## Referenzen
+
+- [Process Kernel Status](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/architecture/process-kernel/STATUS.md)
+- [Delivery Map](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/architecture/process-kernel/DELIVERY-MAP.md)
+- [Target State Landhandel ERP](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/architecture/target-state-landhandel-erp.md)
 - [ADR-015 Analytics-/Benchmark-Datenproduktmodell](../adr/adr-015-analytics-benchmark-datenproduktmodell.md)
 - [ADR-024 Datenprodukt-Strategie für Sustainability- und Compliance-Reporting](../adr/adr-024-datenprodukt-strategie-sustainability-compliance-reporting.md)
 - [Module Resolution Architecture](module-resolution-architecture.md)
@@ -134,7 +146,7 @@ Die nächste sinnvolle ADR-Pipeline verschiebt sich jetzt von Grundsatzarchitekt
 
 ## Process Kernel Delivery
 
-- [Process Kernel Status (Waves 1–50)](process-kernel/STATUS.md)
+- [Process Kernel Status (Waves 1–67)](process-kernel/STATUS.md)
 - [Delivery Map (Wave→Gap)](process-kernel/DELIVERY-MAP.md)
 
 ### Abgeschlossene Waves (Kernmodule)
@@ -151,3 +163,4 @@ Die nächste sinnvolle ADR-Pipeline verschiebt sich jetzt von Grundsatzarchitekt
 | 48 | Timeout, Batch | process_timeout_contracts, workflow_batch_contracts |
 | 49 | Notification, Lock | process_notification_contracts_wave49, workflow_lock_contracts |
 | 50 | Archiv, Metriken | process_archive_contracts, workflow_metrics_contracts |
+| 51–67 | Cache, Schema, Concurrency, Validation, Lineage, Exception, Simulation, Consent, Cost, Observability, Priority, Dependency, Retry, Circuit Breaker, Rate Limit, Capacity | process_cache_contracts, workflow_schema_migration_contracts, process_concurrency_contracts, workflow_resource_lock_contracts, process_validation_contracts, workflow_collaboration_contracts, process_lineage_contracts, workflow_simulation_contracts_wave64, process_exception_pattern_contracts, workflow_remediation_contracts, process_consent_contracts, workflow_trigger_contracts, process_cost_allocation_contracts, workflow_audit_trail_contracts, process_observability_contracts, workflow_versioning_contracts_wave57, process_priority_contracts, workflow_rollback_contracts, process_dependency_contracts, workflow_signal_contracts, process_retry_contracts, workflow_checkpoint_contracts_wave54, process_circuit_breaker_contracts, workflow_event_sourcing_contracts, process_rate_limit_contracts, workflow_idempotency_contracts, process_capacity_contracts_wave51, workflow_compensation_contracts |

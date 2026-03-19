@@ -1,6 +1,6 @@
 # Process Kernel — Delivery Map
 
-Stand: 2026-03-16 | Waves 1–50 abgeschlossen | 3002 Tests gruen
+Stand: 2026-03-19 | Waves 1–67 abgeschlossen | 5646 Tests gruen
 
 ## Wave → Gap Mapping
 
@@ -56,6 +56,23 @@ Stand: 2026-03-16 | Waves 1–50 abgeschlossen | 3002 Tests gruen
 | 48 | 2026-03 | – | 147 | Process Timeout Contracts, Workflow Batch Processing |
 | 49 | 2026-03 | – | 115 | Process Notification Contracts (W49), Workflow Lock |
 | 50 | 2026-03 | – | 129 | Process Archive Contracts, Workflow Metrics Contracts |
+| 51 | 2026-03 | – | 135 | Process Capacity Contracts, Saga Compensation Contracts |
+| 52 | 2026-03 | – | 135 | Circuit Breaker Contracts, Event Sourcing Contracts |
+| 53 | 2026-03 | – | 146 | Rate Limit Contracts, Workflow Idempotency Contracts |
+| 54 | 2026-03 | – | 150 | Process Retry Contracts, Workflow Checkpoint Contracts |
+| 55 | 2026-03 | – | 139 | Process Priority Queue, Workflow Rollback Plans |
+| 56 | 2026-03 | – | 153 | Process Dependency DAG, Workflow Signal Contracts |
+| 57 | 2026-03 | – | 151 | Process Observability Contracts, Workflow Versioning |
+| 58 | 2026-03 | – | 155 | Process Cost Allocation, Workflow Audit Trail (SHA-256) |
+| 59 | 2026-03 | – | 142 | GDPR Consent Contracts, Workflow Trigger Conditions |
+| 60 | 2026-03 | – | 157 | Process Forecasting, Workflow Handover Contracts |
+| 61 | 2026-03 | – | 166 | Process Quota Management, Workflow Pause/Resume |
+| 62 | 2026-03 | – | 132 | Process Template Contracts, Workflow Deadline Escalation |
+| 63 | 2026-03 | – | 150 | Process Validation Engine, Workflow Collaboration Voting |
+| 64 | 2026-03 | – | 173 | Process Data Lineage DAG, Workflow Simulation Contracts |
+| 65 | 2026-03 | – | 155 | Exception Pattern Classification, Remediation Playbooks |
+| 66 | 2026-03 | – | 163 | Process Concurrency/Mutex, Resource Lock + Deadlock Detection |
+| 67 | 2026-03 | – | 192 | Process Cache Contracts, Workflow Schema Migration |
 
 ## Gap → Wave Mapping (nur abgeschlossene Gaps)
 
@@ -129,20 +146,21 @@ Der Process-Kernel-nahe NeuroASSIST-Vertragsstand ist im Kern hergestellt:
 - `CaseRun`
 - `CaseStageTransition`
 
-Offen ist damit primaer nicht mehr das Vertragsmodell, sondern die generische Runtime-Ausfuehrung:
+Offen ist damit primaer nicht mehr das Vertrags- oder Dispatch-Modell. Die naechste Ausbaustufe liegt jetzt in der tieferen Audit- und Kontextintegration:
 
-1. `NeuroAssistService` dispatcht noch capability-spezifisch statt ueber eine generische Runner-/Schema-Registry.
-2. PromptPack-/ExecutionPack-Vertraege fehlen noch als echte Modelle.
-3. Ein generischer Audit-/Explainability-Sink fuer alle NeuroASSIST-Runs fehlt noch.
-4. `data_quality_assistant` und `operations_exception_assistant` sind noch nicht als produktive Runtime-Capabilities angebunden.
-5. `exception`- und `ingestion`-Workflows sind als `WorkflowSchema` modelliert, aber noch nicht als echte NeuroASSIST-Run-Familien operationalisiert.
+1. `data_quality_assistant` und `operations_exception_assistant` sind jetzt als produktive Runtime-Capabilities angebunden.
+2. `exception`- und `ingestion`-Workflows laufen jetzt als echte NeuroASSIST-Run-Familien ueber den generischen Run-/Status-/Audit-Contract.
+3. Der generische Audit-Sink ist jetzt konservativ an die vorhandenen Process-Audit-Contracts und Workflow-Versionen angebunden, sobald Prozessdefinition und Aggregatkontext valide aufgeloest werden koennen.
+4. Ein zentraler Context-Resolver fuer Prozessdefinition, Aggregatkontext, Workflow-Version, Policy-IDs, DQ-RuleSets und Read-Models ist jetzt als eigener Runtime-Baustein eingefuehrt.
+5. Der direkte LangGraph-Zugriff fuer Bestellvorschlag sitzt jetzt hinter `app/agents/neuroassist_workflow_runners.py`, sodass `NeuroAssistService` selbst keine Engine-spezifischen Aufrufe mehr kennen muss.
+6. Die Background-Job-Schicht ist jetzt um `scheduler_heartbeat.py` und Heartbeat-/Lease-Sicht im `SchedulerService` ergaenzt; Scheduler-Liveness und Stale-Detection sind damit nicht mehr implizit.
+7. Scheduler-Liveness ist jetzt auch operativ eskalierbar: `scheduler_recovery.py` und `GET /process/jobs/heartbeat/recovery` liefern einen standardisierten Recovery-Plan statt blossen Status.
 
 Prioritaet fuer die naechste Liefersequenz:
 
-- generische NeuroASSIST-Runner-Registry
-- PromptPack-/ExecutionPack-Vertraege
-- Audit-Sink
-- produktive `exception`-/`ingestion`-Runs
+- weitere produktive Capabilities auf denselben Context-Resolver und Audit-Pfad ziehen
+- weitere Workflow-Runner-Adapter fuer checkpoint-faehige oder asynchrone Faelle auf denselben generischen Service- und Audit-Pfad ziehen
+- spaeter Vollintegration der Process-Audit-Bruecke ohne capability-spezifische Kontextbeimischung
 
 ## Architekturregeln (verbindlich)
 
