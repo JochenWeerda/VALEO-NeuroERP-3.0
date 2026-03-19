@@ -5259,3 +5259,93 @@ def pruefe_schema_kompatibilitaet(payload: dict):
     )
     compat = version.berechne_kompatibilitaet()
     return {"kompatibilitaet": compat.value, "hat_brechende_aenderungen": compat == SchemaKompatibilitaet.KEINE}
+
+
+# Wave 68 — Health Dashboard + Dependency Visualization
+@router.get("/health-dashboard/schwellwerte")
+def liste_health_schwellwerte():
+    from app.core.process_health_dashboard_contracts import STANDARD_SCHWELLWERTE
+    return [{"metrik_typ": s.metrik_typ.value, "warnung_ab": s.warnung_ab,
+             "kritisch_ab": s.kritisch_ab, "einheit": s.einheit}
+            for s in STANDARD_SCHWELLWERTE]
+
+@router.post("/health-dashboard/pruefe-status")
+def pruefe_dashboard_status(payload: dict):
+    from app.core.process_health_dashboard_contracts import (
+        HealthDashboard, DashboardKomponente, KomponentenMetrik, MetrikSchwellwert,
+        MetrikTyp, STANDARD_SCHWELLWERTE
+    )
+    from datetime import datetime
+    komponenten = []
+    for k in payload.get("komponenten", []):
+        metriken = [
+            KomponentenMetrik(
+                komponente_id=k["id"],
+                metrik_typ=MetrikTyp(m["typ"]),
+                wert=m["wert"],
+                erfasst_am=datetime.now(),
+                einheit=m.get("einheit", ""),
+            )
+            for m in k.get("metriken", [])
+        ]
+        komponenten.append(DashboardKomponente(
+            komponente_id=k["id"],
+            name=k.get("name", k["id"]),
+            typ=k.get("typ", "api"),
+            metriken=metriken,
+        ))
+    dashboard = HealthDashboard(
+        dashboard_id=payload.get("dashboard_id", "d1"),
+        name=payload.get("name", "Dashboard"),
+        komponenten=komponenten,
+        schwellwerte=STANDARD_SCHWELLWERTE,
+    )
+    return {
+        "gesamtstatus": dashboard.gesamtstatus().value,
+        "verfuegbarkeit_pct": dashboard.verfuegbarkeits_pct(),
+        "kritische_komponenten": [k.komponente_id for k in dashboard.kritische_komponenten()],
+    }
+
+@router.post("/visualisierung/graph/analyse")
+def analysiere_visualisierungs_graph(payload: dict):
+    from app.core.workflow_dependency_visualization_contracts import (
+        VisualisierungsGraph, VisualisierungsKnoten, VisualisierungsKante,
+        KnotenTyp, KantenStil
+    )
+    knoten = [
+        VisualisierungsKnoten(
+            knoten_id=k["id"],
+            bezeichnung=k.get("bezeichnung", k["id"]),
+            typ=KnotenTyp(k.get("typ", "AUFGABE")),
+        )
+        for k in payload.get("knoten", [])
+    ]
+    kanten = [
+        VisualisierungsKante(
+            von=e["von"],
+            nach=e["nach"],
+            stil=KantenStil(e.get("stil", "NORMAL")),
+        )
+        for e in payload.get("kanten", [])
+    ]
+    graph = VisualisierungsGraph(
+        graph_id=payload.get("graph_id", "g1"),
+        workflow_id=payload.get("workflow_id", "wf1"),
+        knoten=knoten,
+        kanten=kanten,
+    )
+    return {
+        "hat_zyklen": graph.hat_zyklen(),
+        "kritischer_pfad": graph.kritischer_pfad(),
+        "ebenen_layout": graph.ebenen_layout(),
+        "knoten_anzahl": len(graph.knoten),
+        "kanten_anzahl": len(graph.kanten),
+    }
+
+@router.get("/visualisierung/knoten-typen")
+def liste_knoten_typen():
+    from app.core.workflow_dependency_visualization_contracts import KnotenTyp, KantenStil
+    return {
+        "knoten_typen": [t.value for t in KnotenTyp],
+        "kanten_stile": [s.value for s in KantenStil],
+    }
