@@ -375,6 +375,266 @@ class EDINachrichtenKatalogEintrag:
         }
 
 
+# ---------------------------------------------------------------------------
+# Wave 78 Extensions: DigitalExchangeCoverage, PartnerApiKey, EdiHubAuftrag,
+# EdiHubMonitor (Gap 043 — KPI: >=80% Dokumentenaustausch digital)
+# ---------------------------------------------------------------------------
+
+# Standards/Kanäle die als "digital" zählen (kein Papier/Fax/Email-Batch)
+_DIGITALE_STANDARDS: set[EDIStandard] = {
+    EDIStandard.EDIFACT,
+    EDIStandard.XML_UBL,
+    EDIStandard.JSON_API,
+    EDIStandard.ANSI_X12,
+    EDIStandard.IDOC,
+}
+
+
+@dataclass
+class DigitalExchangeCoverage:
+    """
+    KPI-Messung: Anteil digitaler Dokumentenaustausch.
+
+    Gap 043 — Ziel: >=80% aller Dokumente digital (EDIFACT oder REST_API).
+    CSV_FLAT und EMAIL gelten als nicht-digital.
+    """
+    gesamt_dokumente: int
+    digital_dokumente: int
+    periode_beschreibung: str = "letzte 30 Tage"
+
+    @property
+    def coverage_pct(self) -> float:
+        if self.gesamt_dokumente == 0:
+            return 0.0
+        return round(self.digital_dokumente / self.gesamt_dokumente * 100, 2)
+
+    @property
+    def kpi_erfuellt(self) -> bool:
+        """Gap-043-KPI: >=80% digital."""
+        return self.coverage_pct >= 80.0
+
+    @property
+    def fehlend_fuer_kpi(self) -> int:
+        """Wie viele nicht-digitale Dokumente müssen noch migriert werden?"""
+        if self.kpi_erfuellt:
+            return 0
+        ziel = int(self.gesamt_dokumente * 0.80)
+        return max(0, ziel - self.digital_dokumente)
+
+    def as_dict(self) -> dict:
+        return {
+            "gesamt_dokumente": self.gesamt_dokumente,
+            "digital_dokumente": self.digital_dokumente,
+            "coverage_pct": self.coverage_pct,
+            "kpi_erfuellt": self.kpi_erfuellt,
+            "fehlend_fuer_kpi": self.fehlend_fuer_kpi,
+            "periode_beschreibung": self.periode_beschreibung,
+        }
+
+
+def evaluate_digital_coverage(
+    nachrichten: list["EDINachricht"],
+    partner_map: dict[str, "EDIPartner"],
+) -> DigitalExchangeCoverage:
+    """
+    Berechnet den Digitalisierungsgrad anhand tatsächlicher Nachrichten.
+
+    Nachrichten von Partnern mit digitalem Standard zählen als digital.
+    """
+    gesamt = len(nachrichten)
+    digital = 0
+    for msg in nachrichten:
+        partner = partner_map.get(msg.partner_id)
+        if partner and partner.edi_standard in _DIGITALE_STANDARDS:
+            digital += 1
+        elif msg.standard in _DIGITALE_STANDARDS:
+            digital += 1
+    return DigitalExchangeCoverage(
+        gesamt_dokumente=gesamt,
+        digital_dokumente=digital,
+    )
+
+
+# ---------------------------------------------------------------------------
+# PartnerApiKey — REST-API-Schlüssel für non-EDIFACT Partner
+# ---------------------------------------------------------------------------
+
+@dataclass
+class PartnerApiKey:
+    """
+    API-Schlüssel für REST-Partner.
+
+    Der Klartext-Key wird niemals gespeichert — nur der SHA-256-Hash.
+    Ablaufdatum None = unbegrenzt gültig.
+    """
+    key_id: str
+    partner_id: str
+    key_hash: str           # SHA-256 hex digest des Klartext-Keys
+    erstellt_am: datetime
+    laeuft_ab_am: datetime | None = None
+    aktiv: bool = True
+    beschreibung: str = ""
+
+    @property
+    def ist_abgelaufen(self) -> bool:
+        if self.laeuft_ab_am is None:
+            return False
+        ablauf = self.laeuft_ab_am
+        if ablauf.tzinfo is None:
+            ablauf = ablauf.replace(tzinfo=timezone.utc)
+        return datetime.now(timezone.utc) > ablauf
+
+    @property
+    def ist_gueltig(self) -> bool:
+        return self.aktiv and not self.ist_abgelaufen
+
+    def verify_hash(self, kandidat_hash: str) -> bool:
+        """Prüft einen vorgelegten Hash gegen den gespeicherten Hash."""
+        return self.key_hash == kandidat_hash and self.ist_gueltig
+
+    def as_dict(self) -> dict:
+        return {
+            "key_id": self.key_id,
+            "partner_id": self.partner_id,
+            "key_hash": self.key_hash,
+            "erstellt_am": self.erstellt_am.isoformat(),
+            "laeuft_ab_am": self.laeuft_ab_am.isoformat() if self.laeuft_ab_am else None,
+            "aktiv": self.aktiv,
+            "ist_gueltig": self.ist_gueltig,
+            "beschreibung": self.beschreibung,
+        }
+
+
+# ---------------------------------------------------------------------------
+# EdiHubAuftrag — Ausgehende Dispatch-Queue
+# ---------------------------------------------------------------------------
+
+@dataclass
+class EdiHubAuftrag:
+    """
+    Eintrag in der ausgehenden EDI/API-Dispatch-Queue.
+
+    Verwaltet Retry-Logik und Statusübergänge für ausgehende Nachrichten.
+    """
+    auftrag_id: str
+    partner_id: str
+    nachrichtentyp: EDINachrichtenTyp
+    prioritaet: int                         # 1 = höchste, 5 = niedrigste
+    payload_ref: str                        # Referenz auf Quell-Dokument (Bestell-ID etc.)
+    erstellt_am: datetime
+    versuche: int = 0
+    max_versuche: int = 3
+    letzter_fehler: str = ""
+    status: EDINachrichtenStatus = EDINachrichtenStatus.PENDING
+
+    def __post_init__(self) -> None:
+        if not (1 <= self.prioritaet <= 5):
+            raise ValueError(f"Prioritaet muss 1–5 sein, nicht {self.prioritaet}")
+        if self.max_versuche < 1:
+            raise ValueError("max_versuche muss >= 1 sein")
+
+    @property
+    def kann_wiederholt_werden(self) -> bool:
+        return (
+            self.status == EDINachrichtenStatus.FEHLER
+            and self.versuche < self.max_versuche
+        )
+
+    def versuch_starten(self) -> None:
+        """Erhöht Versuchszähler und setzt Status auf GESENDET."""
+        self.versuche += 1
+        self.status = EDINachrichtenStatus.GESENDET
+        self.letzter_fehler = ""
+
+    def versuch_fehlgeschlagen(self, fehler: str) -> None:
+        self.status = EDINachrichtenStatus.FEHLER
+        self.letzter_fehler = fehler
+
+    def versuch_erfolgreich(self) -> None:
+        self.status = EDINachrichtenStatus.QUITTIERT
+
+    def as_dict(self) -> dict:
+        return {
+            "auftrag_id": self.auftrag_id,
+            "partner_id": self.partner_id,
+            "nachrichtentyp": self.nachrichtentyp.value,
+            "prioritaet": self.prioritaet,
+            "payload_ref": self.payload_ref,
+            "erstellt_am": self.erstellt_am.isoformat(),
+            "versuche": self.versuche,
+            "max_versuche": self.max_versuche,
+            "letzter_fehler": self.letzter_fehler,
+            "status": self.status.value,
+            "kann_wiederholt_werden": self.kann_wiederholt_werden,
+        }
+
+
+# ---------------------------------------------------------------------------
+# EdiHubMonitor — Betriebszustand des EDI/API Hubs
+# ---------------------------------------------------------------------------
+
+@dataclass
+class EdiHubMonitor:
+    """
+    Monitoring-Snapshot des EDI/API Hubs.
+
+    Fasst Betriebskennzahlen und KPI-Status zusammen für
+    Health-Dashboard und Alert-Auswertung.
+    """
+    snapshot_zeitpunkt: datetime
+    aktive_partner: int
+    nachrichten_gesamt_24h: int
+    nachrichten_fehler_24h: int
+    sla_verletzungen_24h: int
+    ausstehende_auftraege: int
+    digital_coverage: DigitalExchangeCoverage
+
+    @property
+    def fehlerquote_pct(self) -> float:
+        if self.nachrichten_gesamt_24h == 0:
+            return 0.0
+        return round(
+            self.nachrichten_fehler_24h / self.nachrichten_gesamt_24h * 100, 2
+        )
+
+    @property
+    def hub_gesund(self) -> bool:
+        """
+        Hub gilt als gesund wenn:
+        - KPI >=80% digital erfüllt
+        - Fehlerquote <5%
+        - Keine SLA-Verletzungen in den letzten 24h
+        """
+        return (
+            self.digital_coverage.kpi_erfuellt
+            and self.fehlerquote_pct < 5.0
+            and self.sla_verletzungen_24h == 0
+        )
+
+    @property
+    def alert_level(self) -> str:
+        """'OK' | 'WARN' | 'CRITICAL'."""
+        if self.hub_gesund:
+            return "OK"
+        if self.fehlerquote_pct >= 20.0 or self.sla_verletzungen_24h >= 5:
+            return "CRITICAL"
+        return "WARN"
+
+    def as_dict(self) -> dict:
+        return {
+            "snapshot_zeitpunkt": self.snapshot_zeitpunkt.isoformat(),
+            "aktive_partner": self.aktive_partner,
+            "nachrichten_gesamt_24h": self.nachrichten_gesamt_24h,
+            "nachrichten_fehler_24h": self.nachrichten_fehler_24h,
+            "fehlerquote_pct": self.fehlerquote_pct,
+            "sla_verletzungen_24h": self.sla_verletzungen_24h,
+            "ausstehende_auftraege": self.ausstehende_auftraege,
+            "digital_coverage": self.digital_coverage.as_dict(),
+            "hub_gesund": self.hub_gesund,
+            "alert_level": self.alert_level,
+        }
+
+
 def get_edi_nachrichtentyp_katalog() -> list[EDINachrichtenKatalogEintrag]:
     """Liefert den Katalog aller unterstuetzten EDI-Nachrichtentypen."""
     return [

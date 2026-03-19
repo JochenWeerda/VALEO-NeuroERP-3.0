@@ -109,7 +109,11 @@ class ChannelProcessThreadStore:
 _THREAD_STORE = ChannelProcessThreadStore()
 
 
-def get_channel_process_thread_store() -> ChannelProcessThreadStore:
+def get_channel_process_thread_store(db: Any | None = None) -> ChannelProcessThreadStore:
+    if db is not None:
+        from app.repositories.channel_thread_repository import PersistentChannelProcessThreadStore
+
+        return PersistentChannelProcessThreadStore(db)
     return _THREAD_STORE
 
 
@@ -215,6 +219,7 @@ def execute_channel_process_action(
     employee_ref: str | None = None,
     channel_user_id: str | None = None,
     extra_context: dict[str, Any] | None = None,
+    store: ChannelProcessThreadStore | None = None,
 ) -> ChannelProcessThread:
     normalized_channel = _normalize_channel(kanal)
     reference_context = _build_reference_context(
@@ -278,7 +283,7 @@ def execute_channel_process_action(
             approval_requirement=approval_requirement,
         ),
     )
-    return get_channel_process_thread_store().save(thread)
+    return (store or get_channel_process_thread_store()).save(thread)
 
 
 def decide_channel_process_action(
@@ -288,9 +293,10 @@ def decide_channel_process_action(
     entschieden_von: str,
     approver_role: str,
     begruendung: str,
+    store: ChannelProcessThreadStore | None = None,
 ) -> ChannelProcessThread:
-    store = get_channel_process_thread_store()
-    thread = store.get(thread_id)
+    resolved_store = store or get_channel_process_thread_store()
+    thread = resolved_store.get(thread_id)
     if thread is None:
         raise KeyError(f"Thread {thread_id!r} nicht gefunden")
     if thread.status != ActionExecutionStatus.PENDING_APPROVAL.value:
@@ -333,7 +339,7 @@ def decide_channel_process_action(
                 payload=execution_audit.model_dump(mode="json"),
             )
         )
-        return store.save(thread)
+        return resolved_store.save(thread)
 
     rejection_audit = build_process_audit_entry(
         audit_entry_id=f"reject-{thread.thread_id}",
@@ -363,4 +369,4 @@ def decide_channel_process_action(
             payload=rejection_audit.model_dump(mode="json"),
         )
     )
-    return store.save(thread)
+    return resolved_store.save(thread)

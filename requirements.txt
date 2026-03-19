@@ -65,6 +65,8 @@ factur-x>=2.5,<4
 drafthorse>=2.3.0
 beautifulsoup4==4.12.3
 PyYAML==6.0.1
+langgraph==0.2.59
+langgraph-checkpoint-sqlite==2.0.11
 
 # Rate limiting
 slowapi==0.1.9

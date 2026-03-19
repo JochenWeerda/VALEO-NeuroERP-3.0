@@ -36,12 +36,12 @@ Diese Statusdatei verdichtet den aktuellen Gesamtstand, ohne die Detailnachweise
 ## Gesamtstatus
 
 - Stand: `2026-03-19`
-- Status: `Waves 1 bis 76 abgeschlossen`
-- Gesamtsuite: `5808 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed` (Stand nach Wave 76)
+- Status: `Waves 1 bis 78 abgeschlossen`
+- Gesamtsuite: `5888 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed` (Stand nach Wave 78)
 - Letzte abgeschlossene Waves:
-  - `Wave 74`: Rationsoptimierung GfE-2023 Kontrakte + Proxy-Contract (28 Tests)
-  - `Wave 75`: Gap 049 — Security Hardening: HTTP Security Headers + RBAC Fine-Grained (49 Tests)
   - `Wave 76`: Gap 024 — Touch-optimierte Feldworkflows: TouchFieldLayout + Einlagerung + LKW (37 Tests)
+  - `Wave 77`: Gap 023 — Keyboard-first Kernmasken: useKeyboardShortcuts + ObjectPage + ShortcutBar (34 Tests)
+  - `Wave 78`: Gap 043 — EDI/API Hub: DigitalExchangeCoverage KPI + PartnerApiKey + Dispatch-Queue + Monitor (46 Tests)
 
 ## Wave-Uebersicht
 
@@ -119,6 +119,8 @@ Diese Statusdatei verdichtet den aktuellen Gesamtstand, ohne die Detailnachweise
 | Wave 74 | abgeschlossen | 28 | Rationsoptimierung GfE-2023 |
 | Wave 75 | abgeschlossen | 49 | Gap 049 Security Hardening: Security Headers + RBAC | `wave-75/STATUS.md` |
 | Wave 76 | abgeschlossen | 37 | Gap 024 Touch-Feldworkflows: TouchFieldLayout + Einlagerung + LKW | `wave-76/STATUS.md` |
+| Wave 77 | abgeschlossen | 34 | Gap 023 Keyboard-first: useKeyboardShortcuts + ObjectPage + ShortcutBar | `wave-77/STATUS.md` |
+| Wave 78 | abgeschlossen | 46 | Gap 043 EDI/API Hub: DigitalExchangeCoverage KPI + PartnerApiKey + Dispatch-Queue + Monitor | `wave-78/STATUS.md` |
 
 ## Abgeschlossene Waves 51–67 (Kernmodule)
 
