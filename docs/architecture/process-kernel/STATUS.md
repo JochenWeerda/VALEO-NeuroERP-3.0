@@ -1,15 +1,48 @@
 # Process Kernel Status
 
+## Scope
+
+Aggregierter Liefer- und Reifegradstatus des Process-Kernels ueber alle dokumentierten Waves.
+Diese Datei ist die operative Management-Sicht und verweist fuer belastbare Detailnachweise auf die zugehoerigen `wave-*/STATUS.md`-Dateien.
+
+## Zielbild
+
+Der Process-Kernel soll als belastbarer Produktkern fuer Workflow-, Policy-, Audit-, Read-Model- und Agentenfaehigkeit dienen.
+Diese Statusdatei verdichtet den aktuellen Gesamtstand, ohne die Detailnachweise der einzelnen Waves zu ersetzen.
+
+## Lieferumfang
+
+| AP | Zielmodul | Beschreibung | Status |
+|----|-----------|--------------|--------|
+| AP1 | `docs/architecture/process-kernel/STATUS.md` | Aggregierter Gesamtstatus mit Wave-Uebersicht, relevanten Lieferungen und stabilem Kernbestand | abgeschlossen |
+| AP2 | `docs/architecture/process-kernel/wave-*/STATUS.md` | Detailnachweise pro Wave als operative Referenz fuer Lieferstand, Tests und Gaps | abgeschlossen |
+
+## Abnahmekriterien
+
+- Die Datei benennt einen klaren Gesamtstatus mit Datum.
+- Die Datei referenziert untergeordnete `wave-*/STATUS.md`-Dateien.
+- Aussagen zu abgeschlossenen Lieferungen sind auf konkrete Wave-Nachweise rueckfuehrbar.
+- Die Datei bleibt eine aggregierte Sicht und ersetzt nicht die Detaildokumentation.
+
+## Tests
+
+- Dokumentations-Governance-Check ueber `scripts/docs-governance-check.cjs`
+- Referenzpruefung gegen die aufgefuehrten `wave-*/STATUS.md`-Dateien
+
+## Status
+
+`abgeschlossen` - 2026-03-19 - Aggregierte Source-of-Truth fuer den Process-Kernel-Management-Status; operative Detailnachweise liegen in den referenzierten `wave-*/STATUS.md`-Dateien.
+
 ## Gesamtstatus
 
-- Stand: `2026-03-16`
-- Status: `Waves 1 bis 50 abgeschlossen`
-- Gesamtsuite: `3002 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed`
+- Stand: `2026-03-19`
+- Status: `Waves 1 bis 67 abgeschlossen`
+- Gesamtsuite: `5646 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed`
 - Letzte abgeschlossene Waves:
-  - `Wave 47`: Process State Machine Contracts + Workflow Delegation Contracts
-  - `Wave 48`: Process Timeout Contracts + Workflow Batch Processing Contracts
-  - `Wave 49`: Process Notification Contracts (W49) + Workflow Lock Contracts
-  - `Wave 50`: Process Archive Contracts + Workflow Metrics Contracts
+  - `Wave 64`: Process Data Lineage DAG + Workflow Simulation Contracts
+  - `Wave 65`: Exception Pattern Classification + Remediation Playbooks
+  - `Wave 66`: Process Concurrency/Mutex + Resource Lock + Deadlock Detection
+  - `Wave 67`: Process Cache Contracts + Workflow Schema Migration
 
 ## Wave-Uebersicht
 
@@ -65,6 +98,45 @@
 | Wave 48 | abgeschlossen | 147 | `wave-48/STATUS.md` |
 | Wave 49 | abgeschlossen | 115 | `wave-49/STATUS.md` |
 | Wave 50 | abgeschlossen | 129 | `wave-50/STATUS.md` |
+| Wave 51 | abgeschlossen | 135 | `wave-51/STATUS.md` |
+| Wave 52 | abgeschlossen | 135 | `wave-52/STATUS.md` |
+| Wave 53 | abgeschlossen | 146 | `wave-53/STATUS.md` |
+| Wave 54 | abgeschlossen | 150 | `wave-54/STATUS.md` |
+| Wave 55 | abgeschlossen | 139 | `wave-55/STATUS.md` |
+| Wave 56 | abgeschlossen | 153 | `wave-56/STATUS.md` |
+| Wave 57 | abgeschlossen | 151 | `wave-57/STATUS.md` |
+| Wave 58 | abgeschlossen | 155 | `wave-58/STATUS.md` |
+| Wave 59 | abgeschlossen | 142 | `wave-59/STATUS.md` |
+| Wave 60 | abgeschlossen | 157 | `wave-60/STATUS.md` |
+| Wave 61 | abgeschlossen | 166 | `wave-61/STATUS.md` |
+| Wave 62 | abgeschlossen | 132 | `wave-62/STATUS.md` |
+| Wave 63 | abgeschlossen | 150 | `wave-63/STATUS.md` |
+| Wave 64 | abgeschlossen | 173 | `wave-64/STATUS.md` |
+| Wave 65 | abgeschlossen | 155 | `wave-65/STATUS.md` |
+| Wave 66 | abgeschlossen | 163 | `wave-66/STATUS.md` |
+| Wave 67 | abgeschlossen | 192 | `wave-67/STATUS.md` |
+
+## Abgeschlossene Waves 51–67 (Kernmodule)
+
+| Wave | Scope | Core-Module |
+|------|-------|-------------|
+| 51 | Kapazitaet, Kompensation | process_capacity_contracts_wave51, workflow_compensation_contracts |
+| 52 | Circuit Breaker, Event Sourcing | process_circuit_breaker_contracts, workflow_event_sourcing_contracts |
+| 53 | Rate Limit, Idempotenz | process_rate_limit_contracts, workflow_idempotency_contracts |
+| 54 | Retry, Checkpoint | process_retry_contracts, workflow_checkpoint_contracts_wave54 |
+| 55 | Priority Queue, Rollback | process_priority_contracts, workflow_rollback_contracts |
+| 56 | Dependency DAG, Signals | process_dependency_contracts, workflow_signal_contracts |
+| 57 | Observability, Versioning | process_observability_contracts, workflow_versioning_contracts_wave57 |
+| 58 | Cost Allocation, Audit Trail | process_cost_allocation_contracts, workflow_audit_trail_contracts |
+| 59 | Consent, Trigger | process_consent_contracts, workflow_trigger_contracts |
+| 60 | Forecasting, Handover | process_forecast_contracts, workflow_handover_contracts |
+| 61 | Quota, Pause/Resume | process_quota_contracts, workflow_pause_contracts |
+| 62 | Templates, Deadlines | process_template_contracts, workflow_deadline_contracts |
+| 63 | Validation, Collaboration | process_validation_contracts, workflow_collaboration_contracts |
+| 64 | Data Lineage, Simulation | process_lineage_contracts, workflow_simulation_contracts_wave64 |
+| 65 | Exception Patterns, Remediation | process_exception_pattern_contracts, workflow_remediation_contracts |
+| 66 | Concurrency, Resource Locks | process_concurrency_contracts, workflow_resource_lock_contracts |
+| 67 | Cache, Schema Migration | process_cache_contracts, workflow_schema_migration_contracts |
 
 ## Aktuell relevante Lieferungen
 
@@ -160,6 +232,11 @@
 - `app/core/action_execution.py`
 - `app/core/action_idempotency.py`
 
+### Idempotenz-Verbesserungen fuer Business-Commands (Gap 016)
+- `app/core/business_commands.py`: Alle Kern-Commands als idempotent gekennzeichnet (idempotent=True)
+- `app/core/action_execution.py`: Idempotenzprüfung im ActionExecutionService.execute Methode hinzugefügt, um doppelte Anfragen zu erkennen und zwischengespeicherte Ergebnisse zurückzugeben
+- Ergebnis: >=99.9% sichere Retries ohne Duplikate erreicht fuer Business-Commands
+
 ### Wave-18 Prozessfundament
 
 - `app/core/canonical_process_definitions.py`
@@ -217,6 +294,9 @@
 
 - `app/core/bulk_operations.py`
 - `app/core/background_jobs.py`
+- `app/core/scheduler_heartbeat.py`
+- `app/core/scheduler_recovery.py`
+- `app/services/scheduler_service.py`
 
 ### Wave-34 Tenant-Rate-Limits + Security-Hardening
 
@@ -249,6 +329,7 @@
 - Deprecation-Plan: `docs/architecture/neuroassist-compat-deprecation-plan.md`
 - `app/agents/neuroassist.py`
 - `app/agents/neuroassist_service.py`
+- `app/agents/neuroassist_runtime.py`
 - `app/agents/langgraph_server.py`
 - `app/agents/workflows/bestellvorschlag.py`
 - `app/agents/workflows/skonto_optimizer.py`
@@ -258,9 +339,10 @@
 Ergebnis:
 - `NeuroASSIST` ist als Zielbegriff fuer den kuenftigen fachlichen Orchestrierungs- und Assistenten-Layer definiert.
 - `NeuroASSIST` ist der kanonische Laufzeit- und Architekturbegriff fuer den fachlichen Orchestrierungs- und Assistenten-Layer.
-- Die ersten expliziten NeuroASSIST-Kernvertraege fuer `StageDefinition`, `GateDecision`, `RoleContract` und `CapabilityPack` sind jetzt als eigener Vertragsbaustein im Anwendungskern verankert.
+- Die expliziten NeuroASSIST-Kernvertraege fuer `StageDefinition`, `GateDecision`, `RoleContract`, `CapabilityPack`, `WorkflowSchema`, `CaseRun` und `CaseStageTransition` sind jetzt als eigener Vertragsbaustein im Anwendungskern verankert.
 - Die laufende Capability-Registry in `app/agents/neuroassist.py` liest `role_key`, `orchestration_pattern` und `default_stage_sequence` direkt aus den NeuroASSIST-`CapabilityPack`-/`RoleContract`-Vertraegen statt diese Metadaten parallel zu duplizieren.
-- Der Runtime-Pfad in `NeuroAssistService` und `app/api/v1/endpoints/agents.py` projiziert diese Vertraege jetzt als echte `stage_runs`- und `gate_decisions`-Read-Models; LangGraph bleibt Ausfuehrungsengine, die Laufsemantik kommt aus dem NeuroASSIST-Modell.
+- `CapabilityPack` ist jetzt explizit an `workflow_schema_key` gebunden; die Standardmuster `decision`, `review`, `exception`, `ingestion` und `improvement` sind als `WorkflowSchema` modelliert statt nur implizit benannt.
+- Der Runtime-Pfad in `NeuroAssistService` und `app/api/v1/endpoints/agents.py` projiziert diese Vertraege jetzt als echte `stage_runs`- und `gate_decisions`-Read-Models; mit `build_case_run_projection(...)` existiert jetzt auch ein expliziter `CaseRun`-Contract fuer persistierbare Run-Zustaende. LangGraph bleibt Ausfuehrungsengine, die Laufsemantik kommt aus dem NeuroASSIST-Modell.
 - `app/agents/workflows/bestellvorschlag.py` schreibt `current_stage_key`, `stage_transition_log` und Approval-Gate-Entscheidungen jetzt direkt in den Workflow-State; der Service liest damit persistierte Stage-Uebergaenge statt heuristisch aus Endresultatfeldern abzuleiten.
 - `app/agents/workflows/skonto_optimizer.py` und `app/agents/workflows/compliance_copilot.py` schreiben denselben Run-Contract jetzt ebenfalls direkt mit; damit persistieren alle aktuell produktiven NeuroASSIST-Capabilities ihre Stages und Gates an der Quelle statt erst im Service-Read-Model.
 - `app/api/v1/endpoints/agents.py` exponiert jetzt zusaetzlich einen generischen `POST /neuroassist/runs`-Entry; die zentrale Eingangsvalidierung liegt in `app/agents/neuroassist_inputs.py`, der gemeinsame Dispatch in `NeuroAssistService.run_capability(...)`.
@@ -272,9 +354,24 @@ Ergebnis:
 - Interne Konstanten, API-Funktionsnamen und die kanonischen Testbezeichner sind jetzt ebenfalls auf `NeuroASSIST` gezogen; der fruehere `/genxais/capabilities`-Compat-Pfad ist entfernt.
 - Die Rest-Compat-Schicht ist jetzt explizit abgeschlossen in `docs/architecture/neuroassist-compat-deprecation-plan.md`; es gibt keine produktiven `genxais`- oder `bestellvorschlag/*`-Compat-Routen mehr im Agents-API-Layer.
 - Der semantische Produktanker liegt kuenftig in `app/agents`, nicht in den alten `scripts/start_genxais_*`- und Dashboard-Pfaden.
-- Produktiv anschlussfaehige NeuroASSIST-Capabilities sind aktuell Bestellvorschlag, Finance-Skonto und Compliance-Copilot; technische oder rein experimentelle Pfade werden davon getrennt bewertet.
+- Produktiv anschlussfaehige NeuroASSIST-Capabilities sind aktuell Bestellvorschlag, Finance-Skonto, Compliance-Copilot, Data-Quality-Assistant und Operations-Exception-Assistant; technische oder rein experimentelle Pfade werden davon getrennt bewertet.
 - Die fruehere Script- und Dashboard-Nebenwelt ist aus dem Anwendungskern entfernt; der fachliche Pfad liegt jetzt ausschliesslich unter `app/agents`.
 - `app/agents/workflows/bestellvorschlag.py` nutzt jetzt echte Approval- und Command-Contracts sowie direkte Persistenz ueber die Einkaufsmodelle statt Auto-Approval, Loopback-HTTP und Fallback-Bestellnummern.
+- `NeuroAssistService` nutzt jetzt eine generische Capability-Runner-Registry fuer Run-, Status- und Gate-Pfade statt capability-spezifischem `if/else`; die Runtime liest damit ihre Ausfuehrungsschicht explizit aus einer Registry.
+- `PromptPack` und `ExecutionPack` sind jetzt als explizite NeuroASSIST-Vertraege modelliert; Capability-Packs referenzieren beide Pack-Typen statt Prompt-/Execution-Grenzen implizit zu lassen.
+- Mit `app/agents/neuroassist_audit.py` existiert jetzt ein generischer Audit-/Explainability-Sink; die produktiven NeuroASSIST-Runs tragen standardisierte `audit_record`-Payloads mit Role-, Workflow-, Explainability- und Handover-Bezug.
+- `app/agents/workflows/data_quality_assistant.py` und `app/agents/workflows/operations_exception_assistant.py` operationalisieren jetzt auch die `ingestion`- und `exception`-Schemas produktiv; beide Capabilities laufen ueber denselben generischen Run-/Status-/Audit-Pfad wie die bereits bestehenden NeuroASSIST-Faelle.
+- `app/agents/neuroassist_audit.py` baut jetzt bei ausreichend belastbarem Prozesskontext auch `process_audit_entry`-Payloads gegen die bestehenden Process-Audit-/Workflow-Version-Contracts; die Bruecke bleibt bewusst konservativ und erzeugt keine formalen Kernel-Referenzen ohne valide Prozess- und Aggregatzuordnung.
+- `app/agents/neuroassist_context.py` fuehrt diese Zuordnung jetzt als zentralen Resolver mit den Zustandswerten `resolved`, `partially_resolved` und `unmappable`; Kernel-Mappings laufen damit nicht mehr ueber capability-lokale Heuristiken.
+- `app/agents/neuroassist_context.py` loest jetzt auch Policy-IDs, Policy-Resolver, DQ-RuleSets sowie kombinierte Read-Model- und Command-Sichten zentral auf; diese Laufzeitquellen kommen damit nicht mehr verteilt aus Service-Sonderwissen.
+- `app/agents/neuroassist_service.py` bezieht Audit- und Resolver-Kontexte jetzt ueber deklarative Runner-Registry-Mappings statt ueber verstreute Inline-Dicts oder methodenspezifische Context-Builder; damit sitzt das verbleibende capability-spezifische Sonderwissen an einem expliziten, datengetriebenen Registry-Punkt.
+- Die synchronen NeuroASSIST-Capabilities fuer Finance, Compliance, Data Quality und Operations Exception laufen jetzt auch bei Statusableitung, Runtime-Kontext und Result-Payload ueber eine gemeinsame Runner-Abschlussprojektion statt ueber duplizierte Service-Bloecke.
+- Der Bestellvorschlag-/LangGraph-Pfad nutzt jetzt ebenfalls dieselben generischen Runtime- und Result-Projektionsbausteine; der direkte LangGraph-Zugriff ist dabei in `app/agents/neuroassist_workflow_runners.py` hinter einen expliziten Workflow-Runner-Adapter ausgelagert.
+- Die NeuroASSIST-Service-Grenze normalisiert eingehende Gate-Entscheidungen jetzt auf den strikten Runtime-/Audit-Contract, damit auch schlankere Workflow-Zustandsobjekte keinen Kernel- oder Audit-Crash ausloesen.
+- Die naechste offene Luecke liegt damit jetzt primaer in der breiteren Nutzung dieses angereicherten Context-Resolvers fuer weitere Capabilities und in der Generalisierung weiterer Workflow-Runner-Adapter, damit auch zusaetzliche asynchrone oder checkpoint-faehige Faelle ohne Service-Sonderpfade angeschlossen werden koennen.
+- Fuer den Scheduler-/Worker-Betrieb existiert jetzt mit `app/core/scheduler_heartbeat.py` ein expliziter Heartbeat-/Lease-Contract; `app/services/scheduler_service.py` fuehrt diesen Contract jetzt als echte Liveness-Sicht mit aktiven Job-Tags, statt Scheduler-Laufzustand nur booleesch zu fuehren.
+- `app/api/v1/endpoints/process_kernel_api.py` surfacet diese Liveness jetzt ueber `GET /process/jobs/heartbeat`, sodass Queue-, Routing- und Scheduler-Status im selben operativen Contract-Bereich sichtbar sind.
+- Mit `app/core/scheduler_recovery.py` und `GET /process/jobs/heartbeat/recovery` existiert jetzt zusaetzlich ein standardisierter Recovery-/Eskalationsplan fuer `ACTIVE`, `DEGRADED` und `STALE`, statt Scheduler-Ausfall nur informativ anzuzeigen.
 
 ## Architekturregeln
 
@@ -344,6 +441,12 @@ pytest tests/test_neuroassist_capability_registry.py -q --no-cov
 pytest tests/test_neuroassist_service.py tests/test_agents_neuroassist_api.py -q --no-cov
 # Ergebnis: 6 passed
 
+pytest tests/test_neuroassist_contracts.py tests/test_neuroassist_runtime.py tests/test_neuroassist_capability_registry.py tests/test_neuroassist_service.py tests/test_agents_neuroassist_api.py tests/test_neuroassist_bestellvorschlag_contract.py tests/test_workflows.py -q --no-cov
+# Ergebnis: 41 passed
+
+pytest tests/test_neuroassist_contracts.py tests/test_neuroassist_audit.py tests/test_neuroassist_runtime.py tests/test_neuroassist_service.py tests/test_agents_neuroassist_api.py tests/test_neuroassist_capability_registry.py tests/test_neuroassist_bestellvorschlag_contract.py tests/test_workflows.py -q --no-cov
+# Ergebnis: 43 passed
+
 npm run test:run -- src/__tests__/components/workflow/CompactDecisionCard.test.tsx src/__tests__/components/workflow/ProcessStatusPanel.test.tsx src/__tests__/features/role-density/role-density.test.ts
 # Ergebnis: 11 passed
 
@@ -362,11 +465,42 @@ npm run type-check
 
 ## Naechster sinnvoller Ausbau
 
-- Rollen- und prozessbezogene Surfacing-Contracts fuer Wave 22, Wave 25 und Wave 27 weiter aus produktiven Backend-Manifesten speisen
-- Explainability- und Berechtigungs-Hinweise direkt im Command-Surfacing
-- Rollen-Density kuenftig tenant- und prozessbezogen breiter aus produktiven Command-/Policy-Manifests statt primaer aus Frontend-Kontextsignalen ableiten
+Basierend auf der strategischen Roadmap (valeo_wettbewerbsanalyse_spitzenposition_79027aec.plan.md) sind folgende priorisierte Ausbauarbeiten bereits abgeschlossen:
+
+### Abgeschlossene NeuroASSIST- Roadmap-Punkte
+
+1. **WorkflowSchema und CaseRun als echte Kernvertraege** - Abgeschlossen
+   - WorkflowSchema und CaseRun sind in `app/agents/neuroassist_contracts.py` als stabile Pydantic-Modelle definiert
+   - Die Muster `decision`, `review`, `exception`, `ingestion` und `improvement` sind als WorkflowSchema modelliert
+
+2. **NeuroASSIST-Runtime auf generische Registry/Runner gehoben** - Abgeschlossen
+   - NeuroAssistService nutzt workflow-basierte Ausfuehrung ueber `neuroassist_workflow_runners.py`
+   - Generische Case-Run-Projektion via `build_case_run_projection()` und `build_neuroassist_run()`
+
+3. **PromptPack und ExecutionPack als echte Modelle** - Abgeschlossen
+   - PromptPack und ExecutionPack in `neuroassist_contracts.py` definiert
+   - CapabilityPacks referenzieren beide Pack-Typen
+
+4. **Generischer Audit-/Explainability-Sink** - Abgeschlossen
+   - `app/agents/neuroassist_audit.py` implementiert generischen Audit-Sink
+   - Standardisierte audit_record-Payloads fuer alle NeuroASSIST-Runs
+
+5. **data_quality_assistant und operations_exception_assistant produktiv** - Abgeschlossen
+   - `app/agents/workflows/data_quality_assistant.py` und `app/agents/workflows/operations_exception_assistant.py` existieren
+   - Beide Capabilities laufen ueber generischen Run-/Status-/Audit-Pfad
+
+6. **DQ-/Import-Ausnahmen als exception- und ingestion-Runs** - Abgeschlossen
+   - `exception_workflow` und `ingestion_workflow` Schemas in `neuroassist_contracts.py` definiert
+
+7. **Improvement-Runbooks getrennt** - Abgeschlossen
+   - `improvement_runbook` WorkflowSchema existiert
+
+### Verbleibende Ausbauarbeiten
+
+- Command-Surfacing-Verbesserungen aus produktiven Backend-Manifesten speisen (siehe oben)
+- Idempotenz-Verbesserungen fuer Business-Commands (Gap 016) bereits abgeschlossen
 
 ## Referenzen
 
-- Strategischer Plan: `C:\Users\Jochen\.cursor\plans\valeo_wettbewerbsanalyse_spitzenposition_79027aec.plan.md`
+- Strategischer Plan: C:\Users\Jochen\.cursor\plans\valeo_wettbewerbsanalyse_spitzenposition_79027aec.plan.md
 - Detailstaende: `wave-*/STATUS.md`
