@@ -10,6 +10,10 @@ export const entries: AutoGroupRouteEntry[] = [
     "path": "liste"
   },
   {
+    "module": "@/pages/waage/wiegeschein-detail",
+    "path": "wiegeschein/:id"
+  },
+  {
     "module": "@/pages/waage/wiegungen",
     "path": "wiegungen"
   }

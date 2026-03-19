@@ -10,6 +10,10 @@ export const entries: AliasGroupRouteEntry[] = [
     "path": "hofliste"
   },
   {
+    "module": "@/pages/waage/wiegeschein-detail",
+    "path": "wiegeschein/:id"
+  },
+  {
     "module": "@/pages/waage/wiegungen",
     "path": "wiegungen"
   }
