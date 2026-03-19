@@ -12,6 +12,8 @@ import { AlertTriangle, Loader2, Save, X } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { MaskConfig, Tab as MaskTab, Field } from './types'
 import { createMaskResolver, getFieldsFromMaskConfig } from './validation'
+import { useKeyboardShortcuts, buildCoreMaskShortcuts } from '@/hooks/useKeyboardShortcuts'
+import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
 
 interface ObjectPageProps {
   config: MaskConfig
@@ -90,6 +92,14 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
     reset(data)
     setIsDirty(false)
   }, [data, reset])
+
+  // Keyboard shortcuts: Ctrl+S → Speichern, Escape → Abbrechen (Gap 023)
+  const kbShortcuts = buildCoreMaskShortcuts({
+    onSave: () => { void handleSubmit(onSubmit)() },
+    onCancel: onCancel,
+    isSaveDisabled: isSubmitting || !isDirty,
+  })
+  useKeyboardShortcuts(kbShortcuts)
 
   const onSubmit = async (formData: any) => {
     try {

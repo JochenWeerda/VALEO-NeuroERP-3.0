@@ -36,13 +36,12 @@ Diese Statusdatei verdichtet den aktuellen Gesamtstand, ohne die Detailnachweise
 ## Gesamtstatus
 
 - Stand: `2026-03-19`
-- Status: `Waves 1 bis 67 abgeschlossen`
-- Gesamtsuite: `5646 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed`
+- Status: `Waves 1 bis 76 abgeschlossen`
+- Gesamtsuite: `5808 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed` (Stand nach Wave 76)
 - Letzte abgeschlossene Waves:
-  - `Wave 64`: Process Data Lineage DAG + Workflow Simulation Contracts
-  - `Wave 65`: Exception Pattern Classification + Remediation Playbooks
-  - `Wave 66`: Process Concurrency/Mutex + Resource Lock + Deadlock Detection
-  - `Wave 67`: Process Cache Contracts + Workflow Schema Migration
+  - `Wave 74`: Rationsoptimierung GfE-2023 Kontrakte + Proxy-Contract (28 Tests)
+  - `Wave 75`: Gap 049 — Security Hardening: HTTP Security Headers + RBAC Fine-Grained (49 Tests)
+  - `Wave 76`: Gap 024 — Touch-optimierte Feldworkflows: TouchFieldLayout + Einlagerung + LKW (37 Tests)
 
 ## Wave-Uebersicht
 
@@ -115,6 +114,11 @@ Diese Statusdatei verdichtet den aktuellen Gesamtstand, ohne die Detailnachweise
 | Wave 65 | abgeschlossen | 155 | `wave-65/STATUS.md` |
 | Wave 66 | abgeschlossen | 163 | `wave-66/STATUS.md` |
 | Wave 67 | abgeschlossen | 192 | `wave-67/STATUS.md` |
+| Wave 72 | abgeschlossen | 20 | Gap 003 Trocknungsengine |
+| Wave 73 | abgeschlossen | 28 | Gap 004 Settlement Freigabe |
+| Wave 74 | abgeschlossen | 28 | Rationsoptimierung GfE-2023 |
+| Wave 75 | abgeschlossen | 49 | Gap 049 Security Hardening: Security Headers + RBAC | `wave-75/STATUS.md` |
+| Wave 76 | abgeschlossen | 37 | Gap 024 Touch-Feldworkflows: TouchFieldLayout + Einlagerung + LKW | `wave-76/STATUS.md` |
 
 ## Abgeschlossene Waves 51–67 (Kernmodule)
 

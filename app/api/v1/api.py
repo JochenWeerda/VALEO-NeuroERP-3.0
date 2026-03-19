@@ -133,6 +133,7 @@ from app.api.v1.endpoints import (
     position_rules,
     position_overrides,
     batch,
+    agents,
 )
 
 # Wave 6-9 Process-Kernel-Endpoints (agrar-p0, supplier, wave-7, wave-9)
@@ -170,6 +171,11 @@ async def api_status():
 api_router.include_router(
     batch.router,
     tags=["batch"],
+)
+
+api_router.include_router(
+    agents.router,
+    tags=["neuroassist", "agents"],
 )
 
 api_router.include_router(

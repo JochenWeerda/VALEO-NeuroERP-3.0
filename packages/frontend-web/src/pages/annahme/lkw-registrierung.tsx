@@ -1,3 +1,7 @@
+/**
+ * LKW-Registrierung — Touch-optimierter Feldworkflow (Gap 024, Wave 76)
+ * Priorität via TouchCards statt <select>, alle Touch-Targets >= 44px
+ */
 import { useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useDropzone } from 'react-dropzone'
@@ -5,13 +9,17 @@ import { useToast } from '@/hooks/use-toast'
 import { Wizard } from '@/components/patterns/Wizard'
 import { api } from '@/lib/axios'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { Camera, Clock, Truck, Upload, X } from 'lucide-react'
+import {
+  TouchSection,
+  TouchTextInput,
+  TouchCard,
+  TouchCardGroup,
+  TouchConfirmCard,
+} from '@/components/touch/TouchFieldLayout'
 
 type LKWData = {
   kennzeichen: string
@@ -146,212 +154,173 @@ export default function LKWRegistrierungPage(): JSX.Element {
     }
   }
 
+  const ARTIKEL_OPTIONEN = ['Weizen', 'Gerste', 'Raps', 'Mais', 'Roggen', 'Hafer', 'Sonnenblumen']
+  const PRIORITAETEN = [
+    { id: 'hoch', label: 'Hoch (Express)', description: 'Sofortige Bearbeitung' },
+    { id: 'normal', label: 'Normal', description: 'Standard-Warteschlange' },
+    { id: 'niedrig', label: 'Niedrig', description: 'Flexibel, kein Zeitdruck' },
+  ] as const
+
   const steps = [
     {
       id: 'kennzeichen',
       title: 'Kennzeichen',
       content: (
-        <div className="space-y-6">
-          <div className="flex items-center justify-center">
-            <Truck className="h-24 w-24 text-muted-foreground" />
+        <TouchSection>
+          <div className="flex items-center justify-center py-2">
+            <Truck className="h-16 w-16 text-slate-300" />
+          </div>
+          <div className="space-y-1">
+            <TouchTextInput
+              label="Kennzeichen"
+              value={lkw.kennzeichen}
+              onChange={(v) => updateField('kennzeichen', v.toUpperCase())}
+              placeholder="z.B. AB-CD 1234"
+              autoCapitalize="characters"
+              required
+            />
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full min-h-[44px] gap-2"
+              onClick={() => handleScan('kennzeichen')}
+            >
+              <Camera className="h-4 w-4" />
+              Kennzeichen scannen (in Kürze)
+            </Button>
           </div>
           <div>
-            <Label htmlFor="kennzeichen">Kennzeichen *</Label>
-            <div className="flex gap-2">
-              <Input
-                id="kennzeichen"
-                value={lkw.kennzeichen}
-                onChange={(e) => updateField('kennzeichen', e.target.value.toUpperCase())}
-                placeholder="z.B. AB-CD 1234"
-                required
-                className="text-lg font-semibold text-center"
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="gap-2"
-                onClick={() => handleScan('kennzeichen')}
-                title="Kennzeichen scannen (in Kürze)"
-              >
-                <Camera className="h-4 w-4" />
-                Scan
-              </Button>
-            </div>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Kennzeichen eingeben oder Foto/Barcode hochladen (mobil geeignet)
-            </p>
-          </div>
-          <div>
-            <Label>Foto Kennzeichen / Barcode (optional)</Label>
+            <p className="mb-2 text-base font-medium text-slate-700">Foto Kennzeichen (optional)</p>
             <div
               {...dropzoneKennzeichen.getRootProps()}
-              className="mt-2 rounded-lg border-2 border-dashed border-muted-foreground/30 bg-muted/30 p-4 text-center cursor-pointer hover:border-primary/50 hover:bg-muted/50 transition-colors min-h-[100px] flex flex-col items-center justify-center"
+              className="flex min-h-[80px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-4 text-center transition-colors hover:border-blue-400 hover:bg-blue-50"
             >
               <input {...dropzoneKennzeichen.getInputProps()} accept="image/*" capture="environment" />
-              <Upload className="h-8 w-8 text-muted-foreground mb-2" />
-              <p className="text-sm font-medium">
+              <Upload className="mb-1 h-6 w-6 text-slate-400" />
+              <p className="text-sm text-slate-500">
                 {dropzoneKennzeichen.isDragActive ? 'Ablegen…' : 'Tippen oder Foto hierher ziehen'}
               </p>
-              <p className="text-xs text-muted-foreground mt-1">Bild von Kamera oder Galerie (iOS/Android)</p>
             </div>
           </div>
-          <div>
-            <Label htmlFor="ankunftszeit">Ankunftszeit</Label>
-            <Input
-              id="ankunftszeit"
+          <div className="space-y-1">
+            <p className="text-base font-medium text-slate-700">Ankunftszeit</p>
+            <input
               type="datetime-local"
               value={lkw.ankunftszeit}
               onChange={(e) => updateField('ankunftszeit', e.target.value)}
+              className="flex w-full min-h-[54px] rounded-lg border-2 border-slate-200 bg-white px-4 py-3 text-lg text-slate-900 focus:border-blue-500 focus:outline-none"
             />
           </div>
-        </div>
+        </TouchSection>
       ),
     },
     {
       id: 'lieferung',
       title: 'Lieferung',
       content: (
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="lieferant">Lieferant *</Label>
-            <Input
-              id="lieferant"
-              value={lkw.lieferant}
-              onChange={(e) => updateField('lieferant', e.target.value)}
-              placeholder="Name des Lieferanten"
-              required
+        <TouchSection>
+          <TouchTextInput
+            label="Lieferant"
+            value={lkw.lieferant}
+            onChange={(v) => updateField('lieferant', v)}
+            placeholder="Name des Lieferanten"
+            required
+          />
+          <div className="space-y-1">
+            <TouchTextInput
+              label="Lieferschein-Nr."
+              value={lkw.lieferscheinNr}
+              onChange={(v) => updateField('lieferscheinNr', v)}
+              placeholder="z.B. LS-2025-0042"
             />
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full min-h-[44px] gap-2"
+              onClick={() => handleScan('lieferscheinNr')}
+            >
+              <Camera className="h-4 w-4" />
+              Lieferschein scannen (in Kürze)
+            </Button>
           </div>
           <div>
-            <Label htmlFor="lieferscheinNr">Lieferschein-Nr.</Label>
-            <div className="flex gap-2">
-              <Input
-                id="lieferscheinNr"
-                value={lkw.lieferscheinNr}
-                onChange={(e) => updateField('lieferscheinNr', e.target.value)}
-                placeholder="z.B. LS-2025-0042"
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="gap-2"
-                onClick={() => handleScan('lieferscheinNr')}
-                title="Lieferschein-Nr. scannen (in Kürze)"
-              >
-                <Camera className="h-4 w-4" />
-                Scan
-              </Button>
-            </div>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Lieferschein-Nr. eingeben oder Foto/Barcode hochladen
-            </p>
-          </div>
-          <div>
-            <Label>Foto Lieferschein / Barcode (optional)</Label>
+            <p className="mb-2 text-base font-medium text-slate-700">Foto Lieferschein (optional)</p>
             <div
               {...dropzoneLieferschein.getRootProps()}
-              className="mt-2 rounded-lg border-2 border-dashed border-muted-foreground/30 bg-muted/30 p-4 text-center cursor-pointer hover:border-primary/50 hover:bg-muted/50 transition-colors min-h-[100px] flex flex-col items-center justify-center"
+              className="flex min-h-[80px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-4 text-center transition-colors hover:border-blue-400 hover:bg-blue-50"
             >
               <input {...dropzoneLieferschein.getInputProps()} accept="image/*" capture="environment" />
-              <Upload className="h-8 w-8 text-muted-foreground mb-2" />
-              <p className="text-sm font-medium">
+              <Upload className="mb-1 h-6 w-6 text-slate-400" />
+              <p className="text-sm text-slate-500">
                 {dropzoneLieferschein.isDragActive ? 'Ablegen…' : 'Tippen oder Foto hierher ziehen'}
               </p>
-              <p className="text-xs text-muted-foreground mt-1">Bild von Kamera oder Galerie (iOS/Android)</p>
             </div>
           </div>
-          <div>
-            <Label htmlFor="artikel">Artikel *</Label>
-            <Input
-              id="artikel"
-              value={lkw.artikel}
-              onChange={(e) => updateField('artikel', e.target.value)}
-              placeholder="z.B. Weizen"
-              required
-            />
-          </div>
-          <div>
-            <Label htmlFor="prioritaet">Priorität</Label>
-            <select
-              id="prioritaet"
-              value={lkw.prioritaet}
-              onChange={(e) => updateField('prioritaet', e.target.value as LKWData['prioritaet'])}
-              className="w-full rounded-md border border-input bg-background px-3 py-2"
-            >
-              <option value="hoch">Hoch (Express)</option>
-              <option value="normal">Normal</option>
-              <option value="niedrig">Niedrig</option>
-            </select>
-          </div>
-        </div>
+          <TouchCardGroup label="Artikel" required>
+            {ARTIKEL_OPTIONEN.map((art) => (
+              <TouchCard
+                key={art}
+                selected={lkw.artikel === art}
+                onSelect={() => updateField('artikel', art)}
+              >
+                {art}
+              </TouchCard>
+            ))}
+          </TouchCardGroup>
+          <TouchCardGroup label="Priorität">
+            {PRIORITAETEN.map((p) => (
+              <TouchCard
+                key={p.id}
+                selected={lkw.prioritaet === p.id}
+                onSelect={() => updateField('prioritaet', p.id)}
+                description={p.description}
+              >
+                {p.label}
+              </TouchCard>
+            ))}
+          </TouchCardGroup>
+        </TouchSection>
       ),
     },
     {
       id: 'bestaetigung',
       title: 'Bestätigung',
       content: (
-        <div className="space-y-6">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-center mb-6">
-                <div className="rounded-full bg-muted p-6">
-                  <Truck className="h-16 w-16" />
-                </div>
-              </div>
-              <h3 className="text-center text-2xl font-bold mb-6">{lkw.kennzeichen || 'KENNZEICHEN'}</h3>
-              <dl className="grid gap-4">
-                <div className="flex justify-between border-b pb-2">
-                  <dt className="text-sm font-medium text-muted-foreground">Lieferant</dt>
-                  <dd className="text-sm font-semibold">{lkw.lieferant || '-'}</dd>
-                </div>
-                <div className="flex justify-between border-b pb-2">
-                  <dt className="text-sm font-medium text-muted-foreground">Lieferschein-Nr.</dt>
-                  <dd className="text-sm font-semibold">{lkw.lieferscheinNr || '-'}</dd>
-                </div>
-                <div className="flex justify-between border-b pb-2">
-                  <dt className="text-sm font-medium text-muted-foreground">Artikel</dt>
-                  <dd className="text-sm font-semibold">{lkw.artikel || '-'}</dd>
-                </div>
-                <div className="flex justify-between border-b pb-2">
-                  <dt className="text-sm font-medium text-muted-foreground">Ankunftszeit</dt>
-                  <dd className="text-sm font-semibold flex items-center gap-2">
-                    <Clock className="h-4 w-4" />
-                    {new Date(lkw.ankunftszeit).toLocaleString('de-DE')}
-                  </dd>
-                </div>
-                <div className="flex justify-between">
-                  <dt className="text-sm font-medium text-muted-foreground">Priorität</dt>
-                  <dd>
-                    <Badge
-                      variant={lkw.prioritaet === 'hoch' ? 'destructive' : lkw.prioritaet === 'normal' ? 'default' : 'secondary'}
-                    >
-                      {lkw.prioritaet === 'hoch' ? 'Hoch (Express)' : lkw.prioritaet === 'normal' ? 'Normal' : 'Niedrig'}
-                    </Badge>
-                  </dd>
-                </div>
-                {attachmentIds.length > 0 && (
-                  <div className="flex justify-between items-center border-t pt-2 mt-2">
-                    <dt className="text-sm font-medium text-muted-foreground">Anhänge</dt>
-                    <dd className="flex flex-wrap gap-1">
-                      {attachmentIds.map((id, i) => (
-                        <Badge key={id} variant="secondary" className="gap-1">
-                          #{i + 1}
-                          <button type="button" onClick={() => removeAttachment(i)} className="rounded hover:bg-muted-foreground/20" aria-label="Entfernen">
-                            <X className="h-3 w-3" />
-                          </button>
-                        </Badge>
-                      ))}
-                    </dd>
-                  </div>
-                )}
-              </dl>
-            </CardContent>
-          </Card>
-          <div className="rounded-lg bg-blue-50 p-4 text-center text-sm text-blue-900">
+        <div className="space-y-5">
+          <div className="flex flex-col items-center gap-2 py-2">
+            <div className="rounded-full bg-slate-100 p-5">
+              <Truck className="h-12 w-12 text-slate-600" />
+            </div>
+            <h3 className="text-xl font-bold text-slate-900">{lkw.kennzeichen || 'KENNZEICHEN'}</h3>
+          </div>
+          <TouchConfirmCard
+            title="Lieferungsdetails"
+            fields={[
+              { label: 'Lieferant', value: lkw.lieferant || '—' },
+              { label: 'Lieferschein-Nr.', value: lkw.lieferscheinNr || '—' },
+              { label: 'Artikel', value: lkw.artikel || '—', highlight: true },
+              { label: 'Ankunft', value: new Date(lkw.ankunftszeit).toLocaleString('de-DE') },
+              { label: 'Priorität', value: lkw.prioritaet === 'hoch' ? 'Hoch (Express)' : lkw.prioritaet === 'normal' ? 'Normal' : 'Niedrig', highlight: lkw.prioritaet === 'hoch' },
+            ]}
+          />
+          {attachmentIds.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {attachmentIds.map((id, i) => (
+                <Badge key={id} variant="secondary" className="gap-1">
+                  Anhang #{i + 1}
+                  <button type="button" onClick={() => removeAttachment(i)} aria-label="Entfernen">
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              ))}
+            </div>
+          )}
+          <div className="rounded-xl bg-blue-50 px-4 py-3 text-center text-sm text-blue-900">
             <p className="font-semibold">LKW wird in die Warteschlange eingereiht</p>
-            <p className="mt-1">Der Fahrer erhält eine Wartenummer per SMS</p>
+            <p className="mt-0.5 flex items-center justify-center gap-1 text-blue-700">
+              <Clock className="h-3.5 w-3.5" />
+              Der Fahrer erhält eine Wartenummer
+            </p>
           </div>
         </div>
       ),

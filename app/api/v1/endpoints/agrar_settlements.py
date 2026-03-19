@@ -1568,3 +1568,221 @@ Dieses Dokument ist maschinell erstellt und revisionssicher gespeichert.
         "filename": f"abrechnung_{settlement.settlement_number or settlement.id}.txt",
         "content_type": "text/plain"
     }
+
+
+# ============================================================================
+# GAP 003 — Trocknungsabrechnung Core-Contract API (Wave 72)
+# Exponiert compute_trocknungs_abrechnung() mit SHA-256 Audit-Hash
+# ============================================================================
+
+from app.core.trocknungs_abrechnung import (
+    TrocknungsInput,
+    TrocknungsMethode,
+    TrocknungsRegelParametrierung,
+    compute_trocknungs_abrechnung,
+    validate_trocknungs_ergebnis,
+    get_default_trocknungsregeln,
+)
+
+
+class TrocknungsAbrechnungPreviewRequest(BaseModel):
+    """Stateless Preview: Trocknungsabrechnung mit SHA-256 Audit-Hash berechnen."""
+    crop_code: str = Field(..., min_length=2, max_length=10, description="Fruchtartcode (WW, SG, RA, KM, ZR, ...)")
+    brutto_gewicht_kg: float = Field(..., gt=0, description="Bruttoeingangsgewicht in kg")
+    eingangs_feuchte_pct: float = Field(..., ge=0, le=100, description="Gemessene Feuchte bei Annahme in %")
+    ziel_feuchte_pct: float = Field(..., ge=0, le=100, description="Vertraglich vereinbarte Zielfeuchte in %")
+    methode: str = Field(default="FAKTOR_STUFUNG", description="Berechnungsmethode")
+    rule_set_id: str = Field(default="default", description="Regelwerk-Referenz (für Audit-Hash)")
+    rule_set_version: int = Field(default=1, ge=1, description="Regelwerk-Version")
+    settlement_id: str = Field(default="preview", description="Settlement-ID (für Audit-Hash)")
+    tenant_id: str = Field(default="system", description="Mandant")
+    # Optionale Überschreibung der Berechnungsparameter (sonst Branchenrichtwerte)
+    start_threshold_pct: Optional[float] = Field(default=None, ge=0, le=100)
+    trocknungskosten_eur_per_pct_per_t: Optional[float] = Field(default=None, ge=0)
+    schwund_faktor: Optional[float] = Field(default=None, gt=0)
+    max_abzug_pct: Optional[float] = Field(default=None, ge=0, le=100)
+
+
+@router.post("/trocknungs-abrechnung/preview", response_model=dict, tags=["agrar", "trocknung"])
+async def preview_trocknungs_abrechnung(payload: TrocknungsAbrechnungPreviewRequest):
+    """
+    Trocknungsabrechnung preview mit GoBD-konformem SHA-256 Audit-Hash.
+
+    Verwendet compute_trocknungs_abrechnung() aus dem Core-Contract (Wave 26/Gap 003).
+    Liefert alle Abzugspositionen, Nettogewicht und deterministischen Audit-Hash.
+    Kein DB-Aufruf — rein deterministisch.
+    """
+    try:
+        methode = TrocknungsMethode(payload.methode)
+    except ValueError:
+        raise HTTPException(status_code=422, detail=f"Unbekannte Methode: {payload.methode}. Erlaubt: {[m.value for m in TrocknungsMethode]}")
+
+    inp = TrocknungsInput(
+        settlement_id=payload.settlement_id,
+        tenant_id=payload.tenant_id,
+        crop_code=payload.crop_code,
+        rule_set_id=payload.rule_set_id,
+        rule_set_version=payload.rule_set_version,
+        brutto_gewicht_kg=Decimal(str(payload.brutto_gewicht_kg)),
+        eingangs_feuchte_pct=Decimal(str(payload.eingangs_feuchte_pct)),
+        ziel_feuchte_pct=Decimal(str(payload.ziel_feuchte_pct)),
+        methode=methode,
+    )
+
+    # Parameter: explizit aus Request oder Branchenrichtwerte je Fruchtart
+    defaults = get_default_trocknungsregeln()
+    default_params = defaults.get(payload.crop_code.upper(), TrocknungsRegelParametrierung())
+    params = TrocknungsRegelParametrierung(
+        start_threshold_pct=Decimal(str(payload.start_threshold_pct)) if payload.start_threshold_pct is not None else default_params.start_threshold_pct,
+        trocknungskosten_eur_per_pct_per_t=Decimal(str(payload.trocknungskosten_eur_per_pct_per_t)) if payload.trocknungskosten_eur_per_pct_per_t is not None else default_params.trocknungskosten_eur_per_pct_per_t,
+        schwund_faktor=Decimal(str(payload.schwund_faktor)) if payload.schwund_faktor is not None else default_params.schwund_faktor,
+        max_abzug_pct=Decimal(str(payload.max_abzug_pct)) if payload.max_abzug_pct is not None else default_params.max_abzug_pct,
+    )
+
+    ergebnis = compute_trocknungs_abrechnung(inp, params)
+    validierung = validate_trocknungs_ergebnis(ergebnis)
+    return {**ergebnis.as_dict(), "validierung": validierung.as_dict()}
+
+
+@router.get("/trocknungs-regelsets/defaults", response_model=dict, tags=["agrar", "trocknung"])
+async def get_trocknungs_regelsets_defaults():
+    """
+    Branchenrichtwerte für Trocknungsparameter je Fruchtart zurückgeben.
+
+    Basis: DLG-Empfehlungen, UFOP-Richtwerte, Handelsusancen 2024.
+    Tenants können eigene Regelsets in der DB konfigurieren (GET /drying-rules).
+    """
+    defaults = get_default_trocknungsregeln()
+    return {
+        "schema_version": 1,
+        "quelle": "DLG-Empfehlungen / UFOP-Richtwerte / Handelsusancen 2024",
+        "regelsets": {
+            crop_code: {
+                "crop_code": crop_code,
+                "start_threshold_pct": float(params.start_threshold_pct),
+                "trocknungskosten_eur_per_pct_per_t": float(params.trocknungskosten_eur_per_pct_per_t),
+                "schwund_faktor": float(params.schwund_faktor),
+                "max_abzug_pct": float(params.max_abzug_pct) if params.max_abzug_pct is not None else None,
+            }
+            for crop_code, params in defaults.items()
+        },
+    }
+
+
+# ============================================================================
+# GAP 004 — Settlement Freigabe-Flow + Gutschrift/Belastung (Wave 73)
+# Exponiert evaluate_settlement_approval() via REST
+# ============================================================================
+
+from app.core.settlement_approval import (
+    SettlementApprovalRequest,
+    SettlementApprovalStatus,
+    SettlementActorType,
+    evaluate_settlement_approval,
+    get_allowed_transitions,
+    is_terminal,
+)
+
+
+class SettlementFreigabeRequest(BaseModel):
+    """Freigabe-Anfrage: Status-Übergang mit Aktor-Kontext."""
+    actor_id: str = Field(..., min_length=1, description="Benutzer- oder System-ID")
+    actor_type: str = Field(..., description="Aktor-Typ: SACHBEARBEITER, ABTEILUNGSLEITER, PROKURIST, AGENT, SYSTEM")
+    target_status: str = Field(..., description="Ziel-Status: ZUR_FREIGABE, FREIGEGEBEN, ABGELEHNT, VERBUCHT, ...")
+    reason: Optional[str] = Field(default=None, description="Begründung (optional)")
+    current_status: Optional[str] = Field(default=None, description="Aktueller Status (für stateless Evaluation; leer = aus DB)")
+
+
+@router.post("/freigabe/evaluate", response_model=dict, tags=["agrar", "settlement", "freigabe"])
+async def evaluate_settlement_freigabe_stateless(payload: SettlementFreigabeRequest):
+    """
+    Stateless Freigabe-Evaluation: Prüft ob ein Status-Übergang zulässig ist.
+
+    Kein DB-Zugriff — für Previews, Tests und Agent-Checks.
+    Gibt allowed=True/False + Audit-Entry zurück.
+    """
+    try:
+        actor_type = SettlementActorType(payload.actor_type)
+    except ValueError:
+        raise HTTPException(status_code=422, detail=f"Unbekannter actor_type: {payload.actor_type}")
+
+    try:
+        target_status = SettlementApprovalStatus(payload.target_status)
+    except ValueError:
+        raise HTTPException(status_code=422, detail=f"Unbekannter target_status: {payload.target_status}")
+
+    current_status_str = payload.current_status or "ENTWURF"
+    try:
+        current_status = SettlementApprovalStatus(current_status_str)
+    except ValueError:
+        raise HTTPException(status_code=422, detail=f"Unbekannter current_status: {current_status_str}")
+
+    request = SettlementApprovalRequest(
+        settlement_id="preview",
+        tenant_id="system",
+        actor_id=payload.actor_id,
+        actor_type=actor_type,
+        target_status=target_status,
+        reason=payload.reason,
+    )
+    result = evaluate_settlement_approval(request, current_status)
+    return {
+        **result.audit_entry,
+        "allowed_transitions": [s.value for s in get_allowed_transitions(current_status)],
+        "is_terminal": is_terminal(current_status),
+    }
+
+
+@router.post("/{settlement_id}/freigabe", response_model=dict, tags=["agrar", "settlement", "freigabe"])
+async def settlement_freigabe(
+    settlement_id: str,
+    payload: SettlementFreigabeRequest,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """
+    Freigabe-Schritt für eine Abrechnung (persistiert approval_status im drying_result-JSONB).
+
+    Nutzt evaluate_settlement_approval() aus dem Core-Contract.
+    """
+    settlement = db.query(AgrarSettlement).filter(
+        AgrarSettlement.id == settlement_id,
+        AgrarSettlement.tenant_id == tenant_id,
+    ).first()
+    if not settlement:
+        raise HTTPException(status_code=404, detail="Settlement nicht gefunden")
+
+    # approval_status aus drying_result JSONB lesen (kein extra DB-Feld nötig)
+    approval_state = settlement.drying_result.get("approval_status", "ENTWURF") if settlement.drying_result else "ENTWURF"
+
+    try:
+        actor_type = SettlementActorType(payload.actor_type)
+        target_status = SettlementApprovalStatus(payload.target_status)
+        current_status = SettlementApprovalStatus(approval_state)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+
+    request = SettlementApprovalRequest(
+        settlement_id=settlement_id,
+        tenant_id=tenant_id,
+        actor_id=payload.actor_id,
+        actor_type=actor_type,
+        target_status=target_status,
+        reason=payload.reason,
+    )
+    result = evaluate_settlement_approval(request, current_status)
+
+    if result.allowed:
+        # Persistiere approval_status im JSONB-Feld
+        new_state = dict(settlement.drying_result or {})
+        new_state["approval_status"] = result.new_status.value
+        if "approval_history" not in new_state:
+            new_state["approval_history"] = []
+        new_state["approval_history"].append(result.audit_entry)
+        settlement.drying_result = new_state
+        db.commit()
+
+    return {
+        **result.audit_entry,
+        "allowed_transitions": [s.value for s in get_allowed_transitions(result.new_status if result.allowed else current_status)],
+    }

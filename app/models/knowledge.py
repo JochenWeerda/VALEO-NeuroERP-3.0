@@ -57,3 +57,40 @@ class KnowledgeVersionRecord(Base):
     strukturierte_daten = Column(JSONB, nullable=False, default=dict)
     quelle = Column(String(255), nullable=False, default="system")
     erstellt_am = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+
+class KnowledgeImprovementProposalRecord(Base):
+    __tablename__ = "knowledge_improvement_proposals"
+    __table_args__ = {"schema": "domain_shared", "extend_existing": True}
+
+    proposal_id = Column(String, primary_key=True, default=uuid7)
+    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False, index=True)
+    target_knowledge_id = Column(
+        String,
+        ForeignKey("domain_shared.knowledge_objects.knowledge_id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    titel = Column(String(255), nullable=False)
+    typ = Column(String(64), nullable=False, index=True)
+    status = Column(String(32), nullable=False, index=True, default="EINGEREICHT")
+    beschreibung = Column(Text, nullable=False, default="")
+    tags = Column(JSONB, nullable=False, default=list)
+    zielrollen = Column(JSONB, nullable=False, default=list)
+    format = Column(String(32), nullable=False)
+    inhalt = Column(Text, nullable=False)
+    strukturierte_daten = Column(JSONB, nullable=False, default=dict)
+    quelle = Column(String(255), nullable=False, default="improvement-workflow")
+    vorgeschlagen_von_typ = Column(String(32), nullable=False, default="human")
+    vorgeschlagen_von_ref = Column(String(255), nullable=False, default="unknown")
+    vorgeschlagen_von_rolle = Column(String(128), nullable=True)
+    kanal = Column(String(32), nullable=True)
+    begruendung = Column(Text, nullable=False, default="")
+    reviewer_ref = Column(String(255), nullable=True)
+    reviewer_rolle = Column(String(128), nullable=True)
+    review_notiz = Column(Text, nullable=True)
+    reviewed_at = Column(DateTime(timezone=True), nullable=True)
+    applied_knowledge_id = Column(String, nullable=True)
+    applied_version = Column(Integer, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
