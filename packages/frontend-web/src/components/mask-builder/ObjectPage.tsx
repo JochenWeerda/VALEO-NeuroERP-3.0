@@ -265,7 +265,8 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
   }
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="flex flex-col">
+    <div className="flex-1 space-y-6 p-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -366,6 +367,9 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
           ))}
         </Tabs>
       </form>
+    </div>
+      {/* Keyboard Shortcut Bar — nur auf Desktop sichtbar */}
+      <KeyboardShortcutBar shortcuts={kbShortcuts} />
     </div>
   )
 }

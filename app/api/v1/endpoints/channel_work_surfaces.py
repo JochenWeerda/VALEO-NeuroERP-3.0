@@ -93,7 +93,7 @@ def channel_knowledge_query(channel: str, payload: ChannelKnowledgeQueryRequest,
 
 
 @router.post("/{channel}/process-actions/execute")
-def channel_process_execute(channel: str, payload: ChannelProcessActionRequest):
+def channel_process_execute(channel: str, payload: ChannelProcessActionRequest, db=Depends(get_db)):
     kanal = _parse_supported_channel(channel)
     thread = execute_channel_process_action(
         kanal=kanal,
@@ -109,21 +109,22 @@ def channel_process_execute(channel: str, payload: ChannelProcessActionRequest):
         employee_ref=payload.employee_ref,
         channel_user_id=payload.channel_user_id,
         extra_context=payload.extra_context,
+        store=get_channel_process_thread_store(db),
     )
     return thread.as_dict()
 
 
 @router.get("/{channel}/process-actions/{thread_id}")
-def get_channel_process_thread(channel: str, thread_id: str):
+def get_channel_process_thread(channel: str, thread_id: str, db=Depends(get_db)):
     _parse_supported_channel(channel)
-    thread = get_channel_process_thread_store().get(thread_id)
+    thread = get_channel_process_thread_store(db).get(thread_id)
     if thread is None:
         raise HTTPException(status_code=404, detail="Thread nicht gefunden")
     return thread.as_dict()
 
 
 @router.post("/{channel}/process-actions/{thread_id}/decision")
-def channel_process_decision(channel: str, thread_id: str, payload: ChannelApprovalDecisionRequest):
+def channel_process_decision(channel: str, thread_id: str, payload: ChannelApprovalDecisionRequest, db=Depends(get_db)):
     _parse_supported_channel(channel)
     try:
         decision = ApprovalDecision(payload.decision.strip().upper())
@@ -137,6 +138,7 @@ def channel_process_decision(channel: str, thread_id: str, payload: ChannelAppro
             entschieden_von=payload.entschieden_von,
             approver_role=payload.approver_role,
             begruendung=payload.begruendung,
+            store=get_channel_process_thread_store(db),
         )
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc

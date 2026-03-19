@@ -66,6 +66,12 @@ def create_tables():
         except Exception as e:
             logger.warning(f"Knowledge models import failed: {e}")
 
+        try:
+            from app.models import channel_threads as channel_thread_models  # noqa: F401
+            logger.info("Channel thread models imported")
+        except Exception as e:
+            logger.warning(f"Channel thread models import failed: {e}")
+
         # Ensure outbox table is part of metadata
         try:
             from app.infrastructure.eventbus import outbox as outbox_models  # noqa: F401
