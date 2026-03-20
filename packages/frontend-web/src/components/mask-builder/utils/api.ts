@@ -1,10 +1,13 @@
 // VALEO Mask Builder API Utilities
 
 export interface ApiResponse<T = any> {
-  data: T
+  data: T | null
   success: boolean
   message?: string
   errors?: Record<string, string>
+  error?: string
+  id?: string | number
+  [key: string]: any
 }
 
 export interface PaginatedResponse<T = any> {
@@ -27,7 +30,7 @@ export class ApiClient {
     }
   }
 
-  private async request<T>(
+  private async request<T = any>(
     endpoint: string,
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
@@ -63,38 +66,52 @@ export class ApiClient {
         data: null as T,
         success: false,
         message: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error',
         errors: {}
       }
     }
   }
 
-  async get<T>(endpoint: string, params?: Record<string, any>): Promise<ApiResponse<T>> {
+  async get<T = any>(
+    endpoint: string,
+    paramsOrConfig?: Record<string, any> | { params?: Record<string, any> },
+  ): Promise<ApiResponse<T>> {
+    const params = paramsOrConfig && 'params' in paramsOrConfig ? paramsOrConfig.params : paramsOrConfig
     const url = params ? `${endpoint}?${String(new URLSearchParams(params))}` : endpoint
     return this.request<T>(url)
   }
 
-  async post<T>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
-    return this.request<T>(endpoint, {
+  async post<T = any>(endpoint: string, data?: any, options: RequestInit & { params?: Record<string, any> } = {}): Promise<ApiResponse<T>> {
+    const params = options.params ? `?${String(new URLSearchParams(options.params))}` : ''
+    const { params: _params, ...requestOptions } = options
+    return this.request<T>(`${endpoint}${params}`, {
       method: 'POST',
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
+      ...requestOptions,
     })
   }
 
-  async put<T>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
-    return this.request<T>(endpoint, {
+  async put<T = any>(endpoint: string, data?: any, options: RequestInit & { params?: Record<string, any> } = {}): Promise<ApiResponse<T>> {
+    const params = options.params ? `?${String(new URLSearchParams(options.params))}` : ''
+    const { params: _params, ...requestOptions } = options
+    return this.request<T>(`${endpoint}${params}`, {
       method: 'PUT',
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
+      ...requestOptions,
     })
   }
 
-  async patch<T>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
-    return this.request<T>(endpoint, {
+  async patch<T = any>(endpoint: string, data?: any, options: RequestInit & { params?: Record<string, any> } = {}): Promise<ApiResponse<T>> {
+    const params = options.params ? `?${String(new URLSearchParams(options.params))}` : ''
+    const { params: _params, ...requestOptions } = options
+    return this.request<T>(`${endpoint}${params}`, {
       method: 'PATCH',
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
+      ...requestOptions,
     })
   }
 
-  async delete<T>(endpoint: string): Promise<ApiResponse<T>> {
+  async delete<T = any>(endpoint: string): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
       method: 'DELETE'
     })

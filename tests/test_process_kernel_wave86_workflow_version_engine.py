@@ -1,79 +1,70 @@
 """
-Wave 86 — Versionierte Workflow Engine mit Migrationen (Gap 011)
+test_process_kernel_wave86_workflow_version_engine.py — Versionierte Workflow Engine (Gap 011)
 
-Tests für WorkflowVersion, WorkflowDefinition, WorkflowVersionRegistry,
-MigrationsPlan, MigrationsSchritt und validate_migrations_sicherheit().
-
-Gap 011: 0 ungeplante Workflow-Brüche bei Releases
+Wave 86: Semantic Versioning für Workflows mit Migrationssicherheit
+KPI: MAJOR-Änderungen immer mit genehmigungs_pflicht=True abgesichert
 """
-from __future__ import annotations
-
 import pytest
-
 from app.core.workflow_version_engine_contracts import (
     AenderungsTyp,
-    BreakingChangeRisiko,
-    MigrationStatus,
-    MigrationStrategie,
-    MigrationsSchritt,
-    MigrationsPlan,
+    MigrationsStrategie,
     MigrationsSicherheitsResult,
-    WorkflowDefinition,
+    RisikoStufe,
+    WorkflowMigrationsplan,
+    WorkflowStatus,
     WorkflowVersion,
-    WorkflowVersionRegistry,
+    WorkflowVersionDefinition,
+    WorkflowVersionsHistorie,
     validate_migrations_sicherheit,
 )
 
 
 # ---------------------------------------------------------------------------
-# Fixtures
+# Helpers
 # ---------------------------------------------------------------------------
 
-def _v(major: int, minor: int = 0, patch: int = 0) -> WorkflowVersion:
+def _version(major: int, minor: int, patch: int) -> WorkflowVersion:
     return WorkflowVersion(major=major, minor=minor, patch=patch)
-
-
-def _def(name: str = "ernte_annahme", major: int = 1, minor: int = 0, patch: int = 0,
-         schritte: list[str] | None = None) -> WorkflowDefinition:
-    return WorkflowDefinition(
-        name=name,
-        version=_v(major, minor, patch),
-        schritte=schritte or ["KONTRAKT", "ANNAHME", "QUALITAET", "SETTLEMENT"],
-        schema_hash=f"sha256:{major}{minor}{patch}abc",
-    )
-
-
-def _schritt(
-    von: WorkflowVersion,
-    bis: WorkflowVersion,
-    strategie: MigrationStrategie = MigrationStrategie.DUAL_RUN,
-    risiko: BreakingChangeRisiko = BreakingChangeRisiko.KEIN,
-    umkehrbar: bool = True,
-) -> MigrationsSchritt:
-    return MigrationsSchritt(
-        schritt_id=f"S-{von}->{bis}",
-        von_version=von,
-        bis_version=bis,
-        strategie=strategie,
-        transformation_beschreibung="Test-Transformation",
-        ist_umkehrbar=umkehrbar,
-        risiko=risiko,
-    )
 
 
 def _plan(
     von: WorkflowVersion,
-    bis: WorkflowVersion,
-    schritte: list[MigrationsSchritt] | None = None,
-    genehmigt: bool = False,
-) -> MigrationsPlan:
-    return MigrationsPlan(
-        plan_id=f"PLAN-{von}->{bis}",
-        workflow_name="ernte_annahme",
+    zu: WorkflowVersion,
+    strategie: MigrationsStrategie = MigrationsStrategie.SOFT_UPGRADE,
+    risiko: RisikoStufe = RisikoStufe.NIEDRIG,
+    reversibel: bool = True,
+    genehmigungs_pflicht: bool = True,
+    plan_id: str = "PLAN-001",
+) -> WorkflowMigrationsplan:
+    return WorkflowMigrationsplan(
+        plan_id=plan_id,
+        workflow_id="WF-ANNAHME",
         von_version=von,
-        bis_version=bis,
-        schritte=schritte or [],
-        genehmigungs_pflicht=genehmigt,
+        zu_version=zu,
+        strategie=strategie,
+        risiko=risiko,
+        reversibel=reversibel,
+        genehmigungs_pflicht=genehmigungs_pflicht,
+        beschreibung="Testplan",
+    )
+
+
+def _version_def(
+    major: int, minor: int, patch: int,
+    status: WorkflowStatus = WorkflowStatus.FREIGEGEBEN,
+    genehmigungs_pflicht: bool = False,
+    workflow_id: str = "WF-001",
+) -> WorkflowVersionDefinition:
+    return WorkflowVersionDefinition(
+        workflow_id=workflow_id,
+        name="Test-Workflow",
+        version=WorkflowVersion(major, minor, patch),
+        status=status,
+        beschreibung="Test",
+        aenderungsprotokoll="Keine Änderungen",
+        genehmigungs_pflicht=genehmigungs_pflicht,
+        erstellt_von="admin",
+        erstellt_am="2026-03-20T00:00:00Z",
     )
 
 
@@ -82,311 +73,252 @@ def _plan(
 # ---------------------------------------------------------------------------
 
 class TestWorkflowVersion:
-    def test_str_darstellung(self):
-        v = _v(1, 2, 3)
-        assert str(v) == "1.2.3"
+    def test_als_string(self):
+        v = _version(1, 2, 3)
+        assert v.als_string() == "1.2.3"
 
-    def test_vergleich_kleiner(self):
-        assert _v(1, 0, 0) < _v(2, 0, 0)
-        assert _v(1, 0, 0) < _v(1, 1, 0)
-        assert _v(1, 0, 0) < _v(1, 0, 1)
+    def test_negativ_major_fehler(self):
+        with pytest.raises(ValueError):
+            WorkflowVersion(major=-1, minor=0, patch=0)
 
-    def test_vergleich_gleich(self):
-        assert _v(1, 2, 3) == _v(1, 2, 3)
+    def test_negativ_minor_fehler(self):
+        with pytest.raises(ValueError):
+            WorkflowVersion(major=1, minor=-1, patch=0)
 
-    def test_kompatibel_gleiche_major(self):
-        assert _v(1, 0, 0).ist_kompatibel_mit(_v(1, 5, 3)) is True
+    def test_negativ_patch_fehler(self):
+        with pytest.raises(ValueError):
+            WorkflowVersion(major=1, minor=0, patch=-1)
 
-    def test_nicht_kompatibel_verschiedene_major(self):
-        assert _v(1, 0, 0).ist_kompatibel_mit(_v(2, 0, 0)) is False
+    def test_aenderungstyp_major(self):
+        v1 = _version(1, 0, 0)
+        v2 = _version(2, 0, 0)
+        assert v1.aenderungs_typ(v2) == AenderungsTyp.MAJOR
 
-    def test_aenderungs_typ_patch(self):
-        assert _v(1, 0, 0).aenderungs_typ(_v(1, 0, 1)) == AenderungsTyp.PATCH
+    def test_aenderungstyp_minor(self):
+        v1 = _version(1, 0, 0)
+        v2 = _version(1, 1, 0)
+        assert v1.aenderungs_typ(v2) == AenderungsTyp.MINOR
 
-    def test_aenderungs_typ_minor(self):
-        assert _v(1, 0, 0).aenderungs_typ(_v(1, 1, 0)) == AenderungsTyp.MINOR
+    def test_aenderungstyp_patch(self):
+        v1 = _version(1, 2, 0)
+        v2 = _version(1, 2, 1)
+        assert v1.aenderungs_typ(v2) == AenderungsTyp.PATCH
 
-    def test_aenderungs_typ_major(self):
-        assert _v(1, 0, 0).aenderungs_typ(_v(2, 0, 0)) == AenderungsTyp.MAJOR
+    def test_ist_neuer_als_true(self):
+        v1 = _version(2, 0, 0)
+        v2 = _version(1, 9, 9)
+        assert v1.ist_neuer_als(v2) is True
 
-    def test_as_dict(self):
-        d = _v(2, 3, 4).as_dict()
-        assert d["major"] == 2
-        assert d["minor"] == 3
-        assert d["patch"] == 4
-        assert d["version_str"] == "2.3.4"
-
-
-# ---------------------------------------------------------------------------
-# TestWorkflowDefinition
-# ---------------------------------------------------------------------------
-
-class TestWorkflowDefinition:
-    def test_version_key(self):
-        d = _def("ernte", 1, 2, 3)
-        assert d.version_key == "ernte@1.2.3"
+    def test_ist_neuer_als_false(self):
+        v1 = _version(1, 0, 0)
+        v2 = _version(1, 0, 0)
+        assert v1.ist_neuer_als(v2) is False
 
     def test_as_dict(self):
-        d = _def("ernte", 1, 0, 0)
-        result = d.as_dict()
-        assert result["name"] == "ernte"
-        assert "version" in result
-        assert "schritte" in result
-        assert "schema_hash" in result
+        v = _version(3, 1, 4)
+        d = v.as_dict()
+        assert d["major"] == 3
+        assert d["als_string"] == "3.1.4"
 
 
 # ---------------------------------------------------------------------------
-# TestWorkflowVersionRegistry
+# TestValidateMigrationsSicherheit — erlaubt
 # ---------------------------------------------------------------------------
 
-class TestWorkflowVersionRegistry:
-    def test_register_und_get_latest(self):
-        registry = WorkflowVersionRegistry()
-        registry.register(_def("wf", 1, 0, 0))
-        registry.register(_def("wf", 1, 1, 0))
-        latest = registry.get_latest("wf")
-        assert latest.version == _v(1, 1, 0)
-
-    def test_get_spezifische_version(self):
-        registry = WorkflowVersionRegistry()
-        registry.register(_def("wf", 1, 0, 0))
-        registry.register(_def("wf", 2, 0, 0))
-        v = registry.get_version("wf", _v(1, 0, 0))
-        assert v is not None
-        assert v.version == _v(1, 0, 0)
-
-    def test_get_unbekannte_version_gibt_none(self):
-        registry = WorkflowVersionRegistry()
-        registry.register(_def("wf", 1, 0, 0))
-        assert registry.get_version("wf", _v(9, 9, 9)) is None
-
-    def test_get_unbekannter_workflow_gibt_none(self):
-        registry = WorkflowVersionRegistry()
-        assert registry.get_latest("unbekannt") is None
-
-    def test_duplikat_raises(self):
-        registry = WorkflowVersionRegistry()
-        registry.register(_def("wf", 1, 0, 0))
-        with pytest.raises(ValueError, match="bereits registriert"):
-            registry.register(_def("wf", 1, 0, 0))
-
-    def test_alle_versionen_sortiert(self):
-        registry = WorkflowVersionRegistry()
-        registry.register(_def("wf", 1, 2, 0))
-        registry.register(_def("wf", 1, 0, 0))
-        registry.register(_def("wf", 2, 0, 0))
-        versionen = registry.alle_versionen("wf")
-        assert versionen == sorted(versionen)
-
-    def test_anzahl_workflows(self):
-        registry = WorkflowVersionRegistry()
-        registry.register(_def("wf1", 1, 0, 0))
-        registry.register(_def("wf2", 1, 0, 0))
-        assert registry.anzahl_workflows == 2
-
-    def test_anzahl_definitionen_gesamt(self):
-        registry = WorkflowVersionRegistry()
-        registry.register(_def("wf", 1, 0, 0))
-        registry.register(_def("wf", 1, 1, 0))
-        registry.register(_def("wf2", 1, 0, 0))
-        assert registry.anzahl_definitionen_gesamt == 3
-
-    def test_registrierte_workflows(self):
-        registry = WorkflowVersionRegistry()
-        registry.register(_def("ernte", 1, 0, 0))
-        registry.register(_def("settlement", 1, 0, 0))
-        namen = registry.registrierte_workflows()
-        assert "ernte" in namen
-        assert "settlement" in namen
-
-
-# ---------------------------------------------------------------------------
-# TestMigrationsSchritt
-# ---------------------------------------------------------------------------
-
-class TestMigrationsSchritt:
-    def test_as_dict(self):
-        s = _schritt(_v(1, 0, 0), _v(1, 1, 0))
-        d = s.as_dict()
-        assert d["von_version"] == "1.0.0"
-        assert d["bis_version"] == "1.1.0"
-        assert d["strategie"] == MigrationStrategie.DUAL_RUN.value
-
-    def test_risiko_werte(self):
-        for risiko in BreakingChangeRisiko:
-            s = _schritt(_v(1), _v(2), risiko=risiko)
-            assert s.risiko == risiko
-
-
-# ---------------------------------------------------------------------------
-# TestMigrationsPlan
-# ---------------------------------------------------------------------------
-
-class TestMigrationsPlan:
-    def test_ist_breaking_major(self):
-        plan = _plan(_v(1, 0, 0), _v(2, 0, 0))
-        assert plan.ist_breaking is True
-
-    def test_nicht_breaking_minor(self):
-        plan = _plan(_v(1, 0, 0), _v(1, 1, 0))
-        assert plan.ist_breaking is False
-
-    def test_anzahl_schritte(self):
-        plan = _plan(_v(1), _v(2), schritte=[
-            _schritt(_v(1), _v(2)),
-            _schritt(_v(1), _v(2)),
-        ])
-        assert plan.anzahl_schritte == 2
-
-    def test_hoechstes_risiko_hoch(self):
-        plan = _plan(_v(1), _v(2), schritte=[
-            _schritt(_v(1), _v(2), risiko=BreakingChangeRisiko.NIEDRIG),
-            _schritt(_v(1), _v(2), risiko=BreakingChangeRisiko.HOCH),
-        ])
-        assert plan.hoechstes_risiko == BreakingChangeRisiko.HOCH
-
-    def test_hoechstes_risiko_leer(self):
-        plan = _plan(_v(1), _v(2))
-        assert plan.hoechstes_risiko == BreakingChangeRisiko.KEIN
-
-    def test_as_dict(self):
-        plan = _plan(_v(1, 0, 0), _v(2, 0, 0))
-        d = plan.as_dict()
-        assert d["ist_breaking"] is True
-        assert "status" in d
-        assert "genehmigungs_pflicht" in d
-
-
-# ---------------------------------------------------------------------------
-# TestValidateMigrationsSicherheit
-# ---------------------------------------------------------------------------
-
-class TestValidateMigrationsSicherheit:
-    def test_patch_migration_ist_sicher(self):
-        plan = _plan(_v(1, 0, 0), _v(1, 0, 1), schritte=[
-            _schritt(_v(1, 0, 0), _v(1, 0, 1), MigrationStrategie.IN_PLACE),
-        ])
+class TestValidateMigrationsSicherheitErlaubt:
+    def test_patch_ohne_genehmigung_erlaubt(self):
+        plan = _plan(
+            _version(1, 0, 0), _version(1, 0, 1),
+            genehmigungs_pflicht=False,
+        )
         result = validate_migrations_sicherheit(plan)
-        assert result.ist_sicher is True
-        assert result.kpi_erfuellt is True
+        assert result.erlaubt is True
+        assert result.blockierende_regeln == []
 
-    def test_major_ohne_genehmigung_nicht_sicher(self):
-        plan = _plan(_v(1, 0, 0), _v(2, 0, 0), genehmigt=False, schritte=[
-            _schritt(_v(1), _v(2), risiko=BreakingChangeRisiko.HOCH),
-        ])
+    def test_minor_ohne_genehmigung_erlaubt(self):
+        plan = _plan(
+            _version(1, 0, 0), _version(1, 1, 0),
+            genehmigungs_pflicht=False,
+        )
         result = validate_migrations_sicherheit(plan)
-        assert result.ist_sicher is False
-        assert result.kpi_erfuellt is False
-        assert len(result.blockierende_fehler) > 0
+        assert result.erlaubt is True
 
-    def test_major_mit_genehmigung_ist_sicher(self):
-        plan = _plan(_v(1, 0, 0), _v(2, 0, 0), genehmigt=True, schritte=[
-            _schritt(_v(1), _v(2), MigrationStrategie.DUAL_RUN,
-                     BreakingChangeRisiko.HOCH),
-        ])
+    def test_major_mit_genehmigung_erlaubt(self):
+        plan = _plan(
+            _version(1, 0, 0), _version(2, 0, 0),
+            genehmigungs_pflicht=True,
+        )
         result = validate_migrations_sicherheit(plan)
-        assert result.ist_sicher is True
+        assert result.erlaubt is True
+        assert result.blockierende_regeln == []
+
+    def test_hard_cutover_ohne_aktive_instanzen_erlaubt(self):
+        plan = _plan(
+            _version(1, 0, 0), _version(1, 1, 0),
+            strategie=MigrationsStrategie.HARD_CUTOVER,
+        )
+        result = validate_migrations_sicherheit(plan, aktive_instanzen=0)
+        assert result.erlaubt is True
+
+    def test_soft_upgrade_mit_aktiven_instanzen_erlaubt(self):
+        plan = _plan(
+            _version(1, 0, 0), _version(1, 1, 0),
+            strategie=MigrationsStrategie.SOFT_UPGRADE,
+        )
+        result = validate_migrations_sicherheit(plan, aktive_instanzen=500)
+        assert result.erlaubt is True
+
+
+# ---------------------------------------------------------------------------
+# TestValidateMigrationsSicherheit — blockiert
+# ---------------------------------------------------------------------------
+
+class TestValidateMigrationsSicherheitBlockiert:
+    def test_major_ohne_genehmigung_blockiert(self):
+        plan = _plan(
+            _version(1, 0, 0), _version(2, 0, 0),
+            genehmigungs_pflicht=False,
+        )
+        result = validate_migrations_sicherheit(plan)
+        assert result.erlaubt is False
+        assert len(result.blockierende_regeln) >= 1
+        assert any("MAJOR" in r for r in result.blockierende_regeln)
 
     def test_hard_cutover_mit_aktiven_instanzen_blockiert(self):
-        plan = _plan(_v(1), _v(2), genehmigt=True, schritte=[
-            _schritt(_v(1), _v(2), MigrationStrategie.HARD_CUTOVER),
-        ])
+        plan = _plan(
+            _version(1, 0, 0), _version(1, 1, 0),
+            strategie=MigrationsStrategie.HARD_CUTOVER,
+        )
         result = validate_migrations_sicherheit(plan, aktive_instanzen=42)
-        assert result.ist_sicher is False
-        assert any("HARD_CUTOVER" in f for f in result.blockierende_fehler)
+        assert result.erlaubt is False
+        assert any("HARD_CUTOVER" in r for r in result.blockierende_regeln)
 
-    def test_hard_cutover_ohne_instanzen_ok(self):
-        plan = _plan(_v(1), _v(2), genehmigt=True, schritte=[
-            _schritt(_v(1), _v(2), MigrationStrategie.HARD_CUTOVER),
-        ])
-        result = validate_migrations_sicherheit(plan, aktive_instanzen=0)
-        assert result.ist_sicher is True
+    def test_major_ohne_genehmigung_und_hard_cutover_zwei_blocker(self):
+        plan = _plan(
+            _version(1, 0, 0), _version(2, 0, 0),
+            strategie=MigrationsStrategie.HARD_CUTOVER,
+            genehmigungs_pflicht=False,
+        )
+        result = validate_migrations_sicherheit(plan, aktive_instanzen=10)
+        assert result.erlaubt is False
+        assert len(result.blockierende_regeln) == 2
 
-    def test_nicht_umkehrbarer_hoch_risiko_schritt_warnung(self):
-        plan = _plan(_v(1), _v(2), genehmigt=True, schritte=[
-            _schritt(_v(1), _v(2), risiko=BreakingChangeRisiko.HOCH, umkehrbar=False),
-        ])
+
+# ---------------------------------------------------------------------------
+# TestValidateMigrationsSicherheit — Warnungen und Hinweise
+# ---------------------------------------------------------------------------
+
+class TestValidateMigrationsSicherheitHinweise:
+    def test_irreversibel_hoch_risiko_hinweis(self):
+        plan = _plan(
+            _version(1, 0, 0), _version(1, 1, 0),
+            reversibel=False,
+            risiko=RisikoStufe.HOCH,
+        )
         result = validate_migrations_sicherheit(plan)
-        assert result.ist_sicher is True
-        assert len(result.hinweise) > 0
+        assert result.erlaubt is True
+        assert len(result.hinweise) >= 1
 
-    def test_leerer_plan_hat_hinweis(self):
-        plan = _plan(_v(1, 0, 0), _v(1, 0, 1))
+    def test_irreversibel_kritisch_hinweis(self):
+        plan = _plan(
+            _version(1, 0, 0), _version(2, 0, 0),
+            reversibel=False,
+            risiko=RisikoStufe.KRITISCH,
+            genehmigungs_pflicht=True,
+        )
         result = validate_migrations_sicherheit(plan)
-        assert result.ist_sicher is True
-        assert any("NOOP" in h for h in result.hinweise)
+        assert len(result.hinweise) >= 1
 
-    def test_as_dict(self):
-        plan = _plan(_v(1), _v(1, 1, 0))
+    def test_reversibel_niedrig_kein_hinweis(self):
+        plan = _plan(
+            _version(1, 0, 0), _version(1, 0, 1),
+            reversibel=True,
+            risiko=RisikoStufe.NIEDRIG,
+        )
+        result = validate_migrations_sicherheit(plan)
+        assert result.hinweise == []
+
+    def test_parallel_run_kritisch_warnung(self):
+        plan = _plan(
+            _version(1, 0, 0), _version(1, 1, 0),
+            strategie=MigrationsStrategie.PARALLEL_RUN,
+            risiko=RisikoStufe.KRITISCH,
+        )
+        result = validate_migrations_sicherheit(plan)
+        assert result.erlaubt is True
+        assert len(result.warnungen) >= 1
+
+    def test_result_as_dict(self):
+        plan = _plan(_version(1, 0, 0), _version(1, 0, 1))
         result = validate_migrations_sicherheit(plan)
         d = result.as_dict()
-        assert "ist_sicher" in d
-        assert "risiko" in d
-        assert "kpi_erfuellt" in d
+        assert "erlaubt" in d
+        assert "blockierende_regeln" in d
+        assert "warnungen" in d
 
 
 # ---------------------------------------------------------------------------
-# TestIntegrationSzenario
+# TestWorkflowVersionsHistorie
 # ---------------------------------------------------------------------------
 
-class TestIntegrationSzenario:
-    def test_release_ohne_bruch_patch_update(self):
-        """
-        Patch-Release: 1.0.0 → 1.0.1
-        In-Place, kein Breaking Change, kein Bruch.
-        """
-        registry = WorkflowVersionRegistry()
-        registry.register(_def("ernte_annahme", 1, 0, 0))
-        registry.register(_def("ernte_annahme", 1, 0, 1))
+class TestWorkflowVersionsHistorie:
+    def _make_historie(self) -> WorkflowVersionsHistorie:
+        return WorkflowVersionsHistorie(
+            workflow_id="WF-ANNAHME",
+            versionen=[
+                _version_def(1, 0, 0),
+                _version_def(1, 1, 0),
+                _version_def(2, 0, 0),
+                _version_def(2, 1, 0, status=WorkflowStatus.ENTWURF),
+            ],
+        )
 
-        plan = _plan(_v(1, 0, 0), _v(1, 0, 1), schritte=[
-            _schritt(_v(1, 0, 0), _v(1, 0, 1), MigrationStrategie.IN_PLACE),
-        ])
-        result = validate_migrations_sicherheit(plan)
-        assert result.kpi_erfuellt is True
-        assert result.ist_sicher is True
+    def test_aktuelle_version_neueste_freigegebene(self):
+        h = self._make_historie()
+        aktuell = h.aktuelle_version
+        assert aktuell is not None
+        assert aktuell.version.als_string() == "2.0.0"
 
-    def test_major_release_dual_run(self):
-        """
-        Major-Release: 1.x → 2.0.0
-        DUAL_RUN bis alle Instanzen beendet → kein Bruch.
-        """
-        registry = WorkflowVersionRegistry()
-        registry.register(_def("ernte_annahme", 1, 0, 0))
-        registry.register(_def("ernte_annahme", 2, 0, 0))
+    def test_aktuelle_version_none_wenn_keine_freigabe(self):
+        h = WorkflowVersionsHistorie(
+            workflow_id="WF-X",
+            versionen=[_version_def(1, 0, 0, status=WorkflowStatus.ENTWURF)],
+        )
+        assert h.aktuelle_version is None
 
-        plan = _plan(_v(1, 0, 0), _v(2, 0, 0), genehmigt=True, schritte=[
-            _schritt(_v(1, 0, 0), _v(2, 0, 0),
-                     MigrationStrategie.DUAL_RUN,
-                     BreakingChangeRisiko.HOCH),
-        ])
-        result = validate_migrations_sicherheit(plan, aktive_instanzen=150)
-        assert result.ist_sicher is True
-        assert result.kpi_erfuellt is True
+    def test_anzahl_major_releases(self):
+        h = self._make_historie()
+        assert h.anzahl_major_releases == 2  # 1.x.x und 2.x.x
 
-    def test_registry_liefert_versionshistorie(self):
-        """Registry zeigt vollständige Versionshistorie eines Workflows."""
-        registry = WorkflowVersionRegistry()
-        for major, minor, patch in [(1, 0, 0), (1, 1, 0), (1, 2, 0), (2, 0, 0)]:
-            registry.register(_def("settlement", major, minor, patch))
-        versionen = registry.alle_versionen("settlement")
-        assert len(versionen) == 4
-        assert versionen[0] == _v(1, 0, 0)
-        assert versionen[-1] == _v(2, 0, 0)
+    def test_get_version_gefunden(self):
+        h = self._make_historie()
+        v = h.get_version(1, 1, 0)
+        assert v is not None
+        assert v.version.minor == 1
 
-    def test_kein_unerwarteter_bruch_bei_geplanter_migration(self):
-        """
-        Alle 3 Migrations-Szenarien (Patch/Minor/Major) geplant
-        → alle erfüllen KPI wenn korrekt konfiguriert.
-        """
-        szenarien = [
-            (_v(1, 0, 0), _v(1, 0, 1), False, MigrationStrategie.IN_PLACE, BreakingChangeRisiko.KEIN),
-            (_v(1, 0, 0), _v(1, 1, 0), False, MigrationStrategie.DUAL_RUN, BreakingChangeRisiko.NIEDRIG),
-            (_v(1, 0, 0), _v(2, 0, 0), True,  MigrationStrategie.DUAL_RUN, BreakingChangeRisiko.HOCH),
-        ]
-        for von, bis, genehmigt, strategie, risiko in szenarien:
-            plan = _plan(von, bis, genehmigt=genehmigt, schritte=[
-                _schritt(von, bis, strategie, risiko),
-            ])
-            result = validate_migrations_sicherheit(plan)
-            assert result.kpi_erfuellt is True, f"Szenario {von}→{bis} fehlgeschlagen"
+    def test_get_version_nicht_gefunden(self):
+        h = self._make_historie()
+        assert h.get_version(9, 9, 9) is None
+
+    def test_as_dict(self):
+        h = self._make_historie()
+        d = h.as_dict()
+        assert d["anzahl_versionen"] == 4
+        assert d["aktuelle_version"] == "2.0.0"
+
+
+# ---------------------------------------------------------------------------
+# TestWorkflowMigrationsplan
+# ---------------------------------------------------------------------------
+
+class TestWorkflowMigrationsplan:
+    def test_aenderungstyp_aus_versionen(self):
+        plan = _plan(_version(1, 0, 0), _version(2, 0, 0))
+        assert plan.aenderungs_typ == AenderungsTyp.MAJOR
+
+    def test_as_dict(self):
+        plan = _plan(_version(1, 0, 0), _version(1, 1, 0))
+        d = plan.as_dict()
+        assert d["von_version"] == "1.0.0"
+        assert d["zu_version"] == "1.1.0"
+        assert d["aenderungs_typ"] == "MINOR"

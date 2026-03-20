@@ -6,9 +6,10 @@ interface UseMaskDataOptions {
   apiUrl: string
   id?: string
   autoLoad?: boolean
+  transformResponse?: (_data: any) => any
 }
 
-export function useMaskData<T = any>({ apiUrl, id, autoLoad = true }: UseMaskDataOptions) {
+export function useMaskData<T = any>({ apiUrl, id, autoLoad = true, transformResponse }: UseMaskDataOptions) {
   const [data, setData] = useState<T | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -22,7 +23,8 @@ export function useMaskData<T = any>({ apiUrl, id, autoLoad = true }: UseMaskDat
 
     try {
       const response = await apiClient.get<T>(`${apiUrl}/${id}`)
-      setData(response.data)
+      const nextData = typeof transformResponse === 'function' ? transformResponse(response.data) : response.data
+      setData(nextData)
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error'
       setError(errorMessage)
@@ -45,7 +47,8 @@ export function useMaskData<T = any>({ apiUrl, id, autoLoad = true }: UseMaskDat
         ? await apiClient.put<T>(`${apiUrl}/${id}`, formData)
         : await apiClient.post<T>(apiUrl, formData)
 
-      setData(response.data)
+      const nextData = typeof transformResponse === 'function' ? transformResponse(response.data) : response.data
+      setData(nextData)
 
       toast({
         title: "Erfolgreich gespeichert",
@@ -105,9 +108,11 @@ export function useMaskData<T = any>({ apiUrl, id, autoLoad = true }: UseMaskDat
   return {
     data,
     loading,
+    isLoading: loading,
     error,
     loadData,
     saveData,
+    updateData: saveData,
     deleteData,
     setData,
   }

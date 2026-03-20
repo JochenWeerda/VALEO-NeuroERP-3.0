@@ -14,6 +14,7 @@ import { Archive, Download, Filter, Plus, Sparkles, Upload } from 'lucide-react'
 import { useNavigate } from 'react-router-dom';
 import { getEntityTypeLabel, getListTitle } from '@/features/crud/utils/i18n-helpers';
 import { toast } from '@/hooks/use-toast';
+import { PageSection, PageSurface } from '@/components/patterns/PageSurface';
 
 export default function SalesOrdersModernPage(): JSX.Element {
   const { t } = useTranslation()
@@ -99,8 +100,11 @@ export default function SalesOrdersModernPage(): JSX.Element {
       />
 
       {/* Page Content */}
-      <div className="p-6">
-        <div className="rounded-lg border bg-card p-6">
+      <PageSurface data-page-surface="sales-orders-modern">
+        <PageSection
+          title={pageTitle}
+          description="Legacy-Seite rückwirkend auf den DS-Rahmen gezogen: PageToolbar, Surface, strukturierte Inhaltssektionen."
+        >
           <h3 className="text-lg font-semibold mb-4">{pageTitle}</h3>
           
           <div className="space-y-4">
@@ -118,7 +122,7 @@ export default function SalesOrdersModernPage(): JSX.Element {
               <li>✅ <strong>{t('crud.list.mcpMetadata')}</strong> - {t('crud.list.preparedForAI')}</li>
             </ul>
 
-            <div className="mt-6 p-4 bg-muted rounded-md">
+            <div className="mt-6 rounded-2xl bg-muted p-4">
               <h4 className="font-semibold mb-2">💡 {t('crud.list.testNavigation')}</h4>
               <ul className="space-y-1 text-sm">
                 <li>→ <kbd className="px-2 py-1 bg-background rounded">Ctrl+K</kbd> - {t('crud.list.commandPalette')}</li>
@@ -128,7 +132,7 @@ export default function SalesOrdersModernPage(): JSX.Element {
               </ul>
             </div>
 
-            <div className="mt-4 p-4 bg-primary/10 rounded-md">
+            <div className="mt-4 rounded-2xl bg-primary/10 p-4">
               <h4 className="font-semibold mb-2 flex items-center gap-2">
                 <Sparkles className="h-4 w-4" />
                 {t('crud.list.mcpIntegration')}
@@ -143,8 +147,8 @@ export default function SalesOrdersModernPage(): JSX.Element {
               </ul>
             </div>
           </div>
-        </div>
-      </div>
+        </PageSection>
+      </PageSurface>
     </>
   );
 }

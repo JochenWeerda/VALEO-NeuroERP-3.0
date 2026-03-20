@@ -1,60 +1,59 @@
 """
-Wave 85 — E2E Prozesskette ohne Medienbruch (Gap 001)
+test_process_kernel_wave85_e2e_process_chain.py — E2E Prozesskette (Gap 001)
 
-Tests für ProzessGlied, E2EProzesskette, validate_e2e_kette(),
-MedienbruchBefund und evaluate_e2e_kpi().
-
-Gap 001: ≥95% Vorgänge ohne manuelle Nebenliste
+Wave 85: KONTRAKT → ANNAHME → QUALITAET → SETTLEMENT ohne Medienbruch
+KPI: ≥ 95% aller Ketten ohne manuellen Eingriff
 """
-from __future__ import annotations
-
 import pytest
-
 from app.core.e2e_process_chain_contracts import (
     E2EKettenKpiReport,
     E2EProzesskette,
     GliedStatus,
-    KettenStatus,
     KettenValidierungsResult,
+    MedienbruchBefund,
     MedienbruchTyp,
     ProzessGlied,
     ProzessGliedTyp,
     evaluate_e2e_kpi,
     validate_e2e_kette,
+    ERLAUBTE_REIHENFOLGE,
 )
 
 
 # ---------------------------------------------------------------------------
-# Fixtures
+# Helpers
 # ---------------------------------------------------------------------------
 
 def _glied(
+    glied_id: str,
     typ: ProzessGliedTyp,
-    referenz: str = "REF-001",
-    parent: str = "PARENT-001",
+    parent: str = "P001",
     status: GliedStatus = GliedStatus.ABGESCHLOSSEN,
+    tenant: str = "T-001",
 ) -> ProzessGlied:
     return ProzessGlied(
-        glied_id=f"G-{typ.value}",
+        glied_id=glied_id,
         typ=typ,
-        tenant_id="T-001",
-        referenz_id=referenz,
+        tenant_id=tenant,
+        referenz_id=f"REF-{glied_id}",
         parent_referenz_id=parent,
         status=status,
-        zeitstempel="2026-03-20T08:00:00Z",
+        zeitstempel="2026-03-20T06:00:00Z",
     )
 
 
-def _vollstaendige_kette(tenant_id: str = "T-001") -> E2EProzesskette:
-    """Kette mit allen 4 Gliedern, kein Medienbruch."""
-    kette = E2EProzesskette(ketten_id="K-001", tenant_id=tenant_id)
-    kette.glieder = [
-        _glied(ProzessGliedTyp.KONTRAKT, "KNR-001", ""),      # Anfang, kein Parent
-        _glied(ProzessGliedTyp.ANNAHME,  "ANR-001", "KNR-001"),
-        _glied(ProzessGliedTyp.QUALITAET, "QNR-001", "ANR-001"),
-        _glied(ProzessGliedTyp.SETTLEMENT, "SNR-001", "QNR-001"),
-    ]
-    return kette
+def _vollstaendige_kette(kette_id: str = "K-001", tenant: str = "T-001") -> E2EProzesskette:
+    """Vollständige Kette ohne Medienbruch."""
+    return E2EProzesskette(
+        kette_id=kette_id,
+        tenant_id=tenant,
+        glieder=[
+            _glied("G1", ProzessGliedTyp.KONTRAKT, parent=""),
+            _glied("G2", ProzessGliedTyp.ANNAHME, parent="REF-G1"),
+            _glied("G3", ProzessGliedTyp.QUALITAET, parent="REF-G2"),
+            _glied("G4", ProzessGliedTyp.SETTLEMENT, parent="REF-G3"),
+        ],
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -63,27 +62,28 @@ def _vollstaendige_kette(tenant_id: str = "T-001") -> E2EProzesskette:
 
 class TestProzessGlied:
     def test_hat_eltern_referenz_true(self):
-        g = _glied(ProzessGliedTyp.ANNAHME, parent="KNR-001")
+        g = _glied("G1", ProzessGliedTyp.ANNAHME, parent="KONTRAKT-001")
         assert g.hat_eltern_referenz is True
 
-    def test_hat_eltern_referenz_false(self):
-        g = _glied(ProzessGliedTyp.KONTRAKT, parent="")
+    def test_hat_eltern_referenz_false_leer(self):
+        g = _glied("G1", ProzessGliedTyp.KONTRAKT, parent="")
         assert g.hat_eltern_referenz is False
 
-    def test_ist_abgeschlossen(self):
-        g = _glied(ProzessGliedTyp.ANNAHME, status=GliedStatus.ABGESCHLOSSEN)
-        assert g.ist_abgeschlossen is True
+    def test_ist_uebersprungen_true(self):
+        g = _glied("G1", ProzessGliedTyp.ANNAHME, status=GliedStatus.UEBERSPRUNGEN)
+        assert g.ist_uebersprungen is True
 
-    def test_nicht_abgeschlossen(self):
-        g = _glied(ProzessGliedTyp.ANNAHME, status=GliedStatus.AKTIV)
-        assert g.ist_abgeschlossen is False
+    def test_ist_uebersprungen_false(self):
+        g = _glied("G1", ProzessGliedTyp.ANNAHME, status=GliedStatus.ABGESCHLOSSEN)
+        assert g.ist_uebersprungen is False
 
-    def test_as_dict_vollstaendig(self):
-        g = _glied(ProzessGliedTyp.QUALITAET)
+    def test_as_dict_keys(self):
+        g = _glied("G1", ProzessGliedTyp.ANNAHME)
         d = g.as_dict()
-        assert d["typ"] == "QUALITAET"
+        assert "glied_id" in d
+        assert "typ" in d
         assert "hat_eltern_referenz" in d
-        assert "ist_abgeschlossen" in d
+        assert d["typ"] == "ANNAHME"
 
 
 # ---------------------------------------------------------------------------
@@ -95,251 +95,224 @@ class TestE2EProzesskette:
         kette = _vollstaendige_kette()
         assert kette.ist_vollstaendig is True
 
-    def test_unvollstaendige_kette(self):
-        kette = E2EProzesskette(ketten_id="K-002", tenant_id="T-001")
-        kette.glieder = [
-            _glied(ProzessGliedTyp.KONTRAKT, parent=""),
-            _glied(ProzessGliedTyp.ANNAHME, parent="KNR-001"),
-        ]
+    def test_unvollstaendige_kette_ohne_settlement(self):
+        kette = E2EProzesskette(
+            kette_id="K-001",
+            tenant_id="T-001",
+            glieder=[
+                _glied("G1", ProzessGliedTyp.KONTRAKT, parent=""),
+                _glied("G2", ProzessGliedTyp.ANNAHME, parent="REF-G1"),
+            ],
+        )
         assert kette.ist_vollstaendig is False
 
-    def test_fortschritt_pct_vollstaendig(self):
+    def test_typen_in_kette(self):
         kette = _vollstaendige_kette()
-        assert kette.fortschritt_pct == 100.0
+        typen = kette.typen_in_kette
+        assert ProzessGliedTyp.KONTRAKT in typen
+        assert ProzessGliedTyp.SETTLEMENT in typen
 
-    def test_fortschritt_pct_zwei_glieder(self):
-        kette = E2EProzesskette(ketten_id="K-003", tenant_id="T-001")
-        kette.glieder = [
-            _glied(ProzessGliedTyp.KONTRAKT, parent=""),
-            _glied(ProzessGliedTyp.ANNAHME, parent="KNR-001"),
-        ]
-        assert kette.fortschritt_pct == 50.0
-
-    def test_get_glied_vorhanden(self):
+    def test_get_glied_gefunden(self):
         kette = _vollstaendige_kette()
-        g = kette.get_glied(ProzessGliedTyp.SETTLEMENT)
+        g = kette.get_glied(ProzessGliedTyp.QUALITAET)
         assert g is not None
-        assert g.typ == ProzessGliedTyp.SETTLEMENT
+        assert g.glied_id == "G3"
 
-    def test_get_glied_nicht_vorhanden(self):
-        kette = E2EProzesskette(ketten_id="K-004", tenant_id="T-001")
-        assert kette.get_glied(ProzessGliedTyp.QUALITAET) is None
-
-    def test_abgeschlossene_glieder(self):
-        kette = _vollstaendige_kette()
-        assert kette.abgeschlossene_glieder == 4
+    def test_get_glied_nicht_gefunden(self):
+        kette = E2EProzesskette(kette_id="K-X", tenant_id="T-001", glieder=[
+            _glied("G1", ProzessGliedTyp.KONTRAKT, parent=""),
+        ])
+        assert kette.get_glied(ProzessGliedTyp.SETTLEMENT) is None
 
     def test_as_dict_vollstaendig(self):
         kette = _vollstaendige_kette()
         d = kette.as_dict()
         assert d["ist_vollstaendig"] is True
-        assert d["fortschritt_pct"] == 100.0
-        assert "glieder" in d
+        assert len(d["glieder"]) == 4
 
 
 # ---------------------------------------------------------------------------
-# TestValidateE2EKette
+# TestValidateE2eKette — keine Medienbrüche
 # ---------------------------------------------------------------------------
 
-class TestValidateE2EKette:
+class TestValidateE2eKetteOhneBreuch:
     def test_vollstaendige_kette_kein_bruch(self):
         kette = _vollstaendige_kette()
         result = validate_e2e_kette(kette)
-        assert result.status == KettenStatus.VOLLSTAENDIG
         assert result.hat_medienbruch is False
-        assert result.kpi_erfuellt is True
+        assert result.anzahl_brueche == 0
 
-    def test_kette_ohne_elternreferenz_annahme(self):
-        """ANNAHME ohne Referenz auf KONTRAKT → Medienbruch."""
-        kette = E2EProzesskette(ketten_id="K-BRUCH", tenant_id="T-001")
-        kette.glieder = [
-            _glied(ProzessGliedTyp.KONTRAKT, parent=""),
-            _glied(ProzessGliedTyp.ANNAHME, parent=""),  # fehlt!
-            _glied(ProzessGliedTyp.QUALITAET, parent="ANR-001"),
-            _glied(ProzessGliedTyp.SETTLEMENT, parent="QNR-001"),
-        ]
+    def test_kontrakt_ohne_parent_ok(self):
+        """Kontrakt-Glied darf parent_referenz_id leer haben."""
+        kette = E2EProzesskette(kette_id="K-001", tenant_id="T-001", glieder=[
+            _glied("G1", ProzessGliedTyp.KONTRAKT, parent=""),
+            _glied("G2", ProzessGliedTyp.ANNAHME, parent="REF-G1"),
+        ])
         result = validate_e2e_kette(kette)
-        assert result.hat_medienbruch is True
-        assert any(b.bruch_typ == MedienbruchTyp.FEHLENDE_UEBERGABE
-                   for b in result.medienbrueche)
+        # Kein FEHLENDE_UEBERGABE für den Kontrakt
+        bruch_typen = [b.typ for b in result.befunde]
+        assert MedienbruchTyp.FEHLENDE_UEBERGABE not in bruch_typen
 
-    def test_uebersprungenes_glied_ist_medienbruch(self):
-        """QUALITAET als UEBERSPRUNGEN → Medienbruch MANUELLE_NEBENLISTE."""
-        kette = E2EProzesskette(ketten_id="K-SKIP", tenant_id="T-001")
-        kette.glieder = [
-            _glied(ProzessGliedTyp.KONTRAKT, parent=""),
-            _glied(ProzessGliedTyp.ANNAHME, parent="KNR-001"),
-            _glied(ProzessGliedTyp.QUALITAET, parent="ANR-001",
+
+# ---------------------------------------------------------------------------
+# TestValidateE2eKette — Medienbrüche erkennen
+# ---------------------------------------------------------------------------
+
+class TestValidateE2eKetteMitBruch:
+    def test_manuelle_nebenliste_durch_uebersprungen(self):
+        kette = E2EProzesskette(kette_id="K-001", tenant_id="T-001", glieder=[
+            _glied("G1", ProzessGliedTyp.KONTRAKT, parent=""),
+            _glied("G2", ProzessGliedTyp.ANNAHME, parent="REF-G1",
                    status=GliedStatus.UEBERSPRUNGEN),
-            _glied(ProzessGliedTyp.SETTLEMENT, parent="QNR-001"),
-        ]
+            _glied("G3", ProzessGliedTyp.QUALITAET, parent="REF-G2"),
+        ])
         result = validate_e2e_kette(kette)
         assert result.hat_medienbruch is True
-        assert any(b.bruch_typ == MedienbruchTyp.MANUELLE_NEBENLISTE
-                   for b in result.medienbrueche)
+        typen = [b.typ for b in result.befunde]
+        assert MedienbruchTyp.MANUELLE_NEBENLISTE in typen
 
-    def test_teilweise_kette_kein_bruch(self):
-        """Kette mit KONTRAKT + ANNAHME → TEILWEISE, kein Medienbruch."""
-        kette = E2EProzesskette(ketten_id="K-TEIL", tenant_id="T-001")
-        kette.glieder = [
-            _glied(ProzessGliedTyp.KONTRAKT, parent=""),
-            _glied(ProzessGliedTyp.ANNAHME, parent="KNR-001"),
-        ]
+    def test_fehlende_uebergabe_annahme_ohne_parent(self):
+        kette = E2EProzesskette(kette_id="K-002", tenant_id="T-001", glieder=[
+            _glied("G1", ProzessGliedTyp.KONTRAKT, parent=""),
+            _glied("G2", ProzessGliedTyp.ANNAHME, parent=""),   # fehlende Übergabe
+            _glied("G3", ProzessGliedTyp.QUALITAET, parent="REF-G2"),
+        ])
         result = validate_e2e_kette(kette)
-        assert result.status == KettenStatus.TEILWEISE
-        assert result.hat_medienbruch is False
+        assert result.hat_medienbruch is True
+        typen = [b.typ for b in result.befunde]
+        assert MedienbruchTyp.FEHLENDE_UEBERGABE in typen
 
-    def test_mehrere_medienbrueche(self):
-        kette = E2EProzesskette(ketten_id="K-MULTI", tenant_id="T-001")
-        kette.glieder = [
-            _glied(ProzessGliedTyp.KONTRAKT, parent=""),
-            _glied(ProzessGliedTyp.ANNAHME, parent=""),          # Bruch 1
-            _glied(ProzessGliedTyp.QUALITAET, parent="",
-                   status=GliedStatus.UEBERSPRUNGEN),            # Bruch 2
-            _glied(ProzessGliedTyp.SETTLEMENT, parent="QNR-001"),
-        ]
+    def test_settlement_ohne_parent_bruch(self):
+        kette = E2EProzesskette(kette_id="K-003", tenant_id="T-001", glieder=[
+            _glied("G1", ProzessGliedTyp.SETTLEMENT, parent=""),  # Settlement ohne Vorgänger
+        ])
         result = validate_e2e_kette(kette)
-        assert len(result.medienbrueche) >= 2
+        assert result.hat_medienbruch is True
 
-    def test_status_unterbrochen_bei_bruch(self):
-        kette = E2EProzesskette(ketten_id="K-UNT", tenant_id="T-001")
-        kette.glieder = [
-            _glied(ProzessGliedTyp.KONTRAKT, parent=""),
-            _glied(ProzessGliedTyp.ANNAHME, parent=""),  # Bruch
-            _glied(ProzessGliedTyp.QUALITAET, parent="ANR-001"),
-            _glied(ProzessGliedTyp.SETTLEMENT, parent="QNR-001"),
-        ]
+    def test_mehrere_brueche_gezaehlt(self):
+        kette = E2EProzesskette(kette_id="K-004", tenant_id="T-001", glieder=[
+            _glied("G1", ProzessGliedTyp.KONTRAKT, parent=""),
+            _glied("G2", ProzessGliedTyp.ANNAHME, parent="",
+                   status=GliedStatus.UEBERSPRUNGEN),  # 2 Brüche: kein parent + übersprungen
+            _glied("G3", ProzessGliedTyp.QUALITAET, parent=""),  # 1 Bruch: kein parent
+        ])
         result = validate_e2e_kette(kette)
-        assert result.status == KettenStatus.UNTERBROCHEN
+        assert result.anzahl_brueche >= 2
 
-    def test_as_dict_vollstaendig(self):
-        result = validate_e2e_kette(_vollstaendige_kette())
-        d = result.as_dict()
-        assert "status" in d
-        assert "hat_medienbruch" in d
-        assert "kpi_erfuellt" in d
-        assert "medienbrueche" in d
-
-    def test_empfehlung_bei_fehlender_uebergabe(self):
-        kette = E2EProzesskette(ketten_id="K-EMP", tenant_id="T-001")
-        kette.glieder = [
-            _glied(ProzessGliedTyp.KONTRAKT, parent=""),
-            _glied(ProzessGliedTyp.ANNAHME, parent=""),
-        ]
+    def test_bruch_beschreibung_nicht_leer(self):
+        kette = E2EProzesskette(kette_id="K-005", tenant_id="T-001", glieder=[
+            _glied("G1", ProzessGliedTyp.ANNAHME, parent=""),
+        ])
         result = validate_e2e_kette(kette)
-        bruch = result.medienbrueche[0]
-        assert bruch.empfehlung != ""
+        for befund in result.befunde:
+            assert befund.beschreibung != ""
+            assert befund.kette_id == "K-005"
 
 
 # ---------------------------------------------------------------------------
-# TestEvaluateE2EKpi
+# TestEvaluateE2eKpi
 # ---------------------------------------------------------------------------
 
-class TestEvaluateE2EKpi:
+class TestEvaluateE2eKpi:
+    def _make_result(self, hat_bruch: bool, kette_id: str = "K-001") -> KettenValidierungsResult:
+        befunde = []
+        if hat_bruch:
+            befunde = [MedienbruchBefund(
+                kette_id=kette_id,
+                glied_id="G1",
+                typ=MedienbruchTyp.MANUELLE_NEBENLISTE,
+                beschreibung="Test-Bruch",
+            )]
+        return KettenValidierungsResult(
+            kette_id=kette_id,
+            hat_medienbruch=hat_bruch,
+            befunde=befunde,
+        )
+
     def test_kpi_erfuellt_bei_100_pct(self):
-        ketten = [_vollstaendige_kette(f"T-{i}") for i in range(10)]
-        validierungen = [validate_e2e_kette(k) for k in ketten]
-        # Alle gleichen Tenant überschreiben — simuliere mehrere Vorgänge
-        for v in validierungen:
-            v.ketten_id = f"K-{id(v)}"
+        validierungen = [self._make_result(False, f"K-{i:03d}") for i in range(100)]
         report = evaluate_e2e_kpi("T-001", validierungen)
         assert report.kpi_erfuellt is True
         assert report.kpi_pct == 100.0
+        assert report.ketten_ohne_bruch == 100
+
+    def test_kpi_erfuellt_bei_genau_95_pct(self):
+        validierungen = (
+            [self._make_result(False, f"K-{i:03d}") for i in range(95)]
+            + [self._make_result(True, f"K-{i:03d}") for i in range(95, 100)]
+        )
+        report = evaluate_e2e_kpi("T-001", validierungen)
+        assert report.kpi_erfuellt is True
+        assert report.kpi_pct == 95.0
 
     def test_kpi_nicht_erfuellt_unter_95(self):
-        ohne_bruch = [
-            KettenValidierungsResult(f"K-{i}", KettenStatus.VOLLSTAENDIG)
-            for i in range(94)
-        ]
-        mit_bruch = [
-            KettenValidierungsResult(
-                f"K-B-{i}", KettenStatus.UNTERBROCHEN,
-                medienbrueche=[
-                    type("B", (), {"as_dict": lambda s: {}})()  # dummy
-                ],
-            )
-            for i in range(6)
-        ]
-        # Manuell setzen statt Konstruktor (kein __post_init__ nötig)
-        for v in mit_bruch:
-            from app.core.e2e_process_chain_contracts import MedienbruchBefund
-            v.medienbrueche = [MedienbruchBefund(
-                bruch_typ=MedienbruchTyp.MANUELLE_NEBENLISTE,
-                betroffenes_glied=ProzessGliedTyp.ANNAHME,
-                beschreibung="Test",
-            )]
-        alle = ohne_bruch + mit_bruch
-        report = evaluate_e2e_kpi("T-001", alle)
+        # 94 ok + 6 mit Bruch = 94% < 95%
+        validierungen = (
+            [self._make_result(False, f"K-{i:03d}") for i in range(94)]
+            + [self._make_result(True, f"K-{i:03d}") for i in range(94, 100)]
+        )
+        report = evaluate_e2e_kpi("T-001", validierungen)
         assert report.kpi_erfuellt is False
         assert report.kpi_pct < 95.0
 
-    def test_leere_validierungen_ergeben_100(self):
+    def test_kpi_leere_liste(self):
         report = evaluate_e2e_kpi("T-001", [])
-        assert report.kpi_pct == 100.0
-        assert report.kpi_erfuellt is False  # keine Stichproben → nicht erfüllt
+        assert report.gesamt_ketten == 0
+        assert report.kpi_pct == 0.0
+        assert report.kpi_erfuellt is False
 
-    def test_as_dict_vollstaendig(self):
-        report = evaluate_e2e_kpi("T-001", [validate_e2e_kette(_vollstaendige_kette())])
+    def test_report_as_dict(self):
+        validierungen = [self._make_result(False, f"K-{i:03d}") for i in range(10)]
+        report = evaluate_e2e_kpi("T-001", validierungen)
         d = report.as_dict()
-        assert "kpi_pct" in d
         assert "kpi_erfuellt" in d
-        assert "gesamt_ketten" in d
+        assert "kpi_pct" in d
+        assert d["tenant_id"] == "T-001"
+
+    def test_bruch_details_nur_mit_bruch(self):
+        validierungen = [
+            self._make_result(False, "K-001"),
+            self._make_result(True, "K-002"),
+        ]
+        report = evaluate_e2e_kpi("T-001", validierungen)
+        assert len(report.bruch_details) == 1
+        assert report.bruch_details[0].kette_id == "K-002"
+
+    def test_benutzerdefiniertes_kpi_ziel(self):
+        validierungen = [self._make_result(False, f"K-{i:03d}") for i in range(90)] + \
+                        [self._make_result(True, f"K-{i:03d}") for i in range(90, 100)]
+        report_95 = evaluate_e2e_kpi("T-001", validierungen, kpi_ziel_pct=95.0)
+        report_85 = evaluate_e2e_kpi("T-001", validierungen, kpi_ziel_pct=85.0)
+        assert report_95.kpi_erfuellt is False
+        assert report_85.kpi_erfuellt is True
 
 
 # ---------------------------------------------------------------------------
-# TestIntegrationSzenario
+# TestMedienbruchBefund
 # ---------------------------------------------------------------------------
 
-class TestIntegrationSzenario:
-    def test_typischer_erntevorgang_ohne_bruch(self):
-        """
-        Simuliert: Kontrakt → Annahme (Wiegeschein) → Qualitätslabor → Settlement.
-        Alle Übergaben systemseitig → kein Medienbruch.
-        """
-        kette = E2EProzesskette(ketten_id="ERN-2026-0042", tenant_id="T-GENOSSENSCHAFT")
-        kette.glieder = [
-            ProzessGlied("G-K", ProzessGliedTyp.KONTRAKT, "T-GENOSSENSCHAFT",
-                         "KNR-2026-042", "", GliedStatus.ABGESCHLOSSEN, "2026-08-01T06:00:00Z"),
-            ProzessGlied("G-A", ProzessGliedTyp.ANNAHME, "T-GENOSSENSCHAFT",
-                         "ANR-2026-0101", "KNR-2026-042", GliedStatus.ABGESCHLOSSEN, "2026-08-01T10:30:00Z"),
-            ProzessGlied("G-Q", ProzessGliedTyp.QUALITAET, "T-GENOSSENSCHAFT",
-                         "QNR-2026-0101", "ANR-2026-0101", GliedStatus.ABGESCHLOSSEN, "2026-08-01T11:00:00Z"),
-            ProzessGlied("G-S", ProzessGliedTyp.SETTLEMENT, "T-GENOSSENSCHAFT",
-                         "SET-2026-0101", "QNR-2026-0101", GliedStatus.ABGESCHLOSSEN, "2026-08-02T08:00:00Z"),
-        ]
-        result = validate_e2e_kette(kette)
-        assert result.kpi_erfuellt is True
-        assert result.status == KettenStatus.VOLLSTAENDIG
-        assert kette.fortschritt_pct == 100.0
+class TestMedienbruchBefund:
+    def test_as_dict(self):
+        b = MedienbruchBefund(
+            kette_id="K-001",
+            glied_id="G1",
+            typ=MedienbruchTyp.FEHLENDE_UEBERGABE,
+            beschreibung="Test",
+            schweregrad="HOCH",
+        )
+        d = b.as_dict()
+        assert d["typ"] == "FEHLENDE_UEBERGABE"
+        assert d["schweregrad"] == "HOCH"
 
-    def test_kpi_95_pct_schwelle(self):
-        """95 von 100 Ketten ohne Bruch → KPI knapp erfüllt."""
-        valide = [
-            KettenValidierungsResult(f"K-OK-{i}", KettenStatus.VOLLSTAENDIG)
-            for i in range(95)
-        ]
-        from app.core.e2e_process_chain_contracts import MedienbruchBefund
-        bruch_ketten = []
-        for i in range(5):
-            v = KettenValidierungsResult(f"K-FAIL-{i}", KettenStatus.UNTERBROCHEN)
-            v.medienbrueche = [MedienbruchBefund(
-                bruch_typ=MedienbruchTyp.MANUELLE_NEBENLISTE,
-                betroffenes_glied=ProzessGliedTyp.QUALITAET,
-                beschreibung="Excel-Nebenliste",
-            )]
-            bruch_ketten.append(v)
-        report = evaluate_e2e_kpi("T-001", valide + bruch_ketten)
-        assert report.kpi_pct == 95.0
-        assert report.kpi_erfuellt is True
 
-    def test_tenant_isolation(self):
-        """Ketten verschiedener Tenants werden unabhängig bewertet."""
-        k1 = _vollstaendige_kette("T-A")
-        k1.ketten_id = "K-A-001"
-        k2 = _vollstaendige_kette("T-B")
-        k2.ketten_id = "K-B-001"
-        r1 = validate_e2e_kette(k1)
-        r2 = validate_e2e_kette(k2)
-        assert r1.ketten_id != r2.ketten_id
-        assert r1.kpi_erfuellt is True
-        assert r2.kpi_erfuellt is True
+# ---------------------------------------------------------------------------
+# TestErlaubteReihenfolge
+# ---------------------------------------------------------------------------
+
+class TestErlaubteReihenfolge:
+    def test_vier_typen_definiert(self):
+        assert len(ERLAUBTE_REIHENFOLGE) == 4
+
+    def test_reihenfolge_korrekt(self):
+        assert ERLAUBTE_REIHENFOLGE[0] == ProzessGliedTyp.KONTRAKT
+        assert ERLAUBTE_REIHENFOLGE[-1] == ProzessGliedTyp.SETTLEMENT

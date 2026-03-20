@@ -3,7 +3,7 @@
  * 1:1 Struktur nach Lieferschein-Erfassung — Gewohnheits-Prinzip
  */
 
-import { lazy, Suspense, useState, useEffect, useMemo, useRef, KeyboardEvent } from 'react'
+import { lazy, Suspense, useState, useEffect, useMemo, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -309,13 +309,11 @@ export default function SalesOrderEditorPage(): JSX.Element {
     if (!routeId) return
     const load = async (): Promise<void> => {
       try {
-        const res = await apiClient.get<AuftragResponse>(`/api/v1/sales/orders/${routeId}`)
-        const response = (res as any)?.data ?? res
+        const response = await apiClient.get<AuftragResponse>(`/api/v1/sales/orders/${routeId}`)
         let customer: Customer | null = null
-        if (response?.customer_id) {
+        if (response.customer_id) {
           try {
-            const cr = await apiClient.get<any>(`/api/v1/crm/customers/${response.customer_id}`)
-            const cd = (cr as any)?.data ?? cr
+            const cd = await apiClient.get<any>(`/api/v1/crm/customers/${response.customer_id}`)
             customer = {
               id: cd.id,
               customerNumber: cd.customer_number ?? cd.customerNumber ?? '',
@@ -335,16 +333,16 @@ export default function SalesOrderEditorPage(): JSX.Element {
         }
         setState((prev) => ({
           ...prev,
-          id: response?.id,
-          auftragNr: response?.order_number ?? prev.auftragNr,
-          auftragDatum: response?.created_at?.split('T')[0] ?? formatDateForInput(new Date()),
-          liefertermin: response?.delivery_date?.split('T')[0] ?? '',
-          versandart: response?.shipping_method ?? '',
-          betreff: response?.subject ?? '',
-          notizen: response?.description ?? '',
-          vertreter: response?.contact_person ?? '',
+          id: response.id,
+          auftragNr: response.order_number ?? prev.auftragNr,
+          auftragDatum: response.created_at?.split('T')[0] ?? formatDateForInput(new Date()),
+          liefertermin: response.delivery_date?.split('T')[0] ?? '',
+          versandart: response.shipping_method ?? '',
+          betreff: response.subject ?? '',
+          notizen: response.description ?? '',
+          vertreter: response.contact_person ?? '',
           customer,
-          positionen: mapResponseItemsToPositionen(response?.items ?? []),
+          positionen: mapResponseItemsToPositionen(response.items ?? []),
         }))
       } catch (error: any) {
         push(`Fehler beim Laden: ${error.response?.data?.detail || error.message}`)
@@ -372,7 +370,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
 
   // Keyboard event handler for global shortcuts
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
+    const handleKeyDown = (e: globalThis.KeyboardEvent) => {
       // Prevent form submission on Enter in certain contexts
       if (e.key === 'Enter' && e.target instanceof HTMLInputElement) {
         const targetName = e.target.getAttribute('name');

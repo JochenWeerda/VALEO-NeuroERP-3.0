@@ -3,6 +3,7 @@
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
 import LKWRegistrierungPage from '@/pages/annahme/lkw-registrierung'
 
@@ -33,22 +34,28 @@ vi.mock('@/lib/axios', () => ({
 }))
 
 describe('LKWRegistrierungPage', () => {
-  it('sollte LKW-Registrierung und Kennzeichen anzeigen', () => {
-    render(
-      <MemoryRouter>
-        <LKWRegistrierungPage />
-      </MemoryRouter>,
+  const renderPage = () => {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    })
+
+    return render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter>
+          <LKWRegistrierungPage />
+        </MemoryRouter>
+      </QueryClientProvider>,
     )
-    expect(screen.getByText('LKW-Registrierung')).toBeInTheDocument()
+  }
+
+  it('sollte LKW-Registrierung und Kennzeichen anzeigen', () => {
+    renderPage()
+    expect(screen.getByRole('heading', { name: 'LKW-Registrierung' })).toBeInTheDocument()
     expect(screen.getByLabelText(/Kennzeichen \*/i)).toBeInTheDocument()
   })
 
   it('sollte Scan-Button anzeigen und bei Klick Scan-Dialog öffnen (F18)', () => {
-    render(
-      <MemoryRouter>
-        <LKWRegistrierungPage />
-      </MemoryRouter>,
-    )
+    renderPage()
     const scanButtons = screen.getAllByRole('button', { name: /Scan/i })
     expect(scanButtons.length).toBeGreaterThanOrEqual(1)
     fireEvent.click(scanButtons[0])

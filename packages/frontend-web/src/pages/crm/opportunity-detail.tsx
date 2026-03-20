@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { z } from 'zod'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData } from '@/components/mask-builder/hooks'
 
@@ -39,6 +40,13 @@ const createOpportunitySchema = (t: any) => z.object({
   contact_id: z.string().uuid().optional().or(z.literal('')),
   notes: z.string().optional(),
 })
+
+function validateOpportunityForm(formData: unknown, t: any): { valid: boolean; errors: string[] } {
+  const result = createOpportunitySchema(t).safeParse(formData)
+  return result.success
+    ? { valid: true, errors: [] }
+    : { valid: false, errors: result.error.issues.map((issue) => issue.message) }
+}
 
 // Konfiguration für Opportunity ObjectPage
 const createOpportunityConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
@@ -414,7 +422,7 @@ export default function OpportunityDetailPage(): JSX.Element {
   const opportunityConfig = createOpportunityConfig(t, entityTypeLabel)
   const isNew = !id || id === 'neu' || id === 'new'
 
-  const { data, saveData, isLoading: dataLoading } = useMaskData({
+  const { data, saveData, isLoading: dataLoading } = useMaskData<Record<string, any>>({
     apiUrl: opportunityConfig.api.baseUrl,
     id: id || undefined
   })

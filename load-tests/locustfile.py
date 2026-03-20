@@ -228,7 +228,7 @@ class AbrechnungUser(HttpUser):
     @task(3)
     def get_settlements(self):
         with self.client.get(
-            "/api/v1/agrar/settlements?limit=20",
+            "/api/v1/agrar/settlements/?limit=20",
             headers=_headers(),
             name="[Settlement] /agrar/settlements",
             catch_response=True,

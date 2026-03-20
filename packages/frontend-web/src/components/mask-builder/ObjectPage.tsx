@@ -11,9 +11,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { AlertTriangle, Loader2, Save, X } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { MaskConfig, Tab as MaskTab, Field } from './types'
-import { createMaskResolver, getFieldsFromMaskConfig } from './validation'
-import { useKeyboardShortcuts, buildCoreMaskShortcuts } from '@/hooks/useKeyboardShortcuts'
-import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
+import { createMaskResolver, getFieldName, getFieldsFromMaskConfig } from './validation'
 
 interface ObjectPageProps {
   config: MaskConfig
@@ -93,14 +91,6 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
     setIsDirty(false)
   }, [data, reset])
 
-  // Keyboard shortcuts: Ctrl+S → Speichern, Escape → Abbrechen (Gap 023)
-  const kbShortcuts = buildCoreMaskShortcuts({
-    onSave: () => { void handleSubmit(onSubmit)() },
-    onCancel: onCancel,
-    isSaveDisabled: isSubmitting || !isDirty,
-  })
-  useKeyboardShortcuts(kbShortcuts)
-
   const onSubmit = async (formData: any) => {
     try {
       await onSave(formData)
@@ -119,17 +109,18 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
   }
 
   const renderField = (field: Field) => {
-    const error = errors[field.name]?.message as string
+    const fieldName = getFieldName(field)
+    const error = errors[fieldName]?.message as string
 
     return (
-      <div key={field.name} className="space-y-2">
-        <Label htmlFor={field.name}>
+      <div key={fieldName} className="space-y-2">
+        <Label htmlFor={fieldName}>
           {field.label}
           {field.required && <span className="text-red-500 ml-1">*</span>}
         </Label>
 
         <Controller
-          name={field.name}
+          name={fieldName}
           control={control}
           render={({ field: controllerField }) => {
             switch (field.type) {
@@ -138,10 +129,10 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
                 return (
                   <Input
                     {...controllerField}
-                    id={field.name}
+                    id={fieldName}
                     type={field.type}
                     placeholder={field.placeholder}
-                    readOnly={field.readonly}
+                    readOnly={field.readonly ?? field.readOnly}
                     className={error ? 'border-red-500' : ''}
                   />
                 )
@@ -150,24 +141,25 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
                 return (
                   <Textarea
                     {...controllerField}
-                    id={field.name}
+                    id={fieldName}
                     placeholder={field.placeholder}
-                    readOnly={field.readonly}
+                    readOnly={field.readonly ?? field.readOnly}
                     className={error ? 'border-red-500' : ''}
                   />
                 )
 
               case 'boolean':
+              case 'checkbox':
                 return (
                   <div className="flex items-center space-x-2">
                     <input
                       {...controllerField}
-                      id={field.name}
+                      id={fieldName}
                       type="checkbox"
                       checked={controllerField.value || false}
                       className="h-4 w-4"
                     />
-                    <Label htmlFor={field.name} className="text-sm">
+                    <Label htmlFor={fieldName} className="text-sm">
                       {field.label}
                     </Label>
                   </div>
@@ -177,12 +169,12 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
                 const selectField = field as any
                 return (
                   <NativeSelect
-                    id={field.name}
+                    id={fieldName}
                     value={String(controllerField.value ?? '')}
                     onValueChange={controllerField.onChange}
                     options={selectField.options ?? []}
                     placeholder={field.placeholder}
-                    disabled={field.readonly}
+                    disabled={field.readonly ?? field.readOnly}
                     className={error ? 'border-red-500' : ''}
                   />
                 )
@@ -192,9 +184,9 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
                 return (
                   <Input
                     {...controllerField}
-                    id={field.name}
+                    id={fieldName}
                     type="date"
-                    readOnly={field.readonly}
+                    readOnly={field.readonly ?? field.readOnly}
                     className={error ? 'border-red-500' : ''}
                   />
                 )
@@ -203,9 +195,9 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
                 return (
                   <Input
                     {...controllerField}
-                    id={field.name}
+                    id={fieldName}
                     type="datetime-local"
-                    readOnly={field.readonly}
+                    readOnly={field.readonly ?? field.readOnly}
                     className={error ? 'border-red-500' : ''}
                   />
                 )
@@ -214,9 +206,9 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
                 return (
                   <Input
                     {...controllerField}
-                    id={field.name}
+                    id={fieldName}
                     placeholder={field.placeholder}
-                    readOnly={field.readonly}
+                    readOnly={field.readonly ?? field.readOnly}
                     className={error ? 'border-red-500' : ''}
                   />
                 )
@@ -239,6 +231,15 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
   }
 
   const renderTabContent = (tab: any) => {
+    if (typeof tab.customRender === 'function') {
+      return tab.customRender(watch(), (nextData: any) => {
+        reset(nextData)
+        if (onChange) {
+          onChange(nextData)
+        }
+      })
+    }
+
     const layout = tab.layout || 'grid'
     const columns = tab.columns || 2
 
@@ -265,8 +266,7 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
   }
 
   return (
-    <div className="flex flex-col">
-    <div className="flex-1 space-y-6 p-6">
+    <div className="space-y-6 p-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -286,7 +286,7 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
                   if (onAction) {
                     void Promise.resolve(onAction(action.key, watch())).catch(() => { })
                   } else {
-                    action.onClick?.()
+                    void Promise.resolve(action.onClick?.(watch())).catch(() => {})
                   }
                 }}
                 disabled={action.disabled || isThisLoading}
@@ -367,9 +367,6 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
           ))}
         </Tabs>
       </form>
-    </div>
-      {/* Keyboard Shortcut Bar — nur auf Desktop sichtbar */}
-      <KeyboardShortcutBar shortcuts={kbShortcuts} />
     </div>
   )
 }

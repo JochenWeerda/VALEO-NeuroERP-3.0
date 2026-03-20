@@ -187,7 +187,9 @@ function toSearchParams(params: Record<string, string | number | boolean | undef
 }
 
 export async function getMatrix(params: MatrixParams): Promise<MatrixResponse> {
-  return apiClient.get<MatrixResponse>(`${BASE}/matrix${toSearchParams(params as Record<string, string | number | boolean | undefined | null>)}`)
+  return apiClient.get<MatrixResponse>(
+    `${BASE}/matrix${toSearchParams(params as unknown as Record<string, string | number | boolean | undefined | null>)}`
+  )
 }
 
 export async function getCellDrilldown(

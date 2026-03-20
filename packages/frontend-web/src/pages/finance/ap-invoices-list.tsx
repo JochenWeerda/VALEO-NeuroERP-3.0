@@ -12,14 +12,14 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { DataTable } from '@/components/ui/data-table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { FileDown, FileText, Receipt, Search, CheckCircle2 } from 'lucide-react'
+import { FileDown, FileText, Receipt, CheckCircle2 } from 'lucide-react'
 import { getEntityTypeLabel, getListTitle, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 import { AdvancedFilters, FilterConfig } from '@/components/list/AdvancedFilters'
 import { CSVImport } from '@/components/list/CSVImport'
 import { useToast } from '@/hooks/use-toast'
 import { useListActions } from '@/hooks/useListActions'
 import { formatDateForExport, formatCurrencyForExport } from '@/lib/export-utils'
-import { apiClient } from '@/lib/api-client'
+import { apiClient } from '@/lib/axios'
 import { ErrorState } from '@/components/ErrorState'
 import { buildDecisionView } from '@/policy/decision-view'
 import { CompactDecisionCard } from '@/components/workflow/CompactDecisionCard'
@@ -66,8 +66,7 @@ export default function APInvoicesListPage(): JSX.Element {
       if (searchTerm) params.append('query', searchTerm)
       if (filters.status) params.append('status', String(filters.status))
       if (filters.supplier_id) params.append('supplier_id', String(filters.supplier_id))
-      const response = await apiClient.get<APInvoice[]>(`/api/v1/finance/ap/invoices?${params.toString()}`)
-      return response.data
+      return await apiClient.get<APInvoice[]>(`/api/v1/finance/ap/invoices?${params.toString()}`)
     },
     staleTime: 2 * 60 * 1000,
   })
@@ -199,7 +198,7 @@ export default function APInvoicesListPage(): JSX.Element {
 
   const filterConfig: FilterConfig[] = [
     {
-      id: 'status',
+      key: 'status',
       label: t('crud.fields.status'),
       type: 'select',
       options: [
@@ -214,14 +213,23 @@ export default function APInvoicesListPage(): JSX.Element {
         { value: 'STORNIERT', label: t('status.cancelled') },
       ],
     },
-    { id: 'dateRange', label: t('crud.fields.dateRange'), type: 'dateRange' },
+    { key: 'dateRange', label: t('crud.fields.dateRange'), type: 'dateRange' },
+  ]
+
+  const exportColumns: Array<{ key: keyof APInvoice; label: string }> = [
+    { key: 'number', label: t('crud.fields.invoiceNumber') },
+    { key: 'date', label: t('crud.fields.date') },
+    { key: 'customerId', label: t('crud.entities.supplier') },
+    { key: 'totalGross', label: t('crud.fields.amount') },
+    { key: 'dueDate', label: t('crud.fields.dueDate') },
+    { key: 'status', label: t('crud.fields.status') },
+    { key: 'approvedBy', label: t('finance.apInvoices.approvedBy') },
   ]
 
   const { handleExport, handlePrint } = useListActions({
-    entityType: entityTypeLabel,
+    entityName: entityTypeLabel,
     data: invoices,
-    columns,
-    exportFileName: `${entityTypeLabel}_Liste`,
+    columns: exportColumns,
   })
 
   if (isError) {
@@ -243,7 +251,6 @@ export default function APInvoicesListPage(): JSX.Element {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="max-w-sm"
-              icon={<Search className="h-4 w-4 text-muted-foreground" />}
             />
             <AdvancedFilters filters={filterConfig} values={filters} onChange={setFilters} onReset={() => setFilters({})} />
             <CSVImport onImport={handleImport} entityName={entityTypeLabel} />

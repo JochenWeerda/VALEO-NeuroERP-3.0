@@ -1,4 +1,4 @@
-﻿import { useMemo, useState } from 'react'
+﻿import { useMemo, useState, type FormEvent } from 'react'
 import { useWorkflowRules, type WorkflowRule as ApiWorkflowRule } from '@/lib/api/betrieb'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -107,18 +107,19 @@ interface WorkflowRuleFormProps { rule: WorkflowRule | null; onSave: (_rule: Par
 
 function WorkflowRuleForm({ rule, onSave, onCancel }: WorkflowRuleFormProps): JSX.Element {
   const [formData, setFormData] = useState<Partial<WorkflowRule>>(rule || { active: true })
-  const handleSubmit = (e: React.FormEvent) => { e.preventDefault(); onSave(formData) }
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => { e.preventDefault(); onSave(formData) }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid gap-4 md:grid-cols-2">
-        <div><Label>Ausloeser-Entitaet</Label><NativeSelect value={formData.triggerEntity} onValueChange={(value) => setFormData((prev) => ({ ...prev, triggerEntity: value }))} placeholder="Entitaet auswaehlen" options={entityOptions.map((entity) => ({ value: entity, label: entity }))} /></div>
-        <div><Label>Ausloeser-Aktion</Label><NativeSelect value={formData.triggerAction} onValueChange={(value) => setFormData((prev) => ({ ...prev, triggerAction: value }))} placeholder="Aktion auswaehlen" options={actionOptions.map((action) => ({ value: action, label: action }))} /></div>
-        <div><Label>Ziel-Entitaet</Label><NativeSelect value={formData.targetEntity} onValueChange={(value) => setFormData((prev) => ({ ...prev, targetEntity: value }))} placeholder="Entitaet auswaehlen" options={entityOptions.map((entity) => ({ value: entity, label: entity }))} /></div>
-        <div><Label>Ziel-Aktion</Label><Input value={formData.targetAction} onChange={(e) => setFormData((prev) => ({ ...prev, targetAction: e.target.value }))} placeholder="z.B. CREATE_FROM_..." /></div>
+        <div><Label>Ausloeser-Entitaet</Label><NativeSelect value={formData.triggerEntity ?? ''} onValueChange={(value) => setFormData((prev) => ({ ...prev, triggerEntity: value }))} placeholder="Entitaet auswaehlen" options={entityOptions.map((entity) => ({ value: entity, label: entity }))} /></div>
+        <div><Label>Ausloeser-Aktion</Label><NativeSelect value={formData.triggerAction ?? ''} onValueChange={(value) => setFormData((prev) => ({ ...prev, triggerAction: value }))} placeholder="Aktion auswaehlen" options={actionOptions.map((action) => ({ value: action, label: action }))} /></div>
+        <div><Label>Ziel-Entitaet</Label><NativeSelect value={formData.targetEntity ?? ''} onValueChange={(value) => setFormData((prev) => ({ ...prev, targetEntity: value }))} placeholder="Entitaet auswaehlen" options={entityOptions.map((entity) => ({ value: entity, label: entity }))} /></div>
+        <div><Label>Ziel-Aktion</Label><Input value={formData.targetAction ?? ''} onChange={(e) => setFormData((prev) => ({ ...prev, targetAction: e.target.value }))} placeholder="z.B. CREATE_FROM_..." /></div>
       </div>
-      <div><Label>Bedingung (optional)</Label><Input value={formData.condition} onChange={(e) => setFormData((prev) => ({ ...prev, condition: e.target.value }))} placeholder="z.B. status === 'GEBUCHT'" /></div>
+      <div><Label>Bedingung (optional)</Label><Input value={formData.condition ?? ''} onChange={(e) => setFormData((prev) => ({ ...prev, condition: e.target.value }))} placeholder="z.B. status === 'GEBUCHT'" /></div>
       <div className="flex justify-end gap-2"><Button type="button" variant="outline" onClick={onCancel}>Abbrechen</Button><Button type="submit">Speichern</Button></div>
     </form>
   )
 }
+

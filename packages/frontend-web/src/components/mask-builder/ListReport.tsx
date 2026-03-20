@@ -36,6 +36,7 @@ interface ListReportProps {
   /** Called when config.serverPagination is true and page/sort/filter changes. */
   onPageChange?: (_params: ServerPaginationParams) => void
   isLoading?: boolean
+  loading?: boolean
 }
 
 const ListReport: React.FC<ListReportProps> = ({
@@ -50,7 +51,8 @@ const ListReport: React.FC<ListReportProps> = ({
   onAction,
   onBulkAction,
   onPageChange,
-  isLoading = false
+  isLoading = false,
+  loading
 }) => {
   const { t } = useTranslation()
   const { toast } = useToast()
@@ -64,6 +66,7 @@ const ListReport: React.FC<ListReportProps> = ({
   const pageSize = config.pageSize || 25
   const totalPages = Math.ceil(total / pageSize)
   const isServerPaginated = config.serverPagination === true && !!onPageChange
+  const effectiveLoading = loading ?? isLoading
 
   const notifyServer = useRef(onPageChange)
   notifyServer.current = onPageChange
@@ -282,13 +285,15 @@ const ListReport: React.FC<ListReportProps> = ({
             </div>
 
             {/* Dynamic filters */}
-            {config.filters?.map(filter => (
-              <div key={filter.name}>
+            {config.filters?.map(filter => {
+              const filterName = filter.name || filter.key || ''
+              return (
+              <div key={filterName}>
                 <Label>{getFilterLabel(filter)}</Label>
                 {filter.type === 'select' ? (
                   <NativeSelect
-                    value={filters[filter.name] || ''}
-                    onValueChange={(value) => handleFilterChange(filter.name, value)}
+                    value={filters[filterName] || ''}
+                    onValueChange={(value) => handleFilterChange(filterName, value)}
                     options={((filter as any).options ?? []).map((option: any) => ({
                       value: option.value,
                       label: option.labelKey ? t(option.labelKey) : option.label,
@@ -300,8 +305,8 @@ const ListReport: React.FC<ListReportProps> = ({
                     <Input
                       type="number"
                       placeholder={getFilterPlaceholder(filter) || t('crud.placeholders.enterAmount')}
-                      value={filters[filter.name] || ''}
-                      onChange={(e) => handleFilterChange(filter.name, e.target.value)}
+                      value={filters[filterName] || ''}
+                      onChange={(e) => handleFilterChange(filterName, e.target.value)}
                       min={(filter as any).min}
                       max={(filter as any).max}
                       step={(filter as any).step || '0.01'}
@@ -313,8 +318,8 @@ const ListReport: React.FC<ListReportProps> = ({
                   <Input
                     type="date"
                     placeholder={getFilterPlaceholder(filter)}
-                    value={filters[filter.name] || ''}
-                    onChange={(e) => handleFilterChange(filter.name, e.target.value)}
+                    value={filters[filterName] || ''}
+                    onChange={(e) => handleFilterChange(filterName, e.target.value)}
                     max={(filter as any).maxDate || new Date().toISOString().split('T')[0]}
                     min={(filter as any).minDate}
                     lang="de-DE"
@@ -322,12 +327,12 @@ const ListReport: React.FC<ListReportProps> = ({
                 ) : (
                   <Input
                     placeholder={getFilterPlaceholder(filter)}
-                    value={filters[filter.name] || ''}
-                    onChange={(e) => handleFilterChange(filter.name, e.target.value)}
+                    value={filters[filterName] || ''}
+                    onChange={(e) => handleFilterChange(filterName, e.target.value)}
                   />
                 )}
               </div>
-            ))}
+            )})}
           </div>
         </CardContent>
       </Card>
@@ -403,7 +408,7 @@ const ListReport: React.FC<ListReportProps> = ({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {isLoading ? (
+                {effectiveLoading ? (
                   <TableRow>
                     <TableCell colSpan={config.columns.length + 2} className="text-center py-8">
                       {t('crud.list.loading', { entityType: displayTitle })}

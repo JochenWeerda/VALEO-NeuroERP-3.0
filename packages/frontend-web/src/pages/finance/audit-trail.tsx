@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input'
 import { NativeSelect } from '@/components/ui/native-select'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Search, FileText, Shield, CheckCircle2, XCircle, AlertTriangle } from 'lucide-react'
+import { FileText, Shield, CheckCircle2, XCircle, AlertTriangle } from 'lucide-react'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
 import { useToast } from '@/hooks/use-toast'
@@ -289,7 +289,6 @@ export default function AuditTrailPage(): JSX.Element {
                 placeholder={t('crud.actions.searchPlaceholder', { entityType: 'Audit-Logs' })}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                icon={<Search className="h-4 w-4 text-muted-foreground" />}
               />
             </div>
             <NativeSelect

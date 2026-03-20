@@ -12,6 +12,40 @@ import { useEinkaufReports, useEinkaufReportsStandard } from '@/lib/api/einkauf'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ErrorState } from '@/components/ErrorState'
 
+type SpendByCategoryItem = {
+  category?: string
+  kategorie?: string
+  amount?: number
+  betrag?: number
+  percentage?: number
+  anteil?: number
+}
+
+type SupplierPerformanceItem = {
+  supplier?: string
+  onTimeDelivery?: number
+  qualityScore?: number
+  priceScore?: number
+  serviceScore?: number
+  overallScore?: number
+}
+
+type ToleranceReportItem = {
+  purchaseOrderNumber?: string
+  type?: string
+  deviation?: number
+}
+
+type EinkaufReportsData = {
+  spendByCategory?: SpendByCategoryItem[]
+  supplierPerformance?: SupplierPerformanceItem[]
+}
+
+type EinkaufReportsStandardData = EinkaufReportsData & {
+  openOrders?: Array<Record<string, unknown>>
+  toleranceReports?: ToleranceReportItem[]
+}
+
 export default function ProcurementReportsPage(): JSX.Element {
   const { t } = useTranslation()
   const [activeTab, setActiveTab] = useState('open-orders')
@@ -46,10 +80,12 @@ export default function ProcurementReportsPage(): JSX.Element {
     )
   }
 
-  const openOrders = standardData?.openOrders ?? []
-  const spendByCategory = baseData?.spendByCategory ?? []
-  const supplierPerformance = standardData?.supplierPerformance ?? baseData?.supplierPerformance ?? []
-  const toleranceReports = standardData?.toleranceReports ?? []
+  const baseReports = baseData as EinkaufReportsData | undefined
+  const standardReports = standardData as EinkaufReportsStandardData | undefined
+  const openOrders = standardReports?.openOrders ?? []
+  const spendByCategory = baseReports?.spendByCategory ?? []
+  const supplierPerformance = standardReports?.supplierPerformance ?? baseReports?.supplierPerformance ?? []
+  const toleranceReports = standardReports?.toleranceReports ?? []
 
   const spendAnalysis = {
     totalSpend: spendByCategory.reduce((sum: number, item: any) => sum + Number(item.amount || item.betrag || 0), 0),

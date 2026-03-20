@@ -65,11 +65,11 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
   const loadDetails = async (accountNumber: string) => {
     setSelectedAccount(accountNumber)
     try {
-      const { data } = await apiClient.get(
+      const data = await apiClient.get<any[]>(
         `/api/v1/finance/subsidiary-ledger-reconciliation/${ledgerType.toLowerCase()}/details`,
         { params: { account_number: accountNumber, period } },
       )
-      setDetails(data)
+      setDetails(Array.isArray(data) ? data : [])
     } catch (error) {
       console.error('Error loading details:', error)
     }

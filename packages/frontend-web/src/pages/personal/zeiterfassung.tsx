@@ -37,7 +37,7 @@ export default function ZeiterfassungPage(): JSX.Element {
       key: 'typ' as const,
       label: 'Typ',
       render: (z: ZeitEintrag) => (
-        <Badge variant={z.typ === 'Überstunden' ? 'destructive' : z.typ === 'Urlaub' ? 'secondary' : 'outline'}>
+        <Badge variant={z.typ === 'Ueberstunden' ? 'destructive' : z.typ === 'Urlaub' ? 'secondary' : 'outline'}>
           {z.typ}
         </Badge>
       ),

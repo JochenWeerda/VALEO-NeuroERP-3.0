@@ -51,8 +51,7 @@ function useLohnRuns() {
   return useQuery({
     queryKey: ['finance', 'lohn-connector', 'runs'],
     queryFn: async () => {
-      const res = await apiClient.get<LohnRun[]>('/api/v1/finance/lohn-connector/runs')
-      return res.data
+      return await apiClient.get<LohnRun[]>('/api/v1/finance/lohn-connector/runs')
     },
   })
 }
@@ -61,11 +60,10 @@ function useTriggerLohnImport() {
   const qc = useQueryClient()
   return useMutation({
     mutationFn: async ({ period, dry_run }: { period: string; dry_run: boolean }) => {
-      const res = await apiClient.post<{ run_id: string; period: string; status: string; message: string }>(
+      return await apiClient.post<{ run_id: string; period: string; status: string; message: string }>(
         '/api/v1/finance/lohn-connector/runs/trigger',
         { period, dry_run }
       )
-      return res.data
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['finance', 'lohn-connector', 'runs'] })
@@ -127,8 +125,7 @@ export default function LohnConnectorPage(): JSX.Element {
   const { data: importRun, refetch: refetchRun } = useQuery({
     queryKey: ['finance', 'connectors', 'imports', importRunId],
     queryFn: async () => {
-      const res = await apiClient.get<ConnectorRunSummary>(`${CONNECTOR_BASE}/imports/${importRunId}`)
-      return res.data
+      return await apiClient.get<ConnectorRunSummary>(`${CONNECTOR_BASE}/imports/${importRunId}`)
     },
     enabled: !!importRunId,
   })
@@ -136,10 +133,9 @@ export default function LohnConnectorPage(): JSX.Element {
   const { data: runItems } = useQuery({
     queryKey: ['finance', 'connectors', 'imports', importRunId, 'items'],
     queryFn: async () => {
-      const res = await apiClient.get<ConnectorRunItem[]>(`${CONNECTOR_BASE}/imports/${importRunId}/items`, {
+      return await apiClient.get<ConnectorRunItem[]>(`${CONNECTOR_BASE}/imports/${importRunId}/items`, {
         params: { only_errors: true, limit: 50 },
       })
-      return res.data
     },
     enabled: !!importRunId,
   })
@@ -148,12 +144,11 @@ export default function LohnConnectorPage(): JSX.Element {
     mutationFn: async (file: File) => {
       const form = new FormData()
       form.append('file', file)
-      const res = await apiClient.post<{ run_id: string; status: string; message: string }>(
+      return await apiClient.post<{ run_id: string; status: string; message: string }>(
         `${CONNECTOR_BASE}/PAYROLL/imports`,
         form,
         { headers: { 'Content-Type': 'multipart/form-data' } }
       )
-      return res.data
     },
     onSuccess: (data) => {
       setImportRunId(data.run_id)
@@ -273,7 +268,7 @@ export default function LohnConnectorPage(): JSX.Element {
                 <details className="text-sm">
                   <summary>Fehlerzeilen ({runItems.length})</summary>
                   <ul className="mt-2 list-disc pl-5 space-y-1">
-                    {runItems.slice(0, 20).map((it) => (
+                    {runItems.slice(0, 20).map((it: ConnectorRunItem) => (
                       <li key={it.id}>Zeile {it.line_no}: {it.validation_errors?.toString() ?? it.status}</li>
                     ))}
                     {runItems.length > 20 && <li>… und {runItems.length - 20} weitere</li>}
@@ -356,7 +351,7 @@ export default function LohnConnectorPage(): JSX.Element {
                   </tr>
                 </thead>
                 <tbody>
-                  {runs.map((r) => (
+                  {runs.map((r: LohnRun) => (
                     <tr key={r.id} className="border-b last:border-0">
                       <td className="p-2">{r.period}</td>
                       <td className="p-2">{r.source}</td>
@@ -380,9 +375,9 @@ export default function LohnConnectorPage(): JSX.Element {
               </table>
             </div>
           )}
-          {runs.some((r) => r.message) && (
+          {runs.some((r: LohnRun) => Boolean(r.message)) && (
             <p className="mt-2 text-xs text-muted-foreground">
-              {runs.find((r) => r.message)?.message}
+            {runs.find((r: LohnRun) => r.message)?.message}
             </p>
           )}
         </CardContent>

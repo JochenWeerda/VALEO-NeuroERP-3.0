@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { z } from 'zod'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
@@ -12,7 +13,7 @@ import { useTenant } from '@/hooks/useTenant'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { LeaveConfirmDialog } from '@/components/LeaveConfirmDialog'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
-import { toast } from 'sonner'
+import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/axios'
 
 // Zod-Schema für Debitoren-Stammdaten (wird in Komponente mit i18n erstellt)
@@ -55,6 +56,22 @@ const createDebitorenSchema = (t: any) => z.object({
   is_active: z.boolean().default(true),
   notes: z.string().optional()
 })
+
+const validateDebitorenForm = (formData: any, t: any): { isValid: boolean; errors: Record<string, string> } => {
+  const parsed = createDebitorenSchema(t).safeParse(formData ?? {})
+  if (parsed.success) {
+    return { isValid: true, errors: {} }
+  }
+
+  const errors: Record<string, string> = {}
+  parsed.error.issues.forEach((issue) => {
+    const field = issue.path[0]
+    if (typeof field === 'string' && !errors[field]) {
+      errors[field] = issue.message
+    }
+  })
+  return { isValid: false, errors }
+}
 
 // Konfiguration für Debitoren-Stammdaten ObjectPage (wird in Komponente mit i18n erstellt)
 const createDebitorenConfig = (t: any, entityTypeLabel: string): MaskConfig => ({

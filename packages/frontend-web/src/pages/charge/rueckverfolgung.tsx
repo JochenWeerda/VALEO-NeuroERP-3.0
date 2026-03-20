@@ -32,7 +32,7 @@ export default function RueckverfolgungPage(): JSX.Element {
 
   const query = useLotTrace(activeLotId)
 
-  const traceData: LotTrace | undefined = query.data
+  const traceData: LotTrace | undefined = query.data ?? undefined
 
   const timeline: TimelineEntry[] = useMemo(() => {
     if (!traceData) {
@@ -61,8 +61,8 @@ export default function RueckverfolgungPage(): JSX.Element {
         setActiveLotId(trimmed)
         setLookupError(null)
       } else {
-        const response = await apiClient.get('/api/v1/inventory/lots', { params: { search: trimmed } })
-        const firstMatch = response.data?.items?.[0]
+        const response = await apiClient.get<{ items?: Array<{ id: string }> }>('/api/v1/inventory/lots', { params: { search: trimmed } })
+        const firstMatch = response.data.items?.[0]
         if (!firstMatch) {
           setLookupError('Keine Charge gefunden.')
           return

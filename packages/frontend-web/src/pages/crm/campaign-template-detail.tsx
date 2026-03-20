@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { z } from 'zod'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData } from '@/components/mask-builder/hooks'
 
@@ -27,6 +28,13 @@ const createTemplateSchema = (t: any) => z.object({
   is_active: z.boolean().default(true),
   description: z.string().optional(),
 })
+
+function validateTemplateForm(formData: unknown, t: any): { valid: boolean; errors: string[] } {
+  const result = createTemplateSchema(t).safeParse(formData)
+  return result.success
+    ? { valid: true, errors: [] }
+    : { valid: false, errors: result.error.issues.map((issue) => issue.message) }
+}
 
 // Konfiguration für Campaign Template ObjectPage
 const createTemplateConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
@@ -162,7 +170,7 @@ export default function CampaignTemplateDetailPage(): JSX.Element {
   const templateConfig = createTemplateConfig(t, entityTypeLabel)
   const isNew = !id || id === 'new' || id === 'neu'
 
-  const { data, saveData, isLoading: dataLoading } = useMaskData({
+  const { data, saveData, isLoading: dataLoading } = useMaskData<Record<string, any>>({
     apiUrl: templateConfig.api.baseUrl,
     id: id || undefined
   })
@@ -215,7 +223,7 @@ export default function CampaignTemplateDetailPage(): JSX.Element {
   const handleDuplicate = async () => {
     if (!id) return
     try {
-      const response = await apiClient.post(`/campaigns/templates/${id}/duplicate`)
+      const response = await apiClient.post<{ id?: string; success?: boolean; data?: { id?: string } }>(`/campaigns/templates/${id}/duplicate`)
       if (response.success || response.id) {
         const newId = response.success ? response.data?.id || response.data?.id : response.id
         toast({

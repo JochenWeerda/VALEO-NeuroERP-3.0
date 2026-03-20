@@ -407,8 +407,7 @@ export default function RechnungEingangErfassungPage(): JSX.Element {
                         onClick={async (e) => {
                           e.preventDefault()
                           try {
-                            const list = await apiClient.get<any[]>('/api/v1/einkauf/rechnungen')
-                            const items = Array.isArray(list.data) ? list.data : (list.data as any)?.data ?? []
+                            const items: any[] = await apiClient.get<any[]>('/api/v1/einkauf/rechnungen')
                             const idx = rechnungId ? items.findIndex((r: any) => r.id === rechnungId) : -1
                             if (idx + 1 < items.length) navigate(`/einkauf/rechnungen/${items[idx + 1].id}`)
                             else push('Kein vorheriger Beleg vorhanden.')
@@ -555,22 +554,25 @@ export default function RechnungEingangErfassungPage(): JSX.Element {
                 e.preventDefault()
                 if (!state.lieferant) { push('Bitte zuerst einen Lieferanten auswählen.'); return }
                 try {
-                  const res = await apiClient.get<any[]>('/api/v1/einkauf/lieferscheine', {
+                  const res: any[] = await apiClient.get<any[]>('/api/v1/einkauf/lieferscheine', {
                     params: { lieferant_id: state.lieferant.id, status: 'offen' }
                   })
-                  const lsList = Array.isArray(res.data) ? res.data : (res.data as any)?.data ?? []
+                  const lsList = Array.isArray(res) ? res : []
                   if (lsList.length === 0) { push('Keine offenen Lieferscheine für diesen Lieferanten.'); return }
                   // Übernimmt Positionen des ersten gefundenen Lieferscheins
                   const ls = lsList[0]
                   if (ls.positionen?.length) {
-                    setPositionen(ls.positionen.map((p: any, i: number) => ({
+                    setState((prev) => ({
+                      ...prev,
+                      positionen: ls.positionen.map((p: any, i: number) => ({
                       id: crypto.randomUUID(), posNr: i + 1, liefArt: 'frei',
                       artikelNr: p.artikel_nr ?? '', lieferantArtikelNr: '',
                       artikelBezeichnung: p.bezeichnung ?? '', artikelBezeichnung2: '',
                       einheit: p.einheit ?? 'kg', menge: p.menge ?? 0,
                       einhPreis: p.einzelpreis ?? 0, betrag: (p.menge ?? 0) * (p.einzelpreis ?? 0),
                       mwstKz: '1', mwstSatz: 19, rabatt: 0, lager: '', lagerhalle: '', lagerfach: '', info: ''
-                    })))
+                      }))
+                    }))
                     push(`${lsList.length} Lieferschein(e) gefunden — LS ${ls.ls_nummer ?? ls.id} übernommen.`)
                   }
                 } catch (e: any) { push(`Fehler: ${e.response?.data?.detail ?? e.message}`) }

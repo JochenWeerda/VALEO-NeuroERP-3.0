@@ -20,6 +20,7 @@ import {
   refreshSnapshot,
   getCoverageMonitor,
   getCellDrilldown,
+  type MatrixParams,
   type MatrixResponse,
   type KpiResponse,
   type ArticleRow,
@@ -51,12 +52,12 @@ export default function LstCommodityPositionMatrix(): JSX.Element {
   const [periodFrom, setPeriodFrom] = useState(getDefaultPeriodFrom)
   const [periodTo, setPeriodTo] = useState(getDefaultPeriodTo)
   const [articleIds, setArticleIds] = useState<string>('')
-  const [viewMode, setViewMode] = useState<string>('physisch') // physisch | physisch_disponiert | inkl_archiv
+  const [viewMode, setViewMode] = useState<NonNullable<MatrixParams['view_mode']>>('physisch')
   const [drilldown, setDrilldown] = useState<{ articleId: string; periodKey: string } | null>(null)
   const [contextCell, setContextCell] = useState<{ articleId: string; periodKey: string; x: number; y: number } | null>(null)
 
   const matrixParams = useMemo(
-    () => ({
+    (): MatrixParams => ({
       branch_id: branchId || undefined,
       as_of_date: asOfDate,
       period_mode: periodMode,
@@ -252,7 +253,7 @@ export default function LstCommodityPositionMatrix(): JSX.Element {
             <select
               className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"
               value={viewMode}
-              onChange={(e) => setViewMode(e.target.value)}
+              onChange={(e) => setViewMode(e.target.value as NonNullable<MatrixParams['view_mode']>)}
             >
               <option value="physisch">Physisch</option>
               <option value="physisch_disponiert">Physisch + disponiert</option>

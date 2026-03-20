@@ -28,8 +28,7 @@ function useQuadrigaConfig() {
   return useQuery({
     queryKey: ['finance', 'quadriga-connector', 'config'],
     queryFn: async () => {
-      const res = await apiClient.get<ConnectorConfig | null>('/api/v1/finance/quadriga-connector/config')
-      return res.data
+      return await apiClient.get<ConnectorConfig | null>('/api/v1/finance/quadriga-connector/config')
     },
   })
 }
@@ -71,11 +70,10 @@ export default function QuadrigaConnectorPage(): JSX.Element {
 
   const syncMutation = useMutation({
     mutationFn: async (direction: 'export' | 'import') => {
-      const res = await apiClient.post<{ success: boolean; message: string }>('/api/v1/finance/quadriga-connector/sync', {
+      return await apiClient.post<{ success: boolean; message: string }>('/api/v1/finance/quadriga-connector/sync', {
         direction,
         options: {},
       })
-      return res.data
     },
     onMutate: () => setSyncing(true),
     onSettled: () => setSyncing(false),
