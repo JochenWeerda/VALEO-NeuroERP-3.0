@@ -12,6 +12,14 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
+from .data_quality_rules import (
+    DQRegelTyp,
+    DQSeverity,
+    DQValidationResult,
+    get_dq_ruleset_for_entity,
+    validate_datensatz,
+)
+
 
 # ---------------------------------------------------------------------------
 # Enums
@@ -168,6 +176,13 @@ class BulkResult:
     items: list[BulkItem] = field(default_factory=list)
     trocken_lauf: bool = False
     abgebrochen: bool = False       # True wenn stop_bei_erstem_fehler griff
+    dq_entity_typ: str | None = None
+    dq_ruleset_id: str | None = None
+    dq_total: int = 0
+    dq_bestanden: int = 0
+    dq_fehler: int = 0
+    dq_warnungen: int = 0
+    duplicate_item_ids: list[str] = field(default_factory=list)
     schema_version: int = 1
 
     @property
@@ -188,6 +203,13 @@ class BulkResult:
             "success_rate": round(self.success_rate, 4),
             "trocken_lauf": self.trocken_lauf,
             "abgebrochen": self.abgebrochen,
+            "dq_entity_typ": self.dq_entity_typ,
+            "dq_ruleset_id": self.dq_ruleset_id,
+            "dq_total": self.dq_total,
+            "dq_bestanden": self.dq_bestanden,
+            "dq_fehler": self.dq_fehler,
+            "dq_warnungen": self.dq_warnungen,
+            "duplicate_item_ids": self.duplicate_item_ids,
             "items": [i.as_dict() for i in self.items],
             "schema_version": self.schema_version,
         }
@@ -350,3 +372,145 @@ def get_bulk_limit_by_domain(
         if lim.domain == domain:
             return lim
     return None
+
+
+def _map_dq_result_to_bulk_error(result: DQValidationResult) -> tuple[BulkFehlerCode, str]:
+    """Mappt das erste DQ-Problem auf einen Bulk-Fehlercode."""
+    if not result.verletzungen:
+        return BulkFehlerCode.UNBEKANNT, "DQ validation failed without violations."
+    first = result.verletzungen[0]
+    if first.typ == DQRegelTyp.DUPLIKAT_VERDACHT:
+        return BulkFehlerCode.DUPLIKAT, first.meldung
+    if first.typ == DQRegelTyp.REFERENZ_FEHLT:
+        return BulkFehlerCode.REFERENZ_FEHLT, first.meldung
+    return BulkFehlerCode.VALIDIERUNG, first.meldung
+
+
+def evaluate_bulk_request_with_dq(
+    request: BulkRequest,
+    entity_typ: str | None = None,
+    limit: BulkLimit | None = None,
+) -> tuple[BulkValidationResult, BulkResult]:
+    """Validiert einen Bulk-Request strukturell und gegen DQ-Regeln."""
+    validation = validate_bulk_request(request, limit)
+    items = list(request.items)
+
+    if not validation.gueltig:
+        return validation, BulkResult(
+            operation_typ=request.operation_typ,
+            domain=request.domain,
+            ressource=request.ressource,
+            total=len(items),
+            success_count=0,
+            fehler_count=len(items) if items else 0,
+            skip_count=0,
+            items=[
+                BulkItem(
+                    item_id=item.item_id,
+                    payload=item.payload,
+                    status=BulkItemStatus.FEHLER,
+                    fehler_code=BulkFehlerCode.LIMIT_ERREICHT,
+                    fehler_meldung="Bulk-Request strukturell ungueltig.",
+                )
+                for item in items
+            ],
+            trocken_lauf=request.trocken_lauf,
+            abgebrochen=True,
+        )
+
+    ruleset = get_dq_ruleset_for_entity(entity_typ) if entity_typ else None
+    kontext_datensaetze = [item.payload for item in items]
+    seen_item_ids: set[str] = set()
+    duplicate_item_ids: list[str] = []
+    result_items: list[BulkItem] = []
+    success_count = 0
+    fehler_count = 0
+    skip_count = 0
+    dq_bestanden = 0
+    dq_fehler = 0
+    dq_warnungen = 0
+    abgebrochen = False
+
+    for index, item in enumerate(items):
+        if item.item_id in seen_item_ids:
+            duplicate_item_ids.append(item.item_id)
+            result_items.append(
+                BulkItem(
+                    item_id=item.item_id,
+                    payload=item.payload,
+                    status=BulkItemStatus.FEHLER,
+                    fehler_code=BulkFehlerCode.DUPLIKAT,
+                    fehler_meldung=f"Duplikates item_id '{item.item_id}' im Bulk-Request.",
+                )
+            )
+            fehler_count += 1
+            if request.stop_bei_erstem_fehler:
+                abgebrochen = True
+                break
+            continue
+        seen_item_ids.add(item.item_id)
+
+        if ruleset is not None:
+            other_context = kontext_datensaetze[:index] + kontext_datensaetze[index + 1 :]
+            item_dq_result = validate_datensatz(ruleset, item.payload, other_context)
+            dq_bestanden += 1 if item_dq_result.bestanden else 0
+            dq_fehler += item_dq_result.fehler_anzahl
+            dq_warnungen += item_dq_result.warnungs_anzahl
+            if not item_dq_result.bestanden:
+                fehler_code, fehler_meldung = _map_dq_result_to_bulk_error(item_dq_result)
+                result_items.append(
+                    BulkItem(
+                        item_id=item.item_id,
+                        payload=item.payload,
+                        status=BulkItemStatus.FEHLER,
+                        fehler_code=fehler_code,
+                        fehler_meldung=fehler_meldung,
+                    )
+                )
+                fehler_count += 1
+                if request.stop_bei_erstem_fehler:
+                    abgebrochen = True
+                    break
+                continue
+
+        result_items.append(
+            BulkItem(
+                item_id=item.item_id,
+                payload=item.payload,
+                status=BulkItemStatus.SUCCESS,
+            )
+        )
+        success_count += 1
+
+    if abgebrochen and len(result_items) < len(items):
+        for item in items[len(result_items):]:
+            result_items.append(
+                BulkItem(
+                    item_id=item.item_id,
+                    payload=item.payload,
+                    status=BulkItemStatus.SKIP,
+                    fehler_code=None,
+                    fehler_meldung="Abgebrochen nach erstem Fehler.",
+                )
+            )
+            skip_count += 1
+
+    return validation, BulkResult(
+        operation_typ=request.operation_typ,
+        domain=request.domain,
+        ressource=request.ressource,
+        total=len(items),
+        success_count=success_count,
+        fehler_count=fehler_count,
+        skip_count=skip_count,
+        items=result_items,
+        trocken_lauf=request.trocken_lauf,
+        abgebrochen=abgebrochen,
+        dq_entity_typ=entity_typ,
+        dq_ruleset_id=ruleset.ruleset_id if ruleset else None,
+        dq_total=len(items),
+        dq_bestanden=dq_bestanden,
+        dq_fehler=dq_fehler,
+        dq_warnungen=dq_warnungen,
+        duplicate_item_ids=duplicate_item_ids,
+    )

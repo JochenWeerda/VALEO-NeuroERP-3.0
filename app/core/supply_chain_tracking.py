@@ -140,6 +140,31 @@ class ETABerechnungsErgebnis:
 
 
 @dataclass
+class ETAAlarmBewertung:
+    """Bewertung einer ETA gegen eine Zielankunft mit Alarm-Informationen."""
+    lieferung_id: str
+    ziel_ankunft: datetime
+    eta: ETABerechnungsErgebnis
+    abweichung_stunden: float
+    alarm: AbweichungsAlarm | None
+    alarmstufe: str
+    alarm_ausgeloest: bool
+    hinweise: list[str] = field(default_factory=list)
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "lieferung_id": self.lieferung_id,
+            "ziel_ankunft": self.ziel_ankunft.isoformat(),
+            "eta": self.eta.as_dict(),
+            "abweichung_stunden": round(self.abweichung_stunden, 2),
+            "alarm": self.alarm.as_dict() if self.alarm else None,
+            "alarmstufe": self.alarmstufe,
+            "alarm_ausgeloest": self.alarm_ausgeloest,
+            "hinweise": self.hinweise,
+        }
+
+
+@dataclass
 class AbweichungsAlarm:
     """Abweichungsalarm für eine Lieferung."""
     alarm_id: str
@@ -385,6 +410,55 @@ def bewerte_mengenabweichung(
         erkannt_am=erkannt_am,
         eskalations_empfaenger=empfaenger,
         automatisch_eskaliert=eskalation,
+    )
+
+
+def bewerte_eta_alarm(
+    req: ETABerechnungsRequest,
+    ziel_ankunft: datetime,
+    alarm_id: str,
+    jetzt: datetime | None = None,
+) -> ETAAlarmBewertung:
+    """
+    Bewertet eine ETA gegen eine Zielankunft und erzeugt bei Verzug einen Alarm.
+
+    - ETA <= Zielankunft: kein Alarm, aber Kontext- und Prognoseinformationen
+    - ETA >  Zielankunft: zeitlicher Abweichungsalarm auf Basis der Verzögerung
+    """
+    eta = berechne_eta(req, jetzt=jetzt)
+    abweichung = (eta.geschaetzte_ankunft - ziel_ankunft).total_seconds() / 3600.0
+
+    alarm: AbweichungsAlarm | None = None
+    alarmstufe = AbweichungsSchwere.INFO.value
+    alarm_ausgeloest = False
+    hinweise = list(eta.hinweise)
+
+    if abweichung > 0:
+        alarm = bewerte_zeitliche_abweichung(
+            lieferung_id=req.lieferung_id,
+            alarm_id=alarm_id,
+            verzoegerung_stunden=abweichung,
+            erkannt_am=eta.berechnet_am,
+        )
+        alarmstufe = alarm.schwere.value
+        alarm_ausgeloest = True
+        hinweise.append(
+            f"ETA liegt um {abweichung:.1f} h nach Zielankunft. Alarmstufe: {alarmstufe}"
+        )
+    else:
+        hinweise.append(
+            f"ETA liegt um {abs(abweichung):.1f} h vor Zielankunft."
+        )
+
+    return ETAAlarmBewertung(
+        lieferung_id=req.lieferung_id,
+        ziel_ankunft=ziel_ankunft,
+        eta=eta,
+        abweichung_stunden=abweichung,
+        alarm=alarm,
+        alarmstufe=alarmstufe,
+        alarm_ausgeloest=alarm_ausgeloest,
+        hinweise=hinweise,
     )
 
 

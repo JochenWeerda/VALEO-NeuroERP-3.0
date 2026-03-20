@@ -102,6 +102,34 @@ class ChannelProcessThreadStore:
     def get(self, thread_id: str) -> ChannelProcessThread | None:
         return self._threads.get(thread_id)
 
+    def list_threads(
+        self,
+        *,
+        kanal: str | None = None,
+        tenant_id: str | None = None,
+        status: str | None = None,
+        process_definition_key: str | None = None,
+        limit: int = 50,
+    ) -> list[ChannelProcessThread]:
+        items = list(self._threads.values())
+        if kanal:
+            items = [item for item in items if item.kanal == kanal]
+        if tenant_id:
+            items = [item for item in items if item.tenant_id == tenant_id]
+        if status:
+            items = [item for item in items if item.status == status]
+        if process_definition_key:
+            items = [
+                item for item in items if item.process_definition_key == process_definition_key
+            ]
+        return items[: max(limit, 1)]
+
+    def get_audit_trail(self, thread_id: str) -> list[ChannelThreadAuditItem] | None:
+        thread = self.get(thread_id)
+        if thread is None:
+            return None
+        return list(thread.audit_trail)
+
     def clear(self) -> None:
         self._threads.clear()
 

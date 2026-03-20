@@ -64,8 +64,8 @@ Hinweise:
 | 013 | SLA/Timeout/Eskalationsknoten standardisiert | >=95% SLA-Einhaltung Kernprozesse | M | Notification, RBAC | P0 | H1 | **GESCHLOSSEN Wave 28** — `sla_eskalation_engine.py`: evaluate_sla_breach(), validate_sla_policy(), 6 Default-Policies; API GET /process/sla/eskalationen |
 | 014 | Policy-as-Code mit Tenant Overrides | 100% Ausnahmen regelbasiert dokumentiert | M | Policy Store | P0 | H1 | **GESCHLOSSEN Wave 29** — `policy_code_engine.py`: evaluate_policy_set(), apply_tenant_overrides() (Pflichtregeln geschuetzt), Default-PolicySets; API GET+POST /process/policy-rules |
 | 015 | Human-in-the-loop Freigaben fuer AI Aktionen | 100% AI-Aktionen mit Approval-Trail | M | Agent Layer, Audit | P0 | H1 | **GESCHLOSSEN Wave 30** — `human_approval_gate.py`: evaluate_approval_requirement() (NIEDRIG/MITTEL/HOCH/KRITISCH), record_approval_decision() (frozen + SHA-256 Audit-Trail), 8 Default-Regeln; API GET/POST /process/agent/approval-* |
-| 016 | Idempotente Business-Commands statt UI-CRUD fuer Agenten | >=99.9% sichere Retries ohne Duplikate | L | API Refactor | P0 | H2 |
-| 017 | MCP/OpenAPI Tool Contracts fuer externe Agenten | 20 produktive Agent-Tools freigeschaltet | M | API Governance | P1 | H2 |
+| 016 | Idempotente Business-Commands statt UI-CRUD fuer Agenten | >=99.9% sichere Retries ohne Duplikate | L | API Refactor | P0 | H2 | **GESCHLOSSEN Wave 84** — Business-Commands idempotent, Replay-Schutz aktiv, `GET /api/v1/process/actions/idempotency/overview` als Monitoring-Nachweis |
+| 017 | MCP/OpenAPI Tool Contracts fuer externe Agenten | 20 produktive Agent-Tools freigeschaltet | M | API Governance | P1 | H2 | **GESCHLOSSEN Wave 83** — `/api/v1/agent/tool-contracts` manifest + MCP-/OpenAPI-Views |
 | 018 | Ereignisbasierte Prozessbeobachtung (Process Mining Lite) | Durchlaufzeit-Drilldown fuer Top-10 Prozesse | L | Event Bus, Data Mart | P1 | H2 |
 | 019 | Policy Explainability im UI (Warum freigegeben/blockiert) | 50% weniger Support-Rueckfragen | S | Frontend Components | P1 | H1 |
 | 020 | Workflow-Template Marketplace intern | Neue Prozessvariante in <1 Tag | M | Template Registry | P2 | H3 |
@@ -82,7 +82,7 @@ Hinweise:
 | 026 | Inline-Validierung mit domain-spezifischen Erklaerungen | 35% weniger Eingabefehler | S | Validation Layer | P1 | H1 |
 | 027 | Konsistente Informationsdichte je Rolle | Nutzerzufriedenheit >=8/10 | M | UX Research | P2 | H2 |
 | 028 | Leitsystem fuer Ausnahmefaelle (Error UX) | 50% weniger Abbruchquote bei Fehlern | S | Error Boundaries | P1 | H1 |
-| 029 | Agent UX Panel (Confidence, Quellen, Aktion) | AI-Adoption in Kernteams >=60% | M | Copilot UI | P1 | H2 |
+| 029 | Agent UX Panel (Confidence, Quellen, Aktion) | AI-Adoption in Kernteams >=60% | M | Copilot UI | P1 | H2 | **GESCHLOSSEN Wave 84** — `AgentUxPanel` + `IdempotencyMonitoringPanel` in `admin/agenten-integration` |
 | 030 | Multilingual + Fachsprache Landhandel konsistent | 0 kritische Begriffsinkonsistenzen | M | i18n Catalog | P2 | H2 |
 
 ## Block 031-040: Performance, Daten, Multi-User Parallelbetrieb
@@ -92,13 +92,13 @@ Hinweise:
 | 031 | Query-Vertraege haerten (nie undefined fuer Query Data) | 0 React Query undefined Laufzeitfehler | S | API Client, Schemas | P0 | H1 | **GESCHLOSSEN Wave 29** — `query_contracts.py`: QueryContract + validate_query_result() (strict/non-strict, Enum+Nullable+Typ-Checks), 6 Process-Kernel-Contracts; API GET /process/query-registry |
 | 032 | 500er bei controlling/kpis/timeseries eliminieren | Error Rate <0.5% | S | DB Schema, Migrations | P0 | H1 |
 | 033 | Read-Models fuer Dashboards statt teurer Live-Joins | p95 Dashboard API <250ms | M | Data Pipeline | P0 | H1 |
-| 034 | API-Bulk-Operationen fuer Massenvorgaenge | 3x Throughput bei Batch-Import | M | API Layer | P1 | H2 |
+| 034 | API-Bulk-Operationen fuer Massenvorgaenge | 3x Throughput bei Batch-Import | M | API Layer | P1 | H2 | **GESCHLOSSEN Wave 84** — `POST /api/v1/process/bulk-operations/evaluate` plus DQ-gekoppelte Batch-Validierung |
 | 035 | Optimistic Locking fuer konkurrierende Bearbeitung | 0 stille Ueberschreibungen | M | DB Models | P0 | H1 |
 | 036 | Queue-basierte Hintergrundjobs fuer schwere Prozesse | p95 UI-Response <300ms unter Last | M | Job Runner | P1 | H1 |
 | 037 | Lasttests Erntepeak (mehrere Standorte, parallel) | 500 gleichzeitige User stabil | L | Load Test Harness | P0 | H2 |
 | 038 | Tenant-isolierte Caches/Rate Limits | 0 Cross-tenant Performance-Kollisionen | M | API Gateway | P1 | H2 |
 | 039 | End-to-End Tracing (UI->API->DB->Worker) | MTTR -40% bei Produktionsfehlern | M | OpenTelemetry | P1 | H1 | **GESCHLOSSEN Wave 28** — `otel_span_contracts.py`: 14 SpanContracts (5 Domains), valeo.{domain}.{operation}-Konvention, kein OTel-Import in app/core/; API GET /process/otel/span-registry |
-| 040 | Datenqualitaetsregeln (Dublette, Pflichtfeld, Referenz) | Stammdatenfehler -50% | M | MDM Rules | P1 | H2 |
+| 040 | Datenqualitaetsregeln (Dublette, Pflichtfeld, Referenz) | Stammdatenfehler -50% | M | MDM Rules | P1 | H2 | **GESCHLOSSEN Wave 84** — gemeinsame DQ-Regeln fuer Journal-, Kontoauszug- und Zahlungsimporte vor Persistenz |
 
 ## Block 041-050: Compliance, Integrationen, Markt-Differenzierung
 
@@ -107,8 +107,8 @@ Hinweise:
 | 041 | GoBD Belegkette komplett durchgaengig in allen Finanzpfaden | 100% revisionssichere Kette | L | Finance Service | P0 | H1 |
 | 042 | Intrastat/Zoll produktiv inkl. Monitoring/Alerting | 0 versaeumte Meldefristen | M | Compliance Services | P0 | H1 |
 | 043 | EDI/API Hub fuer Kunden/Lieferanten/Behorden | >=80% Dokumentaustausch digital | L | Integration Platform | P1 | H2 |
-| 044 | Lieferketten-Tracking inkl. ETA/Abweichungsalarme | OTD +10 Prozentpunkte | M | Event Bus, GPS/Telematik | P1 | H2 |
-| 045 | DMS + OCR + strukturierte Extraktion in Kernflows | 60% weniger manuelle Belegerfassung | M | DMS, AI OCR | P1 | H2 |
+| 044 | Lieferketten-Tracking inkl. ETA/Abweichungsalarme | OTD +10 Prozentpunkte | M | Event Bus, GPS/Telematik | P1 | H2 | **GESCHLOSSEN Wave 85** — `POST /api/v1/process/supply-chain/eta/alarm` mit standardisiertem ETA-/Abweichungsalarm |
+| 045 | DMS + OCR + strukturierte Extraktion in Kernflows | 60% weniger manuelle Belegerfassung | M | DMS, AI OCR | P1 | H2 | **GESCHLOSSEN Wave 85** — `POST /api/v1/process/dms/extract` mit Dokumentklassifikation, Feldextraktion und Kernfluss-Contract |
 | 046 | Nachhaltigkeit/CO2 Reporting fuer Agrarkonzerne | ESG-Berichte in <1 Tag erzeugbar | M | Sustainability Domain | P2 | H3 |
 | 047 | Branchenbenchmarking Cockpit je Genossenschaft | Monatlicher Benchmarkreport automatisch | M | Analytics Mart | P2 | H3 |
 | 048 | Offene Integrationsfaehigkeit fuer Agenten (Perplexity etc.) | 10 externe Agent-Use-Cases live | M | Tooling, Security | P1 | H2 |

@@ -72,6 +72,12 @@ def create_tables():
         except Exception as e:
             logger.warning(f"Channel thread models import failed: {e}")
 
+        try:
+            from app.models import blockchain_anchors as blockchain_anchor_models  # noqa: F401
+            logger.info("Blockchain anchor models imported")
+        except Exception as e:
+            logger.warning(f"Blockchain anchor models import failed: {e}")
+
         # Ensure outbox table is part of metadata
         try:
             from app.infrastructure.eventbus import outbox as outbox_models  # noqa: F401

@@ -93,10 +93,14 @@ def _build_journal_import_datensatz(row_data: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-def validate_and_parse_row(row_data: Dict[str, Any], row_number: int) -> tuple[Optional[JournalEntryImportRow], Optional[ImportError]]:
+def validate_and_parse_row(
+    row_data: Dict[str, Any],
+    row_number: int,
+    kontext_datensaetze: list[dict[str, Any]] | None = None,
+) -> tuple[Optional[JournalEntryImportRow], Optional[ImportError]]:
     """Validate and parse a single import row"""
     dq_datensatz = _build_journal_import_datensatz(row_data)
-    dq_result = evaluate_journal_import_datensatz(dq_datensatz)
+    dq_result = evaluate_journal_import_datensatz(dq_datensatz, kontext_datensaetze)
     if not dq_result.bestanden:
         return None, ImportError(
             row_number=row_number,
@@ -195,12 +199,13 @@ async def import_journal_entries_csv(
         errors: List[ImportError] = []
         successful_entries: List[JournalEntryImportRow] = []
         created_entry_ids: List[str] = []
+        dq_context = [_build_journal_import_datensatz(row) for row in rows]
         
         # Group rows by entry (same entry_date and entry_number)
         entries_dict: Dict[str, List[JournalEntryImportRow]] = {}
         
         for idx, row_data in enumerate(rows, start=2):  # Start at 2 (header is row 1)
-            entry, error = validate_and_parse_row(row_data, idx)
+            entry, error = validate_and_parse_row(row_data, idx, dq_context)
             
             if error:
                 raise HTTPException(

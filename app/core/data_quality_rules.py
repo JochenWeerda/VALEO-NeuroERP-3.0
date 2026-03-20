@@ -311,6 +311,31 @@ class DQValidationResult:
         }
 
 
+@dataclass
+class DQBatchValidationResult:
+    """Ergebnis einer Batch-Validierung ueber mehrere Datensaetze."""
+    entity_typ: str
+    ruleset_id: str
+    total: int
+    bestanden: int
+    fehler: int
+    warnungen: int
+    resultate: list[DQValidationResult] = field(default_factory=list)
+    schema_version: int = 1
+
+    def as_dict(self) -> dict:
+        return {
+            "entity_typ": self.entity_typ,
+            "ruleset_id": self.ruleset_id,
+            "total": self.total,
+            "bestanden": self.bestanden,
+            "fehler": self.fehler,
+            "warnungen": self.warnungen,
+            "resultate": [r.as_dict() for r in self.resultate],
+            "schema_version": self.schema_version,
+        }
+
+
 # ---------------------------------------------------------------------------
 # Interne Check-Funktionen
 # ---------------------------------------------------------------------------
@@ -744,6 +769,9 @@ def get_default_dq_rulesets() -> dict[str, DQRuleSet]:
                     "Waehrung muss gueltiger Wert sein",
                     severity=DQSeverity.WARNUNG,
                     referenz_werte=["EUR", "USD", "CHF", "GBP"]),
+            DQRegel("BSI-006", DQRegelTyp.DUPLIKAT_VERDACHT, "reference",
+                    "Kontoauszugszeilen sollten je Import-Batch eindeutig sein",
+                    unique_felder=["booking_date", "value_date", "amount", "reference"]),
         ],
     )
 
@@ -764,6 +792,9 @@ def get_default_dq_rulesets() -> dict[str, DQRuleSet]:
             DQRegel("JI-006", DQRegelTyp.BEREICH_VERLETZUNG, "credit_amount",
                     "Habenbetrag muss >= 0 und <= 100.000.000 sein",
                     min_wert=0.0, max_wert=100000000.0),
+            DQRegel("JI-007", DQRegelTyp.DUPLIKAT_VERDACHT, "entry_date",
+                    "Identische Journalzeilen sollten je Import-Batch eindeutig sein",
+                    unique_felder=["entry_date", "account_number", "description", "debit_amount", "credit_amount"]),
         ],
     )
 
@@ -783,6 +814,9 @@ def get_default_dq_rulesets() -> dict[str, DQRuleSet]:
                     "Waehrung muss gueltiger Wert sein",
                     severity=DQSeverity.WARNUNG,
                     referenz_werte=["EUR", "USD", "CHF", "GBP"]),
+            DQRegel("PI-005", DQRegelTyp.DUPLIKAT_VERDACHT, "reference",
+                    "Zahlungseingaenge sollten je Import-Batch eindeutig sein",
+                    unique_felder=["booking_date", "amount", "reference"]),
         ],
     )
 
@@ -865,3 +899,30 @@ def get_default_dq_rulesets() -> dict[str, DQRuleSet]:
         "AssetLedgerConnectorImport": asset_ledger_connector_import,
         "DailyPriceImport": daily_price_import,
     }
+
+
+def get_dq_ruleset_for_entity(entity_typ: str) -> DQRuleSet | None:
+    """Liefert das Default-Regelset fuer einen Entity-Typ oder None."""
+    return get_default_dq_rulesets().get(entity_typ)
+
+
+def validate_datensaetze_batch(
+    ruleset: DQRuleSet,
+    datensaetze: list[dict],
+) -> DQBatchValidationResult:
+    """Validiert eine Liste von Datensaetzen gegen ein Regelset."""
+    resultate = [
+        validate_datensatz(ruleset, datensatz, datensaetze)
+        for datensatz in datensaetze
+    ]
+    fehler = sum(1 for r in resultate if not r.bestanden)
+    warnungen = sum(r.warnungs_anzahl for r in resultate)
+    return DQBatchValidationResult(
+        entity_typ=ruleset.entity_typ,
+        ruleset_id=ruleset.ruleset_id,
+        total=len(datensaetze),
+        bestanden=len(datensaetze) - fehler,
+        fehler=fehler,
+        warnungen=warnungen,
+        resultate=resultate,
+    )

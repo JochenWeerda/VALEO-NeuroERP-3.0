@@ -5,7 +5,7 @@ Repository for persistent channel process threads.
 from __future__ import annotations
 
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy import select
+from sqlalchemy import desc, select
 from sqlalchemy.orm import Session
 
 from app.core.channel_process_actions import (
@@ -78,6 +78,44 @@ class PersistentChannelProcessThreadStore(ChannelProcessThreadStore):
         if record is None:
             return get_channel_process_thread_store().get(thread_id)
         return self._to_domain(record)
+
+    def list_threads(
+        self,
+        *,
+        kanal: str | None = None,
+        tenant_id: str | None = None,
+        status: str | None = None,
+        process_definition_key: str | None = None,
+        limit: int = 50,
+    ) -> list[ChannelProcessThread]:
+        stmt = select(ChannelProcessThreadRecord)
+        if kanal:
+            stmt = stmt.where(ChannelProcessThreadRecord.kanal == kanal)
+        if tenant_id:
+            stmt = stmt.where(ChannelProcessThreadRecord.tenant_id == tenant_id)
+        if status:
+            stmt = stmt.where(ChannelProcessThreadRecord.status == status)
+        if process_definition_key:
+            stmt = stmt.where(
+                ChannelProcessThreadRecord.process_definition_key == process_definition_key
+            )
+        stmt = stmt.order_by(desc(ChannelProcessThreadRecord.updated_at)).limit(max(limit, 1))
+        records = self.db.execute(stmt).unique().scalars().all()
+        if records:
+            return [self._to_domain(record) for record in records]
+        return get_channel_process_thread_store().list_threads(
+            kanal=kanal,
+            tenant_id=tenant_id,
+            status=status,
+            process_definition_key=process_definition_key,
+            limit=limit,
+        )
+
+    def get_audit_trail(self, thread_id: str) -> list[ChannelThreadAuditItem] | None:
+        thread = self.get(thread_id)
+        if thread is None:
+            return None
+        return list(thread.audit_trail)
 
     def clear(self) -> None:
         self.db.query(ChannelThreadAuditItemRecord).delete()

@@ -212,6 +212,29 @@ class DokumentKlassifikationsErgebnis:
         }
 
 
+@dataclass
+class OCRKernflussErgebnis:
+    """Kernfluss-Kontrakt fuer OCR-Extraktion und anschliessende Prozessanbindung."""
+    dokument_id: str
+    klassifikation: DokumentKlassifikationsErgebnis
+    ocr_ergebnis: OCRExtraktionsErgebnis
+    zielprozesse: list[str] = field(default_factory=list)
+    import_format: str = "ocr_pdf"
+    manuelle_pruefung_erforderlich: bool = False
+    hinweise: list[str] = field(default_factory=list)
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "dokument_id": self.dokument_id,
+            "klassifikation": self.klassifikation.as_dict(),
+            "ocr_ergebnis": self.ocr_ergebnis.as_dict(),
+            "zielprozesse": self.zielprozesse,
+            "import_format": self.import_format,
+            "manuelle_pruefung_erforderlich": self.manuelle_pruefung_erforderlich,
+            "hinweise": self.hinweise,
+        }
+
+
 # ---------------------------------------------------------------------------
 # Klassifikationslogik
 # ---------------------------------------------------------------------------
@@ -289,6 +312,232 @@ def bewerte_ocr_ergebnis(ergebnis: OCRExtraktionsErgebnis) -> ExtraktionsStatus:
     if grad >= 0.20:
         return ExtraktionsStatus.MANUELL_ERFORDERLICH
     return ExtraktionsStatus.FEHLGESCHLAGEN
+
+
+def _match_first(patterns: list[str], text: str) -> str | None:
+    for pattern in patterns:
+        match = re.search(pattern, text, re.IGNORECASE | re.MULTILINE)
+        if match:
+            return match.group(1).strip()
+    return None
+
+
+def _normalize_amount(value: str) -> str:
+    cleaned = value.replace(" ", "").replace(".", "").replace(",", ".")
+    try:
+        return f"{float(cleaned):.2f}"
+    except ValueError:
+        return value.strip()
+
+
+def _build_field(
+    feld_id: str,
+    feld_typ: BelegFeldTyp,
+    wert: str,
+    confidence: float,
+    seite: int = 1,
+) -> ExtrahiertesFelder:
+    return ExtrahiertesFelder(
+        feld_id=feld_id,
+        feld_typ=feld_typ,
+        wert=wert,
+        confidence=confidence,
+        seite=seite,
+    )
+
+
+def extrahiere_belegfelder(
+    dokument_id: str,
+    volltext: str,
+    dokument_typ: DokumentTyp | None = None,
+    engine: OCREngine = OCREngine.INTERN,
+    extrahiert_am: datetime | None = None,
+) -> OCRExtraktionsErgebnis:
+    """
+    Leichtgewichtiges OCR-Extraktionsmodell auf Basis von Volltext und Regex.
+
+    Zweck: belastbarer Contract-Pfad fuer Kernflows, nicht Voll-OCR-Engine.
+    """
+    if extrahiert_am is None:
+        extrahiert_am = datetime.utcnow()
+
+    klassifikation = klassifiziere_dokument(dokument_id, volltext)
+    final_typ = dokument_typ or klassifikation.erkannter_typ
+    text = volltext or ""
+
+    felder: list[ExtrahiertesFelder] = []
+    manuelle_felder: list[str] = []
+    hinweise: list[str] = []
+
+    def add_field(
+        feld_id: str,
+        feld_typ: BelegFeldTyp,
+        patterns: list[str],
+        confidence: float,
+        mandatory: bool = False,
+        transform: Any | None = None,
+    ) -> None:
+        value = _match_first(patterns, text)
+        if value is None:
+            if mandatory:
+                manuelle_felder.append(feld_typ.value)
+            return
+        if transform is not None:
+            value = transform(value)
+        felder.append(_build_field(feld_id, feld_typ, value, confidence))
+
+    add_field(
+        "OCR-F-001",
+        BelegFeldTyp.BELEGNUMMER,
+        [
+            r"(?:rechnungsnummer|rechnung\s*nr\.?|belegnummer|invoice\s*no\.?|invoice\s*number)\s*[:#]?\s*([A-Z0-9\-\/]+)",
+            r"(?:lieferschein\s*nr\.?|delivery\s*note\s*no\.?|ls-nr\.?)\s*[:#]?\s*([A-Z0-9\-\/]+)",
+        ],
+        0.96,
+        mandatory=True,
+    )
+    add_field(
+        "OCR-F-002",
+        BelegFeldTyp.DATUM,
+        [
+            r"(?:datum|date|belegdatum)\s*[:#]?\s*(\d{2}\.\d{2}\.\d{4})",
+            r"(?:datum|date|belegdatum)\s*[:#]?\s*(\d{4}-\d{2}-\d{2})",
+        ],
+        0.91,
+        mandatory=True,
+    )
+    add_field(
+        "OCR-F-003",
+        BelegFeldTyp.BETRAG,
+        [
+            r"(?:gesamtbetrag|endbetrag|betrag|total|summe)\s*[:#]?\s*(?:eur|€|eur)?\s*([0-9\.\,]+)",
+        ],
+        0.93,
+        mandatory=final_typ == DokumentTyp.EINGANGSRECHNUNG,
+        transform=_normalize_amount,
+    )
+    add_field(
+        "OCR-F-004",
+        BelegFeldTyp.WAEHRUNG,
+        [
+            r"(?:währung|waehrung|currency)\s*[:#]?\s*([A-Z]{3})",
+            r"(\bEUR\b|\bUSD\b|\bCHF\b)",
+        ],
+        0.88,
+    )
+    add_field(
+        "OCR-F-005",
+        BelegFeldTyp.IBAN,
+        [
+            r"(?:iban)\s*[:#]?\s*([A-Z]{2}[0-9A-Z ]{13,34})",
+        ],
+        0.95,
+        mandatory=final_typ == DokumentTyp.EINGANGSRECHNUNG,
+    )
+    add_field(
+        "OCR-F-006",
+        BelegFeldTyp.LIEFERANT_NAME,
+        [
+            r"(?:lieferant|vendor|supplier)\s*[:#]?\s*([A-Za-zÄÖÜäöüß0-9&.,\- ]{3,80})",
+        ],
+        0.84,
+    )
+    if final_typ in (DokumentTyp.LIEFERSCHEIN, DokumentTyp.WIEGESCHEIN):
+        add_field(
+            "OCR-F-007",
+            BelegFeldTyp.MENGE,
+            [
+                r"(?:menge|quantity|nettogewicht|bruttogewicht)\s*[:#]?\s*([0-9\.\,]+)",
+            ],
+            0.82,
+        )
+    if final_typ == DokumentTyp.EINGANGSRECHNUNG and not any(f.feld_typ == BelegFeldTyp.MENGE for f in felder):
+        # Rechnungen ohne Positionsanalyse bleiben nicht kritisch, aber manuell prüfbar.
+        hinweise.append("Rechnung erkannt, aber keine Positionsdaten extrahiert")
+
+    status = bewerte_ocr_ergebnis(
+        OCRExtraktionsErgebnis(
+            dokument_id=dokument_id,
+            dokument_typ=final_typ,
+            engine=engine,
+            status=ExtraktionsStatus.ERFOLGREICH,
+            felder=felder,
+            extrahiert_am=extrahiert_am,
+            manuelle_felder=manuelle_felder,
+            hinweise=hinweise,
+        )
+    )
+
+    ergebnis = OCRExtraktionsErgebnis(
+        dokument_id=dokument_id,
+        dokument_typ=final_typ,
+        engine=engine,
+        status=status,
+        felder=felder,
+        extrahiert_am=extrahiert_am,
+        manuelle_felder=manuelle_felder,
+        hinweise=hinweise,
+    )
+    if status != ExtraktionsStatus.ERFOLGREICH:
+        ergebnis.hinweise.append("OCR-Ergebnis erfordert Nachbearbeitung oder Review")
+    return ergebnis
+
+
+def build_ocr_kernfluss(
+    dokument_id: str,
+    volltext: str,
+    dokument_typ: DokumentTyp | None = None,
+    engine: OCREngine = OCREngine.INTERN,
+    extrahiert_am: datetime | None = None,
+) -> OCRKernflussErgebnis:
+    """Baut den Kernfluss-Contract fuer OCR -> DMS -> Prozessanbindung."""
+    if extrahiert_am is None:
+        extrahiert_am = datetime.utcnow()
+
+    klassifikation = klassifiziere_dokument(dokument_id, volltext)
+    ocr_ergebnis = extrahiere_belegfelder(
+        dokument_id=dokument_id,
+        volltext=volltext,
+        dokument_typ=dokument_typ or klassifikation.erkannter_typ,
+        engine=engine,
+        extrahiert_am=extrahiert_am,
+    )
+
+    zielprozesse: list[str] = [
+        "domain_docflow.document_headers",
+        "domain_docflow.document_items",
+        "domain_docflow.document_artifacts",
+    ]
+    hinweise = list(ocr_ergebnis.hinweise)
+    if ocr_ergebnis.dokument_typ == DokumentTyp.EINGANGSRECHNUNG:
+        zielprozesse.extend([
+            "domain_docflow.invoice_xml_store",
+            "finance.ap_invoices",
+            "journal_entries.posting_candidate",
+        ])
+        hinweise.append("Rechnung kann in Finance- und GoBD-Flow uebergeben werden")
+    elif ocr_ergebnis.dokument_typ == DokumentTyp.LIEFERSCHEIN:
+        zielprozesse.extend([
+            "domain_docflow.delivery_note_link",
+            "warehouse.receive_flow",
+        ])
+    elif ocr_ergebnis.dokument_typ == DokumentTyp.ZOLLERKLAERUNG:
+        zielprozesse.append("compliance.customs_review")
+    elif ocr_ergebnis.dokument_typ == DokumentTyp.QUALITAETSPROTOKOLL:
+        zielprozesse.append("quality_protocol.ingestion")
+
+    if ocr_ergebnis.status != ExtraktionsStatus.ERFOLGREICH:
+        hinweise.append("Manuelle Nachbearbeitung vor dem Kernflow empfohlen")
+
+    return OCRKernflussErgebnis(
+        dokument_id=dokument_id,
+        klassifikation=klassifikation,
+        ocr_ergebnis=ocr_ergebnis,
+        zielprozesse=zielprozesse,
+        import_format="ocr_pdf",
+        manuelle_pruefung_erforderlich=ocr_ergebnis.status != ExtraktionsStatus.ERFOLGREICH,
+        hinweise=hinweise,
+    )
 
 
 # ---------------------------------------------------------------------------

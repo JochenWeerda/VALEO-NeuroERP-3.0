@@ -20,6 +20,7 @@ from ....core.action_idempotency import (
     IdempotencyConflictError,
     get_action_idempotency_store,
 )
+from ....core.business_commands import build_core_command_catalog
 from ....core.process_commands import get_process_command_catalog
 from ....core.process_references import build_process_reference_context
 from ....core.policy_decisions import PolicyOverrideLayer, resolve_policy_override_layers
@@ -105,6 +106,7 @@ from ....core.data_quality_rules import (
     DQRuleSet,
     validate_datensatz,
     get_default_dq_rulesets,
+    get_dq_ruleset_for_entity,
 )
 from ....core.bulk_operations import (
     BulkItem,
@@ -112,6 +114,7 @@ from ....core.bulk_operations import (
     BulkRequest,
     get_bulk_limit_by_domain,
     get_default_bulk_limits,
+    evaluate_bulk_request_with_dq,
     validate_bulk_request,
 )
 from ....core.background_jobs import (
@@ -329,6 +332,7 @@ from ....core.dms_ocr_contracts import (
     BelegErkennungsRegel,
     DokumentTyp,
     OCREngine,
+    build_ocr_kernfluss,
     bewerte_ocr_ergebnis,
     get_default_erkennungsregeln,
     klassifiziere_dokument,
@@ -351,6 +355,7 @@ from ....core.supply_chain_tracking import (
     ETABerechnungsRequest,
     LieferkettenPhase,
     TransportModus,
+    bewerte_eta_alarm,
     berechne_eta,
     bewerte_lieferkettenstatus,
     bewerte_mengenabweichung,
@@ -567,6 +572,41 @@ def execute_action(body: ActionExecutionRequest) -> dict[str, Any]:
     return result.model_dump(mode="json")
 
 
+@router.get("/actions/idempotency/overview", response_model=dict)
+def get_idempotency_overview() -> dict[str, Any]:
+    """Liefert einen Monitoring-Überblick über den Idempotenz-Layer."""
+    store = get_action_idempotency_store()
+    store_summary = store.summary()
+    catalog = build_core_command_catalog()
+    idempotent_commands = [cmd.command_name for cmd in catalog if cmd.idempotent]
+    human_confirmation_commands = [cmd.command_name for cmd in catalog if cmd.requires_human_confirmation]
+    agent_ready_commands = [cmd.command_name for cmd in catalog if cmd.allowed_agent_types]
+    total_commands = len(catalog)
+    idempotent_coverage_pct = round((len(idempotent_commands) / total_commands) * 100) if total_commands else 0
+    confidence_score = min(100, max(0, round((idempotent_coverage_pct * 0.7) + (min(store_summary["total_records"], total_commands) * 3))))
+    return {
+        "schema_version": 1,
+        "catalog": {
+            "total_commands": total_commands,
+            "idempotent_commands": len(idempotent_commands),
+            "human_confirmation_commands": len(human_confirmation_commands),
+            "agent_ready_commands": len(agent_ready_commands),
+            "idempotent_coverage_pct": idempotent_coverage_pct,
+        },
+        "store": store_summary,
+        "confidence_score": confidence_score,
+        "recommended_action": (
+            "Idempotente Commands sind live und replay-sicher. "
+            "Nutze die Monitoring-Sicht, um Retries, Replays und Command-Abdeckung zu beobachten."
+        ),
+        "lookup_paths": [
+            "/api/v1/process/actions/execute",
+            "/api/v1/process/actions/idempotency/{tenant_id}/{idempotency_key}",
+            "/api/v1/process/actions/{execution_id}",
+        ],
+    }
+
+
 @router.get("/actions/idempotency/{tenant_id}/{idempotency_key}", response_model=dict)
 def get_action_by_idempotency(tenant_id: str, idempotency_key: str) -> dict[str, Any]:
     """Liefert den kanonischen Action-Snapshot zu einem Idempotency-Key."""
@@ -712,6 +752,25 @@ def get_settlement_audit_chain(settlement_id: str) -> dict[str, Any]:
         gross_amount=0.0,
     )
     return chain.as_dict()
+
+
+@router.post("/settlement/audit-chain/{settlement_id}/anchor", response_model=dict)
+def create_settlement_audit_chain_anchor(settlement_id: str, payload: dict | None = None, db=Depends(get_db)) -> dict[str, Any]:
+    from app.core.blockchain_anchor_runtime import anchor_settlement_audit_chain
+
+    body = payload or {}
+    chain = build_genesis_chain(
+        settlement_id=settlement_id,
+        tenant_id=body.get("tenant_id", "demo-tenant"),
+        gross_amount=float(body.get("gross_amount", 0.0)),
+        currency=body.get("currency", "EUR"),
+        actor_id=body.get("actor_id", "system"),
+    )
+    anchor = anchor_settlement_audit_chain(db, chain=chain)
+    return {
+        "settlement_audit_chain": chain.as_dict(),
+        "blockchain_anchor": anchor.as_dict(),
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -1621,6 +1680,79 @@ def validate_bulk_operation(body: dict = None) -> dict[str, Any]:
     limit = get_bulk_limit_by_domain(domain)
     result = validate_bulk_request(request, limit)
     return result.as_dict()
+
+
+@router.post("/bulk-operations/evaluate", response_model=dict)
+def evaluate_bulk_operation_with_dq(body: dict | None = None) -> dict[str, Any]:
+    """
+    Evaluates a bulk request together with the active DQ rule set.
+
+    Body fields:
+    - operation_typ
+    - domain
+    - ressource
+    - entity_typ
+    - items: [{item_id, payload}]
+    - trocken_lauf (optional)
+    - stop_bei_erstem_fehler (optional)
+    """
+    if body is None:
+        body = {}
+
+    entity_typ: str = body.get("entity_typ", "")
+    op_str: str = body.get("operation_typ", "")
+    domain: str = body.get("domain", "")
+    ressource: str = body.get("ressource", "")
+    items_raw: list = body.get("items", [])
+
+    if not entity_typ:
+        raise HTTPException(status_code=422, detail="entity_typ ist erforderlich")
+    if not op_str or not domain or not ressource:
+        raise HTTPException(status_code=422, detail="operation_typ, domain und ressource sind erforderlich")
+    if not isinstance(items_raw, list):
+        raise HTTPException(status_code=422, detail="items muss eine Liste sein")
+
+    try:
+        op_typ = BulkOperationTyp(op_str)
+    except ValueError:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Unbekannter operation_typ '{op_str}'. Erlaubt: {[e.value for e in BulkOperationTyp]}",
+        )
+
+    items = [
+        BulkItem(
+            item_id=str(it.get("item_id", "")),
+            payload=it.get("payload", {}),
+        )
+        for it in items_raw
+        if isinstance(it, dict)
+    ]
+
+    request = BulkRequest(
+        operation_typ=op_typ,
+        domain=domain,
+        ressource=ressource,
+        items=items,
+        trocken_lauf=bool(body.get("trocken_lauf", True)),
+        stop_bei_erstem_fehler=bool(body.get("stop_bei_erstem_fehler", False)),
+    )
+
+    limit = get_bulk_limit_by_domain(domain)
+    ruleset = get_dq_ruleset_for_entity(entity_typ)
+    if ruleset is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Kein DQ-Regelset fuer entity_typ '{entity_typ}' gefunden. Bekannt: {list(get_default_dq_rulesets().keys())}",
+        )
+
+    validation, result = evaluate_bulk_request_with_dq(request, entity_typ=entity_typ, limit=limit)
+    return {
+        "validation": validation.as_dict(),
+        "bulk_result": result.as_dict(),
+        "dq_ruleset": ruleset.as_dict(),
+        "schema_version": 1,
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -5462,6 +5594,7 @@ def hole_persistentes_knowledge_objekt(knowledge_id: str, version: int | None = 
 
 @router.post("/knowledge/store/objekte", status_code=201, tags=["process-kernel"])
 def erstelle_persistentes_knowledge_objekt(payload: dict, db=Depends(get_db)):
+    from app.core.blockchain_anchor_runtime import anchor_knowledge_object
     from app.repositories.knowledge_repository import KnowledgeRepository
 
     version_payload = payload.get("version")
@@ -5484,18 +5617,30 @@ def erstelle_persistentes_knowledge_objekt(payload: dict, db=Depends(get_db)):
         agentenfreigabe=bool(payload.get("agentenfreigabe", True)),
         version_payload=version_payload,
     )
-    return repo.to_domain_object(record).as_dict()
+    anchor = anchor_knowledge_object(
+        db,
+        knowledge_record=record,
+        version=max((version.version for version in record.versionen), default=1),
+    )
+    body = repo.to_domain_object(record).as_dict()
+    body["blockchain_anchor"] = anchor.as_dict()
+    return body
 
 
 @router.post("/knowledge/store/objekte/{knowledge_id}/versionen", tags=["process-kernel"])
 def fuege_persistente_knowledge_version_hinzu(knowledge_id: str, payload: dict, db=Depends(get_db)):
+    from app.core.blockchain_anchor_runtime import anchor_knowledge_object
     from app.repositories.knowledge_repository import KnowledgeRepository
 
     repo = KnowledgeRepository(db)
     record = repo.add_version(knowledge_id, payload)
     if record is None:
         raise HTTPException(status_code=404, detail=f"KnowledgeObject {knowledge_id!r} nicht gefunden")
-    return repo.to_domain_object(record).as_dict()
+    version = max((entry.version for entry in record.versionen), default=1)
+    anchor = anchor_knowledge_object(db, knowledge_record=record, version=version)
+    body = repo.to_domain_object(record).as_dict()
+    body["blockchain_anchor"] = anchor.as_dict()
+    return body
 
 
 @router.post("/knowledge/store/retrieve", tags=["process-kernel"])
@@ -5573,6 +5718,7 @@ def erstelle_knowledge_improvement_proposal(payload: dict, db=Depends(get_db)):
 
 @router.post("/knowledge/store/proposals/from-neuroassist-run", status_code=201, tags=["process-kernel"])
 async def erstelle_knowledge_improvement_proposal_aus_neuroassist_run(payload: dict, db=Depends(get_db)):
+    from app.core.blockchain_anchor_runtime import anchor_governance_proposal
     from app.repositories.knowledge_repository import KnowledgeRepository
 
     for field in ("run_id", "tenant_id", "titel", "vorgeschlagen_von_ref"):
@@ -5663,11 +5809,14 @@ async def erstelle_knowledge_improvement_proposal_aus_neuroassist_run(payload: d
             "Verbesserung aus NeuroASSIST-Orchestrierung in den Wissensstandard rueckfuehren.",
         ),
     )
-    return repo.proposal_as_dict(proposal)
+    body = repo.proposal_as_dict(proposal)
+    body["blockchain_anchor"] = anchor_governance_proposal(db, proposal=proposal).as_dict()
+    return body
 
 
 @router.post("/knowledge/store/proposals/{proposal_id}/review", tags=["process-kernel"])
 def review_knowledge_improvement_proposal(proposal_id: str, payload: dict, db=Depends(get_db)):
+    from app.core.blockchain_anchor_runtime import anchor_knowledge_object
     from app.repositories.knowledge_repository import KnowledgeRepository
 
     if not payload.get("entscheidung"):
@@ -5690,9 +5839,158 @@ def review_knowledge_improvement_proposal(proposal_id: str, payload: dict, db=De
     if proposal is None:
         raise HTTPException(status_code=404, detail=f"Proposal {proposal_id!r} nicht gefunden")
 
-    return {
+    result = {
         "proposal": repo.proposal_as_dict(proposal),
         "applied_knowledge_object": (
             repo.to_domain_object(applied_record).as_dict() if applied_record is not None else None
         ),
     }
+    if applied_record is not None:
+        applied_version = (
+            proposal.get("applied_version")
+            if isinstance(proposal, dict)
+            else getattr(proposal, "applied_version", None)
+        )
+        proposal_id_ref = (
+            proposal.get("proposal_id")
+            if isinstance(proposal, dict)
+            else getattr(proposal, "proposal_id", None)
+        )
+        version = applied_version or max((entry.version for entry in applied_record.versionen), default=1)
+        result["blockchain_anchor"] = anchor_knowledge_object(
+            db,
+            knowledge_record=applied_record,
+            version=version,
+            proposal_id=proposal_id_ref,
+        ).as_dict()
+    return result
+
+
+# ---------------------------------------------------------------------------
+# Wave 36 â€” AP3b: POST /process/supply-chain/eta/alarm
+# ---------------------------------------------------------------------------
+
+@router.post("/supply-chain/eta/alarm", response_model=dict)
+def bewerte_lieferung_eta_alarm(body: dict = None) -> dict[str, Any]:
+    """
+    Bewertet eine ETA gegen eine Zielankunft und erzeugt bei Verzug einen Alarm.
+
+    Pflichtfelder:
+    - lieferung_id, transport_modus, ursprungsort, zielort, geplante_abfahrt, distanz_km, ziel_ankunft
+    """
+    if body is None:
+        body = {}
+
+    pflicht = [
+        "lieferung_id",
+        "transport_modus",
+        "ursprungsort",
+        "zielort",
+        "geplante_abfahrt",
+        "distanz_km",
+        "ziel_ankunft",
+    ]
+    fehlend = [f for f in pflicht if not body.get(f)]
+    if fehlend:
+        raise HTTPException(status_code=422, detail=f"Pflichtfelder fehlen: {fehlend}")
+
+    try:
+        modus = TransportModus(body["transport_modus"])
+    except ValueError:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Unbekannter transport_modus '{body['transport_modus']}'. "
+                   f"Erlaubt: {[e.value for e in TransportModus]}",
+        )
+
+    try:
+        from datetime import datetime as _dt
+        abfahrt = _dt.fromisoformat(body["geplante_abfahrt"])
+        ziel_ankunft = _dt.fromisoformat(body["ziel_ankunft"])
+    except (ValueError, TypeError):
+        raise HTTPException(
+            status_code=422,
+            detail="geplante_abfahrt und ziel_ankunft muessen ISO-8601 sein",
+        )
+
+    try:
+        distanz = float(body["distanz_km"])
+    except (ValueError, TypeError):
+        raise HTTPException(status_code=422, detail="distanz_km muss eine Zahl sein")
+
+    req = ETABerechnungsRequest(
+        lieferung_id=body["lieferung_id"],
+        transport_modus=modus,
+        ursprungsort=body["ursprungsort"],
+        zielort=body["zielort"],
+        geplante_abfahrt=abfahrt,
+        distanz_km=distanz,
+        zwischenstopps=int(body.get("zwischenstopps", 0)),
+        zoll_erforderlich=bool(body.get("zoll_erforderlich", False)),
+        priorisiert=bool(body.get("priorisiert", False)),
+    )
+
+    bewertung = bewerte_eta_alarm(
+        req=req,
+        ziel_ankunft=ziel_ankunft,
+        alarm_id=str(body.get("alarm_id") or f"ALM-ETA-{body['lieferung_id']}"),
+    )
+    return bewertung.as_dict()
+
+
+# ---------------------------------------------------------------------------
+# Wave 37 â€” AP2b: POST /process/dms/extract
+# ---------------------------------------------------------------------------
+
+@router.post("/dms/extract", response_model=dict)
+def extract_dokument(body: dict = None) -> dict[str, Any]:
+    """
+    Extrahiert strukturierte Felder und baut einen Kernfluss-Contract fuer DMS -> Finance/Docflow.
+
+    Pflichtfelder:
+    - dokument_id: DMS-interne Dokument-ID
+    - volltext:    OCR-Volltext des Dokuments
+    """
+    if body is None:
+        body = {}
+
+    dokument_id: str = body.get("dokument_id", "")
+    volltext: str = body.get("volltext", "")
+
+    if not dokument_id or not volltext:
+        raise HTTPException(
+            status_code=422,
+            detail="dokument_id und volltext sind erforderlich",
+        )
+
+    dokument_typ = None
+    dokument_typ_raw = body.get("dokument_typ")
+    if dokument_typ_raw:
+        try:
+            dokument_typ = DokumentTyp(dokument_typ_raw)
+        except ValueError:
+            raise HTTPException(
+                status_code=422,
+                detail=f"Unbekannter DokumentTyp '{dokument_typ_raw}'. "
+                       f"Erlaubt: {[e.value for e in DokumentTyp]}",
+            )
+
+    engine = OCREngine.INTERN
+    engine_raw = body.get("engine")
+    if engine_raw:
+        try:
+            engine = OCREngine(engine_raw)
+        except ValueError:
+            raise HTTPException(
+                status_code=422,
+                detail=f"Unbekannte OCR-Engine '{engine_raw}'. "
+                       f"Erlaubt: {[e.value for e in OCREngine]}",
+            )
+
+    ergebnis = build_ocr_kernfluss(
+        dokument_id=dokument_id,
+        volltext=volltext,
+        dokument_typ=dokument_typ,
+        engine=engine,
+    )
+    return ergebnis.as_dict()

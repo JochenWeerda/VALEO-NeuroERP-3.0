@@ -62,17 +62,22 @@ def _build_bank_statement_import_datensatz(
     value_date: object,
     amount: object,
     currency: object = "EUR",
+    reference: object | None = None,
 ) -> dict:
     return {
         "booking_date": booking_date,
         "value_date": value_date,
         "amount": amount,
         "currency": currency or "EUR",
+        "reference": reference,
     }
 
 
-def _validate_bank_statement_import_datensatz(datensatz: dict) -> None:
-    result = evaluate_bank_statement_import_datensatz(datensatz)
+def _validate_bank_statement_import_datensatz(
+    datensatz: dict,
+    kontext_datensaetze: list[dict] | None = None,
+) -> None:
+    result = evaluate_bank_statement_import_datensatz(datensatz, kontext_datensaetze)
     if not result.bestanden:
         raise HTTPException(
             status_code=422,
@@ -298,14 +303,6 @@ def parse_csv(content: bytes) -> dict:
             value_date_str = row.get('value_date', row.get('valutadatum', date_str))
             amount_str = str(row.get('amount', row.get('betrag', '0'))).replace(',', '.')
             currency = row.get('currency', row.get('waehrung', 'EUR'))
-            _validate_bank_statement_import_datensatz(
-                _build_bank_statement_import_datensatz(
-                    booking_date=date_str,
-                    value_date=value_date_str,
-                    amount=amount_str,
-                    currency=currency,
-                )
-            )
 
             try:
                 booking_date = datetime.strptime(date_str, '%Y-%m-%d').date()
@@ -324,6 +321,7 @@ def parse_csv(content: bytes) -> dict:
                 'booking_date': booking_date,
                 'value_date': value_date,
                 'amount': amount,
+                'currency': currency or "EUR",
                 'reference': reference,
                 'remittance_info': remittance_info,
                 'creditor_name': creditor_name,
@@ -331,6 +329,28 @@ def parse_csv(content: bytes) -> dict:
                 'debtor_name': debtor_name,
                 'creditor_iban': None
             })
+
+        dq_context = [
+            _build_bank_statement_import_datensatz(
+                booking_date=entry['booking_date'].isoformat(),
+                value_date=entry['value_date'].isoformat(),
+                amount=entry['amount'],
+                currency=entry.get('currency', 'EUR'),
+                reference=entry.get('reference'),
+            )
+            for entry in entries
+        ]
+        for entry in entries:
+            _validate_bank_statement_import_datensatz(
+                _build_bank_statement_import_datensatz(
+                    booking_date=entry['booking_date'].isoformat(),
+                    value_date=entry['value_date'].isoformat(),
+                    amount=entry['amount'],
+                    currency=entry.get('currency', 'EUR'),
+                    reference=entry.get('reference'),
+                ),
+                dq_context,
+            )
         
         # Calculate closing balance (if opening balance provided)
         if entries:
@@ -373,14 +393,28 @@ async def import_bank_statement(
         else:
             raise HTTPException(status_code=400, detail=f"Unsupported format: {format}")
 
+        dq_context = [
+            _build_bank_statement_import_datensatz(
+                booking_date=entry.get('booking_date').isoformat() if hasattr(entry.get('booking_date'), 'isoformat') else entry.get('booking_date'),
+                value_date=entry.get('value_date').isoformat() if hasattr(entry.get('value_date'), 'isoformat') else entry.get('value_date'),
+                amount=entry.get('amount'),
+                currency=entry.get('currency', 'EUR'),
+                reference=entry.get('reference'),
+            )
+            for entry in parsed['entries']
+        ]
+
         for entry in parsed['entries']:
+            current_datensatz = _build_bank_statement_import_datensatz(
+                booking_date=entry.get('booking_date').isoformat() if hasattr(entry.get('booking_date'), 'isoformat') else entry.get('booking_date'),
+                value_date=entry.get('value_date').isoformat() if hasattr(entry.get('value_date'), 'isoformat') else entry.get('value_date'),
+                amount=entry.get('amount'),
+                currency=entry.get('currency', 'EUR'),
+                reference=entry.get('reference'),
+            )
             _validate_bank_statement_import_datensatz(
-                _build_bank_statement_import_datensatz(
-                    booking_date=entry.get('booking_date').isoformat() if hasattr(entry.get('booking_date'), 'isoformat') else entry.get('booking_date'),
-                    value_date=entry.get('value_date').isoformat() if hasattr(entry.get('value_date'), 'isoformat') else entry.get('value_date'),
-                    amount=entry.get('amount'),
-                    currency=entry.get('currency', 'EUR'),
-                )
+                current_datensatz,
+                dq_context,
             )
         
         # Get bank account IBAN if not provided

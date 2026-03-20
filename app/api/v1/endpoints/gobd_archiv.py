@@ -55,6 +55,10 @@ async def register_document_artifact(
     db: Session = Depends(get_db),
 ):
     """Belegartefakt registrieren (PDF/XML) mit Content-Hash für GoBD-Aufbewahrung."""
+    from fastapi.responses import JSONResponse
+
+    from app.core.blockchain_anchor_runtime import anchor_document_artifact
+
     effective_tenant = tenant_id or DEFAULT_TENANT
     art_id = str(uuid4())
     db.execute(
@@ -85,7 +89,7 @@ async def register_document_artifact(
         {"id": art_id},
     ).mappings().first()
     r = dict(row)
-    return DocumentArtifactOut(
+    body = DocumentArtifactOut(
         id=r["id"],
         tenant_id=r["tenant_id"],
         header_id=r["header_id"],
@@ -95,7 +99,19 @@ async def register_document_artifact(
         file_name=r.get("file_name"),
         created_at=r["created_at"],
         created_by=r.get("created_by"),
-    )
+    ).model_dump(mode="json")
+    body["blockchain_anchor"] = anchor_document_artifact(
+        db,
+        tenant_id=effective_tenant,
+        artifact_id=art_id,
+        header_id=payload.header_id,
+        artifact_type=payload.artifact_type,
+        content_hash_sha256=payload.content_hash_sha256,
+        storage_key=payload.storage_key,
+        file_name=payload.file_name,
+        created_by=payload.created_by,
+    ).as_dict()
+    return JSONResponse(content=body)
 
 
 @router.get("/artifacts", response_model=list[DocumentArtifactOut])

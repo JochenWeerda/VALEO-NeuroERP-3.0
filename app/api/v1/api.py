@@ -82,6 +82,7 @@ from app.api.v1.endpoints import (
     business_partners,
     messages,
     channel_work_surfaces,
+    blockchain_runtime,
     dms_images,
     sales_shipping_ext,
     master_data,
@@ -134,6 +135,7 @@ from app.api.v1.endpoints import (
     position_overrides,
     batch,
     agents,
+    agent_tool_contracts,
 )
 
 # Wave 6-9 Process-Kernel-Endpoints (agrar-p0, supplier, wave-7, wave-9)
@@ -179,7 +181,15 @@ api_router.include_router(
 )
 
 api_router.include_router(
+    agent_tool_contracts.router,
+)
+
+api_router.include_router(
     channel_work_surfaces.router,
+)
+
+api_router.include_router(
+    blockchain_runtime.router,
 )
 
 api_router.include_router(

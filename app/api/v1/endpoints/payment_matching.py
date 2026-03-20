@@ -69,11 +69,17 @@ class MatchResult(BaseModel):
     match_reason: str
 
 
-def _build_payment_import_datensatz(booking_date: object, amount: object, currency: object = "EUR") -> dict:
+def _build_payment_import_datensatz(
+    booking_date: object,
+    amount: object,
+    currency: object = "EUR",
+    reference: object | None = None,
+) -> dict:
     return {
         "booking_date": booking_date,
         "amount": amount,
         "currency": currency or "EUR",
+        "reference": reference,
     }
 
 
@@ -90,8 +96,27 @@ async def import_payments_csv(
         text_content = content.decode('utf-8-sig')
         csv_reader = csv.DictReader(io.StringIO(text_content))
         
+        raw_rows = list(csv_reader)
+        if not raw_rows:
+            return []
+
+        dq_context = []
+        for row in raw_rows:
+            booking_date_raw = row.get('date', row.get('booking_date', ''))
+            amount_raw = str(row.get('amount', '0')).replace(',', '.')
+            currency = row.get('currency', row.get('waehrung', 'EUR'))
+            reference = row.get('reference', '')
+            dq_context.append(
+                _build_payment_import_datensatz(
+                    booking_date=booking_date_raw,
+                    amount=amount_raw,
+                    currency=currency,
+                    reference=reference,
+                )
+            )
+
         entries: list[dict] = []
-        for row_number, row in enumerate(csv_reader, start=2):
+        for row_number, row in enumerate(raw_rows, start=2):
             booking_date_raw = row.get('date', row.get('booking_date', ''))
             amount_raw = str(row.get('amount', '0')).replace(',', '.')
             currency = row.get('currency', row.get('waehrung', 'EUR'))
@@ -100,7 +125,9 @@ async def import_payments_csv(
                     booking_date=booking_date_raw,
                     amount=amount_raw,
                     currency=currency,
-                )
+                    reference=row.get('reference', ''),
+                ),
+                dq_context,
             )
             if not dq_result.bestanden:
                 raise HTTPException(

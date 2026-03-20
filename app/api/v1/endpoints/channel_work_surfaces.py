@@ -94,6 +94,8 @@ def channel_knowledge_query(channel: str, payload: ChannelKnowledgeQueryRequest,
 
 @router.post("/{channel}/process-actions/execute")
 def channel_process_execute(channel: str, payload: ChannelProcessActionRequest, db=Depends(get_db)):
+    from app.core.blockchain_anchor_runtime import anchor_channel_process_thread
+
     kanal = _parse_supported_channel(channel)
     thread = execute_channel_process_action(
         kanal=kanal,
@@ -111,7 +113,10 @@ def channel_process_execute(channel: str, payload: ChannelProcessActionRequest, 
         extra_context=payload.extra_context,
         store=get_channel_process_thread_store(db),
     )
-    return thread.as_dict()
+    anchor = anchor_channel_process_thread(db, thread=thread)
+    body = thread.as_dict()
+    body["blockchain_anchor"] = anchor.as_dict()
+    return body
 
 
 @router.get("/{channel}/process-actions/{thread_id}")
@@ -123,8 +128,56 @@ def get_channel_process_thread(channel: str, thread_id: str, db=Depends(get_db))
     return thread.as_dict()
 
 
+@router.get("/{channel}/process-actions")
+def list_channel_process_threads(
+    channel: str,
+    tenant_id: str | None = None,
+    status: str | None = None,
+    process_definition_key: str | None = None,
+    limit: int = 50,
+    db=Depends(get_db),
+):
+    kanal = _parse_supported_channel(channel)
+    threads = get_channel_process_thread_store(db).list_threads(
+        kanal=kanal.value,
+        tenant_id=tenant_id,
+        status=status,
+        process_definition_key=process_definition_key,
+        limit=limit,
+    )
+    return {
+        "items": [thread.as_dict() for thread in threads],
+        "total": len(threads),
+        "filters": {
+            "kanal": kanal.value,
+            "tenant_id": tenant_id,
+            "status": status,
+            "process_definition_key": process_definition_key,
+            "limit": limit,
+        },
+    }
+
+
+@router.get("/{channel}/process-actions/{thread_id}/audit")
+def get_channel_process_thread_audit(channel: str, thread_id: str, db=Depends(get_db)):
+    _parse_supported_channel(channel)
+    store = get_channel_process_thread_store(db)
+    thread = store.get(thread_id)
+    if thread is None:
+        raise HTTPException(status_code=404, detail="Thread nicht gefunden")
+    audit_trail = store.get_audit_trail(thread_id)
+    return {
+        "thread_id": thread_id,
+        "status": thread.status,
+        "audit_trail": [item.as_dict() for item in (audit_trail or [])],
+        "count": len(audit_trail or []),
+    }
+
+
 @router.post("/{channel}/process-actions/{thread_id}/decision")
 def channel_process_decision(channel: str, thread_id: str, payload: ChannelApprovalDecisionRequest, db=Depends(get_db)):
+    from app.core.blockchain_anchor_runtime import anchor_channel_process_thread
+
     _parse_supported_channel(channel)
     try:
         decision = ApprovalDecision(payload.decision.strip().upper())
@@ -144,7 +197,10 @@ def channel_process_decision(channel: str, thread_id: str, payload: ChannelAppro
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
-    return thread.as_dict()
+    anchor = anchor_channel_process_thread(db, thread=thread)
+    body = thread.as_dict()
+    body["blockchain_anchor"] = anchor.as_dict()
+    return body
 
 
 @router.get("/knowledge-graph")
