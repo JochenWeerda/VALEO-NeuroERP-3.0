@@ -11,7 +11,13 @@ from app.core.endpoint_gateways import (
     get_telemetry_device_store,
     get_telemetry_reading_store,
 )
-from app.core.process_mining import ProcessMiningReport
+from app.core.process_mining import (
+    ProcessMiningDrilldown,
+    ProcessMiningProcessSummary,
+    ProcessMiningReport,
+    build_process_mining_drilldown,
+    build_process_mining_top_processes,
+)
 from app.core.process_mining_application import build_process_mining_report_for_tenant
 from app.core.tenant import get_tenant_id
 
@@ -44,3 +50,23 @@ async def list_finance_process_bottlenecks(
 ) -> list[dict]:
     report = await get_finance_process_mining_report(tenant_id=tenant_id, db=db)
     return [entry.model_dump(mode="json") for entry in report.bottlenecks]
+
+
+@router.get("/finance/top-processes", response_model=list[ProcessMiningProcessSummary])
+async def list_finance_top_processes(
+    tenant_id: str = Depends(get_tenant_id),
+    db: Any = Depends(get_db),
+    limit: int = 10,
+) -> list[ProcessMiningProcessSummary]:
+    report = await get_finance_process_mining_report(tenant_id=tenant_id, db=db)
+    return build_process_mining_top_processes(report, limit=limit)
+
+
+@router.get("/finance/drilldown/{projection_key}", response_model=ProcessMiningDrilldown)
+async def get_finance_process_drilldown(
+    projection_key: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Any = Depends(get_db),
+) -> ProcessMiningDrilldown:
+    report = await get_finance_process_mining_report(tenant_id=tenant_id, db=db)
+    return build_process_mining_drilldown(report, projection_key=projection_key)

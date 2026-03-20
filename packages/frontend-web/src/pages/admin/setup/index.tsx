@@ -1,3 +1,6 @@
+import { Link } from 'react-router-dom'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useTranslation } from 'react-i18next'
 import DmsIntegrationCard from './dms-integration'
 
@@ -16,12 +19,31 @@ const SETUP_TEXTS = {
   },
 } as const
 
+const TERMINOLOGY_TEXTS = {
+  de: {
+    title: 'Fachsprache Landhandel',
+    description: 'Zentraler DE/EN-Begriffskatalog fuer Landhandel, CRM, DMS und Finance.',
+    button: 'Terminologie oeffnen',
+  },
+  en: {
+    title: 'Landhandel terminology',
+    description: 'Central DE/EN glossary for landhandel, CRM, DMS and finance.',
+    button: 'Open terminology',
+  },
+  es: {
+    title: 'Terminologia Landhandel',
+    description: 'Glosario central DE/EN para Landhandel, CRM, DMS y finanzas.',
+    button: 'Abrir terminologia',
+  },
+} as const
+
 export default function AdminSetupPage(): JSX.Element {
   const { i18n } = useTranslation()
   const lang = (i18n.language as keyof typeof SETUP_TEXTS) in SETUP_TEXTS
     ? (i18n.language as keyof typeof SETUP_TEXTS)
     : 'de'
   const texts = SETUP_TEXTS[lang]
+  const terminology = TERMINOLOGY_TEXTS[lang] ?? TERMINOLOGY_TEXTS.de
 
   return (
     <div className="container mx-auto py-8 space-y-6">
@@ -32,6 +54,17 @@ export default function AdminSetupPage(): JSX.Element {
 
       <div className="grid gap-6">
         <DmsIntegrationCard />
+        <Card>
+          <CardHeader>
+            <CardTitle>{terminology.title}</CardTitle>
+            <CardDescription>{terminology.description}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild>
+              <Link to="/admin/terminologie">{terminology.button}</Link>
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

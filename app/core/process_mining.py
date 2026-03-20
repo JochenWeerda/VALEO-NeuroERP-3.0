@@ -71,6 +71,27 @@ class ProcessMiningReport(BaseModel):
     schema_version: int = 1
 
 
+class ProcessMiningProcessSummary(BaseModel):
+    projection_key: str
+    item_count: int
+    state: MiningState
+    bottleneck_count: int = 0
+    bottleneck_severity: str = "none"
+    cached: bool = False
+    cursor_status: str | None = None
+    cursor_source: str | None = None
+    last_event_processed: str | None = None
+    schema_version: int = 1
+
+
+class ProcessMiningDrilldown(BaseModel):
+    projection_key: str
+    trace: ProcessMiningTrace | None = None
+    bottlenecks: list[ProcessMiningBottleneck] = Field(default_factory=list)
+    signals: list[ProcessObservabilitySignal] = Field(default_factory=list)
+    schema_version: int = 1
+
+
 def build_process_mining_report(
     projection_status: ProjectionStatusLike,
     runtime_report: RuntimeHealthReport,
@@ -94,6 +115,59 @@ def build_process_mining_report(
         unknown_count=sum(1 for trace in traces if trace.state == "unknown"),
         warning_signal_count=sum(1 for signal in observability_signals if signal.severity == "warning"),
         critical_signal_count=sum(1 for signal in observability_signals if signal.severity == "critical"),
+    )
+
+
+def build_process_mining_top_processes(
+    report: ProcessMiningReport,
+    limit: int = 10,
+) -> list[ProcessMiningProcessSummary]:
+    bottleneck_counts: dict[str, int] = {}
+    bottleneck_severity_by_projection: dict[str, str] = {}
+    for bottleneck in report.bottlenecks:
+        if bottleneck.source_type != "projection":
+            continue
+        bottleneck_counts[bottleneck.source_key] = bottleneck_counts.get(bottleneck.source_key, 0) + 1
+        current = bottleneck_severity_by_projection.get(bottleneck.source_key, "none")
+        if current == "high":
+            continue
+        if bottleneck.severity == "high":
+            bottleneck_severity_by_projection[bottleneck.source_key] = "high"
+        elif bottleneck.severity == "medium" and current != "high":
+            bottleneck_severity_by_projection[bottleneck.source_key] = "medium"
+        else:
+            bottleneck_severity_by_projection.setdefault(bottleneck.source_key, bottleneck.severity)
+
+    summaries = [
+        ProcessMiningProcessSummary(
+            projection_key=trace.projection_key,
+            item_count=trace.item_count,
+            state=trace.state,
+            bottleneck_count=bottleneck_counts.get(trace.projection_key, 0),
+            bottleneck_severity=bottleneck_severity_by_projection.get(trace.projection_key, "none"),
+            cached=trace.cached,
+            cursor_status=trace.cursor_status,
+            cursor_source=trace.cursor_source,
+            last_event_processed=trace.last_event_processed,
+        )
+        for trace in report.traces
+    ]
+    summaries.sort(key=lambda item: (-item.bottleneck_count, -item.item_count, item.projection_key))
+    return summaries[:limit]
+
+
+def build_process_mining_drilldown(
+    report: ProcessMiningReport,
+    projection_key: str,
+) -> ProcessMiningDrilldown:
+    trace = next((item for item in report.traces if item.projection_key == projection_key), None)
+    bottlenecks = [item for item in report.bottlenecks if item.source_key == projection_key]
+    signals = [item for item in report.observability_signals if item.source_key == projection_key]
+    return ProcessMiningDrilldown(
+        projection_key=projection_key,
+        trace=trace,
+        bottlenecks=bottlenecks,
+        signals=signals,
     )
 
 

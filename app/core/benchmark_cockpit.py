@@ -184,6 +184,128 @@ class BenchmarkReport:
         }
 
 
+@dataclass
+class BenchmarkCategorySummary:
+    """Aggregierte Sicht auf Benchmark-Kennzahlen pro Kategorie."""
+
+    kategorie: str
+    kennzahl_count: int
+    top10_count: int
+    improvement_count: int
+    avg_score: float
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "kategorie": self.kategorie,
+            "kennzahl_count": self.kennzahl_count,
+            "top10_count": self.top10_count,
+            "improvement_count": self.improvement_count,
+            "avg_score": round(self.avg_score, 2),
+        }
+
+
+@dataclass
+class BenchmarkCatalog:
+    """Katalogsicht auf den Benchmark-Cockpit-Kern."""
+
+    report_id: str
+    tenant_id: str
+    frequenz: str
+    kennzahl_count: int
+    category_count: int
+    top10_count: int
+    improvement_count: int
+    trend_series_count: int
+    best_metric: str
+    weakest_metric: str
+    categories: list[BenchmarkCategorySummary] = field(default_factory=list)
+    schema_version: int = 1
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "report_id": self.report_id,
+            "tenant_id": self.tenant_id,
+            "frequenz": self.frequenz,
+            "kennzahl_count": self.kennzahl_count,
+            "category_count": self.category_count,
+            "top10_count": self.top10_count,
+            "improvement_count": self.improvement_count,
+            "trend_series_count": self.trend_series_count,
+            "best_metric": self.best_metric,
+            "weakest_metric": self.weakest_metric,
+            "categories": [category.as_dict() for category in self.categories],
+            "schema_version": self.schema_version,
+        }
+
+
+@dataclass
+class BenchmarkReadModel:
+    """Verdichtete Read-Model-Sicht fuer den Benchmark-Report."""
+
+    report: BenchmarkReport
+    catalog: BenchmarkCatalog
+    coverage_notes: list[str] = field(default_factory=list)
+    schema_version: int = 1
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "report": self.report.as_dict(),
+            "catalog": self.catalog.as_dict(),
+            "coverage_notes": self.coverage_notes,
+            "schema_version": self.schema_version,
+        }
+
+
+def build_benchmark_catalog(report: BenchmarkReport) -> BenchmarkCatalog:
+    categories: dict[str, list[BenchmarkKennzahl]] = {}
+    score_map = {
+        PerzentilStufe.TOP_10: 95.0,
+        PerzentilStufe.TOP_25: 75.0,
+        PerzentilStufe.MITTELFELD: 50.0,
+        PerzentilStufe.UNTERES_VIERTEL: 20.0,
+    }
+    for kennzahl in report.kennzahlen:
+        categories.setdefault(kennzahl.kategorie.value, []).append(kennzahl)
+
+    category_summaries: list[BenchmarkCategorySummary] = []
+    for kategorie, values in sorted(categories.items()):
+        category_summaries.append(
+            BenchmarkCategorySummary(
+                kategorie=kategorie,
+                kennzahl_count=len(values),
+                top10_count=sum(1 for value in values if value.perzentil_stufe == PerzentilStufe.TOP_10),
+                improvement_count=sum(1 for value in values if value.perzentil_stufe == PerzentilStufe.UNTERES_VIERTEL),
+                avg_score=sum(score_map[value.perzentil_stufe] for value in values) / len(values),
+            )
+        )
+
+    best_metric = max(report.kennzahlen, key=lambda item: score_map[item.perzentil_stufe]).bezeichnung if report.kennzahlen else "UNKNOWN"
+    weakest_metric = min(report.kennzahlen, key=lambda item: score_map[item.perzentil_stufe]).bezeichnung if report.kennzahlen else "UNKNOWN"
+    return BenchmarkCatalog(
+        report_id=report.report_id,
+        tenant_id=report.tenant_id,
+        frequenz=report.frequenz.value,
+        kennzahl_count=len(report.kennzahlen),
+        category_count=len(category_summaries),
+        top10_count=len(report.top10_kennzahlen),
+        improvement_count=len(report.verbesserungspotenzial),
+        trend_series_count=len(report.trend_daten),
+        best_metric=best_metric,
+        weakest_metric=weakest_metric,
+        categories=category_summaries,
+    )
+
+
+def build_benchmark_read_model(report: BenchmarkReport) -> BenchmarkReadModel:
+    catalog = build_benchmark_catalog(report)
+    coverage_notes = [
+        "Benchmark-Report ist als deterministischer Read-Model-Kern verfuegbar.",
+        "Kategorie-, Top10- und Verbesserungspotenzial-Sichten sind direkt konsumierbar.",
+        "Trendserien und Perzentil-Einordnung bleiben ohne UI-Glue maschinenlesbar.",
+    ]
+    return BenchmarkReadModel(report=report, catalog=catalog, coverage_notes=coverage_notes)
+
+
 # ---------------------------------------------------------------------------
 # Trend-Berechnung
 # ---------------------------------------------------------------------------

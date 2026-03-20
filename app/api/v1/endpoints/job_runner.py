@@ -13,6 +13,13 @@ from pydantic import BaseModel, Field, ConfigDict
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.background_jobs import (
+    JobQueue,
+    JobStatus,
+    JobTyp,
+    evaluate_job_routing,
+    get_default_job_types,
+)
 from app.core.tenant import get_tenant_id
 
 router = APIRouter()
@@ -52,6 +59,22 @@ class JobArtifactOut(BaseModel):
     file_size_bytes: Optional[int] = None
     checksum_sha256: Optional[str] = None
     created_at: Optional[datetime] = None
+
+
+class JobRoutingOut(BaseModel):
+    job_typ: str
+    worker_klasse: str
+    prioritaet: str
+    timeout_sekunden: int
+    meldung: str
+    schema_version: int = 1
+
+
+class JobCatalogOut(BaseModel):
+    schema_version: int = 1
+    job_count: int
+    queue_summary: dict
+    routings: list[JobRoutingOut]
 
 
 # ── Endpoints ───────────────────────────────────────────────────────────────────
@@ -114,6 +137,22 @@ async def run_job(
         error_message=row[7],
         dry_run=row[8],
         created_at=row[9],
+    )
+
+
+@router.get("/catalog", response_model=JobCatalogOut)
+async def get_job_catalog(
+    tenant_id: str = Depends(get_tenant_id),
+):
+    """Liefert eine agentenfaehige Sicht auf Queue-Typen und Job-Routing."""
+    catalog = get_default_job_types()
+    queue = JobQueue()
+    queue_summary = queue.as_dict()
+    routings = [evaluate_job_routing(job.typ).as_dict() for job in catalog]
+    return JobCatalogOut(
+        job_count=len(catalog),
+        queue_summary=queue_summary,
+        routings=[JobRoutingOut.model_validate(item) for item in routings],
     )
 
 

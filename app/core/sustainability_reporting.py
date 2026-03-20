@@ -240,6 +240,149 @@ class ESGBericht:
         }
 
 
+@dataclass
+class SustainabilityScopeSummary:
+    """Aggregierte Sicht auf Emissionen pro Scope."""
+
+    scope: str
+    position_count: int
+    co2e_kg: float
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "scope": self.scope,
+            "position_count": self.position_count,
+            "co2e_kg": round(self.co2e_kg, 3),
+            "co2e_t": round(self.co2e_kg / 1000.0, 6),
+        }
+
+
+@dataclass
+class SustainabilityCategorySummary:
+    """Aggregierte Sicht auf Emissionen pro Kategorie."""
+
+    kategorie: str
+    position_count: int
+    co2e_kg: float
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "kategorie": self.kategorie,
+            "position_count": self.position_count,
+            "co2e_kg": round(self.co2e_kg, 3),
+            "co2e_t": round(self.co2e_kg / 1000.0, 6),
+        }
+
+
+@dataclass
+class SustainabilityCatalog:
+    """Katalogsicht auf den ESG-/CO2-Reporting-Kern."""
+
+    report_id: str
+    tenant_id: str
+    year: int
+    position_count: int
+    total_co2e_kg: float
+    total_co2e_t: float
+    scope_count: int
+    category_count: int
+    top_scope: str
+    top_category: str
+    scopes: list[SustainabilityScopeSummary] = field(default_factory=list)
+    categories: list[SustainabilityCategorySummary] = field(default_factory=list)
+    schema_version: int = 1
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "report_id": self.report_id,
+            "tenant_id": self.tenant_id,
+            "year": self.year,
+            "position_count": self.position_count,
+            "total_co2e_kg": round(self.total_co2e_kg, 3),
+            "total_co2e_t": round(self.total_co2e_t, 6),
+            "scope_count": self.scope_count,
+            "category_count": self.category_count,
+            "top_scope": self.top_scope,
+            "top_category": self.top_category,
+            "scopes": [scope.as_dict() for scope in self.scopes],
+            "categories": [category.as_dict() for category in self.categories],
+            "schema_version": self.schema_version,
+        }
+
+
+@dataclass
+class SustainabilityReadModel:
+    """Verdichtete Read-Model-Sicht fuer ESG-/CO2-Berichte."""
+
+    report: ESGBericht
+    catalog: SustainabilityCatalog
+    coverage_notes: list[str] = field(default_factory=list)
+    schema_version: int = 1
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "report": self.report.as_dict(),
+            "catalog": self.catalog.as_dict(),
+            "coverage_notes": self.coverage_notes,
+            "schema_version": self.schema_version,
+        }
+
+
+def build_sustainability_catalog(report: ESGBericht) -> SustainabilityCatalog:
+    scope_totals: dict[str, float] = {scope.value: 0.0 for scope in EmissionsScope}
+    scope_counts: dict[str, int] = {scope.value: 0 for scope in EmissionsScope}
+    category_totals: dict[str, float] = {}
+    category_counts: dict[str, int] = {}
+
+    for position in report.co2_bilanz.positionen if report.co2_bilanz else []:
+        scope_key = position.scope.value
+        category_key = position.kategorie.value
+        scope_totals[scope_key] = scope_totals.get(scope_key, 0.0) + position.co2e_kg
+        scope_counts[scope_key] = scope_counts.get(scope_key, 0) + 1
+        category_totals[category_key] = category_totals.get(category_key, 0.0) + position.co2e_kg
+        category_counts[category_key] = category_counts.get(category_key, 0) + 1
+
+    scopes = [
+        SustainabilityScopeSummary(scope=scope, position_count=scope_counts.get(scope, 0), co2e_kg=co2e_kg)
+        for scope, co2e_kg in scope_totals.items()
+        if scope_counts.get(scope, 0) > 0
+    ]
+    categories = [
+        SustainabilityCategorySummary(
+            kategorie=kategorie,
+            position_count=category_counts[kategorie],
+            co2e_kg=co2e_kg,
+        )
+        for kategorie, co2e_kg in sorted(category_totals.items(), key=lambda item: item[1], reverse=True)
+    ]
+    top_scope = max(scopes, key=lambda entry: entry.co2e_kg).scope if scopes else "UNKNOWN"
+    top_category = max(categories, key=lambda entry: entry.co2e_kg).kategorie if categories else "UNKNOWN"
+    return SustainabilityCatalog(
+        report_id=report.bericht_id,
+        tenant_id=report.tenant_id,
+        year=report.zeitraum_von.year,
+        position_count=len(report.co2_bilanz.positionen) if report.co2_bilanz else 0,
+        total_co2e_kg=report.co2_bilanz.gesamt_co2e_kg if report.co2_bilanz else 0.0,
+        total_co2e_t=report.co2_bilanz.gesamt_co2e_t if report.co2_bilanz else 0.0,
+        scope_count=len(scopes),
+        category_count=len(categories),
+        top_scope=top_scope,
+        top_category=top_category,
+        scopes=scopes,
+        categories=categories,
+    )
+
+
+def build_sustainability_read_model(report: ESGBericht) -> SustainabilityReadModel:
+    catalog = build_sustainability_catalog(report)
+    coverage_notes = [
+        "CO2-Bilanz ist als strukturierter Read-Model-Kern verfuegbar.",
+        "Scope- und Kategorie-Aggregationen sind ohne UI-Glue direkt konsumierbar.",
+        "Die Sichten sind tenant- und zeitraumbasiert und damit agentenfaehig.",
+    ]
+    return SustainabilityReadModel(report=report, catalog=catalog, coverage_notes=coverage_notes)
+
+
 # ---------------------------------------------------------------------------
 # Berechnungsfunktionen
 # ---------------------------------------------------------------------------
