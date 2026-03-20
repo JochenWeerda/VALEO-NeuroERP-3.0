@@ -12,6 +12,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
+from threading import Lock
 from typing import Any
 import uuid
 
@@ -462,3 +463,124 @@ def create_job_from_request(req: JobEnqueueRequest) -> tuple[BackgroundJob, JobR
         tenant_id=req.tenant_id,
     )
     return job, routing
+
+
+# ---------------------------------------------------------------------------
+# Registry / Read Model
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class BackgroundJobRegistry:
+    """In-memory registry for queue-backed background jobs.
+
+    The contract stays worker-agnostic, but the registry provides a stable
+    enqueue/status/read-model layer for API consumers and tests.
+    """
+
+    _queue: JobQueue = field(default_factory=JobQueue)
+    _jobs: dict[str, BackgroundJob] = field(default_factory=dict)
+    _lock: Lock = field(default_factory=Lock, init=False, repr=False)
+    schema_version: int = 1
+
+    def clear(self) -> None:
+        with self._lock:
+            self._queue._eintraege.clear()
+            self._jobs.clear()
+
+    def enqueue(self, req: JobEnqueueRequest) -> tuple[BackgroundJob, JobRoutingResult]:
+        job, routing = create_job_from_request(req)
+        with self._lock:
+            self._jobs[job.job_id] = job
+            self._queue.enqueue(job)
+        return job, routing
+
+    def dequeue_next(self) -> BackgroundJob | None:
+        with self._lock:
+            job = self._queue.dequeue()
+            if job is not None:
+                self._jobs[job.job_id] = job
+            return job
+
+    def get(self, job_id: str) -> BackgroundJob | None:
+        with self._lock:
+            return self._jobs.get(job_id)
+
+    def list(
+        self,
+        *,
+        status: JobStatus | None = None,
+        tenant_id: str | None = None,
+        typ: JobTyp | None = None,
+        limit: int | None = None,
+    ) -> list[BackgroundJob]:
+        with self._lock:
+            jobs = list(self._jobs.values())
+        if status is not None:
+            jobs = [job for job in jobs if job.status == status]
+        if tenant_id is not None:
+            jobs = [job for job in jobs if job.tenant_id == tenant_id]
+        if typ is not None:
+            jobs = [job for job in jobs if job.typ == typ]
+        jobs.sort(key=lambda job: job.erstellt_am, reverse=True)
+        if limit is not None:
+            jobs = jobs[:limit]
+        return jobs
+
+    def complete(self, job_id: str, ergebnis_summary: str = "") -> BackgroundJob | None:
+        with self._lock:
+            job = self._jobs.get(job_id)
+            if job is None:
+                return None
+            self._queue.cancel(job_id)
+            if job.gestartet_am is None:
+                job.gestartet_am = datetime.now(timezone.utc)
+            job.status = JobStatus.COMPLETED
+            job.abgeschlossen_am = datetime.now(timezone.utc)
+            job.ergebnis_summary = ergebnis_summary
+            self._jobs[job_id] = job
+            return job
+
+    def fail(self, job_id: str, fehler_meldung: str) -> BackgroundJob | None:
+        with self._lock:
+            job = self._jobs.get(job_id)
+            if job is None:
+                return None
+            self._queue.cancel(job_id)
+            if job.gestartet_am is None:
+                job.gestartet_am = datetime.now(timezone.utc)
+            job.status = JobStatus.FAILED
+            job.abgeschlossen_am = datetime.now(timezone.utc)
+            job.fehler_meldung = fehler_meldung
+            self._jobs[job_id] = job
+            return job
+
+    def summary(self) -> dict[str, Any]:
+        jobs = self.list()
+        counts: dict[str, int] = {}
+        by_typ: dict[str, int] = {}
+        by_tenant: dict[str, int] = {}
+        for job in jobs:
+            counts[job.status.value] = counts.get(job.status.value, 0) + 1
+            by_typ[job.typ.value] = by_typ.get(job.typ.value, 0) + 1
+            if job.tenant_id:
+                by_tenant[job.tenant_id] = by_tenant.get(job.tenant_id, 0) + 1
+        return {
+            "schema_version": self.schema_version,
+            "total_jobs": len(jobs),
+            "queue": self._queue.as_dict(),
+            "counts_by_status": counts,
+            "counts_by_typ": by_typ,
+            "counts_by_tenant": by_tenant,
+            "running_jobs": [job.as_dict() for job in jobs if job.status == JobStatus.RUNNING],
+            "pending_jobs": [job.as_dict() for job in jobs if job.status == JobStatus.PENDING][:10],
+            "completed_jobs": [job.as_dict() for job in jobs if job.status == JobStatus.COMPLETED][:10],
+            "failed_jobs": [job.as_dict() for job in jobs if job.status == JobStatus.FAILED][:10],
+        }
+
+
+_BACKGROUND_JOB_REGISTRY = BackgroundJobRegistry()
+
+
+def get_background_job_registry() -> BackgroundJobRegistry:
+    return _BACKGROUND_JOB_REGISTRY

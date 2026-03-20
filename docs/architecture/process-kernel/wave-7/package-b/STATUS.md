@@ -14,18 +14,19 @@ verbleibenden Luecken im Handelsprozess.
 
 | Datei | Inhalt | Status |
 |-------|--------|--------|
-| `app/core/reklamation.py` | `Reklamation`, `ReklamationsZustandsmaschine`, `ReklamationStore` | umgesetzt |
+| `app/core/reklamation.py` | `Reklamation`, `ReklamationsZustandsmaschine`, `ReklamationStore`, CRM-/DMS-Referenzen, SLA-Status, Audit-Trail | umgesetzt |
 | `app/core/exception_workflow_extension.py` | `AusnahmeAntrag`, `AusnahmeGenehmigungsregel`, `pruefe_ausnahme_notwendig()` | umgesetzt |
 | `app/core/price_hedge.py` | `HedgeReference`, `KontraktHedgeBindung`, `berechne_hedge_quote()`, `HedgeStore` | umgesetzt |
 | `app/core/silo_protokolle.py` | `SiloReinigungsprotokoll`, `TrocknungsProtokoll` | umgesetzt |
-| `app/api/v1/endpoints/reklamation_api.py` | CRUD Reklamationen + Statuswechsel | umgesetzt |
+| `app/api/v1/endpoints/reklamation_api.py` | CRUD Reklamationen + Statuswechsel, CRM-/DMS-Verknuepfung, Audit- und SLA-Sichten | umgesetzt |
 | `app/api/v1/endpoints/price_hedge_api.py` | CRUD HedgeReferences + Absicherungsquote | umgesetzt |
 | `tests/test_process_kernel_wave7_domain.py` | 28 Tests | umgesetzt |
+| `tests/test_process_kernel_wave8_complaint_e2e.py` | 3 Tests | umgesetzt |
 
 ## Testergebnis
 
 ```
-28 passed in 27.56s
+31 passed in 27.72s
 ```
 
 - Reklamation Tests: 8 gruen
@@ -33,6 +34,13 @@ verbleibenden Luecken im Handelsprozess.
 - HedgeReference Tests: 8 gruen
 - Silo-Protokoll Tests: 5 gruen
 - API Tests: 2 gruen
+- Complaint-E2E-Tests: 3 gruen
+
+## Erweiterung Gap 008
+
+- Reklamationen tragen jetzt CRM-Referenzen, DMS-Dokumentreferenzen, SLA-Status und einen audit-freundlichen Hash-Trace.
+- Die API bietet Detail-, Audit-, CRM-Lookup-, DMS-Update- und Ueberfaelligkeits-Sichten.
+- Reklamationsfaelle koennen dadurch bis zum CRM-/DMS-Kontext und zur Frist-/Statuslogik durchverfolgt werden.
 
 ## Abnahmekriterien (alle erfuellt)
 

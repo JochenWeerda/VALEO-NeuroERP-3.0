@@ -27,6 +27,7 @@ from ....core.tenant_governance import (
     build_default_governance,
     build_default_agent_manifest,
 )
+from ....core.tenant_rate_limits import get_default_cache_configs, get_default_rate_limit_policies
 
 router = APIRouter(prefix="/tenant", tags=["tenant", "governance"])
 
@@ -157,3 +158,14 @@ async def get_delegation_policy(tenant_id: str = Depends(get_tenant_id)):
 async def get_data_residency(tenant_id: str = Depends(get_tenant_id)):
     """AP6: Liefert die Export- und Datenresidenzregeln des Mandanten (GoBD-konform)."""
     return build_default_governance(tenant_id)
+
+
+@router.get("/runtime-shield", response_model=dict)
+async def get_runtime_shield(tenant_id: str = Depends(get_tenant_id)) -> dict:
+    """Liefert tenant-isolierte Cache- und Rate-Limit-Defaults fuer Agenten und Workloads."""
+    return {
+        "tenant_id": tenant_id,
+        "rate_limit_policies": [policy.as_dict() for policy in get_default_rate_limit_policies()],
+        "cache_configs": [config.as_dict() for config in get_default_cache_configs()],
+        "schema_version": 1,
+    }

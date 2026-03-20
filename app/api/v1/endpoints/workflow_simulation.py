@@ -1,10 +1,14 @@
 from __future__ import annotations
+
 from fastapi import APIRouter
 from app.core.workflow_simulation import (
     SimulationScenario,
     SimulationInput,
     SimulationResult,
+    WorkflowSandboxPreviewInput,
+    WorkflowSandboxPreviewResult,
     simulate_workflow,
+    preview_workflow_sandbox,
 )
 
 router = APIRouter(prefix="/workflow/simulation", tags=["workflow", "simulation"])
@@ -40,10 +44,43 @@ def list_scenarios() -> list[dict]:
     ]
 
 
+@router.get("/sandbox/scenarios", summary="Sandbox-Szenarien fuer neue Workflows")
+def list_sandbox_scenarios() -> list[dict]:
+    """Gibt die Sandbox-Szenarien mit Hinweisen fuer den Go-Live-Review zurueck."""
+    return [
+        {
+            "scenario": scenario.value,
+            "description": _SCENARIO_DESCRIPTIONS.get(scenario, ""),
+            "sandbox_ready": True,
+        }
+        for scenario in SimulationScenario
+    ]
+
+
 @router.post("/run", response_model=SimulationResult, summary="Workflow-Simulation ausfuehren")
 def run_simulation(body: SimulationInput) -> SimulationResult:
     """Fuehrt eine modellbasierte Workflow-Simulation fuer das angegebene Szenario durch."""
     return simulate_workflow(body)
+
+
+@router.post(
+    "/preview",
+    response_model=WorkflowSandboxPreviewResult,
+    summary="Workflow-Sandbox-Preview ausfuehren",
+)
+def preview_simulation(body: WorkflowSandboxPreviewInput) -> WorkflowSandboxPreviewResult:
+    """Fuehrt eine Sandbox-Vorschau fuer neue oder geaenderte Workflows aus."""
+    return preview_workflow_sandbox(body)
+
+
+@router.post(
+    "/sandbox/preview",
+    response_model=WorkflowSandboxPreviewResult,
+    summary="Workflow-Sandbox-Preview ausfuehren",
+)
+def preview_workflow_sandbox_endpoint(body: WorkflowSandboxPreviewInput) -> WorkflowSandboxPreviewResult:
+    """Alias fuer den Sandbox-Preview-Contract mit explizitem Sandbox-Pfad."""
+    return preview_workflow_sandbox(body)
 
 
 @router.get(

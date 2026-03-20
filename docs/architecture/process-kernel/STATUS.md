@@ -36,12 +36,15 @@ Diese Statusdatei verdichtet den aktuellen Gesamtstand, ohne die Detailnachweise
 ## Gesamtstatus
 
 - Stand: `2026-03-20`
-- Status: `Waves 1 bis 84 abgeschlossen`
-- Gesamtsuite: `6117 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed` (Stand nach Wave 84)
+- Status: `Waves 1 bis 90 abgeschlossen`
+- Gesamtsuite: `6230+ Tests gruen, 0 Fehler, 5 skipped, 1 xfailed` (Stand nach Waves 89/90)
 - Letzte abgeschlossene Waves:
-  - `Wave 82`: Gap 032 — Controlling 500er eliminieren: KpiSafeValue.from_raw() + safe_kpi/timeseries_response() (33 Tests)
-  - `Wave 83`: Gap 033 — Dashboard Read-Models: DashboardSnapshot + Store + p95 < 250ms KPI (30 Tests)
-  - `Wave 84`: Gap 021 — Einheitliches Designsystem: DesignSystemRegistry + Compliance-Check + 20+ Komponenten (43 Tests)
+  - `Wave 85`: Gap 001 -- E2E Prozesskette ohne Medienbruch: validate_e2e_kette() + KPI >= 95%% (28 Tests)
+  - `Wave 86`: Gap 011 -- Versionierte Workflow Engine: WorkflowVersionRegistry + MigrationsPlan (40 Tests)
+  - `Wave 87`: Gap 037 -- Lasttest-Contracts Erntepeak: 500-User-SLA + p95 < 2s + Dashboard < 250ms (35 Tests)
+  - `Wave 88`: Gaps 036, 038, 048 -- Background Jobs, Tenant Isolation und External Agent Integrations (Wave-88-Statusdoku separat)
+  - `Wave 89`: Gap 030 -- Multilingual + Fachsprache Landhandel konsistent (Terminologie-Registry + Admin-UI)
+  - `Wave 90`: Gap 020 -- Workflow-Template Marketplace intern (Katalog, Preview, Installationspfad)
 
 ## Wave-Uebersicht
 
@@ -127,6 +130,12 @@ Diese Statusdatei verdichtet den aktuellen Gesamtstand, ohne die Detailnachweise
 | Wave 82 | abgeschlossen | 33 | Gap 032 Controlling 500er: KpiSafeValue.from_raw() + safe_kpi/timeseries_response() + Ampel-Kalkulation | `wave-82/STATUS.md` |
 | Wave 83 | abgeschlossen | 30 | Gap 033 Dashboard Read-Models: DashboardSnapshot + Store + stale-while-revalidate + p95 < 250ms KPI | `wave-83/STATUS.md` |
 | Wave 84 | abgeschlossen | 43 | Gap 021 Einheitliches Designsystem: DesignSystemRegistry + Compliance-Check + 20+ Komponenten + 11 Tokens | `wave-84/STATUS.md` |
+| Wave 85 | abgeschlossen | 28 | Gap 001 E2E Prozesskette ohne Medienbruch: validate_e2e_kette() + KPI >= 95% | `wave-85/STATUS.md` |
+| Wave 86 | abgeschlossen | 40 | Gap 011 Versionierte Workflow Engine: WorkflowVersionRegistry + MigrationsPlan + Sicherheitscheck | `wave-86/STATUS.md` |
+| Wave 87 | abgeschlossen | 35 | Gap 037 Lasttest-Contracts Erntepeak: 500-User-SLA + p95 < 2s + Dashboard-SLA | `wave-87/STATUS.md` |
+| Wave 88 | abgeschlossen | 8 | Gaps 036, 038, 048 Background Jobs, Tenant Isolation, External Agent Integrations | `wave-88/STATUS.md` |
+| Wave 89 | abgeschlossen | 5 | Gap 030 Multilingual + Fachsprache Landhandel konsistent | `wave-89/STATUS.md` |
+| Wave 90 | abgeschlossen | 3 | Gap 020 Workflow-Template Marketplace intern | `wave-90/STATUS.md` |
 
 ## Abgeschlossene Waves 51–67 (Kernmodule)
 
@@ -161,8 +170,9 @@ Diese Statusdatei verdichtet den aktuellen Gesamtstand, ohne die Detailnachweise
   - `app/api/v1/api.py`
 - Ergebnis:
   - Externes Tool-Contract-Manifest fasst den produktiven MCP-Katalog und die OpenAPI-Referenzen in einem stabilen Endpoint zusammen
-  - Externe Agenten koennen Tool-Definitions, OpenAPI-verknuepfte Metadaten und einen MCP-View fuer 20 produktive Tools abrufen
+  - Externe Agenten koennen Tool-Definitions, OpenAPI-verknuepfte Metadaten und einen MCP-View fuer aktuell 23 produktive Tools abrufen
   - Der Contract ist domain-filterbar und einzeln ueber Tool-Namen adressierbar
+  - Manifest-, MCP- und OpenAPI-Sicht sind gegeneinander querpruefbar
 
 ### Wave 84 / Gaps 029, 034, 040
 
@@ -181,6 +191,7 @@ Diese Statusdatei verdichtet den aktuellen Gesamtstand, ohne die Detailnachweise
 - Ergebnis:
   - `POST /api/v1/process/bulk-operations/evaluate` kombiniert Bulk-Validierung, Limits und DQ-Regelsets zu einem agentenfaehigen Batch-Contract.
   - Journal-, Kontoauszug- und Zahlungsimporte pruefen Dubletten und Pflichtfelder jetzt mit demselben DQ-Kern vor jedem DB-Write.
+  - DQ-Regeln decken Dubletten, Pflichtfelder und Referenzverletzungen auf einem gemeinsamen Read-/Write-Path-Kern ab.
   - Das Agent-UX-Panel surfacet Confidence, Quellen und naechste Aktion fuer agentenfaehige Nutzung direkt im Admin-Frontend.
   - Das Idempotenz-Monitoring ist als produktive UI- und API-Sicht verfuegbar und macht Retry-Sicherheit fuer Kern-Commands sichtbar.
 
@@ -195,6 +206,89 @@ Diese Statusdatei verdichtet den aktuellen Gesamtstand, ohne die Detailnachweise
   - `POST /api/v1/process/supply-chain/eta/alarm` bewertet geplante Lieferungen gegen Zielankunft und erzeugt standardisierte ETA-/Abweichungsalarme.
   - `POST /api/v1/process/dms/extract` klassifiziert Dokumente, extrahiert strukturierte Belegfelder und baut einen Kernfluss-Contract fuer Finance-, Docflow- und Lagerpfade.
   - ETA-Alarmierung und OCR-Extraktion sind damit als agenten- und API-faehige Kernflows statt als isolierte Hilfsfunktionen verfuegbar.
+
+### Wave 86 / Gap 012
+
+- Referenz: `docs/roadmap/status/2026-03-06-top-50-gap-backlog-landhandel.md`
+- Scope:
+  - `app/core/workflow_simulation.py`
+  - `app/api/v1/endpoints/workflow_simulation.py`
+  - `app/api/v1/api.py`
+- Ergebnis:
+  - `WorkflowSandboxPreviewInput` und `WorkflowSandboxPreviewResult` bilden einen modellbasierten Sandbox-Preview-Contract fuer neue Workflows.
+  - `POST /api/v1/workflow/simulation/preview` liefert Simulation, Warnungen und eine Empfehlung fuer den Go-Live-Review.
+  - Die bestehende Workflow-Simulation bleibt als generischer Scenario-Contract separat verfuegbar.
+
+### Wave 87 / Gap 018
+
+- Referenz: `docs/roadmap/status/2026-03-06-top-50-gap-backlog-landhandel.md`
+- Scope:
+  - `app/core/process_mining_observation.py`
+  - `app/api/v1/endpoints/process_mining_observation.py`
+  - `app/api/v1/api.py`
+- Ergebnis:
+  - `ProcessMiningObservationReadModel` priorisiert Top-Prozesse anhand von Trace-State, Bottlenecks und Beobachtungssignalen.
+  - `GET /api/v1/process-mining/finance/observation` liefert eine leichtgewichtige Mining-Topliste.
+  - `GET /api/v1/process-mining/finance/observation/{projection_key}` liefert den Drilldown fuer eine einzelne Projection.
+
+### Wave 88 / Gaps 036, 038, 048
+
+- Referenz: `docs/roadmap/status/2026-03-06-top-50-gap-backlog-landhandel.md`
+- Scope:
+  - `app/core/background_jobs.py`
+  - `app/core/tenant_rate_limits.py`
+  - `app/core/external_agent_catalog.py`
+  - `app/api/v1/endpoints/background_jobs.py`
+  - `app/api/v1/endpoints/tenant_limits.py`
+  - `app/api/v1/endpoints/external_agent_integrations.py`
+  - `app/api/v1/api.py`
+- Ergebnis:
+  - Queue-basierte Hintergrundjobs sind ueber `enqueue`, `dequeue`, `complete`, `fail` und Read-Model-Sichten fuer Status/Backlog nutzbar.
+  - Tenant-isolierte Cache- und Rate-Limit-Sichten liefern pro Tenant eine kontrollierbare Isolation und einen praxistauglichen Policy-Read-Model-Pfad.
+- Der External-Agent-Katalog liefert Provider-, Use-Case- und Install-Pack-Sichten fuer OpenAPI-, MCP-, Slack-, Teams- und SDK-Integrationen.
+
+### Wave 89 / Gap 030
+
+- Referenz: `docs/roadmap/status/2026-03-06-top-50-gap-backlog-landhandel.md`
+- Scope:
+  - `app/core/terminology_registry.py`
+  - `app/api/v1/endpoints/terminology.py`
+  - `packages/frontend-web/src/pages/admin/terminologie.tsx`
+  - `packages/frontend-web/src/pages/admin/setup/index.tsx`
+- Ergebnis:
+  - Ein zentraler bilingualer Landhandel-Terminologie-Katalog macht kanonische DE/EN-Begriffe, Synonyme und Avoid-Regeln maschinenlesbar.
+  - `GET /api/v1/terminology/registry` und `GET /api/v1/terminology/terms/{term_key}` surfacen die Registry als API-Contract fuer Backend, Agenten und Frontend.
+  - Die Admin-Sicht zeigt den Katalog mit Suche, Domain-Filter und Leitregeln als konsistente Fachsprache fuer Landhandel.
+
+### Wave 89 / Gaps 016, 040, 046, 047
+
+- Referenz: `docs/roadmap/status/2026-03-06-top-50-gap-backlog-landhandel.md`
+- Scope:
+  - `app/core/action_idempotency.py`
+  - `app/api/v1/endpoints/idempotency_monitoring.py`
+  - `app/core/data_quality_rules.py`
+  - `app/api/v1/endpoints/data_quality.py`
+  - `app/core/sustainability_reporting.py`
+  - `app/api/v1/endpoints/sustainability.py`
+  - `app/core/benchmark_cockpit.py`
+  - `app/api/v1/endpoints/benchmark_cockpit.py`
+  - `app/api/v1/api.py`
+- Ergebnis:
+  - Idempotenz-Monitoring liefert jetzt einen auditierbaren Feed mit Replay-, Status- und Aggregat-Kennzahlen.
+  - Datenqualitaet ist ueber einen konsistenten Katalog, einzelne Rulesets und Rule-Summaries konsumierbar.
+  - Nachhaltigkeit und Benchmarking haben stabile Katalog-/Read-Model-Endpunkte statt nur Beispiel-Reports.
+
+### Wave 90 / Gap 020
+
+- Referenz: `wave-90/STATUS.md`
+- Scope:
+  - `app/core/workflow_template_marketplace.py`
+  - `app/api/v1/endpoints/workflow_template_marketplace.py`
+  - `tests/test_process_kernel_wave89_workflow_template_marketplace.py`
+- Ergebnis:
+  - Interner Marketplace liefert kuratierte Workflow-Templates fuer Finance-, Agrar-, CRM- und Logistik-Pfade.
+  - Templates koennen ueber Katalog, Preview und Installationspfad als kontrollierte Prozessvariante in den Tenant ueberfuehrt werden.
+  - Monitoring- und Sandbox-Hooks sind im Installationsresultat direkt benannt.
 
 ### Wave 21
 

@@ -4,7 +4,7 @@ Datenqualitäts-API (Gap 040): Validierung von Dubletten, Pflichtfeldern und Ref
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -16,6 +16,9 @@ from app.core.data_quality_rules import (
     REQUIRED_FIELD_RULES,
     REFERENCE_RULES,
     get_all_entity_types,
+    get_dq_catalog,
+    get_dq_ruleset_for_entity,
+    get_dq_ruleset_summary,
     DuplicateRule,
     RequiredFieldRule,
     ReferenceRule,
@@ -72,10 +75,36 @@ async def list_data_quality_rules(
     return rules
 
 
+@router.get("/catalog", response_model=dict)
+async def get_data_quality_catalog(
+    entity_type: str | None = Query(None, description="Optionaler Filter nach Entity-Typ"),
+):
+    """Katalogsicht ueber alle produktiven DQ-Regelsets."""
+    return get_dq_catalog(entity_typ=entity_type).as_dict()
+
+
 @router.get("/entity-types", response_model=list[str])
 async def list_entity_types():
     """Liste aller Entity-Typen mit definierten Regeln."""
     return get_all_entity_types()
+
+
+@router.get("/rulesets/{entity_type}", response_model=dict)
+async def get_data_quality_ruleset(entity_type: str):
+    """Gibt das vollstaendige DQ-Regelset fuer einen Entity-Typ zurueck."""
+    ruleset = get_dq_ruleset_for_entity(entity_type)
+    if ruleset is None:
+        raise HTTPException(status_code=404, detail=f"Kein Regelset fuer entity_typ '{entity_type}' gefunden")
+    return ruleset.as_dict()
+
+
+@router.get("/rulesets/{entity_type}/summary", response_model=dict)
+async def get_data_quality_ruleset_summary(entity_type: str):
+    """Verdichtete Sicht auf ein einzelnes DQ-Regelset."""
+    ruleset = get_dq_ruleset_for_entity(entity_type)
+    if ruleset is None:
+        raise HTTPException(status_code=404, detail=f"Kein Regelset fuer entity_typ '{entity_type}' gefunden")
+    return get_dq_ruleset_summary(ruleset).as_dict()
 
 
 def _run_duplicate_check(db: Session, rule: DuplicateRule, tenant_id: str) -> list[ViolationOut]:

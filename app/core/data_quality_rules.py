@@ -336,6 +336,68 @@ class DQBatchValidationResult:
         }
 
 
+@dataclass
+class DQRuleSetSummary:
+    """Verdichtete Sicht auf ein DQ-Regelset fuer Katalog- und Monitoring-APIs."""
+
+    ruleset_id: str
+    entity_typ: str
+    beschreibung: str
+    regel_count: int
+    pflichtfeld_count: int
+    duplikat_count: int
+    referenz_count: int
+    format_count: int
+    bereich_count: int
+    schema_version: int = 1
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "ruleset_id": self.ruleset_id,
+            "entity_typ": self.entity_typ,
+            "beschreibung": self.beschreibung,
+            "regel_count": self.regel_count,
+            "pflichtfeld_count": self.pflichtfeld_count,
+            "duplikat_count": self.duplikat_count,
+            "referenz_count": self.referenz_count,
+            "format_count": self.format_count,
+            "bereich_count": self.bereich_count,
+            "schema_version": self.schema_version,
+        }
+
+
+@dataclass
+class DQCatalog:
+    """Katalogsicht ueber alle produktiven DQ-Regelsets."""
+
+    ruleset_count: int
+    entity_type_count: int
+    rule_count: int
+    pflichtfeld_count: int
+    duplikat_count: int
+    referenz_count: int
+    format_count: int
+    bereich_count: int
+    entity_types: list[str] = field(default_factory=list)
+    rulesets: list[DQRuleSetSummary] = field(default_factory=list)
+    schema_version: int = 1
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "ruleset_count": self.ruleset_count,
+            "entity_type_count": self.entity_type_count,
+            "rule_count": self.rule_count,
+            "pflichtfeld_count": self.pflichtfeld_count,
+            "duplikat_count": self.duplikat_count,
+            "referenz_count": self.referenz_count,
+            "format_count": self.format_count,
+            "bereich_count": self.bereich_count,
+            "entity_types": self.entity_types,
+            "rulesets": [ruleset.as_dict() for ruleset in self.rulesets],
+            "schema_version": self.schema_version,
+        }
+
+
 # ---------------------------------------------------------------------------
 # Interne Check-Funktionen
 # ---------------------------------------------------------------------------
@@ -904,6 +966,47 @@ def get_default_dq_rulesets() -> dict[str, DQRuleSet]:
 def get_dq_ruleset_for_entity(entity_typ: str) -> DQRuleSet | None:
     """Liefert das Default-Regelset fuer einen Entity-Typ oder None."""
     return get_default_dq_rulesets().get(entity_typ)
+
+
+def get_dq_ruleset_summary(ruleset: DQRuleSet) -> DQRuleSetSummary:
+    """Verdichtet ein Regelset fuer Katalog-/Monitoring-Sichten."""
+    pflichtfeld_count = sum(1 for regel in ruleset.regeln if regel.typ == DQRegelTyp.PFLICHTFELD)
+    duplikat_count = sum(1 for regel in ruleset.regeln if regel.typ == DQRegelTyp.DUPLIKAT_VERDACHT)
+    referenz_count = sum(1 for regel in ruleset.regeln if regel.typ == DQRegelTyp.REFERENZ_FEHLT)
+    format_count = sum(1 for regel in ruleset.regeln if regel.typ == DQRegelTyp.FORMAT_VERLETZUNG)
+    bereich_count = sum(1 for regel in ruleset.regeln if regel.typ == DQRegelTyp.BEREICH_VERLETZUNG)
+    return DQRuleSetSummary(
+        ruleset_id=ruleset.ruleset_id,
+        entity_typ=ruleset.entity_typ,
+        beschreibung=ruleset.beschreibung,
+        regel_count=len(ruleset.regeln),
+        pflichtfeld_count=pflichtfeld_count,
+        duplikat_count=duplikat_count,
+        referenz_count=referenz_count,
+        format_count=format_count,
+        bereich_count=bereich_count,
+    )
+
+
+def get_dq_catalog(entity_typ: str | None = None) -> DQCatalog:
+    """Liefert den Katalog der produktiven Datenqualitaets-Regelsets."""
+    rulesets = get_default_dq_rulesets()
+    if entity_typ:
+        rulesets = {k: v for k, v in rulesets.items() if k == entity_typ}
+
+    summaries = [get_dq_ruleset_summary(ruleset) for ruleset in rulesets.values()]
+    return DQCatalog(
+        ruleset_count=len(rulesets),
+        entity_type_count=len({ruleset.entity_typ for ruleset in rulesets.values()}),
+        rule_count=sum(summary.regel_count for summary in summaries),
+        pflichtfeld_count=sum(summary.pflichtfeld_count for summary in summaries),
+        duplikat_count=sum(summary.duplikat_count for summary in summaries),
+        referenz_count=sum(summary.referenz_count for summary in summaries),
+        format_count=sum(summary.format_count for summary in summaries),
+        bereich_count=sum(summary.bereich_count for summary in summaries),
+        entity_types=sorted(rulesets.keys()),
+        rulesets=summaries,
+    )
 
 
 def validate_datensaetze_batch(

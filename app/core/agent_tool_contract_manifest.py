@@ -61,6 +61,7 @@ class AgentToolContractManifest(BaseModel):
     mcp_registry_url: str = "/api/v1/process/agent/tool-registry"
     tool_count: int
     domains: list[str]
+    auth_schemes: list[str]
     approval_required_count: int
     idempotent_count: int
     command_manifest: dict[str, Any]
@@ -140,6 +141,7 @@ def build_agent_tool_contract_manifest(
         ],
         tool_count=len(entries),
         domains=sorted({tool.domain for tool in entries}),
+        auth_schemes=sorted({tool.auth_scheme for tool in entries}),
         approval_required_count=sum(1 for tool in entries if tool.requires_approval),
         idempotent_count=sum(1 for tool in entries if tool.idempotent),
         command_manifest={

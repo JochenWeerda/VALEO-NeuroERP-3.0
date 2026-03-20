@@ -107,6 +107,32 @@ class TenantCacheConfig:
         }
 
 
+@dataclass
+class TenantRateLimitOverview:
+    """Tenant-spezifische Sicht auf Cache- und Rate-Limit-Isolation."""
+
+    tenant_id: str
+    cache_namespace: str
+    cache_config: TenantCacheConfig
+    policy_count: int
+    tenant_isolated_policies: int
+    tenant_override_allowed_policies: int
+    domains: list[str] = field(default_factory=list)
+    schema_version: int = 1
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "tenant_id": self.tenant_id,
+            "cache_namespace": self.cache_namespace,
+            "cache_config": self.cache_config.as_dict(),
+            "policy_count": self.policy_count,
+            "tenant_isolated_policies": self.tenant_isolated_policies,
+            "tenant_override_allowed_policies": self.tenant_override_allowed_policies,
+            "domains": self.domains,
+            "schema_version": self.schema_version,
+        }
+
+
 # ---------------------------------------------------------------------------
 # Rate-Limit-Request + Result
 # ---------------------------------------------------------------------------
@@ -399,3 +425,60 @@ def get_default_cache_configs() -> list[TenantCacheConfig]:
             beschreibung="System-Tenant: kurze TTL, privat",
         ),
     ]
+
+
+@dataclass
+class TenantIsolationRegistry:
+    """Read-model registry for tenant-isolated cache and rate-limit views."""
+
+    policies: list[RateLimitPolicy] = field(default_factory=get_default_rate_limit_policies)
+    cache_configs: list[TenantCacheConfig] = field(default_factory=get_default_cache_configs)
+    schema_version: int = 1
+
+    def get_cache_config(self, tenant_id: str) -> TenantCacheConfig:
+        normalized = tenant_id.strip().upper()
+        for config in self.cache_configs:
+            if config.tenant_id.upper() == normalized:
+                return TenantCacheConfig(
+                    tenant_id=tenant_id,
+                    strategie=config.strategie,
+                    ttl_sekunden=config.ttl_sekunden,
+                    max_cache_eintraege=config.max_cache_eintraege,
+                    beschreibung=config.beschreibung,
+                )
+        default = next((config for config in self.cache_configs if config.tenant_id.upper() == "DEFAULT"), self.cache_configs[0])
+        return TenantCacheConfig(
+            tenant_id=tenant_id,
+            strategie=default.strategie,
+            ttl_sekunden=default.ttl_sekunden,
+            max_cache_eintraege=default.max_cache_eintraege,
+            beschreibung=default.beschreibung,
+        )
+
+    def get_policies(self, domain: str = "") -> list[RateLimitPolicy]:
+        if not domain:
+            return list(self.policies)
+        return [policy for policy in self.policies if policy.domain == domain or policy.domain == "*"]
+
+    def build_overview(self, tenant_id: str, domain: str = "") -> TenantRateLimitOverview:
+        policies = self.get_policies(domain)
+        cache_config = self.get_cache_config(tenant_id)
+        return TenantRateLimitOverview(
+            tenant_id=tenant_id,
+            cache_namespace=f"tenant:{tenant_id}",
+            cache_config=cache_config,
+            policy_count=len(policies),
+            tenant_isolated_policies=sum(1 for policy in policies if policy.bereich == RateLimitBereich.TENANT),
+            tenant_override_allowed_policies=sum(1 for policy in policies if policy.tenant_override_erlaubt),
+            domains=sorted({policy.domain for policy in policies}),
+        )
+
+    def evaluate(self, request: RateLimitRequest) -> RateLimitResult:
+        return evaluate_rate_limit(request, self.get_policies(request.domain))
+
+
+_TENANT_ISOLATION_REGISTRY = TenantIsolationRegistry()
+
+
+def get_tenant_isolation_registry() -> TenantIsolationRegistry:
+    return _TENANT_ISOLATION_REGISTRY

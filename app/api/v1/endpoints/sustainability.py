@@ -23,6 +23,11 @@ from reportlab.pdfgen import canvas
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.sustainability_reporting import (
+    build_sustainability_catalog,
+    build_sustainability_read_model,
+    erstelle_beispiel_esg_bericht,
+)
 from app.documents.router_helpers import get_repository, list_from_store
 from app.integrations.bvl_psm_client import BVLPSMClient
 
@@ -57,6 +62,26 @@ async def get_provider_status() -> dict[str, Any]:
             },
         }
     }
+
+
+@router.get("/catalog")
+async def get_sustainability_catalog(
+    tenant_id: str = Query("TENANT-001", description="Tenant context for the catalog"),
+    jahr: int = Query(2026, ge=2020, le=2100, description="Reporting year"),
+) -> dict[str, Any]:
+    """Return a compact sustainability catalog with scope/category rollups."""
+    report = erstelle_beispiel_esg_bericht(tenant_id=tenant_id, jahr=jahr)
+    return build_sustainability_catalog(report).as_dict()
+
+
+@router.get("/read-model")
+async def get_sustainability_read_model(
+    tenant_id: str = Query("TENANT-001", description="Tenant context for the read model"),
+    jahr: int = Query(2026, ge=2020, le=2100, description="Reporting year"),
+) -> dict[str, Any]:
+    """Return a structured read model for sustainability reporting."""
+    report = erstelle_beispiel_esg_bericht(tenant_id=tenant_id, jahr=jahr)
+    return build_sustainability_read_model(report).as_dict()
 
 
 @router.get("/psm/{zulassungsnummer}")

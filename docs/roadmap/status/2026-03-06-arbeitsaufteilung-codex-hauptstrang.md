@@ -31,7 +31,7 @@ Tasks mit geringerer Abhängigkeit vom Kern-Architektur-Pfad, überwiegend Front
 | **026** | Inline-Validierung mit domain-spezifischen Erklärungen | S | -35 % Eingabefehler | Validation Layer, Fehlermeldungen |
 | **028** | Leitsystem für Ausnahmefälle (Error UX) | S | -50 % Abbruchquote | Error Boundaries, Retry/Recovery-UI |
 | **029** | Agent UX Panel (Confidence, Quellen, Aktion) | M | AI-Adoption ≥60 % | Copilot UI, Erklärbarkeit |
-| **030** | Multilingual + Fachsprache Landhandel konsistent | M | 0 Begriffsinkonsistenzen | i18n-Katalog, Terminologie |
+| **030** | Multilingual + Fachsprache Landhandel konsistent | M | 0 Begriffsinkonsistenzen | i18n-Katalog, Terminologie<br>**GESCHLOSSEN** â€” zentrale Registry + Admin-UI |
 | **031** | Query-Verträge härten (nie undefined für Query Data) | S | 0 React Query undefined | API Client, Schemas, Fallbacks |
 | **034** | API-Bulk-Operationen für Massenvorgänge | M | 3× Throughput | Batch-Endpoints, Chunking |
 | **040** | Datenqualitätsregeln (Dublette, Pflichtfeld, Referenz) | M | -50 % Stammdatenfehler | MDM-Regeln, Validierungs-Service |

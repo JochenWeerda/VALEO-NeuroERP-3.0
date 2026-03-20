@@ -34,7 +34,9 @@ def get_mcp_tool_definitions(
         "generated_at": manifest.generated_at,
         "tool_count": manifest.tool_count,
         "domains": manifest.domains,
+        "auth_schemes": manifest.auth_schemes,
         "tools": [tool.mcp_definition for tool in manifest.tools],
+        "tool_views": [tool.model_dump() for tool in manifest.tools],
     }
 
 
@@ -49,6 +51,7 @@ def get_openapi_tool_contracts(
         "openapi_url": manifest.openapi_url,
         "tool_count": manifest.tool_count,
         "domains": manifest.domains,
+        "auth_schemes": manifest.auth_schemes,
         "tools": [
             {
                 "tool_name": tool.tool_name,
@@ -62,6 +65,7 @@ def get_openapi_tool_contracts(
             }
             for tool in manifest.tools
         ],
+        "tool_views": [tool.model_dump() for tool in manifest.tools],
     }
 
 
