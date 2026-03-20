@@ -1,5 +1,4 @@
 // VALEO Mask Builder Types
-// Typ-Definitionen für das wiederverwendbare Masken-Framework
 
 export type MaskType = 'object-page' | 'list-report' | 'wizard' | 'worklist' | 'overview-page'
 
@@ -9,6 +8,7 @@ export type FieldType =
   | 'date'
   | 'datetime'
   | 'boolean'
+  | 'checkbox'
   | 'select'
   | 'multiselect'
   | 'textarea'
@@ -19,18 +19,23 @@ export type FieldType =
   | 'table'
 
 export interface BaseField {
-  name: string
+  name?: string
+  key?: string
   label: string
-  labelKey?: string // i18n-Key für Label
+  labelKey?: string
   type: FieldType
   required?: boolean
   readonly?: boolean
+  readOnly?: boolean
   placeholder?: string
-  placeholderKey?: string // i18n-Key für Placeholder
+  placeholderKey?: string
   helpText?: string
-  helpTextKey?: string // i18n-Key für Help-Text
+  helpTextKey?: string
   validation?: any
   defaultValue?: any
+  default?: any
+  rows?: number
+  [key: string]: any
 }
 
 export interface TextField extends BaseField {
@@ -80,24 +85,25 @@ export interface Tab {
   fields: Field[]
   layout?: 'grid' | 'flex'
   columns?: number
+  customRender?: (_data: any, _onChange: (_data: any) => void) => React.ReactNode
 }
 
 export interface Action {
   key: string
   label: string
-  labelKey?: string // i18n-Key für Label
-  type: 'primary' | 'secondary' | 'danger'
+  labelKey?: string
+  type?: 'primary' | 'secondary' | 'danger' | 'default' | 'destructive' | 'outline'
   icon?: string
-  /** Optional when ObjectPage/OverviewPage use onAction to dispatch by key */
-  onClick?: () => void
+  onClick?: (..._args: any[]) => unknown | Promise<unknown>
   disabled?: boolean
+  [key: string]: any
 }
 
 export interface MaskConfig {
   title: string
-  titleKey?: string // i18n-Key für Titel
+  titleKey?: string
   subtitle?: string
-  subtitleKey?: string // i18n-Key für Untertitel
+  subtitleKey?: string
   type: MaskType
   tabs: Tab[]
   actions: Action[]
@@ -133,7 +139,7 @@ export interface WizardConfig extends Omit<MaskConfig, 'tabs' | 'type'> {
 export interface ListColumn {
   key: string
   label: string
-  labelKey?: string // i18n-Key für Label
+  labelKey?: string
   sortable?: boolean
   filterable?: boolean
   render?: (_value: any, _row: any) => React.ReactNode
@@ -146,7 +152,6 @@ export interface ListConfig extends Omit<MaskConfig, 'tabs' | 'type'> {
   bulkActions?: Array<Action & { labelKey?: string }>
   defaultSort?: { field: string; direction: 'asc' | 'desc' }
   pageSize?: number
-  /** When true, pagination/sort/filter are delegated to the server via onPageChange. */
   serverPagination?: boolean
 }
 

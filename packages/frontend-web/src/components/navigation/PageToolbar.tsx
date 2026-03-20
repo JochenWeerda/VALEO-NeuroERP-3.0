@@ -115,7 +115,7 @@ export function PageToolbar({
       data-mcp-component="page-toolbar"
       data-mcp-page-domain={mcpContext?.pageDomain}
     >
-      <div className="flex h-16 items-center gap-4 px-6">
+      <div className="flex min-h-[4.5rem] items-center gap-4 px-4 py-3 sm:px-6">
         <div className="flex-1">
           <h1 className="text-xl font-semibold tracking-tight">{title}</h1>
           {hasSubtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
@@ -136,6 +136,7 @@ export function PageToolbar({
                   onClick={action.onClick}
                   disabled={action.disabled === true}
                   size="sm"
+                  className="min-h-touch min-w-touch touch-manipulation"
                   data-mcp-action={action.id}
                   data-mcp-intent={action.mcp?.intent}
                   aria-label={action.label}
@@ -157,6 +158,7 @@ export function PageToolbar({
             <Button
               variant="ghost"
               size="icon"
+              className="min-h-touch min-w-touch touch-manipulation"
               aria-label="More actions"
               onClick={() => setOverflowOpen((current) => !current)}
             >
@@ -179,7 +181,7 @@ export function PageToolbar({
                           setOverflowOpen(false)
                         }}
                         disabled={action.disabled === true}
-                        className={`flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-accent disabled:pointer-events-none disabled:opacity-50 ${destructive ? 'text-destructive' : ''}`}
+                        className={`flex min-h-touch w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm hover:bg-accent disabled:pointer-events-none disabled:opacity-50 ${destructive ? 'text-destructive' : ''}`}
                         data-mcp-action={action.id}
                         data-mcp-intent={action.mcp?.intent}
                       >

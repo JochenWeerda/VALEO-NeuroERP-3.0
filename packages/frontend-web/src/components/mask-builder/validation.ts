@@ -15,6 +15,10 @@ function isEmptyValue(value: unknown) {
   return value === undefined || value === null || value === ''
 }
 
+export function getFieldName(field: Pick<Field, 'name'> & { key?: string }) {
+  return typeof field.name === 'string' && field.name.length > 0 ? field.name : String(field.key ?? '')
+}
+
 function toNumber(value: unknown) {
   if (typeof value === 'number') {
     return Number.isFinite(value) ? value : null
@@ -88,9 +92,10 @@ export function validateFields(fields: Field[], values: Record<string, unknown>)
   const errors: ValidationErrors = {}
 
   for (const field of fields) {
-    const error = getFieldError(field, values[field.name])
+    const fieldName = getFieldName(field)
+    const error = getFieldError(field, values[fieldName])
     if (error) {
-      errors[field.name] = error
+      errors[fieldName] = error
     }
   }
 

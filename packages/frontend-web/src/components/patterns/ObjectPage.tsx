@@ -8,6 +8,7 @@ import { auth } from '@/lib/auth'
 import { resolveRoleDensityProfile } from '@/features/role-density'
 import { useTenant } from '@/hooks/useTenant'
 import { useUIDensityManifest } from '@/lib/api/ui-density-manifest'
+import { PageSection, PageSurface } from '@/components/patterns/PageSurface'
 
 export interface ObjectPageSection {
   id: string
@@ -208,11 +209,15 @@ export function ObjectPage({
         }
       />
 
-      <div className="flex-1 space-y-6 overflow-y-auto p-6">
+      <PageSurface data-page-surface="object-pattern" contentClassName="space-y-6">
         {roleDensityProfile.showKeyInfo && keyInfo !== undefined && keyInfo !== null ? (
-          <div className="rounded-lg border bg-muted/40 p-4" data-mcp-slot="key-info">
+          <PageSection
+            title="Kerninformationen"
+            description="Verdichtete Stammdaten, Status und Primärmerkmale des aktuellen Objekts."
+            className="bg-muted/35"
+          >
             {keyInfo}
-          </div>
+          </PageSection>
         ) : null}
 
         {safeSections.length > 0 ? (
@@ -240,7 +245,7 @@ export function ObjectPage({
                 key={section.id}
                 value={section.id}
                 className={cn(
-                  'rounded-lg border bg-card p-6 shadow-sm',
+                  'rounded-3xl border border-border/70 bg-card/95 p-6 shadow-sm shadow-primary/5',
                   section.id === activeSection ? 'block' : 'hidden',
                 )}
               >
@@ -253,7 +258,7 @@ export function ObjectPage({
             Keine Abschnitte vorhanden.
           </div>
         )}
-      </div>
+      </PageSurface>
     </div>
   )
 }

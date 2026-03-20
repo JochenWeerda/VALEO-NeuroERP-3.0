@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { z } from 'zod'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
@@ -18,12 +19,19 @@ const apiClient = createApiClient('/api/crm-consent')
 
 // Zod-Schema für Consents
 const createConsentSchema = (t: any) => z.object({
-  contact_id: z.string().uuid(t('crud.messages.validationError')),
+  contact_id: z.string().min(1, t('crud.messages.validationError')),
   channel: z.string().min(1, t('crud.messages.validationError')),
   consent_type: z.string().min(1, t('crud.messages.validationError')),
   source: z.string().default('manual'),
   expires_at: z.string().optional(),
 })
+
+function validateConsentForm(formData: unknown, t: any): { valid: boolean; errors: string[] } {
+  const result = createConsentSchema(t).safeParse(formData)
+  return result.success
+    ? { valid: true, errors: [] }
+    : { valid: false, errors: result.error.issues.map((issue) => issue.message) }
+}
 
 // Konfiguration für Consent ObjectPage
 const createConsentConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
@@ -263,7 +271,7 @@ export default function ConsentDetailPage(): JSX.Element {
   const consentConfig = createConsentConfig(t, entityTypeLabel)
   const isNew = !id || id === 'new' || id === 'neu'
 
-  const { data, saveData, isLoading: dataLoading } = useMaskData({
+  const { data, saveData, isLoading: dataLoading } = useMaskData<Record<string, any>>({
     apiUrl: consentConfig.api.baseUrl,
     id: id || undefined
   })

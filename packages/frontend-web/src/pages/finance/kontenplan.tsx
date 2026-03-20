@@ -5,6 +5,7 @@ import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/axios'
+import { z } from 'zod'
 
 // Zod-Schema für Kontenplan
 const kontenplanSchema = z.object({
@@ -21,6 +22,22 @@ const kontenplanSchema = z.object({
   waehrung: z.string().default("EUR"),
   periode: z.string().regex(/^\d{4}-\d{2}$/, "Periode muss YYYY-MM Format haben")
 })
+
+const validateKontenplanForm = (formData: any): { isValid: boolean; errors: Record<string, string> } => {
+  const parsed = kontenplanSchema.safeParse(formData ?? {})
+  if (parsed.success) {
+    return { isValid: true, errors: {} }
+  }
+
+  const errors: Record<string, string> = {}
+  parsed.error.issues.forEach((issue) => {
+    const field = issue.path[0]
+    if (typeof field === 'string' && !errors[field]) {
+      errors[field] = issue.message
+    }
+  })
+  return { isValid: false, errors }
+}
 
 // Konfiguration für Kontenplan ObjectPage
 const kontenplanConfig: MaskConfig = {

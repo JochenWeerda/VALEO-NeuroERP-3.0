@@ -35,7 +35,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Calculator, Cow, Euro, AlertTriangle, CheckCircle2, Loader2, Gift } from 'lucide-react'
+import { Calculator, Euro, AlertTriangle, CheckCircle2, Loader2, Gift, Sprout } from 'lucide-react'
 
 const BREEDS = [
   { value: 'Holstein', label: 'Holstein' },
@@ -107,7 +107,7 @@ export default function PortalRationsoptimierung() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
-            <Cow className="h-4 w-4" />
+            <Sprout className="h-4 w-4" />
             Kuhprofil
           </CardTitle>
           <CardDescription>Eckdaten für die Bedarfsberechnung</CardDescription>

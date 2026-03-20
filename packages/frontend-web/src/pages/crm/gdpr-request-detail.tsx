@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { z } from 'zod'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
@@ -20,9 +21,16 @@ const apiClient = createApiClient('/api/crm-gdpr')
 // Zod-Schema für GDPR-Requests
 const createGDPRRequestSchema = (t: any) => z.object({
   request_type: z.string().min(1, t('crud.messages.validationError')),
-  contact_id: z.string().uuid(t('crud.messages.validationError')),
+  contact_id: z.string().min(1, t('crud.messages.validationError')),
   notes: z.string().optional(),
 })
+
+function validateGDPRRequestForm(formData: unknown, t: any): { valid: boolean; errors: string[] } {
+  const result = createGDPRRequestSchema(t).safeParse(formData)
+  return result.success
+    ? { valid: true, errors: [] }
+    : { valid: false, errors: result.error.issues.map((issue) => issue.message) }
+}
 
 // Konfiguration für GDPR-Request ObjectPage
 const createGDPRRequestConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
@@ -306,7 +314,7 @@ export default function GDPRRequestDetailPage(): JSX.Element {
   const gdprRequestConfig = createGDPRRequestConfig(t, entityTypeLabel)
   const isNew = !id || id === 'new' || id === 'neu'
 
-  const { data, saveData, isLoading: dataLoading } = useMaskData({
+  const { data, saveData, isLoading: dataLoading } = useMaskData<Record<string, any>>({
     apiUrl: gdprRequestConfig.api.baseUrl,
     id: id || undefined
   })
@@ -516,7 +524,7 @@ export default function GDPRRequestDetailPage(): JSX.Element {
                       <strong>{t('crud.fields.fileFormat')}:</strong> {data.response_file_format?.toUpperCase()}
                     </div>
                     <Button
-                      onClick={() => handleAction('downloadExport', data)}
+                      onClick={() => void handleAction('downloadExport')}
                       className="w-full"
                     >
                       <Download className="h-4 w-4 mr-2" />

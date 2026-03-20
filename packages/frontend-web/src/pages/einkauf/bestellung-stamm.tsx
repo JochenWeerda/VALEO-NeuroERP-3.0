@@ -15,11 +15,12 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { toast } from '@/hooks/use-toast'
-import { apiClient } from '@/lib/api-client'
+import { apiClient } from '@/lib/axios'
 import { History, XCircle, AlertTriangle, Mail, Globe } from 'lucide-react'
 import { usePoCommunications, useSendPoCommunication } from '@/lib/api/procurement-plus'
 import { useAuth } from '@/hooks/useAuth'
 import { useTenant } from '@/hooks/useTenant'
+import type { ChangeLog } from '@/features/crud/components/CrudAuditTrailPanel'
 
 const createBestellungConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
@@ -252,15 +253,18 @@ export default function BestellungStammPage(): JSX.Element {
     entityType: 'purchaseOrder',
     entityId: id || '',
     fetchAuditTrail: async (entityType: string, entityId: string) => {
-      const response = await apiClient.get(`/api/v1/audit/logs?entity_type=${entityType}&entity_id=${entityId}&limit=50`)
-      return response.data.map((log: any) => ({
+      const response = (await apiClient.get<any[]>(`/api/v1/audit/logs?entity_type=${entityType}&entity_id=${entityId}&limit=50`)) as unknown as any[]
+      return (response || []).map((log: any) => ({
         id: log.id,
         timestamp: new Date(log.timestamp),
         action: log.action,
-        user: log.user_email || log.user_id,
-        changedFields: log.changes || {},
+        userId: log.user_id || log.user_email || 'system',
+        userName: log.user_email || log.user_id || 'system',
+        changedFields: Array.isArray(log.changes) ? log.changes : Object.keys(log.changes || {}),
+        oldValue: log.changes?.before,
+        newValue: log.changes?.after,
         reason: log.reason || '',
-      }))
+      })) as ChangeLog[]
     },
   })
 

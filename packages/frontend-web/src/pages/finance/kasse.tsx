@@ -522,9 +522,9 @@ export default function KassePage(): JSX.Element {
         setActionLoadingKey(null)
       }
     } else if (action === 'approve') {
-      const isValid = validate(formData)
-      if (!isValid.isValid) {
-        showValidationToast(errors)
+      const validationErrors = validate(formData)
+      if (Object.keys(validationErrors).length > 0) {
+        showValidationToast(validationErrors)
         return
       }
 

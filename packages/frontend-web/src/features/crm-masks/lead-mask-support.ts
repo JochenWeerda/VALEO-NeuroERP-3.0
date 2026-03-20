@@ -8,8 +8,26 @@ import {
 } from '@/features/crm-masks/mappers'
 
 type LeadMaskConfig = typeof leadMaskConfig
-type LeadMaskTab = LeadMaskConfig['tabs'][number]
-type LeadMaskField = LeadMaskTab['sections'][number]['fields'][number]
+type LeadMaskField = {
+  binding: string
+  label: string
+  component: string
+  required?: boolean
+  readonly?: boolean
+  optionsRef?: string
+}
+
+type LeadMaskSection = {
+  label: string
+  layout?: { columns?: number }
+  fields?: LeadMaskField[]
+}
+
+type LeadMaskTab = {
+  id: string
+  label: string
+  sections?: LeadMaskSection[]
+}
 
 const COMPONENT_TO_FIELD_TYPE: Record<string, Field['type']> = {
   TextField: 'text',
@@ -53,7 +71,7 @@ function convertLeadMaskToObjectPageConfig(config: LeadMaskConfig): MaskConfig {
       columns: resolveTabColumns(tab),
       fields:
         tab.sections?.flatMap((section) =>
-          section.fields.map((field) => convertLeadMaskField(field, section.label)),
+          (section.fields ?? []).map((field) => convertLeadMaskField(field, section.label)),
         ) ?? [],
     })),
     actions: [],
@@ -65,7 +83,7 @@ function convertLeadMaskToObjectPageConfig(config: LeadMaskConfig): MaskConfig {
 }
 
 function resolveTabColumns(tab: LeadMaskTab): number {
-  const sectionColumns = tab.sections?.map((section) => section.layout?.columns ?? 2) ?? []
+  const sectionColumns = (tab.sections ?? []).map((section) => section.layout?.columns ?? 2)
   return sectionColumns.length ? Math.max(...sectionColumns) : 2
 }
 

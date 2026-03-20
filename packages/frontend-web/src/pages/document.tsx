@@ -417,7 +417,9 @@ export default function DocumentPanel(): JSX.Element {
                     <Button 
                       size="sm" 
                       variant="destructive"
-                      onClick={(): void => handleDelete(d.id)}
+                      onClick={(): void => {
+                        void handleDelete(d.id)
+                      }}
                       disabled={remove.isPending}
                     >
                       <Trash2 className="h-4 w-4 mr-1" />

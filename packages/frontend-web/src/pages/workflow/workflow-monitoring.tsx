@@ -28,7 +28,12 @@ export default function WorkflowMonitoringPage(): JSX.Element {
   }
 
   const getStatusBadge = (status: string) => {
-    const variants = { SUCCESS: 'outline' as const, FAILED: 'destructive' as const, RUNNING: 'secondary' as const, PENDING: 'secondary' as const }
+    const variants = {
+      SUCCESS: 'outline' as const,
+      FAILED: 'destructive' as const,
+      RUNNING: 'secondary' as const,
+      PENDING: 'secondary' as const,
+    }
     return <Badge variant={variants[status as keyof typeof variants] || 'secondary'}>{getStatusLabel(t, status.toLowerCase(), status)}</Badge>
   }
 
@@ -53,7 +58,10 @@ export default function WorkflowMonitoringPage(): JSX.Element {
     total: executions.length,
     success: executions.filter((e) => e.status === 'SUCCESS').length,
     failed: executions.filter((e) => e.status === 'FAILED').length,
-    running: executions.filter((e) => e.status === 'RUNNING').length,
+    running: executions.filter((e) => {
+      const status = e.status as string
+      return status === 'RUNNING' || status === 'PENDING'
+    }).length,
   }
   const successRate = stats.total > 0 ? (stats.success / stats.total) * 100 : 0
 

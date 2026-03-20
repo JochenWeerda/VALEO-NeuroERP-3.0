@@ -226,7 +226,9 @@ export default function KundenListePage(): JSX.Element {
   const importInputRef = useRef<HTMLInputElement>(null)
   const entityType = 'customer'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Kunde')
-  const baseConfig = createKundenListConfig(t, entityTypeLabel)
+  const baseConfig = createKundenListConfig(t, entityTypeLabel) as ListConfig & {
+    bulkActions: NonNullable<ListConfig['bulkActions']>
+  }
 
   const { data: queryData, isLoading } = useQuery({
     queryKey: ['crm', 'kunden'],

@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from '@/hooks/use-toast'
-import { apiClient } from '@/lib/api-client'
+import { apiClient } from '@/lib/axios'
 import { Plus, ArrowLeft, XCircle } from 'lucide-react'
 import { formatDate, formatNumber } from '@/components/mask-builder/utils/formatting'
 
@@ -136,10 +136,8 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
   const loadCreditMemos = async () => {
     try {
       setLoading(true)
-      const response = await apiClient.get('/api/v1/einkauf/credit-memos')
-      if (response.data) {
-        setCreditMemos(response.data)
-      }
+      const response = (await apiClient.get<CreditMemo[]>('/api/v1/einkauf/credit-memos')) as unknown as CreditMemo[]
+      setCreditMemos(response ?? [])
     } catch (error) {
       console.error('Fehler beim Laden der Gutschriften:', error)
       toast({
@@ -155,10 +153,8 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
   const loadDebitMemos = async () => {
     try {
       setLoading(true)
-      const response = await apiClient.get('/api/v1/einkauf/debit-memos')
-      if (response.data) {
-        setDebitMemos(response.data)
-      }
+      const response = (await apiClient.get<DebitMemo[]>('/api/v1/einkauf/debit-memos')) as unknown as DebitMemo[]
+      setDebitMemos(response ?? [])
     } catch (error) {
       console.error('Fehler beim Laden der Belastungen:', error)
       toast({
@@ -173,16 +169,14 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
 
   const loadOpenInvoices = async () => {
     try {
-      const response = await apiClient.get('/api/v1/ap/invoices?status=APPROVED')
-      const data = (response as any)?.data ?? response
-      const rawList = Array.isArray(data) ? data : []
+      const response = (await apiClient.get<APInvoice[]>('/api/v1/ap/invoices?status=APPROVED')) as unknown as APInvoice[]
+      const rawList = Array.isArray(response) ? response : []
       let openItemsMap: Record<string, number> = {}
       try {
-        const opRes = await apiClient.get<{ items?: Array<{ rechnungsnr?: string; offen?: number }> }>(
+        const opRes = (await apiClient.get<{ items?: Array<{ rechnungsnr?: string; offen?: number }> }>(
           '/api/v1/finance/open-items?konto_typ=kreditoren&limit=500'
-        )
-        const opBody = (opRes as any)?.data ?? opRes
-        const items = opBody?.items ?? []
+        )) as unknown as { items?: Array<{ rechnungsnr?: string; offen?: number }> }
+        const items = opRes?.items ?? []
         items.forEach((op: { rechnungsnr?: string; offen?: number }) => {
           if (op.rechnungsnr != null) openItemsMap[op.rechnungsnr] = Number(op.offen ?? 0)
         })

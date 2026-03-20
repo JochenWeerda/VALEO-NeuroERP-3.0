@@ -181,7 +181,7 @@ export default function AnfrageStammPage(): JSX.Element {
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Anfrage')
   const anfrageConfig = createAnfrageConfig(t, entityTypeLabel)
 
-  const { data, saveData, refetch } = useMaskData({
+  const { data, saveData, loadData } = useMaskData({
     apiUrl: anfrageConfig.api.baseUrl,
     id: id || undefined
   })
@@ -193,7 +193,7 @@ export default function AnfrageStammPage(): JSX.Element {
         const response = await fetch('/api/partners?type=supplier')
         if (response.ok) {
           const suppliers = await response.json()
-          setAvailableSuppliers(suppliers.data || suppliers || [])
+          setAvailableSuppliers(Array.isArray(suppliers) ? suppliers : suppliers?.data || [])
         }
       } catch (error) {
         console.error('Fehler beim Laden der Lieferanten:', error)
@@ -270,7 +270,7 @@ export default function AnfrageStammPage(): JSX.Element {
       })
 
       setApproveDialogOpen(false)
-      refetch()
+      loadData()
     } catch (error: any) {
       console.error('Fehler beim Freigeben:', error)
       toast({
@@ -312,7 +312,7 @@ export default function AnfrageStammPage(): JSX.Element {
 
       setRejectDialogOpen(false)
       setRejectReason('')
-      refetch()
+      loadData()
     } catch (error: any) {
       console.error('Fehler beim Ablehnen:', error)
       toast({
@@ -400,7 +400,7 @@ export default function AnfrageStammPage(): JSX.Element {
 
       setSendRfqDialogOpen(false)
       setSelectedSuppliers([])
-      refetch()
+      loadData()
     } catch (error: any) {
       console.error('Fehler beim Versenden der RFQ:', error)
       toast({
@@ -637,3 +637,4 @@ export default function AnfrageStammPage(): JSX.Element {
     </div>
   )
 }
+

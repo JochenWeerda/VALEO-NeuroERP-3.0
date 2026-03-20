@@ -212,7 +212,7 @@ export default function BestellvorschlagLagerPage(): JSX.Element {
     try {
       const created: string[] = []
       for (const [liefNr, positionen] of Object.entries(byLieferant)) {
-        const res = await apiClient.post('/api/v1/einkauf/bestellungen', {
+        const res = await apiClient.post<{ bestellnummer?: string }>('/api/v1/einkauf/bestellungen', {
           lieferant_id: liefNr,
           lieferant_name: positionen[0].name,
           positionen: positionen.map((v) => ({
@@ -225,7 +225,7 @@ export default function BestellvorschlagLagerPage(): JSX.Element {
           niederlassung: positionen[0].niederlassung,
           bestelldatum: new Date().toISOString().slice(0, 10),
         })
-        created.push((res.data as any)?.bestellnummer ?? liefNr)
+        created.push(res.bestellnummer ?? liefNr)
       }
       push(`${created.length} Bestellung(en) erstellt: ${created.join(', ')}`)
       setVorschlaege([])
@@ -580,7 +580,7 @@ export default function BestellvorschlagLagerPage(): JSX.Element {
             if (!menge) return
             setVorschlaege((prev) => [...prev, {
               id: crypto.randomUUID(), liefNr: '', name: 'Manuell', artikelNr: artNr,
-              liefArt: 'frei', menge, einheit: 'kg', einhPreis: 0, preisJe1: 'kg',
+              liefArt: 'frei', menge, einheit: 'kg', einhPreis: 0, preisEi: 'kg',
               betrag: 0, kontraktNr: '', niederlassung: '', lagerhalle: '', bediener: '', datum: new Date().toISOString().slice(0,10)
             }])
             push('Manuelle Position hinzugefügt')

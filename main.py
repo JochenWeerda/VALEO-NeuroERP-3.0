@@ -18,7 +18,7 @@ import contextlib
 from contextlib import asynccontextmanager
 
 from app.core.config import settings
-from app.core.database import create_tables
+from app.core.database import create_tables, engine
 from app.api.v1.api import api_router
 from app.api.v1.endpoints import policies as policies_v1
 from app.core.logging import setup_logging
@@ -88,6 +88,9 @@ async def lifespan(app: FastAPI):
 
     # Startup
     logger.info("Starting VALEO-NeuroERP API server...")
+
+    # Dispose pre-fork connections so each worker opens fresh ones (multi-worker safety)
+    engine.dispose()
 
     # Configure dependency injection container
     try:

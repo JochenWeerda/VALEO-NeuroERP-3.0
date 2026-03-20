@@ -131,10 +131,12 @@ export default function ChargenStammPage(): JSX.Element {
     )
   }
 
+  const selectedCharge = charge
+
   async function onSave(): Promise<void> {
     try {
       await updateCharge.mutateAsync({
-        id: charge.id,
+        id: selectedCharge.id,
         payload: {
           menge: form.menge,
           lagerort: form.lagerort,
@@ -158,7 +160,7 @@ export default function ChargenStammPage(): JSX.Element {
           qs_datenbank: !Array.isArray(safeJsonParse(form.qs_datenbank)) ? (safeJsonParse(form.qs_datenbank) as Record<string, unknown>) : {},
         },
       })
-      toast({ title: 'Charge gespeichert', description: charge.chargenId })
+      toast({ title: 'Charge gespeichert', description: selectedCharge.chargenId })
     } catch (error) {
       toast({ title: 'Fehler', description: error instanceof Error ? error.message : 'Speichern fehlgeschlagen', variant: 'destructive' })
     }
@@ -166,8 +168,8 @@ export default function ChargenStammPage(): JSX.Element {
 
   async function onDelete(): Promise<void> {
     try {
-      await deleteCharge.mutateAsync(charge.id)
-      toast({ title: 'Charge geloescht', description: charge.chargenId })
+      await deleteCharge.mutateAsync(selectedCharge.id)
+      toast({ title: 'Charge geloescht', description: selectedCharge.chargenId })
       navigate('/charge/liste')
     } catch (error) {
       toast({ title: 'Fehler', description: error instanceof Error ? error.message : 'Loeschen fehlgeschlagen', variant: 'destructive' })
@@ -176,13 +178,13 @@ export default function ChargenStammPage(): JSX.Element {
 
   return (
     <div className="space-y-6 p-3 md:p-6">
-      <ModuleToolbar backTarget="/charge/liste" closeTarget="/charge/liste" title={charge.chargenId} />
+      <ModuleToolbar backTarget="/charge/liste" closeTarget="/charge/liste" title={selectedCharge.chargenId} />
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center gap-3">
             <Package className="h-8 w-8" />
             <div>
-              <h1 className="text-3xl font-bold font-mono">{charge.chargenId}</h1>
+            <h1 className="text-3xl font-bold font-mono">{selectedCharge.chargenId}</h1>
               <p className="text-muted-foreground">{form.artikel}</p>
             </div>
           </div>
@@ -206,7 +208,7 @@ export default function ChargenStammPage(): JSX.Element {
             <Card>
               <CardHeader><CardTitle>Chargendaten</CardTitle></CardHeader>
               <CardContent className="space-y-4">
-                <div><Label>Chargen-ID</Label><Input value={charge.chargenId} readOnly className="font-mono font-bold" /></div>
+                <div><Label>Chargen-ID</Label><Input value={selectedCharge.chargenId} readOnly className="font-mono font-bold" /></div>
                 <div><Label>Losnummer</Label><Input value={form.losnummer} onChange={(e) => setForm((prev) => ({ ...prev, losnummer: e.target.value }))} /></div>
                 <div><Label>Artikel</Label><Input value={form.artikel} onChange={(e) => setForm((prev) => ({ ...prev, artikel: e.target.value }))} /></div>
                 <div><Label>Produktbezeichnung</Label><Input value={form.produktbezeichnung} onChange={(e) => setForm((prev) => ({ ...prev, produktbezeichnung: e.target.value }))} /></div>

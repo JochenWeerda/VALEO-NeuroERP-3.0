@@ -261,7 +261,9 @@ export default function LieferantenListePage(): JSX.Element {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const importInputRef = useRef<HTMLInputElement>(null)
-  const baseConfig = createLieferantenListConfig(t)
+  const baseConfig = createLieferantenListConfig(t) as ListConfig & {
+    bulkActions: NonNullable<ListConfig['bulkActions']>
+  }
 
   const { data: queryData, isLoading } = useQuery({
     queryKey: ['crm', 'lieferanten'],

@@ -8,6 +8,15 @@ import { useInventoryDashboard } from '@/lib/api/dashboard'
 import { useMhdItems, useRennerItems, usePennerItems } from '@/lib/api/inventory'
 import { useNavigate } from 'react-router-dom'
 
+type PsmArtikel = {
+  name: string
+  quantity: number
+  abverkaufsfrist: string
+}
+
+const EMPTY_PSM_ARTIKEL: PsmArtikel[] = []
+const EMPTY_TOP_ARTICLES: Array<{ name: string; quantity: number; value: number }> = []
+
 
 
 export default function BestandsuebersichtPage(): JSX.Element {
@@ -18,7 +27,8 @@ export default function BestandsuebersichtPage(): JSX.Element {
   const navigate = useNavigate()
 
   // Prüfe ob echte Daten vorhanden sind
-  const hasData = bestand && bestand.totalArticles > 0
+  const hasData = Boolean(bestand && bestand.totalArticles > 0)
+  const topArticles = hasData && bestand ? bestand.topArticles : EMPTY_TOP_ARTICLES
 
   return (
     <div className="space-y-6 p-6">
@@ -270,7 +280,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
                   </span>
                   <span className="text-sm text-red-600">PSM mit endender Abverkaufsfrist</span>
                 </div>
-                {[].map((item, i) => (
+                {EMPTY_PSM_ARTIKEL.map((item, i) => (
                   <div key={i} className="flex items-center justify-between rounded border border-red-200 p-2 bg-white/50 text-sm">
                     <span className="font-medium truncate max-w-[200px]">{item.name}</span>
                     <div className="flex items-center gap-2">
@@ -402,7 +412,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
             </div>
           ) : (
             <div className="space-y-3">
-              {(hasData ? bestand.topArticles : []).map((artikel, i) => (
+              {topArticles.map((artikel, i) => (
                 <div key={i} className="flex items-center justify-between rounded-lg border p-4 hover:bg-muted/50 transition-colors">
                   <div>
                     <div className="font-semibold">{artikel.name}</div>
