@@ -215,7 +215,9 @@ export default function DebitorenListePage(): JSX.Element {
   const [data, setData] = useState<any[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
-  const baseConfig = createDebitorenListConfig(t)
+  const baseConfig = createDebitorenListConfig(t) as ListConfig & {
+    bulkActions: NonNullable<ListConfig['bulkActions']>
+  }
 
   const { handleAction } = useMaskActions(async (action: string, item: any) => {
     if (action === 'edit' && item) {
@@ -277,14 +279,15 @@ export default function DebitorenListePage(): JSX.Element {
         toast({ title: 'Fehler', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
       }
     }
+    const bulkActions = baseConfig.bulkActions ?? []
     return {
       ...baseConfig,
-      bulkActions: [
-        { ...baseConfig.bulkActions[0], onClick: onExportBulk },
-        { ...baseConfig.bulkActions[1], onClick: onReminder },
-        { ...baseConfig.bulkActions[2], onClick: onDunning },
-        { ...baseConfig.bulkActions[3], onClick: onBlock },
-      ],
+      bulkActions: bulkActions.length >= 4 ? [
+        { ...bulkActions[0], onClick: onExportBulk },
+        { ...bulkActions[1], onClick: onReminder },
+        { ...bulkActions[2], onClick: onDunning },
+        { ...bulkActions[3], onClick: onBlock },
+      ] : [],
     }
   }, [t])
 

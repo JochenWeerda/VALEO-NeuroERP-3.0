@@ -9,6 +9,7 @@ import { auth } from '@/lib/auth'
 import { resolveRoleDensityProfile } from '@/features/role-density'
 import { useTenant } from '@/hooks/useTenant'
 import { useUIDensityManifest } from '@/lib/api/ui-density-manifest'
+import { PageSection, PageSurface } from '@/components/patterns/PageSurface'
 
 interface WizardLabels {
   back: string
@@ -204,7 +205,7 @@ export function Wizard({
         }
       />
 
-      <div className="flex-1 space-y-6 overflow-y-auto p-6">
+      <PageSurface data-page-surface="wizard-pattern" contentClassName="space-y-6">
         <nav aria-label="Wizard steps">
           <ol className="flex flex-wrap items-center gap-3">
             {safeSteps.map((step, index) => {
@@ -238,17 +239,18 @@ export function Wizard({
 
         <div className="h-px bg-border" role="presentation" />
 
-        <div className="rounded-lg border bg-card p-6 shadow-sm" data-mcp-step={activeStep?.id}>
-          {roleDensityProfile.density !== 'focused' &&
-          typeof activeStep?.description === 'string' &&
-          activeStep.description.length > 0 ? (
-            <p className="mb-4 text-sm text-muted-foreground">{activeStep.description}</p>
-          ) : null}
-          {activeStep?.content ?? (
-            <p className="text-sm text-muted-foreground">Kein Inhalt fuer diesen Schritt vorhanden.</p>
-          )}
-        </div>
-      </div>
+        <PageSection
+          title={activeStep?.title}
+          description={roleDensityProfile.density !== 'focused' ? activeStep?.description : undefined}
+          className="shadow-sm shadow-primary/5"
+        >
+          <div className="min-h-touch" data-mcp-step={activeStep?.id}>
+            {activeStep?.content ?? (
+              <p className="text-sm text-muted-foreground">Kein Inhalt fuer diesen Schritt vorhanden.</p>
+            )}
+          </div>
+        </PageSection>
+      </PageSurface>
 
       <footer className="border-t bg-muted/40 px-6 py-4">
         <div className="flex items-center justify-between gap-3">

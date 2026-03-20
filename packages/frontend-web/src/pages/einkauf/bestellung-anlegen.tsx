@@ -71,8 +71,7 @@ export default function BestellungAnlegenPage(): JSX.Element {
 
   const loadRequisitionData = async (id: string) => {
     try {
-      const response = await apiClient.get(`/api/purchase-workflow/requisitions/${id}`)
-      const req = response.data
+      const req: any = await apiClient.get<any>(`/api/purchase-workflow/requisitions/${id}`)
       if (req) {
         setBestellung(prev => ({
           ...prev,
@@ -92,8 +91,7 @@ export default function BestellungAnlegenPage(): JSX.Element {
 
   const loadContractData = async (id: string) => {
     try {
-      const response = await apiClient.get(`/api/contracts/${id}`)
-      const contract = response.data
+      const contract: any = await apiClient.get<any>(`/api/contracts/${id}`)
       if (contract) {
         setBestellung(prev => ({
           ...prev,
@@ -109,8 +107,7 @@ export default function BestellungAnlegenPage(): JSX.Element {
 
   const loadRFQData = async (id: string) => {
     try {
-      const response = await apiClient.get(`/api/purchase-workflow/rfqs/${id}`)
-      const rfq = response.data
+      const rfq: any = await apiClient.get<any>(`/api/purchase-workflow/rfqs/${id}`)
       if (rfq) {
         setBestellung(prev => ({
           ...prev,
@@ -463,5 +460,7 @@ export default function BestellungAnlegenPage(): JSX.Element {
     </div>
   )
 }
+
+
 
 

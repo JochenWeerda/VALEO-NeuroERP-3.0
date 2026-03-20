@@ -36,15 +36,14 @@ Diese Statusdatei verdichtet den aktuellen Gesamtstand, ohne die Detailnachweise
 ## Gesamtstatus
 
 - Stand: `2026-03-20`
-- Status: `Waves 1 bis 90 abgeschlossen`
-- Gesamtsuite: `6230+ Tests gruen, 0 Fehler, 5 skipped, 1 xfailed` (Stand nach Waves 89/90)
+- Status: `Waves 1 bis 87 abgeschlossen`
+- Gesamtsuite: `5916 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed`
+- Bereinigter Gap-Abgleich gegen spaetere Wave-Nachweise: `docs/roadmap/status/2026-03-20-gap-matrix-bereinigt.md`
 - Letzte abgeschlossene Waves:
-  - `Wave 85`: Gap 001 -- E2E Prozesskette ohne Medienbruch: validate_e2e_kette() + KPI >= 95%% (28 Tests)
-  - `Wave 86`: Gap 011 -- Versionierte Workflow Engine: WorkflowVersionRegistry + MigrationsPlan (40 Tests)
-  - `Wave 87`: Gap 037 -- Lasttest-Contracts Erntepeak: 500-User-SLA + p95 < 2s + Dashboard < 250ms (35 Tests)
-  - `Wave 88`: Gaps 036, 038, 048 -- Background Jobs, Tenant Isolation und External Agent Integrations (Wave-88-Statusdoku separat)
-  - `Wave 89`: Gap 030 -- Multilingual + Fachsprache Landhandel konsistent (Terminologie-Registry + Admin-UI)
-  - `Wave 90`: Gap 020 -- Workflow-Template Marketplace intern (Katalog, Preview, Installationspfad)
+  - `Wave 85`: E2E Prozesskette ohne Medienbruch (Gap 001) -- 28 Tests
+  - `Wave 86`: Versionierte Workflow Engine SemVer (Gap 011) -- 36 Tests
+  - `Wave 87`: Lasttest Erntepeak SLA-Contracts (Gap 037) -- 28 Tests
+  - `Wave 67`: Process Cache Contracts + Workflow Schema Migration
 
 ## Wave-Uebersicht
 
@@ -117,25 +116,6 @@ Diese Statusdatei verdichtet den aktuellen Gesamtstand, ohne die Detailnachweise
 | Wave 65 | abgeschlossen | 155 | `wave-65/STATUS.md` |
 | Wave 66 | abgeschlossen | 163 | `wave-66/STATUS.md` |
 | Wave 67 | abgeschlossen | 192 | `wave-67/STATUS.md` |
-| Wave 72 | abgeschlossen | 20 | Gap 003 Trocknungsengine |
-| Wave 73 | abgeschlossen | 28 | Gap 004 Settlement Freigabe |
-| Wave 74 | abgeschlossen | 28 | Rationsoptimierung GfE-2023 |
-| Wave 75 | abgeschlossen | 49 | Gap 049 Security Hardening: Security Headers + RBAC | `wave-75/STATUS.md` |
-| Wave 76 | abgeschlossen | 37 | Gap 024 Touch-Feldworkflows: TouchFieldLayout + Einlagerung + LKW | `wave-76/STATUS.md` |
-| Wave 77 | abgeschlossen | 34 | Gap 023 Keyboard-first: useKeyboardShortcuts + ObjectPage + ShortcutBar | `wave-77/STATUS.md` |
-| Wave 78 | abgeschlossen | 46 | Gap 043 EDI/API Hub: DigitalExchangeCoverage KPI + PartnerApiKey + Dispatch-Queue + Monitor | `wave-78/STATUS.md` |
-| Wave 79 | abgeschlossen | 52 | Gap 026 Inline-Validierung: GLN/IBAN/Menge/Preis + FormValidationContract + Frontend-Hook | `wave-79/STATUS.md` |
-| Wave 80 | abgeschlossen | 40 | Gap 028 Error UX: classify_http_error() + RecoveryActions + ErrorPanel + ErrorUxRegistry | `wave-80/STATUS.md` |
-| Wave 81 | abgeschlossen | 31 | Gap 019 Policy Explainability: explain_policy_result() + Badge + Cache + 3 Detailgrade | `wave-81/STATUS.md` |
-| Wave 82 | abgeschlossen | 33 | Gap 032 Controlling 500er: KpiSafeValue.from_raw() + safe_kpi/timeseries_response() + Ampel-Kalkulation | `wave-82/STATUS.md` |
-| Wave 83 | abgeschlossen | 30 | Gap 033 Dashboard Read-Models: DashboardSnapshot + Store + stale-while-revalidate + p95 < 250ms KPI | `wave-83/STATUS.md` |
-| Wave 84 | abgeschlossen | 43 | Gap 021 Einheitliches Designsystem: DesignSystemRegistry + Compliance-Check + 20+ Komponenten + 11 Tokens | `wave-84/STATUS.md` |
-| Wave 85 | abgeschlossen | 28 | Gap 001 E2E Prozesskette ohne Medienbruch: validate_e2e_kette() + KPI >= 95% | `wave-85/STATUS.md` |
-| Wave 86 | abgeschlossen | 40 | Gap 011 Versionierte Workflow Engine: WorkflowVersionRegistry + MigrationsPlan + Sicherheitscheck | `wave-86/STATUS.md` |
-| Wave 87 | abgeschlossen | 35 | Gap 037 Lasttest-Contracts Erntepeak: 500-User-SLA + p95 < 2s + Dashboard-SLA | `wave-87/STATUS.md` |
-| Wave 88 | abgeschlossen | 8 | Gaps 036, 038, 048 Background Jobs, Tenant Isolation, External Agent Integrations | `wave-88/STATUS.md` |
-| Wave 89 | abgeschlossen | 5 | Gap 030 Multilingual + Fachsprache Landhandel konsistent | `wave-89/STATUS.md` |
-| Wave 90 | abgeschlossen | 3 | Gap 020 Workflow-Template Marketplace intern | `wave-90/STATUS.md` |
 
 ## Abgeschlossene Waves 51–67 (Kernmodule)
 
@@ -160,135 +140,6 @@ Diese Statusdatei verdichtet den aktuellen Gesamtstand, ohne die Detailnachweise
 | 67 | Cache, Schema Migration | process_cache_contracts, workflow_schema_migration_contracts |
 
 ## Aktuell relevante Lieferungen
-
-### Wave 83 / Gap 017
-
-- Referenz: `docs/roadmap/status/2026-03-06-top-50-gap-backlog-landhandel.md`
-- Scope:
-  - `app/core/agent_tool_contract_manifest.py`
-  - `app/api/v1/endpoints/agent_tool_contracts.py`
-  - `app/api/v1/api.py`
-- Ergebnis:
-  - Externes Tool-Contract-Manifest fasst den produktiven MCP-Katalog und die OpenAPI-Referenzen in einem stabilen Endpoint zusammen
-  - Externe Agenten koennen Tool-Definitions, OpenAPI-verknuepfte Metadaten und einen MCP-View fuer aktuell 23 produktive Tools abrufen
-  - Der Contract ist domain-filterbar und einzeln ueber Tool-Namen adressierbar
-  - Manifest-, MCP- und OpenAPI-Sicht sind gegeneinander querpruefbar
-
-### Wave 84 / Gaps 029, 034, 040
-
-- Referenz: `docs/roadmap/status/2026-03-06-top-50-gap-backlog-landhandel.md`
-- Scope:
-  - `app/core/bulk_operations.py`
-  - `app/core/data_quality_rules.py`
-  - `app/core/data_quality_enforcement.py`
-  - `app/api/v1/endpoints/process_kernel_api.py`
-  - `app/api/v1/endpoints/bank_statement_import.py`
-  - `app/api/v1/endpoints/bulk_journal_import.py`
-  - `app/api/v1/endpoints/payment_matching.py`
-  - `packages/frontend-web/src/components/agent/AgentUxPanel.tsx`
-  - `packages/frontend-web/src/components/agent/IdempotencyMonitoringPanel.tsx`
-  - `packages/frontend-web/src/pages/admin/agenten-integration.tsx`
-- Ergebnis:
-  - `POST /api/v1/process/bulk-operations/evaluate` kombiniert Bulk-Validierung, Limits und DQ-Regelsets zu einem agentenfaehigen Batch-Contract.
-  - Journal-, Kontoauszug- und Zahlungsimporte pruefen Dubletten und Pflichtfelder jetzt mit demselben DQ-Kern vor jedem DB-Write.
-  - DQ-Regeln decken Dubletten, Pflichtfelder und Referenzverletzungen auf einem gemeinsamen Read-/Write-Path-Kern ab.
-  - Das Agent-UX-Panel surfacet Confidence, Quellen und naechste Aktion fuer agentenfaehige Nutzung direkt im Admin-Frontend.
-  - Das Idempotenz-Monitoring ist als produktive UI- und API-Sicht verfuegbar und macht Retry-Sicherheit fuer Kern-Commands sichtbar.
-
-### Wave 85 / Gaps 044, 045
-
-- Referenz: `docs/roadmap/status/2026-03-06-top-50-gap-backlog-landhandel.md`
-- Scope:
-  - `app/core/supply_chain_tracking.py`
-  - `app/core/dms_ocr_contracts.py`
-  - `app/api/v1/endpoints/process_kernel_api.py`
-- Ergebnis:
-  - `POST /api/v1/process/supply-chain/eta/alarm` bewertet geplante Lieferungen gegen Zielankunft und erzeugt standardisierte ETA-/Abweichungsalarme.
-  - `POST /api/v1/process/dms/extract` klassifiziert Dokumente, extrahiert strukturierte Belegfelder und baut einen Kernfluss-Contract fuer Finance-, Docflow- und Lagerpfade.
-  - ETA-Alarmierung und OCR-Extraktion sind damit als agenten- und API-faehige Kernflows statt als isolierte Hilfsfunktionen verfuegbar.
-
-### Wave 86 / Gap 012
-
-- Referenz: `docs/roadmap/status/2026-03-06-top-50-gap-backlog-landhandel.md`
-- Scope:
-  - `app/core/workflow_simulation.py`
-  - `app/api/v1/endpoints/workflow_simulation.py`
-  - `app/api/v1/api.py`
-- Ergebnis:
-  - `WorkflowSandboxPreviewInput` und `WorkflowSandboxPreviewResult` bilden einen modellbasierten Sandbox-Preview-Contract fuer neue Workflows.
-  - `POST /api/v1/workflow/simulation/preview` liefert Simulation, Warnungen und eine Empfehlung fuer den Go-Live-Review.
-  - Die bestehende Workflow-Simulation bleibt als generischer Scenario-Contract separat verfuegbar.
-
-### Wave 87 / Gap 018
-
-- Referenz: `docs/roadmap/status/2026-03-06-top-50-gap-backlog-landhandel.md`
-- Scope:
-  - `app/core/process_mining_observation.py`
-  - `app/api/v1/endpoints/process_mining_observation.py`
-  - `app/api/v1/api.py`
-- Ergebnis:
-  - `ProcessMiningObservationReadModel` priorisiert Top-Prozesse anhand von Trace-State, Bottlenecks und Beobachtungssignalen.
-  - `GET /api/v1/process-mining/finance/observation` liefert eine leichtgewichtige Mining-Topliste.
-  - `GET /api/v1/process-mining/finance/observation/{projection_key}` liefert den Drilldown fuer eine einzelne Projection.
-
-### Wave 88 / Gaps 036, 038, 048
-
-- Referenz: `docs/roadmap/status/2026-03-06-top-50-gap-backlog-landhandel.md`
-- Scope:
-  - `app/core/background_jobs.py`
-  - `app/core/tenant_rate_limits.py`
-  - `app/core/external_agent_catalog.py`
-  - `app/api/v1/endpoints/background_jobs.py`
-  - `app/api/v1/endpoints/tenant_limits.py`
-  - `app/api/v1/endpoints/external_agent_integrations.py`
-  - `app/api/v1/api.py`
-- Ergebnis:
-  - Queue-basierte Hintergrundjobs sind ueber `enqueue`, `dequeue`, `complete`, `fail` und Read-Model-Sichten fuer Status/Backlog nutzbar.
-  - Tenant-isolierte Cache- und Rate-Limit-Sichten liefern pro Tenant eine kontrollierbare Isolation und einen praxistauglichen Policy-Read-Model-Pfad.
-- Der External-Agent-Katalog liefert Provider-, Use-Case- und Install-Pack-Sichten fuer OpenAPI-, MCP-, Slack-, Teams- und SDK-Integrationen.
-
-### Wave 89 / Gap 030
-
-- Referenz: `docs/roadmap/status/2026-03-06-top-50-gap-backlog-landhandel.md`
-- Scope:
-  - `app/core/terminology_registry.py`
-  - `app/api/v1/endpoints/terminology.py`
-  - `packages/frontend-web/src/pages/admin/terminologie.tsx`
-  - `packages/frontend-web/src/pages/admin/setup/index.tsx`
-- Ergebnis:
-  - Ein zentraler bilingualer Landhandel-Terminologie-Katalog macht kanonische DE/EN-Begriffe, Synonyme und Avoid-Regeln maschinenlesbar.
-  - `GET /api/v1/terminology/registry` und `GET /api/v1/terminology/terms/{term_key}` surfacen die Registry als API-Contract fuer Backend, Agenten und Frontend.
-  - Die Admin-Sicht zeigt den Katalog mit Suche, Domain-Filter und Leitregeln als konsistente Fachsprache fuer Landhandel.
-
-### Wave 89 / Gaps 016, 040, 046, 047
-
-- Referenz: `docs/roadmap/status/2026-03-06-top-50-gap-backlog-landhandel.md`
-- Scope:
-  - `app/core/action_idempotency.py`
-  - `app/api/v1/endpoints/idempotency_monitoring.py`
-  - `app/core/data_quality_rules.py`
-  - `app/api/v1/endpoints/data_quality.py`
-  - `app/core/sustainability_reporting.py`
-  - `app/api/v1/endpoints/sustainability.py`
-  - `app/core/benchmark_cockpit.py`
-  - `app/api/v1/endpoints/benchmark_cockpit.py`
-  - `app/api/v1/api.py`
-- Ergebnis:
-  - Idempotenz-Monitoring liefert jetzt einen auditierbaren Feed mit Replay-, Status- und Aggregat-Kennzahlen.
-  - Datenqualitaet ist ueber einen konsistenten Katalog, einzelne Rulesets und Rule-Summaries konsumierbar.
-  - Nachhaltigkeit und Benchmarking haben stabile Katalog-/Read-Model-Endpunkte statt nur Beispiel-Reports.
-
-### Wave 90 / Gap 020
-
-- Referenz: `wave-90/STATUS.md`
-- Scope:
-  - `app/core/workflow_template_marketplace.py`
-  - `app/api/v1/endpoints/workflow_template_marketplace.py`
-  - `tests/test_process_kernel_wave89_workflow_template_marketplace.py`
-- Ergebnis:
-  - Interner Marketplace liefert kuratierte Workflow-Templates fuer Finance-, Agrar-, CRM- und Logistik-Pfade.
-  - Templates koennen ueber Katalog, Preview und Installationspfad als kontrollierte Prozessvariante in den Tenant ueberfuehrt werden.
-  - Monitoring- und Sandbox-Hooks sind im Installationsresultat direkt benannt.
 
 ### Wave 21
 
@@ -352,28 +203,6 @@ Diese Statusdatei verdichtet den aktuellen Gesamtstand, ohne die Detailnachweise
   - Produktive Backend-Command- sowie Policy-/Approval-Contracts speisen ueber `ui-density-manifest` das Mindestniveau fuer die UI-Dichte
   - Toolbar, Listen-/Detail-Pattern, Wizard sowie AP-, Closing-, USTVA-, Zahlungslauf-, Lastschrift-, Settlement- und kompakte Listen-/Badge-Explainability nutzen denselben Dichte-Contract
   - Sichtbare Informationsmenge wird konsistent nach Rolle und Prozesskontext reduziert oder erweitert statt pro Seite separat
-
-### Blockchain- und Compliance-Anchor-Layer
-
-- Scope:
-  - `app/core/blockchain_anchor_contracts.py`
-  - `app/core/blockchain_anchor_runtime.py`
-  - `app/models/blockchain_anchors.py`
-  - `app/repositories/blockchain_anchor_repository.py`
-  - `app/api/v1/endpoints/blockchain_runtime.py`
-  - `app/api/v1/endpoints/channel_work_surfaces.py`
-  - `app/api/v1/endpoints/process_kernel_api.py`
-  - `app/api/v1/endpoints/journal_entries.py`
-  - `app/api/v1/endpoints/gobd_archiv.py`
-- Ergebnis:
-  - Permissioned Enterprise-Blockchain-Anchors sind als eigener Laufzeit- und Persistenzbaustein im Process-Kernel verankert.
-  - Fachliche Wahrheit bleibt off-chain in Postgres; Blockchain wird bewusst als tamper-evidenter Anchor-Layer statt als transaktionales ERP-System-of-Record genutzt.
-  - Oracle-/Fabric- und SAP-HANA-Adapterprofile sind als kanonische Integrationsprofile modelliert.
-  - Channel-Prozessausfuehrungen und Freigabeentscheidungen erzeugen jetzt automatische Audit-Anchors.
-  - Knowledge-Objekte, neue Versionen und uebernommene Improvement-Proposals werden automatisch als Governance-/Wissens-Anchors referenzierbar.
-  - Settlement-Audit-Ketten koennen explizit ueber `POST /api/v1/process/settlement/audit-chain/{settlement_id}/anchor` verankert werden.
-  - Journal-Posting/Reverse sowie GoBD-`document_artifacts` liefern jetzt ebenfalls Blockchain-Anchor-Referenzen zurueck.
-  - NeuroASSIST-basierte Knowledge-Proposals tragen beim Erzeugen einen expliziten Governance-Anchor.
 
 ### PKP-06 Frontend Explainability
 
@@ -480,18 +309,6 @@ Diese Statusdatei verdichtet den aktuellen Gesamtstand, ohne die Detailnachweise
 - `app/core/inline_validation_contracts.py`
 - `app/core/error_guidance_contracts.py`
 
-### Blockchain- / Ledger-Compliance-Schicht
-
-- `app/core/blockchain_anchor_contracts.py`
-- `app/core/blockchain_anchor_runtime.py`
-- `app/models/blockchain_anchors.py`
-- `app/repositories/blockchain_anchor_repository.py`
-- `app/api/v1/endpoints/blockchain_runtime.py`
-
-Ergebnis:
-- Tamper-evidente ERP-Anchors fuer Audit-Ketten, Knowledge-Versionen, Journal-Ereignisse, Channel-Threads und Belegartefakte sind als wiederverwendbare Kernschicht vorhanden.
-- Die Integrationsprofile orientieren sich an permissioned Enterprise-Mustern statt an oeffentlichen Krypto-Chains.
-
 ### Frontend-Power-User-Schicht
 
 - `packages/frontend-web/src/features/ki-usability/context/ActionDispatchContext.tsx`
@@ -505,6 +322,22 @@ Ergebnis:
 - `packages/frontend-web/src/lib/api/ui-density-manifest.ts`
 - `packages/frontend-web/src/components/workflow/ProcessStatusPanel.tsx`
 - `app/core/ui_density_manifest.py`
+- `packages/frontend-web/src/components/patterns/PageSurface.tsx`
+
+Ergebnis:
+- Neue Seiten sollen jetzt verpflichtend ueber `PageSurface` + `PageToolbar` + Pattern-Sektionen aufgebaut werden.
+- Bestehende Seiten, die `OverviewPage`, `ObjectPage`, `ListReport` oder `Wizard` verwenden, profitieren automatisch vom neuen DS-Rahmen.
+- Aeltere Standalone-Seiten wie `sales/orders-modern.tsx` und `controlling/benchmark-cockpit.tsx` wurden rueckwirkend auf denselben Seitenrahmen gezogen.
+
+### Externe Blockchain-Schnittstelle fuer Lieferkettenprozesse
+
+- `app/core/supply_chain_blockchain.py`
+- `app/api/v1/endpoints/supply_chain_blockchain.py`
+
+Ergebnis:
+- Lieferkettenereignisse koennen jetzt fuer externe Blockchain-/Ledger-Ziele als standardisierte Outbound-Payload vorbereitet werden.
+- Unterstuetzte Zielprofile im aktuellen Adapter: SAP BTP Ledger, Oracle Blockchain Platform und Hyperledger Fabric.
+- API-Surfacing: `GET /api/v1/supply-chain/blockchain/profiles`, `POST /api/v1/supply-chain/blockchain/prepare`, `POST /api/v1/supply-chain/blockchain/dispatch`.
 
 ### NeuroASSIST Fach-Workflow- und Assistenten-Schicht
 
@@ -641,6 +474,7 @@ npm run type-check
 ## Offene Punkte
 
 - Der globale Roadmap-Status ausserhalb von `docs/architecture/process-kernel/STATUS.md` ist nicht automatisch synchron und muss bei groesseren Wave-Abschluessen separat nachgezogen werden.
+- Die bereinigte Gap-Einordnung fuer den Stand `2026-03-20` liegt in `docs/roadmap/status/2026-03-20-gap-matrix-bereinigt.md`; Backlog, Delivery-Map und Aggregatstatus koennen zeitweise voneinander abweichen.
 - Neue Frontend- und Integrationsarbeit hat auf den bestehenden Bausteinen aus Wave 9 bis Wave 27 aufzusetzen; keine neuen Parallelpfade fuer Routing, Dispatch, Audit, SLA oder Prozesssurfacing.
 - Bei jeder neuen Lieferung sind Schichtgrenzen aktiv zu verifizieren:
   - kein Import von `app/api/` aus `app/core/`

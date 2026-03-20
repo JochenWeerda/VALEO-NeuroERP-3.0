@@ -9,7 +9,7 @@ import { NativeSelect } from '@/components/ui/native-select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { toast } from '@/hooks/use-toast'
-import { apiClient } from '@/lib/api-client'
+import { apiClient } from '@/lib/axios'
 import { Package } from 'lucide-react'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 
@@ -58,7 +58,6 @@ export default function WareneingangPage(): JSX.Element {
   const { poId } = useParams<{ poId?: string }>()
   const entityType = 'goodsReceipt'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Wareneingang')
-  const purchaseOrderOptions = purchaseOrders.map((po) => ({ value: po.id, label: `${po.number} - ${po.supplierName}` }))
   const qualityInspectionOptions = [
     { value: 'PENDING', label: t('status.pending') },
     { value: 'PASSED', label: t('status.approved') },
@@ -76,6 +75,7 @@ export default function WareneingangPage(): JSX.Element {
   const [purchaseOrder, setPurchaseOrder] = useState<PurchaseOrder | null>(null)
   const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>([])
   const [selectedPoId, setSelectedPoId] = useState<string>(poId || '')
+  const purchaseOrderOptions = purchaseOrders.map((po) => ({ value: po.id, label: `${po.number} - ${po.supplierName}` }))
   const [receiptData, setReceiptData] = useState<GoodsReceiptData>({
     purchaseOrderId: '',
     deliveryNoteNumber: '',
@@ -100,8 +100,7 @@ export default function WareneingangPage(): JSX.Element {
 
   const loadPurchaseOrders = async () => {
     try {
-      const response = await apiClient.get('/api/v1/purchase-orders?status=FREIGEGEBEN&page=1&pageSize=100')
-      const rows = response.data?.data || []
+      const rows = (await apiClient.get<any[]>('/api/v1/purchase-orders?status=FREIGEGEBEN&page=1&pageSize=100')) as unknown as any[]
       setPurchaseOrders(rows.map((po: any) => ({
         id: po.id,
         number: po.purchaseOrderNumber || po.number,
@@ -130,8 +129,7 @@ export default function WareneingangPage(): JSX.Element {
   const loadPurchaseOrder = async (orderId: string) => {
     setLoading(true)
     try {
-      const response = await apiClient.get(`/api/v1/purchase-orders/${orderId}`)
-      const po = response.data
+      const po: any = await apiClient.get<any>(`/api/v1/purchase-orders/${orderId}`)
       setPurchaseOrder({
         id: po.id,
         number: po.purchaseOrderNumber || po.number,

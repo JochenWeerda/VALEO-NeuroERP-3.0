@@ -9,6 +9,7 @@ import { auth } from '@/lib/auth'
 import { limitItemsForDensity, resolveRoleDensityProfile } from '@/features/role-density'
 import { useTenant } from '@/hooks/useTenant'
 import { useUIDensityManifest } from '@/lib/api/ui-density-manifest'
+import { PageSection, PageSurface } from '@/components/patterns/PageSurface'
 
 export interface OverviewKpi {
   label: string
@@ -146,7 +147,7 @@ export function OverviewPage({
         }
       />
 
-      <div className="flex-1 space-y-6 overflow-y-auto p-6">
+      <PageSurface data-page-surface="overview-pattern" contentClassName="space-y-6">
         <section aria-label="KPI cards" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {visibleKpis.map((kpi) => {
             const hasClickHandler = typeof kpi.onClick === 'function'
@@ -178,7 +179,7 @@ export function OverviewPage({
         {visibleCharts.length > 0 ? (
           <section aria-label="Charts" className="grid gap-6 lg:grid-cols-2">
             {visibleCharts.map((chart, index) => (
-              <Card key={index} className="shadow-sm">
+              <Card key={index} className="rounded-3xl border-border/70 shadow-sm shadow-primary/5">
                 <CardContent className="pt-6">{chart}</CardContent>
               </Card>
             ))}
@@ -186,15 +187,19 @@ export function OverviewPage({
         ) : null}
 
         {visibleLists.length > 0 ? (
-          <section aria-label="Analytic lists" className="space-y-4">
+          <PageSection
+            title="Analytische Listen"
+            description="Sekundäre Übersichten, Ausreißer und Drilldowns im selben Designsystem-Rahmen."
+            className="space-y-4"
+          >
             {visibleLists.map((list, index) => (
-              <Card key={index} className="shadow-sm">
+              <Card key={index} className="rounded-2xl border-border/70 shadow-sm">
                 <CardContent className="pt-6">{list}</CardContent>
               </Card>
             ))}
-          </section>
+          </PageSection>
         ) : null}
-      </div>
+      </PageSurface>
     </div>
   )
 }

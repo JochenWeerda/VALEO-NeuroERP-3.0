@@ -66,8 +66,7 @@ export function ArticleSearchDialog({
       if (withCustomerArticleNumber) params.append('with_customer_article_number', 'true')
       if (allArticleTypes) params.append('all_types', 'true')
       
-      const response = await apiClient.get<Article[]>('/api/v1/inventory/articles', { params })
-      return response.data
+      return apiClient.get<Article[]>('/api/v1/inventory/articles', { params })
     },
     enabled: open,
     staleTime: 30_000,
@@ -77,7 +76,7 @@ export function ArticleSearchDialog({
     if (!searchTerm) return articles
     
     const term = searchTerm.toLowerCase()
-    return articles.filter((article) => {
+    return articles.filter((article: Article) => {
       if (searchIn === 'number') {
         return article.articleNumber.toLowerCase().includes(term)
       }
@@ -254,7 +253,7 @@ export function ArticleSearchDialog({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredArticles.map((article) => (
+                  {filteredArticles.map((article: Article) => (
                     <TableRow
                       key={article.id}
                       className={selectedArticle?.id === article.id ? 'bg-muted' : 'cursor-pointer'}

@@ -25,6 +25,7 @@ import { auth } from '@/lib/auth';
 import { resolveRoleDensityProfile } from '@/features/role-density';
 import { useTenant } from '@/hooks/useTenant';
 import { useUIDensityManifest } from '@/lib/api/ui-density-manifest';
+import { PageSection, PageSurface } from '@/components/patterns/PageSurface';
 
 export interface ListReportProps<T> {
   // Titel & Beschreibung
@@ -175,8 +176,13 @@ export function ListReport<T>({
         mcpContext={toolbarContext}
       />
 
-      <div className="flex-1 p-6 space-y-4 overflow-auto">
+      <PageSurface data-page-surface="list-report-pattern" contentClassName="space-y-4">
         {/* Search & Filter-Bar (SAP Fiori Pattern) */}
+        <PageSection
+          title="Listensteuerung"
+          description="Suche, Filter und Massenaktionen laufen im gleichen DS-Rahmen wie Tabelle und Ergebnisstatus."
+          className="space-y-4"
+        >
         <div className="flex gap-4">
           {/* Search */}
           {typeof onSearch === 'function' && (
@@ -205,7 +211,7 @@ export function ListReport<T>({
 
         {/* Filter-Panel (SAP Fiori Pattern - collapsible) */}
         {roleDensityProfile.density !== 'focused' && showFilters && Array.isArray(filterOptions) && (
-          <div className="p-4 border rounded-lg bg-muted/50">
+          <div className="rounded-2xl border border-border/70 bg-muted/50 p-4">
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {filterOptions.map((filter) => (
                 <div key={filter.field}>
@@ -221,24 +227,27 @@ export function ListReport<T>({
             </div>
           </div>
         )}
+        </PageSection>
 
         {/* DataTable (SAP Fiori Pattern) */}
-        <DataTable
-          columns={columns}
-          data={data}
-          selectable={selectable}
-          onSelectionChange={(rows) => {
-            if (typeof onSelectionChange === 'function') {
-              onSelectionChange(rows);
-            }
-          }}
-        />
+        <PageSection title="Ergebnisliste" description="Tabellarische Arbeitsfläche mit konsistenter Informationsdichte und responsiver Interaktion.">
+          <DataTable
+            columns={columns}
+            data={data}
+            selectable={selectable}
+            onSelectionChange={(rows) => {
+              if (typeof onSelectionChange === 'function') {
+                onSelectionChange(rows);
+              }
+            }}
+          />
 
-        {/* Footer mit Item-Count (SAP Fiori Pattern) */}
-        <div className="text-sm text-muted-foreground">
-          {t('pattern.listreport.items_count', { count: data.length })}
-        </div>
-      </div>
+          {/* Footer mit Item-Count (SAP Fiori Pattern) */}
+          <div className="text-sm text-muted-foreground">
+            {t('pattern.listreport.items_count', { count: data.length })}
+          </div>
+        </PageSection>
+      </PageSurface>
     </div>
   );
 }

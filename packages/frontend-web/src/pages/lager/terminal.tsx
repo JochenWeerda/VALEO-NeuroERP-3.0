@@ -80,13 +80,20 @@ export default function WarehouseTerminalPage(): JSX.Element {
     }
   }, [])
 
-  const handleScan = useCallback(
+  const triggerScan = useCallback(
     (barcode: string, format: string) => {
       setScannedBarcode(barcode)
       setScannedFormat(format)
       void searchArticle(barcode)
     },
     [searchArticle],
+  )
+
+  const handleScan = useCallback(
+    (barcode: string) => {
+      triggerScan(barcode, 'SCAN')
+    },
+    [triggerScan],
   )
 
   const handleScanError = useCallback(
@@ -146,7 +153,7 @@ export default function WarehouseTerminalPage(): JSX.Element {
               <QuickActionGrid actions={warehouseActions} columns={2} />
             </div>
 
-            <RecentScans scans={recentScans} onSelect={(barcode) => handleScan(barcode, 'HISTORY')} />
+            <RecentScans scans={recentScans} onSelect={(barcode) => triggerScan(barcode, 'HISTORY')} />
           </>
         )}
 

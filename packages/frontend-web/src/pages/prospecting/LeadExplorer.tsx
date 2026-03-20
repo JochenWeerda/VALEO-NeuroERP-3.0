@@ -121,7 +121,7 @@ export default function LeadExplorer(): JSX.Element {
     [leadCandidates, page],
   )
 
-  function handleCreateLead(): void {
+  function handleCreateLead(candidate?: LeadCandidate): void {
     navigate('/crm/leads/new')
   }
 
@@ -130,7 +130,7 @@ export default function LeadExplorer(): JSX.Element {
     navigate(`/crm/customers/${candidate.matched_customer_id}`)
   }
 
-  function handleAddTask(): void {
+  function handleAddTask(candidate?: LeadCandidate): void {
     navigate('/crm/leads')
   }
 
@@ -306,8 +306,8 @@ export default function LeadExplorer(): JSX.Element {
       
       // Debug-Informationen aus der Antwort anzeigen
       const debugInfo = result.deleted_counts?.debug_remaining_years || []
-      const debugText = debugInfo.length > 0 ? 
-        `\n\nDebug - Verbleibende Daten: ${debugInfo.map(y => `${y.year}: ${y.count}`).join(', ')}` : ''
+      const debugText = debugInfo.length > 0 ?
+        `\n\nDebug - Verbleibende Daten: ${debugInfo.map((y: { year: number; count: number }) => `${y.year}: ${y.count}`).join(', ')}` : ''
       
       setPipelineSuccess(`✅ ${result.message}${debugText}`)
       

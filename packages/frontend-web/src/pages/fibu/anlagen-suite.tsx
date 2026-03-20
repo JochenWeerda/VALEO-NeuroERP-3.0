@@ -50,8 +50,7 @@ function useAssetLedgerConfig() {
   return useQuery({
     queryKey: ['finance', 'asset-ledger-connector', 'config'],
     queryFn: async () => {
-      const res = await apiClient.get<ConnectorConfig | null>('/api/v1/finance/asset-ledger-connector/config')
-      return res.data
+      return await apiClient.get<ConnectorConfig | null>('/api/v1/finance/asset-ledger-connector/config')
     },
   })
 }
@@ -94,11 +93,10 @@ export default function AnlagenSuitePage(): JSX.Element {
 
   const syncMutation = useMutation({
     mutationFn: async (direction: 'export' | 'import') => {
-      const res = await apiClient.post<{ success: boolean; message: string }>('/api/v1/finance/asset-ledger-connector/sync', {
+      return await apiClient.post<{ success: boolean; message: string }>('/api/v1/finance/asset-ledger-connector/sync', {
         direction,
         options: {},
       })
-      return res.data
     },
     onMutate: () => setSyncing(true),
     onSettled: () => setSyncing(false),
@@ -118,8 +116,7 @@ export default function AnlagenSuitePage(): JSX.Element {
   const { data: importRun, refetch: refetchRun } = useQuery({
     queryKey: ['finance', 'connectors', 'imports', importRunId],
     queryFn: async () => {
-      const res = await apiClient.get<ConnectorRunSummary>(`${CONNECTOR_BASE}/imports/${importRunId}`)
-      return res.data
+      return await apiClient.get<ConnectorRunSummary>(`${CONNECTOR_BASE}/imports/${importRunId}`)
     },
     enabled: !!importRunId,
   })
@@ -127,10 +124,9 @@ export default function AnlagenSuitePage(): JSX.Element {
   const { data: runItems } = useQuery({
     queryKey: ['finance', 'connectors', 'imports', importRunId, 'items'],
     queryFn: async () => {
-      const res = await apiClient.get<ConnectorRunItem[]>(`${CONNECTOR_BASE}/imports/${importRunId}/items`, {
+      return await apiClient.get<ConnectorRunItem[]>(`${CONNECTOR_BASE}/imports/${importRunId}/items`, {
         params: { only_errors: true, limit: 50 },
       })
-      return res.data
     },
     enabled: !!importRunId,
   })
@@ -139,12 +135,11 @@ export default function AnlagenSuitePage(): JSX.Element {
     mutationFn: async (file: File) => {
       const form = new FormData()
       form.append('file', file)
-      const res = await apiClient.post<{ run_id: string; status: string; message: string }>(
+      return await apiClient.post<{ run_id: string; status: string; message: string }>(
         `${CONNECTOR_BASE}/ASSET_LEDGER/imports`,
         form,
         { headers: { 'Content-Type': 'multipart/form-data' } }
       )
-      return res.data
     },
     onSuccess: (data) => {
       setImportRunId(data.run_id)
@@ -158,8 +153,7 @@ export default function AnlagenSuitePage(): JSX.Element {
 
   const validateMutation = useMutation({
     mutationFn: async () => {
-      const res = await apiClient.post<ConnectorRunSummary>(`${CONNECTOR_BASE}/imports/${importRunId}/validate`)
-      return res.data
+      return await apiClient.post<ConnectorRunSummary>(`${CONNECTOR_BASE}/imports/${importRunId}/validate`)
     },
     onSuccess: () => {
       refetchRun()
@@ -172,8 +166,7 @@ export default function AnlagenSuitePage(): JSX.Element {
 
   const postMutation = useMutation({
     mutationFn: async () => {
-      const res = await apiClient.post<ConnectorRunSummary>(`${CONNECTOR_BASE}/imports/${importRunId}/post`)
-      return res.data
+      return await apiClient.post<ConnectorRunSummary>(`${CONNECTOR_BASE}/imports/${importRunId}/post`)
     },
     onSuccess: () => {
       refetchRun()
@@ -186,8 +179,7 @@ export default function AnlagenSuitePage(): JSX.Element {
 
   const cancelMutation = useMutation({
     mutationFn: async () => {
-      const res = await apiClient.post<ConnectorRunSummary>(`${CONNECTOR_BASE}/imports/${importRunId}/cancel`)
-      return res.data
+      return await apiClient.post<ConnectorRunSummary>(`${CONNECTOR_BASE}/imports/${importRunId}/cancel`)
     },
     onSuccess: () => {
       refetchRun()
@@ -200,8 +192,7 @@ export default function AnlagenSuitePage(): JSX.Element {
 
   const reverseMutation = useMutation({
     mutationFn: async () => {
-      const res = await apiClient.post<ConnectorRunSummary>(`${CONNECTOR_BASE}/imports/${importRunId}/reverse`)
-      return res.data
+      return await apiClient.post<ConnectorRunSummary>(`${CONNECTOR_BASE}/imports/${importRunId}/reverse`)
     },
     onSuccess: () => {
       refetchRun()
@@ -322,7 +313,7 @@ export default function AnlagenSuitePage(): JSX.Element {
                 <details className="text-sm">
                   <summary>Fehlerzeilen anzeigen ({runItems.length})</summary>
                   <ul className="mt-2 list-disc pl-5 space-y-1">
-                    {runItems.slice(0, 20).map((it) => (
+                    {runItems.slice(0, 20).map((it: ConnectorRunItem) => (
                       <li key={it.id}>
                         Zeile {it.line_no}: {it.validation_errors?.toString() ?? it.status}
                       </li>

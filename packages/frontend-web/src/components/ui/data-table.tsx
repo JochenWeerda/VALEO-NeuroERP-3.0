@@ -8,7 +8,8 @@ export type ColumnRenderArgs<T> = {
 }
 
 export type ColumnDef<T> = {
-  accessorKey: keyof T | string
+  accessorKey?: keyof T | string
+  id?: string
   header: ReactNode
   cell?: (_args: ColumnRenderArgs<T>) => ReactNode
   className?: string
@@ -25,9 +26,10 @@ interface DataTableProps<T> {
   data: T[]
   selectable?: boolean
   onSelectionChange?: (_selected: T[]) => void
+  loading?: boolean
 }
 
-export function DataTable<T>({ columns, data, selectable, onSelectionChange }: DataTableProps<T>): JSX.Element {
+export function DataTable<T>({ columns, data, selectable, onSelectionChange, loading = false }: DataTableProps<T>): JSX.Element {
   useEffect(() => {
     if (selectable !== true) {
       onSelectionChange?.([])
@@ -42,6 +44,7 @@ export function DataTable<T>({ columns, data, selectable, onSelectionChange }: D
     if (isLegacyFormat(col)) {
       return {
         accessorKey: col.key as string,
+        id: String(col.key),
         header: col.label,
         cell: col.render ? (_args: ColumnRenderArgs<T>) => col.render?.(_args.row.original) : undefined,
       }
@@ -54,22 +57,28 @@ export function DataTable<T>({ columns, data, selectable, onSelectionChange }: D
       <TableHeader>
         <TableRow>
           {normalizedColumns.map((column) => (
-            <TableHead key={String(column.accessorKey)} className={column.className}>
+            <TableHead key={String(column.id ?? column.accessorKey)} className={column.className}>
               {column.header}
             </TableHead>
           ))}
         </TableRow>
       </TableHeader>
       <TableBody>
-        {data.map((row, rowIndex) => (
+        {loading ? (
+          <TableRow>
+            <TableCell colSpan={normalizedColumns.length} className="text-center text-muted-foreground">
+              Laden...
+            </TableCell>
+          </TableRow>
+        ) : data.map((row, rowIndex) => (
           <TableRow key={rowIndex}>
-            {normalizedColumns.map((column) => {
+            {normalizedColumns.map((column, columnIndex) => {
               const cellContent =
                 typeof column.cell === 'function'
                   ? column.cell({ row: { original: row } })
-                  : (row as Record<string, unknown>)[column.accessorKey as string]
+                  : (column.accessorKey ? (row as Record<string, unknown>)[column.accessorKey as string] : null)
               return (
-                <TableCell key={String(column.accessorKey)} className={column.className}>
+                <TableCell key={String(column.id ?? column.accessorKey ?? columnIndex)} className={column.className}>
                   {cellContent as ReactNode}
                 </TableCell>
               )

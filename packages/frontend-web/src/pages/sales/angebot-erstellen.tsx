@@ -98,6 +98,19 @@ function emptyPosition(posNr: number): CurrentPositionDetails {
   }
 }
 
+function getErrorMessage(error: unknown): string {
+  if (error && typeof error === 'object') {
+    const response = 'response' in error ? (error as { response?: { data?: { detail?: string } } }).response : undefined
+    if (response?.data?.detail) {
+      return response.data.detail
+    }
+    if ('message' in error && typeof (error as { message?: unknown }).message === 'string') {
+      return (error as { message: string }).message
+    }
+  }
+  return 'Unbekannter Fehler'
+}
+
 // â”€â”€ Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function AngebotErstellenPage(): JSX.Element {
@@ -317,11 +330,7 @@ export default function AngebotErstellenPage(): JSX.Element {
       }
       setIsDirty(false)
     } catch (err: unknown) {
-      const msg =
-        err && typeof err === 'object' && 'response' in err && err.response && typeof err.response === 'object' && 'data' in err.response
-          ? String((err.response as { data?: { detail?: string } }).data?.detail ?? (err as Error).message)
-          : (err as Error).message
-      push(`Fehler beim Speichern: ${msg}`)
+      push(`Fehler beim Speichern: ${getErrorMessage(err)}`)
     } finally {
       setIsSaving(false)
     }
@@ -348,11 +357,7 @@ export default function AngebotErstellenPage(): JSX.Element {
       push('Angebot in Auftrag übernommen')
       navigate(`/sales/order?fromOffer=${id}`)
     } catch (err: unknown) {
-      const msg =
-        err && typeof err === 'object' && 'response' in err && err.response && typeof err.response === 'object' && 'data' in err.response
-          ? String((err.response as { data?: { detail?: string } }).data?.detail ?? (err as Error).message)
-          : (err as Error).message
-      push(`Fehler: ${msg}`)
+      push(`Fehler: ${getErrorMessage(err)}`)
     }
   }, [angebotId, push, navigate])
 
@@ -367,11 +372,7 @@ export default function AngebotErstellenPage(): JSX.Element {
       push('Angebot gelöscht')
       navigate('/sales/angebote')
     } catch (err: unknown) {
-      const msg =
-        err && typeof err === 'object' && 'response' in err && err.response && typeof err.response === 'object' && 'data' in err.response
-          ? String((err.response as { data?: { detail?: string } }).data?.detail ?? (err as Error).message)
-          : (err as Error).message
-      push(`Fehler beim Löschen: ${msg}`)
+      push(`Fehler beim Löschen: ${getErrorMessage(err)}`)
     }
   }, [angebotId, push, navigate])
 

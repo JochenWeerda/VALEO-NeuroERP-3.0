@@ -252,6 +252,7 @@ services:
       API_DEV_TOKEN: dev-token
       AI_SERVICE_URL: http://ai:5000
       DEBUG: "true"
+      WEB_CONCURRENCY: "8"
       LOG_LEVEL: INFO
       CRM_CORE_BASE_URL: http://crm-core:5600
       CRM_CORE_HTTP_TIMEOUT_SECONDS: 5
@@ -280,7 +281,7 @@ services:
       - ./alembic:/app/alembic
       - ./alembic.ini:/app/alembic.ini
       - ./main.py:/app/main.py
-    command: sh -c "alembic upgrade head 2>/dev/null || true && uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+    command: sh -c "alembic upgrade head 2>/dev/null || true && uvicorn main:app --host 0.0.0.0 --port 8000 --workers 8 --timeout-keep-alive 30"
 
   inventory-service:
     build:

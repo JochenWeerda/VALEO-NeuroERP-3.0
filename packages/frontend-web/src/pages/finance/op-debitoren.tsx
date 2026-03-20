@@ -7,7 +7,7 @@ import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { getFieldsFromMaskConfig, validateFields } from '@/components/mask-builder/validation'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
-import { toast } from 'sonner'
+import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/axios'
 
 const createOpDebitorenConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
@@ -326,7 +326,7 @@ function SettlementsList({ opId, t }: { opId: string; t: (key: string) => string
       const res = await apiClient.get<Array<{ id: string; payment_amount: number; payment_date: string | null; payment_reference: string; created_at: string | null }>>(
         `/api/v1/finance/open-items/${opId}/settlements`
       )
-      return res.data
+      return res
     },
     enabled: !!opId,
   })

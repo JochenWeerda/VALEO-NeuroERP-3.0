@@ -13,7 +13,6 @@ from app.api.v1.endpoints import (
     portal_feldbuch,
     health,
     tenants,
-    tenant_governance,
     users,
     customers,
     crm_reports,
@@ -82,12 +81,6 @@ from app.api.v1.endpoints import (
     customer_extensions,
     business_partners,
     messages,
-    background_jobs,
-    channel_work_surfaces,
-    blockchain_runtime,
-    external_agent_integrations,
-    benchmark_cockpit,
-    idempotency_monitoring,
     dms_images,
     sales_shipping_ext,
     master_data,
@@ -139,10 +132,7 @@ from app.api.v1.endpoints import (
     position_rules,
     position_overrides,
     batch,
-    agents,
-    agent_tool_contracts,
-    tenant_limits,
-    terminology,
+    supply_chain_blockchain,
 )
 
 # Wave 6-9 Process-Kernel-Endpoints (agrar-p0, supplier, wave-7, wave-9)
@@ -158,15 +148,7 @@ from app.api.v1.endpoints import (
     ernte_kampagne_api,
 )
 # Wave 2-19 Process-Kernel Read-Models + Commands
-from app.api.v1.endpoints import (
-    agent_context_api,
-    finance_read_models,
-    process_kernel_api,
-    process_mining_api,
-    process_mining_observation,
-    workflow_simulation,
-    workflow_template_marketplace,
-)
+from app.api.v1.endpoints import agent_context_api, finance_read_models, process_kernel_api
 
 # Import domain routers
 from app.domains.agrar.api import psm, psm_proplanta
@@ -191,53 +173,6 @@ api_router.include_router(
 )
 
 api_router.include_router(
-    agents.router,
-    tags=["neuroassist", "agents"],
-)
-
-api_router.include_router(
-    agent_tool_contracts.router,
-)
-
-api_router.include_router(
-    external_agent_integrations.router,
-)
-
-api_router.include_router(
-    background_jobs.router,
-)
-
-api_router.include_router(
-    idempotency_monitoring.router,
-)
-
-api_router.include_router(
-    workflow_simulation.router,
-    tags=["workflow", "simulation"],
-)
-
-api_router.include_router(
-    workflow_template_marketplace.router,
-    tags=["workflow", "templates"],
-)
-
-api_router.include_router(
-    channel_work_surfaces.router,
-)
-
-api_router.include_router(
-    blockchain_runtime.router,
-)
-
-api_router.include_router(
-    tenant_limits.router,
-)
-
-api_router.include_router(
-    terminology.router,
-)
-
-api_router.include_router(
     health,
     prefix="/health",
     tags=["health"]
@@ -259,18 +194,6 @@ api_router.include_router(
     admin_core.router,
     prefix="/admin",
     tags=["admin"]
-)
-
-api_router.include_router(
-    process_mining_api.router,
-)
-
-api_router.include_router(
-    process_mining_observation.router,
-)
-
-api_router.include_router(
-    benchmark_cockpit.router,
 )
 
 api_router.include_router(
@@ -319,10 +242,6 @@ api_router.include_router(
     tenants,
     prefix="/tenants",
     tags=["tenants"]
-)
-
-api_router.include_router(
-    tenant_governance.router,
 )
 
 api_router.include_router(
@@ -1044,3 +963,4 @@ api_router.include_router(ernte_kampagne_api.router)
 api_router.include_router(finance_read_models.router)
 api_router.include_router(process_kernel_api.router)
 api_router.include_router(agent_context_api.router)
+api_router.include_router(supply_chain_blockchain.router)

@@ -488,7 +488,7 @@ export default function BestellvorschlagRohwarePage(): JSX.Element {
             if (!menge) return
             setVorschlaege((prev) => [...prev, {
               id: crypto.randomUUID(), liefNr: '', name: 'Manuell', artikelNr: artNr,
-              liefArt: 'frei', menge, einheit: 'kg', einhPreis: 0, preisJe1: 'kg',
+              liefArt: 'frei', menge, einheit: 'kg', einhPreis: 0, preisEi: 'kg',
               betrag: 0, kontraktNr: '', niederlassung: '', lagerhalle: '', bediener: '', datum: new Date().toISOString().slice(0,10)
             }])
             push('Manuelle Position hinzugefügt')
@@ -511,11 +511,11 @@ export default function BestellvorschlagRohwarePage(): JSX.Element {
           onClick={async () => {
             if (vorschlaege.length === 0) { push('Keine Vorschläge vorhanden'); return }
             try {
-              const res = await apiClient.post('/api/v1/einkauf/bestellungen', {
+              const res = await apiClient.post<{ bestellnummer?: string }>('/api/v1/einkauf/bestellungen', {
                 positionen: vorschlaege.map((v) => ({ artikel_nr: v.artikelNr, menge: v.menge, einheit: v.einheit, einzelpreis: v.einhPreis })),
                 bestelldatum: new Date().toISOString().slice(0, 10),
               })
-              push(`Bestellung erstellt: ${(res.data as any)?.bestellnummer ?? 'OK'}`)
+              push(`Bestellung erstellt: ${res.bestellnummer ?? 'OK'}`)
               setVorschlaege([])
             } catch (e: any) { push(`Fehler: ${e.response?.data?.detail ?? e.message}`) }
           }}>

@@ -19,7 +19,8 @@ describe('fetchLeadCandidates', () => {
     await fetchLeadCandidates({
       refYear: 2025,
       minPotential: 75000,
-      region: 'my-region',
+      zipCodeStart: '26000',
+      zipCodeEnd: '26999',
       source: 'gap_de',
       segment: 'A',
       onlyNewProspects: true,
@@ -34,7 +35,8 @@ describe('fetchLeadCandidates', () => {
 
     expect(params.get('ref_year')).toBe('2025')
     expect(params.get('min_potential')).toBe('75000')
-    expect(params.get('region')).toBe('my-region')
+    expect(params.get('zip_code_start')).toBe('26000')
+    expect(params.get('zip_code_end')).toBe('26999')
     expect(params.get('source')).toBe('gap_de')
     expect(params.get('segment')).toBe('A')
     expect(params.get('only_new_prospects')).toBe('true')

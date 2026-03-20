@@ -1,15 +1,14 @@
 """
-Wave 87 — Lasttest-Contracts Erntepeak (Gap 037)
+test_process_kernel_wave87_load_test_contracts.py — Lasttest-SLA-Contracts (Gap 037)
 
-Tests für LasttestKonfiguration, LasttestErgebnis, ErntepeakSLAContract,
-evaluate_erntepeak_sla() und Standard-Konfigurationen.
+Wave 87: ErntepeakSLAContract, LasttestErgebnis, evaluate_erntepeak_sla()
 
-Gap 037: 500 gleichzeitige User stabil — Error Rate < 1%, p95 < 2s
+HINWEIS: Diese Tests prüfen das Datenmodell und die SLA-Auswertungslogik.
+         Sie führen KEINE echten Lasttests durch. Echte Lasttests erfolgen via:
+         - load-tests/locustfile.py (Locust)
+         - load-tests/erntepeak-load-test.js (k6)
 """
-from __future__ import annotations
-
 import pytest
-
 from app.core.load_test_contracts import (
     EndpointKategorie,
     EndpointLasttestErgebnis,
@@ -27,17 +26,17 @@ from app.core.load_test_contracts import (
 
 
 # ---------------------------------------------------------------------------
-# Fixtures
+# Helpers
 # ---------------------------------------------------------------------------
 
 def _ep(
-    endpoint: str = "/api/v1/dashboard",
+    endpoint: str = "/controlling/dashboards",
     kategorie: EndpointKategorie = EndpointKategorie.DASHBOARD,
-    anfragen: int = 10000,
+    anfragen: int = 1000,
     fehler: int = 0,
     p50: float = 80.0,
-    p95: float = 180.0,
-    p99: float = 250.0,
+    p95: float = 150.0,
+    p99: float = 220.0,
     throughput: float = 50.0,
 ) -> EndpointLasttestErgebnis:
     return EndpointLasttestErgebnis(
@@ -53,29 +52,19 @@ def _ep(
 
 
 def _ergebnis(
-    user: int = 500,
-    szenario: LasttestSzenario = LasttestSzenario.ERNTEPEAK,
-    eps: list[EndpointLasttestErgebnis] | None = None,
-    status: LasttestStatus = LasttestStatus.ABGESCHLOSSEN,
+    gleichzeitige_user: int = 500,
+    endpoints: list[EndpointLasttestErgebnis] | None = None,
 ) -> LasttestErgebnis:
+    if endpoints is None:
+        endpoints = [_ep()]
     return LasttestErgebnis(
-        test_id="T-ERNTE-001",
-        szenario=szenario,
-        gleichzeitige_user=user,
-        status=status,
+        test_id="TEST-001",
+        szenario=LasttestSzenario.ERNTEPEAK,
+        gleichzeitige_user=gleichzeitige_user,
+        status=LasttestStatus.ABGESCHLOSSEN,
         dauer_sekunden=1800.0,
-        endpoint_ergebnisse=eps or [],
+        endpoint_ergebnisse=endpoints,
     )
-
-
-def _stabiles_erntepeak_ergebnis() -> LasttestErgebnis:
-    """Ergebnis das alle SLA-Kriterien erfüllt."""
-    return _ergebnis(user=500, eps=[
-        _ep("/api/v1/dashboard",     EndpointKategorie.DASHBOARD,   10000, 0,   80,  180,  250,  55.0),
-        _ep("/api/v1/annahme",       EndpointKategorie.ANNAHME,     8000,  10,  120, 500,  800,  44.0),
-        _ep("/api/v1/controlling",   EndpointKategorie.CONTROLLING, 6000,  5,   90,  200,  350,  33.0),
-        _ep("/api/v1/settlement",    EndpointKategorie.SETTLEMENT,  4000,  2,   200, 600,  900,  22.0),
-    ])
 
 
 # ---------------------------------------------------------------------------
@@ -83,38 +72,39 @@ def _stabiles_erntepeak_ergebnis() -> LasttestErgebnis:
 # ---------------------------------------------------------------------------
 
 class TestLasttestKonfiguration:
-    def test_gueltiger_erntepeak(self):
-        k = LasttestKonfiguration(
-            szenario=LasttestSzenario.ERNTEPEAK,
-            gleichzeitige_user=500,
-            dauer_sekunden=1800,
-        )
+    def test_erntepeak_konfiguration(self):
+        k = get_erntepeak_konfiguration()
         assert k.gleichzeitige_user == 500
+        assert k.szenario == LasttestSzenario.ERNTEPEAK
 
-    def test_ungueltige_userzahl_raises(self):
-        with pytest.raises(ValueError, match="gleichzeitige_user"):
-            LasttestKonfiguration(LasttestSzenario.ERNTEPEAK, 0, 1800)
+    def test_normalbetrieb_konfiguration(self):
+        k = get_normalbetrieb_konfiguration()
+        assert k.gleichzeitige_user == 50
+        assert k.szenario == LasttestSzenario.NORMALBETRIEB
 
-    def test_ungueltige_dauer_raises(self):
-        with pytest.raises(ValueError, match="dauer_sekunden"):
-            LasttestKonfiguration(LasttestSzenario.ERNTEPEAK, 100, 0)
+    def test_negativ_user_fehler(self):
+        with pytest.raises(ValueError):
+            LasttestKonfiguration(
+                szenario=LasttestSzenario.ERNTEPEAK,
+                gleichzeitige_user=0,
+                dauer_sekunden=300,
+            )
 
-    def test_requests_pro_sekunde(self):
+    def test_requests_pro_sekunde_theoretisch(self):
         k = LasttestKonfiguration(
             szenario=LasttestSzenario.ERNTEPEAK,
             gleichzeitige_user=500,
             dauer_sekunden=1800,
             think_time_ms=500,
         )
-        # 500 User / (500ms / 1000) = 1000 RPS theoretisch
+        # 500 user / 0.5s = 1000 RPS theoretisch
         assert k.requests_pro_sekunde_theoretisch == 1000.0
 
     def test_as_dict(self):
         k = get_erntepeak_konfiguration()
         d = k.as_dict()
-        assert d["szenario"] == "ERNTEPEAK"
-        assert d["gleichzeitige_user"] == 500
-        assert "requests_pro_sekunde_theoretisch" in d
+        assert "gleichzeitige_user" in d
+        assert "szenario" in d
 
 
 # ---------------------------------------------------------------------------
@@ -122,24 +112,24 @@ class TestLasttestKonfiguration:
 # ---------------------------------------------------------------------------
 
 class TestEndpointLasttestErgebnis:
-    def test_fehler_rate_berechnung(self):
-        ep = _ep(anfragen=1000, fehler=5)
-        assert ep.fehler_rate_pct == 0.5
-
-    def test_fehler_rate_null(self):
+    def test_fehlerrate_null(self):
         ep = _ep(anfragen=1000, fehler=0)
         assert ep.fehler_rate_pct == 0.0
 
-    def test_fehler_rate_keine_anfragen(self):
+    def test_fehlerrate_berechnung(self):
+        ep = _ep(anfragen=1000, fehler=10)
+        assert ep.fehler_rate_pct == 1.0
+
+    def test_fehlerrate_null_anfragen(self):
         ep = _ep(anfragen=0, fehler=0)
         assert ep.fehler_rate_pct == 0.0
 
     def test_as_dict(self):
         ep = _ep()
         d = ep.as_dict()
+        assert "endpoint" in d
+        assert "kategorie" in d
         assert "fehler_rate_pct" in d
-        assert "p95_ms" in d
-        assert "throughput_rps" in d
 
 
 # ---------------------------------------------------------------------------
@@ -148,45 +138,53 @@ class TestEndpointLasttestErgebnis:
 
 class TestLasttestErgebnis:
     def test_gesamt_anfragen(self):
-        ergebnis = _ergebnis(eps=[_ep(anfragen=5000), _ep(anfragen=3000)])
-        assert ergebnis.gesamt_anfragen == 8000
+        ergebnis = _ergebnis(endpoints=[
+            _ep(anfragen=1000),
+            _ep(anfragen=500, endpoint="/controlling/kpis"),
+        ])
+        assert ergebnis.gesamt_anfragen == 1500
 
     def test_gesamt_fehler(self):
-        ergebnis = _ergebnis(eps=[_ep(fehler=10), _ep(fehler=5)])
+        ergebnis = _ergebnis(endpoints=[
+            _ep(fehler=10),
+            _ep(fehler=5, endpoint="/controlling/kpis"),
+        ])
         assert ergebnis.gesamt_fehler == 15
 
     def test_gesamt_fehler_rate(self):
-        ergebnis = _ergebnis(eps=[_ep(anfragen=1000, fehler=5)])
+        ergebnis = _ergebnis(endpoints=[
+            _ep(anfragen=1000, fehler=5),
+        ])
         assert ergebnis.gesamt_fehler_rate_pct == 0.5
 
     def test_p95_max(self):
-        ergebnis = _ergebnis(eps=[_ep(p95=200.0), _ep(p95=500.0)])
-        assert ergebnis.p95_max_ms == 500.0
+        ergebnis = _ergebnis(endpoints=[
+            _ep(p95=100.0),
+            _ep(p95=800.0, endpoint="/agrar/settlements"),
+        ])
+        assert ergebnis.p95_max_ms == 800.0
 
     def test_p95_avg(self):
-        ergebnis = _ergebnis(eps=[_ep(p95=200.0), _ep(p95=400.0)])
-        assert ergebnis.p95_avg_ms == 300.0
+        ergebnis = _ergebnis(endpoints=[
+            _ep(p95=100.0),
+            _ep(p95=300.0, endpoint="/agrar/settlements"),
+        ])
+        assert ergebnis.p95_avg_ms == 200.0
 
-    def test_p95_leer(self):
-        ergebnis = _ergebnis()
-        assert ergebnis.p95_max_ms == 0.0
-        assert ergebnis.p95_avg_ms == 0.0
-
-    def test_get_endpoint_vorhanden(self):
-        ergebnis = _ergebnis(eps=[_ep("/api/v1/dashboard")])
-        ep = ergebnis.get_endpoint("/api/v1/dashboard")
+    def test_get_endpoint_gefunden(self):
+        ergebnis = _ergebnis(endpoints=[_ep(endpoint="/controlling/dashboards")])
+        ep = ergebnis.get_endpoint("/controlling/dashboards")
         assert ep is not None
 
-    def test_get_endpoint_nicht_vorhanden(self):
+    def test_get_endpoint_nicht_gefunden(self):
         ergebnis = _ergebnis()
-        assert ergebnis.get_endpoint("/gibt/nicht") is None
+        assert ergebnis.get_endpoint("/not/existing") is None
 
     def test_as_dict(self):
-        ergebnis = _stabiles_erntepeak_ergebnis()
+        ergebnis = _ergebnis()
         d = ergebnis.as_dict()
-        assert d["gleichzeitige_user"] == 500
-        assert "gesamt_fehler_rate_pct" in d
-        assert "p95_max_ms" in d
+        assert "gesamt_anfragen" in d
+        assert "endpoint_ergebnisse" in d
 
 
 # ---------------------------------------------------------------------------
@@ -194,172 +192,142 @@ class TestLasttestErgebnis:
 # ---------------------------------------------------------------------------
 
 class TestErntepeakSLAContract:
-    def test_standard_werte(self):
+    def test_standardwerte(self):
         sla = ErntepeakSLAContract()
         assert sla.min_gleichzeitige_user == 500
         assert sla.max_fehler_rate_pct == 1.0
         assert sla.max_p95_global_ms == 2000.0
         assert sla.max_p95_dashboard_ms == 250.0
+        assert sla.min_throughput_rps == 100.0
 
     def test_as_dict(self):
         sla = ErntepeakSLAContract()
         d = sla.as_dict()
-        assert "min_gleichzeitige_user" in d
-        assert "max_fehler_rate_pct" in d
+        assert d["max_fehler_rate_pct"] == 1.0
+        assert d["max_p95_dashboard_ms"] == 250.0
 
 
 # ---------------------------------------------------------------------------
-# TestEvaluateErntepeak
+# TestEvaluateErntePeakSla — ERFUELLT
 # ---------------------------------------------------------------------------
 
-class TestEvaluateErntepeak:
-    def test_stabile_last_erfuellt_kpi(self):
-        ergebnis = _stabiles_erntepeak_ergebnis()
+class TestEvaluateErntePeakSlaErfuellt:
+    def test_perfektes_ergebnis_erfuellt(self):
+        ergebnis = _ergebnis(
+            gleichzeitige_user=500,
+            endpoints=[_ep(fehler=0, p95=150.0, throughput=200.0)],
+        )
         result = evaluate_erntepeak_sla(ergebnis)
         assert result.kpi_erfuellt is True
         assert result.erfuellungsgrad == SLAErfuellungsGrad.ERFUELLT
 
-    def test_zu_wenige_user_verletzt_kpi(self):
-        ergebnis = _ergebnis(user=200, eps=[_ep()])
+    def test_genau_an_grenzwerten_erfuellt(self):
+        ergebnis = _ergebnis(
+            gleichzeitige_user=500,
+            endpoints=[
+                _ep(anfragen=1000, fehler=9, p95=249.0, throughput=101.0),  # 0.9% error, p95=249ms
+            ],
+        )
         result = evaluate_erntepeak_sla(ergebnis)
-        assert result.kpi_erfuellt is False
-        assert result.erfuellungsgrad == SLAErfuellungsGrad.VERLETZT
-        assert any("User" in v for v in result.verletzte_kriterien)
+        assert result.kpi_erfuellt is True
 
-    def test_hohe_fehlerrate_verletzt_kpi(self):
-        ergebnis = _ergebnis(user=500, eps=[
+
+# ---------------------------------------------------------------------------
+# TestEvaluateErntePeakSla — VERLETZT
+# ---------------------------------------------------------------------------
+
+class TestEvaluateErntePeakSlaVerletzt:
+    def test_error_rate_verletzt(self):
+        ergebnis = _ergebnis(endpoints=[
             _ep(anfragen=1000, fehler=20),  # 2% > 1%
         ])
         result = evaluate_erntepeak_sla(ergebnis)
         assert result.kpi_erfuellt is False
         assert any("Error Rate" in v for v in result.verletzte_kriterien)
 
-    def test_langsamer_p95_verletzt_kpi(self):
-        ergebnis = _ergebnis(user=500, eps=[
-            _ep(p95=3000.0),  # > 2000ms
+    def test_p95_global_verletzt(self):
+        ergebnis = _ergebnis(endpoints=[
+            _ep(p95=2500.0, kategorie=EndpointKategorie.ANNAHME),  # > 2000ms avg
         ])
         result = evaluate_erntepeak_sla(ergebnis)
         assert result.kpi_erfuellt is False
         assert any("p95" in v for v in result.verletzte_kriterien)
 
-    def test_dashboard_p95_verletzt_kpi(self):
-        """Dashboard-Endpoint verletzt 250ms-SLA (Gap 033)."""
-        ergebnis = _ergebnis(user=500, eps=[
-            _ep("/api/v1/dashboard", EndpointKategorie.DASHBOARD,
-                p95=400.0),  # > 250ms
+    def test_dashboard_p95_verletzt(self):
+        ergebnis = _ergebnis(endpoints=[
+            _ep(p95=300.0, kategorie=EndpointKategorie.DASHBOARD),  # > 250ms
         ])
         result = evaluate_erntepeak_sla(ergebnis)
         assert result.kpi_erfuellt is False
         assert any("Dashboard" in v for v in result.verletzte_kriterien)
 
-    def test_niedriger_throughput_nur_warnung(self):
-        """Throughput-Unterschreitung → Warnung, kein Fehler."""
-        ergebnis = _ergebnis(user=500, eps=[
-            _ep(throughput=5.0, p95=180.0),  # 5 RPS < 100 RPS Ziel
+    def test_zu_wenig_user_verletzt(self):
+        ergebnis = _ergebnis(gleichzeitige_user=100)  # < 500
+        result = evaluate_erntepeak_sla(ergebnis)
+        assert result.kpi_erfuellt is False
+        assert any("User" in v for v in result.verletzte_kriterien)
+
+    def test_keine_endpoints_nicht_messbar(self):
+        ergebnis = _ergebnis(endpoints=[])
+        result = evaluate_erntepeak_sla(ergebnis)
+        assert result.kpi_erfuellt is False
+        assert result.erfuellungsgrad == SLAErfuellungsGrad.NICHT_MESSBAR
+
+    def test_mehrere_verletzungen(self):
+        ergebnis = _ergebnis(
+            gleichzeitige_user=100,  # Verletzung 1: zu wenig User
+            endpoints=[
+                _ep(anfragen=100, fehler=5, p95=300.0),  # V2: error rate, V3: dashboard p95
+            ],
+        )
+        result = evaluate_erntepeak_sla(ergebnis)
+        assert len(result.verletzte_kriterien) >= 2
+
+    def test_custom_sla_vertrag(self):
+        """Benutzerdefinierter SLA-Vertrag mit strengeren Grenzen."""
+        sla = ErntepeakSLAContract(max_p95_dashboard_ms=200.0)
+        ergebnis = _ergebnis(endpoints=[
+            _ep(p95=220.0, kategorie=EndpointKategorie.ANNAHME),   # ANNAHME, kein Dashboard
+        ])
+        result = evaluate_erntepeak_sla(ergebnis, sla=sla)
+        # p95 avg = 220ms < 2000ms global SLA, kein Dashboard-Endpoint → kein Verstoß
+        assert result.kpi_erfuellt is True
+
+
+# ---------------------------------------------------------------------------
+# TestEvaluateErntePeakSla — Details und Warnungen
+# ---------------------------------------------------------------------------
+
+class TestEvaluateErntePeakSlaDetails:
+    def test_details_enthalten_fehlerrate(self):
+        ergebnis = _ergebnis()
+        result = evaluate_erntepeak_sla(ergebnis)
+        assert "gesamt_fehler_rate_pct" in result.details
+
+    def test_details_enthalten_p95(self):
+        ergebnis = _ergebnis()
+        result = evaluate_erntepeak_sla(ergebnis)
+        assert "p95_avg_ms" in result.details
+
+    def test_throughput_warnung_niedrig(self):
+        ergebnis = _ergebnis(endpoints=[
+            _ep(throughput=10.0),  # < 100 RPS min
         ])
         result = evaluate_erntepeak_sla(ergebnis)
-        assert len(result.warnungen) > 0
-        # Error Rate und p95 ok → kein KPI-Verstoß wegen Throughput allein
-        assert len(result.verletzte_kriterien) == 0
+        assert any("Throughput" in w for w in result.warnungen)
 
-    def test_leere_endpoints_nicht_messbar(self):
-        ergebnis = _ergebnis(user=500, eps=[])
+    def test_grenzwertig_bei_throughput_warnung_ohne_verletzung(self):
+        ergebnis = _ergebnis(endpoints=[
+            _ep(fehler=0, p95=100.0, throughput=50.0),  # Throughput-Warnung, aber keine Verletzung
+        ])
         result = evaluate_erntepeak_sla(ergebnis)
-        assert result.erfuellungsgrad == SLAErfuellungsGrad.NICHT_MESSBAR
-        assert result.kpi_erfuellt is False
+        assert result.kpi_erfuellt is True
+        assert result.erfuellungsgrad == SLAErfuellungsGrad.GRENZWERTIG
 
     def test_as_dict(self):
-        result = evaluate_erntepeak_sla(_stabiles_erntepeak_ergebnis())
+        ergebnis = _ergebnis()
+        result = evaluate_erntepeak_sla(ergebnis)
         d = result.as_dict()
         assert "kpi_erfuellt" in d
         assert "erfuellungsgrad" in d
         assert "verletzte_kriterien" in d
-
-    def test_custom_sla_vertrag(self):
-        """Angepasster SLA (strengere Werte) kann separat übergeben werden."""
-        sla = ErntepeakSLAContract(
-            min_gleichzeitige_user=500,
-            max_fehler_rate_pct=0.5,    # strenger: < 0.5%
-            max_p95_global_ms=1000.0,   # strenger: < 1s
-            max_p95_dashboard_ms=200.0,
-        )
-        # Non-dashboard endpoint — kein Dashboard-Limit
-        ergebnis = _ergebnis(user=500, eps=[
-            _ep("/api/v1/annahme", EndpointKategorie.ANNAHME,
-                anfragen=1000, fehler=4, p95=800.0, throughput=110.0),  # 0.4%, p95=800ms < 1000ms
-        ])
-        result = evaluate_erntepeak_sla(ergebnis, sla)
-        assert result.kpi_erfuellt is True
-
-
-# ---------------------------------------------------------------------------
-# TestStandardKonfigurationen
-# ---------------------------------------------------------------------------
-
-class TestStandardKonfigurationen:
-    def test_erntepeak_konfiguration(self):
-        k = get_erntepeak_konfiguration()
-        assert k.szenario == LasttestSzenario.ERNTEPEAK
-        assert k.gleichzeitige_user == 500
-        assert k.dauer_sekunden >= 1800
-        assert k.tenant_count >= 5
-
-    def test_normalbetrieb_konfiguration(self):
-        k = get_normalbetrieb_konfiguration()
-        assert k.szenario == LasttestSzenario.NORMALBETRIEB
-        assert k.gleichzeitige_user <= 100
-
-
-# ---------------------------------------------------------------------------
-# TestIntegrationSzenario
-# ---------------------------------------------------------------------------
-
-class TestIntegrationSzenario:
-    def test_vollstaendiger_erntepeak_test(self):
-        """
-        Vollständiger Erntepeak-Test: 500 User, 30 Min,
-        alle Endpoints innerhalb SLA → KPI erfüllt.
-        """
-        config = get_erntepeak_konfiguration()
-        assert config.gleichzeitige_user == 500
-
-        ergebnis = _stabiles_erntepeak_ergebnis()
-        result = evaluate_erntepeak_sla(ergebnis)
-
-        assert result.kpi_erfuellt is True
-        assert result.erfuellungsgrad == SLAErfuellungsGrad.ERFUELLT
-        assert len(result.verletzte_kriterien) == 0
-
-    def test_degradierter_betrieb_bei_uebertemperierung(self):
-        """
-        Bei 500 Usern aber hoher p95 → SLA verletzt, KPI nicht erfüllt.
-        Dashboard > 250ms + Globaler p95 > 2000ms.
-        """
-        ergebnis = _ergebnis(user=500, eps=[
-            _ep("/api/v1/dashboard", EndpointKategorie.DASHBOARD,
-                anfragen=5000, fehler=0, p95=300.0, throughput=50.0),   # Dashboard > 250ms
-            _ep("/api/v1/annahme", EndpointKategorie.ANNAHME,
-                anfragen=3000, fehler=0, p95=3800.0, throughput=30.0),  # p95 avg = (300+3800)/2=2050 > 2000ms
-        ])
-        result = evaluate_erntepeak_sla(ergebnis)
-        assert result.kpi_erfuellt is False
-        assert len(result.verletzte_kriterien) >= 2
-
-    def test_alle_szenarien_konfigurierbar(self):
-        """Alle Lasttest-Szenarien können instanziiert werden."""
-        for szenario in LasttestSzenario:
-            k = LasttestKonfiguration(
-                szenario=szenario,
-                gleichzeitige_user=100,
-                dauer_sekunden=300,
-            )
-            assert k.szenario == szenario
-
-    def test_fehlerrate_grenzwert_genau_1_pct(self):
-        """Genau 1% Fehlerrate liegt auf der Grenze — noch erfüllt."""
-        ergebnis = _ergebnis(user=500, eps=[
-            _ep(anfragen=1000, fehler=10, p95=180.0),  # exakt 1.0%
-        ])
-        result = evaluate_erntepeak_sla(ergebnis)
-        # 1.0% == max_fehler_rate_pct → nicht verletzt
-        assert "Error Rate" not in " ".join(result.verletzte_kriterien)

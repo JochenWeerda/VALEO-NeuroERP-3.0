@@ -279,9 +279,6 @@ function AbgrenzungenTable({ data: _data, onChange }: { data: any[], onChange: (
     onChange(_data.filter((_, i) => i !== index))
   }
 
-  const effectiveData = Object.keys(workspaceData).length > 0 ? workspaceData : data
-  const approvalDecisionView = buildDecisionView(effectiveData?.approval_explainability)
-
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -475,6 +472,8 @@ export default function AbschlussPage(): JSX.Element {
       return response
     }
   })
+  const effectiveData = Object.keys(workspaceData).length > 0 ? workspaceData : data
+  const approvalDecisionView = buildDecisionView(effectiveData?.approval_explainability)
 
   const validate = (formData: any) => validateFields(getFieldsFromMaskConfig(abschlussConfig), formData ?? {})
   const showValidationToast = (errors: Record<string, string>) => {
@@ -532,9 +531,12 @@ export default function AbschlussPage(): JSX.Element {
       return
     }
     if (action === 'validate') {
-      const isValid = validate(formData)
-      if (isValid.isValid) toast({ title: 'Abschlussprüfung erfolgreich!' })
-      else showValidationToast(isValid.errors)
+      const validationErrors = validate(formData)
+      if (Object.keys(validationErrors).length === 0) {
+        toast({ title: 'Abschlussprüfung erfolgreich!' })
+      } else {
+        showValidationToast(validationErrors)
+      }
       return
     }
     if (action === 'approve') {

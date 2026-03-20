@@ -226,13 +226,11 @@ export function useSalesOrders(filters?: { status?: string; search?: string; cus
 
 /** Legacy alias – returns UI-shaped Auftrag objects */
 export function useAuftraege(filters?: { status?: AuftragStatus; search?: string }) {
-  return useQuery({
+  return useQuery<Auftrag[]>({
     queryKey: salesKeys.auftraege(filters),
-    queryFn: () => fetchOrders(filters ?? {}),
-    initialData: EMPTY_AUFTRAEGE,
-    staleTime: 2 * 60 * 1000,
-    select: (data) => {
-      let items = data.map(orderToAuftrag)
+    queryFn: async () => {
+      const orders = await fetchOrders(filters ?? {})
+      let items = orders.map(orderToAuftrag)
       if (filters?.status) items = items.filter((a) => a.status === filters.status)
       if (filters?.search) {
         const s = filters.search.toLowerCase()
@@ -240,6 +238,8 @@ export function useAuftraege(filters?: { status?: AuftragStatus; search?: string
       }
       return items
     },
+    initialData: EMPTY_AUFTRAEGE,
+    staleTime: 2 * 60 * 1000,
   })
 }
 
@@ -256,13 +256,11 @@ export function useSalesOffers(filters?: { status?: string; search?: string; cus
 
 /** Legacy alias – returns UI-shaped Angebot objects */
 export function useAngebote(filters?: { status?: AngebotStatus; search?: string }) {
-  return useQuery({
+  return useQuery<Angebot[]>({
     queryKey: salesKeys.angebote(filters),
-    queryFn: () => fetchOffers(filters ?? {}),
-    initialData: EMPTY_ANGEBOTE,
-    staleTime: 2 * 60 * 1000,
-    select: (data) => {
-      let items = data.map(offerToAngebot)
+    queryFn: async () => {
+      const offers = await fetchOffers(filters ?? {})
+      let items = offers.map(offerToAngebot)
       if (filters?.status) items = items.filter((a) => a.status === filters.status)
       if (filters?.search) {
         const s = filters.search.toLowerCase()
@@ -270,6 +268,8 @@ export function useAngebote(filters?: { status?: AngebotStatus; search?: string 
       }
       return items
     },
+    initialData: EMPTY_ANGEBOTE,
+    staleTime: 2 * 60 * 1000,
   })
 }
 

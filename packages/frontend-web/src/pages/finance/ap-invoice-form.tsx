@@ -14,9 +14,9 @@ import { Label } from '@/components/ui/label'
 import { useToast } from '@/hooks/use-toast'
 import { BelegFlowPanel } from '@/features/flows/BelegFlowPanel'
 import APInvoiceApprovalPanel from '@/features/workflow/APInvoiceApprovalPanel'
-import { getEntityTypeLabel, getSuccessMessage, getErrorMessage } from '@/features/crud/utils/i18n-helpers'
+import { getEntityTypeLabel, getErrorMessage, getSuccessMessage } from '@/features/crud/utils/i18n-helpers'
 import { Save, X } from 'lucide-react'
-import { apiClient } from '@/lib/api-client'
+import { apiClient } from '@/lib/axios'
 import { buildDecisionView } from '@/policy/decision-view'
 import { ProcessStatusPanel } from '@/components/workflow/ProcessStatusPanel'
 
@@ -56,7 +56,10 @@ type APInvoice = {
  */
 export default function APInvoiceFormPage(): JSX.Element {
   const { t } = useTranslation()
-  const { push } = useToast()
+  const { toast } = useToast()
+  const push = (message: string): void => {
+    toast({ title: message })
+  }
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
   const entityType = 'apInvoice'
@@ -82,11 +85,11 @@ export default function APInvoiceFormPage(): JSX.Element {
   async function loadInvoice(invoiceId: string, showErrorToast = true): Promise<void> {
     setLoading(true)
     try {
-      const { data } = await apiClient.get<APInvoice>(`/api/v1/finance/ap/invoices/${invoiceId}`)
+      const data = await apiClient.get<APInvoice>(`/api/v1/finance/ap/invoices/${invoiceId}`)
       setInvoice((prev) => ({ ...prev, ...data }))
     } catch {
       if (showErrorToast) {
-        push(getErrorMessage(t, 'load', entityType))
+        push(t('finance.apInvoices.loadError', { defaultValue: 'Eingangsrechnung konnte nicht geladen werden' }))
       }
     } finally {
       setLoading(false)

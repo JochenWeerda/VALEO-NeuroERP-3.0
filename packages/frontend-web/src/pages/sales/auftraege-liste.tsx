@@ -17,6 +17,7 @@ import { saveDocument } from '@/lib/document-api'
 import { useAuftraege, type Auftrag, type AuftragStatus } from '@/lib/api/sales'
 
 const statusVariantMap: Record<AuftragStatus, 'default' | 'outline' | 'secondary' | 'destructive'> = {
+  open: 'default',
   offen: 'default',
   teilgeliefert: 'secondary',
   geliefert: 'outline',

@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
+from app.core.read_model_cache import cached_read_model, invalidate_tenant_prefix
 
 router = APIRouter(prefix="/controlling", tags=["controlling"])
 
@@ -45,7 +46,8 @@ def _list(db: Session, sql: str, params: dict[str, Any]) -> list[dict[str, Any]]
 
 
 @router.get("/kpis", response_model=list[dict[str, Any]])
-async def list_kpis(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+@cached_read_model("ctrl_kpis", ttl=30)
+def list_kpis(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     return _list(
         db,
         "SELECT * FROM domain_controlling.kpi_definitions WHERE tenant_id=:tenant_id ORDER BY kpi_code ASC",
@@ -100,6 +102,7 @@ async def create_kpi(payload: Payload, tenant_id: str = Depends(get_tenant_id), 
         db.rollback()
         raise HTTPException(status_code=409, detail=f"KPI conflict: {exc}") from exc
     db.commit()
+    invalidate_tenant_prefix("ctrl_kpis", tenant_id)
     row = db.execute(text("SELECT * FROM domain_controlling.kpi_definitions WHERE tenant_id=:tenant_id AND id=:id"), {"tenant_id": tenant_id, "id": item_id}).mappings().first()
     return _clean(dict(row))
 
@@ -139,6 +142,7 @@ async def update_kpi(item_id: str, payload: Payload, tenant_id: str = Depends(ge
     if not updated:
         raise HTTPException(status_code=404, detail="KPI not found")
     db.commit()
+    invalidate_tenant_prefix("ctrl_kpis", tenant_id)
     row = db.execute(text("SELECT * FROM domain_controlling.kpi_definitions WHERE tenant_id=:tenant_id AND id=:id"), {"tenant_id": tenant_id, "id": item_id}).mappings().first()
     return _clean(dict(row))
 
@@ -153,11 +157,13 @@ async def delete_kpi(item_id: str, tenant_id: str = Depends(get_tenant_id), db: 
     if not deleted:
         raise HTTPException(status_code=404, detail="KPI not found")
     db.commit()
+    invalidate_tenant_prefix("ctrl_kpis", tenant_id)
     return None
 
 
 @router.get("/dashboards", response_model=list[dict[str, Any]])
-async def list_dashboards(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+@cached_read_model("ctrl_dashboards", ttl=30)
+def list_dashboards(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     return _list(db, "SELECT * FROM domain_controlling.dashboard_configs WHERE tenant_id=:tenant_id ORDER BY dashboard_code ASC", {"tenant_id": tenant_id})
 
 
@@ -196,6 +202,7 @@ async def create_dashboard(payload: Payload, tenant_id: str = Depends(get_tenant
         db.rollback()
         raise HTTPException(status_code=409, detail=f"Dashboard conflict: {exc}") from exc
     db.commit()
+    invalidate_tenant_prefix("ctrl_dashboards", tenant_id)
     row = db.execute(text("SELECT * FROM domain_controlling.dashboard_configs WHERE tenant_id=:tenant_id AND id=:id"), {"tenant_id": tenant_id, "id": item_id}).mappings().first()
     return _clean(dict(row))
 
@@ -233,6 +240,7 @@ async def update_dashboard(item_id: str, payload: Payload, tenant_id: str = Depe
     if not updated:
         raise HTTPException(status_code=404, detail="Dashboard not found")
     db.commit()
+    invalidate_tenant_prefix("ctrl_dashboards", tenant_id)
     row = db.execute(text("SELECT * FROM domain_controlling.dashboard_configs WHERE tenant_id=:tenant_id AND id=:id"), {"tenant_id": tenant_id, "id": item_id}).mappings().first()
     return _clean(dict(row))
 
@@ -247,6 +255,7 @@ async def delete_dashboard(item_id: str, tenant_id: str = Depends(get_tenant_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Dashboard not found")
     db.commit()
+    invalidate_tenant_prefix("ctrl_dashboards", tenant_id)
     return None
 
 
@@ -345,7 +354,8 @@ async def delete_widget(item_id: str, tenant_id: str = Depends(get_tenant_id), d
 
 
 @router.get("/timeseries", response_model=list[dict[str, Any]])
-async def list_timeseries(kpi_id: str | None = Query(default=None), tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+@cached_read_model("ctrl_timeseries", ttl=60)
+def list_timeseries(kpi_id: str | None = Query(default=None), tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     where = ["tenant_id=:tenant_id"]
     params: dict[str, Any] = {"tenant_id": tenant_id}
     if kpi_id:
@@ -386,6 +396,7 @@ async def create_timeseries(payload: Payload, tenant_id: str = Depends(get_tenan
         db.rollback()
         _handle_controlling_db_error(exc)
     db.commit()
+    invalidate_tenant_prefix("ctrl_timeseries", tenant_id)
     row = db.execute(text("SELECT * FROM domain_controlling.kpi_timeseries WHERE tenant_id=:tenant_id AND id=:id"), {"tenant_id": tenant_id, "id": item_id}).mappings().first()
     return _clean(dict(row))
 
@@ -400,11 +411,13 @@ async def delete_timeseries(item_id: str, tenant_id: str = Depends(get_tenant_id
     if not deleted:
         raise HTTPException(status_code=404, detail="Timeseries item not found")
     db.commit()
+    invalidate_tenant_prefix("ctrl_timeseries", tenant_id)
     return None
 
 
 @router.get("/actions", response_model=list[dict[str, Any]])
-async def list_actions(status: str | None = Query(default=None), tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
+@cached_read_model("ctrl_actions", ttl=15)
+def list_actions(status: str | None = Query(default=None), tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)):
     where = ["tenant_id=:tenant_id"]
     params: dict[str, Any] = {"tenant_id": tenant_id}
     if status:
@@ -445,6 +458,7 @@ async def create_action(payload: Payload, tenant_id: str = Depends(get_tenant_id
         db.rollback()
         _handle_controlling_db_error(exc)
     db.commit()
+    invalidate_tenant_prefix("ctrl_actions", tenant_id)
     row = db.execute(text("SELECT * FROM domain_controlling.controlling_actions WHERE tenant_id=:tenant_id AND id=:id"), {"tenant_id": tenant_id, "id": item_id}).mappings().first()
     return _clean(dict(row))
 
@@ -482,6 +496,7 @@ async def update_action(item_id: str, payload: Payload, tenant_id: str = Depends
     if not updated:
         raise HTTPException(status_code=404, detail="Action not found")
     db.commit()
+    invalidate_tenant_prefix("ctrl_actions", tenant_id)
     row = db.execute(text("SELECT * FROM domain_controlling.controlling_actions WHERE tenant_id=:tenant_id AND id=:id"), {"tenant_id": tenant_id, "id": item_id}).mappings().first()
     return _clean(dict(row))
 
@@ -496,4 +511,5 @@ async def delete_action(item_id: str, tenant_id: str = Depends(get_tenant_id), d
     if not deleted:
         raise HTTPException(status_code=404, detail="Action not found")
     db.commit()
+    invalidate_tenant_prefix("ctrl_actions", tenant_id)
     return None

@@ -1,10 +1,10 @@
 """
-workflow_version_engine_contracts.py — Versionierte Workflow Engine (Wave 86, Gap 011)
+workflow_version_engine_contracts.py — Workflow-Versionierung (Wave 86, Gap 011)
 
-Versionierte Workflow-Definitionen mit automatischen Migrationsplänen.
-Kein ungeplanter Workflow-Bruch bei Releases.
+Semantic Versioning für Workflow-Definitionen mit Migrationsplanung.
 
-Gap 011: 0 ungeplante Workflow-Brüche bei Releases
+KPI: Alle Breaking Changes werden durch genehmigte MAJOR-Versionen abgesichert.
+     HARD_CUTOVER darf nicht mit aktiven Instanzen durchgeführt werden.
 """
 from __future__ import annotations
 
@@ -17,338 +17,269 @@ from typing import Any
 # Enums
 # ---------------------------------------------------------------------------
 
-class MigrationStrategie(str, Enum):
-    """Strategie für die Workflow-Migration."""
-    IN_PLACE      = "IN_PLACE"       # Laufende Instanzen direkt migrieren
-    DUAL_RUN      = "DUAL_RUN"       # Alt + Neu parallel bis alle Instanzen beendet
-    HARD_CUTOVER  = "HARD_CUTOVER"   # Sofortiger Schnitt — nur bei Breaking Changes mit Genehmigung
-    ROLLBACK      = "ROLLBACK"       # Zurück auf Vorgängerversion
-
-
 class AenderungsTyp(str, Enum):
-    """Typ einer Workflow-Änderung (Semantic Versioning)."""
-    PATCH = "PATCH"   # Fehlerbehebung, keine Schemaänderung — minor bump
-    MINOR = "MINOR"   # Neue optionale Schritte, abwärtskompatibel
-    MAJOR = "MAJOR"   # Breaking Change — Instanzen müssen migriert werden
+    """Klassifikation einer Workflow-Versionsänderung (SemVer-Analogie)."""
+    PATCH = "PATCH"    # Nur Dokumentation, Texte, keine Prozessänderung
+    MINOR = "MINOR"    # Neue optionale Schritte, abwärtskompatibel
+    MAJOR = "MAJOR"    # Breaking Change — neue Pflichtschritte, gelöschte Übergänge
 
 
-class MigrationStatus(str, Enum):
-    """Status eines Migrationsplans."""
-    GEPLANT     = "GEPLANT"
-    AKTIV       = "AKTIV"
-    ABGESCHLOSSEN = "ABGESCHLOSSEN"
-    FEHLGESCHLAGEN = "FEHLGESCHLAGEN"
-    ZURUECKGEROLLT = "ZURUECKGEROLLT"
+class MigrationsStrategie(str, Enum):
+    """Strategie für laufende Instanzen bei einer Workflow-Version."""
+    SOFT_UPGRADE  = "SOFT_UPGRADE"   # Instanzen können auf neue Version wechseln
+    HARD_CUTOVER  = "HARD_CUTOVER"   # Alle Instanzen müssen sofort migrieren
+    PARALLEL_RUN  = "PARALLEL_RUN"   # Alte + neue Version laufen gleichzeitig
+    DRAIN         = "DRAIN"          # Keine neuen Instanzen; laufende beenden
 
 
-class BreakingChangeRisiko(str, Enum):
-    """Risikobewertung einer Workflow-Änderung."""
-    KEIN   = "KEIN"    # Patch — kein Risiko
-    NIEDRIG = "NIEDRIG"  # Minor — kompatibel, aber prüfen
-    HOCH   = "HOCH"    # Major — Breaking Change, Genehmigung nötig
+class WorkflowStatus(str, Enum):
+    """Veröffentlichungsstatus einer Workflow-Version."""
+    ENTWURF       = "ENTWURF"
+    REVIEW        = "REVIEW"
+    FREIGEGEBEN   = "FREIGEGEBEN"
+    VERALTET      = "VERALTET"
+    ARCHIVIERT    = "ARCHIVIERT"
+
+
+class RisikoStufe(str, Enum):
+    """Bewertetes Migrationsrisiko."""
+    NIEDRIG  = "NIEDRIG"
+    MITTEL   = "MITTEL"
+    HOCH     = "HOCH"
+    KRITISCH = "KRITISCH"
 
 
 # ---------------------------------------------------------------------------
-# Workflow-Version
+# Versionsmodell
 # ---------------------------------------------------------------------------
 
 @dataclass
 class WorkflowVersion:
-    """
-    Semantic-Version einer Workflow-Definition.
-
-    Format: major.minor.patch
-    - MAJOR: Breaking Change (Instanz-Migration nötig)
-    - MINOR: Neue optionale Schritte (rückwärtskompatibel)
-    - PATCH: Fehlerbehebung (kein Schema-Impact)
-    """
+    """Semantische Versionsnummer eines Workflows."""
     major: int
     minor: int
     patch: int
 
-    def __str__(self) -> str:
+    def __post_init__(self) -> None:
+        for name, val in [("major", self.major), ("minor", self.minor), ("patch", self.patch)]:
+            if val < 0:
+                raise ValueError(f"{name} darf nicht negativ sein")
+
+    def als_string(self) -> str:
         return f"{self.major}.{self.minor}.{self.patch}"
 
-    def __lt__(self, other: "WorkflowVersion") -> bool:
-        return (self.major, self.minor, self.patch) < (other.major, other.minor, other.patch)
-
-    def __le__(self, other: "WorkflowVersion") -> bool:
-        return (self.major, self.minor, self.patch) <= (other.major, other.minor, other.patch)
-
-    def __eq__(self, other: object) -> bool:
-        if not isinstance(other, WorkflowVersion):
-            return NotImplemented
-        return (self.major, self.minor, self.patch) == (other.major, other.minor, other.patch)
-
-    def ist_kompatibel_mit(self, andere: "WorkflowVersion") -> bool:
-        """True wenn dieselbe Major-Version → kein Breaking Change."""
-        return self.major == andere.major
-
     def aenderungs_typ(self, neue: "WorkflowVersion") -> AenderungsTyp:
-        """Ermittelt den Änderungstyp zwischen dieser und einer neuen Version."""
+        """Klassifiziert den Änderungstyp zwischen zwei Versionen."""
         if neue.major != self.major:
             return AenderungsTyp.MAJOR
         if neue.minor != self.minor:
             return AenderungsTyp.MINOR
         return AenderungsTyp.PATCH
 
+    def ist_neuer_als(self, andere: "WorkflowVersion") -> bool:
+        return (self.major, self.minor, self.patch) > (andere.major, andere.minor, andere.patch)
+
     def as_dict(self) -> dict:
         return {
             "major": self.major,
             "minor": self.minor,
             "patch": self.patch,
-            "version_str": str(self),
+            "als_string": self.als_string(),
         }
 
 
 # ---------------------------------------------------------------------------
-# Workflow-Definition (versioniert)
+# Workflow-Versionsdefinition
 # ---------------------------------------------------------------------------
 
 @dataclass
-class WorkflowDefinition:
-    """
-    Versionierte Workflow-Definition.
-
-    name + version identifizieren die Definition eindeutig.
-    schema_hash stellt sicher dass Schema-Änderungen erkannt werden.
-    """
+class WorkflowVersionDefinition:
+    """Vollständige Definition einer Workflow-Version."""
+    workflow_id: str
     name: str
     version: WorkflowVersion
-    schritte: list[str]           # Geordnete Schritt-IDs
-    schema_hash: str              # SHA-256 über Schritte + Config
-    beschreibung: str = ""
-    pflicht_felder: list[str] = field(default_factory=list)
+    status: WorkflowStatus
+    beschreibung: str
+    aenderungsprotokoll: str        # Changelog für diese Version
+    genehmigungs_pflicht: bool      # Muss explizit genehmigt werden (MAJOR)
+    erstellt_von: str
+    erstellt_am: str                # ISO-8601
+    freigegeben_von: str = ""
+    freigegeben_am: str = ""
     metadaten: dict[str, Any] = field(default_factory=dict)
 
-    @property
-    def version_key(self) -> str:
-        return f"{self.name}@{self.version}"
-
     def as_dict(self) -> dict:
         return {
+            "workflow_id": self.workflow_id,
             "name": self.name,
-            "version": self.version.as_dict(),
-            "version_key": self.version_key,
-            "schritte": self.schritte,
-            "schema_hash": self.schema_hash,
+            "version": self.version.als_string(),
+            "status": self.status.value,
             "beschreibung": self.beschreibung,
-            "pflicht_felder": self.pflicht_felder,
+            "genehmigungs_pflicht": self.genehmigungs_pflicht,
+            "erstellt_von": self.erstellt_von,
+            "erstellt_am": self.erstellt_am,
+            "freigegeben_von": self.freigegeben_von,
         }
 
 
 # ---------------------------------------------------------------------------
-# Migrations-Schritt
+# Migrationsplan
 # ---------------------------------------------------------------------------
 
 @dataclass
-class MigrationsSchritt:
-    """
-    Einzelner Schritt eines Migrationsplans.
-
-    Transformiert laufende Instanzen von von_version auf bis_version.
-    """
-    schritt_id: str
-    von_version: WorkflowVersion
-    bis_version: WorkflowVersion
-    strategie: MigrationStrategie
-    transformation_beschreibung: str
-    ist_umkehrbar: bool = True
-    risiko: BreakingChangeRisiko = BreakingChangeRisiko.KEIN
-
-    def as_dict(self) -> dict:
-        return {
-            "schritt_id": self.schritt_id,
-            "von_version": str(self.von_version),
-            "bis_version": str(self.bis_version),
-            "strategie": self.strategie.value,
-            "transformation_beschreibung": self.transformation_beschreibung,
-            "ist_umkehrbar": self.ist_umkehrbar,
-            "risiko": self.risiko.value,
-        }
-
-
-# ---------------------------------------------------------------------------
-# Migrations-Plan
-# ---------------------------------------------------------------------------
-
-@dataclass
-class MigrationsPlan:
-    """
-    Geordneter Plan zur Migration von Workflow-Instanzen.
-
-    Ein Plan besteht aus einer oder mehreren MigrationsSchritten
-    und definiert die Strategie für den Übergang.
-    """
+class WorkflowMigrationsplan:
+    """Plan für den Übergang von einer Workflow-Version auf eine andere."""
     plan_id: str
-    workflow_name: str
+    workflow_id: str
     von_version: WorkflowVersion
-    bis_version: WorkflowVersion
-    schritte: list[MigrationsSchritt] = field(default_factory=list)
-    status: MigrationStatus = MigrationStatus.GEPLANT
-    genehmigungs_pflicht: bool = False
+    zu_version: WorkflowVersion
+    strategie: MigrationsStrategie
+    risiko: RisikoStufe
+    reversibel: bool
+    genehmigungs_pflicht: bool
+    beschreibung: str
+    validiert_am: str = ""    # ISO-8601; leer = noch nicht validiert
+    genehmigt_von: str = ""
 
     @property
-    def ist_breaking(self) -> bool:
-        return self.von_version.aenderungs_typ(self.bis_version) == AenderungsTyp.MAJOR
-
-    @property
-    def anzahl_schritte(self) -> int:
-        return len(self.schritte)
-
-    @property
-    def hoechstes_risiko(self) -> BreakingChangeRisiko:
-        if not self.schritte:
-            return BreakingChangeRisiko.KEIN
-        risikoreihenfolge = [
-            BreakingChangeRisiko.KEIN,
-            BreakingChangeRisiko.NIEDRIG,
-            BreakingChangeRisiko.HOCH,
-        ]
-        max_index = max(risikoreihenfolge.index(s.risiko) for s in self.schritte)
-        return risikoreihenfolge[max_index]
+    def aenderungs_typ(self) -> AenderungsTyp:
+        return self.von_version.aenderungs_typ(self.zu_version)
 
     def as_dict(self) -> dict:
         return {
             "plan_id": self.plan_id,
-            "workflow_name": self.workflow_name,
-            "von_version": str(self.von_version),
-            "bis_version": str(self.bis_version),
-            "ist_breaking": self.ist_breaking,
-            "anzahl_schritte": self.anzahl_schritte,
-            "status": self.status.value,
+            "workflow_id": self.workflow_id,
+            "von_version": self.von_version.als_string(),
+            "zu_version": self.zu_version.als_string(),
+            "aenderungs_typ": self.aenderungs_typ.value,
+            "strategie": self.strategie.value,
+            "risiko": self.risiko.value,
+            "reversibel": self.reversibel,
             "genehmigungs_pflicht": self.genehmigungs_pflicht,
-            "hoechstes_risiko": self.hoechstes_risiko.value,
-            "schritte": [s.as_dict() for s in self.schritte],
+            "genehmigt_von": self.genehmigt_von,
         }
 
 
 # ---------------------------------------------------------------------------
-# Workflow Version Registry
-# ---------------------------------------------------------------------------
-
-@dataclass
-class WorkflowVersionRegistry:
-    """
-    Zentrales Register aller versionierten Workflow-Definitionen.
-
-    Speichert alle Versionen pro Workflow-Name und liefert
-    automatisch Migrationspfade zwischen Versionen.
-    """
-    _definitionen: dict[str, list[WorkflowDefinition]] = field(default_factory=dict)
-
-    def register(self, definition: WorkflowDefinition) -> None:
-        """Registriert eine Workflow-Definition."""
-        name = definition.name
-        if name not in self._definitionen:
-            self._definitionen[name] = []
-        # Duplikat-Check
-        for existing in self._definitionen[name]:
-            if existing.version == definition.version:
-                raise ValueError(
-                    f"Version {definition.version} für '{name}' bereits registriert"
-                )
-        self._definitionen[name].append(definition)
-        self._definitionen[name].sort(key=lambda d: d.version)
-
-    def get_latest(self, name: str) -> WorkflowDefinition | None:
-        """Gibt die neueste Version eines Workflows zurück."""
-        versionen = self._definitionen.get(name, [])
-        return versionen[-1] if versionen else None
-
-    def get_version(self, name: str, version: WorkflowVersion) -> WorkflowDefinition | None:
-        """Gibt eine spezifische Version zurück."""
-        for d in self._definitionen.get(name, []):
-            if d.version == version:
-                return d
-        return None
-
-    def alle_versionen(self, name: str) -> list[WorkflowVersion]:
-        """Alle bekannten Versionen eines Workflows (sortiert)."""
-        return [d.version for d in self._definitionen.get(name, [])]
-
-    def registrierte_workflows(self) -> list[str]:
-        return list(self._definitionen.keys())
-
-    @property
-    def anzahl_workflows(self) -> int:
-        return len(self._definitionen)
-
-    @property
-    def anzahl_definitionen_gesamt(self) -> int:
-        return sum(len(v) for v in self._definitionen.values())
-
-
-# ---------------------------------------------------------------------------
-# Migrations-Sicherheitscheck
+# Migrations-Sicherheitsprüfung
 # ---------------------------------------------------------------------------
 
 @dataclass
 class MigrationsSicherheitsResult:
-    """Ergebnis des Sicherheitschecks für einen Migrationsplan."""
+    """Ergebnis der Sicherheitsprüfung vor einer Workflow-Migration."""
     plan_id: str
-    ist_sicher: bool
-    risiko: BreakingChangeRisiko
+    erlaubt: bool
+    blockierende_regeln: list[str] = field(default_factory=list)
+    warnungen: list[str] = field(default_factory=list)
     hinweise: list[str] = field(default_factory=list)
-    blockierende_fehler: list[str] = field(default_factory=list)
-    kpi_erfuellt: bool = True   # Kein ungeplanter Workflow-Bruch
 
     def as_dict(self) -> dict:
         return {
             "plan_id": self.plan_id,
-            "ist_sicher": self.ist_sicher,
-            "risiko": self.risiko.value,
+            "erlaubt": self.erlaubt,
+            "blockierende_regeln": self.blockierende_regeln,
+            "warnungen": self.warnungen,
             "hinweise": self.hinweise,
-            "blockierende_fehler": self.blockierende_fehler,
-            "kpi_erfuellt": self.kpi_erfuellt,
         }
 
 
 def validate_migrations_sicherheit(
-    plan: MigrationsPlan,
+    plan: WorkflowMigrationsplan,
     aktive_instanzen: int = 0,
 ) -> MigrationsSicherheitsResult:
     """
-    Prüft ob ein Migrationsplan sicher ausgeführt werden kann.
+    Prüft ob eine Workflow-Migration sicher durchgeführt werden kann.
 
-    KPI: 0 ungeplante Workflow-Brüche bei Releases.
-    Ein Bruch tritt auf wenn:
-    - MAJOR-Änderung ohne Genehmigung
-    - HARD_CUTOVER mit aktiven Instanzen
-    - Nicht-umkehrbarer Schritt bei HOCH-Risiko
+    Blockierende Regeln (Gap 011):
+    - MAJOR-Änderung ohne genehmigungs_pflicht=True → blockiert
+    - HARD_CUTOVER mit aktiven Instanzen > 0 → blockiert
+
+    Warnungen (nicht blockierend):
+    - HARD_CUTOVER mit > 0 Instanzen wird gewarnt
+    - PARALLEL_RUN mit KRITISCHEM Risiko
+
+    Hinweise:
+    - Irreversible HOCH-Risiko-Migrationen
     """
-    fehler: list[str] = []
+    blockierend: list[str] = []
+    warnungen: list[str] = []
     hinweise: list[str] = []
 
-    # Breaking Changes brauchen Genehmigung
-    if plan.ist_breaking and not plan.genehmigungs_pflicht:
-        fehler.append(
-            "MAJOR-Änderung ohne genehmigungs_pflicht=True — "
-            "Breaking Change muss explizit genehmigt werden"
+    # MAJOR ohne Genehmigungspflicht → blockiert
+    if plan.aenderungs_typ == AenderungsTyp.MAJOR and not plan.genehmigungs_pflicht:
+        blockierend.append(
+            f"MAJOR-Änderung ({plan.von_version.als_string()} → {plan.zu_version.als_string()}) "
+            f"erfordert genehmigungs_pflicht=True"
         )
 
-    # HARD_CUTOVER mit aktiven Instanzen
-    for schritt in plan.schritte:
-        if schritt.strategie == MigrationStrategie.HARD_CUTOVER and aktive_instanzen > 0:
-            fehler.append(
-                f"Schritt '{schritt.schritt_id}': HARD_CUTOVER mit {aktive_instanzen} "
-                f"aktiven Instanzen — Datenverlust möglich"
-            )
+    # HARD_CUTOVER mit aktiven Instanzen → blockiert
+    if plan.strategie == MigrationsStrategie.HARD_CUTOVER and aktive_instanzen > 0:
+        blockierend.append(
+            f"HARD_CUTOVER nicht möglich: {aktive_instanzen} aktive Instanzen laufen noch. "
+            f"Strategie DRAIN oder PARALLEL_RUN verwenden."
+        )
 
-        if not schritt.ist_umkehrbar and schritt.risiko == BreakingChangeRisiko.HOCH:
-            hinweise.append(
-                f"Schritt '{schritt.schritt_id}': Nicht umkehrbar + HOCH-Risiko — "
-                f"Backup vor Migration empfohlen"
-            )
+    # Nicht-reversibel + hohes Risiko → Hinweis
+    if not plan.reversibel and plan.risiko in (RisikoStufe.HOCH, RisikoStufe.KRITISCH):
+        hinweise.append(
+            f"Irreversible Migration mit Risiko {plan.risiko.value} — "
+            f"Datenbankbackup vor Durchführung empfohlen"
+        )
 
-    if not plan.schritte:
-        hinweise.append("Migrationsplan hat keine Schritte — NOOP")
+    # PARALLEL_RUN mit KRITISCH → Warnung
+    if plan.strategie == MigrationsStrategie.PARALLEL_RUN and plan.risiko == RisikoStufe.KRITISCH:
+        warnungen.append(
+            "PARALLEL_RUN mit KRITISCHEM Risiko erfordert erhöhte Beobachtung"
+        )
 
     return MigrationsSicherheitsResult(
         plan_id=plan.plan_id,
-        ist_sicher=len(fehler) == 0,
-        risiko=plan.hoechstes_risiko,
+        erlaubt=len(blockierend) == 0,
+        blockierende_regeln=blockierend,
+        warnungen=warnungen,
         hinweise=hinweise,
-        blockierende_fehler=fehler,
-        kpi_erfuellt=len(fehler) == 0,
     )
+
+
+# ---------------------------------------------------------------------------
+# Versionshistorie
+# ---------------------------------------------------------------------------
+
+@dataclass
+class WorkflowVersionsHistorie:
+    """Historische Versionsliste eines Workflows."""
+    workflow_id: str
+    versionen: list[WorkflowVersionDefinition] = field(default_factory=list)
+
+    @property
+    def aktuelle_version(self) -> WorkflowVersionDefinition | None:
+        freigegebene = [
+            v for v in self.versionen
+            if v.status == WorkflowStatus.FREIGEGEBEN
+        ]
+        if not freigegebene:
+            return None
+        return max(freigegebene, key=lambda v: (v.version.major, v.version.minor, v.version.patch))
+
+    @property
+    def anzahl_major_releases(self) -> int:
+        seen: set[int] = set()
+        for v in self.versionen:
+            seen.add(v.version.major)
+        return len(seen)
+
+    def get_version(self, major: int, minor: int, patch: int) -> WorkflowVersionDefinition | None:
+        return next(
+            (v for v in self.versionen
+             if v.version.major == major and v.version.minor == minor and v.version.patch == patch),
+            None,
+        )
+
+    def as_dict(self) -> dict:
+        aktuelle = self.aktuelle_version
+        return {
+            "workflow_id": self.workflow_id,
+            "anzahl_versionen": len(self.versionen),
+            "anzahl_major_releases": self.anzahl_major_releases,
+            "aktuelle_version": aktuelle.version.als_string() if aktuelle else None,
+        }

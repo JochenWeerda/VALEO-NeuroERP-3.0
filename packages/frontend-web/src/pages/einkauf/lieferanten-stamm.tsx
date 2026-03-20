@@ -13,8 +13,9 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Building2, Save, Plus, X, AlertTriangle, CheckCircle, Archive, Lock } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
-import { apiClient } from '@/lib/api-client'
+import { apiClient } from '@/lib/axios'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
+import { formatDate } from '@/components/mask-builder/utils/formatting'
 
 type LieferantData = {
   id: string
@@ -175,12 +176,12 @@ export default function LieferantenStammPage(): JSX.Element {
     setLoading(true)
     try {
       // Versuche verschiedene API-Endpunkte
-      let response
+      let response: any
       try {
-        response = await apiClient.get(`/api/partners/${id}?type=supplier`)
+        response = (await apiClient.get<any>(`/api/partners/${id}?type=supplier`)) as any
       } catch (e1) {
         try {
-          response = await apiClient.get(`/api/einkauf/lieferanten/${id}`)
+          response = (await apiClient.get<any>(`/api/einkauf/lieferanten/${id}`)) as any
         } catch (e2) {
           toast({
             variant: 'destructive',
@@ -193,8 +194,8 @@ export default function LieferantenStammPage(): JSX.Element {
         }
       }
 
-      if (response.data) {
-        const data = response.data
+      if (response) {
+        const data = response
         setLieferant({
           id: data.id || id || '',
           name: data.name || '',
@@ -302,8 +303,7 @@ export default function LieferantenStammPage(): JSX.Element {
 
     setLoading(true)
     try {
-      const response = await apiClient.get(`/api/partners?type=supplier&query=${encodeURIComponent(lieferant.name)}`)
-      const results = response.data?.data || response.data || []
+      const results = (await apiClient.get<any[]>(`/api/partners?type=supplier&query=${encodeURIComponent(lieferant.name)}`)) as unknown as any[]
       const duplicates = results.filter((s: any) => 
         s.id !== lieferant.id && 
         (s.name?.toLowerCase().includes(lieferant.name.toLowerCase()) || 
@@ -821,10 +821,10 @@ export default function LieferantenStammPage(): JSX.Element {
                                 onClick={async () => {
                                   try {
                                     const url = `/api/v1/einkauf/lieferanten/${id}/dokumente/${doc.id}/download`
-                                    const res = await apiClient.get(url, { responseType: 'blob' }).catch(() => null)
-                                    if (res?.data instanceof Blob && res.data.size > 0) {
+                                    const res = await apiClient.get<Blob>(url, { responseType: 'blob' }).catch(() => null)
+                                    if (res instanceof Blob && res.size > 0) {
                                       const a = document.createElement('a')
-                                      a.href = URL.createObjectURL(res.data)
+                                      a.href = URL.createObjectURL(res)
                                       a.download = doc.dateiname || doc.titel || 'dokument'
                                       a.click()
                                       URL.revokeObjectURL(a.href)
@@ -1245,8 +1245,8 @@ export default function LieferantenStammPage(): JSX.Element {
               <Label htmlFor="docType">{t('crud.fields.type')} *</Label>
               <NativeSelect
                 value={newDocument.typ}
-                onValueChange={(value) =>
-                  setNewDocument(prev => ({ ...prev, typ: value }))
+                  onValueChange={(value) =>
+                  setNewDocument(prev => ({ ...prev, typ: value as DokumentTyp }))
                 }
                 options={(Object.keys(DOKUMENT_TYP_LABELS) as DokumentTyp[]).map((typ) => ({
                   value: typ,

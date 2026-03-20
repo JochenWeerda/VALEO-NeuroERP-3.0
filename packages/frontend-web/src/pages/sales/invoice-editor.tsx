@@ -70,8 +70,7 @@ export default function SalesInvoiceEditorPage(): JSX.Element {
     }
     void (async () => {
       try {
-        const response = await apiClient.get(`/api/v1/docflow/${editId}`)
-        const doc = response.data as any
+        const doc = await apiClient.get(`/api/v1/docflow/${editId}`) as any
         setDocId(String(doc.id))
         setInvoice((prev) => ({
           ...prev,
@@ -92,7 +91,7 @@ export default function SalesInvoiceEditorPage(): JSX.Element {
           totalGross: Number(doc.total_gross ?? prev.totalGross),
         }))
       } catch {
-        push(getErrorMessage(t, "read", entityType))
+        push(t('crud.messages.readError', { defaultValue: 'Rechnung konnte nicht geladen werden' }))
       }
     })()
   }, [editId, push, t])
@@ -122,8 +121,8 @@ export default function SalesInvoiceEditorPage(): JSX.Element {
         const created = await apiClient.post("/api/v1/docflow", {
           ...docPayload,
           idempotency_key: idempotencyKey,
-        })
-        setDocId(String(created.data?.id))
+        }) as { id?: string }
+        setDocId(String(created.id ?? ''))
       }
 
       push(getSuccessMessage(t, 'update', entityType))

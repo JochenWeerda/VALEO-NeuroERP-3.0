@@ -112,7 +112,6 @@ export const options = {
 // ---------------------------------------------------------------------------
 const BASE_URL   = __ENV.BASE_URL   || 'http://localhost:8000';
 const API_TOKEN  = __ENV.API_TOKEN  || 'dev-token-valeo-erntepeak-2026';
-const TENANT_ID  = __ENV.TENANT_ID  || 'T-GENOSSENSCHAFT-001';
 
 // Mehrere Tenants simulieren (Multi-Tenant-Isolation prüfen)
 const TENANT_POOL = [
@@ -139,17 +138,6 @@ function headers(tenant) {
 // Setup: Token holen (wenn OIDC aktiviert)
 // ---------------------------------------------------------------------------
 export function setup() {
-  // Im Dev-Modus: API_DEV_TOKEN wird direkt als Bearer genutzt,
-  // kein Login-Endpunkt nötig. Für Produktionstest gegen Keycloak:
-  //
-  // const res = http.post(`${BASE_URL}/realms/valeo/protocol/openid-connect/token`, {
-  //   grant_type: 'password',
-  //   client_id: 'valeo-frontend',
-  //   username: 'load-test-user',
-  //   password: __ENV.TEST_PASSWORD,
-  // });
-  // return { token: res.json('access_token') };
-
   const healthRes = http.get(`${BASE_URL}/api/v1/health`, {
     headers: { 'Authorization': `Bearer ${API_TOKEN}` },
   });
@@ -197,7 +185,6 @@ export default function (data) {
 // ---------------------------------------------------------------------------
 function workflowDashboardKpi(hdrs, tenant) {
   group('dashboard_kpi', () => {
-    // Dashboard-Übersicht (Read-Model — muss < 250ms sein)
     let res = http.get(`${BASE_URL}/api/v1/controlling/dashboards`, {
       headers: hdrs,
       tags: { endpoint: 'dashboard' },
@@ -212,7 +199,6 @@ function workflowDashboardKpi(hdrs, tenant) {
 
     sleep(0.3);
 
-    // KPI-Liste
     res = http.get(`${BASE_URL}/api/v1/controlling/kpis`, {
       headers: hdrs,
       tags: { endpoint: 'dashboard' },
@@ -227,7 +213,6 @@ function workflowDashboardKpi(hdrs, tenant) {
 
     sleep(0.2);
 
-    // Timeseries für einen KPI
     res = http.get(`${BASE_URL}/api/v1/controlling/timeseries?kpi=UMSATZ&periode=2026`, {
       headers: hdrs,
       tags: { endpoint: 'dashboard' },
@@ -244,11 +229,9 @@ function workflowDashboardKpi(hdrs, tenant) {
 
 // ---------------------------------------------------------------------------
 // Workflow 2: Annahme & Qualität (30% der Last)
-// Waage-Operator gibt Wiegeschein + Qualitätsdaten ein
 // ---------------------------------------------------------------------------
 function workflowAnnahmeQualitaet(hdrs, tenant) {
   group('annahme_qualitaet', () => {
-    // Aktive Kontrakte abrufen (welche Lieferungen erwartet?)
     let res = http.get(`${BASE_URL}/api/v1/agrar/contracts?status=aktiv&limit=20`, {
       headers: hdrs,
       tags: { endpoint: 'annahme' },
@@ -259,7 +242,6 @@ function workflowAnnahmeQualitaet(hdrs, tenant) {
 
     sleep(0.5);
 
-    // Offene Annahmen abrufen
     res = http.get(`${BASE_URL}/api/v1/agrar/harvest-acceptance?status=offen&limit=10`, {
       headers: hdrs,
       tags: { endpoint: 'annahme' },
@@ -274,7 +256,6 @@ function workflowAnnahmeQualitaet(hdrs, tenant) {
 
     sleep(0.3);
 
-    // Qualitäts-Protokolle abrufen
     res = http.get(`${BASE_URL}/api/v1/agrar/quality-protocols?limit=5`, {
       headers: hdrs,
       tags: { endpoint: 'annahme' },
@@ -288,11 +269,9 @@ function workflowAnnahmeQualitaet(hdrs, tenant) {
 
 // ---------------------------------------------------------------------------
 // Workflow 3: Controlling (20% der Last)
-// Buchhalter liest KPIs und finanzielle Auswertungen
 // ---------------------------------------------------------------------------
 function workflowControlling(hdrs, tenant) {
   group('controlling', () => {
-    // Offene Posten Kreditoren
     let res = http.get(`${BASE_URL}/api/v1/finance/open-items?typ=kreditor&limit=50`, {
       headers: hdrs,
       tags: { endpoint: 'controlling' },
@@ -307,7 +286,6 @@ function workflowControlling(hdrs, tenant) {
 
     sleep(0.4);
 
-    // Zahlungsläufe
     res = http.get(`${BASE_URL}/api/v1/finance/payment-runs?limit=10`, {
       headers: hdrs,
       tags: { endpoint: 'controlling' },
@@ -319,7 +297,6 @@ function workflowControlling(hdrs, tenant) {
 
     sleep(0.3);
 
-    // Controlling-Aktionen
     res = http.get(`${BASE_URL}/api/v1/controlling/actions?limit=20`, {
       headers: hdrs,
       tags: { endpoint: 'controlling' },
@@ -333,12 +310,10 @@ function workflowControlling(hdrs, tenant) {
 
 // ---------------------------------------------------------------------------
 // Workflow 4: Settlement (10% der Last)
-// Abrechnung nach Annahme + Qualitätsprüfung
 // ---------------------------------------------------------------------------
 function workflowSettlement(hdrs, tenant) {
   group('settlement', () => {
-    // Offene Settlements abrufen
-    let res = http.get(`${BASE_URL}/api/v1/agrar/settlements?limit=20`, {
+    let res = http.get(`${BASE_URL}/api/v1/agrar/settlements/?limit=20`, {
       headers: hdrs,
       tags: { endpoint: 'settlement' },
     });
@@ -352,7 +327,6 @@ function workflowSettlement(hdrs, tenant) {
 
     sleep(0.5);
 
-    // Self-Billing abrufen
     res = http.get(`${BASE_URL}/api/v1/agrar/self-billing?limit=10`, {
       headers: hdrs,
       tags: { endpoint: 'settlement' },
@@ -372,8 +346,5 @@ export function teardown(data) {
   console.log('=== VALEO Erntepeak-Lasttest abgeschlossen ===');
   console.log(`Szenario: ${SCENARIO}`);
   console.log('SLA-Prüfung: siehe Threshold-Ergebnisse oben');
-  console.log('');
-  console.log('Zum Auswerten gegen ErntepeakSLAContract:');
-  console.log('  python -c "from app.core.load_test_contracts import *; ...');
   console.log('');
 }
