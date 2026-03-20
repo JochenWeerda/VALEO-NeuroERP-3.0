@@ -20,15 +20,44 @@ const CampaignPerformanceCharts = lazy(() =>
 
 const apiClient = createApiClient('/api/crm-marketing')
 
+interface CampaignSummary {
+  id: string
+  name: string
+  type?: string
+  sent_count?: number
+  open_count?: number
+  click_count?: number
+  conversion_count?: number
+  spent?: number
+}
+
+interface CampaignPerformancePoint {
+  date: string
+  sent_count?: number
+  open_count?: number
+  click_count?: number
+  conversion_count?: number
+}
+
 export default function CampaignPerformanceDashboardPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { tenantId } = useTenant()
   const [loading, setLoading] = useState(true)
   const [timeRange, setTimeRange] = useState('30d')
-  const [campaigns, setCampaigns] = useState<any[]>([])
-  const [performance, setPerformance] = useState<any[]>([])
-  const [summary, setSummary] = useState<any>(null)
+  const [campaigns, setCampaigns] = useState<CampaignSummary[]>([])
+  const [performance, setPerformance] = useState<CampaignPerformancePoint[]>([])
+  const [summary, setSummary] = useState<{
+    totalCampaigns: number
+    totalSent: number
+    totalOpened: number
+    totalClicked: number
+    totalConverted: number
+    totalSpent: number
+    avgOpenRate: number
+    avgClickRate: number
+    avgConversionRate: number
+  } | null>(null)
 
   useEffect(() => {
     void loadData()
@@ -38,12 +67,12 @@ export default function CampaignPerformanceDashboardPage(): JSX.Element {
     setLoading(true)
     try {
       const [campaignsRes, performanceRes] = await Promise.all([
-        apiClient.get('/campaigns', { params: { tenant_id: tenantId, status: 'completed' } }),
-        apiClient.get('/campaigns/performance', { params: { tenant_id: tenantId, time_range: timeRange } }),
+        apiClient.get<CampaignSummary[]>('/campaigns', { params: { tenant_id: tenantId, status: 'completed' } }),
+        apiClient.get<CampaignPerformancePoint[]>('/campaigns/performance', { params: { tenant_id: tenantId, time_range: timeRange } }),
       ])
 
-      if (campaignsRes.success || Array.isArray(campaignsRes)) {
-        const items = Array.isArray(campaignsRes) ? campaignsRes : campaignsRes.data || []
+      if (campaignsRes.success || Array.isArray(campaignsRes.data)) {
+        const items = campaignsRes.data ?? []
         setCampaigns(items)
 
         const totalSent = items.reduce((sum, campaign) => sum + (campaign.sent_count || 0), 0)
@@ -65,8 +94,8 @@ export default function CampaignPerformanceDashboardPage(): JSX.Element {
         })
       }
 
-      if (performanceRes.success || Array.isArray(performanceRes)) {
-        const perf = Array.isArray(performanceRes) ? performanceRes : performanceRes.data || []
+      if (performanceRes.success || Array.isArray(performanceRes.data)) {
+        const perf = performanceRes.data ?? []
         setPerformance(perf)
       }
     } catch {
@@ -100,7 +129,7 @@ export default function CampaignPerformanceDashboardPage(): JSX.Element {
 
   const typeChartData = Object.entries(typeDistribution).map(([type, count]) => ({
     name: t(`crud.campaigns.types.${type}`) || type,
-    value: count,
+    value: Number(count),
   }))
 
   const topCampaigns = [...campaigns].sort((a, b) => (b.conversion_count || 0) - (a.conversion_count || 0)).slice(0, 5)

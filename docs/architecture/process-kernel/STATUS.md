@@ -35,13 +35,14 @@ Diese Statusdatei verdichtet den aktuellen Gesamtstand, ohne die Detailnachweise
 
 ## Gesamtstatus
 
-- Stand: `2026-03-19`
-- Status: `Waves 1 bis 67 abgeschlossen`
-- Gesamtsuite: `5646 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed`
+- Stand: `2026-03-20`
+- Status: `Waves 1 bis 87 abgeschlossen`
+- Gesamtsuite: `5916 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed`
+- Bereinigter Gap-Abgleich gegen spaetere Wave-Nachweise: `docs/roadmap/status/2026-03-20-gap-matrix-bereinigt.md`
 - Letzte abgeschlossene Waves:
-  - `Wave 64`: Process Data Lineage DAG + Workflow Simulation Contracts
-  - `Wave 65`: Exception Pattern Classification + Remediation Playbooks
-  - `Wave 66`: Process Concurrency/Mutex + Resource Lock + Deadlock Detection
+  - `Wave 85`: E2E Prozesskette ohne Medienbruch (Gap 001) -- 28 Tests
+  - `Wave 86`: Versionierte Workflow Engine SemVer (Gap 011) -- 36 Tests
+  - `Wave 87`: Lasttest Erntepeak SLA-Contracts (Gap 037) -- 28 Tests
   - `Wave 67`: Process Cache Contracts + Workflow Schema Migration
 
 ## Wave-Uebersicht
@@ -321,6 +322,22 @@ Diese Statusdatei verdichtet den aktuellen Gesamtstand, ohne die Detailnachweise
 - `packages/frontend-web/src/lib/api/ui-density-manifest.ts`
 - `packages/frontend-web/src/components/workflow/ProcessStatusPanel.tsx`
 - `app/core/ui_density_manifest.py`
+- `packages/frontend-web/src/components/patterns/PageSurface.tsx`
+
+Ergebnis:
+- Neue Seiten sollen jetzt verpflichtend ueber `PageSurface` + `PageToolbar` + Pattern-Sektionen aufgebaut werden.
+- Bestehende Seiten, die `OverviewPage`, `ObjectPage`, `ListReport` oder `Wizard` verwenden, profitieren automatisch vom neuen DS-Rahmen.
+- Aeltere Standalone-Seiten wie `sales/orders-modern.tsx` und `controlling/benchmark-cockpit.tsx` wurden rueckwirkend auf denselben Seitenrahmen gezogen.
+
+### Externe Blockchain-Schnittstelle fuer Lieferkettenprozesse
+
+- `app/core/supply_chain_blockchain.py`
+- `app/api/v1/endpoints/supply_chain_blockchain.py`
+
+Ergebnis:
+- Lieferkettenereignisse koennen jetzt fuer externe Blockchain-/Ledger-Ziele als standardisierte Outbound-Payload vorbereitet werden.
+- Unterstuetzte Zielprofile im aktuellen Adapter: SAP BTP Ledger, Oracle Blockchain Platform und Hyperledger Fabric.
+- API-Surfacing: `GET /api/v1/supply-chain/blockchain/profiles`, `POST /api/v1/supply-chain/blockchain/prepare`, `POST /api/v1/supply-chain/blockchain/dispatch`.
 
 ### NeuroASSIST Fach-Workflow- und Assistenten-Schicht
 
@@ -457,6 +474,7 @@ npm run type-check
 ## Offene Punkte
 
 - Der globale Roadmap-Status ausserhalb von `docs/architecture/process-kernel/STATUS.md` ist nicht automatisch synchron und muss bei groesseren Wave-Abschluessen separat nachgezogen werden.
+- Die bereinigte Gap-Einordnung fuer den Stand `2026-03-20` liegt in `docs/roadmap/status/2026-03-20-gap-matrix-bereinigt.md`; Backlog, Delivery-Map und Aggregatstatus koennen zeitweise voneinander abweichen.
 - Neue Frontend- und Integrationsarbeit hat auf den bestehenden Bausteinen aus Wave 9 bis Wave 27 aufzusetzen; keine neuen Parallelpfade fuer Routing, Dispatch, Audit, SLA oder Prozesssurfacing.
 - Bei jeder neuen Lieferung sind Schichtgrenzen aktiv zu verifizieren:
   - kein Import von `app/api/` aus `app/core/`

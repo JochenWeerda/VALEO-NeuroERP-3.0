@@ -142,11 +142,24 @@ function dispatch(action: Action): void {
 
 type Toast = Omit<ToasterToast, "id">
 
-function toast(props: Toast): {
+type ToastHandle = {
   id: string
   dismiss: () => void
   update: (props: ToasterToast) => void
-} {
+}
+
+type ShortcutToastProps = Omit<Toast, "title" | "description" | "variant"> & {
+  description?: string
+}
+
+type ToastFn = ((props: Toast) => ToastHandle) & {
+  success: (_title: string, _descriptionOrProps?: string | ShortcutToastProps, _props?: ShortcutToastProps) => ToastHandle
+  error: (_title: string, _descriptionOrProps?: string | ShortcutToastProps, _props?: ShortcutToastProps) => ToastHandle
+  info: (_title: string, _descriptionOrProps?: string | ShortcutToastProps, _props?: ShortcutToastProps) => ToastHandle
+  warning: (_title: string, _descriptionOrProps?: string | ShortcutToastProps, _props?: ShortcutToastProps) => ToastHandle
+}
+
+function baseToast(props: Toast): ToastHandle {
   const id = genId()
 
   const update = (updateProps: ToasterToast): void =>
@@ -173,6 +186,76 @@ function toast(props: Toast): {
     dismiss,
     update,
   }
+}
+
+const toast = baseToast as ToastFn
+
+const isShortcutToastProps = (value: unknown): value is ShortcutToastProps =>
+  value !== null
+  && typeof value === "object"
+  && !Array.isArray(value)
+  && React.isValidElement(value) === false
+
+const normalizeShortcutToastProps = (
+  title: string,
+  descriptionOrProps?: string | ShortcutToastProps,
+  props?: ShortcutToastProps,
+): { title: string; description?: string; props: ShortcutToastProps } => {
+  if (isShortcutToastProps(descriptionOrProps)) {
+    return {
+      title,
+      description: descriptionOrProps.description,
+      props: descriptionOrProps,
+    }
+  }
+
+  return {
+    title,
+    description: descriptionOrProps,
+    props: props ?? {},
+  }
+}
+
+toast.success = (title, descriptionOrProps, props) => {
+  const normalized = normalizeShortcutToastProps(title, descriptionOrProps, props)
+  const { description, ...toastProps } = normalized.props
+  return baseToast({
+    ...toastProps,
+    title: normalized.title,
+    description: normalized.description ?? description,
+  })
+}
+
+toast.error = (title, descriptionOrProps, props) => {
+  const normalized = normalizeShortcutToastProps(title, descriptionOrProps, props)
+  const { description, ...toastProps } = normalized.props
+  return baseToast({
+    ...toastProps,
+    title: normalized.title,
+    description: normalized.description ?? description,
+    variant: "destructive",
+  })
+}
+
+toast.info = (title, descriptionOrProps, props) => {
+  const normalized = normalizeShortcutToastProps(title, descriptionOrProps, props)
+  const { description, ...toastProps } = normalized.props
+  return baseToast({
+    ...toastProps,
+    title: normalized.title,
+    description: normalized.description ?? description,
+  })
+}
+
+toast.warning = (title, descriptionOrProps, props) => {
+  const normalized = normalizeShortcutToastProps(title, descriptionOrProps, props)
+  const { description, ...toastProps } = normalized.props
+  return baseToast({
+    ...toastProps,
+    title: normalized.title,
+    description: normalized.description ?? description,
+    variant: "destructive",
+  })
 }
 
 function useToast(): {

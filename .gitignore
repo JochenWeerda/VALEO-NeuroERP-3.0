@@ -192,6 +192,7 @@ coverage/
 playwright-report/
 playwright-tests/artifacts/
 *.spec.js.snap
+load-tests/results/
 
 # Generated reports/artifacts (should not be committed)
 evidence/

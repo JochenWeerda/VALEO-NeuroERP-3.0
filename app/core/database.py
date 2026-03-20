@@ -15,12 +15,13 @@ logger = logging.getLogger(__name__)
 # SQLAlchemy setup for PostgreSQL
 engine = create_engine(
     settings.DATABASE_URL,
-    poolclass=QueuePool,  # Better for PostgreSQL
-    pool_size=10,
-    max_overflow=20,
-    pool_timeout=30,
-    pool_recycle=3600,
-    echo=settings.DEBUG,  # SQL query logging in debug mode
+    poolclass=QueuePool,
+    pool_size=20,       # matches FastAPI threadpool per worker (min(32,cpu+4)=16 on 12-CPU host)
+    max_overflow=5,     # small overflow headroom per worker
+    pool_timeout=10,    # fail fast instead of queueing for 30s
+    pool_recycle=1800,
+    pool_pre_ping=True, # detect stale connections after fork
+    echo=settings.DEBUG,
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

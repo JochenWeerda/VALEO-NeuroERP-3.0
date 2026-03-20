@@ -38,12 +38,12 @@ import {
 } from '@/components/ui/select'
 import {
   Calculator,
-  Cow,
   Package,
   Euro,
   AlertTriangle,
   CheckCircle2,
   Loader2,
+  Sprout,
 } from 'lucide-react'
 
 const BREEDS = [
@@ -141,7 +141,7 @@ export default function Rationsoptimierung() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Cow className="h-5 w-5" />
+              <Sprout className="h-5 w-5" />
               Kuhprofil
             </CardTitle>
             <CardDescription>

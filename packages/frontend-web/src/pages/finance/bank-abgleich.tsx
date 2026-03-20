@@ -514,9 +514,9 @@ export default function BankAbgleichPage(): JSX.Element {
         })
       }
     } else if (action === 'book') {
-      const isValid = validate(formData)
-      if (!isValid.isValid) {
-        showValidationToast(errors)
+      const validationErrors = validate(formData)
+      if (Object.keys(validationErrors).length > 0) {
+        showValidationToast(validationErrors)
         return
       }
       if (!formData.statementId || !formData.kontoId) {

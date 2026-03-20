@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from '@/hooks/use-toast'
-import { apiClient } from '@/lib/api-client'
+import { apiClient } from '@/lib/axios'
 import { CheckCircle, XCircle, AlertTriangle, FileCheck, Receipt } from 'lucide-react'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 
@@ -93,8 +93,8 @@ export default function RechnungAbgleichPage(): JSX.Element {
 
   const loadInvoices = async () => {
     try {
-      const response = await apiClient.get('/api/v1/einkauf/rechnungseingaenge')
-      const rows = Array.isArray(response.data) ? response.data : response.data?.data || response.data?.items || []
+      const response = (await apiClient.get<any[]>('/api/v1/einkauf/rechnungseingaenge')) as unknown as any[]
+      const rows = Array.isArray(response) ? response : []
       const normalized = rows.map((inv: any) => ({
         id: inv.id,
         rechnungsNummer: inv.rechnungsNummer || inv.rechnungs_nummer || inv.rechnungsnr || '',
@@ -117,8 +117,7 @@ export default function RechnungAbgleichPage(): JSX.Element {
     setMatching(true)
     try {
       // Lade Rechnung
-      const invoiceResponse = await apiClient.get(`/api/v1/einkauf/rechnungseingaenge/${selectedInvoiceId}`)
-      const invoice = invoiceResponse.data || {}
+      const invoice: any = await apiClient.get<any>(`/api/v1/einkauf/rechnungseingaenge/${selectedInvoiceId}`)
       const invoiceBestellungId = invoice.bestellungId || invoice.bestellung_id || invoice.bestellung
       const invoiceWareneingangId = invoice.wareneingangId || invoice.wareneingang_id || invoice.wareneingang
 
@@ -132,15 +131,13 @@ export default function RechnungAbgleichPage(): JSX.Element {
         return
       }
 
-      const poResponse = await apiClient.get(`/api/v1/purchase-orders/${invoiceBestellungId}`)
-      const purchaseOrder = poResponse.data
+      const purchaseOrder: any = await apiClient.get<any>(`/api/v1/purchase-orders/${invoiceBestellungId}`)
 
       // Lade Wareneingang (falls vorhanden)
       let goodsReceipt: any = null
       if (invoiceWareneingangId) {
         try {
-          const grResponse = await apiClient.get(`/api/purchase-workflow/orders/${invoiceBestellungId}/goods-receipt/${invoiceWareneingangId}`)
-          goodsReceipt = grResponse.data
+          goodsReceipt = await apiClient.get<any>(`/api/purchase-workflow/orders/${invoiceBestellungId}/goods-receipt/${invoiceWareneingangId}`)
         } catch (grError) {
           console.warn('Wareneingang nicht gefunden:', grError)
         }
@@ -336,7 +333,7 @@ export default function RechnungAbgleichPage(): JSX.Element {
     setLoading(true)
     try {
       // Update Rechnung Status
-      await apiClient.put(`/api/v1/einkauf/rechnungseingaenge/${selectedInvoiceId}`, {
+      await apiClient.put<any>(`/api/v1/einkauf/rechnungseingaenge/${selectedInvoiceId}`, {
         status: 'FREIGEGEBEN',
         abgleichErgebnis: matchResult,
         abweichungsBegruendung: exceptionReason || undefined,

@@ -70,7 +70,7 @@ export default function RfqBidsPage(): JSX.Element {
   const supplierOptions = availableSuppliers.map((supplier) => ({ value: supplier.id, label: supplier.name }))
   const { data: bidsData, isLoading: bidsLoading, isError: bidsError, error: bidsErrorObj, refetch: refetchBids } = useQuery({
     queryKey: ['einkauf', 'rfq-bids', rfqId],
-    queryFn: async () => (await apiClient.get<Bid[]>(`/api/v1/einkauf/anfragen/${rfqId}/bids`)).data,
+    queryFn: async () => apiClient.get<Bid[]>(`/api/v1/einkauf/anfragen/${rfqId}/bids`),
     enabled: !!rfqId,
     staleTime: 2 * 60 * 1000,
   })
@@ -83,9 +83,9 @@ export default function RfqBidsPage(): JSX.Element {
 
   useEffect(() => {
     if (rfqId) {
-      apiClient.get(`/api/einkauf/anfragen/${rfqId}`).then(r => setRfq(r.data)).catch(() => {})
-      apiClient.get('/api/partners?type=supplier').then(r => {
-        setAvailableSuppliers((r as any).data?.data || (r as any).data || [])
+      apiClient.get(`/api/einkauf/anfragen/${rfqId}`).then((r: any) => setRfq(r as any)).catch(() => {})
+      apiClient.get('/api/partners?type=supplier').then((r: any) => {
+        setAvailableSuppliers(Array.isArray(r) ? r : [])
       }).catch(() => {})
     }
   }, [rfqId])
@@ -151,7 +151,7 @@ export default function RfqBidsPage(): JSX.Element {
     })
   }
 
-  const handleImportBids = async () => {
+  const handleImportBids = async (_file?: File) => {
     try {
       // Import parser wird als eigener Schritt angebunden
       toast({

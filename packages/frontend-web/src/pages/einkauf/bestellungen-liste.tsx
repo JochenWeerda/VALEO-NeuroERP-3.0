@@ -13,13 +13,13 @@ import { Label } from '@/components/ui/label'
 import { toast } from '@/hooks/use-toast'
 import { getEntityTypeLabel, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 import { usePurchaseOrders, useApprovePurchaseOrder, useCancelPurchaseOrder, INCOTERM_OPTIONS } from '@/lib/api/purchase-orders'
-import { apiClient } from '@/lib/api-client'
+import { apiClient } from '@/lib/axios'
 
 // Konfiguration für Bestellungen ListReport (wird in Komponente mit i18n erstellt)
 const createBestellungenConfig = (
   t: any,
   entityTypeLabel: string,
-  onBulkPrint?: () => void,
+  onBulkPrint?: (items: any[]) => void,
   onBulkApprove?: (items: any[]) => void,
   onBulkCancel?: (items: any[]) => void,
 ): ListConfig => ({
@@ -267,10 +267,10 @@ export default function BestellungenListePage(): JSX.Element {
         '/api/v1/einkauf/bestellungen/import',
         formData,
       )
-      const received = res?.data?.received ?? 0
+      const received = res?.received ?? 0
       toast({
         title: t('crud.messages.importInfo'),
-        description: res?.data?.message ?? `${received} Zeilen empfangen. Import in Verarbeitung.`,
+        description: res?.message ?? `${received} Zeilen empfangen. Import in Verarbeitung.`,
       })
       setImportOpen(false)
       setImportFile(null)

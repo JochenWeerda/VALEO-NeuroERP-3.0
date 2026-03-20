@@ -4,9 +4,30 @@ import type { CustomerCreate } from '@/lib/api/crm'
 import { ENABLE_PROSPECTING_UI } from '@/features/prospecting/feature-flags'
 import { getNested } from './mappers'
 
-type CustomerMaskConfig = typeof customerMaskConfig
-type CustomerMaskTab = CustomerMaskConfig['tabs'][number]
-type CustomerMaskField = CustomerMaskTab['sections'][number]['fields'][number]
+type CustomerMaskField = {
+  binding?: string | null
+  label: string
+  component: string
+  required?: boolean
+  readonly?: boolean
+  optionsRef?: string
+}
+
+type CustomerMaskSection = {
+  label: string
+  layout?: { columns?: number; type?: string }
+  fields?: CustomerMaskField[]
+}
+
+type CustomerMaskTab = {
+  id: string
+  label: string
+  sections?: CustomerMaskSection[]
+}
+
+type CustomerMaskConfig = {
+  tabs?: CustomerMaskTab[]
+}
 
 const COMPONENT_TO_FIELD_TYPE: Record<string, Field['type']> = {
   TextField: 'text',
@@ -21,7 +42,7 @@ export const ENABLE_CUSTOMER_MASK_BUILDER_FORM =
   import.meta.env.VITE_ENABLE_MASK_BUILDER_CUSTOMER_FORM === 'true'
 
 export const CUSTOMER_MASK_OBJECT_PAGE_CONFIG: MaskConfig = convertCustomerMaskToObjectPageConfig(
-  customerMaskConfig,
+  customerMaskConfig as CustomerMaskConfig,
 )
 
 export function validateCustomerPayload(payload: CustomerCreate): string | null {
@@ -71,6 +92,16 @@ function convertCustomerMaskToObjectPageConfig(config: CustomerMaskConfig): Mask
 }
 
 function convertCustomerMaskField(field: CustomerMaskField, sectionLabel: string): Field {
+  if (typeof field.binding !== 'string' || field.binding.length === 0) {
+    return {
+      name: `__meta_${field.label.replace(/\s+/g, '_').toLowerCase()}`,
+      label: field.label,
+      type: 'text',
+      readonly: true,
+      helpText: sectionLabel,
+    }
+  }
+
   const type = COMPONENT_TO_FIELD_TYPE[field.component] ?? 'text'
 
   if (type === 'select') {
@@ -97,7 +128,7 @@ function convertCustomerMaskField(field: CustomerMaskField, sectionLabel: string
 }
 
 function resolveTabColumns(tab: CustomerMaskTab): number {
-  const sectionColumns = tab.sections?.map((section) => section.layout?.columns ?? 2) ?? []
+  const sectionColumns = (tab.sections ?? []).map((section) => section.layout?.columns ?? 2)
   return sectionColumns.length ? Math.max(...sectionColumns) : 2
 }
 

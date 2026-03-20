@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { z } from 'zod'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
@@ -12,7 +13,7 @@ import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { LeaveConfirmDialog } from '@/components/LeaveConfirmDialog'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import { apiClient } from '@/lib/axios'
-import { toast } from 'sonner'
+import { toast } from '@/hooks/use-toast'
 
 // Zod-Schema für Bankkonten-Stammdaten
 const createBankKontenSchema = (t: any) => z.object({
@@ -29,6 +30,22 @@ const createBankKontenSchema = (t: any) => z.object({
   balance: z.number().default(0),
   is_active: z.boolean().default(true)
 })
+
+const validateBankKontenForm = (formData: any, t: any): { isValid: boolean; errors: Record<string, string> } => {
+  const parsed = createBankKontenSchema(t).safeParse(formData ?? {})
+  if (parsed.success) {
+    return { isValid: true, errors: {} }
+  }
+
+  const errors: Record<string, string> = {}
+  parsed.error.issues.forEach((issue) => {
+    const field = issue.path[0]
+    if (typeof field === 'string' && !errors[field]) {
+      errors[field] = issue.message
+    }
+  })
+  return { isValid: false, errors }
+}
 
 // Konfiguration für Bankkonten-Stammdaten ObjectPage
 const createBankKontenConfig = (t: any, entityTypeLabel: string): MaskConfig => ({

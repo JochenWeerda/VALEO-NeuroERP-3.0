@@ -13,8 +13,8 @@ import { Button } from '@/components/ui/button'
 
 export interface BlockerLike {
   state: string
-  proceed: () => void
-  reset: () => void
+  proceed?: () => void
+  reset?: () => void
 }
 
 interface LeaveConfirmDialogProps {
@@ -40,24 +40,24 @@ export function LeaveConfirmDialog({
 
   const handleSave = async (): Promise<void> => {
     if (!onSave) {
-      blocker.proceed()
+      blocker.proceed?.()
       return
     }
     setSaving(true)
     try {
       await onSave()
-      blocker.proceed()
+      blocker.proceed?.()
     } finally {
       setSaving(false)
     }
   }
 
   const handleDiscard = (): void => {
-    blocker.proceed()
+    blocker.proceed?.()
   }
 
   const handleCancel = (): void => {
-    blocker.reset()
+    blocker.reset?.()
   }
 
   return (

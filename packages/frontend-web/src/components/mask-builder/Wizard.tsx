@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { AlertTriangle, CheckCircle, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { WizardConfig, WizardStep, Field } from './types'
-import { createMaskResolver, getFieldsFromWizardStep } from './validation'
+import { createMaskResolver, getFieldName, getFieldsFromWizardStep } from './validation'
 
 interface WizardProps {
   config: WizardConfig
@@ -99,17 +99,18 @@ const Wizard: React.FC<WizardProps> = ({
   }
 
   const renderField = (field: Field) => {
-    const error = errors[field.name]?.message as string
+    const fieldName = getFieldName(field)
+    const error = errors[fieldName]?.message as string
 
     return (
-      <div key={field.name} className="space-y-2">
-        <Label htmlFor={field.name}>
+      <div key={fieldName} className="space-y-2">
+        <Label htmlFor={fieldName}>
           {field.label}
           {field.required && <span className="text-red-500 ml-1">*</span>}
         </Label>
 
         <Controller
-          name={field.name}
+          name={fieldName}
           control={control}
           render={({ field: controllerField }) => {
             const fieldValue = controllerField.value as string | number | readonly string[] | undefined
@@ -121,7 +122,7 @@ const Wizard: React.FC<WizardProps> = ({
                   <Input
                     {...controllerField}
                     value={fieldValue}
-                    id={field.name}
+                    id={fieldName}
                     type={field.type}
                     placeholder={field.placeholder}
                     className={error ? 'border-red-500' : ''}
@@ -133,34 +134,36 @@ const Wizard: React.FC<WizardProps> = ({
                   <Textarea
                     {...controllerField}
                     value={fieldValue}
-                    id={field.name}
+                    id={fieldName}
                     placeholder={field.placeholder}
                     className={error ? 'border-red-500' : ''}
                   />
                 )
 
               case 'boolean':
+              case 'checkbox': {
+                const { value: _checkboxValue, ...checkboxField } = controllerField
                 return (
                   <div className="flex items-center space-x-2">
                     <input
-                      {...controllerField}
-                      value={String(fieldValue ?? '')}
-                      id={field.name}
+                      {...checkboxField}
+                      id={fieldName}
                       type="checkbox"
                       checked={boolValue || false}
                       className="h-4 w-4"
                     />
-                    <Label htmlFor={field.name} className="text-sm">
+                    <Label htmlFor={fieldName} className="text-sm">
                       {field.label}
                     </Label>
                   </div>
                 )
+              }
 
               case 'select': {
                 const selectField = field as any
                 return (
                   <NativeSelect
-                    id={field.name}
+                    id={fieldName}
                     value={String(controllerField.value ?? '')}
                     onValueChange={controllerField.onChange}
                     options={selectField.options ?? []}
@@ -175,7 +178,7 @@ const Wizard: React.FC<WizardProps> = ({
                   <Input
                     {...controllerField}
                     value={fieldValue}
-                    id={field.name}
+                    id={fieldName}
                     type="date"
                     className={error ? 'border-red-500' : ''}
                   />
@@ -186,7 +189,7 @@ const Wizard: React.FC<WizardProps> = ({
                   <Input
                     {...controllerField}
                     value={fieldValue}
-                    id={field.name}
+                    id={fieldName}
                     type="datetime-local"
                     className={error ? 'border-red-500' : ''}
                   />
@@ -197,7 +200,7 @@ const Wizard: React.FC<WizardProps> = ({
                   <Input
                     {...controllerField}
                     value={fieldValue}
-                    id={field.name}
+                    id={fieldName}
                     placeholder={field.placeholder}
                     className={error ? 'border-red-500' : ''}
                   />

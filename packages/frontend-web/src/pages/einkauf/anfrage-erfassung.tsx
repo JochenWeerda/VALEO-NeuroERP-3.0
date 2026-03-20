@@ -62,6 +62,7 @@ type AnfrageState = {
   anfrageNr: string
   anfrageDat: string
   bediener: string
+  bemerkung: string
   niederlassung: string
   kostenstelle: string
   kommission: string
@@ -192,7 +193,7 @@ export default function AnfrageErfassungPage(): JSX.Element {
 
   const [state, setState] = useState<AnfrageState>({
     id: null, anfrageNr: generateAnfrageNr(), anfrageDat: today(),
-    bediener: getBediener(), niederlassung: '', kostenstelle: '', kommission: '',
+    bediener: getBediener(), bemerkung: '', niederlassung: '', kostenstelle: '', kommission: '',
     geplLieferDatum: today(), ladeTerminAb: today(), ladeDatum: today(),
     erledigt: false, lieferant: null, positionen: [], aktivePositionIndex: null,
   })
@@ -388,8 +389,7 @@ export default function AnfrageErfassungPage(): JSX.Element {
                   onClick={async (e) => {
                     e.preventDefault()
                     try {
-                      const list = await apiClient.get<{ id: string }[]>('/api/v1/einkauf/anfragen')
-                      const items = Array.isArray(list.data) ? list.data : (list.data as any)?.data ?? []
+                      const items = await apiClient.get<{ id: string }[]>('/api/v1/einkauf/anfragen')
                       const idx = anfrageId ? items.findIndex((a: any) => a.id === anfrageId) : -1
                       if (idx + 1 < items.length) {
                         navigate(`/einkauf/anfragen/${items[idx + 1].id}`)
@@ -586,12 +586,12 @@ export default function AnfrageErfassungPage(): JSX.Element {
                       <th className="border px-2 py-1 text-right">Gesamt</th>
                     </tr></thead>
                     <tbody>{state.positionen.map((p) => (
-                      <tr key={p.id}>
+                      <tr key={p.posNr}>
                         <td className="border px-2 py-1">{p.posNr}</td>
-                        <td className="border px-2 py-1">{p.artikelBezeichnung || p.artikelNr}</td>
-                        <td className="border px-2 py-1 text-right">{p.menge} {p.einheit}</td>
+                        <td className="border px-2 py-1">{p.bezeichnung || p.artikelNr}</td>
+                        <td className="border px-2 py-1 text-right">{p.bestellMenge} {p.einheit}</td>
                         <td className="border px-2 py-1 text-right">{p.einhPreis.toFixed(2)} €</td>
-                        <td className="border px-2 py-1 text-right">{p.betrag.toFixed(2)} €</td>
+                        <td className="border px-2 py-1 text-right">{p.bestellWert.toFixed(2)} €</td>
                       </tr>
                     ))}</tbody>
                   </table>
@@ -760,13 +760,13 @@ export default function AnfrageErfassungPage(): JSX.Element {
                 const payload = {
                   lieferant_id: state.lieferant.id,
                   lieferant_name: state.lieferant.name,
-                  positionen: state.positionen.map((p) => ({ artikel_nr: p.artikelNr, bezeichnung: p.artikelBezeichnung, menge: p.menge, einheit: p.einheit })),
-                  anfragedatum: state.anfrageDate,
+                  positionen: state.positionen.map((p) => ({ artikel_nr: p.artikelNr, bezeichnung: p.bezeichnung, menge: p.bestellMenge, einheit: p.einheit })),
+                  anfragedatum: state.anfrageDat,
                 }
                 const resp = state.id
                   ? await apiClient.patch(`/api/v1/einkauf/anfragen/${state.id}`, payload)
                   : await apiClient.post('/api/v1/einkauf/anfragen', payload)
-                push(`Lieferanten-Angebot gesendet (${(resp.data as any)?.anfrageNr ?? 'OK'})`)
+                push(`Lieferanten-Angebot gesendet (${(resp as any)?.anfrageNr ?? 'OK'})`)
               } catch (e: any) { push(`Fehler: ${e.response?.data?.detail ?? e.message}`) }
             }}>
             <Send className="h-4 w-4" />Lieferanten-Angebot
@@ -825,3 +825,5 @@ export default function AnfrageErfassungPage(): JSX.Element {
     </div>
   )
 }
+
+

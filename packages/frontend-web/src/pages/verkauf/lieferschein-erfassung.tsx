@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
@@ -1021,7 +1022,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
       if (!state.id) { push('Kein Lieferschein geöffnet'); return }
       try {
         await apiClient.patch(`/api/v1/sales/delivery-notes/${state.id}`, { status: 'offen', is_printed: false })
-        dispatch({ type: 'SET_FIELD', field: 'statusGedruckt', value: false })
+        setState((prev) => ({ ...prev, statusGedruckt: false }))
         push('Lieferschein zur Korrektur geöffnet — Änderungen vornehmen und erneut speichern.')
       } catch (e: any) {
         push(`Korrektur fehlgeschlagen: ${e.response?.data?.detail ?? e.message}`)

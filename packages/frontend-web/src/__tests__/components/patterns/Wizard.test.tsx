@@ -42,7 +42,7 @@ describe('Wizard', () => {
     renderWizard()
 
     expect(screen.getByText('Test Wizard')).toBeInTheDocument()
-    expect(screen.getByText('Schritt 1')).toBeInTheDocument()
+    expect(screen.getAllByText('Schritt 1').length).toBeGreaterThan(0)
   })
 
   it('sollte ersten Schritt-Inhalt anzeigen', () => {

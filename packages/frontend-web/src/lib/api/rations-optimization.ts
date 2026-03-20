@@ -3,7 +3,7 @@
  * Proxy zum Rationsoptimierungs-Microservice (GfE-2023, PuLP)
  */
 
-import { apiClient } from '../api-client'
+import { apiClient } from '@/lib/axios'
 
 const BASE = '/api/v1/agrar/rations-optimization'
 
@@ -58,13 +58,13 @@ export interface OptimizationResult {
 }
 
 export async function fetchRationsHealth(): Promise<{ success: boolean; configured?: boolean }> {
-  const { data } = await apiClient.get(`${BASE}/health`)
+  const data = await apiClient.get<{ success: boolean; configured?: boolean }>(`${BASE}/health`)
   return data
 }
 
 export async function fetchFeeds(group?: string): Promise<FeedIngredient[]> {
   const params = group ? { group } : {}
-  const { data } = await apiClient.get(`${BASE}/feeds`, { params })
+  const data = await apiClient.get<FeedIngredient[]>(`${BASE}/feeds`, { params })
   return data
 }
 
@@ -72,7 +72,7 @@ export async function optimizeFromProfile(
   cowProfile: CowProfile,
   feedIds?: string[]
 ): Promise<OptimizationResult> {
-  const { data } = await apiClient.post(`${BASE}/optimize/from-profile`, {
+  const data = await apiClient.post<OptimizationResult>(`${BASE}/optimize/from-profile`, {
     cow_profile: cowProfile,
     feeds: feedIds,
   })
@@ -80,11 +80,11 @@ export async function optimizeFromProfile(
 }
 
 export async function optimizeDemo(): Promise<OptimizationResult> {
-  const { data } = await apiClient.post(`${BASE}/optimize/demo`)
+  const data = await apiClient.post<OptimizationResult>(`${BASE}/optimize/demo`)
   return data
 }
 
 export async function calculateRequirements(cowProfile: CowProfile): Promise<Record<string, number>> {
-  const { data } = await apiClient.post(`${BASE}/requirements/calculate`, cowProfile)
+  const data = await apiClient.post<Record<string, number>>(`${BASE}/requirements/calculate`, cowProfile)
   return data
 }

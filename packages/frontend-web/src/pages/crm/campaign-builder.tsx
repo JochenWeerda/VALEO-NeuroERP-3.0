@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import { NativeSelect } from '@/components/ui/native-select'
 import { ArrowLeft, ArrowRight, Check, Mail, Users, Calendar, BarChart3, Settings } from 'lucide-react'
 import { createApiClient } from '@/components/mask-builder/utils/api'
+import { formatCurrency } from '@/components/mask-builder/utils/formatting'
 import { toast } from '@/hooks/use-toast'
 import { useTenant } from '@/hooks/useTenant'
 
@@ -38,6 +39,17 @@ interface CampaignData {
   }>
 }
 
+interface CampaignTemplateSummary {
+  id: string
+  name: string
+}
+
+interface CampaignSegmentSummary {
+  id: string
+  name: string
+  member_count?: number
+}
+
 export default function CampaignBuilderPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -61,8 +73,8 @@ export default function CampaignBuilderPage(): JSX.Element {
       { name: 'B', subject: '', percentage: 50 }
     ]
   })
-  const [templates, setTemplates] = useState<any[]>([])
-  const [segments, setSegments] = useState<any[]>([])
+  const [templates, setTemplates] = useState<CampaignTemplateSummary[]>([])
+  const [segments, setSegments] = useState<CampaignSegmentSummary[]>([])
 
   const steps: Array<{ key: CampaignBuilderStep; label: string; icon: any }> = [
     { key: 'type', label: t('crud.campaigns.builder.steps.type'), icon: Settings },
@@ -82,26 +94,22 @@ export default function CampaignBuilderPage(): JSX.Element {
     const loadData = async () => {
       try {
         const [templatesRes, segmentsRes] = await Promise.all([
-          apiClient.get('/campaigns/templates', {
+          apiClient.get<CampaignTemplateSummary[]>('/campaigns/templates', {
             params: { tenant_id: tenantId }
           }),
-          apiClient.get('/segments', {
+          apiClient.get<CampaignSegmentSummary[]>('/segments', {
             params: { tenant_id: tenantId }
           })
         ])
-        
-        if (templatesRes.success || Array.isArray(templatesRes)) {
-          setTemplates(Array.isArray(templatesRes) ? templatesRes : (templatesRes.data || []))
-        }
-        if (segmentsRes.success || Array.isArray(segmentsRes)) {
-          setSegments(Array.isArray(segmentsRes) ? segmentsRes : (segmentsRes.data || []))
-        }
+
+        setTemplates(templatesRes.data ?? [])
+        setSegments(segmentsRes.data ?? [])
       } catch (error) {
         console.error('Fehler beim Laden der Daten:', error)
       }
     }
     loadData()
-  })
+  }, [tenantId])
 
   const updateField = (field: keyof CampaignData, value: any) => {
     setCampaignData(prev => ({ ...prev, [field]: value }))
@@ -166,10 +174,10 @@ export default function CampaignBuilderPage(): JSX.Element {
         budget: campaignData.budget || null,
       }
 
-      const response = await apiClient.post('/campaigns', payload)
+      const response = await apiClient.post<{ id?: string; success?: boolean; data?: { id?: string } }>('/campaigns', payload)
       
       if (response.success || response.id) {
-        const campaignId = response.success ? response.data?.id || response.data?.id : response.id
+        const campaignId = response.success ? response.data?.id || response.id : response.id
         
         toast({
           title: t('crud.messages.createSuccess', { entityType: t('crud.entities.campaign') }),

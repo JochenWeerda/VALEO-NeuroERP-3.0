@@ -34,6 +34,11 @@ function fmtVal(n: number, suffix: 'S' | 'H' = 'S'): string {
 }
 
 type GridRow = { position: string; description: string; isTotal: boolean; months: number[]; total: number }
+type MonatswerteExportRow = {
+  position: string
+  description: string
+  total: number
+} & Record<`m${number}`, number>
 
 export default function MonatswertePage(): JSX.Element {
   const { toast } = useToast()
@@ -99,23 +104,23 @@ export default function MonatswertePage(): JSX.Element {
   }
 
   const handleExcel = (): void => {
-    const cols = [
-      { key: 'position' as const, label: 'Pos.' },
-      { key: 'description' as const, label: 'BWA Text' },
-      ...displayedMonths.map((m, i) => ({ key: `m${i}` as const, label: m })),
-      { key: 'total' as const, label: 'Gesamt' },
+    const cols: Array<{ key: keyof MonatswerteExportRow; label: string }> = [
+      { key: 'position', label: 'Pos.' },
+      { key: 'description', label: 'BWA Text' },
+      ...displayedMonths.map((m, i) => ({ key: `m${i}` as keyof MonatswerteExportRow, label: m })),
+      { key: 'total', label: 'Gesamt' },
     ]
-    const rows = gridRows.map((r) => ({
+    const rows: MonatswerteExportRow[] = gridRows.map((r) => ({
       position: r.position,
       description: r.description,
-      ...Object.fromEntries(displayedMonths.map((_, i) => [`m${i}`, r.months[i]])),
+      ...(Object.fromEntries(displayedMonths.map((_, i) => [`m${i}`, r.months[i]])) as Record<`m${number}`, number>),
       total: r.total,
     }))
     try {
       exportToCSV(
         rows,
         `Monatswerte_${wirtschaftsjahr}_${listeNr.replace(/\s+/g, '-')}.csv`,
-        cols.map((c) => ({ key: c.key, label: c.label }))
+        cols
       )
       toast({ title: 'Export', description: 'Excel-Export gestartet.' })
     } catch (e) {

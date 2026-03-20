@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { z } from 'zod'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData } from '@/components/mask-builder/hooks'
 
@@ -26,6 +27,13 @@ const createSegmentSchema = (t: any) => z.object({
   status: z.string().optional(),
   description: z.string().optional(),
 })
+
+function validateSegmentForm(formData: unknown, t: any): { valid: boolean; errors: string[] } {
+  const result = createSegmentSchema(t).safeParse(formData)
+  return result.success
+    ? { valid: true, errors: [] }
+    : { valid: false, errors: result.error.issues.map((issue) => issue.message) }
+}
 
 // Konfiguration für Segment ObjectPage
 const createSegmentConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
@@ -296,7 +304,7 @@ export default function SegmentDetailPage(): JSX.Element {
   const segmentConfig = createSegmentConfig(t, entityTypeLabel)
   const isNew = !id || id === 'new' || id === 'neu'
 
-  const { data, saveData, isLoading: dataLoading } = useMaskData({
+  const { data, saveData, isLoading: dataLoading } = useMaskData<Record<string, any>>({
     apiUrl: segmentConfig.api.baseUrl,
     id: id || undefined
   })
