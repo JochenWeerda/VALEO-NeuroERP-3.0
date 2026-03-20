@@ -14,6 +14,8 @@ import {
   Link2,
   Shield,
 } from 'lucide-react'
+import { AgentUxPanel, type AgentUxSource } from '@/components/agent/AgentUxPanel'
+import { IdempotencyMonitoringPanel, type IdempotencyOverview } from '@/components/agent/IdempotencyMonitoringPanel'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -41,6 +43,16 @@ type AgentManifest = {
   notes: string[]
 }
 
+type CommandCatalogItem = {
+  command_id: string
+  aggregate: string
+  intent: string
+  mutating: boolean
+  idempotent: boolean
+  ui_surfaces: string[]
+  backend_endpoints: string[]
+}
+
 const API_BASE = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || ''
 const BACKEND_ORIGIN = API_BASE || (typeof window !== 'undefined' ? window.location.origin : '')
 
@@ -56,6 +68,14 @@ export default function AgentenIntegrationPage(): JSX.Element {
     queryKey: ['admin', 'agent-manifest'],
     queryFn: async () => (await apiClient.get<AgentManifest>('/api/v1/admin/agent-manifest')).data,
   })
+  const commandCatalogQuery = useQuery({
+    queryKey: ['agent', 'command-catalog'],
+    queryFn: async () => (await apiClient.get<CommandCatalogItem[]>('/api/v1/commands/catalog')).data,
+  })
+  const idempotencyOverviewQuery = useQuery({
+    queryKey: ['agent', 'idempotency-overview'],
+    queryFn: async () => (await apiClient.get<IdempotencyOverview>('/api/v1/process/actions/idempotency/overview')).data,
+  })
 
   const downloadManifest = (): void => {
     if (!manifestQuery.data) {
@@ -70,12 +90,13 @@ export default function AgentenIntegrationPage(): JSX.Element {
     URL.revokeObjectURL(url)
   }
 
-  if (manifestQuery.isLoading) {
-    return <LoadingState message="Agenten-Manifest wird geladen..." />
+  if (manifestQuery.isLoading || commandCatalogQuery.isLoading || idempotencyOverviewQuery.isLoading) {
+    return <LoadingState message="Agenten- und Idempotenzdaten werden geladen..." />
   }
 
-  if (manifestQuery.isError || !manifestQuery.data) {
-    return <ErrorState error={manifestQuery.error as Error} onRetry={() => void manifestQuery.refetch()} />
+  const firstError = manifestQuery.error ?? commandCatalogQuery.error ?? idempotencyOverviewQuery.error
+  if (manifestQuery.isError || commandCatalogQuery.isError || idempotencyOverviewQuery.isError || !manifestQuery.data) {
+    return <ErrorState error={firstError as Error} onRetry={() => void manifestQuery.refetch()} />
   }
 
   const manifest = manifestQuery.data
@@ -83,10 +104,43 @@ export default function AgentenIntegrationPage(): JSX.Element {
   const swaggerLink = manifest.links.find((link) => link.rel === 'swagger')
   const redocLink = manifest.links.find((link) => link.rel === 'redoc')
   const docsLink = manifest.links.find((link) => link.rel === 'agent-docs')
+  const commandCatalog = commandCatalogQuery.data ?? []
+  const idempotencyOverview = idempotencyOverviewQuery.data
   const sampleTenant =
     window.localStorage.getItem('tenant_id') ||
     window.sessionStorage.getItem('tenant_id') ||
     '<tenant-uuid>'
+
+  const commandSources: AgentUxSource[] = [
+    {
+      label: 'Agent Manifest',
+      href: absoluteUrl('/api/v1/admin/agent-manifest'),
+      description: 'Oeffentlicher Einstiegspunkt fuer externe Agenten, Tools und Installationspfade.',
+    },
+    {
+      label: 'OpenAPI / MCP',
+      href: absoluteUrl(openapiLink?.href ?? '/openapi.json'),
+      description: 'Maschinenlesbare API- und Integrationssicht fuer Codegen und Agenten.',
+    },
+    {
+      label: 'Command Catalog',
+      href: absoluteUrl('/api/v1/commands/catalog'),
+      description: `${commandCatalog.length} Prozess-Commands, davon ${commandCatalog.filter((item) => item.idempotent).length} idempotent.`,
+    },
+    {
+      label: 'Idempotency Monitoring',
+      href: absoluteUrl('/api/v1/process/actions/idempotency/overview'),
+      description: 'Monitoring-Read-Model fuer Retry-Sicherheit, Store-Footprint und Replay-Nachweis.',
+    },
+  ]
+
+  const confidenceFromOverview = idempotencyOverview?.confidence_score ?? 0
+  const confidenceFromCatalog = commandCatalog.length > 0
+    ? Math.round((commandCatalog.filter((item) => item.idempotent).length / commandCatalog.length) * 100)
+    : 0
+  const confidenceScore = idempotencyOverview
+    ? Math.round((confidenceFromOverview + confidenceFromCatalog) / 2)
+    : confidenceFromCatalog
 
   return (
     <div className="space-y-6 p-6">
@@ -155,6 +209,26 @@ export default function AgentenIntegrationPage(): JSX.Element {
           </CardContent>
         </Card>
       </div>
+
+      {idempotencyOverview ? (
+        <div className="grid gap-4 xl:grid-cols-[1.4fr_0.9fr]">
+          <AgentUxPanel
+            title="Agent UX Panel"
+            summary="Confidence, Quellen und naechste Aktion fuer agentenfaehige Arbeit im Prozesskern."
+            confidence={confidenceScore}
+            confidenceLabel="Agentic Readiness"
+            sources={commandSources}
+            action={{
+              label: 'Idempotenz-Monitoring öffnen',
+              href: '#idempotency-monitoring',
+              description: 'Pruefe Replay-Sicherheit, Store-Footprint und Command-Abdeckung fuer sichere Retries.',
+            }}
+          />
+          <div id="idempotency-monitoring">
+            <IdempotencyMonitoringPanel overview={idempotencyOverview} />
+          </div>
+        </div>
+      ) : null}
 
       <Card>
         <CardHeader>

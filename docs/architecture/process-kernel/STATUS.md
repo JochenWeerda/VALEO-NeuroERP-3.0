@@ -35,13 +35,13 @@ Diese Statusdatei verdichtet den aktuellen Gesamtstand, ohne die Detailnachweise
 
 ## Gesamtstatus
 
-- Stand: `2026-03-19`
-- Status: `Waves 1 bis 78 abgeschlossen`
-- Gesamtsuite: `5888 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed` (Stand nach Wave 78)
+- Stand: `2026-03-20`
+- Status: `Waves 1 bis 84 abgeschlossen`
+- Gesamtsuite: `6117 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed` (Stand nach Wave 84)
 - Letzte abgeschlossene Waves:
-  - `Wave 76`: Gap 024 — Touch-optimierte Feldworkflows: TouchFieldLayout + Einlagerung + LKW (37 Tests)
-  - `Wave 77`: Gap 023 — Keyboard-first Kernmasken: useKeyboardShortcuts + ObjectPage + ShortcutBar (34 Tests)
-  - `Wave 78`: Gap 043 — EDI/API Hub: DigitalExchangeCoverage KPI + PartnerApiKey + Dispatch-Queue + Monitor (46 Tests)
+  - `Wave 82`: Gap 032 — Controlling 500er eliminieren: KpiSafeValue.from_raw() + safe_kpi/timeseries_response() (33 Tests)
+  - `Wave 83`: Gap 033 — Dashboard Read-Models: DashboardSnapshot + Store + p95 < 250ms KPI (30 Tests)
+  - `Wave 84`: Gap 021 — Einheitliches Designsystem: DesignSystemRegistry + Compliance-Check + 20+ Komponenten (43 Tests)
 
 ## Wave-Uebersicht
 
@@ -121,6 +121,12 @@ Diese Statusdatei verdichtet den aktuellen Gesamtstand, ohne die Detailnachweise
 | Wave 76 | abgeschlossen | 37 | Gap 024 Touch-Feldworkflows: TouchFieldLayout + Einlagerung + LKW | `wave-76/STATUS.md` |
 | Wave 77 | abgeschlossen | 34 | Gap 023 Keyboard-first: useKeyboardShortcuts + ObjectPage + ShortcutBar | `wave-77/STATUS.md` |
 | Wave 78 | abgeschlossen | 46 | Gap 043 EDI/API Hub: DigitalExchangeCoverage KPI + PartnerApiKey + Dispatch-Queue + Monitor | `wave-78/STATUS.md` |
+| Wave 79 | abgeschlossen | 52 | Gap 026 Inline-Validierung: GLN/IBAN/Menge/Preis + FormValidationContract + Frontend-Hook | `wave-79/STATUS.md` |
+| Wave 80 | abgeschlossen | 40 | Gap 028 Error UX: classify_http_error() + RecoveryActions + ErrorPanel + ErrorUxRegistry | `wave-80/STATUS.md` |
+| Wave 81 | abgeschlossen | 31 | Gap 019 Policy Explainability: explain_policy_result() + Badge + Cache + 3 Detailgrade | `wave-81/STATUS.md` |
+| Wave 82 | abgeschlossen | 33 | Gap 032 Controlling 500er: KpiSafeValue.from_raw() + safe_kpi/timeseries_response() + Ampel-Kalkulation | `wave-82/STATUS.md` |
+| Wave 83 | abgeschlossen | 30 | Gap 033 Dashboard Read-Models: DashboardSnapshot + Store + stale-while-revalidate + p95 < 250ms KPI | `wave-83/STATUS.md` |
+| Wave 84 | abgeschlossen | 43 | Gap 021 Einheitliches Designsystem: DesignSystemRegistry + Compliance-Check + 20+ Komponenten + 11 Tokens | `wave-84/STATUS.md` |
 
 ## Abgeschlossene Waves 51–67 (Kernmodule)
 
@@ -145,6 +151,50 @@ Diese Statusdatei verdichtet den aktuellen Gesamtstand, ohne die Detailnachweise
 | 67 | Cache, Schema Migration | process_cache_contracts, workflow_schema_migration_contracts |
 
 ## Aktuell relevante Lieferungen
+
+### Wave 83 / Gap 017
+
+- Referenz: `docs/roadmap/status/2026-03-06-top-50-gap-backlog-landhandel.md`
+- Scope:
+  - `app/core/agent_tool_contract_manifest.py`
+  - `app/api/v1/endpoints/agent_tool_contracts.py`
+  - `app/api/v1/api.py`
+- Ergebnis:
+  - Externes Tool-Contract-Manifest fasst den produktiven MCP-Katalog und die OpenAPI-Referenzen in einem stabilen Endpoint zusammen
+  - Externe Agenten koennen Tool-Definitions, OpenAPI-verknuepfte Metadaten und einen MCP-View fuer 20 produktive Tools abrufen
+  - Der Contract ist domain-filterbar und einzeln ueber Tool-Namen adressierbar
+
+### Wave 84 / Gaps 029, 034, 040
+
+- Referenz: `docs/roadmap/status/2026-03-06-top-50-gap-backlog-landhandel.md`
+- Scope:
+  - `app/core/bulk_operations.py`
+  - `app/core/data_quality_rules.py`
+  - `app/core/data_quality_enforcement.py`
+  - `app/api/v1/endpoints/process_kernel_api.py`
+  - `app/api/v1/endpoints/bank_statement_import.py`
+  - `app/api/v1/endpoints/bulk_journal_import.py`
+  - `app/api/v1/endpoints/payment_matching.py`
+  - `packages/frontend-web/src/components/agent/AgentUxPanel.tsx`
+  - `packages/frontend-web/src/components/agent/IdempotencyMonitoringPanel.tsx`
+  - `packages/frontend-web/src/pages/admin/agenten-integration.tsx`
+- Ergebnis:
+  - `POST /api/v1/process/bulk-operations/evaluate` kombiniert Bulk-Validierung, Limits und DQ-Regelsets zu einem agentenfaehigen Batch-Contract.
+  - Journal-, Kontoauszug- und Zahlungsimporte pruefen Dubletten und Pflichtfelder jetzt mit demselben DQ-Kern vor jedem DB-Write.
+  - Das Agent-UX-Panel surfacet Confidence, Quellen und naechste Aktion fuer agentenfaehige Nutzung direkt im Admin-Frontend.
+  - Das Idempotenz-Monitoring ist als produktive UI- und API-Sicht verfuegbar und macht Retry-Sicherheit fuer Kern-Commands sichtbar.
+
+### Wave 85 / Gaps 044, 045
+
+- Referenz: `docs/roadmap/status/2026-03-06-top-50-gap-backlog-landhandel.md`
+- Scope:
+  - `app/core/supply_chain_tracking.py`
+  - `app/core/dms_ocr_contracts.py`
+  - `app/api/v1/endpoints/process_kernel_api.py`
+- Ergebnis:
+  - `POST /api/v1/process/supply-chain/eta/alarm` bewertet geplante Lieferungen gegen Zielankunft und erzeugt standardisierte ETA-/Abweichungsalarme.
+  - `POST /api/v1/process/dms/extract` klassifiziert Dokumente, extrahiert strukturierte Belegfelder und baut einen Kernfluss-Contract fuer Finance-, Docflow- und Lagerpfade.
+  - ETA-Alarmierung und OCR-Extraktion sind damit als agenten- und API-faehige Kernflows statt als isolierte Hilfsfunktionen verfuegbar.
 
 ### Wave 21
 
@@ -208,6 +258,28 @@ Diese Statusdatei verdichtet den aktuellen Gesamtstand, ohne die Detailnachweise
   - Produktive Backend-Command- sowie Policy-/Approval-Contracts speisen ueber `ui-density-manifest` das Mindestniveau fuer die UI-Dichte
   - Toolbar, Listen-/Detail-Pattern, Wizard sowie AP-, Closing-, USTVA-, Zahlungslauf-, Lastschrift-, Settlement- und kompakte Listen-/Badge-Explainability nutzen denselben Dichte-Contract
   - Sichtbare Informationsmenge wird konsistent nach Rolle und Prozesskontext reduziert oder erweitert statt pro Seite separat
+
+### Blockchain- und Compliance-Anchor-Layer
+
+- Scope:
+  - `app/core/blockchain_anchor_contracts.py`
+  - `app/core/blockchain_anchor_runtime.py`
+  - `app/models/blockchain_anchors.py`
+  - `app/repositories/blockchain_anchor_repository.py`
+  - `app/api/v1/endpoints/blockchain_runtime.py`
+  - `app/api/v1/endpoints/channel_work_surfaces.py`
+  - `app/api/v1/endpoints/process_kernel_api.py`
+  - `app/api/v1/endpoints/journal_entries.py`
+  - `app/api/v1/endpoints/gobd_archiv.py`
+- Ergebnis:
+  - Permissioned Enterprise-Blockchain-Anchors sind als eigener Laufzeit- und Persistenzbaustein im Process-Kernel verankert.
+  - Fachliche Wahrheit bleibt off-chain in Postgres; Blockchain wird bewusst als tamper-evidenter Anchor-Layer statt als transaktionales ERP-System-of-Record genutzt.
+  - Oracle-/Fabric- und SAP-HANA-Adapterprofile sind als kanonische Integrationsprofile modelliert.
+  - Channel-Prozessausfuehrungen und Freigabeentscheidungen erzeugen jetzt automatische Audit-Anchors.
+  - Knowledge-Objekte, neue Versionen und uebernommene Improvement-Proposals werden automatisch als Governance-/Wissens-Anchors referenzierbar.
+  - Settlement-Audit-Ketten koennen explizit ueber `POST /api/v1/process/settlement/audit-chain/{settlement_id}/anchor` verankert werden.
+  - Journal-Posting/Reverse sowie GoBD-`document_artifacts` liefern jetzt ebenfalls Blockchain-Anchor-Referenzen zurueck.
+  - NeuroASSIST-basierte Knowledge-Proposals tragen beim Erzeugen einen expliziten Governance-Anchor.
 
 ### PKP-06 Frontend Explainability
 
@@ -313,6 +385,18 @@ Diese Statusdatei verdichtet den aktuellen Gesamtstand, ohne die Detailnachweise
 
 - `app/core/inline_validation_contracts.py`
 - `app/core/error_guidance_contracts.py`
+
+### Blockchain- / Ledger-Compliance-Schicht
+
+- `app/core/blockchain_anchor_contracts.py`
+- `app/core/blockchain_anchor_runtime.py`
+- `app/models/blockchain_anchors.py`
+- `app/repositories/blockchain_anchor_repository.py`
+- `app/api/v1/endpoints/blockchain_runtime.py`
+
+Ergebnis:
+- Tamper-evidente ERP-Anchors fuer Audit-Ketten, Knowledge-Versionen, Journal-Ereignisse, Channel-Threads und Belegartefakte sind als wiederverwendbare Kernschicht vorhanden.
+- Die Integrationsprofile orientieren sich an permissioned Enterprise-Mustern statt an oeffentlichen Krypto-Chains.
 
 ### Frontend-Power-User-Schicht
 

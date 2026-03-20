@@ -23,6 +23,9 @@ VALEO NeuroERP ist ein Multi-Tenant-ERP-System fuer Agrargenossenschaften und de
 |-----|--------------|
 | `{BASE}/api/v1/openapi.json` | OpenAPI 3.x JSON |
 | `{BASE}/api/v1/admin/agent-manifest` | Maschinenlesbares Agent-Manifest |
+| `{BASE}/api/v1/agent/tool-contracts` | Externes MCP/OpenAPI-Tool-Manifest |
+| `{BASE}/api/v1/agent/tool-contracts/mcp` | MCP ToolDefinition-Liste fuer externe Agenten |
+| `{BASE}/api/v1/agent/tool-contracts/openapi` | OpenAPI-verknuepfte Tool-Contracts |
 | `{BASE}/docs` | Swagger UI |
 | `{BASE}/redoc` | ReDoc |
 

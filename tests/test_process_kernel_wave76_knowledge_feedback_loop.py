@@ -9,6 +9,18 @@ from fastapi.testclient import TestClient
 from app.api.v1.endpoints import process_kernel_api
 
 
+class _DummyAnchor:
+    def __init__(self, subject_ref: str):
+        self.subject_ref = subject_ref
+
+    def as_dict(self):
+        return {
+            "anchor_id": "anchor-1",
+            "subject_ref": self.subject_ref,
+            "network_profile": "ORACLE_FABRIC_PERMISSIONED",
+        }
+
+
 class _DummyRepo:
     def __init__(self, db):
         self.db = db
@@ -131,6 +143,18 @@ def _create_client(monkeypatch) -> TestClient:
     app.dependency_overrides[process_kernel_api.get_db] = lambda: object()
     monkeypatch.setattr("app.repositories.knowledge_repository.KnowledgeRepository", _DummyRepo)
     monkeypatch.setattr("app.agents.get_neuroassist_service", lambda: _DummyNeuroAssistService())
+    monkeypatch.setattr(
+        "app.core.blockchain_anchor_runtime.anchor_knowledge_object",
+        lambda db, knowledge_record, version, proposal_id=None: _DummyAnchor(
+            f"{knowledge_record.knowledge_id}:v{version}"
+        ),
+    )
+    monkeypatch.setattr(
+        "app.core.blockchain_anchor_runtime.anchor_governance_proposal",
+        lambda db, proposal: _DummyAnchor(
+            f"proposal:{proposal['proposal_id'] if isinstance(proposal, dict) else proposal.proposal_id}"
+        ),
+    )
     return TestClient(app)
 
 
@@ -177,6 +201,7 @@ def test_review_improvement_proposal_and_apply(monkeypatch):
     body = response.json()
     assert body["proposal"]["status"] == "UEBERNOMMEN"
     assert body["applied_knowledge_object"]["knowledge_id"] == "KNW-SUP-001"
+    assert body["blockchain_anchor"]["subject_ref"] == "KNW-SUP-001:v2"
 
 
 def test_review_requires_decision(monkeypatch):
@@ -204,3 +229,4 @@ def test_create_improvement_proposal_from_neuroassist_run(monkeypatch):
     assert body["proposal_id"] == "p-created"
     assert body["status"] == "EINGEREICHT"
     assert body["quelle"] == "neuroassist-run-feedback"
+    assert body["blockchain_anchor"]["subject_ref"] == "proposal:p-created"

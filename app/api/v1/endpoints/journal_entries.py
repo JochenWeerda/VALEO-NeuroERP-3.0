@@ -310,6 +310,8 @@ async def post_journal_entry(
     This will update account balances and make the entry permanent.
     """
     try:
+        from app.core.blockchain_anchor_runtime import anchor_journal_entry_event
+
         entry_repo = container.resolve(JournalEntryRepository)
         success = await entry_repo.post_entry(entry_id, tenant_id)
         if not success:
@@ -321,7 +323,16 @@ async def post_journal_entry(
         )
         # Return the updated entry
         entry = await entry_repo.get_by_id(entry_id, tenant_id)
-        return JournalEntry.model_validate(entry)
+        anchor = anchor_journal_entry_event(
+            db,
+            tenant_id=tenant_id,
+            entry_id=entry_id,
+            action="post",
+            payload={"status": "posted", "reference": getattr(entry, "reference", None)},
+        )
+        body = JournalEntry.model_validate(entry).model_dump(mode="json")
+        body["blockchain_anchor"] = anchor.as_dict()
+        return JSONResponse(content=body)
     except HTTPException:
         raise
     except Exception as e:
@@ -342,6 +353,8 @@ async def reverse_journal_entry(
     Create a new journal entry that reverses the original entry.
     """
     try:
+        from app.core.blockchain_anchor_runtime import anchor_journal_entry_event
+
         entry_repo = container.resolve(JournalEntryRepository)
         reversal_entry = await entry_repo.reverse_entry(entry_id, reason, tenant_id)
         if not reversal_entry:
@@ -351,10 +364,18 @@ async def reverse_journal_entry(
             {"reason": reason, "reversal_entry_id": reversal_entry.id},
             request=request,
         )
+        anchor = anchor_journal_entry_event(
+            db,
+            tenant_id=tenant_id,
+            entry_id=entry_id,
+            action="reverse",
+            payload={"reason": reason, "reversal_entry_id": reversal_entry.id},
+        )
         return {
             "message": "Reversal entry created successfully",
             "original_entry_id": entry_id,
-            "reversal_entry_id": reversal_entry.id
+            "reversal_entry_id": reversal_entry.id,
+            "blockchain_anchor": anchor.as_dict(),
         }
     except HTTPException:
         raise

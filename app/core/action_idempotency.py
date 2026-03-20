@@ -7,6 +7,7 @@ In-Memory, contract-first und bewusst ohne DB-Persistenz.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Any
 
 from app.core.action_execution import ActionExecutionResult
 
@@ -68,6 +69,21 @@ class ActionIdempotencyStore:
         self._records_by_key[key] = record
         self._records_by_execution_id[result.execution_id] = record
         return record
+
+    def summary(self) -> dict[str, Any]:
+        records = list(self._records_by_key.values())
+        tenant_ids = {record.tenant_id for record in records}
+        command_names = sorted({record.result.command_name for record in records})
+        aggregate_types = sorted({record.result.aggregate_type for record in records})
+        return {
+            "total_records": len(records),
+            "tenant_count": len(tenant_ids),
+            "execution_count": len(self._records_by_execution_id),
+            "command_count": len(command_names),
+            "aggregate_count": len(aggregate_types),
+            "commands": command_names,
+            "aggregates": aggregate_types,
+        }
 
 
 _STORE = ActionIdempotencyStore()

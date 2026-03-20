@@ -107,6 +107,7 @@ class TestDocumentArtifacts:
         assert data["header_id"] == test_header_id
         assert data["artifact_type"] == "pdf"
         assert len(data["content_hash_sha256"]) == 64
+        assert data["blockchain_anchor"]["subject_ref"] == data["id"]
 
     def test_list_artifacts_by_header_id(self, client: TestClient, test_header_id: str):
         r = client.get(

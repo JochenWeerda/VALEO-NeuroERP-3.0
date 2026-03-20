@@ -26,8 +26,11 @@ def _upload(name: str, content: str) -> UploadFile:
     return UploadFile(filename=name, file=BytesIO(content.encode("utf-8")))
 
 
-def test_bank_statement_csv_rejects_invalid_row_before_db_access():
-    file = _upload("statement.csv", "date,amount,reference\ninvalid-date,100.00,REF-1\n")
+def test_bank_statement_csv_rejects_duplicate_rows_before_db_access():
+    file = _upload(
+        "statement.csv",
+        "date,value_date,amount,reference\n2026-03-15,2026-03-15,100.00,REF-1\n2026-03-15,2026-03-15,100.00,REF-1\n",
+    )
 
     with pytest.raises(HTTPException) as exc:
         asyncio.run(

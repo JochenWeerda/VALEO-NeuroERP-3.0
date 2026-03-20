@@ -119,14 +119,20 @@ def evaluate_feldbuch_massnahme_datensatz(datensatz: dict[str, Any]) -> DQValida
     return validate_datensatz(ruleset, datensatz)
 
 
-def evaluate_bank_statement_import_datensatz(datensatz: dict[str, Any]) -> DQValidationResult:
+def evaluate_bank_statement_import_datensatz(
+    datensatz: dict[str, Any],
+    kontext_datensaetze: list[dict[str, Any]] | None = None,
+) -> DQValidationResult:
     ruleset = get_default_dq_rulesets()["KontoauszugImport"]
-    return validate_datensatz(ruleset, datensatz)
+    return validate_datensatz(ruleset, datensatz, kontext_datensaetze)
 
 
-def evaluate_journal_import_datensatz(datensatz: dict[str, Any]) -> DQValidationResult:
+def evaluate_journal_import_datensatz(
+    datensatz: dict[str, Any],
+    kontext_datensaetze: list[dict[str, Any]] | None = None,
+) -> DQValidationResult:
     ruleset = get_default_dq_rulesets()["JournalImport"]
-    result = validate_datensatz(ruleset, datensatz)
+    result = validate_datensatz(ruleset, datensatz, kontext_datensaetze)
     try:
         debit_amount = float(datensatz.get("debit_amount") or 0)
         credit_amount = float(datensatz.get("credit_amount") or 0)
@@ -148,9 +154,12 @@ def evaluate_journal_import_datensatz(datensatz: dict[str, Any]) -> DQValidation
     return result
 
 
-def evaluate_payment_import_datensatz(datensatz: dict[str, Any]) -> DQValidationResult:
+def evaluate_payment_import_datensatz(
+    datensatz: dict[str, Any],
+    kontext_datensaetze: list[dict[str, Any]] | None = None,
+) -> DQValidationResult:
     ruleset = get_default_dq_rulesets()["Zahlungsimport"]
-    return validate_datensatz(ruleset, datensatz)
+    return validate_datensatz(ruleset, datensatz, kontext_datensaetze)
 
 
 def evaluate_payroll_connector_datensatz(datensatz: dict[str, Any]) -> DQValidationResult:
