@@ -1,4 +1,4 @@
-﻿import { useState, useMemo } from 'react'
+﻿import { useState, useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useVerladungen, type VerladungItem } from '@/lib/api/betrieb'
 import { Badge } from '@/components/ui/badge'
@@ -7,6 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
+import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
+import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
+import { AgentProcessPanel } from '@/components/agent'
 import { AlertTriangle, FileDown, Plus, Search, Truck } from 'lucide-react'
 
 function LoadingSkeleton(): JSX.Element {
@@ -44,8 +47,16 @@ function ErrorState({ error, onRetry }: { error: Error | null; onRetry: () => vo
 
 export default function VerladungenListePage(): JSX.Element {
   const navigate = useNavigate()
+  const searchInputRef = useRef<HTMLInputElement | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const { data: verladungen = [], isLoading, isError, error, refetch } = useVerladungen()
+
+  const shortcuts = buildCoreMaskShortcuts({
+    onNew: () => navigate('/verladung/lkw-beladung'),
+    onSearch: () => searchInputRef.current?.focus(),
+    onRefresh: () => { void refetch() },
+  })
+  useKeyboardShortcuts(shortcuts)
 
   const filteredVerladungen = useMemo(() => {
     if (!searchTerm) return verladungen
@@ -74,16 +85,18 @@ export default function VerladungenListePage(): JSX.Element {
   ]
 
   return (
+    <div className="flex flex-col">
     <div className="space-y-4 p-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Verladungen</h1>
           <p className="text-muted-foreground">LKW-Beladungen</p>
         </div>
-        <Button onClick={() => navigate('/verladung/lkw-beladung')} className="gap-2">
+        <Button onClick={() => navigate('/verladung/lkw-beladung')} className="min-h-touch gap-2 touch-manipulation">
           <Plus className="h-4 w-4" />Neue Beladung
         </Button>
       </div>
+      <AgentProcessPanel domain="lager" />
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
@@ -123,11 +136,13 @@ export default function VerladungenListePage(): JSX.Element {
           <div className="flex gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input 
-                placeholder="Suche..." 
-                value={searchTerm} 
-                onChange={(e) => setSearchTerm(e.target.value)} 
-                className="pl-10" 
+              <Input
+                ref={searchInputRef}
+                aria-label="Suche Verladungen"
+                placeholder="Kennzeichen, Artikel oder Lieferschein suchen"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="min-h-touch pl-10"
               />
             </div>
             <Button variant="outline" className="gap-2">
@@ -141,6 +156,8 @@ export default function VerladungenListePage(): JSX.Element {
           <DataTable data={filteredVerladungen} columns={columns} />
         </CardContent>
       </Card>
+    </div>
+    <KeyboardShortcutBar shortcuts={shortcuts} />
     </div>
   )
 }

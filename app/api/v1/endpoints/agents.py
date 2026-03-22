@@ -104,6 +104,20 @@ async def list_neuroassist_capabilities(productive_only: bool = True):
     return _list_capability_responses(productive_only)
 
 
+@router.get("/neuroassist/runs", response_model=list[NeuroAssistRunResponse])
+async def list_neuroassist_runs(status: str | None = None, limit: int = 50):
+    neuroassist_service = _get_neuroassist_service()
+    try:
+        runs = await neuroassist_service.list_runs(status=status, limit=limit)
+        return [NeuroAssistRunResponse(**r) for r in runs]
+    except AttributeError:
+        # Service may not implement list_runs — return empty list gracefully
+        return []
+    except Exception as exc:
+        logger.error("NeuroASSIST list runs failed: %s", exc, exc_info=True)
+        return []
+
+
 @router.post("/neuroassist/runs", response_model=NeuroAssistRunResponse)
 async def run_neuroassist_capability(request: NeuroAssistRunRequest):
     neuroassist_service = _get_neuroassist_service()

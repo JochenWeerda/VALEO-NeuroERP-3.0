@@ -1,0 +1,107 @@
+name: Lasttest Erntepeak (Gap 037)
+
+on:
+  schedule:
+    # Täglich 04:00 UTC gegen Staging
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+    inputs:
+      scenario:
+        description: 'Lasttest-Szenario'
+        required: true
+        default: 'health-check'
+        type: choice
+        options:
+          - health-check
+          - harvest-peak
+      base_url:
+        description: 'Backend-URL'
+        required: false
+        default: 'https://staging.valeo-erp.de'
+  push:
+    branches:
+      - main
+    paths:
+      - 'app/**'
+      - 'tests/load/**'
+
+jobs:
+  health-check:
+    name: Health-Check (pre-deploy Gate)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.scenario == 'health-check')
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: k6 installieren
+        run: |
+          sudo gpg -k
+          sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg \
+            --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" \
+            | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install k6
+
+      - name: Health-Check ausführen
+        env:
+          BASE_URL: ${{ github.event.inputs.base_url || 'http://localhost:8000' }}
+          API_DEV_TOKEN: ${{ secrets.API_DEV_TOKEN }}
+          TENANT_ID: ${{ secrets.TENANT_ID || 'tenant-staging' }}
+        run: |
+          k6 run \
+            --env BASE_URL=$BASE_URL \
+            --env API_DEV_TOKEN=$API_DEV_TOKEN \
+            --env TENANT_ID=$TENANT_ID \
+            tests/load/health-check.js
+
+  harvest-peak:
+    name: Erntepeak-Lasttest (500 VU)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.scenario == 'harvest-peak')
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: k6 installieren
+        run: |
+          sudo gpg -k
+          sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg \
+            --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" \
+            | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install k6
+
+      - name: Erntepeak-Lasttest ausführen
+        env:
+          BASE_URL: ${{ github.event.inputs.base_url || 'https://staging.valeo-erp.de' }}
+          API_DEV_TOKEN: ${{ secrets.API_DEV_TOKEN }}
+          TENANT_ID: ${{ secrets.TENANT_ID || 'tenant-staging' }}
+        run: |
+          mkdir -p results
+          k6 run \
+            --env BASE_URL=$BASE_URL \
+            --env API_DEV_TOKEN=$API_DEV_TOKEN \
+            --env TENANT_ID=$TENANT_ID \
+            --out json=results/harvest-peak-${{ github.run_id }}.json \
+            tests/load/harvest-peak.js
+
+      - name: Ergebnisse hochladen
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lasttest-ergebnisse-${{ github.run_id }}
+          path: results/
+          retention-days: 30
+
+      - name: Ergebnis-Zusammenfassung
+        if: always()
+        run: |
+          echo "## Lasttest-Ergebnis" >> $GITHUB_STEP_SUMMARY
+          echo "| Metrik | Ziel |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|------|" >> $GITHUB_STEP_SUMMARY
+          echo "| P95 Antwortzeit | < 800ms |" >> $GITHUB_STEP_SUMMARY
+          echo "| Fehlerrate | < 2% |" >> $GITHUB_STEP_SUMMARY
+          echo "| Max. VU | 500 (Erntepeak) / 800 (Spike) |" >> $GITHUB_STEP_SUMMARY
+          echo "| Kernprozesse | Annahme, Qualitätsprüfung, Einlagerung |" >> $GITHUB_STEP_SUMMARY

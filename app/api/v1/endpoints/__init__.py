@@ -81,17 +81,10 @@ from . import einkauf_lieferschein
 from . import admin_monitoring
 from . import admin_core
 from . import data_quality
-from . import benchmark_cockpit
-from . import idempotency_monitoring
 from . import admin_pos
 from . import admin_devices
 from . import admin_mobile
 from . import admin_reporting
-from . import process_mining_api
-from . import process_mining_observation
-from . import workflow_simulation
-from . import workflow_template_marketplace
-from . import terminology
 from . import controlling
 from . import training
 from . import personal

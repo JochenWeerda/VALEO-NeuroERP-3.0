@@ -1,7 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Header
 from typing import Optional
-from ...schemas.feed import FeedIngredient
-from ...schemas.requirement import NutrientRequirements
 from ...schemas.optimization import (
     OptimizationRequest,
     OptimizationOptions,
@@ -12,10 +10,24 @@ from ...domain.models import CowProfile
 from ...services.feed_service import FeedService
 from ...services.requirement_service import RequirementService
 from ...optimization.solver import OptimizationService
-from ...schemas.common import BaseResponse
+from ...utils.tenant_feeds import ensure_forage_feeds_for_lp
 import logging
 
 logger = logging.getLogger(__name__)
+
+
+def _merge_forage_supplement_into_result(result, supplemented: bool, extra_warnings: list[str]):
+    if not supplemented:
+        return result
+    meta = dict(result.metadata or {})
+    meta["forage_supplement_from_default_tenant"] = True
+    meta["supplement_tenant_id"] = "default"
+    return result.model_copy(
+        update={
+            "warnings": list(result.warnings) + extra_warnings,
+            "metadata": meta,
+        }
+    )
 
 router = APIRouter()
 feed_service = FeedService()
@@ -42,14 +54,18 @@ async def optimize_ration(request: OptimizationRequest, tenant_id: str = Depends
     active_feeds = [f for f in request.feeds if f.active]
     if not active_feeds:
         raise HTTPException(status_code=400, detail="No active feeds provided")
-    
+
+    active_feeds, supplemented, extra_warnings = ensure_forage_feeds_for_lp(
+        active_feeds, tenant_id, feed_service
+    )
+
     try:
         result = optimization_service.optimize_ration(
             feeds=active_feeds,
             requirements=request.requirements,
             options=request.options
         )
-        return result
+        return _merge_forage_supplement_into_result(result, supplemented, extra_warnings)
     except Exception as e:
         logger.error(f"Error during optimization: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Optimization failed: {str(e)}")
@@ -57,12 +73,31 @@ async def optimize_ration(request: OptimizationRequest, tenant_id: str = Depends
 @router.post("/optimize/demo", response_model=OptimizationResult)
 async def demo_optimization(tenant_id: str = Depends(get_tenant_id)):
     """
-    Run a demo optimization with sample data
+    Demo-Optimierung mit festem Kuhprofil (22 kg TM).
+
+    - **Standard** (`X-Tenant-Id` weglassen → `default`): die 8 Demo-Futtermittel.
+    - **DLG-Merge** (`X-Tenant-Id: dlg` + `RATIONS_DLG_MERGED_ENABLE=1`): gemergte Futtermittel inkl. Raufutter
+      (Silagen/Heu über Overlay im Merge); **ohne** Raufutter im Korb werden wie bei anderen Mandanten
+      **Grassilage + Maissilage** aus `default` ergänzt (Mindest-Raufutteranteil).
+
+    Siehe `docs/futterwerte_dlg_2025_gfe2023.md`.
     """
     logger.info(f"Running demo optimization for tenant {tenant_id}")
     
     # Get sample feeds for the tenant
     feeds = feed_service.get_all_feeds(active_only=True, tenant_id=tenant_id)
+    if not feeds:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"Keine aktiven Futtermittel für Mandant '{tenant_id}'. "
+                "Für Mandant 'dlg': Umgebungsvariable RATIONS_DLG_MERGED_ENABLE=1 setzen "
+                "und dlg_merged_feeds_lp.csv vorhanden lassen, oder ohne X-Tenant-Id den Demo-Mandanten nutzen."
+            ),
+        )
+    feeds, supplemented, extra_warnings = ensure_forage_feeds_for_lp(
+        feeds, tenant_id, feed_service
+    )
     
     # Create a sample cow profile
     cow_profile = CowProfile(
@@ -81,22 +116,17 @@ async def demo_optimization(tenant_id: str = Depends(get_tenant_id)):
     
     # Create default options
     options = OptimizationOptions()
-    
-    # Create request
-    request = OptimizationRequest(
-        cow_profile=cow_profile,
-        requirements=requirements,
-        feeds=feeds,
-        options=options
-    )
-    
+
     try:
         result = optimization_service.optimize_ration(
             feeds=feeds,
             requirements=requirements,
             options=options
         )
-        return result
+        meta = dict(result.metadata or {})
+        meta["tenant_id"] = tenant_id
+        result = result.model_copy(update={"metadata": meta})
+        return _merge_forage_supplement_into_result(result, supplemented, extra_warnings)
     except Exception as e:
         logger.error(f"Error during demo optimization: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Demo optimization failed: {str(e)}")
@@ -138,7 +168,11 @@ async def optimize_from_cow_profile(
     
     if not selected_feeds:
         raise HTTPException(status_code=400, detail=f"No active feeds available for tenant '{tenant_id}'")
-    
+
+    selected_feeds, supplemented, extra_warnings = ensure_forage_feeds_for_lp(
+        selected_feeds, tenant_id, feed_service
+    )
+
     # Use default options if none provided
     if options is None:
         options = OptimizationOptions()
@@ -149,7 +183,7 @@ async def optimize_from_cow_profile(
             requirements=requirements,
             options=options
         )
-        return result
+        return _merge_forage_supplement_into_result(result, supplemented, extra_warnings)
     except Exception as e:
         logger.error(f"Error during optimization from profile: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Optimization failed: {str(e)}")

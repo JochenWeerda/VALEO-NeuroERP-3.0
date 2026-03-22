@@ -1,14 +1,26 @@
+/**
+ * Auslagerung — Touch-optimierter Kernflow (Gap 024, Wave 92)
+ * TouchCards für Artikel- und Strategieauswahl, Keyboard-Shortcuts für Desktop
+ */
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Wizard } from '@/components/patterns/Wizard'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
+import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
+import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { api } from '@/lib/axios'
 import { useToast } from '@/hooks/use-toast'
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { CheckCircle } from 'lucide-react'
+import { AgentSuggestionBadge, AgentProcessPanel } from '@/components/agent'
+import {
+  TouchSection,
+  TouchTextInput,
+  TouchNumericInput,
+  TouchCard,
+  TouchCardGroup,
+  TouchConfirmCard,
+} from '@/components/touch/TouchFieldLayout'
 
 type AuslagerungData = {
   artikel: string
@@ -17,6 +29,14 @@ type AuslagerungData = {
   chargenId: string
   verwendungszweck: string
 }
+
+const ARTIKEL = ['Weizen', 'Gerste', 'Raps', 'Mais', 'Roggen', 'Hafer', 'Sonnenblumen']
+
+const STRATEGIEN = [
+  { id: 'fifo' as const, label: 'FIFO', description: 'Älteste Charge zuerst', empfohlen: true },
+  { id: 'fefo' as const, label: 'FEFO', description: 'Kürzeste Haltbarkeit zuerst', empfohlen: false },
+  { id: 'manuell' as const, label: 'Manuell', description: 'Chargen-ID selbst wählen', empfohlen: false },
+]
 
 export default function AuslagerungPage(): JSX.Element {
   const navigate = useNavigate()
@@ -28,6 +48,7 @@ export default function AuslagerungPage(): JSX.Element {
     chargenId: '',
     verwendungszweck: '',
   })
+  const [saving, setSaving] = useState(false)
 
   function updateField<K extends keyof AuslagerungData>(key: K, value: AuslagerungData[K]): void {
     if (key === 'strategie' && value === 'fifo') {
@@ -37,100 +58,8 @@ export default function AuslagerungPage(): JSX.Element {
     }
   }
 
-  const steps = [
-    {
-      id: 'artikel',
-      title: 'Artikel',
-      content: (
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="artikel">Artikel *</Label>
-            <Input id="artikel" value={auslagerung.artikel} onChange={(e) => updateField('artikel', e.target.value)} />
-          </div>
-          <div>
-            <Label htmlFor="menge">Menge (t) *</Label>
-            <Input id="menge" type="number" value={auslagerung.menge} onChange={(e) => updateField('menge', Number(e.target.value))} step="0.001" />
-          </div>
-        </div>
-      ),
-    },
-    {
-      id: 'strategie',
-      title: 'Strategie',
-      content: (
-        <div className="space-y-4">
-          <div>
-            <Label>Auslagerungs-Strategie</Label>
-            <div className="mt-2 space-y-2">
-              <label className="flex items-center gap-2 rounded-lg border p-3 cursor-pointer hover:bg-accent">
-                <input
-                  type="radio"
-                  name="strategie"
-                  checked={auslagerung.strategie === 'fifo'}
-                  onChange={() => updateField('strategie', 'fifo')}
-                />
-                <div>
-                  <div className="font-semibold">FIFO (First In, First Out)</div>
-                  <div className="text-sm text-muted-foreground">Älteste Charge zuerst</div>
-                </div>
-                <Badge className="ml-auto">Empfohlen</Badge>
-              </label>
-              <label className="flex items-center gap-2 rounded-lg border p-3 cursor-pointer hover:bg-accent">
-                <input
-                  type="radio"
-                  name="strategie"
-                  checked={auslagerung.strategie === 'fefo'}
-                  onChange={() => updateField('strategie', 'fefo')}
-                />
-                <div>
-                  <div className="font-semibold">FEFO (First Expired, First Out)</div>
-                  <div className="text-sm text-muted-foreground">Kürzeste Haltbarkeit zuerst</div>
-                </div>
-              </label>
-            </div>
-          </div>
-          <div>
-            <Label>Ausgewählte Charge</Label>
-            <div className="mt-2 font-mono font-semibold">{auslagerung.chargenId || '-'}</div>
-          </div>
-        </div>
-      ),
-    },
-    {
-      id: 'bestaetigung',
-      title: 'Bestätigung',
-      content: (
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-center mb-6">
-              <CheckCircle className="h-20 w-20 text-green-600" />
-            </div>
-            <h3 className="text-center text-2xl font-bold mb-6">Auslagerung bereit</h3>
-            <dl className="grid gap-3">
-              <div className="flex justify-between border-b pb-2">
-                <dt>Artikel</dt>
-                <dd className="font-semibold">{auslagerung.artikel}</dd>
-              </div>
-              <div className="flex justify-between border-b pb-2">
-                <dt>Menge</dt>
-                <dd className="font-semibold">{auslagerung.menge} t</dd>
-              </div>
-              <div className="flex justify-between border-b pb-2">
-                <dt>Strategie</dt>
-                <dd><Badge>{auslagerung.strategie.toUpperCase()}</Badge></dd>
-              </div>
-              <div className="flex justify-between">
-                <dt>Charge</dt>
-                <dd className="font-mono">{auslagerung.chargenId}</dd>
-              </div>
-            </dl>
-          </CardContent>
-        </Card>
-      ),
-    },
-  ]
-
-  const handleFinish = async () => {
+  const handleFinish = async (): Promise<void> => {
+    setSaving(true)
     try {
       await api.post('/api/v1/lager/auslagerung', {
         artikel: auslagerung.artikel,
@@ -143,13 +72,134 @@ export default function AuslagerungPage(): JSX.Element {
       navigate('/lager/bestandsuebersicht')
     } catch (e: any) {
       toast({ title: 'Buchung fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+    } finally {
+      setSaving(false)
     }
   }
 
+  const shortcuts = buildCoreMaskShortcuts({
+    onSave: () => { void handleFinish() },
+    onCancel: () => navigate('/lager/bestandsuebersicht'),
+    isSaveDisabled: saving,
+  })
+  useKeyboardShortcuts(shortcuts)
+
+  const strategieLabel = STRATEGIEN.find((s) => s.id === auslagerung.strategie)?.label ?? auslagerung.strategie
+
+  const steps = [
+    {
+      id: 'artikel',
+      title: 'Artikel',
+      content: (
+        <TouchSection title="Artikel & Menge">
+          <TouchCardGroup label="Artikel" required>
+            {ARTIKEL.map((art) => (
+              <TouchCard
+                key={art}
+                selected={auslagerung.artikel === art}
+                onSelect={() => updateField('artikel', art)}
+              >
+                {art}
+              </TouchCard>
+            ))}
+          </TouchCardGroup>
+          <TouchNumericInput
+            label="Menge"
+            value={auslagerung.menge}
+            onChange={(v) => updateField('menge', Number(v))}
+            unit="t"
+            min={0}
+            step={0.001}
+            required
+          />
+          <TouchTextInput
+            label="Verwendungszweck (optional)"
+            value={auslagerung.verwendungszweck}
+            onChange={(v) => updateField('verwendungszweck', v)}
+            placeholder="z.B. Verkauf, Verarbeitung"
+          />
+        </TouchSection>
+      ),
+    },
+    {
+      id: 'strategie',
+      title: 'Strategie',
+      content: (
+        <TouchSection title="Auslagerungs-Strategie">
+          <AgentSuggestionBadge
+            capabilityKey="auslagerung_assistant"
+            parameters={{ artikel: auslagerung.artikel, menge: auslagerung.menge }}
+            renderSuggestion={(s: { strategie?: string; chargenId?: string }) => (
+              <div className="space-y-1 text-xs text-violet-800">
+                {s.strategie && <div><span className="font-medium">Strategie:</span> {s.strategie.toUpperCase()}</div>}
+                {s.chargenId && <div><span className="font-medium">Charge:</span> {s.chargenId}</div>}
+              </div>
+            )}
+            onAccept={(s: { strategie?: string; chargenId?: string }) => {
+              if (s.strategie) updateField('strategie', s.strategie as 'fifo' | 'fefo' | 'manuell')
+              if (s.chargenId) updateField('chargenId', s.chargenId)
+            }}
+          />
+          <TouchCardGroup label="Strategie wählen" required>
+            {STRATEGIEN.map((s) => (
+              <TouchCard
+                key={s.id}
+                selected={auslagerung.strategie === s.id}
+                onSelect={() => updateField('strategie', s.id)}
+                description={s.description}
+              >
+                <span className="flex items-center gap-2">
+                  {s.label}
+                  {s.empfohlen && <Badge className="text-xs">Empfohlen</Badge>}
+                </span>
+              </TouchCard>
+            ))}
+          </TouchCardGroup>
+          {auslagerung.strategie === 'manuell' && (
+            <TouchTextInput
+              label="Chargen-ID"
+              value={auslagerung.chargenId}
+              onChange={(v) => updateField('chargenId', v)}
+              placeholder="z.B. 251011-WEI-001"
+              autoCapitalize="characters"
+              required
+            />
+          )}
+        </TouchSection>
+      ),
+    },
+    {
+      id: 'bestaetigung',
+      title: 'Bestätigung',
+      content: (
+        <div className="space-y-6">
+          <div className="flex flex-col items-center gap-2 py-2">
+            <CheckCircle className="h-16 w-16 text-emerald-500" />
+            <h3 className="text-xl font-bold text-slate-800">Auslagerung prüfen</h3>
+          </div>
+          <TouchConfirmCard
+            title="Zusammenfassung"
+            fields={[
+              { label: 'Artikel', value: auslagerung.artikel || '—', highlight: true },
+              { label: 'Menge', value: `${auslagerung.menge} t`, highlight: true },
+              { label: 'Strategie', value: strategieLabel },
+              ...(auslagerung.chargenId ? [{ label: 'Charge', value: auslagerung.chargenId }] : []),
+              ...(auslagerung.verwendungszweck ? [{ label: 'Verwendung', value: auslagerung.verwendungszweck }] : []),
+            ]}
+          />
+        </div>
+      ),
+    },
+  ]
+
   return (
-    <div className="p-6">
-      <ModuleToolbar backTarget="/lager/bestandsuebersicht" closeTarget="/lager/bestandsuebersicht" title="Auslagerung" />
-      <Wizard title="Auslagerung" steps={steps} onFinish={handleFinish} onCancel={() => navigate('/lager/bestandsuebersicht')} />
+    <div className="flex flex-col">
+      <div className="p-6">
+        <ModuleToolbar backTarget="/lager/bestandsuebersicht" closeTarget="/lager/bestandsuebersicht" title="Auslagerung" />
+        <AgentProcessPanel domain="lager" className="mb-4" />
+        <Wizard title="Auslagerung" steps={steps} onFinish={handleFinish} onCancel={() => navigate('/lager/bestandsuebersicht')} />
+      </div>
+      <KeyboardShortcutBar shortcuts={shortcuts} />
     </div>
   )
 }

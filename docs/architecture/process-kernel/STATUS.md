@@ -31,19 +31,25 @@ Diese Statusdatei verdichtet den aktuellen Gesamtstand, ohne die Detailnachweise
 
 ## Status
 
-`abgeschlossen` - 2026-03-19 - Aggregierte Source-of-Truth fuer den Process-Kernel-Management-Status; operative Detailnachweise liegen in den referenzierten `wave-*/STATUS.md`-Dateien.
+`abgeschlossen` - 2026-03-20 - Aggregierte Source-of-Truth fuer den Process-Kernel-Management-Status; operative Detailnachweise liegen in den referenzierten `wave-*/STATUS.md`-Dateien.
 
 ## Gesamtstatus
 
 - Stand: `2026-03-20`
-- Status: `Waves 1 bis 87 abgeschlossen`
+- Status: `Waves 1 bis 100 abgeschlossen`
 - Gesamtsuite: `5916 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed`
 - Bereinigter Gap-Abgleich gegen spaetere Wave-Nachweise: `docs/roadmap/status/2026-03-20-gap-matrix-bereinigt.md`
 - Letzte abgeschlossene Waves:
-  - `Wave 85`: E2E Prozesskette ohne Medienbruch (Gap 001) -- 28 Tests
-  - `Wave 86`: Versionierte Workflow Engine SemVer (Gap 011) -- 36 Tests
-  - `Wave 87`: Lasttest Erntepeak SLA-Contracts (Gap 037) -- 28 Tests
-  - `Wave 67`: Process Cache Contracts + Workflow Schema Migration
+  - `Wave 100`: Settlement-Abschlussvertrag fuer Gap 004
+  - `Wave 99`: Process Mining, Command Monitor, Policy Explainability, Agent UX, Design Tokens
+  - `Wave 98`: Agent-Rollout Stufen 1-4, Capability-Pages, Keyboard-Rollout, QS
+  - `Wave 97`: Compliance-Domain Keyboard/Agent-Rollout
+  - `Wave 96`: Keyboard-Rollout FrmCoverageMonitor + Skonto-Optimizer
+  - `Wave 95`: Keyboard/Agent-Rollout P1/P2-Listen
+  - `Wave 94`: Keyboard/Agent-Rollout Kontrakte, Disposition, Bestellvorschlag
+  - `Wave 93`: Agentic Workflow UI systemweiter Rollout (Gap 029)
+  - `Wave 92`: Touch/Keyboard-Haertung Logistik-Kernflow (Gap 002, 024)
+  - `Wave 91`: Touch/Keyboard-Haertung Annahme-Kernflow (Gap 002, 021, 023, 024)
 
 ## Wave-Uebersicht
 
@@ -140,6 +146,36 @@ Diese Statusdatei verdichtet den aktuellen Gesamtstand, ohne die Detailnachweise
 | 67 | Cache, Schema Migration | process_cache_contracts, workflow_schema_migration_contracts |
 
 ## Aktuell relevante Lieferungen
+
+### Waves 89 bis 98
+
+- Referenzen:
+  - `wave-89/STATUS.md`
+  - `wave-90/STATUS.md`
+  - `wave-91/STATUS.md`
+  - `wave-92/STATUS.md`
+  - `wave-93/STATUS.md`
+  - `wave-94/STATUS.md`
+  - `wave-95/STATUS.md`
+  - `wave-96/STATUS.md`
+  - `wave-97/STATUS.md`
+  - `wave-98/STATUS.md`
+- Ergebnis:
+  - `Gap 030` ist ueber die zentrale Terminologie-Registry und die Admin-Sicht fuer DE/EN-Fachsprache abgeschlossen.
+  - `Gap 020` ist ueber den internen Workflow-Template-Marketplace mit Preview- und Installationspfad abgeschlossen.
+  - `Gap 002`, `Gap 021`, `Gap 023` und `Gap 024` sind ueber Touch-/Keyboard-Haertung des Annahme-, Rohware-, Waage- und Verladungs-Kernflows abgeschlossen.
+  - `Gap 029` ist ueber `AgentProcessPanel`, `AgentSuggestionBadge`, Supervisor- und Capability-Seiten produktiv abgeschlossen.
+  - Die systemweite Keyboard-/Agent-Rollout-Welle deckt inzwischen Kernmasken, P1/P2-Listen, Compliance-Seiten und neue Finance-/Operations-KI-Seiten ab.
+
+### Waves 99 bis 100
+
+- Referenzen:
+  - `wave-99/STATUS.md`
+  - `wave-100/STATUS.md`
+- Ergebnis:
+  - `Gap 016`, `Gap 018`, `Gap 019`, `Gap 021` und `Gap 029` sind in der aktuellen Frontend-/Observability-Sicht nochmals sichtbar verankert.
+  - `Gap 004` ist jetzt ueber einen expliziten Settlement-Abschlussvertrag fuer `GUTSCHRIFT`, `BELASTUNG` und `KORREKTUR` formal geschlossen.
+  - Credit- und Debit-Memos besitzen einen expliziten Buchungspfad mit `journalRef`; Korrekturvarianten werden ueber den Abschlussvertrag auf `STORNO_UND_NEU` plus vollstaendige Belegverknuepfung geprueft.
 
 ### Wave 21
 
@@ -309,6 +345,70 @@ Diese Statusdatei verdichtet den aktuellen Gesamtstand, ohne die Detailnachweise
 - `app/core/inline_validation_contracts.py`
 - `app/core/error_guidance_contracts.py`
 
+### Wave-81 Policy Explainability
+
+- `app/core/policy_explainability_contracts.py`
+- `packages/frontend-web/src/components/policy/PolicyExplanationBadge.tsx`
+
+### Wave-84 Einheitliches Designsystem
+
+- `app/core/design_system_contracts.py`
+- `packages/frontend-web/src/components/patterns/PageSurface.tsx`
+- `packages/frontend-web/src/components/patterns/OverviewPage.tsx`
+- `packages/frontend-web/src/components/patterns/ObjectPage.tsx`
+- `packages/frontend-web/src/components/patterns/ListReport.tsx`
+- `packages/frontend-web/src/components/patterns/Wizard.tsx`
+
+### Wave-85 E2E Prozesskette ohne Medienbruch
+
+- `app/core/e2e_process_chain_contracts.py`
+
+### Wave-87 Lasttests Erntepeak
+
+- `app/core/load_test_contracts.py`
+- `load-tests/locustfile.py`
+- `load-tests/erntepeak-load-test.js`
+- `load-tests/evaluate_results.py`
+
+### Wave-89 Terminologie / Multilingual
+
+- `app/core/terminology_registry.py`
+- `app/api/v1/endpoints/terminology.py`
+- `packages/frontend-web/src/pages/admin/terminologie.tsx`
+
+### Wave-90 Workflow-Template Marketplace
+
+- `app/core/workflow_template_marketplace.py`
+- `app/api/v1/endpoints/workflow_template_marketplace.py`
+
+### Waves-91 bis 98 Touch, Keyboard und Agentic UI Rollout
+
+- `packages/frontend-web/src/hooks/useTouchDevice.ts`
+- `packages/frontend-web/src/components/touch/TouchFieldLayout.tsx`
+- `packages/frontend-web/src/components/navigation/KeyboardShortcutBar.tsx`
+- `packages/frontend-web/src/components/agent/AgentProcessPanel.tsx`
+- `packages/frontend-web/src/components/agent/AgentSuggestionBadge.tsx`
+- `packages/frontend-web/src/hooks/useAgentSuggestion.ts`
+- `packages/frontend-web/src/lib/agentCapabilities.ts`
+- `packages/frontend-web/src/pages/workflows/supervisor.tsx`
+- `packages/frontend-web/src/pages/finance/skonto-optimizer.tsx`
+- `packages/frontend-web/src/pages/qualitaet/ausnahmen.tsx`
+
+Ergebnis:
+- Der fruehere Restgap-Stand fuer `002`, `021`, `023`, `024` und `029` ist aufgehoben; diese Gaps sind ueber die nachgezogenen Waves formal und technisch geschlossen.
+- Die fruehere Rest-Roadmap ist mit Wave `100` produktfachlich abgeschlossen; siehe `docs/roadmap/status/2026-03-20-restgap-roadmap.md`.
+
+### Wave-100 Settlement-Abschlussvertrag
+
+- `app/core/settlement_completion_contracts.py`
+- `app/api/v1/endpoints/process_kernel_api.py`
+- `app/api/v1/endpoints/credit_debit_memos.py`
+
+Ergebnis:
+- `Gap 004` ist nicht mehr nur ueber Teilpfade aus Wave 19/20/21 indirekt belegt, sondern ueber einen expliziten Abschlussvertrag fuer Settlement-Varianten.
+- Der kanonische Contract bewertet die Vollstaendigkeit ueber Freigabe, Audit-Chain, GoBD, Journal-Entry und Finanzbelegstatus.
+- Gutschrift und Belastung besitzen jetzt einen expliziten Journal-/Fibu-Buchungspfad; Korrekturen verlangen `STORNO_UND_NEU` plus vollstaendige Verknuepfung.
+
 ### Frontend-Power-User-Schicht
 
 - `packages/frontend-web/src/features/ki-usability/context/ActionDispatchContext.tsx`
@@ -474,7 +574,7 @@ npm run type-check
 ## Offene Punkte
 
 - Der globale Roadmap-Status ausserhalb von `docs/architecture/process-kernel/STATUS.md` ist nicht automatisch synchron und muss bei groesseren Wave-Abschluessen separat nachgezogen werden.
-- Die bereinigte Gap-Einordnung fuer den Stand `2026-03-20` liegt in `docs/roadmap/status/2026-03-20-gap-matrix-bereinigt.md`; Backlog, Delivery-Map und Aggregatstatus koennen zeitweise voneinander abweichen.
+- Die bereinigte Gap-Einordnung fuer den Stand `2026-03-20` liegt in `docs/roadmap/status/2026-03-20-gap-matrix-bereinigt.md`; produktfachlich verbleiben derzeit keine offenen Top-50-Restgaps.
 - Neue Frontend- und Integrationsarbeit hat auf den bestehenden Bausteinen aus Wave 9 bis Wave 27 aufzusetzen; keine neuen Parallelpfade fuer Routing, Dispatch, Audit, SLA oder Prozesssurfacing.
 - Bei jeder neuen Lieferung sind Schichtgrenzen aktiv zu verifizieren:
   - kein Import von `app/api/` aus `app/core/`

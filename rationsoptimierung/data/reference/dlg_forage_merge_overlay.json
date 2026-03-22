@@ -1,0 +1,68 @@
+{
+  "comment": "Silagen/Heu ohne Zeile in dlg_2025_kraftfutter_* / lkv_*: Nährstoffprofile wie FeedService-Demo; sidp/Ca/P/Na aus LP-Zeile wenn gesetzt.",
+  "lp_feed_template": {
+    "maissilage": "maissilage",
+    "grassilage_1_schnitt": "grassilage",
+    "grascobs_heissluftheu_1_schnitt": "heu_gras_overlay",
+    "grascobs_heissluftheu_folgeschnitte": "heu_gras_overlay",
+    "wiesen_belueftungsheu_1_schnitt": "heu_gras_overlay",
+    "wiesen_belueftungsheu_folgeschnitte": "heu_gras_overlay"
+  },
+  "templates": {
+    "grassilage": {
+      "group": "forage",
+      "dm_frac": 0.35,
+      "price_eur_kgdm": 0.15,
+      "me_mj_kgdm": 10.5,
+      "sidp_g_kgdm": 180,
+      "andfom_g_kgdm": 450,
+      "starch_g_kgdm": 20,
+      "sugar_g_kgdm": 15,
+      "fat_g_kgdm": 30,
+      "ca_g_kgdm": 6,
+      "p_g_kgdm": 3,
+      "na_g_kgdm": 1,
+      "min_kgdm": 0.0,
+      "max_kgdm": 15.0,
+      "merge_analytic_id": "demo_forage_overlay",
+      "merge_note": "Nährwerte Demo (feed_service); kein DLG-Tabelle-2-/LKV-Ernte-Match."
+    },
+    "maissilage": {
+      "group": "forage",
+      "dm_frac": 0.35,
+      "price_eur_kgdm": 0.12,
+      "me_mj_kgdm": 11.0,
+      "sidp_g_kgdm": 80,
+      "andfom_g_kgdm": 220,
+      "starch_g_kgdm": 350,
+      "sugar_g_kgdm": 20,
+      "fat_g_kgdm": 25,
+      "ca_g_kgdm": 2,
+      "p_g_kgdm": 2,
+      "na_g_kgdm": 1,
+      "min_kgdm": 0.0,
+      "max_kgdm": 10.0,
+      "merge_analytic_id": "demo_forage_overlay",
+      "merge_note": "Nährwerte Demo (feed_service); sidp/Mineralien aus LP (LFL-Median) wenn gesetzt."
+    },
+    "heu_gras_overlay": {
+      "group": "forage",
+      "dm_frac": 0.85,
+      "price_eur_kgdm": 0.18,
+      "me_mj_kgdm": 9.0,
+      "sidp_g_kgdm": 90,
+      "andfom_g_kgdm": 480,
+      "starch_g_kgdm": 10,
+      "sugar_g_kgdm": 120,
+      "fat_g_kgdm": 22,
+      "ca_g_kgdm": 5.5,
+      "p_g_kgdm": 3.0,
+      "na_g_kgdm": 0.5,
+      "min_kgdm": 0.0,
+      "max_kgdm": 12.0,
+      "merge_analytic_id": "demo_forage_overlay",
+      "merge_note": "Heu/Cobs-Platzhalter (Demo); sidp/Mineralien aus LP (LFL-Median) wenn gesetzt."
+    }
+  },
+  "standalone_feed_ids": ["grassilage"]
+}

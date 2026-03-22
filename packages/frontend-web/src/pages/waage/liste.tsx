@@ -1,5 +1,7 @@
-import { useState, useMemo } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
+import { PageSection, PageSurface } from '@/components/patterns/PageSurface'
 import { useWaagen, type Waage } from '@/lib/api/betrieb'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -7,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
+import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { useToast } from '@/hooks/use-toast'
 import { AlertTriangle, FileDown, Plus, Scale, Search } from 'lucide-react'
 
@@ -46,18 +49,28 @@ function ErrorState({ error, onRetry }: { error: Error | null; onRetry: () => vo
 export default function WaageListePage(): JSX.Element {
   const navigate = useNavigate()
   const { toast } = useToast()
+  const searchInputRef = useRef<HTMLInputElement | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const { data: waagen = [], isLoading, isError, error, refetch } = useWaagen()
 
   const filteredWaagen = useMemo(() => {
     if (!searchTerm) return waagen
     const term = searchTerm.toLowerCase()
-    return waagen.filter((w) => 
-      w.standort.toLowerCase().includes(term) || 
-      w.id.toLowerCase().includes(term) ||
-      w.typ.toLowerCase().includes(term)
+    return waagen.filter((w) =>
+      [w.standort, w.id, w.typ]
+        .filter(Boolean)
+        .some((value) => String(value).toLowerCase().includes(term)),
     )
   }, [waagen, searchTerm])
+
+  const shortcuts = buildCoreMaskShortcuts({
+    onNew: () => navigate('/waage/neu'),
+    onSearch: () => searchInputRef.current?.focus(),
+    onRefresh: () => {
+      void refetch()
+    },
+  })
+  useKeyboardShortcuts(shortcuts)
 
   // Error State: Keine Mock-Daten als Fallback!
   if (isError && !isLoading) {
@@ -91,73 +104,84 @@ export default function WaageListePage(): JSX.Element {
   }
 
   return (
-    <div className="space-y-4 p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Waagen</h1>
-          <p className="text-muted-foreground">Waagen-Management</p>
+    <PageSurface data-page-surface="waage-liste" contentClassName="space-y-6">
+      <PageSection
+        description="Bestandsseite rueckwirkend auf den DS-Surface, Keyboard-first und touch-feste Bedienung gezogen."
+      >
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h1 className="text-3xl font-bold">Waagen</h1>
+            <p className="text-muted-foreground">Waagen-Management und Eichfaelligkeit.</p>
+          </div>
+          <Button onClick={() => navigate('/waage/neu')} className="min-h-touch gap-2 touch-manipulation">
+            <Plus className="h-4 w-4" />Neue Waage
+          </Button>
         </div>
-        <Button onClick={() => navigate('/waage/neu')} className="gap-2">
-          <Plus className="h-4 w-4" />Neue Waage
-        </Button>
-      </div>
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Waagen Gesamt</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-2">
-              <Scale className="h-5 w-5 text-blue-600" />
-              <span className="text-2xl font-bold">{filteredWaagen.length}</span>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Aktiv</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <span className="text-2xl font-bold text-green-600">
-              {filteredWaagen.filter((w) => w.status === 'aktiv').length}
-            </span>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Eichung faellig</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <span className="text-2xl font-bold">
-              {filteredWaagen.filter((w) => new Date(w.naechsteEichung) <= new Date()).length}
-            </span>
-          </CardContent>
-        </Card>
-      </div>
-      <Card>
-        <CardHeader><CardTitle>Suche</CardTitle></CardHeader>
-        <CardContent>
-          <div className="flex gap-4">
-            <div className="relative flex-1">
+      </PageSection>
+
+      <PageSection title="Uebersicht" description="Live-Zahlen fuer Waagenbestand, Aktivstatus und fällige Eichungen.">
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">Waagen Gesamt</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-2">
+                <Scale className="h-5 w-5 text-blue-600" />
+                <span className="text-2xl font-bold">{filteredWaagen.length}</span>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">Aktiv</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <span className="text-2xl font-bold text-green-600">
+                {filteredWaagen.filter((w) => w.status === 'aktiv').length}
+              </span>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">Eichung faellig</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <span className="text-2xl font-bold">
+                {filteredWaagen.filter((w) => new Date(w.naechsteEichung) <= new Date()).length}
+              </span>
+            </CardContent>
+          </Card>
+        </div>
+      </PageSection>
+
+      <PageSection title="Suche und Liste" description="Ctrl+F fokussiert die Suche, Ctrl+N legt eine neue Waage an, F5 aktualisiert die Liste.">
+        <div className="space-y-4">
+          <div className="flex flex-wrap gap-4">
+            <div className="relative min-w-[18rem] flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input 
-                placeholder="Suche..." 
-                value={searchTerm} 
-                onChange={(e) => setSearchTerm(e.target.value)} 
-                className="pl-10" 
+              <Input
+                ref={searchInputRef}
+                aria-label="Suche Waagen"
+                placeholder="Standort, Waagen-ID oder Typ suchen"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="min-h-touch pl-10"
               />
             </div>
-            <Button variant="outline" className="gap-2" onClick={handleExport}>
+            <Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={handleExport}>
               <FileDown className="h-4 w-4" />Export
             </Button>
           </div>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardContent className="pt-6">
-          <DataTable data={filteredWaagen} columns={columns} />
-        </CardContent>
-      </Card>
-    </div>
+          <Card>
+            <CardContent className="pt-6">
+              <DataTable data={filteredWaagen} columns={columns} />
+            </CardContent>
+          </Card>
+        </div>
+      </PageSection>
+
+      <KeyboardShortcutBar shortcuts={shortcuts} />
+    </PageSurface>
   )
 }

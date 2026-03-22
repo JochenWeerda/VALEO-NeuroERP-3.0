@@ -6,8 +6,11 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import { Wizard } from '@/components/patterns/Wizard'
+import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
+import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { CheckCircle } from 'lucide-react'
 import { apiClient } from '@/lib/api-client'
+import { AgentSuggestionBadge, AgentProcessPanel } from '@/components/agent'
 import { useToast } from '@/hooks/use-toast'
 import {
   TouchSection,
@@ -73,6 +76,13 @@ export default function EinlagerungPage(): JSX.Element {
     },
   })
 
+  const shortcuts = buildCoreMaskShortcuts({
+    onSave: () => buchungMutation.mutate(),
+    onCancel: () => navigate('/lager/bestandsuebersicht'),
+    isSaveDisabled: buchungMutation.isPending,
+  })
+  useKeyboardShortcuts(shortcuts)
+
   const lagerLabel = LAGERORTE.find((l) => l.id === einlagerung.lagerort)?.label ?? einlagerung.lagerort
 
   const steps = [
@@ -117,6 +127,20 @@ export default function EinlagerungPage(): JSX.Element {
       title: 'Lagerort',
       content: (
         <TouchSection title="Lagerort wählen">
+          <AgentSuggestionBadge
+            capabilityKey="einlagerung_assistant"
+            parameters={{ artikel: einlagerung.artikel, menge: einlagerung.menge }}
+            renderSuggestion={(s: { lagerort?: string; lagerplatz?: string }) => (
+              <div className="space-y-1 text-xs text-violet-800">
+                {s.lagerort && <div><span className="font-medium">Lagerort:</span> {s.lagerort}</div>}
+                {s.lagerplatz && <div><span className="font-medium">Platz:</span> {s.lagerplatz}</div>}
+              </div>
+            )}
+            onAccept={(s: { lagerort?: string; lagerplatz?: string }) => {
+              if (s.lagerort) set('lagerort', s.lagerort)
+              if (s.lagerplatz) set('lagerplatz', s.lagerplatz)
+            }}
+          />
           <TouchCardGroup label="Lagerort" required>
             {LAGERORTE.map((lo) => (
               <TouchCard
@@ -165,13 +189,17 @@ export default function EinlagerungPage(): JSX.Element {
   ]
 
   return (
-    <div className="p-4 sm:p-6">
-      <Wizard
-        title="Einlagerung"
-        steps={steps}
-        onFinish={() => buchungMutation.mutate()}
-        onCancel={() => navigate('/lager/bestandsuebersicht')}
-      />
+    <div className="flex flex-col">
+      <div className="p-4 sm:p-6">
+        <AgentProcessPanel domain="lager" className="mb-4" />
+        <Wizard
+          title="Einlagerung"
+          steps={steps}
+          onFinish={() => buchungMutation.mutate()}
+          onCancel={() => navigate('/lager/bestandsuebersicht')}
+        />
+      </div>
+      <KeyboardShortcutBar shortcuts={shortcuts} />
     </div>
   )
 }

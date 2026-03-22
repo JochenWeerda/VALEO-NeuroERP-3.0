@@ -22,6 +22,15 @@ router = APIRouter(tags=["agrar", "rations-optimization"])
 RATIONS_TIMEOUT = 30.0
 
 
+def _tenant_from_request(request: Request, x_tenant_id: Optional[str]) -> Optional[str]:
+    """Client-Tenant an den Microservice weiterreichen (Header-Schreibweisen abdecken)."""
+    if x_tenant_id:
+        return x_tenant_id
+    return request.headers.get("x-tenant-id") or request.headers.get("X-Tenant-Id") or request.headers.get(
+        "X-Tenant-ID"
+    )
+
+
 def get_rations_base_url() -> Optional[str]:
     """Rationsoptimierung-URL aus Config."""
     return getattr(settings, "RATIONS_OPTIMIZATION_URL", None) or None
@@ -106,14 +115,18 @@ async def get_feeds(
 ):
     """Futtermittel abrufen."""
     params = dict(request.query_params)
-    tenant_id = x_tenant_id or request.headers.get("x-tenant-id")
+    tenant_id = _tenant_from_request(request, x_tenant_id)
     return await _proxy_request("GET", "/api/v1/feeds", tenant_id=tenant_id, params=params)
 
 
 @router.get("/feeds/{feed_id}")
-async def get_feed(feed_id: str, x_tenant_id: Optional[str] = Header(None, alias="X-Tenant-Id")):
+async def get_feed(
+    feed_id: str,
+    request: Request,
+    x_tenant_id: Optional[str] = Header(None, alias="X-Tenant-Id"),
+):
     """Einzelnes Futtermittel abrufen."""
-    tenant_id = x_tenant_id
+    tenant_id = _tenant_from_request(request, x_tenant_id)
     return await _proxy_request("GET", f"/api/v1/feeds/{feed_id}", tenant_id=tenant_id)
 
 
@@ -124,8 +137,9 @@ async def validate_feeds(
 ):
     """Futtermittel validieren."""
     body = await request.json()
+    tenant_id = _tenant_from_request(request, x_tenant_id)
     return await _proxy_request(
-        "POST", "/api/v1/feeds/validate", tenant_id=x_tenant_id, json_body=body
+        "POST", "/api/v1/feeds/validate", tenant_id=tenant_id, json_body=body
     )
 
 
@@ -136,21 +150,24 @@ async def calculate_requirements(
 ):
     """Nährstoffbedarf aus Kuhprofil berechnen."""
     body = await request.json()
+    tenant_id = _tenant_from_request(request, x_tenant_id)
     return await _proxy_request(
-        "POST", "/api/v1/requirements/calculate", tenant_id=x_tenant_id, json_body=body
+        "POST", "/api/v1/requirements/calculate", tenant_id=tenant_id, json_body=body
     )
 
 
 @router.post("/requirements/maintenance")
 async def maintenance_requirements(
+    request: Request,
     body_weight_kg: float,
     x_tenant_id: Optional[str] = Header(None, alias="X-Tenant-Id"),
 ):
     """Erhaltungsbedarf berechnen."""
+    tenant_id = _tenant_from_request(request, x_tenant_id)
     return await _proxy_request(
         "POST",
         "/api/v1/requirements/maintenance",
-        tenant_id=x_tenant_id,
+        tenant_id=tenant_id,
         params={"body_weight_kg": body_weight_kg},
     )
 
@@ -159,16 +176,21 @@ async def maintenance_requirements(
 async def optimize(request: Request, x_tenant_id: Optional[str] = Header(None, alias="X-Tenant-Id")):
     """Ration optimieren (volle Anfrage)."""
     body = await request.json()
+    tenant_id = _tenant_from_request(request, x_tenant_id)
     return await _proxy_request(
-        "POST", "/api/v1/optimize", tenant_id=x_tenant_id, json_body=body
+        "POST", "/api/v1/optimize", tenant_id=tenant_id, json_body=body
     )
 
 
 @router.post("/optimize/demo")
-async def optimize_demo(x_tenant_id: Optional[str] = Header(None, alias="X-Tenant-Id")):
+async def optimize_demo(
+    request: Request,
+    x_tenant_id: Optional[str] = Header(None, alias="X-Tenant-Id"),
+):
     """Demo-Optimierung mit Beispieldaten."""
+    tenant_id = _tenant_from_request(request, x_tenant_id)
     return await _proxy_request(
-        "POST", "/api/v1/optimize/demo", tenant_id=x_tenant_id
+        "POST", "/api/v1/optimize/demo", tenant_id=tenant_id
     )
 
 
@@ -179,6 +201,7 @@ async def optimize_from_profile(
 ):
     """Ration aus Kuhprofil optimieren."""
     body = await request.json()
+    tenant_id = _tenant_from_request(request, x_tenant_id)
     return await _proxy_request(
-        "POST", "/api/v1/optimize/from-profile", tenant_id=x_tenant_id, json_body=body
+        "POST", "/api/v1/optimize/from-profile", tenant_id=tenant_id, json_body=body
     )

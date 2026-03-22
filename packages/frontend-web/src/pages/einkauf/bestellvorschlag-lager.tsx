@@ -3,7 +3,7 @@
  * 1:1 Nachbau der zvoove BESTELL-VORSCHLÄGE-Maske (Lager-Variante)
  */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -13,6 +13,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useToast } from '@/components/ui/toast-provider'
 import { apiClient } from '@/lib/axios'
 import { MoreHorizontal, RefreshCw, Plus, Trash2, Calculator } from 'lucide-react'
+import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
+import { AgentProcessPanel, AgentSuggestionBadge } from '@/components/agent'
 
 type ArtikelZeile = {
   id: string
@@ -99,6 +101,14 @@ export default function BestellvorschlagLagerPage(): JSX.Element {
   const [bestellWert, setBestellWert] = useState('')
 
   const [loading, setLoading] = useState(false)
+  const filterRef = useRef<HTMLInputElement | null>(null)
+
+  const shortcuts = buildCoreMaskShortcuts({
+    onRefresh: () => { void loadData() },
+    onSearch: () => filterRef.current?.focus(),
+    onCancel: () => navigate('/einkauf'),
+  })
+  useKeyboardShortcuts(shortcuts)
 
   const loadData = async (): Promise<void> => {
     setLoading(true)
@@ -247,6 +257,7 @@ export default function BestellvorschlagLagerPage(): JSX.Element {
       </div>
 
       <div className="flex-1 overflow-auto p-3 space-y-3">
+        <AgentProcessPanel domain="einkauf" />
         {/* Filter-Bereich */}
         <Card className="p-3">
           <div className="flex flex-wrap gap-4 items-end">
@@ -268,7 +279,7 @@ export default function BestellvorschlagLagerPage(): JSX.Element {
             </div>
             <div className="flex items-center gap-2">
               <Label className="w-24 text-sm shrink-0">Artikel-Nr.:</Label>
-              <Input value={filterArtikelNr} onChange={(e) => setFilterArtikelNr(e.target.value)}
+              <Input ref={filterRef} value={filterArtikelNr} onChange={(e) => setFilterArtikelNr(e.target.value)}
                 className="w-28 h-8" />
               <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                 <MoreHorizontal className="h-4 w-4" />
@@ -429,6 +440,26 @@ export default function BestellvorschlagLagerPage(): JSX.Element {
             </Table>
           </Card>
         </div>
+
+        {/* Agent-Vorschlag: Bestellvorschlag-Assistent */}
+        {selectedArtikel && (
+          <AgentSuggestionBadge<{ lieferant?: string; menge?: number }>
+            capabilityKey="bestellvorschlag_assistant"
+            parameters={{
+              artikel_id: selectedArtikel,
+              artikel_nr: artikel.find((a) => a.id === selectedArtikel)?.artikelNr,
+              bezeichnung: artikel.find((a) => a.id === selectedArtikel)?.bezeichnung,
+            }}
+            label="Bestellvorschlag analysieren"
+            renderSuggestion={(s) => (
+              <span>Lieferant: <strong>{s.lieferant ?? '—'}</strong> / Menge: <strong>{s.menge ?? '—'}</strong></span>
+            )}
+            onAccept={(s) => {
+              if (s.lieferant) setLieferantText(s.lieferant)
+              if (s.menge) setBestellMenge(String(s.menge))
+            }}
+          />
+        )}
 
         {/* Eingabe-Zeile: Vorschlag übernehmen */}
         <Card className="p-3">

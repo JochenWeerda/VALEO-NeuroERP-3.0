@@ -54,9 +54,9 @@ maiskolben_mit_lieschen_lks,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- o
 melasse_zuckerrohr,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
 melasse_zuckerruebe,merged,melasse_zuckerruebe_dlg2025,
 zuckerruebenvinasse,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
-maissilage,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
-grassilage_1_schnitt,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
-grascobs_heissluftheu_1_schnitt,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
-grascobs_heissluftheu_folgeschnitte,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
-wiesen_belueftungsheu_1_schnitt,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
-wiesen_belueftungsheu_folgeschnitte,no_analytic_match,,Kein Eintrag in LKV-Ernte-2025- oder DLG-Kraftfutter-Referenz-CSV
+maissilage,merged,demo_forage_overlay,Nährwerte Demo (feed_service); sidp/Mineralien aus LP (LFL-Median) wenn gesetzt.; MW Bayern 2025 / Median LKV-Futterlabor Bayern; FAN1
+grassilage_1_schnitt,merged,demo_forage_overlay,Nährwerte Demo (feed_service); kein DLG-Tabelle-2-/LKV-Ernte-Match.; Ø 2025 / Median LKV-Futterlabor Bayern; FAN1
+grascobs_heissluftheu_1_schnitt,merged,demo_forage_overlay,Heu/Cobs-Platzhalter (Demo); sidp/Mineralien aus LP (LFL-Median) wenn gesetzt.; 2025 / Median LKV-Futterlabor Bayern; FAN1
+grascobs_heissluftheu_folgeschnitte,merged,demo_forage_overlay,Heu/Cobs-Platzhalter (Demo); sidp/Mineralien aus LP (LFL-Median) wenn gesetzt.; 2025 / Median LKV-Futterlabor Bayern; FAN1
+wiesen_belueftungsheu_1_schnitt,merged,demo_forage_overlay,Heu/Cobs-Platzhalter (Demo); sidp/Mineralien aus LP (LFL-Median) wenn gesetzt.; 2025 / Median LKV-Futterlabor Bayern; FAN1
+wiesen_belueftungsheu_folgeschnitte,merged,demo_forage_overlay,Heu/Cobs-Platzhalter (Demo); sidp/Mineralien aus LP (LFL-Median) wenn gesetzt.; 2025 / Median LKV-Futterlabor Bayern; FAN1

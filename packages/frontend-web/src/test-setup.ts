@@ -1,18 +1,17 @@
 import "@testing-library/jest-dom/vitest";
 
-// Optional shims for JSDOM gaps that surface in component tests.
-if (!("matchMedia" in window)) {
-  (window as any).matchMedia = ((query: string) => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: () => {},
-    removeListener: () => {},
-    addEventListener: () => {},
-    removeEventListener: () => {},
-    dispatchEvent: () => false,
-  })) as Window["matchMedia"];
-}
+// Unconditional matchMedia stub — JSDOM does not implement it at all.
+// Overwrite even if partially defined so useTouchDevice() always gets a safe implementation.
+(window as any).matchMedia = ((query: string) => ({
+  matches: false,
+  media: query,
+  onchange: null,
+  addListener: () => {},
+  removeListener: () => {},
+  addEventListener: () => {},
+  removeEventListener: () => {},
+  dispatchEvent: () => false,
+})) as Window["matchMedia"];
 
 // Polyfill ResizeObserver if not present (JSDOM < v20).
 if (!("ResizeObserver" in window)) {

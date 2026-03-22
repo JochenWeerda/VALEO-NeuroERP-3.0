@@ -26,3 +26,14 @@ def client_no_auth():
     """Test client without API key (for health endpoint)."""
     from app.main import app
     return TestClient(app)
+
+
+@pytest.fixture
+def client_dlg_tenant(monkeypatch):
+    """DLG-Merge-Mandant (opt-in via Env, vor Import von app.main)."""
+    monkeypatch.setenv("RATIONS_DLG_MERGED_ENABLE", "1")
+    monkeypatch.setenv("RATIONS_DLG_MERGED_TENANT_ID", "dlg")
+
+    from app.main import app
+
+    return TestClient(app, headers={"X-API-Key": API_KEY, "X-Tenant-Id": "dlg"})

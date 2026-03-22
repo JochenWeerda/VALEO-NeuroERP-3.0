@@ -1,16 +1,43 @@
+import { useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
+import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Clock, Truck } from 'lucide-react'
+import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
+import { PageSection, PageSurface } from '@/components/patterns/PageSurface'
+import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
+import { Clock, Search, Truck } from 'lucide-react'
 import { useWarteschlange, type LKWEintrag } from '@/lib/api/inventory'
 
 export default function WarteschlangePage(): JSX.Element {
   const navigate = useNavigate()
-  const { data, isLoading } = useWarteschlange()
-  const warteschlange = data?.items ?? []
+  const searchInputRef = useRef<HTMLInputElement | null>(null)
+  const [searchTerm, setSearchTerm] = useState('')
+  const { data, isLoading, refetch } = useWarteschlange()
+  const warteschlange = useMemo(() => {
+    const items = data?.items ?? []
+    if (!searchTerm.trim()) {
+      return items
+    }
+    const term = searchTerm.trim().toLowerCase()
+    return items.filter((entry) =>
+      [entry.kennzeichen, entry.lieferant, entry.artikel, entry.lieferschein_nr]
+        .filter(Boolean)
+        .some((value) => String(value).toLowerCase().includes(term)),
+    )
+  }, [data?.items, searchTerm])
+
+  const shortcuts = buildCoreMaskShortcuts({
+    onNew: () => navigate('/annahme/lkw-registrierung'),
+    onSearch: () => searchInputRef.current?.focus(),
+    onRefresh: () => {
+      void refetch()
+    },
+  })
+  useKeyboardShortcuts(shortcuts)
 
   const columns = [
     { key: 'position' as const, label: '#', render: (l: LKWEintrag) => <span className="text-lg font-bold">#{l.position}</span> },
@@ -67,7 +94,7 @@ export default function WarteschlangePage(): JSX.Element {
 
   if (isLoading) {
     return (
-      <div className="space-y-4 p-6">
+      <PageSurface data-page-surface="annahme-warteschlange-loading" contentClassName="space-y-4">
         <div className="space-y-2">
           <Skeleton className="h-8 w-56" />
           <Skeleton className="h-4 w-32" />
@@ -76,76 +103,99 @@ export default function WarteschlangePage(): JSX.Element {
           {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-24 w-full" />)}
         </div>
         <Skeleton className="h-48 w-full" />
-      </div>
+      </PageSurface>
     )
   }
 
   return (
-    <div className="space-y-4 p-6">
-      <div className="flex items-center justify-between flex-wrap gap-2">
-        <div>
-          <h1 className="text-3xl font-bold">Annahme-Warteschlange</h1>
-          <p className="text-muted-foreground">LKW-Abfertigung</p>
+    <PageSurface data-page-surface="annahme-warteschlange" contentClassName="space-y-6">
+      <PageSection
+        description="Rueckwirkend auf den DS-Rahmen, Keyboard-first und touch-feste Operator-Bedienung gehoben."
+      >
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h1 className="text-3xl font-bold">Annahme-Warteschlange</h1>
+            <p className="text-muted-foreground">LKW-Abfertigung mit QR-, Search- und Queue-Sicht.</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={() => navigate('/annahme/qr')}>
+              QR-Code (Handy)
+            </Button>
+            <Button className="min-h-touch gap-2 touch-manipulation" onClick={() => navigate('/annahme/lkw-registrierung')}>
+              LKW anmelden
+            </Button>
+          </div>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => navigate('/annahme/qr')}>
-            QR-Code (Handy)
-          </Button>
-          <Button onClick={() => navigate('/annahme/lkw-registrierung')}>
-            LKW anmelden
-          </Button>
+      </PageSection>
+
+      <PageSection title="Queue-Lage" description="Live-Zahlen fuer wartende, laufende und abgeschlossene Abfertigungen.">
+        <div className="grid gap-4 md:grid-cols-4">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">In Warteschlange</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-2">
+                <Truck className="h-5 w-5 text-blue-600" />
+                <span className="text-2xl font-bold">{wartend}</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">In Bearbeitung</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <span className="text-2xl font-bold text-orange-600">{inBearbeitung}</span>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">Avg. Wartezeit</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-2">
+                <Clock className="h-5 w-5" />
+                <span className="text-2xl font-bold">{avgWartezeit} min</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">Heute abgefertigt</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <span className="text-2xl font-bold text-green-600">{abgeschlossen}</span>
+            </CardContent>
+          </Card>
         </div>
-      </div>
+      </PageSection>
 
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">In Warteschlange</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-2">
-              <Truck className="h-5 w-5 text-blue-600" />
-              <span className="text-2xl font-bold">{wartend}</span>
-            </div>
-          </CardContent>
-        </Card>
+      <PageSection title="Arbeitsliste" description="Ctrl+F fokussiert die Suche, Ctrl+N oeffnet die Registrierung, F5 aktualisiert die Queue.">
+        <div className="space-y-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              ref={searchInputRef}
+              aria-label="Suche Warteschlange"
+              placeholder="Kennzeichen, Lieferant, Artikel oder Lieferschein suchen"
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              className="min-h-touch pl-10"
+            />
+          </div>
+          <Card>
+            <CardContent className="pt-6">
+              <DataTable data={warteschlange} columns={columns} />
+            </CardContent>
+          </Card>
+        </div>
+      </PageSection>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">In Bearbeitung</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <span className="text-2xl font-bold text-orange-600">{inBearbeitung}</span>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Avg. Wartezeit</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-2">
-              <Clock className="h-5 w-5" />
-              <span className="text-2xl font-bold">{avgWartezeit} min</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Heute abgefertigt</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <span className="text-2xl font-bold text-green-600">{abgeschlossen}</span>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card>
-        <CardContent className="pt-6">
-          <DataTable data={warteschlange} columns={columns} />
-        </CardContent>
-      </Card>
-    </div>
+      <KeyboardShortcutBar shortcuts={shortcuts} />
+    </PageSurface>
   )
 }

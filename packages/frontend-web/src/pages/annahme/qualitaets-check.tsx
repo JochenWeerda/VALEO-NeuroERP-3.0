@@ -2,19 +2,26 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import { Wizard } from '@/components/patterns/Wizard'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
+import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
+import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { AlertTriangle, CheckCircle, XCircle } from 'lucide-react'
 import { apiClient } from '@/lib/api-client'
 import { useToast } from '@/hooks/use-toast'
 import { useWarteschlangeEintrag, usePatchWarteschlangeStatus } from '@/lib/api/inventory'
 import { buildDecisionView } from '@/policy/decision-view'
 import { ProcessStatusPanel } from '@/components/workflow/ProcessStatusPanel'
+import {
+  TouchSection,
+  TouchNumericInput,
+  TouchToggle,
+  TouchCard,
+  TouchCardGroup,
+} from '@/components/touch/TouchFieldLayout'
 
 type QualitaetsData = {
   lieferscheinNr: string
@@ -170,150 +177,99 @@ export default function QualitaetsCheckPage(): JSX.Element {
       id: 'sichtpruefung',
       title: 'Sichtprüfung',
       content: (
-        <div className="space-y-4">
+        <TouchSection>
           <div className="rounded-lg bg-muted p-4">
             <div className="font-semibold">{qualitaet.artikel}</div>
             <div className="text-sm text-muted-foreground">Lieferschein: {qualitaet.lieferscheinNr}</div>
           </div>
-          <div>
-            <Label>Fremdgeruch</Label>
-            <div className="mt-2 flex gap-4">
-              <label className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="fremdgeruch"
-                  checked={qualitaet.fremdgeruch === 'nein'}
-                  onChange={() => updateField('fremdgeruch', 'nein')}
-                />
-                <CheckCircle className="h-4 w-4 text-green-600" />
-                Nein
-              </label>
-              <label className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="fremdgeruch"
-                  checked={qualitaet.fremdgeruch === 'ja'}
-                  onChange={() => updateField('fremdgeruch', 'ja')}
-                />
-                <XCircle className="h-4 w-4 text-red-600" />
-                Ja
-              </label>
-            </div>
-          </div>
-          <div>
-            <Label>Schädlinge / Schimmel</Label>
-            <div className="mt-2 flex gap-4">
-              <label className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="schaedlinge"
-                  checked={qualitaet.schaedlinge === 'nein'}
-                  onChange={() => updateField('schaedlinge', 'nein')}
-                />
-                <CheckCircle className="h-4 w-4 text-green-600" />
-                Nein
-              </label>
-              <label className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="schaedlinge"
-                  checked={qualitaet.schaedlinge === 'ja'}
-                  onChange={() => updateField('schaedlinge', 'ja')}
-                />
-                <XCircle className="h-4 w-4 text-red-600" />
-                Ja
-              </label>
-            </div>
-          </div>
-          <div>
-            <Label>Farbe / Optik</Label>
-            <div className="mt-2 flex gap-4">
-              <label className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="farbe"
-                  checked={qualitaet.farbe === 'normal'}
-                  onChange={() => updateField('farbe', 'normal')}
-                />
-                <CheckCircle className="h-4 w-4 text-green-600" />
-                Normal
-              </label>
-              <label className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  name="farbe"
-                  checked={qualitaet.farbe === 'abweichend'}
-                  onChange={() => updateField('farbe', 'abweichend')}
-                />
-                <AlertTriangle className="h-4 w-4 text-orange-600" />
-                Abweichend
-              </label>
-            </div>
-          </div>
-        </div>
+          {/* Gap 024: TouchToggle ersetzt kleine Radio-Buttons */}
+          <TouchToggle
+            label="Fremdgeruch"
+            value={qualitaet.fremdgeruch === 'ja'}
+            onChange={(v) => updateField('fremdgeruch', v ? 'ja' : 'nein')}
+            labelYes="Ja — Geruch vorhanden"
+            labelNo="Nein — kein Geruch"
+          />
+          <TouchToggle
+            label="Schädlinge / Schimmel"
+            value={qualitaet.schaedlinge === 'ja'}
+            onChange={(v) => updateField('schaedlinge', v ? 'ja' : 'nein')}
+            labelYes="Ja — Befall festgestellt"
+            labelNo="Nein — kein Befall"
+          />
+          <TouchCardGroup label="Farbe / Optik" required>
+            <TouchCard
+              selected={qualitaet.farbe === 'normal'}
+              onSelect={() => updateField('farbe', 'normal')}
+              icon={<CheckCircle className="h-5 w-5 text-green-600" />}
+              description="Farbe und Aussehen im Normbereich"
+            >
+              Normal
+            </TouchCard>
+            <TouchCard
+              selected={qualitaet.farbe === 'abweichend'}
+              onSelect={() => updateField('farbe', 'abweichend')}
+              icon={<AlertTriangle className="h-5 w-5 text-orange-600" />}
+              description="Farbe oder Aussehen weicht ab"
+            >
+              Abweichend
+            </TouchCard>
+          </TouchCardGroup>
+        </TouchSection>
       ),
     },
     {
       id: 'messungen',
       title: 'Messungen',
       content: (
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="feuchtigkeit">Feuchtigkeit (%)</Label>
-            <Input
-              id="feuchtigkeit"
-              type="number"
+        <TouchSection>
+          {/* Gap 024: TouchNumericInput ersetzt Standard-Input — löst Ziffernblock auf Tablet/Handy aus */}
+          <div className="space-y-1">
+            <TouchNumericInput
+              label="Feuchtigkeit (%)"
               value={qualitaet.feuchtigkeit}
-              onChange={(e) => updateField('feuchtigkeit', Number(e.target.value))}
-              step="0.1"
-              min="0"
-              max="100"
+              onChange={(v) => updateField('feuchtigkeit', Number(v))}
+              unit="%"
+              step={0.1}
+              min={0}
+              max={100}
+              placeholder="0.0"
+              required
             />
-            <div className="mt-1 text-sm text-muted-foreground">
-              Ziel: {'<'} 14% | Toleranz: {'<'} 16%
-            </div>
-            {qualitaet.feuchtigkeit > 16 && (
-              <div className="mt-1 text-sm font-semibold text-red-600">⚠ Kritisch überschritten!</div>
-            )}
-            {qualitaet.feuchtigkeit > 14 && qualitaet.feuchtigkeit <= 16 && (
-              <div className="mt-1 text-sm font-semibold text-orange-600">⚠ Toleranz überschritten</div>
-            )}
+            <p className="text-sm text-muted-foreground">Ziel: &lt; 14% | Toleranz: &lt; 16%</p>
+            {qualitaet.feuchtigkeit > 16 && <p className="text-sm font-semibold text-red-600">⚠ Kritisch überschritten!</p>}
+            {qualitaet.feuchtigkeit > 14 && qualitaet.feuchtigkeit <= 16 && <p className="text-sm font-semibold text-orange-600">⚠ Toleranz überschritten</p>}
           </div>
-          <div>
-            <Label htmlFor="protein">Protein (%)</Label>
-            <Input
-              id="protein"
-              type="number"
+          <div className="space-y-1">
+            <TouchNumericInput
+              label="Protein (%)"
               value={qualitaet.protein}
-              onChange={(e) => updateField('protein', Number(e.target.value))}
-              step="0.1"
-              min="0"
-              max="100"
+              onChange={(v) => updateField('protein', Number(v))}
+              unit="%"
+              step={0.1}
+              min={0}
+              max={100}
+              placeholder="0.0"
             />
-            <div className="mt-1 text-sm text-muted-foreground">Ziel: {'>'} 12%</div>
+            <p className="text-sm text-muted-foreground">Ziel: &gt; 12%</p>
           </div>
-          <div>
-            <Label htmlFor="verunreinigung">Verunreinigung (%)</Label>
-            <Input
-              id="verunreinigung"
-              type="number"
+          <div className="space-y-1">
+            <TouchNumericInput
+              label="Verunreinigung (%)"
               value={qualitaet.verunreinigung}
-              onChange={(e) => updateField('verunreinigung', Number(e.target.value))}
-              step="0.1"
-              min="0"
-              max="100"
+              onChange={(v) => updateField('verunreinigung', Number(v))}
+              unit="%"
+              step={0.1}
+              min={0}
+              max={100}
+              placeholder="0.0"
+              required
             />
-            <div className="mt-1 text-sm text-muted-foreground">
-              Ziel: {'<'} 2% | Toleranz: {'<'} 3%
-            </div>
-            {qualitaet.verunreinigung > 3 && (
-              <div className="mt-1 text-sm font-semibold text-red-600">⚠ Kritisch überschritten!</div>
-            )}
-            {qualitaet.verunreinigung > 2 && qualitaet.verunreinigung <= 3 && (
-              <div className="mt-1 text-sm font-semibold text-orange-600">⚠ Toleranz überschritten</div>
-            )}
+            <p className="text-sm text-muted-foreground">Ziel: &lt; 2% | Toleranz: &lt; 3%</p>
+            {qualitaet.verunreinigung > 3 && <p className="text-sm font-semibold text-red-600">⚠ Kritisch überschritten!</p>}
+            {qualitaet.verunreinigung > 2 && qualitaet.verunreinigung <= 3 && <p className="text-sm font-semibold text-orange-600">⚠ Toleranz überschritten</p>}
           </div>
-        </div>
+        </TouchSection>
       ),
     },
     {
@@ -387,6 +343,13 @@ export default function QualitaetsCheckPage(): JSX.Element {
     },
   ]
 
+  const shortcuts = buildCoreMaskShortcuts({
+    onSave: () => saveMutation.mutate(),
+    onCancel: () => navigate('/annahme/warteschlange'),
+    isSaveDisabled: saveMutation.isPending,
+  })
+  useKeyboardShortcuts(shortcuts)
+
   const goToAbrechnung = (): void => {
     navigate('/annahme/abrechnung', {
       state: {
@@ -402,6 +365,7 @@ export default function QualitaetsCheckPage(): JSX.Element {
   }
 
   return (
+    <div className="flex flex-col">
     <div className="p-6">
       <ModuleToolbar
         backTarget="/annahme/warteschlange"
@@ -442,6 +406,8 @@ export default function QualitaetsCheckPage(): JSX.Element {
         onFinish={handleSubmit}
         onCancel={() => navigate('/annahme/warteschlange')}
       />
+    </div>
+      <KeyboardShortcutBar shortcuts={shortcuts} />
     </div>
   )
 }

@@ -1,16 +1,25 @@
-﻿import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useZulassungenRegister, type Zulassung } from '@/lib/api/betrieb'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
+import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
+import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { AlertTriangle, FileDown, Search, ShieldCheck } from 'lucide-react'
 import { ErrorState } from '@/components/ErrorState'
 
 export default function ZulassungenRegisterPage(): JSX.Element {
   const [searchTerm, setSearchTerm] = useState('')
+  const searchRef = useRef<HTMLInputElement | null>(null)
   const { data: zulassungen = [], isError, error, refetch } = useZulassungenRegister()
+
+  const shortcuts = buildCoreMaskShortcuts({
+    onSearch: () => searchRef.current?.focus(),
+    onRefresh: () => { void refetch() },
+  })
+  useKeyboardShortcuts(shortcuts)
 
   if (isError) {
     return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
@@ -27,6 +36,7 @@ export default function ZulassungenRegisterPage(): JSX.Element {
   ]
 
   return (
+    <div className="flex flex-col">
     <div className="space-y-4 p-6">
       <div className="flex items-center justify-between"><div><h1 className="text-3xl font-bold">Zulassungsregister</h1><p className="text-muted-foreground">PSM, Saatgut & Duenger</p></div></div>
       {auslaufend > 0 && <Card className="border-orange-500 bg-orange-50"><CardContent className="pt-4"><div className="flex items-center gap-2 text-orange-900"><AlertTriangle className="h-5 w-5" /><span className="font-semibold">{auslaufend} Zulassung(en) laufen bald ab!</span></div></CardContent></Card>}
@@ -35,10 +45,10 @@ export default function ZulassungenRegisterPage(): JSX.Element {
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Aktiv</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-green-600">{zulassungen.filter((z) => z.status === 'aktiv').length}</span></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Auslaufend</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-orange-600">{auslaufend}</span></CardContent></Card>
       </div>
-      <Card><CardHeader><CardTitle>Suche</CardTitle></CardHeader><CardContent><div className="flex gap-4"><div className="relative flex-1"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><Input placeholder="Suche..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" /></div><Button variant="outline" className="gap-2"><FileDown className="h-4 w-4" />Export</Button></div></CardContent></Card>
+      <Card><CardHeader><CardTitle>Suche</CardTitle></CardHeader><CardContent><div className="flex gap-4"><div className="relative flex-1"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><Input ref={searchRef} placeholder="Suche..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" /></div><Button variant="outline" className="gap-2"><FileDown className="h-4 w-4" />Export</Button></div></CardContent></Card>
       <Card><CardContent className="pt-6"><DataTable data={zulassungen} columns={columns} /></CardContent></Card>
+    </div>
+    <KeyboardShortcutBar shortcuts={shortcuts} />
     </div>
   )
 }
-
-

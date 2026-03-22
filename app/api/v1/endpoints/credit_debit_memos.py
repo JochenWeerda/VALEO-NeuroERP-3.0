@@ -56,6 +56,8 @@ class CreditMemoCreate(BaseModel):
     """Request-Modell für Credit Memo Erstellung"""
     supplierId: str = Field(..., description="Lieferanten-ID")
     invoiceId: Optional[str] = Field(None, description="Referenz-Rechnung (optional)")
+    settlementId: Optional[str] = Field(None, description="Referenz-Settlement fuer Korrekturen (optional)")
+    correctionMode: Optional[str] = Field(None, description="Korrekturmodus, z.B. CREDIT_NOTE")
     memoDate: str = Field(..., description="Gutschriftsdatum (YYYY-MM-DD)")
     reason: str = Field(..., min_length=10, description="Grund für Gutschrift (min. 10 Zeichen)")
     notes: Optional[str] = None
@@ -66,6 +68,8 @@ class DebitMemoCreate(BaseModel):
     """Request-Modell für Debit Memo Erstellung"""
     supplierId: str = Field(..., description="Lieferanten-ID")
     invoiceId: Optional[str] = Field(None, description="Referenz-Rechnung (optional)")
+    settlementId: Optional[str] = Field(None, description="Referenz-Settlement fuer Korrekturen (optional)")
+    correctionMode: Optional[str] = Field(None, description="Korrekturmodus, z.B. DEBIT_MEMO")
     memoDate: str = Field(..., description="Belastungsdatum (YYYY-MM-DD)")
     reason: str = Field(..., min_length=10, description="Grund für Belastung (min. 10 Zeichen)")
     notes: Optional[str] = None
@@ -85,6 +89,8 @@ class CreditMemoResponse(BaseModel):
     supplierName: str
     invoiceId: Optional[str] = None
     invoiceNumber: Optional[str] = None
+    settlementId: Optional[str] = None
+    correctionMode: Optional[str] = None
     memoDate: str
     netAmount: float
     taxAmount: float
@@ -94,6 +100,8 @@ class CreditMemoResponse(BaseModel):
     notes: Optional[str] = None
     settled: bool = False
     settledInvoiceIds: Optional[List[str]] = None
+    booked: bool = False
+    journalRef: Optional[str] = None
 
 
 class DebitMemoResponse(BaseModel):
@@ -104,6 +112,8 @@ class DebitMemoResponse(BaseModel):
     supplierName: str
     invoiceId: Optional[str] = None
     invoiceNumber: Optional[str] = None
+    settlementId: Optional[str] = None
+    correctionMode: Optional[str] = None
     memoDate: str
     netAmount: float
     taxAmount: float
@@ -113,6 +123,8 @@ class DebitMemoResponse(BaseModel):
     notes: Optional[str] = None
     settled: bool = False
     settledInvoiceIds: Optional[List[str]] = None
+    booked: bool = False
+    journalRef: Optional[str] = None
 
 
 def calculate_memo_totals(items: List[MemoItem]) -> tuple[float, float, float]:
@@ -181,6 +193,8 @@ async def create_credit_memo(
             "supplierName": supplier_name,
             "invoiceId": memo.invoiceId,
             "invoiceNumber": invoice_number,
+            "settlementId": memo.settlementId,
+            "correctionMode": memo.correctionMode,
             "memoDate": memo.memoDate,
             "netAmount": net_amount,
             "taxAmount": tax_amount,
@@ -191,6 +205,8 @@ async def create_credit_memo(
             "items": [item.model_dump() for item in memo.items],
             "settled": False,
             "settledInvoiceIds": [],
+            "booked": False,
+            "journalRef": None,
             "createdAt": datetime.now().isoformat(),
             "createdBy": _get_user_id_from_request(request) or "system",
         }
@@ -239,6 +255,8 @@ async def create_debit_memo(
             "supplierName": supplier_name,
             "invoiceId": memo.invoiceId,
             "invoiceNumber": invoice_number,
+            "settlementId": memo.settlementId,
+            "correctionMode": memo.correctionMode,
             "memoDate": memo.memoDate,
             "netAmount": net_amount,
             "taxAmount": tax_amount,
@@ -249,6 +267,8 @@ async def create_debit_memo(
             "items": [item.model_dump() for item in memo.items],
             "settled": False,
             "settledInvoiceIds": [],
+            "booked": False,
+            "journalRef": None,
             "createdAt": datetime.now().isoformat(),
             "createdBy": _get_user_id_from_request(request) or "system",
         }
@@ -495,4 +515,97 @@ async def settle_debit_memo(
     except Exception as e:
         logger.error(f"Error settling debit memo: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to settle debit memo: {str(e)}")
+
+
+def _book_memo_to_store(
+    *,
+    memo_type: str,
+    memo_id: str,
+    repo,
+    request: Request | None,
+) -> dict:
+    memo = get_from_store(memo_type, memo_id, repo)
+    if not memo:
+        raise HTTPException(status_code=404, detail=f"{memo_type} not found")
+    if memo.get("booked") is True:
+        raise HTTPException(status_code=400, detail=f"{memo_type} already booked")
+
+    journal_ref = f"JRN-{datetime.now().strftime('%Y%m%d')}-{memo_id[:8].upper()}"
+    booking = {
+        "id": uuid7(),
+        "memoId": memo_id,
+        "memoType": memo_type,
+        "journalRef": journal_ref,
+        "grossAmount": memo.get("grossAmount", 0),
+        "supplierId": memo.get("supplierId"),
+        "reason": memo.get("reason"),
+        "bookedAt": datetime.now().isoformat(),
+        "bookedBy": _get_user_id_from_request(request) or "system",
+    }
+    save_to_store("ap_memo_booking", booking["id"], booking, repo)
+
+    memo["booked"] = True
+    memo["journalRef"] = journal_ref
+    memo["status"] = "BOOKED"
+    memo["bookedAt"] = booking["bookedAt"]
+    save_to_store(memo_type, memo_id, memo, repo)
+    return booking
+
+
+@router.post("/credit-memos/{memo_id}/buchung")
+async def book_credit_memo(
+    memo_id: str,
+    db: Session = Depends(get_db),
+    request: Request = None,
+) -> dict:
+    """Fuehrt eine Journal-/Fibu-Buchung fuer eine Gutschrift aus."""
+    try:
+        repo = get_repository(db)
+        booking = _book_memo_to_store(
+            memo_type="credit_memo",
+            memo_id=memo_id,
+            repo=repo,
+            request=request,
+        )
+        return {
+            "status": "ok",
+            "message": f"Credit memo {memo_id} booked",
+            "memoId": memo_id,
+            "journalRef": booking["journalRef"],
+            "bookingId": booking["id"],
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error booking credit memo: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to book credit memo: {str(e)}")
+
+
+@router.post("/debit-memos/{memo_id}/buchung")
+async def book_debit_memo(
+    memo_id: str,
+    db: Session = Depends(get_db),
+    request: Request = None,
+) -> dict:
+    """Fuehrt eine Journal-/Fibu-Buchung fuer eine Belastung aus."""
+    try:
+        repo = get_repository(db)
+        booking = _book_memo_to_store(
+            memo_type="debit_memo",
+            memo_id=memo_id,
+            repo=repo,
+            request=request,
+        )
+        return {
+            "status": "ok",
+            "message": f"Debit memo {memo_id} booked",
+            "memoId": memo_id,
+            "journalRef": booking["journalRef"],
+            "bookingId": booking["id"],
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error booking debit memo: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to book debit memo: {str(e)}")
 

@@ -18,7 +18,7 @@ from app.core.data_quality_enforcement import (
     evaluate_settlement_datensatz,
 )
 from app.core.tenant import get_tenant_id
-from app.documents.router_helpers import get_repository, save_to_store
+from app.documents.router_helpers import get_repository, get_from_store, list_from_store, save_to_store
 from app.infrastructure.models import AgrarSettlement, AgrarSettlementDeduction
 from app.domains.inventory.api.inventory_auth import require_inventory_admin
 from app.core.uuid7 import uuid7
@@ -31,6 +31,12 @@ from modules.agrar.services.drying_rule_engine import (
     compute_settlement as _compute_drying_settlement,
 )
 from app.infrastructure.models import DryingRuleFactorRange, DryingRuleLookupRow, DryingRuleSet
+from app.core.settlement_completion_contracts import (
+    SettlementCompletionEvidence,
+    SettlementCompletionVariant,
+    SettlementFinancialDocumentKind,
+    evaluate_settlement_completion,
+)
 from modules.agrar.services.settlement_calculator import (
     calc_deduction_amount as _calc_deduction_amount_impl,
     compute_settlement_amounts as _compute_settlement_amounts_impl,
@@ -317,8 +323,59 @@ class SettlementOut(BaseModel):
     status: SettlementStatus
     posted_journal_ref: Optional[str] = None
     posted_at: Optional[datetime] = None
+    approval_status: str = "ENTWURF"
+    approval_history: list[dict] = Field(default_factory=list)
+    allowed_transitions: list[str] = Field(default_factory=list)
+    can_post_fibu: bool = False
+    correction_options: list[dict] = Field(default_factory=list)
     note: Optional[str] = None
     deductions: list[DeductionOut] = Field(default_factory=list)
+
+
+def _get_settlement_approval_status(settlement: AgrarSettlement) -> str:
+    drying_result = settlement.drying_result or {}
+    return str(drying_result.get("approval_status") or "ENTWURF")
+
+
+def _get_settlement_approval_history(settlement: AgrarSettlement) -> list[dict]:
+    drying_result = settlement.drying_result or {}
+    history = drying_result.get("approval_history") or []
+    return list(history) if isinstance(history, list) else []
+
+
+def _get_settlement_allowed_transitions(approval_status: str) -> list[str]:
+    transition_map = {
+        "ENTWURF": ["ZUR_FREIGABE", "ABGELEHNT"],
+        "ZUR_FREIGABE": ["TEILWEISE_FREIGEGEBEN", "FREIGEGEBEN", "ABGELEHNT", "ENTWURF"],
+        "TEILWEISE_FREIGEGEBEN": ["FREIGEGEBEN", "ABGELEHNT", "ZUR_FREIGABE"],
+        "FREIGEGEBEN": ["VERBUCHT", "ABGELEHNT"],
+        "ABGELEHNT": ["ENTWURF"],
+        "VERBUCHT": [],
+    }
+    return transition_map.get(approval_status, [])
+
+
+def _build_settlement_correction_options(settlement: AgrarSettlement, approval_status: str) -> list[dict]:
+    if settlement.status != "posted":
+        return []
+    base_note = f"Settlement {settlement.settlement_number} / Journal {settlement.posted_journal_ref or '-'}"
+    return [
+        {
+            "memo_type": "credit",
+            "label": "Gutschrift erstellen",
+            "reason": f"Gutschrift zur Settlement-Korrektur ({base_note})",
+        },
+        {
+            "memo_type": "debit",
+            "label": "Belastung erstellen",
+            "reason": f"Belastung zur Settlement-Korrektur ({base_note})",
+        },
+        {
+            "memo_type": "rework",
+            "label": "Korrektur ueber Belegpfad dokumentieren",
+            "reason": f"Settlement ist bereits verbucht; Korrektur nur ueber Gutschrift/Belastung ({base_note})",
+        },
+    ]
 
 
 def _calc_deduction_amount(deduction: DeductionInput, billing_qty_tons: Decimal) -> Decimal:
@@ -343,6 +400,7 @@ def _compute_settlement_amounts(
 
 
 def _to_out(settlement: AgrarSettlement, deductions: list[AgrarSettlementDeduction]) -> SettlementOut:
+    approval_status = _get_settlement_approval_status(settlement)
     return SettlementOut(
         id=settlement.id,
         settlement_number=settlement.settlement_number,
@@ -360,6 +418,11 @@ def _to_out(settlement: AgrarSettlement, deductions: list[AgrarSettlementDeducti
         status=settlement.status,
         posted_journal_ref=settlement.posted_journal_ref,
         posted_at=settlement.posted_at,
+        approval_status=approval_status,
+        approval_history=_get_settlement_approval_history(settlement),
+        allowed_transitions=_get_settlement_allowed_transitions(approval_status),
+        can_post_fibu=settlement.status == "draft" and approval_status == "FREIGEGEBEN",
+        correction_options=_build_settlement_correction_options(settlement, approval_status),
         note=settlement.note,
         deductions=[
             DeductionOut(
@@ -631,6 +694,12 @@ async def post_settlement_to_fibu(
         raise HTTPException(status_code=404, detail="Settlement not found")
     if settlement.status != "draft":
         raise HTTPException(status_code=400, detail=f"Settlement cannot be posted in status {settlement.status}")
+    approval_status = _get_settlement_approval_status(settlement)
+    if approval_status != "FREIGEGEBEN":
+        raise HTTPException(
+            status_code=409,
+            detail=f"Settlement requires approval before posting. Current approval_status={approval_status}",
+        )
 
     posting_date = payload.posting_date or datetime.utcnow()
     journal_ref = f"JE-SET-{datetime.utcnow().strftime('%Y%m%d')}-{settlement.id[:8].upper()}"
@@ -684,8 +753,210 @@ async def post_settlement_to_fibu(
     settlement.status = "posted"
     settlement.posted_journal_ref = journal_ref
     settlement.posted_at = posting_date
+    new_state = dict(settlement.drying_result or {})
+    new_state["approval_status"] = "VERBUCHT"
+    history = list(new_state.get("approval_history") or [])
+    history.append(
+        {
+            "settlement_id": settlement.id,
+            "event": "settlement.approval.verbucht",
+            "actor_id": "system",
+            "actor_type": "SYSTEM",
+            "previous_status": approval_status,
+            "new_status": "VERBUCHT",
+            "allowed": True,
+            "reason": "Settlement nach erteilter Freigabe in FiBu verbucht.",
+            "decided_at": posting_date.isoformat(),
+        }
+    )
+    new_state["approval_history"] = history
+    settlement.drying_result = new_state
     db.commit()
     return {"ok": True, "settlement_id": settlement.id, "journal_ref": journal_ref}
+
+
+class SettlementCorrectionDraftOut(BaseModel):
+    settlement_id: str
+    settlement_number: str
+    memo_type: Literal["credit", "debit"]
+    supplier_id: str
+    supplier_name: Optional[str] = None
+    posted_journal_ref: Optional[str] = None
+    suggested_reason: str
+    suggested_notes: str
+    suggested_route: str
+    items: list[dict] = Field(default_factory=list)
+
+
+class SettlementCompletionStatusOut(BaseModel):
+    settlement_id: str
+    variant: Literal["GUTSCHRIFT", "BELASTUNG", "KORREKTUR"]
+    completed: bool
+    completion_pct: int
+    missing_controls: list[str] = Field(default_factory=list)
+    next_step: Optional[str] = None
+    linked_documents: list[dict] = Field(default_factory=list)
+
+
+@router.get("/{settlement_id}/correction-draft", response_model=SettlementCorrectionDraftOut)
+async def get_settlement_correction_draft(
+    settlement_id: str,
+    memo_type: Literal["credit", "debit"] = Query(...),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    settlement = db.query(AgrarSettlement).filter(
+        AgrarSettlement.id == settlement_id,
+        AgrarSettlement.tenant_id == tenant_id,
+    ).first()
+    if not settlement:
+        raise HTTPException(status_code=404, detail="Settlement not found")
+    if settlement.status != "posted":
+        raise HTTPException(status_code=409, detail="Correction draft requires a posted settlement")
+
+    supplier_name = None
+    try:
+        partner = get_from_store("partner", settlement.supplier_id, get_repository(db))
+        if partner:
+            supplier_name = partner.get("name")
+    except Exception:
+        supplier_name = None
+
+    amount = float(settlement.net_amount_eur)
+    item_reason = "Nachtraegliche Preis-, Mengen- oder Qualitaetskorrektur"
+    suggested_reason = (
+        f"{'Gutschrift' if memo_type == 'credit' else 'Belastung'} fuer Settlement {settlement.settlement_number}"
+    )
+    suggested_notes = (
+        f"Settlement-ID: {settlement.id}\n"
+        f"Settlement-Nummer: {settlement.settlement_number}\n"
+        f"Journal-Ref: {settlement.posted_journal_ref or '-'}\n"
+        f"Lieferant: {settlement.supplier_id}\n"
+        f"Bitte Korrekturgrund fachlich dokumentieren und gegen Audit-Trail freigeben."
+    )
+    route_type = "credit" if memo_type == "credit" else "debit"
+    return SettlementCorrectionDraftOut(
+        settlement_id=settlement.id,
+        settlement_number=settlement.settlement_number,
+        memo_type=memo_type,
+        supplier_id=settlement.supplier_id,
+        supplier_name=supplier_name,
+        posted_journal_ref=settlement.posted_journal_ref,
+        suggested_reason=suggested_reason,
+        suggested_notes=suggested_notes,
+        suggested_route=f"/einkauf/gutschriften-belastungen/{route_type}?settlementId={settlement.id}",
+        items=[
+            {
+                "productName": settlement.article_id or "Settlement-Korrektur",
+                "quantity": 1,
+                "unit": "Vorgang",
+                "unitPrice": amount,
+                "netAmount": amount,
+                "taxRate": 0,
+                "taxAmount": 0,
+                "grossAmount": amount,
+                "reason": item_reason,
+            }
+        ],
+    )
+
+
+@router.get("/{settlement_id}/completion-status", response_model=SettlementCompletionStatusOut)
+async def get_settlement_completion_status(
+    settlement_id: str,
+    variant: Literal["GUTSCHRIFT", "BELASTUNG", "KORREKTUR"] = Query(...),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    settlement = db.query(AgrarSettlement).filter(
+        AgrarSettlement.id == settlement_id,
+        AgrarSettlement.tenant_id == tenant_id,
+    ).first()
+    if not settlement:
+        raise HTTPException(status_code=404, detail="Settlement not found")
+
+    repo = get_repository(db)
+    linked_documents: list[dict] = []
+    credit_memos = list_from_store("credit_memo", repo)
+    debit_memos = list_from_store("debit_memo", repo)
+    for memo in credit_memos:
+        if memo.get("settlementId") == settlement_id:
+            linked_documents.append(
+                {
+                    "memo_id": memo.get("id"),
+                    "memo_type": "credit",
+                    "status": memo.get("status"),
+                    "journal_ref": memo.get("journalRef"),
+                    "correction_mode": memo.get("correctionMode"),
+                }
+            )
+    for memo in debit_memos:
+        if memo.get("settlementId") == settlement_id:
+            linked_documents.append(
+                {
+                    "memo_id": memo.get("id"),
+                    "memo_type": "debit",
+                    "status": memo.get("status"),
+                    "journal_ref": memo.get("journalRef"),
+                    "correction_mode": memo.get("correctionMode"),
+                }
+            )
+
+    approval_status = _get_settlement_approval_status(settlement)
+    approval_history = _get_settlement_approval_history(settlement)
+    has_journal_entry = bool(settlement.posted_journal_ref)
+
+    completion_variant = SettlementCompletionVariant(variant)
+    document_kind = None
+    document_status = None
+    correction_mode = None
+    correction_links_complete = False
+
+    if completion_variant == SettlementCompletionVariant.GUTSCHRIFT:
+        credit = next((doc for doc in linked_documents if doc["memo_type"] == "credit"), None)
+        document_kind = SettlementFinancialDocumentKind.GUTSCHRIFT if credit else None
+        document_status = credit["status"] if credit else None
+    elif completion_variant == SettlementCompletionVariant.BELASTUNG:
+        debit = next((doc for doc in linked_documents if doc["memo_type"] == "debit"), None)
+        document_kind = SettlementFinancialDocumentKind.BELASTUNG if debit else None
+        document_status = debit["status"] if debit else None
+    else:
+        credit = next((doc for doc in linked_documents if doc["memo_type"] == "credit"), None)
+        debit = next((doc for doc in linked_documents if doc["memo_type"] == "debit"), None)
+        if credit and debit:
+            document_kind = SettlementFinancialDocumentKind.KORREKTUR_NEU
+            document_status = "BOOKED" if credit.get("journal_ref") and debit.get("journal_ref") else credit.get("status") or debit.get("status")
+            correction_mode = "STORNO_UND_NEU"
+            correction_links_complete = True
+        elif credit or debit:
+            document_kind = SettlementFinancialDocumentKind.STORNO
+            document_status = (credit or debit).get("status")
+            correction_mode = (credit or debit).get("correction_mode") or "STORNO"
+
+    result = evaluate_settlement_completion(
+        SettlementCompletionEvidence(
+            settlement_id=settlement_id,
+            variant=completion_variant,
+            approval_status=approval_status,
+            has_approval_history=bool(approval_history),
+            has_audit_chain=bool(approval_history),
+            has_gobd_check=has_journal_entry,
+            has_journal_entry=has_journal_entry,
+            financial_document_kind=document_kind,
+            financial_document_status=document_status,
+            correction_mode=correction_mode,
+            correction_links_complete=correction_links_complete,
+        )
+    )
+    return SettlementCompletionStatusOut(
+        settlement_id=result.settlement_id,
+        variant=result.variant.value,
+        completed=result.completed,
+        completion_pct=result.completion_pct,
+        missing_controls=result.missing_controls,
+        next_step=result.next_step,
+        linked_documents=linked_documents,
+    )
 
 
 @router.post("/{settlement_id}/cancel", response_model=dict)

@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect } from 'react'
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -14,6 +14,9 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { RefreshCw, Settings, Download, AlertTriangle } from 'lucide-react'
+import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
+import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
+import { AgentProcessPanel } from '@/components/agent'
 import {
   getMatrix,
   getKpi,
@@ -55,6 +58,7 @@ export default function LstCommodityPositionMatrix(): JSX.Element {
   const [viewMode, setViewMode] = useState<NonNullable<MatrixParams['view_mode']>>('physisch')
   const [drilldown, setDrilldown] = useState<{ articleId: string; periodKey: string } | null>(null)
   const [contextCell, setContextCell] = useState<{ articleId: string; periodKey: string; x: number; y: number } | null>(null)
+  const articleFilterRef = useRef<HTMLInputElement | null>(null)
 
   const matrixParams = useMemo(
     (): MatrixParams => ({
@@ -202,7 +206,14 @@ export default function LstCommodityPositionMatrix(): JSX.Element {
     kpiQuery.refetch()
   }
 
+  const shortcuts = buildCoreMaskShortcuts({
+    onRefresh: () => { void handleRefresh() },
+    onSearch: () => articleFilterRef.current?.focus(),
+  })
+  useKeyboardShortcuts(shortcuts)
+
   return (
+    <div className="flex flex-col">
     <div className="space-y-4 p-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Commodity Position Matrix</h1>
@@ -225,6 +236,8 @@ export default function LstCommodityPositionMatrix(): JSX.Element {
           </Button>
         </div>
       </div>
+
+      <AgentProcessPanel domain="einkauf" />
 
       {/* Filter */}
       <Card>
@@ -291,6 +304,7 @@ export default function LstCommodityPositionMatrix(): JSX.Element {
           <div className="md:col-span-2">
             <Label>Artikel (kommagetrennt)</Label>
             <Input
+              ref={articleFilterRef}
               value={articleIds}
               onChange={(e) => setArticleIds(e.target.value)}
               placeholder="optional (z.B. Raps, Sojaschrot)"
@@ -488,6 +502,8 @@ export default function LstCommodityPositionMatrix(): JSX.Element {
           onOpenChange={(open) => !open && setDrilldown(null)}
         />
       )}
+    </div>
+    <KeyboardShortcutBar shortcuts={shortcuts} />
     </div>
   )
 }

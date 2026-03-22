@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
@@ -9,9 +9,12 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { NativeSelect } from '@/components/ui/native-select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { listKontrakte } from '@/lib/api/kontrakte'
+import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
+import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 
 export default function LstKontraktUebersicht(): JSX.Element {
   const navigate = useNavigate()
+  const matchcodeRef = useRef<HTMLInputElement | null>(null)
   const [contractType, setContractType] = useState('')
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
@@ -37,6 +40,13 @@ export default function LstKontraktUebersicht(): JSX.Element {
       }),
   })
 
+  const shortcuts = buildCoreMaskShortcuts({
+    onNew: () => navigate('/kontrakte/neu'),
+    onSearch: () => matchcodeRef.current?.focus(),
+    onRefresh: () => { void query.refetch() },
+  })
+  useKeyboardShortcuts(shortcuts)
+
   const rows = useMemo(() => {
     const source = [...(query.data?.items ?? [])]
     if (contractNoFrom || contractNoTo) {
@@ -48,6 +58,7 @@ export default function LstKontraktUebersicht(): JSX.Element {
   }, [query.data, contractNoFrom, contractNoTo, sortDir])
 
   return (
+    <div className="flex flex-col">
     <div className="space-y-4 p-6">
       <Card>
         <CardHeader>
@@ -97,7 +108,7 @@ export default function LstKontraktUebersicht(): JSX.Element {
             </div>
             <div className="space-y-1">
               <Label>Matchcode 1</Label>
-              <Input value={matchcode1} onChange={(e) => setMatchcode1(e.target.value)} />
+              <Input ref={matchcodeRef} value={matchcode1} onChange={(e) => setMatchcode1(e.target.value)} />
             </div>
             <div className="space-y-1">
               <Label>Matchcode 2</Label>
@@ -172,6 +183,8 @@ export default function LstKontraktUebersicht(): JSX.Element {
           </div>
         </CardContent>
       </Card>
+    </div>
+    <KeyboardShortcutBar shortcuts={shortcuts} />
     </div>
   )
 }

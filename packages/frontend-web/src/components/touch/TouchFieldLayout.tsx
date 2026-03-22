@@ -15,18 +15,15 @@
  *   <TouchSubmitButton onClick={onSubmit} loading={loading}>Einlagern</TouchSubmitButton>
  */
 
-import React from 'react'
+import React, { useId } from 'react'
 import { cn } from '@/lib/utils'
 import { Check } from 'lucide-react'
 
 // ---------------------------------------------------------------------------
-// useTouchDevice — erkennt Touch-Gerät (Tablet/Smartphone)
+// useTouchDevice — re-export from canonical hook (src/hooks/useTouchDevice.ts)
 // ---------------------------------------------------------------------------
 
-export function useTouchDevice(): boolean {
-  if (typeof window === 'undefined') return false
-  return window.matchMedia('(pointer: coarse)').matches
-}
+export { useTouchDevice } from '@/hooks/useTouchDevice'
 
 // ---------------------------------------------------------------------------
 // TouchCard — Große Auswahl-Karte (min 64px Höhe, volle Breite)
@@ -136,14 +133,17 @@ export function TouchNumericInput({
   required,
   className,
 }: TouchNumericInputProps): JSX.Element {
+  const inputId = useId()
+
   return (
     <div className={cn('space-y-1', className)}>
-      <label className="block text-base font-medium text-slate-700">
+      <label htmlFor={inputId} className="block text-base font-medium text-slate-700">
         {label}
         {required && <span className="ml-1 text-red-500">*</span>}
       </label>
       <div className="relative flex items-center">
         <input
+          id={inputId}
           type="number"
           // inputMode="decimal" löst auf iOS/Android den Ziffernblock aus
           inputMode="decimal"
@@ -316,13 +316,16 @@ export function TouchTextInput({
   className,
   hint,
 }: TouchTextInputProps): JSX.Element {
+  const inputId = useId()
+
   return (
     <div className={cn('space-y-1', className)}>
-      <label className="block text-base font-medium text-slate-700">
+      <label htmlFor={inputId} className="block text-base font-medium text-slate-700">
         {label}
         {required && <span className="ml-1 text-red-500">*</span>}
       </label>
       <input
+        id={inputId}
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}

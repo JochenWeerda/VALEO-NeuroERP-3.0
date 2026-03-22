@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
+import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { Download, RefreshCw, ClipboardList } from 'lucide-react'
 import { getCoverageMonitor, requestOverride, type CoverageItem } from '@/lib/api/positions'
 
@@ -59,6 +61,12 @@ export default function FrmCoverageMonitor(): JSX.Element {
     queryKey: ['positions', 'coverage-monitor', params],
     queryFn: () => getCoverageMonitor(params),
   })
+
+  const shortcuts = buildCoreMaskShortcuts({
+    onRefresh: () => { void refetch() },
+    onCancel: () => navigate('/disposition'),
+  })
+  useKeyboardShortcuts(shortcuts)
 
   const handleExport = () => {
     if (!data?.items?.length) return
@@ -129,6 +137,7 @@ export default function FrmCoverageMonitor(): JSX.Element {
   }
 
   return (
+    <div className="flex flex-col">
     <div className="space-y-4 p-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Coverage Monitor (kritische Lücken)</h1>
@@ -293,6 +302,8 @@ export default function FrmCoverageMonitor(): JSX.Element {
           )}
         </CardContent>
       </Card>
+    </div>
+    <KeyboardShortcutBar shortcuts={shortcuts} />
     </div>
   )
 }

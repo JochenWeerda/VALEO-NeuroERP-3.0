@@ -182,6 +182,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         mcp: { businessDomain: 'finance', scope: 'finance:write' },
       },
       {
+        id: 'skonto-optimizer',
+        label: 'Skonto-Optimierung (KI)',
+        icon: Zap,
+        module: '@/pages/finance/skonto-optimizer',
+        preferredPath: 'finance/skonto-optimizer',
+        keywords: ['skonto', 'optimizer', 'ki', 'agent', 'zahlung', 'fälligkeit', 'liquidität'],
+        mcp: { businessDomain: 'finance', scope: 'finance:write' },
+      },
+      {
         id: 'nebenbuch-abstimmung',
         label: 'Nebenbuch-Abstimmung',
         icon: BarChart3,

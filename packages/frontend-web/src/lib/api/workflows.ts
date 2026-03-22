@@ -53,10 +53,19 @@ type NeuroAssistGateResponse = {
   result: Record<string, unknown>
 }
 
+export type RunListItem = {
+  run_id: string
+  capability_key: string
+  status: 'pending_approval' | 'completed' | 'rejected' | 'running' | 'failed'
+  started_at: string
+  result: Record<string, unknown>
+}
+
 // Query Keys
 export const workflowKeys = {
   all: ['workflows'] as const,
   status: (id: string) => [...workflowKeys.all, 'status', id] as const,
+  list: (status?: string) => [...workflowKeys.all, 'list', status ?? 'all'] as const,
 }
 
 // Hooks
@@ -114,6 +123,22 @@ export function useTriggerWorkflow() {
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: workflowKeys.status(data.workflow_id) })
     },
+  })
+}
+
+export function useListRuns(statusFilter?: string) {
+  return useQuery({
+    queryKey: workflowKeys.list(statusFilter),
+    queryFn: async () => {
+      const params = new URLSearchParams()
+      if (statusFilter) params.set('status', statusFilter)
+      params.set('limit', '50')
+      const response = await apiClient.get<RunListItem[]>(
+        `/api/v1/agents/neuroassist/runs?${params.toString()}`,
+      )
+      return response.data
+    },
+    refetchInterval: 10000,
   })
 }
 
