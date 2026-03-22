@@ -1,34 +1,36 @@
-# Wave 100 - Settlement-Abschlussvertrag fuer Gap 004
+# Wave 100 - Settlement Endabnahme E2E (Gap 004)
 
 ## Scope
 
-Expliziter Abschlussvertrag fuer den Settlement-Lifecycle ueber Freigabe, Gutschrift, Belastung, Korrektur und Journal-/Audit-Nachweise.
+Formaler Abschluss fuer den noch offenen Rest von `Gap 004`: Settlement inkl. Gutschrift, Belastung, Korrekturpfad und Freigabe-/Verbuchungsnachweis als zusammenhaengender End-to-End-Fluss.
 
 ## Zielbild
 
-Gap 004 gilt erst dann als abgeschlossen, wenn die Fachvarianten `Gutschrift`, `Belastung` und `Korrektur/Storno+Neu`
-nicht nur in Teilmodulen vorhanden sind, sondern ueber einen einheitlichen Abnahmevertrag bewertet werden koennen.
+Ein Settlement soll nur nach fachlicher Freigabe verbucht werden koennen und danach einen sichtbaren Korrekturpfad ueber Gutschrift, Belastung oder dokumentierte Korrektur besitzen. Die Abschlusspruefung soll fuer alle Varianten maschinenlesbar auswertbar sein.
 
 ## Lieferumfang
 
 | AP | Zielmodul | Beschreibung | Status |
-|----|-----------|--------------|--------|
-| AP1 | `app/core/settlement_completion_contracts.py` | Kanonischer Abschlussvertrag fuer Settlement-Varianten mit Vollstaendigkeitslogik ueber Freigabe-, Audit-, GoBD- und Journal-Nachweise | abgeschlossen |
-| AP2 | `app/api/v1/endpoints/process_kernel_api.py` | `POST /process/settlement/completion/evaluate` fuer die formale Gap-004-Abnahme | abgeschlossen |
-| AP3 | `app/api/v1/endpoints/credit_debit_memos.py` | Buchungspfad fuer Gutschrift und Belastung inkl. `journalRef` und persistiertem Booking-Record | abgeschlossen |
-| AP4 | `tests/test_process_kernel_wave100_settlement_completion.py` | E2E-Abnahmetests fuer Gutschrift-, Belastung- und Korrekturvariante | abgeschlossen |
+|---|---|---|---|
+| AP1 | `app/api/v1/endpoints/agrar_settlements.py` | Approval-Status, Approval-History, Posting-Gate, Correction-Draft und Completion-Status fuer Settlements | abgeschlossen |
+| AP2 | `app/api/v1/endpoints/credit_debit_memos.py` | Settlement-Referenz und Correction-Mode fuer Gutschrift-/Belastungsbelege | abgeschlossen |
+| AP3 | `packages/frontend-web/src/pages/annahme/abrechnung.tsx` | Sichtbarer Freigabe-, Verbuchungs- und Korrekturpfad direkt an der Settlement-Seite | abgeschlossen |
+| AP4 | `packages/frontend-web/src/pages/einkauf/gutschriften-belastungen.tsx` | Direkte Vorbelegung aus Settlement-Korrekturentwurf fuer Gutschrift/Belastung | abgeschlossen |
+| AP5 | `tests/test_process_kernel_wave100_settlement_completion.py` | Endabnahme fuer Approval -> Posting -> Correction -> Completion-Status | abgeschlossen |
 
 ## Abnahmekriterien
 
-- Gap 004 ist ueber einen einzigen kanonischen Contract evaluierbar.
-- Gutschrift und Belastung besitzen einen expliziten Buchungspfad mit `journalRef`.
-- Korrekturvarianten erfordern `STORNO_UND_NEU` plus vollstaendige Verknuepfung der Korrekturbelege.
-- Die drei Varianten `GUTSCHRIFT`, `BELASTUNG` und `KORREKTUR` sind ueber Tests belegt.
+- `post-fibu` blockiert, solange ein Settlement nicht `FREIGEGEBEN` ist.
+- Die Settlement-API liefert Approval-Status, Approval-History und zulassige Folgeaktionen sichtbar aus.
+- Fuer verbuchte Settlements existiert ein direkter Correction-Draft fuer `credit` und `debit`.
+- Completion-Status fuer `GUTSCHRIFT`, `BELASTUNG` und `KORREKTUR` ist maschinenlesbar abrufbar.
+- Frontend-Seiten verbinden Settlement, Freigabe und Korrekturbeleg ohne Medienbruch.
 
 ## Tests
 
 - `python -m pytest tests/test_process_kernel_wave19_settlement_approval.py tests/test_process_kernel_wave73_settlement_gutschrift_freigabe.py tests/test_process_kernel_wave100_settlement_completion.py -q --no-cov`
+- `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`
 
 ## Status
 
-`abgeschlossen` - 2026-03-22 - Gap 004 ist ueber einen expliziten Settlement-Abschlussvertrag, Buchungspfade fuer Credit-/Debit-Memos und E2E-Abnahmetests formal geschlossen.
+`abgeschlossen` - 2026-03-22 - Settlement-Endabnahme ueber Freigabe, Verbuchung, Gutschrift, Belastung und Korrekturpfad formal geschlossen.

@@ -1766,10 +1766,22 @@ async def export_settlement_pdf(
         AgrarSettlementDeduction.settlement_id == settlement_id
     ).all()
     
-    # Berechne Summen
+    # Berechne Summen (Modell: gross_amount_eur, total_deductions_eur, net_amount_eur — kein billing_amount_eur)
     total_deductions = sum(float(d.amount_eur or 0) for d in deductions)
-    net_amount = float(settlement.billing_amount_eur or 0) - total_deductions
-    
+    gross_amount = float(settlement.gross_amount_eur or 0)
+    net_payable = float(settlement.net_amount_eur or 0)
+
+    def _fmt_de_datum(dt) -> str:
+        if dt is None:
+            return "N/A"
+        try:
+            return dt.strftime("%d.%m.%Y")
+        except Exception:
+            return str(dt)
+
+    # Abrechnungsdatum: Verbuchung, sonst Anlage (kein settlement_date-Feld am Modell)
+    abrechnungs_datum = _fmt_de_datum(settlement.posted_at or settlement.created_at)
+
     # Erstelle PDF-Inhalt (textbasiert für Demo - in Produktion PDF-Library verwenden)
     pdf_content = f"""
 {'=' * 70}
@@ -1777,7 +1789,7 @@ SELBSTABRECHNUNG / LIEFERANTEN-ABRECHNUNG
 {'=' * 70}
 
 Abrechnungsnummer: {settlement.settlement_number or settlement.id}
-Datum: {settlement.settlement_date.strftime('%d.%m.%Y') if settlement.settlement_date else 'N/A'}
+Datum: {abrechnungs_datum}
 Status: {settlement.status.upper()}
 
 {'=' * 70}
@@ -1813,10 +1825,10 @@ Summe Abzüge: -{total_deductions:,.2f} EUR
 {'=' * 70}
 RECHNUNGSBETRAG
 {'=' * 70}
-Abrechnungsbetrag (brutto): {settlement.billing_amount_eur:,.2f} EUR
+Abrechnungsbetrag (brutto): {gross_amount:,.2f} EUR
 -abzüge: -{total_deductions:,.2f} EUR
 -----------------------------------
-ZAHLBAR: {net_amount:,.2f} EUR
+ZAHLBAR: {net_payable:,.2f} EUR
 
 {'=' * 70}
 SONSTIGES

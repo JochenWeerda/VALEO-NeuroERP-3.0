@@ -35,7 +35,9 @@ export default function SuspendedSalesPage(): JSX.Element {
   const suspendedSales: SuspendedSale[] = apiSuspendedSales.map((sale: ApiSuspendedSale) => ({
     id: sale.id,
     timestamp: sale.zeitpunkt,
-    cart: [{ artikelnr: sale.id, bezeichnung: sale.grund, ean: '', preis: sale.betrag, menge: Math.max(sale.positionen, 1) }],
+    cart: (sale as Record<string, unknown>).positionen_detail
+      ? ((sale as Record<string, unknown>).positionen_detail as CartItem[])
+      : [{ artikelnr: sale.id, bezeichnung: sale.grund ?? `Bon ${sale.id}`, ean: '', preis: sale.betrag, menge: Math.max(sale.positionen, 1) }],
     customerName: sale.kassierer,
     total: sale.betrag,
     itemCount: sale.positionen,
@@ -138,7 +140,7 @@ export default function SuspendedSalesPage(): JSX.Element {
                   <div className="space-y-2 mb-4">
                     {sale.cart.slice(0, 3).map((item, idx) => (
                       <div key={idx} className="flex items-center gap-2 text-sm">
-                        <span className="text-2xl">{item.image}</span>
+                        <span className="text-2xl">📦</span>
                         <span className="flex-1 truncate">{item.bezeichnung}</span>
                         <span className="text-muted-foreground">×{item.menge}</span>
                       </div>

@@ -38,8 +38,28 @@ def _repo_save(entity_type: str, entity_id: str, payload: dict, repo: dict):
     repo.setdefault(entity_type, {})[entity_id] = payload
 
 
-def _repo_list(entity_type: str, repo: dict):
-    return list(repo.get(entity_type, {}).values())
+def _repo_list(
+    doc_type: str,
+    skip: int = 0,
+    limit: int = 100,
+    filters: dict | None = None,
+    repo: dict | None = None,
+):
+    """Spiegelt router_helpers.list_from_store: dict mit data/total/skip/limit."""
+    items = list((repo or {}).get(doc_type, {}).values())
+    if filters:
+        if "tenantId" in filters:
+            tid = filters["tenantId"]
+            items = [m for m in items if m.get("tenantId") in (tid, None, "")]
+        if "status" in filters:
+            items = [m for m in items if m.get("status") == filters["status"]]
+        if "customerId" in filters:
+            items = [m for m in items if m.get("customerId") == filters["customerId"]]
+        if "supplierId" in filters:
+            items = [m for m in items if m.get("supplierId") == filters["supplierId"]]
+    total = len(items)
+    page = items[skip : skip + limit]
+    return {"ok": True, "data": page, "total": total, "skip": skip, "limit": limit}
 
 
 @dataclass

@@ -508,7 +508,10 @@ async def list_invoices(
     """Listet alle Rechnungen auf mit Filterung."""
     try:
         repo = get_repository(db)
-        all_invoices = list_from_store("sales_invoice", repo)
+        payload = list_from_store(
+            "sales_invoice", skip=0, limit=100_000, repo=repo
+        )
+        all_invoices = payload.get("data") or []
 
         filtered = all_invoices
         if status:

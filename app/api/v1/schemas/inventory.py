@@ -162,6 +162,7 @@ class ArticleUpdate(BaseSchema):
     weight: Optional[Decimal] = Field(None, ge=0, description="Weight per unit")
     dimensions: Optional[str] = Field(None, max_length=50, description="Dimensions")
     is_active: Optional[bool] = Field(None, description="Whether article is active")
+    image_url: Optional[str] = Field(None, max_length=500, description="Product image URL (auto-fetched or manually set)")
 
 
 class Article(ArticleBase, TimestampMixin, SoftDeleteMixin):

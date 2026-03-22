@@ -295,8 +295,11 @@ async def list_credit_memos(
     logger.info(f"Listing credit memos with skip={skip}, limit={limit}, supplier_id={supplier_id}, settled={settled}")
     try:
         repo = get_repository(db)
-        all_memos = list_from_store("credit_memo", repo)
-        
+        payload = list_from_store(
+            "credit_memo", skip=0, limit=100_000, repo=repo
+        )
+        all_memos = payload.get("data") or []
+
         # Filter
         filtered_memos = []
         for memo in all_memos:
@@ -331,8 +334,11 @@ async def list_debit_memos(
     logger.info(f"Listing debit memos with skip={skip}, limit={limit}, supplier_id={supplier_id}, settled={settled}")
     try:
         repo = get_repository(db)
-        all_memos = list_from_store("debit_memo", repo)
-        
+        payload = list_from_store(
+            "debit_memo", skip=0, limit=100_000, repo=repo
+        )
+        all_memos = payload.get("data") or []
+
         # Filter
         filtered_memos = []
         for memo in all_memos:

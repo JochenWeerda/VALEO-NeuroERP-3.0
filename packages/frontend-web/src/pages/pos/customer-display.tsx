@@ -16,47 +16,45 @@ const usePOSSync = (terminalId = 'terminal-1') => {
   const [cart, setCart] = useState<CartItem[]>([])
   const [total, setTotal] = useState(0)
   const [connected, setConnected] = useState(false)
-  
+
   useEffect(() => {
-    const ws = new WebSocket(`ws://localhost:8000/api/v1/ws/pos/${terminalId}`)
-    
-    ws.onopen = () => {
-      console.log('✅ CustomerDisplay WebSocket connected')
-      setConnected(true)
+    let ws: WebSocket
+    let destroyed = false
+
+    const connect = () => {
+      if (destroyed) return
+      ws = new WebSocket(`ws://localhost:8000/api/v1/ws/pos/${terminalId}`)
+      ws.onopen = () => { if (!destroyed) setConnected(true) }
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data as string)
+          if (!destroyed) { setCart(data.cart || []); setTotal(data.total || 0) }
+        } catch { /* ignore malformed messages */ }
+      }
+      ws.onerror = () => { if (!destroyed) setConnected(false) }
+      ws.onclose = () => {
+        if (!destroyed) { setConnected(false); setTimeout(connect, 3000) }
+      }
     }
-    
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data)
-      setCart(data.cart || [])
-      setTotal(data.total || 0)
-    }
-    
-    ws.onerror = (error) => {
-      console.error('❌ WebSocket error:', error)
-      setConnected(false)
-    }
-    
-    ws.onclose = () => {
-      console.log('🔌 WebSocket disconnected - attempting reconnect...')
-      setConnected(false)
-      
-      // Auto-reconnect after 3 seconds
-      setTimeout(() => {
-        console.log('🔄 Reconnecting...')
-      }, 3000)
-    }
-    
-    return () => {
-      ws.close()
-    }
+
+    connect()
+    return () => { destroyed = true; ws?.close() }
   }, [terminalId])
-  
+
   return { cart, total, connected }
 }
 
 export default function CustomerDisplayPage(): JSX.Element {
   const { cart, total, connected } = usePOSSync()
-  const currentTime = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+  const [currentTime, setCurrentTime] = useState(() =>
+    new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+  )
+  useEffect(() => {
+    const id = setInterval(() => {
+      setCurrentTime(new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }))
+    }, 10000)
+    return () => clearInterval(id)
+  }, [])
 
   return (
     <div className="h-screen flex flex-col bg-gradient-to-br from-primary via-primary/90 to-primary/70 text-white overflow-hidden">

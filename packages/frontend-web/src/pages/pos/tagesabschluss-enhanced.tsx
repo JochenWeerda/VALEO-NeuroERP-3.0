@@ -294,8 +294,13 @@ export default function TagesabschlussEnhancedPage(): JSX.Element {
               </div>
             </dl>
 
-            <Button className="w-full" size="lg">
-              In Fibu buchen & TSE-Journal als gebucht markieren
+            <Button
+              className="w-full"
+              size="lg"
+              onClick={() => buchungMutation.mutate()}
+              disabled={buchungMutation.isPending}
+            >
+              {buchungMutation.isPending ? 'Wird gebucht…' : 'In Fibu buchen & TSE-Journal als gebucht markieren'}
             </Button>
           </CardContent>
         </Card>

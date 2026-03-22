@@ -840,6 +840,7 @@ class Article(Base):
     kaufabrechnung = Column(String(50), nullable=True, comment='Purchase settlement type')
     mva_kontrakt = Column(Boolean, default=False, comment='MVA contract')
     mahlerzeugnis = Column(String(50), nullable=True, comment='Mill certificate')
+    image_url = Column(String(500), nullable=True, comment='Product image URL (auto-fetched or manually set)')
     schnittstelle_artikel_nr = Column(String(50), nullable=True, comment='Interface article number')
     schnittstelle_waage_nr = Column(String(50), nullable=True, comment='Interface scale number')
     schnittstelle_produkt_nr = Column(String(50), nullable=True, comment='Interface product number')
