@@ -31,11 +31,11 @@ Diese Statusdatei verdichtet den aktuellen Gesamtstand, ohne die Detailnachweise
 
 ## Status
 
-`abgeschlossen` - 2026-03-20 - Aggregierte Source-of-Truth fuer den Process-Kernel-Management-Status; operative Detailnachweise liegen in den referenzierten `wave-*/STATUS.md`-Dateien.
+`abgeschlossen` - 2026-03-22 - Aggregierte Source-of-Truth fuer den Process-Kernel-Management-Status; operative Detailnachweise liegen in den referenzierten `wave-*/STATUS.md`-Dateien.
 
 ## Gesamtstatus
 
-- Stand: `2026-03-20`
+- Stand: `2026-03-22`
 - Status: `Waves 1 bis 100 abgeschlossen`
 - Gesamtsuite: `5916 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed`
 - Bereinigter Gap-Abgleich gegen spaetere Wave-Nachweise: `docs/roadmap/status/2026-03-20-gap-matrix-bereinigt.md`

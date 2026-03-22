@@ -3,6 +3,7 @@ import axios from 'axios'
 import { Command, CommandInput, CommandList, CommandItem, CommandEmpty, CommandGroup } from '@/components/ui/command'
 import { Badge } from '@/components/ui/badge'
 import { apiClient } from '@/lib/api-client'
+import { ArticleImage } from './ArticleImage'
 
 export type Article = {
   id: string
@@ -10,7 +11,7 @@ export type Article = {
   bezeichnung: string
   ean?: string
   preis: number
-  image?: string
+  image_url?: string | null
   kategorie?: string
   lagerbestand?: number
 }
@@ -29,6 +30,7 @@ type ArticleApi = {
   category?: string | null
   sales_price: string | number
   available_stock?: string | number
+  image_url?: string | null
 }
 
 type PaginatedArticleResponse = {
@@ -37,7 +39,6 @@ type PaginatedArticleResponse = {
 
 const MIN_QUERY_LENGTH = 2
 const SEARCH_DEBOUNCE_MS = 300
-const DEFAULT_PLACEHOLDER_ICON = '[ ]'
 
 function mapArticle(api: ArticleApi): Article {
   const price = typeof api.sales_price === 'string' ? Number(api.sales_price) : api.sales_price ?? 0
@@ -51,7 +52,7 @@ function mapArticle(api: ArticleApi): Article {
     preis: Number.isFinite(price) ? price : 0,
     kategorie: api.category ?? undefined,
     lagerbestand: stock !== undefined && Number.isFinite(stock) ? Number(stock) : undefined,
-    image: DEFAULT_PLACEHOLDER_ICON,
+    image_url: api.image_url ?? null,
   }
 }
 
@@ -142,7 +143,7 @@ export function ArticleSearch({ onSelect, placeholder = 'Artikel suchen (Name, E
                 onSelect={() => handleSelect(article)}
                 className="flex items-center gap-4 py-4 cursor-pointer"
               >
-                <span className="text-4xl">{article.image ?? DEFAULT_PLACEHOLDER_ICON}</span>
+                <ArticleImage imageUrl={article.image_url} name={article.bezeichnung} category={article.kategorie} size="h-12 w-12" />
 
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold text-base truncate">{article.bezeichnung}</div>

@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from typing import Optional, List
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
+from pydantic import BaseModel as PydanticBaseModel
 from sqlalchemy import or_, func, text
 from sqlalchemy.orm import Session
 
@@ -154,6 +155,7 @@ def _to_article_schema(row: ArticleModel) -> Article:
             "reserved_stock": row.reserved_stock or 0,
             "available_stock": row.available_stock or 0,
             "is_active": row.is_active,
+            "image_url": getattr(row, 'image_url', None),
             "created_at": row.created_at,
             "updated_at": row.updated_at,
             "deleted_at": row.deleted_at,
@@ -738,3 +740,91 @@ async def get_article_stock_movements(
         "page": (skip // limit) + 1,
         "size": limit,
     }
+
+
+# ── Image Enrichment ──────────────────────────────────────────────────────────
+
+class ImageEnrichResult(PydanticBaseModel):
+    article_id: str
+    image_url: Optional[str]
+    source: str  # "category", "open_food_facts", "wikipedia", "none"
+
+
+class EnrichImagesResponse(PydanticBaseModel):
+    enriched: int
+    skipped: int
+    failed: int
+    results: list[ImageEnrichResult]
+
+
+async def _do_enrich(article_ids: list[str], db: Session, tenant_id: str) -> EnrichImagesResponse:
+    """Fetch images for articles that currently have no image_url."""
+    from ....services.article_image_enrichment import resolve_image_for_article
+
+    query = db.query(ArticleModel).filter(
+        ArticleModel.tenant_id == tenant_id,
+        ArticleModel.is_active == True,  # noqa: E712
+        ArticleModel.image_url == None,  # noqa: E711
+    )
+    if article_ids:
+        query = query.filter(ArticleModel.id.in_(article_ids))
+
+    rows = query.limit(200).all()
+    enriched = skipped = failed = 0
+    results: list[ImageEnrichResult] = []
+
+    import asyncio
+    for row in rows:
+        ean = getattr(row, 'ean_code', None) or getattr(row, 'barcode', None)
+        try:
+            url = await resolve_image_for_article(row.name, ean)
+            if url:
+                row.image_url = url
+                enriched += 1
+                source = "category" if "wikimedia" in url else ("wikipedia" if "wikipedia" in url else "open_food_facts")
+            else:
+                skipped += 1
+                source = "none"
+            results.append(ImageEnrichResult(article_id=str(row.id), image_url=url, source=source))
+        except Exception:
+            failed += 1
+            results.append(ImageEnrichResult(article_id=str(row.id), image_url=None, source="none"))
+        await asyncio.sleep(0.2)
+
+    db.commit()
+    return EnrichImagesResponse(enriched=enriched, skipped=skipped, failed=failed, results=results)
+
+
+@router.post("/{article_id}/fetch-image", response_model=ImageEnrichResult)
+async def fetch_article_image(
+    article_id: str,
+    db: Session = Depends(get_db),
+):
+    """Fetch and persist an image for a single article (overwrites existing)."""
+    from ....services.article_image_enrichment import resolve_image_for_article
+
+    row = db.query(ArticleModel).filter(ArticleModel.id == article_id).first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Artikel nicht gefunden")
+
+    ean = getattr(row, 'ean_code', None) or getattr(row, 'barcode', None)
+    url = await resolve_image_for_article(row.name, ean)
+    if url:
+        row.image_url = url
+        db.commit()
+    source = "category" if url and "wikimedia" in url else ("wikipedia" if url and "wikipedia" in url else ("open_food_facts" if url else "none"))
+    return ImageEnrichResult(article_id=article_id, image_url=url, source=source)
+
+
+@router.post("/enrich-images", response_model=EnrichImagesResponse)
+async def enrich_article_images(
+    article_ids: Optional[list[str]] = None,
+    tenant_id: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+):
+    """
+    Batch-fetch product images for articles that have no image_url yet.
+    If article_ids is empty/omitted, processes up to 200 articles per call.
+    """
+    effective_tenant = tenant_id or DEFAULT_TENANT
+    return await _do_enrich(article_ids or [], db, effective_tenant)

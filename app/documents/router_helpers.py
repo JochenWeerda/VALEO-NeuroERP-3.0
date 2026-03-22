@@ -60,7 +60,14 @@ def list_from_store(
     filters: Optional[Dict] = None,
     repo: Optional[DocumentRepository] = None
 ) -> Dict:
-    """Listet Dokumente aus DB oder In-Memory Store"""
+    """Listet Dokumente aus DB oder In-Memory Store.
+
+    Rückgabe: ``{"ok": bool, "data": list[dict], "total": int, "skip": int, "limit": int}``.
+    Caller müssen über die Liste in ``result["data"]`` iterieren — nicht über ``result``.
+
+    **Wichtig:** ``repo`` immer per Keyword übergeben (``repo=...``), wenn ``skip``/``limit``
+    weggelassen werden — der zweite *positions*elle Parameter ist ``skip``, nicht ``repo``.
+    """
     if repo:
         try:
             docs = repo.list_documents(doc_type, skip, limit, filters)
