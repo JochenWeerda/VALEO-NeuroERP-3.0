@@ -3,9 +3,45 @@
  * Proxy zum Rationsoptimierungs-Microservice (GfE-2023, PuLP)
  */
 
-import { apiClient } from '@/lib/axios'
+import { apiClient } from '../api-client'
 
 const BASE = '/api/v1/agrar/rations-optimization'
+
+/**
+ * Lesbare Fehlermeldung aus FastAPI/Axios (HTTP 400+): `detail` als String oder Validierungsliste.
+ */
+export function getRationsApiErrorMessage(error: unknown, fallback: string): string {
+  if (error && typeof error === 'object' && 'response' in error) {
+    const ax = error as {
+      response?: { status?: number; data?: { detail?: unknown; message?: string } }
+      message?: string
+    }
+    const status = ax.response?.status
+    if (status !== undefined && status > 0 && status < 400) {
+      return fallback
+    }
+    const detail = ax.response?.data?.detail
+    if (typeof detail === 'string' && detail.trim()) {
+      return detail
+    }
+    if (Array.isArray(detail)) {
+      const parts = detail.map((item) => {
+        if (typeof item === 'string') return item
+        if (item && typeof item === 'object' && 'msg' in item) {
+          return String((item as { msg?: string }).msg ?? item)
+        }
+        return JSON.stringify(item)
+      })
+      const joined = parts.filter(Boolean).join('; ')
+      if (joined) return joined
+    }
+    const msg = ax.response?.data?.message
+    if (typeof msg === 'string' && msg.trim()) return msg
+    if (ax.message) return ax.message
+  }
+  if (error instanceof Error && error.message) return error.message
+  return fallback
+}
 
 export interface CowProfile {
   breed: string
@@ -40,31 +76,55 @@ export interface FeedIngredient {
 
 export interface RationItem {
   feed_id: string
-  feed_name?: string
-  amount_kg_dm: number
-  amount_kg_fm?: number
-  cost_per_kg_dm?: number
-  daily_cost?: number
+  name: string
+  kgdm: number
+  kgfm: number
+  unit_cost: number
+  total_cost: number
+}
+
+export interface NutrientSupply {
+  dmi_kg: number
+  me_mj: number
+  sidp_g: number
+  andfom_g: number
+  starch_g: number
+  sugar_g: number
+  fat_g: number
+  ca_g: number
+  p_g: number
+  na_g: number
+  forage_share_pct: number
+}
+
+export interface ConstraintReportItem {
+  name: string
+  target: number
+  actual: number
+  difference: number
+  fulfilled: boolean
+  status: string
 }
 
 export interface OptimizationResult {
   status: 'optimal' | 'infeasible' | 'unbounded' | 'error'
-  total_cost_eur_day: number
+  objective_value?: number
+  total_cost_eur_day?: number
   ration_items: RationItem[]
-  nutrient_supply: Record<string, number>
-  constraint_report: Array<{ constraint: string; status: string; value?: number }>
+  nutrient_supply: NutrientSupply
+  constraint_report: ConstraintReportItem[]
   warnings: string[]
   metadata?: Record<string, unknown>
 }
 
 export async function fetchRationsHealth(): Promise<{ success: boolean; configured?: boolean }> {
-  const data = await apiClient.get<{ success: boolean; configured?: boolean }>(`${BASE}/health`)
+  const { data } = await apiClient.get<{ success: boolean; configured?: boolean }>(`${BASE}/health`)
   return data
 }
 
 export async function fetchFeeds(group?: string): Promise<FeedIngredient[]> {
   const params = group ? { group } : {}
-  const data = await apiClient.get<FeedIngredient[]>(`${BASE}/feeds`, { params })
+  const { data } = await apiClient.get<FeedIngredient[]>(`${BASE}/feeds`, { params })
   return data
 }
 
@@ -72,7 +132,7 @@ export async function optimizeFromProfile(
   cowProfile: CowProfile,
   feedIds?: string[]
 ): Promise<OptimizationResult> {
-  const data = await apiClient.post<OptimizationResult>(`${BASE}/optimize/from-profile`, {
+  const { data } = await apiClient.post<OptimizationResult>(`${BASE}/optimize/from-profile`, {
     cow_profile: cowProfile,
     feeds: feedIds,
   })
@@ -80,11 +140,16 @@ export async function optimizeFromProfile(
 }
 
 export async function optimizeDemo(): Promise<OptimizationResult> {
-  const data = await apiClient.post<OptimizationResult>(`${BASE}/optimize/demo`)
+  const { data } = await apiClient.post<OptimizationResult>(`${BASE}/optimize/demo`)
   return data
 }
 
 export async function calculateRequirements(cowProfile: CowProfile): Promise<Record<string, number>> {
-  const data = await apiClient.post<Record<string, number>>(`${BASE}/requirements/calculate`, cowProfile)
+  const { data } = await apiClient.post<Record<string, number>>(`${BASE}/requirements/calculate`, cowProfile)
+  return data
+}
+
+export async function validateFeeds(feeds: FeedIngredient[]): Promise<{ valid: boolean; errors: string[] }> {
+  const { data } = await apiClient.post<{ valid: boolean; errors: string[] }>(`${BASE}/feeds/validate`, { feeds })
   return data
 }

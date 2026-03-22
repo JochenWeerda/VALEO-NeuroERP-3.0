@@ -36,6 +36,17 @@ This tool implements a least-cost ration formulation system for dairy cows using
 - **Hinweis**: Vollständige Tabellen (sidAA, FAN-Korrekturen, exakte Mineralien) nur in der GfE-Publikation (DLG-Verlag); das Modul spiegelt die in Fachartikeln konsistent genannten ME-/ECM-Kernelemente wider.
 - **Futtermittel-ME (Praxis)**: Referenz-CSVs **DLG Futterwerttabellen Wiederkäuer 2025** und **LKV Sachsen Getreideernte 2025** unter `data/reference/`; Einordnung und Mapping → `FeedIngredient` in **`docs/futterwerte_dlg_2025_gfe2023.md`**. Getreide ernteaktuell, übrige Konzentrate nach DLG-Standard; **sidP/Mineralien** aus vollständigen DLG-Tabellen oder Analyse ergänzen (nicht aus RP schätzen). **Excel-/CSV-Vorlage** für LP-Ergänzungsfelder: `data/reference/dlg_2025_lp_import_template.xlsx` (Kopie; Aktualisierung: `python scripts/import_dlg_lp_template_from_xlsx.py`). **Befüllt + Quellen:** `data/reference/dlg_2025_lp_import_filled_sourced.xlsx` / `.csv` (`python scripts/import_dlg_lp_filled_from_xlsx.py`). **Merge** Referenz + befüllt → `dlg_merged_feeds_lp.csv`: `python scripts/merge_dlg_reference_to_lp_csv.py` (Loader: `app.utils.dlg_merged_csv`).
 
+**Dokumentation vertiefen:** [NEL vs. ME](docs/futterwerte_dlg_2025_gfe2023.md#nel-vs-me), sidP/Mineralien-Checkliste und **Regression** nach Änderungen an Aliases oder Referenz-CSVs: [Regression: Merge-Report und Aliases](docs/futterwerte_dlg_2025_gfe2023.md#regression-merge-report-und-aliases).
+
+#### Optional: DLG-Merge über die API (Umgebungsvariablen)
+
+| Variable | Bedeutung | Typischer Default |
+|----------|-----------|-------------------|
+| `RATIONS_DLG_MERGED_ENABLE` | Gemergte Futtermittel (`dlg_merged_feeds_lp.csv`) zusätzlich zum Demo-Datensatz laden | nicht gesetzt bzw. `0` |
+| `RATIONS_DLG_MERGED_TENANT_ID` | Mandanten-ID für den DLG-Merge-Datensatz | `dlg` |
+
+Siehe `docs/futterwerte_dlg_2025_gfe2023.md` (Abschnitt *Optional: API/FeedService Tenant-Hook*).
+
 ### Constraints Implemented
 1. Dry matter intake equality
 2. Minimum metabolizable energy
@@ -156,7 +167,7 @@ rationsoptimierung/
 
 ### Optimization
 - `POST /api/v1/optimize` - Optimize ration for given cow profile, requirements, and feeds
-- `POST /api/v1/optimize/demo` - Run demo optimization with sample data
+- `POST /api/v1/optimize/demo` - Demo mit festem Kuhprofil; bei `X-Tenant-Id: dlg` (Merge aktiv) werden ohne Raufutter im Mandanten automatisch Grassilage/Maissilage aus `default` ergänzt — siehe `docs/futterwerte_dlg_2025_gfe2023.md`
 - `POST /api/v1/optimize/from-profile` - JSON-Body `OptimizeFromProfileRequest`: `cow_profile` (Pflicht), optional `feeds` (Futtermittel-IDs; weglassen = alle aktiven), optional `options`. Ohne `target_dmi_kg` wird TM geschätzt (GfE-kompatibel mit typischer Energiekonzentration im LP).
 
 ## Usage Examples

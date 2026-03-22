@@ -82,11 +82,25 @@ type MemoItem = {
 type MemoData = {
   supplierId: string
   invoiceId?: string
+  settlementId?: string
   memoDate: string
   reason: string
   notes: string
   items: MemoItem[]
   settlementInvoiceIds: string[]
+}
+
+type SettlementCorrectionDraft = {
+  settlement_id: string
+  settlement_number: string
+  memo_type: 'credit' | 'debit'
+  supplier_id: string
+  supplier_name?: string | null
+  posted_journal_ref?: string | null
+  suggested_reason: string
+  suggested_notes: string
+  suggested_route: string
+  items: MemoItem[]
 }
 
 export default function GutschriftenBelastungenPage(): JSX.Element {
@@ -95,6 +109,7 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
   const { type } = useParams<{ type?: string }>()
   const [searchParams] = useSearchParams()
   const invoiceId = searchParams.get('invoiceId')
+  const settlementId = searchParams.get('settlementId')
   
   const [activeTab, setActiveTab] = useState<'credit' | 'debit'>(type === 'debit' ? 'debit' : 'credit')
   const [loading, setLoading] = useState(false)
@@ -104,9 +119,11 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
   const [memoDialogOpen, setMemoDialogOpen] = useState(false)
   const [settlementDialogOpen, setSettlementDialogOpen] = useState(false)
   const [selectedMemo, setSelectedMemo] = useState<CreditMemo | DebitMemo | null>(null)
+  const [settlementDraft, setSettlementDraft] = useState<SettlementCorrectionDraft | null>(null)
   const [memoData, setMemoData] = useState<MemoData>({
     supplierId: '',
     invoiceId: invoiceId || '',
+    settlementId: settlementId || '',
     memoDate: new Date().toISOString().split('T')[0],
     reason: '',
     notes: '',
@@ -119,6 +136,11 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
     loadDebitMemos()
     loadOpenInvoices()
   }, [])
+
+  useEffect(() => {
+    if (!settlementId) return
+    void loadSettlementCorrectionDraft(settlementId, activeTab)
+  }, [settlementId, activeTab])
 
   useEffect(() => {
     if (invoiceId) {
@@ -206,6 +228,31 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
     }
   }
 
+  const loadSettlementCorrectionDraft = async (targetSettlementId: string, memoType: 'credit' | 'debit') => {
+    try {
+      const response = (await apiClient.get<SettlementCorrectionDraft>(
+        `/api/v1/agrar/settlements/${targetSettlementId}/correction-draft?memo_type=${memoType}`
+      )) as unknown as SettlementCorrectionDraft
+      setSettlementDraft(response)
+      setMemoData((prev) => ({
+        ...prev,
+        supplierId: response.supplier_id,
+        invoiceId: '',
+        settlementId: response.settlement_id,
+        reason: response.suggested_reason,
+        notes: response.suggested_notes,
+        items: response.items,
+      }))
+    } catch (error) {
+      console.error('Fehler beim Laden des Settlement-Korrekturentwurfs:', error)
+      toast({
+        variant: 'destructive',
+        title: t('crud.messages.loadError'),
+        description: 'Settlement-Korrekturentwurf konnte nicht geladen werden.',
+      })
+    }
+  }
+
   const handleCreateMemo = () => {
     if (!memoData.supplierId) {
       toast({
@@ -260,6 +307,8 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
       await apiClient.post(endpoint, {
         supplierId: memoData.supplierId,
         invoiceId: memoData.invoiceId || undefined,
+        settlementId: memoData.settlementId || undefined,
+        correctionMode: settlementDraft ? (activeTab === 'credit' ? 'CREDIT_NOTE' : 'DEBIT_MEMO') : undefined,
         memoDate: memoData.memoDate,
         reason: memoData.reason,
         notes: memoData.notes || undefined,
@@ -278,6 +327,7 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
       setMemoData({
         supplierId: '',
         invoiceId: '',
+        settlementId: '',
         memoDate: new Date().toISOString().split('T')[0],
         reason: '',
         notes: '',
@@ -416,6 +466,26 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
           {t('common.back')}
         </Button>
       </div>
+
+      {settlementDraft ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>Settlement-Korrekturbezug</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            <div className="font-medium">{settlementDraft.settlement_number}</div>
+            <div className="text-muted-foreground">
+              Settlement-ID: {settlementDraft.settlement_id}
+            </div>
+            <div className="text-muted-foreground">
+              Journal: {settlementDraft.posted_journal_ref || '-'}
+            </div>
+            <div className="text-muted-foreground">
+              Lieferant: {settlementDraft.supplier_name || settlementDraft.supplier_id}
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
 
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'credit' | 'debit')}>
         <TabsList>

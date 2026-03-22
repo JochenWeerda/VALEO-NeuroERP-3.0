@@ -81,6 +81,7 @@ from app.api.v1.endpoints import (
     customer_extensions,
     business_partners,
     messages,
+    channel_work_surfaces,
     dms_images,
     sales_shipping_ext,
     master_data,
@@ -132,7 +133,7 @@ from app.api.v1.endpoints import (
     position_rules,
     position_overrides,
     batch,
-    supply_chain_blockchain,
+    agents,
 )
 
 # Wave 6-9 Process-Kernel-Endpoints (agrar-p0, supplier, wave-7, wave-9)
@@ -170,6 +171,15 @@ async def api_status():
 api_router.include_router(
     batch.router,
     tags=["batch"],
+)
+
+api_router.include_router(
+    agents.router,
+    tags=["neuroassist", "agents"],
+)
+
+api_router.include_router(
+    channel_work_surfaces.router,
 )
 
 api_router.include_router(
@@ -963,4 +973,3 @@ api_router.include_router(ernte_kampagne_api.router)
 api_router.include_router(finance_read_models.router)
 api_router.include_router(process_kernel_api.router)
 api_router.include_router(agent_context_api.router)
-api_router.include_router(supply_chain_blockchain.router)

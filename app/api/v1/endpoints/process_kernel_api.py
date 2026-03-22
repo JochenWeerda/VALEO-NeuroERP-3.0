@@ -10,6 +10,7 @@ from datetime import datetime
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, Field
 
 from ....core.action_execution import (
     ActionExecutionRequest,
@@ -43,6 +44,12 @@ from ....core.settlement_approval import (
     SettlementApprovalStatus,
     get_allowed_transitions,
     is_terminal,
+)
+from ....core.settlement_completion_contracts import (
+    SettlementCompletionEvidence,
+    SettlementCompletionVariant,
+    SettlementFinancialDocumentKind,
+    evaluate_settlement_completion,
 )
 from ....core.settlement_human_gate import get_default_gate_rules
 from ....core.process_sla import build_default_sla_policies
@@ -407,6 +414,24 @@ from ....core.query_fallback_contracts import (
 
 router = APIRouter(prefix="/process", tags=["process-kernel", "commands"])
 
+
+class SettlementCompletionEvaluateRequest(BaseModel):
+    settlement_id: str = Field(..., min_length=1)
+    variant: str = Field(..., description="GUTSCHRIFT | BELASTUNG | KORREKTUR")
+    approval_status: str = Field(..., description="ENTWURF | ZUR_FREIGABE | FREIGEGEBEN | VERBUCHT")
+    has_approval_history: bool = False
+    has_audit_chain: bool = False
+    has_gobd_check: bool = False
+    has_journal_entry: bool = False
+    has_blockchain_anchor: bool = False
+    financial_document_kind: str | None = Field(
+        default=None,
+        description="GUTSCHRIFT | BELASTUNG | STORNO | KORREKTUR_NEU",
+    )
+    financial_document_status: str | None = None
+    correction_mode: str | None = None
+    correction_links_complete: bool = False
+
 _EXCEPTION_CATALOGS: dict[str, ProcessExceptionCatalog] = {
     "settlement": DEFAULT_SETTLEMENT_EXCEPTION_CATALOG,
 }
@@ -729,6 +754,50 @@ def get_settlement_approval_status(settlement_id: str) -> dict[str, Any]:
         "sla_policies": sla_policies,
         "schema_version": 1,
     }
+
+
+@router.post("/settlement/completion/evaluate", response_model=dict)
+def evaluate_settlement_completion_contract(
+    payload: SettlementCompletionEvaluateRequest,
+) -> dict[str, Any]:
+    """
+    Canonical acceptance contract for Gap 004.
+
+    Evaluates whether a settlement lifecycle variant is fully completed across
+    approval, audit, GoBD and financial document evidence.
+    """
+    try:
+        variant = SettlementCompletionVariant(payload.variant)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=f"Unknown variant: {payload.variant}") from exc
+
+    document_kind = None
+    if payload.financial_document_kind is not None:
+        try:
+            document_kind = SettlementFinancialDocumentKind(payload.financial_document_kind)
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=422,
+                detail=f"Unknown financial_document_kind: {payload.financial_document_kind}",
+            ) from exc
+
+    result = evaluate_settlement_completion(
+        SettlementCompletionEvidence(
+            settlement_id=payload.settlement_id,
+            variant=variant,
+            approval_status=payload.approval_status,
+            has_approval_history=payload.has_approval_history,
+            has_audit_chain=payload.has_audit_chain,
+            has_gobd_check=payload.has_gobd_check,
+            has_journal_entry=payload.has_journal_entry,
+            has_blockchain_anchor=payload.has_blockchain_anchor,
+            financial_document_kind=document_kind,
+            financial_document_status=payload.financial_document_status,
+            correction_mode=payload.correction_mode,
+            correction_links_complete=payload.correction_links_complete,
+        )
+    )
+    return result.as_dict()
 
 
 # ---------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Badge } from '@/components/ui/badge'
@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
+import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
+import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { FileDown, FileText, Loader2, Plus, Search, Users } from 'lucide-react'
 import { useListActions } from '@/hooks/useListActions'
 import { businessPartnerService, type BusinessPartnerEnvelope } from '@/lib/services/business-partner-service'
@@ -37,11 +39,19 @@ function mapToRow(item: BusinessPartnerEnvelope): CustomerRow {
 export default function KundenListePage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
+  const searchRef = useRef<HTMLInputElement | null>(null)
 
   const customersQuery = useQuery({
     queryKey: ['business-partners', searchTerm],
     queryFn: async () => businessPartnerService.list({ search: searchTerm || undefined }),
   })
+
+  const shortcuts = buildCoreMaskShortcuts({
+    onNew: () => navigate('/verkauf/kunde/neu'),
+    onSearch: () => searchRef.current?.focus(),
+    onRefresh: () => { void customersQuery.refetch() },
+  })
+  useKeyboardShortcuts(shortcuts)
 
   const customers = useMemo(
     () => (customersQuery.data ?? []).filter((item) => item.business_partner.roles.is_customer).map(mapToRow),
@@ -100,6 +110,7 @@ export default function KundenListePage(): JSX.Element {
   }
 
   return (
+    <div className="flex flex-col">
     <div className="space-y-4 p-6">
       <div className="flex items-center justify-between">
         <div>
@@ -153,6 +164,7 @@ export default function KundenListePage(): JSX.Element {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
+                ref={searchRef}
                 placeholder="Suche nach Kundennummer oder Name..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -176,6 +188,8 @@ export default function KundenListePage(): JSX.Element {
           <DataTable data={customers} columns={columns} />
         </CardContent>
       </Card>
+    </div>
+    <KeyboardShortcutBar shortcuts={shortcuts} />
     </div>
   )
 }

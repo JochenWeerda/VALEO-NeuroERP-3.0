@@ -3,10 +3,18 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Skeleton } from '@/components/ui/skeleton'
+import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
+import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
+import { AgentProcessPanel } from '@/components/agent'
 import { AlertTriangle, CheckCircle, ClipboardCheck } from 'lucide-react'
 
 export default function CrossCompliancePage(): JSX.Element {
-  const { data: compliance = [], isLoading } = useCrossCompliance()
+  const { data: compliance = [], isLoading, refetch } = useCrossCompliance()
+
+  const shortcuts = buildCoreMaskShortcuts({
+    onRefresh: () => { void refetch() },
+  })
+  useKeyboardShortcuts(shortcuts)
 
   // Loading skeleton
   if (isLoading) {
@@ -54,11 +62,13 @@ export default function CrossCompliancePage(): JSX.Element {
   const offen = compliance.filter((c) => !c.erfuellt).length
 
   return (
+    <div className="flex flex-col">
     <div className="space-y-4 p-6">
       <div>
         <h1 className="text-3xl font-bold">Cross-Compliance</h1>
         <p className="text-muted-foreground">Foerder-Voraussetzungen</p>
       </div>
+      <AgentProcessPanel domain="compliance" />
 
       {offen > 0 && (
         <Card className="border-red-500 bg-red-50">
@@ -111,6 +121,8 @@ export default function CrossCompliancePage(): JSX.Element {
           <DataTable data={compliance} columns={columns} />
         </CardContent>
       </Card>
+    </div>
+    <KeyboardShortcutBar shortcuts={shortcuts} />
     </div>
   )
 }

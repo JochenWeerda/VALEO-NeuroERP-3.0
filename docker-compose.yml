@@ -225,6 +225,9 @@ services:
       - ENVIRONMENT=development
       - LOG_LEVEL=info
       - RATIONS_OPTIMIZATION_API_KEY=${RATIONS_OPTIMIZATION_API_KEY:-dev-api-key-change-in-production}
+      # DLG-Merge (Referenz-Futtermittel): in Prod aktivieren, Datei unter data/reference/dlg_merged_feeds_lp.csv bereitstellen.
+      # - RATIONS_DLG_MERGED_ENABLE=1
+      # - RATIONS_DLG_MERGED_TENANT_ID=dlg
     ports:
       - "8010:8000"
     volumes:
@@ -252,7 +255,6 @@ services:
       API_DEV_TOKEN: dev-token
       AI_SERVICE_URL: http://ai:5000
       DEBUG: "true"
-      WEB_CONCURRENCY: "8"
       LOG_LEVEL: INFO
       CRM_CORE_BASE_URL: http://crm-core:5600
       CRM_CORE_HTTP_TIMEOUT_SECONDS: 5
@@ -281,7 +283,7 @@ services:
       - ./alembic:/app/alembic
       - ./alembic.ini:/app/alembic.ini
       - ./main.py:/app/main.py
-    command: sh -c "alembic upgrade head 2>/dev/null || true && uvicorn main:app --host 0.0.0.0 --port 8000 --workers 8 --timeout-keep-alive 30"
+    command: sh -c "alembic upgrade head 2>/dev/null || true && uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
 
   inventory-service:
     build:

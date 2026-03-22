@@ -17,6 +17,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { AlertCircle, CheckCircle2, Database, Loader2, Play } from 'lucide-react'
+import { AgentProcessPanel, AgentSuggestionBadge } from '@/components/agent'
 
 const ENTITY_LABELS: Record<string, string> = {
   debtors: 'Debitoren',
@@ -53,6 +54,28 @@ export default function DataQualityPage(): JSX.Element {
           MDM-Regeln: Dubletten, Pflichtfelder und Referenzintegrität prüfen (Gap 040).
         </p>
       </div>
+
+      <AgentProcessPanel domain="stammdaten" />
+
+      {results.length > 0 && totalViolations > 0 && (
+        <AgentSuggestionBadge<{ entity_type: string; suggested_action: string; record_ids?: string[] }>
+          capabilityKey="data_quality_assistant"
+          parameters={{
+            entity_types: results.map((r) => r.entity_type),
+            total_violations: totalViolations,
+          }}
+          label="Korrekturvorschlag generieren"
+          renderSuggestion={(s) => (
+            <span>
+              <strong>{s.entity_type}</strong>: {s.suggested_action}
+              {s.record_ids && s.record_ids.length > 0 && (
+                <span className="text-muted-foreground ml-1">({s.record_ids.length} Datensätze)</span>
+              )}
+            </span>
+          )}
+          onAccept={() => { /* Korrektur-Workflow starten */ }}
+        />
+      )}
 
       <Card>
         <CardHeader>

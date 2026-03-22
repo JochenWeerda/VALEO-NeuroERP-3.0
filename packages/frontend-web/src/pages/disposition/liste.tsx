@@ -5,11 +5,20 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Skeleton } from '@/components/ui/skeleton'
+import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
+import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
+import { AgentProcessPanel } from '@/components/agent'
 import { AlertTriangle, BarChart3, CheckCircle } from 'lucide-react'
 
 export default function DispositionPage(): JSX.Element {
   const navigate = useNavigate()
-  const { data: dispo = [], isLoading } = useDisposition()
+  const { data: dispo = [], isLoading, refetch } = useDisposition()
+
+  const shortcuts = buildCoreMaskShortcuts({
+    onNew: () => navigate('/einkauf/bestellvorschlaege'),
+    onRefresh: () => { void refetch() },
+  })
+  useKeyboardShortcuts(shortcuts)
 
   // Loading skeleton
   if (isLoading) {
@@ -72,6 +81,7 @@ export default function DispositionPage(): JSX.Element {
   ]
 
   return (
+    <div className="flex flex-col">
     <div className="space-y-4 p-6">
       <div className="flex items-center justify-between">
         <div>
@@ -80,6 +90,7 @@ export default function DispositionPage(): JSX.Element {
         </div>
         <Button onClick={() => navigate('/einkauf/bestellvorschlaege')}>Zu Bestellvorschlaegen</Button>
       </div>
+      <AgentProcessPanel domain="einkauf" />
 
       {unterMindest > 0 && (
         <Card className="border-red-500 bg-red-50">
@@ -138,6 +149,8 @@ export default function DispositionPage(): JSX.Element {
           <DataTable data={dispo} columns={columns} />
         </CardContent>
       </Card>
+    </div>
+      <KeyboardShortcutBar shortcuts={shortcuts} />
     </div>
   )
 }

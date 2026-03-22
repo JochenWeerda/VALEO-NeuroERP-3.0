@@ -1503,6 +1503,30 @@
     {
       "module": "@/pages/zertifikate/liste",
       "path": "zertifikate"
+    },
+    {
+      "module": "@/pages/finance/skonto-optimizer",
+      "path": "finance/skonto-optimizer"
+    },
+    {
+      "module": "@/pages/workflows/supervisor",
+      "path": "workflows/supervisor"
+    },
+    {
+      "module": "@/pages/admin/data-quality",
+      "path": "admin/data-quality"
+    },
+    {
+      "module": "@/pages/qualitaet/ausnahmen",
+      "path": "qualitaet/ausnahmen"
+    },
+    {
+      "module": "@/pages/workflow/process-mining-analytics",
+      "path": "workflow/process-mining-analytics"
+    },
+    {
+      "module": "@/pages/admin/command-monitor",
+      "path": "admin/command-monitor"
     }
   ]
 }

@@ -15,6 +15,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { CalendarDays, Play, Save, ShieldAlert, Upload, Download, Trash2, Plus, FileText, Clock } from "lucide-react"
 import { ErrorState } from "@/components/ErrorState"
+import { KeyboardShortcutBar } from "@/components/keyboard/KeyboardShortcutBar"
+import { buildCoreMaskShortcuts, useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts"
+import { AgentProcessPanel } from "@/components/agent"
 import {
   listConnectors,
   listReportingUnits,
@@ -424,6 +427,11 @@ export default function MeldewesenKonsole() {
   const isError = errC || errU || errS
   const error = errConn ?? errUnit ?? errSched
 
+  const shortcuts = buildCoreMaskShortcuts({
+    onRefresh: () => { void refetchC(); void refetchU(); void refetchS(); void refetchJ() },
+  })
+  useKeyboardShortcuts(shortcuts)
+
   if (isError) {
     return (
       <div className="p-4">
@@ -442,6 +450,7 @@ export default function MeldewesenKonsole() {
   }
 
   return (
+    <div className="flex flex-col">
     <div className="p-4 md:p-6 space-y-4">
       <div className="flex items-start justify-between gap-3">
         <div>
@@ -472,6 +481,8 @@ export default function MeldewesenKonsole() {
           </label>
         </div>
       </div>
+
+      <AgentProcessPanel domain="compliance" />
 
       <Alert>
         <ShieldAlert className="h-4 w-4" />
@@ -1090,6 +1101,8 @@ export default function MeldewesenKonsole() {
           </ul>
         </CardContent>
       </Card>
+    </div>
+    <KeyboardShortcutBar shortcuts={shortcuts} />
     </div>
   )
 }

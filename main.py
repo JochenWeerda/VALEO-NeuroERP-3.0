@@ -92,6 +92,12 @@ async def lifespan(app: FastAPI):
     # Dispose pre-fork connections so each worker opens fresh ones (multi-worker safety)
     engine.dispose()
 
+    # Increase default threadpool limit for sync route handlers under high concurrency
+    # Default is min(32, cpu_count+4)=16; at 500 users / 8 workers = 62 users/worker
+    import anyio.to_thread
+    limiter = anyio.to_thread.current_default_thread_limiter()
+    limiter.total_tokens = 200
+
     # Configure dependency injection container
     try:
         configure_container()

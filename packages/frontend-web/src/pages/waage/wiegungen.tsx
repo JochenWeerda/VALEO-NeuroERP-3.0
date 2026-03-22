@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -6,6 +6,8 @@ import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ErrorState } from '@/components/ErrorState'
+import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
+import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { useToast } from '@/hooks/use-toast'
 import {
   useAllocateContract,
@@ -43,6 +45,8 @@ export default function WiegungenPage(): JSX.Element {
   const [selectedTicketId, setSelectedTicketId] = useState<string>('')
   const [selectedContractId, setSelectedContractId] = useState<string>('')
   const [form, setForm] = useState<NewTicketForm>(initialForm)
+  const searchRef = useRef<HTMLInputElement | null>(null)
+  const ticketNumberRef = useRef<HTMLInputElement | null>(null)
 
   const ticketsQuery = useWeighingTickets({ limit: 100 })
   const contractsQuery = useOpenContracts()
@@ -126,7 +130,17 @@ export default function WiegungenPage(): JSX.Element {
     }
   }
 
+  const shortcuts = buildCoreMaskShortcuts({
+    onSave: () => { void onCreate() },
+    onSearch: () => searchRef.current?.focus(),
+    onNew: () => ticketNumberRef.current?.focus(),
+    onRefresh: () => { void ticketsQuery.refetch() },
+    isSaveDisabled: createMutation.isPending,
+  })
+  useKeyboardShortcuts(shortcuts)
+
   return (
+    <div className="flex flex-col">
     <div className="space-y-4 p-6">
       <div>
         <h1 className="text-3xl font-bold">Wiegungen</h1>
@@ -170,7 +184,7 @@ export default function WiegungenPage(): JSX.Element {
         <CardContent className="grid gap-3 md:grid-cols-4">
           <div>
             <Label htmlFor="ticketNumber">Ticketnummer</Label>
-            <Input id="ticketNumber" value={form.ticketNumber} onChange={(e) => setForm((p) => ({ ...p, ticketNumber: e.target.value }))} />
+            <Input id="ticketNumber" ref={ticketNumberRef} value={form.ticketNumber} onChange={(e) => setForm((p) => ({ ...p, ticketNumber: e.target.value }))} />
           </div>
           <div>
             <Label htmlFor="scaleId">Waage</Label>
@@ -260,7 +274,7 @@ export default function WiegungenPage(): JSX.Element {
         <CardContent>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="Ticket, Kennzeichen, Waage..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
+            <Input ref={searchRef} placeholder="Ticket, Kennzeichen, Waage..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
           </div>
         </CardContent>
       </Card>
@@ -317,6 +331,8 @@ export default function WiegungenPage(): JSX.Element {
           />
         </CardContent>
       </Card>
+    </div>
+      <KeyboardShortcutBar shortcuts={shortcuts} />
     </div>
   )
 }

@@ -19,3 +19,17 @@ def test_load_merged_feeds_weizen_lkv_me():
 def test_merge_script_output_exists():
     p = Path(__file__).resolve().parents[1] / "data" / "reference" / "dlg_merged_feeds_lp.csv"
     assert p.is_file()
+
+
+def test_load_merged_feeds_includes_forage_silages():
+    feeds = load_merged_feed_ingredients()
+    by_id = {f.id: f for f in feeds}
+    assert "grassilage" in by_id
+    assert "maissilage" in by_id
+    g = by_id["grassilage"]
+    m = by_id["maissilage"]
+    assert g.group.value == "forage"
+    assert m.group.value == "forage"
+    assert g.me_mj_kgdm == pytest.approx(10.5)
+    assert m.me_mj_kgdm == pytest.approx(11.0)
+    assert m.sidp_g_kgdm == pytest.approx(82.0)

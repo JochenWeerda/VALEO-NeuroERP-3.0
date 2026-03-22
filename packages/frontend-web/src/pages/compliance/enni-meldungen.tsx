@@ -3,6 +3,8 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
+import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
+import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { AlertTriangle, Plus } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useENNIMeldungen, type ENNIMeldung } from '@/lib/api/betrieb'
@@ -13,6 +15,12 @@ export default function ENNIMeldungenPage(): JSX.Element {
   const { data: meldungen = [], isError, error, refetch } = useENNIMeldungen()
 
   const offen = useMemo(() => meldungen.filter((m) => m.status === 'entwurf').length, [meldungen])
+
+  const shortcuts = buildCoreMaskShortcuts({
+    onNew: () => navigate('/compliance/enni-neu'),
+    onRefresh: () => { void refetch() },
+  })
+  useKeyboardShortcuts(shortcuts)
 
   if (isError) {
     return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
@@ -46,6 +54,7 @@ export default function ENNIMeldungenPage(): JSX.Element {
   ]
 
   return (
+    <div className="flex flex-col">
     <div className="space-y-4 p-6">
       <div className="flex items-center justify-between">
         <div>
@@ -118,6 +127,8 @@ export default function ENNIMeldungenPage(): JSX.Element {
           <DataTable data={meldungen} columns={columns} />
         </CardContent>
       </Card>
+    </div>
+    <KeyboardShortcutBar shortcuts={shortcuts} />
     </div>
   )
 }

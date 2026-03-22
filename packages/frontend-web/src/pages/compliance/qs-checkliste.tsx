@@ -2,11 +2,19 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
+import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
+import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
+import { AgentProcessPanel } from '@/components/agent'
 import { AlertTriangle, CheckCircle, ClipboardCheck } from 'lucide-react'
 import { ErrorState } from '@/components/ErrorState'
 
 export default function QSChecklistePage(): JSX.Element {
   const { data: qs = [], isError, error, refetch } = useQSCheckliste()
+
+  const shortcuts = buildCoreMaskShortcuts({
+    onRefresh: () => { void refetch() },
+  })
+  useKeyboardShortcuts(shortcuts)
 
   if (isError) {
     return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
@@ -44,6 +52,7 @@ export default function QSChecklistePage(): JSX.Element {
   const offen = qs.filter((q) => !q.erfuellt).length
 
   return (
+    <div className="flex flex-col">
     <div className="space-y-4 p-6">
       <div className="flex items-center justify-between">
         <div>
@@ -52,6 +61,7 @@ export default function QSChecklistePage(): JSX.Element {
         </div>
         <Button>Audit starten</Button>
       </div>
+      <AgentProcessPanel domain="compliance" />
 
       {offen > 0 && (
         <Card className="border-red-500 bg-red-50">
@@ -104,6 +114,8 @@ export default function QSChecklistePage(): JSX.Element {
           <DataTable data={qs} columns={columns} />
         </CardContent>
       </Card>
+    </div>
+    <KeyboardShortcutBar shortcuts={shortcuts} />
     </div>
   )
 }

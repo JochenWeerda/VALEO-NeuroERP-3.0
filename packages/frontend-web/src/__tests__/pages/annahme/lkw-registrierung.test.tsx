@@ -51,7 +51,7 @@ describe('LKWRegistrierungPage', () => {
   it('sollte LKW-Registrierung und Kennzeichen anzeigen', () => {
     renderPage()
     expect(screen.getByRole('heading', { name: 'LKW-Registrierung' })).toBeInTheDocument()
-    expect(screen.getByLabelText(/Kennzeichen \*/i)).toBeInTheDocument()
+    expect(screen.getByRole('textbox', { name: /^Kennzeichen/i })).toBeInTheDocument()
   })
 
   it('sollte Scan-Button anzeigen und bei Klick Scan-Dialog öffnen (F18)', () => {

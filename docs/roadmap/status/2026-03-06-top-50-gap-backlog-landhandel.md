@@ -9,7 +9,7 @@
 ## Ziel
 Dieses Backlog priorisiert die fehlenden Faehigkeiten, um VALEO NeuroERP auf Spitzenniveau gegenueber ServiceERP, a.amic, Odoo, SAP und Oracle zu bringen. Fokus: End-to-End Prozessabdeckung, AI-first Workflows, Agent-Interoperabilitaet, UUIX, Performance, Parallelverarbeitung.
 
-## Statusabgleich 2026-03-15
+## Statusabgleich 2026-03-20
 
 Abgleich gegen den operativen Lieferstand in `docs/architecture/process-kernel/STATUS.md`
 und den zugehoerigen `wave-*/STATUS.md`-Dateien:
@@ -39,20 +39,35 @@ und den zugehoerigen `wave-*/STATUS.md`-Dateien:
 | 022 | abgeschlossen | `docs/architecture/process-kernel/wave-22/STATUS.md` |
 | 035 | abgeschlossen | `docs/architecture/process-kernel/wave-20/STATUS.md` |
 | 041 | abgeschlossen | `docs/architecture/process-kernel/wave-20/STATUS.md` |
-| 001 | teilweise abgeschlossen | `docs/architecture/process-kernel/wave-21/STATUS.md` |
+| 001 | abgeschlossen | `docs/architecture/process-kernel/wave-85/STATUS.md` |
+| 002 | abgeschlossen | `docs/architecture/process-kernel/wave-91/STATUS.md`, `docs/architecture/process-kernel/wave-92/STATUS.md` |
 | 005 | abgeschlossen | `docs/architecture/process-kernel/wave-24/STATUS.md` |
 | 007 | abgeschlossen | `docs/architecture/process-kernel/wave-23/STATUS.md` |
+| 008 | abgeschlossen | `tests/test_process_kernel_wave8_complaint_e2e.py`, `app/api/v1/endpoints/reklamation_api.py` |
 | 009 | abgeschlossen | `docs/architecture/process-kernel/wave-24/STATUS.md` |
 | 025 | abgeschlossen | `docs/architecture/process-kernel/wave-25/STATUS.md` |
 | 027 | abgeschlossen | `docs/architecture/process-kernel/wave-27/STATUS.md` |
 | 042 | abgeschlossen | `docs/architecture/process-kernel/wave-23/STATUS.md` |
+| 012 | abgeschlossen | `tests/test_process_kernel_wave86_workflow_sandbox.py`, `app/api/v1/endpoints/workflow_simulation.py` |
+| 016 | abgeschlossen | `app/api/v1/endpoints/idempotency_monitoring.py`, `packages/frontend-web/src/components/agent/IdempotencyMonitoringPanel.tsx` |
+| 018 | abgeschlossen | `tests/test_process_kernel_wave87_process_mining_observation.py`, `app/api/v1/endpoints/process_mining_observation.py` |
+| 019 | abgeschlossen | `docs/architecture/process-kernel/wave-81/STATUS.md` |
+| 020 | abgeschlossen | `docs/architecture/process-kernel/wave-90/STATUS.md` |
+| 021 | abgeschlossen | `docs/architecture/process-kernel/wave-84/STATUS.md`, `docs/architecture/process-kernel/wave-91/STATUS.md` |
+| 023 | abgeschlossen | `docs/architecture/process-kernel/wave-77/STATUS.md`, `docs/architecture/process-kernel/wave-91/STATUS.md`, `docs/architecture/process-kernel/wave-94/STATUS.md` |
+| 024 | abgeschlossen | `docs/architecture/process-kernel/wave-76/STATUS.md`, `docs/architecture/process-kernel/wave-91/STATUS.md`, `docs/architecture/process-kernel/wave-92/STATUS.md` |
+| 029 | abgeschlossen | `docs/architecture/process-kernel/wave-93/STATUS.md`, `docs/architecture/process-kernel/wave-98/STATUS.md` |
+| 030 | abgeschlossen | `docs/architecture/process-kernel/wave-89/STATUS.md` |
+| 037 | abgeschlossen | `docs/architecture/process-kernel/wave-87/STATUS.md` |
+| 004 | abgeschlossen | `docs/architecture/process-kernel/wave-19/STATUS.md`, `docs/architecture/process-kernel/wave-100/STATUS.md` |
 
 Hinweise:
 - Dieses Dokument bleibt die strategische Priorisierung und kein feingranulares Delivery-Log.
 - Der aktuelle Wahrheitsstand fuer Process-Kernel-Lieferungen liegt in `docs/architecture/process-kernel/STATUS.md`.
-- Weitere Gaps werden hier nur dann als abgeschlossen eingeordnet, wenn der Abschluss explizit in einer Wave-STATUS-Datei belegt ist.
+- Weitere Gaps werden hier nur dann als abgeschlossen eingeordnet, wenn der Abschluss entweder explizit in einer Wave-STATUS-Datei oder ueber stabile Code-/Test-Artefakte belastbar belegt ist.
 - Fuer den bereinigten Zwischenstand nach spaeteren Lieferungen siehe zusaetzlich `docs/roadmap/status/2026-03-20-gap-matrix-bereinigt.md`.
-- Die folgenden Gaps bleiben trotz spaeterer Technikarbeit bewusst weiter offen oder teilweise: `001`, `002`, `004`, `008`, `012`, `016`, `018`, `019`, `020`, `021`, `023`, `024`, `029`, `030`, `037`.
+- Nach dem aktuellen Abgleich verbleiben keine produktfachlich offenen Top-50-Restgaps.
+- Fuer den final bereinigten Stand siehe `docs/roadmap/status/2026-03-20-gap-matrix-bereinigt.md`.
 
 ## Bewertungslogik
 - Prioritaet: P0 (kritisch), P1 (hoch), P2 (mittel)
@@ -64,14 +79,14 @@ Hinweise:
 
 | ID | Gap | KPI-Ziel | Aufwand | Abhaengigkeit | Prioritaet | Horizon |
 |---|---|---|---|---|---|---|
-| 001 | E2E Kontrakt->Annahme->Qualitaet->Settlement ohne Medienbruch | >=95% Vorgaenge ohne manuelle Nebenliste | L | Workflow Core, Stammdaten | P0 | H1 |
-| 002 | Vollstaendige Waage/Annahme-Masken fuer alle Warenfluesse | 100% Annahmearten ueber produktive Maske | M | Waage APIs, Rollenmodell | P0 | H1 |
+| 001 | E2E Kontrakt->Annahme->Qualitaet->Settlement ohne Medienbruch | >=95% Vorgaenge ohne manuelle Nebenliste | L | Workflow Core, Stammdaten | P0 | H1 | **GESCHLOSSEN Wave 85** - `e2e_process_chain_contracts.py`, `docs/architecture/process-kernel/wave-85/STATUS.md` |
+| 002 | Vollstaendige Waage/Annahme-Masken fuer alle Warenfluesse | 100% Annahmearten ueber produktive Maske | M | Waage APIs, Rollenmodell | P0 | H1 | **GESCHLOSSEN Waves 91/92** - Annahme-/Waage-/Rohware-/Verladungs-Kernflow mit Touch/Keyboard-Haertung, `docs/architecture/process-kernel/wave-91/STATUS.md`, `docs/architecture/process-kernel/wave-92/STATUS.md` |
 | 003 | Trocknungs- und Abzugsregeln als versionierte Engine | 100% Abrechnungen regelbasiert reproduzierbar | M | Rule Engine, Audit | P0 | H1 | **GESCHLOSSEN Wave 26** - `trocknungs_abrechnung.py`, `docs/architecture/process-kernel/wave-26/STATUS.md` |
-| 004 | Settlement inkl. Gutschrift/Belastung mit Freigabe-Flow | <2% manuelle Korrekturbuchungen | L | Finance, Approval Workflow | P0 | H1 | **TEILWEISE** - `docs/architecture/process-kernel/wave-19/STATUS.md` |
+| 004 | Settlement inkl. Gutschrift/Belastung mit Freigabe-Flow | <2% manuelle Korrekturbuchungen | L | Finance, Approval Workflow | P0 | H1 | **GESCHLOSSEN Wave 100** - Settlement-Abschlussvertrag ueber Gutschrift, Belastung und Korrektur, `docs/architecture/process-kernel/wave-100/STATUS.md` |
 | 005 | Saisonale Kampagnenprozesse (Erntefenster) als Vorlagen | Setup-Zeit neue Kampagne <30 min | S | Workflow Templates | P1 | H1 |
 | 006 | Kontrakt-Preislogik (Fix, Formel, Terminmarkt) einheitlich | 0 ungeklaerte Preisabweichungen >24h | L | Pricing Service, Marktdaten | P0 | H2 |
 | 007 | Nebenkosten/Fracht/Lagergeld automatisch im Prozess | >=90% automatische Kostenzuordnung | M | Logistik, Finance | P1 | H1 |
-| 008 | Landhandel-spezifische Reklamationsprozesse E2E | SLA-Erfuellung Reklamationen >=95% | M | CRM Service, DMS | P1 | H2 |
+| 008 | Landhandel-spezifische Reklamationsprozesse E2E | SLA-Erfuellung Reklamationen >=95% | M | CRM Service, DMS | P1 | H2 | **GESCHLOSSEN** - `reklamation.py`, `reklamation_api.py`, `tests/test_process_kernel_wave8_complaint_e2e.py` |
 | 009 | Rollenbasierte Prozessvarianten je Genossenschaft | 0 globale Hardcoded Prozessschritte | M | Tenant Config | P0 | H1 |
 | 010 | Betriebspruefungsfeste Prozessjournalisierung | 100% kritische Schritte mit Audit Hash | M | Audit Domain | P0 | H1 |
 
@@ -80,30 +95,30 @@ Hinweise:
 | ID | Gap | KPI-Ziel | Aufwand | Abhaengigkeit | Prioritaet | Horizon |
 |---|---|---|---|---|---|---|
 | 011 | Versionierte Workflow Engine mit Migrationen | 0 ungeplante Workflow-Brueche bei Releases | L | Workflow Service | P0 | H1 | **GESCHLOSSEN Wave 26** - `workflow_migrations_guard.py`, `docs/architecture/process-kernel/wave-26/STATUS.md` |
-| 012 | Simulation/Sandbox fuer neue Workflows | 80% weniger Fehler nach Go-Live | M | Testdaten, Rule Engine | P1 | H1 |
+| 012 | Simulation/Sandbox fuer neue Workflows | 80% weniger Fehler nach Go-Live | M | Testdaten, Rule Engine | P1 | H1 | **GESCHLOSSEN** - `workflow_simulation.py`, `tests/test_process_kernel_wave86_workflow_sandbox.py` |
 | 013 | SLA/Timeout/Eskalationsknoten standardisiert | >=95% SLA-Einhaltung Kernprozesse | M | Notification, RBAC | P0 | H1 | **GESCHLOSSEN Wave 28** — `sla_eskalation_engine.py`: evaluate_sla_breach(), validate_sla_policy(), 6 Default-Policies; API GET /process/sla/eskalationen |
 | 014 | Policy-as-Code mit Tenant Overrides | 100% Ausnahmen regelbasiert dokumentiert | M | Policy Store | P0 | H1 | **GESCHLOSSEN Wave 29** — `policy_code_engine.py`: evaluate_policy_set(), apply_tenant_overrides() (Pflichtregeln geschuetzt), Default-PolicySets; API GET+POST /process/policy-rules |
 | 015 | Human-in-the-loop Freigaben fuer AI Aktionen | 100% AI-Aktionen mit Approval-Trail | M | Agent Layer, Audit | P0 | H1 | **GESCHLOSSEN Wave 30** — `human_approval_gate.py`: evaluate_approval_requirement() (NIEDRIG/MITTEL/HOCH/KRITISCH), record_approval_decision() (frozen + SHA-256 Audit-Trail), 8 Default-Regeln; API GET/POST /process/agent/approval-* |
-| 016 | Idempotente Business-Commands statt UI-CRUD fuer Agenten | >=99.9% sichere Retries ohne Duplikate | L | API Refactor | P0 | H2 |
+| 016 | Idempotente Business-Commands statt UI-CRUD fuer Agenten | >=99.9% sichere Retries ohne Duplikate | L | API Refactor | P0 | H2 | **GESCHLOSSEN** - `action_idempotency.py`, `idempotency_monitoring.py`, `IdempotencyMonitoringPanel.tsx` |
 | 017 | MCP/OpenAPI Tool Contracts fuer externe Agenten | 20 produktive Agent-Tools freigeschaltet | M | API Governance | P1 | H2 | **GESCHLOSSEN Wave 31** - `mcp_tool_contracts.py`, `docs/architecture/process-kernel/wave-31/STATUS.md` |
-| 018 | Ereignisbasierte Prozessbeobachtung (Process Mining Lite) | Durchlaufzeit-Drilldown fuer Top-10 Prozesse | L | Event Bus, Data Mart | P1 | H2 |
-| 019 | Policy Explainability im UI (Warum freigegeben/blockiert) | 50% weniger Support-Rueckfragen | S | Frontend Components | P1 | H1 |
-| 020 | Workflow-Template Marketplace intern | Neue Prozessvariante in <1 Tag | M | Template Registry | P2 | H3 |
+| 018 | Ereignisbasierte Prozessbeobachtung (Process Mining Lite) | Durchlaufzeit-Drilldown fuer Top-10 Prozesse | L | Event Bus, Data Mart | P1 | H2 | **GESCHLOSSEN** - `process_mining_observation.py`, `tests/test_process_kernel_wave87_process_mining_observation.py` |
+| 019 | Policy Explainability im UI (Warum freigegeben/blockiert) | 50% weniger Support-Rueckfragen | S | Frontend Components | P1 | H1 | **GESCHLOSSEN Wave 81** - `policy_explainability_contracts.py`, `docs/architecture/process-kernel/wave-81/STATUS.md` |
+| 020 | Workflow-Template Marketplace intern | Neue Prozessvariante in <1 Tag | M | Template Registry | P2 | H3 | **GESCHLOSSEN Wave 90** - `workflow_template_marketplace.py`, `docs/architecture/process-kernel/wave-90/STATUS.md` |
 
 ## Block 021-030: UUIX, Designsystem, Bedienlogik
 
 | ID | Gap | KPI-Ziel | Aufwand | Abhaengigkeit | Prioritaet | Horizon |
 |---|---|---|---|---|---|---|
-| 021 | Einheitliches Designsystem mit verbindlichen Prozesspatterns | 100% neue Seiten nutzen DS-Komponenten | M | Frontend Platform | P0 | H1 |
+| 021 | Einheitliches Designsystem mit verbindlichen Prozesspatterns | 100% neue Seiten nutzen DS-Komponenten | M | Frontend Platform | P0 | H1 | **GESCHLOSSEN Wave 84** - `design_system_contracts.py`, `docs/architecture/process-kernel/wave-84/STATUS.md` |
 | 022 | Command Palette (Ctrl/Cmd+K) fuer Power User | 30% schnellere Task Completion | S | Frontend Shell | P1 | H1 |
-| 023 | Keyboard-first fuer alle Kernmasken | >=90% Kernflows ohne Maus bedienbar | M | Accessibility Audit | P1 | H2 |
-| 024 | Touch-optimierte Feldworkflows (Tablet/Lager/Waage) | Fehlbedienungen auf Touch -40% | M | Responsive Layouts | P1 | H1 |
+| 023 | Keyboard-first fuer alle Kernmasken | >=90% Kernflows ohne Maus bedienbar | M | Accessibility Audit | P1 | H2 | **GESCHLOSSEN Waves 77/91-98** - Keyboard-Shortcuts und Shortcut-Bar in Kernmasken und P1/P2-Seiten ausgerollt |
+| 024 | Touch-optimierte Feldworkflows (Tablet/Lager/Waage) | Fehlbedienungen auf Touch -40% | M | Responsive Layouts | P1 | H1 | **GESCHLOSSEN Waves 76/91/92** - Touch-Library und Feldworkflows fuer Annahme, Rohware und Verladung produktiv |
 | 025 | Kontextsensitive Quick Actions pro Maske | 25% weniger Klicks pro Vorgang | S | Action Registry | P1 | H1 |
 | 026 | Inline-Validierung mit domain-spezifischen Erklaerungen | 35% weniger Eingabefehler | S | Validation Layer | P1 | H1 | **GESCHLOSSEN Wave 35** - `inline_validation_contracts.py`, `docs/architecture/process-kernel/wave-35/STATUS.md` |
 | 027 | Konsistente Informationsdichte je Rolle | Nutzerzufriedenheit >=8/10 | M | UX Research | P2 | H2 |
 | 028 | Leitsystem fuer Ausnahmefaelle (Error UX) | 50% weniger Abbruchquote bei Fehlern | S | Error Boundaries | P1 | H1 | **GESCHLOSSEN Wave 35** - `error_guidance_contracts.py`, `docs/architecture/process-kernel/wave-35/STATUS.md` |
-| 029 | Agent UX Panel (Confidence, Quellen, Aktion) | AI-Adoption in Kernteams >=60% | M | Copilot UI | P1 | H2 |
-| 030 | Multilingual + Fachsprache Landhandel konsistent | 0 kritische Begriffsinkonsistenzen | M | i18n Catalog | P2 | H2 |
+| 029 | Agent UX Panel (Confidence, Quellen, Aktion) | AI-Adoption in Kernteams >=60% | M | Copilot UI | P1 | H2 | **GESCHLOSSEN Waves 93/98** - `AgentProcessPanel.tsx`, `AgentSuggestionBadge.tsx`, Supervisor- und Capability-Seiten |
+| 030 | Multilingual + Fachsprache Landhandel konsistent | 0 kritische Begriffsinkonsistenzen | M | i18n Catalog | P2 | H2 | **GESCHLOSSEN Wave 89** - `terminology_registry.py`, `docs/architecture/process-kernel/wave-89/STATUS.md` |
 
 ## Block 031-040: Performance, Daten, Multi-User Parallelbetrieb
 
@@ -115,7 +130,7 @@ Hinweise:
 | 034 | API-Bulk-Operationen fuer Massenvorgaenge | 3x Throughput bei Batch-Import | M | API Layer | P1 | H2 | **GESCHLOSSEN Wave 33** - `bulk_operations.py`, `docs/architecture/process-kernel/wave-33/STATUS.md` |
 | 035 | Optimistic Locking fuer konkurrierende Bearbeitung | 0 stille Ueberschreibungen | M | DB Models | P0 | H1 |
 | 036 | Queue-basierte Hintergrundjobs fuer schwere Prozesse | p95 UI-Response <300ms unter Last | M | Job Runner | P1 | H1 | **GESCHLOSSEN Wave 33** - `background_jobs.py`, `docs/architecture/process-kernel/wave-33/STATUS.md` |
-| 037 | Lasttests Erntepeak (mehrere Standorte, parallel) | 500 gleichzeitige User stabil | L | Load Test Harness | P0 | H2 |
+| 037 | Lasttests Erntepeak (mehrere Standorte, parallel) | 500 gleichzeitige User stabil | L | Load Test Harness | P0 | H2 | **GESCHLOSSEN Wave 87** - `load_test_contracts.py`, `docs/architecture/process-kernel/wave-87/STATUS.md` |
 | 038 | Tenant-isolierte Caches/Rate Limits | 0 Cross-tenant Performance-Kollisionen | M | API Gateway | P1 | H2 | **GESCHLOSSEN Wave 34** - `tenant_rate_limits.py`, `docs/architecture/process-kernel/wave-34/STATUS.md` |
 | 039 | End-to-End Tracing (UI->API->DB->Worker) | MTTR -40% bei Produktionsfehlern | M | OpenTelemetry | P1 | H1 | **GESCHLOSSEN Wave 28** — `otel_span_contracts.py`: 14 SpanContracts (5 Domains), valeo.{domain}.{operation}-Konvention, kein OTel-Import in app/core/; API GET /process/otel/span-registry |
 | 040 | Datenqualitaetsregeln (Dublette, Pflichtfeld, Referenz) | Stammdatenfehler -50% | M | MDM Rules | P1 | H2 | **GESCHLOSSEN Wave 31** - `data_quality_rules.py`, `docs/architecture/process-kernel/wave-31/STATUS.md` |

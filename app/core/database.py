@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 engine = create_engine(
     settings.DATABASE_URL,
     poolclass=QueuePool,
-    pool_size=20,       # matches FastAPI threadpool per worker (min(32,cpu+4)=16 on 12-CPU host)
+    pool_size=40,       # 40 per worker × 8 workers = 320 < PG max_connections=400
     max_overflow=5,     # small overflow headroom per worker
     pool_timeout=10,    # fail fast instead of queueing for 30s
     pool_recycle=1800,

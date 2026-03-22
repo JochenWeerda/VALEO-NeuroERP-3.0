@@ -1,10 +1,12 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
+import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
+import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { CheckCircle, ClipboardList, Search, Trash2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { useInventur, useCompleteInventurPositions, useStornierenInventurPosition, type InventurPosition } from '@/lib/api/inventory'
@@ -13,6 +15,7 @@ export default function InventurPage(): JSX.Element {
   const [searchTerm, setSearchTerm] = useState('')
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const { toast } = useToast()
+  const searchRef = useRef<HTMLInputElement | null>(null)
 
   const { data, isLoading } = useInventur({ search: searchTerm || undefined })
   const completeMutation = useCompleteInventurPositions()
@@ -29,6 +32,13 @@ export default function InventurPage(): JSX.Element {
       toast({ title: 'Fehler', description: 'Positionen konnten nicht abgeschlossen werden.', variant: 'destructive' })
     }
   }
+
+  const shortcuts = buildCoreMaskShortcuts({
+    onSave: () => { if (selected.size > 0) void handleComplete() },
+    onSearch: () => searchRef.current?.focus(),
+    isSaveDisabled: selected.size === 0 || completeMutation.isPending,
+  })
+  useKeyboardShortcuts(shortcuts)
 
   const columns = [
     {
@@ -108,6 +118,7 @@ export default function InventurPage(): JSX.Element {
   }
 
   return (
+    <div className="flex flex-col">
     <div className="space-y-4 p-6">
       <div className="flex items-center justify-between">
         <div>
@@ -159,7 +170,7 @@ export default function InventurPage(): JSX.Element {
         <CardContent>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="Suche..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
+            <Input ref={searchRef} placeholder="Suche..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
           </div>
         </CardContent>
       </Card>
@@ -169,6 +180,8 @@ export default function InventurPage(): JSX.Element {
           <DataTable data={positionen} columns={columns} />
         </CardContent>
       </Card>
+    </div>
+      <KeyboardShortcutBar shortcuts={shortcuts} />
     </div>
   )
 }

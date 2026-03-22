@@ -8,6 +8,9 @@ services:
     environment:
       - ENVIRONMENT=development
       - LOG_LEVEL=info
+      # DLG-Merge (Referenz-Futtermittel): in Prod aktivieren, Datei unter data/reference/dlg_merged_feeds_lp.csv bereitstellen.
+      # - RATIONS_DLG_MERGED_ENABLE=1
+      # - RATIONS_DLG_MERGED_TENANT_ID=dlg
     volumes:
       - ./data:/app/data
       - ./logs:/app/logs

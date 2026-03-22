@@ -100,6 +100,34 @@ def test_optimization_with_infeasible_problem(client):
     if data["status"] == "infeasible":
         assert len(data["warnings"]) > 0 or len(data["constraint_report"]) > 0
 
+def test_optimization_from_profile_dlg_tenant_supplements_forage(client_dlg_tenant):
+    """from-profile mit IDs nur ohne FORAGE → Ergänzung aus default (LP mit Mindest-Raufutteranteil)."""
+    cow_profile = {
+        "breed": "Holstein",
+        "body_weight_kg": 650,
+        "milk_kg_day": 35,
+        "milk_fat_pct": 3.8,
+        "milk_protein_pct": 3.2,
+        "lactation_stage_days": 150,
+        "parity": 2,
+    }
+    r_list = client_dlg_tenant.get("/api/v1/feeds")
+    assert r_list.status_code == 200
+    concentrate_ids = [f["id"] for f in r_list.json() if f.get("group") != "forage"]
+    assert concentrate_ids, "DLG-Response sollte Nicht-Raufutter enthalten"
+
+    response = client_dlg_tenant.post(
+        "/api/v1/optimize/from-profile",
+        json={"cow_profile": cow_profile, "feeds": concentrate_ids},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "optimal"
+    assert data["metadata"].get("forage_supplement_from_default_tenant") is True
+    assert data["metadata"].get("supplement_tenant_id") == "default"
+    assert any("Raufutter" in w or "Grundfutter" in w for w in data.get("warnings", []))
+
+
 def test_optimization_from_profile_all_feeds_optimal(client):
     """Mit allen Futtermitteln des Mandanten und geschätzter TM → LP sollte optimal sein (GfE-ME)."""
     cow_profile = {

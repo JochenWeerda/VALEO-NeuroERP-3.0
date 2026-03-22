@@ -6,8 +6,10 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
+import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { useToast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/api-client'
 import { type WeighingTicket } from '@/lib/api/weighing-tickets'
@@ -216,6 +218,22 @@ export default function WiegescheinDetailPage(): JSX.Element {
 
   const netWeight = ticket.net_weight ?? (ticket.gross_weight != null && ticket.tare_weight != null ? ticket.gross_weight - ticket.tare_weight : null)
 
+  // ── Keyboard shortcuts ───────────────────────────────────────────────────────
+  const tabIds: TabId[] = ['gewichte', 'qualitaet', 'kontrakt', 'verlauf']
+  useKeyboardShortcuts([
+    { key: 'Escape', label: 'Zurück', action: () => navigate('/waage/wiegungen') },
+    { key: 'k', ctrl: true, label: 'Kontrakt zuordnen', action: () => setAllocateOpen(true), disabled: ticket.status === 'posted' },
+    { key: 'ArrowRight', alt: true, label: 'Nächster Tab', action: () => setActiveTab((t) => tabIds[(tabIds.indexOf(t) + 1) % tabIds.length]) },
+    { key: 'ArrowLeft', alt: true, label: 'Vorheriger Tab', action: () => setActiveTab((t) => tabIds[(tabIds.indexOf(t) - 1 + tabIds.length) % tabIds.length]) },
+  ])
+
+  const shortcutsForBar = [
+    { key: 'Escape', label: 'Zurück', action: () => navigate('/waage/wiegungen') },
+    { key: 'k', ctrl: true, label: 'Kontrakt zuordnen', action: () => setAllocateOpen(true), disabled: ticket.status === 'posted' },
+    { key: '←', alt: true, label: 'Vorheriger Tab', action: () => {} },
+    { key: '→', alt: true, label: 'Nächster Tab', action: () => {} },
+  ]
+
   // ── Tab content ─────────────────────────────────────────────────────────────
   const tabContent: Record<TabId, JSX.Element> = {
     gewichte: (
@@ -323,6 +341,7 @@ export default function WiegescheinDetailPage(): JSX.Element {
   }
 
   return (
+    <div className="flex flex-col">
     <div className="p-6 space-y-6">
       <ModuleToolbar
         backTarget="/waage/wiegungen"
@@ -431,6 +450,9 @@ export default function WiegescheinDetailPage(): JSX.Element {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Kontrakt zuordnen</DialogTitle>
+            <DialogDescription>
+              Wiegeschein {ticket.ticket_number} — Kontrakt-ID eingeben um den Wiegeschein gegen einen offenen Kontrakt zu allokieren.
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div>
@@ -460,6 +482,8 @@ export default function WiegescheinDetailPage(): JSX.Element {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </div>
+      <KeyboardShortcutBar shortcuts={shortcutsForBar} />
     </div>
   )
 }

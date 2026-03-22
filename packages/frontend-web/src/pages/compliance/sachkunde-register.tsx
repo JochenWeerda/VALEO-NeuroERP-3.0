@@ -1,4 +1,4 @@
-﻿import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSachkundeRegister, type Sachkundenachweis } from '@/lib/api/betrieb'
 import { Badge } from '@/components/ui/badge'
@@ -6,13 +6,23 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
+import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
+import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { AlertTriangle, Award, FileDown, Plus, Search } from 'lucide-react'
 import { ErrorState } from '@/components/ErrorState'
 
 export default function SachkundeRegisterPage(): JSX.Element {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
+  const searchRef = useRef<HTMLInputElement | null>(null)
   const { data: sachkunde = [], isError, error, refetch } = useSachkundeRegister()
+
+  const shortcuts = buildCoreMaskShortcuts({
+    onNew: () => navigate('/compliance/sachkunde-neu'),
+    onSearch: () => searchRef.current?.focus(),
+    onRefresh: () => { void refetch() },
+  })
+  useKeyboardShortcuts(shortcuts)
 
   if (isError) {
     return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
@@ -59,6 +69,7 @@ export default function SachkundeRegisterPage(): JSX.Element {
   ]
 
   return (
+    <div className="flex flex-col">
     <div className="space-y-4 p-6">
       <div className="flex items-center justify-between">
         <div>
@@ -94,7 +105,7 @@ export default function SachkundeRegisterPage(): JSX.Element {
         <CardHeader><CardTitle>Suche</CardTitle></CardHeader>
         <CardContent>
           <div className="flex gap-4">
-            <div className="relative flex-1"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><Input placeholder="Suche Kunde oder Nachweis-Nr..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" /></div>
+            <div className="relative flex-1"><Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><Input ref={searchRef} placeholder="Suche Kunde oder Nachweis-Nr..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" /></div>
             <Button variant="outline" className="gap-2"><FileDown className="h-4 w-4" />Export</Button>
           </div>
         </CardContent>
@@ -102,7 +113,7 @@ export default function SachkundeRegisterPage(): JSX.Element {
 
       <Card><CardContent className="pt-6"><DataTable data={sachkunde} columns={columns} /></CardContent></Card>
     </div>
+    <KeyboardShortcutBar shortcuts={shortcuts} />
+    </div>
   )
 }
-
-

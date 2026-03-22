@@ -28,6 +28,8 @@ import DlgKontraktUmSaetze from '@/pages/kontrakte/DlgKontraktUmSaetze'
 import FrmKontraktProtokoll from '@/pages/kontrakte/FrmKontraktProtokoll'
 import { buildDecisionView } from '@/policy/decision-view'
 import { ProcessStatusPanel } from '@/components/workflow/ProcessStatusPanel'
+import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
+import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 
 type FormState = Omit<Kontrakt, 'contract_id' | 'rest_quantity'>
 
@@ -231,7 +233,15 @@ export default function FrmKontraktDetail(): JSX.Element {
     })
   }
 
+  const shortcuts = buildCoreMaskShortcuts({
+    onSave: () => saveMutation.mutate(),
+    onRefresh: () => { void detailQuery.refetch() },
+    isSaveDisabled: !isDraftEditable || saveMutation.isPending,
+  })
+  useKeyboardShortcuts(shortcuts)
+
   return (
+    <div className="flex flex-col">
     <div className="space-y-4 p-6">
       <Card>
         <CardHeader>
@@ -463,6 +473,8 @@ export default function FrmKontraktDetail(): JSX.Element {
           restQty={detailQuery.data?.rest_quantity}
         />
       )}
+    </div>
+      <KeyboardShortcutBar shortcuts={shortcuts} />
     </div>
   )
 }

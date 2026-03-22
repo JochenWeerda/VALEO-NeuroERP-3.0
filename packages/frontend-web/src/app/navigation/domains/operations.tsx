@@ -409,6 +409,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         mcp: { businessDomain: 'quality', scope: 'quality:read' },
       },
       {
+        id: 'ausnahmen',
+        label: 'Betriebs-Ausnahmen (KI)',
+        icon: AlertCircle,
+        module: '@/pages/qualitaet/ausnahmen',
+        preferredPath: 'qualitaet/ausnahmen',
+        keywords: ['ausnahmen', 'eskalation', 'exception', 'ki', 'agent', 'priorisierung'],
+        mcp: { businessDomain: 'quality', scope: 'quality:write' },
+      },
+      {
         id: 'zertifikate',
         label: 'Zertifikate',
         icon: ShieldCheck,

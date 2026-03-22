@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { toast } from '@/hooks/use-toast'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -7,11 +8,13 @@ import { Badge } from '@/components/ui/badge'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { BackButton } from '@/components/BackButton'
-import { 
-  CheckCircle, XCircle, Loader2, AlertCircle, 
-  Package, Euro, Clock 
+import { PolicyExplanationBadge, type PolicyExplanationData } from '@/components/policy/PolicyExplanationBadge'
+import {
+  CheckCircle, XCircle, Loader2, AlertCircle,
+  Package, Euro, Clock
 } from 'lucide-react'
 import { useWorkflowStatus, useApproveWorkflow } from '@/lib/api/workflows'
+import { apiClient } from '@/lib/axios'
 
 export default function WorkflowApprovalPage(): JSX.Element {
   const { workflowId } = useParams<{ workflowId: string }>()
@@ -20,6 +23,14 @@ export default function WorkflowApprovalPage(): JSX.Element {
   
   const { data: workflow, isLoading, error } = useWorkflowStatus(workflowId ?? '')
   const approveWorkflow = useApproveWorkflow()
+
+  // Gap 019 — Policy Explainability: Lade Policy-Kontext für diesen Workflow
+  const policyQuery = useQuery({
+    queryKey: ['workflow-policy', workflowId],
+    queryFn: () => apiClient.get<PolicyExplanationData>(`/api/v1/policies/explain/workflow/${workflowId ?? ''}`),
+    enabled: !!workflowId,
+    retry: false,
+  })
   
   const handleApprove = async (): Promise<void> => {
     if (!workflowId) return
@@ -198,6 +209,18 @@ export default function WorkflowApprovalPage(): JSX.Element {
           </>
         )}
         
+        {/* Gap 019 — Policy-Kontext */}
+        {policyQuery.data && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm font-medium">Policy-Kontext</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <PolicyExplanationBadge explanation={policyQuery.data} showDetails />
+            </CardContent>
+          </Card>
+        )}
+
         {/* Actions */}
         {workflow.status === 'pending_approval' && (
           <Card>

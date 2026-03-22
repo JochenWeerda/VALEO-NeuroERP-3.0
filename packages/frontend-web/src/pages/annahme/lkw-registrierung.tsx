@@ -10,8 +10,10 @@ import { Wizard } from '@/components/patterns/Wizard'
 import { api } from '@/lib/axios'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
+import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
+import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { Camera, Clock, Truck, Upload, X } from 'lucide-react'
 import {
   TouchSection,
@@ -154,6 +156,12 @@ export default function LKWRegistrierungPage(): JSX.Element {
     }
   }
 
+  const shortcuts = buildCoreMaskShortcuts({
+    onSave: () => { void handleSubmit() },
+    onCancel: () => navigate('/annahme/warteschlange'),
+  })
+  useKeyboardShortcuts(shortcuts)
+
   const ARTIKEL_OPTIONEN = ['Weizen', 'Gerste', 'Raps', 'Mais', 'Roggen', 'Hafer', 'Sonnenblumen']
   const PRIORITAETEN = [
     { id: 'hoch', label: 'Hoch (Express)', description: 'Sofortige Bearbeitung' },
@@ -195,7 +203,7 @@ export default function LKWRegistrierungPage(): JSX.Element {
               {...dropzoneKennzeichen.getRootProps()}
               className="flex min-h-[80px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-4 text-center transition-colors hover:border-blue-400 hover:bg-blue-50"
             >
-              <input {...dropzoneKennzeichen.getInputProps()} accept="image/*" capture="environment" />
+              <input {...dropzoneKennzeichen.getInputProps()} accept="image/*" capture="environment" aria-label="Foto Kennzeichen hochladen" />
               <Upload className="mb-1 h-6 w-6 text-slate-400" />
               <p className="text-sm text-slate-500">
                 {dropzoneKennzeichen.isDragActive ? 'Ablegen…' : 'Tippen oder Foto hierher ziehen'}
@@ -203,8 +211,9 @@ export default function LKWRegistrierungPage(): JSX.Element {
             </div>
           </div>
           <div className="space-y-1">
-            <p className="text-base font-medium text-slate-700">Ankunftszeit</p>
+            <label htmlFor="ankunftszeit" className="block text-base font-medium text-slate-700">Ankunftszeit</label>
             <input
+              id="ankunftszeit"
               type="datetime-local"
               value={lkw.ankunftszeit}
               onChange={(e) => updateField('ankunftszeit', e.target.value)}
@@ -249,7 +258,7 @@ export default function LKWRegistrierungPage(): JSX.Element {
               {...dropzoneLieferschein.getRootProps()}
               className="flex min-h-[80px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 p-4 text-center transition-colors hover:border-blue-400 hover:bg-blue-50"
             >
-              <input {...dropzoneLieferschein.getInputProps()} accept="image/*" capture="environment" />
+              <input {...dropzoneLieferschein.getInputProps()} accept="image/*" capture="environment" aria-label="Foto Lieferschein hochladen" />
               <Upload className="mb-1 h-6 w-6 text-slate-400" />
               <p className="text-sm text-slate-500">
                 {dropzoneLieferschein.isDragActive ? 'Ablegen…' : 'Tippen oder Foto hierher ziehen'}
@@ -328,7 +337,8 @@ export default function LKWRegistrierungPage(): JSX.Element {
   ]
 
   return (
-    <div className="p-6">
+    <div className="flex flex-col">
+      <div className="p-6">
       <ModuleToolbar backTarget="/annahme/warteschlange" closeTarget="/annahme/warteschlange" title="LKW-Registrierung" />
       <Wizard
         title="LKW-Registrierung"
@@ -340,6 +350,9 @@ export default function LKWRegistrierungPage(): JSX.Element {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Scan – Kennzeichen / Lieferschein</DialogTitle>
+            <DialogDescription>
+              Foto-Upload oder manuelle Eingabe fuer Kennzeichen und Lieferschein im Touch-Workflow.
+            </DialogDescription>
           </DialogHeader>
           <p className="text-sm text-muted-foreground py-2">
             {scanDialogField === 'kennzeichen'
@@ -351,6 +364,8 @@ export default function LKWRegistrierungPage(): JSX.Element {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      </div>
+      <KeyboardShortcutBar shortcuts={shortcuts} />
     </div>
   )
 }

@@ -6,10 +6,13 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { NativeSelect } from '@/components/ui/native-select'
 import { ErrorState } from '@/components/ErrorState'
 import { apiClient } from '@/lib/api-client'
 import { useToast } from '@/hooks/use-toast'
 import { Calculator, FileText, Save, Truck } from 'lucide-react'
+import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
+import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { buildDecisionView } from '@/policy/decision-view'
 import { ProcessStatusPanel } from '@/components/workflow/ProcessStatusPanel'
 import { useApprovalDensityProfile } from '@/features/workflow/useApprovalDensityProfile'
@@ -42,6 +45,22 @@ type Settlement = {
   net_amount_eur: number
   status: 'draft' | 'posted' | 'cancelled'
   posted_journal_ref?: string | null
+  approval_status: 'ENTWURF' | 'ZUR_FREIGABE' | 'TEILWEISE_FREIGEGEBEN' | 'FREIGEGEBEN' | 'ABGELEHNT' | 'VERBUCHT'
+  approval_history: Array<{
+    actor_id: string
+    actor_type: string
+    previous_status: string
+    new_status: string
+    reason: string
+    decided_at: string
+  }>
+  allowed_transitions: string[]
+  can_post_fibu: boolean
+  correction_options: Array<{
+    memo_type: 'credit' | 'debit' | 'rework'
+    label: string
+    reason: string
+  }>
   reference_context?: {
     process_key: string
     anchor_entity: string
@@ -58,6 +77,13 @@ type Settlement = {
   }>
   explainability?: unknown
   deductions: SettlementDeduction[]
+}
+
+type SettlementFreigabeResponse = {
+  allowed: boolean
+  reason: string
+  new_status: string
+  previous_status: string
 }
 
 type BillingPreview = {
@@ -179,6 +205,7 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const [form, setForm] = useState<FormState>(initialForm)
+  const [approvalActor, setApprovalActor] = useState({ actorId: 'ui-user', actorType: 'SACHBEARBEITER' })
 
   useEffect(() => {
     const state = location.state as QualitaetsCheckState | null
@@ -350,6 +377,34 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
     },
   })
 
+  const approveSettlement = useMutation({
+    mutationFn: async ({ settlementId, targetStatus, reason }: { settlementId: string; targetStatus: string; reason?: string }) => {
+      const payload = {
+        actor_id: approvalActor.actorId,
+        actor_type: approvalActor.actorType,
+        target_status: targetStatus,
+        reason,
+      }
+      return (await apiClient.post<SettlementFreigabeResponse>(`/api/v1/agrar/settlements/${settlementId}/freigabe`, payload)).data
+    },
+    onSuccess: (result) => {
+      toast({
+        title: result.allowed ? 'Freigabeschritt gespeichert' : 'Freigabeschritt abgelehnt',
+        description: result.reason,
+        variant: result.allowed ? 'default' : 'destructive',
+      })
+      void queryClient.invalidateQueries({ queryKey: ['agrar', 'settlements'] })
+    },
+    onError: (e: unknown) => {
+      const message = e instanceof Error ? e.message : 'Freigabeschritt fehlgeschlagen'
+      toast({ title: 'Fehler', description: message, variant: 'destructive' })
+    },
+  })
+
+  function openCorrection(settlement: Settlement, memoType: 'credit' | 'debit'): void {
+    navigate(`/einkauf/gutschriften-belastungen/${memoType}?settlementId=${settlement.id}`)
+  }
+
   async function runPreview(): Promise<void> {
     if (!form.supplierId.trim()) {
       toast({ title: 'Lieferant fehlt', description: 'Bitte supplier_id eingeben.', variant: 'destructive' })
@@ -388,6 +443,13 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
     await createSettlement.mutateAsync({ billingWeightKg, drying: useDrying, deductions: useDeductions })
   }
 
+  const shortcuts = buildCoreMaskShortcuts({
+    onSave: () => { void saveSettlement() },
+    onCancel: () => navigate('/annahme/warteschlange'),
+    isSaveDisabled: createSettlement.isPending,
+  })
+  useKeyboardShortcuts(shortcuts)
+
   const previewData = settlementPreview.data
   const billingData = billingPreview.data
   const qualityOk = form.feuchtigkeit <= 14.5 && form.verunreinigung <= 2
@@ -395,6 +457,7 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
   const previewDensityProfile = useApprovalDensityProfile('agrar-settlement', previewDecisionView)
 
   return (
+    <div className="flex flex-col">
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div>
@@ -533,6 +596,34 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
       </Card>
 
       <Card>
+        <CardHeader><CardTitle>Freigabe-Kontext</CardTitle></CardHeader>
+        <CardContent className="grid gap-3 md:grid-cols-2">
+          <div>
+            <Label htmlFor="approvalActorId">Aktor-ID</Label>
+            <Input
+              id="approvalActorId"
+              value={approvalActor.actorId}
+              onChange={(e) => setApprovalActor((prev) => ({ ...prev, actorId: e.target.value }))}
+            />
+          </div>
+          <div>
+            <Label htmlFor="approvalActorType">Aktor-Rolle</Label>
+            <NativeSelect
+              value={approvalActor.actorType}
+              onValueChange={(value) => setApprovalActor((prev) => ({ ...prev, actorType: value }))}
+              options={[
+                { value: 'SACHBEARBEITER', label: 'Sachbearbeiter' },
+                { value: 'ABTEILUNGSLEITER', label: 'Abteilungsleiter' },
+                { value: 'PROKURIST', label: 'Prokurist' },
+                { value: 'SYSTEM', label: 'System' },
+                { value: 'AGENT', label: 'Agent' },
+              ]}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
         <CardHeader><CardTitle>Bestehende Settlements</CardTitle></CardHeader>
         <CardContent>
           {isLoading && <div className="text-sm text-muted-foreground">Lade Settlements...</div>}
@@ -544,7 +635,12 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
                 <div key={s.id} className="rounded border p-3">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="font-semibold">{s.settlement_number}</div>
-                    <Badge variant={s.status === 'posted' ? 'outline' : 'secondary'}>{s.status}</Badge>
+                    <div className="flex flex-wrap gap-2">
+                      <Badge variant={s.status === 'posted' ? 'outline' : 'secondary'}>{s.status}</Badge>
+                      <Badge variant={s.approval_status === 'FREIGEGEBEN' || s.approval_status === 'VERBUCHT' ? 'outline' : 'secondary'}>
+                        {s.approval_status}
+                      </Badge>
+                    </div>
                   </div>
                   <div className="mt-1 text-sm text-muted-foreground">
                     Lieferant: {s.supplier_id} | Netto: {money(s.net_amount_eur)} | Abzuege: {money(s.total_deductions_eur)}
@@ -560,15 +656,82 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
                     </div>
                   )}
                   {s.status === 'draft' && (
-                    <div className="mt-3">
-                      <Button size="sm" variant="outline" onClick={() => { void postSettlement.mutateAsync(s.id) }} disabled={postSettlement.isPending}>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {s.allowed_transitions.includes('ZUR_FREIGABE') ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => { void approveSettlement.mutateAsync({ settlementId: s.id, targetStatus: 'ZUR_FREIGABE', reason: 'Settlement aus UI zur Freigabe eingereicht.' }) }}
+                          disabled={approveSettlement.isPending}
+                        >
+                          Zur Freigabe
+                        </Button>
+                      ) : null}
+                      {s.allowed_transitions.includes('FREIGEGEBEN') ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => { void approveSettlement.mutateAsync({ settlementId: s.id, targetStatus: 'FREIGEGEBEN', reason: 'Settlement fachlich freigegeben.' }) }}
+                          disabled={approveSettlement.isPending}
+                        >
+                          Freigeben
+                        </Button>
+                      ) : null}
+                      {s.allowed_transitions.includes('ABGELEHNT') ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => { void approveSettlement.mutateAsync({ settlementId: s.id, targetStatus: 'ABGELEHNT', reason: 'Settlement zur Korrektur abgelehnt.' }) }}
+                          disabled={approveSettlement.isPending}
+                        >
+                          Ablehnen
+                        </Button>
+                      ) : null}
+                      {s.allowed_transitions.includes('ENTWURF') ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => { void approveSettlement.mutateAsync({ settlementId: s.id, targetStatus: 'ENTWURF', reason: 'Settlement zur Ueberarbeitung in Entwurf zurueckgesetzt.' }) }}
+                          disabled={approveSettlement.isPending}
+                        >
+                          Zurueck in Entwurf
+                        </Button>
+                      ) : null}
+                      <Button size="sm" variant="outline" onClick={() => { void postSettlement.mutateAsync(s.id) }} disabled={postSettlement.isPending || !s.can_post_fibu}>
                         In Fibu buchen
                       </Button>
                     </div>
                   )}
+                  {s.status === 'posted' && s.correction_options.length > 0 ? (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {s.correction_options.some((option) => option.memo_type === 'credit') ? (
+                        <Button size="sm" variant="outline" onClick={() => openCorrection(s, 'credit')}>
+                          Gutschrift
+                        </Button>
+                      ) : null}
+                      {s.correction_options.some((option) => option.memo_type === 'debit') ? (
+                        <Button size="sm" variant="outline" onClick={() => openCorrection(s, 'debit')}>
+                          Belastung
+                        </Button>
+                      ) : null}
+                    </div>
+                  ) : null}
                   {s.posted_journal_ref && (
                     <div className="mt-2 text-xs text-muted-foreground">Journal: {s.posted_journal_ref}</div>
                   )}
+                  {s.approval_history.length > 0 ? (
+                    <div className="mt-3 rounded-md border bg-muted/20 p-3">
+                      <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Freigabehistorie</div>
+                      <div className="mt-2 space-y-2 text-xs">
+                        {s.approval_history.map((entry, idx) => (
+                          <div key={`${entry.decided_at}-${idx}`} className="flex flex-wrap justify-between gap-2">
+                            <span>{entry.previous_status || 'START'} {'->'} {entry.new_status}</span>
+                            <span>{entry.actor_type} / {entry.actor_id}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
                   {s.explainability ? (
                     (() => {
                       const view = buildDecisionView(s.explainability)
@@ -583,6 +746,8 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
           )}
         </CardContent>
       </Card>
+    </div>
+      <KeyboardShortcutBar shortcuts={shortcuts} />
     </div>
   )
 }
