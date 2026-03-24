@@ -1,0 +1,359 @@
+import { useEffect, useMemo, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import {
+  ArrowLeftRight,
+  Bell,
+  BookOpen,
+  Calculator,
+  Calendar,
+  ChevronRight,
+  Database,
+  FileText,
+  Landmark,
+  Package,
+  Receipt,
+  Search,
+  Settings,
+  ShieldCheck,
+  ShoppingCart,
+  Sparkles,
+  Truck,
+  UserCircle2,
+  Wallet,
+  Warehouse,
+} from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { PageSection, PageSurface } from '@/components/patterns/PageSurface'
+import { AgentProcessPanel } from '@/components/agent'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { fetchFlowSpineWorkspace, type FlowSpineNode } from '@/lib/api/flow-spines'
+import { cn } from '@/lib/utils'
+
+const ICONS = {
+  ArrowLeftRight,
+  BookOpen,
+  Calculator,
+  Calendar,
+  Database,
+  FileText,
+  Landmark,
+  Package,
+  Receipt,
+  Search,
+  ShieldCheck,
+  ShoppingCart,
+  Sparkles,
+  Truck,
+  UserCircle2,
+  Wallet,
+  Warehouse,
+} as const
+
+interface FlowSpineWorkspaceProps {
+  processKey: string
+}
+
+function toneClasses(tone: string): string {
+  switch (tone) {
+    case 'ok':
+      return 'border-emerald-500/50 bg-emerald-500/12 text-emerald-200'
+    case 'warning':
+      return 'border-amber-500/50 bg-amber-500/12 text-amber-100'
+    case 'critical':
+      return 'border-rose-500/60 bg-rose-500/12 text-rose-100'
+    case 'active':
+      return 'border-indigo-400/70 bg-indigo-400/15 text-indigo-100 shadow-[0_0_40px_rgba(99,102,241,0.28)]'
+    default:
+      return 'border-slate-500/40 bg-slate-500/10 text-slate-200'
+  }
+}
+
+export function FlowSpineWorkspace({ processKey }: FlowSpineWorkspaceProps): JSX.Element {
+  const navigate = useNavigate()
+  const workspaceQuery = useQuery({
+    queryKey: ['workflow', 'flow-spine', processKey],
+    queryFn: () => fetchFlowSpineWorkspace(processKey),
+    retry: false,
+  })
+  const workspace = workspaceQuery.data
+  const [selectedNodeId, setSelectedNodeId] = useState<string>('')
+
+  useEffect(() => {
+    if (workspace?.focus_node_id) {
+      setSelectedNodeId(workspace.focus_node_id)
+    }
+  }, [workspace?.focus_node_id])
+
+  const selectedNode = useMemo(
+    () => workspace?.nodes.find((node) => node.id === selectedNodeId) ?? workspace?.nodes[0],
+    [selectedNodeId, workspace?.nodes],
+  )
+
+  const completedCount = workspace?.nodes.filter((node) => node.status === 'ok').length ?? 0
+  const progressWidth = workspace?.nodes.length ? `${(Math.max(1, completedCount + (selectedNode ? 1 : 0)) / workspace.nodes.length) * 100}%` : '0%'
+
+  const go = (href: string): void => {
+    navigate(href)
+  }
+
+  if (workspaceQuery.isLoading) {
+    return (
+      <PageSurface data-page-surface={`flow-spine-${processKey}`}>
+        <PageSection title="Flow Spine wird geladen" description="Der Prozessraum wird aus dem Backend aufgebaut.">
+          <div className="h-24 rounded-2xl border border-dashed border-border/60 bg-muted/20" />
+        </PageSection>
+      </PageSurface>
+    )
+  }
+
+  if (workspaceQuery.isError || !workspace || !selectedNode) {
+    return (
+      <PageSurface data-page-surface={`flow-spine-${processKey}`}>
+        <PageSection title="Flow Spine nicht verfuegbar" description="Der Prozessraum konnte nicht geladen werden.">
+          <div className="rounded-2xl border border-destructive/30 bg-destructive/10 px-4 py-6 text-sm text-destructive">
+            Bitte Backend-Vertrag oder Routing des Prozessraums pruefen.
+          </div>
+        </PageSection>
+      </PageSurface>
+    )
+  }
+
+  return (
+    <PageSurface
+      data-page-surface={`flow-spine-${processKey}`}
+      className="bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.12),_transparent_28%),linear-gradient(180deg,#08101f,#0d1528)]"
+    >
+      <PageSection className="overflow-hidden border-white/10 bg-slate-950/70 p-0 shadow-2xl shadow-indigo-950/20">
+        <header className="flex h-16 items-center justify-between border-b border-white/5 px-5">
+          <div className="flex items-center gap-4">
+            <div className="text-sm font-semibold tracking-wide text-slate-100">{workspace.breadcrumb[0]}</div>
+            <div className="text-sm text-slate-400">
+              {workspace.breadcrumb[1]} <span className="px-2 text-slate-600">/</span> <span className="font-semibold text-slate-100">{workspace.instance_label}</span>
+            </div>
+          </div>
+          <div className="relative w-full max-w-xl">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+            <Input aria-label="Globale Suche" placeholder={workspace.search_placeholder} className="border-white/10 bg-white/5 pl-9 text-slate-100 placeholder:text-slate-500" />
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="flex rounded-xl bg-white/5 p-1 text-xs">
+              {['Flow', 'Fokus', 'Uebersicht'].map((mode) => (
+                <span key={mode} className={cn('rounded-lg px-3 py-1.5 text-slate-400', workspace.mode === mode && 'bg-indigo-500/30 text-indigo-100')}>
+                  {mode}
+                </span>
+              ))}
+            </div>
+            <Bell className="h-4 w-4 text-slate-300" />
+            <Settings className="h-4 w-4 text-slate-300" />
+            <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-slate-100">
+              <UserCircle2 className="h-5 w-5 text-slate-300" />
+              <span>{workspace.user_role}</span>
+            </div>
+          </div>
+        </header>
+
+        <div className="grid min-h-[720px] grid-cols-[220px_minmax(0,1fr)_360px]">
+          <aside className="border-r border-white/5 bg-slate-950/45 p-4">
+            <div className="mb-6">
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">Prozesse</p>
+              <div className="space-y-2">
+                {workspace.left_navigation.processes.map((process) => (
+                  <button
+                    key={process.key}
+                    onClick={() => go(process.route_path)}
+                    className={cn(
+                      'flex w-full items-center justify-between rounded-2xl px-3 py-3 text-left text-sm transition',
+                      process.active ? 'bg-indigo-500/12 text-indigo-100 ring-1 ring-indigo-400/20' : 'text-slate-300 hover:bg-white/5 hover:text-white',
+                    )}
+                  >
+                    <span>{process.label}</span>
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                ))}
+              </div>
+            </div>
+            {[
+              { title: 'Favoriten', items: workspace.left_navigation.favorites },
+              { title: 'Letzte Vorgaenge', items: workspace.left_navigation.recent_items },
+            ].map((section) => (
+              <div key={section.title} className="mb-6">
+                <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">{section.title}</p>
+                <div className="space-y-2 text-sm text-slate-300">
+                  {section.items.map((item) => (
+                    <div key={item} className="rounded-2xl border border-white/5 bg-white/[0.03] px-3 py-3">{item}</div>
+                  ))}
+                </div>
+              </div>
+            ))}
+            <div>
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">Rollenwechsel</p>
+              <div className="space-y-2">
+                {workspace.left_navigation.role_switches.map((role) => (
+                  <Button key={role} variant="outline" className="w-full justify-start border-white/10 bg-white/5 text-slate-200 hover:bg-white/10">
+                    {role}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </aside>
+
+          <main className="bg-[linear-gradient(180deg,rgba(15,23,42,0.35),rgba(15,23,42,0.15))] p-6">
+            <div className="mb-6 flex items-start justify-between gap-4">
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight text-white">{workspace.title}</h1>
+                <p className="mt-1 max-w-3xl text-sm text-slate-400">{workspace.subtitle}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                {workspace.badges.map((badge) => (
+                  <Badge key={badge.label} className={cn('hover:bg-transparent', badge.tone === 'ok' ? 'bg-emerald-500/15 text-emerald-200' : 'bg-amber-500/15 text-amber-100')}>
+                    {badge.label}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-[28px] border border-white/10 bg-white/[0.03] p-8">
+              <div className="relative mb-8">
+                <div className="absolute left-8 right-8 top-10 h-[2px] rounded-full bg-white/10" />
+                <div className="absolute left-8 top-10 h-[2px] rounded-full bg-gradient-to-r from-emerald-400 via-indigo-400 to-amber-400" style={{ width: progressWidth }} />
+                <div className={cn('relative grid gap-4', workspace.nodes.length === 4 ? 'grid-cols-4' : workspace.nodes.length === 5 ? 'grid-cols-5' : 'grid-cols-6')}>
+                  {workspace.nodes.map((node) => {
+                    const Icon = ICONS[node.icon as keyof typeof ICONS] ?? Sparkles
+                    const active = node.id === selectedNode.id
+                    return (
+                      <button key={node.id} onClick={() => setSelectedNodeId(node.id)} className={cn('rounded-3xl p-3 text-center transition', active ? 'scale-[1.03]' : 'hover:-translate-y-1')}>
+                        <div className={cn('mx-auto flex h-16 w-16 items-center justify-center rounded-full border', toneClasses(node.status), active && 'h-20 w-20')}>
+                          <Icon className="h-6 w-6" />
+                        </div>
+                        <div className="mt-3 text-sm font-semibold text-slate-100">{node.label}</div>
+                        <div className="text-xs text-slate-500">{node.metric}</div>
+                        <div className="text-[11px] text-slate-400">{node.submetric}</div>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              <div className="grid gap-5 xl:grid-cols-[1fr_300px]">
+                <div className="grid gap-5">
+                  <div className="grid gap-5 xl:grid-cols-[1.2fr_280px]">
+                    <Card className="border-white/10 bg-slate-950/50 text-slate-100">
+                      <CardHeader className="flex flex-row items-start justify-between gap-4">
+                        <div>
+                          <CardTitle className="text-xl">Status Details: {selectedNode.label}</CardTitle>
+                          <p className="mt-1 text-sm text-slate-400">{selectedNode.insight}</p>
+                        </div>
+                        <Badge className={cn('border px-2.5 py-1 text-xs', toneClasses(selectedNode.status))}>{selectedNode.status.toUpperCase()}</Badge>
+                      </CardHeader>
+                      <CardContent className="grid gap-4 md:grid-cols-2">
+                        {selectedNode.detail_rows.map((row) => (
+                          <div key={row.label} className="space-y-1">
+                            <div className="text-xs uppercase tracking-[0.18em] text-slate-500">{row.label}</div>
+                            <div className="text-sm font-medium text-slate-100">{row.value}</div>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+
+                    <Card className="border-white/10 bg-white/[0.06] text-slate-100">
+                      <CardHeader>
+                        <CardTitle className="text-sm uppercase tracking-[0.2em] text-slate-400">KPI Health Score</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="mb-3 text-5xl font-bold text-white">{selectedNode.kpis[0]?.value ?? '92%'}</div>
+                        <div className="mb-4 h-2 rounded-full bg-white/10">
+                          <div className="h-2 rounded-full bg-indigo-400" style={{ width: '92%' }} />
+                        </div>
+                        <div className="text-sm text-slate-400">Prozesseffizienz liegt sichtbar ueber dem Quartalsdurchschnitt.</div>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  <div className="grid gap-4 lg:grid-cols-4">
+                    <Card className="border-white/10 bg-white/[0.03] text-slate-100">
+                      <CardHeader><CardTitle className="text-sm">KPIs</CardTitle></CardHeader>
+                      <CardContent className="space-y-2 text-sm">{selectedNode.kpis.map((kpi) => <div key={kpi.label} className="flex justify-between gap-3"><span className="text-slate-400">{kpi.label}</span><span>{kpi.value}</span></div>)}</CardContent>
+                    </Card>
+                    <Card className="border-white/10 bg-white/[0.03] text-slate-100">
+                      <CardHeader><CardTitle className="text-sm">Dokumente</CardTitle></CardHeader>
+                      <CardContent className="space-y-2 text-sm">{selectedNode.documents.map((doc) => <button key={doc.label} onClick={() => go(doc.href)} className="flex w-full items-center gap-2 text-left text-slate-300 hover:text-white"><FileText className="h-4 w-4 text-slate-500" />{doc.label}</button>)}</CardContent>
+                    </Card>
+                    <Card className="border-white/10 bg-white/[0.03] text-slate-100">
+                      <CardHeader><CardTitle className="text-sm">Aktionen</CardTitle></CardHeader>
+                      <CardContent className="space-y-3">{selectedNode.actions.map((action) => <Button key={action.label} onClick={() => go(action.href)} variant={action.variant === 'primary' ? 'default' : 'outline'} className={cn('w-full justify-between', action.variant === 'primary' ? 'bg-indigo-500 text-white hover:bg-indigo-400' : 'border-white/10 bg-white/5 text-slate-200 hover:bg-white/10')}>{action.label}<ChevronRight className="h-4 w-4" /></Button>)}</CardContent>
+                    </Card>
+                    <Card className="border-indigo-400/20 bg-indigo-500/10 text-slate-100">
+                      <CardHeader><CardTitle className="text-sm">Agent</CardTitle></CardHeader>
+                      <CardContent className="space-y-3 text-sm">
+                        <div className="font-semibold text-white">{selectedNode.agent.headline}</div>
+                        <p className="text-slate-300">{selectedNode.agent.message}</p>
+                        <ul className="space-y-1 text-xs text-slate-300">{selectedNode.agent.reasons.map((reason) => <li key={reason}>- {reason}</li>)}</ul>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <AgentProcessPanel domain={workspace.right_panel.domain} className="max-w-none border-white/10 bg-slate-950/50" />
+                  <Card className="border-white/10 bg-slate-950/50 text-slate-100">
+                    <CardHeader><CardTitle className="text-lg">Linked Modules</CardTitle></CardHeader>
+                    <CardContent className="space-y-3">
+                      {workspace.right_panel.linked_modules.map((module) => (
+                        <button key={module.label} onClick={() => go(module.href)} className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-slate-200 hover:bg-white/5">
+                          <span>{module.label}</span>
+                          <ChevronRight className="h-4 w-4 text-slate-500" />
+                        </button>
+                      ))}
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 grid gap-4 lg:grid-cols-3">
+              {workspace.footer_cards.map((card) => (
+                <Card key={card.title} className="border-white/10 bg-slate-950/45 text-slate-100">
+                  <CardHeader><CardTitle className="text-base">{card.title}</CardTitle></CardHeader>
+                  <CardContent className="space-y-3 text-sm text-slate-300">
+                    {card.items.map((item) => <div key={item} className="rounded-2xl border border-white/10 px-4 py-3">{item}</div>)}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </main>
+
+          <aside className="border-l border-white/5 bg-slate-950/45 p-5">
+            <div className="mb-4 text-sm font-semibold text-slate-100">AI Copilot</div>
+            <Tabs defaultValue="agent" className="flex h-full flex-col">
+              <TabsList className="grid w-full grid-cols-4 bg-white/5">
+                <TabsTrigger value="agent">Agent</TabsTrigger>
+                <TabsTrigger value="actions">Aktionen</TabsTrigger>
+                <TabsTrigger value="docs">Docs</TabsTrigger>
+                <TabsTrigger value="kpis">KPIs</TabsTrigger>
+              </TabsList>
+              <TabsContent value="agent" className="mt-4 space-y-4">
+                <Card className="border-white/10 bg-white/[0.03] text-slate-100">
+                  <CardHeader><CardTitle className="text-base">{selectedNode.agent.headline}</CardTitle></CardHeader>
+                  <CardContent className="space-y-3 text-sm">
+                    <p>{selectedNode.agent.message}</p>
+                    <div className="space-y-1 text-xs text-slate-300">{selectedNode.agent.reasons.map((reason) => <div key={reason}>- {reason}</div>)}</div>
+                    <div className="grid grid-cols-3 gap-2">{selectedNode.agent.actions.map((action) => <Button key={action} size="sm" variant={action === 'Uebernehmen' ? 'default' : 'outline'} className={cn(action === 'Uebernehmen' ? 'bg-white text-slate-900 hover:bg-white/90' : 'border-white/10 bg-white/5 text-white hover:bg-white/10')}>{action}</Button>)}</div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              <TabsContent value="actions" className="mt-4 space-y-3">{selectedNode.actions.map((action) => <Button key={action.label} onClick={() => go(action.href)} className={cn('w-full justify-between', action.variant === 'primary' ? 'bg-indigo-500 text-white hover:bg-indigo-400' : 'border-white/10 bg-white/5 text-slate-200 hover:bg-white/10')} variant={action.variant === 'primary' ? 'default' : 'outline'}>{action.label}<ChevronRight className="h-4 w-4" /></Button>)}</TabsContent>
+              <TabsContent value="docs" className="mt-4 space-y-3">{selectedNode.documents.concat(workspace.right_panel.resources).map((doc) => <button key={`${doc.label}-${doc.href}`} onClick={() => go(doc.href)} className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-left text-sm text-slate-200 hover:bg-white/5"><span className="flex items-center gap-2"><FileText className="h-4 w-4 text-slate-500" />{doc.label}</span><ChevronRight className="h-4 w-4 text-slate-500" /></button>)}</TabsContent>
+              <TabsContent value="kpis" className="mt-4 space-y-3">{selectedNode.kpis.map((kpi) => <div key={kpi.label} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4"><div className="text-xs uppercase tracking-[0.2em] text-slate-500">{kpi.label}</div><div className="mt-2 text-lg font-semibold text-white">{kpi.value}</div></div>)}</TabsContent>
+            </Tabs>
+          </aside>
+        </div>
+      </PageSection>
+    </PageSurface>
+  )
+}
+
+export default FlowSpineWorkspace

@@ -1529,6 +1529,30 @@
       "path": "workflow/flow-spine-inventory-to-settlement"
     },
     {
+      "module": "@/pages/workflow/flow-spine-harvest-to-settlement",
+      "path": "workflow/flow-spine-harvest-to-settlement"
+    },
+    {
+      "module": "@/pages/workflow/flow-spine-contract-to-settlement",
+      "path": "workflow/flow-spine-contract-to-settlement"
+    },
+    {
+      "module": "@/pages/workflow/flow-spine-complaint-to-resolution",
+      "path": "workflow/flow-spine-complaint-to-resolution"
+    },
+    {
+      "module": "@/pages/workflow/flow-spine-service-to-customer",
+      "path": "workflow/flow-spine-service-to-customer"
+    },
+    {
+      "module": "@/pages/workflow/flow-spine-finance-to-close",
+      "path": "workflow/flow-spine-finance-to-close"
+    },
+    {
+      "module": "@/pages/workflow/flow-spine-compliance-to-report",
+      "path": "workflow/flow-spine-compliance-to-report"
+    },
+    {
       "module": "@/pages/admin/data-quality",
       "path": "admin/data-quality"
     },
