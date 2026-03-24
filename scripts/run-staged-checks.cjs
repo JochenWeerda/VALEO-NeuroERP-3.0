@@ -5,10 +5,11 @@ const path = require('node:path')
 const repoRoot = process.cwd()
 
 function run(command, args) {
-  execFileSync(command, args, {
+  const executable = process.platform === 'win32' && command === 'npx' ? 'npx.cmd' : command
+  execFileSync(executable, args, {
     cwd: repoRoot,
     stdio: 'inherit',
-    shell: process.platform === 'win32',
+    shell: false,
   })
 }
 
@@ -16,7 +17,7 @@ function getStagedFiles() {
   const output = execFileSync(
     'git',
     ['diff', '--cached', '--name-only', '--diff-filter=ACMR'],
-    { cwd: repoRoot, encoding: 'utf8', shell: process.platform === 'win32' },
+    { cwd: repoRoot, encoding: 'utf8', shell: false },
   )
 
   return output
