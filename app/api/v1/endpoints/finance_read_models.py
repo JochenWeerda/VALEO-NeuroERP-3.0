@@ -1152,7 +1152,7 @@ def _batch_fetch_journal_entries_for_closings(
                 """
             ).bindparams(bindparam("belege", expanding=True))
         )
-        rows = list(db.execute(stmt, {"tenant_id": tenant_id, "belege": belege}).mappings())
+        rows = db.execute(stmt, {"tenant_id": tenant_id, "belege": belege}).mappings().all() or []
     except Exception:
         return {}
     by_key: dict[str, dict[str, Any]] = {}
