@@ -132,10 +132,11 @@ export default function QrScannerPage(): JSX.Element {
                 <span className="font-semibold">{form.artikelCode}</span>
               </div>
             </div>
-            <Button onClick={() => navigate('/annahme/warteschlange')} className="w-full">
+            <Button size="touch" onClick={() => navigate('/annahme/warteschlange')} className="w-full">
               Zur Warteschlange
             </Button>
             <Button
+              size="touch"
               variant="outline"
               onClick={() => {
                 setSubmitted(false)
@@ -204,10 +205,11 @@ export default function QrScannerPage(): JSX.Element {
                     if (e.key === 'Enter') handleParse()
                   }}
                   placeholder="VALEO-LKW:AB-CD 1234:LW-10001:WEIZEN"
-                  className="font-mono text-sm"
+                  className="h-14 font-mono text-sm"
                   autoFocus
                 />
-                <Button onClick={handleParse} disabled={!qrRaw.trim()}>
+                {/* Touch-optimized: size="touch" ≥ 44px (Gap 024) */}
+                <Button size="touch" onClick={handleParse} disabled={!qrRaw.trim()}>
                   Erkennen
                 </Button>
               </div>
@@ -270,7 +272,7 @@ export default function QrScannerPage(): JSX.Element {
                   onChange={(e) =>
                     setForm((p) => ({ ...p, prioritaet: e.target.value as QRFormState['prioritaet'] }))
                   }
-                  className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  className="mt-1 h-14 w-full rounded-md border border-input bg-background px-3 py-2 text-base"
                 >
                   <option value="hoch">Hoch (Express)</option>
                   <option value="normal">Normal</option>
@@ -306,6 +308,7 @@ export default function QrScannerPage(): JSX.Element {
                   </Badge>
                 </div>
                 <Button
+                  size="touch"
                   onClick={() => addToQueue.mutate()}
                   disabled={addToQueue.isPending}
                   className="gap-2"

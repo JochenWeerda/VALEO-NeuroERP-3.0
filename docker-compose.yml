@@ -262,6 +262,9 @@ services:
       CRM_SALES_HTTP_TIMEOUT_SECONDS: 5
       CRM_SERVICE_BASE_URL: http://crm-service:5800
       CRM_SERVICE_HTTP_TIMEOUT_SECONDS: 5
+      # OpenTelemetry (optional): z. B. OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318/v1/traces
+      # OTEL_SERVICE_NAME: valeo-neuroerp-api
+      # ENABLE_TRACING: "true"
     ports:
       - "8000:8000"
     depends_on:

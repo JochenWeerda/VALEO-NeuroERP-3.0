@@ -69,10 +69,6 @@ export default function WiegungenPage(): JSX.Element {
     [tickets, searchTerm],
   )
 
-  if (ticketsQuery.isError) {
-    return <ErrorState error={ticketsQuery.error as Error} onRetry={() => { void ticketsQuery.refetch() }} />
-  }
-
   const totalNetKg = tickets.reduce((sum, t) => sum + Number(t.net_weight ?? 0), 0)
   const totalBillingKg = tickets.reduce((sum, t) => sum + Number(t.billing_weight ?? t.net_weight ?? 0), 0)
 
@@ -139,6 +135,10 @@ export default function WiegungenPage(): JSX.Element {
   })
   useKeyboardShortcuts(shortcuts)
 
+  if (ticketsQuery.isError) {
+    return <ErrorState error={ticketsQuery.error as Error} onRetry={() => { void ticketsQuery.refetch() }} />
+  }
+
   return (
     <div className="flex flex-col">
     <div className="space-y-4 p-6">
@@ -197,24 +197,25 @@ export default function WiegungenPage(): JSX.Element {
           <div className="grid grid-cols-2 gap-2">
             <div>
               <Label htmlFor="grossWeight">Brutto</Label>
-              <Input id="grossWeight" type="number" value={form.grossWeight} onChange={(e) => setForm((p) => ({ ...p, grossWeight: Number(e.target.value) }))} />
+              {/* Touch-optimized: h-14 ≥ 44px touch target (Gap 024) */}
+              <Input id="grossWeight" type="number" inputMode="decimal" value={form.grossWeight} onChange={(e) => setForm((p) => ({ ...p, grossWeight: Number(e.target.value) }))} className="h-14 text-base" />
             </div>
             <div>
               <Label htmlFor="tareWeight">Tara</Label>
-              <Input id="tareWeight" type="number" value={form.tareWeight} onChange={(e) => setForm((p) => ({ ...p, tareWeight: Number(e.target.value) }))} />
+              <Input id="tareWeight" type="number" inputMode="decimal" value={form.tareWeight} onChange={(e) => setForm((p) => ({ ...p, tareWeight: Number(e.target.value) }))} className="h-14 text-base" />
             </div>
           </div>
           <div>
             <Label htmlFor="moisturePct">Feuchte %</Label>
-            <Input id="moisturePct" type="number" step="0.1" value={form.moisturePct} onChange={(e) => setForm((p) => ({ ...p, moisturePct: Number(e.target.value) }))} />
+            <Input id="moisturePct" type="number" inputMode="decimal" step="0.1" value={form.moisturePct} onChange={(e) => setForm((p) => ({ ...p, moisturePct: Number(e.target.value) }))} className="h-14 text-base" />
           </div>
           <div>
             <Label htmlFor="impuritiesPct">Besatz %</Label>
-            <Input id="impuritiesPct" type="number" step="0.1" value={form.impuritiesPct} onChange={(e) => setForm((p) => ({ ...p, impuritiesPct: Number(e.target.value) }))} />
+            <Input id="impuritiesPct" type="number" inputMode="decimal" step="0.1" value={form.impuritiesPct} onChange={(e) => setForm((p) => ({ ...p, impuritiesPct: Number(e.target.value) }))} className="h-14 text-base" />
           </div>
           <div className="md:col-span-2 flex items-end">
-            <Button className="gap-2" onClick={() => { void onCreate() }} disabled={createMutation.isPending}>
-              <Plus className="h-4 w-4" />
+            <Button size="touch" className="gap-2" onClick={() => { void onCreate() }} disabled={createMutation.isPending}>
+              <Plus className="h-5 w-5" />
               Anlegen
             </Button>
           </div>
@@ -230,7 +231,7 @@ export default function WiegungenPage(): JSX.Element {
             <Label htmlFor="selectTicket">Ticket</Label>
             <select
               id="selectTicket"
-              className="mt-1 h-10 w-full rounded-md border bg-background px-3 text-sm"
+              className="mt-1 h-14 w-full rounded-md border bg-background px-3 text-base"
               value={selectedTicketId}
               onChange={(e) => setSelectedTicketId(e.target.value)}
             >
@@ -246,7 +247,7 @@ export default function WiegungenPage(): JSX.Element {
             <Label htmlFor="selectContract">Offener Kontrakt</Label>
             <select
               id="selectContract"
-              className="mt-1 h-10 w-full rounded-md border bg-background px-3 text-sm"
+              className="mt-1 h-14 w-full rounded-md border bg-background px-3 text-base"
               value={selectedContractId}
               onChange={(e) => setSelectedContractId(e.target.value)}
             >
@@ -259,8 +260,8 @@ export default function WiegungenPage(): JSX.Element {
             </select>
           </div>
           <div className="flex items-end">
-            <Button className="gap-2" onClick={() => { void onAllocate() }} disabled={allocateMutation.isPending}>
-              <Link2 className="h-4 w-4" />
+            <Button size="touch" className="gap-2" onClick={() => { void onAllocate() }} disabled={allocateMutation.isPending}>
+              <Link2 className="h-5 w-5" />
               Allokieren
             </Button>
           </div>

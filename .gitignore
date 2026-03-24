@@ -1,309 +1,49 @@
-***REMOVED*** ===================================
-***REMOVED*** VALEO NeuroERP - Git Ignore
-***REMOVED*** ===================================
+# Sync .project/sourceTexts/ folder (source text files)
 
-***REMOVED*** ===================================
-***REMOVED*** Environment Files (CRITICAL - NEVER COMMIT!)
-***REMOVED*** ===================================
-.env
-.env.local
-.env.*.local
-.env.staging.local
-.env.production.local
-*.env
+# Don't sync user-specific SQLite databases
+.project/*.sqlite
 
-***REMOVED*** ===================================
-***REMOVED*** Logs
-***REMOVED*** ===================================
-logs/
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
-*.log.*
+# Don't sync SQLite auxiliary files
+.project/*.sqlite-wal
+.project/*.sqlite-shm
 
-***REMOVED*** Development logs
-dev-sse.log
-dev-sse.err
-frontend-dev.log
-frontend-dev.err
+# Don't sync user-specific files
+.project/complete_drafts.txt
+.project/localProjectSettings.json
+.project/localProjectSwap.json
+copilot-messages.log
 
-***REMOVED*** ===================================
-***REMOVED*** Databases
-***REMOVED*** ===================================
-*.db
-*.db-shm
-*.db-wal
-*.sqlite
-*.sqlite3
-*.dump
-*.sql.gz
-
-***REMOVED*** Database backups
-backups/
-*.backup
-
-***REMOVED*** ===================================
-***REMOVED*** Node / NPM / PNPM
-***REMOVED*** ===================================
-node_modules/
-dist/
-dist-ssr/
-build/
-.cache/
-.temp/
-.tmp/
-
-***REMOVED*** Dependency directories
-de_modules/
-ckage-lock.json
-ckage.json
-mory-bank/
-memory-bank/
-.backups/
-nul
-
-***REMOVED*** Miscreated nested workspace folder (should never be committed)
-C*workspaces*VALEO-NeuroERP-3.0/
-
-***REMOVED*** PNPM
-.pnpm-store/
-.pnpm-debug.log
-
-***REMOVED*** NPM
-package-lock.json
-npm-debug.log
-
-***REMOVED*** Yarn
-yarn.lock
-.yarn/
-.yarnrc.yml
-
-***REMOVED*** ===================================
-***REMOVED*** Python
-***REMOVED*** ===================================
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
-pip-log.txt
-pip-delete-this-directory.txt
-.pytest_cache/
-.coverage
-.hypothesis/
-*.cover
-*.egg
-*.egg-info/
-dist/
-build/
-*.whl
-
-***REMOVED*** Alembic
-alembic.ini.local
-alembic/versions_wip/
-
-***REMOVED*** ===================================
-***REMOVED*** Docker
-***REMOVED*** ===================================
-***REMOVED*** Don't ignore docker-compose files, but ignore overrides
-docker-compose.override.yml
-.dockerignore.local
-
-***REMOVED*** ===================================
-***REMOVED*** IDEs and Editors
-***REMOVED*** ===================================
-***REMOVED*** VS Code
-.vscode/
-!.vscode/extensions.json
-!.vscode/settings.json.example
-*.code-workspace
-
-***REMOVED*** JetBrains (WebStorm, PyCharm, etc.)
-.idea/
-*.iml
-*.iws
-
-***REMOVED*** Sublime Text
-*.sublime-project
-*.sublime-workspace
-
-***REMOVED*** Vim
-*.swp
-*.swo
-*~
-
-***REMOVED*** Emacs
-*~
-\***REMOVED****\***REMOVED***
-.\***REMOVED****
-
-***REMOVED*** ===================================
-***REMOVED*** Operating System
-***REMOVED*** ===================================
-***REMOVED*** macOS
-.DS_Store
-.AppleDouble
-.LSOverride
-._*
-
-***REMOVED*** Windows
-Thumbs.db
-Thumbs.db:encryptable
-ehthumbs.db
-ehthumbs_vista.db
-Desktop.ini
-$RECYCLE.BIN/
-
-***REMOVED*** Linux
-*~
-.directory
-.Trash-*
-
-***REMOVED*** ===================================
-***REMOVED*** Build Artifacts
-***REMOVED*** ===================================
-*.tsbuildinfo
-.turbo/
-.next/
-.nuxt/
-.docusaurus/
-.serverless/
-.fusebox/
-.dynamodb/
-.tern-port
-
-***REMOVED*** Vite
-.vite/
-
-***REMOVED*** ===================================
-***REMOVED*** Test Results
-***REMOVED*** ===================================
-test-results/
-coverage/
-.nyc_output/
-playwright-report/
-playwright-tests/artifacts/
-*.spec.js.snap
-load-tests/results/
-
-# Generated reports/artifacts (should not be committed)
-evidence/
-lint-results.json
-FINAL-LINT-STATUS-REPORT.md
-coverage.xml
-
-***REMOVED*** ===================================
-***REMOVED*** Temporary Files
-***REMOVED*** ===================================
-tmp/
-temp/
-*.tmp
-*.bak
-*.swp
-*~.nib
-
-***REMOVED*** ===================================
-***REMOVED*** Security & Secrets
-***REMOVED*** ===================================
-gitleaks-report.json
-***REMOVED*** SSL Certificates
-*.pem
-*.key
-*.crt
-*.cer
-*.p12
-*.pfx
-
-***REMOVED*** Secrets
-secrets/
-*.secret
-.secrets/
-GITHUB-SECRETS.txt
-*SECRETS*.txt
-
-***REMOVED*** SSH Keys
-id_rsa
-id_rsa.pub
-*.ppk
-
-***REMOVED*** ===================================
-***REMOVED*** Keycloak
-***REMOVED*** ===================================
-***REMOVED*** Keep realm exports, but not runtime data
-data/keycloak/
-keycloak-data/
-
-***REMOVED*** ===================================
-***REMOVED*** Monitoring & Observability
-***REMOVED*** ===================================
-prometheus-data/
-grafana-data/
-elasticsearch-data/
-
-***REMOVED*** ===================================
-***REMOVED*** Misc
-***REMOVED*** ===================================
-.DS_Store?
-Icon?
-.Spotlight-V100
-.Trashes
-
-***REMOVED*** Archives
-*.7z
-*.dmg
-*.gz
-*.iso
-*.jar
-*.rar
-*.tar
+# Archive formats
 *.zip
+*.rar
+*.7z
+*.tar
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.gz
+*.bz2
+*.xz
 
-***REMOVED*** ===================================
-***REMOVED*** Project Specific
-***REMOVED*** ===================================
-***REMOVED*** Data directory (except examples)
-data/*
-!data/.gitkeep
-!data/examples/
+# Windows executables and installers
+*.exe
+*.msi
+*.bat
+*.cmd
+*.com
+*.scr
+*.dll
 
-***REMOVED*** Config overrides
-config/*.local.*
-config/local/
+# macOS executables and disk images
+*.dmg
+*.pkg
 
-***REMOVED*** Scripts outputs
-scripts/output/
-scripts/*.log
+# Disk images and virtual machine files
+*.iso
+*.img
+*.vhd
+*.vmdk
 
-***REMOVED*** Memory bank (Cursor AI)
-memory-bank/
-
-***REMOVED*** Plan files
-*.plan.md
-
-***REMOVED*** ===================================
-***REMOVED*** Keep These Files (Override)
-***REMOVED*** ===================================
-!.github/
-!.vscode/extensions.json
-!config/keycloak/realm-staging.json
-!config/keycloak/realm-production.json
-!env.example*
-!.env.example
-!.gitkeep
-
-
-*storybook.log
-storybook-static
-
-***REMOVED*** Ignore Python bytecode
-__pycache__/
-*.pyc
-
+# System files
+.DS_Store
+.project/attachments/files/**

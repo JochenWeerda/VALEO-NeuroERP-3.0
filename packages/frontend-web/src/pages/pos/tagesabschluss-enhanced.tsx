@@ -1,14 +1,23 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { Wizard } from '@/components/patterns/Wizard'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import { AlertTriangle, CheckCircle, FileText } from 'lucide-react'
+import { AlertTriangle, CheckCircle, Download, FileText, ShieldCheck } from 'lucide-react'
 import { apiClient } from '@/lib/api-client'
 import { useToast } from '@/hooks/use-toast'
+
+type DsfinvkStatus = {
+  status: string
+  taxonomie_version: string
+  letzter_export: string | null
+  letzter_export_dateiname: string | null
+  kasse_id: string
+  hinweis: string
+}
 
 type TagesabschlussData = {
   datum: string
@@ -93,6 +102,19 @@ export default function TagesabschlussEnhancedPage(): JSX.Element {
       toast({ title: 'Fehler beim Buchen', variant: 'destructive' })
     },
   })
+
+  const dsfinvkStatusQuery = useQuery<DsfinvkStatus>({
+    queryKey: ['dsfinvk-status'],
+    queryFn: async () => {
+      const response = await apiClient.get<DsfinvkStatus>('/api/v1/pos/dsfinvk/status')
+      return response.data
+    },
+    staleTime: 60_000,
+  })
+
+  function handleDsfinvkExport(): void {
+    window.open('/api/v1/pos/dsfinvk/export', '_blank')
+  }
 
   function calculateDifferenzen(): void {
     setAbschluss({
@@ -272,6 +294,45 @@ export default function TagesabschlussEnhancedPage(): JSX.Element {
                   Belegnummer: KA-{abschluss.datum} •
                   TSE-Transaktionen: {abschluss.tseTransaktionen}
                 </p>
+              </div>
+
+              {/* DSFinV-K Export */}
+              <div className="rounded-lg border border-blue-200 bg-blue-50 p-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <ShieldCheck className="h-4 w-4 text-blue-700" />
+                      <p className="font-semibold text-blue-900 text-sm">DSFinV-K Export</p>
+                      <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800 border border-green-300">
+                        Gesetzlich vorgeschrieben (KassenSichV)
+                      </span>
+                    </div>
+                    <p className="text-xs text-blue-800 mb-2">
+                      Kassendaten-Export nach DSFinV-K v2.3 gemäß §4 Abs. 3 AEAO.
+                      GoBD-konform archivieren.
+                    </p>
+                    {dsfinvkStatusQuery.data?.letzter_export && (
+                      <p className="text-xs text-blue-700">
+                        Letzter Export:{' '}
+                        <span className="font-medium">
+                          {new Date(dsfinvkStatusQuery.data.letzter_export).toLocaleDateString('de-DE')}
+                        </span>
+                        {dsfinvkStatusQuery.data.letzter_export_dateiname && (
+                          <> · {dsfinvkStatusQuery.data.letzter_export_dateiname}</>
+                        )}
+                      </p>
+                    )}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="shrink-0 border-blue-300 text-blue-800 hover:bg-blue-100"
+                    onClick={handleDsfinvkExport}
+                  >
+                    <Download className="mr-1.5 h-4 w-4" />
+                    ZIP herunterladen
+                  </Button>
+                </div>
               </div>
             </div>
 

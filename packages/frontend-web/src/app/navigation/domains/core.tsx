@@ -30,6 +30,7 @@ import {
   Users,
   Zap,
   Search,
+  BookOpen,
 } from 'lucide-react'
 import type { RawNavItem } from '@/app/navigation/types'
 import { ENABLE_PROSPECTING_UI } from '@/features/prospecting/feature-flags'
@@ -87,6 +88,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         icon: Activity,
         module: '@/pages/workflows/supervisor',
         keywords: ['supervisor', 'agent', 'prozess', 'agentic', 'ki', 'oversight'],
+        mcp: { businessDomain: 'workflow', scope: 'workflow:read' },
+      },
+      {
+        id: 'workflow-flow-spine',
+        label: 'Flow Spine Studio',
+        icon: LayoutGrid,
+        module: '@/pages/workflow/flow-spine-studio',
+        preferredPath: 'workflow/flow-spine-studio',
+        keywords: ['flow spine', 'order to cash', 'control tower', 'agentic ui', 'prozessraum'],
         mcp: { businessDomain: 'workflow', scope: 'workflow:read' },
       },
       {
@@ -225,6 +235,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         mcp: { businessDomain: 'admin', scope: 'admin:read' },
       },
     ],
+  },
+  {
+    id: 'wissen',
+    label: 'Wissensbasis',
+    icon: BookOpen,
+    module: '@/pages/wissen/wissensbasis',
+    preferredPath: 'wissen/wissensbasis',
+    keywords: ['wissen', 'knowledge', 'dokumente', 'handbuch', 'richtlinien', 'ki', 'agent'],
+    mcp: { businessDomain: 'wissen', scope: 'knowledge:read' },
   },
   {
     id: 'kundenportal',

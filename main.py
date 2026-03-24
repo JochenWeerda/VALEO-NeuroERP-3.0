@@ -76,8 +76,6 @@ except ImportError:
     purchase_workflow_router = None
     logger.debug("Purchase workflow router not available (optional module)")
 
-from prometheus_client import make_asgi_app
-
 # Setup logging
 setup_logging()
 
@@ -85,6 +83,45 @@ setup_logging()
 async def lifespan(app: FastAPI):
     """Application lifespan context manager"""
     outbox_task = None
+
+    # SC-AUTH-002: API_DEV_TOKEN darf in Produktion nicht gesetzt sein
+    if settings.APP_ENV == "production" and settings.API_DEV_TOKEN is not None:
+        raise RuntimeError(
+            "SECURITY: API_DEV_TOKEN must not be set in production. "
+            "Remove API_DEV_TOKEN from your environment or set APP_ENV != 'production'."
+        )
+
+    # SC-SECRETS-001: SECRET_KEY und ENCRYPTION_KEY müssen in Produktion aus Env kommen
+    if settings.APP_ENV == "production":
+        if not settings.SECRET_KEY:
+            raise RuntimeError(
+                "SECURITY: SECRET_KEY must be set via environment variable in production."
+            )
+        if not settings.ENCRYPTION_KEY:
+            raise RuntimeError(
+                "SECURITY: ENCRYPTION_KEY must be set via environment variable in production."
+            )
+    else:
+        # Dev-Modus: generiere ephemere Keys mit Warnung (werden bei Restart neu erzeugt)
+        import secrets as _secrets
+        if not settings.SECRET_KEY:
+            settings.SECRET_KEY = _secrets.token_urlsafe(32)
+            logger.warning(
+                "⚠️  SECRET_KEY nicht gesetzt — ephemerer Dev-Key generiert. "
+                "Tokens werden nach Restart ungültig."
+            )
+        if not settings.ENCRYPTION_KEY:
+            settings.ENCRYPTION_KEY = _secrets.token_urlsafe(32)
+            logger.warning(
+                "⚠️  ENCRYPTION_KEY nicht gesetzt — ephemerer Dev-Key generiert."
+            )
+        # Dev-Modus: API_DEV_TOKEN auf 'dev-token' setzen falls nicht konfiguriert
+        if not settings.API_DEV_TOKEN:
+            settings.API_DEV_TOKEN = "dev-token"
+            logger.warning(
+                "⚠️  API_DEV_TOKEN nicht gesetzt — Dev-Token 'dev-token' aktiv. "
+                "In Produktion APP_ENV=production setzen!"
+            )
 
     # Startup
     logger.info("Starting VALEO-NeuroERP API server...")
@@ -209,6 +246,14 @@ app.add_middleware(PrometheusMiddleware)
 # Add Correlation ID middleware
 from app.middleware.correlation import CorrelationMiddleware
 app.add_middleware(CorrelationMiddleware)
+
+# Add Security Headers middleware (Gap 049, SC-HDR-001)
+from app.middleware.security_headers import SecurityHeadersMiddleware
+app.add_middleware(SecurityHeadersMiddleware)
+
+# Add Audit middleware — auto-captures all mutating API calls (Gap 049, SC-AUDIT-001)
+from app.middleware.audit_middleware import AuditMiddleware
+app.add_middleware(AuditMiddleware)
 
 # Authentication middleware
 @app.middleware("http")
@@ -481,9 +526,14 @@ app.include_router(dms_webhook_router)
 # Include Finanzbuchhaltung (130 Masken Integration)
 app.include_router(fibu_router, prefix="/api/v1")
 
-# Mount Prometheus metrics endpoint
-metrics_app = make_asgi_app()
-app.mount("/metrics", metrics_app)
+# Gap 039: OpenTelemetry (optional, siehe OTEL_EXPORTER_OTLP_ENDPOINT / ENABLE_TRACING)
+try:
+    from app.core.otel_setup import instrument_app_if_configured
+
+    if instrument_app_if_configured(app, engine):
+        logger.info("OpenTelemetry: Instrumentierung aktiv")
+except Exception as _otel_exc:
+    logger.debug("OpenTelemetry-Setup übersprungen: %s", _otel_exc)
 
 if __name__ == "__main__":
     uvicorn.run(

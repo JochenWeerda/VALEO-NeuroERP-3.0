@@ -5,7 +5,7 @@
 
 import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { HelpCircle } from 'lucide-react'
+import { Command as CommandIcon, HelpCircle } from 'lucide-react'
 import {
   CommandDialog,
   CommandEmpty,
@@ -102,10 +102,13 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps): JSX
         placeholder="Aktion suchen... (z.B. 'Auftrag', 'Buchung')"
         value={search}
         onValueChange={setSearch}
+        autoFocus
       />
-      <CommandList>
+      <CommandList className="max-h-[400px]">
         <CommandEmpty>
-          Keine Aktionen gefunden.
+          {search.trim().length > 0
+            ? `Keine Ergebnisse für "${search.trim()}"`
+            : 'Keine Aktionen gefunden.'}
           <div className="mt-2 text-xs text-muted-foreground">
             Tipp: Versuche allgemeinere Begriffe wie &quot;Auftrag&quot; oder &quot;Kunde&quot;
           </div>
@@ -143,8 +146,8 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps): JSX
                         {cmd.shortcut}
                       </kbd>
                     )}
-                    {cmd.mcp?.requiredScopes && (
-                      <span className="ml-2 text-xs text-muted-foreground">{cmd.mcp.requiredScopes[0]}</span>
+                    {cmd.mcp?.requiredScopes && !cmd.shortcut && (
+                      <span className="ml-auto text-xs text-muted-foreground">{cmd.mcp.requiredScopes[0]}</span>
                     )}
                   </CommandItem>
                 )
@@ -153,7 +156,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps): JSX
           </div>
         ))}
 
-        {(search.toLowerCase().includes('ai') || search.toLowerCase().includes('help')) && (
+        {(search.toLowerCase().includes('ai') || search.toLowerCase().includes('help') || search.toLowerCase().includes('hilfe')) && (
           <>
             <CommandSeparator />
             <CommandGroup heading="Ask VALEO">
@@ -168,12 +171,25 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps): JSX
                 }}
               >
                 <HelpCircle className="mr-2 h-4 w-4" />
-                Ask VALEO oeffnen
+                Ask VALEO öffnen
               </CommandItem>
             </CommandGroup>
           </>
         )}
       </CommandList>
+
+      {/* Tastenkürzel-Hinweis */}
+      <div className="flex items-center justify-end border-t px-3 py-2 text-xs text-muted-foreground">
+        <span className="flex items-center gap-1">
+          <CommandIcon className="h-3 w-3" />
+          <span>K</span>
+          <span className="mx-1 opacity-50">/</span>
+          <kbd className="rounded bg-muted px-1 py-0.5">Ctrl</kbd>
+          <span>+</span>
+          <kbd className="rounded bg-muted px-1 py-0.5">K</kbd>
+          <span className="ml-1">schließen</span>
+        </span>
+      </div>
     </CommandDialog>
   )
 }

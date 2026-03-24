@@ -25,6 +25,10 @@ const buttonVariants = cva(
         sm: "h-8 rounded-md px-3 text-xs",
         lg: "h-10 rounded-md px-8",
         icon: "h-9 w-9",
+        // Touch-optimized sizes (Gap 024) — min 44px touch target per WCAG 2.5.5
+        touch: "h-14 px-6 text-base rounded-lg min-w-[56px]",
+        "touch-xl": "h-16 px-8 text-lg rounded-xl min-w-[64px] font-semibold",
+        "touch-icon": "h-14 w-14 rounded-lg",
       },
     },
     defaultVariants: {

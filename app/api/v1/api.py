@@ -134,6 +134,8 @@ from app.api.v1.endpoints import (
     position_overrides,
     batch,
     agents,
+    pos_retoure,
+    pos_dsfinvk,
 )
 
 # Wave 6-9 Process-Kernel-Endpoints (agrar-p0, supplier, wave-7, wave-9)
@@ -150,6 +152,9 @@ from app.api.v1.endpoints import (
 )
 # Wave 2-19 Process-Kernel Read-Models + Commands
 from app.api.v1.endpoints import agent_context_api, finance_read_models, process_kernel_api
+
+# Wave 69 — Knowledge Core
+from app.api.v1.endpoints import knowledge_api
 
 # Import domain routers
 from app.domains.agrar.api import psm, psm_proplanta
@@ -863,6 +868,20 @@ api_router.include_router(position_rules.router)
 api_router.include_router(position_overrides.router)
 api_router.include_router(commodity_positions.router)
 
+# POS Retoure & Checkout
+api_router.include_router(
+    pos_retoure.router,
+    prefix="/pos",
+    tags=["pos", "retoure"],
+)
+
+# POS DSFinV-K Export (KassenSichV)
+api_router.include_router(
+    pos_dsfinvk.router,
+    prefix="/pos",
+    tags=["pos", "dsfinvk"],
+)
+
 # Disposition API
 api_router.include_router(
     disposition.router
@@ -973,3 +992,6 @@ api_router.include_router(ernte_kampagne_api.router)
 api_router.include_router(finance_read_models.router)
 api_router.include_router(process_kernel_api.router)
 api_router.include_router(agent_context_api.router)
+
+# Wave 69 — Knowledge Core
+api_router.include_router(knowledge_api.router, prefix="/knowledge", tags=["knowledge"])

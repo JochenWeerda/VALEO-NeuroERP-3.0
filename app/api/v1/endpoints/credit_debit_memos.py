@@ -102,6 +102,10 @@ class CreditMemoResponse(BaseModel):
     settledInvoiceIds: Optional[List[str]] = None
     booked: bool = False
     journalRef: Optional[str] = None
+    # Gap 004: Freigabe vor Buchung bei settlement-verknüpften Memos
+    approvalStatus: Optional[str] = None
+    approvedAt: Optional[str] = None
+    approvedBy: Optional[str] = None
 
 
 class DebitMemoResponse(BaseModel):
@@ -125,6 +129,9 @@ class DebitMemoResponse(BaseModel):
     settledInvoiceIds: Optional[List[str]] = None
     booked: bool = False
     journalRef: Optional[str] = None
+    approvalStatus: Optional[str] = None
+    approvedAt: Optional[str] = None
+    approvedBy: Optional[str] = None
 
 
 def calculate_memo_totals(items: List[MemoItem]) -> tuple[float, float, float]:
@@ -207,6 +214,10 @@ async def create_credit_memo(
             "settledInvoiceIds": [],
             "booked": False,
             "journalRef": None,
+            # Gap 004: Korrektur zu Settlement → Freigabe vor Buchung
+            "approvalStatus": "FREIGEGEBEN" if not memo.settlementId else "ENTWURF",
+            "approvedAt": datetime.now().isoformat() if not memo.settlementId else None,
+            "approvedBy": (_get_user_id_from_request(request) or "system") if not memo.settlementId else None,
             "createdAt": datetime.now().isoformat(),
             "createdBy": _get_user_id_from_request(request) or "system",
         }
@@ -269,6 +280,9 @@ async def create_debit_memo(
             "settledInvoiceIds": [],
             "booked": False,
             "journalRef": None,
+            "approvalStatus": "FREIGEGEBEN" if not memo.settlementId else "ENTWURF",
+            "approvedAt": datetime.now().isoformat() if not memo.settlementId else None,
+            "approvedBy": (_get_user_id_from_request(request) or "system") if not memo.settlementId else None,
             "createdAt": datetime.now().isoformat(),
             "createdBy": _get_user_id_from_request(request) or "system",
         }
@@ -523,6 +537,63 @@ async def settle_debit_memo(
         raise HTTPException(status_code=500, detail=f"Failed to settle debit memo: {str(e)}")
 
 
+def _approve_memo_for_booking(
+    *,
+    memo_type: str,
+    memo_id: str,
+    repo,
+    request: Request | None,
+) -> dict:
+    """Gap 004: Freigabe für Buchung (Pflicht bei settlement-verknüpften Memos)."""
+    memo = get_from_store(memo_type, memo_id, repo)
+    if not memo:
+        raise HTTPException(status_code=404, detail=f"{memo_type} not found")
+    if memo.get("booked") is True:
+        raise HTTPException(status_code=400, detail="Memo bereits gebucht")
+    uid = _get_user_id_from_request(request) or "system"
+    memo["approvalStatus"] = "FREIGEGEBEN"
+    memo["approvedAt"] = datetime.now().isoformat()
+    memo["approvedBy"] = uid
+    save_to_store(memo_type, memo_id, memo, repo)
+    return memo
+
+
+@router.post("/credit-memos/{memo_id}/freigabe")
+async def approve_credit_memo_for_booking(
+    memo_id: str,
+    db: Session = Depends(get_db),
+    request: Request = None,
+) -> dict:
+    """Gap 004: Gutschrift zur Fibu-Buchung freigeben."""
+    try:
+        repo = get_repository(db)
+        _approve_memo_for_booking(memo_type="credit_memo", memo_id=memo_id, repo=repo, request=request)
+        return {"status": "ok", "memoId": memo_id, "approvalStatus": "FREIGEGEBEN"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error approving credit memo: {e}")
+        raise HTTPException(status_code=500, detail=str(e)) from e
+
+
+@router.post("/debit-memos/{memo_id}/freigabe")
+async def approve_debit_memo_for_booking(
+    memo_id: str,
+    db: Session = Depends(get_db),
+    request: Request = None,
+) -> dict:
+    """Gap 004: Belastung zur Fibu-Buchung freigeben."""
+    try:
+        repo = get_repository(db)
+        _approve_memo_for_booking(memo_type="debit_memo", memo_id=memo_id, repo=repo, request=request)
+        return {"status": "ok", "memoId": memo_id, "approvalStatus": "FREIGEGEBEN"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error approving debit memo: {e}")
+        raise HTTPException(status_code=500, detail=str(e)) from e
+
+
 def _book_memo_to_store(
     *,
     memo_type: str,
@@ -535,6 +606,13 @@ def _book_memo_to_store(
         raise HTTPException(status_code=404, detail=f"{memo_type} not found")
     if memo.get("booked") is True:
         raise HTTPException(status_code=400, detail=f"{memo_type} already booked")
+    # Gap 004: Settlement-Korrekturen erst nach Freigabe verbuchen
+    if memo.get("settlementId"):
+        if (memo.get("approvalStatus") or "ENTWURF") != "FREIGEGEBEN":
+            raise HTTPException(
+                status_code=409,
+                detail="Settlement-verknüpftes Memo: zuerst POST .../freigabe, dann Buchung.",
+            )
 
     journal_ref = f"JRN-{datetime.now().strftime('%Y%m%d')}-{memo_id[:8].upper()}"
     booking = {

@@ -103,3 +103,4 @@ from . import gobd_archiv
 from . import commodity_positions
 from . import position_rules
 from . import position_overrides
+from . import pos_dsfinvk

@@ -4,9 +4,11 @@ Demo-Login-Endpoint für lokale Tests (NICHT für Production!)
 """
 
 from __future__ import annotations
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 from .jwt import create_access_token
+from app.core.config import settings
+from app.middleware.rate_limit import limiter
 import logging
 
 logger = logging.getLogger(__name__)
@@ -29,7 +31,8 @@ class LoginResponse(BaseModel):
 
 
 @router.post("/demo-login", response_model=LoginResponse)
-async def demo_login(body: LoginBody) -> LoginResponse:
+@limiter.limit("10/minute")
+async def demo_login(request: Request, body: LoginBody) -> LoginResponse:
     """
     Demo-Login-Endpoint (NUR FÜR ENTWICKLUNG!)
 
@@ -42,6 +45,10 @@ async def demo_login(body: LoginBody) -> LoginResponse:
     Returns:
         LoginResponse mit access_token
     """
+    # SC-AUTH-002: Demo-Endpoints sind nur in Entwicklung erlaubt
+    if settings.APP_ENV == "production":
+        raise HTTPException(status_code=403, detail="Demo-Login nicht verfügbar in Produktion")
+
     # Validiere Rolle
     valid_roles = ["admin", "manager", "operator"]
     if body.role not in valid_roles:
@@ -65,7 +72,8 @@ async def demo_login(body: LoginBody) -> LoginResponse:
 
 
 @router.post("/demo-multi-role", response_model=LoginResponse)
-async def demo_multi_role_login(username: str, roles: list[str]) -> LoginResponse:
+@limiter.limit("10/minute")
+async def demo_multi_role_login(request: Request, username: str, roles: list[str]) -> LoginResponse:
     """
     Demo-Login mit mehreren Rollen (NUR FÜR ENTWICKLUNG!)
 
@@ -76,6 +84,10 @@ async def demo_multi_role_login(username: str, roles: list[str]) -> LoginRespons
     Returns:
         LoginResponse mit access_token
     """
+    # SC-AUTH-002: Demo-Endpoints sind nur in Entwicklung erlaubt
+    if settings.APP_ENV == "production":
+        raise HTTPException(status_code=403, detail="Demo-Login nicht verfügbar in Produktion")
+
     # Erstelle Token mit mehreren Rollen
     token = create_access_token(sub=username, roles=roles)
 

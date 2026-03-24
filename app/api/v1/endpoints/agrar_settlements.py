@@ -10,6 +10,7 @@ from typing import Literal, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field, model_validator
 from sqlalchemy.orm import Session
+from sqlalchemy.orm.exc import StaleDataError
 from datetime import date
 
 from app.core.database import get_db
@@ -122,6 +123,11 @@ class SettlementPostRequest(BaseModel):
     credit_account_supplier: str = Field(default="3300", min_length=3, max_length=20)
     credit_account_deductions: str = Field(default="5490", min_length=3, max_length=20)
     posting_date: Optional[datetime] = None
+    expected_row_version: Optional[int] = Field(
+        default=None,
+        ge=1,
+        description="Optimistic-Locking: zuletzt gelesene row_version der Abrechnung (optional, aber empfohlen).",
+    )
 
 
 class BillingWeightPreviewRequest(BaseModel):
@@ -330,6 +336,42 @@ class SettlementOut(BaseModel):
     correction_options: list[dict] = Field(default_factory=list)
     note: Optional[str] = None
     deductions: list[DeductionOut] = Field(default_factory=list)
+    row_version: int = 1
+
+
+def _current_settlement_row_version(settlement: AgrarSettlement) -> int:
+    v = getattr(settlement, "row_version", None)
+    return int(v) if v is not None else 1
+
+
+def _require_settlement_row_version_match(settlement: AgrarSettlement, expected: Optional[int]) -> None:
+    if expected is None:
+        return
+    cur = _current_settlement_row_version(settlement)
+    if cur != expected:
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "code": "row_version_conflict",
+                "message": "Abrechnung wurde zwischenzeitlich geändert.",
+                "current_row_version": cur,
+                "expected_row_version": expected,
+            },
+        )
+
+
+def _commit_settlement_mutation(db: Session) -> None:
+    try:
+        db.commit()
+    except StaleDataError:
+        db.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "code": "row_version_conflict",
+                "message": "Abrechnung wurde zwischenzeitlich geändert.",
+            },
+        )
 
 
 def _get_settlement_approval_status(settlement: AgrarSettlement) -> str:
@@ -424,6 +466,7 @@ def _to_out(settlement: AgrarSettlement, deductions: list[AgrarSettlementDeducti
         can_post_fibu=settlement.status == "draft" and approval_status == "FREIGEGEBEN",
         correction_options=_build_settlement_correction_options(settlement, approval_status),
         note=settlement.note,
+        row_version=_current_settlement_row_version(settlement),
         deductions=[
             DeductionOut(
                 id=d.id,
@@ -692,6 +735,7 @@ async def post_settlement_to_fibu(
     settlement = db.query(AgrarSettlement).filter(AgrarSettlement.id == settlement_id, AgrarSettlement.tenant_id == tenant_id).first()
     if not settlement:
         raise HTTPException(status_code=404, detail="Settlement not found")
+    _require_settlement_row_version_match(settlement, payload.expected_row_version)
     if settlement.status != "draft":
         raise HTTPException(status_code=400, detail=f"Settlement cannot be posted in status {settlement.status}")
     approval_status = _get_settlement_approval_status(settlement)
@@ -771,7 +815,7 @@ async def post_settlement_to_fibu(
     )
     new_state["approval_history"] = history
     settlement.drying_result = new_state
-    db.commit()
+    _commit_settlement_mutation(db)
     return {"ok": True, "settlement_id": settlement.id, "journal_ref": journal_ref}
 
 
@@ -877,8 +921,8 @@ async def get_settlement_completion_status(
 
     repo = get_repository(db)
     linked_documents: list[dict] = []
-    credit_memos = list_from_store("credit_memo", repo)
-    debit_memos = list_from_store("debit_memo", repo)
+    credit_memos = (list_from_store("credit_memo", repo=repo).get("data") or [])
+    debit_memos = (list_from_store("debit_memo", repo=repo).get("data") or [])
     for memo in credit_memos:
         if memo.get("settlementId") == settlement_id:
             linked_documents.append(
@@ -962,16 +1006,22 @@ async def get_settlement_completion_status(
 @router.post("/{settlement_id}/cancel", response_model=dict)
 async def cancel_settlement(
     settlement_id: str,
+    expected_row_version: Optional[int] = Query(
+        default=None,
+        ge=1,
+        description="Optimistic-Locking: zuletzt gelesene row_version (optional).",
+    ),
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     settlement = db.query(AgrarSettlement).filter(AgrarSettlement.id == settlement_id, AgrarSettlement.tenant_id == tenant_id).first()
     if not settlement:
         raise HTTPException(status_code=404, detail="Settlement not found")
+    _require_settlement_row_version_match(settlement, expected_row_version)
     if settlement.status == "posted":
         raise HTTPException(status_code=400, detail="Posted settlement cannot be cancelled")
     settlement.status = "cancelled"
-    db.commit()
+    _commit_settlement_mutation(db)
     return {"ok": True, "settlement_id": settlement.id, "status": settlement.status}
 
 
@@ -1974,6 +2024,11 @@ class SettlementFreigabeRequest(BaseModel):
     target_status: str = Field(..., description="Ziel-Status: ZUR_FREIGABE, FREIGEGEBEN, ABGELEHNT, VERBUCHT, ...")
     reason: Optional[str] = Field(default=None, description="Begründung (optional)")
     current_status: Optional[str] = Field(default=None, description="Aktueller Status (für stateless Evaluation; leer = aus DB)")
+    expected_row_version: Optional[int] = Field(
+        default=None,
+        ge=1,
+        description="Optimistic-Locking: zuletzt gelesene row_version der Abrechnung (optional).",
+    )
 
 
 @router.post("/freigabe/evaluate", response_model=dict, tags=["agrar", "settlement", "freigabe"])
@@ -2035,6 +2090,8 @@ async def settlement_freigabe(
     if not settlement:
         raise HTTPException(status_code=404, detail="Settlement nicht gefunden")
 
+    _require_settlement_row_version_match(settlement, payload.expected_row_version)
+
     # approval_status aus drying_result JSONB lesen (kein extra DB-Feld nötig)
     approval_state = settlement.drying_result.get("approval_status", "ENTWURF") if settlement.drying_result else "ENTWURF"
 
@@ -2063,7 +2120,7 @@ async def settlement_freigabe(
             new_state["approval_history"] = []
         new_state["approval_history"].append(result.audit_entry)
         settlement.drying_result = new_state
-        db.commit()
+        _commit_settlement_mutation(db)
 
     return {
         **result.audit_entry,
