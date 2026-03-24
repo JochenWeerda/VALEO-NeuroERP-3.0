@@ -12,6 +12,7 @@
     }
   },
   "scripts": {
+    "prepare": "husky",
     "clean": "rimraf ./packages/*/dist",
     "build": "pnpm -r run build",
     "lint": "pnpm -r run lint",
