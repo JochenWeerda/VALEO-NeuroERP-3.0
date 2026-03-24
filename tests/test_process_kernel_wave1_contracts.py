@@ -1297,12 +1297,12 @@ def test_cash_closings_read_model_returns_structured_snapshot():
             if "FROM abschluss_checklisten" in query_str:
                 return DummyResult(closing_rows)
             if "FROM domain_erp.journal_entries" in query_str:
-                return DummyResult(journal_row)
+                return DummyResult([journal_row])
             if "FROM domain_erp.cash_movements" in query_str:
                 return DummyResult(3)
             raise AssertionError(query_str)
 
-    response = asyncio.run(finance_read_models.get_cash_closings(tenant_id="tenant-wave1", db=DummyDb()))
+    response = asyncio.run(finance_read_models.get_cash_closings(tenant_id="tenant-wave1-posted", db=DummyDb()))
 
     assert response.total_count == 1
     assert response.items[0].workflow_status == "posted"
@@ -1364,7 +1364,7 @@ def test_cash_closings_read_model_marks_missing_posting_as_exception():
                 raise Exception("cash_movements missing")
             raise AssertionError(query_str)
 
-    response = asyncio.run(finance_read_models.get_cash_closings(tenant_id="tenant-wave1", db=DummyDb()))
+    response = asyncio.run(finance_read_models.get_cash_closings(tenant_id="tenant-wave1-exc", db=DummyDb()))
 
     assert response.total_count == 1
     assert response.items[0].workflow_status == "exception"
