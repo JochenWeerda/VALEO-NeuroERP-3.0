@@ -1521,6 +1521,14 @@
       "path": "workflow/flow-spine-studio"
     },
     {
+      "module": "@/pages/workflow/flow-spine-procure-to-pay",
+      "path": "workflow/flow-spine-procure-to-pay"
+    },
+    {
+      "module": "@/pages/workflow/flow-spine-inventory-to-settlement",
+      "path": "workflow/flow-spine-inventory-to-settlement"
+    },
+    {
       "module": "@/pages/admin/data-quality",
       "path": "admin/data-quality"
     },
