@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -13,13 +13,17 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import {
   CreditCard, DollarSign, FileText, Scan, ShoppingCart, Smartphone,
   Grid3x3, Search, Keyboard, Settings, Clock, User, UserCheck,
-  CheckCircle2, AlertCircle, X, Trash2,
+  CheckCircle2, AlertCircle, X, Trash2, Star, Percent, RotateCcw,
+  SplitSquareHorizontal, WifiOff, Printer,
 } from 'lucide-react'
 import { useFiskalyTSE, type PaymentType, type TSETransaction } from '@/lib/services/fiskaly-tse'
 import { ChangeCalculator } from '@/components/pos/ChangeCalculator'
 import { ArticleSearch } from '@/components/pos/ArticleSearch'
 import { TouchBedienfeld, type TouchBedienfeldAction } from '@/components/pos/TouchBedienfeld'
 import { ArticleImageLarge, ArticleImageSmall } from '@/components/pos/ArticleImage'
+import { MultiTenderPayment, type PaymentEntry } from '@/components/pos/MultiTenderPayment'
+import { usePosOfflineQueue } from '@/lib/services/pos-offline-queue'
+import { bonDruck, type BonData } from '@/lib/services/bon-druck'
 import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/api-client'
 
@@ -34,6 +38,7 @@ type CartItem = {
   menge: number
   image_url?: string | null
   category?: string
+  rabatt_pct?: number
 }
 
 type PaymentMethod = 'bar' | 'ec' | 'paypal' | 'b2b'
@@ -78,7 +83,9 @@ function TseStatusLight({ isInitialized }: { isInitialized: boolean }) {
 // ── Hauptkomponente ───────────────────────────────────────────────────────────
 export default function POSTerminalPage(): JSX.Element {
   const location = useLocation()
+  const navigate = useNavigate()
   const clock = useClock()
+  const { pendingCount, isSyncing, sync: syncOfflineQueue } = usePosOfflineQueue()
 
   // ── Kernzustand ─────────────────────────────────────────────────────────────
   const [cart, setCart] = useState<CartItem[]>([])
@@ -101,6 +108,20 @@ export default function POSTerminalPage(): JSX.Element {
   const [b2bSearch, setB2bSearch] = useState('')
   const [b2bResults, setB2bResults] = useState<Array<{ id: string; name: string; number: string }>>([])
   const [enriching, setEnriching] = useState(false)
+  const [showSplitPayment, setShowSplitPayment] = useState(false)
+  const [splitPayments, setSplitPayments] = useState<PaymentEntry[]>([])
+  const [showRabattDialog, setShowRabattDialog] = useState(false)
+  const [rabattTargetEan, setRabattTargetEan] = useState<string | null>(null)
+  const [rabattInput, setRabattInput] = useState('')
+
+  // ── Favoriten ───────────────────────────────────────────────────────────────
+  const [favorites, setFavorites] = useState<Set<string>>(() => {
+    try { return new Set(JSON.parse(localStorage.getItem('pos-favorites') ?? '[]') as string[]) }
+    catch { return new Set() }
+  })
+
+  // ── Mengen-Schnelleingabe ────────────────────────────────────────────────────
+  const [qtyBuffer, setQtyBuffer] = useState<number | null>(null)  // null = kein Buffer aktiv
 
   // ── Einstellungen ────────────────────────────────────────────────────────────
   const [kassierer, setKassierer] = useState(() => {
@@ -169,7 +190,6 @@ export default function POSTerminalPage(): JSX.Element {
     }
     document.addEventListener('keydown', onKeyDown)
     return () => document.removeEventListener('keydown', onKeyDown)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // ── Pausierten Verkauf fortsetzen ─────────────────────────────────────────────
@@ -185,7 +205,6 @@ export default function POSTerminalPage(): JSX.Element {
         }
       })
       .catch(() => { /* sale detail not available, resume silently */ })
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // ── Artikel laden ─────────────────────────────────────────────────────────────
@@ -216,11 +235,6 @@ export default function POSTerminalPage(): JSX.Element {
     return Array.from(cats).sort()
   }, [articles])
 
-  const filteredArticles = useMemo(
-    () => (categoryFilter ? articles.filter((a) => a.category === categoryFilter) : articles),
-    [articles, categoryFilter],
-  )
-
   // ── B2B Kunden-Suche ──────────────────────────────────────────────────────────
   useEffect(() => {
     if (!showB2BDialog || b2bSearch.length < 2) { setB2bResults([]); return }
@@ -236,16 +250,29 @@ export default function POSTerminalPage(): JSX.Element {
     return () => clearTimeout(t)
   }, [b2bSearch, showB2BDialog])
 
+  // ── Favoriten Toggle ──────────────────────────────────────────────────────────
+  function toggleFavorite(artikelnr: string): void {
+    setFavorites((prev) => {
+      const next = new Set(prev)
+      if (next.has(artikelnr)) next.delete(artikelnr)
+      else next.add(artikelnr)
+      try { localStorage.setItem('pos-favorites', JSON.stringify(Array.from(next))) } catch { /* */ }
+      return next
+    })
+  }
+
   // ── Warenkorb-Operationen ─────────────────────────────────────────────────────
   const addToCart = useCallback((article: Omit<CartItem, 'menge'>) => {
+    const qty = qtyBuffer ?? 1
+    setQtyBuffer(null)
     setLastAddedEan(article.ean)
     setTimeout(() => setLastAddedEan(null), 1500)
     setCart((prev) => {
       const existing = prev.find((i) => i.ean === article.ean)
-      if (existing) return prev.map((i) => i.ean === article.ean ? { ...i, menge: i.menge + 1 } : i)
-      return [...prev, { ...article, menge: 1 }]
+      if (existing) return prev.map((i) => i.ean === article.ean ? { ...i, menge: i.menge + qty } : i)
+      return [...prev, { ...article, menge: qty }]
     })
-  }, [])
+  }, [qtyBuffer])
 
   function removeFromCart(ean: string): void {
     setRemovingEans((prev) => new Set(prev).add(ean))
@@ -306,30 +333,83 @@ export default function POSTerminalPage(): JSX.Element {
     else void handleCheckout(method)
   }
 
-  async function handleCheckout(method?: PaymentMethod): Promise<void> {
+  async function handleCheckout(method?: PaymentMethod, splitEntries?: PaymentEntry[]): Promise<void> {
     const selectedMethod = method ?? paymentMethod
-    if (!selectedMethod) return
-    const total = cart.reduce((s, i) => s + i.preis * i.menge, 0)
-    if (selectedMethod === 'bar' && tendered < total) {
-      toast({ variant: 'destructive', title: 'Unzureichender Betrag', description: `Fehlbetrag: ${(total - tendered).toFixed(2)} €` })
+    if (!selectedMethod && !splitEntries?.length) return
+    const currentTotal = cart.reduce((s, i) => s + i.preis * (1 - (i.rabatt_pct ?? 0) / 100) * i.menge, 0)
+    if (selectedMethod === 'bar' && tendered < currentTotal) {
+      toast({ variant: 'destructive', title: 'Unzureichender Betrag', description: `Fehlbetrag: ${(currentTotal - tendered).toFixed(2)} €` })
       return
     }
     try {
       let tx = activeTx
       if (!tx) { tx = await startTransaction('Verkauf', 'Kassenbeleg-V1'); setActiveTx(tx) }
       await updateTransaction(tx.txId, cart.map((i) => ({ bezeichnung: i.bezeichnung, preis: i.preis, menge: i.menge })))
-      const payMap: Record<PaymentMethod, PaymentType> = { bar: 'CASH', ec: 'NON_CASH', paypal: 'NON_CASH', b2b: 'INTERNAL' }
-      const signed = await finishTransaction(tx.txId, payMap[selectedMethod], total)
-      const change = selectedMethod === 'bar' ? tendered - total : 0
+      const payMap: Record<string, PaymentType> = { bar: 'CASH', ec: 'NON_CASH', paypal: 'NON_CASH', b2b: 'INTERNAL' }
+      const tsePayType: PaymentType = splitEntries ? 'NON_CASH' : payMap[selectedMethod ?? 'bar'] ?? 'CASH'
+      const signed = await finishTransaction(tx.txId, tsePayType, currentTotal)
+      const change = selectedMethod === 'bar' ? tendered - currentTotal : 0
+
+      // Bon drucken
+      const zahlungen = splitEntries
+        ? splitEntries.map((e) => ({ art: e.type as BonData['zahlungen'][0]['art'], betrag: e.amount, referenz: e.reference }))
+        : [{ art: (selectedMethod ?? 'bar') as BonData['zahlungen'][0]['art'], betrag: currentTotal, wechselgeld: change > 0 ? change : undefined }]
+      void bonDruck.print({
+        bonNr: `BON-${signed.number}`,
+        datum: new Date(),
+        kassierer: kassierer || 'Unbekannt',
+        positionen: cart.map((i) => ({
+          bezeichnung: i.bezeichnung,
+          menge: i.menge,
+          einzelpreis: i.preis,
+          gesamtpreis: i.preis * i.menge,
+          rabatt_pct: i.rabatt_pct,
+        })),
+        zahlungen,
+        gesamt: currentTotal,
+        mwst_zeilen: [{ satz: 19, netto: currentTotal / 1.19, mwst: currentTotal - currentTotal / 1.19, brutto: currentTotal }],
+        tseNr: String(signed.number),
+      })
+
       toast({
         title: '✅ Zahlung erfolgreich',
-        description: `${total.toFixed(2)} € · ${selectedMethod.toUpperCase()}${change > 0 ? ` · Wechselgeld: ${change.toFixed(2)} €` : ''} · TSE ${signed.number}`,
+        description: `${currentTotal.toFixed(2)} €${change > 0 ? ` · Wechselgeld: ${change.toFixed(2)} €` : ''} · TSE ${signed.number}`,
       })
       setCart([]); setPaymentMethod(null); setCustomerId(null); setCustomerName(null)
       setActiveTx(null); setShowChangeCalculator(false); setTendered(0)
+      setShowSplitPayment(false); setSplitPayments([])
     } catch {
-      toast({ variant: 'destructive', title: 'TSE-Fehler', description: 'Transaktion in Offline-Queue gespeichert.' })
+      // Offline-Queue
+      const offlineId = `offline-${Date.now()}`
+      void (async () => {
+        const { posOfflineQueue } = await import('@/lib/services/pos-offline-queue')
+        await posOfflineQueue.enqueue({
+          id: offlineId,
+          timestamp: new Date().toISOString(),
+          cart: cart.map((i) => ({ artikelnr: i.artikelnr, bezeichnung: i.bezeichnung, ean: i.ean, preis: i.preis, menge: i.menge })),
+          zahlungen: splitEntries
+            ? splitEntries.map((e) => ({ art: e.type, betrag: e.amount }))
+            : [{ art: selectedMethod ?? 'bar', betrag: currentTotal }],
+          gesamt: currentTotal,
+          kassierer: kassierer || 'Unbekannt',
+          tse_attempted: true,
+        })
+      })()
+      toast({ variant: 'destructive', title: 'Offline gespeichert', description: 'Transaktion wird automatisch synchronisiert.' })
+      setCart([]); setPaymentMethod(null); setShowChangeCalculator(false); setTendered(0)
+      setShowSplitPayment(false); setSplitPayments([])
     }
+  }
+
+  // ── Split-Payment Abschluss ───────────────────────────────────────────────────
+  async function handleSplitCheckout(): Promise<void> {
+    const currentTotal = cart.reduce((s, i) => s + i.preis * (1 - (i.rabatt_pct ?? 0) / 100) * i.menge, 0)
+    const paid = splitPayments.reduce((s, p) => s + p.amount, 0)
+    if (paid < currentTotal) {
+      toast({ variant: 'destructive', title: 'Offener Betrag', description: `Noch ${(currentTotal - paid).toFixed(2)} € offen` })
+      return
+    }
+    await handleCheckout(undefined, splitPayments)
   }
 
   // ── Touch-Bedienfeld ──────────────────────────────────────────────────────────
@@ -365,8 +445,8 @@ export default function POSTerminalPage(): JSX.Element {
         break
       case 'comma':
         if (showChangeCalculator) {
-          if (!numpadBuffer.includes(',')) { const nb = numpadBuffer + ','; setNumpadBuffer(nb) }
-        } else setBarcode((b) => b + ',')
+          if (!numpadBuffer.includes(',')) { const nb = `${numpadBuffer},`; setNumpadBuffer(nb) }
+        } else setBarcode((b) => `${b},`)
         break
       case 'clear':
         if (showChangeCalculator) { setNumpadBuffer('0'); setTendered(0) }
@@ -393,8 +473,23 @@ export default function POSTerminalPage(): JSX.Element {
     }
   }
 
-  const total = cart.reduce((s, i) => s + i.preis * i.menge, 0)
+  // ── Rabatt setzen ─────────────────────────────────────────────────────────────
+  function applyRabatt(ean: string, pct: number): void {
+    setCart((prev) => prev.map((i) => i.ean === ean ? { ...i, rabatt_pct: pct > 0 ? pct : undefined } : i))
+  }
+
+  const total = cart.reduce((s, i) => s + i.preis * (1 - (i.rabatt_pct ?? 0) / 100) * i.menge, 0)
   const fmt = (n: number) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(n)
+
+  // ── Favoriten sortierte Artikel ────────────────────────────────────────────────
+  const sortedFilteredArticles = useMemo(() => {
+    const base = categoryFilter ? articles.filter((a) => a.category === categoryFilter) : articles
+    return [...base].sort((a, b) => {
+      const aF = favorites.has(a.artikelnr) ? 0 : 1
+      const bF = favorites.has(b.artikelnr) ? 0 : 1
+      return aF - bF
+    })
+  }, [articles, categoryFilter, favorites])
 
   // ── Render ────────────────────────────────────────────────────────────────────
   return (
@@ -419,6 +514,29 @@ export default function POSTerminalPage(): JSX.Element {
 
         {/* Rechts: Kassierer + Status + Settings */}
         <div className="flex items-center gap-3">
+          {/* Offline-Queue Badge */}
+          {pendingCount > 0 && (
+            <button
+              onClick={() => void syncOfflineQueue()}
+              className="flex items-center gap-1.5 text-xs bg-yellow-500 text-white px-2 py-1 rounded-full font-semibold"
+              title="Offline-Transaktionen synchronisieren"
+              disabled={isSyncing}
+            >
+              <WifiOff className="h-3 w-3" />
+              {isSyncing ? 'Sync…' : `${pendingCount} offen`}
+            </button>
+          )}
+
+          {/* Retoure-Button */}
+          <Button
+            size="sm" variant="ghost"
+            onClick={() => navigate('/pos/retoure')}
+            className="text-primary-foreground hover:text-primary-foreground hover:bg-primary-foreground/20 h-8 gap-1.5 text-xs"
+            title="Warenrückgabe"
+          >
+            <RotateCcw className="h-3.5 w-3.5" />Retoure
+          </Button>
+
           {/* Kassierer */}
           <div className="flex items-center gap-1.5 text-sm text-primary-foreground/80">
             <User className="h-4 w-4" />
@@ -511,13 +629,22 @@ export default function POSTerminalPage(): JSX.Element {
                     <div className="text-sm font-semibold leading-tight line-clamp-1">{item.bezeichnung}</div>
                     <div className="text-xs text-muted-foreground mt-0.5">
                       {item.menge} × {fmt(item.preis)}
-                      <span className="font-semibold text-foreground ml-1">= {fmt(item.preis * item.menge)}</span>
+                      {item.rabatt_pct ? <span className="text-orange-500 ml-1">−{item.rabatt_pct}%</span> : null}
+                      <span className="font-semibold text-foreground ml-1">= {fmt(item.preis * (1 - (item.rabatt_pct ?? 0) / 100) * item.menge)}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-1 flex-shrink-0">
                     <Button size="sm" variant="outline" className="h-8 w-8 p-0" onClick={() => updateQuantity(item.ean, item.menge - 1)}>−</Button>
                     <span className="w-7 text-center text-sm font-bold">{item.menge}</span>
                     <Button size="sm" variant="outline" className="h-8 w-8 p-0" onClick={() => updateQuantity(item.ean, item.menge + 1)}>+</Button>
+                    <Button
+                      size="sm" variant="ghost"
+                      className={`h-8 w-8 p-0 ${item.rabatt_pct ? 'text-orange-500' : 'text-muted-foreground'} hover:text-orange-500`}
+                      onClick={() => { setRabattTargetEan(item.ean); setRabattInput(String(item.rabatt_pct ?? '')); setShowRabattDialog(true) }}
+                      title="Rabatt"
+                    >
+                      <Percent className="h-3.5 w-3.5" />
+                    </Button>
                     <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-destructive hover:text-destructive" onClick={() => removeFromCart(item.ean)}>
                       <X className="h-3.5 w-3.5" />
                     </Button>
@@ -580,6 +707,16 @@ export default function POSTerminalPage(): JSX.Element {
                 <FileText className="h-4 w-4" />
                 B2B-Beleg{customerId ? ` (${customerName ?? customerId})` : ' — Kunden wählen'}
               </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={() => setShowSplitPayment(true)}
+                className="col-span-2 gap-2 border-dashed text-sm"
+                disabled={cart.length === 0}
+              >
+                <SplitSquareHorizontal className="h-4 w-4" />
+                Gemischte Zahlung (Split)
+              </Button>
             </div>
           </div>
         </div>
@@ -624,6 +761,30 @@ export default function POSTerminalPage(): JSX.Element {
 
             {/* Artikel-Grid */}
             <TabsContent value="grid" className="flex-1 flex flex-col overflow-hidden px-4 pb-3 pt-2">
+              {/* Mengen-Schnelleingabe */}
+              <div className="flex items-center gap-2 mb-2 flex-shrink-0">
+                <span className="text-xs text-muted-foreground">Menge:</span>
+                <div className="flex gap-1">
+                  {[1, 2, 3, 5, 10, 25, 50].map((n) => (
+                    <button
+                      key={n}
+                      onClick={() => setQtyBuffer(qtyBuffer === n ? null : n)}
+                      className={`h-7 px-2 rounded text-xs font-semibold border transition-colors ${
+                        qtyBuffer === n ? 'bg-primary text-primary-foreground border-primary' : 'border-gray-300 hover:border-primary hover:text-primary'
+                      }`}
+                    >
+                      {n}×
+                    </button>
+                  ))}
+                  {qtyBuffer !== null && (
+                    <button onClick={() => setQtyBuffer(null)} className="h-7 px-2 rounded text-xs border border-gray-300 text-muted-foreground hover:text-destructive">✕</button>
+                  )}
+                </div>
+                {qtyBuffer !== null && (
+                  <span className="text-xs font-semibold text-primary">→ {qtyBuffer}× beim nächsten Artikel</span>
+                )}
+              </div>
+
               {/* Kategorie-Filter */}
               {categories.length > 0 && (
                 <div className="w-full flex-shrink-0 mb-3 overflow-x-auto">
@@ -657,23 +818,31 @@ export default function POSTerminalPage(): JSX.Element {
                   <div className="grid grid-cols-4 gap-3">
                     {Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-44" />)}
                   </div>
-                ) : filteredArticles.length === 0 ? (
+                ) : sortedFilteredArticles.length === 0 ? (
                   <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
                     <AlertCircle className="h-10 w-10 opacity-30 mb-2" />
                     <p className="text-sm">Keine Artikel in dieser Kategorie</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-4 gap-3">
-                    {filteredArticles.map((article) => (
+                    {sortedFilteredArticles.map((article) => (
                       <Card
                         key={article.artikelnr}
                         className={`
-                          cursor-pointer transition-all duration-150 overflow-hidden
+                          cursor-pointer transition-all duration-150 overflow-hidden relative
                           hover:shadow-md active:scale-95
                           ${lastAddedEan === article.ean ? 'ring-2 ring-green-400 shadow-lg' : ''}
+                          ${favorites.has(article.artikelnr) ? 'ring-1 ring-yellow-400' : ''}
                         `}
                         onClick={() => addToCart(article)}
                       >
+                        <button
+                          className="absolute top-1 right-1 z-10 h-6 w-6 flex items-center justify-center rounded-full bg-white/80 hover:bg-white transition-colors"
+                          onClick={(e) => { e.stopPropagation(); toggleFavorite(article.artikelnr) }}
+                          title={favorites.has(article.artikelnr) ? 'Aus Favoriten entfernen' : 'Zu Favoriten hinzufügen'}
+                        >
+                          <Star className={`h-3.5 w-3.5 ${favorites.has(article.artikelnr) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-400'}`} />
+                        </button>
                         <ArticleImageLarge imageUrl={article.image_url} name={article.bezeichnung} category={article.category} />
                         <CardContent className="p-2 text-center">
                           <div className="font-semibold text-xs leading-tight line-clamp-2 mb-1 min-h-[2.5rem] flex items-center justify-center">
@@ -800,6 +969,24 @@ export default function POSTerminalPage(): JSX.Element {
               />
             </div>
             <div className="border-t pt-4">
+              <Label className="text-sm font-semibold flex items-center gap-2">
+                <Printer className="h-4 w-4" />Bondrucker
+              </Label>
+              <p className="text-xs text-muted-foreground mt-1 mb-2">
+                {bonDruck.label}
+              </p>
+              <Button
+                className="w-full"
+                variant="outline"
+                onClick={async () => {
+                  const ok = await bonDruck.connect()
+                  toast({ title: ok ? 'Drucker verbunden' : 'Browser-Druck aktiv', description: bonDruck.label })
+                }}
+              >
+                <Printer className="h-4 w-4 mr-2" />Drucker verbinden (USB/Seriell)
+              </Button>
+            </div>
+            <div className="border-t pt-4">
               <Label className="text-sm font-semibold text-muted-foreground">Artikelbilder</Label>
               <p className="text-xs text-muted-foreground mt-1 mb-2">
                 Lädt fehlende Produktbilder aus Open Food Facts und Wikipedia (EAN/Name-basiert).
@@ -813,6 +1000,83 @@ export default function POSTerminalPage(): JSX.Element {
                 {enriching ? 'Bilder werden geladen…' : 'Artikelbilder jetzt laden'}
               </Button>
             </div>
+            <div className="border-t pt-4">
+              <Button
+                className="w-full"
+                variant="outline"
+                onClick={() => { setShowSettings(false); navigate('/pos/retoure') }}
+              >
+                <RotateCcw className="h-4 w-4 mr-2" />Zur Warenrückgabe
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Split-Payment Dialog ── */}
+      <Dialog open={showSplitPayment} onOpenChange={setShowSplitPayment}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle className="flex items-center gap-2"><SplitSquareHorizontal className="h-5 w-5" />Gemischte Zahlung — {fmt(total)}</DialogTitle></DialogHeader>
+          <MultiTenderPayment total={total} onPaymentsChange={setSplitPayments} />
+          <div className="flex gap-2 mt-2">
+            <Button variant="outline" onClick={() => { setShowSplitPayment(false); setSplitPayments([]) }} className="flex-1">Abbrechen</Button>
+            <Button
+              onClick={() => void handleSplitCheckout()}
+              disabled={splitPayments.reduce((s, p) => s + p.amount, 0) < total}
+              className="flex-1 h-12 text-base font-bold"
+            >
+              <CheckCircle2 className="h-4 w-4 mr-2" />Zahlung abschließen
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Rabatt-Dialog ── */}
+      <Dialog open={showRabattDialog} onOpenChange={setShowRabattDialog}>
+        <DialogContent className="max-w-xs">
+          <DialogHeader><DialogTitle className="flex items-center gap-2"><Percent className="h-5 w-5" />Rabatt eingeben</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <div className="flex gap-2">
+              {[5, 10, 15, 20, 25].map((pct) => (
+                <Button key={pct} size="sm" variant={rabattInput === String(pct) ? 'default' : 'outline'}
+                  onClick={() => setRabattInput(String(pct))}>
+                  {pct}%
+                </Button>
+              ))}
+            </div>
+            <div className="flex items-center gap-2">
+              <Input
+                type="number"
+                min={0}
+                max={100}
+                value={rabattInput}
+                onChange={(e) => setRabattInput(e.target.value)}
+                placeholder="% eingeben"
+                className="flex-1"
+                autoFocus
+              />
+              <span className="text-muted-foreground">%</span>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" className="flex-1" onClick={() => { setShowRabattDialog(false); setRabattInput('') }}>Abbrechen</Button>
+              <Button className="flex-1" onClick={() => {
+                if (rabattTargetEan) {
+                  applyRabatt(rabattTargetEan, parseFloat(rabattInput.replace(',', '.')) || 0)
+                }
+                setShowRabattDialog(false); setRabattInput(''); setRabattTargetEan(null)
+              }}>
+                Übernehmen
+              </Button>
+            </div>
+            {rabattInput && parseFloat(rabattInput) > 0 && (
+              <Button variant="ghost" size="sm" className="w-full text-xs text-muted-foreground"
+                onClick={() => {
+                  if (rabattTargetEan) applyRabatt(rabattTargetEan, 0)
+                  setShowRabattDialog(false); setRabattInput(''); setRabattTargetEan(null)
+                }}>
+                Rabatt entfernen
+              </Button>
+            )}
           </div>
         </DialogContent>
       </Dialog>

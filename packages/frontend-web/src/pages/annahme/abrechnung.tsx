@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { isAxiosError } from 'axios'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -77,6 +78,8 @@ type Settlement = {
   }>
   explainability?: unknown
   deductions: SettlementDeduction[]
+  /** Optimistic locking (Backend AgrarSettlement.row_version) */
+  row_version?: number
 }
 
 type SettlementFreigabeResponse = {
@@ -84,6 +87,21 @@ type SettlementFreigabeResponse = {
   reason: string
   new_status: string
   previous_status: string
+}
+
+function settlementRowVersion(s: Settlement): number {
+  return typeof s.row_version === 'number' && s.row_version >= 1 ? s.row_version : 1
+}
+
+function describeApiError(e: unknown): string {
+  if (isAxiosError(e)) {
+    const d = e.response?.data?.detail
+    if (typeof d === 'string') return d
+    if (d && typeof d === 'object' && 'message' in d && typeof (d as { message: unknown }).message === 'string') {
+      return (d as { message: string }).message
+    }
+  }
+  return e instanceof Error ? e.message : 'Anfrage fehlgeschlagen'
 }
 
 type BillingPreview = {
@@ -359,11 +377,12 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
   })
 
   const postSettlement = useMutation({
-    mutationFn: async (settlementId: string) => {
+    mutationFn: async ({ settlementId, expectedRowVersion }: { settlementId: string; expectedRowVersion: number }) => {
       const payload = {
         debit_account: '5000',
         credit_account_supplier: '3300',
         credit_account_deductions: '5490',
+        expected_row_version: expectedRowVersion,
       }
       return (await apiClient.post(`/api/v1/agrar/settlements/${settlementId}/post-fibu`, payload)).data
     },
@@ -372,18 +391,38 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
       void queryClient.invalidateQueries({ queryKey: ['agrar', 'settlements'] })
     },
     onError: (e: unknown) => {
-      const message = e instanceof Error ? e.message : 'Fibu-Posting fehlgeschlagen'
-      toast({ title: 'Fehler', description: message, variant: 'destructive' })
+      if (
+        isAxiosError(e)
+        && e.response?.status === 409
+        && typeof e.response.data?.detail === 'object'
+        && e.response.data?.detail !== null
+        && (e.response.data.detail as { code?: string }).code === 'row_version_conflict'
+      ) {
+        void queryClient.invalidateQueries({ queryKey: ['agrar', 'settlements'] })
+        toast({
+          title: 'Daten veraltet',
+          description: 'Abrechnung wurde zwischenzeitlich geaendert. Liste wurde aktualisiert.',
+          variant: 'destructive',
+        })
+        return
+      }
+      toast({ title: 'Fehler', description: describeApiError(e), variant: 'destructive' })
     },
   })
 
   const approveSettlement = useMutation({
-    mutationFn: async ({ settlementId, targetStatus, reason }: { settlementId: string; targetStatus: string; reason?: string }) => {
+    mutationFn: async ({
+      settlementId,
+      targetStatus,
+      reason,
+      expectedRowVersion,
+    }: { settlementId: string; targetStatus: string; reason?: string; expectedRowVersion: number }) => {
       const payload = {
         actor_id: approvalActor.actorId,
         actor_type: approvalActor.actorType,
         target_status: targetStatus,
         reason,
+        expected_row_version: expectedRowVersion,
       }
       return (await apiClient.post<SettlementFreigabeResponse>(`/api/v1/agrar/settlements/${settlementId}/freigabe`, payload)).data
     },
@@ -396,8 +435,56 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
       void queryClient.invalidateQueries({ queryKey: ['agrar', 'settlements'] })
     },
     onError: (e: unknown) => {
-      const message = e instanceof Error ? e.message : 'Freigabeschritt fehlgeschlagen'
-      toast({ title: 'Fehler', description: message, variant: 'destructive' })
+      if (
+        isAxiosError(e)
+        && e.response?.status === 409
+        && typeof e.response.data?.detail === 'object'
+        && e.response.data?.detail !== null
+        && (e.response.data.detail as { code?: string }).code === 'row_version_conflict'
+      ) {
+        void queryClient.invalidateQueries({ queryKey: ['agrar', 'settlements'] })
+        toast({
+          title: 'Daten veraltet',
+          description: 'Abrechnung wurde zwischenzeitlich geaendert. Liste wurde aktualisiert.',
+          variant: 'destructive',
+        })
+        return
+      }
+      toast({ title: 'Fehler', description: describeApiError(e), variant: 'destructive' })
+    },
+  })
+
+  const cancelSettlement = useMutation({
+    mutationFn: async ({ settlementId, expectedRowVersion }: { settlementId: string; expectedRowVersion: number }) => {
+      return (
+        await apiClient.post<{ ok: boolean; settlement_id: string; status: string }>(
+          `/api/v1/agrar/settlements/${settlementId}/cancel`,
+          {},
+          { params: { expected_row_version: expectedRowVersion } },
+        )
+      ).data
+    },
+    onSuccess: () => {
+      toast({ title: 'Storniert', description: 'Abrechnung wurde storniert.' })
+      void queryClient.invalidateQueries({ queryKey: ['agrar', 'settlements'] })
+    },
+    onError: (e: unknown) => {
+      if (
+        isAxiosError(e)
+        && e.response?.status === 409
+        && typeof e.response.data?.detail === 'object'
+        && e.response.data?.detail !== null
+        && (e.response.data.detail as { code?: string }).code === 'row_version_conflict'
+      ) {
+        void queryClient.invalidateQueries({ queryKey: ['agrar', 'settlements'] })
+        toast({
+          title: 'Daten veraltet',
+          description: 'Abrechnung wurde zwischenzeitlich geaendert. Liste wurde aktualisiert.',
+          variant: 'destructive',
+        })
+        return
+      }
+      toast({ title: 'Fehler', description: describeApiError(e), variant: 'destructive' })
     },
   })
 
@@ -661,7 +748,14 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => { void approveSettlement.mutateAsync({ settlementId: s.id, targetStatus: 'ZUR_FREIGABE', reason: 'Settlement aus UI zur Freigabe eingereicht.' }) }}
+                          onClick={() => {
+                            void approveSettlement.mutateAsync({
+                              settlementId: s.id,
+                              targetStatus: 'ZUR_FREIGABE',
+                              reason: 'Settlement aus UI zur Freigabe eingereicht.',
+                              expectedRowVersion: settlementRowVersion(s),
+                            })
+                          }}
                           disabled={approveSettlement.isPending}
                         >
                           Zur Freigabe
@@ -671,7 +765,14 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => { void approveSettlement.mutateAsync({ settlementId: s.id, targetStatus: 'FREIGEGEBEN', reason: 'Settlement fachlich freigegeben.' }) }}
+                          onClick={() => {
+                            void approveSettlement.mutateAsync({
+                              settlementId: s.id,
+                              targetStatus: 'FREIGEGEBEN',
+                              reason: 'Settlement fachlich freigegeben.',
+                              expectedRowVersion: settlementRowVersion(s),
+                            })
+                          }}
                           disabled={approveSettlement.isPending}
                         >
                           Freigeben
@@ -681,7 +782,14 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => { void approveSettlement.mutateAsync({ settlementId: s.id, targetStatus: 'ABGELEHNT', reason: 'Settlement zur Korrektur abgelehnt.' }) }}
+                          onClick={() => {
+                            void approveSettlement.mutateAsync({
+                              settlementId: s.id,
+                              targetStatus: 'ABGELEHNT',
+                              reason: 'Settlement zur Korrektur abgelehnt.',
+                              expectedRowVersion: settlementRowVersion(s),
+                            })
+                          }}
                           disabled={approveSettlement.isPending}
                         >
                           Ablehnen
@@ -691,14 +799,46 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => { void approveSettlement.mutateAsync({ settlementId: s.id, targetStatus: 'ENTWURF', reason: 'Settlement zur Ueberarbeitung in Entwurf zurueckgesetzt.' }) }}
+                          onClick={() => {
+                            void approveSettlement.mutateAsync({
+                              settlementId: s.id,
+                              targetStatus: 'ENTWURF',
+                              reason: 'Settlement zur Ueberarbeitung in Entwurf zurueckgesetzt.',
+                              expectedRowVersion: settlementRowVersion(s),
+                            })
+                          }}
                           disabled={approveSettlement.isPending}
                         >
                           Zurueck in Entwurf
                         </Button>
                       ) : null}
-                      <Button size="sm" variant="outline" onClick={() => { void postSettlement.mutateAsync(s.id) }} disabled={postSettlement.isPending || !s.can_post_fibu}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          void postSettlement.mutateAsync({ settlementId: s.id, expectedRowVersion: settlementRowVersion(s) })
+                        }}
+                        disabled={postSettlement.isPending || !s.can_post_fibu}
+                      >
                         In Fibu buchen
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => {
+                          if (!window.confirm('Abrechnung wirklich stornieren?')) return
+                          void cancelSettlement.mutateAsync({
+                            settlementId: s.id,
+                            expectedRowVersion: settlementRowVersion(s),
+                          })
+                        }}
+                        disabled={
+                          cancelSettlement.isPending
+                          || postSettlement.isPending
+                          || approveSettlement.isPending
+                        }
+                      >
+                        Stornieren
                       </Button>
                     </div>
                   )}

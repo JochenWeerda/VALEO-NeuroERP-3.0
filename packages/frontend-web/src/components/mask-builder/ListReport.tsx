@@ -9,6 +9,7 @@ import { NativeSelect } from '@/components/ui/native-select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Search, Filter, Plus, Download, Upload } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { ListConfig, ListColumn } from './types'
 
 export interface ServerPaginationParams {
@@ -82,6 +83,28 @@ const ListReport: React.FC<ListReportProps> = ({
       filters: Object.keys(filters).length > 0 ? filters : undefined,
     })
   }, [isServerPaginated, currentPage, pageSize, sortField, sortDirection, searchTerm, filters])
+
+  const searchRef = useRef<HTMLInputElement>(null)
+
+  // Gap 023: Keyboard-first — Ctrl+F Suche, Ctrl+N Neu, F5 Aktualisieren
+  useKeyboardShortcuts([
+    {
+      key: 'f',
+      ctrl: true,
+      label: 'Suchen',
+      action: () => searchRef.current?.focus(),
+      allowInInputs: false,
+    },
+    ...(onCreate
+      ? [{
+          key: 'n',
+          ctrl: true,
+          label: 'Neu',
+          action: onCreate,
+          disabled: effectiveLoading,
+        }]
+      : []),
+  ])
 
   // i18n-Helper für Titel und Untertitel
   const displayTitle = config.titleKey ? t(config.titleKey, { entityType: config.title }) : config.title
@@ -276,6 +299,7 @@ const ListReport: React.FC<ListReportProps> = ({
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
+                  ref={searchRef}
                   placeholder={t('crud.list.searchPlaceholder')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}

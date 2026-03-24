@@ -10,7 +10,7 @@ from typing import Any, Callable
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
-from sqlalchemy import text
+from sqlalchemy import bindparam, text
 from sqlalchemy.orm import Session
 
 from ....core.database import get_db
@@ -1117,15 +1117,67 @@ def _fetch_cash_movement_count(db: Session, tenant_id: str) -> int:
         return 0
 
 
+def _cash_closing_row_belegnummer(row: dict[str, Any]) -> str | None:
+    raw = _parse_items_blob(row.get("items")).get("belegnummer")
+    if raw is None:
+        return None
+    s = str(raw).strip()
+    return s or None
+
+
+def _batch_fetch_journal_entries_for_closings(
+    db: Session,
+    tenant_id: str,
+    closing_rows: list[dict[str, Any]],
+) -> dict[str, dict[str, Any]]:
+    """
+    Gap 033: Alle Journal-Zuordnungen für Cash-Closings in einem Query statt N+1.
+    Pro Belegnummer wird der neueste passende journal_entries-Datensatz gewählt
+    (gleiche Semantik wie vorher LIMIT 1 ORDER BY created_at DESC).
+    """
+    belege = sorted({b for b in (_cash_closing_row_belegnummer(r) for r in closing_rows) if b})
+    if not belege:
+        return {}
+    try:
+        stmt = (
+            text(
+                """
+                SELECT id, entry_number, posting_date, status, reference, created_at
+                FROM domain_erp.journal_entries
+                WHERE tenant_id = :tenant_id
+                  AND (
+                    entry_number IN :belege OR reference IN :belege
+                  )
+                ORDER BY created_at DESC NULLS LAST
+                """
+            ).bindparams(bindparam("belege", expanding=True))
+        )
+        rows = list(db.execute(stmt, {"tenant_id": tenant_id, "belege": belege}).mappings())
+    except Exception:
+        return {}
+    by_key: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        rowd = dict(row)
+        en = rowd.get("entry_number")
+        ref = rowd.get("reference")
+        for key in belege:
+            if key in by_key:
+                continue
+            if en == key or ref == key:
+                by_key[key] = rowd
+    return by_key
+
+
 def _fetch_journal_entry_for_closing(db: Session, tenant_id: str, belegnummer: str | None) -> dict[str, Any] | None:
+    """Einzelabfrage; Produktivpfade nutzen _batch_fetch_journal_entries_for_closings."""
     if not belegnummer:
         return None
     try:
-        return (
+        row = (
             db.execute(
                 text(
                     """
-                    SELECT id, entry_number, posting_date, status
+                    SELECT id, entry_number, posting_date, status, reference, created_at
                     FROM domain_erp.journal_entries
                     WHERE tenant_id = :tenant_id
                       AND (entry_number = :belegnummer OR reference = :belegnummer)
@@ -1138,6 +1190,7 @@ def _fetch_journal_entry_for_closing(db: Session, tenant_id: str, belegnummer: s
             .mappings()
             .fetchone()
         )
+        return dict(row) if row else None
     except Exception:
         return None
 
@@ -1316,6 +1369,31 @@ def project_cash_closing_detail(snapshot: CashClosingReadModel, closing_id: str)
     return None
 
 
+def _build_cash_closing_read_model(db: Session | None, tenant_id: str) -> CashClosingReadModel:
+    """Gemeinsamer Sync-Build für GET cash-closings und Rebuild (kein Cache)."""
+    if db is None:
+        return project_cash_closing_read_model(
+            tenant_id=tenant_id,
+            closing_rows=[],
+            tenant_cash_movement_count=0,
+            journal_resolver=lambda _row: None,
+        )
+    closing_rows = _fetch_cash_closing_rows(db=db, tenant_id=tenant_id)
+    tenant_cash_movement_count = _fetch_cash_movement_count(db=db, tenant_id=tenant_id)
+    journal_by = _batch_fetch_journal_entries_for_closings(db, tenant_id, closing_rows)
+
+    def _journal_resolve(row: dict[str, Any]) -> dict[str, Any] | None:
+        k = _cash_closing_row_belegnummer(row)
+        return journal_by.get(k) if k else None
+
+    return project_cash_closing_read_model(
+        tenant_id=tenant_id,
+        closing_rows=closing_rows,
+        tenant_cash_movement_count=tenant_cash_movement_count,
+        journal_resolver=_journal_resolve,
+    )
+
+
 def rebuild_finance_projection_store(tenant_id: str, db: Session | None) -> ProjectionRebuildResult:
     rebuilt_at = datetime.now(tz=timezone.utc).isoformat()
     latest_ap_invoice_event_id = _latest_outbox_event_id(
@@ -1419,21 +1497,10 @@ def rebuild_finance_projection_store(tenant_id: str, db: Session | None) -> Proj
     )
     entries.append(ProjectionRebuildEntry(projection_key="process-observation", item_count=process_count))
 
-    closing_rows = _fetch_cash_closing_rows(db=db, tenant_id=tenant_id) if db is not None else []
-    tenant_cash_movement_count = _fetch_cash_movement_count(db=db, tenant_id=tenant_id) if db is not None else 0
     snapshot = _cache_projection(
         tenant_id,
         "cash-closings",
-        project_cash_closing_read_model(
-            tenant_id=tenant_id,
-            closing_rows=closing_rows,
-            tenant_cash_movement_count=tenant_cash_movement_count,
-            journal_resolver=lambda row: _fetch_journal_entry_for_closing(
-                db=db,
-                tenant_id=tenant_id,
-                belegnummer=_parse_items_blob(row.get("items")).get("belegnummer"),
-            ) if db is not None else None,
-        ),
+        _build_cash_closing_read_model(db, tenant_id),
     )
     snapshot_count = _count_projection_items(snapshot)
     _persist_projection_registry_entry(db, tenant_id, "cash-closings", snapshot_count, rebuilt_at=rebuilt_at)
@@ -1591,22 +1658,19 @@ async def get_cash_closings(
     """
     Finance-facing read model over productive POS cash closings.
     Schema v1 — read-only snapshot for reconciliation and reporting.
+
+    Liefert bei Treffer den prozessweiten In-Memory-Cache (`_load_projection`),
+    sonst frischer DB-Build und erneutes Cachen. Nach `POST /finance/read-models/_rebuild`
+    liegt ein aktualisierter Snapshot vor.
     """
-    closing_rows = _fetch_cash_closing_rows(db=db, tenant_id=tenant_id)
-    tenant_cash_movement_count = _fetch_cash_movement_count(db=db, tenant_id=tenant_id)
+    cached = _load_projection(tenant_id, "cash-closings", CashClosingReadModel)
+    if cached is not None:
+        return cached
+
     return _cache_projection(
         tenant_id,
         "cash-closings",
-        project_cash_closing_read_model(
-            tenant_id=tenant_id,
-            closing_rows=closing_rows,
-            tenant_cash_movement_count=tenant_cash_movement_count,
-            journal_resolver=lambda row: _fetch_journal_entry_for_closing(
-                db=db,
-                tenant_id=tenant_id,
-                belegnummer=_parse_items_blob(row.get("items")).get("belegnummer"),
-            ),
-        ),
+        _build_cash_closing_read_model(db, tenant_id),
     )
 
 

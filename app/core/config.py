@@ -17,7 +17,10 @@ class Settings(BaseSettings):
 
     # API Configuration
     API_V1_STR: str = "/api/v1"
-    SECRET_KEY: str = secrets.token_urlsafe(32)
+    # SC-SECRETS-001: SECRET_KEY MUSS aus Umgebungsvariable geladen werden.
+    # Kein hardcoded Default — Startup schlägt fehl wenn nicht gesetzt (außer DEBUG).
+    # In Produktion: openssl rand -hex 32 > .env (SECRET_KEY=<value>)
+    SECRET_KEY: Optional[str] = None
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8  # 8 days
 
     # Server Configuration
@@ -89,13 +92,18 @@ class Settings(BaseSettings):
     LOG_FORMAT: str = "json"
 
     # Security Configuration
-    ENCRYPTION_KEY: str = secrets.token_urlsafe(32)
+    # SC-SECRETS-001: ENCRYPTION_KEY MUSS aus Umgebungsvariable geladen werden.
+    ENCRYPTION_KEY: Optional[str] = None
     JWT_ALGORITHM: str = "HS256"
 
     # Feature Flags
     ENABLE_METRICS: bool = True
     ENABLE_TRACING: bool = False
     ENABLE_CACHE: bool = True
+
+    # OpenTelemetry (Gap 039) — OTLP-HTTP-Endpoint, z.B. http://localhost:4318/v1/traces
+    OTEL_EXPORTER_OTLP_ENDPOINT: Optional[str] = None
+    OTEL_SERVICE_NAME: str = "valeo-neuroerp-api"
 
     # Event Bus / Outbox
     EVENT_BUS_ENABLED: bool = False
@@ -179,7 +187,9 @@ class Settings(BaseSettings):
     MAX_PAGE_SIZE: int = 1000
 
     # API Authentication
-    API_DEV_TOKEN: Optional[str] = "dev-token"
+    # SC-AUTH-002: In Produktion MUSS API_DEV_TOKEN=None sein (Startup-Guard in main.py).
+    # In Entwicklung: API_DEV_TOKEN=dev-token in .env setzen.
+    API_DEV_TOKEN: Optional[str] = None
     CHANNEL_SLACK_SIGNING_SECRET: Optional[str] = None
     CHANNEL_SLACK_BOT_TOKEN: Optional[str] = None
     CHANNEL_TEAMS_WEBHOOK_SECRET: Optional[str] = None

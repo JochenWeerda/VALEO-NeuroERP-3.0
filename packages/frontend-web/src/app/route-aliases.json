@@ -1293,6 +1293,10 @@
       "path": "pos/rabatte"
     },
     {
+      "module": "@/pages/pos/retoure",
+      "path": "pos/retoure"
+    },
+    {
       "module": "@/pages/pos/suspended-sales",
       "path": "pos/suspended-sales"
     },
@@ -1513,6 +1517,10 @@
       "path": "workflows/supervisor"
     },
     {
+      "module": "@/pages/workflow/flow-spine-studio",
+      "path": "workflow/flow-spine-studio"
+    },
+    {
       "module": "@/pages/admin/data-quality",
       "path": "admin/data-quality"
     },
@@ -1527,6 +1535,10 @@
     {
       "module": "@/pages/admin/command-monitor",
       "path": "admin/command-monitor"
+    },
+    {
+      "module": "@/pages/wissen/wissensbasis",
+      "path": "wissen/wissensbasis"
     }
   ]
 }

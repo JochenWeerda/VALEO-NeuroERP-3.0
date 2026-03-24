@@ -84,6 +84,7 @@ class _FakeSettlement:
     note: str | None = None
     drying_result: dict | None = None
     created_at: str = "2026-03-22T10:00:00Z"
+    row_version: int = 1
 
 
 class _FakeQuery:
@@ -205,6 +206,26 @@ def test_posting_requires_freigabe_before_fibu(monkeypatch):
     assert repo["journal_entry"][post_resp.json()["journal_ref"]]["source_id"] == "SET-1"
 
 
+def test_freigabe_rejects_wrong_expected_row_version(monkeypatch):
+    settlement = _FakeSettlement(row_version=3)
+    app, _repo, _fake_db = _app_with_repo_and_settlement(monkeypatch, settlement)
+    client = TestClient(app)
+    resp = client.post(
+        "/SET-1/freigabe",
+        json={
+            "actor_id": "sb-1",
+            "actor_type": "SACHBEARBEITER",
+            "target_status": "ZUR_FREIGABE",
+            "expected_row_version": 2,
+        },
+    )
+    assert resp.status_code == 409
+    body = resp.json()["detail"]
+    assert body["code"] == "row_version_conflict"
+    assert body["current_row_version"] == 3
+    assert body["expected_row_version"] == 2
+
+
 def test_correction_draft_prefills_credit_and_debit_flow(monkeypatch):
     settlement = _FakeSettlement(status="posted", posted_journal_ref="JE-SET-0001", drying_result={"approval_status": "VERBUCHT"})
     app, _repo, _fake_db = _app_with_repo_and_settlement(monkeypatch, settlement)
@@ -263,7 +284,8 @@ def test_completion_status_tracks_credit_debit_and_korrektur_variants(monkeypatc
     )
     assert credit_create.status_code == 200
     credit_id = credit_create.json()["id"]
-    client.post(f"/einkauf/credit-memos/{credit_id}/buchung")
+    assert client.post(f"/einkauf/credit-memos/{credit_id}/freigabe").status_code == 200
+    assert client.post(f"/einkauf/credit-memos/{credit_id}/buchung").status_code == 200
 
     debit_create = client.post(
         "/einkauf/debit-memos",
@@ -287,7 +309,8 @@ def test_completion_status_tracks_credit_debit_and_korrektur_variants(monkeypatc
     )
     assert debit_create.status_code == 200
     debit_id = debit_create.json()["id"]
-    client.post(f"/einkauf/debit-memos/{debit_id}/buchung")
+    assert client.post(f"/einkauf/debit-memos/{debit_id}/freigabe").status_code == 200
+    assert client.post(f"/einkauf/debit-memos/{debit_id}/buchung").status_code == 200
 
     credit_completion = client.get("/SET-1/completion-status", params={"variant": "GUTSCHRIFT"})
     assert credit_completion.status_code == 200

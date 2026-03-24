@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
 import { AlertTriangle, Loader2, Save, X } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { MaskConfig, Tab as MaskTab, Field } from './types'
 import { createMaskResolver, getFieldName, getFieldsFromMaskConfig } from './validation'
 
@@ -90,6 +91,24 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
     reset(data)
     setIsDirty(false)
   }, [data, reset])
+
+  // Gap 023: Keyboard-first — Ctrl+S speichern, Escape abbrechen
+  useKeyboardShortcuts([
+    {
+      key: 's',
+      ctrl: true,
+      label: 'Speichern',
+      action: () => { void handleSubmit(onSubmit)() },
+      disabled: isSubmitting || isLoading,
+      allowInInputs: true,
+    },
+    {
+      key: 'Escape',
+      label: 'Abbrechen',
+      action: onCancel,
+      allowInInputs: false,
+    },
+  ])
 
   const onSubmit = async (formData: any) => {
     try {
