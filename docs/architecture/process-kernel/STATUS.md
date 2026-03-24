@@ -31,11 +31,11 @@ Diese Statusdatei verdichtet den aktuellen Gesamtstand, ohne die Detailnachweise
 
 ## Status
 
-`abgeschlossen` - 2026-03-22 - Aggregierte Source-of-Truth fuer den Process-Kernel-Management-Status; operative Detailnachweise liegen in den referenzierten `wave-*/STATUS.md`-Dateien.
+`abgeschlossen` - 2026-03-24 - Aggregierte Source-of-Truth fuer den Process-Kernel-Management-Status; operative Detailnachweise liegen in den referenzierten `wave-*/STATUS.md`-Dateien.
 
 ## Gesamtstatus
 
-- Stand: `2026-03-22`
+- Stand: `2026-03-24`
 - Status: `Waves 1 bis 100 abgeschlossen`
 - Gesamtsuite: `5916 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed`
 - Bereinigter Gap-Abgleich gegen spaetere Wave-Nachweise: `docs/roadmap/status/2026-03-20-gap-matrix-bereinigt.md`
@@ -176,6 +176,40 @@ Diese Statusdatei verdichtet den aktuellen Gesamtstand, ohne die Detailnachweise
   - `Gap 016`, `Gap 018`, `Gap 019`, `Gap 021` und `Gap 029` sind in der aktuellen Frontend-/Observability-Sicht nochmals sichtbar verankert.
   - `Gap 004` ist jetzt ueber einen expliziten Settlement-Abschlussvertrag fuer `GUTSCHRIFT`, `BELASTUNG` und `KORREKTUR` formal geschlossen.
   - Credit- und Debit-Memos besitzen einen expliziten Buchungspfad mit `journalRef`; Korrekturvarianten werden ueber den Abschlussvertrag auf `STORNO_UND_NEU` plus vollstaendige Belegverknuepfung geprueft.
+
+### Stand 2026-03-24: Flow-Spine-Prozessraeume und Runtime-Haertung
+
+- Scope:
+  - `app/core/flow_spine_registry.py`
+  - `app/api/v1/endpoints/flow_spines.py`
+  - `packages/frontend-web/src/pages/workflow/flow-spine-studio.tsx`
+  - `packages/frontend-web/src/pages/workflow/flow-spine-procure-to-pay.tsx`
+  - `packages/frontend-web/src/pages/workflow/flow-spine-inventory-to-settlement.tsx`
+  - `packages/frontend-web/src/pages/workflow/flow-spine-harvest-to-settlement.tsx`
+  - `packages/frontend-web/src/pages/workflow/flow-spine-contract-to-settlement.tsx`
+  - `packages/frontend-web/src/pages/workflow/flow-spine-complaint-to-resolution.tsx`
+  - `packages/frontend-web/src/pages/workflow/flow-spine-service-to-customer.tsx`
+  - `packages/frontend-web/src/pages/workflow/flow-spine-finance-to-close.tsx`
+  - `packages/frontend-web/src/pages/workflow/flow-spine-compliance-to-report.tsx`
+  - `packages/frontend-web/src/components/workflow/FlowSpineWorkspace.tsx`
+  - `packages/frontend-web/src/lib/api/flow-spines.ts`
+  - `packages/frontend-web/src/lib/api/flow-spine.ts`
+  - `packages/frontend-web/src/app/navigation/domains/core.tsx`
+  - `packages/frontend-web/src/app/route-aliases.json`
+  - `packages/frontend-web/src/pages/wissen/wissensbasis.tsx`
+  - `app/api/v1/endpoints/agents.py`
+  - `app/api/v1/endpoints/finance_read_models.py`
+  - `tests/test_flow_spines_api.py`
+  - `tests/test_process_kernel_wave1_contracts.py`
+- Ergebnis:
+  - Ein gemeinsamer Backend-Vertrag fuer Flow-Spine-Prozessraeume ist ueber `GET /api/v1/process/flow-spines/catalog` und `GET /api/v1/process/flow-spines/{process_key}` eingefuehrt.
+  - Neun repo-native Flow-Spine-Arbeitsraeume fuer `Order-to-Cash`, `Procure-to-Pay`, `Inventory-to-Settlement`, `Harvest-to-Settlement`, `Contract-to-Settlement`, `Complaint-to-Resolution`, `Service-to-Customer`, `Finance-to-Close` und `Compliance-to-Report` sind jetzt als echte Workflow-Seiten im Frontend verankert.
+  - Die Seiten nutzen denselben DS-Rahmen ueber `PageSurface`, Tabs, Agent-Panel, Prozessnavigation und einen generischen Workspace-Renderer statt isolierter Export-Demos oder Parallel-Implementierungen.
+  - Navigation und Routing kennen jetzt explizite Flow-Spine-Einstiege fuer den vollstaendigen End-to-End-Prozesskatalog.
+  - Die exportbedingte TypeScript-Luecke in `wissensbasis.tsx` wurde an der Ursache bereinigt, damit der Frontend-Typecheck fuer die neuen Seiten wieder stabil gruen laeuft.
+  - `app/api/v1/endpoints/agents.py` besitzt jetzt einen modulglobalen `NeuroASSIST`-Service-Proxy, damit API-Tests und Monkeypatching denselben produktiven Servicepfad reproduzierbar verdrahten koennen.
+  - `app/api/v1/endpoints/finance_read_models.py` zieht Journal-Entry-Zeilen fuer Cash-Closings jetzt robust ueber `.mappings().all()`; die Wave-1-Vertragstests wurden darauf nachgezogen.
+  - Die frueheren Sonderseiten `flow-spine-finance-to-close.tsx` und `flow-spine-harvest-to-settlement.tsx` sind auf denselben generischen Backend- und Frontend-Vertrag gezogen; ein separater Parallelpfad fuer Flow-Spine-States existiert nicht mehr.
 
 ### Wave 21
 
@@ -423,11 +457,18 @@ Ergebnis:
 - `packages/frontend-web/src/components/workflow/ProcessStatusPanel.tsx`
 - `app/core/ui_density_manifest.py`
 - `packages/frontend-web/src/components/patterns/PageSurface.tsx`
+- `packages/frontend-web/src/pages/workflow/flow-spine-studio.tsx`
+- `packages/frontend-web/src/pages/workflow/flow-spine-procure-to-pay.tsx`
+- `packages/frontend-web/src/pages/workflow/flow-spine-inventory-to-settlement.tsx`
+- `packages/frontend-web/src/components/workflow/FlowSpineWorkspace.tsx`
+- `app/core/flow_spine_registry.py`
+- `app/api/v1/endpoints/flow_spines.py`
 
 Ergebnis:
 - Neue Seiten sollen jetzt verpflichtend ueber `PageSurface` + `PageToolbar` + Pattern-Sektionen aufgebaut werden.
 - Bestehende Seiten, die `OverviewPage`, `ObjectPage`, `ListReport` oder `Wizard` verwenden, profitieren automatisch vom neuen DS-Rahmen.
 - Aeltere Standalone-Seiten wie `sales/orders-modern.tsx` und `controlling/benchmark-cockpit.tsx` wurden rueckwirkend auf denselben Seitenrahmen gezogen.
+- Der generische Flow-Spine-Workspace und der Backend-Katalog dienen jetzt als Referenz fuer kuenftige prozesszentrierte Arbeitsraeume statt losgeloester Export-Frontends.
 
 ### Externe Blockchain-Schnittstelle fuer Lieferkettenprozesse
 
@@ -569,6 +610,15 @@ npm run test:run -- src/__tests__/components/workflow/CompactDecisionCard.test.t
 
 npm run type-check
 # Ergebnis: gruen
+
+pnpm --dir packages/frontend-web test:run src/__tests__/pages/workflow/flow-spine-studio.test.tsx src/__tests__/pages/workflow/flow-spine-procure-to-pay.test.tsx src/__tests__/pages/workflow/flow-spine-inventory-to-settlement.test.tsx
+# Ergebnis: 3 passed
+
+pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false
+# Ergebnis: gruen
+
+python -m pytest tests/test_process_kernel_wave1_contracts.py -q
+# Ergebnis: 35 passed
 ```
 
 ## Offene Punkte

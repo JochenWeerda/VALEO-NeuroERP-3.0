@@ -129,6 +129,7 @@ from app.api.v1.endpoints import (
     training,
     personal,
     analytics,
+    flow_spines,
     commodity_positions,
     position_rules,
     position_overrides,
@@ -632,6 +633,10 @@ api_router.include_router(
     tags=["analytics", "dashboard"]
 )
 
+api_router.include_router(
+    flow_spines.router,
+)
+
 # Agrar domain routers
 api_router.include_router(
     psm.router,
@@ -995,3 +1000,7 @@ api_router.include_router(agent_context_api.router)
 
 # Wave 69 — Knowledge Core
 api_router.include_router(knowledge_api.router, prefix="/knowledge", tags=["knowledge"])
+
+# Supply Chain Blockchain
+from app.api.v1.endpoints import supply_chain_blockchain
+api_router.include_router(supply_chain_blockchain.router)

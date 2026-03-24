@@ -66,6 +66,16 @@ Sie ersetzt weder die historischen Priorisierungen noch die Detailnachweise pro 
 
 Auf Basis der aktuell belastbaren Repo-Nachweise verbleiben derzeit keine produktfachlich offenen Top-50-Restgaps.
 
+## Nachgezogener Stand 2026-03-24
+
+- Die Lueckenschliessung wurde nach dem finalen Gap-Abschluss auch in einer gemeinsamen produktiven Flow-Spine-Steuerung materialisiert:
+  - Backend-Katalog und Workspace-Contracts ueber `app/core/flow_spine_registry.py` und `app/api/v1/endpoints/flow_spines.py`
+  - End-to-End-Prozessraeume im Frontend fuer `Order-to-Cash`, `Procure-to-Pay`, `Inventory-to-Settlement`, `Harvest-to-Settlement`, `Contract-to-Settlement`, `Complaint-to-Resolution`, `Service-to-Customer`, `Finance-to-Close` und `Compliance-to-Report`
+- Diese Prozessraeume eroefnen keine neuen Gaps, sondern operationalisieren das bereits geschlossene prozesszentrierte Zielbild ueber einen verbindlichen Backend-Vertrag und denselben Designsystem-Rahmen.
+- Parallel wurde der technische Ist-Stand in zwei bestehenden Abschlussfeldern gehaertet:
+  - `NeuroASSIST`-API-Testbarkeit ueber den Service-Proxy in `app/api/v1/endpoints/agents.py`
+  - Cash-Closing-Read-Models ueber die robustere Journal-Zeilenabfrage in `app/api/v1/endpoints/finance_read_models.py`
+
 ## Gaps mit historischem Doku-Nachzug, aber ohne echte Produktluecke
 
 - `008` Reklamationsprozesse E2E
