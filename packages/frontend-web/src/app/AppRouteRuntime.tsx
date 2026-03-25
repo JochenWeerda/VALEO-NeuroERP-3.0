@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import routeAliases from '@/app/route-aliases.json'
 import { ErrorState } from '@/components/ErrorState'
 import { PageLoader } from '@/app/PageLoader'
 import { createRouteElementByModule } from '@/app/page-module-loader'
 import {
   findMatchingAliasModule,
+  findMatchingAliasModuleFromRouteAliases,
   normalizeRelativePath,
 } from '@/app/route-builders/alias-matching'
 import {
@@ -108,8 +110,28 @@ export default function AppRouteRuntime({ prospectingEnabled }: AppRouteRuntimeP
       return autoMatch.module
     }
 
-    return findMatchingAliasModule(filteredAliasEntries, relativePath || '/')
+    const aliasMatch = findMatchingAliasModule(filteredAliasEntries, relativePath || '/')
+    if (aliasMatch) {
+      return aliasMatch
+    }
+
+    return findMatchingAliasModuleFromRouteAliases(
+      (routeAliases.aliases ?? []) as Array<{ module: string; path?: string; index?: boolean }>,
+      prefix,
+      relativePath || '/',
+    )
   }, [aliasEntries, autoEntries, prefix, prospectingEnabled, relativePath])
+
+  // useMemo must be called unconditionally (Rules of Hooks) — before any early
+  // returns. createRouteElementByModule() caches via WeakMap so the call is cheap
+  // even when we ultimately show a loading or error state instead.
+  // This ensures React always receives the same JSX element object for the same
+  // route, preventing Suspense from resetting on every parent re-render.
+  const resolvedModule = matchingModule ?? '@/pages/errors/NotFound'
+  const routeElement = useMemo(
+    () => createRouteElementByModule(resolvedModule),
+    [resolvedModule],
+  )
 
   if (loadError) {
     return (
@@ -132,9 +154,5 @@ export default function AppRouteRuntime({ prospectingEnabled }: AppRouteRuntimeP
     return <PageLoader />
   }
 
-  if (!matchingModule) {
-    return createRouteElementByModule('@/pages/errors/NotFound')
-  }
-
-  return createRouteElementByModule(matchingModule)
+  return routeElement
 }
