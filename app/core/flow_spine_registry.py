@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import json as _json
 from datetime import UTC, datetime
 from typing import Any
 
@@ -87,7 +88,7 @@ CATALOG: list[dict[str, str]] = [
     {
         "key": "order-to-cash",
         "label": "Order-to-Cash",
-        "route_path": "/workflow/flow-spine-studio",
+        "route_path": "/workflow/flow-spine-order-to-cash",
         "summary": "Vertrieb, Lieferung, Faktura und Zahlung in einem agentenfaehigen Steuerraum.",
         "domain": "sales",
     },
@@ -253,14 +254,24 @@ def _workspace(
     }
 
 
+# JSON string cache for catalog: key = lang code (default "de")
+_catalog_json_cache: dict[str, str] = {}
+
+
 def get_flow_spine_catalog(lang: str | None = None) -> dict:
-    payload = {
-        "schema_version": 1,
-        "manifest_kind": "FLOW_SPINE_PROCESS_CATALOG",
-        "generated_at": _now(),
-        "processes": CATALOG,
-    }
-    return _localize_payload(payload, lang)
+    lang_key = lang or "de"
+    cached = _catalog_json_cache.get(lang_key)
+    if cached is None:
+        payload = {
+            "schema_version": 1,
+            "manifest_kind": "FLOW_SPINE_PROCESS_CATALOG",
+            "generated_at": _now(),
+            "processes": CATALOG,
+        }
+        localized = _localize_payload(payload, lang)
+        cached = _json.dumps(localized, ensure_ascii=False)
+        _catalog_json_cache[lang_key] = cached
+    return _json.loads(cached)
 
 
 WORKSPACES: dict[str, dict] = {}
@@ -506,12 +517,38 @@ WORKSPACES["compliance-to-report"] = _workspace(
     "workflow",
 )
 
+# JSON string cache for workspaces: key = (process_key, lang code)
+_workspace_json_cache: dict[tuple[str, str], str] = {}
+
+
 def get_flow_spine_workspace(process_key: str, lang: str | None = None) -> dict:
-    try:
-        payload = copy.deepcopy(WORKSPACES[process_key])
-    except KeyError as exc:
-        raise KeyError(process_key) from exc
-    return _localize_payload(payload, lang)
+    lang_key = lang or "de"
+    cache_key = (process_key, lang_key)
+
+    cached_json = _workspace_json_cache.get(cache_key)
+    if cached_json is None:
+        try:
+            raw = WORKSPACES[process_key]
+        except KeyError as exc:
+            raise KeyError(process_key) from exc
+        # Localize once, serialize to JSON string, cache it
+        localized = _localize_payload(copy.deepcopy(raw), lang)
+        cached_json = _json.dumps(localized, ensure_ascii=False)
+        _workspace_json_cache[cache_key] = cached_json
+
+    # Fast deserialization is much cheaper than deepcopy of a complex dict
+    return _json.loads(cached_json)
+
+
+def invalidate_flow_spine_cache(process_key: str | None = None) -> None:
+    """Clear cached workspace JSON. Call after registry changes in tests or admin."""
+    if process_key:
+        keys_to_remove = [k for k in _workspace_json_cache if k[0] == process_key]
+        for k in keys_to_remove:
+            del _workspace_json_cache[k]
+    else:
+        _workspace_json_cache.clear()
+        _catalog_json_cache.clear()
 
 
 def merge_instance_statuses(workspace: dict, instance: dict) -> dict:

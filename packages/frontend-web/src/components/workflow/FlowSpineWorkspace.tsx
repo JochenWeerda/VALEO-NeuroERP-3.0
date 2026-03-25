@@ -89,7 +89,11 @@ export function FlowSpineWorkspace({ processKey, instanceId }: FlowSpineWorkspac
   const workspaceQuery = useQuery({
     queryKey: ['workflow', 'flow-spine', processKey, instanceId ?? 'default'],
     queryFn: () => fetchFlowSpineWorkspace(processKey, instanceId),
+    staleTime: 5 * 60_000,        // 5 min — workspace is mostly static
+    gcTime: 15 * 60_000,          // keep in cache 15 min after unmount
     retry: false,
+    placeholderData: (prev) => prev,  // show stale data while revalidating (no spinner flash)
+    refetchOnWindowFocus: false,  // don't refetch when tab regains focus
   })
   const workspace = workspaceQuery.data
   const [selectedNodeId, setSelectedNodeId] = useState<string>('')
@@ -176,9 +180,52 @@ export function FlowSpineWorkspace({ processKey, instanceId }: FlowSpineWorkspac
 
   if (workspaceQuery.isLoading) {
     return (
-      <PageSurface data-page-surface={`flow-spine-${processKey}`}>
-        <PageSection title="Flow Spine wird geladen" description="Der Prozessraum wird aus dem Backend aufgebaut.">
-          <div className="h-24 rounded-2xl border border-dashed border-border/60 bg-muted/20" />
+      <PageSurface
+        data-page-surface={`flow-spine-${processKey}`}
+        className="bg-[radial-gradient(circle_at_top_left,_rgba(99,102,241,0.12),_transparent_28%),linear-gradient(180deg,#08101f,#0d1528)]"
+      >
+        <PageSection className="overflow-hidden border-white/10 bg-slate-950/70 p-0">
+          {/* Header skeleton */}
+          <div className="flex h-16 items-center justify-between border-b border-white/5 px-5 gap-4">
+            <div className="h-4 w-48 rounded-full bg-white/10 animate-pulse" />
+            <div className="h-8 flex-1 max-w-xl rounded-lg bg-white/5 animate-pulse" />
+            <div className="h-8 w-32 rounded-lg bg-white/10 animate-pulse" />
+          </div>
+          {/* 3-column body skeleton */}
+          <div className="grid min-h-[720px] grid-cols-[220px_minmax(0,1fr)_360px]">
+            {/* Left nav skeleton */}
+            <div className="border-r border-white/5 bg-slate-950/45 p-4 space-y-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="h-10 rounded-2xl bg-white/5 animate-pulse" style={{ animationDelay: `${i * 60}ms` }} />
+              ))}
+            </div>
+            {/* Main content skeleton */}
+            <div className="bg-[linear-gradient(180deg,rgba(15,23,42,0.35),rgba(15,23,42,0.15))] p-6 space-y-6">
+              <div className="h-8 w-72 rounded-full bg-white/10 animate-pulse" />
+              <div className="rounded-[28px] border border-white/10 bg-white/[0.03] p-8">
+                {/* Node circles */}
+                <div className="flex justify-around mb-8">
+                  {Array.from({ length: 6 }).map((_, i) => (
+                    <div key={i} className="flex flex-col items-center gap-3">
+                      <div className="h-16 w-16 rounded-full bg-white/10 animate-pulse" style={{ animationDelay: `${i * 80}ms` }} />
+                      <div className="h-3 w-16 rounded-full bg-white/10 animate-pulse" />
+                    </div>
+                  ))}
+                </div>
+                {/* Detail cards */}
+                <div className="grid gap-5 xl:grid-cols-[1fr_300px]">
+                  <div className="h-48 rounded-2xl bg-white/5 animate-pulse" />
+                  <div className="h-48 rounded-2xl bg-white/5 animate-pulse" style={{ animationDelay: '100ms' }} />
+                </div>
+              </div>
+            </div>
+            {/* Right panel skeleton */}
+            <div className="border-l border-white/5 bg-slate-950/45 p-5 space-y-3">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="h-12 rounded-2xl bg-white/5 animate-pulse" style={{ animationDelay: `${i * 70}ms` }} />
+              ))}
+            </div>
+          </div>
         </PageSection>
       </PageSurface>
     )

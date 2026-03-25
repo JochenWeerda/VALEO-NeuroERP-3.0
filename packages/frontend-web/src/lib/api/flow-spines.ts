@@ -242,3 +242,52 @@ export function useDeleteFlowSpineInstance(processKey: string) {
     },
   })
 }
+
+// ── Prefetch utilities ────────────────────────────────────────────────────────
+
+/**
+ * Prefetch a single workspace into the React Query cache.
+ * Call on hover or before navigating to a flow-spine page.
+ */
+export function prefetchFlowSpineWorkspace(
+  queryClient: ReturnType<typeof useQueryClient>,
+  processKey: string,
+): Promise<void> {
+  return queryClient.prefetchQuery({
+    queryKey: ['workflow', 'flow-spine', processKey, 'default'],
+    queryFn: () => fetchFlowSpineWorkspace(processKey),
+    staleTime: 5 * 60_000,
+  })
+}
+
+const ALL_PROCESS_KEYS = [
+  'order-to-cash',
+  'procure-to-pay',
+  'harvest-to-settlement',
+  'inventory-to-settlement',
+  'contract-to-settlement',
+  'complaint-to-resolution',
+  'service-to-customer',
+  'finance-to-close',
+  'compliance-to-report',
+] as const
+
+/**
+ * Warm the cache for all 9 flow-spine workspaces in the background.
+ * Call once on app init or after the catalog loads.
+ * Uses staggered requests so it doesn't compete with user-visible fetches.
+ */
+export function warmFlowSpineCache(
+  queryClient: ReturnType<typeof useQueryClient>,
+): void {
+  // Stagger the prefetches to avoid a burst of 9 parallel requests
+  ALL_PROCESS_KEYS.forEach((key, index) => {
+    setTimeout(() => {
+      void queryClient.prefetchQuery({
+        queryKey: ['workflow', 'flow-spine', key, 'default'],
+        queryFn: () => fetchFlowSpineWorkspace(key),
+        staleTime: 5 * 60_000,
+      })
+    }, index * 300) // 300ms stagger between each prefetch
+  })
+}

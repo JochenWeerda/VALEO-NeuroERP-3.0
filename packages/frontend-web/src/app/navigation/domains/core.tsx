@@ -31,6 +31,7 @@ import {
   Zap,
   Search,
   BookOpen,
+  ReceiptText,
 } from 'lucide-react'
 import type { RawNavItem } from '@/app/navigation/types'
 import { ENABLE_PROSPECTING_UI } from '@/features/prospecting/feature-flags'
@@ -92,11 +93,20 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
       },
       {
         id: 'workflow-flow-spine',
-        label: 'Auftrag bis Zahlung',
+        label: 'Flow Spine Studio',
         icon: LayoutGrid,
         module: '@/pages/workflow/flow-spine-studio',
         preferredPath: 'workflow/flow-spine-studio',
-        keywords: ['flow spine', 'order to cash', 'control tower', 'agentic ui', 'prozessraum'],
+        keywords: ['flow spine', 'studio', 'katalog', 'control tower', 'agentic ui', 'prozessraum'],
+        mcp: { businessDomain: 'workflow', scope: 'workflow:read' },
+      },
+      {
+        id: 'workflow-flow-spine-order-to-cash',
+        label: 'Auftrag bis Zahlung',
+        icon: ReceiptText,
+        module: '@/pages/workflow/flow-spine-order-to-cash',
+        preferredPath: 'workflow/flow-spine-order-to-cash',
+        keywords: ['flow spine', 'order to cash', 'vertrieb', 'lieferung', 'faktura', 'zahlung'],
         mcp: { businessDomain: 'workflow', scope: 'workflow:read' },
       },
       {

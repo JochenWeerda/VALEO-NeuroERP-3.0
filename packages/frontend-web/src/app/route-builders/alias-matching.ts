@@ -1,5 +1,5 @@
 import { matchPath } from 'react-router-dom'
-import type { AliasGroupRouteEntry } from '@/app/route-builders/types'
+import type { AliasGroupRouteEntry, RouteAliasEntry } from '@/app/route-builders/types'
 
 export function normalizeRelativePath(value: string | undefined): string {
   return String(value ?? '').replace(/^\/+|\/+$/g, '')
@@ -56,6 +56,24 @@ export function findMatchingAliasModule(
   const match = [...entries]
     .sort(compareAliasEntries)
     .find((entry) => matchPath({ path: entry.path || '/', end: true }, candidatePath))
+
+  return match?.module ?? null
+}
+
+export function findMatchingAliasModuleFromRouteAliases(
+  aliases: RouteAliasEntry[],
+  prefix: string,
+  candidatePath: string,
+): string | null {
+  const normalizedPrefix = normalizeRelativePath(prefix)
+  const normalizedCandidatePath = normalizeRelativePath(candidatePath)
+  const fullPath = normalizedCandidatePath
+    ? `${normalizedPrefix}/${normalizedCandidatePath}`
+    : normalizedPrefix
+
+  const match = aliases.find(
+    (entry) => typeof entry.path === 'string' && normalizeRelativePath(entry.path) === fullPath,
+  )
 
   return match?.module ?? null
 }

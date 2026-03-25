@@ -103,6 +103,7 @@ const GROUP_BY_PREFIX: Record<string, PageModuleGroupName> = {
 }
 
 const pageModuleGroupCache = new Map<PageModuleGroupName, Promise<PageModuleGroupModule>>()
+const pageModuleLoaderCache = new Map<string, PageModuleFactory>()
 
 function resolveModuleKey(modulePath: string): string {
   let resolved = modulePath.replace(/^@\//, '../../')
@@ -138,17 +139,25 @@ function loadPageModuleGroup(groupName: PageModuleGroupName): Promise<PageModule
 }
 
 export function getPageModuleLoader(modulePath: string): PageModuleFactory {
+  const cachedLoader = pageModuleLoaderCache.get(modulePath)
+  if (cachedLoader) {
+    return cachedLoader
+  }
+
   const moduleKey = resolveModuleKey(modulePath)
   const groupName = getPageModuleGroupName(modulePath)
 
-  return async () => {
+  const loader: PageModuleFactory = async () => {
     const groupModule = await loadPageModuleGroup(groupName)
-    const loader = groupModule.PAGE_MODULES[moduleKey]
-    if (!loader) {
+    const pageLoader = groupModule.PAGE_MODULES[moduleKey]
+    if (!pageLoader) {
       throw new Error(`Route references unknown module: ${modulePath}`)
     }
-    return loader()
+    return pageLoader()
   }
+
+  pageModuleLoaderCache.set(modulePath, loader)
+  return loader
 }
 
 export function createRouteElementByModule(modulePath: string): JSX.Element {

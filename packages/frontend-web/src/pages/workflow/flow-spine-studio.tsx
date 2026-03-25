@@ -1,9 +1,11 @@
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronRight, Layers } from 'lucide-react'
+import { useQueryClient } from '@tanstack/react-query'
 import { PageSection, PageSurface } from '@/components/patterns/PageSurface'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { useFlowSpineCatalogHook } from '@/lib/api/flow-spines'
+import { useFlowSpineCatalogHook, warmFlowSpineCache } from '@/lib/api/flow-spines'
 
 const DOMAIN_COLORS: Record<string, string> = {
   sales: 'bg-emerald-500/15 text-emerald-200',
@@ -18,7 +20,17 @@ const DOMAIN_COLORS: Record<string, string> = {
 
 export default function FlowSpineStudioPage(): JSX.Element {
   const navigate = useNavigate()
-  const { data: catalog, isLoading, isError } = useFlowSpineCatalogHook()
+  const queryClient = useQueryClient()
+  const catalogQuery = useFlowSpineCatalogHook()
+  const { data: catalog, isLoading, isError } = catalogQuery
+
+  // Warm the workspace cache for all flow-spine processes as soon as the
+  // catalog has loaded, so navigation to any process page feels instant.
+  useEffect(() => {
+    if (catalogQuery.isSuccess) {
+      warmFlowSpineCache(queryClient)
+    }
+  }, [catalogQuery.isSuccess, queryClient])
 
   if (isLoading) {
     return (

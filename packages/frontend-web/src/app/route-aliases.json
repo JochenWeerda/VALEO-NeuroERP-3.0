@@ -1521,6 +1521,10 @@
       "path": "workflow/flow-spine-studio"
     },
     {
+      "module": "@/pages/workflow/flow-spine-order-to-cash",
+      "path": "workflow/flow-spine-order-to-cash"
+    },
+    {
       "module": "@/pages/workflow/flow-spine-procure-to-pay",
       "path": "workflow/flow-spine-procure-to-pay"
     },
