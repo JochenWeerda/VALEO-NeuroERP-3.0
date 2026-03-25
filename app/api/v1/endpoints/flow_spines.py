@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+import hashlib
+import json as _json
 import uuid
 from datetime import UTC, datetime
 from typing import Any, Optional
 
 from fastapi import APIRouter, HTTPException, Query
-from fastapi.responses import Response
+from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel
 
 from app.core.flow_spine_registry import (
@@ -42,19 +44,28 @@ class TransitionRequest(BaseModel):
 
 # ── Catalog ──────────────────────────────────────────────────────────────────
 
-@router.get("/catalog", response_model=dict)
-def get_catalog(lang: Optional[str] = Query(None, description="Optional language code for localized process labels")) -> dict[str, Any]:
-    return get_flow_spine_catalog(lang)
+@router.get("/catalog")
+def get_catalog(lang: Optional[str] = Query(None, description="Optional language code for localized process labels")) -> JSONResponse:
+    catalog = get_flow_spine_catalog(lang)
+    body = _json.dumps(catalog, ensure_ascii=False)
+    etag = f'"{hashlib.md5(body.encode()).hexdigest()}"'
+    return JSONResponse(
+        content=catalog,
+        headers={
+            "Cache-Control": "public, max-age=300, stale-while-revalidate=600",
+            "ETag": etag,
+        },
+    )
 
 
 # ── Workspace (with optional instance overlay) ───────────────────────────────
 
-@router.get("/{process_key}", response_model=dict)
+@router.get("/{process_key}")
 def get_workspace(
     process_key: str,
     instance_id: Optional[str] = Query(None, description="Optional instance ID to overlay node statuses"),
     lang: Optional[str] = Query(None, description="Optional language code for localized workspace labels"),
-) -> dict[str, Any]:
+) -> JSONResponse:
     try:
         workspace = get_flow_spine_workspace(process_key, lang)
     except KeyError as exc:
@@ -64,8 +75,19 @@ def get_workspace(
         instance = _instances.get(instance_id)
         if instance and instance.get("process_key") == process_key:
             workspace = merge_instance_statuses(workspace, instance)
+        # Instance overlay is dynamic — skip caching headers
+        return JSONResponse(content=workspace)
 
-    return workspace
+    # Static workspace (no instance overlay): add HTTP cache headers
+    body = _json.dumps(workspace, ensure_ascii=False)
+    etag = f'"{hashlib.md5(body.encode()).hexdigest()}"'
+    return JSONResponse(
+        content=workspace,
+        headers={
+            "Cache-Control": "public, max-age=60, stale-while-revalidate=120",
+            "ETag": etag,
+        },
+    )
 
 
 # ── Instance CRUD ─────────────────────────────────────────────────────────────

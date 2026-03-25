@@ -48,7 +48,7 @@ describe('FlowSpineStudioPage', () => {
           {
             key: 'order-to-cash',
             label: 'Auftrag bis Zahlung',
-            route_path: '/workflow/flow-spine-studio',
+            route_path: '/workflow/flow-spine-order-to-cash',
             summary: 'Vertrieb, Lieferung, Faktura und Zahlung in einem agentenfaehigen Steuerraum.',
             domain: 'sales',
           },
