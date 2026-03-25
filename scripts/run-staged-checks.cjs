@@ -9,7 +9,7 @@ function run(command, args) {
   execFileSync(executable, args, {
     cwd: repoRoot,
     stdio: 'inherit',
-    shell: false,
+    shell: process.platform === 'win32',
   })
 }
 

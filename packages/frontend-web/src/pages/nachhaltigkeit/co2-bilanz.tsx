@@ -1,67 +1,98 @@
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
+import { ErrorState } from '@/components/ErrorState'
+import { apiClient } from '@/lib/api-client'
 import { BarChart3, Leaf, TrendingDown } from 'lucide-react'
 
+type EsgReport = {
+  totalCo2eKg: number
+  byMonth: Record<string, { deliveries: number; n_kg: number; p2o5_kg: number; co2e_kg: number }>
+  [key: string]: unknown
+}
+
 export default function CO2BilanzPage(): JSX.Element {
-  const co2 = {
-    gesamt: 1250,
-    vorjahr: 1450,
-    reduktion: 13.8,
-    nachBereich: [
-      { bereich: 'Transport', co2: 450, anteil: 36 },
-      { bereich: 'Lagerung', co2: 320, anteil: 26 },
-      { bereich: 'Verarbeitung', co2: 280, anteil: 22 },
-      { bereich: 'Verwaltung', co2: 200, anteil: 16 },
-    ],
+  const currentYear = new Date().getFullYear()
+  const [year] = useState(currentYear)
+
+  const { data, isLoading, isError, error, refetch } = useQuery({
+    queryKey: ['sustainability', 'esg-report', 'co2', year],
+    queryFn: async () => (await apiClient.get<EsgReport>(`/api/v1/sustainability/esg-report?year=${year}`)).data,
+    staleTime: 5 * 60 * 1000,
+  })
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6 p-6">
+        <Skeleton className="h-9 w-48" />
+        <div className="grid gap-4 md:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-24" />)}
+        </div>
+        <Skeleton className="h-64" />
+      </div>
+    )
   }
+
+  if (isError) {
+    return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
+  }
+
+  // totalCo2eKg is in kg — convert to tonnes
+  const gesamtTonnen = data ? Math.round((data.totalCo2eKg ?? 0) / 1000) : 0
+  const byMonth = data?.byMonth ?? {}
+
+  // Build per-month breakdown for the bar chart
+  const monthEntries = Object.entries(byMonth)
+    .map(([month, values]) => ({
+      monat: month,
+      co2Kg: values.co2e_kg ?? 0,
+    }))
+    .sort((a, b) => a.monat.localeCompare(b.monat))
+
+  const maxMonthCo2 = Math.max(...monthEntries.map((m) => m.co2Kg), 1)
 
   return (
     <div className="space-y-6 p-6">
       <div>
         <h1 className="text-3xl font-bold">CO₂-Bilanz</h1>
-        <p className="text-muted-foreground">Klimabilanz 2025</p>
+        <p className="text-muted-foreground">Klimabilanz {year}</p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">CO₂-Emissionen</CardTitle>
+            <CardTitle className="text-sm font-medium">CO₂-Emissionen (t)</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
               <Leaf className="h-5 w-5 text-green-600" />
-              <span className="text-2xl font-bold">{co2.gesamt.toLocaleString('de-DE')} t</span>
+              <span className="text-2xl font-bold">{gesamtTonnen.toLocaleString('de-DE')} t CO₂e</span>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Vorjahr</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <span className="text-2xl font-bold">{co2.vorjahr.toLocaleString('de-DE')} t</span>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Reduktion</CardTitle>
+            <CardTitle className="text-sm font-medium">Monate mit Daten</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <TrendingDown className="h-5 w-5 text-green-600" />
-              <span className="text-2xl font-bold text-green-600">-{co2.reduktion}%</span>
+              <TrendingDown className="h-5 w-5 text-blue-600" />
+              <span className="text-2xl font-bold">{monthEntries.length}</span>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Eingespart</CardTitle>
+            <CardTitle className="text-sm font-medium">Gesamt CO₂e (kg)</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">{co2.vorjahr - co2.gesamt} t</span>
+            <span className="text-2xl font-bold text-green-600">
+              {(data?.totalCo2eKg ?? 0).toLocaleString('de-DE', { maximumFractionDigits: 1 })} kg
+            </span>
           </CardContent>
         </Card>
       </div>
@@ -70,29 +101,39 @@ export default function CO2BilanzPage(): JSX.Element {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5" />
-            CO₂-Emissionen nach Bereich
+            CO₂e-Emissionen nach Monat ({year})
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            {co2.nachBereich.map((bereich, i) => (
-              <div key={i} className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="font-semibold">{bereich.bereich}</div>
-                  <div className="text-right">
-                    <div className="text-xl font-bold">{bereich.co2} t CO₂</div>
-                    <div className="text-sm text-muted-foreground">{bereich.anteil}% Gesamtanteil</div>
+          {monthEntries.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-4 text-center">
+              Keine Monatsdaten für {year} verfügbar.
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {monthEntries.map((m) => {
+                const anteil = maxMonthCo2 > 0 ? (m.co2Kg / maxMonthCo2) * 100 : 0
+                return (
+                  <div key={m.monat} className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="font-semibold">{m.monat}</div>
+                      <div className="text-right">
+                        <div className="text-xl font-bold">
+                          {m.co2Kg.toLocaleString('de-DE', { maximumFractionDigits: 1 })} kg CO₂e
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                        <div className="h-full bg-green-600" style={{ width: `${anteil}%` }} />
+                      </div>
+                      <Badge variant="outline">{anteil.toFixed(0)}%</Badge>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                    <div className="h-full bg-green-600" style={{ width: `${bereich.anteil}%` }} />
-                  </div>
-                  <Badge variant="outline">{bereich.anteil}%</Badge>
-                </div>
-              </div>
-            ))}
-          </div>
+                )
+              })}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

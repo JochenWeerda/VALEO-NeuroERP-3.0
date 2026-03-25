@@ -4,12 +4,14 @@
  */
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { Wizard } from '@/components/patterns/Wizard'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
 import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { useToast } from '@/hooks/use-toast'
 import { api } from '@/lib/axios'
+import { apiClient } from '@/lib/api-client'
 import { CheckCircle } from 'lucide-react'
 import { AgentProcessPanel } from '@/components/agent'
 import {
@@ -30,17 +32,45 @@ type BeladungData = {
   verladeort: string
 }
 
-const ARTIKEL_OPTIONEN = ['Weizen', 'Gerste', 'Raps', 'Mais', 'Roggen', 'Hafer', 'Sonnenblumen']
+const FALLBACK_ARTIKEL = ['Weizen', 'Gerste', 'Raps', 'Mais', 'Roggen', 'Hafer', 'Sonnenblumen']
 
-const VERLADEORTE = [
-  { id: 'silo-1', label: 'Silo 1', description: 'Weizen / Roggen' },
-  { id: 'silo-2', label: 'Silo 2', description: 'Gerste / Hafer' },
-  { id: 'halle-a', label: 'Halle A', description: 'Schüttgut allgemein' },
-]
+type SiloOption = { id: string; label: string; description: string }
 
 export default function LKWBeladungPage(): JSX.Element {
   const navigate = useNavigate()
   const { toast } = useToast()
+
+  const { data: articlesData } = useQuery({
+    queryKey: ['articles', 'lkw-beladung'],
+    queryFn: async () => {
+      const res = await apiClient.get<{ items: Array<{ id: string; name: string; article_number?: string }> }>(
+        '/api/v1/articles?limit=100',
+      )
+      return res.data
+    },
+    staleTime: 5 * 60_000,
+  })
+  const ARTIKEL_OPTIONEN = articlesData?.items?.map((a) => a.name ?? a.article_number ?? a.id) ?? FALLBACK_ARTIKEL
+
+  const { data: silosData } = useQuery({
+    queryKey: ['silo', 'verladeorte'],
+    queryFn: async () => {
+      const res = await apiClient.get<{ liste: Array<{ id: string; nummer: string; artikel?: string }> }>(
+        '/api/v1/silo/kapazitaeten',
+      )
+      return res.data
+    },
+    staleTime: 5 * 60_000,
+  })
+  const VERLADEORTE: SiloOption[] = silosData?.liste?.map((s) => ({
+    id: s.id,
+    label: s.nummer,
+    description: s.artikel ?? 'Schüttgut',
+  })) ?? [
+    { id: 'silo-1', label: 'Silo 1', description: 'Weizen / Roggen' },
+    { id: 'silo-2', label: 'Silo 2', description: 'Gerste / Hafer' },
+    { id: 'halle-a', label: 'Halle A', description: 'Schüttgut allgemein' },
+  ]
   const [beladung, setBeladung] = useState<BeladungData>({
     kennzeichen: '',
     lieferscheinNr: '',

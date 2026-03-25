@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
 import {
   ArrowLeftRight,
   Bell,
@@ -11,6 +10,7 @@ import {
   FileText,
   Landmark,
   Package,
+  Plus,
   Receipt,
   Search,
   Settings,
@@ -28,10 +28,21 @@ import { AgentProcessPanel } from '@/components/agent'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { fetchFlowSpineWorkspace, type FlowSpineNode } from '@/lib/api/flow-spines'
+import {
+  fetchFlowSpineWorkspace,
+  useCreateFlowSpineInstance,
+  useExecuteAgentAction,
+  useExecuteFlowSpineAction,
+  type FlowSpineAction,
+  type FlowSpineNode,
+} from '@/lib/api/flow-spines'
+import { toast } from '@/hooks/use-toast'
 import { cn } from '@/lib/utils'
+import { useQuery } from '@tanstack/react-query'
 
 const ICONS = {
   ArrowLeftRight,
@@ -55,6 +66,7 @@ const ICONS = {
 
 interface FlowSpineWorkspaceProps {
   processKey: string
+  instanceId?: string
 }
 
 function toneClasses(tone: string): string {
@@ -72,15 +84,24 @@ function toneClasses(tone: string): string {
   }
 }
 
-export function FlowSpineWorkspace({ processKey }: FlowSpineWorkspaceProps): JSX.Element {
+export function FlowSpineWorkspace({ processKey, instanceId }: FlowSpineWorkspaceProps): JSX.Element {
   const navigate = useNavigate()
   const workspaceQuery = useQuery({
-    queryKey: ['workflow', 'flow-spine', processKey],
-    queryFn: () => fetchFlowSpineWorkspace(processKey),
+    queryKey: ['workflow', 'flow-spine', processKey, instanceId ?? 'default'],
+    queryFn: () => fetchFlowSpineWorkspace(processKey, instanceId),
     retry: false,
   })
   const workspace = workspaceQuery.data
   const [selectedNodeId, setSelectedNodeId] = useState<string>('')
+
+  // New instance dialog state
+  const [showNewInstanceDialog, setShowNewInstanceDialog] = useState(false)
+  const [newInstanceLabel, setNewInstanceLabel] = useState('')
+  const createInstance = useCreateFlowSpineInstance(processKey)
+
+  // Action execution hooks
+  const executeAction = useExecuteFlowSpineAction()
+  const executeAgentAction = useExecuteAgentAction(processKey)
 
   useEffect(() => {
     if (workspace?.focus_node_id) {
@@ -98,6 +119,59 @@ export function FlowSpineWorkspace({ processKey }: FlowSpineWorkspaceProps): JSX
 
   const go = (href: string): void => {
     navigate(href)
+  }
+
+  const handleAction = async (action: FlowSpineAction): Promise<void> => {
+    if (action.api_path) {
+      try {
+        await executeAction.mutateAsync({ apiPath: action.api_path })
+        toast({ title: 'Aktion ausgeführt', description: action.label })
+      } catch (e) {
+        console.error('Action failed:', e)
+        toast({
+          title: 'Fehler',
+          description: `Aktion "${action.label}" konnte nicht ausgeführt werden.`,
+          variant: 'destructive',
+        })
+      }
+    }
+    if (action.href) {
+      go(action.href)
+    }
+  }
+
+  const handleAgentAction = async (action: string): Promise<void> => {
+    try {
+      await executeAgentAction.mutateAsync({
+        action,
+        node_id: selectedNode?.id,
+      })
+      toast({ title: 'Agent-Aktion ausgeführt', description: action })
+    } catch (e) {
+      console.error('Agent action failed:', e)
+      toast({
+        title: 'Fehler',
+        description: `Agent-Aktion "${action}" konnte nicht ausgeführt werden.`,
+        variant: 'destructive',
+      })
+    }
+  }
+
+  const handleCreateInstance = async (): Promise<void> => {
+    if (!newInstanceLabel.trim()) return
+    try {
+      await createInstance.mutateAsync({ label: newInstanceLabel.trim() })
+      toast({ title: 'Instanz erstellt', description: newInstanceLabel.trim() })
+      setShowNewInstanceDialog(false)
+      setNewInstanceLabel('')
+    } catch (e) {
+      console.error('Create instance failed:', e)
+      toast({
+        title: 'Fehler',
+        description: 'Instanz konnte nicht erstellt werden.',
+        variant: 'destructive',
+      })
+    }
   }
 
   if (workspaceQuery.isLoading) {
@@ -140,6 +214,15 @@ export function FlowSpineWorkspace({ processKey }: FlowSpineWorkspaceProps): JSX
             <Input aria-label="Globale Suche" placeholder={workspace.search_placeholder} className="border-white/10 bg-white/5 pl-9 text-slate-100 placeholder:text-slate-500" />
           </div>
           <div className="flex items-center gap-3">
+            <Button
+              size="sm"
+              variant="outline"
+              className="border-indigo-400/30 bg-indigo-500/10 text-indigo-200 hover:bg-indigo-500/20"
+              onClick={() => setShowNewInstanceDialog(true)}
+            >
+              <Plus className="mr-1.5 h-3.5 w-3.5" />
+              Neue Instanz
+            </Button>
             <div className="flex rounded-xl bg-white/5 p-1 text-xs">
               {['Flow', 'Fokus', 'Uebersicht'].map((mode) => (
                 <span key={mode} className={cn('rounded-lg px-3 py-1.5 text-slate-400', workspace.mode === mode && 'bg-indigo-500/30 text-indigo-100')}>
@@ -284,7 +367,20 @@ export function FlowSpineWorkspace({ processKey }: FlowSpineWorkspaceProps): JSX
                     </Card>
                     <Card className="border-white/10 bg-white/[0.03] text-slate-100">
                       <CardHeader><CardTitle className="text-sm">Aktionen</CardTitle></CardHeader>
-                      <CardContent className="space-y-3">{selectedNode.actions.map((action) => <Button key={action.label} onClick={() => go(action.href)} variant={action.variant === 'primary' ? 'default' : 'outline'} className={cn('w-full justify-between', action.variant === 'primary' ? 'bg-indigo-500 text-white hover:bg-indigo-400' : 'border-white/10 bg-white/5 text-slate-200 hover:bg-white/10')}>{action.label}<ChevronRight className="h-4 w-4" /></Button>)}</CardContent>
+                      <CardContent className="space-y-3">
+                        {selectedNode.actions.map((action) => (
+                          <Button
+                            key={action.label}
+                            onClick={() => void handleAction(action)}
+                            disabled={executeAction.isPending}
+                            variant={action.variant === 'primary' ? 'default' : 'outline'}
+                            className={cn('w-full justify-between', action.variant === 'primary' ? 'bg-indigo-500 text-white hover:bg-indigo-400' : 'border-white/10 bg-white/5 text-slate-200 hover:bg-white/10')}
+                          >
+                            {action.label}
+                            <ChevronRight className="h-4 w-4" />
+                          </Button>
+                        ))}
+                      </CardContent>
                     </Card>
                     <Card className="border-indigo-400/20 bg-indigo-500/10 text-slate-100">
                       <CardHeader><CardTitle className="text-sm">Agent</CardTitle></CardHeader>
@@ -303,7 +399,16 @@ export function FlowSpineWorkspace({ processKey }: FlowSpineWorkspaceProps): JSX
                     <CardHeader><CardTitle className="text-lg">Linked Modules</CardTitle></CardHeader>
                     <CardContent className="space-y-3">
                       {workspace.right_panel.linked_modules.map((module) => (
-                        <button key={module.label} onClick={() => go(module.href)} className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-slate-200 hover:bg-white/5">
+                        <button
+                          key={module.label}
+                          onClick={() => {
+                            if (module.api_path) {
+                              void executeAction.mutateAsync({ apiPath: module.api_path })
+                            }
+                            if (module.href) go(module.href)
+                          }}
+                          className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-slate-200 hover:bg-white/5"
+                        >
                           <span>{module.label}</span>
                           <ChevronRight className="h-4 w-4 text-slate-500" />
                         </button>
@@ -341,17 +446,99 @@ export function FlowSpineWorkspace({ processKey }: FlowSpineWorkspaceProps): JSX
                   <CardContent className="space-y-3 text-sm">
                     <p>{selectedNode.agent.message}</p>
                     <div className="space-y-1 text-xs text-slate-300">{selectedNode.agent.reasons.map((reason) => <div key={reason}>- {reason}</div>)}</div>
-                    <div className="grid grid-cols-3 gap-2">{selectedNode.agent.actions.map((action) => <Button key={action} size="sm" variant={action === 'Uebernehmen' ? 'default' : 'outline'} className={cn(action === 'Uebernehmen' ? 'bg-white text-slate-900 hover:bg-white/90' : 'border-white/10 bg-white/5 text-white hover:bg-white/10')}>{action}</Button>)}</div>
+                    <div className="grid grid-cols-3 gap-2">
+                      {selectedNode.agent.actions.map((action) => (
+                        <Button
+                          key={action}
+                          size="sm"
+                          disabled={executeAgentAction.isPending}
+                          onClick={() => void handleAgentAction(action)}
+                          variant={action === 'Uebernehmen' ? 'default' : 'outline'}
+                          className={cn(action === 'Uebernehmen' ? 'bg-white text-slate-900 hover:bg-white/90' : 'border-white/10 bg-white/5 text-white hover:bg-white/10')}
+                        >
+                          {action}
+                        </Button>
+                      ))}
+                    </div>
                   </CardContent>
                 </Card>
               </TabsContent>
-              <TabsContent value="actions" className="mt-4 space-y-3">{selectedNode.actions.map((action) => <Button key={action.label} onClick={() => go(action.href)} className={cn('w-full justify-between', action.variant === 'primary' ? 'bg-indigo-500 text-white hover:bg-indigo-400' : 'border-white/10 bg-white/5 text-slate-200 hover:bg-white/10')} variant={action.variant === 'primary' ? 'default' : 'outline'}>{action.label}<ChevronRight className="h-4 w-4" /></Button>)}</TabsContent>
-              <TabsContent value="docs" className="mt-4 space-y-3">{selectedNode.documents.concat(workspace.right_panel.resources).map((doc) => <button key={`${doc.label}-${doc.href}`} onClick={() => go(doc.href)} className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-left text-sm text-slate-200 hover:bg-white/5"><span className="flex items-center gap-2"><FileText className="h-4 w-4 text-slate-500" />{doc.label}</span><ChevronRight className="h-4 w-4 text-slate-500" /></button>)}</TabsContent>
-              <TabsContent value="kpis" className="mt-4 space-y-3">{selectedNode.kpis.map((kpi) => <div key={kpi.label} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4"><div className="text-xs uppercase tracking-[0.2em] text-slate-500">{kpi.label}</div><div className="mt-2 text-lg font-semibold text-white">{kpi.value}</div></div>)}</TabsContent>
+              <TabsContent value="actions" className="mt-4 space-y-3">
+                {selectedNode.actions.map((action) => (
+                  <Button
+                    key={action.label}
+                    onClick={() => void handleAction(action)}
+                    disabled={executeAction.isPending}
+                    className={cn('w-full justify-between', action.variant === 'primary' ? 'bg-indigo-500 text-white hover:bg-indigo-400' : 'border-white/10 bg-white/5 text-slate-200 hover:bg-white/10')}
+                    variant={action.variant === 'primary' ? 'default' : 'outline'}
+                  >
+                    {action.label}
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                ))}
+              </TabsContent>
+              <TabsContent value="docs" className="mt-4 space-y-3">
+                {selectedNode.documents.concat(workspace.right_panel.resources).map((doc) => (
+                  <button
+                    key={`${doc.label}-${doc.href}`}
+                    onClick={() => go(doc.href)}
+                    className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-left text-sm text-slate-200 hover:bg-white/5"
+                  >
+                    <span className="flex items-center gap-2"><FileText className="h-4 w-4 text-slate-500" />{doc.label}</span>
+                    <ChevronRight className="h-4 w-4 text-slate-500" />
+                  </button>
+                ))}
+              </TabsContent>
+              <TabsContent value="kpis" className="mt-4 space-y-3">
+                {selectedNode.kpis.map((kpi) => (
+                  <div key={kpi.label} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                    <div className="text-xs uppercase tracking-[0.2em] text-slate-500">{kpi.label}</div>
+                    <div className="mt-2 text-lg font-semibold text-white">{kpi.value}</div>
+                  </div>
+                ))}
+              </TabsContent>
             </Tabs>
           </aside>
         </div>
       </PageSection>
+
+      {/* Neue Instanz Dialog */}
+      <Dialog open={showNewInstanceDialog} onOpenChange={setShowNewInstanceDialog}>
+        <DialogContent className="border-white/10 bg-slate-900 text-slate-100">
+          <DialogHeader>
+            <DialogTitle>Neue Instanz starten</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="instance-label" className="text-slate-300">Bezeichnung</Label>
+              <Input
+                id="instance-label"
+                value={newInstanceLabel}
+                onChange={(e) => setNewInstanceLabel(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') void handleCreateInstance() }}
+                placeholder="z.B. Bestellung BE-2026-001"
+                className="border-white/10 bg-white/5 text-slate-100 placeholder:text-slate-500"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => { setShowNewInstanceDialog(false); setNewInstanceLabel('') }}
+              className="border-white/10 bg-white/5 text-slate-200 hover:bg-white/10"
+            >
+              Abbrechen
+            </Button>
+            <Button
+              onClick={() => void handleCreateInstance()}
+              disabled={!newInstanceLabel.trim() || createInstance.isPending}
+              className="bg-indigo-500 text-white hover:bg-indigo-400"
+            >
+              {createInstance.isPending ? 'Wird erstellt...' : 'Instanz starten'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </PageSurface>
   )
 }

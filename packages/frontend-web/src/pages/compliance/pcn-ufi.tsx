@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useMutation } from '@tanstack/react-query'
 import { Wizard } from '@/components/patterns/Wizard'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
@@ -9,6 +10,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { CheckCircle, AlertTriangle } from 'lucide-react'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { Button } from '@/components/ui/button'
+import { apiClient } from '@/lib/api-client'
+import { useToast } from '@/hooks/use-toast'
 
 type PCNData = {
   produktname: string
@@ -21,6 +24,22 @@ type PCNData = {
 
 export default function PCNUFIPage(): JSX.Element {
   const navigate = useNavigate()
+  const { toast } = useToast()
+
+  const createMutation = useMutation({
+    mutationFn: async (data: PCNData) =>
+      (await apiClient.post('/api/v1/compliance/pcn-meldungen', data)).data,
+    onSuccess: () => {
+      toast({ title: 'PCN-Meldung gespeichert', description: 'Die Meldung wurde erfolgreich angelegt.' })
+      navigate('/compliance/pcn-liste')
+    },
+    onError: (err: unknown) => {
+      // Backend endpoint /api/v1/compliance/pcn-meldungen not yet implemented — gap noted
+      const msg = err instanceof Error ? err.message : 'Backend-Endpoint noch nicht verfügbar.'
+      toast({ title: 'Speichern fehlgeschlagen', description: msg, variant: 'destructive' })
+    },
+  })
+
   const [pcn, setPCN] = useState<PCNData>({
     produktname: '',
     ufi: '',
@@ -173,7 +192,7 @@ export default function PCNUFIPage(): JSX.Element {
         title="PCN/UFI Generator"
         subtitle="Poison Centre Notification (ECHA Annex VIII)"
         steps={steps}
-        onFinish={() => navigate('/compliance/pcn-liste')}
+        onFinish={() => { createMutation.mutate(pcn) }}
         onCancel={() => navigate('/compliance/pcn-liste')}
       />
     </div>

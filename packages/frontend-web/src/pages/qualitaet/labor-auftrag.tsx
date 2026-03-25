@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { Wizard } from '@/components/patterns/Wizard'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
@@ -7,6 +8,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { CheckCircle } from 'lucide-react'
+import { apiClient } from '@/lib/api-client'
+import { useToast } from '@/hooks/use-toast'
 
 type LaborData = {
   chargenId: string
@@ -19,6 +22,23 @@ type LaborData = {
 
 export default function LaborAuftragPage(): JSX.Element {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const { toast } = useToast()
+
+  const createMutation = useMutation({
+    mutationFn: async (data: LaborData) =>
+      (await apiClient.post('/api/v1/qualitaet/labor-auftraege', data)).data,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['qualitaet', 'labor'] })
+      toast({ title: 'Labor-Auftrag erstellt', description: 'Der Auftrag wurde erfolgreich angelegt.' })
+      navigate('/qualitaet/labor-liste')
+    },
+    onError: (err: unknown) => {
+      const msg = err instanceof Error ? err.message : 'Unbekannter Fehler'
+      toast({ title: 'Fehler', description: msg, variant: 'destructive' })
+    },
+  })
+
   const [labor, setLabor] = useState<LaborData>({
     chargenId: '',
     artikel: '',
@@ -185,7 +205,7 @@ export default function LaborAuftragPage(): JSX.Element {
       <Wizard
         title="Labor-Auftrag erstellen"
         steps={steps}
-        onFinish={() => navigate('/qualitaet/labor-liste')}
+        onFinish={() => { createMutation.mutate(labor) }}
         onCancel={() => navigate('/qualitaet/labor-liste')}
       />
     </div>
