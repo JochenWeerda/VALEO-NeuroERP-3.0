@@ -1,4 +1,6 @@
-import { useMemo } from 'react'
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { apiClient } from '@/lib/api-client'
 
 type Row = {
   datum: string
@@ -10,102 +12,103 @@ type Row = {
   einheit: string
   restmenge: string
   einhPreis: string
+  orderId: string
+}
+
+type SalesOrderItem = {
+  id: string
+  line_number: number
+  article_number: string
+  description?: string | null
+  quantity: number
+  unit_price: number
+  discount_percent: number
+  line_total: number
+}
+
+type SalesOrderApiRow = {
+  id: string
+  order_number: string
+  customer_id: string
+  subject: string
+  status: string
+  total_amount: number
+  currency: string
+  delivery_date?: string | null
+  created_at?: string | null
+  items: SalesOrderItem[]
+}
+
+function toDisplayRows(orders: SalesOrderApiRow[]): Row[] {
+  const result: Row[] = []
+  for (const order of orders) {
+    if (order.status === 'closed' || order.status === 'cancelled') continue
+    const items = order.items ?? []
+    if (items.length === 0) {
+      result.push({
+        datum: order.created_at ? new Date(order.created_at).toLocaleDateString('de-DE') : '-',
+        auftrag: order.order_number,
+        lsNr: '',
+        kunde: order.customer_id,
+        bezeichnung: order.subject,
+        menge: '-',
+        einheit: '-',
+        restmenge: '-',
+        einhPreis: '-',
+        orderId: order.id,
+      })
+    } else {
+      for (const item of items) {
+        result.push({
+          datum: order.created_at ? new Date(order.created_at).toLocaleDateString('de-DE') : '-',
+          auftrag: order.order_number,
+          lsNr: '',
+          kunde: order.customer_id,
+          bezeichnung: item.description || item.article_number,
+          menge: String(item.quantity),
+          einheit: 'kg',
+          restmenge: String(item.quantity),
+          einhPreis: item.unit_price.toFixed(2).replace('.', ','),
+          orderId: order.id,
+        })
+      }
+    }
+  }
+  return result
 }
 
 export default function UnerledigteAuftragsPositionenPage(): JSX.Element {
-  const rows = useMemo<Row[]>(
-    () => [
-      {
-        datum: '16.02.2026',
-        auftrag: '2610111',
-        lsNr: '',
-        kunde: 'Hemken GBR',
-        bezeichnung: 'FUTTERWEIZEN -LOSE-',
-        menge: '21000',
-        einheit: 'kg',
-        restmenge: '-4020',
-        einhPreis: '26,00',
-      },
-      {
-        datum: '16.02.2026',
-        auftrag: '2610111',
-        lsNr: '',
-        kunde: 'Hemken GBR',
-        bezeichnung: 'FUTTERWEIZEN -LOSE-',
-        menge: '4000',
-        einheit: 'kg',
-        restmenge: '-64623',
-        einhPreis: '26,00',
-      },
-      {
-        datum: '20.02.2026',
-        auftrag: '2610136',
-        lsNr: '',
-        kunde: 'Ippen Jannes',
-        bezeichnung: 'MK EXQUISIT 420 OS',
-        menge: '1000',
-        einheit: 'kg',
-        restmenge: '-10000',
-        einhPreis: '28,65',
-      },
-      {
-        datum: '23.02.2026',
-        auftrag: '2610137',
-        lsNr: '',
-        kunde: 'Bauer Ingo',
-        bezeichnung: 'RAPSSCHROT -LOSE-',
-        menge: '9000',
-        einheit: 'kg',
-        restmenge: '-3657',
-        einhPreis: '26,00',
-      },
-      {
-        datum: '23.02.2026',
-        auftrag: '2610139',
-        lsNr: '',
-        kunde: 'Schmidt Jakob',
-        bezeichnung: 'SOJASCHROT LP BASIS 44% -LOS',
-        menge: '3000',
-        einheit: 'kg',
-        restmenge: '-43600',
-        einhPreis: '29,20',
-      },
-      {
-        datum: '25.02.2026',
-        auftrag: '2610141',
-        lsNr: '',
-        kunde: 'Ehmen GbR',
-        bezeichnung: 'RAPSSCHROT -LOSE- frei Silo',
-        menge: '2500',
-        einheit: 'kg',
-        restmenge: '-79180',
-        einhPreis: '29,20',
-      },
-      {
-        datum: '26.02.2026',
-        auftrag: '2610143',
-        lsNr: '',
-        kunde: 'Kromminga Jens-Martin',
-        bezeichnung: 'MK AGF MLF 00870 KROMMINGA',
-        menge: '15000',
-        einheit: 'kg',
-        restmenge: '-15045',
-        einhPreis: '30,80',
-      },
-      {
-        datum: '26.02.2026',
-        auftrag: '2610149',
-        lsNr: '',
-        kunde: 'Berghorst Hermann',
-        bezeichnung: 'NK OG BERGHORST 1 PELLET',
-        menge: '2500',
-        einheit: 'kg',
-        restmenge: '-25000',
-        einhPreis: '25,00',
-      },
-    ],
-    [],
-  )
+  const [auftragVon, setAuftragVon] = useState('')
+  const [auftragBis, setAuftragBis] = useState('')
+
+  const { data, isLoading } = useQuery({
+    queryKey: ['sales', 'orders', 'unerledigte'],
+    queryFn: async () => {
+      const res = await apiClient.get<{ items: SalesOrderApiRow[]; total: number }>(
+        '/api/v1/sales/orders?status=open&limit=200',
+      )
+      return res.data
+    },
+    staleTime: 60_000,
+  })
+
+  const allRows = toDisplayRows(data?.items ?? [])
+  const rows = allRows.filter((r) => {
+    if (auftragVon && r.auftrag < auftragVon) return false
+    if (auftragBis && r.auftrag > auftragBis) return false
+    return true
+  })
+
+  const auftragMenge = rows.reduce((sum, r) => sum + (parseFloat(r.menge) || 0), 0)
+  const lieferscheinMenge = 0
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-12 text-sm text-muted-foreground">
+        Wird geladen…
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-full bg-[#e9e9e9] text-[11px] leading-none text-black">
@@ -138,12 +141,20 @@ export default function UnerledigteAuftragsPositionenPage(): JSX.Element {
       <div className="space-y-1 border-b border-[#c8c8c8] bg-[#ececec] p-1">
         <div className="grid grid-cols-[140px_140px_140px_140px_140px_220px] gap-1">
           <div className="grid grid-cols-[78px_46px_20px] items-center gap-1">
-            <label>Niederlassung von:</label>
-            <input className="h-5 border border-[#a8a8a8] bg-white px-1" />
-            <button className="h-5 border border-[#a8a8a8] bg-[#efefef]">...</button>
+            <label>Auftrag-Nr. von:</label>
+            <input
+              className="h-5 border border-[#a8a8a8] bg-white px-1"
+              value={auftragVon}
+              onChange={(e) => setAuftragVon(e.target.value)}
+            />
+            <span />
             <label>bis:</label>
-            <input className="h-5 border border-[#a8a8a8] bg-white px-1" />
-            <button className="h-5 border border-[#a8a8a8] bg-[#efefef]">...</button>
+            <input
+              className="h-5 border border-[#a8a8a8] bg-white px-1"
+              value={auftragBis}
+              onChange={(e) => setAuftragBis(e.target.value)}
+            />
+            <span />
           </div>
           <div className="grid grid-cols-[72px_46px_20px] items-center gap-1">
             <label>Artikel-Nr. von:</label>
@@ -216,33 +227,36 @@ export default function UnerledigteAuftragsPositionenPage(): JSX.Element {
             <span>Sped.-Nr.</span>
           </div>
 
+          {rows.length === 0 && (
+            <div className="px-1 py-4 text-center text-[10px] text-muted-foreground">
+              Keine offenen Auftragspositionen vorhanden.
+            </div>
+          )}
           {rows.map((row, idx) => (
             <div
-              key={`${row.auftrag}-${idx}`}
-              className={`grid grid-cols-[90px_72px_56px_92px_76px_170px_56px_56px_30px_64px_84px_64px_78px_50px_60px_56px_60px_72px] px-1 py-[2px] ${idx === 0 ? 'bg-[#0078d7] text-white' : 'bg-white hover:bg-[#eaf4ff]'}`}
+              key={`${row.orderId}-${idx}`}
+              className="grid grid-cols-[90px_72px_56px_92px_76px_170px_56px_56px_30px_64px_84px_64px_78px_50px_60px_56px_60px_72px] bg-white px-1 py-[2px] hover:bg-[#eaf4ff]"
             >
-              <span>{idx === 0 ? '10' : ''}</span>
+              <span></span>
               <span>{row.datum}</span>
               <span>{row.auftrag}</span>
               <span>{row.lsNr}</span>
-              <span>147150</span>
               <span>{row.kunde}</span>
               <span></span>
               <span></span>
-              <span>10</span>
-              <span>111800</span>
+              <span></span>
+              <span></span>
+              <span></span>
               <span>{row.bezeichnung}</span>
               <span>{row.menge}</span>
               <span>{row.einheit}</span>
               <span>{row.restmenge}</span>
-              <span>{row.restmenge}</span>
-              <span>{row.restmenge}</span>
+              <span></span>
+              <span></span>
               <span>{row.einhPreis}</span>
               <span></span>
             </div>
           ))}
-
-          <div className="h-[240px] bg-white" />
         </div>
       </div>
 
@@ -254,9 +268,9 @@ export default function UnerledigteAuftragsPositionenPage(): JSX.Element {
           Lieferscheine frei zur Faktur
         </label>
         <label className="ml-4">Auftrag-Menge:</label>
-        <input value="168.000" readOnly className="h-5 w-20 border border-[#a8a8a8] bg-white px-1 text-[10px]" />
+        <input value={auftragMenge.toLocaleString('de-DE')} readOnly className="h-5 w-20 border border-[#a8a8a8] bg-white px-1 text-[10px]" />
         <label>Lieferschein-Menge:</label>
-        <input value="100.200" readOnly className="h-5 w-20 border border-[#a8a8a8] bg-white px-1 text-[10px]" />
+        <input value={lieferscheinMenge.toLocaleString('de-DE')} readOnly className="h-5 w-20 border border-[#a8a8a8] bg-white px-1 text-[10px]" />
       </div>
 
       <div className="mt-1 flex items-center justify-between border-t border-[#bdbdbd] bg-[#efefef] px-1 py-1">

@@ -1,4 +1,5 @@
 import { Suspense, lazy } from 'react'
+import { PageLoader } from '@/app/PageLoader'
 
 const AppRouterProvider = lazy(() =>
   import('@/app/AppRouterProvider').then((module) => ({ default: module.default })),
@@ -6,7 +7,7 @@ const AppRouterProvider = lazy(() =>
 
 export default function RouterLayer(): JSX.Element {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-background" />}>
+    <Suspense fallback={<PageLoader />}>
       <AppRouterProvider />
     </Suspense>
   )

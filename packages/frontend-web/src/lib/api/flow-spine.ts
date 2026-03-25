@@ -1,23 +1,25 @@
-import { useQuery, type UseQueryResult } from '@tanstack/react-query'
+/**
+ * Thin re-export layer kept for backward compatibility.
+ * All hooks and types now live in flow-spines.ts.
+ */
+import { type UseQueryResult } from '@tanstack/react-query'
 import {
   fetchFlowSpineCatalog,
   fetchFlowSpineWorkspace,
+  useFlowSpineWorkspace,
+  useFlowSpineCatalogHook,
   type FlowSpineCatalog,
   type FlowSpineWorkspace,
 } from '@/lib/api/flow-spines'
 
 export function useFlowSpineState(processKey: string): UseQueryResult<FlowSpineWorkspace> {
-  return useQuery({
-    queryKey: ['workflow', 'flow-spine', processKey],
-    queryFn: () => fetchFlowSpineWorkspace(processKey),
-    retry: false,
-  })
+  return useFlowSpineWorkspace(processKey)
 }
 
 export function useFlowSpineCatalog(): UseQueryResult<FlowSpineCatalog> {
-  return useQuery({
-    queryKey: ['workflow', 'flow-spine', 'catalog'],
-    queryFn: () => fetchFlowSpineCatalog(),
-    retry: false,
-  })
+  return useFlowSpineCatalogHook()
 }
+
+// Re-export the fetch helpers so existing consumers continue to work
+export { fetchFlowSpineWorkspace, fetchFlowSpineCatalog }
+export type { FlowSpineWorkspace, FlowSpineCatalog }

@@ -4,11 +4,13 @@
  */
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { Wizard } from '@/components/patterns/Wizard'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
 import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { api } from '@/lib/axios'
+import { apiClient } from '@/lib/api-client'
 import { useToast } from '@/hooks/use-toast'
 import { Badge } from '@/components/ui/badge'
 import { CheckCircle } from 'lucide-react'
@@ -30,8 +32,6 @@ type AuslagerungData = {
   verwendungszweck: string
 }
 
-const ARTIKEL = ['Weizen', 'Gerste', 'Raps', 'Mais', 'Roggen', 'Hafer', 'Sonnenblumen']
-
 const STRATEGIEN = [
   { id: 'fifo' as const, label: 'FIFO', description: 'Älteste Charge zuerst', empfohlen: true },
   { id: 'fefo' as const, label: 'FEFO', description: 'Kürzeste Haltbarkeit zuerst', empfohlen: false },
@@ -41,6 +41,21 @@ const STRATEGIEN = [
 export default function AuslagerungPage(): JSX.Element {
   const navigate = useNavigate()
   const { toast } = useToast()
+
+  const { data: articlesData } = useQuery({
+    queryKey: ['articles', 'auslagerung'],
+    queryFn: async () => {
+      const res = await apiClient.get<{ items: Array<{ id: string; name: string; article_number?: string }> }>(
+        '/api/v1/articles?limit=100',
+      )
+      return res.data
+    },
+    staleTime: 5 * 60_000,
+  })
+  const ARTIKEL = articlesData?.items?.map((a) => a.name ?? a.article_number ?? a.id) ?? [
+    'Weizen', 'Gerste', 'Raps', 'Mais', 'Roggen', 'Hafer', 'Sonnenblumen',
+  ]
+
   const [auslagerung, setAuslagerung] = useState<AuslagerungData>({
     artikel: '',
     menge: 0,

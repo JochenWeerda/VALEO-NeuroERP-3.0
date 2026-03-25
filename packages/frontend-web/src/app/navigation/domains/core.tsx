@@ -92,7 +92,7 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
       },
       {
         id: 'workflow-flow-spine',
-        label: 'Flow Spine Studio',
+        label: 'Auftrag bis Zahlung',
         icon: LayoutGrid,
         module: '@/pages/workflow/flow-spine-studio',
         preferredPath: 'workflow/flow-spine-studio',
@@ -101,7 +101,7 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
       },
       {
         id: 'workflow-flow-spine-procure-to-pay',
-        label: 'Flow Spine P2P',
+        label: 'Bedarf bis Zahlung',
         icon: ShoppingCart,
         module: '@/pages/workflow/flow-spine-procure-to-pay',
         preferredPath: 'workflow/flow-spine-procure-to-pay',
@@ -110,7 +110,7 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
       },
       {
         id: 'workflow-flow-spine-inventory-to-settlement',
-        label: 'Flow Spine I2S',
+        label: 'Lager bis Abrechnung',
         icon: Package,
         module: '@/pages/workflow/flow-spine-inventory-to-settlement',
         preferredPath: 'workflow/flow-spine-inventory-to-settlement',
@@ -119,7 +119,7 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
       },
       {
         id: 'workflow-flow-spine-harvest-to-settlement',
-        label: 'Flow Spine H2S',
+        label: 'Ernte bis Abrechnung',
         icon: Tractor,
         module: '@/pages/workflow/flow-spine-harvest-to-settlement',
         preferredPath: 'workflow/flow-spine-harvest-to-settlement',
@@ -128,7 +128,7 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
       },
       {
         id: 'workflow-flow-spine-contract-to-settlement',
-        label: 'Flow Spine C2S',
+        label: 'Kontrakt bis Abrechnung',
         icon: BookOpen,
         module: '@/pages/workflow/flow-spine-contract-to-settlement',
         preferredPath: 'workflow/flow-spine-contract-to-settlement',
@@ -137,7 +137,7 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
       },
       {
         id: 'workflow-flow-spine-complaint-to-resolution',
-        label: 'Flow Spine Reklamation',
+        label: 'Reklamation bis Lösung',
         icon: AlertCircle,
         module: '@/pages/workflow/flow-spine-complaint-to-resolution',
         preferredPath: 'workflow/flow-spine-complaint-to-resolution',
@@ -146,7 +146,7 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
       },
       {
         id: 'workflow-flow-spine-service-to-customer',
-        label: 'Flow Spine Service',
+        label: 'Service bis Kunde',
         icon: Truck,
         module: '@/pages/workflow/flow-spine-service-to-customer',
         preferredPath: 'workflow/flow-spine-service-to-customer',
@@ -155,7 +155,7 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
       },
       {
         id: 'workflow-flow-spine-finance-to-close',
-        label: 'Flow Spine F2C',
+        label: 'Finanzen bis Abschluss',
         icon: Calculator,
         module: '@/pages/workflow/flow-spine-finance-to-close',
         preferredPath: 'workflow/flow-spine-finance-to-close',
@@ -164,7 +164,7 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
       },
       {
         id: 'workflow-flow-spine-compliance-to-report',
-        label: 'Flow Spine Compliance',
+        label: 'Compliance bis Bericht',
         icon: Leaf,
         module: '@/pages/workflow/flow-spine-compliance-to-report',
         preferredPath: 'workflow/flow-spine-compliance-to-report',
@@ -260,7 +260,7 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
       },
       {
         id: 'command-monitor',
-        label: 'Command Monitor',
+        label: 'Befehlsmonitor',
         icon: Activity,
         module: '@/pages/admin/command-monitor',
         preferredPath: 'admin/command-monitor',

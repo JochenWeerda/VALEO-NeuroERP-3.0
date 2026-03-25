@@ -1,5 +1,6 @@
 import { Suspense, lazy, useEffect, useState } from 'react'
 import i18n from 'i18next'
+import { PageLoader } from '@/app/PageLoader'
 import { initI18n } from '@/i18n/config'
 
 const DataBootstrap = lazy(() =>
@@ -34,11 +35,11 @@ export default function AppRuntime(): JSX.Element {
   }, [])
 
   if (!i18nReady) {
-    return <div className="min-h-screen bg-background" />
+    return <PageLoader />
   }
 
   return (
-    <Suspense fallback={<div className="min-h-screen bg-background" />}>
+    <Suspense fallback={<PageLoader />}>
       <DataBootstrap>
         <RouterBootstrap />
       </DataBootstrap>

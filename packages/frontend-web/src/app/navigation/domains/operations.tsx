@@ -352,7 +352,7 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
     children: [
       {
         id: 'policies',
-        label: 'Policies',
+        label: 'Richtlinien',
         icon: ShieldCheck,
         module: '@/pages/policy-manager',
         preferredPath: 'policies',
@@ -677,14 +677,14 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
     children: [
       {
         id: 'pos-terminal',
-        label: 'POS Terminal',
+        label: 'Kassen-Terminal',
         icon: Euro,
         module: '@/pages/pos/terminal',
         mcp: { businessDomain: 'pos', scope: 'pos:read' },
       },
       {
         id: 'tse-journal',
-        label: 'TSE Journal',
+        label: 'TSE-Journal',
         icon: FileText,
         module: '@/pages/pos/tse-journal',
         mcp: { businessDomain: 'pos', scope: 'pos:read' },

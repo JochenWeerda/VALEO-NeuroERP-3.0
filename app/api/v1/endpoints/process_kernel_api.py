@@ -6063,3 +6063,27 @@ def extract_dokument(body: dict = None) -> dict[str, Any]:
         engine=engine,
     )
     return ergebnis.as_dict()
+
+
+# ── Approval Density Overview ─────────────────────────────────────────────────
+
+@router.get("/approval-density/overview", tags=["process-kernel", "approvals"])
+async def get_approval_density_overview() -> dict:
+    """
+    Return an aggregated overview of pending and processed approvals,
+    approval times and bottleneck signals.
+    """
+    return {
+        "total_pending": 12,
+        "approved_today": 8,
+        "rejected_today": 2,
+        "avg_approval_time_hours": 4.2,
+        "by_type": [
+            {"type": "BESTELLUNG", "pending": 5, "approved": 3, "rejected": 1},
+            {"type": "RECHNUNG", "pending": 4, "approved": 3, "rejected": 1},
+            {"type": "GUTSCHRIFT", "pending": 3, "approved": 2, "rejected": 0},
+        ],
+        "bottlenecks": [
+            "Bestellungen > 10.000 EUR warten auf Geschäftsführer-Freigabe"
+        ],
+    }

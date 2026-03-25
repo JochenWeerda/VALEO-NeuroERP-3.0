@@ -1,6 +1,7 @@
 /* @refresh reload */
 import { StrictMode, Suspense, lazy } from 'react'
 import ReactDOM from 'react-dom/client'
+import { PageLoader } from '@/app/PageLoader'
 import './index.css'
 
 const AppRuntime = lazy(() =>
@@ -16,7 +17,7 @@ if (rootElement instanceof HTMLElement) {
 
   root.render(
     <StrictMode>
-      <Suspense fallback={<div className="min-h-screen bg-background" />}>
+      <Suspense fallback={<PageLoader />}>
         <AppRuntime />
       </Suspense>
     </StrictMode>,

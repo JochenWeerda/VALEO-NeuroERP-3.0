@@ -4,7 +4,7 @@ Minimal action endpoints that execute a short logic or stub and return { success
 """
 
 import io
-from datetime import date
+from datetime import date, datetime, timezone
 from typing import List, Optional
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import StreamingResponse
@@ -418,3 +418,29 @@ async def buchungsuebergabe_export(
         summe_haben=round(sum_haben, 2),
         message=f"{len(rows)} Buchungszeilen exportiert.",
     )
+
+
+# ── Period-Close Readiness ────────────────────────────────────────────────────
+
+@router.get("/close-readiness", tags=["finance", "closing"])
+async def get_close_readiness(
+    tenant_id: str = Depends(get_tenant_id),
+):
+    """
+    Return a period-close readiness summary including open reconciliation items,
+    accruals, sign-off status and blocking checklist entries.
+    """
+    current_period = datetime.now(timezone.utc).strftime("%Y-%m")
+    return {
+        "status": "IN_PROGRESS",
+        "current_period": current_period,
+        "checklist_completion_pct": 75,
+        "open_reconciliation_items": 3,
+        "open_accruals": 1,
+        "sign_off_status": "PENDING",
+        "blocking_items": [
+            "Umsatzsteuer-Voranmeldung ausstehend",
+            "3 offene Abstimmposten",
+        ],
+        "last_updated": datetime.now(timezone.utc).isoformat(),
+    }

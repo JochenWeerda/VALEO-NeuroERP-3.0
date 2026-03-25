@@ -366,3 +366,18 @@ async def export_esg_report_pdf(
         media_type="application/pdf",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'},
     )
+
+
+# ── /reports alias (mirrors /read-model for flow-spine compatibility) ─────────
+
+@router.get("/reports")
+async def get_sustainability_reports(
+    tenant_id: str = Query("TENANT-001", description="Tenant context"),
+    jahr: int = Query(2026, ge=2020, le=2100, description="Reporting year"),
+) -> dict[str, Any]:
+    """
+    Alias for /read-model. Returns the structured sustainability read model.
+    Used by Flow Spine UI and Compliance-to-Report workspace links.
+    """
+    report = erstelle_beispiel_esg_bericht(tenant_id=tenant_id, jahr=jahr)
+    return build_sustainability_read_model(report).as_dict()

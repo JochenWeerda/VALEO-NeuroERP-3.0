@@ -126,7 +126,7 @@ const CRM_CHILDREN: RawNavItem[] = [
 if (ENABLE_PROSPECTING_UI) {
   CRM_CHILDREN.splice(2, 0, {
     id: 'prospecting',
-    label: 'Prospecting',
+    label: 'Potenzialsuche',
     icon: Search,
     module: '@/pages/prospecting/LeadExplorer',
     preferredPath: 'prospecting/leads',
@@ -233,7 +233,7 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
       },
       {
         id: 'analytics',
-        label: 'Analytics',
+        label: 'Vertriebsanalyse',
         icon: BarChart3,
         module: '@/pages/analytics',
         keywords: ['analytics'],
@@ -434,7 +434,7 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
       },
       {
         id: 'commodity-position-matrix',
-        label: 'Commodity Position Matrix',
+        label: 'Rohwaren-Positionsmatrix',
         icon: LayoutGrid,
         module: '@/pages/disposition/LstCommodityPositionMatrix',
         preferredPath: 'disposition/position-matrix',
@@ -452,7 +452,7 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
       },
       {
         id: 'coverage-monitor',
-        label: 'Coverage Monitor',
+        label: 'Deckungsmonitor',
         icon: AlertCircle,
         module: '@/pages/disposition/FrmCoverageMonitor',
         preferredPath: 'disposition/coverage-monitor',
@@ -477,7 +477,7 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
       },
       {
         id: 'service-entry-sheets',
-        label: 'Service Entry Sheets',
+        label: 'Leistungsnachweise',
         icon: FileText,
         module: '@/pages/einkauf/service-entry-sheets',
         keywords: ['ses', 'service entry', 'leistung'],
@@ -485,7 +485,7 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
       },
       {
         id: 'audit-drilldown',
-        label: 'Audit Drilldown',
+        label: 'Audit-Analyse',
         icon: Activity,
         module: '@/pages/einkauf/audit-drilldown',
         keywords: ['audit', 'belegkette', 'drilldown'],
@@ -493,7 +493,7 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
       },
       {
         id: 'edi-portal',
-        label: 'EDI Portal',
+        label: 'EDI-Leitstand',
         icon: Activity,
         module: '@/pages/einkauf/edi-portal',
         keywords: ['edi', 'portal', 'ordner', 'messages'],
