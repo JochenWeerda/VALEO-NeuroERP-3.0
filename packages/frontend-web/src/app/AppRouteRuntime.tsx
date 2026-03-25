@@ -93,9 +93,15 @@ export default function AppRouteRuntime({ prospectingEnabled }: AppRouteRuntimeP
     }
   }, [prefix])
 
-  const matchingModule = useMemo(() => {
+  // Single useMemo that resolves both the matching module and the stable JSX element.
+  // Keeping this as one hook (same count as before) avoids the "rendered more hooks
+  // than previous render" error during HMR when the hook count would otherwise change.
+  // createRouteElementByModule() caches the JSX element via WeakMap, so calling it
+  // with the same module path always returns the exact same object reference —
+  // preventing Suspense from resetting on every parent re-render.
+  const routeElement = useMemo(() => {
     if (!prefix || !autoEntries || !aliasEntries) {
-      return null
+      return createRouteElementByModule('@/pages/errors/NotFound')
     }
 
     const filteredAutoEntries = prospectingEnabled
@@ -107,31 +113,21 @@ export default function AppRouteRuntime({ prospectingEnabled }: AppRouteRuntimeP
 
     const autoMatch = filteredAutoEntries.find((entry) => entry.path === relativePath)
     if (autoMatch) {
-      return autoMatch.module
+      return createRouteElementByModule(autoMatch.module)
     }
 
     const aliasMatch = findMatchingAliasModule(filteredAliasEntries, relativePath || '/')
     if (aliasMatch) {
-      return aliasMatch
+      return createRouteElementByModule(aliasMatch)
     }
 
-    return findMatchingAliasModuleFromRouteAliases(
+    const globalAliasMatch = findMatchingAliasModuleFromRouteAliases(
       (routeAliases.aliases ?? []) as Array<{ module: string; path?: string; index?: boolean }>,
       prefix,
       relativePath || '/',
     )
+    return createRouteElementByModule(globalAliasMatch ?? '@/pages/errors/NotFound')
   }, [aliasEntries, autoEntries, prefix, prospectingEnabled, relativePath])
-
-  // useMemo must be called unconditionally (Rules of Hooks) — before any early
-  // returns. createRouteElementByModule() caches via WeakMap so the call is cheap
-  // even when we ultimately show a loading or error state instead.
-  // This ensures React always receives the same JSX element object for the same
-  // route, preventing Suspense from resetting on every parent re-render.
-  const resolvedModule = matchingModule ?? '@/pages/errors/NotFound'
-  const routeElement = useMemo(
-    () => createRouteElementByModule(resolvedModule),
-    [resolvedModule],
-  )
 
   if (loadError) {
     return (
@@ -156,3 +152,4 @@ export default function AppRouteRuntime({ prospectingEnabled }: AppRouteRuntimeP
 
   return routeElement
 }
+
