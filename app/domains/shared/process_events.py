@@ -162,3 +162,39 @@ class QualityProtocolCompleted(ProcessKernelEvent):
     domain: str = field(default="agrar", init=False)
     aggregate: str = field(default="quality_protocol", init=False)
     verb: str = field(default="completed", init=False)
+
+
+# ---------------------------------------------------------------------------
+# Flow Spine Events (Wave 104 — GAP-104-G)
+# ---------------------------------------------------------------------------
+
+@dataclass(kw_only=True)
+class FlowSpineInstanceCreated(ProcessKernelEvent):
+    """Flow-Spine-Prozessinstanz wurde angelegt."""
+
+    instance_id: str
+    process_key: str
+    case_number: str
+    label: str
+    entry_mode: str | None = None
+    linked_document_type: str | None = None
+
+    domain: str = field(default="operations", init=False)
+    aggregate: str = field(default="flow_spine", init=False)
+    verb: str = field(default="instance_created", init=False)
+
+
+@dataclass(kw_only=True)
+class FlowSpineTransitionOccurred(ProcessKernelEvent):
+    """Flow-Spine-Knoten wechselte den Status."""
+
+    instance_id: str
+    process_key: str
+    node_id: str
+    new_status: str   # ok | active | pending | warning | error
+    action_label: str
+    actor_id: str | None = None
+
+    domain: str = field(default="operations", init=False)
+    aggregate: str = field(default="flow_spine", init=False)
+    verb: str = field(default="transition_occurred", init=False)
