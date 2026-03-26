@@ -15,6 +15,7 @@ import {
   LayoutDashboard,
   LayoutGrid,
   Leaf,
+  Mic,
   Package,
   RefreshCw,
   Scale,
@@ -294,6 +295,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         preferredPath: 'admin/ai-approvals',
         keywords: ['ai', 'freigabe', 'agent', 'human-in-the-loop'],
         mcp: { businessDomain: 'admin', scope: 'admin:write' },
+      },
+      {
+        id: 'voice-channel',
+        label: 'Voice-Kanal',
+        icon: Mic,
+        module: '@/pages/admin/voice-channel',
+        preferredPath: 'admin/voice-channel',
+        keywords: ['voice', 'sprache', 'sprachbefehl', 'ki', 'usability', 'mikrofon'],
+        mcp: { businessDomain: 'admin', scope: 'admin:read' },
       },
       ...(ENABLE_PROSPECTING_UI
         ? [

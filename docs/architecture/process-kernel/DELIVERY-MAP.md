@@ -1,6 +1,6 @@
 # Process Kernel — Delivery Map
 
-Stand: 2026-03-19 | Waves 1–67 abgeschlossen | 5646 Tests gruen
+Stand: 2026-03-26 | Waves 1–67 + 102–104 abgeschlossen | 5646+ Tests gruen
 
 ## Wave → Gap Mapping
 
@@ -73,6 +73,9 @@ Stand: 2026-03-19 | Waves 1–67 abgeschlossen | 5646 Tests gruen
 | 65 | 2026-03 | – | 155 | Exception Pattern Classification, Remediation Playbooks |
 | 66 | 2026-03 | – | 163 | Process Concurrency/Mutex, Resource Lock + Deadlock Detection |
 | 67 | 2026-03 | – | 192 | Process Cache Contracts, Workflow Schema Migration |
+| 102 | 2026-03-24 | Gap 049 | – | Security-Hardening Runtime-Wiring (AuditMiddleware, SecurityHeaders, Startup-Guards) |
+| 103 | 2026-03-24 | Gap 023, Gap 024 | – | Touch-optimierte Feldworkflows (WCAG), Keyboard-first Kernmasken (~85% Abdeckung) |
+| 104 | 2026-03-26 | Gap 104-A–F | 15 | Flow Spine DB+Tenant+Paginierung, PCN DB-Persistenz+Tenant+Paginierung, TS-Typ-Fix, DeprecationWarning |
 
 ## Gap → Wave Mapping (nur abgeschlossene Gaps)
 

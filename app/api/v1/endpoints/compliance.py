@@ -11,11 +11,13 @@ from fastapi.responses import Response, StreamingResponse
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.tenant_context import get_current_tenant_id
 from app.documents.router_helpers import get_repository, list_from_store
 from app.domains.operations.models import (
     ComplianceEintrag,
     ENNIMeldung,
     Charge,
+    PCNMeldung,
     QSCheckEintrag,
     ZulassungRegister,
     SachkundeEintrag,
@@ -369,7 +371,7 @@ async def list_vvvo(db: Session = Depends(get_db)) -> dict:
 
 
 def _pdf_escape(s: str) -> str:
-    """Escape ( ) \ for PDF literal strings."""
+    r"""Escape ( ) \ for PDF literal strings."""
     if s is None:
         return ""
     return str(s).replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)")
@@ -784,6 +786,88 @@ async def validate_intrastat_meldung_endpoint(meldung_id: str) -> dict:
     )
     result = validate_intrastat_meldung(meldung)
     return result.as_dict()
+
+
+# ── PCN-Meldungen (Product Classification Notification / UFI) ────────────────
+
+import re as _re
+_UFI_PATTERN = _re.compile(r"^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$")
+
+
+def _pcn_to_dict(m: PCNMeldung) -> dict:
+    return {
+        "meldung_id": m.id,
+        "produktname": m.produktname,
+        "ufi": m.ufi or "",
+        "cas_nummern": m.cas_nummern or "",
+        "gefahrenklassen": m.gefahrenklassen or [],
+        "verwendungskategorie": m.verwendungskategorie or "",
+        "pcnStatus": m.pcn_status,
+        "tenant_id": m.tenant_id,
+        "created_at": m.created_at.isoformat() if m.created_at else None,
+        "schema_version": 1,
+    }
+
+
+@router.post("/pcn-meldungen", response_model=dict, status_code=201)
+async def create_pcn_meldung(body: dict, db: Session = Depends(get_db)) -> dict:
+    """
+    Anlage einer neuen PCN-Meldung (Product Classification Notification) mit UFI.
+
+    Validiert das UFI-Format (XXXX-XXXX-XXXX-XXXX) und legt die Meldung persistent an.
+    Entspricht den Anforderungen der EU-Verordnung 2017/542 (CLP-Anhang VIII).
+    """
+    from fastapi import HTTPException
+
+    ufi = str(body.get("ufi", "")).strip()
+    if ufi and not _UFI_PATTERN.match(ufi):
+        raise HTTPException(
+            status_code=422,
+            detail=f"Ungültiges UFI-Format '{ufi}'. Erwartet: XXXX-XXXX-XXXX-XXXX (A-Z, 0-9).",
+        )
+
+    meldung = PCNMeldung(
+        produktname=body.get("produktname", ""),
+        ufi=ufi or None,
+        cas_nummern=body.get("cas_nummern") or None,
+        gefahrenklassen=body.get("gefahrenklassen") or [],
+        verwendungskategorie=body.get("verwendungskategorie") or None,
+        pcn_status=body.get("pcnStatus", "entwurf"),
+        tenant_id=get_current_tenant_id(),
+    )
+    try:
+        db.add(meldung)
+        db.commit()
+        db.refresh(meldung)
+    except Exception:
+        db.rollback()
+        raise
+
+    return _pcn_to_dict(meldung)
+
+
+@router.get("/pcn-meldungen", response_model=dict)
+async def list_pcn_meldungen(
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=50, ge=1, le=200),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Liste aller PCN-Meldungen (tenant-isoliert, paginiert)."""
+    tenant_id = get_current_tenant_id()
+    base_q = (
+        db.query(PCNMeldung)
+        .filter(PCNMeldung.tenant_id == tenant_id)
+        .order_by(PCNMeldung.created_at.desc())
+    )
+    total = base_q.count()
+    items = base_q.offset(skip).limit(limit).all()
+    return {
+        "total": total,
+        "skip": skip,
+        "limit": limit,
+        "meldungen": [_pcn_to_dict(m) for m in items],
+        "schema_version": 1,
+    }
 
 
 # ── EUDR (EU Deforestation Regulation) ───────────────────────────────────────

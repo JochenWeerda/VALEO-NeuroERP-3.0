@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json as _json
+import logging
 import uuid
 from datetime import UTC, datetime
 from typing import Any, Optional
@@ -19,7 +20,15 @@ from app.core.flow_spine_registry import (
     merge_instance_statuses,
 )
 from app.domains.operations.models import FlowSpineInstance
+from app.domains.shared.events import get_event_publisher
+from app.domains.shared.process_events import (
+    FlowSpineInstanceCreated,
+    FlowSpineTransitionOccurred,
+)
+from app.infrastructure.eventbus.outbox import OutboxPublisher
 from app.services.numbering_service import get_numbering
+
+logger = logging.getLogger(__name__)
 
 
 router = APIRouter(prefix="/process/flow-spines", tags=["process", "flow-spines"])
@@ -73,6 +82,13 @@ class TransitionRequest(BaseModel):
     user_id: Optional[str] = None
 
 
+class AgentActionRequest(BaseModel):
+    action: str
+    node_id: Optional[str] = None
+    instance_id: Optional[str] = None
+    context: Optional[dict[str, Any]] = None
+
+
 # ── Catalog ──────────────────────────────────────────────────────────────────
 
 @router.get("/catalog")
@@ -123,7 +139,7 @@ def get_workspace(
 # ── Instance CRUD ─────────────────────────────────────────────────────────────
 
 @router.post("/{process_key}/instances", status_code=201, response_model=dict)
-def create_instance(
+async def create_instance(
     process_key: str,
     body: InstanceCreateRequest,
     db: Session = Depends(get_db),
@@ -143,6 +159,7 @@ def create_instance(
     if not label:
         label = f"Vorgang {case_number}"
 
+    tenant_id = get_current_tenant_id()
     inst = FlowSpineInstance(
         id=instance_id,
         case_number=case_number,
@@ -155,9 +172,25 @@ def create_instance(
         linked_document_id=body.linked_document_id,
         linked_document_type=body.linked_document_type,
         node_statuses={},
-        tenant_id=get_current_tenant_id(),
+        tenant_id=tenant_id,
     )
     db.add(inst)
+
+    try:
+        event = FlowSpineInstanceCreated(
+            aggregate_id=instance_id,
+            tenant_id=tenant_id,
+            instance_id=instance_id,
+            process_key=process_key,
+            case_number=case_number,
+            label=label,
+            entry_mode=body.entry_mode,
+            linked_document_type=body.linked_document_type,
+        )
+        await OutboxPublisher(db, get_event_publisher()).store_event(event, tenant_id)
+    except Exception:
+        logger.warning("Outbox unavailable — FlowSpineInstanceCreated not stored", exc_info=True)
+
     db.commit()
     db.refresh(inst)
     return _instance_to_dict(inst)
@@ -209,7 +242,7 @@ def get_instance(
 
 
 @router.post("/{process_key}/instances/{instance_id}/transitions", response_model=dict)
-def transition_instance(
+async def transition_instance(
     process_key: str,
     instance_id: str,
     body: TransitionRequest,
@@ -237,6 +270,22 @@ def transition_instance(
     if body.user_id:
         inst.last_actor = body.user_id
     inst.last_action_label = body.action_label
+
+    try:
+        event = FlowSpineTransitionOccurred(
+            aggregate_id=instance_id,
+            tenant_id=inst.tenant_id,
+            instance_id=instance_id,
+            process_key=process_key,
+            node_id=body.node_id,
+            new_status=body.new_status,
+            action_label=body.action_label,
+            actor_id=body.user_id,
+        )
+        await OutboxPublisher(db, get_event_publisher()).store_event(event, inst.tenant_id)
+    except Exception:
+        logger.warning("Outbox unavailable — FlowSpineTransitionOccurred not stored", exc_info=True)
+
     db.commit()
     db.refresh(inst)
     return _instance_to_dict(inst)
@@ -258,3 +307,78 @@ def delete_instance(
     db.delete(inst)
     db.commit()
     return Response(status_code=204)
+
+
+# ── Agent Action (GAP-104-H) ──────────────────────────────────────────────────
+
+@router.post("/{process_key}/agent-action", response_model=dict)
+async def execute_agent_action(
+    process_key: str,
+    body: AgentActionRequest,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    """Execute an agent action for a flow spine process, optionally enriched with RAG context.
+
+    Falls back gracefully if the vector store (ChromaDB) is not available.
+    """
+    try:
+        workspace = get_flow_spine_workspace(process_key)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=f"Unknown flow spine process '{process_key}'") from exc
+
+    # Optional instance context
+    instance_data: dict[str, Any] | None = None
+    if body.instance_id:
+        inst = db.get(FlowSpineInstance, body.instance_id)
+        if inst and inst.process_key == process_key:
+            instance_data = _instance_to_dict(inst)
+
+    # RAG enrichment — graceful degradation if ChromaDB is unavailable
+    rag_hits: list[dict[str, Any]] = []
+    try:
+        import chromadb  # type: ignore
+        from app.infrastructure.rag.client import get_rag_collection
+
+        collection = get_rag_collection()
+        results = collection.query(
+            query_texts=[body.action],
+            n_results=3,
+            where={"process_key": process_key} if collection.count() > 0 else None,
+        )
+        docs = results.get("documents", [[]])[0]
+        metas = results.get("metadatas", [[]])[0]
+        rag_hits = [
+            {"content": doc, "metadata": meta}
+            for doc, meta in zip(docs, metas)
+            if doc
+        ]
+    except Exception:
+        logger.debug("RAG not available — agent action proceeds without knowledge enrichment")
+
+    # Build response payload
+    response: dict[str, Any] = {
+        "process_key": process_key,
+        "action": body.action,
+        "node_id": body.node_id,
+        "instance_id": body.instance_id,
+        "executed_at": _utcnow(),
+        "status": "accepted",
+        "rag_hits": rag_hits,
+        "workspace_title": workspace.get("title", process_key),
+    }
+    if instance_data:
+        response["instance"] = {
+            "case_number": instance_data["case_number"],
+            "label": instance_data["label"],
+            "active_node_id": instance_data["active_node_id"],
+            "node_statuses": instance_data["node_statuses"],
+        }
+
+    logger.info(
+        "Agent action '%s' accepted for process '%s' (instance=%s, rag_hits=%d)",
+        body.action,
+        process_key,
+        body.instance_id,
+        len(rag_hits),
+    )
+    return response

@@ -47,3 +47,73 @@ copilot-messages.log
 # System files
 .DS_Store
 .project/attachments/files/**
+
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+.coverage
+coverage.xml
+htmlcov/
+.pytest_cache/
+.pytest_last.txt
+rationsoptimierung/.coverage
+rationsoptimierung/coverage.xml
+
+# ── SQLite / lokale Datenbanken ───────────────────────────────────────────────
+*.db
+*.db-shm
+*.db-wal
+
+# ── Node / pnpm ───────────────────────────────────────────────────────────────
+node_modules/
+.pnpm-store/
+*.tsbuildinfo
+packages/frontend-web/dist/
+packages/frontend-web/playwright-report/
+packages/frontend-web/test-results/
+packages/frontend-web/artifacts/
+packages/frontend-web/vite-dev.*.log
+packages/frontend-web/package-lock.json
+packages/*/package-lock.json
+l3-migration-toolkit/package-lock.json
+l3-migration-toolkit/playwright-snap/package-lock.json
+packages/bff/bff-web/package-lock.json
+packages/mobile-app/package-lock.json
+packages/purchase-domain/package-lock.json
+
+# ── Build-Artefakte ───────────────────────────────────────────────────────────
+packages/erp-domain/dist/
+packages/sales-domain/dist/
+packages/inventory-domain/dist/
+packages/delivery-domain/dist/
+packages/purchase-domain/dist/
+packages/contracts-domain/dist/
+packages/data-models/dist/
+packages/business-rules/dist/
+dist/slack-*.pid
+dist/slack-*.yaml
+
+# ── Logs & Laufzeit ───────────────────────────────────────────────────────────
+*.log
+logs/
+load-tests/results/
+test-results/
+
+# ── Secrets / lokale Konfig ───────────────────────────────────────────────────
+.env
+packages/frontend-web/.env
+services/inventory/env/
+
+# ── Laufzeit-Daten (kein Quellcode) ──────────────────────────────────────────
+data/gap/
+data/paperless-consume/
+data/policies.db
+files/
+
+# ── Tool-spezifisch ───────────────────────────────────────────────────────────
+.cursor/
+memory-bank/
+gitleaks-report.json
+metadata.json
+nul
