@@ -954,3 +954,46 @@ class ZertifikatEintrag(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
+
+class PCNMeldung(Base):
+    """PCN-Meldung (Product Classification Notification / UFI) gemäß EU-VO 2017/542."""
+
+    __tablename__ = "ops_pcn_meldungen"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: f"PCN-{uuid7()[:8].upper()}")
+    produktname = Column(String(255), nullable=False, default="")
+    ufi = Column(String(24), nullable=True)
+    cas_nummern = Column(String(500), nullable=True)
+    gefahrenklassen = Column(JSONB, nullable=False, default=list)
+    verwendungskategorie = Column(String(120), nullable=True)
+    pcn_status = Column(String(30), nullable=False, default="entwurf")
+    tenant_id = Column(String(120), nullable=False, default="default", index=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class FlowSpineInstance(Base):
+    """Persistente Flow-Spine-Prozessinstanz (Wave 104 — ersetzt In-Memory-Dict)."""
+
+    __tablename__ = "ops_flow_spine_instances"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=lambda: str(__import__("uuid").uuid4()))
+    case_number = Column(String(64), nullable=False, index=True)
+    process_key = Column(String(120), nullable=False, index=True)
+    label = Column(String(255), nullable=False, default="")
+    customer_id = Column(String(120), nullable=True)
+    customer_name = Column(String(255), nullable=True)
+    subject = Column(String(255), nullable=True)
+    entry_mode = Column(String(80), nullable=True)
+    linked_document_id = Column(String(120), nullable=True)
+    linked_document_type = Column(String(80), nullable=True)
+    node_statuses = Column(JSONB, nullable=False, default=dict)
+    active_node_id = Column(String(120), nullable=True)
+    last_actor = Column(String(120), nullable=True)
+    last_action_label = Column(String(255), nullable=True)
+    tenant_id = Column(String(120), nullable=False, default="default", index=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+

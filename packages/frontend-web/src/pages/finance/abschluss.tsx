@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
@@ -9,6 +9,7 @@ import { apiClient } from '@/lib/axios'
 import { buildDecisionView } from '@/policy/decision-view'
 import { ProcessStatusPanel } from '@/components/workflow/ProcessStatusPanel'
 import { useApprovalDensityProfile } from '@/features/workflow/useApprovalDensityProfile'
+import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
 
 const abschlussConfig: MaskConfig = {
   title: 'Monats-/Jahresabschluss',
@@ -440,6 +441,8 @@ function RueckstellungenTable({ data: _data, onChange }: { data: any[], onChange
 
 export default function AbschlussPage(): JSX.Element {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const workflowContext = readWorkflowEntryContext(searchParams)
   const [isDirty, setIsDirty] = useState(false)
   const [actionLoadingKey, setActionLoadingKey] = useState<string | null>(null)
   const [workspaceData, setWorkspaceData] = useState<any>({})
@@ -635,6 +638,13 @@ export default function AbschlussPage(): JSX.Element {
             </div>
           </div>
         </ProcessStatusPanel>
+      ) : null}
+      {workflowContext ? (
+        <WorkflowEntryBanner
+          context={workflowContext}
+          title="Workflow-Handover aus Finance-to-Close"
+          description="Periode, Abstimmung, Meldewesen und Freigaben werden jetzt im Abschlussarbeitsplatz gepflegt. Der Flow-Fall bleibt als Referenz erhalten."
+        />
       ) : null}
       <ObjectPage
         config={abschlussConfig}

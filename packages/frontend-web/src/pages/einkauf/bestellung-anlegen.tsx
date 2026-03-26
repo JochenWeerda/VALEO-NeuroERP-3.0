@@ -12,6 +12,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Plus, Trash2 } from 'lucide-react'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { apiClient } from '@/lib/api-client'
+import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
 
 type BestellungData = {
   lieferant: string
@@ -40,6 +41,7 @@ export default function BestellungAnlegenPage(): JSX.Element {
   const requisitionId = searchParams.get('requisitionId')
   const contractId = searchParams.get('contractId')
   const rfqId = searchParams.get('rfqId')
+  const workflowContext = readWorkflowEntryContext(searchParams)
   
   const [bestellung, setBestellung] = useState<BestellungData>({
     lieferant: '',
@@ -68,6 +70,19 @@ export default function BestellungAnlegenPage(): JSX.Element {
       loadRFQData(rfqId)
     }
   }, [requisitionId, contractId, rfqId])
+
+  useEffect(() => {
+    if (!workflowContext) return
+    setBestellung((prev) => ({
+      ...prev,
+      lieferant: prev.lieferant || workflowContext.partnerName,
+      notizen: prev.notizen || [
+        workflowContext.caseNumber ? `Workflow-Vorgang ${workflowContext.caseNumber}` : '',
+        workflowContext.entryMode ? `Einstieg: ${workflowContext.entryMode}` : '',
+        workflowContext.subject,
+      ].filter(Boolean).join('\n'),
+    }))
+  }, [workflowContext])
 
   const loadRequisitionData = async (id: string) => {
     try {
@@ -151,14 +166,10 @@ export default function BestellungAnlegenPage(): JSX.Element {
 
   async function handleSubmit(): Promise<void> {
     try {
-      // Generiere Bestellnummer
-      const bestellnummer = `PO-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`
-      
       const purchaseOrder = {
-        purchaseOrderNumber: bestellnummer,
         orderDate: new Date().toISOString().slice(0, 10),
         supplierId: bestellung.lieferant,
-        subject: `Bestellung ${bestellnummer}`,
+        subject: workflowContext?.subject || 'Bestellung',
         description: bestellung.notizen || '',
         status: 'ENTWURF',
         deliveryDate: bestellung.liefertermin,
@@ -450,7 +461,20 @@ export default function BestellungAnlegenPage(): JSX.Element {
   ]
 
   return (
-    <div className="p-6">
+    <div className="space-y-4 p-6">
+      {workflowContext ? (
+        <WorkflowEntryBanner
+          context={workflowContext}
+          title="Workflow-Handover aus Procure-to-Pay"
+          description="Lieferant, Positionen, Mengen, Preise, Incoterms und Termine werden jetzt in der Bestellmaske gepflegt. Die Bestellnummer wird erst beim Speichern im Backend aus dem Nummernkreis vergeben."
+        />
+      ) : null}
+      <Card className="border-dashed border-slate-300/60 bg-slate-50/40 dark:bg-slate-900/20">
+        <CardContent className="py-3 text-sm text-muted-foreground">
+          <div className="font-medium text-foreground">Bestellnummer</div>
+          <div>Wird beim Speichern serverseitig aus dem Nummernkreis vergeben. Im Workflow erfasst du hier zuerst Lieferant, Positionen, Mengen, Preise, Zahlungsbedingungen und Lieferadresse.</div>
+        </CardContent>
+      </Card>
       <Wizard
         title={`${t('crud.actions.new')} ${entityTypeLabel} ${t('crud.actions.create')}`}
         steps={steps}

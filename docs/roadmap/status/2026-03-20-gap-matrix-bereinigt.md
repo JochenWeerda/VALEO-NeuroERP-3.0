@@ -12,6 +12,7 @@ Sie ersetzt weder die historischen Priorisierungen noch die Detailnachweise pro 
 - Strategische Quelle: `docs/roadmap/status/2026-03-06-top-50-gap-backlog-landhandel.md`
 - Liefernachweise: `docs/architecture/process-kernel/wave-*/STATUS.md`
 - Aggregierte Delivery-Sicht: `docs/architecture/process-kernel/STATUS.md`
+- Korrigierte Flow-Spine-Systemanalyse: [2026-03-26-systemanalyse-flow-spine.md](2026-03-26-systemanalyse-flow-spine.md)
 - Direkter Vergleich zum Backlog: [Top-50 Gap Backlog 2026-03-06](2026-03-06-top-50-gap-backlog-landhandel.md)
 - Wichtige Feststellung:
   - Der fruehere Restgap-Stand war durch spaetere Waves und nachgezogene Tests ueberholt.
@@ -72,6 +73,10 @@ Auf Basis der aktuell belastbaren Repo-Nachweise verbleiben derzeit keine produk
   - Backend-Katalog und Workspace-Contracts ueber `app/core/flow_spine_registry.py` und `app/api/v1/endpoints/flow_spines.py`
   - End-to-End-Prozessraeume im Frontend fuer `Order-to-Cash`, `Procure-to-Pay`, `Inventory-to-Settlement`, `Harvest-to-Settlement`, `Contract-to-Settlement`, `Complaint-to-Resolution`, `Service-to-Customer`, `Finance-to-Close` und `Compliance-to-Report`
 - Diese Prozessraeume eroefnen keine neuen Gaps, sondern operationalisieren das bereits geschlossene prozesszentrierte Zielbild ueber einen verbindlichen Backend-Vertrag und denselben Designsystem-Rahmen.
+- Der Runtime-Stand wurde seitdem nochmals auf Prozessrealismus gehaertet:
+  - Flow-Spine-Instanzen erzeugen prozessuebergreifend zuerst einen nummernkreisfaehigen `workflow_case` statt sofort fachlicher Belegnummern.
+  - Reale Fachdaten werden anschliessend in die jeweiligen Standardmasken uebergeben und dort gepflegt.
+  - `Procure-to-Pay` und `Order-to-Cash` vergeben Bestell- bzw. Auftragsnummern damit nicht mehr im Browser, sondern serverseitig.
 - Parallel wurde der technische Ist-Stand in zwei bestehenden Abschlussfeldern gehaertet:
   - `NeuroASSIST`-API-Testbarkeit ueber den Service-Proxy in `app/api/v1/endpoints/agents.py`
   - Cash-Closing-Read-Models ueber die robustere Journal-Zeilenabfrage in `app/api/v1/endpoints/finance_read_models.py`

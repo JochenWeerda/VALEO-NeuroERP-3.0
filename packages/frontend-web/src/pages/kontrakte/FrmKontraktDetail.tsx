@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -30,6 +30,7 @@ import { buildDecisionView } from '@/policy/decision-view'
 import { ProcessStatusPanel } from '@/components/workflow/ProcessStatusPanel'
 import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
 import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
+import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
 
 type FormState = Omit<Kontrakt, 'contract_id' | 'rest_quantity'>
 
@@ -84,8 +85,10 @@ function createEmptyState(): FormState {
 export default function FrmKontraktDetail(): JSX.Element {
   const { id } = useParams()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { toast } = useToast()
   const { hasRole } = useAuth()
+  const workflowContext = readWorkflowEntryContext(searchParams)
 
   const isEdit = Boolean(id)
   const [state, setState] = useState<FormState>(createEmptyState())
@@ -120,6 +123,20 @@ export default function FrmKontraktDetail(): JSX.Element {
       })
     }
   }, [detailQuery.data])
+
+  useEffect(() => {
+    if (!workflowContext || isEdit) return
+    setState((prev) => ({
+      ...prev,
+      notes: prev.notes || [
+        workflowContext.caseNumber ? `Workflow-Vorgang ${workflowContext.caseNumber}` : '',
+        workflowContext.entryMode ? `Einstieg: ${workflowContext.entryMode}` : '',
+        workflowContext.partnerName ? `Partner: ${workflowContext.partnerName}` : '',
+        workflowContext.subject,
+      ].filter(Boolean).join('\n'),
+    }))
+    setSelectedCustomerName((prev) => prev || workflowContext.partnerName)
+  }, [isEdit, workflowContext])
 
   const saveMutation = useMutation({
     mutationFn: async () => {
@@ -243,6 +260,13 @@ export default function FrmKontraktDetail(): JSX.Element {
   return (
     <div className="flex flex-col">
     <div className="space-y-4 p-6">
+      {workflowContext ? (
+        <WorkflowEntryBanner
+          context={workflowContext}
+          title="Workflow-Handover aus Contract-to-Settlement"
+          description="Kontraktstammdaten, Mengen, Preise, Staffeln und Bedingungen werden jetzt in der Kontraktmaske gepflegt. Der Flow-Fall bleibt als Referenz erhalten."
+        />
+      ) : null}
       <Card>
         <CardHeader>
           <CardTitle>FrmKontraktDetail</CardTitle>
@@ -262,10 +286,24 @@ export default function FrmKontraktDetail(): JSX.Element {
             <ProcessStatusPanel view={kontraktStatusView} title="Prozessstatus" />
           ) : null}
 
+          {!isEdit ? (
+            <Card className="border-dashed border-slate-300/60 bg-slate-50/40 dark:bg-slate-900/20">
+              <CardContent className="py-3 text-sm text-muted-foreground">
+                <div className="font-medium text-foreground">Kontraktnummer</div>
+                <div>Wird beim Speichern standardmäßig serverseitig aus dem Nummernkreis vergeben. Partner, Laufzeit, Mengenstaffel, Preise und Konditionen pflegst du in dieser Kontraktmaske.</div>
+              </CardContent>
+            </Card>
+          ) : null}
+
           <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
             <div className="space-y-1">
               <Label>Kontrakt-Nr.</Label>
-              <Input value={state.contract_no || ''} onChange={(e) => setState((s) => ({ ...s, contract_no: e.target.value }))} disabled={!isAdmin && isEdit} />
+              <Input
+                value={state.contract_no || ''}
+                onChange={(e) => setState((s) => ({ ...s, contract_no: e.target.value }))}
+                disabled={isEdit ? !isAdmin : Boolean(workflowContext && !isAdmin)}
+                placeholder={!isEdit ? 'Wird beim Speichern aus dem Nummernkreis vergeben' : undefined}
+              />
             </div>
             <div className="space-y-1">
               <Label>Kontrakt-Typ</Label>

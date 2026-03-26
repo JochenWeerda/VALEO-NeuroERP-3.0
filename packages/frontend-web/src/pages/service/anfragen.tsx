@@ -1,5 +1,5 @@
 ﻿import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useServiceAnfragen, type ServiceAnfrage } from '@/lib/api/betrieb'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -8,11 +8,14 @@ import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { FileDown, HeadphonesIcon, Plus, Search } from 'lucide-react'
 import { ErrorState } from '@/components/ErrorState'
+import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
 
 export default function ServiceAnfragenPage(): JSX.Element {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const [searchTerm, setSearchTerm] = useState('')
   const { data: anfragen = [], isError, error, refetch } = useServiceAnfragen()
+  const workflowContext = readWorkflowEntryContext(searchParams)
 
   if (isError) {
     return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
@@ -31,7 +34,14 @@ export default function ServiceAnfragenPage(): JSX.Element {
 
   return (
     <div className="space-y-4 p-6">
-      <div className="flex items-center justify-between"><div><h1 className="text-3xl font-bold">Service-Anfragen</h1><p className="text-muted-foreground">Kundenservice & Support</p></div><Button onClick={() => navigate('/service/anfrage/neu')} className="gap-2"><Plus className="h-4 w-4" />Neue Anfrage</Button></div>
+      {workflowContext ? (
+        <WorkflowEntryBanner
+          context={workflowContext}
+          title="Workflow-Handover aus Service-to-Customer"
+          description="Ticketdaten, Prioritaet, Einsatzplanung und Rueckmeldung werden jetzt in den Service-Masken gepflegt. Der Flow-Fall bleibt als Referenz erhalten."
+        />
+      ) : null}
+      <div className="flex items-center justify-between"><div><h1 className="text-3xl font-bold">Service-Anfragen</h1><p className="text-muted-foreground">Kundenservice & Support</p></div><Button onClick={() => navigate(`/service/anfrage/neu${workflowContext ? `?${searchParams.toString()}` : ''}`)} className="gap-2"><Plus className="h-4 w-4" />Neue Anfrage</Button></div>
       <div className="grid gap-4 md:grid-cols-3">
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Anfragen Gesamt</CardTitle></CardHeader><CardContent><div className="flex items-center gap-2"><HeadphonesIcon className="h-5 w-5 text-blue-600" /><span className="text-2xl font-bold">{anfragen.length}</span></div></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Neu</CardTitle></CardHeader><CardContent><span className="text-2xl font-bold text-red-600">{neu}</span></CardContent></Card>

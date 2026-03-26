@@ -75,6 +75,11 @@ class NumberingService:
                 int(os.environ.get("NUMBER_WIDTH_SUPPLIER_INVOICE", "5")),
                 int(os.environ.get("NUMBER_START_SUPPLIER_INVOICE", "1")),
             ),
+            "workflow_case": NumberSeries(
+                os.environ.get("NUMBER_PREFIX_WORKFLOW_CASE", "WF-"),
+                int(os.environ.get("NUMBER_WIDTH_WORKFLOW_CASE", "5")),
+                int(os.environ.get("NUMBER_START_WORKFLOW_CASE", "1")),
+            ),
         }
 
     def _apply_overrides(
