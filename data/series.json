@@ -1,0 +1,44 @@
+{
+  "sales_order": {
+    "prefix": "SO-",
+    "width": 5,
+    "start": 1,
+    "value": 0
+  },
+  "delivery": {
+    "prefix": "DL-",
+    "width": 5,
+    "start": 1,
+    "value": 0
+  },
+  "invoice": {
+    "prefix": "INV-",
+    "width": 5,
+    "start": 1,
+    "value": 0
+  },
+  "purchase_order": {
+    "prefix": "PO-",
+    "width": 5,
+    "start": 1,
+    "value": 0
+  },
+  "goods_receipt": {
+    "prefix": "GR-",
+    "width": 5,
+    "start": 1,
+    "value": 0
+  },
+  "supplier_invoice": {
+    "prefix": "PINV-",
+    "width": 5,
+    "start": 1,
+    "value": 0
+  },
+  "workflow_case": {
+    "prefix": "WF-",
+    "width": 5,
+    "start": 1,
+    "value": 3
+  }
+}

@@ -1,0 +1,80 @@
+{
+  "type": "delivery_note",
+  "lang": "de",
+  "page_size": "A4",
+  "template_name": "Lieferschein DIN A4",
+  "version": "1.0",
+  "description": "Standard Lieferschein-Vorlage für DIN A4",
+  "fields": {
+    "header": {
+      "company_name": "COMPANY_NAME",
+      "company_address": "COMPANY_ADDRESS",
+      "company_city": "COMPANY_CITY",
+      "company_country": "COMPANY_COUNTRY",
+      "company_phone": "COMPANY_PHONE",
+      "company_email": "COMPANY_EMAIL",
+      "company_tax_id": "COMPANY_TAX_ID"
+    },
+    "document": {
+      "lieferschein_nr": "lieferscheinNr",
+      "liefer_datum": "lieferDatum",
+      "liefer_uhrzeit": "uhrzeit"
+    },
+    "customer": {
+      "customer_number": "customer.customerNumber",
+      "customer_name": "customer.name",
+      "customer_address": "customer.address",
+      "customer_city": "customer.city",
+      "customer_postal_code": "customer.postalCode",
+      "customer_country": "customer.country",
+      "customer_phone": "customer.phone",
+      "customer_email": "customer.email"
+    },
+    "positions": {
+      "pos_nr": "posNr",
+      "artikel_nr": "artikelNr",
+      "bezeichnung": "bezeichnung",
+      "bezeichnung2": "bezeichnung2",
+      "menge": "menge",
+      "einheit": "einheit",
+      "listenpreis": "listenpreis",
+      "rabatt": "rabatt",
+      "netto_preis": "nettoPreis",
+      "netto_betrag": "nettoBetrag",
+      "mwst_prozent": "mwstProzent"
+    },
+    "sums": {
+      "netto_gesamt": "calculated",
+      "mwst_betrag": "calculated",
+      "brutto_gesamt": "calculated"
+    }
+  },
+  "layout": {
+    "margins": {
+      "top": 20,
+      "bottom": 20,
+      "left": 20,
+      "right": 20
+    },
+    "header_height": 80,
+    "footer_height": 40,
+    "table_style": {
+      "header_background": "#1e40af",
+      "header_text_color": "#ffffff",
+      "row_alternate": "#f3f4f6",
+      "border_color": "#cccccc"
+    }
+  },
+  "print_options": {
+    "include_qr_code": true,
+    "include_barcode": false,
+    "include_signature_line": true,
+    "include_delivery_note": true,
+    "include_general_info": true,
+    "include_route_description": false,
+    "include_loading_info": false
+  }
+}
+
+
+
