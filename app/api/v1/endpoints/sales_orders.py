@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 
 from ....core.config import settings
 from ....core.database import get_db
+from ....services.numbering_service import get_numbering
 from ..schemas.base import PaginatedResponse
 
 router = APIRouter()
@@ -22,7 +23,7 @@ DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
 class SalesOrderBase(BaseModel):
-    order_number: str = Field(..., min_length=1, max_length=64)
+    order_number: Optional[str] = Field(default=None, min_length=1, max_length=64)
     customer_id: str = Field(..., min_length=1)
     subject: str = Field(..., min_length=1, max_length=255)
     description: str = ""
@@ -74,6 +75,7 @@ class SalesOrderItemOut(SalesOrderItemInput):
 
 
 class SalesOrder(SalesOrderBase):
+    order_number: str
     id: str
     tenant_id: str
     sales_offer_id: Optional[str] = None
@@ -91,6 +93,13 @@ def _line_total(quantity: float, unit_price: float, discount_percent: float) -> 
     base = qty * price
     discounted = base * (Decimal("100") - discount) / Decimal("100")
     return discounted.quantize(Decimal("0.01"))
+
+
+def _resolve_order_number(order_number: Optional[str]) -> str:
+    cleaned = (order_number or "").strip()
+    if cleaned:
+        return cleaned
+    return get_numbering().next_number("sales_order")
 
 
 def _fetch_items(db: Session, order_id: str) -> list[SalesOrderItemOut]:
@@ -230,6 +239,7 @@ async def create_sales_order(payload: SalesOrderCreate, db: Session = Depends(ge
     effective_tenant = payload.tenant_id or DEFAULT_TENANT
     order_id = str(uuid4())
     now = datetime.now(timezone.utc)
+    order_number = _resolve_order_number(payload.order_number)
 
     duplicate = db.execute(
         text(
@@ -241,7 +251,7 @@ async def create_sales_order(payload: SalesOrderCreate, db: Session = Depends(ge
               AND deleted_at IS NULL
             """
         ),
-        {"tenant_id": effective_tenant, "order_number": payload.order_number},
+        {"tenant_id": effective_tenant, "order_number": order_number},
     ).first()
     if duplicate:
         raise HTTPException(status_code=409, detail="order_number already exists")
@@ -283,7 +293,7 @@ async def create_sales_order(payload: SalesOrderCreate, db: Session = Depends(ge
             "id": order_id,
             "tenant_id": effective_tenant,
             "customer_id": payload.customer_id,
-            "order_number": payload.order_number,
+            "order_number": order_number,
             "subject": payload.subject,
             "description": payload.description or "",
             "total_amount": total_amount,

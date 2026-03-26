@@ -4,7 +4,7 @@
  */
 
 import { lazy, Suspense, useState, useEffect, useMemo, useRef } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -171,12 +171,6 @@ type Angebot = {
 
 // â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-function generateAuftragNr(): string {
-  const year = new Date().getFullYear()
-  const random = Math.floor(Math.random() * 100000)
-  return `AU${year}-${String(random).padStart(5, '0')}`
-}
-
 function formatDateForInput(date: Date): string {
   const y = date.getFullYear()
   const m = String(date.getMonth() + 1).padStart(2, '0')
@@ -225,8 +219,19 @@ function mapResponseItemsToPositionen(items: AuftragResponse['items']): Position
 export default function SalesOrderEditorPage(): JSX.Element {
   const navigate = useNavigate()
   const { id: routeId } = useParams<{ id?: string }>()
+  const [searchParams] = useSearchParams()
   const { push } = useToast()
   const { user } = useAuth()
+  const queryId = searchParams.get('id') || undefined
+  const editId = routeId ?? queryId
+  const workflowProcess = searchParams.get('workflowProcess') || ''
+  const workflowInstanceId = searchParams.get('workflowInstanceId') || ''
+  const workflowCase = searchParams.get('workflowCase') || ''
+  const workflowLabel = searchParams.get('workflowLabel') || ''
+  const workflowCustomerName = searchParams.get('customerName') || ''
+  const workflowSubject = searchParams.get('subject') || ''
+  const workflowEntryMode = searchParams.get('entryMode') || ''
+  const isWorkflowEntry = !editId && Boolean(workflowCase || workflowInstanceId || workflowProcess)
   
   // Refs for focus management
   const customerInputRef = useRef<HTMLInputElement>(null)
@@ -244,7 +249,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
   // â”€â”€ Haupt-State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [state, setState] = useState<AuftragState>({
     id: null,
-    auftragNr: generateAuftragNr(),
+    auftragNr: '',
     niederlassung: 0,
     vertreter: '',
     bediener: getUserShortName(),
@@ -275,7 +280,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
   const [vorgaengerCount, setVorgaengerCount] = useState(0)
 
   // Dialog-States
-  const [showAuftragAuswahl, setShowAuftragAuswahl] = useState(!routeId)
+  const [showAuftragAuswahl, setShowAuftragAuswahl] = useState(!editId && !isWorkflowEntry)
   const [showCustomerDialog, setShowCustomerDialog] = useState(false)
   const [showArticleDialog, setShowArticleDialog] = useState(false)
   const [showPrintDialog, setShowPrintDialog] = useState(false)
@@ -306,10 +311,10 @@ export default function SalesOrderEditorPage(): JSX.Element {
 
   // Bestehenden Auftrag laden wenn ID in URL (Kunde per customer_id aus API)
   useEffect(() => {
-    if (!routeId) return
+    if (!editId) return
     const load = async (): Promise<void> => {
       try {
-        const response = await apiClient.get<AuftragResponse>(`/api/v1/sales/orders/${routeId}`)
+        const response = await apiClient.get<AuftragResponse>(`/api/v1/sales/orders/${editId}`)
         let customer: Customer | null = null
         if (response.customer_id) {
           try {
@@ -349,7 +354,18 @@ export default function SalesOrderEditorPage(): JSX.Element {
       }
     }
     void load()
-  }, [routeId])
+  }, [editId])
+
+  useEffect(() => {
+    if (!isWorkflowEntry) return
+    setState((prev) => ({
+      ...prev,
+      betreff: prev.betreff || workflowSubject,
+      notizen: prev.notizen || [workflowLabel, workflowCase ? `Workflow-Vorgang ${workflowCase}` : '', workflowEntryMode ? `Einstieg: ${workflowEntryMode}` : '']
+        .filter(Boolean)
+        .join(' | '),
+    }))
+  }, [isWorkflowEntry, workflowCase, workflowEntryMode, workflowLabel, workflowSubject])
 
   // Preis automatisch berechnen
   useEffect(() => {
@@ -626,9 +642,9 @@ export default function SalesOrderEditorPage(): JSX.Element {
     }
     try {
       const payload = {
-        order_number: state.auftragNr,
+        order_number: state.auftragNr || undefined,
         customer_id: state.customer.id,
-        subject: state.betreff || `Auftrag ${state.auftragNr}`,
+        subject: state.betreff || (state.auftragNr ? `Auftrag ${state.auftragNr}` : 'Neuer Auftrag'),
         description: state.notizen,
         total_amount: summen.netto,
         currency: 'EUR',
@@ -657,8 +673,8 @@ export default function SalesOrderEditorPage(): JSX.Element {
         push('Auftrag gespeichert')
         return state.id
       } else {
-        const saved = await apiClient.post<{ id: string }>('/api/v1/sales/orders/', payload)
-        setState((prev) => ({ ...prev, id: saved.id }))
+        const saved = await apiClient.post<{ id: string; order_number: string }>('/api/v1/sales/orders/', payload)
+        setState((prev) => ({ ...prev, id: saved.id, auftragNr: saved.order_number }))
         push('Auftrag angelegt')
         return saved.id
       }
@@ -722,7 +738,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
     if (!state.id) {
       setState((prev) => ({
         ...prev,
-        id: null, auftragNr: generateAuftragNr(),
+        id: null, auftragNr: '',
         auftragDatum: formatDateForInput(new Date()), liefertermin: '',
         customer: null, positionen: [], aktivePositionIndex: null,
       }))
@@ -898,7 +914,12 @@ export default function SalesOrderEditorPage(): JSX.Element {
             <div className="space-y-2">
               <div className="flex items-center gap-2">
                 <Label className="w-32 text-sm">Auftrags-Nr.:</Label>
-                <Input value={state.auftragNr} readOnly className="flex-1 h-8" />
+                <Input
+                  value={state.auftragNr}
+                  readOnly
+                  placeholder="Wird beim Speichern aus dem Nummernkreis vergeben"
+                  className="flex-1 h-8"
+                />
                 <Button variant="ghost" size="sm" className="h-8 w-8 p-0"
                   onClick={() => setShowAuftragAuswahl(true)} title="Auftrag suchen">
                   <MoreHorizontal className="h-4 w-4" />
@@ -910,6 +931,13 @@ export default function SalesOrderEditorPage(): JSX.Element {
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
+              {isWorkflowEntry ? (
+                <div className="rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-xs text-blue-900">
+                  {workflowCase ? `Workflow-Vorgang ${workflowCase}` : 'Workflow-Einstieg'}
+                  {workflowEntryMode ? ` · ${workflowEntryMode}` : ''}
+                  {workflowCustomerName ? ` · ${workflowCustomerName}` : ''}
+                </div>
+              ) : null}
               <div className="flex items-center gap-2">
                 <Label className="w-32 text-sm">Auftrag-Datum:</Label>
                 <Input
@@ -1711,7 +1739,7 @@ export default function SalesOrderEditorPage(): JSX.Element {
             <Button variant="outline" size="sm"
               onClick={() => {
                 setState((prev) => ({
-                  ...prev, id: null, auftragNr: generateAuftragNr(),
+                  ...prev, id: null, auftragNr: '',
                   auftragDatum: formatDateForInput(new Date()), liefertermin: '',
                   customer: null, positionen: [], aktivePositionIndex: null,
                 }))

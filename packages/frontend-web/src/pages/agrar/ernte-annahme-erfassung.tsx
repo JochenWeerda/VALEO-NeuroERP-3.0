@@ -5,7 +5,7 @@
  */
 
 import { lazy, Suspense, useState, useEffect, useRef } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -28,6 +28,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useGlobalShortcutsWithVoice } from '@/features/ki-usability'
 import { ShortcutHintButton } from '@/components/shortcuts/ShortcutHelpPanel'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
+import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
 import { ChevronLeft, ChevronRight, MoreHorizontal, Save, FileText, Folder, Calculator, Printer, Trash2, Download } from 'lucide-react'
 
 const CustomerSelectionDialog = lazy(() =>
@@ -194,9 +195,11 @@ type HarvestAcceptanceState = {
 
 export default function ErnteAnnahmeErfassungPage(): JSX.Element {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { push } = useToast()
   const { user } = useAuth()
   const { id: acceptanceId } = useParams<{ id?: string }>()
+  const workflowContext = readWorkflowEntryContext(searchParams)
 
   // Helper: Format date to yyyy-MM-dd for input field
   const formatDateForInput = (date: Date): string => {
@@ -284,6 +287,19 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
       }))
     }
   }, [user])
+
+  useEffect(() => {
+    if (!workflowContext) return
+    setState((prev) => ({
+      ...prev,
+      remarks: prev.remarks || [
+        workflowContext.caseNumber ? `Workflow-Vorgang ${workflowContext.caseNumber}` : '',
+        workflowContext.entryMode ? `Einstieg: ${workflowContext.entryMode}` : '',
+        workflowContext.partnerName ? `Anlieferer: ${workflowContext.partnerName}` : '',
+        workflowContext.subject,
+      ].filter(Boolean).join('\n'),
+    }))
+  }, [workflowContext])
 
   // Lade bestehende Ernte-Annahme, wenn ID in URL vorhanden
   useEffect(() => {
@@ -949,6 +965,13 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
         closeTarget="/agrar/ernte"
         title="Ernte-Annahme-Erfassung"
       />
+      {workflowContext ? (
+        <WorkflowEntryBanner
+          context={workflowContext}
+          title="Workflow-Handover aus Harvest-to-Settlement"
+          description="Wiegeschein, Qualitaet, Trocknung, Kontraktbezug und Settlement werden jetzt in der Annahme-Maske gepflegt. Der Flow-Fall bleibt als Referenz erhalten."
+        />
+      ) : null}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Ernte-Annahme-Erfassung</h1>

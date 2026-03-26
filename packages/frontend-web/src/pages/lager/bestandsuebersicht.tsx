@@ -6,7 +6,8 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { BarChart3, TrendingDown, TrendingUp, Warehouse, Package, AlertCircle, ArrowUpDown, Clock, Calendar, ShieldAlert, Zap, Snail, ChevronRight } from 'lucide-react'
 import { useInventoryDashboard } from '@/lib/api/dashboard'
 import { useMhdItems, useRennerItems, usePennerItems } from '@/lib/api/inventory'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
 
 type PsmArtikel = {
   name: string
@@ -25,6 +26,8 @@ export default function BestandsuebersichtPage(): JSX.Element {
   const { data: rennerItems } = useRennerItems()
   const { data: pennerItems } = usePennerItems()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const workflowContext = readWorkflowEntryContext(searchParams)
 
   // Prüfe ob echte Daten vorhanden sind
   const hasData = Boolean(bestand && bestand.totalArticles > 0)
@@ -32,6 +35,13 @@ export default function BestandsuebersichtPage(): JSX.Element {
 
   return (
     <div className="space-y-6 p-6">
+      {workflowContext ? (
+        <WorkflowEntryBanner
+          context={workflowContext}
+          title="Workflow-Handover aus Inventory-to-Settlement"
+          description="Bestand, Rampen, Chargen und Versandbewegungen werden jetzt in den Lager- und Verlade-Masken gepflegt. Der Flow-Fall bleibt als Referenz erhalten."
+        />
+      ) : null}
       <div>
         <h1 className="text-3xl font-bold flex items-center gap-2">
           <Warehouse className="h-8 w-8 text-blue-600" />

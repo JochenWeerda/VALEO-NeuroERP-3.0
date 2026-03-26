@@ -31,14 +31,15 @@ Diese Statusdatei verdichtet den aktuellen Gesamtstand, ohne die Detailnachweise
 
 ## Status
 
-`abgeschlossen` - 2026-03-24 - Aggregierte Source-of-Truth fuer den Process-Kernel-Management-Status; operative Detailnachweise liegen in den referenzierten `wave-*/STATUS.md`-Dateien.
+`abgeschlossen` - 2026-03-26 - Aggregierte Source-of-Truth fuer den Process-Kernel-Management-Status; operative Detailnachweise liegen in den referenzierten `wave-*/STATUS.md`-Dateien.
 
 ## Gesamtstatus
 
-- Stand: `2026-03-24`
+- Stand: `2026-03-26`
 - Status: `Waves 1 bis 100 abgeschlossen`
 - Gesamtsuite: `5916 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed`
 - Bereinigter Gap-Abgleich gegen spaetere Wave-Nachweise: `docs/roadmap/status/2026-03-20-gap-matrix-bereinigt.md`
+- Korrigierte Flow-Spine-Systemanalyse: `docs/roadmap/status/2026-03-26-systemanalyse-flow-spine.md`
 - Letzte abgeschlossene Waves:
   - `Wave 100`: Settlement-Abschlussvertrag fuer Gap 004
   - `Wave 99`: Process Mining, Command Monitor, Policy Explainability, Agent UX, Design Tokens
@@ -192,13 +193,24 @@ Diese Statusdatei verdichtet den aktuellen Gesamtstand, ohne die Detailnachweise
   - `packages/frontend-web/src/pages/workflow/flow-spine-finance-to-close.tsx`
   - `packages/frontend-web/src/pages/workflow/flow-spine-compliance-to-report.tsx`
   - `packages/frontend-web/src/components/workflow/FlowSpineWorkspace.tsx`
+  - `packages/frontend-web/src/components/workflow/WorkflowEntryBanner.tsx`
   - `packages/frontend-web/src/lib/api/flow-spines.ts`
   - `packages/frontend-web/src/lib/api/flow-spine.ts`
+  - `packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx`
+  - `packages/frontend-web/src/pages/agrar/ernte-annahme-erfassung.tsx`
+  - `packages/frontend-web/src/pages/kontrakte/FrmKontraktDetail.tsx`
+  - `packages/frontend-web/src/pages/qualitaet/reklamationen.tsx`
+  - `packages/frontend-web/src/pages/service/anfragen.tsx`
+  - `packages/frontend-web/src/pages/finance/abschluss.tsx`
+  - `packages/frontend-web/src/pages/nachhaltigkeit/co2-bilanz.tsx`
+  - `packages/frontend-web/src/pages/lager/bestandsuebersicht.tsx`
+  - `packages/frontend-web/src/pages/sales/order-editor.tsx`
   - `packages/frontend-web/src/app/navigation/domains/core.tsx`
   - `packages/frontend-web/src/app/route-aliases.json`
   - `packages/frontend-web/src/pages/wissen/wissensbasis.tsx`
   - `app/api/v1/endpoints/agents.py`
   - `app/api/v1/endpoints/finance_read_models.py`
+  - `app/services/numbering_service.py`
   - `tests/test_flow_spines_api.py`
   - `tests/test_process_kernel_wave1_contracts.py`
 - Ergebnis:
@@ -206,6 +218,10 @@ Diese Statusdatei verdichtet den aktuellen Gesamtstand, ohne die Detailnachweise
   - Neun repo-native Flow-Spine-Arbeitsraeume fuer `Order-to-Cash`, `Procure-to-Pay`, `Inventory-to-Settlement`, `Harvest-to-Settlement`, `Contract-to-Settlement`, `Complaint-to-Resolution`, `Service-to-Customer`, `Finance-to-Close` und `Compliance-to-Report` sind jetzt als echte Workflow-Seiten im Frontend verankert.
   - Die Seiten nutzen denselben DS-Rahmen ueber `PageSurface`, Tabs, Agent-Panel, Prozessnavigation und einen generischen Workspace-Renderer statt isolierter Export-Demos oder Parallel-Implementierungen.
   - Navigation und Routing kennen jetzt explizite Flow-Spine-Einstiege fuer den vollstaendigen End-to-End-Prozesskatalog.
+  - Der Workflow-Start wurde fuer alle neun Prozessraeume auf ein praxisnahes Handover-Modell synchronisiert: Zuerst entsteht ein `workflow_case` mit Vorgangsnummer, danach wechseln Nutzer in die jeweilige Standard- oder Kernmaske zur Fachdatenpflege.
+  - Flow-Spine-Handover uebergibt jetzt prozessuebergreifend `workflowProcess`, `workflowInstanceId`, `workflowCase`, `workflowLabel`, `entryMode`, `subject` und den jeweiligen Partnerkontext in die Zielmasken.
+  - Nummernkreis-kritische Belege werden dabei nicht mehr im Browser vorgeneriert; Auftrags- und Bestellnummern werden serverseitig vergeben, Kontrakte nutzen fuer Workflow-Einstiege ebenfalls den Backend-Nummernkreis als Default.
+  - Die Zielmasken fuer Einkauf, Agrar-Annahme, Kontrakte, Reklamation, Service, Lager, Finance und Nachhaltigkeit kennzeichnen den Workflow-Handover jetzt explizit und machen transparent, wo reale Fachdaten im Prozess gepflegt werden.
   - Die exportbedingte TypeScript-Luecke in `wissensbasis.tsx` wurde an der Ursache bereinigt, damit der Frontend-Typecheck fuer die neuen Seiten wieder stabil gruen laeuft.
   - `app/api/v1/endpoints/agents.py` besitzt jetzt einen modulglobalen `NeuroASSIST`-Service-Proxy, damit API-Tests und Monkeypatching denselben produktiven Servicepfad reproduzierbar verdrahten koennen.
   - `app/api/v1/endpoints/finance_read_models.py` zieht Journal-Entry-Zeilen fuer Cash-Closings jetzt robust ueber `.mappings().all()`; die Wave-1-Vertragstests wurden darauf nachgezogen.

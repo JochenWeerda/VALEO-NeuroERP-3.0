@@ -1,12 +1,45 @@
 from __future__ import annotations
 
+import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy.exc import SQLAlchemyError
 
+from app.core.database import SessionLocal
+from app.domains.operations.models import FlowSpineInstance, PCNMeldung
 from app.main import app
+from app.api.v1.endpoints import flow_spines
 
 
 client = TestClient(app)
+AUTH_HEADERS = {"Authorization": "Bearer dev-token"}
 
+
+def _require_flow_spine_table(db) -> None:
+    """Skipt den Test wenn DB nicht erreichbar oder Tabelle fehlt."""
+    try:
+        db.query(FlowSpineInstance).limit(1).all()
+    except SQLAlchemyError:
+        pytest.skip("DB nicht erreichbar oder ops_flow_spine_instances fehlt — alembic upgrade head ausführen")
+
+
+def _require_pcn_table(db) -> None:
+    """Skipt den Test wenn DB nicht erreichbar oder PCN-Tabelle fehlt."""
+    try:
+        db.query(PCNMeldung).limit(1).all()
+    except SQLAlchemyError:
+        pytest.skip("DB nicht erreichbar oder ops_pcn_meldungen fehlt — alembic upgrade head ausführen")
+
+
+@pytest.fixture
+def db():
+    session = SessionLocal()
+    try:
+        yield session
+    finally:
+        session.close()
+
+
+# ── Catalog ───────────────────────────────────────────────────────────────────
 
 def test_flow_spine_catalog_returns_all_processes():
     response = client.get("/api/v1/process/flow-spines/catalog")
@@ -37,6 +70,8 @@ def test_flow_spine_catalog_localizes_process_labels_for_german():
     assert domain_by_key["order-to-cash"] == "Vertrieb"
     assert domain_by_key["finance-to-close"] == "Finanzen"
 
+
+# ── Workspace ─────────────────────────────────────────────────────────────────
 
 def test_flow_spine_workspace_returns_contract_to_settlement_links():
     response = client.get("/api/v1/process/flow-spines/contract-to-settlement")
@@ -71,3 +106,251 @@ def test_flow_spine_workspace_localizes_core_labels_for_german():
     assert body["mode"] == "Ablauf"
     assert body["user_role"] == "Betriebsleitung"
     assert body["right_panel"]["domain"] == "Prozesse"
+
+
+# ── Instance CRUD (PostgreSQL) ────────────────────────────────────────────────
+
+def test_flow_spine_instance_creation_assigns_workflow_case_number(monkeypatch, db):
+    _require_flow_spine_table(db)
+
+    class _DummyNumbering:
+        def next_number(self, domain: str) -> str:
+            assert domain == "workflow_case"
+            return "WF-00077"
+
+    monkeypatch.setattr(flow_spines, "get_numbering", lambda: _DummyNumbering())
+
+    response = client.post(
+        "/api/v1/process/flow-spines/order-to-cash/instances",
+        json={
+            "customer_name": "Raiffeisen Nord eG",
+            "subject": "24 t Kalkammonsalpeter",
+            "entry_mode": "Direktauftrag",
+        },
+        headers=AUTH_HEADERS,
+    )
+
+    assert response.status_code == 201
+    body = response.json()
+    assert body["case_number"] == "WF-00077"
+    assert body["entry_mode"] == "Direktauftrag"
+    assert body["customer_name"] == "Raiffeisen Nord eG"
+    assert body["label"] == "Raiffeisen Nord eG 24 t Kalkammonsalpeter"
+    assert "instance_id" in body
+
+    # Cleanup
+    created_id = body["instance_id"]
+    inst = db.get(FlowSpineInstance, created_id)
+    if inst:
+        db.delete(inst)
+        db.commit()
+
+
+def test_flow_spine_instance_list_returns_envelope(monkeypatch, db):
+    _require_flow_spine_table(db)
+
+    created_ids: list[str] = []
+
+    class _DummyNumbering:
+        _counter = 0
+
+        def next_number(self, domain: str) -> str:
+            self._counter += 1
+            return f"WF-TEST-{self._counter:05d}"
+
+    numbering = _DummyNumbering()
+    monkeypatch.setattr(flow_spines, "get_numbering", lambda: numbering)
+
+    resp = client.post(
+        "/api/v1/process/flow-spines/order-to-cash/instances",
+        json={"customer_name": "Genossen AG", "subject": "Raps 2026"},
+        headers=AUTH_HEADERS,
+    )
+    assert resp.status_code == 201
+    created_ids.append(resp.json()["instance_id"])
+
+    response = client.get("/api/v1/process/flow-spines/order-to-cash/instances", headers=AUTH_HEADERS)
+    assert response.status_code == 200
+    body = response.json()
+    assert "instances" in body
+    assert "total" in body
+    assert "skip" in body
+    assert "limit" in body
+    assert "tenant_id" in body
+    assert isinstance(body["instances"], list)
+    assert body["total"] >= 1
+
+    # Cleanup
+    for iid in created_ids:
+        inst = db.get(FlowSpineInstance, iid)
+        if inst:
+            db.delete(inst)
+    db.commit()
+
+
+def test_flow_spine_instance_creation_roundtrips_partner_name_for_non_customer_flow(monkeypatch, db):
+    _require_flow_spine_table(db)
+
+    class _DummyNumbering:
+        def next_number(self, domain: str) -> str:
+            assert domain == "workflow_case"
+            return "WF-00088"
+
+    monkeypatch.setattr(flow_spines, "get_numbering", lambda: _DummyNumbering())
+
+    response = client.post(
+        "/api/v1/process/flow-spines/procure-to-pay/instances",
+        json={
+            "partner_name": "AGRAVIS Technik Nord",
+            "subject": "Saisonbedarf 2026",
+            "entry_mode": "Direktbestellung",
+        },
+        headers=AUTH_HEADERS,
+    )
+
+    assert response.status_code == 201
+    body = response.json()
+    assert body["case_number"] == "WF-00088"
+    assert body["partner_name"] == "AGRAVIS Technik Nord"
+    assert body["customer_name"] == "AGRAVIS Technik Nord"
+    assert body["label"] == "AGRAVIS Technik Nord Saisonbedarf 2026"
+
+    inst = db.get(FlowSpineInstance, body["instance_id"])
+    if inst:
+        db.delete(inst)
+        db.commit()
+
+
+def test_flow_spine_instance_transition(monkeypatch, db):
+    _require_flow_spine_table(db)
+
+    class _DummyNumbering:
+        def next_number(self, domain: str) -> str:
+            return "WF-TRANS-001"
+
+    monkeypatch.setattr(flow_spines, "get_numbering", lambda: _DummyNumbering())
+
+    create_resp = client.post(
+        "/api/v1/process/flow-spines/order-to-cash/instances",
+        json={"subject": "Weizen 500 t"},
+        headers=AUTH_HEADERS,
+    )
+    assert create_resp.status_code == 201
+    instance_id = create_resp.json()["instance_id"]
+
+    trans_resp = client.post(
+        f"/api/v1/process/flow-spines/order-to-cash/instances/{instance_id}/transitions",
+        json={"node_id": "order", "new_status": "ok", "action_label": "Auftrag bestätigt", "user_id": "user-1"},
+        headers=AUTH_HEADERS,
+    )
+    assert trans_resp.status_code == 200
+    body = trans_resp.json()
+    assert body["node_statuses"]["order"] == "ok"
+    assert body["active_node_id"] == "order"
+    assert body["last_actor"] == "user-1"
+
+    # Cleanup
+    inst = db.get(FlowSpineInstance, instance_id)
+    if inst:
+        db.delete(inst)
+        db.commit()
+
+
+def test_flow_spine_instance_delete(monkeypatch, db):
+    _require_flow_spine_table(db)
+
+    class _DummyNumbering:
+        def next_number(self, domain: str) -> str:
+            return "WF-DEL-001"
+
+    monkeypatch.setattr(flow_spines, "get_numbering", lambda: _DummyNumbering())
+
+    create_resp = client.post(
+        "/api/v1/process/flow-spines/order-to-cash/instances",
+        json={"subject": "Gerste 200 t"},
+        headers=AUTH_HEADERS,
+    )
+    assert create_resp.status_code == 201
+    instance_id = create_resp.json()["instance_id"]
+
+    del_resp = client.delete(
+        f"/api/v1/process/flow-spines/order-to-cash/instances/{instance_id}",
+        headers=AUTH_HEADERS,
+    )
+    assert del_resp.status_code == 204
+
+    get_resp = client.get(
+        f"/api/v1/process/flow-spines/order-to-cash/instances/{instance_id}",
+        headers=AUTH_HEADERS,
+    )
+    assert get_resp.status_code == 404
+
+
+# ── PCN-Meldungen (Gap 104-C/D — DB-backed) ──────────────────────────────────
+
+def test_pcn_meldung_create_valid(db):
+    _require_pcn_table(db)
+    response = client.post(
+        "/api/v1/compliance/pcn-meldungen",
+        json={
+            "produktname": "Pflanzenschutzmittel XY",
+            "ufi": "A1B2-C3D4-E5F6-G7H8",
+            "cas_nummern": "1234-56-7",
+            "gefahrenklassen": ["Akute Toxizität Kat. 3"],
+            "verwendungskategorie": "Professionell",
+            "pcnStatus": "entwurf",
+        },
+        headers=AUTH_HEADERS,
+    )
+    assert response.status_code == 201
+    body = response.json()
+    assert body["meldung_id"].startswith("PCN-")
+    assert body["produktname"] == "Pflanzenschutzmittel XY"
+    assert body["ufi"] == "A1B2-C3D4-E5F6-G7H8"
+    assert body["pcnStatus"] == "entwurf"
+    assert body["schema_version"] == 1
+
+    # Cleanup
+    m = db.get(PCNMeldung, body["meldung_id"])
+    if m:
+        db.delete(m)
+        db.commit()
+
+
+def test_pcn_meldung_create_invalid_ufi(db):
+    _require_pcn_table(db)
+    response = client.post(
+        "/api/v1/compliance/pcn-meldungen",
+        json={"produktname": "Test", "ufi": "INVALID-UFI", "gefahrenklassen": []},
+        headers=AUTH_HEADERS,
+    )
+    assert response.status_code == 422
+
+
+def test_pcn_meldung_create_without_ufi(db):
+    _require_pcn_table(db)
+    response = client.post(
+        "/api/v1/compliance/pcn-meldungen",
+        json={"produktname": "Düngemittel ABC", "gefahrenklassen": [], "pcnStatus": "entwurf"},
+        headers=AUTH_HEADERS,
+    )
+    assert response.status_code == 201
+    body = response.json()
+    assert body["ufi"] == ""
+
+    m = db.get(PCNMeldung, body["meldung_id"])
+    if m:
+        db.delete(m)
+        db.commit()
+
+
+def test_pcn_meldungen_list(db):
+    _require_pcn_table(db)
+    response = client.get("/api/v1/compliance/pcn-meldungen", headers=AUTH_HEADERS)
+    assert response.status_code == 200
+    body = response.json()
+    assert "meldungen" in body
+    assert "total" in body
+    assert "skip" in body
+    assert "limit" in body
+    assert isinstance(body["meldungen"], list)

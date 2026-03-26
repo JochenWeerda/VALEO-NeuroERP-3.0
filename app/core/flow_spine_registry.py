@@ -259,7 +259,7 @@ _catalog_json_cache: dict[str, str] = {}
 
 
 def get_flow_spine_catalog(lang: str | None = None) -> dict:
-    lang_key = lang or "de"
+    lang_key = _normalize_lang(lang) or "default"
     cached = _catalog_json_cache.get(lang_key)
     if cached is None:
         payload = {
@@ -279,31 +279,31 @@ WORKSPACES: dict[str, dict] = {}
 WORKSPACES["order-to-cash"] = _workspace(
     "order-to-cash",
     "Auftragsprozess Uebersicht",
-    "Aktive Steuerung der Order-to-Cash Kette mit AI Copilot, Statuskarten und Deep Links in die operativen Masken.",
-    "Auftrag AU-2026-4711",
+    "Vertriebsauftrag, Disponierung, Lieferschein, Faktura und Zahlung in einer durchgaengigen Landhandels-Steuerung.",
+    "Vorgang WF-00001",
     "Operations Lead",
     "Flow",
     "Suche in Prozessen, Auftraegen oder Rechnungen ...",
     [("SLA stabil", "ok"), ("1 kritische Abweichung", "warning")],
-    ["Wichtige Kunden", "Monatsbericht"],
-    ["AU-2024-001", "RE-992-B"],
-    ["Sales Manager", "Finance Controller"],
+    ["Top-Kunden", "Preislisten", "Offene Freigaben"],
+    ["WF-00001", "SO-004712"],
+    ["Innendienst", "Disposition", "Fakturierung"],
     [("Lieferantenvertrag_2024.pdf", "/dokumente/ablage"), ("SLA_TechLogistics.docx", "/dokumente/ablage")],
     [
-        ("Auftragsanlage", "/sales/orders/new", "/api/v1/sales/orders"),
-        ("Lieferungen", "/sales/lieferungen", "/api/v1/sales-shipping/delivery-notes"),
-        ("Rechnungen", "/sales/rechnungen", "/api/v1/finance/invoices"),
+        ("Auftrag erfassen", "/sales/orders/new", "/api/v1/sales/orders"),
+        ("Lieferscheine", "/sales/lieferungen", "/api/v1/sales-shipping/delivery-notes"),
+        ("Rechnungsausgang", "/sales/rechnungen", "/api/v1/finance/invoices"),
     ],
-    "delivery",
+    "order",
     [
-        _node("order", "Auftrag", "ok", "Package", "EUR 48.200", "12. Okt, 09:15", "Auftrag komplett, Bonitaet bestaetigt und Lieferfenster reserviert.", [("Kunde", "Ultrasharp Agrarhandel"), ("Auftrag", "AU-2026-4711"), ("Kanal", "Direktvertrieb")], [("Deckungsbeitrag", "18,4%"), ("Auftragswert", "EUR 48.200"), ("SLA", "98%")], [("Auftragsbestaetigung.pdf", "/sales/auftraege")], [("Auftrag oeffnen", "/sales/order", "primary", "/api/v1/sales/orders"), ("Kundenstamm", "/crm/kunden", "secondary", "/api/v1/crm/customers")], ("Auftrag ist freigabefaehig", "Kreditlimit, Lieferfenster und Preisfreigabe sind konsistent.", ["Kreditlimit gruen", "Preislistenregel getroffen"])),
-        _node("check", "Pruefung", "ok", "ShieldCheck", "3 Checks", "12. Okt, 14:30", "Freigaben und Policy-Regeln wurden ohne Abweichung durchlaufen.", [("Policy", "Preis + Kredit + Lieferfenster"), ("Freigaben", "3/3"), ("Status", "ABGESCHLOSSEN")], [("Freigabezeit", "2 Min"), ("Retry Safety", "99,9%"), ("Audit", "vollstaendig")], [("Policy-Protokoll", "/admin/ai-approvals")], [("Freigaben anzeigen", "/workflows/approval", "primary", "/api/v1/process/approval-density/overview")], ("Keine Richtlinienverletzung", "Freigabe wurde policy-konform und auditierbar abgeschlossen.", ["Preis innerhalb Toleranz", "Lieferfenster verfuegbar"])),
-        _node("delivery", "Lieferung", "active", "Truck", "In Zustellung", "Live-Tracking", "Supply Chain Alert: Verzoegerung um 4-6 Tage moeglich, Expressoption empfohlen.", [("Logistikpartner", "Global Express Logistics"), ("Tracking", "GXL-7782-XQ"), ("Geplanter Erhalt", "Morgen, 10:00 - 12:00")], [("KPI Health", "92%"), ("OTD", "92%"), ("ETA Drift", "+45 Min")], [("Lieferschein LS-884", "/sales/lieferungen")], [("Lieferung starten", "/sales/delivery", "primary", "/api/v1/channels/slack/process-actions/execute"), ("Freigabe senden", "/workflows/approval", "secondary", "/api/v1/channels/slack/process-actions"), ("Rechnung erzeugen", "/sales/invoice", "secondary", "/api/v1/finance/invoices")], ("Supply Chain Alert", "Alternativ-Sourcing oder Express-Versand mit Aufpreis wird empfohlen.", ["Lieferant A verspaetet", "Lagerbestand kritisch"])),
-        _node("invoice", "Rechnung", "warning", "Receipt", "Pending", "1 wartend", "Rechnung wartet auf belastbare Lieferbestaetigung und Zustellstatus.", [("Invoice Queue", "1"), ("Skonto", "2% moeglich"), ("Status", "WARTET")], [("Faktura SLA", "81%"), ("Queue", "1"), ("Cash Forecast", "EUR 41.700")], [("Rechnungsvorschau.xml", "/sales/invoices/new")], [("Rechnungseditor", "/sales/invoices/new", "primary", "/api/v1/finance/invoices")], ("Faktura wartet auf Lieferbestaetigung", "Vorgelagerter Lieferstatus muss gruen sein, bevor Faktura freigegeben wird.", ["Delivery POD fehlt"])),
-        _node("payment", "Zahlung", "warning", "Wallet", "Skonto offen", "T+10", "Fruehe Zahlung steigert Marge, wenn Zustellung termingerecht bleibt.", [("Faelligkeit", "T+10"), ("Skonto", "2%"), ("Forecast", "EUR 41.700")], [("Cash In", "EUR 41.700"), ("Skonto Potenzial", "EUR 834"), ("Mahnrisiko", "niedrig")], [("Zahlungslauf.pdf", "/finance/zahlungslauf-kreditoren")], [("Zahlungslauf", "/finance/zahlungslauf-kreditoren", "primary", "/api/v1/finance/payment-runs")], ("Skonto-Fenster sichern", "Zahlung frueh terminieren, sobald Rechnung freigegeben ist.", ["2% Skonto moeglich"])),
-        _node("close", "Abschluss", "critical", "BookOpen", "1 Risiko", "T+30", "Abschluss ist von Liefer- und Zahlungsstatus abhaengig; Korrekturbedarf moeglich.", [("Abschlussstatus", "RISIKO"), ("Marge", "gefaehrdet"), ("Korrekturen", "1 moeglich")], [("Abschlussquote", "84%"), ("Marge", "14,8%"), ("Audit", "vollstaendig")], [("Abschlussprotokoll", "/finance/abschluss")], [("Abschlusspruefung", "/finance/abschluss", "primary", "/api/v1/process/settlement/completion/evaluate")], ("Abschluss noch nicht stabil", "Bitte Lieferabweichung und Faktura zuerst bereinigen.", ["ETA Drift", "Faktura wartet"])),
+        _node("order", "Auftrag", "active", "Package", "SO offen", "Startpunkt", "Im Vertriebsinnendienst werden Kunde, Positionen, Mengen, Preise und Konditionen gepflegt.", [("Belegart", "Kundenauftrag"), ("Vorgang", "WF-00001"), ("Einstieg", "Innendienst")], [("Pflichtdaten", "Kunde + Positionen"), ("Preisfindung", "aktiv"), ("Nummernkreis", "Backend")], [("Auftragserfassung", "/sales/orders/new")], [("Auftrag erfassen", "/sales/orders/new", "primary", "/api/v1/sales/orders"), ("Kundenstamm", "/crm/kunden", "secondary", "/api/v1/crm/customers")], ("Erfassung zuerst im Beleg", "Mengen, Preise, Rabatte und Zusatzpositionen gehoeren in die Auftragsmaske, nicht in den Flow selbst.", ["Nummernkreis kommt beim Speichern", "Positionen frei pflegbar"])),
+        _node("check", "Pruefung", "ok", "ShieldCheck", "3 Checks", "12. Okt, 14:30", "Bonitaet, Preisregeln und Lieferfaehigkeit werden nach der Auftragserfassung bewertet.", [("Policy", "Preis + Kredit + Lieferfenster"), ("Freigaben", "3/3"), ("Status", "ABGESCHLOSSEN")], [("Freigabezeit", "2 Min"), ("Retry Safety", "99,9%"), ("Audit", "vollstaendig")], [("Policy-Protokoll", "/admin/ai-approvals")], [("Freigaben anzeigen", "/workflows/approval", "primary", "/api/v1/process/approval-density/overview"), ("Preisabweichungen pruefen", "/sales/order", "secondary", "/api/v1/sales/orders")], ("Keine Richtlinienverletzung", "Freigabe wurde policy-konform und auditierbar abgeschlossen.", ["Preis innerhalb Toleranz", "Lieferfenster verfuegbar"])),
+        _node("delivery", "Lieferung", "warning", "Truck", "Disposition aktiv", "Lieferschein", "Nach dem Auftrag werden Mengen disponiert, Lieferscheine erzeugt und die Auslieferung gesteuert.", [("Logistikpartner", "Global Express Logistics"), ("Lieferschein", "LS-884"), ("Geplanter Erhalt", "Morgen, 10:00 - 12:00")], [("KPI Health", "92%"), ("OTD", "92%"), ("ETA Drift", "+45 Min")], [("Lieferschein LS-884", "/sales/lieferungen")], [("Lieferschein anlegen", "/sales/lieferungen", "primary", "/api/v1/sales-shipping/delivery-notes"), ("Disposition oeffnen", "/verladung", "secondary", "/api/v1/tours"), ("Positionen pruefen", "/sales/order", "secondary", "/api/v1/sales/orders")], ("Logistik steuert reale Mengen", "Teillieferungen, Ersatzartikel und Mengenaenderungen passieren spaetestens in Disposition und Lieferschein.", ["Lieferant A verspaetet", "Lagerbestand kritisch"])),
+        _node("invoice", "Rechnung", "warning", "Receipt", "Faktura bereit", "1 wartend", "Die Faktura zieht belastbare Liefermengen aus Lieferschein und Versandstatus.", [("Invoice Queue", "1"), ("Skonto", "2% moeglich"), ("Status", "WARTET")], [("Faktura SLA", "81%"), ("Queue", "1"), ("Cash Forecast", "EUR 41.700")], [("Rechnungsvorschau.xml", "/sales/invoices/new")], [("Rechnung erzeugen", "/sales/invoices/new", "primary", "/api/v1/finance/invoices"), ("Lieferschein pruefen", "/sales/lieferungen", "secondary", "/api/v1/sales-shipping/delivery-notes")], ("Faktura wartet auf belastbare Menge", "Rechnungsmenge kommt aus der gelieferten Menge, nicht aus einem separaten Workflow-Feld.", ["Delivery POD fehlt"])),
+        _node("payment", "Zahlung", "warning", "Wallet", "OP offen", "T+10", "Nach der Faktura steuern Zahlungsziel, Skonto und Mahnstatus den Debitorenprozess.", [("Faelligkeit", "T+10"), ("Skonto", "2%"), ("Forecast", "EUR 41.700")], [("Cash In", "EUR 41.700"), ("Skonto Potenzial", "EUR 834"), ("Mahnrisiko", "niedrig")], [("Offene-Posten-Liste", "/finance/reconciliation")], [("Offene Posten", "/finance/reconciliation", "primary", "/api/v1/finance/reconciliation"), ("Zahlungslauf", "/finance/zahlungslauf-kreditoren", "secondary", "/api/v1/finance/payment-runs")], ("Skonto-Fenster sichern", "Zahlung frueh terminieren, sobald Rechnung freigegeben ist.", ["2% Skonto moeglich"])),
+        _node("close", "Abschluss", "critical", "BookOpen", "1 Risiko", "T+30", "Korrekturen, Gutschriften und Abschlusspruefungen folgen erst, wenn Lieferung, Faktura und Zahlung konsistent sind.", [("Abschlussstatus", "RISIKO"), ("Marge", "gefaehrdet"), ("Korrekturen", "1 moeglich")], [("Abschlussquote", "84%"), ("Marge", "14,8%"), ("Audit", "vollstaendig")], [("Abschlussprotokoll", "/finance/abschluss")], [("Abschlusspruefung", "/finance/abschluss", "primary", "/api/v1/process/settlement/completion/evaluate"), ("Gutschrift/Belastung", "/einkauf/gutschriften-belastungen", "secondary", "/api/v1/credit-debit-memos")], ("Abschluss noch nicht stabil", "Bitte Lieferabweichung und Faktura zuerst bereinigen.", ["ETA Drift", "Faktura wartet"])),
     ],
-    [("Operative Heatmap", ["Region Nord", "Region West", "Region Ost"]), ("Agent Events", ["Delay Prediction aktualisiert", "Skonto-Potenzial erkannt"]), ("Naechste Schritte", ["Live-Daten anbinden", "R3F-Spine ausbauen", "Action Layer erweitern"])],
+    [("Operative Heatmap", ["Region Nord", "Region West", "Region Ost"]), ("Agent Events", ["Delay Prediction aktualisiert", "Skonto-Potenzial erkannt"]), ("Naechste Schritte", ["Auftrag erfassen", "Lieferung disponieren", "Faktura freigeben"])],
     "workflow",
 )
 
@@ -522,7 +522,7 @@ _workspace_json_cache: dict[tuple[str, str], str] = {}
 
 
 def get_flow_spine_workspace(process_key: str, lang: str | None = None) -> dict:
-    lang_key = lang or "de"
+    lang_key = _normalize_lang(lang) or "default"
     cache_key = (process_key, lang_key)
 
     cached_json = _workspace_json_cache.get(cache_key)
@@ -569,7 +569,11 @@ def merge_instance_statuses(workspace: dict, instance: dict) -> dict:
 
     if instance.get("label"):
         workspace["instance_label"] = instance["label"]
+        if isinstance(workspace.get("breadcrumb"), list) and len(workspace["breadcrumb"]) >= 3:
+            workspace["breadcrumb"][2] = instance["label"]
     if instance.get("instance_id"):
         workspace["instance_id"] = instance["instance_id"]
+    if instance.get("case_number"):
+        workspace["case_number"] = instance["case_number"]
 
     return workspace

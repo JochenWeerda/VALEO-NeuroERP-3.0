@@ -78,9 +78,15 @@ export interface FlowSpineCatalog {
 
 export interface FlowSpineInstance {
   instance_id: string
+  case_number: string
   process_key: string
   label: string
   created_at: string
+  customer_id?: string
+  customer_name?: string
+  partner_name?: string
+  subject?: string
+  entry_mode?: string
   node_statuses: Record<string, string>
   active_node_id?: string
   linked_document_id?: string
@@ -88,7 +94,12 @@ export interface FlowSpineInstance {
 }
 
 export interface CreateInstancePayload {
-  label: string
+  label?: string
+  customer_id?: string
+  customer_name?: string
+  partner_name?: string
+  subject?: string
+  entry_mode?: string
   linked_document_id?: string
   linked_document_type?: string
 }
@@ -159,14 +170,20 @@ export function useFlowSpineCatalog() {
   return useFlowSpineCatalogHook()
 }
 
+type FlowSpineInstancesResponse = {
+  process_key: string
+  total: number
+  instances: FlowSpineInstance[]
+}
+
 export function useFlowSpineInstances(processKey: string) {
   return useQuery<FlowSpineInstance[]>({
     queryKey: ['workflow', 'flow-spine', processKey, 'instances'],
     queryFn: async () => {
-      const res = await apiClient.get<FlowSpineInstance[]>(
+      const res = await apiClient.get<FlowSpineInstancesResponse>(
         `/api/v1/process/flow-spines/${processKey}/instances`
       )
-      return res.data
+      return res.data.instances
     },
     retry: false,
   })

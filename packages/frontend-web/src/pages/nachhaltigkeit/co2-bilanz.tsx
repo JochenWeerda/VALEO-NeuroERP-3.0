@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { useSearchParams } from 'react-router-dom'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ErrorState } from '@/components/ErrorState'
 import { apiClient } from '@/lib/api-client'
 import { BarChart3, Leaf, TrendingDown } from 'lucide-react'
+import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
 
 type EsgReport = {
   totalCo2eKg: number
@@ -15,7 +17,9 @@ type EsgReport = {
 
 export default function CO2BilanzPage(): JSX.Element {
   const currentYear = new Date().getFullYear()
+  const [searchParams] = useSearchParams()
   const [year] = useState(currentYear)
+  const workflowContext = readWorkflowEntryContext(searchParams)
 
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['sustainability', 'esg-report', 'co2', year],
@@ -55,6 +59,13 @@ export default function CO2BilanzPage(): JSX.Element {
 
   return (
     <div className="space-y-6 p-6">
+      {workflowContext ? (
+        <WorkflowEntryBanner
+          context={workflowContext}
+          title="Workflow-Handover aus Compliance-to-Report"
+          description="CO2-, EUDR- und ESG-Daten werden jetzt in den Reporting-Cockpits konsolidiert. Der Flow-Fall bleibt als Referenz erhalten."
+        />
+      ) : null}
       <div>
         <h1 className="text-3xl font-bold">CO₂-Bilanz</h1>
         <p className="text-muted-foreground">Klimabilanz {year}</p>

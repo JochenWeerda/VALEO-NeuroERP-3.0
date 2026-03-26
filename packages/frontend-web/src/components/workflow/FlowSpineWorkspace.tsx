@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
+  Building2,
   ArrowLeftRight,
   Bell,
   BookOpen,
@@ -28,7 +29,7 @@ import { AgentProcessPanel } from '@/components/agent'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -62,11 +63,294 @@ const ICONS = {
   UserCircle2,
   Wallet,
   Warehouse,
+  Building2,
 } as const
 
 interface FlowSpineWorkspaceProps {
   processKey: string
   instanceId?: string
+}
+
+type ProcessEntryMode = {
+  value: string
+  description: string
+}
+
+type ProcessStartConfig = {
+  buttonLabel: string
+  dialogTitle: string
+  dialogDescription: string
+  partnerLabel: string
+  subjectLabel: string
+  labelLabel: string
+  labelPlaceholder: string
+  submitLabel: string
+  explanation: string
+  entryModes: ProcessEntryMode[]
+  buildHref: (created: {
+    instance_id: string
+    case_number: string
+    label: string
+    entry_mode?: string
+    customer_name?: string
+    partner_name?: string
+    subject?: string
+  }) => string
+}
+
+const PROCESS_START_CONFIGS: Record<string, ProcessStartConfig> = {
+  'order-to-cash': {
+    buttonLabel: 'Neuer Vorgang',
+    dialogTitle: 'Neuen Vertriebsvorgang starten',
+    dialogDescription: 'Zuerst Vorgang anlegen, dann den eigentlichen Auftrag in der Standardmaske erfassen.',
+    partnerLabel: 'Kunde oder Interessent',
+    subjectLabel: 'Vorgang / Thema',
+    labelLabel: 'Interne Bezeichnung (optional)',
+    labelPlaceholder: 'z.B. Fruehjahrsaktion Nord / Schnellauftrag',
+    submitLabel: 'Vorgang anlegen',
+    explanation: 'Zuerst entsteht ein Vorgang mit eigener Vorgangsnummer. Die eigentliche Auftragsnummer wird erst beim Speichern des Belegs im Backend aus dem Nummernkreis vergeben.',
+    entryModes: [
+      { value: 'Direktauftrag', description: 'Sofort in die Auftragserfassung wechseln.' },
+      { value: 'Kundenanfrage', description: 'Vorgang anlegen und Daten schrittweise erfassen.' },
+      { value: 'Angebot', description: 'Bestehendes Angebot als Ausgangspunkt nutzen.' },
+    ],
+    buildHref: (created) => {
+      const query = new URLSearchParams({
+        workflowProcess: 'order-to-cash',
+        workflowInstanceId: created.instance_id,
+        workflowCase: created.case_number,
+        workflowLabel: created.label,
+        entryMode: created.entry_mode ?? 'Direktauftrag',
+      })
+      if (created.customer_name || created.partner_name) query.set('customerName', created.customer_name ?? created.partner_name ?? '')
+      if (created.subject) query.set('subject', created.subject)
+      return `/sales/order-editor?${query.toString()}`
+    },
+  },
+  'procure-to-pay': {
+    buttonLabel: 'Neuen Beschaffungsvorgang starten',
+    dialogTitle: 'Neue Beschaffung starten',
+    dialogDescription: 'Bedarf oder Lieferantenbezug erfassen und dann in die Bestellmaske uebergeben.',
+    partnerLabel: 'Lieferant / Partner',
+    subjectLabel: 'Bedarf / Thema',
+    labelLabel: 'Interne Referenz (optional)',
+    labelPlaceholder: 'z.B. Saisonbedarf Nord / Rahmenabruf',
+    submitLabel: 'Beschaffungsvorgang anlegen',
+    explanation: 'Im Flow entsteht zuerst der Beschaffungsvorgang. Lieferant, Positionen, Mengen, Preise, Incoterms und Termine werden in der Bestellmaske gepflegt.',
+    entryModes: [
+      { value: 'Direktbestellung', description: 'Sofort in die Bestellanlage wechseln.' },
+      { value: 'Bedarfsmeldung', description: 'Aus internem Bedarf oder Bestellvorschlag starten.' },
+      { value: 'Rahmenabruf', description: 'Auf Basis eines bestehenden Vertrags abrufen.' },
+    ],
+    buildHref: (created) => {
+      const query = new URLSearchParams({
+        workflowProcess: 'procure-to-pay',
+        workflowInstanceId: created.instance_id,
+        workflowCase: created.case_number,
+        workflowLabel: created.label,
+        entryMode: created.entry_mode ?? 'Direktbestellung',
+      })
+      if (created.partner_name || created.customer_name) query.set('partnerName', created.partner_name ?? created.customer_name ?? '')
+      if (created.subject) query.set('subject', created.subject)
+      return `/einkauf/bestellungen/neu?${query.toString()}`
+    },
+  },
+  'inventory-to-settlement': {
+    buttonLabel: 'Neuen Lagerfall starten',
+    dialogTitle: 'Neuen Lager- und Versandvorgang starten',
+    dialogDescription: 'Welle oder Versandfall anlegen und in die operative Bestands- oder Verladeansicht uebergeben.',
+    partnerLabel: 'Kunde / Rampe / Bereich',
+    subjectLabel: 'Welle / Thema',
+    labelLabel: 'Interne Referenz (optional)',
+    labelPlaceholder: 'z.B. Welle Nord / Rampenwechsel',
+    submitLabel: 'Lagerfall anlegen',
+    explanation: 'Im Flow wird der operative Fall sichtbar gemacht. Bestandsdaten, Rampen und reale Versandbewegungen werden in den Lager- und Verlade-Masken gepflegt.',
+    entryModes: [
+      { value: 'Kommissionierwelle', description: 'Startet aus einer neuen Welle oder Prioritaetsliste.' },
+      { value: 'Versandfall', description: 'Fokus auf Rampe, ETA und Verladung.' },
+      { value: 'Bestandsklaerung', description: 'Fokus auf Bestand, Charge oder Inventurdifferenz.' },
+    ],
+    buildHref: (created) => {
+      const query = new URLSearchParams({
+        workflowProcess: 'inventory-to-settlement',
+        workflowInstanceId: created.instance_id,
+        workflowCase: created.case_number,
+        workflowLabel: created.label,
+        entryMode: created.entry_mode ?? 'Kommissionierwelle',
+      })
+      if (created.partner_name || created.customer_name) query.set('partnerName', created.partner_name ?? created.customer_name ?? '')
+      if (created.subject) query.set('subject', created.subject)
+      return `/lager/bestandsuebersicht?${query.toString()}`
+    },
+  },
+  'harvest-to-settlement': {
+    buttonLabel: 'Neue Ernteinstanz starten',
+    dialogTitle: 'Neue Ernteannahme starten',
+    dialogDescription: 'Anlieferer, Kampagne oder Charge erfassen und direkt in die Ernte-Annahmemaske wechseln.',
+    partnerLabel: 'Anlieferer / Landwirt',
+    subjectLabel: 'Charge / Kampagne / Thema',
+    labelLabel: 'Interne Referenz (optional)',
+    labelPlaceholder: 'z.B. Erntefenster Nord / Weizen KW32',
+    submitLabel: 'Erntevorgang anlegen',
+    explanation: 'Der Flow bildet den Kampagnenfall ab. Gewichte, Qualitaet, Trocknung, Silo und Settlement entstehen in den Standardmasken der Annahme.',
+    entryModes: [
+      { value: 'Ernteannahme', description: 'Direkter Einstieg in Annahme und Wiegeschein.' },
+      { value: 'Trocknungsfall', description: 'Fokus auf Feuchte, Trockner und Silo.' },
+      { value: 'Nachabrechnung', description: 'Rueckrechnung oder nachgelagerte Korrektur.' },
+    ],
+    buildHref: (created) => {
+      const query = new URLSearchParams({
+        workflowProcess: 'harvest-to-settlement',
+        workflowInstanceId: created.instance_id,
+        workflowCase: created.case_number,
+        workflowLabel: created.label,
+        entryMode: created.entry_mode ?? 'Ernteannahme',
+      })
+      if (created.partner_name || created.customer_name) query.set('partnerName', created.partner_name ?? created.customer_name ?? '')
+      if (created.subject) query.set('subject', created.subject)
+      return `/agrar/ernte-annahme-erfassung?${query.toString()}`
+    },
+  },
+  'contract-to-settlement': {
+    buttonLabel: 'Neuen Kontraktfall starten',
+    dialogTitle: 'Neuen Kontrakt- und Abrechnungsfall starten',
+    dialogDescription: 'Kontraktkontext aufbauen und danach in die Kontraktmaske oder Annahme uebergeben.',
+    partnerLabel: 'Kunde / Lieferant',
+    subjectLabel: 'Kontrakt / Thema',
+    labelLabel: 'Interne Referenz (optional)',
+    labelPlaceholder: 'z.B. Mais Vertrag 2026 / Nachtrag',
+    submitLabel: 'Kontraktfall anlegen',
+    explanation: 'Kontraktdaten, Mengenstaffeln, Preise und Konditionen gehoeren in die Kontraktmaske. Der Flow steuert danach Annahme, Qualitaet und Settlement.',
+    entryModes: [
+      { value: 'Neukontrakt', description: 'Neuen Kontrakt anlegen.' },
+      { value: 'Annahme zu Kontrakt', description: 'Bestehenden Kontrakt mit Lieferung verbinden.' },
+      { value: 'Nachtrag / Korrektur', description: 'Preis-, Mengen- oder Konditionsaenderung pflegen.' },
+    ],
+    buildHref: (created) => {
+      const query = new URLSearchParams({
+        workflowProcess: 'contract-to-settlement',
+        workflowInstanceId: created.instance_id,
+        workflowCase: created.case_number,
+        workflowLabel: created.label,
+        entryMode: created.entry_mode ?? 'Neukontrakt',
+      })
+      if (created.partner_name || created.customer_name) query.set('partnerName', created.partner_name ?? created.customer_name ?? '')
+      if (created.subject) query.set('subject', created.subject)
+      return `/kontrakte/neu?${query.toString()}`
+    },
+  },
+  'complaint-to-resolution': {
+    buttonLabel: 'Neue Reklamation starten',
+    dialogTitle: 'Neue Reklamation starten',
+    dialogDescription: 'Kunde und Reklamationsanlass erfassen, dann in den Reklamationsarbeitsplatz uebergeben.',
+    partnerLabel: 'Kunde / Ansprechpartner',
+    subjectLabel: 'Reklamationsanlass',
+    labelLabel: 'Interne Referenz (optional)',
+    labelPlaceholder: 'z.B. Charge 553 / Schaeden Nord',
+    submitLabel: 'Reklamationsfall anlegen',
+    explanation: 'Der Flow startet den Fall. Erfassung, Anhange, CRM-Zuordnung und Kulanzentscheidung werden in Reklamation, CRM und DMS gepflegt.',
+    entryModes: [
+      { value: 'Kundenreklamation', description: 'Fall direkt aus Kundenmeldung eroeffnen.' },
+      { value: 'Interne Qualitaetsabweichung', description: 'Interne Abweichung mit DMS- und Audit-Bezug.' },
+      { value: 'Kulanzpruefung', description: 'Bestehenden Fall fuer Freigabe vorbereiten.' },
+    ],
+    buildHref: (created) => {
+      const query = new URLSearchParams({
+        workflowProcess: 'complaint-to-resolution',
+        workflowInstanceId: created.instance_id,
+        workflowCase: created.case_number,
+        workflowLabel: created.label,
+        entryMode: created.entry_mode ?? 'Kundenreklamation',
+      })
+      if (created.partner_name || created.customer_name) query.set('partnerName', created.partner_name ?? created.customer_name ?? '')
+      if (created.subject) query.set('subject', created.subject)
+      return `/qualitaet/reklamationen?${query.toString()}`
+    },
+  },
+  'service-to-customer': {
+    buttonLabel: 'Neuen Servicefall starten',
+    dialogTitle: 'Neuen Servicefall starten',
+    dialogDescription: 'Kundenbezug und Servicethema erfassen und in die Service-Anfragen uebergeben.',
+    partnerLabel: 'Kunde / Standort',
+    subjectLabel: 'Serviceanliegen',
+    labelLabel: 'Interne Referenz (optional)',
+    labelPlaceholder: 'z.B. Spreizer Wartung Nord / Stoerung Feldrand',
+    submitLabel: 'Servicefall anlegen',
+    explanation: 'Im Flow entsteht der Servicefall. Ticketdaten, Termine, Disposition und Rueckmeldung werden in den Service- und Aktivitaetsmasken gepflegt.',
+    entryModes: [
+      { value: 'Stoerung', description: 'Akuter Servicefall mit schneller Priorisierung.' },
+      { value: 'Wartung', description: 'Planbare Wartung oder wiederkehrender Service.' },
+      { value: 'Beratung vor Ort', description: 'Termin oder Einsatz ohne Stoerung.' },
+    ],
+    buildHref: (created) => {
+      const query = new URLSearchParams({
+        workflowProcess: 'service-to-customer',
+        workflowInstanceId: created.instance_id,
+        workflowCase: created.case_number,
+        workflowLabel: created.label,
+        entryMode: created.entry_mode ?? 'Stoerung',
+      })
+      if (created.partner_name || created.customer_name) query.set('partnerName', created.partner_name ?? created.customer_name ?? '')
+      if (created.subject) query.set('subject', created.subject)
+      return `/service/anfragen?${query.toString()}`
+    },
+  },
+  'finance-to-close': {
+    buttonLabel: 'Neuen Abschlussfall starten',
+    dialogTitle: 'Neuen Finance-to-Close-Fall starten',
+    dialogDescription: 'Periode und Abschlusskontext erfassen und ins Abschluss-Cockpit uebergeben.',
+    partnerLabel: 'Periode / Bereich',
+    subjectLabel: 'Abschlussanlass',
+    labelLabel: 'Interne Referenz (optional)',
+    labelPlaceholder: 'z.B. Monatsabschluss 03/2026 / Sonderthema',
+    submitLabel: 'Abschlussfall anlegen',
+    explanation: 'Der Flow bildet den Abschlussfall. Buchungen, Abstimmungen, Meldungen und Sign-off passieren in den Finanzmasken.',
+    entryModes: [
+      { value: 'Monatsabschluss', description: 'Startet den regulaeren Periodenabschluss.' },
+      { value: 'Quartalsabschluss', description: 'Mit Reporting- und Freigabefokus.' },
+      { value: 'Sonderabschluss', description: 'Ausnahmefall oder Nachbearbeitung.' },
+    ],
+    buildHref: (created) => {
+      const query = new URLSearchParams({
+        workflowProcess: 'finance-to-close',
+        workflowInstanceId: created.instance_id,
+        workflowCase: created.case_number,
+        workflowLabel: created.label,
+        entryMode: created.entry_mode ?? 'Monatsabschluss',
+      })
+      if (created.partner_name || created.customer_name) query.set('partnerName', created.partner_name ?? created.customer_name ?? '')
+      if (created.subject) query.set('subject', created.subject)
+      return `/finance/abschluss?${query.toString()}`
+    },
+  },
+  'compliance-to-report': {
+    buttonLabel: 'Neuen Reportingfall starten',
+    dialogTitle: 'Neuen Compliance- und Reportingfall starten',
+    dialogDescription: 'Reportingkontext erfassen und in CO2-, EUDR- oder ESG-Reporting uebergeben.',
+    partnerLabel: 'Report / Organisationseinheit',
+    subjectLabel: 'Melde- oder Reportingthema',
+    labelLabel: 'Interne Referenz (optional)',
+    labelPlaceholder: 'z.B. CO2 Q2 / EUDR Batch Nord',
+    submitLabel: 'Reportingfall anlegen',
+    explanation: 'Der Flow fasst den Reportingfall. Datenqualitaet, Validierung, Freigabe und Publikation erfolgen in den Fachcockpits fuer Nachhaltigkeit und Compliance.',
+    entryModes: [
+      { value: 'CO2 Reporting', description: 'Klimabilanz und Nachhaltigkeitsdaten konsolidieren.' },
+      { value: 'EUDR / Herkunft', description: 'Herkunftsnachweise und Ausnahmen steuern.' },
+      { value: 'ESG Report', description: 'Managementreporting vorbereiten.' },
+    ],
+    buildHref: (created) => {
+      const query = new URLSearchParams({
+        workflowProcess: 'compliance-to-report',
+        workflowInstanceId: created.instance_id,
+        workflowCase: created.case_number,
+        workflowLabel: created.label,
+        entryMode: created.entry_mode ?? 'CO2 Reporting',
+      })
+      if (created.partner_name || created.customer_name) query.set('partnerName', created.partner_name ?? created.customer_name ?? '')
+      if (created.subject) query.set('subject', created.subject)
+      return `/nachhaltigkeit/co2-bilanz?${query.toString()}`
+    },
+  },
 }
 
 function toneClasses(tone: string): string {
@@ -86,6 +370,7 @@ function toneClasses(tone: string): string {
 
 export function FlowSpineWorkspace({ processKey, instanceId }: FlowSpineWorkspaceProps): JSX.Element {
   const navigate = useNavigate()
+  const startConfig = PROCESS_START_CONFIGS[processKey] ?? PROCESS_START_CONFIGS['order-to-cash']
   const workspaceQuery = useQuery({
     queryKey: ['workflow', 'flow-spine', processKey, instanceId ?? 'default'],
     queryFn: () => fetchFlowSpineWorkspace(processKey, instanceId),
@@ -101,11 +386,21 @@ export function FlowSpineWorkspace({ processKey, instanceId }: FlowSpineWorkspac
   // New instance dialog state
   const [showNewInstanceDialog, setShowNewInstanceDialog] = useState(false)
   const [newInstanceLabel, setNewInstanceLabel] = useState('')
+  const [newInstancePartnerName, setNewInstancePartnerName] = useState('')
+  const [newInstanceSubject, setNewInstanceSubject] = useState('')
+  const [newInstanceEntryMode, setNewInstanceEntryMode] = useState(startConfig.entryModes[0]?.value ?? 'Direktauftrag')
   const createInstance = useCreateFlowSpineInstance(processKey)
 
   // Action execution hooks
   const executeAction = useExecuteFlowSpineAction()
   const executeAgentAction = useExecuteAgentAction(processKey)
+
+  useEffect(() => {
+    setNewInstanceEntryMode(startConfig.entryModes[0]?.value ?? 'Direktauftrag')
+    setNewInstanceLabel('')
+    setNewInstancePartnerName('')
+    setNewInstanceSubject('')
+  }, [startConfig, processKey])
 
   useEffect(() => {
     if (workspace?.focus_node_id) {
@@ -162,12 +457,25 @@ export function FlowSpineWorkspace({ processKey, instanceId }: FlowSpineWorkspac
   }
 
   const handleCreateInstance = async (): Promise<void> => {
-    if (!newInstanceLabel.trim()) return
+    const trimmedLabel = newInstanceLabel.trim()
+    const trimmedPartnerName = newInstancePartnerName.trim()
+    const trimmedSubject = newInstanceSubject.trim()
+    if (!trimmedLabel && !trimmedPartnerName && !trimmedSubject) return
     try {
-      await createInstance.mutateAsync({ label: newInstanceLabel.trim() })
-      toast({ title: 'Instanz erstellt', description: newInstanceLabel.trim() })
+      const created = await createInstance.mutateAsync({
+        label: trimmedLabel || undefined,
+        customer_name: processKey === 'order-to-cash' ? trimmedPartnerName || undefined : undefined,
+        partner_name: processKey !== 'order-to-cash' ? trimmedPartnerName || undefined : undefined,
+        subject: trimmedSubject || undefined,
+        entry_mode: newInstanceEntryMode,
+      })
+      toast({ title: 'Vorgang erstellt', description: created.label })
       setShowNewInstanceDialog(false)
       setNewInstanceLabel('')
+      setNewInstancePartnerName('')
+      setNewInstanceSubject('')
+      setNewInstanceEntryMode(startConfig.entryModes[0]?.value ?? 'Direktauftrag')
+      go(startConfig.buildHref(created))
     } catch (e) {
       console.error('Create instance failed:', e)
       toast({
@@ -268,7 +576,7 @@ export function FlowSpineWorkspace({ processKey, instanceId }: FlowSpineWorkspac
               onClick={() => setShowNewInstanceDialog(true)}
             >
               <Plus className="mr-1.5 h-3.5 w-3.5" />
-              Neue Instanz
+              {startConfig.buttonLabel}
             </Button>
             <div className="flex rounded-xl bg-white/5 p-1 text-xs">
               {['Flow', 'Fokus', 'Uebersicht'].map((mode) => (
@@ -551,19 +859,66 @@ export function FlowSpineWorkspace({ processKey, instanceId }: FlowSpineWorkspac
 
       {/* Neue Instanz Dialog */}
       <Dialog open={showNewInstanceDialog} onOpenChange={setShowNewInstanceDialog}>
-        <DialogContent className="border-white/10 bg-slate-900 text-slate-100">
+          <DialogContent className="border-white/10 bg-slate-900 text-slate-100">
           <DialogHeader>
-            <DialogTitle>Neue Instanz starten</DialogTitle>
+            <DialogTitle>{startConfig.dialogTitle}</DialogTitle>
+            <DialogDescription className="text-slate-400">{startConfig.dialogDescription}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
+            <div className="grid gap-3 md:grid-cols-3">
+              {startConfig.entryModes.map((mode) => (
+                    <button
+                      key={mode.value}
+                      type="button"
+                      onClick={() => setNewInstanceEntryMode(mode.value)}
+                      className={cn(
+                        'rounded-2xl border px-4 py-3 text-left text-sm transition',
+                        newInstanceEntryMode === mode.value
+                          ? 'border-indigo-400/60 bg-indigo-500/15 text-indigo-100'
+                          : 'border-white/10 bg-white/5 text-slate-300 hover:bg-white/10',
+                      )}
+                    >
+                      <div className="font-medium">{mode.value}</div>
+                      <div className="mt-1 text-xs text-slate-400">{mode.description}</div>
+                    </button>
+                  ))}
+            </div>
             <div className="space-y-2">
-              <Label htmlFor="instance-label" className="text-slate-300">Bezeichnung</Label>
+              <Label htmlFor="instance-partner" className="text-slate-300">{startConfig.partnerLabel}</Label>
+              <div className="relative">
+                <Building2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+                <Input
+                  id="instance-partner"
+                  value={newInstancePartnerName}
+                  onChange={(e) => setNewInstancePartnerName(e.target.value)}
+                  placeholder="z.B. Agrarhandel Nord eG"
+                  className="border-white/10 bg-white/5 pl-9 text-slate-100 placeholder:text-slate-500"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="instance-subject" className="text-slate-300">{startConfig.subjectLabel}</Label>
+              <Input
+                id="instance-subject"
+                value={newInstanceSubject}
+                onChange={(e) => setNewInstanceSubject(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') void handleCreateInstance() }}
+                placeholder="z.B. Themenbeschreibung oder operative Referenz"
+                className="border-white/10 bg-white/5 text-slate-100 placeholder:text-slate-500"
+              />
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-slate-300">
+              <div className="font-medium text-slate-100">Praxislogik</div>
+              <div className="mt-1">{startConfig.explanation}</div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="instance-label" className="text-slate-300">{startConfig.labelLabel}</Label>
               <Input
                 id="instance-label"
                 value={newInstanceLabel}
                 onChange={(e) => setNewInstanceLabel(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter') void handleCreateInstance() }}
-                placeholder="z.B. Bestellung BE-2026-001"
+                placeholder={startConfig.labelPlaceholder}
                 className="border-white/10 bg-white/5 text-slate-100 placeholder:text-slate-500"
               />
             </div>
@@ -571,17 +926,17 @@ export function FlowSpineWorkspace({ processKey, instanceId }: FlowSpineWorkspac
           <DialogFooter>
             <Button
               variant="outline"
-              onClick={() => { setShowNewInstanceDialog(false); setNewInstanceLabel('') }}
+              onClick={() => { setShowNewInstanceDialog(false); setNewInstanceLabel(''); setNewInstancePartnerName(''); setNewInstanceSubject(''); setNewInstanceEntryMode(startConfig.entryModes[0]?.value ?? 'Direktauftrag') }}
               className="border-white/10 bg-white/5 text-slate-200 hover:bg-white/10"
             >
               Abbrechen
             </Button>
             <Button
               onClick={() => void handleCreateInstance()}
-              disabled={!newInstanceLabel.trim() || createInstance.isPending}
+              disabled={(!newInstanceLabel.trim() && !newInstancePartnerName.trim() && !newInstanceSubject.trim()) || createInstance.isPending}
               className="bg-indigo-500 text-white hover:bg-indigo-400"
             >
-              {createInstance.isPending ? 'Wird erstellt...' : 'Instanz starten'}
+              {createInstance.isPending ? 'Wird erstellt...' : startConfig.submitLabel}
             </Button>
           </DialogFooter>
         </DialogContent>

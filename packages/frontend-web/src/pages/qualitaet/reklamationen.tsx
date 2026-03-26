@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -11,12 +11,15 @@ import { PageSection, PageSurface } from '@/components/patterns/PageSurface'
 import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { AlertCircle, FileDown, Plus, Search } from 'lucide-react'
 import { useReklamationen, type Reklamation } from '@/lib/api/misc-modules'
+import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
 
 export default function ReklamationenPage(): JSX.Element {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const searchInputRef = useRef<HTMLInputElement | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const { data: reklamationen, isLoading } = useReklamationen()
+  const workflowContext = readWorkflowEntryContext(searchParams)
   const list = useMemo(() => {
     const items = reklamationen ?? []
     if (!searchTerm.trim()) {
@@ -123,6 +126,13 @@ export default function ReklamationenPage(): JSX.Element {
 
   return (
     <PageSurface data-page-surface="reklamationen" contentClassName="space-y-6">
+      {workflowContext ? (
+        <WorkflowEntryBanner
+          context={workflowContext}
+          title="Workflow-Handover aus Complaint-to-Resolution"
+          description="Hier werden Reklamationsfall, Kundenbezug, Dokumente und Bearbeitungsstatus gepflegt. Der Flow-Fall bleibt als Referenz erhalten."
+        />
+      ) : null}
       <PageSection
         description="CRM- und DMS-verbundene Reklamationssicht im einheitlichen DS-Rahmen mit Keyboard-first-Liste."
       >
@@ -131,7 +141,7 @@ export default function ReklamationenPage(): JSX.Element {
             <h1 className="text-3xl font-bold">Reklamationen</h1>
             <p className="text-muted-foreground">Qualitaets-Beschwerden mit SLA-, Audit- und Export-Sicht.</p>
           </div>
-          <Button onClick={() => navigate('/qualitaet/reklamation/neu')} className="min-h-touch gap-2 touch-manipulation">
+          <Button onClick={() => navigate(`/qualitaet/reklamation/neu${workflowContext ? `?${searchParams.toString()}` : ''}`)} className="min-h-touch gap-2 touch-manipulation">
             <Plus className="h-4 w-4" />
             Neue Reklamation
           </Button>
