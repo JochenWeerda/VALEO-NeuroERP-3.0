@@ -1,6 +1,6 @@
 # VK-013 - Ernte-Kampagnenabschluss
 
-**Slice:** VK-013 | **Status:** abgeschlossen | **Owner:** aktuell offener Agent (Codex)  
+**Slice:** VK-013 | **Status:** abgeschlossen | **Owner:** aktuell offener Agent (Codex)
 **Datum:** 2026-03-27
 
 ## A - Workflow-Uebersicht

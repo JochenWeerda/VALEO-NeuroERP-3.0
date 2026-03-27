@@ -82,7 +82,7 @@ Kein Agent darf einen Slice beginnen, der bereits `reserviert` oder `in arbeit` 
 
 ## Handoff: 2026-03-27 — DOCS-105 (archiviert)
 
-**Von:** Claude Sonnet 4.6  
+**Von:** Claude Sonnet 4.6
 **Stand:** **abgeschlossen und im Repo eingecheckt** (Nachzug Wave 104, Workboard, Roadmap-Dateien; siehe History ab Wave-104-Commits).
 
 **Hinweis fuer Sessions:** Die frueheren Zeilen "Docs-Commit ausstehend" / "P2P-001 als naechster Schritt" sind **veraltet**; P2P-Slices sind inzwischen ebenfalls abgeschlossen. Aktuelle Prioritaeten: **Parallele E2E-Lanes**, offene Finance-Lane **OTC-011** und im Agrar-Strang der Folge-Slice nach **VK-013**.
