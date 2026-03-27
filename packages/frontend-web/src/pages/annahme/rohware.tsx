@@ -116,7 +116,7 @@ export default function RohwareAnnahmePage(): JSX.Element {
         datum: form.datum || new Date().toISOString(),
         is_rohware: true,
       }
-      return (await apiClient.post<HarvestAcceptanceResponse>('/api/v1/harvest-acceptance', payload)).data
+      return (await apiClient.post<HarvestAcceptanceResponse>('/api/v1/agrar/harvest-acceptance', payload)).data
     },
     onSuccess: (data) => {
       setAcceptanceResult(data)
