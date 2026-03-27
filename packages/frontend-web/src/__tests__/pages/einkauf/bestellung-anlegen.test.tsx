@@ -49,19 +49,57 @@ vi.mock('react-i18next', () => ({
   }),
 }))
 
-vi.mock('@/components/patterns/Wizard', () => ({
-  Wizard: ({ title, steps, onFinish }: { title: string; steps: Array<{ id: string; content: JSX.Element }>; onFinish?: () => void }) => (
-    <div>
-      <h1>{title}</h1>
-      {steps.map((step) => (
-        <section key={step.id}>{step.content}</section>
-      ))}
-      <button type="button" onClick={() => void onFinish?.()}>
-        Abschliessen
-      </button>
-    </div>
-  ),
-}))
+vi.mock('@/components/patterns/Wizard', async () => {
+  const React = await vi.importActual<typeof import('react')>('react')
+
+  return {
+    Wizard: ({
+      title,
+      steps,
+      onFinish,
+      getStepValidationError,
+      onStepValidationError,
+    }: {
+      title: string
+      steps: Array<{ id: string; title: string; content: JSX.Element }>
+      onFinish?: () => void
+      getStepValidationError?: (stepId: string) => string | null
+      onStepValidationError?: (stepId: string, message: string) => void
+    }) => {
+      const [activeIndex, setActiveIndex] = React.useState(0)
+      const activeStep = steps[activeIndex]
+
+      const handleNext = () => {
+        const validationError = getStepValidationError?.(activeStep.id)
+        if (validationError) {
+          onStepValidationError?.(activeStep.id, validationError)
+          return
+        }
+
+        if (activeIndex === steps.length - 1) {
+          void onFinish?.()
+          return
+        }
+
+        setActiveIndex((prev) => prev + 1)
+      }
+
+      return (
+        <div>
+          <h1>{title}</h1>
+          <div>Aktiver Schritt: {activeStep.title}</div>
+          <section key={activeStep.id}>{activeStep.content}</section>
+          <button type="button" onClick={() => setActiveIndex((prev) => Math.max(0, prev - 1))}>
+            Zurueck
+          </button>
+          <button type="button" onClick={handleNext}>
+            {activeIndex === steps.length - 1 ? 'Abschliessen' : 'Weiter'}
+          </button>
+        </div>
+      )
+    },
+  }
+})
 
 vi.mock('@/lib/api-client', () => ({
   apiClient: {
@@ -75,6 +113,12 @@ vi.mock('@/hooks/use-toast', () => ({
 }))
 
 describe('BestellungAnlegenPage', () => {
+  async function goToStep(stepTitle: string): Promise<void> {
+    await waitFor(() => {
+      expect(screen.getByText(`Aktiver Schritt: ${stepTitle}`)).toBeInTheDocument()
+    })
+  }
+
   beforeEach(() => {
     postMock.mockReset()
     getMock.mockReset()
@@ -97,6 +141,12 @@ describe('BestellungAnlegenPage', () => {
     await waitFor(() => {
       expect(screen.getByLabelText('Lieferant *')).toHaveValue('Agrarhandel Nord')
     })
+    fireEvent.click(screen.getByRole('button', { name: 'Weiter' }))
+    await goToStep('Positionen')
+    fireEvent.change(screen.getByPlaceholderText('Artikel'), { target: { value: 'Testprodukt' } })
+    fireEvent.change(screen.getAllByRole('spinbutton')[1], { target: { value: '1' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Weiter' }))
+    await goToStep('Lieferung')
     const notesField = screen.getByLabelText('Notizen (optional)') as HTMLTextAreaElement
     expect(notesField.value).toContain('Workflow-Vorgang WF-2026-001')
     expect(notesField.value).toContain('Einstieg: Direktbestellung')
@@ -110,7 +160,7 @@ describe('BestellungAnlegenPage', () => {
       </MemoryRouter>,
     )
 
-    fireEvent.click(screen.getByRole('button', { name: 'Abschliessen' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Weiter' }))
 
     await waitFor(() => {
       expect(postMock).not.toHaveBeenCalled()
@@ -134,9 +184,15 @@ describe('BestellungAnlegenPage', () => {
     )
 
     fireEvent.change(screen.getByLabelText('Lieferant *'), { target: { value: 'Agrarhandel Nord' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Weiter' }))
+    await goToStep('Positionen')
     fireEvent.change(screen.getByPlaceholderText('Artikel'), { target: { value: 'Sojaschrot' } })
     fireEvent.change(screen.getAllByRole('spinbutton')[1], { target: { value: '42.5' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Weiter' }))
+    await goToStep('Lieferung')
     fireEvent.change(screen.getAllByLabelText('Lieferadresse')[0], { target: { value: 'Werk Nord, Tor 3' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Weiter' }))
+    await goToStep('Zusammenfassung')
 
     fireEvent.click(screen.getByRole('button', { name: 'Abschliessen' }))
 
@@ -177,10 +233,19 @@ describe('BestellungAnlegenPage', () => {
     await waitFor(() => {
       expect(getMock).toHaveBeenCalledWith('/api/v1/einkauf/anfragen/req-1')
     })
+    fireEvent.change(screen.getByLabelText('Lieferant *'), { target: { value: 'Agrarhandel Nord' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Weiter' }))
+    await goToStep('Positionen')
     await waitFor(() => {
-      expect(screen.getByDisplayValue('2026-04-10')).toBeInTheDocument()
       expect(screen.getByPlaceholderText('Artikel')).toHaveValue('Sommergerste')
     })
+    fireEvent.click(screen.getByRole('button', { name: 'Zurueck' }))
+    await goToStep('Lieferant')
+    expect(screen.getByDisplayValue('2026-04-10')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Weiter' }))
+    await goToStep('Positionen')
+    fireEvent.click(screen.getByRole('button', { name: 'Weiter' }))
+    await goToStep('Lieferung')
     const notesField = screen.getByLabelText('Notizen (optional)') as HTMLTextAreaElement
     expect(notesField.value).toContain('Bedarfsmeldung BANF-2026-001')
     expect(notesField.value).toContain('Anforderer: Disposition Nord')
@@ -207,10 +272,19 @@ describe('BestellungAnlegenPage', () => {
     await waitFor(() => {
       expect(getMock).toHaveBeenCalledWith('/api/v1/einkauf/anfragen/rfq-1')
     })
+    fireEvent.change(screen.getByLabelText('Lieferant *'), { target: { value: 'Lieferant RFQ' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Weiter' }))
+    await goToStep('Positionen')
     await waitFor(() => {
       expect(screen.getByPlaceholderText('Artikel')).toHaveValue('Rapsschrot')
-      expect(screen.getByDisplayValue('2026-04-22')).toBeInTheDocument()
     })
+    fireEvent.click(screen.getByRole('button', { name: 'Zurueck' }))
+    await goToStep('Lieferant')
+    expect(screen.getByDisplayValue('2026-04-22')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Weiter' }))
+    await goToStep('Positionen')
+    fireEvent.click(screen.getByRole('button', { name: 'Weiter' }))
+    await goToStep('Lieferung')
     const notesField = screen.getByLabelText('Notizen (optional)') as HTMLTextAreaElement
     expect(notesField.value).toContain('RFQ-Bezug RFQ-2026-008')
     expect(notesField.value).toContain('RFQ-Status: ANGEBOTSPHASE')
@@ -239,10 +313,42 @@ describe('BestellungAnlegenPage', () => {
     })
     await waitFor(() => {
       expect(screen.getByLabelText('Lieferant *')).toHaveValue('Lieferant-77')
-      expect(screen.getByPlaceholderText('Artikel')).toHaveValue('Mais')
-      expect(screen.getByDisplayValue('2026-05-01')).toBeInTheDocument()
     })
+    fireEvent.click(screen.getByRole('button', { name: 'Weiter' }))
+    await goToStep('Positionen')
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('Artikel')).toHaveValue('Mais')
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Zurueck' }))
+    await goToStep('Lieferant')
+    expect(screen.getByDisplayValue('2026-05-01')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Weiter' }))
+    await goToStep('Positionen')
+    fireEvent.click(screen.getByRole('button', { name: 'Weiter' }))
+    await goToStep('Lieferung')
     const notesField = screen.getByLabelText('Notizen (optional)') as HTMLTextAreaElement
     expect(notesField.value).toContain('Vertragsbezug K-2026-004')
+  })
+
+  it('blockiert den Wechsel zum Positionsschritt ohne Lieferant', async () => {
+    render(
+      <MemoryRouter initialEntries={['/einkauf/bestellungen/neu']}>
+        <BestellungAnlegenPage />
+      </MemoryRouter>,
+    )
+
+    await goToStep('Lieferant')
+    fireEvent.click(screen.getByRole('button', { name: 'Weiter' }))
+
+    await waitFor(() => {
+      expect(toastMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Validierung fehlgeschlagen',
+          description: 'Lieferant ist ein Pflichtfeld.',
+          variant: 'destructive',
+        }),
+      )
+    })
+    expect(screen.getByText('Aktiver Schritt: Lieferant')).toBeInTheDocument()
   })
 })
