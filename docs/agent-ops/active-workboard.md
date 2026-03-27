@@ -39,14 +39,18 @@ Zwei End-to-End-Stränge laufen **fachlich und technisch getrennt**. Bitte **nic
 | VK-020 | Rohware-Wizard Schrittvalidierung (VK-012-P1) | abgeschlossen | Cursor Agent | `packages/frontend-web/src/pages/annahme/rohware.tsx`, `packages/frontend-web/src/__tests__/pages/annahme/rohware.test.tsx`, `docs/workflows/vk-020-rohware-wizard-schrittvalidierung.md`, `docs/cards/agrar/VK-020-rohware-wizard-schrittvalidierung.md` | VK-012-P2/P3 oder VK-013 | keine |
 | VK-013 | Ernte-Kampagne-Abschluss: Gesamtabrechnung ueber alle Settlements | abgeschlossen | aktuell offener Agent (Codex) | `docs/agent-ops/active-workboard.md`, `docs/workflows/vk-013-kampagnenabschluss.md`, `docs/cards/agrar/VK-013-kampagnenabschluss.md`, `docs/quality-assurance/browser-use-checklists.md`, `packages/frontend-web/src/pages/agrar/erntefenster-konfig.tsx`, `packages/frontend-web/src/pages/annahme/abrechnung.tsx`, `packages/frontend-web/src/__tests__/pages/agrar/erntefenster-konfig.test.tsx`, `packages/frontend-web/src/__tests__/pages/annahme/abrechnung.test.tsx` | Folge-Slice fuer echte Kampagnenreferenz oder Queue-/Artikel-API zuschneiden | keine |
 | VK-014 | Settlement-Kampagnenreferenz: echte Zuordnung statt Zeitfenster-Proxy | abgeschlossen | aktuell offener Agent (Codex) | `docs/agent-ops/active-workboard.md`, `docs/workflows/vk-014-settlement-kampagnenreferenz.md`, `docs/cards/agrar/VK-014-settlement-kampagnenreferenz.md`, `app/api/v1/endpoints/agrar_settlements.py`, `app/infrastructure/models/l3c_models.py`, `alembic/versions/agrar_settlement_campaign_reference_20260327.py`, `packages/frontend-web/src/pages/agrar/erntefenster-konfig.tsx`, `packages/frontend-web/src/pages/annahme/abrechnung.tsx`, `tests/test_agrar_settlement_campaign_reference.py`, `packages/frontend-web/src/__tests__/pages/agrar/erntefenster-konfig.test.tsx`, `packages/frontend-web/src/__tests__/pages/annahme/abrechnung.test.tsx` | Folge-Slice fuer Backfill oder Queue-/Artikel-API zuschneiden | keine |
-| VK-015 | Settlement-Kampagnenreferenz Backfill fuer Alt-Daten | reserviert | aktuell offener Agent (Codex) | `docs/agent-ops/active-workboard.md`, `docs/workflows/vk-015-settlement-kampagnen-backfill.md`, `docs/cards/agrar/VK-015-settlement-kampagnen-backfill.md`, `docs/quality-assurance/browser-use-checklists.md`, `app/api/v1/endpoints/agrar_settlements.py`, `packages/frontend-web/src/pages/agrar/erntefenster-konfig.tsx`, `tests/test_agrar_settlement_campaign_backfill.py`, `packages/frontend-web/src/__tests__/pages/agrar/erntefenster-konfig.test.tsx` | Claim committen, dann Repair-Endpoint und Kampagnen-CTA umsetzen | keine |
+| VK-015 | Settlement-Kampagnenreferenz Backfill fuer Alt-Daten | abgeschlossen | aktuell offener Agent (Codex) | `docs/agent-ops/active-workboard.md`, `docs/workflows/vk-015-settlement-kampagnen-backfill.md`, `docs/cards/agrar/VK-015-settlement-kampagnen-backfill.md`, `docs/quality-assurance/browser-use-checklists.md`, `app/api/v1/endpoints/agrar_settlements.py`, `packages/frontend-web/src/pages/agrar/erntefenster-konfig.tsx`, `tests/test_agrar_settlement_campaign_backfill.py`, `packages/frontend-web/src/__tests__/pages/agrar/erntefenster-konfig.test.tsx` | Queue-/Artikel-API-Folgeslice fuer die Annahmekette zuschneiden | keine |
 | OTC-010 | Order-to-Cash End-to-End: Verkaufsauftrag → Lieferschein → Rechnung → Zahlung | abgeschlossen | Claude Sonnet 4.6 | `pages/sales/invoice-editor.tsx`, `pages/verkauf/lieferschein-erfassung.tsx`, `docs/workflows/otc-010-order-to-cash.md`, `docs/cards/verkauf/OTC-010-order-to-cash.md` | abgeschlossen | keine |
 | OTC-011 | Zahlungseingang und Abstimmung (Folgeslice OTC-010) | abgeschlossen | Claude Sonnet 4.6 | `packages/frontend-web/src/pages/finance/op-debitoren.tsx`, `pages/finance/payment-matching.tsx`, `pages/sales/invoice-editor.tsx`, `docs/workflows/otc-011-zahlungseingang-und-abstimmung.md`, `docs/cards/finance/OTC-011-zahlungseingang-und-abstimmung.md` | abgeschlossen — P1-P4 als Folge-Slices | keine |
 | CTS-001 | Contract-to-Settlement: Erstanalyse (15 Cards, Mermaid, Soll-Ist, Empfehlungen) | abgeschlossen | Cursor Agent | `docs/workflows/cts-001-contract-to-settlement.md`, `docs/cards/kontrakte/CTS-001-contract-to-settlement.md` | — | keine |
 | CTS-002 | Kontraktbindung auf Belegen: Lookup + Preisuebernahme + Restmengen-Warnung | abgeschlossen | Cursor Agent | `packages/frontend-web/src/hooks/useKontraktLookup.ts`, `pages/sales/order-editor.tsx`, `pages/verkauf/lieferschein-erfassung.tsx` | — | keine |
 | CTS-003 | Auto-Movement-Buchung aus Lieferschein | abgeschlossen | Cursor Agent | `app/services/kontrakt_movement_sync.py`, `app/api/v1/endpoints/sales_delivery_notes.py` | — | keine |
 | CTS-004 | MATIF-Preisfixierungs-Dialog | abgeschlossen | Cursor Agent | `pages/kontrakte/DlgMatifPreisfixierung.tsx`, `pages/kontrakte/FrmKontraktDetail.tsx` | — | keine |
-| CTS-005 | Soft-Delete + Bestaetigung-Dialog | abgeschlossen | Cursor Agent | `app/api/v1/endpoints/kontrakte.py`, `pages/kontrakte/FrmKontraktDetail.tsx`, `lib/api/kontrakte.ts` | Folge: CTS-006 bis CTS-008 (Prio 3) | keine |
+| CTS-005 | Soft-Delete + Bestaetigung-Dialog | abgeschlossen | Cursor Agent | `app/api/v1/endpoints/kontrakte.py`, `pages/kontrakte/FrmKontraktDetail.tsx`, `lib/api/kontrakte.ts` | — | keine |
+| CTS-006 | Kontraktliste aufwerten (Statusfilter, Party-Name, Paginierung, Artikel+Preis) | abgeschlossen | Cursor Agent | `pages/kontrakte/LstKontraktUebersicht.tsx`, `app/api/v1/endpoints/kontrakte.py`, `lib/api/kontrakte.ts` | — | keine |
+| CTS-007 | Tabs differenzieren (Partner, Preismodell, Bedingungen, Notizen, Unterlagen) | abgeschlossen | Cursor Agent | `pages/kontrakte/FrmKontraktDetail.tsx` | — | keine |
+| CTS-008 | Alarm-Dashboard (ablaufende Kontrakte, niedrige Restmenge, offene MATIF) | abgeschlossen | Cursor Agent | `pages/kontrakte/KontraktAlarmDashboard.tsx`, Route-Registrierung | — | keine |
+| CTS-009 | Rohwaren-Positionsmonitor (Long/Short-Deckung, Unterdeckungs-Alarm) | abgeschlossen | Cursor Agent | `app/services/kontrakt_position_service.py`, `app/api/v1/endpoints/kontrakte.py`, `pages/kontrakte/KontraktPositionsmonitor.tsx`, `pages/kontrakte/FrmKontraktDetail.tsx`, `pages/kontrakte/LstKontraktUebersicht.tsx` | — | keine |
 
 ## Reservierungsregel
 
@@ -85,7 +89,9 @@ Kein Agent darf einen Slice beginnen, der bereits `reserviert` oder `in arbeit` 
 - VK-011 abgeschlossen: Qualitaets-Check uebergibt restart-sicher per Query in die Ernte-Annahme; `quality_protocol_id` wird mitpersistiert; LKW-Wizard blockiert leere Pflichtschritte per Toast.
 - VK-013 abgeschlossen: Kampagnenabschluss laeuft ueber bestehende Standardmasken (`erntefenster-konfig.tsx` -> `abrechnung.tsx`); Aggregation erfolgt vorerst ueber `created_at` im Kampagnenfenster.
 - VK-014 abgeschlossen: Settlements tragen jetzt eine echte `campaign_id`; Frontend filtert kampagnenbezogen bevorzugt ueber diese Referenz und nutzt Datumsfenster nur noch als Legacy-Fallback.
+- VK-015 abgeschlossen: Alt-Settlements ohne `campaign_id` koennen kampagnenbezogen per Repair-CTA nachgezogen werden; ueberlappende Kampagnenfenster bleiben bewusst offen statt blind migriert zu werden.
 - Naechste Prioritaet: **parallel getrennt** - Agrar-Lane Folge-Slice fuer Backfill der Alt-Settlements oder Queue-/Artikel-API vs Finance-Folge-Lane **OTC-011** (siehe Abschnitt Parallele E2E-Lanes).
+- Naechste Prioritaet Agrar-Lane: Queue-/Artikel-API-Folgeslice in der Annahmekette, da Neu- und Alt-Daten fuer Kampagnen jetzt belastbar referenziert sind.
 - VK-020 abgeschlossen: Rohware-Wizard mit `getStepValidationError` (Lieferant/Fahrzeug, Ware/Lager/Netto); Card VK-012-P1 als erledigt markiert; Vitest `rohware.test.tsx`.
 - Workboard-Konsistenz 2026-03-27: DOCS-105-Handoff geschlossen (Doku im Repo); VK-013 von Stub auf abgeschlossen gehoben; OTC-011 Folgelane mit Workflow/Card begonnen.
 - CTS-001 abgeschlossen: Contract-to-Settlement vollstaendig analysiert (15 Cards, Mermaid, 28 Soll-Ist-Abweichungen, 8 priorisierte Empfehlungen). Kontrakt-Lane im Workboard eingefuehrt.
@@ -358,6 +364,39 @@ Kein Agent darf einen Slice beginnen, der bereits `reserviert` oder `in arbeit` 
 **Offene Risiken:** Historische Daten ohne Referenz brauchen spaeter Backfill; aktuell bleibt dafuer der Datumsfenster-Fallback aktiv.
 **Annahmen:** Erntefenster-Kampagnen bleiben vorerst in Tenant-Settings, deshalb ist `campaign_id` als String-Referenz der richtige pragmatische Vertrag.
 **Naechster konkreter Schritt:** Entweder Backfill-/Repair-Slice fuer Alt-Settlements oder der offene Queue-/Artikel-API-Folgeslice in der Annahmekette.
+
+## Slice: VK-015 - Settlement-Kampagnen-Backfill
+
+**Owner:** aktuell offener Agent (Codex)
+**Status:** abgeschlossen
+**Ziel:** Historische Settlements ohne `campaign_id` ueber bestehende Standardmasken kontrolliert auf eine echte Kampagnenreferenz heben.
+**Fachlicher Scope:** kampagnenbezogener Repair-CTA in `erntefenster-konfig.tsx`, konservativer Backfill-Endpoint in `agrar_settlements.py`, keine Spezialmaske und kein Ueberschreiben bestehender Referenzen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/workflows/vk-015-settlement-kampagnen-backfill.md`, `docs/cards/agrar/VK-015-settlement-kampagnen-backfill.md`, `docs/quality-assurance/browser-use-checklists.md`, `app/api/v1/endpoints/agrar_settlements.py`, `packages/frontend-web/src/pages/agrar/erntefenster-konfig.tsx`, `tests/test_agrar_settlement_campaign_backfill.py`, `packages/frontend-web/src/__tests__/pages/agrar/erntefenster-konfig.test.tsx`
+**Abnahmekriterien:** Kampagnenkarte markiert Legacy-Fallback-Daten; Repair-CTA triggert kampagnenbezogenen Backfill; nur eindeutige Alt-Datensaetze werden migriert; ueberlappende Kampagnen bleiben offen; Frontend-/Backend-Tests und Doku sind gruen.
+**Tests / Checks:** `pytest tests/test_agrar_settlement_campaign_backfill.py tests/test_agrar_settlement_campaign_reference.py -q`; `pnpm --dir packages/frontend-web exec vitest run src/__tests__/pages/agrar/erntefenster-konfig.test.tsx src/__tests__/pages/annahme/abrechnung.test.tsx`
+**Doku-Updates:** Workboard, Workflow-Datei `vk-015-settlement-kampagnen-backfill.md`, Card `VK-015-settlement-kampagnen-backfill.md`, QA-Checkliste.
+**Risiken / Blocker:** Ueberlappende Kampagnenfenster koennen weiterhin nicht automatisch aufgeloest werden; diese Faelle bleiben bewusst offen.
+**Naechster konkreter Schritt:** Queue-/Artikel-API-Folgeslice fuer die Annahmekette claimen.
+
+## Handoff: 2026-03-27 - VK-015
+
+**Von:** aktuell offener Agent (Codex)
+**An:** naechste Session / naechster Agent
+**Ziel des Slices:** Historische Settlements ohne `campaign_id` kontrolliert per Standardmaske nachziehen.
+**Stand:** abgeschlossen
+**Erledigt:**
+- `agrar_settlements.py` bietet jetzt `POST /api/v1/agrar/settlements/campaign-reference/backfill` mit konservativer Repair-Logik fuer `campaign_id IS NULL`
+- Der Backfill nutzt Tenant-Kampagnen aus `erntefenster_campaigns`, zieht nur eindeutige Legacy-Datensaetze nach und laesst ueberlappende Kampagnenfaelle bewusst offen
+- `erntefenster-konfig.tsx` zeigt einen Legacy-Hinweis auf der Kampagnenkarte und bietet den CTA `Alt-Daten zuordnen`
+- Frontend invalidiert nach erfolgreichem Repair die Settlement-Summaries und zeigt Ergebnis-Toast mit Update-/Ambiguitaetsfeedback
+- Backend-Regressionen in `test_agrar_settlement_campaign_backfill.py`, Frontend-Regression in `erntefenster-konfig.test.tsx`, bestehende Referenztests in `test_agrar_settlement_campaign_reference.py` und `abrechnung.test.tsx` mitgeprueft
+- Workflow-Doku, Card und QA-Checkliste fuer den Repair-Pfad angelegt bzw. aktualisiert
+**Offen:** Kein tenantweiter Report fuer ambige Legacy-Datensaetze; Queue-/Artikel-API in der Annahmekette bleibt der naechste fachliche Folgeslice.
+**Betroffene Dateien:** `docs/agent-ops/active-workboard.md`, `docs/workflows/vk-015-settlement-kampagnen-backfill.md`, `docs/cards/agrar/VK-015-settlement-kampagnen-backfill.md`, `docs/quality-assurance/browser-use-checklists.md`, `app/api/v1/endpoints/agrar_settlements.py`, `packages/frontend-web/src/pages/agrar/erntefenster-konfig.tsx`, `tests/test_agrar_settlement_campaign_backfill.py`, `tests/test_agrar_settlement_campaign_reference.py`, `packages/frontend-web/src/__tests__/pages/agrar/erntefenster-konfig.test.tsx`, `packages/frontend-web/src/__tests__/pages/annahme/abrechnung.test.tsx`
+**Tests / Checks:** `pytest tests/test_agrar_settlement_campaign_backfill.py tests/test_agrar_settlement_campaign_reference.py -q` mit isoliertem `COVERAGE_FILE`; `pnpm --dir packages/frontend-web exec vitest run src/__tests__/pages/agrar/erntefenster-konfig.test.tsx src/__tests__/pages/annahme/abrechnung.test.tsx`
+**Offene Risiken:** Ueberlappende Kampagnenfenster bleiben ohne zusaetzliche Fachinformation ambig und werden nicht automatisch migriert.
+**Annahmen:** `created_at` ist fuer Legacy-Datensaetze die einzig belastbare Zuordnungsbasis; Nicht-Zuordnen ist bei Ambiguitaet fachlich sicherer als Blindmigration.
+**Naechster konkreter Schritt:** Queue-/Artikel-API-Folgeslice in der Annahmekette regelkonform claimen.
 
 ## Slice: CTS-001 - Contract-to-Settlement Erstanalyse
 

@@ -12,5 +12,13 @@ export const entries: AutoGroupRouteEntry[] = [
   {
     "module": "@/pages/kontrakte/LstKontraktUebersicht",
     "path": "LstKontraktUebersicht"
+  },
+  {
+    "module": "@/pages/kontrakte/KontraktAlarmDashboard",
+    "path": "KontraktAlarmDashboard"
+  },
+  {
+    "module": "@/pages/kontrakte/KontraktPositionsmonitor",
+    "path": "KontraktPositionsmonitor"
   }
 ]
