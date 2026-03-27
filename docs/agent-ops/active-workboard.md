@@ -38,7 +38,7 @@ Diese Datei ist absichtlich schlank und soll bei jeder Session schnell lesbar bl
 - Claude-Parallelstand in `docs/AGENT-INTEGRATION.md`, `docs/governance-rollout-summary.md` und `docs/standards/markdown-governance.md` geprueft; operative Folgearbeit richtet sich an den neuen Doku-Einstiegen aus.
 - P2P-040 abgeschlossen: Vorbelegung aus Bedarfsmeldung/Vertrag/RFQ korrekt verdrahtet (`.data`, URL `/v1/`, Toast), Backend-Compat-Endpoints fuer Anfrage und Vertrag nachgezogen, Frontend- und API-Tests gruen.
 - P2P-050 abgeschlossen: Wizard-Schrittvalidierung verdrahtet (validateStep, onStepValidationError), 13 relevante Frontend-Tests gruen.
-- VK-010 abgeschlossen: Workflow-Analyse, Card und Edit-Mode-Bug-Fix (`.data`-Extraktion in `loadHarvestAcceptance`) erledigt. Soll-Ist: 5 Abweichungen dokumentiert (kritisch: Edit-Mode, hoch: Handover-Bruecke, Schrittvalidierung).
+- VK-010 abgeschlossen: Claude-Analyse fuer den breiten Ernte-Annahme-Kernprozess ist mit dem operativen Handover-/QA-Slice zusammengezogen. Dokumentiert und abgesichert sind jetzt sowohl der Edit-Mode-Fix (`.data`-Extraktion in `loadHarvestAcceptance`) als auch die restart-sichere Handover-Haertung (`useMemo` fuer Workflow-Kontext, Seitentest, QA-Checkliste).
 - Naechste Prioritaet: VK-011 Handover-Bruecke (Qualitaets-Check → Ernte-Annahme) und Schrittvalidierung LKW-Wizard.
 
 ## Handoff: 2026-03-27 — DOCS-105
@@ -99,7 +99,7 @@ Diese Datei ist absichtlich schlank und soll bei jeder Session schnell lesbar bl
 **Tests / Checks:** `pnpm --dir packages/frontend-web exec vitest run src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx`; `pytest tests/test_compat_einkauf_anfragen.py -q`
 **Doku-Updates:** Workboard, Workflow-Datei `p2p-040-vorbelegung-requisition-vertrag-rfq.md`, Card `P2P-040-vorbelegung-standardmaske.md`, Handoff.
 **Risiken / Blocker:** Graceful Degradation bleibt gewollt; abweichende Backend-Feldnamen wuerden weiterhin zu teilweiser Leer-Vorbelegung fuehren.
-**Naechster konkreter Schritt:** Fehler-Toast fuer gescheiterten Vorbelegungs-Load oder naechsten Landhandel-Kernprozess beginnen.
+**Naechster konkreter Schritt:** VK-011 Ernte-Annahme-Handover-Bruecke und LKW-Wizard-Schrittvalidierung zuschneiden.
 
 ## Handoff: 2026-03-27 - P2P-040
 
@@ -118,12 +118,12 @@ Diese Datei ist absichtlich schlank und soll bei jeder Session schnell lesbar bl
 - `getMock.mockResolvedValue({ data: null })` als Default-Reset in `beforeEach`
 - Workflow-Analyse `docs/workflows/p2p-040-vorbelegung-requisition-vertrag-rfq.md` erstellt
 - Card `docs/cards/einkauf/P2P-040-vorbelegung-standardmaske.md` erstellt
-**Offen:** Fehler-Toast bei gescheitertem Vorbelegungs-Load optional; weiterfuehrende Landhandel-Kernprozesse folgen separat.
+**Offen:** Weiterfuehrende Landhandel-Kernprozesse folgen separat.
 **Betroffene Dateien:** `docs/agent-ops/active-workboard.md`, `docs/workflows/p2p-040-vorbelegung-requisition-vertrag-rfq.md`, `docs/cards/einkauf/P2P-040-vorbelegung-standardmaske.md`, `app/api/v1/endpoints/compat.py`, `tests/test_compat_einkauf_anfragen.py`, `packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx`, `packages/frontend-web/src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx`, `packages/frontend-web/src/pages/einkauf/rfq-bids.tsx`
 **Tests / Checks:** `pnpm --dir packages/frontend-web exec vitest run src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx` - 6/6 PASS; `pytest tests/test_compat_einkauf_anfragen.py -q` - API-Compat-Regression
-**Offene Risiken:** Graceful Degradation kann bei abweichenden Backend-Feldnamen zu teilweiser Leer-Vorbelegung fuehren; Fehler-Toast fuer fehlgeschlagene Vorbelegung fehlt weiterhin.
+**Offene Risiken:** Graceful Degradation kann bei abweichenden Backend-Feldnamen zu teilweiser Leer-Vorbelegung fuehren.
 **Annahmen:** `apiClient.get<T>()` gibt `AxiosResponse<T>` zurueck (`.data` = Nutzdaten). Requisition und RFQ teilen denselben Endpoint `/api/v1/einkauf/anfragen/`.
-**Naechster konkreter Schritt:** VK-010 Ernte-Annahme oder Fehler-Toast fuer fehlgeschlagene Vorbelegung zuschneiden.
+**Naechster konkreter Schritt:** VK-011 Ernte-Annahme-Handover-Bruecke und LKW-Wizard-Schrittvalidierung zuschneiden.
 
 ## Slice: P2P-050 - Procure-to-Pay Wizard-Schrittvalidierung
 
@@ -136,7 +136,7 @@ Diese Datei ist absichtlich schlank und soll bei jeder Session schnell lesbar bl
 **Tests / Checks:** `pnpm --dir packages/frontend-web exec vitest run src/__tests__/components/patterns/Wizard.test.tsx src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx src/__tests__/pages/workflow/flow-spine-procure-to-pay.test.tsx`; `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`
 **Doku-Updates:** Workboard, Workflow-Datei `p2p-050-wizard-schrittvalidierung.md`, Card `P2P-050-wizard-schrittvalidierung.md`, P2P-001/P2P-040-Nachzug, Browser-Use-Checkliste, Handoff.
 **Risiken / Blocker:** Inline-Fehlhinweise pro Schritt fehlen weiterhin; aktueller Nutzerfeedback-Kanal ist Toast-basiert.
-**Naechster konkreter Schritt:** Fehler-Toast fuer gescheiterten Vorbelegungs-Load oder VK-010 Ernte-Annahme als naechsten Landhandel-Kernprozess aufnehmen.
+**Naechster konkreter Schritt:** VK-011 Ernte-Annahme-Handover-Bruecke und LKW-Wizard-Schrittvalidierung als Folgeslice zuschneiden.
 
 ## Handoff: 2026-03-27 - P2P-050
 
@@ -154,40 +154,43 @@ Diese Datei ist absichtlich schlank und soll bei jeder Session schnell lesbar bl
 - Card `docs/cards/einkauf/P2P-050-wizard-schrittvalidierung.md` erstellt
 - Browser-Use-Checkliste um konkrete P2P-Direkt- und Vorbelegungspruefung ergaenzt
 - P2P-001- und P2P-040-Doku auf den neuen Validierungsstand nachgezogen
-**Offen:** Fehler-Toast fuer fehlgeschlagene Vorbelegungs-Loads bleibt optional; Inline-Fehlhinweise im Wizard sind weiterhin nicht vorhanden.
+**Offen:** Inline-Fehlhinweise im Wizard sind weiterhin nicht vorhanden.
 **Betroffene Dateien:** `docs/agent-ops/active-workboard.md`, `docs/workflows/p2p-001-procure-to-pay-direktbestellung.md`, `docs/workflows/p2p-040-vorbelegung-requisition-vertrag-rfq.md`, `docs/workflows/p2p-050-wizard-schrittvalidierung.md`, `docs/cards/einkauf/P2P-020-direktbestellung-standardmaske.md`, `docs/cards/einkauf/P2P-040-vorbelegung-standardmaske.md`, `docs/cards/einkauf/P2P-050-wizard-schrittvalidierung.md`, `docs/quality-assurance/browser-use-checklists.md`, `packages/frontend-web/src/components/patterns/Wizard.tsx`, `packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx`, `packages/frontend-web/src/__tests__/components/patterns/Wizard.test.tsx`, `packages/frontend-web/src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx`
 **Tests / Checks:** `pnpm --dir packages/frontend-web exec vitest run src/__tests__/components/patterns/Wizard.test.tsx src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx src/__tests__/pages/workflow/flow-spine-procure-to-pay.test.tsx` - 13/13 PASS; `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false` - gruen
 **Offene Risiken:** Toast-basierte Validierung ist funktional, aber weniger fuehrend als Inline-Fehlhinweise; andere Wizards nutzen den neuen Hook noch nicht.
 **Annahmen:** P2P benoetigt vorerst nur harte Schrittvalidierung fuer Lieferanten- und Positionsschritt; Lieferung bleibt optional.
-**Naechster konkreter Schritt:** VK-010 Ernte-Annahme als Landhandel-Kernprozess nach Master-Prompt aufnehmen oder optional Fehler-Toast fuer fehlgeschlagene Vorbelegung nachziehen.
+**Naechster konkreter Schritt:** VK-011 Ernte-Annahme-Handover-Bruecke und LKW-Wizard-Schrittvalidierung als Folgeslice zuschneiden.
 
 ## Slice: VK-010 - Ernte-Annahme (Landhandel-Kernprozess)
 
 **Owner:** aktuell offener Agent
 **Status:** abgeschlossen
-**Ziel:** Ersten Landhandel-Kernprozess-Slice nach optimiertem Master-Prompt vollstaendig analysieren, Card erstellen und kritischen Edit-Mode-Bug beheben.
-**Fachlicher Scope:** Vollstaendige Annahmekette LKW-Registrierung → Warteschlange → Qualitaets-Check → Ernte-Annahme-Erfassung → Abrechnung.
-**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/workflows/vk-010-ernte-annahme.md`, `docs/cards/agrar/VK-010-ernte-annahme.md`, `packages/frontend-web/src/pages/agrar/ernte-annahme-erfassung.tsx`
-**Abnahmekriterien:** Workflow-Analyse nach Master-Prompt (7 Sektionen: A-G); Card nach 17-Abschnitt-Template; kritischer Bug behoben; 5 Soll-Ist-Abweichungen dokumentiert; Mermaid-Diagramm vorhanden.
-**Tests / Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`
-**Doku-Updates:** Workboard, Workflow-Analyse, Card, Handoff-Block.
-**Risiken / Blocker:** Edit-Mode-Bug behoben; Handover-Bruecke (QP → Ernte-Annahme) und Schrittvalidierung (LKW-Wizard) als VK-011 vorgemerkt.
-**Naechster konkreter Schritt:** VK-011 Handover-Bruecke Qualitaets-Check → Ernte-Annahme und Schrittvalidierung im LKW-Wizard zuschneiden.
+**Ziel:** Ersten belastbaren Landhandel-Kernprozess-Slice dokumentieren und die Ernte-Annahme-Maske auf den kritischen Pfaden Edit-Mode und Workflow-Handover stabilisieren.
+**Fachlicher Scope:** Breite Annahmekette LKW-Registrierung -> Warteschlange -> Qualitaets-Check -> Ernte-Annahme-Erfassung -> Abrechnung als Analysebasis; operativer Umsetzungsslice fuer den Handover in die Ernte-Annahme-Maske.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/workflows/vk-010-ernte-annahme.md`, `docs/cards/agrar/VK-010-ernte-annahme.md`, `docs/cards/agrar/VK-010-ernte-annahme-standardmaske.md`, `docs/quality-assurance/browser-use-checklists.md`, `packages/frontend-web/src/pages/agrar/ernte-annahme-erfassung.tsx`, `packages/frontend-web/src/__tests__/pages/agrar/ernte-annahme-erfassung.test.tsx`
+**Abnahmekriterien:** Workflow-Analyse nach Master-Prompt vorhanden; mindestens eine Card fuer den Ernte-Annahme-Einstieg vorhanden; kritischer Edit-Mode-Bug behoben; Workflow-Handover render-stabil; Seitentest und Browser-Use-Checkliste dokumentieren den Handover-Pfad.
+**Tests / Checks:** `pnpm --dir packages/frontend-web exec vitest run src/__tests__/pages/agrar/ernte-annahme-erfassung.test.tsx`; `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`
+**Doku-Updates:** Workboard, Workflow-Analyse, bestehende Kernprozess-Card, fokussierte Standardmasken-Card, QA-Checkliste, Handoff-Block.
+**Risiken / Blocker:** Qualitaets-Check -> Ernte-Annahme ist weiterhin keine vollstaendige Handover-Bruecke; LKW-Wizard hat noch keine Schrittvalidierung; Artikelquelle ist weiterhin nicht kanonisch an Backend-Listen gebunden.
+**Naechster konkreter Schritt:** VK-011 Handover-Bruecke Qualitaets-Check -> Ernte-Annahme und Schrittvalidierung im LKW-Wizard zuschneiden.
 
 ## Handoff: 2026-03-27 - VK-010
 
 **Von:** aktuell offener Agent
 **An:** naechste Session / naechster Agent
-**Ziel des Slices:** Ernte-Annahme-Kette nach Master-Prompt analysieren, Card erstellen, kritischen Edit-Mode-Bug beheben.
+**Ziel des Slices:** Ernte-Annahme-Kernprozess nach Master-Prompt analysieren und die Ernte-Annahme-Maske auf Edit-Mode- und Workflow-Handover-Pfaden stabilisieren.
 **Stand:** abgeschlossen
 **Erledigt:**
-- Workflow-Analyse `docs/workflows/vk-010-ernte-annahme.md` — 7 Sektionen (A-G), 8 Cards (VK-010 bis VK-017), Mermaid-Diagramm, 5 Soll-Ist-Abweichungen
-- Card `docs/cards/agrar/VK-010-ernte-annahme.md` — 17-Abschnitt-Template vollstaendig
-- Edit-Mode-Bug in `ernte-annahme-erfassung.tsx` behoben: `apiClient.get()` gibt `AxiosResponse<T>` zurueck; alle `response.*`-Zugriffe auf `ha.*` (via `const { data: ha }`) korrigiert — betrifft alle Felder inkl. `customer_id`, `positions`, Adress- und Statusfelder
-- Workboard aktualisiert (Slice abgeschlossen, Letzte Entscheidungen ergaenzt)
-**Offen:** VK-011 Handover-Bruecke (Qualitaets-Check → Ernte-Annahme navigieren); Schrittvalidierung im LKW-Wizard; Artikel-API statt hardcodierter Liste; Klaerungsprozess gesperrte Ware.
-**Betroffene Dateien:** `docs/agent-ops/active-workboard.md`, `docs/workflows/vk-010-ernte-annahme.md`, `docs/cards/agrar/VK-010-ernte-annahme.md`, `packages/frontend-web/src/pages/agrar/ernte-annahme-erfassung.tsx`
-**Tests / Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false` muss gruen bleiben.
-**Offene Risiken:** Handover-Bruecke fehlt — Medienbruch nach Qualitaets-Check; Schrittvalidierung LKW-Wizard fehlt — leere Pflichtfelder passierbar.
-**Annahmen:** Edit-Mode-Bug erstreckt sich ausschliesslich auf `loadHarvestAcceptance()`; `handleSave()` und alle anderen Mutations-Calls waren nicht betroffen (POST/PUT nutzen State, nicht Response direkt).
+- Workflow-Analyse `docs/workflows/vk-010-ernte-annahme.md` als breite Prozessbasis fuer die Annahmekette erstellt
+- Kernprozess-Card `docs/cards/agrar/VK-010-ernte-annahme.md` fortgefuehrt; zusaetzlich fokussierte Standardmasken-Card `docs/cards/agrar/VK-010-ernte-annahme-standardmaske.md` fuer den operativen Handover-Slice angelegt
+- Edit-Mode-Bug in `ernte-annahme-erfassung.tsx` behoben: `apiClient.get()` gibt `AxiosResponse<T>` zurueck; `loadHarvestAcceptance()` liest Nutzdaten ueber `.data`
+- Workflow-Handover in `ernte-annahme-erfassung.tsx` render-stabil gemacht: `readWorkflowEntryContext(searchParams)` memoisiert, damit kein instabiler Handover-Kontext pro Render entsteht
+- Seitentest `src/__tests__/pages/agrar/ernte-annahme-erfassung.test.tsx` ergaenzt; Banner- und Bemerkungs-Vorbelegung aus Workflow-Parametern regressionsgesichert
+- Browser-Use-Checkliste fuer Harvest-to-Settlement / Ernte-Annahme und P2P-Fehlerpfad nachgezogen
+- Workboard und P2P-Doku auf den erreichten Stand synchronisiert
+**Offen:** VK-011 Handover-Bruecke (Qualitaets-Check -> Ernte-Annahme navigieren); Schrittvalidierung im LKW-Wizard; Artikel-API statt hardcodierter Liste; Klaerungsprozess gesperrte Ware.
+**Betroffene Dateien:** `docs/agent-ops/active-workboard.md`, `docs/workflows/vk-010-ernte-annahme.md`, `docs/cards/agrar/VK-010-ernte-annahme.md`, `docs/cards/agrar/VK-010-ernte-annahme-standardmaske.md`, `docs/quality-assurance/browser-use-checklists.md`, `packages/frontend-web/src/pages/agrar/ernte-annahme-erfassung.tsx`, `packages/frontend-web/src/__tests__/pages/agrar/ernte-annahme-erfassung.test.tsx`
+**Tests / Checks:** `pnpm --dir packages/frontend-web exec vitest run src/__tests__/pages/agrar/ernte-annahme-erfassung.test.tsx`; `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`
+**Offene Risiken:** Handover-Bruecke fehlt weiterhin als vollstaendige Navigation aus dem Qualitaets-Check; Schrittvalidierung im LKW-Wizard fehlt; Backend-Artikelquelle ist noch nicht kanonisch verdrahtet.
+**Annahmen:** Der zuvor dokumentierte Edit-Mode-Bug lag in `loadHarvestAcceptance()`; der operative Folgeschritt fuer restart-sicheren Handover ist Kontextstabilisierung in der Ernte-Annahme-Maske, nicht eine neue Spezialmaske.
 **Naechster konkreter Schritt:** VK-011 Handover-Bruecke und LKW-Wizard-Schrittvalidierung als eigenstaendigen Slice zuschneiden.
