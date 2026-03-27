@@ -58,6 +58,7 @@ Zwei End-to-End-Stränge laufen **fachlich und technisch getrennt**. Bitte **nic
 | INV-003 | Ein-/Auslagerung: StockMovement-Buchung (FIFO/FEFO, Chargen-Abzug) | abgeschlossen | Cursor Agent | `app/api/v1/endpoints/compat.py` (POST einlagerung/auslagerung) | — | keine |
 | INV-004 | Einlagerung: Stammdaten aus API (Artikel + Lagerorte) statt hart codiert | abgeschlossen | Cursor Agent | `pages/lager/einlagerung.tsx` | — | keine |
 | INV-007 | Lagerplaetze: echte Belegung aus used_capacity/total_capacity | abgeschlossen | Cursor Agent | `pages/lager/lagerplaetze.tsx` | — | keine |
+| FIN-001 | Finance-to-Close: Vollanalyse (7 Masken, 11 Cards, 14 Soll-Ist, Mermaid, P1-P8) | abgeschlossen | Claude Sonnet 4.6 | `docs/workflows/fin-001-finance-to-close.md`, `docs/cards/finance/FIN-001-finance-to-close.md`, `pages/finance/buchungserfassung.tsx`, `pages/finance/nebenbuch-abstimmung.tsx`, `pages/finance/periods.tsx`, `pages/fibu/abschluss-cockpit.tsx`, `pages/fibu/abschluss-checklist-detail.tsx`, `pages/finance/ustva.tsx` | P1-P8 als Folge-Slices | keine |
 
 ## Reservierungsregel
 
