@@ -9,7 +9,7 @@ Diese Datei ist absichtlich schlank und soll bei jeder Session schnell lesbar bl
 ## Aktueller Stand
 
 - Datum: `2026-03-27`
-- Branch: `main` (Wave 104 + Repo-Hygiene committed, kein offener develop-Branch)
+- Branch: `develop` (lokal; mit `backup/develop` abgleichen bei Push)
 - Source of Truth: `docs/architecture/process-kernel/STATUS.md`
 
 ## Aktive Slices
@@ -24,6 +24,7 @@ Diese Datei ist absichtlich schlank und soll bei jeder Session schnell lesbar bl
 | VK-010 | Ernte-Annahme Workflow-Analyse, Handover-Haertung und QA-Slice | abgeschlossen | aktuell offener Agent | `docs/workflows/vk-010-ernte-annahme.md`, `docs/cards/agrar/VK-010-ernte-annahme.md`, `docs/cards/agrar/VK-010-ernte-annahme-standardmaske.md`, `docs/quality-assurance/browser-use-checklists.md`, `packages/frontend-web/src/pages/agrar/ernte-annahme-erfassung.tsx`, `packages/frontend-web/src/__tests__/pages/agrar/ernte-annahme-erfassung.test.tsx` | VK-011 Handover-Bruecke und Schrittvalidierung zuschneiden | keine |
 | VK-011 | Ernte-Annahme Handover-Bruecke (QP→Erfassung) und LKW-Wizard-Schrittvalidierung | reserviert | aktuell offener Agent (Codex) | `packages/frontend-web/src/pages/annahme/qualitaets-check.tsx`, `packages/frontend-web/src/pages/annahme/warteschlange.tsx`, `packages/frontend-web/src/pages/annahme/lkw-registrierung.tsx` | Handover-Bruecke + Schrittvalidierung | keine |
 | VK-012 | Annahme-Abrechnung: Settlement-Flow-Analyse und QA-Haertung | abgeschlossen | Claude Sonnet 4.6 | `packages/frontend-web/src/pages/annahme/abrechnung.tsx`, `packages/frontend-web/src/pages/annahme/rohware.tsx`, `docs/workflows/vk-012-annahme-abrechnung.md`, `docs/cards/agrar/VK-012-annahme-abrechnung.md` | abgeschlossen | keine |
+| VK-020 | Rohware-Wizard Schrittvalidierung (VK-012-P1) | abgeschlossen | Cursor Agent | `packages/frontend-web/src/pages/annahme/rohware.tsx`, `packages/frontend-web/src/__tests__/pages/annahme/rohware.test.tsx`, `docs/workflows/vk-020-rohware-wizard-schrittvalidierung.md`, `docs/cards/agrar/VK-020-rohware-wizard-schrittvalidierung.md` | VK-012-P2/P3 oder VK-013 | keine |
 | VK-013 | Ernte-Kampagne-Abschluss: Gesamtabrechnung ueber alle Settlements | offen | — | `pages/agrar/kampagne*.tsx`, `docs/workflows/vk-013-*`, `docs/cards/agrar/VK-013-*` | Slice zuschneiden und claimen | keine |
 
 ## Reservierungsregel
@@ -61,6 +62,7 @@ Kein Agent darf einen Slice beginnen, der bereits `reserviert` oder `in arbeit` 
 - P2P-050 abgeschlossen: Wizard-Schrittvalidierung verdrahtet (validateStep, onStepValidationError); die relevante Frontend-Regression fuer Wizard und P2P-Pfad ist gruen.
 - VK-010 abgeschlossen: Claude-Analyse fuer den breiten Ernte-Annahme-Kernprozess ist mit dem operativen Handover-/QA-Slice zusammengezogen. Dokumentiert und abgesichert sind jetzt sowohl der Edit-Mode-Fix (`.data`-Extraktion in `loadHarvestAcceptance`) als auch die restart-sichere Handover-Haertung (`useMemo` fuer Workflow-Kontext, Seitentest, QA-Checkliste).
 - Naechste Prioritaet: VK-011 Handover-Bruecke (Qualitaets-Check → Ernte-Annahme) und Schrittvalidierung LKW-Wizard.
+- VK-020 abgeschlossen: Rohware-Wizard mit `getStepValidationError` (Lieferant/Fahrzeug, Ware/Lager/Netto); Card VK-012-P1 als erledigt markiert; Vitest `rohware.test.tsx`.
 
 ## Handoff: 2026-03-27 — DOCS-105
 
