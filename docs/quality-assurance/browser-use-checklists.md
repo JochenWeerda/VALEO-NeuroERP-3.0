@@ -123,3 +123,14 @@ Diese Checklisten schaerfen die UI-, CRUD- und Live-Betriebspruefung fuer Workfl
 7. Erwartung: Er darf im aktuellen Kampagnenabschluss nicht auftauchen.
 8. Legacy-Datensatz ohne `campaign_id` im gueltigen Datumsfenster pruefen.
 9. Erwartung: Er bleibt ueber den Fallback sichtbar, bis ein Backfill existiert.
+
+### VK-015: Settlement-Kampagnen-Backfill
+
+1. `Erntefenster-Konfiguration` mit einer Kampagne oeffnen, in der mindestens ein Legacy-Settlement ohne `campaign_id` sichtbar ist.
+2. Erwartung: Die Kampagnenkarte zeigt den Hinweis auf Alt-Settlements mit Datumsfenster-Fallback.
+3. Auf `Alt-Daten zuordnen` klicken.
+4. Erwartung: Es wird kein neuer Dialog geoeffnet; stattdessen erscheint ein Ergebnis-Toast.
+5. Kampagnenkarte erneut laden.
+6. Erwartung: Eindeutige Legacy-Datensaetze haben jetzt `campaign_id` und fallen nicht mehr nur ueber den Fallback auf.
+7. Kampagne mit ueberlappendem Fenster oder bewusst ambigem Legacy-Datensatz pruefen.
+8. Erwartung: Der Datensatz bleibt ohne neue Referenz; der Toast meldet offene Ambiguitaet statt Blindmigration.

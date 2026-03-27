@@ -4,9 +4,9 @@ Agrar self-billing settlements with deduction and posting workflow (AGRAR-SET-01
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date, datetime
 from decimal import Decimal
-from typing import Literal, Optional
+from typing import Any, Literal, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field, model_validator
 from sqlalchemy.orm import Session
@@ -32,6 +32,7 @@ from modules.agrar.services.drying_rule_engine import (
     compute_settlement as _compute_drying_settlement,
 )
 from app.infrastructure.models import DryingRuleFactorRange, DryingRuleLookupRow, DryingRuleSet
+from app.api.v1.endpoints.admin_core import _load_tenant_settings
 from app.core.settlement_completion_contracts import (
     SettlementCompletionEvidence,
     SettlementCompletionVariant,
@@ -341,6 +342,22 @@ class SettlementOut(BaseModel):
     row_version: int = 1
 
 
+class SettlementCampaignBackfillRequest(BaseModel):
+    campaign_id: str = Field(..., min_length=1, max_length=64)
+    dry_run: bool = False
+
+
+class SettlementCampaignBackfillResponse(BaseModel):
+    campaign_id: str
+    matched_count: int
+    updated_count: int
+    ambiguous_count: int
+    skipped_count: int
+    updated_settlement_ids: list[str] = Field(default_factory=list)
+    ambiguous_settlement_ids: list[str] = Field(default_factory=list)
+    skipped_settlement_ids: list[str] = Field(default_factory=list)
+
+
 def _current_settlement_row_version(settlement: AgrarSettlement) -> int:
     v = getattr(settlement, "row_version", None)
     return int(v) if v is not None else 1
@@ -483,6 +500,83 @@ def _to_out(settlement: AgrarSettlement, deductions: list[AgrarSettlementDeducti
             )
             for d in deductions
         ],
+    )
+
+
+def _parse_campaign_window(campaign: dict[str, Any]) -> tuple[date, date] | None:
+    try:
+        return (
+            date.fromisoformat(str(campaign.get("start_date"))),
+            date.fromisoformat(str(campaign.get("end_date"))),
+        )
+    except Exception:
+        return None
+
+
+def _to_created_date(value: object) -> date | None:
+    if isinstance(value, datetime):
+        return value.date()
+    if isinstance(value, str):
+        try:
+            return datetime.fromisoformat(value.replace("Z", "+00:00")).date()
+        except ValueError:
+            return None
+    return None
+
+
+def _build_campaign_backfill_plan(
+    *,
+    campaign_id: str,
+    campaigns: list[dict[str, Any]],
+    settlements: list[AgrarSettlement],
+) -> SettlementCampaignBackfillResponse:
+    target_campaign = next((campaign for campaign in campaigns if str(campaign.get("id")) == campaign_id), None)
+    if target_campaign is None:
+        raise HTTPException(status_code=404, detail="Campaign not found")
+
+    target_window = _parse_campaign_window(target_campaign)
+    if target_window is None:
+        raise HTTPException(status_code=409, detail="Campaign date range is invalid")
+
+    updated_ids: list[str] = []
+    ambiguous_ids: list[str] = []
+    skipped_ids: list[str] = []
+    start_date, end_date = target_window
+
+    valid_campaigns = [(campaign, _parse_campaign_window(campaign)) for campaign in campaigns]
+    valid_campaigns = [(campaign, window) for campaign, window in valid_campaigns if window is not None]
+
+    for settlement in settlements:
+        if getattr(settlement, "campaign_id", None):
+            continue
+        created_on = _to_created_date(getattr(settlement, "created_at", None))
+        if created_on is None:
+            skipped_ids.append(str(settlement.id))
+            continue
+        if created_on < start_date or created_on > end_date:
+            continue
+
+        matching_campaign_ids = [
+            str(campaign.get("id"))
+            for campaign, window in valid_campaigns
+            if window[0] <= created_on <= window[1]
+        ]
+        if campaign_id not in matching_campaign_ids:
+            continue
+        if len(matching_campaign_ids) > 1:
+            ambiguous_ids.append(str(settlement.id))
+            continue
+        updated_ids.append(str(settlement.id))
+
+    return SettlementCampaignBackfillResponse(
+        campaign_id=campaign_id,
+        matched_count=len(updated_ids) + len(ambiguous_ids) + len(skipped_ids),
+        updated_count=len(updated_ids),
+        ambiguous_count=len(ambiguous_ids),
+        skipped_count=len(skipped_ids),
+        updated_settlement_ids=updated_ids,
+        ambiguous_settlement_ids=ambiguous_ids,
+        skipped_settlement_ids=skipped_ids,
     )
 
 
@@ -717,6 +811,39 @@ async def list_settlements(
         deductions = db.query(AgrarSettlementDeduction).filter(AgrarSettlementDeduction.settlement_id == item.id).all()
         result.append(_to_out(item, deductions))
     return result
+
+
+@router.post("/campaign-reference/backfill", response_model=SettlementCampaignBackfillResponse)
+async def backfill_settlement_campaign_reference(
+    payload: SettlementCampaignBackfillRequest,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    settings = _load_tenant_settings(db, tenant_id)
+    campaigns = settings.get("erntefenster_campaigns")
+    campaign_list = [campaign for campaign in campaigns if isinstance(campaign, dict)] if isinstance(campaigns, list) else []
+
+    settlements = (
+        db.query(AgrarSettlement)
+        .filter(AgrarSettlement.tenant_id == tenant_id)
+        .filter(AgrarSettlement.campaign_id.is_(None))
+        .all()
+    )
+    plan = _build_campaign_backfill_plan(
+        campaign_id=payload.campaign_id,
+        campaigns=campaign_list,
+        settlements=settlements,
+    )
+
+    if payload.dry_run or plan.updated_count == 0:
+        return plan
+
+    updatable_ids = set(plan.updated_settlement_ids)
+    for settlement in settlements:
+        if str(settlement.id) in updatable_ids:
+            settlement.campaign_id = payload.campaign_id
+    _commit_settlement_mutation(db)
+    return plan
 
 
 @router.get("/{settlement_id}", response_model=SettlementOut)
