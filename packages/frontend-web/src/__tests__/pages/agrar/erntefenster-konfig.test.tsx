@@ -33,6 +33,7 @@ describe('ErntefensterKonfigPage', () => {
     navigateMock.mockReset()
     apiGetMock.mockReset()
     apiPostMock.mockReset()
+    toastMock.mockReset()
 
     apiGetMock.mockImplementation(async (url: string) => {
       if (url.includes('/erntefenster-templates')) {
@@ -57,6 +58,21 @@ describe('ErntefensterKonfigPage', () => {
         }
       }
       return { data: [] }
+    })
+
+    apiPostMock.mockImplementation(async (url: string) => {
+      if (url.includes('/campaign-reference/backfill')) {
+        return {
+          data: {
+            campaign_id: 'camp-1',
+            matched_count: 1,
+            updated_count: 1,
+            ambiguous_count: 0,
+            skipped_count: 0,
+          },
+        }
+      }
+      return { data: {} }
     })
   })
 
@@ -89,5 +105,27 @@ describe('ErntefensterKonfigPage', () => {
         '/annahme/abrechnung?campaignId=camp-1&campaignName=Ernte+2026&campaignStart=2026-07-01&campaignEnd=2026-07-31',
       )
     })
+  })
+
+  it('stoesst den Backfill fuer Legacy-Settlements aus der Kampagnenkarte an', async () => {
+    renderPage()
+
+    expect(await screen.findByText('Ernte 2026')).toBeInTheDocument()
+    expect(screen.getByText('1 Alt-Settlement(s) nutzen noch den Datumsfenster-Fallback.')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Alt-Daten zuordnen' }))
+
+    await waitFor(() => {
+      expect(apiPostMock).toHaveBeenCalledWith('/api/v1/agrar/settlements/campaign-reference/backfill', {
+        campaign_id: 'camp-1',
+      })
+    })
+
+    expect(toastMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'Alt-Daten geprueft',
+        description: '1 Alt-Settlements wurden der Kampagne zugeordnet.',
+      }),
+    )
   })
 })

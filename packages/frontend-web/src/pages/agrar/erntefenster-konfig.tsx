@@ -48,6 +48,14 @@ type SettlementSummary = {
   created_at?: string | null
 }
 
+type SettlementCampaignBackfillResult = {
+  campaign_id: string
+  matched_count: number
+  updated_count: number
+  ambiguous_count: number
+  skipped_count: number
+}
+
 const API_BASE = '/api/v1/admin'
 
 export default function ErntefensterKonfigPage(): JSX.Element {
@@ -106,6 +114,30 @@ export default function ErntefensterKonfigPage(): JSX.Element {
     },
   })
 
+  const backfillMutation = useMutation({
+    mutationFn: async (campaignId: string) => {
+      const r = await apiClient.post<SettlementCampaignBackfillResult>('/api/v1/agrar/settlements/campaign-reference/backfill', {
+        campaign_id: campaignId,
+      })
+      return r.data
+    },
+    onSuccess: (result) => {
+      queryClient.invalidateQueries({ queryKey: ['agrar-settlement-summaries'] })
+      toast({
+        title: 'Alt-Daten geprueft',
+        description:
+          result.updated_count > 0
+            ? `${result.updated_count} Alt-Settlements wurden der Kampagne zugeordnet.`
+            : result.ambiguous_count > 0
+              ? `${result.ambiguous_count} Alt-Settlements bleiben wegen ueberlappender Kampagnen offen.`
+              : 'Keine Alt-Settlements fuer diese Kampagne gefunden.',
+      })
+    },
+    onError: (err: Error) => {
+      toast({ variant: 'destructive', title: 'Backfill fehlgeschlagen', description: err.message })
+    },
+  })
+
   const selectedTemplate = templates.find((t) => t.id === selectedTemplateId)
 
   const campaignSummaries = campaigns.map((campaign) => {
@@ -119,6 +151,7 @@ export default function ErntefensterKonfigPage(): JSX.Element {
     })
     const netTotal = matchingSettlements.reduce((sum, settlement) => sum + settlement.net_amount_eur, 0)
     const deductionTotal = matchingSettlements.reduce((sum, settlement) => sum + settlement.total_deductions_eur, 0)
+    const legacySettlementCount = matchingSettlements.filter((settlement) => !settlement.campaign_id).length
     const openSettlements = matchingSettlements.filter(
       (settlement) => settlement.status !== 'posted' || settlement.approval_status !== 'VERBUCHT',
     ).length
@@ -132,7 +165,7 @@ export default function ErntefensterKonfigPage(): JSX.Element {
             ? 'Abschlussbereit'
             : 'Laufend'
 
-    return { campaign, matchingSettlements, netTotal, deductionTotal, openSettlements, closureState }
+    return { campaign, matchingSettlements, netTotal, deductionTotal, legacySettlementCount, openSettlements, closureState }
   })
 
   const openSandboxPreview = (params: {
@@ -325,7 +358,7 @@ export default function ErntefensterKonfigPage(): JSX.Element {
             <p className="text-sm text-muted-foreground">Noch keine Kampagnen angelegt.</p>
           ) : (
             <ul className="space-y-3">
-              {campaignSummaries.map(({ campaign, matchingSettlements, netTotal, deductionTotal, openSettlements, closureState }) => (
+              {campaignSummaries.map(({ campaign, matchingSettlements, netTotal, deductionTotal, legacySettlementCount, openSettlements, closureState }) => (
                 <li key={campaign.id} className="rounded-md border p-3 text-sm">
                   <div className="flex items-start justify-between gap-3">
                     <div>
@@ -355,6 +388,11 @@ export default function ErntefensterKonfigPage(): JSX.Element {
                   <p className="mt-2 text-xs text-muted-foreground">
                     Abzuege gesamt: {deductionTotal.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}
                   </p>
+                  {legacySettlementCount > 0 && (
+                    <p className="mt-1 text-xs text-amber-700">
+                      {legacySettlementCount} Alt-Settlement(s) nutzen noch den Datumsfenster-Fallback.
+                    </p>
+                  )}
                   {campaign.product_groups.length > 0 && (
                     <p className="text-xs text-muted-foreground mt-1">
                       Produktgruppen: {campaign.product_groups.join(', ')}
@@ -385,6 +423,15 @@ export default function ErntefensterKonfigPage(): JSX.Element {
                     >
                       <FlaskConical className="h-4 w-4" />
                       In Sandbox prüfen
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={legacySettlementCount === 0 || backfillMutation.isPending}
+                      onClick={() => backfillMutation.mutate(campaign.id)}
+                    >
+                      {backfillMutation.isPending ? 'Ordnet zu...' : 'Alt-Daten zuordnen'}
                     </Button>
                   </div>
                 </li>
