@@ -80,7 +80,7 @@ Alle schreibenden Operationen (post-fibu, freigabe, cancel) senden `expected_row
 
 | ID | Beschreibung | Priorität |
 |---|---|---|
-| VK-012-P1 | `getStepValidationError` im Rohware-Wizard | Mittel |
+| VK-012-P1 | `getStepValidationError` im Rohware-Wizard | ~~Mittel~~ erledigt in **VK-020** |
 | VK-012-P2 | Supplier-ID CRM-Dropdown statt Freitext | Mittel |
 | VK-012-P3 | Artikel/Lager-Listen aus API (statt hardcoded) | Niedrig |
 
