@@ -77,6 +77,16 @@ function buildContractPositions(contract: any, fallback: BestellungData['positio
   return [{ artikel, menge: contractedQuantity > 0 ? contractedQuantity : 1, einheit: String(contract.qty?.unit || 'kg') || 'kg', preis: 0 }]
 }
 
+function getErrorMessage(error: unknown): string {
+  if (typeof error === 'object' && error !== null) {
+    const maybeMessage = (error as { message?: unknown }).message
+    if (typeof maybeMessage === 'string' && maybeMessage.trim()) {
+      return maybeMessage
+    }
+  }
+  return 'Die Quelldaten konnten nicht geladen werden.'
+}
+
 export default function BestellungAnlegenPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -147,6 +157,11 @@ export default function BestellungAnlegenPage(): JSX.Element {
       }
     } catch (error) {
       console.error('Fehler beim Laden der Requisition:', error)
+      toast({
+        title: 'Bedarfsmeldung konnte nicht geladen werden',
+        description: getErrorMessage(error),
+        variant: 'destructive',
+      })
     }
   }
 
@@ -170,6 +185,11 @@ export default function BestellungAnlegenPage(): JSX.Element {
       }
     } catch (error) {
       console.error('Fehler beim Laden des Vertrags:', error)
+      toast({
+        title: 'Vertrag konnte nicht geladen werden',
+        description: getErrorMessage(error),
+        variant: 'destructive',
+      })
     }
   }
 
@@ -191,6 +211,11 @@ export default function BestellungAnlegenPage(): JSX.Element {
       }
     } catch (error) {
       console.error('Fehler beim Laden der RFQ:', error)
+      toast({
+        title: 'Anfrage konnte nicht geladen werden',
+        description: getErrorMessage(error),
+        variant: 'destructive',
+      })
     }
   }
 
@@ -238,6 +263,32 @@ export default function BestellungAnlegenPage(): JSX.Element {
 
     if (invalidPosition) {
       return 'Alle Positionen brauchen Artikel, Menge groesser 0 und einen nicht negativen Preis.'
+    }
+
+    return null
+  }
+
+  function validateStep(stepId: string): string | null {
+    if (stepId === 'lieferant') {
+      if (!bestellung.lieferant.trim()) {
+        return 'Lieferant ist ein Pflichtfeld.'
+      }
+      if (!bestellung.liefertermin) {
+        return 'Liefertermin ist ein Pflichtfeld.'
+      }
+      return null
+    }
+
+    if (stepId === 'positionen') {
+      if (bestellung.positionen.length === 0) {
+        return 'Mindestens eine Position ist erforderlich.'
+      }
+      const invalidPosition = bestellung.positionen.find(
+        (position) => !position.artikel.trim() || position.menge <= 0 || position.preis < 0,
+      )
+      if (invalidPosition) {
+        return 'Alle Positionen brauchen Artikel, Menge groesser 0 und einen nicht negativen Preis.'
+      }
     }
 
     return null
@@ -568,6 +619,14 @@ export default function BestellungAnlegenPage(): JSX.Element {
       <Wizard
         title={`${t('crud.actions.new')} ${entityTypeLabel} ${t('crud.actions.create')}`}
         steps={steps}
+        getStepValidationError={validateStep}
+        onStepValidationError={(_stepId, message) =>
+          toast({
+            title: t('crud.messages.validationError', { defaultValue: 'Validierung fehlgeschlagen' }),
+            description: message,
+            variant: 'destructive',
+          })
+        }
         onFinish={handleSubmit}
         onCancel={() => navigate('/einkauf/bestellungen')}
       />

@@ -47,7 +47,7 @@ flowchart TD
 | `P2P-040` | Requisition laed Artikel, Menge und Faelligkeit aus `/api/v1/einkauf/anfragen/:id`. | Vor diesem Slice fehlte `.data`-Extraktion; `apiClient.get` gibt `AxiosResponse<T>` zurueck, nicht direkt die Nutzdaten. | Felder wurden nie vorgefuellt; `req` war immer das Response-Objekt. | hoch | `.data`-Extraktion konsequent in allen drei Load-Funktionen nachziehen. |
 | `P2P-040` | Contract-Endpoint liegt unter `/api/v1/contracts/:id`. | Vor diesem Slice wurde `/api/contracts/:id` verwendet (fehlendes `/v1/`). | 404 bei jedem Vertragsabruf. | hoch | URL auf `/api/v1/contracts/:id` korrigieren. |
 | `P2P-040` | Nutzer erhaelt sichtbare Rueckmeldung bei erfolgreicher Vorbelegung. | Keine Toast-Bestaetigung vor diesem Slice. | Unklare UX: Nutzer weiss nicht, ob Vorbelegung erfolgreich war. | mittel | Toast nach erfolgreichem API-Load einfuegen. |
-| `P2P-040` | Fehler beim Laden duerfen Bestellpfad nicht blockieren. | Try/catch vorhanden; Graceful Degradation funktioniert. | Kein Fehler-Toast fuer den Nutzer bei Ladefehlern. | niedrig | Optional spaeter ergaenzen; kein Blocker fuer diesen Slice. |
+| `P2P-040` | Fehler beim Laden duerfen Bestellpfad nicht blockieren. | Try/catch vorhanden; Fehler werden jetzt zusaetzlich ueber Toasts sichtbar gemacht. | Keine verbleibende Kernabweichung im Ladefehlerpfad. | niedrig | Fehler-Toast als regressionsgesicherten Standard beibehalten. |
 
 ## E. UI-/CRUD-Befunde
 
@@ -100,9 +100,9 @@ Felder die genutzt werden:
 ## H. Konkrete Empfehlungen
 
 1. Feldmapping der Compat-Endpoints gegen den kanonischen Workflow-Contract dokumentiert halten.
-2. Wizard-Schrittvalidierung als separaten Folgeslice angehen.
-3. Fehler-Toast fuer gescheiterte Vorbelegung optional nachziehen.
-4. Browser-Use-Pfad fuer alle drei Vorbelegungs-Varianten in der QA-Checkliste fortschreiben.
+2. Browser-Use-Pfad fuer alle drei Vorbelegungs-Varianten in der QA-Checkliste fortschreiben.
+3. Weitere Wizards auf dieselbe generische Schrittvalidierung pruefen.
+4. VK-010 Harvest-Handover als naechsten Landhandel-Kernprozess fortschreiben.
 
 ## Annahmen
 

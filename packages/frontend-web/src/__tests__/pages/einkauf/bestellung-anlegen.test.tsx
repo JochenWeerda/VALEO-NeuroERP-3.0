@@ -330,6 +330,26 @@ describe('BestellungAnlegenPage', () => {
     expect(notesField.value).toContain('Vertragsbezug K-2026-004')
   })
 
+  it('zeigt einen Fehler-Toast, wenn die Bedarfsmeldungs-Vorbelegung fehlschlaegt', async () => {
+    getMock.mockRejectedValueOnce(new Error('Backend offline'))
+
+    render(
+      <MemoryRouter initialEntries={['/einkauf/bestellungen/neu?requisitionId=req-fehler']}>
+        <BestellungAnlegenPage />
+      </MemoryRouter>,
+    )
+
+    await waitFor(() => {
+      expect(toastMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Bedarfsmeldung konnte nicht geladen werden',
+          description: 'Backend offline',
+          variant: 'destructive',
+        }),
+      )
+    })
+  })
+
   it('blockiert den Wechsel zum Positionsschritt ohne Lieferant', async () => {
     render(
       <MemoryRouter initialEntries={['/einkauf/bestellungen/neu']}>

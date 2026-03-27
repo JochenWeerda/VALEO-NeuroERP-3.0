@@ -111,3 +111,5 @@ Der Katalog liefert fuer jeden Use Case:
 - [Architecture Index](architecture/index.md)
 - [Process Kernel Status](architecture/process-kernel/STATUS.md)
 - [AI Vision](AI-VISION.md)
+- [Documentation Entry](README.md)
+- [Workflow Analysis Master Prompt](workflows/workflow-analysis-master-prompt.md)
