@@ -18,10 +18,10 @@ Zwei End-to-End-Stränge laufen **fachlich und technisch getrennt**. Bitte **nic
 
 | Lane | Scope (typisch) | Aktive / reservierte Slices | Regel |
 |------|-----------------|--------------------------------|--------|
-| **Agrar / Harvest-to-Settlement** | `packages/frontend-web/src/pages/agrar/**`, relevante `pages/annahme/**` | VK-013 (Codex) | Kein paralleles Editing mit der OTC-Folge-Lane. |
+| **Agrar / Harvest-to-Settlement** | `packages/frontend-web/src/pages/agrar/**`, relevante `pages/annahme/**` | VK-013 abgeschlossen (Codex) | Kein paralleles Editing mit der OTC-Folge-Lane. |
 | **Order-to-Cash Folge (Finance)** | `packages/frontend-web/src/pages/finance/**`, optional `pages/sales/**` / `pages/verkauf/**` | OTC-011 | Kein paralleles Editing mit VK-013-Agrar ohne Absprache. |
 
-**Stub-Status:** `docs/workflows/vk-013-kampagnenabschluss.md` und zugehoerige Card sind **Platzhalter** bis zur fachlichen Ausarbeitung. `OTC-011` ist als Folgelane zu OTC-010 **begonnen** (Workflow+Card), Umsetzung im Finance-UI folgt iterativ.
+**Lane-Status:** `VK-013` ist fachlich ausgearbeitet und abgeschlossen. `OTC-011` ist als Folgelane zu OTC-010 **begonnen** (Workflow+Card), Umsetzung im Finance-UI folgt iterativ.
 
 ## Aktive Slices
 
@@ -36,7 +36,7 @@ Zwei End-to-End-Stränge laufen **fachlich und technisch getrennt**. Bitte **nic
 | VK-011 | Ernte-Annahme Handover-Bruecke (QP→Erfassung) und LKW-Wizard-Schrittvalidierung | abgeschlossen | aktuell offener Agent (Codex) | `docs/agent-ops/active-workboard.md`, `docs/workflows/vk-011-qp-handover-und-lkw-validierung.md`, `docs/cards/agrar/VK-011-qp-handover-und-lkw-validierung.md`, `docs/quality-assurance/browser-use-checklists.md`, `packages/frontend-web/src/pages/annahme/qualitaets-check.tsx`, `packages/frontend-web/src/pages/annahme/lkw-registrierung.tsx`, `packages/frontend-web/src/pages/agrar/ernte-annahme-erfassung.tsx`, `packages/frontend-web/src/__tests__/pages/annahme/lkw-registrierung.test.tsx`, `packages/frontend-web/src/__tests__/pages/annahme/qualitaets-check.test.tsx`, `packages/frontend-web/src/__tests__/pages/agrar/ernte-annahme-erfassung.test.tsx` | Folgearbeit in **Agrar-Lane**: VK-013 (Codex) oder Queue-/Artikel-Slice | keine |
 | VK-012 | Annahme-Abrechnung: Settlement-Flow-Analyse und QA-Haertung | abgeschlossen | Claude Sonnet 4.6 | `packages/frontend-web/src/pages/annahme/abrechnung.tsx`, `packages/frontend-web/src/pages/annahme/rohware.tsx`, `docs/workflows/vk-012-annahme-abrechnung.md`, `docs/cards/agrar/VK-012-annahme-abrechnung.md` | abgeschlossen | keine |
 | VK-020 | Rohware-Wizard Schrittvalidierung (VK-012-P1) | abgeschlossen | Cursor Agent | `packages/frontend-web/src/pages/annahme/rohware.tsx`, `packages/frontend-web/src/__tests__/pages/annahme/rohware.test.tsx`, `docs/workflows/vk-020-rohware-wizard-schrittvalidierung.md`, `docs/cards/agrar/VK-020-rohware-wizard-schrittvalidierung.md` | VK-012-P2/P3 oder VK-013 | keine |
-| VK-013 | Ernte-Kampagne-Abschluss: Gesamtabrechnung ueber alle Settlements | reserviert | aktuell offener Agent (Codex) | `docs/agent-ops/active-workboard.md`, `docs/workflows/vk-013-kampagnenabschluss.md`, `docs/cards/agrar/VK-013-kampagnenabschluss.md`, `docs/quality-assurance/browser-use-checklists.md`, `packages/frontend-web/src/pages/agrar/kampagne*.tsx`, `packages/frontend-web/src/pages/annahme/abrechnung.tsx`, `packages/frontend-web/src/__tests__/pages/agrar/*.test.tsx` | Claim liegt vor (`chore(workboard): claim VK-013`); Stub → fachliche Workflow-/Card-Ausarbeitung | keine |
+| VK-013 | Ernte-Kampagne-Abschluss: Gesamtabrechnung ueber alle Settlements | abgeschlossen | aktuell offener Agent (Codex) | `docs/agent-ops/active-workboard.md`, `docs/workflows/vk-013-kampagnenabschluss.md`, `docs/cards/agrar/VK-013-kampagnenabschluss.md`, `docs/quality-assurance/browser-use-checklists.md`, `packages/frontend-web/src/pages/agrar/erntefenster-konfig.tsx`, `packages/frontend-web/src/pages/annahme/abrechnung.tsx`, `packages/frontend-web/src/__tests__/pages/agrar/erntefenster-konfig.test.tsx`, `packages/frontend-web/src/__tests__/pages/annahme/abrechnung.test.tsx` | Folge-Slice fuer echte Kampagnenreferenz oder Queue-/Artikel-API zuschneiden | keine |
 | OTC-010 | Order-to-Cash End-to-End: Verkaufsauftrag → Lieferschein → Rechnung → Zahlung | abgeschlossen | Claude Sonnet 4.6 | `pages/sales/invoice-editor.tsx`, `pages/verkauf/lieferschein-erfassung.tsx`, `docs/workflows/otc-010-order-to-cash.md`, `docs/cards/verkauf/OTC-010-order-to-cash.md` | abgeschlossen | keine |
 | OTC-011 | Zahlungseingang und Abstimmung (Folgeslice OTC-010) | in arbeit | Cursor Agent | `packages/frontend-web/src/pages/finance/**`, `docs/workflows/otc-011-zahlungseingang-und-abstimmung.md`, `docs/cards/finance/OTC-011-zahlungseingang-und-abstimmung.md`, `docs/quality-assurance/browser-use-checklists.md` | OP-Zahlung/Abstimmung vertiefen; API-Inventar; Lane **nicht** mit VK-013 mischen | keine |
 
@@ -75,16 +75,17 @@ Kein Agent darf einen Slice beginnen, der bereits `reserviert` oder `in arbeit` 
 - P2P-050 abgeschlossen: Wizard-Schrittvalidierung verdrahtet (validateStep, onStepValidationError); die relevante Frontend-Regression fuer Wizard und P2P-Pfad ist gruen.
 - VK-010 abgeschlossen: Claude-Analyse fuer den breiten Ernte-Annahme-Kernprozess ist mit dem operativen Handover-/QA-Slice zusammengezogen. Dokumentiert und abgesichert sind jetzt sowohl der Edit-Mode-Fix (`.data`-Extraktion in `loadHarvestAcceptance`) als auch die restart-sichere Handover-Haertung (`useMemo` fuer Workflow-Kontext, Seitentest, QA-Checkliste).
 - VK-011 abgeschlossen: Qualitaets-Check uebergibt restart-sicher per Query in die Ernte-Annahme; `quality_protocol_id` wird mitpersistiert; LKW-Wizard blockiert leere Pflichtschritte per Toast.
-- Naechste Prioritaet: **parallel getrennt** — Agrar-Lane **VK-013** (Codex) vs Finance-Folge-Lane **OTC-011** (siehe Abschnitt Parallele E2E-Lanes); optional Queue-/Artikel-API-Folgeslice in Annahmekette separat claimen.
+- VK-013 abgeschlossen: Kampagnenabschluss laeuft ueber bestehende Standardmasken (`erntefenster-konfig.tsx` -> `abrechnung.tsx`); Aggregation erfolgt vorerst ueber `created_at` im Kampagnenfenster.
+- Naechste Prioritaet: **parallel getrennt** - Agrar-Lane Folge-Slice fuer echte Kampagnenreferenz oder Queue-/Artikel-API vs Finance-Folge-Lane **OTC-011** (siehe Abschnitt Parallele E2E-Lanes).
 - VK-020 abgeschlossen: Rohware-Wizard mit `getStepValidationError` (Lieferant/Fahrzeug, Ware/Lager/Netto); Card VK-012-P1 als erledigt markiert; Vitest `rohware.test.tsx`.
-- Workboard-Konsistenz 2026-03-27: DOCS-105-Handoff geschlossen (Doku im Repo); VK-013-Stubs angelegt; OTC-011 Folgelane mit Workflow/Card begonnen.
+- Workboard-Konsistenz 2026-03-27: DOCS-105-Handoff geschlossen (Doku im Repo); VK-013 von Stub auf abgeschlossen gehoben; OTC-011 Folgelane mit Workflow/Card begonnen.
 
 ## Handoff: 2026-03-27 — DOCS-105 (archiviert)
 
 **Von:** Claude Sonnet 4.6  
 **Stand:** **abgeschlossen und im Repo eingecheckt** (Nachzug Wave 104, Workboard, Roadmap-Dateien; siehe History ab Wave-104-Commits).
 
-**Hinweis fuer Sessions:** Die frueheren Zeilen „Docs-Commit ausstehend“ / „P2P-001 als naechster Schritt“ sind **veraltet**; P2P-Slices sind inzwischen ebenfalls abgeschlossen. Aktuelle Prioritaeten: **Parallele E2E-Lanes** und die offenen Slices **VK-013** / **OTC-011**.
+**Hinweis fuer Sessions:** Die frueheren Zeilen "Docs-Commit ausstehend" / "P2P-001 als naechster Schritt" sind **veraltet**; P2P-Slices sind inzwischen ebenfalls abgeschlossen. Aktuelle Prioritaeten: **Parallele E2E-Lanes**, offene Finance-Lane **OTC-011** und im Agrar-Strang der Folge-Slice nach **VK-013**.
 
 **Tests / Checks:** `node scripts/docs-governance-check.cjs` bei Doku-Aenderungen.
 
@@ -281,3 +282,35 @@ Kein Agent darf einen Slice beginnen, der bereits `reserviert` oder `in arbeit` 
 **Tests / Checks:** Manuell: Rohware-Wizard → Annahmenummer (kein 404), "Zur Abrechnung" mit prefilled Werten, Settlement anlegen, Freigabe-Workflow, FIBU-Verbuchung
 **Offene Risiken:** Kein `getStepValidationError` im Rohware-Wizard — ungueltige Daten koennen durchkommen; Supplier-ID bleibt Freitext ohne CRM-Validierung
 **Naechster konkreter Schritt:** VK-013 Ernte-Kampagne-Abschluss claimen oder VK-012-P1 Rohware-Wizard Schrittvalidierung.
+
+## Slice: VK-013 - Ernte-Kampagnenabschluss
+
+**Owner:** aktuell offener Agent (Codex)
+**Status:** abgeschlossen
+**Ziel:** Einen belastbaren Kampagnenabschluss ueber bestehende Standardmasken verfuegbar machen, statt eine neue Spezialmaske einzufuehren.
+**Fachlicher Scope:** `erntefenster-konfig.tsx` als Kampagnenmonitor, `abrechnung.tsx` als bestehender Abschlussort fuer zugeordnete Settlements.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/workflows/vk-013-kampagnenabschluss.md`, `docs/cards/agrar/VK-013-kampagnenabschluss.md`, `docs/quality-assurance/browser-use-checklists.md`, `packages/frontend-web/src/pages/agrar/erntefenster-konfig.tsx`, `packages/frontend-web/src/pages/annahme/abrechnung.tsx`, `packages/frontend-web/src/__tests__/pages/agrar/erntefenster-konfig.test.tsx`, `packages/frontend-web/src/__tests__/pages/annahme/abrechnung.test.tsx`
+**Abnahmekriterien:** Kampagnenliste zeigt KPI und Abschlussstatus je Kampagne; CTA oeffnet die gefilterte Settlement-Pruefung; Abrechnungsmaske filtert ueber Query-Parameter; Workflow/Card/QA-Doku sind nachgezogen; relevante Vitest-Regressionen sind gruen.
+**Tests / Checks:** `pnpm --dir packages/frontend-web exec vitest run src/__tests__/pages/agrar/erntefenster-konfig.test.tsx src/__tests__/pages/annahme/abrechnung.test.tsx`
+**Doku-Updates:** Workboard, Workflow-Datei `vk-013-kampagnenabschluss.md`, Card `VK-013-kampagnenabschluss.md`, QA-Checkliste.
+**Risiken / Blocker:** Kampagnenzuordnung basiert vorerst nur auf `created_at` im Zeitfenster und ist damit noch keine revisionssichere fachliche Referenz.
+**Naechster konkreter Schritt:** Folge-Slice fuer echte Kampagnenreferenz oder fuer Queue-/Artikel-API in der Annahmekette claimen.
+
+## Handoff: 2026-03-27 - VK-013
+
+**Von:** aktuell offener Agent (Codex)
+**An:** naechste Session / naechster Agent
+**Ziel des Slices:** Kampagnenabschluss ueber vorhandene Standardmasken verfuegbar machen und fachlich dokumentieren.
+**Stand:** abgeschlossen
+**Erledigt:**
+- `erntefenster-konfig.tsx` laedt jetzt zusaetzlich Settlements, aggregiert je Kampagne Anzahl, Netto, Abzuege und offene Datensaetze und zeigt daraus einen UI-Abschlussstatus
+- CTA `Settlement-Abschluss pruefen` springt mit `campaignName`, `campaignStart` und `campaignEnd` in `annahme/abrechnung`
+- `abrechnung.tsx` filtert die Settlement-Liste query-basiert auf das Kampagnenfenster und zeigt oben eine kompakte Kampagnenkarte
+- Regressionen in `erntefenster-konfig.test.tsx` und `abrechnung.test.tsx` sichern KPI-/Filterpfad
+- Workflow-Doku, Card und QA-Checkliste von Stub auf Ist-Stand nachgezogen
+**Offen:** Keine explizite Kampagnen-ID am Settlement-Contract; Aggregation erfolgt nur ueber `created_at` im Zeitfenster.
+**Betroffene Dateien:** `docs/agent-ops/active-workboard.md`, `docs/workflows/vk-013-kampagnenabschluss.md`, `docs/cards/agrar/VK-013-kampagnenabschluss.md`, `docs/quality-assurance/browser-use-checklists.md`, `packages/frontend-web/src/pages/agrar/erntefenster-konfig.tsx`, `packages/frontend-web/src/pages/annahme/abrechnung.tsx`, `packages/frontend-web/src/__tests__/pages/agrar/erntefenster-konfig.test.tsx`, `packages/frontend-web/src/__tests__/pages/annahme/abrechnung.test.tsx`
+**Tests / Checks:** `pnpm --dir packages/frontend-web exec vitest run src/__tests__/pages/agrar/erntefenster-konfig.test.tsx src/__tests__/pages/annahme/abrechnung.test.tsx`
+**Offene Risiken:** Ueberlappende Kampagnen oder spaet erfasste Settlements koennen im aktuellen Proxy-Modell falsch zugeordnet werden.
+**Annahmen:** `created_at` bleibt bis zu einem Backend-Folgeslice die einzig belastbare Zuordnungsbasis; Standardmaske vor Spezialmaske bleibt fuer den Kampagnenabschluss korrekt.
+**Naechster konkreter Schritt:** Entweder echte Kampagnenreferenz im Settlement-Contract oder separater Folge-Slice fuer Queue-/Artikel-API in der Annahmekette.

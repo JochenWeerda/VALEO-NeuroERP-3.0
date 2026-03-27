@@ -98,3 +98,16 @@ Diese Checklisten schaerfen die UI-, CRUD- und Live-Betriebspruefung fuer Workfl
 7. Fahrzeug-Kennzeichen, Artikelname sowie Bemerkungen fuer Lieferschein, Qualitaetspruefung und Qualitaetsprotokoll pruefen.
 8. Browser neu laden.
 9. Erwartung: Vorbelegung bleibt restart-sicher erhalten.
+
+### VK-013: Ernte-Kampagnenabschluss
+
+1. `Erntefenster-Konfiguration` oeffnen und eine Kampagne mit vorhandenem Zeitraum aufrufen.
+2. Erwartung: Jede Kampagne zeigt Abschlussstatus, Anzahl Settlements, Netto gesamt, offene Settlements und Abzuege gesamt.
+3. Kampagne mit mindestens einem offenen oder noch nicht verbuchten Settlement pruefen.
+4. Erwartung: Status `Abschluss offen`.
+5. Auf `Settlement-Abschluss pruefen` klicken.
+6. Erwartung: Navigation nach `/annahme/abrechnung` mit `campaignName`, `campaignStart` und `campaignEnd`.
+7. In der Abrechnungsmaske Kampagnenkarte und gefilterte Settlement-Liste pruefen.
+8. Erwartung: Nur Settlements innerhalb des Kampagnenfensters sind sichtbar; Datensaetze ausserhalb des Fensters fehlen.
+9. Optional einen offenen Settlement-Datensatz freigeben oder verbuchen und die Kampagnenliste erneut laden.
+10. Erwartung: KPI und Abschlussstatus aktualisieren sich konsistent.
