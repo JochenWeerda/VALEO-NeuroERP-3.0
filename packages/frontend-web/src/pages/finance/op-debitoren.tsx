@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useMemo, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { ObjectPage } from '@/components/mask-builder'
@@ -9,8 +9,38 @@ import { getFieldsFromMaskConfig, validateFields } from '@/components/mask-build
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/axios'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Banknote } from 'lucide-react'
 
-const createOpDebitorenConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
+/** Mappt GET /finance/open-items/{id} (API) auf Masken-Felder (OTC-011). */
+function mapOpenItemApiToForm(row: Record<string, unknown>): Record<string, unknown> {
+  const opStatus = String(row.op_status ?? 'offen')
+  const statusUi: Record<string, string> = {
+    offen: 'offen',
+    teilweise: 'teilbezahlt',
+    geschlossen: 'ausgeglichen',
+    storniert: 'ausgeglichen',
+  }
+  const rd = row.rechnungsdatum ?? row.datum
+  const fd = row.faelligkeit
+  return {
+    id: row.id,
+    debitorId: String(row.kunde_id ?? 'K001'),
+    opNummer: String(row.rechnungsnr ?? row.id ?? ''),
+    rechnungId: String(row.rechnungsnr ?? ''),
+    buchungsdatum: rd ? String(rd).slice(0, 10) : '',
+    faelligkeit: fd ? String(fd).slice(0, 10) : '',
+    status: statusUi[opStatus] ?? 'offen',
+    betrag: Number(row.op_betrag ?? row.betrag ?? 0),
+    offen: Number(row.offen ?? 0),
+    waehrung: String(row.waehrung ?? 'EUR'),
+    mahnstufe: Number(row.mahn_stufe ?? 0),
+    zahlungen: [],
+    notizen: String(row.op_text ?? ''),
+  }
+}
+
+const createOpDebitorenConfig = (t: any, entityTypeLabel: string, customerOptions: Array<{ value: string; label: string }>): MaskConfig => ({
   title: entityTypeLabel,
   subtitle: t('crud.fields.opKreditoren.subtitle'),
   type: 'object-page',
@@ -24,11 +54,9 @@ const createOpDebitorenConfig = (t: any, entityTypeLabel: string): MaskConfig =>
           label: t('crud.entities.debtor'),
           type: 'select',
           required: true,
-          options: [
-            { value: 'K001', label: 'K001 - Müller GmbH' },
-            { value: 'K002', label: 'K002 - Schmidt KG' },
-            { value: 'K003', label: 'K003 - Bauer e.K.' }
-          ]
+          options: customerOptions.length > 0
+            ? customerOptions
+            : [{ value: '', label: t('common.loading') ?? 'Laden...' }]
         },
         {
           name: 'opNummer',
@@ -368,15 +396,74 @@ function SettlementsList({ opId, t }: { opId: string; t: (key: string) => string
 export default function OPDebitorenPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const [isDirty, setIsDirty] = useState(false)
   const [actionLoadingKey, setActionLoadingKey] = useState<string | null>(null)
   const entityType = 'openItem'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'OP-Verwaltung (Debitoren)')
-  const opDebitorenConfig = createOpDebitorenConfig(t, entityTypeLabel)
+
+  // OTC-011-P1: Debitoren aus CRM laden statt hardcoded
+  const { data: customers } = useQuery({
+    queryKey: ['crm', 'customers', 'debitor-select'],
+    queryFn: async () => {
+      const res = await apiClient.get<Array<{ id: string; customer_number?: string; company_name?: string; name?: string }>>('/api/v1/crm/customers?limit=500')
+      return (Array.isArray(res) ? res : []).map((c) => ({
+        value: c.customer_number ?? c.id,
+        label: `${c.customer_number ?? c.id} - ${c.company_name ?? c.name ?? ''}`.trim(),
+      }))
+    },
+    staleTime: 5 * 60 * 1000,
+  })
+  const customerOptions = customers ?? []
+
+  const opDebitorenConfig = createOpDebitorenConfig(t, entityTypeLabel, customerOptions)
+
+  const opIdParam = searchParams.get('opId') ?? searchParams.get('op')
+  const rechnungsnrParam = searchParams.get('rechnungsnr') ?? searchParams.get('rechnung')
+
+  const { data: resolvedOpId, isLoading: resolvingOp } = useQuery({
+    queryKey: ['otc-011-resolve-op', opIdParam, rechnungsnrParam],
+    queryFn: async (): Promise<string | null> => {
+      const direct = opIdParam?.trim()
+      if (direct) {
+        return direct
+      }
+      const nr = rechnungsnrParam?.trim()
+      if (!nr) {
+        return null
+      }
+      const res = await apiClient.get<{ items: Array<{ id: string; rechnungsnr?: string }> }>(
+        `/api/v1/finance/open-items?konto_typ=debitoren&search=${encodeURIComponent(nr)}`,
+      )
+      const items = res.items ?? []
+      const exact = items.find((i) => String(i.rechnungsnr ?? '') === nr) ?? items[0]
+      return exact?.id ?? null
+    },
+    enabled: Boolean(opIdParam?.trim() || rechnungsnrParam?.trim()),
+  })
+
+  const maskId = useMemo(() => {
+    if (!opIdParam?.trim() && !rechnungsnrParam?.trim()) {
+      return undefined
+    }
+    if (resolvingOp) {
+      return undefined
+    }
+    return resolvedOpId ?? undefined
+  }, [opIdParam, rechnungsnrParam, resolvedOpId, resolvingOp])
+
+  const showOtcHandoverHint = Boolean(opIdParam?.trim() || rechnungsnrParam?.trim())
+  const noOpMatch =
+    showOtcHandoverHint &&
+    !resolvingOp &&
+    rechnungsnrParam?.trim() &&
+    !opIdParam?.trim() &&
+    resolvedOpId === null
 
   const { data, loading, saveData } = useMaskData({
     apiUrl: opDebitorenConfig.api.baseUrl,
-    id: 'new'
+    id: maskId,
+    transformResponse: (raw) => mapOpenItemApiToForm(raw as Record<string, unknown>),
   })
 
   const validate = (formData: any) => validateFields(getFieldsFromMaskConfig(opDebitorenConfig), formData ?? {})
@@ -457,9 +544,11 @@ export default function OPDebitorenPage(): JSX.Element {
             await apiClient.post(`/api/v1/finance/open-items/${formData.id}/settle`, settlement)
           }
 
-          toast.success(t('crud.messages.settlementSuccess'))
+          // OTC-011-P3: Toast mit OP-Nummer statt Navigation zu leerer Maske
+          const opNr = formData.opNummer || formData.id || ''
+          toast.success(t('crud.messages.settlementSuccess') + (opNr ? ` (${opNr})` : ''))
           setIsDirty(false)
-          navigate('/finance/op-debitoren')
+          navigate('/finance/offene-posten')
         } catch (error: any) {
           toast.error(error.message || t('crud.messages.settlementError'))
         }
@@ -469,7 +558,7 @@ export default function OPDebitorenPage(): JSX.Element {
           await saveData(formData)
           setIsDirty(false)
           toast.success(t('crud.messages.saveSuccess', { entityType: entityTypeLabel }))
-          navigate('/finance/op-debitoren')
+          navigate('/finance/offene-posten')
         } catch (error) {
           // Error wird bereits in useMaskData behandelt
         }
@@ -481,24 +570,14 @@ export default function OPDebitorenPage(): JSX.Element {
         return
       }
 
+      // OTC-011-P2: apiClient statt raw fetch (OIDC-kompatibel)
       try {
-        const response = await fetch(`/api/v1/finance/dunning/${formData.id}/mahnung`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          },
-        })
-
-        if (response.ok) {
-          formData.mahnstufe = (formData.mahnstufe || 0) + 1
-          toast.success(t('crud.messages.dunningCreated', { level: formData.mahnstufe }))
-        } else {
-          const error = await response.json()
-          toast.error(error.detail || t('crud.messages.dunningError'))
-        }
-      } catch (error) {
-        toast.error(t('crud.messages.networkError'))
+        await apiClient.post(`/api/v1/finance/dunning/${formData.id}/mahnung`)
+        formData.mahnstufe = (formData.mahnstufe || 0) + 1
+        toast.success(t('crud.messages.dunningCreated', { level: formData.mahnstufe }))
+      } catch (error: any) {
+        const msg = error.response?.data?.detail ?? error.message ?? t('crud.messages.dunningError')
+        toast.error(msg)
       }
     } else if (action === 'export') {
       if (!formData.id) {
@@ -527,18 +606,33 @@ export default function OPDebitorenPage(): JSX.Element {
     if (isDirty && !confirm(t('crud.messages.unsavedChanges'))) {
       return
     }
-    navigate('/finance/op-debitoren')
+    navigate('/finance/offene-posten')
   }
 
   return (
-    <ObjectPage
-      config={opDebitorenConfig}
-      data={data}
-      onSave={handleSave}
-      onCancel={handleCancel}
-      isLoading={loading}
-      onAction={(key, formData) => handleAction(key, formData)}
-      loadingActionKey={actionLoadingKey}
-    />
+    <div className="space-y-4 p-4">
+      {showOtcHandoverHint ? (
+        <Alert>
+          <Banknote className="h-4 w-4" />
+          <AlertTitle>OTC-011 — Zahlungseingang / OP-Abstimmung</AlertTitle>
+          <AlertDescription>
+            {resolvingOp
+              ? 'Offenen Posten werden aufgeloest …'
+              : noOpMatch
+                ? `Kein Debitoren-OP fuer Rechnungsnr. "${rechnungsnrParam}" gefunden. Legen Sie einen neuen OP an oder pruefen Sie die Nummer.`
+                : `Zuordnung zu ${rechnungsnrParam ? `Rechnung ${rechnungsnrParam}` : `OP-ID ${opIdParam}`}. Zahlungen erfassen und ueber „Ausgleich“ verbuchen.`}
+          </AlertDescription>
+        </Alert>
+      ) : null}
+      <ObjectPage
+        config={opDebitorenConfig}
+        data={data}
+        onSave={handleSave}
+        onCancel={handleCancel}
+        isLoading={loading || resolvingOp}
+        onAction={(key, formData) => handleAction(key, formData)}
+        loadingActionKey={actionLoadingKey}
+      />
+    </div>
   )
 }

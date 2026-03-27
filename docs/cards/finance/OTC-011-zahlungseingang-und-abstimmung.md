@@ -63,14 +63,14 @@ op-debitoren.tsx
 | OTC-011-G3 | Zahlungserfassung und Ausgleich-Buchung vollständig implementiert |
 | OTC-011-G4 | Ausgleichshistorie-Tab vorhanden |
 
-## 7. Offene Punkte
+## 7. Behobene offene Punkte
 
-| ID | Beschreibung | Priorität |
+| ID | Beschreibung | Status |
 |---|---|---|
-| OTC-011-P1 | Debitor-Dropdown aus `GET /crm/customers` statt hardcoded K001/K002/K003 | Hoch |
-| OTC-011-P2 | Mahnung-Aktion auf `apiClient` von `@/lib/axios` umstellen | Hoch |
-| OTC-011-P3 | Navigation nach Ausgleich zu Listenansicht statt leerer Einzelmaske | Mittel |
-| OTC-011-P4 | `payment-matching.tsx` nach Match auf `/finance/op-debitoren?opId=` verlinken | Mittel |
+| OTC-011-P1 | Debitor-Dropdown aus `GET /crm/customers` | behoben — `useQuery` mit CRM-API |
+| OTC-011-P2 | Mahnung-Aktion auf `apiClient.post()` | behoben — raw fetch entfernt |
+| OTC-011-P3 | Navigation nach Ausgleich zu `/finance/offene-posten` + Toast | behoben |
+| OTC-011-P4 | `payment-matching.tsx` → Toast mit „OP öffnen"-Button | behoben |
 
 ## 8. Tests (manuell)
 
