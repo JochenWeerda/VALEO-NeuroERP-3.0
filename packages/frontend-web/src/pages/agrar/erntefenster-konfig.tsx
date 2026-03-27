@@ -40,6 +40,7 @@ type ErntefensterCampaign = {
 type SettlementSummary = {
   id: string
   settlement_number: string
+  campaign_id?: string | null
   net_amount_eur: number
   total_deductions_eur: number
   approval_status: string
@@ -109,6 +110,9 @@ export default function ErntefensterKonfigPage(): JSX.Element {
 
   const campaignSummaries = campaigns.map((campaign) => {
     const matchingSettlements = settlements.filter((settlement) => {
+      if (settlement.campaign_id) {
+        return settlement.campaign_id === campaign.id
+      }
       if (!settlement.created_at) return false
       const createdAt = String(settlement.created_at).slice(0, 10)
       return createdAt >= campaign.start_date && createdAt <= campaign.end_date
