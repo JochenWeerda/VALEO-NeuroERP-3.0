@@ -48,6 +48,28 @@ type QualityProtocolResponse = {
   } | null
 }
 
+function buildHarvestAcceptanceHandoverQuery(input: {
+  partnerName: string
+  artikel: string
+  lieferscheinNr: string
+  vehiclePlate: string
+  qualityProtocolId: string
+  qpErgebnis: QualitaetsData['ergebnis']
+}): string {
+  const query = new URLSearchParams()
+  query.set('workflowProcess', 'harvest-to-settlement')
+  query.set('workflowLabel', `quality-protocol:${input.qualityProtocolId}`)
+  query.set('entryMode', 'Qualitaetspruefung')
+  if (input.partnerName) query.set('partnerName', input.partnerName)
+  if (input.artikel || input.qpErgebnis) query.set('subject', [input.artikel, input.qpErgebnis].filter(Boolean).join(' / '))
+  if (input.lieferscheinNr) query.set('lieferscheinNr', input.lieferscheinNr)
+  if (input.vehiclePlate) query.set('vehiclePlate', input.vehiclePlate)
+  if (input.artikel) query.set('articleName', input.artikel)
+  query.set('qpResult', input.qpErgebnis)
+  query.set('qualityProtocolId', input.qualityProtocolId)
+  return query.toString()
+}
+
 export default function QualitaetsCheckPage(): JSX.Element {
   const navigate = useNavigate()
   const location = useLocation()
@@ -140,7 +162,22 @@ export default function QualitaetsCheckPage(): JSX.Element {
       if (eintragId) {
         patchStatus.mutate({ id: eintragId, status: 'abgeschlossen' })
       }
-      navigate('/annahme/warteschlange')
+      if (qualitaet.ergebnis === 'gesperrt') {
+        navigate('/annahme/warteschlange')
+        return
+      }
+      const handoverQuery = buildHarvestAcceptanceHandoverQuery({
+        partnerName: lkwEintrag?.lieferant ?? '',
+        artikel: qualitaet.artikel,
+        lieferscheinNr: qualitaet.lieferscheinNr,
+        vehiclePlate: lkwEintrag?.kennzeichen ?? '',
+        qualityProtocolId: data.id,
+        qpErgebnis: qualitaet.ergebnis,
+      })
+      navigate({
+        pathname: '/agrar/ernte-annahme-erfassung',
+        search: `?${handoverQuery}`,
+      })
     },
     onError: () => {
       toast({ title: 'Fehler beim Speichern', variant: 'destructive' })

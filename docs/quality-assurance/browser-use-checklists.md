@@ -86,3 +86,15 @@ Diese Checklisten schaerfen die UI-, CRUD- und Live-Betriebspruefung fuer Workfl
 1. Neue Ernte-Annahme mit Harvest-Handover oeffnen und einen ersten Speicherversuch vorbereiten.
 2. Bestehende Ernte-Annahme per ID oeffnen.
 3. Erwartung: Handover und Edit-Mode koennen nebeneinander bestehen; Felder bleiben bedienbar.
+
+### VK-011: Qualitaets-Check -> Ernte-Annahme
+
+1. LKW-Registrierung oeffnen und im ersten Schritt ohne Kennzeichen auf `Weiter` klicken.
+2. Erwartung: destructive Toast, kein Schrittwechsel.
+3. Kennzeichen erfassen, in Schritt 2 ohne Lieferant oder Artikel erneut `Weiter` klicken.
+4. Erwartung: Wizard blockiert erneut und bleibt im Lieferungs-Schritt.
+5. LKW vollstaendig registrieren, in der Warteschlange zur Qualitaetspruefung gehen und mit `freigegeben` oder `bedingt` abschliessen.
+6. Erwartung: Navigation direkt in `/agrar/ernte-annahme-erfassung` mit Query-Handover.
+7. Fahrzeug-Kennzeichen, Artikelname sowie Bemerkungen fuer Lieferschein, Qualitaetspruefung und Qualitaetsprotokoll pruefen.
+8. Browser neu laden.
+9. Erwartung: Vorbelegung bleibt restart-sicher erhalten.

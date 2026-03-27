@@ -71,4 +71,26 @@ describe('ErnteAnnahmeErfassungPage', () => {
     expect(screen.getByDisplayValue(/Anlieferer: Hof Meyer/)).toBeInTheDocument()
     expect(screen.getByDisplayValue(/Weizen Herbst/)).toBeInTheDocument()
   })
+
+  it('uebernimmt die Vorbelegung aus dem Qualitaets-Check restart-sicher ueber Query-Parameter', async () => {
+    render(
+      <MemoryRouter
+        initialEntries={[
+          '/agrar/ernte-annahme-erfassung?workflowProcess=harvest-to-settlement&workflowLabel=quality-protocol%3Aqp-1&entryMode=Qualitaetspruefung&partnerName=Hof%20Meyer&subject=Weizen%20%2F%20freigegeben&lieferscheinNr=LS-42&vehiclePlate=AB-CD%201234&articleName=Weizen&qpResult=freigegeben&qualityProtocolId=qp-1',
+        ]}
+      >
+        <Routes>
+          <Route path="/agrar/ernte-annahme-erfassung" element={<ErnteAnnahmeErfassungPage />} />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('AB-CD 1234')).toBeInTheDocument()
+    })
+    expect(screen.getByDisplayValue('Weizen')).toBeInTheDocument()
+    expect(screen.getByDisplayValue(/Lieferschein: LS-42/)).toBeInTheDocument()
+    expect(screen.getByDisplayValue(/Qualitaetspruefung: freigegeben/)).toBeInTheDocument()
+    expect(screen.getByDisplayValue(/Qualitaetsprotokoll: qp-1/)).toBeInTheDocument()
+  })
 })
