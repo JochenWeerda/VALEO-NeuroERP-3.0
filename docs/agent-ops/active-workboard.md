@@ -18,7 +18,8 @@ Diese Datei ist absichtlich schlank und soll bei jeder Session schnell lesbar bl
 |----------|-------|--------|-------|-------------|-------------------|---------|
 | OPS-001 | Workflow-Analyse-Methodik und Agent-Ops-Doku | abgeschlossen | — | `AGENTS.md`, `docs/agent-ops/**`, `docs/workflows/**`, `docs/project-context/**`, `docs/quality-assurance/**` | bei neuen Workflow-Slices wiederverwenden | keine |
 | DOCS-105 | Wave-104-Dokumentations-Nachzug (GAP-G/H/I, Repo-Hygiene) | abgeschlossen | — | `docs/architecture/process-kernel/STATUS.md`, `DELIVERY-MAP.md`, `wave-104/STATUS.md`, `docs/roadmap/status/2026-03-27-wave-104-abschluss.md`, `docs/project-context/open-gaps-and-known-issues.md` | committen | keine |
-| P2P-001 | Procure-to-Pay Direktbestellung: Workflow-Analyse, QA und Handover-Haertung | in arbeit | naechster Agent | `docs/workflows/p2p-001-procure-to-pay-direktbestellung.md`, `docs/cards/einkauf/**`, `packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx`, `packages/frontend-web/src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx` | Workflow/Card-Doku anlegen, Pflichtvalidierung und Lieferadress-Handover absichern | keine |
+| P2P-001 | Procure-to-Pay Direktbestellung: Workflow-Analyse, QA und Handover-Haertung | abgeschlossen | aktuell offener Agent | `docs/workflows/p2p-001-procure-to-pay-direktbestellung.md`, `docs/cards/einkauf/**`, `packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx`, `packages/frontend-web/src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx` | Folgeslice fuer Bedarfsmeldung/Rahmenabruf zuschneiden | keine |
+| P2P-040 | Procure-to-Pay Vorbelegung aus Bedarfsmeldung/Vertrag/RFQ | abgeschlossen | aktuell offener Agent | `docs/agent-ops/active-workboard.md`, `docs/workflows/p2p-040-vorbelegung-requisition-vertrag-rfq.md`, `docs/cards/einkauf/P2P-040-vorbelegung-standardmaske.md`, `packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx`, `packages/frontend-web/src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx` | Folgeslice Schrittvalidierung zuschneiden | keine |
 
 ## Reservierungsregel
 
@@ -32,7 +33,8 @@ Diese Datei ist absichtlich schlank und soll bei jeder Session schnell lesbar bl
 - Standardmaske vor Spezialmaske ist verbindliche Entscheidungsregel.
 - Restart-sicherer Kontext laeuft ueber `AGENTS.md` plus `docs/agent-ops/`.
 - Wave 104 vollstaendig abgeschlossen (GAP-A bis GAP-I, 5931 Tests gruen, commit `1ad5ea4d`).
-- Naechste Prioritaeten: P2P-001 (Procure-to-Pay Workflow-Doku und QA), danach Landhandel-Kernprozesse.
+- P2P-040 abgeschlossen: Vorbelegung aus Bedarfsmeldung/Vertrag/RFQ korrekt verdrahtet (`.data`, URL `/v1/`, Toast), 6 Tests gruen.
+- Naechste Prioritaeten: P2P-050 (Wizard-Schrittvalidierung) oder naechster Landhandel-Kernprozess (Ernte, Silo, Kontrakt).
 
 ## Handoff: 2026-03-27 — DOCS-105
 
@@ -57,12 +59,60 @@ Diese Datei ist absichtlich schlank und soll bei jeder Session schnell lesbar bl
 ## Slice: P2P-001 - Procure-to-Pay Direktbestellung
 
 **Owner:** aktuell offener Agent
-**Status:** in arbeit
-**Ziel:** Ersten belastbaren Workflow-/QA-Slice fuer den Flow-Spine-Einstieg `Procure-to-Pay` in die Standard-Bestellmaske dokumentieren und einen gefundenen Workflow-Bruch direkt beheben.
+**Status:** abgeschlossen
+**Ziel:** Ersten belastbaren Workflow-/QA-Slice fuer den Flow-Spine-Einstieg `Procure-to-Pay` in die Standard-Bestellmaske dokumentieren und gefundene Workflow-Brueche direkt beheben.
 **Fachlicher Scope:** Flow-Spine-Handover, Standardmaske `Bestellung anlegen`, Direktbestellung als Standardstart, Bedarfsmeldung und Rahmenabruf als Alternativpfade.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/workflows/p2p-001-procure-to-pay-direktbestellung.md`, `docs/cards/einkauf/**`, `packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx`, `packages/frontend-web/src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx`
 **Abnahmekriterien:** Workflow-Doku nach Master-Prompt vorhanden; mindestens eine Card nach Template vorhanden; Bestellmaske verhindert leere oder fachlich unbrauchbare Anlage; Lieferadresse wird konsistent an den Backend-Contract uebergeben; Regressionstest ist gruen.
-**Tests / Checks:** `pnpm --dir packages/frontend-web test:run src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx`
+**Tests / Checks:** `pnpm --dir packages/frontend-web exec vitest run src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx src/__tests__/pages/workflow/flow-spine-procure-to-pay.test.tsx`
 **Doku-Updates:** Workboard, Workflow-Analyse, Card-Datei, Resume-/Handoff-Block.
 **Risiken / Blocker:** Backend-Compat-Contract erzwingt Pflichtfelder nicht serverseitig; Frontend muss fuer diesen Slice eine belastbare Mindestvalidierung sicherstellen.
-**Naechster konkreter Schritt:** Workflow-Doku und Card aufbauen, dann den validierten Handover in der Bestellmaske absichern.
+**Naechster konkreter Schritt:** Folgeslice fuer Bedarfsmeldung-, Vertrags- und RFQ-Vorbelegung separat zuschneiden.
+
+## Handoff: 2026-03-27 - P2P-001
+
+**Von:** aktuell offener Agent
+**An:** naechste Session / naechster Agent
+**Ziel des Slices:** `Procure-to-Pay`-Direktbestellung dokumentieren, QA-haerten und den Handover in die Standard-Bestellmaske stabilisieren.
+**Stand:** abgeschlossen
+**Erledigt:** Workflow-Analyse nach Master-Prompt erstellt; Card fuer `P2P-020` erstellt; Render-Schleife im Workflow-Handover ueber memoisierten Kontext behoben; Mindestvalidierung vor Bestellungsspeicherung ergaenzt; Lieferadresse auf `shippingAddress` ausgerichtet; Frontend-Regressionstests fuer Handover, Validierung und Payload ergaenzt.
+**Offen:** Bedarfsmeldung-, Vertrags- und RFQ-Vorbelegung als eigener Folgeslice; optionale serverseitige Pflichtfeldvalidierung im Compat-Endpoint.
+**Betroffene Dateien:** `docs/agent-ops/active-workboard.md`, `docs/workflows/p2p-001-procure-to-pay-direktbestellung.md`, `docs/cards/einkauf/P2P-020-direktbestellung-standardmaske.md`, `packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx`, `packages/frontend-web/src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx`
+**Tests / Checks:** `pnpm --dir packages/frontend-web exec vitest run src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx src/__tests__/pages/workflow/flow-spine-procure-to-pay.test.tsx`
+**Offene Risiken:** Backend-Compat-Endpoint erzwingt Pflichtfelder weiterhin nicht serverseitig; Wizard hat weiterhin keine Schrittvalidierung vor `Weiter`.
+**Annahmen:** `shippingAddress` bleibt das kanonische Persistenzfeld des aktuellen Purchase-Order-Contracts; Direktbestellung ist der priorisierte Standardstart fuer den ersten P2P-Slice.
+**Naechster konkreter Schritt:** `P2P-040` fuer Vorbelegung aus Requisition, Vertrag und RFQ zuschneiden und mit Browser-Use-/CRUD-Checks absichern.
+
+## Slice: P2P-040 - Procure-to-Pay Vorbelegung
+
+**Owner:** aktuell offener Agent
+**Status:** abgeschlossen
+**Ziel:** Vorbelegung der Bestellmaske aus Bedarfsmeldung, RFQ und Vertrag auf reale API- und Datenvertraege ziehen.
+**Fachlicher Scope:** Einkaufsanfrage als Bedarfsmeldung/RFQ, Vertragsbezug fuer Rahmenabruf, Vorbelegung der Standard-Bestellmaske ohne Spezialmaske.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/workflows/p2p-040-vorbelegung-requisition-vertrag-rfq.md`, `docs/cards/einkauf/P2P-040-vorbelegung-standardmaske.md`, `packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx`, `packages/frontend-web/src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx`
+**Abnahmekriterien:** `.data`-Extraktion in allen Load-Funktionen; URL-Prefix `/v1/` konsistent; Toast-Bestaetigung bei Vorbelegung; 6 Regressionstests gruen.
+**Tests / Checks:** `pnpm --dir packages/frontend-web exec vitest run src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx`
+**Doku-Updates:** Workboard, Workflow-Datei `p2p-040-vorbelegung-requisition-vertrag-rfq.md`, Card `P2P-040-vorbelegung-standardmaske.md`, Handoff.
+**Risiken / Blocker:** Backend-Endpoints fuer `/api/v1/einkauf/anfragen/` und `/api/v1/contracts/` noch nicht produktiv vorhanden; Graceful Degradation schlaegt auf leere Felder zurueck.
+**Naechster konkreter Schritt:** Folgeslice P2P-050 fuer Wizard-Schrittvalidierung zuschneiden oder naechsten Landhandel-Kernprozess beginnen.
+
+## Handoff: 2026-03-27 - P2P-040
+
+**Von:** aktuell offener Agent
+**An:** naechste Session / naechster Agent
+**Ziel des Slices:** Vorbelegungs-Ladefunktionen fuer Bedarfsmeldung, RFQ und Vertrag korrekt verdrahten.
+**Stand:** abgeschlossen
+**Erledigt:**
+- `.data`-Extraktion in `loadRequisitionData`, `loadContractData`, `loadRFQData` nachgezogen (war fehlendes `.data` bei `apiClient.get` = AxiosResponse)
+- Contract-URL von `/api/contracts/:id` auf `/api/v1/contracts/:id` korrigiert
+- Toast-Bestaetigung nach erfolgreichem Vorbelegungs-Load eingefuegt
+- 3 neue Regressionstests: Bedarfsmeldung-Prefill, RFQ-Prefill, Vertrags-Prefill
+- `getMock.mockResolvedValue({ data: null })` als Default-Reset in `beforeEach`
+- Workflow-Analyse `docs/workflows/p2p-040-vorbelegung-requisition-vertrag-rfq.md` erstellt
+- Card `docs/cards/einkauf/P2P-040-vorbelegung-standardmaske.md` erstellt
+**Offen:** Backend-Endpoints fuer `/api/v1/einkauf/anfragen/` und `/api/v1/contracts/` noch nicht produktiv implementiert; Graceful Degradation bereits vorhanden. Wizard-Schrittvalidierung als P2P-050 vorgemerkt.
+**Betroffene Dateien:** `docs/agent-ops/active-workboard.md`, `docs/workflows/p2p-040-vorbelegung-requisition-vertrag-rfq.md`, `docs/cards/einkauf/P2P-040-vorbelegung-standardmaske.md`, `packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx`, `packages/frontend-web/src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx`
+**Tests / Checks:** `pnpm --dir packages/frontend-web exec vitest run src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx` — 6/6 PASS
+**Offene Risiken:** Backend-Endpoints nicht produktiv; Wizard hat keine Schrittvalidierung.
+**Annahmen:** `apiClient.get<T>()` gibt `AxiosResponse<T>` zurueck (`.data` = Nutzdaten). Requisition und RFQ teilen denselben Endpoint `/api/v1/einkauf/anfragen/`.
+**Naechster konkreter Schritt:** P2P-050 (Wizard-Schrittvalidierung) oder Landhandel-Kernprozess (Ernte, Silo, Kontrakt) zuschneiden.

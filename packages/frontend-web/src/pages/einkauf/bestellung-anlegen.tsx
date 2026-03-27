@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { toast } from '@/hooks/use-toast'
@@ -32,6 +32,51 @@ type BestellungData = {
   notizen: string
 }
 
+type EinkaufAnfragePrefill = {
+  id: string
+  anfrageNummer?: string
+  typ?: string
+  anforderer?: string
+  artikel?: string
+  menge?: number
+  prioritaet?: string
+  status?: string
+  faelligkeit?: string | null
+}
+
+function mergeNotes(existingNotes: string, lines: Array<string | undefined | null>): string {
+  const existing = existingNotes
+    .split('\n')
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+  const additions = lines.map((entry) => entry?.trim() ?? '').filter(Boolean)
+  const unique = [...existing]
+  for (const addition of additions) {
+    if (!unique.includes(addition)) {
+      unique.push(addition)
+    }
+  }
+  return unique.join('\n')
+}
+
+function buildRequestPositions(request: EinkaufAnfragePrefill, fallback: BestellungData['positionen']): BestellungData['positionen'] {
+  const artikel = request.artikel?.trim() ?? ''
+  const menge = typeof request.menge === 'number' && request.menge > 0 ? request.menge : 1
+  if (!artikel) {
+    return fallback
+  }
+  return [{ artikel, menge, einheit: 't', preis: 0 }]
+}
+
+function buildContractPositions(contract: any, fallback: BestellungData['positionen']): BestellungData['positionen'] {
+  const artikel = String(contract.commodity || '').trim()
+  const contractedQuantity = Number(contract.qty?.contracted ?? 0)
+  if (!artikel) {
+    return fallback
+  }
+  return [{ artikel, menge: contractedQuantity > 0 ? contractedQuantity : 1, einheit: String(contract.qty?.unit || 'kg') || 'kg', preis: 0 }]
+}
+
 export default function BestellungAnlegenPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -41,7 +86,7 @@ export default function BestellungAnlegenPage(): JSX.Element {
   const requisitionId = searchParams.get('requisitionId')
   const contractId = searchParams.get('contractId')
   const rfqId = searchParams.get('rfqId')
-  const workflowContext = readWorkflowEntryContext(searchParams)
+  const workflowContext = useMemo(() => readWorkflowEntryContext(searchParams), [searchParams])
   
   const [bestellung, setBestellung] = useState<BestellungData>({
     lieferant: '',
@@ -86,18 +131,19 @@ export default function BestellungAnlegenPage(): JSX.Element {
 
   const loadRequisitionData = async (id: string) => {
     try {
-      const req: any = await apiClient.get<any>(`/api/purchase-workflow/requisitions/${id}`)
+      const req: any = (await apiClient.get<any>(`/api/v1/einkauf/anfragen/${id}`)).data
       if (req) {
         setBestellung(prev => ({
           ...prev,
-          lieferant: req.supplierId || prev.lieferant,
-          positionen: req.items?.map((item: any) => ({
-            artikel: item.articleId || item.sku || '',
-            menge: item.quantity || 1,
-            einheit: item.unit || 't',
-            preis: item.price || 0,
-          })) || prev.positionen,
+          requisitionId: req.anfrageNummer || req.id || prev.requisitionId,
+          liefertermin: req.faelligkeit || prev.liefertermin,
+          positionen: buildRequestPositions(req, prev.positionen),
+          notizen: mergeNotes(prev.notizen, [
+            req.anfrageNummer ? `Bedarfsmeldung ${req.anfrageNummer}` : '',
+            req.anforderer ? `Anforderer: ${req.anforderer}` : '',
+          ]),
         }))
+        toast({ title: 'Bedarfsmeldung geladen', description: `Felder aus Bedarfsmeldung ${req.anfrageNummer || id} vorbelegt.` })
       }
     } catch (error) {
       console.error('Fehler beim Laden der Requisition:', error)
@@ -106,14 +152,21 @@ export default function BestellungAnlegenPage(): JSX.Element {
 
   const loadContractData = async (id: string) => {
     try {
-      const contract: any = await apiClient.get<any>(`/api/contracts/${id}`)
+      const contract: any = (await apiClient.get<any>(`/api/v1/contracts/${id}`)).data
       if (contract) {
         setBestellung(prev => ({
           ...prev,
-          lieferant: contract.supplierId || prev.lieferant,
+          contractId: contract.contractNo || contract.id || prev.contractId,
+          lieferant: contract.supplierId || contract.counterpartyId || prev.lieferant,
+          liefertermin: contract.deliveryWindow?.to || prev.liefertermin,
           incoterms: contract.incoterms || prev.incoterms,
           zahlungsbedingung: contract.paymentTerms || prev.zahlungsbedingung,
+          positionen: buildContractPositions(contract, prev.positionen),
+          notizen: mergeNotes(prev.notizen, [
+            contract.contractNo ? `Vertragsbezug ${contract.contractNo}` : '',
+          ]),
         }))
+        toast({ title: 'Vertrag geladen', description: `Felder aus Vertrag ${contract.contractNo || id} vorbelegt.` })
       }
     } catch (error) {
       console.error('Fehler beim Laden des Vertrags:', error)
@@ -122,17 +175,19 @@ export default function BestellungAnlegenPage(): JSX.Element {
 
   const loadRFQData = async (id: string) => {
     try {
-      const rfq: any = await apiClient.get<any>(`/api/purchase-workflow/rfqs/${id}`)
+      const rfq: any = (await apiClient.get<any>(`/api/v1/einkauf/anfragen/${id}`)).data
       if (rfq) {
         setBestellung(prev => ({
           ...prev,
-          positionen: rfq.items?.map((item: any) => ({
-            artikel: item.articleId || item.sku || '',
-            menge: item.quantity || 1,
-            einheit: item.unit || 't',
-            preis: item.price || 0,
-          })) || prev.positionen,
+          rfqId: rfq.anfrageNummer || rfq.id || prev.rfqId,
+          liefertermin: rfq.faelligkeit || prev.liefertermin,
+          positionen: buildRequestPositions(rfq, prev.positionen),
+          notizen: mergeNotes(prev.notizen, [
+            rfq.anfrageNummer ? `RFQ-Bezug ${rfq.anfrageNummer}` : '',
+            rfq.status ? `RFQ-Status: ${rfq.status}` : '',
+          ]),
         }))
+        toast({ title: 'Anfrage geladen', description: `Felder aus Anfrage ${rfq.anfrageNummer || id} vorbelegt.` })
       }
     } catch (error) {
       console.error('Fehler beim Laden der RFQ:', error)
@@ -164,7 +219,41 @@ export default function BestellungAnlegenPage(): JSX.Element {
     }))
   }
 
+  function validateBestellung(): string | null {
+    if (!bestellung.lieferant.trim()) {
+      return 'Lieferant ist ein Pflichtfeld.'
+    }
+
+    if (!bestellung.liefertermin) {
+      return 'Liefertermin ist ein Pflichtfeld.'
+    }
+
+    if (bestellung.positionen.length === 0) {
+      return 'Mindestens eine Position ist erforderlich.'
+    }
+
+    const invalidPosition = bestellung.positionen.find(
+      (position) => !position.artikel.trim() || position.menge <= 0 || position.preis < 0,
+    )
+
+    if (invalidPosition) {
+      return 'Alle Positionen brauchen Artikel, Menge groesser 0 und einen nicht negativen Preis.'
+    }
+
+    return null
+  }
+
   async function handleSubmit(): Promise<void> {
+    const validationError = validateBestellung()
+    if (validationError) {
+      toast({
+        title: t('crud.messages.validationError', { defaultValue: 'Validierung fehlgeschlagen' }),
+        description: validationError,
+        variant: 'destructive',
+      })
+      return
+    }
+
     try {
       const purchaseOrder = {
         orderDate: new Date().toISOString().slice(0, 10),
@@ -174,6 +263,7 @@ export default function BestellungAnlegenPage(): JSX.Element {
         status: 'ENTWURF',
         deliveryDate: bestellung.liefertermin,
         deliveryAddress: bestellung.lieferadresse,
+        shippingAddress: bestellung.lieferadresse,
         paymentTerms: bestellung.zahlungsbedingung,
         incoterms: bestellung.incoterms,
         requisitionId: bestellung.requisitionId,
