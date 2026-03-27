@@ -36,6 +36,8 @@ export interface WizardProps {
   onFinish?: () => void
   onNextStep?: (_currentStepId: string) => void
   onPreviousStep?: (_currentStepId: string) => void
+  getStepValidationError?: (_currentStepId: string) => string | null | Promise<string | null>
+  onStepValidationError?: (_currentStepId: string, _message: string) => void
   labels?: Partial<WizardLabels>
   loading?: boolean
   allowStepNavigation?: boolean
@@ -82,6 +84,8 @@ export function Wizard({
   onFinish,
   onNextStep,
   onPreviousStep,
+  getStepValidationError,
+  onStepValidationError,
   labels,
   loading = false,
   allowStepNavigation = true,
@@ -149,9 +153,27 @@ export function Wizard({
     return Array.from(byId.values())
   }, [contextualToolbarActions.overflow, overflowActions, primaryActions])
 
-  const handleGoToStep = (stepId: string, index: number): void => {
+  const validateActiveStep = async (): Promise<boolean> => {
+    if (typeof getStepValidationError !== 'function') {
+      return true
+    }
+    const validationError = await getStepValidationError(activeStepId)
+    if (!validationError) {
+      return true
+    }
+    onStepValidationError?.(activeStepId, validationError)
+    return false
+  }
+
+  const handleGoToStep = async (stepId: string, index: number): Promise<void> => {
     if (allowStepNavigation === false && index > activeIndex) {
       return
+    }
+    if (index > activeIndex) {
+      const canProceed = await validateActiveStep()
+      if (!canProceed) {
+        return
+      }
     }
     setActiveStepId(stepId)
     onStepChange?.(stepId)
@@ -167,7 +189,11 @@ export function Wizard({
     onStepChange?.(prevStep.id)
   }
 
-  const handleNext = (): void => {
+  const handleNext = async (): Promise<void> => {
+    const canProceed = await validateActiveStep()
+    if (!canProceed) {
+      return
+    }
     if (activeIndex === safeSteps.length - 1) {
       onFinish?.()
       return
@@ -217,7 +243,7 @@ export function Wizard({
                 <li key={step.id}>
                   <button
                     type="button"
-                    onClick={() => handleGoToStep(step.id, index)}
+                    onClick={() => void handleGoToStep(step.id, index)}
                     className={cn(
                       'flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition-colors',
                       isActive && 'border-primary bg-primary/10 text-primary',
@@ -270,7 +296,7 @@ export function Wizard({
             <Button variant="outline" onClick={handleBack} disabled={activeIndex === 0 || loading}>
               {mergedLabels.back}
             </Button>
-            <Button onClick={handleNext} disabled={loading}>
+            <Button onClick={() => void handleNext()} disabled={loading}>
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

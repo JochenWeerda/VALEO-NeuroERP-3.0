@@ -2,14 +2,24 @@
 
 ## A. Workflow-Uebersicht
 
-Gepruefter Workflow: Schritt-fuer-Schritt-Validierung im Wizard `Bestellung anlegen`, die verhindert, dass ein Nutzer ohne gueltige Pflichtdaten auf den naechsten Schritt wechselt.
+Gepruefter Workflow: Schrittweiser Anlagepfad in [`bestellung-anlegen.tsx`](c:/Users/Jochen/VALEO-NeuroERP-3.0/packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx) innerhalb des `Procure-to-Pay`-Wizards.
 
-Ziel ist ein belastbarer Datenfluss im Wizard: Pflichtfelder werden gepruefte bevor der Nutzer weiternavigiert, statt erst beim finalen Abschluss. Die Entscheidung `Standardmaske vor Spezialmaske` bleibt unveraendert — es wird nur die bestehende Wizard-Infrastruktur (`getStepValidationError`-Prop) genutzt.
+Ziel ist, dass Anwender nicht mehr mit fachlich leeren Lieferanten- oder Positionsschritten in spaetere Wizard-Schritte springen. Die Validierung bleibt in der Standardmaske und wird additiv ueber den Standard-Wizard verdrahtet.
+
+Entscheidung `Standardmaske vor Spezialmaske`:
+
+- Keine neue Einkaufs-Spezialmaske.
+- Keine P2P-exklusive Wizard-Abspaltung.
+- Schrittvalidierung wurde additiv im generischen [`Wizard.tsx`](c:/Users/Jochen/VALEO-NeuroERP-3.0/packages/frontend-web/src/components/patterns/Wizard.tsx) erweitert und in der Bestellmaske konfiguriert.
 
 ## B. Vollstaendige Card-Liste
 
-5. `P2P-050` Wizard-Schrittvalidierung vor `Weiter`
-   Jeder Schritt prueft eigene Pflichtdaten bevor der Nutzer weiternavigiert.
+1. `P2P-050` Lieferanten-Schritt validieren
+   Lieferant und Liefertermin muessen vor `Weiter` vorhanden sein.
+2. `P2P-051` Positions-Schritt validieren
+   Mindestens eine fachlich gueltige Position muss vor `Weiter` vorhanden sein.
+3. `P2P-052` Browser-Use-Checkliste fuer Wizard-Pfad fortschreiben
+   Einstieg, Schrittwechsel, Ruecksprung und Abschluss muessen reproduzierbar beschrieben sein.
 
 Detail-Card:
 
@@ -19,68 +29,56 @@ Detail-Card:
 
 ```mermaid
 flowchart TD
-    A([Schritt: Lieferant]) --> B{Lieferant und Liefertermin gesetzt?}
-    B -->|Nein| C[Toast-Fehlermeldung — bleibt auf Schritt 1]
-    B -->|Ja| D([Schritt: Positionen])
-    D --> E{Mindestens eine gueltige Position?}
-    E -->|Nein| F[Toast-Fehlermeldung — bleibt auf Schritt 2]
-    E -->|Ja| G([Schritt: Lieferung])
-    G --> H([Schritt: Zusammenfassung])
-    H --> I[Abschliessen — finaler Submit mit Gesamtvalidierung]
+    A([Start: Bestellung anlegen]) --> B[Schritt Lieferant]
+    B --> C{Lieferant + Liefertermin gueltig?}
+    C -->|Nein| D[Toast mit Validierungsfehler]
+    D --> B
+    C -->|Ja| E[Schritt Positionen]
+    E --> F{Positionen gueltig?}
+    F -->|Nein| G[Toast mit Validierungsfehler]
+    G --> E
+    F -->|Ja| H[Schritt Lieferung]
+    H --> I[Schritt Zusammenfassung]
+    I --> J{Gesamtvalidierung okay?}
+    J -->|Nein| K[Fehler-Toast, kein API-Call]
+    K --> I
+    J -->|Ja| L[Bestellung speichern]
 ```
 
 ## D. Soll-Ist-Abweichungen
 
 | Card | Soll | Ist | Abweichung | Risiko | Massnahme |
 |------|------|-----|------------|--------|-----------|
-| `P2P-050` | `Weiter` auf Schritt 1 soll blockieren wenn Lieferant fehlt. | Vor diesem Slice war `getStepValidationError` nicht verdrahtet; `Weiter` navigierte ohne Pruefung. | Nutzer konnte leere Schritte durchklicken und erst beim Submit scheitern. | hoch | `validateStep(stepId)` an `getStepValidationError`-Prop uebergeben. |
-| `P2P-050` | `Weiter` auf Schritt 2 soll blockieren wenn keine valide Position vorhanden. | Identisch mit obigem — keine Pruefung vor diesem Slice. | Gleicher Effekt: leere Positionen blieben bis zum Submit unentdeckt. | hoch | Position-Validierung in `validateStep('positionen')` eingebaut. |
-| `P2P-050` | Fehlermeldung soll als Toast sichtbar sein. | `onStepValidationError` war unverdrahtet; kein User-Feedback. | Fehlermeldung waere lautlos ignoriert worden. | mittel | `onStepValidationError` zeigt Toast mit `variant: 'destructive'`. |
+| `P2P-050` | Vor `Weiter` duerfen leere Pflichtschritte nicht passiert werden. | Vor diesem Slice konnte der Wizard trotz leerem Lieferanten- oder Positionsschritt voranschreiten. | Fehler wurden erst beim Abschliessen sichtbar. | hoch | Additive Schrittvalidierung im Standard-Wizard plus P2P-spezifische Regeln. |
+| `P2P-051` | Positionen muessen vor Wechsel in spaetere Schritte fachlich brauchbar sein. | Leere Artikelzeilen konnten bis in die Zusammenfassung gelangen. | Unklare Prozessfuehrung und spaete Fehlererkennung. | hoch | Positionen vor `Weiter` auf Artikel, Menge > 0 und Preis >= 0 pruefen. |
+| `P2P-052` | Browser-Use fuer den echten Wizard-Pfad soll dokumentiert sein. | QA-Checkliste war generisch, aber nicht P2P-konkreter Ablauf. | Restart-unscharf fuer manuelle Pruefung. | mittel | P2P-spezifische Browser-Use-Checkliste nachziehen. |
 
-## E. Validierungsregeln pro Schritt
+## E. UI-/CRUD-Befunde
 
-### Schritt `lieferant`
-- `bestellung.lieferant` darf nicht leer sein.
-- `bestellung.liefertermin` muss gesetzt sein.
+- `Create`: vorhanden und jetzt zweistufig abgesichert: Schrittvalidierung plus Abschlussvalidierung.
+- `Read / Suchen`: nicht Teil dieses Slices.
+- `Update`: Ruecksprung in fruehere Schritte bleibt moeglich.
+- `Delete`: fachlich ueber Abbruch oder spaeteren Storno.
+- `Statuswechsel`: nicht Teil dieses Slices.
+- `Maskenuebergabe`: Vorbelegung aus Flow Spine, Anfrage oder Vertrag bleibt erhalten und wird von der Schrittvalidierung respektiert.
+- `Sackgasse`: keine; Nutzer bleibt im aktuellen Schritt und erhaelt einen Fehler-Toast.
+- `Browser-Use`: Schrittweise Navigation, Ruecksprung, Validierungsblock und Abschluss sind explizit pruefbar.
 
-### Schritt `positionen`
-- Mindestens eine Position muss vorhanden sein.
-- Jede Position benoetigt: `artikel` nicht leer, `menge > 0`, `preis >= 0`.
+## F. Risiken
 
-### Schritt `lieferung`
-- Keine Pflichtfelder — Lieferadresse und Notizen sind optional.
+- `mittel`: Andere Wizard-Nutzer koennen den neuen generischen Hook spaeter ebenfalls nutzen; deshalb muss die API additiv und rueckwaertskompatibel bleiben.
+- `mittel`: Direkte Klick-Navigation auf spaetere Steps ist nur sicher, solange derselbe Validierungshook fuer Vorwaertsspruenge aktiv bleibt.
+- `niedrig`: React-Router-Zukunftswarnungen bestehen weiterhin in den Tests, sind aber nicht Teil dieses Slices.
 
-### Schritt `zusammenfassung` (letzter Schritt)
-- `Abschliessen` loest `handleSubmit` aus, der `validateBestellung()` als Sicherheitsnetz aufruft.
+## G. Konkrete Empfehlungen
 
-## F. Technische Umsetzung
+1. Generischen Wizard-Hook `getStepValidationError` fuer weitere fachliche Wizards wiederverwenden statt lokale Next-Button-Sonderlogik einzubauen.
+2. P2P-Browser-Use-Checkliste bei jedem weiteren Alternativpfad-Slice mitpflegen.
+3. Optional als naechsten Folgeschritt Fehler-Toast fuer fehlgeschlagene Vorbelegungs-Loads einfuehren.
+4. Fuer andere prozesskritische Wizards pruefen, ob dieselbe Schrittvalidierung noetig ist.
 
-Die `Wizard`-Komponente hat bereits eine `getStepValidationError`-Prop (synchron oder async, gibt `string | null` zurueck) und eine `onStepValidationError`-Prop fuer Fehler-Callbacks. In `bestellung-anlegen.tsx`:
+## Annahmen
 
-```typescript
-function validateStep(stepId: string): string | null {
-  if (stepId === 'lieferant') {
-    if (!bestellung.lieferant.trim()) return 'Lieferant ist ein Pflichtfeld.'
-    if (!bestellung.liefertermin) return 'Liefertermin ist ein Pflichtfeld.'
-  }
-  if (stepId === 'positionen') {
-    if (bestellung.positionen.length === 0) return 'Mindestens eine Position ist erforderlich.'
-    const invalid = bestellung.positionen.find(
-      (pos) => !pos.artikel.trim() || pos.menge <= 0 || pos.preis < 0
-    )
-    if (invalid) return 'Alle Positionen brauchen Artikel, Menge groesser 0 und einen nicht negativen Preis.'
-  }
-  return null
-}
-```
-
-## G. Risiken
-
-- `niedrig`: `validateBestellung()` beim Submit bleibt als Sicherheitsnetz erhalten; doppelte Validierung schadet nicht.
-- `niedrig`: RFQ/Requisition-Vorbelegung kann `lieferant` noch leer lassen, wenn der API-Load noch nicht abgeschlossen ist; Nutzer muss den Lieferanten dann manuell ergaenzen.
-
-## H. Annahmen
-
-- Der `Wizard` navigiert nicht weiter wenn `getStepValidationError` einen String zurueckgibt.
-- Schrittvalidierung ist synchron; asynchrone Validierung (z.B. Backend-Check) ist nicht Teil dieses Slice.
-- Schritt `lieferung` und `zusammenfassung` haben keine Pflichtfelder und benoetigen keine eigene Validierungsfunktion.
+- Die Abschlussvalidierung in `handleSubmit()` bleibt der kanonische letzte Schutz vor dem API-Call.
+- Ruecksprung in bereits durchlaufene Schritte soll weiterhin ohne erneute Sperre moeglich sein.
+- P2P benoetigt vorerst nur Pflichtvalidierung fuer Lieferanten- und Positionsschritt; Lieferung bleibt optional.

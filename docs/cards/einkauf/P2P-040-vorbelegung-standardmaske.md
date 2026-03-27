@@ -48,7 +48,7 @@
 - Status vor Ausfuehrung: URL mit Quell-ID aufgerufen, API noch nicht geladen.
 - Status nach Ausfuehrung: Felder vorbelegt, Toast-Bestaetigung sichtbar.
 - Sichtbare Felder: Referenz-Badge fuer Quell-ID in Lieferant-Schritt; alle vorbelegten Felder editierbar.
-- Fehlende Felder / Aktionen: Keine Schrittvalidierung vor `Weiter`.
+- Fehlende Felder / Aktionen: Inline-Fehlhinweise pro Schritt fehlen; Toast-basierte Schrittvalidierung ist vorhanden.
 
 ## 7. Aktion
 - Benutzeraktion: Bestellmaske ueber URL mit Quell-ID oeffnen.
@@ -95,7 +95,7 @@
 - Soll-Prozess: URL-Parameter triggern korrekten API-Load; Felder werden vorgefuellt; Nutzer erhaelt Bestaetigung.
 - Ist-Umsetzung (vor diesem Slice): `.data` fehlte; Contract-URL ohne `/v1/`; kein Toast.
 - Abweichung: Felder wurden nie vorgefuellt (Response-Objekt statt Nutzdaten).
-- Fehlende Umsetzung: keine nach diesem Slice; Schrittvalidierung bleibt separates Thema.
+- Fehlende Umsetzung: keine fuer den Vorbelegungspfad; Ladefehler werden jetzt toast-basiert sichtbar.
 - Workaround aktuell noetig: keiner nach diesem Fix.
 
 ## 14. Risiko
@@ -115,7 +115,7 @@
 - Technisch: Feldmapping der Compat-Endpoints fuer Anfrage und Vertrag stabil halten und bei Contract-Aenderungen mitziehen.
 - Prioritaet der Umsetzung: sofort
 - Sofortmassnahme: in diesem Slice umgesetzt
-- Spaetere Optimierung: Wizard-Schrittvalidierung und Fehler-Toast bei gescheitertem API-Load.
+- Spaetere Optimierung: Inline-Fehlhinweise im Wizard.
 
 ## 16. Annahmen
 - Annahme 1: `apiClient.get<T>()` gibt `AxiosResponse<T>` zurueck; `.data` ist der einzige korrekte Datenzugriff.

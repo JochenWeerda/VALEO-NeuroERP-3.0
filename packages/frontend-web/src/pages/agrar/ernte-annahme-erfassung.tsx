@@ -4,7 +4,7 @@
  * Basierend auf Lieferschein-Erfassung (Gewohnheits-Prinzip)
  */
 
-import { lazy, Suspense, useState, useEffect, useRef } from 'react'
+import { lazy, Suspense, useState, useEffect, useMemo, useRef } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -199,7 +199,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
   const { push } = useToast()
   const { user } = useAuth()
   const { id: acceptanceId } = useParams<{ id?: string }>()
-  const workflowContext = readWorkflowEntryContext(searchParams)
+  const workflowContext = useMemo(() => readWorkflowEntryContext(searchParams), [searchParams])
 
   // Helper: Format date to yyyy-MM-dd for input field
   const formatDateForInput = (date: Date): string => {
@@ -307,17 +307,17 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
       if (!acceptanceId) return
 
       try {
-        const response = await apiClient.get<HarvestAcceptanceResponse>(`/api/v1/agrar/harvest-acceptance/${acceptanceId}`)
-        const positions = response.positions ?? []
+        const { data: ha } = await apiClient.get<HarvestAcceptanceResponse>(`/api/v1/agrar/harvest-acceptance/${acceptanceId}`)
+        const positions = ha.positions ?? []
         const pos15 = positions.find((p: { position_number: number }) => p.position_number === 15)
         const pos20 = positions.find((p: { position_number: number }) => p.position_number === 20)
         const pos40 = positions.find((p: { position_number: number }) => p.position_number === 40)
 
         // Lade Kunde
         let customer: Customer | null = null
-        if (response.customer_id) {
+        if (ha.customer_id) {
           try {
-            const customerData = await apiClient.get<any>(`/api/v1/crm/customers/${response.customer_id}`)
+            const { data: customerData } = await apiClient.get<any>(`/api/v1/crm/customers/${ha.customer_id}`)
             customer = {
               id: customerData.id,
               customerNumber: customerData.customer_number || customerData.customerNumber || '',
@@ -334,56 +334,56 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
         }
 
         // Parse delivery_date
-        const deliveryDate = response.delivery_date ? formatDateForInput(new Date(response.delivery_date)) : formatDateForInput(new Date())
-        
+        const deliveryDate = ha.delivery_date ? formatDateForInput(new Date(ha.delivery_date)) : formatDateForInput(new Date())
+
         // Parse delivery_time
-        const deliveryTime = response.delivery_time 
-          ? response.delivery_time.substring(0, 5) // HH:MM
+        const deliveryTime = ha.delivery_time
+          ? ha.delivery_time.substring(0, 5) // HH:MM
           : new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
 
         setState({
-          id: response.id,
-          acceptanceNumber: response.acceptance_number,
-          branchId: response.branch_id,
-          warehouseId: response.warehouse_id,
+          id: ha.id,
+          acceptanceNumber: ha.acceptance_number,
+          branchId: ha.branch_id,
+          warehouseId: ha.warehouse_id,
           deliveryDate,
           deliveryTime,
-          salesRepId: response.sales_rep_id,
-          operatorId: response.operator_id || getUserShortName(),
-          weighingTicketId: response.weighing_ticket_id,
-          costCenterId: response.cost_center_id,
+          salesRepId: ha.sales_rep_id,
+          operatorId: ha.operator_id || getUserShortName(),
+          weighingTicketId: ha.weighing_ticket_id,
+          costCenterId: ha.cost_center_id,
           customer,
-          contractId: response.contract_id,
-          forwarderId: response.forwarder_id,
-          intermediateDealerId: response.intermediate_dealer_id,
-          deviatingVatId: response.deviating_vat_id,
-          articleId: response.article_id,
-          varietyId: response.variety_id,
-          vehiclePlate: response.vehicle_plate || '',
-          originNuts2Code: response.origin_nuts2_code || '',
-          nutsVersion: response.nuts_version || 'NUTS 2024',
-          originPostalCode: response.origin_postal_code || '',
-          originCity: response.origin_city || '',
-          originCountryCode: response.origin_country_code || 'DE',
-          isSustainableBiomass: response.is_sustainable_biomass,
-          releaseStatus: response.release_status as HarvestAcceptanceState['releaseStatus'],
-          pricingMode: response.pricing_mode as HarvestAcceptanceState['pricingMode'],
-          priceSourceId: response.price_source_id,
-          acceptanceMode: response.acceptance_mode || 'PURCHASE_AT_DELIVERY_PTBF',
-          ownershipType: response.ownership_type || 'OWN_STOCK',
-          vatEvent: response.vat_event || 'NO_INVOICE',
-          advancePaymentAmountEur: response.advance_payment_amount_eur ?? null,
-          advancePaymentDate: response.advance_payment_date || '',
-          provisionalInvoiceNumber: response.provisional_invoice_number || '',
-          invoiceNumber: response.invoice_number || '',
-          remarks: response.remarks || '',
-          printRemarksOnAcceptanceNote: response.print_remarks_on_acceptance_note,
-          printRemarksOnSettlement: response.print_remarks_on_settlement,
-          totalNetAmountEur: response.total_net_amount_eur,
-          totalVatAmountEur: response.total_vat_amount_eur,
-          totalGrossAmountEur: response.total_gross_amount_eur,
-          vatRatePercent: response.vat_rate_percent,
-          articleName: response.article_name ?? '',
+          contractId: ha.contract_id,
+          forwarderId: ha.forwarder_id,
+          intermediateDealerId: ha.intermediate_dealer_id,
+          deviatingVatId: ha.deviating_vat_id,
+          articleId: ha.article_id,
+          varietyId: ha.variety_id,
+          vehiclePlate: ha.vehicle_plate || '',
+          originNuts2Code: ha.origin_nuts2_code || '',
+          nutsVersion: ha.nuts_version || 'NUTS 2024',
+          originPostalCode: ha.origin_postal_code || '',
+          originCity: ha.origin_city || '',
+          originCountryCode: ha.origin_country_code || 'DE',
+          isSustainableBiomass: ha.is_sustainable_biomass,
+          releaseStatus: ha.release_status as HarvestAcceptanceState['releaseStatus'],
+          pricingMode: ha.pricing_mode as HarvestAcceptanceState['pricingMode'],
+          priceSourceId: ha.price_source_id,
+          acceptanceMode: ha.acceptance_mode || 'PURCHASE_AT_DELIVERY_PTBF',
+          ownershipType: ha.ownership_type || 'OWN_STOCK',
+          vatEvent: ha.vat_event || 'NO_INVOICE',
+          advancePaymentAmountEur: ha.advance_payment_amount_eur ?? null,
+          advancePaymentDate: ha.advance_payment_date || '',
+          provisionalInvoiceNumber: ha.provisional_invoice_number || '',
+          invoiceNumber: ha.invoice_number || '',
+          remarks: ha.remarks || '',
+          printRemarksOnAcceptanceNote: ha.print_remarks_on_acceptance_note,
+          printRemarksOnSettlement: ha.print_remarks_on_settlement,
+          totalNetAmountEur: ha.total_net_amount_eur,
+          totalVatAmountEur: ha.total_vat_amount_eur,
+          totalGrossAmountEur: ha.total_gross_amount_eur,
+          vatRatePercent: ha.vat_rate_percent,
+          articleName: ha.article_name ?? '',
           positions: positions.map((pos: { id: string; position_number: number; description: string; is_printable: boolean; is_calculable: boolean; lab_value_pct: number | null; quantity_kg: number | null; unit: string | null; price_per_unit_eur: number | null; amount_eur: number | null }) => ({
             id: pos.id,
             positionNumber: pos.position_number,

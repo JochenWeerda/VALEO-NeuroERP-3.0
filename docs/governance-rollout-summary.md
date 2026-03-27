@@ -61,12 +61,27 @@ Diese Bereiche bleiben vorerst locker oder ausgenommen:
 - [markdown-governance.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/standards/markdown-governance.md)
 - [docs-governance.yml](c:/Users/Jochen/VALEO-NeuroERP-3.0/.github/workflows/docs-governance.yml)
 
+## Neue Analyse-Leitfaeden
+
+Fuer workflow- und UI-zentrierte Prozessanalysen stehen jetzt zusaetzlich bereit:
+
+- [docs/README.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/README.md)
+- [AGENTS.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/AGENTS.md)
+- [Agent Ops README](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/agent-ops/README.md)
+- [Active Workboard](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/agent-ops/active-workboard.md)
+- [System Overview](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/project-context/system-overview.md)
+- [Domain Landhandel und Agrarhandel](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/project-context/domain-landhandel-und-agrarhandel.md)
+- [Workflow Analysis Master Prompt](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/workflows/workflow-analysis-master-prompt.md)
+- [Card Template](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/cards/card-template.md)
+- [Browser-Use Checklists](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/quality-assurance/browser-use-checklists.md)
+
 ## Arbeitsregel fuer neue Agenten
 
 - Erst pruefen, ob ein Dokument Source of Truth oder abgeleitete Sicht ist.
 - Steuerungsdokumente nicht frei umformulieren; nur innerhalb des vorgegebenen Schemas aendern.
 - Historische Dokumente nicht in aktuelle Ist-Aussagen umdeuten.
 - Bei neuen statusrelevanten Dokumenttypen zuerst das Governance-Dokument erweitern, dann Inhalte anpassen.
+- Vor Workflow-Analyse oder UI-Validierung immer zuerst `docs/README.md` und den relevanten Kontext unter `docs/project-context/` lesen.
 
 ## Referenzen
 

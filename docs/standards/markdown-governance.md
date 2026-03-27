@@ -114,6 +114,11 @@ Beispiele:
 - `packages/**/README.md`
 - `services/**/README.md`
 - `docs/setup/**`
+- `docs/project-context/**`
+- `docs/workflows/**`
+- `docs/cards/**`
+- `docs/quality-assurance/**`
+- `docs/agent-ops/**`
 
 Eigenschaften:
 
