@@ -12,21 +12,33 @@ Diese Datei ist absichtlich schlank und soll bei jeder Session schnell lesbar bl
 - Branch: `develop` (lokal; mit `backup/develop` abgleichen bei Push)
 - Source of Truth: `docs/architecture/process-kernel/STATUS.md`
 
+## Parallele E2E-Lanes (Kollisionen vermeiden)
+
+Zwei End-to-End-Stränge laufen **fachlich und technisch getrennt**. Bitte **nicht** ohne Lead-Abstimmung dieselben Verzeichnisse in einer Session bearbeiten:
+
+| Lane | Scope (typisch) | Aktive / reservierte Slices | Regel |
+|------|-----------------|--------------------------------|--------|
+| **Agrar / Harvest-to-Settlement** | `packages/frontend-web/src/pages/agrar/**`, relevante `pages/annahme/**` | VK-013 (Codex) | Kein paralleles Editing mit der OTC-Folge-Lane. |
+| **Order-to-Cash Folge (Finance)** | `packages/frontend-web/src/pages/finance/**`, optional `pages/sales/**` / `pages/verkauf/**` | OTC-011 | Kein paralleles Editing mit VK-013-Agrar ohne Absprache. |
+
+**Stub-Status:** `docs/workflows/vk-013-kampagnenabschluss.md` und zugehoerige Card sind **Platzhalter** bis zur fachlichen Ausarbeitung. `OTC-011` ist als Folgelane zu OTC-010 **begonnen** (Workflow+Card), Umsetzung im Finance-UI folgt iterativ.
+
 ## Aktive Slices
 
 | Slice-ID | Thema | Status | Owner | Dateibesitz | Naechster Schritt | Blocker |
 |----------|-------|--------|-------|-------------|-------------------|---------|
 | OPS-001 | Workflow-Analyse-Methodik und Agent-Ops-Doku | abgeschlossen | — | `AGENTS.md`, `docs/agent-ops/**`, `docs/workflows/**`, `docs/project-context/**`, `docs/quality-assurance/**` | bei neuen Workflow-Slices wiederverwenden | keine |
-| DOCS-105 | Wave-104-Dokumentations-Nachzug (GAP-G/H/I, Repo-Hygiene) | abgeschlossen | — | `docs/architecture/process-kernel/STATUS.md`, `DELIVERY-MAP.md`, `wave-104/STATUS.md`, `docs/roadmap/status/2026-03-27-wave-104-abschluss.md`, `docs/project-context/open-gaps-and-known-issues.md` | committen | keine |
+| DOCS-105 | Wave-104-Dokumentations-Nachzug (GAP-G/H/I, Repo-Hygiene) | abgeschlossen | — | `docs/architecture/process-kernel/STATUS.md`, `DELIVERY-MAP.md`, `wave-104/STATUS.md`, `docs/roadmap/status/2026-03-27-wave-104-abschluss.md`, `docs/project-context/open-gaps-and-known-issues.md` | keine (Doku im Repo eingecheckt) | keine |
 | P2P-001 | Procure-to-Pay Direktbestellung: Workflow-Analyse, QA und Handover-Haertung | abgeschlossen | aktuell offener Agent | `docs/workflows/p2p-001-procure-to-pay-direktbestellung.md`, `docs/cards/einkauf/**`, `packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx`, `packages/frontend-web/src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx` | Folgeslice fuer Bedarfsmeldung/Rahmenabruf zuschneiden | keine |
 | P2P-040 | Procure-to-Pay Vorbelegung aus Bedarfsmeldung/Vertrag/RFQ | abgeschlossen | aktuell offener Agent | `docs/agent-ops/active-workboard.md`, `docs/workflows/p2p-040-vorbelegung-requisition-vertrag-rfq.md`, `docs/cards/einkauf/P2P-040-vorbelegung-standardmaske.md`, `packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx`, `packages/frontend-web/src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx` | Folgeslice Schrittvalidierung zuschneiden | keine |
 | P2P-050 | Procure-to-Pay Wizard-Schrittvalidierung | abgeschlossen | aktuell offener Agent | `docs/workflows/p2p-050-wizard-schrittvalidierung.md`, `docs/cards/einkauf/P2P-050-wizard-schrittvalidierung.md`, `packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx`, `packages/frontend-web/src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx` | Landhandel-Kernprozess beginnen | keine |
 | VK-010 | Ernte-Annahme Workflow-Analyse, Handover-Haertung und QA-Slice | abgeschlossen | aktuell offener Agent | `docs/workflows/vk-010-ernte-annahme.md`, `docs/cards/agrar/VK-010-ernte-annahme.md`, `docs/cards/agrar/VK-010-ernte-annahme-standardmaske.md`, `docs/quality-assurance/browser-use-checklists.md`, `packages/frontend-web/src/pages/agrar/ernte-annahme-erfassung.tsx`, `packages/frontend-web/src/__tests__/pages/agrar/ernte-annahme-erfassung.test.tsx` | VK-011 Handover-Bruecke und Schrittvalidierung zuschneiden | keine |
-| VK-011 | Ernte-Annahme Handover-Bruecke (QP→Erfassung) und LKW-Wizard-Schrittvalidierung | abgeschlossen | aktuell offener Agent (Codex) | `docs/agent-ops/active-workboard.md`, `docs/workflows/vk-011-qp-handover-und-lkw-validierung.md`, `docs/cards/agrar/VK-011-qp-handover-und-lkw-validierung.md`, `docs/quality-assurance/browser-use-checklists.md`, `packages/frontend-web/src/pages/annahme/qualitaets-check.tsx`, `packages/frontend-web/src/pages/annahme/lkw-registrierung.tsx`, `packages/frontend-web/src/pages/agrar/ernte-annahme-erfassung.tsx`, `packages/frontend-web/src/__tests__/pages/annahme/lkw-registrierung.test.tsx`, `packages/frontend-web/src/__tests__/pages/annahme/qualitaets-check.test.tsx`, `packages/frontend-web/src/__tests__/pages/agrar/ernte-annahme-erfassung.test.tsx` | VK-013 claimen oder Queue-/Artikel-Folgeslice schneiden | keine |
+| VK-011 | Ernte-Annahme Handover-Bruecke (QP→Erfassung) und LKW-Wizard-Schrittvalidierung | abgeschlossen | aktuell offener Agent (Codex) | `docs/agent-ops/active-workboard.md`, `docs/workflows/vk-011-qp-handover-und-lkw-validierung.md`, `docs/cards/agrar/VK-011-qp-handover-und-lkw-validierung.md`, `docs/quality-assurance/browser-use-checklists.md`, `packages/frontend-web/src/pages/annahme/qualitaets-check.tsx`, `packages/frontend-web/src/pages/annahme/lkw-registrierung.tsx`, `packages/frontend-web/src/pages/agrar/ernte-annahme-erfassung.tsx`, `packages/frontend-web/src/__tests__/pages/annahme/lkw-registrierung.test.tsx`, `packages/frontend-web/src/__tests__/pages/annahme/qualitaets-check.test.tsx`, `packages/frontend-web/src/__tests__/pages/agrar/ernte-annahme-erfassung.test.tsx` | Folgearbeit in **Agrar-Lane**: VK-013 (Codex) oder Queue-/Artikel-Slice | keine |
 | VK-012 | Annahme-Abrechnung: Settlement-Flow-Analyse und QA-Haertung | abgeschlossen | Claude Sonnet 4.6 | `packages/frontend-web/src/pages/annahme/abrechnung.tsx`, `packages/frontend-web/src/pages/annahme/rohware.tsx`, `docs/workflows/vk-012-annahme-abrechnung.md`, `docs/cards/agrar/VK-012-annahme-abrechnung.md` | abgeschlossen | keine |
 | VK-020 | Rohware-Wizard Schrittvalidierung (VK-012-P1) | abgeschlossen | Cursor Agent | `packages/frontend-web/src/pages/annahme/rohware.tsx`, `packages/frontend-web/src/__tests__/pages/annahme/rohware.test.tsx`, `docs/workflows/vk-020-rohware-wizard-schrittvalidierung.md`, `docs/cards/agrar/VK-020-rohware-wizard-schrittvalidierung.md` | VK-012-P2/P3 oder VK-013 | keine |
-| VK-013 | Ernte-Kampagne-Abschluss: Gesamtabrechnung ueber alle Settlements | reserviert | aktuell offener Agent (Codex) | `docs/agent-ops/active-workboard.md`, `docs/workflows/vk-013-kampagnenabschluss.md`, `docs/cards/agrar/VK-013-kampagnenabschluss.md`, `docs/quality-assurance/browser-use-checklists.md`, `packages/frontend-web/src/pages/agrar/kampagne*.tsx`, `packages/frontend-web/src/pages/annahme/abrechnung.tsx`, `packages/frontend-web/src/__tests__/pages/agrar/*.test.tsx`, `packages/frontend-web/src/__tests__/pages/annahme/*.test.tsx` | Claim-Commit abschliessen, dann Kampagnen-/Settlement-Slice zuschneiden | keine |
-| OTC-010 | Order-to-Cash End-to-End: Verkaufsauftrag → Lieferschein → Rechnung → Zahlung | reserviert | Claude Sonnet 4.6 | `pages/sales/order-editor.tsx`, `pages/workflow/flow-spine-order-to-cash.tsx`, `pages/verkauf/**`, `docs/workflows/otc-010-*`, `docs/cards/verkauf/OTC-010-*` | Workflow-Analyse + Soll-Ist + Bugs | keine |
+| VK-013 | Ernte-Kampagne-Abschluss: Gesamtabrechnung ueber alle Settlements | reserviert | aktuell offener Agent (Codex) | `docs/agent-ops/active-workboard.md`, `docs/workflows/vk-013-kampagnenabschluss.md`, `docs/cards/agrar/VK-013-kampagnenabschluss.md`, `docs/quality-assurance/browser-use-checklists.md`, `packages/frontend-web/src/pages/agrar/kampagne*.tsx`, `packages/frontend-web/src/pages/annahme/abrechnung.tsx`, `packages/frontend-web/src/__tests__/pages/agrar/*.test.tsx` | Claim liegt vor (`chore(workboard): claim VK-013`); Stub → fachliche Workflow-/Card-Ausarbeitung | keine |
+| OTC-010 | Order-to-Cash End-to-End: Verkaufsauftrag → Lieferschein → Rechnung → Zahlung | abgeschlossen | Claude Sonnet 4.6 | `pages/sales/invoice-editor.tsx`, `pages/verkauf/lieferschein-erfassung.tsx`, `docs/workflows/otc-010-order-to-cash.md`, `docs/cards/verkauf/OTC-010-order-to-cash.md` | abgeschlossen | keine |
+| OTC-011 | Zahlungseingang und Abstimmung (Folgeslice OTC-010) | in arbeit | Cursor Agent | `packages/frontend-web/src/pages/finance/**`, `docs/workflows/otc-011-zahlungseingang-und-abstimmung.md`, `docs/cards/finance/OTC-011-zahlungseingang-und-abstimmung.md`, `docs/quality-assurance/browser-use-checklists.md` | OP-Zahlung/Abstimmung vertiefen; API-Inventar; Lane **nicht** mit VK-013 mischen | keine |
 
 ## Reservierungsregel
 
@@ -63,26 +75,18 @@ Kein Agent darf einen Slice beginnen, der bereits `reserviert` oder `in arbeit` 
 - P2P-050 abgeschlossen: Wizard-Schrittvalidierung verdrahtet (validateStep, onStepValidationError); die relevante Frontend-Regression fuer Wizard und P2P-Pfad ist gruen.
 - VK-010 abgeschlossen: Claude-Analyse fuer den breiten Ernte-Annahme-Kernprozess ist mit dem operativen Handover-/QA-Slice zusammengezogen. Dokumentiert und abgesichert sind jetzt sowohl der Edit-Mode-Fix (`.data`-Extraktion in `loadHarvestAcceptance`) als auch die restart-sichere Handover-Haertung (`useMemo` fuer Workflow-Kontext, Seitentest, QA-Checkliste).
 - VK-011 abgeschlossen: Qualitaets-Check uebergibt restart-sicher per Query in die Ernte-Annahme; `quality_protocol_id` wird mitpersistiert; LKW-Wizard blockiert leere Pflichtschritte per Toast.
-- Naechste Prioritaet: VK-013 Ernte-Kampagne-Abschluss oder ein Folge-Slice fuer Queue-CTA/Artikel-API in der Annahmekette.
+- Naechste Prioritaet: **parallel getrennt** — Agrar-Lane **VK-013** (Codex) vs Finance-Folge-Lane **OTC-011** (siehe Abschnitt Parallele E2E-Lanes); optional Queue-/Artikel-API-Folgeslice in Annahmekette separat claimen.
 - VK-020 abgeschlossen: Rohware-Wizard mit `getStepValidationError` (Lieferant/Fahrzeug, Ware/Lager/Netto); Card VK-012-P1 als erledigt markiert; Vitest `rohware.test.tsx`.
+- Workboard-Konsistenz 2026-03-27: DOCS-105-Handoff geschlossen (Doku im Repo); VK-013-Stubs angelegt; OTC-011 Folgelane mit Workflow/Card begonnen.
 
-## Handoff: 2026-03-27 — DOCS-105
+## Handoff: 2026-03-27 — DOCS-105 (archiviert)
 
-**Von:** Claude Sonnet 4.6
-**An:** naechste Session / naechster Agent
-**Ziel:** Vollstaendiger Dokumentations-Nachzug Wave 104 GAP-G/H/I + Repo-Hygiene
-**Stand:** abgeschlossen
-**Erledigt:**
-- `docs/architecture/process-kernel/STATUS.md` — Gesamtstatus auf 2026-03-27 / 5931 Tests, Waves 102–104, neuer Abschnitt "Waves 102 bis 104"
-- `docs/architecture/process-kernel/DELIVERY-MAP.md` — Stand 2026-03-27, Wave-104-Eintrag GAP-A–I
-- `docs/architecture/process-kernel/wave-104/STATUS.md` — Governance-Headings komplett
-- `docs/roadmap/status/2026-03-27-wave-104-abschluss.md` — NEU: Detaildoku, Architekturabgleich, Commitliste
-- `docs/project-context/open-gaps-and-known-issues.md` — geschlossene Punkte markiert, neue Realitaet dokumentiert
-- `docs/agent-ops/active-workboard.md` — Slices aktualisiert, Handoff-Block erstellt
-**Offen:** Docs-Commit ausstehend. P2P-001 folgt als naechster Slice.
-**Naechster konkreter Schritt:** DOCS-105-Dateien committen, dann P2P-001 aufnehmen.
-**Tests / Checks:** `node scripts/docs-governance-check.cjs` muss gruen bleiben.
-**Annahmen:** Testzahl 5931 = 5916 (Wave-100-Baseline) + 15 (Wave-104); bei naechstem vollstaendigen pytest-Lauf verifizieren.
+**Von:** Claude Sonnet 4.6  
+**Stand:** **abgeschlossen und im Repo eingecheckt** (Nachzug Wave 104, Workboard, Roadmap-Dateien; siehe History ab Wave-104-Commits).
+
+**Hinweis fuer Sessions:** Die frueheren Zeilen „Docs-Commit ausstehend“ / „P2P-001 als naechster Schritt“ sind **veraltet**; P2P-Slices sind inzwischen ebenfalls abgeschlossen. Aktuelle Prioritaeten: **Parallele E2E-Lanes** und die offenen Slices **VK-013** / **OTC-011**.
+
+**Tests / Checks:** `node scripts/docs-governance-check.cjs` bei Doku-Aenderungen.
 
 ## Slice-Details
 

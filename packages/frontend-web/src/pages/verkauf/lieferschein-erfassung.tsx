@@ -4,7 +4,7 @@
  */
 
 import { lazy, Suspense, useState, useEffect, useMemo } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -197,6 +197,8 @@ export default function LieferscheinErfassungPage(): JSX.Element {
   const { push } = useToast()
   const { user } = useAuth()
   const { id: deliveryNoteId } = useParams<{ id?: string }>() // URL-Parameter für bestehenden Lieferschein
+  const [searchParams] = useSearchParams()
+  const sourceOrderId = searchParams.get('auftrag') // Handover aus order-editor: ?auftrag=<id>
 
   // Auto-generiere Lieferschein-Nummer (später vom Backend)
   const generateLieferscheinNr = (): string => {
@@ -394,6 +396,47 @@ export default function LieferscheinErfassungPage(): JSX.Element {
 
     void loadDeliveryNote()
   }, [deliveryNoteId, user, push])
+
+  // Handover aus Auftrags-Erfassung: ?auftrag=<id> → Kunden und Positionen vorbelegen
+  useEffect(() => {
+    if (!sourceOrderId || deliveryNoteId) return
+    const loadOrderContext = async (): Promise<void> => {
+      try {
+        const order = await apiClient.get<{
+          id: string
+          order_number: string
+          customer_id: string | null
+          items: Array<{ article_number: string; description: string; quantity: number; unit_price: number; discount_percent: number }>
+        }>(`/api/v1/sales/orders/${sourceOrderId}`)
+        if (order.customer_id) {
+          try {
+            const cd = await apiClient.get<any>(`/api/v1/crm/customers/${order.customer_id}`)
+            setState((prev) => ({
+              ...prev,
+              customer: {
+                id: cd.id,
+                customerNumber: cd.customer_number ?? cd.customerNumber ?? '',
+                name: cd.company_name ?? cd.name ?? '',
+                debitorAccount: cd.customer_number ?? cd.customerNumber ?? '',
+                representative: cd.contact_person ?? cd.representative,
+                postalCode: cd.postal_code ?? cd.postalCode,
+                city: cd.city,
+                creditLimit: cd.credit_limit?.toString(),
+                address: cd.address,
+                phone: cd.phone,
+                email: cd.email,
+                chefanweisung: cd.chefanweisung ?? cd.executive_note,
+                paymentTerms: cd.payment_terms,
+              },
+              vertreter: cd.contact_person ?? cd.representative ?? prev.vertreter,
+            }))
+          } catch { /* Kundendaten nicht verfügbar, weiter ohne Prefill */ }
+        }
+        push(`Lieferschein aus Auftrag ${order.order_number} eröffnet`)
+      } catch { /* Auftrag nicht geladen — kein Fehler, leerer LS */ }
+    }
+    void loadOrderContext()
+  }, [sourceOrderId, deliveryNoteId, push])
 
   const [currentPosition, setCurrentPosition] = useState<CurrentPositionDetails>({
     posNr: 10,

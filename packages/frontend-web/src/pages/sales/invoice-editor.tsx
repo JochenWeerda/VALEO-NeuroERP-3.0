@@ -70,7 +70,7 @@ export default function SalesInvoiceEditorPage(): JSX.Element {
     }
     void (async () => {
       try {
-        const doc = await apiClient.get(`/api/v1/docflow/${editId}`) as any
+        const { data: doc } = await apiClient.get(`/api/v1/docflow/${editId}`) as any
         setDocId(String(doc.id))
         setInvoice((prev) => ({
           ...prev,
@@ -118,11 +118,11 @@ export default function SalesInvoiceEditorPage(): JSX.Element {
         await apiClient.put(`/api/v1/docflow/${docId}`, docPayload)
       } else {
         const idempotencyKey = crypto.randomUUID()
-        const created = await apiClient.post("/api/v1/docflow", {
+        const { data: created } = await apiClient.post("/api/v1/docflow", {
           ...docPayload,
           idempotency_key: idempotencyKey,
-        }) as { id?: string }
-        setDocId(String(created.id ?? ''))
+        }) as any
+        setDocId(String((created as { id?: string }).id ?? ''))
       }
 
       push(getSuccessMessage(t, 'update', entityType))
