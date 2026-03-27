@@ -2974,6 +2974,65 @@ async def ack_edi_message(msg_id: str, tenant_id: str = Depends(get_tenant_id), 
 
 
 # ---------------------------------------------------------------------------
+# Lager Dashboard KPIs
+# ---------------------------------------------------------------------------
+
+@router.get("/lager/dashboard", tags=["lager"])
+async def lager_dashboard(
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Echte Bestands-KPIs aus StockMovements aggregiert."""
+    row = db.execute(
+        text("""
+            SELECT
+                COUNT(DISTINCT article_id) AS total_articles,
+                COALESCE(SUM(CASE WHEN movement_type = 'in' THEN quantity ELSE 0 END), 0) AS total_in,
+                COALESCE(SUM(CASE WHEN movement_type = 'out' THEN quantity ELSE 0 END), 0) AS total_out,
+                COALESCE(SUM(CASE WHEN movement_type = 'in' THEN quantity * COALESCE(unit_cost, 0) ELSE 0 END)
+                       - SUM(CASE WHEN movement_type = 'out' THEN quantity * COALESCE(unit_cost, 0) ELSE 0 END), 0) AS total_value,
+                COUNT(CASE WHEN movement_date = CURRENT_DATE THEN 1 END) AS movements_today
+            FROM domain_inventory.inventory_stock_movements
+            WHERE tenant_id = :tid
+        """),
+        {"tid": tenant_id},
+    ).first()
+
+    total_articles = row[0] if row else 0
+    total_in = float(row[1]) if row else 0
+    total_out = float(row[2]) if row else 0
+    current_stock = total_in - total_out
+    total_value = float(row[3]) if row else 0
+    movements_today = row[4] if row else 0
+
+    low_stock_row = db.execute(
+        text("""
+            SELECT COUNT(DISTINCT sm.article_id)
+            FROM (
+                SELECT article_id,
+                       SUM(CASE WHEN movement_type = 'in' THEN quantity ELSE -quantity END) AS bestand
+                FROM domain_inventory.inventory_stock_movements
+                WHERE tenant_id = :tid
+                GROUP BY article_id
+            ) sm
+            JOIN domain_inventory.articles a ON a.id = sm.article_id
+            WHERE sm.bestand > 0 AND sm.bestand < COALESCE(a.min_stock, 10)
+        """),
+        {"tid": tenant_id},
+    ).scalar() or 0
+
+    return {
+        "total_articles": total_articles,
+        "current_stock_qty": current_stock,
+        "total_value": total_value,
+        "movements_today": movements_today,
+        "low_stock_count": low_stock_row,
+        "reorder_soon": int(low_stock_row * 1.5),
+        "optimal_count": max(0, total_articles - low_stock_row),
+    }
+
+
+# ---------------------------------------------------------------------------
 # Lager Einlagerung
 # ---------------------------------------------------------------------------
 
@@ -3002,10 +3061,10 @@ async def create_einlagerung(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> EinlagerungOut:
-    """Einlagerung buchen — legt einen Chargen-Eintrag in domain_inventory.article_batches an."""
+    """Einlagerung buchen — Chargen-Eintrag + StockMovement."""
     einlagerung_id = str(uuid4())
+    movement_id = str(uuid4())
     today = date.today()
-    # Encode lagerplatz into warehouse_id when present (e.g. "silo-1/A-12-03")
     warehouse_key = f"{payload.lagerort}/{payload.lagerplatz}" if payload.lagerplatz else payload.lagerort
 
     db.execute(
@@ -3021,6 +3080,31 @@ async def create_einlagerung(
             "batch_number": payload.chargen_id,
             "warehouse_id": warehouse_key,
             "quantity": payload.menge,
+        },
+    )
+
+    db.execute(
+        text("""
+            INSERT INTO domain_inventory.inventory_stock_movements
+            (id, article_id, warehouse_id, movement_type, quantity, unit, charge,
+             warehouse_location, reference_number, movement_date, movement_time,
+             notes, booking_user, auto_created, ownership_type, tenant_id, created_at)
+            VALUES (:id, :article_id, :warehouse_id, 'in', :quantity, 't', :charge,
+                    :location, :ref, :date, NOW()::time,
+                    :notes, :user, false, 'owned', :tenant_id, NOW())
+        """),
+        {
+            "id": movement_id,
+            "article_id": payload.artikel,
+            "warehouse_id": payload.lagerort,
+            "quantity": payload.menge,
+            "charge": payload.chargen_id,
+            "location": payload.lagerplatz,
+            "ref": f"EINL-{einlagerung_id[:8].upper()}",
+            "date": today,
+            "notes": f"Einlagerung Charge {payload.chargen_id}",
+            "user": "system",
+            "tenant_id": tenant_id,
         },
     )
     db.commit()
@@ -3063,16 +3147,83 @@ class AuslagerungOut(BaseModel):
 async def create_auslagerung(
     payload: AuslagerungIn,
     tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
 ) -> AuslagerungOut:
-    """Auslagerung buchen — Stub: erzeugt Beleg-Response; kann später an domain_inventory angebunden werden."""
+    """Auslagerung buchen — StockMovement mit Strategie (FIFO/FEFO/Manuell)."""
     auslagerung_id = str(uuid4())
+    movement_id = str(uuid4())
     today = date.today()
+
+    charge_to_use = payload.chargen_id
+    warehouse_id = None
+
+    if payload.strategie == "manuell" and payload.chargen_id:
+        row = db.execute(
+            text("""
+                SELECT warehouse_id FROM domain_inventory.article_batches
+                WHERE tenant_id = :tid AND batch_number = :batch AND article_id = :art
+                ORDER BY created_at DESC LIMIT 1
+            """),
+            {"tid": tenant_id, "batch": payload.chargen_id, "art": payload.artikel},
+        ).first()
+        if row:
+            warehouse_id = row[0]
+    elif payload.strategie in ("fifo", "fefo"):
+        order_col = "created_at ASC" if payload.strategie == "fifo" else "created_at ASC"
+        row = db.execute(
+            text(f"""
+                SELECT batch_number, warehouse_id FROM domain_inventory.article_batches
+                WHERE tenant_id = :tid AND article_id = :art AND quantity > 0
+                ORDER BY {order_col} LIMIT 1
+            """),
+            {"tid": tenant_id, "art": payload.artikel},
+        ).first()
+        if row:
+            charge_to_use = row[0]
+            warehouse_id = row[1]
+
+    db.execute(
+        text("""
+            INSERT INTO domain_inventory.inventory_stock_movements
+            (id, article_id, warehouse_id, movement_type, quantity, unit, charge,
+             reference_number, movement_date, movement_time,
+             notes, booking_user, auto_created, ownership_type, tenant_id, created_at)
+            VALUES (:id, :article_id, :warehouse_id, 'out', :quantity, 't', :charge,
+                    :ref, :date, NOW()::time,
+                    :notes, :user, false, 'owned', :tenant_id, NOW())
+        """),
+        {
+            "id": movement_id,
+            "article_id": payload.artikel,
+            "warehouse_id": warehouse_id or "UNBEKANNT",
+            "quantity": payload.menge,
+            "charge": charge_to_use,
+            "ref": f"AUSL-{auslagerung_id[:8].upper()}",
+            "date": today,
+            "notes": payload.verwendungszweck or f"Auslagerung {payload.strategie}",
+            "user": "system",
+            "tenant_id": tenant_id,
+        },
+    )
+
+    if charge_to_use and warehouse_id:
+        db.execute(
+            text("""
+                UPDATE domain_inventory.article_batches
+                SET quantity = GREATEST(0, quantity - :menge)
+                WHERE tenant_id = :tid AND batch_number = :batch AND article_id = :art
+            """),
+            {"menge": payload.menge, "tid": tenant_id, "batch": charge_to_use, "art": payload.artikel},
+        )
+
+    db.commit()
+
     return AuslagerungOut(
         id=auslagerung_id,
         artikel=payload.artikel,
         menge=payload.menge,
         strategie=payload.strategie,
-        chargen_id=payload.chargen_id,
+        chargen_id=charge_to_use,
         datum=today,
         status="gebucht",
     )

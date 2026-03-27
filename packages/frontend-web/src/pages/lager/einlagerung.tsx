@@ -2,9 +2,9 @@
  * Einlagerung — Touch-optimierter Feldworkflow (Gap 024, Wave 76)
  * Touch-Targets >= 44px, Lagerort-Auswahl via TouchCard statt <select>
  */
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { Wizard } from '@/components/patterns/Wizard'
 import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
 import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
@@ -29,14 +29,14 @@ type EinlagerungData = {
   lagerplatz: string
 }
 
-const LAGERORTE = [
+const FALLBACK_LAGERORTE = [
   { id: 'silo-1', label: 'Silo 1', description: 'Weizen / Roggen' },
   { id: 'silo-2', label: 'Silo 2', description: 'Gerste / Hafer' },
-  { id: 'halle-a', label: 'Halle A', description: 'Schüttgut allgemein' },
-  { id: 'halle-b', label: 'Halle B', description: 'Säcke / Paletten' },
+  { id: 'halle-a', label: 'Halle A', description: 'Allgemein' },
+  { id: 'halle-b', label: 'Halle B', description: 'Saecke / Paletten' },
 ]
 
-const ARTIKEL = ['Weizen', 'Gerste', 'Raps', 'Mais', 'Roggen', 'Hafer', 'Sonnenblumen']
+const FALLBACK_ARTIKEL = ['Weizen', 'Gerste', 'Raps', 'Mais', 'Roggen', 'Hafer', 'Sonnenblumen']
 
 export default function EinlagerungPage(): JSX.Element {
   const navigate = useNavigate()
@@ -48,6 +48,40 @@ export default function EinlagerungPage(): JSX.Element {
     lagerort: '',
     lagerplatz: '',
   })
+
+  const artikelQuery = useQuery({
+    queryKey: ['articles', 'einlagerung'],
+    queryFn: async () => {
+      const res = await apiClient.get<{ items: Array<{ id: string; name: string; article_number: string }> }>('/api/v1/articles?limit=100')
+      return res.data?.items ?? []
+    },
+  })
+
+  const warehouseQuery = useQuery({
+    queryKey: ['warehouses', 'einlagerung'],
+    queryFn: async () => {
+      const res = await apiClient.get<{ items: Array<{ id: string; warehouse_code: string; name: string; warehouse_type: string }> }>('/api/v1/warehouses?limit=100')
+      return res.data?.items ?? []
+    },
+  })
+
+  const ARTIKEL = useMemo(() => {
+    if (artikelQuery.data && artikelQuery.data.length > 0) {
+      return artikelQuery.data.map((a) => a.name)
+    }
+    return FALLBACK_ARTIKEL
+  }, [artikelQuery.data])
+
+  const LAGERORTE = useMemo(() => {
+    if (warehouseQuery.data && warehouseQuery.data.length > 0) {
+      return warehouseQuery.data.map((w) => ({
+        id: w.warehouse_code || w.id,
+        label: w.name,
+        description: w.warehouse_type || '',
+      }))
+    }
+    return FALLBACK_LAGERORTE
+  }, [warehouseQuery.data])
 
   function set<K extends keyof EinlagerungData>(key: K, value: EinlagerungData[K]): void {
     setEinlagerung((prev) => ({ ...prev, [key]: value }))

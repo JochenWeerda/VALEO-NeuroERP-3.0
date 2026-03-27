@@ -20,7 +20,8 @@ Zwei End-to-End-Stränge laufen **fachlich und technisch getrennt**. Bitte **nic
 |------|-----------------|--------------------------------|--------|
 | **Agrar / Harvest-to-Settlement** | `packages/frontend-web/src/pages/agrar/**`, relevante `pages/annahme/**` | VK-013 abgeschlossen (Codex) | Kein paralleles Editing mit der OTC-Folge-Lane. |
 | **Order-to-Cash Folge (Finance)** | `packages/frontend-web/src/pages/finance/**`, optional `pages/sales/**` / `pages/verkauf/**` | OTC-011 | Kein paralleles Editing mit VK-013-Agrar ohne Absprache. |
-| **Kontrakt (Contract-to-Settlement)** | `packages/frontend-web/src/pages/kontrakte/**`, `lib/api/kontrakte.ts` | CTS-001 (Erstanalyse abgeschlossen) | Ueberlappung mit OTC (Auftrag/LS) und VK (Ernte-Annahme) — bei Aenderungen an order-editor/lieferschein abstimmen. |
+| **Kontrakt (Contract-to-Settlement)** | `packages/frontend-web/src/pages/kontrakte/**`, `lib/api/kontrakte.ts` | CTS-001 bis CTS-009 abgeschlossen | Ueberlappung mit OTC (Auftrag/LS) und VK (Ernte-Annahme) — bei Aenderungen an order-editor/lieferschein abstimmen. |
+| **Lager (Inventory-to-Settlement)** | `packages/frontend-web/src/pages/lager/**`, `app/api/v1/endpoints/warehouses*.py`, `inventory_counts.py` | INV-001 bis INV-007 (P1 abgeschlossen) | Ueberlappung mit CTS (Auslagerung aus Kontrakt) und VK (Einlagerung aus Ernte). |
 
 **Lane-Status:** `VK-013` ist fachlich ausgearbeitet und abgeschlossen. `OTC-011` ist als Folgelane zu OTC-010 **begonnen** (Workflow+Card), Umsetzung im Finance-UI folgt iterativ.
 
@@ -52,6 +53,11 @@ Zwei End-to-End-Stränge laufen **fachlich und technisch getrennt**. Bitte **nic
 | CTS-007 | Tabs differenzieren (Partner, Preismodell, Bedingungen, Notizen, Unterlagen) | abgeschlossen | Cursor Agent | `pages/kontrakte/FrmKontraktDetail.tsx` | — | keine |
 | CTS-008 | Alarm-Dashboard (ablaufende Kontrakte, niedrige Restmenge, offene MATIF) | abgeschlossen | Cursor Agent | `pages/kontrakte/KontraktAlarmDashboard.tsx`, Route-Registrierung | — | keine |
 | CTS-009 | Rohwaren-Positionsmonitor (Long/Short-Deckung, Unterdeckungs-Alarm) | abgeschlossen | Cursor Agent | `app/services/kontrakt_position_service.py`, `app/api/v1/endpoints/kontrakte.py`, `pages/kontrakte/KontraktPositionsmonitor.tsx`, `pages/kontrakte/FrmKontraktDetail.tsx`, `pages/kontrakte/LstKontraktUebersicht.tsx` | — | keine |
+| INV-001 | Inventory-to-Settlement: Vollanalyse (11 Masken, 11 Cards, 15 Soll-Ist, Mermaid, P1-P5) | abgeschlossen | Claude Opus 4.6 | `docs/workflows/inv-001-inventory-to-settlement.md`, `docs/cards/inventory/INV-001-inventory-to-settlement.md`, `pages/lager/**`, `pages/verladung/**` | P1-P5 als Folge-Slices | keine |
+| INV-002 | Bestandsuebersicht: echte KPIs aus StockMovement-Aggregation | abgeschlossen | Cursor Agent | `app/api/v1/endpoints/compat.py` (GET /lager/dashboard), `lib/api/dashboard.ts` | — | keine |
+| INV-003 | Ein-/Auslagerung: StockMovement-Buchung (FIFO/FEFO, Chargen-Abzug) | abgeschlossen | Cursor Agent | `app/api/v1/endpoints/compat.py` (POST einlagerung/auslagerung) | — | keine |
+| INV-004 | Einlagerung: Stammdaten aus API (Artikel + Lagerorte) statt hart codiert | abgeschlossen | Cursor Agent | `pages/lager/einlagerung.tsx` | — | keine |
+| INV-007 | Lagerplaetze: echte Belegung aus used_capacity/total_capacity | abgeschlossen | Cursor Agent | `pages/lager/lagerplaetze.tsx` | — | keine |
 
 ## Reservierungsregel
 
