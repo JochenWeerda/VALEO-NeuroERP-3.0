@@ -1,6 +1,6 @@
 # VK-020 — Rohware-Wizard Schrittvalidierung
 
-**Slice:** VK-020 | **Datum:** 2026-03-27  
+**Slice:** VK-020 | **Datum:** 2026-03-27
 **Status:** abgeschlossen
 
 ## Zweck
