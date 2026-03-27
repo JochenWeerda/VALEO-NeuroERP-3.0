@@ -8,17 +8,25 @@ export default function LagerplaetzePage(): JSX.Element {
   const { data: warehousesData, isLoading } = useWarehouses()
   const items = warehousesData?.items ?? []
   const lager = (() => {
-    const bereiche = items.map((w) => ({
-      name: w.name || w.code || w.id,
-      plaetze: 1,
-      belegt: 0,
-      kapazitaet: w.capacity ?? 0,
-      bestand: 0,
-    }))
-    const plaetze = bereiche.length
-    const belegt = 0
+    const bereiche = items.map((w) => {
+      const kapazitaet = w.capacity ?? 0
+      const bestand = w.used_capacity ?? 0
+      const auslastungPct = kapazitaet > 0 ? (bestand / kapazitaet) * 100 : 0
+      return {
+        name: w.name || w.code || w.id,
+        plaetze: Math.max(1, Math.ceil(kapazitaet / 100)),
+        belegt: Math.ceil(bestand > 0 ? Math.max(1, Math.ceil(bestand / 100)) : 0),
+        kapazitaet,
+        bestand,
+        auslastungPct,
+      }
+    })
+    const totalKapazitaet = bereiche.reduce((s, b) => s + b.kapazitaet, 0)
+    const totalBestand = bereiche.reduce((s, b) => s + b.bestand, 0)
+    const plaetze = bereiche.reduce((s, b) => s + b.plaetze, 0)
+    const belegt = bereiche.reduce((s, b) => s + b.belegt, 0)
     const frei = plaetze - belegt
-    const auslastung = plaetze > 0 ? (belegt / plaetze) * 100 : 0
+    const auslastung = totalKapazitaet > 0 ? (totalBestand / totalKapazitaet) * 100 : 0
     return { plaetze, belegt, frei, auslastung, bereiche }
   })()
 

@@ -131,21 +131,51 @@ export function useInventoryDashboard() {
   return useQuery({
     queryKey: dashboardKeys.inventory(),
     queryFn: async () => {
-      // TODO: Real endpoint /api/v1/dashboard/inventory
-      const articlesResponse = await apiClient.get<{ items: any[], total: number }>('/api/v1/articles')
-      const articles = articlesResponse.data.items || []
-      
-      return {
-        totalArticles: articles.length,
-        totalValue: 275000,
-        lowStockCount: articles.filter((a: any) => a.stock_quantity < (a.min_stock || 10)).length,
-        topArticles: articles.slice(0, 5).map((a: any) => ({
-          id: a.id,
-          name: a.name,
-          quantity: a.stock_quantity || 0,
-          value: (a.stock_quantity || 0) * (a.price || 0)
-        }))
-      } as InventoryDashboardData
+      try {
+        const dashRes = await apiClient.get<{
+          total_articles: number
+          current_stock_qty: number
+          total_value: number
+          movements_today: number
+          low_stock_count: number
+          reorder_soon: number
+          optimal_count: number
+        }>('/api/v1/lager/dashboard')
+        const dash = dashRes.data
+
+        const articlesResponse = await apiClient.get<{ items: any[], total: number }>('/api/v1/articles?limit=5&sort=stock_quantity:desc')
+        const articles = articlesResponse.data?.items || []
+
+        return {
+          totalArticles: dash.total_articles,
+          totalValue: dash.total_value,
+          currentStockQty: dash.current_stock_qty,
+          movementsToday: dash.movements_today,
+          lowStockCount: dash.low_stock_count,
+          reorderSoon: dash.reorder_soon,
+          optimalCount: dash.optimal_count,
+          topArticles: articles.slice(0, 5).map((a: any) => ({
+            id: a.id,
+            name: a.name,
+            quantity: a.stock_quantity || 0,
+            value: (a.stock_quantity || 0) * (a.price || 0),
+          })),
+        } as InventoryDashboardData
+      } catch {
+        const articlesResponse = await apiClient.get<{ items: any[], total: number }>('/api/v1/articles')
+        const articles = articlesResponse.data?.items || []
+        return {
+          totalArticles: articles.length,
+          totalValue: 0,
+          lowStockCount: articles.filter((a: any) => a.stock_quantity < (a.min_stock || 10)).length,
+          topArticles: articles.slice(0, 5).map((a: any) => ({
+            id: a.id,
+            name: a.name,
+            quantity: a.stock_quantity || 0,
+            value: (a.stock_quantity || 0) * (a.price || 0),
+          })),
+        } as InventoryDashboardData
+      }
     },
     initialData: EMPTY_INVENTORY_DASHBOARD,
   })
