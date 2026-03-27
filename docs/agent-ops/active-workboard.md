@@ -22,8 +22,27 @@ Diese Datei ist absichtlich schlank und soll bei jeder Session schnell lesbar bl
 | P2P-040 | Procure-to-Pay Vorbelegung aus Bedarfsmeldung/Vertrag/RFQ | abgeschlossen | aktuell offener Agent | `docs/agent-ops/active-workboard.md`, `docs/workflows/p2p-040-vorbelegung-requisition-vertrag-rfq.md`, `docs/cards/einkauf/P2P-040-vorbelegung-standardmaske.md`, `packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx`, `packages/frontend-web/src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx` | Folgeslice Schrittvalidierung zuschneiden | keine |
 | P2P-050 | Procure-to-Pay Wizard-Schrittvalidierung | abgeschlossen | aktuell offener Agent | `docs/workflows/p2p-050-wizard-schrittvalidierung.md`, `docs/cards/einkauf/P2P-050-wizard-schrittvalidierung.md`, `packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx`, `packages/frontend-web/src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx` | Landhandel-Kernprozess beginnen | keine |
 | VK-010 | Ernte-Annahme Workflow-Analyse, Handover-Haertung und QA-Slice | abgeschlossen | aktuell offener Agent | `docs/workflows/vk-010-ernte-annahme.md`, `docs/cards/agrar/VK-010-ernte-annahme.md`, `docs/cards/agrar/VK-010-ernte-annahme-standardmaske.md`, `docs/quality-assurance/browser-use-checklists.md`, `packages/frontend-web/src/pages/agrar/ernte-annahme-erfassung.tsx`, `packages/frontend-web/src/__tests__/pages/agrar/ernte-annahme-erfassung.test.tsx` | VK-011 Handover-Bruecke und Schrittvalidierung zuschneiden | keine |
+| VK-011 | Ernte-Annahme Handover-Bruecke (QP→Erfassung) und LKW-Wizard-Schrittvalidierung | offen | — | `packages/frontend-web/src/pages/annahme/qualitaets-check.tsx`, `packages/frontend-web/src/pages/annahme/warteschlange.tsx`, `packages/frontend-web/src/pages/annahme/lkw-registrierung.tsx` | Claim-Commit vor Beginn | keine |
 
 ## Reservierungsregel
+
+**Pflichtschritt vor jeder Arbeit an einem Slice (Claim-Protokoll):**
+
+1. Workboard lesen — ist der Slice bereits `reserviert` oder `in arbeit`? Dann: anderen Slice waehlen.
+2. Slice in der Tabelle auf Status `reserviert` setzen, Owner eintragen, Dateibesitz listen.
+3. Diesen Workboard-Stand **sofort als eigenen Commit** abgeben: `chore(workboard): claim SLICE-ID`.
+4. Erst nach diesem Commit mit der eigentlichen Arbeit beginnen.
+
+Kein Agent darf einen Slice beginnen, der bereits `reserviert` oder `in arbeit` ist.
+
+**Status-Werte:**
+
+| Status | Bedeutung |
+|--------|-----------|
+| `offen` | Noch nicht begonnen, kann uebernommen werden |
+| `reserviert` | Claim-Commit erfolgt, Agent beginnt gleich |
+| `in arbeit` | Agent arbeitet aktiv, keine Neuuebernahme |
+| `abgeschlossen` | Fertig, committet, Handoff vorhanden |
 
 - Pro Slice ein Owner.
 - Dateibesitz klar dokumentieren.
@@ -37,7 +56,7 @@ Diese Datei ist absichtlich schlank und soll bei jeder Session schnell lesbar bl
 - Wave 104 vollstaendig abgeschlossen (GAP-A bis GAP-I, 5931 Tests gruen, commit `1ad5ea4d`).
 - Claude-Parallelstand in `docs/AGENT-INTEGRATION.md`, `docs/governance-rollout-summary.md` und `docs/standards/markdown-governance.md` geprueft; operative Folgearbeit richtet sich an den neuen Doku-Einstiegen aus.
 - P2P-040 abgeschlossen: Vorbelegung aus Bedarfsmeldung/Vertrag/RFQ korrekt verdrahtet (`.data`, URL `/v1/`, Toast), Backend-Compat-Endpoints fuer Anfrage und Vertrag nachgezogen, Frontend- und API-Tests gruen.
-- P2P-050 abgeschlossen: Wizard-Schrittvalidierung verdrahtet (validateStep, onStepValidationError), 13 relevante Frontend-Tests gruen.
+- P2P-050 abgeschlossen: Wizard-Schrittvalidierung verdrahtet (validateStep, onStepValidationError); die relevante Frontend-Regression fuer Wizard und P2P-Pfad ist gruen.
 - VK-010 abgeschlossen: Claude-Analyse fuer den breiten Ernte-Annahme-Kernprozess ist mit dem operativen Handover-/QA-Slice zusammengezogen. Dokumentiert und abgesichert sind jetzt sowohl der Edit-Mode-Fix (`.data`-Extraktion in `loadHarvestAcceptance`) als auch die restart-sichere Handover-Haertung (`useMemo` fuer Workflow-Kontext, Seitentest, QA-Checkliste).
 - Naechste Prioritaet: VK-011 Handover-Bruecke (Qualitaets-Check → Ernte-Annahme) und Schrittvalidierung LKW-Wizard.
 
@@ -120,7 +139,7 @@ Diese Datei ist absichtlich schlank und soll bei jeder Session schnell lesbar bl
 - Card `docs/cards/einkauf/P2P-040-vorbelegung-standardmaske.md` erstellt
 **Offen:** Weiterfuehrende Landhandel-Kernprozesse folgen separat.
 **Betroffene Dateien:** `docs/agent-ops/active-workboard.md`, `docs/workflows/p2p-040-vorbelegung-requisition-vertrag-rfq.md`, `docs/cards/einkauf/P2P-040-vorbelegung-standardmaske.md`, `app/api/v1/endpoints/compat.py`, `tests/test_compat_einkauf_anfragen.py`, `packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx`, `packages/frontend-web/src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx`, `packages/frontend-web/src/pages/einkauf/rfq-bids.tsx`
-**Tests / Checks:** `pnpm --dir packages/frontend-web exec vitest run src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx` - 6/6 PASS; `pytest tests/test_compat_einkauf_anfragen.py -q` - API-Compat-Regression
+**Tests / Checks:** `pnpm --dir packages/frontend-web exec vitest run src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx` - gruen; `pytest tests/test_compat_einkauf_anfragen.py -q` - API-Compat-Regression
 **Offene Risiken:** Graceful Degradation kann bei abweichenden Backend-Feldnamen zu teilweiser Leer-Vorbelegung fuehren.
 **Annahmen:** `apiClient.get<T>()` gibt `AxiosResponse<T>` zurueck (`.data` = Nutzdaten). Requisition und RFQ teilen denselben Endpoint `/api/v1/einkauf/anfragen/`.
 **Naechster konkreter Schritt:** VK-011 Ernte-Annahme-Handover-Bruecke und LKW-Wizard-Schrittvalidierung zuschneiden.
@@ -156,7 +175,7 @@ Diese Datei ist absichtlich schlank und soll bei jeder Session schnell lesbar bl
 - P2P-001- und P2P-040-Doku auf den neuen Validierungsstand nachgezogen
 **Offen:** Inline-Fehlhinweise im Wizard sind weiterhin nicht vorhanden.
 **Betroffene Dateien:** `docs/agent-ops/active-workboard.md`, `docs/workflows/p2p-001-procure-to-pay-direktbestellung.md`, `docs/workflows/p2p-040-vorbelegung-requisition-vertrag-rfq.md`, `docs/workflows/p2p-050-wizard-schrittvalidierung.md`, `docs/cards/einkauf/P2P-020-direktbestellung-standardmaske.md`, `docs/cards/einkauf/P2P-040-vorbelegung-standardmaske.md`, `docs/cards/einkauf/P2P-050-wizard-schrittvalidierung.md`, `docs/quality-assurance/browser-use-checklists.md`, `packages/frontend-web/src/components/patterns/Wizard.tsx`, `packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx`, `packages/frontend-web/src/__tests__/components/patterns/Wizard.test.tsx`, `packages/frontend-web/src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx`
-**Tests / Checks:** `pnpm --dir packages/frontend-web exec vitest run src/__tests__/components/patterns/Wizard.test.tsx src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx src/__tests__/pages/workflow/flow-spine-procure-to-pay.test.tsx` - 13/13 PASS; `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false` - gruen
+**Tests / Checks:** `pnpm --dir packages/frontend-web exec vitest run src/__tests__/components/patterns/Wizard.test.tsx src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx src/__tests__/pages/workflow/flow-spine-procure-to-pay.test.tsx` - gruen; `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false` - gruen
 **Offene Risiken:** Toast-basierte Validierung ist funktional, aber weniger fuehrend als Inline-Fehlhinweise; andere Wizards nutzen den neuen Hook noch nicht.
 **Annahmen:** P2P benoetigt vorerst nur harte Schrittvalidierung fuer Lieferanten- und Positionsschritt; Lieferung bleibt optional.
 **Naechster konkreter Schritt:** VK-011 Ernte-Annahme-Handover-Bruecke und LKW-Wizard-Schrittvalidierung als Folgeslice zuschneiden.
