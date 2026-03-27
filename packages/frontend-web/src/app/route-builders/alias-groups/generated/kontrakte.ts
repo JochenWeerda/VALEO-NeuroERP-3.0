@@ -12,5 +12,13 @@ export const entries: AliasGroupRouteEntry[] = [
   {
     "module": "@/pages/kontrakte/FrmKontraktDetail",
     "path": ":id"
+  },
+  {
+    "module": "@/pages/kontrakte/KontraktAlarmDashboard",
+    "path": "alarme"
+  },
+  {
+    "module": "@/pages/kontrakte/KontraktPositionsmonitor",
+    "path": "positionen"
   }
 ]

@@ -19,6 +19,7 @@ import type { PrintOptions } from '@/components/sales/LieferscheinDruckDialog'
 import type { BelegfolgePosition } from '@/components/sales/BelegfolgePositionenDialog'
 import { useAuftraege, type Auftrag } from '@/lib/api/sales'
 import { apiClient } from '@/lib/axios'
+import { useKontraktLookup } from '@/hooks/useKontraktLookup'
 import { useAuth } from '@/hooks/useAuth'
 import { globalShortcutManager } from '@/lib/shortcuts/global-shortcuts'
 import { useGlobalShortcutsWithVoice } from '@/features/ki-usability'
@@ -45,6 +46,9 @@ const AttestationDialog = lazy(() =>
 )
 const BelegfolgePositionenDialog = lazy(() =>
   import('@/components/sales/BelegfolgePositionenDialog').then((m) => ({ default: m.BelegfolgePositionenDialog }))
+)
+const DlgAuswahlVerkaufKontrakte = lazy(() =>
+  import('@/pages/kontrakte/DlgAuswahlVerkaufKontrakte')
 )
 
 function LazyDialogBoundary({ children }: { children: JSX.Element }) {
@@ -293,6 +297,8 @@ export default function SalesOrderEditorPage(): JSX.Element {
   const [sucheText, setSucheText] = useState('')
   const [showNiederlassungDialog, setShowNiederlassungDialog] = useState(false)
   const [showVertreterDialog, setShowVertreterDialog] = useState(false)
+  const [showKontraktLookup, setShowKontraktLookup] = useState(false)
+  const { resolveKontrakt, isResolving: isResolvingKontrakt } = useKontraktLookup()
   const [vertreterInput, setVertreterInput] = useState('')
   const [branchesList, setBranchesList] = useState<Array<{ id: string; branch_number: number; name: string }>>([])
 
@@ -1523,11 +1529,41 @@ export default function SalesOrderEditorPage(): JSX.Element {
 
             <div className="space-y-1">
               <Label className="text-xs">Kontrakt-Nr.:</Label>
-              <Input
-                value={currentPosition.kontraktNr}
-                onChange={(e) => setCurrentPosition((prev) => ({ ...prev, kontraktNr: e.target.value }))}
-                className="h-8"
-              />
+              <div className="flex gap-1">
+                <Input
+                  value={currentPosition.kontraktNr}
+                  onChange={(e) => setCurrentPosition((prev) => ({ ...prev, kontraktNr: e.target.value }))}
+                  onBlur={async () => {
+                    if (!currentPosition.kontraktNr.trim()) return
+                    const result = await resolveKontrakt(currentPosition.kontraktNr, currentPosition.artikelNr || undefined)
+                    if (result) {
+                      setCurrentPosition((prev) => ({
+                        ...prev,
+                        kontraktNr: result.contract_no,
+                        einhPreis: result.unit_price ?? prev.einhPreis,
+                        rabatt: result.discount_pct ?? prev.rabatt,
+                        betrag: (prev.mengeGebinde * (result.unit_price ?? prev.einhPreis)) * (1 - (result.discount_pct ?? prev.rabatt) / 100),
+                      }))
+                      if (result.qty_remaining !== null && result.qty_remaining < currentPosition.mengeGebinde && !result.allow_overdelivery) {
+                        push(`Kontraktrestmenge nur ${result.qty_remaining} — Bestellmenge ${currentPosition.mengeGebinde} ueberschreitet Kontrakt.`)
+                      }
+                    } else {
+                      push('Kontrakt nicht gefunden oder nicht offen.')
+                    }
+                  }}
+                  className="h-8"
+                  placeholder={isResolvingKontrakt ? 'Pruefe...' : ''}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-8 px-2"
+                  onClick={() => setShowKontraktLookup(true)}
+                  title="Kontrakt suchen"
+                >
+                  <Search className="h-3.5 w-3.5" />
+                </Button>
+              </div>
             </div>
             <div className="space-y-1">
               <Label className="text-xs">EK-Preis:</Label>
@@ -1930,6 +1966,28 @@ export default function SalesOrderEditorPage(): JSX.Element {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {showKontraktLookup && (
+        <LazyDialogBoundary>
+          <DlgAuswahlVerkaufKontrakte
+            open={showKontraktLookup}
+            onOpenChange={setShowKontraktLookup}
+            onSelect={async (item) => {
+              const result = await resolveKontrakt(item.contract_no, currentPosition.artikelNr || undefined)
+              if (result) {
+                setCurrentPosition((prev) => ({
+                  ...prev,
+                  kontraktNr: result.contract_no,
+                  einhPreis: result.unit_price ?? prev.einhPreis,
+                  rabatt: result.discount_pct ?? prev.rabatt,
+                  betrag: (prev.mengeGebinde * (result.unit_price ?? prev.einhPreis)) * (1 - (result.discount_pct ?? prev.rabatt) / 100),
+                }))
+                push(`Kontrakt ${result.contract_no} uebernommen — Preis: ${result.unit_price ?? '-'}, Rest: ${result.rest_quantity}`)
+              }
+            }}
+          />
+        </LazyDialogBoundary>
+      )}
     </div>
   )
 }

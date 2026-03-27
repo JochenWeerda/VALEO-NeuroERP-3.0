@@ -21,12 +21,13 @@ import type { BelegfolgePosition } from '@/components/sales/BelegfolgePositionen
 import { apiClient } from '@/lib/axios'
 import { useAuth } from '@/hooks/useAuth'
 import { useSchlaege } from '@/lib/api/agrar'
+import { useKontraktLookup } from '@/hooks/useKontraktLookup'
 import { globalShortcutManager } from '@/lib/shortcuts/global-shortcuts'
 import { useGlobalShortcutsWithVoice } from '@/features/ki-usability'
 import { ShortcutHintButton } from '@/components/shortcuts/ShortcutHelpPanel'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { NativeSelect } from '@/components/ui/native-select'
-import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown, MoreHorizontal, Check, Printer, Save, X, FileText, Folder, FileCheck, Link as LinkIcon, Receipt, Trash2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown, MoreHorizontal, Check, Printer, Save, X, FileText, Folder, FileCheck, Link as LinkIcon, Receipt, Trash2, Search } from 'lucide-react'
 
 const CustomerSelectionDialog = lazy(() =>
   import('@/components/sales/CustomerSelectionDialog').then((m) => ({ default: m.CustomerSelectionDialog }))
@@ -45,6 +46,9 @@ const AttestationDialog = lazy(() =>
 )
 const BelegfolgePositionenDialog = lazy(() =>
   import('@/components/sales/BelegfolgePositionenDialog').then((m) => ({ default: m.BelegfolgePositionenDialog }))
+)
+const DlgAuswahlVerkaufKontrakte = lazy(() =>
+  import('@/pages/kontrakte/DlgAuswahlVerkaufKontrakte')
 )
 
 function LazyDialogBoundary({ children }: { children: JSX.Element }) {
@@ -480,6 +484,8 @@ export default function LieferscheinErfassungPage(): JSX.Element {
   const [showVertreterDialog, setShowVertreterDialog] = useState(false)
   const [showPositionPopUpDialog, setShowPositionPopUpDialog] = useState(false)
   const [showPositionDetailsDialog, setShowPositionDetailsDialog] = useState(false)
+  const [showKontraktLookup, setShowKontraktLookup] = useState(false)
+  const { resolveKontrakt, isResolving: isResolvingKontrakt } = useKontraktLookup()
   const [vertreterInput, setVertreterInput] = useState('')
   const [branchesList, setBranchesList] = useState<Array<{ id: string; branch_number: number; name: string }>>([])
 
@@ -2176,6 +2182,44 @@ export default function LieferscheinErfassungPage(): JSX.Element {
               />
             </div>
             <div className="space-y-1">
+              <Label className="text-xs">Kontrakt-Nr.:</Label>
+              <div className="flex gap-1">
+                <Input
+                  value={currentPosition.kontraktNr}
+                  onChange={(e) => setCurrentPosition((prev) => ({ ...prev, kontraktNr: e.target.value }))}
+                  onBlur={async () => {
+                    if (!currentPosition.kontraktNr.trim()) return
+                    const result = await resolveKontrakt(currentPosition.kontraktNr, currentPosition.artikelNr || undefined)
+                    if (result) {
+                      setCurrentPosition((prev) => ({
+                        ...prev,
+                        kontraktNr: result.contract_no,
+                        einhPreis: result.unit_price ?? prev.einhPreis,
+                        rabatt: result.discount_pct ?? prev.rabatt,
+                        betrag: (prev.mengeGebinde * (result.unit_price ?? prev.einhPreis)) * (1 - (result.discount_pct ?? prev.rabatt) / 100),
+                      }))
+                      if (result.qty_remaining !== null && result.qty_remaining < currentPosition.mengeGebinde && !result.allow_overdelivery) {
+                        push(`Kontraktrestmenge nur ${result.qty_remaining} — Bestellmenge ${currentPosition.mengeGebinde} ueberschreitet Kontrakt.`)
+                      }
+                    } else {
+                      push('Kontrakt nicht gefunden oder nicht offen.')
+                    }
+                  }}
+                  className="h-8"
+                  placeholder={isResolvingKontrakt ? 'Pruefe...' : ''}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-8 px-2"
+                  onClick={() => setShowKontraktLookup(true)}
+                  title="Kontrakt suchen"
+                >
+                  <Search className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </div>
+            <div className="space-y-1">
               <Label className="text-xs">verfügbar:</Label>
               <Input value={`${currentPosition.verfuegbar} ${currentPosition.einheit}`} readOnly className="h-8" />
             </div>
@@ -2593,6 +2637,28 @@ export default function LieferscheinErfassungPage(): JSX.Element {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {showKontraktLookup && (
+        <LazyDialogBoundary>
+          <DlgAuswahlVerkaufKontrakte
+            open={showKontraktLookup}
+            onOpenChange={setShowKontraktLookup}
+            onSelect={async (item) => {
+              const result = await resolveKontrakt(item.contract_no, currentPosition.artikelNr || undefined)
+              if (result) {
+                setCurrentPosition((prev) => ({
+                  ...prev,
+                  kontraktNr: result.contract_no,
+                  einhPreis: result.unit_price ?? prev.einhPreis,
+                  rabatt: result.discount_pct ?? prev.rabatt,
+                  betrag: (prev.mengeGebinde * (result.unit_price ?? prev.einhPreis)) * (1 - (result.discount_pct ?? prev.rabatt) / 100),
+                }))
+                push(`Kontrakt ${result.contract_no} uebernommen — Preis: ${result.unit_price ?? '-'}, Rest: ${result.rest_quantity}`)
+              }
+            }}
+          />
+        </LazyDialogBoundary>
+      )}
     </div>
   )
 }

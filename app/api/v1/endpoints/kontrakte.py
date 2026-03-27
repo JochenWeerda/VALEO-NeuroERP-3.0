@@ -29,7 +29,7 @@ from app.services.kontrakte_service import (
 router = APIRouter(prefix="/kontrakte", tags=["kontrakte"])
 
 ContractType = Literal["EINKAUF", "ZUKAUF", "VERKAUF"]
-StatusType = Literal["OFFEN", "ERLEDIGT", "STORNIERT"]
+StatusType = Literal["OFFEN", "ERLEDIGT", "STORNIERT", "GELOESCHT"]
 QuantityType = Literal["GESAMTKONTRAKT", "EINZELMENGEN"]
 
 
@@ -200,6 +200,7 @@ async def list_kontrakte(
         q = q.filter(KonContract.valid_to >= valid_from)
     if valid_to:
         q = q.filter(KonContract.valid_from <= valid_to)
+    q = q.filter(KonContract.status != "GELOESCHT")
     if not include_done:
         q = q.filter(KonContract.status != "ERLEDIGT")
     if query:
@@ -210,15 +211,24 @@ async def list_kontrakte(
     total = q.count()
     items = q.order_by(KonContract.updated_at.desc(), KonContract.created_at.desc()).offset(skip).limit(limit).all()
     rest_service = KontraktRestmengenService(db)
+    party_adapter = PartyLookupAdapter(db)
     payload = []
     for c in items:
         rest = rest_service.compute_rest(tenant_id, c.contract_id)
+        first_line = (
+            db.query(KonContractLine)
+            .filter(KonContractLine.contract_id == c.contract_id, KonContractLine.tenant_id == tenant_id)
+            .order_by(KonContractLine.position_no.asc())
+            .first()
+        )
+        party_name = party_adapter.get_name(c.party_id)
         payload.append(
             {
                 "contract_id": c.contract_id,
                 "contract_no": c.contract_no,
                 "contract_type": c.contract_type,
                 "party_id": c.party_id,
+                "party_name": party_name,
                 "contract_date": c.contract_date,
                 "valid_from": c.valid_from,
                 "valid_to": c.valid_to,
@@ -228,6 +238,9 @@ async def list_kontrakte(
                 "status": c.status,
                 "pricing_model": c.pricing_model,
                 "allow_overdelivery": bool(c.allow_overdelivery),
+                "first_article_id": first_line.article_id if first_line else None,
+                "first_article_desc": first_line.description1 if first_line else None,
+                "first_unit_price": float(first_line.unit_price) if first_line and first_line.unit_price is not None else None,
             }
         )
     return {"items": payload, "total": total, "skip": skip, "limit": limit}
@@ -496,22 +509,34 @@ async def delete_kontrakt(
         if not KontraktSecurityService.has_any_role(roles, KontraktSecurityService.ROLE_ADMIN):
             raise HTTPException(status_code=403, detail="Deleting contracts with movements requires KONTRAKT_ADMIN")
         if not force:
-            raise HTTPException(status_code=400, detail="force=true required when movements exist")
+            raise HTTPException(
+                status_code=409,
+                detail="Kontrakt hat Umsaetze/Movements. Loeschung nur mit force=true (KONTRAKT_ADMIN).",
+            )
     else:
         _require_roles(user, KontraktSecurityService.ROLE_LOESCHEN, KontraktSecurityService.ROLE_ADMIN)
-    db.delete(contract)
+
+    old_status = contract.status
+    if force and has_movements:
+        db.delete(contract)
+        action = "HARD_DELETE"
+    else:
+        contract.status = "GELOESCHT"
+        contract.updated_by = user.get("sub")
+        action = "SOFT_DELETE"
+
     KontraktAuditService(db).log_change(
         tenant_id=tenant_id,
         entity_type="kon_contract",
         entity_id=contract_id,
-        field_name="contract_id",
-        action="DELETE",
+        field_name="status",
+        action=action,
         changed_by=user.get("sub"),
-        old_value=contract_id,
-        new_value=None,
+        old_value=old_status,
+        new_value="GELOESCHT" if action == "SOFT_DELETE" else None,
     )
     db.commit()
-    return {"ok": True}
+    return {"ok": True, "action": action}
 
 
 @router.post("/{contract_id}/cancel")
@@ -798,3 +823,28 @@ async def lookup_verkauf_kontrakte(
                 }
             )
     return {"items": result}
+
+
+# ---------------------------------------------------------------------------
+# Long/Short-Positionsmonitor
+# ---------------------------------------------------------------------------
+
+@router.get("/positionen")
+def get_positionen(
+    article_ids: Optional[str] = Query(None, description="Komma-separierte Artikel-IDs"),
+    include_done: bool = Query(False, description="Erledigte Kontrakte einbeziehen"),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+    user: User = Depends(get_current_user),
+):
+    """Rohwaren-Positionsmonitor: Long/Short pro Artikel.
+
+    Zeigt Einkauf vs. Verkauf Restmengen und Deckungsgrad.
+    SHORT = Unterdeckung (Verkaufskontrakte nicht gedeckt durch Einkauf).
+    """
+    from app.services.kontrakt_position_service import KontraktPositionService
+
+    ids = [a.strip() for a in article_ids.split(",") if a.strip()] if article_ids else None
+    service = KontraktPositionService(db)
+    summary = service.compute_positions(tenant_id, article_ids=ids, include_done=include_done)
+    return summary.to_dict()

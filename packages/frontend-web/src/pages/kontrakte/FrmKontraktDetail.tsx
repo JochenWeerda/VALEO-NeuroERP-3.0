@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery } from '@tanstack/react-query'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -9,6 +11,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { NativeSelect } from '@/components/ui/native-select'
 import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/hooks/useAuth'
@@ -25,12 +28,15 @@ import {
 } from '@/lib/api/kontrakte'
 import DlgAuswahlVerkaufKontrakte from '@/pages/kontrakte/DlgAuswahlVerkaufKontrakte'
 import DlgKontraktUmSaetze from '@/pages/kontrakte/DlgKontraktUmSaetze'
+import DlgMatifPreisfixierung from '@/pages/kontrakte/DlgMatifPreisfixierung'
 import FrmKontraktProtokoll from '@/pages/kontrakte/FrmKontraktProtokoll'
 import { buildDecisionView } from '@/policy/decision-view'
 import { ProcessStatusPanel } from '@/components/workflow/ProcessStatusPanel'
+import { apiClient } from '@/lib/axios'
 import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
 import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { ShieldAlert, ShieldCheck } from 'lucide-react'
 
 type FormState = Omit<Kontrakt, 'contract_id' | 'rest_quantity'>
 
@@ -94,6 +100,8 @@ export default function FrmKontraktDetail(): JSX.Element {
   const [state, setState] = useState<FormState>(createEmptyState())
   const [showLookupDlg, setShowLookupDlg] = useState(false)
   const [showUmsaetze, setShowUmsaetze] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [showMatifDialog, setShowMatifDialog] = useState(false)
   const [showCustomerDlg, setShowCustomerDlg] = useState(false)
   const [showArticleDlg, setShowArticleDlg] = useState(false)
   const [activeLineIndex, setActiveLineIndex] = useState<number | null>(null)
@@ -109,6 +117,35 @@ export default function FrmKontraktDetail(): JSX.Element {
     queryFn: () => getKontrakt(String(id)),
     enabled: isEdit,
   })
+
+  const articleIdsForPosition = useMemo(
+    () => state.lines.map((l) => l.article_id).filter(Boolean),
+    [state.lines],
+  )
+
+  const positionQuery = useQuery({
+    queryKey: ['kontrakte', 'positionen', articleIdsForPosition],
+    queryFn: () =>
+      apiClient.get<{
+        positions: Array<{
+          article_id: string
+          article_desc: string
+          net_position: number
+          signal: string
+          coverage_pct: number | null
+          sell_rest_qty: number
+          buy_rest_qty: number
+        }>
+        total_short_articles: number
+      }>(`/api/v1/kontrakte/positionen?article_ids=${articleIdsForPosition.join(',')}`),
+    enabled: isEdit && articleIdsForPosition.length > 0,
+    refetchInterval: 60_000,
+  })
+
+  const shortArticles = useMemo(
+    () => (positionQuery.data?.positions ?? []).filter((p) => p.signal === 'SHORT'),
+    [positionQuery.data],
+  )
 
   useEffect(() => {
     if (detailQuery.data) {
@@ -274,17 +311,55 @@ export default function FrmKontraktDetail(): JSX.Element {
         <CardContent className="space-y-4">
           <div className="flex flex-wrap gap-2">
             <Button disabled={!isDraftEditable || saveMutation.isPending} onClick={() => saveMutation.mutate()}>Speichern</Button>
-            <Button variant="outline" disabled={!canDelete || !isEdit || deleteMutation.isPending || !isDraftEditable} onClick={() => deleteMutation.mutate()}>Loeschen</Button>
+            <Button variant="outline" disabled={!canDelete || !isEdit || deleteMutation.isPending || !isDraftEditable} onClick={() => setShowDeleteConfirm(true)}>Loeschen</Button>
             <Button variant="outline" disabled={!isEdit} onClick={() => window.print()}>Drucken</Button>
             <Button variant="outline" disabled={!isEdit} onClick={() => setShowUmsaetze(true)}>Umsaetze</Button>
             <Button variant="outline" onClick={() => setShowLookupDlg(true)}>Lookup/Matchcode</Button>
             <Button variant="outline" onClick={() => navigate('/dokumente/ablage')}>Unterlagen/Dateien</Button>
+            {state.pricing_model === 'matif' && isEdit && (
+              <Button variant="outline" onClick={() => setShowMatifDialog(true)}>MATIF-Preisfixierung</Button>
+            )}
             <Button variant="outline" disabled={!isEdit || !canEdit || cancelMutation.isPending} onClick={() => cancelMutation.mutate()}>Workflow erledigt/stornieren</Button>
           </div>
 
           {isEdit && kontraktStatusView ? (
             <ProcessStatusPanel view={kontraktStatusView} title="Prozessstatus" />
           ) : null}
+
+          {isEdit && shortArticles.length > 0 && (
+            <Alert variant="destructive" className="border-red-300 bg-red-50">
+              <ShieldAlert className="h-4 w-4" />
+              <AlertTitle className="flex items-center gap-2">
+                Unterdeckung (Short-Position)
+                <Badge className="bg-red-600 text-white">{shortArticles.length} Artikel</Badge>
+              </AlertTitle>
+              <AlertDescription className="mt-1 space-y-1">
+                {shortArticles.map((a) => (
+                  <p key={a.article_id} className="text-sm">
+                    <strong>{a.article_desc}</strong>: VK offen {a.sell_rest_qty.toLocaleString('de-DE')} t,
+                    EK gedeckt {a.buy_rest_qty.toLocaleString('de-DE')} t
+                    → Netto {a.net_position.toLocaleString('de-DE')} t
+                    {a.coverage_pct != null && ` (Deckung ${a.coverage_pct.toFixed(1)}%)`}
+                  </p>
+                ))}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-2 border-red-300 text-red-700 hover:bg-red-100"
+                  onClick={() => navigate('/kontrakte/positionen')}
+                >
+                  Zum Positionsmonitor
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {isEdit && positionQuery.data && shortArticles.length === 0 && articleIdsForPosition.length > 0 && (
+            <div className="flex items-center gap-2 rounded border border-green-200 bg-green-50 px-3 py-2 text-sm text-green-800">
+              <ShieldCheck className="h-4 w-4" />
+              Alle Artikel dieses Kontrakts sind gedeckt (Long oder Balanced).
+            </div>
+          )}
 
           {!isEdit ? (
             <Card className="border-dashed border-slate-300/60 bg-slate-50/40 dark:bg-slate-900/20">
@@ -376,27 +451,189 @@ export default function FrmKontraktDetail(): JSX.Element {
             </div>
           </div>
 
-          <Tabs defaultValue={state.contract_type === 'VERKAUF' ? 'kunde' : 'lieferant'}>
+          <Tabs defaultValue={state.contract_type === 'VERKAUF' ? 'partner' : 'partner'}>
             <TabsList className="flex flex-wrap">
-              <TabsTrigger value="kunde">KUNDE</TabsTrigger>
-              <TabsTrigger value="lieferant">LIEFERANT</TabsTrigger>
-              <TabsTrigger value="lieferanschrift">LIEFERANSCHR</TabsTrigger>
-              <TabsTrigger value="info">INFO</TabsTrigger>
+              <TabsTrigger value="partner">PARTNER</TabsTrigger>
+              <TabsTrigger value="lieferanschrift">LIEFERANSCHR.</TabsTrigger>
               <TabsTrigger value="zahlungsbed">ZAHLUNGSBED.</TabsTrigger>
-              <TabsTrigger value="texte">TEXTE</TabsTrigger>
+              <TabsTrigger value="preismodell">PREISMODELL</TabsTrigger>
               <TabsTrigger value="bedingungen">BEDINGUNGEN</TabsTrigger>
-              <TabsTrigger value="unterlagen">UNTERLAGEN/DATEIEN</TabsTrigger>
+              <TabsTrigger value="notizen">NOTIZEN</TabsTrigger>
+              <TabsTrigger value="unterlagen">UNTERLAGEN</TabsTrigger>
               <TabsTrigger value="protokoll">PROTOKOLL</TabsTrigger>
             </TabsList>
-            <TabsContent value="kunde"><Input value={state.party_id} onChange={(e) => setState((s) => ({ ...s, party_id: e.target.value }))} /></TabsContent>
-            <TabsContent value="lieferant"><Input value={state.party_id} onChange={(e) => setState((s) => ({ ...s, party_id: e.target.value }))} /></TabsContent>
-            <TabsContent value="lieferanschrift"><Textarea value={state.notes || ''} onChange={(e) => setState((s) => ({ ...s, notes: e.target.value }))} /></TabsContent>
-            <TabsContent value="info"><Textarea value={state.notes || ''} onChange={(e) => setState((s) => ({ ...s, notes: e.target.value }))} /></TabsContent>
-            <TabsContent value="zahlungsbed"><Textarea value={state.payment_terms || ''} onChange={(e) => setState((s) => ({ ...s, payment_terms: e.target.value }))} /></TabsContent>
-            <TabsContent value="texte"><Textarea value={state.notes || ''} onChange={(e) => setState((s) => ({ ...s, notes: e.target.value }))} /></TabsContent>
-            <TabsContent value="bedingungen"><Textarea value={JSON.stringify(state.conditions_json || {}, null, 2)} onChange={(e) => { try { setState((s) => ({ ...s, conditions_json: JSON.parse(e.target.value) })) } catch (_error) { /* ignore */ } }} /></TabsContent>
-            <TabsContent value="unterlagen"><Button variant="outline" onClick={() => navigate('/dokumente/ablage')}>Unterlagen/Dateien oeffnen</Button></TabsContent>
-            <TabsContent value="protokoll">{isEdit ? <FrmKontraktProtokoll contractId={String(id)} /> : <p>Protokoll erst nach dem Speichern verfuegbar.</p>}</TabsContent>
+
+            <TabsContent value="partner">
+              <div className="space-y-3 py-2">
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                  <div className="space-y-1">
+                    <Label>{state.contract_type === 'VERKAUF' ? 'Kunde (Party-ID)' : 'Lieferant (Party-ID)'}</Label>
+                    <div className="flex gap-2">
+                      <Input value={state.party_id} onChange={(e) => setState((s) => ({ ...s, party_id: e.target.value }))} disabled={!isDraftEditable} />
+                      <Button type="button" variant="outline" disabled={!isDraftEditable} onClick={() => setShowCustomerDlg(true)}>Suchen</Button>
+                    </div>
+                    {selectedCustomerName ? <p className="text-xs text-muted-foreground">{selectedCustomerName}</p> : null}
+                  </div>
+                  <div className="space-y-1">
+                    <Label>{state.contract_type === 'VERKAUF' ? 'Debitor-Konto' : 'Kreditor-Konto'}</Label>
+                    <Input
+                      value={state.contract_type === 'VERKAUF' ? (state.debitor_kto || '') : (state.kreditor_kto || '')}
+                      onChange={(e) => {
+                        const field = state.contract_type === 'VERKAUF' ? 'debitor_kto' : 'kreditor_kto'
+                        setState((s) => ({ ...s, [field]: e.target.value }))
+                      }}
+                      disabled={!isDraftEditable}
+                    />
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="lieferanschrift">
+              <div className="space-y-2 py-2">
+                <Label>Lieferanschrift / Abholadresse</Label>
+                <Textarea
+                  value={(state.conditions_json as Record<string, string>)?.lieferanschrift || ''}
+                  onChange={(e) => setState((s) => ({
+                    ...s,
+                    conditions_json: { ...(s.conditions_json || {}), lieferanschrift: e.target.value },
+                  }))}
+                  disabled={!isDraftEditable}
+                  placeholder="Strasse, PLZ, Ort"
+                  rows={4}
+                />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="zahlungsbed">
+              <div className="space-y-2 py-2">
+                <Label>Zahlungsbedingungen</Label>
+                <Textarea
+                  value={state.payment_terms || ''}
+                  onChange={(e) => setState((s) => ({ ...s, payment_terms: e.target.value }))}
+                  disabled={!isDraftEditable}
+                  placeholder="z.B. 30 Tage netto, 2% Skonto bei Zahlung innerhalb 10 Tagen"
+                  rows={4}
+                />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="preismodell">
+              <div className="space-y-3 py-2">
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                  <div className="space-y-1">
+                    <Label>Preismodell</Label>
+                    <NativeSelect
+                      value={state.pricing_model || 'fixed'}
+                      onValueChange={(v) => setState((s) => ({ ...s, pricing_model: v }))}
+                      options={[
+                        { value: 'fixed', label: 'Festpreis' },
+                        { value: 'matif', label: 'MATIF-Kopplung' },
+                        { value: 'premium', label: 'Praemienmodell' },
+                        { value: 'index', label: 'Indexbasiert' },
+                      ]}
+                      disabled={!isDraftEditable}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Basis-Referenz</Label>
+                    <Input
+                      value={state.basis_reference || ''}
+                      onChange={(e) => setState((s) => ({ ...s, basis_reference: e.target.value }))}
+                      disabled={!isDraftEditable}
+                      placeholder="z.B. MATIF Weizen Dez 26"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Mindestpreis (EUR/t)</Label>
+                    <Input
+                      type="number"
+                      value={state.min_price ?? ''}
+                      onChange={(e) => setState((s) => ({ ...s, min_price: e.target.value ? Number(e.target.value) : null }))}
+                      disabled={!isDraftEditable}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Praemien-Typ</Label>
+                    <NativeSelect
+                      value={state.premium_type || ''}
+                      onValueChange={(v) => setState((s) => ({ ...s, premium_type: v }))}
+                      options={[
+                        { value: 'absolut', label: 'Absolut (EUR/t)' },
+                        { value: 'prozentual', label: 'Prozentual (%)' },
+                      ]}
+                      placeholder="Keine"
+                      disabled={!isDraftEditable}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Praemien-Wert</Label>
+                    <Input
+                      type="number"
+                      value={state.premium_value ?? ''}
+                      onChange={(e) => setState((s) => ({ ...s, premium_value: e.target.value ? Number(e.target.value) : null }))}
+                      disabled={!isDraftEditable}
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                  <div className="space-y-1">
+                    <Label>Preisfenster von</Label>
+                    <Input
+                      type="date"
+                      value={(state.pricing_window_from || '').slice(0, 10)}
+                      onChange={(e) => setState((s) => ({ ...s, pricing_window_from: e.target.value }))}
+                      disabled={!isDraftEditable}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Preisfenster bis</Label>
+                    <Input
+                      type="date"
+                      value={(state.pricing_window_to || '').slice(0, 10)}
+                      onChange={(e) => setState((s) => ({ ...s, pricing_window_to: e.target.value }))}
+                      disabled={!isDraftEditable}
+                    />
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="bedingungen">
+              <div className="space-y-2 py-2">
+                <Label>Bedingungen (strukturiert)</Label>
+                <Textarea
+                  value={JSON.stringify(state.conditions_json || {}, null, 2)}
+                  onChange={(e) => { try { setState((s) => ({ ...s, conditions_json: JSON.parse(e.target.value) })) } catch (_error) { /* ignore parse errors while typing */ } }}
+                  disabled={!isDraftEditable}
+                  rows={8}
+                  className="font-mono text-xs"
+                />
+                <p className="text-xs text-muted-foreground">JSON-Format: Qualitaetsparameter, Trocknungsregeln, Sonderbedingungen</p>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="notizen">
+              <div className="space-y-2 py-2">
+                <Label>Interne Notizen</Label>
+                <Textarea
+                  value={state.notes || ''}
+                  onChange={(e) => setState((s) => ({ ...s, notes: e.target.value }))}
+                  disabled={!isDraftEditable}
+                  rows={6}
+                  placeholder="Interne Bemerkungen, Verhandlungsnotizen, Sonderwuensche ..."
+                />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="unterlagen">
+              <div className="space-y-2 py-2">
+                <p className="text-sm text-muted-foreground">Kontraktbezogene Dokumente und Dateien.</p>
+                <Button variant="outline" onClick={() => navigate('/dokumente/ablage')}>Dokumentenablage oeffnen</Button>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="protokoll">{isEdit ? <FrmKontraktProtokoll contractId={String(id)} /> : <p className="py-2 text-sm text-muted-foreground">Protokoll erst nach dem Speichern verfuegbar.</p>}</TabsContent>
           </Tabs>
 
           <Card>
@@ -511,6 +748,50 @@ export default function FrmKontraktDetail(): JSX.Element {
           restQty={detailQuery.data?.rest_quantity}
         />
       )}
+      {showMatifDialog && (
+        <DlgMatifPreisfixierung
+          open={showMatifDialog}
+          onOpenChange={setShowMatifDialog}
+          contractNo={state.contract_no}
+          pricingModel={state.pricing_model ?? null}
+          basisReference={state.basis_reference ?? null}
+          premiumType={state.premium_type ?? null}
+          premiumValue={state.premium_value ?? null}
+          minPrice={state.min_price ?? null}
+          pricingWindowFrom={state.pricing_window_from ?? null}
+          pricingWindowTo={state.pricing_window_to ?? null}
+          lines={state.lines.map((l) => ({
+            position_no: l.position_no,
+            article_id: l.article_id,
+            description1: l.description1,
+            qty_contract: l.qty_contract,
+            unit_price: l.unit_price ?? null,
+          }))}
+          onFixPrice={(lineIndex, fixedPrice) => {
+            updateLine(lineIndex, { unit_price: fixedPrice })
+            toast({ title: 'Preis fixiert', description: `Position ${lineIndex + 1}: ${fixedPrice} EUR/t` })
+          }}
+        />
+      )}
+
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Kontrakt loeschen?</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            Kontrakt <strong>{state.contract_no || '(neu)'}</strong> wird als geloescht markiert
+            und ist danach nicht mehr in der Kontraktliste sichtbar.
+            {isAdmin && ' Als Admin kannst du mit force=true auch physisch loeschen.'}
+          </p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeleteConfirm(false)}>Abbrechen</Button>
+            <Button variant="destructive" onClick={() => { setShowDeleteConfirm(false); deleteMutation.mutate() }}>
+              Loeschen bestaetigen
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
       <KeyboardShortcutBar shortcuts={shortcuts} />
     </div>

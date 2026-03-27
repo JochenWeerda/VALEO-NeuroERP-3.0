@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.config import settings
+from app.services.kontrakt_movement_sync import sync_movements_for_delivery_note
 
 router = APIRouter(prefix="/sales/delivery-notes", tags=["sales", "delivery-notes"])
 
@@ -196,6 +197,7 @@ def _list_positions(db: Session, delivery_note_id: str) -> list[dict]:
 @router.post("", response_model=DeliveryNote, status_code=status.HTTP_201_CREATED)
 async def create_delivery_note(
     payload: DeliveryNoteCreate,
+    request: Request,
     tenant_id: str = Query(DEFAULT_TENANT),
     db: Session = Depends(get_db),
 ):
@@ -291,6 +293,19 @@ async def create_delivery_note(
             }
         )
     
+    try:
+        sync_movements_for_delivery_note(
+            db=db,
+            tenant_id=tenant_id,
+            delivery_note_id=ls_id,
+            delivery_note_number=delivery_note_number,
+            positions=[pos.model_dump() for pos in payload.positionen],
+            user_id=_get_user_id_from_request(request),
+        )
+    except Exception:
+        import logging
+        logging.getLogger(__name__).warning("Kontrakt-Movement-Sync fehlgeschlagen", exc_info=True)
+
     db.commit()
     row = _get_delivery_note_or_404(db, ls_id, tenant_id)
     positions = _list_positions(db, ls_id)

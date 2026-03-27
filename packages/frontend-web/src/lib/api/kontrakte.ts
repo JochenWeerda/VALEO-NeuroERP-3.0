@@ -1,7 +1,7 @@
 import { apiClient } from '@/lib/axios'
 
 export type KontraktType = 'EINKAUF' | 'ZUKAUF' | 'VERKAUF'
-export type KontraktStatus = 'OFFEN' | 'ERLEDIGT' | 'STORNIERT'
+export type KontraktStatus = 'OFFEN' | 'ERLEDIGT' | 'STORNIERT' | 'GELOESCHT'
 export type MengenArt = 'GESAMTKONTRAKT' | 'EINZELMENGEN'
 
 export type KontraktLine = {
@@ -57,6 +57,7 @@ export type KontraktListItem = {
   contract_no: string
   contract_type: KontraktType
   party_id: string
+  party_name?: string | null
   contract_date?: string | null
   valid_from?: string | null
   valid_to?: string | null
@@ -66,6 +67,9 @@ export type KontraktListItem = {
   status: KontraktStatus
   pricing_model?: string | null
   allow_overdelivery: boolean
+  first_article_id?: string | null
+  first_article_desc?: string | null
+  first_unit_price?: number | null
 }
 
 export type KontraktListResponse = {
