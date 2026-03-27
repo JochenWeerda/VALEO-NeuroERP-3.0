@@ -20,6 +20,7 @@ Zwei End-to-End-Stränge laufen **fachlich und technisch getrennt**. Bitte **nic
 |------|-----------------|--------------------------------|--------|
 | **Agrar / Harvest-to-Settlement** | `packages/frontend-web/src/pages/agrar/**`, relevante `pages/annahme/**` | VK-013 abgeschlossen (Codex) | Kein paralleles Editing mit der OTC-Folge-Lane. |
 | **Order-to-Cash Folge (Finance)** | `packages/frontend-web/src/pages/finance/**`, optional `pages/sales/**` / `pages/verkauf/**` | OTC-011 | Kein paralleles Editing mit VK-013-Agrar ohne Absprache. |
+| **Kontrakt (Contract-to-Settlement)** | `packages/frontend-web/src/pages/kontrakte/**`, `lib/api/kontrakte.ts` | CTS-001 (Erstanalyse abgeschlossen) | Ueberlappung mit OTC (Auftrag/LS) und VK (Ernte-Annahme) — bei Aenderungen an order-editor/lieferschein abstimmen. |
 
 **Lane-Status:** `VK-013` ist fachlich ausgearbeitet und abgeschlossen. `OTC-011` ist als Folgelane zu OTC-010 **begonnen** (Workflow+Card), Umsetzung im Finance-UI folgt iterativ.
 
@@ -39,7 +40,8 @@ Zwei End-to-End-Stränge laufen **fachlich und technisch getrennt**. Bitte **nic
 | VK-013 | Ernte-Kampagne-Abschluss: Gesamtabrechnung ueber alle Settlements | abgeschlossen | aktuell offener Agent (Codex) | `docs/agent-ops/active-workboard.md`, `docs/workflows/vk-013-kampagnenabschluss.md`, `docs/cards/agrar/VK-013-kampagnenabschluss.md`, `docs/quality-assurance/browser-use-checklists.md`, `packages/frontend-web/src/pages/agrar/erntefenster-konfig.tsx`, `packages/frontend-web/src/pages/annahme/abrechnung.tsx`, `packages/frontend-web/src/__tests__/pages/agrar/erntefenster-konfig.test.tsx`, `packages/frontend-web/src/__tests__/pages/annahme/abrechnung.test.tsx` | Folge-Slice fuer echte Kampagnenreferenz oder Queue-/Artikel-API zuschneiden | keine |
 | VK-014 | Settlement-Kampagnenreferenz: echte Zuordnung statt Zeitfenster-Proxy | reserviert | aktuell offener Agent (Codex) | `docs/agent-ops/active-workboard.md`, `docs/workflows/vk-014-settlement-kampagnenreferenz.md`, `docs/cards/agrar/VK-014-settlement-kampagnenreferenz.md`, `app/api/v1/endpoints/agrar_settlements.py`, `app/models/**`, `packages/frontend-web/src/pages/agrar/erntefenster-konfig.tsx`, `packages/frontend-web/src/pages/annahme/abrechnung.tsx`, `tests/**`, `packages/frontend-web/src/__tests__/pages/agrar/*.test.tsx`, `packages/frontend-web/src/__tests__/pages/annahme/*.test.tsx` | Claim-Commit abschliessen, dann Contract- und Filterpfad auf echte Kampagnenreferenz umstellen | keine |
 | OTC-010 | Order-to-Cash End-to-End: Verkaufsauftrag → Lieferschein → Rechnung → Zahlung | abgeschlossen | Claude Sonnet 4.6 | `pages/sales/invoice-editor.tsx`, `pages/verkauf/lieferschein-erfassung.tsx`, `docs/workflows/otc-010-order-to-cash.md`, `docs/cards/verkauf/OTC-010-order-to-cash.md` | abgeschlossen | keine |
-| OTC-011 | Zahlungseingang und Abstimmung (Folgeslice OTC-010) | in arbeit | Cursor Agent | `packages/frontend-web/src/pages/finance/**`, `docs/workflows/otc-011-zahlungseingang-und-abstimmung.md`, `docs/cards/finance/OTC-011-zahlungseingang-und-abstimmung.md`, `docs/quality-assurance/browser-use-checklists.md` | OP-Zahlung/Abstimmung vertiefen; API-Inventar; Lane **nicht** mit VK-013 mischen | keine |
+| OTC-011 | Zahlungseingang und Abstimmung (Folgeslice OTC-010) | abgeschlossen | Claude Sonnet 4.6 | `packages/frontend-web/src/pages/finance/op-debitoren.tsx`, `pages/finance/payment-matching.tsx`, `pages/sales/invoice-editor.tsx`, `docs/workflows/otc-011-zahlungseingang-und-abstimmung.md`, `docs/cards/finance/OTC-011-zahlungseingang-und-abstimmung.md` | abgeschlossen — P1-P4 als Folge-Slices | keine |
+| CTS-001 | Contract-to-Settlement: Erstanalyse (15 Cards, Mermaid, Soll-Ist, Empfehlungen) | abgeschlossen | Cursor Agent | `docs/workflows/cts-001-contract-to-settlement.md`, `docs/cards/kontrakte/CTS-001-contract-to-settlement.md`, `packages/frontend-web/src/pages/kontrakte/**`, `lib/api/kontrakte.ts` | Folge-Slices CTS-002 (Kontraktbindung auf Belegen) und CTS-003 (Auto-Movements) priorisieren | keine |
 
 ## Reservierungsregel
 
@@ -80,6 +82,7 @@ Kein Agent darf einen Slice beginnen, der bereits `reserviert` oder `in arbeit` 
 - Naechste Prioritaet: **parallel getrennt** - Agrar-Lane Folge-Slice fuer echte Kampagnenreferenz oder Queue-/Artikel-API vs Finance-Folge-Lane **OTC-011** (siehe Abschnitt Parallele E2E-Lanes).
 - VK-020 abgeschlossen: Rohware-Wizard mit `getStepValidationError` (Lieferant/Fahrzeug, Ware/Lager/Netto); Card VK-012-P1 als erledigt markiert; Vitest `rohware.test.tsx`.
 - Workboard-Konsistenz 2026-03-27: DOCS-105-Handoff geschlossen (Doku im Repo); VK-013 von Stub auf abgeschlossen gehoben; OTC-011 Folgelane mit Workflow/Card begonnen.
+- CTS-001 abgeschlossen: Contract-to-Settlement vollstaendig analysiert (15 Cards, Mermaid, 28 Soll-Ist-Abweichungen, 8 priorisierte Empfehlungen). Kontrakt-Lane im Workboard eingefuehrt.
 
 ## Handoff: 2026-03-27 — DOCS-105 (archiviert)
 
@@ -315,3 +318,35 @@ Kein Agent darf einen Slice beginnen, der bereits `reserviert` oder `in arbeit` 
 **Offene Risiken:** Ueberlappende Kampagnen oder spaet erfasste Settlements koennen im aktuellen Proxy-Modell falsch zugeordnet werden.
 **Annahmen:** `created_at` bleibt bis zu einem Backend-Folgeslice die einzig belastbare Zuordnungsbasis; Standardmaske vor Spezialmaske bleibt fuer den Kampagnenabschluss korrekt.
 **Naechster konkreter Schritt:** Entweder echte Kampagnenreferenz im Settlement-Contract oder separater Folge-Slice fuer Queue-/Artikel-API in der Annahmekette.
+
+## Slice: CTS-001 - Contract-to-Settlement Erstanalyse
+
+**Owner:** Cursor Agent
+**Status:** abgeschlossen
+**Ziel:** Vollstaendige Workflow-Analyse des Contract-to-Settlement Flow-Spine nach Master-Prompt: Card-Zerlegung, Mermaid-Diagramm, Soll-Ist-Abweichungen, UI-/CRUD-Pruefung, Risikobewertung und konkrete Empfehlungen.
+**Fachlicher Scope:** Gesamter Kontraktlebenszyklus — Anlage (Verkauf/Einkauf/Zukauf), MATIF-Preisfixierung, Aenderung, Abruf/Lieferung, Movement-Buchung, Restmengen-Ueberwachung, Storno, Loeschung, Fakturierung, Kontraktabschluss, externe Uebernahme.
+**Dateibesitz:** `docs/workflows/cts-001-contract-to-settlement.md`, `docs/cards/kontrakte/CTS-001-contract-to-settlement.md`
+**Abnahmekriterien:** 15 Cards nach Master-Prompt-Vorlage; Mermaid-Flowchart mit Hauptfluss, Alternativpfaden, Schleifen; 28 Soll-Ist-Abweichungen dokumentiert; UI-/CRUD-Matrix fuer alle 7 Masken; Risikobewertung (4 kritisch, 4 hoch, 4 mittel, 3 niedrig); 8 priorisierte Empfehlungen; 8 explizite Annahmen.
+**Tests / Checks:** Reine Analyse — keine Code-Aenderungen in diesem Slice.
+**Doku-Updates:** Workboard (Lane + Slice + Handoff), Workflow-Datei, Card-Datei.
+**Risiken / Blocker:** keine
+
+## Handoff: 2026-03-27 - CTS-001
+
+**Von:** Cursor Agent
+**An:** naechste Session / naechster Agent
+**Ziel des Slices:** Contract-to-Settlement vollstaendig nach Master-Prompt analysieren.
+**Stand:** abgeschlossen
+**Erledigt:**
+- Workflow-Analyse `docs/workflows/cts-001-contract-to-settlement.md` mit 15 Cards, Mermaid-Diagramm und Soll-Ist-Tabelle erstellt
+- Card `docs/cards/kontrakte/CTS-001-contract-to-settlement.md` mit Zusammenfassung, Kritikalitaets-Matrix und Folge-Slice-Empfehlungen erstellt
+- Workboard um CTS-Lane und CTS-001-Slice ergaenzt
+- Alle 5 Kontrakt-Frontend-Masken, die API-Schicht (`kontrakte.ts`, `kontrakte.py`, `contract_pricing_api.py`) und die Kontraktreferenzen in `order-editor.tsx` und `lieferschein-erfassung.tsx` wurden analysiert
+**Offen:** Alle 8 Empfehlungen (CTS-002 bis CTS-008) sind als Folge-Slices definiert, aber noch nicht begonnen.
+**Betroffene Dateien:** `docs/agent-ops/active-workboard.md`, `docs/workflows/cts-001-contract-to-settlement.md`, `docs/cards/kontrakte/CTS-001-contract-to-settlement.md`
+**Top-4-Findings:**
+1. Kontraktnummer auf Auftrags-/Lieferschein-Positionen ist nur Freitext — keine echte FK-Referenz, keine Preisuebernahme, keine Restmengen-Pruefung
+2. Movements (Kontraktumsaetze) werden nicht automatisch aus Lieferschein/Rechnung erzeugt — Restmengen sind rein manuell
+3. MATIF-Preisfixierung: Datenmodell komplett vorhanden (pricing_model, min_price, premium, basis_reference, pricing_window), aber kein Prozess und kein UI
+4. Teillieferungen sind im Datenmodell moeglich (Movements), aber operativ nicht verdrahtet
+**Naechster konkreter Schritt:** CTS-002 (Kontraktbindung auf Belegen als echte Referenz) oder CTS-003 (automatische Movement-Buchung) als naechsten Implementierungs-Slice claimen.
