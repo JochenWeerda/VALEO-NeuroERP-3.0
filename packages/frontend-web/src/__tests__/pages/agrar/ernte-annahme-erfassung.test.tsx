@@ -48,6 +48,29 @@ describe('ErnteAnnahmeErfassungPage', () => {
     axiosPostMock.mockReset()
     axiosPutMock.mockReset()
     axiosDeleteMock.mockReset()
+    axiosGetMock.mockImplementation(async (url: string) => {
+      if (url === '/api/v1/articles') {
+        return {
+          data: {
+            items: [
+              {
+                id: 'art-raps',
+                name: 'Raps',
+                article_number: 'ART-RAPS',
+                vat_rate: 7,
+              },
+              {
+                id: 'art-weizen',
+                name: 'Weizen',
+                article_number: 'ART-WEIZEN',
+                vat_rate: 7,
+              },
+            ],
+          },
+        }
+      }
+      return { data: [] }
+    })
   })
 
   it('uebernimmt den Harvest-to-Settlement-Handover stabil in die Ernte-Annahme-Maske', async () => {
@@ -92,5 +115,28 @@ describe('ErnteAnnahmeErfassungPage', () => {
     expect(screen.getByDisplayValue(/Lieferschein: LS-42/)).toBeInTheDocument()
     expect(screen.getByDisplayValue(/Qualitaetspruefung: freigegeben/)).toBeInTheDocument()
     expect(screen.getByDisplayValue(/Qualitaetsprotokoll: qp-1/)).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('art-weizen')).toBeInTheDocument()
+    })
+  })
+
+  it('zieht fuer Queue-Handover die kanonische article_id aus der Artikel-API nach', async () => {
+    render(
+      <MemoryRouter
+        initialEntries={[
+          '/agrar/ernte-annahme-erfassung?workflowProcess=harvest-to-settlement&workflowLabel=queue-entry%3Aqueue-2&entryMode=Warteschlange&partnerName=Hof%20Meyer&subject=Raps%20%2F%20Queue&lieferscheinNr=LS-99&vehiclePlate=EF-GH%205678&articleName=Raps&queueEntryId=queue-2',
+        ]}
+      >
+        <Routes>
+          <Route path="/agrar/ernte-annahme-erfassung" element={<ErnteAnnahmeErfassungPage />} />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('art-raps')).toBeInTheDocument()
+    })
+    expect(screen.getByDisplayValue('Raps')).toBeInTheDocument()
+    expect(screen.getByDisplayValue(/Warteschlange: queue-2/)).toBeInTheDocument()
   })
 })
