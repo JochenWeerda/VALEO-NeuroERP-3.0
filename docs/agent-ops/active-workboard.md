@@ -22,10 +22,11 @@ Diese Datei ist absichtlich schlank und soll bei jeder Session schnell lesbar bl
 | P2P-040 | Procure-to-Pay Vorbelegung aus Bedarfsmeldung/Vertrag/RFQ | abgeschlossen | aktuell offener Agent | `docs/agent-ops/active-workboard.md`, `docs/workflows/p2p-040-vorbelegung-requisition-vertrag-rfq.md`, `docs/cards/einkauf/P2P-040-vorbelegung-standardmaske.md`, `packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx`, `packages/frontend-web/src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx` | Folgeslice Schrittvalidierung zuschneiden | keine |
 | P2P-050 | Procure-to-Pay Wizard-Schrittvalidierung | abgeschlossen | aktuell offener Agent | `docs/workflows/p2p-050-wizard-schrittvalidierung.md`, `docs/cards/einkauf/P2P-050-wizard-schrittvalidierung.md`, `packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx`, `packages/frontend-web/src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx` | Landhandel-Kernprozess beginnen | keine |
 | VK-010 | Ernte-Annahme Workflow-Analyse, Handover-Haertung und QA-Slice | abgeschlossen | aktuell offener Agent | `docs/workflows/vk-010-ernte-annahme.md`, `docs/cards/agrar/VK-010-ernte-annahme.md`, `docs/cards/agrar/VK-010-ernte-annahme-standardmaske.md`, `docs/quality-assurance/browser-use-checklists.md`, `packages/frontend-web/src/pages/agrar/ernte-annahme-erfassung.tsx`, `packages/frontend-web/src/__tests__/pages/agrar/ernte-annahme-erfassung.test.tsx` | VK-011 Handover-Bruecke und Schrittvalidierung zuschneiden | keine |
-| VK-011 | Ernte-Annahme Handover-Bruecke (QP→Erfassung) und LKW-Wizard-Schrittvalidierung | reserviert | aktuell offener Agent (Codex) | `packages/frontend-web/src/pages/annahme/qualitaets-check.tsx`, `packages/frontend-web/src/pages/annahme/warteschlange.tsx`, `packages/frontend-web/src/pages/annahme/lkw-registrierung.tsx` | Handover-Bruecke + Schrittvalidierung | keine |
+| VK-011 | Ernte-Annahme Handover-Bruecke (QP→Erfassung) und LKW-Wizard-Schrittvalidierung | abgeschlossen | aktuell offener Agent (Codex) | `docs/agent-ops/active-workboard.md`, `docs/workflows/vk-011-qp-handover-und-lkw-validierung.md`, `docs/cards/agrar/VK-011-qp-handover-und-lkw-validierung.md`, `docs/quality-assurance/browser-use-checklists.md`, `packages/frontend-web/src/pages/annahme/qualitaets-check.tsx`, `packages/frontend-web/src/pages/annahme/lkw-registrierung.tsx`, `packages/frontend-web/src/pages/agrar/ernte-annahme-erfassung.tsx`, `packages/frontend-web/src/__tests__/pages/annahme/lkw-registrierung.test.tsx`, `packages/frontend-web/src/__tests__/pages/annahme/qualitaets-check.test.tsx`, `packages/frontend-web/src/__tests__/pages/agrar/ernte-annahme-erfassung.test.tsx` | VK-013 claimen oder Queue-/Artikel-Folgeslice schneiden | keine |
 | VK-012 | Annahme-Abrechnung: Settlement-Flow-Analyse und QA-Haertung | abgeschlossen | Claude Sonnet 4.6 | `packages/frontend-web/src/pages/annahme/abrechnung.tsx`, `packages/frontend-web/src/pages/annahme/rohware.tsx`, `docs/workflows/vk-012-annahme-abrechnung.md`, `docs/cards/agrar/VK-012-annahme-abrechnung.md` | abgeschlossen | keine |
 | VK-020 | Rohware-Wizard Schrittvalidierung (VK-012-P1) | abgeschlossen | Cursor Agent | `packages/frontend-web/src/pages/annahme/rohware.tsx`, `packages/frontend-web/src/__tests__/pages/annahme/rohware.test.tsx`, `docs/workflows/vk-020-rohware-wizard-schrittvalidierung.md`, `docs/cards/agrar/VK-020-rohware-wizard-schrittvalidierung.md` | VK-012-P2/P3 oder VK-013 | keine |
-| VK-013 | Ernte-Kampagne-Abschluss: Gesamtabrechnung ueber alle Settlements | offen | — | `pages/agrar/kampagne*.tsx`, `docs/workflows/vk-013-*`, `docs/cards/agrar/VK-013-*` | Slice zuschneiden und claimen | keine |
+| VK-013 | Ernte-Kampagne-Abschluss: Gesamtabrechnung ueber alle Settlements | reserviert | aktuell offener Agent (Codex) | `docs/agent-ops/active-workboard.md`, `docs/workflows/vk-013-kampagnenabschluss.md`, `docs/cards/agrar/VK-013-kampagnenabschluss.md`, `docs/quality-assurance/browser-use-checklists.md`, `packages/frontend-web/src/pages/agrar/kampagne*.tsx`, `packages/frontend-web/src/pages/annahme/abrechnung.tsx`, `packages/frontend-web/src/__tests__/pages/agrar/*.test.tsx`, `packages/frontend-web/src/__tests__/pages/annahme/*.test.tsx` | Claim-Commit abschliessen, dann Kampagnen-/Settlement-Slice zuschneiden | keine |
+| OTC-010 | Order-to-Cash End-to-End: Verkaufsauftrag → Lieferschein → Rechnung → Zahlung | reserviert | Claude Sonnet 4.6 | `pages/sales/order-editor.tsx`, `pages/workflow/flow-spine-order-to-cash.tsx`, `pages/verkauf/**`, `docs/workflows/otc-010-*`, `docs/cards/verkauf/OTC-010-*` | Workflow-Analyse + Soll-Ist + Bugs | keine |
 
 ## Reservierungsregel
 
@@ -61,7 +62,8 @@ Kein Agent darf einen Slice beginnen, der bereits `reserviert` oder `in arbeit` 
 - P2P-040 abgeschlossen: Vorbelegung aus Bedarfsmeldung/Vertrag/RFQ korrekt verdrahtet (`.data`, URL `/v1/`, Toast), Backend-Compat-Endpoints fuer Anfrage und Vertrag nachgezogen, Frontend- und API-Tests gruen.
 - P2P-050 abgeschlossen: Wizard-Schrittvalidierung verdrahtet (validateStep, onStepValidationError); die relevante Frontend-Regression fuer Wizard und P2P-Pfad ist gruen.
 - VK-010 abgeschlossen: Claude-Analyse fuer den breiten Ernte-Annahme-Kernprozess ist mit dem operativen Handover-/QA-Slice zusammengezogen. Dokumentiert und abgesichert sind jetzt sowohl der Edit-Mode-Fix (`.data`-Extraktion in `loadHarvestAcceptance`) als auch die restart-sichere Handover-Haertung (`useMemo` fuer Workflow-Kontext, Seitentest, QA-Checkliste).
-- Naechste Prioritaet: VK-011 Handover-Bruecke (Qualitaets-Check → Ernte-Annahme) und Schrittvalidierung LKW-Wizard.
+- VK-011 abgeschlossen: Qualitaets-Check uebergibt restart-sicher per Query in die Ernte-Annahme; `quality_protocol_id` wird mitpersistiert; LKW-Wizard blockiert leere Pflichtschritte per Toast.
+- Naechste Prioritaet: VK-013 Ernte-Kampagne-Abschluss oder ein Folge-Slice fuer Queue-CTA/Artikel-API in der Annahmekette.
 - VK-020 abgeschlossen: Rohware-Wizard mit `getStepValidationError` (Lieferant/Fahrzeug, Ware/Lager/Netto); Card VK-012-P1 als erledigt markiert; Vitest `rohware.test.tsx`.
 
 ## Handoff: 2026-03-27 — DOCS-105
@@ -217,6 +219,38 @@ Kein Agent darf einen Slice beginnen, der bereits `reserviert` oder `in arbeit` 
 **Offene Risiken:** Handover-Bruecke fehlt weiterhin als vollstaendige Navigation aus dem Qualitaets-Check; Schrittvalidierung im LKW-Wizard fehlt; Backend-Artikelquelle ist noch nicht kanonisch verdrahtet.
 **Annahmen:** Der zuvor dokumentierte Edit-Mode-Bug lag in `loadHarvestAcceptance()`; der operative Folgeschritt fuer restart-sicheren Handover ist Kontextstabilisierung in der Ernte-Annahme-Maske, nicht eine neue Spezialmaske.
 **Naechster konkreter Schritt:** VK-011 Handover-Bruecke und LKW-Wizard-Schrittvalidierung als eigenstaendigen Slice zuschneiden.
+
+## Slice: VK-011 - QP-Handover und LKW-Wizard-Validierung
+
+**Owner:** aktuell offener Agent (Codex)
+**Status:** abgeschlossen
+**Ziel:** Den operativen Handover aus der Qualitaetspruefung restart-sicher in die Ernte-Annahme ziehen und den Touch-Wizard fuer LKW-Registrierung gegen leere Pflichtschritte haerten.
+**Fachlicher Scope:** `Qualitaetspruefung` -> `Ernte-Annahme-Erfassung`, Query-basierter Handover, Persistenz von `quality_protocol_id`, additive Schrittvalidierung im LKW-Wizard.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/workflows/vk-011-qp-handover-und-lkw-validierung.md`, `docs/cards/agrar/VK-011-qp-handover-und-lkw-validierung.md`, `docs/quality-assurance/browser-use-checklists.md`, `packages/frontend-web/src/pages/annahme/qualitaets-check.tsx`, `packages/frontend-web/src/pages/annahme/lkw-registrierung.tsx`, `packages/frontend-web/src/pages/agrar/ernte-annahme-erfassung.tsx`, `packages/frontend-web/src/__tests__/pages/annahme/lkw-registrierung.test.tsx`, `packages/frontend-web/src/__tests__/pages/annahme/qualitaets-check.test.tsx`, `packages/frontend-web/src/__tests__/pages/agrar/ernte-annahme-erfassung.test.tsx`
+**Abnahmekriterien:** QP navigiert bei `freigegeben`/`bedingt` direkt in die Ernte-Annahme; Handover ueberlebt Reload; `quality_protocol_id` wird mitpersistiert; LKW-Wizard blockiert leere Pflichtschritte; Doku und QA-Checkliste sind nachgezogen.
+**Tests / Checks:** `pnpm --dir packages/frontend-web exec vitest run src/__tests__/components/patterns/Wizard.test.tsx src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx src/__tests__/pages/workflow/flow-spine-procure-to-pay.test.tsx src/__tests__/pages/annahme/lkw-registrierung.test.tsx src/__tests__/pages/annahme/qualitaets-check.test.tsx src/__tests__/pages/agrar/ernte-annahme-erfassung.test.tsx`
+**Doku-Updates:** Workboard, Workflow-Datei `vk-011-qp-handover-und-lkw-validierung.md`, Card `VK-011-qp-handover-und-lkw-validierung.md`, QA-Checkliste.
+**Risiken / Blocker:** Queue-CTA fuer abgeschlossene Eintraege fehlt weiterhin; Artikelname bleibt im Handover noch Freitext statt kanonischer API-Referenz; `tsc --noEmit` lief in dieser Session mehrfach ins Timeout ohne konkreten Compilerfehler.
+**Naechster konkreter Schritt:** VK-013 claimen oder einen Folge-Slice fuer Queue-CTA/Artikel-API schneiden.
+
+## Handoff: 2026-03-27 - VK-011
+
+**Von:** aktuell offener Agent (Codex)
+**An:** naechste Session / naechster Agent
+**Ziel des Slices:** QP-Handover in die Ernte-Annahme restart-sicher machen und den LKW-Wizard validieren.
+**Stand:** abgeschlossen
+**Erledigt:**
+- `qualitaets-check.tsx` baut jetzt einen query-basierten Handover nach `/agrar/ernte-annahme-erfassung` statt stumpf zur Warteschlange zurueckzuspringen; `gesperrt` bleibt weiterhin in der Warteschlange
+- `ernte-annahme-erfassung.tsx` liest QP-Handover aus Query-Parametern/Route-State, vorbelegt Fahrzeug, Artikelname und Bemerkungen additiv und persistiert `quality_protocol_id` im Harvest-Acceptance-Write-Contract
+- `lkw-registrierung.tsx` nutzt `getStepValidationError` und destructive Toasts fuer Kennzeichen-, Lieferanten- und Artikel-Pflichtfelder
+- Regressionen nachgezogen in `lkw-registrierung.test.tsx`, `qualitaets-check.test.tsx` und `ernte-annahme-erfassung.test.tsx`
+- Workflow-Doku, Card und Browser-Use-Checkliste erstellt bzw. aktualisiert
+**Offen:** Queue-CTA `Ernte-Annahme anlegen` fuer abgeschlossene Eintraege; kanonische Artikel-API fuer den Handover; fachliche Entscheidung, ob `bedingt` spaeter einen separaten Freigabeschritt braucht.
+**Betroffene Dateien:** `docs/agent-ops/active-workboard.md`, `docs/workflows/vk-011-qp-handover-und-lkw-validierung.md`, `docs/cards/agrar/VK-011-qp-handover-und-lkw-validierung.md`, `docs/quality-assurance/browser-use-checklists.md`, `packages/frontend-web/src/pages/annahme/qualitaets-check.tsx`, `packages/frontend-web/src/pages/annahme/lkw-registrierung.tsx`, `packages/frontend-web/src/pages/agrar/ernte-annahme-erfassung.tsx`, `packages/frontend-web/src/__tests__/pages/annahme/lkw-registrierung.test.tsx`, `packages/frontend-web/src/__tests__/pages/annahme/qualitaets-check.test.tsx`, `packages/frontend-web/src/__tests__/pages/agrar/ernte-annahme-erfassung.test.tsx`
+**Tests / Checks:** Relevanter Vitest-Satz gruen (`20/20`). `pnpm exec tsc --noEmit --pretty false` in `packages/frontend-web` lief mehrfach ins Timeout; kein konkreter TypeScript-Fehler ausgegeben.
+**Offene Risiken:** Queue-Pfad und Artikel-API bleiben offen; TypeScript-Gesamtlauf konnte in dieser Session nicht abgeschlossen werden.
+**Annahmen:** Query-Parameter bleiben der restart-sichere Handover-Kanal; `quality_protocol_id` ist ein gueltiger Write-Contract der Ernte-Annahme-API; `bedingt` darf aktuell in die Ernte-Annahme weiterlaufen.
+**Naechster konkreter Schritt:** VK-013 claimen oder Folge-Slice fuer Queue-CTA/Artikel-API reservieren.
 
 ## Slice: VK-012 - Annahme-Abrechnung
 
