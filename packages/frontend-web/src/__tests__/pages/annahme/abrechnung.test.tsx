@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -43,6 +43,7 @@ describe('AnnahmeAbrechnungPage', () => {
             {
               id: 'set-1',
               settlement_number: 'SET-1',
+              campaign_id: 'camp-1',
               supplier_id: 'LW-1',
               gross_quantity_kg: 1000,
               billing_quantity_kg: 950,
@@ -62,6 +63,7 @@ describe('AnnahmeAbrechnungPage', () => {
             {
               id: 'set-2',
               settlement_number: 'SET-2',
+              campaign_id: 'camp-2',
               supplier_id: 'LW-2',
               gross_quantity_kg: 1000,
               billing_quantity_kg: 950,
@@ -111,5 +113,42 @@ describe('AnnahmeAbrechnungPage', () => {
     })
     expect(screen.queryByText('SET-2')).not.toBeInTheDocument()
     expect(screen.queryByText((content) => content.includes('Lieferant: LW-2'))).not.toBeInTheDocument()
+  })
+
+  it('uebergibt campaign_id beim Speichern eines Settlements aus dem Kampagnenkontext', async () => {
+    renderPage()
+
+    expect(await screen.findByText('Kampagnenabschluss: Ernte 2026')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByLabelText('Supplier ID')).toBeInTheDocument()
+    })
+
+    apiPostMock.mockImplementation(async (url: string, payload?: Record<string, unknown>) => {
+      if (url.includes('/api/v1/agrar/settlements/drying/compute')) {
+        throw new Error('no drying rule')
+      }
+      if (url.includes('/api/v1/agrar/settlements/billing-weight/preview')) {
+        return { data: { billing_weight_kg: 950, deduction_kg: 0 } }
+      }
+      if (url === '/api/v1/agrar/settlements') {
+        return { data: { id: 'set-new', ...payload } }
+      }
+      return { data: {} }
+    })
+
+    const supplierInput = screen.getByLabelText('Supplier ID')
+    fireEvent.change(supplierInput, { target: { value: 'LW-NEW' } })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Settlement speichern' }))
+
+    await waitFor(() => {
+      expect(apiPostMock).toHaveBeenCalledWith(
+        '/api/v1/agrar/settlements',
+        expect.objectContaining({
+          campaign_id: 'camp-1',
+          supplier_id: 'LW-NEW',
+        }),
+      )
+    })
   })
 })

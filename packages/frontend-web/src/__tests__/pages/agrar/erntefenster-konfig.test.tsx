@@ -48,8 +48,10 @@ describe('ErntefensterKonfigPage', () => {
       if (url.includes('/api/v1/agrar/settlements')) {
         return {
           data: [
-            { id: 'set-1', settlement_number: 'SET-1', net_amount_eur: 1000, total_deductions_eur: 50, approval_status: 'VERBUCHT', status: 'posted', created_at: '2026-07-10T10:00:00Z' },
-            { id: 'set-2', settlement_number: 'SET-2', net_amount_eur: 500, total_deductions_eur: 20, approval_status: 'ENTWURF', status: 'draft', created_at: '2026-07-20T10:00:00Z' },
+            { id: 'set-1', settlement_number: 'SET-1', campaign_id: 'camp-1', net_amount_eur: 1000, total_deductions_eur: 50, approval_status: 'VERBUCHT', status: 'posted', created_at: '2026-07-10T10:00:00Z' },
+            { id: 'set-2', settlement_number: 'SET-2', campaign_id: 'camp-1', net_amount_eur: 500, total_deductions_eur: 20, approval_status: 'ENTWURF', status: 'draft', created_at: '2026-07-20T10:00:00Z' },
+            { id: 'set-legacy', settlement_number: 'SET-LEG', net_amount_eur: 250, total_deductions_eur: 15, approval_status: 'VERBUCHT', status: 'posted', created_at: '2026-07-15T10:00:00Z' },
+            { id: 'set-wrong-campaign', settlement_number: 'SET-WRONG', campaign_id: 'camp-2', net_amount_eur: 777, total_deductions_eur: 12, approval_status: 'VERBUCHT', status: 'posted', created_at: '2026-07-12T10:00:00Z' },
             { id: 'set-3', settlement_number: 'SET-3', net_amount_eur: 999, total_deductions_eur: 10, approval_status: 'VERBUCHT', status: 'posted', created_at: '2026-08-05T10:00:00Z' },
           ],
         }
@@ -77,8 +79,8 @@ describe('ErntefensterKonfigPage', () => {
 
     expect(await screen.findByText('Ernte 2026')).toBeInTheDocument()
     expect(screen.getByText('Abschluss offen')).toBeInTheDocument()
-    expect(screen.getByText((content) => content.includes('1.500,00'))).toBeInTheDocument()
-    expect(screen.getByText((content) => content.includes('70,00'))).toBeInTheDocument()
+    expect(screen.getByText((content) => content.includes('1.750,00'))).toBeInTheDocument()
+    expect(screen.getByText((content) => content.includes('85,00'))).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Settlement-Abschluss pruefen' }))
 

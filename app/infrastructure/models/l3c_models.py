@@ -206,6 +206,7 @@ class AgrarSettlement(Base):
 
     id = Column(String, primary_key=True, default=uuid7)
     settlement_number = Column(String(50), nullable=False)
+    campaign_id = Column(String(64), nullable=True)
     contract_id = Column(String, ForeignKey("domain_inventory.agrar_contracts.id"), nullable=True)
     ticket_id = Column(String, ForeignKey("domain_inventory.weighing_tickets.id"), nullable=True)
     supplier_id = Column(String(64), nullable=False)
@@ -1237,4 +1238,3 @@ class ArticleSelection(Base):
     label = Column(String(200), nullable=True)
     tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-

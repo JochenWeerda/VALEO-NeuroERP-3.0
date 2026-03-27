@@ -111,3 +111,15 @@ Diese Checklisten schaerfen die UI-, CRUD- und Live-Betriebspruefung fuer Workfl
 8. Erwartung: Nur Settlements innerhalb des Kampagnenfensters sind sichtbar; Datensaetze ausserhalb des Fensters fehlen.
 9. Optional einen offenen Settlement-Datensatz freigeben oder verbuchen und die Kampagnenliste erneut laden.
 10. Erwartung: KPI und Abschlussstatus aktualisieren sich konsistent.
+
+### VK-014: Settlement-Kampagnenreferenz
+
+1. Aus `Erntefenster-Konfiguration` den CTA `Settlement-Abschluss pruefen` fuer eine Kampagne oeffnen.
+2. In `Annahme-Abrechnung` ein neues Settlement im Kampagnenkontext speichern.
+3. Erwartung: Save-Request enthaelt `campaign_id`.
+4. Danach in die Kampagnenliste zurueckkehren und den Abschluss erneut oeffnen.
+5. Erwartung: Das neue Settlement erscheint unter derselben Kampagne auch dann, wenn spaeter weitere Kampagnen mit aehnlichem Datumsfenster existieren.
+6. Einen Datensatz mit abweichender `campaign_id` im selben Datumsfenster pruefen.
+7. Erwartung: Er darf im aktuellen Kampagnenabschluss nicht auftauchen.
+8. Legacy-Datensatz ohne `campaign_id` im gueltigen Datumsfenster pruefen.
+9. Erwartung: Er bleibt ueber den Fallback sichtbar, bis ein Backfill existiert.

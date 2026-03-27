@@ -106,6 +106,7 @@ class DryingApplyInput(BaseModel):
 
 class SettlementCreate(BaseModel):
     settlement_number: Optional[str] = Field(default=None, min_length=3, max_length=50)
+    campaign_id: Optional[str] = Field(default=None, min_length=1, max_length=64)
     contract_id: Optional[str] = None
     ticket_id: Optional[str] = None
     supplier_id: str
@@ -315,6 +316,7 @@ class DeductionOut(BaseModel):
 class SettlementOut(BaseModel):
     id: str
     settlement_number: str
+    campaign_id: Optional[str] = None
     contract_id: Optional[str] = None
     ticket_id: Optional[str] = None
     supplier_id: str
@@ -446,6 +448,7 @@ def _to_out(settlement: AgrarSettlement, deductions: list[AgrarSettlementDeducti
     return SettlementOut(
         id=settlement.id,
         settlement_number=settlement.settlement_number,
+        campaign_id=getattr(settlement, "campaign_id", None),
         contract_id=settlement.contract_id,
         ticket_id=settlement.ticket_id,
         supplier_id=settlement.supplier_id,
@@ -651,6 +654,7 @@ async def create_settlement(
     settlement = AgrarSettlement(
         id=uuid7(),
         settlement_number=settlement_number,
+        campaign_id=payload.campaign_id,
         contract_id=payload.contract_id,
         ticket_id=payload.ticket_id,
         supplier_id=payload.supplier_id,
@@ -696,6 +700,7 @@ async def create_settlement(
 async def list_settlements(
     status: Optional[SettlementStatus] = Query(None),
     supplier_id: Optional[str] = Query(None),
+    campaign_id: Optional[str] = Query(None),
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
@@ -704,6 +709,8 @@ async def list_settlements(
         query = query.filter(AgrarSettlement.status == status)
     if supplier_id:
         query = query.filter(AgrarSettlement.supplier_id == supplier_id)
+    if campaign_id:
+        query = query.filter(AgrarSettlement.campaign_id == campaign_id)
     items = query.order_by(AgrarSettlement.created_at.desc()).limit(500).all()
     result: list[SettlementOut] = []
     for item in items:

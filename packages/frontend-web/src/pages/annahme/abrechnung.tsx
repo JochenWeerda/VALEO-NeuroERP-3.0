@@ -36,6 +36,7 @@ type SettlementDeduction = {
 type Settlement = {
   id: string
   settlement_number: string
+  campaign_id?: string | null
   supplier_id: string
   article_id?: string | null
   gross_quantity_kg: number
@@ -355,6 +356,7 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
     mutationFn: async (opts: { billingWeightKg: number; drying?: { crop_code: string; moisture_pct: number }; deductions: typeof deductions }) => {
       const payload: Record<string, unknown> = {
         settlement_number: form.settlementNumber || undefined,
+        campaign_id: searchParams.get('campaignId') || undefined,
         supplier_id: form.supplierId,
         article_id: form.articleId,
         gross_quantity_kg: nettoGewicht,
@@ -545,19 +547,23 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
   const previewDecisionView = buildDecisionView(previewData?.explainability)
   const previewDensityProfile = useApprovalDensityProfile('agrar-settlement', previewDecisionView)
   const campaignName = searchParams.get('campaignName') || ''
+  const campaignId = searchParams.get('campaignId') || ''
   const campaignStart = searchParams.get('campaignStart') || ''
   const campaignEnd = searchParams.get('campaignEnd') || ''
   const filteredSettlements = useMemo(() => {
     const items = settlements ?? []
-    if (!campaignStart || !campaignEnd) {
+    if (!campaignId && (!campaignStart || !campaignEnd)) {
       return items
     }
     return items.filter((settlement) => {
+      if (campaignId && settlement.campaign_id) {
+        return settlement.campaign_id === campaignId
+      }
       if (!settlement.created_at) return false
       const createdAt = String(settlement.created_at).slice(0, 10)
       return createdAt >= campaignStart && createdAt <= campaignEnd
     })
-  }, [campaignEnd, campaignStart, settlements])
+  }, [campaignEnd, campaignId, campaignStart, settlements])
   const filteredNetTotal = filteredSettlements.reduce((sum, settlement) => sum + settlement.net_amount_eur, 0)
   const filteredOpenCount = filteredSettlements.filter(
     (settlement) => settlement.status !== 'posted' || settlement.approval_status !== 'VERBUCHT',
