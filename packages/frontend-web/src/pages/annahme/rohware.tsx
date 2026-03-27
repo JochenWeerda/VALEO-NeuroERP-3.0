@@ -98,6 +98,42 @@ export default function RohwareAnnahmePage(): JSX.Element {
     [form.bruttoKg, form.taraKg],
   )
 
+  function validateRohwareStep(stepId: string): string | null {
+    if (stepId === 'lieferant-fahrzeug') {
+      if (!form.lieferant.trim()) {
+        return 'Lieferant ist ein Pflichtfeld.'
+      }
+      if (!form.kennzeichen.trim()) {
+        return 'Kennzeichen ist ein Pflichtfeld.'
+      }
+      return null
+    }
+    if (stepId === 'ware-gewicht') {
+      if (!form.artikel.trim()) {
+        return 'Bitte einen Artikel auswaehlen.'
+      }
+      if (!form.lagerZiel.trim()) {
+        return 'Bitte ein Lagerziel auswaehlen.'
+      }
+      if (nettoKg <= 0) {
+        return 'Nettogewicht muss groesser 0 kg sein (Brutto und Tara pruefen).'
+      }
+      return null
+    }
+    if (stepId === 'qualitaet') {
+      return null
+    }
+    return null
+  }
+
+  function handleRohwareStepValidationError(_stepId: string, message: string): void {
+    toast({
+      title: 'Schritt unvollstaendig',
+      description: message,
+      variant: 'destructive',
+    })
+  }
+
   const createAcceptance = useMutation({
     mutationFn: async () => {
       const payload = {
@@ -422,6 +458,8 @@ export default function RohwareAnnahmePage(): JSX.Element {
           title="Rohware-Annahme"
           subtitle="4-schrittiger Assistent für die Rohware-Eingangserfassung"
           steps={steps}
+          getStepValidationError={validateRohwareStep}
+          onStepValidationError={handleRohwareStepValidationError}
           onFinish={handleFinish}
           onCancel={() => navigate('/annahme/warteschlange')}
           loading={createAcceptance.isPending}
