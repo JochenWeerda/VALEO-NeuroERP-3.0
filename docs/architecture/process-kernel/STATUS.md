@@ -35,12 +35,16 @@ Diese Statusdatei verdichtet den aktuellen Gesamtstand, ohne die Detailnachweise
 
 ## Gesamtstatus
 
-- Stand: `2026-03-26`
-- Status: `Waves 1 bis 100 abgeschlossen`
-- Gesamtsuite: `5916 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed`
+- Stand: `2026-03-27`
+- Status: `Waves 1 bis 100 sowie Waves 102–104 abgeschlossen`
+- Gesamtsuite: `5931 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed` (Wave 104 +15)
 - Bereinigter Gap-Abgleich gegen spaetere Wave-Nachweise: `docs/roadmap/status/2026-03-20-gap-matrix-bereinigt.md`
 - Korrigierte Flow-Spine-Systemanalyse: `docs/roadmap/status/2026-03-26-systemanalyse-flow-spine.md`
+- Wave-104-Nachlieferung (GAP-G/H/I + Repo-Hygiene): `docs/roadmap/status/2026-03-27-wave-104-abschluss.md`
 - Letzte abgeschlossene Waves:
+  - `Wave 104`: Flow Spine DB-Persistenz, PCN DB, Tenant-Isolation, Outbox-Events, Agent-Action+RAG, Voice-Kanal
+  - `Wave 103`: Touch-optimierte Feldworkflows (WCAG), Keyboard-first Kernmasken (~85%)
+  - `Wave 102`: Security-Hardening Runtime-Wiring (AuditMiddleware, SecurityHeaders, Startup-Guards)
   - `Wave 100`: Settlement-Abschlussvertrag fuer Gap 004
   - `Wave 99`: Process Mining, Command Monitor, Policy Explainability, Agent UX, Design Tokens
   - `Wave 98`: Agent-Rollout Stufen 1-4, Capability-Pages, Keyboard-Rollout, QS
@@ -48,9 +52,6 @@ Diese Statusdatei verdichtet den aktuellen Gesamtstand, ohne die Detailnachweise
   - `Wave 96`: Keyboard-Rollout FrmCoverageMonitor + Skonto-Optimizer
   - `Wave 95`: Keyboard/Agent-Rollout P1/P2-Listen
   - `Wave 94`: Keyboard/Agent-Rollout Kontrakte, Disposition, Bestellvorschlag
-  - `Wave 93`: Agentic Workflow UI systemweiter Rollout (Gap 029)
-  - `Wave 92`: Touch/Keyboard-Haertung Logistik-Kernflow (Gap 002, 024)
-  - `Wave 91`: Touch/Keyboard-Haertung Annahme-Kernflow (Gap 002, 021, 023, 024)
 
 ## Wave-Uebersicht
 
@@ -684,7 +685,27 @@ Basierend auf der strategischen Roadmap (valeo_wettbewerbsanalyse_spitzenpositio
 - Command-Surfacing-Verbesserungen aus produktiven Backend-Manifesten speisen (siehe oben)
 - Idempotenz-Verbesserungen fuer Business-Commands (Gap 016) bereits abgeschlossen
 
+### Waves 102 bis 104 — Produktionshaertung und Flow-Spine-Vervollstaendigung
+
+- Referenzen:
+  - `wave-102/STATUS.md`
+  - `wave-103/STATUS.md`
+  - `wave-104/STATUS.md`
+- Ergebnis:
+  - `Wave 102` schliesst Gap 049: SecurityHeadersMiddleware, Startup-Guards fuer API_DEV_TOKEN und SECRET_KEY, AuditMiddleware fuer alle POST/PUT/PATCH/DELETE auf /api/v1/*.
+  - `Wave 103` schliesst Gap 023 und Gap 024: Touch-Targets >=56px in Button + TouchNumpad, Keyboard-Shortcuts in ObjectPage (Ctrl+S/Escape) und ListReport (Ctrl+F/Ctrl+N); Abdeckung von ~7% auf ~85%.
+  - `Wave 104` schliesst GAP-104-A bis GAP-104-I vollstaendig:
+    - `ops_flow_spine_instances` und `ops_pcn_meldungen` als Alembic-Migrationen und PostgreSQL-Tabellen produktiv.
+    - Flow-Spine-CRUD vollstaendig DB-backed; kein In-Memory-Store mehr.
+    - Tenant-Isolation und Paginierung auf allen Instance- und PCN-Endpunkten.
+    - `FlowSpineInstanceCreated` und `FlowSpineTransitionOccurred` als Outbox-Events (NATS JetStream) verdrahtet.
+    - `POST /api/v1/process/flow-spines/{key}/agent-action` mit ChromaDB-RAG-Suche (graceful degradation).
+    - Voice-Kanal Admin-Seite (`pages/admin/voice-channel.tsx`) mit useVoiceIntent, Konfidenz-Slider und Verlaufsansicht im Nav verankert.
+    - `.gitignore` umfassend ergaenzt; `coverage.xml` aus Tracking entfernt; Repo-Hygiene hergestellt.
+  - Gesamtsuite nach Wave 104: `5931 Tests gruen`.
+
 ## Referenzen
 
 - Strategischer Plan: C:\Users\Jochen\.cursor\plans\valeo_wettbewerbsanalyse_spitzenposition_79027aec.plan.md
 - Detailstaende: `wave-*/STATUS.md`
+- Wave-104-Nachlieferungsdoku: `docs/roadmap/status/2026-03-27-wave-104-abschluss.md`
