@@ -177,8 +177,10 @@ describe('BestellungAnlegenPage', () => {
     await waitFor(() => {
       expect(getMock).toHaveBeenCalledWith('/api/v1/einkauf/anfragen/req-1')
     })
-    expect(screen.getByDisplayValue('2026-04-10')).toBeInTheDocument()
-    expect(screen.getByDisplayValue('Sommergerste')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('2026-04-10')).toBeInTheDocument()
+      expect(screen.getByPlaceholderText('Artikel')).toHaveValue('Sommergerste')
+    })
     const notesField = screen.getByLabelText('Notizen (optional)') as HTMLTextAreaElement
     expect(notesField.value).toContain('Bedarfsmeldung BANF-2026-001')
     expect(notesField.value).toContain('Anforderer: Disposition Nord')
@@ -205,7 +207,10 @@ describe('BestellungAnlegenPage', () => {
     await waitFor(() => {
       expect(getMock).toHaveBeenCalledWith('/api/v1/einkauf/anfragen/rfq-1')
     })
-    expect(screen.getByDisplayValue('Rapsschrot')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('Artikel')).toHaveValue('Rapsschrot')
+      expect(screen.getByDisplayValue('2026-04-22')).toBeInTheDocument()
+    })
     const notesField = screen.getByLabelText('Notizen (optional)') as HTMLTextAreaElement
     expect(notesField.value).toContain('RFQ-Bezug RFQ-2026-008')
     expect(notesField.value).toContain('RFQ-Status: ANGEBOTSPHASE')
@@ -232,9 +237,11 @@ describe('BestellungAnlegenPage', () => {
     await waitFor(() => {
       expect(getMock).toHaveBeenCalledWith('/api/v1/contracts/kon-1')
     })
-    expect(screen.getByLabelText('Lieferant *')).toHaveValue('Lieferant-77')
-    expect(screen.getByDisplayValue('Mais')).toBeInTheDocument()
-    expect(screen.getByDisplayValue('2026-05-01')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByLabelText('Lieferant *')).toHaveValue('Lieferant-77')
+      expect(screen.getByPlaceholderText('Artikel')).toHaveValue('Mais')
+      expect(screen.getByDisplayValue('2026-05-01')).toBeInTheDocument()
+    })
     const notesField = screen.getByLabelText('Notizen (optional)') as HTMLTextAreaElement
     expect(notesField.value).toContain('Vertragsbezug K-2026-004')
   })

@@ -112,7 +112,7 @@
 ## 15. Empfehlung
 - Empfohlene Massnahme: `.data`-Extraktion, URL-Korrektur und Toast-Feedback umgesetzt.
 - Fachlich: Vorbelegungspfade ohne Spezialmaske über URL-Parameter weiterhin bevorzugen.
-- Technisch: Backend-Endpoints fuer Requisition und RFQ unter `/api/v1/einkauf/anfragen/` produktiv einfuehren.
+- Technisch: Feldmapping der Compat-Endpoints fuer Anfrage und Vertrag stabil halten und bei Contract-Aenderungen mitziehen.
 - Prioritaet der Umsetzung: sofort
 - Sofortmassnahme: in diesem Slice umgesetzt
 - Spaetere Optimierung: Wizard-Schrittvalidierung und Fehler-Toast bei gescheitertem API-Load.

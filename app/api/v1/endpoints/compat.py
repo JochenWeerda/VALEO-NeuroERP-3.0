@@ -31,6 +31,7 @@ from app.domains.shared.events import IntegrationEvent, get_event_publisher
 from app.infrastructure.models import Article as ArticleModel, InventoryCount
 from app.infrastructure.eventbus.outbox import OutboxPublisher
 from app.integrations.crm_core_client import list_customers as crm_list_customers, list_leads as crm_list_leads
+from app.routers.contracts_router import get_contract as get_contract_via_router
 
 router = APIRouter(tags=["compat"])
 
@@ -668,6 +669,57 @@ async def einkauf_anfragen_list(db: Session = Depends(get_db)) -> list[dict[str,
         }
         for r in rows
     ]
+
+
+def _load_einkauf_anfrage(db: Session, anfrage_id: str) -> dict[str, Any] | None:
+    try:
+        row = db.execute(
+            text(
+                """
+                SELECT id, anfrage_nummer, typ, anforderer, artikel, menge, prioritaet, status, datum, created_at
+                FROM einkauf_anfragen
+                WHERE id = :anfrage_id OR anfrage_nummer = :anfrage_id
+                ORDER BY created_at DESC
+                LIMIT 1
+                """
+            ),
+            {"anfrage_id": anfrage_id},
+        ).fetchone()
+    except Exception:
+        return None
+
+    if row is None:
+        return None
+
+    return {
+        "id": str(row._mapping.get("id")),
+        "anfrageNummer": row._mapping.get("anfrage_nummer") or str(row._mapping.get("id")),
+        "typ": row._mapping.get("typ") or "",
+        "anforderer": row._mapping.get("anforderer") or "",
+        "artikel": row._mapping.get("artikel") or "",
+        "menge": float(row._mapping.get("menge") or 0),
+        "prioritaet": row._mapping.get("prioritaet") or "normal",
+        "status": row._mapping.get("status") or "offen",
+        "faelligkeit": row._mapping.get("datum").isoformat()[:10] if row._mapping.get("datum") else None,
+        "createdAt": row._mapping.get("created_at").isoformat() if row._mapping.get("created_at") else None,
+    }
+
+
+@router.get("/einkauf/anfragen/{anfrage_id}", response_model=dict)
+async def einkauf_anfrage_get(anfrage_id: str, db: Session = Depends(get_db)) -> dict[str, Any]:
+    item = _load_einkauf_anfrage(db, anfrage_id)
+    if item is None:
+        raise HTTPException(status_code=404, detail="Anfrage not found")
+    return item
+
+
+@router.get("/contracts/{contract_id}", response_model=dict)
+async def compat_contract_get(
+    contract_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
+    return await get_contract_via_router(contract_id=contract_id, db=db, tenant_id=tenant_id)
 
 
 @router.get("/einkauf/angebote", response_model=list)
