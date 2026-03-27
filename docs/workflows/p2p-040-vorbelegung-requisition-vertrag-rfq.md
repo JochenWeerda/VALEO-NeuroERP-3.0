@@ -93,15 +93,15 @@ Felder die genutzt werden:
 
 ## G. Risiken
 
-- `hoch`: Requisition- und RFQ-Endpoints (`/api/v1/einkauf/anfragen/`) muessen im Backend produktiv vorhanden sein; sonst schlaegt Graceful Degradation auf leere Maske zurueck.
-- `mittel`: Contract-Endpoint `/api/v1/contracts/:id` muss den beschriebenen Response-Contract liefern; abweichende Feldnamen im Backend fuehren zu leerer Vorbelegung ohne Fehlermeldung.
+- `mittel`: Requisition- und RFQ-Endpoint (`/api/v1/einkauf/anfragen/`) ist als Compat-Pfad vorhanden; abweichende Feldnamen oder unvollstaendige Anfragedaten fuehren weiterhin zu teilweiser Leer-Vorbelegung.
+- `mittel`: Contract-Endpoint `/api/v1/contracts/:id` ist ueber den Compat-Layer verdrahtet; abweichende Feldnamen im Backend fuehren weiter zu leerer Vorbelegung ohne Fehlermeldung.
 - `niedrig`: Vorbelegungs-Quellen koennen sich ueberlappen (z.B. `requisitionId` + `contractId` gleichzeitig); letzter Laden gewinnt wegen `prev`-Pattern im State.
 
 ## H. Konkrete Empfehlungen
 
-1. Backend-Endpoints fuer Requisition und RFQ unter `/api/v1/einkauf/anfragen/` produktiv einfuehren.
-2. Contract-API `/api/v1/contracts/:id` dokumentieren und mit Canonical-Contract abgleichen.
-3. Wizard-Schrittvalidierung als separaten Folgeslice angehen.
+1. Feldmapping der Compat-Endpoints gegen den kanonischen Workflow-Contract dokumentiert halten.
+2. Wizard-Schrittvalidierung als separaten Folgeslice angehen.
+3. Fehler-Toast fuer gescheiterte Vorbelegung optional nachziehen.
 4. Browser-Use-Pfad fuer alle drei Vorbelegungs-Varianten in der QA-Checkliste fortschreiben.
 
 ## Annahmen

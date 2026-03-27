@@ -33,7 +33,7 @@ Diese Datei ist absichtlich schlank und soll bei jeder Session schnell lesbar bl
 - Standardmaske vor Spezialmaske ist verbindliche Entscheidungsregel.
 - Restart-sicherer Kontext laeuft ueber `AGENTS.md` plus `docs/agent-ops/`.
 - Wave 104 vollstaendig abgeschlossen (GAP-A bis GAP-I, 5931 Tests gruen, commit `1ad5ea4d`).
-- P2P-040 abgeschlossen: Vorbelegung aus Bedarfsmeldung/Vertrag/RFQ korrekt verdrahtet (`.data`, URL `/v1/`, Toast), 6 Tests gruen.
+- P2P-040 abgeschlossen: Vorbelegung aus Bedarfsmeldung/Vertrag/RFQ korrekt verdrahtet (`.data`, URL `/v1/`, Toast), Backend-Compat-Endpoints fuer Anfrage und Vertrag nachgezogen, Frontend- und API-Tests gruen.
 - Naechste Prioritaeten: P2P-050 (Wizard-Schrittvalidierung) oder naechster Landhandel-Kernprozess (Ernte, Silo, Kontrakt).
 
 ## Handoff: 2026-03-27 — DOCS-105
@@ -90,10 +90,10 @@ Diese Datei ist absichtlich schlank und soll bei jeder Session schnell lesbar bl
 **Ziel:** Vorbelegung der Bestellmaske aus Bedarfsmeldung, RFQ und Vertrag auf reale API- und Datenvertraege ziehen.
 **Fachlicher Scope:** Einkaufsanfrage als Bedarfsmeldung/RFQ, Vertragsbezug fuer Rahmenabruf, Vorbelegung der Standard-Bestellmaske ohne Spezialmaske.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/workflows/p2p-040-vorbelegung-requisition-vertrag-rfq.md`, `docs/cards/einkauf/P2P-040-vorbelegung-standardmaske.md`, `packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx`, `packages/frontend-web/src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx`
-**Abnahmekriterien:** `.data`-Extraktion in allen Load-Funktionen; URL-Prefix `/v1/` konsistent; Toast-Bestaetigung bei Vorbelegung; 6 Regressionstests gruen.
-**Tests / Checks:** `pnpm --dir packages/frontend-web exec vitest run src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx`
+**Abnahmekriterien:** `.data`-Extraktion in allen Load-Funktionen; URL-Prefix `/v1/` konsistent; Toast-Bestaetigung bei Vorbelegung; Backend-Compat-Endpoints fuer Anfrage und Vertrag vorhanden; Frontend- und API-Regressionstests gruen.
+**Tests / Checks:** `pnpm --dir packages/frontend-web exec vitest run src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx`; `pytest tests/test_compat_einkauf_anfragen.py -q`
 **Doku-Updates:** Workboard, Workflow-Datei `p2p-040-vorbelegung-requisition-vertrag-rfq.md`, Card `P2P-040-vorbelegung-standardmaske.md`, Handoff.
-**Risiken / Blocker:** Backend-Endpoints fuer `/api/v1/einkauf/anfragen/` und `/api/v1/contracts/` noch nicht produktiv vorhanden; Graceful Degradation schlaegt auf leere Felder zurueck.
+**Risiken / Blocker:** Graceful Degradation bleibt gewollt; abweichende Backend-Feldnamen wuerden weiterhin zu teilweiser Leer-Vorbelegung fuehren.
 **Naechster konkreter Schritt:** Folgeslice P2P-050 fuer Wizard-Schrittvalidierung zuschneiden oder naechsten Landhandel-Kernprozess beginnen.
 
 ## Handoff: 2026-03-27 - P2P-040
@@ -105,14 +105,17 @@ Diese Datei ist absichtlich schlank und soll bei jeder Session schnell lesbar bl
 **Erledigt:**
 - `.data`-Extraktion in `loadRequisitionData`, `loadContractData`, `loadRFQData` nachgezogen (war fehlendes `.data` bei `apiClient.get` = AxiosResponse)
 - Contract-URL von `/api/contracts/:id` auf `/api/v1/contracts/:id` korrigiert
+- Backend-Compat-Endpoint `GET /api/v1/einkauf/anfragen/:id` fuer Bedarfsmeldung und RFQ eingefuehrt
+- Backend-Compat-Endpoint `GET /api/v1/contracts/:id` auf bestehenden Contract-Router verdrahtet
 - Toast-Bestaetigung nach erfolgreichem Vorbelegungs-Load eingefuegt
 - 3 neue Regressionstests: Bedarfsmeldung-Prefill, RFQ-Prefill, Vertrags-Prefill
+- API-Regressionstests fuer Anfrage- und Contract-Compat-Pfade ergaenzt
 - `getMock.mockResolvedValue({ data: null })` als Default-Reset in `beforeEach`
 - Workflow-Analyse `docs/workflows/p2p-040-vorbelegung-requisition-vertrag-rfq.md` erstellt
 - Card `docs/cards/einkauf/P2P-040-vorbelegung-standardmaske.md` erstellt
-**Offen:** Backend-Endpoints fuer `/api/v1/einkauf/anfragen/` und `/api/v1/contracts/` noch nicht produktiv implementiert; Graceful Degradation bereits vorhanden. Wizard-Schrittvalidierung als P2P-050 vorgemerkt.
-**Betroffene Dateien:** `docs/agent-ops/active-workboard.md`, `docs/workflows/p2p-040-vorbelegung-requisition-vertrag-rfq.md`, `docs/cards/einkauf/P2P-040-vorbelegung-standardmaske.md`, `packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx`, `packages/frontend-web/src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx`
-**Tests / Checks:** `pnpm --dir packages/frontend-web exec vitest run src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx` — 6/6 PASS
-**Offene Risiken:** Backend-Endpoints nicht produktiv; Wizard hat keine Schrittvalidierung.
+**Offen:** Wizard-Schrittvalidierung als P2P-050 vorgemerkt; Fehler-Toast bei gescheitertem Vorbelegungs-Load optional.
+**Betroffene Dateien:** `docs/agent-ops/active-workboard.md`, `docs/workflows/p2p-040-vorbelegung-requisition-vertrag-rfq.md`, `docs/cards/einkauf/P2P-040-vorbelegung-standardmaske.md`, `app/api/v1/endpoints/compat.py`, `tests/test_compat_einkauf_anfragen.py`, `packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx`, `packages/frontend-web/src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx`, `packages/frontend-web/src/pages/einkauf/rfq-bids.tsx`
+**Tests / Checks:** `pnpm --dir packages/frontend-web exec vitest run src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx` - 6/6 PASS; `pytest tests/test_compat_einkauf_anfragen.py -q` - API-Compat-Regression
+**Offene Risiken:** Wizard hat keine Schrittvalidierung; Graceful Degradation kann bei abweichenden Backend-Feldnamen zu teilweiser Leer-Vorbelegung fuehren.
 **Annahmen:** `apiClient.get<T>()` gibt `AxiosResponse<T>` zurueck (`.data` = Nutzdaten). Requisition und RFQ teilen denselben Endpoint `/api/v1/einkauf/anfragen/`.
 **Naechster konkreter Schritt:** P2P-050 (Wizard-Schrittvalidierung) oder Landhandel-Kernprozess (Ernte, Silo, Kontrakt) zuschneiden.
