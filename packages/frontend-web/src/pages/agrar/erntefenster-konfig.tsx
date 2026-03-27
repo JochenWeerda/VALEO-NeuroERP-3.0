@@ -37,6 +37,16 @@ type ErntefensterCampaign = {
   created_at: string
 }
 
+type SettlementSummary = {
+  id: string
+  settlement_number: string
+  net_amount_eur: number
+  total_deductions_eur: number
+  approval_status: string
+  status: string
+  created_at?: string | null
+}
+
 const API_BASE = '/api/v1/admin'
 
 export default function ErntefensterKonfigPage(): JSX.Element {
@@ -68,6 +78,15 @@ export default function ErntefensterKonfigPage(): JSX.Element {
     initialData: [],
   })
 
+  const { data: settlements = [] } = useQuery({
+    queryKey: ['agrar-settlement-summaries'],
+    queryFn: async () => {
+      const r = await apiClient.get<SettlementSummary[]>('/api/v1/agrar/settlements')
+      return Array.isArray(r.data) ? r.data : []
+    },
+    initialData: [],
+  })
+
   const createMutation = useMutation({
     mutationFn: async (payload: { template_id: string; name: string; year: number; start_mmdd?: string; end_mmdd?: string }) => {
       const r = await apiClient.post<ErntefensterCampaign>(`${API_BASE}/erntefenster-from-template`, payload)
@@ -88,6 +107,30 @@ export default function ErntefensterKonfigPage(): JSX.Element {
 
   const selectedTemplate = templates.find((t) => t.id === selectedTemplateId)
 
+  const campaignSummaries = campaigns.map((campaign) => {
+    const matchingSettlements = settlements.filter((settlement) => {
+      if (!settlement.created_at) return false
+      const createdAt = String(settlement.created_at).slice(0, 10)
+      return createdAt >= campaign.start_date && createdAt <= campaign.end_date
+    })
+    const netTotal = matchingSettlements.reduce((sum, settlement) => sum + settlement.net_amount_eur, 0)
+    const deductionTotal = matchingSettlements.reduce((sum, settlement) => sum + settlement.total_deductions_eur, 0)
+    const openSettlements = matchingSettlements.filter(
+      (settlement) => settlement.status !== 'posted' || settlement.approval_status !== 'VERBUCHT',
+    ).length
+    const nowIso = new Date().toISOString().slice(0, 10)
+    const closureState =
+      matchingSettlements.length === 0
+        ? 'Keine Settlements'
+        : openSettlements > 0
+          ? 'Abschluss offen'
+          : campaign.end_date <= nowIso
+            ? 'Abschlussbereit'
+            : 'Laufend'
+
+    return { campaign, matchingSettlements, netTotal, deductionTotal, openSettlements, closureState }
+  })
+
   const openSandboxPreview = (params: {
     processKey: string
     simulationDate: string
@@ -105,6 +148,16 @@ export default function ErntefensterKonfigPage(): JSX.Element {
       searchParams.set('productGroup', params.productGroup)
     }
     navigate(`/workflow/workflow-sandbox?${searchParams.toString()}`)
+  }
+
+  const openSettlementReview = (campaign: ErntefensterCampaign): void => {
+    const searchParams = new URLSearchParams({
+      campaignId: campaign.id,
+      campaignName: campaign.name,
+      campaignStart: campaign.start_date,
+      campaignEnd: campaign.end_date,
+    })
+    navigate(`/annahme/abrechnung?${searchParams.toString()}`)
   }
 
   const handleTemplateSelect = (id: string): void => {
@@ -264,38 +317,72 @@ export default function ErntefensterKonfigPage(): JSX.Element {
             </div>
           ) : campaignsError ? (
             <ErrorState error={campaignsErr as Error} onRetry={() => void refetch()} compact />
-          ) : campaigns.length === 0 ? (
+          ) : campaignSummaries.length === 0 ? (
             <p className="text-sm text-muted-foreground">Noch keine Kampagnen angelegt.</p>
           ) : (
             <ul className="space-y-3">
-              {campaigns.map((c) => (
-                <li key={c.id} className="rounded-md border p-3 text-sm">
-                  <p className="font-medium">{c.name}</p>
-                  <p className="text-muted-foreground">
-                    {c.start_date} – {c.end_date} · {c.process_key}
+              {campaignSummaries.map(({ campaign, matchingSettlements, netTotal, deductionTotal, openSettlements, closureState }) => (
+                <li key={campaign.id} className="rounded-md border p-3 text-sm">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="font-medium">{campaign.name}</p>
+                      <p className="text-muted-foreground">
+                        {campaign.start_date} – {campaign.end_date} · {campaign.process_key}
+                      </p>
+                    </div>
+                    <span className="rounded-full border px-2 py-1 text-xs font-medium">
+                      {closureState}
+                    </span>
+                  </div>
+                  <div className="mt-3 grid gap-2 md:grid-cols-3">
+                    <div className="rounded-md bg-muted/40 p-2">
+                      <div className="text-xs text-muted-foreground">Settlements</div>
+                      <div className="text-lg font-semibold">{matchingSettlements.length}</div>
+                    </div>
+                    <div className="rounded-md bg-muted/40 p-2">
+                      <div className="text-xs text-muted-foreground">Netto gesamt</div>
+                      <div className="text-lg font-semibold">{netTotal.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}</div>
+                    </div>
+                    <div className="rounded-md bg-muted/40 p-2">
+                      <div className="text-xs text-muted-foreground">Offene Settlements</div>
+                      <div className="text-lg font-semibold">{openSettlements}</div>
+                    </div>
+                  </div>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Abzuege gesamt: {deductionTotal.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}
                   </p>
-                  {c.product_groups.length > 0 && (
+                  {campaign.product_groups.length > 0 && (
                     <p className="text-xs text-muted-foreground mt-1">
-                      Produktgruppen: {c.product_groups.join(', ')}
+                      Produktgruppen: {campaign.product_groups.join(', ')}
                     </p>
                   )}
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="mt-3 gap-2"
-                    onClick={() =>
-                      openSandboxPreview({
-                        processKey: c.process_key,
-                        simulationDate: c.start_date,
-                        campaignId: c.id,
-                        productGroup: c.product_groups[0],
-                      })
-                    }
-                  >
-                    <FlaskConical className="h-4 w-4" />
-                    In Sandbox prüfen
-                  </Button>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => openSettlementReview(campaign)}
+                    >
+                      Settlement-Abschluss pruefen
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="gap-2"
+                      onClick={() =>
+                        openSandboxPreview({
+                          processKey: campaign.process_key,
+                          simulationDate: campaign.start_date,
+                          campaignId: campaign.id,
+                          productGroup: campaign.product_groups[0],
+                        })
+                      }
+                    >
+                      <FlaskConical className="h-4 w-4" />
+                      In Sandbox prüfen
+                    </Button>
+                  </div>
                 </li>
               ))}
             </ul>

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { isAxiosError } from 'axios'
 import { Button } from '@/components/ui/button'
@@ -80,6 +80,7 @@ type Settlement = {
   deductions: SettlementDeduction[]
   /** Optimistic locking (Backend AgrarSettlement.row_version) */
   row_version?: number
+  created_at?: string | null
 }
 
 type SettlementFreigabeResponse = {
@@ -220,6 +221,7 @@ type QualitaetsCheckState = {
 export default function AnnahmeAbrechnungPage(): JSX.Element {
   const navigate = useNavigate()
   const location = useLocation()
+  const [searchParams] = useSearchParams()
   const { toast } = useToast()
   const queryClient = useQueryClient()
   const [form, setForm] = useState<FormState>(initialForm)
@@ -542,6 +544,24 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
   const qualityOk = form.feuchtigkeit <= 14.5 && form.verunreinigung <= 2
   const previewDecisionView = buildDecisionView(previewData?.explainability)
   const previewDensityProfile = useApprovalDensityProfile('agrar-settlement', previewDecisionView)
+  const campaignName = searchParams.get('campaignName') || ''
+  const campaignStart = searchParams.get('campaignStart') || ''
+  const campaignEnd = searchParams.get('campaignEnd') || ''
+  const filteredSettlements = useMemo(() => {
+    const items = settlements ?? []
+    if (!campaignStart || !campaignEnd) {
+      return items
+    }
+    return items.filter((settlement) => {
+      if (!settlement.created_at) return false
+      const createdAt = String(settlement.created_at).slice(0, 10)
+      return createdAt >= campaignStart && createdAt <= campaignEnd
+    })
+  }, [campaignEnd, campaignStart, settlements])
+  const filteredNetTotal = filteredSettlements.reduce((sum, settlement) => sum + settlement.net_amount_eur, 0)
+  const filteredOpenCount = filteredSettlements.filter(
+    (settlement) => settlement.status !== 'posted' || settlement.approval_status !== 'VERBUCHT',
+  ).length
 
   return (
     <div className="flex flex-col">
@@ -563,6 +583,28 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
           </Button>
         </div>
       </div>
+
+      {campaignName ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>Kampagnenabschluss: {campaignName}</CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-3 md:grid-cols-3">
+            <div>
+              <div className="text-xs text-muted-foreground">Kampagnenfenster</div>
+              <div className="font-semibold">{campaignStart} bis {campaignEnd}</div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground">Gefilterte Settlements</div>
+              <div className="font-semibold">{filteredSettlements.length}</div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground">Offen / Netto</div>
+              <div className="font-semibold">{filteredOpenCount} / {money(filteredNetTotal)}</div>
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
 
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
@@ -717,8 +759,8 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
           {isError && <ErrorState error={(error as Error) ?? new Error('Settlements konnten nicht geladen werden')} onRetry={() => { void refetch() }} />}
           {!isLoading && !isError && (
             <div className="space-y-3">
-              {(settlements ?? []).length === 0 && <div className="text-sm text-muted-foreground">Keine Settlements vorhanden.</div>}
-              {(settlements ?? []).map((s) => (
+              {filteredSettlements.length === 0 && <div className="text-sm text-muted-foreground">Keine Settlements vorhanden.</div>}
+              {filteredSettlements.map((s) => (
                 <div key={s.id} className="rounded border p-3">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="font-semibold">{s.settlement_number}</div>
