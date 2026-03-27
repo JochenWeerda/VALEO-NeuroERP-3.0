@@ -39,6 +39,23 @@ export default function WarteschlangePage(): JSX.Element {
   })
   useKeyboardShortcuts(shortcuts)
 
+  const openHarvestAcceptance = (entry: LKWEintrag): void => {
+    const searchParams = new URLSearchParams({
+      workflowProcess: 'harvest-to-settlement',
+      workflowLabel: `queue-entry:${entry.id}`,
+      entryMode: 'Warteschlange',
+    })
+    if (entry.lieferant) searchParams.set('partnerName', entry.lieferant)
+    if (entry.lieferschein_nr) searchParams.set('lieferscheinNr', entry.lieferschein_nr)
+    if (entry.kennzeichen) searchParams.set('vehiclePlate', entry.kennzeichen)
+    if (entry.artikel) {
+      searchParams.set('articleName', entry.artikel)
+      searchParams.set('subject', `${entry.artikel} / Queue`)
+    }
+    searchParams.set('queueEntryId', entry.id)
+    navigate(`/agrar/ernte-annahme-erfassung?${searchParams.toString()}`)
+  }
+
   const columns = [
     { key: 'position' as const, label: '#', render: (l: LKWEintrag) => <span className="text-lg font-bold">#{l.position}</span> },
     {
@@ -80,6 +97,11 @@ export default function WarteschlangePage(): JSX.Element {
           <Button size="sm" variant="outline" onClick={() => navigate('/annahme/qualitaets-check', { state: { eintragId: l.id } })}>
             Bearbeiten
           </Button>
+          {l.status === 'abgeschlossen' && (
+            <Button size="sm" onClick={() => openHarvestAcceptance(l)}>
+              Ernte-Annahme anlegen
+            </Button>
+          )}
         </div>
       ),
     },

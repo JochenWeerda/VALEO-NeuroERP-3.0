@@ -40,7 +40,7 @@ Zwei End-to-End-Stränge laufen **fachlich und technisch getrennt**. Bitte **nic
 | VK-013 | Ernte-Kampagne-Abschluss: Gesamtabrechnung ueber alle Settlements | abgeschlossen | aktuell offener Agent (Codex) | `docs/agent-ops/active-workboard.md`, `docs/workflows/vk-013-kampagnenabschluss.md`, `docs/cards/agrar/VK-013-kampagnenabschluss.md`, `docs/quality-assurance/browser-use-checklists.md`, `packages/frontend-web/src/pages/agrar/erntefenster-konfig.tsx`, `packages/frontend-web/src/pages/annahme/abrechnung.tsx`, `packages/frontend-web/src/__tests__/pages/agrar/erntefenster-konfig.test.tsx`, `packages/frontend-web/src/__tests__/pages/annahme/abrechnung.test.tsx` | Folge-Slice fuer echte Kampagnenreferenz oder Queue-/Artikel-API zuschneiden | keine |
 | VK-014 | Settlement-Kampagnenreferenz: echte Zuordnung statt Zeitfenster-Proxy | abgeschlossen | aktuell offener Agent (Codex) | `docs/agent-ops/active-workboard.md`, `docs/workflows/vk-014-settlement-kampagnenreferenz.md`, `docs/cards/agrar/VK-014-settlement-kampagnenreferenz.md`, `app/api/v1/endpoints/agrar_settlements.py`, `app/infrastructure/models/l3c_models.py`, `alembic/versions/agrar_settlement_campaign_reference_20260327.py`, `packages/frontend-web/src/pages/agrar/erntefenster-konfig.tsx`, `packages/frontend-web/src/pages/annahme/abrechnung.tsx`, `tests/test_agrar_settlement_campaign_reference.py`, `packages/frontend-web/src/__tests__/pages/agrar/erntefenster-konfig.test.tsx`, `packages/frontend-web/src/__tests__/pages/annahme/abrechnung.test.tsx` | Folge-Slice fuer Backfill oder Queue-/Artikel-API zuschneiden | keine |
 | VK-015 | Settlement-Kampagnenreferenz Backfill fuer Alt-Daten | abgeschlossen | aktuell offener Agent (Codex) | `docs/agent-ops/active-workboard.md`, `docs/workflows/vk-015-settlement-kampagnen-backfill.md`, `docs/cards/agrar/VK-015-settlement-kampagnen-backfill.md`, `docs/quality-assurance/browser-use-checklists.md`, `app/api/v1/endpoints/agrar_settlements.py`, `packages/frontend-web/src/pages/agrar/erntefenster-konfig.tsx`, `tests/test_agrar_settlement_campaign_backfill.py`, `packages/frontend-web/src/__tests__/pages/agrar/erntefenster-konfig.test.tsx` | Queue-/Artikel-API-Folgeslice fuer die Annahmekette zuschneiden | keine |
-| VK-016 | Annahme-Warteschlange CTA und kanonische Artikel-API | reserviert | aktuell offener Agent (Codex) | `docs/agent-ops/active-workboard.md`, `docs/workflows/vk-016-queue-cta-und-artikel-api.md`, `docs/cards/agrar/VK-016-queue-cta-und-artikel-api.md`, `docs/quality-assurance/browser-use-checklists.md`, `packages/frontend-web/src/pages/annahme/warteschlange.tsx`, `packages/frontend-web/src/pages/agrar/ernte-annahme-erfassung.tsx`, `packages/frontend-web/src/__tests__/pages/annahme/warteschlange.test.tsx`, `packages/frontend-web/src/__tests__/pages/agrar/ernte-annahme-erfassung.test.tsx` | Claim committen, dann Queue-CTA und Artikelquelle auf Standardmasken nachziehen | keine |
+| VK-016 | Annahme-Warteschlange CTA und kanonische Artikel-API | abgeschlossen | aktuell offener Agent (Codex) | `docs/agent-ops/active-workboard.md`, `docs/workflows/vk-016-queue-cta-und-artikel-api.md`, `docs/cards/agrar/VK-016-queue-cta-und-artikel-api.md`, `docs/quality-assurance/browser-use-checklists.md`, `packages/frontend-web/src/pages/annahme/warteschlange.tsx`, `packages/frontend-web/src/pages/agrar/ernte-annahme-erfassung.tsx`, `packages/frontend-web/src/__tests__/pages/annahme/warteschlange.test.tsx`, `packages/frontend-web/src/__tests__/pages/agrar/ernte-annahme-erfassung.test.tsx` | Folge-Slice fuer echte `article_id` bereits in der Queue-API oder Klaerungsprozess gesperrte Ware zuschneiden | keine |
 | OTC-010 | Order-to-Cash End-to-End: Verkaufsauftrag → Lieferschein → Rechnung → Zahlung | abgeschlossen | Claude Sonnet 4.6 | `pages/sales/invoice-editor.tsx`, `pages/verkauf/lieferschein-erfassung.tsx`, `docs/workflows/otc-010-order-to-cash.md`, `docs/cards/verkauf/OTC-010-order-to-cash.md` | abgeschlossen | keine |
 | OTC-011 | Zahlungseingang und Abstimmung (Folgeslice OTC-010) | abgeschlossen | Claude Sonnet 4.6 | `packages/frontend-web/src/pages/finance/op-debitoren.tsx`, `pages/finance/payment-matching.tsx`, `pages/sales/invoice-editor.tsx`, `docs/workflows/otc-011-zahlungseingang-und-abstimmung.md`, `docs/cards/finance/OTC-011-zahlungseingang-und-abstimmung.md` | abgeschlossen — P1-P4 als Folge-Slices | keine |
 | CTS-001 | Contract-to-Settlement: Erstanalyse (15 Cards, Mermaid, Soll-Ist, Empfehlungen) | abgeschlossen | Cursor Agent | `docs/workflows/cts-001-contract-to-settlement.md`, `docs/cards/kontrakte/CTS-001-contract-to-settlement.md` | — | keine |
@@ -91,8 +91,10 @@ Kein Agent darf einen Slice beginnen, der bereits `reserviert` oder `in arbeit` 
 - VK-013 abgeschlossen: Kampagnenabschluss laeuft ueber bestehende Standardmasken (`erntefenster-konfig.tsx` -> `abrechnung.tsx`); Aggregation erfolgt vorerst ueber `created_at` im Kampagnenfenster.
 - VK-014 abgeschlossen: Settlements tragen jetzt eine echte `campaign_id`; Frontend filtert kampagnenbezogen bevorzugt ueber diese Referenz und nutzt Datumsfenster nur noch als Legacy-Fallback.
 - VK-015 abgeschlossen: Alt-Settlements ohne `campaign_id` koennen kampagnenbezogen per Repair-CTA nachgezogen werden; ueberlappende Kampagnenfenster bleiben bewusst offen statt blind migriert zu werden.
+- VK-016 abgeschlossen: Die Warteschlange bietet fuer abgeschlossene Eintraege einen direkten CTA in die Ernte-Annahme; der Handover zieht die kanonische `article_id` ueber die Artikel-API nach, wenn moeglich.
 - Naechste Prioritaet: **parallel getrennt** - Agrar-Lane Folge-Slice fuer Backfill der Alt-Settlements oder Queue-/Artikel-API vs Finance-Folge-Lane **OTC-011** (siehe Abschnitt Parallele E2E-Lanes).
 - Naechste Prioritaet Agrar-Lane: Queue-/Artikel-API-Folgeslice in der Annahmekette, da Neu- und Alt-Daten fuer Kampagnen jetzt belastbar referenziert sind.
+- Naechste Prioritaet Agrar-Lane aktuell: echte `article_id` schon in der Queue persistieren oder den Klaerungsprozess fuer `gesperrt` als naechsten VK-Slice schneiden.
 - VK-020 abgeschlossen: Rohware-Wizard mit `getStepValidationError` (Lieferant/Fahrzeug, Ware/Lager/Netto); Card VK-012-P1 als erledigt markiert; Vitest `rohware.test.tsx`.
 - Workboard-Konsistenz 2026-03-27: DOCS-105-Handoff geschlossen (Doku im Repo); VK-013 von Stub auf abgeschlossen gehoben; OTC-011 Folgelane mit Workflow/Card begonnen.
 - CTS-001 abgeschlossen: Contract-to-Settlement vollstaendig analysiert (15 Cards, Mermaid, 28 Soll-Ist-Abweichungen, 8 priorisierte Empfehlungen). Kontrakt-Lane im Workboard eingefuehrt.
@@ -398,6 +400,39 @@ Kein Agent darf einen Slice beginnen, der bereits `reserviert` oder `in arbeit` 
 **Offene Risiken:** Ueberlappende Kampagnenfenster bleiben ohne zusaetzliche Fachinformation ambig und werden nicht automatisch migriert.
 **Annahmen:** `created_at` ist fuer Legacy-Datensaetze die einzig belastbare Zuordnungsbasis; Nicht-Zuordnen ist bei Ambiguitaet fachlich sicherer als Blindmigration.
 **Naechster konkreter Schritt:** Queue-/Artikel-API-Folgeslice in der Annahmekette regelkonform claimen.
+
+## Slice: VK-016 - Queue-CTA und kanonische Artikel-API
+
+**Owner:** aktuell offener Agent (Codex)
+**Status:** abgeschlossen
+**Ziel:** Den offenen Medienbruch aus der Warteschlange in die Ernte-Annahme schliessen und den Handover auf eine kanonische `article_id` statt nur auf Freitext heben.
+**Fachlicher Scope:** CTA `Ernte-Annahme anlegen` auf `warteschlange.tsx`, restart-sicherer Queue-Handover in `ernte-annahme-erfassung.tsx`, Artikelauflösung ueber `/api/v1/articles`.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/workflows/vk-016-queue-cta-und-artikel-api.md`, `docs/cards/agrar/VK-016-queue-cta-und-artikel-api.md`, `docs/quality-assurance/browser-use-checklists.md`, `packages/frontend-web/src/pages/annahme/warteschlange.tsx`, `packages/frontend-web/src/pages/agrar/ernte-annahme-erfassung.tsx`, `packages/frontend-web/src/__tests__/pages/annahme/warteschlange.test.tsx`, `packages/frontend-web/src/__tests__/pages/agrar/ernte-annahme-erfassung.test.tsx`
+**Abnahmekriterien:** Abgeschlossene Queue-Eintraege bieten einen direkten CTA; Navigation in die Ernte-Annahme ist query-basiert restart-sicher; `articleName` wird bei eindeutiger Suche auf kanonische `article_id` aufgeloest; Frontend-Regressionen und Doku sind gruen.
+**Tests / Checks:** `pnpm --dir packages/frontend-web exec vitest run src/__tests__/pages/annahme/warteschlange.test.tsx src/__tests__/pages/agrar/ernte-annahme-erfassung.test.tsx src/__tests__/pages/annahme/qualitaets-check.test.tsx`
+**Doku-Updates:** Workboard, Workflow-Datei `vk-016-queue-cta-und-artikel-api.md`, Card `VK-016-queue-cta-und-artikel-api.md`, QA-Checkliste.
+**Risiken / Blocker:** Mehrdeutige Artikeltreffer bleiben vorerst beim Freitext; die Queue selbst fuehrt noch keine kanonische `article_id`.
+**Naechster konkreter Schritt:** Folge-Slice fuer echte `article_id` bereits in der Queue-API oder alternativ den Klaerungsprozess fuer `gesperrt` claimen.
+
+## Handoff: 2026-03-27 - VK-016
+
+**Von:** aktuell offener Agent (Codex)
+**An:** naechste Session / naechster Agent
+**Ziel des Slices:** Queue-Eintraege ohne Medienbruch in die Ernte-Annahme ueberfuehren und den Artikelhandever kanonisieren.
+**Stand:** abgeschlossen
+**Erledigt:**
+- `warteschlange.tsx` zeigt fuer `status === 'abgeschlossen'` jetzt den CTA `Ernte-Annahme anlegen`
+- Der CTA navigiert query-basiert mit `workflowProcess`, `workflowLabel`, `entryMode`, Lieferant, Lieferschein, Kennzeichen, Artikel und `queueEntryId` in die Ernte-Annahme
+- `ernte-annahme-erfassung.tsx` uebernimmt `queueEntryId` additiv in die Bemerkungen und versucht bei vorhandenem `articleName` eine kanonische `article_id` ueber `/api/v1/articles` aufzulösen
+- Bei nicht eindeutiger oder fehlerhafter Artikelsuche bleibt der Freitext stabil erhalten; vorhandene `article_id` wird nicht ueberschrieben
+- Frontend-Regressionen in `warteschlange.test.tsx` und `ernte-annahme-erfassung.test.tsx` ergaenzt; `qualitaets-check.test.tsx` als angrenzender Handover-Pfad mitgeprueft
+- Workflow-Doku, Card und Browser-Use-Checkliste fuer den Slice erstellt bzw. aktualisiert
+**Offen:** Die Queue selbst persistiert noch keine echte `article_id`; mehrdeutige Artikeltreffer brauchen weiterhin manuelle Artikelwahl.
+**Betroffene Dateien:** `docs/agent-ops/active-workboard.md`, `docs/workflows/vk-016-queue-cta-und-artikel-api.md`, `docs/cards/agrar/VK-016-queue-cta-und-artikel-api.md`, `docs/quality-assurance/browser-use-checklists.md`, `packages/frontend-web/src/pages/annahme/warteschlange.tsx`, `packages/frontend-web/src/pages/agrar/ernte-annahme-erfassung.tsx`, `packages/frontend-web/src/__tests__/pages/annahme/warteschlange.test.tsx`, `packages/frontend-web/src/__tests__/pages/agrar/ernte-annahme-erfassung.test.tsx`, `packages/frontend-web/src/__tests__/pages/annahme/qualitaets-check.test.tsx`
+**Tests / Checks:** `pnpm --dir packages/frontend-web exec vitest run src/__tests__/pages/annahme/warteschlange.test.tsx src/__tests__/pages/agrar/ernte-annahme-erfassung.test.tsx src/__tests__/pages/annahme/qualitaets-check.test.tsx`
+**Offene Risiken:** Ohne echte `article_id` bereits in der Queue bleibt die automatische Aufloesung textbasiert und damit bei Mehrdeutigkeit begrenzt.
+**Annahmen:** `abgeschlossen` in der Queue ist der fachlich richtige Schwellenwert fuer den CTA; die Artikel-API `/api/v1/articles` ist fuer diesen Slice die kanonische Lookup-Quelle.
+**Naechster konkreter Schritt:** Entweder Queue-API um echte `article_id` erweitern oder den `gesperrt`-Klaerungspfad als naechsten VK-Slice schneiden.
 
 ## Slice: CTS-001 - Contract-to-Settlement Erstanalyse
 

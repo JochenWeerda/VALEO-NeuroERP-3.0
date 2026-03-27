@@ -205,6 +205,16 @@ type QualityCheckHandoverState = {
   qpErgebnis?: 'freigegeben' | 'bedingt' | 'gesperrt'
 }
 
+type ArticleLookupCandidate = {
+  id: string
+  name?: string | null
+  description?: string | null
+  article_number?: string | null
+  vat_rate?: number | null
+  mwst_prozent?: number | null
+  mehrwertsteuer_prozent?: number | null
+}
+
 function appendUniqueLines(baseText: string, lines: Array<string | null | undefined>): string {
   const existingLines = baseText
     .split('\n')
@@ -217,6 +227,18 @@ function appendUniqueLines(baseText: string, lines: Array<string | null | undefi
     }
   }
   return nextLines.join('\n')
+}
+
+function normalizeArticleLookup(value: string): string {
+  return value.trim().toLowerCase().replace(/\s+/g, ' ')
+}
+
+function extractArticleLookupCandidates(payload: any): ArticleLookupCandidate[] {
+  if (Array.isArray(payload)) return payload
+  if (Array.isArray(payload?.items)) return payload.items
+  if (Array.isArray(payload?.data?.items)) return payload.data.items
+  if (Array.isArray(payload?.data)) return payload.data
+  return []
 }
 
 export default function ErnteAnnahmeErfassungPage(): JSX.Element {
@@ -343,8 +365,9 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
     const lieferscheinNr = searchParams.get('lieferscheinNr') || qualityCheckHandoverState?.lieferscheinNr || ''
     const qpResult = searchParams.get('qpResult') || qualityCheckHandoverState?.qpErgebnis || ''
     const partnerName = searchParams.get('partnerName') || qualityCheckHandoverState?.lieferant || ''
+    const queueEntryId = searchParams.get('queueEntryId') || ''
 
-    if (!articleName && !vehiclePlate && !qualityProtocolId && !lieferscheinNr && !qpResult && !partnerName) {
+    if (!articleName && !vehiclePlate && !qualityProtocolId && !lieferscheinNr && !qpResult && !partnerName && !queueEntryId) {
       return
     }
 
@@ -358,9 +381,61 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
         lieferscheinNr ? `Lieferschein: ${lieferscheinNr}` : '',
         qpResult ? `Qualitaetspruefung: ${qpResult}` : '',
         qualityProtocolId ? `Qualitaetsprotokoll: ${qualityProtocolId}` : '',
+        queueEntryId ? `Warteschlange: ${queueEntryId}` : '',
       ]),
     }))
   }, [acceptanceId, qualityCheckHandoverState, searchParams])
+
+  useEffect(() => {
+    if (acceptanceId || state.articleId || !state.articleName.trim()) {
+      return
+    }
+
+    let isCancelled = false
+
+    const resolveArticle = async (): Promise<void> => {
+      try {
+        const response = await apiClient.get('/api/v1/articles', {
+          params: {
+            search: state.articleName.trim(),
+            limit: 20,
+          },
+        })
+        const candidates = extractArticleLookupCandidates(response.data)
+        const wanted = normalizeArticleLookup(state.articleName)
+        const matched =
+          candidates.find((candidate) =>
+            [candidate.name, candidate.description, candidate.article_number]
+              .filter(Boolean)
+              .some((value) => normalizeArticleLookup(String(value)) === wanted),
+          ) ?? (candidates.length === 1 ? candidates[0] : null)
+
+        if (!matched || isCancelled) {
+          return
+        }
+
+        setState((prev) => {
+          if (prev.articleId || normalizeArticleLookup(prev.articleName) !== wanted) {
+            return prev
+          }
+          return {
+            ...prev,
+            articleId: matched.id,
+            articleName: matched.name || matched.description || prev.articleName,
+            vatRatePercent: matched.vat_rate || matched.mwst_prozent || matched.mehrwertsteuer_prozent || prev.vatRatePercent,
+          }
+        })
+      } catch (error) {
+        console.warn('Article lookup for handover failed:', error)
+      }
+    }
+
+    void resolveArticle()
+
+    return () => {
+      isCancelled = true
+    }
+  }, [acceptanceId, state.articleId, state.articleName, state.vatRatePercent])
 
   // Lade bestehende Ernte-Annahme, wenn ID in URL vorhanden
   useEffect(() => {

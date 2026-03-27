@@ -134,3 +134,14 @@ Diese Checklisten schaerfen die UI-, CRUD- und Live-Betriebspruefung fuer Workfl
 6. Erwartung: Eindeutige Legacy-Datensaetze haben jetzt `campaign_id` und fallen nicht mehr nur ueber den Fallback auf.
 7. Kampagne mit ueberlappendem Fenster oder bewusst ambigem Legacy-Datensatz pruefen.
 8. Erwartung: Der Datensatz bleibt ohne neue Referenz; der Toast meldet offene Ambiguitaet statt Blindmigration.
+
+### VK-016: Queue-CTA und Artikel-API
+
+1. `Annahme-Warteschlange` oeffnen und einen Eintrag mit Status `abgeschlossen` pruefen.
+2. Erwartung: Zusaetzlich zu `Bearbeiten` erscheint `Ernte-Annahme anlegen`.
+3. CTA klicken.
+4. Erwartung: Navigation nach `/agrar/ernte-annahme-erfassung` mit restart-sicherem Query-Handover.
+5. In der Zielmaske Artikel-Nr., Bezeichnung, Kennzeichen und Bemerkungen pruefen.
+6. Erwartung: `queueEntryId` ist in den Bemerkungen sichtbar; bei eindeutiger Artikelsuche ist eine kanonische Artikel-Nr. gesetzt.
+7. Einen nicht abgeschlossenen Queue-Eintrag pruefen.
+8. Erwartung: Dort erscheint kein CTA `Ernte-Annahme anlegen`.

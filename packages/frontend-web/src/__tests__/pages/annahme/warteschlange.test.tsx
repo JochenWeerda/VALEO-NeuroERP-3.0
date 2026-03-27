@@ -29,8 +29,19 @@ vi.mock('@/lib/api/inventory', () => ({
           status: 'wartend',
           lieferschein_nr: 'LS-42',
         },
+        {
+          id: 'queue-2',
+          position: 2,
+          kennzeichen: 'EF-GH 5678',
+          lieferant: 'Hof Meyer',
+          artikel: 'Raps',
+          ankunft: '08:45',
+          wartezeit: 4,
+          status: 'abgeschlossen',
+          lieferschein_nr: 'LS-99',
+        },
       ],
-      total: 1,
+      total: 2,
     },
     isLoading: false,
     refetch: refetchMock,
@@ -59,5 +70,19 @@ describe('WarteschlangePage', () => {
 
     fireEvent.change(screen.getByLabelText('Suche Warteschlange'), { target: { value: 'Mais' } })
     expect(screen.queryByText('AB-CD 1234')).not.toBeInTheDocument()
+  })
+
+  it('bietet fuer abgeschlossene Queue-Eintraege den CTA zur Ernte-Annahme', () => {
+    render(
+      <MemoryRouter>
+        <WarteschlangePage />
+      </MemoryRouter>,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Ernte-Annahme anlegen' }))
+
+    expect(navigateMock).toHaveBeenCalledWith(
+      '/agrar/ernte-annahme-erfassung?workflowProcess=harvest-to-settlement&workflowLabel=queue-entry%3Aqueue-2&entryMode=Warteschlange&partnerName=Hof+Meyer&lieferscheinNr=LS-99&vehiclePlate=EF-GH+5678&articleName=Raps&subject=Raps+%2F+Queue&queueEntryId=queue-2',
+    )
   })
 })
