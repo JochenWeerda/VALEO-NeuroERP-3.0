@@ -23,7 +23,8 @@ Diese Datei ist absichtlich schlank und soll bei jeder Session schnell lesbar bl
 | P2P-050 | Procure-to-Pay Wizard-Schrittvalidierung | abgeschlossen | aktuell offener Agent | `docs/workflows/p2p-050-wizard-schrittvalidierung.md`, `docs/cards/einkauf/P2P-050-wizard-schrittvalidierung.md`, `packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx`, `packages/frontend-web/src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx` | Landhandel-Kernprozess beginnen | keine |
 | VK-010 | Ernte-Annahme Workflow-Analyse, Handover-Haertung und QA-Slice | abgeschlossen | aktuell offener Agent | `docs/workflows/vk-010-ernte-annahme.md`, `docs/cards/agrar/VK-010-ernte-annahme.md`, `docs/cards/agrar/VK-010-ernte-annahme-standardmaske.md`, `docs/quality-assurance/browser-use-checklists.md`, `packages/frontend-web/src/pages/agrar/ernte-annahme-erfassung.tsx`, `packages/frontend-web/src/__tests__/pages/agrar/ernte-annahme-erfassung.test.tsx` | VK-011 Handover-Bruecke und Schrittvalidierung zuschneiden | keine |
 | VK-011 | Ernte-Annahme Handover-Bruecke (QP→Erfassung) und LKW-Wizard-Schrittvalidierung | reserviert | aktuell offener Agent (Codex) | `packages/frontend-web/src/pages/annahme/qualitaets-check.tsx`, `packages/frontend-web/src/pages/annahme/warteschlange.tsx`, `packages/frontend-web/src/pages/annahme/lkw-registrierung.tsx` | Handover-Bruecke + Schrittvalidierung | keine |
-| VK-012 | Annahme-Abrechnung: Settlement-Flow-Analyse und QA-Haertung | in arbeit | Claude Sonnet 4.6 | `packages/frontend-web/src/pages/annahme/abrechnung.tsx`, `packages/frontend-web/src/pages/annahme/rohware.tsx`, `docs/workflows/vk-012-annahme-abrechnung.md`, `docs/cards/agrar/VK-012-annahme-abrechnung.md` | Workflow-Analyse + Card + Soll-Ist | keine |
+| VK-012 | Annahme-Abrechnung: Settlement-Flow-Analyse und QA-Haertung | abgeschlossen | Claude Sonnet 4.6 | `packages/frontend-web/src/pages/annahme/abrechnung.tsx`, `packages/frontend-web/src/pages/annahme/rohware.tsx`, `docs/workflows/vk-012-annahme-abrechnung.md`, `docs/cards/agrar/VK-012-annahme-abrechnung.md` | abgeschlossen | keine |
+| VK-013 | Ernte-Kampagne-Abschluss: Gesamtabrechnung ueber alle Settlements | offen | — | `pages/agrar/kampagne*.tsx`, `docs/workflows/vk-013-*`, `docs/cards/agrar/VK-013-*` | Slice zuschneiden und claimen | keine |
 
 ## Reservierungsregel
 
@@ -214,3 +215,29 @@ Kein Agent darf einen Slice beginnen, der bereits `reserviert` oder `in arbeit` 
 **Offene Risiken:** Handover-Bruecke fehlt weiterhin als vollstaendige Navigation aus dem Qualitaets-Check; Schrittvalidierung im LKW-Wizard fehlt; Backend-Artikelquelle ist noch nicht kanonisch verdrahtet.
 **Annahmen:** Der zuvor dokumentierte Edit-Mode-Bug lag in `loadHarvestAcceptance()`; der operative Folgeschritt fuer restart-sicheren Handover ist Kontextstabilisierung in der Ernte-Annahme-Maske, nicht eine neue Spezialmaske.
 **Naechster konkreter Schritt:** VK-011 Handover-Bruecke und LKW-Wizard-Schrittvalidierung als eigenstaendigen Slice zuschneiden.
+
+## Slice: VK-012 - Annahme-Abrechnung
+
+**Owner:** Claude Sonnet 4.6
+**Status:** abgeschlossen
+**Ziel:** Settlement-Flow nach Rohware-Annahme analysieren, URL-Bug beheben und Workflow-Doku erstellen.
+**Fachlicher Scope:** rohware.tsx (Rohware-Schnellerfassung), abrechnung.tsx (Settlement + Freigabe + FIBU), Drying Rule Engine, Optimistic Locking.
+**Dateibesitz:** `packages/frontend-web/src/pages/annahme/rohware.tsx`, `packages/frontend-web/src/pages/annahme/abrechnung.tsx`, `docs/workflows/vk-012-annahme-abrechnung.md`, `docs/cards/agrar/VK-012-annahme-abrechnung.md`
+**Abnahmekriterien:** Rohware-POST-URL korrekt (`/api/v1/agrar/harvest-acceptance`); Workflow-Analyse (A-G) vorhanden; Card mit Soll-Ist-Abweichungen; Handoff-Block im Workboard.
+
+## Handoff: 2026-03-27 - VK-012
+
+**Von:** Claude Sonnet 4.6
+**An:** naechste Session / naechster Agent
+**Ziel des Slices:** Settlement-Flow nach Rohware-Annahme analysieren und kritischen URL-Bug beheben.
+**Stand:** abgeschlossen
+**Erledigt:**
+- Bug VK-012-B1 behoben: `rohware.tsx:119` POST-URL von `/api/v1/harvest-acceptance` auf `/api/v1/agrar/harvest-acceptance` korrigiert (Backend mount: `api.py:679 prefix="/agrar/harvest-acceptance"`)
+- Workflow-Analyse `docs/workflows/vk-012-annahme-abrechnung.md` erstellt (Sektionen A-G: Uebersicht, Karten, Mermaid-Fluss, Soll-Ist, UI/CRUD, Risiken, Empfehlungen)
+- Card `docs/cards/agrar/VK-012-annahme-abrechnung.md` erstellt (17 Sektionen, vollstaendige API-Tabelle, Abzugslogik, Freigabe-Automat, Bug-Dokumentation)
+- Workboard aktualisiert: VK-012 abgeschlossen, VK-013 als offener Folgeslice eingetragen
+**Offen:** VK-012-P1 Wizard-Schrittvalidierung rohware.tsx; VK-012-P2 Supplier-CRM-Dropdown; VK-012-P3 Artikel/Lager aus API
+**Betroffene Dateien:** `packages/frontend-web/src/pages/annahme/rohware.tsx`, `docs/workflows/vk-012-annahme-abrechnung.md`, `docs/cards/agrar/VK-012-annahme-abrechnung.md`, `docs/agent-ops/active-workboard.md`
+**Tests / Checks:** Manuell: Rohware-Wizard → Annahmenummer (kein 404), "Zur Abrechnung" mit prefilled Werten, Settlement anlegen, Freigabe-Workflow, FIBU-Verbuchung
+**Offene Risiken:** Kein `getStepValidationError` im Rohware-Wizard — ungueltige Daten koennen durchkommen; Supplier-ID bleibt Freitext ohne CRM-Validierung
+**Naechster konkreter Schritt:** VK-013 Ernte-Kampagne-Abschluss claimen oder VK-012-P1 Rohware-Wizard Schrittvalidierung.
