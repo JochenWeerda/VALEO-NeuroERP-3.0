@@ -5,7 +5,7 @@
  */
 
 import { lazy, Suspense, useState, useEffect, useMemo, useRef } from 'react'
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -133,6 +133,7 @@ type HarvestAcceptanceState = {
   operatorId: string
   weighingTicketId: string | null
   costCenterId: string | null
+  qualityProtocolId: string | null
   customer: Customer | null
   contractId: string | null
   forwarderId: string | null
@@ -193,13 +194,40 @@ type HarvestAcceptanceState = {
   }
 }
 
+type QualityCheckHandoverState = {
+  fromQualitaetsCheck?: boolean
+  artikel?: string
+  lieferscheinNr?: string
+  lieferant?: string
+  vehiclePlate?: string
+  qualityProtocolId?: string
+  harvestAcceptanceId?: string | null
+  qpErgebnis?: 'freigegeben' | 'bedingt' | 'gesperrt'
+}
+
+function appendUniqueLines(baseText: string, lines: Array<string | null | undefined>): string {
+  const existingLines = baseText
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean)
+  const nextLines = [...existingLines]
+  for (const line of lines.map((entry) => entry?.trim()).filter(Boolean) as string[]) {
+    if (!nextLines.includes(line)) {
+      nextLines.push(line)
+    }
+  }
+  return nextLines.join('\n')
+}
+
 export default function ErnteAnnahmeErfassungPage(): JSX.Element {
+  const location = useLocation()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const { push } = useToast()
   const { user } = useAuth()
   const { id: acceptanceId } = useParams<{ id?: string }>()
   const workflowContext = useMemo(() => readWorkflowEntryContext(searchParams), [searchParams])
+  const qualityCheckHandoverState = (location.state as QualityCheckHandoverState | null) ?? null
 
   // Helper: Format date to yyyy-MM-dd for input field
   const formatDateForInput = (date: Date): string => {
@@ -229,6 +257,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
     operatorId: getUserShortName(),
     weighingTicketId: null,
     costCenterId: null,
+    qualityProtocolId: null,
     customer: null,
     contractId: null,
     forwarderId: null,
@@ -292,14 +321,46 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
     if (!workflowContext) return
     setState((prev) => ({
       ...prev,
-      remarks: prev.remarks || [
-        workflowContext.caseNumber ? `Workflow-Vorgang ${workflowContext.caseNumber}` : '',
-        workflowContext.entryMode ? `Einstieg: ${workflowContext.entryMode}` : '',
-        workflowContext.partnerName ? `Anlieferer: ${workflowContext.partnerName}` : '',
-        workflowContext.subject,
-      ].filter(Boolean).join('\n'),
+      remarks:
+        prev.remarks ||
+        [
+          workflowContext.caseNumber ? `Workflow-Vorgang ${workflowContext.caseNumber}` : '',
+          workflowContext.entryMode ? `Einstieg: ${workflowContext.entryMode}` : '',
+          workflowContext.partnerName ? `Anlieferer: ${workflowContext.partnerName}` : '',
+          workflowContext.subject,
+        ]
+          .filter(Boolean)
+          .join('\n'),
     }))
   }, [workflowContext])
+
+  useEffect(() => {
+    if (acceptanceId) return
+
+    const articleName = searchParams.get('articleName') || qualityCheckHandoverState?.artikel || ''
+    const vehiclePlate = searchParams.get('vehiclePlate') || qualityCheckHandoverState?.vehiclePlate || ''
+    const qualityProtocolId = searchParams.get('qualityProtocolId') || qualityCheckHandoverState?.qualityProtocolId || ''
+    const lieferscheinNr = searchParams.get('lieferscheinNr') || qualityCheckHandoverState?.lieferscheinNr || ''
+    const qpResult = searchParams.get('qpResult') || qualityCheckHandoverState?.qpErgebnis || ''
+    const partnerName = searchParams.get('partnerName') || qualityCheckHandoverState?.lieferant || ''
+
+    if (!articleName && !vehiclePlate && !qualityProtocolId && !lieferscheinNr && !qpResult && !partnerName) {
+      return
+    }
+
+    setState((prev) => ({
+      ...prev,
+      articleName: prev.articleName || articleName,
+      vehiclePlate: prev.vehiclePlate || vehiclePlate,
+      qualityProtocolId: prev.qualityProtocolId || qualityProtocolId || null,
+      remarks: appendUniqueLines(prev.remarks, [
+        partnerName ? `Anlieferer: ${partnerName}` : '',
+        lieferscheinNr ? `Lieferschein: ${lieferscheinNr}` : '',
+        qpResult ? `Qualitaetspruefung: ${qpResult}` : '',
+        qualityProtocolId ? `Qualitaetsprotokoll: ${qualityProtocolId}` : '',
+      ]),
+    }))
+  }, [acceptanceId, qualityCheckHandoverState, searchParams])
 
   // Lade bestehende Ernte-Annahme, wenn ID in URL vorhanden
   useEffect(() => {
@@ -352,6 +413,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
           operatorId: ha.operator_id || getUserShortName(),
           weighingTicketId: ha.weighing_ticket_id,
           costCenterId: ha.cost_center_id,
+          qualityProtocolId: ha.quality_protocol_id,
           customer,
           contractId: ha.contract_id,
           forwarderId: ha.forwarder_id,
@@ -474,6 +536,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
         sales_rep_id: state.salesRepId || undefined,
         weighing_ticket_id: state.weighingTicketId || undefined,
         cost_center_id: state.costCenterId || undefined,
+        quality_protocol_id: state.qualityProtocolId || undefined,
         customer_id: state.customer.id,
         contract_id: state.contractId || undefined,
         forwarder_id: state.forwarderId || undefined,

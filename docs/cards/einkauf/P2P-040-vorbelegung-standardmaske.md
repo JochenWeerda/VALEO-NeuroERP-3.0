@@ -121,7 +121,7 @@
 - Annahme 1: `apiClient.get<T>()` gibt `AxiosResponse<T>` zurueck; `.data` ist der einzige korrekte Datenzugriff.
 - Annahme 2: Requisition und RFQ teilen denselben Backend-Endpoint `/api/v1/einkauf/anfragen/`.
 - Annahme 3: Contract-Endpoint ist `/api/v1/contracts/:id` gemaess einheitlichem API-Prefix-Standard.
-- Offene Fragen: Sollen Fehler beim Vorbelegungs-Load dem Nutzer als Toast angezeigt werden?
+- Offene Fragen: Keine fuer den aktuellen Slice; Fehler beim Vorbelegungs-Load werden toast-basiert sichtbar gemacht.
 
 ## 17. Testhinweise
 - Positiver Testfall: Requisition-ID in URL triggert API-Call; Artikel und Faelligkeit werden in Formular uebernommen; Notizen enthalten Bedarfsmeldungs-Referenz.

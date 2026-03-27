@@ -131,6 +131,32 @@ export default function LKWRegistrierungPage(): JSX.Element {
     setAttachmentIds((prev) => prev.filter((_, i) => i !== index))
   }
 
+  const validateStep = (stepId: string): string | null => {
+    if (stepId === 'kennzeichen') {
+      if (!lkw.kennzeichen.trim()) {
+        return 'Kennzeichen ist ein Pflichtfeld.'
+      }
+      return null
+    }
+    if (stepId === 'lieferung') {
+      if (!lkw.lieferant.trim()) {
+        return 'Lieferant ist ein Pflichtfeld.'
+      }
+      if (!lkw.artikel.trim()) {
+        return 'Artikel ist ein Pflichtfeld.'
+      }
+    }
+    return null
+  }
+
+  const handleStepValidationError = (_stepId: string, message: string): void => {
+    toast({
+      title: 'Schritt unvollstaendig',
+      description: message,
+      variant: 'destructive',
+    })
+  }
+
   async function handleSubmit(): Promise<void> {
     try {
       await api.post('/api/v1/annahme/lkw-registrierung', {
@@ -345,6 +371,8 @@ export default function LKWRegistrierungPage(): JSX.Element {
         steps={steps}
         onFinish={handleSubmit}
         onCancel={() => navigate('/annahme/warteschlange')}
+        getStepValidationError={validateStep}
+        onStepValidationError={handleStepValidationError}
       />
       <Dialog open={!!scanDialogField} onOpenChange={(open) => !open && setScanDialogField(null)}>
         <DialogContent className="sm:max-w-md">
