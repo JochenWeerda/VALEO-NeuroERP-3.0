@@ -82,10 +82,10 @@ flowchart TD
 | D-03 | Zahlungen manuell erfassbar (Zahlung, Skonto, Gutschrift) | `ZahlungenTable` mit Edit/Add/Remove; offener Betrag wird live berechnet | behoben |
 | D-04 | Ausgleich persistiert Zahlungen im Backend | `POST /open-items/{id}/settle` je Zahlung; Storno-Typ wird übersprungen | behoben |
 | D-05 | Ausgleichshistorie lesbar | Tab „Ausgleichshistorie” mit `GET /open-items/{id}/settlements` | behoben |
-| D-06 | Debitor-Auswahl aus CRM | Dropdown hardcoded: K001/K002/K003, nicht aus `GET /crm/customers` | offen OTC-011-P1 |
-| D-07 | Mahnung nutzt einheitlichen `apiClient` | Mahnung-Aktion nutzt `raw fetch()` mit `localStorage.getItem('token')` | offen OTC-011-P2 |
-| D-08 | Nach Ausgleich zu OP-Liste navigieren | `navigate('/finance/op-debitoren')` führt zu leerer Einzel-Maske | offen OTC-011-P3 |
-| D-09 | Bankimport und manuelle OP-Erfassung verbunden | `payment-matching.tsx` und `op-debitoren.tsx` vollständig isoliert | offen OTC-011-P4 |
+| D-06 | Debitor-Auswahl aus CRM | `GET /crm/customers` dynamisch geladen, Dropdown zeigt Kunden-Nr + Name | behoben (P1) |
+| D-07 | Mahnung nutzt einheitlichen `apiClient` | `apiClient.post()` von `@/lib/axios` — raw fetch entfernt | behoben (P2) |
+| D-08 | Nach Ausgleich zu OP-Liste navigieren | `navigate('/finance/offene-posten')` + Toast mit OP-Nummer | behoben (P3) |
+| D-09 | Bankimport und manuelle OP-Erfassung verbunden | Match-Toast mit „OP öffnen"-Button → `/finance/op-debitoren?opId=` | behoben (P4) |
 | D-10 | `payment-matching.tsx` apiClient korrekt | Nutzt `@/lib/api-client` mit korrekter `{ data }` Destrukturierung | ok |
 
 ---
@@ -110,9 +110,9 @@ flowchart TD
 | Skonto-Zahlung vorbelegen | OK |
 | Ausgleich buchen (`POST /settle`) | OK |
 | Ausgleichshistorie (`GET /settlements`) | OK |
-| Mahnung eskalieren | Partiell — raw fetch statt apiClient |
+| Mahnung eskalieren (`apiClient.post`) | OK — P2 behoben |
 | Export (`POST /export/list`) | OK |
-| Debitor-Dropdown | Lücke — hardcoded |
+| Debitor-Dropdown (CRM-API) | OK — P1 behoben |
 
 ### `payment-matching.tsx` (`@/lib/api-client` — `.data` korrekt)
 
@@ -130,36 +130,29 @@ flowchart TD
 
 ### hoch
 
-- `raw fetch()` in der Mahnung-Aktion liest `localStorage.getItem('token')` — in OIDC-Umgebungen
-  wird das Token nicht unter dem Key `token` gespeichert. Mahnstufen-Erhöhung schlägt im
-  Prod-Betrieb lautlos fehl.
+- keine (P1–P4 behoben)
 
 ### mittel
 
-- Debitor-Dropdown mit drei Hardcode-Einträgen ist nicht produktionstauglich. Jeder OP der einem
-  anderen Kunden gehört kann nicht korrekt erfasst werden.
-- `navigate('/finance/op-debitoren')` nach Ausgleich landet auf leerer Maske — kein Feedback für
-  den Sachbearbeiter ob der Ausgleich gespeichert wurde.
+- keine
 
 ### niedrig
 
-- `payment-matching.tsx` und `op-debitoren.tsx` sind vollständig isoliert. Bankabgleich und
-  manuelle OP-Bearbeitung müssen manuell zwischen den Seiten koordiniert werden.
+- `/finance/offene-posten` als Navigations-Ziel nach Ausgleich muss als Route existieren;
+  falls sie fehlt, wird ein 404 angezeigt. Prüfen und ggf. Redirect einrichten.
 
 ---
 
 ## G — Empfehlungen
 
-1. **OTC-011-P1:** Debitor-Dropdown durch `GET /api/v1/crm/customers` ersetzen — analog
-   Kunden-Prefill in `lieferschein-erfassung.tsx`.
-2. **OTC-011-P2:** Mahnung-Aktion auf `apiClient.post(...)` von `@/lib/axios` umstellen —
-   `raw fetch()` mit `localStorage.getItem('token')` entfernen.
-3. **OTC-011-P3:** Nach Ausgleich zu `/finance/offene-posten` navigieren (Listenansicht) oder
-   Bestätigungs-Toast mit OP-Nummer einblenden vor Seitenwechsel.
-4. **OTC-011-P4:** `payment-matching.tsx` nach erfolgreichem Match auf
-   `/finance/op-debitoren?opId=<matched_op_id>` weiterleiten.
+1. ~~**OTC-011-P1:**~~ behoben — Debitor-Dropdown aus CRM API.
+2. ~~**OTC-011-P2:**~~ behoben — Mahnung nutzt `apiClient.post()`.
+3. ~~**OTC-011-P3:**~~ behoben — Navigation zu `/finance/offene-posten` + Toast mit OP-Nummer.
+4. ~~**OTC-011-P4:**~~ behoben — Match-Toast mit „OP öffnen"-Button.
 5. **OTC-012:** Belegkette-Visualisierung — Auftrag → LS → Rechnung → OP → Zahlung als
    Timeline im Flow-Spine Cockpit.
+6. Route `/finance/offene-posten` prüfen — muss als ListReport existieren oder Redirect auf
+   bestehende OP-Übersicht einrichten.
 
 ---
 

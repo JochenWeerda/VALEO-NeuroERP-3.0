@@ -5,6 +5,7 @@
  */
 
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
@@ -58,6 +59,7 @@ type MatchResult = {
 
 export default function PaymentMatchingPage(): JSX.Element {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const { toast } = useToast()
   const [payments, setPayments] = useState<PaymentEntry[]>([])
   const [loading, setLoading] = useState(true)
@@ -143,12 +145,19 @@ export default function PaymentMatchingPage(): JSX.Element {
       const { data: result } = await apiClient.post<MatchResult>(
         `/api/v1/finance/payments/match/${selectedPayment.id}?op_id=${selectedOpId}&match_type=MANUAL`
       )
+      // OTC-011-P4: Deep-Link zu OP-Debitoren nach Match
+      const matchedOp = result.matched_op_id
       toast({
         title: t('common.success'),
-        description: t('finance.payments.matchSuccess', { 
+        description: t('finance.payments.matchSuccess', {
           payment: selectedPayment.id,
-          op: result.matched_op_id 
+          op: matchedOp
         }),
+        action: matchedOp ? (
+          <Button variant="outline" size="sm" onClick={() => navigate(`/finance/op-debitoren?opId=${encodeURIComponent(matchedOp)}`)}>
+            OP öffnen
+          </Button>
+        ) : undefined,
       })
       setIsMatchDialogOpen(false)
       setSelectedPayment(null)
