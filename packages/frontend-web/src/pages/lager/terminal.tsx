@@ -3,7 +3,7 @@
  */
 
 import { useState, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   WarehouseLayout,
   ScannerInput,
@@ -45,6 +45,10 @@ function mapArticle(row: Record<string, unknown>): TerminalArticle {
 export default function WarehouseTerminalPage(): JSX.Element {
   const navigate = useNavigate()
   const { toast } = useToast()
+  const [searchParams] = useSearchParams()
+  const workflowInstanceId = searchParams.get('workflowInstanceId')
+  const workflowProcess = searchParams.get('workflowProcess')
+  const workflowCase = searchParams.get('workflowCase')
   const [scannedBarcode, setScannedBarcode] = useState<string | null>(null)
   const [scannedFormat, setScannedFormat] = useState<string>('')
   const [article, setArticle] = useState<TerminalArticle | null>(null)
@@ -133,6 +137,11 @@ export default function WarehouseTerminalPage(): JSX.Element {
   return (
     <WarehouseLayout title="Lager-Terminal" subtitle="Scan & Go" showScanner onScan={handleScan}>
       <div className="space-y-4 max-w-3xl mx-auto">
+        {workflowInstanceId && (
+          <div className="mb-4 rounded-md border border-indigo-500/30 bg-indigo-500/10 px-4 py-2 text-sm text-indigo-200">
+            Flow-Spine: {workflowCase || workflowProcess} (Instanz {workflowInstanceId.slice(0, 8)}...)
+          </div>
+        )}
         <ScannerInput onScan={handleScan} onError={handleScanError} placeholder="Barcode scannen..." autoFocus />
 
         {scannedBarcode && (

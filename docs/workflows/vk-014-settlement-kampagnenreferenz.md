@@ -95,3 +95,7 @@ flowchart TD
 - Erntefenster-Kampagnen bleiben vorerst in Tenant-Settings gespeichert; eine String-Referenz `campaign_id` ist daher der pragmatisch richtige Vertrag.
 - Alt-Daten ohne Referenz muessen sichtbar bleiben; deshalb ist der Datumsfenster-Fallback weiterhin gewollt.
 - Eine nachtraegliche Edit-Maske fuer `campaign_id` ist fuer diesen Slice nicht erforderlich.
+
+## Status
+
+**Erstanalyse abgeschlossen** — Settlement-Kampagnenreferenz dokumentiert.

@@ -1,3 +1,4 @@
+import { useSearchParams } from 'react-router-dom'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { AlertTriangle, MapPin, Package, Warehouse } from 'lucide-react'
@@ -5,6 +6,10 @@ import { useWarehouses } from '@/lib/api/inventory'
 import { Skeleton } from '@/components/ui/skeleton'
 
 export default function LagerplaetzePage(): JSX.Element {
+  const [searchParams] = useSearchParams()
+  const workflowInstanceId = searchParams.get('workflowInstanceId')
+  const workflowProcess = searchParams.get('workflowProcess')
+  const workflowCase = searchParams.get('workflowCase')
   const { data: warehousesData, isLoading } = useWarehouses()
   const items = warehousesData?.items ?? []
   const lager = (() => {
@@ -36,6 +41,11 @@ export default function LagerplaetzePage(): JSX.Element {
 
   return (
     <div className="space-y-6 p-6">
+      {workflowInstanceId && (
+        <div className="mb-4 rounded-md border border-indigo-500/30 bg-indigo-500/10 px-4 py-2 text-sm text-indigo-200">
+          Flow-Spine: {workflowCase || workflowProcess} (Instanz {workflowInstanceId.slice(0, 8)}...)
+        </div>
+      )}
       <div>
         <h1 className="text-3xl font-bold">Lagerplätze</h1>
         <p className="text-muted-foreground">Lagerverwaltung & Auslastung</p>

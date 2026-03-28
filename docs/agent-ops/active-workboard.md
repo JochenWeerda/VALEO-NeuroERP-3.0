@@ -22,8 +22,11 @@ Zwei End-to-End-Stränge laufen **fachlich und technisch getrennt**. Bitte **nic
 | **Order-to-Cash Folge (Finance)** | `packages/frontend-web/src/pages/finance/**`, optional `pages/sales/**` / `pages/verkauf/**` | OTC-011 | Kein paralleles Editing mit VK-013-Agrar ohne Absprache. |
 | **Kontrakt (Contract-to-Settlement)** | `packages/frontend-web/src/pages/kontrakte/**`, `lib/api/kontrakte.ts` | CTS-001 bis CTS-009 abgeschlossen | Ueberlappung mit OTC (Auftrag/LS) und VK (Ernte-Annahme) — bei Aenderungen an order-editor/lieferschein abstimmen. |
 | **Lager (Inventory-to-Settlement)** | `packages/frontend-web/src/pages/lager/**`, `app/api/v1/endpoints/warehouses*.py`, `inventory_counts.py` | INV-001 bis INV-007 (P1 abgeschlossen) | Ueberlappung mit CTS (Auslagerung aus Kontrakt) und VK (Einlagerung aus Ernte). |
+| **Finance (Finance-to-Reporting)** | `packages/frontend-web/src/pages/finance/**`, `pages/fibu/**`, `app/api/v1/endpoints/finance_*.py` | FIN-001 bis FIN-003 (P1 abgeschlossen) | Ueberlappung mit OTC (Zahlungen) und Compliance (USTVA). |
+| **CRM (CRM-to-Revenue)** | `packages/frontend-web/src/pages/crm/**`, `pages/vertrieb/**`, `app/api/v1/endpoints/customers.py` | CRM-001, CRM-002 (P1 abgeschlossen) | Ueberlappung mit OTC (Auftraege) und CTS (Kontrakte). |
+| **Compliance (Compliance-to-Audit)** | `packages/frontend-web/src/pages/compliance/**`, `app/api/v1/endpoints/compliance.py`, `audit.py` | COM-001, COM-002 (P1 abgeschlossen) | Ueberlappung mit Finance (USTVA) und Agrar (BVL-PSM). |
 
-**Lane-Status:** `VK-013` ist fachlich ausgearbeitet und abgeschlossen. `OTC-011` ist als Folgelane zu OTC-010 **begonnen** (Workflow+Card), Umsetzung im Finance-UI folgt iterativ.
+**Lane-Status:** `VK-013` ist fachlich ausgearbeitet und abgeschlossen. `OTC-011` ist als Folgelane zu OTC-010 **begonnen** (Workflow+Card), Umsetzung im Finance-UI folgt iterativ. Alle 9 Flow-Spine-Lanes haben jetzt Workflow-Dokumentation mit Mermaid-Diagrammen und Status-Abschnitten.
 
 ## Aktive Slices
 

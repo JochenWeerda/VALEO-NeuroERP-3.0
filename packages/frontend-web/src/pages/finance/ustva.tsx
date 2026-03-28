@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
@@ -390,6 +390,10 @@ function AbweichungenTable({ data: _data, onChange }: { data: any[], onChange: (
 export default function UStVAPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const workflowInstanceId = searchParams.get('workflowInstanceId')
+  const workflowProcess = searchParams.get('workflowProcess')
+  const workflowCase = searchParams.get('workflowCase')
   const [isDirty, setIsDirty] = useState(false)
   const [actionLoadingKey, setActionLoadingKey] = useState<string | null>(null)
   const [workspaceData, setWorkspaceData] = useState<any>({})
@@ -541,6 +545,14 @@ export default function UStVAPage(): JSX.Element {
         })).data
         applyVATReturnResponse(response)
         setIsDirty(false)
+        if (workflowInstanceId && workflowProcess) {
+          try {
+            await apiClient.post(`/api/v1/process/flow-spines/${workflowProcess}/instances/${workflowInstanceId}/transitions`, {
+              node_id: 'meldewesen',
+              new_status: 'ok',
+            })
+          } catch { /* best-effort, don't block user */ }
+        }
         toast({
           title: t('crud.messages.ustvaSubmitted'),
           description: t('crud.messages.ustvaSubmittedDesc'),
@@ -586,6 +598,11 @@ export default function UStVAPage(): JSX.Element {
 
   return (
     <>
+      {workflowInstanceId && (
+        <div className="mb-4 rounded-md border border-indigo-500/30 bg-indigo-500/10 px-4 py-2 text-sm text-indigo-200">
+          Flow-Spine: {workflowCase || workflowProcess} (Instanz {workflowInstanceId.slice(0, 8)}...)
+        </div>
+      )}
       {effectiveData?.id && approvalDecisionView !== null ? (
         <ProcessStatusPanel view={approvalDecisionView} className="mb-4 px-4 py-3" densityProfileOverride={approvalDensityProfile}>
           <div className="mt-3 grid gap-3 md:grid-cols-3">

@@ -109,3 +109,7 @@ Felder die genutzt werden:
 - `apiClient.get<T>()` gibt stets `AxiosResponse<T>` zurueck; `.data` ist der einzige korrekte Datenzugriff.
 - Liefertermin aus Vertrag ist `deliveryWindow.to` (ISO-Date-String); andere Vertragsformate erfordern eigene Feldmapping-Ergaenzung.
 - Requisition und RFQ teilen denselben Einkaufsanfrage-Endpoint; Differenzierung erfolgt ausschliesslich ueber den URL-Parameter-Typ.
+
+## Status
+
+**Erstanalyse abgeschlossen** — Vorbelegung Requisition/Vertrag/RFQ dokumentiert.

@@ -3,7 +3,7 @@
  * TouchCards für Artikel- und Strategieauswahl, Keyboard-Shortcuts für Desktop
  */
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Wizard } from '@/components/patterns/Wizard'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
@@ -40,6 +40,10 @@ const STRATEGIEN = [
 export default function AuslagerungPage(): JSX.Element {
   const navigate = useNavigate()
   const { toast } = useToast()
+  const [searchParams] = useSearchParams()
+  const workflowInstanceId = searchParams.get('workflowInstanceId')
+  const workflowProcess = searchParams.get('workflowProcess')
+  const workflowCase = searchParams.get('workflowCase')
 
   const { data: articlesData } = useQuery({
     queryKey: ['articles', 'auslagerung'],
@@ -82,6 +86,14 @@ export default function AuslagerungPage(): JSX.Element {
         chargen_id: auslagerung.chargenId || undefined,
         verwendungszweck: auslagerung.verwendungszweck || undefined,
       })
+      if (workflowInstanceId && workflowProcess) {
+        try {
+          await apiClient.post(`/api/v1/process/flow-spines/${workflowProcess}/instances/${workflowInstanceId}/transitions`, {
+            node_id: 'picking',
+            new_status: 'ok',
+          })
+        } catch { /* best-effort, don't block user */ }
+      }
       toast({ title: 'Auslagerung gebucht', description: `${auslagerung.artikel}: ${auslagerung.menge} t` })
       navigate('/lager/bestandsuebersicht')
     } catch (e: any) {
@@ -210,6 +222,11 @@ export default function AuslagerungPage(): JSX.Element {
     <div className="flex flex-col">
       <div className="p-6">
         <ModuleToolbar backTarget="/lager/bestandsuebersicht" closeTarget="/lager/bestandsuebersicht" title="Auslagerung" />
+        {workflowInstanceId && (
+          <div className="mb-4 rounded-md border border-indigo-500/30 bg-indigo-500/10 px-4 py-2 text-sm text-indigo-200">
+            Flow-Spine: {workflowCase || workflowProcess} (Instanz {workflowInstanceId.slice(0, 8)}...)
+          </div>
+        )}
         <AgentProcessPanel domain="lager" className="mb-4" />
         <Wizard title="Auslagerung" steps={steps} onFinish={handleFinish} onCancel={() => navigate('/lager/bestandsuebersicht')} />
       </div>

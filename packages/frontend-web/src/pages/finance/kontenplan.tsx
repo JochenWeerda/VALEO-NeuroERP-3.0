@@ -184,13 +184,13 @@ const kontenplanConfig: MaskConfig = {
     { key: 'export', label: 'DATEV Export', type: 'secondary' }
   ],
   api: {
-    baseUrl: '/api/v1/chart-of-accounts',
+    baseUrl: '/api/v1/finance/chart-of-accounts',
     endpoints: {
-      list: '/api/v1/chart-of-accounts',
-      get: '/api/v1/chart-of-accounts/{id}',
-      create: '/api/v1/chart-of-accounts',
-      update: '/api/v1/chart-of-accounts/{id}',
-      delete: '/api/v1/chart-of-accounts/{id}'
+      list: '/api/v1/finance/chart-of-accounts',
+      get: '/api/v1/finance/chart-of-accounts/{id}',
+      create: '/api/v1/finance/chart-of-accounts',
+      update: '/api/v1/finance/chart-of-accounts/{id}',
+      delete: '/api/v1/finance/chart-of-accounts/{id}'
     }
   } as any,
   permissions: ['fibu.read', 'fibu.write']

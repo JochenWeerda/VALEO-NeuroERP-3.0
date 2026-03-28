@@ -1,23 +1,83 @@
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import { BarChart3, Euro, TrendingUp, Users } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import { apiClient } from '@/lib/api-client'
+
+type KundenumsatzData = {
+  gesamtumsatz: number
+  kunden: number
+  durchschnitt: number
+  wachstum: number
+  segmente: Array<{ segment: string; anzahl: number; umsatz: number; anteil: number }>
+  topKunden: Array<{ name: string; umsatz: number; wachstum: number }>
+}
+
+const FALLBACK: KundenumsatzData = {
+  gesamtumsatz: 0,
+  kunden: 0,
+  durchschnitt: 0,
+  wachstum: 0,
+  segmente: [],
+  topKunden: [],
+}
 
 export default function KundenumsatzPage(): JSX.Element {
-  const analyse = {
-    gesamtumsatz: 1250000,
-    kunden: 142,
-    durchschnitt: 8803,
-    wachstum: 8.7,
-    segmente: [
-      { segment: 'A-Kunden (>50k)', anzahl: 12, umsatz: 750000, anteil: 60 },
-      { segment: 'B-Kunden (20-50k)', anzahl: 28, umsatz: 350000, anteil: 28 },
-      { segment: 'C-Kunden (<20k)', anzahl: 102, umsatz: 150000, anteil: 12 },
-    ],
-    topKunden: [
-      { name: 'Landhandel Nord', umsatz: 125000, wachstum: 12.5 },
-      { name: 'Agrar Süd', umsatz: 98000, wachstum: 8.2 },
-      { name: 'Müller GmbH', umsatz: 87000, wachstum: -3.1 },
-    ],
+  const { data: analyse = FALLBACK, isLoading } = useQuery({
+    queryKey: ['crm', 'kundenumsatz'],
+    queryFn: async () => {
+      const customersRes = await apiClient.get<{ items: Array<{ id: string; name: string; revenue?: number }>, total: number }>('/api/v1/crm/customers?limit=500')
+      const customers = customersRes.data?.items ?? []
+
+      const totalRevenue = customers.reduce((s, c) => s + (c.revenue ?? 0), 0)
+      const count = customers.length
+      const avg = count > 0 ? Math.round(totalRevenue / count) : 0
+
+      const sorted = [...customers].sort((a, b) => (b.revenue ?? 0) - (a.revenue ?? 0))
+      const aThreshold = 50000
+      const bThreshold = 20000
+
+      const aKunden = sorted.filter((c) => (c.revenue ?? 0) >= aThreshold)
+      const bKunden = sorted.filter((c) => (c.revenue ?? 0) >= bThreshold && (c.revenue ?? 0) < aThreshold)
+      const cKunden = sorted.filter((c) => (c.revenue ?? 0) < bThreshold)
+
+      const aUmsatz = aKunden.reduce((s, c) => s + (c.revenue ?? 0), 0)
+      const bUmsatz = bKunden.reduce((s, c) => s + (c.revenue ?? 0), 0)
+      const cUmsatz = cKunden.reduce((s, c) => s + (c.revenue ?? 0), 0)
+
+      return {
+        gesamtumsatz: totalRevenue,
+        kunden: count,
+        durchschnitt: avg,
+        wachstum: 0,
+        segmente: [
+          { segment: `A-Kunden (>${(aThreshold / 1000).toFixed(0)}k)`, anzahl: aKunden.length, umsatz: aUmsatz, anteil: totalRevenue > 0 ? Math.round((aUmsatz / totalRevenue) * 100) : 0 },
+          { segment: `B-Kunden (${(bThreshold / 1000).toFixed(0)}-${(aThreshold / 1000).toFixed(0)}k)`, anzahl: bKunden.length, umsatz: bUmsatz, anteil: totalRevenue > 0 ? Math.round((bUmsatz / totalRevenue) * 100) : 0 },
+          { segment: `C-Kunden (<${(bThreshold / 1000).toFixed(0)}k)`, anzahl: cKunden.length, umsatz: cUmsatz, anteil: totalRevenue > 0 ? Math.round((cUmsatz / totalRevenue) * 100) : 0 },
+        ],
+        topKunden: sorted.slice(0, 5).map((c) => ({
+          name: c.name,
+          umsatz: c.revenue ?? 0,
+          wachstum: 0,
+        })),
+      } as KundenumsatzData
+    },
+    staleTime: 60_000,
+  })
+
+  const fmt = (v: number) =>
+    new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(v)
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6 p-6">
+        <Skeleton className="h-8 w-64" />
+        <div className="grid gap-4 md:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-24" />)}
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -35,9 +95,7 @@ export default function KundenumsatzPage(): JSX.Element {
           <CardContent>
             <div className="flex items-center gap-2">
               <Euro className="h-5 w-5 text-blue-600" />
-              <span className="text-2xl font-bold">
-                {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(analyse.gesamtumsatz)}
-              </span>
+              <span className="text-2xl font-bold">{fmt(analyse.gesamtumsatz)}</span>
             </div>
           </CardContent>
         </Card>
@@ -59,9 +117,7 @@ export default function KundenumsatzPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Ø Umsatz/Kunde</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold">
-              {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(analyse.durchschnitt)}
-            </span>
+            <span className="text-2xl font-bold">{fmt(analyse.durchschnitt)}</span>
           </CardContent>
         </Card>
 
@@ -72,7 +128,9 @@ export default function KundenumsatzPage(): JSX.Element {
           <CardContent>
             <div className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-green-600" />
-              <span className="text-2xl font-bold text-green-600">+{analyse.wachstum}%</span>
+              <span className="text-2xl font-bold text-green-600">
+                {analyse.wachstum > 0 ? '+' : ''}{analyse.wachstum}%
+              </span>
             </div>
           </CardContent>
         </Card>
@@ -95,9 +153,7 @@ export default function KundenumsatzPage(): JSX.Element {
                     <div className="text-sm text-muted-foreground">{seg.anzahl} Kunden</div>
                   </div>
                   <div className="text-right">
-                    <div className="text-xl font-bold">
-                      {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(seg.umsatz)}
-                    </div>
+                    <div className="text-xl font-bold">{fmt(seg.umsatz)}</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -117,7 +173,7 @@ export default function KundenumsatzPage(): JSX.Element {
 
       <Card>
         <CardHeader>
-          <CardTitle>Top 3 Kunden</CardTitle>
+          <CardTitle>Top Kunden</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
@@ -128,12 +184,7 @@ export default function KundenumsatzPage(): JSX.Element {
                   <Badge variant="outline" className="mt-1">#{i + 1}</Badge>
                 </div>
                 <div className="text-right">
-                  <div className="text-xl font-bold">
-                    {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(kunde.umsatz)}
-                  </div>
-                  <div className={`text-sm font-semibold ${kunde.wachstum > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {kunde.wachstum > 0 ? '+' : ''}{kunde.wachstum}%
-                  </div>
+                  <div className="text-xl font-bold">{fmt(kunde.umsatz)}</div>
                 </div>
               </div>
             ))}
@@ -143,4 +194,3 @@ export default function KundenumsatzPage(): JSX.Element {
     </div>
   )
 }
-

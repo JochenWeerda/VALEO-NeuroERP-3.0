@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -36,6 +36,11 @@ const EMPTY_CLOSING_COCKPIT_SUMMARY: ClosingCockpitSummary = {
 }
 
 export default function AbschlussCockpitPage(): JSX.Element {
+  const [searchParams] = useSearchParams()
+  const workflowInstanceId = searchParams.get('workflowInstanceId')
+  const workflowProcess = searchParams.get('workflowProcess')
+  const workflowCase = searchParams.get('workflowCase')
+
   const { data, isLoading, error } = useQuery({
     queryKey: ['finance', 'closing-cockpit-summary'],
     queryFn: async () => (await apiClient.get<ClosingCockpitSummary>('/api/v1/finance/closing-checklists/cockpit/summary')).data,
@@ -55,6 +60,11 @@ export default function AbschlussCockpitPage(): JSX.Element {
 
   return (
     <div className="space-y-6 p-6">
+      {workflowInstanceId && (
+        <div className="mb-4 rounded-md border border-indigo-500/30 bg-indigo-500/10 px-4 py-2 text-sm text-indigo-200">
+          Flow-Spine: {workflowCase || workflowProcess} (Instanz {workflowInstanceId.slice(0, 8)}...)
+        </div>
+      )}
       <div>
         <h1 className="text-3xl font-bold">Abschluss-Cockpit</h1>
         <p className="text-muted-foreground">Status der Perioden und Abschluss-Checklisten inkl. Blocker-Uebersicht.</p>
@@ -93,7 +103,7 @@ export default function AbschlussCockpitPage(): JSX.Element {
               <div className="flex items-center gap-2">
                 <Badge variant={item.status === 'blocked' ? 'destructive' : 'outline'}>{item.status}</Badge>
                 <Button variant="outline" size="sm" asChild>
-                  <Link to={`/fibu/abschluss-checklist-detail/${item.id}`}>Details</Link>
+                  <Link to={`/fibu/abschluss-checklist-detail/${item.id}${workflowInstanceId ? `?workflowInstanceId=${workflowInstanceId}&workflowProcess=${workflowProcess ?? ''}&workflowCase=${workflowCase ?? ''}` : ''}`}>Details</Link>
                 </Button>
               </div>
             </div>

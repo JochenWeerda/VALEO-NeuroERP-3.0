@@ -1345,6 +1345,10 @@
       "path": "qualitaet/reklamationen"
     },
     {
+      "module": "@/pages/qualitaet/reklamation-detail",
+      "path": "qualitaet/reklamation/:id"
+    },
+    {
       "module": "@/pages/reports/deckungsbeitrag",
       "path": "reports/deckungsbeitrag"
     },
@@ -1399,6 +1403,22 @@
     {
       "module": "@/pages/service/anfragen",
       "path": "service/anfragen"
+    },
+    {
+      "module": "@/pages/service/anfrage-detail",
+      "path": "service/anfrage/:id"
+    },
+    {
+      "module": "@/pages/service/anfrage-neu",
+      "path": "service/anfrage/neu"
+    },
+    {
+      "module": "@/pages/service/rueckmeldung",
+      "path": "service/rueckmeldung"
+    },
+    {
+      "module": "@/pages/service/abschluss",
+      "path": "service/abschluss"
     },
     {
       "module": "@/pages/setup/firma",

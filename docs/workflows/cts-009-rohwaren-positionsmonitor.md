@@ -108,6 +108,25 @@ Spread          = Durchschnitts-VK-Preis - Durchschnitts-EK-Preis
 
 **Umgesetzt** (2026-03-27) — Backend-Service, API, Dashboard, Integration in Kontraktdetail und -liste.
 
+## Mermaid — Positionsmonitor Datenfluss
+
+```mermaid
+graph TD
+    A[Einkaufskontrakte] --> B[Restmenge Einkauf]
+    C[Verkaufskontrakte] --> D[Restmenge Verkauf]
+    B --> E{Netto-Position pro Artikel}
+    D --> E
+    E -->|Einkauf > Verkauf| F[LONG]
+    E -->|Einkauf < Verkauf| G[SHORT / Unterdeckung]
+    E -->|Einkauf = Verkauf| H[BALANCED]
+    G --> I[Alarm-Banner in Kontraktdetail]
+    G --> J[KPI-Karte im Dashboard]
+    F --> K[Gruener Status]
+    H --> K
+    J --> L[Positionsmonitor-Tabelle]
+    L --> M[Filter: Nur Short / Erledigte]
+```
+
 ## Naechste Schritte (optional)
 
 - Futures/Hedging-Positionen parallel abbilden (finanziell Long/Short neben physisch)

@@ -23,3 +23,22 @@ Feedback: Toast **Schritt unvollstaendig** (wie LKW-Wizard).
 
 - `packages/frontend-web/src/pages/annahme/rohware.tsx`
 - `docs/cards/agrar/VK-020-rohware-wizard-schrittvalidierung.md`
+
+## Mermaid — Wizard-Schrittvalidierung
+
+```mermaid
+graph TD
+    A[Schritt 1: Lieferant + Fahrzeug] --> B{Validierung}
+    B -->|Leer| C[Toast: Schritt unvollstaendig]
+    B -->|OK| D[Schritt 2: Ware + Gewicht]
+    D --> E{Validierung}
+    E -->|Artikel/Lager fehlt oder Gewicht=0| C
+    E -->|OK| F[Schritt 3: Qualitaet]
+    F --> G[Schritt 4: Uebersicht]
+    G --> H[POST /api/v1/rohware-annahme]
+    H --> I[Annahme gebucht]
+```
+
+## Status
+
+**Umgesetzt** — Schrittvalidierung in `rohware.tsx` aktiv, Tests in `rohware.test.tsx`.

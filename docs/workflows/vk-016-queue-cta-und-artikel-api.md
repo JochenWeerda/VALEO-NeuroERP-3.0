@@ -89,3 +89,7 @@ flowchart TD
 - `abgeschlossen` in der Warteschlange bedeutet fachlich, dass ein Ernte-Annahme-CTA zulaessig ist.
 - Die Artikel-API `/api/v1/articles?search=...` ist aktuell die kanonische Quelle fuer die Auflösung auf `article_id`.
 - Bei fehlender Eindeutigkeit ist Freitext-Fallback fachlich sicherer als automatische Fehlzuordnung.
+
+## Status
+
+**Erstanalyse abgeschlossen** — Queue-CTA und Artikel-API dokumentiert.

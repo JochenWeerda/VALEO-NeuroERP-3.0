@@ -103,3 +103,7 @@ flowchart TD
 - Settlements besitzen derzeit keine belastbare Kampagnen-ID; `created_at` im Kampagnenfenster ist deshalb der einzig verfuegbare restart-sichere Filter.
 - Der fachlich richtige Abschlussort bleibt die bestehende Abrechnungsmaske; eine neue Spezialmaske waere fuer diesen Slice Overengineering.
 - Kampagnen in `erntefenster-konfig.tsx` sind der kanonische Einstieg fuer saisonale Abschlusspruefungen.
+
+## Status
+
+**Erstanalyse abgeschlossen** — Kampagnenabschluss dokumentiert.

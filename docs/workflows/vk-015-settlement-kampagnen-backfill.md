@@ -93,3 +93,7 @@ flowchart TD
 - `created_at` bleibt fuer den Repair-Fall die einzig verfuegbare Legacy-Zuordnungsbasis.
 - Bei Kampagnenueberlappung ist Nicht-Zuordnen fachlich sicherer als heuristisches Migrieren.
 - Ein kampagnenbezogener CTA auf der Standardkarte reicht fuer den operativen Scope; keine Spezialmaske noetig.
+
+## Status
+
+**Erstanalyse abgeschlossen** — Settlement-Kampagnen-Backfill dokumentiert.

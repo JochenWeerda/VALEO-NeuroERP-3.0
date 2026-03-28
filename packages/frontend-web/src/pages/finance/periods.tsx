@@ -5,6 +5,7 @@
  */
 
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { apiClient } from '@/lib/api-client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -14,7 +15,7 @@ import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Lock, Plus, AlertCircle } from 'lucide-react'
+import { Lock, Unlock, Plus, AlertCircle } from 'lucide-react'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
 import { useToast } from '@/hooks/use-toast'
@@ -34,6 +35,10 @@ type AccountingPeriod = {
 export default function PeriodsPage(): JSX.Element {
   const { t } = useTranslation()
   const { toast } = useToast()
+  const [searchParams] = useSearchParams()
+  const workflowInstanceId = searchParams.get('workflowInstanceId')
+  const workflowProcess = searchParams.get('workflowProcess')
+  const workflowCase = searchParams.get('workflowCase')
   const [periods, setPeriods] = useState<AccountingPeriod[]>([])
   const [loading, setLoading] = useState(true)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
@@ -102,6 +107,14 @@ export default function PeriodsPage(): JSX.Element {
         closed_by: closeBy,
       })
 
+      if (workflowInstanceId && workflowProcess) {
+        try {
+          await apiClient.post(`/api/v1/process/flow-spines/${workflowProcess}/instances/${workflowInstanceId}/transitions`, {
+            node_id: 'abschluss',
+            new_status: 'ok',
+          })
+        } catch { /* best-effort, don't block user */ }
+      }
       toast({
         title: t('common.success'),
         description: t('finance.periods.periodClosed', { period: selectedPeriod.period }),
@@ -115,6 +128,27 @@ export default function PeriodsPage(): JSX.Element {
       toast({
         title: t('common.error'),
         description: error?.response?.data?.detail || error.message || t('finance.periods.closeError'),
+        variant: 'destructive',
+      })
+    }
+  }
+
+  async function reopenPeriod(period: AccountingPeriod): Promise<void> {
+    try {
+      await apiClient.put(`/api/v1/finance/periods/${period.id}`, {
+        status: 'OPEN',
+        reopened_by: closeBy || 'system',
+      })
+      toast({
+        title: t('common.success'),
+        description: `Periode ${period.period} wurde wieder geöffnet.`,
+      })
+      await fetchPeriods()
+    } catch (error: any) {
+      console.error('Error reopening period:', error)
+      toast({
+        title: t('common.error'),
+        description: error?.response?.data?.detail || error.message || 'Fehler beim Wiedereröffnen der Periode.',
         variant: 'destructive',
       })
     }
@@ -213,6 +247,16 @@ export default function PeriodsPage(): JSX.Element {
               {t('finance.periods.close')}
             </Button>
           )}
+          {row.original.status === 'CLOSED' && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => reopenPeriod(row.original)}
+            >
+              <Unlock className="h-4 w-4 mr-1" />
+              Wiedereröffnen
+            </Button>
+          )}
         </div>
       ),
     },
@@ -220,6 +264,11 @@ export default function PeriodsPage(): JSX.Element {
 
   return (
     <div className="space-y-6 p-6">
+      {workflowInstanceId && (
+        <div className="mb-4 rounded-md border border-indigo-500/30 bg-indigo-500/10 px-4 py-2 text-sm text-indigo-200">
+          Flow-Spine: {workflowCase || workflowProcess} (Instanz {workflowInstanceId.slice(0, 8)}...)
+        </div>
+      )}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">{t('finance.periods.title')}</h2>

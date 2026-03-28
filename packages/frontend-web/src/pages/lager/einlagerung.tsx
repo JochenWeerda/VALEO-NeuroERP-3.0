@@ -3,7 +3,7 @@
  * Touch-Targets >= 44px, Lagerort-Auswahl via TouchCard statt <select>
  */
 import { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { Wizard } from '@/components/patterns/Wizard'
 import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
@@ -41,6 +41,10 @@ const FALLBACK_ARTIKEL = ['Weizen', 'Gerste', 'Raps', 'Mais', 'Roggen', 'Hafer',
 export default function EinlagerungPage(): JSX.Element {
   const navigate = useNavigate()
   const { toast } = useToast()
+  const [searchParams] = useSearchParams()
+  const workflowInstanceId = searchParams.get('workflowInstanceId')
+  const workflowProcess = searchParams.get('workflowProcess')
+  const workflowCase = searchParams.get('workflowCase')
   const [einlagerung, setEinlagerung] = useState<EinlagerungData>({
     chargenId: '',
     artikel: '',
@@ -98,7 +102,15 @@ export default function EinlagerungPage(): JSX.Element {
       })
       return response.data
     },
-    onSuccess: () => {
+    onSuccess: async () => {
+      if (workflowInstanceId && workflowProcess) {
+        try {
+          await apiClient.post(`/api/v1/process/flow-spines/${workflowProcess}/instances/${workflowInstanceId}/transitions`, {
+            node_id: 'inventory-check',
+            new_status: 'ok',
+          })
+        } catch { /* best-effort, don't block user */ }
+      }
       toast({
         title: 'Einlagerung gebucht',
         description: `${einlagerung.artikel} (${einlagerung.chargenId}) — ${einlagerung.menge} t → ${einlagerung.lagerort}`,
@@ -225,6 +237,11 @@ export default function EinlagerungPage(): JSX.Element {
   return (
     <div className="flex flex-col">
       <div className="p-4 sm:p-6">
+        {workflowInstanceId && (
+          <div className="mb-4 rounded-md border border-indigo-500/30 bg-indigo-500/10 px-4 py-2 text-sm text-indigo-200">
+            Flow-Spine: {workflowCase || workflowProcess} (Instanz {workflowInstanceId.slice(0, 8)}...)
+          </div>
+        )}
         <AgentProcessPanel domain="lager" className="mb-4" />
         <Wizard
           title="Einlagerung"

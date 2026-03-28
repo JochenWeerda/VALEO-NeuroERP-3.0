@@ -83,3 +83,7 @@ flowchart TD
 - RFQ ist im aktuellen Einkaufspfad keine eigene Ressource, sondern eine Statusphase der Einkaufsanfrage.
 - Einkaufsanfragen repraesentieren internen Bedarf und keine Lieferantenbindung.
 - `counterpartyId` aus dem Contract-Endpoint ist fuer den aktuellen Slice der beste verfuegbare Partnerbezug fuer den Rahmenabruf.
+
+## Status
+
+**Erstanalyse abgeschlossen** — Procure-to-Pay Vorbelegung dokumentiert.

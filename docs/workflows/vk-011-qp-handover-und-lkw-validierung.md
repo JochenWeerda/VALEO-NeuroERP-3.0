@@ -85,3 +85,7 @@ Neu mitpersistiert:
 - `quality_protocol_id` ist ein gueltiger Frontend-Write-Contract der Ernte-Annahme-API.
 - Der restart-sichere Mindestpfad wird ueber Query-Parameter erreicht; Route-State allein ist nicht ausreichend.
 - `bedingt` darf aktuell wie `freigegeben` in die Ernte-Annahme weiterlaufen.
+
+## Status
+
+**Erstanalyse abgeschlossen** — QP-Handover und LKW-Validierung dokumentiert.
