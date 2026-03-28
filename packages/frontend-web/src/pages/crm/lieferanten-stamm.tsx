@@ -265,13 +265,13 @@ const lieferantenConfig: MaskConfig = {
     }
   ],
   api: {
-    baseUrl: '/api/crm/lieferanten',
+    baseUrl: '/api/v1/crm/business-partners',
     endpoints: {
-      list: '/api/crm/lieferanten',
-      get: '/api/crm/lieferanten/{id}',
-      create: '/api/crm/lieferanten',
-      update: '/api/crm/lieferanten/{id}',
-      delete: '/api/crm/lieferanten/{id}'
+      list: '/api/v1/crm/business-partners',
+      get: '/api/v1/crm/business-partners/{id}',
+      create: '/api/v1/crm/business-partners',
+      update: '/api/v1/crm/business-partners/{id}',
+      delete: '/api/v1/crm/business-partners/{id}'
     }
   },
   permissions: ['crm.write', 'supplier.admin']

@@ -243,13 +243,13 @@ const createLieferantenListConfig = (t: any): ListConfig => ({
   defaultSort: { field: 'firma', direction: 'asc' },
   pageSize: 25,
   api: {
-    baseUrl: '/api/crm/lieferanten',
+    baseUrl: '/api/v1/crm/business-partners',
     endpoints: {
-      list: '/api/crm/lieferanten',
-      get: '/api/crm/lieferanten/{id}',
-      create: '/api/crm/lieferanten',
-      update: '/api/crm/lieferanten/{id}',
-      delete: '/api/crm/lieferanten/{id}'
+      list: '/api/v1/crm/business-partners',
+      get: '/api/v1/crm/business-partners/{id}',
+      create: '/api/v1/crm/business-partners',
+      update: '/api/v1/crm/business-partners/{id}',
+      delete: '/api/v1/crm/business-partners/{id}'
     }
   },
   permissions: ['crm.read', 'supplier.read'],
@@ -269,7 +269,7 @@ export default function LieferantenListePage(): JSX.Element {
     queryKey: ['crm', 'lieferanten'],
     queryFn: async () => {
       try {
-        const r = await apiClient.get('/api/crm/lieferanten')
+        const r = await apiClient.get('/api/v1/crm/business-partners')
         if (r.data) {
           const raw = r.data as any
           const items = raw.data || (Array.isArray(raw) ? raw : [])
@@ -380,7 +380,7 @@ export default function LieferantenListePage(): JSX.Element {
   const handleDelete = async (item: any) => {
     if (confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: 'Lieferant', defaultValue: `Lieferanten "${item.firma}" wirklich löschen?` }))) {
       try {
-        await apiClient.delete(`/api/crm/lieferanten/${item.id}`)
+        await apiClient.delete(`/api/v1/crm/business-partners/${item.id}`)
         invalidate()
       } catch {
         toast({

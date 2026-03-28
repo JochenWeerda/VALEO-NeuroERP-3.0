@@ -191,3 +191,13 @@ flowchart TD
 ---
 
 *Erstellt von Claude Opus 4.6 — Slice CMP-001 — 2026-03-27*
+
+## Status
+
+| Slice | Beschreibung | Status |
+|-------|-------------|--------|
+| COM-001 | Workflow-Analyse + Mermaid | abgeschlossen |
+| COM-002 | BVL-Umsaetze Endpoint | abgeschlossen |
+| COM-003 | CamelCase-Mismatch in Registern gefixt | abgeschlossen |
+| COM-004 | Audit-Evidence API registriert | abgeschlossen |
+| COM-005 | PCN-Liste Seite + Route | abgeschlossen |

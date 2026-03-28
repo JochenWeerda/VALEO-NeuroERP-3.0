@@ -300,13 +300,13 @@ const createKundenConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
     }
   ],
   api: {
-    baseUrl: '/api/crm/kunden',
+    baseUrl: '/api/v1/crm/customers',
     endpoints: {
-      list: '/api/crm/kunden',
-      get: '/api/crm/kunden/{id}',
-      create: '/api/crm/kunden',
-      update: '/api/crm/kunden/{id}',
-      delete: '/api/crm/kunden/{id}'
+      list: '/api/v1/crm/customers',
+      get: '/api/v1/crm/customers/{id}',
+      create: '/api/v1/crm/customers',
+      update: '/api/v1/crm/customers/{id}',
+      delete: '/api/v1/crm/customers/{id}'
     }
   },
   permissions: ['crm.write', 'customer.admin']

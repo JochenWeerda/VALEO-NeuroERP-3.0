@@ -206,13 +206,13 @@ const createKundenListConfig = (t: any, entityTypeLabel: string): ListConfig => 
   defaultSort: { field: 'firma', direction: 'asc' },
   pageSize: 25,
   api: {
-    baseUrl: '/api/crm/kunden',
+    baseUrl: '/api/v1/crm/customers',
     endpoints: {
-      list: '/api/crm/kunden',
-      get: '/api/crm/kunden/{id}',
-      create: '/api/crm/kunden',
-      update: '/api/crm/kunden/{id}',
-      delete: '/api/crm/kunden/{id}'
+      list: '/api/v1/crm/customers',
+      get: '/api/v1/crm/customers/{id}',
+      create: '/api/v1/crm/customers',
+      update: '/api/v1/crm/customers/{id}',
+      delete: '/api/v1/crm/customers/{id}'
     }
   },
   permissions: ['crm.read', 'customer.read'],
@@ -234,7 +234,7 @@ export default function KundenListePage(): JSX.Element {
     queryKey: ['crm', 'kunden'],
     queryFn: async () => {
       try {
-        const r = await apiClient.get('/api/crm/kunden')
+        const r = await apiClient.get('/api/v1/crm/customers')
         if (r.data) {
           const raw = r.data as any
           const items = raw.data || (Array.isArray(raw) ? raw : [])
@@ -315,7 +315,7 @@ export default function KundenListePage(): JSX.Element {
   const handleDelete = async (item: any) => {
     if (confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) {
       try {
-        await apiClient.delete(`/api/crm/kunden/${item.id}`)
+        await apiClient.delete(`/api/v1/crm/customers/${item.id}`)
         invalidate()
       } catch {
         toast({

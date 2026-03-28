@@ -225,3 +225,15 @@ flowchart TD
 ### INV-007: Lagerplaetze echte Belegung
 - Auslastung berechnet sich jetzt aus `used_capacity / total_capacity` statt fest `0%`
 - Belegte Plaetze werden proportional zur Kapazitaet berechnet
+
+## Status
+
+| Slice | Beschreibung | Status |
+|-------|-------------|--------|
+| INV-001 | Workflow-Analyse + Mermaid | abgeschlossen |
+| INV-002 | Dashboard echte KPIs | abgeschlossen |
+| INV-003 | Ein-/Auslagerung StockMovement | abgeschlossen |
+| INV-004 | Einlagerung Stammdaten-Anbindung | abgeschlossen |
+| INV-005 | Transfer-Verbuchung POST mit StockMovements | abgeschlossen |
+| INV-006 | Inventur-Kopf CRUD Endpoints | abgeschlossen |
+| INV-007 | Lagerplaetze echte Belegung | abgeschlossen |
