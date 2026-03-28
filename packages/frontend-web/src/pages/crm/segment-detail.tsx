@@ -18,7 +18,7 @@ import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { DataTable } from '@/components/ui/data-table'
 
 // API Client
-const apiClient = createApiClient('/api/crm-marketing')
+const apiClient = createApiClient('/api/v1/marketing')
 
 // Zod-Schema für Segmente
 const createSegmentSchema = (t: any) => z.object({
@@ -162,12 +162,12 @@ const createSegmentConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
     }
   ],
   api: {
-    baseUrl: '/api/crm-marketing/segments',
+    baseUrl: '/api/v1/marketing/segments',
     endpoints: {
-      get: '/api/crm-marketing/segments/{id}',
-      create: '/api/crm-marketing/segments',
-      update: '/api/crm-marketing/segments/{id}',
-      delete: '/api/crm-marketing/segments/{id}'
+      get: '/api/v1/marketing/segments/{id}',
+      create: '/api/v1/marketing/segments',
+      update: '/api/v1/marketing/segments/{id}',
+      delete: '/api/v1/marketing/segments/{id}'
     }
   },
   permissions: ['crm.read', 'marketing.read', 'marketing.write']

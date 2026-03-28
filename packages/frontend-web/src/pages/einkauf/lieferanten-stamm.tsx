@@ -178,10 +178,10 @@ export default function LieferantenStammPage(): JSX.Element {
       // Versuche verschiedene API-Endpunkte
       let response: any
       try {
-        response = (await apiClient.get<any>(`/api/partners/${id}?type=supplier`)) as any
+        response = (await apiClient.get<any>(`/api/v1/crm/business-partners/${id}?type=supplier`)) as any
       } catch (e1) {
         try {
-          response = (await apiClient.get<any>(`/api/einkauf/lieferanten/${id}`)) as any
+          response = (await apiClient.get<any>(`/api/v1/einkauf/lieferanten/${id}`)) as any
         } catch (e2) {
           toast({
             variant: 'destructive',
@@ -268,12 +268,12 @@ export default function LieferantenStammPage(): JSX.Element {
       }
 
       if (id) {
-        await apiClient.put(`/api/partners/${id}?type=supplier`, payload)
+        await apiClient.put(`/api/v1/crm/business-partners/${id}?type=supplier`, payload)
         toast({
           title: t('crud.messages.updateSuccess', { entityType: entityTypeLabel }),
         })
       } else {
-        await apiClient.post('/api/partners?type=supplier', payload)
+        await apiClient.post('/api/v1/crm/business-partners?type=supplier', payload)
         toast({
           title: t('crud.messages.createSuccess', { entityType: entityTypeLabel }),
         })
@@ -303,7 +303,7 @@ export default function LieferantenStammPage(): JSX.Element {
 
     setLoading(true)
     try {
-      const results = (await apiClient.get<any[]>(`/api/partners?type=supplier&query=${encodeURIComponent(lieferant.name)}`)) as unknown as any[]
+      const results = (await apiClient.get<any[]>(`/api/v1/crm/business-partners?type=supplier&query=${encodeURIComponent(lieferant.name)}`)) as unknown as any[]
       const duplicates = results.filter((s: any) => 
         s.id !== lieferant.id && 
         (s.name?.toLowerCase().includes(lieferant.name.toLowerCase()) || 

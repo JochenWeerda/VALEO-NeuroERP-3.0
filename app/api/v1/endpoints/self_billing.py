@@ -381,18 +381,45 @@ async def preview_self_billing(
     if not dq_result.bestanden:
         raise HTTPException(status_code=422, detail=build_dq_error_detail("SelfBilling", dq_result))
 
-    from modules.agrar.services.self_billing_service import create_credit_note, CreditNoteCreate
-    # Placeholder: Berechne aus harvest_acceptance (Positionen, Preise, Qualität)
-    # Hier: Minimal-Draft basierend auf Annahme-Summen
+    from sqlalchemy import text as sa_text
+    line_items = []
+    try:
+        rows = db.execute(sa_text("""
+            SELECT hap.position_number, hap.description,
+                   COALESCE(hap.quantity_kg, 0) AS menge_kg,
+                   COALESCE(hap.unit_price_eur_per_t, 0) AS preis_eur_t,
+                   COALESCE(hap.quality_grade, '') AS qualitaet
+            FROM domain_inventory.harvest_acceptance_positions hap
+            WHERE hap.harvest_acceptance_id = :ha_id
+            ORDER BY hap.position_number
+        """), {"ha_id": payload.harvest_acceptance_id}).fetchall()
+
+        for r in rows:
+            menge_t = float(r.menge_kg) / 1000.0
+            netto = round(menge_t * float(r.preis_eur_t), 2)
+            line_items.append({
+                "position": r.position_number,
+                "description": r.description or "",
+                "quantity_kg": float(r.menge_kg),
+                "quantity_t": round(menge_t, 3),
+                "unit_price_eur_t": float(r.preis_eur_t),
+                "net_amount_eur": netto,
+                "quality_grade": r.qualitaet,
+            })
+    except Exception:
+        pass
+
+    calculated_net = sum(li["net_amount_eur"] for li in line_items) if line_items else payload.total_net_amount_eur
+    vat_amount = round(calculated_net * (payload.vat_rate_percent / 100), 2)
+
     return {
         "harvest_acceptance_id": payload.harvest_acceptance_id,
         "status": "draft",
-        "total_net_amount_eur": payload.total_net_amount_eur,
-        "total_vat_amount_eur": max(payload.total_gross_amount_eur - payload.total_net_amount_eur, 0),
-        "total_gross_amount_eur": payload.total_gross_amount_eur,
+        "total_net_amount_eur": round(calculated_net, 2),
+        "total_vat_amount_eur": vat_amount,
+        "total_gross_amount_eur": round(calculated_net + vat_amount, 2),
         "vat_rate_percent": payload.vat_rate_percent,
-        "line_items": [],
-        "note": "Preview: Beträge aus Ernte-Annahme-Positionen berechnen (TODO: Vollimplementierung)",
+        "line_items": line_items,
     }
 
 

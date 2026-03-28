@@ -23,7 +23,7 @@ import {
 } from 'lucide-react'
 
 // API Client
-const apiClient = createApiClient('/api/crm-sales')
+const apiClient = createApiClient('/api/v1/crm')
 
 interface Opportunity {
   id: string

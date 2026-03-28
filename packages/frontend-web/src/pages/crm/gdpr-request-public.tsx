@@ -13,7 +13,7 @@ import { toast } from '@/hooks/use-toast'
 import { useTenant } from '@/hooks/useTenant'
 
 // API Client
-const apiClient = createApiClient('/api/crm-gdpr')
+const apiClient = createApiClient('/api/v1/gdpr')
 
 export default function GDPRRequestPublicPage(): JSX.Element {
   const { t } = useTranslation()
@@ -35,7 +35,7 @@ export default function GDPRRequestPublicPage(): JSX.Element {
     setLoading(true)
 
     try {
-      const response = await apiClient.post('/gdpr/requests', {
+      const response = await apiClient.post('/requests', {
         tenant_id: tenantId,
         request_type: formData.request_type,
         contact_id: formData.contact_id,
@@ -76,7 +76,7 @@ export default function GDPRRequestPublicPage(): JSX.Element {
 
     setLoading(true)
     try {
-      const response = await apiClient.get(`/gdpr/requests/${requestId}`)
+      const response = await apiClient.get(`/requests/${requestId}`)
       if (response.success) {
         setStatusData(response.data)
         if (response.data.status === 'completed' && response.data.response_file_path) {
@@ -99,7 +99,7 @@ export default function GDPRRequestPublicPage(): JSX.Element {
     if (!requestId) return
 
     try {
-      const response = await fetch(`/api/crm-gdpr/gdpr/requests/${requestId}/download`)
+      const response = await fetch(`/api/v1/gdpr/requests/${requestId}/download`)
       if (response.ok) {
         const blob = await response.blob()
         const url = window.URL.createObjectURL(blob)

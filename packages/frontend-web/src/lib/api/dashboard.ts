@@ -106,24 +106,42 @@ export function useSalesDashboard() {
   return useQuery({
     queryKey: dashboardKeys.sales(),
     queryFn: async () => {
-      // TODO: Real endpoint /api/v1/dashboard/sales
-      // For now, aggregate from customers + orders
-      const customersResponse = await apiClient.get<{ items: any[], total: number }>('/api/v1/crm/customers')
-      const customers = customersResponse.data.items || []
-      
+      const now = new Date()
+      const periodFrom = `${now.getFullYear()}-01-01`
+      const periodTo = now.toISOString().slice(0, 10)
+
+      const [summaryRes, topRes] = await Promise.allSettled([
+        apiClient.get<{
+          total_revenue: number
+          total_orders: number
+          avg_order_value: number
+          period_from: string
+          period_to: string
+        }>(`/api/v1/sales/reports/summary?period_from=${periodFrom}&period_to=${periodTo}`),
+        apiClient.get<Array<{ customer_id: string; customer_name: string; total_revenue: number }>>(
+          `/api/v1/sales/reports/top-customers?period_from=${periodFrom}&period_to=${periodTo}&limit=5`,
+        ),
+      ])
+
+      const summary =
+        summaryRes.status === 'fulfilled' ? summaryRes.value.data : null
+      const topCustomers =
+        topRes.status === 'fulfilled' ? topRes.value.data || [] : []
+
       return {
-        totalRevenue: 450000,
-        totalOrders: 156,
-        avgOrderValue: 2885,
-        topCustomers: customers.slice(0, 5).map((c: any) => ({
-          id: c.id,
-          name: c.name,
-          revenue: Math.random() * 100000
+        totalRevenue: summary?.total_revenue ?? 0,
+        totalOrders: summary?.total_orders ?? 0,
+        avgOrderValue: summary?.avg_order_value ?? 0,
+        topCustomers: (Array.isArray(topCustomers) ? topCustomers : []).map((c: any) => ({
+          id: c.customer_id,
+          name: c.customer_name,
+          revenue: c.total_revenue,
         })),
-        revenueByMonth: []
+        revenueByMonth: [],
       } as SalesDashboardData
     },
     initialData: EMPTY_SALES_DASHBOARD,
+    staleTime: 5 * 60 * 1000,
   })
 }
 
@@ -185,76 +203,62 @@ export function useExecutiveDashboard() {
   return useQuery({
     queryKey: dashboardKeys.executive(),
     queryFn: async () => {
-      try {
-        const [salesRes, articlesRes, financeRes] = await Promise.allSettled([
-          apiClient.get<{ items: any[]; total: number }>('/api/v1/crm/customers'),
-          apiClient.get<{ items: any[]; total: number }>('/api/v1/articles'),
-          apiClient.get<{ items: any[] }>('/api/v1/journal-entries'),
-        ])
+      const now = new Date()
+      const periodFrom = `${now.getFullYear()}-01-01`
+      const periodTo = now.toISOString().slice(0, 10)
 
-        const customers =
-          salesRes.status === 'fulfilled' ? salesRes.value.data : { items: [], total: 0 }
-        const articles =
-          articlesRes.status === 'fulfilled' ? articlesRes.value.data : { items: [], total: 0 }
-        const journalEntries =
-          financeRes.status === 'fulfilled' ? financeRes.value.data.items || [] : []
+      const [salesSummaryRes, customersRes, articlesRes, journalRes] = await Promise.allSettled([
+        apiClient.get<{
+          total_revenue: number
+          total_orders: number
+          avg_order_value: number
+        }>(`/api/v1/sales/reports/summary?period_from=${periodFrom}&period_to=${periodTo}`),
+        apiClient.get<{ items: any[]; total: number }>('/api/v1/crm/customers'),
+        apiClient.get<{ items: any[]; total: number }>('/api/v1/articles'),
+        apiClient.get<{ items: any[] }>('/api/v1/journal-entries'),
+      ])
 
-        // Calculate revenue from journal entries (positive amounts)
-        const totalRevenue = journalEntries
-          .filter((e: any) => Number(e.amount) > 0)
-          .reduce((sum: number, e: any) => sum + Number(e.amount), 0)
-        const totalCosts = journalEntries
-          .filter((e: any) => Number(e.amount) < 0)
-          .reduce((sum: number, e: any) => sum + Math.abs(Number(e.amount)), 0)
+      const salesSummary =
+        salesSummaryRes.status === 'fulfilled' ? salesSummaryRes.value.data : null
+      const customers =
+        customersRes.status === 'fulfilled' ? customersRes.value.data : { items: [], total: 0 }
+      const articles =
+        articlesRes.status === 'fulfilled' ? articlesRes.value.data : { items: [], total: 0 }
+      const journalEntries =
+        journalRes.status === 'fulfilled' ? journalRes.value.data.items || [] : []
 
-        return {
-          umsatz: totalRevenue || 1250000,
-          ertrag: totalRevenue - totalCosts || 430000,
-          wachstum: 8.7,
-          kunden: customers.total || customers.items?.length || 142,
-          mitarbeiter: 27,
-          kennzahlen: [
-            {
-              label: 'Umsatzrendite',
-              wert:
-                totalRevenue > 0
-                  ? `${(((totalRevenue - totalCosts) / totalRevenue) * 100).toFixed(1)}%`
-                  : '34.4%',
-              trend: '+2.1%',
-            },
-            { label: 'Eigenkapitalquote', wert: '58.2%', trend: '+3.5%' },
-            {
-              label: 'Lagerumschlag',
-              wert: articles.total ? (articles.total / 12).toFixed(1) : '8.2',
-              trend: '+0.8',
-            },
-          ],
-          bereiche: [
-            { name: 'Verkauf Getreide', umsatz: totalRevenue * 0.42 || 525000, anteil: 42 },
-            { name: 'Verkauf Futtermittel', umsatz: totalRevenue * 0.3 || 380000, anteil: 30 },
-            { name: 'Verkauf Betriebsmittel', umsatz: totalRevenue * 0.28 || 345000, anteil: 28 },
-          ],
-        } as ExecutiveDashboardData
-      } catch {
-        // Fallback to demo data
-        return {
-          umsatz: 1250000,
-          ertrag: 430000,
-          wachstum: 8.7,
-          kunden: 142,
-          mitarbeiter: 27,
-          kennzahlen: [
-            { label: 'Umsatzrendite', wert: '34.4%', trend: '+2.1%' },
-            { label: 'Eigenkapitalquote', wert: '58.2%', trend: '+3.5%' },
-            { label: 'Lagerumschlag', wert: '8.2', trend: '+0.8' },
-          ],
-          bereiche: [
-            { name: 'Verkauf Getreide', umsatz: 525000, anteil: 42 },
-            { name: 'Verkauf Futtermittel', umsatz: 380000, anteil: 30 },
-            { name: 'Verkauf Betriebsmittel', umsatz: 345000, anteil: 28 },
-          ],
-        } as ExecutiveDashboardData
-      }
+      const totalRevenue = salesSummary?.total_revenue ?? journalEntries
+        .filter((e: any) => Number(e.amount) > 0)
+        .reduce((sum: number, e: any) => sum + Number(e.amount), 0)
+      const totalCosts = journalEntries
+        .filter((e: any) => Number(e.amount) < 0)
+        .reduce((sum: number, e: any) => sum + Math.abs(Number(e.amount)), 0)
+
+      const kundenCount = customers.total || customers.items?.length || 0
+      const artikelCount = articles.total || articles.items?.length || 0
+      const rendite = totalRevenue > 0
+        ? ((totalRevenue - totalCosts) / totalRevenue * 100).toFixed(1)
+        : '0.0'
+
+      return {
+        umsatz: totalRevenue,
+        ertrag: totalRevenue - totalCosts,
+        wachstum: 0,
+        kunden: kundenCount,
+        mitarbeiter: 0,
+        kennzahlen: [
+          { label: 'Umsatzrendite', wert: `${rendite}%`, trend: '' },
+          { label: 'Kunden gesamt', wert: String(kundenCount), trend: '' },
+          { label: 'Lagerumschlag', wert: artikelCount > 0 ? (artikelCount / 12).toFixed(1) : '0', trend: '' },
+        ],
+        bereiche: totalRevenue > 0
+          ? [
+              { name: 'Verkauf Getreide', umsatz: Math.round(totalRevenue * 0.42), anteil: 42 },
+              { name: 'Verkauf Futtermittel', umsatz: Math.round(totalRevenue * 0.30), anteil: 30 },
+              { name: 'Verkauf Betriebsmittel', umsatz: Math.round(totalRevenue * 0.28), anteil: 28 },
+            ]
+          : [],
+      } as ExecutiveDashboardData
     },
     initialData: EMPTY_EXECUTIVE_DASHBOARD,
     staleTime: 5 * 60 * 1000,
@@ -265,50 +269,43 @@ export function useProcurementDashboard() {
   return useQuery({
     queryKey: dashboardKeys.procurement(),
     queryFn: async () => {
-      try {
-        const [openItemsRes] = await Promise.allSettled([
-          apiClient.get<{ items: any[] }>('/api/v1/open-items'),
-        ])
+      const [statsRes, posRes, openItemsRes] = await Promise.allSettled([
+        apiClient.get<{ totalOrders: number; totalValue: number; byStatus: Record<string, number> }>(
+          '/api/v1/purchase-orders/statistics',
+        ),
+        apiClient.get<{ data: any[]; total: number }>('/api/v1/purchase-orders?status=open&pageSize=5'),
+        apiClient.get<{ items: any[] }>('/api/v1/finance/open-items'),
+      ])
 
-        const openItems =
-          openItemsRes.status === 'fulfilled' ? openItemsRes.value.data.items || [] : []
+      const stats = statsRes.status === 'fulfilled' ? statsRes.value.data : null
+      const posData = posRes.status === 'fulfilled' ? posRes.value.data : null
+      const openItems = openItemsRes.status === 'fulfilled' ? openItemsRes.value.data.items || [] : []
 
-        const offenePosten = openItems.reduce(
-          (sum: number, item: any) => sum + Number(item.amount || 0),
-          0,
-        )
+      const today = new Date()
+      const offenePosten = openItems.reduce(
+        (sum: number, item: any) => sum + Number(item.amount || 0), 0,
+      )
+      const ueberfaellig = openItems.filter(
+        (item: any) => new Date(item.due_date) < today && item.status === 'open',
+      ).length
 
-        const today = new Date()
-        const ueberfaellig = openItems.filter(
-          (item: any) => new Date(item.due_date) < today && item.status === 'open',
-        ).length
+      const bestellungen = (posData?.data || []).slice(0, 5).map((po: any) => ({
+        nummer: po.purchaseOrderNumber || po.id,
+        lieferant: po.supplierName || po.supplier_id || '',
+        betrag: Number(po.totalAmount || po.total || 0),
+        status: (po.status === 'approved' || po.status === 'open' ? 'offen'
+          : po.status === 'partially_delivered' ? 'teilgeliefert'
+          : 'komplett') as 'offen' | 'teilgeliefert' | 'komplett',
+      }))
 
-        return {
-          bestellungenOffen: 8,
-          einkaufsvolumen: 175000,
-          lieferantenAktiv: 28,
-          offenePosten: offenePosten || 125000,
-          ueberfaellig: ueberfaellig || 3,
-          bestellungen: [
-            { nummer: 'PO-2026-042', lieferant: 'Saatgut AG', betrag: 25000, status: 'offen' as const },
-            { nummer: 'PO-2026-041', lieferant: 'Dünger GmbH', betrag: 18500, status: 'teilgeliefert' as const },
-            { nummer: 'PO-2026-040', lieferant: 'Technik GmbH', betrag: 8900, status: 'komplett' as const },
-          ],
-        } as ProcurementDashboardData
-      } catch {
-        return {
-          bestellungenOffen: 8,
-          einkaufsvolumen: 175000,
-          lieferantenAktiv: 28,
-          offenePosten: 125000,
-          ueberfaellig: 3,
-          bestellungen: [
-            { nummer: 'PO-2026-042', lieferant: 'Saatgut AG', betrag: 25000, status: 'offen' as const },
-            { nummer: 'PO-2026-041', lieferant: 'Dünger GmbH', betrag: 18500, status: 'teilgeliefert' as const },
-            { nummer: 'PO-2026-040', lieferant: 'Technik GmbH', betrag: 8900, status: 'komplett' as const },
-          ],
-        } as ProcurementDashboardData
-      }
+      return {
+        bestellungenOffen: stats?.byStatus?.['open'] ?? stats?.byStatus?.['approved'] ?? 0,
+        einkaufsvolumen: stats?.totalValue ?? 0,
+        lieferantenAktiv: 0,
+        offenePosten,
+        ueberfaellig,
+        bestellungen,
+      } as ProcurementDashboardData
     },
     initialData: EMPTY_PROCUREMENT_DASHBOARD,
     staleTime: 5 * 60 * 1000,

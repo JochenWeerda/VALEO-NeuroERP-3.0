@@ -17,7 +17,7 @@ const OpportunitiesForecastCharts = lazy(() =>
   import('@/pages/crm/charts/OpportunitiesForecastCharts').then((module) => ({ default: module.default })),
 )
 
-const apiClient = createApiClient('/api/crm-sales')
+const apiClient = createApiClient('/api/v1/crm')
 
 interface ForecastData {
   period: string

@@ -20,7 +20,7 @@ const CampaignDetailPerformanceChart = lazy(() =>
   import('@/pages/crm/charts/CampaignDetailPerformanceChart').then((module) => ({ default: module.default })),
 )
 
-const apiClient = createApiClient('/api/crm-marketing')
+const apiClient = createApiClient('/api/v1/marketing')
 
 function validateCampaignForm(formData: Record<string, any>, t: any): { valid: boolean; errors: string[] } {
   const errorMessage = t('crud.messages.validationError')
@@ -78,8 +78,8 @@ const createCampaignConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
             { value: 'cancelled', label: t('status.cancelled') },
           ],
         },
-        { name: 'segment_id', label: t('crud.fields.segment'), type: 'lookup', endpoint: '/api/crm-marketing/segments', displayField: 'name', valueField: 'id' },
-        { name: 'template_id', label: t('crud.fields.template'), type: 'lookup', endpoint: '/api/crm-marketing/campaigns/templates', displayField: 'name', valueField: 'id' },
+        { name: 'segment_id', label: t('crud.fields.segment'), type: 'lookup', endpoint: '/api/v1/marketing/segments', displayField: 'name', valueField: 'id' },
+        { name: 'template_id', label: t('crud.fields.template'), type: 'lookup', endpoint: '/api/v1/marketing/campaigns/templates', displayField: 'name', valueField: 'id' },
         { name: 'budget', label: t('crud.fields.budget'), type: 'currency', placeholder: t('crud.tooltips.placeholders.budget') },
         { name: 'spent', label: t('crud.fields.spent'), type: 'currency', readOnly: true },
       ],
@@ -114,12 +114,12 @@ const createCampaignConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
     { key: 'cancel', label: t('crud.actions.cancel'), type: 'secondary', onClick: () => undefined },
   ],
   api: {
-    baseUrl: '/api/crm-marketing/campaigns',
+    baseUrl: '/api/v1/marketing/campaigns',
     endpoints: {
-      get: '/api/crm-marketing/campaigns/{id}',
-      create: '/api/crm-marketing/campaigns',
-      update: '/api/crm-marketing/campaigns/{id}',
-      delete: '/api/crm-marketing/campaigns/{id}',
+      get: '/api/v1/marketing/campaigns/{id}',
+      create: '/api/v1/marketing/campaigns',
+      update: '/api/v1/marketing/campaigns/{id}',
+      delete: '/api/v1/marketing/campaigns/{id}',
     },
   },
   permissions: ['crm.read', 'marketing.read', 'marketing.write'],

@@ -84,7 +84,7 @@ export default function RfqBidsPage(): JSX.Element {
   useEffect(() => {
     if (rfqId) {
       apiClient.get(`/api/v1/einkauf/anfragen/${rfqId}`).then((r: any) => setRfq(r as any)).catch(() => {})
-      apiClient.get('/api/partners?type=supplier').then((r: any) => {
+      apiClient.get('/api/v1/crm/business-partners').then((r: any) => {
         setAvailableSuppliers(Array.isArray(r) ? r : [])
       }).catch(() => {})
     }

@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useQuery } from '@tanstack/react-query'
 import { z } from 'zod'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData } from '@/components/mask-builder/hooks'
@@ -8,6 +9,7 @@ import { useMaskData } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { getEntityTypeLabel, getDetailTitle, getSuccessMessage, getErrorMessage } from '@/features/crud/utils/i18n-helpers'
 import { createApiClient } from '@/components/mask-builder/utils/api'
+import { apiClient as globalApiClient } from '@/lib/api-client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -15,8 +17,7 @@ import { formatDate, formatCurrency } from '@/components/mask-builder/utils/form
 import { toast } from '@/hooks/use-toast'
 import { ArrowLeft, History, FileText } from 'lucide-react'
 
-// API Client
-const apiClient = createApiClient('/api/crm-sales')
+const apiClient = createApiClient('/api/v1/crm')
 
 // Zod-Schema für Opportunities
 const createOpportunitySchema = (t: any) => z.object({
@@ -49,7 +50,12 @@ function validateOpportunityForm(formData: unknown, t: any): { valid: boolean; e
 }
 
 // Konfiguration für Opportunity ObjectPage
-const createOpportunityConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
+const createOpportunityConfig = (
+  t: any,
+  entityTypeLabel: string,
+  customerOptions: Array<{ value: string; label: string }> = [],
+  contactOptions: Array<{ value: string; label: string }> = [],
+): MaskConfig => ({
   title: entityTypeLabel,
   subtitle: t('crud.detail.manage', { entityType: entityTypeLabel }),
   type: 'object-page',
@@ -110,15 +116,15 @@ const createOpportunityConfig = (t: any, entityTypeLabel: string): MaskConfig =>
           name: 'customer_id',
           label: t('crud.entities.customer'),
           type: 'select',
-          placeholder: t('crud.tooltips.placeholders.selectCustomer')
-          // TODO: Load customers from API
+          placeholder: t('crud.tooltips.placeholders.selectCustomer'),
+          options: customerOptions,
         },
         {
           name: 'contact_id',
           label: t('crud.entities.contact'),
           type: 'select',
-          placeholder: t('crud.tooltips.placeholders.selectContact')
-          // TODO: Load contacts from API
+          placeholder: t('crud.tooltips.placeholders.selectContact'),
+          options: contactOptions,
         },
         {
           name: 'owner_id',
@@ -419,7 +425,38 @@ export default function OpportunityDetailPage(): JSX.Element {
   const [loading, setLoading] = useState(false)
   const entityType = 'opportunity'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Opportunity')
-  const opportunityConfig = createOpportunityConfig(t, entityTypeLabel)
+
+  const { data: customersData } = useQuery({
+    queryKey: ['crm', 'customers-lookup'],
+    queryFn: async () => {
+      const r = await globalApiClient.get<{ items: any[]; total: number }>('/api/v1/crm/customers')
+      return r.data?.items || []
+    },
+    staleTime: 10 * 60 * 1000,
+  })
+  const { data: contactsData } = useQuery({
+    queryKey: ['crm', 'contacts-lookup'],
+    queryFn: async () => {
+      const r = await globalApiClient.get<any[]>('/api/v1/crm/contacts')
+      const items = Array.isArray(r.data) ? r.data : r.data?.items || []
+      return items
+    },
+    staleTime: 10 * 60 * 1000,
+  })
+
+  const customerOpts = useMemo(() =>
+    (customersData || []).map((c: any) => ({ value: c.id, label: c.name || c.firma || c.id })),
+    [customersData],
+  )
+  const contactOpts = useMemo(() =>
+    (contactsData || []).map((c: any) => ({
+      value: c.id,
+      label: [c.first_name, c.last_name].filter(Boolean).join(' ') || c.email || c.id,
+    })),
+    [contactsData],
+  )
+
+  const opportunityConfig = createOpportunityConfig(t, entityTypeLabel, customerOpts, contactOpts)
   const isNew = !id || id === 'neu' || id === 'new'
 
   const { data, saveData, isLoading: dataLoading } = useMaskData<Record<string, any>>({

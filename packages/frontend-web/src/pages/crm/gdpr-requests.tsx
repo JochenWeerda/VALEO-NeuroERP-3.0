@@ -143,13 +143,13 @@ const createGDPRRequestsConfig = (t: any, entityTypeLabel: string): ListConfig =
     }
   ],
   api: {
-    baseUrl: '/api/crm-gdpr/gdpr/requests',
+    baseUrl: '/api/v1/gdpr/requests',
     endpoints: {
-      list: '/api/crm-gdpr/gdpr/requests',
-      get: '/api/crm-gdpr/gdpr/requests/{id}',
-      create: '/api/crm-gdpr/gdpr/requests',
-      update: '/api/crm-gdpr/gdpr/requests/{id}',
-      delete: '/api/crm-gdpr/gdpr/requests/{id}'
+      list: '/api/v1/gdpr/requests',
+      get: '/api/v1/gdpr/requests/{id}',
+      create: '/api/v1/gdpr/requests',
+      update: '/api/v1/gdpr/requests/{id}',
+      delete: '/api/v1/gdpr/requests/{id}'
     }
   },
   permissions: ['crm.read', 'gdpr.read', 'gdpr.write']
@@ -166,7 +166,7 @@ export default function GDPRRequestsPage(): JSX.Element {
   const { data: queryData, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['crm', 'gdpr-requests'],
     queryFn: async () => {
-      const r = await apiClient.get('/api/crm-gdpr/gdpr/requests')
+      const r = await apiClient.get('/api/v1/gdpr/requests')
       const raw = r.data as any
       const items = Array.isArray(raw) ? raw : (raw.data || [])
       return { items, total: items.length }
@@ -189,7 +189,7 @@ export default function GDPRRequestsPage(): JSX.Element {
     } else if (action === 'delete' && item) {
       if (confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) {
         try {
-          await apiClient.delete(`/api/crm-gdpr/gdpr/requests/${item.id}`)
+          await apiClient.delete(`/api/v1/gdpr/requests/${item.id}`)
           toast({
             title: getSuccessMessage(t, 'delete', entityType),
           })

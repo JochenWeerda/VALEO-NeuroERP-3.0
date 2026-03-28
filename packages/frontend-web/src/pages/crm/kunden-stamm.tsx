@@ -319,7 +319,7 @@ function GDPRRequestsList({ contactId }: { contactId?: string }) {
   const { tenantId } = useTenant()
   const [requests, setRequests] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const gdprApiClient = createApiClient('/api/crm-gdpr')
+  const gdprApiClient = createApiClient('/api/v1/gdpr')
 
   useEffect(() => {
     const loadRequests = async () => {
@@ -329,7 +329,7 @@ function GDPRRequestsList({ contactId }: { contactId?: string }) {
       }
 
       try {
-        const response = await gdprApiClient.get('/gdpr/requests', {
+        const response = await gdprApiClient.get('/requests', {
           params: {
             tenant_id: tenantId,
             contact_id: contactId
@@ -439,7 +439,7 @@ function ConsentsList({ contactId }: { contactId?: string }) {
   const { tenantId } = useTenant()
   const [consents, setConsents] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const consentApiClient = createApiClient('/api/crm-consent')
+  const consentApiClient = createApiClient('/api/v1/crm')
 
   useEffect(() => {
     const loadConsents = async () => {

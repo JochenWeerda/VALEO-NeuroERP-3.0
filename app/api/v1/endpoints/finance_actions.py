@@ -55,14 +55,33 @@ async def run_bank_reconciliation(
     db: Session = Depends(get_db),
 ):
     """
-    Start Bankabgleich (Abgleich Job anstoßen oder Status setzen).
-    Für konkreten Abgleich: GET /finance/bank-reconciliation/{statement_id}/reconcile mit Query-Parametern nutzen.
+    Start Bankabgleich — delegiert an den bestehenden Reconciliation-Endpunkt.
     """
-    # Stub: can be extended to enqueue job or call reconcile logic
-    return ActionResponse(
-        success=True,
-        message=f"Bankabgleich für Konto {body.bank_account_id} angestoßen.",
-    )
+    from app.api.v1.endpoints.bank_reconciliation import reconcile_bank_statement as _reconcile
+
+    if not body.statement_id:
+        return ActionResponse(
+            success=False,
+            message="statement_id ist erforderlich fuer den Bankabgleich.",
+        )
+
+    try:
+        result = await _reconcile(
+            statement_id=body.statement_id,
+            bank_account_id=body.bank_account_id,
+            tenant_id=tenant_id,
+            db=db,
+        )
+        matched = getattr(result, "matched_count", 0) if hasattr(result, "matched_count") else len(getattr(result, "matched", []))
+        return ActionResponse(
+            success=True,
+            message=f"Bankabgleich abgeschlossen: {matched} Zuordnung(en) fuer Konto {body.bank_account_id}.",
+        )
+    except Exception as e:
+        return ActionResponse(
+            success=False,
+            message=f"Bankabgleich fehlgeschlagen: {str(e)}",
+        )
 
 
 # ── Journal entry post ─────────────────────────────────────────────────────────

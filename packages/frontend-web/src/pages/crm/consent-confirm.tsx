@@ -8,7 +8,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { CheckCircle2, XCircle, Loader2 } from 'lucide-react'
 
 // API Client
-const apiClient = createApiClient('/api/crm-consent')
+const apiClient = createApiClient('/api/v1/crm')
 
 export default function ConsentConfirmPage(): JSX.Element {
   const { t } = useTranslation()

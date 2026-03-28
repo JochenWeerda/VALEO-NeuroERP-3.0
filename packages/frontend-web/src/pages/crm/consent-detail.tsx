@@ -15,7 +15,7 @@ import { useTenant } from '@/hooks/useTenant'
 import { ArrowLeft, History } from 'lucide-react'
 
 // API Client
-const apiClient = createApiClient('/api/crm-consent')
+const apiClient = createApiClient('/api/v1/crm')
 
 // Zod-Schema für Consents
 const createConsentSchema = (t: any) => z.object({
@@ -175,12 +175,12 @@ const createConsentConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
     }
   ],
   api: {
-    baseUrl: '/api/crm-consent/consents',
+    baseUrl: '/api/v1/crm/consents',
     endpoints: {
-      get: '/api/crm-consent/consents/{id}',
-      create: '/api/crm-consent/consents',
-      update: '/api/crm-consent/consents/{id}',
-      delete: '/api/crm-consent/consents/{id}'
+      get: '/api/v1/crm/consents/{id}',
+      create: '/api/v1/crm/consents',
+      update: '/api/v1/crm/consents/{id}',
+      delete: '/api/v1/crm/consents/{id}'
     }
   },
   permissions: ['crm.read', 'consent.read', 'consent.write']

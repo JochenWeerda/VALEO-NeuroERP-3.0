@@ -11,7 +11,7 @@ import { toast } from '@/hooks/use-toast'
 import { api } from '@/lib/axios'
 
 // API Client für Debitoren (Liste)
-const apiClient = createApiClient('/api/finance')
+const apiClient = createApiClient('/api/v1/finance')
 
 // Konfiguration für Debitoren ListReport (wird in Komponente mit i18n erstellt)
 const createDebitorenListConfig = (t: any): ListConfig => ({

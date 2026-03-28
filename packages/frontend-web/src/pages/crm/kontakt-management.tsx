@@ -9,7 +9,7 @@ import { toast } from '@/hooks/use-toast'
 import { api } from '@/lib/axios'
 
 // API Client für Kontakte
-const apiClient = createApiClient('/api/crm')
+const apiClient = createApiClient('/api/v1/crm')
 
 // Konfiguration für Kontakt-Management ListReport
 const kontaktListConfig: ListConfig = {

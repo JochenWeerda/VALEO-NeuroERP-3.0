@@ -18,7 +18,7 @@ const CampaignPerformanceCharts = lazy(() =>
   import('@/pages/crm/charts/CampaignPerformanceCharts').then((module) => ({ default: module.default })),
 )
 
-const apiClient = createApiClient('/api/crm-marketing')
+const apiClient = createApiClient('/api/v1/marketing')
 
 interface CampaignSummary {
   id: string

@@ -12,7 +12,7 @@ import { toast } from '@/hooks/use-toast'
 import { useTenant } from '@/hooks/useTenant'
 
 // API Client
-const apiClient = createApiClient('/api/crm-marketing')
+const apiClient = createApiClient('/api/v1/marketing')
 
 // Konfiguration für Segmente ListReport
 const createSegmentsConfig = (t: any, entityTypeLabel: string): ListConfig => ({
@@ -115,13 +115,13 @@ const createSegmentsConfig = (t: any, entityTypeLabel: string): ListConfig => ({
     { key: 'delete', label: t('crud.actions.delete'), type: 'danger' }
   ],
   api: {
-    baseUrl: '/api/crm-marketing/segments',
+    baseUrl: '/api/v1/marketing/segments',
     endpoints: {
-      list: '/api/crm-marketing/segments',
-      get: '/api/crm-marketing/segments/{id}',
-      create: '/api/crm-marketing/segments',
-      update: '/api/crm-marketing/segments/{id}',
-      delete: '/api/crm-marketing/segments/{id}'
+      list: '/api/v1/marketing/segments',
+      get: '/api/v1/marketing/segments/{id}',
+      create: '/api/v1/marketing/segments',
+      update: '/api/v1/marketing/segments/{id}',
+      delete: '/api/v1/marketing/segments/{id}'
     }
   },
   permissions: ['crm.read', 'marketing.read', 'marketing.write']

@@ -16,7 +16,7 @@ import { toast } from '@/hooks/use-toast'
 import { useTenant } from '@/hooks/useTenant'
 
 // API Client
-const apiClient = createApiClient('/api/crm-marketing')
+const apiClient = createApiClient('/api/v1/marketing')
 
 type CampaignBuilderStep = 'type' | 'template' | 'segment' | 'abtest' | 'schedule' | 'review'
 
