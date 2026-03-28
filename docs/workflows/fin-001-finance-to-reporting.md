@@ -71,12 +71,19 @@ graph TD
 ### FIN-003: Finance-Followup Router registriert
 - `api.py`: `finance_followup.router` eingebunden — Mahnwesen-Export und Lastschriften-Endpoints jetzt erreichbar
 
-## Offene P2-Gaps
+## Weitere Fixes (2026-03-28)
 
-- Abschluss-Aktionen (`calculate`, `lock`, `run`) sind Backend-Stubs
-- Journal-Pfad in `reports.tsx` weicht vom Backend ab (`/finance/journal-entries` vs. `/journal-entries`)
-- `reporting_api.py` nicht in `api.py` registriert
+### FIN-004: Abschluss-Aktionen implementiert
+- `POST /closing/calculate` — Summen und Salden fuer Periode aus Journal-Entries
+- `POST /closing/lock` — Periode sperren (UPDATE accounting_periods SET status=closed)
+- `POST /closing/run` — Periodenabschluss durchfuehren (berechnen + sperren)
+
+### FIN-005: Journal-Pfad korrigiert
+- `reports.tsx`: `/api/v1/finance/journal-entries` → `/api/v1/journal-entries` (passend zum Backend-Mount)
+
+### FIN-006: reporting_api.py registriert
+- `api.py`: `reporting_api.router` eingebunden — Data-Products und Process-Mining Endpoints erreichbar
 
 ## Status
 
-**Erstanalyse + P1-Fixes abgeschlossen** (2026-03-28).
+**Alle Gaps geschlossen** (2026-03-28).

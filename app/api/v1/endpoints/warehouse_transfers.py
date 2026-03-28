@@ -162,6 +162,72 @@ async def update_transfer(
     return TransferOut.model_validate(obj)
 
 
+@router.post("/{transfer_id}/post", response_model=dict)
+async def post_transfer(
+    transfer_id: str,
+    tenant_id: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+):
+    """Umlagerung freigeben — erzeugt StockMovements (out vom Quell-Lager, in zum Ziel-Lager)."""
+    from app.core.uuid7 import uuid7
+    from sqlalchemy import text as sa_text
+    from datetime import date as dt_date
+
+    tid = tenant_id or DEFAULT_TENANT
+    transfer = db.query(WarehouseTransfer).filter(WarehouseTransfer.id == transfer_id).first()
+    if not transfer:
+        raise HTTPException(404, "Transfer not found")
+
+    lines = db.query(WarehouseTransferLine).filter(
+        WarehouseTransferLine.transfer_id == transfer_id
+    ).all()
+    if not lines:
+        raise HTTPException(400, "Transfer hat keine Positionen")
+
+    today = dt_date.today()
+    movements_created = 0
+
+    for line in lines:
+        out_id = uuid7()
+        in_id = uuid7()
+        ref = f"UML-{transfer.transfer_number or transfer_id[:8]}"
+
+        db.execute(sa_text("""
+            INSERT INTO domain_inventory.inventory_stock_movements
+            (id, article_id, warehouse_id, movement_type, quantity, unit,
+             charge, reference_number, movement_date, movement_time,
+             notes, booking_user, auto_created, ownership_type, tenant_id, created_at)
+            VALUES (:id, :art, :wh, 'out', :qty, 't',
+                    :batch, :ref, :date, NOW()::time,
+                    :notes, 'system', true, 'owned', :tid, NOW())
+        """), {
+            "id": out_id, "art": line.article_id, "wh": transfer.from_warehouse_id,
+            "qty": line.quantity, "batch": getattr(line, 'batch_number', None),
+            "ref": ref, "date": today, "notes": f"Umlagerung Abgang {ref}", "tid": tid,
+        })
+
+        db.execute(sa_text("""
+            INSERT INTO domain_inventory.inventory_stock_movements
+            (id, article_id, warehouse_id, movement_type, quantity, unit,
+             charge, reference_number, movement_date, movement_time,
+             notes, booking_user, auto_created, ownership_type, tenant_id, created_at)
+            VALUES (:id, :art, :wh, 'in', :qty, 't',
+                    :batch, :ref, :date, NOW()::time,
+                    :notes, 'system', true, 'owned', :tid, NOW())
+        """), {
+            "id": in_id, "art": line.article_id, "wh": transfer.to_warehouse_id,
+            "qty": line.quantity, "batch": getattr(line, 'batch_number', None),
+            "ref": ref, "date": today, "notes": f"Umlagerung Zugang {ref}", "tid": tid,
+        })
+        movements_created += 2
+
+    if hasattr(transfer, 'status'):
+        transfer.status = 'posted'
+    db.commit()
+
+    return {"success": True, "movements_created": movements_created, "transfer_id": transfer_id}
+
+
 @router.delete("/{transfer_id}", status_code=204)
 async def delete_transfer(transfer_id: str, db: Session = Depends(get_db)):
     """DEL Lager-zu-Lager Buchung Löschen"""

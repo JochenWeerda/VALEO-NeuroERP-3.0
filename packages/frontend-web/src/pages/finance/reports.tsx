@@ -150,7 +150,7 @@ async function fetchProfitLossSeries(period: string): Promise<Array<{ period: st
 async function fetchJournalEntries(period: string): Promise<JournalEntry[]> {
   const startDate = `${period}-01`
   const endDate = `${period}-31`
-  const result = await apiClient.get<JournalListResponse>('/api/v1/finance/journal-entries', {
+  const result = await apiClient.get<JournalListResponse>('/api/v1/journal-entries', {
     params: { start_date: startDate, end_date: endDate, limit: 50 },
   })
   return Array.isArray(result.items) ? result.items : []
@@ -332,7 +332,7 @@ export default function FinanceReportsPage(): JSX.Element {
     if (journalDetails[entryId] || journalDetailLoading[entryId]) return
     setJournalDetailLoading((prev) => ({ ...prev, [entryId]: true }))
     try {
-      const detail = await apiClient.get<JournalEntry>(`/api/v1/finance/journal-entries/${entryId}`)
+      const detail = await apiClient.get<JournalEntry>(`/api/v1/journal-entries/${entryId}`)
       setJournalDetails((prev) => ({ ...prev, [entryId]: detail }))
     } finally {
       setJournalDetailLoading((prev) => ({ ...prev, [entryId]: false }))

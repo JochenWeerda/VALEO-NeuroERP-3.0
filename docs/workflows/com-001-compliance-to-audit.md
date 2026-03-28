@@ -78,13 +78,25 @@ graph TD
 ### COM-002: BVL-Umsaetze Endpoint
 - `compliance.py`: `GET /compliance/bvl-umsaetze` implementiert — aggregiert PSM-Absatzmengen aus StockMovements
 
-## Offene P2-Gaps
+## Weitere Fixes (2026-03-28)
 
-- CamelCase-Mismatch: Backend liefert `snake_case`, Frontend-Typen erwarten `camelCase` (QS, Zulassungen, VVVO, Sachkunde)
-- `audit_evidence.py` nicht in `api.py` registriert
-- PCN: Navigation zu `/compliance/pcn-liste` ohne Route
-- Flow-Spine heisst `compliance-to-report`, nicht `compliance-to-audit`
+### COM-003: CamelCase-Mismatch in 5 Registern
+- QS-Checkliste: `geprrueftAm` hinzugefuegt
+- Zulassungen: `gueltigBis` hinzugefuegt
+- Sachkunde: `nachweisNr` + `gueltigBis` hinzugefuegt
+- VVVO: `letzteAktualisierung` hinzugefuegt
+
+### COM-004: audit_evidence.py registriert
+- `api.py`: `audit_evidence.router` eingebunden — GoBD-konforme Belegnachweise erreichbar
+
+### COM-005: PCN-Liste Seite
+- Neue Seite `pcn-liste.tsx` mit Tabelle aller PCN-Meldungen
+- Route in alias-groups und auto-groups registriert
+
+## Verbleibend (P3)
+
+- Flow-Spine Name: `compliance-to-report` vs. `compliance-to-audit` (kosmetisch)
 
 ## Status
 
-**Erstanalyse + P1-Fixes abgeschlossen** (2026-03-28).
+**Alle P1/P2-Gaps geschlossen** (2026-03-28).

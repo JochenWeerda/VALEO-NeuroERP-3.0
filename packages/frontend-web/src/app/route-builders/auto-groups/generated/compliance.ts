@@ -22,6 +22,10 @@ export const entries: AutoGroupRouteEntry[] = [
     "path": "meldewesen-konsole"
   },
   {
+    "module": "@/pages/compliance/pcn-liste",
+    "path": "pcn-liste"
+  },
+  {
     "module": "@/pages/compliance/pcn-ufi",
     "path": "pcn-ufi"
   },
