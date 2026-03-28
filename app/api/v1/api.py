@@ -1015,3 +1015,11 @@ api_router.include_router(supply_chain_blockchain.router)
 # Finance Follow-up (Mahnwesen-Export, Lastschriften)
 from app.api.v1.endpoints import finance_followup
 api_router.include_router(finance_followup.router)
+
+# Audit Evidence (GoBD-konforme Belegnachweise)
+from app.api.v1.endpoints import audit_evidence
+api_router.include_router(audit_evidence.router)
+
+# Reporting (Data-Products, Process-Mining)
+from app.api.v1.endpoints import reporting_api
+api_router.include_router(reporting_api.router)

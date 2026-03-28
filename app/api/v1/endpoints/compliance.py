@@ -261,6 +261,7 @@ async def list_qs_checkliste(db: Session = Depends(get_db)) -> dict:
             "erfuellt": bool(i.erfuellt),
             "bemerkung": i.bemerkung,
             "geprueft_am": _dt(i.geprueft_am),
+            "geprrueftAm": _dt(i.geprueft_am),
         }
         for i in items
     ]
@@ -294,6 +295,7 @@ async def list_zulassungen(
                 "nummer": i.nummer,
                 "behoerde": i.behoerde,
                 "gueltig_bis": _dt(i.gueltig_bis),
+                "gueltigBis": _dt(i.gueltig_bis),
                 "status": i.status,
             }
             for i in items
@@ -316,8 +318,10 @@ async def list_sachkunde(status: Optional[str] = Query(None), db: Session = Depe
                 "kunde": i.kunde,
                 "kundennr": i.kundennr,
                 "nachweis_nr": i.nachweis_nr,
+                "nachweisNr": i.nachweis_nr,
                 "ausstellungsdatum": _dt(i.ausstellungsdatum),
                 "gueltig_bis": _dt(i.gueltig_bis),
+                "gueltigBis": _dt(i.gueltig_bis),
                 "ausstellende_stelle": i.ausstellende_stelle,
                 "status": i.status,
             }
@@ -363,6 +367,7 @@ async def list_vvvo(db: Session = Depends(get_db)) -> dict:
                 "tierart": i.tierart,
                 "status": i.status,
                 "letzte_aktualisierung": _dt(i.letzte_aktualisierung),
+                "letzteAktualisierung": _dt(i.letzte_aktualisierung),
             }
             for i in items
         ],

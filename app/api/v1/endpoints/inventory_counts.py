@@ -44,12 +44,18 @@ class InventoryCountLineUpdate(BaseModel):
     expected_qty: Optional[float] = None
 
 
+class InventoryCountCreate(BaseModel):
+    warehouse_id: str
+    notes: Optional[str] = None
+
+
 class InventoryCountOut(BaseSchema):
     id: str
     warehouse_id: str
     status: str
     total_items: int = 0
     discrepancies_found: int = 0
+    notes: Optional[str] = None
 
 
 # ── Routes ───────────────────────────────────────────────────────
@@ -73,6 +79,51 @@ async def list_inventory_counts(
         total=total, page=page, size=limit, pages=pages,
         has_next=(skip + limit) < total, has_prev=skip > 0,
     )
+
+
+@router.post("/", response_model=InventoryCountOut, status_code=201)
+async def create_inventory_count(
+    payload: InventoryCountCreate,
+    tenant_id: Optional[str] = Query(None),
+    db: Session = Depends(get_db),
+):
+    """Inventur-Kopf anlegen."""
+    from app.core.uuid7 import uuid7
+    tid = tenant_id or DEFAULT_TENANT
+    obj = InventoryCount(
+        id=uuid7(),
+        warehouse_id=payload.warehouse_id,
+        status="open",
+        total_items=0,
+        discrepancies_found=0,
+        tenant_id=tid,
+    )
+    if hasattr(obj, 'notes') and payload.notes:
+        obj.notes = payload.notes
+    db.add(obj)
+    db.commit()
+    db.refresh(obj)
+    return InventoryCountOut.model_validate(obj)
+
+
+@router.get("/{count_id}", response_model=InventoryCountOut)
+async def get_inventory_count(count_id: str, db: Session = Depends(get_db)):
+    """Inventur-Kopf Detail."""
+    obj = db.query(InventoryCount).filter(InventoryCount.id == count_id).first()
+    if not obj:
+        raise HTTPException(404, "Inventory count not found")
+    return InventoryCountOut.model_validate(obj)
+
+
+@router.delete("/{count_id}", status_code=204)
+async def delete_inventory_count(count_id: str, db: Session = Depends(get_db)):
+    """Inventur-Kopf loeschen."""
+    obj = db.query(InventoryCount).filter(InventoryCount.id == count_id).first()
+    if not obj:
+        raise HTTPException(404, "Inventory count not found")
+    db.query(InventoryCountLine).filter(InventoryCountLine.inventory_count_id == count_id).delete()
+    db.delete(obj)
+    db.commit()
 
 
 @router.get("/{count_id}/lines", response_model=list[InventoryCountLineOut])

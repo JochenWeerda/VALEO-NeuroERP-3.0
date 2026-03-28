@@ -129,23 +129,24 @@ function unwrapItem<T>(payload: any): T {
 export const crmService = {
   // Contacts
   async getContacts(params?: { search?: string; type?: string; limit?: number; offset?: number }) {
-    const response = await apiClient.get<{ data: Contact[]; total: number }>('/api/v1/crm/contacts', { params })
-    return response.data
+    const response = await apiClient.get<{ items?: Contact[]; data?: Contact[]; total: number }>('/api/v1/crm/contacts', { params })
+    const items = response.data.items || response.data.data || []
+    return { data: items, total: response.data.total }
   },
 
   async getContact(id: string) {
-    const response = await apiClient.get<{ data: Contact }>(`/api/v1/crm/contacts/${id}`)
-    return response.data.data
+    const response = await apiClient.get<any>(`/api/v1/crm/contacts/${id}`)
+    return unwrapItem<Contact>(response.data)
   },
 
   async createContact(data: Omit<Contact, 'id' | 'createdAt' | 'updatedAt'>) {
-    const response = await apiClient.post<{ data: Contact }>('/api/v1/crm/contacts', data)
-    return response.data.data
+    const response = await apiClient.post<any>('/api/v1/crm/contacts', data)
+    return unwrapItem<Contact>(response.data)
   },
 
   async updateContact(id: string, data: Partial<Omit<Contact, 'id' | 'createdAt' | 'updatedAt'>>) {
-    const response = await apiClient.put<{ data: Contact }>(`/api/v1/crm/contacts/${id}`, data)
-    return response.data.data
+    const response = await apiClient.put<any>(`/api/v1/crm/contacts/${id}`, data)
+    return unwrapItem<Contact>(response.data)
   },
 
   async deleteContact(id: string) {
@@ -154,23 +155,24 @@ export const crmService = {
 
   // Leads
   async getLeads(params?: { search?: string; status?: string; priority?: string; limit?: number; offset?: number }) {
-    const response = await apiClient.get<{ data: Lead[]; total: number }>('/api/v1/crm/leads', { params })
-    return response.data
+    const response = await apiClient.get<{ items?: Lead[]; data?: Lead[]; total: number }>('/api/v1/crm/leads', { params })
+    const items = response.data.items || response.data.data || []
+    return { data: items, total: response.data.total }
   },
 
   async getLead(id: string) {
-    const response = await apiClient.get<{ data: Lead }>(`/api/v1/crm/leads/${id}`)
-    return response.data.data
+    const response = await apiClient.get<any>(`/api/v1/crm/leads/${id}`)
+    return unwrapItem<Lead>(response.data)
   },
 
   async createLead(data: Omit<Lead, 'id' | 'createdAt' | 'updatedAt'>) {
-    const response = await apiClient.post<{ data: Lead }>('/api/v1/crm/leads', data)
-    return response.data.data
+    const response = await apiClient.post<any>('/api/v1/crm/leads', data)
+    return unwrapItem<Lead>(response.data)
   },
 
   async updateLead(id: string, data: Partial<Omit<Lead, 'id' | 'createdAt' | 'updatedAt'>>) {
-    const response = await apiClient.put<{ data: Lead }>(`/api/v1/crm/leads/${id}`, data)
-    return response.data.data
+    const response = await apiClient.put<any>(`/api/v1/crm/leads/${id}`, data)
+    return unwrapItem<Lead>(response.data)
   },
 
   async deleteLead(id: string) {

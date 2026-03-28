@@ -68,6 +68,59 @@ async def list_opportunities(
     )
 
 
+OPPORTUNITY_STAGES_LIST = [
+    {"id": "lead", "name": "Lead", "order": 1, "probability": 10, "color": "#94a3b8"},
+    {"id": "qualified", "name": "Qualifiziert", "order": 2, "probability": 25, "color": "#60a5fa"},
+    {"id": "proposal", "name": "Angebot", "order": 3, "probability": 50, "color": "#f59e0b"},
+    {"id": "negotiation", "name": "Verhandlung", "order": 4, "probability": 75, "color": "#f97316"},
+    {"id": "won", "name": "Gewonnen", "order": 5, "probability": 100, "color": "#22c55e"},
+    {"id": "lost", "name": "Verloren", "order": 6, "probability": 0, "color": "#ef4444"},
+]
+
+
+@router.get("/stages", response_model=list[dict])
+async def list_stages():
+    """Pipeline-Stages fuer Kanban-Board."""
+    return OPPORTUNITY_STAGES_LIST
+
+
+@router.get("/forecast", response_model=dict)
+async def get_forecast(
+    tenant_id: Optional[str] = Query(None),
+    period: Optional[str] = Query(None, description="YYYY-MM"),
+):
+    """Umsatz-Forecast aus offenen Opportunities."""
+    try:
+        opportunities, total = await crm_list_opportunities(
+            tenant_id=tenant_id, skip=0, limit=500,
+        )
+    except Exception:
+        opportunities, total = [], 0
+
+    pipeline_value = 0.0
+    weighted_value = 0.0
+    by_stage: dict[str, float] = {}
+    stage_map = {s["id"]: s["probability"] for s in OPPORTUNITY_STAGES_LIST}
+
+    for opp in opportunities:
+        value = float(opp.get("value", 0) or opp.get("amount", 0) or 0)
+        stage = opp.get("stage", opp.get("status", "lead"))
+        pipeline_value += value
+        prob = stage_map.get(stage, 25) / 100
+        weighted_value += value * prob
+        by_stage[stage] = by_stage.get(stage, 0) + value
+
+    return {
+        "total_opportunities": total,
+        "pipeline_value": pipeline_value,
+        "weighted_forecast": weighted_value,
+        "by_stage": [
+            {"stage": s["name"], "stage_id": s["id"], "value": by_stage.get(s["id"], 0)}
+            for s in OPPORTUNITY_STAGES_LIST
+        ],
+    }
+
+
 @router.get("/{opportunity_id}", response_model=Opportunity)
 async def get_opportunity(opportunity_id: str):
     """Get a specific sales opportunity by ID."""
@@ -107,3 +160,4 @@ async def delete_opportunity(opportunity_id: str):
         raise HTTPException(status_code=exc.response.status_code, detail=exc.response.text) from exc
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Failed to delete opportunity: {exc}") from exc
+

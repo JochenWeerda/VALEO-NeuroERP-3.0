@@ -75,13 +75,21 @@ graph TD
 - `vertrieb/kundenumsatz.tsx`: Von statischen Demo-Daten auf `GET /api/v1/crm/customers` umgestellt
 - ABC-Segmentierung wird jetzt aus echten Kundendaten berechnet
 
-## Offene P2-Gaps
+## Weitere Fixes (2026-03-28)
 
-- Opportunities Kanban: `/opportunities/stages` Endpoint fehlt im v1-Router
-- Opportunities Forecast: `/opportunities/forecast` Endpoint fehlt
-- crm-service.ts erwartet `{ data: [] }` statt `{ items: [] }` — Format-Mismatch
-- Legacy-Pfade `/api/crm/kunden` vs. kanonisch `/api/v1/crm/customers`
+### CRM-003: Opportunities Stages Endpoint
+- `GET /opportunities/stages` — 6 Pipeline-Stages (Lead → Qualifiziert → Angebot → Verhandlung → Gewonnen → Verloren)
+
+### CRM-004: Opportunities Forecast Endpoint
+- `GET /opportunities/forecast` — Umsatz-Forecast mit Pipeline-Wert, gewichtetem Forecast, Aufschluesselung nach Stage
+
+### CRM-005: crm-service.ts Format-Mismatch
+- `getContacts()` und `getLeads()` akzeptieren jetzt sowohl `{ items }` als auch `{ data }` vom Backend
+
+## Verbleibend (P3)
+
+- Legacy-Pfade `/api/crm/kunden` vs. kanonisch `/api/v1/crm/customers` (Vite-Proxy-Thema)
 
 ## Status
 
-**Erstanalyse + P1-Fixes abgeschlossen** (2026-03-28).
+**Alle P1/P2-Gaps geschlossen** (2026-03-28).
