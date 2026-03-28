@@ -12,7 +12,7 @@ import { LeaveConfirmDialog } from '@/components/LeaveConfirmDialog'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import { financeService } from '@/lib/services/finance-service'
 import { toast } from '@/hooks/use-toast'
-import { apiClient } from '@/lib/axios'
+import { apiClient } from '@/lib/api-client'
 
 
 // Konfiguration für Buchungserfassung ObjectPage (wird in Komponente mit i18n erstellt)
@@ -343,12 +343,12 @@ export default function BuchungserfassungPage(): JSX.Element {
       try {
         const period = String(formData?.periode ?? '').trim()
         if (period) {
-          const periodCheck = await apiClient.get<{ is_open: boolean; message: string }>(`/api/v1/finance/periods/check/${period}`)
+          const periodCheck = (await apiClient.get<{ is_open: boolean; message: string }>(`/api/v1/finance/periods/check/${period}`)).data
           if (!periodCheck?.is_open) {
             throw new Error(periodCheck?.message || `Periode ${period} ist gesperrt.`)
           }
         }
-        const postRes = await apiClient.post<{ success: boolean; message: string }>('/api/v1/finance/journal-entries/post', formData ?? {})
+        const postRes = (await apiClient.post<{ success: boolean; message: string }>('/api/v1/finance/journal-entries/post', formData ?? {})).data
         if (!postRes?.success) {
           throw new Error(postRes?.message || 'Buchung konnte nicht verbucht werden')
         }
@@ -387,7 +387,7 @@ export default function BuchungserfassungPage(): JSX.Element {
     if (action === 'export') {
       setActionLoadingKey('export')
       try {
-        const res = await apiClient.post<{ url?: string }>('/api/v1/export/list', { entity: 'journal_entries', format: 'datev' })
+        const res = (await apiClient.post<{ url?: string }>('/api/v1/export/list', { entity: 'journal_entries', format: 'datev' })).data
         if (res?.url) window.open(res.url, '_blank')
         toast({ title: t('crud.actions.datevExport'), description: t('crud.messages.exportCreated', { defaultValue: 'Export erstellt' }) })
       } catch (error: any) {

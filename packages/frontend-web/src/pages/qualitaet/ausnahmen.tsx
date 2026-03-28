@@ -14,7 +14,7 @@ import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
 import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { AgentProcessPanel, AgentSuggestionBadge } from '@/components/agent'
 import { AlertCircle, AlertTriangle, CheckCircle, Plus } from 'lucide-react'
-import { apiClient } from '@/lib/axios'
+import { apiClient } from '@/lib/api-client'
 
 type AusnahmeRecord = {
   id: string
@@ -35,7 +35,7 @@ type ExceptionSuggestion = {
 }
 
 async function fetchAusnahmen(): Promise<AusnahmeRecord[]> {
-  return apiClient.get<AusnahmeRecord[]>('/api/v1/operations/exceptions')
+  return (await apiClient.get<AusnahmeRecord[]>('/api/v1/operations/exceptions')).data
 }
 
 export default function AusnahmenPage(): JSX.Element {

@@ -9,7 +9,6 @@ import { Wizard } from '@/components/patterns/Wizard'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
 import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
-import { api } from '@/lib/axios'
 import { apiClient } from '@/lib/api-client'
 import { useToast } from '@/hooks/use-toast'
 import { Badge } from '@/components/ui/badge'
@@ -76,7 +75,7 @@ export default function AuslagerungPage(): JSX.Element {
   const handleFinish = async (): Promise<void> => {
     setSaving(true)
     try {
-      await api.post('/api/v1/lager/auslagerung', {
+      await apiClient.post('/api/v1/lager/auslagerung', {
         artikel: auslagerung.artikel,
         menge: auslagerung.menge,
         strategie: auslagerung.strategie,
