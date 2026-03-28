@@ -1017,3 +1017,17 @@ Die folgenden Folge-Slices wurden nach der Erstanalyse umgesetzt:
 - `app/api/v1/endpoints/kontrakte.py` (GEAENDERT)
 - `packages/frontend-web/src/pages/kontrakte/FrmKontraktDetail.tsx` (GEAENDERT)
 - `packages/frontend-web/src/lib/api/kontrakte.ts` (GEAENDERT)
+
+## Status
+
+| Slice | Beschreibung | Status |
+|-------|-------------|--------|
+| CTS-001 | Workflow-Analyse + Mermaid | abgeschlossen |
+| CTS-002 | Kontraktbindung in Auftraegen/Lieferscheinen | abgeschlossen |
+| CTS-003 | Automatische Bewegungsbuchung | abgeschlossen |
+| CTS-004 | MATIF-Preisfixierung Dialog | abgeschlossen |
+| CTS-005 | Soft-Delete + Bestaetigung | abgeschlossen |
+| CTS-006 | Kontraktliste aufwerten | abgeschlossen |
+| CTS-007 | Tabs differenzieren | abgeschlossen |
+| CTS-008 | Alarm-Dashboard | abgeschlossen |
+| CTS-009 | Rohwaren-Positionsmonitor (Long/Short) | abgeschlossen |

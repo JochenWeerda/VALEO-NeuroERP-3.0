@@ -205,3 +205,14 @@ flowchart TD
 ---
 
 *Erstellt von Claude Sonnet 4.6 — Slice FIN-001 — 2026-03-27*
+
+## Status
+
+| Slice | Beschreibung | Status |
+|-------|-------------|--------|
+| FIN-001 | Workflow-Analyse + Mermaid | abgeschlossen |
+| FIN-002 | Kontenplan API-Pfad korrigiert | abgeschlossen |
+| FIN-003 | Finance Follow-up Router registriert | abgeschlossen |
+| FIN-004 | Abschluss-Aktionen (calculate/lock/run) | abgeschlossen |
+| FIN-005 | Journal-Pfad in reports.tsx korrigiert | abgeschlossen |
+| FIN-006 | Reporting-API registriert | abgeschlossen |

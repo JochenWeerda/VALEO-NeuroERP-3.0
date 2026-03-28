@@ -6,7 +6,7 @@
 | **Name** | Inventory-to-Settlement (Lager bis Abrechnung) |
 | **Flow-Spine** | `flow-spine-inventory-to-settlement` |
 | **Prozessbereich** | Lagerverwaltung / Bestandsfuehrung / Versand |
-| **Status** | P1-Slices umgesetzt |
+| **Status** | alle Slices umgesetzt |
 | **Erstellt** | 2026-03-27 |
 | **Bearbeiter** | Cursor Agent |
 
@@ -44,8 +44,8 @@ Vollstaendige Workflow-Analyse des Lagerprozesses im Landhandel — Einlagerung,
 | INV-002 | Bestandsuebersicht: echte KPIs | P1 | **umgesetzt** |
 | INV-003 | Ein-/Auslagerung Backend-Buchung | P1 | **umgesetzt** |
 | INV-004 | Einlagerung Stammdaten-Anbindung | P1 | **umgesetzt** |
-| INV-005 | Transfer-Verbuchung | P2 | offen |
-| INV-006 | Inventur-Kopf CRUD | P2 | offen |
+| INV-005 | Transfer-Verbuchung | P2 | **umgesetzt** |
+| INV-006 | Inventur-Kopf CRUD | P2 | **umgesetzt** |
 | INV-007 | Lagerplaetze echte Belegung | P2 | **umgesetzt** |
 
 ## Workflow-Dokumentation
