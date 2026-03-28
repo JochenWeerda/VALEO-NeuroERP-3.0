@@ -16,7 +16,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { ArrowLeft, History, Download, FileText } from 'lucide-react'
 
 // API Client
-const apiClient = createApiClient('/api/crm-gdpr')
+const apiClient = createApiClient('/api/v1/gdpr')
 
 // Zod-Schema für GDPR-Requests
 const createGDPRRequestSchema = (t: any) => z.object({
@@ -220,12 +220,12 @@ const createGDPRRequestConfig = (t: any, entityTypeLabel: string): MaskConfig =>
     }
   ],
   api: {
-    baseUrl: '/api/crm-gdpr/gdpr/requests',
+    baseUrl: '/api/v1/gdpr/requests',
     endpoints: {
-      get: '/api/crm-gdpr/gdpr/requests/{id}',
-      create: '/api/crm-gdpr/gdpr/requests',
-      update: '/api/crm-gdpr/gdpr/requests/{id}',
-      delete: '/api/crm-gdpr/gdpr/requests/{id}'
+      get: '/api/v1/gdpr/requests/{id}',
+      create: '/api/v1/gdpr/requests',
+      update: '/api/v1/gdpr/requests/{id}',
+      delete: '/api/v1/gdpr/requests/{id}'
     }
   },
   permissions: ['crm.read', 'gdpr.read', 'gdpr.write']
@@ -240,7 +240,7 @@ function GDPRRequestHistoryTab({ requestId }: { requestId: string }) {
   useEffect(() => {
     const loadHistory = async () => {
       try {
-        const response = await apiClient.get(`/gdpr/requests/${requestId}/history`)
+        const response = await apiClient.get(`/requests/${requestId}/history`)
         if (response.success) {
           setHistory(response.data || [])
         }
@@ -365,7 +365,7 @@ export default function GDPRRequestDetailPage(): JSX.Element {
     if (action === 'verify') {
       try {
         const method = prompt('Verifizierungsmethode wählen (email, id_card, manual, other):', 'manual') || 'manual'
-        await apiClient.post(`/gdpr/requests/${id}/verify`, {
+        await apiClient.post(`/requests/${id}/verify`, {
           verification_method: method,
           verification_token: null
         })
@@ -382,7 +382,7 @@ export default function GDPRRequestDetailPage(): JSX.Element {
     } else if (action === 'generateExport') {
       try {
         const format = prompt('Export-Format wählen (json, csv, pdf):', 'json') || 'json'
-        await apiClient.post(`/gdpr/requests/${id}/export`, {
+        await apiClient.post(`/requests/${id}/export`, {
           format: format,
           data_areas: ['all']
         })
@@ -399,7 +399,7 @@ export default function GDPRRequestDetailPage(): JSX.Element {
     } else if (action === 'deleteData') {
       if (confirm(t('crud.gdpr.confirmDeleteData'))) {
         try {
-          await apiClient.post(`/gdpr/requests/${id}/delete`, {
+          await apiClient.post(`/requests/${id}/delete`, {
             reason: t('crud.gdpr.gdprRequest'),
             anonymize_only: true
           })
@@ -418,7 +418,7 @@ export default function GDPRRequestDetailPage(): JSX.Element {
       const reason = prompt(t('crud.gdpr.enterRejectionReason'))
       if (reason) {
         try {
-          await apiClient.post(`/gdpr/requests/${id}/reject`, {
+          await apiClient.post(`/requests/${id}/reject`, {
             rejection_reason: reason
           })
           toast({
@@ -434,7 +434,7 @@ export default function GDPRRequestDetailPage(): JSX.Element {
       }
     } else if (action === 'downloadExport') {
       try {
-        const response = await fetch(`/api/crm-gdpr/gdpr/requests/${id}/download`)
+        const response = await fetch(`/api/v1/gdpr/requests/${id}/download`)
         if (response.ok) {
           const blob = await response.blob()
           const url = window.URL.createObjectURL(blob)

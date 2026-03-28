@@ -14,7 +14,7 @@ import { useTenant } from '@/hooks/useTenant'
 import { ArrowLeft, Copy } from 'lucide-react'
 
 // API Client
-const apiClient = createApiClient('/api/crm-marketing')
+const apiClient = createApiClient('/api/v1/marketing')
 
 // Zod-Schema für Campaign Templates
 const createTemplateSchema = (t: any) => z.object({
@@ -148,12 +148,12 @@ const createTemplateConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
     }
   ],
   api: {
-    baseUrl: '/api/crm-marketing/campaigns/templates',
+    baseUrl: '/api/v1/marketing/campaigns/templates',
     endpoints: {
-      get: '/api/crm-marketing/campaigns/templates/{id}',
-      create: '/api/crm-marketing/campaigns/templates',
-      update: '/api/crm-marketing/campaigns/templates/{id}',
-      delete: '/api/crm-marketing/campaigns/templates/{id}'
+      get: '/api/v1/marketing/campaigns/templates/{id}',
+      create: '/api/v1/marketing/campaigns/templates',
+      update: '/api/v1/marketing/campaigns/templates/{id}',
+      delete: '/api/v1/marketing/campaigns/templates/{id}'
     }
   },
   permissions: ['crm.read', 'marketing.read', 'marketing.write']

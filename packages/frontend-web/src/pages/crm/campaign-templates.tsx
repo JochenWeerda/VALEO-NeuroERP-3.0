@@ -142,13 +142,13 @@ const createTemplatesConfig = (t: any, entityTypeLabel: string, handleAction: (a
     }
   ],
   api: {
-    baseUrl: '/api/crm-marketing/campaigns/templates',
+    baseUrl: '/api/v1/marketing/campaigns/templates',
     endpoints: {
-      list: '/api/crm-marketing/campaigns/templates',
-      get: '/api/crm-marketing/campaigns/templates/{id}',
-      create: '/api/crm-marketing/campaigns/templates',
-      update: '/api/crm-marketing/campaigns/templates/{id}',
-      delete: '/api/crm-marketing/campaigns/templates/{id}'
+      list: '/api/v1/marketing/campaigns/templates',
+      get: '/api/v1/marketing/campaigns/templates/{id}',
+      create: '/api/v1/marketing/campaigns/templates',
+      update: '/api/v1/marketing/campaigns/templates/{id}',
+      delete: '/api/v1/marketing/campaigns/templates/{id}'
     }
   },
   permissions: ['crm.read', 'marketing.read', 'marketing.write']
@@ -164,7 +164,7 @@ export default function CampaignTemplatesPage(): JSX.Element {
   const { data: queryData, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['crm', 'campaign-templates'],
     queryFn: async () => {
-      const r = await apiClient.get('/api/crm-marketing/campaigns/templates')
+      const r = await apiClient.get('/api/v1/marketing/campaigns/templates')
       const items = Array.isArray(r.data) ? r.data : ((r.data as any).data || [])
       return { items, total: items.length }
     },
@@ -188,7 +188,7 @@ export default function CampaignTemplatesPage(): JSX.Element {
     } else if (action === 'delete' && item) {
       if (confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) {
         try {
-          await apiClient.delete(`/api/crm-marketing/campaigns/templates/${item.id}`)
+          await apiClient.delete(`/api/v1/marketing/campaigns/templates/${item.id}`)
           toast({
             title: getSuccessMessage(t, 'delete', entityType),
           })
@@ -202,7 +202,7 @@ export default function CampaignTemplatesPage(): JSX.Element {
       }
     } else if (action === 'duplicate' && item) {
       try {
-        const response = await apiClient.post(`/api/crm-marketing/campaigns/templates/${item.id}/duplicate`)
+        const response = await apiClient.post(`/api/v1/marketing/campaigns/templates/${item.id}/duplicate`)
         if (response.data) {
           toast({
             title: t('crud.messages.templateDuplicated'),
@@ -217,7 +217,7 @@ export default function CampaignTemplatesPage(): JSX.Element {
       }
     } else if (action === 'activate' && item) {
       try {
-        await apiClient.post(`/api/crm-marketing/campaigns/templates/${item.id}/activate`)
+        await apiClient.post(`/api/v1/marketing/campaigns/templates/${item.id}/activate`)
         toast({
           title: t('crud.messages.templateActivated'),
         })
@@ -230,7 +230,7 @@ export default function CampaignTemplatesPage(): JSX.Element {
       }
     } else if (action === 'deactivate' && item) {
       try {
-        await apiClient.post(`/api/crm-marketing/campaigns/templates/${item.id}/deactivate`)
+        await apiClient.post(`/api/v1/marketing/campaigns/templates/${item.id}/deactivate`)
         toast({
           title: t('crud.messages.templateDeactivated'),
         })

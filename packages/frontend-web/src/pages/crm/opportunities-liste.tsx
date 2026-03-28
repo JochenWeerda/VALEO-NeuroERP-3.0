@@ -11,7 +11,7 @@ import { getEntityTypeLabel, getStatusLabel } from '@/features/crud/utils/i18n-h
 import { toast } from '@/hooks/use-toast'
 
 // API Client für Opportunities
-const apiClient = createApiClient('/api/crm-sales')
+const apiClient = createApiClient('/api/v1/crm')
 
 // Konfiguration für Opportunities ListReport (wird in Komponente mit i18n erstellt)
 const createOpportunitiesConfig = (t: any, entityTypeLabel: string): ListConfig => ({

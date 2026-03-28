@@ -173,13 +173,13 @@ const createConsentConfig = (t: any, entityTypeLabel: string): ListConfig => ({
     }
   ],
   api: {
-    baseUrl: '/api/crm-consent/consents',
+    baseUrl: '/api/v1/crm/consents',
     endpoints: {
-      list: '/api/crm-consent/consents',
-      get: '/api/crm-consent/consents/{id}',
-      create: '/api/crm-consent/consents',
-      update: '/api/crm-consent/consents/{id}',
-      delete: '/api/crm-consent/consents/{id}'
+      list: '/api/v1/crm/consents',
+      get: '/api/v1/crm/consents/{id}',
+      create: '/api/v1/crm/consents',
+      update: '/api/v1/crm/consents/{id}',
+      delete: '/api/v1/crm/consents/{id}'
     }
   },
   permissions: ['crm.read', 'consent.read', 'consent.write']
@@ -204,7 +204,7 @@ export default function ConsentManagementPage(): JSX.Element {
   const { data: queryData, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['crm', 'consents'],
     queryFn: async () => {
-      const r = await apiClient.get('/api/crm-consent/consents')
+      const r = await apiClient.get('/api/v1/crm/consents')
       const raw = r.data as any
       const items = Array.isArray(raw) ? raw : (raw.data || [])
       return { items, total: items.length }
@@ -227,7 +227,7 @@ export default function ConsentManagementPage(): JSX.Element {
     } else if (action === 'delete' && item) {
       if (confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) {
         try {
-          await apiClient.delete(`/api/crm-consent/consents/${item.id}`)
+          await apiClient.delete(`/api/v1/crm/consents/${item.id}`)
           toast({
             title: getSuccessMessage(t, 'delete', entityType),
           })
@@ -241,7 +241,7 @@ export default function ConsentManagementPage(): JSX.Element {
       }
     } else if (action === 'revoke' && item) {
       try {
-        await apiClient.post(`/api/crm-consent/consents/${item.id}/revoke`)
+        await apiClient.post(`/api/v1/crm/consents/${item.id}/revoke`)
         toast({
           title: t('crud.messages.consentRevoked'),
         })

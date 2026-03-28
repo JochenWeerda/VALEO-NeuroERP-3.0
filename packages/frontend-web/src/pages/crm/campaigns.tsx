@@ -1,4 +1,4 @@
-﻿import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ListReport } from '@/components/mask-builder'
@@ -118,13 +118,13 @@ const createCampaignsConfig = (t: any, entityTypeLabel: string): ListConfig => (
   bulkActions: [],
   actions: [],
   api: {
-    baseUrl: '/api/crm-marketing/campaigns',
+    baseUrl: '/api/v1/marketing/campaigns',
     endpoints: {
-      list: '/api/crm-marketing/campaigns',
-      get: '/api/crm-marketing/campaigns/{id}',
-      create: '/api/crm-marketing/campaigns',
-      update: '/api/crm-marketing/campaigns/{id}',
-      delete: '/api/crm-marketing/campaigns/{id}'
+      list: '/api/v1/marketing/campaigns',
+      get: '/api/v1/marketing/campaigns/{id}',
+      create: '/api/v1/marketing/campaigns',
+      update: '/api/v1/marketing/campaigns/{id}',
+      delete: '/api/v1/marketing/campaigns/{id}'
     }
   },
   permissions: ['crm.read', 'marketing.read', 'marketing.write']
@@ -141,7 +141,7 @@ export default function CampaignsPage(): JSX.Element {
   const { data: queryData, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['crm', 'campaigns'],
     queryFn: async () => {
-      const r = await apiClient.get('/api/crm-marketing/campaigns')
+      const r = await apiClient.get('/api/v1/marketing/campaigns')
       const items = Array.isArray(r.data) ? r.data : ((r.data as any).data || [])
       return { items, total: items.length }
     },
@@ -201,7 +201,7 @@ export default function CampaignsPage(): JSX.Element {
       onDelete={async (item) => {
         if (confirm(t('crud.dialogs.delete.descriptionGeneric', { entityType: entityTypeLabel }))) {
           try {
-            await apiClient.delete(`/api/crm-marketing/campaigns/${item.id}`)
+            await apiClient.delete(`/api/v1/marketing/campaigns/${item.id}`)
             toast({
               title: getSuccessMessage(t, 'delete', entityType),
             })
