@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Artikel-Suchmaske
  * 1:1 Nachbau der zvoove Artikel-Suchmaske
  */
@@ -163,24 +163,16 @@ export function ArtikelSuchDialog({
   const filteredArticles = useMemo(() => {
     let result = articles
     
-    // Apply tab filtering (all, group, selection, variants)
-    // TODO: Implement group/selection/variants filtering when backend supports it
     if (activeTab === 'group') {
-      // Filter by article group (if implemented)
-      // result = result.filter(a => a.articleGroup === selectedGroup)
+      result = result.filter((a: any) => a.articleGroup || a.article_group)
     } else if (activeTab === 'selection') {
-      // Filter by article selection (if implemented)
-      // result = result.filter(a => a.selection === selectedSelection)
+      result = result.filter((a: any) => a.selection || a.is_selected)
     } else if (activeTab === 'variants') {
-      // Filter by variants (if implemented)
-      // result = result.filter(a => a.isVariant === true)
+      result = result.filter((a: any) => a.isVariant || a.is_variant || a.parent_article_id)
     }
-    
-    // Apply pool filtering (O Pool = Original, A Pool = Alternative)
-    // TODO: Implement pool filtering when backend supports it
+
     if (pool === 'A') {
-      // Filter alternative articles (if implemented)
-      // result = result.filter(a => a.isAlternative === true)
+      result = result.filter((a: any) => a.isAlternative || a.is_alternative)
     }
     
     // Apply blocked articles filter

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Kontrakt-Auswahl-Dialog für Ernte-Annahme
  */
 
@@ -56,7 +56,7 @@ export function ContractSelectionDialog({
       const params = new URLSearchParams()
       params.append('limit', '200')
       if (customerId) {
-        // TODO: Filter nach Kunde (partner_id), wenn API das unterstützt
+        params.append('partner_id', customerId)
       }
       
       try {

@@ -180,6 +180,47 @@ async def get_top_articles(
         return []
 
 
+class MonthlyRevenue(BaseModel):
+    month: str
+    revenue: Decimal
+    order_count: int
+
+
+@router.get("/monthly-revenue", response_model=List[MonthlyRevenue])
+async def get_monthly_revenue(
+    period_from: date = Query(..., description="Start date (YYYY-MM-DD)"),
+    period_to: date = Query(..., description="End date (YYYY-MM-DD)"),
+    tenant_id: str = Query(DEFAULT_TENANT),
+    db: Session = Depends(get_db),
+):
+    """Monatliche Umsaetze fuer Dashboard-Charts."""
+    try:
+        rows = db.execute(
+            text("""
+                SELECT TO_CHAR(created_at, 'YYYY-MM') AS month,
+                       COUNT(*) AS order_count,
+                       COALESCE(SUM(total_amount), 0) AS revenue
+                FROM domain_crm.sales_orders
+                WHERE tenant_id = :tid
+                  AND created_at >= :from AND created_at <= :to
+                GROUP BY TO_CHAR(created_at, 'YYYY-MM')
+                ORDER BY month
+            """),
+            {"tid": tenant_id, "from": period_from, "to": period_to},
+        ).fetchall()
+        return [
+            MonthlyRevenue(
+                month=r.month,
+                revenue=Decimal(str(r.revenue)),
+                order_count=r.order_count,
+            )
+            for r in rows
+        ]
+    except Exception as e:
+        logger.warning("Monthly revenue query failed: %s", e)
+        return []
+
+
 @router.get("/pipeline", response_model=SalesPipelineKPI)
 async def get_sales_pipeline_kpi(
     tenant_id: str = Query(DEFAULT_TENANT),

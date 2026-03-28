@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Wiegeschein-Auswahl-Dialog für Ernte-Annahme
  */
 
@@ -61,7 +61,7 @@ export function WeighingTicketSelectionDialog({
       const params = new URLSearchParams()
       params.append('limit', '200')
       if (customerId) {
-        // TODO: Filter nach Kunde, wenn API das unterstützt
+        params.append('customer_id', customerId)
       }
       
       try {
