@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
+import { useAuth } from '@/hooks/useAuth'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -21,12 +22,16 @@ const EMPTY_ACTIVITIES_RESPONSE: { data: Activity[]; total: number } = {
 export default function AktivitaetenPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const { user } = useAuth()
   const entityType = 'activity'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Aktivität')
   const [searchTerm, setSearchTerm] = useState('')
   const [typeFilter, setTypeFilter] = useState<string>('all')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [assignedFilter, setAssignedFilter] = useState<string>('all')
+  const currentUserTokens = [user?.email, user?.sub, user?.name]
+    .filter(Boolean)
+    .map((value) => String(value).trim().toLowerCase())
 
   const { data: activitiesData, isLoading, error } = useQuery({
     queryKey: queryKeys.crm.activities.listFiltered({
@@ -47,7 +52,10 @@ export default function AktivitaetenPage(): JSX.Element {
   // Filter activities based on status and assignment
   const filteredActivities = activities.filter(activity => {
     if (statusFilter !== 'all' && activity.status !== statusFilter) return false
-    if (assignedFilter === 'mine' && activity.assignedTo !== 'current-user') return false // TODO: Get current user
+    if (assignedFilter === 'mine') {
+      const assignedToken = String(activity.assignedTo || '').trim().toLowerCase()
+      if (!assignedToken || !currentUserTokens.includes(assignedToken)) return false
+    }
     return true
   })
 
