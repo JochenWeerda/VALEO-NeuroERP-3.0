@@ -26,7 +26,7 @@ Zwei End-to-End-Stränge laufen **fachlich und technisch getrennt**. Bitte **nic
 | **CRM (CRM-to-Revenue)** | `packages/frontend-web/src/pages/crm/**`, `pages/vertrieb/**`, `app/api/v1/endpoints/customers.py` | CRM-001, CRM-002 (P1 abgeschlossen) | Ueberlappung mit OTC (Auftraege) und CTS (Kontrakte). |
 | **Compliance (Compliance-to-Audit)** | `packages/frontend-web/src/pages/compliance/**`, `app/api/v1/endpoints/compliance.py`, `audit.py` | COM-001, COM-002 (P1 abgeschlossen) | Ueberlappung mit Finance (USTVA) und Agrar (BVL-PSM). |
 
-**Lane-Status:** `VK-013` ist fachlich ausgearbeitet und abgeschlossen. `OTC-011` ist als Folgelane zu OTC-010 **begonnen** (Workflow+Card), Umsetzung im Finance-UI folgt iterativ. Alle 9 Flow-Spine-Lanes haben jetzt Workflow-Dokumentation mit Mermaid-Diagrammen und Status-Abschnitten.
+**Lane-Status:** `VK-017` ist abgeschlossen; naechster Agrar-Lane-Slice ist `VK-018` (Klaerungsprozess `gesperrt`). `OTC-011` ist als Folgelane zu OTC-010 **begonnen** (Workflow+Card), Umsetzung im Finance-UI folgt iterativ. Alle 9 Flow-Spine-Lanes haben jetzt Workflow-Dokumentation mit Mermaid-Diagrammen und Status-Abschnitten.
 
 ## Aktive Slices
 
@@ -46,6 +46,7 @@ Zwei End-to-End-Stränge laufen **fachlich und technisch getrennt**. Bitte **nic
 | VK-015 | Settlement-Kampagnenreferenz Backfill fuer Alt-Daten | abgeschlossen | aktuell offener Agent (Codex) | `docs/agent-ops/active-workboard.md`, `docs/workflows/vk-015-settlement-kampagnen-backfill.md`, `docs/cards/agrar/VK-015-settlement-kampagnen-backfill.md`, `docs/quality-assurance/browser-use-checklists.md`, `app/api/v1/endpoints/agrar_settlements.py`, `packages/frontend-web/src/pages/agrar/erntefenster-konfig.tsx`, `tests/test_agrar_settlement_campaign_backfill.py`, `packages/frontend-web/src/__tests__/pages/agrar/erntefenster-konfig.test.tsx` | Queue-/Artikel-API-Folgeslice fuer die Annahmekette zuschneiden | keine |
 | VK-016 | Annahme-Warteschlange CTA und kanonische Artikel-API | abgeschlossen | aktuell offener Agent (Codex) | `docs/agent-ops/active-workboard.md`, `docs/workflows/vk-016-queue-cta-und-artikel-api.md`, `docs/cards/agrar/VK-016-queue-cta-und-artikel-api.md`, `docs/quality-assurance/browser-use-checklists.md`, `packages/frontend-web/src/pages/annahme/warteschlange.tsx`, `packages/frontend-web/src/pages/agrar/ernte-annahme-erfassung.tsx`, `packages/frontend-web/src/__tests__/pages/annahme/warteschlange.test.tsx`, `packages/frontend-web/src/__tests__/pages/agrar/ernte-annahme-erfassung.test.tsx` | Folge-Slice fuer echte `article_id` bereits in der Queue-API oder Klaerungsprozess gesperrte Ware zuschneiden | keine |
 | VK-017 | Annahmekette Queue-Contract mit echter `article_id` | abgeschlossen | Codex | `docs/agent-ops/active-workboard.md`, `docs/workflows/vk-017-queue-article-id.md`, `docs/cards/agrar/VK-017-queue-article-id.md`, `docs/quality-assurance/browser-use-checklists.md`, `app/api/v1/endpoints/compat.py`, `app/infrastructure/models/l3c_models.py`, `alembic/versions/lkw_annahme_queue_article_reference_20260328.py`, `packages/frontend-web/src/lib/api/inventory.ts`, `packages/frontend-web/src/pages/annahme/lkw-registrierung.tsx`, `packages/frontend-web/src/pages/annahme/qr-scanner.tsx`, `packages/frontend-web/src/pages/annahme/qualitaets-check.tsx`, `packages/frontend-web/src/pages/annahme/warteschlange.tsx`, `packages/frontend-web/src/pages/agrar/ernte-annahme-erfassung.tsx`, `packages/frontend-web/src/__tests__/pages/annahme/lkw-registrierung.test.tsx`, `packages/frontend-web/src/__tests__/pages/annahme/qualitaets-check.test.tsx`, `packages/frontend-web/src/__tests__/pages/annahme/warteschlange.test.tsx`, `packages/frontend-web/src/__tests__/pages/agrar/ernte-annahme-erfassung.test.tsx`, `tests/test_compat_lkw_registrierung.py` | Klaerungsprozess `gesperrt` oder Repair-Slice fuer historische Queue-Eintraege schneiden | keine |
+| VK-018 | Klaerungsprozess gesperrte Ware (QP-Ergebnis `gesperrt`) | offen | â€” | `docs/agent-ops/active-workboard.md`, `docs/workflows/vk-018-klaerungsprozess-gesperrt.md`, `docs/cards/agrar/VK-018-klaerungsprozess-gesperrt.md`, `docs/quality-assurance/browser-use-checklists.md`, `packages/frontend-web/src/pages/annahme/qualitaets-check.tsx`, `packages/frontend-web/src/pages/annahme/warteschlange.tsx`, `packages/frontend-web/src/pages/agrar/ernte-annahme-erfassung.tsx` | Slice claimen und Workflow+Card fuer den Klaerungsprozess schneiden | keine |
 | OTC-010 | Order-to-Cash End-to-End: Verkaufsauftrag → Lieferschein → Rechnung → Zahlung | abgeschlossen | Claude Sonnet 4.6 | `pages/sales/invoice-editor.tsx`, `pages/verkauf/lieferschein-erfassung.tsx`, `docs/workflows/otc-010-order-to-cash.md`, `docs/cards/verkauf/OTC-010-order-to-cash.md` | abgeschlossen | keine |
 | OTC-011 | Zahlungseingang und Abstimmung (Folgeslice OTC-010) | abgeschlossen | Claude Sonnet 4.6 | `packages/frontend-web/src/pages/finance/op-debitoren.tsx`, `pages/finance/payment-matching.tsx`, `pages/sales/invoice-editor.tsx`, `docs/workflows/otc-011-zahlungseingang-und-abstimmung.md`, `docs/cards/finance/OTC-011-zahlungseingang-und-abstimmung.md` | abgeschlossen — P1-P4 als Folge-Slices | keine |
 | CTS-001 | Contract-to-Settlement: Erstanalyse (15 Cards, Mermaid, Soll-Ist, Empfehlungen) | abgeschlossen | Cursor Agent | `docs/workflows/cts-001-contract-to-settlement.md`, `docs/cards/kontrakte/CTS-001-contract-to-settlement.md` | — | keine |
@@ -482,6 +483,24 @@ Kein Agent darf einen Slice beginnen, der bereits `reserviert` oder `in arbeit` 
 **Offene Risiken:** QR-Codes mit unbekannter Artikelreferenz bleiben Freitext-Faelle; Alt-Queue ohne `article_id` profitiert erst nach einem Repair-Slice vollstaendig.
 **Annahmen:** `article_number` ist fuer externe QR-Referenzen die realistischste Fallback-Referenz neben der internen `article_id`.
 **Naechster konkreter Schritt:** VK-Folgeslice fuer den Klaerungsprozess `gesperrt` claimen.
+
+## Slice: VK-018 - Klaerungsprozess gesperrte Ware
+
+**Owner:** â€”
+**Status:** offen
+**Ziel:** Gesperrte QP-Ergebnisse (Qualitaets-Check = `gesperrt`) fachlich sauber in einen Klaerungsprozess ueberfuehren, ohne Medienbruch in der Annahmekette.
+**Fachlicher Scope:** QP-Ergebnis `gesperrt` bleibt in der Queue sichtbar, bietet aber einen klaren Klaerungs-CTA; Standardmasken vor Spezialmaske pruefen; Handover-/Statusdaten fuer die Klaerung bleiben restart-sicher; keine direkte Ernte-Annahme bei `gesperrt`.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/workflows/vk-018-klaerungsprozess-gesperrt.md`, `docs/cards/agrar/VK-018-klaerungsprozess-gesperrt.md`, `docs/quality-assurance/browser-use-checklists.md`, `packages/frontend-web/src/pages/annahme/qualitaets-check.tsx`, `packages/frontend-web/src/pages/annahme/warteschlange.tsx`, `packages/frontend-web/src/pages/agrar/ernte-annahme-erfassung.tsx` (weitere Dateien erst nach Analyse definieren)
+**Abnahmekriterien:**
+- `gesperrt` erzeugt keinen Handover zur Ernte-Annahme, sondern fuehrt in einen dokumentierten Klaerungspfad.
+- CTA/Status im Queue- und QP-Kontext ist sichtbar und nachvollziehbar.
+- Klaerungspfad ist restart-sicher (Query-/ID-Handover) und CRUD-faehig.
+- Browser-Use-Checkliste fuer den Klaerungspfad ist ergaenzt.
+**Tests / Checks:** Frontend-Regression fuer QP/Queue/Klaerungspfad; ggf. API-Contract-Test falls neuer Endpoint.
+**Doku-Updates:** Workboard, Workflow-Datei `vk-018-klaerungsprozess-gesperrt.md`, Card `VK-018-klaerungsprozess-gesperrt.md`, QA-Checkliste.
+**Risiken / Blocker:** Unklare Fachentscheidung, ob Klaerung in bestehender Maske oder eigenstaendigem Dialog erfolgt; Abgrenzung zu Lager-/Retourenprozess.
+**Annahmen:** Gesperrte Ware darf nicht in die Ernte-Annahme; Klaerung ist ein eigener Teilprozess ohne automatische Freigabe.
+**Naechster konkreter Schritt:** Slice regelkonform claimen, dann Workflow- und Card-Analyse nach Master-Prompt starten.
 
 ## Slice: CTS-001 - Contract-to-Settlement Erstanalyse
 
