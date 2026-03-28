@@ -138,3 +138,7 @@ flowchart TD
 3. **OTC-010-P3:** Prüfen ob `/verkauf/rechnungen/<id>` Route auf `invoice-editor.tsx` mit `?id=` weiterleitet
 4. **OTC-011:** Zahlungseingangs-Flow — `POST /api/v1/finance/payment-runs` und Abstimmung gegen offene Rechnungen
 5. **OTC-012:** Belegkette-Visualisierung im Flow-Spine Cockpit — Statuskarten Auftrag → LS → Rechnung → Zahlung live
+
+## Status
+
+**Erstanalyse abgeschlossen** (2026-03-27). P1-Empfehlungen (OTC-010-P1 bis P3) dokumentiert, OTC-011 separat umgesetzt.

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { apiClient } from '@/lib/api-client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -12,6 +13,10 @@ import { Loader2, CheckCircle2, XCircle, ChevronRight, Download } from 'lucide-r
 export default function NebenbuchAbstimmungPage(): JSX.Element {
   const { t } = useTranslation()
   const { toast } = useToast()
+  const [searchParams] = useSearchParams()
+  const workflowInstanceId = searchParams.get('workflowInstanceId')
+  const workflowProcess = searchParams.get('workflowProcess')
+  const workflowCase = searchParams.get('workflowCase')
   const [loading, setLoading] = useState(false)
   const [ledgerType, setLedgerType] = useState<string>('AR')
   const [period, setPeriod] = useState<string>(new Date().toISOString().slice(0, 7))
@@ -65,7 +70,7 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
   const loadDetails = async (accountNumber: string) => {
     setSelectedAccount(accountNumber)
     try {
-      const data = await apiClient.get<any[]>(
+      const { data } = await apiClient.get<any[]>(
         `/api/v1/finance/subsidiary-ledger-reconciliation/${ledgerType.toLowerCase()}/details`,
         { params: { account_number: accountNumber, period } },
       )
@@ -130,6 +135,11 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
+      {workflowInstanceId && (
+        <div className="mb-4 rounded-md border border-indigo-500/30 bg-indigo-500/10 px-4 py-2 text-sm text-indigo-200">
+          Flow-Spine: {workflowCase || workflowProcess} (Instanz {workflowInstanceId.slice(0, 8)}...)
+        </div>
+      )}
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">{t('crud.fields.subsidiaryLedgerReconciliation')}</h1>

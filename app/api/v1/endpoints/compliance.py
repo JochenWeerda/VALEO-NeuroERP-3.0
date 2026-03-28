@@ -920,3 +920,38 @@ async def get_ustva_status(
         "deadline": "2026-04-10",
         "last_updated": datetime.utcnow().isoformat(),
     }
+
+
+# ── BVL-Umsatzmeldung (Pflanzenschutzmittel) ────────────────────────────────
+
+@router.get("/bvl-umsaetze", response_model=list)
+async def get_bvl_umsaetze(
+    tenant_id: Optional[str] = Query(None, description="Tenant context"),
+    db: Session = Depends(get_db),
+) -> list:
+    """
+    PSM-Umsaetze fuer BVL-Meldung aggregieren.
+    Liefert Wirkstoffe mit Absatzmengen aus Lagerbewegungen/Rechnungen.
+    """
+    from sqlalchemy import text
+    tid = tenant_id or "default"
+    try:
+        rows = db.execute(
+            text("""
+                SELECT a.name AS wirkstoff,
+                       COALESCE(SUM(sm.quantity), 0) AS menge,
+                       COALESCE(a.unit, 'kg') AS einheit
+                FROM domain_inventory.inventory_stock_movements sm
+                JOIN domain_inventory.articles a ON a.id = sm.article_id
+                WHERE sm.tenant_id = :tid
+                  AND sm.movement_type = 'out'
+                  AND a.article_group = 'PSM'
+                  AND EXTRACT(YEAR FROM sm.movement_date) = EXTRACT(YEAR FROM CURRENT_DATE) - 1
+                GROUP BY a.name, a.unit
+                ORDER BY menge DESC
+            """),
+            {"tid": tid},
+        ).fetchall()
+        return [{"wirkstoff": r[0], "menge": float(r[1]), "einheit": r[2]} for r in rows]
+    except Exception:
+        return []

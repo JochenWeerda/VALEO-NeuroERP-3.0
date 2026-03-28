@@ -1,4 +1,5 @@
 import { type FormEvent, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -59,6 +60,10 @@ const EMPTY_FORM: MovementFormState = {
 export default function LagerbewegungenPage(): JSX.Element {
   const queryClient = useQueryClient()
   const { toast } = useToast()
+  const [searchParams] = useSearchParams()
+  const workflowInstanceId = searchParams.get('workflowInstanceId')
+  const workflowProcess = searchParams.get('workflowProcess')
+  const workflowCase = searchParams.get('workflowCase')
   const [search, setSearch] = useState('')
   const [movementTypeFilter, setMovementTypeFilter] = useState<string>('all')
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -205,6 +210,11 @@ export default function LagerbewegungenPage(): JSX.Element {
 
   return (
     <div className="space-y-4 p-6">
+      {workflowInstanceId && (
+        <div className="mb-4 rounded-md border border-indigo-500/30 bg-indigo-500/10 px-4 py-2 text-sm text-indigo-200">
+          Flow-Spine: {workflowCase || workflowProcess} (Instanz {workflowInstanceId.slice(0, 8)}...)
+        </div>
+      )}
       <div className="flex items-center justify-between gap-3">
         <div>
           <h1 className="text-3xl font-bold">Lagerbewegungen</h1>

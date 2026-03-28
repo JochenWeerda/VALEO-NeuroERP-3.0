@@ -1,5 +1,5 @@
 ﻿import { useState, useMemo, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useVerladungen, type VerladungItem } from '@/lib/api/betrieb'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -48,6 +48,10 @@ function ErrorState({ error, onRetry }: { error: Error | null; onRetry: () => vo
 export default function VerladungenListePage(): JSX.Element {
   const navigate = useNavigate()
   const searchInputRef = useRef<HTMLInputElement | null>(null)
+  const [searchParams] = useSearchParams()
+  const workflowInstanceId = searchParams.get('workflowInstanceId')
+  const workflowProcess = searchParams.get('workflowProcess')
+  const workflowCase = searchParams.get('workflowCase')
   const [searchTerm, setSearchTerm] = useState('')
   const { data: verladungen = [], isLoading, isError, error, refetch } = useVerladungen()
 
@@ -87,6 +91,11 @@ export default function VerladungenListePage(): JSX.Element {
   return (
     <div className="flex flex-col">
     <div className="space-y-4 p-6">
+      {workflowInstanceId && (
+        <div className="mb-4 rounded-md border border-indigo-500/30 bg-indigo-500/10 px-4 py-2 text-sm text-indigo-200">
+          Flow-Spine: {workflowCase || workflowProcess} (Instanz {workflowInstanceId.slice(0, 8)}...)
+        </div>
+      )}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Verladungen</h1>

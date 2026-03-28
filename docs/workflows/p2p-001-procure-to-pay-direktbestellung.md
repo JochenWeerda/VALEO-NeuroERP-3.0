@@ -93,3 +93,7 @@ flowchart TD
 - Der aktuelle Standardstart fuer den Slice ist `Direktbestellung`; Bedarfsmeldung und Rahmenabruf bleiben dokumentierte Alternativpfade.
 - `shippingAddress` ist das kanonische Persistenzfeld des aktuellen Backend-Compat-Contracts.
 - Serverseitige Pflichtfeldvalidierung ist in diesem Slice nicht vorhanden und wird deshalb nicht stillschweigend vorausgesetzt.
+
+## Status
+
+**Erstanalyse abgeschlossen** — Procure-to-Pay Flow-Spine aktiv, Direktbestellung als Standardpfad dokumentiert.

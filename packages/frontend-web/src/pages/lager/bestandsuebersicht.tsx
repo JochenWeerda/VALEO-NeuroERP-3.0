@@ -28,6 +28,9 @@ export default function BestandsuebersichtPage(): JSX.Element {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const workflowContext = readWorkflowEntryContext(searchParams)
+  const workflowInstanceId = searchParams.get('workflowInstanceId')
+  const workflowProcess = searchParams.get('workflowProcess')
+  const workflowCase = searchParams.get('workflowCase')
 
   // Prüfe ob echte Daten vorhanden sind
   const hasData = Boolean(bestand && bestand.totalArticles > 0)
@@ -35,6 +38,11 @@ export default function BestandsuebersichtPage(): JSX.Element {
 
   return (
     <div className="space-y-6 p-6">
+      {workflowInstanceId && !workflowContext && (
+        <div className="mb-4 rounded-md border border-indigo-500/30 bg-indigo-500/10 px-4 py-2 text-sm text-indigo-200">
+          Flow-Spine: {workflowCase || workflowProcess} (Instanz {workflowInstanceId.slice(0, 8)}...)
+        </div>
+      )}
       {workflowContext ? (
         <WorkflowEntryBanner
           context={workflowContext}

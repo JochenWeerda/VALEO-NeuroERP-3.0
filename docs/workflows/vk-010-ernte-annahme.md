@@ -80,3 +80,7 @@ flowchart TD
 - Die Spezialmaske ist fuer Ernte-Annahme fachlich gerechtfertigt und wird nicht durch eine generische Standardmaske ersetzt.
 - Der erste belastbare Slice fokussiert den Handover und nicht die Vollabnahme aller Pricing-/Settlement-Regeln.
 - Workflow-Bemerkungen duerfen additive operative Hinweise sein und muessen bestehende Fachbemerkungen nicht ueberschreiben.
+
+## Status
+
+**Erstanalyse abgeschlossen** — Harvest-to-Settlement Flow-Spine aktiv, Spezialmaske fuer Ernte-Annahme dokumentiert.

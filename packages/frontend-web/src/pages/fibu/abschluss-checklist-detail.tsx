@@ -3,7 +3,7 @@
  * Lädt GET /api/v1/finance/closing-checklists/:id und erlaubt Erledigen von Aufgaben.
  */
 
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -54,6 +54,10 @@ export default function AbschlussChecklistDetailPage(): JSX.Element {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const [searchParams] = useSearchParams()
+  const workflowInstanceId = searchParams.get('workflowInstanceId')
+  const workflowProcess = searchParams.get('workflowProcess')
+  const workflowCase = searchParams.get('workflowCase')
   const isValidChecklistId = typeof id === 'string'
     && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)
 
@@ -70,10 +74,22 @@ export default function AbschlussChecklistDetailPage(): JSX.Element {
         status: 'completed',
         completed_by: 'current-user',
       }),
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.invalidateQueries({ queryKey: ['finance', 'closing-checklist', id] })
       queryClient.invalidateQueries({ queryKey: ['finance', 'closing-cockpit-summary'] })
       toast.success('Aufgabe als erledigt markiert.')
+      // Check if all items are now complete and trigger flow-spine transition
+      if (workflowInstanceId && workflowProcess) {
+        try {
+          const updated = (await apiClient.get<Checklist>(`/api/v1/finance/closing-checklists/${id}`)).data
+          if (updated.completed_required_items >= updated.required_items) {
+            await apiClient.post(`/api/v1/process/flow-spines/${workflowProcess}/instances/${workflowInstanceId}/transitions`, {
+              node_id: 'abschluss-check',
+              new_status: 'ok',
+            })
+          }
+        } catch { /* best-effort, don't block user */ }
+      }
     },
     onError: (e: unknown) => {
       const msg = (e as { response?: { data?: { detail?: string } } })?.response?.data?.detail ?? 'Aktion fehlgeschlagen'
@@ -100,6 +116,11 @@ export default function AbschlussChecklistDetailPage(): JSX.Element {
           <ArrowLeft className="h-4 w-4 mr-1" /> Cockpit
         </Button>
       </div>
+      {workflowInstanceId && (
+        <div className="mb-4 rounded-md border border-indigo-500/30 bg-indigo-500/10 px-4 py-2 text-sm text-indigo-200">
+          Flow-Spine: {workflowCase || workflowProcess} (Instanz {workflowInstanceId.slice(0, 8)}...)
+        </div>
+      )}
       <div>
         <h1 className="text-2xl font-bold">Checkliste: {checklist.period} · {checklist.closing_type}</h1>
         <p className="text-muted-foreground">

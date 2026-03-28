@@ -12,5 +12,9 @@ export const entries: AliasGroupRouteEntry[] = [
   {
     "module": "@/pages/qualitaet/reklamationen",
     "path": "reklamationen"
+  },
+  {
+    "module": "@/pages/qualitaet/reklamation-detail",
+    "path": "reklamation/:id"
   }
 ]

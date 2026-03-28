@@ -141,3 +141,7 @@ flowchart TD
 2. **VK-012-P2:** Supplier-ID Freitext durch CRM-Dropdown ersetzen (`useCustomers()` Hook)
 3. **VK-012-P3:** ARTIKEL_OPTIONEN und LAGER_OPTIONEN aus API laden (`/api/v1/articles?is_grain=true`, `/api/v1/lager/silos`)
 4. **VK-013:** Ernte-Kampagne-Abschluss — Gesamtabrechnung über alle Settlements einer Kampagne
+
+## Status
+
+**Erstanalyse abgeschlossen** — Annahme-Abrechnung dokumentiert.

@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -12,6 +13,10 @@ import { useToast } from '@/hooks/use-toast'
 import { useInventur, useCompleteInventurPositions, useStornierenInventurPosition, type InventurPosition } from '@/lib/api/inventory'
 
 export default function InventurPage(): JSX.Element {
+  const [searchParams] = useSearchParams()
+  const workflowInstanceId = searchParams.get('workflowInstanceId')
+  const workflowProcess = searchParams.get('workflowProcess')
+  const workflowCase = searchParams.get('workflowCase')
   const [searchTerm, setSearchTerm] = useState('')
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const { toast } = useToast()
@@ -120,6 +125,11 @@ export default function InventurPage(): JSX.Element {
   return (
     <div className="flex flex-col">
     <div className="space-y-4 p-6">
+      {workflowInstanceId && (
+        <div className="mb-4 rounded-md border border-indigo-500/30 bg-indigo-500/10 px-4 py-2 text-sm text-indigo-200">
+          Flow-Spine: {workflowCase || workflowProcess} (Instanz {workflowInstanceId.slice(0, 8)}...)
+        </div>
+      )}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Inventur</h1>

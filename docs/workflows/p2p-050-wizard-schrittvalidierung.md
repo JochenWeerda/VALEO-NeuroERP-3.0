@@ -82,3 +82,7 @@ flowchart TD
 - Die Abschlussvalidierung in `handleSubmit()` bleibt der kanonische letzte Schutz vor dem API-Call.
 - Ruecksprung in bereits durchlaufene Schritte soll weiterhin ohne erneute Sperre moeglich sein.
 - P2P benoetigt vorerst nur Pflichtvalidierung fuer Lieferanten- und Positionsschritt; Lieferung bleibt optional.
+
+## Status
+
+**Erstanalyse abgeschlossen** — Wizard-Schrittvalidierung dokumentiert.

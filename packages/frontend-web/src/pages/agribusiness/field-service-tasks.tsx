@@ -4,7 +4,10 @@
  */
 
 import React, { useState, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
+import { apiClient } from '@/lib/api-client';
 import { toast } from '@/hooks/use-toast';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -31,47 +34,30 @@ interface FieldServiceTask {
 
 export default function FieldServiceTasksPage(): JSX.Element {
   const { t } = useTranslation();
-  const [tasks, setTasks] = useState<FieldServiceTask[]>([]);
+  const [searchParams] = useSearchParams();
+  const workflowInstanceId = searchParams.get('workflowInstanceId') || '';
+  const workflowCase = searchParams.get('workflowCase') || '';
+  const isWorkflowEntry = Boolean(workflowInstanceId || workflowCase);
+
   const [selectedTask, setSelectedTask] = useState<FieldServiceTask | null>(null);
   const [query, setQuery] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
 
   const entityType = 'fieldServiceTask';
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Field Service Task');
 
   // Fetch tasks
-  React.useEffect(() => {
-    const fetchTasks = async () => {
-      setIsLoading(true);
-      try {
-        const response = await fetch('/api/agribusiness/field-service-tasks');
-        if (response.ok) {
-          const data = await response.json();
-          setTasks(data.data || []);
-        }
-      } catch (error) {
-        console.error('Error fetching tasks:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchTasks();
-  }, []);
+  const { data: tasks = [], refetch, isLoading } = useQuery({
+    queryKey: ['field-service-tasks'],
+    queryFn: async () => (await apiClient.get<FieldServiceTask[]>('/api/v1/agribusiness/field-service-tasks')).data,
+    initialData: [],
+  });
 
   // Delete handler
   const handleDelete = async (id: string, reason: string) => {
     try {
-      const response = await fetch(`/api/agribusiness/field-service-tasks/${id}`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason }),
-      });
-      if (response.ok) {
-        setTasks(tasks.filter(t => t.id !== id));
-        setSelectedTask(null);
-      } else {
-        throw new Error('Failed to delete task');
-      }
+      await apiClient.delete(`/api/v1/agribusiness/field-service-tasks/${id}`, { data: { reason } });
+      setSelectedTask(null);
+      refetch();
     } catch (error) {
       console.error('Error deleting task:', error);
       throw error;
@@ -93,18 +79,9 @@ export default function FieldServiceTasksPage(): JSX.Element {
   // Cancel handler
   const handleCancel = async (id: string, reason: string) => {
     try {
-      const response = await fetch(`/api/agribusiness/field-service-tasks/${id}/cancel`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason }),
-      });
-      if (response.ok) {
-        const updated = await response.json();
-        setTasks(tasks.map(t => t.id === id ? updated : t));
-        setSelectedTask(null);
-      } else {
-        throw new Error('Failed to cancel task');
-      }
+      await apiClient.post(`/api/v1/agribusiness/field-service-tasks/${id}/cancel`, { reason });
+      setSelectedTask(null);
+      refetch();
     } catch (error) {
       console.error('Error cancelling task:', error);
       throw error;
@@ -125,12 +102,12 @@ export default function FieldServiceTasksPage(): JSX.Element {
 
   // Audit trail
   const fetchAuditTrail = async (entityType: string, entityId: string) => {
-    const response = await fetch(`/api/audit/change-logs/audit-trail/${entityType}/${entityId}`);
-    if (response.ok) {
-      const data = await response.json();
+    try {
+      const { data } = await apiClient.get(`/api/v1/audit/change-logs/audit-trail/${entityType}/${entityId}`);
       return data.data || [];
+    } catch {
+      return [];
     }
-    return [];
   };
 
   const {
@@ -206,6 +183,13 @@ export default function FieldServiceTasksPage(): JSX.Element {
           </Button>
         </div>
       </div>
+
+      {isWorkflowEntry && (
+        <div className="rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-xs text-blue-900">
+          {workflowCase ? `Workflow-Vorgang ${workflowCase}` : 'Workflow-Einstieg'}
+          {workflowInstanceId ? ` · Instanz ${workflowInstanceId}` : ''}
+        </div>
+      )}
 
       <Toolbar
         onSearch={setQuery}

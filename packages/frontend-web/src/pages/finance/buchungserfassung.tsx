@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
@@ -284,6 +284,10 @@ function BuchungszeilenTable({ data: _data, onChange }: { data: any[], onChange:
 export default function BuchungserfassungPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const workflowInstanceId = searchParams.get('workflowInstanceId')
+  const workflowProcess = searchParams.get('workflowProcess')
+  const workflowCase = searchParams.get('workflowCase')
   const [isDirty, setIsDirty] = useState(false)
   const [isStornoDialogOpen, setIsStornoDialogOpen] = useState(false)
   const [isStornoLoading, setIsStornoLoading] = useState(false)
@@ -351,6 +355,14 @@ export default function BuchungserfassungPage(): JSX.Element {
         const postRes = (await apiClient.post<{ success: boolean; message: string }>('/api/v1/finance/journal-entries/post', formData ?? {})).data
         if (!postRes?.success) {
           throw new Error(postRes?.message || 'Buchung konnte nicht verbucht werden')
+        }
+        if (workflowInstanceId && workflowProcess) {
+          try {
+            await apiClient.post(`/api/v1/process/flow-spines/${workflowProcess}/instances/${workflowInstanceId}/transitions`, {
+              node_id: 'buchung',
+              new_status: 'ok',
+            })
+          } catch { /* best-effort, don't block user */ }
         }
         toast({ title: t('crud.messages.bookingValidationSuccess', { defaultValue: 'Buchung gebucht' }) })
         setIsDirty(false)
@@ -444,6 +456,11 @@ export default function BuchungserfassungPage(): JSX.Element {
         closeTarget="/finance/buchungen"
         title={entityTypeLabel}
       />
+      {workflowInstanceId && (
+        <div className="mb-4 rounded-md border border-indigo-500/30 bg-indigo-500/10 px-4 py-2 text-sm text-indigo-200">
+          Flow-Spine: {workflowCase || workflowProcess} (Instanz {workflowInstanceId.slice(0, 8)}...)
+        </div>
+      )}
       <LeaveConfirmDialog
         blocker={blocker}
         onSave={() => handleSave(latestFormData ?? formData)}

@@ -137,6 +137,7 @@ from app.api.v1.endpoints import (
     agents,
     pos_retoure,
     pos_dsfinvk,
+    service_anfragen,
 )
 
 # Wave 6-9 Process-Kernel-Endpoints (agrar-p0, supplier, wave-7, wave-9)
@@ -1001,6 +1002,16 @@ api_router.include_router(agent_context_api.router)
 # Wave 69 — Knowledge Core
 api_router.include_router(knowledge_api.router, prefix="/knowledge", tags=["knowledge"])
 
+# Service-Anfragen (Service Requests, Feedback, Case Closure)
+api_router.include_router(
+    service_anfragen.router,
+    tags=["Service"],
+)
+
 # Supply Chain Blockchain
 from app.api.v1.endpoints import supply_chain_blockchain
 api_router.include_router(supply_chain_blockchain.router)
+
+# Finance Follow-up (Mahnwesen-Export, Lastschriften)
+from app.api.v1.endpoints import finance_followup
+api_router.include_router(finance_followup.router)
