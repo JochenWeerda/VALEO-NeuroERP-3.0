@@ -50,6 +50,7 @@ type QualityProtocolResponse = {
 
 function buildHarvestAcceptanceHandoverQuery(input: {
   partnerName: string
+  articleId?: string | null
   artikel: string
   lieferscheinNr: string
   vehiclePlate: string
@@ -64,6 +65,7 @@ function buildHarvestAcceptanceHandoverQuery(input: {
   if (input.artikel || input.qpErgebnis) query.set('subject', [input.artikel, input.qpErgebnis].filter(Boolean).join(' / '))
   if (input.lieferscheinNr) query.set('lieferscheinNr', input.lieferscheinNr)
   if (input.vehiclePlate) query.set('vehiclePlate', input.vehiclePlate)
+  if (input.articleId) query.set('articleId', input.articleId)
   if (input.artikel) query.set('articleName', input.artikel)
   query.set('qpResult', input.qpErgebnis)
   query.set('qualityProtocolId', input.qualityProtocolId)
@@ -168,6 +170,7 @@ export default function QualitaetsCheckPage(): JSX.Element {
       }
       const handoverQuery = buildHarvestAcceptanceHandoverQuery({
         partnerName: lkwEintrag?.lieferant ?? '',
+        articleId: lkwEintrag?.article_id ?? null,
         artikel: qualitaet.artikel,
         lieferscheinNr: qualitaet.lieferscheinNr,
         vehiclePlate: lkwEintrag?.kennzeichen ?? '',

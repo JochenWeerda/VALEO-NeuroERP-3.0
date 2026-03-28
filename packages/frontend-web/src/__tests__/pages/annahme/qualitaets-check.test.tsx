@@ -42,6 +42,7 @@ vi.mock('@/lib/api/inventory', () => ({
       id: 'queue-1',
       kennzeichen: 'AB-CD 1234',
       lieferant: 'Hof Meyer',
+      article_id: 'art-weizen',
       artikel: 'Weizen',
       lieferschein_nr: 'LS-42',
       status: 'wartend',
@@ -96,7 +97,7 @@ describe('QualitaetsCheckPage', () => {
       expect(navigateMock).toHaveBeenCalledWith({
         pathname: '/agrar/ernte-annahme-erfassung',
         search:
-          '?workflowProcess=harvest-to-settlement&workflowLabel=quality-protocol%3Aqp-1&entryMode=Qualitaetspruefung&partnerName=Hof+Meyer&subject=Weizen+%2F+freigegeben&lieferscheinNr=LS-42&vehiclePlate=AB-CD+1234&articleName=Weizen&qpResult=freigegeben&qualityProtocolId=qp-1',
+          '?workflowProcess=harvest-to-settlement&workflowLabel=quality-protocol%3Aqp-1&entryMode=Qualitaetspruefung&partnerName=Hof+Meyer&subject=Weizen+%2F+freigegeben&lieferscheinNr=LS-42&vehiclePlate=AB-CD+1234&articleId=art-weizen&articleName=Weizen&qpResult=freigegeben&qualityProtocolId=qp-1',
       })
     })
   })

@@ -113,6 +113,7 @@ class LkwAnnahmeQueue(Base):
     kennzeichen = Column(String(20), nullable=False)
     lieferant = Column(String(200), nullable=False)
     lieferschein_nr = Column(String(100), nullable=True, default="")
+    article_id = Column(String, ForeignKey("domain_inventory.articles.id", ondelete="SET NULL"), nullable=True)
     artikel = Column(String(200), nullable=True, default="")
     ankunftszeit = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     prioritaet = Column(String(20), nullable=False, default="normal")  # hoch | normal | niedrig

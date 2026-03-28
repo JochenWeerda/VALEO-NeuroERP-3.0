@@ -23,6 +23,7 @@ vi.mock('@/lib/api/inventory', () => ({
           position: 1,
           kennzeichen: 'AB-CD 1234',
           lieferant: 'Mueller Agrar',
+          article_id: 'art-weizen',
           artikel: 'Weizen',
           ankunft: '08:15',
           wartezeit: 12,
@@ -34,6 +35,7 @@ vi.mock('@/lib/api/inventory', () => ({
           position: 2,
           kennzeichen: 'EF-GH 5678',
           lieferant: 'Hof Meyer',
+          article_id: 'art-raps',
           artikel: 'Raps',
           ankunft: '08:45',
           wartezeit: 4,
@@ -82,7 +84,7 @@ describe('WarteschlangePage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Ernte-Annahme anlegen' }))
 
     expect(navigateMock).toHaveBeenCalledWith(
-      '/agrar/ernte-annahme-erfassung?workflowProcess=harvest-to-settlement&workflowLabel=queue-entry%3Aqueue-2&entryMode=Warteschlange&partnerName=Hof+Meyer&lieferscheinNr=LS-99&vehiclePlate=EF-GH+5678&articleName=Raps&subject=Raps+%2F+Queue&queueEntryId=queue-2',
+      '/agrar/ernte-annahme-erfassung?workflowProcess=harvest-to-settlement&workflowLabel=queue-entry%3Aqueue-2&entryMode=Warteschlange&partnerName=Hof+Meyer&lieferscheinNr=LS-99&vehiclePlate=EF-GH+5678&articleId=art-raps&articleName=Raps&subject=Raps+%2F+Queue&queueEntryId=queue-2',
     )
   })
 })

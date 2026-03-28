@@ -99,7 +99,7 @@ describe('ErnteAnnahmeErfassungPage', () => {
     render(
       <MemoryRouter
         initialEntries={[
-          '/agrar/ernte-annahme-erfassung?workflowProcess=harvest-to-settlement&workflowLabel=quality-protocol%3Aqp-1&entryMode=Qualitaetspruefung&partnerName=Hof%20Meyer&subject=Weizen%20%2F%20freigegeben&lieferscheinNr=LS-42&vehiclePlate=AB-CD%201234&articleName=Weizen&qpResult=freigegeben&qualityProtocolId=qp-1',
+          '/agrar/ernte-annahme-erfassung?workflowProcess=harvest-to-settlement&workflowLabel=quality-protocol%3Aqp-1&entryMode=Qualitaetspruefung&partnerName=Hof%20Meyer&subject=Weizen%20%2F%20freigegeben&lieferscheinNr=LS-42&vehiclePlate=AB-CD%201234&articleId=art-weizen&articleName=Weizen&qpResult=freigegeben&qualityProtocolId=qp-1',
         ]}
       >
         <Routes>
@@ -115,16 +115,14 @@ describe('ErnteAnnahmeErfassungPage', () => {
     expect(screen.getByDisplayValue(/Lieferschein: LS-42/)).toBeInTheDocument()
     expect(screen.getByDisplayValue(/Qualitaetspruefung: freigegeben/)).toBeInTheDocument()
     expect(screen.getByDisplayValue(/Qualitaetsprotokoll: qp-1/)).toBeInTheDocument()
-    await waitFor(() => {
-      expect(screen.getByDisplayValue('art-weizen')).toBeInTheDocument()
-    })
+    expect(screen.getByDisplayValue('art-weizen')).toBeInTheDocument()
   })
 
   it('zieht fuer Queue-Handover die kanonische article_id aus der Artikel-API nach', async () => {
     render(
       <MemoryRouter
         initialEntries={[
-          '/agrar/ernte-annahme-erfassung?workflowProcess=harvest-to-settlement&workflowLabel=queue-entry%3Aqueue-2&entryMode=Warteschlange&partnerName=Hof%20Meyer&subject=Raps%20%2F%20Queue&lieferscheinNr=LS-99&vehiclePlate=EF-GH%205678&articleName=Raps&queueEntryId=queue-2',
+          '/agrar/ernte-annahme-erfassung?workflowProcess=harvest-to-settlement&workflowLabel=queue-entry%3Aqueue-2&entryMode=Warteschlange&partnerName=Hof%20Meyer&subject=Raps%20%2F%20Queue&articleId=art-raps&lieferscheinNr=LS-99&vehiclePlate=EF-GH%205678&articleName=Raps&queueEntryId=queue-2',
         ]}
       >
         <Routes>
@@ -133,9 +131,7 @@ describe('ErnteAnnahmeErfassungPage', () => {
       </MemoryRouter>,
     )
 
-    await waitFor(() => {
-      expect(screen.getByDisplayValue('art-raps')).toBeInTheDocument()
-    })
+    expect(screen.getByDisplayValue('art-raps')).toBeInTheDocument()
     expect(screen.getByDisplayValue('Raps')).toBeInTheDocument()
     expect(screen.getByDisplayValue(/Warteschlange: queue-2/)).toBeInTheDocument()
   })

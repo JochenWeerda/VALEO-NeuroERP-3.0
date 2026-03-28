@@ -1939,12 +1939,49 @@ def _lkw_db_to_item(row: LkwAnnahmeQueue, position: int) -> dict:
         "position": position,
         "kennzeichen": row.kennzeichen or "",
         "lieferant": row.lieferant or "",
+        "article_id": row.article_id,
         "artikel": row.artikel or "",
         "ankunft": ankunftszeit_s,
         "wartezeit": wartezeit_min,
         "status": status,
         "lieferschein_nr": row.lieferschein_nr or "",
     }
+
+
+def _resolve_lkw_article_reference(
+    db: Session,
+    *,
+    tenant_id: str,
+    article_id: str | None,
+    artikel: str | None,
+) -> tuple[str | None, str]:
+    candidate_id = (article_id or "").strip() or None
+    candidate_label = (artikel or "").strip()
+    base_query = db.query(ArticleModel).filter(
+        ArticleModel.is_active == True,  # noqa: E712
+        ((ArticleModel.tenant_id == tenant_id) | (ArticleModel.tenant_id.is_(None))),
+    )
+
+    article = None
+    if candidate_id:
+        article = base_query.filter(ArticleModel.id == candidate_id).first()
+        if article is None:
+            article = base_query.filter(ArticleModel.article_number == candidate_id).first()
+
+    if article is None and candidate_label:
+        article = (
+            base_query.filter(
+                (ArticleModel.article_number == candidate_label) | (ArticleModel.name == candidate_label)
+            )
+            .order_by(ArticleModel.name.asc())
+            .first()
+        )
+
+    if article is None:
+        return candidate_id, candidate_label
+
+    resolved_label = article.name or article.article_number or candidate_label or str(article.id)
+    return str(article.id), resolved_label
 
 
 @router.get("/annahme/warteschlange", response_model=dict)
@@ -2015,6 +2052,7 @@ class LKWRegistrierungIn(BaseModel):
     kennzeichen: str = Field(..., min_length=1)
     lieferant: str = Field(..., min_length=1)
     lieferschein_nr: str = Field(default="")
+    article_id: str | None = Field(default=None)
     artikel: str = Field(default="")
     ankunftszeit: str = Field(default="")
     prioritaet: str = Field(default="normal", description="hoch | normal | niedrig")
@@ -2024,6 +2062,8 @@ class LKWRegistrierungIn(BaseModel):
 class LKWRegistrierungOut(BaseModel):
     id: str
     kennzeichen: str
+    article_id: str | None = None
+    artikel: str = ""
     status: str = "warteschlange"
 
 
@@ -2072,13 +2112,20 @@ async def create_lkw_registrierung(
                 ankunft_dt = ankunft_dt.replace(tzinfo=timezone.utc)
         except Exception:
             pass
+    resolved_article_id, resolved_artikel = _resolve_lkw_article_reference(
+        db,
+        tenant_id=tenant_id,
+        article_id=payload.article_id,
+        artikel=payload.artikel,
+    )
     row = LkwAnnahmeQueue(
         id=reg_id,
         tenant_id=tenant_id,
         kennzeichen=payload.kennzeichen,
         lieferant=payload.lieferant,
         lieferschein_nr=payload.lieferschein_nr or "",
-        artikel=payload.artikel or "",
+        article_id=resolved_article_id,
+        artikel=resolved_artikel,
         ankunftszeit=ankunft_dt,
         prioritaet=payload.prioritaet,
         status="wartend",
@@ -2087,7 +2134,23 @@ async def create_lkw_registrierung(
     db.add(row)
     db.commit()
     db.refresh(row)
-    return LKWRegistrierungOut(id=reg_id, kennzeichen=payload.kennzeichen, status="wartend")
+    return LKWRegistrierungOut(
+        id=reg_id,
+        kennzeichen=payload.kennzeichen,
+        article_id=resolved_article_id,
+        artikel=resolved_artikel,
+        status="wartend",
+    )
+
+
+@router.post("/annahme/warteschlange", response_model=LKWRegistrierungOut, status_code=201, tags=["annahme"])
+async def create_lkw_warteschlange_alias(
+    payload: LKWRegistrierungIn,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> LKWRegistrierungOut:
+    """Rueckwaertskompatibler Alias fuer QR-/Mobile-Pfade, die direkt auf die Warteschlange posten."""
+    return await create_lkw_registrierung(payload=payload, tenant_id=tenant_id, db=db)
 
 
 # Portal compatibility ------------------------------------------------------
