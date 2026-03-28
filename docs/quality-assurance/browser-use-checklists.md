@@ -171,3 +171,12 @@ Diese Checklisten schaerfen die UI-, CRUD- und Live-Betriebspruefung fuer Workfl
 8. Erwartung: Queue-Status aktualisiert sich; Handover in Ernte-Annahme ist moeglich.
 9. Entscheidung `Endgueltig gesperrt` pruefen.
 10. Erwartung: Eintrag bleibt gesperrt, kein Handover in die Ernte-Annahme.
+
+### VK-019: Queue-Repair historische article_id
+
+1. Einen Queue-Eintrag ohne `article_id` oeffnen.
+2. Erwartung: CTA `Artikel reparieren` ist sichtbar.
+3. CTA klicken.
+4. Erwartung: Bei eindeutiger Zuordnung wird `article_id` gesetzt und die Queue refresht.
+5. Eintrag mit mehrdeutigem Artikelnamen pruefen.
+6. Erwartung: Kein Update, Hinweis-Toast mit Grund.

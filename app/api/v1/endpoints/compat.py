@@ -1985,6 +1985,40 @@ def _resolve_lkw_article_reference(
     return str(article.id), resolved_label
 
 
+def _repair_lkw_article_reference(
+    db: Session,
+    *,
+    tenant_id: str,
+    artikel: str | None,
+) -> tuple[str | None, str | None, str]:
+    candidate_label = (artikel or "").strip()
+    if not candidate_label:
+        return None, None, "missing_label"
+
+    base_query = db.query(ArticleModel).filter(
+        ArticleModel.is_active == True,  # noqa: E712
+        ((ArticleModel.tenant_id == tenant_id) | (ArticleModel.tenant_id.is_(None))),
+    )
+
+    by_number = base_query.filter(ArticleModel.article_number == candidate_label).all()
+    if len(by_number) == 1:
+        article = by_number[0]
+        label = article.name or article.article_number or candidate_label
+        return str(article.id), label, "article_number"
+    if len(by_number) > 1:
+        return None, None, "ambiguous_article_number"
+
+    by_name = base_query.filter(ArticleModel.name == candidate_label).all()
+    if len(by_name) == 1:
+        article = by_name[0]
+        label = article.name or article.article_number or candidate_label
+        return str(article.id), label, "article_name"
+    if len(by_name) > 1:
+        return None, None, "ambiguous_article_name"
+
+    return None, None, "not_found"
+
+
 @router.get("/annahme/warteschlange", response_model=dict)
 async def annahme_warteschlange(
     tenant_id: str = Depends(get_tenant_id),
@@ -2058,6 +2092,36 @@ async def annahme_warteschlange_patch(
     db.commit()
     db.refresh(row)
     return _lkw_db_to_item(row, position=0)
+
+
+@router.post("/annahme/warteschlange/{reg_id}/repair-article", response_model=dict)
+async def annahme_warteschlange_repair_article(
+    reg_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Konservativer Repair fuer Queue-Eintraege ohne article_id."""
+    row = (
+        db.query(LkwAnnahmeQueue)
+        .filter(LkwAnnahmeQueue.id == reg_id, LkwAnnahmeQueue.tenant_id == tenant_id)
+        .first()
+    )
+    if not row:
+        raise HTTPException(status_code=404, detail="LKW-Eintrag nicht gefunden")
+    if row.article_id:
+        return {"status": "already_set", "article_id": row.article_id, "artikel": row.artikel}
+
+    article_id, artikel_label, reason = _repair_lkw_article_reference(
+        db, tenant_id=tenant_id, artikel=row.artikel
+    )
+    if not article_id or not artikel_label:
+        return {"status": "not_resolved", "reason": reason}
+
+    row.article_id = article_id
+    row.artikel = artikel_label
+    db.commit()
+    db.refresh(row)
+    return {"status": "updated", "article_id": article_id, "artikel": artikel_label}
 
 
 class LKWRegistrierungIn(BaseModel):
@@ -3311,17 +3375,39 @@ async def create_auslagerung(
 @router.get("/pos/suspended-sales", response_model=list, tags=["pos"])
 async def list_suspended_sales(
     tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
 ) -> list:
-    """Liste pausierter Verkäufe — Stub: liefert leere Liste; kann später an POS-Store angebunden werden."""
-    return []
+    """Liste pausierter Verkauefe aus dem Document-Store (Typ pos_suspended_sale)."""
+    try:
+        docs = _list_docs(db, "pos_suspended_sale", limit=100, tenant_id=tenant_id)
+        return [
+            {
+                "id": d.get("id"),
+                "customer_name": d.get("customerName", ""),
+                "items": d.get("items", []),
+                "total": d.get("total", 0),
+                "suspended_at": d.get("suspendedAt") or d.get("createdAt"),
+                "status": d.get("status", "suspended"),
+            }
+            for d in docs
+        ]
+    except Exception:
+        return []
 
 
 @router.delete("/pos/suspended-sales/{sale_id}", status_code=204, tags=["pos"], response_class=Response)
 async def delete_suspended_sale(
     sale_id: str,
     tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
 ):
-    """Pausierten Verkauf löschen — Stub: bestätigt nur; kann später an POS-Store angebunden werden."""
+    """Pausierten Verkauf loeschen — entfernt aus Document-Store."""
+    try:
+        repo = _doc_repo(db)
+        from app.documents.store import delete_from_store
+        delete_from_store("pos_suspended_sale", sale_id, repo=repo)
+    except Exception:
+        pass
     return Response(status_code=204)
 
 

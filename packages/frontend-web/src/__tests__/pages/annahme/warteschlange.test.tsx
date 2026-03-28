@@ -23,7 +23,7 @@ vi.mock('@/lib/api/inventory', () => ({
           position: 1,
           kennzeichen: 'AB-CD 1234',
           lieferant: 'Mueller Agrar',
-          article_id: 'art-weizen',
+          article_id: null,
           artikel: 'Weizen',
           ankunft: '08:15',
           wartezeit: 12,
@@ -59,6 +59,9 @@ vi.mock('@/lib/api/inventory', () => ({
     },
     isLoading: false,
     refetch: refetchMock,
+  }),
+  useRepairWarteschlangeArticle: () => ({
+    mutate: vi.fn(),
   }),
 }))
 
@@ -110,5 +113,15 @@ describe('WarteschlangePage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Klaerung starten' }))
 
     expect(navigateMock).toHaveBeenCalledWith('/annahme/klaerung-gesperrt?queueEntryId=queue-3')
+  })
+
+  it('bietet fuer Eintraege ohne article_id den Repair-CTA', () => {
+    render(
+      <MemoryRouter>
+        <WarteschlangePage />
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByRole('button', { name: 'Artikel reparieren' })).toBeInTheDocument()
   })
 })
