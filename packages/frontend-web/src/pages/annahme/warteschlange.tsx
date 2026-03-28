@@ -10,13 +10,16 @@ import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
 import { PageSection, PageSurface } from '@/components/patterns/PageSurface'
 import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { Clock, Search, Truck } from 'lucide-react'
-import { useWarteschlange, type LKWEintrag } from '@/lib/api/inventory'
+import { useToast } from '@/hooks/use-toast'
+import { useRepairWarteschlangeArticle, useWarteschlange, type LKWEintrag } from '@/lib/api/inventory'
 
 export default function WarteschlangePage(): JSX.Element {
   const navigate = useNavigate()
+  const { toast } = useToast()
   const searchInputRef = useRef<HTMLInputElement | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const { data, isLoading, refetch } = useWarteschlange()
+  const repairArticle = useRepairWarteschlangeArticle()
   const warteschlange = useMemo(() => {
     const items = data?.items ?? []
     if (!searchTerm.trim()) {
@@ -121,6 +124,32 @@ export default function WarteschlangePage(): JSX.Element {
           <Button size="sm" variant="outline" onClick={() => navigate('/annahme/qualitaets-check', { state: { eintragId: l.id } })}>
             Bearbeiten
           </Button>
+          {!l.article_id && l.artikel ? (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() =>
+                repairArticle.mutate(l.id, {
+                  onSuccess: (result) => {
+                    if (result.status === 'updated') {
+                      toast({ title: 'Artikel repariert', description: result.artikel || l.artikel })
+                      return
+                    }
+                    toast({
+                      title: 'Repair nicht moeglich',
+                      description: result.reason || 'Kein eindeutiger Treffer',
+                      variant: 'destructive',
+                    })
+                  },
+                  onError: () => {
+                    toast({ title: 'Repair fehlgeschlagen', variant: 'destructive' })
+                  },
+                })
+              }
+            >
+              Artikel reparieren
+            </Button>
+          ) : null}
           {l.status === 'gesperrt' && (
             <Button size="sm" variant="destructive" onClick={() => openKlaerung(l)}>
               Klaerung starten

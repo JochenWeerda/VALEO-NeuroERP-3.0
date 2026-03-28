@@ -288,3 +288,18 @@ export function usePatchWarteschlangeStatus() {
     },
   })
 }
+
+export function useRepairWarteschlangeArticle() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { data } = await apiClient.post<{ status: string; reason?: string; article_id?: string; artikel?: string }>(
+        `/api/v1/annahme/warteschlange/${id}/repair-article`,
+      )
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: inventoryExtraKeys.warteschlange() })
+    },
+  })
+}
