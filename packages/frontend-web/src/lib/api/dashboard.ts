@@ -110,16 +110,17 @@ export function useSalesDashboard() {
       const periodFrom = `${now.getFullYear()}-01-01`
       const periodTo = now.toISOString().slice(0, 10)
 
-      const [summaryRes, topRes] = await Promise.allSettled([
+      const [summaryRes, topRes, monthlyRes] = await Promise.allSettled([
         apiClient.get<{
           total_revenue: number
           total_orders: number
           avg_order_value: number
-          period_from: string
-          period_to: string
         }>(`/api/v1/sales/reports/summary?period_from=${periodFrom}&period_to=${periodTo}`),
         apiClient.get<Array<{ customer_id: string; customer_name: string; total_revenue: number }>>(
           `/api/v1/sales/reports/top-customers?period_from=${periodFrom}&period_to=${periodTo}&limit=5`,
+        ),
+        apiClient.get<Array<{ month: string; revenue: number; order_count: number }>>(
+          `/api/v1/sales/reports/monthly-revenue?period_from=${periodFrom}&period_to=${periodTo}`,
         ),
       ])
 
@@ -127,6 +128,8 @@ export function useSalesDashboard() {
         summaryRes.status === 'fulfilled' ? summaryRes.value.data : null
       const topCustomers =
         topRes.status === 'fulfilled' ? topRes.value.data || [] : []
+      const monthlyData =
+        monthlyRes.status === 'fulfilled' ? monthlyRes.value.data || [] : []
 
       return {
         totalRevenue: summary?.total_revenue ?? 0,
@@ -137,7 +140,10 @@ export function useSalesDashboard() {
           name: c.customer_name,
           revenue: c.total_revenue,
         })),
-        revenueByMonth: [],
+        revenueByMonth: (Array.isArray(monthlyData) ? monthlyData : []).map((m: any) => ({
+          month: m.month,
+          revenue: m.revenue,
+        })),
       } as SalesDashboardData
     },
     initialData: EMPTY_SALES_DASHBOARD,

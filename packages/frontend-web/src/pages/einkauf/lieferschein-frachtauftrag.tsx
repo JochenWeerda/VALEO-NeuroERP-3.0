@@ -57,8 +57,21 @@ export default function EinkaufLieferscheinFrachtauftragPage(): JSX.Element {
     staleTime: 5 * 60 * 1000,
   })
 
-  // Frachtauftraege — endpoint does not exist yet, returns empty array
-  const frachtauftraege: Frachtauftrag[] = []
+  const { data: frachtauftraege = [], refetch: refetchFracht } = useQuery<Frachtauftrag[]>({
+    queryKey: ['einkauf', 'frachtauftraege'],
+    queryFn: async () => {
+      try {
+        const res = await apiClient.get<{ data: Frachtauftrag[] } | Frachtauftrag[]>(
+          '/api/v1/einkauf/frachtauftraege',
+        )
+        const raw = res.data
+        return Array.isArray(raw) ? raw : (raw as any)?.data || []
+      } catch {
+        return []
+      }
+    },
+    staleTime: 2 * 60 * 1000,
+  })
 
   const filtered = useMemo(() => {
     let items = frachtauftraege
@@ -87,7 +100,7 @@ export default function EinkaufLieferscheinFrachtauftragPage(): JSX.Element {
   const shortcuts = buildCoreMaskShortcuts({
     onSearch: () => searchInputRef.current?.focus(),
     onRefresh: () => {
-      // TODO: refetch frachtauftraege when endpoint exists
+      refetchFracht()
     },
   })
   useKeyboardShortcuts(shortcuts)

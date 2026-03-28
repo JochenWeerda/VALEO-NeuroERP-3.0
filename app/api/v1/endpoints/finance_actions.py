@@ -164,11 +164,55 @@ async def cash_close_day(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    """
-    Kasse Tagesabschluss (Stub: Status/Job anstoßen).
-    """
-    # Stub: can be extended to close cash register day, create closing entry, etc.
-    return ActionResponse(success=True, message="Kassen-Tagesabschluss angestoßen.")
+    """Kasse Tagesabschluss — erzeugt Abschlussbuchung fuer den aktuellen Tag."""
+    from datetime import date as _date
+    today = _date.today()
+    period = today.strftime("%Y-%m")
+
+    try:
+        row = db.execute(
+            text("""
+                SELECT COUNT(*) AS cnt,
+                       COALESCE(SUM(CASE WHEN je.status = 'posted' THEN je.total_debit ELSE 0 END), 0) AS total_debit,
+                       COALESCE(SUM(CASE WHEN je.status = 'posted' THEN je.total_credit ELSE 0 END), 0) AS total_credit
+                FROM domain_erp.journal_entries je
+                WHERE je.tenant_id = :tid
+                  AND je.entry_date = :today
+            """),
+            {"tid": tenant_id, "today": today},
+        ).fetchone()
+
+        buchungen = row.cnt if row else 0
+        soll = float(row.total_debit) if row else 0
+        haben = float(row.total_credit) if row else 0
+
+        db.execute(
+            text("""
+                INSERT INTO domain_erp.journal_entries
+                    (id, tenant_id, entry_number, entry_date, posting_date, description,
+                     source, status, total_debit, total_credit, created_at)
+                VALUES
+                    (:id, :tid, :nr, :today, :today, :desc, 'cash_close', 'posted', :debit, :credit, NOW())
+                ON CONFLICT DO NOTHING
+            """),
+            {
+                "id": f"cash-close-{tenant_id}-{today}",
+                "tid": tenant_id,
+                "nr": f"KA-{today.strftime('%Y%m%d')}",
+                "today": today,
+                "desc": f"Kassen-Tagesabschluss {today}: {buchungen} Buchungen, Soll {soll:.2f}, Haben {haben:.2f}",
+                "debit": soll,
+                "credit": haben,
+            },
+        )
+        db.commit()
+
+        return ActionResponse(
+            success=True,
+            message=f"Tagesabschluss {today}: {buchungen} Buchungen, Soll {soll:.2f} EUR, Haben {haben:.2f} EUR.",
+        )
+    except Exception as e:
+        return ActionResponse(success=False, message=f"Tagesabschluss fehlgeschlagen: {e!s}")
 
 
 # ── Direct debit run ───────────────────────────────────────────────────────────
@@ -178,11 +222,52 @@ async def run_direct_debit(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    """
-    Lastschriftenlauf starten (Debitoren-Lastschriften; Stub).
-    """
-    # Stub: can be extended to create SEPA direct debit file, update status
-    return ActionResponse(success=True, message="Lastschriftenlauf angestoßen.")
+    """Lastschriftenlauf — sammelt offene Posten mit SEPA-Mandat und erzeugt direct_debit_items."""
+    from uuid import uuid4
+    run_id = f"DD-{uuid4().hex[:8].upper()}"
+
+    try:
+        result = db.execute(
+            text("""
+                INSERT INTO domain_shared.direct_debit_items
+                    (id, tenant_id, run_id, debitor_id, amount, currency, mandate_ref, status, created_at)
+                SELECT
+                    gen_random_uuid()::text,
+                    oi.tenant_id,
+                    :run_id,
+                    oi.debitor_id,
+                    oi.amount,
+                    COALESCE(oi.currency, 'EUR'),
+                    sm.mandate_reference,
+                    'pending',
+                    NOW()
+                FROM domain_shared.open_items oi
+                JOIN domain_shared.sepa_mandates sm
+                    ON sm.debitor_id = oi.debitor_id AND sm.tenant_id = oi.tenant_id
+                    AND sm.mandate_valid = true
+                    AND (sm.mandate_expired_at IS NULL OR sm.mandate_expired_at > NOW())
+                WHERE oi.tenant_id = :tid
+                  AND oi.status = 'open'
+                  AND oi.due_date <= CURRENT_DATE
+                RETURNING id
+            """),
+            {"tid": tenant_id, "run_id": run_id},
+        )
+        count = len(result.fetchall())
+        db.commit()
+
+        if count == 0:
+            return ActionResponse(
+                success=True,
+                message=f"Lastschriftenlauf {run_id}: Keine faelligen Posten mit gueltigem SEPA-Mandat gefunden.",
+            )
+
+        return ActionResponse(
+            success=True,
+            message=f"Lastschriftenlauf {run_id} erzeugt: {count} Lastschrift(en) angelegt.",
+        )
+    except Exception as e:
+        return ActionResponse(success=False, message=f"Lastschriftenlauf fehlgeschlagen: {e!s}")
 
 
 # ── Closing run ───────────────────────────────────────────────────────────────
