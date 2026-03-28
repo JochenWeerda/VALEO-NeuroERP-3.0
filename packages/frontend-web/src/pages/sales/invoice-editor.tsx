@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { useSearchParams } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/components/ui/toast-provider"
@@ -43,6 +43,7 @@ type SalesInvoice = {
 export default function SalesInvoiceEditorPage(): JSX.Element {
   const { t } = useTranslation()
   const { push } = useToast()
+  const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const editId = searchParams.get("id")
   const entityType = 'invoice'
@@ -188,13 +189,25 @@ export default function SalesInvoiceEditorPage(): JSX.Element {
           submitLabel={`${t('crud.actions.save')} ${entityTypeLabel}`}
         />
         {docId && (
-          <div className="mt-4 flex gap-2">
+          <div className="mt-4 flex flex-wrap gap-2">
             <Button type="button" variant="outline" size="sm" onClick={() => void recordPrint()}>
               Druck protokollieren
             </Button>
             <Button type="button" variant="outline" size="sm" onClick={() => void recordExport()}>
               Export protokollieren
             </Button>
+            {invoice.number?.trim() ? (
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() =>
+                  navigate(`/finance/op-debitoren?rechnungsnr=${encodeURIComponent(invoice.number.trim())}`)
+                }
+              >
+                OP / Zahlungseingang (OTC-011)
+              </Button>
+            ) : null}
           </div>
         )}
       </Card>
