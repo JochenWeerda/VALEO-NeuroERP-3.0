@@ -160,8 +160,17 @@ export type LKWEintrag = {
   artikel: string
   ankunft: string
   wartezeit: number
-  status: 'wartend' | 'in-bearbeitung' | 'abgeschlossen'
+  status: 'wartend' | 'in-bearbeitung' | 'abgeschlossen' | 'gesperrt'
   lieferschein_nr?: string
+  klaerung?: {
+    status?: 'offen' | 'freigegeben' | 'gesperrt'
+    decision?: 'sonderfreigabe' | 'gesperrt'
+    reason?: string
+    qp_result?: string
+    decided_at?: string
+    quality_protocol_id?: string
+    updated_at?: string
+  } | null
 }
 
 export const inventoryExtraKeys = {
@@ -256,8 +265,22 @@ export function useWarteschlangeEintrag(id: string | undefined) {
 export function usePatchWarteschlangeStatus() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async ({ id, status }: { id: string; status: 'in-bearbeitung' | 'abgeschlossen' }) => {
-      const { data } = await apiClient.patch<LKWEintrag>(`/api/v1/annahme/warteschlange/${id}`, { status })
+    mutationFn: async ({
+      id,
+      status,
+      klaerung,
+    }: {
+      id: string
+      status?: 'in-bearbeitung' | 'abgeschlossen' | 'gesperrt'
+      klaerung?: LKWEintrag['klaerung']
+    }) => {
+      const payload: Record<string, unknown> = {}
+      if (status) payload.status = status
+      if (klaerung) payload.klaerung = klaerung
+      if (!payload.status && !payload.klaerung) {
+        throw new Error('status oder klaerung muss gesetzt sein')
+      }
+      const { data } = await apiClient.patch<LKWEintrag>(`/api/v1/annahme/warteschlange/${id}`, payload)
       return data
     },
     onSuccess: () => {

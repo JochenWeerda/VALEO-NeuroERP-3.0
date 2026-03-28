@@ -57,6 +57,13 @@ export default function WarteschlangePage(): JSX.Element {
     navigate(`/agrar/ernte-annahme-erfassung?${searchParams.toString()}`)
   }
 
+  const openKlaerung = (entry: LKWEintrag): void => {
+    const searchParams = new URLSearchParams({
+      queueEntryId: entry.id,
+    })
+    navigate(`/annahme/klaerung-gesperrt?${searchParams.toString()}`)
+  }
+
   const columns = [
     { key: 'position' as const, label: '#', render: (l: LKWEintrag) => <span className="text-lg font-bold">#{l.position}</span> },
     {
@@ -85,8 +92,24 @@ export default function WarteschlangePage(): JSX.Element {
       key: 'status' as const,
       label: 'Status',
       render: (l: LKWEintrag) => (
-        <Badge variant={l.status === 'abgeschlossen' ? 'outline' : l.status === 'in-bearbeitung' ? 'secondary' : 'default'}>
-          {l.status === 'wartend' ? 'Wartend' : l.status === 'in-bearbeitung' ? 'In Bearbeitung' : 'Abgeschlossen'}
+        <Badge
+          variant={
+            l.status === 'gesperrt'
+              ? 'destructive'
+              : l.status === 'abgeschlossen'
+                ? 'outline'
+                : l.status === 'in-bearbeitung'
+                  ? 'secondary'
+                  : 'default'
+          }
+        >
+          {l.status === 'wartend'
+            ? 'Wartend'
+            : l.status === 'in-bearbeitung'
+              ? 'In Bearbeitung'
+              : l.status === 'gesperrt'
+                ? 'Gesperrt'
+                : 'Abgeschlossen'}
         </Badge>
       ),
     },
@@ -98,6 +121,11 @@ export default function WarteschlangePage(): JSX.Element {
           <Button size="sm" variant="outline" onClick={() => navigate('/annahme/qualitaets-check', { state: { eintragId: l.id } })}>
             Bearbeiten
           </Button>
+          {l.status === 'gesperrt' && (
+            <Button size="sm" variant="destructive" onClick={() => openKlaerung(l)}>
+              Klaerung starten
+            </Button>
+          )}
           {l.status === 'abgeschlossen' && (
             <Button size="sm" onClick={() => openHarvestAcceptance(l)}>
               Ernte-Annahme anlegen

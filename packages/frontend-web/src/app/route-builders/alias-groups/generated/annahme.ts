@@ -10,6 +10,10 @@ export const entries: AliasGroupRouteEntry[] = [
     "path": "qr"
   },
   {
+    "module": "@/pages/annahme/klaerung-gesperrt",
+    "path": "klaerung-gesperrt"
+  },
+  {
     "module": "@/pages/annahme/lkw-registrierung",
     "path": "lkw-registrierung"
   },

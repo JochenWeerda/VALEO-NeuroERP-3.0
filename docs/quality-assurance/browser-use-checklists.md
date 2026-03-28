@@ -158,3 +158,16 @@ Diese Checklisten schaerfen die UI-, CRUD- und Live-Betriebspruefung fuer Workfl
 8. Erwartung: Die Ernte-Annahme zeigt die `article_id` direkt, ohne auf den Textlookup angewiesen zu sein.
 9. `QR-Scanner` mit einem gueltigen Artikelcode pruefen.
 10. Erwartung: Der POST bricht nicht mit 404; der Queue-Pfad nutzt denselben Registrierungs-Contract bzw. den Alias.
+
+### VK-018: Klaerungsprozess gesperrte Ware
+
+1. Einen Queue-Eintrag via QP mit Ergebnis `gesperrt` abschliessen.
+2. Erwartung: Queue-Status zeigt `gesperrt`; es gibt einen CTA `Klaerung starten`.
+3. CTA anklicken.
+4. Erwartung: Klaerungsmaske oeffnet mit Kennzeichen, Lieferant, Artikel und QP-Referenz.
+5. Ohne Begruendung speichern versuchen.
+6. Erwartung: Validierung blockiert, Toast/Meldung sichtbar.
+7. Entscheidung `Sonderfreigabe` mit Begruendung speichern.
+8. Erwartung: Queue-Status aktualisiert sich; Handover in Ernte-Annahme ist moeglich.
+9. Entscheidung `Endgueltig gesperrt` pruefen.
+10. Erwartung: Eintrag bleibt gesperrt, kein Handover in die Ernte-Annahme.

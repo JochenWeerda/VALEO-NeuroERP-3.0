@@ -10,6 +10,10 @@ export const entries: AutoGroupRouteEntry[] = [
     "path": "annahme-qr"
   },
   {
+    "module": "@/pages/annahme/klaerung-gesperrt",
+    "path": "klaerung-gesperrt"
+  },
+  {
     "module": "@/pages/annahme/lkw-registrierung",
     "path": "lkw-registrierung"
   },

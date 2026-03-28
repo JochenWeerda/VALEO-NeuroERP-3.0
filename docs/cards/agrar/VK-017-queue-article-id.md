@@ -120,7 +120,7 @@
 - Betroffene Folgeprozesse: Qualitaets-Check, Ernte-Annahme, Settlement
 
 ## 15. Empfehlung
-- Empfohlene Massnahme: als naechsten Slice den Klaerungsprozess fuer `gesperrt` oder unaufgeloeste Sonderfaelle schneiden.
+- Empfohlene Massnahme: Klaerungsprozess fuer `gesperrt` ist in VK-018 umgesetzt; unaufgeloeste Sonderfaelle bleiben als Folgepfad offen.
 - Fachlich: externe QR-Erzeuger spaeter auf echte interne `article_id` oder eindeutige `article_number` normieren.
 - Technisch: Alias fuer `POST /annahme/warteschlange` beibehalten, bis alle Clients umgestellt sind.
 - UI-seitig: optional Warnhinweis bei Freitext-Fallback in der Queue ergaenzen.
