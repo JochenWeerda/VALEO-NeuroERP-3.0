@@ -1012,6 +1012,10 @@ api_router.include_router(
 from app.api.v1.endpoints import supply_chain_blockchain
 api_router.include_router(supply_chain_blockchain.router)
 
+# Liquidity Planning (Liquiditätsplanung)
+from app.api.v1.endpoints import liquidity
+api_router.include_router(liquidity.router)
+
 # Finance Follow-up (Mahnwesen-Export, Lastschriften)
 from app.api.v1.endpoints import finance_followup
 api_router.include_router(finance_followup.router)

@@ -48,8 +48,7 @@ const createConsentConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
           label: t('crud.entities.contact'),
           type: 'text',
           required: true,
-          placeholder: t('crud.tooltips.placeholders.selectContact')
-          // TODO: Load contacts from API
+          placeholder: 'Kontakt-ID eingeben (z.B. KON-001)'
         },
         {
           name: 'channel',

@@ -1,14 +1,61 @@
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { AlertTriangle, Cloud, CloudRain } from 'lucide-react'
+import { AlertTriangle, Cloud, CloudRain, Loader2, ShieldAlert } from 'lucide-react'
+import { useWetterWarnungen, type WetterWarnung } from '@/lib/api/agrar'
+
+const DEFAULT_COORDS = { lat: 53.36, lon: 7.21 } // Emden / Ostfriesland
+
+function severityBorderClass(severity: string): string {
+  switch (severity) {
+    case 'Extreme': return 'border-red-600'
+    case 'Severe': return 'border-orange-500'
+    case 'Moderate': return 'border-yellow-500'
+    default: return 'border-blue-400'
+  }
+}
+
+function severityBadgeVariant(severity: string): 'destructive' | 'secondary' | 'outline' {
+  switch (severity) {
+    case 'Extreme':
+    case 'Severe': return 'destructive'
+    case 'Moderate': return 'secondary'
+    default: return 'outline'
+  }
+}
+
+function severityLabel(severity: string): string {
+  switch (severity) {
+    case 'Extreme': return 'Extrem'
+    case 'Severe': return 'Schwer'
+    case 'Moderate': return 'Mäßig'
+    case 'Minor': return 'Gering'
+    default: return severity
+  }
+}
+
+function warnungIcon(event: string) {
+  const lower = event.toLowerCase()
+  if (lower.includes('regen') || lower.includes('niederschlag')) {
+    return <CloudRain className="h-8 w-8 text-blue-600" />
+  }
+  if (lower.includes('gewitter') || lower.includes('sturm') || lower.includes('wind')) {
+    return <ShieldAlert className="h-8 w-8 text-orange-600" />
+  }
+  return <Cloud className="h-8 w-8 text-gray-600" />
+}
 
 export default function WetterwarnungPage(): JSX.Element {
-  const warnungen = {
-    aktiv: 2,
-    warnliste: [
-      { stufe: 'orange', typ: 'Starkregen', beginn: '2025-10-12 18:00', ende: '2025-10-13 06:00', region: 'Nordhausen' },
-      { stufe: 'gelb', typ: 'Gewitter', beginn: '2025-10-12 14:00', ende: '2025-10-12 20:00', region: 'Gesamtgebiet' },
-    ],
+  const { data: warnungen, isLoading, isError } = useWetterWarnungen(DEFAULT_COORDS)
+
+  const aktiv = warnungen?.length ?? 0
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-12">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <span className="ml-3 text-muted-foreground">Wetterwarnungen werden geladen...</span>
+      </div>
+    )
   }
 
   return (
@@ -18,12 +65,12 @@ export default function WetterwarnungPage(): JSX.Element {
         <p className="text-muted-foreground">DWD-Warnlagebericht</p>
       </div>
 
-      {warnungen.aktiv > 0 && (
+      {aktiv > 0 && (
         <Card className="border-orange-500 bg-orange-50">
           <CardContent className="pt-4">
             <div className="flex items-center gap-2 text-orange-900">
               <AlertTriangle className="h-5 w-5" />
-              <span className="font-semibold">{warnungen.aktiv} aktive Wetterwarnung(en)!</span>
+              <span className="font-semibold">{aktiv} aktive Wetterwarnung(en)!</span>
             </div>
           </CardContent>
         </Card>
@@ -37,7 +84,7 @@ export default function WetterwarnungPage(): JSX.Element {
           <CardContent>
             <div className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-orange-600" />
-              <span className="text-2xl font-bold text-orange-600">{warnungen.aktiv}</span>
+              <span className="text-2xl font-bold text-orange-600">{aktiv}</span>
             </div>
           </CardContent>
         </Card>
@@ -60,36 +107,42 @@ export default function WetterwarnungPage(): JSX.Element {
           </CardTitle>
         </CardHeader>
         <CardContent>
+          {isError && (
+            <p className="text-muted-foreground">Wetterwarnungen konnten nicht geladen werden.</p>
+          )}
+          {!isError && aktiv === 0 && (
+            <p className="text-muted-foreground">Derzeit liegen keine Wetterwarnungen vor.</p>
+          )}
           <div className="space-y-3">
-            {warnungen.warnliste.map((warnung, i) => (
-              <Card key={i} className={warnung.stufe === 'orange' ? 'border-orange-500' : 'border-yellow-500'}>
+            {(warnungen ?? []).map((warnung: WetterWarnung) => (
+              <Card key={warnung.id} className={severityBorderClass(warnung.severity)}>
                 <CardContent className="pt-4">
                   <div className="flex items-start gap-4">
-                    {warnung.typ === 'Starkregen' ? (
-                      <CloudRain className="h-8 w-8 text-blue-600" />
-                    ) : (
-                      <Cloud className="h-8 w-8 text-gray-600" />
-                    )}
+                    {warnungIcon(warnung.event)}
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
-                        <span className="font-semibold text-lg">{warnung.typ}</span>
-                        <Badge variant={warnung.stufe === 'orange' ? 'secondary' : 'outline'}>
-                          {warnung.stufe === 'orange' ? 'Stufe Orange (2)' : 'Stufe Gelb (1)'}
+                        <span className="font-semibold text-lg">{warnung.headline}</span>
+                        <Badge variant={severityBadgeVariant(warnung.severity)}>
+                          {severityLabel(warnung.severity)}
                         </Badge>
                       </div>
                       <div className="text-sm space-y-1">
                         <div className="flex gap-2">
-                          <span className="text-muted-foreground w-24">Beginn:</span>
-                          <span className="font-mono">{warnung.beginn}</span>
+                          <span className="text-muted-foreground w-24">Ereignis:</span>
+                          <span className="font-semibold">{warnung.event}</span>
                         </div>
-                        <div className="flex gap-2">
-                          <span className="text-muted-foreground w-24">Ende:</span>
-                          <span className="font-mono">{warnung.ende}</span>
-                        </div>
-                        <div className="flex gap-2">
-                          <span className="text-muted-foreground w-24">Region:</span>
-                          <span className="font-semibold">{warnung.region}</span>
-                        </div>
+                        {warnung.description && (
+                          <div className="flex gap-2">
+                            <span className="text-muted-foreground w-24">Details:</span>
+                            <span>{warnung.description}</span>
+                          </div>
+                        )}
+                        {warnung.instruction && (
+                          <div className="flex gap-2">
+                            <span className="text-muted-foreground w-24">Hinweis:</span>
+                            <span>{warnung.instruction}</span>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

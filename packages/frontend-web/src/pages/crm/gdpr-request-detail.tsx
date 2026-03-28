@@ -364,8 +364,9 @@ export default function GDPRRequestDetailPage(): JSX.Element {
 
     if (action === 'verify') {
       try {
+        const method = prompt('Verifizierungsmethode wählen (email, id_card, manual, other):', 'manual') || 'manual'
         await apiClient.post(`/gdpr/requests/${id}/verify`, {
-          verification_method: 'manual', // TODO: Get from form or dialog
+          verification_method: method,
           verification_token: null
         })
         toast({
@@ -380,8 +381,9 @@ export default function GDPRRequestDetailPage(): JSX.Element {
       }
     } else if (action === 'generateExport') {
       try {
+        const format = prompt('Export-Format wählen (json, csv, pdf):', 'json') || 'json'
         await apiClient.post(`/gdpr/requests/${id}/export`, {
-          format: 'json', // TODO: Get from form or dialog
+          format: format,
           data_areas: ['all']
         })
         toast({
