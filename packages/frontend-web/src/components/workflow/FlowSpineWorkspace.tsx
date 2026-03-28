@@ -320,7 +320,7 @@ const PROCESS_START_CONFIGS: Record<string, ProcessStartConfig> = {
       })
       if (created.partner_name || created.customer_name) query.set('partnerName', created.partner_name ?? created.customer_name ?? '')
       if (created.subject) query.set('subject', created.subject)
-      return `/finance/abschluss?${query.toString()}`
+      return `/fibu/abschluss-cockpit?${query.toString()}`
     },
   },
   'compliance-to-report': {

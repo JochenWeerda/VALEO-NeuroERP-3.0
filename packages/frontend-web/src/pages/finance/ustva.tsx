@@ -6,7 +6,7 @@ import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { getFieldsFromMaskConfig, validateFields } from '@/components/mask-builder/validation'
 import { toast } from '@/hooks/use-toast'
-import { apiClient } from '@/lib/axios'
+import { apiClient } from '@/lib/api-client'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { buildDecisionView } from '@/policy/decision-view'
 import { ProcessStatusPanel } from '@/components/workflow/ProcessStatusPanel'
@@ -462,9 +462,9 @@ export default function UStVAPage(): JSX.Element {
     if (action === 'calculate') {
       setActionLoadingKey('calculate')
       try {
-        const result = await apiClient.post<Record<string, unknown>>('/api/v1/finance/vat-return/calculate', {
+        const result = (await apiClient.post<Record<string, unknown>>('/api/v1/finance/vat-return/calculate', {
           period: formData?.periode,
-        })
+        })).data
         toast({ title: t('crud.messages.calculationCompleted'), description: t('crud.messages.ustvaAmountsRecalculated') })
         applyVATReturnResponse(result)
       } catch (error: any) {
@@ -497,9 +497,9 @@ export default function UStVAPage(): JSX.Element {
       }
 
       try {
-        const response = await apiClient.post(`/api/v1/finance/vat-return/${formData.id}/approve`, {
+        const response = (await apiClient.post(`/api/v1/finance/vat-return/${formData.id}/approve`, {
           approved_by: currentActor,
-        })
+        })).data
         applyVATReturnResponse(response)
         toast({
           title: t('crud.messages.approvalSuccess'),
@@ -536,9 +536,9 @@ export default function UStVAPage(): JSX.Element {
       }
 
       try {
-        const response = await apiClient.post(`/api/v1/finance/vat-return/${formData.id}/submit`, {
+        const response = (await apiClient.post(`/api/v1/finance/vat-return/${formData.id}/submit`, {
           submitted_by: currentActor,
-        })
+        })).data
         applyVATReturnResponse(response)
         setIsDirty(false)
         toast({
@@ -557,7 +557,7 @@ export default function UStVAPage(): JSX.Element {
       }
       setActionLoadingKey('export')
       try {
-        const res = await apiClient.post<{ url?: string }>('/api/v1/export/list', { entity: 'vat_return', format: 'xml', id: formData.id })
+        const res = (await apiClient.post<{ url?: string }>('/api/v1/export/list', { entity: 'vat_return', format: 'xml', id: formData.id })).data
         if (res?.url) window.open(res.url, '_blank')
         toast({ title: t('crud.actions.xmlExport'), description: t('crud.messages.exportCreated', { defaultValue: 'Export erstellt' }) })
       } catch (error: any) {
