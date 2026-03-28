@@ -88,7 +88,7 @@ flowchart TD
 
 ## G - Konkrete Empfehlungen
 
-1. Naechsten Slice fuer den Klaerungsprozess `gesperrt` schneiden, weil die Artikelreferenz in der Annahmekette jetzt belastbar ist.
+1. Klaerungsprozess `gesperrt` ist in VK-018 umgesetzt; naechster Schritt ist die operative Abnahme des Klaerungspfads.
 2. Spaeter einen expliziten Queue-Hinweis fuer unaufgeloeste QR-Artikelcodes ergaenzen.
 3. Optional vorhandene historische Queue-Eintraege ohne `article_id` per kleinen Repair-Slice nachziehen, falls sie fachlich relevant bleiben.
 

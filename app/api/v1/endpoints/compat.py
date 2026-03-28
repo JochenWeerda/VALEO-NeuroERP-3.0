@@ -1945,6 +1945,7 @@ def _lkw_db_to_item(row: LkwAnnahmeQueue, position: int) -> dict:
         "wartezeit": wartezeit_min,
         "status": status,
         "lieferschein_nr": row.lieferschein_nr or "",
+        "klaerung": row.klaerung or None,
     }
 
 
@@ -2022,7 +2023,8 @@ async def annahme_warteschlange_get(
 
 
 class AnnahmeStatusUpdate(BaseModel):
-    status: str = Field(..., description="in-bearbeitung | abgeschlossen")
+    status: Optional[str] = Field(default=None, description="in-bearbeitung | abgeschlossen | gesperrt")
+    klaerung: Optional[dict[str, Any]] = Field(default=None, description="Klaerungsdaten fuer gesperrte Ware")
 
 
 @router.patch("/annahme/warteschlange/{reg_id}", response_model=dict)
@@ -2033,8 +2035,10 @@ async def annahme_warteschlange_patch(
     db: Session = Depends(get_db),
 ) -> dict:
     """Status eines LKW-Eintrags aktualisieren (z.B. In Bearbeitung, Abgeschlossen)."""
-    if body.status not in ("in-bearbeitung", "abgeschlossen"):
-        raise HTTPException(status_code=400, detail="status muss 'in-bearbeitung' oder 'abgeschlossen' sein")
+    if body.status is None and body.klaerung is None:
+        raise HTTPException(status_code=400, detail="status oder klaerung muss angegeben werden")
+    if body.status is not None and body.status not in ("in-bearbeitung", "abgeschlossen", "gesperrt"):
+        raise HTTPException(status_code=400, detail="status muss 'in-bearbeitung', 'abgeschlossen' oder 'gesperrt' sein")
     row = (
         db.query(LkwAnnahmeQueue)
         .filter(LkwAnnahmeQueue.id == reg_id, LkwAnnahmeQueue.tenant_id == tenant_id)
@@ -2042,7 +2046,15 @@ async def annahme_warteschlange_patch(
     )
     if not row:
         raise HTTPException(status_code=404, detail="LKW-Eintrag nicht gefunden")
-    row.status = body.status
+    if body.status is not None:
+        row.status = body.status
+    if body.klaerung is not None:
+        existing = row.klaerung or {}
+        if not isinstance(existing, dict):
+            existing = {}
+        existing.update(body.klaerung)
+        existing.setdefault("updated_at", datetime.utcnow().isoformat())
+        row.klaerung = existing
     db.commit()
     db.refresh(row)
     return _lkw_db_to_item(row, position=0)

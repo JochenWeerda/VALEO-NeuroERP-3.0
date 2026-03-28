@@ -60,6 +60,7 @@ class _QueueRowStub:
     ankunftszeit: datetime | None = datetime(2026, 3, 28, 8, 0, tzinfo=timezone.utc)
     status: str = "wartend"
     lieferschein_nr: str = "LS-42"
+    klaerung: dict | None = None
 
 
 def test_create_lkw_registrierung_resolves_article_reference_from_article_code():
@@ -86,3 +87,9 @@ def test_lkw_queue_item_exposes_article_id():
 
     assert item["article_id"] == "art-weizen"
     assert item["artikel"] == "Weizen"
+
+
+def test_lkw_queue_item_exposes_klaerung_payload():
+    item = _lkw_db_to_item(_QueueRowStub(klaerung={"status": "gesperrt"}), position=1)
+
+    assert item["klaerung"]["status"] == "gesperrt"

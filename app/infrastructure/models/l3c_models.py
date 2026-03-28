@@ -117,8 +117,9 @@ class LkwAnnahmeQueue(Base):
     artikel = Column(String(200), nullable=True, default="")
     ankunftszeit = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     prioritaet = Column(String(20), nullable=False, default="normal")  # hoch | normal | niedrig
-    status = Column(String(30), nullable=False, default="wartend")  # wartend | in-bearbeitung | abgeschlossen
+    status = Column(String(30), nullable=False, default="wartend")  # wartend | in-bearbeitung | abgeschlossen | gesperrt
     attachment_ids = Column(JSONB, nullable=True, default=list)  # Liste von Upload-IDs
+    klaerung = Column(JSONB, nullable=True, default=dict)  # Klaerungsdaten fuer gesperrte Ware
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 

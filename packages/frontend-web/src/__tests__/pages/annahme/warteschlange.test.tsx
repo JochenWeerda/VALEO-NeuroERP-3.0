@@ -42,8 +42,20 @@ vi.mock('@/lib/api/inventory', () => ({
           status: 'abgeschlossen',
           lieferschein_nr: 'LS-99',
         },
+        {
+          id: 'queue-3',
+          position: 3,
+          kennzeichen: 'IJ-KL 9012',
+          lieferant: 'Agrar Schmidt',
+          article_id: 'art-gerste',
+          artikel: 'Gerste',
+          ankunft: '09:10',
+          wartezeit: 2,
+          status: 'gesperrt',
+          lieferschein_nr: 'LS-77',
+        },
       ],
-      total: 2,
+      total: 3,
     },
     isLoading: false,
     refetch: refetchMock,
@@ -86,5 +98,17 @@ describe('WarteschlangePage', () => {
     expect(navigateMock).toHaveBeenCalledWith(
       '/agrar/ernte-annahme-erfassung?workflowProcess=harvest-to-settlement&workflowLabel=queue-entry%3Aqueue-2&entryMode=Warteschlange&partnerName=Hof+Meyer&lieferscheinNr=LS-99&vehiclePlate=EF-GH+5678&articleId=art-raps&articleName=Raps&subject=Raps+%2F+Queue&queueEntryId=queue-2',
     )
+  })
+
+  it('bietet fuer gesperrte Queue-Eintraege den CTA zur Klaerung', () => {
+    render(
+      <MemoryRouter>
+        <WarteschlangePage />
+      </MemoryRouter>,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Klaerung starten' }))
+
+    expect(navigateMock).toHaveBeenCalledWith('/annahme/klaerung-gesperrt?queueEntryId=queue-3')
   })
 })

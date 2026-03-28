@@ -72,6 +72,13 @@ function buildHarvestAcceptanceHandoverQuery(input: {
   return query.toString()
 }
 
+function buildKlaerungQuery(input: { queueEntryId: string; qualityProtocolId: string }): string {
+  const query = new URLSearchParams()
+  query.set('queueEntryId', input.queueEntryId)
+  query.set('qualityProtocolId', input.qualityProtocolId)
+  return query.toString()
+}
+
 export default function QualitaetsCheckPage(): JSX.Element {
   const navigate = useNavigate()
   const location = useLocation()
@@ -161,12 +168,29 @@ export default function QualitaetsCheckPage(): JSX.Element {
     onSuccess: (data) => {
       setSavedReferenceContext(data.reference_context ?? null)
       toast({ title: 'Qualitätsprüfung gespeichert', description: `Ergebnis: ${qualitaet.ergebnis}` })
-      if (eintragId) {
-        patchStatus.mutate({ id: eintragId, status: 'abgeschlossen' })
-      }
       if (qualitaet.ergebnis === 'gesperrt') {
+        if (eintragId) {
+          patchStatus.mutate({
+            id: eintragId,
+            status: 'gesperrt',
+            klaerung: {
+              status: 'offen',
+              qp_result: qualitaet.ergebnis,
+              quality_protocol_id: data.id,
+              updated_at: new Date().toISOString(),
+            },
+          })
+          navigate({
+            pathname: '/annahme/klaerung-gesperrt',
+            search: `?${buildKlaerungQuery({ queueEntryId: eintragId, qualityProtocolId: data.id })}`,
+          })
+          return
+        }
         navigate('/annahme/warteschlange')
         return
+      }
+      if (eintragId) {
+        patchStatus.mutate({ id: eintragId, status: 'abgeschlossen' })
       }
       const handoverQuery = buildHarvestAcceptanceHandoverQuery({
         partnerName: lkwEintrag?.lieferant ?? '',

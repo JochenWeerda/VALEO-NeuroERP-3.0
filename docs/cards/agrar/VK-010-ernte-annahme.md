@@ -111,7 +111,7 @@
 - Soll-Prozess: Lueckenlose Kette von LKW-Anmeldung bis Gutschrift ohne Medienbrueche.
 - Ist-Umsetzung: Alle Masken vorhanden und mit Backend verbunden; Kettennavigation zwischen Masken fehlt.
 - Abweichung: Drei Medienbruecke (Queue→QP→Ernte-Annahme); Edit-Mode-Bug; fehlende Schrittvalidierung.
-- Fehlende Umsetzung: Handover-Bruecke, Button in Queue, Schrittvalidierung, Klaerungsprozess gesperrte Ware.
+- Fehlende Umsetzung: Handover-Bruecke, Button in Queue, Schrittvalidierung (Klaerungsprozess gesperrte Ware ist in VK-018 abgedeckt).
 - Unklare Umsetzung: Kalkulations- und Freigabe-Button in Ernte-Annahme-Maske (nicht gelesen).
 - Workaround aktuell noetig: Manuelle Navigation und Dateneingabe nach Qualitaets-Check.
 
@@ -133,10 +133,10 @@
 - UI-seitig: Button `Ernte-Annahme anlegen` in Warteschlange fuer Eintraege mit `status === 'abgeschlossen'`.
 - Prioritaet der Umsetzung: sofort (Edit-Mode-Bug); hoch (Handover-Bruecke)
 - Sofortmassnahme: `.data`-Extraktion in `loadHarvestAcceptance()` korrigiert.
-- Spaetere Optimierung: Schrittvalidierung LKW-Wizard; Artikel-API-Anbindung; Klaerungsprozess gesperrte Ware.
+- Spaetere Optimierung: Schrittvalidierung LKW-Wizard; Artikel-API-Anbindung.
 
 ## 16. Annahmen
-- Annahme 1: Gesperrte Ware wird separat behandelt (Klaerungsprozess noch nicht implementiert).
+- Annahme 1: Gesperrte Ware wird separat behandelt (Klaerungsprozess in VK-018).
 - Annahme 2: Kalkulations- und Freigabe-Buttons existieren in der Toolbar der Ernte-Annahme-Maske (nicht im gelesenen Codeabschnitt sichtbar).
 - Annahme 3: Wiegeschein-Integration ist optionaler Zusatz; Annahme ohne Wiegeschein ist fachlich erlaubt.
 - Offene Fragen: Soll Qualitaets-Check-Ergebnis `bedingt` ebenfalls direkt zur Ernte-Annahme weiterleiten oder erst nach Manualfreigabe?
