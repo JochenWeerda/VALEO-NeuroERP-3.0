@@ -145,3 +145,16 @@ Diese Checklisten schaerfen die UI-, CRUD- und Live-Betriebspruefung fuer Workfl
 6. Erwartung: `queueEntryId` ist in den Bemerkungen sichtbar; bei eindeutiger Artikelsuche ist eine kanonische Artikel-Nr. gesetzt.
 7. Einen nicht abgeschlossenen Queue-Eintrag pruefen.
 8. Erwartung: Dort erscheint kein CTA `Ernte-Annahme anlegen`.
+
+### VK-017: Queue-Contract mit echter article_id
+
+1. `LKW-Registrierung` oeffnen und den Lieferungs-Schritt erreichen.
+2. Erwartung: Die Artikelauswahl kommt aus `/api/v1/articles` statt aus einer harten lokalen Liste.
+3. Einen Artikel waehlen und die Registrierung abschliessen.
+4. Erwartung: Der Queue-Eintrag ist angelegt; Folgepfade fuehren dieselbe `article_id` mit.
+5. Den angelegten Eintrag in `Annahme-Warteschlange` oeffnen und ueber `Bearbeiten` in den Qualitaets-Check gehen.
+6. Erwartung: Der Qualitaets-Check navigiert mit `articleId` in die Ernte-Annahme.
+7. Alternativ den CTA `Ernte-Annahme anlegen` aus der Queue pruefen.
+8. Erwartung: Die Ernte-Annahme zeigt die `article_id` direkt, ohne auf den Textlookup angewiesen zu sein.
+9. `QR-Scanner` mit einem gueltigen Artikelcode pruefen.
+10. Erwartung: Der POST bricht nicht mit 404; der Queue-Pfad nutzt denselben Registrierungs-Contract bzw. den Alias.

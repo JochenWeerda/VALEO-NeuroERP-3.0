@@ -77,9 +77,10 @@ export default function QrScannerPage(): JSX.Element {
   const addToQueue = useMutation({
     mutationFn: async () => {
       return (
-        await apiClient.post('/api/v1/annahme/warteschlange', {
+        await apiClient.post('/api/v1/annahme/lkw-registrierung', {
           kennzeichen: form.kennzeichen,
           lieferant: form.lieferantId,
+          article_id: form.artikelCode,
           artikel: form.artikelCode,
           prioritaet: form.prioritaet,
           bemerkung: form.bemerkung,

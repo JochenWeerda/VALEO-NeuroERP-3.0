@@ -359,6 +359,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
   useEffect(() => {
     if (acceptanceId) return
 
+    const articleId = searchParams.get('articleId') || ''
     const articleName = searchParams.get('articleName') || qualityCheckHandoverState?.artikel || ''
     const vehiclePlate = searchParams.get('vehiclePlate') || qualityCheckHandoverState?.vehiclePlate || ''
     const qualityProtocolId = searchParams.get('qualityProtocolId') || qualityCheckHandoverState?.qualityProtocolId || ''
@@ -367,12 +368,13 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
     const partnerName = searchParams.get('partnerName') || qualityCheckHandoverState?.lieferant || ''
     const queueEntryId = searchParams.get('queueEntryId') || ''
 
-    if (!articleName && !vehiclePlate && !qualityProtocolId && !lieferscheinNr && !qpResult && !partnerName && !queueEntryId) {
+    if (!articleId && !articleName && !vehiclePlate && !qualityProtocolId && !lieferscheinNr && !qpResult && !partnerName && !queueEntryId) {
       return
     }
 
     setState((prev) => ({
       ...prev,
+      articleId: prev.articleId || articleId || null,
       articleName: prev.articleName || articleName,
       vehiclePlate: prev.vehiclePlate || vehiclePlate,
       qualityProtocolId: prev.qualityProtocolId || qualityProtocolId || null,

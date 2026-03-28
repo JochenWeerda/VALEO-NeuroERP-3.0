@@ -48,6 +48,7 @@ export default function WarteschlangePage(): JSX.Element {
     if (entry.lieferant) searchParams.set('partnerName', entry.lieferant)
     if (entry.lieferschein_nr) searchParams.set('lieferscheinNr', entry.lieferschein_nr)
     if (entry.kennzeichen) searchParams.set('vehiclePlate', entry.kennzeichen)
+    if (entry.article_id) searchParams.set('articleId', entry.article_id)
     if (entry.artikel) {
       searchParams.set('articleName', entry.artikel)
       searchParams.set('subject', `${entry.artikel} / Queue`)

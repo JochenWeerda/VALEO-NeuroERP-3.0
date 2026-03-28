@@ -156,6 +156,7 @@ export type LKWEintrag = {
   position: number
   kennzeichen: string
   lieferant: string
+  article_id?: string | null
   artikel: string
   ankunft: string
   wartezeit: number

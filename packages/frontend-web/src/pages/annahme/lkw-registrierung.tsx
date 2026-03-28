@@ -2,7 +2,7 @@
  * LKW-Registrierung — Touch-optimierter Feldworkflow (Gap 024, Wave 76)
  * Priorität via TouchCards statt <select>, alle Touch-Targets >= 44px
  */
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useDropzone } from 'react-dropzone'
 import { useToast } from '@/hooks/use-toast'
@@ -27,10 +27,26 @@ type LKWData = {
   kennzeichen: string
   lieferant: string
   lieferscheinNr: string
+  articleId: string | null
   artikel: string
   ankunftszeit: string
   prioritaet: 'hoch' | 'normal' | 'niedrig'
 }
+
+type ArticleOption = {
+  id: string
+  label: string
+}
+
+const FALLBACK_ARTIKEL_OPTIONEN: ArticleOption[] = [
+  'Weizen',
+  'Gerste',
+  'Raps',
+  'Mais',
+  'Roggen',
+  'Hafer',
+  'Sonnenblumen',
+].map((label) => ({ id: label, label }))
 
 export default function LKWRegistrierungPage(): JSX.Element {
   const navigate = useNavigate()
@@ -39,10 +55,12 @@ export default function LKWRegistrierungPage(): JSX.Element {
     kennzeichen: '',
     lieferant: '',
     lieferscheinNr: '',
+    articleId: null,
     artikel: '',
     ankunftszeit: new Date().toISOString().slice(0, 16),
     prioritaet: 'normal',
   })
+  const [artikelOptionen, setArtikelOptionen] = useState<ArticleOption[]>(FALLBACK_ARTIKEL_OPTIONEN)
   const [attachmentIds, setAttachmentIds] = useState<string[]>([])
   const [uploading, setUploading] = useState(false)
   const [scanDialogField, setScanDialogField] = useState<'kennzeichen' | 'lieferscheinNr' | null>(null)
@@ -50,6 +68,35 @@ export default function LKWRegistrierungPage(): JSX.Element {
   function updateField<K extends keyof LKWData>(key: K, value: LKWData[K]): void {
     setLKW((prev) => ({ ...prev, [key]: value }))
   }
+
+  useEffect(() => {
+    let active = true
+
+    const loadArticles = async (): Promise<void> => {
+      try {
+        const response = await api.get<{ items?: Array<{ id: string; name?: string; article_number?: string }> }>('/api/v1/articles?limit=100')
+        const items =
+          response.data?.items
+            ?.map((item) => ({
+              id: item.id,
+              label: item.name || item.article_number || item.id,
+            }))
+            .filter((item) => item.id && item.label) ?? []
+        if (!active || items.length === 0) {
+          return
+        }
+        setArtikelOptionen(items)
+      } catch (error) {
+        console.warn('Article options for LKW registration could not be loaded:', error)
+      }
+    }
+
+    void loadArticles()
+
+    return () => {
+      active = false
+    }
+  }, [])
 
   /** Datei an Backend senden, ID in attachmentIds aufnehmen. */
   const uploadAttachment = useCallback(
@@ -142,7 +189,7 @@ export default function LKWRegistrierungPage(): JSX.Element {
       if (!lkw.lieferant.trim()) {
         return 'Lieferant ist ein Pflichtfeld.'
       }
-      if (!lkw.artikel.trim()) {
+      if (!lkw.articleId && !lkw.artikel.trim()) {
         return 'Artikel ist ein Pflichtfeld.'
       }
     }
@@ -163,6 +210,7 @@ export default function LKWRegistrierungPage(): JSX.Element {
         kennzeichen: lkw.kennzeichen,
         lieferant: lkw.lieferant,
         lieferschein_nr: lkw.lieferscheinNr,
+        article_id: lkw.articleId,
         artikel: lkw.artikel,
         ankunftszeit: lkw.ankunftszeit || new Date().toISOString(),
         prioritaet: lkw.prioritaet,
@@ -188,7 +236,6 @@ export default function LKWRegistrierungPage(): JSX.Element {
   })
   useKeyboardShortcuts(shortcuts)
 
-  const ARTIKEL_OPTIONEN = ['Weizen', 'Gerste', 'Raps', 'Mais', 'Roggen', 'Hafer', 'Sonnenblumen']
   const PRIORITAETEN = [
     { id: 'hoch', label: 'Hoch (Express)', description: 'Sofortige Bearbeitung' },
     { id: 'normal', label: 'Normal', description: 'Standard-Warteschlange' },
@@ -292,13 +339,13 @@ export default function LKWRegistrierungPage(): JSX.Element {
             </div>
           </div>
           <TouchCardGroup label="Artikel" required>
-            {ARTIKEL_OPTIONEN.map((art) => (
+            {artikelOptionen.map((art) => (
               <TouchCard
-                key={art}
-                selected={lkw.artikel === art}
-                onSelect={() => updateField('artikel', art)}
+                key={art.id}
+                selected={lkw.articleId === art.id || (!lkw.articleId && lkw.artikel === art.label)}
+                onSelect={() => setLKW((prev) => ({ ...prev, articleId: art.id, artikel: art.label }))}
               >
-                {art}
+                {art.label}
               </TouchCard>
             ))}
           </TouchCardGroup>
