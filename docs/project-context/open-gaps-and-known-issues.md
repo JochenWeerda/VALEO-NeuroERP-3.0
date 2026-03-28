@@ -11,6 +11,7 @@ Diese Datei sammelt die fuer neue Analysen wichtigsten offenen Restthemen und be
 - NATS-Consumer fuer Flow-Spine-Events noch nicht implementiert (Events landen im Outbox-Table, werden aber noch nicht aktiv konsumiert)
 - ChromaDB fuer produktive RAG-Nutzung muss mit Prozesswissen befuellt werden
 - Voice-Kanal setzt Web Speech API voraus (Chrome/Edge); Firefox und Safari nicht unterstuetzt
+- Agentenarchitektur-Diagramm zeigt Luecken bei IAM/Secrets, Memory-Governance, Process-Kernel-Contracts und Observability (siehe `docs/project-context/agent-architecture-gaps-2026-03-28.md`)
 
 ## Zuletzt geschlossene Punkte (Wave 104, 2026-03-27)
 
