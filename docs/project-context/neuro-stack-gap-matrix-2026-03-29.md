@@ -18,7 +18,7 @@ Die folgende Matrix basiert auf dem gelieferten Komponenten-Status und fasst die
 | Action & Policy Layer | 100% | BusinessCommands + CommandDispatcher produktiv |
 | Human Oversight | 80% | Approval-Gate mit 4 Risikostufen vorhanden, Case-Management-UI fehlt |
 | Audit & Trace | 70% | Audit Hardening D1-D3 vorhanden, Hash-Chain/Append-Only-Vertiefung offen |
-| Event Bus (NATS) | 75% | Publisher + Consumer-Framework vorhanden; aktive Handler (NC-G3) fehlen |
+| Event Bus (NATS) | 85% | Publisher + Consumer + Core-Handler vorhanden; DLQ/Idempotenz fehlen |
 | Fast Track | 70% | Fast-Track + Compensation als NC-E abgeschlossen, Bypass-Policy-Ausbau offen |
 | Copilot UI | 50% | Frontend-Chat-Hook da, WebSocket-Streaming teilweise (NC-F), fehlende F5-Integration |
 | Multi-Channel | 40% | WhatsApp-Adapter vorhanden, Email/LiveChat fehlt |
@@ -47,5 +47,5 @@ Die folgende Matrix basiert auf dem gelieferten Komponenten-Status und fasst die
 ## Naechste 3 Schritte (Plan)
 
 1. NC-D4: Audit Hardening Pipeline-Integration abschliessen.
-2. NC-G3: Mindestens 3 aktive Consumer-Handler verdrahten.
+2. NC-G4/G5: Policy- und Prompt-Registry weiter ausbauen.
 3. NC-A/Planner: NLU/Confidence-Scoring und dynamische Schrittgenerierung priorisieren.

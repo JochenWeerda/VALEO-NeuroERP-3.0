@@ -115,3 +115,27 @@ async def shutdown_event_publisher() -> None:
     disconnect = getattr(publisher, "disconnect", None)
     if callable(disconnect):
         await disconnect()
+
+
+async def startup_event_consumer() -> None:
+    """Initialize NATS consumer and register core handlers if enabled."""
+    from app.infrastructure.eventbus.nats_consumer import nats_consumer
+    from app.services.nats_event_handlers import register_core_event_handlers
+
+    enabled = bool(getattr(settings, "EVENT_BUS_ENABLED", False))
+    provider = getattr(settings, "EVENT_BUS_PROVIDER", "memory")
+    if not enabled or provider != "nats":
+        logger.info("Event consumer disabled (provider=%s, enabled=%s)", provider, enabled)
+        return
+
+    nats_consumer.enabled = True
+    nats_consumer.nats_url = getattr(settings, "EVENT_BUS_NATS_URL", nats_consumer.nats_url)
+    register_core_event_handlers(nats_consumer)
+    await nats_consumer.start()
+
+
+async def shutdown_event_consumer() -> None:
+    """Stop the NATS consumer if running."""
+    from app.infrastructure.eventbus.nats_consumer import nats_consumer
+
+    await nats_consumer.stop()

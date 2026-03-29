@@ -725,3 +725,20 @@ Basierend auf der strategischen Roadmap (valeo_wettbewerbsanalyse_spitzenpositio
 
 Alle Router registriert in `app/api/v1/api.py`. Mermaid-Diagramme und Cards unter `docs/workflows/nc-*` und `docs/cards/neuro-core/NC-*`.
 Gap-Analyse aktualisiert: `docs/architecture/neuro-core-gap-analysis-2026-03-29.md` (EXT-01 bis EXT-06 als umgesetzt markiert).
+
+### Neuro-Core Kernel + Channels (2026-03-29, Folge-Commits)
+
+Lane A (Kern-Lane) und alle abhaengigen Slices implementiert:
+
+| Komponente | Service/Datei | API-Prefix | Commit |
+|-----------|--------------|-----------|--------|
+| NC-A Intent Engine | `app/agents/neuro_intent_engine.py` | `/api/v1/neuro/classify`, `/intents` | `c83edb6d2` |
+| NC-A Planner | `app/agents/neuro_planner.py` | `/api/v1/neuro/plan` | `c83edb6d2` |
+| NC-A Pipeline | `app/agents/neuro_pipeline.py` | `/api/v1/neuro/execute` | `c83edb6d2` |
+| NC-D4 Audit Middleware | `app/middleware/neuro_audit_middleware.py` | (intern) | `74378078f` |
+| NC-F5 Copilot Pipeline | `app/api/v1/endpoints/copilot_ws.py` (Update) | WS `/copilot/chat` | `74378078f` |
+| NC-H1 WhatsApp Adapter | `app/channels/whatsapp_adapter.py` | `/api/v1/channels/whatsapp/webhook` | `74378078f` |
+| NC-H2 Email Channel | `app/channels/email_channel.py` | `/api/v1/channels/email/ingest` | `74378078f` |
+| NC-H4 Channel Ingress | `app/channels/channel_ingress.py` | `/api/v1/channels/route` | `74378078f` |
+
+Alle 8 Neuro-Core Lanes (A-H) jetzt umgesetzt oder teilweise umgesetzt. Einzig NC-G3 (aktive NATS-Handler) steht noch aus (Codex-Aufgabe).

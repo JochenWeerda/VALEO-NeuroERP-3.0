@@ -234,7 +234,7 @@ Abhaengigkeiten zwischen Lanes sind explizit markiert.
 |-------|--------|---------|
 | NC-G1 | Event-Schema-Registry: Pydantic-Modelle fuer Domain-Events mit Version-Header | Unit-Test |
 | NC-G2 | `NATSConsumer` -- generischer Consumer mit Retry, DLQ, Idempotenz-Pruefung | Unit-Test (umgesetzt) |
-| NC-G3 | Mindestens 3 Consumer aktivieren: Audit-Event, Inventory-Movement, Settlement-Created | Integration-Test |
+| NC-G3 | Mindestens 3 Consumer aktivieren: Audit-Event, Inventory-Movement, Settlement-Created | Integration-Test (umgesetzt) |
 | NC-G4 | `PolicyRegistry` -- YAML/JSON-backed Policy-Speicher mit Versionierung + Rollback | Unit-Test |
 | NC-G5 | `PromptPackRegistry` -- versionierte Prompt-Packs mit A/B-Testing-Faehigkeit | Unit-Test |
 
