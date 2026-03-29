@@ -28,6 +28,23 @@ Zwei End-to-End-Stränge laufen **fachlich und technisch getrennt**. Bitte **nic
 
 **Lane-Status:** `VK-019` ist abgeschlossen (Queue-Repair). `OTC-011` ist als Folgelane zu OTC-010 **begonnen** (Workflow+Card), Umsetzung im Finance-UI folgt iterativ. Alle 9 Flow-Spine-Lanes haben jetzt Workflow-Dokumentation mit Mermaid-Diagrammen und Status-Abschnitten.
 
+## Neuro-Core Architektur-Lanes (NEU 2026-03-29)
+
+8 parallelisierbare Lanes fuer die integrierte Zielarchitektur. Vollstaendige Gap-Analyse und Slice-Details: `docs/architecture/neuro-core-gap-analysis-2026-03-29.md`
+
+| Lane | Scope | Slices | Status | Dateibesitz (exklusiv) | Abhaengigkeit |
+|------|-------|--------|--------|----------------------|---------------|
+| **NC-A: Neuro-Core Kernel** | Intent Engine + Planner + Verification Engine | NC-A1..A5 | offen | `app/agents/neuro_intent_engine.py`, `neuro_planner.py`, `neuro_verification_engine.py`, `tests/test_neuro_*.py` | keine |
+| **NC-B: State Graph + Confidence** | Business Object Graph + Append-Only Confidence Ledger | NC-B1..B5 | offen | `app/core/neuro_state_graph.py`, `confidence_ledger.py`, `app/infrastructure/models/neuro_state_models.py` | B5 wartet auf A |
+| **NC-C: Guardrails + Consent** | PII/DLP-Schutz, Consent-Lifecycle (DSGVO) | NC-C1..C5 | offen | `app/core/guardrails.py`, `pii_detector.py`, `consent_engine.py`, `app/middleware/guardrail_middleware.py` | keine |
+| **NC-D: Audit Hardening** | Append-Only Audit-Schema, Neuro-Entscheidungs-Protokoll, Hash-Chain | NC-D1..D5 | offen | `app/infrastructure/models/audit_models.py`, `app/core/neuro_decision_protocol.py`, `app/middleware/audit_middleware.py` (EDIT) | D4 wartet auf A |
+| **NC-E: Fast Track + Compensation** | Deterministischer CRUD-Bypass + Saga-Rollback | NC-E1..E5 | offen | `app/core/fast_track.py`, `compensation_engine.py`, `app/middleware/fast_track_middleware.py` | keine |
+| **NC-F: Copilot Backend** | WebSocket-Streaming + Interaction State FSM | NC-F1..F5 | offen | `app/api/v1/endpoints/copilot_ws.py`, `app/core/interaction_state.py`, `packages/frontend-web/src/features/copilot/useCopilotStream.ts` | F5 wartet auf A |
+| **NC-G: Event Bus + Knowledge** | NATS-Consumer, Event-Schemas, Policy-Versionierung | NC-G1..G5 | offen | `app/infrastructure/eventbus/nats_consumer.py`, `event_schemas.py`, `app/core/policy_registry.py` | keine |
+| **NC-H: Channels + Voice** | WhatsApp, E-Mail, Voice-Adapter, Simulation Engine | NC-H1..H5 | offen | `app/channels/whatsapp_adapter.py`, `email_channel.py`, `voice_adapter.py`, `app/core/simulation_engine.py` | H4/H5 warten auf A |
+
+**Prioritaet:** P1 = A, B, C, D (sofort) | P2 = E, F, G (danach) | P3 = H (Channel-Erweiterung)
+
 ## Aktive Slices
 
 | Slice-ID | Thema | Status | Owner | Dateibesitz | Naechster Schritt | Blocker |
