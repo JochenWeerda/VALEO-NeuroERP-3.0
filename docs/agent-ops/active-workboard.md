@@ -34,7 +34,7 @@ Zwei End-to-End-Stränge laufen **fachlich und technisch getrennt**. Bitte **nic
 
 | Lane | Scope | Slices | Status | Dateibesitz (exklusiv) | Abhaengigkeit |
 |------|-------|--------|--------|----------------------|---------------|
-| **NC-A: Neuro-Core Kernel** | Intent Engine + Planner + Verification Engine | **reserviert** (Cursor Agent, 2026-03-29) | Cursor Agent | `app/agents/neuro_intent_engine.py`, `app/agents/neuro_planner.py`, `app/services/neuro_verification_engine.py`, `tests/test_neuro_intent_engine.py`, `tests/test_neuro_planner.py` | keine (Kern-Lane) |
+| **NC-A: Neuro-Core Kernel** | Intent Engine + Planner + Verification Engine | **abgeschlossen** (A1-A5) | Cursor Agent | `app/agents/neuro_intent_engine.py`, `app/agents/neuro_planner.py`, `app/agents/neuro_pipeline.py`, `app/services/neuro_verification_engine.py`, `app/api/v1/endpoints/neuro_pipeline.py` | keine — Kern-Lane fertig, abhaengige Slices (D4, F5, H4, H5) jetzt freigegeben |
 | **NC-B: State Graph + Confidence** | Business Object Graph + Append-Only Confidence Ledger | NC-B1..B5 | abgeschlossen (Codex, 2026-03-29) | `app/core/neuro_state_graph.py`, `confidence_ledger.py`, `app/infrastructure/models/neuro_state_models.py`, `app/api/v1/endpoints/neuro_state_graph_api.py`, `tests/test_neuro_state_graph.py` | B5 wartet auf A |
 | **NC-C: Guardrails + Consent** | PII/DLP-Schutz, Consent-Lifecycle (DSGVO) | **abgeschlossen** (C1-C3 + NC-004) | Cursor Agent | `app/services/pii_detector.py`, `app/services/guardrails.py`, `app/services/consent_engine.py`, `app/api/v1/endpoints/neuro_guardrails.py`, `app/api/v1/endpoints/neuro_consent.py` | keine |
 | **NC-D: Audit Hardening** | Append-Only Audit-Schema, Neuro-Entscheidungs-Protokoll, Hash-Chain | teilweise (D1-D3 umgesetzt) | Cursor Agent | `app/services/audit_hardening.py`, `app/services/neuro_decision_protocol.py`, `app/api/v1/endpoints/neuro_audit.py` | D4 (Pipeline-Integration) wartet auf A |
@@ -122,11 +122,11 @@ Cursor Agent arbeitet jetzt an Lane A (Intent Engine + Planner). Das ist die Ker
 
 | Slice | Inhalt | Status |
 |-------|--------|--------|
-| NC-A1 | `IntentResult` Contract: intent, confidence_score (0-1), risk_class, explanation, requested_action | offen |
-| NC-A2 | `IntentEngine.classify(user_input, context) -> IntentResult` mit Capability-Matching | offen |
-| NC-A3 | `PlanStep` Contract + `Planner.generate_plan(intent, context) -> list[PlanStep]` | offen |
-| NC-A4 | `VerificationResult` Integration — Planner nutzt bestehende Verification Engine (NC-001) | offen |
-| NC-A5 | Integration: Intent -> Context -> Plan -> Verify -> Execute Pipeline | offen |
+| NC-A1 | `IntentResult` Contract: intent, confidence_score (0-1), risk_class, explanation, requested_action | **abgeschlossen** |
+| NC-A2 | `IntentEngine.classify(user_input, context) -> IntentResult` mit 11 Intents + Capability-Matching | **abgeschlossen** |
+| NC-A3 | `PlanStep` Contract + `Planner.generate_plan(intent, context) -> ExecutionPlan` mit 9 Templates | **abgeschlossen** |
+| NC-A4 | `VerificationResult` Integration — Planner nutzt bestehende Verification Engine (NC-001) | **abgeschlossen** |
+| NC-A5 | Pipeline: Intent -> Plan -> Verify -> Execute + Decision Protocol | **abgeschlossen** |
 
 **Dateibesitz (exklusiv):** `app/agents/neuro_intent_engine.py`, `app/agents/neuro_planner.py`, `tests/test_neuro_intent_engine.py`, `tests/test_neuro_planner.py`
 
