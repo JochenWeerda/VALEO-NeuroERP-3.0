@@ -41,16 +41,21 @@ interface DashboardData {
   topCustomers: { name: string; revenue: number; orders: number }[]
 }
 
-function generateTrendData(days: number, min: number, max: number): TrendDataPoint[] {
+function generateTrendData(days: number, base: number, variance: number): TrendDataPoint[] {
   const data: TrendDataPoint[] = []
   const now = new Date()
+  let current = base
 
   for (let i = days - 1; i >= 0; i--) {
     const date = new Date(now)
     date.setDate(date.getDate() - i)
+    const dayOfWeek = date.getDay()
+    const weekendDip = dayOfWeek === 0 || dayOfWeek === 6 ? 0.7 : 1.0
+    const trend = 1 + (days - i) * 0.002
+    current = base * weekendDip * trend + (i % 3 === 0 ? variance * 0.5 : -variance * 0.3)
     data.push({
       label: date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }),
-      value: Math.round(min + Math.random() * (max - min)),
+      value: Math.round(current),
     })
   }
 

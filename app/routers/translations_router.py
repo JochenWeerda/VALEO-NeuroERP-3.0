@@ -6,7 +6,7 @@ Ermöglicht Frontend den Zugriff auf Übersetzungen aus der Datenbank
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, func
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 from pydantic import BaseModel
 
 from app.core.database import get_db
@@ -103,7 +103,7 @@ async def get_missing_translations(
 @router.get("/contexts/list")
 async def get_contexts(
     db: Session = Depends(get_db)
-) -> List[Dict[str, any]]:
+) -> List[Dict[str, Any]]:
     """
     Liefert alle verfügbaren Kontexte mit Statistiken
     """

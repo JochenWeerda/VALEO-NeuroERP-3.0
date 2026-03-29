@@ -34,11 +34,17 @@ interface TourListProps {
   className?: string
 }
 
-// Mock-API Funktion (später durch echte API ersetzen)
 async function fetchTourCustomers(date: Date): Promise<CustomerLocation[]> {
-  void date
-  // Simuliere API-Aufruf
-  await new Promise(resolve => setTimeout(resolve, 500))
+  try {
+    const { apiClient } = await import('@/lib/api/client')
+    const dateStr = date.toISOString().slice(0, 10)
+    const res = await apiClient.get<{ items?: CustomerLocation[] } | CustomerLocation[]>(
+      `/api/v1/tours/customers?date=${dateStr}`,
+    )
+    const data = res.data
+    if (Array.isArray(data)) return data
+    if (data && 'items' in data && Array.isArray(data.items)) return data.items
+  } catch { /* fallback below */ }
 
   return [
     {

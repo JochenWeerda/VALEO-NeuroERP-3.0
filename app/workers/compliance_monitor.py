@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import SessionLocal
 from app.agents.workflows.compliance_copilot import check_compliance
+from app.domains.shared.events import IntegrationEvent, get_event_publisher
 
 logger = logging.getLogger(__name__)
 
@@ -84,13 +85,18 @@ class ComplianceMonitorWorker:
             article_violations = []
             
             for article in articles:
+                is_explosiv_konform = bool(
+                    getattr(article, "explosivstoff_konform", None)
+                    or getattr(article, "is_compliant", None)
+                    or (getattr(article, "category", "") not in ("Sprengstoff", "Explosivstoff"))
+                )
                 result = await check_compliance(
                     entity_type="article",
                     entity_id=article.id,
                     entity_data={
                         "name": article.name,
                         "category": article.category,
-                        "explosivstoff_konform": True  # TODO: Real check
+                        "explosivstoff_konform": is_explosiv_konform,
                     }
                 )
                 
@@ -105,9 +111,23 @@ class ComplianceMonitorWorker:
             
             if total_violations > 0:
                 logger.warning(
-                    f"⚠️ Compliance check found {total_violations} violations"
+                    f"Compliance check found {total_violations} violations"
                 )
-                # TODO: Send alerts via Event-Bus
+                try:
+                    publisher = get_event_publisher()
+                    await publisher.publish(IntegrationEvent(
+                        aggregate_id="compliance-monitor",
+                        timestamp=self.last_check or datetime.utcnow(),
+                        event_type="compliance.violations_detected",
+                        payload={
+                            "total_violations": total_violations,
+                            "customer_violations": len(customer_violations),
+                            "article_violations": len(article_violations),
+                            "checked_at": self.last_check.isoformat() if self.last_check else None,
+                        },
+                    ))
+                except Exception as alert_err:
+                    logger.warning("Failed to publish compliance alert: %s", alert_err)
             else:
                 logger.info("✅ All compliance checks passed")
         
