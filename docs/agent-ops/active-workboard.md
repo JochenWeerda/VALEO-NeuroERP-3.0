@@ -40,7 +40,7 @@ Zwei End-to-End-Stränge laufen **fachlich und technisch getrennt**. Bitte **nic
 | **NC-D: Audit Hardening** | Append-Only Audit-Schema, Neuro-Entscheidungs-Protokoll, Hash-Chain | **abgeschlossen** (D1-D4) | Cursor Agent | `app/services/audit_hardening.py`, `app/services/neuro_decision_protocol.py`, `app/api/v1/endpoints/neuro_audit.py`, `app/middleware/neuro_audit_middleware.py` | keine |
 | **NC-E: Fast Track + Compensation** | Deterministischer CRUD-Bypass + Saga-Rollback | **abgeschlossen** (E1-E2 + NC-006) | Cursor Agent | `app/services/fast_track.py`, `app/services/compensation_engine.py`, `app/api/v1/endpoints/neuro_fast_track.py`, `app/api/v1/endpoints/neuro_compensation.py` | keine |
 | **NC-F: Copilot Backend** | WebSocket-Streaming + Interaction State FSM | **abgeschlossen** (F1-F5) | Cursor Agent | `app/api/v1/endpoints/copilot_ws.py`, `app/services/interaction_state_manager.py`, `packages/frontend-web/src/features/copilot/useCopilotStream.ts` | keine |
-| **NC-G: Event Bus + Knowledge** | NATS-Consumer, Event-Schemas, Policy-Versionierung | in arbeit (NC-G4/G5, Codex) | Codex | `app/services/event_schema_registry.py`, `app/services/policy_registry.py`, `app/api/v1/endpoints/neuro_event_policy.py`, `app/infrastructure/eventbus/nats_consumer.py` | NC-G4/G5 vertiefen |
+| **NC-G: Event Bus + Knowledge** | NATS-Consumer, Event-Schemas, Policy-Versionierung | teilweise (G1-G5 umgesetzt, DLQ/Idempotenz offen) | Codex | `app/services/event_schema_registry.py`, `app/services/policy_registry.py`, `app/api/v1/endpoints/neuro_event_policy.py`, `app/infrastructure/eventbus/nats_consumer.py` | NC-G6 (DLQ/Idempotenz) schneiden |
 | **NC-H: Channels + Voice** | WhatsApp, E-Mail, Voice-Adapter, Simulation Engine, Channel Ingress | **abgeschlossen** (H1-H5) | Cursor Agent | `app/channels/whatsapp_adapter.py`, `app/channels/email_channel.py`, `app/channels/channel_ingress.py`, `app/services/voice_adapter.py`, `app/services/neuro_simulation_engine.py`, `app/api/v1/endpoints/channels.py` | keine |
 
 **Prioritaet:** P1 = A, B, C, D (sofort) | P2 = E, F, G (danach) | P3 = H (Channel-Erweiterung)
@@ -54,8 +54,8 @@ Zwei End-to-End-Stränge laufen **fachlich und technisch getrennt**. Bitte **nic
 | NC-B1 | Neuro State Graph + Confidence Ledger (Grundgeruest) | abgeschlossen | Codex | `app/core/neuro_state_graph.py`, `app/core/confidence_ledger.py`, `app/infrastructure/models/neuro_state_models.py`, `app/api/v1/endpoints/neuro_state_graph_api.py`, `alembic/versions/neuroassist_state_graph_confidence_ledger_20260329.py`, `tests/test_neuro_state_graph.py`, `docs/workflows/nc-b1-state-graph-confidence-ledger.md`, `docs/cards/neuro-core/NC-B1-state-graph-confidence-ledger.md` | NC-D1 oder NC-C1 claimen | keine |
 | NC-G2 | NATS Consumer Framework | abgeschlossen | Codex | `app/infrastructure/eventbus/nats_consumer.py`, `app/services/event_schema_registry.py`, `app/api/v1/endpoints/neuro_event_policy.py`, `docs/workflows/nc-g2-nats-consumer.md`, `docs/cards/neuro-core/NC-G2-nats-consumer.md`, `tests/test_nats_consumer.py` | NC-G3 starten | keine |
 | NC-G3 | NATS Consumer Handler (Audit/Inventory/Settlement) | abgeschlossen | Codex | `app/services/nats_event_handlers.py`, `app/domains/shared/events.py`, `app/infrastructure/eventbus/nats_consumer.py`, `tests/test_nats_event_handlers.py`, `docs/workflows/nc-g3-nats-handlers.md`, `docs/cards/neuro-core/NC-G3-nats-handlers.md` | NC-G4/G5 vertiefen | keine |
-| NC-G4 | Policy Registry Ausbau (A/B, Rollback, Audit) | reserviert | Codex | `app/services/policy_registry.py`, `app/api/v1/endpoints/neuro_event_policy.py`, `tests/test_policy_registry.py`, `docs/workflows/nc-g4-policy-registry.md`, `docs/cards/neuro-core/NC-G4-policy-registry.md` | Umsetzung starten | keine |
-| NC-G5 | PromptPack Registry (Versioning + A/B) | reserviert | Codex | `app/services/prompt_pack_registry.py`, `app/api/v1/endpoints/neuro_prompt_packs.py`, `tests/test_prompt_pack_registry.py`, `docs/workflows/nc-g5-prompt-pack-registry.md`, `docs/cards/neuro-core/NC-G5-prompt-pack-registry.md` | Umsetzung starten | keine |
+| NC-G4 | Policy Registry Ausbau (A/B, Rollback, Audit) | abgeschlossen | Codex | `app/services/policy_registry.py`, `app/api/v1/endpoints/neuro_event_policy.py`, `tests/test_policy_registry.py`, `docs/workflows/nc-g4-policy-registry.md`, `docs/cards/neuro-core/NC-G4-policy-registry.md` | NC-G6 definieren | keine |
+| NC-G5 | PromptPack Registry (Versioning + A/B) | abgeschlossen | Codex | `app/services/prompt_pack_registry.py`, `app/api/v1/endpoints/neuro_prompt_packs.py`, `tests/test_prompt_pack_registry.py`, `docs/workflows/nc-g5-prompt-pack-registry.md`, `docs/cards/neuro-core/NC-G5-prompt-pack-registry.md` | NC-G6 definieren | keine |
 | P2P-001 | Procure-to-Pay Direktbestellung: Workflow-Analyse, QA und Handover-Haertung | abgeschlossen | aktuell offener Agent | `docs/workflows/p2p-001-procure-to-pay-direktbestellung.md`, `docs/cards/einkauf/**`, `packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx`, `packages/frontend-web/src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx` | Folgeslice fuer Bedarfsmeldung/Rahmenabruf zuschneiden | keine |
 | P2P-040 | Procure-to-Pay Vorbelegung aus Bedarfsmeldung/Vertrag/RFQ | abgeschlossen | aktuell offener Agent | `docs/agent-ops/active-workboard.md`, `docs/workflows/p2p-040-vorbelegung-requisition-vertrag-rfq.md`, `docs/cards/einkauf/P2P-040-vorbelegung-standardmaske.md`, `packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx`, `packages/frontend-web/src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx` | Folgeslice Schrittvalidierung zuschneiden | keine |
 | P2P-050 | Procure-to-Pay Wizard-Schrittvalidierung | abgeschlossen | aktuell offener Agent | `docs/workflows/p2p-050-wizard-schrittvalidierung.md`, `docs/cards/einkauf/P2P-050-wizard-schrittvalidierung.md`, `packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx`, `packages/frontend-web/src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx` | Landhandel-Kernprozess beginnen | keine |
@@ -735,3 +735,19 @@ Alle 6 Router registriert in `app/api/v1/api.py` unter `/api/v1/neuro/*`. Commit
 **Betroffene Dateien:** `app/services/nats_event_handlers.py`, `app/domains/shared/events.py`, `app/infrastructure/eventbus/nats_consumer.py`, `tests/test_nats_event_handlers.py`, `docs/workflows/nc-g3-nats-handlers.md`, `docs/cards/neuro-core/NC-G3-nats-handlers.md`, `docs/agent-ops/active-workboard.md`
 **Tests / Checks:** nicht ausgefuehrt in dieser Session
 **Naechster konkreter Schritt:** NC-G4/G5 vertiefen oder DLQ/Idempotenz-Slice schneiden.
+
+## Handoff: 2026-03-29 - NC-G4/NC-G5
+
+**Von:** Codex
+**An:** naechste Session / naechster Agent
+**Ziel des Slices:** Policy Registry mit A/B-Auswahl erweitern und Prompt-Pack Registry bereitstellen.
+**Stand:** abgeschlossen
+**Erledigt:**
+- Policy Registry um Variant-Key, Traffic-Weight und Auswahl-Endpoint erweitert.
+- Prompt-Pack Registry (in-memory) mit A/B-Auswahl, Rollback und API eingefuehrt.
+- Tests fuer Policy- und Prompt-Pack-Registry ergaenzt.
+- Workflow- und Card-Doku fuer NC-G4/NC-G5 angelegt.
+**Offen:** Persistenter Knowledge Store und DLQ/Idempotenz fehlen.
+**Betroffene Dateien:** `app/services/policy_registry.py`, `app/api/v1/endpoints/neuro_event_policy.py`, `tests/test_policy_registry.py`, `app/services/prompt_pack_registry.py`, `app/api/v1/endpoints/neuro_prompt_packs.py`, `tests/test_prompt_pack_registry.py`, `docs/workflows/nc-g4-policy-registry.md`, `docs/workflows/nc-g5-prompt-pack-registry.md`, `docs/cards/neuro-core/NC-G4-policy-registry.md`, `docs/cards/neuro-core/NC-G5-prompt-pack-registry.md`, `app/api/v1/api.py`, `docs/agent-ops/active-workboard.md`
+**Tests / Checks:** nicht ausgefuehrt in dieser Session
+**Naechster konkreter Schritt:** NC-G6 (DLQ/Idempotenz + persistenter Knowledge Store) schneiden.
