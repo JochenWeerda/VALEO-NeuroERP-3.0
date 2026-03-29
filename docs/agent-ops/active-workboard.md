@@ -111,6 +111,52 @@ Kein Agent darf einen Slice beginnen, der bereits `reserviert` oder `in arbeit` 
 - Dateibesitz klar dokumentieren.
 - Ueberschneidungen nur mit explizitem Integrationshinweis.
 
+## Aufgabenverteilung Cursor Agent / Codex (Stand 2026-03-29)
+
+### Cursor Agent: Lane A — Neuro-Core Kernel (reserviert)
+
+Cursor Agent arbeitet jetzt an Lane A (Intent Engine + Planner). Das ist die Kern-Lane, von der D4, F5, H4, H5 abhaengen.
+
+**Slices:**
+
+| Slice | Inhalt | Status |
+|-------|--------|--------|
+| NC-A1 | `IntentResult` Contract: intent, confidence_score (0-1), risk_class, explanation, requested_action | offen |
+| NC-A2 | `IntentEngine.classify(user_input, context) -> IntentResult` mit Capability-Matching | offen |
+| NC-A3 | `PlanStep` Contract + `Planner.generate_plan(intent, context) -> list[PlanStep]` | offen |
+| NC-A4 | `VerificationResult` Integration — Planner nutzt bestehende Verification Engine (NC-001) | offen |
+| NC-A5 | Integration: Intent -> Context -> Plan -> Verify -> Execute Pipeline | offen |
+
+**Dateibesitz (exklusiv):** `app/agents/neuro_intent_engine.py`, `app/agents/neuro_planner.py`, `tests/test_neuro_intent_engine.py`, `tests/test_neuro_planner.py`
+
+### Codex: Verbleibende Aufgaben
+
+Codex soll folgende Aufgaben uebernehmen, sobald seine aktuelle Arbeit (NC-B) abgeschlossen ist:
+
+**Prio 1 — Abhaengig von Lane A (erst nach Cursor-Agent-Commit NC-A5):**
+
+| Aufgabe | Lane | Beschreibung | Dateibesitz |
+|---------|------|-------------|-------------|
+| NC-D4 | D | Decision Protocol automatisch aus Neuro-Core Pipeline befuellen | `app/middleware/audit_middleware.py` (EDIT) |
+| NC-D5 | D | Audit-Query-API: Hash-Chain-Validierung als Regression | `tests/test_audit_append_only.py` |
+| NC-F5 | F | Copilot -> Neuro-Core Pipeline: Chat -> IntentEngine -> Planner -> Response-Stream | `app/api/v1/endpoints/copilot_ws.py` (EDIT) |
+
+**Prio 2 — Sofort machbar (keine Abhaengigkeit):**
+
+| Aufgabe | Lane | Beschreibung | Dateibesitz |
+|---------|------|-------------|-------------|
+| NC-G2 | G | `NATSConsumer` — generischer Consumer mit Retry, DLQ, Idempotenz | `app/infrastructure/eventbus/nats_consumer.py` |
+| NC-G3 | G | Mindestens 3 Consumer aktivieren: Audit-Event, Inventory-Movement, Settlement-Created | `app/infrastructure/eventbus/` |
+| NC-H1 | H | `WhatsAppAdapter` — WhatsApp Business API Webhook-Empfang, Message-Parsing, Reply | `app/channels/whatsapp_adapter.py` |
+| NC-H2 | H | `EmailChannel` — IMAP-Polling/Webhook fuer eingehende E-Mails, Response via SMTP | `app/channels/email_channel.py` |
+| NC-H4 | H | Channel -> ChannelIngress -> Neuro-Core Routing fuer alle neuen Kanaele | `app/channels/` |
+
+**Regeln fuer Codex:**
+- Vor jeder Arbeit den Slice im Workboard auf `reserviert` setzen und sofort committen (`chore(workboard): claim SLICE-ID`).
+- Dateibesitz ist exklusiv — keine Dateien aus Lane A oder den bereits abgeschlossenen Lanes C/E bearbeiten.
+- Nach jedem Slice: Tests, Doku (Workflow + Card) und Workboard aktualisieren.
+- Commit-Convention: `feat(nc-XX): <beschreibung>`.
+
 ## Letzte wichtige Entscheidungen
 
 - Workflow-Analyse wird dokumentationsbasiert und card-basiert durchgefuehrt.
