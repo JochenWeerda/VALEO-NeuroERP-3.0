@@ -522,8 +522,8 @@ Kein Agent darf einen Slice beginnen, der bereits `reserviert` oder `in arbeit` 
 
 ## Handoff: 2026-03-28 - VK-019
 
-**Von:** Codex  
-**An:** naechste Session / naechster Agent  
+**Von:** Codex
+**An:** naechste Session / naechster Agent
 **Ziel des Slices:** Repair historischer Queue-Eintraege ohne `article_id`.
 **Stand:** abgeschlossen
 **Erledigt:**
@@ -532,16 +532,16 @@ Kein Agent darf einen Slice beginnen, der bereits `reserviert` oder `in arbeit` 
 - Ergebnisfeedback via Toast, Queue-Refresh per Query-Invalidation.
 - Workflow/Card/QA-Doku nachgezogen.
 **Offen:** Keine manuelle Artikelauswahl bei Mehrdeutigkeit; keine Batch-Reparatur.
-**Betroffene Dateien:** `docs/agent-ops/active-workboard.md`, `docs/workflows/vk-019-queue-repair-article-id.md`, `docs/cards/agrar/VK-019-queue-repair-article-id.md`, `docs/quality-assurance/browser-use-checklists.md`, `app/api/v1/endpoints/compat.py`, `packages/frontend-web/src/lib/api/inventory.ts`, `packages/frontend-web/src/pages/annahme/warteschlange.tsx`, `packages/frontend-web/src/__tests__/pages/annahme/warteschlange.test.tsx`
-**Tests / Checks:** nicht ausgefuehrt in dieser Session
+**Betroffene Dateien:** `docs/agent-ops/active-workboard.md`, `docs/workflows/vk-019-queue-repair-article-id.md`, `docs/cards/agrar/VK-019-queue-repair-article-id.md`, `docs/quality-assurance/browser-use-checklists.md`, `app/api/v1/endpoints/compat.py`, `packages/frontend-web/src/lib/api/inventory.ts`, `packages/frontend-web/src/pages/annahme/warteschlange.tsx`, `packages/frontend-web/src/__tests__/pages/annahme/warteschlange.test.tsx`, `tests/test_compat_lkw_registrierung.py`
+**Tests / Checks:** 9/9 gruen (`pytest tests/test_compat_lkw_registrierung.py`); 6 neue Repair-Tests fuer `_repair_lkw_article_reference` (article_number, article_name, not_found, missing_label x2, ambiguous); Frontend-Repair-CTA-Test in `warteschlange.test.tsx` bestand bereits.
 **Offene Risiken:** Fehlende Aufloesung bei Mehrdeutigkeit bleibt manuell.
 **Annahmen:** Exakter `article_number` oder Name ist in Alt-Eintraegen haeufig genug fuer Repair.
 **Naechster konkreter Schritt:** Sonderfreigabe-Policy/Role-Guard definieren oder optionalen Batch-Repair mit Freigabe entwerfen.
 
 ## Handoff: 2026-03-28 - VK-018
 
-**Von:** Codex  
-**An:** naechste Session / naechster Agent  
+**Von:** Codex
+**An:** naechste Session / naechster Agent
 **Ziel des Slices:** Gesperrte QP-Ergebnisse fachlich klaeren und dokumentieren.
 **Stand:** abgeschlossen
 **Erledigt:**
