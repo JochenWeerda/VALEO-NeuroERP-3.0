@@ -34,12 +34,12 @@ Zwei End-to-End-Stränge laufen **fachlich und technisch getrennt**. Bitte **nic
 
 | Lane | Scope | Slices | Status | Dateibesitz (exklusiv) | Abhaengigkeit |
 |------|-------|--------|--------|----------------------|---------------|
-| **NC-A: Neuro-Core Kernel** | Intent Engine + Planner + Verification Engine | teilweise (EXT-01 umgesetzt via NC-001) | Cursor Agent (NC-001) | `app/agents/neuro_intent_engine.py`, `neuro_planner.py`, `app/services/neuro_verification_engine.py`, `tests/test_neuro_*.py` | NC-A1 (Intent) starten |
-| **NC-B: State Graph + Confidence** | Business Object Graph + Append-Only Confidence Ledger | NC-B1..B5 | reserviert (Codex, 2026-03-29) | `app/core/neuro_state_graph.py`, `confidence_ledger.py`, `app/infrastructure/models/neuro_state_models.py`, `app/api/v1/endpoints/neuro_state_graph_api.py`, `tests/test_neuro_state_graph.py` | B5 wartet auf A |
-| **NC-C: Guardrails + Consent** | PII/DLP-Schutz, Consent-Lifecycle (DSGVO) | teilweise (EXT-04 umgesetzt via NC-004) | Cursor Agent (NC-004) | `app/core/guardrails.py`, `pii_detector.py`, `app/services/consent_engine.py`, `app/middleware/guardrail_middleware.py` | NC-C1 (PII Detector) starten |
+| **NC-A: Neuro-Core Kernel** | Intent Engine + Planner + Verification Engine | **reserviert** (Cursor Agent, 2026-03-29) | Cursor Agent | `app/agents/neuro_intent_engine.py`, `app/agents/neuro_planner.py`, `app/services/neuro_verification_engine.py`, `tests/test_neuro_intent_engine.py`, `tests/test_neuro_planner.py` | keine (Kern-Lane) |
+| **NC-B: State Graph + Confidence** | Business Object Graph + Append-Only Confidence Ledger | NC-B1..B5 | abgeschlossen (Codex, 2026-03-29) | `app/core/neuro_state_graph.py`, `confidence_ledger.py`, `app/infrastructure/models/neuro_state_models.py`, `app/api/v1/endpoints/neuro_state_graph_api.py`, `tests/test_neuro_state_graph.py` | B5 wartet auf A |
+| **NC-C: Guardrails + Consent** | PII/DLP-Schutz, Consent-Lifecycle (DSGVO) | **abgeschlossen** (C1-C3 + NC-004) | Cursor Agent | `app/services/pii_detector.py`, `app/services/guardrails.py`, `app/services/consent_engine.py`, `app/api/v1/endpoints/neuro_guardrails.py`, `app/api/v1/endpoints/neuro_consent.py` | keine |
 | **NC-D: Audit Hardening** | Append-Only Audit-Schema, Neuro-Entscheidungs-Protokoll, Hash-Chain | teilweise (D1-D3 umgesetzt) | Cursor Agent | `app/services/audit_hardening.py`, `app/services/neuro_decision_protocol.py`, `app/api/v1/endpoints/neuro_audit.py` | D4 (Pipeline-Integration) wartet auf A |
-| **NC-E: Fast Track + Compensation** | Deterministischer CRUD-Bypass + Saga-Rollback | teilweise (EXT-06 umgesetzt via NC-006) | Cursor Agent (NC-006) | `app/core/fast_track.py`, `app/services/compensation_engine.py`, `app/middleware/fast_track_middleware.py` | NC-E1 (Fast Track Classifier) starten |
-| **NC-F: Copilot Backend** | WebSocket-Streaming + Interaction State FSM | teilweise (EXT-02 umgesetzt via NC-002) | Cursor Agent (NC-002) | `app/api/v1/endpoints/copilot_ws.py`, `app/services/interaction_state_manager.py`, `packages/frontend-web/src/features/copilot/useCopilotStream.ts` | NC-F1 (FSM Migration) starten |
+| **NC-E: Fast Track + Compensation** | Deterministischer CRUD-Bypass + Saga-Rollback | **abgeschlossen** (E1-E2 + NC-006) | Cursor Agent | `app/services/fast_track.py`, `app/services/compensation_engine.py`, `app/api/v1/endpoints/neuro_fast_track.py`, `app/api/v1/endpoints/neuro_compensation.py` | keine |
+| **NC-F: Copilot Backend** | WebSocket-Streaming + Interaction State FSM | teilweise (F1-F4 umgesetzt) | Cursor Agent | `app/api/v1/endpoints/copilot_ws.py`, `app/services/interaction_state_manager.py`, `packages/frontend-web/src/features/copilot/useCopilotStream.ts` | F5 wartet auf Lane A |
 | **NC-G: Event Bus + Knowledge** | NATS-Consumer, Event-Schemas, Policy-Versionierung | teilweise (G1, G4-G5 umgesetzt) | Cursor Agent | `app/services/event_schema_registry.py`, `app/services/policy_registry.py`, `app/api/v1/endpoints/neuro_event_policy.py` | NC-G2 (NATS Consumer) starten |
 | **NC-H: Channels + Voice** | WhatsApp, E-Mail, Voice-Adapter, Simulation Engine | teilweise (EXT-03 + EXT-05 umgesetzt via NC-003/NC-005) | Cursor Agent (NC-003/NC-005) | `app/channels/whatsapp_adapter.py`, `email_channel.py`, `app/services/voice_adapter.py`, `app/services/neuro_simulation_engine.py` | NC-H1 (WhatsApp Adapter) starten |
 
@@ -51,7 +51,7 @@ Zwei End-to-End-Stränge laufen **fachlich und technisch getrennt**. Bitte **nic
 |----------|-------|--------|-------|-------------|-------------------|---------|
 | OPS-001 | Workflow-Analyse-Methodik und Agent-Ops-Doku | abgeschlossen | — | `AGENTS.md`, `docs/agent-ops/**`, `docs/workflows/**`, `docs/project-context/**`, `docs/quality-assurance/**` | bei neuen Workflow-Slices wiederverwenden | keine |
 | DOCS-105 | Wave-104-Dokumentations-Nachzug (GAP-G/H/I, Repo-Hygiene) | abgeschlossen | — | `docs/architecture/process-kernel/STATUS.md`, `DELIVERY-MAP.md`, `wave-104/STATUS.md`, `docs/roadmap/status/2026-03-27-wave-104-abschluss.md`, `docs/project-context/open-gaps-and-known-issues.md` | keine (Doku im Repo eingecheckt) | keine |
-| NC-B1 | Neuro State Graph + Confidence Ledger (Grundgeruest) | reserviert | Codex | `app/core/neuro_state_graph.py`, `app/core/confidence_ledger.py`, `app/infrastructure/models/neuro_state_models.py`, `app/api/v1/endpoints/neuro_state_graph_api.py`, `alembic/versions/neuroassist_state_graph_confidence_ledger_20260329.py`, `tests/test_neuro_state_graph.py`, `docs/workflows/nc-b1-state-graph-confidence-ledger.md`, `docs/cards/neuro-core/NC-B1-state-graph-confidence-ledger.md` | Umsetzung starten | keine |
+| NC-B1 | Neuro State Graph + Confidence Ledger (Grundgeruest) | abgeschlossen | Codex | `app/core/neuro_state_graph.py`, `app/core/confidence_ledger.py`, `app/infrastructure/models/neuro_state_models.py`, `app/api/v1/endpoints/neuro_state_graph_api.py`, `alembic/versions/neuroassist_state_graph_confidence_ledger_20260329.py`, `tests/test_neuro_state_graph.py`, `docs/workflows/nc-b1-state-graph-confidence-ledger.md`, `docs/cards/neuro-core/NC-B1-state-graph-confidence-ledger.md` | NC-D1 oder NC-C1 claimen | keine |
 | P2P-001 | Procure-to-Pay Direktbestellung: Workflow-Analyse, QA und Handover-Haertung | abgeschlossen | aktuell offener Agent | `docs/workflows/p2p-001-procure-to-pay-direktbestellung.md`, `docs/cards/einkauf/**`, `packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx`, `packages/frontend-web/src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx` | Folgeslice fuer Bedarfsmeldung/Rahmenabruf zuschneiden | keine |
 | P2P-040 | Procure-to-Pay Vorbelegung aus Bedarfsmeldung/Vertrag/RFQ | abgeschlossen | aktuell offener Agent | `docs/agent-ops/active-workboard.md`, `docs/workflows/p2p-040-vorbelegung-requisition-vertrag-rfq.md`, `docs/cards/einkauf/P2P-040-vorbelegung-standardmaske.md`, `packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx`, `packages/frontend-web/src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx` | Folgeslice Schrittvalidierung zuschneiden | keine |
 | P2P-050 | Procure-to-Pay Wizard-Schrittvalidierung | abgeschlossen | aktuell offener Agent | `docs/workflows/p2p-050-wizard-schrittvalidierung.md`, `docs/cards/einkauf/P2P-050-wizard-schrittvalidierung.md`, `packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx`, `packages/frontend-web/src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx` | Landhandel-Kernprozess beginnen | keine |
@@ -636,3 +636,21 @@ Alle 6 Router registriert in `app/api/v1/api.py` unter `/api/v1/neuro/*`. Commit
 **Betroffene Dateien:** `docs/project-context/neuro-stack-gap-matrix-2026-03-29.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/agent-ops/active-workboard.md`
 **Tests / Checks:** keine
 **Naechster konkreter Schritt:** Slice fuer NC-B1 (State Graph + Modelle) im Workboard claimen und erst danach mit Code starten.
+
+## Handoff: 2026-03-29 - NC-B1
+
+**Von:** Codex
+**An:** naechste Session / naechster Agent
+**Ziel des Slices:** State Graph und Confidence Ledger als P1-Grundgeruest produktiv verdrahten.
+**Stand:** abgeschlossen
+**Erledigt:**
+- State Graph Models + Service (Nodes, Edges, Transitions) mit Transition-Matrix.
+- Confidence Ledger mit Hash-Chain, Input-Hash und Risiko-Summary.
+- SQLAlchemy-Modelle + Alembic-Migration fuer `domain_shared`.
+- REST-API fuer Graph und Ledger (Read, Transition, Verify, Summary).
+- Workflow-Doku und Card fuer NC-B1 angelegt.
+- Workboard-Lane NC-B als abgeschlossen markiert.
+**Offen:** keine
+**Betroffene Dateien:** `app/core/neuro_state_graph.py`, `app/core/confidence_ledger.py`, `app/infrastructure/models/neuro_state_models.py`, `app/infrastructure/models/__init__.py`, `app/api/v1/endpoints/neuro_state_graph_api.py`, `alembic/versions/neuroassist_state_graph_confidence_ledger_20260329.py`, `tests/test_neuro_state_graph.py`, `docs/workflows/nc-b1-state-graph-confidence-ledger.md`, `docs/cards/neuro-core/NC-B1-state-graph-confidence-ledger.md`, `docs/agent-ops/active-workboard.md`
+**Tests / Checks:** nicht ausgefuehrt in dieser Session
+**Naechster konkreter Schritt:** NC-D1 (Audit Hardening) oder NC-C1 (Guardrails PII/DLP) claimen.
