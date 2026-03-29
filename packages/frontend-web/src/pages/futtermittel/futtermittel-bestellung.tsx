@@ -21,7 +21,7 @@ const bestellungWizardConfig: WizardConfig = {
           label: 'Lieferant',
           type: 'lookup',
           required: true,
-          endpoint: '/api/partners?type=supplier',
+          endpoint: '/api/v1/crm/business-partners?type=supplier',
           displayField: 'name',
           valueField: 'id',
           helpText: 'Nur zertifizierte Futtermittel-Lieferanten verfügbar'
@@ -118,10 +118,10 @@ const bestellungWizardConfig: WizardConfig = {
     }
   ],
   api: {
-    baseUrl: '/api/futtermittel/bestellungen',
+    baseUrl: '/api/v1/futter/bestellungen',
     endpoints: {
-      create: '/api/futtermittel/bestellungen',
-      update: '/api/futtermittel/bestellungen/{id}'
+      create: '/api/v1/futter/bestellungen',
+      update: '/api/v1/futter/bestellungen/{id}'
     }
   },
   permissions: ['futtermittel.order', 'supplier.read'],

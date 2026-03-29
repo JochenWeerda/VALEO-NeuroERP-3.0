@@ -44,7 +44,7 @@ export interface Contact {
 // Fetch opportunities with customer/contact resolution
 async function fetchOpportunities(params?: Record<string, string>): Promise<Opportunity[]> {
   const searchParams = new URLSearchParams(params)
-  const response = await authenticatedFetch(`/api/crm-sales/opportunities?${searchParams.toString()}`)
+  const response = await authenticatedFetch(`/api/v1/crm/opportunities?${searchParams.toString()}`)
 
   if (!response.ok) {
     throw new Error('Failed to fetch opportunities')
@@ -59,7 +59,7 @@ async function fetchOpportunities(params?: Record<string, string>): Promise<Oppo
 
 // Fetch single opportunity
 async function fetchOpportunity(id: string): Promise<Opportunity> {
-  const response = await authenticatedFetch(`/api/crm-sales/opportunities/${id}`)
+  const response = await authenticatedFetch(`/api/v1/crm/opportunities/${id}`)
 
   if (!response.ok) {
     throw new Error('Failed to fetch opportunity')
@@ -88,8 +88,8 @@ async function fetchCustomers(): Promise<Customer[]> {
 async function fetchContacts(customerId?: string): Promise<Contact[]> {
   try {
     const url = customerId
-      ? `/api/crm-sales/contacts?customer_id=${customerId}&limit=500`
-      : '/api/crm-sales/contacts?limit=500'
+      ? `/api/v1/crm/contacts?customer_id=${customerId}&limit=500`
+      : '/api/v1/crm/contacts?limit=500'
     const response = await authenticatedFetch(url)
 
     if (!response.ok) {
@@ -105,7 +105,7 @@ async function fetchContacts(customerId?: string): Promise<Contact[]> {
 
 // Create opportunity
 async function createOpportunity(data: Partial<Opportunity>): Promise<Opportunity> {
-  const response = await authenticatedFetch('/api/crm-sales/opportunities', {
+  const response = await authenticatedFetch('/api/v1/crm/opportunities', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -120,7 +120,7 @@ async function createOpportunity(data: Partial<Opportunity>): Promise<Opportunit
 
 // Update opportunity
 async function updateOpportunity(id: string, data: Partial<Opportunity>): Promise<Opportunity> {
-  const response = await authenticatedFetch(`/api/crm-sales/opportunities/${id}`, {
+  const response = await authenticatedFetch(`/api/v1/crm/opportunities/${id}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -135,7 +135,7 @@ async function updateOpportunity(id: string, data: Partial<Opportunity>): Promis
 
 // Delete opportunity
 async function deleteOpportunity(id: string): Promise<void> {
-  const response = await authenticatedFetch(`/api/crm-sales/opportunities/${id}`, {
+  const response = await authenticatedFetch(`/api/v1/crm/opportunities/${id}`, {
     method: 'DELETE',
   })
 

@@ -21,7 +21,7 @@ const wareneingangWizardConfig: WizardConfig = {
           label: 'Lieferant',
           type: 'lookup',
           required: true,
-          endpoint: '/api/partners?type=supplier',
+          endpoint: '/api/v1/crm/business-partners?type=supplier',
           displayField: 'name',
           valueField: 'id'
         },
@@ -29,7 +29,7 @@ const wareneingangWizardConfig: WizardConfig = {
           name: 'bestellungId',
           label: 'Bestellreferenz',
           type: 'lookup',
-          endpoint: '/api/futtermittel/bestellungen?status=offen',
+          endpoint: '/api/v1/futter/bestellungen?status=offen',
           displayField: 'nummer',
           valueField: 'id',
           helpText: 'Optional: Verknüpfung mit bestehender Bestellung'
@@ -216,10 +216,10 @@ const wareneingangWizardConfig: WizardConfig = {
     }
   ],
   api: {
-    baseUrl: '/api/futtermittel/wareneingang',
+    baseUrl: '/api/v1/futter/wareneingang',
     endpoints: {
-      create: '/api/futtermittel/wareneingang',
-      update: '/api/futtermittel/wareneingang/{id}'
+      create: '/api/v1/futter/wareneingang',
+      update: '/api/v1/futter/wareneingang/{id}'
     }
   },
   permissions: ['futtermittel.receive', 'quality.check', 'warehouse.manage'],

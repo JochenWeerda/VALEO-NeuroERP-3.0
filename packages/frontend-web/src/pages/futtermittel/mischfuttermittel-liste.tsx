@@ -190,13 +190,13 @@ const mischfuttermittelListConfig: ListConfig = {
   defaultSort: { field: 'name', direction: 'asc' },
   pageSize: 25,
   api: {
-    baseUrl: '/api/futtermittel/mischfuttermittel',
+    baseUrl: '/api/v1/futter/mischfuttermittel',
     endpoints: {
-      list: '/api/futtermittel/mischfuttermittel',
-      get: '/api/futtermittel/mischfuttermittel/{id}',
-      create: '/api/futtermittel/mischfuttermittel',
-      update: '/api/futtermittel/mischfuttermittel/{id}',
-      delete: '/api/futtermittel/mischfuttermittel/{id}'
+      list: '/api/v1/futter/mischfuttermittel',
+      get: '/api/v1/futter/mischfuttermittel/{id}',
+      create: '/api/v1/futter/mischfuttermittel',
+      update: '/api/v1/futter/mischfuttermittel/{id}',
+      delete: '/api/v1/futter/mischfuttermittel/{id}'
     }
   },
   permissions: ['futtermittel.read', 'futtermittel.write'],

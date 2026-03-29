@@ -1,4 +1,4 @@
-﻿import { useMemo } from 'react'
+import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
@@ -165,13 +165,13 @@ const createAnfragenConfig = (t: any, entityTypeLabel: string): ListConfig => ({
   defaultSort: { field: 'createdAt', direction: 'desc' },
   pageSize: 25,
   api: {
-    baseUrl: '/api/einkauf/anfragen',
+    baseUrl: '/api/v1/einkauf/anfragen',
     endpoints: {
-      list: '/api/einkauf/anfragen',
-      get: '/api/einkauf/anfragen/{id}',
-      create: '/api/einkauf/anfragen',
-      update: '/api/einkauf/anfragen/{id}',
-      delete: '/api/einkauf/anfragen/{id}'
+      list: '/api/v1/einkauf/anfragen',
+      get: '/api/v1/einkauf/anfragen/{id}',
+      create: '/api/v1/einkauf/anfragen',
+      update: '/api/v1/einkauf/anfragen/{id}',
+      delete: '/api/v1/einkauf/anfragen/{id}'
     }
   },
   permissions: ['einkauf.read', 'einkauf.write'],

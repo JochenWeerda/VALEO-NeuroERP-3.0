@@ -27,7 +27,7 @@ const createAngebotConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
           name: 'anfrageId',
           label: t('crud.entities.purchaseRequest'),
           type: 'lookup',
-          endpoint: '/api/einkauf/anfragen?status=FREIGEGEBEN',
+          endpoint: '/api/v1/einkauf/anfragen?status=FREIGEGEBEN',
           displayField: 'anfrageNummer',
           valueField: 'id',
           helpText: t('crud.tooltips.fields.linkedRequest')
@@ -37,7 +37,7 @@ const createAngebotConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
           label: t('crud.entities.supplier'),
           type: 'lookup',
           required: true,
-          endpoint: '/api/partners?type=supplier',
+          endpoint: '/api/v1/crm/business-partners?type=supplier',
           displayField: 'name',
           valueField: 'id'
         },
@@ -64,7 +64,7 @@ const createAngebotConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
           label: t('crud.fields.product'),
           type: 'lookup',
           required: true,
-          endpoint: '/api/articles',
+          endpoint: '/api/v1/articles',
           displayField: 'name',
           valueField: 'id'
         },
@@ -182,13 +182,13 @@ const createAngebotConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
     }
   ],
   api: {
-    baseUrl: '/api/einkauf/angebote',
+    baseUrl: '/api/v1/einkauf/angebote',
     endpoints: {
-      list: '/api/einkauf/angebote',
-      get: '/api/einkauf/angebote/{id}',
-      create: '/api/einkauf/angebote',
-      update: '/api/einkauf/angebote/{id}',
-      delete: '/api/einkauf/angebote/{id}'
+      list: '/api/v1/einkauf/angebote',
+      get: '/api/v1/einkauf/angebote/{id}',
+      create: '/api/v1/einkauf/angebote',
+      update: '/api/v1/einkauf/angebote/{id}',
+      delete: '/api/v1/einkauf/angebote/{id}'
     }
   },
   permissions: ['einkauf.read', 'einkauf.write']

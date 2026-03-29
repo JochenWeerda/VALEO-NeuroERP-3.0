@@ -1,4 +1,4 @@
-﻿import { useMemo } from 'react'
+import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
@@ -101,13 +101,13 @@ const createAuftragsbestaetigungenConfig = (t: any, entityTypeLabel: string): Li
   defaultSort: { field: 'createdAt', direction: 'desc' },
   pageSize: 25,
   api: {
-    baseUrl: '/api/einkauf/auftragsbestaetigungen',
+    baseUrl: '/api/v1/einkauf/auftragsbestaetigungen',
     endpoints: {
-      list: '/api/einkauf/auftragsbestaetigungen',
-      get: '/api/einkauf/auftragsbestaetigungen/{id}',
-      create: '/api/einkauf/auftragsbestaetigungen',
-      update: '/api/einkauf/auftragsbestaetigungen/{id}',
-      delete: '/api/einkauf/auftragsbestaetigungen/{id}'
+      list: '/api/v1/einkauf/auftragsbestaetigungen',
+      get: '/api/v1/einkauf/auftragsbestaetigungen/{id}',
+      create: '/api/v1/einkauf/auftragsbestaetigungen',
+      update: '/api/v1/einkauf/auftragsbestaetigungen/{id}',
+      delete: '/api/v1/einkauf/auftragsbestaetigungen/{id}'
     }
   },
   permissions: ['einkauf.read', 'einkauf.write'],

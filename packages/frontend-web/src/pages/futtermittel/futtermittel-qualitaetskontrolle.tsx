@@ -13,9 +13,9 @@ const qualityControlConfig: WorklistConfig = {
   groupBy: 'status',
   itemTemplate: (item: WorklistItem) => <div>{item.title}</div>,
   api: {
-    baseUrl: '/api/futtermittel/quality-control',
+    baseUrl: '/api/v1/futter/quality-control',
     endpoints: {
-      list: '/api/futtermittel/quality-control'
+      list: '/api/v1/futter/quality-control'
     }
   },
   permissions: ['futtermittel.quality', 'lab.read'],

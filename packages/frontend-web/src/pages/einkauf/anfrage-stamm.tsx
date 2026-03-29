@@ -72,7 +72,7 @@ const createAnfrageConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
           label: t('crud.fields.product'),
           type: 'lookup',
           required: true,
-          endpoint: '/api/articles',
+          endpoint: '/api/v1/articles',
           displayField: 'name',
           valueField: 'id'
         },
@@ -190,7 +190,7 @@ export default function AnfrageStammPage(): JSX.Element {
   useEffect(() => {
     const loadSuppliers = async () => {
       try {
-        const response = await fetch('/api/partners?type=supplier')
+        const response = await fetch('/api/v1/crm/business-partners?type=supplier')
         if (response.ok) {
           const suppliers = await response.json()
           setAvailableSuppliers(Array.isArray(suppliers) ? suppliers : suppliers?.data || [])

@@ -271,12 +271,12 @@ const createOpportunityConfig = (
     }
   ],
   api: {
-    baseUrl: '/api/crm-sales/opportunities',
+    baseUrl: '/api/v1/crm/opportunities',
     endpoints: {
-      get: '/api/crm-sales/opportunities/{id}',
-      create: '/api/crm-sales/opportunities',
-      update: '/api/crm-sales/opportunities/{id}',
-      delete: '/api/crm-sales/opportunities/{id}'
+      get: '/api/v1/crm/opportunities/{id}',
+      create: '/api/v1/crm/opportunities',
+      update: '/api/v1/crm/opportunities/{id}',
+      delete: '/api/v1/crm/opportunities/{id}'
     }
   },
   permissions: ['crm.read', 'sales.read', 'sales.write']

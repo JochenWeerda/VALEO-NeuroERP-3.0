@@ -127,13 +127,13 @@ const futtermittelListConfig: ListConfig = {
   defaultSort: { field: 'name', direction: 'asc' },
   pageSize: 25,
   api: {
-    baseUrl: '/api/futtermittel/einzelfuttermittel',
+    baseUrl: '/api/v1/futter/einzelfuttermittel',
     endpoints: {
-      list: '/api/futtermittel/einzelfuttermittel',
-      get: '/api/futtermittel/einzelfuttermittel/{id}',
-      create: '/api/futtermittel/einzelfuttermittel',
-      update: '/api/futtermittel/einzelfuttermittel/{id}',
-      delete: '/api/futtermittel/einzelfuttermittel/{id}'
+      list: '/api/v1/futter/einzelfuttermittel',
+      get: '/api/v1/futter/einzelfuttermittel/{id}',
+      create: '/api/v1/futter/einzelfuttermittel',
+      update: '/api/v1/futter/einzelfuttermittel/{id}',
+      delete: '/api/v1/futter/einzelfuttermittel/{id}'
     }
   },
   permissions: ['futtermittel.read', 'futtermittel.write'],

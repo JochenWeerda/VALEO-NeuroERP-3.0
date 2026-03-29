@@ -189,13 +189,13 @@ const createOpportunitiesConfig = (t: any, entityTypeLabel: string): ListConfig 
   defaultSort: { field: 'expected_close_date', direction: 'desc' },
   pageSize: 25,
   api: {
-    baseUrl: '/api/crm-sales/opportunities',
+    baseUrl: '/api/v1/crm/opportunities',
     endpoints: {
-      list: '/api/crm-sales/opportunities',
-      get: '/api/crm-sales/opportunities/{id}',
-      create: '/api/crm-sales/opportunities',
-      update: '/api/crm-sales/opportunities/{id}',
-      delete: '/api/crm-sales/opportunities/{id}'
+      list: '/api/v1/crm/opportunities',
+      get: '/api/v1/crm/opportunities/{id}',
+      create: '/api/v1/crm/opportunities',
+      update: '/api/v1/crm/opportunities/{id}',
+      delete: '/api/v1/crm/opportunities/{id}'
     }
   },
   permissions: ['crm.read', 'sales.read'],

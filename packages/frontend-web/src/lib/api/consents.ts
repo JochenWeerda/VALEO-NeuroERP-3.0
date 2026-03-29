@@ -33,7 +33,7 @@ async function fetchConsents(params?: Record<string, string>): Promise<Consent[]
   const searchParams = new URLSearchParams(params)
 
   try {
-    const response = await authenticatedFetch(`/api/crm-sales/consents?${searchParams.toString()}`)
+    const response = await authenticatedFetch(`/api/v1/crm/consents?${searchParams.toString()}`)
 
     if (!response.ok) {
       return []
@@ -49,7 +49,7 @@ async function fetchConsents(params?: Record<string, string>): Promise<Consent[]
 // Fetch single consent
 async function fetchConsent(id: string): Promise<Consent | null> {
   try {
-    const response = await authenticatedFetch(`/api/crm-sales/consents/${id}`)
+    const response = await authenticatedFetch(`/api/v1/crm/consents/${id}`)
 
     if (!response.ok) {
       return null
@@ -64,7 +64,7 @@ async function fetchConsent(id: string): Promise<Consent | null> {
 // Fetch contacts for select dropdown
 async function fetchContacts(): Promise<Contact[]> {
   try {
-    const response = await authenticatedFetch('/api/crm-sales/contacts?limit=500')
+    const response = await authenticatedFetch('/api/v1/crm/contacts?limit=500')
 
     if (!response.ok) {
       return []
@@ -79,7 +79,7 @@ async function fetchContacts(): Promise<Contact[]> {
 
 // Create consent
 async function createConsent(data: Partial<Consent>): Promise<Consent> {
-  const response = await authenticatedFetch('/api/crm-sales/consents', {
+  const response = await authenticatedFetch('/api/v1/crm/consents', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -94,7 +94,7 @@ async function createConsent(data: Partial<Consent>): Promise<Consent> {
 
 // Update consent
 async function updateConsent(id: string, data: Partial<Consent>): Promise<Consent> {
-  const response = await authenticatedFetch(`/api/crm-sales/consents/${id}`, {
+  const response = await authenticatedFetch(`/api/v1/crm/consents/${id}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -109,7 +109,7 @@ async function updateConsent(id: string, data: Partial<Consent>): Promise<Consen
 
 // Grant consent
 async function grantConsent(id: string): Promise<Consent> {
-  const response = await authenticatedFetch(`/api/crm-sales/consents/${id}/grant`, {
+  const response = await authenticatedFetch(`/api/v1/crm/consents/${id}/grant`, {
     method: 'POST',
   })
 
@@ -122,7 +122,7 @@ async function grantConsent(id: string): Promise<Consent> {
 
 // Revoke consent
 async function revokeConsent(id: string): Promise<Consent> {
-  const response = await authenticatedFetch(`/api/crm-sales/consents/${id}/revoke`, {
+  const response = await authenticatedFetch(`/api/v1/crm/consents/${id}/revoke`, {
     method: 'POST',
   })
 
@@ -135,7 +135,7 @@ async function revokeConsent(id: string): Promise<Consent> {
 
 // Delete consent
 async function deleteConsent(id: string): Promise<void> {
-  const response = await authenticatedFetch(`/api/crm-sales/consents/${id}`, {
+  const response = await authenticatedFetch(`/api/v1/crm/consents/${id}`, {
     method: 'DELETE',
   })
 
