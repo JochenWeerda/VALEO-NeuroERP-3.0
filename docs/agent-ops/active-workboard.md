@@ -605,3 +605,18 @@ Kein Agent darf einen Slice beginnen, der bereits `reserviert` oder `in arbeit` 
 3. MATIF-Preisfixierung: Datenmodell komplett vorhanden (pricing_model, min_price, premium, basis_reference, pricing_window), aber kein Prozess und kein UI
 4. Teillieferungen sind im Datenmodell moeglich (Movements), aber operativ nicht verdrahtet
 **Naechster konkreter Schritt:** CTS-002 (Kontraktbindung auf Belegen als echte Referenz) oder CTS-003 (automatische Movement-Buchung) als naechsten Implementierungs-Slice claimen.
+
+## Handoff: 2026-03-29 - Neuro Stack Gap Matrix
+
+**Von:** Codex
+**An:** naechste Session / naechster Agent
+**Ziel:** Neuro-Stack-Gaps aus dem gelieferten Komponenten-Status dokumentieren und priorisieren.
+**Stand:** abgeschlossen
+**Erledigt:**
+- Statusmatrix und P1-Luecken als eigene Doku erfasst.
+- Open-Gaps-Liste um den neuen Matrix-Verweis ergaenzt.
+- Naechste 3 Schritte fuer die P1-Lanes dokumentiert (NC-B1, NC-D1, NC-C1).
+**Offen:** Claim-Commit fuer den naechsten Neuro-Core-Slice steht noch aus.
+**Betroffene Dateien:** `docs/project-context/neuro-stack-gap-matrix-2026-03-29.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/agent-ops/active-workboard.md`
+**Tests / Checks:** keine
+**Naechster konkreter Schritt:** Slice fuer NC-B1 (State Graph + Modelle) im Workboard claimen und erst danach mit Code starten.
