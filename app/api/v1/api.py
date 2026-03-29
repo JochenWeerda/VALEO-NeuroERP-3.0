@@ -1117,3 +1117,16 @@ api_router.include_router(neuro_compensation.router)
 from app.api.v1.endpoints import neuro_audit
 
 api_router.include_router(neuro_audit.router)
+
+# ── Neuro-Core Lanes C, E, F, G ───────────────────────────────
+from app.api.v1.endpoints import (
+    neuro_guardrails,
+    neuro_fast_track,
+    copilot_ws,
+    neuro_event_policy,
+)
+
+api_router.include_router(neuro_guardrails.router)
+api_router.include_router(neuro_fast_track.router)
+api_router.include_router(copilot_ws.router)
+api_router.include_router(neuro_event_policy.router)
