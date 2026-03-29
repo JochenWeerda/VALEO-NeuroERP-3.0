@@ -8,7 +8,7 @@ Diese Datei ist absichtlich schlank und soll bei jeder Session schnell lesbar bl
 
 ## Aktueller Stand
 
-- Datum: `2026-03-28`
+- Datum: `2026-03-29`
 - Branch: `develop` (lokal; mit `backup/develop` abgleichen bei Push)
 - Source of Truth: `docs/architecture/process-kernel/STATUS.md`
 
@@ -51,6 +51,7 @@ Zwei End-to-End-Stränge laufen **fachlich und technisch getrennt**. Bitte **nic
 |----------|-------|--------|-------|-------------|-------------------|---------|
 | OPS-001 | Workflow-Analyse-Methodik und Agent-Ops-Doku | abgeschlossen | — | `AGENTS.md`, `docs/agent-ops/**`, `docs/workflows/**`, `docs/project-context/**`, `docs/quality-assurance/**` | bei neuen Workflow-Slices wiederverwenden | keine |
 | DOCS-105 | Wave-104-Dokumentations-Nachzug (GAP-G/H/I, Repo-Hygiene) | abgeschlossen | — | `docs/architecture/process-kernel/STATUS.md`, `DELIVERY-MAP.md`, `wave-104/STATUS.md`, `docs/roadmap/status/2026-03-27-wave-104-abschluss.md`, `docs/project-context/open-gaps-and-known-issues.md` | keine (Doku im Repo eingecheckt) | keine |
+| NC-B1 | Neuro State Graph + Confidence Ledger (Grundgeruest) | reserviert | Codex | `app/core/neuro_state_graph.py`, `app/core/confidence_ledger.py`, `app/infrastructure/models/neuro_state_models.py`, `app/api/v1/endpoints/neuro_state_graph_api.py`, `alembic/versions/neuroassist_state_graph_confidence_ledger_20260329.py`, `tests/test_neuro_state_graph.py`, `docs/workflows/nc-b1-state-graph-confidence-ledger.md`, `docs/cards/neuro-core/NC-B1-state-graph-confidence-ledger.md` | Umsetzung starten | keine |
 | P2P-001 | Procure-to-Pay Direktbestellung: Workflow-Analyse, QA und Handover-Haertung | abgeschlossen | aktuell offener Agent | `docs/workflows/p2p-001-procure-to-pay-direktbestellung.md`, `docs/cards/einkauf/**`, `packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx`, `packages/frontend-web/src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx` | Folgeslice fuer Bedarfsmeldung/Rahmenabruf zuschneiden | keine |
 | P2P-040 | Procure-to-Pay Vorbelegung aus Bedarfsmeldung/Vertrag/RFQ | abgeschlossen | aktuell offener Agent | `docs/agent-ops/active-workboard.md`, `docs/workflows/p2p-040-vorbelegung-requisition-vertrag-rfq.md`, `docs/cards/einkauf/P2P-040-vorbelegung-standardmaske.md`, `packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx`, `packages/frontend-web/src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx` | Folgeslice Schrittvalidierung zuschneiden | keine |
 | P2P-050 | Procure-to-Pay Wizard-Schrittvalidierung | abgeschlossen | aktuell offener Agent | `docs/workflows/p2p-050-wizard-schrittvalidierung.md`, `docs/cards/einkauf/P2P-050-wizard-schrittvalidierung.md`, `packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx`, `packages/frontend-web/src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx` | Landhandel-Kernprozess beginnen | keine |
