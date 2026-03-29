@@ -1135,3 +1135,8 @@ api_router.include_router(neuro_event_policy.router)
 from app.api.v1.endpoints import neuro_pipeline
 
 api_router.include_router(neuro_pipeline.router)
+
+# ── Neuro-Core Lane H: Channels (WhatsApp, E-Mail, Generic) ──
+from app.api.v1.endpoints import channels
+
+api_router.include_router(channels.router)
