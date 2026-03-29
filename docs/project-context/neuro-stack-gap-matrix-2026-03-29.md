@@ -9,28 +9,28 @@ Die folgende Matrix basiert auf dem gelieferten Komponenten-Status und fasst die
 | Komponente | Status | Details |
 |---|---:|---|
 | Neuro Intent Engine | 60% | Capability-Routing existiert (`neuroassist.py`), NLU/Confidence-Scoring fehlt |
-| Neuro State Graph | 0% | Fehlt komplett -- kein unified State Graph fuer Bestellung/Rechnung/Kunde/Lager |
+| Neuro State Graph | 70% | Grundgeruest + API + DB-Modelle umgesetzt (NC-B1), Pipeline-Integration fehlt |
 | Neuro Context Resolver | 70% | Prozess-/Aggregate-Kontext vorhanden, Consent-Status + Kanal-Historie fehlt |
 | Neuro Planner | 65% | Stage-Contracts + Bestellvorschlag-Workflow produktiv, dynamische Schrittgenerierung fehlt |
-| Confidence & Risk Engine | 40% | 4-Stufen-Risikomatrix vorhanden, Append-Only Ledger fehlt |
+| Confidence & Risk Engine | 70% | Append-Only Ledger umgesetzt (NC-B1), weitere Risk-Aggregate fehlen |
 | Rule & Knowledge Store | 55% | Knowledge-Versioning vorhanden, A/B-Testing + Rollback fehlt |
-| Guardrails / PII-DLP | 25% | Kritische Luecke -- kein PII-Masking, kein DLP, kein Prompt-Injection-Schutz |
+| Guardrails / PII-DLP | 70% | PII-Detector/Guardrails/Consent als NC-C abgeschlossen, DLP-Ausbau offen |
 | Action & Policy Layer | 100% | BusinessCommands + CommandDispatcher produktiv |
 | Human Oversight | 80% | Approval-Gate mit 4 Risikostufen vorhanden, Case-Management-UI fehlt |
-| Audit & Trace | 65% | Middleware + Evidence-Refs vorhanden, Hash-Chain + Append-Only fehlt |
-| Event Bus (NATS) | 50% | Publisher vorhanden, Consumer-Framework fehlt |
-| Fast Track | 0% | Fehlt -- kein deterministischer Bypass-Pfad |
-| Copilot UI | 40% | Frontend-Chat-Hook vorhanden, WebSocket-Streaming fehlt |
-| Multi-Channel | 35% | WhatsApp-Adapter vorhanden, Email/LiveChat fehlt |
+| Audit & Trace | 70% | Audit Hardening D1-D3 vorhanden, Hash-Chain/Append-Only-Vertiefung offen |
+| Event Bus (NATS) | 60% | Publisher vorhanden, Consumer-Framework (NC-G2) fehlt |
+| Fast Track | 70% | Fast-Track + Compensation als NC-E abgeschlossen, Bypass-Policy-Ausbau offen |
+| Copilot UI | 50% | Frontend-Chat-Hook da, WebSocket-Streaming teilweise (NC-F), fehlende F5-Integration |
+| Multi-Channel | 40% | WhatsApp-Adapter vorhanden, Email/LiveChat fehlt |
 | LangGraph Integration | 100% | Produktiv -- Workflows, Checkpoints, Human-in-the-Loop |
 
 ## P1-Luecken (sofort schliessen)
 
-1. Neuro State Graph -- Unified Business State Tracking
-2. Confidence Ledger -- Append-Only mit Hash-Chain
-3. Guardrails Middleware -- PII/DLP/Prompt-Injection
-4. Fast Track -- Deterministischer Bypass fuer Standard-CRUD
-5. Audit Hardening -- Neuro-Entscheidungs-Protokoll
+1. Audit Hardening -- Hash-Chain + Append-Only-Vertiefung (NC-D4/NC-D5)
+2. Guardrails Middleware -- DLP/Prompt-Injection Ausbau (NC-C Folge)
+3. Neuro Intent Engine -- NLU/Confidence-Scoring
+4. Neuro Planner -- dynamische Schrittgenerierung
+5. Event Bus -- NATS Consumer-Framework (NC-G2)
 
 ## Produktive Staerken (Ist)
 
@@ -46,6 +46,6 @@ Die folgende Matrix basiert auf dem gelieferten Komponenten-Status und fasst die
 
 ## Naechste 3 Schritte (Plan)
 
-1. NC-B1: Neuro State Graph Grundgeruest plus DB-Modelle anlegen (Lane NC-B, P1).
-2. NC-D1: Append-Only Audit/Confidence Ledger Basisvertrag definieren (Lane NC-D, P1).
-3. NC-C1: Guardrails-Middleware Basisschutz (PII/DLP/Prompt-Injection) als minimaler End-to-End-Pfad.
+1. NC-D4: Audit Hardening Pipeline-Integration abschliessen.
+2. NC-G2: NATS Consumer-Framework fuer Event Bus umsetzen.
+3. NC-A/Planner: NLU/Confidence-Scoring und dynamische Schrittgenerierung priorisieren.
