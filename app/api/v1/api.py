@@ -158,6 +158,9 @@ from app.api.v1.endpoints import agent_context_api, finance_read_models, process
 # Wave 69 — Knowledge Core
 from app.api.v1.endpoints import knowledge_api
 
+# Lane B — Neuro State Graph + Confidence Ledger
+from app.api.v1.endpoints import neuro_state_graph_api
+
 # Import domain routers
 from app.domains.agrar.api import psm, psm_proplanta
 from app.domains.inventory.api import router as inventory_domain_router
@@ -183,6 +186,12 @@ api_router.include_router(
 api_router.include_router(
     agents.router,
     tags=["neuroassist", "agents"],
+)
+
+api_router.include_router(
+    neuro_state_graph_api.router,
+    prefix="/neuro",
+    tags=["neuro-state-graph", "confidence-ledger"],
 )
 
 api_router.include_router(
@@ -1086,3 +1095,20 @@ api_router.include_router(terminology.router)
 api_router.include_router(workflow_runtime.router)
 api_router.include_router(workflow_simulation.router)
 api_router.include_router(workflow_template_marketplace.router)
+
+# ── Neuro-Core Architecture Layer (NC-001 bis NC-006) ──────────
+from app.api.v1.endpoints import (
+    neuro_verification,
+    neuro_interactions,
+    neuro_voice,
+    neuro_consent,
+    neuro_simulation,
+    neuro_compensation,
+)
+
+api_router.include_router(neuro_verification.router)
+api_router.include_router(neuro_interactions.router)
+api_router.include_router(neuro_voice.router)
+api_router.include_router(neuro_consent.router)
+api_router.include_router(neuro_simulation.router)
+api_router.include_router(neuro_compensation.router)
