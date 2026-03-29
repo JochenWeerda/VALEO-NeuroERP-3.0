@@ -34,14 +34,14 @@ Zwei End-to-End-Stränge laufen **fachlich und technisch getrennt**. Bitte **nic
 
 | Lane | Scope | Slices | Status | Dateibesitz (exklusiv) | Abhaengigkeit |
 |------|-------|--------|--------|----------------------|---------------|
-| **NC-A: Neuro-Core Kernel** | Intent Engine + Planner + Verification Engine | NC-A1..A5 | offen | `app/agents/neuro_intent_engine.py`, `neuro_planner.py`, `neuro_verification_engine.py`, `tests/test_neuro_*.py` | keine |
+| **NC-A: Neuro-Core Kernel** | Intent Engine + Planner + Verification Engine | teilweise (EXT-01 umgesetzt via NC-001) | Cursor Agent (NC-001) | `app/agents/neuro_intent_engine.py`, `neuro_planner.py`, `app/services/neuro_verification_engine.py`, `tests/test_neuro_*.py` | NC-A1 (Intent) starten |
 | **NC-B: State Graph + Confidence** | Business Object Graph + Append-Only Confidence Ledger | NC-B1..B5 | offen | `app/core/neuro_state_graph.py`, `confidence_ledger.py`, `app/infrastructure/models/neuro_state_models.py` | B5 wartet auf A |
-| **NC-C: Guardrails + Consent** | PII/DLP-Schutz, Consent-Lifecycle (DSGVO) | NC-C1..C5 | offen | `app/core/guardrails.py`, `pii_detector.py`, `consent_engine.py`, `app/middleware/guardrail_middleware.py` | keine |
+| **NC-C: Guardrails + Consent** | PII/DLP-Schutz, Consent-Lifecycle (DSGVO) | teilweise (EXT-04 umgesetzt via NC-004) | Cursor Agent (NC-004) | `app/core/guardrails.py`, `pii_detector.py`, `app/services/consent_engine.py`, `app/middleware/guardrail_middleware.py` | NC-C1 (PII Detector) starten |
 | **NC-D: Audit Hardening** | Append-Only Audit-Schema, Neuro-Entscheidungs-Protokoll, Hash-Chain | NC-D1..D5 | offen | `app/infrastructure/models/audit_models.py`, `app/core/neuro_decision_protocol.py`, `app/middleware/audit_middleware.py` (EDIT) | D4 wartet auf A |
-| **NC-E: Fast Track + Compensation** | Deterministischer CRUD-Bypass + Saga-Rollback | NC-E1..E5 | offen | `app/core/fast_track.py`, `compensation_engine.py`, `app/middleware/fast_track_middleware.py` | keine |
-| **NC-F: Copilot Backend** | WebSocket-Streaming + Interaction State FSM | NC-F1..F5 | offen | `app/api/v1/endpoints/copilot_ws.py`, `app/core/interaction_state.py`, `packages/frontend-web/src/features/copilot/useCopilotStream.ts` | F5 wartet auf A |
+| **NC-E: Fast Track + Compensation** | Deterministischer CRUD-Bypass + Saga-Rollback | teilweise (EXT-06 umgesetzt via NC-006) | Cursor Agent (NC-006) | `app/core/fast_track.py`, `app/services/compensation_engine.py`, `app/middleware/fast_track_middleware.py` | NC-E1 (Fast Track Classifier) starten |
+| **NC-F: Copilot Backend** | WebSocket-Streaming + Interaction State FSM | teilweise (EXT-02 umgesetzt via NC-002) | Cursor Agent (NC-002) | `app/api/v1/endpoints/copilot_ws.py`, `app/services/interaction_state_manager.py`, `packages/frontend-web/src/features/copilot/useCopilotStream.ts` | NC-F1 (FSM Migration) starten |
 | **NC-G: Event Bus + Knowledge** | NATS-Consumer, Event-Schemas, Policy-Versionierung | NC-G1..G5 | offen | `app/infrastructure/eventbus/nats_consumer.py`, `event_schemas.py`, `app/core/policy_registry.py` | keine |
-| **NC-H: Channels + Voice** | WhatsApp, E-Mail, Voice-Adapter, Simulation Engine | NC-H1..H5 | offen | `app/channels/whatsapp_adapter.py`, `email_channel.py`, `voice_adapter.py`, `app/core/simulation_engine.py` | H4/H5 warten auf A |
+| **NC-H: Channels + Voice** | WhatsApp, E-Mail, Voice-Adapter, Simulation Engine | teilweise (EXT-03 + EXT-05 umgesetzt via NC-003/NC-005) | Cursor Agent (NC-003/NC-005) | `app/channels/whatsapp_adapter.py`, `email_channel.py`, `app/services/voice_adapter.py`, `app/services/neuro_simulation_engine.py` | NC-H1 (WhatsApp Adapter) starten |
 
 **Prioritaet:** P1 = A, B, C, D (sofort) | P2 = E, F, G (danach) | P3 = H (Channel-Erweiterung)
 
@@ -605,6 +605,21 @@ Kein Agent darf einen Slice beginnen, der bereits `reserviert` oder `in arbeit` 
 3. MATIF-Preisfixierung: Datenmodell komplett vorhanden (pricing_model, min_price, premium, basis_reference, pricing_window), aber kein Prozess und kein UI
 4. Teillieferungen sind im Datenmodell moeglich (Movements), aber operativ nicht verdrahtet
 **Naechster konkreter Schritt:** CTS-002 (Kontraktbindung auf Belegen als echte Referenz) oder CTS-003 (automatische Movement-Buchung) als naechsten Implementierungs-Slice claimen.
+
+## Neuro-Core Runtime Layer (NC-001 bis NC-006) — umgesetzt 2026-03-29
+
+Die 6 fehlenden Architektur-Layer aus dem Architektur-Review wurden als eigenstaendige Services mit REST-API, Mermaid-Doku und Cards implementiert:
+
+| Slice-ID | Thema | Status | Owner | Dateien |
+|----------|-------|--------|-------|---------|
+| NC-001 | Neuro Verification Engine — formale Planverifikation vor Ausfuehrung | abgeschlossen | Cursor Agent | `app/services/neuro_verification_engine.py`, `app/api/v1/endpoints/neuro_verification.py`, `docs/workflows/nc-001-*.md`, `docs/cards/neuro-core/NC-001-*.md` |
+| NC-002 | Interaction State Manager — Kanal-/Dialogzustands-FSM | abgeschlossen | Cursor Agent | `app/services/interaction_state_manager.py`, `app/api/v1/endpoints/neuro_interactions.py`, `docs/workflows/nc-002-*.md`, `docs/cards/neuro-core/NC-002-*.md` |
+| NC-003 | Voice Adapter Layer — STT/TTS, Turn Manager, Latency Control | abgeschlossen | Cursor Agent | `app/services/voice_adapter.py`, `app/api/v1/endpoints/neuro_voice.py`, `docs/workflows/nc-003-*.md`, `docs/cards/neuro-core/NC-003-*.md` |
+| NC-004 | Consent Engine — DSGVO-konformer Einwilligungs-Lifecycle | abgeschlossen | Cursor Agent | `app/services/consent_engine.py`, `app/api/v1/endpoints/neuro_consent.py`, `docs/workflows/nc-004-*.md`, `docs/cards/neuro-core/NC-004-*.md` |
+| NC-005 | Neuro Simulation Engine — Dry-Run und What-If | abgeschlossen | Cursor Agent | `app/services/neuro_simulation_engine.py`, `app/api/v1/endpoints/neuro_simulation.py`, `docs/workflows/nc-005-*.md`, `docs/cards/neuro-core/NC-005-*.md` |
+| NC-006 | Compensation Engine — Retry, Rollback, Eskalation | abgeschlossen | Cursor Agent | `app/services/compensation_engine.py`, `app/api/v1/endpoints/neuro_compensation.py`, `docs/workflows/nc-006-*.md`, `docs/cards/neuro-core/NC-006-*.md` |
+
+Alle 6 Router registriert in `app/api/v1/api.py` unter `/api/v1/neuro/*`. Commit: `c6e82411`.
 
 ## Handoff: 2026-03-29 - Neuro Stack Gap Matrix
 
