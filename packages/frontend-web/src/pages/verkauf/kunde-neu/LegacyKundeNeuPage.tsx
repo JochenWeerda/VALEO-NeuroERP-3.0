@@ -38,8 +38,8 @@ const DEFAULT_STATE: FormState = {
 
 function generateDefaultCustomerNumber(): string {
   const year = new Date().getFullYear()
-  const random = Math.floor(Math.random() * 9000) + 1000
-  return `K-${year}-${random}`
+  const seq = Date.now().toString(36).toUpperCase().slice(-4)
+  return `K-${year}-${seq}`
 }
 
 

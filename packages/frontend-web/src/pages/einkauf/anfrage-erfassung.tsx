@@ -183,7 +183,7 @@ export default function AnfrageErfassungPage(): JSX.Element {
 
   const generateAnfrageNr = (): string => {
     const y = new Date().getFullYear()
-    return `ANF-${y}-${String(Math.floor(Math.random() * 100000)).padStart(5, '0')}`
+    return `ANF-${y}-${Date.now().toString(36).toUpperCase().slice(-5)}`
   }
 
   const getBediener = (): string => {

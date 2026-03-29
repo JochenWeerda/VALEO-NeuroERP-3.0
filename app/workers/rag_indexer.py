@@ -52,24 +52,29 @@ class RAGIndexerWorker:
         db: Session = SessionLocal()
         
         try:
+            from sqlalchemy import text
+
             indexer = get_indexer()
-            
-            # Index all tenants (in production: only updated since last_sync)
-            tenant_id = "system"  # TODO: Multi-tenant support
-            
-            # Index articles
-            article_count = await indexer.index_articles(db, tenant_id)
-            logger.info(f"Indexed {article_count} articles")
-            
-            # Index customers
-            customer_count = await indexer.index_customers(db, tenant_id)
-            logger.info(f"Indexed {customer_count} customers")
-            
+
+            tenant_rows = db.execute(
+                text("SELECT DISTINCT tenant_id FROM domain_shared.tenants WHERE active = true LIMIT 50")
+            ).fetchall()
+            tenant_ids = [r.tenant_id for r in tenant_rows] if tenant_rows else ["system"]
+
+            total_articles = 0
+            total_customers = 0
+            for tenant_id in tenant_ids:
+                article_count = await indexer.index_articles(db, tenant_id)
+                customer_count = await indexer.index_customers(db, tenant_id)
+                total_articles += article_count
+                total_customers += customer_count
+                logger.debug("Tenant %s: %d articles, %d customers", tenant_id, article_count, customer_count)
+
             self.last_sync = datetime.utcnow()
-            
+
             logger.info(
-                f"✅ RAG indexing complete: "
-                f"{article_count} articles, {customer_count} customers"
+                "RAG indexing complete: %d tenants, %d articles, %d customers",
+                len(tenant_ids), total_articles, total_customers,
             )
         
         finally:

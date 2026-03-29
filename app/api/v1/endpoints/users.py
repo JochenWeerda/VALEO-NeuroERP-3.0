@@ -65,7 +65,8 @@ async def get_current_user(
         user_repo = container.resolve(UserRepository)
 
         # Get user by ID (sub from OIDC token)
-        user = await user_repo.get_by_id(oidc_user["sub"], "system")  # TODO: Extract tenant from token
+        token_tenant = oidc_user.get("tenant_id") or oidc_user.get("tid") or oidc_user.get("x-tenant-id") or "system"
+        user = await user_repo.get_by_id(oidc_user["sub"], token_tenant)
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
 

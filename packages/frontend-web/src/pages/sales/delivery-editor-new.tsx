@@ -183,7 +183,7 @@ export default function DeliveryEditorNewPage(): JSX.Element {
       setShowPrintDialog(false)
       setDeliveryNote((prev) => ({
         ...prev,
-        deliveryNumber: String(Math.floor(Math.random() * 9999999)).padStart(7, '0'),
+        deliveryNumber: `LS-${Date.now().toString(36).toUpperCase()}`,
         customerId: '',
         customerName: '',
         customerAccount: '',

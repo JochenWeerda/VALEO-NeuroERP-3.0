@@ -1027,3 +1027,62 @@ api_router.include_router(audit_evidence.router)
 # Reporting (Data-Products, Process-Mining)
 from app.api.v1.endpoints import reporting_api
 api_router.include_router(reporting_api.router)
+
+# ── Previously unregistered routers ─────────────────────────────
+from app.api.v1.endpoints import (
+    agent_tool_contracts,
+    background_jobs,
+    benchmark_api,
+    benchmark_cockpit,
+    blockchain_runtime,
+    command_catalog,
+    e2e_chain,
+    external_agent_integrations,
+    idempotency_monitoring,
+    import_pipeline,
+    iot_telemetry,
+    mask_registry,
+    operational_governance,
+    pricing_governance,
+    process_mining_api,
+    process_mining_observation,
+    process_sla,
+    projection_consumer,
+    quality_lot_binding,
+    runtime_operations,
+    sla_escalation_api,
+    tenant_governance,
+    tenant_limits,
+    terminology,
+    workflow_runtime,
+    workflow_simulation,
+    workflow_template_marketplace,
+)
+
+api_router.include_router(agent_tool_contracts.router)
+api_router.include_router(background_jobs.router)
+api_router.include_router(benchmark_api.router)
+api_router.include_router(benchmark_cockpit.router)
+api_router.include_router(blockchain_runtime.router)
+api_router.include_router(command_catalog.router)
+api_router.include_router(e2e_chain.router)
+api_router.include_router(external_agent_integrations.router)
+api_router.include_router(idempotency_monitoring.router)
+api_router.include_router(import_pipeline.router)
+api_router.include_router(iot_telemetry.router)
+api_router.include_router(mask_registry.router)
+api_router.include_router(operational_governance.router)
+api_router.include_router(pricing_governance.router)
+api_router.include_router(process_mining_api.router)
+api_router.include_router(process_mining_observation.router)
+api_router.include_router(process_sla.router)
+api_router.include_router(projection_consumer.router)
+api_router.include_router(quality_lot_binding.router)
+api_router.include_router(runtime_operations.router)
+api_router.include_router(sla_escalation_api.router)
+api_router.include_router(tenant_governance.router)
+api_router.include_router(tenant_limits.router)
+api_router.include_router(terminology.router)
+api_router.include_router(workflow_runtime.router)
+api_router.include_router(workflow_simulation.router)
+api_router.include_router(workflow_template_marketplace.router)

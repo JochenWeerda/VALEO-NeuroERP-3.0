@@ -48,14 +48,14 @@ async def export_documents(
         # Get DocumentRepository from container
         doc_repo = container.resolve(DocumentRepository)
 
-        # Get all documents for the domain (TODO: Add date filtering to repository)
-        # For now, get all and filter in memory
         from datetime import datetime
         docs = []
 
-        # This is a simplified approach - in production, add date filtering to repository
-        # For now, we'll get a reasonable number of recent documents
-        all_docs = doc_repo.list_by_type(domain, limit=1000)  # Get recent documents
+        list_kwargs: dict = {"limit": 5000}
+        if hasattr(doc_repo, "list_by_type_and_date") and from_date and to_date:
+            all_docs = doc_repo.list_by_type_and_date(domain, from_date=from_date, to_date=to_date, **list_kwargs)
+        else:
+            all_docs = doc_repo.list_by_type(domain, **list_kwargs)
 
         # Filter by date if provided
         for doc_header in all_docs:

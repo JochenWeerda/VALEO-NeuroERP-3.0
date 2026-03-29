@@ -3678,3 +3678,103 @@ async def save_firma(
         )
     db.commit()
     return {"ok": True, "saved": True}
+
+
+# ── Management Dashboard ────────────────────────────────────────────
+
+@router.get("/management/dashboard")
+async def management_dashboard(
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Aggregiertes Management-Dashboard mit KPIs, Alerts, Top-Produkten/Kunden."""
+    try:
+        sales_row = db.execute(text("""
+            SELECT COUNT(*) AS cnt,
+                   COALESCE(SUM(total_amount), 0) AS revenue
+            FROM domain_crm.sales_orders
+            WHERE tenant_id = :tid
+              AND created_at >= date_trunc('month', CURRENT_DATE)
+        """), {"tid": tenant_id}).fetchone()
+        umsatz = float(sales_row.revenue) if sales_row else 0
+        auftraege = int(sales_row.cnt) if sales_row else 0
+
+        oi_row = db.execute(text("""
+            SELECT COALESCE(SUM(amount), 0) AS total
+            FROM domain_shared.open_items
+            WHERE tenant_id = :tid AND status = 'open'
+        """), {"tid": tenant_id}).fetchone()
+        offene_posten = float(oi_row.total) if oi_row else 0
+
+        top_products = db.execute(text("""
+            SELECT a.name, COALESCE(SUM(sol.total), 0) AS umsatz
+            FROM domain_crm.sales_order_lines sol
+            JOIN domain_inventory.articles a ON a.id = sol.article_id
+            JOIN domain_crm.sales_orders so ON so.id = sol.order_id AND so.tenant_id = :tid
+            GROUP BY a.name ORDER BY umsatz DESC LIMIT 5
+        """), {"tid": tenant_id}).fetchall()
+
+        top_customers = db.execute(text("""
+            SELECT c.company_name AS name, COALESCE(SUM(so.total_amount), 0) AS umsatz
+            FROM domain_crm.sales_orders so
+            JOIN domain_crm.customers c ON c.id = so.customer_id
+            WHERE so.tenant_id = :tid
+            GROUP BY c.company_name ORDER BY umsatz DESC LIMIT 5
+        """), {"tid": tenant_id}).fetchall()
+    except Exception:
+        umsatz, auftraege, offene_posten = 0, 0, 0
+        top_products, top_customers = [], []
+
+    def fmt_eur(v: float) -> str:
+        if v >= 1_000_000:
+            return f"{v / 1_000_000:.2f}M"
+        if v >= 1_000:
+            return f"{v / 1_000:.0f}K"
+        return f"{v:.0f}"
+
+    return {
+        "kpis": [
+            {"label": "Umsatz MTD", "value": fmt_eur(umsatz), "trend": 0, "einheit": "EUR"},
+            {"label": "Offene Auftraege", "value": str(auftraege), "trend": 0},
+            {"label": "Offene Posten", "value": fmt_eur(offene_posten), "trend": 0, "einheit": "EUR"},
+        ],
+        "alerts": [],
+        "topProducts": [{"name": r.name, "umsatz": float(r.umsatz)} for r in top_products],
+        "topCustomers": [{"name": r.name, "umsatz": float(r.umsatz)} for r in top_customers],
+    }
+
+
+# ── Benachrichtigungen ──────────────────────────────────────────────
+
+@router.get("/benachrichtigungen")
+async def list_benachrichtigungen(
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Benachrichtigungen fuer den aktuellen Mandanten."""
+    try:
+        rows = db.execute(text("""
+            SELECT id, title AS titel, message AS nachricht,
+                   COALESCE(severity, 'info') AS typ,
+                   created_at AS zeitstempel,
+                   COALESCE(read, false) AS gelesen
+            FROM domain_shared.notifications
+            WHERE tenant_id = :tid
+            ORDER BY created_at DESC
+            LIMIT 50
+        """), {"tid": tenant_id}).fetchall()
+        return {
+            "items": [
+                {
+                    "id": str(r.id),
+                    "titel": r.titel or "",
+                    "nachricht": r.nachricht or "",
+                    "typ": r.typ,
+                    "zeitstempel": str(r.zeitstempel),
+                    "gelesen": bool(r.gelesen),
+                }
+                for r in rows
+            ]
+        }
+    except Exception:
+        return {"items": []}

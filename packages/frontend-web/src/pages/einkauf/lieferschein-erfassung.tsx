@@ -264,8 +264,7 @@ export default function EinkaufLieferscheinErfassungPage(): JSX.Element {
 
   const generateLsNr = (): string => {
     const year = new Date().getFullYear()
-    const rand = Math.floor(Math.random() * 1000000)
-    return `E${year}${String(rand).padStart(6, '0')}`
+    return `E${year}-${Date.now().toString(36).toUpperCase().slice(-6)}`
   }
 
   const formatDate = (d: Date): string => {

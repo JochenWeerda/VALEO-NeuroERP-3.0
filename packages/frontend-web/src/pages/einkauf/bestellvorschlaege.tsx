@@ -112,9 +112,7 @@ export default function BestellvorschlaegePage(): JSX.Element {
           unresolvedSuppliers.push(item.lieferant || '(leer)')
           continue
         }
-        const number = `PO-${new Date().getFullYear()}-${Math.floor(Math.random() * 100000)
-          .toString()
-          .padStart(5, '0')}`
+        const number = `PO-${new Date().getFullYear()}-${Date.now().toString(36).toUpperCase().slice(-5)}`
 
         await apiClient.post('/api/v1/purchase-orders', {
           purchaseOrderNumber: number,

@@ -1,6 +1,7 @@
 import type { Alert } from "./rules"
 import { AlertActions } from "./AlertActions"
 import { PolicyBadge } from "@/policy/PolicyBadge"
+import { useAuth } from "@/hooks/useAuth"
 
 type AlertBannerProps = {
   items: Alert[]
@@ -46,8 +47,12 @@ export function AlertBanner({ items }: AlertBannerProps): JSX.Element | null {
  * Zeigt alle Alerts als Liste mit Workflow-Buttons an
  */
 export function AlertList({ items }: AlertListProps): JSX.Element {
-  // TODO: Aus Auth-Context ziehen
-  const userRoles: Array<"admin" | "manager" | "operator"> = ["manager"]
+  const { hasRole } = useAuth()
+  const userRoles: Array<"admin" | "manager" | "operator"> = [
+    ...(hasRole("admin") ? ["admin" as const] : []),
+    ...(hasRole("manager") ? ["manager" as const] : []),
+    ...(hasRole("operator") ? ["operator" as const] : []),
+  ]
 
   if (items.length === 0) {
     return <p className="text-sm opacity-70">Keine aktiven Alerts.</p>

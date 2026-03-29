@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import type { Alert } from "./rules"
 import { Button } from "@/components/ui/button"
 import {
@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useAlertActions } from "./actions"
 import { useToast } from "@/components/ui/toast-provider"
+import { useAuth } from "@/hooks/useAuth"
 import { decide, updateCounters } from "@/policy/engine"
 import { audit } from "@/policy/audit"
 
@@ -45,11 +46,15 @@ type Props = {
 export function AlertActions({ alert }: Props): JSX.Element {
   const { priceAdjust, reorder, notifySales } = useAlertActions()
   const { push } = useToast()
+  const { hasRole, user: authUser } = useAuth()
   const [open, setOpen] = useState<boolean>(false)
   const [pending, setPending] = useState<ActionKind | null>(null)
 
-  // TODO: Aus Auth-Context ziehen
-  const userRoles: Array<"admin" | "manager" | "operator"> = ["manager"]
+  const userRoles = useMemo<Array<"admin" | "manager" | "operator">>(() => [
+    ...(hasRole("admin") ? ["admin" as const] : []),
+    ...(hasRole("manager") ? ["manager" as const] : []),
+    ...(hasRole("operator") ? ["operator" as const] : []),
+  ], [hasRole])
 
   // Vordefinierte Vorschläge (konservativ)
   const priceDelta =
@@ -102,7 +107,7 @@ export function AlertActions({ alert }: Props): JSX.Element {
       // Audit-Log
       void audit({
         ts: new Date().toISOString(),
-        user: "current-user", // TODO: Aus Auth
+        user: authUser?.profile?.email ?? authUser?.profile?.sub ?? "unknown",
         roles: userRoles,
         action: kind === "price" ? "pricing.adjust" : kind === "reorder" ? "inventory.reorder" : "sales.notify",
         params: decision.resolvedParams,
@@ -142,7 +147,7 @@ export function AlertActions({ alert }: Props): JSX.Element {
       // Audit-Log
       void audit({
         ts: new Date().toISOString(),
-        user: "current-user", // TODO: Aus Auth
+        user: authUser?.profile?.email ?? authUser?.profile?.sub ?? "unknown",
         roles: userRoles,
         action: kind === "price" ? "pricing.adjust" : kind === "reorder" ? "inventory.reorder" : "sales.notify",
         params: { deltaPct: finalDeltaPct, qty: finalQty, topic: finalTopic, message: finalMessage },
@@ -155,7 +160,7 @@ export function AlertActions({ alert }: Props): JSX.Element {
       // Audit-Log für Fehler
       void audit({
         ts: new Date().toISOString(),
-        user: "current-user",
+        user: authUser?.profile?.email ?? authUser?.profile?.sub ?? "unknown",
         roles: userRoles,
         action: kind === "price" ? "pricing.adjust" : kind === "reorder" ? "inventory.reorder" : "sales.notify",
         params: decision.resolvedParams,
