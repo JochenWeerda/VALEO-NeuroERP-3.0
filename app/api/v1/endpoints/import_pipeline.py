@@ -89,14 +89,32 @@ async def validate_job(
 
     job = store[job_id]
 
-    # Stub validation: mark as valid if total_rows > 0
-    is_valid = job.get("total_rows", 0) > 0
+    total_rows = job.get("total_rows", 0)
+    errors: list[str] = []
+    warnings: list[str] = []
+
+    if total_rows == 0:
+        errors.append("Keine Zeilen zum Verarbeiten vorhanden")
+
+    source_format = job.get("source_format", "")
+    if source_format and source_format not in ("csv", "xlsx", "edi", "json", "xml"):
+        errors.append(f"Unbekanntes Quellformat: {source_format}")
+
+    if total_rows > 50000:
+        warnings.append(f"Grosse Datei mit {total_rows} Zeilen — Import kann laenger dauern")
+
+    target = job.get("target_entity", "")
+    valid_targets = {"articles", "customers", "suppliers", "invoices", "orders", "inventory", "contacts"}
+    if target and target not in valid_targets:
+        warnings.append(f"Ziel-Entitaet '{target}' ist nicht in der Standardliste")
+
+    is_valid = len(errors) == 0
     result = ImportValidationResult(
         is_valid=is_valid,
-        error_count=0 if is_valid else 1,
-        warning_count=0,
-        errors=[] if is_valid else ["No rows to process"],
-        warnings=[],
+        error_count=len(errors),
+        warning_count=len(warnings),
+        errors=errors,
+        warnings=warnings,
     )
 
     # Update job stage

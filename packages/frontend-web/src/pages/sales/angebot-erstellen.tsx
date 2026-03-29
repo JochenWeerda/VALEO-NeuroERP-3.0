@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Angebot-Erfassung (Verkauf)
  * Im Stil der Lieferschein-Erfassung — einheitliches ERP-Look & Feel
  */
@@ -73,10 +73,16 @@ type CurrentPositionDetails = {
 
 // â”€â”€ Helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
+import { fetchDocumentNumber } from '@/hooks/useDocumentNumber'
+
+let _angebotNrCache: string | null = null
 function generateAngebotNr(): string {
-  const year = new Date().getFullYear()
-  const random = Math.floor(Math.random() * 100000)
-  return `A${year}-${String(random).padStart(5, '0')}`
+  if (!_angebotNrCache) {
+    const year = new Date().getFullYear()
+    _angebotNrCache = `A${year}-DRAFT`
+    fetchDocumentNumber('angebot').then(nr => { _angebotNrCache = nr }).catch(() => {})
+  }
+  return _angebotNrCache
 }
 
 function emptyPosition(posNr: number): CurrentPositionDetails {

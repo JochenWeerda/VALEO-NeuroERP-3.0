@@ -179,8 +179,8 @@ export default function FinanceInvoiceFormPage(): JSX.Element {
       let number = invoiceNumber;
       if (!number) {
         const year = new Date().getFullYear();
-        const random = Math.floor(Math.random() * 10000).toString().padStart(5, "0");
-        number = `INV-${year}-${random}`;
+        const seq = Date.now().toString(36).toUpperCase().slice(-5);
+        number = `INV-${year}-${seq}`;
       }
 
       // Berechne Fälligkeitsdatum

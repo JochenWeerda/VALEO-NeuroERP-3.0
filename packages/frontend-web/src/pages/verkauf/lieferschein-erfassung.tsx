@@ -204,11 +204,9 @@ export default function LieferscheinErfassungPage(): JSX.Element {
   const [searchParams] = useSearchParams()
   const sourceOrderId = searchParams.get('auftrag') // Handover aus order-editor: ?auftrag=<id>
 
-  // Auto-generiere Lieferschein-Nummer (später vom Backend)
   const generateLieferscheinNr = (): string => {
     const year = new Date().getFullYear()
-    const random = Math.floor(Math.random() * 1000000)
-    return `${year}${String(random).padStart(6, '0')}`
+    return `${year}-DRAFT-${Date.now().toString(36).toUpperCase()}`
   }
 
   // Helper: Format date to yyyy-MM-dd for input field

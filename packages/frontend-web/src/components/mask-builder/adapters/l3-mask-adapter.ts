@@ -247,8 +247,11 @@ function convertActions(l3Actions: Array<{ id: string; label: string; type: stri
     label: action.label,
     type: action.type === 'primary' ? 'primary' : action.type === 'menu' ? 'secondary' : 'secondary',
     onClick: () => {
-      console.log(`Action ${action.id} clicked`)
-      // TODO: Implementiere Action-Handler
+      const event = new CustomEvent('mask-action', {
+        detail: { actionId: action.id, actionType: action.type, label: action.label },
+        bubbles: true,
+      })
+      document.dispatchEvent(event)
     }
   }))
 }

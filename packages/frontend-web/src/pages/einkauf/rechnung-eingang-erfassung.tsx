@@ -178,7 +178,7 @@ export default function RechnungEingangErfassungPage(): JSX.Element {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
   }
   const generateBelegNr = (): string =>
-    `RG-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 100000)).padStart(5, '0')}`
+    `RG-${new Date().getFullYear()}-${Date.now().toString(36).toUpperCase().slice(-5)}`
 
   const getBediener = (): string => {
     if (!user) return 'SY'

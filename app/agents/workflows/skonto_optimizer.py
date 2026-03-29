@@ -63,31 +63,49 @@ def fetch_open_invoices(state: SkontoOptimizerState) -> dict:
     logger.info("Fetching open invoices...")
     _mark_stage(state, "analysis", "Fetch open invoices")
     
-    # TODO: Real database query
-    # For now, mock data
-    mock_invoices = [
-        {
-            "invoice_id": "INV-001",
-            "supplier": "Raiffeisen AG",
-            "amount": Decimal("10000.00"),
-            "due_date": datetime.now() + timedelta(days=30),
-            "skonto_rate": Decimal("0.03"),  # 3%
-            "skonto_days": 14,
-            "potential_saving": Decimal("300.00")
-        },
-        {
-            "invoice_id": "INV-002",
-            "supplier": "BayWa Agrar",
-            "amount": Decimal("5000.00"),
-            "due_date": datetime.now() + timedelta(days=20),
-            "skonto_rate": Decimal("0.02"),  # 2%
-            "skonto_days": 10,
-            "potential_saving": Decimal("100.00")
-        },
-    ]
-    
+    try:
+        from app.core.database import SessionLocal
+        from sqlalchemy import text
+
+        db = SessionLocal()
+        try:
+            rows = db.execute(text("""
+                SELECT oi.id            AS invoice_id,
+                       oi.debitor_id    AS supplier,
+                       oi.amount,
+                       oi.due_date,
+                       COALESCE(oi.skonto_rate, 0)  AS skonto_rate,
+                       COALESCE(oi.skonto_days, 0)  AS skonto_days
+                FROM domain_shared.open_items oi
+                WHERE oi.status = 'open'
+                  AND oi.skonto_rate IS NOT NULL
+                  AND oi.skonto_rate > 0
+                  AND oi.due_date >= CURRENT_DATE
+                ORDER BY (oi.amount * oi.skonto_rate) DESC
+                LIMIT 200
+            """)).fetchall()
+
+            invoices = []
+            for r in rows:
+                amt = Decimal(str(r.amount))
+                rate = Decimal(str(r.skonto_rate))
+                invoices.append({
+                    "invoice_id": str(r.invoice_id),
+                    "supplier": str(r.supplier or ""),
+                    "amount": amt,
+                    "due_date": r.due_date if hasattr(r.due_date, "year") else datetime.now() + timedelta(days=30),
+                    "skonto_rate": rate,
+                    "skonto_days": int(r.skonto_days),
+                    "potential_saving": (amt * rate).quantize(Decimal("0.01")),
+                })
+        finally:
+            db.close()
+    except Exception as exc:
+        logger.warning("DB query for open invoices failed, using empty list: %s", exc)
+        invoices = []
+
     return {
-        "invoices": mock_invoices,
+        "invoices": invoices,
         "current_stage_key": state["current_stage_key"],
         "stage_transition_log": state["stage_transition_log"],
     }
