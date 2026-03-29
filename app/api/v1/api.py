@@ -1112,3 +1112,8 @@ api_router.include_router(neuro_voice.router)
 api_router.include_router(neuro_consent.router)
 api_router.include_router(neuro_simulation.router)
 api_router.include_router(neuro_compensation.router)
+
+# ── Neuro-Core Lane D: Audit Hardening + Decision Protocol ────
+from app.api.v1.endpoints import neuro_audit
+
+api_router.include_router(neuro_audit.router)
