@@ -1,4 +1,4 @@
-﻿import { useMemo } from 'react'
+import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
@@ -109,13 +109,13 @@ const createAnlieferavisConfig = (t: any): ListConfig => ({
   defaultSort: { field: 'createdAt', direction: 'desc' },
   pageSize: 25,
   api: {
-    baseUrl: '/api/einkauf/anlieferavis',
+    baseUrl: '/api/v1/einkauf/anlieferavis',
     endpoints: {
-      list: '/api/einkauf/anlieferavis',
-      get: '/api/einkauf/anlieferavis/{id}',
-      create: '/api/einkauf/anlieferavis',
-      update: '/api/einkauf/anlieferavis/{id}',
-      delete: '/api/einkauf/anlieferavis/{id}'
+      list: '/api/v1/einkauf/anlieferavis',
+      get: '/api/v1/einkauf/anlieferavis/{id}',
+      create: '/api/v1/einkauf/anlieferavis',
+      update: '/api/v1/einkauf/anlieferavis/{id}',
+      delete: '/api/v1/einkauf/anlieferavis/{id}'
     }
   },
   permissions: ['einkauf.read', 'einkauf.write', 'warehouse.read'],

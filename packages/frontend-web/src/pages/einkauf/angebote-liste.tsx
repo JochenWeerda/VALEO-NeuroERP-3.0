@@ -1,4 +1,4 @@
-﻿import { useMemo } from 'react'
+import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
@@ -156,13 +156,13 @@ const createAngeboteConfig = (t: any, entityTypeLabel: string): ListConfig => ({
   defaultSort: { field: 'createdAt', direction: 'desc' },
   pageSize: 25,
   api: {
-    baseUrl: '/api/einkauf/angebote',
+    baseUrl: '/api/v1/einkauf/angebote',
     endpoints: {
-      list: '/api/einkauf/angebote',
-      get: '/api/einkauf/angebote/{id}',
-      create: '/api/einkauf/angebote',
-      update: '/api/einkauf/angebote/{id}',
-      delete: '/api/einkauf/angebote/{id}'
+      list: '/api/v1/einkauf/angebote',
+      get: '/api/v1/einkauf/angebote/{id}',
+      create: '/api/v1/einkauf/angebote',
+      update: '/api/v1/einkauf/angebote/{id}',
+      delete: '/api/v1/einkauf/angebote/{id}'
     }
   },
   permissions: ['einkauf.read', 'einkauf.write'],

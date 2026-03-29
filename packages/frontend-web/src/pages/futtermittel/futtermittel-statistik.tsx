@@ -12,9 +12,9 @@ const statistikConfig: OverviewConfig = {
   charts: [],
   actions: [],
   api: {
-    baseUrl: '/api/futtermittel/statistics',
+    baseUrl: '/api/v1/futter/statistics',
     endpoints: {
-      list: '/api/futtermittel/statistics',
+      list: '/api/v1/futter/statistics',
     },
   },
   permissions: ['futtermittel.read', 'statistics.read'],

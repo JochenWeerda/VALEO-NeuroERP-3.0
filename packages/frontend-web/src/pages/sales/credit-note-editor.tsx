@@ -35,7 +35,7 @@ const createCreditNoteConfig = (t: any, entityTypeLabel: string): MaskConfig => 
           label: t('crud.entities.customer'),
           type: 'lookup',
           required: true,
-          endpoint: '/api/customers',
+          endpoint: '/api/v1/crm/customers',
           displayField: 'name',
           valueField: 'id'
         },
@@ -43,7 +43,7 @@ const createCreditNoteConfig = (t: any, entityTypeLabel: string): MaskConfig => 
           name: 'sourceInvoice',
           label: t('crud.fields.sourceInvoice'),
           type: 'lookup',
-          endpoint: '/api/invoices',
+          endpoint: '/api/v1/finance/invoices',
           displayField: 'number',
           valueField: 'id',
           helpText: t('crud.tooltips.fields.sourceInvoice')
@@ -224,13 +224,13 @@ const createCreditNoteConfig = (t: any, entityTypeLabel: string): MaskConfig => 
     }
   ],
   api: {
-    baseUrl: '/api/sales/credit-notes',
+    baseUrl: '/api/v1/sales/credit-notes',
     endpoints: {
-      list: '/api/sales/credit-notes',
-      get: '/api/sales/credit-notes/{id}',
-      create: '/api/sales/credit-notes',
-      update: '/api/sales/credit-notes/{id}',
-      delete: '/api/sales/credit-notes/{id}'
+      list: '/api/v1/sales/credit-notes',
+      get: '/api/v1/sales/credit-notes/{id}',
+      create: '/api/v1/sales/credit-notes',
+      update: '/api/v1/sales/credit-notes/{id}',
+      delete: '/api/v1/sales/credit-notes/{id}'
     }
   },
   permissions: ['sales.write', 'sales.credit_notes']
@@ -260,7 +260,7 @@ export default function CreditNoteEditorPage(): JSX.Element {
       toast({ title: 'Neuberechnung', description: t('crud.messages.recalculateFunction', { defaultValue: 'Beträge werden neu berechnet.' }) })
     } else if (action === 'preview') {
       // Vorschau anzeigen
-      window.open('/api/sales/credit-notes/preview', '_blank')
+      window.open('/api/v1/sales/credit-notes/preview', '_blank')
     } else if (action === 'approve') {
       const errors = validate(formData)
       if (Object.keys(errors).length > 0) {
@@ -290,7 +290,7 @@ export default function CreditNoteEditorPage(): JSX.Element {
         // Error wird bereits in useMaskData behandelt
       }
     } else if (action === 'print') {
-      window.open('/api/sales/credit-notes/print', '_blank')
+      window.open('/api/v1/sales/credit-notes/print', '_blank')
     } else if (action === 'cancel') {
       if (window.confirm(t('crud.dialogs.cancel.descriptionGeneric', { entityType: entityTypeLabel }))) {
         try {

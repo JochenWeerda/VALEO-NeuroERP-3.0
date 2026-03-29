@@ -314,7 +314,7 @@ export async function createPortalInquiry(
     status: 'ENTWURF',
   }
   const response = await apiClient.post<{ id: string; anfrageNummer?: string; message?: string }>(
-    '/api/einkauf/anfragen',
+    '/api/v1/einkauf/anfragen',
     payload,
   )
   return response.data

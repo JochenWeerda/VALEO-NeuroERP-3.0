@@ -165,13 +165,13 @@ const chargeVerfolgungConfig: ListConfig = {
   defaultSort: { field: 'produktionsdatum', direction: 'desc' },
   pageSize: 25,
   api: {
-    baseUrl: '/api/futtermittel/chargen',
+    baseUrl: '/api/v1/futter/chargen',
     endpoints: {
-      list: '/api/futtermittel/chargen',
-      get: '/api/futtermittel/chargen/{id}',
-      create: '/api/futtermittel/chargen',
-      update: '/api/futtermittel/chargen/{id}',
-      delete: '/api/futtermittel/chargen/{id}'
+      list: '/api/v1/futter/chargen',
+      get: '/api/v1/futter/chargen/{id}',
+      create: '/api/v1/futter/chargen',
+      update: '/api/v1/futter/chargen/{id}',
+      delete: '/api/v1/futter/chargen/{id}'
     }
   },
   permissions: ['futtermittel.read', 'traceability.read'],

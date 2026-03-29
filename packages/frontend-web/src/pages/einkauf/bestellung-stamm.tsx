@@ -43,7 +43,7 @@ const createBestellungConfig = (t: any, entityTypeLabel: string): MaskConfig => 
           label: t('crud.entities.supplier'),
           type: 'lookup',
           required: true,
-          endpoint: '/api/partners?type=supplier',
+          endpoint: '/api/v1/crm/business-partners?type=supplier',
           displayField: 'name',
           valueField: 'id'
         },

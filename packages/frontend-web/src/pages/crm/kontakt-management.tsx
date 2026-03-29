@@ -232,13 +232,13 @@ const kontaktListConfig: ListConfig = {
   defaultSort: { field: 'prioritaet', direction: 'asc' },
   pageSize: 25,
   api: {
-    baseUrl: '/api/crm/kontakte',
+    baseUrl: '/api/v1/crm/contacts',
     endpoints: {
-      list: '/api/crm/kontakte',
-      get: '/api/crm/kontakte/{id}',
-      create: '/api/crm/kontakte',
-      update: '/api/crm/kontakte/{id}',
-      delete: '/api/crm/kontakte/{id}'
+      list: '/api/v1/crm/contacts',
+      get: '/api/v1/crm/contacts/{id}',
+      create: '/api/v1/crm/contacts',
+      update: '/api/v1/crm/contacts/{id}',
+      delete: '/api/v1/crm/contacts/{id}'
     }
   },
   permissions: ['crm.read', 'contacts.read'],
