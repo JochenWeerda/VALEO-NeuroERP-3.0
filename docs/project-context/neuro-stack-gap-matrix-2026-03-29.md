@@ -43,3 +43,9 @@ Die folgende Matrix basiert auf dem gelieferten Komponenten-Status und fasst die
 
 - Die Prozentwerte sind Einschaetzungen und nicht automatisch aus Tests abgeleitet.
 - Status bezieht sich auf funktionale Vollstaendigkeit, nicht auf Skalierung oder Security-Haertung.
+
+## Naechste 3 Schritte (Plan)
+
+1. NC-B1: Neuro State Graph Grundgeruest plus DB-Modelle anlegen (Lane NC-B, P1).
+2. NC-D1: Append-Only Audit/Confidence Ledger Basisvertrag definieren (Lane NC-D, P1).
+3. NC-C1: Guardrails-Middleware Basisschutz (PII/DLP/Prompt-Injection) als minimaler End-to-End-Pfad.
