@@ -13,7 +13,7 @@ Die folgende Matrix basiert auf dem gelieferten Komponenten-Status und fasst die
 | Neuro Context Resolver | 70% | Prozess-/Aggregate-Kontext vorhanden, Consent-Status + Kanal-Historie fehlt |
 | Neuro Planner | 65% | Stage-Contracts + Bestellvorschlag-Workflow produktiv, dynamische Schrittgenerierung fehlt |
 | Confidence & Risk Engine | 70% | Append-Only Ledger umgesetzt (NC-B1), weitere Risk-Aggregate fehlen |
-| Rule & Knowledge Store | 55% | Knowledge-Versioning vorhanden, A/B-Testing + Rollback fehlt |
+| Rule & Knowledge Store | 70% | Policy-Registry mit A/B + Rollback, Prompt-Pack Registry vorhanden; Knowledge-Store fehlt |
 | Guardrails / PII-DLP | 70% | PII-Detector/Guardrails/Consent als NC-C abgeschlossen, DLP-Ausbau offen |
 | Action & Policy Layer | 100% | BusinessCommands + CommandDispatcher produktiv |
 | Human Oversight | 80% | Approval-Gate mit 4 Risikostufen vorhanden, Case-Management-UI fehlt |
@@ -30,7 +30,7 @@ Die folgende Matrix basiert auf dem gelieferten Komponenten-Status und fasst die
 2. Guardrails Middleware -- DLP/Prompt-Injection Ausbau (NC-C Folge)
 3. Neuro Intent Engine -- NLU/Confidence-Scoring
 4. Neuro Planner -- dynamische Schrittgenerierung
-5. Rule & Knowledge Store -- A/B-Testing + Rollback fehlt
+5. Event Bus -- DLQ/Idempotenz fehlt
 
 ## Produktive Staerken (Ist)
 

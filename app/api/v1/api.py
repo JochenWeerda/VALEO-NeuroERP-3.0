@@ -138,6 +138,7 @@ from app.api.v1.endpoints import (
     pos_retoure,
     pos_dsfinvk,
     service_anfragen,
+    neuro_prompt_packs,
 )
 
 # Wave 6-9 Process-Kernel-Endpoints (agrar-p0, supplier, wave-7, wave-9)
@@ -186,6 +187,10 @@ api_router.include_router(
 api_router.include_router(
     agents.router,
     tags=["neuroassist", "agents"],
+)
+
+api_router.include_router(
+    neuro_prompt_packs.router,
 )
 
 api_router.include_router(
