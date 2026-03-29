@@ -709,3 +709,19 @@ Basierend auf der strategischen Roadmap (valeo_wettbewerbsanalyse_spitzenpositio
 - Strategischer Plan: C:\Users\Jochen\.cursor\plans\valeo_wettbewerbsanalyse_spitzenposition_79027aec.plan.md
 - Detailstaende: `wave-*/STATUS.md`
 - Wave-104-Nachlieferungsdoku: `docs/roadmap/status/2026-03-27-wave-104-abschluss.md`
+
+### Neuro-Core Architecture Layer (2026-03-29)
+
+6 fehlende Architektur-Layer aus dem Architektur-Review als eigenstaendige Services implementiert:
+
+| Layer | Service | API-Prefix | Commit |
+|-------|---------|-----------|--------|
+| NC-001 Verification Engine | `app/services/neuro_verification_engine.py` | `/api/v1/neuro/verify` | `c6e82411` |
+| NC-002 Interaction State | `app/services/interaction_state_manager.py` | `/api/v1/neuro/interactions` | `c6e82411` |
+| NC-003 Voice Adapter | `app/services/voice_adapter.py` | `/api/v1/neuro/voice` | `c6e82411` |
+| NC-004 Consent Engine | `app/services/consent_engine.py` | `/api/v1/neuro/consent` | `c6e82411` |
+| NC-005 Simulation Engine | `app/services/neuro_simulation_engine.py` | `/api/v1/neuro/simulate` | `c6e82411` |
+| NC-006 Compensation Engine | `app/services/compensation_engine.py` | `/api/v1/neuro/compensate` | `c6e82411` |
+
+Alle Router registriert in `app/api/v1/api.py`. Mermaid-Diagramme und Cards unter `docs/workflows/nc-*` und `docs/cards/neuro-core/NC-*`.
+Gap-Analyse aktualisiert: `docs/architecture/neuro-core-gap-analysis-2026-03-29.md` (EXT-01 bis EXT-06 als umgesetzt markiert).

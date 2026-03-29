@@ -38,12 +38,12 @@ Dazwischen: Guardrails, Audit, Policy, Human Oversight als Querschnittsschichten
 
 | # | Komponente | Beschreibung | Gap-Typ | Prio |
 |---|-----------|-------------|---------|------|
-| EXT-01 | Neuro Verification Engine | Formale Pruefung JEDES Plans VOR Ausfuehrung (Vorbedingungen, Policy, Datenintegritaet, Zustandsuebergaenge) | **Neubau** | P1 |
-| EXT-02 | Interaction State Manager | Kanal-/Dialogzustand (new -> engaged -> qualified -> intent_detected -> conversion_ready -> escalated -> closed) | **Neubau** | P2 |
-| EXT-03 | Voice Adapter Layer | STT/TTS, Turn Manager, Latency Control -- Voice ist Echtzeit, kein Chat | **Neubau** | P3 |
-| EXT-04 | Consent Engine | Opt-in/Opt-out, Kanalberechtigungen, Zeitstempel, Zweckbindung (DSGVO) | **Neubau** | P2 |
-| EXT-05 | Neuro Simulation Engine | Dry-Run fuer Entscheidungen, Regelvalidierung, Edge-Case-Simulation | **Neubau** | P2 |
-| EXT-06 | Compensation Engine | Rollback, Retry, Alternative Pfade, Eskalation bei Teilprozess-Abbruch | **Neubau** | P1 |
+| EXT-01 | Neuro Verification Engine | Formale Pruefung JEDES Plans VOR Ausfuehrung (Vorbedingungen, Policy, Datenintegritaet, Zustandsuebergaenge) | **Umgesetzt** (NC-001, `c6e82411`) | P1 |
+| EXT-02 | Interaction State Manager | Kanal-/Dialogzustand (new -> engaged -> qualified -> intent_detected -> conversion_ready -> escalated -> closed) | **Umgesetzt** (NC-002, `c6e82411`) | P2 |
+| EXT-03 | Voice Adapter Layer | STT/TTS, Turn Manager, Latency Control -- Voice ist Echtzeit, kein Chat | **Umgesetzt** (NC-003, `c6e82411`) | P3 |
+| EXT-04 | Consent Engine | Opt-in/Opt-out, Kanalberechtigungen, Zeitstempel, Zweckbindung (DSGVO) | **Umgesetzt** (NC-004, `c6e82411`) | P2 |
+| EXT-05 | Neuro Simulation Engine | Dry-Run fuer Entscheidungen, Regelvalidierung, Edge-Case-Simulation | **Umgesetzt** (NC-005, `c6e82411`) | P2 |
+| EXT-06 | Compensation Engine | Rollback, Retry, Alternative Pfade, Eskalation bei Teilprozess-Abbruch | **Umgesetzt** (NC-006, `c6e82411`) | P1 |
 
 ## 3. Parallelisierbare Lanes
 
