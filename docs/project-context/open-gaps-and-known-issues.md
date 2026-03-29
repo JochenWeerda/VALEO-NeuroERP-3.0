@@ -8,7 +8,7 @@ Diese Datei sammelt die fuer neue Analysen wichtigsten offenen Restthemen und be
 
 - einzelne Prozessstarts muessen weiter auf Praxisrealismus gegen Landhandelsablaeufe geprueft werden
 - Browser-Use- und CRUD-Pruefungen muessen pro Workflow fortgeschrieben werden
-- NATS-Consumer Framework vorhanden; aktive Handler (NC-G3) fuer Flow-Spine-Events fehlen noch
+- NATS-Consumer + Core-Handler vorhanden; DLQ/Idempotenz und Flow-Spine-spezifische Handler fehlen noch
 - ChromaDB fuer produktive RAG-Nutzung muss mit Prozesswissen befuellt werden
 - Voice-Kanal setzt Web Speech API voraus (Chrome/Edge); Firefox und Safari nicht unterstuetzt
 - Agentenarchitektur-Diagramm zeigt Luecken bei IAM/Secrets, Memory-Governance, Process-Kernel-Contracts und Observability (siehe `docs/project-context/agent-architecture-gaps-2026-03-28.md`)

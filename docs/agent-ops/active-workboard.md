@@ -35,12 +35,12 @@ Zwei End-to-End-Stränge laufen **fachlich und technisch getrennt**. Bitte **nic
 | Lane | Scope | Slices | Status | Dateibesitz (exklusiv) | Abhaengigkeit |
 |------|-------|--------|--------|----------------------|---------------|
 | **NC-A: Neuro-Core Kernel** | Intent Engine + Planner + Verification Engine | **abgeschlossen** (A1-A5) | Cursor Agent | `app/agents/neuro_intent_engine.py`, `app/agents/neuro_planner.py`, `app/agents/neuro_pipeline.py`, `app/services/neuro_verification_engine.py`, `app/api/v1/endpoints/neuro_pipeline.py` | keine — Kern-Lane fertig, abhaengige Slices (D4, F5, H4, H5) jetzt freigegeben |
-| **NC-B: State Graph + Confidence** | Business Object Graph + Append-Only Confidence Ledger | NC-B1..B5 | abgeschlossen (Codex, 2026-03-29) | `app/core/neuro_state_graph.py`, `confidence_ledger.py`, `app/infrastructure/models/neuro_state_models.py`, `app/api/v1/endpoints/neuro_state_graph_api.py`, `tests/test_neuro_state_graph.py` | B5 wartet auf A |
+| **NC-B: State Graph + Confidence** | Business Object Graph + Append-Only Confidence Ledger | NC-B1..B5 | abgeschlossen (Codex, 2026-03-29) | `app/core/neuro_state_graph.py`, `confidence_ledger.py`, `app/infrastructure/models/neuro_state_models.py`, `app/api/v1/endpoints/neuro_state_graph_api.py`, `tests/test_neuro_state_graph.py` | Lane A fertig — B5-Integration jetzt moeglich |
 | **NC-C: Guardrails + Consent** | PII/DLP-Schutz, Consent-Lifecycle (DSGVO) | **abgeschlossen** (C1-C3 + NC-004) | Cursor Agent | `app/services/pii_detector.py`, `app/services/guardrails.py`, `app/services/consent_engine.py`, `app/api/v1/endpoints/neuro_guardrails.py`, `app/api/v1/endpoints/neuro_consent.py` | keine |
 | **NC-D: Audit Hardening** | Append-Only Audit-Schema, Neuro-Entscheidungs-Protokoll, Hash-Chain | **abgeschlossen** (D1-D4) | Cursor Agent | `app/services/audit_hardening.py`, `app/services/neuro_decision_protocol.py`, `app/api/v1/endpoints/neuro_audit.py`, `app/middleware/neuro_audit_middleware.py` | keine |
 | **NC-E: Fast Track + Compensation** | Deterministischer CRUD-Bypass + Saga-Rollback | **abgeschlossen** (E1-E2 + NC-006) | Cursor Agent | `app/services/fast_track.py`, `app/services/compensation_engine.py`, `app/api/v1/endpoints/neuro_fast_track.py`, `app/api/v1/endpoints/neuro_compensation.py` | keine |
 | **NC-F: Copilot Backend** | WebSocket-Streaming + Interaction State FSM | **abgeschlossen** (F1-F5) | Cursor Agent | `app/api/v1/endpoints/copilot_ws.py`, `app/services/interaction_state_manager.py`, `packages/frontend-web/src/features/copilot/useCopilotStream.ts` | keine |
-| **NC-G: Event Bus + Knowledge** | NATS-Consumer, Event-Schemas, Policy-Versionierung | teilweise (G1, G2, G4-G5 umgesetzt) | Codex | `app/services/event_schema_registry.py`, `app/services/policy_registry.py`, `app/api/v1/endpoints/neuro_event_policy.py`, `app/infrastructure/eventbus/nats_consumer.py` | NC-G3 (aktive Handler) starten |
+| **NC-G: Event Bus + Knowledge** | NATS-Consumer, Event-Schemas, Policy-Versionierung | teilweise (G1, G2, G3, G4-G5 umgesetzt) | Codex | `app/services/event_schema_registry.py`, `app/services/policy_registry.py`, `app/api/v1/endpoints/neuro_event_policy.py`, `app/infrastructure/eventbus/nats_consumer.py` | NC-G4/G5 vertiefen |
 | **NC-H: Channels + Voice** | WhatsApp, E-Mail, Voice-Adapter, Simulation Engine, Channel Ingress | **abgeschlossen** (H1-H5) | Cursor Agent | `app/channels/whatsapp_adapter.py`, `app/channels/email_channel.py`, `app/channels/channel_ingress.py`, `app/services/voice_adapter.py`, `app/services/neuro_simulation_engine.py`, `app/api/v1/endpoints/channels.py` | keine |
 
 **Prioritaet:** P1 = A, B, C, D (sofort) | P2 = E, F, G (danach) | P3 = H (Channel-Erweiterung)
@@ -53,6 +53,7 @@ Zwei End-to-End-Stränge laufen **fachlich und technisch getrennt**. Bitte **nic
 | DOCS-105 | Wave-104-Dokumentations-Nachzug (GAP-G/H/I, Repo-Hygiene) | abgeschlossen | — | `docs/architecture/process-kernel/STATUS.md`, `DELIVERY-MAP.md`, `wave-104/STATUS.md`, `docs/roadmap/status/2026-03-27-wave-104-abschluss.md`, `docs/project-context/open-gaps-and-known-issues.md` | keine (Doku im Repo eingecheckt) | keine |
 | NC-B1 | Neuro State Graph + Confidence Ledger (Grundgeruest) | abgeschlossen | Codex | `app/core/neuro_state_graph.py`, `app/core/confidence_ledger.py`, `app/infrastructure/models/neuro_state_models.py`, `app/api/v1/endpoints/neuro_state_graph_api.py`, `alembic/versions/neuroassist_state_graph_confidence_ledger_20260329.py`, `tests/test_neuro_state_graph.py`, `docs/workflows/nc-b1-state-graph-confidence-ledger.md`, `docs/cards/neuro-core/NC-B1-state-graph-confidence-ledger.md` | NC-D1 oder NC-C1 claimen | keine |
 | NC-G2 | NATS Consumer Framework | abgeschlossen | Codex | `app/infrastructure/eventbus/nats_consumer.py`, `app/services/event_schema_registry.py`, `app/api/v1/endpoints/neuro_event_policy.py`, `docs/workflows/nc-g2-nats-consumer.md`, `docs/cards/neuro-core/NC-G2-nats-consumer.md`, `tests/test_nats_consumer.py` | NC-G3 starten | keine |
+| NC-G3 | NATS Consumer Handler (Audit/Inventory/Settlement) | abgeschlossen | Codex | `app/services/nats_event_handlers.py`, `app/domains/shared/events.py`, `app/infrastructure/eventbus/nats_consumer.py`, `tests/test_nats_event_handlers.py`, `docs/workflows/nc-g3-nats-handlers.md`, `docs/cards/neuro-core/NC-G3-nats-handlers.md` | NC-G4/G5 vertiefen | keine |
 | P2P-001 | Procure-to-Pay Direktbestellung: Workflow-Analyse, QA und Handover-Haertung | abgeschlossen | aktuell offener Agent | `docs/workflows/p2p-001-procure-to-pay-direktbestellung.md`, `docs/cards/einkauf/**`, `packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx`, `packages/frontend-web/src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx` | Folgeslice fuer Bedarfsmeldung/Rahmenabruf zuschneiden | keine |
 | P2P-040 | Procure-to-Pay Vorbelegung aus Bedarfsmeldung/Vertrag/RFQ | abgeschlossen | aktuell offener Agent | `docs/agent-ops/active-workboard.md`, `docs/workflows/p2p-040-vorbelegung-requisition-vertrag-rfq.md`, `docs/cards/einkauf/P2P-040-vorbelegung-standardmaske.md`, `packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx`, `packages/frontend-web/src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx` | Folgeslice Schrittvalidierung zuschneiden | keine |
 | P2P-050 | Procure-to-Pay Wizard-Schrittvalidierung | abgeschlossen | aktuell offener Agent | `docs/workflows/p2p-050-wizard-schrittvalidierung.md`, `docs/cards/einkauf/P2P-050-wizard-schrittvalidierung.md`, `packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx`, `packages/frontend-web/src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx` | Landhandel-Kernprozess beginnen | keine |
@@ -147,7 +148,7 @@ Codex soll folgende Aufgaben uebernehmen, sobald seine aktuelle Arbeit (NC-B) ab
 | Aufgabe | Lane | Beschreibung | Dateibesitz |
 |---------|------|-------------|-------------|
 | NC-G2 | G | `NATSConsumer` — generischer Consumer mit Retry, DLQ, Idempotenz | `app/infrastructure/eventbus/nats_consumer.py` |
-| NC-G3 | G | Mindestens 3 Consumer aktivieren: Audit-Event, Inventory-Movement, Settlement-Created | `app/infrastructure/eventbus/` |
+| NC-G3 | G | Mindestens 3 Consumer aktiviert: Audit-Event, Inventory-Movement, Settlement-Created | `app/infrastructure/eventbus/` |
 | NC-H1 | H | `WhatsAppAdapter` — WhatsApp Business API Webhook-Empfang, Message-Parsing, Reply | `app/channels/whatsapp_adapter.py` |
 | NC-H2 | H | `EmailChannel` — IMAP-Polling/Webhook fuer eingehende E-Mails, Response via SMTP | `app/channels/email_channel.py` |
 | NC-H4 | H | Channel -> ChannelIngress -> Neuro-Core Routing fuer alle neuen Kanaele | `app/channels/` |
@@ -712,7 +713,23 @@ Alle 6 Router registriert in `app/api/v1/api.py` unter `/api/v1/neuro/*`. Commit
 - `NATSEventConsumer` mit Handler-Registry, Default-Handler, Ack/Nak/Term.
 - Tests fuer Handler-Dispatch und Fallback.
 - Workflow- und Card-Doku fuer NC-G2 erstellt.
-**Offen:** NC-G3 aktive Handler (Audit, Inventory, Settlement) fehlen.
+**Offen:** NC-G3 ist nachgezogen; DLQ/Idempotenz bleibt offen.
 **Betroffene Dateien:** `app/infrastructure/eventbus/nats_consumer.py`, `tests/test_nats_consumer.py`, `docs/workflows/nc-g2-nats-consumer.md`, `docs/cards/neuro-core/NC-G2-nats-consumer.md`, `docs/agent-ops/active-workboard.md`
 **Tests / Checks:** nicht ausgefuehrt in dieser Session
-**Naechster konkreter Schritt:** NC-G3 claimen und konkrete Consumer-Handler verdrahten.
+**Naechster konkreter Schritt:** NC-G4/G5 vertiefen oder DLQ/Idempotenz ergaenzen.
+
+## Handoff: 2026-03-29 - NC-G3
+
+**Von:** Codex
+**An:** naechste Session / naechster Agent
+**Ziel des Slices:** Drei aktive Consumer-Handler fuer Audit, Inventory, Settlement verdrahten.
+**Stand:** abgeschlossen
+**Erledigt:**
+- Core Handler in `nats_event_handlers.py` registriert und an Consumer gebunden.
+- Startup/Shutdown Hooks fuer Consumer vorbereitet.
+- Tests fuer Handler-Registrierung ergaenzt.
+- Workflow- und Card-Doku fuer NC-G3 erstellt.
+**Offen:** DLQ/Idempotenz und produktive Handler-Implementierungen fehlen noch.
+**Betroffene Dateien:** `app/services/nats_event_handlers.py`, `app/domains/shared/events.py`, `app/infrastructure/eventbus/nats_consumer.py`, `tests/test_nats_event_handlers.py`, `docs/workflows/nc-g3-nats-handlers.md`, `docs/cards/neuro-core/NC-G3-nats-handlers.md`, `docs/agent-ops/active-workboard.md`
+**Tests / Checks:** nicht ausgefuehrt in dieser Session
+**Naechster konkreter Schritt:** NC-G4/G5 vertiefen oder DLQ/Idempotenz-Slice schneiden.
