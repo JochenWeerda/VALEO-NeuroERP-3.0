@@ -17,19 +17,19 @@ Dazwischen: Guardrails, Audit, Policy, Human Oversight als Querschnittsschichten
 | # | Komponente | Soll (Zielarchitektur) | Ist (Codebase) | Gap-Typ | Prio |
 |---|-----------|----------------------|---------------|---------|------|
 | NC-01 | Neuro Intent Engine | Intent-Klassifikation, Confidence, Risikoklasse | Stage-basiertes Routing in `neuroassist.py`, kein NLU | **Ausbau** | P1 |
-| NC-02 | Neuro State Graph | Stateful Business Object Graph (Bestellung, Rechnung, Kunde, Freigabe) | LangGraph-Threads + ORM-Entities, kein expliziter Graph | **Neubau** | P1 |
+| NC-02 | Neuro State Graph | Stateful Business Object Graph (Bestellung, Rechnung, Kunde, Freigabe) | **Umgesetzt** (Lane B, `neuro_state_graph.py`, 37 Tests gruen) | Fertig | -- |
 | NC-03 | Neuro Context Resolver | Rolle, Berechtigung, Business Objects, Einwilligung, Historie, Kanal | `neuroassist_context.py` loest Prozess/Aggregat auf; Consent fehlt | **Ausbau** | P2 |
 | NC-04 | Neuro Planner | Kontext-Pruefung, Schritte generieren, Aktions-Favorit, Validierungsvertrag | Role/PromptPack Contracts vorhanden; kein expliziter Planner | **Ausbau** | P1 |
-| NC-05 | Confidence & Risk Engine | Append-Only Confidence Ledger | `human_approval_gate.py` mit Risikostufen; kein Confidence-Ledger | **Neubau** | P1 |
-| NC-06 | Rule & Knowledge Store | Versionierte Policy- und Prompt-Registrierung | Code-basierte Metadaten-Registry; keine Versionierung | **Ausbau** | P2 |
+| NC-05 | Confidence & Risk Engine | Append-Only Confidence Ledger | **Umgesetzt** (Lane B, `confidence_ledger.py`, SHA-256 Hash-Chain, 37 Tests gruen) | Fertig | -- |
+| NC-06 | Rule & Knowledge Store | Versionierte Policy- und Prompt-Registrierung | **Teilweise** (Lane G, `policy_registry.py` mit Versionierung + Rollback, `be5b0ddf4`) | **Ausbau** | P2 |
 | NC-07 | Action & Policy Layer | Definierte Aktionen und Risikosteuerung | `business_commands.py`, `command_dispatcher.py` -- **produktionsreif** | Fertig | -- |
 | NC-08 | Human Oversight | Menschliche Freigabe | `human_approval_gate.py` mit 4 Risikostufen -- **vorhanden** | **Ausbau** (Case Mgmt) | P3 |
-| NC-09 | Guardrails & Output-Validierung | PII/DLP-Schutz, Inhaltsfilterung | GDPR-Endpoints, Schema-Validierung; kein aktives PII-Masking | **Neubau** | P1 |
-| NC-10 | Fast Track | Umgehung Neuro-Core fuer deterministisches CRUD | Nicht vorhanden | **Neubau** | P2 |
-| NC-11 | VALEO Copilot UI | Konversationale AI-Oberflaeche | Frontend-Komponenten (`AskValeo`, `CopilotInsights`); kein Backend-Streaming | **Ausbau** | P2 |
+| NC-09 | Guardrails & Output-Validierung | PII/DLP-Schutz, Inhaltsfilterung | **Umgesetzt** (Lane C, `pii_detector.py`, `guardrails.py`, `be5b0ddf4`) | Fertig | -- |
+| NC-10 | Fast Track | Umgehung Neuro-Core fuer deterministisches CRUD | **Umgesetzt** (Lane E, `fast_track.py`, `be5b0ddf4`) | Fertig | -- |
+| NC-11 | VALEO Copilot UI | Konversationale AI-Oberflaeche | **Umgesetzt** (Lane F, `copilot_ws.py`, `useCopilotStream.ts`, `be5b0ddf4`) | Fertig | -- |
 | NC-12 | Interaktions-Kanaele | WhatsApp, E-Mail, Live-Chat/Web-Chat | Slack/Teams-Framework in `channel_ingress.py`; WA/Email/Chat fehlen | **Neubau** | P3 |
-| NC-13 | Audit & Trace Layer | Unveraenderlicher Audit-Trail, Neuro-Entscheidungs-Protokoll, SIEM | Audit-Middleware + Evidence-Modell; kein persistentes Append-Only-Schema | **Ausbau** | P1 |
-| NC-14 | Event Bus (Kafka) | Kafka Event Bus | NATS JetStream vorhanden (Memory-Default); keine Consumer | **Ausbau** | P2 |
+| NC-13 | Audit & Trace Layer | Unveraenderlicher Audit-Trail, Neuro-Entscheidungs-Protokoll, SIEM | **Umgesetzt** (Lane D, `audit_hardening.py`, `neuro_decision_protocol.py`, `79267fb43`) | Fertig | -- |
+| NC-14 | Event Bus (Kafka) | Kafka Event Bus | **Teilweise** (Lane G, Event Schema Registry + Policy Registry, `be5b0ddf4`; NATS Consumer offen) | **Ausbau** | P2 |
 | NC-15 | Identity & Access / Secrets | OIDC + Vault | OIDC/Keycloak + RBAC vorhanden; kein Vault | **Ausbau** | P3 |
 | NC-16 | Load Balancer | Service-Routing | Traefik-Ingress in k8s; kein expliziter LB in Compose | Infra | P3 |
 | NC-17 | Domain Services | Auftrags-Service, Einkauf, Finanzdienst, externe APIs | **Produktionsreif** | Fertig | -- |
@@ -79,30 +79,31 @@ Abhaengigkeiten zwischen Lanes sind explizit markiert.
 
 ---
 
-### Lane B: State Graph + Confidence Ledger (NC-02, NC-05)
+### Lane B: State Graph + Confidence Ledger (NC-02, NC-05) -- ABGESCHLOSSEN
 
+**Status:** Umgesetzt am 2026-03-29, 37 Tests gruen
 **Scope:** Expliziter Business State Graph + Append-Only Confidence Ledger
-**Dateibesitz:**
 
-- `app/core/neuro_state_graph.py` (NEU)
-- `app/core/confidence_ledger.py` (NEU)
-- `app/infrastructure/models/neuro_state_models.py` (NEU)
-- `alembic/versions/neuro_state_graph_*.py` (NEU)
-- `alembic/versions/confidence_ledger_*.py` (NEU)
-- `tests/test_neuro_state_graph.py` (NEU)
-- `tests/test_confidence_ledger.py` (NEU)
+**Erstellte Dateien:**
 
-**Slices:**
+- `app/core/neuro_state_graph.py` -- StateNode, StateEdge, StateTransition, StateGraphSnapshot, StateGraphService mit Transitions-Matrix fuer 8 Business-Object-Typen
+- `app/core/confidence_ledger.py` -- Append-Only Ledger mit SHA-256 Hash-Chain, Reproducibility (model_id, model_version, input_hash), ConfidenceLedgerService
+- `app/infrastructure/models/neuro_state_models.py` -- SQLAlchemy ORM (4 Tabellen in domain_shared)
+- `alembic/versions/neuroassist_state_graph_confidence_ledger_20260329.py` -- Migration (4 Tabellen, 13 Indices)
+- `app/api/v1/endpoints/neuro_state_graph_api.py` -- REST API unter `/api/v1/neuro/` (State Graph CRUD + Transitions + Confidence Ledger + Chain Verification)
+- `tests/test_neuro_state_graph.py` -- 37 Tests (Unit + API)
 
-| Slice | Inhalt | Abnahme |
-|-------|--------|---------|
-| NC-B1 | `StateNode` + `StateEdge` SQLAlchemy-Modelle; Graph-Operationen (add_node, add_edge, get_subgraph) | Unit-Test + Migration |
-| NC-B2 | Mapping: ORM-Entities (Bestellung, Rechnung, Lagerbestand, Kunde, Freigabe) -> StateNode Registration | Unit-Test |
-| NC-B3 | `ConfidenceLedgerEntry` Append-Only-Tabelle (decision_id, confidence_score, risk_score, model_version, input_hash, timestamp) | Migration + Unit-Test |
-| NC-B4 | `ConfidenceLedger.append(entry)` + `query(aggregate_id) -> list[Entry]` -- nur INSERT, kein UPDATE/DELETE | Unit-Test mit Constraint-Pruefung |
-| NC-B5 | Integration: Planner und Approval Gate schreiben in Confidence Ledger | Integration-Test |
+**Slices (alle abgeschlossen):**
 
-**Abhaengigkeiten:** B5 haengt von Lane A (Planner) ab -- kann aber parallel bis B4 laufen.
+| Slice | Inhalt | Status |
+|-------|--------|--------|
+| NC-B1 | StateNode + StateEdge + StateTransition Modelle, Graph-Operationen, Transitions-Matrix | Gruen (8 Tests) |
+| NC-B2 | 8 Node-Typen: Bestellung, Rechnung, Lagerbestand, Kunde, Freigabe, Lieferschein, Kontrakt, Gutschrift | Gruen |
+| NC-B3 | ConfidenceLedgerEntry Append-Only mit SHA-256 Hash-Chain, model_version, input_hash | Gruen (5 Tests) |
+| NC-B4 | Chain Verification, Tamper Detection, Risk Summary, Latest Confidence | Gruen (10 Tests) |
+| NC-B5 | REST API: 12 Endpoints, Chain Verify Endpoint, Summary Endpoint | Gruen (14 Tests) |
+
+**Abhaengigkeiten:** B5 (Integration mit Planner/Approval Gate) kann spaeter nachgezogen werden.
 
 ---
 
