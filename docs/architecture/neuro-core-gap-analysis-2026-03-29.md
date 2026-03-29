@@ -29,7 +29,7 @@ Dazwischen: Guardrails, Audit, Policy, Human Oversight als Querschnittsschichten
 | NC-11 | VALEO Copilot UI | Konversationale AI-Oberflaeche | **Umgesetzt** (Lane F, `copilot_ws.py`, `useCopilotStream.ts`, `be5b0ddf4`) | Fertig | -- |
 | NC-12 | Interaktions-Kanaele | WhatsApp, E-Mail, Live-Chat/Web-Chat | Slack/Teams-Framework in `channel_ingress.py`; WA/Email/Chat fehlen | **Neubau** | P3 |
 | NC-13 | Audit & Trace Layer | Unveraenderlicher Audit-Trail, Neuro-Entscheidungs-Protokoll, SIEM | **Umgesetzt** (Lane D, `audit_hardening.py`, `neuro_decision_protocol.py`, `79267fb43`) | Fertig | -- |
-| NC-14 | Event Bus (Kafka) | Kafka Event Bus | **Teilweise** (Lane G, Event Schema Registry + Policy Registry, `be5b0ddf4`; NATS Consumer offen) | **Ausbau** | P2 |
+| NC-14 | Event Bus (Kafka) | Kafka Event Bus | **Teilweise** (Lane G, Event Schema Registry + Policy Registry, NATS Consumer umgesetzt) | **Ausbau** | P2 |
 | NC-15 | Identity & Access / Secrets | OIDC + Vault | OIDC/Keycloak + RBAC vorhanden; kein Vault | **Ausbau** | P3 |
 | NC-16 | Load Balancer | Service-Routing | Traefik-Ingress in k8s; kein expliziter LB in Compose | Infra | P3 |
 | NC-17 | Domain Services | Auftrags-Service, Einkauf, Finanzdienst, externe APIs | **Produktionsreif** | Fertig | -- |
@@ -233,7 +233,7 @@ Abhaengigkeiten zwischen Lanes sind explizit markiert.
 | Slice | Inhalt | Abnahme |
 |-------|--------|---------|
 | NC-G1 | Event-Schema-Registry: Pydantic-Modelle fuer Domain-Events mit Version-Header | Unit-Test |
-| NC-G2 | `NATSConsumer` -- generischer Consumer mit Retry, DLQ, Idempotenz-Pruefung | Unit-Test |
+| NC-G2 | `NATSConsumer` -- generischer Consumer mit Retry, DLQ, Idempotenz-Pruefung | Unit-Test (umgesetzt) |
 | NC-G3 | Mindestens 3 Consumer aktivieren: Audit-Event, Inventory-Movement, Settlement-Created | Integration-Test |
 | NC-G4 | `PolicyRegistry` -- YAML/JSON-backed Policy-Speicher mit Versionierung + Rollback | Unit-Test |
 | NC-G5 | `PromptPackRegistry` -- versionierte Prompt-Packs mit A/B-Testing-Faehigkeit | Unit-Test |
