@@ -95,10 +95,25 @@ def run_pipeline(
             "status": "executed" if step.type.value != "gate" else "skipped",
         })
 
-    return {
+    result = {
         "status": "executed",
         "intent": intent_result.to_dict(),
         "plan": plan.to_dict(),
         "executed_steps": executed_steps,
         "message": f"Plan mit {len(plan.steps)} Schritten ausgefuehrt.",
     }
+
+    # 6. Audit Trail (NC-D4)
+    if db:
+        try:
+            from app.middleware.neuro_audit_middleware import record_pipeline_audit
+            record_pipeline_audit(
+                db=db,
+                tenant_id=tenant_id,
+                pipeline_result=result,
+                channel=ctx.get("channel", "api"),
+            )
+        except Exception as exc:
+            logger.warning("Audit recording failed: %s", exc)
+
+    return result
