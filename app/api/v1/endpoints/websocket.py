@@ -81,14 +81,27 @@ async def workflow_websocket(websocket: WebSocket, workflow_id: str):
             
             logger.info(f"Workflow command: {command}")
             
-            # Send progress updates
-            # TODO: Hook into workflow execution
-            await websocket.send_json({
-                "type": "progress",
-                "workflow_id": workflow_id,
-                "step": "analyzing",
-                "message": "Analyzing stock levels..."
-            })
+            if command.get("action") == "cancel":
+                await websocket.send_json({
+                    "type": "cancelled",
+                    "workflow_id": workflow_id,
+                    "message": "Workflow abgebrochen.",
+                })
+            elif command.get("action") == "status":
+                from app.core.cache import cache_get_json
+                cached = cache_get_json(f"workflow:{workflow_id}:status")
+                await websocket.send_json({
+                    "type": "status",
+                    "workflow_id": workflow_id,
+                    "data": cached or {"step": "unknown", "message": "Kein aktiver Lauf gefunden."},
+                })
+            else:
+                await websocket.send_json({
+                    "type": "ack",
+                    "workflow_id": workflow_id,
+                    "command": command,
+                    "message": "Kommando empfangen.",
+                })
     
     except WebSocketDisconnect:
         logger.info(f"Workflow WebSocket disconnected: {workflow_id}")

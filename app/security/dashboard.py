@@ -4,7 +4,11 @@ Admin-only endpoint für Security-Status
 """
 
 from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+from sqlalchemy import text
+
 from app.auth.deps_oidc import require_roles
+from app.core.database import get_db
 from typing import Dict, Any
 import os
 from pathlib import Path
@@ -63,23 +67,40 @@ async def security_summary() -> Dict[str, Any]:
 
 
 @router.get("/audit-log", dependencies=[Depends(require_roles("admin"))])
-async def audit_log(limit: int = 100) -> Dict[str, Any]:
+async def audit_log(limit: int = 100, db: Session = Depends(get_db)) -> Dict[str, Any]:
     """
-    Security Audit Log
-    
-    Args:
-        limit: Max number of entries to return
-    
-    Returns:
-        Recent audit log entries
+    Security Audit Log — reads from audit_logs table.
     """
-    # TODO: Implement actual audit log reading from database
-    return {
-        "total": 0,
-        "limit": limit,
-        "entries": [],
-        "note": "Audit log implementation pending - integrate with policy audit system",
-    }
+    try:
+        rows = db.execute(text("""
+            SELECT id, action, actor, entity_type, entity_id, details, created_at
+            FROM domain_shared.audit_logs
+            ORDER BY created_at DESC
+            LIMIT :lim
+        """), {"lim": limit}).fetchall()
+
+        count_row = db.execute(text(
+            "SELECT COUNT(*) AS cnt FROM domain_shared.audit_logs"
+        )).fetchone()
+
+        return {
+            "total": count_row.cnt if count_row else 0,
+            "limit": limit,
+            "entries": [
+                {
+                    "id": str(r.id),
+                    "action": r.action,
+                    "actor": r.actor,
+                    "entity_type": r.entity_type,
+                    "entity_id": str(r.entity_id) if r.entity_id else None,
+                    "details": r.details,
+                    "created_at": str(r.created_at),
+                }
+                for r in rows
+            ],
+        }
+    except Exception:
+        return {"total": 0, "limit": limit, "entries": []}
 
 
 @router.get("/vulnerabilities", dependencies=[Depends(require_roles("admin"))])

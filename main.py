@@ -47,6 +47,8 @@ from app.routers.numbering_router import router as numbering_router  # Numbering
 from app.routers.admin_dms_router import router as admin_dms_router  # Admin DMS Integration
 from app.routers.dms_webhook_router import router as dms_webhook_router  # DMS Webhooks & Inbox
 from app.routers.fibu_router import router as fibu_router  # Finanzbuchhaltung (130 Masken)
+from app.routers.translations_router import router as translations_router  # Übersetzungen (/api/translations)
+from app.routers.vies_router import router as vies_router  # VIES USt-IdNr.-Prüfung (/api/vies)
 from app.routers.contracts_router import router as contracts_router  # Verträge (contracts-v2 Maske)
 from app.api.v1.endpoints.kontrakte import router as kontrakte_router  # Valeo Kontraktmodul
 from app.api.v1.endpoints import opportunities as opportunities_endpoints  # CRM-Sales (Frontend /api/crm-sales)
@@ -495,6 +497,8 @@ app.include_router(lookup_router)
 # Include Print & Export (Phase P - Dokumenten-Druck)
 app.include_router(print_router)
 app.include_router(export_router)
+app.include_router(translations_router)
+app.include_router(vies_router)
 
 # Include Workflow & Approval (Phase Q - Workflow-Management)
 app.include_router(workflow_router)

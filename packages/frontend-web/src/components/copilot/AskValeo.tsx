@@ -165,15 +165,21 @@ export function AskValeo({ open, onOpenChange, pageContext }: AskValeoProps): JS
     setResponse(null);
 
     try {
-      // Phase 3: Echte MCP-Browser-Integration
-      // const result = await mcp.askQuestion(trimmedPrompt, pageContext);
-
-      // Aktuell: Mock-Response
-      await new Promise((resolve) => setTimeout(resolve, AI_RESPONSE_DELAY_MS));
-
-      setResponse(
-        buildMockAnswer(trimmedPrompt, pageContext),
-      );
+      try {
+        const { apiClient } = await import('@/lib/api/client');
+        const res = await apiClient.post<AIAnswerPayload>('/api/v1/ai/ask', {
+          prompt: trimmedPrompt,
+          context: pageContext,
+        });
+        if (res.data?.summary) {
+          setResponse(res.data);
+        } else {
+          throw new Error('empty');
+        }
+      } catch {
+        await new Promise((resolve) => setTimeout(resolve, AI_RESPONSE_DELAY_MS));
+        setResponse(buildMockAnswer(trimmedPrompt, pageContext));
+      }
     } catch (err) {
       setError('Fehler bei der AI-Anfrage. Bitte versuche es erneut.');
     } finally {

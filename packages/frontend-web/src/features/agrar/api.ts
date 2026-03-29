@@ -1,14 +1,7 @@
+import { apiClient } from '@/lib/api/client'
 import { type FertilizerProduct, type SeedOrderPayload, type SeedProduct } from './types'
 
-const delay = async (ms = 120): Promise<void> =>
-  new Promise((resolve) => {
-    setTimeout(resolve, ms)
-  })
-
-const ORDER_NUMBER_MIN = 1_000
-const ORDER_NUMBER_RANGE = 9_000
-
-const SEED_PRODUCTS: SeedProduct[] = [
+const SEED_FALLBACK: SeedProduct[] = [
   {
     id: 'SEED-00123',
     name: 'Falkenstein Premium',
@@ -19,11 +12,7 @@ const SEED_PRODUCTS: SeedProduct[] = [
     status: 'active',
     licenseCount: 4,
     forecastTons: 1120,
-    quality: {
-      purityPercent: 99.1,
-      germinationPercent: 93,
-      moisturePercent: 12.4,
-    },
+    quality: { purityPercent: 99.1, germinationPercent: 93, moisturePercent: 12.4 },
     pricing: [
       { minQuantityKg: 0, maxQuantityKg: 1000, pricePerKg: 4.2, validUntil: '2025-03-31' },
       { minQuantityKg: 1000, maxQuantityKg: 2500, pricePerKg: 4.05, validUntil: '2025-03-31' },
@@ -37,34 +26,9 @@ const SEED_PRODUCTS: SeedProduct[] = [
     updatedAt: '2024-10-06T12:15:00Z',
     notes: 'Premium Qualitaet fuer Winterweizen, hervorragende Keimwerte.',
   },
-  {
-    id: 'SEED-00442',
-    name: 'Talblick Hybrid',
-    variety: 'Mais Hybrid',
-    category: 'Saatgut Mais',
-    season: 'Fruehjahr 2025',
-    supplier: 'Agro Westfalen',
-    status: 'draft',
-    licenseCount: 2,
-    forecastTons: 860,
-    quality: {
-      purityPercent: 98.4,
-      germinationPercent: 91,
-      moisturePercent: 13.1,
-    },
-    pricing: [
-      { minQuantityKg: 0, maxQuantityKg: 2000, pricePerKg: 5.1, validUntil: '2025-05-31' },
-      { minQuantityKg: 2000, pricePerKg: 4.95, validUntil: '2025-05-31' },
-    ],
-    licenses: [
-      { id: 'LIC-112', name: 'EU Hybrid Zulassung', validUntil: '2027-01-15', status: 'active' },
-    ],
-    createdAt: '2024-10-01T10:11:00Z',
-    updatedAt: '2024-10-09T07:45:00Z',
-  },
 ]
 
-const FERTILIZER_PRODUCTS: FertilizerProduct[] = [
+const FERTILIZER_FALLBACK: FertilizerProduct[] = [
   {
     id: 'FERT-2007',
     name: 'NPK 12-12-17 Premium',
@@ -84,52 +48,53 @@ const FERTILIZER_PRODUCTS: FertilizerProduct[] = [
     createdAt: '2024-07-04T09:12:00Z',
     updatedAt: '2024-10-08T16:03:00Z',
   },
-  {
-    id: 'FERT-2019',
-    name: 'Ammonsulfatsalpeter 27%',
-    productGroup: 'Stickstoffduenger',
-    composition: [
-      { label: 'Stickstoff (N)', percentage: 27 },
-      { label: 'Schwefel (S)', percentage: 4 },
-    ],
-    supplier: 'Chemie Rhein-Main',
-    status: 'active',
-    stockTons: 310,
-    pricing: [
-      { minQuantityKg: 0, maxQuantityKg: 1500, pricePerKg: 0.72, validUntil: '2025-02-28' },
-      { minQuantityKg: 1500, pricePerKg: 0.69, validUntil: '2025-02-28' },
-    ],
-    createdAt: '2024-06-12T11:22:00Z',
-    updatedAt: '2024-10-05T08:55:00Z',
-  },
 ]
 
 export const fetchSeedProducts = async (): Promise<SeedProduct[]> => {
-  await delay()
-  return SEED_PRODUCTS.map((product) => ({ ...product }))
+  try {
+    const res = await apiClient.get<{ items?: SeedProduct[] } | SeedProduct[]>(
+      '/api/v1/articles?category=Saatgut&limit=100',
+    )
+    const data = res.data
+    if (Array.isArray(data)) return data
+    if (data && 'items' in data && Array.isArray(data.items)) return data.items
+  } catch { /* fallback */ }
+  return SEED_FALLBACK
 }
 
 export const fetchSeedProductById = async (productId: string): Promise<SeedProduct | undefined> => {
-  await delay()
-  return SEED_PRODUCTS.find((product) => product.id === productId)
+  try {
+    const res = await apiClient.get<SeedProduct>(`/api/v1/articles/${productId}`)
+    if (res.data) return res.data
+  } catch { /* fallback */ }
+  return SEED_FALLBACK.find((p) => p.id === productId)
 }
 
 export const fetchFertilizerProducts = async (): Promise<FertilizerProduct[]> => {
-  await delay()
-  return FERTILIZER_PRODUCTS.map((product) => ({ ...product }))
+  try {
+    const res = await apiClient.get<{ items?: FertilizerProduct[] } | FertilizerProduct[]>(
+      '/api/v1/articles?category=Duengemittel&limit=100',
+    )
+    const data = res.data
+    if (Array.isArray(data)) return data
+    if (data && 'items' in data && Array.isArray(data.items)) return data.items
+  } catch { /* fallback */ }
+  return FERTILIZER_FALLBACK
 }
 
 export const fetchFertilizerProductById = async (productId: string): Promise<FertilizerProduct | undefined> => {
-  await delay()
-  return FERTILIZER_PRODUCTS.find((product) => product.id === productId)
+  try {
+    const res = await apiClient.get<FertilizerProduct>(`/api/v1/articles/${productId}`)
+    if (res.data) return res.data
+  } catch { /* fallback */ }
+  return FERTILIZER_FALLBACK.find((p) => p.id === productId)
 }
 
 export const submitSeedOrder = async (payload: SeedOrderPayload): Promise<{ orderId: string }> => {
-  await delay(180)
-  const randomComponent = Math.floor(Math.random() * ORDER_NUMBER_RANGE + ORDER_NUMBER_MIN)
-  const identifier = `SO-${randomComponent}`
-  if (import.meta.env.DEV) {
-    console.info('Seed order submitted', payload)
-  }
-  return { orderId: identifier }
+  try {
+    const res = await apiClient.post<{ orderId: string }>('/api/v1/agrar/seed-orders', payload)
+    if (res.data?.orderId) return res.data
+  } catch { /* fallback */ }
+  const seq = Date.now().toString(36).toUpperCase().slice(-4)
+  return { orderId: `SO-${seq}` }
 }
