@@ -6,6 +6,10 @@ export const entries: AutoGroupRouteEntry[] = [
     "path": "labor-auftrag"
   },
   {
+    "module": "@/pages/qualitaet/labor-detail",
+    "path": "labor/:id"
+  },
+  {
     "module": "@/pages/qualitaet/labor-liste",
     "path": "labor-liste"
   },

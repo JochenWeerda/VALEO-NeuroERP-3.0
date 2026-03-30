@@ -6,6 +6,10 @@ export const entries: AliasGroupRouteEntry[] = [
     "path": "labor-auftrag"
   },
   {
+    "module": "@/pages/qualitaet/labor-detail",
+    "path": "labor/:id"
+  },
+  {
     "module": "@/pages/qualitaet/labor-liste",
     "path": "labor"
   },
