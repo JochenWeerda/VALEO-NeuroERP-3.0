@@ -68,11 +68,26 @@ class TestGeneratePlan:
         assert len(plan.steps) == 1
         assert plan.steps[0].type == StepType.QUERY
 
-    def test_unknown_intent_fallback(self):
+    def test_unknown_intent_uses_dynamic_command_plan(self):
         intent = _make_intent("something_unknown")
         plan = generate_plan(intent)
-        assert len(plan.steps) == 1
-        assert plan.steps[0].action == "fallback_search"
+        assert len(plan.steps) == 3
+        assert plan.steps[0].action == "validate_dynamic_request"
+        assert plan.steps[-1].action == "execute_dynamic_command"
+        assert plan.steps[-1].parameters["_dynamic_plan"] is True
+
+    def test_navigation_without_template_uses_dynamic_navigation_plan(self):
+        intent = IntentResult(
+            intent="navigation",
+            category=IntentCategory.NAVIGATION,
+            confidence_score=0.9,
+            risk_class=RiskClass.LOW,
+            explanation="test",
+        )
+        plan = generate_plan(intent)
+        assert len(plan.steps) == 2
+        assert plan.steps[0].action == "resolve_navigation_target"
+        assert plan.steps[1].action == "open_navigation_target"
 
     def test_high_risk_requires_approval(self):
         intent = _make_intent("ausnahme_behandeln", "operations_exception_assistant", RiskClass.HIGH)

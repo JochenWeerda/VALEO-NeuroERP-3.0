@@ -14,7 +14,7 @@ Die folgende Matrix basiert auf dem gelieferten Komponenten-Status und fasst die
 | Neuro Intent Engine | 95% | NC-A1/A2 + NC-A9: 11 Intent-Patterns, Capability-Matching, Confidence-Scoring, Risk-Klassen, Parameter-Extraktion, LLM-Fallback fuer unbekannte Intents (injected + service-basiert). 103+ Tests gruen. Offen: Prompt-Pack-Integration, Confidence-Ledger-Feedback |
 | Neuro State Graph | 75% | Grundgeruest + API + DB-Modelle + Pipeline-Verdrahtung (Broker/NC-A7); dynamische Plaene/Cross-Entity noch Ausbau |
 | Neuro Context Resolver | 85% | Prozess-/Aggregate-Kontext + Consent-Status + Kanal-Historie in `neuroassist_context` (schema_version 2) |
-| Neuro Planner | 90% | NC-A3/A4 + NC-A8: 9 Plan-Templates, typisierte Schritte, per-Step-Verification, Capability-Runner-Delegation. Offen: dynamische Schrittgenerierung fuer unbekannte Intents |
+| Neuro Planner | 95% | NC-A3/A4 + NC-A8 + NC-A10: 9 Plan-Templates, typisierte Schritte, per-Step-Verification, Capability-Runner-Delegation und dynamische Plan-Generierung fuer templatefreie Intents. Offen: tiefere Cross-Entity-Integrity |
 | Policy Engine | 90% | NC-A8: temporale Bedingungen + verschachtelte AND/OR-Gruppen + Policy→Verify-Kopplung umgesetzt. Offen: tiefere produktive Tenant-Override-Nutzung |
 | Verification Engine | 90% | NC-A8: per-Step-Verification, Policy-Integration und State-Graph-Transition-Pruefung umgesetzt. Offen: tiefere Cross-Entity-Integrity |
 | Confidence & Risk Engine | 75% | Append-Only Ledger umgesetzt (NC-B1), weitere Risk-Aggregate und Cross-Run-Scoring fehlen |
@@ -53,7 +53,7 @@ Die folgende Matrix basiert auf dem gelieferten Komponenten-Status und fasst die
 
 1. ~~NC-A7 — Broker OpenAPI Execution Adapter~~ → umgesetzt
 2. ~~Wave 2 — Verification + Policy Integration~~ → NC-A8 umgesetzt: Policy Engine in Verification verdrahtet, State-Graph-Transitions unifiziert, per-Step Verification im Planner
-3. ~~Wave 3 — Decision Trace Hardening + LLM-Fallback~~ → NC-A9 (LLM-Fallback) + NC-D5 Hash-Chain-Tests umgesetzt. Offen: dynamische Schrittgenerierung, Cross-Entity-Integrity (Wave 4).
+3. ~~Wave 3 — Decision Trace Hardening + LLM-Fallback~~ -> NC-A9 (LLM-Fallback) + NC-D5 Hash-Chain-Tests umgesetzt. Wave 4 ist mit NC-A10 gestartet.
 
 ## Neuro Core Completion Plan (4 Waves)
 
@@ -62,4 +62,4 @@ Die folgende Matrix basiert auf dem gelieferten Komponenten-Status und fasst die
 | **1: Foundation** | Tool Broker Execution + Pipeline-Verdrahtung | NC-A7: OpenAPI-Adapter, State-Graph-Persistenz, per-Step Audit | keine |
 | **2: Correctness** | Verification + Policy Engine Integration | Policy→Verify, State→Verify, per-Step Verify, nested/temporale Bedingungen | erledigt |
 | **3: Completeness** | Decision Trace Hardening + Intent LLM | ~~NC-A9 LLM-Fallback~~ umgesetzt; NC-D5 Hash-Chain Regression-Tests offen | Wave 1 |
-| **4: Maturity** | Advanced Features + Stufe 2 Vorbereitung | Dynamische Schrittgenerierung, Cross-Entity-Integrity, Risk-Scoring | Waves 2+3 |
+| **4: Maturity** | Advanced Features + Stufe 2 Vorbereitung | ~~NC-A10 Dynamische Schrittgenerierung~~ umgesetzt; Cross-Entity-Integrity, Risk-Scoring | Waves 2+3 |
