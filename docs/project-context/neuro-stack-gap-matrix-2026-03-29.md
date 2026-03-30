@@ -8,6 +8,7 @@ Die folgende Matrix basiert auf dem gelieferten Komponenten-Status und fasst die
 
 | Komponente | Status | Details |
 |---|---:|---|
+| Neuro Tool Broker | 90% | NC-A6 + NC-A7 abgeschlossen: ToolBinding-Registry (20+ Actions), OpenAPI-Execution via TestClient, State-Graph-Persistenz nach Execution, per-Step Audit Trace, Fallback-Handling (4xx→degraded, 5xx→failed). 13 Tests gruen. Offen: echte HTTP-Execution gegen externe Services (aktuell TestClient intern) |
 | Neuro Intent Engine | 85% | NC-A1/A2 umgesetzt: 11 Intent-Patterns, Capability-Matching, Confidence-Scoring, Risk-Klassen, Parameter-Extraktion. 100 Tests gruen. Offen: LLM-basiertes NLU fuer unbekannte Intents |
 | Neuro State Graph | 70% | Grundgeruest + API + DB-Modelle umgesetzt (NC-B1), Pipeline-Integration fehlt |
 | Neuro Context Resolver | 70% | Prozess-/Aggregate-Kontext vorhanden, Consent-Status + Kanal-Historie fehlt |
@@ -46,6 +47,15 @@ Die folgende Matrix basiert auf dem gelieferten Komponenten-Status und fasst die
 
 ## Naechste 3 Schritte (Plan, Stand 2026-03-30)
 
-1. Pipeline E2E: NeuroASSIST-Input-Contracts aus der Intent Engine befuellen und echte Capability-Runs ausloesen.
-2. Copilot/Oversight tiefer in Kernmasken surfacen — Pipeline-Ergebnisse in ObjectPage/ListReport einbetten.
-3. Live-Chat und outbound Routing als Multi-Channel-Folge ausbauen.
+1. **NC-A7 — Broker OpenAPI Execution Adapter:** `_simulate_tool_call()` durch echten HTTP-Client ersetzen, State-Graph-Mutationen persistieren, per-Step Decision Trace.
+2. **Wave 2 — Verification + Policy Integration:** Policy Engine in Verification verdrahten, State-Graph-Transitions unifizieren, per-Step Verification im Planner.
+3. **Wave 3 — Decision Trace Hardening + LLM-Fallback:** Hash-Chain Tamper-Detection, Intent Engine LLM-Fallback fuer unbekannte Intents.
+
+## Neuro Core Completion Plan (4 Waves)
+
+| Wave | Ziel | Kern-Tasks | Abhaengigkeit |
+|------|------|------------|---------------|
+| **1: Foundation** | Tool Broker Execution + Pipeline-Verdrahtung | NC-A7: OpenAPI-Adapter, State-Graph-Persistenz, per-Step Audit | keine |
+| **2: Correctness** | Verification + Policy Engine Integration | Policy→Verify, State→Verify, per-Step Verify, nested/temporale Bedingungen | Wave 1 |
+| **3: Completeness** | Decision Trace Hardening + Intent LLM | Hash-Chain Tamper-Detection, LLM-Fallback fuer unbekannte Intents | Wave 1 |
+| **4: Maturity** | Advanced Features + Stufe 2 Vorbereitung | Dynamische Schrittgenerierung, Cross-Entity-Integrity, Risk-Scoring | Waves 2+3 |
