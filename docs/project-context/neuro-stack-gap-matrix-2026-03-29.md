@@ -8,29 +8,29 @@ Die folgende Matrix basiert auf dem gelieferten Komponenten-Status und fasst die
 
 | Komponente | Status | Details |
 |---|---:|---|
-| Neuro Intent Engine | 60% | Capability-Routing existiert (`neuroassist.py`), NLU/Confidence-Scoring fehlt |
+| Neuro Intent Engine | 85% | NC-A1/A2 umgesetzt: 11 Intent-Patterns, Capability-Matching, Confidence-Scoring, Risk-Klassen, Parameter-Extraktion. 100 Tests gruen. Offen: LLM-basiertes NLU fuer unbekannte Intents |
 | Neuro State Graph | 70% | Grundgeruest + API + DB-Modelle umgesetzt (NC-B1), Pipeline-Integration fehlt |
 | Neuro Context Resolver | 70% | Prozess-/Aggregate-Kontext vorhanden, Consent-Status + Kanal-Historie fehlt |
-| Neuro Planner | 65% | Stage-Contracts + Bestellvorschlag-Workflow produktiv, dynamische Schrittgenerierung fehlt |
-| Confidence & Risk Engine | 70% | Append-Only Ledger umgesetzt (NC-B1), weitere Risk-Aggregate fehlen |
+| Neuro Planner | 85% | NC-A3/A4: 9 Plan-Templates, typisierte Schritte, Verification-Engine-Integration, Capability-Runner-Delegation. Offen: dynamische Schrittgenerierung fuer unbekannte Intents |
+| Confidence & Risk Engine | 75% | Append-Only Ledger umgesetzt (NC-B1), weitere Risk-Aggregate und Cross-Run-Scoring fehlen |
 | Rule & Knowledge Store | 70% | Policy-Registry mit A/B + Rollback, Prompt-Pack Registry vorhanden; Knowledge-Store fehlt |
 | Guardrails / PII-DLP | 70% | PII-Detector/Guardrails/Consent als NC-C abgeschlossen, DLP-Ausbau offen |
 | Action & Policy Layer | 100% | BusinessCommands + CommandDispatcher produktiv |
-| Human Oversight | 80% | Approval-Gate mit 4 Risikostufen vorhanden, Case-Management-UI fehlt |
-| Audit & Trace | 70% | Audit Hardening D1-D3 vorhanden, Hash-Chain/Append-Only-Vertiefung offen |
-| Event Bus (NATS) | 85% | Publisher + Consumer + Core-Handler vorhanden; DLQ/Idempotenz fehlen |
+| Human Oversight | 95% | Approval-Gates, Prozess-Supervisor, generische Run-API und Case-Management-UI vorhanden; generische Gate-Aktionen ausserhalb Bestellvorschlag fehlen |
+| Audit & Trace | 85% | Audit Hardening D1-D4 umgesetzt, Pipeline-Audit-Middleware (NC-D4), Hash-Chain + Decision Protocol. Offen: NC-D5 Regression-Tests |
+| Event Bus (NATS) | 90% | Publisher + Consumer + Core-Handler vorhanden; DLQ und event_id-Idempotenz vorhanden, Flow-Spine-spezifische Handler/Observability offen |
 | Fast Track | 70% | Fast-Track + Compensation als NC-E abgeschlossen, Bypass-Policy-Ausbau offen |
-| Copilot UI | 50% | Frontend-Chat-Hook da, WebSocket-Streaming teilweise (NC-F), fehlende F5-Integration |
-| Multi-Channel | 40% | WhatsApp-Adapter vorhanden, Email/LiveChat fehlt |
+| Copilot UI | 85% | WebSocket-Streaming, Pipeline-Integration, Copilot-Dock und Supervisor/Oversight-UI vorhanden; tiefere Prozess-Einbettung in Kernmasken offen |
+| Multi-Channel | 75% | WhatsApp, E-Mail, Voice und Channel-Ingress vorhanden; Live-Chat und outbound Routing fehlen |
 | LangGraph Integration | 100% | Produktiv -- Workflows, Checkpoints, Human-in-the-Loop |
 
 ## P1-Luecken (sofort schliessen)
 
-1. Audit Hardening -- Hash-Chain + Append-Only-Vertiefung (NC-D4/NC-D5)
+1. ~~Audit Hardening -- Hash-Chain + Append-Only-Vertiefung (NC-D4/NC-D5)~~ → D4 umgesetzt, D5 (Regression-Tests) offen
 2. Guardrails Middleware -- DLP/Prompt-Injection Ausbau (NC-C Folge)
-3. Neuro Intent Engine -- NLU/Confidence-Scoring
-4. Neuro Planner -- dynamische Schrittgenerierung
-5. Event Bus -- DLQ/Idempotenz fehlt
+3. ~~Neuro Intent Engine -- NLU/Confidence-Scoring~~ → NC-A1/A2 umgesetzt mit 11 Intents + Tests
+4. ~~Neuro Planner -- dynamische Schrittgenerierung~~ → NC-A3/A4 mit 9 Templates + Capability-Runner-Delegation
+5. **NEU:** Pipeline E2E-Integration: Capability-Runner-Aufruf mit echtem NeuroASSIST-Input-Contract
 
 ## Produktive Staerken (Ist)
 
@@ -44,8 +44,8 @@ Die folgende Matrix basiert auf dem gelieferten Komponenten-Status und fasst die
 - Die Prozentwerte sind Einschaetzungen und nicht automatisch aus Tests abgeleitet.
 - Status bezieht sich auf funktionale Vollstaendigkeit, nicht auf Skalierung oder Security-Haertung.
 
-## Naechste 3 Schritte (Plan)
+## Naechste 3 Schritte (Plan, Stand 2026-03-30)
 
-1. NC-D4: Audit Hardening Pipeline-Integration abschliessen.
-2. NC-G4/G5: Policy- und Prompt-Registry weiter ausbauen.
-3. NC-A/Planner: NLU/Confidence-Scoring und dynamische Schrittgenerierung priorisieren.
+1. Pipeline E2E: NeuroASSIST-Input-Contracts aus der Intent Engine befuellen und echte Capability-Runs ausloesen.
+2. Copilot/Oversight tiefer in Kernmasken surfacen — Pipeline-Ergebnisse in ObjectPage/ListReport einbetten.
+3. Live-Chat und outbound Routing als Multi-Channel-Folge ausbauen.

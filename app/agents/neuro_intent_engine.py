@@ -183,6 +183,8 @@ INTENT_PATTERNS: list[dict] = [
     },
 ]
 
+_RISK_ORDER = {RiskClass.LOW: 0, RiskClass.MEDIUM: 1, RiskClass.HIGH: 2, RiskClass.CRITICAL: 3}
+
 RISK_KEYWORDS: dict[str, RiskClass] = {
     "loeschen": RiskClass.CRITICAL,
     "stornieren": RiskClass.HIGH,
@@ -229,7 +231,7 @@ def classify(user_input: str, context: Optional[dict] = None) -> IntentResult:
     if best_match and best_score >= 0.5:
         risk = best_match["risk_class"]
         for keyword, keyword_risk in RISK_KEYWORDS.items():
-            if keyword in text.lower() and keyword_risk.value > risk.value:
+            if keyword in text.lower() and _RISK_ORDER.get(keyword_risk, 0) > _RISK_ORDER.get(risk, 0):
                 risk = keyword_risk
 
         return IntentResult(

@@ -170,11 +170,14 @@ def verify_plan(plan: ExecutionPlan, tenant_id: str = "system", db=None) -> Exec
     try:
         from app.services.neuro_verification_engine import verify_plan as _verify
 
+        first_step = plan.steps[0] if plan.steps else None
+        action = first_step.action if first_step else plan.intent
+        is_create = any(w in action for w in ("create", "anlegen", "generate", "check", "query", "validate", "scan", "load", "list", "calculate", "detect", "assess", "notify", "fallback"))
         verify_input = {
-            "action": plan.intent,
-            "entity_type": plan.steps[0].entity_type if plan.steps else "unknown",
+            "action": "create" if is_create else action,
+            "entity_type": first_step.entity_type if first_step else "unknown",
             "requires_approval": plan.requires_human_approval,
-            "amount": plan.steps[0].parameters.get("amount") if plan.steps else None,
+            "amount": first_step.parameters.get("amount") if first_step else None,
         }
         result = _verify(verify_input, tenant_id, db)
         plan.verification_status = result.status.value
