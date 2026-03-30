@@ -12,7 +12,7 @@ import { useTenant } from '@/hooks/useTenant'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { LeaveConfirmDialog } from '@/components/LeaveConfirmDialog'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
-import { apiClient } from '@/lib/axios'
+import { apiClient } from '@/lib/api-client'
 import { toast } from '@/hooks/use-toast'
 
 // Zod-Schema für Bankkonten-Stammdaten

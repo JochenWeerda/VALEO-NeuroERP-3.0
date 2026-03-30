@@ -27,7 +27,7 @@ import { useToast } from '@/components/ui/toast-provider'
 import { CustomerSelectionDialog, type Customer } from '@/components/sales/CustomerSelectionDialog'
 import { ArticleSearchDialog, type Article } from '@/components/sales/ArticleSearchDialog'
 import { LieferscheinDruckDialog, type PrintOptions } from '@/components/sales/LieferscheinDruckDialog'
-import { apiClient } from '@/lib/axios'
+import { apiClient } from '@/lib/api-client'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { MoreHorizontal, Check, Printer, Save } from 'lucide-react'
 

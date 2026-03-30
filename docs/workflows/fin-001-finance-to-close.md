@@ -88,19 +88,19 @@ flowchart TD
 | # | Soll | Ist nach FIN-001 | Bewertung |
 |---|---|---|---|
 | D-01 | Buchungserfassung POST funktioniert | POST `/finance/journal-entries/post` korrekt, Periodenprüfung vorhanden | ok |
-| D-02 | Buchungserfassung nutzt einheitlichen apiClient | Importiert `@/lib/axios` (Legacy-Client) statt `@/lib/api-client` | offen FIN-001-P1 |
-| D-03 | Buchungserfassung: Edit/Delete | Kein GET/{id}, kein PUT, kein DELETE für bestehende Buchungen | offen FIN-001-P2 |
-| D-04 | Nebenbuch-Abstimmung: Summary + Details | GET summary + GET details korrekt, `.data`-Extraktion gemischt | teilweise |
-| D-05 | Nebenbuch-Abstimmung: Matching buchen | Kein POST für Reconciliation-Match oder Ausgleichsbuchung | offen FIN-001-P3 |
+| D-02 | Buchungserfassung nutzt einheitlichen apiClient | Migriert auf `@/lib/api-client` (2026-03-30) | ok ~~FIN-001-P1~~ |
+| D-03 | Buchungserfassung: Edit/Delete | Edit via `?id=<entryId>`, PUT + DELETE implementiert (2026-03-30) | ok ~~FIN-001-P2~~ |
+| D-04 | Nebenbuch-Abstimmung: Summary + Details | GET summary + GET details korrekt via `@/lib/api-client` | ok |
+| D-05 | Nebenbuch-Abstimmung: Matching buchen | POST Matching-Endpoint + "Offene Posten abstimmen"-Button (2026-03-30) | ok ~~FIN-001-P3~~ |
 | D-06 | Perioden: Create + Close | GET list, POST create, PUT close korrekt via `@/lib/api-client` | ok |
-| D-07 | Perioden: Reopen für Korrekturbuchungen | Kein Reopen-Pfad (CLOSED → OPEN) | offen FIN-001-P4 |
+| D-07 | Perioden: Reopen fuer Korrekturbuchungen | `reopenPeriod()` mit PUT status OPEN implementiert | ok ~~FIN-001-P4~~ |
 | D-08 | Abschluss-Cockpit: Dashboard | GET `/closing-checklists/cockpit/summary` korrekt mit `.data` | ok |
 | D-09 | Checkliste: Positionen abhaken | GET detail + POST complete korrekt via `@/lib/api-client` | ok |
-| D-10 | UStVA: Berechnung + Genehmigung + Submit | GET list, POST calculate/approve/submit — vollständiger ELSTER-Flow | ok |
-| D-11 | UStVA nutzt einheitlichen apiClient | Importiert `@/lib/axios` (Legacy-Client) statt `@/lib/api-client` | offen FIN-001-P5 |
-| D-12 | Flow-Spine: Redirect-Ziel existiert | Redirect geht auf `/finance/abschluss` — Datei existiert NICHT | offen FIN-001-P6 |
-| D-13 | Flow-Spine: Instance-ID durch alle Masken | Keine der 6 Masken liest `workflowInstanceId` aus SearchParams | offen FIN-001-P7 |
-| D-14 | Flow-Spine: Transition-API aufrufen | Keine Maske ruft `POST /flow-spines/.../transitions` nach Domain-Aktion | offen FIN-001-P8 |
+| D-10 | UStVA: Berechnung + Genehmigung + Submit | GET list, POST calculate/approve/submit — vollstaendiger ELSTER-Flow | ok |
+| D-11 | UStVA nutzt einheitlichen apiClient | Bereits auf `@/lib/api-client` | ok ~~FIN-001-P5~~ |
+| D-12 | Flow-Spine: Redirect-Ziel existiert | `finance/abschluss.tsx` existiert | ok ~~FIN-001-P6~~ |
+| D-13 | Flow-Spine: Instance-ID durch alle Masken | Alle 3 Kern-Masken lesen `workflowInstanceId` aus SearchParams | ok ~~FIN-001-P7~~ |
+| D-14 | Flow-Spine: Transition-API aufrufen | Buchungserfassung + Perioden rufen Transitions-API auf | ok ~~FIN-001-P8~~ |
 
 ---
 

@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { LayoutGrid, Save, RefreshCw, ArrowRightLeft } from 'lucide-react'
-import { apiClient } from '@/lib/axios'
+import { apiClient } from '@/lib/api-client'
 import { useToast } from '@/hooks/use-toast'
 
 type ConnectorConfig = {

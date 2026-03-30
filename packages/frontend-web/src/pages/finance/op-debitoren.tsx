@@ -8,7 +8,7 @@ import { MaskConfig } from '@/components/mask-builder/types'
 import { getFieldsFromMaskConfig, validateFields } from '@/components/mask-builder/validation'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { toast } from '@/hooks/use-toast'
-import { apiClient } from '@/lib/axios'
+import { apiClient } from '@/lib/api-client'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Banknote } from 'lucide-react'
 

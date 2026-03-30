@@ -288,9 +288,12 @@ export default function BuchungserfassungPage(): JSX.Element {
   const workflowInstanceId = searchParams.get('workflowInstanceId')
   const workflowProcess = searchParams.get('workflowProcess')
   const workflowCase = searchParams.get('workflowCase')
+  const entryId = searchParams.get('id')
+  const isEditMode = !!entryId
   const [isDirty, setIsDirty] = useState(false)
   const [isStornoDialogOpen, setIsStornoDialogOpen] = useState(false)
   const [isStornoLoading, setIsStornoLoading] = useState(false)
+  const [isDeleteLoading, setIsDeleteLoading] = useState(false)
   const [actionLoadingKey, setActionLoadingKey] = useState<string | null>(null)
   const entityType = 'booking'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Buchungserfassung')
@@ -298,7 +301,7 @@ export default function BuchungserfassungPage(): JSX.Element {
 
   const { data, loading } = useMaskData({
     apiUrl: buchungConfig.api.baseUrl,
-    id: 'new'
+    id: isEditMode ? entryId : 'new'
   })
   const initialFormData = {
     belegart: 'BANK',
@@ -336,6 +339,21 @@ export default function BuchungserfassungPage(): JSX.Element {
     })
   }
 
+  const handleDelete = async () => {
+    if (!entryId) return
+    setIsDeleteLoading(true)
+    try {
+      await apiClient.delete(`/api/v1/journal-entries/${entryId}`)
+      toast({ title: t('crud.messages.deleteSuccess', { defaultValue: 'Buchung gelöscht' }) })
+      navigate('/finance/buchungen')
+    } catch (error: any) {
+      const msg = error.response?.data?.detail ?? error.message
+      toast({ variant: 'destructive', title: t('common.error'), description: msg })
+    } finally {
+      setIsDeleteLoading(false)
+    }
+  }
+
   const { handleAction } = useMaskActions(async (action: string, formData: any) => {
     if (action === 'save') {
       const errors = validate(formData)
@@ -352,9 +370,16 @@ export default function BuchungserfassungPage(): JSX.Element {
             throw new Error(periodCheck?.message || `Periode ${period} ist gesperrt.`)
           }
         }
-        const postRes = (await apiClient.post<{ success: boolean; message: string }>('/api/v1/finance/journal-entries/post', formData ?? {})).data
-        if (!postRes?.success) {
-          throw new Error(postRes?.message || 'Buchung konnte nicht verbucht werden')
+        if (isEditMode && entryId) {
+          const putRes = (await apiClient.put<{ success: boolean; message: string }>(`/api/v1/journal-entries/${entryId}`, formData ?? {})).data
+          if (putRes && !putRes.success) {
+            throw new Error(putRes?.message || 'Buchung konnte nicht aktualisiert werden')
+          }
+        } else {
+          const postRes = (await apiClient.post<{ success: boolean; message: string }>('/api/v1/finance/journal-entries/post', formData ?? {})).data
+          if (!postRes?.success) {
+            throw new Error(postRes?.message || 'Buchung konnte nicht verbucht werden')
+          }
         }
         if (workflowInstanceId && workflowProcess) {
           try {
@@ -362,9 +387,9 @@ export default function BuchungserfassungPage(): JSX.Element {
               node_id: 'buchung',
               new_status: 'ok',
             })
-          } catch { /* best-effort, don't block user */ }
+          } catch { /* best-effort */ }
         }
-        toast({ title: t('crud.messages.bookingValidationSuccess', { defaultValue: 'Buchung gebucht' }) })
+        toast({ title: isEditMode ? 'Buchung aktualisiert' : t('crud.messages.bookingValidationSuccess', { defaultValue: 'Buchung gebucht' }) })
         setIsDirty(false)
         navigate('/finance/buchungen')
       } catch (error: any) {
@@ -373,6 +398,10 @@ export default function BuchungserfassungPage(): JSX.Element {
       } finally {
         setActionLoadingKey(null)
       }
+      return
+    }
+    if (action === 'delete') {
+      await handleDelete()
       return
     }
     if (action === 'validate') {

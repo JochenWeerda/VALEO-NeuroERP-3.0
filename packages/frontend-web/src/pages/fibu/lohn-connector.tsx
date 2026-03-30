@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Building2, Play, RefreshCw, Trash2, Upload, FileUp, CheckCircle2, BookOpen, Undo2 } from 'lucide-react'
-import { apiClient } from '@/lib/axios'
+import { apiClient } from '@/lib/api-client'
 import { useToast } from '@/hooks/use-toast'
 
 const CONNECTOR_BASE = '/api/v1/finance/connectors'
