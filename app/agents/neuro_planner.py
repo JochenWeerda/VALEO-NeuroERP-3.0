@@ -13,7 +13,7 @@ from enum import Enum
 from typing import Any, Optional
 from uuid import uuid4
 
-from app.agents.neuro_intent_engine import IntentResult, RiskClass
+from app.agents.neuro_intent_engine import IntentCategory, IntentResult, RiskClass
 
 logger = logging.getLogger(__name__)
 
@@ -138,13 +138,9 @@ def generate_plan(intent_result: IntentResult, context: Optional[dict] = None) -
     template = PLAN_TEMPLATES.get(intent_result.intent, [])
 
     if not template:
-        plan.steps.append(PlanStep(
-            order=1,
-            type=StepType.QUERY,
-            action="fallback_search",
-            description=f"Kein Plan-Template fuer Intent '{intent_result.intent}' — Fallback-Suche",
-            entity_type="unknown",
-        ))
+        plan.steps = _generate_dynamic_steps(intent_result, ctx)
+        if intent_result.risk_class in (RiskClass.HIGH, RiskClass.CRITICAL):
+            plan.requires_human_approval = True
         return plan
 
     for i, step_def in enumerate(template, 1):
@@ -166,6 +162,158 @@ def generate_plan(intent_result: IntentResult, context: Optional[dict] = None) -
     return plan
 
 
+def _generate_dynamic_steps(intent_result: IntentResult, context: dict[str, Any]) -> list[PlanStep]:
+    shared_parameters = {
+        **intent_result.parameters,
+        **context.get("extra_params", {}),
+        "_dynamic_plan": True,
+        "_intent_category": intent_result.category.value,
+        "_source_intent": intent_result.intent,
+    }
+
+    dynamic_steps: list[dict[str, Any]]
+
+    if intent_result.category == IntentCategory.NAVIGATION:
+        dynamic_steps = [
+            {
+                "type": StepType.QUERY,
+                "action": "resolve_navigation_target",
+                "description": f"Navigationsziel fuer Intent '{intent_result.intent}' aufloesen",
+                "entity_type": "route",
+            },
+            {
+                "type": StepType.COMMAND,
+                "action": "open_navigation_target",
+                "description": "Zielansicht oeffnen",
+                "entity_type": "route",
+            },
+        ]
+    elif intent_result.category == IntentCategory.APPROVAL:
+        dynamic_steps = [
+            {
+                "type": StepType.QUERY,
+                "action": "load_pending_approvals",
+                "description": "Offene Freigabefaelle fuer den Kontext laden",
+                "entity_type": "approval",
+            },
+            {
+                "type": StepType.GATE,
+                "action": "human_approval",
+                "description": "Passende Freigabeentscheidung einholen",
+                "entity_type": "approval",
+                "requires_approval": True,
+            },
+        ]
+    elif intent_result.matched_capability:
+        dynamic_steps = [
+            {
+                "type": StepType.VALIDATION,
+                "action": "validate_dynamic_request",
+                "description": "Anfrage fuer dynamische Capability-Ausfuehrung validieren",
+                "entity_type": "request",
+            },
+            {
+                "type": StepType.COMMAND,
+                "action": "delegate_capability_workflow",
+                "description": "Dynamischen Capability-Run delegieren",
+                "entity_type": "capability_run",
+            },
+            {
+                "type": StepType.NOTIFICATION,
+                "action": "summarize_dynamic_result",
+                "description": "Ergebnis fuer den Nutzer zusammenfassen",
+                "entity_type": "response",
+            },
+        ]
+    elif intent_result.category == IntentCategory.ANALYSIS:
+        dynamic_steps = [
+            {
+                "type": StepType.QUERY,
+                "action": "collect_business_context",
+                "description": "Fachkontext fuer die Analyse sammeln",
+                "entity_type": "context",
+            },
+            {
+                "type": StepType.COMMAND,
+                "action": "run_dynamic_analysis",
+                "description": "Dynamische Analyse ohne statisches Template ausfuehren",
+                "entity_type": "analysis",
+            },
+            {
+                "type": StepType.NOTIFICATION,
+                "action": "summarize_findings",
+                "description": "Analyseergebnis strukturieren und zusammenfassen",
+                "entity_type": "response",
+            },
+        ]
+    elif intent_result.category == IntentCategory.QUERY:
+        dynamic_steps = [
+            {
+                "type": StepType.QUERY,
+                "action": "collect_business_context",
+                "description": "Kontext fuer die Anfrage sammeln",
+                "entity_type": "context",
+            },
+            {
+                "type": StepType.COMMAND,
+                "action": "synthesize_query_answer",
+                "description": "Antwort aus dem verfuegbaren Kontext ableiten",
+                "entity_type": "response",
+            },
+        ]
+    elif intent_result.category == IntentCategory.COMMAND:
+        dynamic_steps = [
+            {
+                "type": StepType.VALIDATION,
+                "action": "validate_dynamic_request",
+                "description": "Unbekannten Command-Kontext validieren",
+                "entity_type": "request",
+            },
+            {
+                "type": StepType.QUERY,
+                "action": "collect_business_context",
+                "description": "Abhaengige Stammdaten und Prozesskontext laden",
+                "entity_type": "context",
+            },
+            {
+                "type": StepType.COMMAND,
+                "action": "execute_dynamic_command",
+                "description": "Heuristisch abgeleiteten Command ausfuehren",
+                "entity_type": "operation",
+                "requires_approval": intent_result.risk_class in (RiskClass.MEDIUM, RiskClass.HIGH, RiskClass.CRITICAL),
+            },
+        ]
+    else:
+        dynamic_steps = [
+            {
+                "type": StepType.QUERY,
+                "action": "collect_business_context",
+                "description": "Basis-Kontext fuer unbekannten Intent sammeln",
+                "entity_type": "unknown",
+            },
+            {
+                "type": StepType.QUERY,
+                "action": "fallback_search",
+                "description": f"Kein Template fuer Intent '{intent_result.intent}' - Fallback-Suche mit Kontext",
+                "entity_type": "unknown",
+            },
+        ]
+
+    return [
+        PlanStep(
+            order=index,
+            type=step_def["type"],
+            action=step_def["action"],
+            description=step_def["description"],
+            entity_type=step_def.get("entity_type", ""),
+            parameters=dict(shared_parameters),
+            requires_approval=step_def.get("requires_approval", False),
+            rollback_action=step_def.get("rollback"),
+        )
+        for index, step_def in enumerate(dynamic_steps, 1)
+    ]
+
+
 def verify_plan(plan: ExecutionPlan, tenant_id: str = "system", db=None) -> ExecutionPlan:
     """
     Wave 2: Verifies ALL steps, not just the first one.
@@ -176,7 +324,7 @@ def verify_plan(plan: ExecutionPlan, tenant_id: str = "system", db=None) -> Exec
 
         first_step = plan.steps[0] if plan.steps else None
         action = first_step.action if first_step else plan.intent
-        is_create = any(w in action for w in ("create", "anlegen", "generate", "check", "query", "validate", "scan", "load", "list", "calculate", "detect", "assess", "notify", "fallback"))
+        is_create = any(w in action for w in ("create", "anlegen", "generate", "check", "query", "validate", "scan", "load", "list", "calculate", "detect", "assess", "notify", "fallback", "resolve", "collect", "synthesize", "delegate", "summarize", "run_dynamic", "execute_dynamic", "open_navigation"))
 
         verify_input = {
             "action": "create" if is_create else action,

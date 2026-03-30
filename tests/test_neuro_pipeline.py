@@ -52,6 +52,13 @@ class TestPipelineDryRun:
         result = run_pipeline("Skonto bei Rechnungen nutzen", dry_run=True)
         assert result["intent"]["intent"] == "skonto_pruefen"
 
+    def test_navigation_dry_run_uses_dynamic_plan(self):
+        result = run_pipeline("Zeig mir die offenen Auftraege", dry_run=True)
+        assert result["status"] == "dry_run"
+        assert result["plan"]["step_count"] == 2
+        assert result["plan"]["steps"][0]["action"] == "resolve_navigation_target"
+        assert result["plan"]["steps"][1]["action"] == "open_navigation_target"
+
 
 class TestPipelineApproval:
     def test_high_risk_requires_approval(self):

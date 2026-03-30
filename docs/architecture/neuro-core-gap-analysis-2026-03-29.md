@@ -54,8 +54,8 @@ Abhaengigkeiten zwischen Lanes sind explizit markiert.
 
 ### Lane A: Neuro-Core Kernel (NC-01, NC-04, EXT-01) -- ABGESCHLOSSEN
 
-**Status:** Umgesetzt 2026-03-30; NC-A6 bis NC-A8 haben Broker-, Execution- und Verification/Policy-Wave-2-Nachzug abgeschlossen
-**Scope:** Intent Engine + Planner + Pipeline + Capability-Runner-Delegation + zentraler Tool Broker + Wave-2-Verification/Policy-Integration
+**Status:** Umgesetzt 2026-03-30; NC-A6 bis NC-A10 haben Broker-, Execution-, Verification/Policy- und Dynamic-Plan-Wave-4-Nachzug abgeschlossen
+**Scope:** Intent Engine + Planner + Pipeline + Capability-Runner-Delegation + zentraler Tool Broker + Wave-2-Verification/Policy-Integration + heuristische Dynamic Plans
 **Dateibesitz:**
 
 - `app/agents/neuro_intent_engine.py` -- 11 Intent-Patterns, Capability-Matching, Risk-Klassen, Parameter-Extraktion
@@ -82,6 +82,7 @@ Abhaengigkeiten zwischen Lanes sind explizit markiert.
 | NC-A5 | Pipeline: Intent -> Plan -> Verify -> Execute + Decision Protocol + Audit | Gruen (11 Tests) |
 | NC-A6 | Zentraler Neuro Tool Broker mit Step-Verifikation, Approval-Stops, Tool-Trace und State-Summary | Gruen (19 gezielte Tests fuer Broker/Pipeline) |
 | NC-A8 | Wave-2: temporale/nested Policies, Policy→Verify-Kopplung, State-Graph-Transitions, per-Step-Verification | Gruen (123 gezielte Planner/Verification/Policy-Tests) |
+| NC-A10 | Wave-4: dynamische Mehrschritt-Plaene fuer templatefreie Intents | Gruen (41 gezielte Planner/Pipeline-Tests) |
 
 **Abhaengigkeiten:** Keine — Kern-Lane fertig, alle abhaengigen Slices (D4, F5, H1-H4) ebenfalls umgesetzt
 
