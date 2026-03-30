@@ -10,7 +10,7 @@ Diese Datei sammelt die fuer neue Analysen wichtigsten offenen Restthemen und be
 - Browser-Use- und CRUD-Pruefungen muessen pro Workflow fortgeschrieben werden
 - NATS-Consumer + Core-Handler: DLQ, Idempotenz, zusaetzlich Flow-Spine-Handler und Event-Observability (`flow_spine_handlers.py`, `observability.py`); offen bleibt produktives Surfacing im Betrieb/Monitoring
 - Der zentrale Neuro Tool Broker ist umgesetzt (NC-A6/NC-A7 inkl. interner OpenAPI-Execution); offen bleiben externe HTTP-Execution, breitere Tool-Contract-Harmonisierung
-- Verification und Policy Engine sind in Wave 2 (NC-A8) gekoppelt; Wave 3 ist mit NC-A9 (LLM-Fallback) und NC-D5 (Hash-Chain-Tests) umgesetzt; in Wave 4 ist NC-A10 (dynamische Plan-Generierung) erledigt. Offen bleiben Cross-Entity-Integrity, Risk-Scoring und produktive Tenant-Overrides. Details in `docs/project-context/neuro-stack-gap-matrix-2026-03-29.md`
+- Verification und Policy Engine sind in Wave 2 (NC-A8) gekoppelt; Wave 3 ist mit NC-A9 (LLM-Fallback) und NC-D5 (Hash-Chain-Tests) umgesetzt; in Wave 4 sind NC-A10 (dynamische Plan-Generierung) und NC-A11 (Cross-Entity-Integrity) erledigt. Offen bleiben Risk-Scoring und produktive Tenant-Overrides. Details in `docs/project-context/neuro-stack-gap-matrix-2026-03-29.md`
 - ChromaDB fuer produktive RAG-Nutzung muss mit Prozesswissen befuellt werden
 - Voice-Kanal setzt Web Speech API voraus (Chrome/Edge); Firefox und Safari nicht unterstuetzt
 - Agentenarchitektur-Diagramm zeigt weiterhin Restluecken bei produktiver Vault-Anbindung, Memory-Governance, Process-Kernel-Contracts und tieferer Observability (siehe `docs/project-context/agent-architecture-gaps-2026-03-28.md`)

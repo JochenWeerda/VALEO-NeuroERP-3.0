@@ -36,6 +36,7 @@ class ViolationType(str, Enum):
     POLICY_VIOLATION = "policy_violation"
     DATA_INTEGRITY = "data_integrity"
     INVALID_TRANSITION = "invalid_transition"
+    CROSS_ENTITY_INTEGRITY = "cross_entity_integrity"
 
 
 @dataclass
@@ -271,6 +272,43 @@ def check_state_transition(plan: dict) -> list[Violation]:
     return violations
 
 
+def check_cross_entity_integrity(plan: dict) -> list[Violation]:
+    """
+    Wave 4: Verify snapshot-level cross-entity integrity if a state graph snapshot
+    is available on the plan or step payload.
+    """
+    violations: list[Violation] = []
+    snapshot_payload = (
+        plan.get("state_graph_snapshot")
+        or plan.get("cross_entity_snapshot")
+        or plan.get("state_snapshot")
+    )
+    if not snapshot_payload:
+        return violations
+
+    try:
+        from app.core.neuro_state_graph import StateGraphService, StateGraphSnapshot
+
+        snapshot = (
+            snapshot_payload
+            if isinstance(snapshot_payload, StateGraphSnapshot)
+            else StateGraphSnapshot.model_validate(snapshot_payload)
+        )
+        integrity_violations = StateGraphService.verify_snapshot_integrity(snapshot)
+        for message in integrity_violations:
+            violations.append(
+                Violation(
+                    ViolationType.CROSS_ENTITY_INTEGRITY,
+                    message,
+                    "state_graph_snapshot",
+                )
+            )
+    except Exception as exc:
+        logger.warning("Cross-entity integrity check skipped: %s", exc)
+
+    return violations
+
+
 def _verify_single(plan: dict, tenant_id: str, db: Optional[Session] = None, **kwargs) -> list[Violation]:
     """Verify a single plan/step dict and return all violations."""
     violations = []
@@ -278,6 +316,7 @@ def _verify_single(plan: dict, tenant_id: str, db: Optional[Session] = None, **k
     violations.extend(check_policy_conformity(plan, tenant_id, db, **kwargs))
     violations.extend(check_data_integrity(plan))
     violations.extend(check_state_transition(plan))
+    violations.extend(check_cross_entity_integrity(plan))
     return violations
 
 
@@ -311,11 +350,16 @@ def verify_plan(plan: dict, tenant_id: str = "system", db: Optional[Session] = N
             "target_state": step.get("target_state", ""),
             "prozess_key": step.get("prozess_key", plan.get("prozess_key", "")),
             "policy_context": step.get("policy_context", plan.get("policy_context", {})),
+            "state_graph_snapshot": step.get(
+                "state_graph_snapshot",
+                plan.get("state_graph_snapshot", plan.get("cross_entity_snapshot")),
+            ),
         }
         step_violations = []
         step_violations.extend(check_policy_conformity(step_plan, tenant_id, db))
         step_violations.extend(check_data_integrity(step_plan))
         step_violations.extend(check_state_transition(step_plan))
+        step_violations.extend(check_cross_entity_integrity(step_plan))
 
         step_status = "approved"
         if any(v.severity == "error" for v in step_violations):
