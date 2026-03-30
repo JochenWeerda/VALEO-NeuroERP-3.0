@@ -1,7 +1,7 @@
 # REK-001 — Complaint-to-Resolution (Card)
 
-**Slice:** REK-001 | **Lane:** Complaint-to-Resolution | **Status:** abgeschlossen
-**Owner:** Claude Opus 4.6 | **Datum:** 2026-03-27
+**Slice:** REK-001 | **Lane:** Complaint-to-Resolution | **Status:** umgesetzt (Detail + Kern-Flow)
+**Owner:** Claude Opus 4.6 | **Datum:** 2026-03-30
 
 ---
 
@@ -13,11 +13,12 @@ und des Backend-Reklamations-API auf CRUD-Vollständigkeit, API-Korrektheit und 
 
 ## 2. Betroffene Dateien
 
-- `packages/frontend-web/src/pages/qualitaet/reklamationen.tsx` — Liste + Neuanlage (ok)
-- `packages/frontend-web/src/pages/qualitaet/ausnahmen.tsx` — Legacy apiClient, `.data`-Bug
-- `packages/frontend-web/src/pages/qualitaet/labor-auftrag.tsx` — Create (ok)
-- `packages/frontend-web/src/pages/qualitaet/labor-liste.tsx` — Liste (ok)
-- `app/api/v1/endpoints/reklamation_api.py` — Full CRUD + CRM + DMS + Audit (Backend ok)
+- `packages/frontend-web/src/pages/qualitaet/reklamationen.tsx` — Liste + Neuanlage
+- `packages/frontend-web/src/pages/qualitaet/reklamation-detail.tsx` — Detail mit Tabs (Uebersicht, CRM, Dokumente, Audit), Transitions, Workflow-Banner
+- `packages/frontend-web/src/pages/qualitaet/ausnahmen.tsx` — `@/lib/api-client`, GET mit `.data`
+- `packages/frontend-web/src/pages/qualitaet/labor-auftrag.tsx` — Create
+- `packages/frontend-web/src/pages/qualitaet/labor-liste.tsx` — Liste
+- `app/api/v1/endpoints/reklamation_api.py` — Full CRUD + CRM + DMS + Audit
 
 ## 3. API-Endpoints
 
@@ -34,36 +35,26 @@ und des Backend-Reklamations-API auf CRUD-Vollständigkeit, API-Korrektheit und 
 | `/api/v1/qualitaet/labor-auftraege` | GET/POST | Laboraufträge |
 | `/api/v1/operations/exceptions` | GET | Ausnahmen-Register |
 
-## 4. Client-Warnung
+## 4. Client-Hinweise
 
-- `reklamationen.tsx` nutzt `useReklamationen()` aus `@/lib/api/misc-modules` — korrekt
-- `ausnahmen.tsx` nutzt `@/lib/axios` — `.data`-Bug in Zeile 38
-- `labor-auftrag.tsx` nutzt `@/lib/api-client` — korrekt
-- `labor-liste.tsx` nutzt `useLaborAuftraege()` aus `@/lib/api/betrieb` — korrekt
+- `reklamationen.tsx` nutzt `useReklamationen()` aus `@/lib/api/misc-modules`
+- `ausnahmen.tsx` nutzt `@/lib/api-client` mit korrekter `.data`-Extraktion
+- `reklamation-detail.tsx` nutzt `@/lib/api-client`; Flow-Spine: `readWorkflowEntryContext`, best-effort Transition nach Statuswechsel
 
 ## 5. Offene Punkte
 
 | ID | Beschreibung | Priorität |
 |---|---|---|
-| REK-001-P1 | Detail-Seite `/qualitaet/reklamation/{id}` erstellen | Hoch |
-| REK-001-P2 | Transition-Buttons (erfassung → bewertung → ... → abschluss) | Hoch |
-| REK-001-P3 | CRM-Verknüpfung in Detail-Seite | Mittel |
-| REK-001-P4 | DMS-Dokumentanhang in Detail-Seite | Mittel |
-| REK-001-P5 | Audit-Trail Tab in Detail-Seite | Mittel |
-| REK-001-P6 | Labor Detail-Seite erstellen | Niedrig |
-| REK-001-P7 | ausnahmen.tsx: `.data`-Bug + apiClient-Import | Mittel |
-| REK-001-P8 | Reklamation-Create → Flow-Spine Instance auto-create | Hoch |
-| REK-001-P9 | Backend-Transition → Flow-Spine Node synchronisieren | Hoch |
-| REK-001-P10 | `workflowInstanceId` in alle Masken durchreichen | Mittel |
+| REK-001-P6 | Labor Detail-Seite `/qualitaet/labor/{id}` (Link aus Liste) | Niedrig |
+| — | P1–P5, P7–P10 | erledigt (siehe `docs/workflows/rek-001-complaint-to-resolution.md`) |
 
 ## 6. Tests (manuell)
 
-1. Reklamationen → Liste laden (3+ Einträge aus API)
-2. Reklamation → Neuanlage → POST erfolgreich
-3. Laborauftrag → Anlegen → POST erfolgreich
-4. Labor-Liste → Aufträge sichtbar
-5. Ausnahmen → Liste laden (ggf. `.data`-Fehler sichtbar)
+1. Reklamationen → Liste laden
+2. Reklamation → Detail öffnen → Transition, CRM, DMS, Audit prüfen
+3. Ausnahmen → Liste laden
+4. Laborauftrag / Labor-Liste wie bisher
 
 ---
 
-*Erstellt von Claude Opus 4.6 — Slice REK-001 — 2026-03-27*
+*Aktualisiert 2026-03-30 — Workflow: `docs/workflows/rek-001-complaint-to-resolution.md`*
