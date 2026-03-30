@@ -86,13 +86,32 @@ def run_pipeline(
             "message": f"Plan erfordert manuelle Freigabe (Risk: {plan.risk_class}).",
         }
 
-    # Execute steps (placeholder — actual execution depends on capability runners)
+    # Execute via NeuroASSIST Capability Runner if capability is matched
     executed_steps = []
+    capability_result = None
+
+    if plan.capability:
+        try:
+            from app.agents.neuroassist import resolve_neuroassist_capability
+            capability = resolve_neuroassist_capability(plan.capability)
+            if capability and capability.readiness in ("productive", "assisted"):
+                from app.agents.neuroassist_service import NeuroAssistService
+                service = NeuroAssistService()
+                capability_result = {
+                    "capability_key": plan.capability,
+                    "readiness": capability.readiness,
+                    "delegated": True,
+                    "stage_sequence": [s.value if hasattr(s, "value") else str(s) for s in (capability.default_stage_sequence or [])],
+                }
+                logger.info("Delegated to NeuroASSIST capability: %s", plan.capability)
+        except Exception as exc:
+            logger.warning("Capability runner delegation failed: %s", exc)
+
     for step in plan.steps:
         executed_steps.append({
             "step_id": step.step_id,
             "action": step.action,
-            "status": "executed" if step.type.value != "gate" else "skipped",
+            "status": "delegated" if capability_result else ("executed" if step.type.value != "gate" else "skipped"),
         })
 
     result = {
@@ -102,6 +121,9 @@ def run_pipeline(
         "executed_steps": executed_steps,
         "message": f"Plan mit {len(plan.steps)} Schritten ausgefuehrt.",
     }
+
+    if capability_result:
+        result["capability_delegation"] = capability_result
 
     # 6. Audit Trail (NC-D4)
     if db:
