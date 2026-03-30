@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 
 from app.agents.neuro_intent_engine import classify, IntentResult
 from app.agents.neuro_planner import generate_plan, verify_plan, ExecutionPlan
+from app.services.neuro_tool_broker import execute_plan as execute_plan_via_broker
 
 logger = logging.getLogger(__name__)
 
@@ -78,16 +79,6 @@ def run_pipeline(
             "message": "Dry-Run — keine Ausfuehrung.",
         }
 
-    if plan.requires_human_approval:
-        return {
-            "status": "awaiting_approval",
-            "intent": intent_result.to_dict(),
-            "plan": plan.to_dict(),
-            "message": f"Plan erfordert manuelle Freigabe (Risk: {plan.risk_class}).",
-        }
-
-    # Execute via NeuroASSIST Capability Runner if capability is matched
-    executed_steps = []
     capability_result = None
 
     if plan.capability:
@@ -107,19 +98,22 @@ def run_pipeline(
         except Exception as exc:
             logger.warning("Capability runner delegation failed: %s", exc)
 
-    for step in plan.steps:
-        executed_steps.append({
-            "step_id": step.step_id,
-            "action": step.action,
-            "status": "delegated" if capability_result else ("executed" if step.type.value != "gate" else "skipped"),
-        })
+    broker_result = execute_plan_via_broker(
+        plan,
+        tenant_id=tenant_id,
+        context=ctx,
+        db=db,
+    )
 
     result = {
-        "status": "executed",
+        "status": broker_result["status"],
         "intent": intent_result.to_dict(),
         "plan": plan.to_dict(),
-        "executed_steps": executed_steps,
-        "message": f"Plan mit {len(plan.steps)} Schritten ausgefuehrt.",
+        "executed_steps": broker_result["executed_steps"],
+        "tool_trace": broker_result["tool_trace"],
+        "state_summary": broker_result["state_summary"],
+        "rollback_plan": broker_result["rollback_plan"],
+        "message": broker_result["message"],
     }
 
     if capability_result:
