@@ -9,7 +9,8 @@ Diese Datei sammelt die fuer neue Analysen wichtigsten offenen Restthemen und be
 - einzelne Prozessstarts muessen weiter auf Praxisrealismus gegen Landhandelsablaeufe geprueft werden
 - Browser-Use- und CRUD-Pruefungen muessen pro Workflow fortgeschrieben werden
 - NATS-Consumer + Core-Handler besitzen jetzt DLQ und Idempotenzschutz; offen bleiben Flow-Spine-spezifische Handler und tieferes Event-Observability-Surfacing
-- Der zentrale Neuro Tool Broker ist umgesetzt; offen bleiben reale MCP-/OpenAPI-Tool-Ausfuehrung, persistente State-Graph-Mutationen und per-Step-Persistenz im Decision Trace
+- Der zentrale Neuro Tool Broker ist umgesetzt (NC-A6); **NC-A7 in Arbeit:** reale MCP-/OpenAPI-Tool-Ausfuehrung via HTTP-Client, persistente State-Graph-Mutationen nach Execution, per-Step-Persistenz im Decision Trace
+- **Neuro Core Completion Plan (4 Waves):** Wave 1 (Foundation/NC-A7) → Wave 2 (Verification+Policy Integration) → Wave 3 (Decision Trace Hardening + LLM-Fallback) → Wave 4 (Dynamic Plans + Stufe 2). Details in `docs/project-context/neuro-stack-gap-matrix-2026-03-29.md`
 - ChromaDB fuer produktive RAG-Nutzung muss mit Prozesswissen befuellt werden
 - Voice-Kanal setzt Web Speech API voraus (Chrome/Edge); Firefox und Safari nicht unterstuetzt
 - Agentenarchitektur-Diagramm zeigt weiterhin Restluecken bei produktiver Vault-Anbindung, Memory-Governance, Process-Kernel-Contracts und tieferer Observability (siehe `docs/project-context/agent-architecture-gaps-2026-03-28.md`)

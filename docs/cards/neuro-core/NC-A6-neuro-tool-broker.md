@@ -22,6 +22,6 @@ Der Execute-Pfad der Neuro-Core-Pipeline war bisher ein Platzhalter: Schritte wu
 
 ## Offene Folgearbeit
 
-- echter Tool-Client fuer MCP-/OpenAPI-Aufrufe
-- persistente State-Graph-Mutationen nach erfolgreicher Tool-Execution
-- per-Step-Persistenz im Decision Trace
+- ~~echter Tool-Client fuer MCP-/OpenAPI-Aufrufe~~ → NC-A7 umgesetzt
+- ~~persistente State-Graph-Mutationen nach erfolgreicher Tool-Execution~~ → NC-A7 umgesetzt
+- ~~per-Step-Persistenz im Decision Trace~~ → NC-A7 umgesetzt
