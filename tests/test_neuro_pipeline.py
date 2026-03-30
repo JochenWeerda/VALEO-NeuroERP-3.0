@@ -89,6 +89,7 @@ class TestPipelineResultStructure:
     def test_executed_result_includes_broker_trace(self):
         result = run_pipeline("Lagerbestand abfragen")
         assert result["tool_trace"][0]["binding_target"] == "valeo_inventory_bestand_get"
+        assert result["tool_trace"][0]["result"]["mode"] == "openapi_internal"
         assert "state_summary" in result
 
     def test_medium_risk_step_level_approval_is_visible(self):
