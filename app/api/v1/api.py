@@ -937,9 +937,16 @@ api_router.include_router(
     marketing.router
 )
 
-# Labor API
+# Labor API (kanonisch /labor; Alias /qualitaet fuer Frontend-Hooks)
 api_router.include_router(
-    labor.router
+    labor.router,
+    prefix="/labor",
+    tags=["Labor"],
+)
+api_router.include_router(
+    labor.router,
+    prefix="/qualitaet",
+    tags=["Labor", "Qualitaet"],
 )
 
 # Fuhrpark API

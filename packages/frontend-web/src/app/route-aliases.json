@@ -1337,6 +1337,10 @@
       "path": "qualitaet/labor-auftrag"
     },
     {
+      "module": "@/pages/qualitaet/labor-detail",
+      "path": "qualitaet/labor/:id"
+    },
+    {
       "module": "@/pages/qualitaet/labor-liste",
       "path": "qualitaet/labor"
     },

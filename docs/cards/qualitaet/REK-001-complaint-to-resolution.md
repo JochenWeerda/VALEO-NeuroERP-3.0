@@ -18,6 +18,7 @@ und des Backend-Reklamations-API auf CRUD-Vollständigkeit, API-Korrektheit und 
 - `packages/frontend-web/src/pages/qualitaet/ausnahmen.tsx` — `@/lib/api-client`, GET mit `.data`
 - `packages/frontend-web/src/pages/qualitaet/labor-auftrag.tsx` — Create
 - `packages/frontend-web/src/pages/qualitaet/labor-liste.tsx` — Liste
+- `packages/frontend-web/src/pages/qualitaet/labor-detail.tsx` — Labor-Auftrag Detail
 - `app/api/v1/endpoints/reklamation_api.py` — Full CRUD + CRM + DMS + Audit
 
 ## 3. API-Endpoints
@@ -43,10 +44,7 @@ und des Backend-Reklamations-API auf CRUD-Vollständigkeit, API-Korrektheit und 
 
 ## 5. Offene Punkte
 
-| ID | Beschreibung | Priorität |
-|---|---|---|
-| REK-001-P6 | Labor Detail-Seite `/qualitaet/labor/{id}` (Link aus Liste) | Niedrig |
-| — | P1–P5, P7–P10 | erledigt (siehe `docs/workflows/rek-001-complaint-to-resolution.md`) |
+Keine aus dieser Card — siehe `docs/workflows/rek-001-complaint-to-resolution.md` fuer Historie.
 
 ## 6. Tests (manuell)
 

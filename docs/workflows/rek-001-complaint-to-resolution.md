@@ -93,7 +93,7 @@ flowchart TD
 | D-07 | Audit-Trail Viewer | Audit-Tab mit Integritaetspruefung in Detail-Seite | ok (2026-03-30) |
 | D-08 | Laborauftrag anlegen | POST `/qualitaet/labor-auftraege` korrekt via `@/lib/api-client` | ok |
 | D-09 | Laborliste lesen | GET `/qualitaet/labor-auftraege` via Hook — korrekt | ok |
-| D-10 | Labor Detail-Seite | Link zu `/qualitaet/labor/{id}` — Detail-Seite fehlt | offen REK-001-P6 |
+| D-10 | Labor Detail-Seite | `labor-detail.tsx`, GET `/qualitaet/labor-auftraege/{id}`, Route `qualitaet/labor/:id` | ok (2026-03-30) |
 | D-11 | Ausnahmen: apiClient | Nutzt `@/lib/api-client` mit korrekter `.data`-Extraktion | ok (2026-03-30) |
 | D-12 | Flow-Spine: Auto-Instance | Best-effort Flow-Spine Transition in Detail handleTransition | ok (2026-03-30) |
 | D-13 | Flow-Spine: State-Mapping | handleTransition sendet Status an Flow-Spine Instance | ok (2026-03-30) |
@@ -193,4 +193,4 @@ flowchart TD
 
 ## Status
 
-**Umgesetzt** (2026-03-30). Detail-UI mit Tabs (Uebersicht, CRM, Dokumente, Audit), Transition-Buttons, Flow-Spine-Integration. Einziger offener Punkt: REK-001-P6 (Labor Detail-Seite).
+**Umgesetzt** (2026-03-30). Detail-UI mit Tabs, Labor-Detail (`/qualitaet/labor/:id`), Backend GET/POST Labor unter `/labor` und `/qualitaet`. Keine offenen REK-001-Punkte aus dieser Analyse.
