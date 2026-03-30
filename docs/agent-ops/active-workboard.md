@@ -95,8 +95,8 @@ Zwei End-to-End-Stränge laufen **fachlich und technisch getrennt**. Bitte **nic
 | INV-007 | Lagerplaetze: echte Belegung aus used_capacity/total_capacity | abgeschlossen | Cursor Agent | `pages/lager/lagerplaetze.tsx` | — | keine |
 | FIN-001 | Finance-to-Close: Vollanalyse (7 Masken, 11 Cards, 14 Soll-Ist, Mermaid, P1-P8) | abgeschlossen | Claude Opus 4.6 | `docs/workflows/fin-001-finance-to-close.md`, `docs/cards/finance/FIN-001-finance-to-close.md`, `pages/finance/buchungserfassung.tsx`, `pages/finance/nebenbuch-abstimmung.tsx`, `pages/finance/periods.tsx`, `pages/fibu/abschluss-cockpit.tsx`, `pages/fibu/abschluss-checklist-detail.tsx`, `pages/finance/ustva.tsx` | P1-P8 als Folge-Slices | keine |
 | CMP-001 | Compliance-to-Report: Vollanalyse (6 Masken, 12 Cards, 13 Soll-Ist, Mermaid, P1-P5) | abgeschlossen | Claude Opus 4.6 | `docs/workflows/cmp-001-compliance-to-report.md`, `docs/cards/compliance/CMP-001-compliance-to-report.md`, `pages/compliance/**`, `pages/nachhaltigkeit/eudr-compliance.tsx`, `pages/finance/ustva.tsx`, `pages/admin/compliance-dashboard.tsx` | P1-P5 als Folge-Slices | keine |
-| REK-001 | Complaint-to-Resolution: Vollanalyse (5 Masken, 11 Cards, 14 Soll-Ist, Mermaid, P1-P10) | abgeschlossen | Claude Opus 4.6 | `docs/workflows/rek-001-complaint-to-resolution.md`, `docs/cards/qualitaet/REK-001-complaint-to-resolution.md`, `pages/qualitaet/**`, `app/api/v1/endpoints/reklamation_api.py` | P1-P10 als Folge-Slices | keine |
-| SVC-001 | Service-to-Customer: Vollanalyse (2 Masken, 10 Cards, 15 Soll-Ist, Mermaid, P1-P10) | abgeschlossen | Claude Opus 4.6 | `docs/workflows/svc-001-service-to-customer.md`, `docs/cards/service/SVC-001-service-to-customer.md`, `pages/service/anfragen.tsx`, `pages/agribusiness/field-service-tasks.tsx` | P1-P10 als Folge-Slices | keine |
+| REK-001 | Complaint-to-Resolution: P1-P5 + P7-P10 umgesetzt. Detail-UI mit Tabs, Transitions, CRM, DMS, Audit. Nur P6 (Labor-Detail) offen. | umgesetzt | Claude Opus 4.6 | `pages/qualitaet/reklamation-detail.tsx`, `reklamationen.tsx`, `ausnahmen.tsx`, `reklamation_api.py` | P6 (Labor-Detail) | keine |
+| SVC-001 | Service-to-Customer: Detail + Neu + Rueckmeldung + Abschluss. Backend Full CRUD. Nur P4/P5 (Field-Service) offen. | umgesetzt | Claude Opus 4.6 | `pages/service/anfrage-detail.tsx`, `anfrage-neu.tsx`, `rueckmeldung.tsx`, `abschluss.tsx`, `service_anfragen.py` | P4 (Field-Service apiClient), P5 (FS Create/Edit) | keine |
 
 ## Reservierungsregel
 
@@ -141,6 +141,9 @@ Kein Agent darf einen Slice beginnen, der bereits `reserviert` oder `in arbeit` 
 
 **E2E-Workflows:**
 - FIN-001 P1-P8: Alle D-Checks gruen, 20 Seiten apiClient-Migration (`20f3cb40d`)
+- REK-001: Detail-UI (P1-P5), Transitions, CRM/DMS/Audit Tabs — Doku aktualisiert
+- SVC-001: Detail + Neu + Rueckmeldung + Abschluss — Doku aktualisiert
+- apiClient-Migration: 40 weitere Dateien migriert (`8df97bd53`), insgesamt 60+ Dateien
 
 **Dateibesitz (Cursor Agent):**
 - `app/agents/neuro_intent_engine.py`, `neuro_planner.py`, `neuro_pipeline.py`
@@ -164,9 +167,9 @@ Kein Agent darf einen Slice beginnen, der bereits `reserviert` oder `in arbeit` 
 
 | Aufgabe | Beschreibung | Status |
 |---------|-------------|--------|
-| REK-001 | Reklamations-Detail-UI + Flow-Spine | offen — Cursor Agent uebernimmt |
-| SVC-001 | Service-Backend + Detail-Routen | offen — Cursor Agent uebernimmt |
-| apiClient-Migration | Verbleibende ~36 Legacy-Import-Seiten | offen — Cursor Agent uebernimmt |
+| REK-001 | Reklamations-Detail-UI + Flow-Spine | abgeschlossen (8df97bd53) — Detail existierte bereits, Doku aktualisiert |
+| SVC-001 | Service-Backend + Detail-Routen | abgeschlossen (8df97bd53) — 5 Seiten + Backend existierten, Doku aktualisiert |
+| apiClient-Migration | 40 apiClient-Imports migriert (8df97bd53) | abgeschlossen — 17 api-only Dateien bleiben bei @/lib/axios |
 
 **Regeln:**
 - Commit-Convention: `feat(nc-XX): <beschreibung>` / `feat(SLICE-ID): <beschreibung>`.

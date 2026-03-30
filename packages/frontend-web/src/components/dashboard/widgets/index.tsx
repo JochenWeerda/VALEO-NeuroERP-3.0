@@ -171,7 +171,7 @@ function KPIWidget({ widget }: { widget: WidgetLayout }) {
   // Bestimme die anzuzeigenden Daten
   let displayData: { label: string; value: string; delta: number; icon: ReactNode }
 
-  if (kpiConfig && kpiData && kpiData[kpiConfig.key] !== undefined) {
+  if (kpiConfig && kpiData?.[kpiConfig.key] !== undefined) {
     const value = kpiData[kpiConfig.key] || 0
     const prevValue = prevKpiData?.[kpiConfig.key]
     const delta = prevValue !== undefined ? computeDelta(value, prevValue) : 0
