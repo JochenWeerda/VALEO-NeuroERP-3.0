@@ -1,7 +1,7 @@
 # SVC-001 — Service-to-Customer End-to-End Workflow-Analyse
 
-**Slice:** SVC-001 | **Lane:** Service-to-Customer | **Status:** abgeschlossen | **Owner:** Claude Opus 4.6
-**Datum:** 2026-03-27
+**Slice:** SVC-001 | **Lane:** Service-to-Customer | **Status:** umgesetzt | **Owner:** Claude Opus 4.6
+**Datum:** 2026-03-30
 
 ---
 
@@ -82,19 +82,19 @@ flowchart TD
 | # | Soll | Ist nach SVC-001 | Bewertung |
 |---|---|---|---|
 | D-01 | Serviceanfragen-Liste | GET `/service/anfragen` via `useServiceAnfragen()` Hook — korrekt | ok |
-| D-02 | Serviceanfrage Detail | Kein `/service/anfrage/{id}` Route — Link führt ins Leere | offen SVC-001-P1 |
-| D-03 | Serviceanfrage anlegen | Kein `/service/anfrage/neu` Route — Button ohne Zielseite | offen SVC-001-P2 |
-| D-04 | Serviceanfrage CRUD | Nur GET (Liste) — kein Create/Update/Delete im Frontend | offen SVC-001-P3 |
+| D-02 | Serviceanfrage Detail | `anfrage-detail.tsx` (293 Z.) — GET/PUT mit Tabs + Workflow-Banner | ok (2026-03-30) |
+| D-03 | Serviceanfrage anlegen | `anfrage-neu.tsx` (158 Z.) — POST mit Workflow-Handover | ok (2026-03-30) |
+| D-04 | Serviceanfrage CRUD | GET/POST/PUT/DELETE via `service_anfragen.py` + Frontend | ok (2026-03-30) |
 | D-05 | Field-Service-Tasks: Liste | GET via `fetch()` — funktioniert, aber nicht über apiClient | teilweise |
 | D-06 | Field-Service-Tasks: apiClient | Nutzt native `fetch()` statt `apiClient`/React Query | offen SVC-001-P4 |
 | D-07 | Field-Service-Tasks: Cancel/Delete | POST cancel + DELETE vorhanden | ok |
 | D-08 | Field-Service-Tasks: Create/Edit | Buttons vorhanden, Navigation auskommentiert | offen SVC-001-P5 |
 | D-09 | Field-Service-Tasks: Audit-Trail | GET audit-trail funktioniert | ok |
-| D-10 | Rückmeldung/Aktivitäten | Keine Seite, kein Endpoint — Node `report` ist leer | offen SVC-001-P6 |
-| D-11 | Kundenabschluss/Closure | Keine Seite, kein Endpoint — Node `closure` ist leer | offen SVC-001-P7 |
-| D-12 | Service Domain Backend | Kein `/app/domains/service/` — Backend fehlt | offen SVC-001-P8 |
-| D-13 | API-Endpunkt Mismatch | Registry verweist auf `/api/v1/crm/cases`, Frontend nutzt `/api/v1/service/anfragen` | offen SVC-001-P9 |
-| D-14 | Flow-Spine: Instance-ID | Nur `anfragen.tsx` zeigt WorkflowEntryBanner, alle anderen ignorieren Instance | offen SVC-001-P10 |
+| D-10 | Rueckmeldung/Aktivitaeten | `rueckmeldung.tsx` (177 Z.) — POST mit Arbeitszeit/Material/Ergebnis | ok (2026-03-30) |
+| D-11 | Kundenabschluss/Closure | `abschluss.tsx` (163 Z.) — POST mit Star-Rating + Kommentar | ok (2026-03-30) |
+| D-12 | Service Domain Backend | `service_anfragen.py` — Full CRUD + Rueckmeldung + Abschluss | ok (2026-03-30) |
+| D-13 | API-Endpunkt Mismatch | Frontend nutzt `/api/v1/service/anfragen` kanonisch | ok (2026-03-30) |
+| D-14 | Flow-Spine: Instance-ID | `readWorkflowEntryContext` in Detail, Neu, Rueckmeldung, Abschluss | ok (2026-03-30) |
 | D-15 | Flow-Spine: Redirect | Workspace leitet korrekt auf `/service/anfragen?workflowInstanceId=...` | ok |
 
 ---
@@ -180,4 +180,4 @@ flowchart TD
 
 ## Status
 
-**Erstanalyse abgeschlossen** (2026-03-27). Service-to-Customer Flow-Spine aktiv, Slices dokumentiert.
+**Umgesetzt** (2026-03-30). Detail, Neu, Rueckmeldung, Abschluss Frontend-Seiten mit Backend CRUD. Offene Punkte: SVC-001-P4 (Field-Service apiClient-Migration), SVC-001-P5 (Field-Service Create/Edit).

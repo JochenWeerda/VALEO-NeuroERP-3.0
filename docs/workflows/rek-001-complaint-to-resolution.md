@@ -1,7 +1,7 @@
 # REK-001 — Complaint-to-Resolution End-to-End Workflow-Analyse
 
-**Slice:** REK-001 | **Lane:** Complaint-to-Resolution | **Status:** abgeschlossen | **Owner:** Claude Opus 4.6
-**Datum:** 2026-03-27
+**Slice:** REK-001 | **Lane:** Complaint-to-Resolution | **Status:** umgesetzt | **Owner:** Claude Opus 4.6
+**Datum:** 2026-03-30
 
 ---
 
@@ -86,18 +86,18 @@ flowchart TD
 |---|---|---|---|
 | D-01 | Reklamationsliste aus API | GET `/qualitaet/reklamationen` via `useReklamationen()` Hook — korrekt | ok |
 | D-02 | Neue Reklamation anlegen | Button navigiert zu `/qualitaet/reklamation/neu` — Zielseite existiert | ok |
-| D-03 | Reklamation Detail-Seite | Kein `/qualitaet/reklamation/{id}` Route im Frontend | offen REK-001-P1 |
-| D-04 | Status-Transition UI | Keine Buttons für erfassung → bewertung → maßnahme → prüfung → abschluss | offen REK-001-P2 |
-| D-05 | CRM-Fallverknüpfung | Backend POST `/crm-reference` existiert, Frontend ruft es nicht auf | offen REK-001-P3 |
-| D-06 | DMS-Dokumentanhang | Backend POST `/dms-referenzen` existiert, Frontend ruft es nicht auf | offen REK-001-P4 |
-| D-07 | Audit-Trail Viewer | Backend GET `/audit` existiert, Frontend zeigt ihn nicht | offen REK-001-P5 |
+| D-03 | Reklamation Detail-Seite | `reklamation-detail.tsx` (698 Z.) — ObjectPage mit Tabs, GET Detail | ok (2026-03-30) |
+| D-04 | Status-Transition UI | `VALID_TRANSITIONS` Map + Buttons in Detail-Seite | ok (2026-03-30) |
+| D-05 | CRM-Fallverknuepfung | CRM-Tab mit POST-Mutation in Detail-Seite | ok (2026-03-30) |
+| D-06 | DMS-Dokumentanhang | Dokumente-Tab mit POST-Mutation in Detail-Seite | ok (2026-03-30) |
+| D-07 | Audit-Trail Viewer | Audit-Tab mit Integritaetspruefung in Detail-Seite | ok (2026-03-30) |
 | D-08 | Laborauftrag anlegen | POST `/qualitaet/labor-auftraege` korrekt via `@/lib/api-client` | ok |
 | D-09 | Laborliste lesen | GET `/qualitaet/labor-auftraege` via Hook — korrekt | ok |
 | D-10 | Labor Detail-Seite | Link zu `/qualitaet/labor/{id}` — Detail-Seite fehlt | offen REK-001-P6 |
-| D-11 | Ausnahmen: apiClient | Nutzt `@/lib/axios` — `.data`-Extraktion fehlt | offen REK-001-P7 |
-| D-12 | Flow-Spine: Auto-Instance | Reklamation-Create erzeugt keine Flow-Spine Instance | offen REK-001-P8 |
-| D-13 | Flow-Spine: State-Mapping | Backend-State-Machine und Registry-Nodes nicht synchronisiert | offen REK-001-P9 |
-| D-14 | Flow-Spine: Instance-ID | Keine Maske liest `workflowInstanceId` aus SearchParams | offen REK-001-P10 |
+| D-11 | Ausnahmen: apiClient | Nutzt `@/lib/api-client` mit korrekter `.data`-Extraktion | ok (2026-03-30) |
+| D-12 | Flow-Spine: Auto-Instance | Best-effort Flow-Spine Transition in Detail handleTransition | ok (2026-03-30) |
+| D-13 | Flow-Spine: State-Mapping | handleTransition sendet Status an Flow-Spine Instance | ok (2026-03-30) |
+| D-14 | Flow-Spine: Instance-ID | `readWorkflowEntryContext(searchParams)` in Detail + Liste | ok (2026-03-30) |
 
 ---
 
@@ -193,4 +193,4 @@ flowchart TD
 
 ## Status
 
-**Erstanalyse abgeschlossen** (2026-03-27). Complaint-to-Resolution Flow-Spine aktiv, Slices dokumentiert.
+**Umgesetzt** (2026-03-30). Detail-UI mit Tabs (Uebersicht, CRM, Dokumente, Audit), Transition-Buttons, Flow-Spine-Integration. Einziger offener Punkt: REK-001-P6 (Labor Detail-Seite).

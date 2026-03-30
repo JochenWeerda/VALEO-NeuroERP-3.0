@@ -1,4 +1,4 @@
-import { apiClient } from '@/lib/axios'
+import { apiClient } from '@/lib/api-client'
 
 export type KontraktType = 'EINKAUF' | 'ZUKAUF' | 'VERKAUF'
 export type KontraktStatus = 'OFFEN' | 'ERLEDIGT' | 'STORNIERT' | 'GELOESCHT'

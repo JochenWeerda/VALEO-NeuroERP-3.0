@@ -9,7 +9,7 @@ import { ListConfig } from '@/components/mask-builder/types'
 import { getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 import { toast } from '@/hooks/use-toast'
 import { useAnlieferavis, type Anlieferavis, einkaufKeys } from '@/lib/api/einkauf'
-import { apiClient } from '@/lib/axios'
+import { apiClient } from '@/lib/api-client'
 
 const createAnlieferavisConfig = (t: any): ListConfig => ({
   title: 'Anlieferavis',

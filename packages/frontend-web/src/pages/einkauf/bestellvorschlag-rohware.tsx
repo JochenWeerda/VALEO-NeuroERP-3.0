@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label'
 import { Card } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { useToast } from '@/components/ui/toast-provider'
-import { apiClient } from '@/lib/axios'
+import { apiClient } from '@/lib/api-client'
 import { MoreHorizontal, RefreshCw, Plus, Trash2, Calculator } from 'lucide-react'
 
 type ArtikelZeile = {

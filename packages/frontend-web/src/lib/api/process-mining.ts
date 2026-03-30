@@ -4,7 +4,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query'
-import { apiClient } from '@/lib/axios'
+import { apiClient } from '@/lib/api-client'
 
 export type ProcessSummary = {
   projection_key: string

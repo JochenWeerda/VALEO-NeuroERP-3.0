@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Building2, Save, Plus, X, AlertTriangle, CheckCircle, Archive, Lock } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
-import { apiClient } from '@/lib/axios'
+import { apiClient } from '@/lib/api-client'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { formatDate } from '@/components/mask-builder/utils/formatting'
 

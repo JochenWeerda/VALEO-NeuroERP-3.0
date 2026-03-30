@@ -1,4 +1,4 @@
-﻿import { Suspense, lazy, type ReactElement } from 'react'
+import { Suspense, lazy, type ReactElement } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import {
   Alert,
@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { queryKeys } from '@/lib/query'
-import { apiClient } from '@/lib/axios'
+import { apiClient } from '@/lib/api-client'
 
 const KPI_KEYS = [
   'contract_long_tons',

@@ -12,7 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from '@/hooks/use-toast'
-import { apiClient } from '@/lib/axios'
+import { apiClient } from '@/lib/api-client'
 import { Plus, ArrowLeft, XCircle } from 'lucide-react'
 import { formatDate, formatNumber } from '@/components/mask-builder/utils/formatting'
 

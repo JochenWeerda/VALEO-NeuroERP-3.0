@@ -9,7 +9,7 @@ import { NativeSelect } from '@/components/ui/native-select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { toast } from '@/hooks/use-toast'
-import { apiClient } from '@/lib/axios'
+import { apiClient } from '@/lib/api-client'
 import { Package } from 'lucide-react'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 

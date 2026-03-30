@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { apiClient } from '@/lib/axios'
+import { apiClient } from '@/lib/api-client'
 
 export type Article = {
   id: string

@@ -9,7 +9,7 @@ import { ListConfig } from '@/components/mask-builder/types'
 import { getEntityTypeLabel, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 import { toast } from '@/hooks/use-toast'
 import { useEinkaufAnfragen, type EinkaufAnfrage, einkaufKeys } from '@/lib/api/einkauf'
-import { apiClient } from '@/lib/axios'
+import { apiClient } from '@/lib/api-client'
 
 // Konfiguration fuer Anfragen ListReport (wird in Komponente mit i18n erstellt)
 const createAnfragenConfig = (t: any, entityTypeLabel: string): ListConfig => ({

@@ -23,7 +23,7 @@ import type { WeighingTicket } from '@/components/agrar/WeighingTicketSelectionD
 import type { AgrarContract } from '@/components/agrar/ContractSelectionDialog'
 import type { Variety } from '@/components/agrar/VarietySelectionDialog'
 
-import { apiClient } from '@/lib/axios'
+import { apiClient } from '@/lib/api-client'
 import { useAuth } from '@/hooks/useAuth'
 import { useGlobalShortcutsWithVoice } from '@/features/ki-usability'
 import { ShortcutHintButton } from '@/components/shortcuts/ShortcutHelpPanel'

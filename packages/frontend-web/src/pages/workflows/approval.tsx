@@ -14,7 +14,7 @@ import {
   Package, Euro, Clock
 } from 'lucide-react'
 import { useWorkflowStatus, useApproveWorkflow } from '@/lib/api/workflows'
-import { apiClient } from '@/lib/axios'
+import { apiClient } from '@/lib/api-client'
 import { getCapabilityByKey } from '@/lib/agentCapabilities'
 
 export default function WorkflowApprovalPage(): JSX.Element {
