@@ -6,6 +6,8 @@ Dockt an die bestehende NeuroASSIST-Capability-Registry an.
 
 from __future__ import annotations
 
+import asyncio
+import json
 import logging
 import re
 from dataclasses import dataclass, field
@@ -245,12 +247,16 @@ def classify(user_input: str, context: Optional[dict] = None) -> IntentResult:
             parameters=_extract_parameters(text, best_match["intent"]),
         )
 
+    llm_result = _classify_with_llm_fallback(text, ctx)
+    if llm_result is not None:
+        return llm_result
+
     return IntentResult(
         intent="unknown",
         category=IntentCategory.UNKNOWN,
         confidence_score=0.1,
         risk_class=RiskClass.LOW,
-        explanation="Kein Pattern-Match — Fallback auf unknown",
+        explanation="Kein Pattern-Match und kein LLM-Fallback verfuegbar - Fallback auf unknown",
     )
 
 
@@ -272,6 +278,143 @@ def _extract_parameters(text: str, intent: str) -> dict:
         params["article_ref"] = article_match.group(1)
 
     return params
+
+
+def _classify_with_llm_fallback(text: str, context: dict[str, Any]) -> IntentResult | None:
+    payload = _resolve_llm_payload(text, context)
+    if not payload:
+        return None
+
+    intent_name = str(payload.get("intent") or "").strip()
+    if not intent_name:
+        return None
+
+    entry = next((candidate for candidate in INTENT_PATTERNS if candidate["intent"] == intent_name), None)
+    if entry is None:
+        logger.warning("LLM fallback returned unsupported intent '%s'", intent_name)
+        return None
+
+    category = entry["category"]
+    payload_category = payload.get("category")
+    if payload_category:
+        try:
+            category = IntentCategory(str(payload_category))
+        except ValueError:
+            logger.warning("LLM fallback returned unsupported category '%s'", payload_category)
+
+    risk = entry["risk_class"]
+    payload_risk = payload.get("risk_class")
+    if payload_risk:
+        try:
+            risk = RiskClass(str(payload_risk))
+        except ValueError:
+            logger.warning("LLM fallback returned unsupported risk '%s'", payload_risk)
+
+    confidence = max(float(payload.get("confidence_score", 0.55)), 0.31)
+    parameters = _extract_parameters(text, intent_name)
+    parameters.update(payload.get("parameters") or {})
+    explanation = str(payload.get("explanation") or "LLM-Fallback fuer unbekannten Intent")
+    capability = payload.get("matched_capability") or entry.get("capability")
+
+    return IntentResult(
+        intent=intent_name,
+        category=category,
+        confidence_score=round(min(confidence, 0.95), 3),
+        risk_class=risk,
+        explanation=explanation,
+        matched_capability=capability,
+        requested_action=str(payload.get("requested_action") or intent_name),
+        parameters=parameters,
+    )
+
+
+def _resolve_llm_payload(text: str, context: dict[str, Any]) -> dict[str, Any] | None:
+    resolver = context.get("intent_llm_resolver")
+    if callable(resolver):
+        try:
+            payload = resolver(text=text, context=context)
+        except TypeError:
+            payload = resolver(text, context)
+        except Exception as exc:
+            logger.warning("Injected intent LLM resolver failed: %s", exc)
+            return None
+        return _normalize_llm_payload(payload)
+
+    if not context.get("intent_llm_enabled"):
+        return None
+
+    try:
+        from services.ai.app.services.openai_service import generate_completion
+    except Exception as exc:
+        logger.warning("Intent LLM fallback unavailable: %s", exc)
+        return None
+
+    prompt = _build_llm_prompt(text)
+    try:
+        raw = _run_async_llm_completion(
+            generate_completion(
+                prompt=prompt,
+                system_message=(
+                    "Du klassifizierst unbekannte ERP-Nutzeranfragen auf einen vorhandenen Neuro-Intent. "
+                    "Erfinde keine neuen Intents und antworte nur als JSON."
+                ),
+                temperature=0.0,
+                max_tokens=200,
+            )
+        )
+    except RuntimeError as exc:
+        logger.info("Intent LLM fallback skipped: %s", exc)
+        return None
+    except Exception as exc:
+        logger.warning("Intent LLM fallback failed: %s", exc)
+        return None
+
+    if not raw:
+        return None
+
+    try:
+        payload = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        logger.warning("Intent LLM fallback returned invalid JSON: %s", exc)
+        return None
+    return _normalize_llm_payload(payload)
+
+
+def _normalize_llm_payload(payload: Any) -> dict[str, Any] | None:
+    if isinstance(payload, IntentResult):
+        return payload.to_dict()
+    if not isinstance(payload, dict):
+        return None
+    return payload
+
+
+def _run_async_llm_completion(coro: Any) -> Any:
+    try:
+        asyncio.get_running_loop()
+    except RuntimeError:
+        return asyncio.run(coro)
+    raise RuntimeError("running_loop")
+
+
+def _build_llm_prompt(text: str) -> str:
+    intents = [
+        {
+            "intent": entry["intent"],
+            "category": entry["category"].value,
+            "risk_class": entry["risk_class"].value,
+            "capability": entry.get("capability"),
+        }
+        for entry in INTENT_PATTERNS
+    ]
+    return (
+        "Ordne die folgende Eingabe genau einem vorhandenen Intent zu oder gib 'unknown' zurueck.\n"
+        f"Bekannte Intents: {json.dumps(intents, ensure_ascii=True)}\n"
+        "Antwortformat JSON: "
+        '{"intent":"...","category":"query|command|navigation|analysis|approval|unknown",'
+        '"risk_class":"low|medium|high|critical","confidence_score":0.0,'
+        '"matched_capability":"...", "requested_action":"...", "parameters":{}, "explanation":"..."}\n'
+        f"Eingabe: {text}"
+    )
 
 
 def get_supported_intents() -> list[dict]:
