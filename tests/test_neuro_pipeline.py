@@ -16,6 +16,25 @@ class TestPipelineClassification:
         result = run_pipeline("xyz abc 123")
         assert result["status"] == "low_confidence" or result["intent"]["intent"] == "unknown"
 
+    def test_unknown_intent_with_llm_fallback_returns_plan(self):
+        result = run_pipeline(
+            "Bitte analysiere rasch die faelligen Rechnungen auf Lieferantenrabattpotenzial",
+            context={
+                "intent_llm_resolver": lambda text, context: {
+                    "intent": "skonto_pruefen",
+                    "category": "analysis",
+                    "risk_class": "low",
+                    "confidence_score": 0.72,
+                    "matched_capability": "finance_skonto_assistant",
+                    "explanation": "LLM-Fallback hat einen bekannten Intent erkannt",
+                }
+            },
+            dry_run=True,
+        )
+        assert result["status"] == "dry_run"
+        assert result["intent"]["intent"] == "skonto_pruefen"
+        assert result["plan"]["step_count"] >= 1
+
     def test_empty_input(self):
         result = run_pipeline("")
         assert result["status"] == "low_confidence"

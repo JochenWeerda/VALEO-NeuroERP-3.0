@@ -95,6 +95,43 @@ class TestClassifyEdgeCases:
         assert result.intent == "unknown"
         assert result.confidence_score < 0.5
 
+    def test_unknown_input_uses_injected_llm_fallback(self):
+        def resolver(text: str, context: dict):
+            assert text == "Bitte analysiere unsere faelligen Rechnungen auf Lieferantenrabattpotenzial"
+            return {
+                "intent": "skonto_pruefen",
+                "category": "analysis",
+                "risk_class": "low",
+                "confidence_score": 0.74,
+                "matched_capability": "finance_skonto_assistant",
+                "parameters": {"scope": "offene_rechnungen"},
+                "explanation": "LLM-Fallback fuer unbekannte Formulierung",
+            }
+
+        result = classify(
+            "Bitte analysiere unsere faelligen Rechnungen auf Lieferantenrabattpotenzial",
+            {"intent_llm_resolver": resolver},
+        )
+        assert result.intent == "skonto_pruefen"
+        assert result.category == IntentCategory.ANALYSIS
+        assert result.matched_capability == "finance_skonto_assistant"
+        assert result.parameters["scope"] == "offene_rechnungen"
+        assert result.confidence_score == 0.74
+
+    def test_unknown_input_with_invalid_llm_intent_falls_back_to_unknown(self):
+        result = classify(
+            "Bitte hilf mir bei irgendwas",
+            {"intent_llm_resolver": lambda text, context: {"intent": "not_supported", "confidence_score": 0.9}},
+        )
+        assert result.intent == "unknown"
+
+    def test_unknown_input_with_broken_llm_resolver_falls_back_to_unknown(self):
+        def broken_resolver(text: str, context: dict):
+            raise RuntimeError("boom")
+
+        result = classify("Bitte klassifizieren", {"intent_llm_resolver": broken_resolver})
+        assert result.intent == "unknown"
+
     def test_case_insensitive(self):
         result = classify("BESTELLUNG ANLEGEN")
         assert result.intent == "bestellung_anlegen"
