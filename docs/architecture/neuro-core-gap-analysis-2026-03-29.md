@@ -18,18 +18,18 @@ Dazwischen: Guardrails, Audit, Policy, Human Oversight als Querschnittsschichten
 |---|-----------|----------------------|---------------|---------|------|
 | NC-01 | Neuro Intent Engine | Intent-Klassifikation, Confidence, Risikoklasse | **Umgesetzt** (Lane A, `neuro_intent_engine.py`, 11 Intents, 17 Tests, `c83edb6d2`) | Fertig | -- |
 | NC-02 | Neuro State Graph | Stateful Business Object Graph (Bestellung, Rechnung, Kunde, Freigabe) | **Umgesetzt** (Lane B, `neuro_state_graph.py`, 37 Tests gruen) | Fertig | -- |
-| NC-03 | Neuro Context Resolver | Rolle, Berechtigung, Business Objects, Einwilligung, Historie, Kanal | `neuroassist_context.py` loest Prozess/Aggregat auf; Consent fehlt | **Ausbau** | P2 |
+| NC-03 | Neuro Context Resolver | Rolle, Berechtigung, Business Objects, Einwilligung, Historie, Kanal | **Umgesetzt** (Consent + Channel Context in `neuroassist_context.py`, 2026-03-30) | Fertig | -- |
 | NC-04 | Neuro Planner | Kontext-Pruefung, Schritte generieren, Aktions-Favorit, Validierungsvertrag | **Umgesetzt** (Lane A, `neuro_planner.py`, 9 Templates, Capability-Delegation, 15 Tests, `c83edb6d2`) | Fertig | -- |
 | NC-05 | Confidence & Risk Engine | Append-Only Confidence Ledger | **Umgesetzt** (Lane B, `confidence_ledger.py`, SHA-256 Hash-Chain, 37 Tests gruen) | Fertig | -- |
-| NC-06 | Rule & Knowledge Store | Versionierte Policy- und Prompt-Registrierung | **Teilweise** (Policy Registry A/B + Rollback, Prompt Pack Registry umgesetzt) | **Ausbau** | P2 |
+| NC-06 | Rule & Knowledge Store | Versionierte Policy- und Prompt-Registrierung | **Umgesetzt** (Knowledge Store + REST API, Policy/Prompt Registries, 13 Tests, 2026-03-30) | Fertig | -- |
 | NC-07 | Action & Policy Layer | Definierte Aktionen und Risikosteuerung | `business_commands.py`, `command_dispatcher.py` -- **produktionsreif** | Fertig | -- |
-| NC-08 | Human Oversight | Menschliche Freigabe | `human_approval_gate.py` mit 4 Risikostufen -- **vorhanden** | **Ausbau** (Case Mgmt) | P3 |
+| NC-08 | Human Oversight | Menschliche Freigabe | **Umgesetzt** (`human_approval_gate.py`, Supervisor-Case-Management-UI, generische Run-API; UI-Gate-Aktionen ausserhalb Bestellvorschlag offen) | Ausbau | P3 |
 | NC-09 | Guardrails & Output-Validierung | PII/DLP-Schutz, Inhaltsfilterung | **Umgesetzt** (Lane C, `pii_detector.py`, `guardrails.py`, `be5b0ddf4`) | Fertig | -- |
 | NC-10 | Fast Track | Umgehung Neuro-Core fuer deterministisches CRUD | **Umgesetzt** (Lane E, `fast_track.py`, `be5b0ddf4`) | Fertig | -- |
 | NC-11 | VALEO Copilot UI | Konversationale AI-Oberflaeche | **Umgesetzt** (Lane F, `copilot_ws.py`, `useCopilotStream.ts`, `be5b0ddf4`) | Fertig | -- |
 | NC-12 | Interaktions-Kanaele | WhatsApp, E-Mail, Live-Chat/Web-Chat | **Umgesetzt** (Lane H, WhatsApp/Email/Voice/Ingress, `74378078f`). Live-Chat offen | **Ausbau** | P3 |
 | NC-13 | Audit & Trace Layer | Unveraenderlicher Audit-Trail, Neuro-Entscheidungs-Protokoll, SIEM | **Umgesetzt** (Lane D, `audit_hardening.py`, `neuro_decision_protocol.py`, `79267fb43`) | Fertig | -- |
-| NC-14 | Event Bus (Kafka) | Kafka Event Bus | **Teilweise** (Lane G, Event Schema Registry + Policy Registry, NATS Consumer umgesetzt) | **Ausbau** | P2 |
+| NC-14 | Event Bus (NATS) | Event Bus mit Flow-Spine-Handlern | **Umgesetzt** (NATS Consumer + DLQ + Idempotenz, 7 Flow-Spine-Handler, Observability, 20 Tests, 2026-03-30) | Fertig | -- |
 | NC-15 | Identity & Access / Secrets | OIDC + Vault | OIDC/Keycloak + RBAC vorhanden; kein Vault | **Ausbau** | P3 |
 | NC-16 | Load Balancer | Service-Routing | Traefik-Ingress in k8s; kein expliziter LB in Compose | Infra | P3 |
 | NC-17 | Domain Services | Auftrags-Service, Einkauf, Finanzdienst, externe APIs | **Produktionsreif** | Fertig | -- |
@@ -189,8 +189,9 @@ Abhaengigkeiten zwischen Lanes sind explizit markiert.
 
 ---
 
-### Lane F: Copilot Backend + Interaction State (NC-11, EXT-02)
+### Lane F: Copilot Backend + Interaction State (NC-11, EXT-02) -- ABGESCHLOSSEN
 
+**Status:** Umgesetzt 2026-03-30, Copilot-Dock auf produktiven WebSocket-Stream gezogen
 **Scope:** WebSocket-Streaming fuer Copilot, Interaction State Machine
 **Dateibesitz:**
 
@@ -198,8 +199,10 @@ Abhaengigkeiten zwischen Lanes sind explizit markiert.
 - `app/core/interaction_state.py` (NEU)
 - `app/infrastructure/models/interaction_state_models.py` (NEU)
 - `alembic/versions/interaction_state_*.py` (NEU)
-- `packages/frontend-web/src/features/copilot/useCopilotChat.ts` (EDIT -- WebSocket statt Mock)
+- `packages/frontend-web/src/features/copilot/useCopilotChat.ts` (EDIT -- WebSocket statt Alt-POST)
 - `packages/frontend-web/src/features/copilot/useCopilotStream.ts` (NEU)
+- `packages/frontend-web/src/features/copilot/CopilotDockPanel.tsx` (NEU)
+- `packages/frontend-web/src/features/workflow/HumanOversightBoard.tsx` (NEU)
 - `tests/test_copilot_ws.py` (NEU)
 - `tests/test_interaction_state.py` (NEU)
 
@@ -211,14 +214,15 @@ Abhaengigkeiten zwischen Lanes sind explizit markiert.
 | NC-F2 | `InteractionStateManager.transition(session_id, event) -> InteractionState` mit Guards und Audit | Unit-Test |
 | NC-F3 | WebSocket-Endpoint `ws://host/api/v1/copilot/chat` mit Token-Auth, SSE-Fallback | Integration-Test |
 | NC-F4 | Frontend `useCopilotStream` Hook -- WebSocket-Client mit Reconnect und Message-Queue | Vitest |
-| NC-F5 | Copilot -> Neuro-Core Pipeline: Chat-Nachricht -> IntentEngine -> Planner -> Response-Stream | E2E-Test |
+| NC-F5 | Copilot -> Neuro-Core Pipeline: Chat-Nachricht -> IntentEngine -> Planner -> Response-Stream | umgesetzt |
 
 **Abhaengigkeiten:** F5 haengt von Lane A (IntentEngine/Planner) ab.
 
 ---
 
-### Lane G: Event Bus Hardening + Knowledge Store (NC-14, NC-06)
+### Lane G: Event Bus Hardening + Knowledge Store (NC-14, NC-06) -- TEILWEISE ABGESCHLOSSEN
 
+**Status:** Stand 2026-03-30: NC-G1 bis NC-G5 plus DLQ/Idempotenz-Haertung umgesetzt; persistenter Knowledge Store und Flow-Spine-Observability offen
 **Scope:** NATS-Consumer aktivieren, Event-Schemas, Knowledge/Policy Versionierung
 **Dateibesitz:**
 
@@ -238,6 +242,7 @@ Abhaengigkeiten zwischen Lanes sind explizit markiert.
 | NC-G3 | Mindestens 3 Consumer aktivieren: Audit-Event, Inventory-Movement, Settlement-Created | Integration-Test (umgesetzt) |
 | NC-G4 | `PolicyRegistry` -- YAML/JSON-backed Policy-Speicher mit Versionierung + Rollback | Unit-Test (umgesetzt) |
 | NC-G5 | `PromptPackRegistry` -- versionierte Prompt-Packs mit A/B-Testing-Faehigkeit | Unit-Test (umgesetzt) |
+| NC-G6 | DLQ + event_id-Idempotenz fuer `NATSConsumer`, Oversight-/Doku-Nachzug | Unit-Test + Storybook/Docs (umgesetzt) |
 
 **Abhaengigkeiten:** Keine
 

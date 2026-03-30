@@ -21,6 +21,24 @@ from .neuroassist import NeuroAssistCapability
 NeuroAssistContextStatus = Literal["resolved", "partially_resolved", "unmappable"]
 
 
+class ConsentContext(BaseModel):
+    """Consent-Status fuer den aktuellen Kanal/Zweck (DSGVO)."""
+    entity_id: str | None = None
+    channel: str | None = None
+    has_consent: bool = True
+    consent_purposes: list[str] = Field(default_factory=list)
+    missing_consents: list[str] = Field(default_factory=list)
+
+
+class ChannelContext(BaseModel):
+    """Kanal-Kontext fuer Multi-Channel-Routing."""
+    channel_type: str | None = None
+    sender_id: str | None = None
+    interaction_state: str | None = None
+    message_count: int = 0
+    last_intent: str | None = None
+
+
 class NeuroAssistContextResolution(BaseModel):
     """Validated Process-Kernel context for a NeuroASSIST run."""
 
@@ -36,9 +54,11 @@ class NeuroAssistContextResolution(BaseModel):
     dq_ruleset_ids: list[str] = Field(default_factory=list)
     read_model_keys: list[str] = Field(default_factory=list)
     action_command_names: list[str] = Field(default_factory=list)
+    consent: ConsentContext = Field(default_factory=ConsentContext)
+    channel: ChannelContext = Field(default_factory=ChannelContext)
     errors: list[str] = Field(default_factory=list)
     hints: list[str] = Field(default_factory=list)
-    schema_version: int = 1
+    schema_version: int = 2
 
 
 _DQ_RULESET_NAME_ALIASES = {
@@ -213,6 +233,12 @@ def resolve_neuroassist_context(
     else:
         status = "unmappable"
 
+    consent_ctx = _resolve_consent_context(context, tenant_id)
+    channel_ctx = _resolve_channel_context(context)
+
+    if not consent_ctx.has_consent and consent_ctx.missing_consents:
+        hints.append(f"Fehlende Consents: {', '.join(consent_ctx.missing_consents)}")
+
     return NeuroAssistContextResolution(
         capability_key=capability.capability_key,
         tenant_id=tenant_id,
@@ -228,6 +254,70 @@ def resolve_neuroassist_context(
         dq_ruleset_ids=dq_ruleset_ids,
         read_model_keys=read_model_keys,
         action_command_names=action_command_names,
+        consent=consent_ctx,
+        channel=channel_ctx,
         errors=errors,
         hints=hints,
     )
+
+
+def _resolve_consent_context(context: dict[str, Any], tenant_id: str) -> ConsentContext:
+    entity_id = context.get("entity_id") or context.get("sender_id") or context.get("from_number")
+    channel = context.get("channel") or context.get("channel_type")
+
+    if not entity_id:
+        return ConsentContext()
+
+    consent_ctx = ConsentContext(entity_id=entity_id, channel=channel)
+
+    required_purposes = ["data_processing"]
+    if channel in ("whatsapp", "email", "voice"):
+        required_purposes.append(f"{channel}_communication")
+
+    try:
+        from app.services.consent_engine import check_consent
+        db = context.get("_db")
+        if db:
+            granted = []
+            missing = []
+            for purpose in required_purposes:
+                if check_consent(db, entity_id, purpose, tenant_id):
+                    granted.append(purpose)
+                else:
+                    missing.append(purpose)
+            consent_ctx.consent_purposes = granted
+            consent_ctx.missing_consents = missing
+            consent_ctx.has_consent = len(missing) == 0
+        else:
+            consent_ctx.has_consent = True
+            consent_ctx.consent_purposes = required_purposes
+    except Exception:
+        consent_ctx.has_consent = True
+        consent_ctx.consent_purposes = required_purposes
+
+    return consent_ctx
+
+
+def _resolve_channel_context(context: dict[str, Any]) -> ChannelContext:
+    channel_type = context.get("channel") or context.get("channel_type")
+    sender_id = context.get("sender_id") or context.get("from_number") or context.get("from_address")
+
+    channel_ctx = ChannelContext(
+        channel_type=channel_type,
+        sender_id=sender_id,
+        last_intent=context.get("last_intent"),
+    )
+
+    try:
+        from app.services.interaction_state_manager import get_interaction
+        interaction_id = context.get("interaction_id")
+        db = context.get("_db")
+        if interaction_id and db:
+            interaction = get_interaction(db, interaction_id)
+            if interaction:
+                channel_ctx.interaction_state = interaction.get("state")
+                channel_ctx.message_count = interaction.get("message_count", 0)
+    except Exception:
+        pass
+
+    return channel_ctx

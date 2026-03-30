@@ -397,13 +397,13 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
 
     const resolveArticle = async (): Promise<void> => {
       try {
-        const response = await apiClient.get('/api/v1/articles', {
+        const response = await apiClient.get<unknown>('/api/v1/articles', {
           params: {
             search: state.articleName.trim(),
             limit: 20,
           },
         })
-        const candidates = extractArticleLookupCandidates(response.data)
+        const candidates = extractArticleLookupCandidates(response)
         const wanted = normalizeArticleLookup(state.articleName)
         const matched =
           candidates.find((candidate) =>
@@ -445,7 +445,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
       if (!acceptanceId) return
 
       try {
-        const { data: ha } = await apiClient.get<HarvestAcceptanceResponse>(`/api/v1/agrar/harvest-acceptance/${acceptanceId}`)
+        const ha = await apiClient.get<HarvestAcceptanceResponse>(`/api/v1/agrar/harvest-acceptance/${acceptanceId}`)
         const positions = ha.positions ?? []
         const pos15 = positions.find((p: { position_number: number }) => p.position_number === 15)
         const pos20 = positions.find((p: { position_number: number }) => p.position_number === 20)

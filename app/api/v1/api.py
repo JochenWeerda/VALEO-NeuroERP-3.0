@@ -1145,3 +1145,8 @@ api_router.include_router(neuro_pipeline.router)
 from app.api.v1.endpoints import channels
 
 api_router.include_router(channels.router)
+
+# ── Neuro-Core NC-06: Knowledge Store ─────────────────────────
+from app.api.v1.endpoints import neuro_knowledge
+
+api_router.include_router(neuro_knowledge.router)
