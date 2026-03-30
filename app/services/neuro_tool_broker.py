@@ -1,20 +1,30 @@
 """
-Neuro Tool Broker - NC-A6
+Neuro Tool Broker - NC-A6 / NC-A7
 Centralized tool and command orchestration for Neuro-Core execution plans.
+
+NC-A7 additions:
+- Real OpenAPI execution via NeuroToolExecutionService (replaces simulation)
+- Persistent State-Graph mutations after successful execution
+- Per-step audit trace in the Decision Protocol
 """
 
 from __future__ import annotations
 
+import json
 import logging
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from typing import Any, Optional
+from uuid import uuid4
 
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.agents.neuro_planner import ExecutionPlan, PlanStep, StepType
 from app.core.action_execution import ActionExecutionRequest, ActionExecutionService
 from app.core.mcp_tool_contracts import MCPToolContract, MCPToolKategorie, get_process_kernel_mcp_tools
 from app.core.neuro_state_graph import StateGraphService, StateNode, StateNodeType, StatePhase
+from app.services.neuro_tool_execution import NeuroToolExecutionService
 from app.services.neuro_verification_engine import verify_plan
 
 logger = logging.getLogger(__name__)
@@ -182,9 +192,11 @@ class NeuroToolBroker:
         self,
         *,
         action_execution_service: ActionExecutionService | None = None,
+        tool_execution_service: NeuroToolExecutionService | None = None,
     ) -> None:
         self._registry = get_process_kernel_mcp_tools()
         self._action_execution_service = action_execution_service or ActionExecutionService()
+        self._tool_execution_service = tool_execution_service or NeuroToolExecutionService()
 
     def execute_plan(
         self,
@@ -263,6 +275,22 @@ class NeuroToolBroker:
                     "status": execution["step_status"],
                 }
             )
+
+            # NC-A7: persist state transition after successful execution
+            if execution["step_status"] in ("executed", "delegated") and state_transition:
+                self._persist_state_transition(state_transition, step, binding, tenant_id, db)
+
+            # NC-A7: record per-step audit trace in decision protocol
+            self._record_step_audit(
+                plan_id=plan.plan_id,
+                step=step,
+                binding=binding,
+                execution=execution,
+                state_transition=state_transition,
+                tenant_id=tenant_id,
+                db=db,
+            )
+
             if execution["step_status"] == "failed":
                 rollback_plan = self._build_rollback_plan(plan, executed_steps[:-1])
                 return {
@@ -391,7 +419,7 @@ class NeuroToolBroker:
         if binding.kind == "command":
             return self._dispatch_command(step, plan, binding, tenant_id)
         if binding.kind == "mcp_tool":
-            return self._simulate_tool_call(step, binding, context)
+            return self._execute_tool_contract(step, binding, tenant_id, context)
         if binding.kind == "capability":
             return {
                 "step_status": "delegated",
@@ -460,10 +488,11 @@ class NeuroToolBroker:
             },
         }
 
-    def _simulate_tool_call(
+    def _execute_tool_contract(
         self,
         step: PlanStep,
         binding: ToolBinding,
+        tenant_id: str,
         context: dict[str, Any],
     ) -> dict[str, Any]:
         contract = self._registry.by_tool_name(binding.target_name)
@@ -475,18 +504,176 @@ class NeuroToolBroker:
                     "result": {"error": f"Unknown tool contract '{binding.target_name}'"},
                 },
             }
-        payload = {
-            "tool_name": contract.tool_name,
-            "api_endpoint": contract.api_endpoint,
-            "requires_approval": contract.requires_approval,
-            "category": contract.kategorie.value,
-            "parameters": step.parameters,
-            "channel": context.get("channel", "api"),
-        }
+        payload = self._tool_execution_service.execute_contract(
+            contract,
+            parameters=step.parameters,
+            tenant_id=tenant_id,
+            context={
+                **context,
+                "entity_type": step.entity_type,
+                "action_type": step.action,
+            },
+        )
+        payload["category"] = contract.kategorie.value
+        payload["requires_approval"] = contract.requires_approval
+
+        # NC-A7: distinguish real execution from fallback
+        mode = payload.get("mode", "unknown")
+        if mode == "fallback_contract":
+            http_status = payload.get("http_status")
+            if http_status and http_status >= 500:
+                return {
+                    "step_status": "failed",
+                    "trace": {"status": "failed", "result": payload},
+                }
+            # 4xx or transport errors: degraded but not hard failure
+            return {
+                "step_status": "degraded",
+                "trace": {"status": "degraded", "result": payload},
+            }
+
         return {
             "step_status": "executed",
             "trace": {"status": "executed", "result": payload},
         }
+
+    # ------------------------------------------------------------------
+    # NC-A7: State-Graph Mutation Persistence
+    # ------------------------------------------------------------------
+
+    def _persist_state_transition(
+        self,
+        state_transition: dict[str, Any],
+        step: PlanStep,
+        binding: ToolBinding,
+        tenant_id: str,
+        db: Optional[Session],
+    ) -> None:
+        """Persist a planned state transition to the database after successful execution."""
+        if db is None or state_transition.get("status") != "planned":
+            return
+        try:
+            from app.infrastructure.models.neuro_state_models import (
+                StateNodeRecord,
+                StateTransitionRecord,
+            )
+            node_id = state_transition["node_id"]
+
+            # Update the node's current phase
+            existing_node = db.query(StateNodeRecord).filter_by(
+                node_id=node_id, tenant_id=tenant_id,
+            ).first()
+            if existing_node:
+                existing_node.phase = state_transition["to_phase"]
+            else:
+                # Create a minimal node record if it doesn't exist yet
+                new_node = StateNodeRecord(
+                    node_id=node_id,
+                    node_type=binding.target_node_type.value if binding.target_node_type else "unknown",
+                    phase=state_transition["to_phase"],
+                    tenant_id=tenant_id,
+                    aggregate_id=step.parameters.get("aggregate_id", node_id),
+                    aggregate_type=step.entity_type or binding.aggregate_type or "unknown",
+                    label=step.description or step.action,
+                    metadata_={},
+                )
+                db.add(new_node)
+
+            # Record the transition
+            transition_record = StateTransitionRecord(
+                transition_id=f"{step.step_id}-transition",
+                node_id=node_id,
+                from_phase=state_transition["from_phase"],
+                to_phase=state_transition["to_phase"],
+                tenant_id=tenant_id,
+                triggered_by="neuro-tool-broker",
+                reason=step.description or step.action,
+                context_hash=state_transition.get("context_hash", ""),
+                evidence_refs=json.dumps([step.step_id]),
+                schema_version=1,
+            )
+            db.add(transition_record)
+            db.commit()
+
+            state_transition["status"] = "committed"
+            logger.info(
+                "State transition persisted: %s %s → %s",
+                node_id, state_transition["from_phase"], state_transition["to_phase"],
+            )
+        except Exception as exc:
+            logger.warning("State transition persistence failed for step %s: %s", step.action, exc)
+            try:
+                db.rollback()
+            except Exception:
+                pass
+
+    # ------------------------------------------------------------------
+    # NC-A7: Per-Step Decision Trace
+    # ------------------------------------------------------------------
+
+    def _record_step_audit(
+        self,
+        *,
+        plan_id: str,
+        step: PlanStep,
+        binding: ToolBinding,
+        execution: dict[str, Any],
+        state_transition: dict[str, Any] | None,
+        tenant_id: str,
+        db: Optional[Session],
+    ) -> None:
+        """Write a per-step audit entry to the decision protocol table."""
+        if db is None:
+            return
+        trace_id = str(uuid4())
+        now = datetime.now(timezone.utc)
+        step_audit = {
+            "trace_id": trace_id,
+            "plan_id": plan_id,
+            "step_id": step.step_id,
+            "step_order": step.order,
+            "action": step.action,
+            "step_type": step.type.value,
+            "entity_type": step.entity_type,
+            "binding_kind": binding.kind,
+            "binding_target": binding.target_name,
+            "step_status": execution["step_status"],
+            "execution_mode": execution.get("trace", {}).get("result", {}).get("mode"),
+            "http_status": execution.get("trace", {}).get("result", {}).get("http_status"),
+            "state_transition": state_transition,
+            "recorded_at": now.isoformat(),
+        }
+        try:
+            db.execute(text("""
+                INSERT INTO domain_shared.neuro_step_audit_trace
+                    (id, tenant_id, plan_id, step_id, step_order, action,
+                     step_type, binding_kind, binding_target, step_status,
+                     execution_detail, recorded_at)
+                VALUES
+                    (:id, :tid, :plan_id, :step_id, :step_order, :action,
+                     :step_type, :binding_kind, :binding_target, :step_status,
+                     :detail, :recorded_at)
+            """), {
+                "id": trace_id,
+                "tid": tenant_id,
+                "plan_id": plan_id,
+                "step_id": step.step_id,
+                "step_order": step.order,
+                "action": step.action,
+                "step_type": step.type.value,
+                "binding_kind": binding.kind,
+                "binding_target": binding.target_name,
+                "step_status": execution["step_status"],
+                "detail": json.dumps(step_audit),
+                "recorded_at": now,
+            })
+            db.commit()
+        except Exception as exc:
+            logger.debug("Step audit trace write skipped (table may not exist): %s", exc)
+            try:
+                db.rollback()
+            except Exception:
+                pass
 
     def _build_rollback_plan(
         self,
@@ -508,8 +695,11 @@ class NeuroToolBroker:
         return rollback_plan
 
     def _build_state_summary(self, state_transitions: list[dict[str, Any]]) -> dict[str, Any]:
-        planned = [transition for transition in state_transitions if transition and transition.get("status") == "planned"]
+        relevant = [
+            t for t in state_transitions
+            if t and t.get("status") in ("planned", "committed")
+        ]
         return {
-            "transition_count": len(planned),
-            "transitions": planned,
+            "transition_count": len(relevant),
+            "transitions": relevant,
         }
