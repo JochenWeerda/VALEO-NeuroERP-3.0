@@ -13,7 +13,7 @@ Diese Datei sammelt die fuer neue Analysen wichtigsten offenen Restthemen und be
 - Voice-Kanal setzt Web Speech API voraus (Chrome/Edge); Firefox und Safari nicht unterstuetzt
 - Agentenarchitektur-Diagramm zeigt Luecken bei IAM/Secrets, Memory-Governance, Process-Kernel-Contracts und Observability (siehe `docs/project-context/agent-architecture-gaps-2026-03-28.md`)
 - Neuro-Stack-Status und P1-Luecken sind als Matrix dokumentiert (siehe `docs/project-context/neuro-stack-gap-matrix-2026-03-29.md`)
-- Knowledge Store fuer Policies/Prompt-Packs fehlt weiterhin (Registry vorhanden, aber kein persistenter Store)
+- Knowledge Store fuer Policies/Prompt-Packs ist jetzt als lokaler NC-G-Baustein vorhanden; offen bleiben DB-Migration, breitere API-Surfacing-Integration und produktive Nutzung in RAG-/Resolver-Pfaden
 - Multi-Channel deckt jetzt WhatsApp, E-Mail, Voice und Channel-Ingress ab; Live-Chat und outbound Routing fehlen weiterhin
 
 ## Zuletzt geschlossene Punkte (Wave 104, 2026-03-27)

@@ -6,7 +6,6 @@ Metriken, Health-Checks und Monitoring fuer den Event Bus.
 from __future__ import annotations
 
 import logging
-import time
 from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime, timezone

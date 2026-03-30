@@ -51,6 +51,7 @@ class TestStoreKnowledge:
         retrieved = get_knowledge(None, "einkauf", "test-v")
         assert retrieved is not None
         assert retrieved.title == "V2"
+        assert retrieved.version == 2
 
     def test_store_different_domains(self):
         store_knowledge(None, _make_entry(domain="einkauf", key="regel-a"))
@@ -58,6 +59,18 @@ class TestStoreKnowledge:
         assert get_knowledge(None, "einkauf", "regel-a") is not None
         assert get_knowledge(None, "agrar", "regel-b") is not None
         assert get_knowledge(None, "einkauf", "regel-b") is None
+
+    def test_store_isolated_by_tenant_in_memory(self):
+        store_knowledge(None, _make_entry(key="shared-key", title="Tenant A"), tenant_id="tenant-a")
+        store_knowledge(None, _make_entry(key="shared-key", title="Tenant B"), tenant_id="tenant-b")
+
+        tenant_a_entry = get_knowledge(None, "einkauf", "shared-key", tenant_id="tenant-a")
+        tenant_b_entry = get_knowledge(None, "einkauf", "shared-key", tenant_id="tenant-b")
+
+        assert tenant_a_entry is not None
+        assert tenant_b_entry is not None
+        assert tenant_a_entry.title == "Tenant A"
+        assert tenant_b_entry.title == "Tenant B"
 
 
 class TestSearchKnowledge:
@@ -93,6 +106,18 @@ class TestSearchKnowledge:
         results = search_knowledge(None, limit=3)
         assert len(results) == 3
 
+    def test_search_isolated_by_tenant_in_memory(self):
+        store_knowledge(None, _make_entry(key="tenant-a", title="A"), tenant_id="tenant-a")
+        store_knowledge(None, _make_entry(key="tenant-b", title="B"), tenant_id="tenant-b")
+
+        tenant_a_results = search_knowledge(None, tenant_id="tenant-a")
+        tenant_b_results = search_knowledge(None, tenant_id="tenant-b")
+
+        assert len(tenant_a_results) == 1
+        assert tenant_a_results[0].title == "A"
+        assert len(tenant_b_results) == 1
+        assert tenant_b_results[0].title == "B"
+
 
 class TestDeleteKnowledge:
     def test_delete_existing(self):
@@ -105,6 +130,15 @@ class TestDeleteKnowledge:
     def test_delete_nonexistent(self):
         deleted = delete_knowledge(None, "einkauf", "does-not-exist")
         assert deleted is False
+
+    def test_delete_respects_tenant_scope(self):
+        store_knowledge(None, _make_entry(key="same-key", title="Tenant A"), tenant_id="tenant-a")
+        store_knowledge(None, _make_entry(key="same-key", title="Tenant B"), tenant_id="tenant-b")
+
+        deleted = delete_knowledge(None, "einkauf", "same-key", tenant_id="tenant-a")
+        assert deleted is True
+        assert get_knowledge(None, "einkauf", "same-key", tenant_id="tenant-a") is None
+        assert get_knowledge(None, "einkauf", "same-key", tenant_id="tenant-b") is not None
 
 
 class TestKnowledgeStats:
@@ -119,6 +153,16 @@ class TestKnowledgeStats:
         stats = get_knowledge_stats(None)
         assert stats.get("business_rule") == 2
         assert stats.get("faq") == 1
+
+    def test_stats_respect_tenant_scope(self):
+        store_knowledge(None, _make_entry(key="a", knowledge_type=KnowledgeType.BUSINESS_RULE), tenant_id="tenant-a")
+        store_knowledge(None, _make_entry(key="b", knowledge_type=KnowledgeType.FAQ), tenant_id="tenant-b")
+
+        tenant_a_stats = get_knowledge_stats(None, tenant_id="tenant-a")
+        tenant_b_stats = get_knowledge_stats(None, tenant_id="tenant-b")
+
+        assert tenant_a_stats == {"business_rule": 1}
+        assert tenant_b_stats == {"faq": 1}
 
 
 class TestKnowledgeEntryModel:

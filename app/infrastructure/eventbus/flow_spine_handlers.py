@@ -7,7 +7,6 @@ Registrieren sich beim NATSEventConsumer.
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
 from typing import Any
 
 logger = logging.getLogger(__name__)
