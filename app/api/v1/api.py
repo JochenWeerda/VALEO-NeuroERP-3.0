@@ -1150,3 +1150,8 @@ api_router.include_router(channels.router)
 from app.api.v1.endpoints import neuro_knowledge
 
 api_router.include_router(neuro_knowledge.router)
+
+# ── Neuro-Core NC-08: Case Management (Human Oversight) ──────
+from app.api.v1.endpoints import case_management_api
+
+api_router.include_router(case_management_api.router)

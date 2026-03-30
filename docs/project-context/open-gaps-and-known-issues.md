@@ -11,10 +11,10 @@ Diese Datei sammelt die fuer neue Analysen wichtigsten offenen Restthemen und be
 - NATS-Consumer + Core-Handler besitzen jetzt DLQ und Idempotenzschutz; offen bleiben Flow-Spine-spezifische Handler und tieferes Event-Observability-Surfacing
 - ChromaDB fuer produktive RAG-Nutzung muss mit Prozesswissen befuellt werden
 - Voice-Kanal setzt Web Speech API voraus (Chrome/Edge); Firefox und Safari nicht unterstuetzt
-- Agentenarchitektur-Diagramm zeigt Luecken bei IAM/Secrets, Memory-Governance, Process-Kernel-Contracts und Observability (siehe `docs/project-context/agent-architecture-gaps-2026-03-28.md`)
+- Agentenarchitektur-Diagramm zeigt weiterhin Restluecken bei produktiver Vault-Anbindung, Memory-Governance, Process-Kernel-Contracts und tieferer Observability (siehe `docs/project-context/agent-architecture-gaps-2026-03-28.md`)
 - Neuro-Stack-Status und P1-Luecken sind als Matrix dokumentiert (siehe `docs/project-context/neuro-stack-gap-matrix-2026-03-29.md`)
 - Knowledge Store fuer Policies/Prompt-Packs ist jetzt als lokaler NC-G-Baustein vorhanden; offen bleiben DB-Migration, breitere API-Surfacing-Integration und produktive Nutzung in RAG-/Resolver-Pfaden
-- Multi-Channel deckt jetzt WhatsApp, E-Mail, Voice und Channel-Ingress ab; Live-Chat und outbound Routing fehlen weiterhin
+- Multi-Channel deckt jetzt WhatsApp, E-Mail, Voice, Live-Chat und Channel-Ingress ab; offen bleiben outbound Routing und produktive WebSocket-/Frontend-Verdrahtung fuer Live-Chat
 
 ## Zuletzt geschlossene Punkte (Wave 104, 2026-03-27)
 

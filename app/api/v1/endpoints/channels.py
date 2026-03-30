@@ -118,3 +118,63 @@ async def route_generic(
     )
     response = await route_message(message, db)
     return response.to_dict()
+
+
+# ── Live-Chat (NC-12) ──────────────────────────────────────────
+
+class ChatStartRequest(BaseModel):
+    user_id: str = Field(...)
+    context: Optional[dict[str, Any]] = None
+
+
+class ChatMessageRequest(BaseModel):
+    text: str = Field(...)
+    user_id: str = Field("")
+
+
+@router.post("/livechat/start")
+async def livechat_start(
+    request: ChatStartRequest,
+    tenant_id: str = Depends(get_tenant_id),
+):
+    """Neue Live-Chat-Session starten."""
+    from app.channels.livechat_channel import create_session
+    session = create_session(request.user_id, tenant_id, request.context)
+    return session.to_dict()
+
+
+@router.post("/livechat/{session_id}/message")
+async def livechat_message(
+    session_id: str,
+    request: ChatMessageRequest,
+):
+    """Nachricht an eine Live-Chat-Session senden."""
+    from app.channels.livechat_channel import process_chat_message
+    result = process_chat_message(session_id, request.text, request.user_id)
+    return result
+
+
+@router.get("/livechat/{session_id}/history")
+async def livechat_history(session_id: str, limit: int = 50):
+    """Chat-Historie einer Session abrufen."""
+    from app.channels.livechat_channel import get_history
+    messages = get_history(session_id, limit)
+    return {"count": len(messages), "messages": [m.to_dict() for m in messages]}
+
+
+@router.post("/livechat/{session_id}/close")
+async def livechat_close(session_id: str):
+    """Live-Chat-Session schliessen."""
+    from app.channels.livechat_channel import close_session
+    session = close_session(session_id)
+    if not session:
+        return {"error": "Session nicht gefunden"}
+    return session.to_dict()
+
+
+@router.get("/livechat/sessions")
+async def livechat_sessions(tenant_id: str = Depends(get_tenant_id)):
+    """Aktive Chat-Sessions auflisten."""
+    from app.channels.livechat_channel import list_active_sessions
+    sessions = list_active_sessions(tenant_id)
+    return {"count": len(sessions), "sessions": [s.to_dict() for s in sessions]}
