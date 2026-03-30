@@ -20,6 +20,7 @@ from app.services.neuro_verification_engine import (
     VerificationStatus,
     Violation,
     ViolationType,
+    check_cross_entity_integrity,
     check_data_integrity,
     check_policy_conformity,
     check_preconditions,
@@ -223,6 +224,95 @@ class TestCheckStateTransition:
 
 
 # ---------------------------------------------------------------------------
+# Cross-entity integrity
+# ---------------------------------------------------------------------------
+
+class TestCheckCrossEntityIntegrity:
+    def test_valid_snapshot_passes(self):
+        plan = {
+            "state_graph_snapshot": {
+                "snapshot_id": "snap-001",
+                "tenant_id": "t-001",
+                "root_node_id": "order-1",
+                "nodes": [
+                    {
+                        "node_id": "order-1",
+                        "node_type": "bestellung",
+                        "phase": "offen",
+                        "tenant_id": "t-001",
+                        "aggregate_id": "BO-1",
+                        "aggregate_type": "PurchaseOrder",
+                        "label": "Bestellung 1",
+                    },
+                    {
+                        "node_id": "delivery-1",
+                        "node_type": "lieferschein",
+                        "phase": "offen",
+                        "tenant_id": "t-001",
+                        "aggregate_id": "LS-1",
+                        "aggregate_type": "DeliveryNote",
+                        "label": "Lieferschein 1",
+                    },
+                ],
+                "edges": [
+                    {
+                        "edge_id": "edge-1",
+                        "source_node_id": "order-1",
+                        "target_node_id": "delivery-1",
+                        "relation": "erzeugt",
+                        "tenant_id": "t-001",
+                    }
+                ],
+                "transitions": [],
+            }
+        }
+        violations = check_cross_entity_integrity(plan)
+        assert violations == []
+
+    def test_invalid_snapshot_reports_violation(self):
+        plan = {
+            "state_graph_snapshot": {
+                "snapshot_id": "snap-002",
+                "tenant_id": "t-001",
+                "root_node_id": "order-1",
+                "nodes": [
+                    {
+                        "node_id": "order-1",
+                        "node_type": "bestellung",
+                        "phase": "entwurf",
+                        "tenant_id": "t-001",
+                        "aggregate_id": "BO-1",
+                        "aggregate_type": "PurchaseOrder",
+                        "label": "Bestellung 1",
+                    },
+                    {
+                        "node_id": "delivery-1",
+                        "node_type": "lieferschein",
+                        "phase": "offen",
+                        "tenant_id": "t-001",
+                        "aggregate_id": "LS-1",
+                        "aggregate_type": "DeliveryNote",
+                        "label": "Lieferschein 1",
+                    },
+                ],
+                "edges": [
+                    {
+                        "edge_id": "edge-1",
+                        "source_node_id": "order-1",
+                        "target_node_id": "delivery-1",
+                        "relation": "erzeugt",
+                        "tenant_id": "t-001",
+                    }
+                ],
+                "transitions": [],
+            }
+        }
+        violations = check_cross_entity_integrity(plan)
+        assert len(violations) == 1
+        assert violations[0].type == ViolationType.CROSS_ENTITY_INTEGRITY
+
+
+# ---------------------------------------------------------------------------
 # Data integrity
 # ---------------------------------------------------------------------------
 
@@ -321,6 +411,103 @@ class TestVerifyPlan:
         result = verify_plan(plan)
         assert result.status == VerificationStatus.APPROVED
         assert result.step_results == []
+
+    def test_plan_cross_entity_violation_rejects(self):
+        plan = {
+            "action": "create",
+            "entity_type": "purchase_order",
+            "entity_id": "1",
+            "state_graph_snapshot": {
+                "snapshot_id": "snap-003",
+                "tenant_id": "t-001",
+                "root_node_id": "approval-1",
+                "nodes": [
+                    {
+                        "node_id": "approval-1",
+                        "node_type": "freigabe",
+                        "phase": "offen",
+                        "tenant_id": "t-001",
+                        "aggregate_id": "APP-1",
+                        "aggregate_type": "Approval",
+                        "label": "Freigabe 1",
+                    },
+                    {
+                        "node_id": "invoice-1",
+                        "node_type": "rechnung",
+                        "phase": "freigegeben",
+                        "tenant_id": "t-001",
+                        "aggregate_id": "INV-1",
+                        "aggregate_type": "Invoice",
+                        "label": "Rechnung 1",
+                    },
+                ],
+                "edges": [
+                    {
+                        "edge_id": "edge-2",
+                        "source_node_id": "approval-1",
+                        "target_node_id": "invoice-1",
+                        "relation": "blockiert",
+                        "tenant_id": "t-001",
+                    }
+                ],
+                "transitions": [],
+            },
+        }
+        result = verify_plan(plan)
+        assert result.status == VerificationStatus.REJECTED
+        assert any(v.type == ViolationType.CROSS_ENTITY_INTEGRITY for v in result.violations)
+
+    def test_step_cross_entity_violation_propagates(self):
+        plan = {
+            "action": "create",
+            "entity_type": "purchase_order",
+            "entity_id": "1",
+            "steps": [
+                {
+                    "step_id": "s1",
+                    "action": "execute_dynamic_command",
+                    "entity_type": "purchase_order",
+                    "state_graph_snapshot": {
+                        "snapshot_id": "snap-004",
+                        "tenant_id": "t-001",
+                        "root_node_id": "order-1",
+                        "nodes": [
+                            {
+                                "node_id": "order-1",
+                                "node_type": "bestellung",
+                                "phase": "entwurf",
+                                "tenant_id": "t-001",
+                                "aggregate_id": "BO-1",
+                                "aggregate_type": "PurchaseOrder",
+                                "label": "Bestellung 1",
+                            },
+                            {
+                                "node_id": "delivery-1",
+                                "node_type": "lieferschein",
+                                "phase": "offen",
+                                "tenant_id": "t-001",
+                                "aggregate_id": "LS-1",
+                                "aggregate_type": "DeliveryNote",
+                                "label": "Lieferschein 1",
+                            },
+                        ],
+                        "edges": [
+                            {
+                                "edge_id": "edge-3",
+                                "source_node_id": "order-1",
+                                "target_node_id": "delivery-1",
+                                "relation": "erzeugt",
+                                "tenant_id": "t-001",
+                            }
+                        ],
+                        "transitions": [],
+                    },
+                },
+            ],
+        }
+        result = verify_plan(plan)
+        assert result.status == VerificationStatus.REJECTED
+        assert result.step_results[0]["status"] == "rejected"
 
 
 # ---------------------------------------------------------------------------

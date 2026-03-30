@@ -169,6 +169,114 @@ class TestStateGraphSnapshot:
         assert len(snapshot.nodes) == 2
         assert len(snapshot.edges) == 1
 
+    def test_find_related_nodes_outgoing(self):
+        root = StateNode(
+            node_id="sn-root",
+            node_type=StateNodeType.BESTELLUNG,
+            phase=StatePhase.OFFEN,
+            tenant_id="t-001",
+            aggregate_id="BO-001",
+            aggregate_type="SalesOrder",
+            label="Bestellung 001",
+        )
+        related = StateNode(
+            node_id="sn-ls",
+            node_type=StateNodeType.LIEFERSCHEIN,
+            phase=StatePhase.OFFEN,
+            tenant_id="t-001",
+            aggregate_id="LS-001",
+            aggregate_type="DeliveryNote",
+            label="Lieferschein 001",
+        )
+        edge = StateEdge(
+            edge_id="se-001",
+            source_node_id="sn-root",
+            target_node_id="sn-ls",
+            relation=EdgeRelation.ERZEUGT,
+            tenant_id="t-001",
+        )
+
+        result = StateGraphService.find_related_nodes("sn-root", [edge], [root, related])
+        assert [node.node_id for node in result] == ["sn-ls"]
+
+    def test_snapshot_integrity_detects_invalid_erzeugt_relation(self):
+        root = StateNode(
+            node_id="sn-root",
+            node_type=StateNodeType.BESTELLUNG,
+            phase=StatePhase.ENTWURF,
+            tenant_id="t-001",
+            aggregate_id="BO-001",
+            aggregate_type="SalesOrder",
+            label="Bestellung 001",
+        )
+        related = StateNode(
+            node_id="sn-ls",
+            node_type=StateNodeType.LIEFERSCHEIN,
+            phase=StatePhase.OFFEN,
+            tenant_id="t-001",
+            aggregate_id="LS-001",
+            aggregate_type="DeliveryNote",
+            label="Lieferschein 001",
+        )
+        edge = StateEdge(
+            edge_id="se-001",
+            source_node_id="sn-root",
+            target_node_id="sn-ls",
+            relation=EdgeRelation.ERZEUGT,
+            tenant_id="t-001",
+        )
+
+        snapshot = StateGraphService.build_snapshot(
+            snapshot_id="snap-002",
+            tenant_id="t-001",
+            root_node=root,
+            related_nodes=[related],
+            edges=[edge],
+            transitions=[],
+        )
+        violations = StateGraphService.verify_snapshot_integrity(snapshot)
+        assert len(violations) == 1
+        assert "Entwurf" in violations[0]
+
+    def test_snapshot_integrity_detects_blocked_target_progress(self):
+        approval = StateNode(
+            node_id="sn-appr",
+            node_type=StateNodeType.FREIGABE,
+            phase=StatePhase.OFFEN,
+            tenant_id="t-001",
+            aggregate_id="APP-001",
+            aggregate_type="Approval",
+            label="Freigabe 001",
+        )
+        invoice = StateNode(
+            node_id="sn-inv",
+            node_type=StateNodeType.RECHNUNG,
+            phase=StatePhase.FREIGEGEBEN,
+            tenant_id="t-001",
+            aggregate_id="INV-001",
+            aggregate_type="Invoice",
+            label="Rechnung 001",
+        )
+        edge = StateEdge(
+            edge_id="se-002",
+            source_node_id="sn-appr",
+            target_node_id="sn-inv",
+            relation=EdgeRelation.BLOCKIERT,
+            tenant_id="t-001",
+        )
+
+        snapshot = StateGraphService.build_snapshot(
+            snapshot_id="snap-003",
+            tenant_id="t-001",
+            root_node=approval,
+            related_nodes=[invoice],
+            edges=[edge],
+            transitions=[],
+        )
+        violations = StateGraphService.verify_snapshot_integrity(snapshot)
+        assert len(violations) == 1
+        assert "kann nicht freigegeben sein" in violations[0]
+
 
 # ===================================================================
 # Confidence Ledger -- Unit Tests

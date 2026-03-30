@@ -236,7 +236,9 @@ class ConfidenceLedgerService:
             filtered = [e for e in entries if e.source == source]
         if not filtered:
             return None
-        return max(filtered, key=lambda e: e.recorded_at)
+        # Ledger entries are append-only and callers hand them in chronological order.
+        # Using the last entry avoids unstable ties when recorded_at timestamps are equal.
+        return filtered[-1]
 
     @staticmethod
     def risk_summary(entries: list[ConfidenceLedgerEntry]) -> dict[str, Any]:

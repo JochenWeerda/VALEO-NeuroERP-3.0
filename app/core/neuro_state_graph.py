@@ -288,3 +288,131 @@ class StateGraphService:
         """Return phases reachable from the current phase."""
         allowed = _ALLOWED_TRANSITIONS.get(node_type, [])
         return [b.value for a, b in allowed if a == current_phase]
+
+    # ------------------------------------------------------------------
+    # Wave 4: Cross-Entity Integrity
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def find_related_nodes(
+        node_id: str,
+        edges: list[StateEdge],
+        nodes: list[StateNode],
+        *,
+        relation: EdgeRelation | None = None,
+        direction: str = "outgoing",
+    ) -> list[StateNode]:
+        """
+        Find nodes related to *node_id* via edges.
+
+        direction='outgoing': node_id is source → returns targets
+        direction='incoming': node_id is target → returns sources
+        direction='both': union
+        """
+        node_map = {n.node_id: n for n in nodes}
+        result: list[StateNode] = []
+
+        for edge in edges:
+            if relation and edge.relation != relation:
+                continue
+            if direction in ("outgoing", "both") and edge.source_node_id == node_id:
+                target = node_map.get(edge.target_node_id)
+                if target:
+                    result.append(target)
+            if direction in ("incoming", "both") and edge.target_node_id == node_id:
+                source = node_map.get(edge.source_node_id)
+                if source:
+                    result.append(source)
+
+        return result
+
+    @staticmethod
+    def verify_cross_entity_integrity(
+        *,
+        source_node: StateNode,
+        target_node: StateNode,
+        relation: EdgeRelation,
+    ) -> list[str]:
+        """
+        Verify that source and target nodes are in compatible phases
+        for the given relation. Returns a list of violation messages
+        (empty = OK).
+
+        Rules:
+        - ERZEUGT: source must be >= OFFEN; target cannot be STORNIERT
+        - REFERENZIERT: source cannot be STORNIERT if target is active
+        - BLOCKIERT: if source is OFFEN (active block), target cannot advance past OFFEN
+        - FOLGT_AUF: target must be >= ABGESCHLOSSEN
+        - ENTHAELT: source must not be STORNIERT
+        """
+        violations: list[str] = []
+        sp = source_node.phase
+        tp = target_node.phase
+
+        terminal = {StatePhase.STORNIERT, StatePhase.ARCHIVIERT}
+
+        if relation == EdgeRelation.ERZEUGT:
+            if sp == StatePhase.ENTWURF:
+                violations.append(
+                    f"{source_node.node_type.value} '{source_node.aggregate_id}' ist noch im Entwurf "
+                    f"und kann kein(e) {target_node.node_type.value} erzeugen"
+                )
+            if tp == StatePhase.STORNIERT:
+                violations.append(
+                    f"Ziel-{target_node.node_type.value} '{target_node.aggregate_id}' ist storniert"
+                )
+
+        elif relation == EdgeRelation.REFERENZIERT:
+            if sp in terminal and tp not in terminal:
+                violations.append(
+                    f"{source_node.node_type.value} '{source_node.aggregate_id}' referenziert "
+                    f"aktives {target_node.node_type.value} '{target_node.aggregate_id}', "
+                    f"ist aber selbst {sp.value}"
+                )
+
+        elif relation == EdgeRelation.BLOCKIERT:
+            if sp in (StatePhase.OFFEN, StatePhase.IN_BEARBEITUNG):
+                blocked_advance = {StatePhase.FREIGEGEBEN, StatePhase.ABGESCHLOSSEN}
+                if tp in blocked_advance:
+                    violations.append(
+                        f"{target_node.node_type.value} '{target_node.aggregate_id}' kann nicht "
+                        f"{tp.value} sein, solange Freigabe '{source_node.aggregate_id}' noch {sp.value} ist"
+                    )
+
+        elif relation == EdgeRelation.FOLGT_AUF:
+            predecessor_done = {StatePhase.ABGESCHLOSSEN, StatePhase.ARCHIVIERT}
+            if tp not in predecessor_done and tp != StatePhase.STORNIERT:
+                violations.append(
+                    f"Vorgaenger {target_node.node_type.value} '{target_node.aggregate_id}' "
+                    f"ist noch {tp.value} — Nachfolger kann noch nicht beginnen"
+                )
+
+        elif relation == EdgeRelation.ENTHAELT:
+            if sp == StatePhase.STORNIERT:
+                violations.append(
+                    f"Container {source_node.node_type.value} '{source_node.aggregate_id}' ist storniert"
+                )
+
+        return violations
+
+    @staticmethod
+    def verify_snapshot_integrity(snapshot: 'StateGraphSnapshot') -> list[str]:
+        """
+        Verify all edges in a snapshot for cross-entity integrity.
+        Returns all violation messages across all edges.
+        """
+        node_map = {n.node_id: n for n in snapshot.nodes}
+        all_violations: list[str] = []
+
+        for edge in snapshot.edges:
+            source = node_map.get(edge.source_node_id)
+            target = node_map.get(edge.target_node_id)
+            if source and target:
+                violations = StateGraphService.verify_cross_entity_integrity(
+                    source_node=source,
+                    target_node=target,
+                    relation=edge.relation,
+                )
+                all_violations.extend(violations)
+
+        return all_violations
