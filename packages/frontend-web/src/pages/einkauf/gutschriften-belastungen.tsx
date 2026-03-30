@@ -193,7 +193,7 @@ export default function GutschriftenBelastungenPage(): JSX.Element {
     try {
       const response = (await apiClient.get<APInvoice[]>('/api/v1/ap/invoices?status=APPROVED')) as unknown as APInvoice[]
       const rawList = Array.isArray(response) ? response : []
-      let openItemsMap: Record<string, number> = {}
+      const openItemsMap: Record<string, number> = {}
       try {
         const opRes = (await apiClient.get<{ items?: Array<{ rechnungsnr?: string; offen?: number }> }>(
           '/api/v1/finance/open-items?konto_typ=kreditoren&limit=500'
