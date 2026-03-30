@@ -167,17 +167,23 @@ def generate_plan(intent_result: IntentResult, context: Optional[dict] = None) -
 
 
 def verify_plan(plan: ExecutionPlan, tenant_id: str = "system", db=None) -> ExecutionPlan:
+    """
+    Wave 2: Verifies ALL steps, not just the first one.
+    Passes the full steps list to the Verification Engine for per-step checks.
+    """
     try:
         from app.services.neuro_verification_engine import verify_plan as _verify
 
         first_step = plan.steps[0] if plan.steps else None
         action = first_step.action if first_step else plan.intent
         is_create = any(w in action for w in ("create", "anlegen", "generate", "check", "query", "validate", "scan", "load", "list", "calculate", "detect", "assess", "notify", "fallback"))
+
         verify_input = {
             "action": "create" if is_create else action,
             "entity_type": first_step.entity_type if first_step else "unknown",
             "requires_approval": plan.requires_human_approval,
             "amount": first_step.parameters.get("amount") if first_step else None,
+            "steps": [s.to_dict() for s in plan.steps],
         }
         result = _verify(verify_input, tenant_id, db)
         plan.verification_status = result.status.value

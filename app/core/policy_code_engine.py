@@ -15,6 +15,7 @@ Aktionen:
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from datetime import date, datetime, time
 from enum import Enum
 from typing import Any, Optional
 
@@ -35,6 +36,10 @@ class PolicyBedingungsTyp(str, Enum):
     KLEINER_GLEICH    = "KLEINER_GLEICH"     # feld <= wert
     ENTHAELT          = "ENTHAELT"           # wert in feld (Liste oder String)
     NICHT_LEER        = "NICHT_LEER"         # feld ist gesetzt und nicht leer
+    # Wave 2: Temporale Bedingungen
+    WOCHENTAG         = "WOCHENTAG"          # wert = Liste von Wochentag-Ints (0=Mo..6=So)
+    ZEITRAUM          = "ZEITRAUM"           # wert = {"von": "YYYY-MM-DD", "bis": "YYYY-MM-DD"}
+    UHRZEIT           = "UHRZEIT"            # wert = {"von": "HH:MM", "bis": "HH:MM"}
 
 
 class PolicyAktion(str, Enum):
@@ -63,8 +68,12 @@ class PolicyBedingung:
     feld: str           # Schluessel im Kontext-Dict (z.B. "betrag_eur", "rolle", "land")
     wert: Any = None    # Vergleichswert; bei NICHT_LEER ignoriert
 
-    def evaluate(self, kontext: dict[str, Any]) -> bool:
+    def evaluate(self, kontext: dict[str, Any], *, now: datetime | None = None) -> bool:
         """Wertet die Bedingung gegen den Prozesskontext aus."""
+        # Wave 2: Temporale Bedingungen (nutzen Systemzeit, nicht Kontext-Feld)
+        if self.typ in (PolicyBedingungsTyp.WOCHENTAG, PolicyBedingungsTyp.ZEITRAUM, PolicyBedingungsTyp.UHRZEIT):
+            return self._evaluate_temporal(now or datetime.now())
+
         feldwert = kontext.get(self.feld)
         try:
             if self.typ == PolicyBedingungsTyp.NICHT_LEER:
@@ -94,6 +103,23 @@ class PolicyBedingung:
             return False
         return False
 
+    def _evaluate_temporal(self, now: datetime) -> bool:
+        """Wave 2: Temporale Bedingungsauswertung."""
+        try:
+            if self.typ == PolicyBedingungsTyp.WOCHENTAG:
+                return now.weekday() in self.wert
+            if self.typ == PolicyBedingungsTyp.ZEITRAUM:
+                von = date.fromisoformat(self.wert["von"])
+                bis = date.fromisoformat(self.wert["bis"])
+                return von <= now.date() <= bis
+            if self.typ == PolicyBedingungsTyp.UHRZEIT:
+                von = time.fromisoformat(self.wert["von"])
+                bis = time.fromisoformat(self.wert["bis"])
+                return von <= now.time() <= bis
+        except (TypeError, ValueError, KeyError):
+            return False
+        return False
+
     def as_dict(self) -> dict:
         return {
             "typ": self.typ.value,
@@ -103,11 +129,43 @@ class PolicyBedingung:
 
 
 @dataclass
+class PolicyBedingungsGruppe:
+    """
+    Wave 2: Rekursive AND/OR-Gruppe fuer verschachtelte Bedingungen.
+
+    operator = "AND" → alle Kinder muessen zutreffen
+    operator = "OR"  → mindestens ein Kind muss zutreffen
+    Kinder koennen PolicyBedingung oder weitere PolicyBedingungsGruppe sein.
+    """
+    operator: str  # "AND" | "OR"
+    kinder: list[Any] = field(default_factory=list)  # PolicyBedingung | PolicyBedingungsGruppe
+
+    def evaluate(self, kontext: dict[str, Any], *, now: datetime | None = None) -> bool:
+        if not self.kinder:
+            return True
+        results = (
+            child.evaluate(kontext, now=now) if isinstance(child, (PolicyBedingung, PolicyBedingungsGruppe))
+            else child.evaluate(kontext)
+            for child in self.kinder
+        )
+        if self.operator == "OR":
+            return any(results)
+        return all(results)
+
+    def as_dict(self) -> dict:
+        return {
+            "operator": self.operator,
+            "kinder": [k.as_dict() for k in self.kinder],
+        }
+
+
+@dataclass
 class PolicyRegel:
     """
     Einzelne Geschaeftsregel innerhalb eines PolicySets.
 
     Alle Bedingungen muessen zutreffen (AND-Logik) damit die Aktion greift.
+    Optional: bedingungsgruppe fuer verschachtelte AND/OR-Logik (Wave 2).
     """
     regel_id: str
     bezeichnung: str
@@ -116,10 +174,13 @@ class PolicyRegel:
     prioritaet: int = 100          # Niedrigerer Wert = hoehere Prioritaet
     pflicht: bool = False          # Pflichtregeln koennen durch Overrides nicht deaktiviert werden
     begruendung: str = ""          # Erklaerung fuer Audit-Trail
+    bedingungsgruppe: Optional[PolicyBedingungsGruppe] = None  # Wave 2: verschachtelte Logik
 
-    def matches(self, kontext: dict[str, Any]) -> bool:
+    def matches(self, kontext: dict[str, Any], *, now: datetime | None = None) -> bool:
         """Gibt True zurueck wenn alle Bedingungen erfuellt sind."""
-        return all(b.evaluate(kontext) for b in self.bedingungen)
+        if self.bedingungsgruppe is not None:
+            return self.bedingungsgruppe.evaluate(kontext, now=now)
+        return all(b.evaluate(kontext, now=now) for b in self.bedingungen)
 
     def as_dict(self) -> dict:
         return {
