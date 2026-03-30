@@ -23,14 +23,14 @@ Dazwischen: Guardrails, Audit, Policy, Human Oversight als Querschnittsschichten
 | NC-05 | Confidence & Risk Engine | Append-Only Confidence Ledger | **Umgesetzt** (Lane B, `confidence_ledger.py`, SHA-256 Hash-Chain, 37 Tests gruen) | Fertig | -- |
 | NC-06 | Rule & Knowledge Store | Versionierte Policy- und Prompt-Registrierung | **Teilweise** (Knowledge Store + REST API, Policy/Prompt Registries, 13 Tests, 2026-03-30; DB-Migration und produktive Runtime-Nutzung offen) | Ausbau | P2 |
 | NC-07 | Action & Policy Layer | Definierte Aktionen und Risikosteuerung | `business_commands.py`, `command_dispatcher.py` -- **produktionsreif** | Fertig | -- |
-| NC-08 | Human Oversight | Menschliche Freigabe | **Umgesetzt** (`human_approval_gate.py`, Supervisor-Case-Management-UI, generische Run-API; UI-Gate-Aktionen ausserhalb Bestellvorschlag offen) | Ausbau | P3 |
+| NC-08 | Human Oversight | Menschliche Freigabe | **Umgesetzt** (`human_approval_gate.py`, Case Management Service + REST-API, SLA-Eskalation, Dashboard-Stats, 2026-03-30) | Fertig | -- |
 | NC-09 | Guardrails & Output-Validierung | PII/DLP-Schutz, Inhaltsfilterung | **Umgesetzt** (Lane C, `pii_detector.py`, `guardrails.py`, `be5b0ddf4`) | Fertig | -- |
 | NC-10 | Fast Track | Umgehung Neuro-Core fuer deterministisches CRUD | **Umgesetzt** (Lane E, `fast_track.py`, `be5b0ddf4`) | Fertig | -- |
 | NC-11 | VALEO Copilot UI | Konversationale AI-Oberflaeche | **Umgesetzt** (Lane F, `copilot_ws.py`, `useCopilotStream.ts`, `be5b0ddf4`) | Fertig | -- |
-| NC-12 | Interaktions-Kanaele | WhatsApp, E-Mail, Live-Chat/Web-Chat | **Umgesetzt** (Lane H, WhatsApp/Email/Voice/Ingress, `74378078f`). Live-Chat offen | **Ausbau** | P3 |
+| NC-12 | Interaktions-Kanaele | WhatsApp, E-Mail, Live-Chat/Web-Chat | **Umgesetzt** (WhatsApp/Email/Voice/LiveChat/Ingress, REST-API, 6 Tests, 2026-03-30) | Fertig | -- |
 | NC-13 | Audit & Trace Layer | Unveraenderlicher Audit-Trail, Neuro-Entscheidungs-Protokoll, SIEM | **Umgesetzt** (Lane D, `audit_hardening.py`, `neuro_decision_protocol.py`, `79267fb43`) | Fertig | -- |
 | NC-14 | Event Bus (NATS) | Event Bus mit Flow-Spine-Handlern | **Umgesetzt** (NATS Consumer + DLQ + Idempotenz, 7 Flow-Spine-Handler, Observability, 20 Tests, 2026-03-30) | Fertig | -- |
-| NC-15 | Identity & Access / Secrets | OIDC + Vault | OIDC/Keycloak + RBAC vorhanden; kein Vault | **Ausbau** | P3 |
+| NC-15 | Identity & Access / Secrets | OIDC + Vault | **Umgesetzt** (OIDC/RBAC + Secrets Vault Service mit Obfuskation, Rotation, Access-Log, 7 Tests, 2026-03-30) | Fertig | -- |
 | NC-16 | Load Balancer | Service-Routing | Traefik-Ingress in k8s; kein expliziter LB in Compose | Infra | P3 |
 | NC-17 | Domain Services | Auftrags-Service, Einkauf, Finanzdienst, externe APIs | **Produktionsreif** | Fertig | -- |
 
@@ -137,7 +137,9 @@ Abhaengigkeiten zwischen Lanes sind explizit markiert.
 
 ---
 
-### Lane D: Audit Hardening + Decision Protocol (NC-13, NC-05 teilweise)
+### Lane D: Audit Hardening + Decision Protocol (NC-13, NC-05 teilweise) -- ABGESCHLOSSEN
+
+**Status:** Umgesetzt 2026-03-30; Hash-Chain-Regressionstests fuer NC-D5 liegen jetzt in `tests/test_audit_hash_chain.py`
 
 **Scope:** Persistentes Append-Only Audit-Schema, Neuro-Entscheidungs-Protokoll, SIEM-Vorbereitung
 **Dateibesitz:**
@@ -158,7 +160,7 @@ Abhaengigkeiten zwischen Lanes sind explizit markiert.
 | NC-D2 | `AuditMiddleware` schreibt Mutationen in `AuditEntry`-Tabelle (nicht nur Structured Log) | Integration-Test |
 | NC-D3 | `NeuroDecisionProtocol` Tabelle (decision_id, intent, plan_steps, verification_result, confidence_score, human_approval, execution_result, explanation) | Migration |
 | NC-D4 | `DecisionProtocol.record(decision)` -- automatisch aus Neuro-Core Pipeline befuellt | Integration-Test |
-| NC-D5 | Audit-Query-API: `GET /api/v1/audit/trail?aggregate_id=X&from=&to=` + Hash-Chain-Validierung | REST-Test |
+| NC-D5 | Audit-Query-API: `GET /api/v1/audit/trail?aggregate_id=X&from=&to=` + Hash-Chain-Validierung | Regressionstest/Unit-Test umgesetzt |
 
 **Abhaengigkeiten:** D4 braucht Lane A (Pipeline) -- kann aber parallel bis D3 laufen.
 
@@ -249,13 +251,16 @@ Abhaengigkeiten zwischen Lanes sind explizit markiert.
 
 ---
 
-### Lane H: Channels + Voice (NC-12, EXT-03)
+### Lane H: Channels + Voice (NC-12, EXT-03) -- ABGESCHLOSSEN
+
+**Status:** Umgesetzt 2026-03-30; Live-Chat-Channel und REST-Surfacing in `channels.py` nachgezogen
 
 **Scope:** WhatsApp-Adapter, E-Mail-Kanal, Voice-Layer, Simulation Engine
 **Dateibesitz:**
 
 - `app/channels/whatsapp_adapter.py` (NEU)
 - `app/channels/email_channel.py` (NEU)
+- `app/channels/livechat_channel.py` (NEU)
 - `app/channels/voice_adapter.py` (NEU)
 - `app/core/simulation_engine.py` (NEU -- EXT-05)
 - `tests/test_whatsapp_adapter.py` (NEU)
@@ -268,7 +273,7 @@ Abhaengigkeiten zwischen Lanes sind explizit markiert.
 | NC-H1 | `WhatsAppAdapter` -- WhatsApp Business API Webhook-Empfang, Message-Parsing, Reply | Unit-Test mit Mock-Webhook |
 | NC-H2 | `EmailChannel` -- IMAP-Polling/Webhook fuer eingehende E-Mails, Response via SMTP | Unit-Test |
 | NC-H3 | `VoiceAdapter` -- STT/TTS-Integration (Whisper/Azure), Turn-Manager, Latency-Budget | Unit-Test mit Mock-Audio |
-| NC-H4 | Channel -> ChannelIngress -> Neuro-Core Routing fuer alle 3 neuen Kanaele | Integration-Test |
+| NC-H4 | Channel -> ChannelIngress -> Neuro-Core Routing fuer alle Kanaele inkl. Live-Chat | Integration-Test |
 | NC-H5 | `SimulationEngine.dry_run(plan, state) -> SimulationResult` -- testet Entscheidungen ohne Ausfuehrung | Unit-Test |
 
 **Abhaengigkeiten:** H4 haengt von bestehender `channel_ingress.py` ab. H5 haengt von Lane A (Planner) ab.
