@@ -54,12 +54,12 @@ Abhaengigkeiten zwischen Lanes sind explizit markiert.
 
 ### Lane A: Neuro-Core Kernel (NC-01, NC-04, EXT-01) -- ABGESCHLOSSEN
 
-**Status:** Umgesetzt 2026-03-30; NC-A6 hat den zentralen Tool-Broker und die Pipeline-Integration nachgezogen (`19` gezielte Broker/Pipeline-Tests gruen)
-**Scope:** Intent Engine + Planner + Pipeline + Capability-Runner-Delegation + zentraler Tool Broker
+**Status:** Umgesetzt 2026-03-30; NC-A6 bis NC-A8 haben Broker-, Execution- und Verification/Policy-Wave-2-Nachzug abgeschlossen
+**Scope:** Intent Engine + Planner + Pipeline + Capability-Runner-Delegation + zentraler Tool Broker + Wave-2-Verification/Policy-Integration
 **Dateibesitz:**
 
 - `app/agents/neuro_intent_engine.py` -- 11 Intent-Patterns, Capability-Matching, Risk-Klassen, Parameter-Extraktion
-- `app/agents/neuro_planner.py` -- 9 Plan-Templates, typisierte Schritte, Verification-Engine-Integration
+- `app/agents/neuro_planner.py` -- 9 Plan-Templates, typisierte Schritte, per-Step-Verification-Integration
 - `app/agents/neuro_pipeline.py` -- Vollstaendige Pipeline: Classify -> Plan -> Verify -> Broker -> Execute
 - `app/services/neuro_tool_broker.py` -- zentrale Aufloesung von Plan-Steps auf MCP-Tools, Commands, Capability-Delegation und Human Gates
 - `app/api/v1/endpoints/neuro_pipeline.py` -- REST-API: /neuro/classify, /intents, /plan, /execute
@@ -67,6 +67,9 @@ Abhaengigkeiten zwischen Lanes sind explizit markiert.
 - `tests/test_neuro_planner.py` -- 15 Tests
 - `tests/test_neuro_pipeline.py` -- Broker-integrierte Pipeline-Tests
 - `tests/test_neuro_tool_broker.py` -- dedizierte Broker-Tests
+- `app/core/policy_code_engine.py` -- temporale + verschachtelte Policy-Bedingungen
+- `app/services/neuro_verification_engine.py` -- Policy-Engine-Kopplung, State-Graph-Transition-Pruefung, per-Step-Verification
+- `tests/test_neuro_verification_engine.py` -- Wave-2-Verification-Tests
 
 **Slices (alle abgeschlossen):**
 
@@ -78,6 +81,7 @@ Abhaengigkeiten zwischen Lanes sind explizit markiert.
 | NC-A4 | Verification Engine Integration -- Planner nutzt NC-001 zur Plan-Vorabpruefung | Gruen |
 | NC-A5 | Pipeline: Intent -> Plan -> Verify -> Execute + Decision Protocol + Audit | Gruen (11 Tests) |
 | NC-A6 | Zentraler Neuro Tool Broker mit Step-Verifikation, Approval-Stops, Tool-Trace und State-Summary | Gruen (19 gezielte Tests fuer Broker/Pipeline) |
+| NC-A8 | Wave-2: temporale/nested Policies, Policy→Verify-Kopplung, State-Graph-Transitions, per-Step-Verification | Gruen (123 gezielte Planner/Verification/Policy-Tests) |
 
 **Abhaengigkeiten:** Keine — Kern-Lane fertig, alle abhaengigen Slices (D4, F5, H1-H4) ebenfalls umgesetzt
 

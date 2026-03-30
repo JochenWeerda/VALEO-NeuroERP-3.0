@@ -12,7 +12,9 @@ Die folgende Matrix basiert auf dem gelieferten Komponenten-Status und fasst die
 | Neuro Intent Engine | 85% | NC-A1/A2 umgesetzt: 11 Intent-Patterns, Capability-Matching, Confidence-Scoring, Risk-Klassen, Parameter-Extraktion. 100 Tests gruen. Offen: LLM-basiertes NLU fuer unbekannte Intents |
 | Neuro State Graph | 70% | Grundgeruest + API + DB-Modelle umgesetzt (NC-B1), Pipeline-Integration fehlt |
 | Neuro Context Resolver | 70% | Prozess-/Aggregate-Kontext vorhanden, Consent-Status + Kanal-Historie fehlt |
-| Neuro Planner | 85% | NC-A3/A4: 9 Plan-Templates, typisierte Schritte, Verification-Engine-Integration, Capability-Runner-Delegation. Offen: dynamische Schrittgenerierung fuer unbekannte Intents |
+| Neuro Planner | 90% | NC-A3/A4 + NC-A8: 9 Plan-Templates, typisierte Schritte, per-Step-Verification, Capability-Runner-Delegation. Offen: dynamische Schrittgenerierung fuer unbekannte Intents |
+| Policy Engine | 90% | NC-A8: temporale Bedingungen + verschachtelte AND/OR-Gruppen + Policy→Verify-Kopplung umgesetzt. Offen: tiefere produktive Tenant-Override-Nutzung |
+| Verification Engine | 90% | NC-A8: per-Step-Verification, Policy-Integration und State-Graph-Transition-Pruefung umgesetzt. Offen: tiefere Cross-Entity-Integrity |
 | Confidence & Risk Engine | 75% | Append-Only Ledger umgesetzt (NC-B1), weitere Risk-Aggregate und Cross-Run-Scoring fehlen |
 | Rule & Knowledge Store | 70% | Policy-Registry mit A/B + Rollback, Prompt-Pack Registry vorhanden; Knowledge-Store fehlt |
 | Guardrails / PII-DLP | 70% | PII-Detector/Guardrails/Consent als NC-C abgeschlossen, DLP-Ausbau offen |
@@ -47,8 +49,8 @@ Die folgende Matrix basiert auf dem gelieferten Komponenten-Status und fasst die
 
 ## Naechste 3 Schritte (Plan, Stand 2026-03-30)
 
-1. **NC-A7 — Broker OpenAPI Execution Adapter:** `_simulate_tool_call()` durch echten HTTP-Client ersetzen, State-Graph-Mutationen persistieren, per-Step Decision Trace.
-2. **Wave 2 — Verification + Policy Integration:** Policy Engine in Verification verdrahten, State-Graph-Transitions unifizieren, per-Step Verification im Planner.
+1. ~~NC-A7 — Broker OpenAPI Execution Adapter~~ → umgesetzt
+2. ~~Wave 2 — Verification + Policy Integration~~ → NC-A8 umgesetzt: Policy Engine in Verification verdrahtet, State-Graph-Transitions unifiziert, per-Step Verification im Planner
 3. **Wave 3 — Decision Trace Hardening + LLM-Fallback:** Hash-Chain Tamper-Detection, Intent Engine LLM-Fallback fuer unbekannte Intents.
 
 ## Neuro Core Completion Plan (4 Waves)
@@ -56,6 +58,6 @@ Die folgende Matrix basiert auf dem gelieferten Komponenten-Status und fasst die
 | Wave | Ziel | Kern-Tasks | Abhaengigkeit |
 |------|------|------------|---------------|
 | **1: Foundation** | Tool Broker Execution + Pipeline-Verdrahtung | NC-A7: OpenAPI-Adapter, State-Graph-Persistenz, per-Step Audit | keine |
-| **2: Correctness** | Verification + Policy Engine Integration | Policy→Verify, State→Verify, per-Step Verify, nested/temporale Bedingungen | Wave 1 |
+| **2: Correctness** | Verification + Policy Engine Integration | Policy→Verify, State→Verify, per-Step Verify, nested/temporale Bedingungen | erledigt |
 | **3: Completeness** | Decision Trace Hardening + Intent LLM | Hash-Chain Tamper-Detection, LLM-Fallback fuer unbekannte Intents | Wave 1 |
 | **4: Maturity** | Advanced Features + Stufe 2 Vorbereitung | Dynamische Schrittgenerierung, Cross-Entity-Integrity, Risk-Scoring | Waves 2+3 |
