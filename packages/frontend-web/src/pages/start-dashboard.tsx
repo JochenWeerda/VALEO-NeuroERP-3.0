@@ -26,7 +26,7 @@ import { useFeature } from '@/hooks/useFeature'
 import { usePinnedTiles } from '@/hooks/usePinnedTiles'
 import { useTranslation } from 'react-i18next'
 import { queryKeys } from '@/lib/query'
-import { apiClient } from '@/lib/axios'
+import { apiClient } from '@/lib/api-client'
 import { fetchFlowSpineCatalog, type FlowSpineCatalog } from '@/lib/api/flow-spines'
 
 type StarterTile = {

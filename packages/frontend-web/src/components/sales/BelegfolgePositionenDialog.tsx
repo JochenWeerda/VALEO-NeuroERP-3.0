@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
-import { apiClient } from '@/lib/axios'
+import { apiClient } from '@/lib/api-client'
 import { FileText, Globe, ShoppingCart, Truck, ChevronDown, ChevronRight } from 'lucide-react'
 
 // ── Types ──────────────────────────────────────────────────────────────────────

@@ -1,4 +1,4 @@
-﻿import { type ReactElement, useMemo } from 'react'
+import { type ReactElement, useMemo } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Alert,
@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { mutationKeys, queryKeys } from '@/lib/query'
-import { apiClient } from '@/lib/axios'
+import { apiClient } from '@/lib/api-client'
 
 const TICKET_STATUSES = ['Draft', 'InProgress', 'Completed', 'Cancelled'] as const
 const SKELETON_ROWS = 4

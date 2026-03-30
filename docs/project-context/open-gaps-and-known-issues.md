@@ -11,7 +11,7 @@ Diese Datei sammelt die fuer neue Analysen wichtigsten offenen Restthemen und be
 - NATS-Consumer + Core-Handler besitzen jetzt DLQ und Idempotenzschutz; offen bleiben Flow-Spine-spezifische Handler und tieferes Event-Observability-Surfacing
 - Der zentrale Neuro Tool Broker ist umgesetzt (NC-A6/NC-A7); offen bleiben weitere Tool-Contract-Harmonisierung fuer echten Execution-Pfad, persistente State-Graph-Mutationen ueber mehr Faelle und per-Step-Persistenz im Decision Trace
 - Verification und Policy Engine sind in Wave 2 enger gekoppelt; offen bleiben dynamische Schrittgenerierung, tiefere Cross-Entity-Integrity und produktive Tenant-Override-Nutzung im Laufzeitpfad
-- **Neuro Core Completion Plan (4 Waves):** Wave 1 (Foundation/NC-A7) → Wave 2 (Verification+Policy Integration) → Wave 3 (Decision Trace Hardening + LLM-Fallback) → Wave 4 (Dynamic Plans + Stufe 2). Details in `docs/project-context/neuro-stack-gap-matrix-2026-03-29.md`
+- **Neuro Core Completion Plan (4 Waves):** Wave 1 (Foundation/NC-A7) und Wave 2 (Verification+Policy Integration/NC-A8) sind umgesetzt; offen bleiben Wave 3 (Decision Trace Hardening + LLM-Fallback) und Wave 4 (Dynamic Plans + Stufe 2). Details in `docs/project-context/neuro-stack-gap-matrix-2026-03-29.md`
 - ChromaDB fuer produktive RAG-Nutzung muss mit Prozesswissen befuellt werden
 - Voice-Kanal setzt Web Speech API voraus (Chrome/Edge); Firefox und Safari nicht unterstuetzt
 - Agentenarchitektur-Diagramm zeigt weiterhin Restluecken bei produktiver Vault-Anbindung, Memory-Governance, Process-Kernel-Contracts und tieferer Observability (siehe `docs/project-context/agent-architecture-gaps-2026-03-28.md`)
@@ -21,9 +21,9 @@ Diese Datei sammelt die fuer neue Analysen wichtigsten offenen Restthemen und be
 
 ## Zuletzt geschlossene Punkte (Wave 104, 2026-03-27)
 
-- ~~Copilot-/Voice-Pfade sind nicht ueberall gleich tief produktiv~~ → Voice-Kanal Admin-Seite (`pages/admin/voice-channel.tsx`) im Nav verankert (GAP-104-I)
-- ~~RAG-/Knowledge-Tiefe ist nicht in jedem Agentenpfad vollstaendig verdrahtet~~ → `POST /agent-action` mit ChromaDB-RAG produktiv (graceful degradation, GAP-104-H)
-- ~~Flow Spine Outbox-Events nicht verdrahtet~~ → `FlowSpineInstanceCreated` / `FlowSpineTransitionOccurred` via Outbox (GAP-104-G)
+- ~~Copilot-/Voice-Pfade sind nicht ueberall gleich tief produktiv~~ -> Voice-Kanal Admin-Seite (`pages/admin/voice-channel.tsx`) im Nav verankert (GAP-104-I)
+- ~~RAG-/Knowledge-Tiefe ist nicht in jedem Agentenpfad vollstaendig verdrahtet~~ -> `POST /agent-action` mit ChromaDB-RAG produktiv (graceful degradation, GAP-104-H)
+- ~~Flow Spine Outbox-Events nicht verdrahtet~~ -> `FlowSpineInstanceCreated` / `FlowSpineTransitionOccurred` via Outbox (GAP-104-G)
 
 ## Analysepflicht
 

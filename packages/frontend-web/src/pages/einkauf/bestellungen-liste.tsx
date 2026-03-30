@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label'
 import { toast } from '@/hooks/use-toast'
 import { getEntityTypeLabel, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 import { usePurchaseOrders, useApprovePurchaseOrder, useCancelPurchaseOrder, INCOTERM_OPTIONS } from '@/lib/api/purchase-orders'
-import { apiClient } from '@/lib/axios'
+import { apiClient } from '@/lib/api-client'
 
 // Konfiguration für Bestellungen ListReport (wird in Komponente mit i18n erstellt)
 const createBestellungenConfig = (

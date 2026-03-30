@@ -5,7 +5,7 @@
 
 import { useState, useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { apiClient } from '@/lib/axios'
+import { apiClient } from '@/lib/api-client'
 import {
   Dialog,
   DialogContent,

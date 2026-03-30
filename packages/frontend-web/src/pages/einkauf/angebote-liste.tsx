@@ -9,7 +9,7 @@ import { ListConfig } from '@/components/mask-builder/types'
 import { getEntityTypeLabel, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 import { toast } from '@/hooks/use-toast'
 import { useEinkaufAngebote, type EinkaufAngebot, einkaufKeys } from '@/lib/api/einkauf'
-import { apiClient } from '@/lib/axios'
+import { apiClient } from '@/lib/api-client'
 
 const createAngeboteConfig = (t: any, entityTypeLabel: string): ListConfig => ({
   title: entityTypeLabel,

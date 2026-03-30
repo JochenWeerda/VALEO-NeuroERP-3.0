@@ -12,7 +12,7 @@ import { Card } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { NativeSelect } from '@/components/ui/native-select'
 import { useToast } from '@/components/ui/toast-provider'
-import { apiClient } from '@/lib/axios'
+import { apiClient } from '@/lib/api-client'
 import { MoreHorizontal, RefreshCw, Truck, Eye, Calculator } from 'lucide-react'
 
 type Frachtauftrag = {

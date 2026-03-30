@@ -2,7 +2,7 @@
  * Commodity Position Matrix API client.
  */
 
-import { apiClient } from '@/lib/axios'
+import { apiClient } from '@/lib/api-client'
 
 const BASE = '/api/v1/positions'
 
