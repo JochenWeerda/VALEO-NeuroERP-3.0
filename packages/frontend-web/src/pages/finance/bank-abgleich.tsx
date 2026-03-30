@@ -6,7 +6,7 @@ import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { getFieldsFromMaskConfig, validateFields } from '@/components/mask-builder/validation'
 import { toast } from '@/hooks/use-toast'
-import { apiClient } from '@/lib/axios'
+import { apiClient } from '@/lib/api-client'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { useTenant } from '@/hooks/useTenant'
 

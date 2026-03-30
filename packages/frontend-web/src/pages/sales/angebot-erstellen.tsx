@@ -17,7 +17,7 @@ import { ArtikelSuchDialog } from '@/components/sales/ArtikelSuchDialog'
 import { LieferscheinDruckDialog, type PrintOptions } from '@/components/sales/LieferscheinDruckDialog'
 import { DmsAnhangDialog } from '@/components/dms/DmsAnhangDialog'
 import { useAngebote, type Angebot } from '@/lib/api/sales'
-import { apiClient } from '@/lib/axios'
+import { apiClient } from '@/lib/api-client'
 import { useToast } from '@/components/ui/toast-provider'
 import {
   ChevronLeft,

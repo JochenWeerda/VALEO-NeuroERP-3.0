@@ -1,4 +1,4 @@
-﻿/**
+/**
  * VALEO Suite Anlagen (Asset Ledger) – Zentrale Anlagenbuchhaltung.
  * Bündelt: Anlagenverwaltung (Stammdaten, AfA, Buchwerte), Import-Wizard und Connector-Konfiguration.
  */
@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
 import { Building2, LayoutGrid, Save, RefreshCw, ArrowRightLeft, FileUp, Upload, CheckCircle2, BookOpen, Undo2 } from 'lucide-react'
-import { apiClient } from '@/lib/axios'
+import { apiClient } from '@/lib/api-client'
 import { useToast } from '@/hooks/use-toast'
 
 const CONNECTOR_BASE = '/api/v1/finance/connectors'

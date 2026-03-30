@@ -25,6 +25,7 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
   const [selectedAccount, setSelectedAccount] = useState<string | null>(null)
   const [details, setDetails] = useState<any[]>([])
   const [exporting, setExporting] = useState(false)
+  const [matchingInProgress, setMatchingInProgress] = useState(false)
 
   useEffect(() => {
     loadSummary()
@@ -90,6 +91,29 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
         return t('crud.fields.bankAccount')
       default:
         return type
+    }
+  }
+
+  const matchEntries = async (entryIds: string[]) => {
+    if (!entryIds.length) return
+    setMatchingInProgress(true)
+    try {
+      await apiClient.post(
+        `/api/v1/finance/subsidiary-ledger-reconciliation/${ledgerType.toLowerCase()}/match`,
+        { entry_ids: entryIds, period, account_number: selectedAccount },
+      )
+      toast({ title: 'Abstimmung erfolgreich', description: `${entryIds.length} Posten abgestimmt.` })
+      if (selectedAccount) await loadDetails(selectedAccount)
+      await loadReconciliation()
+      await loadSummary()
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: t('crud.messages.error'),
+        description: error?.response?.data?.detail || error.message || 'Abstimmung fehlgeschlagen',
+      })
+    } finally {
+      setMatchingInProgress(false)
     }
   }
 
@@ -301,9 +325,24 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
       {selectedAccount && details.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>
-              {t('crud.fields.details')} - {selectedAccount}
-            </CardTitle>
+            <div className="flex justify-between items-center">
+              <CardTitle>
+                {t('crud.fields.details')} - {selectedAccount}
+              </CardTitle>
+              <Button
+                size="sm"
+                disabled={matchingInProgress || !details.some((d: any) => !d.matched)}
+                onClick={() => {
+                  const unmatchedIds = details
+                    .filter((d: any) => !d.matched && d.entry_id)
+                    .map((d: any) => d.entry_id)
+                  matchEntries(unmatchedIds)
+                }}
+              >
+                {matchingInProgress ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <CheckCircle2 className="h-4 w-4 mr-2" />}
+                Offene Posten abstimmen
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <Table>

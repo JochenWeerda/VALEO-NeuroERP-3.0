@@ -16,7 +16,7 @@ import { BelegFlowPanel } from '@/features/flows/BelegFlowPanel'
 import APInvoiceApprovalPanel from '@/features/workflow/APInvoiceApprovalPanel'
 import { getEntityTypeLabel, getErrorMessage, getSuccessMessage } from '@/features/crud/utils/i18n-helpers'
 import { Save, X } from 'lucide-react'
-import { apiClient } from '@/lib/axios'
+import { apiClient } from '@/lib/api-client'
 import { buildDecisionView } from '@/policy/decision-view'
 import { ProcessStatusPanel } from '@/components/workflow/ProcessStatusPanel'
 

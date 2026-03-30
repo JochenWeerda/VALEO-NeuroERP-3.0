@@ -14,7 +14,7 @@ import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { LeaveConfirmDialog } from '@/components/LeaveConfirmDialog'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import { toast } from '@/hooks/use-toast'
-import { apiClient } from '@/lib/axios'
+import { apiClient } from '@/lib/api-client'
 
 // Zod-Schema für Debitoren-Stammdaten (wird in Komponente mit i18n erstellt)
 const createDebitorenSchema = (t: any) => z.object({

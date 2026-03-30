@@ -10,7 +10,7 @@ import { validateIBAN } from '@/lib/utils/iban-validator'
 import { validateVatIdFormat } from '@/lib/utils/vat-validator'
 import { useIbanLookup } from '@/hooks/useIbanLookup'
 import { toast } from 'sonner'
-import { apiClient } from '@/lib/axios'
+import { apiClient } from '@/lib/api-client'
 import { useTenant } from '@/hooks/useTenant'
 
 const createKreditorenConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
