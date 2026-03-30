@@ -1,7 +1,7 @@
 # SVC-001 — Service-to-Customer (Card)
 
-**Slice:** SVC-001 | **Lane:** Service-to-Customer | **Status:** abgeschlossen
-**Owner:** Claude Opus 4.6 | **Datum:** 2026-03-27
+**Slice:** SVC-001 | **Lane:** Service-to-Customer | **Status:** umgesetzt (Kernpfad Serviceanfragen + Rueckmeldung + Abschluss)
+**Owner:** Claude Opus 4.6 | **Datum:** 2026-03-30
 
 ---
 
@@ -13,49 +13,47 @@ CRUD-Vollständigkeit und Flow-Spine-Integration.
 
 ## 2. Betroffene Dateien
 
-- `packages/frontend-web/src/pages/service/anfragen.tsx` — Liste (nur GET, kein Detail/Create)
-- `packages/frontend-web/src/pages/agribusiness/field-service-tasks.tsx` — fetch() statt apiClient
-- (fehlt) Rückmeldung/Aktivitäten-Seite
-- (fehlt) Kundenabschluss-Seite
+- `packages/frontend-web/src/pages/service/anfragen.tsx` — Liste
+- `packages/frontend-web/src/pages/service/anfrage-detail.tsx` — GET/PUT, Tabs, Workflow-Banner
+- `packages/frontend-web/src/pages/service/anfrage-neu.tsx` — POST neue Anfrage
+- `packages/frontend-web/src/pages/service/rueckmeldung.tsx` — POST Rueckmeldung (report-Node)
+- `packages/frontend-web/src/pages/service/abschluss.tsx` — POST Abschluss (closure-Node)
+- `packages/frontend-web/src/pages/agribusiness/field-service-tasks.tsx` — weiterhin `fetch()` (P4)
 
-## 3. API-Endpoints
+## 3. API-Endpoints (kanonisch `/api/v1/service/...`)
 
 | Endpoint | Methode | Zweck |
 |---|---|---|
-| `/api/v1/service/anfragen` | GET | Serviceanfragen-Liste |
-| `/api/agribusiness/field-service-tasks` | GET | Field-Service-Aufgaben |
-| `/api/agribusiness/field-service-tasks/{id}/cancel` | POST | Aufgabe stornieren |
-| `/api/agribusiness/field-service-tasks/{id}` | DELETE | Aufgabe löschen |
-| `/api/audit/change-logs/audit-trail/{type}/{id}` | GET | Audit-Trail |
+| `/api/v1/service/anfragen` | GET/POST | Liste / Anlegen |
+| `/api/v1/service/anfragen/{id}` | GET/PUT/DELETE | Detail / Update / Loeschen |
+| `/api/v1/service/rueckmeldungen` | POST | Rueckmeldung |
+| `/api/v1/service/abschluss` | POST | Fall abschliessen |
+| `/api/v1/agribusiness/field-service-tasks` | (Frontend) | Field-Service (separater Pfad) |
 
-## 4. Client-Warnung
+Backend: `app/api/v1/endpoints/service_anfragen.py` (In-Memory-Store, tenant-isoliert).
 
-- `anfragen.tsx` nutzt `useServiceAnfragen()` aus `@/lib/api/betrieb` — korrekt (.data abstrahiert)
-- `field-service-tasks.tsx` nutzt native `fetch()` — NICHT apiClient, kein Auth-Interceptor
+## 4. Client-Hinweise
+
+- `anfragen.tsx` nutzt `useServiceAnfragen()` aus `@/lib/api/betrieb`
+- Detail/Neu/Rueckmeldung/Abschluss nutzen `@/lib/api-client`
+- Field-Service: weiterhin native `fetch()` — siehe SVC-001-P4
 
 ## 5. Offene Punkte
 
 | ID | Beschreibung | Priorität |
 |---|---|---|
-| SVC-001-P1 | Detail-Seite `/service/anfrage/{id}` | Hoch |
-| SVC-001-P2 | Create-Seite `/service/anfrage/neu` | Hoch |
-| SVC-001-P3 | CRUD-Hooks für Serviceanfragen | Hoch |
-| SVC-001-P4 | Field-Service: fetch() → apiClient + React Query | Mittel |
+| SVC-001-P4 | Field-Service: `fetch()` → apiClient + React Query | Mittel |
 | SVC-001-P5 | Field-Service: Create/Edit Navigation aktivieren | Mittel |
-| SVC-001-P6 | Rückmeldung-Seite erstellen (Node: report) | Hoch |
-| SVC-001-P7 | Kundenabschluss-Seite erstellen (Node: closure) | Hoch |
-| SVC-001-P8 | Backend Service Domain anlegen | Hoch |
-| SVC-001-P9 | API-Endpunkt kanonisieren (crm/cases vs service/anfragen) | Mittel |
-| SVC-001-P10 | workflowInstanceId in alle Masken durchreichen | Mittel |
+| — | P1–P3, P6–P10 (Kernpfad) | erledigt (siehe `docs/workflows/svc-001-service-to-customer.md`) |
 
 ## 6. Tests (manuell)
 
-1. Flow-Spine → Neuen Servicefall starten → Redirect auf `/service/anfragen`
-2. Serviceanfragen → Liste laden (2+ Einträge)
-3. Field-Service → Aufgaben-Liste laden
-4. Field-Service → Aufgabe stornieren → Toast
-5. Field-Service → Audit-Trail abrufen
+1. Flow-Spine → Servicefall → `/service/anfragen?workflowInstanceId=...`
+2. Neue Anfrage → POST → Liste
+3. Detail → PUT → speichern
+4. Rueckmeldung / Abschluss mit Query `anfrage_id` wo relevant
+5. Field-Service separat (P4/P5)
 
 ---
 
-*Erstellt von Claude Opus 4.6 — Slice SVC-001 — 2026-03-27*
+*Aktualisiert 2026-03-30 — Workflow: `docs/workflows/svc-001-service-to-customer.md`*

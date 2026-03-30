@@ -1,5 +1,7 @@
 # Neuro Stack Gap Matrix (2026-03-29)
 
+**Letzte Doku-Synchronisation:** 2026-03-30 (Kontext-Resolver, Knowledge Store, NC-D5, Event-Bus Flow-Spine, Live-Chat, REK/SVC-Cards).
+
 ## Quelle
 
 Die folgende Matrix basiert auf dem gelieferten Komponenten-Status und fasst die Luecken in der Neuro-Architektur zusammen.
@@ -9,27 +11,27 @@ Die folgende Matrix basiert auf dem gelieferten Komponenten-Status und fasst die
 | Komponente | Status | Details |
 |---|---:|---|
 | Neuro Tool Broker | 90% | NC-A6 + NC-A7 abgeschlossen: ToolBinding-Registry (20+ Actions), OpenAPI-Execution via TestClient, State-Graph-Persistenz nach Execution, per-Step Audit Trace, Fallback-Handling (4xx→degraded, 5xx→failed). 13 Tests gruen. Offen: echte HTTP-Execution gegen externe Services (aktuell TestClient intern) |
-| Neuro Intent Engine | 85% | NC-A1/A2 umgesetzt: 11 Intent-Patterns, Capability-Matching, Confidence-Scoring, Risk-Klassen, Parameter-Extraktion. 100 Tests gruen. Offen: LLM-basiertes NLU fuer unbekannte Intents |
-| Neuro State Graph | 70% | Grundgeruest + API + DB-Modelle umgesetzt (NC-B1), Pipeline-Integration fehlt |
-| Neuro Context Resolver | 70% | Prozess-/Aggregate-Kontext vorhanden, Consent-Status + Kanal-Historie fehlt |
+| Neuro Intent Engine | 95% | NC-A1/A2 + NC-A9: 11 Intent-Patterns, Capability-Matching, Confidence-Scoring, Risk-Klassen, Parameter-Extraktion, LLM-Fallback fuer unbekannte Intents (injected + service-basiert). 103+ Tests gruen. Offen: Prompt-Pack-Integration, Confidence-Ledger-Feedback |
+| Neuro State Graph | 75% | Grundgeruest + API + DB-Modelle + Pipeline-Verdrahtung (Broker/NC-A7); dynamische Plaene/Cross-Entity noch Ausbau |
+| Neuro Context Resolver | 85% | Prozess-/Aggregate-Kontext + Consent-Status + Kanal-Historie in `neuroassist_context` (schema_version 2) |
 | Neuro Planner | 90% | NC-A3/A4 + NC-A8: 9 Plan-Templates, typisierte Schritte, per-Step-Verification, Capability-Runner-Delegation. Offen: dynamische Schrittgenerierung fuer unbekannte Intents |
 | Policy Engine | 90% | NC-A8: temporale Bedingungen + verschachtelte AND/OR-Gruppen + Policy→Verify-Kopplung umgesetzt. Offen: tiefere produktive Tenant-Override-Nutzung |
 | Verification Engine | 90% | NC-A8: per-Step-Verification, Policy-Integration und State-Graph-Transition-Pruefung umgesetzt. Offen: tiefere Cross-Entity-Integrity |
 | Confidence & Risk Engine | 75% | Append-Only Ledger umgesetzt (NC-B1), weitere Risk-Aggregate und Cross-Run-Scoring fehlen |
-| Rule & Knowledge Store | 70% | Policy-Registry mit A/B + Rollback, Prompt-Pack Registry vorhanden; Knowledge-Store fehlt |
+| Rule & Knowledge Store | 85% | Policy-/Prompt-Pack-Registry; Knowledge Store (`knowledge_store.py`, `/neuro/knowledge`) + Tests; produktive RAG-/Resolver-Anbindung Ausbau |
 | Guardrails / PII-DLP | 70% | PII-Detector/Guardrails/Consent als NC-C abgeschlossen, DLP-Ausbau offen |
 | Action & Policy Layer | 100% | BusinessCommands + CommandDispatcher produktiv |
 | Human Oversight | 95% | Approval-Gates, Prozess-Supervisor, generische Run-API und Case-Management-UI vorhanden; generische Gate-Aktionen ausserhalb Bestellvorschlag fehlen |
-| Audit & Trace | 85% | Audit Hardening D1-D4 umgesetzt, Pipeline-Audit-Middleware (NC-D4), Hash-Chain + Decision Protocol. Offen: NC-D5 Regression-Tests |
-| Event Bus (NATS) | 90% | Publisher + Consumer + Core-Handler vorhanden; DLQ und event_id-Idempotenz vorhanden, Flow-Spine-spezifische Handler/Observability offen |
+| Audit & Trace | 92% | D1-D4 + NC-D5 Hash-Chain-Regression-Tests (`test_audit_hash_chain.py`) |
+| Event Bus (NATS) | 93% | Publisher + Consumer + Core-Handler; DLQ/Idempotenz; Flow-Spine-Handler + Observability (`flow_spine_handlers.py`, `observability.py`) |
 | Fast Track | 70% | Fast-Track + Compensation als NC-E abgeschlossen, Bypass-Policy-Ausbau offen |
 | Copilot UI | 85% | WebSocket-Streaming, Pipeline-Integration, Copilot-Dock und Supervisor/Oversight-UI vorhanden; tiefere Prozess-Einbettung in Kernmasken offen |
-| Multi-Channel | 75% | WhatsApp, E-Mail, Voice und Channel-Ingress vorhanden; Live-Chat und outbound Routing fehlen |
+| Multi-Channel | 82% | WhatsApp, E-Mail, Voice, Channel-Ingress, Live-Chat (REST unter `channels.py`); outbound Routing / produktive WS-UI Ausbau |
 | LangGraph Integration | 100% | Produktiv -- Workflows, Checkpoints, Human-in-the-Loop |
 
 ## P1-Luecken (sofort schliessen)
 
-1. ~~Audit Hardening -- Hash-Chain + Append-Only-Vertiefung (NC-D4/NC-D5)~~ → D4 umgesetzt, D5 (Regression-Tests) offen
+1. ~~Audit Hardening -- Hash-Chain + Append-Only-Vertiefung (NC-D4/NC-D5)~~ → D4 + D5 (Regression-Tests) umgesetzt
 2. Guardrails Middleware -- DLP/Prompt-Injection Ausbau (NC-C Folge)
 3. ~~Neuro Intent Engine -- NLU/Confidence-Scoring~~ → NC-A1/A2 umgesetzt mit 11 Intents + Tests
 4. ~~Neuro Planner -- dynamische Schrittgenerierung~~ → NC-A3/A4 mit 9 Templates + Capability-Runner-Delegation
@@ -51,7 +53,7 @@ Die folgende Matrix basiert auf dem gelieferten Komponenten-Status und fasst die
 
 1. ~~NC-A7 — Broker OpenAPI Execution Adapter~~ → umgesetzt
 2. ~~Wave 2 — Verification + Policy Integration~~ → NC-A8 umgesetzt: Policy Engine in Verification verdrahtet, State-Graph-Transitions unifiziert, per-Step Verification im Planner
-3. **Wave 3 — Decision Trace Hardening + LLM-Fallback:** Hash-Chain Tamper-Detection, Intent Engine LLM-Fallback fuer unbekannte Intents.
+3. ~~Wave 3 — Decision Trace Hardening + LLM-Fallback~~ → NC-A9 (LLM-Fallback) + NC-D5 Hash-Chain-Tests umgesetzt. Offen: dynamische Schrittgenerierung, Cross-Entity-Integrity (Wave 4).
 
 ## Neuro Core Completion Plan (4 Waves)
 
@@ -59,5 +61,5 @@ Die folgende Matrix basiert auf dem gelieferten Komponenten-Status und fasst die
 |------|------|------------|---------------|
 | **1: Foundation** | Tool Broker Execution + Pipeline-Verdrahtung | NC-A7: OpenAPI-Adapter, State-Graph-Persistenz, per-Step Audit | keine |
 | **2: Correctness** | Verification + Policy Engine Integration | Policy→Verify, State→Verify, per-Step Verify, nested/temporale Bedingungen | erledigt |
-| **3: Completeness** | Decision Trace Hardening + Intent LLM | Hash-Chain Tamper-Detection, LLM-Fallback fuer unbekannte Intents | Wave 1 |
+| **3: Completeness** | Decision Trace Hardening + Intent LLM | ~~NC-A9 LLM-Fallback~~ umgesetzt; NC-D5 Hash-Chain Regression-Tests offen | Wave 1 |
 | **4: Maturity** | Advanced Features + Stufe 2 Vorbereitung | Dynamische Schrittgenerierung, Cross-Entity-Integrity, Risk-Scoring | Waves 2+3 |

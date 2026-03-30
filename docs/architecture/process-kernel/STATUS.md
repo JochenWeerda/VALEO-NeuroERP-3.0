@@ -35,7 +35,7 @@ Diese Statusdatei verdichtet den aktuellen Gesamtstand, ohne die Detailnachweise
 
 ## Gesamtstatus
 
-- Stand: `2026-03-27`
+- Stand: `2026-03-30` (Doku-Sync: Neuro-Gap-Matrix, REK/SVC-Cards, `open-gaps`; Kern-Waves unveraendert)
 - Status: `Waves 1 bis 100 sowie Waves 102–104 abgeschlossen`
 - Gesamtsuite: `5931 Tests gruen, 0 Fehler, 5 skipped, 1 xfailed` (Wave 104 +15)
 - Bereinigter Gap-Abgleich gegen spaetere Wave-Nachweise: `docs/roadmap/status/2026-03-20-gap-matrix-bereinigt.md`

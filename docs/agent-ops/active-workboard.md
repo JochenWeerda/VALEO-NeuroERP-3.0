@@ -34,13 +34,13 @@ Zwei End-to-End-Stränge laufen **fachlich und technisch getrennt**. Bitte **nic
 
 | Lane | Scope | Slices | Status | Dateibesitz (exklusiv) | Abhaengigkeit |
 |------|-------|--------|--------|----------------------|---------------|
-| **NC-A: Neuro-Core Kernel** | Intent Engine + Planner + Verification Engine | **abgeschlossen** (A1-A5) | Cursor Agent | `app/agents/neuro_intent_engine.py`, `app/agents/neuro_planner.py`, `app/agents/neuro_pipeline.py`, `app/services/neuro_verification_engine.py`, `app/api/v1/endpoints/neuro_pipeline.py` | keine — Kern-Lane fertig, abhaengige Slices (D4, F5, H4, H5) jetzt freigegeben |
+| **NC-A: Neuro-Core Kernel** | Intent Engine + Planner + Verification Engine + Tool Broker | **abgeschlossen** (A1-A9) | Cursor Agent + Claude Opus 4.6 | `app/agents/neuro_intent_engine.py`, `app/agents/neuro_planner.py`, `app/agents/neuro_pipeline.py`, `app/services/neuro_verification_engine.py`, `app/services/neuro_tool_broker.py`, `app/core/policy_code_engine.py` | Waves 1-3 fertig. Wave 4 (Dynamic Plans, Cross-Entity-Integrity) offen |
 | **NC-B: State Graph + Confidence** | Business Object Graph + Append-Only Confidence Ledger | NC-B1..B5 | abgeschlossen (Codex, 2026-03-29) | `app/core/neuro_state_graph.py`, `confidence_ledger.py`, `app/infrastructure/models/neuro_state_models.py`, `app/api/v1/endpoints/neuro_state_graph_api.py`, `tests/test_neuro_state_graph.py` | Lane A fertig — B5-Integration jetzt moeglich |
 | **NC-C: Guardrails + Consent** | PII/DLP-Schutz, Consent-Lifecycle (DSGVO) | **abgeschlossen** (C1-C3 + NC-004) | Cursor Agent | `app/services/pii_detector.py`, `app/services/guardrails.py`, `app/services/consent_engine.py`, `app/api/v1/endpoints/neuro_guardrails.py`, `app/api/v1/endpoints/neuro_consent.py` | keine |
 | **NC-D: Audit Hardening** | Append-Only Audit-Schema, Neuro-Entscheidungs-Protokoll, Hash-Chain | **abgeschlossen** (D1-D4) | Cursor Agent | `app/services/audit_hardening.py`, `app/services/neuro_decision_protocol.py`, `app/api/v1/endpoints/neuro_audit.py`, `app/middleware/neuro_audit_middleware.py` | keine |
 | **NC-E: Fast Track + Compensation** | Deterministischer CRUD-Bypass + Saga-Rollback | **abgeschlossen** (E1-E2 + NC-006) | Cursor Agent | `app/services/fast_track.py`, `app/services/compensation_engine.py`, `app/api/v1/endpoints/neuro_fast_track.py`, `app/api/v1/endpoints/neuro_compensation.py` | keine |
 | **NC-F: Copilot Backend** | WebSocket-Streaming + Interaction State FSM | **abgeschlossen** (F1-F5) | Cursor Agent | `app/api/v1/endpoints/copilot_ws.py`, `app/services/interaction_state_manager.py`, `packages/frontend-web/src/features/copilot/useCopilotStream.ts` | keine |
-| **NC-G: Event Bus + Knowledge** | NATS-Consumer, Event-Schemas, Policy-Versionierung | teilweise (G1-G5 umgesetzt, DLQ/Idempotenz offen) | Codex | `app/services/event_schema_registry.py`, `app/services/policy_registry.py`, `app/api/v1/endpoints/neuro_event_policy.py`, `app/infrastructure/eventbus/nats_consumer.py` | NC-G6 (DLQ/Idempotenz) schneiden |
+| **NC-G: Event Bus + Knowledge** | NATS-Consumer, Event-Schemas, Policy-Versionierung, Knowledge Store, Flow-Spine-Handler | **abgeschlossen** (G1-G7, NC-G6/NC-G7 Slices) | Codex + Cursor | `app/services/event_schema_registry.py`, `app/services/policy_registry.py`, `app/infrastructure/eventbus/nats_consumer.py`, `app/services/knowledge_store.py`, `app/infrastructure/eventbus/flow_spine_handlers.py`, `observability.py` | optional: produktives Monitoring-Surfacing |
 | **NC-H: Channels + Voice** | WhatsApp, E-Mail, Voice-Adapter, Simulation Engine, Channel Ingress | **abgeschlossen** (H1-H5) | Cursor Agent | `app/channels/whatsapp_adapter.py`, `app/channels/email_channel.py`, `app/channels/channel_ingress.py`, `app/services/voice_adapter.py`, `app/services/neuro_simulation_engine.py`, `app/api/v1/endpoints/channels.py` | keine |
 
 **Prioritaet:** P1 = A, B, C, D (sofort) | P2 = E, F, G (danach) | P3 = H (Channel-Erweiterung)
@@ -62,7 +62,7 @@ Zwei End-to-End-Stränge laufen **fachlich und technisch getrennt**. Bitte **nic
 | NC-A6 | Neuro Tool Broker + Pipeline-Integration | abgeschlossen | Codex | `docs/agent-ops/active-workboard.md`, `docs/architecture/neuro-core-gap-analysis-2026-03-29.md`, `docs/workflows/nc-a6-neuro-tool-broker.md`, `docs/cards/neuro-core/NC-A6-neuro-tool-broker.md`, `app/services/neuro_tool_broker.py`, `app/agents/neuro_pipeline.py`, `app/agents/neuro_planner.py`, `tests/test_neuro_tool_broker.py`, `tests/test_neuro_pipeline.py` | abgeschlossen | keine |
 | NC-A7 | Broker OpenAPI Execution Adapter | abgeschlossen | Claude Opus 4.6 | `app/services/neuro_tool_broker.py`, `app/services/neuro_tool_execution.py`, `tests/test_neuro_tool_broker.py`, `docs/agent-ops/active-workboard.md`, `docs/project-context/neuro-stack-gap-matrix-2026-03-29.md`, `docs/project-context/open-gaps-and-known-issues.md` | abgeschlossen — 3 Erweiterungen: (1) Fallback-Handling fuer 4xx/5xx/Transport-Errors, (2) State-Graph-Mutations-Persistenz nach Execution, (3) per-Step Audit Trace in neuro_step_audit_trace. 13 Tests gruen. | keine |
 | NC-A8 | Verification + Policy Wave-2 Integration | abgeschlossen | Codex | `docs/agent-ops/active-workboard.md`, `docs/architecture/neuro-core-gap-analysis-2026-03-29.md`, `docs/project-context/neuro-stack-gap-matrix-2026-03-29.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/workflows/nc-a8-verification-policy-wave2.md`, `docs/cards/neuro-core/NC-A8-verification-policy-wave2.md`, `app/core/policy_code_engine.py`, `app/services/neuro_verification_engine.py`, `app/agents/neuro_planner.py`, `tests/test_neuro_verification_engine.py`, `tests/test_neuro_planner.py`, `tests/test_process_kernel_wave29_policy_query.py` | abgeschlossen | keine |
-| NC-A9 | Intent Engine LLM-Fallback fuer unbekannte Intents | reserviert | Codex | `docs/agent-ops/active-workboard.md`, `docs/architecture/neuro-core-gap-analysis-2026-03-29.md`, `docs/project-context/neuro-stack-gap-matrix-2026-03-29.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/workflows/nc-a9-intent-llm-fallback.md`, `docs/cards/neuro-core/NC-A9-intent-llm-fallback.md`, `app/agents/neuro_intent_engine.py`, `tests/test_neuro_intent_engine.py`, `tests/test_neuro_pipeline.py` | Claim committen, dann Unknown-Intent-Pfad auf optionalen LLM-/AI-Service-Fallback heben | keine |
+| NC-A9 | Intent Engine LLM-Fallback fuer unbekannte Intents | abgeschlossen | Claude Opus 4.6 | `app/agents/neuro_intent_engine.py`, `tests/test_neuro_intent_engine.py`, `tests/test_neuro_pipeline.py`, `docs/workflows/nc-a9-intent-llm-fallback.md`, `docs/cards/neuro-core/NC-A9-intent-llm-fallback.md` | abgeschlossen — LLM-Fallback mit Injected-Resolver + Service-basiert, 4 Tests, Safety-Guardrails | keine |
 | P2P-001 | Procure-to-Pay Direktbestellung: Workflow-Analyse, QA und Handover-Haertung | abgeschlossen | aktuell offener Agent | `docs/workflows/p2p-001-procure-to-pay-direktbestellung.md`, `docs/cards/einkauf/**`, `packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx`, `packages/frontend-web/src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx` | Folgeslice fuer Bedarfsmeldung/Rahmenabruf zuschneiden | keine |
 | P2P-040 | Procure-to-Pay Vorbelegung aus Bedarfsmeldung/Vertrag/RFQ | abgeschlossen | aktuell offener Agent | `docs/agent-ops/active-workboard.md`, `docs/workflows/p2p-040-vorbelegung-requisition-vertrag-rfq.md`, `docs/cards/einkauf/P2P-040-vorbelegung-standardmaske.md`, `packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx`, `packages/frontend-web/src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx` | Folgeslice Schrittvalidierung zuschneiden | keine |
 | P2P-050 | Procure-to-Pay Wizard-Schrittvalidierung | abgeschlossen | aktuell offener Agent | `docs/workflows/p2p-050-wizard-schrittvalidierung.md`, `docs/cards/einkauf/P2P-050-wizard-schrittvalidierung.md`, `packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx`, `packages/frontend-web/src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx` | Landhandel-Kernprozess beginnen | keine |
@@ -139,6 +139,10 @@ Kein Agent darf einen Slice beginnen, der bereits `reserviert` oder `in arbeit` 
 - NC-F5: Copilot Pipeline
 - NC-H1-H4: WhatsApp, Email, Voice, Channel Ingress, 14 Tests
 
+**Wave 2+3 (Neuro Core Correctness + Completeness):**
+- NC-A8: Policy→Verify-Kopplung, State-Graph-Transitions, per-Step Verification, temporale + verschachtelte Bedingungen, 48 Tests (`2d87ee6f8`)
+- NC-A9: Intent Engine LLM-Fallback (Injected Resolver + Service-basiert), 4 Tests
+
 **E2E-Workflows:**
 - FIN-001 P1-P8: Alle D-Checks gruen, 20 Seiten apiClient-Migration (`20f3cb40d`)
 - REK-001: Detail-UI (P1-P5), Transitions, CRM/DMS/Audit Tabs — Doku aktualisiert
@@ -163,13 +167,7 @@ Kein Agent darf einen Slice beginnen, der bereits `reserviert` oder `in arbeit` 
 - NC-A7 (OpenAPI Execution Adapter): `neuro_tool_execution.py` + Tests (Integration mit Cursor Agent NC-A7 Commits)
 - Copilot-UI Verdrahtung (CopilotDockPanel, useCopilotChat, HumanOversightBoard)
 
-**Verbleibend:**
-
-| Aufgabe | Beschreibung | Status |
-|---------|-------------|--------|
-| REK-001 | Reklamations-Detail-UI + Flow-Spine | abgeschlossen (8df97bd53) — Detail existierte bereits, Doku aktualisiert |
-| SVC-001 | Service-Backend + Detail-Routen | abgeschlossen (8df97bd53) — 5 Seiten + Backend existierten, Doku aktualisiert |
-| apiClient-Migration | 40 apiClient-Imports migriert (8df97bd53) | abgeschlossen — 17 api-only Dateien bleiben bei @/lib/axios |
+**Verbleibend (niedrige Prioritaet):** Field-Service `fetch()`→apiClient (SVC-001-P4), Labor-Detail (REK-001-P6), ggf. `api`-only-Seiten bei Bedarf auf gemeinsames HTTP-Layer vereinheitlichen.
 
 **Regeln:**
 - Commit-Convention: `feat(nc-XX): <beschreibung>` / `feat(SLICE-ID): <beschreibung>`.
