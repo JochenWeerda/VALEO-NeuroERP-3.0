@@ -61,22 +61,30 @@ class KnowledgeEntry:
 _IN_MEMORY_STORE: dict[str, KnowledgeEntry] = {}
 
 
+def _store_key(tenant_id: str, domain: str, key: str) -> str:
+    return f"{tenant_id}:{domain}:{key}"
+
+
 def store_knowledge(
     db: Optional[Session],
     entry: KnowledgeEntry,
     tenant_id: str = "system",
 ) -> KnowledgeEntry:
+    store_key = _store_key(tenant_id, entry.domain, entry.key)
+
     if db:
         try:
             existing = db.execute(text(
-                "SELECT version FROM domain_shared.knowledge_store WHERE key = :key AND domain = :domain AND active = true"
-            ), {"key": entry.key, "domain": entry.domain}).fetchone()
+                "SELECT version FROM domain_shared.knowledge_store "
+                "WHERE key = :key AND domain = :domain AND tenant_id = :tid AND active = true"
+            ), {"key": entry.key, "domain": entry.domain, "tid": tenant_id}).fetchone()
 
             if existing:
                 entry.version = existing[0] + 1
                 db.execute(text(
-                    "UPDATE domain_shared.knowledge_store SET active = false WHERE key = :key AND domain = :domain AND active = true"
-                ), {"key": entry.key, "domain": entry.domain})
+                    "UPDATE domain_shared.knowledge_store SET active = false "
+                    "WHERE key = :key AND domain = :domain AND tenant_id = :tid AND active = true"
+                ), {"key": entry.key, "domain": entry.domain, "tid": tenant_id})
 
             db.execute(text("""
                 INSERT INTO domain_shared.knowledge_store
@@ -95,11 +103,18 @@ def store_knowledge(
                 "tid": tenant_id,
             })
             db.commit()
+            _IN_MEMORY_STORE.pop(store_key, None)
         except Exception as exc:
             logger.warning("DB knowledge store failed, using in-memory: %s", exc)
-            _IN_MEMORY_STORE[f"{entry.domain}:{entry.key}"] = entry
+            existing = _IN_MEMORY_STORE.get(store_key)
+            if existing is not None:
+                entry.version = existing.version + 1
+            _IN_MEMORY_STORE[store_key] = entry
     else:
-        _IN_MEMORY_STORE[f"{entry.domain}:{entry.key}"] = entry
+        existing = _IN_MEMORY_STORE.get(store_key)
+        if existing is not None:
+            entry.version = existing.version + 1
+        _IN_MEMORY_STORE[store_key] = entry
 
     return entry
 
@@ -133,7 +148,7 @@ def get_knowledge(
         except Exception:
             pass
 
-    return _IN_MEMORY_STORE.get(f"{domain}:{key}")
+    return _IN_MEMORY_STORE.get(_store_key(tenant_id, domain, key))
 
 
 def search_knowledge(
@@ -184,7 +199,11 @@ def search_knowledge(
         except Exception:
             pass
 
-    results = list(_IN_MEMORY_STORE.values())
+    results = [
+        entry
+        for key, entry in _IN_MEMORY_STORE.items()
+        if key.startswith(f"{tenant_id}:")
+    ]
     if domain:
         results = [e for e in results if e.domain == domain]
     if knowledge_type:
@@ -203,16 +222,16 @@ def delete_knowledge(
 ) -> bool:
     if db:
         try:
-            db.execute(text(
+            result = db.execute(text(
                 "UPDATE domain_shared.knowledge_store SET active = false, updated_at = NOW() "
                 "WHERE key = :key AND domain = :domain AND active = true AND tenant_id = :tid"
             ), {"key": key, "domain": domain, "tid": tenant_id})
             db.commit()
-            return True
+            return bool(getattr(result, "rowcount", 0))
         except Exception:
             pass
 
-    store_key = f"{domain}:{key}"
+    store_key = _store_key(tenant_id, domain, key)
     if store_key in _IN_MEMORY_STORE:
         del _IN_MEMORY_STORE[store_key]
         return True
@@ -234,7 +253,9 @@ def get_knowledge_stats(
             pass
 
     stats: dict[str, int] = {}
-    for entry in _IN_MEMORY_STORE.values():
+    for key, entry in _IN_MEMORY_STORE.items():
+        if not key.startswith(f"{tenant_id}:"):
+            continue
         kt = entry.knowledge_type.value
         stats[kt] = stats.get(kt, 0) + 1
     return stats

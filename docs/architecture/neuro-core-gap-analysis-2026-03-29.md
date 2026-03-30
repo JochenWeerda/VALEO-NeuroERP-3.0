@@ -21,7 +21,7 @@ Dazwischen: Guardrails, Audit, Policy, Human Oversight als Querschnittsschichten
 | NC-03 | Neuro Context Resolver | Rolle, Berechtigung, Business Objects, Einwilligung, Historie, Kanal | **Umgesetzt** (Consent + Channel Context in `neuroassist_context.py`, 2026-03-30) | Fertig | -- |
 | NC-04 | Neuro Planner | Kontext-Pruefung, Schritte generieren, Aktions-Favorit, Validierungsvertrag | **Umgesetzt** (Lane A, `neuro_planner.py`, 9 Templates, Capability-Delegation, 15 Tests, `c83edb6d2`) | Fertig | -- |
 | NC-05 | Confidence & Risk Engine | Append-Only Confidence Ledger | **Umgesetzt** (Lane B, `confidence_ledger.py`, SHA-256 Hash-Chain, 37 Tests gruen) | Fertig | -- |
-| NC-06 | Rule & Knowledge Store | Versionierte Policy- und Prompt-Registrierung | **Umgesetzt** (Knowledge Store + REST API, Policy/Prompt Registries, 13 Tests, 2026-03-30) | Fertig | -- |
+| NC-06 | Rule & Knowledge Store | Versionierte Policy- und Prompt-Registrierung | **Teilweise** (Knowledge Store + REST API, Policy/Prompt Registries, 13 Tests, 2026-03-30; DB-Migration und produktive Runtime-Nutzung offen) | Ausbau | P2 |
 | NC-07 | Action & Policy Layer | Definierte Aktionen und Risikosteuerung | `business_commands.py`, `command_dispatcher.py` -- **produktionsreif** | Fertig | -- |
 | NC-08 | Human Oversight | Menschliche Freigabe | **Umgesetzt** (`human_approval_gate.py`, Supervisor-Case-Management-UI, generische Run-API; UI-Gate-Aktionen ausserhalb Bestellvorschlag offen) | Ausbau | P3 |
 | NC-09 | Guardrails & Output-Validierung | PII/DLP-Schutz, Inhaltsfilterung | **Umgesetzt** (Lane C, `pii_detector.py`, `guardrails.py`, `be5b0ddf4`) | Fertig | -- |
@@ -222,7 +222,7 @@ Abhaengigkeiten zwischen Lanes sind explizit markiert.
 
 ### Lane G: Event Bus Hardening + Knowledge Store (NC-14, NC-06) -- TEILWEISE ABGESCHLOSSEN
 
-**Status:** Stand 2026-03-30: NC-G1 bis NC-G5 plus DLQ/Idempotenz-Haertung umgesetzt; persistenter Knowledge Store und Flow-Spine-Observability offen
+**Status:** Stand 2026-03-30: NC-G1 bis NC-G6 plus lokaler Knowledge Store, Flow-Spine-Handler und Event-Bus-Observability umgesetzt; DB-Migration und tiefere Runtime-Nutzung offen
 **Scope:** NATS-Consumer aktivieren, Event-Schemas, Knowledge/Policy Versionierung
 **Dateibesitz:**
 
@@ -243,6 +243,7 @@ Abhaengigkeiten zwischen Lanes sind explizit markiert.
 | NC-G4 | `PolicyRegistry` -- YAML/JSON-backed Policy-Speicher mit Versionierung + Rollback | Unit-Test (umgesetzt) |
 | NC-G5 | `PromptPackRegistry` -- versionierte Prompt-Packs mit A/B-Testing-Faehigkeit | Unit-Test (umgesetzt) |
 | NC-G6 | DLQ + event_id-Idempotenz fuer `NATSConsumer`, Oversight-/Doku-Nachzug | Unit-Test + Storybook/Docs (umgesetzt) |
+| NC-G7 | Knowledge Store REST/API + Flow-Spine-Handler/Observability, Tenant-/Versionierungs-Nachhaertung | Unit-Test (umgesetzt) |
 
 **Abhaengigkeiten:** Keine
 
