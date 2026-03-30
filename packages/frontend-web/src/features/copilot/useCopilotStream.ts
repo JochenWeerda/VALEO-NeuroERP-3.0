@@ -7,12 +7,16 @@ interface CopilotMessage {
   chunk?: string
   full_text?: string
   index?: number
+  result?: Record<string, unknown>
+  error?: string
 }
 
 interface UseCopilotStreamOptions {
   url?: string
   token?: string
   onStateChange?: (state: string) => void
+  onMessage?: (message: CopilotMessage) => void
+  autoReconnect?: boolean
 }
 
 export function useCopilotStream(options: UseCopilotStreamOptions = {}) {
@@ -20,6 +24,8 @@ export function useCopilotStream(options: UseCopilotStreamOptions = {}) {
     url = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/api/v1/copilot/chat`,
     token,
     onStateChange,
+    onMessage,
+    autoReconnect = true,
   } = options
 
   const [connected, setConnected] = useState(false)
@@ -27,11 +33,25 @@ export function useCopilotStream(options: UseCopilotStreamOptions = {}) {
   const [streaming, setStreaming] = useState(false)
   const [currentChunks, setCurrentChunks] = useState<string[]>([])
   const [lastResponse, setLastResponse] = useState<string | null>(null)
+  const [pipelineResult, setPipelineResult] = useState<Record<string, unknown> | null>(null)
   const wsRef = useRef<WebSocket | null>(null)
   const reconnectTimer = useRef<ReturnType<typeof setTimeout>>()
+  const manuallyClosedRef = useRef(false)
+  const onMessageRef = useRef(onMessage)
+  const onStateChangeRef = useRef(onStateChange)
+
+  useEffect(() => {
+    onMessageRef.current = onMessage
+  }, [onMessage])
+
+  useEffect(() => {
+    onStateChangeRef.current = onStateChange
+  }, [onStateChange])
 
   const connect = useCallback(() => {
+    manuallyClosedRef.current = false
     if (wsRef.current?.readyState === WebSocket.OPEN) return
+    if (wsRef.current?.readyState === WebSocket.CONNECTING) return
 
     const wsUrl = token ? `${url}?token=${encodeURIComponent(token)}` : url
     const ws = new WebSocket(wsUrl)
@@ -43,13 +63,14 @@ export function useCopilotStream(options: UseCopilotStreamOptions = {}) {
     ws.onmessage = (event) => {
       try {
         const msg: CopilotMessage = JSON.parse(event.data)
+        onMessageRef.current?.(msg)
 
         switch (msg.type) {
           case 'session_start':
             setSessionId(msg.session_id ?? null)
             break
           case 'state_change':
-            onStateChange?.(msg.state ?? 'unknown')
+            onStateChangeRef.current?.(msg.state ?? 'unknown')
             break
           case 'stream_start':
             setStreaming(true)
@@ -62,6 +83,9 @@ export function useCopilotStream(options: UseCopilotStreamOptions = {}) {
             setStreaming(false)
             setLastResponse(msg.full_text ?? null)
             break
+          case 'pipeline_result':
+            setPipelineResult(msg.result ?? null)
+            break
         }
       } catch {
         // ignore parse errors
@@ -71,7 +95,10 @@ export function useCopilotStream(options: UseCopilotStreamOptions = {}) {
     ws.onclose = () => {
       setConnected(false)
       setSessionId(null)
-      reconnectTimer.current = setTimeout(connect, 3000)
+      wsRef.current = null
+      if (!manuallyClosedRef.current && autoReconnect) {
+        reconnectTimer.current = setTimeout(connect, 3000)
+      }
     }
 
     ws.onerror = () => {
@@ -79,9 +106,10 @@ export function useCopilotStream(options: UseCopilotStreamOptions = {}) {
     }
 
     wsRef.current = ws
-  }, [url, token, onStateChange])
+  }, [url, token, autoReconnect])
 
   const disconnect = useCallback(() => {
+    manuallyClosedRef.current = true
     clearTimeout(reconnectTimer.current)
     wsRef.current?.close()
     wsRef.current = null
@@ -98,6 +126,7 @@ export function useCopilotStream(options: UseCopilotStreamOptions = {}) {
   useEffect(() => {
     return () => {
       clearTimeout(reconnectTimer.current)
+      manuallyClosedRef.current = true
       wsRef.current?.close()
     }
   }, [])
@@ -111,5 +140,6 @@ export function useCopilotStream(options: UseCopilotStreamOptions = {}) {
     streaming,
     currentText: currentChunks.join(''),
     lastResponse,
+    pipelineResult,
   }
 }

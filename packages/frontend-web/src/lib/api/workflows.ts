@@ -26,6 +26,9 @@ export type WorkflowStatus = {
   proposal?: WorkflowProposal
   order_id?: string
   created_at?: string
+  capability_key?: string
+  runtime?: Record<string, unknown>
+  result?: Record<string, unknown>
 }
 
 export type ApprovalRequest = {
@@ -59,6 +62,7 @@ export type RunListItem = {
   status: 'pending_approval' | 'completed' | 'rejected' | 'running' | 'failed'
   started_at: string
   result: Record<string, unknown>
+  runtime?: Record<string, unknown>
 }
 
 // Query Keys
@@ -84,6 +88,9 @@ export function useWorkflowStatus(workflowId: string) {
         proposal: result.proposal as WorkflowProposal | undefined,
         order_id: result.order_id as string | undefined,
         created_at: (result.created_at as string | undefined) ?? payload.started_at,
+        capability_key: payload.capability_key,
+        runtime: payload.runtime,
+        result,
       } satisfies WorkflowStatus
     },
     enabled: !!workflowId,

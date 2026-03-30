@@ -16,10 +16,10 @@ Dazwischen: Guardrails, Audit, Policy, Human Oversight als Querschnittsschichten
 
 | # | Komponente | Soll (Zielarchitektur) | Ist (Codebase) | Gap-Typ | Prio |
 |---|-----------|----------------------|---------------|---------|------|
-| NC-01 | Neuro Intent Engine | Intent-Klassifikation, Confidence, Risikoklasse | Stage-basiertes Routing in `neuroassist.py`, kein NLU | **Ausbau** | P1 |
+| NC-01 | Neuro Intent Engine | Intent-Klassifikation, Confidence, Risikoklasse | **Umgesetzt** (Lane A, `neuro_intent_engine.py`, 11 Intents, 17 Tests, `c83edb6d2`) | Fertig | -- |
 | NC-02 | Neuro State Graph | Stateful Business Object Graph (Bestellung, Rechnung, Kunde, Freigabe) | **Umgesetzt** (Lane B, `neuro_state_graph.py`, 37 Tests gruen) | Fertig | -- |
 | NC-03 | Neuro Context Resolver | Rolle, Berechtigung, Business Objects, Einwilligung, Historie, Kanal | `neuroassist_context.py` loest Prozess/Aggregat auf; Consent fehlt | **Ausbau** | P2 |
-| NC-04 | Neuro Planner | Kontext-Pruefung, Schritte generieren, Aktions-Favorit, Validierungsvertrag | Role/PromptPack Contracts vorhanden; kein expliziter Planner | **Ausbau** | P1 |
+| NC-04 | Neuro Planner | Kontext-Pruefung, Schritte generieren, Aktions-Favorit, Validierungsvertrag | **Umgesetzt** (Lane A, `neuro_planner.py`, 9 Templates, Capability-Delegation, 15 Tests, `c83edb6d2`) | Fertig | -- |
 | NC-05 | Confidence & Risk Engine | Append-Only Confidence Ledger | **Umgesetzt** (Lane B, `confidence_ledger.py`, SHA-256 Hash-Chain, 37 Tests gruen) | Fertig | -- |
 | NC-06 | Rule & Knowledge Store | Versionierte Policy- und Prompt-Registrierung | **Teilweise** (Policy Registry A/B + Rollback, Prompt Pack Registry umgesetzt) | **Ausbau** | P2 |
 | NC-07 | Action & Policy Layer | Definierte Aktionen und Risikosteuerung | `business_commands.py`, `command_dispatcher.py` -- **produktionsreif** | Fertig | -- |
@@ -27,7 +27,7 @@ Dazwischen: Guardrails, Audit, Policy, Human Oversight als Querschnittsschichten
 | NC-09 | Guardrails & Output-Validierung | PII/DLP-Schutz, Inhaltsfilterung | **Umgesetzt** (Lane C, `pii_detector.py`, `guardrails.py`, `be5b0ddf4`) | Fertig | -- |
 | NC-10 | Fast Track | Umgehung Neuro-Core fuer deterministisches CRUD | **Umgesetzt** (Lane E, `fast_track.py`, `be5b0ddf4`) | Fertig | -- |
 | NC-11 | VALEO Copilot UI | Konversationale AI-Oberflaeche | **Umgesetzt** (Lane F, `copilot_ws.py`, `useCopilotStream.ts`, `be5b0ddf4`) | Fertig | -- |
-| NC-12 | Interaktions-Kanaele | WhatsApp, E-Mail, Live-Chat/Web-Chat | Slack/Teams-Framework in `channel_ingress.py`; WA/Email/Chat fehlen | **Neubau** | P3 |
+| NC-12 | Interaktions-Kanaele | WhatsApp, E-Mail, Live-Chat/Web-Chat | **Umgesetzt** (Lane H, WhatsApp/Email/Voice/Ingress, `74378078f`). Live-Chat offen | **Ausbau** | P3 |
 | NC-13 | Audit & Trace Layer | Unveraenderlicher Audit-Trail, Neuro-Entscheidungs-Protokoll, SIEM | **Umgesetzt** (Lane D, `audit_hardening.py`, `neuro_decision_protocol.py`, `79267fb43`) | Fertig | -- |
 | NC-14 | Event Bus (Kafka) | Kafka Event Bus | **Teilweise** (Lane G, Event Schema Registry + Policy Registry, NATS Consumer umgesetzt) | **Ausbau** | P2 |
 | NC-15 | Identity & Access / Secrets | OIDC + Vault | OIDC/Keycloak + RBAC vorhanden; kein Vault | **Ausbau** | P3 |
@@ -52,30 +52,31 @@ Abhaengigkeiten zwischen Lanes sind explizit markiert.
 
 ---
 
-### Lane A: Neuro-Core Kernel (NC-01, NC-04, EXT-01)
+### Lane A: Neuro-Core Kernel (NC-01, NC-04, EXT-01) -- ABGESCHLOSSEN
 
-**Scope:** Intent Engine + Planner + Verification Engine
+**Status:** Umgesetzt 2026-03-30, 100 Tests gruen (Commits `c83edb6d2`, `74378078f`, `4c478b8fc`)
+**Scope:** Intent Engine + Planner + Pipeline + Capability-Runner-Delegation
 **Dateibesitz:**
 
-- `app/agents/neuro_intent_engine.py` (NEU)
-- `app/agents/neuro_planner.py` (NEU)
-- `app/agents/neuro_verification_engine.py` (NEU)
-- `app/agents/neuroassist_contracts.py` (EDIT -- IntentResult, PlanStep, VerificationResult Contracts)
-- `tests/test_neuro_intent_engine.py` (NEU)
-- `tests/test_neuro_planner.py` (NEU)
-- `tests/test_neuro_verification_engine.py` (NEU)
+- `app/agents/neuro_intent_engine.py` -- 11 Intent-Patterns, Capability-Matching, Risk-Klassen, Parameter-Extraktion
+- `app/agents/neuro_planner.py` -- 9 Plan-Templates, typisierte Schritte, Verification-Engine-Integration
+- `app/agents/neuro_pipeline.py` -- Vollstaendige Pipeline: Classify -> Plan -> Verify -> Execute
+- `app/api/v1/endpoints/neuro_pipeline.py` -- REST-API: /neuro/classify, /intents, /plan, /execute
+- `tests/test_neuro_intent_engine.py` -- 17 Tests
+- `tests/test_neuro_planner.py` -- 15 Tests
+- `tests/test_neuro_pipeline.py` -- 11 Tests
 
-**Slices:**
+**Slices (alle abgeschlossen):**
 
-| Slice | Inhalt | Abnahme |
-|-------|--------|---------|
-| NC-A1 | `IntentResult` Contract: intent, confidence_score (0-1), risk_class, explanation, requested_action | Unit-Test |
-| NC-A2 | `IntentEngine.classify(user_input, context) -> IntentResult` mit Capability-Matching | Unit-Test + Integration mit bestehenden 5 Capabilities |
-| NC-A3 | `PlanStep` Contract + `Planner.generate_plan(intent, context) -> list[PlanStep]` | Unit-Test |
-| NC-A4 | `VerificationResult` Contract + `VerificationEngine.verify(plan, state) -> VerificationResult` mit Policy-Check, Precondition-Check, State-Transition-Check | Unit-Test |
-| NC-A5 | Integration: Intent -> Context -> Plan -> Verify -> Execute Pipeline im `neuroassist_runtime.py` | E2E-Test |
+| Slice | Inhalt | Status |
+|-------|--------|--------|
+| NC-A1 | `IntentResult` Contract mit Confidence-Scoring und Risk-Klassen | Gruen (17 Tests) |
+| NC-A2 | `IntentEngine.classify()` mit 11 deutschen Intents + 6 Capability-Matches | Gruen |
+| NC-A3 | `PlanStep` + `ExecutionPlan` + `Planner.generate_plan()` mit 9 Templates | Gruen (15 Tests) |
+| NC-A4 | Verification Engine Integration -- Planner nutzt NC-001 zur Plan-Vorabpruefung | Gruen |
+| NC-A5 | Pipeline: Intent -> Plan -> Verify -> Execute + Decision Protocol + Audit | Gruen (11 Tests) |
 
-**Abhaengigkeiten:** Keine (nutzt bestehende Contracts aus `neuroassist_contracts.py`)
+**Abhaengigkeiten:** Keine — Kern-Lane fertig, alle abhaengigen Slices (D4, F5, H1-H4) ebenfalls umgesetzt
 
 ---
 

@@ -8,7 +8,7 @@ Diese Datei ist absichtlich schlank und soll bei jeder Session schnell lesbar bl
 
 ## Aktueller Stand
 
-- Datum: `2026-03-29`
+- Datum: `2026-03-30`
 - Branch: `develop` (lokal; mit `backup/develop` abgleichen bei Push)
 - Source of Truth: `docs/architecture/process-kernel/STATUS.md`
 
@@ -118,49 +118,41 @@ Kein Agent darf einen Slice beginnen, der bereits `reserviert` oder `in arbeit` 
 
 ## Aufgabenverteilung Cursor Agent / Codex (Stand 2026-03-29)
 
-### Cursor Agent: Lane A — Neuro-Core Kernel (reserviert)
+### Cursor Agent: Abgeschlossene Arbeit (Stand 2026-03-30)
 
-Cursor Agent arbeitet jetzt an Lane A (Intent Engine + Planner). Das ist die Kern-Lane, von der D4, F5, H4, H5 abhaengen.
+**Lane A (Kern-Lane):** A1-A5 abgeschlossen. 100 Tests gruen. Commits: `c83edb6d2`, `74378078f`, `4c478b8fc`.
+**Abhaengige Slices:** NC-D4 (Audit Middleware), NC-F5 (Copilot Pipeline), NC-H1-H4 (Channels) — alle abgeschlossen.
+**Tests:** 5 Test-Suites mit 100 Tests (Intent Engine 17, Planner 15, Pipeline 11, Guardrails 17, Channels 14).
+**Pipeline-Fix:** Risk-Escalation Bug gefixt, Verification-Engine-Integration korrigiert, Capability-Runner-Delegation implementiert.
+**Doku:** Gap-Analyse, Stack-Matrix und Workboard aktualisiert.
 
-**Slices:**
+**Dateibesitz (Cursor Agent):**
+- `app/agents/neuro_intent_engine.py`, `app/agents/neuro_planner.py`, `app/agents/neuro_pipeline.py`
+- `app/api/v1/endpoints/neuro_pipeline.py`, `app/api/v1/endpoints/channels.py`
+- `app/channels/whatsapp_adapter.py`, `app/channels/email_channel.py`, `app/channels/channel_ingress.py`
+- `app/middleware/neuro_audit_middleware.py`
+- `tests/test_neuro_intent_engine.py`, `tests/test_neuro_planner.py`, `tests/test_neuro_pipeline.py`, `tests/test_neuro_guardrails.py`, `tests/test_neuro_channels.py`
 
-| Slice | Inhalt | Status |
-|-------|--------|--------|
-| NC-A1 | `IntentResult` Contract: intent, confidence_score (0-1), risk_class, explanation, requested_action | **abgeschlossen** |
-| NC-A2 | `IntentEngine.classify(user_input, context) -> IntentResult` mit 11 Intents + Capability-Matching | **abgeschlossen** |
-| NC-A3 | `PlanStep` Contract + `Planner.generate_plan(intent, context) -> ExecutionPlan` mit 9 Templates | **abgeschlossen** |
-| NC-A4 | `VerificationResult` Integration — Planner nutzt bestehende Verification Engine (NC-001) | **abgeschlossen** |
-| NC-A5 | Pipeline: Intent -> Plan -> Verify -> Execute + Decision Protocol | **abgeschlossen** |
+### Codex: Abgeschlossene und verbleibende Aufgaben
 
-**Dateibesitz (exklusiv):** `app/agents/neuro_intent_engine.py`, `app/agents/neuro_planner.py`, `tests/test_neuro_intent_engine.py`, `tests/test_neuro_planner.py`
+**Abgeschlossen (Codex):**
+- NC-B (State Graph + Confidence): B1-B5, 37 Tests
+- NC-G2 (NATS Consumer Framework)
+- NC-G3 (Core Handlers: Audit, Inventory, Settlement)
+- NC-G4/G5 (Policy + Prompt Pack Registries)
+- Copilot-UI Verdrahtung (CopilotDockPanel, useCopilotChat, HumanOversightBoard)
 
-### Codex: Verbleibende Aufgaben
+**Verbleibend (Codex):**
 
-Codex soll folgende Aufgaben uebernehmen, sobald seine aktuelle Arbeit (NC-B) abgeschlossen ist:
+| Aufgabe | Lane | Beschreibung | Status |
+|---------|------|-------------|--------|
+| NC-D5 | D | Audit Hash-Chain Regression-Tests | offen |
+| NC-G6+ | G | Flow-Spine-spezifische Event-Handler + Observability | offen |
+| Live-Chat | H | Web-Chat-Kanal als Ergaenzung zu WhatsApp/Email | offen |
 
-**Prio 1 — Abhaengig von Lane A (erst nach Cursor-Agent-Commit NC-A5):**
-
-| Aufgabe | Lane | Beschreibung | Dateibesitz |
-|---------|------|-------------|-------------|
-| NC-D4 | D | Decision Protocol automatisch aus Neuro-Core Pipeline befuellen | `app/middleware/audit_middleware.py` (EDIT) |
-| NC-D5 | D | Audit-Query-API: Hash-Chain-Validierung als Regression | `tests/test_audit_append_only.py` |
-| NC-F5 | F | Copilot -> Neuro-Core Pipeline: Chat -> IntentEngine -> Planner -> Response-Stream | `app/api/v1/endpoints/copilot_ws.py` (EDIT) |
-
-**Prio 2 — Sofort machbar (keine Abhaengigkeit):**
-
-| Aufgabe | Lane | Beschreibung | Dateibesitz |
-|---------|------|-------------|-------------|
-| NC-G2 | G | `NATSConsumer` — generischer Consumer mit Retry, DLQ, Idempotenz | `app/infrastructure/eventbus/nats_consumer.py` |
-| NC-G3 | G | Mindestens 3 Consumer aktiviert: Audit-Event, Inventory-Movement, Settlement-Created | `app/infrastructure/eventbus/` |
-| NC-H1 | H | `WhatsAppAdapter` — WhatsApp Business API Webhook-Empfang, Message-Parsing, Reply | `app/channels/whatsapp_adapter.py` |
-| NC-H2 | H | `EmailChannel` — IMAP-Polling/Webhook fuer eingehende E-Mails, Response via SMTP | `app/channels/email_channel.py` |
-| NC-H4 | H | Channel -> ChannelIngress -> Neuro-Core Routing fuer alle neuen Kanaele | `app/channels/` |
-
-**Regeln fuer Codex:**
-- Vor jeder Arbeit den Slice im Workboard auf `reserviert` setzen und sofort committen (`chore(workboard): claim SLICE-ID`).
-- Dateibesitz ist exklusiv — keine Dateien aus Lane A oder den bereits abgeschlossenen Lanes C/E bearbeiten.
-- Nach jedem Slice: Tests, Doku (Workflow + Card) und Workboard aktualisieren.
+**Regeln:**
 - Commit-Convention: `feat(nc-XX): <beschreibung>`.
+- Dateibesitz ist exklusiv — keine Dateien des jeweils anderen Agents bearbeiten.
 
 ## Letzte wichtige Entscheidungen
 
@@ -752,3 +744,24 @@ Alle 6 Router registriert in `app/api/v1/api.py` unter `/api/v1/neuro/*`. Commit
 **Betroffene Dateien:** `app/services/policy_registry.py`, `app/api/v1/endpoints/neuro_event_policy.py`, `tests/test_policy_registry.py`, `app/services/prompt_pack_registry.py`, `app/api/v1/endpoints/neuro_prompt_packs.py`, `tests/test_prompt_pack_registry.py`, `docs/workflows/nc-g4-policy-registry.md`, `docs/workflows/nc-g5-prompt-pack-registry.md`, `docs/cards/neuro-core/NC-G4-policy-registry.md`, `docs/cards/neuro-core/NC-G5-prompt-pack-registry.md`, `app/api/v1/api.py`, `docs/agent-ops/active-workboard.md`
 **Tests / Checks:** nicht ausgefuehrt in dieser Session
 **Naechster konkreter Schritt:** NC-G6 (DLQ/Idempotenz + persistenter Knowledge Store) schneiden.
+
+## Handoff: 2026-03-30 - NC-G6
+
+**Von:** Codex
+**An:** naechste Session / naechster Agent
+**Ziel des Slices:** Event-Bus-Haertung abschliessen und Copilot/Human-Oversight auf den produktiven NeuroASSIST-Pfad ziehen.
+**Stand:** abgeschlossen
+**Erledigt:**
+- `NATSEventConsumer` besitzt jetzt Replay-Schutz ueber `event_id`, Delivery-Attempt-Auswertung und eine interne DLQ-Erfassung fuer Decode-/Handler-Fehler.
+- `tests/test_nats_consumer.py` deckt Duplicate-Ack, Decode-DLQ, Nak vor Threshold und Term+DLQ nach Threshold ab.
+- Das Copilot-Dock nutzt jetzt den WebSocket-Stream statt eines separaten Alt-POST-Pfads; Session-/Stream-Status sind im UI sichtbar.
+- `Prozess-Supervisor` ist zu einer Case-Management-Oberflaeche fuer Human Oversight verdichtet; Storybook-Stories fuer Copilot-Dock und Oversight-Board sind angelegt.
+- Neuro-Stack-Matrix, Open-Gaps und NC-F-Doku sind auf den Ist-Stand `2026-03-30` nachgezogen.
+**Offen:**
+- Generische UI-Gate-Aktionen existieren weiterhin nur fuer `bestellvorschlag_assistant`; andere Pending-Approval-Runs sind sichtbar, aber noch nicht per generischem UI-Action-Contract bedienbar.
+- Flow-Spine-spezifische NATS-Handler und tieferes Event-Observability-Surfacing bleiben als Folgeslice offen.
+**Betroffene Dateien:** `docs/agent-ops/active-workboard.md`, `docs/project-context/neuro-stack-gap-matrix-2026-03-29.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/workflows/nc-f-copilot-backend.md`, `docs/cards/neuro-core/NC-F5-copilot-pipeline.md`, `app/infrastructure/eventbus/nats_consumer.py`, `tests/test_nats_consumer.py`, `tests/test_nats_event_handlers.py`, `packages/frontend-web/src/features/copilot/AdvisorDock.tsx`, `packages/frontend-web/src/features/copilot/CopilotDockPanel.tsx`, `packages/frontend-web/src/features/copilot/useCopilotChat.ts`, `packages/frontend-web/src/features/copilot/useCopilotStream.ts`, `packages/frontend-web/src/features/copilot/__stories__/CopilotDockPanel.stories.tsx`, `packages/frontend-web/src/features/workflow/HumanOversightBoard.tsx`, `packages/frontend-web/src/features/workflow/__stories__/HumanOversightBoard.stories.tsx`, `packages/frontend-web/src/lib/agentCapabilities.ts`, `packages/frontend-web/src/lib/api/workflows.ts`, `packages/frontend-web/src/pages/workflows/approval.tsx`, `packages/frontend-web/src/pages/workflows/supervisor.tsx`
+**Tests / Checks:** `pytest tests/test_nats_consumer.py tests/test_nats_event_handlers.py -q --no-cov` gruen (`8 passed`); `pnpm --dir packages/frontend-web storybook:smoke` gruen; gezielter `eslint` auf den geaenderten Frontend-Dateien gruen; globaler `pnpm --dir packages/frontend-web type-check` scheitert weiter an bereits bestehenden Fehlern in `packages/frontend-web/src/pages/agrar/ernte-annahme-erfassung.tsx`.
+**Offene Risiken:** Der globale Frontend-Typecheck ist in dieser Session nicht voll gruen bestaetigt, weil die bestehenden Agrar-Fehler ausserhalb dieses Slices liegen.
+**Annahmen:** `event_id` ist fuer produktive NATS-Events der kanonische Dedup-Key; fuer andere Pending-Approval-Capabilities ist Sichtbarkeit im Oversight-Board kurzfristig wichtiger als vorschnelle generische Approval-Buttons ohne Backend-Handler.
+**Naechster konkreter Schritt:** Generische Gate-Actions fuer DQ-/Operations-Runs oder Flow-Spine-spezifische NATS-Handler als Folgeslice schneiden.

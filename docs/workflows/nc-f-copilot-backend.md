@@ -41,4 +41,10 @@ sequenceDiagram
 | NC-F2 | InteractionStateManager transitions | umgesetzt |
 | NC-F3 | WebSocket-Endpoint mit Streaming | umgesetzt |
 | NC-F4 | useCopilotStream React Hook | umgesetzt |
-| NC-F5 | Neuro-Core Pipeline Integration | wartet auf Lane A |
+| NC-F5 | Neuro-Core Pipeline Integration | umgesetzt |
+
+## Ist-Stand 2026-03-30
+
+- `copilot_ws.py` streamt nicht mehr nur Stub-Antworten, sondern liefert den formatierten Output der Neuro-Core Pipeline.
+- Das Frontend nutzt den WebSocket-Stream jetzt auch im Copilot-Dock statt eines separaten Alt-POST-Pfads.
+- Human Oversight und Copilot-UI sind ueber den Prozess-Supervisor und die generische Run-API sichtbar an dieselben NeuroASSIST-Contracts angebunden.
