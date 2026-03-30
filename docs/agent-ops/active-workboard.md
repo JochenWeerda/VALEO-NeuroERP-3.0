@@ -124,38 +124,50 @@ Kein Agent darf einen Slice beginnen, der bereits `reserviert` oder `in arbeit` 
 
 ### Cursor Agent: Abgeschlossene Arbeit (Stand 2026-03-30)
 
-**Lane A (Kern-Lane):** A1-A5 abgeschlossen. 100 Tests gruen. Commits: `c83edb6d2`, `74378078f`, `4c478b8fc`.
-**Abhaengige Slices:** NC-D4 (Audit Middleware), NC-F5 (Copilot Pipeline), NC-H1-H4 (Channels) — alle abgeschlossen.
-**Tests:** 5 Test-Suites mit 100 Tests (Intent Engine 17, Planner 15, Pipeline 11, Guardrails 17, Channels 14).
-**Pipeline-Fix:** Risk-Escalation Bug gefixt, Verification-Engine-Integration korrigiert, Capability-Runner-Delegation implementiert.
-**Doku:** Gap-Analyse, Stack-Matrix und Workboard aktualisiert.
+**Neuro-Core (komplett):**
+- Lane A (A1-A5): Intent Engine + Planner + Pipeline, 100 Tests
+- NC-A7: Broker Fallback, State-Graph-Persistence, Per-Step-Audit-Trace (`15c7952fc`)
+- NC-03: Context Resolver + Consent + Channel Context
+- NC-06: Knowledge Store + REST-API, 13 Tests
+- NC-08: Case Management Service + REST-API, SLA-Eskalation, 4 Tests
+- NC-12: Live-Chat-Kanal mit Pipeline-Integration, 6 Tests
+- NC-14: 7 Flow-Spine-Handler + EventBus Observability, 20 Tests
+- NC-15: Secrets Vault mit Obfuskation, Rotation, Access-Log, 7 Tests
+- NC-D4/D5: Audit Middleware + Hash-Chain Regression-Tests, 11 Tests
+- NC-F5: Copilot Pipeline
+- NC-H1-H4: WhatsApp, Email, Voice, Channel Ingress, 14 Tests
+
+**E2E-Workflows:**
+- FIN-001 P1-P8: Alle D-Checks gruen, 20 Seiten apiClient-Migration (`20f3cb40d`)
 
 **Dateibesitz (Cursor Agent):**
-- `app/agents/neuro_intent_engine.py`, `app/agents/neuro_planner.py`, `app/agents/neuro_pipeline.py`
-- `app/api/v1/endpoints/neuro_pipeline.py`, `app/api/v1/endpoints/channels.py`
-- `app/channels/whatsapp_adapter.py`, `app/channels/email_channel.py`, `app/channels/channel_ingress.py`
+- `app/agents/neuro_intent_engine.py`, `neuro_planner.py`, `neuro_pipeline.py`
+- `app/services/case_management.py`, `secrets_vault.py`, `knowledge_store.py`
+- `app/channels/livechat_channel.py`, `whatsapp_adapter.py`, `email_channel.py`, `channel_ingress.py`
+- `app/infrastructure/eventbus/flow_spine_handlers.py`, `observability.py`
+- `app/api/v1/endpoints/neuro_pipeline.py`, `channels.py`, `neuro_knowledge.py`, `case_management_api.py`
 - `app/middleware/neuro_audit_middleware.py`
-- `tests/test_neuro_intent_engine.py`, `tests/test_neuro_planner.py`, `tests/test_neuro_pipeline.py`, `tests/test_neuro_guardrails.py`, `tests/test_neuro_channels.py`
+- `tests/test_neuro_*.py`, `tests/test_knowledge_store.py`, `tests/test_flow_spine_handlers.py`, `tests/test_audit_hash_chain.py`
 
 ### Codex: Abgeschlossene und verbleibende Aufgaben
 
 **Abgeschlossen (Codex):**
 - NC-B (State Graph + Confidence): B1-B5, 37 Tests
-- NC-G2 (NATS Consumer Framework)
-- NC-G3 (Core Handlers: Audit, Inventory, Settlement)
-- NC-G4/G5 (Policy + Prompt Pack Registries)
+- NC-G2-G7 (NATS Consumer, Core Handlers, Policy/Prompt Registries, DLQ/Idempotenz, Knowledge Store Haertung)
+- NC-A6 (Neuro Tool Broker): `5a455061f`
+- NC-A7 (OpenAPI Execution Adapter): `neuro_tool_execution.py` + Tests (Integration mit Cursor Agent NC-A7 Commits)
 - Copilot-UI Verdrahtung (CopilotDockPanel, useCopilotChat, HumanOversightBoard)
 
-**Verbleibend (Codex):**
+**Verbleibend:**
 
-| Aufgabe | Lane | Beschreibung | Status |
-|---------|------|-------------|--------|
-| NC-D5 | D | Audit Hash-Chain Regression-Tests | offen |
-| NC-G6+ | G | Flow-Spine-spezifische Event-Handler + Observability | offen |
-| Live-Chat | H | Web-Chat-Kanal als Ergaenzung zu WhatsApp/Email | offen |
+| Aufgabe | Beschreibung | Status |
+|---------|-------------|--------|
+| REK-001 | Reklamations-Detail-UI + Flow-Spine | offen — Cursor Agent uebernimmt |
+| SVC-001 | Service-Backend + Detail-Routen | offen — Cursor Agent uebernimmt |
+| apiClient-Migration | Verbleibende ~36 Legacy-Import-Seiten | offen — Cursor Agent uebernimmt |
 
 **Regeln:**
-- Commit-Convention: `feat(nc-XX): <beschreibung>`.
+- Commit-Convention: `feat(nc-XX): <beschreibung>` / `feat(SLICE-ID): <beschreibung>`.
 - Dateibesitz ist exklusiv — keine Dateien des jeweils anderen Agents bearbeiten.
 
 ## Letzte wichtige Entscheidungen
