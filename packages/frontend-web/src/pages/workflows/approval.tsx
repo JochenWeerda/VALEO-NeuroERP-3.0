@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import { useWorkflowStatus, useApproveWorkflow } from '@/lib/api/workflows'
 import { apiClient } from '@/lib/axios'
+import { getCapabilityByKey } from '@/lib/agentCapabilities'
 
 export default function WorkflowApprovalPage(): JSX.Element {
   const { workflowId } = useParams<{ workflowId: string }>()
@@ -94,6 +95,9 @@ export default function WorkflowApprovalPage(): JSX.Element {
   }
   
   const proposal = workflow.proposal
+  const capability = workflow.capability_key ? getCapabilityByKey(workflow.capability_key) : undefined
+  const capabilityTitle = capability?.title ?? workflow.capability_key ?? 'NeuroASSIST-Run'
+  const canUseGenericApproval = workflow.capability_key === 'bestellvorschlag_assistant'
   
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -101,7 +105,7 @@ export default function WorkflowApprovalPage(): JSX.Element {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Bestellvorschlag freigeben</h1>
+            <h1 className="text-3xl font-bold">{capabilityTitle} freigeben</h1>
             <p className="text-muted-foreground">Workflow: {workflowId}</p>
           </div>
           <div className="flex gap-2 items-center">
@@ -208,6 +212,19 @@ export default function WorkflowApprovalPage(): JSX.Element {
             </Card>
           </>
         )}
+
+        {!proposal && workflow.result ? (
+          <Card>
+            <CardHeader>
+              <CardTitle>Run-Details</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <pre className="max-h-72 overflow-auto rounded-lg bg-slate-950 p-3 text-xs text-slate-100">
+                {JSON.stringify(workflow.result, null, 2)}
+              </pre>
+            </CardContent>
+          </Card>
+        ) : null}
         
         {/* Gap 019 — Policy-Kontext */}
         {policyQuery.data && (
@@ -222,7 +239,7 @@ export default function WorkflowApprovalPage(): JSX.Element {
         )}
 
         {/* Actions */}
-        {workflow.status === 'pending_approval' && (
+        {workflow.status === 'pending_approval' && canUseGenericApproval && (
           <Card>
             <CardHeader>
               <CardTitle>Freigabe-Entscheidung</CardTitle>
@@ -268,6 +285,14 @@ export default function WorkflowApprovalPage(): JSX.Element {
             </CardContent>
           </Card>
         )}
+
+        {workflow.status === 'pending_approval' && !canUseGenericApproval ? (
+          <Card className="border-dashed">
+            <CardContent className="pt-6 text-sm text-muted-foreground">
+              Dieser Run wartet auf Human Oversight, exponiert aber aktuell noch keinen generischen UI-Freigabepfad.
+            </CardContent>
+          </Card>
+        ) : null}
         
         {/* Completed */}
         {workflow.status === 'completed' && workflow.order_id && (

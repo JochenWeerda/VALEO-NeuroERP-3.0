@@ -49,7 +49,7 @@ export const AGENT_CAPABILITIES: AgentCapabilityDef[] = [
     readiness: 'assisted',
   },
   {
-    capability_key: 'skonto_optimizer',
+    capability_key: 'finance_skonto_assistant',
     title: 'Skonto-Optimierung',
     domain: 'finanzen',
     description: 'Analysiert offene Posten und empfiehlt Zahlungen mit maximalem Skontonutzen.',

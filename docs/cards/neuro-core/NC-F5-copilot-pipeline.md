@@ -14,5 +14,8 @@ wird klassifiziert, ein Plan generiert, verifiziert und ausgefuehrt.
 formatierte Ergebnis als Chunks zurueck. Zusaetzlich wird das rohe
 Pipeline-Ergebnis als `pipeline_result` Event gesendet.
 
+Der Frontend-Copilot nutzt diesen Stream jetzt ebenfalls direkt; der
+fruehere Alt-POST-Pfad ist fuer das Advisor-Dock ersetzt.
+
 ## Dateien
 - `app/api/v1/endpoints/copilot_ws.py` — Copilot WS mit Pipeline
