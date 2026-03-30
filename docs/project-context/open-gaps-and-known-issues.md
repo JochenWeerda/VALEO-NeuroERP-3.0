@@ -9,6 +9,7 @@ Diese Datei sammelt die fuer neue Analysen wichtigsten offenen Restthemen und be
 - einzelne Prozessstarts muessen weiter auf Praxisrealismus gegen Landhandelsablaeufe geprueft werden
 - Browser-Use- und CRUD-Pruefungen muessen pro Workflow fortgeschrieben werden
 - NATS-Consumer + Core-Handler besitzen jetzt DLQ und Idempotenzschutz; offen bleiben Flow-Spine-spezifische Handler und tieferes Event-Observability-Surfacing
+- Der zentrale Neuro Tool Broker ist umgesetzt; offen bleiben reale MCP-/OpenAPI-Tool-Ausfuehrung, persistente State-Graph-Mutationen und per-Step-Persistenz im Decision Trace
 - ChromaDB fuer produktive RAG-Nutzung muss mit Prozesswissen befuellt werden
 - Voice-Kanal setzt Web Speech API voraus (Chrome/Edge); Firefox und Safari nicht unterstuetzt
 - Agentenarchitektur-Diagramm zeigt weiterhin Restluecken bei produktiver Vault-Anbindung, Memory-Governance, Process-Kernel-Contracts und tieferer Observability (siehe `docs/project-context/agent-architecture-gaps-2026-03-28.md`)

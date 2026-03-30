@@ -50,6 +50,7 @@ class TestPipelineExecution:
         result = run_pipeline("Lagerbestand abfragen")
         assert result["status"] == "executed"
         assert "executed_steps" in result
+        assert "tool_trace" in result
         assert len(result["executed_steps"]) >= 1
 
     def test_skonto_executes(self):
@@ -84,3 +85,13 @@ class TestPipelineResultStructure:
             result = run_pipeline(text)
             assert "intent" in result
             assert "status" in result
+
+    def test_executed_result_includes_broker_trace(self):
+        result = run_pipeline("Lagerbestand abfragen")
+        assert result["tool_trace"][0]["binding_target"] == "valeo_inventory_bestand_get"
+        assert "state_summary" in result
+
+    def test_medium_risk_step_level_approval_is_visible(self):
+        result = run_pipeline("Bestellung anlegen")
+        assert result["status"] == "awaiting_approval"
+        assert result["tool_trace"][-1]["status"] == "pending_approval"

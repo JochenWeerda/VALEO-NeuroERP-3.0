@@ -1,6 +1,6 @@
 # Neuro-Core Zielarchitektur -- Gap-Analyse und Umsetzungsplan
 
-Stand: 2026-03-29
+Stand: 2026-03-30
 Quelle: Integrierte Zielarchitektur (Bild) + Architektur-Review (6 fehlende Layer)
 
 ## 1. Architektur-Uebersicht
@@ -22,7 +22,7 @@ Dazwischen: Guardrails, Audit, Policy, Human Oversight als Querschnittsschichten
 | NC-04 | Neuro Planner | Kontext-Pruefung, Schritte generieren, Aktions-Favorit, Validierungsvertrag | **Umgesetzt** (Lane A, `neuro_planner.py`, 9 Templates, Capability-Delegation, 15 Tests, `c83edb6d2`) | Fertig | -- |
 | NC-05 | Confidence & Risk Engine | Append-Only Confidence Ledger | **Umgesetzt** (Lane B, `confidence_ledger.py`, SHA-256 Hash-Chain, 37 Tests gruen) | Fertig | -- |
 | NC-06 | Rule & Knowledge Store | Versionierte Policy- und Prompt-Registrierung | **Teilweise** (Knowledge Store + REST API, Policy/Prompt Registries, 13 Tests, 2026-03-30; DB-Migration und produktive Runtime-Nutzung offen) | Ausbau | P2 |
-| NC-07 | Action & Policy Layer | Definierte Aktionen und Risikosteuerung | `business_commands.py`, `command_dispatcher.py` -- **produktionsreif** | Fertig | -- |
+| NC-07 | Action & Policy Layer | Definierte Aktionen und Risikosteuerung | `business_commands.py`, `command_dispatcher.py`, `neuro_tool_broker.py` -- **produktionsreif** (zentraler Broker-Pfad, 2026-03-30) | Fertig | -- |
 | NC-08 | Human Oversight | Menschliche Freigabe | **Umgesetzt** (`human_approval_gate.py`, Case Management Service + REST-API, SLA-Eskalation, Dashboard-Stats, 2026-03-30) | Fertig | -- |
 | NC-09 | Guardrails & Output-Validierung | PII/DLP-Schutz, Inhaltsfilterung | **Umgesetzt** (Lane C, `pii_detector.py`, `guardrails.py`, `be5b0ddf4`) | Fertig | -- |
 | NC-10 | Fast Track | Umgehung Neuro-Core fuer deterministisches CRUD | **Umgesetzt** (Lane E, `fast_track.py`, `be5b0ddf4`) | Fertig | -- |
@@ -54,17 +54,19 @@ Abhaengigkeiten zwischen Lanes sind explizit markiert.
 
 ### Lane A: Neuro-Core Kernel (NC-01, NC-04, EXT-01) -- ABGESCHLOSSEN
 
-**Status:** Umgesetzt 2026-03-30, 100 Tests gruen (Commits `c83edb6d2`, `74378078f`, `4c478b8fc`)
-**Scope:** Intent Engine + Planner + Pipeline + Capability-Runner-Delegation
+**Status:** Umgesetzt 2026-03-30; NC-A6 hat den zentralen Tool-Broker und die Pipeline-Integration nachgezogen (`19` gezielte Broker/Pipeline-Tests gruen)
+**Scope:** Intent Engine + Planner + Pipeline + Capability-Runner-Delegation + zentraler Tool Broker
 **Dateibesitz:**
 
 - `app/agents/neuro_intent_engine.py` -- 11 Intent-Patterns, Capability-Matching, Risk-Klassen, Parameter-Extraktion
 - `app/agents/neuro_planner.py` -- 9 Plan-Templates, typisierte Schritte, Verification-Engine-Integration
-- `app/agents/neuro_pipeline.py` -- Vollstaendige Pipeline: Classify -> Plan -> Verify -> Execute
+- `app/agents/neuro_pipeline.py` -- Vollstaendige Pipeline: Classify -> Plan -> Verify -> Broker -> Execute
+- `app/services/neuro_tool_broker.py` -- zentrale Aufloesung von Plan-Steps auf MCP-Tools, Commands, Capability-Delegation und Human Gates
 - `app/api/v1/endpoints/neuro_pipeline.py` -- REST-API: /neuro/classify, /intents, /plan, /execute
 - `tests/test_neuro_intent_engine.py` -- 17 Tests
 - `tests/test_neuro_planner.py` -- 15 Tests
-- `tests/test_neuro_pipeline.py` -- 11 Tests
+- `tests/test_neuro_pipeline.py` -- Broker-integrierte Pipeline-Tests
+- `tests/test_neuro_tool_broker.py` -- dedizierte Broker-Tests
 
 **Slices (alle abgeschlossen):**
 
@@ -75,6 +77,7 @@ Abhaengigkeiten zwischen Lanes sind explizit markiert.
 | NC-A3 | `PlanStep` + `ExecutionPlan` + `Planner.generate_plan()` mit 9 Templates | Gruen (15 Tests) |
 | NC-A4 | Verification Engine Integration -- Planner nutzt NC-001 zur Plan-Vorabpruefung | Gruen |
 | NC-A5 | Pipeline: Intent -> Plan -> Verify -> Execute + Decision Protocol + Audit | Gruen (11 Tests) |
+| NC-A6 | Zentraler Neuro Tool Broker mit Step-Verifikation, Approval-Stops, Tool-Trace und State-Summary | Gruen (19 gezielte Tests fuer Broker/Pipeline) |
 
 **Abhaengigkeiten:** Keine — Kern-Lane fertig, alle abhaengigen Slices (D4, F5, H1-H4) ebenfalls umgesetzt
 
