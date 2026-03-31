@@ -185,6 +185,54 @@ class TestCheckPolicyConformityEngine:
         violations = check_policy_conformity(plan, "t1", policy_sets=[ps])
         assert any("Fremdbetrieb" in v.message for v in violations)
 
+    def test_tenant_policy_override_disables_non_pflicht_rule(self):
+        ps = self._make_policy_set()
+        plan = {
+            "action": "create",
+            "entity_type": "test_entity",
+            "amount": 30000,
+            "tenant_policy_overrides": {
+                "PS-TEST": {
+                    "deaktivierte_regel_ids": ["T-002"],
+                }
+            },
+        }
+        violations = check_policy_conformity(plan, "t1", policy_sets=[ps])
+        assert not any("Eskalation" in v.message for v in violations)
+
+    def test_tenant_policy_override_parameter_override_changes_threshold(self):
+        ps = self._make_policy_set()
+        plan = {
+            "action": "create",
+            "entity_type": "test_entity",
+            "amount": 150000,
+            "tenant_policy_overrides": {
+                "PS-TEST": {
+                    "regel_parameter_overrides": {
+                        "T-001": {"brutto_eur": 200000},
+                    }
+                }
+            },
+        }
+        violations = check_policy_conformity(plan, "t1", policy_sets=[ps])
+        assert not any("Policy abgelehnt" in v.message for v in violations)
+        assert any("Eskalation" in v.message for v in violations)
+
+    def test_tenant_policy_override_loads_from_db_settings(self):
+        ps = self._make_policy_set()
+        plan = {
+            "action": "create",
+            "entity_type": "test_entity",
+            "amount": 30000,
+        }
+        db = MagicMock()
+        with patch(
+            "app.core.policy_overrides._load_tenant_settings",
+            return_value={"policy_overrides": {"T-002": {"enabled": False, "reason": "Tenant-Ausnahme"}}},
+        ):
+            violations = check_policy_conformity(plan, "t1", db=db, policy_sets=[ps])
+        assert not any("Eskalation" in v.message for v in violations)
+
 
 # ---------------------------------------------------------------------------
 # State transition — State Graph integration
@@ -456,6 +504,47 @@ class TestVerifyPlan:
         result = verify_plan(plan)
         assert result.status == VerificationStatus.REJECTED
         assert any(v.type == ViolationType.CROSS_ENTITY_INTEGRITY for v in result.violations)
+
+    def test_step_level_tenant_override_passthrough(self):
+        ps = PolicySet(
+            policy_set_id="PS-TEST",
+            prozess_key="test_entity",
+            bezeichnung="Step Override Test",
+            regeln=[
+                PolicyRegel(
+                    regel_id="T-002",
+                    bezeichnung="Mittlerer Betrag eskalieren",
+                    bedingungen=[PolicyBedingung(PolicyBedingungsTyp.GROESSER, "brutto_eur", 25000)],
+                    aktion=PolicyAktion.ESKALATION,
+                    prioritaet=20,
+                    begruendung="Betrag ueber 25k braucht Eskalation",
+                ),
+            ],
+        )
+        plan = {
+            "action": "create",
+            "entity_type": "test_entity",
+            "entity_id": "1",
+            "steps": [
+                {
+                    "step_id": "s1",
+                    "action": "create",
+                    "entity_type": "test_entity",
+                    "parameters": {"amount": 30000},
+                    "prozess_key": "test_entity",
+                    "tenant_policy_overrides": {
+                        "PS-TEST": {"deaktivierte_regel_ids": ["T-002"]},
+                    },
+                }
+            ],
+        }
+        with patch(
+            "app.core.policy_code_engine.get_default_agrar_policy_sets",
+            return_value=[ps],
+        ):
+            result = verify_plan(plan)
+        assert result.step_results[0]["status"] == "approved"
+        assert not any("Eskalation" in violation["message"] for violation in result.step_results[0]["violations"])
 
     def test_step_cross_entity_violation_propagates(self):
         plan = {

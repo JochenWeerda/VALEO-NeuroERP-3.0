@@ -135,13 +135,28 @@ def check_policy_conformity(
         from app.core.policy_code_engine import (
             PolicyAktion,
             PolicyEvaluationResult,
-            apply_tenant_overrides,
             evaluate_policy_set,
             get_default_agrar_policy_sets,
+            resolve_tenant_policy_sets,
         )
 
         available_sets = policy_sets or get_default_agrar_policy_sets()
         matching_sets = [ps for ps in available_sets if ps.prozess_key == prozess_key]
+        raw_overrides = (
+            plan.get("tenant_policy_overrides")
+            or plan.get("policy_overrides")
+            or plan.get("policy_context", {}).get("tenant_policy_overrides")
+        )
+        if db is not None and not raw_overrides:
+            try:
+                from app.core.policy_overrides import _load_tenant_settings
+
+                tenant_settings = _load_tenant_settings(db, tenant_id)
+                raw_overrides = tenant_settings.get("policy_overrides")
+            except Exception as exc:
+                logger.warning("Tenant policy override loading failed: %s", exc)
+
+        matching_sets = resolve_tenant_policy_sets(matching_sets, tenant_id, raw_overrides)
 
         kontext = {
             "aktion": action,
@@ -350,6 +365,14 @@ def verify_plan(plan: dict, tenant_id: str = "system", db: Optional[Session] = N
             "target_state": step.get("target_state", ""),
             "prozess_key": step.get("prozess_key", plan.get("prozess_key", "")),
             "policy_context": step.get("policy_context", plan.get("policy_context", {})),
+            "tenant_policy_overrides": step.get(
+                "tenant_policy_overrides",
+                plan.get("tenant_policy_overrides"),
+            ),
+            "policy_overrides": step.get(
+                "policy_overrides",
+                plan.get("policy_overrides"),
+            ),
             "state_graph_snapshot": step.get(
                 "state_graph_snapshot",
                 plan.get("state_graph_snapshot", plan.get("cross_entity_snapshot")),

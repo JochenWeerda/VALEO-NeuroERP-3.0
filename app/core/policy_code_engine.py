@@ -14,6 +14,7 @@ Aktionen:
 """
 from __future__ import annotations
 
+from copy import deepcopy
 from dataclasses import dataclass, field
 from datetime import date, datetime, time
 from enum import Enum
@@ -338,6 +339,7 @@ class TenantPolicyOverride:
     policy_set_id: str
     zusaetzliche_regeln: list[PolicyRegel] = field(default_factory=list)
     deaktivierte_regel_ids: list[str] = field(default_factory=list)
+    regel_parameter_overrides: dict[str, dict[str, Any]] = field(default_factory=dict)
     schema_version: int = POLICY_ENGINE_SCHEMA_VERSION
 
     def as_dict(self) -> dict:
@@ -346,8 +348,210 @@ class TenantPolicyOverride:
             "policy_set_id": self.policy_set_id,
             "zusaetzliche_regeln_count": len(self.zusaetzliche_regeln),
             "deaktivierte_regel_ids": self.deaktivierte_regel_ids,
+            "regel_parameter_overrides": self.regel_parameter_overrides,
             "schema_version": self.schema_version,
         }
+
+
+def _coerce_policy_bedingung(data: Any) -> PolicyBedingung:
+    if isinstance(data, PolicyBedingung):
+        return deepcopy(data)
+    return PolicyBedingung(
+        typ=PolicyBedingungsTyp(data["typ"]),
+        feld=data["feld"],
+        wert=data.get("wert"),
+    )
+
+
+def _coerce_policy_bedingungsgruppe(data: Any) -> PolicyBedingungsGruppe:
+    if isinstance(data, PolicyBedingungsGruppe):
+        return deepcopy(data)
+    return PolicyBedingungsGruppe(
+        operator=data["operator"],
+        kinder=[
+            _coerce_policy_bedingungsgruppe(kind)
+            if isinstance(kind, dict) and "operator" in kind
+            else _coerce_policy_bedingung(kind)
+            for kind in data.get("kinder", [])
+        ],
+    )
+
+
+def _coerce_policy_regel(data: Any) -> PolicyRegel:
+    if isinstance(data, PolicyRegel):
+        return deepcopy(data)
+    return PolicyRegel(
+        regel_id=data["regel_id"],
+        bezeichnung=data["bezeichnung"],
+        bedingungen=[_coerce_policy_bedingung(item) for item in data.get("bedingungen", [])],
+        aktion=PolicyAktion(data["aktion"]),
+        prioritaet=data.get("prioritaet", 100),
+        pflicht=data.get("pflicht", False),
+        begruendung=data.get("begruendung", ""),
+        bedingungsgruppe=(
+            _coerce_policy_bedingungsgruppe(data["bedingungsgruppe"])
+            if data.get("bedingungsgruppe") is not None
+            else None
+        ),
+    )
+
+
+def _apply_parameter_overrides_to_gruppe(
+    gruppe: PolicyBedingungsGruppe | None,
+    feld_overrides: dict[str, Any],
+) -> PolicyBedingungsGruppe | None:
+    if gruppe is None:
+        return None
+    neue_kinder: list[Any] = []
+    for kind in gruppe.kinder:
+        if isinstance(kind, PolicyBedingungsGruppe):
+            neue_kinder.append(_apply_parameter_overrides_to_gruppe(kind, feld_overrides))
+        else:
+            neuer_wert = feld_overrides.get(kind.feld, kind.wert)
+            neue_kinder.append(
+                PolicyBedingung(
+                    typ=kind.typ,
+                    feld=kind.feld,
+                    wert=neuer_wert,
+                )
+            )
+    return PolicyBedingungsGruppe(operator=gruppe.operator, kinder=neue_kinder)
+
+
+def _apply_parameter_overrides_to_regel(
+    regel: PolicyRegel,
+    feld_overrides: dict[str, Any],
+) -> PolicyRegel:
+    if not feld_overrides:
+        return deepcopy(regel)
+    return PolicyRegel(
+        regel_id=regel.regel_id,
+        bezeichnung=regel.bezeichnung,
+        bedingungen=[
+            PolicyBedingung(
+                typ=bedingung.typ,
+                feld=bedingung.feld,
+                wert=feld_overrides.get(bedingung.feld, bedingung.wert),
+            )
+            for bedingung in regel.bedingungen
+        ],
+        aktion=regel.aktion,
+        prioritaet=regel.prioritaet,
+        pflicht=regel.pflicht,
+        begruendung=regel.begruendung,
+        bedingungsgruppe=_apply_parameter_overrides_to_gruppe(
+            regel.bedingungsgruppe,
+            feld_overrides,
+        ),
+    )
+
+
+def normalize_tenant_policy_overrides(
+    tenant_id: str,
+    overrides: Any,
+    *,
+    policy_sets: list[PolicySet] | None = None,
+) -> list[TenantPolicyOverride]:
+    """
+    Normalize runtime tenant override payloads into typed overrides.
+
+    Supported formats:
+    - list[dict|TenantPolicyOverride] with explicit `policy_set_id`
+    - dict keyed by `policy_set_id`
+    - legacy admin/settings dict keyed by `regel_id` with `enabled` / `params_override`
+    """
+    if not overrides:
+        return []
+
+    def _normalize_single(item: Any, default_policy_set_id: str | None = None) -> TenantPolicyOverride:
+        if isinstance(item, TenantPolicyOverride):
+            return deepcopy(item)
+
+        policy_set_id = item.get("policy_set_id") or default_policy_set_id
+        if not policy_set_id:
+            raise ValueError("tenant policy override requires policy_set_id")
+
+        return TenantPolicyOverride(
+            tenant_id=item.get("tenant_id", tenant_id),
+            policy_set_id=policy_set_id,
+            deaktivierte_regel_ids=list(item.get("deaktivierte_regel_ids", [])),
+            zusaetzliche_regeln=[
+                _coerce_policy_regel(regel)
+                for regel in item.get("zusaetzliche_regeln", [])
+            ],
+            regel_parameter_overrides={
+                regel_id: dict(params)
+                for regel_id, params in item.get("regel_parameter_overrides", {}).items()
+                if isinstance(params, dict)
+            },
+        )
+
+    if isinstance(overrides, list):
+        return [_normalize_single(item) for item in overrides]
+
+    if not isinstance(overrides, dict):
+        return []
+
+    explicit_keys = {
+        "policy_set_id",
+        "tenant_id",
+        "deaktivierte_regel_ids",
+        "zusaetzliche_regeln",
+        "regel_parameter_overrides",
+    }
+    if explicit_keys & set(overrides.keys()):
+        return [_normalize_single(overrides)]
+
+    policy_set_ids = {ps.policy_set_id for ps in policy_sets or []}
+    if set(overrides.keys()) & policy_set_ids:
+        return [
+            _normalize_single(value, default_policy_set_id=policy_set_id)
+            for policy_set_id, value in overrides.items()
+            if isinstance(value, dict)
+        ]
+
+    normalized: list[TenantPolicyOverride] = []
+    for policy_set in policy_sets or []:
+        disabled_ids: list[str] = []
+        parameter_overrides: dict[str, dict[str, Any]] = {}
+        for regel in policy_set.regeln:
+            legacy = overrides.get(regel.regel_id)
+            if not isinstance(legacy, dict):
+                continue
+            if legacy.get("enabled") is False:
+                disabled_ids.append(regel.regel_id)
+            if isinstance(legacy.get("params_override"), dict):
+                parameter_overrides[regel.regel_id] = dict(legacy["params_override"])
+
+        if disabled_ids or parameter_overrides:
+            normalized.append(
+                TenantPolicyOverride(
+                    tenant_id=tenant_id,
+                    policy_set_id=policy_set.policy_set_id,
+                    deaktivierte_regel_ids=disabled_ids,
+                    regel_parameter_overrides=parameter_overrides,
+                )
+            )
+    return normalized
+
+
+def resolve_tenant_policy_sets(
+    policy_sets: list[PolicySet],
+    tenant_id: str,
+    overrides: Any,
+) -> list[PolicySet]:
+    """Apply matching tenant overrides to all provided policy sets."""
+    normalized = normalize_tenant_policy_overrides(
+        tenant_id,
+        overrides,
+        policy_sets=policy_sets,
+    )
+    override_map = {override.policy_set_id: override for override in normalized}
+    resolved: list[PolicySet] = []
+    for policy_set in policy_sets:
+        override = override_map.get(policy_set.policy_set_id)
+        resolved.append(apply_tenant_overrides(policy_set, override) if override else deepcopy(policy_set))
+    return resolved
 
 
 def apply_tenant_overrides(
@@ -363,12 +567,15 @@ def apply_tenant_overrides(
     """
     deaktiviert = set(override.deaktivierte_regel_ids)
 
+    parameter_overrides = override.regel_parameter_overrides or {}
+
     gefilterte_regeln = [
-        r for r in base_set.regeln
+        _apply_parameter_overrides_to_regel(r, parameter_overrides.get(r.regel_id, {}))
+        for r in base_set.regeln
         if r.regel_id not in deaktiviert or r.pflicht
     ]
 
-    merged_regeln = gefilterte_regeln + override.zusaetzliche_regeln
+    merged_regeln = gefilterte_regeln + [_coerce_policy_regel(regel) for regel in override.zusaetzliche_regeln]
 
     return PolicySet(
         policy_set_id=base_set.policy_set_id,

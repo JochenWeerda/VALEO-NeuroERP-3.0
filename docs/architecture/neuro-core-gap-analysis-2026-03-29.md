@@ -1,6 +1,6 @@
 # Neuro-Core Zielarchitektur -- Gap-Analyse und Umsetzungsplan
 
-Stand: 2026-03-30
+Stand: 2026-03-31
 Quelle: Integrierte Zielarchitektur (Bild) + Architektur-Review (6 fehlende Layer)
 
 ## 1. Architektur-Uebersicht
@@ -21,7 +21,7 @@ Dazwischen: Guardrails, Audit, Policy, Human Oversight als Querschnittsschichten
 | NC-03 | Neuro Context Resolver | Rolle, Berechtigung, Business Objects, Einwilligung, Historie, Kanal | **Umgesetzt** (Consent + Channel Context in `neuroassist_context.py`, 2026-03-30) | Fertig | -- |
 | NC-04 | Neuro Planner | Kontext-Pruefung, Schritte generieren, Aktions-Favorit, Validierungsvertrag | **Umgesetzt** (Lane A, `neuro_planner.py`, 9 Templates, Capability-Delegation, 15 Tests, `c83edb6d2`) | Fertig | -- |
 | NC-05 | Confidence & Risk Engine | Append-Only Confidence Ledger | **Umgesetzt** (Lane B, `confidence_ledger.py`, SHA-256 Hash-Chain, 37 Tests gruen) | Fertig | -- |
-| NC-06 | Rule & Knowledge Store | Versionierte Policy- und Prompt-Registrierung | **Teilweise** (Knowledge Store + REST API, Policy/Prompt Registries, 13 Tests, 2026-03-30; DB-Migration und produktive Runtime-Nutzung offen) | Ausbau | P2 |
+| NC-06 | Rule & Knowledge Store | Versionierte Policy- und Prompt-Registrierung | **Teilweise** (Knowledge Store + REST API, Policy/Prompt Registries, Runtime-Tenant-Overrides in Verification, 2026-03-31; DB-Migration und breitere produktive Runtime-Nutzung offen) | Ausbau | P2 |
 | NC-07 | Action & Policy Layer | Definierte Aktionen und Risikosteuerung | `business_commands.py`, `command_dispatcher.py`, `neuro_tool_broker.py` -- **produktionsreif** (zentraler Broker-Pfad, 2026-03-30) | Fertig | -- |
 | NC-08 | Human Oversight | Menschliche Freigabe | **Umgesetzt** (`human_approval_gate.py`, Case Management Service + REST-API, SLA-Eskalation, Dashboard-Stats, 2026-03-30) | Fertig | -- |
 | NC-09 | Guardrails & Output-Validierung | PII/DLP-Schutz, Inhaltsfilterung | **Umgesetzt** (Lane C, `pii_detector.py`, `guardrails.py`, `be5b0ddf4`) | Fertig | -- |
@@ -54,8 +54,8 @@ Abhaengigkeiten zwischen Lanes sind explizit markiert.
 
 ### Lane A: Neuro-Core Kernel (NC-01, NC-04, EXT-01) -- ABGESCHLOSSEN
 
-**Status:** Umgesetzt 2026-03-31; NC-A6 bis NC-A12 haben Broker-, Execution-, Verification/Policy-, Dynamic-Plan-, Cross-Entity- und Risk-Scoring-Wave-4-Nachzug abgeschlossen
-**Scope:** Intent Engine + Planner + Pipeline + Capability-Runner-Delegation + zentraler Tool Broker + Wave-2-Verification/Policy-Integration + heuristische Dynamic Plans + Snapshot-basierte Cross-Entity-Integrity + Ledger-basiertes Risk-Scoring
+**Status:** Umgesetzt 2026-03-31; NC-A6 bis NC-A13 haben Broker-, Execution-, Verification/Policy-, Dynamic-Plan-, Cross-Entity-, Risk-Scoring- und Tenant-Override-Wave-4-Nachzug abgeschlossen
+**Scope:** Intent Engine + Planner + Pipeline + Capability-Runner-Delegation + zentraler Tool Broker + Wave-2-Verification/Policy-Integration + heuristische Dynamic Plans + Snapshot-basierte Cross-Entity-Integrity + Ledger-basiertes Risk-Scoring + Runtime-Tenant-Overrides
 **Dateibesitz:**
 
 - `app/agents/neuro_intent_engine.py` -- 11 Intent-Patterns, Capability-Matching, Risk-Klassen, Parameter-Extraktion
@@ -85,6 +85,7 @@ Abhaengigkeiten zwischen Lanes sind explizit markiert.
 | NC-A10 | Wave-4: dynamische Mehrschritt-Plaene fuer templatefreie Intents | Gruen (41 gezielte Planner/Pipeline-Tests) |
 | NC-A11 | Wave-4: Snapshot-basierte Cross-Entity-Integrity in State Graph + Verification | Gruen (92 gezielte State-Graph/Verification-Tests) |
 | NC-A12 | Wave-4: Composite Risk-Scoring aus Confidence Ledger + API-Surfacing | Gruen (41 gezielte State-Graph/Ledger-Tests) |
+| NC-A13 | Wave-4: Runtime-Tenant-Overrides fuer Policy/Verification | Gruen (110 gezielte Verification/Policy-Tests) |
 
 **Abhaengigkeiten:** Keine — Kern-Lane fertig, alle abhaengigen Slices (D4, F5, H1-H4) ebenfalls umgesetzt
 

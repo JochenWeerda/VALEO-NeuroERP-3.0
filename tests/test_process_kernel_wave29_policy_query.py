@@ -295,6 +295,33 @@ def test_apply_tenant_overrides_keine_mutation():
     assert len(base.regeln) == original_count  # Original unveraendert
 
 
+def test_apply_tenant_overrides_parameter_override_aendert_schwelle():
+    from app.core.policy_code_engine import apply_tenant_overrides, TenantPolicyOverride, evaluate_policy_set
+    base = _make_policy_set()
+    override = TenantPolicyOverride(
+        tenant_id="tenant-at",
+        policy_set_id="PS-TEST",
+        regel_parameter_overrides={"R-001": {"betrag": 20000}},
+    )
+    merged = apply_tenant_overrides(base, override)
+    result = evaluate_policy_set(merged, {"betrag": 15000})
+    assert result.wirksame_aktion.value != "ABGELEHNT"
+
+
+def test_normalize_tenant_policy_overrides_legacy_rule_dict():
+    from app.core.policy_code_engine import normalize_tenant_policy_overrides
+    base = _make_policy_set()
+    overrides = {
+        "R-002": {"enabled": False, "reason": "Tenant-Ausnahme"},
+        "R-003": {"params_override": {"betrag": 2500}, "reason": "Niedrigere Schwelle"},
+    }
+    normalized = normalize_tenant_policy_overrides("tenant-legacy", overrides, policy_sets=[base])
+    assert len(normalized) == 1
+    assert normalized[0].policy_set_id == "PS-TEST"
+    assert normalized[0].deaktivierte_regel_ids == ["R-002"]
+    assert normalized[0].regel_parameter_overrides["R-003"]["betrag"] == 2500
+
+
 # ---------------------------------------------------------------------------
 # AP2: validate_policy_set()
 # ---------------------------------------------------------------------------
