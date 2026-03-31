@@ -311,6 +311,58 @@ class TestSecretsVault:
         _VAULT_STORE.clear()
         _ACCESS_LOG.clear()
 
+    def test_keyring_provider_roundtrip(self, monkeypatch):
+        import sys
+        import types
+
+        backend_store: dict[tuple[str, str], str] = {}
+
+        fake_keyring = types.SimpleNamespace(
+            set_password=lambda service, key, value: backend_store.__setitem__((service, key), value),
+            get_password=lambda service, key: backend_store.get((service, key)),
+            delete_password=lambda service, key: backend_store.pop((service, key), None),
+        )
+        monkeypatch.setitem(sys.modules, "keyring", fake_keyring)
+
+        from app.services.secrets_vault import (
+            SecretProvider, store_secret, get_secret, list_secrets, _VAULT_STORE,
+        )
+
+        _VAULT_STORE.clear()
+        store_secret("KR_TEST", "secret-value", provider=SecretProvider.KEYRING)
+        _VAULT_STORE.clear()
+
+        assert get_secret("KR_TEST", accessor="pytest") == "secret-value"
+        assert any(item.key == "KR_TEST" and item.provider == SecretProvider.KEYRING for item in list_secrets())
+
+        _VAULT_STORE.clear()
+
+    def test_keyring_provider_rotate_and_delete(self, monkeypatch):
+        import sys
+        import types
+
+        backend_store: dict[tuple[str, str], str] = {}
+
+        fake_keyring = types.SimpleNamespace(
+            set_password=lambda service, key, value: backend_store.__setitem__((service, key), value),
+            get_password=lambda service, key: backend_store.get((service, key)),
+            delete_password=lambda service, key: backend_store.pop((service, key), None),
+        )
+        monkeypatch.setitem(sys.modules, "keyring", fake_keyring)
+
+        from app.services.secrets_vault import (
+            SecretProvider, store_secret, rotate_secret, delete_secret, get_secret, _VAULT_STORE,
+        )
+
+        _VAULT_STORE.clear()
+        store_secret("KR_ROTATE", "old", provider=SecretProvider.KEYRING)
+        rotate_secret("KR_ROTATE", "new", rotated_by="pytest")
+        assert get_secret("KR_ROTATE") == "new"
+        assert delete_secret("KR_ROTATE", deleted_by="pytest") is True
+        assert get_secret("KR_ROTATE") is None
+
+        _VAULT_STORE.clear()
+
 
 class TestLiveChatChannel:
     """Tests fuer den Live-Chat-Kanal (NC-12)."""
