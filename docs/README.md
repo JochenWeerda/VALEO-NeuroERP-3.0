@@ -57,6 +57,7 @@ Verbindlicher Liefer- und Reifegrad liegt in:
 - [Process Kernel Status](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/architecture/process-kernel/STATUS.md)
 - `docs/architecture/process-kernel/wave-*/STATUS.md`
 - `docs/roadmap/status/*.md`
+- strategische Leitpläne (ergänzend): [Strategic Next Steps (2026-03-31)](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/roadmap/2026-03-31-strategic-next-steps.md)
 
 ## Qualitaetsziel
 

@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
@@ -34,10 +34,19 @@ interface FieldServiceTask {
 
 export default function FieldServiceTasksPage(): JSX.Element {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const workflowInstanceId = searchParams.get('workflowInstanceId') || '';
   const workflowCase = searchParams.get('workflowCase') || '';
   const isWorkflowEntry = Boolean(workflowInstanceId || workflowCase);
+
+  const workflowQuery = useMemo(() => {
+    const p = new URLSearchParams();
+    if (workflowInstanceId) p.set('workflowInstanceId', workflowInstanceId);
+    if (workflowCase) p.set('workflowCase', workflowCase);
+    const s = p.toString();
+    return s ? `?${s}` : '';
+  }, [workflowInstanceId, workflowCase]);
 
   const [selectedTask, setSelectedTask] = useState<FieldServiceTask | null>(null);
   const [query, setQuery] = useState('');
@@ -263,7 +272,9 @@ export default function FieldServiceTasksPage(): JSX.Element {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => {/* Navigate to edit */}}
+                        onClick={() =>
+                          navigate(`/agribusiness/field-service-tasks/${encodeURIComponent(task.id)}/bearbeiten${workflowQuery}`)
+                        }
                       >
                         {t('crud.actions.edit')}
                       </Button>

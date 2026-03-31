@@ -88,7 +88,7 @@ flowchart TD
 | D-05 | Field-Service-Tasks: Liste | GET `/api/v1/agribusiness/field-service-tasks` via `apiClient` + `useQuery` | ok (2026-03-31) |
 | D-06 | Field-Service-Tasks: Mutations | `useMutation` + Query-Invalidation; Backend in `compat.py` (CRM-Mapping + Demo-Fallback) | ok (2026-03-31) |
 | D-07 | Field-Service-Tasks: Cancel/Delete | POST cancel + DELETE vorhanden | ok |
-| D-08 | Field-Service-Tasks: Create/Edit | Buttons vorhanden, Navigation auskommentiert | offen SVC-001-P5 |
+| D-08 | Field-Service-Tasks: Create/Edit | Routen `/agribusiness/field-service-tasks/neu` und `.../:id/bearbeiten` + API POST/PUT | ok (2026-03-31) |
 | D-09 | Field-Service-Tasks: Audit-Trail | GET audit-trail funktioniert | ok |
 | D-10 | Rueckmeldung/Aktivitaeten | `rueckmeldung.tsx` (177 Z.) — POST mit Arbeitszeit/Material/Ergebnis | ok (2026-03-30) |
 | D-11 | Kundenabschluss/Closure | `abschluss.tsx` (163 Z.) — POST mit Star-Rating + Kommentar | ok (2026-03-30) |
@@ -121,8 +121,8 @@ flowchart TD
 | Cancel (POST) | OK — `useMutation` |
 | Delete (DELETE) | OK — `useMutation` |
 | Audit-Trail (GET) | OK |
-| Create | Fehlt — Button ohne Navigation (P5) |
-| Edit | Fehlt — Button ohne Navigation (P5) |
+| Create | OK — `field-service-task-neu.tsx`, POST compat |
+| Edit | OK — `field-service-task-edit.tsx`, GET/PUT compat |
 | Flow-Spine | Query `workflowInstanceId` / `workflowCase` im Banner |
 
 ### Backend: Service Domain
@@ -150,7 +150,7 @@ flowchart TD
 
 ### niedrig
 
-- **Field-Service Create/Edit**: Buttons ohne Navigation — SVC-001-P5.
+- ~~**Field-Service Create/Edit**~~ — erledigt (Routen + API).
 
 ---
 
@@ -160,7 +160,7 @@ flowchart TD
 2. ~~**SVC-001-P2:** Create-Seite~~ — `anfrage-neu.tsx`
 3. ~~**SVC-001-P3:** CRUD-Hooks~~ — über `betrieb.ts` / apiClient
 4. ~~**SVC-001-P4:** Field-Service `apiClient` + React Query~~ — inkl. `compat.py`-Endpunkte (2026-03-31)
-5. **SVC-001-P5:** Create/Edit Navigation in Field-Service verdrahten.
+5. ~~**SVC-001-P5:** Create/Edit Navigation~~ — erledigt (2026-03-31)
 6. ~~**SVC-001-P6:** Rückmeldung~~ — `rueckmeldung.tsx`
 7. ~~**SVC-001-P7:** Abschluss~~ — `abschluss.tsx`
 8. **SVC-001-P8 (optional):** Eigenes `app/domains/service/` nur bei Bedarf (mehrere Bounded Contexts trennen).
@@ -173,7 +173,17 @@ flowchart TD
 
 ## Status
 
-**Umgesetzt** (2026-03-31). Kernpfad inkl. Field-Service: Frontend `apiClient` + React Query, Backend-Liste/Mutation via `compat.py` (CRM + Demo-Fallback). **Offen:** SVC-001-P5 (Field-Service Create/Edit-Navigation).
+**Umgesetzt** (2026-03-31). Kernpfad inkl. Field-Service: Frontend `apiClient` + React Query, Backend-Liste/Mutation via `compat.py` (CRM + Demo-Fallback). **SVC-001-P5** (Field-Service Create/Edit inkl. Navigation) ist erledigt.
+
+### E2E-Smoke (Playwright)
+
+Im Verzeichnis `packages/frontend-web` ausführen (Dev-Server wie bei anderen Smokes, z. B. Port 3000):
+
+```bash
+npm run test:e2e:service-to-customer
+```
+
+Testdatei: `packages/frontend-web/tests/e2e/service-to-customer-smoke.e2e.ts` — prüft u. a. `/service/anfragen`, Field-Service-Liste, `/agribusiness/field-service-tasks/neu`, Flow-Spine-Cockpit und die Bearbeiten-Route mit Demo-ID `fst-seed-001`.
 
 ## Backend: Kurz-IDs (uuid7)
 

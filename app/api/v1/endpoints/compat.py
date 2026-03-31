@@ -31,7 +31,9 @@ from app.domains.shared.events import IntegrationEvent, get_event_publisher
 from app.infrastructure.models import Article as ArticleModel, InventoryCount
 from app.infrastructure.eventbus.outbox import OutboxPublisher
 from app.integrations.crm_core_client import (
+    create_case as crm_create_case,
     delete_case as crm_delete_case,
+    get_case as crm_get_case,
     list_cases as crm_list_cases,
     list_customers as crm_list_customers,
     list_leads as crm_list_leads,
@@ -3829,6 +3831,21 @@ def _case_to_field_service_task(c: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _ui_priority_to_crm(priority: str) -> str:
+    p = (priority or "MEDIUM").upper()
+    return {"URGENT": "urgent", "HIGH": "high", "LOW": "low", "MEDIUM": "medium"}.get(p, "medium")
+
+
+def _ui_status_to_crm(status: str) -> str:
+    s = (status or "SCHEDULED").upper()
+    return {
+        "SCHEDULED": "new",
+        "IN_PROGRESS": "open",
+        "COMPLETED": "closed",
+        "CANCELLED": "cancelled",
+    }.get(s, "new")
+
+
 _DEMO_FIELD_SERVICE_TASKS: list[dict[str, Any]] = [
     {
         "id": "fst-seed-001",
@@ -3867,6 +3884,108 @@ async def list_field_service_tasks() -> list[dict[str, Any]]:
     except Exception:
         pass
     return list(_DEMO_FIELD_SERVICE_TASKS)
+
+
+@router.get("/agribusiness/field-service-tasks/{task_id}")
+async def get_field_service_task(task_id: str) -> dict[str, Any]:
+    """Einzelne Field-Service-Aufgabe (CRM-Case oder Demo)."""
+    if task_id.startswith("fst-seed-"):
+        for t in _DEMO_FIELD_SERVICE_TASKS:
+            if t["id"] == task_id:
+                return dict(t)
+        raise HTTPException(status_code=404, detail="Task not found")
+    try:
+        case = await crm_get_case(task_id)
+        return _case_to_field_service_task(dict(case))
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"CRM get failed: {exc}") from exc
+
+
+class FieldServiceTaskCreateBody(BaseModel):
+    title: str = Field(..., min_length=1, max_length=500)
+    taskType: str = Field("FIELD_SERVICE", max_length=80)
+    priority: str = Field("MEDIUM", max_length=20)
+
+
+@router.post("/agribusiness/field-service-tasks")
+async def create_field_service_task(
+    body: FieldServiceTaskCreateBody,
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
+    """Neue Aufgabe als CRM-Fall; bei CRM-Ausfall Demo-Eintrag."""
+    payload = {
+        "tenant_id": tenant_id,
+        "subject": body.title.strip(),
+        "case_type": (body.taskType or "field_service").lower().replace("-", "_"),
+        "priority": _ui_priority_to_crm(body.priority),
+        "status": "new",
+    }
+    try:
+        created = await crm_create_case(payload)
+        return _case_to_field_service_task(dict(created))
+    except Exception:
+        nid = f"fst-seed-{uuid4().hex[:8]}"
+        row = {
+            "id": nid,
+            "taskNumber": f"FS-DEMO-{nid[-6:].upper()}",
+            "title": body.title.strip(),
+            "taskType": (body.taskType or "FIELD_SERVICE").upper(),
+            "status": "SCHEDULED",
+            "priority": (body.priority or "MEDIUM").upper(),
+            "assignedToName": "-",
+            "farmerName": None,
+            "scheduledStartDate": datetime.now(timezone.utc).isoformat(),
+            "completionPercentage": 0,
+        }
+        _DEMO_FIELD_SERVICE_TASKS.append(row)
+        return dict(row)
+
+
+class FieldServiceTaskUpdateBody(BaseModel):
+    title: Optional[str] = Field(None, max_length=500)
+    taskType: Optional[str] = Field(None, max_length=80)
+    priority: Optional[str] = Field(None, max_length=20)
+    status: Optional[str] = Field(None, max_length=30)
+
+
+@router.put("/agribusiness/field-service-tasks/{task_id}")
+async def update_field_service_task(task_id: str, body: FieldServiceTaskUpdateBody) -> dict[str, Any]:
+    """Aufgabe aktualisieren (CRM update_case oder Demo-Liste)."""
+    if task_id.startswith("fst-seed-"):
+        for t in _DEMO_FIELD_SERVICE_TASKS:
+            if t["id"] == task_id:
+                if body.title is not None:
+                    t["title"] = body.title.strip()
+                if body.taskType is not None:
+                    t["taskType"] = body.taskType.upper()
+                if body.priority is not None:
+                    t["priority"] = body.priority.upper()
+                if body.status is not None:
+                    t["status"] = body.status.upper()
+                return dict(t)
+        raise HTTPException(status_code=404, detail="Task not found")
+    upd: dict[str, Any] = {}
+    if body.title is not None:
+        upd["subject"] = body.title.strip()
+    if body.taskType is not None:
+        upd["case_type"] = body.taskType.lower().replace("-", "_")
+    if body.priority is not None:
+        upd["priority"] = _ui_priority_to_crm(body.priority)
+    if body.status is not None:
+        upd["status"] = _ui_status_to_crm(body.status)
+    if not upd:
+        try:
+            case = await crm_get_case(task_id)
+            return _case_to_field_service_task(dict(case))
+        except Exception as exc:
+            raise HTTPException(status_code=502, detail=f"CRM get failed: {exc}") from exc
+    try:
+        updated = await crm_update_case(task_id, upd)
+        return _case_to_field_service_task(dict(updated))
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"CRM update failed: {exc}") from exc
 
 
 class FieldServiceTaskDeleteBody(BaseModel):

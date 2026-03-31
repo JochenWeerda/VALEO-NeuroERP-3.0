@@ -565,6 +565,14 @@
       "path": "agribusiness/field-service-tasks"
     },
     {
+      "module": "@/pages/agribusiness/field-service-task-neu",
+      "path": "agribusiness/field-service-tasks/neu"
+    },
+    {
+      "module": "@/pages/agribusiness/field-service-task-edit",
+      "path": "agribusiness/field-service-tasks/:taskId/bearbeiten"
+    },
+    {
       "module": "@/pages/annahme/abrechnung",
       "path": "annahme/abrechnung"
     },
