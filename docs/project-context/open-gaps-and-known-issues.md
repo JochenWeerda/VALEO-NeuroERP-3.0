@@ -24,6 +24,11 @@ Diese Datei sammelt die fuer neue Analysen wichtigsten offenen Restthemen und be
 - ~~RAG-/Knowledge-Tiefe ist nicht in jedem Agentenpfad vollstaendig verdrahtet~~ -> `POST /agent-action` mit ChromaDB-RAG produktiv (graceful degradation, GAP-104-H)
 - ~~Flow Spine Outbox-Events nicht verdrahtet~~ -> `FlowSpineInstanceCreated` / `FlowSpineTransitionOccurred` via Outbox (GAP-104-G)
 
+## Zuletzt geschlossene Punkte (2026-03-31)
+
+- ~~SVC-001-P4 Field-Service: `fetch()` statt apiClient~~ — `field-service-tasks.tsx` nutzt `apiClient` + TanStack Query; Backend-Endpunkte unter `/api/v1/agribusiness/field-service-tasks` in `app/api/v1/endpoints/compat.py` (CRM-Mapping, Demo-Fallback).
+- ~~Kurz-IDs aus `uuid7()[:8]` bei schnellen Mehrfach-Inserts~~ — Präfix-IDs verwenden `uuid7_short_suffix()` / `default_prefixed_id()` / `prefixed_id()` in `app/core/uuid7.py` (Zeit-Präfix der v7-String-Darstellung war in derselben Millisekunde nicht eindeutig).
+
 ## Analysepflicht
 
 Wenn in Code, Tests oder UI ein Widerspruch zwischen:

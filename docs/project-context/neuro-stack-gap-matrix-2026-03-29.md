@@ -1,6 +1,6 @@
 # Neuro Stack Gap Matrix (2026-03-29)
 
-**Letzte Doku-Synchronisation:** 2026-03-31 (NC-A12 Risk-Scoring, Confidence-Ledger-Surfacing, Wave-4-Abschluss).
+**Letzte Doku-Synchronisation:** 2026-03-31 (NC-A12 Risk-Scoring, Confidence-Ledger-Surfacing, Wave-4-Abschluss; SVC-001-P4 Field-Service + ORM uuid7 Kurz-ID-Härtung in Projekt-Doku nachgezogen).
 
 ## Quelle
 

@@ -1,7 +1,7 @@
 # SVC-001 — Service-to-Customer End-to-End Workflow-Analyse
 
 **Slice:** SVC-001 | **Lane:** Service-to-Customer | **Status:** umgesetzt | **Owner:** Claude Opus 4.6
-**Datum:** 2026-03-30
+**Datum:** 2026-03-31
 
 ---
 
@@ -19,8 +19,8 @@ Serviceleistungen rund um Silo-/Lageranlagen.
 | 1 | `workflow/flow-spine-service-to-customer.tsx` | Cockpit mit FlowSpineWorkspace |
 | 2 | `service/anfragen.tsx` | Serviceanfragen-Liste + Neuanlage |
 | 3 | `agribusiness/field-service-tasks.tsx` | Field-Service-Aufgaben (Disposition + Einsatz) |
-| 4 | — (fehlt) | Rückmeldung/Aktivitäten |
-| 5 | — (fehlt) | Kundenabschluss/Abrechnung |
+| 4 | `service/rueckmeldung.tsx` | Rückmeldung (report-Node) |
+| 5 | `service/abschluss.tsx` | Kundenabschluss (closure-Node) |
 
 ### Flow-Spine Steps (Registry)
 
@@ -59,10 +59,10 @@ flowchart TD
     F -->|Disposition| G[Techniker zugewiesen]
     G -->|Einsatz| H[Durchfuehrung]
 
-    H -->|Rueckmeldung| I[Aktivitaet erfassen\nFEHLT]
+    H -->|Rueckmeldung| I[rueckmeldung.tsx]
     I -->|Material + Arbeitszeit| J[Rueckmeldung gebucht]
 
-    J --> K[Kundenabschluss\nFEHLT]
+    J --> K[abschluss.tsx]
     K -->|Feedback| L[Servicefall geschlossen]
 
     F -->|Stornieren| M[POST cancel]
@@ -71,8 +71,8 @@ flowchart TD
 
     style A fill:#6366f1,color:#fff
     style L fill:#10b981,color:#fff
-    style I fill:#ef4444,color:#fff
-    style K fill:#ef4444,color:#fff
+    style I fill:#22c55e,color:#fff
+    style K fill:#22c55e,color:#fff
 ```
 
 ---
@@ -85,8 +85,8 @@ flowchart TD
 | D-02 | Serviceanfrage Detail | `anfrage-detail.tsx` (293 Z.) — GET/PUT mit Tabs + Workflow-Banner | ok (2026-03-30) |
 | D-03 | Serviceanfrage anlegen | `anfrage-neu.tsx` (158 Z.) — POST mit Workflow-Handover | ok (2026-03-30) |
 | D-04 | Serviceanfrage CRUD | GET/POST/PUT/DELETE via `service_anfragen.py` + Frontend | ok (2026-03-30) |
-| D-05 | Field-Service-Tasks: Liste | GET via `fetch()` — funktioniert, aber nicht über apiClient | teilweise |
-| D-06 | Field-Service-Tasks: apiClient | Nutzt native `fetch()` statt `apiClient`/React Query | offen SVC-001-P4 |
+| D-05 | Field-Service-Tasks: Liste | GET `/api/v1/agribusiness/field-service-tasks` via `apiClient` + `useQuery` | ok (2026-03-31) |
+| D-06 | Field-Service-Tasks: Mutations | `useMutation` + Query-Invalidation; Backend in `compat.py` (CRM-Mapping + Demo-Fallback) | ok (2026-03-31) |
 | D-07 | Field-Service-Tasks: Cancel/Delete | POST cancel + DELETE vorhanden | ok |
 | D-08 | Field-Service-Tasks: Create/Edit | Buttons vorhanden, Navigation auskommentiert | offen SVC-001-P5 |
 | D-09 | Field-Service-Tasks: Audit-Trail | GET audit-trail funktioniert | ok |
@@ -108,71 +108,64 @@ flowchart TD
 | Liste mit Suche (GET) | OK |
 | Card-Summary (Total, Neu, In Bearbeitung) | OK |
 | WorkflowEntryBanner | OK |
-| Detail-Seite | Fehlt |
-| Neuanlage-Seite | Fehlt |
-| Update/Delete | Fehlt |
+| Detail-Seite | OK — `anfrage-detail.tsx` |
+| Neuanlage-Seite | OK — `anfrage-neu.tsx` |
+| Update/Delete | OK — via API |
 
-### `field-service-tasks.tsx` (native `fetch()`)
+### `field-service-tasks.tsx` (`apiClient` + TanStack Query)
 
 | Funktion | Status |
 |---|---|
-| Liste (GET) | OK — via fetch() |
-| Detail-Panel | OK — inline Sidebar |
-| Cancel (POST) | OK |
-| Delete (DELETE) | OK |
+| Liste (GET) | OK — `apiClient` + `useQuery` |
+| Detail-Panel | OK — inline Drawer |
+| Cancel (POST) | OK — `useMutation` |
+| Delete (DELETE) | OK — `useMutation` |
 | Audit-Trail (GET) | OK |
-| Create | Fehlt — Button auskommentiert |
-| Edit | Fehlt — Button auskommentiert |
-| apiClient-Integration | Fehlt — nutzt fetch() |
-| Flow-Spine Link | Fehlt |
+| Create | Fehlt — Button ohne Navigation (P5) |
+| Edit | Fehlt — Button ohne Navigation (P5) |
+| Flow-Spine | Query `workflowInstanceId` / `workflowCase` im Banner |
 
 ### Backend: Service Domain
 
 | Funktion | Status |
 |---|---|
-| `/app/domains/service/` | Fehlt komplett |
-| `/api/v1/service/anfragen` | Existiert (Endpunkt) |
-| `/api/v1/service/anfragen/{id}` | Fehlt |
-| `/api/v1/crm/activities` | Fehlt (für Rückmeldung) |
+| `/app/domains/service/` | Kein eigenes Paket; Servicefall über `service_anfragen.py` |
+| `/api/v1/service/anfragen` | OK — Full CRUD |
+| `/api/v1/service/anfragen/{id}` | OK |
+| `/api/v1/agribusiness/field-service-tasks` | OK — `compat.py`, CRM-Fälle + Demo-Fallback |
 
 ---
 
 ## F — Risiken
 
-### hoch
+### historisch (behoben Stand 2026-03-30/31)
 
-- **2 von 5 Lanes komplett leer**: Rückmeldung (report) und Kundenabschluss (closure) haben
-  weder Frontend-Seite noch Backend-Endpoint. Der Service-Prozess kann nicht zu Ende geführt werden.
-- **Serviceanfrage nur Listenansicht**: Kein Detail, kein Create, kein Update — die Anfrage kann
-  nicht bearbeitet werden.
+- ~~Rückmeldung/Kundenabschluss fehlen~~ — `rueckmeldung.tsx`, `abschluss.tsx` + Backend POST.
+- ~~Serviceanfrage nur Liste~~ — Detail, Neu, CRUD umgesetzt.
 
 ### mittel
 
-- **API-Endpunkt-Diskrepanz**: Registry verweist auf `/api/v1/crm/cases`, Frontend nutzt
-  `/api/v1/service/anfragen`. Unklar welcher Endpunkt kanonisch ist.
-- **Field-Service nutzt fetch()**: Keine zentralisierte Fehlerbehandlung, kein Auth-Token
-  über Interceptor, kein Cache.
-- **Service Domain Backend fehlt**: Kein `/app/domains/service/` Verzeichnis — Service ist
-  kein eigenständiger Domain-Bereich.
+- **Zwei Kanäle Servicefall vs. Field-Service**: Flow-Spine/Registry verweist für Disposition teils auf `/api/v1/crm/cases`; die Serviceanfragen laufen kanonisch über `/api/v1/service/anfragen`, Field-Service-Tasks über Compat → CRM. Für Produktion klären, ob Field-Service künftig nur CRM oder gebündelt über einen BFF laufen soll.
+- **Field-Service ohne dediziertes Domain-Modul**: Implementierung in `compat.py` — für reife SLA/Disposition ggf. eigenes Aggregat/Repository.
 
 ### niedrig
 
-- **Field-Service Create/Edit auskommentiert**: Buttons existieren aber Navigation fehlt.
+- **Field-Service Create/Edit**: Buttons ohne Navigation — SVC-001-P5.
 
 ---
 
 ## G — Empfehlungen
 
-1. **SVC-001-P1:** Detail-Seite `/service/anfrage/{id}` erstellen.
-2. **SVC-001-P2:** Create-Seite `/service/anfrage/neu` erstellen.
-3. **SVC-001-P3:** CRUD-Hooks (Create/Update/Delete) für Serviceanfragen in `betrieb.ts`.
-4. **SVC-001-P4:** `field-service-tasks.tsx` auf `apiClient` + React Query migrieren.
-5. **SVC-001-P5:** Create/Edit Navigation in Field-Service einkommentieren.
-6. **SVC-001-P6:** Rückmeldung-Seite erstellen (`/service/rueckmeldung` oder CRM-Aktivitäten).
-7. **SVC-001-P7:** Kundenabschluss-Seite erstellen (`/service/abschluss`).
-8. **SVC-001-P8:** Backend Service Domain anlegen (`/app/domains/service/`).
-9. **SVC-001-P9:** API-Endpunkt klären: `/crm/cases` vs. `/service/anfragen` kanonisieren.
-10. **SVC-001-P10:** `workflowInstanceId` in Field-Service + Rückmeldung durchreichen.
+1. ~~**SVC-001-P1:** Detail-Seite~~ — `anfrage-detail.tsx`
+2. ~~**SVC-001-P2:** Create-Seite~~ — `anfrage-neu.tsx`
+3. ~~**SVC-001-P3:** CRUD-Hooks~~ — über `betrieb.ts` / apiClient
+4. ~~**SVC-001-P4:** Field-Service `apiClient` + React Query~~ — inkl. `compat.py`-Endpunkte (2026-03-31)
+5. **SVC-001-P5:** Create/Edit Navigation in Field-Service verdrahten.
+6. ~~**SVC-001-P6:** Rückmeldung~~ — `rueckmeldung.tsx`
+7. ~~**SVC-001-P7:** Abschluss~~ — `abschluss.tsx`
+8. **SVC-001-P8 (optional):** Eigenes `app/domains/service/` nur bei Bedarf (mehrere Bounded Contexts trennen).
+9. **SVC-001-P9:** Dokumentierte Dualität: Registry/CRM vs. `service_anfragen` — Architekturentscheid festhalten (kein Blocker für UI).
+10. ~~**SVC-001-P10:** `workflowInstanceId`~~ — in Field-Service (Query) und übrigen Service-Seiten vorhanden; bei Bedarf vertiefen.
 
 ---
 
@@ -180,4 +173,8 @@ flowchart TD
 
 ## Status
 
-**Umgesetzt** (2026-03-30). Detail, Neu, Rueckmeldung, Abschluss Frontend-Seiten mit Backend CRUD. Offene Punkte: SVC-001-P4 (Field-Service apiClient-Migration), SVC-001-P5 (Field-Service Create/Edit).
+**Umgesetzt** (2026-03-31). Kernpfad inkl. Field-Service: Frontend `apiClient` + React Query, Backend-Liste/Mutation via `compat.py` (CRM + Demo-Fallback). **Offen:** SVC-001-P5 (Field-Service Create/Edit-Navigation).
+
+## Backend: Kurz-IDs (uuid7)
+
+Präfix-IDs (`W-…`, `LB-…`, etc.) nutzen `uuid7_short_suffix()` / `default_prefixed_id()` — nicht `uuid7()[:8]`, da der Anfang der v7-UUID zeitlich ist und bei Mehrfach-Insert in derselben Millisekunde kollidieren kann. Siehe `app/core/uuid7.py`.

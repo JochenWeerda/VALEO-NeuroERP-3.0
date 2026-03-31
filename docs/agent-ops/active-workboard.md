@@ -8,7 +8,7 @@ Diese Datei ist absichtlich schlank und soll bei jeder Session schnell lesbar bl
 
 ## Aktueller Stand
 
-- Datum: `2026-03-30`
+- Datum: `2026-03-31`
 - Branch: `develop` (lokal; mit `backup/develop` abgleichen bei Push)
 - Source of Truth: `docs/architecture/process-kernel/STATUS.md`
 
@@ -100,7 +100,7 @@ Zwei End-to-End-Stränge laufen **fachlich und technisch getrennt**. Bitte **nic
 | FIN-001 | Finance-to-Close: Vollanalyse (7 Masken, 11 Cards, 14 Soll-Ist, Mermaid, P1-P8) | abgeschlossen | Claude Opus 4.6 | `docs/workflows/fin-001-finance-to-close.md`, `docs/cards/finance/FIN-001-finance-to-close.md`, `pages/finance/buchungserfassung.tsx`, `pages/finance/nebenbuch-abstimmung.tsx`, `pages/finance/periods.tsx`, `pages/fibu/abschluss-cockpit.tsx`, `pages/fibu/abschluss-checklist-detail.tsx`, `pages/finance/ustva.tsx` | P1-P8 als Folge-Slices | keine |
 | CMP-001 | Compliance-to-Report: Vollanalyse (6 Masken, 12 Cards, 13 Soll-Ist, Mermaid, P1-P5) | abgeschlossen | Claude Opus 4.6 | `docs/workflows/cmp-001-compliance-to-report.md`, `docs/cards/compliance/CMP-001-compliance-to-report.md`, `pages/compliance/**`, `pages/nachhaltigkeit/eudr-compliance.tsx`, `pages/finance/ustva.tsx`, `pages/admin/compliance-dashboard.tsx` | P1-P5 als Folge-Slices | keine |
 | REK-001 | Complaint-to-Resolution: inkl. Labor-Detail (`labor-detail.tsx`), Backend Labor unter `/labor` + `/qualitaet`. | umgesetzt | Claude Opus 4.6 | `pages/qualitaet/reklamation-detail.tsx`, `labor-detail.tsx`, `reklamation_api.py`, `app/api/v1/endpoints/labor.py` | — | keine |
-| SVC-001 | Service-to-Customer: Detail + Neu + Rueckmeldung + Abschluss. Backend Full CRUD. Nur P4/P5 (Field-Service) offen. | umgesetzt | Claude Opus 4.6 | `pages/service/anfrage-detail.tsx`, `anfrage-neu.tsx`, `rueckmeldung.tsx`, `abschluss.tsx`, `service_anfragen.py` | P4 (Field-Service apiClient), P5 (FS Create/Edit) | keine |
+| SVC-001 | Service-to-Customer: Kernpfad + Field-Service P4 (apiClient/RQ + compat-API). Offen: P5 Create/Edit-Navigation. | umgesetzt | Claude Opus 4.6 | `pages/service/anfrage-detail.tsx`, `anfrage-neu.tsx`, `rueckmeldung.tsx`, `abschluss.tsx`, `pages/agribusiness/field-service-tasks.tsx`, `service_anfragen.py`, `app/api/v1/endpoints/compat.py` (Field-Service), `app/core/uuid7.py` (Kurz-IDs) | P5 (FS Create/Edit) | keine |
 
 ## Reservierungsregel
 
@@ -151,6 +151,7 @@ Kein Agent darf einen Slice beginnen, der bereits `reserviert` oder `in arbeit` 
 - FIN-001 P1-P8: Alle D-Checks gruen, 20 Seiten apiClient-Migration (`20f3cb40d`)
 - REK-001: Detail-UI (P1-P5), Transitions, CRM/DMS/Audit Tabs — Doku aktualisiert
 - SVC-001: Detail + Neu + Rueckmeldung + Abschluss — Doku aktualisiert
+- SVC-001-P4: Field-Service `apiClient` + React Query + `/agribusiness/field-service-tasks` in compat; ORM-Kurz-IDs über `uuid7_short_suffix` / `default_prefixed_id` (Doku 2026-03-31)
 - apiClient-Migration: 40 weitere Dateien migriert (`8df97bd53`), insgesamt 60+ Dateien
 
 **Dateibesitz (Cursor Agent):**
@@ -171,7 +172,7 @@ Kein Agent darf einen Slice beginnen, der bereits `reserviert` oder `in arbeit` 
 - NC-A7 (OpenAPI Execution Adapter): `neuro_tool_execution.py` + Tests (Integration mit Cursor Agent NC-A7 Commits)
 - Copilot-UI Verdrahtung (CopilotDockPanel, useCopilotChat, HumanOversightBoard)
 
-**Verbleibend (niedrige Prioritaet):** Field-Service `fetch()`→apiClient (SVC-001-P4), Labor-Detail (REK-001-P6), ggf. `api`-only-Seiten bei Bedarf auf gemeinsames HTTP-Layer vereinheitlichen.
+**Verbleibend (niedrige Prioritaet):** SVC-001-P5 (Field-Service Create/Edit-Navigation), ggf. `api`-only-Seiten bei Bedarf auf gemeinsames HTTP-Layer vereinheitlichen.
 
 **Regeln:**
 - Commit-Convention: `feat(nc-XX): <beschreibung>` / `feat(SLICE-ID): <beschreibung>`.
