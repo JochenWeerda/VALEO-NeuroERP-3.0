@@ -41,6 +41,13 @@ class MCPToolKategorie(str, Enum):
     ESKALIEREN  = "ESKALIEREN"   # Eskalationen und Benachrichtigungen
 
 
+class MCPRequestPayloadMode(str, Enum):
+    DEFAULT = "default"
+    DATASET_VALIDATION = "dataset_validation"
+    POLICY_CONTEXT = "policy_context"
+    APPROVAL_CONTEXT = "approval_context"
+
+
 # ---------------------------------------------------------------------------
 # AP1: MCPToolParameter + MCPToolContract
 # ---------------------------------------------------------------------------
@@ -103,6 +110,7 @@ class MCPToolContract:
     output_beschreibung: str = ""
     requires_approval: bool = False        # True wenn menschliche Freigabe noetig
     api_endpoint: Optional[str] = None     # REST-Endpunkt der das Tool implementiert
+    request_payload_mode: MCPRequestPayloadMode = MCPRequestPayloadMode.DEFAULT
     schema_version: int = MCP_CONTRACT_SCHEMA_VERSION
 
     def validate_name(self) -> bool:
@@ -147,6 +155,7 @@ class MCPToolContract:
             "convention_valid": self.validate_name(),
             "requires_approval": self.requires_approval,
             "api_endpoint": self.api_endpoint,
+            "request_payload_mode": self.request_payload_mode.value,
             "parameter_count": len(self.parameter),
             "pflicht_parameter": [p.name for p in self.pflicht_parameter],
             "optionale_parameter": [p.name for p in self.optionale_parameter],
@@ -444,6 +453,7 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
             beschreibung="Bewertet ob eine Agent-Aktion menschliche Freigabe erfordert",
             kategorie=MCPToolKategorie.VALIDIEREN,
             api_endpoint="POST /api/v1/process/agent/approval-evaluate",
+            request_payload_mode=MCPRequestPayloadMode.APPROVAL_CONTEXT,
             output_beschreibung="Risikostufe, requires_human_approval, Freigabe-Rolle",
             parameter=[
                 _p_str("aktions_typ", "Typ der geplanten Aktion", True, "SETTLEMENT_FREIGABE"),
@@ -490,6 +500,7 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
             beschreibung="Wertet Policy-Regelset gegen einen Prozesskontext aus",
             kategorie=MCPToolKategorie.BERECHNEN,
             api_endpoint="POST /api/v1/process/policy-rules/evaluate",
+            request_payload_mode=MCPRequestPayloadMode.POLICY_CONTEXT,
             output_beschreibung="Wirksame Aktion (ERLAUBT/ABGELEHNT/WARNUNG/ESKALATION) + Treffer-Liste",
             parameter=[
                 _p_str("prozess_key", "Prozess-Key fuer Policy-Lookup", True, "agrar_settlement"),
@@ -553,6 +564,7 @@ def get_process_kernel_mcp_tools() -> MCPToolRegistry:
             beschreibung="Prueft Stammdaten-Datensatz gegen Qualitaetsregeln",
             kategorie=MCPToolKategorie.VALIDIEREN,
             api_endpoint="POST /api/v1/process/data-quality/validate",
+            request_payload_mode=MCPRequestPayloadMode.DATASET_VALIDATION,
             output_beschreibung="Validierungsergebnis: valid/invalid, Violations mit Code und Feld",
             parameter=[
                 _p_str("entity_typ", "Entitaetstyp (LIEFERANT/KONTRAKT/WIEGESCHEIN/ARTIKEL)", True),

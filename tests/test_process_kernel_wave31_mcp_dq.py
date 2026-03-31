@@ -15,6 +15,7 @@ from fastapi.testclient import TestClient
 from starlette.routing import Route
 
 from app.core.mcp_tool_contracts import (
+    MCPRequestPayloadMode,
     MCPParameterTyp,
     MCPToolContract,
     MCPToolKategorie,
@@ -136,6 +137,18 @@ class TestMCPToolContract:
         assert isinstance(mcp, dict)
         assert mcp["name"].startswith("valeo_")
 
+    def test_request_payload_mode_default_and_serialized(self):
+        t = MCPToolContract(
+            tool_name="valeo_process_action_execute",
+            domain="process",
+            operation="action_execute",
+            beschreibung="Fuehrt Action aus",
+            kategorie=MCPToolKategorie.SCHREIBEN,
+            request_payload_mode=MCPRequestPayloadMode.POLICY_CONTEXT,
+        )
+        assert t.request_payload_mode == MCPRequestPayloadMode.POLICY_CONTEXT
+        assert t.as_dict()["request_payload_mode"] == "policy_context"
+
 
 # ---------------------------------------------------------------------------
 # AP2: MCPToolRegistry
@@ -234,6 +247,15 @@ class TestMCPToolRegistry:
                 missing.append(tool.api_endpoint)
 
         assert missing == []
+
+    def test_specialized_payload_modes_are_registered(self):
+        dq = self.registry.by_tool_name("valeo_process_data_quality_validate")
+        policy = self.registry.by_tool_name("valeo_compliance_policy_evaluate")
+        approval = self.registry.by_tool_name("valeo_workflow_approval_evaluate")
+
+        assert dq is not None and dq.request_payload_mode == MCPRequestPayloadMode.DATASET_VALIDATION
+        assert policy is not None and policy.request_payload_mode == MCPRequestPayloadMode.POLICY_CONTEXT
+        assert approval is not None and approval.request_payload_mode == MCPRequestPayloadMode.APPROVAL_CONTEXT
 
 
 # ---------------------------------------------------------------------------
