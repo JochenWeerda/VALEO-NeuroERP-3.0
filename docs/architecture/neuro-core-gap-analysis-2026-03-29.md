@@ -54,8 +54,8 @@ Abhaengigkeiten zwischen Lanes sind explizit markiert.
 
 ### Lane A: Neuro-Core Kernel (NC-01, NC-04, EXT-01) -- ABGESCHLOSSEN
 
-**Status:** Umgesetzt 2026-03-31; NC-A6 bis NC-A15 haben Broker-, Execution-, Verification/Policy-, Dynamic-Plan-, Cross-Entity-, Risk-Scoring-, Tenant-Override- und externe-HTTP-Wave-4-Nachzug abgeschlossen
-**Scope:** Intent Engine + Planner + Pipeline + Capability-Runner-Delegation + zentraler Tool Broker + Wave-2-Verification/Policy-Integration + heuristische Dynamic Plans + Snapshot-basierte Cross-Entity-Integrity + Ledger-basiertes Risk-Scoring + Runtime-Tenant-Overrides + externe HTTP-Execution
+**Status:** Umgesetzt 2026-03-31; NC-A6 bis NC-A16 haben Broker-, Execution-, Verification/Policy-, Dynamic-Plan-, Cross-Entity-, Risk-Scoring-, Tenant-Override-, externe-HTTP- und Tool-Contract-Harmonisierungs-Nachzug abgeschlossen
+**Scope:** Intent Engine + Planner + Pipeline + Capability-Runner-Delegation + zentraler Tool Broker + Wave-2-Verification/Policy-Integration + heuristische Dynamic Plans + Snapshot-basierte Cross-Entity-Integrity + Ledger-basiertes Risk-Scoring + Runtime-Tenant-Overrides + externe HTTP-Execution + contract-gesteuerte Payload-Spezialisierung fuer MCP/OpenAPI-Tools
 **Dateibesitz:**
 
 - `app/agents/neuro_intent_engine.py` -- 11 Intent-Patterns, Capability-Matching, Risk-Klassen, Parameter-Extraktion
@@ -88,6 +88,7 @@ Abhaengigkeiten zwischen Lanes sind explizit markiert.
 | NC-A13 | Wave-4: Runtime-Tenant-Overrides fuer Policy/Verification | Gruen (110 gezielte Verification/Policy-Tests) |
 | NC-A14 | Wave-4: Tenant-Overrides bis in Broker-/Execution-Kontext | Gruen (Broker-/Execution-Tests) |
 | NC-A15 | Wave-4: Externe HTTP-Execution fuer Tool Broker | Gruen (Broker-/Execution-Tests) |
+| NC-A16 | Wave-4: Tool-Contract-Harmonisierung fuer spezialisierte Request-Payloads | Gruen (93 gezielte MCP/Broker/Execution-Tests) |
 
 **Abhaengigkeiten:** Keine — Kern-Lane fertig, alle abhaengigen Slices (D4, F5, H1-H4) ebenfalls umgesetzt
 

@@ -15,7 +15,7 @@ from typing import Any
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from app.core.mcp_tool_contracts import MCPToolContract
+from app.core.mcp_tool_contracts import MCPRequestPayloadMode, MCPToolContract
 
 logger = logging.getLogger(__name__)
 
@@ -205,13 +205,13 @@ class NeuroToolExecutionService:
         context: dict[str, Any],
         tenant_id: str,
     ) -> dict[str, Any]:
-        if contract.tool_name == "valeo_process_data_quality_validate":
+        if contract.request_payload_mode == MCPRequestPayloadMode.DATASET_VALIDATION:
             return {
                 "entity_typ": merged.get("entity_typ") or "ARTIKEL",
                 "datensatz": dict(parameters),
                 "kontext_datensaetze": context.get("comparison_records"),
             }
-        if contract.tool_name == "valeo_compliance_policy_evaluate":
+        if contract.request_payload_mode == MCPRequestPayloadMode.POLICY_CONTEXT:
             return {
                 "prozess_key": merged.get("prozess_key", "agrar_settlement"),
                 "kontext": {
@@ -221,7 +221,7 @@ class NeuroToolExecutionService:
                     **dict(parameters),
                 },
             }
-        if contract.tool_name == "valeo_workflow_approval_evaluate":
+        if contract.request_payload_mode == MCPRequestPayloadMode.APPROVAL_CONTEXT:
             return {
                 "aktions_typ": merged.get("aktions_typ", "NEURO_STEP"),
                 "kontext": {
