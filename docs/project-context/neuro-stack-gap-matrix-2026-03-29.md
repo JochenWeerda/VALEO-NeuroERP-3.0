@@ -1,6 +1,6 @@
 # Neuro Stack Gap Matrix (2026-03-29)
 
-**Letzte Doku-Synchronisation:** 2026-03-30 (Kontext-Resolver, Knowledge Store, NC-D5, Event-Bus Flow-Spine, Live-Chat, REK/SVC-Cards).
+**Letzte Doku-Synchronisation:** 2026-03-31 (NC-A12 Risk-Scoring, Confidence-Ledger-Surfacing, Wave-4-Abschluss).
 
 ## Quelle
 
@@ -12,12 +12,12 @@ Die folgende Matrix basiert auf dem gelieferten Komponenten-Status und fasst die
 |---|---:|---|
 | Neuro Tool Broker | 90% | NC-A6 + NC-A7 abgeschlossen: ToolBinding-Registry (20+ Actions), OpenAPI-Execution via TestClient, State-Graph-Persistenz nach Execution, per-Step Audit Trace, Fallback-Handling (4xx→degraded, 5xx→failed). 13 Tests gruen. Offen: echte HTTP-Execution gegen externe Services (aktuell TestClient intern) |
 | Neuro Intent Engine | 95% | NC-A1/A2 + NC-A9: 11 Intent-Patterns, Capability-Matching, Confidence-Scoring, Risk-Klassen, Parameter-Extraktion, LLM-Fallback fuer unbekannte Intents (injected + service-basiert). 103+ Tests gruen. Offen: Prompt-Pack-Integration, Confidence-Ledger-Feedback |
-| Neuro State Graph | 88% | Grundgeruest + API + DB-Modelle + Pipeline-Verdrahtung (Broker/NC-A7) + NC-A11 Snapshot-/Relations-Integrity fuer ERZEUGT/REFERENZIERT/BLOCKIERT/FOLGT_AUF/ENTHAELT. Offen: Risk-Scoring/Persistenz-Tiefe |
+| Neuro State Graph | 92% | Grundgeruest + API + DB-Modelle + Pipeline-Verdrahtung (Broker/NC-A7) + NC-A11 Snapshot-/Relations-Integrity + NC-A12 Risk-Surfacing ueber Ledger-Summaries. Offen: Persistenz-Tiefe |
 | Neuro Context Resolver | 85% | Prozess-/Aggregate-Kontext + Consent-Status + Kanal-Historie in `neuroassist_context` (schema_version 2) |
 | Neuro Planner | 95% | NC-A3/A4 + NC-A8 + NC-A10: 9 Plan-Templates, typisierte Schritte, per-Step-Verification, Capability-Runner-Delegation und dynamische Plan-Generierung fuer templatefreie Intents. Offen: tiefere Cross-Entity-Integrity |
 | Policy Engine | 90% | NC-A8: temporale Bedingungen + verschachtelte AND/OR-Gruppen + Policy→Verify-Kopplung umgesetzt. Offen: tiefere produktive Tenant-Override-Nutzung |
 | Verification Engine | 95% | NC-A8 + NC-A11: per-Step-Verification, Policy-Integration, State-Graph-Transitionen und Snapshot-basierte Cross-Entity-Integrity. Offen: produktive Tenant-Override-Tiefe |
-| Confidence & Risk Engine | 75% | Append-Only Ledger umgesetzt (NC-B1), weitere Risk-Aggregate und Cross-Run-Scoring fehlen |
+| Confidence & Risk Engine | 90% | Append-Only Ledger + NC-A12 Composite Risk-Scoring, Latest-Risk-Surfacing und Verteilungsmetriken ueber `/confidence-ledger/summary`. Offen: tieferes produktives Feedback in Intent/Planner |
 | Rule & Knowledge Store | 85% | Policy-/Prompt-Pack-Registry; Knowledge Store (`knowledge_store.py`, `/neuro/knowledge`) + Tests; produktive RAG-/Resolver-Anbindung Ausbau |
 | Guardrails / PII-DLP | 70% | PII-Detector/Guardrails/Consent als NC-C abgeschlossen, DLP-Ausbau offen |
 | Action & Policy Layer | 100% | BusinessCommands + CommandDispatcher produktiv |
@@ -49,11 +49,11 @@ Die folgende Matrix basiert auf dem gelieferten Komponenten-Status und fasst die
 - Die Prozentwerte sind Einschaetzungen und nicht automatisch aus Tests abgeleitet.
 - Status bezieht sich auf funktionale Vollstaendigkeit, nicht auf Skalierung oder Security-Haertung.
 
-## Naechste 3 Schritte (Plan, Stand 2026-03-30)
+## Naechste 3 Schritte (Plan, Stand 2026-03-31)
 
 1. ~~NC-A7 — Broker OpenAPI Execution Adapter~~ → umgesetzt
 2. ~~Wave 2 — Verification + Policy Integration~~ → NC-A8 umgesetzt: Policy Engine in Verification verdrahtet, State-Graph-Transitions unifiziert, per-Step Verification im Planner
-3. ~~Wave 3 — Decision Trace Hardening + LLM-Fallback~~ -> NC-A9 (LLM-Fallback) + NC-D5 Hash-Chain-Tests umgesetzt. Wave 4 laeuft mit NC-A10 + NC-A11.
+3. ~~Wave 3 — Decision Trace Hardening + LLM-Fallback~~ -> NC-A9 (LLM-Fallback) + NC-D5 Hash-Chain-Tests umgesetzt. Wave 4 ist mit NC-A10, NC-A11 und NC-A12 abgeschlossen.
 
 ## Neuro Core Completion Plan (4 Waves)
 
@@ -62,4 +62,4 @@ Die folgende Matrix basiert auf dem gelieferten Komponenten-Status und fasst die
 | **1: Foundation** | Tool Broker Execution + Pipeline-Verdrahtung | NC-A7: OpenAPI-Adapter, State-Graph-Persistenz, per-Step Audit | keine |
 | **2: Correctness** | Verification + Policy Engine Integration | Policy→Verify, State→Verify, per-Step Verify, nested/temporale Bedingungen | erledigt |
 | **3: Completeness** | Decision Trace Hardening + Intent LLM | ~~NC-A9 LLM-Fallback~~ umgesetzt; NC-D5 Hash-Chain Regression-Tests offen | Wave 1 |
-| **4: Maturity** | Advanced Features + Stufe 2 Vorbereitung | ~~NC-A10 Dynamische Schrittgenerierung~~ + ~~NC-A11 Cross-Entity-Integrity~~ umgesetzt; Risk-Scoring | Waves 2+3 |
+| **4: Maturity** | Advanced Features + Stufe 2 Vorbereitung | ~~NC-A10 Dynamische Schrittgenerierung~~ + ~~NC-A11 Cross-Entity-Integrity~~ + ~~NC-A12 Risk-Scoring~~ umgesetzt | Waves 2+3 |
