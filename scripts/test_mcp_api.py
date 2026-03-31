@@ -14,8 +14,7 @@ def main():
     """Hauptfunktion"""
     print("Sende Test-Prompt an den MCP-Server...")
     
-    # API-Key (aus dem MCP-Server-Code)
-    API_KEY = "REDACTED-LINKUP-KEY-ROTATED"
+    api_key = os.getenv("LINKUP_API_KEY", "")
     
     # Test-Prompt
     data = {
@@ -35,12 +34,13 @@ def main():
     
     # Sende den Prompt an den MCP-Server
     try:
+        headers = {"Content-Type": "application/json"}
+        if api_key:
+            headers["Authorization"] = f"Bearer {api_key}"
+
         response = requests.post(
             "http://localhost:8000/api/prompt",
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {API_KEY}"
-            },
+            headers=headers,
             json={"prompt": data["prompt"]}
         )
         

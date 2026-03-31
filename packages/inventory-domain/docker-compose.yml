@@ -14,7 +14,7 @@ services:
       - DB_PORT=5432
       - DB_NAME=neuroerp_inventory
       - DB_USER=neuroerp
-      - DB_PASSWORD=password
+      - DB_PASSWORD=${INVENTORY_DB_PASSWORD:?INVENTORY_DB_PASSWORD must be set}
       - EVENT_BUS_TYPE=KAFKA
       - KAFKA_BROKERS=kafka:9092
       - REDIS_URL=redis://inventory-redis:6379
@@ -37,7 +37,7 @@ services:
     environment:
       - POSTGRES_DB=neuroerp_inventory
       - POSTGRES_USER=neuroerp
-      - POSTGRES_PASSWORD=password
+      - POSTGRES_PASSWORD=${INVENTORY_DB_PASSWORD:?INVENTORY_DB_PASSWORD must be set}
     ports:
       - "5436:5432"
     volumes:
@@ -91,7 +91,7 @@ services:
     ports:
       - "3003:3000"
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:?GRAFANA_ADMIN_PASSWORD must be set}
     volumes:
       - ../../monitoring/grafana/provisioning:/etc/grafana/provisioning
       - ../../monitoring/grafana/dashboards:/var/lib/grafana/dashboards

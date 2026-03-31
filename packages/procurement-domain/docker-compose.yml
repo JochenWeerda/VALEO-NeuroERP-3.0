@@ -7,7 +7,7 @@ services:
     environment:
       POSTGRES_DB: neuroerp_procurement
       POSTGRES_USER: neuroerp
-      POSTGRES_PASSWORD: password
+      POSTGRES_PASSWORD: ${PROCUREMENT_DB_PASSWORD:?PROCUREMENT_DB_PASSWORD must be set}
       POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
     ports:
       - "5436:5432"
@@ -51,15 +51,15 @@ services:
       DB_PORT: 5432
       DB_NAME: neuroerp_procurement
       DB_USER: neuroerp
-      DB_PASSWORD: password
+      DB_PASSWORD: ${PROCUREMENT_DB_PASSWORD:?PROCUREMENT_DB_PASSWORD must be set}
       REDIS_URL: redis://procurement-redis:6379
       MESSAGING_TYPE: KAFKA
       MESSAGING_URL: kafka:9092
       PROCUREMENT_PORT: 3002
-      JWT_SECRET: procurement-jwt-secret-key-for-development
+      JWT_SECRET: ${PROCUREMENT_JWT_SECRET:?PROCUREMENT_JWT_SECRET must be set}
       AI_MODEL_PATH: ./models/procurement-model.pkl
       OCR_SERVICE_URL: http://ocr-service:3003
-      SUPPLIER_API_KEY: demo-api-key
+      SUPPLIER_API_KEY: ${PROCUREMENT_SUPPLIER_API_KEY:?PROCUREMENT_SUPPLIER_API_KEY must be set}
       CATALOG_FEED_URL: https://catalog.valero-neuroerp.com
     ports:
       - "3002:3002"
@@ -93,7 +93,7 @@ services:
       DB_PORT: 5432
       DB_NAME: neuroerp_procurement
       DB_USER: neuroerp
-      DB_PASSWORD: password
+      DB_PASSWORD: ${PROCUREMENT_DB_PASSWORD:?PROCUREMENT_DB_PASSWORD must be set}
       REDIS_URL: redis://procurement-redis:6379
       MESSAGING_TYPE: KAFKA
       MESSAGING_URL: kafka:9092
@@ -121,7 +121,7 @@ services:
       DB_PORT: 5432
       DB_NAME: neuroerp_procurement
       DB_USER: neuroerp
-      DB_PASSWORD: password
+      DB_PASSWORD: ${PROCUREMENT_DB_PASSWORD:?PROCUREMENT_DB_PASSWORD must be set}
     depends_on:
       procurement-postgres:
         condition: service_healthy
@@ -140,7 +140,7 @@ services:
       DB_PORT: 5432
       DB_NAME: neuroerp_procurement
       DB_USER: neuroerp
-      DB_PASSWORD: password
+      DB_PASSWORD: ${PROCUREMENT_DB_PASSWORD:?PROCUREMENT_DB_PASSWORD must be set}
       SEED_COUNT: 100
     depends_on:
       procurement-postgres:
