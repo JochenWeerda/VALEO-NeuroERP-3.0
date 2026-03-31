@@ -32,6 +32,7 @@
     "check:routing-integrity": "node scripts/check-routing-integrity.mjs",
     "test:e2e": "playwright test",
     "test:e2e:routing-smoke": "playwright test tests/e2e/main-routes-smoke.spec.ts",
+    "test:e2e:service-to-customer": "playwright test tests/e2e/service-to-customer-smoke.e2e.ts",
     "test:e2e:smoke-all": "node scripts/harvest-routes.mjs && playwright test tests/e2e/all-routes-smoke.spec.ts --workers=1 && node scripts/smoke-report-html.mjs",
     "test:e2e:smoke-report": "node scripts/smoke-report-html.mjs",
     "test:e2e:ui": "playwright test --ui",

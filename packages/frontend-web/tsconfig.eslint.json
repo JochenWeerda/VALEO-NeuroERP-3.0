@@ -4,6 +4,7 @@
     "src/**/*",
     ".storybook/**/*",
     "scripts/**/*",
+    "tests/e2e/**/*.ts",
     "playwright.config.ts",
     "vite.config.ts",
     "vite.config.performance.ts"

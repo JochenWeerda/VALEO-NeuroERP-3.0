@@ -1,6 +1,6 @@
 # SVC-001 — Service-to-Customer (Card)
 
-**Slice:** SVC-001 | **Lane:** Service-to-Customer | **Status:** umgesetzt (Kernpfad Serviceanfragen + Rueckmeldung + Abschluss; Field-Service P4 erledigt)
+**Slice:** SVC-001 | **Lane:** Service-to-Customer | **Status:** umgesetzt (Kernpfad + Field-Service P4/P5)
 **Owner:** Claude Opus 4.6 | **Datum:** 2026-03-31
 
 ---
@@ -18,7 +18,7 @@ CRUD-Vollständigkeit und Flow-Spine-Integration.
 - `packages/frontend-web/src/pages/service/anfrage-neu.tsx` — POST neue Anfrage
 - `packages/frontend-web/src/pages/service/rueckmeldung.tsx` — POST Rueckmeldung (report-Node)
 - `packages/frontend-web/src/pages/service/abschluss.tsx` — POST Abschluss (closure-Node)
-- `packages/frontend-web/src/pages/agribusiness/field-service-tasks.tsx` — `apiClient` + `useQuery` / `useMutation`, Invalidation nach Delete/Cancel
+- `packages/frontend-web/src/pages/agribusiness/field-service-tasks.tsx` — Liste; `field-service-task-neu.tsx`, `field-service-task-edit.tsx` — Neu/Bearbeiten
 
 ## 3. API-Endpoints (kanonisch `/api/v1/service/...`)
 
@@ -28,8 +28,8 @@ CRUD-Vollständigkeit und Flow-Spine-Integration.
 | `/api/v1/service/anfragen/{id}` | GET/PUT/DELETE | Detail / Update / Loeschen |
 | `/api/v1/service/rueckmeldungen` | POST | Rueckmeldung |
 | `/api/v1/service/abschluss` | POST | Fall abschliessen |
-| `/api/v1/agribusiness/field-service-tasks` | GET | Field-Service-Liste (CRM-Cases gemappt; Demo-Daten `fst-seed-*` bei CRM-Ausfall) |
-| `/api/v1/agribusiness/field-service-tasks/{id}` | DELETE | Aufgabe loeschen (CRM; Seeds stub) |
+| `/api/v1/agribusiness/field-service-tasks` | GET/POST | Liste / Neu (CRM `create_case`; Demo-Append bei Ausfall) |
+| `/api/v1/agribusiness/field-service-tasks/{id}` | GET/PUT/DELETE | Detail / Update / Loeschen |
 | `/api/v1/agribusiness/field-service-tasks/{id}/cancel` | POST | Storno (CRM `update_case`; Seeds stub) |
 
 Backend Servicefall: `app/api/v1/endpoints/service_anfragen.py` (In-Memory-Store, tenant-isoliert).
@@ -47,8 +47,8 @@ Backend Field-Service: `app/api/v1/endpoints/compat.py` (Compat-Router unter `/a
 | ID | Beschreibung | Priorität |
 |---|---|---|
 | ~~SVC-001-P4~~ | ~~Field-Service: `fetch()` → apiClient + React Query~~ | erledigt (2026-03-31) |
-| SVC-001-P5 | Field-Service: Create/Edit Navigation aktivieren | Mittel |
-| — | P1–P3, P4, P6–P10 (Kernpfad inkl. Field-Service API) | erledigt (siehe Workflow) |
+| ~~SVC-001-P5~~ | ~~Field-Service: Create/Edit~~ | erledigt (2026-03-31): Routen `.../neu`, `.../:id/bearbeiten` + API |
+| — | P1–P10 (Kernpfad) | erledigt (siehe Workflow) |
 
 ## 6. Tests (manuell)
 
@@ -56,7 +56,7 @@ Backend Field-Service: `app/api/v1/endpoints/compat.py` (Compat-Router unter `/a
 2. Neue Anfrage → POST → Liste
 3. Detail → PUT → speichern
 4. Rueckmeldung / Abschluss mit Query `anfrage_id` wo relevant
-5. Field-Service: Liste/CRM-Fallback, Delete/Cancel (P4 erledigt); Create/Edit weiterhin P5
+5. Field-Service: Neu/Bearbeiten; E2E-Smoke `tests/e2e/service-to-customer-smoke.e2e.ts`
 
 ---
 
