@@ -411,13 +411,25 @@ class TestConfidenceLedgerAnalytics:
         summary = ConfidenceLedgerService.risk_summary(entries)
         assert summary["count"] == 4
         assert summary["max_risk"] == "KRITISCH"
+        assert summary["latest_risk"] == "KRITISCH"
+        assert summary["latest_confidence"] == 0.2
         assert summary["min_confidence"] == 0.2
         assert summary["max_confidence"] == 0.9
+        assert summary["risk_score"] > 0
         assert len(summary["sources"]) == 4
+        assert summary["risk_distribution"] == {
+            "NIEDRIG": 1,
+            "MITTEL": 1,
+            "HOCH": 1,
+            "KRITISCH": 1,
+        }
 
     def test_risk_summary_empty(self):
         summary = ConfidenceLedgerService.risk_summary([])
         assert summary["count"] == 0
+        assert summary["risk_score"] == 0.0
+        assert summary["sources"] == []
+        assert summary["risk_distribution"]["KRITISCH"] == 0
 
     def test_latest_confidence(self):
         entries = self._build_entries()
@@ -435,6 +447,21 @@ class TestConfidenceLedgerAnalytics:
         entries = self._build_entries()
         latest = ConfidenceLedgerService.latest_confidence(entries, source=ConfidenceSource.DQ_GATE)
         assert latest is None
+
+    def test_risk_score_escalates_for_low_confidence_and_higher_risk(self):
+        low_risk = [
+            ConfidenceLedgerService.build_entry(
+                entry_id="cl-low",
+                tenant_id="t-001",
+                confidence_score=0.93,
+                risk_level=RiskLevel.NIEDRIG,
+                source=ConfidenceSource.INTENT_ENGINE,
+                reason="low risk",
+            )
+        ]
+        high_risk = self._build_entries()
+
+        assert ConfidenceLedgerService.risk_score(high_risk) > ConfidenceLedgerService.risk_score(low_risk)
 
 
 # ===================================================================
@@ -648,6 +675,10 @@ class TestConfidenceLedgerAPI:
         data = resp.json()
         assert data["count"] == 3
         assert data["max_risk"] == "KRITISCH"
+        assert data["latest_risk"] == "KRITISCH"
+        assert data["latest_confidence"] == 0.1
+        assert data["risk_score"] > 0
+        assert data["risk_distribution"]["KRITISCH"] == 1
 
     def test_list_filtered_by_source(self, client):
         client.post("/api/v1/neuro/confidence-ledger/entries", json={

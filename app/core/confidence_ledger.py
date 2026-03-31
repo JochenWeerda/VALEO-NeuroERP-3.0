@@ -241,14 +241,60 @@ class ConfidenceLedgerService:
         return filtered[-1]
 
     @staticmethod
+    def risk_score(entries: list[ConfidenceLedgerEntry]) -> float:
+        """
+        Derive a composite 0-100 risk score from confidence and discrete risk levels.
+
+        The score intentionally leans conservative:
+          - lower confidence raises risk
+          - later / more severe entries dominate earlier low-risk ones
+          - repeated high-risk entries nudge the aggregate further upward
+        """
+        if not entries:
+            return 0.0
+
+        risk_weight = {
+            RiskLevel.NIEDRIG: 0.2,
+            RiskLevel.MITTEL: 0.45,
+            RiskLevel.HOCH: 0.75,
+            RiskLevel.KRITISCH: 1.0,
+        }
+
+        weighted = []
+        for index, entry in enumerate(entries, start=1):
+            confidence_component = 1.0 - entry.confidence_score
+            severity_component = risk_weight[entry.risk_level]
+            recency_factor = 0.85 + (0.15 * index / len(entries))
+            weighted.append(((confidence_component * 0.55) + (severity_component * 0.45)) * recency_factor)
+
+        aggregate = sum(weighted) / len(weighted)
+        return round(min(max(aggregate * 100, 0.0), 100.0), 2)
+
+    @staticmethod
     def risk_summary(entries: list[ConfidenceLedgerEntry]) -> dict[str, Any]:
         """Aggregate risk statistics for a case/node."""
         if not entries:
-            return {"count": 0, "avg_confidence": 0.0, "max_risk": None}
+            return {
+                "count": 0,
+                "avg_confidence": 0.0,
+                "min_confidence": 0.0,
+                "max_confidence": 0.0,
+                "max_risk": None,
+                "risk_score": 0.0,
+                "latest_confidence": None,
+                "latest_risk": None,
+                "sources": [],
+                "risk_distribution": {risk.value: 0 for risk in RiskLevel},
+            }
 
         scores = [e.confidence_score for e in entries]
         risk_order = [RiskLevel.NIEDRIG, RiskLevel.MITTEL, RiskLevel.HOCH, RiskLevel.KRITISCH]
         max_risk = max(entries, key=lambda e: risk_order.index(e.risk_level)).risk_level
+        latest = ConfidenceLedgerService.latest_confidence(entries)
+        risk_distribution = {
+            risk.value: sum(1 for entry in entries if entry.risk_level == risk)
+            for risk in RiskLevel
+        }
 
         return {
             "count": len(entries),
@@ -256,5 +302,9 @@ class ConfidenceLedgerService:
             "min_confidence": min(scores),
             "max_confidence": max(scores),
             "max_risk": max_risk.value,
+            "risk_score": ConfidenceLedgerService.risk_score(entries),
+            "latest_confidence": latest.confidence_score if latest else None,
+            "latest_risk": latest.risk_level.value if latest else None,
             "sources": list({e.source.value for e in entries}),
+            "risk_distribution": risk_distribution,
         }

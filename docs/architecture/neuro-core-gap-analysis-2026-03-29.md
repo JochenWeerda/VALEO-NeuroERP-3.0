@@ -54,8 +54,8 @@ Abhaengigkeiten zwischen Lanes sind explizit markiert.
 
 ### Lane A: Neuro-Core Kernel (NC-01, NC-04, EXT-01) -- ABGESCHLOSSEN
 
-**Status:** Umgesetzt 2026-03-30; NC-A6 bis NC-A11 haben Broker-, Execution-, Verification/Policy-, Dynamic-Plan- und Cross-Entity-Wave-4-Nachzug abgeschlossen
-**Scope:** Intent Engine + Planner + Pipeline + Capability-Runner-Delegation + zentraler Tool Broker + Wave-2-Verification/Policy-Integration + heuristische Dynamic Plans + Snapshot-basierte Cross-Entity-Integrity
+**Status:** Umgesetzt 2026-03-31; NC-A6 bis NC-A12 haben Broker-, Execution-, Verification/Policy-, Dynamic-Plan-, Cross-Entity- und Risk-Scoring-Wave-4-Nachzug abgeschlossen
+**Scope:** Intent Engine + Planner + Pipeline + Capability-Runner-Delegation + zentraler Tool Broker + Wave-2-Verification/Policy-Integration + heuristische Dynamic Plans + Snapshot-basierte Cross-Entity-Integrity + Ledger-basiertes Risk-Scoring
 **Dateibesitz:**
 
 - `app/agents/neuro_intent_engine.py` -- 11 Intent-Patterns, Capability-Matching, Risk-Klassen, Parameter-Extraktion
@@ -84,6 +84,7 @@ Abhaengigkeiten zwischen Lanes sind explizit markiert.
 | NC-A8 | Wave-2: temporale/nested Policies, Policy→Verify-Kopplung, State-Graph-Transitions, per-Step-Verification | Gruen (123 gezielte Planner/Verification/Policy-Tests) |
 | NC-A10 | Wave-4: dynamische Mehrschritt-Plaene fuer templatefreie Intents | Gruen (41 gezielte Planner/Pipeline-Tests) |
 | NC-A11 | Wave-4: Snapshot-basierte Cross-Entity-Integrity in State Graph + Verification | Gruen (92 gezielte State-Graph/Verification-Tests) |
+| NC-A12 | Wave-4: Composite Risk-Scoring aus Confidence Ledger + API-Surfacing | Gruen (41 gezielte State-Graph/Ledger-Tests) |
 
 **Abhaengigkeiten:** Keine — Kern-Lane fertig, alle abhaengigen Slices (D4, F5, H1-H4) ebenfalls umgesetzt
 
