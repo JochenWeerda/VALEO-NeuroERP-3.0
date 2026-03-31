@@ -17,7 +17,7 @@ class CrmCustomer(Base):
     __tablename__ = "crm_customers"
     __table_args__ = {"schema": "domain_crm", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: uuid7())
+    id = Column(String, primary_key=True, default=uuid7)
     customer_number = Column(String(20), nullable=False, unique=True)
     company_name = Column(String(200), nullable=False)
     salutation = Column(String(20))
@@ -71,7 +71,7 @@ class CrmContact(Base):
     __tablename__ = "crm_contacts"
     __table_args__ = {"schema": "domain_crm", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: uuid7())
+    id = Column(String, primary_key=True, default=uuid7)
     customer_id = Column(String, ForeignKey("domain_crm.crm_customers.id"), nullable=False)
 
     first_name = Column(String(100), nullable=False)
@@ -111,7 +111,7 @@ class CrmActivity(Base):
     __tablename__ = "crm_activities"
     __table_args__ = {"schema": "domain_crm", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: uuid7())
+    id = Column(String, primary_key=True, default=uuid7)
     customer_id = Column(String, ForeignKey("domain_crm.crm_customers.id"), nullable=False)
     contact_id = Column(String, ForeignKey("domain_crm.crm_contacts.id"))
 
@@ -154,7 +154,7 @@ class VisitReport(Base):
     __tablename__ = "crm_visit_reports"
     __table_args__ = {"schema": "domain_crm", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: uuid7())
+    id = Column(String, primary_key=True, default=uuid7)
     customer_id = Column(String, ForeignKey("domain_crm.crm_customers.id"), nullable=False)
 
     # Visit details
@@ -205,7 +205,7 @@ class Opportunity(Base):
     __tablename__ = "crm_opportunities"
     __table_args__ = {"schema": "domain_crm", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: uuid7())
+    id = Column(String, primary_key=True, default=uuid7)
     customer_id = Column(String, ForeignKey("domain_crm.crm_customers.id"), nullable=False)
 
     # Opportunity details

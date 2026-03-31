@@ -9,7 +9,7 @@ import logging
 from datetime import datetime, timedelta
 from decimal import Decimal
 from typing import List, Optional
-from app.core.uuid7 import uuid7
+from app.core.uuid7 import uuid7, uuid7_short_suffix
 
 logger = logging.getLogger(__name__)
 
@@ -310,7 +310,7 @@ async def create_order(
     customer_number = customer.customer_number if customer else f"K-{effective_customer[:8].upper()}"
     
     # Generiere Bestellnummer
-    order_number = f"PO-{datetime.utcnow().strftime('%Y%m%d')}-{uuid7()[:8].upper()}"
+    order_number = f"PO-{datetime.utcnow().strftime('%Y%m%d')}-{uuid7_short_suffix()}"
     
     # Erstelle Bestellung
     order = CustomerOrder(

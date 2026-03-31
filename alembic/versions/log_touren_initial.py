@@ -6,7 +6,7 @@ Creates tables for Tours, Stops, Delivery Notes, and Events
 from typing import Optional
 from alembic import op
 import sqlalchemy as sa
-from app.core.uuid7 import uuid7
+from app.core.uuid7 import default_prefixed_id, uuid7
 
 # Revision identifiers
 revision = "log_touren_initial"
@@ -71,7 +71,7 @@ def upgrade():
     # Create log_touren table
     op.create_table(
         "log_touren",
-        sa.Column("id", sa.String, primary_key=True, default=lambda: f"TOUR-{uuid7()[:8].upper()}"),
+        sa.Column("id", sa.String, primary_key=True, default=default_prefixed_id("TOUR")),
         sa.Column("tour_no", sa.String(50), nullable=False, unique=True),
         sa.Column("date", sa.DateTime(timezone=True), nullable=False),
         sa.Column("week", sa.String(10)),
@@ -119,7 +119,7 @@ def upgrade():
     # Create log_tour_delivery_notes table
     op.create_table(
         "log_tour_delivery_notes",
-        sa.Column("id", sa.String, primary_key=True, default=lambda: f"DN-{uuid7()[:8].upper()}"),
+        sa.Column("id", sa.String, primary_key=True, default=default_prefixed_id("DN")),
         sa.Column("tour_id", sa.String, sa.ForeignKey("domain_log.log_touren.id", ondelete="CASCADE")),
         sa.Column("stop_id", sa.String, sa.ForeignKey("domain_log.log_tour_stops.id", ondelete="CASCADE")),
         sa.Column("dn_no", sa.String(50), nullable=False),
@@ -140,7 +140,7 @@ def upgrade():
     # Create log_tour_events table
     op.create_table(
         "log_tour_events",
-        sa.Column("id", sa.String, primary_key=True, default=lambda: f"EVT-{uuid7()[:8].upper()}"),
+        sa.Column("id", sa.String, primary_key=True, default=default_prefixed_id("EVT")),
         sa.Column("tour_id", sa.String, sa.ForeignKey("domain_log.log_touren.id", ondelete="CASCADE")),
         sa.Column("at", sa.DateTime(timezone=True), nullable=False, server_default=sa.text("NOW()")),
         sa.Column("type", sa.String(50), nullable=False),

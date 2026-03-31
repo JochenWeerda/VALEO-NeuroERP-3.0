@@ -60,7 +60,7 @@ from modules.agrar.services.self_billing_service import (
 from modules.agrar.repositories.self_billing_repo import SelfBillingRepositoryImpl
 from modules.agrar.services.tax_profile_service import get_taxation_type_for_supplier
 from modules.agrar.services.partie_service import generate_lot_number
-from app.core.uuid7 import uuid7
+from app.core.uuid7 import uuid7, uuid7_short_suffix
 
 router = APIRouter()
 
@@ -676,7 +676,7 @@ async def create_harvest_acceptance(
     acceptance_number = payload.acceptance_number
     if not acceptance_number:
         timestamp = datetime.utcnow()
-        acceptance_number = f"HA-{timestamp.strftime('%Y%m%d')}-{uuid7()[:8].upper()}"
+        acceptance_number = f"HA-{timestamp.strftime('%Y%m%d')}-{uuid7_short_suffix()}"
 
     dq_result = evaluate_harvest_acceptance_datensatz(
         _build_harvest_acceptance_dq_datensatz(
@@ -726,7 +726,7 @@ async def create_harvest_acceptance(
     if not acceptance_number:
         # Format: HA-YYYY-MMDD-HHMMSS oder HA-YYYY-XXXXX
         timestamp = datetime.utcnow()
-        acceptance_number = f"HA-{timestamp.strftime('%Y%m%d')}-{uuid7()[:8].upper()}"
+        acceptance_number = f"HA-{timestamp.strftime('%Y%m%d')}-{uuid7_short_suffix()}"
 
     dq_result = evaluate_harvest_acceptance_datensatz(
         _build_harvest_acceptance_dq_datensatz(

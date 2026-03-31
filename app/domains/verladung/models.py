@@ -6,7 +6,7 @@ from sqlalchemy import Column, String, Integer, Float, DateTime, Text, ForeignKe
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 import enum
-from app.core.uuid7 import uuid7
+from app.core.uuid7 import default_prefixed_id
 
 from app.core.database import Base
 
@@ -75,7 +75,7 @@ class Tour(Base):
     __tablename__ = "log_touren"
     __table_args__ = {"schema": "domain_log", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: f"TOUR-{uuid7()[:8].upper()}")
+    id = Column(String, primary_key=True, default=default_prefixed_id("TOUR"))
     
     # Tour identification
     tour_no = Column(String(50), nullable=False, unique=True)
@@ -120,7 +120,7 @@ class TourStop(Base):
     __tablename__ = "log_tour_stops"
     __table_args__ = {"schema": "domain_log", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: f"STOP-{uuid7()[:8].upper()}")
+    id = Column(String, primary_key=True, default=default_prefixed_id("STOP"))
     
     # References
     tour_id = Column(String, ForeignKey("domain_log.log_touren.id", ondelete="CASCADE"))
@@ -169,7 +169,7 @@ class TourDeliveryNote(Base):
     __tablename__ = "log_tour_delivery_notes"
     __table_args__ = {"schema": "domain_log", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: f"DN-{uuid7()[:8].upper()}")
+    id = Column(String, primary_key=True, default=default_prefixed_id("DN"))
     
     # References
     tour_id = Column(String, ForeignKey("domain_log.log_touren.id", ondelete="CASCADE"))
@@ -209,7 +209,7 @@ class TourEvent(Base):
     __tablename__ = "log_tour_events"
     __table_args__ = {"schema": "domain_log", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: f"EVT-{uuid7()[:8].upper()}")
+    id = Column(String, primary_key=True, default=default_prefixed_id("EVT"))
     
     # References
     tour_id = Column(String, ForeignKey("domain_log.log_touren.id", ondelete="CASCADE"))
