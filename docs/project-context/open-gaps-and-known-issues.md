@@ -8,8 +8,8 @@ Diese Datei sammelt die fuer neue Analysen wichtigsten offenen Restthemen und be
 
 - einzelne Prozessstarts muessen weiter auf Praxisrealismus gegen Landhandelsablaeufe geprueft werden
 - Browser-Use- und CRUD-Pruefungen muessen pro Workflow fortgeschrieben werden
-- NATS-Consumer + Core-Handler: DLQ, Idempotenz, zusaetzlich Flow-Spine-Handler und Event-Observability (`flow_spine_handlers.py`, `observability.py`); offen bleibt produktives Surfacing im Betrieb/Monitoring
-- Der zentrale Neuro Tool Broker ist umgesetzt (NC-A6/NC-A7 inkl. interner OpenAPI-Execution); offen bleiben externe HTTP-Execution, breitere Tool-Contract-Harmonisierung
+- NATS-Consumer + Core-Handler: DLQ, Idempotenz, zusaetzlich Flow-Spine-Handler und Event-Observability (`flow_spine_handlers.py`, `observability.py`) sind umgesetzt; produktives Surfacing im Betrieb/Monitoring steht jetzt ueber `neuro_event_monitoring.py` bereit. Offen bleibt vor allem die Anbindung an externe Dashboards/Alerting
+- Der zentrale Neuro Tool Broker ist umgesetzt (NC-A6/NC-A7 inkl. interner OpenAPI-Execution); NC-A14/NC-A15 ziehen Tenant-Override-Propagation und externe HTTP-Execution nach. Offen bleibt primaer breitere Tool-Contract-Harmonisierung
 - Verification und Policy Engine sind in Wave 2 (NC-A8) gekoppelt; Wave 3 ist mit NC-A9 (LLM-Fallback) und NC-D5 (Hash-Chain-Tests) umgesetzt; Wave 4 ist mit NC-A10 (dynamische Plan-Generierung), NC-A11 (Cross-Entity-Integrity), NC-A12 (Risk-Scoring) und NC-A13 (Tenant-Overrides) abgeschlossen. Offen bleiben nun vor allem tiefere Broker-/UI-Folgepfade und produktive Monitoring-/RAG-Ausbaustufen. Details in `docs/project-context/neuro-stack-gap-matrix-2026-03-29.md`
 - ChromaDB fuer produktive RAG-Nutzung muss mit Prozesswissen befuellt werden
 - Voice-Kanal setzt Web Speech API voraus (Chrome/Edge); Firefox und Safari nicht unterstuetzt

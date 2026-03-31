@@ -354,6 +354,15 @@ class NeuroToolBroker:
             "params": step.parameters,
             "current_state": context.get("state_graph_node", {}).get("current_phase"),
             "target_state": binding.target_phase.value if binding.target_phase else None,
+            "policy_context": {
+                **dict(context.get("policy_context", {})),
+                **dict(step.parameters.get("policy_context", {})),
+            },
+            "tenant_policy_overrides": (
+                step.parameters.get("tenant_policy_overrides")
+                or context.get("tenant_policy_overrides")
+                or context.get("policy_overrides")
+            ),
         }
         result = verify_plan(verification_input, tenant_id, db)
         return {"status": result.status.value, "trace_id": result.trace_id}
@@ -512,6 +521,15 @@ class NeuroToolBroker:
                 **context,
                 "entity_type": step.entity_type,
                 "action_type": step.action,
+                "policy_context": {
+                    **dict(context.get("policy_context", {})),
+                    **dict(step.parameters.get("policy_context", {})),
+                },
+                "tenant_policy_overrides": (
+                    step.parameters.get("tenant_policy_overrides")
+                    or context.get("tenant_policy_overrides")
+                    or context.get("policy_overrides")
+                ),
             },
         )
         payload["category"] = contract.kategorie.value

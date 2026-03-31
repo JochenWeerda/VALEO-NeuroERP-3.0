@@ -255,6 +255,77 @@ def test_openapi_internal_execution_carries_mode():
     assert result["tool_trace"][0]["result"]["http_status"] == 200
 
 
+def test_broker_passes_tenant_overrides_into_tool_execution_context():
+    captured = {}
+    mock_exec_svc = MagicMock(spec=NeuroToolExecutionService)
+
+    def _execute(contract, *, parameters, tenant_id, context):
+        captured["context"] = context
+        return {
+            "mode": "openapi_internal",
+            "tool_name": contract.tool_name,
+            "api_endpoint": contract.api_endpoint,
+            "http_status": 200,
+            "request": {},
+            "response": {"ok": True},
+        }
+
+    mock_exec_svc.execute_contract.side_effect = _execute
+    broker = NeuroToolBroker(tool_execution_service=mock_exec_svc)
+    plan = ExecutionPlan(
+        intent="lagerbestand_abfragen",
+        steps=[
+            PlanStep(
+                order=1,
+                type=StepType.QUERY,
+                action="query_stock_levels",
+                description="Bestand abfragen",
+                entity_type="inventory",
+                parameters={"tenant_policy_overrides": {"PS-X": {"deaktivierte_regel_ids": ["R-1"]}}},
+            )
+        ],
+    )
+
+    broker.execute_plan(plan, tenant_id="t1", context={"policy_context": {"rolle": "dispo"}})
+
+    assert captured["context"]["policy_context"]["rolle"] == "dispo"
+    assert "PS-X" in captured["context"]["tenant_policy_overrides"]
+
+
+def test_broker_marks_external_execution_mode():
+    mock_exec_svc = MagicMock(spec=NeuroToolExecutionService)
+    mock_exec_svc.execute_contract.return_value = {
+        "mode": "openapi_external",
+        "tool_name": "valeo_inventory_bestand_get",
+        "api_endpoint": "GET /api/v1/silo/bestand/{tenant_id}",
+        "http_status": 200,
+        "request": {"url": "https://gateway.example/api/v1/silo/bestand/t1"},
+        "response": {"total_kg": 42000},
+    }
+
+    broker = NeuroToolBroker(tool_execution_service=mock_exec_svc)
+    plan = ExecutionPlan(
+        intent="lagerbestand_abfragen",
+        steps=[
+            PlanStep(
+                order=1,
+                type=StepType.QUERY,
+                action="query_stock_levels",
+                description="Bestand abfragen",
+            )
+        ],
+    )
+
+    result = broker.execute_plan(
+        plan,
+        tenant_id="t1",
+        context={"external_base_url": "https://gateway.example"},
+    )
+
+    assert result["status"] == "executed"
+    assert result["tool_trace"][0]["result"]["mode"] == "openapi_external"
+
+
 # ---------------------------------------------------------------------------
 # NC-A7: State-Graph persistence tests
 # ---------------------------------------------------------------------------

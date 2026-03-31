@@ -54,8 +54,8 @@ Abhaengigkeiten zwischen Lanes sind explizit markiert.
 
 ### Lane A: Neuro-Core Kernel (NC-01, NC-04, EXT-01) -- ABGESCHLOSSEN
 
-**Status:** Umgesetzt 2026-03-31; NC-A6 bis NC-A13 haben Broker-, Execution-, Verification/Policy-, Dynamic-Plan-, Cross-Entity-, Risk-Scoring- und Tenant-Override-Wave-4-Nachzug abgeschlossen
-**Scope:** Intent Engine + Planner + Pipeline + Capability-Runner-Delegation + zentraler Tool Broker + Wave-2-Verification/Policy-Integration + heuristische Dynamic Plans + Snapshot-basierte Cross-Entity-Integrity + Ledger-basiertes Risk-Scoring + Runtime-Tenant-Overrides
+**Status:** Umgesetzt 2026-03-31; NC-A6 bis NC-A15 haben Broker-, Execution-, Verification/Policy-, Dynamic-Plan-, Cross-Entity-, Risk-Scoring-, Tenant-Override- und externe-HTTP-Wave-4-Nachzug abgeschlossen
+**Scope:** Intent Engine + Planner + Pipeline + Capability-Runner-Delegation + zentraler Tool Broker + Wave-2-Verification/Policy-Integration + heuristische Dynamic Plans + Snapshot-basierte Cross-Entity-Integrity + Ledger-basiertes Risk-Scoring + Runtime-Tenant-Overrides + externe HTTP-Execution
 **Dateibesitz:**
 
 - `app/agents/neuro_intent_engine.py` -- 11 Intent-Patterns, Capability-Matching, Risk-Klassen, Parameter-Extraktion
@@ -86,6 +86,8 @@ Abhaengigkeiten zwischen Lanes sind explizit markiert.
 | NC-A11 | Wave-4: Snapshot-basierte Cross-Entity-Integrity in State Graph + Verification | Gruen (92 gezielte State-Graph/Verification-Tests) |
 | NC-A12 | Wave-4: Composite Risk-Scoring aus Confidence Ledger + API-Surfacing | Gruen (41 gezielte State-Graph/Ledger-Tests) |
 | NC-A13 | Wave-4: Runtime-Tenant-Overrides fuer Policy/Verification | Gruen (110 gezielte Verification/Policy-Tests) |
+| NC-A14 | Wave-4: Tenant-Overrides bis in Broker-/Execution-Kontext | Gruen (Broker-/Execution-Tests) |
+| NC-A15 | Wave-4: Externe HTTP-Execution fuer Tool Broker | Gruen (Broker-/Execution-Tests) |
 
 **Abhaengigkeiten:** Keine — Kern-Lane fertig, alle abhaengigen Slices (D4, F5, H1-H4) ebenfalls umgesetzt
 
@@ -235,7 +237,7 @@ Abhaengigkeiten zwischen Lanes sind explizit markiert.
 
 ### Lane G: Event Bus Hardening + Knowledge Store (NC-14, NC-06) -- TEILWEISE ABGESCHLOSSEN
 
-**Status:** Stand 2026-03-30: NC-G1 bis NC-G6 plus lokaler Knowledge Store, Flow-Spine-Handler und Event-Bus-Observability umgesetzt; DB-Migration und tiefere Runtime-Nutzung offen
+**Status:** Stand 2026-03-31: NC-G1 bis NC-G8 umgesetzt; lokaler Knowledge Store, Flow-Spine-Handler, Event-Bus-Observability und Monitoring-Surfacing vorhanden; DB-Migration und tiefere Runtime-Nutzung bleiben offen
 **Scope:** NATS-Consumer aktivieren, Event-Schemas, Knowledge/Policy Versionierung
 **Dateibesitz:**
 
@@ -257,6 +259,7 @@ Abhaengigkeiten zwischen Lanes sind explizit markiert.
 | NC-G5 | `PromptPackRegistry` -- versionierte Prompt-Packs mit A/B-Testing-Faehigkeit | Unit-Test (umgesetzt) |
 | NC-G6 | DLQ + event_id-Idempotenz fuer `NATSConsumer`, Oversight-/Doku-Nachzug | Unit-Test + Storybook/Docs (umgesetzt) |
 | NC-G7 | Knowledge Store REST/API + Flow-Spine-Handler/Observability, Tenant-/Versionierungs-Nachhaertung | Unit-Test (umgesetzt) |
+| NC-G8 | Monitoring-Surfacing fuer Event Bus/Flow Spine (Metrics, Health, Errors) | Unit-Test (umgesetzt) |
 
 **Abhaengigkeiten:** Keine
 

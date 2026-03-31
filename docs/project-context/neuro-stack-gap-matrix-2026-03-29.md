@@ -10,7 +10,7 @@ Die folgende Matrix basiert auf dem gelieferten Komponenten-Status und fasst die
 
 | Komponente | Status | Details |
 |---|---:|---|
-| Neuro Tool Broker | 90% | NC-A6 + NC-A7 abgeschlossen: ToolBinding-Registry (20+ Actions), OpenAPI-Execution via TestClient, State-Graph-Persistenz nach Execution, per-Step Audit Trace, Fallback-Handling (4xx→degraded, 5xx→failed). 13 Tests gruen. Offen: echte HTTP-Execution gegen externe Services (aktuell TestClient intern) |
+| Neuro Tool Broker | 97% | NC-A6 + NC-A7 + NC-A14/A15 abgeschlossen: ToolBinding-Registry (20+ Actions), Tenant-Override-Propagation bis in Tool-Calls, OpenAPI-Execution intern und extern, State-Graph-Persistenz nach Execution, per-Step Audit Trace, Fallback-Handling (4xx→degraded, 5xx→failed). Offen: breitere Tool-Contract-Harmonisierung |
 | Neuro Intent Engine | 95% | NC-A1/A2 + NC-A9: 11 Intent-Patterns, Capability-Matching, Confidence-Scoring, Risk-Klassen, Parameter-Extraktion, LLM-Fallback fuer unbekannte Intents (injected + service-basiert). 103+ Tests gruen. Offen: Prompt-Pack-Integration, Confidence-Ledger-Feedback |
 | Neuro State Graph | 92% | Grundgeruest + API + DB-Modelle + Pipeline-Verdrahtung (Broker/NC-A7) + NC-A11 Snapshot-/Relations-Integrity + NC-A12 Risk-Surfacing ueber Ledger-Summaries. Offen: Persistenz-Tiefe |
 | Neuro Context Resolver | 85% | Prozess-/Aggregate-Kontext + Consent-Status + Kanal-Historie in `neuroassist_context` (schema_version 2) |
@@ -23,7 +23,7 @@ Die folgende Matrix basiert auf dem gelieferten Komponenten-Status und fasst die
 | Action & Policy Layer | 100% | BusinessCommands + CommandDispatcher produktiv |
 | Human Oversight | 95% | Approval-Gates, Prozess-Supervisor, generische Run-API und Case-Management-UI vorhanden; generische Gate-Aktionen ausserhalb Bestellvorschlag fehlen |
 | Audit & Trace | 92% | D1-D4 + NC-D5 Hash-Chain-Regression-Tests (`test_audit_hash_chain.py`) |
-| Event Bus (NATS) | 93% | Publisher + Consumer + Core-Handler; DLQ/Idempotenz; Flow-Spine-Handler + Observability (`flow_spine_handlers.py`, `observability.py`) |
+| Event Bus (NATS) | 97% | Publisher + Consumer + Core-Handler; DLQ/Idempotenz; Flow-Spine-Handler + Observability (`flow_spine_handlers.py`, `observability.py`) plus REST-Surfacing fuer Metrics/Health/Errors (`neuro_event_monitoring.py`) |
 | Fast Track | 70% | Fast-Track + Compensation als NC-E abgeschlossen, Bypass-Policy-Ausbau offen |
 | Copilot UI | 85% | WebSocket-Streaming, Pipeline-Integration, Copilot-Dock und Supervisor/Oversight-UI vorhanden; tiefere Prozess-Einbettung in Kernmasken offen |
 | Multi-Channel | 82% | WhatsApp, E-Mail, Voice, Channel-Ingress, Live-Chat (REST unter `channels.py`); outbound Routing / produktive WS-UI Ausbau |

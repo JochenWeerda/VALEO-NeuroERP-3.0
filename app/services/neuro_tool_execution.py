@@ -9,6 +9,7 @@ from __future__ import annotations
 import json
 import logging
 import re
+from urllib import parse, request
 from typing import Any
 
 from fastapi import FastAPI
@@ -22,8 +23,14 @@ _PATH_PARAM_PATTERN = re.compile(r"{([^{}]+)}")
 
 
 class NeuroToolExecutionService:
-    def __init__(self, client: TestClient | None = None) -> None:
+    def __init__(
+        self,
+        client: TestClient | None = None,
+        *,
+        external_requester: Any | None = None,
+    ) -> None:
         self._client = client
+        self._external_requester = external_requester
 
     def execute_contract(
         self,
@@ -43,6 +50,9 @@ class NeuroToolExecutionService:
             tenant_id=tenant_id,
             context=ctx,
         )
+
+        if ctx.get("external_base_url"):
+            return self._execute_external(contract, request_spec, ctx)
 
         client = self._get_client()
         try:
@@ -73,6 +83,45 @@ class NeuroToolExecutionService:
             "http_status": response.status_code,
             "request": request_spec,
             "response": self._read_response_body(response),
+        }
+
+    def _execute_external(
+        self,
+        contract: MCPToolContract,
+        request_spec: dict[str, Any],
+        context: dict[str, Any],
+    ) -> dict[str, Any]:
+        base_url = str(context["external_base_url"]).rstrip("/")
+        path = request_spec["path"]
+        url = f"{base_url}{path}" if path.startswith("/") else f"{base_url}/{path}"
+        try:
+            response = self._request_external(
+                method=request_spec["method"],
+                url=url,
+                params=request_spec["query"],
+                json_body=request_spec["json"],
+                headers=request_spec["headers"],
+            )
+        except Exception as exc:  # pragma: no cover - defensive boundary
+            logger.warning("External tool execution failed for %s: %s", contract.tool_name, exc)
+            return self._fallback_result(contract, {**request_spec, "url": url}, f"transport_error: {exc}")
+
+        if response["status_code"] >= 400:
+            return self._fallback_result(
+                contract,
+                {**request_spec, "url": url},
+                f"http_{response['status_code']}",
+                http_status=response["status_code"],
+                response_body=response["body"],
+            )
+
+        return {
+            "mode": "openapi_external",
+            "tool_name": contract.tool_name,
+            "api_endpoint": contract.api_endpoint,
+            "http_status": response["status_code"],
+            "request": {**request_spec, "url": url},
+            "response": response["body"],
         }
 
     @staticmethod
@@ -144,6 +193,7 @@ class NeuroToolExecutionService:
                 "Authorization": "Bearer neuro-tool-broker",
                 "X-Tenant-ID": tenant_id,
                 "Content-Type": "application/json",
+                **dict(context.get("execution_headers", {})),
             },
         }
 
@@ -216,6 +266,57 @@ class NeuroToolExecutionService:
             return response.json()
         except Exception:
             return {"text": response.text}
+
+    def _request_external(
+        self,
+        *,
+        method: str,
+        url: str,
+        params: dict[str, Any],
+        json_body: dict[str, Any] | None,
+        headers: dict[str, Any],
+    ) -> dict[str, Any]:
+        if self._external_requester is not None:
+            return self._external_requester(
+                method=method,
+                url=url,
+                params=params,
+                json_body=json_body,
+                headers=headers,
+            )
+
+        full_url = url
+        if params:
+            full_url = f"{url}?{parse.urlencode(params, doseq=True)}"
+
+        payload = None
+        req_headers = dict(headers)
+        if json_body is not None:
+            payload = json.dumps(json_body).encode("utf-8")
+            req_headers.setdefault("Content-Type", "application/json")
+
+        req = request.Request(full_url, data=payload, headers=req_headers, method=method.upper())
+        try:
+            with request.urlopen(req, timeout=10) as response:
+                body_bytes = response.read()
+                body_text = body_bytes.decode("utf-8") if body_bytes else ""
+                try:
+                    body = json.loads(body_text) if body_text else None
+                except Exception:
+                    body = {"text": body_text}
+                return {"status_code": response.status, "body": body}
+        except Exception as exc:
+            status = getattr(exc, "code", None)
+            body = None
+            if hasattr(exc, "read"):
+                try:
+                    raw = exc.read().decode("utf-8")
+                    body = json.loads(raw) if raw else None
+                except Exception:
+                    body = {"text": raw} if "raw" in locals() else None
+            if status is not None:
+                return {"status_code": status, "body": body}
+            raise
 
     @staticmethod
     def _fallback_result(
