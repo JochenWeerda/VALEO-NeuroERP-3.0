@@ -6,7 +6,7 @@
 import React, { useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 import { toast } from '@/hooks/use-toast';
 import { Card } from '@/components/ui/card';
@@ -45,19 +45,29 @@ export default function FieldServiceTasksPage(): JSX.Element {
   const entityType = 'fieldServiceTask';
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Field Service Task');
 
+  const queryClient = useQueryClient();
+  const listQueryKey = ['field-service-tasks', workflowInstanceId] as const;
+
   // Fetch tasks
-  const { data: tasks = [], refetch, isLoading } = useQuery({
-    queryKey: ['field-service-tasks'],
+  const { data: tasks = [], isLoading } = useQuery({
+    queryKey: listQueryKey,
     queryFn: async () => (await apiClient.get<FieldServiceTask[]>('/api/v1/agribusiness/field-service-tasks')).data,
-    initialData: [],
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async ({ id, reason }: { id: string; reason: string }) => {
+      await apiClient.delete(`/api/v1/agribusiness/field-service-tasks/${id}`, { data: { reason } });
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: listQueryKey });
+      setSelectedTask(null);
+    },
   });
 
   // Delete handler
   const handleDelete = async (id: string, reason: string) => {
     try {
-      await apiClient.delete(`/api/v1/agribusiness/field-service-tasks/${id}`, { data: { reason } });
-      setSelectedTask(null);
-      refetch();
+      await deleteMutation.mutateAsync({ id, reason });
     } catch (error) {
       console.error('Error deleting task:', error);
       throw error;
@@ -76,12 +86,20 @@ export default function FieldServiceTasksPage(): JSX.Element {
     entityType: entityTypeLabel,
   });
 
+  const cancelMutation = useMutation({
+    mutationFn: async ({ id, reason }: { id: string; reason: string }) => {
+      await apiClient.post(`/api/v1/agribusiness/field-service-tasks/${id}/cancel`, { reason });
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: listQueryKey });
+      setSelectedTask(null);
+    },
+  });
+
   // Cancel handler
   const handleCancel = async (id: string, reason: string) => {
     try {
-      await apiClient.post(`/api/v1/agribusiness/field-service-tasks/${id}/cancel`, { reason });
-      setSelectedTask(null);
-      refetch();
+      await cancelMutation.mutateAsync({ id, reason });
     } catch (error) {
       console.error('Error cancelling task:', error);
       throw error;

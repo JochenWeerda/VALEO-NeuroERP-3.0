@@ -30,7 +30,13 @@ from app.domains.operations.models import Charge, Dokument, Rahmenvertrag, Zerti
 from app.domains.shared.events import IntegrationEvent, get_event_publisher
 from app.infrastructure.models import Article as ArticleModel, InventoryCount
 from app.infrastructure.eventbus.outbox import OutboxPublisher
-from app.integrations.crm_core_client import list_customers as crm_list_customers, list_leads as crm_list_leads
+from app.integrations.crm_core_client import (
+    delete_case as crm_delete_case,
+    list_cases as crm_list_cases,
+    list_customers as crm_list_customers,
+    list_leads as crm_list_leads,
+    update_case as crm_update_case,
+)
 from app.routers.contracts_router import get_contract as get_contract_via_router
 
 router = APIRouter(tags=["compat"])
@@ -3778,3 +3784,123 @@ async def list_benachrichtigungen(
         }
     except Exception:
         return {"items": []}
+
+
+# ── Agribusiness / Field Service Tasks (CRM-Fälle → UI-Shape) ─────
+
+
+def _case_to_field_service_task(c: dict[str, Any]) -> dict[str, Any]:
+    """Mappt CRM-Case-Dicts auf das Frontend-Format von field-service-tasks.tsx."""
+    status_raw = (c.get("status") or "").lower().replace(" ", "_")
+    status_map = {
+        "new": "SCHEDULED",
+        "open": "IN_PROGRESS",
+        "in_progress": "IN_PROGRESS",
+        "pending": "SCHEDULED",
+        "resolved": "COMPLETED",
+        "closed": "COMPLETED",
+        "cancelled": "CANCELLED",
+    }
+    task_status = status_map.get(status_raw, "SCHEDULED")
+    pri_raw = (c.get("priority") or "medium").upper()
+    if pri_raw not in ("URGENT", "HIGH", "MEDIUM", "LOW"):
+        pri_raw = {"CRITICAL": "URGENT", "NORMAL": "MEDIUM"}.get(pri_raw, "MEDIUM")
+    created = c.get("created_at")
+    if hasattr(created, "isoformat"):
+        sched = created.isoformat()
+    elif isinstance(created, str):
+        sched = created
+    else:
+        sched = datetime.now(timezone.utc).isoformat()
+    pct = 100 if task_status == "COMPLETED" else (50 if task_status == "IN_PROGRESS" else 0)
+    desc = c.get("description")
+    farmer = (desc[:120] + "…") if isinstance(desc, str) and len(desc) > 120 else desc
+    return {
+        "id": str(c.get("id", "")),
+        "taskNumber": c.get("case_number") or str(c.get("id", "")),
+        "title": c.get("subject") or "(ohne Betreff)",
+        "taskType": (c.get("case_type") or "service").upper(),
+        "status": task_status,
+        "priority": pri_raw,
+        "assignedToName": c.get("assigned_to") or "-",
+        "farmerName": farmer if isinstance(farmer, str) else None,
+        "scheduledStartDate": sched,
+        "completionPercentage": pct,
+    }
+
+
+_DEMO_FIELD_SERVICE_TASKS: list[dict[str, Any]] = [
+    {
+        "id": "fst-seed-001",
+        "taskNumber": "FS-2026-DEMO-001",
+        "title": "Wartung Dosieranlage",
+        "taskType": "FIELD_SERVICE",
+        "status": "SCHEDULED",
+        "priority": "HIGH",
+        "assignedToName": "Team Nord",
+        "farmerName": "Mustermann Agrar GmbH",
+        "scheduledStartDate": datetime.now(timezone.utc).isoformat(),
+        "completionPercentage": 0,
+    },
+    {
+        "id": "fst-seed-002",
+        "taskNumber": "FS-2026-DEMO-002",
+        "title": "Kalibrierung Waage",
+        "taskType": "INSPECTION",
+        "status": "IN_PROGRESS",
+        "priority": "MEDIUM",
+        "assignedToName": "Technik",
+        "farmerName": None,
+        "scheduledStartDate": datetime.now(timezone.utc).isoformat(),
+        "completionPercentage": 40,
+    },
+]
+
+
+@router.get("/agribusiness/field-service-tasks")
+async def list_field_service_tasks() -> list[dict[str, Any]]:
+    """Liste Field-Service-Aufgaben (CRM-Fälle); bei Ausfall des CRM-Dienstes Demo-Daten."""
+    try:
+        cases, _total = await crm_list_cases(skip=0, limit=200)
+        if cases:
+            return [_case_to_field_service_task(dict(c)) for c in cases]
+    except Exception:
+        pass
+    return list(_DEMO_FIELD_SERVICE_TASKS)
+
+
+class FieldServiceTaskDeleteBody(BaseModel):
+    reason: str = ""
+
+
+@router.delete("/agribusiness/field-service-tasks/{task_id}")
+async def delete_field_service_task(
+    task_id: str,
+    body: FieldServiceTaskDeleteBody | None = Body(None),
+) -> dict[str, Any]:
+    if task_id.startswith("fst-seed-"):
+        return {"ok": True, "deleted": task_id}
+    try:
+        await crm_delete_case(task_id)
+        return {"ok": True, "deleted": task_id}
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"CRM delete failed: {exc}") from exc
+
+
+class FieldServiceTaskCancelBody(BaseModel):
+    reason: str = ""
+
+
+@router.post("/agribusiness/field-service-tasks/{task_id}/cancel")
+async def cancel_field_service_task(
+    task_id: str,
+    body: FieldServiceTaskCancelBody | None = None,
+) -> dict[str, Any]:
+    reason = (body.reason if body else "") or "Storniert"
+    if task_id.startswith("fst-seed-"):
+        return {"ok": True, "cancelled": task_id, "reason": reason}
+    try:
+        await crm_update_case(task_id, {"status": "cancelled", "resolution": reason})
+        return {"ok": True, "cancelled": task_id}
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f"CRM update failed: {exc}") from exc

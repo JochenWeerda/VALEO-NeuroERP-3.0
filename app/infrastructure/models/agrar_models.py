@@ -18,7 +18,7 @@ class Saatgut(Base):
     __tablename__ = "agrar_saatgut"
     __table_args__ = {"schema": "domain_agrar", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: uuid7())
+    id = Column(String, primary_key=True, default=uuid7)
     artikelnummer = Column(String(50), nullable=False, unique=True)
     name = Column(String(200), nullable=False)
     sorte = Column(String(100), nullable=False)
@@ -58,7 +58,7 @@ class SaatgutLizenz(Base):
     __tablename__ = "agrar_saatgut_lizenzen"
     __table_args__ = {"schema": "domain_agrar", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: uuid7())
+    id = Column(String, primary_key=True, default=uuid7)
     saatgut_id = Column(String, ForeignKey("domain_agrar.agrar_saatgut.id"), nullable=False)
     typ = Column(String(50), nullable=False)  # Nachbaugebühr, Z-Saatgut, etc.
     saison = Column(String(9), nullable=False)  # 2024/2025
@@ -77,7 +77,7 @@ class Duenger(Base):
     __tablename__ = "agrar_duenger"
     __table_args__ = {"schema": "domain_agrar", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: uuid7())
+    id = Column(String, primary_key=True, default=uuid7)
     artikelnummer = Column(String(50), nullable=False, unique=True)
     name = Column(String(200), nullable=False)
     typ = Column(String(50), nullable=False)  # Mineraldünger, Organisch, etc.
@@ -129,7 +129,7 @@ class DuengerMischung(Base):
     __tablename__ = "agrar_duenger_mischungen"
     __table_args__ = {"schema": "domain_agrar", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: uuid7())
+    id = Column(String, primary_key=True, default=uuid7)
     name = Column(String(200), nullable=False)
     beschreibung = Column(Text, nullable=True)
 
@@ -159,7 +159,7 @@ class PSM(Base):
     __tablename__ = "agrar_psm"
     __table_args__ = {"schema": "domain_agrar", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: uuid7())
+    id = Column(String, primary_key=True, default=uuid7)
     artikelnummer = Column(String(50), nullable=False, unique=True)
     name = Column(String(200), nullable=False)
     wirkstoff = Column(String(100), nullable=False)
@@ -213,7 +213,7 @@ class Sachkunde(Base):
     __tablename__ = "agrar_sachkunde"
     __table_args__ = {"schema": "domain_agrar", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: uuid7())
+    id = Column(String, primary_key=True, default=uuid7)
     person_id = Column(String, nullable=False)  # Verknüpfung zu CRM/Contact
     sachkunde_typ = Column(String(50), nullable=False)  # PSM, Dünger, etc.
     zertifikat_nummer = Column(String(50), nullable=True)
@@ -235,7 +235,7 @@ class Biostimulanz(Base):
     __tablename__ = "agrar_biostimulanzien"
     __table_args__ = {"schema": "domain_agrar", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: uuid7())
+    id = Column(String, primary_key=True, default=uuid7)
     artikelnummer = Column(String(50), nullable=False, unique=True)
     name = Column(String(200), nullable=False)
     typ = Column(String(50), nullable=False)  # Biostimulanz, Kalk, Substrat, etc.
@@ -270,7 +270,7 @@ class FeldbuchSchlag(Base):
     __tablename__ = "feldbuch_schlaege"
     __table_args__ = {"schema": "domain_agrar", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: uuid7())
+    id = Column(String, primary_key=True, default=uuid7)
     tenant_id = Column(String, nullable=False, index=True)
     customer_id = Column(String, nullable=False, index=True)  # FK → domain_crm.customers
 
@@ -297,7 +297,7 @@ class FeldbuchMassnahme(Base):
     __tablename__ = "feldbuch_massnahmen"
     __table_args__ = {"schema": "domain_agrar", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: uuid7())
+    id = Column(String, primary_key=True, default=uuid7)
     tenant_id = Column(String, nullable=False, index=True)
     schlag_id = Column(String, ForeignKey("domain_agrar.feldbuch_schlaege.id"), nullable=True)
     customer_id = Column(String, nullable=False, index=True)
@@ -349,7 +349,7 @@ class AgrarMaschine(Base):
     __tablename__ = "agrar_maschinen"
     __table_args__ = {"schema": "domain_agrar", "extend_existing": True}
 
-    id = Column(String, primary_key=True, default=lambda: uuid7())
+    id = Column(String, primary_key=True, default=uuid7)
     tenant_id = Column(String, nullable=False, index=True)
     customer_id = Column(String, nullable=True, index=True)
     # None = eigene Maschine des Landhandels; gesetzt = Lohnmaschine eines Kunden
