@@ -1,0 +1,163 @@
+rules:
+  # ── Tenant-Isolation ──────────────────────────────────────────────────────
+
+  - id: valeo-tenant-bypass
+    patterns:
+      - pattern: |
+          @router.$METHOD(...)
+          def $FUNC(...):
+              ...
+      - pattern-not: |
+          @router.$METHOD(...)
+          def $FUNC(..., tenant_id: ... = Depends(...), ...):
+              ...
+      - pattern-not: |
+          @router.$METHOD(...)
+          def $FUNC(..., current_user: ... = Depends(...), ...):
+              ...
+    message: >
+      Endpoint $FUNC hat keinen tenant_id oder current_user Dependency-Parameter.
+      In einem Multi-Tenant ERP muss jeder Endpoint die Tenant-Isolation sicherstellen.
+    languages: [python]
+    severity: ERROR
+    metadata:
+      category: security
+      subcategory: [authorization]
+      confidence: MEDIUM
+      cwe: ["CWE-284: Improper Access Control"]
+      owasp: ["A01:2021 - Broken Access Control"]
+
+  # ── SQL Injection via f-strings ───────────────────────────────────────────
+
+  - id: valeo-sqli-fstring
+    patterns:
+      - pattern: |
+          $DB.execute(f"...")
+      - pattern: |
+          $DB.execute(f'...')
+      - pattern: |
+          text(f"...")
+      - pattern: |
+          text(f'...')
+    message: >
+      SQL-Query mit f-string gefunden. Verwende SQLAlchemy text() mit :param
+      Bindings oder ORM-Queries statt String-Interpolation.
+    languages: [python]
+    severity: ERROR
+    metadata:
+      category: security
+      subcategory: [injection]
+      confidence: HIGH
+      cwe: ["CWE-89: SQL Injection"]
+      owasp: ["A03:2021 - Injection"]
+
+  # ── Unsichere Deserialisierung ────────────────────────────────────────────
+
+  - id: valeo-pickle-usage
+    pattern: pickle.loads(...)
+    message: >
+      pickle.loads() ist unsicher und kann zu Remote Code Execution fuehren.
+      Verwende json.loads() oder Pydantic-Deserialisierung.
+    languages: [python]
+    severity: ERROR
+    metadata:
+      category: security
+      subcategory: [deserialization]
+      confidence: HIGH
+      cwe: ["CWE-502: Deserialization of Untrusted Data"]
+
+  # ── Hardcoded Secrets ─────────────────────────────────────────────────────
+
+  - id: valeo-hardcoded-secret
+    patterns:
+      - pattern: |
+          $VAR = "..."
+      - metavariable-regex:
+          metavariable: $VAR
+          regex: (?i)(secret|password|api_key|private_key|token)
+      - pattern-not: |
+          $VAR = "..."  # nosec
+      - pattern-not: |
+          $VAR = ""
+    message: >
+      Moeglicherweise hardcoded Secret in $VAR. Verwende Umgebungsvariablen
+      oder einen Secret-Manager.
+    languages: [python]
+    severity: WARNING
+    metadata:
+      category: security
+      subcategory: [secrets]
+      confidence: MEDIUM
+      cwe: ["CWE-798: Use of Hard-coded Credentials"]
+
+  # ── SSRF via unkontrollierten URL-Parameter ───────────────────────────────
+
+  - id: valeo-ssrf-requests
+    patterns:
+      - pattern: |
+          requests.get($URL, ...)
+      - pattern-not: |
+          requests.get("...", ...)
+    message: >
+      HTTP-Request mit dynamischer URL. Pruefen, ob der URL-Parameter vom
+      Benutzer kontrolliert werden kann (SSRF-Risiko).
+    languages: [python]
+    severity: WARNING
+    metadata:
+      category: security
+      subcategory: [ssrf]
+      confidence: LOW
+      cwe: ["CWE-918: Server-Side Request Forgery"]
+      owasp: ["A10:2021 - Server-Side Request Forgery"]
+
+  # ── Path Traversal ───────────────────────────────────────────────────────
+
+  - id: valeo-path-traversal
+    patterns:
+      - pattern: |
+          open($PATH, ...)
+      - pattern-not: |
+          open("...", ...)
+    message: >
+      Datei-Oeffnung mit dynamischem Pfad. Sicherstellen, dass der Pfad
+      validiert/sanitized wird (kein ../ etc.).
+    languages: [python]
+    severity: WARNING
+    metadata:
+      category: security
+      subcategory: [path-traversal]
+      confidence: LOW
+      cwe: ["CWE-22: Path Traversal"]
+
+  # ── Frontend: dangerouslySetInnerHTML ─────────────────────────────────────
+
+  - id: valeo-xss-dangerously
+    pattern: dangerouslySetInnerHTML={{__html: $EXPR}}
+    message: >
+      dangerouslySetInnerHTML mit dynamischem Wert. XSS-Risiko — HTML vorher
+      mit DOMPurify sanitizen oder auf React-Rendering umstellen.
+    languages: [typescript, javascript]
+    severity: ERROR
+    metadata:
+      category: security
+      subcategory: [xss]
+      confidence: HIGH
+      cwe: ["CWE-79: Cross-site Scripting"]
+      owasp: ["A03:2021 - Injection"]
+
+  # ── Frontend: eval() ─────────────────────────────────────────────────────
+
+  - id: valeo-eval-usage
+    patterns:
+      - pattern: eval(...)
+      - pattern: new Function(...)
+    message: >
+      eval() oder new Function() gefunden. Kann zu Code-Injection fuehren.
+      Verwende sichere Alternativen.
+    languages: [typescript, javascript]
+    severity: ERROR
+    metadata:
+      category: security
+      subcategory: [injection]
+      confidence: HIGH
+      cwe: ["CWE-95: Eval Injection"]

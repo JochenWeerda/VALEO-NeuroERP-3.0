@@ -1,3 +1,6 @@
+# Security scan reports (generated locally)
+security-reports/
+
 # Sync .project/sourceTexts/ folder (source text files)
 
 # Don't sync user-specific SQLite databases
