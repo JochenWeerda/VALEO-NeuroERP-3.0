@@ -14,7 +14,7 @@ services:
       - SERVICE_PORT=3002
       - SERVICE_REGISTRY_URL=http://service-registry:3000
       - SERVICE_BUS_URL=amqp://rabbitmq:5672
-      - DATABASE_URL=postgresql://erp_user:erp_password@postgres:5432/erp_db
+      - DATABASE_URL=${ERP_DATABASE_URL:?ERP_DATABASE_URL must be set}
       - REDIS_URL=redis://redis:6379
     depends_on:
       - postgres
@@ -45,7 +45,7 @@ services:
     environment:
       - POSTGRES_DB=erp_db
       - POSTGRES_USER=erp_user
-      - POSTGRES_PASSWORD=erp_password
+      - POSTGRES_PASSWORD=${ERP_DB_PASSWORD:?ERP_DB_PASSWORD must be set}
     ports:
       - "5433:5432"
     networks:

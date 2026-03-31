@@ -16,7 +16,7 @@ services:
       - DB_PORT=5432
       - DB_NAME=neuroerp_finance
       - DB_USER=neuroerp
-      - DB_PASSWORD=${DB_PASSWORD:-finance_password}
+      - DB_PASSWORD=${FINANCE_DB_PASSWORD:?FINANCE_DB_PASSWORD must be set}
       - MESSAGING_TYPE=KAFKA
       - MESSAGING_URL=kafka:9092
       - FINANCE_PORT=3001
@@ -44,7 +44,7 @@ services:
     environment:
       - POSTGRES_DB=neuroerp_finance
       - POSTGRES_USER=neuroerp
-      - POSTGRES_PASSWORD=${DB_PASSWORD:-finance_password}
+      - POSTGRES_PASSWORD=${FINANCE_DB_PASSWORD:?FINANCE_DB_PASSWORD must be set}
     volumes:
       - finance_postgres_data:/var/lib/postgresql/data
       - ../migrations/sql/finance:/docker-entrypoint-initdb.d

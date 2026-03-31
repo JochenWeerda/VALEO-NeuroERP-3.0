@@ -42,8 +42,8 @@ logger = logging.getLogger("mcp_server")
 # Flask-App initialisieren
 app = Flask(__name__)
 
-# API-Key (standardmäßig der LinkUp API-Key)
-API_KEY = os.environ.get("LINKUP_API_KEY", "aca0b877-88dd-4423-a35b-97de39012db9")
+# API-Key nur aus Umgebung laden. Kein Repo-Default.
+API_KEY = os.environ.get("LINKUP_API_KEY", "")
 
 # Status-Informationen
 SERVER_STATUS = {
@@ -199,7 +199,7 @@ def linkup_search():
                     "url": "https://example.com/result"
                 }
             ],
-            "api_key_used": API_KEY[:8] + "..." # Zeige nur einen Teil des API-Keys aus Sicherheitsgründen
+            "api_key_configured": bool(API_KEY)
         }
         
         return jsonify(response_data)
@@ -219,10 +219,6 @@ if __name__ == "__main__":
         API_KEY = os.environ["LINKUP_API_KEY"]
         SERVER_STATUS["api_key_set"] = bool(API_KEY)
         logger.info("API-Key aus Umgebungsvariable geladen.")
-    else:
-        # Standard-API-Key setzen
-        os.environ["LINKUP_API_KEY"] = API_KEY
-    
     # Server starten
     logger.info(f"Server wird auf Port 8000 gestartet. API-Key ist gesetzt: {bool(API_KEY)}")
     app.run(host="0.0.0.0", port=8000, debug=False) 

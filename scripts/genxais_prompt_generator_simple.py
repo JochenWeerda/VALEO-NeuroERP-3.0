@@ -92,7 +92,7 @@ def main():
     # API-Key Eingabe (optional)
     with st.expander("API-Key Konfiguration"):
         api_key = st.text_input("LinkUp API-Key", 
-                               value=os.environ.get("LINKUP_API_KEY", "aca0b877-88dd-4423-a35b-97de39012db9"), 
+                               value=os.environ.get("LINKUP_API_KEY", ""), 
                                type="password")
         if st.button("API-Key speichern"):
             os.environ["LINKUP_API_KEY"] = api_key
