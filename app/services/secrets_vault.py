@@ -10,6 +10,7 @@ from __future__ import annotations
 import base64
 import hashlib
 import logging
+import json
 import os
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -23,6 +24,7 @@ logger = logging.getLogger(__name__)
 class SecretProvider(str, Enum):
     ENV = "env"
     MEMORY = "memory"
+    KEYRING = "keyring"
     HASHICORP_VAULT = "hashicorp_vault"
     AZURE_KEYVAULT = "azure_keyvault"
     AWS_SECRETS = "aws_secrets"
@@ -67,6 +69,8 @@ class SecretMetadata:
 
 
 _OBFUSCATION_KEY = os.getenv("VAULT_OBFUSCATION_KEY", "valeo-neuro-erp-default-key")
+_KEYRING_SERVICE_NAME = os.getenv("VALEO_SECRET_SERVICE_NAME", "VALEO-NeuroERP")
+_KEYRING_INDEX_KEY = "__VALEO_SECRET_INDEX__"
 
 
 def _obfuscate(value: str) -> str:
@@ -88,6 +92,52 @@ _VAULT_STORE: dict[str, tuple[SecretMetadata, str]] = {}
 _ACCESS_LOG: list[dict[str, Any]] = []
 
 
+def _get_keyring_module() -> Any | None:
+    try:
+        import keyring  # type: ignore
+    except Exception:
+        return None
+    return keyring
+
+
+def _metadata_from_dict(payload: dict[str, Any]) -> SecretMetadata:
+    return SecretMetadata(
+        secret_id=payload.get("secret_id", str(uuid4())),
+        key=payload.get("key", ""),
+        secret_type=SecretType(payload.get("secret_type", SecretType.API_KEY.value)),
+        provider=SecretProvider(payload.get("provider", SecretProvider.MEMORY.value)),
+        description=payload.get("description", ""),
+        created_at=payload.get("created_at", datetime.now(timezone.utc).isoformat()),
+        rotated_at=payload.get("rotated_at"),
+        expires_at=payload.get("expires_at"),
+        access_count=payload.get("access_count", 0),
+        last_accessed_at=payload.get("last_accessed_at"),
+    )
+
+
+def _load_keyring_index(keyring_module: Any) -> dict[str, SecretMetadata]:
+    raw = keyring_module.get_password(_KEYRING_SERVICE_NAME, _KEYRING_INDEX_KEY)
+    if not raw:
+        return {}
+    try:
+        payload = json.loads(raw)
+    except json.JSONDecodeError:
+        logger.warning("Keyring metadata index ist unlesbar und wird ignoriert.")
+        return {}
+    return {key: _metadata_from_dict(value) for key, value in payload.items()}
+
+
+def _save_keyring_index(keyring_module: Any, index: dict[str, SecretMetadata]) -> None:
+    serialized = json.dumps({key: metadata.to_dict() for key, metadata in index.items()})
+    keyring_module.set_password(_KEYRING_SERVICE_NAME, _KEYRING_INDEX_KEY, serialized)
+
+
+def _touch_metadata(metadata: SecretMetadata, accessor: str, operation: str) -> None:
+    metadata.access_count += 1
+    metadata.last_accessed_at = datetime.now(timezone.utc).isoformat()
+    _record_access(metadata.key, accessor, operation)
+
+
 def store_secret(
     key: str,
     value: str,
@@ -101,8 +151,18 @@ def store_secret(
         provider=provider,
         description=description,
     )
-    obfuscated = _obfuscate(value)
-    _VAULT_STORE[key] = (metadata, obfuscated)
+    if provider == SecretProvider.KEYRING:
+        keyring_module = _get_keyring_module()
+        if keyring_module is None:
+            raise RuntimeError("Python-Paket 'keyring' ist nicht verfuegbar.")
+        keyring_module.set_password(_KEYRING_SERVICE_NAME, key, value)
+        index = _load_keyring_index(keyring_module)
+        index[key] = metadata
+        _save_keyring_index(keyring_module, index)
+        _VAULT_STORE[key] = (metadata, "")
+    else:
+        obfuscated = _obfuscate(value)
+        _VAULT_STORE[key] = (metadata, obfuscated)
     logger.info("Secret '%s' gespeichert (Typ: %s, Provider: %s)", key, secret_type.value, provider.value)
     return metadata
 
@@ -110,10 +170,31 @@ def store_secret(
 def get_secret(key: str, accessor: str = "system") -> Optional[str]:
     if key in _VAULT_STORE:
         metadata, obfuscated = _VAULT_STORE[key]
-        metadata.access_count += 1
-        metadata.last_accessed_at = datetime.now(timezone.utc).isoformat()
-        _record_access(key, accessor, "read")
+        if metadata.provider == SecretProvider.KEYRING:
+            keyring_module = _get_keyring_module()
+            if keyring_module is None:
+                return None
+            value = keyring_module.get_password(_KEYRING_SERVICE_NAME, key)
+            if value is not None:
+                _touch_metadata(metadata, accessor, "keyring_read")
+            return value
+        _touch_metadata(metadata, accessor, "read")
         return _deobfuscate(obfuscated)
+
+    keyring_module = _get_keyring_module()
+    if keyring_module is not None:
+        value = keyring_module.get_password(_KEYRING_SERVICE_NAME, key)
+        if value is not None:
+            index = _load_keyring_index(keyring_module)
+            metadata = index.get(
+                key,
+                SecretMetadata(key=key, provider=SecretProvider.KEYRING),
+            )
+            _touch_metadata(metadata, accessor, "keyring_read")
+            index[key] = metadata
+            _save_keyring_index(keyring_module, index)
+            _VAULT_STORE[key] = (metadata, "")
+            return value
 
     env_value = os.getenv(key)
     if env_value:
@@ -126,16 +207,29 @@ def get_secret(key: str, accessor: str = "system") -> Optional[str]:
 def get_secret_metadata(key: str) -> Optional[SecretMetadata]:
     if key in _VAULT_STORE:
         return _VAULT_STORE[key][0]
+    keyring_module = _get_keyring_module()
+    if keyring_module is not None:
+        return _load_keyring_index(keyring_module).get(key)
     return None
 
 
 def rotate_secret(key: str, new_value: str, rotated_by: str = "system") -> Optional[SecretMetadata]:
-    if key not in _VAULT_STORE:
+    metadata = get_secret_metadata(key)
+    if metadata is None:
         return None
-    metadata, _ = _VAULT_STORE[key]
-    obfuscated = _obfuscate(new_value)
     metadata.rotated_at = datetime.now(timezone.utc).isoformat()
-    _VAULT_STORE[key] = (metadata, obfuscated)
+    if metadata.provider == SecretProvider.KEYRING:
+        keyring_module = _get_keyring_module()
+        if keyring_module is None:
+            return None
+        keyring_module.set_password(_KEYRING_SERVICE_NAME, key, new_value)
+        index = _load_keyring_index(keyring_module)
+        index[key] = metadata
+        _save_keyring_index(keyring_module, index)
+        _VAULT_STORE[key] = (metadata, "")
+    else:
+        obfuscated = _obfuscate(new_value)
+        _VAULT_STORE[key] = (metadata, obfuscated)
     _record_access(key, rotated_by, "rotate")
     logger.info("Secret '%s' rotiert von %s", key, rotated_by)
     return metadata
@@ -143,14 +237,42 @@ def rotate_secret(key: str, new_value: str, rotated_by: str = "system") -> Optio
 
 def delete_secret(key: str, deleted_by: str = "system") -> bool:
     if key in _VAULT_STORE:
+        metadata, _ = _VAULT_STORE[key]
+        if metadata.provider == SecretProvider.KEYRING:
+            keyring_module = _get_keyring_module()
+            if keyring_module is not None:
+                try:
+                    keyring_module.delete_password(_KEYRING_SERVICE_NAME, key)
+                except Exception:
+                    pass
+                index = _load_keyring_index(keyring_module)
+                index.pop(key, None)
+                _save_keyring_index(keyring_module, index)
         del _VAULT_STORE[key]
         _record_access(key, deleted_by, "delete")
         return True
+    keyring_module = _get_keyring_module()
+    if keyring_module is not None:
+        value = keyring_module.get_password(_KEYRING_SERVICE_NAME, key)
+        if value is not None:
+            try:
+                keyring_module.delete_password(_KEYRING_SERVICE_NAME, key)
+            except Exception:
+                pass
+            index = _load_keyring_index(keyring_module)
+            index.pop(key, None)
+            _save_keyring_index(keyring_module, index)
+            _record_access(key, deleted_by, "delete")
+            return True
     return False
 
 
 def list_secrets() -> list[SecretMetadata]:
-    return [metadata for metadata, _ in _VAULT_STORE.values()]
+    combined: dict[str, SecretMetadata] = {metadata.key: metadata for metadata, _ in _VAULT_STORE.values()}
+    keyring_module = _get_keyring_module()
+    if keyring_module is not None:
+        combined.update(_load_keyring_index(keyring_module))
+    return list(combined.values())
 
 
 def get_access_log(limit: int = 50) -> list[dict[str, Any]]:
