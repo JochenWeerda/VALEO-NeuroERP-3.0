@@ -3,9 +3,7 @@ Webhook management endpoints (l3c-webhook)
 GET/POST/DEL for webhook registrations + event areas.
 """
 
-import ipaddress
 from typing import Optional
-from urllib.parse import urlparse
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, HttpUrl, field_validator
@@ -13,17 +11,26 @@ from sqlalchemy.orm import Session
 
 from ....core.config import settings
 from ....core.database import get_db
+from ....core.outbound_security import validate_outbound_http_target
 from ....infrastructure.models import WebhookRegistration
-from ..schemas.base import PaginatedResponse, BaseSchema
+from ..schemas.base import BaseSchema, PaginatedResponse
 
 router = APIRouter()
 DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
-# Pre-defined event areas matching L3-Connect
 EVENT_AREAS = [
-    "auftrag", "bestellung", "kunde", "artikel",
-    "lieferschein", "rechnung", "inventur", "lager",
-    "pickliste", "wiegeschein", "nve", "stammdaten",
+    "auftrag",
+    "bestellung",
+    "kunde",
+    "artikel",
+    "lieferschein",
+    "rechnung",
+    "inventur",
+    "lager",
+    "pickliste",
+    "wiegeschein",
+    "nve",
+    "stammdaten",
 ]
 
 
@@ -41,21 +48,8 @@ class WebhookCreate(BaseModel):
 
     @field_validator("url")
     @classmethod
-    def validate_webhook_url(cls, v):
-        parsed = urlparse(str(v))
-        if parsed.scheme not in ("http", "https"):
-            raise ValueError("Nur HTTP/HTTPS URLs erlaubt")
-        hostname = parsed.hostname or ""
-        try:
-            ip = ipaddress.ip_address(hostname)
-            if ip.is_private or ip.is_loopback or ip.is_link_local:
-                raise ValueError("Interne/Private IP-Adressen nicht erlaubt")
-        except ValueError as exc:
-            if hostname.replace(".", "").isdigit() or ":" in hostname:
-                raise exc
-            # hostname is a domain, not IP — check for localhost
-            if hostname in ("localhost", "127.0.0.1", "0.0.0.0", "::1"):
-                raise ValueError("Localhost nicht erlaubt als Webhook-Ziel")
+    def validate_webhook_url(cls, v: HttpUrl) -> HttpUrl:
+        validate_outbound_http_target(str(v))
         return v
 
 
@@ -80,8 +74,12 @@ async def list_webhooks(
     pages = max((total + limit - 1) // limit, 1)
     return PaginatedResponse[WebhookOut](
         items=[WebhookOut.model_validate(i) for i in items],
-        total=total, page=page, size=limit, pages=pages,
-        has_next=(skip + limit) < total, has_prev=skip > 0,
+        total=total,
+        page=page,
+        size=limit,
+        pages=pages,
+        has_next=(skip + limit) < total,
+        has_prev=skip > 0,
     )
 
 
@@ -99,6 +97,7 @@ async def register_webhook(
 ):
     """POST Registrieren"""
     from app.core.uuid7 import uuid7
+
     tid = tenant_id or DEFAULT_TENANT
     if payload.event_area not in EVENT_AREAS:
         raise HTTPException(400, f"Unknown event area: {payload.event_area}")

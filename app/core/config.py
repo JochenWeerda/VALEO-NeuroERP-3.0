@@ -101,6 +101,8 @@ class Settings(BaseSettings):
     HASHICORP_VAULT_TOKEN: Optional[str] = None
     HASHICORP_VAULT_MOUNT: str = "secret"
     HASHICORP_VAULT_PATH_PREFIX: str = "valeo-neuroerp"
+    OUTBOUND_HTTP_ALLOWED_HOSTS: List[str] = []
+    OUTBOUND_HTTP_ALLOWED_DOMAINS: List[str] = []
 
     # Feature Flags
     ENABLE_METRICS: bool = True
@@ -167,6 +169,19 @@ class Settings(BaseSettings):
                 if isinstance(modules, list)
             }
         raise ValueError("TENANT_MODULE_FLAGS must be dict or JSON object string")
+
+    @field_validator("OUTBOUND_HTTP_ALLOWED_HOSTS", "OUTBOUND_HTTP_ALLOWED_DOMAINS", mode="before")
+    @classmethod
+    def assemble_outbound_allowlists(
+        cls, v: Union[str, List[str]]
+    ) -> Union[List[str], str]:
+        if v is None or v == "":
+            return []
+        if isinstance(v, str) and not v.startswith("["):
+            return [i.strip() for i in v.split(",") if i.strip()]
+        if isinstance(v, (list, str)):
+            return v
+        raise ValueError(v)
 
     # External Services
     EMAIL_SMTP_SERVER: Optional[str] = None
