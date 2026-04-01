@@ -95,6 +95,12 @@ class Settings(BaseSettings):
     # SC-SECRETS-001: ENCRYPTION_KEY MUSS aus Umgebungsvariable geladen werden.
     ENCRYPTION_KEY: Optional[str] = None
     JWT_ALGORITHM: str = "HS256"
+    SECRET_PROVIDER: str = "env"
+    REQUIRE_EXTERNAL_SECRETS_IN_PRODUCTION: bool = True
+    HASHICORP_VAULT_ADDR: Optional[str] = None
+    HASHICORP_VAULT_TOKEN: Optional[str] = None
+    HASHICORP_VAULT_MOUNT: str = "secret"
+    HASHICORP_VAULT_PATH_PREFIX: str = "valeo-neuroerp"
 
     # Feature Flags
     ENABLE_METRICS: bool = True

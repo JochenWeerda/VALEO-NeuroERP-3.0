@@ -43,6 +43,9 @@ def _parse_args() -> argparse.Namespace:
     sub.add_parser("list", help="Gespeicherte Secret-Metadaten listen")
     sub.add_parser("health", help="Vault-Health anzeigen")
 
+    config_cmd = sub.add_parser("config", help="Aktive Secret-Konfiguration anzeigen")
+    config_cmd.add_argument("--json", action="store_true", help="Als JSON ausgeben")
+
     return parser.parse_args()
 
 
@@ -83,6 +86,19 @@ def main() -> int:
 
         if args.command == "health":
             print(json.dumps(check_health(), indent=2))
+            return 0
+
+        if args.command == "config":
+            from app.core.config import settings
+
+            payload = {
+                "secret_provider": settings.SECRET_PROVIDER,
+                "require_external_secrets_in_production": settings.REQUIRE_EXTERNAL_SECRETS_IN_PRODUCTION,
+                "hashicorp_vault_addr": settings.HASHICORP_VAULT_ADDR,
+                "hashicorp_vault_mount": settings.HASHICORP_VAULT_MOUNT,
+                "hashicorp_vault_path_prefix": settings.HASHICORP_VAULT_PATH_PREFIX,
+            }
+            print(json.dumps(payload, indent=2))
             return 0
     except RuntimeError as exc:
         print(str(exc), file=sys.stderr)
