@@ -8,11 +8,12 @@ import re
 import json
 from decimal import Decimal
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 
 from ....core.database import get_db
+from ....core.tenant import get_tenant_id
 from ....core.data_quality_enforcement import (
     build_dq_error_detail,
     evaluate_creditor_datensatz,
@@ -140,10 +141,13 @@ def _row_to_creditor(row) -> Creditor:
 @router.post("/", response_model=Creditor, status_code=201)
 async def create_creditor(
     payload: CreditorCreate,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Create a new creditor. Duplicate creditor_number per tenant is rejected."""
     try:
+        if payload.tenant_id != tenant_id:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Tenant mismatch")
         _validate_vat_id_format(payload.vat_id)
         _validate_iban(payload.iban)
         dq_result = evaluate_creditor_datensatz(_build_creditor_dq_datensatz(payload.model_dump()))
@@ -153,7 +157,7 @@ async def create_creditor(
             text(
                 "SELECT id FROM domain_erp.creditors WHERE creditor_number = :cn AND (tenant_id = :tid OR (tenant_id IS NULL AND :tid = 'system'))"
             ),
-            {"cn": payload.creditor_number, "tid": payload.tenant_id},
+            {"cn": payload.creditor_number, "tid": tenant_id},
         ).fetchone()
         if check:
             raise HTTPException(status_code=400, detail=f"Kreditor mit Nummer {payload.creditor_number} existiert bereits.")
@@ -171,7 +175,7 @@ async def create_creditor(
             ),
             {
                 "id": acc_id,
-                "tenant_id": payload.tenant_id,
+                "tenant_id": tenant_id,
                 "creditor_number": payload.creditor_number,
                 "company_name": payload.company_name,
                 "address": address_json,
@@ -182,9 +186,9 @@ async def create_creditor(
         db.commit()
         row = db.execute(
             text(
-                "SELECT id, tenant_id, creditor_number, name, address, payment_terms, current_balance, is_active, created_at, updated_at FROM domain_erp.creditors WHERE id = :id"
+                "SELECT id, tenant_id, creditor_number, name, address, payment_terms, current_balance, is_active, created_at, updated_at FROM domain_erp.creditors WHERE id = :id AND (tenant_id = :tenant_id OR (tenant_id IS NULL AND :tenant_id = 'system'))"
             ),
-            {"id": acc_id},
+            {"id": acc_id, "tenant_id": tenant_id},
         ).fetchone()
         return _row_to_creditor(row)
     except HTTPException:
@@ -196,18 +200,17 @@ async def create_creditor(
 
 @router.get("/", response_model=PaginatedResponse[Creditor])
 async def list_creditors(
-    tenant_id: Optional[str] = Query(None),
     is_active: Optional[bool] = Query(None),
     search: Optional[str] = Query(None),
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """List creditors with pagination and optional filters."""
     try:
-        tid = tenant_id or "system"
         where = ["(tenant_id = :tenant_id OR (tenant_id IS NULL AND :tenant_id = 'system'))"]
-        params = {"tenant_id": tid}
+        params = {"tenant_id": tenant_id}
         if is_active is not None:
             where.append("is_active = :is_active")
             params["is_active"] = is_active
@@ -246,14 +249,15 @@ async def list_creditors(
 @router.get("/{creditor_id}", response_model=Creditor)
 async def get_creditor(
     creditor_id: str,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Get creditor by ID."""
     row = db.execute(
         text(
-            "SELECT id, tenant_id, creditor_number, name, address, payment_terms, current_balance, is_active, created_at, updated_at FROM domain_erp.creditors WHERE id = :id"
+            "SELECT id, tenant_id, creditor_number, name, address, payment_terms, current_balance, is_active, created_at, updated_at FROM domain_erp.creditors WHERE id = :id AND (tenant_id = :tenant_id OR (tenant_id IS NULL AND :tenant_id = 'system'))"
         ),
-        {"id": creditor_id},
+        {"id": creditor_id, "tenant_id": tenant_id},
     ).fetchone()
     if not row:
         raise HTTPException(status_code=404, detail="Kreditor nicht gefunden")
@@ -264,6 +268,7 @@ async def get_creditor(
 async def update_creditor(
     creditor_id: str,
     payload: CreditorUpdate,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Update creditor."""
@@ -271,8 +276,10 @@ async def update_creditor(
         _validate_vat_id_format(payload.vat_id)
         _validate_iban(payload.iban)
         existing = db.execute(
-            text("SELECT id, name, address FROM domain_erp.creditors WHERE id = :id"),
-            {"id": creditor_id},
+            text(
+                "SELECT id, name, address FROM domain_erp.creditors WHERE id = :id AND (tenant_id = :tenant_id OR (tenant_id IS NULL AND :tenant_id = 'system'))"
+            ),
+            {"id": creditor_id, "tenant_id": tenant_id},
         ).fetchone()
         if not existing:
             raise HTTPException(status_code=404, detail="Kreditor nicht gefunden")
@@ -285,8 +292,10 @@ async def update_creditor(
             "tax_number": address.get("tax_number"),
         }
         creditor_number_row = db.execute(
-            text("SELECT creditor_number FROM domain_erp.creditors WHERE id = :id"),
-            {"id": creditor_id},
+            text(
+                "SELECT creditor_number FROM domain_erp.creditors WHERE id = :id AND (tenant_id = :tenant_id OR (tenant_id IS NULL AND :tenant_id = 'system'))"
+            ),
+            {"id": creditor_id, "tenant_id": tenant_id},
         ).fetchone()
         effective_data["creditor_number"] = creditor_number_row[0] if creditor_number_row else None
         if payload.contact_person is not None:
@@ -335,6 +344,7 @@ async def update_creditor(
         set_parts = ["address = :address::jsonb", "payment_terms = :payment_terms", "updated_at = NOW()"]
         params_update: dict = {
             "id": creditor_id,
+            "tenant_id": tenant_id,
             "address": json.dumps(address),
             "payment_terms": f"{payment_terms_days}_days",
         }
@@ -345,15 +355,17 @@ async def update_creditor(
             set_parts.append("is_active = :is_active")
             params_update["is_active"] = payload.is_active
         db.execute(
-            text(f"UPDATE domain_erp.creditors SET {', '.join(set_parts)} WHERE id = :id"),
+            text(
+                f"UPDATE domain_erp.creditors SET {', '.join(set_parts)} WHERE id = :id AND (tenant_id = :tenant_id OR (tenant_id IS NULL AND :tenant_id = 'system'))"
+            ),
             params_update,
         )
         db.commit()
         row = db.execute(
             text(
-                "SELECT id, tenant_id, creditor_number, name, address, payment_terms, current_balance, is_active, created_at, updated_at FROM domain_erp.creditors WHERE id = :id"
+                "SELECT id, tenant_id, creditor_number, name, address, payment_terms, current_balance, is_active, created_at, updated_at FROM domain_erp.creditors WHERE id = :id AND (tenant_id = :tenant_id OR (tenant_id IS NULL AND :tenant_id = 'system'))"
             ),
-            {"id": creditor_id},
+            {"id": creditor_id, "tenant_id": tenant_id},
         ).fetchone()
         return _row_to_creditor(row)
     except HTTPException:
@@ -366,11 +378,15 @@ async def update_creditor(
 @router.get("/{creditor_id}/balance", response_model=dict)
 async def get_creditor_balance(
     creditor_id: str,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """OP-Saldo eines Kreditors: offener Betrag, Anzahl OPs, ältester OP."""
     existing = db.execute(
-        text("SELECT id FROM domain_erp.creditors WHERE id = :id"), {"id": creditor_id}
+        text(
+            "SELECT id FROM domain_erp.creditors WHERE id = :id AND (tenant_id = :tenant_id OR (tenant_id IS NULL AND :tenant_id = 'system'))"
+        ),
+        {"id": creditor_id, "tenant_id": tenant_id},
     ).fetchone()
     if not existing:
         raise HTTPException(status_code=404, detail="Kreditor nicht gefunden")
@@ -399,11 +415,22 @@ async def get_creditor_balance(
 @router.delete("/{creditor_id}", status_code=204)
 async def delete_creditor(
     creditor_id: str,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Soft-delete creditor (set is_active = false)."""
-    existing = db.execute(text("SELECT id FROM domain_erp.creditors WHERE id = :id"), {"id": creditor_id}).fetchone()
+    existing = db.execute(
+        text(
+            "SELECT id FROM domain_erp.creditors WHERE id = :id AND (tenant_id = :tenant_id OR (tenant_id IS NULL AND :tenant_id = 'system'))"
+        ),
+        {"id": creditor_id, "tenant_id": tenant_id},
+    ).fetchone()
     if not existing:
         raise HTTPException(status_code=404, detail="Kreditor nicht gefunden")
-    db.execute(text("UPDATE domain_erp.creditors SET is_active = false, updated_at = NOW() WHERE id = :id"), {"id": creditor_id})
+    db.execute(
+        text(
+            "UPDATE domain_erp.creditors SET is_active = false, updated_at = NOW() WHERE id = :id AND (tenant_id = :tenant_id OR (tenant_id IS NULL AND :tenant_id = 'system'))"
+        ),
+        {"id": creditor_id, "tenant_id": tenant_id},
+    )
     db.commit()
