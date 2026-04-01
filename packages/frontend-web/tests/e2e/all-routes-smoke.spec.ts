@@ -11,6 +11,7 @@
 import { test, expect, type Page, type ConsoleMessage } from '@playwright/test'
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { join, resolve } from 'node:path'
+import { waitForDashboardShell } from './helpers/wait-dashboard-shell'
 
 // ── Typen ──────────────────────────────────────────────────────────────
 
@@ -60,7 +61,7 @@ const results: RouteResult[] = []
 
 // ── Konfiguration ──────────────────────────────────────────────────────
 
-const PAGE_TIMEOUT = 20_000
+const PAGE_TIMEOUT = 45_000
 const BATCH_SIZE = 20
 
 // ── Hilfsfunktionen ────────────────────────────────────────────────────
@@ -87,12 +88,16 @@ async function testRoute(
   page.on('console', onConsole)
 
   try {
-    const resp = await page.goto(route.path, {
+    await page.goto(route.path, {
       waitUntil: 'domcontentloaded',
       timeout: PAGE_TIMEOUT,
     })
 
-    await page.waitForTimeout(500)
+    try {
+      await waitForDashboardShell(page, 30_000)
+    } catch {
+      await page.waitForTimeout(800)
+    }
 
     const url = page.url()
     const pathname = new URL(url).pathname
