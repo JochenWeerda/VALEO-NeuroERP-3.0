@@ -42,18 +42,18 @@
 |-----------|-------|------------------|
 | `P0` | externer Produktions-Vault | lokales Keyring ist praktikabel fuer Dev, aber kein produktiver Secret-Store |
 | `P1` | weitere Auth-/Tenant-Router | die SAST-Triage nannte breite Endpunktflaechen; bisher nur die hoechst priorisierten Router sind hart gemacht |
-| `P1` | zentrale Egress-/SSRF-Policy | `SEC-012` haertet einen Endpunkt, aber noch keine zentrale Runtime-Regel fuer ausgehende Ziele |
-| `P1` | CI-Sicherheitslane | die Regressionen laufen lokal, aber noch nicht als verbindlicher Sicherheitsgate in jeder Pipeline |
-| `P2` | restliche Frontend-HTML-Pfade | ausserhalb der jetzt gefixten Print-/Exportpfade koennen weitere Browser-HTML-Templates existieren |
+| `P1` | zentrale Egress-/SSRF-Policy | durch `SEC-016` geschlossen |
+| `P1` | CI-Sicherheitslane | durch `SEC-017` geschlossen |
+| `P2` | restliche Frontend-HTML-Pfade | durch `SEC-018` inventarisiert und als Guard-Test abgesichert |
 | `P2` | Security-Observability | Verstoss- und Block-Events sind noch nicht als eigener Security-Dashboard-/Alerting-Pfad verdrahtet |
 
 ## Empfohlene Folge-Slices
 
 1. `SEC-014` Externer Vault Adapter + Startup-Fail-Fast
 2. `SEC-015` Weitere Auth-/Tenant-Router aus der SAST-Triage, jeweils einzeln und mit Dateibesitz
-3. `SEC-016` Zentrale SSRF-/Egress-Policy fuer Webhooks und externe HTTP-Executors
-4. `SEC-017` Security-Regressionen als feste CI-Lane
-5. `SEC-018` Restliche Frontend-Print-/HTML-Template-Pfade inventarisieren und haerten
+3. weiterer einzelner Backend-SAST-Slice mit klarem Dateibesitz
+4. Security-Observability fuer Block-/Violation-Events
+5. produktive Rollout-/Rotationsstrecke fuer den externen Vault
 
 ## Operative Regeln fuer die Folgephase
 
