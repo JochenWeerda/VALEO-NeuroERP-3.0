@@ -3,15 +3,18 @@ System Metrics API for AI Agents
 Provides real-time metrics for Auto-Scaling and Optimization
 """
 
-from fastapi import APIRouter, Depends
-from typing import Dict, Any, List
 from datetime import datetime, timedelta
-import psutil
 import logging
-from sqlalchemy.orm import Session
-from sqlalchemy import text
+from typing import Any, Dict, List
 
+from fastapi import APIRouter, Depends
+import psutil
+from sqlalchemy import text
+from sqlalchemy.orm import Session
+
+from app.auth.deps import User, get_current_user
 from app.core.database import get_db
+from app.core.tenant import get_tenant_id
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +22,10 @@ router = APIRouter()
 
 
 @router.get("/system")
-async def get_system_metrics() -> Dict[str, Any]:
+async def get_system_metrics(
+    current_user: User = Depends(get_current_user),
+    tenant_id: str = Depends(get_tenant_id),
+) -> Dict[str, Any]:
     """
     Real-time system metrics for AI-based optimization.
     
@@ -46,6 +52,8 @@ async def get_system_metrics() -> Dict[str, Any]:
         
         return {
             "timestamp": datetime.utcnow().isoformat(),
+            "tenant_id": tenant_id,
+            "user_id": current_user.get("sub", ""),
             "cpu": {
                 "percent": cpu_percent,
                 "count": cpu_count,
@@ -72,11 +80,20 @@ async def get_system_metrics() -> Dict[str, Any]:
         }
     except Exception as e:
         logger.error(f"Failed to collect system metrics: {e}")
-        return {"error": str(e), "timestamp": datetime.utcnow().isoformat()}
+        return {
+            "error": str(e),
+            "timestamp": datetime.utcnow().isoformat(),
+            "tenant_id": tenant_id,
+            "user_id": current_user.get("sub", ""),
+        }
 
 
 @router.get("/business")
-async def get_business_metrics(db: Session = Depends(get_db)) -> Dict[str, Any]:
+async def get_business_metrics(
+    current_user: User = Depends(get_current_user),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> Dict[str, Any]:
     """
     Business KPIs for AI-driven process optimization.
     
@@ -96,30 +113,39 @@ async def get_business_metrics(db: Session = Depends(get_db)) -> Dict[str, Any]:
         today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
         
         # Pending events (not yet published)
-        pending_count = db.query(OutboxEvent).filter(OutboxEvent.published == False).count()
+        pending_count = db.query(OutboxEvent).filter(  # noqa: E712
+            OutboxEvent.published == False,
+            OutboxEvent.tenant_id == tenant_id,
+        ).count()
         
         # Published today
-        published_today = db.query(OutboxEvent).filter(
+        published_today = db.query(OutboxEvent).filter(  # noqa: E712
             OutboxEvent.published == True,
-            OutboxEvent.published_at >= today_start
+            OutboxEvent.published_at >= today_start,
+            OutboxEvent.tenant_id == tenant_id,
         ).count()
         
         # Failed events (retries exceeded or stuck for > 24h)
         failed_count = db.query(OutboxEvent).filter(
-            (OutboxEvent.retry_count >= 3) | 
-            ((OutboxEvent.published == False) & (OutboxEvent.timestamp < now - timedelta(hours=24)))
+            OutboxEvent.tenant_id == tenant_id,
+            (OutboxEvent.retry_count >= 3)
+            | ((OutboxEvent.published == False) & (OutboxEvent.timestamp < now - timedelta(hours=24)))  # noqa: E712
         ).count()
         
         # Oldest pending event
         oldest_pending = db.query(OutboxEvent).filter(
-            OutboxEvent.published == False
+            OutboxEvent.published == False,  # noqa: E712
+            OutboxEvent.tenant_id == tenant_id,
         ).order_by(OutboxEvent.timestamp.asc()).first()
         
         # Events by type (for analysis)
         event_types = db.query(
             OutboxEvent.event_type,
             db.func.count(OutboxEvent.id).label('count')
-        ).filter(OutboxEvent.published == False).group_by(OutboxEvent.event_type).all()
+        ).filter(
+            OutboxEvent.published == False,  # noqa: E712
+            OutboxEvent.tenant_id == tenant_id,
+        ).group_by(OutboxEvent.event_type).all()
         
         event_bus_metrics = {
             "pending_events": pending_count,
@@ -133,16 +159,20 @@ async def get_business_metrics(db: Session = Depends(get_db)) -> Dict[str, Any]:
         workflow_metrics = {"active_workflows": 0, "pending_approvals": 0, "completed_today": 0}
         try:
             pending = db.execute(
-                text("SELECT COUNT(*) FROM domain_erp.ap_approval_requests WHERE status = 'pending'")
+                text(
+                    "SELECT COUNT(*) FROM domain_erp.ap_approval_requests "
+                    "WHERE status = 'pending' AND tenant_id = :tenant_id"
+                ),
+                {"tenant_id": tenant_id},
             ).scalar()
             workflow_metrics["pending_approvals"] = pending or 0
             workflow_metrics["active_workflows"] = pending or 0
             completed_today = db.execute(
                 text(
                     "SELECT COUNT(*) FROM domain_erp.ap_approvals "
-                    "WHERE approved_at >= :today"
+                    "WHERE approved_at >= :today AND tenant_id = :tenant_id"
                 ),
-                {"today": today_start},
+                {"today": today_start, "tenant_id": tenant_id},
             ).scalar()
             workflow_metrics["completed_today"] = completed_today or 0
         except Exception:
@@ -157,6 +187,8 @@ async def get_business_metrics(db: Session = Depends(get_db)) -> Dict[str, Any]:
         
         return {
             "timestamp": datetime.utcnow().isoformat(),
+            "tenant_id": tenant_id,
+            "user_id": current_user.get("sub", ""),
             "database": {
                 "pool_size": engine.pool.size(),
                 "connections_in_use": engine.pool.checkedin() + engine.pool.checkedout(),
@@ -169,11 +201,19 @@ async def get_business_metrics(db: Session = Depends(get_db)) -> Dict[str, Any]:
         }
     except Exception as e:
         logger.error(f"Failed to collect business metrics: {e}")
-        return {"error": str(e), "timestamp": datetime.utcnow().isoformat()}
+        return {
+            "error": str(e),
+            "timestamp": datetime.utcnow().isoformat(),
+            "tenant_id": tenant_id,
+            "user_id": current_user.get("sub", ""),
+        }
 
 
 @router.get("/optimization-signals")
-async def get_optimization_signals() -> Dict[str, Any]:
+async def get_optimization_signals(
+    current_user: User = Depends(get_current_user),
+    tenant_id: str = Depends(get_tenant_id),
+) -> Dict[str, Any]:
     """
     Optimization signals for AI Agents.
     
@@ -237,13 +277,20 @@ async def get_optimization_signals() -> Dict[str, Any]:
         
         return {
             "timestamp": datetime.utcnow().isoformat(),
+            "tenant_id": tenant_id,
+            "user_id": current_user.get("sub", ""),
             "signals": signals,
             "signal_count": len(signals),
             "overall_health": "critical" if any(s["severity"] == "critical" for s in signals) else "warning" if signals else "healthy"
         }
     except Exception as e:
         logger.error(f"Failed to generate optimization signals: {e}")
-        return {"error": str(e), "timestamp": datetime.utcnow().isoformat()}
+        return {
+            "error": str(e),
+            "timestamp": datetime.utcnow().isoformat(),
+            "tenant_id": tenant_id,
+            "user_id": current_user.get("sub", ""),
+        }
 
 
 def _generate_recommendations(event_metrics: Dict, workflow_metrics: Dict) -> List[str]:
