@@ -7,12 +7,13 @@ from typing import List, Optional
 from datetime import date, datetime
 from decimal import Decimal
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
 
 router = APIRouter(prefix="/accruals-provisions", tags=["finance", "closing"])
@@ -42,7 +43,7 @@ class AccrualItem(AccrualItemBase):
 async def list_accruals_provisions(
     period: Optional[str] = Query(None, description="Filter by period YYYY-MM"),
     accrual_type: Optional[str] = Query(None, description="Filter: rechnungsabgrenzungsposten or rueckstellung"),
-    tenant_id: str = Query("system"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """List accruals and provisions for a period."""
@@ -88,7 +89,7 @@ async def list_accruals_provisions(
 @router.post("", response_model=AccrualItem, status_code=201)
 async def create_accrual_provision(
     item: AccrualItemCreate,
-    tenant_id: str = Query("system"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Create accrual or provision entry (draft)."""
@@ -126,7 +127,7 @@ async def create_accrual_provision(
 @router.post("/{item_id}/post", response_model=dict)
 async def post_accrual_provision(
     item_id: str,
-    tenant_id: str = Query("system"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Post accrual/provision — creates GL journal entry."""
@@ -140,8 +141,8 @@ async def post_accrual_provision(
         raise HTTPException(status_code=400, detail="Already posted")
 
     full = db.execute(
-        text("SELECT * FROM domain_erp.accruals_provisions WHERE id = :id"),
-        {"id": item_id},
+        text("SELECT * FROM domain_erp.accruals_provisions WHERE id = :id AND tenant_id = :tid"),
+        {"id": item_id, "tid": tenant_id},
     ).fetchone()
     if not full:
         raise HTTPException(status_code=404, detail="Not found")
@@ -168,8 +169,8 @@ async def post_accrual_provision(
         },
     )
     db.execute(
-        text("UPDATE domain_erp.accruals_provisions SET status = 'posted' WHERE id = :id"),
-        {"id": item_id},
+        text("UPDATE domain_erp.accruals_provisions SET status = 'posted' WHERE id = :id AND tenant_id = :tid"),
+        {"id": item_id, "tid": tenant_id},
     )
     db.commit()
     return {"ok": True, "journal_entry_id": je_id}
