@@ -15,6 +15,7 @@ from typing import Any
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
+from app.core.outbound_security import validate_outbound_http_target
 from app.core.mcp_tool_contracts import MCPRequestPayloadMode, MCPToolContract
 
 logger = logging.getLogger(__name__)
@@ -91,10 +92,11 @@ class NeuroToolExecutionService:
         request_spec: dict[str, Any],
         context: dict[str, Any],
     ) -> dict[str, Any]:
-        base_url = str(context["external_base_url"]).rstrip("/")
         path = request_spec["path"]
-        url = f"{base_url}{path}" if path.startswith("/") else f"{base_url}/{path}"
         try:
+            base_url = validate_outbound_http_target(str(context["external_base_url"])).rstrip("/")
+            url = f"{base_url}{path}" if path.startswith("/") else f"{base_url}/{path}"
+            validate_outbound_http_target(url)
             response = self._request_external(
                 method=request_spec["method"],
                 url=url,
@@ -104,7 +106,11 @@ class NeuroToolExecutionService:
             )
         except Exception as exc:  # pragma: no cover - defensive boundary
             logger.warning("External tool execution failed for %s: %s", contract.tool_name, exc)
-            return self._fallback_result(contract, {**request_spec, "url": url}, f"transport_error: {exc}")
+            return self._fallback_result(
+                contract,
+                {**request_spec, "url": locals().get("url", f"<blocked>{path}")},
+                f"transport_error: {exc}",
+            )
 
         if response["status_code"] >= 400:
             return self._fallback_result(
