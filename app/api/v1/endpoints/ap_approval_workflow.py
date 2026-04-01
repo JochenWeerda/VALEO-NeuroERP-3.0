@@ -14,6 +14,7 @@ import logging
 from app.core.uuid7 import uuid7
 
 from ....core.database import get_db
+from app.core.tenant import get_tenant_id
 from app.core.ap_approval_status import (
     APPROVAL_STATUS_TO_DOCUMENT_STATUS,
     DOCUMENT_STATUS_TO_APPROVAL_STATUS,
@@ -166,10 +167,20 @@ def _write_approval_audit_log(
     db.add(entry)
 
 
+def _ensure_invoice_tenant_access(invoice: dict[str, Any] | None, tenant_id: str) -> dict[str, Any]:
+    if not invoice:
+        raise HTTPException(status_code=404, detail="AP Invoice not found")
+
+    invoice_tenant = str(invoice.get("tenantId") or invoice.get("tenant_id") or "").strip()
+    if invoice_tenant and invoice_tenant != tenant_id:
+        raise HTTPException(status_code=403, detail="Invoice belongs to a different tenant")
+    return invoice
+
+
 @router.get("/rules", response_model=List[ApprovalRuleResponse])
 async def list_approval_rules(
     active_only: bool = Query(True, description="Show only active rules"),
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -265,7 +276,7 @@ async def list_approval_rules(
 @router.post("/rules", response_model=ApprovalRuleResponse, status_code=201)
 async def create_approval_rule(
     rule: ApprovalRuleCreate,
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -275,7 +286,7 @@ async def create_approval_rule(
         rule_id = uuid7()
         
         import json
-        conditions_json = json.dumps([c.dict() for c in rule.conditions])
+        conditions_json = json.dumps([c.model_dump() for c in rule.conditions])
         roles_json = json.dumps(rule.approval_roles)
         
         insert_query = text("""
@@ -329,7 +340,7 @@ async def create_approval_rule(
 @router.post("/request", response_model=ApprovalStatusResponse)
 async def request_approval(
     request: ApprovalRequest,
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -339,10 +350,10 @@ async def request_approval(
         # Get invoice
         from app.documents.router_helpers import get_repository, get_from_store
         repo = get_repository(db)
-        invoice = get_from_store("ap_invoice", request.invoice_id, repo)
-        
-        if not invoice:
-            raise HTTPException(status_code=404, detail="AP Invoice not found")
+        invoice = _ensure_invoice_tenant_access(
+            get_from_store("ap_invoice", request.invoice_id, repo),
+            tenant_id,
+        )
         
         # Check if already approved
         if invoice.get("status") == "FREIGEGEBEN":
@@ -457,7 +468,7 @@ async def request_approval(
 @router.post("/approve", response_model=ApprovalStatusResponse)
 async def approve_invoice(
     action: ApprovalAction,
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -624,7 +635,7 @@ async def approve_invoice(
 @router.get("/status/{invoice_id}", response_model=ApprovalStatusResponse)
 async def get_approval_status(
     invoice_id: str,
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -649,10 +660,10 @@ async def get_approval_status(
             # No approval request - check invoice status
             from app.documents.router_helpers import get_repository, get_from_store
             repo = get_repository(db)
-            invoice = get_from_store("ap_invoice", invoice_id, repo)
-            
-            if not invoice:
-                raise HTTPException(status_code=404, detail="AP Invoice not found")
+            invoice = _ensure_invoice_tenant_access(
+                get_from_store("ap_invoice", invoice_id, repo),
+                tenant_id,
+            )
             
             invoice_status = str(invoice.get("status", "ENTWURF"))
             derived_status = DOCUMENT_STATUS_TO_APPROVAL_STATUS.get(invoice_status, "approved")
