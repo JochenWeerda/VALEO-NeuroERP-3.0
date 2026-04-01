@@ -15,8 +15,8 @@ from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from app.core.config import settings
 from app.core.database import get_db
+from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
 from app.core.fibu_audit import log_fibu_audit
 
@@ -24,7 +24,12 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/sales", tags=["sales", "credit-notes", "returns"])
 
-DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
+
+def _resolve_sales_payload_tenant(payload_tenant_id: Optional[str], tenant_id: str) -> str:
+    requested_tenant = (payload_tenant_id or "").strip()
+    if requested_tenant and requested_tenant != tenant_id:
+        raise HTTPException(status_code=403, detail="Payload belongs to a different tenant")
+    return tenant_id
 
 
 # ---------------------------------------------------------------------------
@@ -72,11 +77,11 @@ class CreditNoteOut(CreditNoteBase):
 async def create_credit_note(
     payload: CreditNoteCreate,
     request: Request,
-    tenant_id: str = Query(DEFAULT_TENANT),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Create a sales credit note (Gutschrift)."""
-    tid = payload.tenant_id or tenant_id
+    tid = _resolve_sales_payload_tenant(payload.tenant_id, tenant_id)
     cn_id = uuid7()
 
     total = sum(
@@ -138,7 +143,7 @@ async def create_credit_note(
 
 @router.get("/credit-notes", response_model=List[CreditNoteOut])
 async def list_credit_notes(
-    tenant_id: str = Query(DEFAULT_TENANT),
+    tenant_id: str = Depends(get_tenant_id),
     status: Optional[str] = None,
     customer_id: Optional[str] = None,
     db: Session = Depends(get_db),
@@ -180,13 +185,16 @@ async def list_credit_notes(
 async def post_credit_note(
     cn_id: str,
     request: Request,
-    tenant_id: str = Query(DEFAULT_TENANT),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Post a credit note — creates GL reversal entry and updates OP."""
     row = db.execute(
-        text("SELECT id, tenant_id, credit_note_number, customer_id, total_amount, status FROM domain_sales.sales_credit_notes WHERE id = :id"),
-        {"id": cn_id},
+        text(
+            "SELECT id, tenant_id, credit_note_number, customer_id, total_amount, status "
+            "FROM domain_sales.sales_credit_notes WHERE id = :id AND tenant_id = :tid"
+        ),
+        {"id": cn_id, "tid": tenant_id},
     ).fetchone()
     if not row:
         raise HTTPException(status_code=404, detail="Gutschrift nicht gefunden")
@@ -211,8 +219,11 @@ async def post_credit_note(
     )
 
     db.execute(
-        text("UPDATE domain_sales.sales_credit_notes SET status = 'posted', updated_at = NOW() WHERE id = :id"),
-        {"id": cn_id},
+        text(
+            "UPDATE domain_sales.sales_credit_notes SET status = 'posted', updated_at = NOW() "
+            "WHERE id = :id AND tenant_id = :tid"
+        ),
+        {"id": cn_id, "tid": tenant_id},
     )
     db.commit()
     log_fibu_audit(db, row[1], "post", "sales_credit_note", cn_id, {"total": float(total)}, request=request)
@@ -249,11 +260,11 @@ class ReturnOut(ReturnBase):
 @router.post("/returns", response_model=ReturnOut, status_code=201)
 async def create_return(
     payload: ReturnCreate,
-    tenant_id: str = Query(DEFAULT_TENANT),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Create a return/Retoure."""
-    tid = payload.tenant_id or tenant_id
+    tid = _resolve_sales_payload_tenant(payload.tenant_id, tenant_id)
     ret_id = uuid7()
     db.execute(
         text("""
@@ -279,7 +290,7 @@ async def create_return(
 
 @router.get("/returns", response_model=List[ReturnOut])
 async def list_returns(
-    tenant_id: str = Query(DEFAULT_TENANT),
+    tenant_id: str = Depends(get_tenant_id),
     status: Optional[str] = None,
     db: Session = Depends(get_db),
 ):
@@ -317,6 +328,7 @@ async def list_returns(
 async def update_return_status(
     return_id: str,
     new_status: str = Query(..., description="New status: open, processing, completed, cancelled"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Update return status."""
@@ -324,14 +336,17 @@ async def update_return_status(
     if new_status not in valid:
         raise HTTPException(status_code=400, detail=f"Status muss einer von {valid} sein")
     existing = db.execute(
-        text("SELECT id FROM domain_sales.sales_returns WHERE id = :id"),
-        {"id": return_id},
+        text("SELECT id FROM domain_sales.sales_returns WHERE id = :id AND tenant_id = :tid"),
+        {"id": return_id, "tid": tenant_id},
     ).fetchone()
     if not existing:
         raise HTTPException(status_code=404, detail="Retoure nicht gefunden")
     db.execute(
-        text("UPDATE domain_sales.sales_returns SET status = :s, updated_at = NOW() WHERE id = :id"),
-        {"id": return_id, "s": new_status},
+        text(
+            "UPDATE domain_sales.sales_returns SET status = :s, updated_at = NOW() "
+            "WHERE id = :id AND tenant_id = :tid"
+        ),
+        {"id": return_id, "s": new_status, "tid": tenant_id},
     )
     db.commit()
     return {"ok": True, "return_id": return_id, "status": new_status}

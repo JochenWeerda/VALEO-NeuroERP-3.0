@@ -14,6 +14,7 @@ import logging
 from app.core.uuid7 import uuid7
 from app.core.explainability import ExplainabilityView
 from app.core.policy_decisions import PolicyOverrideResolution
+from app.core.tenant import get_tenant_id
 
 from ....core.database import get_db
 
@@ -74,7 +75,7 @@ class VATReturnResponse(BaseModel):
 class VATReturnCalculationRequest(BaseModel):
     """Request to calculate VAT return from journal entries"""
     period: str = Field(..., description="Period in YYYY-MM format")
-    tenant_id: str = Field(default="system")
+    tenant_id: Optional[str] = Field(default=None)
 
 
 class ELSTERExportRequest(BaseModel):
@@ -144,15 +145,24 @@ def _build_vat_return_response(row, *, positions_data: list[dict[str, Any]]) -> 
     )
 
 
+def _resolve_vat_request_tenant(payload_tenant_id: Optional[str], tenant_id: str) -> str:
+    requested_tenant = (payload_tenant_id or "").strip()
+    if requested_tenant and requested_tenant != tenant_id:
+        raise HTTPException(status_code=403, detail="VAT return request belongs to a different tenant")
+    return tenant_id
+
+
 @router.post("/calculate", response_model=VATReturnResponse)
 async def calculate_vat_return(
     request: VATReturnCalculationRequest,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
     Calculate VAT return from journal entries for a period.
     """
     try:
+        effective_tenant_id = _resolve_vat_request_tenant(request.tenant_id, tenant_id)
         # Get journal entries for period
         period_start = f"{request.period}-01"
         period_end = f"{request.period}-31"
@@ -165,7 +175,7 @@ async def calculate_vat_return(
         """)
         
         tax_keys_rows = db.execute(tax_keys_query, {
-            "tenant_id": request.tenant_id
+            "tenant_id": effective_tenant_id
         }).fetchall()
         
         # Build tax key lookup
@@ -195,7 +205,7 @@ async def calculate_vat_return(
         """)
         
         journal_rows = db.execute(journal_query, {
-            "tenant_id": request.tenant_id,
+            "tenant_id": effective_tenant_id,
             "period": request.period
         }).fetchall()
         
@@ -277,7 +287,7 @@ async def calculate_vat_return(
         return_id = uuid7()
         
         import json
-        positions_json = json.dumps([p.dict() for p in positions])
+        positions_json = json.dumps([p.model_dump() for p in positions])
         
         insert_query = text("""
             INSERT INTO domain_erp.vat_returns
@@ -296,7 +306,7 @@ async def calculate_vat_return(
         
         row = db.execute(insert_query, {
             "id": return_id,
-            "tenant_id": request.tenant_id,
+            "tenant_id": effective_tenant_id,
             "period": request.period,
             "return_type": "monthly",
             "taxpayer_name": "Company Name",  # Should come from company master data
@@ -317,6 +327,8 @@ async def calculate_vat_return(
         
         return _build_vat_return_response(row, positions_data=positions_data)
         
+    except HTTPException:
+        raise
     except Exception as e:
         db.rollback()
         logger.error(f"Error calculating VAT return: {e}")
@@ -326,7 +338,7 @@ async def calculate_vat_return(
 @router.get("/{return_id}", response_model=VATReturnResponse)
 async def get_vat_return(
     return_id: str,
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -365,7 +377,7 @@ async def get_vat_return(
 @router.get("/export/{return_id}")
 async def export_vat_return_download(
     return_id: str,
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """
@@ -377,7 +389,7 @@ async def export_vat_return_download(
 @router.get("/{return_id}/elster-xml")
 async def export_elster_xml(
     return_id: str,
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -420,7 +432,7 @@ async def export_elster_xml(
 @router.post("/{return_id}/validate")
 async def validate_vat_return(
     return_id: str,
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -508,7 +520,7 @@ async def validate_vat_return(
 @router.get("", response_model=List[VATReturnResponse])
 async def list_vat_returns(
     period: Optional[str] = Query(None, description="Filter by period (YYYY-MM)"),
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -552,7 +564,7 @@ async def list_vat_returns(
 async def approve_vat_return(
     return_id: str,
     request: VATReturnApprovalRequest,
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     vat_return = await get_vat_return(return_id, tenant_id, db)
@@ -594,7 +606,7 @@ async def approve_vat_return(
 async def submit_vat_return(
     return_id: str,
     request: VATReturnSubmitRequest,
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     vat_return = await get_vat_return(return_id, tenant_id, db)
