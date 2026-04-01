@@ -98,6 +98,30 @@ Workflow: `.github/workflows/security-agent.yml`
 - Manuell: Actions > Security Agent > Run workflow
 - Ergebnisse: Artifacts > security-agent-unified
 
+## Feste Regression-Lane
+
+Seit `SEC-017` enthaelt derselbe Workflow zusaetzlich eine feste Security-Regression-Lane.
+Sie ist kein Scanner-Ersatz, sondern prueft die bereits behobenen P0/P1-Pfade direkt gegen
+Regressionen im Code.
+
+Backend:
+
+```bash
+pytest tests/test_security_*.py tests/test_secrets_vault.py tests/test_neuro_tool_execution.py -q --no-cov
+```
+
+Frontend:
+
+```bash
+pnpm --dir packages/frontend-web exec vitest run src/__tests__/lib/export-utils.test.ts
+```
+
+Dokumentation:
+
+```bash
+node scripts/docs-governance-check.cjs
+```
+
 ## Custom Semgrep Rules
 
 `semgrep-rules.yml` enthaelt projektspezifische Regeln:
