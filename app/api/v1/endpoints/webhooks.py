@@ -3,10 +3,12 @@ Webhook management endpoints (l3c-webhook)
 GET/POST/DEL for webhook registrations + event areas.
 """
 
+import ipaddress
 from typing import Optional
+from urllib.parse import urlparse
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel
+from pydantic import BaseModel, HttpUrl, field_validator
 from sqlalchemy.orm import Session
 
 from ....core.config import settings
@@ -33,9 +35,28 @@ class WebhookOut(BaseSchema):
 
 
 class WebhookCreate(BaseModel):
-    url: str
+    url: HttpUrl
     event_area: str
     secret: Optional[str] = None
+
+    @field_validator("url")
+    @classmethod
+    def validate_webhook_url(cls, v):
+        parsed = urlparse(str(v))
+        if parsed.scheme not in ("http", "https"):
+            raise ValueError("Nur HTTP/HTTPS URLs erlaubt")
+        hostname = parsed.hostname or ""
+        try:
+            ip = ipaddress.ip_address(hostname)
+            if ip.is_private or ip.is_loopback or ip.is_link_local:
+                raise ValueError("Interne/Private IP-Adressen nicht erlaubt")
+        except ValueError as exc:
+            if hostname.replace(".", "").isdigit() or ":" in hostname:
+                raise exc
+            # hostname is a domain, not IP — check for localhost
+            if hostname in ("localhost", "127.0.0.1", "0.0.0.0", "::1"):
+                raise ValueError("Localhost nicht erlaubt als Webhook-Ziel")
+        return v
 
 
 class EventAreaOut(BaseModel):
@@ -83,7 +104,7 @@ async def register_webhook(
         raise HTTPException(400, f"Unknown event area: {payload.event_area}")
     obj = WebhookRegistration(
         id=uuid7(),
-        url=payload.url,
+        url=str(payload.url),
         event_area=payload.event_area,
         secret=payload.secret,
         tenant_id=tid,

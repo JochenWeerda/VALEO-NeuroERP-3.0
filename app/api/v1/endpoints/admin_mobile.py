@@ -17,6 +17,24 @@ from app.core.tenant import get_tenant_id
 
 router = APIRouter()
 
+# --- SQL-Injection prevention: only whitelisted identifiers may be interpolated ---
+_ALLOWED_TABLES = frozenset({
+    "domain_shared.admin_stations",
+    "domain_shared.admin_routing_rules",
+    "domain_shared.admin_scan_profiles",
+    "domain_shared.admin_mobile_devices",
+    "domain_shared.admin_connector_configs",
+})
+
+_ALLOWED_ORDER_CLAUSES = frozenset({
+    "station_code ASC",
+    "priority ASC, rule_code ASC",
+    "profile_code ASC",
+    "device_code ASC",
+    "connector_type ASC, config_code ASC",
+    "id",
+})
+
 
 class JsonPayload(BaseModel):
     data: dict[str, Any] = Field(default_factory=dict)
@@ -33,6 +51,10 @@ def _jsonable(row: dict[str, Any]) -> dict[str, Any]:
 
 
 def _list_rows(db: Session, table: str, tenant_id: str, order_by: str, limit: int = 500) -> list[dict[str, Any]]:
+    if table not in _ALLOWED_TABLES:
+        raise ValueError(f"Table '{table}' is not in the allowed tables whitelist")
+    if order_by not in _ALLOWED_ORDER_CLAUSES:
+        order_by = "id"
     rows = db.execute(
         text(f"SELECT * FROM {table} WHERE tenant_id = :tenant_id ORDER BY {order_by} LIMIT :limit"),
         {"tenant_id": tenant_id, "limit": limit},

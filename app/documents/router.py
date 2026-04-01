@@ -223,7 +223,7 @@ async def upsert_customer_inquiry(doc: CustomerInquiry, db: Session = Depends(ge
         raise
     except Exception as e:
         logger.error(f"Failed to save customer inquiry: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Interner Fehler bei Dokumentverarbeitung")
 
 
 @router.post("/sales_offer")
@@ -269,7 +269,7 @@ async def upsert_sales_offer(doc: SalesOffer, db: Session = Depends(get_db)) -> 
         raise
     except Exception as e:
         logger.error(f"Failed to save sales offer: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Interner Fehler bei Dokumentverarbeitung")
 
 
 @router.post("/sales_order")
@@ -280,7 +280,7 @@ async def upsert_sales_order(doc: SalesOrder, db: Session = Depends(get_db)) -> 
         return save_to_store("sales_order", doc.number, doc.model_dump(), repo)
     except Exception as e:
         logger.error(f"Failed to save sales order: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Interner Fehler bei Dokumentverarbeitung")
 
 
 @router.post("/sales_delivery")
@@ -294,7 +294,7 @@ async def upsert_sales_delivery(doc: SalesDelivery, db: Session = Depends(get_db
         return {"ok": True, "number": doc.number}
     except Exception as e:
         logger.error(f"Failed to save sales delivery: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Interner Fehler bei Dokumentverarbeitung")
 
 
 @router.post("/sales_invoice")
@@ -340,7 +340,7 @@ async def upsert_sales_invoice(doc: SalesInvoice, db: Session = Depends(get_db))
         raise
     except Exception as e:
         logger.error(f"Failed to save sales invoice: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Interner Fehler bei Dokumentverarbeitung")
 
 
 @router.post("/payment_received")
@@ -374,7 +374,7 @@ async def upsert_payment_received(doc: PaymentReceived, db: Session = Depends(ge
         raise
     except Exception as e:
         logger.error(f"Failed to save payment received: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Interner Fehler bei Dokumentverarbeitung")
 
 
 # --- Purchase Endpoints ---
@@ -412,7 +412,7 @@ async def upsert_purchase_request(doc: PurchaseRequest, db: Session = Depends(ge
         raise
     except Exception as e:
         logger.error(f"Failed to save purchase request: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Interner Fehler bei Dokumentverarbeitung")
 
 
 @router.post("/purchase_offer")
@@ -458,7 +458,7 @@ async def upsert_purchase_offer(doc: PurchaseOffer, db: Session = Depends(get_db
         raise
     except Exception as e:
         logger.error(f"Failed to save purchase offer: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Interner Fehler bei Dokumentverarbeitung")
 
 
 @router.post("/purchase_order")
@@ -505,7 +505,7 @@ async def upsert_purchase_order(doc: PurchaseOrder, db: Session = Depends(get_db
         raise
     except Exception as e:
         logger.error(f"Failed to save purchase order: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Interner Fehler bei Dokumentverarbeitung")
 
 
 # --- GET Endpoints ---
@@ -548,7 +548,7 @@ async def list_documents(doc_type: str, skip: int = 0, limit: int = 100) -> dict
         }
     except Exception as e:
         logger.error(f"Failed to list documents: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Interner Fehler bei Dokumentverarbeitung")
 
 
 @router.get("/{doc_type}/{doc_number}")
@@ -564,7 +564,7 @@ async def get_document(doc_type: str, doc_number: str, db: Session = Depends(get
         raise
     except Exception as e:
         logger.error(f"Failed to get document: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Interner Fehler bei Dokumentverarbeitung")
 
 
 @router.put("/{doc_type}/{doc_number}")
@@ -594,7 +594,7 @@ async def update_document(doc_type: str, doc_number: str, doc: dict, db: Session
         raise
     except Exception as e:
         logger.error(f"Failed to update document: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Interner Fehler bei Dokumentverarbeitung")
 
 
 @router.delete("/{doc_type}/{doc_number}")
@@ -627,7 +627,7 @@ async def delete_document(doc_type: str, doc_number: str, db: Session = Depends(
         raise
     except Exception as e:
         logger.error(f"Failed to delete document: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Interner Fehler bei Dokumentverarbeitung")
 
 
 @router.delete("/{doc_type}")
@@ -664,7 +664,7 @@ async def bulk_delete_documents(doc_type: str, numbers: List[str] = Query(...)) 
         }
     except Exception as e:
         logger.error(f"Failed to bulk delete documents: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Interner Fehler bei Dokumentverarbeitung")
 
 
 # --- Belegfluss-Engine ---
@@ -846,7 +846,7 @@ async def create_follow_up(req: FollowRequest) -> dict:
         return {"ok": True, **out}
     except Exception as e:
         logger.error(f"Failed to create follow-up: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Interner Fehler bei Dokumentverarbeitung")
 
 
 # --- Lookup-Endpoints (für Autocomplete) ---
@@ -1013,7 +1013,7 @@ async def get_sales_performance_analytics(
         }
     except Exception as e:
         logger.error(f"Failed to get sales performance analytics: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Interner Fehler bei Dokumentverarbeitung")
 
 
 @router.get("/analytics/customer-analytics")
@@ -1082,7 +1082,7 @@ async def get_customer_analytics(
         }
     except Exception as e:
         logger.error(f"Failed to get customer analytics: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Interner Fehler bei Dokumentverarbeitung")
 
 
 @router.get("/analytics/product-analytics")
@@ -1146,7 +1146,7 @@ async def get_product_analytics(
         }
     except Exception as e:
         logger.error(f"Failed to get product analytics: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Interner Fehler bei Dokumentverarbeitung")
 
 
 @router.get("/analytics/financial-analytics")
@@ -1231,7 +1231,7 @@ async def get_financial_analytics(
         }
     except Exception as e:
         logger.error(f"Failed to get financial analytics: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Interner Fehler bei Dokumentverarbeitung")
 
 
 @router.get("/analytics/sales-delivery-sustainability")
@@ -1255,7 +1255,7 @@ async def get_sales_delivery_sustainability(
         }
     except Exception as e:
         logger.error(f"Failed to aggregate sales delivery sustainability analytics: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Interner Fehler bei Dokumentverarbeitung")
 
 
 @router.get("/analytics/sales-delivery-sustainability/export.csv")
@@ -1302,7 +1302,7 @@ async def export_sales_delivery_sustainability_csv(
         )
     except Exception as e:
         logger.error(f"Failed to export sales delivery sustainability CSV: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Interner Fehler bei Dokumentverarbeitung")
 
 
 @router.get("/analytics/sales-delivery-sustainability/export.pdf")
@@ -1390,7 +1390,7 @@ async def export_sales_delivery_sustainability_pdf(
         )
     except Exception as e:
         logger.error(f"Failed to export sales delivery sustainability PDF: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Interner Fehler bei Dokumentverarbeitung")
 
 
 @router.get("/analytics/trend-analytics")
@@ -1469,6 +1469,6 @@ async def get_trend_analytics(
         }
     except Exception as e:
         logger.error(f"Failed to get trend analytics: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Interner Fehler bei Dokumentverarbeitung")
 
 
