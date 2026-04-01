@@ -1273,6 +1273,10 @@
       "path": "portal/naehrstoffbilanzen"
     },
     {
+      "module": "@/pages/portal/rationsoptimierung",
+      "path": "portal/rationsoptimierung"
+    },
+    {
       "module": "@/pages/portal/rechnungen",
       "path": "portal/rechnungen"
     },

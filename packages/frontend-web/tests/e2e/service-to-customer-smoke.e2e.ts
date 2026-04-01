@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { waitForDashboardShell } from './helpers/wait-dashboard-shell'
 
 /**
  * Smoke: Service-to-Customer Kernpfad (Liste, Field-Service inkl. Neu, Flow-Spine).
@@ -15,8 +16,8 @@ const SERVICE_ROUTES: { path: string }[] = [
 test.describe('Service-to-Customer Smoke', () => {
   for (const route of SERVICE_ROUTES) {
     test(`route ${route.path} lädt ohne Dashboard-Fallback`, async ({ page }) => {
-      await page.goto(route.path)
-      await page.waitForLoadState('domcontentloaded')
+      await page.goto(route.path, { waitUntil: 'domcontentloaded' })
+      await waitForDashboardShell(page)
 
       await expect(page.getByRole('heading', { name: /app starter/i })).toHaveCount(0)
       await expect(page.getByText(/fehler beim laden der seite/i)).toHaveCount(0)
@@ -30,8 +31,10 @@ test.describe('Service-to-Customer Smoke', () => {
   }
 
   test('Field-Service Bearbeiten-Route (Demo-ID) — Shell ohne Dashboard-Fallback', async ({ page }) => {
-    await page.goto('/agribusiness/field-service-tasks/fst-seed-001/bearbeiten')
-    await page.waitForLoadState('domcontentloaded')
+    await page.goto('/agribusiness/field-service-tasks/fst-seed-001/bearbeiten', {
+      waitUntil: 'domcontentloaded',
+    })
+    await waitForDashboardShell(page)
 
     await expect(page.getByRole('heading', { name: /app starter/i })).toHaveCount(0)
     await expect(page.getByText(/fehler beim laden der seite/i)).toHaveCount(0)

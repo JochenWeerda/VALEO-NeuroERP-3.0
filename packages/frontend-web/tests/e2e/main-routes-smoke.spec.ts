@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { waitForDashboardShell } from './helpers/wait-dashboard-shell'
 
 type RouteCheck = {
   path: string
@@ -28,8 +29,8 @@ const MAIN_ROUTES: RouteCheck[] = [
 test.describe('Main Routes Smoke (no dashboard fallback)', () => {
   for (const route of MAIN_ROUTES) {
     test(`route ${route.path} renders target page`, async ({ page }) => {
-      await page.goto(route.path)
-      await page.waitForLoadState('domcontentloaded')
+      await page.goto(route.path, { waitUntil: 'domcontentloaded' })
+      await waitForDashboardShell(page)
 
       // Hard guard against known routing failure: page falls back to App Starter dashboard.
       await expect(page.getByRole('heading', { name: /app starter/i })).toHaveCount(0)
@@ -60,8 +61,7 @@ test.describe('Auth and NotFound routes', () => {
       localStorage.clear()
       sessionStorage.clear()
     })
-    await page.goto('/login')
-    await page.waitForLoadState('domcontentloaded')
+    await page.goto('/login', { waitUntil: 'domcontentloaded', timeout: 60_000 })
 
     // Login-Seite: Titel/Beschreibung/Button (oder Redirect zu / bei bereits gültiger Session)
     const loginContent = page.getByText(/valeo neuroerp|melden sie sich|sso anmelden|weiterleitung/i).first()
@@ -79,8 +79,8 @@ test.describe('Auth and NotFound routes', () => {
   })
 
   test('unknown route renders 404 page', async ({ page }) => {
-    await page.goto('/this-route-does-not-exist')
-    await page.waitForLoadState('domcontentloaded')
+    await page.goto('/this-route-does-not-exist-xyz', { waitUntil: 'domcontentloaded' })
+    await waitForDashboardShell(page)
 
     await expect(page.getByRole('heading', { name: /404/i })).toBeVisible()
     await expect(page.getByText(/seite nicht gefunden/i)).toBeVisible()

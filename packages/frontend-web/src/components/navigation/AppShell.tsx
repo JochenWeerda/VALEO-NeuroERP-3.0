@@ -181,7 +181,12 @@ export function AppShell({ children, enableCommandPalette = true }: AppShellProp
           />
         </Suspense>
 
-        <main className="flex-1 overflow-y-auto overflow-x-hidden" role="main" aria-label="Main content">
+        <main
+          className="flex-1 overflow-y-auto overflow-x-hidden"
+          role="main"
+          aria-label="Main content"
+          data-testid="page-root"
+        >
           {children}
         </main>
       </div>
