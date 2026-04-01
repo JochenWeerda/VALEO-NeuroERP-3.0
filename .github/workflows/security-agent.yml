@@ -152,7 +152,10 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Frontend security regression suite
-        run: pnpm --dir packages/frontend-web exec vitest run src/__tests__/lib/export-utils.test.ts
+        run: |
+          pnpm --dir packages/frontend-web exec vitest run \
+            src/__tests__/lib/export-utils.test.ts \
+            src/__tests__/security/print-html-sinks.test.ts
 
       - name: Security docs governance
         run: node scripts/docs-governance-check.cjs

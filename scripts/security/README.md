@@ -113,7 +113,9 @@ pytest tests/test_security_*.py tests/test_secrets_vault.py tests/test_neuro_too
 Frontend:
 
 ```bash
-pnpm --dir packages/frontend-web exec vitest run src/__tests__/lib/export-utils.test.ts
+pnpm --dir packages/frontend-web exec vitest run \
+  src/__tests__/lib/export-utils.test.ts \
+  src/__tests__/security/print-html-sinks.test.ts
 ```
 
 Dokumentation:
