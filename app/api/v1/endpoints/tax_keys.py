@@ -13,6 +13,7 @@ from pydantic import BaseModel, Field, field_validator
 import logging
 
 from ....core.database import get_db
+from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
 
 logger = logging.getLogger(__name__)
@@ -125,7 +126,7 @@ class TaxKeyResponse(BaseModel):
 
 @router.get("", response_model=List[TaxKeyResponse])
 async def list_tax_keys(
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     active_only: bool = Query(True, description="Show only active tax keys"),
     country: Optional[str] = Query(None, description="Filter by country code"),
     db: Session = Depends(get_db)
@@ -191,7 +192,7 @@ async def list_tax_keys(
 @router.get("/{tax_key_id}", response_model=TaxKeyResponse)
 async def get_tax_key(
     tax_key_id: str,
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -247,7 +248,7 @@ async def get_tax_key(
 @router.post("", response_model=TaxKeyResponse, status_code=201)
 async def create_tax_key(
     tax_key: TaxKeyCreate,
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -343,7 +344,7 @@ async def create_tax_key(
 async def update_tax_key(
     tax_key_id: str,
     tax_key: TaxKeyUpdate,
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -478,7 +479,7 @@ async def update_tax_key(
 @router.delete("/{tax_key_id}", status_code=204)
 async def delete_tax_key(
     tax_key_id: str,
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """
@@ -512,7 +513,7 @@ async def delete_tax_key(
 @router.get("/code/{code}", response_model=TaxKeyResponse)
 async def get_tax_key_by_code(
     code: str,
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """

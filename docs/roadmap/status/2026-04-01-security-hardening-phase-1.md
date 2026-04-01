@@ -25,12 +25,21 @@
 | `SEC-011` | Documents Router | kein Information Disclosure via `str(e)` |
 | `SEC-012` | Webhooks | SSRF-Block fuer localhost/private IPs |
 | `SEC-013` | Print-/Export-Pfade | XSS-Schutz fuer `document.write`-basierte HTML-Interpolation |
+| `SEC-014` | externer Vault | HashiCorp Vault + Production-Startup-Fail-Fast |
+| `SEC-015` | Accruals / Provisions | tenant-gebundene Finance-Pfade |
+| `SEC-016` | zentrale Egress-Policy | gemeinsame SSRF-/Outbound-Regel fuer Runtime-Pfade |
+| `SEC-017` | CI-Sicherheitslane | feste Backend-/Frontend-Security-Regressionen |
+| `SEC-018` | Frontend-HTML-Sinks | Inventur + Guard-Test fuer neue rohe HTML-Sinks |
+| `SEC-019` | AP Approval Workflow | Tenant aus Kontext, Cross-Tenant-Invoices werden abgewiesen |
+| `SEC-020` | Nebenbuch-Abstimmung | Reconciliation-/Export-Pfade sind tenant-gebunden |
+| `SEC-021` | Tax Keys | CRUD und Lookup ziehen Tenant nur noch aus dem Kontext |
 
 ## Wirkungsbild
 
 - Die ersten repoweiten CRITICAL/P1-Funde aus Secrets-, Backend-SAST- und Frontend-/Runtime-Hardening sind auf konkrete Slices heruntergebrochen und technisch verifiziert geschlossen.
 - Besonders risikoreiche Muster sind jetzt systematisch reduziert:
   - freie Tenant-Zugriffe in Finance-/Einkauf-Routern
+  - freie Finance-Query-Tenants in Approval-, Reconciliation- und Tax-Key-Routern
   - ungeschuetzte Realtime-/WS-Pfade
   - rohe Exception-Leaks
   - unkontrollierte Identifier-/XML-/HTML-Interpolation

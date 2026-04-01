@@ -18,6 +18,7 @@ from pydantic import BaseModel
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from ....core.tenant import get_tenant_id
 from ....core.database import get_db
 
 logger = logging.getLogger(__name__)
@@ -104,7 +105,7 @@ def _sum_gl_balance(
 @router.get("/ar", response_model=ReconciliationResult)
 async def reconcile_ar(
     period: str = Query(..., description="Accounting period (YYYY-MM)"),
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Reconcile Accounts Receivable (Debitoren) with General Ledger."""
@@ -195,7 +196,7 @@ async def reconcile_ar(
 @router.get("/ap", response_model=ReconciliationResult)
 async def reconcile_ap(
     period: str = Query(..., description="Accounting period (YYYY-MM)"),
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Reconcile Accounts Payable (Kreditoren) with General Ledger."""
@@ -286,7 +287,7 @@ async def reconcile_ap(
 @router.get("/bank", response_model=ReconciliationResult)
 async def reconcile_bank(
     period: str = Query(..., description="Accounting period (YYYY-MM)"),
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Reconcile Bank accounts with General Ledger."""
@@ -383,7 +384,7 @@ async def get_reconciliation_details(
     ledger_type: str,
     account_number: str = Query(..., description="Account number"),
     period: str = Query(..., description="Accounting period (YYYY-MM)"),
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Get detailed entries for drilldown into differences."""
@@ -495,7 +496,7 @@ async def get_reconciliation_details(
 async def export_reconciliation_csv(
     ledger_type: str,
     period: str = Query(..., description="Accounting period (YYYY-MM)"),
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Export reconciliation result as CSV for closing documentation."""
@@ -557,7 +558,7 @@ async def export_reconciliation_csv(
 @router.get("/summary", response_model=Dict[str, Any])
 async def get_reconciliation_summary(
     period: str = Query(..., description="Accounting period (YYYY-MM)"),
-    tenant_id: str = Query("system", description="Tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Get summary of all subsidiary ledger reconciliations."""
