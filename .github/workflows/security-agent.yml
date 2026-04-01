@@ -12,12 +12,17 @@ on:
   push:
     branches: [main]
     paths:
+      - '.github/workflows/security-agent.yml'
       - 'app/**'
       - 'modules/**'
+      - 'tests/**'
+      - 'scripts/security/**'
+      - 'packages/frontend-web/**'
       - 'Dockerfile*'
       - 'docker-compose*.yml'
       - 'requirements*.txt'
       - 'package*.json'
+      - 'pnpm-lock.yaml'
 
 permissions:
   contents: read
@@ -110,6 +115,47 @@ jobs:
           name: bandit-report
           path: bandit.json
           retention-days: 30
+
+  security-regression:
+    name: "Security Regression Lane"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install backend test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Backend security regression suite
+        run: |
+          pytest \
+            tests/test_security_*.py \
+            tests/test_secrets_vault.py \
+            tests/test_neuro_tool_execution.py \
+            -q --no-cov
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install frontend dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Frontend security regression suite
+        run: pnpm --dir packages/frontend-web exec vitest run src/__tests__/lib/export-utils.test.ts
+
+      - name: Security docs governance
+        run: node scripts/docs-governance-check.cjs
 
   # ═══════════════════════════════════════════════════════════════════════════
   # Stufe 3: Trivy (Filesystem + Config + Image)
