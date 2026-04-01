@@ -14,6 +14,7 @@ interface CopilotMessage {
 interface UseCopilotStreamOptions {
   url?: string
   token?: string
+  tenantId?: string
   onStateChange?: (state: string) => void
   onMessage?: (message: CopilotMessage) => void
   autoReconnect?: boolean
@@ -23,6 +24,7 @@ export function useCopilotStream(options: UseCopilotStreamOptions = {}) {
   const {
     url = `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/api/v1/copilot/chat`,
     token,
+    tenantId,
     onStateChange,
     onMessage,
     autoReconnect = true,
@@ -53,7 +55,14 @@ export function useCopilotStream(options: UseCopilotStreamOptions = {}) {
     if (wsRef.current?.readyState === WebSocket.OPEN) return
     if (wsRef.current?.readyState === WebSocket.CONNECTING) return
 
-    const wsUrl = token ? `${url}?token=${encodeURIComponent(token)}` : url
+    const params = new URLSearchParams()
+    if (token) {
+      params.set('token', token)
+    }
+    if (tenantId) {
+      params.set('tenant_id', tenantId)
+    }
+    const wsUrl = params.size > 0 ? `${url}?${params.toString()}` : url
     const ws = new WebSocket(wsUrl)
 
     ws.onopen = () => {
@@ -106,7 +115,7 @@ export function useCopilotStream(options: UseCopilotStreamOptions = {}) {
     }
 
     wsRef.current = ws
-  }, [url, token, autoReconnect])
+  }, [url, token, tenantId, autoReconnect])
 
   const disconnect = useCallback(() => {
     manuallyClosedRef.current = true

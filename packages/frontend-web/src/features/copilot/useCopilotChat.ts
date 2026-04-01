@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
+import { useTenant } from '@/hooks/useTenant'
+import { getAccessToken } from '@/lib/auth'
 import { useCopilotStream } from './useCopilotStream'
 
 export type MessageRole = 'user' | 'assistant'
@@ -21,8 +23,16 @@ export function useCopilotChat(): {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [loading, setLoading] = useState<boolean>(false)
   const currentAssistantIdRef = useRef<string | null>(null)
+  const { tenantId } = useTenant()
+  const accessToken =
+    getAccessToken()
+    ?? window.localStorage.getItem('token')
+    ?? import.meta.env.VITE_API_DEV_TOKEN
+    ?? undefined
 
   const { connect, disconnect, send, connected, sessionId, pipelineResult } = useCopilotStream({
+    token: accessToken,
+    tenantId,
     onMessage: (message) => {
       switch (message.type) {
         case 'stream_start':

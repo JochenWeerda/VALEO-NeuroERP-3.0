@@ -10,12 +10,60 @@ import logging
 from datetime import datetime, timezone
 from uuid import uuid4
 
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query
+from fastapi import APIRouter, Query, WebSocket, WebSocketDisconnect, status
+
+from app.auth.jwt import decode_token
+from app.core.config import settings
 
 router = APIRouter(tags=["neuro-core", "copilot"])
 logger = logging.getLogger(__name__)
 
 _SESSIONS: dict[str, dict] = {}
+
+
+def _extract_websocket_token(websocket: WebSocket, query_token: str | None) -> str:
+    if query_token:
+        return query_token.strip()
+
+    auth_header = (websocket.headers.get("authorization") or "").strip()
+    if auth_header.lower().startswith("bearer "):
+        return auth_header[7:].strip()
+
+    return auth_header
+
+
+def _resolve_authenticated_context(
+    websocket: WebSocket,
+    query_token: str | None,
+    query_tenant_id: str | None,
+) -> dict:
+    token = _extract_websocket_token(websocket, query_token)
+    if not token:
+        raise ValueError("Missing bearer token")
+
+    if settings.API_DEV_TOKEN and token == settings.API_DEV_TOKEN:
+        user_id = "dev"
+        roles: list[str] = ["admin"]
+    else:
+        claims = decode_token(token)
+        user_id = (claims.get("sub") or "").strip()
+        roles = claims.get("roles") or []
+        if not isinstance(roles, list):
+            roles = []
+        if not user_id:
+            raise ValueError("Invalid or expired token")
+
+    tenant_id = (
+        (query_tenant_id or "").strip()
+        or (websocket.headers.get("x-tenant-id") or "").strip()
+        or "system"
+    )
+
+    return {
+        "user_id": user_id,
+        "tenant_id": tenant_id,
+        "roles": roles,
+    }
 
 
 def _run_pipeline_sync(user_text: str, session_context: dict) -> dict:
@@ -84,14 +132,25 @@ def _format_pipeline_response(result: dict) -> str:
 async def copilot_chat(
     websocket: WebSocket,
     token: str = Query(None),
+    tenant_id: str | None = Query(None),
 ):
+    try:
+        auth_context = _resolve_authenticated_context(websocket, token, tenant_id)
+    except Exception as exc:
+        await websocket.close(code=status.WS_1008_POLICY_VIOLATION, reason=str(exc))
+        return
+
     await websocket.accept()
     session_id = str(uuid4())
     _SESSIONS[session_id] = {
         "state": "new",
         "created_at": datetime.now(timezone.utc).isoformat(),
         "messages": [],
-        "context": {"tenant_id": "system"},
+        "context": {
+            "tenant_id": auth_context["tenant_id"],
+            "user_id": auth_context["user_id"],
+            "roles": auth_context["roles"],
+        },
     }
 
     try:
@@ -99,6 +158,7 @@ async def copilot_chat(
             "type": "session_start",
             "session_id": session_id,
             "state": "new",
+            "tenant_id": auth_context["tenant_id"],
         })
 
         while True:
@@ -112,8 +172,16 @@ async def copilot_chat(
             session_ctx = _SESSIONS[session_id].get("context", {})
 
             if msg.get("context"):
-                session_ctx.update(msg["context"])
-                _SESSIONS[session_id]["context"] = session_ctx
+                incoming_context = dict(msg["context"])
+                incoming_context.pop("tenant_id", None)
+                incoming_context.pop("user_id", None)
+                incoming_context.pop("roles", None)
+                session_ctx.update(incoming_context)
+
+            session_ctx["tenant_id"] = auth_context["tenant_id"]
+            session_ctx["user_id"] = auth_context["user_id"]
+            session_ctx["roles"] = auth_context["roles"]
+            _SESSIONS[session_id]["context"] = session_ctx
 
             _SESSIONS[session_id]["messages"].append({
                 "role": "user", "text": user_text,
