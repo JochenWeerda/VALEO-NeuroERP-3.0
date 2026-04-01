@@ -2,12 +2,9 @@ import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from "react
 import { Outlet } from "react-router-dom"
 import { ActionDispatchProvider } from "@/features/ki-usability"
 import { AppShell } from "@/components/navigation/AppShell"
+import { AdvisorDock } from "@/features/copilot/AdvisorDock"
 import { useFeature } from "@/hooks/useFeature"
 import { type McpRealtimeEvent, useMcpConnectionState, useMcpRealtime } from "@/lib/useMcpRealtime"
-
-const AdvisorDock = lazy(() =>
-  import("@/features/copilot/AdvisorDock").then((module) => ({ default: module.AdvisorDock })),
-)
 
 const AskVALEO = lazy(() =>
   import("@/components/ai/AskVALEO").then((module) => ({ default: module.AskVALEO })),
@@ -93,9 +90,7 @@ export default function AppLayout(): JSX.Element {
       <Suspense fallback={null}>
         <GlobalButtonHandler />
       </Suspense>
-      <Suspense fallback={null}>
-        <AdvisorDock />
-      </Suspense>
+      <AdvisorDock />
       <Suspense fallback={null}>
         <CallWidget />
       </Suspense>
