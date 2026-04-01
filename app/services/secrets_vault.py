@@ -12,6 +12,9 @@ import hashlib
 import logging
 import json
 import os
+from urllib.error import HTTPError, URLError
+from urllib.parse import quote
+from urllib.request import Request, urlopen
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
@@ -92,6 +95,122 @@ _VAULT_STORE: dict[str, tuple[SecretMetadata, str]] = {}
 _ACCESS_LOG: list[dict[str, Any]] = []
 
 
+def _load_settings() -> Any:
+    from app.core.config import settings
+
+    return settings
+
+
+def _configured_default_provider() -> SecretProvider:
+    provider_name = os.getenv("SECRET_PROVIDER")
+    if not provider_name:
+        provider_name = getattr(_load_settings(), "SECRET_PROVIDER", SecretProvider.ENV.value)
+    try:
+        return SecretProvider(str(provider_name).lower())
+    except ValueError:
+        logger.warning("Unbekannter SECRET_PROVIDER '%s', fallback auf env.", provider_name)
+        return SecretProvider.ENV
+
+
+def _is_production_environment() -> bool:
+    settings = _load_settings()
+    app_env = str(getattr(settings, "APP_ENV", "development") or "development").strip().lower()
+    return app_env in {"prod", "production"}
+
+
+def _external_secret_providers() -> set[SecretProvider]:
+    return {
+        SecretProvider.HASHICORP_VAULT,
+        SecretProvider.AZURE_KEYVAULT,
+        SecretProvider.AWS_SECRETS,
+    }
+
+
+def _hashicorp_secret_url(*, metadata: bool, key: str) -> str:
+    settings = _load_settings()
+    addr = (getattr(settings, "HASHICORP_VAULT_ADDR", None) or "").rstrip("/")
+    mount = (getattr(settings, "HASHICORP_VAULT_MOUNT", "secret") or "secret").strip("/")
+    prefix = (getattr(settings, "HASHICORP_VAULT_PATH_PREFIX", "valeo-neuroerp") or "valeo-neuroerp").strip("/")
+    if not addr:
+        raise RuntimeError("HASHICORP_VAULT_ADDR ist nicht konfiguriert.")
+    if not getattr(settings, "HASHICORP_VAULT_TOKEN", None):
+        raise RuntimeError("HASHICORP_VAULT_TOKEN ist nicht konfiguriert.")
+    scope = "metadata" if metadata else "data"
+    encoded_key = quote(key, safe="")
+    return f"{addr}/v1/{mount}/{scope}/{prefix}/{encoded_key}"
+
+
+def _hashicorp_headers() -> dict[str, str]:
+    settings = _load_settings()
+    token = getattr(settings, "HASHICORP_VAULT_TOKEN", None)
+    if not token:
+        raise RuntimeError("HASHICORP_VAULT_TOKEN ist nicht konfiguriert.")
+    return {
+        "X-Vault-Token": token,
+        "Content-Type": "application/json",
+    }
+
+
+def _hashicorp_request(method: str, url: str, payload: Optional[dict[str, Any]] = None) -> tuple[int, str]:
+    body = None
+    if payload is not None:
+        body = json.dumps(payload).encode("utf-8")
+    request = Request(url, data=body, headers=_hashicorp_headers(), method=method)
+    try:
+        with urlopen(request, timeout=5) as response:
+            return response.status, response.read().decode("utf-8")
+    except HTTPError as exc:
+        return exc.code, exc.read().decode("utf-8", errors="ignore")
+    except URLError as exc:
+        raise RuntimeError(f"HashiCorp Vault nicht erreichbar: {exc.reason}") from exc
+
+
+def _hashicorp_store_secret(key: str, value: str, metadata: SecretMetadata) -> None:
+    url = _hashicorp_secret_url(metadata=False, key=key)
+    status, body = _hashicorp_request(
+        "POST",
+        url,
+        {
+            "data": {
+                "value": value,
+                "metadata": metadata.to_dict(),
+            }
+        },
+    )
+    if status not in {200, 204}:
+        raise RuntimeError(f"HashiCorp Vault write fehlgeschlagen ({status}): {body[:200]}")
+
+
+def _hashicorp_get_secret(key: str) -> tuple[Optional[str], Optional[SecretMetadata]]:
+    url = _hashicorp_secret_url(metadata=False, key=key)
+    status, body = _hashicorp_request("GET", url)
+    if status == 404:
+        return None, None
+    if status != 200:
+        raise RuntimeError(f"HashiCorp Vault read fehlgeschlagen ({status}): {body[:200]}")
+    payload = json.loads(body or "{}")
+    data = payload.get("data", {}).get("data", {})
+    value = data.get("value")
+    metadata_payload = data.get("metadata") or {}
+    metadata = _metadata_from_dict(metadata_payload) if metadata_payload else SecretMetadata(
+        key=key,
+        provider=SecretProvider.HASHICORP_VAULT,
+    )
+    metadata.key = key
+    metadata.provider = SecretProvider.HASHICORP_VAULT
+    return value, metadata
+
+
+def _hashicorp_delete_secret(key: str) -> bool:
+    url = _hashicorp_secret_url(metadata=True, key=key)
+    status, body = _hashicorp_request("DELETE", url)
+    if status == 404:
+        return False
+    if status not in {200, 204}:
+        raise RuntimeError(f"HashiCorp Vault delete fehlgeschlagen ({status}): {body[:200]}")
+    return True
+
+
 def _get_keyring_module() -> Any | None:
     try:
         import keyring  # type: ignore
@@ -143,8 +262,9 @@ def store_secret(
     value: str,
     secret_type: SecretType = SecretType.API_KEY,
     description: str = "",
-    provider: SecretProvider = SecretProvider.MEMORY,
+    provider: Optional[SecretProvider] = None,
 ) -> SecretMetadata:
+    provider = provider or _configured_default_provider()
     metadata = SecretMetadata(
         key=key,
         secret_type=secret_type,
@@ -159,6 +279,9 @@ def store_secret(
         index = _load_keyring_index(keyring_module)
         index[key] = metadata
         _save_keyring_index(keyring_module, index)
+        _VAULT_STORE[key] = (metadata, "")
+    elif provider == SecretProvider.HASHICORP_VAULT:
+        _hashicorp_store_secret(key, value, metadata)
         _VAULT_STORE[key] = (metadata, "")
     else:
         obfuscated = _obfuscate(value)
@@ -178,6 +301,13 @@ def get_secret(key: str, accessor: str = "system") -> Optional[str]:
             if value is not None:
                 _touch_metadata(metadata, accessor, "keyring_read")
             return value
+        if metadata.provider == SecretProvider.HASHICORP_VAULT:
+            value, remote_metadata = _hashicorp_get_secret(key)
+            if value is not None:
+                metadata = remote_metadata or metadata
+                _touch_metadata(metadata, accessor, "hashicorp_read")
+                _VAULT_STORE[key] = (metadata, "")
+            return value
         _touch_metadata(metadata, accessor, "read")
         return _deobfuscate(obfuscated)
 
@@ -196,6 +326,15 @@ def get_secret(key: str, accessor: str = "system") -> Optional[str]:
             _VAULT_STORE[key] = (metadata, "")
             return value
 
+    provider = _configured_default_provider()
+    if provider == SecretProvider.HASHICORP_VAULT:
+        value, metadata = _hashicorp_get_secret(key)
+        if value is not None:
+            resolved_metadata = metadata or SecretMetadata(key=key, provider=SecretProvider.HASHICORP_VAULT)
+            _touch_metadata(resolved_metadata, accessor, "hashicorp_read")
+            _VAULT_STORE[key] = (resolved_metadata, "")
+            return value
+
     env_value = os.getenv(key)
     if env_value:
         _record_access(key, accessor, "env_read")
@@ -210,6 +349,9 @@ def get_secret_metadata(key: str) -> Optional[SecretMetadata]:
     keyring_module = _get_keyring_module()
     if keyring_module is not None:
         return _load_keyring_index(keyring_module).get(key)
+    if _configured_default_provider() == SecretProvider.HASHICORP_VAULT:
+        _, metadata = _hashicorp_get_secret(key)
+        return metadata
     return None
 
 
@@ -226,6 +368,9 @@ def rotate_secret(key: str, new_value: str, rotated_by: str = "system") -> Optio
         index = _load_keyring_index(keyring_module)
         index[key] = metadata
         _save_keyring_index(keyring_module, index)
+        _VAULT_STORE[key] = (metadata, "")
+    elif metadata.provider == SecretProvider.HASHICORP_VAULT:
+        _hashicorp_store_secret(key, new_value, metadata)
         _VAULT_STORE[key] = (metadata, "")
     else:
         obfuscated = _obfuscate(new_value)
@@ -264,6 +409,11 @@ def delete_secret(key: str, deleted_by: str = "system") -> bool:
             _save_keyring_index(keyring_module, index)
             _record_access(key, deleted_by, "delete")
             return True
+    if _configured_default_provider() == SecretProvider.HASHICORP_VAULT:
+        deleted = _hashicorp_delete_secret(key)
+        if deleted:
+            _record_access(key, deleted_by, "delete")
+        return deleted
     return False
 
 
@@ -302,11 +452,29 @@ def check_health() -> dict[str, Any]:
             except ValueError:
                 pass
 
+    provider = _configured_default_provider()
+    external_vault = {
+        "configured_provider": provider.value,
+        "healthy": True,
+        "detail": None,
+    }
+    if provider == SecretProvider.HASHICORP_VAULT:
+        try:
+            url = _hashicorp_secret_url(metadata=False, key="__healthcheck__")
+            status, _ = _hashicorp_request("GET", url)
+            external_vault["healthy"] = status in {200, 404}
+            if not external_vault["healthy"]:
+                external_vault["detail"] = f"unexpected_status:{status}"
+        except Exception as exc:
+            external_vault["healthy"] = False
+            external_vault["detail"] = str(exc)
+
     return {
-        "status": "healthy" if expired == 0 else "warning",
+        "status": "healthy" if expired == 0 and external_vault["healthy"] else "warning",
         "total_secrets": total,
         "expired_secrets": expired,
         "provider_counts": _provider_counts(),
+        "external_vault": external_vault,
     }
 
 
@@ -316,3 +484,27 @@ def _provider_counts() -> dict[str, int]:
         p = metadata.provider.value
         counts[p] = counts.get(p, 0) + 1
     return counts
+
+
+def validate_startup_secrets() -> None:
+    settings = _load_settings()
+    provider = _configured_default_provider()
+    is_production = _is_production_environment()
+
+    if is_production and settings.API_DEV_TOKEN:
+        raise RuntimeError("API_DEV_TOKEN darf in Produktion nicht gesetzt sein.")
+
+    if is_production and settings.REQUIRE_EXTERNAL_SECRETS_IN_PRODUCTION and provider not in _external_secret_providers():
+        raise RuntimeError(
+            "Produktion erfordert einen externen Secret-Provider "
+            f"({', '.join(sorted(item.value for item in _external_secret_providers()))}); "
+            f"konfiguriert ist '{provider.value}'."
+        )
+
+    for secret_key in ("SECRET_KEY", "ENCRYPTION_KEY"):
+        current_value = getattr(settings, secret_key, None)
+        resolved = current_value or get_secret(secret_key, accessor="startup_guard")
+        if is_production and not resolved:
+            raise RuntimeError(f"{secret_key} konnte zum Startup nicht aus Secret-Provider oder Environment geladen werden.")
+        if resolved and not current_value:
+            setattr(settings, secret_key, resolved)

@@ -62,6 +62,34 @@ python scripts/security/secret_store.py list
 Ohne `keyring` kann bewusst `--provider memory` genutzt werden; das ist dann nur
 prozesslokal und nicht fuer dauerhafte Pflege gedacht.
 
+## Produktiver Vault-Pfad
+
+Seit `SEC-014` kann der Vault-Service auch HashiCorp Vault KV-v2 als externen
+Provider nutzen. Fuer Produktion ist der erwartete Grundpfad:
+
+```bash
+SECRET_PROVIDER=hashicorp_vault
+REQUIRE_EXTERNAL_SECRETS_IN_PRODUCTION=true
+HASHICORP_VAULT_ADDR=https://vault.example.local
+HASHICORP_VAULT_TOKEN=<token>
+HASHICORP_VAULT_MOUNT=secret
+HASHICORP_VAULT_PATH_PREFIX=valeo-neuroerp
+```
+
+Pflicht-Secrets fuer den Startup-Guard:
+
+```bash
+python scripts/security/secret_store.py set SECRET_KEY <wert> --provider hashicorp_vault --type encryption_key
+python scripts/security/secret_store.py set ENCRYPTION_KEY <wert> --provider hashicorp_vault --type encryption_key
+python scripts/security/secret_store.py config
+python scripts/security/secret_store.py health
+```
+
+In `APP_ENV=production` blockiert der App-Start jetzt, wenn
+- `API_DEV_TOKEN` gesetzt ist
+- kein externer Secret-Provider aktiv ist
+- `SECRET_KEY` oder `ENCRYPTION_KEY` nicht aus Provider/Environment geladen werden koennen
+
 ## CI/CD (GitHub Actions)
 
 Workflow: `.github/workflows/security-agent.yml`
