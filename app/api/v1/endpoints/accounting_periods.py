@@ -3,7 +3,7 @@ Accounting Period Management API
 FIBU-GL-05: Periodensteuerung
 """
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from typing import List, Optional
 from datetime import datetime, date
 from pydantic import BaseModel, ConfigDict
@@ -54,10 +54,17 @@ class PeriodUpdate(BaseModel):
 async def create_period(
     period_data: PeriodCreate,
     request: Request,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """Create a new accounting period."""
     try:
+        if period_data.tenant_id != tenant_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Tenant mismatch",
+            )
+
         # Validate period format (YYYY-MM)
         if len(period_data.period) != 7 or period_data.period[4] != '-':
             raise HTTPException(
@@ -71,13 +78,13 @@ async def create_period(
                 SELECT id FROM finance_accounting_periods
                 WHERE tenant_id = :tenant_id AND period = :period
             """),
-            {"tenant_id": period_data.tenant_id, "period": period_data.period}
+            {"tenant_id": tenant_id, "period": period_data.period}
         ).fetchone()
 
         if existing:
             raise HTTPException(
                 status_code=400,
-                detail=f"Period {period_data.period} already exists for tenant {period_data.tenant_id}"
+                detail=f"Period {period_data.period} already exists for tenant {tenant_id}"
             )
 
         # Validate dates
@@ -97,7 +104,7 @@ async def create_period(
             """),
             {
                 "id": period_id,
-                "tenant_id": period_data.tenant_id,
+                "tenant_id": tenant_id,
                 "period": period_data.period,
                 "status": period_data.status,
                 "start_date": period_data.start_date,
@@ -129,7 +136,7 @@ async def create_period(
             metadata=result[8] or {}
         )
         log_fibu_audit(
-            db, period_data.tenant_id, "create", "accounting_period", period_id,
+            db, tenant_id, "create", "accounting_period", period_id,
             {"period": period_data.period, "status": period_data.status},
             request=request,
         )
@@ -145,10 +152,10 @@ async def create_period(
 
 @router.get("/", response_model=List[AccountingPeriod])
 async def list_periods(
-    tenant_id: Optional[str] = Query(None),
     status: Optional[str] = Query(None),
     limit: int = Query(100, le=1000),
     skip: int = Query(0, ge=0),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """List accounting periods with filters."""
@@ -161,9 +168,8 @@ async def list_periods(
         """
         params = {}
 
-        if tenant_id:
-            query += " AND tenant_id = :tenant_id"
-            params["tenant_id"] = tenant_id
+        query += " AND tenant_id = :tenant_id"
+        params["tenant_id"] = tenant_id
 
         if status:
             query += " AND status = :status"
@@ -198,6 +204,7 @@ async def list_periods(
 @router.get("/{period_id}", response_model=AccountingPeriod)
 async def get_period(
     period_id: str,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """Get a specific accounting period."""
@@ -207,9 +214,9 @@ async def get_period(
                 SELECT id, tenant_id, period, status, start_date, end_date,
                        closed_at, closed_by, metadata, created_at
                 FROM finance_accounting_periods
-                WHERE id = :id
+                WHERE id = :id AND tenant_id = :tenant_id
             """),
-            {"id": period_id}
+            {"id": period_id, "tenant_id": tenant_id}
         ).fetchone()
 
         if not result:
@@ -239,6 +246,7 @@ async def update_period(
     period_id: str,
     period_update: PeriodUpdate,
     request: Request,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """Update an accounting period (e.g., close it)."""
@@ -249,9 +257,9 @@ async def update_period(
                 SELECT id, tenant_id, period, status, start_date, end_date,
                        closed_at, closed_by, metadata, created_at
                 FROM finance_accounting_periods
-                WHERE id = :id
+                WHERE id = :id AND tenant_id = :tenant_id
             """),
-            {"id": period_id}
+            {"id": period_id, "tenant_id": tenant_id}
         ).fetchone()
 
         if not existing:
@@ -259,7 +267,7 @@ async def update_period(
 
         # Update status
         update_query = "UPDATE finance_accounting_periods SET"
-        params = {"id": period_id}
+        params = {"id": period_id, "tenant_id": tenant_id}
         updates = []
 
         if period_update.status:
@@ -281,7 +289,7 @@ async def update_period(
         if not updates:
             raise HTTPException(status_code=400, detail="No fields to update")
 
-        update_query += ",".join(updates) + " WHERE id = :id"
+        update_query += ",".join(updates) + " WHERE id = :id AND tenant_id = :tenant_id"
         db.execute(text(update_query), params)
         db.commit()
         tenant_id = existing[1]
@@ -297,9 +305,9 @@ async def update_period(
                 SELECT id, tenant_id, period, status, start_date, end_date,
                        closed_at, closed_by, metadata, created_at
                 FROM finance_accounting_periods
-                WHERE id = :id
+                WHERE id = :id AND tenant_id = :tenant_id
             """),
-            {"id": period_id}
+            {"id": period_id, "tenant_id": tenant_id}
         ).fetchone()
 
         return AccountingPeriod(
@@ -326,10 +334,16 @@ async def update_period(
 async def check_period_status(
     tenant_id: str,
     period: str,
+    current_tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db)
 ):
     """Check if a period is open for bookings."""
     try:
+        if tenant_id != current_tenant_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Tenant mismatch",
+            )
         result = db.execute(
             text("""
                 SELECT status FROM finance_accounting_periods
@@ -347,16 +361,18 @@ async def check_period_status(
                 "message": "Period does not exist, will be created on first booking"
             }
 
-        status = result[0]
-        is_open = status == "OPEN"
+        period_status = result[0]
+        is_open = period_status == "OPEN"
 
         return {
             "period": period,
-            "status": status,
+            "status": period_status,
             "is_open": is_open,
-            "message": "Period is open for bookings" if is_open else f"Period is {status}, bookings are blocked"
+            "message": "Period is open for bookings" if is_open else f"Period is {period_status}, bookings are blocked"
         }
 
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error checking period status: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to check period status: {str(e)}")
@@ -369,5 +385,10 @@ async def check_period_status_for_current_tenant(
     db: Session = Depends(get_db),
 ):
     """Check if a period is open for bookings (current tenant from context)."""
-    return await check_period_status(tenant_id=tenant_id, period=period, db=db)
+    return await check_period_status(
+        tenant_id=tenant_id,
+        period=period,
+        current_tenant_id=tenant_id,
+        db=db,
+    )
 
