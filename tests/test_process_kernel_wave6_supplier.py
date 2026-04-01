@@ -6,6 +6,8 @@ from __future__ import annotations
 import pytest
 from datetime import date, datetime
 import uuid
+from app.core import security
+from app.core.config import settings
 
 # ── PriceMatrix Tests ─────────────────────────────────────────────────────────
 
@@ -314,11 +316,40 @@ def test_silo_transfers_protokolliert():
 
 from fastapi.testclient import TestClient
 from main import app
+from app.api.v1.endpoints import supplier_portal
 
 client = TestClient(app, raise_server_exceptions=False, base_url="http://localhost")
 AUTH_HEADERS = {"Authorization": "Bearer dev-token"}
 TENANT_HEADER = {"X-Tenant-ID": "default"}
 COMMON_HEADERS = {**AUTH_HEADERS, **TENANT_HEADER}
+
+
+@pytest.fixture(autouse=True)
+def _configure_dev_token(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(settings, "API_DEV_TOKEN", "dev-token")
+    monkeypatch.setattr(security.settings, "API_DEV_TOKEN", "dev-token")
+
+
+class _FakeResult:
+    def __init__(self, rows):
+        self._rows = rows
+
+    def fetchall(self):
+        return self._rows
+
+    def fetchone(self):
+        return self._rows[0] if self._rows else None
+
+
+class _CapturingDb:
+    def __init__(self):
+        self.statement = None
+        self.params = None
+
+    def execute(self, statement, params):
+        self.statement = str(statement)
+        self.params = dict(params)
+        return _FakeResult([])
 
 
 def test_api_price_matrix_post():
@@ -389,3 +420,41 @@ def test_api_supplier_preisauskunft():
     assert data["sorte"] == "Weizen"
     assert data["qualitaet"] == "A"
     assert data["verfuegbar"] is False
+
+
+def test_supplier_lieferungen_query_is_tenant_scoped_and_parameterized():
+    db = _CapturingDb()
+
+    result = supplier_portal.get_lieferant_lieferungen(
+        "lief-001",
+        von="2026-01-01",
+        bis="2026-01-31",
+        tenant_id="tenant-a",
+        db=db,
+    )
+
+    assert result == []
+    assert "ha.tenant_id = :tenant_id" in db.statement
+    assert "ha.customer_id = :lieferant_id" in db.statement
+    assert db.params == {
+        "lieferant_id": "lief-001",
+        "tenant_id": "tenant-a",
+        "von": "2026-01-01",
+        "bis": "2026-01-31",
+    }
+
+
+def test_supplier_silo_query_keeps_supplier_filter_parameterized():
+    db = _CapturingDb()
+
+    result = supplier_portal.get_silo_bestaende(
+        tenant_id="tenant-a",
+        lieferant_id="lief-007",
+        db=db,
+    )
+
+    assert result["tenant_id"] == "tenant-a"
+    assert "s.tenant_id = :tenant_id" in db.statement
+    assert "sl.tenant_id = :tenant_id" in db.statement
+    assert "sl.source_partner_id = :lieferant_id" in db.statement
+    assert db.params == {"tenant_id": "tenant-a", "lieferant_id": "lief-007"}

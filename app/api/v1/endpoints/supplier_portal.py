@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from fastapi import APIRouter, Query, Depends
 from pydantic import BaseModel
 from typing import Optional
@@ -48,29 +49,33 @@ def get_lieferant_lieferungen(
     lieferant_id: str,
     von: Optional[str] = Query(None),
     bis: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Lieferungen eines Lieferanten aus harvest_acceptances."""
     try:
-        params: dict = {"lid": lieferant_id}
-        date_filter = ""
+        params: dict = {"lieferant_id": lieferant_id, "tenant_id": tenant_id}
+        where_clauses = [
+            "ha.customer_id = :lieferant_id",
+            "ha.tenant_id = :tenant_id",
+        ]
         if von:
-            date_filter += " AND ha.acceptance_date >= :von"
+            where_clauses.append("ha.acceptance_date >= :von")
             params["von"] = von
         if bis:
-            date_filter += " AND ha.acceptance_date <= :bis"
+            where_clauses.append("ha.acceptance_date <= :bis")
             params["bis"] = bis
 
-        rows = db.execute(text(f"""
+        rows = db.execute(text("""
             SELECT ha.id, ha.acceptance_date, ha.article_name,
                    COALESCE(ha.net_weight_kg, 0) / 1000.0 AS menge_t,
                    COALESCE(ha.quality_grade, '') AS qualitaet,
                    ha.release_status, ha.invoice_id
             FROM domain_inventory.harvest_acceptances ha
-            WHERE ha.customer_id = :lid {date_filter}
+            WHERE {where_clause}
             ORDER BY ha.acceptance_date DESC
             LIMIT 100
-        """), params).fetchall()
+        """.format(where_clause=" AND ".join(where_clauses))), params).fetchall()
 
         return [
             SupplierLieferungView(
@@ -91,6 +96,7 @@ def get_lieferant_lieferungen(
 @router.get("/lieferanten/{lieferant_id}/kontrakte", response_model=list[SupplierKontraktView])
 def get_lieferant_kontrakte(
     lieferant_id: str,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Kontrakte eines Lieferanten mit Erfuellungsstand."""
@@ -102,10 +108,11 @@ def get_lieferant_kontrakte(
                    COALESCE(ac.fixed_price, 0) AS preis,
                    ac.status
             FROM domain_inventory.agrar_contracts ac
-            WHERE ac.partner_id = :lid
+            WHERE ac.partner_id = :lieferant_id
+              AND ac.tenant_id = :tenant_id
             ORDER BY ac.created_at DESC
             LIMIT 100
-        """), {"lid": lieferant_id}).fetchall()
+        """), {"lieferant_id": lieferant_id, "tenant_id": tenant_id}).fetchall()
 
         return [
             SupplierKontraktView(
@@ -129,6 +136,7 @@ def get_preisauskunft(
     sorte: str = Query(...),
     qualitaet: str = Query(...),
     stichtag: str = Query(...),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Preisauskunft: letzter Kontraktpreis fuer Sorte/Qualitaet."""
@@ -137,10 +145,11 @@ def get_preisauskunft(
             SELECT ac.fixed_price
             FROM domain_inventory.agrar_contracts ac
             WHERE LOWER(ac.article_name) = LOWER(:sorte)
+              AND ac.tenant_id = :tenant_id
               AND ac.status IN ('active', 'aktiv')
             ORDER BY ac.created_at DESC
             LIMIT 1
-        """), {"sorte": sorte}).fetchone()
+        """), {"sorte": sorte, "tenant_id": tenant_id}).fetchone()
 
         if row and row.fixed_price:
             return SupplierPreisauskunft(
@@ -164,18 +173,17 @@ def get_silo_bestaende(
 ):
     """Aggregierte Silo-Bestaende, optional gefiltert nach Lieferant."""
     try:
-        partner_filter = ""
-        params: dict = {}
-        if lieferant_id:
-            partner_filter = "WHERE sl.source_partner_id = :lid"
-            params["lid"] = lieferant_id
-
-        rows = db.execute(text(f"""
+        params = {"tenant_id": tenant_id, "lieferant_id": lieferant_id}
+        rows = db.execute(text("""
             SELECT s.silo_number, s.article_name,
                    COALESCE(SUM(sl.current_quantity_kg), 0) / 1000.0 AS bestand_t,
                    s.capacity_kg / 1000.0 AS kapazitaet_t
             FROM domain_inventory.silos s
-            LEFT JOIN domain_inventory.silo_lots sl ON sl.silo_id = s.id {partner_filter}
+            LEFT JOIN domain_inventory.silo_lots sl
+              ON sl.silo_id = s.id
+             AND sl.tenant_id = :tenant_id
+             AND (:lieferant_id IS NULL OR sl.source_partner_id = :lieferant_id)
+            WHERE s.tenant_id = :tenant_id
             GROUP BY s.id, s.silo_number, s.article_name, s.capacity_kg
             ORDER BY s.silo_number
         """), params).fetchall()
