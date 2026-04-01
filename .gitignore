@@ -75,6 +75,10 @@ node_modules/
 packages/frontend-web/dist/
 packages/frontend-web/playwright-report/
 packages/frontend-web/test-results/
+# All-routes smoke (harvest + JSON/HTML-Report, lokal generiert)
+packages/frontend-web/tests/e2e/.generated-routes.json
+packages/frontend-web/tests/e2e/smoke-results.json
+packages/frontend-web/tests/e2e/smoke-report.html
 packages/frontend-web/artifacts/
 packages/frontend-web/vite-dev.*.log
 packages/frontend-web/package-lock.json
