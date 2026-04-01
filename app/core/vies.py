@@ -12,6 +12,7 @@ import logging
 import re
 from dataclasses import dataclass
 from typing import Optional
+from xml.sax.saxutils import escape as xml_escape
 
 logger = logging.getLogger(__name__)
 
@@ -92,8 +93,8 @@ def check_vat_vies(vat_id: str, use_test_service: bool = False) -> VIESResult:
 <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:urn="urn:ec.europa.eu:taxud:vies:services:checkVat:types">
   <soap:Body>
     <urn:checkVat>
-      <urn:countryCode>{country}</urn:countryCode>
-      <urn:vatNumber>{number}</urn:vatNumber>
+      <urn:countryCode>{xml_escape(country)}</urn:countryCode>
+      <urn:vatNumber>{xml_escape(number)}</urn:vatNumber>
     </urn:checkVat>
   </soap:Body>
 </soap:Envelope>"""

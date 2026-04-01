@@ -2,6 +2,19 @@
  * Export Utilities für CSV, Excel und PDF Export
  */
 
+/**
+ * Escapes HTML special characters to prevent XSS when interpolating
+ * dynamic values into HTML template strings.
+ */
+export function escapeHtml(s: unknown): string {
+  return String(s ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
 export type ExportFormat = 'csv' | 'xlsx' | 'pdf'
 
 /**
@@ -79,7 +92,7 @@ export function printTable<T extends Record<string, any>>(
     <!DOCTYPE html>
     <html>
     <head>
-      <title>${title}</title>
+      <title>${escapeHtml(title)}</title>
       <style>
         body { font-family: Arial, sans-serif; margin: 20px; }
         h1 { color: #333; border-bottom: 2px solid #333; padding-bottom: 10px; }
@@ -93,18 +106,18 @@ export function printTable<T extends Record<string, any>>(
       </style>
     </head>
     <body>
-      <h1>${title}</h1>
-      <p>Erstellt am: ${new Date().toLocaleString('de-DE')}</p>
+      <h1>${escapeHtml(title)}</h1>
+      <p>Erstellt am: ${escapeHtml(new Date().toLocaleString('de-DE'))}</p>
       <table>
         <thead>
           <tr>
-            ${cols.map(col => `<th>${col.label}</th>`).join('')}
+            ${cols.map(col => `<th>${escapeHtml(col.label)}</th>`).join('')}
           </tr>
         </thead>
         <tbody>
           ${data.map(item => `
             <tr>
-              ${cols.map(col => `<td>${item[col.key] ?? ''}</td>`).join('')}
+              ${cols.map(col => `<td>${escapeHtml(item[col.key])}</td>`).join('')}
             </tr>
           `).join('')}
         </tbody>

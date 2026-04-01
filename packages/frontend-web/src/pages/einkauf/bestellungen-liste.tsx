@@ -14,6 +14,7 @@ import { toast } from '@/hooks/use-toast'
 import { getEntityTypeLabel, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 import { usePurchaseOrders, useApprovePurchaseOrder, useCancelPurchaseOrder, INCOTERM_OPTIONS } from '@/lib/api/purchase-orders'
 import { apiClient } from '@/lib/api-client'
+import { escapeHtml } from '@/lib/export-utils'
 
 // Konfiguration für Bestellungen ListReport (wird in Komponente mit i18n erstellt)
 const createBestellungenConfig = (
@@ -167,9 +168,9 @@ export default function BestellungenListePage(): JSX.Element {
       return
     }
     const rows = items.map((o: any) =>
-      `<tr><td>${o.purchaseOrderNumber ?? o.id}</td><td>${o.supplier ?? o.subject ?? ''}</td><td>${o.status ?? ''}</td><td>${o.deliveryDate ? new Date(o.deliveryDate).toLocaleDateString('de-DE') : ''}</td><td>${o.totalAmount != null ? Number(o.totalAmount).toFixed(2) : ''} €</td></tr>`
+      `<tr><td>${escapeHtml(o.purchaseOrderNumber ?? o.id)}</td><td>${escapeHtml(o.supplier ?? o.subject ?? '')}</td><td>${escapeHtml(o.status ?? '')}</td><td>${escapeHtml(o.deliveryDate ? new Date(o.deliveryDate).toLocaleDateString('de-DE') : '')}</td><td>${escapeHtml(o.totalAmount != null ? `${Number(o.totalAmount).toFixed(2)} EUR` : '')}</td></tr>`
     ).join('')
-    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Bestellungen</title></head><body><h1>Bestellungen (${items.length})</h1><table border="1" cellpadding="4"><thead><tr><th>Bestellnr.</th><th>Lieferant</th><th>Status</th><th>Lieferdatum</th><th>Betrag</th></tr></thead><tbody>${rows}</tbody></table><p style="margin-top:1em">Erstellt: ${new Date().toLocaleString('de-DE')}</p></body></html>`
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Bestellungen</title></head><body><h1>Bestellungen (${items.length})</h1><table border="1" cellpadding="4"><thead><tr><th>Bestellnr.</th><th>Lieferant</th><th>Status</th><th>Lieferdatum</th><th>Betrag</th></tr></thead><tbody>${rows}</tbody></table><p style="margin-top:1em">Erstellt: ${escapeHtml(new Date().toLocaleString('de-DE'))}</p></body></html>`
     const w = window.open('', '_blank')
     if (w) {
       w.document.write(html)

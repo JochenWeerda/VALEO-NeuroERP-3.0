@@ -1,23 +1,49 @@
 """
 VALEO-NeuroERP - Einkauf Router
 REST API Endpoints für Einkauf/Beschaffung
+
+SEC-008: Tenant-Isolation + Mass-Assignment-Whitelist + Information-Disclosure-Fix
 """
 
 import logging
 from app.core.uuid7 import uuid7
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Header, Request
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 from typing import List, Optional
 
 from app.core.database import get_db
+from app.auth.deps import get_tenant_id
 from app.einkauf import schemas
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/einkauf", tags=["Einkauf"])
+
+# ── Mass-Assignment Whitelists ───────────────────────────────────────────────
+_LIEFERANT_UPDATABLE = frozenset({
+    "firmenname", "ansprechpartner", "email", "telefon",
+    "strasse", "plz", "ort", "land", "zahlungsbedingungen",
+    "lieferzeit_tage", "bewertung", "aktiv",
+})
+
+_BESTELLUNG_UPDATABLE = frozenset({
+    "lieferant_id", "gewuenschtes_lieferdatum", "status",
+    "netto_summe", "mwst_betrag", "brutto_summe",
+})
+
+_ANFRAGE_UPDATABLE = frozenset({
+    "typ", "anforderer", "abteilung", "datum", "prioritaet", "status",
+    "begruendung", "kostenstelle", "projekt_id", "artikel", "menge",
+    "einheit", "budget", "notizen",
+})
+
+
+def _safe_update_data(raw: dict, whitelist: frozenset) -> dict:
+    """Filter update payload against whitelist — prevents mass-assignment attacks."""
+    return {k: v for k, v in raw.items() if v is not None and k in whitelist}
 
 
 # ============================================================================
@@ -29,152 +55,164 @@ async def get_lieferanten(
     aktiv: Optional[bool] = None,
     skip: int = 0,
     limit: int = 100,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """Holt Lieferantenliste"""
     try:
-        query = "SELECT * FROM einkauf_lieferanten"
-        params = {"limit": limit, "skip": skip}
-        
+        query = "SELECT * FROM einkauf_lieferanten WHERE tenant_id = :tenant_id"
+        params = {"limit": limit, "skip": skip, "tenant_id": tenant_id}
+
         if aktiv is not None:
-            query += " WHERE aktiv = :aktiv"
+            query += " AND aktiv = :aktiv"
             params["aktiv"] = aktiv
-        
+
         query += " ORDER BY firmenname LIMIT :limit OFFSET :skip"
-        
+
         result = db.execute(text(query), params)
         lieferanten = [dict(row) for row in result]
-        
+
         return {
             "total": len(lieferanten),
             "items": lieferanten
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Datenbankfehler: {str(e)}")
+        logger.exception("Lieferantenliste laden fehlgeschlagen")
+        raise HTTPException(status_code=500, detail="Datenbankfehler beim Laden der Lieferanten")
 
 
 @router.get("/lieferanten/{lieferant_id}")
-async def get_lieferant(lieferant_id: int, db: Session = Depends(get_db)):
+async def get_lieferant(
+    lieferant_id: int,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
     """Holt einzelnen Lieferanten"""
     try:
-        query = "SELECT * FROM einkauf_lieferanten WHERE id = :id"
-        result = db.execute(text(query), {"id": lieferant_id})
+        query = "SELECT * FROM einkauf_lieferanten WHERE id = :id AND tenant_id = :tenant_id"
+        result = db.execute(text(query), {"id": lieferant_id, "tenant_id": tenant_id})
         lieferant = result.fetchone()
-        
+
         if not lieferant:
             raise HTTPException(status_code=404, detail="Lieferant nicht gefunden")
-        
+
         return dict(lieferant)
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Datenbankfehler: {str(e)}")
+        logger.exception("Lieferant laden fehlgeschlagen")
+        raise HTTPException(status_code=500, detail="Datenbankfehler beim Laden des Lieferanten")
 
 
 @router.post("/lieferanten", status_code=201)
 async def create_lieferant(
     lieferant: schemas.LieferantCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """Erstellt neuen Lieferanten"""
     try:
-        # Prüfe ob Lieferantennummer bereits existiert
-        check_query = "SELECT id FROM einkauf_lieferanten WHERE lieferantennummer = :nummer"
-        existing = db.execute(text(check_query), {"nummer": lieferant.lieferantennummer}).fetchone()
-        
+        check_query = "SELECT id FROM einkauf_lieferanten WHERE lieferantennummer = :nummer AND tenant_id = :tenant_id"
+        existing = db.execute(text(check_query), {"nummer": lieferant.lieferantennummer, "tenant_id": tenant_id}).fetchone()
+
         if existing:
             raise HTTPException(
                 status_code=400,
                 detail=f"Lieferantennummer {lieferant.lieferantennummer} existiert bereits"
             )
-        
-        # Neuen Lieferanten einfügen
+
         insert_query = """
             INSERT INTO einkauf_lieferanten (
                 lieferantennummer, firmenname, ansprechpartner, email, telefon,
                 strasse, plz, ort, land, zahlungsbedingungen, lieferzeit_tage,
-                bewertung, aktiv
+                bewertung, aktiv, tenant_id
             ) VALUES (
                 :lieferantennummer, :firmenname, :ansprechpartner, :email, :telefon,
                 :strasse, :plz, :ort, :land, :zahlungsbedingungen, :lieferzeit_tage,
-                :bewertung, :aktiv
+                :bewertung, :aktiv, :tenant_id
             ) RETURNING id
         """
-        
-        result = db.execute(text(insert_query), lieferant.dict())
+
+        params = lieferant.model_dump()
+        params["tenant_id"] = tenant_id
+        result = db.execute(text(insert_query), params)
         lieferant_id = result.fetchone()[0]
         db.commit()
-        
+
         return {"id": lieferant_id, "message": "Lieferant erfolgreich erstellt"}
-        
+
     except HTTPException:
         raise
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=f"Fehler beim Erstellen: {str(e)}")
+        logger.exception("Lieferant erstellen fehlgeschlagen")
+        raise HTTPException(status_code=500, detail="Fehler beim Erstellen des Lieferanten")
 
 
 @router.put("/lieferanten/{lieferant_id}")
 async def update_lieferant(
     lieferant_id: int,
     lieferant: schemas.LieferantUpdate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """Aktualisiert Lieferanten"""
     try:
-        # Prüfe ob Lieferant existiert
-        check_query = "SELECT id FROM einkauf_lieferanten WHERE id = :id"
-        existing = db.execute(text(check_query), {"id": lieferant_id}).fetchone()
-        
+        check_query = "SELECT id FROM einkauf_lieferanten WHERE id = :id AND tenant_id = :tenant_id"
+        existing = db.execute(text(check_query), {"id": lieferant_id, "tenant_id": tenant_id}).fetchone()
+
         if not existing:
             raise HTTPException(status_code=404, detail="Lieferant nicht gefunden")
-        
-        # Nur gesetzte Felder aktualisieren
-        update_data = {k: v for k, v in lieferant.dict().items() if v is not None}
-        
+
+        update_data = _safe_update_data(lieferant.model_dump(), _LIEFERANT_UPDATABLE)
+
         if not update_data:
             raise HTTPException(status_code=400, detail="Keine Daten zum Aktualisieren")
-        
-        # UPDATE Query bauen
+
         set_clause = ", ".join([f"{k} = :{k}" for k in update_data.keys()])
-        update_query = f"UPDATE einkauf_lieferanten SET {set_clause}, updated_at = CURRENT_TIMESTAMP WHERE id = :id"
-        
+        update_query = f"UPDATE einkauf_lieferanten SET {set_clause}, updated_at = CURRENT_TIMESTAMP WHERE id = :id AND tenant_id = :tenant_id"
+
         update_data["id"] = lieferant_id
+        update_data["tenant_id"] = tenant_id
         db.execute(text(update_query), update_data)
         db.commit()
-        
+
         return {"message": "Lieferant erfolgreich aktualisiert"}
-        
+
     except HTTPException:
         raise
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=f"Fehler beim Aktualisieren: {str(e)}")
+        logger.exception("Lieferant aktualisieren fehlgeschlagen")
+        raise HTTPException(status_code=500, detail="Fehler beim Aktualisieren des Lieferanten")
 
 
 @router.delete("/lieferanten/{lieferant_id}")
-async def delete_lieferant(lieferant_id: int, db: Session = Depends(get_db)):
+async def delete_lieferant(
+    lieferant_id: int,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
     """Löscht Lieferanten"""
     try:
-        # Prüfe ob Lieferant existiert
-        check_query = "SELECT id FROM einkauf_lieferanten WHERE id = :id"
-        existing = db.execute(text(check_query), {"id": lieferant_id}).fetchone()
-        
+        check_query = "SELECT id FROM einkauf_lieferanten WHERE id = :id AND tenant_id = :tenant_id"
+        existing = db.execute(text(check_query), {"id": lieferant_id, "tenant_id": tenant_id}).fetchone()
+
         if not existing:
             raise HTTPException(status_code=404, detail="Lieferant nicht gefunden")
-        
-        # Lösche Lieferanten
-        delete_query = "DELETE FROM einkauf_lieferanten WHERE id = :id"
-        db.execute(text(delete_query), {"id": lieferant_id})
+
+        delete_query = "DELETE FROM einkauf_lieferanten WHERE id = :id AND tenant_id = :tenant_id"
+        db.execute(text(delete_query), {"id": lieferant_id, "tenant_id": tenant_id})
         db.commit()
-        
+
         return {"message": "Lieferant erfolgreich gelöscht"}
-        
+
     except HTTPException:
         raise
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=f"Fehler beim Löschen: {str(e)}")
+        logger.exception("Lieferant löschen fehlgeschlagen")
+        raise HTTPException(status_code=500, detail="Fehler beim Löschen des Lieferanten")
 
 
 # ============================================================================
@@ -187,158 +225,166 @@ async def get_bestellungen(
     lieferant_id: Optional[int] = None,
     skip: int = 0,
     limit: int = 100,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """Holt Bestellungsliste"""
     try:
-        query = "SELECT * FROM einkauf_bestellungen"
-        params = {"limit": limit, "skip": skip}
-        conditions = []
-        
+        query = "SELECT * FROM einkauf_bestellungen WHERE tenant_id = :tenant_id"
+        params = {"limit": limit, "skip": skip, "tenant_id": tenant_id}
+
         if status:
-            conditions.append("status = :status")
+            query += " AND status = :status"
             params["status"] = status
-        
+
         if lieferant_id:
-            conditions.append("lieferant_id = :lieferant_id")
+            query += " AND lieferant_id = :lieferant_id"
             params["lieferant_id"] = lieferant_id
-        
-        if conditions:
-            query += " WHERE " + " AND ".join(conditions)
-        
+
         query += " ORDER BY bestelldatum DESC LIMIT :limit OFFSET :skip"
-        
+
         result = db.execute(text(query), params)
         bestellungen = [dict(row) for row in result]
-        
+
         return {
             "total": len(bestellungen),
             "items": bestellungen
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Datenbankfehler: {str(e)}")
+        logger.exception("Bestellungsliste laden fehlgeschlagen")
+        raise HTTPException(status_code=500, detail="Datenbankfehler beim Laden der Bestellungen")
 
 
 @router.get("/bestellungen/{bestellung_id}")
-async def get_bestellung(bestellung_id: int, db: Session = Depends(get_db)):
+async def get_bestellung(
+    bestellung_id: int,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
     """Holt einzelne Bestellung"""
     try:
-        query = "SELECT * FROM einkauf_bestellungen WHERE id = :id"
-        result = db.execute(text(query), {"id": bestellung_id})
+        query = "SELECT * FROM einkauf_bestellungen WHERE id = :id AND tenant_id = :tenant_id"
+        result = db.execute(text(query), {"id": bestellung_id, "tenant_id": tenant_id})
         bestellung = result.fetchone()
-        
+
         if not bestellung:
             raise HTTPException(status_code=404, detail="Bestellung nicht gefunden")
-        
+
         return dict(bestellung)
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Datenbankfehler: {str(e)}")
+        logger.exception("Bestellung laden fehlgeschlagen")
+        raise HTTPException(status_code=500, detail="Datenbankfehler beim Laden der Bestellung")
 
 
 @router.post("/bestellungen", status_code=201)
 async def create_bestellung(
     bestellung: schemas.BestellungCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """Erstellt neue Bestellung"""
     try:
-        # Prüfe ob Bestellnummer bereits existiert
-        check_query = "SELECT id FROM einkauf_bestellungen WHERE bestellnummer = :nummer"
-        existing = db.execute(text(check_query), {"nummer": bestellung.bestellnummer}).fetchone()
-        
+        check_query = "SELECT id FROM einkauf_bestellungen WHERE bestellnummer = :nummer AND tenant_id = :tenant_id"
+        existing = db.execute(text(check_query), {"nummer": bestellung.bestellnummer, "tenant_id": tenant_id}).fetchone()
+
         if existing:
             raise HTTPException(
                 status_code=400,
                 detail=f"Bestellnummer {bestellung.bestellnummer} existiert bereits"
             )
-        
-        # Neue Bestellung einfügen
+
         insert_query = """
             INSERT INTO einkauf_bestellungen (
                 bestellnummer, lieferant_id, bestelldatum, gewuenschtes_lieferdatum,
-                status, netto_summe, mwst_betrag, brutto_summe, erstellt_von
+                status, netto_summe, mwst_betrag, brutto_summe, erstellt_von, tenant_id
             ) VALUES (
                 :bestellnummer, :lieferant_id, :bestelldatum, :gewuenschtes_lieferdatum,
-                :status, :netto_summe, :mwst_betrag, :brutto_summe, :erstellt_von
+                :status, :netto_summe, :mwst_betrag, :brutto_summe, :erstellt_von, :tenant_id
             ) RETURNING id
         """
-        
-        result = db.execute(text(insert_query), bestellung.dict())
+
+        params = bestellung.model_dump()
+        params["tenant_id"] = tenant_id
+        result = db.execute(text(insert_query), params)
         bestellung_id = result.fetchone()[0]
         db.commit()
-        
+
         return {"id": bestellung_id, "message": "Bestellung erfolgreich erstellt"}
-        
+
     except HTTPException:
         raise
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=f"Fehler beim Erstellen: {str(e)}")
+        logger.exception("Bestellung erstellen fehlgeschlagen")
+        raise HTTPException(status_code=500, detail="Fehler beim Erstellen der Bestellung")
 
 
 @router.put("/bestellungen/{bestellung_id}")
 async def update_bestellung(
     bestellung_id: int,
     bestellung: schemas.BestellungUpdate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """Aktualisiert Bestellung"""
     try:
-        # Prüfe ob Bestellung existiert
-        check_query = "SELECT id FROM einkauf_bestellungen WHERE id = :id"
-        existing = db.execute(text(check_query), {"id": bestellung_id}).fetchone()
-        
+        check_query = "SELECT id FROM einkauf_bestellungen WHERE id = :id AND tenant_id = :tenant_id"
+        existing = db.execute(text(check_query), {"id": bestellung_id, "tenant_id": tenant_id}).fetchone()
+
         if not existing:
             raise HTTPException(status_code=404, detail="Bestellung nicht gefunden")
-        
-        # Nur gesetzte Felder aktualisieren
-        update_data = {k: v for k, v in bestellung.dict().items() if v is not None}
-        
+
+        update_data = _safe_update_data(bestellung.model_dump(), _BESTELLUNG_UPDATABLE)
+
         if not update_data:
             raise HTTPException(status_code=400, detail="Keine Daten zum Aktualisieren")
-        
-        # UPDATE Query bauen
+
         set_clause = ", ".join([f"{k} = :{k}" for k in update_data.keys()])
-        update_query = f"UPDATE einkauf_bestellungen SET {set_clause}, updated_at = CURRENT_TIMESTAMP WHERE id = :id"
-        
+        update_query = f"UPDATE einkauf_bestellungen SET {set_clause}, updated_at = CURRENT_TIMESTAMP WHERE id = :id AND tenant_id = :tenant_id"
+
         update_data["id"] = bestellung_id
+        update_data["tenant_id"] = tenant_id
         db.execute(text(update_query), update_data)
         db.commit()
-        
+
         return {"message": "Bestellung erfolgreich aktualisiert"}
-        
+
     except HTTPException:
         raise
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=f"Fehler beim Aktualisieren: {str(e)}")
+        logger.exception("Bestellung aktualisieren fehlgeschlagen")
+        raise HTTPException(status_code=500, detail="Fehler beim Aktualisieren der Bestellung")
 
 
 @router.delete("/bestellungen/{bestellung_id}")
-async def delete_bestellung(bestellung_id: int, db: Session = Depends(get_db)):
+async def delete_bestellung(
+    bestellung_id: int,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
     """Löscht Bestellung"""
     try:
-        # Prüfe ob Bestellung existiert
-        check_query = "SELECT id FROM einkauf_bestellungen WHERE id = :id"
-        existing = db.execute(text(check_query), {"id": bestellung_id}).fetchone()
-        
+        check_query = "SELECT id FROM einkauf_bestellungen WHERE id = :id AND tenant_id = :tenant_id"
+        existing = db.execute(text(check_query), {"id": bestellung_id, "tenant_id": tenant_id}).fetchone()
+
         if not existing:
             raise HTTPException(status_code=404, detail="Bestellung nicht gefunden")
-        
-        # Lösche Bestellung
-        delete_query = "DELETE FROM einkauf_bestellungen WHERE id = :id"
-        db.execute(text(delete_query), {"id": bestellung_id})
+
+        delete_query = "DELETE FROM einkauf_bestellungen WHERE id = :id AND tenant_id = :tenant_id"
+        db.execute(text(delete_query), {"id": bestellung_id, "tenant_id": tenant_id})
         db.commit()
-        
+
         return {"message": "Bestellung erfolgreich gelöscht"}
-        
+
     except HTTPException:
         raise
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=f"Fehler beim Löschen: {str(e)}")
+        logger.exception("Bestellung löschen fehlgeschlagen")
+        raise HTTPException(status_code=500, detail="Fehler beim Löschen der Bestellung")
 
 
 # ============================================================================
@@ -351,23 +397,21 @@ async def get_anfragen(
     typ: Optional[str] = None,
     skip: int = 0,
     limit: int = 100,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """Holt Anfragen/Bedarfsmeldungen"""
     try:
-        query = "SELECT * FROM einkauf_anfragen"
-        params: dict = {"limit": limit, "skip": skip}
-        conditions = []
+        query = "SELECT * FROM einkauf_anfragen WHERE tenant_id = :tenant_id"
+        params: dict = {"limit": limit, "skip": skip, "tenant_id": tenant_id}
 
         if status:
-            conditions.append("status = :status")
+            query += " AND status = :status"
             params["status"] = status
         if typ:
-            conditions.append("typ = :typ")
+            query += " AND typ = :typ"
             params["typ"] = typ
 
-        if conditions:
-            query += " WHERE " + " AND ".join(conditions)
         query += " ORDER BY created_at DESC LIMIT :limit OFFSET :skip"
 
         result = db.execute(text(query), params)
@@ -375,23 +419,27 @@ async def get_anfragen(
 
         return {"total": len(anfragen), "items": anfragen}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Datenbankfehler: {str(e)}")
+        logger.exception("Anfragenliste laden fehlgeschlagen")
+        raise HTTPException(status_code=500, detail="Datenbankfehler beim Laden der Anfragen")
 
 
 @router.get("/anfragen/{anfrage_id}")
-async def get_anfrage(anfrage_id: str, db: Session = Depends(get_db)):
+async def get_anfrage(
+    anfrage_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
     """Holt einzelne Anfrage"""
     try:
         row = db.execute(
-            text("SELECT * FROM einkauf_anfragen WHERE id = :id OR anfrage_nummer = :id"),
-            {"id": anfrage_id},
+            text("SELECT * FROM einkauf_anfragen WHERE (id = :id OR anfrage_nummer = :id) AND tenant_id = :tenant_id"),
+            {"id": anfrage_id, "tenant_id": tenant_id},
         ).fetchone()
         if not row:
             raise HTTPException(status_code=404, detail="Anfrage nicht gefunden")
 
         anfrage = dict(row._mapping)
 
-        # Positionen laden
         pos_rows = db.execute(
             text("SELECT * FROM einkauf_anfragen_positionen WHERE anfrage_id = :id"),
             {"id": anfrage["id"]},
@@ -402,13 +450,15 @@ async def get_anfrage(anfrage_id: str, db: Session = Depends(get_db)):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Datenbankfehler: {str(e)}")
+        logger.exception("Anfrage laden fehlgeschlagen")
+        raise HTTPException(status_code=500, detail="Datenbankfehler beim Laden der Anfrage")
 
 
 @router.post("/anfragen", status_code=201)
 async def create_anfrage(
     anfrage: schemas.AnfrageCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """Erstellt neue Anfrage/Bedarfsmeldung"""
     try:
@@ -420,11 +470,11 @@ async def create_anfrage(
                 INSERT INTO einkauf_anfragen (
                     id, anfrage_nummer, typ, anforderer, abteilung, datum,
                     prioritaet, status, begruendung, kostenstelle, projekt_id,
-                    artikel, menge, einheit, budget, notizen
+                    artikel, menge, einheit, budget, notizen, tenant_id
                 ) VALUES (
                     :id, :nummer, :typ, :anforderer, :abteilung, :datum,
                     :prioritaet, :status, :begruendung, :kostenstelle, :projekt_id,
-                    :artikel, :menge, :einheit, :budget, :notizen
+                    :artikel, :menge, :einheit, :budget, :notizen, :tenant_id
                 )
             """),
             {
@@ -444,10 +494,10 @@ async def create_anfrage(
                 "einheit": anfrage.einheit,
                 "budget": anfrage.budget,
                 "notizen": anfrage.notizen,
+                "tenant_id": tenant_id,
             },
         )
 
-        # Positionen anlegen
         if anfrage.positionen:
             for pos in anfrage.positionen:
                 pos_id = uuid7()
@@ -478,31 +528,36 @@ async def create_anfrage(
         raise
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=f"Fehler beim Erstellen: {str(e)}")
+        logger.exception("Anfrage erstellen fehlgeschlagen")
+        raise HTTPException(status_code=500, detail="Fehler beim Erstellen der Anfrage")
 
 
 @router.put("/anfragen/{anfrage_id}")
 async def update_anfrage(
     anfrage_id: str,
     anfrage: schemas.AnfrageUpdate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """Aktualisiert Anfrage"""
     try:
         existing = db.execute(
-            text("SELECT id FROM einkauf_anfragen WHERE id = :id OR anfrage_nummer = :id"),
-            {"id": anfrage_id},
+            text("SELECT id FROM einkauf_anfragen WHERE (id = :id OR anfrage_nummer = :id) AND tenant_id = :tenant_id"),
+            {"id": anfrage_id, "tenant_id": tenant_id},
         ).fetchone()
         if not existing:
             raise HTTPException(status_code=404, detail="Anfrage nicht gefunden")
 
         real_id = existing[0]
-        update_data = {k: v for k, v in anfrage.model_dump(exclude={"positionen"}).items() if v is not None}
+        update_data = _safe_update_data(
+            anfrage.model_dump(exclude={"positionen"}), _ANFRAGE_UPDATABLE
+        )
 
         if update_data:
             set_clause = ", ".join([f"{k} = :{k}" for k in update_data.keys()])
-            update_query = f"UPDATE einkauf_anfragen SET {set_clause}, updated_at = now() WHERE id = :id"
+            update_query = f"UPDATE einkauf_anfragen SET {set_clause}, updated_at = now() WHERE id = :id AND tenant_id = :tenant_id"
             update_data["id"] = real_id
+            update_data["tenant_id"] = tenant_id
             db.execute(text(update_query), update_data)
 
         db.commit()
@@ -512,25 +567,28 @@ async def update_anfrage(
         raise
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=f"Fehler beim Aktualisieren: {str(e)}")
+        logger.exception("Anfrage aktualisieren fehlgeschlagen")
+        raise HTTPException(status_code=500, detail="Fehler beim Aktualisieren der Anfrage")
 
 
 @router.delete("/anfragen/{anfrage_id}")
-async def delete_anfrage(anfrage_id: str, db: Session = Depends(get_db)):
+async def delete_anfrage(
+    anfrage_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
     """Loescht Anfrage"""
     try:
         existing = db.execute(
-            text("SELECT id FROM einkauf_anfragen WHERE id = :id OR anfrage_nummer = :id"),
-            {"id": anfrage_id},
+            text("SELECT id FROM einkauf_anfragen WHERE (id = :id OR anfrage_nummer = :id) AND tenant_id = :tenant_id"),
+            {"id": anfrage_id, "tenant_id": tenant_id},
         ).fetchone()
         if not existing:
             raise HTTPException(status_code=404, detail="Anfrage nicht gefunden")
 
         real_id = existing[0]
-        # Positionen loeschen
         db.execute(text("DELETE FROM einkauf_anfragen_positionen WHERE anfrage_id = :id"), {"id": real_id})
-        # Anfrage loeschen
-        db.execute(text("DELETE FROM einkauf_anfragen WHERE id = :id"), {"id": real_id})
+        db.execute(text("DELETE FROM einkauf_anfragen WHERE id = :id AND tenant_id = :tenant_id"), {"id": real_id, "tenant_id": tenant_id})
         db.commit()
         return {"message": "Anfrage erfolgreich geloescht"}
 
@@ -538,24 +596,29 @@ async def delete_anfrage(anfrage_id: str, db: Session = Depends(get_db)):
         raise
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=f"Fehler beim Loeschen: {str(e)}")
+        logger.exception("Anfrage löschen fehlgeschlagen")
+        raise HTTPException(status_code=500, detail="Fehler beim Loeschen der Anfrage")
 
 
 @router.post("/anfragen/{anfrage_id}/send")
-async def send_anfrage(anfrage_id: str, db: Session = Depends(get_db)):
+async def send_anfrage(
+    anfrage_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
     """Versendet Anfrage an Lieferanten / setzt Status auf FREIGEGEBEN"""
     try:
         existing = db.execute(
-            text("SELECT id, status FROM einkauf_anfragen WHERE id = :id OR anfrage_nummer = :id"),
-            {"id": anfrage_id},
+            text("SELECT id, status FROM einkauf_anfragen WHERE (id = :id OR anfrage_nummer = :id) AND tenant_id = :tenant_id"),
+            {"id": anfrage_id, "tenant_id": tenant_id},
         ).fetchone()
         if not existing:
             raise HTTPException(status_code=404, detail="Anfrage nicht gefunden")
 
         real_id = existing[0]
         db.execute(
-            text("UPDATE einkauf_anfragen SET status = 'FREIGEGEBEN', updated_at = now() WHERE id = :id"),
-            {"id": real_id},
+            text("UPDATE einkauf_anfragen SET status = 'FREIGEGEBEN', updated_at = now() WHERE id = :id AND tenant_id = :tenant_id"),
+            {"id": real_id, "tenant_id": tenant_id},
         )
         db.commit()
         return {"message": "Anfrage erfolgreich freigegeben", "status": "FREIGEGEBEN"}
@@ -564,7 +627,8 @@ async def send_anfrage(anfrage_id: str, db: Session = Depends(get_db)):
         raise
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=f"Fehler beim Freigeben: {str(e)}")
+        logger.exception("Anfrage freigeben fehlgeschlagen")
+        raise HTTPException(status_code=500, detail="Fehler beim Freigeben der Anfrage")
 
 
 # ============================================================================
@@ -581,7 +645,8 @@ async def send_anfrage(anfrage_id: str, db: Session = Depends(get_db)):
 async def import_rechnung_pdf(
     file_id: str,
     bestellung_id: Optional[str] = None,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """
     Importiert Rechnungsdaten aus PDF via OCR
@@ -623,54 +688,52 @@ async def import_rechnung_pdf(
             "ocr_model": "tesseract-v4",
             "processed_at": datetime.utcnow().isoformat()
         }
-        
-        # Wenn Bestellung angegeben: hole Bestelldaten für Vormerkung
+
         po_data = None
         if bestellung_id:
             po_result = db.execute(
-                text("SELECT * FROM einkauf_bestellungen WHERE id = :id OR bestellnummer = :id"),
-                {"id": bestellung_id}
+                text("SELECT * FROM einkauf_bestellungen WHERE (id = :id OR bestellnummer = :id) AND tenant_id = :tenant_id"),
+                {"id": bestellung_id, "tenant_id": tenant_id}
             ).fetchone()
             if po_result:
                 po_data = dict(po_result._mapping)
-        
+
         return {
             "ocr_result": ocr_result,
             "bestellung": po_data,
             "message": "OCR-Extraktion erfolgreich. Bitte Daten prüfen und bestätigen."
         }
-        
+
     except Exception as e:
-        logger.error(f"OCR Import Fehler: {e}")
-        raise HTTPException(status_code=500, detail=f"OCR-Fehler: {str(e)}")
+        logger.exception("OCR Import fehlgeschlagen")
+        raise HTTPException(status_code=500, detail="Fehler beim OCR-Import")
 
 
 @router.post("/rechnungseingaenge/import/confirm", status_code=201)
 async def confirm_ocr_import(
     data: dict,
     bestellung_id: Optional[str] = None,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ):
-    """
-    Bestätigt OCR-Extraktion und erstellt Rechnungseingang
-    """
+    """Bestätigt OCR-Extraktion und erstellt Rechnungseingang"""
     try:
+        from datetime import timedelta
         rechnung_id = uuid7()
         extracted = data.get("extracted_data", {})
-        
-        # Rechnungseingang erstellen
+
         db.execute(
             text("""
                 INSERT INTO einkauf_rechnungseingaenge (
                     id, rechnungs_nummer, lieferant_name, bestellung_id,
                     rechnungs_datum, faelligkeits_datum,
                     netto_betrag, mwst_betrag, brutto_betrag, waehrung,
-                    status, notizen, ocr_confidence
+                    status, notizen, ocr_confidence, tenant_id
                 ) VALUES (
                     :id, :rnummer, :lname, :bid,
                     :rdatum, :fdatum,
                     :netto, :mwst, :brutto, :waehrung,
-                    'OFFEN', :notizen, :confidence
+                    'OFFEN', :notizen, :confidence, :tenant_id
                 )
             """),
             {
@@ -685,11 +748,11 @@ async def confirm_ocr_import(
                 "brutto": extracted.get("brutto_betrag"),
                 "waehrung": extracted.get("waehrung", "EUR"),
                 "notizen": f"OCR-importiert: {data.get('ocr_result', {}).get('ocr_model')}",
-                "confidence": data.get("ocr_result", {}).get("confidence_score", 0)
+                "confidence": data.get("ocr_result", {}).get("confidence_score", 0),
+                "tenant_id": tenant_id,
             }
         )
-        
-        # Positionen erstellen
+
         for idx, pos in enumerate(extracted.get("positionen", [])):
             pos_id = uuid7()
             db.execute(
@@ -708,20 +771,20 @@ async def confirm_ocr_import(
                     "mwst": pos.get("mwst_satz", 19.0)
                 }
             )
-        
+
         db.commit()
-        
+
         return {
             "id": rechnung_id,
             "rechnungs_nummer": extracted.get("rechnungs_nummer"),
             "status": "OFFEN",
             "message": "Rechnung erfolgreich importiert"
         }
-        
+
     except Exception as e:
         db.rollback()
-        logger.error(f"OCR Confirm Fehler: {e}")
-        raise HTTPException(status_code=500, detail=f"Bestätigungs-Fehler: {str(e)}")
+        logger.exception("OCR Bestätigung fehlgeschlagen")
+        raise HTTPException(status_code=500, detail="Fehler bei der OCR-Bestätigung")
 
 
 # ============================================================================
@@ -735,26 +798,24 @@ async def get_zahlungslaeufe(
     to_date: Optional[str] = None,
     skip: int = 0,
     limit: int = 100,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """Holt Zahlungsläufe"""
     try:
-        query = "SELECT * FROM einkauf_zahlungslaeufe"
-        params: dict = {"limit": limit, "skip": skip}
-        conditions = []
+        query = "SELECT * FROM einkauf_zahlungslaeufe WHERE tenant_id = :tenant_id"
+        params: dict = {"limit": limit, "skip": skip, "tenant_id": tenant_id}
 
         if status:
-            conditions.append("status = :status")
+            query += " AND status = :status"
             params["status"] = status
         if from_date:
-            conditions.append("ausfuehrungs_datum >= :from_date")
+            query += " AND ausfuehrungs_datum >= :from_date"
             params["from_date"] = from_date
         if to_date:
-            conditions.append("ausfuehrungs_datum <= :to_date")
+            query += " AND ausfuehrungs_datum <= :to_date"
             params["to_date"] = to_date
 
-        if conditions:
-            query += " WHERE " + " AND ".join(conditions)
         query += " ORDER BY created_at DESC LIMIT :limit OFFSET :skip"
 
         result = db.execute(text(query), params)
@@ -762,23 +823,27 @@ async def get_zahlungslaeufe(
 
         return {"total": len(laeufe), "items": laeufe}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Datenbankfehler: {str(e)}")
+        logger.exception("Zahlungsläufe laden fehlgeschlagen")
+        raise HTTPException(status_code=500, detail="Datenbankfehler beim Laden der Zahlungsläufe")
 
 
 @router.get("/zahlungslaeufe/{lauf_id}")
-async def get_zahlungslauf(lauf_id: str, db: Session = Depends(get_db)):
+async def get_zahlungslauf(
+    lauf_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
     """Holt einzelnen Zahlungslauf mit Positionen"""
     try:
         row = db.execute(
-            text("SELECT * FROM einkauf_zahlungslaeufe WHERE id = :id"),
-            {"id": lauf_id}
+            text("SELECT * FROM einkauf_zahlungslaeufe WHERE id = :id AND tenant_id = :tenant_id"),
+            {"id": lauf_id, "tenant_id": tenant_id}
         ).fetchone()
         if not row:
             raise HTTPException(status_code=404, detail="Zahlungslauf nicht gefunden")
 
         lauf = dict(row._mapping)
 
-        # Positionen laden
         pos_rows = db.execute(
             text("SELECT * FROM einkauf_zahlungslauf_positionen WHERE zahlungslauf_id = :id"),
             {"id": lauf_id}
@@ -789,13 +854,15 @@ async def get_zahlungslauf(lauf_id: str, db: Session = Depends(get_db)):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Datenbankfehler: {str(e)}")
+        logger.exception("Zahlungslauf laden fehlgeschlagen")
+        raise HTTPException(status_code=500, detail="Datenbankfehler beim Laden des Zahlungslaufs")
 
 
 @router.post("/zahlungslaeufe", status_code=201)
 async def create_zahlungslauf(
     data: dict,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """
     Erstellt neuen Zahlungslauf aus offenen Rechnungen
@@ -803,46 +870,43 @@ async def create_zahlungslauf(
     - Generiert SEPA-XML
     """
     try:
+        from datetime import timedelta
         lauf_id = uuid7()
         ausfuehrungsdatum = data.get("ausfuehrungs_datum") or (datetime.utcnow().date() + timedelta(days=1)).isoformat()
-        
-        # Sammle offene Rechnungen
-        rechnungen_query = """
-            SELECT r.*, l.iban, l.bic, l.kontoinhaber, l.firmenname as lieferant_name
-            FROM einkauf_rechnungseingaenge r
-            LEFT JOIN einkauf_lieferanten l ON r.lieferant_id = l.id
-            WHERE r.status = 'OFFEN'
-            AND (r.lieferant_id IS NULL OR r.lieferant_id IN :lieferanten)
-            ORDER BY r.faelligkeits_datum ASC
-        """
-        
+
         lieferanten_ids = data.get("lieferanten_ids", [])
         if not lieferanten_ids:
-            # Alle offenen Rechnungen
             rechnungen_result = db.execute(
                 text("""
                     SELECT r.*, l.iban, l.bic, l.kontoinhaber, l.firmenname as lieferant_name
                     FROM einkauf_rechnungseingaenge r
                     LEFT JOIN einkauf_lieferanten l ON r.lieferant_id = l.id
-                    WHERE r.status = 'OFFEN'
+                    WHERE r.status = 'OFFEN' AND r.tenant_id = :tenant_id
                     ORDER BY r.faelligkeits_datum ASC
                 """),
-                {}
+                {"tenant_id": tenant_id}
             )
         else:
             rechnungen_result = db.execute(
-                text(rechnungen_query),
-                {"lieferanten": tuple(lieferanten_ids)}
+                text("""
+                    SELECT r.*, l.iban, l.bic, l.kontoinhaber, l.firmenname as lieferant_name
+                    FROM einkauf_rechnungseingaenge r
+                    LEFT JOIN einkauf_lieferanten l ON r.lieferant_id = l.id
+                    WHERE r.status = 'OFFEN' AND r.tenant_id = :tenant_id
+                    AND (r.lieferant_id IS NULL OR r.lieferant_id IN :lieferanten)
+                    ORDER BY r.faelligkeits_datum ASC
+                """),
+                {"lieferanten": tuple(lieferanten_ids), "tenant_id": tenant_id}
             )
-        
+
         rechnungen = [dict(row._mapping) for row in rechnungen_result]
-        
+
         if not rechnungen:
             return {
                 "message": "Keine offenen Rechnungen für Auswahl gefunden",
                 "count": 0
             }
-        
+
         # Gruppiere nach Lieferanten für SEPA
         lieferanten_gruppen = {}
         for r in rechnungen:
@@ -854,7 +918,7 @@ async def create_zahlungslauf(
                     "bic": r.get("bic") or "",
                     "kontoinhaber": r.get("kontoinhaber") or "",
                     "rechnungen": [],
-                    " Gesamtbetrag": 0
+                    "gesamtbetrag": 0
                 }
             lieferanten_gruppen[key]["rechnungen"].append({
                 "rechnungs_nummer": r["rechnungs_nummer"],
@@ -862,70 +926,70 @@ async def create_zahlungslauf(
                 "faelligkeit": str(r["faelligkeits_datum"]) if r["faelligkeits_datum"] else None,
                 "rechnung_id": r["id"]
             })
-            lieferanten_gruppen[key][" Gesamtbetrag"] += float(r["brutto_betrag"]) if r["brutto_betrag"] else 0
-        
+            lieferanten_gruppen[key]["gesamtbetrag"] += float(r["brutto_betrag"]) if r["brutto_betrag"] else 0
+
         # Generiere SEPA-XML (vereinfacht)
+        from xml.sax.saxutils import escape as xml_escape
         sepa_xml = f"""<?xml version="1.0" encoding="UTF-8"?>
 <Document xmlns="urn:iso:std:iso:20022:tech:pain:001:001">
   <CstmrCdtTrfInitn>
     <GrpHdr>
-      <MsgId>PAY-{lauf_id[:8]}-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}</MsgId>
+      <MsgId>PAY-{xml_escape(str(lauf_id)[:8])}-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}</MsgId>
       <CreDtTm>{datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S')}</CreDtTm>
       <NbOfCstrms>{len(lieferanten_gruppen)}</NbOfCstrms>
-      <CtrlSum>{sum(l[' Gesamtbetrag'] for l in lieferanten_gruppen.values()):.2f}</CtrlSum>
+      <CtrlSum>{sum(l['gesamtbetrag'] for l in lieferanten_gruppen.values()):.2f}</CtrlSum>
     </GrpHdr>"""
-        
+
         for lid, gruppe in lieferanten_gruppen.items():
             sepa_xml += f"""
     <PmtInf>
-      <PmtInfId>PI-{lid}</PmtInfId>
+      <PmtInfId>PI-{xml_escape(str(lid))}</PmtInfId>
       <PmtMtd>TRF</PmtMtd>
-      <ReqdExctnDt>{ausfuehrungsdatum}</ReqdExctnDt>
+      <ReqdExctnDt>{xml_escape(str(ausfuehrungsdatum))}</ReqdExctnDt>
       <Dbtr>
-        <Nm>{gruppe['kontoinhaber']}</Nm>
+        <Nm>{xml_escape(gruppe['kontoinhaber'])}</Nm>
       </Dbtr>
       <DbtrAcct>
         <IBAN>DE12345678901234567890</IBAN>
       </DbtrAcct>
       <Cdtr>
-        <Nm>{gruppe['lieferant_name']}</Nm>
+        <Nm>{xml_escape(gruppe['lieferant_name'])}</Nm>
       </Cdtr>
       <CdtrAcct>
-        <IBAN>{gruppe['iban']}</IBAN>
+        <IBAN>{xml_escape(gruppe['iban'])}</IBAN>
       </CdtrAcct>
-      <Amt>  
-        <InstdAmt>{gruppe[' Gesamtbetrag']:.2f}</InstdAmt>
+      <Amt>
+        <InstdAmt>{gruppe['gesamtbetrag']:.2f}</InstdAmt>
       </Amt>
     </PmtInf>"""
-        
+
         sepa_xml += """
   </CstmrCdtTrfInitn>
 </Document>"""
-        
-        # Speichere Zahlungslauf
+
         db.execute(
             text("""
                 INSERT INTO einkauf_zahlungslaeufe (
                     id, bezeichnung, ausfuehrungs_datum, gesamt_betrag,
                     lieferanten_count, rechnungen_count, status,
-                    sepa_xml, notizen
+                    sepa_xml, notizen, tenant_id
                 ) VALUES (
-                    :id, :bez, :datum, :betrag, :lcount, :rcount, 'BEREIT', :xml, :notizen
+                    :id, :bez, :datum, :betrag, :lcount, :rcount, 'BEREIT', :xml, :notizen, :tenant_id
                 )
             """),
             {
                 "id": lauf_id,
                 "bez": data.get("bezeichnung", f"Zahlungslauf {datetime.utcnow().strftime('%Y-%m-%d')}"),
                 "datum": ausfuehrungsdatum,
-                "betrag": sum(l[" Gesamtbetrag"] for l in lieferanten_gruppen.values()),
+                "betrag": sum(l["gesamtbetrag"] for l in lieferanten_gruppen.values()),
                 "lcount": len(lieferanten_gruppen),
                 "rcount": len(rechnungen),
                 "xml": sepa_xml[:1000] + "..." if len(sepa_xml) > 1000 else sepa_xml,
-                "notizen": data.get("notizen")
+                "notizen": data.get("notizen"),
+                "tenant_id": tenant_id,
             }
         )
-        
-        # Positionen speichern
+
         for lid, gruppe in lieferanten_gruppen.items():
             for r in gruppe["rechnungen"]:
                 pos_id = uuid7()
@@ -944,127 +1008,129 @@ async def create_zahlungslauf(
                         "betrag": r["betrag"]
                     }
                 )
-        
+
         db.commit()
-        
+
         return {
             "id": lauf_id,
             "bezeichnung": data.get("bezeichnung"),
             "ausfuehrungs_datum": ausfuehrungsdatum,
-            "gesamt_betrag": sum(l[" Gesamtbetrag"] for l in lieferanten_gruppen.values()),
+            "gesamt_betrag": sum(l["gesamtbetrag"] for l in lieferanten_gruppen.values()),
             "lieferanten_count": len(lieferanten_gruppen),
             "rechnungen_count": len(rechnungen),
             "status": "BEREIT",
             "message": "Zahlungslauf erfolgreich erstellt"
         }
-        
+
     except Exception as e:
         db.rollback()
-        logger.error(f"Zahlungslauf Fehler: {e}")
-        raise HTTPException(status_code=500, detail=f"Fehler: {str(e)}")
+        logger.exception("Zahlungslauf erstellen fehlgeschlagen")
+        raise HTTPException(status_code=500, detail="Fehler beim Erstellen des Zahlungslaufs")
 
 
 @router.post("/zahlungslaeufe/{lauf_id}/execute")
-async def execute_zahlungslauf(lauf_id: str, db: Session = Depends(get_db)):
-    """
-    Führt Zahlungslauf aus
-    - Ändert Status auf 'AUSGEFUEHRT'
-    - Markiert alle Rechnungen als 'BEZAHLT'
-    """
+async def execute_zahlungslauf(
+    lauf_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
+    """Führt Zahlungslauf aus — Status auf AUSGEFUEHRT, Rechnungen auf BEZAHLT"""
     try:
-        # Prüfe Zahlungslauf
         row = db.execute(
-            text("SELECT id, status FROM einkauf_zahlungslaeufe WHERE id = :id"),
-            {"id": lauf_id}
+            text("SELECT id, status FROM einkauf_zahlungslaeufe WHERE id = :id AND tenant_id = :tenant_id"),
+            {"id": lauf_id, "tenant_id": tenant_id}
         ).fetchone()
         if not row:
             raise HTTPException(status_code=404, detail="Zahlungslauf nicht gefunden")
-        
+
         if row["status"] != "BEREIT":
             raise HTTPException(status_code=400, detail=f"Zahlungslauf hat Status '{row['status']}' und kann nicht ausgeführt werden")
-        
-        # Hole Positionen
+
         positionen = db.execute(
             text("SELECT * FROM einkauf_zahlungslauf_positionen WHERE zahlungslauf_id = :id"),
             {"id": lauf_id}
         ).fetchall()
-        
-        # Update Rechnungen
+
         for pos in positionen:
             if pos["rechnung_id"]:
                 db.execute(
-                    text("UPDATE einkauf_rechnungseingaenge SET status = 'BEZAHLT', updated_at = now() WHERE id = :id"),
-                    {"id": pos["rechnung_id"]}
+                    text("UPDATE einkauf_rechnungseingaenge SET status = 'BEZAHLT', updated_at = now() WHERE id = :id AND tenant_id = :tenant_id"),
+                    {"id": pos["rechnung_id"], "tenant_id": tenant_id}
                 )
-            
-            # Update Position
+
             db.execute(
                 text("UPDATE einkauf_zahlungslauf_positionen SET status = 'AUSGEFUEHRT', executed_at = now() WHERE id = :id"),
                 {"id": pos["id"]}
             )
-        
-        # Update Zahlungslauf
+
         db.execute(
-            text("UPDATE einkauf_zahlungslaeufe SET status = 'AUSGEFUEHRT', executed_at = now(), updated_at = now() WHERE id = :id"),
-            {"id": lauf_id}
+            text("UPDATE einkauf_zahlungslaeufe SET status = 'AUSGEFUEHRT', executed_at = now(), updated_at = now() WHERE id = :id AND tenant_id = :tenant_id"),
+            {"id": lauf_id, "tenant_id": tenant_id}
         )
-        
+
         db.commit()
-        
+
         return {
             "id": lauf_id,
             "status": "AUSGEFUEHRT",
             "executed_at": datetime.utcnow().isoformat(),
             "message": "Zahlungslauf erfolgreich ausgeführt"
         }
-        
+
     except HTTPException:
         raise
     except Exception as e:
         db.rollback()
-        logger.error(f"Execute Fehler: {e}")
-        raise HTTPException(status_code=500, detail=f"Fehler: {str(e)}")
+        logger.exception("Zahlungslauf ausführen fehlgeschlagen")
+        raise HTTPException(status_code=500, detail="Fehler beim Ausführen des Zahlungslaufs")
 
 
 @router.get("/zahlungslaeufe/{lauf_id}/sepa")
-async def get_sepa_xml(lauf_id: str, db: Session = Depends(get_db)):
+async def get_sepa_xml(
+    lauf_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
     """Holt SEPA-XML für Zahlungslauf (Download)"""
     try:
         row = db.execute(
-            text("SELECT sepa_xml, bezeichnung, gesamt_betrag FROM einkauf_zahlungslaeufe WHERE id = :id"),
-            {"id": lauf_id}
+            text("SELECT sepa_xml, bezeichnung, gesamt_betrag FROM einkauf_zahlungslaeufe WHERE id = :id AND tenant_id = :tenant_id"),
+            {"id": lauf_id, "tenant_id": tenant_id}
         ).fetchone()
         if not row:
             raise HTTPException(status_code=404, detail="Zahlungslauf nicht gefunden")
-        
+
         from fastapi.responses import PlainTextResponse
         return PlainTextResponse(
             content=row["sepa_xml"],
             media_type="application/xml",
             headers={"Content-Disposition": f'attachment; filename="sepa_{row["bezeichnung"]}.xml"'}
         )
-        
+
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Fehler: {str(e)}")
-
+        logger.exception("SEPA-XML laden fehlgeschlagen")
+        raise HTTPException(status_code=500, detail="Fehler beim Laden des SEPA-XML")
 
 
 @router.get("/rechnungseingaenge/{rechnung_id}")
-async def get_rechnungseingang(rechnung_id: str, db: Session = Depends(get_db)):
+async def get_rechnungseingang(
+    rechnung_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
     """Holt einzelnen Rechnungseingang"""
     try:
         row = db.execute(
-            text("SELECT * FROM einkauf_rechnungseingaenge WHERE id = :id OR rechnungs_nummer = :id"),
-            {"id": rechnung_id},
+            text("SELECT * FROM einkauf_rechnungseingaenge WHERE (id = :id OR rechnungs_nummer = :id) AND tenant_id = :tenant_id"),
+            {"id": rechnung_id, "tenant_id": tenant_id},
         ).fetchone()
         if not row:
             raise HTTPException(status_code=404, detail="Rechnungseingang nicht gefunden")
 
         rechnung = dict(row._mapping)
 
-        # Positionen laden
         pos_rows = db.execute(
             text("SELECT * FROM einkauf_rechnungseingang_positionen WHERE rechnungseingang_id = :id"),
             {"id": rechnung["id"]},
@@ -1075,7 +1141,8 @@ async def get_rechnungseingang(rechnung_id: str, db: Session = Depends(get_db)):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Datenbankfehler: {str(e)}")
+        logger.exception("Rechnungseingang laden fehlgeschlagen")
+        raise HTTPException(status_code=500, detail="Datenbankfehler beim Laden des Rechnungseingangs")
 
 
 def _get_audit_user(request: Request) -> str:
@@ -1089,11 +1156,12 @@ async def rechnungseingang_pruefen(
     rechnung_id: str,
     request: Request,
     db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """Setzt Status auf GEPRUEFT (nur aus ENTWURF/ERFASST/OFFEN). Speichert checked_by/checked_at."""
     row = db.execute(
-        text("SELECT id, status FROM einkauf_rechnungseingaenge WHERE id = :id OR rechnungs_nummer = :id"),
-        {"id": rechnung_id},
+        text("SELECT id, status FROM einkauf_rechnungseingaenge WHERE (id = :id OR rechnungs_nummer = :id) AND tenant_id = :tenant_id"),
+        {"id": rechnung_id, "tenant_id": tenant_id},
     ).fetchone()
     if not row:
         raise HTTPException(status_code=404, detail="Rechnungseingang nicht gefunden")
@@ -1109,9 +1177,9 @@ async def rechnungseingang_pruefen(
         text("""
             UPDATE einkauf_rechnungseingaenge
             SET status = 'GEPRUEFT', checked_by = :user, checked_at = now(), updated_at = now()
-            WHERE id = :id
+            WHERE id = :id AND tenant_id = :tenant_id
         """),
-        {"id": row._mapping["id"], "user": user},
+        {"id": row._mapping["id"], "user": user, "tenant_id": tenant_id},
     )
     db.commit()
     return {"message": "Rechnungseingang geprüft", "status": "GEPRUEFT"}
@@ -1122,11 +1190,12 @@ async def rechnungseingang_freigeben(
     rechnung_id: str,
     request: Request,
     db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """Setzt Status auf FREIGEGEBEN (nur aus GEPRUEFT). Speichert approved_by/approved_at."""
     row = db.execute(
-        text("SELECT id, status FROM einkauf_rechnungseingaenge WHERE id = :id OR rechnungs_nummer = :id"),
-        {"id": rechnung_id},
+        text("SELECT id, status FROM einkauf_rechnungseingaenge WHERE (id = :id OR rechnungs_nummer = :id) AND tenant_id = :tenant_id"),
+        {"id": rechnung_id, "tenant_id": tenant_id},
     ).fetchone()
     if not row:
         raise HTTPException(status_code=404, detail="Rechnungseingang nicht gefunden")
@@ -1141,9 +1210,9 @@ async def rechnungseingang_freigeben(
         text("""
             UPDATE einkauf_rechnungseingaenge
             SET status = 'FREIGEGEBEN', approved_by = :user, approved_at = now(), updated_at = now()
-            WHERE id = :id
+            WHERE id = :id AND tenant_id = :tenant_id
         """),
-        {"id": row._mapping["id"], "user": user},
+        {"id": row._mapping["id"], "user": user, "tenant_id": tenant_id},
     )
     db.commit()
     return {"message": "Rechnungseingang freigegeben", "status": "FREIGEGEBEN"}
@@ -1154,11 +1223,12 @@ async def rechnungseingang_verbuchen(
     rechnung_id: str,
     request: Request,
     db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """Setzt Status auf VERBUCHT (nur aus FREIGEGEBEN). Speichert posted_by/posted_at."""
     row = db.execute(
-        text("SELECT id, status FROM einkauf_rechnungseingaenge WHERE id = :id OR rechnungs_nummer = :id"),
-        {"id": rechnung_id},
+        text("SELECT id, status FROM einkauf_rechnungseingaenge WHERE (id = :id OR rechnungs_nummer = :id) AND tenant_id = :tenant_id"),
+        {"id": rechnung_id, "tenant_id": tenant_id},
     ).fetchone()
     if not row:
         raise HTTPException(status_code=404, detail="Rechnungseingang nicht gefunden")
@@ -1173,9 +1243,9 @@ async def rechnungseingang_verbuchen(
         text("""
             UPDATE einkauf_rechnungseingaenge
             SET status = 'VERBUCHT', posted_by = :user, posted_at = now(), updated_at = now()
-            WHERE id = :id
+            WHERE id = :id AND tenant_id = :tenant_id
         """),
-        {"id": row._mapping["id"], "user": user},
+        {"id": row._mapping["id"], "user": user, "tenant_id": tenant_id},
     )
     db.commit()
     return {"message": "Rechnungseingang verbucht", "status": "VERBUCHT"}
@@ -1184,7 +1254,8 @@ async def rechnungseingang_verbuchen(
 @router.post("/rechnungseingaenge", status_code=201)
 async def create_rechnungseingang(
     rechnung: schemas.RechnungseingangCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """Erstellt neuen Rechnungseingang"""
     try:
@@ -1196,11 +1267,11 @@ async def create_rechnungseingang(
                     id, rechnungs_nummer, lieferant_id, lieferant_name,
                     bestellung_id, wareneingang_id, rechnungs_datum,
                     faelligkeits_datum, netto_betrag, mwst_betrag, brutto_betrag,
-                    waehrung, status, zahlungsreferenz, notizen
+                    waehrung, status, zahlungsreferenz, notizen, tenant_id
                 ) VALUES (
                     :id, :nummer, :lid, :lname, :bid, :wid, :rdatum,
                     :fdatum, :netto, :mwst, :brutto,
-                    :waehrung, :status, :zref, :notizen
+                    :waehrung, :status, :zref, :notizen, :tenant_id
                 )
             """),
             {
@@ -1219,10 +1290,10 @@ async def create_rechnungseingang(
                 "status": rechnung.status,
                 "zref": rechnung.zahlungsreferenz,
                 "notizen": rechnung.notizen,
+                "tenant_id": tenant_id,
             },
         )
 
-        # Positionen anlegen
         if rechnung.positionen:
             for pos in rechnung.positionen:
                 pos_id = uuid7()
@@ -1256,20 +1327,30 @@ async def create_rechnungseingang(
         raise
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=f"Fehler beim Erstellen: {str(e)}")
+        logger.exception("Rechnungseingang erstellen fehlgeschlagen")
+        raise HTTPException(status_code=500, detail="Fehler beim Erstellen des Rechnungseingangs")
+
+
+_RECHNUNGSEINGANG_UPDATABLE_COLS = frozenset({
+    "lieferant_id", "lieferant_name", "bestellung_id", "wareneingang_id",
+    "rechnungs_datum", "faelligkeits_datum", "netto_betrag", "mwst_betrag",
+    "brutto_betrag", "zahlungsreferenz", "notizen", "status",
+    "abgleich_ergebnis", "abweichungs_begruendung",
+})
 
 
 @router.put("/rechnungseingaenge/{rechnung_id}")
 async def update_rechnungseingang(
     rechnung_id: str,
     rechnung: schemas.RechnungseingangUpdate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """Aktualisiert Rechnungseingang"""
     try:
         existing = db.execute(
-            text("SELECT id FROM einkauf_rechnungseingaenge WHERE id = :id OR rechnungs_nummer = :id"),
-            {"id": rechnung_id},
+            text("SELECT id FROM einkauf_rechnungseingaenge WHERE (id = :id OR rechnungs_nummer = :id) AND tenant_id = :tenant_id"),
+            {"id": rechnung_id, "tenant_id": tenant_id},
         ).fetchone()
         if not existing:
             raise HTTPException(status_code=404, detail="Rechnungseingang nicht gefunden")
@@ -1299,12 +1380,14 @@ async def update_rechnungseingang(
         for key, val in raw_data.items():
             if val is not None:
                 db_col = field_mapping.get(key, key)
-                update_data[db_col] = val
+                if db_col in _RECHNUNGSEINGANG_UPDATABLE_COLS:
+                    update_data[db_col] = val
 
         if update_data:
             set_clause = ", ".join([f"{k} = :{k}" for k in update_data.keys()])
-            update_query = f"UPDATE einkauf_rechnungseingaenge SET {set_clause}, updated_at = now() WHERE id = :id"
+            update_query = f"UPDATE einkauf_rechnungseingaenge SET {set_clause}, updated_at = now() WHERE id = :id AND tenant_id = :tenant_id"
             update_data["id"] = real_id
+            update_data["tenant_id"] = tenant_id
             db.execute(text(update_query), update_data)
 
         db.commit()
@@ -1314,23 +1397,28 @@ async def update_rechnungseingang(
         raise
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=f"Fehler beim Aktualisieren: {str(e)}")
+        logger.exception("Rechnungseingang aktualisieren fehlgeschlagen")
+        raise HTTPException(status_code=500, detail="Fehler beim Aktualisieren des Rechnungseingangs")
 
 
 @router.delete("/rechnungseingaenge/{rechnung_id}")
-async def delete_rechnungseingang(rechnung_id: str, db: Session = Depends(get_db)):
+async def delete_rechnungseingang(
+    rechnung_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
     """Loescht Rechnungseingang"""
     try:
         existing = db.execute(
-            text("SELECT id FROM einkauf_rechnungseingaenge WHERE id = :id OR rechnungs_nummer = :id"),
-            {"id": rechnung_id},
+            text("SELECT id FROM einkauf_rechnungseingaenge WHERE (id = :id OR rechnungs_nummer = :id) AND tenant_id = :tenant_id"),
+            {"id": rechnung_id, "tenant_id": tenant_id},
         ).fetchone()
         if not existing:
             raise HTTPException(status_code=404, detail="Rechnungseingang nicht gefunden")
 
         real_id = existing[0]
         db.execute(text("DELETE FROM einkauf_rechnungseingang_positionen WHERE rechnungseingang_id = :id"), {"id": real_id})
-        db.execute(text("DELETE FROM einkauf_rechnungseingaenge WHERE id = :id"), {"id": real_id})
+        db.execute(text("DELETE FROM einkauf_rechnungseingaenge WHERE id = :id AND tenant_id = :tenant_id"), {"id": real_id, "tenant_id": tenant_id})
         db.commit()
         return {"message": "Rechnungseingang erfolgreich geloescht"}
 
@@ -1338,5 +1426,5 @@ async def delete_rechnungseingang(rechnung_id: str, db: Session = Depends(get_db
         raise
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=f"Fehler beim Loeschen: {str(e)}")
-
+        logger.exception("Rechnungseingang löschen fehlgeschlagen")
+        raise HTTPException(status_code=500, detail="Fehler beim Loeschen des Rechnungseingangs")

@@ -9,6 +9,8 @@
  * ESC/POS-Kompatibilität: Epson TM-Serie, Star mC-Print, Bixolon, etc.
  */
 
+import { escapeHtml } from '@/lib/export-utils'
+
 // ── Minimale WebUSB/WebSerial Type-Stubs (nicht im std lib.dom.d.ts enthalten) ──
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type USBDevice = any
@@ -358,15 +360,15 @@ export class BonDruckService {
 
     const posHtml = bon.positionen.map((p) => `
       <tr>
-        <td>${p.menge} × ${p.bezeichnung}${p.rabatt_pct ? ` <small>(-${p.rabatt_pct}%)</small>` : ''}</td>
-        <td style="text-align:right">${sign}${fmt(p.gesamtpreis)}</td>
+        <td>${escapeHtml(`${p.menge} × ${p.bezeichnung}`)}${p.rabatt_pct ? ` <small>(-${escapeHtml(p.rabatt_pct)}%)</small>` : ''}</td>
+        <td style="text-align:right">${escapeHtml(`${sign}${fmt(p.gesamtpreis)}`)}</td>
       </tr>`).join('')
 
     const zahlHtml = bon.zahlungen.map((z) => `
       <tr>
-        <td>${{ bar: 'Bar', ec: 'EC-Karte', paypal: 'PayPal', gift_card: 'Geschenkkarte', b2b: 'B2B' }[z.art]}</td>
-        <td style="text-align:right">${fmt(z.betrag)}</td>
-      </tr>${z.wechselgeld ? `<tr><td style="padding-left:1rem">Wechselgeld</td><td style="text-align:right">${fmt(z.wechselgeld)}</td></tr>` : ''}`).join('')
+        <td>${escapeHtml(({ bar: 'Bar', ec: 'EC-Karte', paypal: 'PayPal', gift_card: 'Geschenkkarte', b2b: 'B2B' }[z.art]))}</td>
+        <td style="text-align:right">${escapeHtml(fmt(z.betrag))}</td>
+      </tr>${z.wechselgeld ? `<tr><td style="padding-left:1rem">Wechselgeld</td><td style="text-align:right">${escapeHtml(fmt(z.wechselgeld))}</td></tr>` : ''}`).join('')
 
     const html = `
       <!DOCTYPE html><html><head><meta charset="utf-8">
@@ -381,22 +383,22 @@ export class BonDruckService {
         .tse { font-size: 10px; word-break: break-all; }
       </style></head><body>
       <h2>${bon.isRetoure ? 'RETOURE' : 'KASSENBON'}</h2>
-      <p class="center">${bon.filiale ?? 'VALEO Landhandel'}</p>
+      <p class="center">${escapeHtml(bon.filiale ?? 'VALEO Landhandel')}</p>
       <hr>
       <table>
-        <tr><td>Bon-Nr:</td><td>${bon.bonNr}</td></tr>
-        <tr><td>Datum:</td><td>${bon.datum.toLocaleString('de-DE')}</td></tr>
-        <tr><td>Kassierer:</td><td>${bon.kassierer}</td></tr>
+        <tr><td>Bon-Nr:</td><td>${escapeHtml(bon.bonNr)}</td></tr>
+        <tr><td>Datum:</td><td>${escapeHtml(bon.datum.toLocaleString('de-DE'))}</td></tr>
+        <tr><td>Kassierer:</td><td>${escapeHtml(bon.kassierer)}</td></tr>
       </table>
       <hr>
       <table>${posHtml}</table>
       <hr>
       <table class="total">
-        <tr><td>GESAMT</td><td style="text-align:right">${sign}${fmt(bon.gesamt)}</td></tr>
+        <tr><td>GESAMT</td><td style="text-align:right">${escapeHtml(`${sign}${fmt(bon.gesamt)}`)}</td></tr>
       </table>
       <hr>
       <table>${zahlHtml}</table>
-      ${bon.tseNr ? `<hr><p class="tse">TSE-Nr: ${bon.tseNr}</p>` : ''}
+      ${bon.tseNr ? `<hr><p class="tse">TSE-Nr: ${escapeHtml(bon.tseNr)}</p>` : ''}
       <hr><p class="center">Vielen Dank!</p>
       </body></html>`
 
