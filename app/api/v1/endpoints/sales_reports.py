@@ -15,14 +15,12 @@ from pydantic import BaseModel
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from app.core.config import settings
 from app.core.database import get_db
+from app.core.tenant import get_tenant_id
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/sales/reports", tags=["sales", "reports"])
-
-DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
 class SalesSummary(BaseModel):
@@ -62,7 +60,7 @@ class SalesPipelineKPI(BaseModel):
 async def get_sales_summary(
     period_from: date = Query(..., description="Start date (YYYY-MM-DD)"),
     period_to: date = Query(..., description="End date (YYYY-MM-DD)"),
-    tenant_id: str = Query(DEFAULT_TENANT),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Sales summary for a period."""
@@ -116,7 +114,7 @@ async def get_top_customers(
     period_from: date = Query(...),
     period_to: date = Query(...),
     limit: int = Query(10, ge=1, le=50),
-    tenant_id: str = Query(DEFAULT_TENANT),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Top customers by revenue in a period."""
@@ -149,7 +147,7 @@ async def get_top_articles(
     period_from: date = Query(...),
     period_to: date = Query(...),
     limit: int = Query(10, ge=1, le=50),
-    tenant_id: str = Query(DEFAULT_TENANT),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Top articles by revenue in a period."""
@@ -190,7 +188,7 @@ class MonthlyRevenue(BaseModel):
 async def get_monthly_revenue(
     period_from: date = Query(..., description="Start date (YYYY-MM-DD)"),
     period_to: date = Query(..., description="End date (YYYY-MM-DD)"),
-    tenant_id: str = Query(DEFAULT_TENANT),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Monatliche Umsaetze fuer Dashboard-Charts."""
@@ -223,7 +221,7 @@ async def get_monthly_revenue(
 
 @router.get("/pipeline", response_model=SalesPipelineKPI)
 async def get_sales_pipeline_kpi(
-    tenant_id: str = Query(DEFAULT_TENANT),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Sales pipeline KPIs: open orders, offers, conversion rate."""

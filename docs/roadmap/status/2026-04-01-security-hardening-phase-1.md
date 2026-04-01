@@ -33,6 +33,9 @@
 | `SEC-019` | AP Approval Workflow | Tenant aus Kontext, Cross-Tenant-Invoices werden abgewiesen |
 | `SEC-020` | Nebenbuch-Abstimmung | Reconciliation-/Export-Pfade sind tenant-gebunden |
 | `SEC-021` | Tax Keys | CRUD und Lookup ziehen Tenant nur noch aus dem Kontext |
+| `SEC-022` | VAT Return Export | Query-/Body-Tenants entfernt, VAT-Return-Pfade tenant-gebunden |
+| `SEC-023` | Sales Credit Notes / Returns | Payload-/Query-Tenants entfernt, Post-/Status-Pfade tenant-gescoped |
+| `SEC-024` | Sales Reports | Report- und Pipeline-Pfade lesen Tenant nur noch aus dem Kontext |
 
 ## Wirkungsbild
 
@@ -40,6 +43,7 @@
 - Besonders risikoreiche Muster sind jetzt systematisch reduziert:
   - freie Tenant-Zugriffe in Finance-/Einkauf-Routern
   - freie Finance-Query-Tenants in Approval-, Reconciliation- und Tax-Key-Routern
+  - freie Query-/Payload-Tenants in VAT-, Sales-Credit- und Sales-Reporting-Routern
   - ungeschuetzte Realtime-/WS-Pfade
   - rohe Exception-Leaks
   - unkontrollierte Identifier-/XML-/HTML-Interpolation
