@@ -40,6 +40,8 @@
 | `SEC-026` | Articles API | Payload-Spoofing blockiert; Dokument-, Preis-, Supplier-, Stock- und Image-Nebenpfade tenant-gebunden |
 | `SEC-027` | Warehouse Transfers | Transfer-, Lines-, Corrections- und Bin-Location-Pfade nur noch ueber Kontext-Tenant |
 | `SEC-028` | Security Observability | blockierte SSRF-Ziele und denied Cross-Tenant-Zugriffe werden zentral aufgezeichnet und ueber REST surfact |
+| `SEC-029` | Agrar Contracts | Contract- und Allocation-Pfade sind tenant-gebunden; freie Query-Tenants sind entfernt |
+| `SEC-030` | Security Dashboard / Alerting | Admin-Monitoring zeigt Security-Summary und Security-Alerts aus dem Recorder; CI deckt die neuen Monitoring-Pfade explizit ab |
 
 ## Wirkungsbild
 
@@ -50,6 +52,7 @@
   - freie Query-/Payload-Tenants in VAT-, Sales-Credit- und Sales-Reporting-Routern
   - freie Query-/Payload-/ID-Tenants in Delivery-Note-, Artikel- und Lagertransfer-Pfaden
   - fehlende Surfacing-Schicht fuer Security-Block-/Violation-Events
+  - freier Tenant-/ID-Zugriff im Agrar-Contract-Router
   - ungeschuetzte Realtime-/WS-Pfade
   - rohe Exception-Leaks
   - unkontrollierte Identifier-/XML-/HTML-Interpolation
@@ -60,19 +63,19 @@
 | Prioritaet | Thema | Warum noch offen |
 |-----------|-------|------------------|
 | `P0` | externer Produktions-Vault | lokales Keyring ist praktikabel fuer Dev, aber kein produktiver Secret-Store |
-| `P1` | weitere Auth-/Tenant-Router | die SAST-Triage nannte breite Endpunktflaechen; ein grosser Finance-/Sales-/Inventory-Block ist geschlossen, aber nicht die gesamte API-Flaeche |
+| `P1` | weitere Auth-/Tenant-Router | die SAST-Triage nannte breite Endpunktflaechen; Finance/Sales/Inventory plus Agrar-Contracts sind gehaertet, aber nicht die gesamte API-Flaeche |
 | `P1` | zentrale Egress-/SSRF-Policy | durch `SEC-016` geschlossen |
 | `P1` | CI-Sicherheitslane | durch `SEC-017` geschlossen |
 | `P2` | restliche Frontend-HTML-Pfade | durch `SEC-018` inventarisiert und als Guard-Test abgesichert |
-| `P2` | Security-Observability | zentrale API-Surface ist vorhanden; offen bleiben Dashboard-/Alerting-Integration und laengerfristige Persistenz |
+| `P2` | Security-Observability | Dashboard-/Alerting-Surface ist angebunden; offen bleiben laengerfristige Persistenz und externes Alerting |
 
 ## Empfohlene Folge-Slices
 
 1. `SEC-014` Externer Vault Adapter + Startup-Fail-Fast
 2. weiterer einzelner Backend-SAST-Slice mit klarem Dateibesitz
 3. produktive Rollout-/Rotationsstrecke fuer den externen Vault
-4. Restinventur weiterer Router ausserhalb Finance/Sales/Inventory
-5. Security-Dashboard-/Alerting-Integration auf Basis der neuen Monitoring-Surface
+4. Restinventur weiterer Router ausserhalb Finance/Sales/Inventory/Agrar-Contracts
+5. externes Alerting und Persistenz auf Basis der neuen Monitoring-Surface
 
 ## Operative Regeln fuer die Folgephase
 
