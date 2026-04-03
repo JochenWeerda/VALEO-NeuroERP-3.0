@@ -1137,6 +1137,7 @@ from app.api.v1.endpoints import (
     copilot_ws,
     neuro_event_policy,
     neuro_event_monitoring,
+    security_monitoring,
 )
 
 api_router.include_router(neuro_guardrails.router)
@@ -1144,6 +1145,7 @@ api_router.include_router(neuro_fast_track.router)
 api_router.include_router(copilot_ws.router)
 api_router.include_router(neuro_event_policy.router)
 api_router.include_router(neuro_event_monitoring.router)
+api_router.include_router(security_monitoring.router)
 
 # ── Neuro-Core Lane A: Intent Engine + Planner + Pipeline ─────
 from app.api.v1.endpoints import neuro_pipeline
