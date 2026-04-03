@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Contracts Page V2
  * CRUD interface for managing contracts with Amendment support
  */
@@ -108,8 +108,7 @@ export default function ContractsPageV2(): JSX.Element {
         } else {
           setContracts([]);
         }
-      } catch (error) {
-        console.error('Error fetching contracts:', error);
+      } catch {
         setContracts([]);
       } finally {
         setIsLoading(false);

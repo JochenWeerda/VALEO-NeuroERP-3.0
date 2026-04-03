@@ -113,9 +113,9 @@ export default function LstCommodityPositionMatrix(): JSX.Element {
     queryFn: () => getCoverageMonitor(coverageParams),
   })
 
-  const matrix = matrixQuery.data
-  const kpi = kpiQuery.data
-  const coverage = coverageQuery.data
+  const matrix = matrixQuery.data?.data
+  const kpi = kpiQuery.data?.data
+  const coverage = coverageQuery.data?.data
 
   const handleExportMatrix = useCallback(() => {
     if (!matrix) return
@@ -130,7 +130,7 @@ export default function LstCommodityPositionMatrix(): JSX.Element {
       ...row.cells.map((c: PeriodCell) => c.qty_net),
     ])
     const csv = [headers.join(';'), ...rows.map((r: (string | number)[]) => r.join(';'))].join('\n')
-    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' })
+    const blob = new Blob([`\ufeff${  csv}`], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
@@ -180,7 +180,7 @@ export default function LstCommodityPositionMatrix(): JSX.Element {
         ...drill.top_causers.map((t) => [t.contract_no, t.contract_type, String(t.qty_rest), String(t.share_pct ?? '')]),
       ]
       const csv = rows.map((r) => r.join(';')).join('\n')
-      const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' })
+      const blob = new Blob([`\ufeff${  csv}`], { type: 'text/csv;charset=utf-8;' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
@@ -449,7 +449,7 @@ export default function LstCommodityPositionMatrix(): JSX.Element {
                       <TableCell className="text-right">{item.qty_sell_open.toLocaleString('de-DE')}</TableCell>
                       <TableCell className="text-right">{item.qty_net.toLocaleString('de-DE')}</TableCell>
                       <TableCell>
-                        <span className={cellBgClass(item.severity) + ' px-2 py-0.5 rounded'}>{item.severity}</span>
+                        <span className={`${cellBgClass(item.severity)  } px-2 py-0.5 rounded`}>{item.severity}</span>
                       </TableCell>
                     </TableRow>
                   ))}

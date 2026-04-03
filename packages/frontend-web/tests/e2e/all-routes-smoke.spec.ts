@@ -1,7 +1,7 @@
 /**
  * ALL-ROUTES SMOKE TEST
  *
- * Testet ALLE 494+ Routen des ERP-Systems automatisch und kategorisiert Fehler.
+ * Testet alle aus route-aliases + generierten Route-Gruppen geharvesteten Routen (typisch ~560).
  * Generiert einen JSON-Report unter tests/e2e/smoke-results.json
  *
  * Ausführung:

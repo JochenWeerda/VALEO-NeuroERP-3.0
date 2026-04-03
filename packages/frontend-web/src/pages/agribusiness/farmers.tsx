@@ -47,12 +47,17 @@ export default function FarmersPage(): JSX.Element {
       setIsLoading(true);
       try {
         const response = await fetch('/api/agribusiness/farmers');
-        if (response.ok) {
+        if (
+          response.ok &&
+          response.headers.get('content-type')?.includes('application/json')
+        ) {
           const data = await response.json();
-          setFarmers(data.data || []);
+          setFarmers(Array.isArray(data?.data) ? data.data : []);
+        } else {
+          setFarmers([]);
         }
-      } catch (error) {
-        console.error('Error fetching farmers:', error);
+      } catch {
+        setFarmers([]);
       } finally {
         setIsLoading(false);
       }

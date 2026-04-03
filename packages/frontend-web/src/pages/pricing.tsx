@@ -15,7 +15,7 @@ const DECIMAL_PLACES = 2
 
 export default function PricingPanel(): JSX.Element {
   const { data, isLoading } = useMcpQuery<{ data: PriceItem[] }>('pricing', 'list', [])
-  const rows: PriceItem[] = (data?.data ?? []) as PriceItem[]
+  const rows: PriceItem[] = Array.isArray(data?.data) ? (data.data as PriceItem[]) : []
   const [q, setQ] = React.useState<string>("")
   const [sel, setSel] = React.useState<PriceItem | null>(null)
   const { push } = useToast()

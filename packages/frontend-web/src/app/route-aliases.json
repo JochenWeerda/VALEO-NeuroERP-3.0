@@ -29,6 +29,14 @@
       "path": "admin/integrationen-quarantaene"
     },
     {
+      "module": "@/pages/admin/terminologie",
+      "path": "admin/terminologie"
+    },
+    {
+      "module": "@/pages/admin/voice-channel",
+      "path": "admin/voice-channel"
+    },
+    {
       "module": "@/pages/admin/monitoring/alerts",
       "path": "monitoring/alerts"
     },
