@@ -42,6 +42,9 @@
 | `SEC-028` | Security Observability | blockierte SSRF-Ziele und denied Cross-Tenant-Zugriffe werden zentral aufgezeichnet und ueber REST surfact |
 | `SEC-029` | Agrar Contracts | Contract- und Allocation-Pfade sind tenant-gebunden; freie Query-Tenants sind entfernt |
 | `SEC-030` | Security Dashboard / Alerting | Admin-Monitoring zeigt Security-Summary und Security-Alerts aus dem Recorder; CI deckt die neuen Monitoring-Pfade explizit ab |
+| `SEC-031` | Sales Orders | Query-/Payload-Tenants entfernt; Item-Deletes, Re-Reads und Delivery-Mutationen tenant-gescoped |
+| `SEC-032` | Sales Offers | Query-/Payload-Tenants entfernt; Update-/Delete-/Convert-Pfade und Item-Reset/Readback tenant-gescoped |
+| `SEC-034` | Security Event Persistence | append-only JSONL-Persistenz fuer Security-Events; Monitoring/Admin lesen nach Restart weiter |
 
 ## Wirkungsbild
 
@@ -51,8 +54,10 @@
   - freie Finance-Query-Tenants in Approval-, Reconciliation- und Tax-Key-Routern
   - freie Query-/Payload-Tenants in VAT-, Sales-Credit- und Sales-Reporting-Routern
   - freie Query-/Payload-/ID-Tenants in Delivery-Note-, Artikel- und Lagertransfer-Pfaden
+  - freie Query-/Payload-Tenants in Sales-Order- und Sales-Offer-Routern
   - fehlende Surfacing-Schicht fuer Security-Block-/Violation-Events
   - freier Tenant-/ID-Zugriff im Agrar-Contract-Router
+  - fluechtige In-Memory-Only-Security-Events ohne Restart-Persistenz
   - ungeschuetzte Realtime-/WS-Pfade
   - rohe Exception-Leaks
   - unkontrollierte Identifier-/XML-/HTML-Interpolation
@@ -63,19 +68,19 @@
 | Prioritaet | Thema | Warum noch offen |
 |-----------|-------|------------------|
 | `P0` | externer Produktions-Vault | lokales Keyring ist praktikabel fuer Dev, aber kein produktiver Secret-Store |
-| `P1` | weitere Auth-/Tenant-Router | die SAST-Triage nannte breite Endpunktflaechen; Finance/Sales/Inventory plus Agrar-Contracts sind gehaertet, aber nicht die gesamte API-Flaeche |
+| `P1` | weitere Auth-/Tenant-Router | die SAST-Triage nannte breite Endpunktflaechen; Finance/Sales/Inventory plus Agrar-Contracts, Sales Orders und Sales Offers sind gehaertet, aber nicht die gesamte API-Flaeche |
 | `P1` | zentrale Egress-/SSRF-Policy | durch `SEC-016` geschlossen |
 | `P1` | CI-Sicherheitslane | durch `SEC-017` geschlossen |
 | `P2` | restliche Frontend-HTML-Pfade | durch `SEC-018` inventarisiert und als Guard-Test abgesichert |
-| `P2` | Security-Observability | Dashboard-/Alerting-Surface ist angebunden; offen bleiben laengerfristige Persistenz und externes Alerting |
+| `P2` | Security-Observability | Dashboard-/Alerting-Surface ist angebunden; append-only Persistenz ist da, offen bleiben DB-/Audit-Bridge und externes Alerting |
 
 ## Empfohlene Folge-Slices
 
 1. `SEC-014` Externer Vault Adapter + Startup-Fail-Fast
-2. weiterer einzelner Backend-SAST-Slice mit klarem Dateibesitz
+2. weiterer einzelner Backend-SAST-Slice mit klarem Dateibesitz ausserhalb des bisherigen Sales-/Finance-Clusters
 3. produktive Rollout-/Rotationsstrecke fuer den externen Vault
-4. Restinventur weiterer Router ausserhalb Finance/Sales/Inventory/Agrar-Contracts
-5. externes Alerting und Persistenz auf Basis der neuen Monitoring-Surface
+4. DB-/Audit-Bridge fuer Security-Events statt nur JSONL-Datei
+5. externes Alerting auf Basis der neuen Monitoring-Surface
 
 ## Operative Regeln fuer die Folgephase
 
