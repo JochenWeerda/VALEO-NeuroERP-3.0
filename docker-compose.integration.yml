@@ -28,3 +28,25 @@ services:
       - workflow-mock
     ports:
       - "5205:5200"
+
+  superglue-db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: superglue
+      POSTGRES_USER: superglue
+      POSTGRES_PASSWORD: REDACTED_PASSWORD
+    ports:
+      - "5436:5432"
+
+  superglue:
+    image: superglueai/superglue:latest
+    depends_on:
+      - superglue-db
+    environment:
+      SUPERGLUE_AUTH_TOKEN: ${SUPERGLUE_AUTH_TOKEN:-change-me}
+      DATABASE_URL: postgresql://superglue:REDACTED_PASSWORD@superglue-db:5432/superglue
+      SUPERGLUE_PORT: "3011"
+    ports:
+      - "3010:3000"
+      - "3011:3011"
+      - "3012:3012"

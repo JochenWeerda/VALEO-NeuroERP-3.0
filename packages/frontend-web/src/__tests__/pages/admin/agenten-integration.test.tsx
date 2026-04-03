@@ -80,6 +80,17 @@ describe('AgentenIntegrationPage', () => {
           ],
         },
       })
+      .mockResolvedValueOnce({
+        data: {
+          provider_key: 'superglue',
+          enabled: true,
+          sync_enabled: true,
+          execution_enabled: false,
+          tool_count: 3,
+          healthy: true,
+          dashboard_url: '/api/v1/agent/integrations/providers/superglue/sync-status',
+        },
+      })
   })
 
   it('zeigt Agent UX Panel und Idempotency Monitoring', async () => {
@@ -87,6 +98,7 @@ describe('AgentenIntegrationPage', () => {
 
     expect(await screen.findByText('Agent UX Panel')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Idempotency Monitoring' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Superglue Hub' })).toBeInTheDocument()
     expect(screen.getByText('84%')).toBeInTheDocument()
     expect(screen.getByText('Command Catalog')).toBeInTheDocument()
   })

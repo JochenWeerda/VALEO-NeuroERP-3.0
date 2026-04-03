@@ -1,6 +1,6 @@
 # Superglue Integration - Implementierungsplan
 
-**Status:** Planungsgrundlage / umsetzungsnah
+**Status:** in Umsetzung, Basispfade INT-SG-001 bis INT-SG-008 umgesetzt
 **Datum:** 2026-04-03
 **Baut auf:** [superglue-integration-bewertung.md](./superglue-integration-bewertung.md), [ADR-014](../adr/adr-014-integrationsgrenzen-api-edi-mcp-partneradapter.md), [ADR-007](../adr/adr-007-agent-tool-contract-governance.md)
 
@@ -265,6 +265,11 @@ Jeder produktive Call erzeugt:
 | Business-Logik-Drift | Mapping-Logik wandert in Superglue | Transforms nur technisch, nie fachlich |
 
 ## 9. Rollout-Reihenfolge
+
+Aktueller Stand 2026-04-03:
+
+- `INT-SG-001` bis `INT-SG-008` sind als Basis-MVP im Repo umgesetzt.
+- Offen bleiben produktive Connector-Konfiguration, tenant-spezifische Secret-Bestueckung und ein erster echter Live-Connector.
 
 ### INT-SG-001 - Contract- und Settings-Basis
 

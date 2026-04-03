@@ -115,6 +115,7 @@ class Settings(BaseSettings):
     SUPERGLUE_ALLOWED_DOMAINS: List[str] = []
     SUPERGLUE_SYNC_ENABLED: bool = False
     SUPERGLUE_EXECUTION_ENABLED: bool = False
+    SUPERGLUE_REQUIRE_TENANT_SECRETS: bool = False
     SECURITY_EVENT_PERSISTENCE_ENABLED: bool = True
     SECURITY_EVENT_LOG_PATH: str = "runtime/security-events/security-events.jsonl"
 

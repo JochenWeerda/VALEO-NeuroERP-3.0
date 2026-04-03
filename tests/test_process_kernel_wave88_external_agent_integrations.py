@@ -20,8 +20,8 @@ def test_external_agent_catalog_exposes_openapi_and_mcp_surfaces():
     assert response.status_code == 200
     body = response.json()
     assert body["manifest_kind"] == "EXTERNAL_AGENT_INTEGRATION_CATALOG"
-    assert body["provider_count"] >= 6
-    assert body["use_case_count"] >= 10
+    assert body["provider_count"] >= 7
+    assert body["use_case_count"] >= 12
     assert set(use_case["domain"] for use_case in body["use_cases"]) >= {
         "process",
         "workflow",
@@ -34,6 +34,7 @@ def test_external_agent_catalog_exposes_openapi_and_mcp_surfaces():
     assert body["sources"]
     assert any(source["rel"] == "openapi" for source in body["sources"])
     assert any(source["rel"] == "mcp-tool-contracts" for source in body["sources"])
+    assert any(provider["provider_key"] == "superglue" for provider in body["providers"])
 
 
 def test_external_agent_provider_catalog_filters_by_provider_key():
@@ -67,6 +68,24 @@ def test_external_agent_use_cases_surface_install_pack_and_domain_filter():
     assert "/api/v1/process/knowledge/retrieve" in pack["entrypoints"]
     assert pack["tool_contracts"]
     assert pack["command_manifest_url"] == "/api/v1/commands/agent-manifest"
+
+
+def test_superglue_provider_routes_surface_sync_and_health():
+    client = _client()
+
+    provider = client.get("/agent/integrations/providers/superglue")
+    sync = client.get("/agent/integrations/providers/superglue/sync-status")
+    tools = client.get("/agent/integrations/providers/superglue/tools")
+    health = client.get("/agent/integrations/providers/superglue/health")
+
+    assert provider.status_code == 200
+    assert provider.json()["provider_key"] == "superglue"
+    assert sync.status_code == 200
+    assert sync.json()["provider_key"] == "superglue"
+    assert tools.status_code == 200
+    assert tools.json()["tool_count"] >= 3
+    assert health.status_code == 200
+    assert health.json()["provider_key"] == "superglue"
 
 
 def test_external_agent_unknown_use_case_returns_404():

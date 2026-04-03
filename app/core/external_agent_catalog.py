@@ -23,6 +23,7 @@ ProviderKind = Literal[
     "microsoft_teams_app",
     "custom_agent_sdk",
     "automation_platform",
+    "superglue",
 ]
 
 
@@ -37,6 +38,7 @@ class ExternalAgentProvider(BaseModel):
     requires_manual_install: bool = False
     default_headers: list[str] = Field(default_factory=lambda: ["Authorization", "X-Tenant-ID"])
     install_notes: list[str] = Field(default_factory=list)
+    dashboard_url: str | None = None
     schema_version: int = 1
 
 
@@ -91,6 +93,18 @@ class ExternalAgentIntegrationManifest(BaseModel):
 
 def _default_providers() -> list[ExternalAgentProvider]:
     return [
+        ExternalAgentProvider(
+            provider_key="superglue",
+            provider_name="Superglue Integration Hub",
+            provider_kind="superglue",
+            auth_model="tenant-scoped secret + bearer header",
+            requires_manual_install=True,
+            install_notes=[
+                "Runs behind the VALEO integration boundary.",
+                "Use VALEO provider sync instead of a second standalone tool registry.",
+            ],
+            dashboard_url="/api/v1/agent/integrations/providers/superglue/sync-status",
+        ),
         ExternalAgentProvider(
             provider_key="openapi_client",
             provider_name="OpenAPI Client",
@@ -165,6 +179,44 @@ def _default_providers() -> list[ExternalAgentProvider]:
 
 def _default_use_cases() -> list[ExternalAgentUseCase]:
     return [
+        ExternalAgentUseCase(
+            use_case_id="superglue_document_bridge",
+            title="Superglue Document Bridge",
+            description="Pilot document lookup via Superglue without bypassing VALEO audit and tenant rules.",
+            domain="docflow",
+            provider_keys=["superglue"],
+            auth_model="tenant-scoped secret + bearer header",
+            approval_required=False,
+            entrypoints=[
+                "/api/v1/agent/integrations/providers/superglue/tools",
+                "/api/v1/agent/integrations/providers/superglue/sync-status",
+            ],
+            tool_contracts=["superglue.document.search", "superglue.document.metadata"],
+            install_steps=[
+                "Configure tenant-specific Superglue credentials.",
+                "Validate outbound allowlists and dashboard reachability.",
+                "Use the pilot document adapter for read-only lookups first.",
+            ],
+            example_prompt="Search external DMS documents for contract 4711.",
+            expected_outcome="A tenant-safe document search via the Superglue pilot adapter.",
+        ),
+        ExternalAgentUseCase(
+            use_case_id="superglue_partner_preview",
+            title="Superglue Partner Preview",
+            description="Preview external partner and legacy adapter mappings before productive execution is enabled.",
+            domain="supply_chain",
+            provider_keys=["superglue"],
+            auth_model="tenant-scoped secret + bearer header",
+            approval_required=False,
+            entrypoints=["/api/v1/agent/integrations/providers/superglue/sync-status"],
+            tool_contracts=["superglue.partner.adapter.preview"],
+            install_steps=[
+                "Use sync status to verify the mapped tool catalog.",
+                "Keep partner preview flows in simulate/suggest until approvals are wired.",
+            ],
+            example_prompt="Preview the mapped adapter steps for partner feed X.",
+            expected_outcome="A synced provider view without introducing a second registry.",
+        ),
         ExternalAgentUseCase(
             use_case_id="knowledge_lookup",
             title="Knowledge Lookup",
@@ -398,6 +450,9 @@ def build_external_agent_integration_catalog(
 
     tool_manifest = build_agent_tool_contract_manifest()
     command_manifest = build_agent_command_manifest()
+    from app.integrations.adapters.superglue.tool_sync import build_superglue_sync_status
+
+    superglue_sync = build_superglue_sync_status()
     domains = sorted({use_case.domain for use_case in use_cases})
 
     return ExternalAgentIntegrationManifest(
@@ -429,11 +484,17 @@ def build_external_agent_integration_catalog(
                 "href": "/api/v1/agent/tool-contracts/openapi",
                 "description": "OpenAPI-linked tool contract view",
             },
+            {
+                "rel": "superglue-sync-status",
+                "href": "/api/v1/agent/integrations/providers/superglue/sync-status",
+                "description": "Mapped Superglue provider and sync surface",
+            },
         ],
         notes=[
             "Provider catalog and use-case catalog are additive to the Process-Kernel tool manifest.",
             f"Tool contract manifest exposes {tool_manifest.tool_count} productively supported tools.",
             f"Command manifest exposes {len(command_manifest.commands)} command contracts.",
+            f"Superglue sync currently exposes {superglue_sync.tool_count} mapped tool records.",
             "Install packs are intentionally opinionated: they show the canonical entry points, headers and approval constraints.",
         ],
     )

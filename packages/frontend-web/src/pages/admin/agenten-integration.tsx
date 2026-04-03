@@ -53,6 +53,19 @@ type CommandCatalogItem = {
   backend_endpoints: string[]
 }
 
+type SuperglueStatus = {
+  provider_key: string
+  enabled: boolean
+  sync_enabled: boolean
+  execution_enabled: boolean
+  tool_count: number
+  healthy: boolean
+  dashboard_url?: string | null
+  graphql_url?: string | null
+  rest_url?: string | null
+  detail?: string | null
+}
+
 const API_BASE = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || ''
 const BACKEND_ORIGIN = API_BASE || (typeof window !== 'undefined' ? window.location.origin : '')
 
@@ -76,6 +89,10 @@ export default function AgentenIntegrationPage(): JSX.Element {
     queryKey: ['agent', 'idempotency-overview'],
     queryFn: async () => (await apiClient.get<IdempotencyOverview>('/api/v1/process/actions/idempotency/overview')).data,
   })
+  const superglueStatusQuery = useQuery({
+    queryKey: ['agent', 'superglue-status'],
+    queryFn: async () => (await apiClient.get<SuperglueStatus>('/api/v1/agent/integrations/providers/superglue/sync-status')).data,
+  })
 
   const downloadManifest = (): void => {
     if (!manifestQuery.data) {
@@ -90,12 +107,12 @@ export default function AgentenIntegrationPage(): JSX.Element {
     URL.revokeObjectURL(url)
   }
 
-  if (manifestQuery.isLoading || commandCatalogQuery.isLoading || idempotencyOverviewQuery.isLoading) {
+  if (manifestQuery.isLoading || commandCatalogQuery.isLoading || idempotencyOverviewQuery.isLoading || superglueStatusQuery.isLoading) {
     return <LoadingState message="Agenten- und Idempotenzdaten werden geladen..." />
   }
 
-  const firstError = manifestQuery.error ?? commandCatalogQuery.error ?? idempotencyOverviewQuery.error
-  if (manifestQuery.isError || commandCatalogQuery.isError || idempotencyOverviewQuery.isError || !manifestQuery.data) {
+  const firstError = manifestQuery.error ?? commandCatalogQuery.error ?? idempotencyOverviewQuery.error ?? superglueStatusQuery.error
+  if (manifestQuery.isError || commandCatalogQuery.isError || idempotencyOverviewQuery.isError || superglueStatusQuery.isError || !manifestQuery.data) {
     return <ErrorState error={firstError as Error} onRetry={() => void manifestQuery.refetch()} />
   }
 
@@ -106,6 +123,7 @@ export default function AgentenIntegrationPage(): JSX.Element {
   const docsLink = manifest.links.find((link) => link.rel === 'agent-docs')
   const commandCatalog = commandCatalogQuery.data ?? []
   const idempotencyOverview = idempotencyOverviewQuery.data
+  const superglueStatus = superglueStatusQuery.data
   const sampleTenant =
     window.localStorage.getItem('tenant_id') ||
     window.sessionStorage.getItem('tenant_id') ||
@@ -206,6 +224,37 @@ export default function AgentenIntegrationPage(): JSX.Element {
             {openapiLink ? <p><strong>OpenAPI:</strong> <a href={absoluteUrl(openapiLink.href)} target="_blank" rel="noopener noreferrer" className="text-primary underline hover:no-underline">{absoluteUrl(openapiLink.href)}</a></p> : null}
             {swaggerLink ? <p><strong>Swagger:</strong> <a href={absoluteUrl(swaggerLink.href)} target="_blank" rel="noopener noreferrer" className="text-primary underline hover:no-underline">{absoluteUrl(swaggerLink.href)}</a></p> : null}
             {redocLink ? <p><strong>ReDoc:</strong> <a href={absoluteUrl(redocLink.href)} target="_blank" rel="noopener noreferrer" className="text-primary underline hover:no-underline">{absoluteUrl(redocLink.href)}</a></p> : null}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5" />
+              Superglue Hub
+            </CardTitle>
+            <CardDescription>
+              Kontrollierter Integrationspfad hinter der VALEO Integration Boundary.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            <p><strong>Status:</strong> {superglueStatus?.healthy ? 'gesund' : 'nicht bereit'}</p>
+            <p><strong>Tools:</strong> {superglueStatus?.tool_count ?? 0}</p>
+            <p><strong>Sync:</strong> {superglueStatus?.sync_enabled ? 'aktiv' : 'deaktiviert'}</p>
+            <p><strong>Execution:</strong> {superglueStatus?.execution_enabled ? 'aktiv' : 'deaktiviert'}</p>
+            {superglueStatus?.dashboard_url ? (
+              <a
+                href={absoluteUrl(superglueStatus.dashboard_url)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-primary underline hover:no-underline"
+              >
+                Dashboard / Status
+                <ExternalLink className="h-4 w-4" />
+              </a>
+            ) : (
+              <Badge variant="outline">Dashboard-Link folgt aus der Backend-Konfiguration</Badge>
+            )}
           </CardContent>
         </Card>
       </div>

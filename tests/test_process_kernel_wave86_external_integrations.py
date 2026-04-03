@@ -29,10 +29,11 @@ def test_external_agent_integration_catalog_surfaces_eleven_use_cases():
     assert response.status_code == 200
     body = response.json()
     assert body["manifest_kind"] == "EXTERNAL_AGENT_INTEGRATION_CATALOG"
-    assert body["provider_count"] >= 6
-    assert body["use_case_count"] >= 11
+    assert body["provider_count"] >= 7
+    assert body["use_case_count"] >= 13
     assert "knowledge_lookup" in {item["use_case_id"] for item in body["use_cases"]}
     assert "slack_app" in {provider["provider_key"] for provider in body["providers"]}
+    assert "superglue" in {provider["provider_key"] for provider in body["providers"]}
 
 
 def test_external_agent_install_pack_exposes_entrypoints_and_headers():
