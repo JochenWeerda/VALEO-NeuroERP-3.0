@@ -79,6 +79,45 @@ def validate_outbound_http_target(
     return urlunsplit(parsed)
 
 
+def validate_outbound_http_target_against_allowlists(
+    raw_url: str,
+    *,
+    allowed_hosts: list[str] | tuple[str, ...] | None = None,
+    allowed_domains: list[str] | tuple[str, ...] | None = None,
+    allowed_schemes: tuple[str, ...] = ("http", "https"),
+) -> str:
+    """
+    Validate an outbound target against the shared network policy and an optional
+    caller-provided allowlist set.
+    """
+
+    parsed = urlsplit(str(raw_url).strip())
+    scheme = parsed.scheme.lower()
+    if scheme not in allowed_schemes:
+        _reject_outbound_target("Nur HTTP/HTTPS URLs erlaubt", raw_url=raw_url)
+
+    hostname = (parsed.hostname or "").strip().lower()
+    if not hostname:
+        _reject_outbound_target("Hostname fehlt", raw_url=raw_url)
+
+    if hostname in _DISALLOWED_HOSTS or hostname.endswith(_DISALLOWED_HOST_SUFFIXES):
+        _reject_outbound_target(
+            "Localhost/interne Hostnamen sind nicht erlaubt",
+            raw_url=raw_url,
+            hostname=hostname,
+        )
+
+    _validate_host_against_network_policy(hostname, raw_url)
+    _validate_host_against_allowlist(
+        hostname,
+        raw_url,
+        allowed_hosts=allowed_hosts,
+        allowed_domains=allowed_domains,
+    )
+
+    return urlunsplit(parsed)
+
+
 def _validate_host_against_network_policy(hostname: str, raw_url: str) -> None:
     try:
         ip = ipaddress.ip_address(hostname)
@@ -100,20 +139,30 @@ def _validate_host_against_network_policy(hostname: str, raw_url: str) -> None:
         )
 
 
-def _validate_host_against_allowlist(hostname: str, raw_url: str) -> None:
-    allowed_hosts = {host.strip().lower() for host in settings.OUTBOUND_HTTP_ALLOWED_HOSTS if host.strip()}
-    allowed_domains = {
+def _validate_host_against_allowlist(
+    hostname: str,
+    raw_url: str,
+    *,
+    allowed_hosts: list[str] | tuple[str, ...] | None = None,
+    allowed_domains: list[str] | tuple[str, ...] | None = None,
+) -> None:
+    allowed_host_values = allowed_hosts if allowed_hosts is not None else settings.OUTBOUND_HTTP_ALLOWED_HOSTS
+    allowed_domain_values = (
+        allowed_domains if allowed_domains is not None else settings.OUTBOUND_HTTP_ALLOWED_DOMAINS
+    )
+    allowed_hosts_set = {host.strip().lower() for host in allowed_host_values if host.strip()}
+    allowed_domains_set = {
         domain.strip().lower().lstrip(".")
-        for domain in settings.OUTBOUND_HTTP_ALLOWED_DOMAINS
+        for domain in allowed_domain_values
         if domain.strip()
     }
-    if not allowed_hosts and not allowed_domains:
+    if not allowed_hosts_set and not allowed_domains_set:
         return
 
-    if hostname in allowed_hosts:
+    if hostname in allowed_hosts_set:
         return
 
-    for domain in allowed_domains:
+    for domain in allowed_domains_set:
         if hostname == domain or hostname.endswith(f".{domain}"):
             return
 
