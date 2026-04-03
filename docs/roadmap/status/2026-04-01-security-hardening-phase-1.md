@@ -36,6 +36,9 @@
 | `SEC-022` | VAT Return Export | Query-/Body-Tenants entfernt, VAT-Return-Pfade tenant-gebunden |
 | `SEC-023` | Sales Credit Notes / Returns | Payload-/Query-Tenants entfernt, Post-/Status-Pfade tenant-gescoped |
 | `SEC-024` | Sales Reports | Report- und Pipeline-Pfade lesen Tenant nur noch aus dem Kontext |
+| `SEC-025` | Sales Delivery Notes | Context-Tenant auf allen CRUD-/Post-/Print-/Invoice-Pfaden, finale Invoice-Mutation tenant-gescoped |
+| `SEC-026` | Articles API | Payload-Spoofing blockiert; Dokument-, Preis-, Supplier-, Stock- und Image-Nebenpfade tenant-gebunden |
+| `SEC-027` | Warehouse Transfers | Transfer-, Lines-, Corrections- und Bin-Location-Pfade nur noch ueber Kontext-Tenant |
 
 ## Wirkungsbild
 
@@ -44,6 +47,7 @@
   - freie Tenant-Zugriffe in Finance-/Einkauf-Routern
   - freie Finance-Query-Tenants in Approval-, Reconciliation- und Tax-Key-Routern
   - freie Query-/Payload-Tenants in VAT-, Sales-Credit- und Sales-Reporting-Routern
+  - freie Query-/Payload-/ID-Tenants in Delivery-Note-, Artikel- und Lagertransfer-Pfaden
   - ungeschuetzte Realtime-/WS-Pfade
   - rohe Exception-Leaks
   - unkontrollierte Identifier-/XML-/HTML-Interpolation
@@ -54,7 +58,7 @@
 | Prioritaet | Thema | Warum noch offen |
 |-----------|-------|------------------|
 | `P0` | externer Produktions-Vault | lokales Keyring ist praktikabel fuer Dev, aber kein produktiver Secret-Store |
-| `P1` | weitere Auth-/Tenant-Router | die SAST-Triage nannte breite Endpunktflaechen; bisher nur die hoechst priorisierten Router sind hart gemacht |
+| `P1` | weitere Auth-/Tenant-Router | die SAST-Triage nannte breite Endpunktflaechen; ein grosser Finance-/Sales-/Inventory-Block ist geschlossen, aber nicht die gesamte API-Flaeche |
 | `P1` | zentrale Egress-/SSRF-Policy | durch `SEC-016` geschlossen |
 | `P1` | CI-Sicherheitslane | durch `SEC-017` geschlossen |
 | `P2` | restliche Frontend-HTML-Pfade | durch `SEC-018` inventarisiert und als Guard-Test abgesichert |
@@ -63,10 +67,10 @@
 ## Empfohlene Folge-Slices
 
 1. `SEC-014` Externer Vault Adapter + Startup-Fail-Fast
-2. `SEC-015` Weitere Auth-/Tenant-Router aus der SAST-Triage, jeweils einzeln und mit Dateibesitz
-3. weiterer einzelner Backend-SAST-Slice mit klarem Dateibesitz
-4. Security-Observability fuer Block-/Violation-Events
-5. produktive Rollout-/Rotationsstrecke fuer den externen Vault
+2. weiterer einzelner Backend-SAST-Slice mit klarem Dateibesitz
+3. Security-Observability fuer Block-/Violation-Events
+4. produktive Rollout-/Rotationsstrecke fuer den externen Vault
+5. Restinventur weiterer Router ausserhalb Finance/Sales/Inventory
 
 ## Operative Regeln fuer die Folgephase
 
