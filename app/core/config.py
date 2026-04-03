@@ -103,6 +103,8 @@ class Settings(BaseSettings):
     HASHICORP_VAULT_PATH_PREFIX: str = "valeo-neuroerp"
     OUTBOUND_HTTP_ALLOWED_HOSTS: List[str] = []
     OUTBOUND_HTTP_ALLOWED_DOMAINS: List[str] = []
+    SECURITY_EVENT_PERSISTENCE_ENABLED: bool = True
+    SECURITY_EVENT_LOG_PATH: str = "runtime/security-events/security-events.jsonl"
 
     # Feature Flags
     ENABLE_METRICS: bool = True

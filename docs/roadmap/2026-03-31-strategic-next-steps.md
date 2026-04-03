@@ -15,7 +15,7 @@ Dieses Dokument fasst priorisierte Hebel fuer **Produktreife**, **Vertrauen im B
 | **End-to-End-Tests pro Kern-Lane** | Wenige kritische Flows wie Service-to-Customer, Agrar-Annahme und OTC-Zahlung mit fester Testdaten-Strategie und CI absichern. |
 | **Beobachtbarkeit** | Strukturierte Logs, Metriken und Tracing fuer API, Neuro-Pipeline und NATS sichtbar machen, bevor Kunden Fehler melden. |
 | **Offene UI-Skelette** | Kleine Navigations- und Integrationsluecken schliessen; hoher "fertig"-Effekt bei geringem Aufwand. |
-| **Security-Hardening Phase 2** | Nach `SEC-001` bis `SEC-013` die restlichen P1-SAST-Funde pro Router und Runtime-Schnittstelle einzeln abarbeiten: Auth-Dependencies, Tenant-Isolation, SSRF-/Egress-Regeln und verbleibende Injection-Pfade. |
+| **Security-Hardening Phase 2** | Nach `SEC-001` bis `SEC-034` die restlichen P1-SAST-Funde pro Router und Runtime-Schnittstelle einzeln abarbeiten und die neue Security-Observability von JSONL-Persistenz zu DB-/Alerting-Pfaden weiterziehen. |
 
 ## 2. Mittelfristig - Produktreife
 
@@ -49,7 +49,7 @@ Dieses Dokument fasst priorisierte Hebel fuer **Produktreife**, **Vertrauen im B
 | **P1** | **Outbound-/Webhook-Governance** | SSRF-Block aus `SEC-012` zu einer zentralen Egress-Policy erweitern: Allow-Lists, DNS-/IP-Pruefung, optional Timeout-/Retry-Budget. |
 | **P1** | **Security-Regression in CI** | Die neuen Security-Tests als feste Lane im CI verankern, damit die SAST-Funde nicht wieder aufbrechen. |
 | **P2** | **Frontend-Print-/Export-Haertung ausweiten** | `document.write`- und HTML-Template-Pfade ausserhalb der jetzt gefixten Utilities auf denselben Escape-Standard ziehen. |
-| **P2** | **Observability fuer Security-Ereignisse** | Auth-/Tenant-Verstoesse, SSRF-Blockaden und Vault-Fehler als sichtbare Security-Metriken und strukturierte Logs surfacen. |
+| **P2** | **Observability fuer Security-Ereignisse** | Auth-/Tenant-Verstoesse, SSRF-Blockaden und Vault-Fehler sind sichtbar; als naechstes DB-/Audit-Bridge und externes Alerting nachziehen. |
 
 ## Verweise
 
@@ -57,3 +57,4 @@ Dieses Dokument fasst priorisierte Hebel fuer **Produktreife**, **Vertrauen im B
 - Neuro-Stack-Matrix: [neuro-stack-gap-matrix-2026-03-29.md](../project-context/neuro-stack-gap-matrix-2026-03-29.md)
 - Operativ: [active-workboard.md](../agent-ops/active-workboard.md)
 - Security-Fortschritt / Folgeplan: [2026-04-01-security-hardening-phase-1.md](status/2026-04-01-security-hardening-phase-1.md)
+- Security-Phase 2: [2026-04-03-security-hardening-phase-2.md](status/2026-04-03-security-hardening-phase-2.md)
