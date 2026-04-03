@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.config import settings
+from app.core.tenant import get_tenant_id
 from app.services.kontrakt_movement_sync import sync_movements_for_delivery_note
 
 router = APIRouter(prefix="/sales/delivery-notes", tags=["sales", "delivery-notes"])
@@ -198,7 +199,7 @@ def _list_positions(db: Session, delivery_note_id: str) -> list[dict]:
 async def create_delivery_note(
     payload: DeliveryNoteCreate,
     request: Request,
-    tenant_id: str = Query(DEFAULT_TENANT),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Create a new delivery note."""
@@ -319,7 +320,7 @@ async def create_delivery_note(
 @router.get("/{ls_id}", response_model=DeliveryNote)
 async def get_delivery_note(
     ls_id: str,
-    tenant_id: str = Query(DEFAULT_TENANT),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Get a delivery note by ID."""
@@ -336,7 +337,7 @@ async def get_delivery_note(
 async def update_delivery_note(
     ls_id: str,
     payload: DeliveryNoteUpdate,
-    tenant_id: str = Query(DEFAULT_TENANT),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Update a delivery note. When status is draft and positionen is provided, positions are replaced (Option A)."""
@@ -428,7 +429,7 @@ async def update_delivery_note(
 @router.delete("/{ls_id}", status_code=204)
 async def delete_delivery_note(
     ls_id: str,
-    tenant_id: str = Query(DEFAULT_TENANT),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Delete a delivery note. Only draft delivery notes can be deleted."""
@@ -455,7 +456,7 @@ async def delete_delivery_note(
 @router.post("/{ls_id}/post", response_model=DeliveryNote)
 async def post_delivery_note(
     ls_id: str,
-    tenant_id: str = Query(DEFAULT_TENANT),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Post (book) a delivery note."""
@@ -487,7 +488,7 @@ async def post_delivery_note(
 async def print_delivery_note(
     ls_id: str,
     attestation: Optional[str] = Query(None, description="Reason for printing (required if already posted)"),
-    tenant_id: str = Query(DEFAULT_TENANT),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
     request: Request = None,
 ):
@@ -539,7 +540,7 @@ async def print_delivery_note(
 async def list_delivery_notes(
     customer_id: Optional[str] = Query(None),
     status_filter: Optional[str] = Query(None),
-    tenant_id: str = Query(DEFAULT_TENANT),
+    tenant_id: str = Depends(get_tenant_id),
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=200),
     db: Session = Depends(get_db),
@@ -582,7 +583,7 @@ async def list_delivery_notes(
 async def get_last_delivery_note(
     operator_id: Optional[str] = Query(None, description="Filter by operator ID (user who created the delivery note)"),
     customer_id: Optional[str] = Query(None, description="Filter by customer ID"),
-    tenant_id: str = Query(DEFAULT_TENANT),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Get the last delivery note for a user/customer (for 'Wie vorheriger Beleg' functionality)."""
@@ -617,7 +618,7 @@ async def get_last_delivery_note(
 @router.post("/{ls_id}/create-invoice", response_model=dict, status_code=201)
 async def create_invoice_from_delivery(
     ls_id: str,
-    tenant_id: str = Query(DEFAULT_TENANT),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Create a sales invoice from a posted delivery note (Dokumentenfluss LS → RE)."""
@@ -652,8 +653,12 @@ async def create_invoice_from_delivery(
     )
 
     db.execute(
-        text("UPDATE domain_sales.delivery_notes SET status = 'invoiced', updated_at = NOW() WHERE id = :id"),
-        {"id": ls_id},
+        text("""
+            UPDATE domain_sales.delivery_notes
+            SET status = 'invoiced', updated_at = NOW()
+            WHERE id = :id AND tenant_id = :tenant_id
+        """),
+        {"id": ls_id, "tenant_id": tenant_id},
     )
     db.commit()
     return {

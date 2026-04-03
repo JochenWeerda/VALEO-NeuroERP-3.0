@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from ....core.config import settings
 from ....core.data_quality_enforcement import build_dq_error_detail, evaluate_article_datensatz
 from ....core.database import get_db
+from ....core.tenant import get_tenant_id
 from ....infrastructure.models import Article as ArticleModel
 from ....infrastructure.models import BusinessPartnerDiscountItem, BusinessPartnerPriceAgreement, ArticleSupplier, ArticleDocument
 from ....infrastructure.models import StockMovement
@@ -20,6 +21,29 @@ from ..schemas.inventory import Article, ArticleCreate, ArticleUpdate
 router = APIRouter()
 
 DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
+
+
+def _resolve_article_tenant(payload_tenant_id: Optional[str], tenant_id: str) -> str:
+    requested_tenant = (payload_tenant_id or "").strip()
+    if requested_tenant and requested_tenant != tenant_id:
+        raise HTTPException(status_code=403, detail="Article payload belongs to a different tenant")
+    return tenant_id
+
+
+def _get_article_or_404(db: Session, article_id: str, tenant_id: str) -> ArticleModel:
+    article = (
+        db.query(ArticleModel)
+        .filter(
+            ArticleModel.id == article_id,
+            ArticleModel.tenant_id == tenant_id,
+            ArticleModel.is_active == True,  # noqa: E712
+            ArticleModel.deleted_at.is_(None),
+        )
+        .first()
+    )
+    if not article:
+        raise HTTPException(status_code=404, detail="Article not found")
+    return article
 
 
 def _build_article_dq_datensatz(data: dict) -> dict[str, object]:
@@ -165,17 +189,15 @@ def _to_article_schema(row: ArticleModel) -> Article:
 
 @router.get("/", response_model=PaginatedResponse[Article])
 async def list_articles(
-    tenant_id: Optional[str] = Query(None, description="Filter by tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     search: Optional[str] = Query(None, description="Search in name, number or barcode"),
     skip: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(25, ge=1, le=200, description="Maximum number of records"),
     db: Session = Depends(get_db),
 ):
     """Return a paginated list of articles."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
-
     query = db.query(ArticleModel).filter(ArticleModel.is_active == True)  # noqa: E712
-    query = query.filter(ArticleModel.tenant_id == effective_tenant)
+    query = query.filter(ArticleModel.tenant_id == tenant_id)
 
     rank = None
     if search:
@@ -205,14 +227,13 @@ async def search_articles(
     q: str = Query(..., min_length=2, description="Search term"),
     limit: int = Query(10, ge=1, le=50, description="Maximum number of results"),
     db: Session = Depends(get_db),
-    tenant_id: Optional[str] = Query(None, description="Filter by tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """Lightweight search endpoint used by the POS to power autocomplete."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
     query = (
         db.query(ArticleModel)
         .filter(ArticleModel.is_active == True)  # noqa: E712
-        .filter(ArticleModel.tenant_id == effective_tenant)
+        .filter(ArticleModel.tenant_id == tenant_id)
     )
 
     query, rank = _fulltext_filter(query, q)
@@ -230,29 +251,22 @@ async def search_articles(
 @router.get("/{article_id}", response_model=Article)
 async def get_article(
     article_id: str,
-    tenant_id: Optional[str] = Query(None, description="Filter by tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Fetch a single article by identifier."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
-    article = (
-        db.query(ArticleModel)
-        .filter(
-            ArticleModel.id == article_id,
-            ArticleModel.tenant_id == effective_tenant,
-            ArticleModel.is_active == True,  # noqa: E712
-            ArticleModel.deleted_at.is_(None),
-        )
-        .first()
-    )
-    if not article:
-        raise HTTPException(status_code=404, detail="Article not found")
+    article = _get_article_or_404(db, article_id, tenant_id)
     return _to_article_schema(article)
 
 
 @router.post("/", response_model=Article, status_code=status.HTTP_201_CREATED)
-async def create_article(article_data: ArticleCreate, db: Session = Depends(get_db)):
+async def create_article(
+    article_data: ArticleCreate,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
     """Create a new article."""
+    effective_tenant = _resolve_article_tenant(article_data.tenant_id, tenant_id)
     dq_result = evaluate_article_datensatz(_build_article_dq_datensatz(article_data.model_dump()))
     if not dq_result.bestanden:
         raise HTTPException(status_code=422, detail=build_dq_error_detail("Artikel", dq_result))
@@ -260,7 +274,7 @@ async def create_article(article_data: ArticleCreate, db: Session = Depends(get_
     duplicate = (
         db.query(ArticleModel)
         .filter(
-            ArticleModel.tenant_id == article_data.tenant_id,
+            ArticleModel.tenant_id == effective_tenant,
             ArticleModel.article_number == article_data.article_number,
             ArticleModel.deleted_at.is_(None),
         )
@@ -270,7 +284,7 @@ async def create_article(article_data: ArticleCreate, db: Session = Depends(get_
         raise HTTPException(status_code=409, detail="Article number already exists")
 
     article = ArticleModel(
-        tenant_id=article_data.tenant_id,
+        tenant_id=effective_tenant,
         article_number=article_data.article_number,
         name=article_data.name,
         description=article_data.description,
@@ -363,23 +377,12 @@ async def create_article(article_data: ArticleCreate, db: Session = Depends(get_
 async def update_article(
     article_id: str,
     article_data: ArticleUpdate,
-    tenant_id: Optional[str] = Query(None, description="Filter by tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Update an existing article."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
-    article = (
-        db.query(ArticleModel)
-        .filter(
-            ArticleModel.id == article_id,
-            ArticleModel.tenant_id == effective_tenant,
-            ArticleModel.is_active == True,  # noqa: E712
-            ArticleModel.deleted_at.is_(None),
-        )
-        .first()
-    )
-    if not article:
-        raise HTTPException(status_code=404, detail="Article not found")
+    effective_tenant = tenant_id
+    article = _get_article_or_404(db, article_id, effective_tenant)
 
     payload = article_data.model_dump(exclude_unset=True)
     new_number = payload.get("article_number")
@@ -424,23 +427,11 @@ async def update_article(
 )
 async def delete_article(
     article_id: str,
-    tenant_id: Optional[str] = Query(None, description="Filter by tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> Response:
     """Soft-delete an article."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
-    article = (
-        db.query(ArticleModel)
-        .filter(
-            ArticleModel.id == article_id,
-            ArticleModel.tenant_id == effective_tenant,
-            ArticleModel.is_active == True,  # noqa: E712
-            ArticleModel.deleted_at.is_(None),
-        )
-        .first()
-    )
-    if not article:
-        raise HTTPException(status_code=404, detail="Article not found")
+    article = _get_article_or_404(db, article_id, tenant_id)
 
     article.is_active = False
     article.deleted_at = datetime.now(timezone.utc)
@@ -458,15 +449,16 @@ from ....infrastructure.models import BusinessPartnerDiscountItem, BusinessPartn
 @router.get("/{article_id}/suppliers", response_model=dict)
 async def get_article_suppliers(
     article_id: str,
-    tenant_id: Optional[str] = Query(None, description="Filter by tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Get suppliers for an article."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    _get_article_or_404(db, article_id, tenant_id)
     
     # Query article suppliers
     suppliers = db.query(ArticleSupplier).filter(
-        ArticleSupplier.article_id == article_id
+        ArticleSupplier.article_id == article_id,
+        ArticleSupplier.tenant_id == tenant_id,
     ).all()
     
     return {
@@ -495,19 +487,16 @@ async def get_article_suppliers(
 @router.get("/{article_id}/discounts", response_model=dict)
 async def get_article_discounts(
     article_id: str,
-    tenant_id: Optional[str] = Query(None, description="Filter by tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Get discounts for an article."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
-    # Get article number first
-    article = db.query(ArticleModel).filter(ArticleModel.id == article_id).first()
-    if not article:
-        return {"items": []}
+    article = _get_article_or_404(db, article_id, tenant_id)
     
     # Query discount items by article number
     discounts = db.query(BusinessPartnerDiscountItem).filter(
-        BusinessPartnerDiscountItem.article_number == article.article_number
+        BusinessPartnerDiscountItem.article_number == article.article_number,
+        BusinessPartnerDiscountItem.tenant_id == tenant_id,
     ).all()
     
     return {
@@ -532,19 +521,16 @@ async def get_article_discounts(
 @router.get("/{article_id}/prices", response_model=dict)
 async def get_article_prices(
     article_id: str,
-    tenant_id: Optional[str] = Query(None, description="Filter by tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Get price agreements for an article."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
-    # Get article number first
-    article = db.query(ArticleModel).filter(ArticleModel.id == article_id).first()
-    if not article:
-        return {"items": []}
+    article = _get_article_or_404(db, article_id, tenant_id)
     
     # Query price agreements by article number
     prices = db.query(BusinessPartnerPriceAgreement).filter(
-        BusinessPartnerPriceAgreement.article_number == article.article_number
+        BusinessPartnerPriceAgreement.article_number == article.article_number,
+        BusinessPartnerPriceAgreement.tenant_id == tenant_id,
     ).all()
     
     return {
@@ -570,15 +556,16 @@ async def get_article_prices(
 @router.get("/{article_id}/documents", response_model=dict)
 async def get_article_documents(
     article_id: str,
-    tenant_id: Optional[str] = Query(None, description="Filter by tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Get documents for an article."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
+    _get_article_or_404(db, article_id, tenant_id)
     
     # Query article documents
     documents = db.query(ArticleDocument).filter(
-        ArticleDocument.article_id == article_id
+        ArticleDocument.article_id == article_id,
+        ArticleDocument.tenant_id == tenant_id,
     ).all()
     
     return {
@@ -603,20 +590,17 @@ async def get_article_documents(
 async def get_article_stock(
     article_id: str,
     branch_id: Optional[str] = Query(None, description="Filter by branch"),
-    tenant_id: Optional[str] = Query(None, description="Filter by tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Get stock summary for an article per branch/warehouse."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
-    
-    # Get article first
-    article = db.query(ArticleModel).filter(ArticleModel.id == article_id).first()
-    if not article:
-        return {"items": []}
+    effective_tenant = tenant_id
+    article = _get_article_or_404(db, article_id, effective_tenant)
     
     # Query stock movements to calculate stock per warehouse
     query = db.query(StockMovement).filter(
-        StockMovement.article_id == article_id
+        StockMovement.article_id == article_id,
+        StockMovement.tenant_id == effective_tenant,
     )
     
     if branch_id:
@@ -683,17 +667,18 @@ async def get_article_stock_movements(
     from_date: Optional[str] = Query(None, description="From date (YYYY-MM-DD)"),
     to_date: Optional[str] = Query(None, description="To date (YYYY-MM-DD)"),
     warehouse_id: Optional[str] = Query(None, description="Filter by warehouse"),
-    tenant_id: Optional[str] = Query(None, description="Filter by tenant ID"),
+    tenant_id: str = Depends(get_tenant_id),
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=200),
     db: Session = Depends(get_db),
 ):
     """Get stock movements for an article."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
-    
-    # Query stock movements
+    effective_tenant = tenant_id
+    _get_article_or_404(db, article_id, effective_tenant)
+
     query = db.query(StockMovement).filter(
-        StockMovement.article_id == article_id
+        StockMovement.article_id == article_id,
+        StockMovement.tenant_id == effective_tenant,
     )
     
     if warehouse_id:
@@ -798,14 +783,13 @@ async def _do_enrich(article_ids: list[str], db: Session, tenant_id: str) -> Enr
 @router.post("/{article_id}/fetch-image", response_model=ImageEnrichResult)
 async def fetch_article_image(
     article_id: str,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Fetch and persist an image for a single article (overwrites existing)."""
     from ....services.article_image_enrichment import resolve_image_for_article
 
-    row = db.query(ArticleModel).filter(ArticleModel.id == article_id).first()
-    if not row:
-        raise HTTPException(status_code=404, detail="Artikel nicht gefunden")
+    row = _get_article_or_404(db, article_id, tenant_id)
 
     ean = getattr(row, 'ean_code', None) or getattr(row, 'barcode', None)
     url = await resolve_image_for_article(row.name, ean)
@@ -819,12 +803,11 @@ async def fetch_article_image(
 @router.post("/enrich-images", response_model=EnrichImagesResponse)
 async def enrich_article_images(
     article_ids: Optional[list[str]] = None,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """
     Batch-fetch product images for articles that have no image_url yet.
     If article_ids is empty/omitted, processes up to 200 articles per call.
     """
-    effective_tenant = tenant_id or DEFAULT_TENANT
-    return await _do_enrich(article_ids or [], db, effective_tenant)
+    return await _do_enrich(article_ids or [], db, tenant_id)
