@@ -103,6 +103,18 @@ class Settings(BaseSettings):
     HASHICORP_VAULT_PATH_PREFIX: str = "valeo-neuroerp"
     OUTBOUND_HTTP_ALLOWED_HOSTS: List[str] = []
     OUTBOUND_HTTP_ALLOWED_DOMAINS: List[str] = []
+    SUPERGLUE_ENABLED: bool = False
+    SUPERGLUE_BASE_URL: Optional[str] = None
+    SUPERGLUE_GRAPHQL_URL: Optional[str] = None
+    SUPERGLUE_REST_URL: Optional[str] = None
+    SUPERGLUE_DASHBOARD_URL: Optional[str] = None
+    SUPERGLUE_AUTH_TOKEN: Optional[str] = None
+    SUPERGLUE_TIMEOUT_SECONDS: float = 10.0
+    SUPERGLUE_PROVIDER_KEY: str = "superglue"
+    SUPERGLUE_ALLOWED_HOSTS: List[str] = []
+    SUPERGLUE_ALLOWED_DOMAINS: List[str] = []
+    SUPERGLUE_SYNC_ENABLED: bool = False
+    SUPERGLUE_EXECUTION_ENABLED: bool = False
     SECURITY_EVENT_PERSISTENCE_ENABLED: bool = True
     SECURITY_EVENT_LOG_PATH: str = "runtime/security-events/security-events.jsonl"
 
@@ -172,7 +184,13 @@ class Settings(BaseSettings):
             }
         raise ValueError("TENANT_MODULE_FLAGS must be dict or JSON object string")
 
-    @field_validator("OUTBOUND_HTTP_ALLOWED_HOSTS", "OUTBOUND_HTTP_ALLOWED_DOMAINS", mode="before")
+    @field_validator(
+        "OUTBOUND_HTTP_ALLOWED_HOSTS",
+        "OUTBOUND_HTTP_ALLOWED_DOMAINS",
+        "SUPERGLUE_ALLOWED_HOSTS",
+        "SUPERGLUE_ALLOWED_DOMAINS",
+        mode="before",
+    )
     @classmethod
     def assemble_outbound_allowlists(
         cls, v: Union[str, List[str]]
