@@ -5,6 +5,8 @@ from typing import Optional
 from datetime import datetime
 import uuid
 
+from app.services.security_observability import security_observer
+
 class IsolationDecision(str, Enum):
     ALLOWED = "allowed"
     VERBUND_ALLOWED = "verbund_allowed"
@@ -90,6 +92,18 @@ class TenantIsolationGuard(BaseModel):
                     timestamp=datetime.utcnow(),
                 )
                 self.audit_log.append(attempt)
+                security_observer.record_event(
+                    category="tenant_isolation",
+                    outcome="verbund_allowed",
+                    severity="info",
+                    message="Cross-tenant access allowed via shared-tenant policy",
+                    tenant_id=requesting_tenant,
+                    details={
+                        "resource_tenant": resource_tenant,
+                        "resource_type": resource_type,
+                        "decision": IsolationDecision.VERBUND_ALLOWED.value,
+                    },
+                )
                 return IsolationDecision.VERBUND_ALLOWED
 
         # Zugriff verweigert - protokollieren
@@ -102,4 +116,16 @@ class TenantIsolationGuard(BaseModel):
             timestamp=datetime.utcnow(),
         )
         self.audit_log.append(attempt)
+        security_observer.record_event(
+            category="tenant_isolation",
+            outcome="denied",
+            severity="warning",
+            message="Cross-tenant access denied",
+            tenant_id=requesting_tenant,
+            details={
+                "resource_tenant": resource_tenant,
+                "resource_type": resource_type,
+                "decision": IsolationDecision.DENIED.value,
+            },
+        )
         return IsolationDecision.DENIED

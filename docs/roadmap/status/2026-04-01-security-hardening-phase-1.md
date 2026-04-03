@@ -39,6 +39,7 @@
 | `SEC-025` | Sales Delivery Notes | Context-Tenant auf allen CRUD-/Post-/Print-/Invoice-Pfaden, finale Invoice-Mutation tenant-gescoped |
 | `SEC-026` | Articles API | Payload-Spoofing blockiert; Dokument-, Preis-, Supplier-, Stock- und Image-Nebenpfade tenant-gebunden |
 | `SEC-027` | Warehouse Transfers | Transfer-, Lines-, Corrections- und Bin-Location-Pfade nur noch ueber Kontext-Tenant |
+| `SEC-028` | Security Observability | blockierte SSRF-Ziele und denied Cross-Tenant-Zugriffe werden zentral aufgezeichnet und ueber REST surfact |
 
 ## Wirkungsbild
 
@@ -48,6 +49,7 @@
   - freie Finance-Query-Tenants in Approval-, Reconciliation- und Tax-Key-Routern
   - freie Query-/Payload-Tenants in VAT-, Sales-Credit- und Sales-Reporting-Routern
   - freie Query-/Payload-/ID-Tenants in Delivery-Note-, Artikel- und Lagertransfer-Pfaden
+  - fehlende Surfacing-Schicht fuer Security-Block-/Violation-Events
   - ungeschuetzte Realtime-/WS-Pfade
   - rohe Exception-Leaks
   - unkontrollierte Identifier-/XML-/HTML-Interpolation
@@ -62,15 +64,15 @@
 | `P1` | zentrale Egress-/SSRF-Policy | durch `SEC-016` geschlossen |
 | `P1` | CI-Sicherheitslane | durch `SEC-017` geschlossen |
 | `P2` | restliche Frontend-HTML-Pfade | durch `SEC-018` inventarisiert und als Guard-Test abgesichert |
-| `P2` | Security-Observability | Verstoss- und Block-Events sind noch nicht als eigener Security-Dashboard-/Alerting-Pfad verdrahtet |
+| `P2` | Security-Observability | zentrale API-Surface ist vorhanden; offen bleiben Dashboard-/Alerting-Integration und laengerfristige Persistenz |
 
 ## Empfohlene Folge-Slices
 
 1. `SEC-014` Externer Vault Adapter + Startup-Fail-Fast
 2. weiterer einzelner Backend-SAST-Slice mit klarem Dateibesitz
-3. Security-Observability fuer Block-/Violation-Events
-4. produktive Rollout-/Rotationsstrecke fuer den externen Vault
-5. Restinventur weiterer Router ausserhalb Finance/Sales/Inventory
+3. produktive Rollout-/Rotationsstrecke fuer den externen Vault
+4. Restinventur weiterer Router ausserhalb Finance/Sales/Inventory
+5. Security-Dashboard-/Alerting-Integration auf Basis der neuen Monitoring-Surface
 
 ## Operative Regeln fuer die Folgephase
 
