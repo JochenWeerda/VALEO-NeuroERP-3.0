@@ -6,6 +6,11 @@ from app.core.external_agent_catalog import (
     build_external_agent_install_pack,
     build_external_agent_integration_catalog,
 )
+from app.integrations.adapters.superglue.tool_sync import (
+    build_superglue_health_status,
+    build_superglue_sync_status,
+    build_superglue_tool_summary,
+)
 
 router = APIRouter(prefix="/agent/integrations", tags=["agents", "integrations", "openapi", "mcp"])
 
@@ -30,6 +35,29 @@ def get_external_agent_provider_catalog(
         "provider_count": manifest.provider_count,
         "providers": [provider.model_dump() for provider in manifest.providers],
     }
+
+
+@router.get("/providers/{provider_key}", summary="Single External Agent Provider")
+def get_external_agent_provider(provider_key: str) -> dict:
+    manifest = build_external_agent_integration_catalog(provider_key=provider_key)
+    if not manifest.providers:
+        raise HTTPException(status_code=404, detail=f"Provider {provider_key!r} not found")
+    return manifest.providers[0].model_dump()
+
+
+@router.get("/providers/superglue/tools", summary="Mapped Superglue Tool Catalog")
+def get_superglue_tool_catalog() -> dict:
+    return build_superglue_tool_summary()
+
+
+@router.get("/providers/superglue/sync-status", summary="Superglue Sync Status")
+def get_superglue_sync_status() -> dict:
+    return build_superglue_sync_status().model_dump()
+
+
+@router.get("/providers/superglue/health", summary="Superglue Health")
+def get_superglue_health() -> dict:
+    return build_superglue_health_status().model_dump()
 
 
 @router.get("/use-cases", summary="External Agent Use Cases")

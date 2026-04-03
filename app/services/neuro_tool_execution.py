@@ -17,6 +17,7 @@ from fastapi.testclient import TestClient
 
 from app.core.outbound_security import validate_outbound_http_target
 from app.core.mcp_tool_contracts import MCPRequestPayloadMode, MCPToolContract
+from app.integrations.services.superglue_secret_resolver import resolve_superglue_auth_token
 
 logger = logging.getLogger(__name__)
 
@@ -196,7 +197,9 @@ class NeuroToolExecutionService:
             "query": query,
             "json": body,
             "headers": {
-                "Authorization": "Bearer neuro-tool-broker",
+                "Authorization": (
+                    f"Bearer {context.get('auth_token') or (resolve_superglue_auth_token(tenant_id, allow_global_fallback=True) if context.get('provider_key') == 'superglue' else None) or 'neuro-tool-broker'}"
+                ),
                 "X-Tenant-ID": tenant_id,
                 "Content-Type": "application/json",
                 **dict(context.get("execution_headers", {})),

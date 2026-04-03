@@ -343,6 +343,14 @@ def get_secret(key: str, accessor: str = "system") -> Optional[str]:
     return None
 
 
+def get_first_secret(keys: list[str], accessor: str = "system") -> Optional[str]:
+    for key in keys:
+        value = get_secret(key, accessor=accessor)
+        if value:
+            return value
+    return None
+
+
 def get_secret_metadata(key: str) -> Optional[SecretMetadata]:
     if key in _VAULT_STORE:
         return _VAULT_STORE[key][0]

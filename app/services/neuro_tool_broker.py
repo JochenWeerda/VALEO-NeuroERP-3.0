@@ -24,6 +24,7 @@ from app.agents.neuro_planner import ExecutionPlan, PlanStep, StepType
 from app.core.action_execution import ActionExecutionRequest, ActionExecutionService
 from app.core.mcp_tool_contracts import MCPToolContract, MCPToolKategorie, get_process_kernel_mcp_tools
 from app.core.neuro_state_graph import StateGraphService, StateNode, StateNodeType, StatePhase
+from app.integrations.services.superglue_capability_service import SuperglueCapabilityService
 from app.services.neuro_tool_execution import NeuroToolExecutionService
 from app.services.neuro_verification_engine import verify_plan
 
@@ -193,10 +194,12 @@ class NeuroToolBroker:
         *,
         action_execution_service: ActionExecutionService | None = None,
         tool_execution_service: NeuroToolExecutionService | None = None,
+        superglue_capability_service: SuperglueCapabilityService | None = None,
     ) -> None:
         self._registry = get_process_kernel_mcp_tools()
         self._action_execution_service = action_execution_service or ActionExecutionService()
         self._tool_execution_service = tool_execution_service or NeuroToolExecutionService()
+        self._superglue_capability_service = superglue_capability_service or SuperglueCapabilityService()
 
     def execute_plan(
         self,
@@ -319,6 +322,13 @@ class NeuroToolBroker:
         if binding:
             return binding
 
+        if self._superglue_capability_service.can_handle(
+            capability=capability,
+            action=step.action,
+            parameters=step.parameters,
+        ):
+            return ToolBinding(kind="superglue", target_name=str(step.parameters.get("superglue_tool_id", step.action)))
+
         if capability:
             return ToolBinding(kind="capability", target_name=capability)
 
@@ -429,6 +439,8 @@ class NeuroToolBroker:
             return self._dispatch_command(step, plan, binding, tenant_id)
         if binding.kind == "mcp_tool":
             return self._execute_tool_contract(step, binding, tenant_id, context)
+        if binding.kind == "superglue":
+            return self._execute_superglue_step(step, plan, binding, tenant_id)
         if binding.kind == "capability":
             return {
                 "step_status": "delegated",
@@ -550,6 +562,24 @@ class NeuroToolBroker:
                 "trace": {"status": "degraded", "result": payload},
             }
 
+        return {
+            "step_status": "executed",
+            "trace": {"status": "executed", "result": payload},
+        }
+
+    def _execute_superglue_step(
+        self,
+        step: PlanStep,
+        plan: ExecutionPlan,
+        binding: ToolBinding,
+        tenant_id: str,
+    ) -> dict[str, Any]:
+        payload = self._superglue_capability_service.execute_step(
+            tenant_id=tenant_id,
+            capability=plan.capability,
+            action=step.action,
+            parameters=step.parameters,
+        )
         return {
             "step_status": "executed",
             "trace": {"status": "executed", "result": payload},
