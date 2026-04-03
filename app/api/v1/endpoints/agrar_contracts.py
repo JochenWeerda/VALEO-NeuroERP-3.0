@@ -54,6 +54,20 @@ def _compute_status(total_quantity: Decimal, remaining_quantity: Decimal, curren
     return "open"
 
 
+def _get_contract_or_404(db: Session, contract_id: str, tenant_id: str) -> AgrarContract:
+    contract = (
+        db.query(AgrarContract)
+        .filter(
+            AgrarContract.id == contract_id,
+            AgrarContract.tenant_id == tenant_id,
+        )
+        .first()
+    )
+    if not contract:
+        raise HTTPException(status_code=404, detail="Contract not found")
+    return contract
+
+
 class AgrarContractOut(BaseSchema):
     id: str
     contract_number: str
@@ -135,16 +149,14 @@ def _to_contract_out(obj: AgrarContract) -> AgrarContractOut:
 
 @router.get("/", response_model=PaginatedResponse[AgrarContractOut])
 async def list_agrar_contracts(
-    tenant_id: Optional[str] = Query(None),
     status: Optional[ContractStatus] = Query(None),
     pricing_model: Optional[PricingModel] = Query(None),
     skip: int = Query(0, ge=0),
     limit: int = Query(25, ge=1, le=200),
     db: Session = Depends(get_db),
-    header_tenant: str = Depends(get_tenant_id),
+    tenant_id: str = Depends(get_tenant_id),
 ):
-    tid = tenant_id or header_tenant or DEFAULT_TENANT
-    query = db.query(AgrarContract).filter(AgrarContract.tenant_id == tid)
+    query = db.query(AgrarContract).filter(AgrarContract.tenant_id == tenant_id)
     if status:
         query = query.filter(AgrarContract.status == status)
     if pricing_model:
@@ -165,20 +177,21 @@ async def list_agrar_contracts(
 
 
 @router.get("/{contract_id}", response_model=AgrarContractOut)
-async def get_agrar_contract(contract_id: str, db: Session = Depends(get_db)):
-    contract = db.query(AgrarContract).filter(AgrarContract.id == contract_id).first()
-    if not contract:
-        raise HTTPException(status_code=404, detail="Contract not found")
+async def get_agrar_contract(
+    contract_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    contract = _get_contract_or_404(db, contract_id, tenant_id)
     return _to_contract_out(contract)
 
 
 @router.post("/", response_model=AgrarContractOut, status_code=201)
 async def create_agrar_contract(
     payload: AgrarContractCreate,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    tid = tenant_id or DEFAULT_TENANT
     dq_result = evaluate_contract_datensatz(_build_contract_dq_datensatz({
         **payload.model_dump(),
         "status": "AKTIV",
@@ -187,7 +200,7 @@ async def create_agrar_contract(
         raise HTTPException(status_code=422, detail=build_dq_error_detail("Kontrakt", dq_result))
     exists = (
         db.query(AgrarContract)
-        .filter(AgrarContract.tenant_id == tid, AgrarContract.contract_number == payload.contract_number)
+        .filter(AgrarContract.tenant_id == tenant_id, AgrarContract.contract_number == payload.contract_number)
         .first()
     )
     if exists:
@@ -209,7 +222,7 @@ async def create_agrar_contract(
         status="open",
         valid_from=payload.valid_from,
         valid_until=payload.valid_until,
-        tenant_id=tid,
+        tenant_id=tenant_id,
     )
     db.add(contract)
     db.commit()
@@ -221,11 +234,10 @@ async def create_agrar_contract(
 async def update_agrar_contract(
     contract_id: str,
     payload: AgrarContractUpdate,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    contract = db.query(AgrarContract).filter(AgrarContract.id == contract_id).first()
-    if not contract:
-        raise HTTPException(status_code=404, detail="Contract not found")
+    contract = _get_contract_or_404(db, contract_id, tenant_id)
 
     data = payload.model_dump(exclude_unset=True)
     effective_data = {
@@ -263,11 +275,10 @@ async def update_agrar_contract(
 async def allocate_contract_quantity(
     contract_id: str,
     payload: ContractAllocationCreate,
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    contract = db.query(AgrarContract).filter(AgrarContract.id == contract_id).first()
-    if not contract:
-        raise HTTPException(status_code=404, detail="Contract not found")
+    contract = _get_contract_or_404(db, contract_id, tenant_id)
     if contract.status == "cancelled":
         raise HTTPException(status_code=400, detail="Contract is cancelled")
     if contract.status == "fulfilled":
@@ -308,13 +319,18 @@ async def allocate_contract_quantity(
 
 
 @router.get("/{contract_id}/allocations", response_model=list[ContractAllocationOut])
-async def list_contract_allocations(contract_id: str, db: Session = Depends(get_db)):
-    contract = db.query(AgrarContract).filter(AgrarContract.id == contract_id).first()
-    if not contract:
-        raise HTTPException(status_code=404, detail="Contract not found")
+async def list_contract_allocations(
+    contract_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    contract = _get_contract_or_404(db, contract_id, tenant_id)
     rows = (
         db.query(AgrarContractAllocation)
-        .filter(AgrarContractAllocation.contract_id == contract_id)
+        .filter(
+            AgrarContractAllocation.contract_id == contract_id,
+            AgrarContractAllocation.tenant_id == tenant_id,
+        )
         .order_by(AgrarContractAllocation.allocated_at.desc())
         .all()
     )

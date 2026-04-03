@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 
 from ....core.database import get_db
 from ....core.tenant import get_tenant_id
+from ....services.security_observability import security_observer
 
 router = APIRouter()
 
@@ -32,6 +33,18 @@ class AdminAlertsResponse(BaseModel):
     warning: int
     system_status: Literal["online", "degraded", "offline"]
     items: list[AdminAlert]
+
+
+class SecurityMonitoringSummary(BaseModel):
+    status: Literal["ok", "warning", "critical"]
+    event_count: int
+    blocked_count: int
+    denied_count: int
+    critical_count: int
+    top_categories: dict[str, int]
+    channel_count: int
+    rule_count: int
+    recent_events: list[dict]
 
 
 class MonitoringRuleIn(BaseModel):
@@ -120,8 +133,35 @@ def _find_by_id(items: list[dict], item_id: str) -> int:
     return -1
 
 
+def _tenant_visible_security_events(tenant_id: str, limit: int = 20) -> list[dict]:
+    return [
+        event
+        for event in security_observer.get_recent_events(limit)
+        if event.get("tenant_id") in (None, tenant_id)
+    ]
+
+
+def _build_security_alerts(tenant_id: str, limit: int = 5) -> list[AdminAlert]:
+    alerts: list[AdminAlert] = []
+    for idx, event in enumerate(reversed(_tenant_visible_security_events(tenant_id, limit))):
+        level = "critical" if event["severity"] == "critical" else ("warning" if event["outcome"] in {"blocked", "denied"} else "info")
+        alerts.append(
+            AdminAlert(
+                id=f"security-{idx}",
+                level=level,
+                type=f"Security {event['category']}",
+                message=event["message"],
+                timestamp=event["timestamp"],
+            )
+        )
+    return alerts
+
+
 @router.get("/alerts", response_model=AdminAlertsResponse)
-def list_admin_monitoring_alerts(db: Session = Depends(get_db)):
+def list_admin_monitoring_alerts(
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
     alerts: list[AdminAlert] = []
     today_iso = date.today().isoformat()
 
@@ -197,6 +237,8 @@ def list_admin_monitoring_alerts(db: Session = Depends(get_db)):
     except Exception:
         pass
 
+    alerts.extend(_build_security_alerts(tenant_id))
+
     if not alerts:
         alerts.append(
             AdminAlert(
@@ -224,6 +266,41 @@ def list_admin_monitoring_alerts(db: Session = Depends(get_db)):
         warning=warning,
         system_status=system_status,
         items=alerts,
+    )
+
+
+@router.get("/security-summary", response_model=SecurityMonitoringSummary)
+def get_security_monitoring_summary(
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    cfg = _monitoring_cfg(_load_tenant_settings(db, tenant_id))
+    visible_events = _tenant_visible_security_events(tenant_id, limit=20)
+    visible_metrics = {
+        "blocked_count": sum(1 for event in visible_events if event["outcome"] == "blocked"),
+        "denied_count": sum(1 for event in visible_events if event["outcome"] == "denied"),
+        "critical_count": sum(1 for event in visible_events if event["severity"] == "critical"),
+    }
+    top_categories: dict[str, int] = {}
+    for event in visible_events:
+        top_categories[event["category"]] = top_categories.get(event["category"], 0) + 1
+
+    status: Literal["ok", "warning", "critical"] = "ok"
+    if visible_metrics["blocked_count"] or visible_metrics["denied_count"]:
+        status = "warning"
+    if visible_metrics["critical_count"]:
+        status = "critical"
+
+    return SecurityMonitoringSummary(
+        status=status,
+        event_count=len(visible_events),
+        blocked_count=visible_metrics["blocked_count"],
+        denied_count=visible_metrics["denied_count"],
+        critical_count=visible_metrics["critical_count"],
+        top_categories=top_categories,
+        channel_count=len(cfg["channels"]),
+        rule_count=len(cfg["rules"]),
+        recent_events=visible_events,
     )
 
 

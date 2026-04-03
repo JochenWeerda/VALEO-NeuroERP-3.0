@@ -135,6 +135,8 @@ jobs:
         run: |
           pytest \
             tests/test_security_*.py \
+            tests/test_security_monitoring.py \
+            tests/test_security_admin_monitoring.py \
             tests/test_secrets_vault.py \
             tests/test_neuro_tool_execution.py \
             -q --no-cov
