@@ -1,6 +1,5 @@
 # VALEO NeuroERP 3.0 🚀
-<img width="1024" height="1536" alt="image" src="https://github.com/user-attachments/assets/0f66c3aa-1166-4cb4-ac89-2125e0249afb" />
-
+<img width="683" height="1024" alt="image" src="https://github.com/user-attachments/assets/46ef33e2-44de-42ee-a32e-a9089319ea89" />
 **Zweck:** Einstiegs- und `Referenzdokument` fuer Produktidee, Projektueberblick und weiterfuehrende Architekturpfade. Nicht der operative Lieferstand.
 
 Experimental **open-source ERP and automation platform** combining classical enterprise resource planning with AI-assisted workflows. A modular research and development environment for AI agents, automation pipelines, and enterprise data.
