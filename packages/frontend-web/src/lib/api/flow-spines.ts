@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import axios from 'axios'
 import { apiClient } from '@/lib/api-client'
 import i18n from '@/i18n/config'
 
@@ -124,7 +125,38 @@ function getActiveLanguage(): string {
   return i18n.resolvedLanguage ?? i18n.language ?? 'de'
 }
 
+export function getFlowSpineWorkspaceQueryKey(
+  processKey: string,
+  instanceId?: string,
+  lang: string = getActiveLanguage(),
+) {
+  return ['workflow', 'flow-spine', processKey, instanceId ?? 'default', lang] as const
+}
+
 // ── Plain fetch helpers (used by FlowSpineWorkspace via useQuery) ─────────────
+
+/** Extrahiert lesbare Fehlermeldung aus Axios/FastAPI-Fehlern (für UI). */
+export function getFlowSpineFetchErrorMessage(err: unknown): string {
+  if (axios.isAxiosError(err)) {
+    const status = err.response?.status
+    const data = err.response?.data as { detail?: unknown } | undefined
+    const detail = data?.detail
+    if (typeof detail === 'string') return `HTTP ${status ?? '?'}: ${detail}`
+    if (detail != null) {
+      try {
+        return `HTTP ${status ?? '?'}: ${JSON.stringify(detail)}`
+      } catch {
+        return `HTTP ${status ?? '?'}`
+      }
+    }
+    if (err.code === 'ERR_NETWORK' || err.message?.includes('Network Error')) {
+      return 'Netzwerkfehler: Backend nicht erreichbar (uvicorn/FastAPI gestartet? Vite-Proxy /api/v1 → Backend?).'
+    }
+    return err.message || `HTTP ${status ?? '?'}`
+  }
+  if (err instanceof Error) return err.message
+  return String(err)
+}
 
 export async function fetchFlowSpineWorkspace(processKey: string, instanceId?: string): Promise<FlowSpineWorkspace> {
   const lang = encodeURIComponent(getActiveLanguage())
@@ -134,7 +166,11 @@ export async function fetchFlowSpineWorkspace(processKey: string, instanceId?: s
   }
   const url = `/api/v1/process/flow-spines/${processKey}?${query.toString()}`
   const response = await apiClient.get<FlowSpineWorkspace>(url)
-  return response.data
+  const body = response.data
+  if (body == null || typeof body !== 'object' || !Array.isArray(body.nodes)) {
+    throw new Error('Flow-Spine API: Antwort ohne gueltiges nodes-Array (Backend-Vertrag pruefen).')
+  }
+  return body
 }
 
 export async function fetchFlowSpineCatalog(): Promise<FlowSpineCatalog> {
@@ -148,7 +184,7 @@ export async function fetchFlowSpineCatalog(): Promise<FlowSpineCatalog> {
 export function useFlowSpineWorkspace(processKey: string, instanceId?: string) {
   const lang = getActiveLanguage()
   return useQuery<FlowSpineWorkspace>({
-    queryKey: ['workflow', 'flow-spine', processKey, instanceId ?? 'default', lang],
+    queryKey: getFlowSpineWorkspaceQueryKey(processKey, instanceId, lang),
     queryFn: () => fetchFlowSpineWorkspace(processKey, instanceId),
     staleTime: 30_000,
     retry: false,
@@ -269,10 +305,12 @@ export function useDeleteFlowSpineInstance(processKey: string) {
 export function prefetchFlowSpineWorkspace(
   queryClient: ReturnType<typeof useQueryClient>,
   processKey: string,
+  instanceId?: string,
 ): Promise<void> {
+  const lang = getActiveLanguage()
   return queryClient.prefetchQuery({
-    queryKey: ['workflow', 'flow-spine', processKey, 'default'],
-    queryFn: () => fetchFlowSpineWorkspace(processKey),
+    queryKey: getFlowSpineWorkspaceQueryKey(processKey, instanceId, lang),
+    queryFn: () => fetchFlowSpineWorkspace(processKey, instanceId),
     staleTime: 5 * 60_000,
   })
 }
@@ -297,11 +335,12 @@ const ALL_PROCESS_KEYS = [
 export function warmFlowSpineCache(
   queryClient: ReturnType<typeof useQueryClient>,
 ): void {
+  const lang = getActiveLanguage()
   // Stagger the prefetches to avoid a burst of 9 parallel requests
   ALL_PROCESS_KEYS.forEach((key, index) => {
     setTimeout(() => {
       void queryClient.prefetchQuery({
-        queryKey: ['workflow', 'flow-spine', key, 'default'],
+        queryKey: getFlowSpineWorkspaceQueryKey(key, undefined, lang),
         queryFn: () => fetchFlowSpineWorkspace(key),
         staleTime: 5 * 60_000,
       })

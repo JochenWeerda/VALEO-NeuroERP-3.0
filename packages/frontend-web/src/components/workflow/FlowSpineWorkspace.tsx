@@ -35,6 +35,8 @@ import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   fetchFlowSpineWorkspace,
+  getFlowSpineFetchErrorMessage,
+  getFlowSpineWorkspaceQueryKey,
   useCreateFlowSpineInstance,
   useExecuteAgentAction,
   useExecuteFlowSpineAction,
@@ -42,6 +44,7 @@ import {
   type FlowSpineNode,
 } from '@/lib/api/flow-spines'
 import { toast } from '@/hooks/use-toast'
+import i18n from '@/i18n/config'
 import { cn } from '@/lib/utils'
 import { useQuery } from '@tanstack/react-query'
 
@@ -370,9 +373,10 @@ function toneClasses(tone: string): string {
 
 export function FlowSpineWorkspace({ processKey, instanceId }: FlowSpineWorkspaceProps): JSX.Element {
   const navigate = useNavigate()
+  const activeLang = i18n.resolvedLanguage ?? i18n.language ?? 'de'
   const startConfig = PROCESS_START_CONFIGS[processKey] ?? PROCESS_START_CONFIGS['order-to-cash']
   const workspaceQuery = useQuery({
-    queryKey: ['workflow', 'flow-spine', processKey, instanceId ?? 'default'],
+    queryKey: getFlowSpineWorkspaceQueryKey(processKey, instanceId, activeLang),
     queryFn: () => fetchFlowSpineWorkspace(processKey, instanceId),
     staleTime: 5 * 60_000,        // 5 min — workspace is mostly static
     gcTime: 15 * 60_000,          // keep in cache 15 min after unmount
@@ -408,13 +412,20 @@ export function FlowSpineWorkspace({ processKey, instanceId }: FlowSpineWorkspac
     }
   }, [workspace?.focus_node_id])
 
-  const selectedNode = useMemo(
-    () => workspace?.nodes.find((node) => node.id === selectedNodeId) ?? workspace?.nodes[0],
-    [selectedNodeId, workspace?.nodes],
+  const nodes: FlowSpineNode[] = useMemo(
+    () => (Array.isArray(workspace?.nodes) ? workspace.nodes : []),
+    [workspace?.nodes],
   )
 
-  const completedCount = workspace?.nodes.filter((node) => node.status === 'ok').length ?? 0
-  const progressWidth = workspace?.nodes.length ? `${(Math.max(1, completedCount + (selectedNode ? 1 : 0)) / workspace.nodes.length) * 100}%` : '0%'
+  const selectedNode = useMemo(
+    () => nodes.find((node) => node.id === selectedNodeId) ?? nodes[0],
+    [selectedNodeId, nodes],
+  )
+
+  const completedCount = useMemo(() => nodes.filter((node) => node.status === 'ok').length, [nodes])
+  const progressWidth = nodes.length
+    ? `${(Math.max(1, completedCount + (selectedNode ? 1 : 0)) / nodes.length) * 100}%`
+    : '0%'
 
   const go = (href: string): void => {
     navigate(href)
@@ -539,12 +550,35 @@ export function FlowSpineWorkspace({ processKey, instanceId }: FlowSpineWorkspac
     )
   }
 
-  if (workspaceQuery.isError || !workspace || !selectedNode) {
+  if (workspaceQuery.isError) {
+    const detail = getFlowSpineFetchErrorMessage(workspaceQuery.error)
+    return (
+      <PageSurface data-page-surface={`flow-spine-${processKey}`}>
+        <PageSection title="Flow Spine nicht verfuegbar" description="Der Prozessraum konnte nicht geladen werden.">
+          <div className="space-y-3 rounded-2xl border border-destructive/30 bg-destructive/10 px-4 py-6 text-sm">
+            <p className="font-medium text-destructive">{detail}</p>
+            <p className="text-muted-foreground">
+              Erwartet wird{' '}
+              <code className="rounded bg-muted px-1 py-0.5 text-xs">
+                GET /api/v1/process/flow-spines/{processKey}
+              </code>{' '}
+              mit JSON-Feld <code className="rounded bg-muted px-1 py-0.5 text-xs">nodes</code>. Lokal: FastAPI
+              starten (z.&nbsp;B. Port 8000) und sicherstellen, dass Vite{' '}
+              <code className="rounded bg-muted px-1 py-0.5 text-xs">/api/v1</code> dorthin proxied oder{' '}
+              <code className="rounded bg-muted px-1 py-0.5 text-xs">VITE_API_BASE_URL</code> korrekt ist.
+            </p>
+          </div>
+        </PageSection>
+      </PageSurface>
+    )
+  }
+
+  if (!workspace || nodes.length === 0 || !selectedNode) {
     return (
       <PageSurface data-page-surface={`flow-spine-${processKey}`}>
         <PageSection title="Flow Spine nicht verfuegbar" description="Der Prozessraum konnte nicht geladen werden.">
           <div className="rounded-2xl border border-destructive/30 bg-destructive/10 px-4 py-6 text-sm text-destructive">
-            Bitte Backend-Vertrag oder Routing des Prozessraums pruefen.
+            Ungueltige oder leere Workspace-Daten (nodes). Bitte Backend-Vertrag pruefen.
           </div>
         </PageSection>
       </PageSurface>
@@ -658,8 +692,8 @@ export function FlowSpineWorkspace({ processKey, instanceId }: FlowSpineWorkspac
               <div className="relative mb-8">
                 <div className="absolute left-8 right-8 top-10 h-[2px] rounded-full bg-white/10" />
                 <div className="absolute left-8 top-10 h-[2px] rounded-full bg-gradient-to-r from-emerald-400 via-indigo-400 to-amber-400" style={{ width: progressWidth }} />
-                <div className={cn('relative grid gap-4', workspace.nodes.length === 4 ? 'grid-cols-4' : workspace.nodes.length === 5 ? 'grid-cols-5' : 'grid-cols-6')}>
-                  {workspace.nodes.map((node) => {
+                <div className={cn('relative grid gap-4', nodes.length === 4 ? 'grid-cols-4' : nodes.length === 5 ? 'grid-cols-5' : 'grid-cols-6')}>
+                  {nodes.map((node) => {
                     const Icon = ICONS[node.icon as keyof typeof ICONS] ?? Sparkles
                     const active = node.id === selectedNode.id
                     return (
