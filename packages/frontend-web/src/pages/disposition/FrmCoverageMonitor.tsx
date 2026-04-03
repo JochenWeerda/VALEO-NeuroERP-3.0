@@ -57,10 +57,11 @@ export default function FrmCoverageMonitor(): JSX.Element {
     [branchId, asOfDate, periodFrom, periodTo, severityFilter, withoutOverrideOnly, skip],
   )
 
-  const { data, isLoading, refetch } = useQuery({
+  const { data: coverageRes, isLoading, refetch } = useQuery({
     queryKey: ['positions', 'coverage-monitor', params],
     queryFn: () => getCoverageMonitor(params),
   })
+  const data = coverageRes?.data
 
   const shortcuts = buildCoreMaskShortcuts({
     onRefresh: () => { void refetch() },
@@ -81,7 +82,7 @@ export default function FrmCoverageMonitor(): JSX.Element {
       i.severity,
       i.override_status ?? '',
     ])
-    const csv = ['\ufeff' + headers.join(';'), ...rows.map((r: (string | number)[]) => r.join(';'))].join('\n')
+    const csv = [`\ufeff${  headers.join(';')}`, ...rows.map((r: (string | number)[]) => r.join(';'))].join('\n')
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
@@ -270,7 +271,7 @@ export default function FrmCoverageMonitor(): JSX.Element {
                         {item.qty_tolerance != null ? item.qty_tolerance.toLocaleString('de-DE') : '-'}
                       </TableCell>
                       <TableCell>
-                        <span className={cellBgClass(item.severity) + ' px-2 py-0.5 rounded'}>
+                        <span className={`${cellBgClass(item.severity)  } px-2 py-0.5 rounded`}>
                           {item.severity}
                         </span>
                       </TableCell>

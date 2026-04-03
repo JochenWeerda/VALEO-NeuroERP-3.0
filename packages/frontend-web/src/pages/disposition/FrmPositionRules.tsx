@@ -43,7 +43,11 @@ export default function FrmPositionRules(): JSX.Element {
 
   const { data: rules = [], isLoading } = useQuery({
     queryKey: ['positions', 'rules'],
-    queryFn: () => listRules(),
+    queryFn: async () => {
+      const res = await listRules()
+      const payload = res.data as unknown
+      return Array.isArray(payload) ? payload : []
+    },
   })
 
   const createMutation = useMutation({

@@ -53,9 +53,18 @@ export function findMatchingAliasModule(
   entries: AliasGroupRouteEntry[],
   candidatePath: string,
 ): string | null {
+  // matchPath erwartet eine URL-Pathname mit führendem "/" (RR 6.30); relativePath aus dem
+  // Splat ist ohne Slash — sonst schlagen dynamische Aliase (z. B. lead/:id) fehl.
+  const pathname =
+    !candidatePath || candidatePath === '/'
+      ? '/'
+      : candidatePath.startsWith('/')
+        ? candidatePath
+        : `/${candidatePath}`
+
   const match = [...entries]
     .sort(compareAliasEntries)
-    .find((entry) => matchPath({ path: entry.path || '/', end: true }, candidatePath))
+    .find((entry) => matchPath({ path: entry.path || '/', end: true }, pathname))
 
   return match?.module ?? null
 }
