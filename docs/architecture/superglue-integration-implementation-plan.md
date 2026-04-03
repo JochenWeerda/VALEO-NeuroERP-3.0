@@ -346,6 +346,32 @@ Empfehlung Reihenfolge:
 2. einfacher Legacy-/Partneradapter
 3. erst danach agentische Execution gegen produktive Systeme
 
+### INT-SG-007 - Tenant-Secret-Resolution
+
+Ziel:
+
+- tenant-spezifische Credential-Aufloesung fuer Superglue
+- kein Shared Token im produktiven Multi-Tenant-Betrieb
+
+Dateibesitz:
+
+- `app/integrations/services/superglue_secret_resolver.py`
+- `app/services/secrets_vault.py`
+- `app/core/config.py`
+
+### INT-SG-008 - Sync- und Health-Observability
+
+Ziel:
+
+- Sync-Status und Provider-Health fuer Superglue surfacen
+- Admin-Sicht auf Tool-Sync, letzte Fehler und Dashboard-Link
+
+Dateibesitz:
+
+- `app/integrations/adapters/superglue/tool_sync.py`
+- `app/api/v1/endpoints/external_agent_integrations.py`
+- optional Admin-Frontend fuer Statusanzeige
+
 ## 10. Nicht-Ziele fuer Phase 1
 
 - kein Superglue-Fork
