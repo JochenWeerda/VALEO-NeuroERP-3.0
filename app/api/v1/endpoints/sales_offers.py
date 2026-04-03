@@ -12,13 +12,11 @@ from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from ....core.config import settings
 from ....core.database import get_db
+from ....core.tenant import get_tenant_id
 from ..schemas.base import PaginatedResponse
 
 router = APIRouter()
-
-DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
 class SalesOfferItemInput(BaseModel):
@@ -92,18 +90,25 @@ def _line_total(quantity: float, unit_price: float, discount_percent: float) -> 
     return discounted.quantize(Decimal("0.01"))
 
 
-def _fetch_items(db: Session, offer_id: str) -> list[SalesOfferItemOut]:
+def _resolve_tenant_scope(payload_tenant_id: str | None, tenant_id: str) -> str:
+    payload_tenant = (payload_tenant_id or "").strip()
+    if payload_tenant and payload_tenant != tenant_id:
+        raise HTTPException(status_code=403, detail="tenant_id mismatch")
+    return tenant_id
+
+
+def _fetch_items(db: Session, offer_id: str, tenant_id: str) -> list[SalesOfferItemOut]:
     rows = db.execute(
         text(
             """
             SELECT id, line_number, article_number, description,
                    quantity, unit, unit_price, ek_price, discount_percent, line_total
             FROM domain_crm.sales_offer_items
-            WHERE offer_id = :offer_id
+            WHERE offer_id = :offer_id AND tenant_id = :tenant_id
             ORDER BY line_number ASC
             """
         ),
-        {"offer_id": offer_id},
+        {"offer_id": offer_id, "tenant_id": tenant_id},
     ).mappings().all()
     return [
         SalesOfferItemOut(
@@ -120,6 +125,22 @@ def _fetch_items(db: Session, offer_id: str) -> list[SalesOfferItemOut]:
         )
         for row in rows
     ]
+
+
+def _get_sales_offer_row(db: Session, offer_id: str, tenant_id: str) -> dict:
+    row = db.execute(
+        text(
+            """
+            SELECT *
+            FROM domain_crm.sales_offers
+            WHERE id = :id AND tenant_id = :tenant_id AND deleted_at IS NULL
+            """
+        ),
+        {"id": offer_id, "tenant_id": tenant_id},
+    ).mappings().first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Sales offer not found")
+    return dict(row)
 
 
 def _row_to_offer(row: dict, items: Optional[list[SalesOfferItemOut]] = None) -> SalesOffer:
@@ -148,17 +169,16 @@ def _row_to_offer(row: dict, items: Optional[list[SalesOfferItemOut]] = None) ->
 
 @router.get("/", response_model=PaginatedResponse[SalesOffer])
 async def list_sales_offers(
-    tenant_id: Optional[str] = Query(None),
     customer_id: Optional[str] = Query(None, description="Filter by customer ID"),
     search: Optional[str] = Query(None),
     status_filter: Optional[str] = Query(None, alias="status"),
     skip: int = Query(0, ge=0),
     limit: int = Query(25, ge=1, le=200),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    effective_tenant = tenant_id or DEFAULT_TENANT
     params: dict[str, object] = {
-        "tenant_id": effective_tenant,
+        "tenant_id": tenant_id,
         "skip": skip,
         "limit": limit,
     }
@@ -196,7 +216,7 @@ async def list_sales_offers(
     offer_list = []
     for row in rows:
         row_dict = dict(row)
-        offer_items = _fetch_items(db, str(row_dict["id"]))
+        offer_items = _fetch_items(db, str(row_dict["id"]), tenant_id)
         offer_list.append(_row_to_offer(row_dict, offer_items))
 
     page = (skip // limit) + 1
@@ -215,28 +235,20 @@ async def list_sales_offers(
 @router.get("/{offer_id}", response_model=SalesOffer)
 async def get_sales_offer(
     offer_id: str,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    effective_tenant = tenant_id or DEFAULT_TENANT
-    row = db.execute(
-        text(
-            """
-            SELECT *
-            FROM domain_crm.sales_offers
-            WHERE id = :id AND tenant_id = :tenant_id AND deleted_at IS NULL
-            """
-        ),
-        {"id": offer_id, "tenant_id": effective_tenant},
-    ).mappings().first()
-    if not row:
-        raise HTTPException(status_code=404, detail="Sales offer not found")
-    return _row_to_offer(dict(row), _fetch_items(db, offer_id))
+    row = _get_sales_offer_row(db, offer_id, tenant_id)
+    return _row_to_offer(row, _fetch_items(db, offer_id, tenant_id))
 
 
 @router.post("/", response_model=SalesOffer, status_code=status.HTTP_201_CREATED)
-async def create_sales_offer(payload: SalesOfferCreate, db: Session = Depends(get_db)):
-    effective_tenant = payload.tenant_id or DEFAULT_TENANT
+async def create_sales_offer(
+    payload: SalesOfferCreate,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    effective_tenant = _resolve_tenant_scope(payload.tenant_id, tenant_id)
     offer_id = str(uuid4())
     now = datetime.now(timezone.utc)
 
@@ -346,7 +358,7 @@ async def create_sales_offer(payload: SalesOfferCreate, db: Session = Depends(ge
             "deleted_at": None,
             "version": 1,
         },
-        _fetch_items(db, offer_id),
+        _fetch_items(db, offer_id, effective_tenant),
     )
 
 
@@ -354,21 +366,11 @@ async def create_sales_offer(payload: SalesOfferCreate, db: Session = Depends(ge
 async def update_sales_offer(
     offer_id: str,
     payload: SalesOfferUpdate,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    effective_tenant = tenant_id or DEFAULT_TENANT
-    row = db.execute(
-        text(
-            """
-            SELECT * FROM domain_crm.sales_offers
-            WHERE id = :id AND tenant_id = :tenant_id AND deleted_at IS NULL
-            """
-        ),
-        {"id": offer_id, "tenant_id": effective_tenant},
-    ).mappings().first()
-    if not row:
-        raise HTTPException(status_code=404, detail="Sales offer not found")
+    effective_tenant = tenant_id
+    row = _get_sales_offer_row(db, offer_id, effective_tenant)
 
     update_data = payload.model_dump(exclude_unset=True, exclude={"items"})
     now = datetime.now(timezone.utc)
@@ -391,8 +393,8 @@ async def update_sales_offer(
 
     if payload.items is not None:
         db.execute(
-            text("DELETE FROM domain_crm.sales_offer_items WHERE offer_id = :offer_id"),
-            {"offer_id": offer_id},
+            text("DELETE FROM domain_crm.sales_offer_items WHERE offer_id = :offer_id AND tenant_id = :tenant_id"),
+            {"offer_id": offer_id, "tenant_id": effective_tenant},
         )
         computed_total = Decimal("0")
         for idx, item in enumerate(payload.items, start=1):
@@ -431,48 +433,35 @@ async def update_sales_offer(
                 """
                 UPDATE domain_crm.sales_offers
                 SET total_amount = :total, updated_at = :now
-                WHERE id = :offer_id
+                WHERE id = :offer_id AND tenant_id = :tenant_id AND deleted_at IS NULL
                 """
             ),
-            {"total": float(computed_total), "now": now, "offer_id": offer_id},
+            {"total": float(computed_total), "now": now, "offer_id": offer_id, "tenant_id": effective_tenant},
         )
 
     db.commit()
 
-    updated_row = db.execute(
-        text("SELECT * FROM domain_crm.sales_offers WHERE id = :id"),
-        {"id": offer_id},
-    ).mappings().first()
-    return _row_to_offer(dict(updated_row), _fetch_items(db, offer_id))
+    updated_row = _get_sales_offer_row(db, offer_id, effective_tenant)
+    return _row_to_offer(updated_row, _fetch_items(db, offer_id, effective_tenant))
 
 
 @router.delete("/{offer_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_sales_offer(
     offer_id: str,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    effective_tenant = tenant_id or DEFAULT_TENANT
-    row = db.execute(
-        text(
-            """
-            SELECT 1 FROM domain_crm.sales_offers
-            WHERE id = :id AND tenant_id = :tenant_id AND deleted_at IS NULL
-            """
-        ),
-        {"id": offer_id, "tenant_id": effective_tenant},
-    ).first()
-    if not row:
-        raise HTTPException(status_code=404, detail="Sales offer not found")
+    effective_tenant = tenant_id
+    _get_sales_offer_row(db, offer_id, effective_tenant)
     db.execute(
         text(
             """
             UPDATE domain_crm.sales_offers
             SET deleted_at = :now, updated_at = :now
-            WHERE id = :id
+            WHERE id = :id AND tenant_id = :tenant_id AND deleted_at IS NULL
             """
         ),
-        {"now": datetime.now(timezone.utc), "id": offer_id},
+        {"now": datetime.now(timezone.utc), "id": offer_id, "tenant_id": effective_tenant},
     )
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
@@ -481,32 +470,28 @@ async def delete_sales_offer(
 @router.post("/{offer_id}/convert-to-order", status_code=status.HTTP_200_OK)
 async def convert_offer_to_order(
     offer_id: str,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Mark offer as accepted and return the offer data ready for order creation."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
-    row = db.execute(
-        text(
-            """
-            SELECT * FROM domain_crm.sales_offers
-            WHERE id = :id AND tenant_id = :tenant_id AND deleted_at IS NULL
-            """
-        ),
-        {"id": offer_id, "tenant_id": effective_tenant},
-    ).mappings().first()
-    if not row:
-        raise HTTPException(status_code=404, detail="Sales offer not found")
+    effective_tenant = tenant_id
+    row = _get_sales_offer_row(db, offer_id, effective_tenant)
 
     now = datetime.now(timezone.utc)
     db.execute(
-        text("UPDATE domain_crm.sales_offers SET status = 'angenommen', updated_at = :now WHERE id = :id"),
-        {"now": now, "id": offer_id},
+        text(
+            """
+            UPDATE domain_crm.sales_offers
+            SET status = 'angenommen', updated_at = :now
+            WHERE id = :id AND tenant_id = :tenant_id AND deleted_at IS NULL
+            """
+        ),
+        {"now": now, "id": offer_id, "tenant_id": effective_tenant},
     )
 
     order_id = str(uuid4())
     order_number = f"SO-{row['offer_number']}"
-    offer_items = _fetch_items(db, offer_id)
+    offer_items = _fetch_items(db, offer_id, effective_tenant)
     total = sum(Decimal(str(i.line_total)) for i in offer_items)
 
     db.execute(
@@ -547,11 +532,8 @@ async def convert_offer_to_order(
 
     db.commit()
 
-    updated = db.execute(
-        text("SELECT * FROM domain_crm.sales_offers WHERE id = :id"),
-        {"id": offer_id},
-    ).mappings().first()
-    offer_out = _row_to_offer(dict(updated), offer_items)
+    updated = _get_sales_offer_row(db, offer_id, effective_tenant)
+    offer_out = _row_to_offer(updated, offer_items)
     return {
         "offer": offer_out.model_dump() if hasattr(offer_out, "model_dump") else offer_out,
         "created_order_id": order_id,

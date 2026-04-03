@@ -12,14 +12,12 @@ from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from ....core.config import settings
 from ....core.database import get_db
+from ....core.tenant import get_tenant_id
 from ....services.numbering_service import get_numbering
 from ..schemas.base import PaginatedResponse
 
 router = APIRouter()
-
-DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
 class SalesOrderBase(BaseModel):
@@ -102,17 +100,24 @@ def _resolve_order_number(order_number: Optional[str]) -> str:
     return get_numbering().next_number("sales_order")
 
 
-def _fetch_items(db: Session, order_id: str) -> list[SalesOrderItemOut]:
+def _resolve_tenant_scope(payload_tenant_id: str | None, tenant_id: str) -> str:
+    payload_tenant = (payload_tenant_id or "").strip()
+    if payload_tenant and payload_tenant != tenant_id:
+        raise HTTPException(status_code=403, detail="tenant_id mismatch")
+    return tenant_id
+
+
+def _fetch_items(db: Session, order_id: str, tenant_id: str) -> list[SalesOrderItemOut]:
     rows = db.execute(
         text(
             """
             SELECT id, line_number, article_number, description, quantity, unit_price, discount_percent, line_total
             FROM domain_crm.sales_order_items
-            WHERE order_id = :order_id
+            WHERE order_id = :order_id AND tenant_id = :tenant_id
             ORDER BY line_number ASC
             """
         ),
-        {"order_id": order_id},
+        {"order_id": order_id, "tenant_id": tenant_id},
     ).mappings().all()
     return [
         SalesOrderItemOut(
@@ -127,6 +132,22 @@ def _fetch_items(db: Session, order_id: str) -> list[SalesOrderItemOut]:
         )
         for row in rows
     ]
+
+
+def _get_sales_order_row(db: Session, order_id: str, tenant_id: str) -> dict:
+    row = db.execute(
+        text(
+            """
+            SELECT *
+            FROM domain_crm.sales_orders
+            WHERE id = :id AND tenant_id = :tenant_id AND deleted_at IS NULL
+            """
+        ),
+        {"id": order_id, "tenant_id": tenant_id},
+    ).mappings().first()
+    if not row:
+        raise HTTPException(status_code=404, detail="Sales order not found")
+    return dict(row)
 
 
 def _row_to_order(row: dict, items: Optional[list[SalesOrderItemOut]] = None) -> SalesOrder:
@@ -157,17 +178,16 @@ def _row_to_order(row: dict, items: Optional[list[SalesOrderItemOut]] = None) ->
 
 @router.get("/", response_model=PaginatedResponse[SalesOrder])
 async def list_sales_orders(
-    tenant_id: Optional[str] = Query(None),
     customer_id: Optional[str] = Query(None, description="Filter by customer ID"),
     search: Optional[str] = Query(None),
     status_filter: Optional[str] = Query(None, alias="status"),
     skip: int = Query(0, ge=0),
     limit: int = Query(25, ge=1, le=200),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    effective_tenant = tenant_id or DEFAULT_TENANT
     params: dict[str, object] = {
-        "tenant_id": effective_tenant,
+        "tenant_id": tenant_id,
         "skip": skip,
         "limit": limit,
     }
@@ -200,7 +220,7 @@ async def list_sales_orders(
     items = []
     for row in rows:
         row_dict = dict(row)
-        order_items = _fetch_items(db, str(row_dict["id"]))
+        order_items = _fetch_items(db, str(row_dict["id"]), tenant_id)
         items.append(_row_to_order(row_dict, order_items))
 
     page = (skip // limit) + 1
@@ -217,26 +237,22 @@ async def list_sales_orders(
 
 
 @router.get("/{order_id}", response_model=SalesOrder)
-async def get_sales_order(order_id: str, tenant_id: Optional[str] = Query(None), db: Session = Depends(get_db)):
-    effective_tenant = tenant_id or DEFAULT_TENANT
-    row = db.execute(
-        text(
-            """
-            SELECT *
-            FROM domain_crm.sales_orders
-            WHERE id = :id AND tenant_id = :tenant_id AND deleted_at IS NULL
-            """
-        ),
-        {"id": order_id, "tenant_id": effective_tenant},
-    ).mappings().first()
-    if not row:
-        raise HTTPException(status_code=404, detail="Sales order not found")
-    return _row_to_order(dict(row), _fetch_items(db, order_id))
+async def get_sales_order(
+    order_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    row = _get_sales_order_row(db, order_id, tenant_id)
+    return _row_to_order(row, _fetch_items(db, order_id, tenant_id))
 
 
 @router.post("/", response_model=SalesOrder, status_code=status.HTTP_201_CREATED)
-async def create_sales_order(payload: SalesOrderCreate, db: Session = Depends(get_db)):
-    effective_tenant = payload.tenant_id or DEFAULT_TENANT
+async def create_sales_order(
+    payload: SalesOrderCreate,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    effective_tenant = _resolve_tenant_scope(payload.tenant_id, tenant_id)
     order_id = str(uuid4())
     now = datetime.now(timezone.utc)
     order_number = _resolve_order_number(payload.order_number)
@@ -340,37 +356,23 @@ async def create_sales_order(payload: SalesOrderCreate, db: Session = Depends(ge
         )
     db.commit()
 
-    row = db.execute(
-        text("SELECT * FROM domain_crm.sales_orders WHERE id = :id"),
-        {"id": order_id},
-    ).mappings().first()
-    return _row_to_order(dict(row), _fetch_items(db, order_id))
+    row = _get_sales_order_row(db, order_id, effective_tenant)
+    return _row_to_order(row, _fetch_items(db, order_id, effective_tenant))
 
 
 @router.put("/{order_id}", response_model=SalesOrder)
 async def update_sales_order(
     order_id: str,
     payload: SalesOrderUpdate,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    effective_tenant = tenant_id or DEFAULT_TENANT
-    current = db.execute(
-        text(
-            """
-            SELECT *
-            FROM domain_crm.sales_orders
-            WHERE id = :id AND tenant_id = :tenant_id AND deleted_at IS NULL
-            """
-        ),
-        {"id": order_id, "tenant_id": effective_tenant},
-    ).mappings().first()
-    if not current:
-        raise HTTPException(status_code=404, detail="Sales order not found")
+    effective_tenant = tenant_id
+    current = _get_sales_order_row(db, order_id, effective_tenant)
 
     data = payload.model_dump(exclude_unset=True)
     if not data:
-        return _row_to_order(dict(current), _fetch_items(db, order_id))
+        return _row_to_order(current, _fetch_items(db, order_id, effective_tenant))
 
     if "order_number" in data and data["order_number"] != current["order_number"]:
         duplicate = db.execute(
@@ -438,8 +440,8 @@ async def update_sales_order(
     if replace_items is not None:
         now = datetime.now(timezone.utc)
         db.execute(
-            text("DELETE FROM domain_crm.sales_order_items WHERE order_id = :order_id"),
-            {"order_id": order_id},
+            text("DELETE FROM domain_crm.sales_order_items WHERE order_id = :order_id AND tenant_id = :tenant_id"),
+            {"order_id": order_id, "tenant_id": effective_tenant},
         )
         for index, item in enumerate(replace_items, start=1):
             db.execute(
@@ -471,27 +473,19 @@ async def update_sales_order(
             )
     db.commit()
 
-    row = db.execute(
-        text("SELECT * FROM domain_crm.sales_orders WHERE id = :id"),
-        {"id": order_id},
-    ).mappings().first()
-    return _row_to_order(dict(row), _fetch_items(db, order_id))
+    row = _get_sales_order_row(db, order_id, effective_tenant)
+    return _row_to_order(row, _fetch_items(db, order_id, effective_tenant))
 
 
 @router.post("/{order_id}/create-delivery-note", response_model=dict, status_code=201)
 async def create_delivery_from_order(
     order_id: str,
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Create a delivery note from a sales order (document flow)."""
-    effective_tenant = tenant_id or DEFAULT_TENANT
-    order_row = db.execute(
-        text("SELECT * FROM domain_crm.sales_orders WHERE id = :id AND tenant_id = :tid AND deleted_at IS NULL"),
-        {"id": order_id, "tid": effective_tenant},
-    ).mappings().first()
-    if not order_row:
-        raise HTTPException(status_code=404, detail="Sales order not found")
+    effective_tenant = tenant_id
+    order_row = _get_sales_order_row(db, order_id, effective_tenant)
     if order_row["status"] in ("cancelled", "completed"):
         raise HTTPException(status_code=400, detail=f"Auftrag hat Status '{order_row['status']}' und kann nicht geliefert werden")
 
@@ -517,7 +511,7 @@ async def create_delivery_from_order(
         },
     )
 
-    items = _fetch_items(db, order_id)
+    items = _fetch_items(db, order_id, effective_tenant)
     for i, item in enumerate(items, 1):
         pos_id = uuid7()
         db.execute(
@@ -537,19 +531,29 @@ async def create_delivery_from_order(
         )
 
     db.execute(
-        text("UPDATE domain_crm.sales_orders SET status = 'in_delivery', updated_at = NOW() WHERE id = :id"),
-        {"id": order_id},
+        text(
+            """
+            UPDATE domain_crm.sales_orders
+            SET status = 'in_delivery', updated_at = NOW()
+            WHERE id = :id AND tenant_id = :tenant_id AND deleted_at IS NULL
+            """
+        ),
+        {"id": order_id, "tenant_id": effective_tenant},
     )
     db.commit()
     return {"ok": True, "delivery_note_id": dn_id, "delivery_note_number": dn_nr, "order_id": order_id}
 
 
 @router.delete("/{order_id}", status_code=status.HTTP_204_NO_CONTENT, response_class=Response)
-async def delete_sales_order(order_id: str, tenant_id: Optional[str] = Query(None), db: Session = Depends(get_db)) -> Response:
-    effective_tenant = tenant_id or DEFAULT_TENANT
+async def delete_sales_order(
+    order_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> Response:
+    effective_tenant = tenant_id
     db.execute(
-        text("DELETE FROM domain_crm.sales_order_items WHERE order_id = :id"),
-        {"id": order_id},
+        text("DELETE FROM domain_crm.sales_order_items WHERE order_id = :id AND tenant_id = :tenant_id"),
+        {"id": order_id, "tenant_id": effective_tenant},
     )
     updated = db.execute(
         text(

@@ -1,17 +1,17 @@
 from __future__ import annotations
 
+import app.api.v1.endpoints.security_monitoring as security_monitoring_endpoint
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from app.api.v1.endpoints.security_monitoring import router
 from app.core.outbound_security import OutboundTargetPolicyError, validate_outbound_http_target
 from app.core.tenant_isolation_guard import IsolationDecision, TenantIsolationGuard
-from app.services.security_observability import security_observer
+from app.services.security_observability import SecurityObservability, security_observer
 
 
 def _client() -> TestClient:
     app = FastAPI()
-    app.include_router(router, prefix="/api/v1")
+    app.include_router(security_monitoring_endpoint.router, prefix="/api/v1")
     return TestClient(app)
 
 
@@ -71,3 +71,32 @@ def test_security_monitoring_events_endpoint_supports_filters():
     assert body["event_count"] == 1
     assert body["events"][0]["category"] == "tenant_isolation"
     assert body["events"][0]["outcome"] == "denied"
+
+
+def test_security_monitoring_metrics_survive_observer_restart(tmp_path, monkeypatch):
+    observer = SecurityObservability(
+        persist_enabled=True,
+        storage_path=tmp_path / "security-events.jsonl",
+    )
+    observer.reset()
+    observer.record_event(
+        category="tenant_isolation",
+        outcome="denied",
+        severity="warning",
+        message="Cross-tenant access denied",
+        tenant_id="tenant-a",
+    )
+
+    reloaded = SecurityObservability(
+        persist_enabled=True,
+        storage_path=tmp_path / "security-events.jsonl",
+    )
+    monkeypatch.setattr(security_monitoring_endpoint, "security_observer", reloaded)
+
+    response = _client().get("/api/v1/security/monitoring/metrics")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["event_count"] == 1
+    assert body["by_category"]["tenant_isolation"] == 1
+    assert body["persistence_enabled"] is True
