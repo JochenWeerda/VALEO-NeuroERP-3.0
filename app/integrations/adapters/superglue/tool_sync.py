@@ -73,6 +73,17 @@ _DEFAULT_SUPERGLUE_TOOLS: list[SuperglueToolRecord] = [
         tags=["partner", "preview"],
         metadata={"source_system": "superglue"},
     ),
+    SuperglueToolRecord(
+        external_tool_id="sg.customer.profile.preview",
+        external_tool_version="2026.04",
+        valeo_contract_id="superglue.customer.profile.preview",
+        display_name="Superglue Customer Profile Preview",
+        execution_modes=["read", "suggest"],
+        target_kind="customer_profile",
+        auth_model="superglue_token",
+        tags=["crm", "preview"],
+        metadata={"source_system": "superglue"},
+    ),
 ]
 
 
@@ -122,13 +133,15 @@ def list_superglue_tool_records(client: SuperglueClient | None = None) -> list[S
 def refresh_superglue_sync_snapshot(client: SuperglueClient | None = None) -> dict[str, Any]:
     records = list_superglue_tool_records(client)
     _persist_snapshot(records)
-    return {
+    payload = {
         "provider_key": "superglue",
         "refreshed_at": datetime.now(timezone.utc).isoformat(),
         "tool_count": len(records),
         "storage_path": str(_snapshot_path()),
         "schema_version": 1,
     }
+    _append_sync_history(payload)
+    return payload
 
 
 def build_superglue_sync_status(client: SuperglueClient | None = None) -> SuperglueSyncStatus:
@@ -204,15 +217,63 @@ def build_superglue_config_summary() -> dict[str, Any]:
         "dashboard_url": settings.SUPERGLUE_DASHBOARD_URL,
         "auth_token_configured": bool(settings.SUPERGLUE_AUTH_TOKEN),
         "sync_state_path": settings.SUPERGLUE_SYNC_STATE_PATH,
+        "sync_history_path": settings.SUPERGLUE_SYNC_HISTORY_PATH,
         "quarantine_log_path": settings.SUPERGLUE_QUARANTINE_LOG_PATH,
+        "execution_journal_path": settings.SUPERGLUE_EXECUTION_JOURNAL_PATH,
         "allowed_hosts": list(settings.SUPERGLUE_ALLOWED_HOSTS),
         "allowed_domains": list(settings.SUPERGLUE_ALLOWED_DOMAINS),
         "schema_version": 1,
     }
 
 
+def build_superglue_sync_history(limit: int = 20) -> dict[str, Any]:
+    entries = _load_sync_history_entries(limit=limit)
+    return {
+        "provider_key": "superglue",
+        "entry_count": len(entries),
+        "latest": entries[-1] if entries else None,
+        "entries": entries,
+        "storage_path": str(_sync_history_path()),
+        "schema_version": 1,
+    }
+
+
+def get_superglue_tool_record(tool_id: str) -> SuperglueToolRecord | None:
+    normalized = str(tool_id or "").strip()
+    if not normalized:
+        return None
+    for record in list_superglue_tool_records():
+        if normalized in {record.external_tool_id, record.valeo_contract_id}:
+            return record
+    return None
+
+
+def validate_superglue_execution_request(
+    *,
+    tool_id: str,
+    execution_mode: str,
+    target_kind: str,
+) -> SuperglueToolRecord:
+    record = get_superglue_tool_record(tool_id)
+    if record is None:
+        raise ValueError(f"Unbekanntes Superglue-Tool: {tool_id}")
+    if execution_mode not in record.execution_modes:
+        raise ValueError(
+            f"Execution-Mode {execution_mode!r} ist fuer Tool {record.external_tool_id!r} nicht erlaubt"
+        )
+    if target_kind and target_kind != record.target_kind:
+        raise ValueError(
+            f"Target-Kind {target_kind!r} passt nicht zu Tool {record.external_tool_id!r} ({record.target_kind!r})"
+        )
+    return record
+
+
 def _snapshot_path() -> Path:
     return Path(settings.SUPERGLUE_SYNC_STATE_PATH)
+
+
+def _sync_history_path() -> Path:
+    return Path(settings.SUPERGLUE_SYNC_HISTORY_PATH)
 
 
 def _persist_snapshot(records: list[SuperglueToolRecord]) -> None:
@@ -225,6 +286,14 @@ def _persist_snapshot(records: list[SuperglueToolRecord]) -> None:
         "schema_version": 1,
     }
     path.write_text(json.dumps(payload, ensure_ascii=True, sort_keys=True), encoding="utf-8")
+
+
+def _append_sync_history(entry: dict[str, Any]) -> None:
+    path = _sync_history_path()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as handle:
+        handle.write(json.dumps(entry, ensure_ascii=True, sort_keys=True))
+        handle.write("\n")
 
 
 def _load_snapshot_payload() -> dict[str, Any] | None:
@@ -250,3 +319,22 @@ def _load_snapshot_records() -> list[SuperglueToolRecord]:
         except Exception:
             continue
     return records
+
+
+def _load_sync_history_entries(limit: int = 20) -> list[dict[str, Any]]:
+    path = _sync_history_path()
+    if not path.exists():
+        return []
+    entries: list[dict[str, Any]] = []
+    with path.open("r", encoding="utf-8") as handle:
+        for line in handle:
+            payload = line.strip()
+            if not payload:
+                continue
+            try:
+                data = json.loads(payload)
+            except json.JSONDecodeError:
+                continue
+            if isinstance(data, dict):
+                entries.append(data)
+    return entries[-limit:]

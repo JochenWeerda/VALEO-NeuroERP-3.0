@@ -274,7 +274,7 @@ Aktueller Stand 2026-04-03:
 Folgewelle 2026-04-04:
 
 - `INT-SG-009` bis `INT-SG-014` sind als Folgewelle umgesetzt: Sync-Snapshot, Config-Summary, Quarantaene, Audit-/Security-Bridge, zweiter Preview-Adapter und Admin-UX.
-- `INT-SG-015` bis `INT-SG-020` bilden die naechste Operations-Welle: Execution-Guardrails, Sync-History, Resolve-Pfad fuer Quarantaene, Execution-Journal, dritter read-only Pilotadapter und Admin-UX-Nachzug.
+- `INT-SG-015` bis `INT-SG-020` sind umgesetzt: Execution-Guardrails, Sync-History, Resolve-Pfad fuer Quarantaene, Execution-Journal, dritter read-only Pilotadapter und Admin-UX-Nachzug.
 
 ### INT-SG-001 - Contract- und Settings-Basis
 

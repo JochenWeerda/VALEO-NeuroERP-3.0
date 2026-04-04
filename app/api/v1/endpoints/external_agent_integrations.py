@@ -9,11 +9,13 @@ from app.core.external_agent_catalog import (
 from app.integrations.adapters.superglue.tool_sync import (
     build_superglue_config_summary,
     build_superglue_health_status,
+    build_superglue_sync_history,
     build_superglue_sync_status,
     build_superglue_tool_summary,
     refresh_superglue_sync_snapshot,
 )
-from app.integrations.services.superglue_quarantine import build_quarantine_summary
+from app.integrations.services.superglue_execution_journal import build_execution_journal_summary
+from app.integrations.services.superglue_quarantine import build_quarantine_summary, resolve_quarantine_entry
 
 router = APIRouter(prefix="/agent/integrations", tags=["agents", "integrations", "openapi", "mcp"])
 
@@ -73,9 +75,27 @@ def refresh_superglue_sync() -> dict:
     return refresh_superglue_sync_snapshot()
 
 
+@router.get("/providers/superglue/sync-history", summary="Superglue Sync History")
+def get_superglue_sync_history(limit: int = Query(default=20, ge=1, le=100)) -> dict:
+    return build_superglue_sync_history(limit=limit)
+
+
 @router.get("/providers/superglue/quarantine", summary="Superglue Quarantine")
 def get_superglue_quarantine() -> dict:
     return build_quarantine_summary()
+
+
+@router.post("/providers/superglue/quarantine/{entry_id}/resolve", summary="Resolve Superglue Quarantine Entry")
+def resolve_superglue_quarantine(entry_id: str, resolved_by: str = Query(...), note: str | None = Query(default=None)) -> dict:
+    try:
+        return resolve_quarantine_entry(entry_id=entry_id, resolved_by=resolved_by, note=note)
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"Quarantine entry {entry_id!r} not found")
+
+
+@router.get("/providers/superglue/execution-journal", summary="Superglue Execution Journal")
+def get_superglue_execution_journal(limit: int = Query(default=20, ge=1, le=100)) -> dict:
+    return build_execution_journal_summary(limit=limit)
 
 
 @router.get("/use-cases", summary="External Agent Use Cases")
