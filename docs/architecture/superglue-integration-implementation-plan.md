@@ -277,6 +277,7 @@ Folgewelle 2026-04-04:
 - `INT-SG-015` bis `INT-SG-020` sind umgesetzt: Execution-Guardrails, Sync-History, Resolve-Pfad fuer Quarantaene, Execution-Journal, dritter read-only Pilotadapter und Admin-UX-Nachzug.
 - `INT-SG-021` ist umgesetzt: Compose-Stack fuer Superglue mit eigener DB, MinIO, Init-Job, Volumes und Healthchecks.
 - `INT-SG-022` ist umgesetzt: Reverse-Proxy-Overlay mit TLS-Endpunkten, internen Service-Ports und Header-Hardening.
+- `INT-SG-023` bis `INT-SG-028` bilden die Infra-/Ops-Folgewelle: Kubernetes-Basis, Helm-Overlay, NetworkPolicy/Ingress, Backup/Restore, CI-Validierung und wiederholbare Ops-Scripts.
 
 ### INT-SG-001 - Contract- und Settings-Basis
 
@@ -562,6 +563,92 @@ Dateibesitz:
 
 - `docker-compose.integration.edge.yml`
 - `ops/superglue/Caddyfile`
+- zugehoerige Doku unter `docs/workflows/` und `docs/cards/`
+
+### INT-SG-023 - Kubernetes Basis-Manifeste
+
+Ziel:
+
+- denselben Superglue-Stack neben Compose auch als Cluster-Basis modellieren
+- Services, Persistenz und Secret-/Config-Verkabelung sauber trennen
+- keine zweite Naming-Welt neben `SUPERGLUE_*`
+
+Dateibesitz:
+
+- `k8s/superglue/**`
+- zugehoerige Doku unter `docs/workflows/` und `docs/cards/`
+
+### INT-SG-024 - Helm-Overlay im bestehenden Chart
+
+Ziel:
+
+- Superglue als optionale Komponente im bestehenden `valeo-erp`-Chart rendern
+- vorhandene Label-, SecretRef- und Ressourcenmuster wiederverwenden
+- keine zweite Chart-Welt nur fuer Superglue aufbauen
+
+Dateibesitz:
+
+- `k8s/helm/valeo-erp/values.yaml`
+- `k8s/helm/valeo-erp/templates/superglue-*.yaml`
+- zugehoerige Doku unter `docs/workflows/` und `docs/cards/`
+
+### INT-SG-025 - NetworkPolicy und Ingress im K8s-Pfad
+
+Ziel:
+
+- interne und externe Superglue-Verkehrswege im Cluster begrenzen
+- TLS-/Host-Pfade fuer API und MinIO-Konsole kontrolliert modellieren
+- Compose- und K8s-Edge-Konventionen angleichen
+
+Dateibesitz:
+
+- `k8s/superglue/networkpolicy.yaml`
+- `k8s/superglue/ingress.yaml`
+- `k8s/helm/valeo-erp/templates/superglue-networkpolicy.yaml`
+- `k8s/helm/valeo-erp/templates/superglue-ingress.yaml`
+- zugehoerige Doku unter `docs/workflows/` und `docs/cards/`
+
+### INT-SG-026 - Backup/Restore-Ops fuer DB und MinIO
+
+Ziel:
+
+- Postgres-Dump, Artefakt-Sync und Restore-Test fuer Superglue standardisieren
+- Cron-/Job-Pfade in Helm und lokale Ops-Scripts angleichen
+- Restore explizit pruefbar machen statt nur Backup-Dateien zu erzeugen
+
+Dateibesitz:
+
+- `k8s/helm/valeo-erp/templates/superglue-backup-*.yaml`
+- `scripts/superglue/*.ps1`
+- `scripts/superglue/*.sh`
+- zugehoerige Doku unter `docs/workflows/` und `docs/cards/`
+
+### INT-SG-027 - CI-Validierung fuer Infra-Pfade
+
+Ziel:
+
+- Compose-, K8s- und Helm-Renderpfade automatisiert pruefen
+- Basis-Smokes fuer Ops-Scripts und Rendering in GitHub Actions verankern
+- Drift zwischen lokaler Doku und deploybarer Konfiguration frueh erkennen
+
+Dateibesitz:
+
+- `.github/workflows/superglue-infra.yml`
+- `scripts/superglue/*.ps1`
+- `scripts/superglue/*.sh`
+- zugehoerige Doku unter `docs/workflows/` und `docs/cards/`
+
+### INT-SG-028 - Ops-Scripts und Runbook
+
+Ziel:
+
+- wiederholbare Start-, Deploy-, Smoke- und Drift-Checks fuer Superglue liefern
+- Compose- und K8s-Pfade unter einem kleinen Script-Set dokumentieren
+- keine manuellen Schrittlisten ohne automatisierbaren Gegenpfad offen lassen
+
+Dateibesitz:
+
+- `scripts/superglue/**`
 - zugehoerige Doku unter `docs/workflows/` und `docs/cards/`
 
 ## 10. Nicht-Ziele fuer Phase 1
