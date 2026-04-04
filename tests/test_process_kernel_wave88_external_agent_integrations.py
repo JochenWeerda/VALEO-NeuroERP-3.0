@@ -77,6 +77,9 @@ def test_superglue_provider_routes_surface_sync_and_health():
     sync = client.get("/agent/integrations/providers/superglue/sync-status")
     tools = client.get("/agent/integrations/providers/superglue/tools")
     health = client.get("/agent/integrations/providers/superglue/health")
+    config = client.get("/agent/integrations/providers/superglue/config-summary")
+    quarantine = client.get("/agent/integrations/providers/superglue/quarantine")
+    refresh = client.post("/agent/integrations/providers/superglue/sync-status/refresh")
 
     assert provider.status_code == 200
     assert provider.json()["provider_key"] == "superglue"
@@ -86,6 +89,12 @@ def test_superglue_provider_routes_surface_sync_and_health():
     assert tools.json()["tool_count"] >= 3
     assert health.status_code == 200
     assert health.json()["provider_key"] == "superglue"
+    assert config.status_code == 200
+    assert config.json()["provider_key"] == "superglue"
+    assert quarantine.status_code == 200
+    assert "entry_count" in quarantine.json()
+    assert refresh.status_code == 200
+    assert refresh.json()["provider_key"] == "superglue"
 
 
 def test_external_agent_unknown_use_case_returns_404():

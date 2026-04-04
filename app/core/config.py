@@ -116,6 +116,8 @@ class Settings(BaseSettings):
     SUPERGLUE_SYNC_ENABLED: bool = False
     SUPERGLUE_EXECUTION_ENABLED: bool = False
     SUPERGLUE_REQUIRE_TENANT_SECRETS: bool = False
+    SUPERGLUE_SYNC_STATE_PATH: str = "runtime/superglue/sync-state.json"
+    SUPERGLUE_QUARANTINE_LOG_PATH: str = "runtime/superglue/quarantine.jsonl"
     SECURITY_EVENT_PERSISTENCE_ENABLED: bool = True
     SECURITY_EVENT_LOG_PATH: str = "runtime/security-events/security-events.jsonl"
 

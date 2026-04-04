@@ -66,6 +66,38 @@ type SuperglueStatus = {
   detail?: string | null
 }
 
+type SuperglueConfigSummary = {
+  provider_key: string
+  enabled: boolean
+  sync_enabled: boolean
+  execution_enabled: boolean
+  require_tenant_secrets: boolean
+  base_url_configured: boolean
+  graphql_url_configured: boolean
+  rest_url_configured: boolean
+  dashboard_url?: string | null
+  auth_token_configured: boolean
+  sync_state_path: string
+  quarantine_log_path: string
+  allowed_hosts: string[]
+  allowed_domains: string[]
+}
+
+type SuperglueQuarantineSummary = {
+  entry_count: number
+  latest?: {
+    reason: string
+    tool_id: string
+    outcome: string
+  } | null
+}
+
+type SuperglueRefreshResult = {
+  provider_key: string
+  refreshed_at: string
+  tool_count: number
+}
+
 const API_BASE = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || ''
 const BACKEND_ORIGIN = API_BASE || (typeof window !== 'undefined' ? window.location.origin : '')
 
@@ -93,6 +125,14 @@ export default function AgentenIntegrationPage(): JSX.Element {
     queryKey: ['agent', 'superglue-status'],
     queryFn: async () => (await apiClient.get<SuperglueStatus>('/api/v1/agent/integrations/providers/superglue/sync-status')).data,
   })
+  const superglueConfigQuery = useQuery({
+    queryKey: ['agent', 'superglue-config'],
+    queryFn: async () => (await apiClient.get<SuperglueConfigSummary>('/api/v1/agent/integrations/providers/superglue/config-summary')).data,
+  })
+  const superglueQuarantineQuery = useQuery({
+    queryKey: ['agent', 'superglue-quarantine'],
+    queryFn: async () => (await apiClient.get<SuperglueQuarantineSummary>('/api/v1/agent/integrations/providers/superglue/quarantine')).data,
+  })
 
   const downloadManifest = (): void => {
     if (!manifestQuery.data) {
@@ -107,12 +147,27 @@ export default function AgentenIntegrationPage(): JSX.Element {
     URL.revokeObjectURL(url)
   }
 
-  if (manifestQuery.isLoading || commandCatalogQuery.isLoading || idempotencyOverviewQuery.isLoading || superglueStatusQuery.isLoading) {
+  if (
+    manifestQuery.isLoading ||
+    commandCatalogQuery.isLoading ||
+    idempotencyOverviewQuery.isLoading ||
+    superglueStatusQuery.isLoading ||
+    superglueConfigQuery.isLoading ||
+    superglueQuarantineQuery.isLoading
+  ) {
     return <LoadingState message="Agenten- und Idempotenzdaten werden geladen..." />
   }
 
-  const firstError = manifestQuery.error ?? commandCatalogQuery.error ?? idempotencyOverviewQuery.error ?? superglueStatusQuery.error
-  if (manifestQuery.isError || commandCatalogQuery.isError || idempotencyOverviewQuery.isError || superglueStatusQuery.isError || !manifestQuery.data) {
+  const firstError = manifestQuery.error ?? commandCatalogQuery.error ?? idempotencyOverviewQuery.error ?? superglueStatusQuery.error ?? superglueConfigQuery.error ?? superglueQuarantineQuery.error
+  if (
+    manifestQuery.isError ||
+    commandCatalogQuery.isError ||
+    idempotencyOverviewQuery.isError ||
+    superglueStatusQuery.isError ||
+    superglueConfigQuery.isError ||
+    superglueQuarantineQuery.isError ||
+    !manifestQuery.data
+  ) {
     return <ErrorState error={firstError as Error} onRetry={() => void manifestQuery.refetch()} />
   }
 
@@ -124,6 +179,8 @@ export default function AgentenIntegrationPage(): JSX.Element {
   const commandCatalog = commandCatalogQuery.data ?? []
   const idempotencyOverview = idempotencyOverviewQuery.data
   const superglueStatus = superglueStatusQuery.data
+  const superglueConfig = superglueConfigQuery.data
+  const superglueQuarantine = superglueQuarantineQuery.data
   const sampleTenant =
     window.localStorage.getItem('tenant_id') ||
     window.sessionStorage.getItem('tenant_id') ||
@@ -159,6 +216,15 @@ export default function AgentenIntegrationPage(): JSX.Element {
   const confidenceScore = idempotencyOverview
     ? Math.round((confidenceFromOverview + confidenceFromCatalog) / 2)
     : confidenceFromCatalog
+
+  const refreshSuperglueSnapshot = async (): Promise<void> => {
+    await apiClient.post<SuperglueRefreshResult>('/api/v1/agent/integrations/providers/superglue/sync-status/refresh')
+    await Promise.all([
+      superglueStatusQuery.refetch(),
+      superglueConfigQuery.refetch(),
+      superglueQuarantineQuery.refetch(),
+    ])
+  }
 
   return (
     <div className="space-y-6 p-6">
@@ -242,6 +308,11 @@ export default function AgentenIntegrationPage(): JSX.Element {
             <p><strong>Tools:</strong> {superglueStatus?.tool_count ?? 0}</p>
             <p><strong>Sync:</strong> {superglueStatus?.sync_enabled ? 'aktiv' : 'deaktiviert'}</p>
             <p><strong>Execution:</strong> {superglueStatus?.execution_enabled ? 'aktiv' : 'deaktiviert'}</p>
+            <p><strong>Quarantaene:</strong> {superglueQuarantine?.entry_count ?? 0} Eintraege</p>
+            <Button type="button" variant="outline" size="sm" className="gap-2" onClick={() => void refreshSuperglueSnapshot()}>
+              <Download className="h-4 w-4" />
+              Sync aktualisieren
+            </Button>
             {superglueStatus?.dashboard_url ? (
               <a
                 href={absoluteUrl(superglueStatus.dashboard_url)}
@@ -255,6 +326,43 @@ export default function AgentenIntegrationPage(): JSX.Element {
             ) : (
               <Badge variant="outline">Dashboard-Link folgt aus der Backend-Konfiguration</Badge>
             )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Superglue Konfiguration</CardTitle>
+            <CardDescription>
+              Maskierte Betriebsparameter und Hinweise fuer den produktiven Rollout.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            <p><strong>Tenant-Secrets erzwungen:</strong> {superglueConfig?.require_tenant_secrets ? 'ja' : 'nein'}</p>
+            <p><strong>Base URL konfiguriert:</strong> {superglueConfig?.base_url_configured ? 'ja' : 'nein'}</p>
+            <p><strong>GraphQL URL konfiguriert:</strong> {superglueConfig?.graphql_url_configured ? 'ja' : 'nein'}</p>
+            <p><strong>REST URL konfiguriert:</strong> {superglueConfig?.rest_url_configured ? 'ja' : 'nein'}</p>
+            <p><strong>Auth Token gesetzt:</strong> {superglueConfig?.auth_token_configured ? 'ja' : 'nein'}</p>
+            <p><strong>Sync State:</strong> <code>{superglueConfig?.sync_state_path}</code></p>
+            <p><strong>Quarantaene Log:</strong> <code>{superglueConfig?.quarantine_log_path}</code></p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Quarantaene / Hinweise</CardTitle>
+            <CardDescription>
+              Degradierte Superglue-Aufrufe werden getrennt nachvollzogen, ohne den Core zu blockieren.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            <p><strong>Eintraege:</strong> {superglueQuarantine?.entry_count ?? 0}</p>
+            <p><strong>Letztes Tool:</strong> {superglueQuarantine?.latest?.tool_id ?? '—'}</p>
+            <p><strong>Letzter Grund:</strong> {superglueQuarantine?.latest?.reason ?? 'kein degradierter Aufruf'}</p>
+            <Badge variant="outline">
+              Write-Pfade bleiben weiter approval- und policy-gated.
+            </Badge>
           </CardContent>
         </Card>
       </div>

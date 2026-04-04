@@ -8,6 +8,7 @@ const getMock = vi.hoisted(() => vi.fn())
 vi.mock('@/lib/api-client', () => ({
   apiClient: {
     get: getMock,
+    post: vi.fn().mockResolvedValue({ data: { provider_key: 'superglue', refreshed_at: '2026-04-04T10:00:00Z', tool_count: 3 } }),
   },
 }))
 
@@ -91,6 +92,34 @@ describe('AgentenIntegrationPage', () => {
           dashboard_url: '/api/v1/agent/integrations/providers/superglue/sync-status',
         },
       })
+      .mockResolvedValueOnce({
+        data: {
+          provider_key: 'superglue',
+          enabled: true,
+          sync_enabled: true,
+          execution_enabled: false,
+          require_tenant_secrets: true,
+          base_url_configured: true,
+          graphql_url_configured: true,
+          rest_url_configured: true,
+          dashboard_url: '/api/v1/agent/integrations/providers/superglue/sync-status',
+          auth_token_configured: false,
+          sync_state_path: 'runtime/superglue/sync-state.json',
+          quarantine_log_path: 'runtime/superglue/quarantine.jsonl',
+          allowed_hosts: [],
+          allowed_domains: [],
+        },
+      })
+      .mockResolvedValueOnce({
+        data: {
+          entry_count: 1,
+          latest: {
+            tool_id: 'sg.document.search',
+            reason: 'temporary backend outage',
+            outcome: 'degraded',
+          },
+        },
+      })
   })
 
   it('zeigt Agent UX Panel und Idempotency Monitoring', async () => {
@@ -99,7 +128,10 @@ describe('AgentenIntegrationPage', () => {
     expect(await screen.findByText('Agent UX Panel')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Idempotency Monitoring' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Superglue Hub' })).toBeInTheDocument()
+    expect(screen.getByText('Superglue Konfiguration')).toBeInTheDocument()
+    expect(screen.getByText('Quarantaene / Hinweise')).toBeInTheDocument()
     expect(screen.getByText('84%')).toBeInTheDocument()
     expect(screen.getByText('Command Catalog')).toBeInTheDocument()
+    expect(screen.getByText('temporary backend outage')).toBeInTheDocument()
   })
 })

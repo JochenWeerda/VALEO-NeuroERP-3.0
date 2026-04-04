@@ -273,12 +273,7 @@ Aktueller Stand 2026-04-03:
 
 Folgewelle 2026-04-04:
 
-- `INT-SG-009` Sync-Snapshot-Persistenz und manueller Refresh
-- `INT-SG-010` Config-Summary und Admin-Aktionspfad
-- `INT-SG-011` Quarantaene fuer degradierte Superglue-Aufrufe
-- `INT-SG-012` Audit-/Security-Bridge fuer Superglue-Execution
-- `INT-SG-013` zweiter read-only Pilotadapter (Partner/Legacy Preview)
-- `INT-SG-014` Admin-UX fuer Refresh/Quarantaene/Config-Hinweise
+- `INT-SG-009` bis `INT-SG-014` sind als Folgewelle umgesetzt: Sync-Snapshot, Config-Summary, Quarantaene, Audit-/Security-Bridge, zweiter Preview-Adapter und Admin-UX.
 
 ### INT-SG-001 - Contract- und Settings-Basis
 

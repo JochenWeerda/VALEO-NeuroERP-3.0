@@ -580,6 +580,12 @@ class NeuroToolBroker:
             action=step.action,
             parameters=step.parameters,
         )
+        if payload.get("result_status") != "success":
+            status = "failed" if str(payload.get("execution_mode")) == "execute" else "degraded"
+            return {
+                "step_status": status,
+                "trace": {"status": status, "result": payload},
+            }
         return {
             "step_status": "executed",
             "trace": {"status": "executed", "result": payload},
