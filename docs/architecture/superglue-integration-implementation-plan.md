@@ -278,6 +278,7 @@ Folgewelle 2026-04-04:
 - `INT-SG-021` ist umgesetzt: Compose-Stack fuer Superglue mit eigener DB, MinIO, Init-Job, Volumes und Healthchecks.
 - `INT-SG-022` ist umgesetzt: Reverse-Proxy-Overlay mit TLS-Endpunkten, internen Service-Ports und Header-Hardening.
 - `INT-SG-023` bis `INT-SG-028` sind umgesetzt: Kubernetes-Basis, Helm-Overlay, NetworkPolicy/Ingress, Backup/Restore, CI-Validierung und wiederholbare Ops-Scripts.
+- `INT-SG-029` bis `INT-SG-034` bilden die produktionsnahe Control-Plane-Welle: ArgoCD, Secret-/Certificate-CRDs, Prometheus/Grafana, dedizierter Deploy-Workflow und Bootstrap der tenant-spezifischen Ops-Konfiguration.
 
 ### INT-SG-001 - Contract- und Settings-Basis
 
@@ -649,6 +650,87 @@ Ziel:
 Dateibesitz:
 
 - `scripts/superglue/**`
+- zugehoerige Doku unter `docs/workflows/` und `docs/cards/`
+
+### INT-SG-029 - ArgoCD Application
+
+Ziel:
+
+- Superglue in den bestehenden GitOps-Pfad ziehen
+- separates App-of-Apps-Artefakt statt manuellem `kubectl apply`
+
+Dateibesitz:
+
+- `k8s/argocd/apps/superglue-platform.yaml`
+- `k8s/argocd/apps/kustomization.yaml`
+- zugehoerige Doku unter `docs/workflows/` und `docs/cards/`
+
+### INT-SG-030 - Secret- und Certificate-CRDs
+
+Ziel:
+
+- produktive Secret- und Zertifikatsquellen im K8s-Pfad modellieren
+- `ExternalSecret`/`Certificate` nicht nur im Runbook erwaehnen, sondern als Artefakt ablegen
+
+Dateibesitz:
+
+- `k8s/superglue/external-secret.yaml`
+- `k8s/superglue/certificate.yaml`
+- `k8s/helm/valeo-erp/templates/superglue-external-secret.yaml`
+- `k8s/helm/valeo-erp/templates/superglue-certificate.yaml`
+- zugehoerige Doku unter `docs/workflows/` und `docs/cards/`
+
+### INT-SG-031 - ServiceMonitor und Alerts
+
+Ziel:
+
+- Superglue-Metriken an bestehende Prometheus-Konventionen anbinden
+- konkrete Alert-Regeln fuer Health, Sync und Quarantaene modellieren
+
+Dateibesitz:
+
+- `k8s/superglue/servicemonitor.yaml`
+- `k8s/helm/valeo-erp/templates/superglue-servicemonitor.yaml`
+- `k8s/helm/valeo-erp/templates/prometheus-alerts.yaml`
+- zugehoerige Doku unter `docs/workflows/` und `docs/cards/`
+
+### INT-SG-032 - Grafana Dashboard
+
+Ziel:
+
+- Superglue-Ops als standardisiertes Dashboard mit Health, Journal, Sync und Quarantaene surfacen
+- Dashboard-Datei und Cluster-Einspielpfad sauber trennen
+
+Dateibesitz:
+
+- `ops/superglue/grafana-dashboard.json`
+- `k8s/helm/valeo-erp/templates/superglue-dashboard-configmap.yaml`
+- zugehoerige Doku unter `docs/workflows/` und `docs/cards/`
+
+### INT-SG-033 - GitHub Deploy Workflow
+
+Ziel:
+
+- Superglue-Infra nicht nur rendern, sondern kontrolliert deploybar machen
+- Staging/Main-Pfade und Artefakte trennen
+
+Dateibesitz:
+
+- `.github/workflows/superglue-deploy.yml`
+- `scripts/superglue/*.ps1`
+- `scripts/superglue/*.sh`
+- zugehoerige Doku unter `docs/workflows/` und `docs/cards/`
+
+### INT-SG-034 - Bootstrap und Secret-Mapping
+
+Ziel:
+
+- tenant-spezifisches Secret-/Host-Mapping fuer Produktion explizit machen
+- Bootstrap nicht als freie Handarbeit, sondern als Script + Doku liefern
+
+Dateibesitz:
+
+- `scripts/superglue/bootstrap-secrets.*`
 - zugehoerige Doku unter `docs/workflows/` und `docs/cards/`
 
 ## 10. Nicht-Ziele fuer Phase 1
