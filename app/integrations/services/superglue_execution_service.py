@@ -6,8 +6,10 @@ from datetime import UTC, datetime
 from typing import Any
 
 from app.integrations.adapters.superglue.client import SuperglueClient
-from app.integrations.contracts import ExternalResultEnvelope
+from app.integrations.contracts import ExternalResultEnvelope, ExternalResultError
+from app.integrations.services.superglue_quarantine import append_quarantine_entry
 from app.integrations.services.superglue_secret_resolver import resolve_superglue_auth_token
+from app.services.security_observability import security_observer
 
 
 class SuperglueExecutionService:
@@ -26,15 +28,67 @@ class SuperglueExecutionService:
     ) -> ExternalResultEnvelope:
         client = self._client or SuperglueClient(auth_token=resolve_superglue_auth_token(tenant_id))
         started_at = datetime.now(UTC)
-        result = client.request("POST", f"/api/tools/{tool_id}/execute", mode="rest", json=payload)
-        finished_at = datetime.now(UTC)
-        return ExternalResultEnvelope(
-            tenant_id=tenant_id,
-            correlation_id=correlation_id,
-            execution_mode=execution_mode,
-            target_kind=target_kind,
-            result_status="success",
-            started_at=started_at,
-            finished_at=finished_at,
-            payload=result,
-        )
+        try:
+            result = client.request("POST", f"/api/tools/{tool_id}/execute", mode="rest", json=payload)
+            finished_at = datetime.now(UTC)
+            security_observer.record_event(
+                category="superglue_execution",
+                outcome="executed",
+                severity="info",
+                message=f"Superglue tool '{tool_id}' erfolgreich ausgefuehrt",
+                tenant_id=tenant_id,
+                details={"execution_mode": execution_mode, "target_kind": target_kind},
+            )
+            return ExternalResultEnvelope(
+                tenant_id=tenant_id,
+                correlation_id=correlation_id,
+                execution_mode=execution_mode,
+                target_kind=target_kind,
+                result_status="success",
+                started_at=started_at,
+                finished_at=finished_at,
+                payload={
+                    **result,
+                    "audit_metadata": {
+                        "provider_key": "superglue",
+                        "tool_id": tool_id,
+                        "execution_mode": execution_mode,
+                    },
+                },
+            )
+        except Exception as exc:
+            finished_at = datetime.now(UTC)
+            append_quarantine_entry(
+                tenant_id=tenant_id,
+                tool_id=tool_id,
+                execution_mode=execution_mode,
+                outcome="degraded",
+                reason=str(exc),
+                correlation_id=correlation_id,
+                detail={"target_kind": target_kind},
+            )
+            security_observer.record_event(
+                category="superglue_execution",
+                outcome="degraded",
+                severity="warning",
+                message=f"Superglue tool '{tool_id}' ist degradiert",
+                tenant_id=tenant_id,
+                details={"execution_mode": execution_mode, "target_kind": target_kind, "error": str(exc)},
+            )
+            return ExternalResultEnvelope(
+                tenant_id=tenant_id,
+                correlation_id=correlation_id,
+                execution_mode=execution_mode,
+                target_kind=target_kind,
+                result_status="error",
+                started_at=started_at,
+                finished_at=finished_at,
+                payload={
+                    "audit_metadata": {
+                        "provider_key": "superglue",
+                        "tool_id": tool_id,
+                        "execution_mode": execution_mode,
+                    }
+                },
+                errors=[ExternalResultError(code="SUPERGLUE_EXECUTION_FAILED", message=str(exc), retryable=True)],
+            )

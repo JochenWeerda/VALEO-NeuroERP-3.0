@@ -7,10 +7,13 @@ from app.core.external_agent_catalog import (
     build_external_agent_integration_catalog,
 )
 from app.integrations.adapters.superglue.tool_sync import (
+    build_superglue_config_summary,
     build_superglue_health_status,
     build_superglue_sync_status,
     build_superglue_tool_summary,
+    refresh_superglue_sync_snapshot,
 )
+from app.integrations.services.superglue_quarantine import build_quarantine_summary
 
 router = APIRouter(prefix="/agent/integrations", tags=["agents", "integrations", "openapi", "mcp"])
 
@@ -58,6 +61,21 @@ def get_superglue_sync_status() -> dict:
 @router.get("/providers/superglue/health", summary="Superglue Health")
 def get_superglue_health() -> dict:
     return build_superglue_health_status().model_dump()
+
+
+@router.get("/providers/superglue/config-summary", summary="Superglue Config Summary")
+def get_superglue_config_summary() -> dict:
+    return build_superglue_config_summary()
+
+
+@router.post("/providers/superglue/sync-status/refresh", summary="Refresh Superglue Sync Snapshot")
+def refresh_superglue_sync() -> dict:
+    return refresh_superglue_sync_snapshot()
+
+
+@router.get("/providers/superglue/quarantine", summary="Superglue Quarantine")
+def get_superglue_quarantine() -> dict:
+    return build_quarantine_summary()
 
 
 @router.get("/use-cases", summary="External Agent Use Cases")

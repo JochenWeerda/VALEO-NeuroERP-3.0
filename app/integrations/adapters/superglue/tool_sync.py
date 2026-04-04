@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+import json
+from pathlib import Path
 from typing import Any
 
 from pydantic import BaseModel
@@ -76,7 +78,7 @@ _DEFAULT_SUPERGLUE_TOOLS: list[SuperglueToolRecord] = [
 
 def list_superglue_tool_records(client: SuperglueClient | None = None) -> list[SuperglueToolRecord]:
     if not settings.SUPERGLUE_ENABLED or not settings.SUPERGLUE_SYNC_ENABLED:
-        return list(_DEFAULT_SUPERGLUE_TOOLS)
+        return _load_snapshot_records() or list(_DEFAULT_SUPERGLUE_TOOLS)
 
     sync_client = client or SuperglueClient()
     try:
@@ -109,13 +111,29 @@ def list_superglue_tool_records(client: SuperglueClient | None = None) -> list[S
                     metadata={"source_system": "superglue"},
                 )
             )
-        return mapped or list(_DEFAULT_SUPERGLUE_TOOLS)
+        if mapped:
+            _persist_snapshot(mapped)
+            return mapped
+        return _load_snapshot_records() or list(_DEFAULT_SUPERGLUE_TOOLS)
     except Exception:
-        return list(_DEFAULT_SUPERGLUE_TOOLS)
+        return _load_snapshot_records() or list(_DEFAULT_SUPERGLUE_TOOLS)
+
+
+def refresh_superglue_sync_snapshot(client: SuperglueClient | None = None) -> dict[str, Any]:
+    records = list_superglue_tool_records(client)
+    _persist_snapshot(records)
+    return {
+        "provider_key": "superglue",
+        "refreshed_at": datetime.now(timezone.utc).isoformat(),
+        "tool_count": len(records),
+        "storage_path": str(_snapshot_path()),
+        "schema_version": 1,
+    }
 
 
 def build_superglue_sync_status(client: SuperglueClient | None = None) -> SuperglueSyncStatus:
     records = list_superglue_tool_records(client)
+    snapshot = _load_snapshot_payload()
     return SuperglueSyncStatus(
         enabled=settings.SUPERGLUE_ENABLED,
         sync_enabled=settings.SUPERGLUE_SYNC_ENABLED,
@@ -125,7 +143,7 @@ def build_superglue_sync_status(client: SuperglueClient | None = None) -> Superg
         dashboard_url=settings.SUPERGLUE_DASHBOARD_URL,
         graphql_url=settings.SUPERGLUE_GRAPHQL_URL,
         rest_url=settings.SUPERGLUE_REST_URL or settings.SUPERGLUE_BASE_URL,
-        last_synced_at=datetime.now(timezone.utc).isoformat(),
+        last_synced_at=snapshot.get("refreshed_at") if snapshot else datetime.now(timezone.utc).isoformat(),
     )
 
 
@@ -171,3 +189,64 @@ def build_superglue_tool_summary() -> dict[str, Any]:
         "tools": [item.model_dump() for item in records],
         "schema_version": 1,
     }
+
+
+def build_superglue_config_summary() -> dict[str, Any]:
+    return {
+        "provider_key": "superglue",
+        "enabled": settings.SUPERGLUE_ENABLED,
+        "sync_enabled": settings.SUPERGLUE_SYNC_ENABLED,
+        "execution_enabled": settings.SUPERGLUE_EXECUTION_ENABLED,
+        "require_tenant_secrets": settings.SUPERGLUE_REQUIRE_TENANT_SECRETS,
+        "base_url_configured": bool(settings.SUPERGLUE_BASE_URL),
+        "graphql_url_configured": bool(settings.SUPERGLUE_GRAPHQL_URL),
+        "rest_url_configured": bool(settings.SUPERGLUE_REST_URL),
+        "dashboard_url": settings.SUPERGLUE_DASHBOARD_URL,
+        "auth_token_configured": bool(settings.SUPERGLUE_AUTH_TOKEN),
+        "sync_state_path": settings.SUPERGLUE_SYNC_STATE_PATH,
+        "quarantine_log_path": settings.SUPERGLUE_QUARANTINE_LOG_PATH,
+        "allowed_hosts": list(settings.SUPERGLUE_ALLOWED_HOSTS),
+        "allowed_domains": list(settings.SUPERGLUE_ALLOWED_DOMAINS),
+        "schema_version": 1,
+    }
+
+
+def _snapshot_path() -> Path:
+    return Path(settings.SUPERGLUE_SYNC_STATE_PATH)
+
+
+def _persist_snapshot(records: list[SuperglueToolRecord]) -> None:
+    path = _snapshot_path()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "provider_key": "superglue",
+        "refreshed_at": datetime.now(timezone.utc).isoformat(),
+        "tools": [item.model_dump() for item in records],
+        "schema_version": 1,
+    }
+    path.write_text(json.dumps(payload, ensure_ascii=True, sort_keys=True), encoding="utf-8")
+
+
+def _load_snapshot_payload() -> dict[str, Any] | None:
+    path = _snapshot_path()
+    if not path.exists():
+        return None
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
+def _load_snapshot_records() -> list[SuperglueToolRecord]:
+    payload = _load_snapshot_payload()
+    if not payload:
+        return []
+    tools = payload.get("tools", [])
+    records: list[SuperglueToolRecord] = []
+    for item in tools:
+        try:
+            records.append(SuperglueToolRecord.model_validate(item))
+        except Exception:
+            continue
+    return records
