@@ -1,0 +1,66 @@
+{{- if .Values.superglue.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "valeo-erp.fullname" . }}-superglue
+  namespace: {{ .Values.superglue.namespace | quote }}
+  labels:
+    {{- include "valeo-erp.labels" . | nindent 4 }}
+    app.kubernetes.io/component: superglue
+spec:
+  type: {{ .Values.superglue.service.type }}
+  selector:
+    app.kubernetes.io/name: {{ include "valeo-erp.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: superglue
+  ports:
+    - name: http
+      port: {{ .Values.superglue.service.port }}
+      targetPort: http
+    - name: runtime
+      port: {{ .Values.superglue.service.runtimePort }}
+      targetPort: runtime
+    - name: events
+      port: {{ .Values.superglue.service.eventsPort }}
+      targetPort: events
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "valeo-erp.fullname" . }}-superglue-db
+  namespace: {{ .Values.superglue.namespace | quote }}
+  labels:
+    {{- include "valeo-erp.labels" . | nindent 4 }}
+    app.kubernetes.io/component: superglue-db
+spec:
+  selector:
+    app.kubernetes.io/name: {{ include "valeo-erp.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: superglue-db
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "valeo-erp.fullname" . }}-superglue-minio
+  namespace: {{ .Values.superglue.namespace | quote }}
+  labels:
+    {{- include "valeo-erp.labels" . | nindent 4 }}
+    app.kubernetes.io/component: superglue-minio
+spec:
+  selector:
+    app.kubernetes.io/name: {{ include "valeo-erp.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: superglue-minio
+  ports:
+    - name: api
+      port: 9000
+      targetPort: 9000
+    - name: console
+      port: 9001
+      targetPort: 9001
+{{- end }}
+

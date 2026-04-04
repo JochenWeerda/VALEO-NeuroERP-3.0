@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: superglue
+  labels:
+    app.kubernetes.io/name: superglue
+    app.kubernetes.io/part-of: valeo-neuroerp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: superglue
+      app.kubernetes.io/part-of: valeo-neuroerp
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: superglue
+        app.kubernetes.io/part-of: valeo-neuroerp
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3000"
+        prometheus.io/path: "/health"
+    spec:
+      serviceAccountName: superglue
+      securityContext:
+        runAsNonRoot: true
+        fsGroup: 1000
+      containers:
+        - name: superglue
+          image: superglueai/superglue:latest
+          ports:
+            - containerPort: 3000
+              name: http
+            - containerPort: 3011
+              name: runtime
+            - containerPort: 3012
+              name: events
+          envFrom:
+            - configMapRef:
+                name: superglue-config
+          env:
+            - name: SUPERGLUE_AUTH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: superglue-app-secret
+                  key: authToken
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: superglue-app-secret
+                  key: databaseUrl
+            - name: S3_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: superglue-minio-secret
+                  key: rootUser
+            - name: S3_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: superglue-minio-secret
+                  key: rootPassword
+            - name: S3_BUCKET
+              valueFrom:
+                configMapKeyRef:
+                  name: superglue-config
+                  key: SUPERGLUE_MINIO_BUCKET
+            - name: S3_REGION
+              valueFrom:
+                configMapKeyRef:
+                  name: superglue-config
+                  key: SUPERGLUE_S3_REGION
+            - name: S3_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: superglue-config
+                  key: MINIO_ENDPOINT
+            - name: S3_FORCE_PATH_STYLE
+              value: "true"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          volumeMounts:
+            - name: runtime
+              mountPath: /var/lib/superglue
+      volumes:
+        - name: runtime
+          persistentVolumeClaim:
+            claimName: superglue-runtime-data

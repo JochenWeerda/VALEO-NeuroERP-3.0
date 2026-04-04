@@ -1,0 +1,86 @@
+{{- if .Values.superglue.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "valeo-erp.fullname" . }}-superglue
+  namespace: {{ .Values.superglue.namespace | quote }}
+  labels:
+    {{- include "valeo-erp.labels" . | nindent 4 }}
+    app.kubernetes.io/component: superglue
+spec:
+  replicas: {{ .Values.superglue.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "valeo-erp.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: superglue
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "valeo-erp.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: superglue
+    spec:
+      serviceAccountName: {{ default (printf "%s-superglue" (include "valeo-erp.fullname" .)) .Values.superglue.serviceAccount.name }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: superglue
+          image: "{{ .Values.superglue.image.repository }}:{{ .Values.superglue.image.tag }}"
+          imagePullPolicy: {{ .Values.superglue.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          ports:
+            - containerPort: 3000
+              name: http
+            - containerPort: 3011
+              name: runtime
+            - containerPort: 3012
+              name: events
+          envFrom:
+            - configMapRef:
+                name: {{ include "valeo-erp.fullname" . }}-superglue-config
+          env:
+            - name: SUPERGLUE_AUTH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.superglue.authTokenSecret.name }}
+                  key: {{ .Values.superglue.authTokenSecret.key }}
+            - name: DATABASE_URL
+              value: {{ printf "postgresql://$(DB_USER):$(DB_PASSWORD)@%s-superglue-db:5432/%s" (include "valeo-erp.fullname" .) .Values.superglue.database.name | quote }}
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.superglue.database.secretName }}
+                  key: {{ .Values.superglue.database.userKey }}
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.superglue.database.secretName }}
+                  key: {{ .Values.superglue.database.passwordKey }}
+            - name: S3_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.superglue.minio.secretName }}
+                  key: {{ .Values.superglue.minio.userKey }}
+            - name: S3_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.superglue.minio.secretName }}
+                  key: {{ .Values.superglue.minio.passwordKey }}
+            - name: S3_ENDPOINT
+              value: {{ printf "http://%s-superglue-minio:9000" (include "valeo-erp.fullname" .) | quote }}
+            - name: S3_BUCKET
+              value: {{ .Values.superglue.minio.bucket | quote }}
+            - name: S3_REGION
+              value: {{ .Values.superglue.config.s3Region | quote }}
+            - name: S3_FORCE_PATH_STYLE
+              value: "true"
+          volumeMounts:
+            - name: runtime
+              mountPath: /var/lib/superglue
+      volumes:
+        - name: runtime
+          persistentVolumeClaim:
+            claimName: {{ include "valeo-erp.fullname" . }}-superglue-runtime
+{{- end }}

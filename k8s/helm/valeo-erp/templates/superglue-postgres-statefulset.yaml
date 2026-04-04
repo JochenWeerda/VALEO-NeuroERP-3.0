@@ -1,0 +1,63 @@
+{{- if .Values.superglue.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "valeo-erp.fullname" . }}-superglue-db
+  namespace: {{ .Values.superglue.namespace | quote }}
+  labels:
+    {{- include "valeo-erp.labels" . | nindent 4 }}
+    app.kubernetes.io/component: superglue-db
+spec:
+  serviceName: {{ include "valeo-erp.fullname" . }}-superglue-db
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "valeo-erp.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: superglue-db
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "valeo-erp.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: superglue-db
+    spec:
+      serviceAccountName: {{ default (printf "%s-superglue" (include "valeo-erp.fullname" .)) .Values.superglue.serviceAccount.name }}
+      containers:
+        - name: postgres
+          image: {{ .Values.superglue.database.image | quote }}
+          ports:
+            - containerPort: 5432
+              name: postgres
+          env:
+            - name: POSTGRES_DB
+              value: {{ .Values.superglue.database.name | quote }}
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.superglue.database.secretName }}
+                  key: {{ .Values.superglue.database.userKey }}
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.superglue.database.secretName }}
+                  key: {{ .Values.superglue.database.passwordKey }}
+          resources:
+            {{- toYaml .Values.superglue.database.resources | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        {{- with .Values.superglue.database.storage.storageClassName }}
+        storageClassName: {{ . | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.superglue.database.storage.size }}
+{{- end }}
+

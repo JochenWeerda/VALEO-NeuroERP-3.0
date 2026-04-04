@@ -1,0 +1,20 @@
+{{- if .Values.superglue.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "valeo-erp.fullname" . }}-superglue-runtime
+  namespace: {{ .Values.superglue.namespace | quote }}
+  labels:
+    {{- include "valeo-erp.labels" . | nindent 4 }}
+    app.kubernetes.io/component: superglue
+spec:
+  accessModes:
+    - ReadWriteOnce
+  {{- with .Values.superglue.runtimeStorage.storageClassName }}
+  storageClassName: {{ . | quote }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.superglue.runtimeStorage.size }}
+{{- end }}
+

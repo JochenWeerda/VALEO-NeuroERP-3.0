@@ -1,0 +1,60 @@
+name: Superglue Infra
+
+on:
+  push:
+    paths:
+      - "docker-compose.integration*.yml"
+      - "k8s/superglue/**"
+      - "k8s/helm/valeo-erp/templates/superglue-*.yaml"
+      - "k8s/helm/valeo-erp/values.yaml"
+      - "ops/superglue/**"
+      - "scripts/superglue/**"
+      - ".github/workflows/superglue-infra.yml"
+      - "docs/workflows/int-sg-02*.md"
+      - "docs/cards/neuro-core/INT-SG-02*.md"
+      - "docs/architecture/superglue-integration-implementation-plan.md"
+  pull_request:
+    paths:
+      - "docker-compose.integration*.yml"
+      - "k8s/superglue/**"
+      - "k8s/helm/valeo-erp/templates/superglue-*.yaml"
+      - "k8s/helm/valeo-erp/values.yaml"
+      - "ops/superglue/**"
+      - "scripts/superglue/**"
+      - ".github/workflows/superglue-infra.yml"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Compose render
+        env:
+          SUPERGLUE_DB_PASSWORD: test-password
+          SUPERGLUE_AUTH_TOKEN: test-token
+          SUPERGLUE_MINIO_ROOT_PASSWORD: test-minio-password
+          SUPERGLUE_TLS_DOMAIN: superglue.example.test
+          SUPERGLUE_MINIO_TLS_DOMAIN: superglue-minio.example.test
+          SUPERGLUE_EDGE_BASICAUTH_HASH: test-hash
+        run: |
+          docker compose -f docker-compose.integration.yml --profile superglue config >/tmp/superglue-compose.yaml
+          docker compose -f docker-compose.integration.yml -f docker-compose.integration.edge.yml --profile superglue-edge config >/tmp/superglue-edge-compose.yaml
+
+      - name: Kustomize render
+        run: |
+          kubectl kustomize k8s/superglue >/tmp/superglue-kustomize.yaml
+          test -s /tmp/superglue-kustomize.yaml
+
+      - name: Helm render
+        run: bash scripts/superglue/render-helm.sh
+
+      - name: Docs governance
+        run: node scripts/docs-governance-check.cjs
