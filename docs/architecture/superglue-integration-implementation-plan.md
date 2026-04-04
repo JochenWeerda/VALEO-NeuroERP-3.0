@@ -274,6 +274,7 @@ Aktueller Stand 2026-04-03:
 Folgewelle 2026-04-04:
 
 - `INT-SG-009` bis `INT-SG-014` sind als Folgewelle umgesetzt: Sync-Snapshot, Config-Summary, Quarantaene, Audit-/Security-Bridge, zweiter Preview-Adapter und Admin-UX.
+- `INT-SG-015` bis `INT-SG-020` bilden die naechste Operations-Welle: Execution-Guardrails, Sync-History, Resolve-Pfad fuer Quarantaene, Execution-Journal, dritter read-only Pilotadapter und Admin-UX-Nachzug.
 
 ### INT-SG-001 - Contract- und Settings-Basis
 
@@ -449,6 +450,85 @@ Dateibesitz:
 Ziel:
 
 - Refresh, Config-Hinweise und Quarantaene in der Admin-Seite surfacen
+
+Dateibesitz:
+
+- `packages/frontend-web/src/pages/admin/agenten-integration.tsx`
+- `packages/frontend-web/src/__tests__/pages/admin/agenten-integration.test.tsx`
+
+### INT-SG-015 - Execution-Guardrails gegen Tool-/Mode-Drift
+
+Ziel:
+
+- nur gemappte Superglue-Tools ausfuehren
+- Execution-Modes pro Tool hart validieren
+- keine freie Tool-ID-/Mode-Kombination aus Planpayloads
+
+Dateibesitz:
+
+- `app/integrations/adapters/superglue/tool_sync.py`
+- `app/integrations/services/superglue_execution_service.py`
+- `app/integrations/services/superglue_capability_service.py`
+- `tests/test_superglue_execution_guardrails.py`
+
+### INT-SG-016 - Sync-History und letzte Refreshes
+
+Ziel:
+
+- Refresh-Historie append-only festhalten
+- letzte Sync-Laeufe im Admin-/API-Pfad surfacen
+
+Dateibesitz:
+
+- `app/integrations/adapters/superglue/tool_sync.py`
+- `app/api/v1/endpoints/external_agent_integrations.py`
+- `tests/test_superglue_refresh_and_quarantine.py`
+
+### INT-SG-017 - Quarantaene Resolve / Ack
+
+Ziel:
+
+- Quarantaene-Eintraege nach Review als erledigt markieren
+- offene vs. erledigte Faelle trennen
+
+Dateibesitz:
+
+- `app/integrations/services/superglue_quarantine.py`
+- `app/api/v1/endpoints/external_agent_integrations.py`
+- Frontend-Admin-Seite + Tests
+
+### INT-SG-018 - Execution-Journal / Operations-Trail
+
+Ziel:
+
+- erfolgreiche und degradierte Superglue-Executions append-only protokollieren
+- kompakte Summary fuer Ops/Admin bereitstellen
+
+Dateibesitz:
+
+- `app/integrations/services/superglue_execution_service.py`
+- neuer Journal-Service unter `app/integrations/services/`
+- API-/Admin-Summary
+
+### INT-SG-019 - Dritter read-only Pilotadapter
+
+Ziel:
+
+- dritten read-only Port fuer externes Stammdaten-/CRM-Preview liefern
+- denselben Standardpfad wie die bisherigen Pilotadapter nutzen
+
+Dateibesitz:
+
+- `app/integrations/ports/customer_profile_port.py`
+- `app/integrations/adapters/superglue/customer_profile_adapter.py`
+- Tests
+
+### INT-SG-020 - Admin-UX Nachzug fuer History / Journal / Resolve
+
+Ziel:
+
+- Sync-History, Journal-Summary und Resolve-Aktion im Admin-Frontend surfacen
+- keine direkte Connector-Bedienung, nur kontrollierte Ops-Funktionen
 
 Dateibesitz:
 
