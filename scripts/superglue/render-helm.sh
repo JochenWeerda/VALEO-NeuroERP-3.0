@@ -10,13 +10,18 @@ if command -v helm >/dev/null 2>&1; then
   helm template superglue "${tmp_chart_dir}" \
     --set superglue.enabled=true \
     --set superglue.ingress.enabled=true \
-    --set superglue.backup.enabled=true >/tmp/superglue-helm-render.yaml
+    --set superglue.backup.enabled=true \
+    --set superglue.externalSecrets.enabled=true \
+    --set superglue.certificate.enabled=true \
+    --set superglue.serviceMonitor.enabled=true \
+    --set superglue.dashboard.enabled=true \
+    --set alerts.superglueEnabled=true >/tmp/superglue-helm-render.yaml
 else
   docker run --rm \
     -v "${tmp_chart_dir}:/chart" \
     -v "/tmp:/tmp" \
     alpine/helm:3.17.2 \
-    sh -lc "helm dependency build /chart >/dev/null && helm template superglue /chart --set superglue.enabled=true --set superglue.ingress.enabled=true --set superglue.backup.enabled=true >/tmp/superglue-helm-render.yaml"
+    sh -lc "helm dependency build /chart >/dev/null && helm template superglue /chart --set superglue.enabled=true --set superglue.ingress.enabled=true --set superglue.backup.enabled=true --set superglue.externalSecrets.enabled=true --set superglue.certificate.enabled=true --set superglue.serviceMonitor.enabled=true --set superglue.dashboard.enabled=true --set alerts.superglueEnabled=true >/tmp/superglue-helm-render.yaml"
 fi
 
 test -s /tmp/superglue-helm-render.yaml

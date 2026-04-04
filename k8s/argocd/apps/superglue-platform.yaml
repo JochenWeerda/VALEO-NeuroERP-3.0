@@ -1,0 +1,42 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: valeo-neuroerp-superglue
+  namespace: argocd
+spec:
+  project: valeo-neuroerp
+  source:
+    repoURL: https://github.com/jochenweerda/VALEO-NeuroERP-3.0.git
+    targetRevision: develop
+    path: k8s/helm/valeo-erp
+    helm:
+      releaseName: valeo-superglue
+      parameters:
+        - name: superglue.enabled
+          value: "true"
+        - name: superglue.ingress.enabled
+          value: "true"
+        - name: superglue.networkPolicy.enabled
+          value: "true"
+        - name: superglue.backup.enabled
+          value: "true"
+        - name: superglue.externalSecrets.enabled
+          value: "true"
+        - name: superglue.certificate.enabled
+          value: "true"
+        - name: superglue.serviceMonitor.enabled
+          value: "true"
+        - name: superglue.dashboard.enabled
+          value: "true"
+        - name: alerts.superglueEnabled
+          value: "true"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: valeo-integrations
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

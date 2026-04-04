@@ -5,6 +5,8 @@ resources:
   - namespace.yaml
   - serviceaccount.yaml
   - configmap.yaml
+  - external-secret.yaml
+  - certificate.yaml
   - runtime-pvc.yaml
   - postgres-service.yaml
   - postgres-statefulset.yaml
@@ -14,4 +16,4 @@ resources:
   - superglue-deployment.yaml
   - ingress.yaml
   - networkpolicy.yaml
-
+  - servicemonitor.yaml

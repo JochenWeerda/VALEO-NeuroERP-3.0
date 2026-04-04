@@ -9,13 +9,18 @@ try {
           --set superglue.enabled=true `
           --set superglue.ingress.enabled=true `
           --set superglue.backup.enabled=true `
+          --set superglue.externalSecrets.enabled=true `
+          --set superglue.certificate.enabled=true `
+          --set superglue.serviceMonitor.enabled=true `
+          --set superglue.dashboard.enabled=true `
+          --set alerts.superglueEnabled=true `
           | Set-Content -Path $renderPath
     } else {
         docker run --rm `
           -v "${tempChart}:/chart" `
           -v "${env:TEMP}:/tmp" `
           alpine/helm:3.17.2 `
-          sh -lc "helm dependency build /chart >/dev/null && helm template superglue /chart --set superglue.enabled=true --set superglue.ingress.enabled=true --set superglue.backup.enabled=true >/tmp/superglue-helm-render.yaml"
+          sh -lc "helm dependency build /chart >/dev/null && helm template superglue /chart --set superglue.enabled=true --set superglue.ingress.enabled=true --set superglue.backup.enabled=true --set superglue.externalSecrets.enabled=true --set superglue.certificate.enabled=true --set superglue.serviceMonitor.enabled=true --set superglue.dashboard.enabled=true --set alerts.superglueEnabled=true >/tmp/superglue-helm-render.yaml"
     }
 
     if (-not (Test-Path $renderPath)) { throw "helm render file missing" }
