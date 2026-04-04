@@ -1,0 +1,42 @@
+# Sourcegraph — Dateien die nicht in der Code-Suche erscheinen sollen
+# https://docs.sourcegraph.com/admin/search
+
+# Build-Artefakte
+node_modules/
+dist/
+__pycache__/
+storybook-static/
+.next/
+htmlcov/
+coverage/
+
+# Generierte Dateien
+*.min.js
+*.min.css
+pnpm-lock.yaml
+package-lock.json
+
+# Binaerdateien und Assets
+*.png
+*.jpg
+*.gif
+*.ico
+*.svg
+*.woff
+*.woff2
+*.ttf
+*.eot
+
+# Alembic Migrationen (grosse auto-generierte Dateien)
+alembic/versions/*.py
+
+# Test-Reports
+playwright-report/
+test-results/
+security-reports/
+
+# Lokale Daten
+data/gap/
+data/paperless-consume/
+*.db
+*.sqlite
