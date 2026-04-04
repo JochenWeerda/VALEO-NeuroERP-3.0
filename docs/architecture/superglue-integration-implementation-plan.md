@@ -275,6 +275,7 @@ Folgewelle 2026-04-04:
 
 - `INT-SG-009` bis `INT-SG-014` sind als Folgewelle umgesetzt: Sync-Snapshot, Config-Summary, Quarantaene, Audit-/Security-Bridge, zweiter Preview-Adapter und Admin-UX.
 - `INT-SG-015` bis `INT-SG-020` sind umgesetzt: Execution-Guardrails, Sync-History, Resolve-Pfad fuer Quarantaene, Execution-Journal, dritter read-only Pilotadapter und Admin-UX-Nachzug.
+- `INT-SG-021` folgt als Ops-/Deployment-Slice: Compose-Stack fuer Superglue mit eigener DB, MinIO, Init-Job, Volumes und Healthchecks.
 
 ### INT-SG-001 - Contract- und Settings-Basis
 
@@ -534,6 +535,19 @@ Dateibesitz:
 
 - `packages/frontend-web/src/pages/admin/agenten-integration.tsx`
 - `packages/frontend-web/src/__tests__/pages/admin/agenten-integration.test.tsx`
+
+### INT-SG-021 - Compose-Stack fuer Superglue Ops
+
+Ziel:
+
+- separaten Superglue-Stack mit Postgres und MinIO belastbar bereitstellen
+- Healthchecks, Volumes, internes Netz und Bucket-Init mitliefern
+- keine harten Secrets in Compose selbst
+
+Dateibesitz:
+
+- `docker-compose.integration.yml`
+- zugehoerige Ops-Doku unter `docs/workflows/` und `docs/cards/`
 
 ## 10. Nicht-Ziele fuer Phase 1
 
