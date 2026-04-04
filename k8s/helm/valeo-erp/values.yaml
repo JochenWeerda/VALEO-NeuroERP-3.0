@@ -252,3 +252,91 @@ inventory:
   secretRefs: []
   servicePort: 5400
   resources: {}
+
+superglue:
+  enabled: false
+  namespace: valeo-integrations
+  serviceAccount:
+    create: true
+    name: ""
+  image:
+    repository: superglueai/superglue
+    tag: latest
+    pullPolicy: IfNotPresent
+  replicas: 1
+  authTokenSecret:
+    name: superglue-app-secret
+    key: authToken
+  database:
+    secretName: superglue-db-secret
+    userKey: username
+    passwordKey: password
+    name: superglue
+    storage:
+      size: 10Gi
+      storageClassName: ""
+    image: postgres:15
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+  minio:
+    secretName: superglue-minio-secret
+    userKey: rootUser
+    passwordKey: rootPassword
+    bucket: superglue-artifacts
+    image: minio/minio:RELEASE.2026-03-12T18-04-18Z
+    storage:
+      size: 20Gi
+      storageClassName: ""
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+  runtimeStorage:
+    size: 5Gi
+    storageClassName: ""
+  config:
+    publicBaseUrl: https://superglue.example.test
+    restUrl: http://superglue:3000
+    graphqlUrl: http://superglue:3000/graphql
+    syncEnabled: true
+    executionEnabled: false
+    s3Region: eu-central-1
+  service:
+    type: ClusterIP
+    port: 3000
+    runtimePort: 3011
+    eventsPort: 3012
+  ingress:
+    enabled: false
+    className: nginx
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+      nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    hosts:
+      api: superglue.example.test
+      minio: superglue-minio.example.test
+    tls:
+      apiSecretName: superglue-tls
+      minioSecretName: superglue-minio-tls
+  networkPolicy:
+    enabled: true
+    ingressNamespaces:
+      - ingress-nginx
+  backup:
+    enabled: false
+    schedule: "30 2 * * *"
+    restoreTestSchedule: "0 4 * * 0"
+    retentionDays: 14
+    retentionMonths: 3
+    s3:
+      enabled: false
+      bucket: ""
+      prefix: superglue

@@ -1,0 +1,39 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: superglue
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: 16m
+spec:
+  ingressClassName: nginx
+  tls:
+    - secretName: superglue-tls
+      hosts:
+        - superglue.example.test
+    - secretName: superglue-minio-tls
+      hosts:
+        - superglue-minio.example.test
+  rules:
+    - host: superglue.example.test
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: superglue
+                port:
+                  number: 3000
+    - host: superglue-minio.example.test
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: superglue-minio
+                port:
+                  number: 9001
+

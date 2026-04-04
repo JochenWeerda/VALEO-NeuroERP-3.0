@@ -1,0 +1,105 @@
+{{- if and .Values.superglue.enabled .Values.superglue.backup.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "valeo-erp.fullname" . }}-superglue-db-backup
+  namespace: {{ .Values.superglue.namespace | quote }}
+  labels:
+    {{- include "valeo-erp.labels" . | nindent 4 }}
+    app.kubernetes.io/component: superglue-backup
+spec:
+  schedule: {{ .Values.superglue.backup.schedule | quote }}
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            {{- include "valeo-erp.selectorLabels" . | nindent 12 }}
+            app.kubernetes.io/component: superglue-backup
+        spec:
+          restartPolicy: OnFailure
+          serviceAccountName: {{ default (printf "%s-superglue" (include "valeo-erp.fullname" .)) .Values.superglue.serviceAccount.name }}
+          containers:
+            - name: backup
+              image: postgres:15-alpine
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -e
+                  TS=$(date +%Y%m%d_%H%M%S)
+                  pg_dump -Fc -h {{ include "valeo-erp.fullname" . }}-superglue-db -U "$DB_USER" -d {{ .Values.superglue.database.name }} > /backup/db/superglue_${TS}.dump
+                  find /backup/db -name '*.dump' -mtime +{{ .Values.superglue.backup.retentionDays }} -delete
+              env:
+                - name: DB_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Values.superglue.database.secretName }}
+                      key: {{ .Values.superglue.database.userKey }}
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Values.superglue.database.secretName }}
+                      key: {{ .Values.superglue.database.passwordKey }}
+              volumeMounts:
+                - name: backup
+                  mountPath: /backup
+          volumes:
+            - name: backup
+              persistentVolumeClaim:
+                claimName: {{ include "valeo-erp.fullname" . }}-superglue-backup
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "valeo-erp.fullname" . }}-superglue-minio-backup
+  namespace: {{ .Values.superglue.namespace | quote }}
+  labels:
+    {{- include "valeo-erp.labels" . | nindent 4 }}
+    app.kubernetes.io/component: superglue-backup
+spec:
+  schedule: {{ .Values.superglue.backup.schedule | quote }}
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            {{- include "valeo-erp.selectorLabels" . | nindent 12 }}
+            app.kubernetes.io/component: superglue-backup
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: mirror
+              image: minio/mc:RELEASE.2026-03-12T17-29-24Z
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -e
+                  TS=$(date +%Y%m%d_%H%M%S)
+                  mc alias set local http://{{ include "valeo-erp.fullname" . }}-superglue-minio:9000 "$MINIO_USER" "$MINIO_PASSWORD"
+                  mkdir -p /backup/minio/${TS}
+                  mc mirror local/{{ .Values.superglue.minio.bucket }} /backup/minio/${TS}
+                  find /backup/minio -mindepth 1 -maxdepth 1 -type d -mtime +{{ .Values.superglue.backup.retentionDays }} -exec rm -rf {} +
+              env:
+                - name: MINIO_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Values.superglue.minio.secretName }}
+                      key: {{ .Values.superglue.minio.userKey }}
+                - name: MINIO_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ .Values.superglue.minio.secretName }}
+                      key: {{ .Values.superglue.minio.passwordKey }}
+              volumeMounts:
+                - name: backup
+                  mountPath: /backup
+          volumes:
+            - name: backup
+              persistentVolumeClaim:
+                claimName: {{ include "valeo-erp.fullname" . }}-superglue-backup
+{{- end }}
+

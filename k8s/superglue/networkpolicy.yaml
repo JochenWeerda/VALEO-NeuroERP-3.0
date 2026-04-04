@@ -1,0 +1,120 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: superglue-default-deny
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: superglue-app-policy
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: superglue
+      app.kubernetes.io/part-of: valeo-neuroerp
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: valeo-integrations
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+      ports:
+        - port: 3000
+        - port: 3011
+        - port: 3012
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: superglue-db
+              app.kubernetes.io/part-of: valeo-neuroerp
+      ports:
+        - port: 5432
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: superglue-minio
+              app.kubernetes.io/part-of: valeo-neuroerp
+      ports:
+        - port: 9000
+        - port: 9001
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: superglue-db-policy
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: superglue-db
+      app.kubernetes.io/part-of: valeo-neuroerp
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: superglue
+              app.kubernetes.io/part-of: valeo-neuroerp
+      ports:
+        - port: 5432
+  egress:
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: superglue-minio-policy
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: superglue-minio
+      app.kubernetes.io/part-of: valeo-neuroerp
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: superglue
+              app.kubernetes.io/part-of: valeo-neuroerp
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+      ports:
+        - port: 9000
+        - port: 9001
+  egress:
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
+

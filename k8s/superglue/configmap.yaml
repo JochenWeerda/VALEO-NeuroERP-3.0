@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: superglue-config
+  labels:
+    app.kubernetes.io/name: superglue
+    app.kubernetes.io/part-of: valeo-neuroerp
+data:
+  SUPERGLUE_PORT: "3011"
+  SUPERGLUE_PUBLIC_BASE_URL: "https://superglue.example.test"
+  SUPERGLUE_REST_URL: "http://superglue:3000"
+  SUPERGLUE_GRAPHQL_URL: "http://superglue:3000/graphql"
+  SUPERGLUE_SYNC_ENABLED: "true"
+  SUPERGLUE_EXECUTION_ENABLED: "false"
+  SUPERGLUE_MINIO_BUCKET: "superglue-artifacts"
+  SUPERGLUE_S3_REGION: "eu-central-1"
+  DATABASE_HOST: "superglue-db"
+  DATABASE_PORT: "5432"
+  DATABASE_NAME: "superglue"
+  MINIO_ENDPOINT: "http://superglue-minio:9000"
+  MINIO_CONSOLE_ENDPOINT: "http://superglue-minio:9001"
+

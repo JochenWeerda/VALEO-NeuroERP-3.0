@@ -1,6 +1,6 @@
 # Superglue Integration - Implementierungsplan
 
-**Status:** in Umsetzung, Basispfade INT-SG-001 bis INT-SG-008 umgesetzt
+**Status:** in Umsetzung, Basispfade INT-SG-001 bis INT-SG-028 umgesetzt
 **Datum:** 2026-04-03
 **Baut auf:** [superglue-integration-bewertung.md](./superglue-integration-bewertung.md), [ADR-014](../adr/adr-014-integrationsgrenzen-api-edi-mcp-partneradapter.md), [ADR-007](../adr/adr-007-agent-tool-contract-governance.md)
 
@@ -277,7 +277,7 @@ Folgewelle 2026-04-04:
 - `INT-SG-015` bis `INT-SG-020` sind umgesetzt: Execution-Guardrails, Sync-History, Resolve-Pfad fuer Quarantaene, Execution-Journal, dritter read-only Pilotadapter und Admin-UX-Nachzug.
 - `INT-SG-021` ist umgesetzt: Compose-Stack fuer Superglue mit eigener DB, MinIO, Init-Job, Volumes und Healthchecks.
 - `INT-SG-022` ist umgesetzt: Reverse-Proxy-Overlay mit TLS-Endpunkten, internen Service-Ports und Header-Hardening.
-- `INT-SG-023` bis `INT-SG-028` bilden die Infra-/Ops-Folgewelle: Kubernetes-Basis, Helm-Overlay, NetworkPolicy/Ingress, Backup/Restore, CI-Validierung und wiederholbare Ops-Scripts.
+- `INT-SG-023` bis `INT-SG-028` sind umgesetzt: Kubernetes-Basis, Helm-Overlay, NetworkPolicy/Ingress, Backup/Restore, CI-Validierung und wiederholbare Ops-Scripts.
 
 ### INT-SG-001 - Contract- und Settings-Basis
 

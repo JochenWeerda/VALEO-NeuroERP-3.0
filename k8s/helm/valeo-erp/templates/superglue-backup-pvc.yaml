@@ -1,0 +1,17 @@
+{{- if and .Values.superglue.enabled .Values.superglue.backup.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "valeo-erp.fullname" . }}-superglue-backup
+  namespace: {{ .Values.superglue.namespace | quote }}
+  labels:
+    {{- include "valeo-erp.labels" . | nindent 4 }}
+    app.kubernetes.io/component: superglue-backup
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+{{- end }}
+

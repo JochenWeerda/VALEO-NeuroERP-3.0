@@ -1,0 +1,42 @@
+{{- if and .Values.superglue.enabled .Values.superglue.backup.enabled }}
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "valeo-erp.fullname" . }}-superglue-restore-test
+  namespace: {{ .Values.superglue.namespace | quote }}
+  labels:
+    {{- include "valeo-erp.labels" . | nindent 4 }}
+    app.kubernetes.io/component: superglue-backup
+spec:
+  schedule: {{ .Values.superglue.backup.restoreTestSchedule | quote }}
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            {{- include "valeo-erp.selectorLabels" . | nindent 12 }}
+            app.kubernetes.io/component: superglue-backup
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: restore-test
+              image: postgres:15-alpine
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -e
+                  LATEST=$(ls -t /backup/db/*.dump | head -n 1)
+                  [ -n "$LATEST" ]
+                  pg_restore --list "$LATEST" >/tmp/restore.list
+                  test -s /tmp/restore.list
+              volumeMounts:
+                - name: backup
+                  mountPath: /backup
+          volumes:
+            - name: backup
+              persistentVolumeClaim:
+                claimName: {{ include "valeo-erp.fullname" . }}-superglue-backup
+{{- end }}
+

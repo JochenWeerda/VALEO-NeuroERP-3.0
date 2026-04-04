@@ -1,0 +1,68 @@
+{{- if .Values.superglue.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "valeo-erp.fullname" . }}-superglue-minio
+  namespace: {{ .Values.superglue.namespace | quote }}
+  labels:
+    {{- include "valeo-erp.labels" . | nindent 4 }}
+    app.kubernetes.io/component: superglue-minio
+spec:
+  serviceName: {{ include "valeo-erp.fullname" . }}-superglue-minio
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "valeo-erp.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: superglue-minio
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "valeo-erp.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: superglue-minio
+    spec:
+      serviceAccountName: {{ default (printf "%s-superglue" (include "valeo-erp.fullname" .)) .Values.superglue.serviceAccount.name }}
+      containers:
+        - name: minio
+          image: {{ .Values.superglue.minio.image | quote }}
+          args:
+            - server
+            - /data
+            - --console-address
+            - :9001
+          ports:
+            - containerPort: 9000
+              name: api
+            - containerPort: 9001
+              name: console
+          env:
+            - name: MINIO_ROOT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.superglue.minio.secretName }}
+                  key: {{ .Values.superglue.minio.userKey }}
+            - name: MINIO_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.superglue.minio.secretName }}
+                  key: {{ .Values.superglue.minio.passwordKey }}
+          resources:
+            {{- toYaml .Values.superglue.minio.resources | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: /data
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        {{- with .Values.superglue.minio.storage.storageClassName }}
+        storageClassName: {{ . | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.superglue.minio.storage.size }}
+{{- end }}
+
