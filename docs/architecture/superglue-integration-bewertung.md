@@ -287,33 +287,96 @@ Extern erreichbar (via Reverse Proxy / Traefik):
 
 ---
 
-## 8. VALEO Adapter-Layer — Zielstruktur
+## 8. VALEO Adapter-Layer — Ist-Stand und Zielstruktur
+
+### 8.1 Bereits implementiert (Stand 2026-04-04)
+
+Die gesamte Grundstruktur ist produktionsreif vorhanden:
 
 ```
-app/
-├── integrations/
-│   ├── __init__.py
-│   ├── ports/                         # Abstrakte Interfaces (ADR-014 Punkt 1)
-│   │   ├── __init__.py
-│   │   ├── document_port.py           # get_document, store_document, list_documents
-│   │   ├── partner_edi_port.py        # send_order, receive_ack, get_status
-│   │   └── external_api_port.py       # typed generic call mit Schema-Contract
-│   ├── adapters/
-│   │   ├── __init__.py
-│   │   ├── native/                    # Bestehende direkte Implementierungen
-│   │   │   ├── __init__.py
-│   │   │   ├── paperless.py           # Paperless-ngx DMS
-│   │   │   ├── brightsky.py           # DWD Wetter
-│   │   │   └── twilio_fax.py          # Fax-Versand
-│   │   └── superglue/                 # Superglue-backed Implementierungen
-│   │       ├── __init__.py
-│   │       ├── client.py              # GraphQL SDK Wrapper + outbound validation
-│   │       ├── tool_sync.py           # Sync superglue Tools → VALEO Agent Manifest
-│   │       ├── document_adapter.py    # Implements document_port via superglue
-│   │       └── edi_adapter.py         # Implements partner_edi_port via superglue
-│   ├── result_envelope.py             # ExternalResultEnvelope Schema
-│   └── circuit_breaker.py             # Timeout, Retry, Fallback-Logik
+app/integrations/
+├── ports/
+│   ├── document_port.py           ✅ DocumentPort ABC + DocumentMetadata
+│   └── partner_adapter_port.py    ✅ PartnerAdapterPort ABC + PartnerPreview
+├── contracts/
+│   ├── types.py                   ✅ IntegrationProviderKey, ExecutionMode, TargetKind,
+│   │                                 AuthModel, ResultStatus, SuperglueToolRecord
+│   └── result_envelope.py         ✅ ExternalResultEnvelope + ExternalResultError
+│                                     (tenant_id, correlation_id, cost_cents, schema_version)
+├── adapters/superglue/
+│   ├── client.py                  ✅ SuperglueClient (REST + GraphQL, Circuit Breaker,
+│   │                                 Outbound Security via validate_outbound_http_target,
+│   │                                 Retry, SUPERGLUE_ALLOWED_HOSTS/DOMAINS)
+│   ├── tool_sync.py               ✅ GraphQL-Katalog-Sync → SuperglueToolRecord,
+│   │                                 Snapshot-Persistenz, Health/Status/Config-Summary
+│   ├── document_adapter.py        ✅ SuperglueDocumentAdapter implements DocumentPort
+│   └── edi_adapter.py             ✅ SupergluePartnerPreviewAdapter implements PartnerAdapterPort
+├── services/
+│   ├── superglue_execution_service.py  ✅ Tool-Execution → ExternalResultEnvelope,
+│   │                                      Quarantine bei Fehler, Security-Observer-Logging
+│   ├── superglue_capability_service.py ✅ Bridge Neuro Broker → Superglue (can_handle + execute_step)
+│   ├── superglue_secret_resolver.py    ✅ Tenant-spezifische Auth-Token-Aufloesung
+│   │                                      (SUPERGLUE__TENANT__{id}__AUTH_TOKEN Hierarchie)
+│   ├── superglue_quarantine.py         ✅ Append-only JSONL Quarantine-Log
+│   └── integration_circuit_breaker.py  ✅ In-Memory Circuit Breaker (closed/open/half_open)
 ```
+
+**API-Endpoints** (`app/api/v1/endpoints/external_agent_integrations.py`):
+- `GET  /agent/integrations` — Gesamtkatalog
+- `GET  /agent/integrations/providers` — Provider-Liste
+- `GET  /agent/integrations/providers/superglue/tools` — Gemappte Tools
+- `GET  /agent/integrations/providers/superglue/sync-status` — Sync-Status
+- `GET  /agent/integrations/providers/superglue/health` — Health-Check
+- `GET  /agent/integrations/providers/superglue/config-summary` — Konfiguration
+- `POST /agent/integrations/providers/superglue/sync-status/refresh` — Snapshot aktualisieren
+- `GET  /agent/integrations/providers/superglue/quarantine` — Quarantine-Eintraege
+
+**Config** (`app/core/config.py`):
+- `SUPERGLUE_ENABLED`, `SUPERGLUE_SYNC_ENABLED`, `SUPERGLUE_EXECUTION_ENABLED` — 3-Stufen Feature Gate
+- `SUPERGLUE_BASE_URL`, `SUPERGLUE_GRAPHQL_URL`, `SUPERGLUE_REST_URL`, `SUPERGLUE_DASHBOARD_URL`
+- `SUPERGLUE_AUTH_TOKEN`, `SUPERGLUE_REQUIRE_TENANT_SECRETS`
+- `SUPERGLUE_ALLOWED_HOSTS`, `SUPERGLUE_ALLOWED_DOMAINS` — Egress-Allowlists
+- `SUPERGLUE_TIMEOUT_SECONDS`, `SUPERGLUE_SYNC_STATE_PATH`, `SUPERGLUE_QUARANTINE_LOG_PATH`
+
+**Tests** (10 Testdateien):
+- `test_superglue_client.py`, `test_superglue_contracts.py`, `test_superglue_tool_sync.py`
+- `test_superglue_document_adapter.py`, `test_superglue_partner_preview.py`
+- `test_superglue_secret_resolver.py`, `test_superglue_broker_integration.py`
+- `test_superglue_refresh_and_quarantine.py`
+- `test_process_kernel_wave86_external_integrations.py`
+- `test_process_kernel_wave88_external_agent_integrations.py`
+
+### 8.2 Umsetzungsstand der Risiko-Korrekturen
+
+| Korrektur | Status | Nachweis |
+|-----------|--------|----------|
+| Kein eigener Orchestrator | ✅ Umgesetzt | `SuperglueCapabilityService` ist Bridge, kein Orchestrator. Aufrufe laufen über Neuro Broker. |
+| Kein eigener Tool-Katalog | ✅ Umgesetzt | `tool_sync.py` synchronisiert in `SuperglueToolRecord`, integriert über `ExternalAgentIntegrationManifest`. |
+| Outbound Security | ✅ Umgesetzt | `client.py` nutzt `validate_outbound_http_target_against_allowlists()` mit `SUPERGLUE_ALLOWED_HOSTS/DOMAINS`. |
+| Tenant-Isolation | ✅ Umgesetzt | `superglue_secret_resolver.py` liest tenant-spezifische Tokens (`SUPERGLUE__TENANT__{id}__AUTH_TOKEN`). Prod erzwingt `SUPERGLUE_REQUIRE_TENANT_SECRETS=true`. |
+| Circuit Breaker | ✅ Umgesetzt | `IntegrationCircuitBreaker` (closed/open/half_open) im `SuperglueClient`. |
+| Cost Tracking | ✅ Umgesetzt | `ExternalResultEnvelope.cost_cents` Feld vorhanden. |
+| Schema Versioning | ✅ Umgesetzt | `schema_version` in `SuperglueToolRecord`, `ExternalResultEnvelope` und allen Status-Modellen. |
+| Quarantine/DLQ | ✅ Umgesetzt | `superglue_quarantine.py` — Append-only JSONL-Log mit Summary-API. |
+| Security Observability | ✅ Umgesetzt | `security_observer.record_event()` bei jeder Execution (success + degraded). |
+
+### 8.3 Verbleibende Lücken (Zielstruktur)
+
+```
+app/integrations/
+├── ports/
+│   └── external_api_port.py       ❌ FEHLT — Generischer typed API-Call Port
+├── adapters/
+│   └── native/                    ❌ FEHLT — Bestehende Direktadapter (Paperless, BrightSky,
+│                                     Twilio) noch nicht als Port-Implementierungen refactored
+```
+
+| Lücke | Priorität | Empfehlung |
+|-------|-----------|------------|
+| `external_api_port.py` | Mittel | Bei erstem generischen API-Anwendungsfall (z.B. BayWa) einführen |
+| Native Adapter als Port-Implementierungen | Niedrig | Paperless, BrightSky, Twilio nur refactoren wenn konkret benötigt |
+| Event-Integration (Outbox) | Mittel | `SuperglueExecutionService` Ergebnisse als `IntegrationEvent` über Outbox publizieren |
+| Docker-Compose Erweiterung | Hoch | Superglue-Container + DB + MinIO aufsetzen (siehe Abschnitt 7.2) |
 
 ---
 
@@ -329,6 +392,15 @@ app/
 | Tenant-Isolation | VALEO-Adapter injiziert tenant-spezifische Credentials in jeden Call. Superglue sieht verschiedene API-Keys pro Tenant — funktioniert wie Multi-User nativ. | Ja |
 
 **Superglue wird als unmodifiziertes Docker-Image (`superglueai/superglue:latest`) betrieben.** Alle Anpassungen liegen im VALEO Adapter-Layer und in der Docker/Network-Konfiguration. Kein Fork nötig.
+
+### 9.1 Implementierungsnachweis
+
+Alle Korrekturen sind bereits im Code umgesetzt (siehe Abschnitt 8.2). Die VALEO-seitige Integration greift an keiner Stelle in superglue's Source Code ein:
+
+- **`SuperglueClient`** nutzt superglue's Standard-REST/GraphQL-Endpunkte (`/health`, `/api/tools/{id}/execute`, GraphQL `tools` Query)
+- **`tool_sync.py`** liest den Katalog per GraphQL und mappt in VALEO's `SuperglueToolRecord` — superglue's internes Tool-Management bleibt unberührt
+- **`superglue_secret_resolver.py`** löst Credentials pro Tenant auf und injiziert sie als Bearer-Token — superglue's eigenes Auth-Modell bleibt erhalten
+- **Outbound-Validierung** passiert im VALEO-Client vor dem HTTP-Call — superglue sieht nur den validierten Request
 
 ---
 

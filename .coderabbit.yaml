@@ -1,0 +1,96 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# CodeRabbit — VALEO NeuroERP 3.0
+# https://docs.coderabbit.ai/getting-started/configure-coderabbit
+# ══════════════════════════════════════════════════════════════════════════════
+
+language: de-DE
+
+reviews:
+  # Automatisch bei jedem neuen PR und bei Folge-Commits reviewen
+  auto_review:
+    enabled: true
+    # Keine Reviews auf Draft-PRs (erst bei Ready for Review)
+    drafts: false
+    # Inkrementelles Review bei neuen Commits auf offenem PR
+    incremental: true
+
+  # Review-Profil: assertiv aber hilfreich
+  profile: assertive
+
+  # Pfade die NICHT reviewed werden sollen
+  path_filters:
+    - "!**/node_modules/**"
+    - "!**/dist/**"
+    - "!**/__pycache__/**"
+    - "!**/storybook-static/**"
+    - "!**/coverage/**"
+    - "!**/htmlcov/**"
+    - "!**/*.min.js"
+    - "!**/*.min.css"
+    - "!**/pnpm-lock.yaml"
+    - "!**/package-lock.json"
+    - "!**/alembic/versions/*.py"
+    - "!**/*.svg"
+    - "!**/*.png"
+    - "!**/*.jpg"
+    - "!**/*.gif"
+    - "!**/*.ico"
+    - "!**/playwright-report/**"
+    - "!**/test-results/**"
+
+  # Maximale Anzahl an Kommentaren pro Review (zu viele = noise)
+  request_changes_workflow: true
+  high_level_summary: true
+  poem: false
+
+  # Review-Schwerpunkte
+  review_comment_lgtm: false
+
+  tools:
+    # GitHub Checks auslesen und Fehler in Review-Kommentare uebersetzen
+    github-checks:
+      enabled: true
+      timeout_ms: 120000
+
+    # Statische Analyse
+    ast-grep:
+      enabled: true
+
+  # Custom Review-Anweisungen fuer dieses Repo
+  instructions: |
+    Du reviewst ein deutschsprachiges Multi-Tenant-ERP fuer Agrargenossenschaften.
+
+    Prioritaeten beim Review:
+    1. **Tenant-Isolation**: Jede DB-Query MUSS tenant_id filtern. Fehlende WHERE-Klauseln
+       mit tenant_id sind kritische Sicherheitsluecken.
+    2. **Mass Assignment**: PUT/PATCH-Endpoints muessen Whitelists fuer aenderbare Felder haben.
+       Kein blindes `**payload.dict()` in SQL-Updates.
+    3. **Information Disclosure**: Keine `str(e)` in HTTP-Responses. Nur generische Fehlermeldungen
+       an den Client, Details ins Log.
+    4. **SSRF**: Ausgehende HTTP-Calls muessen durch `validate_outbound_http_target()` laufen.
+    5. **XSS**: Frontend-Code der `dangerouslySetInnerHTML` oder `document.write()` nutzt muss
+       `escapeHtml()` verwenden.
+    6. **SQL Injection**: Keine f-Strings in SQL-Queries. Nur parameterized queries oder
+       SQLAlchemy ORM.
+    7. **Fachliche Konsistenz**: Dokument-Ketten (Auftrag → Lieferschein → Rechnung) muessen
+       das gleiche Layout-Muster verwenden (ObjectPage mit Tabs).
+    8. **API-URL-Konsistenz**: Frontend-Calls muessen `/api/v1/...` verwenden, nicht `/api/...`
+       oder hardcodierte Pfade.
+
+    Stil-Hinweise:
+    - UI-Labels, Docs und Domain-Begriffe sind auf Deutsch
+    - Mask-Builder verwenden: ObjectPage, ListReport, Wizard — kein Custom-JSX fuer Standard-ERP-Masken
+    - Tests nicht blockieren, aber fehlende Tests bei neuer Business-Logik anmerken
+
+chat:
+  auto_reply: true
+
+knowledge_base:
+  learnings:
+    scope: auto
+  issues:
+    scope: auto
+  jira:
+    project_keys: []
+  pull_requests:
+    scope: auto

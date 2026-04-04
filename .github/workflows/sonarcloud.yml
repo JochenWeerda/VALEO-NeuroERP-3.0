@@ -1,0 +1,104 @@
+name: SonarCloud Analysis
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: sonarcloud-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.11"
+  NODE_VERSION: "20"
+  PNPM_VERSION: "9.12.0"
+
+jobs:
+  sonarcloud:
+    name: SonarCloud Scan
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: valeo_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d valeo_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Vollstaendige History fuer Blame-Analyse
+
+      # ── Python Backend: Tests + Coverage ──────────────────────────────────
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest-cov
+
+      - name: Migrate DB schema
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/valeo_test
+          API_DEV_TOKEN: dev-token
+        run: python scripts/init_db.py
+
+      - name: Run backend tests with coverage
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/valeo_test
+          API_DEV_TOKEN: dev-token
+        run: |
+          pytest \
+            --cov=app \
+            --cov=modules \
+            --cov-report=xml:coverage.xml \
+            --junitxml=test-results.xml \
+            -q || true
+
+      # ── Frontend: Tests + Coverage ────────────────────────────────────────
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install frontend dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run frontend tests with coverage
+        run: |
+          pnpm --filter @valero-neuroerp/frontend-web exec vitest run \
+            --coverage --coverage.reporter=lcov \
+            --coverage.reportsDirectory=packages/frontend-web/coverage \
+            || true
+
+      # ── SonarCloud Analyse ────────────────────────────────────────────────
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
