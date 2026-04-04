@@ -271,6 +271,15 @@ Aktueller Stand 2026-04-03:
 - `INT-SG-001` bis `INT-SG-008` sind als Basis-MVP im Repo umgesetzt.
 - Offen bleiben produktive Connector-Konfiguration, tenant-spezifische Secret-Bestueckung und ein erster echter Live-Connector.
 
+Folgewelle 2026-04-04:
+
+- `INT-SG-009` Sync-Snapshot-Persistenz und manueller Refresh
+- `INT-SG-010` Config-Summary und Admin-Aktionspfad
+- `INT-SG-011` Quarantaene fuer degradierte Superglue-Aufrufe
+- `INT-SG-012` Audit-/Security-Bridge fuer Superglue-Execution
+- `INT-SG-013` zweiter read-only Pilotadapter (Partner/Legacy Preview)
+- `INT-SG-014` Admin-UX fuer Refresh/Quarantaene/Config-Hinweise
+
 ### INT-SG-001 - Contract- und Settings-Basis
 
 Ziel:
@@ -376,6 +385,80 @@ Dateibesitz:
 - `app/integrations/adapters/superglue/tool_sync.py`
 - `app/api/v1/endpoints/external_agent_integrations.py`
 - optional Admin-Frontend fuer Statusanzeige
+
+### INT-SG-009 - Sync-Snapshot-Persistenz und Refresh
+
+Ziel:
+
+- letzten Sync-Stand ausserhalb des Prozessspeichers halten
+- manuellen Refresh-Trigger fuer Admins anbieten
+
+Dateibesitz:
+
+- `app/integrations/adapters/superglue/tool_sync.py`
+- `app/api/v1/endpoints/external_agent_integrations.py`
+- `app/core/config.py`
+
+### INT-SG-010 - Config-Summary und Admin-Aktionspfad
+
+Ziel:
+
+- lesbare, maskierte Superglue-Konfigurationssicht
+- Admin-Seite fuer Refresh/Status/naechste Schritte erweitern
+
+Dateibesitz:
+
+- `app/api/v1/endpoints/external_agent_integrations.py`
+- `packages/frontend-web/src/pages/admin/agenten-integration.tsx`
+- Frontend-Test
+
+### INT-SG-011 - Superglue-Quarantaene
+
+Ziel:
+
+- degradierte/fallbackende Superglue-Aufrufe als Quarantaene-Eintraege festhalten
+- Admin-Sicht auf letzte Faelle
+
+Dateibesitz:
+
+- `app/integrations/services/superglue_quarantine.py`
+- `app/integrations/services/superglue_execution_service.py`
+- `app/api/v1/endpoints/external_agent_integrations.py`
+
+### INT-SG-012 - Audit-/Security-Bridge
+
+Ziel:
+
+- Superglue-Execution an Security-Observability und Audit-Metadaten anbinden
+
+Dateibesitz:
+
+- `app/integrations/services/superglue_execution_service.py`
+- `app/services/security_observability.py`
+- optional Audit-Bridge-Nutzung
+
+### INT-SG-013 - Zweiter read-only Pilotadapter
+
+Ziel:
+
+- zweiten read-only Port fuer Partner-/Legacy-Preview liefern
+
+Dateibesitz:
+
+- `app/integrations/ports/partner_adapter_port.py`
+- `app/integrations/adapters/superglue/edi_adapter.py`
+- Tests
+
+### INT-SG-014 - Admin-UX fuer Superglue-Operationen
+
+Ziel:
+
+- Refresh, Config-Hinweise und Quarantaene in der Admin-Seite surfacen
+
+Dateibesitz:
+
+- `packages/frontend-web/src/pages/admin/agenten-integration.tsx`
+- `packages/frontend-web/src/__tests__/pages/admin/agenten-integration.test.tsx`
 
 ## 10. Nicht-Ziele fuer Phase 1
 
