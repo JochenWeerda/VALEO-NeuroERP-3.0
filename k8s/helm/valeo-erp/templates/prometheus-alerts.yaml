@@ -149,6 +149,38 @@ data:
               summary: "Hohe Block-Rate im Screening"
               description: "Mehr als 10% der Vorgänge werden aktuell blockiert"
 {{- end }}
+{{- if .Values.alerts.superglueEnabled }}
+      - name: superglue-alerts
+        interval: 1m
+        rules:
+          - alert: SuperglueDown
+            expr: up{job=~".*superglue.*"} == 0
+            for: 5m
+            labels:
+              severity: critical
+              component: superglue
+            annotations:
+              summary: "Superglue nicht erreichbar"
+              description: "Der Superglue-Service meldet ueber 5 Minuten kein gesundes Target"
+          - alert: SuperglueSyncFailures
+            expr: increase(superglue_sync_failures_total[15m]) > 0
+            for: 10m
+            labels:
+              severity: warning
+              component: superglue
+            annotations:
+              summary: "Superglue Sync-Fehler erkannt"
+              description: "Es wurden Sync-Fehler in den letzten 15 Minuten erkannt"
+          - alert: SuperglueQuarantineGrowth
+            expr: increase(superglue_quarantine_events_total[30m]) > 10
+            for: 15m
+            labels:
+              severity: warning
+              component: superglue
+            annotations:
+              summary: "Superglue Quarantaene waechst schnell"
+              description: "Mehr als 10 neue Quarantaene-Faelle in 30 Minuten"
+{{- end }}
       - name: inventory-alerts
         interval: 1m
         rules:

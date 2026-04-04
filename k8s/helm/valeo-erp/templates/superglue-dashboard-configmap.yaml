@@ -1,0 +1,17 @@
+{{- if and .Values.superglue.enabled .Values.superglue.dashboard.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "valeo-erp.fullname" . }}-superglue-dashboard
+  namespace: {{ .Values.superglue.namespace | quote }}
+  labels:
+    {{- include "valeo-erp.labels" . | nindent 4 }}
+    app.kubernetes.io/component: superglue-dashboard
+    {{- with .Values.superglue.dashboard.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+data:
+  superglue-dashboard.json: |
+{{ .Files.Get "files/superglue/grafana-dashboard.json" | indent 4 }}
+{{- end }}
+

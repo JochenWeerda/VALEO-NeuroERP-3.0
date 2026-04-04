@@ -34,7 +34,9 @@ securityContext:
   capabilities:
     drop:
     - ALL
-  readOnlyRootFilesystem: false
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
 
 service:
   type: ClusterIP
@@ -235,6 +237,7 @@ zoll:
 alerts:
   infrastatEnabled: false
   inventoryEnabled: false
+  superglueEnabled: false
 
 inventory:
   enabled: true
@@ -330,6 +333,31 @@ superglue:
     enabled: true
     ingressNamespaces:
       - ingress-nginx
+  externalSecrets:
+    enabled: false
+    refreshInterval: 1h
+    secretStoreRef:
+      kind: ClusterSecretStore
+      name: valeo-vault
+    keys:
+      app: secret/data/valeo/superglue/app
+      db: secret/data/valeo/superglue/db
+      minio: secret/data/valeo/superglue/minio
+  certificate:
+    enabled: false
+    issuerRef:
+      name: letsencrypt-prod
+      kind: ClusterIssuer
+  serviceMonitor:
+    enabled: false
+    labels:
+      release: prometheus
+    interval: 30s
+    scrapeTimeout: 10s
+  dashboard:
+    enabled: false
+    labels:
+      grafana_dashboard: "1"
   backup:
     enabled: false
     schedule: "30 2 * * *"

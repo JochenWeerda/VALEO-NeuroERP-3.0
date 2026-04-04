@@ -1,0 +1,28 @@
+{{- if and .Values.superglue.enabled .Values.superglue.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "valeo-erp.fullname" . }}-superglue
+  namespace: {{ .Values.superglue.namespace | quote }}
+  labels:
+    {{- include "valeo-erp.labels" . | nindent 4 }}
+    app.kubernetes.io/component: superglue
+    {{- with .Values.superglue.serviceMonitor.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "valeo-erp.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: superglue
+  namespaceSelector:
+    matchNames:
+      - {{ .Values.superglue.namespace | quote }}
+  endpoints:
+    - port: http
+      path: /health
+      interval: {{ .Values.superglue.serviceMonitor.interval | quote }}
+      scrapeTimeout: {{ .Values.superglue.serviceMonitor.scrapeTimeout | quote }}
+{{- end }}
+

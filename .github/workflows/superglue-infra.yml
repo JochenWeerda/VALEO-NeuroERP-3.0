@@ -11,7 +11,9 @@ on:
       - "scripts/superglue/**"
       - ".github/workflows/superglue-infra.yml"
       - "docs/workflows/int-sg-02*.md"
+      - "docs/workflows/int-sg-03*.md"
       - "docs/cards/neuro-core/INT-SG-02*.md"
+      - "docs/cards/neuro-core/INT-SG-03*.md"
       - "docs/architecture/superglue-integration-implementation-plan.md"
   pull_request:
     paths:
@@ -22,6 +24,8 @@ on:
       - "ops/superglue/**"
       - "scripts/superglue/**"
       - ".github/workflows/superglue-infra.yml"
+      - "docs/workflows/int-sg-03*.md"
+      - "docs/cards/neuro-core/INT-SG-03*.md"
 
 jobs:
   validate:

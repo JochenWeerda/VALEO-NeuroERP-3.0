@@ -2,3 +2,4 @@
 kind: Kustomization
 resources:
   - valeo-platform.yaml
+  - superglue-platform.yaml

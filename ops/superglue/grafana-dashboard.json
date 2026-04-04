@@ -1,0 +1,39 @@
+{
+  "title": "Superglue Operations",
+  "uid": "superglue-ops",
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "tags": ["superglue", "integrations"],
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Health Checks",
+      "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0},
+      "targets": [{"expr": "up{job=~\".*superglue.*\"}", "refId": "A"}]
+    },
+    {
+      "type": "timeseries",
+      "title": "HTTP Request Rate",
+      "gridPos": {"h": 8, "w": 12, "x": 6, "y": 0},
+      "targets": [{"expr": "rate(http_requests_total{job=~\".*superglue.*\"}[5m])", "refId": "A"}]
+    },
+    {
+      "type": "timeseries",
+      "title": "Sync and Quarantine Events",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4},
+      "targets": [
+        {"expr": "rate(superglue_sync_runs_total[5m])", "refId": "A"},
+        {"expr": "rate(superglue_quarantine_events_total[5m])", "refId": "B"}
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Execution Journal Events",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+      "targets": [{"expr": "rate(superglue_execution_journal_total[5m])", "refId": "A"}]
+    }
+  ]
+}
+

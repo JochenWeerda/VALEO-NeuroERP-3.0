@@ -1,0 +1,34 @@
+{{- if and .Values.superglue.enabled .Values.superglue.certificate.enabled }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "valeo-erp.fullname" . }}-superglue-api
+  namespace: {{ .Values.superglue.namespace | quote }}
+  labels:
+    {{- include "valeo-erp.labels" . | nindent 4 }}
+    app.kubernetes.io/component: superglue
+spec:
+  secretName: {{ .Values.superglue.ingress.tls.apiSecretName }}
+  issuerRef:
+    name: {{ .Values.superglue.certificate.issuerRef.name }}
+    kind: {{ .Values.superglue.certificate.issuerRef.kind }}
+  dnsNames:
+    - {{ .Values.superglue.ingress.hosts.api | quote }}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "valeo-erp.fullname" . }}-superglue-minio
+  namespace: {{ .Values.superglue.namespace | quote }}
+  labels:
+    {{- include "valeo-erp.labels" . | nindent 4 }}
+    app.kubernetes.io/component: superglue-minio
+spec:
+  secretName: {{ .Values.superglue.ingress.tls.minioSecretName }}
+  issuerRef:
+    name: {{ .Values.superglue.certificate.issuerRef.name }}
+    kind: {{ .Values.superglue.certificate.issuerRef.kind }}
+  dnsNames:
+    - {{ .Values.superglue.ingress.hosts.minio | quote }}
+{{- end }}
+

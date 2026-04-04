@@ -1,0 +1,70 @@
+name: Superglue Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        required: true
+        default: "staging"
+        type: choice
+        options:
+          - staging
+          - production
+      mode:
+        description: "Render only or apply"
+        required: true
+        default: "render"
+        type: choice
+        options:
+          - render
+          - apply
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Render Superglue manifests
+        run: |
+          helm dependency build k8s/helm/valeo-erp
+          helm template valeo-superglue k8s/helm/valeo-erp \
+            --set superglue.enabled=true \
+            --set superglue.ingress.enabled=true \
+            --set superglue.networkPolicy.enabled=true \
+            --set superglue.externalSecrets.enabled=true \
+            --set superglue.certificate.enabled=true \
+            --set superglue.serviceMonitor.enabled=true \
+            --set superglue.dashboard.enabled=true \
+            --set alerts.superglueEnabled=true \
+            > superglue-rendered.yaml
+          test -s superglue-rendered.yaml
+
+      - name: Configure kubeconfig
+        if: ${{ inputs.mode == 'apply' }}
+        run: |
+          test -n "${KUBECONFIG_B64}"
+          echo "$KUBECONFIG_B64" | base64 -d > kubeconfig
+          echo "KUBECONFIG=$PWD/kubeconfig" >> $GITHUB_ENV
+        env:
+          KUBECONFIG_B64: ${{ secrets.SUPERGLUE_KUBECONFIG_B64 }}
+
+      - name: Apply manifests
+        if: ${{ inputs.mode == 'apply' }}
+        run: kubectl apply -f superglue-rendered.yaml
+
+      - name: Upload rendered manifests
+        uses: actions/upload-artifact@v4
+        with:
+          name: superglue-rendered-${{ inputs.environment }}
+          path: superglue-rendered.yaml
+
