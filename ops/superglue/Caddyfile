@@ -1,0 +1,29 @@
+{
+	email {$SUPERGLUE_TLS_EMAIL}
+	auto_https on
+}
+
+{$SUPERGLUE_TLS_DOMAIN} {
+	encode zstd gzip
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+	}
+	reverse_proxy superglue:3000
+}
+
+{$SUPERGLUE_MINIO_TLS_DOMAIN} {
+	encode zstd gzip
+	basicauth {
+		{$SUPERGLUE_EDGE_BASICAUTH_USER} {$SUPERGLUE_EDGE_BASICAUTH_HASH}
+	}
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "SAMEORIGIN"
+		Referrer-Policy "strict-origin-when-cross-origin"
+	}
+	reverse_proxy superglue-minio:9001
+}

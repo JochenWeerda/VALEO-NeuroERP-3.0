@@ -1,0 +1,52 @@
+services:
+  superglue-db:
+    profiles: ["superglue", "superglue-edge"]
+    ports: !reset []
+    expose:
+      - "5432"
+
+  superglue-minio:
+    profiles: ["superglue", "superglue-edge"]
+    ports: !reset []
+    expose:
+      - "9000"
+      - "9001"
+
+  superglue-minio-init:
+    profiles: ["superglue", "superglue-edge"]
+
+  superglue:
+    profiles: ["superglue", "superglue-edge"]
+    ports: !reset []
+    expose:
+      - "3000"
+      - "3011"
+      - "3012"
+
+  superglue-edge:
+    profiles: ["superglue-edge"]
+    image: caddy:2.10.0-alpine
+    restart: unless-stopped
+    depends_on:
+      superglue:
+        condition: service_healthy
+      superglue-minio:
+        condition: service_healthy
+    environment:
+      SUPERGLUE_TLS_DOMAIN: ${SUPERGLUE_TLS_DOMAIN:?SUPERGLUE_TLS_DOMAIN is required}
+      SUPERGLUE_MINIO_TLS_DOMAIN: ${SUPERGLUE_MINIO_TLS_DOMAIN:?SUPERGLUE_MINIO_TLS_DOMAIN is required}
+      SUPERGLUE_EDGE_BASICAUTH_USER: ${SUPERGLUE_EDGE_BASICAUTH_USER:-admin}
+      SUPERGLUE_EDGE_BASICAUTH_HASH: ${SUPERGLUE_EDGE_BASICAUTH_HASH:?SUPERGLUE_EDGE_BASICAUTH_HASH is required}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./ops/superglue/Caddyfile:/etc/caddy/Caddyfile:ro
+      - superglue_caddy_data:/data
+      - superglue_caddy_config:/config
+    networks:
+      - superglue_net
+
+volumes:
+  superglue_caddy_data:
+  superglue_caddy_config:
