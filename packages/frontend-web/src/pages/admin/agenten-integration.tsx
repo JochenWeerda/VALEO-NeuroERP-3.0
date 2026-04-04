@@ -78,17 +78,49 @@ type SuperglueConfigSummary = {
   dashboard_url?: string | null
   auth_token_configured: boolean
   sync_state_path: string
+  sync_history_path: string
   quarantine_log_path: string
+  execution_journal_path: string
   allowed_hosts: string[]
   allowed_domains: string[]
 }
 
 type SuperglueQuarantineSummary = {
   entry_count: number
+  open_count: number
+  resolved_count: number
   latest?: {
+    entry_id?: string
     reason: string
     tool_id: string
     outcome: string
+    status?: string
+  } | null
+  open_entries?: Array<{
+    entry_id: string
+    tool_id: string
+    reason: string
+    timestamp: string
+    status: string
+  }>
+}
+
+type SuperglueSyncHistorySummary = {
+  entry_count: number
+  latest?: {
+    refreshed_at: string
+    tool_count: number
+  } | null
+}
+
+type SuperglueExecutionJournalSummary = {
+  entry_count: number
+  success_count: number
+  error_count: number
+  latest?: {
+    tool_id: string
+    result_status: string
+    timestamp: string
   } | null
 }
 
@@ -133,6 +165,14 @@ export default function AgentenIntegrationPage(): JSX.Element {
     queryKey: ['agent', 'superglue-quarantine'],
     queryFn: async () => (await apiClient.get<SuperglueQuarantineSummary>('/api/v1/agent/integrations/providers/superglue/quarantine')).data,
   })
+  const superglueHistoryQuery = useQuery({
+    queryKey: ['agent', 'superglue-history'],
+    queryFn: async () => (await apiClient.get<SuperglueSyncHistorySummary>('/api/v1/agent/integrations/providers/superglue/sync-history')).data,
+  })
+  const superglueJournalQuery = useQuery({
+    queryKey: ['agent', 'superglue-journal'],
+    queryFn: async () => (await apiClient.get<SuperglueExecutionJournalSummary>('/api/v1/agent/integrations/providers/superglue/execution-journal')).data,
+  })
 
   const downloadManifest = (): void => {
     if (!manifestQuery.data) {
@@ -153,12 +193,14 @@ export default function AgentenIntegrationPage(): JSX.Element {
     idempotencyOverviewQuery.isLoading ||
     superglueStatusQuery.isLoading ||
     superglueConfigQuery.isLoading ||
-    superglueQuarantineQuery.isLoading
+    superglueQuarantineQuery.isLoading ||
+    superglueHistoryQuery.isLoading ||
+    superglueJournalQuery.isLoading
   ) {
     return <LoadingState message="Agenten- und Idempotenzdaten werden geladen..." />
   }
 
-  const firstError = manifestQuery.error ?? commandCatalogQuery.error ?? idempotencyOverviewQuery.error ?? superglueStatusQuery.error ?? superglueConfigQuery.error ?? superglueQuarantineQuery.error
+  const firstError = manifestQuery.error ?? commandCatalogQuery.error ?? idempotencyOverviewQuery.error ?? superglueStatusQuery.error ?? superglueConfigQuery.error ?? superglueQuarantineQuery.error ?? superglueHistoryQuery.error ?? superglueJournalQuery.error
   if (
     manifestQuery.isError ||
     commandCatalogQuery.isError ||
@@ -166,6 +208,8 @@ export default function AgentenIntegrationPage(): JSX.Element {
     superglueStatusQuery.isError ||
     superglueConfigQuery.isError ||
     superglueQuarantineQuery.isError ||
+    superglueHistoryQuery.isError ||
+    superglueJournalQuery.isError ||
     !manifestQuery.data
   ) {
     return <ErrorState error={firstError as Error} onRetry={() => void manifestQuery.refetch()} />
@@ -181,6 +225,8 @@ export default function AgentenIntegrationPage(): JSX.Element {
   const superglueStatus = superglueStatusQuery.data
   const superglueConfig = superglueConfigQuery.data
   const superglueQuarantine = superglueQuarantineQuery.data
+  const superglueHistory = superglueHistoryQuery.data
+  const superglueJournal = superglueJournalQuery.data
   const sampleTenant =
     window.localStorage.getItem('tenant_id') ||
     window.sessionStorage.getItem('tenant_id') ||
@@ -223,6 +269,20 @@ export default function AgentenIntegrationPage(): JSX.Element {
       superglueStatusQuery.refetch(),
       superglueConfigQuery.refetch(),
       superglueQuarantineQuery.refetch(),
+      superglueHistoryQuery.refetch(),
+    ])
+  }
+
+  const resolveQuarantineEntry = async (entryId: string): Promise<void> => {
+    await apiClient.post(`/api/v1/agent/integrations/providers/superglue/quarantine/${entryId}/resolve`, null, {
+      params: {
+        resolved_by: 'admin-ui',
+        note: 'reviewed in admin page',
+      },
+    })
+    await Promise.all([
+      superglueQuarantineQuery.refetch(),
+      superglueJournalQuery.refetch(),
     ])
   }
 
@@ -309,6 +369,7 @@ export default function AgentenIntegrationPage(): JSX.Element {
             <p><strong>Sync:</strong> {superglueStatus?.sync_enabled ? 'aktiv' : 'deaktiviert'}</p>
             <p><strong>Execution:</strong> {superglueStatus?.execution_enabled ? 'aktiv' : 'deaktiviert'}</p>
             <p><strong>Quarantaene:</strong> {superglueQuarantine?.entry_count ?? 0} Eintraege</p>
+            <p><strong>Sync-Historie:</strong> {superglueHistory?.entry_count ?? 0} Refreshes</p>
             <Button type="button" variant="outline" size="sm" className="gap-2" onClick={() => void refreshSuperglueSnapshot()}>
               <Download className="h-4 w-4" />
               Sync aktualisieren
@@ -345,7 +406,9 @@ export default function AgentenIntegrationPage(): JSX.Element {
             <p><strong>REST URL konfiguriert:</strong> {superglueConfig?.rest_url_configured ? 'ja' : 'nein'}</p>
             <p><strong>Auth Token gesetzt:</strong> {superglueConfig?.auth_token_configured ? 'ja' : 'nein'}</p>
             <p><strong>Sync State:</strong> <code>{superglueConfig?.sync_state_path}</code></p>
+            <p><strong>Sync-History:</strong> <code>{superglueConfig?.sync_history_path}</code></p>
             <p><strong>Quarantaene Log:</strong> <code>{superglueConfig?.quarantine_log_path}</code></p>
+            <p><strong>Execution Journal:</strong> <code>{superglueConfig?.execution_journal_path}</code></p>
           </CardContent>
         </Card>
 
@@ -358,11 +421,56 @@ export default function AgentenIntegrationPage(): JSX.Element {
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
             <p><strong>Eintraege:</strong> {superglueQuarantine?.entry_count ?? 0}</p>
-            <p><strong>Letztes Tool:</strong> {superglueQuarantine?.latest?.tool_id ?? '—'}</p>
+            <p><strong>Offen:</strong> {superglueQuarantine?.open_count ?? 0}</p>
+            <p><strong>Erledigt:</strong> {superglueQuarantine?.resolved_count ?? 0}</p>
+            <p><strong>Letztes Tool:</strong> {superglueQuarantine?.latest?.tool_id ?? '-'}</p>
             <p><strong>Letzter Grund:</strong> {superglueQuarantine?.latest?.reason ?? 'kein degradierter Aufruf'}</p>
+            {superglueQuarantine?.open_entries?.length ? (
+              <div className="space-y-2 pt-2">
+                {superglueQuarantine.open_entries.slice(-3).reverse().map((entry) => (
+                  <div key={entry.entry_id} className="rounded border p-2">
+                    <p><strong>{entry.tool_id}</strong> | {entry.reason}</p>
+                    <Button type="button" variant="outline" size="sm" onClick={() => void resolveQuarantineEntry(entry.entry_id)}>
+                      Als erledigt markieren
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            ) : null}
             <Badge variant="outline">
               Write-Pfade bleiben weiter approval- und policy-gated.
             </Badge>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Sync History</CardTitle>
+            <CardDescription>
+              Letzte Snapshot-Aktualisierungen fuer Tool-Katalog und Provider-Sicht.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            <p><strong>Refreshes:</strong> {superglueHistory?.entry_count ?? 0}</p>
+            <p><strong>Letzter Lauf:</strong> {superglueHistory?.latest?.refreshed_at ?? '-'}</p>
+            <p><strong>Letzte Tool-Anzahl:</strong> {superglueHistory?.latest?.tool_count ?? 0}</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Execution Journal</CardTitle>
+            <CardDescription>
+              Erfolgreiche und degradierte Superglue-Ausfuehrungen als kompakte Ops-Sicht.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            <p><strong>Eintraege:</strong> {superglueJournal?.entry_count ?? 0}</p>
+            <p><strong>Erfolgreich:</strong> {superglueJournal?.success_count ?? 0}</p>
+            <p><strong>Fehler:</strong> {superglueJournal?.error_count ?? 0}</p>
+            <p><strong>Letztes Tool:</strong> {superglueJournal?.latest?.tool_id ?? '-'}</p>
           </CardContent>
         </Card>
       </div>

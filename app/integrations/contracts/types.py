@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field
 
 IntegrationProviderKey = Literal["superglue"]
 IntegrationExecutionMode = Literal["read", "suggest", "simulate", "execute"]
-IntegrationTargetKind = Literal["tool", "connection", "document", "partner_adapter", "external_api"]
+IntegrationTargetKind = Literal["tool", "connection", "document", "partner_adapter", "customer_profile", "external_api"]
 IntegrationAuthModel = Literal["none", "bearer", "api_key", "oauth2", "superglue_token"]
 IntegrationResultStatus = Literal["success", "error", "partial", "pending"]
 
