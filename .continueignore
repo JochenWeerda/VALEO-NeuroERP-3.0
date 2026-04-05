@@ -1,0 +1,36 @@
+# Build-Artefakte
+node_modules/
+dist/
+__pycache__/
+storybook-static/
+.next/
+htmlcov/
+coverage/
+
+# Generierte Dateien
+*.min.js
+*.min.css
+pnpm-lock.yaml
+package-lock.json
+
+# Binaerdateien
+*.png
+*.jpg
+*.gif
+*.ico
+*.svg
+*.woff
+*.woff2
+
+# Alembic Migrationen
+alembic/versions/*.py
+
+# Reports
+playwright-report/
+test-results/
+security-reports/
+
+# Lokale Daten
+data/
+*.db
+*.sqlite

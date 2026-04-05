@@ -1,0 +1,32 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# Aider — VALEO NeuroERP 3.0
+# Multi-File Refactoring mit Claude
+# https://aider.chat/docs/config/aider_conf.html
+# ══════════════════════════════════════════════════════════════════════════════
+
+# ── Modell ───────────────────────────────────────────────────────────────────
+# Claude Sonnet als Architect (plant Refactoring), Claude Sonnet als Editor
+model: anthropic/claude-sonnet-4-20250514
+editor-model: anthropic/claude-sonnet-4-20250514
+
+# ── Git-Integration ──────────────────────────────────────────────────────────
+auto-commits: true
+dirty-commits: false
+attribute-author: false
+attribute-committer: false
+commit-prompt: "refactor: {subject}"
+
+# ── Kontext ──────────────────────────────────────────────────────────────────
+# Repo-Map fuer besseres Codebase-Verstaendnis
+map-tokens: 4096
+map-refresh: auto
+
+# ── Dateien die nie bearbeitet werden sollen ─────────────────────────────────
+read:
+  - CLAUDE.md
+  - docs/MASKEN.md
+
+# ── Ausgabe ──────────────────────────────────────────────────────────────────
+dark-mode: true
+pretty: true
+stream: true

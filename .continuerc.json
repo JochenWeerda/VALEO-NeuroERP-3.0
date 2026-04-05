@@ -1,0 +1,49 @@
+{
+  "$schema": "https://continue.dev/schemas/config.json",
+  "models": [
+    {
+      "title": "Claude Sonnet (Navigation & Verstaendnis)",
+      "provider": "anthropic",
+      "model": "claude-sonnet-4-20250514",
+      "cacheSystemMessage": true,
+      "contextLength": 200000
+    }
+  ],
+  "tabAutocompleteModel": {
+    "title": "Claude Haiku (Autocomplete)",
+    "provider": "anthropic",
+    "model": "claude-haiku-4-5-20251001"
+  },
+  "contextProviders": [
+    {
+      "name": "codebase",
+      "params": {
+        "nRetrieve": 25,
+        "nFinal": 10,
+        "useReranking": true
+      }
+    },
+    {
+      "name": "folder"
+    },
+    {
+      "name": "terminal"
+    },
+    {
+      "name": "diff"
+    },
+    {
+      "name": "open"
+    }
+  ],
+  "docs": [
+    {
+      "title": "VALEO Masken-Standard",
+      "startUrl": "docs/MASKEN.md"
+    },
+    {
+      "title": "VALEO Architecture",
+      "startUrl": "docs/architecture/"
+    }
+  ]
+}
