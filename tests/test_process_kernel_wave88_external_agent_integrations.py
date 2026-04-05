@@ -71,6 +71,21 @@ def test_external_agent_use_cases_surface_install_pack_and_domain_filter():
 
 
 def test_superglue_provider_routes_surface_sync_and_health():
+    external_agent_integrations.provision_superglue_pilot_tools = lambda: {
+        "provider_key": "superglue",
+        "tool_count": 3,
+        "tool_ids": [
+            "sg.document.search",
+            "sg.partner.adapter.preview",
+            "sg.customer.profile.preview",
+        ],
+    }
+    external_agent_integrations.run_superglue_pilot_smoke = lambda: {
+        "provider_key": "superglue",
+        "tool_id": "sg.document.search",
+        "run_id": "sg-run-smoke",
+        "status": "success",
+    }
     client = _client()
 
     provider = client.get("/agent/integrations/providers/superglue")
@@ -82,6 +97,8 @@ def test_superglue_provider_routes_surface_sync_and_health():
     quarantine = client.get("/agent/integrations/providers/superglue/quarantine")
     journal = client.get("/agent/integrations/providers/superglue/execution-journal")
     refresh = client.post("/agent/integrations/providers/superglue/sync-status/refresh")
+    provision = client.post("/agent/integrations/providers/superglue/pilot-tools/provision")
+    smoke = client.post("/agent/integrations/providers/superglue/pilot-tools/smoke-run")
 
     assert provider.status_code == 200
     assert provider.json()["provider_key"] == "superglue"
@@ -101,6 +118,10 @@ def test_superglue_provider_routes_surface_sync_and_health():
     assert "entry_count" in journal.json()
     assert refresh.status_code == 200
     assert refresh.json()["provider_key"] == "superglue"
+    assert provision.status_code == 200
+    assert provision.json()["provider_key"] == "superglue"
+    assert smoke.status_code == 200
+    assert smoke.json()["provider_key"] == "superglue"
 
 
 def test_external_agent_unknown_use_case_returns_404():

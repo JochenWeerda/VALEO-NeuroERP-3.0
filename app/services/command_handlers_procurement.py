@@ -13,6 +13,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.action_execution import ActionExecutionRequest, ActionExecutionResult
+from app.services.numbering_service import get_numbering
 
 logger = logging.getLogger(__name__)
 
@@ -38,11 +39,12 @@ def _create_purchase_order_mutation(
         logger.warning("CreatePurchaseOrder: ungueltige lieferant_id: %s", lid)
         return
 
-    bn = str(
-        payload.get("bestellnummer")
-        or payload.get("order_number")
-        or f"AE-{request.aggregate_id}"[:40]
-    ).strip()[:80]
+    if payload.get("bestellnummer") or payload.get("order_number"):
+        bn = str(
+            payload.get("bestellnummer") or payload.get("order_number")
+        ).strip()[:80]
+    else:
+        bn = get_numbering().next_number("purchase_order")[:80]
     if not bn:
         bn = f"AE-{request.idempotency_key}"[:40]
 

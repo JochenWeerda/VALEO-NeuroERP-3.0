@@ -11,10 +11,13 @@ def test_superglue_partner_preview_adapter_maps_preview():
             lambda request: httpx.Response(
                 200,
                 json={
-                    "title": "Legacy EDI Preview",
-                    "mapped_steps": ["extract", "map", "preview"],
-                    "notices": ["read-only"],
-                    "metadata": {"partner": "legacy-a"},
+                    "status": "completed",
+                    "data": {
+                        "title": "Legacy EDI Preview",
+                        "mapped_steps": ["extract", "map", "preview"],
+                        "notices": ["read-only"],
+                        "metadata": {"partner": "legacy-a"},
+                    },
                 },
             )
         ),

@@ -33,8 +33,10 @@ def clear_action_store():
 def register_procurement_command_mutations():
     """Gleicher Registry-Stand wie Produktion (api.py ruft register_command_mutations)."""
     from app.services.command_handlers_procurement import register_command_mutations
+    from app.services.command_handlers_finance import register_finance_command_mutations
 
     register_command_mutations()
+    register_finance_command_mutations()
 
 
 @pytest.fixture

@@ -114,6 +114,12 @@ def _persist_kernel_action_audit_no_commit(
                 "recorded_at": now,
             },
         )
+        try:
+            from app.core.metrics import neuro_kernel_audit_inserts_total
+
+            neuro_kernel_audit_inserts_total.inc()
+        except Exception:
+            pass
     except Exception as exc:
         logger.debug("Kernel action audit skipped: %s", exc)
         try:

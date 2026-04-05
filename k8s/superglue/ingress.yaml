@@ -25,7 +25,7 @@ spec:
               service:
                 name: superglue
                 port:
-                  number: 3000
+                  number: 3001
     - host: superglue-minio.example.test
       http:
         paths:

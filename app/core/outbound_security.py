@@ -28,6 +28,10 @@ class OutboundTargetPolicyError(ValueError):
     """Raised when an outbound URL violates the central egress policy."""
 
 
+def _is_loopback_hostname(hostname: str) -> bool:
+    return hostname in {"localhost", "127.0.0.1", "::1"}
+
+
 def _reject_outbound_target(
     message: str,
     *,
@@ -51,6 +55,7 @@ def validate_outbound_http_target(
     raw_url: str,
     *,
     allowed_schemes: tuple[str, ...] = ("http", "https"),
+    allow_loopback_hosts: bool = False,
 ) -> str:
     """
     Validate an outbound HTTP target against the shared SSRF policy and
@@ -66,14 +71,20 @@ def validate_outbound_http_target(
     if not hostname:
         _reject_outbound_target("Hostname fehlt", raw_url=raw_url)
 
-    if hostname in _DISALLOWED_HOSTS or hostname.endswith(_DISALLOWED_HOST_SUFFIXES):
+    if hostname.endswith(_DISALLOWED_HOST_SUFFIXES):
+        _reject_outbound_target(
+            "Localhost/interne Hostnamen sind nicht erlaubt",
+            raw_url=raw_url,
+            hostname=hostname,
+        )
+    if hostname in _DISALLOWED_HOSTS and not (allow_loopback_hosts and _is_loopback_hostname(hostname)):
         _reject_outbound_target(
             "Localhost/interne Hostnamen sind nicht erlaubt",
             raw_url=raw_url,
             hostname=hostname,
         )
 
-    _validate_host_against_network_policy(hostname, raw_url)
+    _validate_host_against_network_policy(hostname, raw_url, allow_loopback_hosts=allow_loopback_hosts)
     _validate_host_against_allowlist(hostname, raw_url)
 
     return urlunsplit(parsed)
@@ -85,6 +96,7 @@ def validate_outbound_http_target_against_allowlists(
     allowed_hosts: list[str] | tuple[str, ...] | None = None,
     allowed_domains: list[str] | tuple[str, ...] | None = None,
     allowed_schemes: tuple[str, ...] = ("http", "https"),
+    allow_loopback_hosts: bool = False,
 ) -> str:
     """
     Validate an outbound target against the shared network policy and an optional
@@ -100,14 +112,20 @@ def validate_outbound_http_target_against_allowlists(
     if not hostname:
         _reject_outbound_target("Hostname fehlt", raw_url=raw_url)
 
-    if hostname in _DISALLOWED_HOSTS or hostname.endswith(_DISALLOWED_HOST_SUFFIXES):
+    if hostname.endswith(_DISALLOWED_HOST_SUFFIXES):
+        _reject_outbound_target(
+            "Localhost/interne Hostnamen sind nicht erlaubt",
+            raw_url=raw_url,
+            hostname=hostname,
+        )
+    if hostname in _DISALLOWED_HOSTS and not (allow_loopback_hosts and _is_loopback_hostname(hostname)):
         _reject_outbound_target(
             "Localhost/interne Hostnamen sind nicht erlaubt",
             raw_url=raw_url,
             hostname=hostname,
         )
 
-    _validate_host_against_network_policy(hostname, raw_url)
+    _validate_host_against_network_policy(hostname, raw_url, allow_loopback_hosts=allow_loopback_hosts)
     _validate_host_against_allowlist(
         hostname,
         raw_url,
@@ -118,10 +136,18 @@ def validate_outbound_http_target_against_allowlists(
     return urlunsplit(parsed)
 
 
-def _validate_host_against_network_policy(hostname: str, raw_url: str) -> None:
+def _validate_host_against_network_policy(
+    hostname: str,
+    raw_url: str,
+    *,
+    allow_loopback_hosts: bool = False,
+) -> None:
     try:
         ip = ipaddress.ip_address(hostname)
     except ValueError:
+        return
+
+    if allow_loopback_hosts and ip.is_loopback:
         return
 
     if (

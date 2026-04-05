@@ -8,18 +8,23 @@ metadata:
     {{- include "valeo-erp.labels" . | nindent 4 }}
     app.kubernetes.io/component: superglue
 data:
-  SUPERGLUE_PORT: "3011"
-  SUPERGLUE_PUBLIC_BASE_URL: {{ .Values.superglue.config.publicBaseUrl | quote }}
-  SUPERGLUE_REST_URL: {{ .Values.superglue.config.restUrl | quote }}
-  SUPERGLUE_GRAPHQL_URL: {{ .Values.superglue.config.graphqlUrl | quote }}
+  API_PORT: "3002"
+  API_ENDPOINT: {{ .Values.superglue.config.apiEndpoint | quote }}
+  WEB_PORT: "3001"
+  SUPERGLUE_APP_URL: {{ .Values.superglue.config.appUrl | quote }}
+  START_SCHEDULER_SERVER: {{ ternary "true" "false" .Values.superglue.config.schedulerEnabled | quote }}
+  DATASTORE_TYPE: "postgres"
   SUPERGLUE_SYNC_ENABLED: {{ ternary "true" "false" .Values.superglue.config.syncEnabled | quote }}
   SUPERGLUE_EXECUTION_ENABLED: {{ ternary "true" "false" .Values.superglue.config.executionEnabled | quote }}
-  SUPERGLUE_MINIO_BUCKET: {{ .Values.superglue.minio.bucket | quote }}
-  SUPERGLUE_S3_REGION: {{ .Values.superglue.config.s3Region | quote }}
-  DATABASE_HOST: {{ printf "%s-superglue-db" (include "valeo-erp.fullname" .) | quote }}
-  DATABASE_PORT: "5432"
-  DATABASE_NAME: {{ .Values.superglue.database.name | quote }}
-  MINIO_ENDPOINT: {{ printf "http://%s-superglue-minio:9000" (include "valeo-erp.fullname" .) | quote }}
-  MINIO_CONSOLE_ENDPOINT: {{ printf "http://%s-superglue-minio:9001" (include "valeo-erp.fullname" .) | quote }}
+  POSTGRES_HOST: {{ printf "%s-superglue-db" (include "valeo-erp.fullname" .) | quote }}
+  POSTGRES_PORT: "5432"
+  POSTGRES_SSL: "false"
+  POSTGRES_DB: {{ .Values.superglue.database.name | quote }}
+  FILE_STORAGE_PROVIDER: "minio"
+  S3_ENDPOINT: {{ printf "http://%s-superglue-minio:9000" (include "valeo-erp.fullname" .) | quote }}
+  S3_PUBLIC_ENDPOINT: {{ printf "https://%s" .Values.superglue.ingress.hosts.minio | quote }}
+  MINIO_BUCKET_NAME: {{ .Values.superglue.minio.bucket | quote }}
+  MINIO_BUCKET_PREFIX: "raw"
+  MINIO_WEBHOOK_ENDPOINT: {{ printf "http://%s-superglue:3002/v1/file-references/process" (include "valeo-erp.fullname" .) | quote }}
 {{- end }}
 

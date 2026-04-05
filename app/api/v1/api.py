@@ -1169,5 +1169,7 @@ api_router.include_router(case_management_api.router)
 
 # Process Kernel: Domain-Mutationen fuer Business-Commands registrieren
 from app.services.command_handlers_procurement import register_command_mutations
+from app.services.command_handlers_finance import register_finance_command_mutations
 
 register_command_mutations()
+register_finance_command_mutations()

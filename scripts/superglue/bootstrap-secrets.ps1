@@ -11,6 +11,7 @@ namespace=$Namespace
 secretStoreRef.kind=$SecretStoreKind
 secretStoreRef.name=$SecretStoreName
 app=$VaultPrefix/app
+app.keys=authToken,openaiApiKey,masterEncryptionKey
 db=$VaultPrefix/db
 minio=$VaultPrefix/minio
 hosts.api=$(if ($env:SUPERGLUE_HOST_API) { $env:SUPERGLUE_HOST_API } else { "superglue.example.test" })

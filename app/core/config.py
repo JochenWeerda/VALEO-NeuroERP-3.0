@@ -113,6 +113,7 @@ class Settings(BaseSettings):
     SUPERGLUE_PROVIDER_KEY: str = "superglue"
     SUPERGLUE_ALLOWED_HOSTS: List[str] = []
     SUPERGLUE_ALLOWED_DOMAINS: List[str] = []
+    SUPERGLUE_ALLOW_LOOPBACK_DEV_EGRESS: bool = False
     SUPERGLUE_SYNC_ENABLED: bool = False
     SUPERGLUE_EXECUTION_ENABLED: bool = False
     SUPERGLUE_REQUIRE_TENANT_SECRETS: bool = False

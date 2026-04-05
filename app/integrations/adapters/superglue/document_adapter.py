@@ -14,12 +14,13 @@ class SuperglueDocumentAdapter(DocumentPort):
     def search_documents(self, *, tenant_id: str, query: str, limit: int = 10) -> list[DocumentMetadata]:
         client = self._client or SuperglueClient(auth_token=resolve_superglue_auth_token(tenant_id))
         payload = client.request(
-            "GET",
-            "/api/documents/search",
+            "POST",
+            "/v1/tools/sg.document.search/run",
             mode="rest",
-            params={"q": query, "limit": limit, "tenant_id": tenant_id},
+            json={"inputs": {"tenantId": tenant_id, "query": query, "limit": limit}},
         )
-        items = payload.get("documents", [])
+        run_data = payload.get("data", {})
+        items = run_data.get("documents") or run_data.get("items") or []
         return [
             DocumentMetadata(
                 document_id=str(item["id"]),

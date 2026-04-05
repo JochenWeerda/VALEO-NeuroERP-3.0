@@ -16,6 +16,10 @@ from app.integrations.adapters.superglue.tool_sync import (
 )
 from app.integrations.services.superglue_execution_journal import build_execution_journal_summary
 from app.integrations.services.superglue_quarantine import build_quarantine_summary, resolve_quarantine_entry
+from app.integrations.services.superglue_tool_provisioning import (
+    provision_superglue_pilot_tools,
+    run_superglue_pilot_smoke,
+)
 
 router = APIRouter(prefix="/agent/integrations", tags=["agents", "integrations", "openapi", "mcp"])
 
@@ -96,6 +100,16 @@ def resolve_superglue_quarantine(entry_id: str, resolved_by: str = Query(...), n
 @router.get("/providers/superglue/execution-journal", summary="Superglue Execution Journal")
 def get_superglue_execution_journal(limit: int = Query(default=20, ge=1, le=100)) -> dict:
     return build_execution_journal_summary(limit=limit)
+
+
+@router.post("/providers/superglue/pilot-tools/provision", summary="Provision canonical Superglue pilot tools")
+def provision_superglue_pilots() -> dict:
+    return provision_superglue_pilot_tools()
+
+
+@router.post("/providers/superglue/pilot-tools/smoke-run", summary="Run canonical Superglue pilot smoke")
+def run_superglue_pilot_tool_smoke() -> dict:
+    return run_superglue_pilot_smoke()
 
 
 @router.get("/use-cases", summary="External Agent Use Cases")

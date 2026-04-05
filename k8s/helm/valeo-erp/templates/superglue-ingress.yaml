@@ -30,7 +30,7 @@ spec:
               service:
                 name: {{ include "valeo-erp.fullname" . }}-superglue
                 port:
-                  number: {{ .Values.superglue.service.port }}
+                  number: {{ .Values.superglue.service.webPort }}
     - host: {{ .Values.superglue.ingress.hosts.minio | quote }}
       http:
         paths:

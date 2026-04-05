@@ -11,7 +11,7 @@
 		X-Frame-Options "DENY"
 		Referrer-Policy "strict-origin-when-cross-origin"
 	}
-	reverse_proxy superglue:3000
+	reverse_proxy superglue:3001
 }
 
 {$SUPERGLUE_MINIO_TLS_DOMAIN} {

@@ -13,7 +13,7 @@ spec:
     matchNames:
       - valeo-integrations
   endpoints:
-    - port: http
-      path: /health
+    - port: api
+      path: /v1/health
       interval: 30s
       scrapeTimeout: 10s

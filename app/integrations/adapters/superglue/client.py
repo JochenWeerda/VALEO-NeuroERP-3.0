@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from typing import Any
 
 import httpx
@@ -17,6 +18,10 @@ class SuperglueClientConfigError(ValueError):
 
 class SuperglueClientRequestError(RuntimeError):
     """Raised when a Superglue request cannot be completed successfully."""
+
+    def __init__(self, message: str, *, status_code: int | None = None) -> None:
+        super().__init__(message)
+        self.status_code = status_code
 
 
 class SuperglueClient:
@@ -62,6 +67,7 @@ class SuperglueClient:
         json: dict[str, Any] | None = None,
         headers: dict[str, str] | None = None,
         params: dict[str, Any] | None = None,
+        allow_statuses: Iterable[int] | None = None,
     ) -> dict[str, Any]:
         if not self.breaker.allow_request():
             raise SuperglueClientRequestError("Superglue transport is temporarily blocked by the circuit breaker")
@@ -69,6 +75,7 @@ class SuperglueClient:
         target_url = self._resolve_target_url(mode=mode, path=path)
         request_headers = self._build_headers(headers)
         last_error: Exception | None = None
+        allowed_status_codes = set(allow_statuses or [])
 
         for _attempt in range(self.retry_attempts + 1):
             try:
@@ -78,15 +85,25 @@ class SuperglueClient:
                     transport=self.transport,
                 ) as client:
                     response = client.request(method.upper(), target_url, json=json, params=params)
+                if response.status_code in allowed_status_codes:
+                    self.breaker.record_success()
+                    return response.json() if response.content else {}
                 if response.status_code >= 500:
                     raise SuperglueClientRequestError(
-                        f"Superglue request failed with status {response.status_code}"
+                        f"Superglue request failed with status {response.status_code}",
+                        status_code=response.status_code,
                     )
                 response.raise_for_status()
                 self.breaker.record_success()
                 return response.json() if response.content else {}
             except (httpx.HTTPError, SuperglueClientRequestError) as exc:
-                last_error = exc
+                if isinstance(exc, httpx.HTTPStatusError):
+                    last_error = SuperglueClientRequestError(
+                        f"Superglue request failed with status {exc.response.status_code}",
+                        status_code=exc.response.status_code,
+                    )
+                else:
+                    last_error = exc
                 self.breaker.record_failure()
 
         raise SuperglueClientRequestError(str(last_error) if last_error else "Superglue request failed")
@@ -102,6 +119,7 @@ class SuperglueClient:
             self._join_base_path(base, path),
             allowed_hosts=self._effective_allowed_hosts(),
             allowed_domains=self._effective_allowed_domains(),
+            allow_loopback_hosts=self._allow_loopback_dev_egress(),
         )
 
     def _build_headers(self, headers: dict[str, str] | None = None) -> dict[str, str]:
@@ -137,3 +155,7 @@ class SuperglueClient:
             *settings.OUTBOUND_HTTP_ALLOWED_DOMAINS,
             *settings.SUPERGLUE_ALLOWED_DOMAINS,
         ]
+
+    @staticmethod
+    def _allow_loopback_dev_egress() -> bool:
+        return bool(settings.DEBUG and settings.SUPERGLUE_ALLOW_LOOPBACK_DEV_EGRESS)
