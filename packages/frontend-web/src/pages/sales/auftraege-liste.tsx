@@ -14,6 +14,7 @@ import { useToast } from '@/hooks/use-toast'
 import { useListActions } from '@/hooks/useListActions'
 import { formatDateForExport, formatCurrencyForExport } from '@/lib/export-utils'
 import { saveDocument } from '@/lib/document-api'
+import { getAxiosErrorMessage } from '@/lib/api-client'
 import { useAuftraege, type Auftrag, type AuftragStatus } from '@/lib/api/sales'
 
 const statusVariantMap: Record<AuftragStatus, 'default' | 'outline' | 'secondary' | 'destructive'> = {
@@ -130,7 +131,7 @@ export default function AuftraegeListePage(): JSX.Element {
       toast({
         variant: 'destructive',
         title: t('crud.messages.importError'),
-        description: error instanceof Error ? error.message : 'Unbekannter Fehler',
+        description: getAxiosErrorMessage(error),
       })
     }
   }

@@ -24,7 +24,7 @@ const SEARCH_FIXTURES: SearchResultDescriptor[] = [
     title: 'Landwirtschaft Mueller GmbH',
     subtitle: 'Hauptstrasse 15, 12345 Neustadt',
     meta: 'Kunde seit 2019',
-    url: '/crm/kunden-stamm/1',
+    url: '/verkauf/kunden-liste',
     match: (query) => query.includes('mueller') || query.includes('muller'),
   },
   {
@@ -94,7 +94,7 @@ export async function searchAll(query: string): Promise<SearchResult[]> {
         id: 'c2',
         type: 'customer',
         title: `Suche nach "${query}" in Kunden...`,
-        url: `/crm/kunden-stamm?search=${encodeURIComponent(query)}`,
+        url: `/verkauf/kunden-liste?search=${encodeURIComponent(query)}`,
       },
       {
         id: 'a3',

@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { NativeSelect } from '@/components/ui/native-select'
-import { Save, Tractor, Plus, Minus, Loader2, ArrowLeft, MapPin } from 'lucide-react'
+import { Save, Tractor, Plus, Minus, Loader2, ArrowLeft, MapPin, AlertTriangle } from 'lucide-react'
 import { queryKeys } from '@/lib/query'
 import { crmService, type FarmProfile } from '@/lib/services/crm-service'
 import { useToast } from '@/components/ui/toast-provider'
@@ -326,8 +326,9 @@ export default function BetriebsprofilePage(): JSX.Element {
                     <span className="text-lg font-bold">{totalCropArea.toFixed(2)} {t('crud.fields.hectares')}</span>
                   </div>
                   {farmProfile.totalArea && totalCropArea > farmProfile.totalArea && (
-                    <p className="text-sm text-red-600 mt-2">
-                      âš ï¸ {t('crud.messages.cropAreaExceedsTotal')}
+                    <p className="mt-2 flex items-center gap-1.5 text-sm text-red-600">
+                      <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden />
+                      {t('crud.messages.cropAreaExceedsTotal')}
                     </p>
                   )}
                 </div>

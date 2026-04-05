@@ -68,9 +68,8 @@ export function useAgentSuggestion<T = Record<string, unknown>>(
   const pollQuery = useQuery({
     queryKey: ['agent-suggestion', capabilityKey, runId],
     queryFn: async () => {
-      const response = await apiClient.get<RunResponse>(
-        `/api/v1/agents/neuroassist/runs/${runId!}`,
-      )
+      if (!runId) throw new Error('runId required')
+      const response = await apiClient.get<RunResponse>(`/api/v1/agents/neuroassist/runs/${runId}`)
       return response.data
     },
     enabled: !!runId && suggestionStatus === 'loading',

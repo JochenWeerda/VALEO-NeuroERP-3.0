@@ -37,11 +37,11 @@ const DEFAULT_COMMAND_DESCRIPTORS: CommandDescriptor[] = [
   {
     id: 'nav-customers',
     label: 'Kunden',
-    description: 'Kundenstamm oeffnen',
+    description: 'Kundenliste (Stammdaten) oeffnen',
     icon: Users,
     shortcut: 'G K',
     category: 'navigation',
-    path: '/crm/kunden-stamm',
+    path: '/verkauf/kunden-liste',
     keywords: ['crm', 'kontakte', 'adressen'],
   },
   {
@@ -99,7 +99,7 @@ const DEFAULT_COMMAND_DESCRIPTORS: CommandDescriptor[] = [
     icon: Plus,
     shortcut: 'N K',
     category: 'action',
-    path: '/verkauf/kunde-neu',
+    path: '/verkauf/kunde/neu',
     keywords: ['erstellen', 'anlegen', 'create'],
   },
   {

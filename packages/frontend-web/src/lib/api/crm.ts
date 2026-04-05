@@ -39,6 +39,8 @@ export interface CustomerAnalytics {
 // Types
 export type Customer = {
   id: string
+  /** Verknüpfter Business-Partner (Verkaufs-Stammdaten), falls gespeichert */
+  business_partner_id?: string | null
   customer_number: string
   name: string
   email?: string
@@ -54,7 +56,10 @@ export type Customer = {
   analytics?: CustomerAnalytics
 }
 
-export type CustomerCreate = Omit<Customer, 'id' | 'created_at' | 'updated_at' | 'tenant_id'>
+export type CustomerCreate = Omit<Customer, 'id' | 'created_at' | 'updated_at' | 'tenant_id'> & {
+  /** Backend erwartet `company_name`; optional, falls nur `name` gesetzt ist. */
+  company_name?: string
+}
 
 export type CustomerUpdate = Partial<CustomerCreate>
 

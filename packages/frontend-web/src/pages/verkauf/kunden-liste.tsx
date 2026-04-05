@@ -1,5 +1,5 @@
-import { useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -38,8 +38,14 @@ function mapToRow(item: BusinessPartnerEnvelope): CustomerRow {
 
 export default function KundenListePage(): JSX.Element {
   const navigate = useNavigate()
-  const [searchTerm, setSearchTerm] = useState('')
+  const [searchParams] = useSearchParams()
+  const searchFromUrl = searchParams.get('search') ?? ''
+  const [searchTerm, setSearchTerm] = useState(searchFromUrl)
   const searchRef = useRef<HTMLInputElement | null>(null)
+
+  useEffect(() => {
+    setSearchTerm(searchFromUrl)
+  }, [searchFromUrl])
 
   const customersQuery = useQuery({
     queryKey: ['business-partners', searchTerm],

@@ -7,6 +7,7 @@ import { formatCurrency, formatNumber } from '@/components/mask-builder/utils/fo
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
 import { apiClient } from '@/lib/api-client'
+import { resolveBusinessPartnerIdForCrmCustomer } from '@/lib/crm/fetch-customer-chef-hints'
 import { api } from '@/lib/axios'
 import { toast } from '@/hooks/use-toast'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
@@ -305,11 +306,26 @@ export default function KundenListePage(): JSX.Element {
   }
 
   const handleCreate = () => {
-    navigate('/crm/kunden/stamm/new')
+    navigate('/verkauf/kunde/neu')
   }
 
   const handleEdit = (item: any) => {
-    navigate(`/crm/kunden/stamm/${item.id}`)
+    void (async () => {
+      try {
+        const partnerId = await resolveBusinessPartnerIdForCrmCustomer({
+          crmCustomerId: item.id,
+          customerNumber: item.customer_number ?? item.customerNumber ?? null,
+          businessPartnerIdHint: item.business_partner_id ?? null,
+        })
+        if (partnerId) {
+          navigate(`/verkauf/kunden-stamm/${partnerId}`)
+          return
+        }
+      } catch {
+        /* CRM-Detail */
+      }
+      navigate(`/crm/kunden/${item.id}`)
+    })()
   }
 
   const handleDelete = async (item: any) => {

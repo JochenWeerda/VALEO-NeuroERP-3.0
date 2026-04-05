@@ -197,6 +197,30 @@ export default function WiegescheinDetailPage(): JSX.Element {
     },
   })
 
+  const tabIds: TabId[] = ['gewichte', 'qualitaet', 'kontrakt', 'verlauf']
+  useKeyboardShortcuts([
+    { key: 'Escape', label: 'Zurück', action: () => navigate('/waage/wiegungen') },
+    {
+      key: 'k',
+      ctrl: true,
+      label: 'Kontrakt zuordnen',
+      action: () => setAllocateOpen(true),
+      disabled: !ticket || ticket.status === 'posted',
+    },
+    {
+      key: 'ArrowRight',
+      alt: true,
+      label: 'Nächster Tab',
+      action: () => setActiveTab((t) => tabIds[(tabIds.indexOf(t) + 1) % tabIds.length]),
+    },
+    {
+      key: 'ArrowLeft',
+      alt: true,
+      label: 'Vorheriger Tab',
+      action: () => setActiveTab((t) => tabIds[(tabIds.indexOf(t) - 1 + tabIds.length) % tabIds.length]),
+    },
+  ])
+
   // ── Loading / Error ─────────────────────────────────────────────────────────
   if (isLoading) {
     return (
@@ -217,15 +241,6 @@ export default function WiegescheinDetailPage(): JSX.Element {
   }
 
   const netWeight = ticket.net_weight ?? (ticket.gross_weight != null && ticket.tare_weight != null ? ticket.gross_weight - ticket.tare_weight : null)
-
-  // ── Keyboard shortcuts ───────────────────────────────────────────────────────
-  const tabIds: TabId[] = ['gewichte', 'qualitaet', 'kontrakt', 'verlauf']
-  useKeyboardShortcuts([
-    { key: 'Escape', label: 'Zurück', action: () => navigate('/waage/wiegungen') },
-    { key: 'k', ctrl: true, label: 'Kontrakt zuordnen', action: () => setAllocateOpen(true), disabled: ticket.status === 'posted' },
-    { key: 'ArrowRight', alt: true, label: 'Nächster Tab', action: () => setActiveTab((t) => tabIds[(tabIds.indexOf(t) + 1) % tabIds.length]) },
-    { key: 'ArrowLeft', alt: true, label: 'Vorheriger Tab', action: () => setActiveTab((t) => tabIds[(tabIds.indexOf(t) - 1 + tabIds.length) % tabIds.length]) },
-  ])
 
   const shortcutsForBar = [
     { key: 'Escape', label: 'Zurück', action: () => navigate('/waage/wiegungen') },

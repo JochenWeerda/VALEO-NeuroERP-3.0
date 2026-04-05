@@ -54,6 +54,7 @@ import {
 } from '@/components/ui/tooltip'
 import { Progress } from '@/components/ui/progress'
 import { portalService } from '@/lib/services/portal-service'
+import { getAxiosErrorMessage } from '@/lib/api-client'
 
 // Kontrakt-Status für Rahmenverträge
 type ContractStatus = 'NONE' | 'ACTIVE' | 'LOW' | 'EXHAUSTED'
@@ -464,7 +465,7 @@ export default function PortalShop() {
         setAnfrageProdukt('')
       }, 2000)
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : 'Anfrage konnte nicht gesendet werden')
+      setActionError(getAxiosErrorMessage(err))
     } finally {
       setInquirySubmitting(false)
     }

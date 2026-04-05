@@ -1,6 +1,6 @@
 # Neuro Stack Gap Matrix (2026-03-29)
 
-**Letzte Doku-Synchronisation:** 2026-03-31 (NC-A16 Tool-Contract-Harmonisierung, NC-A13 Tenant-Overrides, NC-A12 Risk-Scoring, Wave-4-Abschluss; SVC-001-P4 Field-Service + ORM uuid7 Kurz-ID-Haertung in Projekt-Doku nachgezogen).
+**Letzte Doku-Synchronisation:** 2026-04-30 (Stammdaten: Verkaufseligibility mandantenkorrekt, CRM-CSV/Debitoren-Import Upsert + Dubletten E-Mail/USt-Id; Gap-Abschnitt Stammdaten aktualisiert).
 
 ## Quelle
 
@@ -63,3 +63,24 @@ Die folgende Matrix basiert auf dem gelieferten Komponenten-Status und fasst die
 | **2: Correctness** | Verification + Policy Engine Integration | Policy->Verify, State->Verify, per-Step Verify, nested/temporale Bedingungen | erledigt |
 | **3: Completeness** | Decision Trace Hardening + Intent LLM | ~~NC-A9 LLM-Fallback~~ umgesetzt; NC-D5 Hash-Chain Regression-Tests offen | Wave 1 |
 | **4: Maturity** | Advanced Features + Stufe 2 Vorbereitung | ~~NC-A10 Dynamische Schrittgenerierung~~ + ~~NC-A11 Cross-Entity-Integrity~~ + ~~NC-A12 Risk-Scoring~~ + ~~NC-A13 Tenant-Overrides~~ + ~~NC-A16 Tool-Contract-Harmonisierung~~ umgesetzt | Waves 2+3 |
+
+## Abgleich Stammdaten Kunden / CRM (2026-04-04)
+
+**Systemarchitektur (Ist):**
+
+- **Kanonische Pflege** der verkaufsrelevanten Business-Partner-Stammdaten: UI unter `/verkauf/kunden-stamm`, API `GET/PUT /api/v1/crm/business-partners/...`.
+- **CRM-Kunden** (`/api/v1/crm/customers`): primär crm-core; Erweiterungsfelder nur in `domain_crm.customers` (z. B. `chefanweisung`, neu **`business_partner_id`** FK auf `business_partners.partner_id`).
+- **Verknüpfung**: `business_partner_id` optional; ohne Eintrag weiterhin Auflösung per Kundennummer (`partner_number` / `debitor_account`) im Frontend.
+
+**Umgesetzt / nachgezogen:**
+
+- DB-Spalte + API-Felder für `business_partner_id`; CRM-Liste öffnet bei Treffer den Verkaufs-Stamm; Hinweis-Link in CRM Mask-Builder (modern).
+- Neuanlage: `/verkauf/kunde-neu` → Redirect auf `/verkauf/kunde/neu` wenn kein Mask-Builder-Flag; **Vorlage**: Query `?vorlage=<partnerId>` auf Neuanlage kopiert Stammdaten (neue Kundennummer).
+- **Sperre / Eligibility**: Backend-Guards und UI-Banner/Abbrüche für Verkaufsbelege (Auftrag, Lieferschein, Angebot, Rechnung/Docflow, Gutschriften/Retouren, Portal-Bestellung); `GET /crm/customers/{id}/sales-eligibility` nutzt **Mandanten-ID aus dem Request** (`X-Tenant-ID`), nicht nur Default-Tenant.
+- **Import**: `POST /crm/import/kunden` und `POST /finance/import/debitoren` schreiben in `domain_crm.customers` mit aktuellem Schema; Dubletten über **Kundennummer**, **E-Mail**, **USt-Id (`tax_id`)**, Firma+PLZ+Ort; `PATCH /crm/kunden/{id}` setzt `is_active` (kein Legacy-Feld `status`).
+
+**Offene Lücken (priorisiert):**
+
+1. CRM-core-only Kunden ohne Zeile in `domain_crm.customers`: Verknüpfung `business_partner_id` erst nach Sync/Anlage in Monolith-DB nutzbar (Upsert-Stub bei Linkpfaden wo möglich).
+2. Import-Pipeline: Feinjustierung (z. B. Normalisierung E-Mail, Konflikt-Strategie „merge vs. skip“) und ggf. weitere Legacy-Endpunkte bereinigen.
+3. Erweiterte Nutzung der Sperrflags in **weiteren** Domänen (z. B. reine Auswertungen, E-Mail-Versand) — Verkaufs-OTC-Kern ist angebunden.

@@ -18,6 +18,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { AlertCircle } from 'lucide-react'
+import { getAxiosErrorMessage } from '@/lib/api-client'
 
 interface StornoDialogProps {
   open: boolean
@@ -52,7 +53,7 @@ export function StornoDialog({
       setReason('')
       onOpenChange(false)
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('crud.messages.stornoError'))
+      setError(getAxiosErrorMessage(err))
     }
   }
 

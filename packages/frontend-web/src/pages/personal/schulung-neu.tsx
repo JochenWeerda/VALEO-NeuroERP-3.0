@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { apiClient } from '@/lib/api-client'
+import { apiClient, getAxiosErrorMessage } from '@/lib/api-client'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -53,7 +53,7 @@ export default function SchulungNeuPage(): JSX.Element {
       navigate('/personal/schulungen')
     },
     onError: (error) => {
-      push(error instanceof Error ? error.message : 'Speichern fehlgeschlagen.')
+      push(getAxiosErrorMessage(error))
     },
   })
 

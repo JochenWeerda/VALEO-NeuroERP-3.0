@@ -37,6 +37,14 @@ spec:
       - name: neuroerp-api
         image: valeo/neuroerp-3.0:latest
         imagePullPolicy: Always
+        securityContext:
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1000
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
         ports:
         - containerPort: 3000
           name: http

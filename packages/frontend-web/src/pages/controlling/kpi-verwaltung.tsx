@@ -12,6 +12,7 @@ import {
   type KpiDefinition,
   type KpiInput,
 } from '@/lib/api/controlling'
+import { getAxiosErrorMessage } from '@/lib/api-client'
 import { useToast } from '@/components/ui/toast-provider'
 
 const EMPTY_FORM: KpiInput = {
@@ -66,7 +67,7 @@ export default function KpiVerwaltungPage(): JSX.Element {
       target_value: targetValue.trim() ? Number(targetValue) : undefined,
     }
     const onError = (error: unknown): void => {
-      push(error instanceof Error ? error.message : 'Speichern fehlgeschlagen.')
+      push(getAxiosErrorMessage(error))
     }
 
     if (editingId) {
@@ -95,7 +96,7 @@ export default function KpiVerwaltungPage(): JSX.Element {
   const remove = (id: string): void => {
     deleteMutation.mutate(id, {
       onSuccess: () => push('KPI geloescht.'),
-      onError: (error) => push(error instanceof Error ? error.message : 'Loeschen fehlgeschlagen.'),
+      onError: (error) => push(getAxiosErrorMessage(error)),
     })
   }
 

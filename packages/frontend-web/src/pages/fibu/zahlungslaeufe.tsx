@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Wizard } from '@/components/patterns/Wizard'
 import { Input } from '@/components/ui/input'
@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Calendar, CheckCircle, Euro, FileDown } from 'lucide-react'
 import { ErrorState } from '@/components/ErrorState'
 import { toast } from '@/hooks/use-toast'
+import { getAxiosErrorMessage } from '@/lib/api-client'
 import { useDATEVExport, useZahlungslauf, useZahlungsvorschlaege, type Zahlungsvorschlag } from '@/lib/api/fibu'
 
 type ZahlungslaufData = {
@@ -58,7 +59,7 @@ export default function ZahlungslaeufeePage(): JSX.Element {
       toast({
         variant: 'destructive',
         title: 'Zahlungslauf fehlgeschlagen',
-        description: err instanceof Error ? err.message : String(err),
+        description: getAxiosErrorMessage(err),
       })
     }
   }

@@ -86,6 +86,11 @@ class Customer(Base):
     payment_terms = Column(Integer, nullable=True)
     tax_id = Column(String(50), nullable=True)
     chefanweisung = Column(Text, nullable=True, comment='Chefanweisung (Executive Note) - Special instructions for this customer')
+    business_partner_id = Column(
+        String(36),
+        ForeignKey("domain_crm.business_partners.partner_id", ondelete="SET NULL"),
+        nullable=True,
+    )
     tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -272,6 +277,9 @@ class BusinessPartner(Base):
     created_by = Column(String(36), nullable=True)
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     updated_by = Column(String(36), nullable=True)
+
+    # Tab 23 Kundenstamm-Erfassung (option2_masterdata_model.json) — zusaetzliche Schluessel
+    tab_23 = Column(postgresql.JSONB(astext_type=Text()), nullable=True)
 
     # legacy customer master extensions (tabs/screens mapping)
     salutation = Column(String(40), nullable=True)

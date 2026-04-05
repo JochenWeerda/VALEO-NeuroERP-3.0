@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Download, Loader2 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { getAxiosErrorMessage } from '@/lib/api-client'
 
 interface BatchPrintButtonProps {
   selectedIds: string[]
@@ -60,7 +61,7 @@ export function BatchPrintButton({ selectedIds, domain, onComplete }: BatchPrint
     } catch (error) {
       toast({
         title: 'Batch print failed',
-        description: error instanceof Error ? error.message : 'Unknown error',
+        description: getAxiosErrorMessage(error),
         variant: 'destructive',
       })
     } finally {

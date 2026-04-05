@@ -69,6 +69,14 @@ spec:
       containers:
         - name: workflow-postgres
           image: {{ .Values.workflowSupport.postgres.image | quote }}
+          securityContext:
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1000
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
           ports:
             - containerPort: 5432
               name: postgres
@@ -123,6 +131,14 @@ spec:
       containers:
         - name: nats
           image: {{ .Values.workflowSupport.nats.image | quote }}
+          securityContext:
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1000
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
           args:
             - "--jetstream"
             - "--store_dir=/data"

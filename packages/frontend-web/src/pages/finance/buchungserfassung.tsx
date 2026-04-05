@@ -12,7 +12,7 @@ import { LeaveConfirmDialog } from '@/components/LeaveConfirmDialog'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import { financeService } from '@/lib/services/finance-service'
 import { toast } from '@/hooks/use-toast'
-import { apiClient } from '@/lib/api-client'
+import { apiClient, getAxiosErrorMessage } from '@/lib/api-client'
 
 
 // Konfiguration für Buchungserfassung ObjectPage (wird in Komponente mit i18n erstellt)
@@ -471,7 +471,7 @@ export default function BuchungserfassungPage(): JSX.Element {
       toast({
         variant: 'destructive',
         title: t('crud.messages.stornoError'),
-        description: error instanceof Error ? error.message : t('common.unknownError'),
+        description: getAxiosErrorMessage(error),
       })
     } finally {
       setIsStornoLoading(false)

@@ -10,6 +10,8 @@ import ApprovalPanel from "@/features/workflow/ApprovalPanel"
 import invoiceSchema from "@/domain-schemas/sales_invoice.schema.json"
 import { getEntityTypeLabel, getSuccessMessage, getErrorMessage } from "@/features/crud/utils/i18n-helpers"
 import { apiClient } from "@/lib/api-client"
+import { CustomerSalesEligibilityBanner } from "@/components/sales/CustomerSalesEligibilityBanner"
+import { useCustomerSalesEligibility } from "@/hooks/useCustomerSalesEligibility"
 
 const ISO_DATE_LENGTH = 10
 const DAYS_IN_MS = 24 * 60 * 60 * 1000
@@ -64,6 +66,7 @@ export default function SalesInvoiceEditorPage(): JSX.Element {
     totalTax: 0,
     totalGross: 0,
   })
+  const { data: salesEligibility } = useCustomerSalesEligibility(invoice.customerId || undefined)
 
   useEffect(() => {
     if (!editId) {
@@ -99,6 +102,13 @@ export default function SalesInvoiceEditorPage(): JSX.Element {
 
   async function save(v: SalesInvoice): Promise<void> {
     try {
+      if (salesEligibility && v.customerId && !salesEligibility.allowed_invoice) {
+        push(
+          salesEligibility.reasons.join(" ") ||
+            "Kunde ist für Rechnungen nicht freigegeben (Stammdaten).",
+        )
+        return
+      }
       const docPayload = {
         doc_type: "sales_invoice",
         doc_number: v.number,
@@ -179,6 +189,12 @@ export default function SalesInvoiceEditorPage(): JSX.Element {
       <ApprovalPanel domain="sales" doc={invoice} />
 
       <Card className="p-4">
+        {invoice.customerId ? (
+          <CustomerSalesEligibilityBanner
+            crmCustomerId={invoice.customerId}
+            modus="rechnung"
+          />
+        ) : null}
         <FormBuilder
           schema={invoiceSchema as unknown as FormSchema}
           data={invoice}

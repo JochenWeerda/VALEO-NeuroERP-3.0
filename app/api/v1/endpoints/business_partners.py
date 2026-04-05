@@ -226,6 +226,8 @@ class LegacyCustomerFields(BaseModel):
     webshop_description: Optional[str] = None
     discount_items: Optional[list[dict[str, Any]]] = None
     price_agreements: Optional[list[dict[str, Any]]] = None
+    # Tab 23 Kundenstamm-Erfassung (docs/migration/option2_masterdata_model.json)
+    tab_23: Optional[dict[str, Any]] = None
 
 
 class BusinessPartnerPayload(BaseModel):
@@ -993,6 +995,7 @@ LEGACY_CUSTOMER_FIELD_NAMES = [
     "webshop_description",
     "discount_items",
     "price_agreements",
+    "tab_23",
 ]
 
 

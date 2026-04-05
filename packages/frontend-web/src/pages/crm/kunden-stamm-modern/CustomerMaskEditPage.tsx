@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ObjectPage } from '@/components/mask-builder'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -14,6 +14,7 @@ import {
   mapMaskToCustomer,
   type MaskCustomerData,
 } from '@/features/crm-masks/mappers'
+import { getAxiosErrorMessage } from '@/lib/api-client'
 import { useCustomer, useUpdateCustomer } from '@/lib/api/crm'
 import { Loader2, ArrowLeft } from 'lucide-react'
 
@@ -64,8 +65,7 @@ function CustomerMaskEditPage(): JSX.Element {
         description: `${customerName || 'Kunde'} (${customerNumber}) wurde erfolgreich gespeichert.`,
       })
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Aktualisierung fehlgeschlagen.'
-      setFormError(message)
+      setFormError(getAxiosErrorMessage(err))
     }
   }
 
@@ -81,7 +81,7 @@ function CustomerMaskEditPage(): JSX.Element {
   }
 
   if (error) {
-    const message = error instanceof Error ? error.message : 'Fehler beim Laden des Kunden.'
+    const message = getAxiosErrorMessage(error)
     return (
       <div className="p-6">
         <Alert variant="destructive">
@@ -121,6 +121,23 @@ function CustomerMaskEditPage(): JSX.Element {
         <Alert variant="destructive">
           <AlertTitle>Speichern fehlgeschlagen</AlertTitle>
           <AlertDescription>{formError}</AlertDescription>
+        </Alert>
+      ) : null}
+
+      {customer?.business_partner_id ? (
+        <Alert className="border-amber-300 bg-amber-50">
+          <AlertTitle>Verkaufs-Stammdaten</AlertTitle>
+          <AlertDescription>
+            Dieser CRM-Kunde ist mit einem Business-Partner verknüpft. Für die kanonische Pflege (Chef-Anweisungen,
+            Tab 21–25) den{' '}
+            <Link
+              to={`/verkauf/kunden-stamm/${customer.business_partner_id}`}
+              className="font-medium underline underline-offset-2"
+            >
+              Kundenstamm (Verkauf)
+            </Link>{' '}
+            öffnen.
+          </AlertDescription>
         </Alert>
       ) : null}
 

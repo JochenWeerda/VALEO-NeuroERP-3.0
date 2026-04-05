@@ -13,7 +13,7 @@ import { AlertTriangle, CheckCircle, Search, Upload, Link2, Sparkles } from 'luc
 import { getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 import { toast } from '@/hooks/use-toast'
 import { useTenant } from '@/hooks/useTenant'
-import { apiClient } from '@/lib/api-client'
+import { apiClient, getAxiosErrorMessage } from '@/lib/api-client'
 import { ErrorState } from '@/components/ErrorState'
 
 type Zahlungseingang = {
@@ -132,7 +132,7 @@ export default function ZahlungseingangsPage(): JSX.Element {
       toast({
         variant: 'destructive',
         title: 'Bank-Import fehlgeschlagen',
-        description: err instanceof Error ? err.message : String(err),
+        description: getAxiosErrorMessage(err),
       })
     } finally {
       setBankImportSubmitting(false)
@@ -173,7 +173,7 @@ export default function ZahlungseingangsPage(): JSX.Element {
       toast({
         variant: 'destructive',
         title: t('crud.messages.autoMatchError'),
-        description: error instanceof Error ? error.message : String(error)
+        description: getAxiosErrorMessage(error)
       })
     } finally {
       setAutoMatching(false)
@@ -194,7 +194,7 @@ export default function ZahlungseingangsPage(): JSX.Element {
       toast({
         variant: 'destructive',
         title: t('crud.messages.matchError'),
-        description: error instanceof Error ? error.message : String(error),
+        description: getAxiosErrorMessage(error),
       })
     }
   }
@@ -217,7 +217,7 @@ export default function ZahlungseingangsPage(): JSX.Element {
       toast({
         variant: 'destructive',
         title: t('crud.messages.matchError'),
-        description: error instanceof Error ? error.message : String(error)
+        description: getAxiosErrorMessage(error)
       })
     }
   }

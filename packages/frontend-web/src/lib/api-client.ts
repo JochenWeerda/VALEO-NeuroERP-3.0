@@ -1,8 +1,8 @@
-﻿/**
+/**
  * API Client
  * Axios-basierter HTTP-Client mit Interceptors
  */
-import axios, { type AxiosInstance } from 'axios'
+import axios, { type AxiosInstance, isAxiosError } from 'axios'
 import { auth } from './auth'
 
 const DEV_TOKEN = import.meta.env.VITE_API_DEV_TOKEN as string | undefined || 'dev-token'
@@ -84,6 +84,28 @@ class APIClient {
 }
 
 export const apiClient = new APIClient()
+
+/** Lesbare Fehlermeldung fuer Toast/Alerts (inkl. Netzwerk ohne Response). */
+export function getAxiosErrorMessage(error: unknown): string {
+  if (isAxiosError(error)) {
+    if (error.code === 'ERR_NETWORK' || error.message === 'Network Error') {
+      return 'Netzwerkfehler: API nicht erreichbar. Pruefen Sie, ob das Backend laeuft und VITE_API_BASE_URL bzw. der Vite-Proxy (/api/v1) stimmt.'
+    }
+    const data = error.response?.data as { detail?: unknown } | undefined
+    const detail = data?.detail
+    if (typeof detail === 'string') return detail
+    if (Array.isArray(detail)) {
+      return detail
+        .map((d: { msg?: string }) => (typeof d?.msg === 'string' ? d.msg : JSON.stringify(d)))
+        .join('; ')
+    }
+    if (error.response?.status != null) {
+      return `HTTP ${error.response.status}: ${error.response.statusText || 'Anfrage fehlgeschlagen'}`
+    }
+  }
+  if (error instanceof Error) return error.message
+  return 'Unbekannter Fehler.'
+}
 
 
 

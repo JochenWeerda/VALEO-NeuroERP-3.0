@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 
 from ....core.config import settings
 from ....core.database import get_db
+from app.services.customer_sales_eligibility import assert_customer_allowed_for_invoice
 
 router = APIRouter()
 
@@ -1066,6 +1067,8 @@ async def create_document(
         total_gross += line_gross
 
     try:
+        if payload.doc_type == "sales_invoice" and payload.customer_id:
+            assert_customer_allowed_for_invoice(db, effective_tenant, str(payload.customer_id))
         db.execute(
             text(
                 """
@@ -1189,6 +1192,10 @@ async def update_document(
     _validate_pos_compliance_requirements(effective_doc_type, payload.pos_compliance)
 
     try:
+        if effective_doc_type == "sales_invoice":
+            eff_cid = payload.customer_id if payload.customer_id is not None else header.get("customer_id")
+            if eff_cid:
+                assert_customer_allowed_for_invoice(db, effective_tenant, str(eff_cid))
         updates: dict[str, Any] = {
             "id": doc_id,
             "tenant_id": effective_tenant,
@@ -1401,6 +1408,11 @@ async def convert_document(
                 selected_items.append({"item": item, "target_qty": _qty(target_qty)})
         if not selected_items:
             raise HTTPException(status_code=400, detail="No convertible item quantities provided")
+
+        if payload.target_doc_type == "sales_invoice":
+            cid_conv = source.get("customer_id")
+            if cid_conv:
+                assert_customer_allowed_for_invoice(db, effective_tenant, str(cid_conv))
 
         total_net = Decimal("0")
         total_tax = Decimal("0")

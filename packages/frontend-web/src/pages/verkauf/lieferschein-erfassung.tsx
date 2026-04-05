@@ -26,6 +26,9 @@ import { globalShortcutManager } from '@/lib/shortcuts/global-shortcuts'
 import { useGlobalShortcutsWithVoice } from '@/features/ki-usability'
 import { ShortcutHintButton } from '@/components/shortcuts/ShortcutHelpPanel'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
+import { CustomerChefHintsBanner } from '@/components/sales/CustomerChefHintsBanner'
+import { CustomerSalesEligibilityBanner } from '@/components/sales/CustomerSalesEligibilityBanner'
+import { useCustomerSalesEligibility } from '@/hooks/useCustomerSalesEligibility'
 import { NativeSelect } from '@/components/ui/native-select'
 import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown, MoreHorizontal, Check, Printer, Save, X, FileText, Folder, FileCheck, Link as LinkIcon, Receipt, Trash2, Search } from 'lucide-react'
 
@@ -494,6 +497,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
   const [psmSchlagId, setPsmSchlagId] = useState<string>('')
   const [psmFlaeche, setPsmFlaeche] = useState<string>('')
   const customerId = state.customer?.id
+  const { data: salesEligibility } = useCustomerSalesEligibility(customerId)
   const { data: schlaege = [] } = useSchlaege(customerId)
 
   // Berechne Summen
@@ -852,6 +856,10 @@ export default function LieferscheinErfassungPage(): JSX.Element {
     try {
       if (!state.customer) {
         push('Bitte wählen Sie einen Kunden aus')
+        return null
+      }
+      if (salesEligibility && !salesEligibility.allowed_delivery) {
+        push(salesEligibility.reasons.join(' ') || 'Kunde ist für Lieferscheine nicht freigegeben (Stammdaten).')
         return null
       }
 
@@ -1546,6 +1554,16 @@ export default function LieferscheinErfassungPage(): JSX.Element {
       )}
 
       <div className="flex-1 overflow-auto p-4">
+        {state.customer ? (
+          <CustomerChefHintsBanner
+            customerNumber={state.customer.customerNumber}
+            crmCustomerId={state.customer.id}
+            chefanweisungFromCustomer={state.customer.chefanweisung ?? state.customer.executiveNote}
+          />
+        ) : null}
+        {state.customer ? (
+          <CustomerSalesEligibilityBanner crmCustomerId={state.customer.id} modus="lieferschein" />
+        ) : null}
         {/* Header-Bereich (3 Spalten) */}
         <Card className="mb-4 p-4">
           <div className="grid grid-cols-3 gap-4">

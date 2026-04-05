@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 
 from ....core.database import get_db
 from ....core.tenant import get_tenant_id
+from ....services.customer_sales_eligibility import assert_customer_allowed_for_sales_order
 from ..schemas.base import PaginatedResponse
 
 router = APIRouter()
@@ -267,6 +268,9 @@ async def create_sales_offer(
     if duplicate:
         raise HTTPException(status_code=409, detail="offer_number already exists")
 
+    if payload.customer_id:
+        assert_customer_allowed_for_sales_order(db, effective_tenant, payload.customer_id)
+
     # Compute totals from items
     computed_total = Decimal("0")
     for item in payload.items:
@@ -372,6 +376,9 @@ async def update_sales_offer(
     effective_tenant = tenant_id
     row = _get_sales_offer_row(db, offer_id, effective_tenant)
 
+    if payload.customer_id is not None and (payload.customer_id or "").strip():
+        assert_customer_allowed_for_sales_order(db, effective_tenant, str(payload.customer_id).strip())
+
     update_data = payload.model_dump(exclude_unset=True, exclude={"items"})
     now = datetime.now(timezone.utc)
 
@@ -476,6 +483,10 @@ async def convert_offer_to_order(
     """Mark offer as accepted and return the offer data ready for order creation."""
     effective_tenant = tenant_id
     row = _get_sales_offer_row(db, offer_id, effective_tenant)
+
+    cid_conv = row.get("customer_id")
+    if cid_conv:
+        assert_customer_allowed_for_sales_order(db, effective_tenant, str(cid_conv))
 
     now = datetime.now(timezone.utc)
     db.execute(

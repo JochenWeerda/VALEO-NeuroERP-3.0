@@ -30,7 +30,7 @@ type PendingRequest = {
 const BATCH_WINDOW_MS = 50
 const MAX_BATCH_SIZE = 10
 
-let pendingQueue: PendingRequest[] = []
+const pendingQueue: PendingRequest[] = []
 let flushTimer: ReturnType<typeof setTimeout> | null = null
 
 function scheduleFlush(): void {

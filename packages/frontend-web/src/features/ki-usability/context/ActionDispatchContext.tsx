@@ -23,14 +23,14 @@ export const ActionDispatchContext = createContext<ActionDispatchContextValue | 
 
 const NAV_ACTIONS: Record<string, string> = {
   'nav-dashboard': '/',
-  'nav-customers': '/crm/kunden-stamm',
+  'nav-customers': '/verkauf/kunden-liste',
   'nav-orders': '/sales/auftraege-liste',
   'nav-invoices': '/sales/rechnungen-liste',
   'nav-inventory': '/lager/bestandsuebersicht',
   'nav-fibu': '/fibu-suite',
   'action-new-order': '/sales/order-editor',
   'action-new-invoice': '/finance/invoices/new',
-  'action-new-customer': '/verkauf/kunde-neu',
+  'action-new-customer': '/verkauf/kunde/neu',
 }
 
 const GLOBAL_SHORTCUT_ACTION_IDS = new Set<string>([

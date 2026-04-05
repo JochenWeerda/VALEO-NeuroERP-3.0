@@ -6,7 +6,7 @@ import React, { useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMutation } from '@tanstack/react-query';
-import { apiClient } from '@/lib/api-client';
+import { apiClient, getAxiosErrorMessage } from '@/lib/api-client';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -65,8 +65,7 @@ export default function FieldServiceTaskNeuPage(): JSX.Element {
       navigate(backHref);
     },
     onError: (err: unknown) => {
-      const msg = err instanceof Error ? err.message : String(err);
-      toast({ variant: 'destructive', title: 'Fehler', description: msg });
+      toast({ variant: 'destructive', title: 'Fehler', description: getAxiosErrorMessage(err) });
     },
   });
 

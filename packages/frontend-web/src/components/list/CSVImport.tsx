@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useToast } from '@/hooks/use-toast'
 import { Upload, FileText, CheckCircle, AlertCircle } from 'lucide-react'
+import { getAxiosErrorMessage } from '@/lib/api-client'
 
 export interface CSVImportProps {
   onImport: (data: any[]) => Promise<void>
@@ -136,7 +137,7 @@ export function CSVImport({ onImport, expectedColumns, entityName }: CSVImportPr
       toast({
         variant: 'destructive',
         title: t('crud.messages.importError'),
-        description: error instanceof Error ? error.message : 'Unbekannter Fehler',
+        description: getAxiosErrorMessage(error),
       })
     } finally {
       setLoading(false)

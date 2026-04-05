@@ -22,6 +22,7 @@ import {
   type PortalMassnahme,
   type PortalSchlag,
 } from '@/lib/api/portal'
+import { getAxiosErrorMessage } from '@/lib/api-client'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -393,8 +394,7 @@ function ImportDialog({
       const res = await importFeldbuchCsv(file)
       setResult(res)
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Unbekannter Fehler'
-      setError(msg)
+      setError(getAxiosErrorMessage(err))
     } finally {
       setLoading(false)
     }

@@ -4,13 +4,15 @@ Schemas for customers, leads, and CRM-related entities
 """
 
 from datetime import datetime
-from typing import Optional
-from uuid import UUID
-from pydantic import EmailStr, Field, ValidationInfo, field_validator
 from decimal import Decimal
+from typing import Any, Optional
+from uuid import UUID
+
+from pydantic import EmailStr, Field, ValidationInfo, field_validator, model_validator
 
 from .base import BaseSchema, TimestampMixin, SoftDeleteMixin
 
+_DEFAULT_TENANT_ID = UUID("00000000-0000-0000-0000-000000000001")
 
 # Customer Schemas
 class CustomerBase(BaseSchema):
@@ -45,12 +47,38 @@ class CustomerBase(BaseSchema):
 
 
 class CustomerCreate(CustomerBase):
-    """Schema for creating a customer"""
-    tenant_id: UUID = Field(..., description="Tenant ID")
+    """Schema for creating a customer (UI sendet oft `name` statt `company_name`, ohne tenant_id)."""
+
+    business_partner_id: Optional[str] = Field(
+        None,
+        max_length=36,
+        description="Optional: Verknüpfung zum Business-Partner (Stammdaten Verkauf)",
+    )
+    tenant_id: UUID = Field(default=_DEFAULT_TENANT_ID, description="Tenant ID (Default: Dev-Tenant)")
+    credit_limit: Optional[Decimal] = Field(None, ge=0, description="Credit limit")
+    payment_terms: Optional[int] = Field(None, ge=0, description="Payment terms in days")
+    tax_id: Optional[str] = Field(None, max_length=50, description="Tax identification number")
+    is_active: bool = Field(default=True, description="Whether customer is active")
+
+    @model_validator(mode="before")
+    @classmethod
+    def coerce_company_name_from_ui_name(cls, data: Any) -> Any:
+        if not isinstance(data, dict):
+            return data
+        company_name = data.get("company_name")
+        name = data.get("name")
+        if (company_name is None or str(company_name).strip() == "") and name:
+            data["company_name"] = str(name).strip()
+        return data
 
 
 class CustomerUpdate(BaseSchema):
     """Schema for updating a customer"""
+    business_partner_id: Optional[str] = Field(
+        None,
+        max_length=36,
+        description="Verknüpfung zum Business-Partner (Stammdaten); null = entfernen",
+    )
     customer_number: Optional[str] = Field(None, min_length=1, max_length=50, description="Unique customer number")
     company_name: Optional[str] = Field(None, min_length=1, max_length=100, description="Company name")
     contact_person: Optional[str] = Field(None, max_length=100, description="Primary contact person")
@@ -71,6 +99,11 @@ class CustomerUpdate(BaseSchema):
 class Customer(CustomerBase, TimestampMixin, SoftDeleteMixin):
     """Full customer schema"""
     id: UUID = Field(..., description="Customer ID")
+    business_partner_id: Optional[str] = Field(
+        None,
+        max_length=36,
+        description="Verknüpfter Business-Partner (Stammdaten), falls in DB gepflegt",
+    )
     tenant_id: UUID = Field(..., description="Tenant ID")
     credit_limit: Optional[Decimal] = Field(None, ge=0, description="Credit limit")
     payment_terms: Optional[int] = Field(None, ge=0, description="Payment terms in days")

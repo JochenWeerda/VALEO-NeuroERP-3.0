@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useToast } from '@/hooks/use-toast'
-import { apiClient } from '@/lib/api-client'
+import { apiClient, getAxiosErrorMessage } from '@/lib/api-client'
 
 interface UseMaskDataOptions {
   apiUrl: string
@@ -26,7 +26,7 @@ export function useMaskData<T = any>({ apiUrl, id, autoLoad = true, transformRes
       const nextData = typeof transformResponse === 'function' ? transformResponse(response.data) : response.data
       setData(nextData)
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error'
+      const errorMessage = getAxiosErrorMessage(err)
       setError(errorMessage)
       toast({
         title: "Fehler beim Laden",
@@ -86,7 +86,7 @@ export function useMaskData<T = any>({ apiUrl, id, autoLoad = true, transformRes
         description: "Das Element wurde erfolgreich gelöscht.",
       })
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error'
+      const errorMessage = getAxiosErrorMessage(err)
       setError(errorMessage)
       toast({
         title: "Fehler beim Löschen",

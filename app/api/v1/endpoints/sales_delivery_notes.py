@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.config import settings
 from app.core.tenant import get_tenant_id
+from app.services.customer_sales_eligibility import assert_customer_allowed_for_delivery
 from app.services.kontrakt_movement_sync import sync_movements_for_delivery_note
 
 router = APIRouter(prefix="/sales/delivery-notes", tags=["sales", "delivery-notes"])
@@ -203,6 +204,9 @@ async def create_delivery_note(
     db: Session = Depends(get_db),
 ):
     """Create a new delivery note."""
+    if payload.customer_id:
+        assert_customer_allowed_for_delivery(db, tenant_id, payload.customer_id)
+
     ls_id = uuid7()
     delivery_note_number = _generate_delivery_note_number(db, tenant_id)
     

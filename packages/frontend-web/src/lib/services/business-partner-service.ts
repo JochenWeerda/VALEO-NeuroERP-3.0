@@ -1,5 +1,68 @@
 import { apiClient } from '@/lib/api-client'
 
+/** Tab 23 keys (option2_masterdata_model.json — Kundenstamm-Erfassung) */
+export type Tab23Stammdaten = {
+  name_3: string
+  po_box: string
+  po_box_postal_code: string
+  po_box_city: string
+  salutation: string
+  brief_salutation: string
+  free_field_1: string
+  free_field_2: string
+  free_field_3: string
+  region_code: string
+  state_name: string
+  federal_state: string
+  customer_since: string
+  debtor_account: string
+  main_account: string
+  dispatcher: string
+  sales_representative: string
+  abc_status: string
+  farm_operation_number: string
+  block_reason: string
+  customer_group: string
+  info_4: string
+  info_5: string
+  info_6: string
+}
+
+export const EMPTY_TAB23_STAMMDATEN: Tab23Stammdaten = {
+  name_3: '',
+  po_box: '',
+  po_box_postal_code: '',
+  po_box_city: '',
+  salutation: '',
+  brief_salutation: '',
+  free_field_1: '',
+  free_field_2: '',
+  free_field_3: '',
+  region_code: '',
+  state_name: '',
+  federal_state: '',
+  customer_since: '',
+  debtor_account: '',
+  main_account: '',
+  dispatcher: '',
+  sales_representative: '',
+  abc_status: '',
+  farm_operation_number: '',
+  block_reason: '',
+  customer_group: '',
+  info_4: '',
+  info_5: '',
+  info_6: '',
+}
+
+export type LegacyCustomerFieldsPartial = Record<string, unknown> & {
+  customer_group?: string | null
+  operation_number?: string | null
+  fax_blocked?: boolean | null
+  salutation?: string | null
+  tab_23?: Partial<Tab23Stammdaten> & Record<string, unknown>
+}
+
 export type BusinessPartnerEnvelope = {
   business_partner: {
     core_identity: {
@@ -55,7 +118,7 @@ export type BusinessPartnerEnvelope = {
     logistics: Record<string, unknown>
     marketing_consent: Record<string, unknown>
     gdpr: Record<string, unknown>
-    legacy_customer_fields?: Record<string, unknown>
+    legacy_customer_fields?: LegacyCustomerFieldsPartial
     audit: {
       created_at?: string | null
       created_by?: string | null
@@ -145,6 +208,51 @@ export type Instruction = {
   created_at?: string | null
   updated_at?: string | null
 }
+
+export type InstructionPayload = {
+  instruction_text: string
+  instruction_priority: 'low' | 'normal' | 'high' | 'critical'
+  valid_from?: string | null
+  valid_to?: string | null
+  created_by?: string | null
+  updated_by?: string | null
+}
+
+export type BpContact = {
+  id: string
+  partner_id: string
+  priority: number
+  salutation?: string | null
+  brief_salutation?: string | null
+  title?: string | null
+  first_name?: string | null
+  last_name: string
+  position?: string | null
+  department?: string | null
+  phone_1?: string | null
+  phone_2?: string | null
+  mobile?: string | null
+  email?: string | null
+  street?: string | null
+  postal_code?: string | null
+  city?: string | null
+  birth_date?: string | null
+  hobbies?: string | null
+  info_1?: string | null
+  info_2?: string | null
+  invoice_email_recipient: boolean
+  reminder_email_recipient: boolean
+  contact_type: 'main' | 'billing' | 'logistics' | 'sales' | 'other'
+  cad_system?: string | null
+  software_systems: string[]
+  is_data_protection_officer: boolean
+  created_by?: string | null
+  updated_by?: string | null
+  created_at?: string | null
+  updated_at?: string | null
+}
+
+export type BpContactPayload = Omit<BpContact, 'id' | 'partner_id' | 'created_at' | 'updated_at'>
 
 export type Address = {
   id: string
@@ -329,6 +437,48 @@ export const businessPartnerService = {
   async listInstructions(partnerId: string) {
     const response = await apiClient.get<Instruction[]>(`/api/v1/crm/business-partners/${partnerId}/instructions`)
     return response.data
+  },
+
+  async createInstruction(partnerId: string, payload: InstructionPayload) {
+    const response = await apiClient.post<Instruction>(
+      `/api/v1/crm/business-partners/${partnerId}/instructions`,
+      payload,
+    )
+    return response.data
+  },
+
+  async updateInstruction(partnerId: string, instructionId: string, payload: InstructionPayload) {
+    const response = await apiClient.put<Instruction>(
+      `/api/v1/crm/business-partners/${partnerId}/instructions/${instructionId}`,
+      payload,
+    )
+    return response.data
+  },
+
+  async deleteInstruction(partnerId: string, instructionId: string) {
+    await apiClient.delete(`/api/v1/crm/business-partners/${partnerId}/instructions/${instructionId}`)
+  },
+
+  async listContacts(partnerId: string) {
+    const response = await apiClient.get<BpContact[]>(`/api/v1/crm/business-partners/${partnerId}/contacts`)
+    return response.data
+  },
+
+  async createContact(partnerId: string, payload: BpContactPayload) {
+    const response = await apiClient.post<BpContact>(`/api/v1/crm/business-partners/${partnerId}/contacts`, payload)
+    return response.data
+  },
+
+  async updateContact(partnerId: string, contactId: string, payload: BpContactPayload) {
+    const response = await apiClient.put<BpContact>(
+      `/api/v1/crm/business-partners/${partnerId}/contacts/${contactId}`,
+      payload,
+    )
+    return response.data
+  },
+
+  async deleteContact(partnerId: string, contactId: string) {
+    await apiClient.delete(`/api/v1/crm/business-partners/${partnerId}/contacts/${contactId}`)
   },
 
   async listAddresses(partnerId: string) {

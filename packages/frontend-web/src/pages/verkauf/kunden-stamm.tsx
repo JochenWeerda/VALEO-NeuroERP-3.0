@@ -1,14 +1,15 @@
-import { useEffect, useMemo, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useToast } from '@/hooks/use-toast'
-import { Save, User } from 'lucide-react'
+import { Copy, Save, User } from 'lucide-react'
 import { ErrorState } from '@/components/ErrorState'
 import {
   businessPartnerService,
@@ -22,23 +23,37 @@ import {
   type DiscountItemPayload,
   type PriceAgreement,
   type PriceAgreementPayload,
+  type Instruction,
+  type InstructionPayload,
+  type BpContact,
+  type BpContactPayload,
+  EMPTY_TAB23_STAMMDATEN,
+  type Tab23Stammdaten,
 } from '@/lib/services/business-partner-service'
+import { getAxiosErrorMessage } from '@/lib/api-client'
 
 type KundeData = {
   id: string
   kundennummer: string
   name: string
+  name_2: string
+  land: string
   strasse: string
   hausnummer: string
   plz: string
   ort: string
   email: string
   telefon: string
+  mobil: string
+  fax: string
+  website: string
   ust_id: string
   steuernummer: string
   zahlungsziel: string
   kreditlimit: number
   status: 'active' | 'inactive' | 'blocked'
+  fax_blocked: boolean
+  tab23: Tab23Stammdaten
 }
 
 type DiscountForm = {
@@ -69,13 +84,26 @@ type PriceAgreementForm = {
 type AddressForm = {
   address_type: 'customer' | 'invoice' | 'shipping' | 'postal'
   name_1: string
+  name_2: string
+  name_3: string
   street: string
   house_number: string
   postal_code: string
   city: string
   country: string
+  po_box: string
+  po_box_postal_code: string
+  po_box_city: string
   phone: string
+  fax: string
   email: string
+  website: string
+  salutation: string
+  brief_salutation: string
+  free_field_1: string
+  free_field_2: string
+  free_field_3: string
+  area_code: string
   is_default: boolean
 }
 
@@ -146,13 +174,26 @@ const DEFAULT_PRICE_FORM: PriceAgreementForm = {
 const DEFAULT_ADDRESS_FORM: AddressForm = {
   address_type: 'customer',
   name_1: '',
+  name_2: '',
+  name_3: '',
   street: '',
   house_number: '',
   postal_code: '',
   city: '',
   country: 'DE',
+  po_box: '',
+  po_box_postal_code: '',
+  po_box_city: '',
   phone: '',
+  fax: '',
   email: '',
+  website: '',
+  salutation: '',
+  brief_salutation: '',
+  free_field_1: '',
+  free_field_2: '',
+  free_field_3: '',
+  area_code: '',
   is_default: false,
 }
 
@@ -196,40 +237,249 @@ const DEFAULT_KUNDE: KundeData = {
   id: '',
   kundennummer: '',
   name: '',
+  name_2: '',
+  land: 'DE',
   strasse: '',
   hausnummer: '',
   plz: '',
   ort: '',
   email: '',
   telefon: '',
+  mobil: '',
+  fax: '',
+  website: '',
   ust_id: '',
   steuernummer: '',
   zahlungsziel: '',
   kreditlimit: 0,
   status: 'active',
+  fax_blocked: false,
+  tab23: { ...EMPTY_TAB23_STAMMDATEN },
+}
+
+type InstructionFormState = {
+  instruction_text: string
+  instruction_priority: InstructionPayload['instruction_priority']
+  valid_from: string
+  valid_to: string
+}
+
+const DEFAULT_INSTRUCTION_FORM: InstructionFormState = {
+  instruction_text: '',
+  instruction_priority: 'normal',
+  valid_from: '',
+  valid_to: '',
+}
+
+const DEFAULT_CONTACT_FORM: BpContactPayload = {
+  priority: 0,
+  salutation: null,
+  brief_salutation: null,
+  title: null,
+  first_name: null,
+  last_name: '',
+  position: null,
+  department: null,
+  phone_1: null,
+  phone_2: null,
+  mobile: null,
+  email: null,
+  street: null,
+  postal_code: null,
+  city: null,
+  birth_date: null,
+  hobbies: null,
+  info_1: null,
+  info_2: null,
+  invoice_email_recipient: false,
+  reminder_email_recipient: false,
+  contact_type: 'other',
+  cad_system: null,
+  software_systems: [],
+  is_data_protection_officer: false,
+  created_by: 'ui',
+  updated_by: 'ui',
+}
+
+function toInstructionPayload(form: InstructionFormState): InstructionPayload {
+  return {
+    instruction_text: form.instruction_text,
+    instruction_priority: form.instruction_priority,
+    valid_from: form.valid_from || null,
+    valid_to: form.valid_to || null,
+    created_by: 'ui',
+    updated_by: 'ui',
+  }
+}
+
+function instructionToForm(row: Instruction): InstructionFormState {
+  return {
+    instruction_text: row.instruction_text,
+    instruction_priority: row.instruction_priority,
+    valid_from: row.valid_from ? String(row.valid_from).slice(0, 10) : '',
+    valid_to: row.valid_to ? String(row.valid_to).slice(0, 10) : '',
+  }
+}
+
+function contactToFormPayload(c: BpContact): BpContactPayload {
+  return {
+    priority: c.priority,
+    salutation: c.salutation ?? null,
+    brief_salutation: c.brief_salutation ?? null,
+    title: c.title ?? null,
+    first_name: c.first_name ?? null,
+    last_name: c.last_name,
+    position: c.position ?? null,
+    department: c.department ?? null,
+    phone_1: c.phone_1 ?? null,
+    phone_2: c.phone_2 ?? null,
+    mobile: c.mobile ?? null,
+    email: c.email ?? null,
+    street: c.street ?? null,
+    postal_code: c.postal_code ?? null,
+    city: c.city ?? null,
+    birth_date: c.birth_date ?? null,
+    hobbies: c.hobbies ?? null,
+    info_1: c.info_1 ?? null,
+    info_2: c.info_2 ?? null,
+    invoice_email_recipient: c.invoice_email_recipient,
+    reminder_email_recipient: c.reminder_email_recipient,
+    contact_type: c.contact_type,
+    cad_system: c.cad_system ?? null,
+    software_systems: c.software_systems ?? [],
+    is_data_protection_officer: c.is_data_protection_officer,
+    created_by: 'ui',
+    updated_by: 'ui',
+  }
+}
+
+function mergeTab23FromBp(bp: BusinessPartnerEnvelope['business_partner']): Tab23Stammdaten {
+  const t: Tab23Stammdaten = { ...EMPTY_TAB23_STAMMDATEN }
+  const raw = bp.legacy_customer_fields?.tab_23
+  if (raw && typeof raw === 'object') {
+    for (const key of Object.keys(EMPTY_TAB23_STAMMDATEN) as (keyof Tab23Stammdaten)[]) {
+      const v = (raw as Record<string, unknown>)[key]
+      if (v != null && String(v) !== '') t[key] = String(v)
+    }
+  }
+  const leg = bp.legacy_customer_fields
+  if (leg?.customer_group && !t.customer_group) t.customer_group = String(leg.customer_group)
+  if (leg?.operation_number && !t.farm_operation_number) t.farm_operation_number = String(leg.operation_number)
+  if (leg?.salutation && !t.salutation) t.salutation = String(leg.salutation)
+  const mem = leg?.membership_entry_date
+  if (mem && !t.customer_since) t.customer_since = String(mem).slice(0, 10)
+  if (bp.core_identity.state && !t.federal_state) t.federal_state = String(bp.core_identity.state)
+  const agr = bp.agrar_extension as { farm_number?: string | null }
+  if (agr?.farm_number && !t.farm_operation_number) t.farm_operation_number = String(agr.farm_number)
+  const gdpr = bp.gdpr as { contact_block_reason?: string | null }
+  if (gdpr?.contact_block_reason && !t.block_reason) t.block_reason = String(gdpr.contact_block_reason)
+  const m = bp.marketing_consent as { marketing_segment?: string | null }
+  if (m?.marketing_segment && !t.abc_status) t.abc_status = String(m.marketing_segment)
+  const log = bp.logistics as { loading_requirements?: string | null }
+  if (log?.loading_requirements && !t.dispatcher) t.dispatcher = String(log.loading_requirements)
+  if (bp.finance.debtor_account && !t.debtor_account) t.debtor_account = String(bp.finance.debtor_account)
+  if (bp.finance.creditor_account && !t.main_account) t.main_account = String(bp.finance.creditor_account)
+  return t
 }
 
 function toForm(envelope: BusinessPartnerEnvelope): KundeData {
   const bp = envelope.business_partner
+  const leg = bp.legacy_customer_fields
   return {
     id: String(bp.core_identity.partner_id ?? ''),
     kundennummer: bp.core_identity.partner_number,
     name: bp.core_identity.name_1,
+    name_2: String(bp.core_identity.name_2 ?? ''),
+    land: String(bp.core_identity.country ?? 'DE'),
     strasse: String(bp.core_identity.street ?? ''),
     hausnummer: String(bp.core_identity.house_number ?? ''),
     plz: String(bp.core_identity.postal_code ?? ''),
     ort: String(bp.core_identity.city ?? ''),
     email: String(bp.contact_data.email ?? ''),
     telefon: String(bp.contact_data.phone ?? ''),
+    mobil: String(bp.contact_data.mobile ?? ''),
+    fax: String(bp.contact_data.fax ?? ''),
+    website: String(bp.contact_data.website ?? ''),
     ust_id: String(bp.finance.vat_id ?? ''),
     steuernummer: String(bp.finance.tax_number ?? ''),
     zahlungsziel: String(bp.finance.payment_terms_id ?? ''),
     kreditlimit: Number(bp.finance.credit_limit ?? 0),
     status: bp.core_identity.status,
+    fax_blocked: Boolean(leg?.fax_blocked),
+    tab23: mergeTab23FromBp(bp),
   }
 }
 
-function toPayload(form: KundeData): BusinessPartnerEnvelope {
+const DEFAULT_MARKETING_CONSENT: Record<string, unknown> = {
+  email_opt_in: false,
+  email_opt_in_timestamp: null,
+  sms_opt_in: false,
+  sms_opt_in_timestamp: null,
+  whatsapp_opt_in: false,
+  whatsapp_opt_in_timestamp: null,
+  newsletter_opt_in: false,
+  newsletter_language: null,
+  flyer_subscription: false,
+  flyer_delivery_type: null,
+  marketing_segment: null,
+}
+
+const DEFAULT_GDPR: Record<string, unknown> = {
+  privacy_policy_accepted: false,
+  privacy_policy_version: null,
+  privacy_policy_accepted_at: null,
+  data_processing_agreement_signed: false,
+  data_retention_until: null,
+  contact_block_reason: null,
+  anonymized_at: null,
+}
+
+const DEFAULT_AGRAR: Record<string, unknown> = {
+  farm_number: null,
+  eu_farm_id: null,
+  harvest_year_default: null,
+  qs_certificate_number: null,
+  qs_valid_until: null,
+  bio_certified: false,
+  bio_certificate_valid_until: null,
+  contract_group: null,
+  default_silo_location: null,
+}
+
+const DEFAULT_LOGISTICS: Record<string, unknown> = {
+  default_route_id: null,
+  preferred_carrier_id: null,
+  loading_requirements: null,
+}
+
+function mergePayload(form: KundeData, base: BusinessPartnerEnvelope | null): BusinessPartnerEnvelope {
+  const b = base?.business_partner
+  const legBase = (b?.legacy_customer_fields ?? {}) as Record<string, unknown>
+  const legacy_customer_fields = {
+    ...legBase,
+    customer_group: form.tab23.customer_group || null,
+    operation_number: form.tab23.farm_operation_number || null,
+    fax_blocked: form.fax_blocked,
+    salutation: form.tab23.salutation || null,
+    membership_entry_date: form.tab23.customer_since || null,
+    tab_23: {
+      ...form.tab23,
+      vat_id: form.ust_id,
+      tax_number: form.steuernummer,
+    },
+  }
+  const agrar = { ...DEFAULT_AGRAR, ...(typeof b?.agrar_extension === 'object' && b.agrar_extension ? b.agrar_extension : {}), farm_number: form.tab23.farm_operation_number || null }
+  const logistics = { ...DEFAULT_LOGISTICS, ...(typeof b?.logistics === 'object' && b.logistics ? b.logistics : {}), loading_requirements: form.tab23.dispatcher || null }
+  const marketing_consent = {
+    ...DEFAULT_MARKETING_CONSENT,
+    ...(typeof b?.marketing_consent === 'object' && b.marketing_consent ? b.marketing_consent : {}),
+    marketing_segment: form.tab23.abc_status || null,
+  }
+  const gdpr = {
+    ...DEFAULT_GDPR,
+    ...(typeof b?.gdpr === 'object' && b.gdpr ? b.gdpr : {}),
+    contact_block_reason: form.tab23.block_reason || null,
+  }
   return {
     business_partner: {
       core_identity: {
@@ -237,18 +487,18 @@ function toPayload(form: KundeData): BusinessPartnerEnvelope {
         partner_number: form.kundennummer,
         matchcode: form.name,
         name_1: form.name,
-        name_2: null,
-        legal_form: null,
+        name_2: form.name_2 || null,
+        legal_form: b?.core_identity.legal_form ?? null,
         street: form.strasse || null,
         house_number: form.hausnummer || null,
         postal_code: form.plz || null,
         city: form.ort || null,
-        country: 'DE',
-        state: null,
-        language: 'de',
+        country: form.land || 'DE',
+        state: form.tab23.federal_state || null,
+        language: b?.core_identity.language ?? 'de',
         status: form.status,
       },
-      roles: {
+      roles: b?.roles ?? {
         is_customer: true,
         is_supplier: false,
         is_carrier: false,
@@ -257,12 +507,12 @@ function toPayload(form: KundeData): BusinessPartnerEnvelope {
       },
       contact_data: {
         phone: form.telefon || null,
-        mobile: null,
+        mobile: form.mobil || null,
         email: form.email || null,
-        website: null,
-        fax: null,
+        website: form.website || null,
+        fax: form.fax || null,
       },
-      banking: {
+      banking: b?.banking ?? {
         iban: null,
         bic: null,
         bank_name: null,
@@ -270,24 +520,27 @@ function toPayload(form: KundeData): BusinessPartnerEnvelope {
         sepa_mandate_signed_at: null,
       },
       finance: {
-        debtor_account: null,
-        creditor_account: null,
+        debtor_account: form.tab23.debtor_account || null,
+        creditor_account: form.tab23.main_account || null,
         tax_number: form.steuernummer || null,
         vat_id: form.ust_id || null,
-        tax_type: 'standard',
+        tax_type: b?.finance.tax_type ?? 'standard',
         payment_terms_id: form.zahlungsziel || null,
         credit_limit: form.kreditlimit,
-        dunning_level: 0,
-        blocked_for_delivery: false,
-        blocked_for_invoice: false,
+        dunning_level: b?.finance.dunning_level ?? 0,
+        blocked_for_delivery: b?.finance.blocked_for_delivery ?? false,
+        blocked_for_invoice: b?.finance.blocked_for_invoice ?? false,
       },
-      agrar_extension: {},
-      logistics: {},
-      marketing_consent: {},
-      gdpr: {},
+      agrar_extension: agrar,
+      logistics,
+      marketing_consent,
+      gdpr,
+      legacy_customer_fields,
       audit: {
-        created_by: 'ui',
+        created_by: b?.audit.created_by ?? 'ui',
         updated_by: 'ui',
+        created_at: b?.audit.created_at ?? null,
+        updated_at: b?.audit.updated_at ?? null,
       },
     },
   }
@@ -302,6 +555,7 @@ function generateCustomerNumber(): string {
 export default function KundenStammPage(): JSX.Element {
   const navigate = useNavigate()
   const { id } = useParams<{ id?: string }>()
+  const [searchParams, setSearchParams] = useSearchParams()
   const { toast } = useToast()
 
   const isNew = !id || id === 'neu'
@@ -319,6 +573,10 @@ export default function KundenStammPage(): JSX.Element {
   const [cpdForm, setCpdForm] = useState<CpdForm>(DEFAULT_CPD_FORM)
   const [editingAddressId, setEditingAddressId] = useState<string | null>(null)
   const [editingCpdId, setEditingCpdId] = useState<string | null>(null)
+  const [instructionForm, setInstructionForm] = useState<InstructionFormState>(DEFAULT_INSTRUCTION_FORM)
+  const [editingInstructionId, setEditingInstructionId] = useState<string | null>(null)
+  const [contactForm, setContactForm] = useState<BpContactPayload>(DEFAULT_CONTACT_FORM)
+  const [editingContactId, setEditingContactId] = useState<string | null>(null)
   const [discountErrors, setDiscountErrors] = useState<DiscountFormErrors>({})
   const [priceErrors, setPriceErrors] = useState<PriceAgreementFormErrors>({})
 
@@ -328,11 +586,45 @@ export default function KundenStammPage(): JSX.Element {
     enabled: !isNew,
   })
 
+  const vorlageId = searchParams.get('vorlage')
+  const vorlageQuery = useQuery({
+    queryKey: ['business-partner-vorlage', vorlageId],
+    queryFn: async () => businessPartnerService.get(String(vorlageId)),
+    enabled: isNew && Boolean(vorlageId),
+  })
+  const vorlageAppliedRef = useRef(false)
+
+  useEffect(() => {
+    if (!vorlageId) vorlageAppliedRef.current = false
+  }, [vorlageId])
+
   useEffect(() => {
     if (detailQuery.data) {
       setKunde(toForm(detailQuery.data))
     }
   }, [detailQuery.data])
+
+  useEffect(() => {
+    if (!isNew || !vorlageId || !vorlageQuery.data || vorlageAppliedRef.current) return
+    vorlageAppliedRef.current = true
+    const merged = toForm(vorlageQuery.data)
+    setKunde({
+      ...merged,
+      id: '',
+      kundennummer: generateCustomerNumber(),
+    })
+    toast({
+      title: 'Vorlage übernommen',
+      description: 'Kundennummer wurde neu vergeben — Daten prüfen und speichern.',
+    })
+    setSearchParams(
+      (p) => {
+        p.delete('vorlage')
+        return p
+      },
+      { replace: true },
+    )
+  }, [isNew, vorlageId, vorlageQuery.data, setSearchParams, toast])
 
   const discountItemsQuery = useQuery({
     queryKey: ['business-partner-discount-items', partnerId],
@@ -370,6 +662,18 @@ export default function KundenStammPage(): JSX.Element {
     enabled: Boolean(partnerId),
   })
 
+  const instructionsQuery = useQuery({
+    queryKey: ['business-partner-instructions', partnerId],
+    queryFn: async () => businessPartnerService.listInstructions(partnerId),
+    enabled: Boolean(partnerId),
+  })
+
+  const contactsQuery = useQuery({
+    queryKey: ['business-partner-contacts', partnerId],
+    queryFn: async () => businessPartnerService.listContacts(partnerId),
+    enabled: Boolean(partnerId),
+  })
+
   useEffect(() => {
     if (!billingConfigQuery.data) return
     const bc = billingConfigQuery.data
@@ -393,7 +697,7 @@ export default function KundenStammPage(): JSX.Element {
 
   const saveMutation = useMutation({
     mutationFn: async () => {
-      const payload = toPayload(kunde)
+      const payload = mergePayload(kunde, isNew ? null : detailQuery.data ?? null)
       if (isNew) {
         return businessPartnerService.create(payload)
       }
@@ -445,7 +749,7 @@ export default function KundenStammPage(): JSX.Element {
       toast({ title: 'Rabattliste gespeichert' })
     },
     onError: (error) => {
-      toast({ title: 'Fehler bei Rabattliste', description: error instanceof Error ? error.message : 'Fehler', variant: 'destructive' })
+      toast({ title: 'Fehler bei Rabattliste', description: getAxiosErrorMessage(error), variant: 'destructive' })
     },
   })
 
@@ -457,6 +761,68 @@ export default function KundenStammPage(): JSX.Element {
     onSuccess: () => {
       void discountItemsQuery.refetch()
       toast({ title: 'Rabatt-Eintrag geloescht' })
+    },
+  })
+
+  const instructionMutation = useMutation({
+    mutationFn: async () => {
+      if (!partnerId) throw new Error('Kunde zuerst speichern')
+      const payload = toInstructionPayload(instructionForm)
+      if (editingInstructionId) {
+        return businessPartnerService.updateInstruction(partnerId, editingInstructionId, payload)
+      }
+      return businessPartnerService.createInstruction(partnerId, payload)
+    },
+    onSuccess: () => {
+      setInstructionForm(DEFAULT_INSTRUCTION_FORM)
+      setEditingInstructionId(null)
+      void instructionsQuery.refetch()
+      toast({ title: 'Chef-Anweisung gespeichert' })
+    },
+    onError: (error) => {
+      toast({ title: 'Fehler Chef-Anweisung', description: getAxiosErrorMessage(error), variant: 'destructive' })
+    },
+  })
+
+  const deleteInstructionMutation = useMutation({
+    mutationFn: async (instructionId: string) => {
+      if (!partnerId) throw new Error('Kunde zuerst speichern')
+      return businessPartnerService.deleteInstruction(partnerId, instructionId)
+    },
+    onSuccess: () => {
+      void instructionsQuery.refetch()
+      toast({ title: 'Chef-Anweisung geloescht' })
+    },
+  })
+
+  const contactMutation = useMutation({
+    mutationFn: async () => {
+      if (!partnerId) throw new Error('Kunde zuerst speichern')
+      if (!contactForm.last_name?.trim()) throw new Error('Nachname ist erforderlich')
+      if (editingContactId) {
+        return businessPartnerService.updateContact(partnerId, editingContactId, contactForm)
+      }
+      return businessPartnerService.createContact(partnerId, contactForm)
+    },
+    onSuccess: () => {
+      setContactForm(DEFAULT_CONTACT_FORM)
+      setEditingContactId(null)
+      void contactsQuery.refetch()
+      toast({ title: 'Ansprechpartner gespeichert' })
+    },
+    onError: (error) => {
+      toast({ title: 'Fehler Ansprechpartner', description: getAxiosErrorMessage(error), variant: 'destructive' })
+    },
+  })
+
+  const deleteContactMutation = useMutation({
+    mutationFn: async (contactId: string) => {
+      if (!partnerId) throw new Error('Kunde zuerst speichern')
+      return businessPartnerService.deleteContact(partnerId, contactId)
+    },
+    onSuccess: () => {
+      void contactsQuery.refetch()
+      toast({ title: 'Ansprechpartner geloescht' })
     },
   })
 
@@ -493,7 +859,7 @@ export default function KundenStammPage(): JSX.Element {
       toast({ title: 'Preisvereinbarung gespeichert' })
     },
     onError: (error) => {
-      toast({ title: 'Fehler bei Preisvereinbarung', description: error instanceof Error ? error.message : 'Fehler', variant: 'destructive' })
+      toast({ title: 'Fehler bei Preisvereinbarung', description: getAxiosErrorMessage(error), variant: 'destructive' })
     },
   })
 
@@ -512,20 +878,29 @@ export default function KundenStammPage(): JSX.Element {
     mutationFn: async () => {
       if (!partnerId) throw new Error('Kunde zuerst speichern')
       const payload: AddressPayload = {
-        ...addressForm,
-        name_2: null,
-        name_3: null,
-        po_box: null,
-        po_box_postal_code: null,
-        po_box_city: null,
-        fax: null,
-        website: null,
-        salutation: null,
-        brief_salutation: null,
-        free_field_1: null,
-        free_field_2: null,
-        free_field_3: null,
-        area_code: null,
+        address_type: addressForm.address_type,
+        name_1: addressForm.name_1 || null,
+        name_2: addressForm.name_2 || null,
+        name_3: addressForm.name_3 || null,
+        street: addressForm.street || null,
+        house_number: addressForm.house_number || null,
+        postal_code: addressForm.postal_code || null,
+        city: addressForm.city || null,
+        country: addressForm.country || null,
+        po_box: addressForm.po_box || null,
+        po_box_postal_code: addressForm.po_box_postal_code || null,
+        po_box_city: addressForm.po_box_city || null,
+        phone: addressForm.phone || null,
+        fax: addressForm.fax || null,
+        email: addressForm.email || null,
+        website: addressForm.website || null,
+        salutation: addressForm.salutation || null,
+        brief_salutation: addressForm.brief_salutation || null,
+        free_field_1: addressForm.free_field_1 || null,
+        free_field_2: addressForm.free_field_2 || null,
+        free_field_3: addressForm.free_field_3 || null,
+        area_code: addressForm.area_code || null,
+        is_default: addressForm.is_default,
         created_by: 'ui',
         updated_by: 'ui',
       }
@@ -668,13 +1043,26 @@ export default function KundenStammPage(): JSX.Element {
     setAddressForm({
       address_type: item.address_type,
       name_1: item.name_1 ?? '',
+      name_2: item.name_2 ?? '',
+      name_3: item.name_3 ?? '',
       street: item.street ?? '',
       house_number: item.house_number ?? '',
       postal_code: item.postal_code ?? '',
       city: item.city ?? '',
       country: item.country ?? 'DE',
+      po_box: item.po_box ?? '',
+      po_box_postal_code: item.po_box_postal_code ?? '',
+      po_box_city: item.po_box_city ?? '',
       phone: item.phone ?? '',
+      fax: item.fax ?? '',
       email: item.email ?? '',
+      website: item.website ?? '',
+      salutation: item.salutation ?? '',
+      brief_salutation: item.brief_salutation ?? '',
+      free_field_1: item.free_field_1 ?? '',
+      free_field_2: item.free_field_2 ?? '',
+      free_field_3: item.free_field_3 ?? '',
+      area_code: item.area_code ?? '',
       is_default: item.is_default,
     })
   }
@@ -753,6 +1141,17 @@ export default function KundenStammPage(): JSX.Element {
           </div>
         </div>
         <div className="flex gap-2">
+          {!isNew && kunde.id ? (
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => navigate(`/verkauf/kunde/neu?vorlage=${encodeURIComponent(kunde.id)}`)}
+              disabled={saveMutation.isPending}
+            >
+              <Copy className="h-4 w-4 mr-2" />
+              Als Vorlage für Neuanlage
+            </Button>
+          ) : null}
           <Button variant="outline" onClick={() => navigate('/verkauf/kunden-liste')} disabled={saveMutation.isPending}>
             Zurueck
           </Button>
@@ -773,6 +1172,8 @@ export default function KundenStammPage(): JSX.Element {
         <TabsList>
           <TabsTrigger value="stammdaten">Stammdaten</TabsTrigger>
           <TabsTrigger value="konditionen">Konditionen</TabsTrigger>
+          <TabsTrigger value="tab21">Chef-Anweisung</TabsTrigger>
+          <TabsTrigger value="tab22">Ansprechpartner</TabsTrigger>
           <TabsTrigger value="tab23">Tab 23 Anschriften</TabsTrigger>
           <TabsTrigger value="tab24">Tab 24 Rechnung/Kontoauszug</TabsTrigger>
           <TabsTrigger value="tab25">Tab 25 CPD-Konto</TabsTrigger>
@@ -789,8 +1190,21 @@ export default function KundenStammPage(): JSX.Element {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label>Firmenname</Label>
+                  <Label>Firmenname (Zeile 1)</Label>
                   <Input value={kunde.name} onChange={(e) => setKunde((prev) => ({ ...prev, name: e.target.value }))} />
+                </div>
+                <div>
+                  <Label>Name Zeile 2</Label>
+                  <Input value={kunde.name_2} onChange={(e) => setKunde((prev) => ({ ...prev, name_2: e.target.value }))} />
+                </div>
+                <div>
+                  <Label>Name Zeile 3 (Tab 23)</Label>
+                  <Input
+                    value={kunde.tab23.name_3}
+                    onChange={(e) =>
+                      setKunde((prev) => ({ ...prev, tab23: { ...prev.tab23, name_3: e.target.value } }))
+                    }
+                  />
                 </div>
                 <div>
                   <Label>Status</Label>
@@ -819,27 +1233,163 @@ export default function KundenStammPage(): JSX.Element {
                     />
                   </div>
                 </div>
-                <div className="grid gap-4 grid-cols-3">
-                  <div className="col-span-1">
+                <div className="grid gap-4 md:grid-cols-3">
+                  <div>
                     <Label>PLZ</Label>
                     <Input value={kunde.plz} onChange={(e) => setKunde((prev) => ({ ...prev, plz: e.target.value }))} />
                   </div>
-                  <div className="col-span-2">
+                  <div>
                     <Label>Ort</Label>
                     <Input value={kunde.ort} onChange={(e) => setKunde((prev) => ({ ...prev, ort: e.target.value }))} />
+                  </div>
+                  <div>
+                    <Label>Land (ISO)</Label>
+                    <Input value={kunde.land} onChange={(e) => setKunde((prev) => ({ ...prev, land: e.target.value }))} />
+                  </div>
+                </div>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <Label>Anrede (Tab 23)</Label>
+                    <Input
+                      value={kunde.tab23.salutation}
+                      onChange={(e) =>
+                        setKunde((prev) => ({ ...prev, tab23: { ...prev.tab23, salutation: e.target.value } }))
+                      }
+                    />
+                  </div>
+                  <div>
+                    <Label>Briefanrede (Tab 23)</Label>
+                    <Input
+                      value={kunde.tab23.brief_salutation}
+                      onChange={(e) =>
+                        setKunde((prev) => ({ ...prev, tab23: { ...prev.tab23, brief_salutation: e.target.value } }))
+                      }
+                    />
                   </div>
                 </div>
                 <div>
                   <Label>E-Mail</Label>
                   <Input value={kunde.email} onChange={(e) => setKunde((prev) => ({ ...prev, email: e.target.value }))} />
                 </div>
-                <div>
-                  <Label>Telefon</Label>
-                  <Input value={kunde.telefon} onChange={(e) => setKunde((prev) => ({ ...prev, telefon: e.target.value }))} />
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <Label>Telefon</Label>
+                    <Input value={kunde.telefon} onChange={(e) => setKunde((prev) => ({ ...prev, telefon: e.target.value }))} />
+                  </div>
+                  <div>
+                    <Label>Mobil</Label>
+                    <Input value={kunde.mobil} onChange={(e) => setKunde((prev) => ({ ...prev, mobil: e.target.value }))} />
+                  </div>
+                </div>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div>
+                    <Label>Fax</Label>
+                    <Input value={kunde.fax} onChange={(e) => setKunde((prev) => ({ ...prev, fax: e.target.value }))} />
+                  </div>
+                  <div>
+                    <Label>Web</Label>
+                    <Input value={kunde.website} onChange={(e) => setKunde((prev) => ({ ...prev, website: e.target.value }))} />
+                  </div>
+                </div>
+                <div className="grid gap-4 md:grid-cols-3">
+                  <div>
+                    <Label>Postfach</Label>
+                    <Input
+                      value={kunde.tab23.po_box}
+                      onChange={(e) =>
+                        setKunde((prev) => ({ ...prev, tab23: { ...prev.tab23, po_box: e.target.value } }))
+                      }
+                    />
+                  </div>
+                  <div>
+                    <Label>Postfach-PLZ</Label>
+                    <Input
+                      value={kunde.tab23.po_box_postal_code}
+                      onChange={(e) =>
+                        setKunde((prev) => ({ ...prev, tab23: { ...prev.tab23, po_box_postal_code: e.target.value } }))
+                      }
+                    />
+                  </div>
+                  <div>
+                    <Label>Postfach-Ort</Label>
+                    <Input
+                      value={kunde.tab23.po_box_city}
+                      onChange={(e) =>
+                        setKunde((prev) => ({ ...prev, tab23: { ...prev.tab23, po_box_city: e.target.value } }))
+                      }
+                    />
+                  </div>
                 </div>
               </CardContent>
             </Card>
           </div>
+
+          <Card className="mt-6 border-dashed border-primary/30">
+            <CardHeader>
+              <CardTitle>Tab 23 — Klassifikation, Konten, Freifelder</CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-4 md:grid-cols-3">
+              {(
+                [
+                  ['region_code', 'Region / Gebietscode'],
+                  ['state_name', 'Bundesland (Text)'],
+                  ['federal_state', 'Bundesland (Kuerzel → Kernzustand)'],
+                  ['customer_since', 'Kunde seit', 'date'],
+                  ['debtor_account', 'Debitoren-Konto'],
+                  ['main_account', 'Hauptkonto (Kreditor)'],
+                  ['dispatcher', 'Disponent (Logistik-Hinweis)'],
+                  ['sales_representative', 'Vertriebsbeauftragter'],
+                  ['farm_operation_number', 'Betriebsnummer (Landwirtschaft)'],
+                  ['customer_group', 'Kundengruppe'],
+                  ['block_reason', 'Sperrgrund / Hinweis'],
+                  ['info_4', 'Info-Feld 4'],
+                  ['info_5', 'Info-Feld 5'],
+                  ['info_6', 'Info-Feld 6'],
+                  ['free_field_1', 'Freifeld 1'],
+                  ['free_field_2', 'Freifeld 2'],
+                  ['free_field_3', 'Freifeld 3'],
+                ] as const
+              ).map(([key, label, typ]) => (
+                <div key={key}>
+                  <Label>{label}</Label>
+                  <Input
+                    type={typ === 'date' ? 'date' : 'text'}
+                    value={(kunde.tab23 as Record<string, string>)[key]}
+                    onChange={(e) =>
+                      setKunde((prev) => ({
+                        ...prev,
+                        tab23: { ...prev.tab23, [key]: e.target.value },
+                      }))
+                    }
+                  />
+                </div>
+              ))}
+              <div>
+                <Label>ABC-Status (→ Marketing-Segment)</Label>
+                <select
+                  className="w-full rounded-md border px-3 py-2 text-sm"
+                  value={kunde.tab23.abc_status}
+                  onChange={(e) =>
+                    setKunde((prev) => ({ ...prev, tab23: { ...prev.tab23, abc_status: e.target.value } }))
+                  }
+                >
+                  <option value="">—</option>
+                  <option value="A">A</option>
+                  <option value="B">B</option>
+                  <option value="C">C</option>
+                </select>
+              </div>
+              <div className="flex items-center gap-2 pt-7">
+                <input
+                  id="fax_blocked"
+                  type="checkbox"
+                  checked={kunde.fax_blocked}
+                  onChange={(e) => setKunde((prev) => ({ ...prev, fax_blocked: e.target.checked }))}
+                />
+                <Label htmlFor="fax_blocked">Fax gesperrt (Legacy)</Label>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="konditionen">
@@ -878,6 +1428,313 @@ export default function KundenStammPage(): JSX.Element {
           </Card>
         </TabsContent>
 
+        <TabsContent value="tab21">
+          <Card>
+            <CardHeader>
+              <CardTitle>Chef-Anweisung (Tab 21)</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {!partnerId && (
+                <p className="text-sm text-muted-foreground">Kunde zuerst speichern, dann Eintraege pflegen.</p>
+              )}
+              {partnerId && (
+                <>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <div className="md:col-span-2">
+                      <Label>Text</Label>
+                      <Textarea
+                        rows={5}
+                        value={instructionForm.instruction_text}
+                        onChange={(e) => setInstructionForm((p) => ({ ...p, instruction_text: e.target.value }))}
+                      />
+                    </div>
+                    <div>
+                      <Label>Prioritaet</Label>
+                      <select
+                        className="w-full rounded-md border px-3 py-2 text-sm"
+                        value={instructionForm.instruction_priority}
+                        onChange={(e) =>
+                          setInstructionForm((p) => ({
+                            ...p,
+                            instruction_priority: e.target.value as InstructionPayload['instruction_priority'],
+                          }))
+                        }
+                      >
+                        <option value="low">niedrig</option>
+                        <option value="normal">normal</option>
+                        <option value="high">hoch</option>
+                        <option value="critical">kritisch</option>
+                      </select>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <Label>gueltig ab</Label>
+                        <Input
+                          type="date"
+                          value={instructionForm.valid_from}
+                          onChange={(e) => setInstructionForm((p) => ({ ...p, valid_from: e.target.value }))}
+                        />
+                      </div>
+                      <div>
+                        <Label>gueltig bis</Label>
+                        <Input
+                          type="date"
+                          value={instructionForm.valid_to}
+                          onChange={(e) => setInstructionForm((p) => ({ ...p, valid_to: e.target.value }))}
+                        />
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-2 md:col-span-2">
+                      <Button
+                        type="button"
+                        onClick={() => void instructionMutation.mutateAsync()}
+                        disabled={instructionMutation.isPending || !instructionForm.instruction_text.trim()}
+                      >
+                        {editingInstructionId ? 'Aktualisieren' : 'Hinzufuegen'}
+                      </Button>
+                      {editingInstructionId && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => {
+                            setEditingInstructionId(null)
+                            setInstructionForm(DEFAULT_INSTRUCTION_FORM)
+                          }}
+                        >
+                          Abbrechen
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                  <div className="overflow-x-auto rounded border">
+                    <table className="w-full text-sm">
+                      <thead className="bg-muted/40">
+                        <tr>
+                          <th className="px-3 py-2 text-left">Prioritaet</th>
+                          <th className="px-3 py-2 text-left">Text</th>
+                          <th className="px-3 py-2 text-left">Aktion</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(instructionsQuery.data ?? []).map((row) => (
+                          <tr key={row.id} className="border-t">
+                            <td className="px-3 py-2">{row.instruction_priority}</td>
+                            <td className="px-3 py-2 max-w-md truncate" title={row.instruction_text}>
+                              {row.instruction_text}
+                            </td>
+                            <td className="px-3 py-2 space-x-2">
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setEditingInstructionId(row.id)
+                                  setInstructionForm(instructionToForm(row))
+                                }}
+                              >
+                                Bearbeiten
+                              </Button>
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => void deleteInstructionMutation.mutateAsync(row.id)}
+                                disabled={deleteInstructionMutation.isPending}
+                              >
+                                Loeschen
+                              </Button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="tab22">
+          <Card>
+            <CardHeader>
+              <CardTitle>Ansprechpartner (Tab 22)</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {!partnerId && (
+                <p className="text-sm text-muted-foreground">Kunde zuerst speichern, dann Ansprechpartner erfassen.</p>
+              )}
+              {partnerId && (
+                <>
+                  <div className="grid gap-4 md:grid-cols-3">
+                    <div>
+                      <Label>Anrede</Label>
+                      <Input
+                        value={contactForm.salutation ?? ''}
+                        onChange={(e) => setContactForm((p) => ({ ...p, salutation: e.target.value || null }))}
+                      />
+                    </div>
+                    <div>
+                      <Label>Vorname</Label>
+                      <Input
+                        value={contactForm.first_name ?? ''}
+                        onChange={(e) => setContactForm((p) => ({ ...p, first_name: e.target.value || null }))}
+                      />
+                    </div>
+                    <div>
+                      <Label>Nachname *</Label>
+                      <Input
+                        value={contactForm.last_name}
+                        onChange={(e) => setContactForm((p) => ({ ...p, last_name: e.target.value }))}
+                      />
+                    </div>
+                    <div>
+                      <Label>Position</Label>
+                      <Input
+                        value={contactForm.position ?? ''}
+                        onChange={(e) => setContactForm((p) => ({ ...p, position: e.target.value || null }))}
+                      />
+                    </div>
+                    <div>
+                      <Label>Abteilung</Label>
+                      <Input
+                        value={contactForm.department ?? ''}
+                        onChange={(e) => setContactForm((p) => ({ ...p, department: e.target.value || null }))}
+                      />
+                    </div>
+                    <div>
+                      <Label>Typ</Label>
+                      <select
+                        className="w-full rounded-md border px-3 py-2 text-sm"
+                        value={contactForm.contact_type}
+                        onChange={(e) =>
+                          setContactForm((p) => ({
+                            ...p,
+                            contact_type: e.target.value as BpContactPayload['contact_type'],
+                          }))
+                        }
+                      >
+                        <option value="main">Haupt</option>
+                        <option value="billing">Rechnung</option>
+                        <option value="logistics">Logistik</option>
+                        <option value="sales">Vertrieb</option>
+                        <option value="other">sonstige</option>
+                      </select>
+                    </div>
+                    <div>
+                      <Label>Telefon</Label>
+                      <Input
+                        value={contactForm.phone_1 ?? ''}
+                        onChange={(e) => setContactForm((p) => ({ ...p, phone_1: e.target.value || null }))}
+                      />
+                    </div>
+                    <div>
+                      <Label>Mobil</Label>
+                      <Input
+                        value={contactForm.mobile ?? ''}
+                        onChange={(e) => setContactForm((p) => ({ ...p, mobile: e.target.value || null }))}
+                      />
+                    </div>
+                    <div>
+                      <Label>E-Mail</Label>
+                      <Input
+                        value={contactForm.email ?? ''}
+                        onChange={(e) => setContactForm((p) => ({ ...p, email: e.target.value || null }))}
+                      />
+                    </div>
+                    <div className="flex items-center gap-4 md:col-span-3">
+                      <label className="flex items-center gap-2 text-sm">
+                        <input
+                          type="checkbox"
+                          checked={contactForm.invoice_email_recipient}
+                          onChange={(e) => setContactForm((p) => ({ ...p, invoice_email_recipient: e.target.checked }))}
+                        />
+                        Rechnungs-E-Mail
+                      </label>
+                      <label className="flex items-center gap-2 text-sm">
+                        <input
+                          type="checkbox"
+                          checked={contactForm.reminder_email_recipient}
+                          onChange={(e) => setContactForm((p) => ({ ...p, reminder_email_recipient: e.target.checked }))}
+                        />
+                        Mahn-E-Mail
+                      </label>
+                    </div>
+                    <div className="flex flex-wrap gap-2 md:col-span-3">
+                      <Button
+                        type="button"
+                        onClick={() => void contactMutation.mutateAsync()}
+                        disabled={contactMutation.isPending}
+                      >
+                        {editingContactId ? 'Aktualisieren' : 'Hinzufuegen'}
+                      </Button>
+                      {editingContactId && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => {
+                            setEditingContactId(null)
+                            setContactForm(DEFAULT_CONTACT_FORM)
+                          }}
+                        >
+                          Abbrechen
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                  <div className="overflow-x-auto rounded border">
+                    <table className="w-full text-sm">
+                      <thead className="bg-muted/40">
+                        <tr>
+                          <th className="px-3 py-2 text-left">Name</th>
+                          <th className="px-3 py-2 text-left">Typ</th>
+                          <th className="px-3 py-2 text-left">Kontakt</th>
+                          <th className="px-3 py-2 text-left">Aktion</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(contactsQuery.data ?? []).map((c) => (
+                          <tr key={c.id} className="border-t">
+                            <td className="px-3 py-2">
+                              {[c.first_name, c.last_name].filter(Boolean).join(' ') || c.last_name}
+                            </td>
+                            <td className="px-3 py-2">{c.contact_type}</td>
+                            <td className="px-3 py-2">
+                              {[c.phone_1, c.mobile, c.email].filter(Boolean).join(' · ') || '—'}
+                            </td>
+                            <td className="px-3 py-2 space-x-2">
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setEditingContactId(c.id)
+                                  setContactForm(contactToFormPayload(c))
+                                }}
+                              >
+                                Bearbeiten
+                              </Button>
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => void deleteContactMutation.mutateAsync(c.id)}
+                                disabled={deleteContactMutation.isPending}
+                              >
+                                Loeschen
+                              </Button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         <TabsContent value="tab23">
           <Card>
             <CardHeader>
@@ -887,7 +1744,10 @@ export default function KundenStammPage(): JSX.Element {
               {!partnerId && <p className="text-sm text-muted-foreground">Kunde zuerst speichern, dann Anschriften pflegen.</p>}
               {partnerId && (
                 <>
-                  <div className="grid gap-4 md:grid-cols-5">
+                  <p className="text-xs text-muted-foreground">
+                    Entspricht Tab 23 Zusatzfeldern je Anschriftenzeile (Name 2/3, Postfach, Freifelder, Gebietscode).
+                  </p>
+                  <div className="grid gap-4 md:grid-cols-4">
                     <div>
                       <Label>Typ</Label>
                       <select
@@ -906,12 +1766,24 @@ export default function KundenStammPage(): JSX.Element {
                       <Input value={addressForm.name_1} onChange={(e) => setAddressForm((p) => ({ ...p, name_1: e.target.value }))} />
                     </div>
                     <div>
+                      <Label>Name 2</Label>
+                      <Input value={addressForm.name_2} onChange={(e) => setAddressForm((p) => ({ ...p, name_2: e.target.value }))} />
+                    </div>
+                    <div>
+                      <Label>Name 3</Label>
+                      <Input value={addressForm.name_3} onChange={(e) => setAddressForm((p) => ({ ...p, name_3: e.target.value }))} />
+                    </div>
+                    <div className="md:col-span-2">
                       <Label>Strasse</Label>
                       <Input value={addressForm.street} onChange={(e) => setAddressForm((p) => ({ ...p, street: e.target.value }))} />
                     </div>
                     <div>
                       <Label>Nr.</Label>
                       <Input value={addressForm.house_number} onChange={(e) => setAddressForm((p) => ({ ...p, house_number: e.target.value }))} />
+                    </div>
+                    <div>
+                      <Label>Gebietscode</Label>
+                      <Input value={addressForm.area_code} onChange={(e) => setAddressForm((p) => ({ ...p, area_code: e.target.value }))} />
                     </div>
                     <div>
                       <Label>PLZ</Label>
@@ -926,12 +1798,52 @@ export default function KundenStammPage(): JSX.Element {
                       <Input value={addressForm.country} onChange={(e) => setAddressForm((p) => ({ ...p, country: e.target.value }))} />
                     </div>
                     <div>
+                      <Label>Postfach</Label>
+                      <Input value={addressForm.po_box} onChange={(e) => setAddressForm((p) => ({ ...p, po_box: e.target.value }))} />
+                    </div>
+                    <div>
+                      <Label>Postfach-PLZ</Label>
+                      <Input value={addressForm.po_box_postal_code} onChange={(e) => setAddressForm((p) => ({ ...p, po_box_postal_code: e.target.value }))} />
+                    </div>
+                    <div>
+                      <Label>Postfach-Ort</Label>
+                      <Input value={addressForm.po_box_city} onChange={(e) => setAddressForm((p) => ({ ...p, po_box_city: e.target.value }))} />
+                    </div>
+                    <div>
+                      <Label>Anrede</Label>
+                      <Input value={addressForm.salutation} onChange={(e) => setAddressForm((p) => ({ ...p, salutation: e.target.value }))} />
+                    </div>
+                    <div>
+                      <Label>Briefanrede</Label>
+                      <Input value={addressForm.brief_salutation} onChange={(e) => setAddressForm((p) => ({ ...p, brief_salutation: e.target.value }))} />
+                    </div>
+                    <div>
                       <Label>Telefon</Label>
                       <Input value={addressForm.phone} onChange={(e) => setAddressForm((p) => ({ ...p, phone: e.target.value }))} />
                     </div>
                     <div>
+                      <Label>Fax</Label>
+                      <Input value={addressForm.fax} onChange={(e) => setAddressForm((p) => ({ ...p, fax: e.target.value }))} />
+                    </div>
+                    <div>
                       <Label>E-Mail</Label>
                       <Input value={addressForm.email} onChange={(e) => setAddressForm((p) => ({ ...p, email: e.target.value }))} />
+                    </div>
+                    <div>
+                      <Label>Web</Label>
+                      <Input value={addressForm.website} onChange={(e) => setAddressForm((p) => ({ ...p, website: e.target.value }))} />
+                    </div>
+                    <div>
+                      <Label>Freifeld 1</Label>
+                      <Input value={addressForm.free_field_1} onChange={(e) => setAddressForm((p) => ({ ...p, free_field_1: e.target.value }))} />
+                    </div>
+                    <div>
+                      <Label>Freifeld 2</Label>
+                      <Input value={addressForm.free_field_2} onChange={(e) => setAddressForm((p) => ({ ...p, free_field_2: e.target.value }))} />
+                    </div>
+                    <div>
+                      <Label>Freifeld 3</Label>
+                      <Input value={addressForm.free_field_3} onChange={(e) => setAddressForm((p) => ({ ...p, free_field_3: e.target.value }))} />
                     </div>
                     <div className="flex items-center gap-2 pt-8">
                       <input
@@ -942,7 +1854,7 @@ export default function KundenStammPage(): JSX.Element {
                       />
                       <Label htmlFor="addr_default">Standard</Label>
                     </div>
-                    <div className="flex items-end gap-2">
+                    <div className="flex items-end gap-2 md:col-span-3">
                       <Button onClick={() => void addressMutation.mutateAsync()} disabled={addressMutation.isPending}>
                         {editingAddressId ? 'Aktualisieren' : 'Hinzufuegen'}
                       </Button>

@@ -5,6 +5,7 @@
 import { useCallback } from 'react'
 import { exportToCSV, printTable } from '@/lib/export-utils'
 import { useToast } from '@/hooks/use-toast'
+import { getAxiosErrorMessage } from '@/lib/api-client'
 
 export interface UseListActionsOptions<T> {
   data: T[]
@@ -84,7 +85,7 @@ export function useListActions<T extends Record<string, any>>({
     } catch (error) {
       toast({
         title: 'Fehler beim Löschen',
-        description: error instanceof Error ? error.message : 'Ein unbekannter Fehler ist aufgetreten.',
+        description: getAxiosErrorMessage(error),
         variant: 'destructive',
       })
     }

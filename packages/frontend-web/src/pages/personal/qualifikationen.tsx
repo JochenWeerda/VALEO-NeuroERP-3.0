@@ -11,6 +11,7 @@ import {
   type QualificationLevel,
   type Qualifikation,
 } from '@/lib/api/personal'
+import { getAxiosErrorMessage } from '@/lib/api-client'
 import { useToast } from '@/components/ui/toast-provider'
 
 const levels: QualificationLevel[] = ['basic', 'advanced', 'expert']
@@ -55,7 +56,7 @@ export default function QualifikationenPage(): JSX.Element {
           setValidUntil('')
         },
         onError: (error) => {
-          push(error instanceof Error ? error.message : 'Speichern fehlgeschlagen.')
+          push(getAxiosErrorMessage(error))
         },
       },
     )

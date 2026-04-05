@@ -26,7 +26,7 @@ import {
 import { Plus, Trash2, Save, X, Check, ChevronsUpDown } from "lucide-react";
 import { ModuleToolbar } from "@/components/navigation/ModuleToolbar";
 import { useToast } from "@/hooks/use-toast";
-import { apiClient } from "@/lib/api-client";
+import { apiClient, getAxiosErrorMessage } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
 
 const CUSTOMER_SEARCH_DEBOUNCE_MS = 300;
@@ -229,7 +229,7 @@ export default function FinanceInvoiceFormPage(): JSX.Element {
     } catch (error) {
       toast({
         title: "Fehler",
-        description: error instanceof Error ? error.message : "Fehler beim Speichern",
+        description: getAxiosErrorMessage(error),
         variant: "destructive",
       });
     } finally {

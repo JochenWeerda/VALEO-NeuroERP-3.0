@@ -25,6 +25,7 @@ import {
 import { ErrorState } from '@/components/ErrorState'
 import { Download, Leaf, BarChart3, Droplets, Zap, Loader2 } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
+import { getAxiosErrorMessage } from '@/lib/api-client'
 
 export default function EsgReportPage(): JSX.Element {
   const currentYear = new Date().getFullYear()
@@ -47,7 +48,7 @@ export default function EsgReportPage(): JSX.Element {
       toast({
         variant: 'destructive',
         title: 'Export fehlgeschlagen',
-        description: err instanceof Error ? err.message : 'Unbekannter Fehler',
+        description: getAxiosErrorMessage(err),
       })
     } finally {
       setExporting(null)

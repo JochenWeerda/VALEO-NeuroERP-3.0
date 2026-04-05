@@ -12,12 +12,10 @@
 import { escapeHtml } from '@/lib/export-utils'
 
 // ── Minimale WebUSB/WebSerial Type-Stubs (nicht im std lib.dom.d.ts enthalten) ──
-/* eslint-disable @typescript-eslint/no-explicit-any */
-type USBDevice = any
-type SerialPort = any
+type USBDevice = object
+type SerialPort = object
 type USB = { requestDevice(opts: { filters: { vendorId?: number }[] }): Promise<USBDevice> }
 type Serial = { requestPort(opts: { filters: object[] }): Promise<SerialPort> }
-/* eslint-enable @typescript-eslint/no-explicit-any */
 
 // ── ESC/POS Konstanten ────────────────────────────────────────────────────────
 const ESC = 0x1b
@@ -285,8 +283,9 @@ export class BonDruckService {
         const iface = device.configuration?.interfaces?.[0]
         if (iface) {
           await device.claimInterface(iface.interfaceNumber)
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const ep = iface.alternate.endpoints.find((e: any) => e.direction === 'out')
+          const ep = iface.alternate.endpoints.find(
+            (e: { direction?: string }) => e.direction === 'out',
+          )
           if (ep) {
             this._usbInterface = iface.interfaceNumber
             this._usbEndpoint = ep.endpointNumber

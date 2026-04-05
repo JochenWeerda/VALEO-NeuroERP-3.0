@@ -52,7 +52,7 @@ export function CallWidget(): JSX.Element | null {
               variant="outline"
               size="sm"
               className="w-full mb-3"
-              onClick={() => navigate(`/verkauf/kunden-stamm-enhanced/${activeCall.customerId}`)}
+              onClick={() => navigate(`/verkauf/kunden-stamm/${activeCall.customerId}`)}
             >
               🔗 Kunde öffnen
             </Button>

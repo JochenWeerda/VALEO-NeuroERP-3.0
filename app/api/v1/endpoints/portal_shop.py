@@ -20,6 +20,7 @@ from app.core.security import get_user_id_from_request
 from sqlalchemy import and_, or_, desc
 
 from app.core.database import get_db
+from app.services.customer_sales_eligibility import assert_customer_allowed_for_sales_order
 from app.core.config import settings
 from app.infrastructure.models import Article as ArticleModel, Customer as CustomerModel
 from app.infrastructure.models.portal_models import (
@@ -300,6 +301,13 @@ async def create_order(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Bestellung enthält keine Positionen"
         )
+
+    if not effective_customer:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Kundenkontext fehlt (Anmeldung / customer_id)",
+        )
+    assert_customer_allowed_for_sales_order(db, tenant_id, effective_customer)
 
     # Lade Kundendaten aus CRM
     customer = db.query(CustomerModel).filter(

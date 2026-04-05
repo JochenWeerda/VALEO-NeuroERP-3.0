@@ -13,6 +13,7 @@ import {
   type DashboardWidget,
   type WidgetInput,
 } from '@/lib/api/controlling'
+import { getAxiosErrorMessage } from '@/lib/api-client'
 import { useToast } from '@/components/ui/toast-provider'
 
 const EMPTY: WidgetInput = {
@@ -69,7 +70,7 @@ export default function WidgetVerwaltungPage(): JSX.Element {
       return
     }
     const onError = (error: unknown): void => {
-      push(error instanceof Error ? error.message : 'Speichern fehlgeschlagen.')
+      push(getAxiosErrorMessage(error))
     }
     if (editingId) {
       updateMutation.mutate(
@@ -96,7 +97,7 @@ export default function WidgetVerwaltungPage(): JSX.Element {
   const remove = (id: string): void => {
     deleteMutation.mutate(id, {
       onSuccess: () => push('Widget geloescht.'),
-      onError: (error) => push(error instanceof Error ? error.message : 'Loeschen fehlgeschlagen.'),
+      onError: (error) => push(getAxiosErrorMessage(error)),
     })
   }
 

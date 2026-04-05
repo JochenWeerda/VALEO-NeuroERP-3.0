@@ -18,8 +18,11 @@ export function GlobalShortcutLayer(): JSX.Element {
       const nextMode = modes[(modes.indexOf(current) + 1) % modes.length]
       localStorage.setItem('shortcut-help-display-mode', nextMode)
 
-      if (nextMode === 'always' && typeof (window as any).__expandShortcutHelpPanel === 'function') {
-        ;(window as any).__expandShortcutHelpPanel()
+      if (nextMode === 'always') {
+        const w = window as Window & { __expandShortcutHelpPanel?: () => void }
+        if (typeof w.__expandShortcutHelpPanel === 'function') {
+          w.__expandShortcutHelpPanel()
+        }
       }
 
       return nextMode
@@ -27,12 +30,16 @@ export function GlobalShortcutLayer(): JSX.Element {
   }, [])
 
   useEffect(() => {
-    ;(window as any).__cycleShortcutDisplayMode = cycleDisplayMode
-    ;(window as any).__getShortcutDisplayMode = () => displayMode
+    const w = window as Window & {
+      __cycleShortcutDisplayMode?: typeof cycleDisplayMode
+      __getShortcutDisplayMode?: () => ShortcutDisplayMode
+    }
+    w.__cycleShortcutDisplayMode = cycleDisplayMode
+    w.__getShortcutDisplayMode = () => displayMode
 
     return () => {
-      delete (window as any).__cycleShortcutDisplayMode
-      delete (window as any).__getShortcutDisplayMode
+      delete w.__cycleShortcutDisplayMode
+      delete w.__getShortcutDisplayMode
     }
   }, [cycleDisplayMode, displayMode])
 
