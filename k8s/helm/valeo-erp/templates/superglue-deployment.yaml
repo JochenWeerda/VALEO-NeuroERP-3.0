@@ -31,54 +31,78 @@ spec:
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           ports:
-            - containerPort: 3000
-              name: http
-            - containerPort: 3011
-              name: runtime
-            - containerPort: 3012
-              name: events
+            - containerPort: 3001
+              name: web
+            - containerPort: 3002
+              name: api
           envFrom:
             - configMapRef:
                 name: {{ include "valeo-erp.fullname" . }}-superglue-config
           env:
-            - name: SUPERGLUE_AUTH_TOKEN
+            - name: AUTH_TOKEN
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.superglue.authTokenSecret.name }}
                   key: {{ .Values.superglue.authTokenSecret.key }}
-            - name: DATABASE_URL
-              value: {{ printf "postgresql://$(DB_USER):$(DB_PASSWORD)@%s-superglue-db:5432/%s" (include "valeo-erp.fullname" .) .Values.superglue.database.name | quote }}
-            - name: DB_USER
+            - name: NEXT_PUBLIC_SUPERGLUE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.superglue.authTokenSecret.name }}
+                  key: {{ .Values.superglue.authTokenSecret.key }}
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.superglue.openaiSecret.name }}
+                  key: {{ .Values.superglue.openaiSecret.key }}
+            - name: MASTER_ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.superglue.masterEncryptionSecret.name }}
+                  key: {{ .Values.superglue.masterEncryptionSecret.key }}
+            - name: POSTGRES_USERNAME
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.superglue.database.secretName }}
                   key: {{ .Values.superglue.database.userKey }}
-            - name: DB_PASSWORD
+            - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.superglue.database.secretName }}
                   key: {{ .Values.superglue.database.passwordKey }}
-            - name: S3_ACCESS_KEY_ID
+            - name: MINIO_ROOT_USER
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.superglue.minio.secretName }}
                   key: {{ .Values.superglue.minio.userKey }}
-            - name: S3_SECRET_ACCESS_KEY
+            - name: MINIO_ROOT_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.superglue.minio.secretName }}
                   key: {{ .Values.superglue.minio.passwordKey }}
-            - name: S3_ENDPOINT
-              value: {{ printf "http://%s-superglue-minio:9000" (include "valeo-erp.fullname" .) | quote }}
-            - name: S3_BUCKET
+            - name: MINIO_WEBHOOK_AUTH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.superglue.authTokenSecret.name }}
+                  key: {{ .Values.superglue.authTokenSecret.key }}
+            - name: MINIO_BUCKET_NAME
               value: {{ .Values.superglue.minio.bucket | quote }}
-            - name: S3_REGION
-              value: {{ .Values.superglue.config.s3Region | quote }}
-            - name: S3_FORCE_PATH_STYLE
-              value: "true"
+            - name: MINIO_BUCKET_PREFIX
+              value: "raw"
           volumeMounts:
             - name: runtime
               mountPath: /var/lib/superglue
+          readinessProbe:
+            httpGet:
+              path: /v1/health
+              port: 3002
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /v1/health
+              port: 3002
+            initialDelaySeconds: 30
+            periodSeconds: 15
       volumes:
         - name: runtime
           persistentVolumeClaim:

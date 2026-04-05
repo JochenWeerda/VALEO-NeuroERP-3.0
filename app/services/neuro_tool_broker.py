@@ -725,6 +725,12 @@ class NeuroToolBroker:
                 "detail": json.dumps(step_audit),
                 "recorded_at": now,
             })
+            try:
+                from app.core.metrics import neuro_kernel_audit_inserts_total
+
+                neuro_kernel_audit_inserts_total.inc()
+            except Exception:
+                pass
             db.commit()
         except Exception as exc:
             logger.debug("Step audit trace write skipped (table may not exist): %s", exc)

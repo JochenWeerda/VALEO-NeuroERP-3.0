@@ -11,17 +11,20 @@ def test_superglue_document_adapter_maps_documents():
             lambda request: httpx.Response(
                 200,
                 json={
-                    "documents": [
-                        {
-                            "id": "doc-1",
-                            "title": "Contract 4711",
-                            "source_system": "sharepoint",
-                            "mime_type": "application/pdf",
-                            "url": "https://documents.example/doc-1",
-                            "tags": ["contract"],
-                            "metadata": {"contract_no": "4711"},
-                        }
-                    ]
+                    "status": "completed",
+                    "data": {
+                        "documents": [
+                            {
+                                "id": "doc-1",
+                                "title": "Contract 4711",
+                                "source_system": "sharepoint",
+                                "mime_type": "application/pdf",
+                                "url": "https://documents.example/doc-1",
+                                "tags": ["contract"],
+                                "metadata": {"contract_no": "4711"},
+                            }
+                        ]
+                    },
                 },
             )
         ),

@@ -40,41 +40,64 @@ class SuperglueExecutionService:
             normalized_tool_id = tool_record.external_tool_id
             if execution_mode == "execute" and not settings.SUPERGLUE_EXECUTION_ENABLED:
                 raise ValueError("Superglue execute mode ist aktuell deaktiviert")
-            result = client.request("POST", f"/api/tools/{normalized_tool_id}/execute", mode="rest", json=payload)
+            result = client.request(
+                "POST",
+                f"/v1/tools/{normalized_tool_id}/run",
+                mode="rest",
+                json={
+                    "inputs": payload,
+                    "options": {
+                        "async": execution_mode == "execute",
+                        "traceId": correlation_id,
+                    },
+                },
+            )
             finished_at = datetime.now(UTC)
+            upstream_status = str(result.get("status", "success"))
+            result_status = "pending" if upstream_status == "running" else "success"
             append_execution_journal_entry(
                 tenant_id=tenant_id,
                 correlation_id=correlation_id,
                 tool_id=normalized_tool_id,
                 execution_mode=execution_mode,
                 target_kind=target_kind,
-                result_status="success",
+                result_status=result_status,
                 started_at=started_at,
                 finished_at=finished_at,
-                detail={"provider_key": "superglue"},
+                detail={
+                    "provider_key": "superglue",
+                    "run_id": result.get("runId"),
+                    "upstream_status": upstream_status,
+                },
             )
             security_observer.record_event(
                 category="superglue_execution",
-                outcome="executed",
+                outcome="accepted" if result_status == "pending" else "executed",
                 severity="info",
                 message=f"Superglue tool '{normalized_tool_id}' erfolgreich ausgefuehrt",
                 tenant_id=tenant_id,
-                details={"execution_mode": execution_mode, "target_kind": target_kind},
+                details={
+                    "execution_mode": execution_mode,
+                    "target_kind": target_kind,
+                    "run_id": result.get("runId"),
+                    "upstream_status": upstream_status,
+                },
             )
             return ExternalResultEnvelope(
                 tenant_id=tenant_id,
                 correlation_id=correlation_id,
                 execution_mode=execution_mode,
                 target_kind=target_kind,
-                result_status="success",
+                result_status=result_status,
                 started_at=started_at,
                 finished_at=finished_at,
                 payload={
-                    **result,
+                    "upstream_run": result,
                     "audit_metadata": {
                         "provider_key": "superglue",
                         "tool_id": normalized_tool_id,
                         "execution_mode": execution_mode,
+                        "run_id": result.get("runId"),
                     },
                 },
             )

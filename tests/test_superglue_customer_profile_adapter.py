@@ -11,13 +11,16 @@ def test_superglue_customer_profile_adapter_maps_preview():
             lambda request: httpx.Response(
                 200,
                 json={
-                    "customer_id": "cust-7",
-                    "display_name": "Musterkunde Nord",
-                    "status": "active",
-                    "email": "nord@example.test",
-                    "city": "Bremen",
-                    "tags": ["crm", "preview"],
-                    "metadata": {"source": "legacy-crm"},
+                    "status": "completed",
+                    "data": {
+                        "customer_id": "cust-7",
+                        "display_name": "Musterkunde Nord",
+                        "status": "active",
+                        "email": "nord@example.test",
+                        "city": "Bremen",
+                        "tags": ["crm", "preview"],
+                        "metadata": {"source": "legacy-crm"},
+                    },
                 },
             )
         ),

@@ -20,8 +20,8 @@ spec:
     matchNames:
       - {{ .Values.superglue.namespace | quote }}
   endpoints:
-    - port: http
-      path: /health
+    - port: api
+      path: /v1/health
       interval: {{ .Values.superglue.serviceMonitor.interval | quote }}
       scrapeTimeout: {{ .Values.superglue.serviceMonitor.scrapeTimeout | quote }}
 {{- end }}

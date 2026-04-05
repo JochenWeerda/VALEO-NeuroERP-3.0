@@ -24,6 +24,36 @@ def test_superglue_client_blocks_disallowed_targets() -> None:
         client.request("GET", "/tools")
 
 
+def test_superglue_client_can_allow_loopback_only_in_opt_in_debug_mode(monkeypatch) -> None:
+    monkeypatch.setattr("app.integrations.adapters.superglue.client.settings.DEBUG", True, raising=False)
+    monkeypatch.setattr(
+        "app.integrations.adapters.superglue.client.settings.SUPERGLUE_ALLOW_LOOPBACK_DEV_EGRESS",
+        True,
+        raising=False,
+    )
+    client = SuperglueClient(
+        base_url="http://localhost:3011",
+        transport=httpx.MockTransport(lambda request: httpx.Response(200, json={"ok": True})),
+    )
+
+    result = client.request("GET", "/v1/health")
+
+    assert result == {"ok": True}
+
+
+def test_superglue_client_still_rejects_private_ip_even_with_dev_loopback_override(monkeypatch) -> None:
+    monkeypatch.setattr("app.integrations.adapters.superglue.client.settings.DEBUG", True, raising=False)
+    monkeypatch.setattr(
+        "app.integrations.adapters.superglue.client.settings.SUPERGLUE_ALLOW_LOOPBACK_DEV_EGRESS",
+        True,
+        raising=False,
+    )
+    client = SuperglueClient(base_url="http://10.0.0.5:3011")
+
+    with pytest.raises(OutboundTargetPolicyError):
+        client.request("GET", "/v1/health")
+
+
 def test_superglue_client_retries_and_sends_auth_header() -> None:
     attempts = {"count": 0}
 
@@ -71,3 +101,14 @@ def test_circuit_breaker_opens_after_repeated_failures() -> None:
         client.request("GET", "/v1/tools")
 
     assert breaker.state == "open"
+
+
+def test_superglue_client_can_allow_specific_status_codes() -> None:
+    client = SuperglueClient(
+        base_url="https://api.superglue.dev",
+        transport=httpx.MockTransport(lambda request: httpx.Response(404, json={"error": "missing"})),
+    )
+
+    result = client.request("GET", "/v1/tools/unknown", allow_statuses={404})
+
+    assert result == {"error": "missing"}

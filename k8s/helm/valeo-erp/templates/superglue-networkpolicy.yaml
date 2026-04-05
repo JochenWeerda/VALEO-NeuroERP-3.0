@@ -41,9 +41,8 @@ spec:
               kubernetes.io/metadata.name: {{ . | quote }}
         {{- end }}
       ports:
-        - port: 3000
-        - port: 3011
-        - port: 3012
+        - port: 3001
+        - port: 3002
   egress:
     - to:
         - podSelector:

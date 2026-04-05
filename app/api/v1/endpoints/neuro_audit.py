@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 from typing import Any, Optional
 
 from app.core.database import get_db
@@ -94,3 +95,69 @@ async def list_all_decisions(
     db: Session = Depends(get_db),
 ):
     return {"items": list_decisions(db, tenant_id, limit, risk_class)}
+
+
+@router.get("/neuro/kernel-step-audit/summary")
+async def neuro_kernel_step_audit_summary(
+    days: int = Query(7, ge=1, le=366),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Aggregierte Zeilen aus neuro_step_audit_trace fuer Monitoring (pro Tenant)."""
+    try:
+        total = db.execute(
+            text(
+                """
+                SELECT COUNT(*) AS c
+                FROM domain_shared.neuro_step_audit_trace
+                WHERE tenant_id = :tid
+                  AND recorded_at >= NOW() - make_interval(days => :days)
+                """
+            ),
+            {"tid": tenant_id, "days": days},
+        ).scalar()
+        by_day = db.execute(
+            text(
+                """
+                SELECT date_trunc('day', recorded_at AT TIME ZONE 'UTC') AS day, COUNT(*) AS cnt
+                FROM domain_shared.neuro_step_audit_trace
+                WHERE tenant_id = :tid
+                  AND recorded_at >= NOW() - make_interval(days => :days)
+                GROUP BY 1
+                ORDER BY 1
+                """
+            ),
+            {"tid": tenant_id, "days": days},
+        ).fetchall()
+        by_command = db.execute(
+            text(
+                """
+                SELECT step_id, COUNT(*) AS cnt
+                FROM domain_shared.neuro_step_audit_trace
+                WHERE tenant_id = :tid
+                  AND recorded_at >= NOW() - make_interval(days => :days)
+                GROUP BY step_id
+                ORDER BY cnt DESC
+                LIMIT 50
+                """
+            ),
+            {"tid": tenant_id, "days": days},
+        ).fetchall()
+    except Exception as exc:
+        raise HTTPException(
+            status_code=503,
+            detail=f"neuro_step_audit_trace nicht lesbar: {exc}",
+        ) from exc
+
+    return {
+        "tenant_id": tenant_id,
+        "days": days,
+        "total_rows": int(total or 0),
+        "by_day": [
+            {"day": (r.day.isoformat() if r.day else None), "count": int(r.cnt or 0)}
+            for r in by_day
+        ],
+        "by_step_id": [
+            {"step_id": r.step_id, "count": int(r.cnt or 0)} for r in by_command
+        ],
+    }

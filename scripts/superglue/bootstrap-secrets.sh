@@ -12,6 +12,7 @@ namespace=${SUPERGLUE_NAMESPACE}
 secretStoreRef.kind=${SUPERGLUE_SECRET_STORE_KIND}
 secretStoreRef.name=${SUPERGLUE_SECRET_STORE_NAME}
 app=${SUPERGLUE_VAULT_PREFIX}/app
+app.keys=authToken,openaiApiKey,masterEncryptionKey
 db=${SUPERGLUE_VAULT_PREFIX}/db
 minio=${SUPERGLUE_VAULT_PREFIX}/minio
 hosts.api=${SUPERGLUE_HOST_API:-superglue.example.test}

@@ -270,6 +270,12 @@ superglue:
   authTokenSecret:
     name: superglue-app-secret
     key: authToken
+  openaiSecret:
+    name: superglue-app-secret
+    key: openaiApiKey
+  masterEncryptionSecret:
+    name: superglue-app-secret
+    key: masterEncryptionKey
   database:
     secretName: superglue-db-secret
     userKey: username
@@ -291,7 +297,7 @@ superglue:
     userKey: rootUser
     passwordKey: rootPassword
     bucket: superglue-artifacts
-    image: minio/minio:RELEASE.2026-03-12T18-04-18Z
+    image: minio/minio:RELEASE.2025-09-07T16-13-09Z
     storage:
       size: 20Gi
       storageClassName: ""
@@ -306,17 +312,15 @@ superglue:
     size: 5Gi
     storageClassName: ""
   config:
-    publicBaseUrl: https://superglue.example.test
-    restUrl: http://superglue:3000
-    graphqlUrl: http://superglue:3000/graphql
+    appUrl: https://superglue.example.test
+    apiEndpoint: http://superglue:3002
+    schedulerEnabled: false
     syncEnabled: true
     executionEnabled: false
-    s3Region: eu-central-1
   service:
     type: ClusterIP
-    port: 3000
-    runtimePort: 3011
-    eventsPort: 3012
+    webPort: 3001
+    apiPort: 3002
   ingress:
     enabled: false
     className: nginx

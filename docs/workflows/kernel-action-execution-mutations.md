@@ -42,10 +42,19 @@ Weitere Commands: `register_domain_mutation("CommandName", callable)` — Signat
 
 - `POST/GET /api/v1/compliance/pcn-meldungen` — Mandant über `X-Tenant-ID` (`get_tenant_id`), Liste liefert `items` und `meldungen`.
 
-## Nächste logische Schritte
+## Nächste logische Schritte (Stand 2026-04)
 
-1. **Weitere Domain-Handler** für Kern-Commands (z. B. `ApproveAPInvoice`) mit echten Buchungs-/Status-Updates statt nur Audit.
-2. **Download-Endpoints** für `finance_followup` (`.../download`) an DMS/Blob anbinden.
-3. **Neuro Broker**: Integrationstests mit echter DB-Session für Command-Steps.
-4. **Einkauf**: Unique-Constraint `(tenant_id, bestellnummer)` wenn fachlich gewünscht; Nummernkreis statt freier Strings im Mutation-Handler.
-5. **Monitoring**: Dashboard-Widgets für `neuro_step_audit_trace` und Kernel-Action-Volumen pro Tenant.
+Erledigt in diesem Slice:
+
+1. **Domain-Handler `ApproveAPInvoice`** — Status/Freigabe in `documents` (AP); Registrierung in `command_handlers_finance.py`.
+2. **Finance Follow-up** — `GET .../download` für Mahnwesen, Lastschrift, Kasse (CSV); optional DMS-Spiegel via `DMS_TOKEN` + `DMS_DOCUMENT_TYPE_ID`; Stub-Tabelle `domain_shared.finance_followup_exports`.
+3. **Neuro Broker** — Integrationstest `tests/test_neuro_tool_broker_db_integration.py` (mark `integration`, echte Session).
+4. **Einkauf** — `get_numbering().next_number("purchase_order")` wenn keine Bestellnummer im Payload; Unique-Index `(tenant_id, bestellnummer)` per Migration wenn keine Duplikate.
+5. **Monitoring** — Prometheus `neuro_kernel_audit_inserts_total`; API `GET /api/v1/neuro/kernel-step-audit/summary?days=7`.
+6. **Deployment** — `docs/operations/kernel-deployment-smoke.md`, `scripts/smoke_kernel_action_execute.ps1`.
+
+Offen / Feinschliff:
+
+- **PostAPInvoice** / Buchungs-Handler mit echten Journal-Postings (nicht nur Dokument-Status).
+- **Blob-Storage** alternativ zu Mayan (gleiche Export-Pipeline, anderer Upload-Adapter).
+- **Grafana-Dashboards** auf Basis von `neuro_kernel_audit_inserts_total` und der Summary-API.

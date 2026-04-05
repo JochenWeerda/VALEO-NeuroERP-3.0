@@ -38,3 +38,9 @@ api_request_duration_seconds = Histogram(
     ['method', 'endpoint']
 )
 
+# Kernel / Neuro: Audit-Inserts (ohne Tenant-Label — Cardinality)
+neuro_kernel_audit_inserts_total = Counter(
+    'neuro_kernel_audit_inserts_total',
+    'Successful audit rows written to neuro_step_audit_trace (kernel execute + broker)',
+)
+

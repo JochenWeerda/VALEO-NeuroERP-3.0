@@ -86,6 +86,16 @@ _DEFAULT_SUPERGLUE_TOOLS: list[SuperglueToolRecord] = [
     ),
 ]
 
+_PILOT_TOOL_DEFAULTS: dict[str, dict[str, Any]] = {
+    item.external_tool_id: {
+        "display_name": item.display_name,
+        "execution_modes": list(item.execution_modes),
+        "target_kind": item.target_kind,
+        "tags": list(item.tags),
+    }
+    for item in _DEFAULT_SUPERGLUE_TOOLS
+}
+
 
 def list_superglue_tool_records(client: SuperglueClient | None = None) -> list[SuperglueToolRecord]:
     if not settings.SUPERGLUE_ENABLED or not settings.SUPERGLUE_SYNC_ENABLED:
@@ -93,33 +103,33 @@ def list_superglue_tool_records(client: SuperglueClient | None = None) -> list[S
 
     sync_client = client or SuperglueClient()
     try:
-        payload = sync_client.execute_graphql(
-            """
-            query ValeoSuperglueCatalog {
-              tools {
-                id
-                version
-                title
-                targetKind
-                executionModes
-              }
-            }
-            """,
-        )
-        tools = payload.get("data", {}).get("tools", [])
+        payload = sync_client.request("GET", "/v1/tools", mode="rest", params={"page": 1, "limit": 100})
+        tools = payload.get("data", [])
         mapped: list[SuperglueToolRecord] = []
         for item in tools:
+            tool_id = str(item.get("id") or item.get("toolId") or "").strip()
+            if not tool_id:
+                continue
             mapped.append(
                 SuperglueToolRecord(
-                    external_tool_id=str(item["id"]),
-                    external_tool_version=str(item.get("version", "1")),
-                    valeo_contract_id=f"superglue.{item['id']}",
-                    display_name=str(item.get("title", item["id"])),
-                    execution_modes=list(item.get("executionModes", ["read"])),
-                    target_kind=str(item.get("targetKind", "external_api")),
+                    external_tool_id=tool_id,
+                    external_tool_version=str(item.get("version", item.get("updatedAt", "1"))),
+                    valeo_contract_id=f"superglue.{tool_id}",
+                    display_name=str(
+                        item.get("title")
+                        or item.get("name")
+                        or _pilot_tool_defaults(tool_id).get("display_name")
+                        or tool_id
+                    ),
+                    execution_modes=_normalize_execution_modes(item),
+                    target_kind=str(item.get("targetKind") or _pilot_tool_defaults(tool_id).get("target_kind") or "external_api"),
                     auth_model="superglue_token",
-                    tags=["synced"],
-                    metadata={"source_system": "superglue"},
+                    tags=_normalize_tags(tool_id),
+                    metadata={
+                        "source_system": "superglue",
+                        "folder_path": item.get("folderPath"),
+                        "request_source": "rest_v1",
+                    },
                 )
             )
         if mapped:
@@ -152,7 +162,9 @@ def build_superglue_sync_status(client: SuperglueClient | None = None) -> Superg
         sync_enabled=settings.SUPERGLUE_SYNC_ENABLED,
         execution_enabled=settings.SUPERGLUE_EXECUTION_ENABLED,
         tool_count=len(records),
-        healthy=settings.SUPERGLUE_ENABLED and bool(settings.SUPERGLUE_BASE_URL or settings.SUPERGLUE_GRAPHQL_URL),
+        healthy=settings.SUPERGLUE_ENABLED and bool(
+            settings.SUPERGLUE_BASE_URL or settings.SUPERGLUE_GRAPHQL_URL or settings.SUPERGLUE_REST_URL
+        ),
         dashboard_url=settings.SUPERGLUE_DASHBOARD_URL,
         graphql_url=settings.SUPERGLUE_GRAPHQL_URL,
         rest_url=settings.SUPERGLUE_REST_URL or settings.SUPERGLUE_BASE_URL,
@@ -178,11 +190,11 @@ def build_superglue_health_status(client: SuperglueClient | None = None) -> Supe
         )
     sync_client = client or SuperglueClient()
     try:
-        sync_client.request("GET", "/health", mode="rest")
+        sync_client.request("GET", "/v1/health", mode="rest")
         return SuperglueHealthStatus(
             healthy=True,
             checked_at=checked_at,
-            detail="HTTP health check erfolgreich",
+            detail="HTTP /v1/health erfolgreich",
             dashboard_url=settings.SUPERGLUE_DASHBOARD_URL,
         )
     except Exception as exc:
@@ -338,3 +350,25 @@ def _load_sync_history_entries(limit: int = 20) -> list[dict[str, Any]]:
             if isinstance(data, dict):
                 entries.append(data)
     return entries[-limit:]
+
+
+def _normalize_execution_modes(item: dict[str, Any]) -> list[str]:
+    tool_id = str(item.get("id") or item.get("toolId") or "").strip()
+    raw_modes = item.get("executionModes")
+    if isinstance(raw_modes, list) and raw_modes:
+        return [str(mode) for mode in raw_modes]
+    known_modes = _pilot_tool_defaults(tool_id).get("execution_modes")
+    if isinstance(known_modes, list) and known_modes:
+        return [str(mode) for mode in known_modes]
+    return ["read", "suggest", "simulate", "execute"]
+
+
+def _pilot_tool_defaults(tool_id: str) -> dict[str, Any]:
+    return _PILOT_TOOL_DEFAULTS.get(str(tool_id).strip(), {})
+
+
+def _normalize_tags(tool_id: str) -> list[str]:
+    known_tags = _pilot_tool_defaults(tool_id).get("tags")
+    if isinstance(known_tags, list) and known_tags:
+        return ["synced", *[str(tag) for tag in known_tags]]
+    return ["synced"]

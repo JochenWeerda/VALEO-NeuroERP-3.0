@@ -522,6 +522,21 @@ CREATE INDEX IF NOT EXISTS ix_neuro_step_audit_tenant
 CREATE INDEX IF NOT EXISTS ix_neuro_step_audit_plan
     ON domain_shared.neuro_step_audit_trace (plan_id);
 
+CREATE TABLE IF NOT EXISTS domain_shared.finance_followup_exports (
+    id UUID NOT NULL PRIMARY KEY,
+    tenant_id VARCHAR(120) NOT NULL,
+    kind VARCHAR(40) NOT NULL,
+    run_id VARCHAR(120),
+    record_count INTEGER NOT NULL DEFAULT 0,
+    dms_document_id INTEGER,
+    dms_view_url TEXT,
+    params_json JSONB,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS ix_finance_followup_exports_tenant
+    ON domain_shared.finance_followup_exports (tenant_id);
+
 -- ============================================================================
 -- ABSCHLUSS
 -- ============================================================================

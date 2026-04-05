@@ -15,6 +15,7 @@ def test_superglue_settings_defaults_and_allowlists() -> None:
     assert settings.SUPERGLUE_TIMEOUT_SECONDS == 10.0
     assert settings.SUPERGLUE_ALLOWED_HOSTS == ["api.superglue.dev", "superglue.internal"]
     assert settings.SUPERGLUE_ALLOWED_DOMAINS == ["superglue.dev", "example.com"]
+    assert settings.SUPERGLUE_ALLOW_LOOPBACK_DEV_EGRESS is False
 
 
 def test_superglue_tool_record_uses_central_contract_defaults() -> None:

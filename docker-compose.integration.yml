@@ -51,7 +51,7 @@ services:
 
   superglue-minio:
     profiles: ["superglue"]
-    image: minio/minio:RELEASE.2026-03-12T18-04-18Z
+    image: minio/minio:RELEASE.2025-09-07T16-13-09Z
     restart: unless-stopped
     command: server /data --console-address ":9001"
     environment:
@@ -73,7 +73,7 @@ services:
 
   superglue-minio-init:
     profiles: ["superglue"]
-    image: minio/mc:RELEASE.2026-03-12T17-29-24Z
+    image: minio/mc:RELEASE.2025-08-13T08-35-41Z
     depends_on:
       superglue-minio:
         condition: service_healthy
@@ -99,26 +99,40 @@ services:
       superglue-minio-init:
         condition: service_completed_successfully
     environment:
-      SUPERGLUE_AUTH_TOKEN: ${SUPERGLUE_AUTH_TOKEN:?SUPERGLUE_AUTH_TOKEN is required}
-      SUPERGLUE_PORT: "3011"
-      DATABASE_URL: postgresql://${SUPERGLUE_DB_USER:-superglue}:${SUPERGLUE_DB_PASSWORD}@superglue-db:5432/${SUPERGLUE_DB_NAME:-superglue}
+      API_PORT: "3002"
+      API_ENDPOINT: ${SUPERGLUE_API_ENDPOINT:-http://localhost:3011}
+      WEB_PORT: "3001"
+      SUPERGLUE_APP_URL: ${SUPERGLUE_PUBLIC_BASE_URL:-http://localhost:3010}
+      AUTH_TOKEN: ${SUPERGLUE_AUTH_TOKEN:?SUPERGLUE_AUTH_TOKEN is required}
+      NEXT_PUBLIC_SUPERGLUE_API_KEY: ${SUPERGLUE_AUTH_TOKEN:?SUPERGLUE_AUTH_TOKEN is required}
+      OPENAI_API_KEY: ${SUPERGLUE_OPENAI_API_KEY:?SUPERGLUE_OPENAI_API_KEY is required}
+      START_SCHEDULER_SERVER: ${SUPERGLUE_START_SCHEDULER_SERVER:-false}
+      DATASTORE_TYPE: "postgres"
+      POSTGRES_HOST: superglue-db
+      POSTGRES_PORT: "5432"
+      POSTGRES_SSL: "false"
+      POSTGRES_USERNAME: ${SUPERGLUE_DB_USER:-superglue}
+      POSTGRES_PASSWORD: ${SUPERGLUE_DB_PASSWORD}
+      POSTGRES_DB: ${SUPERGLUE_DB_NAME:-superglue}
+      FILE_STORAGE_PROVIDER: "minio"
       S3_ENDPOINT: http://superglue-minio:9000
-      S3_REGION: ${SUPERGLUE_S3_REGION:-eu-central-1}
-      S3_BUCKET: ${SUPERGLUE_MINIO_BUCKET:-superglue-artifacts}
-      S3_ACCESS_KEY_ID: ${SUPERGLUE_MINIO_ROOT_USER:-superglue}
-      S3_SECRET_ACCESS_KEY: ${SUPERGLUE_MINIO_ROOT_PASSWORD}
-      S3_FORCE_PATH_STYLE: "true"
-      SUPERGLUE_PUBLIC_BASE_URL: ${SUPERGLUE_PUBLIC_BASE_URL:-http://localhost:3010}
+      S3_PUBLIC_ENDPOINT: ${SUPERGLUE_S3_PUBLIC_ENDPOINT:-http://localhost:9000}
+      MINIO_ROOT_USER: ${SUPERGLUE_MINIO_ROOT_USER:-superglue}
+      MINIO_ROOT_PASSWORD: ${SUPERGLUE_MINIO_ROOT_PASSWORD}
+      MINIO_BUCKET_NAME: ${SUPERGLUE_MINIO_BUCKET:-superglue-artifacts}
+      MINIO_BUCKET_PREFIX: ${SUPERGLUE_MINIO_BUCKET_PREFIX:-raw}
+      MINIO_WEBHOOK_ENDPOINT: http://superglue:3002/v1/file-references/process
+      MINIO_WEBHOOK_AUTH_TOKEN: ${SUPERGLUE_AUTH_TOKEN:?SUPERGLUE_AUTH_TOKEN is required}
+      MASTER_ENCRYPTION_KEY: ${SUPERGLUE_MASTER_ENCRYPTION_KEY:?SUPERGLUE_MASTER_ENCRYPTION_KEY is required}
     healthcheck:
-      test: ["CMD-SHELL", "wget -q -O - http://localhost:3000/health >/dev/null 2>&1 || wget -q -O - http://localhost:3011/health >/dev/null 2>&1"]
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:3002/v1/health >/dev/null 2>&1"]
       interval: 15s
       timeout: 5s
       retries: 10
       start_period: 20s
     ports:
-      - "3010:3000"
-      - "3011:3011"
-      - "3012:3012"
+      - "3010:3001"
+      - "3011:3002"
     volumes:
       - superglue_runtime_data:/var/lib/superglue
     networks:

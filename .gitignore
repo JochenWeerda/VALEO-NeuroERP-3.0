@@ -113,6 +113,7 @@ packages/frontend-web/.env
 services/inventory/env/
 
 # ── Laufzeit-Daten (kein Quellcode) ──────────────────────────────────────────
+runtime/
 data/gap/
 data/paperless-consume/
 data/policies.db

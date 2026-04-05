@@ -41,6 +41,19 @@ def test_outbound_policy_honors_explicit_allowlists(monkeypatch):
         validate_outbound_http_target("https://api.other.example/hook")
 
 
+def test_outbound_policy_can_allow_loopback_only_when_explicitly_enabled():
+    assert (
+        validate_outbound_http_target("http://localhost:3011/v1/health", allow_loopback_hosts=True)
+        == "http://localhost:3011/v1/health"
+    )
+
+    with pytest.raises(OutboundTargetPolicyError):
+        validate_outbound_http_target("https://billing.internal/hook", allow_loopback_hosts=True)
+
+    with pytest.raises(OutboundTargetPolicyError):
+        validate_outbound_http_target("http://10.0.0.5/hook", allow_loopback_hosts=True)
+
+
 def test_webhook_create_uses_shared_outbound_policy():
     with pytest.raises(ValueError):
         WebhookCreate(url="http://localhost:8080/hook", event_area="auftrag")

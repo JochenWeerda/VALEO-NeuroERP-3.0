@@ -10,7 +10,16 @@ from app.services.neuro_tool_broker import NeuroToolBroker
 def test_neuro_tool_broker_executes_superglue_step():
     client = SuperglueClient(
         base_url="https://api.superglue.dev",
-        transport=httpx.MockTransport(lambda request: httpx.Response(200, json={"ok": True, "tool": "sg.document.search"})),
+        transport=httpx.MockTransport(
+            lambda request: httpx.Response(
+                200,
+                json={
+                    "runId": "run-1",
+                    "status": "completed",
+                    "data": {"ok": True, "tool": "sg.document.search"},
+                },
+            )
+        ),
     )
     broker = NeuroToolBroker(
         superglue_capability_service=SuperglueCapabilityService(

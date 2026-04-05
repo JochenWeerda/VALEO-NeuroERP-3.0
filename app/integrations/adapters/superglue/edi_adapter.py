@@ -21,14 +21,21 @@ class SupergluePartnerPreviewAdapter(PartnerAdapterPort):
         client = self._client or SuperglueClient(auth_token=resolve_superglue_auth_token(tenant_id))
         payload = client.request(
             "POST",
-            "/api/partner-adapters/preview",
+            "/v1/tools/sg.partner.adapter.preview/run",
             mode="rest",
-            json={"tenant_id": tenant_id, "partner_key": partner_key, "sample_payload": sample_payload or {}},
+            json={
+                "inputs": {
+                    "tenantId": tenant_id,
+                    "partnerKey": partner_key,
+                    "samplePayload": sample_payload or {},
+                }
+            },
         )
+        run_data = payload.get("data", {})
         return PartnerPreview(
             partner_key=partner_key,
-            title=str(payload.get("title", partner_key)),
-            mapped_steps=list(payload.get("mapped_steps", [])),
-            notices=list(payload.get("notices", [])),
-            metadata={str(k): str(v) for k, v in dict(payload.get("metadata", {})).items()},
+            title=str(run_data.get("title", partner_key)),
+            mapped_steps=list(run_data.get("mapped_steps", [])),
+            notices=list(run_data.get("notices", [])),
+            metadata={str(k): str(v) for k, v in dict(run_data.get("metadata", {})).items()},
         )

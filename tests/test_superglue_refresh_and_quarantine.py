@@ -12,6 +12,7 @@ from app.integrations.services.superglue_quarantine import (
     build_quarantine_summary,
     resolve_quarantine_entry,
 )
+from app.integrations.services.superglue_tool_provisioning import provision_superglue_pilot_tools
 
 
 def test_refresh_superglue_sync_snapshot_persists_file(monkeypatch, tmp_path: Path):
@@ -107,3 +108,35 @@ def test_external_agent_integrations_surface_refresh_config_and_quarantine(monke
     assert resolve.status_code == 200
     assert resolve.json()["status"] == "resolved"
     assert journal.status_code == 200
+
+
+def test_provision_superglue_pilot_tools_route(monkeypatch):
+    monkeypatch.setattr(
+        "app.api.v1.endpoints.external_agent_integrations.provision_superglue_pilot_tools",
+        lambda: {"provider_key": "superglue", "tool_count": 3, "tool_ids": ["sg.document.search"]},
+    )
+
+    app = FastAPI()
+    app.include_router(external_agent_integrations.router)
+    client = TestClient(app)
+
+    response = client.post("/agent/integrations/providers/superglue/pilot-tools/provision")
+
+    assert response.status_code == 200
+    assert response.json()["provider_key"] == "superglue"
+
+
+def test_superglue_pilot_smoke_route(monkeypatch):
+    monkeypatch.setattr(
+        "app.api.v1.endpoints.external_agent_integrations.run_superglue_pilot_smoke",
+        lambda: {"provider_key": "superglue", "run_id": "run-smoke", "status": "success"},
+    )
+
+    app = FastAPI()
+    app.include_router(external_agent_integrations.router)
+    client = TestClient(app)
+
+    response = client.post("/agent/integrations/providers/superglue/pilot-tools/smoke-run")
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "success"

@@ -1,7 +1,7 @@
 # Superglue Integration - Implementierungsplan
 
-**Status:** in Umsetzung, Basispfade INT-SG-001 bis INT-SG-034 umgesetzt
-**Datum:** 2026-04-03
+**Status:** in Umsetzung, Basispfade INT-SG-001 bis INT-SG-041 umgesetzt
+**Datum:** 2026-04-05
 **Baut auf:** [superglue-integration-bewertung.md](./superglue-integration-bewertung.md), [ADR-014](../adr/adr-014-integrationsgrenzen-api-edi-mcp-partneradapter.md), [ADR-007](../adr/adr-007-agent-tool-contract-governance.md)
 
 ## 1. Ziel
@@ -279,6 +279,8 @@ Folgewelle 2026-04-04:
 - `INT-SG-022` ist umgesetzt: Reverse-Proxy-Overlay mit TLS-Endpunkten, internen Service-Ports und Header-Hardening.
 - `INT-SG-023` bis `INT-SG-028` sind umgesetzt: Kubernetes-Basis, Helm-Overlay, NetworkPolicy/Ingress, Backup/Restore, CI-Validierung und wiederholbare Ops-Scripts.
 - `INT-SG-029` bis `INT-SG-034` sind umgesetzt: ArgoCD, Secret-/Certificate-CRDs, Prometheus/Grafana, dedizierter Deploy-Workflow und Bootstrap der tenant-spezifischen Ops-Konfiguration.
+- `INT-SG-035` bis `INT-SG-040` sind umgesetzt: aktueller Self-Host-Runtime-Contract, `/v1`-REST- und Run-Mapping, read-only Tool-Bootstrap, lokaler Runtime-Smoke gegen den echten Upstream-Container und Zielstruktur-/Doku-Alignment.
+- `INT-SG-041` ist umgesetzt: kanonische Pilot-Tools werden per REST reproduzierbar provisioniert, `GET /v1/tools` liefert im frischen Stack echte Eintraege, und ein echter `POST /v1/tools/{toolId}/run`-Smoke ist gegen den lokalen Upstream-Container nachgewiesen.
 
 ### INT-SG-001 - Contract- und Settings-Basis
 
@@ -732,6 +734,119 @@ Dateibesitz:
 
 - `scripts/superglue/bootstrap-secrets.*`
 - zugehoerige Doku unter `docs/workflows/` und `docs/cards/`
+
+### INT-SG-035 - Upstream Runtime-Contract fuer Self-Host
+
+Ziel:
+
+- Compose-, K8s- und Helm-Pfad auf den aktuellen Upstream-Port-/Env-/Storage-Contract ziehen
+- lokale Runtime-Fallen fuer Self-Host explizit modellieren
+
+Dateibesitz:
+
+- `docker-compose.integration.yml`
+- `docker-compose.integration.edge.yml`
+- `k8s/superglue/**`
+- `k8s/helm/valeo-erp/templates/superglue-*.yaml`
+- `k8s/helm/valeo-erp/values.yaml`
+- `scripts/superglue/**`
+
+### INT-SG-036 - REST- und Health-Mapping auf `/v1`
+
+Ziel:
+
+- Tool-Sync und Health auf den aktuellen REST-Vertrag umstellen
+- alte GraphQL-/Health-Annahmen aus dem produktiven Pfad entfernen
+
+Dateibesitz:
+
+- `app/integrations/adapters/superglue/tool_sync.py`
+- `tests/test_superglue_tool_sync.py`
+- `tests/test_process_kernel_wave88_external_agent_integrations.py`
+
+### INT-SG-037 - Tool-Execution und Run-Tracking
+
+Ziel:
+
+- produktive Tool-Execution auf `/v1/tools/{toolId}/run` ziehen
+- Run-Status, Journal und Audit-Envelope auf denselben Vertrag harmonisieren
+
+Dateibesitz:
+
+- `app/integrations/services/superglue_execution_service.py`
+- `app/integrations/services/superglue_execution_journal.py`
+- `app/integrations/services/superglue_capability_service.py`
+- `tests/test_superglue_execution_guardrails.py`
+- `tests/test_superglue_broker_integration.py`
+
+### INT-SG-038 - Bootstrap, Secret-Mapping und Pilotadapter
+
+Ziel:
+
+- read-only Pilotadapter auf echte Tool-Run-Pfade ziehen
+- Bootstrap und Zielstruktur um die fehlenden Upstream-Pflichtpfade ergaenzen
+
+Dateibesitz:
+
+- `app/integrations/adapters/superglue/*.py`
+- `app/integrations/ports/**`
+- `scripts/superglue/bootstrap-secrets.*`
+- `tests/test_superglue_document_adapter.py`
+- `tests/test_superglue_partner_preview.py`
+- `tests/test_superglue_customer_profile_adapter.py`
+
+### INT-SG-039 - Live-Smoke gegen echten Upstream-Container
+
+Ziel:
+
+- den Compose-Pfad nicht nur rendern, sondern gegen einen real gestarteten Upstream-Container pruefen
+- erkannte Runtime-Blocker im selben Slice schliessen
+
+Dateibesitz:
+
+- `docker-compose.integration.yml`
+- `scripts/superglue/start-compose.*`
+- `scripts/superglue/smoke-check.*`
+- `docs/workflows/int-sg-039-superglue-runtime-smoke.md`
+- `docs/cards/neuro-core/INT-SG-039-superglue-runtime-smoke.md`
+
+### INT-SG-040 - Zielstruktur- und Doku-Alignment
+
+Ziel:
+
+- Soll-/Ist-Zielstruktur fuer `app/integrations/**` abschliessen
+- Workboard, Architekturplan und bekannte Restluecken auf denselben Stand ziehen
+
+Dateibesitz:
+
+- `app/integrations/**`
+- `docs/agent-ops/active-workboard.md`
+- `docs/architecture/superglue-integration-implementation-plan.md`
+- `docs/project-context/open-gaps-and-known-issues.md`
+- `docs/workflows/int-sg-040-superglue-target-structure.md`
+- `docs/cards/neuro-core/INT-SG-040-superglue-target-structure.md`
+
+### INT-SG-041 - Tool-Provisioning und echter Run-Smoke
+
+Ziel:
+
+- den leeren Upstream-Katalog in einen reproduzierbar provisionierten Pilotpfad ueberfuehren
+- einen echten Tool-Run gegen den aktuellen Self-Host-Container nachweisen
+- lokale Start-Smokes gegen Health-Readiness robuster machen
+
+Dateibesitz:
+
+- `app/integrations/adapters/superglue/client.py`
+- `app/integrations/adapters/superglue/tool_sync.py`
+- `app/integrations/services/superglue_tool_provisioning.py`
+- `app/api/v1/endpoints/external_agent_integrations.py`
+- `scripts/superglue/smoke-check.*`
+- `tests/test_superglue_client.py`
+- `tests/test_superglue_tool_provisioning.py`
+- `tests/test_superglue_refresh_and_quarantine.py`
+- `tests/test_process_kernel_wave88_external_agent_integrations.py`
+- `docs/workflows/int-sg-041-superglue-tool-provisioning.md`
+- `docs/cards/neuro-core/INT-SG-041-superglue-tool-provisioning.md`
 
 ## 10. Nicht-Ziele fuer Phase 1
 

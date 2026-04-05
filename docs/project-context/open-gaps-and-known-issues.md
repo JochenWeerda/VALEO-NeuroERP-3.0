@@ -18,6 +18,7 @@ Diese Datei sammelt die fuer neue Analysen wichtigsten offenen Restthemen und be
 - Neuro-Stack-Status und P1-Luecken sind als Matrix dokumentiert (siehe `docs/project-context/neuro-stack-gap-matrix-2026-03-29.md`)
 - Knowledge Store (`knowledge_store.py`, `/neuro/knowledge`) ist umgesetzt; offen bleiben breitere produktive Nutzung in RAG-/Resolver-Pfaden und ggf. dedizierte Migrationen je nach Deploy-Strategie
 - Multi-Channel: WhatsApp, E-Mail, Voice, Live-Chat (Backend-REST), Channel-Ingress; offen bleiben outbound Routing und vollstaendige Live-Chat-WebSocket-Anbindung im Produkt-UI
+- Superglue Self-Host ist mit `INT-SG-035` bis `INT-SG-041` auf den aktuellen Upstream-Runtime-/REST-Vertrag gezogen; drei kanonische Pilot-Tools werden jetzt reproduzierbar provisioniert und ein echter `POST /v1/tools/{toolId}/run` ist lokal nachgewiesen. Offen bleiben vor allem produktiver Tenant-/System-Bootstrap fuer echte Connectoren sowie ein sauberer Dev-Pfad, falls derselbe lokale Smoke einmal ueber den zentralen `SuperglueClient` statt per raw HTTP laufen soll, ohne die SSRF-/Egress-Regeln aufzuweichen.
 
 ## Zuletzt geschlossene Punkte (Wave 104, 2026-03-27)
 
@@ -34,7 +35,10 @@ Diese Datei sammelt die fuer neue Analysen wichtigsten offenen Restthemen und be
 
 - ~~CRM-Kunde/Business-Partner-Verknuepfung persistiert implizit gegen den Default-Tenant~~ — `app/api/v1/endpoints/customers.py` validiert und persistiert `business_partner_id` jetzt tenant-gebunden auch im Create-/Update-Pfad; Regressionen liegen in `tests/test_crm_customer_business_partner_link.py`.
 - ~~Globaler Frontend-Typecheck ist breit an inkonsistenten `apiClient`-/Axios-Contracts rot~~ — `packages/frontend-web/src/lib/api-client.ts` stellt jetzt einen hybriden `ApiResult<T>` bereit; betroffene Call Sites und Typstubs wurden nachgezogen, `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false` ist wieder gruen.
+- ~~Superglue Self-Host lief auf einem veralteten Runtime-Vertrag und scheiterte im echten Compose-Smoke~~ — Compose/K8s/Helm sprechen jetzt den aktuellen Upstream-Port-/Env-/Run-Contract (`/v1/*`, `3001/3002`, `OPENAI_API_KEY`, `POSTGRES_SSL=false`, `MASTER_ENCRYPTION_KEY`); der lokale Upstream-Container liefert wieder `GET /v1/health` und `GET /v1/tools`.
 - Process-Kernel: Migration `neuro_step_audit_einkauf_tenant_20260405` legt `domain_shared.neuro_step_audit_trace` an und ergänzt `einkauf_bestellungen.tenant_id` wo fehlend; Kernel-Actions und Broker schreiben Audit bei gesetzter DB-Session; optionale Mutation `CreatePurchaseOrder` (Einkauf); Finance-Follow-up-Erweiterung Kasse (`/finance/followup/kasse/*`); PCN nutzt `X-Tenant-ID`. Doku: `docs/workflows/kernel-action-execution-mutations.md`.
+
+- ~~Superglue-Katalog blieb im frischen lokalen Stack leer und ein echter Tool-Run war nicht nachgewiesen~~ â€” `app/integrations/services/superglue_tool_provisioning.py` provisioniert jetzt drei kanonische Pilot-Tools via `POST/PUT /v1/tools`; der lokale Upstream-Container liefert `total=3` auf `GET /v1/tools`, und `POST /v1/tools/sg.document.search/run` endet erfolgreich.
 
 ## Analysepflicht
 

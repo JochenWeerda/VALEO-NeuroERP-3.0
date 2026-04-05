@@ -14,15 +14,12 @@ spec:
     app.kubernetes.io/instance: {{ .Release.Name }}
     app.kubernetes.io/component: superglue
   ports:
-    - name: http
-      port: {{ .Values.superglue.service.port }}
-      targetPort: http
-    - name: runtime
-      port: {{ .Values.superglue.service.runtimePort }}
-      targetPort: runtime
-    - name: events
-      port: {{ .Values.superglue.service.eventsPort }}
-      targetPort: events
+    - name: web
+      port: {{ .Values.superglue.service.webPort }}
+      targetPort: web
+    - name: api
+      port: {{ .Values.superglue.service.apiPort }}
+      targetPort: api
 ---
 apiVersion: v1
 kind: Service

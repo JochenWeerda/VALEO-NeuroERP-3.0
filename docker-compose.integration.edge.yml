@@ -19,9 +19,8 @@ services:
     profiles: ["superglue", "superglue-edge"]
     ports: !reset []
     expose:
-      - "3000"
-      - "3011"
-      - "3012"
+      - "3001"
+      - "3002"
 
   superglue-edge:
     profiles: ["superglue-edge"]
