@@ -20,18 +20,23 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 
-def _widen_version_num_column(database_url: str) -> None:
-    """Ensure alembic_version.version_num can hold long revision IDs (>32 chars)."""
+def _ensure_wide_version_table(database_url: str) -> None:
+    """Ensure alembic_version.version_num can hold long revision IDs (>32 chars).
+
+    On a fresh DB the table doesn't exist yet — create it with varchar(128).
+    On an existing DB widen the column if it's still varchar(32).
+    """
     engine = create_engine(database_url)
     with engine.begin() as conn:
         conn.execute(text(
-            "DO $$ BEGIN "
-            "  IF EXISTS (SELECT 1 FROM information_schema.columns "
-            "     WHERE table_name='alembic_version' AND column_name='version_num' "
-            "     AND character_maximum_length < 128) THEN "
-            "    ALTER TABLE alembic_version ALTER COLUMN version_num TYPE varchar(128); "
-            "  END IF; "
-            "END $$;"
+            "CREATE TABLE IF NOT EXISTS alembic_version ("
+            "  version_num VARCHAR(128) NOT NULL, "
+            "  CONSTRAINT alembic_version_pkc PRIMARY KEY (version_num)"
+            ");"
+        ))
+        conn.execute(text(
+            "ALTER TABLE alembic_version "
+            "ALTER COLUMN version_num TYPE VARCHAR(128);"
         ))
     engine.dispose()
 
@@ -51,7 +56,7 @@ def main() -> None:
     last_err: Exception | None = None
     while time.time() < deadline:
         try:
-            _widen_version_num_column(database_url)
+            _ensure_wide_version_table(database_url)
             command.upgrade(alembic_cfg, "head")
             last_err = None
             break
