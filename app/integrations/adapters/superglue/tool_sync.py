@@ -234,6 +234,7 @@ def build_superglue_config_summary() -> dict[str, Any]:
         "execution_journal_path": settings.SUPERGLUE_EXECUTION_JOURNAL_PATH,
         "allowed_hosts": list(settings.SUPERGLUE_ALLOWED_HOSTS),
         "allowed_domains": list(settings.SUPERGLUE_ALLOWED_DOMAINS),
+        "allow_loopback_dev_egress": settings.SUPERGLUE_ALLOW_LOOPBACK_DEV_EGRESS,
         "schema_version": 1,
     }
 
