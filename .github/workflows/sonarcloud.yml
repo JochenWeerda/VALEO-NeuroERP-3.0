@@ -17,7 +17,6 @@ concurrency:
 env:
   PYTHON_VERSION: "3.11"
   NODE_VERSION: "20"
-  PNPM_VERSION: "9.12.0"
 
 jobs:
   sonarcloud:
@@ -83,8 +82,6 @@ jobs:
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
 
       - name: Install frontend dependencies
         run: pnpm install --frozen-lockfile
