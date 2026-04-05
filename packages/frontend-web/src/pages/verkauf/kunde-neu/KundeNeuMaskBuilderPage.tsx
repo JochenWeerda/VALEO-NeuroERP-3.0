@@ -13,6 +13,7 @@ import {
   CUSTOMER_MASK_OBJECT_PAGE_CONFIG,
   validateCustomerPayload,
 } from '@/features/crm-masks/customer-mask-support'
+import { getAxiosErrorMessage } from '@/lib/api-client'
 import { useCreateCustomer } from '@/lib/api/crm'
 
 export default function KundeNeuMaskBuilderPage(): JSX.Element {
@@ -39,8 +40,7 @@ export default function KundeNeuMaskBuilderPage(): JSX.Element {
       })
       navigate('/verkauf/kunden-liste', { replace: true })
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Unbekannter Fehler beim Speichern.'
-      setError(message)
+      setError(getAxiosErrorMessage(err))
     }
   }
 

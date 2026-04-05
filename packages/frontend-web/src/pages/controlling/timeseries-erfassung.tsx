@@ -9,6 +9,7 @@ import {
   useDeleteTimeseriesItem,
   useKpiTimeseries,
 } from '@/lib/api/controlling'
+import { getAxiosErrorMessage } from '@/lib/api-client'
 import { useToast } from '@/components/ui/toast-provider'
 
 export default function TimeseriesErfassungPage(): JSX.Element {
@@ -53,7 +54,7 @@ export default function TimeseriesErfassungPage(): JSX.Element {
           setValue('')
           setSource('')
         },
-        onError: (error) => push(error instanceof Error ? error.message : 'Speichern fehlgeschlagen.'),
+        onError: (error) => push(getAxiosErrorMessage(error)),
       },
     )
   }
@@ -61,7 +62,7 @@ export default function TimeseriesErfassungPage(): JSX.Element {
   const remove = (id: string): void => {
     deleteMutation.mutate(id, {
       onSuccess: () => push('Zeitreiheneintrag geloescht.'),
-      onError: (error) => push(error instanceof Error ? error.message : 'Loeschen fehlgeschlagen.'),
+      onError: (error) => push(getAxiosErrorMessage(error)),
     })
   }
 

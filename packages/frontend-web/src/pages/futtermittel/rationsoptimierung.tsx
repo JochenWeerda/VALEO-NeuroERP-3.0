@@ -323,7 +323,7 @@ export default function Rationsoptimierung() {
     return activeRationItems.map((r) => {
       const feed = feeds.find((f) => f.id === r.feed_id)
       return {
-        name: r.name.length > 16 ? r.name.slice(0, 14) + '…' : r.name,
+        name: r.name.length > 16 ? `${r.name.slice(0, 14)}…` : r.name,
         gruppe: feed?.group ?? '–',
         kgdm: parseFloat(r.kgdm.toFixed(2)),
         anteil: totalKgdm > 0 ? parseFloat(((r.kgdm / totalKgdm) * 100).toFixed(1)) : 0,
@@ -697,7 +697,11 @@ export default function Rationsoptimierung() {
                                   className={`cursor-pointer transition-colors hover:bg-muted/40 ${checked ? '' : 'opacity-50'}`}
                                   onClick={() => {
                                     const next = new Set(selectedFeedIds)
-                                    checked ? next.delete(f.id) : next.add(f.id)
+                                    if (checked) {
+                                      next.delete(f.id)
+                                    } else {
+                                      next.add(f.id)
+                                    }
                                     setSelectedFeedIds(next)
                                   }}
                                 >
@@ -706,7 +710,11 @@ export default function Rationsoptimierung() {
                                       checked={checked}
                                       onCheckedChange={() => {
                                         const next = new Set(selectedFeedIds)
-                                        checked ? next.delete(f.id) : next.add(f.id)
+                                        if (checked) {
+                                          next.delete(f.id)
+                                        } else {
+                                          next.add(f.id)
+                                        }
                                         setSelectedFeedIds(next)
                                       }}
                                     />

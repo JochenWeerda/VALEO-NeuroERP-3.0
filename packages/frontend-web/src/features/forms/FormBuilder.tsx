@@ -186,7 +186,8 @@ export function FormBuilder<T extends Record<string, unknown>>({
             columns={schema.lines.columns}
             value={(values[schema.lines.name] as unknown[]) ?? []}
             onChange={(rows): void => {
-              setField(schema.lines!.name, rows)
+              const lines = schema.lines
+              if (lines) setField(lines.name, rows)
             }}
           />
           {Object.entries(errors)

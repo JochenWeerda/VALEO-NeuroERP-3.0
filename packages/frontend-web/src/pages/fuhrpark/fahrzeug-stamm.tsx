@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
@@ -18,6 +18,7 @@ import {
   updateFuhrparkFahrzeug,
   type FuhrparkFahrzeugPayload,
 } from '@/lib/api/fuhrpark'
+import { getAxiosErrorMessage } from '@/lib/api-client'
 
 function dateOnly(value?: string | null): string {
   if (!value) return ''
@@ -131,7 +132,7 @@ export default function FuhrparkFahrzeugStammPage(): JSX.Element {
       navigate(`/fuhrpark/fahrzeug/${saved.id}`)
     },
     onError: (error: unknown) => {
-      toast({ title: 'Fehler', description: error instanceof Error ? error.message : 'Speichern fehlgeschlagen', variant: 'destructive' })
+      toast({ title: 'Fehler', description: getAxiosErrorMessage(error), variant: 'destructive' })
     },
   })
 

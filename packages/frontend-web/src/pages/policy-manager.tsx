@@ -11,6 +11,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/components/ui/toast-provider"
+import { getAxiosErrorMessage } from "@/lib/api-client"
 import { CompactDecisionCard } from "@/components/workflow/CompactDecisionCard"
 import { useMcpMutation, useMcpQuery } from "@/lib/mcp"
 import { buildDecisionView } from "@/policy/decision-view"
@@ -177,8 +178,7 @@ function ImportDialog(): JSX.Element {
         }
       )
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error)
-      push(`JSON ungueltig: ${errorMessage}`)
+      push(`JSON ungueltig: ${getAxiosErrorMessage(error)}`)
     }
   }
 

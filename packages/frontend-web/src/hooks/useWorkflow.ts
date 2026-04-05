@@ -1,4 +1,5 @@
-﻿import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { getAxiosErrorMessage } from '@/lib/api-client'
 import { useSSE } from '@/lib/sse'
 import { useLive } from '@/state/live'
 
@@ -102,7 +103,7 @@ export function useWorkflow(domain: 'sales' | 'purchase', number: string): Workf
       }
       return json
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unknown error'
+      const message = getAxiosErrorMessage(error)
       console.error('Failed to transition workflow:', message)
       return { ok: false, error: message }
     } finally {

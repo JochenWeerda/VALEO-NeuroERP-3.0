@@ -74,6 +74,8 @@ type CurrentPositionDetails = {
 // â”€â”€ Helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 import { fetchDocumentNumber } from '@/hooks/useDocumentNumber'
+import { CustomerSalesEligibilityBanner } from '@/components/sales/CustomerSalesEligibilityBanner'
+import { useCustomerSalesEligibility } from '@/hooks/useCustomerSalesEligibility'
 
 let _angebotNrCache: string | null = null
 function generateAngebotNr(): string {
@@ -133,6 +135,7 @@ export default function AngebotErstellenPage(): JSX.Element {
   const [isPauschale, setIsPauschale] = useState(false)
   const [kontakt, setKontakt] = useState('')
   const [customer, setCustomer] = useState<Customer | null>(null)
+  const { data: salesEligibility } = useCustomerSalesEligibility(customer?.id)
 
   // â”€â”€ Dialoge â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const [showAngebotAuswahl, setShowAngebotAuswahl] = useState(false) // öffnet nur per Button
@@ -312,6 +315,13 @@ export default function AngebotErstellenPage(): JSX.Element {
   }
 
   const handleSave = useCallback(async () => {
+    if (customer && salesEligibility && !salesEligibility.allowed_order) {
+      push(
+        salesEligibility.reasons.join(' ') ||
+          'Kunde ist für Angebote/Aufträge nicht freigegeben (Stammdaten).',
+      )
+      return
+    }
     const payload = buildOfferPayload()
     setIsSaving(true)
     try {
@@ -350,12 +360,21 @@ export default function AngebotErstellenPage(): JSX.Element {
     positionen,
     status,
     push,
+    salesEligibility,
+    customer,
   ])
 
   const handleConvertToOrder = useCallback(async () => {
     const id = angebotId
     if (!id) {
       push('Bitte zuerst Angebot speichern')
+      return
+    }
+    if (customer && salesEligibility && !salesEligibility.allowed_order) {
+      push(
+        salesEligibility.reasons.join(' ') ||
+          'Übernahme in Auftrag nicht möglich — Kunde gesperrt (Stammdaten).',
+      )
       return
     }
     try {
@@ -365,7 +384,7 @@ export default function AngebotErstellenPage(): JSX.Element {
     } catch (err: unknown) {
       push(`Fehler: ${getErrorMessage(err)}`)
     }
-  }, [angebotId, push, navigate])
+  }, [angebotId, push, navigate, customer, salesEligibility])
 
   const handleDelete = useCallback(async () => {
     const id = angebotId
@@ -481,6 +500,9 @@ export default function AngebotErstellenPage(): JSX.Element {
       </div>
 
       <div className="flex-1 overflow-auto p-4">
+        {customer ? (
+          <CustomerSalesEligibilityBanner crmCustomerId={customer.id} modus="auftrag" />
+        ) : null}
 
         {/* â”€â”€ Kopf-Bereich â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <Card className="mb-4 p-4">

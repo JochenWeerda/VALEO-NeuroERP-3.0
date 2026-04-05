@@ -12,6 +12,7 @@ import { Package, Save, Trash2 } from 'lucide-react'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { useToast } from '@/hooks/use-toast'
 import { useCharge, useChargeQsReadiness, useDeleteCharge, useUpdateCharge, type ChargeStatus } from '@/lib/api/charges'
+import { getAxiosErrorMessage } from '@/lib/api-client'
 
 function safeJsonParse(input: string): Record<string, unknown> | Array<Record<string, unknown>> {
   try {
@@ -162,7 +163,7 @@ export default function ChargenStammPage(): JSX.Element {
       })
       toast({ title: 'Charge gespeichert', description: selectedCharge.chargenId })
     } catch (error) {
-      toast({ title: 'Fehler', description: error instanceof Error ? error.message : 'Speichern fehlgeschlagen', variant: 'destructive' })
+      toast({ title: 'Fehler', description: getAxiosErrorMessage(error), variant: 'destructive' })
     }
   }
 
@@ -172,7 +173,7 @@ export default function ChargenStammPage(): JSX.Element {
       toast({ title: 'Charge geloescht', description: selectedCharge.chargenId })
       navigate('/charge/liste')
     } catch (error) {
-      toast({ title: 'Fehler', description: error instanceof Error ? error.message : 'Loeschen fehlgeschlagen', variant: 'destructive' })
+      toast({ title: 'Fehler', description: getAxiosErrorMessage(error), variant: 'destructive' })
     }
   }
 

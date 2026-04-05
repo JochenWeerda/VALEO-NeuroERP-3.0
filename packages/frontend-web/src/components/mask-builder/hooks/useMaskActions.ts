@@ -1,5 +1,6 @@
 import { useCallback } from 'react'
 import { useToast } from '@/hooks/use-toast'
+import { getAxiosErrorMessage } from '@/lib/api-client'
 
 interface ActionHandler {
   (_action: string, _data?: any): Promise<void> | void
@@ -42,7 +43,7 @@ export function useMaskActions(onAction?: ActionHandler) {
           break
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unbekannter Fehler'
+      const errorMessage = getAxiosErrorMessage(error)
 
       toast({
         title: "Fehler",
@@ -82,7 +83,7 @@ export function useMaskActions(onAction?: ActionHandler) {
           description: `Die Aktion wurde auf ${items.length} Element(e) angewendet.`,
         })
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unbekannter Fehler'
+        const errorMessage = getAxiosErrorMessage(error)
 
         toast({
           title: "Fehler bei Massenaktion",

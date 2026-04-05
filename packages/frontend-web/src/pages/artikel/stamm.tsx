@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Article Master Data Page (Artikel-Stammdaten)
  * Comprehensive article management with all required tabs based on templates:
  * - Stammdaten (Master Data)
@@ -65,6 +65,7 @@ import {
   type ArticlePrice,
   type ArticleDocument,
 } from '@/lib/services/article-service'
+import { getAxiosErrorMessage } from '@/lib/api-client'
 
 // ============================================================================
 // Type Definitions
@@ -503,8 +504,7 @@ export default function ArtikelStammPage(): JSX.Element {
       navigate(`/artikel/${saved.id}`)
     },
     onError: (error) => {
-      const message = error instanceof Error ? error.message : 'Speichern fehlgeschlagen'
-      push(message)
+      push(getAxiosErrorMessage(error))
     },
   })
 

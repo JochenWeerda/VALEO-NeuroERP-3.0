@@ -4,6 +4,7 @@ import asyncio
 import importlib
 from datetime import date
 from io import BytesIO
+from unittest.mock import MagicMock
 from uuid import UUID
 
 import pytest
@@ -107,7 +108,7 @@ def test_create_customer_rejects_invalid_country_before_crm_call(monkeypatch: py
     )
 
     with pytest.raises(HTTPException) as exc:
-        asyncio.run(create_customer(payload))
+        asyncio.run(create_customer(payload, db=MagicMock()))
 
     assert exc.value.status_code == 422
     assert exc.value.detail["entity_typ"] == "Debitor"
@@ -129,7 +130,13 @@ def test_update_customer_rejects_invalid_country_before_crm_call(monkeypatch: py
 def test_import_kunden_csv_skips_invalid_country_without_db_write():
     file = _upload("kunden.csv", "Firma;Land\nKunde AG;XX\n")
 
-    result = asyncio.run(import_kunden_csv(file=file, db=ImportGuardDB()))
+    result = asyncio.run(
+        import_kunden_csv(
+            file=file,
+            db=ImportGuardDB(),
+            tenant_id="00000000-0000-0000-0000-000000000001",
+        )
+    )
 
     assert result["created"] == 0
     assert result["updated"] == 0
@@ -149,7 +156,13 @@ def test_import_einzelfuttermittel_csv_skips_invalid_vat_without_db_write():
 def test_import_debitoren_csv_skips_invalid_country_without_db_write():
     file = _upload("debitoren.csv", "Kunde;Land\nKunde AG;XX\n")
 
-    result = asyncio.run(import_debitoren_csv(file=file, db=ImportGuardDB()))
+    result = asyncio.run(
+        import_debitoren_csv(
+            file=file,
+            db=ImportGuardDB(),
+            tenant_id="00000000-0000-0000-0000-000000000001",
+        )
+    )
 
     assert result["created"] == 0
     assert result["updated"] == 0

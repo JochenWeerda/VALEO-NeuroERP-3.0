@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -17,6 +17,7 @@ import {
   type NawaroRapsBalance,
   type NawaroRapsCertificate,
 } from '@/lib/api/nawaro'
+import { getAxiosErrorMessage } from '@/lib/api-client'
 
 function emptyCert(): NawaroRapsCertificate {
   return {
@@ -109,8 +110,7 @@ export default function NawaroRapsProfilPage(): JSX.Element {
       void queryClient.invalidateQueries({ queryKey: ['nawaro', 'raps-profiles'] })
     },
     onError: (err: unknown) => {
-      const message = err instanceof Error ? err.message : 'Fehler beim Speichern'
-      toast({ title: 'Fehler', description: message, variant: 'destructive' })
+      toast({ title: 'Fehler', description: getAxiosErrorMessage(err), variant: 'destructive' })
     },
   })
 
@@ -157,8 +157,7 @@ export default function NawaroRapsProfilPage(): JSX.Element {
       void queryClient.invalidateQueries({ queryKey: ['nawaro', 'raps-profiles'] })
     },
     onError: (err: unknown) => {
-      const message = err instanceof Error ? err.message : 'Fehler bei Auto-Ableitung'
-      toast({ title: 'Fehler', description: message, variant: 'destructive' })
+      toast({ title: 'Fehler', description: getAxiosErrorMessage(err), variant: 'destructive' })
     },
   })
 

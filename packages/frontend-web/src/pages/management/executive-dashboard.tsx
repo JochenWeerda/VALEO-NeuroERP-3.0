@@ -191,7 +191,7 @@ export default function ExecutiveDashboardPage(): JSX.Element {
             color="success"
             trend={{ value: data.kpis.customers.trend }}
             tooltip={`${data.kpis.customers.newCount} Neukunden im Zeitraum`}
-            onClick={() => navigate('/crm/kunden-stamm')}
+            onClick={() => navigate('/verkauf/kunden-liste')}
           />
           <KPICard
             title="Lagerwert"
@@ -297,7 +297,7 @@ export default function ExecutiveDashboardPage(): JSX.Element {
         <div className="bg-card rounded-xl border p-4">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold">Top Kunden</h3>
-            <Button variant="ghost" size="sm" onClick={() => navigate('/crm/kunden-stamm')}>
+            <Button variant="ghost" size="sm" onClick={() => navigate('/verkauf/kunden-liste')}>
               Alle anzeigen
             </Button>
           </div>
@@ -314,7 +314,7 @@ export default function ExecutiveDashboardPage(): JSX.Element {
                 <div
                   key={customer.name}
                   className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
-                  onClick={() => navigate(`/crm/kunden-stamm?search=${encodeURIComponent(customer.name)}`)}
+                  onClick={() => navigate(`/verkauf/kunden-liste?search=${encodeURIComponent(customer.name)}`)}
                 >
                   <span className="w-6 h-6 flex items-center justify-center rounded-full bg-muted text-sm font-medium">
                     {index + 1}

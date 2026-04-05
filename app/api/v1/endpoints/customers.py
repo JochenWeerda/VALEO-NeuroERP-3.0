@@ -2,18 +2,21 @@
 
 from __future__ import annotations
 
+import logging
 from datetime import datetime
 from math import ceil
-from typing import Optional, Union
+from typing import Any, Optional, Union
 from uuid import UUID
 
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from ....core.config import settings
 from ....core.data_quality_enforcement import build_dq_error_detail, evaluate_customer_datensatz
 from ....core.database import get_db
+from ....core.tenant import get_tenant_id
 from ....integrations.crm_core_client import (
     CRMCoreCustomer,
     create_customer as crm_create_customer,
@@ -27,7 +30,220 @@ from ..schemas.crm import Customer, CustomerCreate, CustomerUpdate
 
 router = APIRouter()
 
+logger = logging.getLogger(__name__)
+
 DEFAULT_TENANT = "00000000-0000-0000-0000-000000000001"
+
+
+def _ensure_bp_belongs_to_tenant(partner_id: str, tenant_id: str, db: Session) -> None:
+    """Prüft, dass der Business-Partner im gleichen Mandanten existiert."""
+    from sqlalchemy import text
+
+    ok = db.execute(
+        text(
+            "SELECT 1 FROM domain_crm.business_partners WHERE partner_id = :pid AND tenant_id = :tid"
+        ),
+        {"pid": partner_id, "tid": tenant_id},
+    ).scalar()
+    if not ok:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="business_partner_id ungültig oder nicht im Mandanten gefunden.",
+        )
+
+
+def _fetch_monolith_extensions(customer_id: str, db: Session) -> dict[str, Any]:
+    """Felder, die nur in domain_crm.customers liegen (nicht in crm-core)."""
+    from sqlalchemy import text
+
+    try:
+        row = db.execute(
+            text(
+                "SELECT chefanweisung, business_partner_id FROM domain_crm.customers WHERE id = :cid"
+            ),
+            {"cid": customer_id},
+        ).fetchone()
+    except Exception:
+        return {}
+    if not row:
+        return {}
+    return {
+        "chefanweisung": row.chefanweisung,
+        "business_partner_id": row.business_partner_id,
+    }
+
+
+def _upsert_monolith_customer_stub(
+    customer_id: str,
+    business_partner_id: str | None,
+    db: Session,
+    tenant_id: str,
+    company_name: str,
+    customer_number: str,
+) -> None:
+    """Legt bei Bedarf eine Zeile in domain_crm.customers an (crm-core-Kunden ohne Monolith-Zeile)."""
+    from sqlalchemy import text
+
+    db.execute(
+        text(
+            """
+            INSERT INTO domain_crm.customers (
+                id, tenant_id, customer_number, company_name, business_partner_id,
+                is_active, created_at, updated_at
+            ) VALUES (
+                :id, :tid, :cn, :cname, :bid, true, NOW(), NOW()
+            )
+            ON CONFLICT (id) DO UPDATE SET
+                business_partner_id = EXCLUDED.business_partner_id,
+                updated_at = NOW()
+            """
+        ),
+        {
+            "id": customer_id,
+            "tid": tenant_id,
+            "cn": customer_number[:50],
+            "cname": company_name[:255],
+            "bid": business_partner_id,
+        },
+    )
+    db.commit()
+
+
+def _persist_business_partner_link(
+    customer_id: str,
+    customer_data: CustomerUpdate,
+    db: Session,
+    *,
+    core_customer: CRMCoreCustomer | None = None,
+) -> None:
+    data = customer_data.model_dump(exclude_unset=True)
+    if "business_partner_id" not in data:
+        return
+    bid = data["business_partner_id"]
+    tid = DEFAULT_TENANT
+    if bid:
+        _ensure_bp_belongs_to_tenant(bid, tid, db)
+    if core_customer is not None:
+        company_name = (core_customer.display_name or "Kunde").strip() or "Kunde"
+        customer_number = f"CRM-{core_customer.id[:8].upper()}"
+        _upsert_monolith_customer_stub(customer_id, bid, db, tid, company_name, customer_number)
+        return
+    from sqlalchemy import text
+
+    db.execute(
+        text(
+            "UPDATE domain_crm.customers SET business_partner_id = :bid, updated_at = NOW() "
+            "WHERE id = :cid AND tenant_id = :tid"
+        ),
+        {"bid": bid, "cid": customer_id, "tid": tid},
+    )
+    db.commit()
+
+
+def _merge_extensions_for_customer_list(db: Session, items: list[Customer]) -> list[Customer]:
+    """Reichert crm-core-Listeneinträge mit Monolith-Feldern an (chefanweisung, business_partner_id)."""
+    if not items:
+        return items
+    from sqlalchemy import text
+
+    ids = [str(i.id) for i in items]
+    placeholders = ",".join([f":id{i}" for i in range(len(ids))])
+    params: dict[str, str] = {f"id{i}": ids[i] for i in range(len(ids))}
+    rows = db.execute(
+        text(
+            f"SELECT id, chefanweisung, business_partner_id FROM domain_crm.customers "
+            f"WHERE id IN ({placeholders})"
+        ),
+        params,
+    ).fetchall()
+    ext_map = {str(r.id): r for r in rows}
+    merged: list[Customer] = []
+    for item in items:
+        row = ext_map.get(str(item.id))
+        if not row:
+            merged.append(item)
+            continue
+        d = item.model_dump()
+        if getattr(row, "chefanweisung", None) is not None:
+            d["chefanweisung"] = row.chefanweisung
+        if getattr(row, "business_partner_id", None):
+            d["business_partner_id"] = row.business_partner_id
+        merged.append(Customer.model_validate(d))
+    return merged
+
+
+def _create_customer_in_monolith_db(customer_data: CustomerCreate, db: Session) -> Customer:
+    """Persist customer in domain_crm when crm-core is offline (dev / degraded mode)."""
+    from ....core.uuid7 import uuid7
+    from ....infrastructure.models import Customer as CustomerModel
+
+    cid = uuid7()
+    tid = str(customer_data.tenant_id)
+    payment_terms = customer_data.payment_terms if customer_data.payment_terms is not None else 30
+    bp_link = getattr(customer_data, "business_partner_id", None)
+    if bp_link:
+        _ensure_bp_belongs_to_tenant(str(bp_link).strip(), tid, db)
+    row = CustomerModel(
+        id=cid,
+        tenant_id=tid,
+        customer_number=customer_data.customer_number.strip(),
+        company_name=customer_data.company_name.strip(),
+        contact_person=None,
+        email=str(customer_data.email) if customer_data.email else None,
+        phone=customer_data.phone,
+        address=customer_data.address,
+        city=None,
+        postal_code=None,
+        country=None,
+        industry=None,
+        website=None,
+        customer_type=None,
+        credit_limit=customer_data.credit_limit,
+        payment_terms=payment_terms,
+        tax_id=customer_data.tax_id,
+        chefanweisung=None,
+        business_partner_id=str(bp_link).strip() if bp_link else None,
+        is_active=customer_data.is_active,
+    )
+    try:
+        db.add(row)
+        db.commit()
+        db.refresh(row)
+    except IntegrityError as exc:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Kundennummer oder Datensatz existiert bereits.",
+        ) from exc
+
+    customer_dict = {
+        "id": row.id,
+        "tenant_id": UUID(str(row.tenant_id)),
+        "customer_number": row.customer_number,
+        "company_name": row.company_name,
+        "name": row.company_name,
+        "contact_person": row.contact_person,
+        "email": row.email,
+        "phone": row.phone,
+        "address": row.address,
+        "city": None,
+        "postal_code": None,
+        "country": None,
+        "industry": None,
+        "website": None,
+        "price_group": None,
+        "tax_category": None,
+        "credit_limit": row.credit_limit,
+        "payment_terms": payment_terms,
+        "tax_id": row.tax_id,
+        "chefanweisung": row.chefanweisung,
+        "business_partner_id": getattr(row, "business_partner_id", None),
+        "is_active": row.is_active if row.is_active is not None else True,
+        "deleted_at": None,
+        "created_at": row.created_at,
+        "updated_at": row.updated_at,
+    }
+    return Customer.model_validate(customer_dict)
 
 
 def _build_customer_dq_datensatz(data: dict[str, object]) -> dict[str, object]:
@@ -39,8 +255,11 @@ def _build_customer_dq_datensatz(data: dict[str, object]) -> dict[str, object]:
 
 
 @router.post("/", response_model=Customer, status_code=status.HTTP_201_CREATED)
-async def create_customer(customer_data: CustomerCreate) -> Customer:
-    """Create a new customer via crm-core."""
+async def create_customer(
+    customer_data: CustomerCreate,
+    db: Session = Depends(get_db),
+) -> Customer:
+    """Create a new customer via crm-core, or in PostgreSQL if crm-core is unreachable."""
     dq_result = evaluate_customer_datensatz(_build_customer_dq_datensatz(customer_data.model_dump(mode="python")))
     if not dq_result.bestanden:
         raise HTTPException(status_code=422, detail=build_dq_error_detail("Debitor", dq_result))
@@ -49,6 +268,13 @@ async def create_customer(customer_data: CustomerCreate) -> Customer:
         created = await crm_create_customer(payload)
     except httpx.HTTPStatusError as exc:  # pragma: no cover - network errors handled uniformly
         raise _to_http_exception(exc) from exc
+    except httpx.RequestError as exc:
+        logger.warning(
+            "crm-core unreachable, persisting customer in domain_crm: %s: %s",
+            type(exc).__name__,
+            exc,
+        )
+        return _create_customer_in_monolith_db(customer_data, db)
     return _adapt_customer(created)
 
 
@@ -67,6 +293,7 @@ async def list_customers(
     try:
         core_customers, total = await crm_list_customers(skip=skip, limit=limit, search=search)
         items = [_adapt_customer(customer) for customer in core_customers]
+        items = _merge_extensions_for_customer_list(db, items)
         pages = ceil(total / limit) if total else 1
         return PaginatedResponse[Customer](
             items=items,
@@ -115,6 +342,7 @@ async def list_customers(
                     id, tenant_id, customer_number, company_name, contact_person, 
                     email, phone, address, customer_type,
                     credit_limit, payment_terms, is_active, chefanweisung,
+                    business_partner_id,
                     created_at, updated_at
                 FROM domain_crm.customers 
                 WHERE {where_sql}
@@ -181,6 +409,7 @@ async def list_customers(
                         "payment_terms": payment_terms_val,
                         "tax_id": None,  # Column doesn't exist in DB
                         "chefanweisung": getattr(row, 'chefanweisung', None),  # Chefanweisung from customer table
+                        "business_partner_id": getattr(row, "business_partner_id", None),
                         "is_active": row.is_active if row.is_active is not None else True,
                         "deleted_at": None,  # Column doesn't exist in DB
                         "created_at": row.created_at,
@@ -215,6 +444,18 @@ async def list_customers(
             )
 
 
+@router.get("/{customer_id}/sales-eligibility")
+async def get_customer_sales_eligibility(
+    customer_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, object]:
+    """Verkaufs-/Lieferfreigabe aus Stammdaten (Business-Partner), für Belegmasken."""
+    from ....services.customer_sales_eligibility import describe_sales_eligibility
+
+    return describe_sales_eligibility(db, tenant_id, customer_id)
+
+
 @router.get("/{customer_id}", response_model=Customer)
 async def get_customer(
     customer_id: str,
@@ -224,35 +465,25 @@ async def get_customer(
     try:
         customer = await crm_get_customer(customer_id)
         adapted = _adapt_customer(customer)
-        
-        # Try to load chefanweisung from database directly
-        try:
-            from sqlalchemy import text
-            
-            # Try to find customer in database and load chefanweisung
-            db_customer = db.execute(
-                text("SELECT chefanweisung FROM domain_crm.customers WHERE id = :customer_id"),
-                {"customer_id": customer_id}
-            ).fetchone()
-            
-            if db_customer and db_customer.chefanweisung:
-                # Update the adapted customer with chefanweisung
-                customer_dict = adapted.model_dump()
-                customer_dict["chefanweisung"] = db_customer.chefanweisung
-                adapted = Customer.model_validate(customer_dict)
-        except Exception as db_err:
-            # If database lookup fails, continue without chefanweisung
-            import logging
-            logger = logging.getLogger(__name__)
-            logger.debug(f"Could not load chefanweisung for customer {customer_id}: {db_err}")
-        
+        ext = _fetch_monolith_extensions(customer_id, db)
+        if ext:
+            customer_dict = adapted.model_dump()
+            if ext.get("chefanweisung") is not None:
+                customer_dict["chefanweisung"] = ext["chefanweisung"]
+            if ext.get("business_partner_id"):
+                customer_dict["business_partner_id"] = ext["business_partner_id"]
+            adapted = Customer.model_validate(customer_dict)
         return adapted
     except httpx.HTTPStatusError as exc:
         raise _to_http_exception(exc) from exc
 
 
 @router.put("/{customer_id}", response_model=Customer)
-async def update_customer(customer_id: str, customer_data: CustomerUpdate) -> Customer:
+async def update_customer(
+    customer_id: str,
+    customer_data: CustomerUpdate,
+    db: Session = Depends(get_db),
+) -> Customer:
     """Update customer details by delegating to crm-core."""
     data = customer_data.model_dump(exclude_unset=True, mode="python")
     if {"customer_number", "company_name", "country"} & data.keys():
@@ -269,10 +500,23 @@ async def update_customer(customer_id: str, customer_data: CustomerUpdate) -> Cu
             raise HTTPException(status_code=422, detail=build_dq_error_detail("Debitor", dq_result))
     payload = _map_update_payload(customer_data)
     try:
-        updated = await crm_update_customer(customer_id, payload)
+        if payload:
+            updated = await crm_update_customer(customer_id, payload)
+        else:
+            updated = await crm_get_customer(customer_id)
     except httpx.HTTPStatusError as exc:
         raise _to_http_exception(exc) from exc
-    return _adapt_customer(updated)
+    _persist_business_partner_link(customer_id, customer_data, db, core_customer=updated)
+    adapted = _adapt_customer(updated)
+    ext = _fetch_monolith_extensions(customer_id, db)
+    if ext:
+        d = adapted.model_dump()
+        if ext.get("chefanweisung") is not None:
+            d["chefanweisung"] = ext["chefanweisung"]
+        if ext.get("business_partner_id"):
+            d["business_partner_id"] = ext["business_partner_id"]
+        adapted = Customer.model_validate(d)
+    return adapted
 
 
 @router.delete(
@@ -316,6 +560,7 @@ def _adapt_customer(core_customer: CRMCoreCustomer) -> Customer:
         "payment_terms": 30,
         "tax_id": None,
         "chefanweisung": None,  # Will be loaded from database if available
+        "business_partner_id": None,
         "is_active": is_active,
         "deleted_at": None,
         "created_at": created_at,

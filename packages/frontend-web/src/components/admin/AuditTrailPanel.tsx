@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useToast } from '@/hooks/use-toast'
+import { getAxiosErrorMessage } from '@/lib/api-client'
 
 interface AuditEntry {
   ts: number
@@ -49,7 +50,7 @@ export default function AuditTrailPanel({ domain, number }: AuditTrailPanelProps
         setEntries([])
       }
     } catch (error) {
-      const description = error instanceof Error ? error.message : 'Unbekannter Fehler'
+      const description = getAxiosErrorMessage(error)
       toast({
         title: 'Fehler beim Laden',
         description,

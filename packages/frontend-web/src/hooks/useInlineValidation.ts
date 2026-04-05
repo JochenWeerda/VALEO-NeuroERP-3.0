@@ -38,8 +38,8 @@ type ValidationRuleId =
 function _makeError(
   title: string,
   detail: string,
-  suggestion: string = '',
-  fieldName: string = '',
+  suggestion = '',
+  fieldName = '',
 ): ValidationResultData {
   const msg: ValidationMessageData = {
     title,
@@ -60,8 +60,8 @@ function _makeError(
 function _makeWarning(
   title: string,
   detail: string,
-  suggestion: string = '',
-  fieldName: string = '',
+  suggestion = '',
+  fieldName = '',
 ): ValidationResultData {
   const msg: ValidationMessageData = {
     title,
@@ -174,7 +174,7 @@ interface UseInlineValidationReturn {
 export function useInlineValidation(
   rule: ValidationRuleId,
   fieldName: string = rule,
-  debounceMs: number = 300,
+  debounceMs = 300,
 ): UseInlineValidationReturn {
   const [result, setResult] = useState<ValidationResultData | null>(null)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)

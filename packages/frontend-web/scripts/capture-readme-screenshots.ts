@@ -84,7 +84,7 @@ async function main() {
       await page.screenshot({ path: outPath, fullPage })
       console.log(`  -> ${outPath}`)
     } catch (e) {
-      console.error(`  Failed: ${e}`)
+      console.error(`  Failed: ${e instanceof Error ? e.message : String(e)}`)
     }
   }
 

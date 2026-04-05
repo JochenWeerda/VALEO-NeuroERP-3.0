@@ -23,7 +23,7 @@ const ACTION_SHORTCUTS_CONFIG: Array<{
     id: 'action-new-customer',
     label: 'Neuer Kunde anlegen',
     icon: Plus,
-    module: '@/pages/verkauf/kunde-neu',
+    module: '@/pages/verkauf/kunden-stamm',
     keywords: ['neu', 'kunde'],
     shortcut: 'Ctrl+Alt+N',
   },

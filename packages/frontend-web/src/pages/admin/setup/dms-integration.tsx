@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { useToast } from '@/hooks/use-toast'
+import { getAxiosErrorMessage } from '@/lib/api-client'
 import { Badge } from '@/components/ui/badge'
 import { CheckCircle2, ExternalLink, Loader2 } from 'lucide-react'
 
@@ -130,7 +131,7 @@ export default function DmsIntegrationCard(): JSX.Element {
       setTestState('fail')
       toast({
         title: 'Verbindungsfehler',
-        description: error instanceof Error ? error.message : UNKNOWN_ERROR_MESSAGE,
+        description: getAxiosErrorMessage(error),
         variant: 'destructive',
       })
     } finally {
@@ -173,7 +174,7 @@ export default function DmsIntegrationCard(): JSX.Element {
     } catch (error) {
       toast({
         title: BOOTSTRAP_FAILURE_TITLE,
-        description: error instanceof Error ? error.message : UNKNOWN_ERROR_MESSAGE,
+        description: getAxiosErrorMessage(error),
         variant: 'destructive',
       })
     } finally {

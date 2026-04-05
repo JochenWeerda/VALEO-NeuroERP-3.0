@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { CheckCircle } from 'lucide-react'
-import { apiClient } from '@/lib/api-client'
+import { apiClient, getAxiosErrorMessage } from '@/lib/api-client'
 import { useToast } from '@/hooks/use-toast'
 
 type LaborData = {
@@ -34,8 +34,7 @@ export default function LaborAuftragPage(): JSX.Element {
       navigate('/qualitaet/labor-liste')
     },
     onError: (err: unknown) => {
-      const msg = err instanceof Error ? err.message : 'Unbekannter Fehler'
-      toast({ title: 'Fehler', description: msg, variant: 'destructive' })
+      toast({ title: 'Fehler', description: getAxiosErrorMessage(err), variant: 'destructive' })
     },
   })
 

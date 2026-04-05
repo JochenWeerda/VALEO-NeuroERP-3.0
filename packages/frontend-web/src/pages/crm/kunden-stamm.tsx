@@ -677,7 +677,7 @@ export default function KundenStammPage(): JSX.Element {
       try {
         await saveData(formData)
         setIsDirty(false)
-        navigate('/crm/kunden/liste')
+        navigate('/crm/kunden')
       } catch (error) {
         // Error wird bereits in useMaskData behandelt
       }
@@ -699,7 +699,7 @@ export default function KundenStammPage(): JSX.Element {
     if (isDirty && !confirm(t('crud.messages.discardChanges'))) {
       return
     }
-    navigate('/crm/kunden/liste')
+    navigate('/crm/kunden')
   }
 
   return (

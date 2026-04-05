@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { CheckCircle, AlertTriangle } from 'lucide-react'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { Button } from '@/components/ui/button'
-import { apiClient } from '@/lib/api-client'
+import { apiClient, getAxiosErrorMessage } from '@/lib/api-client'
 import { useToast } from '@/hooks/use-toast'
 
 type PCNData = {
@@ -34,9 +34,7 @@ export default function PCNUFIPage(): JSX.Element {
       navigate('/compliance/pcn-liste')
     },
     onError: (err: unknown) => {
-      // Backend endpoint /api/v1/compliance/pcn-meldungen not yet implemented — gap noted
-      const msg = err instanceof Error ? err.message : 'Backend-Endpoint noch nicht verfügbar.'
-      toast({ title: 'Speichern fehlgeschlagen', description: msg, variant: 'destructive' })
+      toast({ title: 'Speichern fehlgeschlagen', description: getAxiosErrorMessage(err), variant: 'destructive' })
     },
   })
 

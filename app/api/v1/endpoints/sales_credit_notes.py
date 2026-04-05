@@ -16,6 +16,10 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.services.customer_sales_eligibility import (
+    assert_customer_allowed_for_delivery,
+    assert_customer_allowed_for_invoice,
+)
 from app.core.tenant import get_tenant_id
 from app.core.uuid7 import uuid7
 from app.core.fibu_audit import log_fibu_audit
@@ -82,6 +86,7 @@ async def create_credit_note(
 ):
     """Create a sales credit note (Gutschrift)."""
     tid = _resolve_sales_payload_tenant(payload.tenant_id, tenant_id)
+    assert_customer_allowed_for_invoice(db, tid, payload.customer_id)
     cn_id = uuid7()
 
     total = sum(
@@ -201,6 +206,8 @@ async def post_credit_note(
     if row[5] == "posted":
         raise HTTPException(status_code=400, detail="Gutschrift bereits gebucht")
 
+    assert_customer_allowed_for_invoice(db, tenant_id, str(row[3]))
+
     total = Decimal(str(row[4]))
     je_id = uuid7()
     db.execute(
@@ -265,6 +272,7 @@ async def create_return(
 ):
     """Create a return/Retoure."""
     tid = _resolve_sales_payload_tenant(payload.tenant_id, tenant_id)
+    assert_customer_allowed_for_delivery(db, tid, payload.customer_id)
     ret_id = uuid7()
     db.execute(
         text("""

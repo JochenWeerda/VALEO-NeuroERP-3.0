@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
+import { getAxiosErrorMessage } from '@/lib/api-client'
 import { CheckCircle2, ExternalLink, FileText, XCircle } from 'lucide-react'
 
 interface InboxDocument {
@@ -83,7 +84,7 @@ export default function InboxPage(): JSX.Element {
         }
       }
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unbekannter Fehler'
+      const message = getAxiosErrorMessage(error)
       toast({
         title: 'Fehler beim Laden',
         description: message,
@@ -131,7 +132,7 @@ export default function InboxPage(): JSX.Element {
         variant: 'destructive',
       })
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unbekannter Fehler'
+      const message = getAxiosErrorMessage(error)
       toast({
         title: 'Fehler beim Erstellen',
         description: message,
@@ -157,7 +158,7 @@ export default function InboxPage(): JSX.Element {
 
       await loadInbox()
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unbekannter Fehler'
+      const message = getAxiosErrorMessage(error)
       toast({
         title: 'Fehler beim Loeschen',
         description: message,

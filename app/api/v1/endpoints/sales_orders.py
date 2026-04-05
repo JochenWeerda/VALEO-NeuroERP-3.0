@@ -14,6 +14,8 @@ from sqlalchemy.orm import Session
 
 from ....core.database import get_db
 from ....core.tenant import get_tenant_id
+from ....services.customer_sales_eligibility import assert_customer_allowed_for_delivery
+from ....services.customer_sales_eligibility import assert_customer_allowed_for_sales_order
 from ....services.numbering_service import get_numbering
 from ..schemas.base import PaginatedResponse
 
@@ -285,6 +287,8 @@ async def create_sales_order(
     if not customer_exists:
         raise HTTPException(status_code=400, detail="customer_id does not exist")
 
+    assert_customer_allowed_for_sales_order(db, effective_tenant, payload.customer_id)
+
     items_total = sum(
         (_line_total(i.quantity, i.unit_price, i.discount_percent) for i in payload.items),
         Decimal("0.00"),
@@ -404,6 +408,7 @@ async def update_sales_order(
         ).first()
         if not customer_exists:
             raise HTTPException(status_code=400, detail="customer_id does not exist")
+        assert_customer_allowed_for_sales_order(db, effective_tenant, data["customer_id"])
 
     replace_items = None
     if "items" in data:
@@ -488,6 +493,10 @@ async def create_delivery_from_order(
     order_row = _get_sales_order_row(db, order_id, effective_tenant)
     if order_row["status"] in ("cancelled", "completed"):
         raise HTTPException(status_code=400, detail=f"Auftrag hat Status '{order_row['status']}' und kann nicht geliefert werden")
+
+    cid = order_row.get("customer_id")
+    if cid:
+        assert_customer_allowed_for_delivery(db, effective_tenant, str(cid))
 
     from app.core.uuid7 import uuid7
     dn_id = uuid7()

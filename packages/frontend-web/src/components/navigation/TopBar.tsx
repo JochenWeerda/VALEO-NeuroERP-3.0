@@ -1,4 +1,4 @@
-import { Suspense, lazy } from 'react'
+import { Suspense, lazy, useEffect, useState, useCallback, useRef } from 'react'
 import { clsx } from 'clsx'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button'
 import { Command as CommandIcon, Check, HelpCircle, Home, Keyboard, LogOut, Menu, Moon, PanelLeft, Search, Settings, Sparkles, Sun, User } from 'lucide-react'
 import { useFeature } from '@/hooks/useFeature'
 import { useTheme } from '@/hooks/useTheme'
-import { useEffect, useState, useCallback, useRef } from 'react'
 import { availableLanguages, loadLanguage } from '@/i18n/config'
 
 interface TopBarProps {

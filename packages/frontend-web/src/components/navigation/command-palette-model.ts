@@ -416,12 +416,12 @@ const BASE_COMMANDS: PaletteCommand[] = [
   // ── CRM ────────────────────────────────────────────────────────────────────
   {
     id: 'nav-crm-kunden',
-    label: 'Kunden (CRM)',
-    keywords: ['kunden', 'crm', 'kontakte', 'customer', 'betrieb'],
+    label: 'Kunden (Stammdaten)',
+    keywords: ['kunden', 'crm', 'kontakte', 'customer', 'betrieb', 'stammdaten', 'verkauf'],
     icon: Users,
     category: 'CRM',
     actionId: 'nav-crm-kunden',
-    actionParams: { path: '/crm/kunden' },
+    actionParams: { path: '/verkauf/kunden-liste' },
     mcp: { intent: 'navigate', businessDomain: 'crm', requiredScopes: ['crm:read'] },
   },
   {

@@ -11,6 +11,7 @@ import {
   type MitarbeiterInput,
   type MitarbeiterStatus,
 } from '@/lib/api/personal'
+import { getAxiosErrorMessage } from '@/lib/api-client'
 import { useToast } from '@/components/ui/toast-provider'
 
 const DEFAULT_FORM: MitarbeiterInput = {
@@ -55,7 +56,7 @@ export default function MitarbeiterStammPage(): JSX.Element {
     }
 
     const onError = (error: unknown): void => {
-      push(error instanceof Error ? error.message : 'Speichern fehlgeschlagen.')
+      push(getAxiosErrorMessage(error))
     }
     if (isNew) {
       createMutation.mutate(form, {

@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { Camera, FileCheck, MapPin, Package } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { useCreateCharge } from '@/lib/api/charges'
+import { getAxiosErrorMessage } from '@/lib/api-client'
 
 type WareneingangData = {
   lieferant: string
@@ -92,7 +93,7 @@ export default function WareneingangPage(): JSX.Element {
       toast({ title: 'Charge angelegt', description: wareneingang.chargenId })
       navigate('/charge/liste')
     } catch (error) {
-      toast({ title: 'Fehler', description: error instanceof Error ? error.message : 'Charge konnte nicht angelegt werden.', variant: 'destructive' })
+      toast({ title: 'Fehler', description: getAxiosErrorMessage(error), variant: 'destructive' })
     }
   }
 

@@ -5,6 +5,7 @@
 
 import { useState, useCallback } from 'react'
 import { useToast } from '@/hooks/use-toast'
+import { getAxiosErrorMessage } from '@/lib/api-client'
 import { bulkDeleteDocuments, type DocumentType } from '@/lib/document-api'
 
 export interface UseBulkActionsOptions {
@@ -65,7 +66,7 @@ export function useBulkActions({ docType, onSuccess }: UseBulkActionsOptions) {
     } catch (error) {
       toast({
         title: 'Fehler beim Löschen',
-        description: error instanceof Error ? error.message : 'Ein unbekannter Fehler ist aufgetreten.',
+        description: getAxiosErrorMessage(error),
         variant: 'destructive',
       })
     } finally {

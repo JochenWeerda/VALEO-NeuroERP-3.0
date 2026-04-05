@@ -24,8 +24,8 @@ import {
   Calculator,
   ArrowLeft,
   X,
+  type LucideIcon,
 } from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth'
 
 interface NavItem {

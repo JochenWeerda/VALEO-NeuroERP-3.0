@@ -8,10 +8,9 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { AlertTriangle, Check, Globe, Languages, Loader2, Save, Settings, Sparkles } from 'lucide-react'
-import { apiClient } from '@/lib/api-client'
+import { apiClient, getAxiosErrorMessage } from '@/lib/api-client'
 import { useToast } from '@/hooks/use-toast'
-import { availableLanguages, loadLanguage } from '@/i18n/config'
-import type { LanguageInfo } from '@/i18n/config'
+import { availableLanguages, loadLanguage, type LanguageInfo } from '@/i18n/config'
 
 type TenantResponse = {
   id: string
@@ -230,7 +229,7 @@ export default function SystemEinstellungenPage(): JSX.Element {
     onError: (error) => {
       toast({
         title: 'Speichern fehlgeschlagen',
-        description: error instanceof Error ? error.message : 'Unbekannter Fehler',
+        description: getAxiosErrorMessage(error),
         variant: 'destructive',
       })
     },

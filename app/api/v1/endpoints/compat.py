@@ -1534,23 +1534,35 @@ async def patch_lieferant(lieferant_id: str, body: dict = Body(default={}), db: 
 
 
 @router.patch("/crm/kunden/{kunden_id}", response_model=dict)
-async def patch_kunde(kunden_id: str, body: dict = Body(default={}), db: Session = Depends(get_db)) -> dict:
-    """Partielle Aktualisierung eines Kunden (z.B. Status sperren)."""
+async def patch_kunde(
+    kunden_id: str,
+    body: dict = Body(default={}),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict:
+    """Partielle Aktualisierung eines Kunden (z.B. Status sperren). Nutzt ``is_active`` (kein Legacy-``status``-Feld)."""
+    is_active = _csv_status_to_is_active(body.get("status"))
     q = text("""
         UPDATE domain_crm.customers
-        SET status = :status, updated_at = NOW()
-        WHERE id = :id
-        RETURNING id, status
+        SET is_active = :is_active, updated_at = NOW()
+        WHERE id = :id AND tenant_id = :tid
+        RETURNING id, is_active
     """)
     try:
-        result = db.execute(q, {"id": kunden_id, "status": body.get("status", "aktiv")})
+        result = db.execute(q, {"id": kunden_id, "is_active": is_active, "tid": tenant_id})
         db.commit()
         row = result.fetchone()
         if row:
-            return {"id": str(row[0]), "status": str(row[1])}
+            ia = bool(row[1])
+            return {"id": str(row[0]), "status": "aktiv" if ia else "gesperrt", "is_active": ia}
     except Exception:
         db.rollback()
-    return {"id": kunden_id, "status": body.get("status", "aktiv"), "updated": True}
+    return {
+        "id": kunden_id,
+        "status": "aktiv" if is_active else "gesperrt",
+        "is_active": is_active,
+        "updated": True,
+    }
 
 
 # CSV-Import Endpoints -------------------------------------------------------
@@ -1568,6 +1580,162 @@ def _parse_csv_bytes(content: bytes) -> list[dict]:
 
 def _csv_error_prefix(row_number: int) -> str:
     return f"Zeile {row_number}:"
+
+
+def _csv_status_to_is_active(status_raw: str | None) -> bool:
+    s = (status_raw or "aktiv").strip().lower()
+    if s in ("gesperrt", "inaktiv", "blocked", "0", "false", "nein", "sperre"):
+        return False
+    return True
+
+
+def _allocate_import_customer_number(db: Session) -> str:
+    """Eindeutige Kundennummer für CSV-Neuanlage (global unique customer_number)."""
+    import uuid as _uuid
+
+    for _ in range(64):
+        cn = f"IMP-{_uuid.uuid4().hex[:10].upper()}"
+        row = db.execute(
+            text("SELECT 1 FROM domain_crm.customers WHERE customer_number = :cn LIMIT 1"),
+            {"cn": cn},
+        ).fetchone()
+        if not row:
+            return cn
+    return f"IMP-{_uuid.uuid4().hex}"
+
+
+def _domain_crm_upsert_customer_norm(
+    db: Session,
+    tenant_id: str,
+    *,
+    firma: str,
+    kundennummer: str,
+    plz: str,
+    ort: str,
+    land: str,
+    email: str,
+    telefon: str,
+    is_active: bool,
+    ust_id: str,
+) -> tuple[bool, bool, str | None]:
+    """Ein Kunden-Datensatz aus CSV — Dubletten über Nr., E-Mail, USt-Id, Firma+PLZ+Ort. Returns (created, updated, error)."""
+    import uuid as uuid_module
+
+    created = updated = False
+    try:
+        existing_id: str | None = None
+        if kundennummer:
+            row_ex = db.execute(
+                text(
+                    "SELECT id FROM domain_crm.customers WHERE tenant_id = :tid AND customer_number = :cn LIMIT 1"
+                ),
+                {"tid": tenant_id, "cn": kundennummer},
+            ).fetchone()
+            if row_ex:
+                existing_id = str(row_ex[0])
+        if not existing_id and email:
+            row_ex = db.execute(
+                text(
+                    """
+                    SELECT id FROM domain_crm.customers
+                    WHERE tenant_id = :tid
+                      AND lower(trim(coalesce(email, ''))) = lower(:em)
+                    LIMIT 1
+                    """
+                ),
+                {"tid": tenant_id, "em": email},
+            ).fetchone()
+            if row_ex:
+                existing_id = str(row_ex[0])
+        if not existing_id and ust_id:
+            row_ex = db.execute(
+                text(
+                    "SELECT id FROM domain_crm.customers WHERE tenant_id = :tid AND tax_id = :tx LIMIT 1"
+                ),
+                {"tid": tenant_id, "tx": ust_id},
+            ).fetchone()
+            if row_ex:
+                existing_id = str(row_ex[0])
+        if not existing_id:
+            row_ex = db.execute(
+                text(
+                    """
+                    SELECT id FROM domain_crm.customers
+                    WHERE tenant_id = :tid
+                      AND lower(trim(company_name)) = lower(trim(:name))
+                      AND coalesce(postal_code, '') = :plz
+                      AND coalesce(city, '') = :ort
+                    LIMIT 1
+                    """
+                ),
+                {"tid": tenant_id, "name": firma, "plz": plz, "ort": ort},
+            ).fetchone()
+            if row_ex:
+                existing_id = str(row_ex[0])
+        if existing_id:
+            db.execute(
+                text(
+                    """
+                    UPDATE domain_crm.customers
+                    SET company_name = :cname,
+                        email = CASE WHEN :email <> '' THEN :email ELSE email END,
+                        phone = CASE WHEN :phone <> '' THEN :phone ELSE phone END,
+                        postal_code = CASE WHEN :plz <> '' THEN :plz ELSE postal_code END,
+                        city = CASE WHEN :ort <> '' THEN :ort ELSE city END,
+                        country = CASE WHEN :land <> '' THEN :land ELSE country END,
+                        tax_id = CASE WHEN :tx <> '' THEN :tx ELSE tax_id END,
+                        is_active = :is_active,
+                        updated_at = NOW()
+                    WHERE id = :id AND tenant_id = :tid
+                    """
+                ),
+                {
+                    "cname": firma[:255],
+                    "email": email,
+                    "phone": telefon,
+                    "plz": plz,
+                    "ort": ort,
+                    "land": land,
+                    "tx": ust_id,
+                    "is_active": is_active,
+                    "id": existing_id,
+                    "tid": tenant_id,
+                },
+            )
+            updated = True
+        else:
+            cn = kundennummer if kundennummer else _allocate_import_customer_number(db)
+            new_id = str(uuid_module.uuid4())
+            db.execute(
+                text(
+                    """
+                    INSERT INTO domain_crm.customers (
+                        id, tenant_id, customer_number, company_name, email, phone,
+                        postal_code, city, country, tax_id, is_active, created_at, updated_at
+                    ) VALUES (
+                        :id, :tid, :cn, :cname, :email, :phone,
+                        :plz, :ort, :land, :tx, :is_active, NOW(), NOW()
+                    )
+                    """
+                ),
+                {
+                    "id": new_id,
+                    "tid": tenant_id,
+                    "cn": cn,
+                    "cname": firma[:255],
+                    "email": email or None,
+                    "phone": telefon or None,
+                    "plz": plz or None,
+                    "ort": ort or None,
+                    "land": land,
+                    "tx": ust_id or None,
+                    "is_active": is_active,
+                },
+            )
+            created = True
+    except Exception as e:
+        return False, False, str(e)[:120]
+    return created, updated, None
 
 
 def _validate_csv_customer_row(norm: dict[str, str]) -> str | None:
@@ -1604,46 +1772,83 @@ def _validate_csv_article_row(norm: dict[str, str]) -> str | None:
 
 
 @router.post("/crm/import/kunden", response_model=dict)
-async def import_kunden_csv(file: UploadFile = File(...), db: Session = Depends(get_db)) -> dict:
-    """CSV-Import für Kunden. Erwartet Spalten: Firma, Ort, PLZ, Land, E-Mail, Telefon, Status."""
+async def import_kunden_csv(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict:
+    """CSV-Import für Kunden (domain_crm.customers). Spalten u.a.: Firma, Ort, PLZ, Land, E-Mail, Telefon, Status, Kundennummer, USt-Id."""
+
     content = await file.read()
     rows = _parse_csv_bytes(content)
     created = updated = 0
     errors: list[str] = []
-    col_map = {"firma": "firma", "company": "firma", "name": "firma",
-               "email": "email", "e-mail": "email", "ort": "ort", "city": "ort",
-               "plz": "plz", "zip": "plz", "land": "land", "country": "land",
-               "telefon": "telefon", "phone": "telefon", "status": "status"}
+    col_map = {
+        "firma": "firma",
+        "company": "firma",
+        "name": "firma",
+        "email": "email",
+        "e-mail": "email",
+        "ort": "ort",
+        "city": "ort",
+        "plz": "plz",
+        "zip": "plz",
+        "land": "land",
+        "country": "land",
+        "telefon": "telefon",
+        "phone": "telefon",
+        "status": "status",
+        "kundennummer": "kundennummer",
+        "customer_number": "kundennummer",
+        "debitorennummer": "kundennummer",
+        "debitor": "kundennummer",
+        "ust-id": "ust_id",
+        "ust_id": "ust_id",
+        "umsatzsteuer_id": "ust_id",
+        "umsatzsteuer": "ust_id",
+        "tax_id": "ust_id",
+    }
     for i, row in enumerate(rows):
-        norm = {col_map.get(k.lower().strip(), k.lower().strip()): v.strip() for k, v in row.items() if v}
-        dq_error = _validate_csv_customer_row(norm)
+        norm = {col_map.get(k.lower().strip(), k.lower().strip()): (v or "").strip() for k, v in row.items()}
+        firma = norm.get("firma", "").strip()
+        if not firma:
+            errors.append(f"{_csv_error_prefix(i+2)} Firma fehlt")
+            continue
+        dq_payload = {k: v for k, v in norm.items() if v}
+        dq_payload["firma"] = firma
+        dq_payload.setdefault("land", norm.get("land") or "DE")
+        dq_error = _validate_csv_customer_row(dq_payload)
         if dq_error:
             errors.append(f"{_csv_error_prefix(i+2)} {dq_error}")
             continue
-        firma = norm.get("firma", "")
-        try:
-            existing = db.execute(
-                text("SELECT id FROM domain_crm.customers WHERE name = :n LIMIT 1"),
-                {"n": firma}
-            ).fetchone()
-            if existing:
-                db.execute(
-                    text("UPDATE domain_crm.customers SET status=:s, updated_at=NOW() WHERE id=:id"),
-                    {"s": norm.get("status", "aktiv"), "id": str(existing[0])}
-                )
-                updated += 1
-            else:
-                import uuid
-                db.execute(
-                    text("""INSERT INTO domain_crm.customers (id, name, email, city, country, status, created_at)
-                            VALUES (:id, :name, :email, :city, :country, :status, NOW())"""),
-                    {"id": str(uuid.uuid4()), "name": firma,
-                     "email": norm.get("email", ""), "city": norm.get("ort", ""),
-                     "country": norm.get("land", "DE"), "status": norm.get("status", "aktiv")}
-                )
+        kundennummer = (norm.get("kundennummer") or "").strip()[:50]
+        plz = norm.get("plz", "").strip()[:10]
+        ort = norm.get("ort", "").strip()[:50]
+        land = (norm.get("land", "") or "DE").strip()[:50] or "DE"
+        email = norm.get("email", "").strip()[:255]
+        telefon = norm.get("telefon", "").strip()[:50]
+        ust_id = (norm.get("ust_id") or "").strip()[:50]
+        is_active = _csv_status_to_is_active(norm.get("status"))
+        cr, up, err = _domain_crm_upsert_customer_norm(
+            db,
+            tenant_id,
+            firma=firma,
+            kundennummer=kundennummer,
+            plz=plz,
+            ort=ort,
+            land=land,
+            email=email,
+            telefon=telefon,
+            is_active=is_active,
+            ust_id=ust_id,
+        )
+        if err:
+            errors.append(f"Zeile {i+2}: {err}")
+        else:
+            if cr:
                 created += 1
-        except Exception as e:
-            errors.append(f"Zeile {i+2}: {str(e)[:80]}")
+            if up:
+                updated += 1
     try:
         db.commit()
     except Exception as e:
@@ -1653,36 +1858,79 @@ async def import_kunden_csv(file: UploadFile = File(...), db: Session = Depends(
 
 
 @router.post("/finance/import/debitoren", response_model=dict)
-async def import_debitoren_csv(file: UploadFile = File(...), db: Session = Depends(get_db)) -> dict:
-    """CSV-Import für Debitoren. Spalten: Kunde, IBAN, Betrag, Fälligkeit, Status."""
+async def import_debitoren_csv(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict:
+    """CSV-Import für Debitoren-Stammdaten → ``domain_crm.customers``. Spalten u.a.: Kunde, Debitorennummer, Land, PLZ, Ort, E-Mail."""
     content = await file.read()
     rows = _parse_csv_bytes(content)
     created = updated = 0
     errors: list[str] = []
+    col_map = {
+        "kunde": "firma",
+        "name": "firma",
+        "company": "firma",
+        "firma": "firma",
+        "debitorennummer": "kundennummer",
+        "kundennummer": "kundennummer",
+        "ort": "ort",
+        "city": "ort",
+        "plz": "plz",
+        "zip": "plz",
+        "land": "land",
+        "country": "land",
+        "email": "email",
+        "e-mail": "email",
+        "telefon": "telefon",
+        "phone": "telefon",
+        "status": "status",
+        "ust-id": "ust_id",
+        "ust_id": "ust_id",
+        "tax_id": "ust_id",
+    }
     for i, row in enumerate(rows):
-        norm = {k.lower().strip(): v.strip() for k, v in row.items() if v}
-        kunde = norm.get("kunde", norm.get("name", norm.get("company", "")))
-        dq_error = _validate_csv_customer_row(
-            {
-                "firma": kunde,
-                "land": norm.get("land", "DE"),
-                "debitorennummer": norm.get("debitorennummer", kunde),
-            }
-        )
+        norm = {col_map.get(k.lower().strip(), k.lower().strip()): (v or "").strip() for k, v in row.items()}
+        firma = norm.get("firma", "").strip()
+        if not firma:
+            errors.append(f"{_csv_error_prefix(i+2)} Kunde/Firma fehlt")
+            continue
+        dq_payload = {k: v for k, v in norm.items() if v}
+        dq_payload["firma"] = firma
+        dq_payload.setdefault("land", norm.get("land") or "DE")
+        dq_error = _validate_csv_customer_row(dq_payload)
         if dq_error:
             errors.append(f"{_csv_error_prefix(i+2)} {dq_error}")
             continue
-        try:
-            import uuid as _uuid
-            db.execute(
-                text("""INSERT INTO domain_crm.customers (id, name, status, created_at)
-                        VALUES (:id, :name, 'aktiv', NOW())
-                        ON CONFLICT (id) DO NOTHING"""),
-                {"id": str(_uuid.uuid4()), "name": kunde}
-            )
-            created += 1
-        except Exception as e:
-            errors.append(f"Zeile {i+2}: {str(e)[:80]}")
+        kundennummer = (norm.get("kundennummer") or "").strip()[:50]
+        plz = norm.get("plz", "").strip()[:10]
+        ort = norm.get("ort", "").strip()[:50]
+        land = (norm.get("land", "") or "DE").strip()[:50] or "DE"
+        email = norm.get("email", "").strip()[:255]
+        telefon = norm.get("telefon", "").strip()[:50]
+        ust_id = (norm.get("ust_id") or "").strip()[:50]
+        is_active = _csv_status_to_is_active(norm.get("status"))
+        cr, up, err = _domain_crm_upsert_customer_norm(
+            db,
+            tenant_id,
+            firma=firma,
+            kundennummer=kundennummer,
+            plz=plz,
+            ort=ort,
+            land=land,
+            email=email,
+            telefon=telefon,
+            is_active=is_active,
+            ust_id=ust_id,
+        )
+        if err:
+            errors.append(f"Zeile {i+2}: {err}")
+        else:
+            if cr:
+                created += 1
+            if up:
+                updated += 1
     try:
         db.commit()
     except Exception as e:
@@ -2168,11 +2416,16 @@ async def annahme_upload(
     if len(content) > getattr(settings, "MAX_UPLOAD_SIZE", 10 * 1024 * 1024):
         raise HTTPException(status_code=413, detail="Datei zu groß")
     upload_id = str(uuid4())
-    base_dir = os.path.join(getattr(settings, "UPLOAD_DIR", "uploads"), "annahme")
+    base_dir = os.path.realpath(os.path.join(getattr(settings, "UPLOAD_DIR", "uploads"), "annahme"))
     os.makedirs(base_dir, exist_ok=True)
-    ext = os.path.splitext(file.filename or "")[1] or ".bin"
+    ext = os.path.splitext(os.path.basename(file.filename or ""))[1] or ".bin"
+    # Only allow safe extension characters (alphanumeric + dot)
+    if not all(c.isalnum() or c == '.' for c in ext):
+        ext = ".bin"
     safe_name = f"{upload_id}{ext}"
-    path = os.path.join(base_dir, safe_name)
+    path = os.path.realpath(os.path.join(base_dir, safe_name))
+    if not path.startswith(base_dir + os.sep) and path != base_dir:
+        raise HTTPException(status_code=400, detail="Ungueltiger Dateipfad")
     with open(path, "wb") as f:
         f.write(content)
     cache_set_json(f"annahme:upload:{upload_id}", {"id": upload_id, "filename": file.filename, "path": path}, ttl_seconds=86400 * 7)

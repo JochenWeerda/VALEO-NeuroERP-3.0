@@ -28,7 +28,7 @@ import { PageSection, PageSurface } from '@/components/patterns/PageSurface'
 import { AgentProcessPanel } from '@/components/agent'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -809,14 +809,39 @@ export function FlowSpineWorkspace({ processKey, instanceId }: FlowSpineWorkspac
             </div>
 
             <div className="mt-6 grid gap-4 lg:grid-cols-3">
-              {workspace.footer_cards.map((card) => (
+              {workspace.footer_cards.map((card) => {
+                const isNextSteps =
+                  /schritt/i.test(card.title) || /naechste/i.test(card.title)
+                return (
                 <Card key={card.title} className="border-white/10 bg-slate-950/45 text-slate-100">
-                  <CardHeader><CardTitle className="text-base">{card.title}</CardTitle></CardHeader>
-                  <CardContent className="space-y-3 text-sm text-slate-300">
-                    {card.items.map((item) => <div key={item} className="rounded-2xl border border-white/10 px-4 py-3">{item}</div>)}
+                  <CardHeader>
+                    <CardTitle className="text-base">{card.title}</CardTitle>
+                    {isNextSteps ? (
+                      <CardDescription className="text-slate-400">
+                        Orientierung — keine Navigation; die Punkte sind als Checkliste gemeint.
+                      </CardDescription>
+                    ) : null}
+                  </CardHeader>
+                  <CardContent className="text-sm text-slate-300">
+                    <ul
+                      className={
+                        isNextSteps
+                          ? 'list-disc space-y-1.5 pl-5 marker:text-slate-500'
+                          : 'space-y-2'
+                      }
+                    >
+                      {card.items.map((item) => (
+                        <li
+                          key={item}
+                          className={isNextSteps ? 'leading-snug' : 'rounded-2xl border border-white/10 px-4 py-3'}
+                        >
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
                   </CardContent>
                 </Card>
-              ))}
+              )})}
             </div>
           </main>
 

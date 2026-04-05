@@ -14,6 +14,7 @@ import { AdvancedFilters, FilterConfig } from '@/components/list/AdvancedFilters
 import { CSVImport } from '@/components/list/CSVImport'
 import { useToast } from '@/hooks/use-toast'
 import { saveDocument } from '@/lib/document-api'
+import { getAxiosErrorMessage } from '@/lib/api-client'
 import { useAngebote, type Angebot, type AngebotStatus } from '@/lib/api/sales'
 
 const statusVariantMap: Record<AngebotStatus, 'default' | 'outline' | 'secondary' | 'destructive'> = {
@@ -106,7 +107,7 @@ export default function AngeboteListePage(): JSX.Element {
       toast({
         variant: 'destructive',
         title: t('crud.messages.importError'),
-        description: error instanceof Error ? error.message : 'Unbekannter Fehler',
+        description: getAxiosErrorMessage(error),
       })
     }
   }

@@ -12,6 +12,7 @@ import {
   type OnboardingRun,
   type OnboardingStatus,
 } from '@/lib/api/personal'
+import { getAxiosErrorMessage } from '@/lib/api-client'
 import { useToast } from '@/components/ui/toast-provider'
 
 const statusLabels: Record<OnboardingStatus, string> = {
@@ -57,7 +58,7 @@ export default function PersonalOnboardingPage(): JSX.Element {
           setAssignedBy('')
         },
         onError: (error) => {
-          push(error instanceof Error ? error.message : 'Speichern fehlgeschlagen.')
+          push(getAxiosErrorMessage(error))
         },
       },
     )

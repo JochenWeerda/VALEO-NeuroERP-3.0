@@ -24,6 +24,9 @@ import { useAuth } from '@/hooks/useAuth'
 import { globalShortcutManager } from '@/lib/shortcuts/global-shortcuts'
 import { useGlobalShortcutsWithVoice } from '@/features/ki-usability'
 import { ShortcutHintButton } from '@/components/shortcuts/ShortcutHelpPanel'
+import { CustomerChefHintsBanner } from '@/components/sales/CustomerChefHintsBanner'
+import { CustomerSalesEligibilityBanner } from '@/components/sales/CustomerSalesEligibilityBanner'
+import { useCustomerSalesEligibility } from '@/hooks/useCustomerSalesEligibility'
 import {
   ChevronLeft, ChevronRight, ChevronUp, ChevronDown, MoreHorizontal, Check, Printer, Save,
   FileText, Folder, FileCheck, Link as LinkIcon, Receipt, Trash2, Search,
@@ -309,6 +312,8 @@ export default function SalesOrderEditorPage(): JSX.Element {
       a.nummer.toLowerCase().includes(sucheText.toLowerCase()) ||
       a.kunde.toLowerCase().includes(sucheText.toLowerCase()),
   )
+
+  const { data: salesEligibility } = useCustomerSalesEligibility(state.customer?.id)
 
   // Bediener aus Session aktualisieren
   useEffect(() => {
@@ -646,6 +651,10 @@ export default function SalesOrderEditorPage(): JSX.Element {
       push('Bitte zuerst einen Kunden auswählen')
       return null
     }
+    if (salesEligibility && !salesEligibility.allowed_order) {
+      push(salesEligibility.reasons.join(' ') || 'Kunde ist für Aufträge nicht freigegeben (Stammdaten).')
+      return null
+    }
     try {
       const payload = {
         order_number: state.auftragNr || undefined,
@@ -911,6 +920,17 @@ export default function SalesOrderEditorPage(): JSX.Element {
       )}
 
       <div className="flex-1 overflow-auto p-4">
+        {state.customer ? (
+          <CustomerChefHintsBanner
+            customerNumber={state.customer.customerNumber}
+            crmCustomerId={state.customer.id}
+            chefanweisungFromCustomer={state.customer.chefanweisung ?? state.customer.executiveNote}
+          />
+        ) : null}
+        {state.customer ? (
+          <CustomerSalesEligibilityBanner crmCustomerId={state.customer.id} modus="auftrag" />
+        ) : null}
+
 
         {/* â”€â”€ Kopf-Bereich (3 Spalten) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         <Card className="mb-4 p-4">
