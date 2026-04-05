@@ -124,3 +124,6 @@ memory-bank/
 gitleaks-report.json
 metadata.json
 nul
+.aider*
+!.aider.conf.yml
+!.aiderignore
