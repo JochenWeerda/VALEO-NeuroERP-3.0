@@ -51,6 +51,8 @@ Zwei End-to-End-Stränge laufen **fachlich und technisch getrennt**. Bitte **nic
 |----------|-------|--------|-------|-------------|-------------------|---------|
 | OPS-001 | Workflow-Analyse-Methodik und Agent-Ops-Doku | abgeschlossen | — | `AGENTS.md`, `docs/agent-ops/**`, `docs/workflows/**`, `docs/project-context/**`, `docs/quality-assurance/**` | bei neuen Workflow-Slices wiederverwenden | keine |
 | DOCS-105 | Wave-104-Dokumentations-Nachzug (GAP-G/H/I, Repo-Hygiene) | abgeschlossen | — | `docs/architecture/process-kernel/STATUS.md`, `DELIVERY-MAP.md`, `wave-104/STATUS.md`, `docs/roadmap/status/2026-03-27-wave-104-abschluss.md`, `docs/project-context/open-gaps-and-known-issues.md` | keine (Doku im Repo eingecheckt) | keine |
+| CRM-003 | CRM-Kunde ↔ Business-Partner Verknuepfung und Verkaufsfreigaben | abgeschlossen | Codex | `app/api/v1/endpoints/customers.py`, `app/services/customer_sales_eligibility.py`, `tests/test_crm_customer_business_partner_link.py`, `tests/test_security_sales_orders.py`, `tests/test_security_sales_offers.py`, `tests/test_security_sales_credit_notes.py` | Frontend- oder Workboard-Folgeslice fuer breitere CRM/BP-UI-Verdrahtung schneiden | globaler Frontend-Typecheck bleibt ausserhalb dieses Slices an `apiClient`-/Axios-Contracts offen |
+| CRM-004 | Frontend `apiClient`-/Axios-Contract harmonisieren | reserviert | Codex | `packages/frontend-web/src/lib/api-client.ts`, betroffene `packages/frontend-web/src/lib/api/**`, `packages/frontend-web/src/hooks/**`, `packages/frontend-web/src/pages/**`, `packages/frontend-web/src/components/**` entlang des zentralen Response-Contracts | zentralen Response-Contract festziehen, Typecheck gegen die groessten Fehlercluster erneut laufen lassen | grosser bestehender Frontend-Worktree; keine stillen Reverts |
 | NC-B1 | Neuro State Graph + Confidence Ledger (Grundgeruest) | abgeschlossen | Codex | `app/core/neuro_state_graph.py`, `app/core/confidence_ledger.py`, `app/infrastructure/models/neuro_state_models.py`, `app/api/v1/endpoints/neuro_state_graph_api.py`, `alembic/versions/neuroassist_state_graph_confidence_ledger_20260329.py`, `tests/test_neuro_state_graph.py`, `docs/workflows/nc-b1-state-graph-confidence-ledger.md`, `docs/cards/neuro-core/NC-B1-state-graph-confidence-ledger.md` | NC-D1 oder NC-C1 claimen | keine |
 | NC-G2 | NATS Consumer Framework | abgeschlossen | Codex | `app/infrastructure/eventbus/nats_consumer.py`, `app/services/event_schema_registry.py`, `app/api/v1/endpoints/neuro_event_policy.py`, `docs/workflows/nc-g2-nats-consumer.md`, `docs/cards/neuro-core/NC-G2-nats-consumer.md`, `tests/test_nats_consumer.py` | NC-G3 starten | keine |
 | NC-G3 | NATS Consumer Handler (Audit/Inventory/Settlement) | abgeschlossen | Codex | `app/services/nats_event_handlers.py`, `app/domains/shared/events.py`, `app/infrastructure/eventbus/nats_consumer.py`, `tests/test_nats_event_handlers.py`, `docs/workflows/nc-g3-nats-handlers.md`, `docs/cards/neuro-core/NC-G3-nats-handlers.md` | NC-G4/G5 vertiefen | keine |
@@ -945,3 +947,23 @@ Alle 6 Router registriert in `app/api/v1/api.py` unter `/api/v1/neuro/*`. Commit
 **Offene Risiken:** Die neue Korrektheitsschicht ist fachlich staerker, aber produktive Tenant-Override-Nutzung und weitergehende Integrity-Checks bleiben getrennte Folgearbeit.
 **Annahmen:** Default-PolicySets bleiben fuer Wave 2 die tragende fachliche Basis; echte Tenant-Overrides koennen in einem getrennten Runtime-Slice nachgezogen werden.
 **Naechster konkreter Schritt:** Decision-Trace-Hardening/LLM-Fallback oder dynamische Plan-Generierung als naechsten NC-A-Folgeslice schneiden.
+
+## Handoff: 2026-04-05 - CRM-003
+
+**Von:** Codex
+**An:** naechste Session / naechster Agent
+**Ziel des Slices:** CRM-Kunde ↔ Business-Partner-Verknuepfung tenant-sicher persistieren und Verkaufsfreigaben gegen denselben Stammdatenpfad absichern.
+**Stand:** abgeschlossen
+**Erledigt:**
+- `app/api/v1/endpoints/customers.py` persistiert `business_partner_id` jetzt im Create- und Update-Pfad tenant-spezifisch statt hart gegen den Default-Tenant.
+- Der Create-Pfad validiert referenzierte `business_partner_id` jetzt ebenfalls gegen den Request-/Payload-Tenant, bevor ein Monolith-Stub geschrieben wird.
+- `get_customer` und `update_customer` lesen Monolith-Erweiterungen (`business_partner_id`, `chefanweisung`) jetzt tenant-gebunden.
+- Neue Regressionstests decken Create-/Update-Persistenz und die kombinierte Delivery-/Invoice-Sperrlogik ab; bestehende Sales-Security-Tests bleiben gruen.
+**Offen:**
+- Der globale Frontend-Typecheck ist weiterhin ausserhalb dieses Slices rot, weil breit im Repo `apiClient`-/Axios-Contracts inkonsistent verwendet werden.
+- Die breitere UI-Verdrahtung des neuen CRM/BP-Pfads ist im Worktree zwar begonnen, aber noch nicht als eigener sauber abgegrenzter Slice dokumentiert.
+**Betroffene Dateien:** `app/api/v1/endpoints/customers.py`, `app/services/customer_sales_eligibility.py`, `tests/test_crm_customer_business_partner_link.py`, `tests/test_security_sales_orders.py`, `tests/test_security_sales_offers.py`, `tests/test_security_sales_credit_notes.py`, `docs/agent-ops/active-workboard.md`
+**Tests / Checks:** `pytest tests/test_crm_customer_business_partner_link.py tests/test_security_sales_orders.py tests/test_security_sales_offers.py tests/test_security_sales_credit_notes.py -q --no-cov` gruen (`12 passed`); `python -m py_compile app/api/v1/endpoints/customers.py app/services/customer_sales_eligibility.py tests/test_crm_customer_business_partner_link.py` gruen.
+**Offene Risiken:** Ohne separaten Folgeslice bleibt unklar, welche Teile des grossen uncommitteten CRM-/Frontend-Worktrees zum selben Thema gehoeren und welche fremde Zwischenstaende sind.
+**Annahmen:** Fuer diesen Nachzug war Backend-Korrektheit wichtiger als ein weiterer ungezielter Versuch, den globalen Frontend-Typecheck im selben unscharfen Worktree zu bereinigen.
+**Naechster konkreter Schritt:** Einen eigenen CRM-Frontend-Folgeslice fuer `apiClient`-/Axios-Contract-Harmonisierung und die begonnene CRM/BP-UI-Verdrahtung schneiden, claimen und separat abarbeiten.
