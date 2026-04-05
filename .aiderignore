@@ -1,0 +1,49 @@
+# Build-Artefakte
+node_modules/
+dist/
+__pycache__/
+storybook-static/
+.next/
+htmlcov/
+coverage/
+
+# Generierte Dateien
+*.min.js
+*.min.css
+pnpm-lock.yaml
+package-lock.json
+
+# Binaerdateien
+*.png
+*.jpg
+*.gif
+*.ico
+*.svg
+*.woff
+*.woff2
+*.ttf
+*.eot
+
+# Alembic Migrationen (generierter Code)
+alembic/versions/*.py
+
+# Reports und Logs
+playwright-report/
+test-results/
+security-reports/
+
+# Lokale Daten
+data/
+*.db
+*.sqlite
+
+# K8s und Infra (selten refactored)
+k8s/
+ops/
+.github/
+
+# Docs (read-only via .aider.conf.yml)
+docs/
+
+# Third-party Snapshots
+l3-migration-toolkit/
