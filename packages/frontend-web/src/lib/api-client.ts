@@ -2,13 +2,69 @@
  * API Client
  * Axios-basierter HTTP-Client mit Interceptors
  */
-import axios, { type AxiosInstance, isAxiosError } from 'axios'
+import axios, { type AxiosInstance, type AxiosResponse, isAxiosError } from 'axios'
 import { auth } from './auth'
 
 const DEV_TOKEN = import.meta.env.VITE_API_DEV_TOKEN as string | undefined || 'dev-token'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? ''
 const DEFAULT_TENANT_ID = import.meta.env.VITE_TENANT_ID || '00000000-0000-0000-0000-000000000001'
+
+export type ApiResult<T> = T & {
+  data: T
+  ok: boolean
+  httpStatus: number
+  statusText: string
+  headers: AxiosResponse['headers']
+  response: AxiosResponse<T>
+}
+
+function wrapResponseData<T>(response: AxiosResponse<T>): ApiResult<T> {
+  const payload = response.data
+  const meta = {
+    data: payload,
+    ok: response.status >= 200 && response.status < 300,
+    httpStatus: response.status,
+    statusText: response.statusText,
+    headers: response.headers,
+    response,
+  }
+
+  if (payload == null || (typeof payload !== 'object' && typeof payload !== 'function')) {
+    return meta as ApiResult<T>
+  }
+
+  return new Proxy(payload as object, {
+    get(target, prop, receiver) {
+      if (prop in meta) {
+        return Reflect.get(meta, prop, receiver)
+      }
+      const value = Reflect.get(target, prop, receiver)
+      if (typeof value === 'function') {
+        return value.bind(target)
+      }
+      return value
+    },
+    has(target, prop) {
+      return prop in meta || prop in target
+    },
+    ownKeys(target) {
+      const keys = new Set<string | symbol>(Reflect.ownKeys(target))
+      for (const key of Reflect.ownKeys(meta)) {
+        if (typeof key === 'string' || typeof key === 'symbol') {
+          keys.add(key)
+        }
+      }
+      return [...keys]
+    },
+    getOwnPropertyDescriptor(target, prop) {
+      return (
+        Reflect.getOwnPropertyDescriptor(meta, prop)
+        ?? Reflect.getOwnPropertyDescriptor(target, prop)
+      )
+    },
+  }) as ApiResult<T>
+}
 
 class APIClient {
   private client: AxiosInstance
@@ -62,24 +118,29 @@ class APIClient {
     )
   }
 
-  get<T>(url: string, config?: Parameters<AxiosInstance['get']>[1]) {
-    return this.client.get<T>(url, config)
+  async get<T, D = unknown>(url: string, config?: Parameters<AxiosInstance['get']>[1]): Promise<ApiResult<T>> {
+    const response = await this.client.get<T, AxiosResponse<T>, D>(url, config as any)
+    return wrapResponseData(response)
   }
 
-  post<T>(url: string, data?: unknown, config?: Parameters<AxiosInstance['post']>[2]) {
-    return this.client.post<T>(url, data, config)
+  async post<T, D = unknown>(url: string, data?: D, config?: Parameters<AxiosInstance['post']>[2]): Promise<ApiResult<T>> {
+    const response = await this.client.post<T, AxiosResponse<T>, D>(url, data, config as any)
+    return wrapResponseData(response)
   }
 
-  put<T>(url: string, data?: unknown, config?: Parameters<AxiosInstance['put']>[2]) {
-    return this.client.put<T>(url, data, config)
+  async put<T, D = unknown>(url: string, data?: D, config?: Parameters<AxiosInstance['put']>[2]): Promise<ApiResult<T>> {
+    const response = await this.client.put<T, AxiosResponse<T>, D>(url, data, config as any)
+    return wrapResponseData(response)
   }
 
-  patch<T>(url: string, data?: unknown, config?: Parameters<AxiosInstance['patch']>[2]) {
-    return this.client.patch<T>(url, data, config)
+  async patch<T, D = unknown>(url: string, data?: D, config?: Parameters<AxiosInstance['patch']>[2]): Promise<ApiResult<T>> {
+    const response = await this.client.patch<T, AxiosResponse<T>, D>(url, data, config as any)
+    return wrapResponseData(response)
   }
 
-  delete<T>(url: string, config?: Parameters<AxiosInstance['delete']>[1]) {
-    return this.client.delete<T>(url, config)
+  async delete<T, D = unknown>(url: string, config?: Parameters<AxiosInstance['delete']>[1]): Promise<ApiResult<T>> {
+    const response = await this.client.delete<T, AxiosResponse<T>, D>(url, config as any)
+    return wrapResponseData(response)
   }
 }
 

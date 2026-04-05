@@ -1,11 +1,23 @@
 from __future__ import annotations
 
 from decimal import Decimal
+from types import SimpleNamespace
 
 import pytest
 from fastapi import HTTPException
 
 from app.api.v1.endpoints import sales_credit_notes
+
+
+def _eligibility_fetchone_ok():
+    return SimpleNamespace(
+        customer_number="",
+        business_partner_id=None,
+        bp_id=None,
+        bp_status=None,
+        blocked_for_delivery=None,
+        blocked_for_invoice=None,
+    )
 
 
 class _FakeResult:
@@ -59,7 +71,14 @@ async def test_create_credit_note_rejects_payload_tenant_mismatch(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_post_credit_note_scopes_lookup_and_update_by_tenant(monkeypatch):
-    db = _CapturingDb(rows=[[("cn-1", "tenant-a", "GS-1", "cust-1", Decimal("50.00"), "draft")], [], []])
+    db = _CapturingDb(
+        rows=[
+            [("cn-1", "tenant-a", "GS-1", "cust-1", Decimal("50.00"), "draft")],
+            [_eligibility_fetchone_ok()],
+            [],
+            [],
+        ]
+    )
     monkeypatch.setattr(sales_credit_notes, "log_fibu_audit", lambda *args, **kwargs: None)
 
     result = await sales_credit_notes.post_credit_note(
@@ -70,7 +89,7 @@ async def test_post_credit_note_scopes_lookup_and_update_by_tenant(monkeypatch):
     )
 
     select_statement, select_params = db.calls[0]
-    update_statement, update_params = db.calls[2]
+    update_statement, update_params = db.calls[3]
     assert "WHERE id = :id AND tenant_id = :tid" in select_statement
     assert select_params == {"id": "cn-1", "tid": "tenant-a"}
     assert "WHERE id = :id AND tenant_id = :tid" in update_statement

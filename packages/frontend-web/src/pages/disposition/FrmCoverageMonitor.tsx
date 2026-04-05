@@ -61,7 +61,7 @@ export default function FrmCoverageMonitor(): JSX.Element {
     queryKey: ['positions', 'coverage-monitor', params],
     queryFn: () => getCoverageMonitor(params),
   })
-  const data = coverageRes?.data
+  const data = coverageRes
 
   const shortcuts = buildCoreMaskShortcuts({
     onRefresh: () => { void refetch() },

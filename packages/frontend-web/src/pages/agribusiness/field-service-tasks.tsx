@@ -15,6 +15,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Toolbar } from '@/components/ui/toolbar';
 import { DetailDrawer } from '@/components/ui/detail-drawer';
 import { CrudDeleteDialog, CrudCancelDialog, CrudAuditTrailPanel, CrudPrintButton } from '@/features/crud/components';
+import type { ChangeLog } from '@/features/crud/components/CrudAuditTrailPanel';
 import { useCrudDelete, useCrudCancel, useCrudAuditTrail } from '@/features/crud/hooks';
 import { Badge } from '@/components/ui/badge';
 import { getEntityTypeLabel, getListTitle, getDetailTitle, getStatusLabel } from '@/features/crud/utils/i18n-helpers';
@@ -130,7 +131,7 @@ export default function FieldServiceTasksPage(): JSX.Element {
   // Audit trail
   const fetchAuditTrail = async (entityType: string, entityId: string) => {
     try {
-      const { data } = await apiClient.get(`/api/v1/audit/change-logs/audit-trail/${entityType}/${entityId}`);
+      const data = await apiClient.get<{ data?: ChangeLog[] }>(`/api/v1/audit/change-logs/audit-trail/${entityType}/${entityId}`);
       return data.data || [];
     } catch {
       return [];

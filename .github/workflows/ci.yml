@@ -68,6 +68,7 @@ jobs:
           python scripts/init_db.py
           python -m app.seeds.inventory_seed
       
+      # Vollsuite deckt u.a. Compliance/PCN (test_flow_spines_api), Kernel-Actions (wave17), Broker ab.
       - name: Run tests
         run: |
           pytest --cov=app --cov-report=xml --cov-report=term

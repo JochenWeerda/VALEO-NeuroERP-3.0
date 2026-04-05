@@ -64,3 +64,23 @@ class LastschriftExportResult(BaseModel):
     download_url: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     schema_version: int = 1
+
+
+class KassenfolgePreview(BaseModel):
+    """Vorschau fuer POS-/Kassen-Folge (TSE/Compliance-Nachzug)."""
+
+    tenant_id: str
+    pos_compliance_records: int
+    pending_export_count: int
+    export_ready: bool
+    schema_version: int = 1
+
+
+class KassenfolgeExportResult(BaseModel):
+    export_id: str
+    tenant_id: str
+    format: str = "zip"
+    record_count: int
+    download_url: Optional[str] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    schema_version: int = 1

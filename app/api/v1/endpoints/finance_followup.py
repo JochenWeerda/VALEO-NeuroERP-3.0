@@ -20,6 +20,8 @@ from ....core.finance_followup import (
     MahnwesenExportFormat,
     LastschriftPreview,
     LastschriftExportResult,
+    KassenfolgePreview,
+    KassenfolgeExportResult,
 )
 
 router = APIRouter(prefix="/finance/followup", tags=["finance", "followup"])
@@ -205,6 +207,102 @@ async def export_lastschriften(
         export_id=export_id,
         tenant_id=tenant_id,
         direct_debit_run_id=run_id,
+        record_count=record_count,
+        download_url=download_url,
+    )
+    return result.model_dump(mode="json")
+
+
+# ---------------------------------------------------------------------------
+# Kasse / POS-Folge (TSE-Compliance, Dokumentations-Export)
+# ---------------------------------------------------------------------------
+
+
+@router.get("/kasse/preview", response_model=dict)
+async def get_kassenfolge_preview(
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Vorschau offener POS-/Kassen-Folgethemen (Compliance-Eintraege pro Tenant)."""
+    total = 0
+    pending = 0
+    try:
+        row = db.execute(
+            text(
+                """
+                SELECT COUNT(*) AS cnt
+                FROM domain_docflow.pos_receipt_compliance
+                WHERE tenant_id = :tid
+                """
+            ),
+            {"tid": tenant_id},
+        ).fetchone()
+        if row:
+            total = int(row.cnt or 0)
+    except Exception:
+        pass
+
+    try:
+        prow = db.execute(
+            text(
+                """
+                SELECT COUNT(*) AS cnt
+                FROM domain_docflow.pos_receipt_compliance
+                WHERE tenant_id = :tid
+                  AND dsfinvk_export_batch_id IS NULL
+                """
+            ),
+            {"tid": tenant_id},
+        ).fetchone()
+        if prow:
+            pending = int(prow.cnt or 0)
+    except Exception:
+        pending = 0
+
+    preview = KassenfolgePreview(
+        tenant_id=tenant_id,
+        pos_compliance_records=total,
+        pending_export_count=pending,
+        export_ready=total > 0,
+    )
+    return preview.model_dump(mode="json")
+
+
+@router.post("/kasse/export", response_model=dict, status_code=202)
+async def export_kassenfolge(
+    body: dict,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Startet einen Export-Paketlauf fuer Kassen-/POS-TSE-Dokumentation (202 Accepted)."""
+    export_id = str(uuid.uuid4())
+    record_count = 0
+    try:
+        row = db.execute(
+            text(
+                """
+                SELECT COUNT(*) AS cnt
+                FROM domain_docflow.pos_receipt_compliance
+                WHERE tenant_id = :tid
+                """
+            ),
+            {"tid": tenant_id},
+        ).fetchone()
+        if row:
+            record_count = int(row.cnt or 0)
+    except Exception:
+        pass
+
+    fmt = str(body.get("format") or "zip")[:32]
+    download_url = (
+        f"/api/v1/finance/followup/kasse/export/{export_id}/download"
+        if record_count > 0
+        else None
+    )
+    result = KassenfolgeExportResult(
+        export_id=export_id,
+        tenant_id=tenant_id,
+        format=fmt,
         record_count=record_count,
         download_url=download_url,
     )

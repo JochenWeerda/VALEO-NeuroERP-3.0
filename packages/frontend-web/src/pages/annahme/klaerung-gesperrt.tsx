@@ -79,7 +79,7 @@ export default function KlaerungGesperrtPage(): JSX.Element {
       toast({ title: 'Begruendung fehlt', description: 'Bitte eine kurze Begruendung erfassen.', variant: 'destructive' })
       return
     }
-    const klaerungPayload = {
+    const klaerungPayload: NonNullable<NonNullable<typeof entry>['klaerung']> = {
       status: decision === 'sonderfreigabe' ? 'freigegeben' : 'gesperrt',
       decision,
       reason: reason.trim(),

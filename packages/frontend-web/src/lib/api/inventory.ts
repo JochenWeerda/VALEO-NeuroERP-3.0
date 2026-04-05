@@ -12,6 +12,7 @@ export type Warehouse = {
   name: string
   address?: string
   capacity?: number
+  used_capacity?: number
   is_active: boolean
   tenant_id: string
   created_at: string

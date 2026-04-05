@@ -11,6 +11,7 @@ from fastapi.responses import Response, StreamingResponse
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.tenant import get_tenant_id
 from app.core.tenant_context import get_current_tenant_id
 from app.documents.router_helpers import get_repository, list_from_store
 from app.domains.operations.models import (
@@ -815,7 +816,11 @@ def _pcn_to_dict(m: PCNMeldung) -> dict:
 
 
 @router.post("/pcn-meldungen", response_model=dict, status_code=201)
-async def create_pcn_meldung(body: dict, db: Session = Depends(get_db)) -> dict:
+async def create_pcn_meldung(
+    body: dict,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict:
     """
     Anlage einer neuen PCN-Meldung (Product Classification Notification) mit UFI.
 
@@ -823,6 +828,10 @@ async def create_pcn_meldung(body: dict, db: Session = Depends(get_db)) -> dict:
     Entspricht den Anforderungen der EU-Verordnung 2017/542 (CLP-Anhang VIII).
     """
     from fastapi import HTTPException
+
+    produktname = str(body.get("produktname", "")).strip()
+    if not produktname:
+        raise HTTPException(status_code=422, detail="produktname ist erforderlich.")
 
     ufi = str(body.get("ufi", "")).strip()
     if ufi and not _UFI_PATTERN.match(ufi):
@@ -832,13 +841,13 @@ async def create_pcn_meldung(body: dict, db: Session = Depends(get_db)) -> dict:
         )
 
     meldung = PCNMeldung(
-        produktname=body.get("produktname", ""),
+        produktname=produktname,
         ufi=ufi or None,
         cas_nummern=body.get("cas_nummern") or None,
         gefahrenklassen=body.get("gefahrenklassen") or [],
         verwendungskategorie=body.get("verwendungskategorie") or None,
         pcn_status=body.get("pcnStatus", "entwurf"),
-        tenant_id=get_current_tenant_id(),
+        tenant_id=tenant_id,
     )
     try:
         db.add(meldung)
@@ -856,21 +865,23 @@ async def list_pcn_meldungen(
     skip: int = Query(default=0, ge=0),
     limit: int = Query(default=50, ge=1, le=200),
     db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ) -> dict:
     """Liste aller PCN-Meldungen (tenant-isoliert, paginiert)."""
-    tenant_id = get_current_tenant_id()
     base_q = (
         db.query(PCNMeldung)
         .filter(PCNMeldung.tenant_id == tenant_id)
         .order_by(PCNMeldung.created_at.desc())
     )
     total = base_q.count()
-    items = base_q.offset(skip).limit(limit).all()
+    rows = base_q.offset(skip).limit(limit).all()
+    meldungen = [_pcn_to_dict(m) for m in rows]
     return {
         "total": total,
         "skip": skip,
         "limit": limit,
-        "meldungen": [_pcn_to_dict(m) for m in items],
+        "meldungen": meldungen,
+        "items": meldungen,
         "schema_version": 1,
     }
 

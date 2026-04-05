@@ -1,11 +1,23 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+from types import SimpleNamespace
 
 import pytest
 from fastapi import HTTPException
 
 from app.api.v1.endpoints import sales_offers
+
+
+def _eligibility_fetchone_ok():
+    return SimpleNamespace(
+        customer_number="",
+        business_partner_id=None,
+        bp_id=None,
+        bp_status=None,
+        blocked_for_delivery=None,
+        blocked_for_invoice=None,
+    )
 
 
 class _FakeMappingsResult:
@@ -20,15 +32,24 @@ class _FakeMappingsResult:
 
 
 class _FakeResult:
-    def __init__(self, rows=None, *, rowcount: int = 1):
+    def __init__(self, rows=None, *, rowcount: int = 1, fetchone_row=None):
         self._rows = list(rows or [])
         self.rowcount = rowcount
+        self._fetchone_row = fetchone_row
 
     def mappings(self):
         return _FakeMappingsResult(self._rows)
 
     def first(self):
         return self._rows[0] if self._rows else None
+
+    def fetchone(self):
+        if self._fetchone_row is not None:
+            return self._fetchone_row
+        if not self._rows:
+            return None
+        r = self._rows[0]
+        return SimpleNamespace(**r) if isinstance(r, dict) else r
 
     def scalar(self):
         return self._rows[0] if self._rows else None
@@ -164,6 +185,7 @@ async def test_convert_offer_to_order_scopes_status_update_by_tenant():
                     }
                 ]
             ),
+            _FakeResult(fetchone_row=_eligibility_fetchone_ok()),
             _FakeResult(),
             _FakeResult(
                 [
@@ -206,7 +228,7 @@ async def test_convert_offer_to_order_scopes_status_update_by_tenant():
         db=db,
     )
 
-    update_statement, update_params = db.calls[1]
+    update_statement, update_params = db.calls[2]
     assert "WHERE id = :id AND tenant_id = :tenant_id" in update_statement
     assert update_params["id"] == "offer-1"
     assert update_params["tenant_id"] == "tenant-a"

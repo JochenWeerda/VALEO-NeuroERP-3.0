@@ -268,7 +268,7 @@ class NeuroToolBroker:
                     "message": f"Step '{step.action}' wartet auf menschliche Freigabe.",
                 }
 
-            execution = self._execute_step(step, plan, binding, tenant_id, ctx)
+            execution = self._execute_step(step, plan, binding, tenant_id, ctx, db)
             trace_entry.update(execution["trace"])
             tool_trace.append(trace_entry)
             executed_steps.append(
@@ -434,9 +434,10 @@ class NeuroToolBroker:
         binding: ToolBinding,
         tenant_id: str,
         context: dict[str, Any],
+        db: Optional[Session] = None,
     ) -> dict[str, Any]:
         if binding.kind == "command":
-            return self._dispatch_command(step, plan, binding, tenant_id)
+            return self._dispatch_command(step, plan, binding, tenant_id, db)
         if binding.kind == "mcp_tool":
             return self._execute_tool_contract(step, binding, tenant_id, context)
         if binding.kind == "superglue":
@@ -468,6 +469,7 @@ class NeuroToolBroker:
         plan: ExecutionPlan,
         binding: ToolBinding,
         tenant_id: str,
+        db: Optional[Session] = None,
     ) -> dict[str, Any]:
         request = ActionExecutionRequest(
             command_name=binding.target_name,
@@ -484,7 +486,9 @@ class NeuroToolBroker:
         if binding.target_name == "CreatePurchaseOrder":
             aggregate_state.setdefault("approval_status", "approved")
 
-        result = self._action_execution_service.execute(request, aggregate_state=aggregate_state)
+        result = self._action_execution_service.execute(
+            request, aggregate_state=aggregate_state, db=db
+        )
         if result.status.value in {"rejected"}:
             return {
                 "step_status": "failed",

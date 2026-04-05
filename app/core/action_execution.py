@@ -14,6 +14,7 @@ from enum import Enum
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
 
 from app.core.aggregate_registry import (
     AggregateDefinition,
@@ -199,7 +200,10 @@ class ActionExecutionService:
         self._dispatcher = dispatcher or CommandDispatcher()
 
     def execute(
-        self, request: ActionExecutionRequest, aggregate_state: dict[str, Any] | None = None
+        self,
+        request: ActionExecutionRequest,
+        aggregate_state: dict[str, Any] | None = None,
+        db: Session | None = None,
     ) -> ActionExecutionResult:
         aggregate_definition = get_aggregate_definition(request.aggregate_type)
         command_definition = self._dispatcher.get_definition(request.command_name)
@@ -269,7 +273,15 @@ class ActionExecutionService:
             dispatch_status=dispatch.status,
             error=dispatch.error,
         )
-        
+
+        if (
+            db is not None
+            and dispatch.status == CommandStatus.ACCEPTED
+        ):
+            from app.services.action_execution_mutations import apply_accepted_action_mutations
+
+            apply_accepted_action_mutations(db, request, result)
+
         # Store the result for future idempotency checks
         if dispatch.status in (CommandStatus.ACCEPTED, CommandStatus.REJECTED, CommandStatus.PENDING_APPROVAL):
             idempotency_store.remember(
@@ -278,7 +290,7 @@ class ActionExecutionService:
                 request_fingerprint=request.request_fingerprint(),
                 result=result,
             )
-        
+
         return result
 
     def _resolve_process_contract(

@@ -104,7 +104,7 @@ flowchart TD
 | D-09 | Compliance-Dashboard: Alle Register | Sachkunde, QS, Zulassungen, Cross-Compliance — echte API | ok |
 | D-10 | Compliance-Dashboard: PDF-Download | GET `/compliance/report-pdf` via Blob-Download | ok |
 | D-11 | Compliance-Register: Mutationen | Cross-Compliance, ENNI, QS, Zulassungen, Sachkunde nur read-only (GET) | offen CMP-001-P3 |
-| D-12 | PCN-Meldungen: POST Endpoint | Backend-Endpoint fehlt — Frontend zeigt Error-Toast | offen CMP-001-P4 |
+| D-12 | PCN-Meldungen: POST Endpoint | `POST/GET /compliance/pcn-meldungen` DB-backed, `items`+`meldungen`, `X-Tenant-ID` via `get_tenant_id` | ok |
 | D-13 | Flow-Spine: Instance-ID durchreichen | Keine Maske liest `workflowInstanceId` aus SearchParams | offen CMP-001-P5 |
 
 ---
@@ -160,8 +160,7 @@ flowchart TD
 
 ### hoch
 
-- **PCN-Meldungen Endpoint fehlt**: `POST /api/v1/compliance/pcn-meldungen` nicht implementiert.
-  Frontend-Seite `pcn-ufi.tsx` zeigt Fehler-Toast — Funktionslücke.
+- ~~**PCN-Meldungen Endpoint fehlt**~~ — **erledigt** (Wave-104 / Nachzug 2026-04): Persistenz `domain_ops.ops_pcn_meldungen`, Tenant aus `X-Tenant-ID` (Fallback Default).
 
 ### mittel
 
@@ -185,7 +184,7 @@ flowchart TD
 1. **CMP-001-P1:** `ustva.tsx` — Import auf `@/lib/api-client` umstellen (gleich wie FIN-001-P5).
 2. **CMP-001-P2:** `ustva.tsx` Zeile 469 — `applyVATReturnResponse(result.data)` statt `result`.
 3. **CMP-001-P3:** CRUD-Endpoints für Compliance-Register (mindestens POST/PUT für Sachkunde, QS).
-4. **CMP-001-P4:** `POST /api/v1/compliance/pcn-meldungen` Backend-Endpoint implementieren.
+4. ~~**CMP-001-P4:** `POST /api/v1/compliance/pcn-meldungen`~~ — implementiert; bei Toast-Errors: UFI-Format, DB-Migration, Auth prüfen.
 5. **CMP-001-P5:** `useSearchParams()` für `workflowInstanceId` in alle Masken einbauen.
 
 ---

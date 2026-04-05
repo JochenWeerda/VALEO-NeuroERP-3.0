@@ -437,7 +437,7 @@ export default function OpportunityDetailPage(): JSX.Element {
   const { data: contactsData } = useQuery({
     queryKey: ['crm', 'contacts-lookup'],
     queryFn: async () => {
-      const r = await globalApiClient.get<any[]>('/api/v1/crm/contacts')
+      const r = await globalApiClient.get<any[] | { items?: any[] }>('/api/v1/crm/contacts')
       const items = Array.isArray(r.data) ? r.data : r.data?.items || []
       return items
     },

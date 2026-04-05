@@ -1,0 +1,106 @@
+"""
+Domain-Mutationen fuer Process-Kernel-Commands (Einkauf).
+
+Registrierung erfolgt beim Laden von app.api.v1.api (siehe register_command_mutations).
+"""
+
+from __future__ import annotations
+
+import logging
+from datetime import date, datetime
+
+from sqlalchemy import text
+from sqlalchemy.orm import Session
+
+from app.core.action_execution import ActionExecutionRequest, ActionExecutionResult
+
+logger = logging.getLogger(__name__)
+
+
+def _create_purchase_order_mutation(
+    db: Session,
+    request: ActionExecutionRequest,
+    result: ActionExecutionResult,
+) -> None:
+    """
+    Legt eine Bestellzeile an, wenn Payload `lieferant_id` und optional `bestellnummer` enthaelt.
+    Idempotenz: gleiche bestellnummer pro Tenant wird uebersprungen.
+    """
+    payload = request.payload or {}
+    lid = payload.get("lieferant_id")
+    if lid is None:
+        logger.debug("CreatePurchaseOrder: keine lieferant_id im Payload — keine DB-Mutation")
+        return
+
+    try:
+        lieferant_id = int(lid)
+    except (TypeError, ValueError):
+        logger.warning("CreatePurchaseOrder: ungueltige lieferant_id: %s", lid)
+        return
+
+    bn = str(
+        payload.get("bestellnummer")
+        or payload.get("order_number")
+        or f"AE-{request.aggregate_id}"[:40]
+    ).strip()[:80]
+    if not bn:
+        bn = f"AE-{request.idempotency_key}"[:40]
+
+    tenant_id = request.tenant_id
+    check = db.execute(
+        text(
+            "SELECT id FROM einkauf_bestellungen "
+            "WHERE bestellnummer = :nummer AND tenant_id = :tenant_id LIMIT 1"
+        ),
+        {"nummer": bn, "tenant_id": tenant_id},
+    ).fetchone()
+    if check:
+        logger.debug("CreatePurchaseOrder: Bestellnummer %s existiert bereits", bn)
+        return
+
+    bestelldatum = date.today()
+    gd = payload.get("gewuenschtes_lieferdatum")
+    gew_dt = None
+    if isinstance(gd, str) and gd:
+        try:
+            gew_dt = datetime.fromisoformat(gd[:10]).date()
+        except Exception:
+            gew_dt = None
+
+    status = str(payload.get("status") or "entwurf")[:50]
+    netto = payload.get("netto_summe")
+    mwst = payload.get("mwst_betrag")
+    brutto = payload.get("brutto_summe")
+    erstellt = str(payload.get("erstellt_von") or request.issuer_role or "kernel")[:100]
+
+    db.execute(
+        text(
+            """
+            INSERT INTO einkauf_bestellungen (
+                bestellnummer, lieferant_id, bestelldatum, gewuenschtes_lieferdatum,
+                status, netto_summe, mwst_betrag, brutto_summe, erstellt_von, tenant_id
+            ) VALUES (
+                :bestellnummer, :lieferant_id, :bestelldatum, :gewuenschtes_lieferdatum,
+                :status, :netto_summe, :mwst_betrag, :brutto_summe, :erstellt_von, :tenant_id
+            )
+            """
+        ),
+        {
+            "bestellnummer": bn,
+            "lieferant_id": lieferant_id,
+            "bestelldatum": bestelldatum,
+            "gewuenschtes_lieferdatum": gew_dt,
+            "status": status,
+            "netto_summe": float(netto) if netto is not None else None,
+            "mwst_betrag": float(mwst) if mwst is not None else None,
+            "brutto_summe": float(brutto) if brutto is not None else None,
+            "erstellt_von": erstellt,
+            "tenant_id": tenant_id,
+        },
+    )
+
+
+def register_command_mutations() -> None:
+    from app.services.action_execution_mutations import register_domain_mutation
+
+    register_domain_mutation("CreatePurchaseOrder", _create_purchase_order_mutation)

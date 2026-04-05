@@ -451,6 +451,10 @@ CREATE INDEX idx_bestellungen_nummer ON einkauf_bestellungen(bestellnummer);
 CREATE INDEX idx_bestellungen_lieferant ON einkauf_bestellungen(lieferant_id);
 CREATE INDEX idx_bestellungen_status ON einkauf_bestellungen(status);
 
+-- Mandanten-Spalte (Process-Kernel CreatePurchaseOrder, Einkauf-Router)
+ALTER TABLE einkauf_bestellungen ADD COLUMN IF NOT EXISTS tenant_id VARCHAR(64) NOT NULL DEFAULT 'default';
+CREATE INDEX IF NOT EXISTS ix_einkauf_bestellungen_tenant_id ON einkauf_bestellungen(tenant_id);
+
 -- ============================================================================
 -- TRIGGER FÜR AUTOMATISCHE TIMESTAMPS
 -- ============================================================================
@@ -491,6 +495,32 @@ BEGIN
         END IF;
     END LOOP;
 END $$;
+
+-- ============================================================================
+-- Neuro-Core: Schritt-Audit (Broker + Kernel Action Execute)
+-- ============================================================================
+
+CREATE SCHEMA IF NOT EXISTS domain_shared;
+
+CREATE TABLE IF NOT EXISTS domain_shared.neuro_step_audit_trace (
+    id VARCHAR(36) NOT NULL PRIMARY KEY,
+    tenant_id VARCHAR(120) NOT NULL,
+    plan_id VARCHAR(255) NOT NULL,
+    step_id VARCHAR(120) NOT NULL,
+    step_order INTEGER NOT NULL DEFAULT 0,
+    action VARCHAR(120) NOT NULL,
+    step_type VARCHAR(80) NOT NULL,
+    binding_kind VARCHAR(80) NOT NULL,
+    binding_target VARCHAR(255) NOT NULL,
+    step_status VARCHAR(80) NOT NULL,
+    execution_detail TEXT,
+    recorded_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS ix_neuro_step_audit_tenant
+    ON domain_shared.neuro_step_audit_trace (tenant_id);
+CREATE INDEX IF NOT EXISTS ix_neuro_step_audit_plan
+    ON domain_shared.neuro_step_audit_trace (plan_id);
 
 -- ============================================================================
 -- ABSCHLUSS

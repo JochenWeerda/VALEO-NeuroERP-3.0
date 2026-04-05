@@ -350,7 +350,72 @@ def test_pcn_meldungen_list(db):
     assert response.status_code == 200
     body = response.json()
     assert "meldungen" in body
+    assert "items" in body
+    assert body["items"] == body["meldungen"]
     assert "total" in body
     assert "skip" in body
     assert "limit" in body
     assert isinstance(body["meldungen"], list)
+
+
+def test_pcn_meldung_create_empty_produktname_rejected(db):
+    _require_pcn_table(db)
+    response = client.post(
+        "/api/v1/compliance/pcn-meldungen",
+        json={"produktname": "   ", "ufi": "", "gefahrenklassen": []},
+        headers=AUTH_HEADERS,
+    )
+    assert response.status_code == 422
+
+
+def test_pcn_meldung_create_respects_x_tenant_id_header(db):
+    _require_pcn_table(db)
+    tid = "pytest-tenant-pcn-xhdr"
+    response = client.post(
+        "/api/v1/compliance/pcn-meldungen",
+        json={
+            "produktname": "Tenant-Header-Test",
+            "ufi": "K0L1-M2N3-O4P5-Q6R7",
+            "cas_nummern": "",
+            "gefahrenklassen": [],
+            "verwendungskategorie": "Test",
+            "pcnStatus": "entwurf",
+        },
+        headers={**AUTH_HEADERS, "X-Tenant-ID": tid},
+    )
+    assert response.status_code == 201
+    assert response.json()["tenant_id"] == tid
+    mid = response.json()["meldung_id"]
+    m = db.get(PCNMeldung, mid)
+    if m:
+        assert m.tenant_id == tid
+        db.delete(m)
+        db.commit()
+
+
+def test_pcn_meldungen_roundtrip_list_contains_created(db):
+    _require_pcn_table(db)
+    create = client.post(
+        "/api/v1/compliance/pcn-meldungen",
+        json={
+            "produktname": "Roundtrip-Produkt",
+            "ufi": "Z9Y8-X7W6-V5U4-T3S2",
+            "cas_nummern": "",
+            "gefahrenklassen": [],
+            "verwendungskategorie": "Test",
+            "pcnStatus": "entwurf",
+        },
+        headers=AUTH_HEADERS,
+    )
+    assert create.status_code == 201
+    mid = create.json()["meldung_id"]
+
+    listed = client.get("/api/v1/compliance/pcn-meldungen?limit=200", headers=AUTH_HEADERS)
+    assert listed.status_code == 200
+    ids = {m["meldung_id"] for m in listed.json()["items"]}
+    assert mid in ids
+
+    m = db.get(PCNMeldung, mid)
+    if m:
+        db.delete(m)
+        db.commit()
