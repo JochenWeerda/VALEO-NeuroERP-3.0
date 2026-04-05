@@ -2,10 +2,14 @@ import os
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
-from sqlalchemy import pool
+from sqlalchemy import pool, String
 from sqlalchemy import MetaData
 
 from alembic import context
+
+# Override the default varchar(32) for alembic_version.version_num
+# Many revision IDs in this project exceed 32 characters.
+VERSION_TABLE_KWARGS = {"version_num_type": String(128)}
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -32,6 +36,7 @@ def run_migrations_offline() -> None:
         target_metadata=metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        **VERSION_TABLE_KWARGS,
     )
 
     with context.begin_transaction():
@@ -51,7 +56,8 @@ def run_migrations_online() -> None:
     with connectable.connect() as connection:
         context.configure(
             connection=connection,
-            target_metadata=metadata
+            target_metadata=metadata,
+            **VERSION_TABLE_KWARGS,
         )
 
         with context.begin_transaction():
