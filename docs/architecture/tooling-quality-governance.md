@@ -9,11 +9,13 @@ VALEO NeuroERP führt drei externe Governance-Tools ein:
 
 | Tool | Zweck | Phase |
 |------|-------|-------|
-| **SonarCloud** | Statische Analyse, Quality Gates, technische Schulden | Sofort |
-| **CodeRabbit** | AI-gestütztes PR-Review, inkrementell bei Commits | Sofort |
-| **Sourcegraph** | Codebase-Suche, Cross-Repo-Kontext, Cody AI-Assistenz | Phase 2 |
+| **SonarCloud** | Statische Analyse, Quality Gates, technische Schulden | Aktiv |
+| **CodeRabbit** | AI-gestütztes PR-Review, inkrementell bei Commits | Aktiv |
+| **Aider** | Terminal-basierte Multi-File-Refactorings mit Claude | Aktiv |
+| **Continue.dev** | IDE-integriertes Codebase-Verständnis und Navigation | Aktiv |
 
-**Nicht eingeführt:**
+**Nicht eingeführt / entfernt:**
+- ~~Sourcegraph/Cody~~ — seit Juli 2025 nur Enterprise ($49/User/Monat), ersetzt durch Aider + Continue
 - Qodo (Alternative zu CodeRabbit, nicht parallel)
 - Weitere Scanner (Scan-Abdeckung ist bereits dicht; Engpass = Gates + Priorisierung)
 
@@ -112,64 +114,132 @@ reviews.instructions: |            # VALEO-spezifische Regeln:
 | Cross-File-Kontext im Review | Begrenzt | Ja (AI) |
 | Tenant-Isolation als Review-Regel | Nein | Ja (custom instruction) |
 
-## 5. Sourcegraph
+## 5. Aider (Multi-File Refactoring)
 
-### 5.1 Setup-Schritte
+### 5.1 Setup
 
-1. **Sourcegraph Cloud**: https://sourcegraph.com → GitHub-Konto verbinden → Repo indexieren
-   **ODER Self-Hosted**: Docker/Kubernetes-Deployment (empfohlen ab 50+ Repos)
-2. **Ignore-Datei committed** (bereits vorhanden): `.sourcegraph/ignore`
-3. **Cody IDE-Extension** installieren (VS Code / JetBrains)
-4. Optional: Webhook in GitHub konfigurieren für schnellere Index-Updates
+```bash
+# Installation
+pip install aider-chat
+# ODER mit uv (empfohlen)
+uv tool install aider-chat
+
+# API-Key setzen
+export ANTHROPIC_API_KEY=<dein-key>
+
+# Starten im Projektverzeichnis
+cd VALEO-NeuroERP-3.0
+aider
+```
 
 ### 5.2 Konfiguration
 
 ```
-.sourcegraph/ignore  # Dateien die nicht in der Code-Suche erscheinen
+.aider.conf.yml   # Modell, Git-Integration, Repo-Map, Read-Only-Dateien
 ```
 
-Sourcegraph-Konfiguration ist **instanz-zentriert**, nicht repo-zentriert. Die Ignore-Datei
-ist die einzige Repo-Level-Konfiguration.
+Kernpunkte:
+- **Modell**: Claude Sonnet als Architect + Editor
+- **Repo-Map**: 4096 Tokens für Codebase-Kontext
+- **Read-Only**: `CLAUDE.md` und `docs/MASKEN.md` als Kontext ohne Bearbeitungsrisiko
+- **Auto-Commits**: Ein, für nachvollziehbare Refactoring-Schritte
 
-### 5.3 Was Sourcegraph abdeckt, was die anderen Tools nicht tun
+### 5.3 Einsatz für VALEO
 
-| Fähigkeit | SonarCloud | CodeRabbit | Sourcegraph |
-|-----------|------------|------------|-------------|
-| Repo-weite Code-Suche (Regex, Structural) | Nein | Nein | Ja |
-| Cross-Repo-Referenzen | Nein | Nein | Ja |
-| Code Intelligence (Go-to-Definition, Find-References) | Nein | Nein | Ja |
-| Cody AI-Chat mit vollem Repo-Kontext | Nein | Nein | Ja |
-| Batch Changes (automatisierte Refactorings) | Nein | Nein | Ja |
-| Code Ownership / Contributor-Graph | Nein | Nein | Ja |
+- **Multi-File-Refactorings**: `/add app/api/v1/endpoints/customers.py app/api/v1/schemas/crm.py` → Änderungen über mehrere Dateien planen und ausführen
+- **Systematische Umstellungen**: z.B. alle `|| true` entfernen, URL-Patterns vereinheitlichen
+- **Architect-Modus**: Erst planen, dann Code generieren — ideal für Domain-übergreifende Änderungen
 
-### 5.4 Empfohlener Einsatz für VALEO
+### 5.4 Wichtige Befehle
 
-- **Code-Suche**: „Wo wird `tenant_id` NICHT in einer Query gefiltert?" — strukturelle Suche
-- **Refactoring**: Batch Changes für systematische Umstellungen (z.B. alle `|| true` entfernen)
-- **Cody**: AI-Assistenz mit vollem ERP-Kontext für neue Entwickler / Onboarding
-- **Architecture**: Code-Graph für Abhängigkeitsanalyse zwischen Domains
+| Befehl | Funktion |
+|--------|----------|
+| `/add <datei>` | Datei in Kontext aufnehmen |
+| `/drop <datei>` | Datei aus Kontext entfernen |
+| `/architect` | Planungsmodus (nur Reasoning) |
+| `/code` | Code-Modus (Edits ausführen) |
+| `/diff` | Aktuelle Änderungen anzeigen |
+| `/undo` | Letzten Commit rückgängig machen |
 
-## 6. Zusammenspiel der drei Tools
+## 6. Continue.dev (Codebase-Verständnis & Navigation)
+
+### 6.1 Setup
+
+1. **VS Code Extension**: Extensions → Suche „Continue" → Install
+2. **API-Key**: Beim ersten Start nach Anthropic-Key gefragt, oder in `~/.continue/config.json`
+3. **Projekt-Config**: `.continuerc.json` im Repo-Root (bereits committed)
+
+### 6.2 Konfiguration
 
 ```
-Developer öffnet PR
+.continuerc.json    # Modelle, Context-Provider, Docs-Index
+.continueignore     # Dateien die nicht indexiert werden (wie .gitignore)
+```
+
+Kernpunkte:
+- **Chat-Modell**: Claude Sonnet mit 200k Kontext + Prompt-Caching
+- **Autocomplete**: Claude Haiku für schnelle Tab-Completion
+- **Context-Provider**: @Codebase (Embeddings-Suche), @Folder, @Terminal, @Diff, @Open
+- **Docs-Index**: MASKEN.md und Architecture-Docs automatisch indexiert
+
+### 6.3 Einsatz für VALEO
+
+- **@Codebase-Fragen**: „Wo wird tenant_id NICHT in einer Query gefiltert?"
+- **Navigation**: „Zeige alle Endpoints die sales_orders betreffen"
+- **Verständnis**: „Erkläre den Flow von Auftragseingang bis Lieferschein"
+- **Onboarding**: Neue Entwickler können Fragen zur Architektur stellen
+- **Autocomplete**: Kontextbewusste Vorschläge beim Tippen
+
+### 6.4 Wichtige Shortcuts (VS Code)
+
+| Shortcut | Funktion |
+|----------|----------|
+| `Ctrl+L` | Chat öffnen |
+| `Ctrl+I` | Inline-Edit |
+| `@Codebase` | Gesamte Codebase durchsuchen |
+| `@Folder` | Ordner als Kontext |
+| `@Diff` | Aktuelle Änderungen als Kontext |
+
+## 7. ~~Sourcegraph~~ (entfernt)
+
+Sourcegraph/Cody ist seit Juli 2025 nur noch als Enterprise-Produkt verfügbar
+($49/User/Monat). Die `.sourcegraph/ignore` bleibt im Repo für den Fall einer
+späteren Enterprise-Evaluierung.
+
+**Ersatz-Abdeckung:**
+
+| Sourcegraph-Feature | Ersatz |
+|---------------------|--------|
+| Code-Suche (Regex, Structural) | Continue.dev @Codebase + GitHub Code Search |
+| AI-Chat mit Repo-Kontext | Continue.dev Chat + Claude Code |
+| Batch Refactorings | Aider Multi-File-Modus |
+| Go-to-Definition | VS Code built-in + Continue.dev |
+
+## 8. Zusammenspiel der vier Tools
+
+```
+Entwickler plant Refactoring
+      │
+      ├──→ Continue.dev: @Codebase — "Welche Dateien sind betroffen?"
+      │     └──→ Codebase-Verständnis, Navigation, Kontext
+      │
+      └──→ Aider: Multi-File-Refactoring ausführen
+            └──→ /add betroffene Dateien → Änderungen planen → Code generieren
+
+Entwickler öffnet PR
       │
       ├──→ CodeRabbit: AI-Review (fachlich + Security)
       │     └──→ Kommentare direkt im PR
       │
-      ├──→ SonarCloud: Statische Analyse + Quality Gate
-      │     └──→ PR-Status-Check (blockierend bei Verletzung)
-      │
-      └──→ Sourcegraph Cody: AI-Chat für Kontext-Fragen
-            └──→ "Was macht diese Funktion?" / "Wo wird das sonst verwendet?"
+      └──→ SonarCloud: Statische Analyse + Quality Gate
+            └──→ PR-Status-Check (blockierend bei Verletzung)
 
 PR wird gemerged
       │
-      ├──→ SonarCloud: Trend-Dashboard aktualisiert
-      └──→ Sourcegraph: Index aktualisiert (via Webhook)
+      └──→ SonarCloud: Trend-Dashboard aktualisiert
 ```
 
-## 7. Migration bestehender `|| true` Checks
+## 9. Migration bestehender `|| true` Checks
 
 Nach SonarCloud-Einführung schrittweise die bestehenden advisory-only Checks härten:
 
@@ -185,9 +255,12 @@ Nach SonarCloud-Einführung schrittweise die bestehenden advisory-only Checks h�
 
 **Reihenfolge**: SonarCloud Quality Gate zuerst → dann bestehende `|| true` schrittweise entfernen
 
-## 8. Referenzen
+## 10. Referenzen
 
 - [SonarCloud Docs](https://docs.sonarsource.com/sonarcloud/)
 - [CodeRabbit Docs](https://docs.coderabbit.ai/)
-- [Sourcegraph Docs](https://docs.sourcegraph.com/)
+- [Aider Docs](https://aider.chat/docs/)
+- [Aider Anthropic-Integration](https://aider.chat/docs/llms/anthropic.html)
+- [Continue.dev Docs](https://docs.continue.dev/)
+- [Continue.dev Anthropic-Setup](https://docs.continue.dev/customize/model-providers/top-level/anthropic)
 - [ADR-007 Agent-Tool-Contract-Governance](../adr/adr-007-agent-tool-contract-governance.md)
