@@ -1,9 +1,23 @@
 from __future__ import annotations
 
+from types import SimpleNamespace
+
 import pytest
 from fastapi import HTTPException
 
 from app.api.v1.endpoints import sales_orders
+
+
+def _eligibility_fetchone_ok():
+    """Row for domain_crm.customers↔BP join: no linked BP → checks pass."""
+    return SimpleNamespace(
+        customer_number="",
+        business_partner_id=None,
+        bp_id=None,
+        bp_status=None,
+        blocked_for_delivery=None,
+        blocked_for_invoice=None,
+    )
 
 
 class _FakeMappingsResult:
@@ -18,15 +32,24 @@ class _FakeMappingsResult:
 
 
 class _FakeResult:
-    def __init__(self, rows=None, *, rowcount: int = 1):
+    def __init__(self, rows=None, *, rowcount: int = 1, fetchone_row=None):
         self._rows = list(rows or [])
         self.rowcount = rowcount
+        self._fetchone_row = fetchone_row
 
     def mappings(self):
         return _FakeMappingsResult(self._rows)
 
     def first(self):
         return self._rows[0] if self._rows else None
+
+    def fetchone(self):
+        if self._fetchone_row is not None:
+            return self._fetchone_row
+        if not self._rows:
+            return None
+        r = self._rows[0]
+        return SimpleNamespace(**r) if isinstance(r, dict) else r
 
     def scalar(self):
         return self._rows[0] if self._rows else None
@@ -79,6 +102,9 @@ async def test_create_delivery_from_order_scopes_final_update_by_tenant():
                     }
                 ]
             ),
+            _FakeResult(fetchone_row=_eligibility_fetchone_ok()),
+            _FakeResult(),
+            _FakeResult(),
             _FakeResult(
                 [
                     {
@@ -93,7 +119,6 @@ async def test_create_delivery_from_order_scopes_final_update_by_tenant():
                     }
                 ]
             ),
-            _FakeResult(),
             _FakeResult(),
             _FakeResult(),
         ]

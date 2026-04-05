@@ -52,17 +52,17 @@ def _ensure_bp_belongs_to_tenant(partner_id: str, tenant_id: str, db: Session) -
         )
 
 
-def _fetch_monolith_extensions(customer_id: str, db: Session) -> dict[str, Any]:
+def _fetch_monolith_extensions(customer_id: str, db: Session, tenant_id: str | None = None) -> dict[str, Any]:
     """Felder, die nur in domain_crm.customers liegen (nicht in crm-core)."""
     from sqlalchemy import text
 
     try:
-        row = db.execute(
-            text(
-                "SELECT chefanweisung, business_partner_id FROM domain_crm.customers WHERE id = :cid"
-            ),
-            {"cid": customer_id},
-        ).fetchone()
+        query = "SELECT chefanweisung, business_partner_id FROM domain_crm.customers WHERE id = :cid"
+        params: dict[str, Any] = {"cid": customer_id}
+        if tenant_id:
+            query += " AND tenant_id = :tid"
+            params["tid"] = tenant_id
+        row = db.execute(text(query), params).fetchone()
     except Exception:
         return {}
     if not row:
@@ -113,6 +113,7 @@ def _persist_business_partner_link(
     customer_id: str,
     customer_data: CustomerUpdate,
     db: Session,
+    tenant_id: str,
     *,
     core_customer: CRMCoreCustomer | None = None,
 ) -> None:
@@ -120,13 +121,12 @@ def _persist_business_partner_link(
     if "business_partner_id" not in data:
         return
     bid = data["business_partner_id"]
-    tid = DEFAULT_TENANT
     if bid:
-        _ensure_bp_belongs_to_tenant(bid, tid, db)
+        _ensure_bp_belongs_to_tenant(bid, tenant_id, db)
     if core_customer is not None:
         company_name = (core_customer.display_name or "Kunde").strip() or "Kunde"
         customer_number = f"CRM-{core_customer.id[:8].upper()}"
-        _upsert_monolith_customer_stub(customer_id, bid, db, tid, company_name, customer_number)
+        _upsert_monolith_customer_stub(customer_id, bid, db, tenant_id, company_name, customer_number)
         return
     from sqlalchemy import text
 
@@ -135,7 +135,7 @@ def _persist_business_partner_link(
             "UPDATE domain_crm.customers SET business_partner_id = :bid, updated_at = NOW() "
             "WHERE id = :cid AND tenant_id = :tid"
         ),
-        {"bid": bid, "cid": customer_id, "tid": tid},
+        {"bid": bid, "cid": customer_id, "tid": tenant_id},
     )
     db.commit()
 
@@ -275,7 +275,24 @@ async def create_customer(
             exc,
         )
         return _create_customer_in_monolith_db(customer_data, db)
-    return _adapt_customer(created)
+    if customer_data.business_partner_id:
+        _ensure_bp_belongs_to_tenant(customer_data.business_partner_id, str(customer_data.tenant_id), db)
+        _upsert_monolith_customer_stub(
+            created.id,
+            customer_data.business_partner_id,
+            db,
+            str(customer_data.tenant_id),
+            (created.display_name or customer_data.company_name or "Kunde").strip() or "Kunde",
+            f"CRM-{created.id[:8].upper()}",
+        )
+    adapted = _adapt_customer(created)
+    ext = _fetch_monolith_extensions(created.id, db, str(customer_data.tenant_id))
+    if ext:
+        d = adapted.model_dump()
+        if ext.get("business_partner_id"):
+            d["business_partner_id"] = ext["business_partner_id"]
+        adapted = Customer.model_validate(d)
+    return adapted
 
 
 @router.get("/", response_model=PaginatedResponse[Customer])
@@ -460,12 +477,13 @@ async def get_customer_sales_eligibility(
 async def get_customer(
     customer_id: str,
     db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ) -> Customer:
     """Return a customer by ID."""
     try:
         customer = await crm_get_customer(customer_id)
         adapted = _adapt_customer(customer)
-        ext = _fetch_monolith_extensions(customer_id, db)
+        ext = _fetch_monolith_extensions(customer_id, db, tenant_id)
         if ext:
             customer_dict = adapted.model_dump()
             if ext.get("chefanweisung") is not None:
@@ -483,6 +501,7 @@ async def update_customer(
     customer_id: str,
     customer_data: CustomerUpdate,
     db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ) -> Customer:
     """Update customer details by delegating to crm-core."""
     data = customer_data.model_dump(exclude_unset=True, mode="python")
@@ -506,9 +525,9 @@ async def update_customer(
             updated = await crm_get_customer(customer_id)
     except httpx.HTTPStatusError as exc:
         raise _to_http_exception(exc) from exc
-    _persist_business_partner_link(customer_id, customer_data, db, core_customer=updated)
+    _persist_business_partner_link(customer_id, customer_data, db, tenant_id, core_customer=updated)
     adapted = _adapt_customer(updated)
-    ext = _fetch_monolith_extensions(customer_id, db)
+    ext = _fetch_monolith_extensions(customer_id, db, tenant_id)
     if ext:
         d = adapted.model_dump()
         if ext.get("chefanweisung") is not None:

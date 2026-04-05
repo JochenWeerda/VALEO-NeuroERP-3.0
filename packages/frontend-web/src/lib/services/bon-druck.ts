@@ -12,8 +12,42 @@
 import { escapeHtml } from '@/lib/export-utils'
 
 // ── Minimale WebUSB/WebSerial Type-Stubs (nicht im std lib.dom.d.ts enthalten) ──
-type USBDevice = object
-type SerialPort = object
+type USBEndpoint = {
+  direction?: string
+  endpointNumber: number
+}
+
+type USBAlternateInterface = {
+  endpoints: USBEndpoint[]
+}
+
+type USBConfigurationInterface = {
+  interfaceNumber: number
+  alternate: USBAlternateInterface
+}
+
+type USBConfiguration = {
+  interfaces?: USBConfigurationInterface[]
+}
+
+type USBDevice = {
+  configuration?: USBConfiguration
+  open(): Promise<void>
+  selectConfiguration(configurationValue: number): Promise<void>
+  claimInterface(interfaceNumber: number): Promise<void>
+  transferOut(endpointNumber: number, data: Uint8Array): Promise<unknown>
+  close(): Promise<void>
+}
+
+type SerialWritable = {
+  getWriter(): WritableStreamDefaultWriter<Uint8Array>
+}
+
+type SerialPort = {
+  writable?: SerialWritable | null
+  open(options: { baudRate: number }): Promise<void>
+  close(): Promise<void>
+}
 type USB = { requestDevice(opts: { filters: { vendorId?: number }[] }): Promise<USBDevice> }
 type Serial = { requestPort(opts: { filters: object[] }): Promise<SerialPort> }
 
@@ -283,9 +317,7 @@ export class BonDruckService {
         const iface = device.configuration?.interfaces?.[0]
         if (iface) {
           await device.claimInterface(iface.interfaceNumber)
-          const ep = iface.alternate.endpoints.find(
-            (e: { direction?: string }) => e.direction === 'out',
-          )
+          const ep = iface.alternate.endpoints.find((e) => e.direction === 'out')
           if (ep) {
             this._usbInterface = iface.interfaceNumber
             this._usbEndpoint = ep.endpointNumber

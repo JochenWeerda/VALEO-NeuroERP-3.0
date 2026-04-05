@@ -6,10 +6,13 @@ AP5: Action- und Business-Commands tragen process_definition_key und Workflow-Me
 
 from __future__ import annotations
 
+from unittest.mock import MagicMock
+
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from app.api.v1.endpoints import process_kernel_api
+from app.core.database import get_db
 from app.core.action_execution import (
     ActionExecutionRequest,
     ActionExecutionService,
@@ -21,6 +24,12 @@ from app.core.action_idempotency import get_action_idempotency_store
 def _make_client() -> TestClient:
     app = FastAPI()
     app.include_router(process_kernel_api.router)
+    mock_session = MagicMock()
+
+    def override_get_db():
+        yield mock_session
+
+    app.dependency_overrides[get_db] = override_get_db
     return TestClient(app)
 
 

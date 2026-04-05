@@ -11,16 +11,14 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
 
 from ....core.action_execution import (
     ActionExecutionRequest,
     ActionExecutionService,
     build_action_conflict_error,
 )
-from ....core.action_idempotency import (
-    IdempotencyConflictError,
-    get_action_idempotency_store,
-)
+from ....core.action_idempotency import get_action_idempotency_store
 from ....core.business_commands import build_core_command_catalog
 from ....core.process_commands import get_process_command_catalog
 from ....core.process_references import build_process_reference_context
@@ -564,7 +562,7 @@ def build_explainability(body: dict) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 @router.post("/actions/execute", response_model=dict)
-def execute_action(body: ActionExecutionRequest) -> dict[str, Any]:
+def execute_action(body: ActionExecutionRequest, db: Session = Depends(get_db)) -> dict[str, Any]:
     """Fuehrt einen Process-Kernel-Command ueber den zentralen Action-Layer aus."""
     body.normalized_reference_context()
     try:
@@ -583,17 +581,8 @@ def execute_action(body: ActionExecutionRequest) -> dict[str, Any]:
         return replay.model_dump(mode="json")
 
     service = ActionExecutionService()
-    result = service.execute(body)
-    try:
-        store.remember(
-            tenant_id=body.tenant_id,
-            idempotency_key=body.idempotency_key,
-            request_fingerprint=fingerprint,
-            result=result,
-        )
-    except IdempotencyConflictError as exc:
-        error = build_action_conflict_error()
-        raise HTTPException(status_code=409, detail=error.model_dump(mode="json")) from exc
+    # Idempotenz-Persistenz erfolgt ausschliesslich in ActionExecutionService.execute
+    result = service.execute(body, db=db)
     return result.model_dump(mode="json")
 
 

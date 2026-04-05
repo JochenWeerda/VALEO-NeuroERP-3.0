@@ -30,6 +30,12 @@ Diese Datei sammelt die fuer neue Analysen wichtigsten offenen Restthemen und be
 - ~~SVC-001-P4 Field-Service: `fetch()` statt apiClient~~ — `field-service-tasks.tsx` nutzt `apiClient` + TanStack Query; Backend-Endpunkte unter `/api/v1/agribusiness/field-service-tasks` in `app/api/v1/endpoints/compat.py` (CRM-Mapping, Demo-Fallback).
 - ~~Kurz-IDs aus `uuid7()[:8]` bei schnellen Mehrfach-Inserts~~ — Präfix-IDs verwenden `uuid7_short_suffix()` / `default_prefixed_id()` / `prefixed_id()` in `app/core/uuid7.py` (Zeit-Präfix der v7-String-Darstellung war in derselben Millisekunde nicht eindeutig).
 
+## Zuletzt geschlossene Punkte (2026-04-05)
+
+- ~~CRM-Kunde/Business-Partner-Verknuepfung persistiert implizit gegen den Default-Tenant~~ — `app/api/v1/endpoints/customers.py` validiert und persistiert `business_partner_id` jetzt tenant-gebunden auch im Create-/Update-Pfad; Regressionen liegen in `tests/test_crm_customer_business_partner_link.py`.
+- ~~Globaler Frontend-Typecheck ist breit an inkonsistenten `apiClient`-/Axios-Contracts rot~~ — `packages/frontend-web/src/lib/api-client.ts` stellt jetzt einen hybriden `ApiResult<T>` bereit; betroffene Call Sites und Typstubs wurden nachgezogen, `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false` ist wieder gruen.
+- Process-Kernel: Migration `neuro_step_audit_einkauf_tenant_20260405` legt `domain_shared.neuro_step_audit_trace` an und ergänzt `einkauf_bestellungen.tenant_id` wo fehlend; Kernel-Actions und Broker schreiben Audit bei gesetzter DB-Session; optionale Mutation `CreatePurchaseOrder` (Einkauf); Finance-Follow-up-Erweiterung Kasse (`/finance/followup/kasse/*`); PCN nutzt `X-Tenant-ID`. Doku: `docs/workflows/kernel-action-execution-mutations.md`.
+
 ## Analysepflicht
 
 Wenn in Code, Tests oder UI ein Widerspruch zwischen:

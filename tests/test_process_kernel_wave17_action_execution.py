@@ -3,11 +3,14 @@ Wave-17 Contract Tests: Action Execution Layer und Agent Contracts
 """
 from __future__ import annotations
 
+from unittest.mock import MagicMock
+
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 import pytest
 
 from app.api.v1.endpoints import process_kernel_api
+from app.core.database import get_db
 from app.core.action_execution import (
     ActionExecutionRequest,
     ActionExecutionResult,
@@ -26,10 +29,24 @@ def clear_action_store():
     store.clear()
 
 
+@pytest.fixture(autouse=True)
+def register_procurement_command_mutations():
+    """Gleicher Registry-Stand wie Produktion (api.py ruft register_command_mutations)."""
+    from app.services.command_handlers_procurement import register_command_mutations
+
+    register_command_mutations()
+
+
 @pytest.fixture
 def client() -> TestClient:
     app = FastAPI()
     app.include_router(process_kernel_api.router)
+    mock_session = MagicMock()
+
+    def override_get_db():
+        yield mock_session
+
+    app.dependency_overrides[get_db] = override_get_db
     return TestClient(app)
 
 
@@ -73,6 +90,59 @@ def test_action_execution_service_accepts_valid_human_command():
     assert result.status == ActionExecutionStatus.ACCEPTED
     assert result.aggregate_owner == "finance"
     assert result.result_source == ActionResultSource.FRESH
+
+
+def test_action_execution_service_calls_db_when_accepted():
+    """Mit Session: Audit-Pfad (execute/commit) wird ausgeloest — Domain-Handler optional."""
+    mock_db = MagicMock()
+    service = ActionExecutionService()
+    result = service.execute(
+        ActionExecutionRequest(
+            command_name="ApproveAPInvoice",
+            aggregate_type="ap_invoice",
+            aggregate_id="INV-1",
+            payload={"status": "ZUR_FREIGABE"},
+            tenant_id="t1",
+            issuer_role="ap_approver",
+            issuer_type="human",
+            idempotency_key="idem-db-mutation",
+        ),
+        db=mock_db,
+    )
+    assert result.status == ActionExecutionStatus.ACCEPTED
+    mock_db.execute.assert_called()
+    mock_db.commit.assert_called()
+
+
+def test_create_purchase_order_runs_domain_mutation_with_db():
+    """CreatePurchaseOrder: Dispatch ACCEPTED + registrierter Handler → mehrere executes (Audit + Bestellung)."""
+    mock_db = MagicMock()
+    service = ActionExecutionService()
+    result = service.execute(
+        ActionExecutionRequest(
+            command_name="CreatePurchaseOrder",
+            aggregate_type="purchase_order",
+            aggregate_id="PO-UNIT-1",
+            payload={
+                "approval_status": "approved",
+                "lieferant_id": 1,
+                "bestellnummer": "UNIT-AE-PO-1",
+            },
+            tenant_id="t-procurement",
+            issuer_role="buyer",
+            issuer_type="human",
+            idempotency_key="idem-create-po-domain-1",
+        ),
+        aggregate_state={
+            "approval_status": "approved",
+            "lieferant_id": 1,
+            "bestellnummer": "UNIT-AE-PO-1",
+        },
+        db=mock_db,
+    )
+    assert result.status == ActionExecutionStatus.ACCEPTED
+    assert mock_db.execute.call_count >= 2
+    mock_db.commit.assert_called()
 
 
 def test_action_execution_service_rejects_unknown_command_name():

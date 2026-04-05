@@ -113,9 +113,9 @@ export default function LstCommodityPositionMatrix(): JSX.Element {
     queryFn: () => getCoverageMonitor(coverageParams),
   })
 
-  const matrix = matrixQuery.data?.data
-  const kpi = kpiQuery.data?.data
-  const coverage = coverageQuery.data?.data
+  const matrix = matrixQuery.data
+  const kpi = kpiQuery.data
+  const coverage = coverageQuery.data
 
   const handleExportMatrix = useCallback(() => {
     if (!matrix) return

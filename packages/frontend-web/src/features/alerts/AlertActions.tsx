@@ -39,6 +39,10 @@ type Props = {
   alert: Alert
 }
 
+function getAuditUser(authUser: { email?: string; sub?: string } | null | undefined): string {
+  return authUser?.email ?? authUser?.sub ?? "unknown"
+}
+
 /**
  * Alert-Actions Komponente mit Policy-Integration
  * Zeigt kontextabhängige Action-Buttons mit Confirm-Dialogs
@@ -107,7 +111,7 @@ export function AlertActions({ alert }: Props): JSX.Element {
       // Audit-Log
       void audit({
         ts: new Date().toISOString(),
-        user: authUser?.profile?.email ?? authUser?.profile?.sub ?? "unknown",
+        user: getAuditUser(authUser),
         roles: userRoles,
         action: kind === "price" ? "pricing.adjust" : kind === "reorder" ? "inventory.reorder" : "sales.notify",
         params: decision.resolvedParams,
@@ -147,7 +151,7 @@ export function AlertActions({ alert }: Props): JSX.Element {
       // Audit-Log
       void audit({
         ts: new Date().toISOString(),
-        user: authUser?.profile?.email ?? authUser?.profile?.sub ?? "unknown",
+        user: getAuditUser(authUser),
         roles: userRoles,
         action: kind === "price" ? "pricing.adjust" : kind === "reorder" ? "inventory.reorder" : "sales.notify",
         params: { deltaPct: finalDeltaPct, qty: finalQty, topic: finalTopic, message: finalMessage },
@@ -160,7 +164,7 @@ export function AlertActions({ alert }: Props): JSX.Element {
       // Audit-Log für Fehler
       void audit({
         ts: new Date().toISOString(),
-        user: authUser?.profile?.email ?? authUser?.profile?.sub ?? "unknown",
+        user: getAuditUser(authUser),
         roles: userRoles,
         action: kind === "price" ? "pricing.adjust" : kind === "reorder" ? "inventory.reorder" : "sales.notify",
         params: decision.resolvedParams,

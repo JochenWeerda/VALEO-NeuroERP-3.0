@@ -32,7 +32,7 @@ Sie richtet sich an:
 ## Relevante Doku-Bereiche
 
 - `docs/project-context/`: fachlicher und technischer Rahmen
-- `docs/workflows/`: Arbeitsweise fuer Workflow-Zerlegung, Prompting und Struktur
+- `docs/workflows/`: Arbeitsweise fuer Workflow-Zerlegung, Prompting und Struktur (Kernel-Actions/DB: [kernel-action-execution-mutations.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/workflows/kernel-action-execution-mutations.md))
 - `docs/cards/`: Card-Templates und Ablagelogik
 - `docs/quality-assurance/`: Browser-Use-, CRUD- und Soll-Ist-Pruefung
 - `docs/agent-ops/`: restart-sichere Parallelarbeit fuer mehrere Agenten

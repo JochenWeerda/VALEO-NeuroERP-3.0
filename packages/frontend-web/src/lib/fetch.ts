@@ -65,8 +65,8 @@ export async function authenticatedFetch(
     // Return a Response-like object for backwards compatibility
     const data = response.data
     return {
-      ok: response.status >= 200 && response.status < 300,
-      status: response.status,
+      ok: response.ok,
+      status: response.httpStatus,
       statusText: response.statusText,
       headers: new Headers(response.headers as Record<string, string>),
       json: async () => data,

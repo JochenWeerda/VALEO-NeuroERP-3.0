@@ -55,7 +55,7 @@ beteiligten Masken auf API-Korrektheit, CRUD-Vollständigkeit und Flow-Spine-Int
 | CMP-001-P1 | ustva: Import auf `@/lib/api-client` umstellen | Mittel |
 | CMP-001-P2 | ustva Zeile 469: `.data`-Extraktion korrigieren | Mittel |
 | CMP-001-P3 | Compliance-Register: CRUD-Endpoints (mindestens Sachkunde, QS) | Mittel |
-| CMP-001-P4 | `POST /api/v1/compliance/pcn-meldungen` Backend implementieren | Hoch |
+| CMP-001-P4 | `POST/GET /compliance/pcn-meldungen` (DB, Tenant-Header) | erledigt |
 | CMP-001-P5 | Flow-Spine `workflowInstanceId` in alle Masken durchreichen | Mittel |
 
 ## 6. Tests (manuell)

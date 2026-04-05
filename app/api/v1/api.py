@@ -1166,3 +1166,8 @@ api_router.include_router(neuro_knowledge.router)
 from app.api.v1.endpoints import case_management_api
 
 api_router.include_router(case_management_api.router)
+
+# Process Kernel: Domain-Mutationen fuer Business-Commands registrieren
+from app.services.command_handlers_procurement import register_command_mutations
+
+register_command_mutations()
