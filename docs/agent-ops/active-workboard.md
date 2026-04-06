@@ -169,7 +169,7 @@ Keine Re-Implementierung von Superglue-Tool-CRUD, Run-Status oder Connector-Logi
 | INT-SG-058 | Finance-/Steuer-/Export-Connectoren ueber Superglue ausrollen | abgeschlossen | Codex | `app/api/v1/endpoints/finance_*.py`, `app/api/v1/endpoints/export_service.py`, `app/integrations/adapters/superglue/**`, `docs/workflows/int-sg-058-superglue-finance-export.md`, `docs/cards/neuro-core/INT-SG-058-superglue-finance-export.md` | abgeschlossen - Finance-Export-Connector ist in Rollout-Summary und Export-Service verdrahtet | regulatorische Zielsysteme bleiben environment-spezifisch zu onboarden |
 | INT-SG-059 | Logistics-/Warehouse-/Carrier-Connectoren ueber Superglue ausrollen | abgeschlossen | Codex | `app/api/v1/endpoints/warehouses*.py`, `app/integrations/adapters/superglue/**`, `docs/workflows/int-sg-059-superglue-logistics.md`, `docs/cards/neuro-core/INT-SG-059-superglue-logistics.md` | abgeschlossen - Carrier-/Shipment-Rollout ist im Warehouse-API-Pfad surfact | echte Label-/Write-Flows bleiben bewusst Folgearbeit |
 | INT-SG-060 | Optionaler breiter Rollout auf Agrar, Service und Analytics | abgeschlossen | Codex | `app/integrations/adapters/superglue/**`, `packages/frontend-web/src/pages/**`, `docs/workflows/int-sg-060-superglue-broad-rollout.md`, `docs/cards/neuro-core/INT-SG-060-superglue-broad-rollout.md` | abgeschlossen - Agribusiness-, Service- und Analytics-Connectoren sind als Domain-Rollouts und Admin-Surface verfuegbar | produktive Live-Datenhaushalte muessen separat je Domain aktiviert werden |
-| INT-SG-061 | Superglue Live-Readiness fuer Credentials, Onboarding und Policies surfacen | reserviert | Codex | `app/integrations/services/superglue_*.py`, `app/api/v1/endpoints/external_agent_integrations.py`, `packages/frontend-web/src/pages/admin/agenten-integration.tsx`, `tests/test_superglue_*.py`, `tests/test_process_kernel_wave88_external_agent_integrations.py`, `docs/workflows/int-sg-061-superglue-live-readiness.md`, `docs/cards/neuro-core/INT-SG-061-superglue-live-readiness.md` | offen - tenant-spezifische Live-Readiness fuer fehlende Credentials, Zielsystem-Onboarding sowie Alerting-/Retention-Policies je Environment sichtbar machen | keine |
+| INT-SG-061 | Superglue Live-Readiness fuer Credentials, Onboarding und Policies surfacen | abgeschlossen | Codex | `app/integrations/services/superglue_*.py`, `app/api/v1/endpoints/external_agent_integrations.py`, `packages/frontend-web/src/pages/admin/agenten-integration.tsx`, `tests/test_superglue_*.py`, `tests/test_process_kernel_wave88_external_agent_integrations.py`, `docs/workflows/int-sg-061-superglue-live-readiness.md`, `docs/cards/neuro-core/INT-SG-061-superglue-live-readiness.md` | abgeschlossen - tenant-spezifische Live-Readiness fuer fehlende Credentials, Zielsystem-Onboarding sowie Alerting-/Retention-Policies je Environment ist als API- und Admin-Surface verfuegbar | echte Live-Credentials und Zielsysteme muessen weiterhin je Tenant gesetzt werden |
 | P2P-001 | Procure-to-Pay Direktbestellung: Workflow-Analyse, QA und Handover-Haertung | abgeschlossen | aktuell offener Agent | `docs/workflows/p2p-001-procure-to-pay-direktbestellung.md`, `docs/cards/einkauf/**`, `packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx`, `packages/frontend-web/src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx` | Folgeslice fuer Bedarfsmeldung/Rahmenabruf zuschneiden | keine |
 | P2P-040 | Procure-to-Pay Vorbelegung aus Bedarfsmeldung/Vertrag/RFQ | abgeschlossen | aktuell offener Agent | `docs/agent-ops/active-workboard.md`, `docs/workflows/p2p-040-vorbelegung-requisition-vertrag-rfq.md`, `docs/cards/einkauf/P2P-040-vorbelegung-standardmaske.md`, `packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx`, `packages/frontend-web/src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx` | Folgeslice Schrittvalidierung zuschneiden | keine |
 | P2P-050 | Procure-to-Pay Wizard-Schrittvalidierung | abgeschlossen | aktuell offener Agent | `docs/workflows/p2p-050-wizard-schrittvalidierung.md`, `docs/cards/einkauf/P2P-050-wizard-schrittvalidierung.md`, `packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx`, `packages/frontend-web/src/__tests__/pages/einkauf/bestellung-anlegen.test.tsx` | Landhandel-Kernprozess beginnen | keine |
@@ -1023,6 +1023,29 @@ Alle 6 Router registriert in `app/api/v1/api.py` unter `/api/v1/neuro/*`. Commit
 **Offene Risiken:** Ein versehentlich gesetztes Dev-Flag in einem nicht-lokalen Environment wuerde Loopback fuer Superglue freischalten; deshalb bleibt die Ausnahme default-off, debug-gebunden und auf Loopback beschraenkt.
 **Annahmen:** Fuer lokale End-to-End-Smokes ist ein expliziter Loopback-Override technisch sauberer als ein generelles Aufweichen der zentralen SSRF-Policy oder das Erzwingen kuenstlicher Host-Workarounds.
 **Naechster konkreter Schritt:** Tenant-/System-Bootstrap fuer echte Connectoren schneiden oder den lokalen Dev-Smoke in ein standardisiertes Ops-/CI-Runbook ueberfuehren.
+
+## Handoff: 2026-04-06 - INT-SG-061
+
+**Ziel des Slices:** Die verbleibende operative Superglue-Restluecke aus dem Rollout explizit surfacen: fehlende Tenant-Credentials, Platzhalter-Zielsysteme sowie environment-spezifische Alerting-/Retention-Policies als echte API-/Admin-Sicht statt nur als Doku-Restpunkt.
+
+**Umgesetzter Stand:**
+
+- `app/integrations/services/superglue_live_readiness.py` liefert eine tenant-spezifische Betriebsfreigabe mit Blockern pro Connector, Ready-/Blocked-Zaehlern, Execute-Readiness und kompakten Handlungsempfehlungen.
+- `app/integrations/services/superglue_connector_registry.py` surfact die erforderlichen Credential-Felder jetzt direkt in den Binding-Metadaten, damit derselbe Registry-Pfad fuer Runtime und Betriebsfreigabe gilt.
+- `app/api/v1/endpoints/external_agent_integrations.py` bietet den neuen Endpoint `GET /providers/superglue/live-readiness`.
+- `packages/frontend-web/src/pages/admin/agenten-integration.tsx` zeigt die neue Karte `Superglue Live Readiness` mit Ready-/Blocked-Counts, Policy-Werten und den ersten Connector-Blockern.
+- `app/core/config.py` enthaelt jetzt explizite Settings fuer Error-Rate-Alert, offene Quarantaene sowie Run-/Artifact-Retention.
+
+**Verifikation:**
+
+- `pytest tests/test_superglue_live_readiness.py tests/test_superglue_connector_registry.py tests/test_process_kernel_wave88_external_agent_integrations.py -q --no-cov` gruen.
+- `python -m py_compile app/core/config.py app/integrations/services/superglue_connector_registry.py app/integrations/services/superglue_live_readiness.py app/api/v1/endpoints/external_agent_integrations.py tests/test_superglue_live_readiness.py tests/test_superglue_connector_registry.py tests/test_process_kernel_wave88_external_agent_integrations.py` gruen.
+- `pnpm --dir packages/frontend-web exec vitest run src/__tests__/pages/admin/agenten-integration.test.tsx` gruen.
+- `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false` gruen.
+
+**Offene Risiken / naechster Schritt:**
+
+- Code und Admin-Surface zeigen die Restluecken jetzt belastbar; die eigentliche Aktivierung echter Tenant-Credentials und Zielsystem-URLs bleibt weiterhin ein environment-/ops-seitiger Onboarding-Schritt.
 
 ## Handoff: 2026-04-06 - INT-SG-049 bis INT-SG-060
 

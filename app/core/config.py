@@ -121,6 +121,10 @@ class Settings(BaseSettings):
     SUPERGLUE_SYNC_HISTORY_PATH: str = "runtime/superglue/sync-history.jsonl"
     SUPERGLUE_QUARANTINE_LOG_PATH: str = "runtime/superglue/quarantine.jsonl"
     SUPERGLUE_EXECUTION_JOURNAL_PATH: str = "runtime/superglue/execution-journal.jsonl"
+    SUPERGLUE_ALERT_ERROR_RATE_PCT: float = 5.0
+    SUPERGLUE_ALERT_OPEN_QUARANTINE_COUNT: int = 5
+    SUPERGLUE_RUN_RETENTION_DAYS: int = 30
+    SUPERGLUE_ARTIFACT_RETENTION_DAYS: int = 14
     SECURITY_EVENT_PERSISTENCE_ENABLED: bool = True
     SECURITY_EVENT_LOG_PATH: str = "runtime/security-events/security-events.jsonl"
 

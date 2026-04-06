@@ -11,7 +11,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from main import app
 from app.core.database import get_db, SessionLocal
-from app.infrastructure.models import User, Customer, AuditLog
+from app.infrastructure.models import User, Customer, AuditLog, Tenant
 
 
 client = TestClient(app)
@@ -63,10 +63,36 @@ def test_data_portability_api_exists():
 def test_audit_log_contains_required_fields(db: Session):
     """Test that audit log contains all GDPR-required fields."""
     _require_table(db, "domain_shared", "audit_logs")
-    # Create test audit log
+    _require_table(db, "domain_shared", "tenants")
+    _require_table(db, "domain_shared", "users")
+    tenant = db.query(Tenant).filter(Tenant.id == "test-tenant").first()
+    if tenant is None:
+        tenant = Tenant(
+            id="test-tenant",
+            name="Test",
+            domain="test.local",
+            is_active=True,
+        )
+        db.add(tenant)
+        db.flush()
+    user = db.query(User).filter(User.id == "test-user").first()
+    if user is None:
+        user = User(
+            id="test-user",
+            tenant_id="test-tenant",
+            first_name="Test",
+            last_name="User",
+            username="tuser-gdpr",
+            email="test-gdpr@example.com",
+            is_active=True,
+        )
+        db.add(user)
+        db.flush()
+    db.commit()
+
     from uuid import uuid4
     from datetime import datetime
-    
+
     log = AuditLog(
         id=str(uuid4()),
         timestamp=datetime.utcnow(),
@@ -80,7 +106,7 @@ def test_audit_log_contains_required_fields(db: Session):
         ip_address="127.0.0.1",
         user_agent="Test-Agent"
     )
-    
+
     db.add(log)
     db.commit()
     

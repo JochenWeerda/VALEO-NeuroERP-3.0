@@ -83,7 +83,27 @@ def _approve_ap_invoice_mutation(
     )
 
 
+def _post_ap_invoice_mutation(
+    db: Session,
+    request: ActionExecutionRequest,
+    result: ActionExecutionResult,
+) -> None:
+    """
+    Buchung Eingangsrechnung (Journal + OP + Outbox). PostAPInvoice erfordert
+    human_confirmation=true im Execute-Request, sonst bleibt Dispatch PENDING.
+    """
+    from app.services.ap_invoice_kernel_posting import post_ap_invoice_kernel_sync
+
+    post_ap_invoice_kernel_sync(
+        db,
+        invoice_id=request.aggregate_id,
+        tenant_id=request.tenant_id,
+        posted_by=request.issuer_role or "kernel",
+    )
+
+
 def register_finance_command_mutations() -> None:
     from app.services.action_execution_mutations import register_domain_mutation
 
     register_domain_mutation("ApproveAPInvoice", _approve_ap_invoice_mutation)
+    register_domain_mutation("PostAPInvoice", _post_ap_invoice_mutation)

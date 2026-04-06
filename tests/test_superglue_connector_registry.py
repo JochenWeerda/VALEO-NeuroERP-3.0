@@ -20,6 +20,7 @@ def test_superglue_connector_registry_builds_deterministic_bindings(monkeypatch)
     assert binding.system.url == "https://dms.example.test/api"
     assert binding.run_credentials == {"apiKey": "doc-key"}
     assert binding.metadata["tool_family"] == "sg.document.search"
+    assert binding.metadata["credential_fields"] == ["apiKey", "apiSecret", "accessToken"]
 
 
 def test_superglue_connector_registry_lists_all_default_connectors():

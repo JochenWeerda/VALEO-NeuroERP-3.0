@@ -186,6 +186,7 @@ def build_superglue_connector_binding(*, tenant_id: str, connector_key: str) -> 
         metadata={
             "tool_family": tool_family,
             "connector_key": normalized_connector_key,
+            "credential_fields": list(defaults.get("credential_fields", [])),
         },
     )
 

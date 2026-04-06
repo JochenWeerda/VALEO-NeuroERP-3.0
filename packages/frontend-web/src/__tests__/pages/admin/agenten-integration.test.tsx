@@ -180,6 +180,37 @@ describe('AgentenIntegrationPage', () => {
         data: {
           provider_key: 'superglue',
           tenant_id: 'default',
+          environment: 'staging',
+          connector_count: 9,
+          ready_connector_count: 2,
+          blocked_connector_count: 7,
+          execute_ready_count: 1,
+          policy: {
+            require_tenant_secrets: true,
+            execution_enabled: false,
+            alert_error_rate_pct: 5,
+            alert_open_quarantine_count: 5,
+            run_retention_days: 30,
+            artifact_retention_days: 14,
+          },
+          connectors: [
+            {
+              connector_key: 'document_search',
+              display_name: 'Superglue Document Search',
+              tool_id: 'default.sg.document.search',
+              missing_credential_fields: ['apiKey'],
+              uses_placeholder_url: true,
+              ready: false,
+              blockers: ['missing_credentials', 'placeholder_system_url'],
+            },
+          ],
+          recommended_actions: ['1 Connector(en) brauchen tenant-spezifische Live-Credentials.'],
+        },
+      })
+      .mockResolvedValueOnce({
+        data: {
+          provider_key: 'superglue',
+          tenant_id: 'default',
           domain_count: 6,
           domains: [
             { domain_key: 'finance', connector_count: 1, connectors: [] },
@@ -201,10 +232,12 @@ describe('AgentenIntegrationPage', () => {
     expect(screen.getByText('Execution Journal')).toBeInTheDocument()
     expect(screen.getByText('Superglue Admin Overview')).toBeInTheDocument()
     expect(screen.getByText('Connector Monitoring')).toBeInTheDocument()
+    expect(screen.getByText('Superglue Live Readiness')).toBeInTheDocument()
     expect(screen.getByText('Domain Rollouts')).toBeInTheDocument()
     expect(screen.getByText('84%')).toBeInTheDocument()
     expect(screen.getByText('Command Catalog')).toBeInTheDocument()
     expect(screen.getByText('temporary backend outage')).toBeInTheDocument()
+    expect(screen.getByText(/tenant-spezifische Live-Credentials/i)).toBeInTheDocument()
     expect(screen.getByText(/finance:/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Als erledigt markieren' })).toBeInTheDocument()
   })
