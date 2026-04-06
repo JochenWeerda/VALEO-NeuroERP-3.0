@@ -17,6 +17,7 @@ jobs:
     env:
       DATABASE_URL: postgresql://valeo_dev:REDACTED_PASSWORD@localhost:5432/valeo_neuro_erp
       API_DEV_TOKEN: dev-token
+      PYTEST_REQUIRE_DB_STRICT: "1"
     services:
       postgres:
         image: postgres:15
@@ -324,6 +325,13 @@ jobs:
           pip install pytest pytest-asyncio pytest-cov
 
       - name: Start integration stack
+        env:
+          # compose.yml wertet alle Services aus (inkl. profile superglue); Pflichtvariablen setzen
+          SUPERGLUE_DB_PASSWORD: ci-superglue-db-password
+          SUPERGLUE_MINIO_ROOT_PASSWORD: ci-superglue-minio-password
+          SUPERGLUE_AUTH_TOKEN: ci-superglue-auth-token
+          SUPERGLUE_OPENAI_API_KEY: ci-superglue-openai-placeholder
+          SUPERGLUE_MASTER_ENCRYPTION_KEY: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
         run: docker compose -f docker-compose.integration.yml up -d --build
 
       - name: Run InfraStat integration tests
@@ -334,6 +342,12 @@ jobs:
 
       - name: Stop integration stack
         if: always()
+        env:
+          SUPERGLUE_DB_PASSWORD: ci-superglue-db-password
+          SUPERGLUE_MINIO_ROOT_PASSWORD: ci-superglue-minio-password
+          SUPERGLUE_AUTH_TOKEN: ci-superglue-auth-token
+          SUPERGLUE_OPENAI_API_KEY: ci-superglue-openai-placeholder
+          SUPERGLUE_MASTER_ENCRYPTION_KEY: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
         run: docker compose -f docker-compose.integration.yml down --remove-orphans
 
   finance-gobd-tests:
