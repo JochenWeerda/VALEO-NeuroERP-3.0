@@ -34,6 +34,21 @@ Superglue ist damit:
 5. `execute` ist nie ein Direktpfad, sondern laeuft durch bestehende Approval-/Policy-/Audit-Gates.
 6. Keine Typduplikate zwischen `core`, `api`, `agents`, `integrations`.
 
+### 2.1 Upstream-First-Regel
+
+Fuer alle offenen Superglue-Folge-Slices ab `INT-SG-043` gilt verbindlich:
+
+1. Upstream zuerst uebernehmen, nicht lokal nachbauen.
+2. VALEO ergaenzt Superglue nur um Tenant-Isolation, Secret-/Vault-Resolution, Broker-/Approval-/Policy-Gates, Audit, Monitoring und Admin-Surface.
+3. Wenn Upstream bereits API, Payload-Shape, Run-Semantik, Self-Host-Konvention oder Datenmodell liefert, wird dieser Pfad 1:1 oder als duenne Wrapper-Schicht uebernommen.
+4. Neue VALEO-Strukturen sind nur zulaessig, wenn sie fachlich oder governance-seitig zwingend VALEO-spezifisch sind.
+5. Keine parallele Re-Implementierung von Tool-CRUD, Run-Status-Logik, System-/Credential-Modellen oder Self-Host-/Runtime-Konventionen.
+
+Merksatz:
+
+- Superglue liefert Integrationsfunktionalitaet.
+- VALEO liefert Governance, Tenanting und Fachkontext.
+
 ## 3. Architekturgrenzen
 
 ### 3.1 Was in VALEO bleibt
@@ -282,6 +297,14 @@ Folgewelle 2026-04-04:
 - `INT-SG-035` bis `INT-SG-040` sind umgesetzt: aktueller Self-Host-Runtime-Contract, `/v1`-REST- und Run-Mapping, read-only Tool-Bootstrap, lokaler Runtime-Smoke gegen den echten Upstream-Container und Zielstruktur-/Doku-Alignment.
 - `INT-SG-041` ist umgesetzt: kanonische Pilot-Tools werden per REST reproduzierbar provisioniert, `GET /v1/tools` liefert im frischen Stack echte Eintraege, und ein echter `POST /v1/tools/{toolId}/run`-Smoke ist gegen den lokalen Upstream-Container nachgewiesen.
 - `INT-SG-042` ist umgesetzt: der lokale In-App-Pfad ueber `SuperglueClient` kann fuer Dev-Smokes jetzt explizit loopback-freigegeben werden, ohne die produktive SSRF-/Egress-Policy fuer interne Hosts oder private Netze aufzuweichen.
+
+Folge-Rollout ab `INT-SG-043`:
+
+- **Phase 1 - Produktionsfaehiger Kern:** `INT-SG-043` bis `INT-SG-046`
+- **Phase 2 - Echte Referenz-Connectoren:** `INT-SG-047` bis `INT-SG-050`
+- **Phase 3 - Governance fuer reale Write-Pfade:** `INT-SG-051` bis `INT-SG-053`
+- **Phase 4 - Admin- und Betriebsreife:** `INT-SG-054` bis `INT-SG-056`
+- **Phase 5 - Optionaler breiter Domänen-Rollout:** `INT-SG-057` bis `INT-SG-060`
 
 ### INT-SG-001 - Contract- und Settings-Basis
 
@@ -868,6 +891,319 @@ Dateibesitz:
 - `tests/test_superglue_contracts.py`
 - `docs/workflows/int-sg-042-superglue-dev-egress.md`
 - `docs/cards/neuro-core/INT-SG-042-superglue-dev-egress.md`
+
+### INT-SG-043 - Tenant-/System-Bootstrap fuer echte Connectoren
+
+Ziel:
+
+- Systems, Credentials und Tool-Definitionen pro Tenant reproduzierbar gegen den laufenden Superglue-Server provisionieren
+- lokalen Pilot-Bootstrap in einen produktiven Tenant-Bootstrap ueberfuehren
+
+Dateibesitz:
+
+- `app/integrations/services/**`
+- `app/api/v1/endpoints/external_agent_integrations.py`
+- `scripts/superglue/**`
+- `tests/test_superglue_*`
+
+Abnahme:
+
+- mindestens ein Tenant kann Systems, Credentials und Tools deterministisch bootstrapen
+- kein Shared-Credential-Pfad fuer produktive Tenant-Daten
+
+### INT-SG-044 - Produktiver Secret-/Credential-Resolver
+
+Ziel:
+
+- tenant-spezifische Credential-Aufloesung in den Laufzeitpfad ziehen
+- fehlende oder invalide Secrets kontrolliert degradieren
+
+Dateibesitz:
+
+- `app/integrations/services/superglue_secret_resolver.py`
+- `app/services/secrets_vault.py`
+- `app/core/config.py`
+- `tests/test_superglue_*`
+
+Abnahme:
+
+- produktive Connector-Aufrufe nutzen tenant-spezifische Secrets
+- kein stiller Fallback auf globale Shared-Credentials
+
+### INT-SG-045 - Tool-Lifecycle-Management und Drift-Control
+
+Ziel:
+
+- Create/Update/Archive fuer echte Superglue-Tools standardisieren
+- Drift und Versionen in der VALEO-Admin-Sicht nachvollziehbar machen
+
+Dateibesitz:
+
+- `app/integrations/adapters/superglue/tool_sync.py`
+- `app/integrations/services/superglue_tool_provisioning.py`
+- `app/api/v1/endpoints/external_agent_integrations.py`
+- `tests/test_superglue_tool_*`
+
+Abnahme:
+
+- Tool-Versionen, Delta und Archive-Status sind sichtbar
+- VALEO-Contract-Mapping bleibt trotz Upstream-Aenderungen stabil
+
+### INT-SG-046 - Run-Result-Normalisierung
+
+Ziel:
+
+- echte Connector-Responses und Fehler in stabile VALEO-Envelopes ueberfuehren
+- Result- und Error-Semantik ueber alle Superglue-Connectoren angleichen
+
+Dateibesitz:
+
+- `app/integrations/contracts/**`
+- `app/integrations/services/superglue_execution_service.py`
+- `app/integrations/services/superglue_execution_journal.py`
+- `tests/test_superglue_execution_*`
+
+Abnahme:
+
+- `read`, `suggest`, `simulate` und `execute` liefern denselben Envelope-Standard
+- Fehlerklassen, Retry-Hinweise und Audit-Metadaten sind connector-unabhaengig
+
+### INT-SG-047 - DMS-Connector produktiv
+
+Ziel:
+
+- Document-Preview durch echten DMS-Read-/Search-/Reference-Pfad ersetzen
+
+Dateibesitz:
+
+- `app/integrations/adapters/superglue/document_adapter.py`
+- `app/integrations/ports/document_port.py`
+- `tests/test_superglue_document_adapter.py`
+
+Abnahme:
+
+- VALEO kann echte Dokumente suchen und referenzieren
+- File-Reference-/Metadata-Pfad ist tenant-sicher
+
+### INT-SG-048 - Partner-EDI-Connector produktiv
+
+Ziel:
+
+- Partner-/EDI-Preview durch echten Simulations- und Mappingpfad ersetzen
+
+Dateibesitz:
+
+- `app/integrations/adapters/superglue/edi_adapter.py`
+- `app/integrations/ports/partner_edi_port.py`
+- `tests/test_superglue_partner_preview.py`
+
+Abnahme:
+
+- mindestens ein realer Partnerflow kann simuliert und validiert werden
+- Partner-spezifische Fehler und Mapping-Hinweise sind versioniert surfacbar
+
+### INT-SG-049 - CRM-/Masterdata-Connector produktiv
+
+Ziel:
+
+- externen Customer-/Masterdata-Read statt Preview liefern
+
+Dateibesitz:
+
+- `app/integrations/adapters/superglue/customer_profile_adapter.py`
+- `app/integrations/ports/customer_profile_port.py`
+- `tests/test_superglue_customer_profile_adapter.py`
+
+Abnahme:
+
+- CRM-/Stammdaten-Read laeuft ueber echten Connector
+- Datenschutz- und Tenant-Feldmapping sind abgesichert
+
+### INT-SG-050 - File-Reference-/Artifact-Pfad produktiv
+
+Ziel:
+
+- echte Run-Artefakte, Uploads und Dateireferenzen in VALEO nutzbar machen
+
+Dateibesitz:
+
+- `app/integrations/services/superglue_execution_service.py`
+- `docker-compose.integration.yml`
+- `k8s/superglue/**`
+- `tests/test_superglue_*`
+
+Abnahme:
+
+- echte Dateiartefakte koennen referenziert und auditiert werden
+- Zugriffsschutz und Lebenszyklus fuer Artefakte sind dokumentiert
+
+### INT-SG-051 - Execute-Gates fuer reale Connector-Writes
+
+Ziel:
+
+- reale Write-Connectoren hart an Approval, Policy und Audit binden
+
+Dateibesitz:
+
+- `app/services/neuro_tool_broker.py`
+- `app/services/neuro_tool_execution.py`
+- `app/integrations/services/superglue_execution_service.py`
+- `tests/test_superglue_broker_integration.py`
+
+Abnahme:
+
+- kein Write-Pfad umgeht Approval-/Policy-Gates
+- Write-Runs erscheinen belastbar in Audit und Decision-Trace
+
+### INT-SG-052 - Idempotenz, Replay und Correlation-Hardening
+
+Ziel:
+
+- doppelte externe Writes und unsaubere Retries verhindern
+
+Dateibesitz:
+
+- `app/integrations/services/superglue_execution_service.py`
+- `app/integrations/services/superglue_execution_journal.py`
+- `tests/test_superglue_execution_*`
+
+Abnahme:
+
+- identische Correlation-/Replay-Faelle werden sicher behandelt
+- Retry fuehrt nicht zu fachlichen Dubletten
+
+### INT-SG-053 - Quarantaene, Retry und Dead-letter fuer echte Connectorfehler
+
+Ziel:
+
+- betriebsfaehige Fehlerpfade fuer reale externe Ausfaelle schliessen
+
+Dateibesitz:
+
+- `app/integrations/services/superglue_quarantine.py`
+- `app/integrations/services/superglue_execution_service.py`
+- `tests/test_superglue_refresh_and_quarantine.py`
+
+Abnahme:
+
+- degradierte Runs landen nachvollziehbar in Quarantaene
+- Retry-/Resolve-Entscheidungen sind ohne Fachduplikate moeglich
+
+### INT-SG-054 - Admin-Surface fuer Systems, Credentials, Tools und Drift
+
+Ziel:
+
+- Superglue-Operations nicht nur technisch, sondern betreibbar surfacen
+
+Dateibesitz:
+
+- `app/api/v1/endpoints/external_agent_integrations.py`
+- `packages/frontend-web/src/pages/admin/**`
+- `tests/test_process_kernel_wave88_external_agent_integrations.py`
+
+Abnahme:
+
+- Betreiber sehen Bootstrap, Drift, letzte Runs und Quarantaene in einer konsistenten Admin-Sicht
+- keine Secret-Exposition und keine direkte Fachbedienung im UI
+
+### INT-SG-055 - Monitoring, Kosten und Alerting pro Connector/Tenant
+
+Ziel:
+
+- technische Health-Sicht um Nutzung, Fehlerquote, Latenz und Kosten erweitern
+
+Dateibesitz:
+
+- `app/integrations/services/**`
+- `k8s/helm/valeo-erp/templates/**`
+- `ops/superglue/**`
+
+Abnahme:
+
+- Monitoring zeigt Connector-, Tool- und Tenant-Sicht
+- Alerting deckt Health, Fehlerquote und Kostenanomalien ab
+
+### INT-SG-056 - Staging-/CI-Smoke mit echtem Dev-Connector
+
+Ziel:
+
+- lokalen Dev-Smoke in einen reproduzierbaren CI-/Staging-Pfad ueberfuehren
+
+Dateibesitz:
+
+- `.github/workflows/**`
+- `scripts/superglue/**`
+- `tests/test_superglue_*`
+
+Abnahme:
+
+- mindestens ein echter Connector-Smoke laeuft automatisiert vor Deploy
+- Test-Credentials und externe Systeme sind sauber isoliert
+
+### INT-SG-057 - Procurement-/Lieferanten-Connectoren ausrollen
+
+Ziel:
+
+- ersten echten P2P-/Supplier-Nutzen produktiv ueber Superglue liefern
+
+Dateibesitz:
+
+- `app/integrations/adapters/superglue/**`
+- `app/services/command_handlers_procurement.py`
+
+Abnahme:
+
+- mindestens ein produktiver Procurement-/Supplier-Flow nutzt Superglue
+- Einkaufslogik bleibt in VALEO, nicht in Transforms
+
+### INT-SG-058 - Finance-/Steuer-/Export-Connectoren ausrollen
+
+Ziel:
+
+- ersten echten Finance-/Export-Nutzen produktiv ueber Superglue liefern
+
+Dateibesitz:
+
+- `app/api/v1/endpoints/finance_*.py`
+- `app/api/v1/endpoints/export_service.py`
+- `app/integrations/adapters/superglue/**`
+
+Abnahme:
+
+- mindestens ein Finance-/Export-Flow nutzt echten Connector
+- Auditierbarkeit fuer regulatorische Exporte bleibt intakt
+
+### INT-SG-059 - Logistics-/Warehouse-/Carrier-Connectoren ausrollen
+
+Ziel:
+
+- Transport-, Versand- oder Lageranbindungen ueber denselben Standardpfad aufbauen
+
+Dateibesitz:
+
+- `app/api/v1/endpoints/warehouses*.py`
+- `app/integrations/adapters/superglue/**`
+
+Abnahme:
+
+- mindestens ein Logistics-/Carrier-Flow ist produktiv angebunden
+- zustandsbehaftete Label-/Carrier-Pfade bleiben write-sicher
+
+### INT-SG-060 - Optionaler breiter Rollout auf Agrar, Service und Analytics
+
+Ziel:
+
+- priorisierte Zusatzdomänen nach demselben Connector-Standard erschliessen
+
+Dateibesitz:
+
+- `app/integrations/adapters/superglue/**`
+- `packages/frontend-web/src/pages/**`
+
+Abnahme:
+
+- Zusatzdomänen folgen dem etablierten Standardpfad statt Einzellösungen
+- Start erst nach mindestens drei produktiven Referenz-Connectoren und Betriebsreife
 
 ## 10. Nicht-Ziele fuer Phase 1
 
