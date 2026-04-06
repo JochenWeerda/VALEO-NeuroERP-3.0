@@ -7,6 +7,7 @@ Create Date: 2026-02-14
 
 from alembic import op
 import sqlalchemy as sa
+from sqlalchemy import text
 from sqlalchemy.dialects import postgresql
 
 
@@ -18,6 +19,34 @@ depends_on = None
 
 
 def upgrade() -> None:
+    # Neuinstallation: domain_crm.business_partners wurde in aelteren Migrationen nie angelegt,
+    # aber nachfolgende ALTERs setzen voraus, dass die Tabelle existiert (CI: UndefinedTable).
+    conn = op.get_bind()
+    if conn.execute(text("SELECT to_regclass('domain_crm.business_partners')")).scalar() is None:
+        op.execute(text("CREATE SCHEMA IF NOT EXISTS domain_crm"))
+        op.execute(
+            text(
+                """
+                CREATE TABLE domain_crm.business_partners (
+                    partner_id VARCHAR(36) NOT NULL PRIMARY KEY,
+                    tenant_id VARCHAR NOT NULL REFERENCES domain_shared.tenants(id),
+                    partner_number VARCHAR(64) NOT NULL,
+                    name_1 VARCHAR(255) NOT NULL,
+                    name_2 VARCHAR(255),
+                    status VARCHAR(20) NOT NULL DEFAULT 'active',
+                    created_at TIMESTAMPTZ DEFAULT now(),
+                    updated_at TIMESTAMPTZ
+                )
+                """
+            )
+        )
+        op.execute(
+            text(
+                "CREATE UNIQUE INDEX IF NOT EXISTS uq_domain_crm_bp_partner_number "
+                "ON domain_crm.business_partners (partner_number)"
+            )
+        )
+
     op.add_column("business_partners", sa.Column("salutation", sa.String(length=40), nullable=True), schema="domain_crm")
     op.add_column("business_partners", sa.Column("first_name", sa.String(length=120), nullable=True), schema="domain_crm")
     op.add_column("business_partners", sa.Column("last_name", sa.String(length=120), nullable=True), schema="domain_crm")
