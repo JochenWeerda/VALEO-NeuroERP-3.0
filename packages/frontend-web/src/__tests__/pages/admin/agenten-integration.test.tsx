@@ -211,6 +211,29 @@ describe('AgentenIntegrationPage', () => {
         data: {
           provider_key: 'superglue',
           tenant_id: 'default',
+          environment: 'staging',
+          vault_path_prefix: 'valeo-neuroerp',
+          connector_count: 9,
+          blocked_connector_count: 7,
+          platform_secret_keys: {
+            AUTH_TOKEN: ['SUPERGLUE__TENANT__default__AUTH_TOKEN'],
+          },
+          connectors: [
+            {
+              connector_key: 'document_search',
+              display_name: 'Superglue Document Search',
+              secret_keys: {
+                SYSTEM_URL: ['SUPERGLUE__TENANT__default__CONNECTOR__document_search__SYSTEM_URL'],
+                apiKey: ['SUPERGLUE__TENANT__default__CONNECTOR__document_search__APIKEY'],
+              },
+            },
+          ],
+        },
+      })
+      .mockResolvedValueOnce({
+        data: {
+          provider_key: 'superglue',
+          tenant_id: 'default',
           domain_count: 6,
           domains: [
             { domain_key: 'finance', connector_count: 1, connectors: [] },
@@ -233,6 +256,7 @@ describe('AgentenIntegrationPage', () => {
     expect(screen.getByText('Superglue Admin Overview')).toBeInTheDocument()
     expect(screen.getByText('Connector Monitoring')).toBeInTheDocument()
     expect(screen.getByText('Superglue Live Readiness')).toBeInTheDocument()
+    expect(screen.getByText('Superglue Onboarding Pack')).toBeInTheDocument()
     expect(screen.getByText('Domain Rollouts')).toBeInTheDocument()
     expect(screen.getByText('84%')).toBeInTheDocument()
     expect(screen.getByText('Command Catalog')).toBeInTheDocument()

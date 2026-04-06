@@ -139,6 +139,16 @@ def test_superglue_provider_routes_surface_sync_and_health():
         "connectors": [],
         "recommended_actions": ["tenant credentials missing"],
     }
+    external_agent_integrations.build_superglue_onboarding_pack = lambda tenant_id: {
+        "provider_key": "superglue",
+        "tenant_id": tenant_id,
+        "environment": "development",
+        "vault_path_prefix": "valeo-neuroerp",
+        "connector_count": 9,
+        "blocked_connector_count": 7,
+        "platform_secret_keys": {"AUTH_TOKEN": ["SUPERGLUE__TENANT__tenant-a__AUTH_TOKEN"]},
+        "connectors": [],
+    }
     external_agent_integrations.build_superglue_domain_rollout_summary = lambda tenant_id: {
         "provider_key": "superglue",
         "tenant_id": tenant_id,
@@ -171,6 +181,7 @@ def test_superglue_provider_routes_surface_sync_and_health():
     admin_overview = client.get("/agent/integrations/providers/superglue/admin-overview?tenant_id=tenant-a")
     monitoring = client.get("/agent/integrations/providers/superglue/monitoring?tenant_id=tenant-a")
     live_readiness = client.get("/agent/integrations/providers/superglue/live-readiness?tenant_id=tenant-a")
+    onboarding_pack = client.get("/agent/integrations/providers/superglue/onboarding-pack?tenant_id=tenant-a")
     refresh = client.post("/agent/integrations/providers/superglue/sync-status/refresh")
     provision = client.post("/agent/integrations/providers/superglue/pilot-tools/provision")
     smoke = client.post("/agent/integrations/providers/superglue/pilot-tools/smoke-run")
@@ -205,6 +216,8 @@ def test_superglue_provider_routes_surface_sync_and_health():
     assert monitoring.json()["provider_key"] == "superglue"
     assert live_readiness.status_code == 200
     assert live_readiness.json()["blocked_connector_count"] == 7
+    assert onboarding_pack.status_code == 200
+    assert onboarding_pack.json()["vault_path_prefix"] == "valeo-neuroerp"
     assert refresh.status_code == 200
     assert refresh.json()["provider_key"] == "superglue"
     assert provision.status_code == 200

@@ -1,6 +1,6 @@
 # Superglue Integration - Implementierungsplan
 
-**Status:** in Umsetzung, Basispfade INT-SG-001 bis INT-SG-061 umgesetzt
+**Status:** in Umsetzung, Basispfade INT-SG-001 bis INT-SG-062 umgesetzt
 **Datum:** 2026-04-06
 **Baut auf:** [superglue-integration-bewertung.md](./superglue-integration-bewertung.md), [ADR-014](../adr/adr-014-integrationsgrenzen-api-edi-mcp-partneradapter.md), [ADR-007](../adr/adr-007-agent-tool-contract-governance.md)
 
@@ -300,6 +300,7 @@ Folgewelle 2026-04-04:
 - `INT-SG-043` bis `INT-SG-048` sind umgesetzt: tenant-spezifischer Connector-Bootstrap, connector-scoped Secret-Resolution, tenant-spezifische Tool-/Lifecycle-Summaries, zentral normalisierte Run-Ergebnisse sowie tenant-gebundene DMS- und Partner-EDI-Adapter sind im VALEO-Superglue-Pfad integriert.
 - `INT-SG-049` bis `INT-SG-060` sind umgesetzt: CRM-/Masterdata-Read, Artifact-/Idempotenz-/Retry-Pfade, Admin-/Monitoring-/CI-Surfaces sowie Procurement-, Finance-, Logistics-, Agribusiness-, Service- und Analytics-Rollouts liegen jetzt als thin-wrapper Connector-Familien im VALEO-Superglue-Pfad vor.
 - `INT-SG-061` ist umgesetzt: tenant-spezifische Live-Readiness surfact fehlende Credentials, Platzhalter-Zielsysteme sowie environment-spezifische Alerting-/Retention-Policies jetzt direkt als API- und Admin-Sicht.
+- `INT-SG-062` ist umgesetzt: ein expliziter Tenant-Onboarding-Pack exportiert jetzt Secret-Key-Kandidaten, Zielsystem-Felder und Policy-Werte fuer Ops je Environment.
 
 Folge-Rollout ab `INT-SG-043`:
 
@@ -1302,6 +1303,27 @@ Abnahme:
 
 - Admin und API zeigen pro Tenant fehlende Credentials, Platzhalter-Zielsysteme und Execute-Blocker
 - Alerting-/Retention-Werte sind je Environment explizit sichtbar statt nur implizit in Ops-Dokumenten
+
+### INT-SG-062 - Tenant-Onboarding-Pack fuer Ops exportieren
+
+Status:
+
+- umgesetzt am 2026-04-06
+
+Ziel:
+
+- aus der Live-Readiness einen konkreten Ops-Export fuer Tenant-Aktivierung bauen
+
+Dateibesitz:
+
+- `app/integrations/services/superglue_onboarding_pack.py`
+- `app/api/v1/endpoints/external_agent_integrations.py`
+- `packages/frontend-web/src/pages/admin/agenten-integration.tsx`
+
+Abnahme:
+
+- API liefert Secret-Key-Kandidaten, Zielsystem-Felder und Policy-Werte je Tenant
+- Admin-Surface zeigt den Onboarding-Pack fuer Ops lesbar an
 
 ## 10. Nicht-Ziele fuer Phase 1
 
