@@ -38,7 +38,7 @@ BRANCH = "NL-TEST"
 
 
 @pytest.fixture
-def db() -> Session:
+def db(require_db) -> Session:
     connection = engine.connect()
     outer_tx = connection.begin()
     session = SessionLocal(bind=connection)
@@ -359,7 +359,7 @@ class TestPositionsAPI:
         r = client.get("/api/v1/positions/matrix?period_from=2026-04&period_to=2026-05")
         assert r.status_code in (401, 403)
 
-    def test_get_matrix_with_dev_token(self):
+    def test_get_matrix_with_dev_token(self, require_db):
         client = TestClient(app)
         r = client.get(
             "/api/v1/positions/matrix?period_from=2026-04&period_to=2026-05",
@@ -370,7 +370,7 @@ class TestPositionsAPI:
         assert "period_keys" in data
         assert "rows" in data
 
-    def test_get_kpi_with_dev_token(self):
+    def test_get_kpi_with_dev_token(self, require_db):
         client = TestClient(app)
         r = client.get(
             "/api/v1/positions/kpi?period_from=2026-04&period_to=2026-05",
@@ -381,7 +381,7 @@ class TestPositionsAPI:
         assert "short_cell_count" in data
         assert "max_short_qty" in data
 
-    def test_get_matrix_accepts_view_mode(self):
+    def test_get_matrix_accepts_view_mode(self, require_db):
         client = TestClient(app)
         r = client.get(
             "/api/v1/positions/matrix?period_from=2026-04&period_to=2026-05&view_mode=inkl_archiv",

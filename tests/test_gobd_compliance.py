@@ -22,13 +22,16 @@ def client():
 
 
 @pytest.fixture
-def db():
+def db(require_db):
     """DB-Session für Integrationstests (Tenant/Konten anlegen)."""
     session = SessionLocal()
     try:
         yield session
     finally:
         session.close()
+
+
+pytestmark = pytest.mark.usefixtures("require_db")
 
 
 def _ensure_system_tenant_and_accounts(db_session):

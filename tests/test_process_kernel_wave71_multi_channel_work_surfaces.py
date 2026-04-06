@@ -11,7 +11,7 @@ from app.api.v1.endpoints import channel_work_surfaces
 
 
 @pytest.fixture
-def client() -> TestClient:
+def client(require_db) -> TestClient:
     app = FastAPI()
     app.include_router(channel_work_surfaces.router)
     return TestClient(app)

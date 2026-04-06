@@ -15,7 +15,7 @@ from app.core.knowledge_core_contracts import KnowledgeChannel, build_context_pa
 
 
 @pytest.fixture
-def client() -> TestClient:
+def client(require_db) -> TestClient:
     app = FastAPI()
     app.include_router(process_kernel_api.router)
     app.include_router(agent_context_api.router)
