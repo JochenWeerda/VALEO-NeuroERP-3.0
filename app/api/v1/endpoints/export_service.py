@@ -131,7 +131,7 @@ def _export_chart_of_accounts(db: Session, tenant_id: str, filt: Optional[Export
     q = text("""
         SELECT id, tenant_id, account_number, account_name, account_type, category, subcategory,
                description, is_summary, balance, last_transaction_date, is_active, created_at, updated_at
-        FROM domain_erp.finance_accounts
+        FROM domain_erp.chart_of_accounts
         WHERE tenant_id = :tenant_id AND (is_active IS NULL OR is_active = true)
         ORDER BY account_number
     """)

@@ -1126,7 +1126,7 @@ class InventoryCount(Base):
 # Finance Models
 class Account(Base):
     """Chart of accounts model"""
-    __tablename__ = "finance_accounts"
+    __tablename__ = "chart_of_accounts"
     __table_args__ = {"schema": "domain_erp", "extend_existing": True}
 
     id = Column(String, primary_key=True, default=uuid7)
@@ -1140,7 +1140,7 @@ class Account(Base):
     balance = Column(DECIMAL(15, 2), default=0)
     last_transaction_date = Column(DateTime(timezone=True), nullable=True)
     tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
-    parent_account_id = Column(String, ForeignKey("domain_erp.finance_accounts.id"), nullable=True)
+    parent_account_id = Column(String, ForeignKey("domain_erp.chart_of_accounts.id"), nullable=True)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

@@ -1,6 +1,6 @@
 # Superglue Integration - Implementierungsplan
 
-**Status:** in Umsetzung, Basispfade INT-SG-001 bis INT-SG-041 umgesetzt
+**Status:** in Umsetzung, Basispfade INT-SG-001 bis INT-SG-042 umgesetzt
 **Datum:** 2026-04-05
 **Baut auf:** [superglue-integration-bewertung.md](./superglue-integration-bewertung.md), [ADR-014](../adr/adr-014-integrationsgrenzen-api-edi-mcp-partneradapter.md), [ADR-007](../adr/adr-007-agent-tool-contract-governance.md)
 
@@ -281,6 +281,7 @@ Folgewelle 2026-04-04:
 - `INT-SG-029` bis `INT-SG-034` sind umgesetzt: ArgoCD, Secret-/Certificate-CRDs, Prometheus/Grafana, dedizierter Deploy-Workflow und Bootstrap der tenant-spezifischen Ops-Konfiguration.
 - `INT-SG-035` bis `INT-SG-040` sind umgesetzt: aktueller Self-Host-Runtime-Contract, `/v1`-REST- und Run-Mapping, read-only Tool-Bootstrap, lokaler Runtime-Smoke gegen den echten Upstream-Container und Zielstruktur-/Doku-Alignment.
 - `INT-SG-041` ist umgesetzt: kanonische Pilot-Tools werden per REST reproduzierbar provisioniert, `GET /v1/tools` liefert im frischen Stack echte Eintraege, und ein echter `POST /v1/tools/{toolId}/run`-Smoke ist gegen den lokalen Upstream-Container nachgewiesen.
+- `INT-SG-042` ist umgesetzt: der lokale In-App-Pfad ueber `SuperglueClient` kann fuer Dev-Smokes jetzt explizit loopback-freigegeben werden, ohne die produktive SSRF-/Egress-Policy fuer interne Hosts oder private Netze aufzuweichen.
 
 ### INT-SG-001 - Contract- und Settings-Basis
 
@@ -847,6 +848,26 @@ Dateibesitz:
 - `tests/test_process_kernel_wave88_external_agent_integrations.py`
 - `docs/workflows/int-sg-041-superglue-tool-provisioning.md`
 - `docs/cards/neuro-core/INT-SG-041-superglue-tool-provisioning.md`
+
+### INT-SG-042 - Guarded Dev-Egress fuer lokalen SuperglueClient
+
+Ziel:
+
+- lokalen Dev-Smoke ueber den echten `SuperglueClient` ermoeglichen
+- dabei nur Loopback explizit und default-off freigeben
+- zentrale SSRF-/Egress-Regeln fuer `.internal`, `.local` und private Netze unangetastet lassen
+
+Dateibesitz:
+
+- `app/core/config.py`
+- `app/core/outbound_security.py`
+- `app/integrations/adapters/superglue/client.py`
+- `app/integrations/adapters/superglue/tool_sync.py`
+- `tests/test_security_outbound_policy.py`
+- `tests/test_superglue_client.py`
+- `tests/test_superglue_contracts.py`
+- `docs/workflows/int-sg-042-superglue-dev-egress.md`
+- `docs/cards/neuro-core/INT-SG-042-superglue-dev-egress.md`
 
 ## 10. Nicht-Ziele fuer Phase 1
 
