@@ -1,8 +1,11 @@
 """Labor API: /labor und /qualitaet Alias, Liste, Detail, Create."""
 
+import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
+
+pytestmark = pytest.mark.usefixtures("require_db")
 
 client = TestClient(app, raise_server_exceptions=False)
 

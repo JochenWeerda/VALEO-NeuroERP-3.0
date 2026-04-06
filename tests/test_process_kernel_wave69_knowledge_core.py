@@ -25,7 +25,7 @@ from app.core.knowledge_core_contracts import (
 
 
 @pytest.fixture
-def client() -> TestClient:
+def client(require_db) -> TestClient:
     app = FastAPI()
     app.include_router(process_kernel_api.router)
     return TestClient(app)

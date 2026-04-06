@@ -258,7 +258,7 @@ async def bulk_seed_translations(
 @router.get("/export/{language_code}")
 async def export_translations(
     language_code: str,
-    format: str = Query("json", regex="^(json|csv)$"),
+    format: str = Query("json", pattern="^(json|csv)$"),
     db: Session = Depends(get_db)
 ):
     """

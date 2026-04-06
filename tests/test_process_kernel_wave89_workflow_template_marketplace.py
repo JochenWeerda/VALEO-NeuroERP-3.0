@@ -2,11 +2,14 @@ from __future__ import annotations
 
 import json
 
+import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from sqlalchemy import text
 
 from app.api.v1.endpoints import workflow_template_marketplace
+
+pytestmark = pytest.mark.usefixtures("require_db")
 from app.core.database import SessionLocal
 from app.core.workflow_template_marketplace import (
     build_workflow_template_marketplace_catalog,

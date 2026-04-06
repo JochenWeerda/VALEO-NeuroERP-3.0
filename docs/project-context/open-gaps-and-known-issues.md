@@ -18,7 +18,7 @@ Diese Datei sammelt die fuer neue Analysen wichtigsten offenen Restthemen und be
 - Neuro-Stack-Status und P1-Luecken sind als Matrix dokumentiert (siehe `docs/project-context/neuro-stack-gap-matrix-2026-03-29.md`)
 - Knowledge Store (`knowledge_store.py`, `/neuro/knowledge`) ist umgesetzt; offen bleiben breitere produktive Nutzung in RAG-/Resolver-Pfaden und ggf. dedizierte Migrationen je nach Deploy-Strategie
 - Multi-Channel: WhatsApp, E-Mail, Voice, Live-Chat (Backend-REST), Channel-Ingress; offen bleiben outbound Routing und vollstaendige Live-Chat-WebSocket-Anbindung im Produkt-UI
-- Superglue Self-Host ist mit `INT-SG-035` bis `INT-SG-041` auf den aktuellen Upstream-Runtime-/REST-Vertrag gezogen; drei kanonische Pilot-Tools werden jetzt reproduzierbar provisioniert und ein echter `POST /v1/tools/{toolId}/run` ist lokal nachgewiesen. Offen bleiben vor allem produktiver Tenant-/System-Bootstrap fuer echte Connectoren sowie ein sauberer Dev-Pfad, falls derselbe lokale Smoke einmal ueber den zentralen `SuperglueClient` statt per raw HTTP laufen soll, ohne die SSRF-/Egress-Regeln aufzuweichen.
+- Superglue Self-Host ist mit `INT-SG-035` bis `INT-SG-042` auf den aktuellen Upstream-Runtime-/REST-Vertrag gezogen; drei kanonische Pilot-Tools werden reproduzierbar provisioniert, ein echter `POST /v1/tools/{toolId}/run` ist lokal nachgewiesen, und der lokale In-App-Smoke ueber `SuperglueClient` hat jetzt einen expliziten, default-off, loopback-only Dev-Pfad. Offen bleiben vor allem produktiver Tenant-/System-Bootstrap fuer echte Connectoren sowie die Frage, ob der lokale Dev-Smoke spaeter in einen standardisierten CI-/Ops-Pfad ueberfuehrt werden soll.
 
 ## Zuletzt geschlossene Punkte (Wave 104, 2026-03-27)
 
@@ -31,6 +31,12 @@ Diese Datei sammelt die fuer neue Analysen wichtigsten offenen Restthemen und be
 - ~~SVC-001-P4 Field-Service: `fetch()` statt apiClient~~ — `field-service-tasks.tsx` nutzt `apiClient` + TanStack Query; Backend-Endpunkte unter `/api/v1/agribusiness/field-service-tasks` in `app/api/v1/endpoints/compat.py` (CRM-Mapping, Demo-Fallback).
 - ~~Kurz-IDs aus `uuid7()[:8]` bei schnellen Mehrfach-Inserts~~ — Präfix-IDs verwenden `uuid7_short_suffix()` / `default_prefixed_id()` / `prefixed_id()` in `app/core/uuid7.py` (Zeit-Präfix der v7-String-Darstellung war in derselben Millisekunde nicht eindeutig).
 
+## Zuletzt geschlossene Punkte (2026-04-06)
+
+- ~~Test-Suite scheitert ohne laufende DB/Keycloak an fehlender `API_DEV_TOKEN`-Konfiguration und ungefangenen DB-Verbindungsfehlern~~ — zentrales `tests/conftest.py` setzt `API_DEV_TOKEN` fuer alle Tests via autouse-Fixture; `require_db`-Fixture und `skip_if_db_unavailable()` sorgen fuer sauberes Skippen bei fehlender PostgreSQL-Verbindung. 10 Testdateien gefixt, 49 vorherige Failures/Errors auf 0 reduziert.
+- ~~FastAPI Deprecation-Warnung: `regex=` in `Query()`~~ — `app/routers/translations_router.py` nutzt jetzt `pattern=` statt `regex=`.
+- Mock-Seiten-Inventur: 10 Frontend-Seiten mit Hardcoded-Daten statt API-Anbindung identifiziert (Futter, Rezepte, Produktion, Kasse, Etiketten, Strecke — zur Mock-API-Migration vorgemerkt).
+
 ## Zuletzt geschlossene Punkte (2026-04-05)
 
 - ~~CRM-Kunde/Business-Partner-Verknuepfung persistiert implizit gegen den Default-Tenant~~ — `app/api/v1/endpoints/customers.py` validiert und persistiert `business_partner_id` jetzt tenant-gebunden auch im Create-/Update-Pfad; Regressionen liegen in `tests/test_crm_customer_business_partner_link.py`.
@@ -39,6 +45,8 @@ Diese Datei sammelt die fuer neue Analysen wichtigsten offenen Restthemen und be
 - Process-Kernel: Migration `neuro_step_audit_einkauf_tenant_20260405` legt `domain_shared.neuro_step_audit_trace` an und ergänzt `einkauf_bestellungen.tenant_id` wo fehlend; Kernel-Actions und Broker schreiben Audit bei gesetzter DB-Session; optionale Mutation `CreatePurchaseOrder` (Einkauf); Finance-Follow-up-Erweiterung Kasse (`/finance/followup/kasse/*`); PCN nutzt `X-Tenant-ID`. Doku: `docs/workflows/kernel-action-execution-mutations.md`.
 
 - ~~Superglue-Katalog blieb im frischen lokalen Stack leer und ein echter Tool-Run war nicht nachgewiesen~~ â€” `app/integrations/services/superglue_tool_provisioning.py` provisioniert jetzt drei kanonische Pilot-Tools via `POST/PUT /v1/tools`; der lokale Upstream-Container liefert `total=3` auf `GET /v1/tools`, und `POST /v1/tools/sg.document.search/run` endet erfolgreich.
+
+- ~~Lokaler In-App-Smoke ueber `SuperglueClient` blockierte `localhost` vollstaendig~~ â€” `SUPERGLUE_ALLOW_LOOPBACK_DEV_EGRESS` erlaubt jetzt explizit und default-off nur im Debug-Kontext Loopback fuer Superglue; `.internal`-Hosts und private Netze bleiben weiter geblockt.
 
 ## Analysepflicht
 

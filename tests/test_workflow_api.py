@@ -17,7 +17,7 @@ APPROVER_USER = {"user_info": {"roles": ["admin"]}}
 
 
 @pytest.fixture(autouse=True)
-def _reset_workflow_tables():
+def _reset_workflow_tables(require_db):
     """Keep workflow API tests deterministic across larger test runs."""
     with SessionLocal() as db:
         bind = db.get_bind()
