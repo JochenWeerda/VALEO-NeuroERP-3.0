@@ -202,6 +202,21 @@ type SuperglueDomainRolloutSummary = {
   }>
 }
 
+type SuperglueOnboardingPack = {
+  provider_key: string
+  tenant_id: string
+  environment: string
+  vault_path_prefix: string
+  connector_count: number
+  blocked_connector_count: number
+  platform_secret_keys: Record<string, string[]>
+  connectors: Array<{
+    connector_key: string
+    display_name: string
+    secret_keys: Record<string, string[]>
+  }>
+}
+
 type SuperglueRefreshResult = {
   provider_key: string
   refreshed_at: string
@@ -263,6 +278,10 @@ export default function AgentenIntegrationPage(): JSX.Element {
     queryKey: ['agent', 'superglue-live-readiness'],
     queryFn: async () => (await apiClient.get<SuperglueLiveReadiness>('/api/v1/agent/integrations/providers/superglue/live-readiness', { params: { tenant_id: 'default' } })).data,
   })
+  const superglueOnboardingPackQuery = useQuery({
+    queryKey: ['agent', 'superglue-onboarding-pack'],
+    queryFn: async () => (await apiClient.get<SuperglueOnboardingPack>('/api/v1/agent/integrations/providers/superglue/onboarding-pack', { params: { tenant_id: 'default' } })).data,
+  })
   const superglueDomainRolloutsQuery = useQuery({
     queryKey: ['agent', 'superglue-domain-rollouts'],
     queryFn: async () => (await apiClient.get<SuperglueDomainRolloutSummary>('/api/v1/agent/integrations/providers/superglue/domain-rollouts', { params: { tenant_id: 'default' } })).data,
@@ -293,12 +312,13 @@ export default function AgentenIntegrationPage(): JSX.Element {
     superglueAdminOverviewQuery.isLoading ||
     superglueMonitoringQuery.isLoading ||
     superglueLiveReadinessQuery.isLoading ||
+    superglueOnboardingPackQuery.isLoading ||
     superglueDomainRolloutsQuery.isLoading
   ) {
     return <LoadingState message="Agenten- und Idempotenzdaten werden geladen..." />
   }
 
-  const firstError = manifestQuery.error ?? commandCatalogQuery.error ?? idempotencyOverviewQuery.error ?? superglueStatusQuery.error ?? superglueConfigQuery.error ?? superglueQuarantineQuery.error ?? superglueHistoryQuery.error ?? superglueJournalQuery.error ?? superglueAdminOverviewQuery.error ?? superglueMonitoringQuery.error ?? superglueLiveReadinessQuery.error ?? superglueDomainRolloutsQuery.error
+  const firstError = manifestQuery.error ?? commandCatalogQuery.error ?? idempotencyOverviewQuery.error ?? superglueStatusQuery.error ?? superglueConfigQuery.error ?? superglueQuarantineQuery.error ?? superglueHistoryQuery.error ?? superglueJournalQuery.error ?? superglueAdminOverviewQuery.error ?? superglueMonitoringQuery.error ?? superglueLiveReadinessQuery.error ?? superglueOnboardingPackQuery.error ?? superglueDomainRolloutsQuery.error
   if (
     manifestQuery.isError ||
     commandCatalogQuery.isError ||
@@ -311,6 +331,7 @@ export default function AgentenIntegrationPage(): JSX.Element {
     superglueAdminOverviewQuery.isError ||
     superglueMonitoringQuery.isError ||
     superglueLiveReadinessQuery.isError ||
+    superglueOnboardingPackQuery.isError ||
     superglueDomainRolloutsQuery.isError ||
     !manifestQuery.data
   ) {
@@ -332,6 +353,7 @@ export default function AgentenIntegrationPage(): JSX.Element {
   const superglueAdminOverview = superglueAdminOverviewQuery.data
   const superglueMonitoring = superglueMonitoringQuery.data
   const superglueLiveReadiness = superglueLiveReadinessQuery.data
+  const superglueOnboardingPack = superglueOnboardingPackQuery.data
   const superglueDomainRollouts = superglueDomainRolloutsQuery.data
   const sampleTenant =
     window.localStorage.getItem('tenant_id') ||
@@ -379,6 +401,7 @@ export default function AgentenIntegrationPage(): JSX.Element {
       superglueMonitoringQuery.refetch(),
       superglueAdminOverviewQuery.refetch(),
       superglueLiveReadinessQuery.refetch(),
+      superglueOnboardingPackQuery.refetch(),
     ])
   }
 
@@ -395,6 +418,7 @@ export default function AgentenIntegrationPage(): JSX.Element {
       superglueMonitoringQuery.refetch(),
       superglueAdminOverviewQuery.refetch(),
       superglueLiveReadinessQuery.refetch(),
+      superglueOnboardingPackQuery.refetch(),
     ])
   }
 
@@ -546,6 +570,26 @@ export default function AgentenIntegrationPage(): JSX.Element {
                   <p>Fehlende Credentials: {connector.missing_credential_fields.join(', ')}</p>
                 ) : null}
                 {connector.uses_placeholder_url ? <p>Zielsystem: Platzhalter-URL</p> : null}
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Superglue Onboarding Pack</CardTitle>
+            <CardDescription>
+              Exportierbare Secret-Key- und Zielsystem-Hinweise fuer Ops pro Tenant.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            <p><strong>Vault Prefix:</strong> <code>{superglueOnboardingPack?.vault_path_prefix}</code></p>
+            <p><strong>Blocked Connectoren:</strong> {superglueOnboardingPack?.blocked_connector_count ?? 0}</p>
+            <p><strong>AUTH_TOKEN Keys:</strong> {superglueOnboardingPack?.platform_secret_keys.AUTH_TOKEN?.length ?? 0}</p>
+            {superglueOnboardingPack?.connectors?.slice(0, 2).map((connector) => (
+              <div key={connector.connector_key} className="rounded border p-2">
+                <p><strong>{connector.display_name}</strong></p>
+                <p>Secretfelder: {Object.keys(connector.secret_keys).join(', ')}</p>
               </div>
             ))}
           </CardContent>

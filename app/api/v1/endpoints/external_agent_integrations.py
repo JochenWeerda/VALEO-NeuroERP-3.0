@@ -25,6 +25,7 @@ from app.integrations.services.superglue_monitoring import (
     build_superglue_monitoring_summary,
 )
 from app.integrations.services.superglue_live_readiness import build_superglue_live_readiness
+from app.integrations.services.superglue_onboarding_pack import build_superglue_onboarding_pack
 from app.integrations.services.superglue_quarantine import build_quarantine_summary, resolve_quarantine_entry
 from app.integrations.services.superglue_quarantine import retry_quarantine_entry
 from app.integrations.services.superglue_tool_provisioning import (
@@ -133,6 +134,11 @@ def get_superglue_monitoring(tenant_id: str | None = Query(default=None)) -> dic
 @router.get("/providers/superglue/live-readiness", summary="Superglue live readiness for tenant onboarding")
 def get_superglue_live_readiness(tenant_id: str = Query(default="default")) -> dict:
     return build_superglue_live_readiness(tenant_id)
+
+
+@router.get("/providers/superglue/onboarding-pack", summary="Superglue onboarding pack for tenant ops")
+def get_superglue_onboarding_pack(tenant_id: str = Query(default="default")) -> dict:
+    return build_superglue_onboarding_pack(tenant_id)
 
 
 @router.post("/providers/superglue/pilot-tools/provision", summary="Provision canonical Superglue pilot tools")
