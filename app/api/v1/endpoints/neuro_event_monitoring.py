@@ -9,9 +9,22 @@ from app.infrastructure.eventbus.observability import event_bus_observer
 router = APIRouter(prefix="/neuro/event-bus", tags=["neuro-event-bus", "monitoring"])
 
 
+_PROMETHEUS_COUNTERS = (
+    "valeo_event_bus_events_received_total",
+    "valeo_event_bus_events_processed_total",
+    "valeo_event_bus_events_failed_total",
+    "valeo_event_bus_dlq_entries_total",
+)
+
+
 @router.get("/metrics")
 async def get_event_bus_metrics() -> dict:
-    return event_bus_observer.get_metrics()
+    out = event_bus_observer.get_metrics()
+    out["prometheus"] = {
+        "scrape_path": "/metrics",
+        "counter_names": list(_PROMETHEUS_COUNTERS),
+    }
+    return out
 
 
 @router.get("/health")

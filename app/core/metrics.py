@@ -44,3 +44,21 @@ neuro_kernel_audit_inserts_total = Counter(
     'Successful audit rows written to neuro_step_audit_trace (kernel execute + broker)',
 )
 
+# NATS / Event-Bus (EventBusObserver) — Scraping: GET /metrics (root main.py)
+valeo_event_bus_events_received_total = Counter(
+    'valeo_event_bus_events_received_total',
+    'Events received by in-process event bus observer',
+)
+valeo_event_bus_events_processed_total = Counter(
+    'valeo_event_bus_events_processed_total',
+    'Events processed successfully',
+)
+valeo_event_bus_events_failed_total = Counter(
+    'valeo_event_bus_events_failed_total',
+    'Events failed during processing',
+)
+valeo_event_bus_dlq_entries_total = Counter(
+    'valeo_event_bus_dlq_entries_total',
+    'Events sent to DLQ',
+)
+

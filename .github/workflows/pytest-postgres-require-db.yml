@@ -1,0 +1,58 @@
+# Gezielte Backend-Tests, die die Fixture `require_db` nutzen.
+# Läuft gegen einen echten PostgreSQL-Service (kein Skip wegen fehlender DB).
+#
+# Vollständige Testsuite mit DB bleibt in ci.yml (Job "test"); dieser Workflow
+# ist schneller und scheitert bei PYTEST_REQUIRE_DB_STRICT=1 hart, wenn Postgres
+# oder Migrationen fehlen.
+
+name: Pytest (PostgreSQL / require_db)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  DATABASE_URL: postgresql://valeo_dev:REDACTED_PASSWORD@localhost:5432/valeo_neuro_erp
+  API_DEV_TOKEN: dev-token
+  PYTEST_REQUIRE_DB_STRICT: "1"
+
+jobs:
+  require-db:
+    name: Tests mit require_db (strict)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: valeo_neuro_erp
+          POSTGRES_USER: valeo_dev
+          POSTGRES_PASSWORD: REDACTED_PASSWORD
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U valeo_dev"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 8
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Migrate database (Alembic head)
+        run: python scripts/init_db.py
+
+      - name: Run tests (-m needs_live_db, strict DB)
+        run: pytest tests/ -m needs_live_db --tb=short -q

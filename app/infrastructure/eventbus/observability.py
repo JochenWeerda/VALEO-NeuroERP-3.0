@@ -11,6 +11,13 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any
 
+from app.core.metrics import (
+    valeo_event_bus_dlq_entries_total,
+    valeo_event_bus_events_failed_total,
+    valeo_event_bus_events_processed_total,
+    valeo_event_bus_events_received_total,
+)
+
 logger = logging.getLogger(__name__)
 
 
@@ -45,11 +52,13 @@ class EventBusObserver:
         self._metrics.events_received += 1
         self._metrics.by_type[event_type] += 1
         self._metrics.last_event_at = datetime.now(timezone.utc).isoformat()
+        valeo_event_bus_events_received_total.inc()
 
     def record_event_processed(self, event_type: str, handler_name: str, duration_ms: float) -> None:
         self._metrics.events_processed += 1
         self._metrics.by_handler[handler_name] += 1
         self._processing_times.append(duration_ms)
+        valeo_event_bus_events_processed_total.inc()
 
         if len(self._processing_times) > 10_000:
             self._processing_times = self._processing_times[-5_000:]
@@ -59,6 +68,7 @@ class EventBusObserver:
 
     def record_event_failed(self, event_type: str, error: str) -> None:
         self._metrics.events_failed += 1
+        valeo_event_bus_events_failed_total.inc()
         self._metrics.errors.append({
             "event_type": event_type,
             "error": error,
@@ -69,6 +79,7 @@ class EventBusObserver:
 
     def record_dlq_entry(self, event_type: str) -> None:
         self._metrics.events_dlq += 1
+        valeo_event_bus_dlq_entries_total.inc()
 
     def get_metrics(self) -> dict[str, Any]:
         return {

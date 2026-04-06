@@ -1,6 +1,7 @@
 name: Superglue Infra
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - "docker-compose.integration*.yml"

@@ -160,6 +160,34 @@ type SuperglueMonitoringSummary = {
   }>
 }
 
+type SuperglueLiveReadiness = {
+  provider_key: string
+  tenant_id: string
+  environment: string
+  connector_count: number
+  ready_connector_count: number
+  blocked_connector_count: number
+  execute_ready_count: number
+  policy: {
+    require_tenant_secrets: boolean
+    execution_enabled: boolean
+    alert_error_rate_pct: number
+    alert_open_quarantine_count: number
+    run_retention_days: number
+    artifact_retention_days: number
+  }
+  connectors: Array<{
+    connector_key: string
+    display_name: string
+    tool_id: string
+    missing_credential_fields: string[]
+    uses_placeholder_url: boolean
+    ready: boolean
+    blockers: string[]
+  }>
+  recommended_actions: string[]
+}
+
 type SuperglueDomainRolloutSummary = {
   provider_key: string
   tenant_id: string
@@ -231,6 +259,10 @@ export default function AgentenIntegrationPage(): JSX.Element {
     queryKey: ['agent', 'superglue-monitoring'],
     queryFn: async () => (await apiClient.get<SuperglueMonitoringSummary>('/api/v1/agent/integrations/providers/superglue/monitoring')).data,
   })
+  const superglueLiveReadinessQuery = useQuery({
+    queryKey: ['agent', 'superglue-live-readiness'],
+    queryFn: async () => (await apiClient.get<SuperglueLiveReadiness>('/api/v1/agent/integrations/providers/superglue/live-readiness', { params: { tenant_id: 'default' } })).data,
+  })
   const superglueDomainRolloutsQuery = useQuery({
     queryKey: ['agent', 'superglue-domain-rollouts'],
     queryFn: async () => (await apiClient.get<SuperglueDomainRolloutSummary>('/api/v1/agent/integrations/providers/superglue/domain-rollouts', { params: { tenant_id: 'default' } })).data,
@@ -260,12 +292,13 @@ export default function AgentenIntegrationPage(): JSX.Element {
     superglueJournalQuery.isLoading ||
     superglueAdminOverviewQuery.isLoading ||
     superglueMonitoringQuery.isLoading ||
+    superglueLiveReadinessQuery.isLoading ||
     superglueDomainRolloutsQuery.isLoading
   ) {
     return <LoadingState message="Agenten- und Idempotenzdaten werden geladen..." />
   }
 
-  const firstError = manifestQuery.error ?? commandCatalogQuery.error ?? idempotencyOverviewQuery.error ?? superglueStatusQuery.error ?? superglueConfigQuery.error ?? superglueQuarantineQuery.error ?? superglueHistoryQuery.error ?? superglueJournalQuery.error ?? superglueAdminOverviewQuery.error ?? superglueMonitoringQuery.error ?? superglueDomainRolloutsQuery.error
+  const firstError = manifestQuery.error ?? commandCatalogQuery.error ?? idempotencyOverviewQuery.error ?? superglueStatusQuery.error ?? superglueConfigQuery.error ?? superglueQuarantineQuery.error ?? superglueHistoryQuery.error ?? superglueJournalQuery.error ?? superglueAdminOverviewQuery.error ?? superglueMonitoringQuery.error ?? superglueLiveReadinessQuery.error ?? superglueDomainRolloutsQuery.error
   if (
     manifestQuery.isError ||
     commandCatalogQuery.isError ||
@@ -277,6 +310,7 @@ export default function AgentenIntegrationPage(): JSX.Element {
     superglueJournalQuery.isError ||
     superglueAdminOverviewQuery.isError ||
     superglueMonitoringQuery.isError ||
+    superglueLiveReadinessQuery.isError ||
     superglueDomainRolloutsQuery.isError ||
     !manifestQuery.data
   ) {
@@ -297,6 +331,7 @@ export default function AgentenIntegrationPage(): JSX.Element {
   const superglueJournal = superglueJournalQuery.data
   const superglueAdminOverview = superglueAdminOverviewQuery.data
   const superglueMonitoring = superglueMonitoringQuery.data
+  const superglueLiveReadiness = superglueLiveReadinessQuery.data
   const superglueDomainRollouts = superglueDomainRolloutsQuery.data
   const sampleTenant =
     window.localStorage.getItem('tenant_id') ||
@@ -343,6 +378,7 @@ export default function AgentenIntegrationPage(): JSX.Element {
       superglueHistoryQuery.refetch(),
       superglueMonitoringQuery.refetch(),
       superglueAdminOverviewQuery.refetch(),
+      superglueLiveReadinessQuery.refetch(),
     ])
   }
 
@@ -358,6 +394,7 @@ export default function AgentenIntegrationPage(): JSX.Element {
       superglueJournalQuery.refetch(),
       superglueMonitoringQuery.refetch(),
       superglueAdminOverviewQuery.refetch(),
+      superglueLiveReadinessQuery.refetch(),
     ])
   }
 
@@ -480,6 +517,37 @@ export default function AgentenIntegrationPage(): JSX.Element {
             <p><strong>Artefakte:</strong> {superglueAdminOverview?.journal.artifact_count ?? 0}</p>
             <p><strong>Quarantaene offen:</strong> {superglueAdminOverview?.quarantine.open_count ?? 0}</p>
             <p><strong>Dead-letter:</strong> {superglueAdminOverview?.quarantine.dead_letter_count ?? 0}</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Superglue Live Readiness</CardTitle>
+            <CardDescription>
+              Betriebliche Freigabe fuer echte Tenant-Credentials, Zielsystem-Onboarding und Policy-Werte.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            <p><strong>Environment:</strong> {superglueLiveReadiness?.environment ?? '-'}</p>
+            <p><strong>Ready:</strong> {superglueLiveReadiness?.ready_connector_count ?? 0} / {superglueLiveReadiness?.connector_count ?? 0}</p>
+            <p><strong>Execute-ready:</strong> {superglueLiveReadiness?.execute_ready_count ?? 0}</p>
+            <p><strong>Alert Error Rate:</strong> {superglueLiveReadiness?.policy.alert_error_rate_pct ?? 0}%</p>
+            <p><strong>Open Quarantine Alert:</strong> {superglueLiveReadiness?.policy.alert_open_quarantine_count ?? 0}</p>
+            <p><strong>Run Retention:</strong> {superglueLiveReadiness?.policy.run_retention_days ?? 0} Tage</p>
+            <p><strong>Artifact Retention:</strong> {superglueLiveReadiness?.policy.artifact_retention_days ?? 0} Tage</p>
+            {superglueLiveReadiness?.recommended_actions?.map((action) => (
+              <p key={action} className="text-muted-foreground">{action}</p>
+            ))}
+            {superglueLiveReadiness?.connectors?.filter((connector) => !connector.ready).slice(0, 3).map((connector) => (
+              <div key={connector.connector_key} className="rounded border p-2">
+                <p><strong>{connector.display_name}</strong></p>
+                <p>Blocker: {connector.blockers.join(', ') || 'keine'}</p>
+                {connector.missing_credential_fields.length ? (
+                  <p>Fehlende Credentials: {connector.missing_credential_fields.join(', ')}</p>
+                ) : null}
+                {connector.uses_placeholder_url ? <p>Zielsystem: Platzhalter-URL</p> : null}
+              </div>
+            ))}
           </CardContent>
         </Card>
 

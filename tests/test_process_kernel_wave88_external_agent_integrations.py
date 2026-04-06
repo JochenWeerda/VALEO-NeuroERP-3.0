@@ -122,6 +122,23 @@ def test_superglue_provider_routes_surface_sync_and_health():
         "tenant_id": tenant_id,
         "run_count": 4,
     }
+    external_agent_integrations.build_superglue_live_readiness = lambda tenant_id: {
+        "provider_key": "superglue",
+        "tenant_id": tenant_id,
+        "environment": "development",
+        "connector_count": 9,
+        "ready_connector_count": 2,
+        "blocked_connector_count": 7,
+        "execute_ready_count": 1,
+        "policy": {
+            "alert_error_rate_pct": 5.0,
+            "alert_open_quarantine_count": 5,
+            "run_retention_days": 30,
+            "artifact_retention_days": 14,
+        },
+        "connectors": [],
+        "recommended_actions": ["tenant credentials missing"],
+    }
     external_agent_integrations.build_superglue_domain_rollout_summary = lambda tenant_id: {
         "provider_key": "superglue",
         "tenant_id": tenant_id,
@@ -153,6 +170,7 @@ def test_superglue_provider_routes_surface_sync_and_health():
     journal = client.get("/agent/integrations/providers/superglue/execution-journal")
     admin_overview = client.get("/agent/integrations/providers/superglue/admin-overview?tenant_id=tenant-a")
     monitoring = client.get("/agent/integrations/providers/superglue/monitoring?tenant_id=tenant-a")
+    live_readiness = client.get("/agent/integrations/providers/superglue/live-readiness?tenant_id=tenant-a")
     refresh = client.post("/agent/integrations/providers/superglue/sync-status/refresh")
     provision = client.post("/agent/integrations/providers/superglue/pilot-tools/provision")
     smoke = client.post("/agent/integrations/providers/superglue/pilot-tools/smoke-run")
@@ -185,6 +203,8 @@ def test_superglue_provider_routes_surface_sync_and_health():
     assert admin_overview.json()["tenant_id"] == "tenant-a"
     assert monitoring.status_code == 200
     assert monitoring.json()["provider_key"] == "superglue"
+    assert live_readiness.status_code == 200
+    assert live_readiness.json()["blocked_connector_count"] == 7
     assert refresh.status_code == 200
     assert refresh.json()["provider_key"] == "superglue"
     assert provision.status_code == 200

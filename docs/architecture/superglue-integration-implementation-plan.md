@@ -1,6 +1,6 @@
 # Superglue Integration - Implementierungsplan
 
-**Status:** in Umsetzung, Basispfade INT-SG-001 bis INT-SG-060 umgesetzt
+**Status:** in Umsetzung, Basispfade INT-SG-001 bis INT-SG-061 umgesetzt
 **Datum:** 2026-04-06
 **Baut auf:** [superglue-integration-bewertung.md](./superglue-integration-bewertung.md), [ADR-014](../adr/adr-014-integrationsgrenzen-api-edi-mcp-partneradapter.md), [ADR-007](../adr/adr-007-agent-tool-contract-governance.md)
 
@@ -299,6 +299,7 @@ Folgewelle 2026-04-04:
 - `INT-SG-042` ist umgesetzt: der lokale In-App-Pfad ueber `SuperglueClient` kann fuer Dev-Smokes jetzt explizit loopback-freigegeben werden, ohne die produktive SSRF-/Egress-Policy fuer interne Hosts oder private Netze aufzuweichen.
 - `INT-SG-043` bis `INT-SG-048` sind umgesetzt: tenant-spezifischer Connector-Bootstrap, connector-scoped Secret-Resolution, tenant-spezifische Tool-/Lifecycle-Summaries, zentral normalisierte Run-Ergebnisse sowie tenant-gebundene DMS- und Partner-EDI-Adapter sind im VALEO-Superglue-Pfad integriert.
 - `INT-SG-049` bis `INT-SG-060` sind umgesetzt: CRM-/Masterdata-Read, Artifact-/Idempotenz-/Retry-Pfade, Admin-/Monitoring-/CI-Surfaces sowie Procurement-, Finance-, Logistics-, Agribusiness-, Service- und Analytics-Rollouts liegen jetzt als thin-wrapper Connector-Familien im VALEO-Superglue-Pfad vor.
+- `INT-SG-061` ist umgesetzt: tenant-spezifische Live-Readiness surfact fehlende Credentials, Platzhalter-Zielsysteme sowie environment-spezifische Alerting-/Retention-Policies jetzt direkt als API- und Admin-Sicht.
 
 Folge-Rollout ab `INT-SG-043`:
 
@@ -1278,6 +1279,29 @@ Abnahme:
 
 - Zusatzdomänen folgen dem etablierten Standardpfad statt Einzellösungen
 - Start erst nach mindestens drei produktiven Referenz-Connectoren und Betriebsreife
+
+### INT-SG-061 - Live-Readiness fuer Credentials, Onboarding und Policies surfacen
+
+Status:
+
+- umgesetzt am 2026-04-06
+
+Ziel:
+
+- die verbleibenden operativen Restluecken nach dem Code-Rollout explizit als API-/Admin-Sicht surfacen
+
+Dateibesitz:
+
+- `app/core/config.py`
+- `app/integrations/services/superglue_connector_registry.py`
+- `app/integrations/services/superglue_live_readiness.py`
+- `app/api/v1/endpoints/external_agent_integrations.py`
+- `packages/frontend-web/src/pages/admin/agenten-integration.tsx`
+
+Abnahme:
+
+- Admin und API zeigen pro Tenant fehlende Credentials, Platzhalter-Zielsysteme und Execute-Blocker
+- Alerting-/Retention-Werte sind je Environment explizit sichtbar statt nur implizit in Ops-Dokumenten
 
 ## 10. Nicht-Ziele fuer Phase 1
 
