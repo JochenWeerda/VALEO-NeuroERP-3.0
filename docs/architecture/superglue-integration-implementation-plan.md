@@ -1,7 +1,7 @@
 # Superglue Integration - Implementierungsplan
 
-**Status:** in Umsetzung, Basispfade INT-SG-001 bis INT-SG-042 umgesetzt
-**Datum:** 2026-04-05
+**Status:** in Umsetzung, Basispfade INT-SG-001 bis INT-SG-060 umgesetzt
+**Datum:** 2026-04-06
 **Baut auf:** [superglue-integration-bewertung.md](./superglue-integration-bewertung.md), [ADR-014](../adr/adr-014-integrationsgrenzen-api-edi-mcp-partneradapter.md), [ADR-007](../adr/adr-007-agent-tool-contract-governance.md)
 
 ## 1. Ziel
@@ -297,6 +297,8 @@ Folgewelle 2026-04-04:
 - `INT-SG-035` bis `INT-SG-040` sind umgesetzt: aktueller Self-Host-Runtime-Contract, `/v1`-REST- und Run-Mapping, read-only Tool-Bootstrap, lokaler Runtime-Smoke gegen den echten Upstream-Container und Zielstruktur-/Doku-Alignment.
 - `INT-SG-041` ist umgesetzt: kanonische Pilot-Tools werden per REST reproduzierbar provisioniert, `GET /v1/tools` liefert im frischen Stack echte Eintraege, und ein echter `POST /v1/tools/{toolId}/run`-Smoke ist gegen den lokalen Upstream-Container nachgewiesen.
 - `INT-SG-042` ist umgesetzt: der lokale In-App-Pfad ueber `SuperglueClient` kann fuer Dev-Smokes jetzt explizit loopback-freigegeben werden, ohne die produktive SSRF-/Egress-Policy fuer interne Hosts oder private Netze aufzuweichen.
+- `INT-SG-043` bis `INT-SG-048` sind umgesetzt: tenant-spezifischer Connector-Bootstrap, connector-scoped Secret-Resolution, tenant-spezifische Tool-/Lifecycle-Summaries, zentral normalisierte Run-Ergebnisse sowie tenant-gebundene DMS- und Partner-EDI-Adapter sind im VALEO-Superglue-Pfad integriert.
+- `INT-SG-049` bis `INT-SG-060` sind umgesetzt: CRM-/Masterdata-Read, Artifact-/Idempotenz-/Retry-Pfade, Admin-/Monitoring-/CI-Surfaces sowie Procurement-, Finance-, Logistics-, Agribusiness-, Service- und Analytics-Rollouts liegen jetzt als thin-wrapper Connector-Familien im VALEO-Superglue-Pfad vor.
 
 Folge-Rollout ab `INT-SG-043`:
 
@@ -894,6 +896,10 @@ Dateibesitz:
 
 ### INT-SG-043 - Tenant-/System-Bootstrap fuer echte Connectoren
 
+Status:
+
+- umgesetzt am 2026-04-06
+
 Ziel:
 
 - Systems, Credentials und Tool-Definitionen pro Tenant reproduzierbar gegen den laufenden Superglue-Server provisionieren
@@ -912,6 +918,10 @@ Abnahme:
 - kein Shared-Credential-Pfad fuer produktive Tenant-Daten
 
 ### INT-SG-044 - Produktiver Secret-/Credential-Resolver
+
+Status:
+
+- umgesetzt am 2026-04-06
 
 Ziel:
 
@@ -932,6 +942,10 @@ Abnahme:
 
 ### INT-SG-045 - Tool-Lifecycle-Management und Drift-Control
 
+Status:
+
+- umgesetzt am 2026-04-06
+
 Ziel:
 
 - Create/Update/Archive fuer echte Superglue-Tools standardisieren
@@ -950,6 +964,10 @@ Abnahme:
 - VALEO-Contract-Mapping bleibt trotz Upstream-Aenderungen stabil
 
 ### INT-SG-046 - Run-Result-Normalisierung
+
+Status:
+
+- umgesetzt am 2026-04-06
 
 Ziel:
 
@@ -970,6 +988,10 @@ Abnahme:
 
 ### INT-SG-047 - DMS-Connector produktiv
 
+Status:
+
+- umgesetzt am 2026-04-06
+
 Ziel:
 
 - Document-Preview durch echten DMS-Read-/Search-/Reference-Pfad ersetzen
@@ -986,6 +1008,10 @@ Abnahme:
 - File-Reference-/Metadata-Pfad ist tenant-sicher
 
 ### INT-SG-048 - Partner-EDI-Connector produktiv
+
+Status:
+
+- umgesetzt am 2026-04-06
 
 Ziel:
 
@@ -1004,6 +1030,10 @@ Abnahme:
 
 ### INT-SG-049 - CRM-/Masterdata-Connector produktiv
 
+Status:
+
+- umgesetzt am 2026-04-06
+
 Ziel:
 
 - externen Customer-/Masterdata-Read statt Preview liefern
@@ -1020,6 +1050,10 @@ Abnahme:
 - Datenschutz- und Tenant-Feldmapping sind abgesichert
 
 ### INT-SG-050 - File-Reference-/Artifact-Pfad produktiv
+
+Status:
+
+- umgesetzt am 2026-04-06
 
 Ziel:
 
@@ -1039,6 +1073,10 @@ Abnahme:
 
 ### INT-SG-051 - Execute-Gates fuer reale Connector-Writes
 
+Status:
+
+- umgesetzt am 2026-04-06
+
 Ziel:
 
 - reale Write-Connectoren hart an Approval, Policy und Audit binden
@@ -1057,6 +1095,10 @@ Abnahme:
 
 ### INT-SG-052 - Idempotenz, Replay und Correlation-Hardening
 
+Status:
+
+- umgesetzt am 2026-04-06
+
 Ziel:
 
 - doppelte externe Writes und unsaubere Retries verhindern
@@ -1073,6 +1115,10 @@ Abnahme:
 - Retry fuehrt nicht zu fachlichen Dubletten
 
 ### INT-SG-053 - Quarantaene, Retry und Dead-letter fuer echte Connectorfehler
+
+Status:
+
+- umgesetzt am 2026-04-06
 
 Ziel:
 
@@ -1091,6 +1137,10 @@ Abnahme:
 
 ### INT-SG-054 - Admin-Surface fuer Systems, Credentials, Tools und Drift
 
+Status:
+
+- umgesetzt am 2026-04-06
+
 Ziel:
 
 - Superglue-Operations nicht nur technisch, sondern betreibbar surfacen
@@ -1107,6 +1157,10 @@ Abnahme:
 - keine Secret-Exposition und keine direkte Fachbedienung im UI
 
 ### INT-SG-055 - Monitoring, Kosten und Alerting pro Connector/Tenant
+
+Status:
+
+- umgesetzt am 2026-04-06
 
 Ziel:
 
@@ -1125,6 +1179,10 @@ Abnahme:
 
 ### INT-SG-056 - Staging-/CI-Smoke mit echtem Dev-Connector
 
+Status:
+
+- umgesetzt am 2026-04-06
+
 Ziel:
 
 - lokalen Dev-Smoke in einen reproduzierbaren CI-/Staging-Pfad ueberfuehren
@@ -1142,6 +1200,10 @@ Abnahme:
 
 ### INT-SG-057 - Procurement-/Lieferanten-Connectoren ausrollen
 
+Status:
+
+- umgesetzt am 2026-04-06
+
 Ziel:
 
 - ersten echten P2P-/Supplier-Nutzen produktiv ueber Superglue liefern
@@ -1157,6 +1219,10 @@ Abnahme:
 - Einkaufslogik bleibt in VALEO, nicht in Transforms
 
 ### INT-SG-058 - Finance-/Steuer-/Export-Connectoren ausrollen
+
+Status:
+
+- umgesetzt am 2026-04-06
 
 Ziel:
 
@@ -1175,6 +1241,10 @@ Abnahme:
 
 ### INT-SG-059 - Logistics-/Warehouse-/Carrier-Connectoren ausrollen
 
+Status:
+
+- umgesetzt am 2026-04-06
+
 Ziel:
 
 - Transport-, Versand- oder Lageranbindungen ueber denselben Standardpfad aufbauen
@@ -1190,6 +1260,10 @@ Abnahme:
 - zustandsbehaftete Label-/Carrier-Pfade bleiben write-sicher
 
 ### INT-SG-060 - Optionaler breiter Rollout auf Agrar, Service und Analytics
+
+Status:
+
+- umgesetzt am 2026-04-06
 
 Ziel:
 

@@ -7,6 +7,9 @@ from .types import (
     IntegrationProviderKey,
     IntegrationResultStatus,
     IntegrationTargetKind,
+    ExternalArtifactReference,
+    SuperglueConnectorBinding,
+    SuperglueSystemBinding,
     SuperglueToolRecord,
 )
 
@@ -18,5 +21,8 @@ __all__ = [
     "IntegrationProviderKey",
     "IntegrationResultStatus",
     "IntegrationTargetKind",
+    "ExternalArtifactReference",
+    "SuperglueConnectorBinding",
+    "SuperglueSystemBinding",
     "SuperglueToolRecord",
 ]

@@ -1,0 +1,17 @@
+name: superglue-dev-connector-smoke
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '30 3 * * *'
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Superglue dev connector smoke
+        env:
+          SUPERGLUE_CI_BASE_URL: ${{ secrets.SUPERGLUE_CI_BASE_URL }}
+          SUPERGLUE_CI_TENANT_ID: ${{ secrets.SUPERGLUE_CI_TENANT_ID }}
+        run: bash scripts/superglue/ci-smoke.sh

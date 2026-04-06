@@ -26,6 +26,9 @@ class SuperglueQuarantineEntry(BaseModel):
     correlation_id: str | None = None
     resolved_at: str | None = None
     resolved_by: str | None = None
+    retry_count: int = 0
+    next_retry_at: str | None = None
+    dead_letter: bool = False
     detail: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -42,6 +45,9 @@ def append_quarantine_entry(
     reason: str,
     correlation_id: str | None = None,
     detail: dict[str, Any] | None = None,
+    retry_count: int = 0,
+    next_retry_at: str | None = None,
+    dead_letter: bool = False,
 ) -> SuperglueQuarantineEntry:
     entry = SuperglueQuarantineEntry(
         entry_id=f"sgq-{uuid4()}",
@@ -52,6 +58,9 @@ def append_quarantine_entry(
         outcome=outcome,
         reason=reason,
         correlation_id=correlation_id,
+        retry_count=retry_count,
+        next_retry_at=next_retry_at,
+        dead_letter=dead_letter,
         detail=detail or {},
     )
     _append_event(entry.model_dump())
@@ -81,6 +90,40 @@ def resolve_quarantine_entry(
         correlation_id=current.get("correlation_id"),
         resolved_at=datetime.now(timezone.utc).isoformat(),
         resolved_by=resolved_by,
+        detail={"note": note or "", "previous_outcome": current.get("outcome")},
+    )
+    _append_event(event.model_dump())
+    updated = _fold_events().get(entry_id, current)
+    return updated
+
+
+def retry_quarantine_entry(
+    *,
+    entry_id: str,
+    retried_by: str,
+    note: str | None = None,
+    dead_letter: bool = False,
+) -> dict[str, Any]:
+    entries = _fold_events()
+    if entry_id not in entries:
+        raise KeyError(entry_id)
+    current = entries[entry_id]
+    retry_count = int(current.get("retry_count") or 0) + 1
+    event = SuperglueQuarantineEntry(
+        entry_id=entry_id,
+        event_type="retry",
+        timestamp=datetime.now(timezone.utc).isoformat(),
+        status="open" if not dead_letter else "dead_letter",
+        tenant_id=str(current.get("tenant_id", "unknown")),
+        tool_id=str(current.get("tool_id", "unknown")),
+        execution_mode=str(current.get("execution_mode", "unknown")),
+        outcome="retrying" if not dead_letter else "dead_letter",
+        reason=note or "retry requested",
+        correlation_id=current.get("correlation_id"),
+        retry_count=retry_count,
+        next_retry_at=None if dead_letter else datetime.now(timezone.utc).isoformat(),
+        dead_letter=dead_letter,
+        resolved_by=retried_by,
         detail={"note": note or "", "previous_outcome": current.get("outcome")},
     )
     _append_event(event.model_dump())
@@ -130,8 +173,18 @@ def _fold_events() -> dict[str, dict[str, Any]]:
             continue
         normalized = dict(event)
         normalized.setdefault("status", "open")
+        normalized.setdefault("retry_count", 0)
+        normalized.setdefault("dead_letter", False)
         normalized["last_event_at"] = event.get("timestamp")
         folded[entry_id] = normalized
+        if event.get("event_type") == "retry" and existing:
+            existing["status"] = normalized.get("status", "open")
+            existing["retry_count"] = normalized.get("retry_count", existing.get("retry_count", 0))
+            existing["next_retry_at"] = normalized.get("next_retry_at")
+            existing["dead_letter"] = normalized.get("dead_letter", False)
+            existing["retry_reason"] = normalized.get("reason")
+            existing["last_event_at"] = event.get("timestamp")
+            continue
     return folded
 
 
@@ -147,14 +200,17 @@ def build_quarantine_summary() -> dict[str, Any]:
     all_entries = list_quarantine_entries(limit=500, status="all")
     open_entries = [entry for entry in all_entries if entry.get("status") == "open"]
     resolved_entries = [entry for entry in all_entries if entry.get("status") == "resolved"]
+    dead_letter_entries = [entry for entry in all_entries if entry.get("dead_letter")]
     return {
         "entry_count": len(all_entries),
         "open_count": len(open_entries),
         "resolved_count": len(resolved_entries),
+        "dead_letter_count": len(dead_letter_entries),
         "latest": all_entries[-1] if all_entries else None,
         "entries": all_entries[-20:],
         "open_entries": open_entries[-20:],
         "resolved_entries": resolved_entries[-20:],
+        "dead_letter_entries": dead_letter_entries[-20:],
         "storage_path": str(_storage_path()),
         "schema_version": 1,
     }

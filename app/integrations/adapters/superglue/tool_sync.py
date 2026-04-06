@@ -12,6 +12,10 @@ from pydantic import BaseModel
 from app.core.config import settings
 from app.integrations.adapters.superglue.client import SuperglueClient
 from app.integrations.contracts import SuperglueToolRecord
+from app.integrations.services.superglue_connector_registry import (
+    build_superglue_connector_binding,
+    list_superglue_connector_bindings,
+)
 
 
 class SuperglueSyncStatus(BaseModel):
@@ -110,25 +114,27 @@ def list_superglue_tool_records(client: SuperglueClient | None = None) -> list[S
             tool_id = str(item.get("id") or item.get("toolId") or "").strip()
             if not tool_id:
                 continue
+            defaults = _tool_defaults(tool_id)
             mapped.append(
                 SuperglueToolRecord(
                     external_tool_id=tool_id,
                     external_tool_version=str(item.get("version", item.get("updatedAt", "1"))),
-                    valeo_contract_id=f"superglue.{tool_id}",
+                    valeo_contract_id=str(item.get("valeoContractId") or defaults.get("valeo_contract_id") or f"superglue.{tool_id}"),
                     display_name=str(
                         item.get("title")
                         or item.get("name")
-                        or _pilot_tool_defaults(tool_id).get("display_name")
+                        or defaults.get("display_name")
                         or tool_id
                     ),
                     execution_modes=_normalize_execution_modes(item),
-                    target_kind=str(item.get("targetKind") or _pilot_tool_defaults(tool_id).get("target_kind") or "external_api"),
+                    target_kind=str(item.get("targetKind") or defaults.get("target_kind") or "external_api"),
                     auth_model="superglue_token",
                     tags=_normalize_tags(tool_id),
                     metadata={
                         "source_system": "superglue",
                         "folder_path": item.get("folderPath"),
                         "request_source": "rest_v1",
+                        "connector_key": defaults.get("connector_key"),
                     },
                 )
             )
@@ -235,6 +241,30 @@ def build_superglue_config_summary() -> dict[str, Any]:
         "allowed_hosts": list(settings.SUPERGLUE_ALLOWED_HOSTS),
         "allowed_domains": list(settings.SUPERGLUE_ALLOWED_DOMAINS),
         "allow_loopback_dev_egress": settings.SUPERGLUE_ALLOW_LOOPBACK_DEV_EGRESS,
+        "upstream_first": True,
+        "schema_version": 1,
+    }
+
+
+def build_superglue_tenant_tool_summary(tenant_id: str) -> dict[str, Any]:
+    bindings = list_superglue_connector_bindings(tenant_id)
+    records = [get_superglue_tool_record(binding.tool_id) for binding in bindings]
+    return {
+        "provider_key": "superglue",
+        "tenant_id": tenant_id,
+        "tool_count": len(bindings),
+        "tools": [
+            {
+                "connector_key": binding.connector_key,
+                "tool_id": binding.tool_id,
+                "valeo_contract_id": binding.valeo_contract_id,
+                "target_kind": binding.target_kind,
+                "execution_modes": list(binding.execution_modes),
+                "system_id": binding.system.system_id,
+                "tool_record": record.model_dump() if record else None,
+            }
+            for binding, record in zip(bindings, records, strict=False)
+        ],
         "schema_version": 1,
     }
 
@@ -258,6 +288,19 @@ def get_superglue_tool_record(tool_id: str) -> SuperglueToolRecord | None:
     for record in list_superglue_tool_records():
         if normalized in {record.external_tool_id, record.valeo_contract_id}:
             return record
+    defaults = _tool_defaults(normalized)
+    if defaults:
+        return SuperglueToolRecord(
+            external_tool_id=normalized,
+            external_tool_version="registry",
+            valeo_contract_id=str(defaults.get("valeo_contract_id") or f"superglue.{normalized}"),
+            display_name=str(defaults.get("display_name") or normalized),
+            execution_modes=list(defaults.get("execution_modes") or ["read"]),
+            target_kind=str(defaults.get("target_kind") or "external_api"),
+            auth_model="superglue_token",
+            tags=list(defaults.get("tags") or ["connector"]),
+            metadata={"source_system": "superglue", "connector_key": defaults.get("connector_key")},
+        )
     return None
 
 
@@ -358,7 +401,7 @@ def _normalize_execution_modes(item: dict[str, Any]) -> list[str]:
     raw_modes = item.get("executionModes")
     if isinstance(raw_modes, list) and raw_modes:
         return [str(mode) for mode in raw_modes]
-    known_modes = _pilot_tool_defaults(tool_id).get("execution_modes")
+    known_modes = _tool_defaults(tool_id).get("execution_modes")
     if isinstance(known_modes, list) and known_modes:
         return [str(mode) for mode in known_modes]
     return ["read", "suggest", "simulate", "execute"]
@@ -369,7 +412,28 @@ def _pilot_tool_defaults(tool_id: str) -> dict[str, Any]:
 
 
 def _normalize_tags(tool_id: str) -> list[str]:
-    known_tags = _pilot_tool_defaults(tool_id).get("tags")
+    known_tags = _tool_defaults(tool_id).get("tags")
     if isinstance(known_tags, list) and known_tags:
         return ["synced", *[str(tag) for tag in known_tags]]
     return ["synced"]
+
+
+def _tool_defaults(tool_id: str) -> dict[str, Any]:
+    normalized = str(tool_id).strip()
+    if not normalized:
+        return {}
+    direct = _pilot_tool_defaults(normalized)
+    if direct:
+        return direct
+    for binding in list_superglue_connector_bindings("default"):
+        connector_key = binding.connector_key
+        if normalized == binding.tool_id or normalized.endswith(f".{binding.metadata.get('tool_family')}"):
+            return {
+                "display_name": binding.display_name,
+                "execution_modes": list(binding.execution_modes),
+                "target_kind": binding.target_kind,
+                "tags": ["connector", connector_key],
+                "valeo_contract_id": binding.valeo_contract_id,
+                "connector_key": connector_key,
+            }
+    return {}

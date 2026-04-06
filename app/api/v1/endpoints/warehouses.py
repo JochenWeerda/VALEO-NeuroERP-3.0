@@ -18,6 +18,22 @@ router = APIRouter()
 DEFAULT_TENANT = settings.DEFAULT_TENANT_ID
 
 
+@router.get("/integrations/superglue/carrier-rollout", response_model=dict)
+async def get_superglue_carrier_rollout(tenant_id: Optional[str] = Query(None, description="Tenant ID for rollout summary")):
+    """Thin logistics rollout surface for Superglue carrier connectors."""
+    from app.integrations.services.superglue_domain_rollouts import build_superglue_domain_rollout_summary
+
+    summary = build_superglue_domain_rollout_summary(tenant_id or DEFAULT_TENANT)
+    domain = next((item for item in summary["domains"] if item["domain_key"] == "logistics"), None)
+    return {
+        "provider_key": "superglue",
+        "tenant_id": tenant_id or DEFAULT_TENANT,
+        "domain_key": "logistics",
+        "rollout": domain or {"domain_key": "logistics", "connector_count": 0, "connectors": []},
+        "schema_version": 1,
+    }
+
+
 @router.get("/", response_model=PaginatedResponse[Warehouse])
 async def list_warehouses(
     tenant_id: Optional[str] = Query(None, description="Filter by tenant ID"),

@@ -117,11 +117,61 @@ type SuperglueExecutionJournalSummary = {
   entry_count: number
   success_count: number
   error_count: number
+  replay_count?: number
+  average_latency_ms?: number
+  total_cost_cents?: number
+  artifact_count?: number
   latest?: {
     tool_id: string
     result_status: string
     timestamp: string
   } | null
+}
+
+type SuperglueAdminOverview = {
+  provider_key: string
+  tenant_id: string
+  connector_count: number
+  journal: {
+    entry_count: number
+    error_count: number
+    artifact_count: number
+  }
+  quarantine: {
+    open_count: number
+    dead_letter_count: number
+  }
+}
+
+type SuperglueMonitoringSummary = {
+  provider_key: string
+  tenant_id?: string | null
+  run_count: number
+  average_latency_ms: number
+  total_cost_cents: number
+  artifact_count: number
+  connectors: Array<{
+    tool_id: string
+    runs: number
+    errors: number
+    replays: number
+    average_latency_ms: number
+    error_rate_pct: number
+  }>
+}
+
+type SuperglueDomainRolloutSummary = {
+  provider_key: string
+  tenant_id: string
+  domain_count: number
+  domains: Array<{
+    domain_key: string
+    connector_count: number
+    connectors: Array<{
+      connector_key: string
+      tool_id: string
+    }>
+  }>
 }
 
 type SuperglueRefreshResult = {
@@ -173,6 +223,18 @@ export default function AgentenIntegrationPage(): JSX.Element {
     queryKey: ['agent', 'superglue-journal'],
     queryFn: async () => (await apiClient.get<SuperglueExecutionJournalSummary>('/api/v1/agent/integrations/providers/superglue/execution-journal')).data,
   })
+  const superglueAdminOverviewQuery = useQuery({
+    queryKey: ['agent', 'superglue-admin-overview'],
+    queryFn: async () => (await apiClient.get<SuperglueAdminOverview>('/api/v1/agent/integrations/providers/superglue/admin-overview', { params: { tenant_id: 'default' } })).data,
+  })
+  const superglueMonitoringQuery = useQuery({
+    queryKey: ['agent', 'superglue-monitoring'],
+    queryFn: async () => (await apiClient.get<SuperglueMonitoringSummary>('/api/v1/agent/integrations/providers/superglue/monitoring')).data,
+  })
+  const superglueDomainRolloutsQuery = useQuery({
+    queryKey: ['agent', 'superglue-domain-rollouts'],
+    queryFn: async () => (await apiClient.get<SuperglueDomainRolloutSummary>('/api/v1/agent/integrations/providers/superglue/domain-rollouts', { params: { tenant_id: 'default' } })).data,
+  })
 
   const downloadManifest = (): void => {
     if (!manifestQuery.data) {
@@ -195,12 +257,15 @@ export default function AgentenIntegrationPage(): JSX.Element {
     superglueConfigQuery.isLoading ||
     superglueQuarantineQuery.isLoading ||
     superglueHistoryQuery.isLoading ||
-    superglueJournalQuery.isLoading
+    superglueJournalQuery.isLoading ||
+    superglueAdminOverviewQuery.isLoading ||
+    superglueMonitoringQuery.isLoading ||
+    superglueDomainRolloutsQuery.isLoading
   ) {
     return <LoadingState message="Agenten- und Idempotenzdaten werden geladen..." />
   }
 
-  const firstError = manifestQuery.error ?? commandCatalogQuery.error ?? idempotencyOverviewQuery.error ?? superglueStatusQuery.error ?? superglueConfigQuery.error ?? superglueQuarantineQuery.error ?? superglueHistoryQuery.error ?? superglueJournalQuery.error
+  const firstError = manifestQuery.error ?? commandCatalogQuery.error ?? idempotencyOverviewQuery.error ?? superglueStatusQuery.error ?? superglueConfigQuery.error ?? superglueQuarantineQuery.error ?? superglueHistoryQuery.error ?? superglueJournalQuery.error ?? superglueAdminOverviewQuery.error ?? superglueMonitoringQuery.error ?? superglueDomainRolloutsQuery.error
   if (
     manifestQuery.isError ||
     commandCatalogQuery.isError ||
@@ -210,6 +275,9 @@ export default function AgentenIntegrationPage(): JSX.Element {
     superglueQuarantineQuery.isError ||
     superglueHistoryQuery.isError ||
     superglueJournalQuery.isError ||
+    superglueAdminOverviewQuery.isError ||
+    superglueMonitoringQuery.isError ||
+    superglueDomainRolloutsQuery.isError ||
     !manifestQuery.data
   ) {
     return <ErrorState error={firstError as Error} onRetry={() => void manifestQuery.refetch()} />
@@ -227,6 +295,9 @@ export default function AgentenIntegrationPage(): JSX.Element {
   const superglueQuarantine = superglueQuarantineQuery.data
   const superglueHistory = superglueHistoryQuery.data
   const superglueJournal = superglueJournalQuery.data
+  const superglueAdminOverview = superglueAdminOverviewQuery.data
+  const superglueMonitoring = superglueMonitoringQuery.data
+  const superglueDomainRollouts = superglueDomainRolloutsQuery.data
   const sampleTenant =
     window.localStorage.getItem('tenant_id') ||
     window.sessionStorage.getItem('tenant_id') ||
@@ -270,6 +341,8 @@ export default function AgentenIntegrationPage(): JSX.Element {
       superglueConfigQuery.refetch(),
       superglueQuarantineQuery.refetch(),
       superglueHistoryQuery.refetch(),
+      superglueMonitoringQuery.refetch(),
+      superglueAdminOverviewQuery.refetch(),
     ])
   }
 
@@ -283,6 +356,8 @@ export default function AgentenIntegrationPage(): JSX.Element {
     await Promise.all([
       superglueQuarantineQuery.refetch(),
       superglueJournalQuery.refetch(),
+      superglueMonitoringQuery.refetch(),
+      superglueAdminOverviewQuery.refetch(),
     ])
   }
 
@@ -394,6 +469,22 @@ export default function AgentenIntegrationPage(): JSX.Element {
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
+            <CardTitle>Superglue Admin Overview</CardTitle>
+            <CardDescription>
+              Tenant-bezogene Betriebskennzahlen fuer Connectoren, Journal und Quarantaene.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            <p><strong>Connectoren:</strong> {superglueAdminOverview?.connector_count ?? 0}</p>
+            <p><strong>Journal-Eintraege:</strong> {superglueAdminOverview?.journal.entry_count ?? 0}</p>
+            <p><strong>Artefakte:</strong> {superglueAdminOverview?.journal.artifact_count ?? 0}</p>
+            <p><strong>Quarantaene offen:</strong> {superglueAdminOverview?.quarantine.open_count ?? 0}</p>
+            <p><strong>Dead-letter:</strong> {superglueAdminOverview?.quarantine.dead_letter_count ?? 0}</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
             <CardTitle>Superglue Konfiguration</CardTitle>
             <CardDescription>
               Maskierte Betriebsparameter und Hinweise fuer den produktiven Rollout.
@@ -470,7 +561,43 @@ export default function AgentenIntegrationPage(): JSX.Element {
             <p><strong>Eintraege:</strong> {superglueJournal?.entry_count ?? 0}</p>
             <p><strong>Erfolgreich:</strong> {superglueJournal?.success_count ?? 0}</p>
             <p><strong>Fehler:</strong> {superglueJournal?.error_count ?? 0}</p>
+            <p><strong>Replays:</strong> {superglueJournal?.replay_count ?? 0}</p>
+            <p><strong>Artefakte:</strong> {superglueJournal?.artifact_count ?? 0}</p>
             <p><strong>Letztes Tool:</strong> {superglueJournal?.latest?.tool_id ?? '-'}</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Connector Monitoring</CardTitle>
+            <CardDescription>
+              Laufzeiten, Fehlerraten und Kosten pro Connector im Superglue-Pfad.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            <p><strong>Runs:</strong> {superglueMonitoring?.run_count ?? 0}</p>
+            <p><strong>Average Latency:</strong> {superglueMonitoring?.average_latency_ms ?? 0} ms</p>
+            <p><strong>Total Cost:</strong> {superglueMonitoring?.total_cost_cents ?? 0} ct</p>
+            <p><strong>Artefakte:</strong> {superglueMonitoring?.artifact_count ?? 0}</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Domain Rollouts</CardTitle>
+            <CardDescription>
+              Freigeschaltete Superglue-Domänen fuer Procurement, Finance, Logistics und Zusatzrollen.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            <p><strong>Domänen:</strong> {superglueDomainRollouts?.domain_count ?? 0}</p>
+            {superglueDomainRollouts?.domains?.slice(0, 6).map((domain) => (
+              <p key={domain.domain_key}>
+                <strong>{domain.domain_key}:</strong> {domain.connector_count} Connectoren
+              </p>
+            ))}
           </CardContent>
         </Card>
       </div>

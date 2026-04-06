@@ -11,13 +11,25 @@ from app.integrations.adapters.superglue.tool_sync import (
     build_superglue_health_status,
     build_superglue_sync_history,
     build_superglue_sync_status,
+    build_superglue_tenant_tool_summary,
     build_superglue_tool_summary,
     refresh_superglue_sync_snapshot,
 )
 from app.integrations.services.superglue_execution_journal import build_execution_journal_summary
+from app.integrations.services.superglue_domain_rollouts import (
+    build_superglue_domain_rollout_summary,
+    preview_superglue_domain_rollout,
+)
+from app.integrations.services.superglue_monitoring import (
+    build_superglue_admin_overview,
+    build_superglue_monitoring_summary,
+)
 from app.integrations.services.superglue_quarantine import build_quarantine_summary, resolve_quarantine_entry
+from app.integrations.services.superglue_quarantine import retry_quarantine_entry
 from app.integrations.services.superglue_tool_provisioning import (
+    build_superglue_tool_lifecycle_summary,
     provision_superglue_pilot_tools,
+    provision_superglue_tenant_connectors,
     run_superglue_pilot_smoke,
 )
 
@@ -57,6 +69,11 @@ def get_external_agent_provider(provider_key: str) -> dict:
 @router.get("/providers/superglue/tools", summary="Mapped Superglue Tool Catalog")
 def get_superglue_tool_catalog() -> dict:
     return build_superglue_tool_summary()
+
+
+@router.get("/providers/superglue/tenants/{tenant_id}/tools", summary="Mapped Superglue Tool Catalog for a Tenant")
+def get_superglue_tenant_tool_catalog(tenant_id: str) -> dict:
+    return build_superglue_tenant_tool_summary(tenant_id)
 
 
 @router.get("/providers/superglue/sync-status", summary="Superglue Sync Status")
@@ -102,6 +119,16 @@ def get_superglue_execution_journal(limit: int = Query(default=20, ge=1, le=100)
     return build_execution_journal_summary(limit=limit)
 
 
+@router.get("/providers/superglue/admin-overview", summary="Superglue Admin Overview")
+def get_superglue_admin_overview(tenant_id: str = Query(default="default")) -> dict:
+    return build_superglue_admin_overview(tenant_id)
+
+
+@router.get("/providers/superglue/monitoring", summary="Superglue Monitoring Summary")
+def get_superglue_monitoring(tenant_id: str | None = Query(default=None)) -> dict:
+    return build_superglue_monitoring_summary(tenant_id)
+
+
 @router.post("/providers/superglue/pilot-tools/provision", summary="Provision canonical Superglue pilot tools")
 def provision_superglue_pilots() -> dict:
     return provision_superglue_pilot_tools()
@@ -110,6 +137,46 @@ def provision_superglue_pilots() -> dict:
 @router.post("/providers/superglue/pilot-tools/smoke-run", summary="Run canonical Superglue pilot smoke")
 def run_superglue_pilot_tool_smoke() -> dict:
     return run_superglue_pilot_smoke()
+
+
+@router.post("/providers/superglue/tenants/{tenant_id}/bootstrap", summary="Provision tenant-specific Superglue systems and tools")
+def bootstrap_superglue_tenant_connectors(tenant_id: str) -> dict:
+    return provision_superglue_tenant_connectors(tenant_id)
+
+
+@router.get("/providers/superglue/tenants/{tenant_id}/tool-lifecycle", summary="Superglue tenant tool lifecycle summary")
+def get_superglue_tenant_tool_lifecycle(tenant_id: str) -> dict:
+    return build_superglue_tool_lifecycle_summary(tenant_id)
+
+
+@router.post("/providers/superglue/quarantine/{entry_id}/retry", summary="Retry or dead-letter a Superglue quarantine entry")
+def retry_superglue_quarantine(
+    entry_id: str,
+    retried_by: str = Query(...),
+    note: str | None = Query(default=None),
+    dead_letter: bool = Query(default=False),
+) -> dict:
+    try:
+        return retry_quarantine_entry(entry_id=entry_id, retried_by=retried_by, note=note, dead_letter=dead_letter)
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"Quarantine entry {entry_id!r} not found")
+
+
+@router.get("/providers/superglue/domain-rollouts", summary="Superglue domain rollout summary")
+def get_superglue_domain_rollouts(tenant_id: str = Query(default="default")) -> dict:
+    return build_superglue_domain_rollout_summary(tenant_id)
+
+
+@router.post("/providers/superglue/domain-rollouts/{domain_key}/preview", summary="Superglue domain rollout preview")
+def run_superglue_domain_rollout_preview(
+    domain_key: str,
+    tenant_id: str = Query(default="default"),
+    body: dict | None = None,
+) -> dict:
+    try:
+        return preview_superglue_domain_rollout(tenant_id=tenant_id, domain_key=domain_key, parameters=body or {})
+    except KeyError:
+        raise HTTPException(status_code=404, detail=f"Superglue domain rollout {domain_key!r} not found")
 
 
 @router.get("/use-cases", summary="External Agent Use Cases")

@@ -7,6 +7,7 @@ Registrierung erfolgt beim Laden von app.api.v1.api (siehe register_command_muta
 from __future__ import annotations
 
 import logging
+import os
 from datetime import date, datetime
 
 from sqlalchemy import text
@@ -44,7 +45,14 @@ def _create_purchase_order_mutation(
             payload.get("bestellnummer") or payload.get("order_number")
         ).strip()[:80]
     else:
-        bn = get_numbering().next_number("purchase_order")[:80]
+        safe_tenant = "".join(c if c.isalnum() else "_" for c in tenant_id)[:48]
+        tenant_prefix = os.environ.get(f"TENANT_PO_PREFIX_{safe_tenant.upper()}")
+        core = get_numbering().next_number("purchase_order")
+        bn = (
+            f"{tenant_prefix}{core}"
+            if tenant_prefix
+            else core
+        )[:80]
     if not bn:
         bn = f"AE-{request.idempotency_key}"[:40]
 
@@ -106,3 +114,18 @@ def register_command_mutations() -> None:
     from app.services.action_execution_mutations import register_domain_mutation
 
     register_domain_mutation("CreatePurchaseOrder", _create_purchase_order_mutation)
+
+
+def build_procurement_superglue_rollout(tenant_id: str) -> dict[str, object]:
+    """Thin wrapper for procurement-specific Superglue rollout metadata."""
+    from app.integrations.services.superglue_domain_rollouts import build_superglue_domain_rollout_summary
+
+    summary = build_superglue_domain_rollout_summary(tenant_id)
+    domain = next((item for item in summary["domains"] if item["domain_key"] == "procurement"), None)
+    return {
+        "provider_key": "superglue",
+        "tenant_id": tenant_id,
+        "domain_key": "procurement",
+        "rollout": domain or {"domain_key": "procurement", "connector_count": 0, "connectors": []},
+        "schema_version": 1,
+    }
