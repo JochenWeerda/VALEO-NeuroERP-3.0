@@ -11,6 +11,7 @@ from app.integrations.services.superglue_quarantine import (
     append_quarantine_entry,
     build_quarantine_summary,
     resolve_quarantine_entry,
+    retry_quarantine_entry,
 )
 from app.integrations.services.superglue_tool_provisioning import provision_superglue_pilot_tools
 
@@ -41,6 +42,8 @@ def test_superglue_quarantine_summary_surfaces_latest(monkeypatch, tmp_path: Pat
 
     assert summary["entry_count"] == 1
     assert summary["latest"]["tool_id"] == "sg.document.search"
+    retried = retry_quarantine_entry(entry_id=entry.entry_id, retried_by="tester", note="retry once")
+    assert retried["retry_count"] == 1
     resolve_quarantine_entry(entry_id=entry.entry_id, resolved_by="tester", note="reviewed")
     resolved = build_quarantine_summary()
     assert resolved["open_count"] == 0
@@ -67,6 +70,7 @@ def test_superglue_execution_journal_summary(monkeypatch, tmp_path: Path):
     summary = build_execution_journal_summary()
     assert summary["entry_count"] == 1
     assert summary["success_count"] == 1
+    assert "average_latency_ms" in summary
 
 
 def test_external_agent_integrations_surface_refresh_config_and_quarantine(monkeypatch, tmp_path: Path):
@@ -95,7 +99,10 @@ def test_external_agent_integrations_surface_refresh_config_and_quarantine(monke
     quarantine = client.get("/agent/integrations/providers/superglue/quarantine")
     entry_id = quarantine.json()["open_entries"][0]["entry_id"]
     resolve = client.post(f"/agent/integrations/providers/superglue/quarantine/{entry_id}/resolve?resolved_by=tester")
+    retry = client.post(f"/agent/integrations/providers/superglue/quarantine/{entry_id}/retry?retried_by=tester")
     journal = client.get("/agent/integrations/providers/superglue/execution-journal")
+    monitoring = client.get("/agent/integrations/providers/superglue/monitoring")
+    admin_overview = client.get("/agent/integrations/providers/superglue/admin-overview?tenant_id=tenant-a")
 
     assert refresh.status_code == 200
     assert refresh.json()["provider_key"] == "superglue"
@@ -107,7 +114,12 @@ def test_external_agent_integrations_surface_refresh_config_and_quarantine(monke
     assert quarantine.json()["entry_count"] == 1
     assert resolve.status_code == 200
     assert resolve.json()["status"] == "resolved"
+    assert retry.status_code == 200
     assert journal.status_code == 200
+    assert monitoring.status_code == 200
+    assert monitoring.json()["provider_key"] == "superglue"
+    assert admin_overview.status_code == 200
+    assert admin_overview.json()["tenant_id"] == "tenant-a"
 
 
 def test_provision_superglue_pilot_tools_route(monkeypatch):

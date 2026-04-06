@@ -36,6 +36,21 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/finance/followup", tags=["finance", "followup"])
 
 
+def build_finance_followup_superglue_rollout(tenant_id: str) -> dict[str, object]:
+    """Thin wrapper for finance/export-specific Superglue rollout metadata."""
+    from app.integrations.services.superglue_domain_rollouts import build_superglue_domain_rollout_summary
+
+    summary = build_superglue_domain_rollout_summary(tenant_id)
+    domain = next((item for item in summary["domains"] if item["domain_key"] == "finance"), None)
+    return {
+        "provider_key": "superglue",
+        "tenant_id": tenant_id,
+        "domain_key": "finance",
+        "rollout": domain or {"domain_key": "finance", "connector_count": 0, "connectors": []},
+        "schema_version": 1,
+    }
+
+
 def _insert_finance_export_stub(
     db: Session,
     *,
@@ -304,8 +319,11 @@ async def export_mahnwesen(
             record_count=record_count,
             params_json=export_params or None,
         )
-        if record_count > 0 and os.environ.get("DMS_DOCUMENT_TYPE_ID"):
-            from app.integrations.finance_export_dms import try_upload_finance_csv_to_dms
+        if record_count > 0 and (
+            os.environ.get("DMS_DOCUMENT_TYPE_ID")
+            or os.environ.get("FINANCE_EXPORT_S3_BUCKET")
+        ):
+            from app.integrations.finance_export_upload import upload_finance_export_csv
 
             rows = _mahnwesen_csv_rows(db, tenant_id, export_params or None)
             with tempfile.NamedTemporaryFile(
@@ -316,10 +334,12 @@ async def export_mahnwesen(
                     w.writerow(r)
                 tmp_path = tmp.name
             try:
-                up = try_upload_finance_csv_to_dms(
-                    tmp_path, label=f"mahnwesen-{export_id}.csv"
+                up = upload_finance_export_csv(
+                    tmp_path,
+                    label=f"mahnwesen-{export_id}.csv",
+                    tenant_id=tenant_id,
                 )
-                if up.get("ok") and up.get("document_id"):
+                if up.get("ok") and (up.get("document_id") or up.get("url")):
                     db.execute(
                         text(
                             """
@@ -329,18 +349,19 @@ async def export_mahnwesen(
                             """
                         ),
                         {
-                            "did": up["document_id"],
+                            "did": up.get("document_id"),
                             "url": up.get("url"),
                             "eid": export_id,
                         },
                     )
                     dms_meta = {
-                        "dms_upload": "ok",
-                        "dms_url": up.get("url"),
+                        "export_upload": "ok",
+                        "export_backend": up.get("backend"),
+                        "export_url": up.get("url"),
                         "dms_document_id": up.get("document_id"),
                     }
                 else:
-                    dms_meta = {"dms_upload": "skipped", "detail": up.get("error")}
+                    dms_meta = {"export_upload": "skipped", "detail": up.get("error")}
             finally:
                 try:
                     os.unlink(tmp_path)
@@ -484,8 +505,11 @@ async def export_lastschriften(
             record_count=record_count,
             params_json={"run_id": run_id},
         )
-        if record_count > 0 and os.environ.get("DMS_DOCUMENT_TYPE_ID"):
-            from app.integrations.finance_export_dms import try_upload_finance_csv_to_dms
+        if record_count > 0 and (
+            os.environ.get("DMS_DOCUMENT_TYPE_ID")
+            or os.environ.get("FINANCE_EXPORT_S3_BUCKET")
+        ):
+            from app.integrations.finance_export_upload import upload_finance_export_csv
 
             rows = _lastschrift_csv_rows(db, tenant_id, run_id)
             with tempfile.NamedTemporaryFile(
@@ -496,10 +520,12 @@ async def export_lastschriften(
                     w.writerow(r)
                 tmp_path = tmp.name
             try:
-                up = try_upload_finance_csv_to_dms(
-                    tmp_path, label=f"lastschrift-{run_id}-{export_id}.csv"
+                up = upload_finance_export_csv(
+                    tmp_path,
+                    label=f"lastschrift-{run_id}-{export_id}.csv",
+                    tenant_id=tenant_id,
                 )
-                if up.get("ok") and up.get("document_id"):
+                if up.get("ok") and (up.get("document_id") or up.get("url")):
                     db.execute(
                         text(
                             """
@@ -509,12 +535,19 @@ async def export_lastschriften(
                             """
                         ),
                         {
-                            "did": up["document_id"],
+                            "did": up.get("document_id"),
                             "url": up.get("url"),
                             "eid": export_id,
                         },
                     )
-                    dms_meta = {"dms_upload": "ok", "dms_url": up.get("url")}
+                    dms_meta = {
+                        "export_upload": "ok",
+                        "export_backend": up.get("backend"),
+                        "export_url": up.get("url"),
+                        "dms_document_id": up.get("document_id"),
+                    }
+                else:
+                    dms_meta = {"export_upload": "skipped", "detail": up.get("error")}
             finally:
                 try:
                     os.unlink(tmp_path)
@@ -652,8 +685,11 @@ async def export_kassenfolge(
             record_count=record_count,
             params_json={"format": fmt},
         )
-        if record_count > 0 and os.environ.get("DMS_DOCUMENT_TYPE_ID"):
-            from app.integrations.finance_export_dms import try_upload_finance_csv_to_dms
+        if record_count > 0 and (
+            os.environ.get("DMS_DOCUMENT_TYPE_ID")
+            or os.environ.get("FINANCE_EXPORT_S3_BUCKET")
+        ):
+            from app.integrations.finance_export_upload import upload_finance_export_csv
 
             rows = _kasse_csv_rows(db, tenant_id)
             with tempfile.NamedTemporaryFile(
@@ -664,10 +700,12 @@ async def export_kassenfolge(
                     w.writerow(r)
                 tmp_path = tmp.name
             try:
-                up = try_upload_finance_csv_to_dms(
-                    tmp_path, label=f"kasse-{export_id}.csv"
+                up = upload_finance_export_csv(
+                    tmp_path,
+                    label=f"kasse-{export_id}.csv",
+                    tenant_id=tenant_id,
                 )
-                if up.get("ok") and up.get("document_id"):
+                if up.get("ok") and (up.get("document_id") or up.get("url")):
                     db.execute(
                         text(
                             """
@@ -677,12 +715,19 @@ async def export_kassenfolge(
                             """
                         ),
                         {
-                            "did": up["document_id"],
+                            "did": up.get("document_id"),
                             "url": up.get("url"),
                             "eid": export_id,
                         },
                     )
-                    dms_meta = {"dms_upload": "ok", "dms_url": up.get("url")}
+                    dms_meta = {
+                        "export_upload": "ok",
+                        "export_backend": up.get("backend"),
+                        "export_url": up.get("url"),
+                        "dms_document_id": up.get("document_id"),
+                    }
+                else:
+                    dms_meta = {"export_upload": "skipped", "detail": up.get("error")}
             finally:
                 try:
                     os.unlink(tmp_path)

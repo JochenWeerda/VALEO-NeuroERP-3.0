@@ -35,6 +35,7 @@ SUPPORTED_ENTITIES = [
     "futtermittel_einzel",
     "futtermittel_misch",
     "futtermittel_chargen",
+    "superglue_domain_rollouts",
 ]
 
 
@@ -135,18 +136,7 @@ def _export_chart_of_accounts(db: Session, tenant_id: str, filt: Optional[Export
         WHERE tenant_id = :tenant_id AND (is_active IS NULL OR is_active = true)
         ORDER BY account_number
     """)
-    try:
-        rows = db.execute(q, {"tenant_id": effective_tenant}).fetchall()
-    except Exception:
-        # Some setups may use chart_of_accounts table name
-        q = text("""
-            SELECT id, tenant_id, account_number, account_name, account_type, category, subcategory,
-                   description, is_summary, balance, last_transaction_date, is_active, created_at, updated_at
-            FROM domain_erp.chart_of_accounts
-            WHERE tenant_id = :tenant_id AND (is_active IS NULL OR is_active = true)
-            ORDER BY account_number
-        """)
-        rows = db.execute(q, {"tenant_id": effective_tenant}).fetchall()
+    rows = db.execute(q, {"tenant_id": effective_tenant}).fetchall()
     cols = ["id", "tenant_id", "account_number", "account_name", "account_type", "category", "subcategory",
             "description", "is_summary", "balance", "last_transaction_date", "is_active", "created_at", "updated_at"]
     return [dict(zip(cols, [_safe_str(c) for c in row])) for row in rows]
@@ -314,6 +304,27 @@ def _export_futtermittel_chargen(db: Session, tenant_id: str, filt: Optional[Exp
     return [dict(zip(cols, [_safe_str(c) for c in row])) for row in rows]
 
 
+def _export_superglue_domain_rollouts(db: Session, tenant_id: str, filt: Optional[ExportListFilter]) -> list[dict]:
+    from app.integrations.services.superglue_domain_rollouts import build_superglue_domain_rollout_summary
+
+    summary = build_superglue_domain_rollout_summary((filt.tenant_id if filt else None) or tenant_id)
+    rows: list[dict] = []
+    for domain in summary["domains"]:
+        for connector in domain["connectors"]:
+            rows.append(
+                {
+                    "tenant_id": summary["tenant_id"],
+                    "domain_key": domain["domain_key"],
+                    "connector_key": connector["connector_key"],
+                    "tool_id": connector["tool_id"],
+                    "valeo_contract_id": connector["valeo_contract_id"],
+                    "execution_modes": ",".join(connector["execution_modes"]),
+                    "system_url": connector["system_url"],
+                }
+            )
+    return rows
+
+
 def _get_entity_data(entity: str, db: Session, tenant_id: str, filt: Optional[ExportListFilter]) -> list[dict]:
     handlers = {
         "debtors": _export_debtors,
@@ -325,6 +336,7 @@ def _get_entity_data(entity: str, db: Session, tenant_id: str, filt: Optional[Ex
         "futtermittel_einzel": _export_futtermittel_einzel,
         "futtermittel_misch": _export_futtermittel_misch,
         "futtermittel_chargen": _export_futtermittel_chargen,
+        "superglue_domain_rollouts": _export_superglue_domain_rollouts,
     }
     fn = handlers.get(entity)
     if not fn:

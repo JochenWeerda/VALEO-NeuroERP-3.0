@@ -8,6 +8,7 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 from .types import (
+    ExternalArtifactReference,
     IntegrationExecutionMode,
     IntegrationProviderKey,
     IntegrationResultStatus,
@@ -35,7 +36,11 @@ class ExternalResultEnvelope(BaseModel):
     target_kind: IntegrationTargetKind
     result_status: IntegrationResultStatus
     cost_cents: int = Field(default=0, ge=0)
+    idempotency_key: str | None = None
+    replayed_from_correlation_id: str | None = None
     started_at: datetime
     finished_at: datetime | None = None
+    artifacts: list[ExternalArtifactReference] = Field(default_factory=list)
+    metrics: dict[str, Any] = Field(default_factory=dict)
     payload: dict[str, Any] = Field(default_factory=dict)
     errors: list[ExternalResultError] = Field(default_factory=list)
