@@ -1230,3 +1230,32 @@ Alle 6 Router registriert in `app/api/v1/api.py` unter `/api/v1/neuro/*`. Commit
 **Offene Risiken:** Ohne echte Exportdumps und abgestimmtes Finance-Mapping bleibt FIBU nur bis zur sauberen Roh-Landing-Zone vorbereitet; das ist fachlich korrekt, aber noch kein automatischer Vollimport.
 **Annahmen:** Die bestehende `service-erp`-Installation liefert L3-Exporte in CSV/TSV/JSON sowie belastbare Metadaten in `docs/data/l3/raw_tables.json`; weitere fachliche Transformationsregeln werden getrennt pro Domäne freigegeben.
 **Naechster konkreter Schritt:** Falls gewuenscht, die echten Produktivwerte je Tenant/Environment ausserhalb des Repos setzen, einen Dry-Run gegen reale Exportdumps fahren und danach den domänenspezifischen Transformations-/Cutover-Slice fuer FIBU und weitere L3-Domänen schneiden.
+
+## PCP-001 bis PCP-006
+
+**Von:** Codex
+**An:** naechste Session / naechster Agent
+**Ziel des Slices:** Die Paperclip-inspirierten Agent-Ops-Grundlagen direkt im bestehenden NeuroASSIST-Pfad verankern, ohne eine zweite Orchestrierungsschicht aufzubauen.
+**Stand:** abgeschlossen
+**Erledigt:**
+- `app/agents/agent_ops.py` fuehrt tenant-spezifische Budgets, Cost-Ledger-Eintraege, Heartbeats, Rollen-/Reporting-Linien, Goal-Nodes und Ticket-Journal in einer gemeinsamen Runtime zusammen.
+- `app/agents/neuroassist_service.py` prueft Budgets vor neuen Runs, schreibt Kosten-/Heartbeat-/Ticket-Updates bei echten NeuroASSIST-Ausfuehrungen und liefert jetzt auch `list_runs()`.
+- `app/api/v1/endpoints/agents.py` stellt neue Ops-Endpunkte bereit: `GET /api/v1/agents/neuroassist/ops/overview`, `GET /api/v1/agents/neuroassist/ops/tickets` und `POST /api/v1/agents/neuroassist/ops/budgets/{capability_key}`.
+- `packages/frontend-web/src/pages/admin/agenten-integration.tsx` surfact den neuen Block als `Agent Ops Budgeting`, `Agent Cost Ledger`, `Agent Heartbeats` und `Agent Roles And Goals`.
+- Regressionen liegen in `tests/test_neuroassist_service.py`, `tests/test_agents_neuroassist_api.py` und `packages/frontend-web/src/__tests__/pages/admin/agenten-integration.test.tsx`.
+**Offen:**
+- `PCP-007` bis `PCP-012` bleiben offen: Intervention Console, zentrales Ops-Dashboard, Templates, Skill Packs, Mobile Ops Surface und Plugin Boundary Review.
+- Die aktuelle Agent-Ops-Runtime ist bewusst in-memory und fuer den Produktkern ausreichend als erster Schritt; persistente DB-Modelle waeren erst im Folgeslice sinnvoll, wenn echte Eingriffs- und Template-Pfade dazukommen.
+**Betroffene Dateien:** `app/agents/agent_ops.py`, `app/agents/__init__.py`, `app/agents/neuroassist_service.py`, `app/api/v1/endpoints/agents.py`, `packages/frontend-web/src/pages/admin/agenten-integration.tsx`, `tests/test_neuroassist_service.py`, `tests/test_agents_neuroassist_api.py`, `packages/frontend-web/src/__tests__/pages/admin/agenten-integration.test.tsx`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/agent-ops/active-workboard.md`
+**Tests / Checks:** `pytest tests/test_neuroassist_service.py tests/test_agents_neuroassist_api.py -q --no-cov`; `pnpm --dir packages/frontend-web exec vitest run src/__tests__/pages/admin/agenten-integration.test.tsx`; `python -m py_compile app/agents/agent_ops.py app/agents/neuroassist_service.py app/api/v1/endpoints/agents.py tests/test_neuroassist_service.py tests/test_agents_neuroassist_api.py`
+**Offene Risiken:** Kosten- und Budgetwerte sind derzeit bewusst heuristisch, weil noch kein provideruebergreifender Live-Cost-Feed existiert; fuer harte Finanzsteuerung muss `PCP-002` spaeter an echte Provider-/Broker-Kostenquellen angeschlossen werden.
+**Annahmen:** NeuroASSIST bleibt der einzige interne Agent-Orchestrierungspfad; Heartbeats nutzen vorerst die bestehende Scheduler-/Job-Runner-Welt nur konzeptionell und nicht als neue persistente Scheduling-Domain.
+**Naechster konkreter Schritt:** `PCP-007` und `PCP-010` schneiden: Eingriffs-/Intervention-Console plus zentrales Agent-Ops-Dashboard auf Basis der jetzt vorhandenen Runtime.
+
+## PCP-007 bis PCP-012
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Die verbleibenden Paperclip-inspirierten Agent-Ops-Folgeslices auf der vorhandenen NeuroASSIST- und Agent-Ops-Runtime schliessen.
+**Enthaelt:** `PCP-007` Approval And Intervention Console, `PCP-008` Portable Agent Templates, `PCP-009` Agent Skill Packs, `PCP-010` Agent Ops Dashboard, `PCP-011` Mobile Ops Surface, `PCP-012` Plugin Boundary Review.
+**Dateibesitz:** `app/agents/*`, `app/api/v1/endpoints/agents.py`, `packages/frontend-web/src/pages/admin/agenten-integration.tsx`, `packages/frontend-web/src/__tests__/pages/admin/agenten-integration.test.tsx`, neue Agent-Ops-Workflow-/ADR-Dokumente.
