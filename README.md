@@ -62,6 +62,16 @@ Experimental **open-source ERP and automation platform** combining classical ent
 
 See [docs/AI-VISION.md](docs/AI-VISION.md) for the project’s AI and research vision.
 
+## Third-Party Licensing Notes
+
+This repository contains integration and deployment support for the third-party project `superglue-ai/superglue`.
+
+- Superglue upstream license: `FSL-1.1-Apache-2.0`
+- Upstream license file: <https://github.com/superglue-ai/superglue/blob/main/LICENSE>
+- Local attribution file: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)
+
+Where copies, modifications or derivatives of Superglue are redistributed with this repository, the applicable upstream copyright and license notice must be retained.
+
 ## Project Purpose / Ziel und Zweck
 
 ### Deutsch
