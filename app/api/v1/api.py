@@ -139,6 +139,11 @@ from app.api.v1.endpoints import (
     pos_dsfinvk,
     service_anfragen,
     neuro_prompt_packs,
+    schaeden,
+    etiketten,
+    strecke,
+    produktion_mischfutter,
+    kasse_tagesabschluss,
 )
 
 # Wave 6-9 Process-Kernel-Endpoints (agrar-p0, supplier, wave-7, wave-9)
@@ -959,6 +964,21 @@ api_router.include_router(
     strecke_speditionen.router
 )
 
+# Strecke – Streckengeschaefte CRUD
+api_router.include_router(
+    strecke.router
+)
+
+# Produktion – Mischfutter
+api_router.include_router(
+    produktion_mischfutter.router
+)
+
+# Kasse – Tagesabschluss (einfach)
+api_router.include_router(
+    kasse_tagesabschluss.router
+)
+
 # Tours API
 api_router.include_router(
     tours.router
@@ -1166,6 +1186,27 @@ api_router.include_router(neuro_knowledge.router)
 from app.api.v1.endpoints import case_management_api
 
 api_router.include_router(case_management_api.router)
+
+# ── Futtermittel-Stammdaten & Rezepte ──────────────────────────
+from app.api.v1.endpoints import futter_stamm
+
+api_router.include_router(
+    futter_stamm.router,
+    prefix="/futter",
+    tags=["futter", "stammdaten"],
+)
+
+# Schaeden (Schadenmeldung + Versicherungen)
+api_router.include_router(
+    schaeden.router,
+    tags=["schaeden", "versicherung"],
+)
+
+# Etiketten (Drucker + Druckaufträge)
+api_router.include_router(
+    etiketten.router,
+    tags=["etiketten", "druck"],
+)
 
 # Process Kernel: Domain-Mutationen fuer Business-Commands registrieren
 from app.services.command_handlers_procurement import register_command_mutations

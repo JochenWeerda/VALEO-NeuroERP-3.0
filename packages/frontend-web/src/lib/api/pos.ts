@@ -3,7 +3,7 @@
  * Error-first fetching without mock fallback data.
  */
 
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation } from '@tanstack/react-query'
 import { apiClient } from '../api-client'
 
 export type GiftCard = {
@@ -84,5 +84,61 @@ export function useTSEJournal() {
     queryFn: async () => (await apiClient.get<TSEEintrag[]>('/api/v1/pos/tse-journal')).data,
     initialData: [],
     staleTime: 30 * 1000,
+  })
+}
+
+// ── Kasse Tagesabschluss (einfach) ──────────────────────────────────────────
+
+export type KasseTagesabschlussAktuell = {
+  datum: string
+  barverkauf: number
+  kartenzahlung: number
+  umsatz_gesamt: number
+  transaktionen: number
+  stornos: number
+  retouren: number
+}
+
+export type KasseTagesabschlussSubmit = {
+  datum: string
+  kassenstand: number
+  barverkauf: number
+  kartenzahlung: number
+  differenz: number
+}
+
+export type KasseTagesabschlussResult = {
+  id: string
+  datum: string
+  status: string
+  belegnummer: string
+  umsatz_gesamt: number
+}
+
+const EMPTY_KASSE: KasseTagesabschlussAktuell = {
+  datum: '',
+  barverkauf: 0,
+  kartenzahlung: 0,
+  umsatz_gesamt: 0,
+  transaktionen: 0,
+  stornos: 0,
+  retouren: 0,
+}
+
+export function useKasseTagesabschlussAktuell(datum?: string) {
+  const q = datum ? `?datum=${datum}` : ''
+  return useQuery({
+    queryKey: ['kasse', 'tagesabschluss', 'aktuell', datum],
+    queryFn: async () =>
+      (await apiClient.get<KasseTagesabschlussAktuell>(`/api/v1/kasse/tagesabschluss/aktuell${q}`)).data,
+    initialData: EMPTY_KASSE,
+    staleTime: 30 * 1000,
+  })
+}
+
+export function useKasseTagesabschlussSubmit() {
+  return useMutation({
+    mutationFn: async (payload: KasseTagesabschlussSubmit) =>
+      (await apiClient.post<KasseTagesabschlussResult>('/api/v1/kasse/tagesabschluss', payload)).data,
   })
 }

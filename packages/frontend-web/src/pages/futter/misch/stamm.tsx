@@ -1,36 +1,31 @@
-import { useState } from 'react'
+import { useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Save } from 'lucide-react'
-
-type MischfutterData = {
-  id: string
-  typ: string
-  tierart: string
-  leistungsstufe: string
-  rezeptur: Array<{ komponente: string; anteil: number }>
-  protein: number
-  energie: number
-}
+import { useMischfutterDetail } from '@/lib/api/futter'
 
 export default function MischfutterStammPage(): JSX.Element {
-  const [mischfutter] = useState<MischfutterData>({
-    id: 'MF-001',
-    typ: 'Milchviehfutter Hochleistung',
-    tierart: 'Rind (Milch)',
-    leistungsstufe: 'Hochleistung (>30 l/Tag)',
-    rezeptur: [
-      { komponente: 'Sojaschrot 44%', anteil: 25 },
-      { komponente: 'Weizen', anteil: 30 },
-      { komponente: 'Mais', anteil: 20 },
-      { komponente: 'Mineralfutter', anteil: 5 },
-    ],
-    protein: 18.5,
-    energie: 11.8,
-  })
+  const { id = 'MF-001' } = useParams<{ id: string }>()
+  const { data: mischfutter, isLoading, isError } = useMischfutterDetail(id)
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-12">
+        <p className="text-muted-foreground">Lade Mischfutter…</p>
+      </div>
+    )
+  }
+
+  if (isError || !mischfutter) {
+    return (
+      <div className="flex items-center justify-center p-12">
+        <p className="text-destructive">Mischfutter konnte nicht geladen werden.</p>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6 p-6">
@@ -57,16 +52,16 @@ export default function MischfutterStammPage(): JSX.Element {
             <CardContent className="space-y-4 pt-6">
               <div>
                 <Label>Typ</Label>
-                <Input value={mischfutter.typ} />
+                <Input value={mischfutter.typ} readOnly />
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <Label>Tierart</Label>
-                  <Input value={mischfutter.tierart} />
+                  <Input value={mischfutter.tierart} readOnly />
                 </div>
                 <div>
                   <Label>Leistungsstufe</Label>
-                  <Input value={mischfutter.leistungsstufe} />
+                  <Input value={mischfutter.leistungsstufe} readOnly />
                 </div>
               </div>
             </CardContent>
@@ -101,11 +96,11 @@ export default function MischfutterStammPage(): JSX.Element {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <Label>Rohprotein (%)</Label>
-                  <Input type="number" value={mischfutter.protein} step="0.1" />
+                  <Input type="number" value={mischfutter.protein} step="0.1" readOnly />
                 </div>
                 <div>
                   <Label>Energie (MJ/kg)</Label>
-                  <Input type="number" value={mischfutter.energie} step="0.1" />
+                  <Input type="number" value={mischfutter.energie} step="0.1" readOnly />
                 </div>
               </div>
             </CardContent>
