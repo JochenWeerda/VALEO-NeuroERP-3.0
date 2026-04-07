@@ -233,6 +233,59 @@ function absoluteUrl(path: string): string {
   return `${BACKEND_ORIGIN}${path}`
 }
 
+function renderOnboardingEnvTemplate(pack: SuperglueOnboardingPack): string {
+  const lines = [
+    `# Superglue onboarding env template for tenant ${pack.tenant_id}`,
+    `# Environment: ${pack.environment}`,
+    '',
+  ]
+  for (const key of pack.platform_secret_keys.AUTH_TOKEN ?? []) {
+    lines.push(`${key}=`)
+  }
+  lines.push('')
+  for (const connector of pack.connectors) {
+    lines.push(`# ${connector.display_name} (${connector.connector_key})`)
+    for (const candidates of Object.values(connector.secret_keys)) {
+      if (candidates.length > 0) {
+        lines.push(`${candidates[0]}=`)
+      }
+    }
+    lines.push('')
+  }
+  return `${lines.join('\n').trimEnd()}\n`
+}
+
+function renderOnboardingVaultTemplate(pack: SuperglueOnboardingPack): string {
+  const lines = [
+    `# Superglue onboarding vault mapping for tenant ${pack.tenant_id}`,
+    `# Prefix: ${pack.vault_path_prefix}`,
+    '',
+    `[tenant:${pack.tenant_id}]`,
+  ]
+  for (const [key, candidates] of Object.entries(pack.platform_secret_keys)) {
+    lines.push(`${key}=${candidates.join(',')}`)
+  }
+  lines.push('')
+  for (const connector of pack.connectors) {
+    lines.push(`[connector:${connector.connector_key}]`)
+    for (const [field, candidates] of Object.entries(connector.secret_keys)) {
+      lines.push(`${field}=${candidates.join(',')}`)
+    }
+    lines.push('')
+  }
+  return `${lines.join('\n').trimEnd()}\n`
+}
+
+function downloadTextArtifact(filename: string, content: string, mimeType = 'text/plain;charset=utf-8'): void {
+  const blob = new Blob([content], { type: mimeType })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = filename
+  link.click()
+  URL.revokeObjectURL(url)
+}
+
 export default function AgentenIntegrationPage(): JSX.Element {
   const manifestQuery = useQuery({
     queryKey: ['admin', 'agent-manifest'],
@@ -298,6 +351,37 @@ export default function AgentenIntegrationPage(): JSX.Element {
     link.download = 'valeo-agent-manifest.json'
     link.click()
     URL.revokeObjectURL(url)
+  }
+
+  const downloadSuperglueOnboardingJson = (): void => {
+    if (!superglueOnboardingPackQuery.data) {
+      return
+    }
+    downloadTextArtifact(
+      `superglue-onboarding-${superglueOnboardingPackQuery.data.tenant_id}.json`,
+      `${JSON.stringify(superglueOnboardingPackQuery.data, null, 2)}\n`,
+      'application/json',
+    )
+  }
+
+  const downloadSuperglueOnboardingEnv = (): void => {
+    if (!superglueOnboardingPackQuery.data) {
+      return
+    }
+    downloadTextArtifact(
+      `superglue-onboarding-${superglueOnboardingPackQuery.data.tenant_id}.env`,
+      renderOnboardingEnvTemplate(superglueOnboardingPackQuery.data),
+    )
+  }
+
+  const downloadSuperglueOnboardingVault = (): void => {
+    if (!superglueOnboardingPackQuery.data) {
+      return
+    }
+    downloadTextArtifact(
+      `superglue-onboarding-${superglueOnboardingPackQuery.data.tenant_id}.vault.txt`,
+      renderOnboardingVaultTemplate(superglueOnboardingPackQuery.data),
+    )
   }
 
   if (
@@ -586,6 +670,11 @@ export default function AgentenIntegrationPage(): JSX.Element {
             <p><strong>Vault Prefix:</strong> <code>{superglueOnboardingPack?.vault_path_prefix}</code></p>
             <p><strong>Blocked Connectoren:</strong> {superglueOnboardingPack?.blocked_connector_count ?? 0}</p>
             <p><strong>AUTH_TOKEN Keys:</strong> {superglueOnboardingPack?.platform_secret_keys.AUTH_TOKEN?.length ?? 0}</p>
+            <div className="flex flex-wrap gap-2 pt-1">
+              <Button type="button" variant="outline" size="sm" onClick={downloadSuperglueOnboardingJson}>Onboarding JSON</Button>
+              <Button type="button" variant="outline" size="sm" onClick={downloadSuperglueOnboardingEnv}>ENV Template</Button>
+              <Button type="button" variant="outline" size="sm" onClick={downloadSuperglueOnboardingVault}>Vault Template</Button>
+            </div>
             {superglueOnboardingPack?.connectors?.slice(0, 2).map((connector) => (
               <div key={connector.connector_key} className="rounded border p-2">
                 <p><strong>{connector.display_name}</strong></p>
