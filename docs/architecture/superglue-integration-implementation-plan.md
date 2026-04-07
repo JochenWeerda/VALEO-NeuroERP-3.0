@@ -1,6 +1,6 @@
 # Superglue Integration - Implementierungsplan
 
-**Status:** in Umsetzung, Basispfade INT-SG-001 bis INT-SG-062 umgesetzt
+**Status:** in Umsetzung, Basispfade INT-SG-001 bis INT-SG-066 umgesetzt
 **Datum:** 2026-04-06
 **Baut auf:** [superglue-integration-bewertung.md](./superglue-integration-bewertung.md), [ADR-014](../adr/adr-014-integrationsgrenzen-api-edi-mcp-partneradapter.md), [ADR-007](../adr/adr-007-agent-tool-contract-governance.md)
 
@@ -301,6 +301,7 @@ Folgewelle 2026-04-04:
 - `INT-SG-049` bis `INT-SG-060` sind umgesetzt: CRM-/Masterdata-Read, Artifact-/Idempotenz-/Retry-Pfade, Admin-/Monitoring-/CI-Surfaces sowie Procurement-, Finance-, Logistics-, Agribusiness-, Service- und Analytics-Rollouts liegen jetzt als thin-wrapper Connector-Familien im VALEO-Superglue-Pfad vor.
 - `INT-SG-061` ist umgesetzt: tenant-spezifische Live-Readiness surfact fehlende Credentials, Platzhalter-Zielsysteme sowie environment-spezifische Alerting-/Retention-Policies jetzt direkt als API- und Admin-Sicht.
 - `INT-SG-062` ist umgesetzt: ein expliziter Tenant-Onboarding-Pack exportiert jetzt Secret-Key-Kandidaten, Zielsystem-Felder und Policy-Werte fuer Ops je Environment.
+- `INT-SG-063` bis `INT-SG-066` sind umgesetzt: CLI-/Shell-Exports, ENV-/Vault-Templates, CI-Validierung und direkte Admin-Downloads schliessen die letzten implementierbaren Superglue-Ops-Pfade.
 
 Folge-Rollout ab `INT-SG-043`:
 
@@ -1324,6 +1325,86 @@ Abnahme:
 
 - API liefert Secret-Key-Kandidaten, Zielsystem-Felder und Policy-Werte je Tenant
 - Admin-Surface zeigt den Onboarding-Pack fuer Ops lesbar an
+
+### INT-SG-063 - Onboarding-Pack als CLI-/Script-Export bereitstellen
+
+Status:
+
+- umgesetzt am 2026-04-06
+
+Ziel:
+
+- den bestehenden Tenant-Onboarding-Pack ohne UI direkt als Skript-/CLI-Artefakt exportieren
+
+Dateibesitz:
+
+- `scripts/superglue/export-onboarding-pack.*`
+- `app/integrations/services/superglue_onboarding_templates.py`
+
+Abnahme:
+
+- JSON-Export ist fuer einen Tenant direkt per Script renderbar
+- PowerShell- und Bash-Pfad nutzen denselben Python-Renderer
+
+### INT-SG-064 - Env-/Vault-Template aus Onboarding-Pack rendern
+
+Status:
+
+- umgesetzt am 2026-04-06
+
+Ziel:
+
+- aus demselben Onboarding-Pack direkt verwertbare Template-Artefakte fuer Ops erzeugen
+
+Dateibesitz:
+
+- `app/integrations/services/superglue_onboarding_templates.py`
+- `scripts/superglue/export-onboarding-pack.*`
+
+Abnahme:
+
+- `.env`-Template und Vault-Mapping lassen sich ohne zweite Modellierung rendern
+- Templates enthalten nur Key-Kandidaten und Policy-Werte, keine Live-Secrets
+
+### INT-SG-065 - Onboarding-Skripte in CI validieren
+
+Status:
+
+- umgesetzt am 2026-04-06
+
+Ziel:
+
+- die neuen Onboarding-Artefakte automatisiert auf Renderbarkeit pruefen
+
+Dateibesitz:
+
+- `.github/workflows/superglue-infra.yml`
+- `scripts/superglue/export-onboarding-pack.*`
+
+Abnahme:
+
+- CI rendert JSON-, ENV- und Vault-Artefakt fuer einen Beispiel-Tenant
+- no-silent-drift im Ops-Pfad fuer neue Exportformate
+
+### INT-SG-066 - Admin-Download fuer Onboarding-Artefakte surfacen
+
+Status:
+
+- umgesetzt am 2026-04-06
+
+Ziel:
+
+- Ops soll dieselben Artefakte direkt aus der Admin-Seite herunterladen koennen
+
+Dateibesitz:
+
+- `packages/frontend-web/src/pages/admin/agenten-integration.tsx`
+- `packages/frontend-web/src/__tests__/pages/admin/agenten-integration.test.tsx`
+
+Abnahme:
+
+- Admin bietet direkte Downloads fuer Onboarding JSON, ENV Template und Vault Template
+- Downloads werden aus demselben Pack/Renderer-Pfad abgeleitet
 
 ## 10. Nicht-Ziele fuer Phase 1
 
