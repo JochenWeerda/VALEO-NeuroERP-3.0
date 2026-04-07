@@ -5,7 +5,9 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { CheckCircle } from 'lucide-react'
+import { CheckCircle, Loader2 } from 'lucide-react'
+import { useVersicherungen, useSchadenMeldungErstellen } from '@/lib/api/schaeden'
+import { useToast } from '@/hooks/use-toast'
 
 type SchadenData = {
   art: string
@@ -13,25 +15,31 @@ type SchadenData = {
   ort: string
   beschreibung: string
   schadenhoehe: number
-  versicherung: string
+  versicherung_id: string
   zeuge: string
 }
 
 export default function SchadenMeldungPage(): JSX.Element {
   const navigate = useNavigate()
+  const { toast } = useToast()
+  const { data: versicherungen = [] } = useVersicherungen()
+  const meldungMutation = useSchadenMeldungErstellen()
+
   const [schaden, setSchaden] = useState<SchadenData>({
     art: '',
     datum: new Date().toISOString().slice(0, 10),
     ort: '',
     beschreibung: '',
     schadenhoehe: 0,
-    versicherung: '',
+    versicherung_id: '',
     zeuge: '',
   })
 
   function updateField<K extends keyof SchadenData>(key: K, value: SchadenData[K]): void {
     setSchaden((prev) => ({ ...prev, [key]: value }))
   }
+
+  const selectedVersicherung = versicherungen.find((v) => v.id === schaden.versicherung_id)
 
   const steps = [
     {
@@ -109,14 +117,16 @@ export default function SchadenMeldungPage(): JSX.Element {
             <Label htmlFor="versicherung">Zuständige Versicherung</Label>
             <select
               id="versicherung"
-              value={schaden.versicherung}
-              onChange={(e) => updateField('versicherung', e.target.value)}
+              value={schaden.versicherung_id}
+              onChange={(e) => updateField('versicherung_id', e.target.value)}
               className="w-full rounded-md border border-input bg-background px-3 py-2"
             >
               <option value="">-- Wählen --</option>
-              <option value="hagel">Vereinigte Hagel (VH-2024-5678)</option>
-              <option value="haftpflicht">R+V Haftpflicht (RV-2024-1234)</option>
-              <option value="feuer">LVM Feuerversicherung (LVM-2024-9012)</option>
+              {versicherungen.map((v) => (
+                <option key={v.id} value={v.id}>
+                  {v.bezeichnung} ({v.vertragsnummer})
+                </option>
+              ))}
             </select>
           </div>
         </div>
@@ -129,9 +139,15 @@ export default function SchadenMeldungPage(): JSX.Element {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-center mb-6">
-              <CheckCircle className="h-20 w-20 text-green-600" />
+              {meldungMutation.isPending ? (
+                <Loader2 className="h-20 w-20 text-blue-600 animate-spin" />
+              ) : (
+                <CheckCircle className="h-20 w-20 text-green-600" />
+              )}
             </div>
-            <h3 className="text-center text-2xl font-bold mb-6">Schadenmeldung bereit</h3>
+            <h3 className="text-center text-2xl font-bold mb-6">
+              {meldungMutation.isSuccess ? `Meldung ${meldungMutation.data.meldungsnummer} erstellt` : 'Schadenmeldung bereit'}
+            </h3>
             <dl className="grid gap-3">
               <div className="flex justify-between border-b pb-2">
                 <dt>Schadenart</dt>
@@ -153,25 +169,62 @@ export default function SchadenMeldungPage(): JSX.Element {
               </div>
               <div className="flex justify-between">
                 <dt>Versicherung</dt>
-                <dd className="font-semibold">{schaden.versicherung || 'Nicht ausgewählt'}</dd>
+                <dd className="font-semibold">
+                  {selectedVersicherung
+                    ? `${selectedVersicherung.bezeichnung} (${selectedVersicherung.vertragsnummer})`
+                    : 'Nicht ausgewählt'}
+                </dd>
               </div>
             </dl>
-            <div className="mt-6 rounded-lg bg-blue-50 p-4 text-center text-sm text-blue-900">
-              <p className="font-semibold">Schadenmeldung wird an Versicherung übermittelt</p>
-              <p className="mt-1">Ein Sachverständiger wird Sie kontaktieren</p>
-            </div>
+            {meldungMutation.isError && (
+              <div className="mt-4 rounded-lg bg-red-50 p-4 text-center text-sm text-red-900">
+                <p className="font-semibold">Fehler beim Erstellen der Meldung</p>
+                <p className="mt-1">{String(meldungMutation.error)}</p>
+              </div>
+            )}
+            {!meldungMutation.isError && (
+              <div className="mt-6 rounded-lg bg-blue-50 p-4 text-center text-sm text-blue-900">
+                <p className="font-semibold">Schadenmeldung wird an Versicherung übermittelt</p>
+                <p className="mt-1">Ein Sachverständiger wird Sie kontaktieren</p>
+              </div>
+            )}
           </CardContent>
         </Card>
       ),
     },
   ]
 
+  async function handleFinish(): Promise<void> {
+    try {
+      await meldungMutation.mutateAsync({
+        art: schaden.art,
+        datum: schaden.datum,
+        ort: schaden.ort || undefined,
+        beschreibung: schaden.beschreibung,
+        schadenhoehe: schaden.schadenhoehe,
+        versicherung_id: schaden.versicherung_id || undefined,
+        zeuge: schaden.zeuge || undefined,
+      })
+      toast({
+        title: 'Schadenmeldung erstellt',
+        description: 'Die Meldung wurde erfolgreich übermittelt.',
+      })
+      navigate('/schaeden/liste')
+    } catch {
+      toast({
+        title: 'Fehler',
+        description: 'Die Schadenmeldung konnte nicht erstellt werden.',
+        variant: 'destructive',
+      })
+    }
+  }
+
   return (
     <div className="p-3 md:p-6">
       <Wizard
         title="Schadenmeldung"
         steps={steps}
-        onFinish={() => navigate('/schaeden/liste')}
+        onFinish={handleFinish}
         onCancel={() => navigate('/schaeden/liste')}
       />
     </div>

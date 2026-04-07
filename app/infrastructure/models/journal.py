@@ -3,7 +3,7 @@ Journal entry ORM models in a dedicated module to avoid registry name clashes
 with Pydantic/schema classes named JournalEntry/JournalEntryLine.
 """
 
-from sqlalchemy import Column, String, DateTime, Text, ForeignKey, DECIMAL
+from sqlalchemy import Column, String, Integer, DateTime, Text, ForeignKey, DECIMAL
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -52,6 +52,9 @@ class JournalEntry(Base):
     posted_at = Column(DateTime(timezone=True), nullable=True)
     reversed_entry_id = Column(String, ForeignKey("domain_erp.journal_entries.id"), nullable=True)
     tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
+    sequence_number = Column(Integer, nullable=True)  # GoBD lückenlose Sequenz
+    hash_current = Column(String(64), nullable=True)  # GoBD Hash-Kette
+    hash_prev = Column(String(64), nullable=True)  # GoBD Vorgänger-Hash
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 

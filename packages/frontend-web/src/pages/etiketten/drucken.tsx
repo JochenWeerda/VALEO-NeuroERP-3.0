@@ -4,6 +4,9 @@ import { Wizard } from '@/components/patterns/Wizard'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Loader2 } from 'lucide-react'
+import { useDrucker, useDruckauftragErstellen } from '@/lib/api/etiketten'
+import { useToast } from '@/hooks/use-toast'
 
 type EtikettenData = {
   chargenId: string
@@ -12,11 +15,15 @@ type EtikettenData = {
   lieferant: string
   eingang: string
   anzahlEtiketten: number
-  drucker: string
+  druckerId: string
 }
 
 export default function EtikettenDruckenPage(): JSX.Element {
   const navigate = useNavigate()
+  const { toast } = useToast()
+  const { data: drucker = [] } = useDrucker()
+  const druckMutation = useDruckauftragErstellen()
+
   const [etiketten, setEtiketten] = useState<EtikettenData>({
     chargenId: '',
     artikel: '',
@@ -24,12 +31,14 @@ export default function EtikettenDruckenPage(): JSX.Element {
     lieferant: '',
     eingang: new Date().toISOString().slice(0, 10),
     anzahlEtiketten: 1,
-    drucker: '',
+    druckerId: '',
   })
 
   function updateField<K extends keyof EtikettenData>(key: K, value: EtikettenData[K]): void {
     setEtiketten((prev) => ({ ...prev, [key]: value }))
   }
+
+  const selectedDrucker = drucker.find((d) => d.id === etiketten.druckerId)
 
   const steps = [
     {
@@ -83,13 +92,25 @@ export default function EtikettenDruckenPage(): JSX.Element {
             <Label htmlFor="drucker">Drucker</Label>
             <select
               id="drucker"
-              value={etiketten.drucker}
-              onChange={(e) => updateField('drucker', e.target.value)}
+              value={etiketten.druckerId}
+              onChange={(e) => updateField('druckerId', e.target.value)}
               className="w-full rounded-md border border-input bg-background px-3 py-2"
             >
               <option value="">-- Wählen --</option>
-              <option value="zebra-1">Zebra ZT230 (Annahme)</option>
-              <option value="zebra-2">Zebra ZT410 (Lager)</option>
+              {drucker
+                .filter((d) => d.status === 'online')
+                .map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.name}
+                  </option>
+                ))}
+              {drucker
+                .filter((d) => d.status !== 'online')
+                .map((d) => (
+                  <option key={d.id} value={d.id} disabled>
+                    {d.name} (offline)
+                  </option>
+                ))}
             </select>
           </div>
         </div>
@@ -131,21 +152,64 @@ export default function EtikettenDruckenPage(): JSX.Element {
               </div>
             </CardContent>
           </Card>
-          <div className="rounded-lg bg-blue-50 p-4 text-center text-sm text-blue-900">
-            <p className="font-semibold">{etiketten.anzahlEtiketten} Etikett(en) werden gedruckt</p>
-            <p className="mt-1">Drucker: {etiketten.drucker || 'Nicht ausgewählt'}</p>
-          </div>
+          {druckMutation.isPending ? (
+            <div className="flex items-center justify-center gap-2 rounded-lg bg-blue-50 p-4 text-sm text-blue-900">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span>Druckauftrag wird gesendet...</span>
+            </div>
+          ) : druckMutation.isSuccess ? (
+            <div className="rounded-lg bg-green-50 p-4 text-center text-sm text-green-900">
+              <p className="font-semibold">Druckauftrag {druckMutation.data.auftrags_nr} erstellt</p>
+              <p className="mt-1">Drucker: {druckMutation.data.drucker_name}</p>
+            </div>
+          ) : (
+            <div className="rounded-lg bg-blue-50 p-4 text-center text-sm text-blue-900">
+              <p className="font-semibold">{etiketten.anzahlEtiketten} Etikett(en) werden gedruckt</p>
+              <p className="mt-1">Drucker: {selectedDrucker?.name ?? 'Nicht ausgewählt'}</p>
+            </div>
+          )}
+          {druckMutation.isError && (
+            <div className="rounded-lg bg-red-50 p-4 text-center text-sm text-red-900">
+              <p className="font-semibold">Fehler beim Druckauftrag</p>
+              <p className="mt-1">{String(druckMutation.error)}</p>
+            </div>
+          )}
         </div>
       ),
     },
   ]
+
+  async function handleFinish(): Promise<void> {
+    try {
+      await druckMutation.mutateAsync({
+        chargen_id: etiketten.chargenId,
+        artikel: etiketten.artikel || undefined,
+        menge: etiketten.menge || undefined,
+        lieferant: etiketten.lieferant || undefined,
+        eingang: etiketten.eingang || undefined,
+        anzahl_etiketten: etiketten.anzahlEtiketten,
+        drucker_id: etiketten.druckerId,
+      })
+      toast({
+        title: 'Druckauftrag erstellt',
+        description: `${etiketten.anzahlEtiketten} Etikett(en) werden gedruckt.`,
+      })
+      navigate('/charge/liste')
+    } catch {
+      toast({
+        title: 'Fehler',
+        description: 'Der Druckauftrag konnte nicht erstellt werden.',
+        variant: 'destructive',
+      })
+    }
+  }
 
   return (
     <div className="p-6">
       <Wizard
         title="Etiketten drucken"
         steps={steps}
-        onFinish={() => navigate('/charge/liste')}
+        onFinish={handleFinish}
         onCancel={() => navigate('/charge/liste')}
       />
     </div>

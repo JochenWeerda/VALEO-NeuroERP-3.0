@@ -1,57 +1,59 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useParams } from 'react-router-dom'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ChefHat, Plus, Save, Trash2 } from 'lucide-react'
-
-type Komponente = {
-  id: string
-  name: string
-  anteil: number
-}
-
-type RezeptData = {
-  id: string
-  name: string
-  tierart: string
-  komponenten: Komponente[]
-  protein: number
-  energie: number
-}
+import { useRezeptDetail, type RezeptKomponente } from '@/lib/api/futter'
 
 export default function RezeptEditorPage(): JSX.Element {
-  const [rezept, setRezept] = useState<RezeptData>({
-    id: 'REZ-001',
-    name: 'Milchviehfutter Hochleistung',
-    tierart: 'Rind (Milch)',
-    komponenten: [
-      { id: '1', name: 'Sojaschrot 44%', anteil: 25 },
-      { id: '2', name: 'Weizen', anteil: 30 },
-      { id: '3', name: 'Mais', anteil: 20 },
-      { id: '4', name: 'Mineralfutter', anteil: 5 },
-    ],
-    protein: 18.5,
-    energie: 11.8,
-  })
+  const { id = 'REZ-001' } = useParams<{ id: string }>()
+  const { data, isLoading, isError } = useRezeptDetail(id)
+
+  const [name, setName] = useState('')
+  const [tierart, setTierart] = useState('')
+  const [komponenten, setKomponenten] = useState<RezeptKomponente[]>([])
+  const [protein, setProtein] = useState(0)
+  const [energie, setEnergie] = useState(0)
+
+  useEffect(() => {
+    if (data) {
+      setName(data.name)
+      setTierart(data.tierart)
+      setKomponenten(data.komponenten.map((k) => ({ ...k })))
+      setProtein(data.protein)
+      setEnergie(data.energie)
+    }
+  }, [data])
 
   function addKomponente(): void {
-    const newId = String(rezept.komponenten.length + 1)
-    setRezept((prev) => ({
-      ...prev,
-      komponenten: [...prev.komponenten, { id: newId, name: '', anteil: 0 }],
-    }))
+    const newId = String(komponenten.length + 1)
+    setKomponenten((prev) => [...prev, { id: newId, name: '', anteil: 0 }])
   }
 
-  function removeKomponente(id: string): void {
-    setRezept((prev) => ({
-      ...prev,
-      komponenten: prev.komponenten.filter((k) => k.id !== id),
-    }))
+  function removeKomponente(kid: string): void {
+    setKomponenten((prev) => prev.filter((k) => k.id !== kid))
   }
 
-  const gesamtAnteil = rezept.komponenten.reduce((sum, k) => sum + k.anteil, 0)
+  const gesamtAnteil = komponenten.reduce((sum, k) => sum + k.anteil, 0)
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-12">
+        <p className="text-muted-foreground">Lade Rezept…</p>
+      </div>
+    )
+  }
+
+  if (isError || !data) {
+    return (
+      <div className="flex items-center justify-center p-12">
+        <p className="text-destructive">Rezept konnte nicht geladen werden.</p>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6 p-6">
@@ -60,7 +62,7 @@ export default function RezeptEditorPage(): JSX.Element {
           <div className="flex items-center gap-3">
             <ChefHat className="h-8 w-8" />
             <div>
-              <h1 className="text-3xl font-bold">{rezept.name}</h1>
+              <h1 className="text-3xl font-bold">{name}</h1>
               <p className="text-muted-foreground">Rezeptur-Editor</p>
             </div>
           </div>
@@ -79,11 +81,11 @@ export default function RezeptEditorPage(): JSX.Element {
           <CardContent className="space-y-4">
             <div>
               <Label>Name</Label>
-              <Input value={rezept.name} />
+              <Input value={name} onChange={(e) => setName(e.target.value)} />
             </div>
             <div>
               <Label>Tierart</Label>
-              <Input value={rezept.tierart} />
+              <Input value={tierart} onChange={(e) => setTierart(e.target.value)} />
             </div>
           </CardContent>
         </Card>
@@ -95,11 +97,11 @@ export default function RezeptEditorPage(): JSX.Element {
           <CardContent className="space-y-4">
             <div>
               <Label>Rohprotein</Label>
-              <div className="text-2xl font-bold">{rezept.protein}%</div>
+              <div className="text-2xl font-bold">{protein}%</div>
             </div>
             <div>
               <Label>Energie</Label>
-              <div className="text-2xl font-bold">{rezept.energie} MJ/kg</div>
+              <div className="text-2xl font-bold">{energie} MJ/kg</div>
             </div>
           </CardContent>
         </Card>
@@ -117,10 +119,29 @@ export default function RezeptEditorPage(): JSX.Element {
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            {rezept.komponenten.map((k) => (
+            {komponenten.map((k) => (
               <div key={k.id} className="flex items-center gap-4 rounded-lg border p-3">
-                <Input value={k.name} placeholder="Komponente" className="flex-1" />
-                <Input type="number" value={k.anteil} step="0.1" className="w-24" />
+                <Input
+                  value={k.name}
+                  placeholder="Komponente"
+                  className="flex-1"
+                  onChange={(e) =>
+                    setKomponenten((prev) =>
+                      prev.map((x) => (x.id === k.id ? { ...x, name: e.target.value } : x)),
+                    )
+                  }
+                />
+                <Input
+                  type="number"
+                  value={k.anteil}
+                  step="0.1"
+                  className="w-24"
+                  onChange={(e) =>
+                    setKomponenten((prev) =>
+                      prev.map((x) => (x.id === k.id ? { ...x, anteil: Number(e.target.value) } : x)),
+                    )
+                  }
+                />
                 <span className="text-sm text-muted-foreground">%</span>
                 <Button size="sm" variant="ghost" onClick={() => removeKomponente(k.id)}>
                   <Trash2 className="h-4 w-4" />

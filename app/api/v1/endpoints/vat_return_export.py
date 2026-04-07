@@ -152,6 +152,105 @@ def _resolve_vat_request_tenant(payload_tenant_id: Optional[str], tenant_id: str
     return tenant_id
 
 
+class VATReturnVorberechnung(BaseModel):
+    """Pre-calculation result (not persisted)"""
+    zeitraum: str
+    umsatz_netto: float = Field(0, description="Netto-Umsatz")
+    umsatzsteuer: float = Field(0, description="Umsatzsteuer (19%)")
+    vorsteuer: float = Field(0, description="Abziehbare Vorsteuer")
+    zahllast: float = Field(0, description="Verbleibende USt-Zahllast")
+    positionen: List[Dict[str, Any]] = Field(default_factory=list)
+
+
+@router.get("/vorberechnung", response_model=VATReturnVorberechnung)
+async def vorberechnung_ustva(
+    zeitraum: str = Query(..., description="Zeitraum im Format YYYY-MM oder YYYY-QN"),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """
+    Vorberechnung der UStVA aus gebuchten Journaleinträgen.
+    Gibt aggregierte Beträge zurück, ohne einen VAT-Return anzulegen.
+    """
+    try:
+        # Normalise quarterly periods to month range
+        if "-Q" in zeitraum:
+            quarter_map = {
+                "Q1": ("01", "03"),
+                "Q2": ("04", "06"),
+                "Q3": ("07", "09"),
+                "Q4": ("10", "12"),
+            }
+            year, q = zeitraum.split("-")
+            start_month, end_month = quarter_map.get(q, ("01", "03"))
+            periods = [f"{year}-{str(m).zfill(2)}" for m in range(int(start_month), int(end_month) + 1)]
+        else:
+            periods = [zeitraum]
+
+        total_sales_net = Decimal("0.00")
+        total_output_tax = Decimal("0.00")
+        total_input_tax = Decimal("0.00")
+
+        for period in periods:
+            journal_query = text("""
+                SELECT jel.account_id, jel.debit, jel.credit, jel.tax_code
+                FROM domain_erp.journal_entry_lines jel
+                JOIN domain_erp.journal_entries je ON jel.journal_entry_id = je.id
+                WHERE je.tenant_id = :tenant_id
+                AND je.period = :period
+                AND je.status = 'posted'
+                AND jel.tax_code IS NOT NULL
+            """)
+
+            rows = db.execute(journal_query, {
+                "tenant_id": tenant_id,
+                "period": period,
+            }).fetchall()
+
+            for row in rows:
+                account_id = str(row[0])
+                debit = Decimal(str(row[1]))
+                credit = Decimal(str(row[2]))
+
+                is_sales = account_id.startswith("8") or account_id.startswith("4")
+                is_purchase = account_id.startswith("6") or account_id.startswith("5")
+
+                if is_sales:
+                    amount = credit if credit > 0 else debit
+                    net = amount / Decimal("1.19")
+                    tax = amount - net
+                    total_sales_net += net
+                    total_output_tax += tax
+                elif is_purchase:
+                    amount = debit if debit > 0 else credit
+                    net = amount / Decimal("1.19")
+                    tax = amount - net
+                    total_input_tax += tax
+
+        zahllast = total_output_tax - total_input_tax
+
+        return VATReturnVorberechnung(
+            zeitraum=zeitraum,
+            umsatz_netto=float(total_sales_net.quantize(Decimal("0.01"))),
+            umsatzsteuer=float(total_output_tax.quantize(Decimal("0.01"))),
+            vorsteuer=float(total_input_tax.quantize(Decimal("0.01"))),
+            zahllast=float(zahllast.quantize(Decimal("0.01"))),
+            positionen=[],
+        )
+
+    except Exception as e:
+        logger.error(f"UStVA Vorberechnung fehlgeschlagen: {e}")
+        # Return zeros on error so the form is still usable
+        return VATReturnVorberechnung(
+            zeitraum=zeitraum,
+            umsatz_netto=0,
+            umsatzsteuer=0,
+            vorsteuer=0,
+            zahllast=0,
+            positionen=[],
+        )
+
+
 @router.post("/calculate", response_model=VATReturnResponse)
 async def calculate_vat_return(
     request: VATReturnCalculationRequest,

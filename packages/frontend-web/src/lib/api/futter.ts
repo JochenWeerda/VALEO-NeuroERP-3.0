@@ -117,6 +117,80 @@ export function useFutterStatistik() {
   })
 }
 
+// ── Detail-Types ──────────────────────────────────────────────
+
+export type EinzelfutterDetail = {
+  id: string
+  artikel: string
+  art: string
+  herkunft: string
+  lieferant: string
+  protein: number
+  energie: number
+  gvo_status: string
+  qs_milch: boolean
+  verfuegbar: number
+}
+
+export type MischfutterKomponente = {
+  komponente: string
+  anteil: number
+}
+
+export type MischfutterDetail = {
+  id: string
+  typ: string
+  tierart: string
+  leistungsstufe: string
+  rezeptur: MischfutterKomponente[]
+  protein: number
+  energie: number
+}
+
+export type RezeptKomponente = {
+  id: string
+  name: string
+  anteil: number
+}
+
+export type RezeptDetail = {
+  id: string
+  name: string
+  tierart: string
+  komponenten: RezeptKomponente[]
+  protein: number
+  energie: number
+}
+
+// ── Detail-Hooks ──────────────────────────────────────────────
+
+export function useEinzelfutterDetail(id: string) {
+  return useQuery({
+    queryKey: ['futter', 'einzel', id],
+    queryFn: async () => (await apiClient.get<EinzelfutterDetail>(`/api/v1/futter/einzelfuttermittel/${id}`)).data,
+    enabled: !!id,
+    staleTime: 2 * 60 * 1000,
+  })
+}
+
+export function useMischfutterDetail(id: string) {
+  return useQuery({
+    queryKey: ['futter', 'misch', id],
+    queryFn: async () => (await apiClient.get<MischfutterDetail>(`/api/v1/futter/mischfuttermittel/${id}`)).data,
+    enabled: !!id,
+    staleTime: 2 * 60 * 1000,
+  })
+}
+
+export function useRezeptDetail(id: string) {
+  return useQuery({
+    queryKey: ['rezepte', id],
+    queryFn: async () => (await apiClient.get<RezeptDetail>(`/api/v1/futter/rezepte/${id}`)).data,
+    enabled: !!id,
+    staleTime: 2 * 60 * 1000,
+  })
+}
+
 export async function bulkDeleteFutterItems(
   kind: 'einzelfuttermittel' | 'mischfuttermittel',
   ids: string[],
