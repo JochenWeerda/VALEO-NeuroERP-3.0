@@ -1397,8 +1397,19 @@ Alle 6 Router registriert in `app/api/v1/api.py` unter `/api/v1/neuro/*`. Commit
 ## KTR-PRO-003
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Den Kontraktpfad um die naechsten professionellen Folgebausteine erweitern: Ausweichliste/Ausweichartikel, Abschreibung bzw. Washout-Entscheidung, Drucksteuerung/Formularbild sowie ein eigenes Risiko- und Steuer-Cockpit fuer Hedging, Marktbewertung und Mahnstatus.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `app/api/v1/endpoints/kontrakte.py`, `packages/frontend-web/src/lib/api/kontrakte.ts`, `packages/frontend-web/src/pages/kontrakte/FrmKontraktDetail.tsx`, `packages/frontend-web/src/pages/kontrakte/KontraktAlarmDashboard.tsx`, `packages/frontend-web/src/pages/kontrakte/KontraktPositionsmonitor.tsx`, `packages/frontend-web/src/pages/kontrakte/LstKontraktUebersicht.tsx`, `packages/frontend-web/src/pages/contracts-v2.tsx`.
 **Abnahmekriterien:** Kontrakte besitzen eine erfassbare Ausweich-/Washout-/Drucksteuerung; Risiko- und Folgeentscheidungen sind in einer professionellen UI sichtbar und direkt ansteuerbar; die bestehenden Kontraktarbeitsplaetze zeigen nicht nur Parameter, sondern konkrete Folgewege fuer Risiko, Ausweichung, Abschreibung und Druck.
-**Offene Risiken:** Ein vollstaendiger physischer Druck-/Belegservice oder eine vollstaendige Bewertungsengine kann weiterhin ausserhalb des Slice-Scopes liegen; im Slice muss die Steuerung deshalb auf belastbare bestehende Module und Kontrakt-Read-Models aufsetzen.
+**Erledigt:** `app/api/v1/endpoints/kontrakte.py` erweitert die strukturierte `steering`-Sicht jetzt um Ausweichartikel/-route, Washout-/Abschreibungsparameter, Druckvorlage/-kanal/-kopien und Druckbereitschaft. `packages/frontend-web/src/pages/kontrakte/FrmKontraktDetail.tsx` pflegt diese Folgebausteine in der Steuerungssektion und zeigt sie als eigene operative Karten fuer Ausweichliste, Washout/Abschreibung und Druckpaket. `packages/frontend-web/src/pages/kontrakte/LstKontraktUebersicht.tsx` ist jetzt als Steuer-Cockpit verdichtet und zeigt Ausweichbereitschaft, Abschreibungsbedarf, Druckbereitschaft und Mahnfaelligkeit im Kopfbereich und in der Tabelle. `packages/frontend-web/src/pages/kontrakte/KontraktAlarmDashboard.tsx` alarmiert zusaetzlich auf Washout-/Abschreibungskandidaten und fehlende Drucksteuerung; `packages/frontend-web/src/pages/contracts-v2.tsx` surfact Ausweichung, Druckreife und Washout-Flag in der Kurzsicht.
+**Tests / Checks:** `python -m py_compile app/api/v1/endpoints/kontrakte.py`; `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`
+**Offene Risiken:** Ein vollstaendiger physischer Druck-/Belegservice oder eine vollstaendige externe Bewertungsengine ist weiterhin nicht Teil dieses Slices; die UI fuehrt den Nutzer aber jetzt sauber bis an diese vorhandenen Anschlussstellen heran.
+
+## KTR-PRO-004
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Die Kontraktlandschaft um eine professionelle Engagement- und Auswertungssicht erweitern: Exposure nach Vertragsart, Risiko- und Mengenfokus, wertseitige Gesamtsicht sowie Top-Risiko-Kontrakte als Fuehrungsbild fuer Disposition und Management.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/kontrakte/LstKontraktUebersicht.tsx`, `packages/frontend-web/src/pages/kontrakte/KontraktPositionsmonitor.tsx`, `packages/frontend-web/src/pages/contracts-v2.tsx`, bei Bedarf `packages/frontend-web/src/lib/api/kontrakte.ts`.
+**Abnahmekriterien:** Die Kontraktseiten zeigen nicht nur Einzelobjekte, sondern auch aggregiertes Engagement nach Typ, offener Menge, negativer Marktbewertung und Hedge-Luecke; das Management sieht auf einen Blick die groessten Risiko-Kontrakte und Exposures.
+**Offene Risiken:** Die Engagement-Sicht muss auf den vorhandenen Vertrags- und Steeringdaten aufsetzen; ohne separate Bewertungsengine bleiben die Werte bewusst operative Steuerwerte und keine formale Bilanzbewertung.
