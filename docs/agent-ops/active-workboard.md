@@ -1408,8 +1408,34 @@ Alle 6 Router registriert in `app/api/v1/api.py` unter `/api/v1/neuro/*`. Commit
 ## KTR-PRO-004
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Die Kontraktlandschaft um eine professionelle Engagement- und Auswertungssicht erweitern: Exposure nach Vertragsart, Risiko- und Mengenfokus, wertseitige Gesamtsicht sowie Top-Risiko-Kontrakte als Fuehrungsbild fuer Disposition und Management.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/kontrakte/LstKontraktUebersicht.tsx`, `packages/frontend-web/src/pages/kontrakte/KontraktPositionsmonitor.tsx`, `packages/frontend-web/src/pages/contracts-v2.tsx`, bei Bedarf `packages/frontend-web/src/lib/api/kontrakte.ts`.
 **Abnahmekriterien:** Die Kontraktseiten zeigen nicht nur Einzelobjekte, sondern auch aggregiertes Engagement nach Typ, offener Menge, negativer Marktbewertung und Hedge-Luecke; das Management sieht auf einen Blick die groessten Risiko-Kontrakte und Exposures.
-**Offene Risiken:** Die Engagement-Sicht muss auf den vorhandenen Vertrags- und Steeringdaten aufsetzen; ohne separate Bewertungsengine bleiben die Werte bewusst operative Steuerwerte und keine formale Bilanzbewertung.
+**Erledigt:** `packages/frontend-web/src/pages/kontrakte/LstKontraktUebersicht.tsx` zeigt jetzt neben Filter und Liste eine echte Engagement-Sicht: offenes VK-/EK-/Zukauf-Exposure, aggregierte negative Marktwerte, Hedge-Lueckenmenge und eine `Top-Risiko-Kontrakte`-Tabelle mit Mahn-, Washout- und Druckflags. Damit ist die Kontraktuebersicht nicht mehr nur Suchliste, sondern Fuehrungsbild fuer Disposition und Management.
+**Tests / Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`; `python -m py_compile app/api/v1/endpoints/kontrakte.py`
+**Offene Risiken:** Die Engagement-Werte sind bewusst operative Steuerwerte auf Basis der vorhandenen Vertrags- und Marktdaten; eine spaetere formale Bilanz- oder Marktwertbewertung kann darauf aufsetzen, ohne dieses Fuehrungsbild neu bauen zu muessen.
+
+## FIBU-PRO-001
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Die bislang seitenweise verteilte Finanzbuchhaltung zu einem professionellen FIBU-Kern verdichten: Stammdaten/Parameter, eBilanz- und E-Clearing-Lage, Zinswesen, Jahreswechsel/Reorganisator sowie zusammenhaengende Schnittstellen- und Revisionssicht.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `app/api/v1/endpoints/finance_followup.py`, `app/api/v1/endpoints/fibu_connectors.py`, ggf. neue Finance-Read-Model-Endpunkte, `packages/frontend-web/src/lib/api/fibu.ts`, `packages/frontend-web/src/pages/{finance/mahnwesen,finance/op-debitoren,finance/op-kreditoren,finance/ustva,fibu/anlagen-suite,fibu/zahlungslaeufe}.tsx`.
+**Abnahmekriterien:** FIBU zeigt nicht mehr nur Einzelmasken, sondern ein zusammenhaengendes professionelles Fuehrungsbild mit Stammdaten-/Parameterlage, Dunning-/Zins-/Payment-/Tax-/Asset-/Connector-Status, Readiness fuer eBilanz/E-Clearing/Jahreswechsel, klaren Revisionspfaden und naechsten Aktionen.
+
+## MELD-PRO-001
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Das Meldewesen vom reinen Betriebsstatus auf echte Rueckkopplung erweitern: externe Rueckmeldelogik, Artefakt-/Bescheid-/Fehlerpfade direkt am Vorgang sowie staerkere Verzahnung mit Fracht, Waage, Rohware und Dokumenten.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, ggf. neue Meldewesen-/Finance-Read-Model-Endpunkte, `packages/frontend-web/src/lib/api/meldewesen.ts`, `packages/frontend-web/src/pages/{fibu/atlas,compliance/meldewesen-konsole}.tsx`.
+**Abnahmekriterien:** Atlas und Meldewesen-Konsole zeigen nicht nur Connector-/Joblage, sondern auch Rueckmeldungen, Bescheide/Artefakte, Fehlerpfade, Objektbezug und direkte Folgewege in Dokumente, Waage, Rohware und Fracht.
+
+## SUPPLY-E2E-001
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Die bislang verteilte Partie-/Rohware-/Waage-/Fracht-Kette zu einem durchgaengigen E2E-Arbeitsbild verdichten: Partie -> Annahme -> Wiegung -> Lager/Charge -> Fracht -> Abrechnung.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, ggf. neue Aggregatendpunkte unter `app/api/v1/endpoints/{charges,waage}.py`, `packages/frontend-web/src/lib/api/{inventory,betrieb,misc-modules}.ts`, `packages/frontend-web/src/pages/{charge/rueckverfolgung,annahme/rohware,waage/liste,logistik/frachtbriefe}.tsx`.
+**Abnahmekriterien:** Die betroffenen Seiten spiegeln dieselbe Objektkette wieder, zeigen Mengen-, Status-, Dokument- und Ausnahmebezug ueber die Kette hinweg und bieten klare Folgepfade statt isolierter Listen.
