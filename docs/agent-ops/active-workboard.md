@@ -1386,8 +1386,19 @@ Alle 6 Router registriert in `app/api/v1/api.py` unter `/api/v1/neuro/*`. Commit
 ## KTR-PRO-002
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Die vorhandene Kontraktstrecke um professionelle Steuerparameter erweitern: Kontraktklassen, Gruppen, Varianten, Paritaeten, Dispositionskennzeichen sowie vorbereitende Sicht auf Hedging, Marktpreisbewertung und Mahnstatus.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `app/api/v1/endpoints/kontrakte.py`, `packages/frontend-web/src/lib/api/kontrakte.ts`, `packages/frontend-web/src/pages/kontrakte/FrmKontraktDetail.tsx`, `packages/frontend-web/src/pages/kontrakte/KontraktAlarmDashboard.tsx`, `packages/frontend-web/src/pages/kontrakte/KontraktPositionsmonitor.tsx`, `packages/frontend-web/src/pages/contracts-v2.tsx`.
 **Abnahmekriterien:** Kontrakte besitzen erfassbare und sichtbare Profi-Parameter fuer Klasse/Gruppe/Variante/Paritaet/Disposition; Arbeitsplaetze zeigen diese Parameter in Liste, Detail und Monitoring; Hedging-, Marktbewertungs- und Mahnindikatoren sind mindestens als professionelle Steuer- und Statussicht integriert statt nur als spaetere Idee.
-**Offene Risiken:** Fuer echte Marktpreisbewertung und Mahnlogik koennen im Repo noch keine vollstaendigen Bewertungs- oder Mahnservices existieren; in diesem Slice ist deshalb gegebenenfalls eine belastbare Vorstufe ueber vorhandene Preis- und Alarmdaten noetig.
+**Erledigt:** `app/api/v1/endpoints/kontrakte.py` liefert jetzt strukturierte `steering`-Daten aus `conditions_json` fuer Kontraktklasse/-gruppe/-variante, Paritaet, Dispositionskennzeichen, Hedge-Ziel/Quote, Marktpreisdifferenz/-bewertung und Mahnindikatoren. `packages/frontend-web/src/pages/kontrakte/FrmKontraktDetail.tsx` pflegt diese Parameter in einer eigenen Steuerungssektion statt nur ueber Roh-JSON und kann aus dem Kontrakt heraus Hedge-Anlage und Mahnwesen anstossen. `packages/frontend-web/src/pages/kontrakte/KontraktAlarmDashboard.tsx` und `packages/frontend-web/src/pages/kontrakte/KontraktPositionsmonitor.tsx` zeigen Hedge-Luecken, negative Marktbewertungen, Mahnfaelligkeit sowie Dispositions-/Paritaetsabdeckung als professionelle Monitoring-Sicht; `packages/frontend-web/src/pages/contracts-v2.tsx` surfact dieselben Steuerfelder als Quellen-/Kurzsicht in Tabelle und Drawer.
+**Tests / Checks:** `python -m py_compile app/api/v1/endpoints/kontrakte.py`; `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`; `node scripts/docs-governance-check.cjs`
+**Offene Risiken:** Die Marktpreisbewertung basiert in diesem Slice auf den im Kontrakt gepflegten Referenz- und Marktpreisen; ein spaeterer Ausbau kann das noch an externe Marktfeeds und tiefere Mahnservices anbinden, ohne den jetzigen Vertragsarbeitsplatz erneut aufzubrechen.
+
+## KTR-PRO-003
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Den Kontraktpfad um die naechsten professionellen Folgebausteine erweitern: Ausweichliste/Ausweichartikel, Abschreibung bzw. Washout-Entscheidung, Drucksteuerung/Formularbild sowie ein eigenes Risiko- und Steuer-Cockpit fuer Hedging, Marktbewertung und Mahnstatus.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `app/api/v1/endpoints/kontrakte.py`, `packages/frontend-web/src/lib/api/kontrakte.ts`, `packages/frontend-web/src/pages/kontrakte/FrmKontraktDetail.tsx`, `packages/frontend-web/src/pages/kontrakte/KontraktAlarmDashboard.tsx`, `packages/frontend-web/src/pages/kontrakte/KontraktPositionsmonitor.tsx`, `packages/frontend-web/src/pages/kontrakte/LstKontraktUebersicht.tsx`, `packages/frontend-web/src/pages/contracts-v2.tsx`.
+**Abnahmekriterien:** Kontrakte besitzen eine erfassbare Ausweich-/Washout-/Drucksteuerung; Risiko- und Folgeentscheidungen sind in einer professionellen UI sichtbar und direkt ansteuerbar; die bestehenden Kontraktarbeitsplaetze zeigen nicht nur Parameter, sondern konkrete Folgewege fuer Risiko, Ausweichung, Abschreibung und Druck.
+**Offene Risiken:** Ein vollstaendiger physischer Druck-/Belegservice oder eine vollstaendige Bewertungsengine kann weiterhin ausserhalb des Slice-Scopes liegen; im Slice muss die Steuerung deshalb auf belastbare bestehende Module und Kontrakt-Read-Models aufsetzen.
