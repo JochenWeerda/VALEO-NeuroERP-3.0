@@ -11,7 +11,6 @@ import { toast } from '@/hooks/use-toast'
 import { useEinkaufAnfragen, type EinkaufAnfrage, einkaufKeys } from '@/lib/api/einkauf'
 import { apiClient } from '@/lib/api-client'
 
-// Konfiguration fuer Anfragen ListReport (wird in Komponente mit i18n erstellt)
 const createAnfragenConfig = (t: any, entityTypeLabel: string): ListConfig => ({
   title: entityTypeLabel,
   titleKey: 'crud.list.title',
@@ -37,7 +36,7 @@ const createAnfragenConfig = (t: any, entityTypeLabel: string): ListConfig => ({
           BANF: t('crud.fields.requisition'),
           ANF: t('crud.entities.purchaseRequest')
         }
-        return <Badge variant="outline">{typLabels[value] || value}</Badge>
+        return <Badge variant="outline">{typLabels[String(value)] || String(value)}</Badge>
       }
     },
     {
@@ -74,7 +73,7 @@ const createAnfragenConfig = (t: any, entityTypeLabel: string): ListConfig => ({
           hoch: { label: t('crud.fields.priorityHigh'), variant: 'destructive' },
           dringend: { label: t('crud.fields.priorityUrgent'), variant: 'destructive' }
         }
-        const prio = prioLabels[value] || { label: value, variant: 'secondary' as const }
+        const prio = prioLabels[String(value)] || { label: String(value), variant: 'secondary' as const }
         return <Badge variant={prio.variant}>{prio.label}</Badge>
       }
     },
@@ -85,13 +84,16 @@ const createAnfragenConfig = (t: any, entityTypeLabel: string): ListConfig => ({
       sortable: true,
       filterable: true,
       render: (value) => {
-        const statusLabel = getStatusLabel(t, value as string, value as string)
+        const statusValue = String(value || '')
+        const statusLabel = getStatusLabel(t, statusValue, statusValue)
         const variants: Record<string, 'secondary' | 'default' | 'outline' | 'destructive'> = {
           ENTWURF: 'secondary',
           FREIGEGEBEN: 'default',
-          ANGEBOTSPHASE: 'outline'
+          ANGEBOTSPHASE: 'outline',
+          BESTELLT: 'outline',
+          ABGELEHNT: 'destructive',
         }
-        return <Badge variant={variants[value as string] || 'secondary'}>{statusLabel}</Badge>
+        return <Badge variant={variants[statusValue] || 'secondary'}>{statusLabel}</Badge>
       }
     },
     {
@@ -118,7 +120,8 @@ const createAnfragenConfig = (t: any, entityTypeLabel: string): ListConfig => ({
       options: [
         { value: 'ENTWURF', label: t('status.draft'), labelKey: 'status.draft' },
         { value: 'FREIGEGEBEN', label: t('status.approved'), labelKey: 'status.approved' },
-        { value: 'ANGEBOTSPHASE', label: t('crud.status.offerPhase'), labelKey: 'crud.status.offerPhase' }
+        { value: 'ANGEBOTSPHASE', label: t('crud.status.offerPhase'), labelKey: 'crud.status.offerPhase' },
+        { value: 'BESTELLT', label: 'Bestellt' }
       ]
     },
     {
@@ -146,22 +149,7 @@ const createAnfragenConfig = (t: any, entityTypeLabel: string): ListConfig => ({
       type: 'text'
     }
   ],
-  bulkActions: [
-    {
-      key: 'freigeben',
-      label: t('crud.actions.approve'),
-      labelKey: 'crud.actions.approve',
-      type: 'primary',
-      onClick: () => toast({ title: 'Freigeben', description: 'Anfrage wurde freigegeben.' })
-    },
-    {
-      key: 'inBestellung',
-      label: t('crud.actions.convertToOrder'),
-      labelKey: 'crud.actions.convertToOrder',
-      type: 'secondary',
-      onClick: () => toast({ title: 'In Bestellung', description: 'Anfrage wurde in eine Bestellung umgewandelt.' })
-    }
-  ],
+  bulkActions: [],
   defaultSort: { field: 'createdAt', direction: 'desc' },
   pageSize: 25,
   api: {
@@ -178,6 +166,34 @@ const createAnfragenConfig = (t: any, entityTypeLabel: string): ListConfig => ({
   actions: []
 })
 
+async function bulkRequestMutation(
+  selectedItems: any[],
+  endpointSuffix: 'send' | 'convert-to-order',
+  allowedStatuses: string[],
+): Promise<{ ok: number; errors: string[]; createdOrderId?: string; createdOrderNumber?: string }> {
+  let ok = 0
+  const errors: string[] = []
+  let createdOrderId: string | undefined
+  let createdOrderNumber: string | undefined
+  const eligible = selectedItems.filter((item) => allowedStatuses.includes(String(item.status || '').toUpperCase()))
+
+  for (const item of eligible) {
+    try {
+      const response = await apiClient.post<{
+        purchaseOrderId?: string
+        purchaseOrderNumber?: string
+      }>(`/api/v1/einkauf/anfragen/${encodeURIComponent(item.id)}/${endpointSuffix}`)
+      createdOrderId = createdOrderId || response.data?.purchaseOrderId
+      createdOrderNumber = createdOrderNumber || response.data?.purchaseOrderNumber
+      ok += 1
+    } catch (error: any) {
+      errors.push(`${item.anfrageNummer || item.id}: ${error.response?.data?.detail ?? error.message}`)
+    }
+  }
+
+  return { ok, errors, createdOrderId, createdOrderNumber }
+}
+
 export default function AnfragenListePage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -190,7 +206,50 @@ export default function AnfragenListePage(): JSX.Element {
   const total = data.length
   const entityType = 'purchaseRequest'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Anfrage')
-  const anfragenConfig = createAnfragenConfig(t, entityTypeLabel)
+  const baseConfig = createAnfragenConfig(t, entityTypeLabel)
+  const anfragenConfig = useMemo<ListConfig>(() => ({
+    ...baseConfig,
+    bulkActions: [
+      {
+        key: 'freigeben',
+        label: t('crud.actions.approve'),
+        labelKey: 'crud.actions.approve',
+        type: 'primary',
+        onClick: async (selectedItems: any[]) => {
+          const result = await bulkRequestMutation(selectedItems, 'send', ['ENTWURF', 'OFFEN'])
+          queryClient.invalidateQueries({ queryKey: einkaufKeys.anfragen() })
+          if (result.ok > 0) {
+            toast({ title: 'Anfragen freigegeben', description: `${result.ok} Anfrage(n) in die Angebotsphase ueberfuehrt.` })
+            return
+          }
+          toast({ variant: 'destructive', title: 'Keine freigabefaehigen Anfragen', description: result.errors[0] || 'Bitte Entwurfsanfragen markieren.' })
+        }
+      },
+      {
+        key: 'inBestellung',
+        label: t('crud.actions.convertToOrder'),
+        labelKey: 'crud.actions.convertToOrder',
+        type: 'secondary',
+        onClick: async (selectedItems: any[]) => {
+          const result = await bulkRequestMutation(selectedItems, 'convert-to-order', ['FREIGEGEBEN', 'ANGEBOTSPHASE'])
+          queryClient.invalidateQueries({ queryKey: einkaufKeys.anfragen() })
+          if (result.ok > 0) {
+            toast({
+              title: 'Bestellungen erzeugt',
+              description: result.createdOrderNumber
+                ? `${result.ok} Bestellung(en) aus Anfragen erzeugt. Erste Bestellung: ${result.createdOrderNumber}.`
+                : `${result.ok} Bestellung(en) aus Anfragen erzeugt.`,
+            })
+            if (result.ok === 1 && result.createdOrderId) {
+              navigate(`/einkauf/bestellungen/${encodeURIComponent(result.createdOrderId)}`)
+            }
+            return
+          }
+          toast({ variant: 'destructive', title: 'Keine bestellbaren Anfragen', description: result.errors[0] || 'Bitte freigegebene Anfragen markieren.' })
+        }
+      }
+    ],
+  }), [baseConfig, navigate, queryClient, t])
 
   const handleCreate = () => {
     navigate('/einkauf/anfrage/neu')

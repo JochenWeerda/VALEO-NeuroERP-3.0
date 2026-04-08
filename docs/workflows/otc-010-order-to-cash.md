@@ -142,3 +142,9 @@ flowchart TD
 ## Status
 
 **Erstanalyse abgeschlossen** (2026-03-27). P1-Empfehlungen (OTC-010-P1 bis P3) dokumentiert, OTC-011 separat umgesetzt.
+
+## Update OTC-012 (2026-04-08)
+
+- `packages/frontend-web/src/pages/verkauf/lieferschein-erfassung.tsx` liest jetzt den vorhandenen Aggregat-Endpoint `GET /api/v1/articles/{id}/position-context` und zeigt dazu ein sichtbares Artikel-Kontext-Panel mit Lagerorten, Zufuhr, Chargen sowie Kunden-/Einkaufspreishinweisen.
+- Das Feld `verfuegbar` wird im Positionsbereich nicht mehr statisch mit `0` gehalten, sondern live aus `stock.total_available` des Kontext-Endpunkts befuellt.
+- Die beim OTC-UI-Scan gefundenen toten Handler sind auf reale Zielpfade gezogen: CRM-Betriebsprofil, Field-Service-Neuanlage, Compliance-Register und Workflow-Supervisor statt leerer Klicks bzw. `coming soon`.

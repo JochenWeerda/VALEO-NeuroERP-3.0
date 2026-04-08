@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { useNavigate } from 'react-router-dom'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -94,6 +95,7 @@ const scoreColor = (score: number) =>
 // ─── Komponente ──────────────────────────────────────────────────────────────
 
 export default function ComplianceDashboardPage(): JSX.Element {
+  const navigate = useNavigate()
   const { toast } = useToast()
   const { data: stats, isLoading: loadStats } = useQuery({
     queryKey: ['compliance', 'stats'],
@@ -127,6 +129,21 @@ export default function ComplianceDashboardPage(): JSX.Element {
 
   const isLoading = loadStats || loadSachkunde || loadQs || loadZulassungen || loadCross
 
+  const openComplianceDetails = (action: { id: string; anforderung: string; bereich: string }) => {
+    const bereich = action.bereich.toLowerCase()
+    const target = bereich.includes('sachkunde')
+      ? '/compliance/sachkunde-register'
+      : bereich.includes('qs')
+        ? '/compliance/qs-checkliste'
+        : bereich.includes('zulassung')
+          ? '/compliance/zulassungen-register'
+          : bereich.includes('enni')
+            ? '/compliance/enni-meldungen'
+            : '/compliance/cross-compliance'
+    navigate(target)
+    toast({ title: action.anforderung, description: `${action.bereich} geoeffnet.` })
+  }
+
   const handleReportPdf = async () => {
     try {
       const res = await api.get('/api/v1/compliance/report-pdf', { responseType: 'blob' })
@@ -144,7 +161,7 @@ export default function ComplianceDashboardPage(): JSX.Element {
   }
 
   const handleDetails = (action: { id: string; anforderung: string; bereich: string }) => {
-    toast({ title: action.anforderung, description: `${action.bereich} — Detailansicht in Kürze verfügbar.` })
+    openComplianceDetails(action)
   }
 
   // ── Berechnungen ──────────────────────────────────────────────────────────
@@ -335,7 +352,7 @@ export default function ComplianceDashboardPage(): JSX.Element {
                     {action.erfuellt
                       ? <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Erfüllt</Badge>
                       : <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Offen</Badge>}
-                    <Button variant="ghost" size="sm" onClick={() => handleDetails(action)}>Details</Button>
+                    <Button variant="ghost" size="sm" onClick={() => openComplianceDetails(action)}>Details</Button>
                   </div>
                 </div>
               ))}

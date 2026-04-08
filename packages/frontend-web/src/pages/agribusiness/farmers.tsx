@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { toast } from '@/hooks/use-toast';
 import { Card } from '@/components/ui/card';
@@ -33,6 +34,7 @@ interface Farmer {
 
 export default function FarmersPage(): JSX.Element {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [farmers, setFarmers] = useState<Farmer[]>([]);
   const [selectedFarmer, setSelectedFarmer] = useState<Farmer | null>(null);
   const [query, setQuery] = useState('');
@@ -173,6 +175,14 @@ export default function FarmersPage(): JSX.Element {
     );
   };
 
+  const handleCopilot = () => {
+    navigate('/admin/control-center/agent-ops?context=farmers&intent=masterdata-review');
+    toast({
+      title: 'Agent Ops geöffnet',
+      description: 'Landwirt-Stammdaten können jetzt im Leitstand als Review- oder Bereinigungsfall weiterbearbeitet werden.',
+    });
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -192,7 +202,7 @@ export default function FarmersPage(): JSX.Element {
             onPrintPDF={handlePrintPDF}
             onPrintExcel={handlePrintExcel}
           />
-          <Button onClick={() => {/* Navigate to create page */}}>
+          <Button onClick={() => navigate('/crm/betriebsprofil/neu')}>
             {t('crud.actions.new')} {entityTypeLabel}
           </Button>
         </div>
@@ -200,7 +210,7 @@ export default function FarmersPage(): JSX.Element {
 
       <Toolbar
         onSearch={setQuery}
-        onCopilot={() => toast({ title: 'Copilot', description: 'KI-Analyse für Landwirt-Stammdaten wird in Kürze verfügbar.' })}
+        onCopilot={handleCopilot}
       />
 
       <Card className="p-4">
@@ -240,7 +250,7 @@ export default function FarmersPage(): JSX.Element {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => {/* Navigate to edit */}}
+                        onClick={() => navigate(`/crm/betriebsprofil/${encodeURIComponent(farmer.id)}`)}
                       >
                         {t('crud.actions.edit')}
                       </Button>

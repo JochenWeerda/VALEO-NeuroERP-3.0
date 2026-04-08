@@ -228,8 +228,12 @@ async def po_get(po_id: str, tenant_id: str = Depends(get_tenant_id), db: Sessio
     raise HTTPException(status_code=404, detail="Purchase order not found")
 
 
-@router.post("/purchase-orders", response_model=dict, status_code=201)
-async def po_create(payload: dict[str, Any], tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
+async def _create_compat_purchase_order(
+    db: Session,
+    *,
+    tenant_id: str,
+    payload: dict[str, Any],
+) -> dict[str, Any]:
     now = _now_iso()
     po_number = payload.get("purchaseOrderNumber") or f"PO-{datetime.utcnow().strftime('%Y%m%d')}-{str(uuid4())[:6].upper()}"
     item_list = payload.get("items", [])
@@ -283,6 +287,11 @@ async def po_create(payload: dict[str, Any], tenant_id: str = Depends(get_tenant
     cache_delete_prefix(f"compat:procurement:{tenant_id}:")
     db.commit()
     return doc
+
+
+@router.post("/purchase-orders", response_model=dict, status_code=201)
+async def po_create(payload: dict[str, Any], tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
+    return await _create_compat_purchase_order(db, tenant_id=tenant_id, payload=payload)
 
 
 @router.patch("/purchase-orders/{po_id}", response_model=dict)
@@ -713,12 +722,79 @@ def _load_einkauf_anfrage(db: Session, anfrage_id: str) -> dict[str, Any] | None
     }
 
 
+def _load_einkauf_anfrage_row(db: Session, anfrage_id: str, tenant_id: str) -> Any | None:
+    try:
+        return db.execute(
+            text(
+                """
+                SELECT id, anfrage_nummer, typ, anforderer, artikel, menge, prioritaet, status, datum, created_at
+                FROM einkauf_anfragen
+                WHERE (id = :anfrage_id OR anfrage_nummer = :anfrage_id) AND tenant_id = :tenant_id
+                ORDER BY created_at DESC
+                LIMIT 1
+                """
+            ),
+            {"anfrage_id": anfrage_id, "tenant_id": tenant_id},
+        ).fetchone()
+    except Exception:
+        return None
+
+
 @router.get("/einkauf/anfragen/{anfrage_id}", response_model=dict)
 async def einkauf_anfrage_get(anfrage_id: str, db: Session = Depends(get_db)) -> dict[str, Any]:
     item = _load_einkauf_anfrage(db, anfrage_id)
     if item is None:
         raise HTTPException(status_code=404, detail="Anfrage not found")
     return item
+
+
+@router.post("/einkauf/anfragen/{anfrage_id}/convert-to-order", response_model=dict)
+async def einkauf_anfrage_convert_to_order(
+    anfrage_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
+    row = _load_einkauf_anfrage_row(db, anfrage_id, tenant_id)
+    if row is None:
+        raise HTTPException(status_code=404, detail="Anfrage not found")
+
+    mapping = row._mapping
+    po = await _create_compat_purchase_order(
+        db,
+        tenant_id=tenant_id,
+        payload={
+            "subject": mapping.get("artikel") or f"Anfrage {mapping.get('anfrage_nummer')}",
+            "description": f"Erzeugt aus Anfrage {mapping.get('anfrage_nummer') or mapping.get('id')}",
+            "deliveryDate": mapping.get("datum").isoformat()[:10] if mapping.get("datum") else None,
+            "externalReference": mapping.get("anfrage_nummer") or str(mapping.get("id")),
+            "items": [
+                {
+                    "description": mapping.get("artikel") or "Bedarfsposition",
+                    "quantity": float(mapping.get("menge") or 0),
+                    "unitPrice": 0,
+                    "unit": "Stk",
+                }
+            ],
+        },
+    )
+
+    db.execute(
+        text(
+            """
+            UPDATE einkauf_anfragen
+            SET status = 'BESTELLT', updated_at = CURRENT_TIMESTAMP
+            WHERE id = :id AND tenant_id = :tenant_id
+            """
+        ),
+        {"id": mapping.get("id"), "tenant_id": tenant_id},
+    )
+    db.commit()
+    return {
+        "message": "Anfrage in Bestellung ueberfuehrt",
+        "purchaseOrderId": po.get("id"),
+        "purchaseOrderNumber": po.get("purchaseOrderNumber"),
+        "status": "BESTELLT",
+    }
 
 
 @router.get("/contracts/{contract_id}", response_model=dict)
@@ -757,6 +833,152 @@ async def einkauf_angebote_list(db: Session = Depends(get_db)) -> list[dict[str,
     ]
 
 
+def _load_einkauf_angebot_row(db: Session, angebot_id: str, tenant_id: str) -> Any | None:
+    try:
+        return db.execute(
+            text(
+                """
+                SELECT id, angebots_nummer, anfrage_id, lieferant_name, artikel_name, netto_summe, gueltig_bis, status, lieferzeit_tage, created_at
+                FROM einkauf_angebote
+                WHERE (id = :angebot_id OR angebots_nummer = :angebot_id) AND tenant_id = :tenant_id
+                ORDER BY created_at DESC
+                LIMIT 1
+                """
+            ),
+            {"angebot_id": angebot_id, "tenant_id": tenant_id},
+        ).fetchone()
+    except Exception:
+        return None
+
+
+async def _update_angebot_status(
+    db: Session,
+    *,
+    angebot_id: str,
+    new_status: str,
+    tenant_id: str,
+    change_type: str,
+) -> dict[str, Any]:
+    row = _load_einkauf_angebot_row(db, angebot_id, tenant_id)
+    if row is None:
+        raise HTTPException(status_code=404, detail="Angebot not found")
+
+    db.execute(
+        text(
+            """
+            UPDATE einkauf_angebote
+            SET status = :status, updated_at = CURRENT_TIMESTAMP
+            WHERE id = :id AND tenant_id = :tenant_id
+            """
+        ),
+        {"status": new_status, "id": row._mapping.get("id"), "tenant_id": tenant_id},
+    )
+    db.commit()
+    cache_delete_prefix(f"compat:procurement:{tenant_id}:")
+    return {
+        "message": f"Angebot {change_type.lower()}",
+        "status": new_status,
+        "id": str(row._mapping.get("id")),
+        "angebotNummer": row._mapping.get("angebots_nummer") or str(row._mapping.get("id")),
+    }
+
+
+@router.post("/einkauf/angebote/{angebot_id}/review", response_model=dict)
+async def einkauf_angebot_review(
+    angebot_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
+    return await _update_angebot_status(
+        db,
+        angebot_id=angebot_id,
+        new_status="GEPRUEFT",
+        tenant_id=tenant_id,
+        change_type="GEPRUEFT",
+    )
+
+
+@router.post("/einkauf/angebote/{angebot_id}/approve", response_model=dict)
+async def einkauf_angebot_approve(
+    angebot_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
+    return await _update_angebot_status(
+        db,
+        angebot_id=angebot_id,
+        new_status="GENEHMIGT",
+        tenant_id=tenant_id,
+        change_type="GENEHMIGT",
+    )
+
+
+@router.post("/einkauf/angebote/{angebot_id}/reject", response_model=dict)
+async def einkauf_angebot_reject(
+    angebot_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
+    return await _update_angebot_status(
+        db,
+        angebot_id=angebot_id,
+        new_status="ABGELEHNT",
+        tenant_id=tenant_id,
+        change_type="ABGELEHNT",
+    )
+
+
+@router.post("/einkauf/angebote/{angebot_id}/convert-to-order", response_model=dict)
+async def einkauf_angebot_convert_to_order(
+    angebot_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
+    row = _load_einkauf_angebot_row(db, angebot_id, tenant_id)
+    if row is None:
+        raise HTTPException(status_code=404, detail="Angebot not found")
+
+    mapping = row._mapping
+    po = await _create_compat_purchase_order(
+        db,
+        tenant_id=tenant_id,
+        payload={
+            "subject": mapping.get("artikel_name") or f"Angebot {mapping.get('angebots_nummer')}",
+            "description": f"Erzeugt aus Angebot {mapping.get('angebots_nummer') or mapping.get('id')} von {mapping.get('lieferant_name') or 'Lieferant'}",
+            "deliveryDate": mapping.get("gueltig_bis").isoformat()[:10] if mapping.get("gueltig_bis") else None,
+            "externalReference": mapping.get("angebots_nummer") or str(mapping.get("id")),
+            "items": [
+                {
+                    "description": mapping.get("artikel_name") or "Angebotsposition",
+                    "quantity": 1,
+                    "unitPrice": float(mapping.get("netto_summe") or 0),
+                    "unit": "Stk",
+                }
+            ],
+            "notes": f"Lieferant: {mapping.get('lieferant_name') or 'unbekannt'}",
+        },
+    )
+
+    db.execute(
+        text(
+            """
+            UPDATE einkauf_angebote
+            SET status = 'IN_BESTELLUNG', updated_at = CURRENT_TIMESTAMP
+            WHERE id = :id AND tenant_id = :tenant_id
+            """
+        ),
+        {"id": mapping.get("id"), "tenant_id": tenant_id},
+    )
+    db.commit()
+    cache_delete_prefix(f"compat:procurement:{tenant_id}:")
+    return {
+        "message": "Angebot in Bestellung ueberfuehrt",
+        "purchaseOrderId": po.get("id"),
+        "purchaseOrderNumber": po.get("purchaseOrderNumber"),
+        "status": "IN_BESTELLUNG",
+    }
+
+
 @router.get("/einkauf/anlieferavis", response_model=list)
 async def einkauf_anlieferavis_list(db: Session = Depends(get_db)) -> list[dict[str, Any]]:
     try:
@@ -782,6 +1004,63 @@ async def einkauf_anlieferavis_list(db: Session = Depends(get_db)) -> list[dict[
     ]
 
 
+def _load_anlieferavis_row(db: Session, avis_id: str, tenant_id: str) -> Any | None:
+    try:
+        return db.execute(
+            text(
+                """
+                SELECT id, avis_nummer, bestellung_id, lieferant_name, status, geplantes_anliefer_datum, kennzeichen, created_at
+                FROM einkauf_anlieferavis
+                WHERE (id = :avis_id OR avis_nummer = :avis_id) AND tenant_id = :tenant_id
+                ORDER BY created_at DESC
+                LIMIT 1
+                """
+            ),
+            {"avis_id": avis_id, "tenant_id": tenant_id},
+        ).fetchone()
+    except Exception:
+        return None
+
+
+@router.post("/einkauf/anlieferavis/{avis_id}/{action}", response_model=dict)
+async def einkauf_anlieferavis_transition(
+    avis_id: str,
+    action: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
+    status_map = {
+        "send": "GESENDET",
+        "confirm": "BESTAETIGT",
+        "cancel": "STORNIERT",
+    }
+    if action not in status_map:
+        raise HTTPException(status_code=404, detail="Unknown action")
+
+    row = _load_anlieferavis_row(db, avis_id, tenant_id)
+    if row is None:
+        raise HTTPException(status_code=404, detail="Anlieferavis not found")
+
+    db.execute(
+        text(
+            """
+            UPDATE einkauf_anlieferavis
+            SET status = :status, updated_at = CURRENT_TIMESTAMP
+            WHERE id = :id AND tenant_id = :tenant_id
+            """
+        ),
+        {"status": status_map[action], "id": row._mapping.get("id"), "tenant_id": tenant_id},
+    )
+    db.commit()
+    cache_delete_prefix(f"compat:procurement:{tenant_id}:")
+    return {
+        "message": f"Anlieferavis {action}",
+        "status": status_map[action],
+        "id": str(row._mapping.get("id")),
+        "avisNummer": row._mapping.get("avis_nummer") or str(row._mapping.get("id")),
+    }
+
+
 @router.get("/einkauf/auftragsbestaetigungen", response_model=list)
 async def einkauf_auftragsbestaetigungen_list(db: Session = Depends(get_db)) -> list[dict[str, Any]]:
     try:
@@ -803,6 +1082,62 @@ async def einkauf_auftragsbestaetigungen_list(db: Session = Depends(get_db)) -> 
         }
         for r in rows
     ]
+
+
+def _load_auftragsbestaetigung_row(db: Session, bestaetigung_id: str, tenant_id: str) -> Any | None:
+    try:
+        return db.execute(
+            text(
+                """
+                SELECT id, bestaetigungs_nummer, bestellung_id, lieferant_name, status, created_at
+                FROM einkauf_auftragsbestaetigungen
+                WHERE (id = :bestaetigung_id OR bestaetigungs_nummer = :bestaetigung_id) AND tenant_id = :tenant_id
+                ORDER BY created_at DESC
+                LIMIT 1
+                """
+            ),
+            {"bestaetigung_id": bestaetigung_id, "tenant_id": tenant_id},
+        ).fetchone()
+    except Exception:
+        return None
+
+
+@router.post("/einkauf/auftragsbestaetigungen/{bestaetigung_id}/{action}", response_model=dict)
+async def einkauf_auftragsbestaetigung_transition(
+    bestaetigung_id: str,
+    action: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
+    status_map = {
+        "review": "GEPRUEFT",
+        "confirm": "BESTAETIGT",
+    }
+    if action not in status_map:
+        raise HTTPException(status_code=404, detail="Unknown action")
+
+    row = _load_auftragsbestaetigung_row(db, bestaetigung_id, tenant_id)
+    if row is None:
+        raise HTTPException(status_code=404, detail="Auftragsbestaetigung not found")
+
+    db.execute(
+        text(
+            """
+            UPDATE einkauf_auftragsbestaetigungen
+            SET status = :status, updated_at = CURRENT_TIMESTAMP
+            WHERE id = :id AND tenant_id = :tenant_id
+            """
+        ),
+        {"status": status_map[action], "id": row._mapping.get("id"), "tenant_id": tenant_id},
+    )
+    db.commit()
+    cache_delete_prefix(f"compat:procurement:{tenant_id}:")
+    return {
+        "message": f"Auftragsbestaetigung {action}",
+        "status": status_map[action],
+        "id": str(row._mapping.get("id")),
+        "bestaetigungsNummer": row._mapping.get("bestaetigungs_nummer") or str(row._mapping.get("id")),
+    }
 
 
 @router.get("/einkauf/rechnungseingaenge", response_model=list)
