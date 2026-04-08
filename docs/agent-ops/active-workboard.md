@@ -1255,7 +1255,17 @@ Alle 6 Router registriert in `app/api/v1/api.py` unter `/api/v1/neuro/*`. Commit
 ## PCP-007 bis PCP-012
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Die verbleibenden Paperclip-inspirierten Agent-Ops-Folgeslices auf der vorhandenen NeuroASSIST- und Agent-Ops-Runtime schliessen.
 **Enthaelt:** `PCP-007` Approval And Intervention Console, `PCP-008` Portable Agent Templates, `PCP-009` Agent Skill Packs, `PCP-010` Agent Ops Dashboard, `PCP-011` Mobile Ops Surface, `PCP-012` Plugin Boundary Review.
 **Dateibesitz:** `app/agents/*`, `app/api/v1/endpoints/agents.py`, `packages/frontend-web/src/pages/admin/agenten-integration.tsx`, `packages/frontend-web/src/__tests__/pages/admin/agenten-integration.test.tsx`, neue Agent-Ops-Workflow-/ADR-Dokumente.
+**Erledigt:** `app/agents/agent_ops.py` deckt jetzt Interventionen, Dashboard, Mobile-Overview, Template-Export/Import, Skill-Packs und Plugin-Boundary-Review mit ab; `app/api/v1/endpoints/agents.py` surfact dafuer die neuen `/api/v1/agents/neuroassist/ops/*`-Pfade; `packages/frontend-web/src/pages/admin/agenten-integration.tsx` hat die neuen Bereiche `Agent Ops Dashboard`, `Approval And Intervention Console`, `Portable Agent Templates`, `Agent Skill Packs`, `Mobile Ops Surface` und `Plugin Boundary Review`.
+**Tests / Checks:** `pytest tests/test_neuroassist_service.py tests/test_agents_neuroassist_api.py -q --no-cov`; `pnpm --dir packages/frontend-web exec vitest run src/__tests__/pages/admin/agenten-integration.test.tsx`; `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`; `python -m py_compile app/agents/agent_ops.py app/agents/neuroassist_service.py app/api/v1/endpoints/agents.py tests/test_neuroassist_service.py tests/test_agents_neuroassist_api.py`; `node scripts/docs-governance-check.cjs`
+
+## PCP-013 bis PCP-018
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Das Agent Control Center auf produktnaehere Ticket-, stale-work-, chain-of-command- und Revisionsfaehigkeit ausbauen.
+**Enthaelt:** `PCP-013` Agent Control Center, `PCP-014` Ticket-zentrierte Agentenarbeit, `PCP-015` Chain Of Command Surface, `PCP-016` Config Revisions, `PCP-017` Stale Work And Review States, `PCP-018` Focused Mobile Ops.
+**Dateibesitz:** `app/agents/*`, `app/api/v1/endpoints/agents.py`, `packages/frontend-web/src/pages/admin/agenten-integration.tsx`, `packages/frontend-web/src/__tests__/pages/admin/agenten-integration.test.tsx`, Agent-Ops-Doku unter `docs/architecture` und `docs/workflows`.
