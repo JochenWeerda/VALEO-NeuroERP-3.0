@@ -1353,7 +1353,18 @@ Alle 6 Router registriert in `app/api/v1/api.py` unter `/api/v1/neuro/*`. Commit
 ## UIX-031
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Vertrags- und Meldewesenarbeitsplaetze von verbleibenden Demo-/Brueckenlogiken auf konsistente produktive Folgepfade und belastbare Statusbewertung ziehen.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/contracts-v2.tsx`, `packages/frontend-web/src/pages/compliance/meldewesen-konsole.tsx`, ggf. direkt angrenzende API-Typdateien.
 **Abnahmekriterien:** `contracts-v2.tsx` leitet Editieren je Vertragsquelle in echte Zielmasken statt in einen generischen Hinweis; `meldewesen-konsole.tsx` bewertet Schwellen-/Aktivierungslogik aus vorhandenen Schedules/Jobs/Reporting Units statt als `Demo`-Fortschritt.
+**Erledigt:** `packages/frontend-web/src/pages/contracts-v2.tsx` leitet den Edit-Pfad jetzt quellenabhaengig auf echte Arbeitsmasken: neue Kontrakte nach `/kontrakte/:id`, Rahmenvertraege nach `/vertrag/:id` und Agrarvertraege in den Flow-Spine-Arbeitsplatz; `packages/frontend-web/src/pages/compliance/meldewesen-konsole.tsx` leitet die Intrastat-Schwellen nun aus vorhandenen Reporting Units, Zeitplaenen und Job-Laeufen ab und zeigt Status, Aktivierungsgrad, Zeitplan-/Laufzaehler sowie einen belastbaren Hinweis statt Demo-Fortschritt.
+**Tests / Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`; `node scripts/docs-governance-check.cjs`; gezielter Restscan auf `Schwellen / Aktivierungslogik (Demo)`, `Fortschritt (Demo)` und den alten Vertrags-Hinweis per `rg`
+**Offene Risiken:** Fuer Agrarvertraege fuehrt der Edit-Pfad mangels eigener dedizierter Detailmaske bewusst in den vorhandenen Flow-Spine-Arbeitsplatz; falls spaeter eine explizite Agrarvertragsmaske entsteht, sollte diese Navigation dorthin wechseln.
+
+## REF-ERP-001
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Die externe ERP-Referenzanalyse gegen AMIC, Odoo/OCA und SAP Fiori/OpenUI5 als belastbare MD-Referenz fuer spaetere Profiausbauslices dokumentieren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, neue Referenzdatei unter `docs/project-context/`, ggf. benachbarte Gap-/Architektur-Doku falls zur Verlinkung noetig.
+**Abnahmekriterien:** Eine eigenstaendige MD-Datei beschreibt die aus AMIC abgeleiteten fachlichen Tiefenbereiche, den Abgleich mit VALEO, priorisierte Ausbaukandidaten sowie geeignete Upstream-Referenzquellen aus Odoo/OCA und SAP Fiori/OpenUI5 inklusive Lizenzhinweis fuer spaetere kommerzielle Nutzung.
