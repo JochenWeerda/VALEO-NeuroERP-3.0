@@ -1277,7 +1277,19 @@ Alle 6 Router registriert in `app/api/v1/api.py` unter `/api/v1/neuro/*`. Commit
 ## PCP-019 bis PCP-021
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Den Agent-/Superglue-Leitstand aus der Sammelseite in einen eigenen Admin-Unterbereich mit klarer Navigation und getrennten Detailseiten ueberfuehren.
 **Enthaelt:** `PCP-019` Admin Control Center Subdirectory, `PCP-020` Control-Center Routing And Navigation, `PCP-021` Split Admin Surfaces For Agent Ops And Superglue.
 **Dateibesitz:** `packages/frontend-web/src/pages/admin/**`, Frontend-Routing/Nav-Komponenten, zugehoerige Frontend-Tests, `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`.
+**Erledigt:** `packages/frontend-web/src/pages/admin/control-center/` enthaelt jetzt einen eigenen Admin-Unterbereich mit `index.tsx`, `superglue.tsx` und `agent-ops.tsx`; `packages/frontend-web/src/pages/admin/agenten-integration.tsx` ist zur wiederverwendbaren Workspace-Surface fuer `overview`, `superglue` und `agents` umgebaut; Routing/Aliase/Navigation fuehren auf `admin/control-center`, `admin/control-center/superglue` und `admin/control-center/agent-ops`, waehrend die alte Sammelseite als Legacy-Einstieg bestehen bleibt.
+**Tests / Checks:** `pnpm --dir packages/frontend-web exec vitest run src/__tests__/pages/admin/agenten-integration.test.tsx`; `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`; `node scripts/docs-governance-check.cjs`
+
+## PCP-022 bis PCP-026
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Den Admin-Leitstand von einer lesenden Uebersicht zu einer produktnaeheren Leitstandsoberflaeche mit Persistenz, Mutationen, Onboarding-Flow, Planung und Incident-Steuerung ausbauen.
+**Enthaelt:** `PCP-022` Persistent Agent Ops Read Models, `PCP-023` Superglue Admin Mutations, `PCP-024` Tenant Onboarding Wizard, `PCP-025` Scheduling And Planning Surface, `PCP-026` Unified Incident Alert Escalation Center.
+**Dateibesitz:** `app/agents/*`, `app/api/v1/endpoints/agents.py`, `app/api/v1/endpoints/external_agent_integrations.py`, `app/integrations/services/superglue_*`, `packages/frontend-web/src/pages/admin/control-center/**`, zugehoerige Frontend-/Backend-Tests, `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`.
+**Annahmen:** Superglue bleibt upstream-first und thin-wrapper-only; produktive Secrets selbst bleiben ausserhalb des Repos, koennen aber im Leitstand als fehlende Pflichtwerte, Placeholder und Wizard-Schritte explizit gesteuert werden.
+**Naechster konkreter Schritt:** `PCP-022` bis `PCP-024` jetzt direkt umsetzen: persistente Agent-Ops-Snapshots/Revisionshistorie, echte Superglue-Admin-Mutationen im Frontend und ein Tenant-Onboarding-/Rollout-Wizard im neuen Admin-Unterbereich.
