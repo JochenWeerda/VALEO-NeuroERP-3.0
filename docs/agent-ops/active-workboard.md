@@ -1338,3 +1338,11 @@ Alle 6 Router registriert in `app/api/v1/api.py` unter `/api/v1/neuro/*`. Commit
 **Erledigt:** `packages/frontend-web/src/pages/agribusiness/farmers.tsx`, `packages/frontend-web/src/pages/agribusiness/field-service-tasks.tsx` und `packages/frontend-web/src/pages/contracts-v2.tsx` fuehren `Ask VALEO` jetzt direkt in den Admin-Leitstand fuer Agent Ops statt auf `in Kuerze`; `packages/frontend-web/src/pages/admin/compliance-dashboard.tsx` oeffnet Detailaktionen gegen echte Compliance-Register; `packages/frontend-web/src/pages/fibu/atlas.tsx` ist als operative Zoll-/Meldekonsole mit Anschluss an Meldewesen, Schnittstellen-Center und ELSTER neu aufgebaut; `packages/frontend-web/src/pages/controlling/benchmark-cockpit.tsx` und `packages/frontend-web/src/pages/analytics.tsx` kommunizieren den Ist-Zustand jetzt belastbar statt ueber Platzhaltertexte.
 **Tests / Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`; `node scripts/docs-governance-check.cjs`; gezielter Restscan auf bearbeitete Platzhalterpfade per `rg`
 **Offene Risiken:** Repo-weit bleiben ausserhalb dieses Slices weiterhin einzelne fachlich bewusst noch leere oder nur lesende Bereiche, etwa `pages/admin/agenten-integration.tsx` mit Hinweis auf Platzhalter-URLs aus Live-Readiness oder tiefergehende externe FIBU-/POS-Providerpfade. Diese wurden hier nicht pauschal umgedeutet, wenn der Ist-Zustand produktiv noch tatsaechlich extern oder read-only ist.
+
+## UIX-030
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Fachlich noch duenne Betriebsbilder auf professionelles ERP-Niveau heben, indem echte Entscheidungs- und Handlungsinformation direkt in die bestehenden Seiten gezogen wird.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/fibu/atlas.tsx`, `packages/frontend-web/src/pages/controlling/benchmark-cockpit.tsx`, ggf. direkt benoetigte API-/Typdateien unter `packages/frontend-web/src/lib/api/`.
+**Abnahmekriterien:** `fibu/atlas.tsx` zeigt nicht nur Anschlusswege, sondern den aktuellen operativen Meldewesen-/Job-/Connector-Zustand mit naechsten Aktionen; `benchmark-cockpit.tsx` zeigt neben KPI-Abweichungen auch Management-Zusammenfassung, Stärken/Schwaechen, Kategorie-Sicht und konkrete Handlungsprioritaeten statt nur Einzelkarten.
