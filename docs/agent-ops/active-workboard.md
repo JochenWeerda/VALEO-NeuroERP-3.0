@@ -1342,7 +1342,18 @@ Alle 6 Router registriert in `app/api/v1/api.py` unter `/api/v1/neuro/*`. Commit
 ## UIX-030
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Fachlich noch duenne Betriebsbilder auf professionelles ERP-Niveau heben, indem echte Entscheidungs- und Handlungsinformation direkt in die bestehenden Seiten gezogen wird.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/fibu/atlas.tsx`, `packages/frontend-web/src/pages/controlling/benchmark-cockpit.tsx`, ggf. direkt benoetigte API-/Typdateien unter `packages/frontend-web/src/lib/api/`.
 **Abnahmekriterien:** `fibu/atlas.tsx` zeigt nicht nur Anschlusswege, sondern den aktuellen operativen Meldewesen-/Job-/Connector-Zustand mit naechsten Aktionen; `benchmark-cockpit.tsx` zeigt neben KPI-Abweichungen auch Management-Zusammenfassung, Stärken/Schwaechen, Kategorie-Sicht und konkrete Handlungsprioritaeten statt nur Einzelkarten.
+**Erledigt:** `packages/frontend-web/src/pages/fibu/atlas.tsx` liest jetzt echte Meldewesen-Daten ueber `packages/frontend-web/src/lib/api/meldewesen.ts` ein und verdichtet Connector-Lage, Reporting Units, aktive Zeitplaene, letzte Job-Laeufe, Systemstatus und Direktaktionen zu einer arbeitsfaehigen Zoll-/Melde-Operationskonsole; `packages/frontend-web/src/lib/api/controlling.ts` liefert zusaetzlich `useBenchmarkReadModel()`, und `packages/frontend-web/src/pages/controlling/benchmark-cockpit.tsx` zeigt jetzt Management-Zusammenfassung, KPI-Handlungshinweise, Staerken/Schwaechen sowie Kategorie- und Fokus-Sicht aus dem Benchmark-Read-Model statt nur Einzelkarten.
+**Tests / Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`; `node scripts/docs-governance-check.cjs`; gezielter Restscan auf Platzhaltertexte in `atlas.tsx` und `benchmark-cockpit.tsx` per `rg`
+**Offene Risiken:** Die Benchmark-Referenzen in `/api/v1/analytics/benchmark` bleiben fachlich nur so belastbar wie die aktuell hinterlegten Branchenreferenzwerte im Backend; fuer ATLAS/Zoll haengt der operative Reifegrad weiterhin von den tatsaechlich eingerichteten Meldewesen-Connectoren und Zeitplaenen je Mandant ab.
+
+## UIX-031
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Vertrags- und Meldewesenarbeitsplaetze von verbleibenden Demo-/Brueckenlogiken auf konsistente produktive Folgepfade und belastbare Statusbewertung ziehen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/contracts-v2.tsx`, `packages/frontend-web/src/pages/compliance/meldewesen-konsole.tsx`, ggf. direkt angrenzende API-Typdateien.
+**Abnahmekriterien:** `contracts-v2.tsx` leitet Editieren je Vertragsquelle in echte Zielmasken statt in einen generischen Hinweis; `meldewesen-konsole.tsx` bewertet Schwellen-/Aktivierungslogik aus vorhandenen Schedules/Jobs/Reporting Units statt als `Demo`-Fortschritt.
