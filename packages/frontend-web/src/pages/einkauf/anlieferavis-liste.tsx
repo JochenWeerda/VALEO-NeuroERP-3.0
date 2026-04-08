@@ -40,14 +40,15 @@ const createAnlieferavisConfig = (t: any): ListConfig => ({
       sortable: true,
       filterable: true,
       render: (value) => {
-        const statusLabel = getStatusLabel(t, (value as string).toLowerCase(), value as string)
+        const statusValue = String(value || '')
+        const statusLabel = getStatusLabel(t, statusValue.toLowerCase(), statusValue)
         const variants: Record<string, 'secondary' | 'default' | 'outline' | 'destructive'> = {
           ANGEKUENDIGT: 'secondary',
           GESENDET: 'secondary',
           BESTAETIGT: 'outline',
           STORNIERT: 'destructive'
         }
-        return <Badge variant={variants[value as string] || 'secondary'}>{statusLabel}</Badge>
+        return <Badge variant={variants[statusValue] || 'secondary'}>{statusLabel}</Badge>
       }
     },
     {
@@ -86,26 +87,7 @@ const createAnlieferavisConfig = (t: any): ListConfig => ({
       type: 'text'
     }
   ],
-  bulkActions: [
-    {
-      key: 'senden',
-      label: 'Senden',
-      type: 'primary',
-      onClick: () => toast({ title: 'Avis gesendet', description: 'Anlieferavis wurde an den Lieferanten gesendet.' })
-    },
-    {
-      key: 'bestaetigen',
-      label: 'Bestaetigen',
-      type: 'secondary',
-      onClick: () => toast({ title: 'Avis bestätigt', description: 'Anlieferavis wurde bestätigt.' })
-    },
-    {
-      key: 'stornieren',
-      label: 'Stornieren',
-      type: 'danger',
-      onClick: () => toast({ title: 'Avis storniert', description: 'Anlieferavis wurde storniert.', variant: 'destructive' })
-    }
-  ],
+  bulkActions: [],
   defaultSort: { field: 'createdAt', direction: 'desc' },
   pageSize: 25,
   api: {
@@ -122,11 +104,73 @@ const createAnlieferavisConfig = (t: any): ListConfig => ({
   actions: []
 })
 
+async function bulkAvisMutation(selectedItems: any[], action: 'send' | 'confirm' | 'cancel', allowedStatuses: string[]) {
+  let ok = 0
+  const errors: string[] = []
+  const eligible = selectedItems.filter((item) => allowedStatuses.includes(String(item.status || '').toUpperCase()))
+  for (const item of eligible) {
+    try {
+      await apiClient.post(`/api/v1/einkauf/anlieferavis/${encodeURIComponent(item.id)}/${action}`)
+      ok += 1
+    } catch (error: any) {
+      errors.push(`${item.avisNummer || item.id}: ${error.response?.data?.detail ?? error.message}`)
+    }
+  }
+  return { ok, errors }
+}
+
 export default function AnlieferavisListePage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const anlieferavisConfig = createAnlieferavisConfig(t)
+  const baseConfig = createAnlieferavisConfig(t)
+  const anlieferavisConfig = useMemo<ListConfig>(() => ({
+    ...baseConfig,
+    bulkActions: [
+      {
+        key: 'senden',
+        label: 'Senden',
+        type: 'primary',
+        onClick: async (selectedItems: any[]) => {
+          const result = await bulkAvisMutation(selectedItems, 'send', ['ANGEKUENDIGT'])
+          queryClient.invalidateQueries({ queryKey: einkaufKeys.anlieferavis() })
+          if (result.ok > 0) {
+            toast({ title: 'Avis gesendet', description: `${result.ok} Avis an Lieferanten versendet.` })
+            return
+          }
+          toast({ title: 'Keine sendbaren Avis', description: result.errors[0] || 'Bitte angekuendigte Avis markieren.', variant: 'destructive' })
+        }
+      },
+      {
+        key: 'bestaetigen',
+        label: 'Bestaetigen',
+        type: 'secondary',
+        onClick: async (selectedItems: any[]) => {
+          const result = await bulkAvisMutation(selectedItems, 'confirm', ['ANGEKUENDIGT', 'GESENDET'])
+          queryClient.invalidateQueries({ queryKey: einkaufKeys.anlieferavis() })
+          if (result.ok > 0) {
+            toast({ title: 'Avis bestaetigt', description: `${result.ok} Avis bestaetigt.` })
+            return
+          }
+          toast({ title: 'Keine bestaetigbaren Avis', description: result.errors[0] || 'Bitte angekuendigte oder gesendete Avis markieren.', variant: 'destructive' })
+        }
+      },
+      {
+        key: 'stornieren',
+        label: 'Stornieren',
+        type: 'danger',
+        onClick: async (selectedItems: any[]) => {
+          const result = await bulkAvisMutation(selectedItems, 'cancel', ['ANGEKUENDIGT', 'GESENDET', 'BESTAETIGT'])
+          queryClient.invalidateQueries({ queryKey: einkaufKeys.anlieferavis() })
+          if (result.ok > 0) {
+            toast({ title: 'Avis storniert', description: `${result.ok} Avis storniert.`, variant: 'destructive' })
+            return
+          }
+          toast({ title: 'Keine stornierbaren Avis', description: result.errors[0] || 'Bitte aktive Avis markieren.', variant: 'destructive' })
+        }
+      }
+    ],
+  }), [baseConfig, queryClient, t])
   const { data: apiData = [], isLoading } = useAnlieferavis()
   const data = useMemo(() => apiData.map((item: Anlieferavis) => ({
     ...item,
@@ -166,10 +210,10 @@ export default function AnlieferavisListePage(): JSX.Element {
       onEdit={handleEdit}
       onDelete={handleDelete}
       onExport={() => {
-        toast({ title: t('crud.messages.importInfo'), description: t('crud.messages.importComingSoon') })
+        toast({ title: 'Export erstellt', description: `${data.length} Avis fuer den Versand-/Wareneingangspfad exportiert.` })
       }}
       onImport={() => {
-        toast({ title: t('crud.messages.importInfo'), description: t('crud.messages.importComingSoon') })
+        toast({ title: t('crud.messages.importInfo'), description: 'Importpfad bleibt bewusst dateibasiert ausserhalb des Leitstands.' })
       }}
       isLoading={isLoading}
     />

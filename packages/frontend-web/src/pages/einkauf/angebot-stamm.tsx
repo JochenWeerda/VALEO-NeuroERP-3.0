@@ -6,6 +6,7 @@ import { useMaskData } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { toast } from '@/hooks/use-toast'
+import { apiClient } from '@/lib/api-client'
 
 const createAngebotConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
@@ -16,13 +17,7 @@ const createAngebotConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
       key: 'stammdaten',
       label: t('crud.detail.basicInfo'),
       fields: [
-        {
-          name: 'angebotNummer',
-          label: t('crud.fields.number'),
-          type: 'text',
-          required: true,
-          readonly: true
-        },
+        { name: 'angebotNummer', label: t('crud.fields.number'), type: 'text', required: true, readonly: true },
         {
           name: 'anfrageId',
           label: t('crud.entities.purchaseRequest'),
@@ -50,6 +45,7 @@ const createAngebotConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
             { value: 'ERFASST', label: t('status.recorded') },
             { value: 'GEPRUEFT', label: t('status.reviewed') },
             { value: 'GENEHMIGT', label: t('status.approved') },
+            { value: 'IN_BESTELLUNG', label: 'In Bestellung' },
             { value: 'ABGELEHNT', label: t('status.rejected') }
           ]
         }
@@ -68,12 +64,7 @@ const createAngebotConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
           displayField: 'name',
           valueField: 'id'
         },
-        {
-          name: 'menge',
-          label: t('crud.fields.quantity'),
-          type: 'number',
-          required: true
-        },
+        { name: 'menge', label: t('crud.fields.quantity'), type: 'number', required: true },
         {
           name: 'einheit',
           label: t('crud.fields.unit'),
@@ -86,12 +77,7 @@ const createAngebotConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
             { value: 'Stk', label: 'Stk' }
           ]
         },
-        {
-          name: 'preis',
-          label: t('crud.fields.price'),
-          type: 'number',
-          required: true
-        },
+        { name: 'preis', label: t('crud.fields.price'), type: 'number', required: true },
         {
           name: 'waehrung',
           label: t('crud.fields.currency'),
@@ -102,43 +88,23 @@ const createAngebotConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
             { value: 'GBP', label: 'GBP' }
           ]
         },
-        {
-          name: 'lieferzeit',
-          label: t('crud.fields.deliveryTime'),
-          type: 'number',
-          required: true
-        },
-        {
-          name: 'gueltigBis',
-          label: t('crud.fields.validUntil'),
-          type: 'date',
-          required: true
-        }
+        { name: 'lieferzeit', label: t('crud.fields.deliveryTime'), type: 'number', required: true },
+        { name: 'gueltigBis', label: t('crud.fields.validUntil'), type: 'date', required: true }
       ]
     },
     {
       key: 'konditionen',
       label: t('crud.fields.conditions'),
       fields: [
-        {
-          name: 'mindestabnahme',
-          label: t('crud.fields.minimumOrder'),
-          type: 'number',
-          helpText: t('crud.tooltips.fields.minimumOrder')
-        },
-        {
-          name: 'zahlungsbedingungen',
-          label: t('crud.fields.paymentTerms'),
-          type: 'text',
-          placeholder: t('crud.tooltips.placeholders.paymentTerms')
-        },
+        { name: 'mindestabnahme', label: t('crud.fields.minimumOrder'), type: 'number', helpText: t('crud.tooltips.fields.minimumOrder') },
+        { name: 'zahlungsbedingungen', label: t('crud.fields.paymentTerms'), type: 'text', placeholder: t('crud.tooltips.placeholders.paymentTerms') },
         {
           name: 'incoterms',
           label: t('crud.fields.incoterms'),
           type: 'select',
           options: [
             { value: 'EXW', label: 'EXW - Ab Werk' },
-            { value: 'FCA', label: 'FCA - Frei Frachtführer' },
+            { value: 'FCA', label: 'FCA - Frei Frachtfuehrer' },
             { value: 'CPT', label: 'CPT - Frachtfrei bezahlt bis' },
             { value: 'CIP', label: 'CIP - Frachtfrei versichert bis' },
             { value: 'DAT', label: 'DAT - Geliefert Terminal' },
@@ -146,40 +112,15 @@ const createAngebotConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
             { value: 'DDP', label: 'DDP - Geliefert verzollt' }
           ]
         },
-        {
-          name: 'bemerkungen',
-          label: t('crud.fields.notes'),
-          type: 'textarea',
-          placeholder: t('crud.tooltips.placeholders.offerNotes')
-        }
+        { name: 'bemerkungen', label: t('crud.fields.notes'), type: 'textarea', placeholder: t('crud.tooltips.placeholders.offerNotes') }
       ]
     }
   ],
   actions: [
-    {
-      key: 'pruefen',
-      label: t('crud.actions.review'),
-      type: 'secondary',
-      onClick: () => toast({ title: 'Prüfen', description: 'Angebot wurde zur Prüfung markiert.' })
-    },
-    {
-      key: 'genehmigen',
-      label: t('crud.actions.approve'),
-      type: 'primary',
-      onClick: () => toast({ title: 'Genehmigen', description: 'Angebot wurde genehmigt.' })
-    },
-    {
-      key: 'ablehnen',
-      label: t('crud.actions.reject'),
-      type: 'danger',
-      onClick: () => toast({ title: 'Ablehnen', description: 'Angebot wurde abgelehnt.', variant: 'destructive' })
-    },
-    {
-      key: 'inBestellung',
-      label: t('crud.actions.convertToOrder'),
-      type: 'secondary',
-      onClick: () => toast({ title: 'In Bestellung', description: 'Angebot wurde in eine Bestellung umgewandelt.' })
-    }
+    { key: 'pruefen', label: t('crud.actions.review'), type: 'secondary' },
+    { key: 'genehmigen', label: t('crud.actions.approve'), type: 'primary' },
+    { key: 'ablehnen', label: t('crud.actions.reject'), type: 'danger' },
+    { key: 'inBestellung', label: t('crud.actions.convertToOrder'), type: 'secondary' }
   ],
   api: {
     baseUrl: '/api/v1/einkauf/angebote',
@@ -226,6 +167,13 @@ export default function AngebotStammPage(): JSX.Element {
     }
   }
 
+  const transitionMap: Record<string, string> = {
+    pruefen: 'review',
+    genehmigen: 'approve',
+    ablehnen: 'reject',
+    inBestellung: 'convert-to-order',
+  }
+
   return (
     <ObjectPage
       config={angebotConfig}
@@ -233,6 +181,29 @@ export default function AngebotStammPage(): JSX.Element {
       onSave={handleSave}
       onCancel={handleCancel}
       isLoading={loading}
+      onAction={async (actionKey) => {
+        if (!id || !transitionMap[actionKey]) {
+          toast({ title: 'Aktion nicht moeglich', description: 'Das Angebot muss zuerst gespeichert werden.', variant: 'destructive' })
+          return
+        }
+        setLoading(true)
+        try {
+          const response = await apiClient.post<{ purchaseOrderId?: string; purchaseOrderNumber?: string }>(
+            `/api/v1/einkauf/angebote/${encodeURIComponent(id)}/${transitionMap[actionKey]}`,
+          )
+          if (actionKey === 'inBestellung' && response.data?.purchaseOrderId) {
+            toast({ title: 'Bestellung erzeugt', description: response.data.purchaseOrderNumber || 'Folgebeleg erzeugt.' })
+            navigate(`/einkauf/bestellungen/${encodeURIComponent(response.data.purchaseOrderId)}`)
+            return
+          }
+          toast({ title: 'Aktion ausgefuehrt', description: `Angebot ${id} wurde aktualisiert.` })
+          navigate('/einkauf/angebote')
+        } catch (error: any) {
+          toast({ title: 'Aktion fehlgeschlagen', description: error.response?.data?.detail || error.message, variant: 'destructive' })
+        } finally {
+          setLoading(false)
+        }
+      }}
     />
   )
 }

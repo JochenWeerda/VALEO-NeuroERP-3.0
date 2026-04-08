@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -49,6 +49,7 @@ function cellBgClass(severity: string): string {
 }
 
 export default function LstCommodityPositionMatrix(): JSX.Element {
+  const navigate = useNavigate()
   const [branchId, setBranchId] = useState<string | undefined>(undefined)
   const [asOfDate, setAsOfDate] = useState<string>(() => new Date().toISOString().slice(0, 10))
   const [periodMode, setPeriodMode] = useState<string>('M')
@@ -158,6 +159,14 @@ export default function LstCommodityPositionMatrix(): JSX.Element {
     setDrilldown({ articleId: contextCell.articleId, periodKey: contextCell.periodKey })
     setContextCell(null)
   }, [contextCell])
+
+  const handleCreateTaskFromContext = useCallback(() => {
+    if (!contextCell) return
+    navigate(
+      `/workflows/supervisor?source=position-matrix&articleId=${encodeURIComponent(contextCell.articleId)}&periodKey=${encodeURIComponent(contextCell.periodKey)}`,
+    )
+    setContextCell(null)
+  }, [contextCell, navigate])
 
   const handleExportDetail = useCallback(async () => {
     if (!contextCell) return
@@ -475,10 +484,10 @@ export default function LstCommodityPositionMatrix(): JSX.Element {
           </button>
           <button
             type="button"
-            className="w-full px-3 py-2 text-left text-sm hover:bg-accent text-muted-foreground"
-            onClick={(e) => { e.stopPropagation(); setContextCell(null); }}
+            className="w-full px-3 py-2 text-left text-sm hover:bg-accent"
+            onClick={(e) => { e.stopPropagation(); handleCreateTaskFromContext(); }}
           >
-            Als Aufgabe (in Kürze)
+            Als Aufgabe
           </button>
           <button
             type="button"

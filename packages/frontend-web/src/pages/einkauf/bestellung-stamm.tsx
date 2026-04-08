@@ -18,6 +18,7 @@ import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/api-client'
 import { History, XCircle, AlertTriangle, Mail, Globe } from 'lucide-react'
 import { usePoCommunications, useSendPoCommunication } from '@/lib/api/procurement-plus'
+import { useApprovePurchaseOrder, useCancelPurchaseOrder } from '@/lib/api/purchase-orders'
 import { useAuth } from '@/hooks/useAuth'
 import { useTenant } from '@/hooks/useTenant'
 import type { ChangeLog } from '@/features/crud/components/CrudAuditTrailPanel'
@@ -187,13 +188,11 @@ const createBestellungConfig = (t: any, entityTypeLabel: string): MaskConfig => 
       key: 'freigeben',
       label: t('crud.actions.approve'),
       type: 'primary',
-      onClick: () => toast({ title: 'Freigegeben', description: 'Bestellung wurde freigegeben.' })
     },
     {
       key: 'stornieren',
       label: t('crud.actions.cancel'),
       type: 'danger',
-      onClick: () => toast({ title: 'Storniert', description: 'Bestellung wurde storniert.', variant: 'destructive' })
     },
     {
       key: 'drucken',
@@ -247,6 +246,8 @@ export default function BestellungStammPage(): JSX.Element {
   const { data: poCommunications = [] } = usePoCommunications(poCommunicationId)
   const sendPoEmail = useSendPoCommunication(poCommunicationId, 'email')
   const sendPoPortal = useSendPoCommunication(poCommunicationId, 'portal')
+  const approvePurchaseOrder = useApprovePurchaseOrder()
+  const cancelPurchaseOrder = useCancelPurchaseOrder()
 
   // Audit Trail
   const { changeLogs, isLoading: isLoadingAudit, refetch: refetchAudit } = useCrudAuditTrail({
@@ -358,14 +359,11 @@ export default function BestellungStammPage(): JSX.Element {
 
     setLoading(true)
     try {
-      // Update Status auf STORNIERT
-      const updateData = {
-        ...data,
-        status: 'STORNIERT',
-        version: (data?.version || 0) + 1,
+      const purchaseOrderId = id || data?.id || data?.nummer || data?.purchaseOrderNumber
+      if (!purchaseOrderId) {
+        throw new Error('Bestellung muss zuerst gespeichert werden.')
       }
-
-      await saveData(updateData)
+      await cancelPurchaseOrder.mutateAsync({ id: String(purchaseOrderId), reason: stornoReason })
 
       // Erstelle Audit-Log für Storno
       try {
@@ -375,7 +373,7 @@ export default function BestellungStammPage(): JSX.Element {
           tenant_id: tenantId,
           action: 'CANCEL',
           entity_type: 'purchaseOrder',
-          entity_id: id || data?.id,
+          entity_id: String(purchaseOrderId),
           changes: {
             status: 'STORNIERT',
             reason: stornoReason,
@@ -425,13 +423,43 @@ export default function BestellungStammPage(): JSX.Element {
         onSave={handleSave}
         onCancel={handleCancel}
         isLoading={loading}
-        onAction={(key) => {
+        onAction={async (key, formData) => {
+          const purchaseOrderId = id || formData?.id || data?.id || data?.nummer || data?.purchaseOrderNumber
+          if (key === 'freigeben') {
+            if (!purchaseOrderId) {
+              toast({
+                variant: 'destructive',
+                title: 'Freigabe nicht moeglich',
+                description: 'Die Bestellung muss zuerst gespeichert werden.',
+              })
+              return
+            }
+            setLoading(true)
+            try {
+              await approvePurchaseOrder.mutateAsync(String(purchaseOrderId))
+              toast({ title: 'Bestellung freigegeben', description: `Bestellung ${data?.nummer || data?.purchaseOrderNumber || purchaseOrderId} wurde freigegeben.` })
+              navigate('/einkauf/bestellungen')
+            } catch (error: any) {
+              toast({
+                variant: 'destructive',
+                title: 'Freigabe fehlgeschlagen',
+                description: error.response?.data?.detail || error.message,
+              })
+            } finally {
+              setLoading(false)
+            }
+            return
+          }
+          if (key === 'stornieren') {
+            setStornoDialogOpen(true)
+            return
+          }
           if (key === 'drucken') {
-            if (id || data?.nummer) {
-              window.open(`/api/mcp/documents/purchase_order/${id || data?.nummer}/print?locale=${sendLanguage}`, '_blank')
+            if (purchaseOrderId) {
+              window.open(`/api/mcp/documents/purchase_order/${purchaseOrderId}/print?locale=${sendLanguage}`, '_blank')
             }
           } else if (key === 'senden') {
-            if (data?.lieferantId) {
+            if (formData?.lieferantId || data?.lieferantId) {
               setSendDialogOpen(true)
             }
           }

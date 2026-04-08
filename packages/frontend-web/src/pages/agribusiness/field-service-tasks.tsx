@@ -188,6 +188,14 @@ export default function FieldServiceTasksPage(): JSX.Element {
     }
   };
 
+  const handleCopilot = () => {
+    navigate(`/admin/control-center/agent-ops?context=field-service&intent=dispatch-review${workflowQuery ? `&${workflowQuery.slice(1)}` : ''}`);
+    toast({
+      title: 'Agent Ops geöffnet',
+      description: 'Außendienst-Aufgaben können jetzt im Leitstand priorisiert, überwacht und eskaliert werden.',
+    });
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -206,7 +214,7 @@ export default function FieldServiceTasksPage(): JSX.Element {
             entityType={entityTypeLabel}
             printTitle={getListTitle(t, entityTypeLabel)}
           />
-          <Button onClick={() => {/* Navigate to create */}}>
+          <Button onClick={() => navigate(`/agribusiness/field-service-tasks/neu${workflowQuery}`)}>
             {t('crud.actions.new')} {t('crud.entities.task')}
           </Button>
         </div>
@@ -221,7 +229,7 @@ export default function FieldServiceTasksPage(): JSX.Element {
 
       <Toolbar
         onSearch={setQuery}
-        onCopilot={() => toast({ title: 'Copilot', description: 'KI-Analyse für Außendienst-Aufgaben wird in Kürze verfügbar.' })}
+        onCopilot={handleCopilot}
       />
 
       <Card className="p-4">

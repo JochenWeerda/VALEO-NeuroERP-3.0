@@ -46,13 +46,14 @@ const createAuftragsbestaetigungenConfig = (t: any, entityTypeLabel: string): Li
       sortable: true,
       filterable: true,
       render: (value) => {
-        const statusLabel = getStatusLabel(t, value as string, value as string)
+        const statusValue = String(value || '')
+        const statusLabel = getStatusLabel(t, statusValue, statusValue)
         const variants: Record<string, 'secondary' | 'default' | 'outline' | 'destructive'> = {
           OFFEN: 'secondary',
           GEPRUEFT: 'default',
           BESTAETIGT: 'outline'
         }
-        return <Badge variant={variants[value as string] || 'secondary'}>{statusLabel}</Badge>
+        return <Badge variant={variants[statusValue] || 'secondary'}>{statusLabel}</Badge>
       }
     },
     {
@@ -82,22 +83,7 @@ const createAuftragsbestaetigungenConfig = (t: any, entityTypeLabel: string): Li
       type: 'text'
     }
   ],
-  bulkActions: [
-    {
-      key: 'pruefen',
-      label: t('crud.actions.review'),
-      labelKey: 'crud.actions.review',
-      type: 'secondary',
-      onClick: () => toast({ title: 'Prüfen', description: 'Auftragsbestätigung wurde zur Prüfung markiert.' })
-    },
-    {
-      key: 'bestaetigen',
-      label: t('crud.actions.confirm'),
-      labelKey: 'crud.actions.confirm',
-      type: 'primary',
-      onClick: () => toast({ title: 'Bestätigt', description: 'Auftragsbestätigung wurde bestätigt.' })
-    }
-  ],
+  bulkActions: [],
   defaultSort: { field: 'createdAt', direction: 'desc' },
   pageSize: 25,
   api: {
@@ -114,6 +100,21 @@ const createAuftragsbestaetigungenConfig = (t: any, entityTypeLabel: string): Li
   actions: []
 })
 
+async function bulkConfirmationMutation(selectedItems: any[], action: 'review' | 'confirm', allowedStatuses: string[]) {
+  let ok = 0
+  const errors: string[] = []
+  const eligible = selectedItems.filter((item) => allowedStatuses.includes(String(item.status || '').toUpperCase()))
+  for (const item of eligible) {
+    try {
+      await apiClient.post(`/api/v1/einkauf/auftragsbestaetigungen/${encodeURIComponent(item.id)}/${action}`)
+      ok += 1
+    } catch (error: any) {
+      errors.push(`${item.bestaetigungsNummer || item.id}: ${error.response?.data?.detail ?? error.message}`)
+    }
+  }
+  return { ok, errors }
+}
+
 export default function AuftragsbestaetigungenListePage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -126,7 +127,42 @@ export default function AuftragsbestaetigungenListePage(): JSX.Element {
   const total = data.length
   const entityType = 'orderConfirmation'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Auftragsbestaetigung')
-  const auftragsbestaetigungenConfig = createAuftragsbestaetigungenConfig(t, entityTypeLabel)
+  const baseConfig = createAuftragsbestaetigungenConfig(t, entityTypeLabel)
+  const auftragsbestaetigungenConfig = useMemo<ListConfig>(() => ({
+    ...baseConfig,
+    bulkActions: [
+      {
+        key: 'pruefen',
+        label: t('crud.actions.review'),
+        labelKey: 'crud.actions.review',
+        type: 'secondary',
+        onClick: async (selectedItems: any[]) => {
+          const result = await bulkConfirmationMutation(selectedItems, 'review', ['OFFEN'])
+          queryClient.invalidateQueries({ queryKey: einkaufKeys.bestaetigungen() })
+          if (result.ok > 0) {
+            toast({ title: 'Auftragsbestaetigungen geprueft', description: `${result.ok} Auftragsbestaetigung(en) geprueft.` })
+            return
+          }
+          toast({ variant: 'destructive', title: 'Keine pruefbaren Bestaetigungen', description: result.errors[0] || 'Bitte offene Auftragsbestaetigungen markieren.' })
+        }
+      },
+      {
+        key: 'bestaetigen',
+        label: t('crud.actions.confirm'),
+        labelKey: 'crud.actions.confirm',
+        type: 'primary',
+        onClick: async (selectedItems: any[]) => {
+          const result = await bulkConfirmationMutation(selectedItems, 'confirm', ['OFFEN', 'GEPRUEFT'])
+          queryClient.invalidateQueries({ queryKey: einkaufKeys.bestaetigungen() })
+          if (result.ok > 0) {
+            toast({ title: 'Auftragsbestaetigungen bestaetigt', description: `${result.ok} Auftragsbestaetigung(en) bestaetigt.` })
+            return
+          }
+          toast({ variant: 'destructive', title: 'Keine bestaetigbaren Auftragsbestaetigungen', description: result.errors[0] || 'Bitte offene oder gepruefte Bestaetigungen markieren.' })
+        }
+      }
+    ],
+  }), [baseConfig, queryClient, t])
 
   const handleCreate = () => {
     navigate('/einkauf/auftragsbestaetigung/neu')

@@ -199,6 +199,75 @@ type CurrentPositionDetails = {
   artikelGefahrgutPunkte: number // Gefahrgut-Punkte pro Einheit (aus Artikel)
 }
 
+type ArticlePositionContext = {
+  article_id: string
+  article_number: string
+  article_name: string
+  stock: {
+    total_available: number
+    total_reserved: number
+    total_physical: number
+    by_warehouse: Array<{
+      warehouse_id: string
+      warehouse_name: string
+      available: number
+      reserved: number
+    }>
+  }
+  incoming_orders: {
+    total_quantity: number
+    orders: Array<{
+      order_number: string
+      quantity: number
+      expected_date: string | null
+    }>
+  }
+  batches: Array<{
+    batch_number: string
+    quantity: number
+    expiry_date: string | null
+    warehouse_id: string | null
+  }>
+  freely_available: number
+  customer_pricing: {
+    last_sale_price: number | null
+    last_sale_date: string | null
+    last_sale_quantity: number | null
+  }
+  purchase_pricing: {
+    avg_purchase_price_90d: number | null
+    last_purchase_price: number | null
+    last_purchase_date: string | null
+  }
+  current_price: {
+    list_price: number
+    source: string
+  }
+}
+
+function createEmptyCurrentPosition(posNr: number): CurrentPositionDetails {
+  return {
+    posNr,
+    artikelNr: '',
+    artikelId: null,
+    artikelBezeichnung: '',
+    artikelBezeichnung2: '',
+    mengeGebinde: 0,
+    einheit: '',
+    listenpreis: 0,
+    rabatt: 0,
+    einhPreis: 0,
+    betrag: 0,
+    mwstProzent: 19,
+    verfuegbar: 0,
+    kontraktNr: '',
+    skontierf: false,
+    fremdware: false,
+    artikelGewicht: 0,
+    artikelGefahrgutPunkte: 0,
+  }
+}
+
 export default function LieferscheinErfassungPage(): JSX.Element {
   const navigate = useNavigate()
   const { push } = useToast()
@@ -463,6 +532,9 @@ export default function LieferscheinErfassungPage(): JSX.Element {
     artikelGewicht: 0, // Gewicht pro Einheit
     artikelGefahrgutPunkte: 0, // Gefahrgut-Punkte pro Einheit
   })
+  const [positionContext, setPositionContext] = useState<ArticlePositionContext | null>(null)
+  const [isPositionContextLoading, setIsPositionContextLoading] = useState(false)
+  const [positionContextError, setPositionContextError] = useState<string | null>(null)
 
   const [showCustomerDialog, setShowCustomerDialog] = useState(false)
   const [showArticleDialog, setShowArticleDialog] = useState(false)
@@ -499,6 +571,21 @@ export default function LieferscheinErfassungPage(): JSX.Element {
   const customerId = state.customer?.id
   const { data: salesEligibility } = useCustomerSalesEligibility(customerId)
   const { data: schlaege = [] } = useSchlaege(customerId)
+
+  const formatQuantity = (value: number | null | undefined): string =>
+    Number(value ?? 0).toLocaleString('de-DE', { maximumFractionDigits: 2 })
+
+  const formatCurrency = (value: number | null | undefined): string =>
+    Number(value ?? 0).toLocaleString('de-DE', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })
+
+  const formatOptionalDate = (value: string | null | undefined): string => {
+    if (!value) return '—'
+    const parsed = new Date(value)
+    return Number.isNaN(parsed.getTime()) ? value : parsed.toLocaleDateString('de-DE')
+  }
 
   // Berechne Summen
   const summen = useMemo(() => {
@@ -1179,26 +1266,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
         positionen: [],
         aktivePositionIndex: null,
       })
-      setCurrentPosition({
-        posNr: 10,
-        artikelNr: '',
-        artikelId: null,
-        artikelBezeichnung: '',
-        artikelBezeichnung2: '',
-        mengeGebinde: 0,
-        einheit: '',
-        listenpreis: 0,
-        rabatt: 0,
-        einhPreis: 0,
-        betrag: 0,
-        mwstProzent: 19,
-        verfuegbar: 0,
-        kontraktNr: '',
-        skontierf: false,
-        fremdware: false,
-        artikelGewicht: 0,
-        artikelGefahrgutPunkte: 0,
-      })
+      setCurrentPosition(createEmptyCurrentPosition(10))
       setBestellungen([])
     } catch (error: any) {
       console.error('Print error:', error)
@@ -1233,13 +1301,7 @@ export default function LieferscheinErfassungPage(): JSX.Element {
         positionen: [],
         aktivePositionIndex: null,
       })
-      setCurrentPosition({
-        posNr: 10, artikelNr: '', artikelId: null, artikelBezeichnung: '',
-        artikelBezeichnung2: '', mengeGebinde: 0, einheit: '', listenpreis: 0,
-        rabatt: 0, einhPreis: 0, betrag: 0, mwstProzent: 19, verfuegbar: 0,
-        kontraktNr: '', skontierf: false, fremdware: false, artikelGewicht: 0,
-        artikelGefahrgutPunkte: 0,
-      })
+      setCurrentPosition(createEmptyCurrentPosition(10))
       setBestellungen([])
       setShowDeleteDialog(false)
       return
@@ -1265,6 +1327,58 @@ export default function LieferscheinErfassungPage(): JSX.Element {
       betrag,
     }))
   }, [currentPosition.listenpreis, currentPosition.rabatt, currentPosition.mengeGebinde])
+
+  useEffect(() => {
+    const articleId = currentPosition.artikelId
+
+    if (!articleId) {
+      setPositionContext(null)
+      setPositionContextError(null)
+      setIsPositionContextLoading(false)
+      setCurrentPosition((prev) => (prev.verfuegbar === 0 ? prev : { ...prev, verfuegbar: 0 }))
+      return
+    }
+
+    let cancelled = false
+
+    const loadPositionContext = async (): Promise<void> => {
+      setIsPositionContextLoading(true)
+      setPositionContextError(null)
+      try {
+        const response = await apiClient.get<ArticlePositionContext>(
+          `/api/v1/articles/${encodeURIComponent(articleId)}/position-context`,
+          {
+            params: {
+              customer_id: state.customer?.id,
+            },
+          },
+        )
+        if (cancelled) return
+        setPositionContext(response.data)
+        setCurrentPosition((prev) => ({
+          ...prev,
+          verfuegbar: Number(response.data.stock.total_available ?? 0),
+        }))
+      } catch (error: any) {
+        if (cancelled) return
+        console.warn('Positionskontext konnte nicht geladen werden:', error)
+        setPositionContext(null)
+        setPositionContextError(
+          error?.response?.data?.detail || error?.message || 'Positionskontext konnte nicht geladen werden.',
+        )
+      } finally {
+        if (!cancelled) {
+          setIsPositionContextLoading(false)
+        }
+      }
+    }
+
+    void loadPositionContext()
+
+    return () => {
+      cancelled = true
+    }
+  }, [currentPosition.artikelId, state.customer?.id])
 
   // Globale Shortcuts registrieren
   useGlobalShortcutsWithVoice({
@@ -2275,6 +2389,131 @@ export default function LieferscheinErfassungPage(): JSX.Element {
         </Card>
 
         {/* PSM-Dienstleistung: Schlag-Auswahl für Feldbuch */}
+        {(currentPosition.artikelId || isPositionContextLoading || positionContextError) && (
+          <Card className="mb-4 border-slate-200 bg-slate-50/70 p-4">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-sm font-semibold">Artikel-Kontext</h2>
+                <p className="text-xs text-muted-foreground">
+                  Bestand, Zufuhr, Chargen und Preisverlauf fuer die aktuelle Positionsauswahl.
+                </p>
+              </div>
+              {positionContext && (
+                <div className="text-right text-xs">
+                  <div className="font-medium">{positionContext.article_number}</div>
+                  <div className="text-muted-foreground">{positionContext.article_name}</div>
+                </div>
+              )}
+            </div>
+
+            {isPositionContextLoading && (
+              <div className="mt-3 grid gap-3 md:grid-cols-4">
+                {Array.from({ length: 4 }).map((_, idx) => (
+                  <div key={idx} className="h-20 animate-pulse rounded border bg-white" />
+                ))}
+              </div>
+            )}
+
+            {!isPositionContextLoading && positionContextError && (
+              <div className="mt-3 rounded border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                {positionContextError}
+              </div>
+            )}
+
+            {!isPositionContextLoading && positionContext && (
+              <div className="mt-3 space-y-4">
+                <div className="grid gap-3 md:grid-cols-4">
+                  <div className="rounded border bg-white p-3">
+                    <div className="text-xs text-muted-foreground">Verfuegbar</div>
+                    <div className="text-lg font-semibold">
+                      {formatQuantity(positionContext.stock.total_available)} {currentPosition.einheit}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      reserviert {formatQuantity(positionContext.stock.total_reserved)}
+                    </div>
+                  </div>
+                  <div className="rounded border bg-white p-3">
+                    <div className="text-xs text-muted-foreground">Frei verkaeuflich</div>
+                    <div className="text-lg font-semibold">
+                      {formatQuantity(positionContext.freely_available)} {currentPosition.einheit}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      physisch {formatQuantity(positionContext.stock.total_physical)}
+                    </div>
+                  </div>
+                  <div className="rounded border bg-white p-3">
+                    <div className="text-xs text-muted-foreground">Letzter VK beim Kunden</div>
+                    <div className="text-lg font-semibold">
+                      {positionContext.customer_pricing.last_sale_price !== null
+                        ? `${formatCurrency(positionContext.customer_pricing.last_sale_price)} EUR`
+                        : '—'}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {formatOptionalDate(positionContext.customer_pricing.last_sale_date)}
+                    </div>
+                  </div>
+                  <div className="rounded border bg-white p-3">
+                    <div className="text-xs text-muted-foreground">Einkauf / Liste</div>
+                    <div className="text-lg font-semibold">
+                      {formatCurrency(positionContext.purchase_pricing.avg_purchase_price_90d)} / {formatCurrency(positionContext.current_price.list_price)} EUR
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      letzter EK {formatCurrency(positionContext.purchase_pricing.last_purchase_price)}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid gap-4 lg:grid-cols-3">
+                  <div className="rounded border bg-white p-3">
+                    <div className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">Lagerorte</div>
+                    <div className="space-y-2 text-xs">
+                      {positionContext.stock.by_warehouse.length > 0 ? positionContext.stock.by_warehouse.map((warehouse) => (
+                        <div key={warehouse.warehouse_id} className="rounded border border-slate-100 px-2 py-1">
+                          <div className="font-medium">{warehouse.warehouse_name}</div>
+                          <div className="text-muted-foreground">
+                            verfuegbar {formatQuantity(warehouse.available)} · reserviert {formatQuantity(warehouse.reserved)}
+                          </div>
+                        </div>
+                      )) : <div className="text-muted-foreground">Keine Lagerbestaende gefunden.</div>}
+                    </div>
+                  </div>
+
+                  <div className="rounded border bg-white p-3">
+                    <div className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">Zufuhr / offene Bestellungen</div>
+                    <div className="space-y-2 text-xs">
+                      <div className="font-medium">
+                        Gesamt {formatQuantity(positionContext.incoming_orders.total_quantity)} {currentPosition.einheit}
+                      </div>
+                      {positionContext.incoming_orders.orders.length > 0 ? positionContext.incoming_orders.orders.slice(0, 4).map((order) => (
+                        <div key={`${order.order_number}-${order.expected_date ?? 'n/a'}`} className="rounded border border-slate-100 px-2 py-1">
+                          <div className="font-medium">{order.order_number}</div>
+                          <div className="text-muted-foreground">
+                            {formatQuantity(order.quantity)} · ETA {formatOptionalDate(order.expected_date)}
+                          </div>
+                        </div>
+                      )) : <div className="text-muted-foreground">Keine offenen Bestellungen fuer diesen Artikel.</div>}
+                    </div>
+                  </div>
+
+                  <div className="rounded border bg-white p-3">
+                    <div className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">Chargen</div>
+                    <div className="space-y-2 text-xs">
+                      {positionContext.batches.length > 0 ? positionContext.batches.slice(0, 5).map((batch) => (
+                        <div key={`${batch.batch_number}-${batch.warehouse_id ?? 'none'}`} className="rounded border border-slate-100 px-2 py-1">
+                          <div className="font-medium">{batch.batch_number}</div>
+                          <div className="text-muted-foreground">
+                            {formatQuantity(batch.quantity)} · MHD {formatOptionalDate(batch.expiry_date)}
+                          </div>
+                        </div>
+                      )) : <div className="text-muted-foreground">Keine verfuegbaren Chargen gefunden.</div>}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </Card>
+        )}
+
         {schlaege.length > 0 && (
           <Card className="mb-4 p-4 border-amber-200 bg-amber-50">
             <h2 className="mb-2 font-semibold text-sm text-amber-800">PSM-Dienstleistung → Feldbuch</h2>

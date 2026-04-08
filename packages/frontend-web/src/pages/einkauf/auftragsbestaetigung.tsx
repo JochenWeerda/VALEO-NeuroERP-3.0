@@ -7,6 +7,7 @@ import { MaskConfig } from '@/components/mask-builder/types'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { toast } from '@/hooks/use-toast'
+import { apiClient } from '@/lib/api-client'
 
 const createAuftragsbestaetigungConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
@@ -26,12 +27,7 @@ const createAuftragsbestaetigungConfig = (t: any, entityTypeLabel: string): Mask
           displayField: 'purchaseOrderNumber',
           valueField: 'id'
         },
-        {
-          name: 'bestaetigungsNummer',
-          label: t('crud.fields.confirmationNumber'),
-          type: 'text',
-          required: true
-        },
+        { name: 'bestaetigungsNummer', label: t('crud.fields.confirmationNumber'), type: 'text', required: true },
         {
           name: 'status',
           label: t('crud.fields.status'),
@@ -54,23 +50,9 @@ const createAuftragsbestaetigungConfig = (t: any, entityTypeLabel: string): Mask
           label: t('crud.fields.dateDeviations'),
           type: 'table',
           columns: [
-            {
-              key: 'positionId',
-              label: t('crud.fields.item'),
-              type: 'text',
-              required: true
-            },
-            {
-              key: 'bestaetigterTermin',
-              label: t('crud.fields.confirmedDate'),
-              type: 'date',
-              required: true
-            },
-            {
-              key: 'abweichung',
-              label: t('crud.fields.deviation'),
-              type: 'text'
-            }
+            { key: 'positionId', label: t('crud.fields.item'), type: 'text', required: true },
+            { key: 'bestaetigterTermin', label: t('crud.fields.confirmedDate'), type: 'date', required: true },
+            { key: 'abweichung', label: t('crud.fields.deviation'), type: 'text' }
           ] as any,
           helpText: t('crud.tooltips.fields.dateDeviations')
         }
@@ -85,29 +67,10 @@ const createAuftragsbestaetigungConfig = (t: any, entityTypeLabel: string): Mask
           label: t('crud.fields.priceChanges'),
           type: 'table',
           columns: [
-            {
-              key: 'positionId',
-              label: t('crud.fields.item'),
-              type: 'text',
-              required: true
-            },
-            {
-              key: 'urspruenglicherPreis',
-              label: t('crud.fields.originalPrice'),
-              type: 'number',
-              required: true
-            },
-            {
-              key: 'neuerPreis',
-              label: t('crud.fields.newPrice'),
-              type: 'number',
-              required: true
-            },
-            {
-              key: 'begruendung',
-              label: t('crud.fields.reason'),
-              type: 'text'
-            }
+            { key: 'positionId', label: t('crud.fields.item'), type: 'text', required: true },
+            { key: 'urspruenglicherPreis', label: t('crud.fields.originalPrice'), type: 'number', required: true },
+            { key: 'neuerPreis', label: t('crud.fields.newPrice'), type: 'number', required: true },
+            { key: 'begruendung', label: t('crud.fields.reason'), type: 'text' }
           ] as any,
           helpText: t('crud.tooltips.fields.priceDeviations')
         }
@@ -127,18 +90,8 @@ const createAuftragsbestaetigungConfig = (t: any, entityTypeLabel: string): Mask
     }
   ],
   actions: [
-    {
-      key: 'pruefen',
-      label: t('crud.actions.review'),
-      type: 'secondary',
-      onClick: () => toast({ title: 'Prüfen', description: 'Auftragsbestätigung wurde zur Prüfung markiert.' })
-    },
-    {
-      key: 'bestaetigen',
-      label: t('crud.actions.confirm'),
-      type: 'primary',
-      onClick: () => toast({ title: 'Bestätigt', description: 'Auftragsbestätigung wurde bestätigt.' })
-    }
+    { key: 'pruefen', label: t('crud.actions.review'), type: 'secondary' },
+    { key: 'bestaetigen', label: t('crud.actions.confirm'), type: 'primary' }
   ],
   api: {
     baseUrl: '/api/v1/einkauf/auftragsbestaetigungen',
@@ -159,7 +112,7 @@ export default function AuftragsbestaetigungPage(): JSX.Element {
   const { id } = useParams<{ id: string }>()
   const [loading, setLoading] = useState(false)
   const entityType = 'orderConfirmation'
-  const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Auftragsbestätigung')
+  const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Auftragsbestaetigung')
   const auftragsbestaetigungConfig = createAuftragsbestaetigungConfig(t, entityTypeLabel)
 
   const { data, saveData } = useMaskData({
@@ -194,6 +147,26 @@ export default function AuftragsbestaetigungPage(): JSX.Element {
         onSave={handleSave}
         onCancel={handleCancel}
         isLoading={loading}
+        onAction={async (actionKey) => {
+          const actionMap: Record<string, string> = {
+            pruefen: 'review',
+            bestaetigen: 'confirm',
+          }
+          if (!id || !actionMap[actionKey]) {
+            toast({ title: 'Aktion nicht moeglich', description: 'Die Auftragsbestaetigung muss zuerst gespeichert werden.', variant: 'destructive' })
+            return
+          }
+          setLoading(true)
+          try {
+            await apiClient.post(`/api/v1/einkauf/auftragsbestaetigungen/${encodeURIComponent(id)}/${actionMap[actionKey]}`)
+            toast({ title: 'Aktion ausgefuehrt', description: `Auftragsbestaetigung ${id} wurde aktualisiert.` })
+            navigate('/einkauf/auftragsbestaetigungen')
+          } catch (error: any) {
+            toast({ title: 'Aktion fehlgeschlagen', description: error.response?.data?.detail || error.message, variant: 'destructive' })
+          } finally {
+            setLoading(false)
+          }
+        }}
       />
     </>
   )

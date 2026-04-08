@@ -67,14 +67,16 @@ const createAngeboteConfig = (t: any, entityTypeLabel: string): ListConfig => ({
       sortable: true,
       filterable: true,
       render: (value) => {
-        const statusLabel = getStatusLabel(t, value as string, value as string)
+        const statusValue = String(value || '')
+        const statusLabel = getStatusLabel(t, statusValue, statusValue)
         const variants: Record<string, 'secondary' | 'default' | 'outline' | 'destructive'> = {
           ERFASST: 'secondary',
           GEPRUEFT: 'default',
           GENEHMIGT: 'outline',
+          IN_BESTELLUNG: 'outline',
           ABGELEHNT: 'destructive'
         }
-        return <Badge variant={variants[value as string] || 'secondary'}>{statusLabel}</Badge>
+        return <Badge variant={variants[statusValue] || 'secondary'}>{statusLabel}</Badge>
       }
     },
     {
@@ -107,6 +109,7 @@ const createAngeboteConfig = (t: any, entityTypeLabel: string): ListConfig => ({
         { value: 'ERFASST', label: t('status.recorded'), labelKey: 'status.recorded' },
         { value: 'GEPRUEFT', label: t('status.reviewed'), labelKey: 'status.reviewed' },
         { value: 'GENEHMIGT', label: t('status.approved'), labelKey: 'status.approved' },
+        { value: 'IN_BESTELLUNG', label: 'In Bestellung' },
         { value: 'ABGELEHNT', label: t('status.rejected'), labelKey: 'status.rejected' }
       ]
     },
@@ -123,36 +126,7 @@ const createAngeboteConfig = (t: any, entityTypeLabel: string): ListConfig => ({
       type: 'text'
     }
   ],
-  bulkActions: [
-    {
-      key: 'pruefen',
-      label: t('crud.actions.review'),
-      labelKey: 'crud.actions.review',
-      type: 'secondary',
-      onClick: () => toast({ title: 'Prüfen', description: 'Angebot wurde zur Prüfung markiert.' })
-    },
-    {
-      key: 'genehmigen',
-      label: t('crud.actions.approve'),
-      labelKey: 'crud.actions.approve',
-      type: 'primary',
-      onClick: () => toast({ title: 'Genehmigen', description: 'Angebot wurde genehmigt.' })
-    },
-    {
-      key: 'ablehnen',
-      label: t('crud.actions.reject'),
-      labelKey: 'crud.actions.reject',
-      type: 'danger',
-      onClick: () => toast({ title: 'Ablehnen', description: 'Angebot wurde abgelehnt.', variant: 'destructive' })
-    },
-    {
-      key: 'inBestellung',
-      label: t('crud.actions.convertToOrder'),
-      labelKey: 'crud.actions.convertToOrder',
-      type: 'secondary',
-      onClick: () => toast({ title: 'In Bestellung', description: 'Angebot wurde in eine Bestellung umgewandelt.' })
-    }
-  ],
+  bulkActions: [],
   defaultSort: { field: 'createdAt', direction: 'desc' },
   pageSize: 25,
   api: {
@@ -169,6 +143,34 @@ const createAngeboteConfig = (t: any, entityTypeLabel: string): ListConfig => ({
   actions: []
 })
 
+async function bulkOfferMutation(
+  selectedItems: any[],
+  endpointSuffix: 'review' | 'approve' | 'reject' | 'convert-to-order',
+  allowedStatuses: string[],
+): Promise<{ ok: number; errors: string[]; createdOrderId?: string; createdOrderNumber?: string }> {
+  let ok = 0
+  const errors: string[] = []
+  let createdOrderId: string | undefined
+  let createdOrderNumber: string | undefined
+  const eligible = selectedItems.filter((item) => allowedStatuses.includes(String(item.status || '').toUpperCase()))
+
+  for (const item of eligible) {
+    try {
+      const response = await apiClient.post<{
+        purchaseOrderId?: string
+        purchaseOrderNumber?: string
+      }>(`/api/v1/einkauf/angebote/${encodeURIComponent(item.id)}/${endpointSuffix}`)
+      createdOrderId = createdOrderId || response.data?.purchaseOrderId
+      createdOrderNumber = createdOrderNumber || response.data?.purchaseOrderNumber
+      ok += 1
+    } catch (error: any) {
+      errors.push(`${item.angebotNummer || item.id}: ${error.response?.data?.detail ?? error.message}`)
+    }
+  }
+
+  return { ok, errors, createdOrderId, createdOrderNumber }
+}
+
 export default function AngeboteListePage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -182,7 +184,80 @@ export default function AngeboteListePage(): JSX.Element {
   const total = data.length
   const entityType = 'purchaseOffer'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Angebot')
-  const angeboteConfig = createAngeboteConfig(t, entityTypeLabel)
+  const baseConfig = createAngeboteConfig(t, entityTypeLabel)
+  const angeboteConfig = useMemo<ListConfig>(() => ({
+    ...baseConfig,
+    bulkActions: [
+      {
+        key: 'pruefen',
+        label: t('crud.actions.review'),
+        labelKey: 'crud.actions.review',
+        type: 'secondary',
+        onClick: async (selectedItems: any[]) => {
+          const result = await bulkOfferMutation(selectedItems, 'review', ['ERFASST', 'OFFEN', 'ENTWURF'])
+          queryClient.invalidateQueries({ queryKey: einkaufKeys.angebote() })
+          if (result.ok > 0) {
+            toast({ title: 'Angebote geprueft', description: `${result.ok} Angebot(e) auf GEPRUEFT gesetzt.` })
+            return
+          }
+          toast({ variant: 'destructive', title: 'Keine pruefbaren Angebote', description: result.errors[0] || 'Bitte Angebote im Status Erfasst/Entwurf markieren.' })
+        }
+      },
+      {
+        key: 'genehmigen',
+        label: t('crud.actions.approve'),
+        labelKey: 'crud.actions.approve',
+        type: 'primary',
+        onClick: async (selectedItems: any[]) => {
+          const result = await bulkOfferMutation(selectedItems, 'approve', ['GEPRUEFT', 'GENEHMIGT'])
+          queryClient.invalidateQueries({ queryKey: einkaufKeys.angebote() })
+          if (result.ok > 0) {
+            toast({ title: 'Angebote genehmigt', description: `${result.ok} Angebot(e) freigegeben.` })
+            return
+          }
+          toast({ variant: 'destructive', title: 'Keine genehmigbaren Angebote', description: result.errors[0] || 'Bitte gepruefte Angebote markieren.' })
+        }
+      },
+      {
+        key: 'ablehnen',
+        label: t('crud.actions.reject'),
+        labelKey: 'crud.actions.reject',
+        type: 'danger',
+        onClick: async (selectedItems: any[]) => {
+          const result = await bulkOfferMutation(selectedItems, 'reject', ['ERFASST', 'GEPRUEFT', 'GENEHMIGT', 'OFFEN'])
+          queryClient.invalidateQueries({ queryKey: einkaufKeys.angebote() })
+          if (result.ok > 0) {
+            toast({ title: 'Angebote abgelehnt', description: `${result.ok} Angebot(e) auf ABGELEHNT gesetzt.`, variant: 'destructive' })
+            return
+          }
+          toast({ variant: 'destructive', title: 'Keine ablehnbaren Angebote', description: result.errors[0] || 'Bitte offene oder gepruefte Angebote markieren.' })
+        }
+      },
+      {
+        key: 'inBestellung',
+        label: t('crud.actions.convertToOrder'),
+        labelKey: 'crud.actions.convertToOrder',
+        type: 'secondary',
+        onClick: async (selectedItems: any[]) => {
+          const result = await bulkOfferMutation(selectedItems, 'convert-to-order', ['GEPRUEFT', 'GENEHMIGT'])
+          queryClient.invalidateQueries({ queryKey: einkaufKeys.angebote() })
+          if (result.ok > 0) {
+            toast({
+              title: 'Bestellungen erzeugt',
+              description: result.createdOrderNumber
+                ? `${result.ok} Bestellung(en) erzeugt. Erste Bestellung: ${result.createdOrderNumber}.`
+                : `${result.ok} Bestellung(en) erzeugt.`,
+            })
+            if (result.ok === 1 && result.createdOrderId) {
+              navigate(`/einkauf/bestellungen/${encodeURIComponent(result.createdOrderId)}`)
+            }
+            return
+          }
+          toast({ variant: 'destructive', title: 'Keine bestellbaren Angebote', description: result.errors[0] || 'Bitte gepruefte oder genehmigte Angebote markieren.' })
+        }
+      }
+    ],
+  }), [baseConfig, navigate, queryClient, t])
 
   const handleCreate = () => {
     navigate('/einkauf/angebot/neu')

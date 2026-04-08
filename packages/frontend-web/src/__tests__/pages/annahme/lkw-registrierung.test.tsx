@@ -82,8 +82,8 @@ describe('LKWRegistrierungPage', () => {
     expect(scanButtons.length).toBeGreaterThanOrEqual(1)
     fireEvent.click(scanButtons[0])
     expect(screen.getByRole('dialog')).toBeInTheDocument()
-    expect(screen.getByText('Scan – Kennzeichen / Lieferschein')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Schließen' })).toBeInTheDocument()
+    expect(screen.getByText('Scan - Kennzeichen / Lieferschein')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Schliessen' })).toBeInTheDocument()
   })
 
   it('blockiert Weiter im ersten Wizard-Schritt ohne Kennzeichen', () => {
