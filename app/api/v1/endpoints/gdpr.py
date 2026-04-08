@@ -10,7 +10,8 @@ import logging
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.core.rbac import require_role, Role, get_tenant_id
+from app.core.rbac import require_role, Role
+from app.core.tenant import get_tenant_id
 from fastapi import Request
 
 logger = logging.getLogger(__name__)
@@ -22,13 +23,13 @@ router = APIRouter()
 async def export_user_data(
     user_id: str,
     request: Request,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ) -> Dict[str, Any]:
     """
     GDPR Article 15: Right to Access
     Export all data for a user.
     """
-    tenant_id = get_tenant_id(request)
     
     logger.info(f"GDPR data-export requested for user: {user_id}")
     
@@ -109,13 +110,12 @@ async def delete_user_data(
     user_id: str,
     request: Request,
     db: Session = Depends(get_db),
-    _auth: bool = Depends(require_role(Role.ADMIN))
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """
     GDPR Article 17: Right to Erasure
     Delete all user data (with anonymization for audit-trail).
     """
-    tenant_id = get_tenant_id(request)
     
     logger.warning(f"GDPR deletion requested for user: {user_id}")
     
@@ -156,6 +156,8 @@ async def delete_user_data(
         
         logger.info(f"GDPR deletion completed for {user_id} (anonymized)")
         
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"GDPR deletion failed: {e}", exc_info=True)
         db.rollback()
@@ -169,13 +171,13 @@ async def delete_user_data(
 async def export_portable_data(
     user_id: str,
     request: Request,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ) -> Dict[str, Any]:
     """
     GDPR Article 20: Right to Data Portability
     Export data in structured, machine-readable format.
     """
-    tenant_id = get_tenant_id(request)
     
     logger.info(f"GDPR portable-export requested for user: {user_id}")
     

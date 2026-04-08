@@ -1265,7 +1265,11 @@ Alle 6 Router registriert in `app/api/v1/api.py` unter `/api/v1/neuro/*`. Commit
 ## PCP-013 bis PCP-018
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Das Agent Control Center auf produktnaehere Ticket-, stale-work-, chain-of-command- und Revisionsfaehigkeit ausbauen.
 **Enthaelt:** `PCP-013` Agent Control Center, `PCP-014` Ticket-zentrierte Agentenarbeit, `PCP-015` Chain Of Command Surface, `PCP-016` Config Revisions, `PCP-017` Stale Work And Review States, `PCP-018` Focused Mobile Ops.
 **Dateibesitz:** `app/agents/*`, `app/api/v1/endpoints/agents.py`, `packages/frontend-web/src/pages/admin/agenten-integration.tsx`, `packages/frontend-web/src/__tests__/pages/admin/agenten-integration.test.tsx`, Agent-Ops-Doku unter `docs/architecture` und `docs/workflows`.
+**Erledigt:** `app/agents/agent_ops.py` fuehrt jetzt stale-work-/review-Hydration, fachliche Ticket-Arbeitsobjekte, sichtbare Ownership-/Eskalationsketten und Config-Revisions fuer Budgets, Heartbeats, Profile und Skill-Packs; `app/api/v1/endpoints/agents.py` surfact dafuer `GET /api/v1/agents/neuroassist/ops/control-center`, `GET /api/v1/agents/neuroassist/ops/config-revisions` sowie Update-Pfade fuer Budgets, Heartbeats, Profile und Skill-Packs; `packages/frontend-web/src/pages/admin/agenten-integration.tsx` zeigt jetzt `Agent Control Center`, `Ticket-Centered Agent Work`, `Chain Of Command`, `Config Versions` und eine fokussierte Mobile-Ops-Surface mit nur `Freigeben`, `Pausieren`, `Eskalieren` und Budgetwarnung.
+**Tests / Checks:** `pytest tests/test_neuroassist_service.py tests/test_agents_neuroassist_api.py -q --no-cov`; `pnpm --dir packages/frontend-web exec vitest run src/__tests__/pages/admin/agenten-integration.test.tsx`; `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`; `python -m py_compile app/agents/agent_ops.py app/agents/neuroassist_service.py app/api/v1/endpoints/agents.py tests/test_neuroassist_service.py tests/test_agents_neuroassist_api.py`; `node scripts/docs-governance-check.cjs`
+**Offene Risiken:** Die Agent-Ops-Runtime bleibt weiterhin bewusst in-memory; fuer produktive Mehrinstanz-/Historisierungspfade waere spaeter ein persistentes Modell fuer Tickets, Revisions und Interventionen sinnvoll.
+**Naechster konkreter Schritt:** Falls gewuenscht, Revisions-/Ticket-Historie und Interventionen aus der In-Memory-Runtime in persistente Read-Models ueberfuehren oder die Control-Center-Surface fachlich auf weitere Agentfamilien ausrollen.

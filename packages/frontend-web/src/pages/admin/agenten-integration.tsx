@@ -223,6 +223,153 @@ type SuperglueRefreshResult = {
   tool_count: number
 }
 
+type AgentOpsOverview = {
+  tenant_id: string
+  schema_version: number
+  budget_total_cents: number
+  spent_total_cents: number
+  remaining_total_cents: number
+  blocked_budget_count: number
+  monthly_run_count: number
+  budget_summaries: Array<{
+    capability_key: string
+    monthly_budget_cents: number
+    spent_cents: number
+    remaining_cents: number
+    blocked: boolean
+  }>
+  heartbeats: Array<{
+    capability_key: string
+    cadence: string
+    enabled: boolean
+    last_status?: string | null
+  }>
+  roles: Array<{
+    role_key: string
+    reports_to?: string | null
+    owns_capabilities: string[]
+    can_intervene?: boolean
+    manages_roles?: string[]
+  }>
+  profiles?: Array<{
+    profile_key: string
+    owner_role: string
+    escalation_role: string
+    review_sla_hours: number
+    stale_after_hours: number
+    allowed_actions: string[]
+    version: number
+  }>
+  goals: Array<{
+    goal_key: string
+    title: string
+    active_ticket_count: number
+  }>
+  open_tickets: Array<{
+    ticket_id: string
+    capability_key: string
+    status: string
+    latest_summary: string
+    work_item_id?: string | null
+    work_item_title?: string | null
+    owner_role?: string | null
+    escalation_role?: string | null
+    allowed_actions?: string[]
+    blocker_reasons?: string[]
+    requires_review?: boolean
+    is_stale?: boolean
+    age_minutes?: number
+  }>
+}
+
+type AgentOpsDashboard = {
+  tenant_id: string
+  budget_health: string
+  active_ticket_count: number
+  intervention_count: number
+  blocked_capabilities: string[]
+  top_budget_pressures: Array<{
+    capability_key: string
+    remaining_cents: number
+  }>
+  recent_interventions: Array<{
+    intervention_id: string
+    ticket_id: string
+    action: string
+    resulting_status: string
+    requested_by: string
+  }>
+  stale_work_count?: number
+  review_queue_count?: number
+  open_blocker_count?: number
+  mobile_actions: string[]
+}
+
+type AgentIntervention = {
+  intervention_id: string
+  ticket_id: string
+  action: string
+  resulting_status: string
+  requested_by: string
+  note?: string | null
+}
+
+type AgentTemplateExport = {
+  tenant_id: string
+  template_key: string
+  exported_at: string
+  budgets: Array<{ capability_key: string; monthly_budget_cents: number }>
+  heartbeats: Array<{ capability_key: string; cadence: string }>
+  roles: Array<{ role_key: string }>
+  goals: Array<{ goal_key: string }>
+  skill_packs: Array<{ skill_pack_key: string; display_name: string }>
+}
+
+type AgentSkillPack = {
+  skill_pack_key: string
+  display_name: string
+  role_key: string
+  version?: number
+  capability_keys: string[]
+  skills: string[]
+  prompt_contracts: string[]
+}
+
+type AgentMobileOpsOverview = {
+  tenant_id: string
+  urgent_ticket_count: number
+  blocked_budget_count: number
+  pending_intervention_count: number
+  review_ticket_count?: number
+  top_actions: string[]
+}
+
+type AgentConfigRevision = {
+  revision_id: string
+  config_type: string
+  config_key: string
+  version: number
+  changed_by: string
+  summary: string
+}
+
+type AgentControlCenter = {
+  tenant_id: string
+  dashboard: AgentOpsDashboard
+  tickets: AgentOpsOverview['open_tickets']
+  chain_of_command: AgentOpsOverview['roles']
+  config_revisions: AgentConfigRevision[]
+  mobile_overview: AgentMobileOpsOverview
+}
+
+type AgentPluginBoundaryReview = {
+  tenant_id: string
+  schema_version: number
+  approved_patterns: string[]
+  forbidden_patterns: string[]
+  rationale: string[]
+}
+
 const API_BASE = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || ''
 const BACKEND_ORIGIN = API_BASE || (typeof window !== 'undefined' ? window.location.origin : '')
 
@@ -287,6 +434,9 @@ function downloadTextArtifact(filename: string, content: string, mimeType = 'tex
 }
 
 export default function AgentenIntegrationPage(): JSX.Element {
+  const stale5m = 5 * 60 * 1000
+
+  // ── Overview: always enabled (small payloads) ──
   const manifestQuery = useQuery({
     queryKey: ['admin', 'agent-manifest'],
     queryFn: async () => (await apiClient.get<AgentManifest>('/api/v1/admin/agent-manifest')).data,
@@ -295,49 +445,106 @@ export default function AgentenIntegrationPage(): JSX.Element {
     queryKey: ['agent', 'command-catalog'],
     queryFn: async () => (await apiClient.get<CommandCatalogItem[]>('/api/v1/commands/catalog')).data,
   })
+
+  // ── Idempotency ──
   const idempotencyOverviewQuery = useQuery({
     queryKey: ['agent', 'idempotency-overview'],
     queryFn: async () => (await apiClient.get<IdempotencyOverview>('/api/v1/process/actions/idempotency/overview')).data,
+    staleTime: stale5m,
   })
+
+  // ── Superglue ──
   const superglueStatusQuery = useQuery({
     queryKey: ['agent', 'superglue-status'],
     queryFn: async () => (await apiClient.get<SuperglueStatus>('/api/v1/agent/integrations/providers/superglue/sync-status')).data,
+    staleTime: stale5m,
   })
   const superglueConfigQuery = useQuery({
     queryKey: ['agent', 'superglue-config'],
     queryFn: async () => (await apiClient.get<SuperglueConfigSummary>('/api/v1/agent/integrations/providers/superglue/config-summary')).data,
+    staleTime: stale5m,
   })
   const superglueQuarantineQuery = useQuery({
     queryKey: ['agent', 'superglue-quarantine'],
     queryFn: async () => (await apiClient.get<SuperglueQuarantineSummary>('/api/v1/agent/integrations/providers/superglue/quarantine')).data,
+    staleTime: stale5m,
   })
   const superglueHistoryQuery = useQuery({
     queryKey: ['agent', 'superglue-history'],
     queryFn: async () => (await apiClient.get<SuperglueSyncHistorySummary>('/api/v1/agent/integrations/providers/superglue/sync-history')).data,
+    staleTime: stale5m,
   })
   const superglueJournalQuery = useQuery({
     queryKey: ['agent', 'superglue-journal'],
     queryFn: async () => (await apiClient.get<SuperglueExecutionJournalSummary>('/api/v1/agent/integrations/providers/superglue/execution-journal')).data,
+    staleTime: stale5m,
   })
   const superglueAdminOverviewQuery = useQuery({
     queryKey: ['agent', 'superglue-admin-overview'],
     queryFn: async () => (await apiClient.get<SuperglueAdminOverview>('/api/v1/agent/integrations/providers/superglue/admin-overview', { params: { tenant_id: 'default' } })).data,
+    staleTime: stale5m,
   })
   const superglueMonitoringQuery = useQuery({
     queryKey: ['agent', 'superglue-monitoring'],
     queryFn: async () => (await apiClient.get<SuperglueMonitoringSummary>('/api/v1/agent/integrations/providers/superglue/monitoring')).data,
+    staleTime: stale5m,
   })
   const superglueLiveReadinessQuery = useQuery({
     queryKey: ['agent', 'superglue-live-readiness'],
     queryFn: async () => (await apiClient.get<SuperglueLiveReadiness>('/api/v1/agent/integrations/providers/superglue/live-readiness', { params: { tenant_id: 'default' } })).data,
+    staleTime: stale5m,
   })
   const superglueOnboardingPackQuery = useQuery({
     queryKey: ['agent', 'superglue-onboarding-pack'],
     queryFn: async () => (await apiClient.get<SuperglueOnboardingPack>('/api/v1/agent/integrations/providers/superglue/onboarding-pack', { params: { tenant_id: 'default' } })).data,
+    staleTime: stale5m,
   })
   const superglueDomainRolloutsQuery = useQuery({
     queryKey: ['agent', 'superglue-domain-rollouts'],
     queryFn: async () => (await apiClient.get<SuperglueDomainRolloutSummary>('/api/v1/agent/integrations/providers/superglue/domain-rollouts', { params: { tenant_id: 'default' } })).data,
+    staleTime: stale5m,
+  })
+
+  // ── Agent Ops ──
+  const agentOpsOverviewQuery = useQuery({
+    queryKey: ['agent', 'ops-overview'],
+    queryFn: async () => (await apiClient.get<AgentOpsOverview>('/api/v1/agents/neuroassist/ops/overview', { params: { tenant_id: 'default' } })).data,
+    staleTime: stale5m,
+  })
+  const agentOpsDashboardQuery = useQuery({
+    queryKey: ['agent', 'ops-dashboard'],
+    queryFn: async () => (await apiClient.get<AgentOpsDashboard>('/api/v1/agents/neuroassist/ops/dashboard', { params: { tenant_id: 'default' } })).data,
+    staleTime: stale5m,
+  })
+  const agentInterventionsQuery = useQuery({
+    queryKey: ['agent', 'ops-interventions'],
+    queryFn: async () => (await apiClient.get<AgentIntervention[]>('/api/v1/agents/neuroassist/ops/interventions', { params: { tenant_id: 'default' } })).data,
+    staleTime: stale5m,
+  })
+  const agentTemplateQuery = useQuery({
+    queryKey: ['agent', 'ops-template-export'],
+    queryFn: async () => (await apiClient.get<AgentTemplateExport>('/api/v1/agents/neuroassist/ops/templates/export', { params: { tenant_id: 'default', template_key: 'default' } })).data,
+    staleTime: stale5m,
+  })
+  const agentSkillPacksQuery = useQuery({
+    queryKey: ['agent', 'ops-skill-packs'],
+    queryFn: async () => (await apiClient.get<AgentSkillPack[]>('/api/v1/agents/neuroassist/ops/skill-packs', { params: { tenant_id: 'default' } })).data,
+    staleTime: stale5m,
+  })
+  const agentMobileOverviewQuery = useQuery({
+    queryKey: ['agent', 'ops-mobile-overview'],
+    queryFn: async () => (await apiClient.get<AgentMobileOpsOverview>('/api/v1/agents/neuroassist/ops/mobile-overview', { params: { tenant_id: 'default' } })).data,
+    staleTime: stale5m,
+  })
+  const agentPluginBoundaryQuery = useQuery({
+    queryKey: ['agent', 'ops-plugin-boundary'],
+    queryFn: async () => (await apiClient.get<AgentPluginBoundaryReview>('/api/v1/agents/neuroassist/ops/plugin-boundary-review', { params: { tenant_id: 'default' } })).data,
+    staleTime: stale5m,
+  })
+  const agentControlCenterQuery = useQuery({
+    queryKey: ['agent', 'control-center'],
+    queryFn: async () => (await apiClient.get<AgentControlCenter>('/api/v1/agents/neuroassist/ops/control-center', { params: { tenant_id: 'default' } })).data,
+    staleTime: stale5m,
   })
 
   const downloadManifest = (): void => {
@@ -384,41 +591,39 @@ export default function AgentenIntegrationPage(): JSX.Element {
     )
   }
 
-  if (
-    manifestQuery.isLoading ||
-    commandCatalogQuery.isLoading ||
-    idempotencyOverviewQuery.isLoading ||
-    superglueStatusQuery.isLoading ||
-    superglueConfigQuery.isLoading ||
-    superglueQuarantineQuery.isLoading ||
-    superglueHistoryQuery.isLoading ||
-    superglueJournalQuery.isLoading ||
-    superglueAdminOverviewQuery.isLoading ||
-    superglueMonitoringQuery.isLoading ||
-    superglueLiveReadinessQuery.isLoading ||
-    superglueOnboardingPackQuery.isLoading ||
-    superglueDomainRolloutsQuery.isLoading
-  ) {
-    return <LoadingState message="Agenten- und Idempotenzdaten werden geladen..." />
+  const downloadAgentTemplate = (): void => {
+    if (!agentTemplateQuery.data) {
+      return
+    }
+    downloadTextArtifact(
+      `agent-ops-template-${agentTemplateQuery.data.tenant_id}.json`,
+      `${JSON.stringify(agentTemplateQuery.data, null, 2)}\n`,
+      'application/json',
+    )
   }
 
-  const firstError = manifestQuery.error ?? commandCatalogQuery.error ?? idempotencyOverviewQuery.error ?? superglueStatusQuery.error ?? superglueConfigQuery.error ?? superglueQuarantineQuery.error ?? superglueHistoryQuery.error ?? superglueJournalQuery.error ?? superglueAdminOverviewQuery.error ?? superglueMonitoringQuery.error ?? superglueLiveReadinessQuery.error ?? superglueOnboardingPackQuery.error ?? superglueDomainRolloutsQuery.error
-  if (
-    manifestQuery.isError ||
-    commandCatalogQuery.isError ||
-    idempotencyOverviewQuery.isError ||
-    superglueStatusQuery.isError ||
-    superglueConfigQuery.isError ||
-    superglueQuarantineQuery.isError ||
-    superglueHistoryQuery.isError ||
-    superglueJournalQuery.isError ||
-    superglueAdminOverviewQuery.isError ||
-    superglueMonitoringQuery.isError ||
-    superglueLiveReadinessQuery.isError ||
-    superglueOnboardingPackQuery.isError ||
-    superglueDomainRolloutsQuery.isError ||
-    !manifestQuery.data
-  ) {
+  const applyAgentIntervention = async (ticketId: string, action: string): Promise<void> => {
+    await apiClient.post(`/api/v1/agents/neuroassist/ops/tickets/${ticketId}/interventions`, {
+      tenant_id: 'default',
+      action,
+      requested_by: 'admin-ui',
+      note: `Applied from Agent Ops Dashboard: ${action}`,
+    })
+    await Promise.all([
+      agentOpsOverviewQuery.refetch(),
+      agentOpsDashboardQuery.refetch(),
+      agentInterventionsQuery.refetch(),
+      agentMobileOverviewQuery.refetch(),
+      agentControlCenterQuery.refetch(),
+    ])
+  }
+
+  if (manifestQuery.isLoading || commandCatalogQuery.isLoading) {
+    return <LoadingState message="Agenten-Manifest wird geladen..." />
+  }
+
+  if (manifestQuery.isError || commandCatalogQuery.isError || !manifestQuery.data) {
+    const firstError = manifestQuery.error ?? commandCatalogQuery.error
     return <ErrorState error={firstError as Error} onRetry={() => void manifestQuery.refetch()} />
   }
 
@@ -439,6 +644,14 @@ export default function AgentenIntegrationPage(): JSX.Element {
   const superglueLiveReadiness = superglueLiveReadinessQuery.data
   const superglueOnboardingPack = superglueOnboardingPackQuery.data
   const superglueDomainRollouts = superglueDomainRolloutsQuery.data
+  const agentOpsOverview = agentOpsOverviewQuery.data
+  const agentOpsDashboard = agentOpsDashboardQuery.data
+  const agentInterventions = agentInterventionsQuery.data ?? []
+  const agentTemplate = agentTemplateQuery.data
+  const agentSkillPacks = agentSkillPacksQuery.data ?? []
+  const agentMobileOverview = agentMobileOverviewQuery.data
+  const agentPluginBoundary = agentPluginBoundaryQuery.data
+  const agentControlCenter = agentControlCenterQuery.data
   const sampleTenant =
     window.localStorage.getItem('tenant_id') ||
     window.sessionStorage.getItem('tenant_id') ||
@@ -822,6 +1035,257 @@ export default function AgentenIntegrationPage(): JSX.Element {
           </div>
         </div>
       ) : null}
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Agent Ops Budgeting</CardTitle>
+            <CardDescription>
+              Monatsbudget, Verbrauch und Guardrails pro produktiver NeuroASSIST-Faehigkeit.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            <p><strong>Budget total:</strong> {agentOpsOverview?.budget_total_cents ?? 0} ct</p>
+            <p><strong>Spent:</strong> {agentOpsOverview?.spent_total_cents ?? 0} ct</p>
+            <p><strong>Remaining:</strong> {agentOpsOverview?.remaining_total_cents ?? 0} ct</p>
+            <p><strong>Blocked:</strong> {agentOpsOverview?.blocked_budget_count ?? 0}</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Agent Cost Ledger</CardTitle>
+            <CardDescription>
+              Kosten- und Run-Trace fuer tenant-spezifische Agentenlaeufe.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            <p><strong>Monatslaeufe:</strong> {agentOpsOverview?.monthly_run_count ?? 0}</p>
+            <p><strong>Heartbeats:</strong> {agentOpsOverview?.heartbeats.length ?? 0}</p>
+            <p><strong>Open Tickets:</strong> {agentOpsOverview?.open_tickets.length ?? 0}</p>
+            <p><strong>Goal Nodes:</strong> {agentOpsOverview?.goals.length ?? 0}</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Agent Heartbeats</CardTitle>
+            <CardDescription>
+              Geplante Routinen fuer Reviews, Ingestion und Exception-Handling.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            {agentOpsOverview?.heartbeats.slice(0, 3).map((heartbeat) => (
+              <p key={heartbeat.capability_key}>
+                <strong>{heartbeat.capability_key}:</strong> {heartbeat.cadence} · {heartbeat.last_status ?? 'noch kein Lauf'}
+              </p>
+            ))}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Agent Roles And Goals</CardTitle>
+            <CardDescription>
+              Org- und Zielsicht fuer laufende Agentenarbeit und Eskalationen.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            <p><strong>Rollen:</strong> {agentOpsOverview?.roles.length ?? 0}</p>
+            <p><strong>Ziele:</strong> {agentOpsOverview?.goals.length ?? 0}</p>
+            {agentOpsOverview?.open_tickets.slice(0, 2).map((ticket) => (
+              <p key={ticket.ticket_id}>
+                <strong>{ticket.capability_key}:</strong> {ticket.latest_summary}
+              </p>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
+        <Card>
+          <CardHeader>
+            <CardTitle>Agent Control Center</CardTitle>
+            <CardDescription>
+              Zentrale Betriebsansicht fuer stale work, Review-Queue, Budgetdruck, letzte Eingriffe und offene Blocker.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            <p><strong>Budget Health:</strong> {agentControlCenter?.dashboard.budget_health ?? agentOpsDashboard?.budget_health ?? 'unknown'}</p>
+            <p><strong>Aktive Tickets:</strong> {agentControlCenter?.dashboard.active_ticket_count ?? agentOpsDashboard?.active_ticket_count ?? 0}</p>
+            <p><strong>Stale Work:</strong> {agentControlCenter?.dashboard.stale_work_count ?? agentOpsDashboard?.stale_work_count ?? 0}</p>
+            <p><strong>Review Queue:</strong> {agentControlCenter?.dashboard.review_queue_count ?? agentOpsDashboard?.review_queue_count ?? 0}</p>
+            <p><strong>Open Blockers:</strong> {agentControlCenter?.dashboard.open_blocker_count ?? agentOpsDashboard?.open_blocker_count ?? 0}</p>
+            <p><strong>Interventionen:</strong> {agentControlCenter?.dashboard.intervention_count ?? agentOpsDashboard?.intervention_count ?? 0}</p>
+            {(agentControlCenter?.dashboard.top_budget_pressures ?? agentOpsDashboard?.top_budget_pressures ?? []).map((item) => (
+              <p key={item.capability_key}>
+                <strong>{item.capability_key}:</strong> {item.remaining_cents} ct verbleibend
+              </p>
+            ))}
+            {(agentControlCenter?.dashboard.recent_interventions ?? []).slice(0, 2).map((entry) => (
+              <p key={entry.intervention_id}>
+                <strong>{entry.action}</strong> bei {entry.ticket_id} ({entry.requested_by})
+              </p>
+            ))}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Mobile Ops Surface</CardTitle>
+            <CardDescription>
+              Kompakte Sicht fuer wenige kritische Aktionen: freigeben, pausieren, eskalieren, Budgetwarnung sehen.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            <p><strong>Urgent Tickets:</strong> {agentControlCenter?.mobile_overview.urgent_ticket_count ?? agentMobileOverview?.urgent_ticket_count ?? 0}</p>
+            <p><strong>Review Tickets:</strong> {agentControlCenter?.mobile_overview.review_ticket_count ?? agentMobileOverview?.review_ticket_count ?? 0}</p>
+            <p><strong>Blocked Budgets:</strong> {agentControlCenter?.mobile_overview.blocked_budget_count ?? agentMobileOverview?.blocked_budget_count ?? 0}</p>
+            <p><strong>Pending Interventions:</strong> {agentControlCenter?.mobile_overview.pending_intervention_count ?? agentMobileOverview?.pending_intervention_count ?? 0}</p>
+            {(agentControlCenter?.mobile_overview.top_actions ?? agentMobileOverview?.top_actions ?? []).map((action) => (
+              <p key={action}>{action}</p>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
+        <Card>
+          <CardHeader>
+            <CardTitle>Ticket-Centered Agent Work</CardTitle>
+            <CardDescription>
+              Fachliche Arbeitsobjekte mit stale/review-Zustaenden, Blockern, Ownership und gezielten Eingriffen.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sm">
+            {(agentControlCenter?.tickets ?? agentOpsOverview?.open_tickets ?? []).slice(0, 4).map((ticket) => (
+              <div key={ticket.ticket_id} className="rounded border p-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <p><strong>{ticket.work_item_title ?? ticket.capability_key}</strong></p>
+                  <Badge variant={ticket.is_stale ? 'destructive' : 'secondary'}>
+                    {ticket.is_stale ? 'stale' : ticket.status}
+                  </Badge>
+                  {ticket.requires_review ? <Badge variant="outline">review</Badge> : null}
+                </div>
+                <p className="text-muted-foreground">{ticket.latest_summary}</p>
+                <p><strong>Owner:</strong> {ticket.owner_role ?? 'unassigned'} · <strong>Eskalation:</strong> {ticket.escalation_role ?? 'tenant_operations_lead'}</p>
+                <p><strong>Alter:</strong> {ticket.age_minutes ?? 0} min · <strong>Work Item:</strong> {ticket.work_item_id ?? ticket.ticket_id}</p>
+                {(ticket.blocker_reasons?.length ?? 0) > 0 ? (
+                  <p><strong>Blocker:</strong> {ticket.blocker_reasons?.join(', ')}</p>
+                ) : null}
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <Button type="button" size="sm" variant="outline" onClick={() => void applyAgentIntervention(ticket.ticket_id, 'approve')}>
+                    Freigeben
+                  </Button>
+                  <Button type="button" size="sm" variant="outline" onClick={() => void applyAgentIntervention(ticket.ticket_id, 'pause')}>
+                    Pausieren
+                  </Button>
+                  <Button type="button" size="sm" variant="outline" onClick={() => void applyAgentIntervention(ticket.ticket_id, 'escalate')}>
+                    Eskalieren
+                  </Button>
+                </div>
+              </div>
+            ))}
+            {agentInterventions.slice(0, 2).map((entry) => (
+              <p key={entry.intervention_id}>
+                <strong>{entry.action}</strong> {'->'} {entry.resulting_status} ({entry.requested_by})
+              </p>
+            ))}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Chain Of Command</CardTitle>
+            <CardDescription>
+              Sichtbare Ownership-Kette fuer Agentenrollen, Eingriffsrechte und Eskalationswege.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            {(agentControlCenter?.chain_of_command ?? agentOpsOverview?.roles ?? []).slice(0, 6).map((role) => (
+              <div key={role.role_key} className="rounded border p-2">
+                <p><strong>{role.role_key}</strong></p>
+                <p>Reports to: {role.reports_to ?? 'root'}</p>
+                <p>Capabilities: {role.owns_capabilities.join(', ') || 'none'}</p>
+                <p>Intervention: {role.can_intervene ? 'allowed' : 'not allowed'}</p>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Config Versions</CardTitle>
+            <CardDescription>
+              Revisionsverlauf fuer Skill-Packs, Budgets, Heartbeats und Agentprofile.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            {(agentControlCenter?.config_revisions ?? []).slice(0, 6).map((revision) => (
+              <div key={revision.revision_id} className="rounded border p-2">
+                <p><strong>{revision.config_type}</strong> · {revision.config_key}</p>
+                <p>Version: {revision.version} · By: {revision.changed_by}</p>
+                <p className="text-muted-foreground">{revision.summary}</p>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Portable Agent Templates</CardTitle>
+            <CardDescription>
+              Exportierbare Tenant-Setups ohne Secret-Material fuer wiederholbare Rollouts.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            <p><strong>Template:</strong> {agentTemplate?.template_key ?? 'default'}</p>
+            <p><strong>Budgets:</strong> {agentTemplate?.budgets.length ?? 0}</p>
+            <p><strong>Heartbeats:</strong> {agentTemplate?.heartbeats.length ?? 0}</p>
+            <p><strong>Skill Packs:</strong> {agentTemplate?.skill_packs.length ?? 0}</p>
+            <Button type="button" variant="outline" size="sm" onClick={downloadAgentTemplate}>Template Export</Button>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Agent Skill Packs</CardTitle>
+            <CardDescription>
+              Versionierbare Skill- und Prompt-Vertraege pro Rolle und Capability.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            {agentSkillPacks.slice(0, 3).map((skillPack) => (
+              <div key={skillPack.skill_pack_key} className="rounded border p-2">
+                <p><strong>{skillPack.display_name}</strong></p>
+                <p>Rolle: {skillPack.role_key}</p>
+                <p>Version: {skillPack.version ?? 1}</p>
+                <p>Skills: {skillPack.skills.join(', ')}</p>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Plugin Boundary Review</CardTitle>
+            <CardDescription>
+              Explizite Architekturgrenze fuer Plugin-/Paperclip-Muster im VALEO-Kern.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            <p><strong>Approved:</strong> {agentPluginBoundary?.approved_patterns.length ?? 0}</p>
+            <p><strong>Forbidden:</strong> {agentPluginBoundary?.forbidden_patterns.length ?? 0}</p>
+            {agentPluginBoundary?.rationale.map((line) => (
+              <p key={line} className="text-muted-foreground">{line}</p>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
 
       <Card>
         <CardHeader>

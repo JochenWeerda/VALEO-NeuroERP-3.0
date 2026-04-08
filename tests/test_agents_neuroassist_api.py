@@ -4,6 +4,8 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 import pytest
 
+from app.agents import get_agent_ops_service
+from app.agents.neuroassist_service import NeuroAssistService
 from app.api.v1.endpoints import agents
 
 
@@ -11,6 +13,12 @@ def _client() -> TestClient:
     app = FastAPI()
     app.include_router(agents.router, prefix="/api/v1/agents")
     return TestClient(app)
+
+
+@pytest.fixture(autouse=True)
+def _reset_agent_ops_state() -> None:
+    get_agent_ops_service().reset()
+    NeuroAssistService._run_registry.clear()
 
 
 def test_neuroassist_capabilities_endpoint_lists_productive_capabilities():
@@ -319,3 +327,191 @@ def test_neuroassist_runs_endpoint_rejects_invalid_input_contract(monkeypatch: p
 
     assert response.status_code == 422
     assert "available_cash" in response.json()["detail"]
+
+
+def test_neuroassist_ops_overview_endpoint_surfaces_budgeting_and_tickets(monkeypatch: pytest.MonkeyPatch):
+    async def _fake_run(capability_key: str, tenant_id: str = "system", parameters: dict | None = None):
+        return {
+            "run_id": "run-1",
+            "correlation_id": "run-1",
+            "capability_key": capability_key,
+            "status": "pending_approval",
+            "started_at": "2026-03-16T00:00:00",
+            "runtime": {
+                "capability_key": capability_key,
+                "role_key": "finance_action_assistant",
+                "orchestration_pattern": "review_workflow",
+                "current_stage_key": "analysis",
+                "status": "pending_approval",
+                "stage_runs": [{"stage_key": "analysis", "title": "Analyse", "status": "in_progress"}],
+                "gate_decisions": [],
+                "schema_version": 1,
+            },
+            "result": {"current_stage_key": "analysis"},
+        }
+
+    monkeypatch.setattr(agents.neuroassist_service, "run_capability", _fake_run)
+    client = _client()
+
+    run_response = client.post(
+        "/api/v1/agents/neuroassist/runs",
+        json={"capability_key": "finance_skonto_assistant"},
+    )
+    assert run_response.status_code == 200
+
+    monkeypatch.undo()
+    from app.agents import get_neuroassist_service
+
+    service = get_neuroassist_service()
+    service._record_agent_ops(
+        run_id="run-1",
+        tenant_id="system",
+        capability_key="finance_skonto_assistant",
+        status="pending_approval",
+        runtime=run_response.json()["runtime"],
+        result=run_response.json()["result"],
+    )
+
+    response = client.get("/api/v1/agents/neuroassist/ops/overview")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["monthly_run_count"] >= 1
+    assert payload["budget_summaries"]
+    assert payload["heartbeats"]
+    assert payload["roles"]
+    assert payload["goals"]
+
+
+def test_neuroassist_ops_budget_update_and_ticket_listing_endpoints():
+    ops = get_agent_ops_service()
+    ops.record_run(
+        tenant_id="system",
+        run_id="run-ops",
+        capability_key="operations_exception_assistant",
+        role_key="operations_exception_assistant",
+        status="pending_approval",
+        current_stage_key="approval",
+        runtime={"current_stage_key": "approval", "stage_runs": [], "gate_decisions": []},
+        result={"exception_summary": "needs review"},
+    )
+    client = _client()
+
+    budget_response = client.post(
+        "/api/v1/agents/neuroassist/ops/budgets/finance_skonto_assistant",
+        json={"tenant_id": "system", "monthly_budget_cents": 999},
+    )
+    tickets_response = client.get("/api/v1/agents/neuroassist/ops/tickets")
+
+    assert budget_response.status_code == 200
+    assert budget_response.json()["monthly_budget_cents"] == 999
+    assert tickets_response.status_code == 200
+    assert tickets_response.json()[0]["capability_key"] == "operations_exception_assistant"
+
+
+def test_neuroassist_ops_dashboard_intervention_template_and_boundary_endpoints():
+    ops = get_agent_ops_service()
+    ops.record_run(
+        tenant_id="system",
+        run_id="run-ops",
+        capability_key="operations_exception_assistant",
+        role_key="operations_exception_assistant",
+        status="pending_approval",
+        current_stage_key="approval",
+        runtime={"current_stage_key": "approval", "stage_runs": [], "gate_decisions": []},
+        result={"exception_summary": "needs review"},
+    )
+    ticket_id = ops.list_tickets()[0].ticket_id
+    client = _client()
+
+    intervention_response = client.post(
+        f"/api/v1/agents/neuroassist/ops/tickets/{ticket_id}/interventions",
+        json={"tenant_id": "system", "action": "pause", "requested_by": "tester", "note": "hold"},
+    )
+    dashboard_response = client.get("/api/v1/agents/neuroassist/ops/dashboard")
+    mobile_response = client.get("/api/v1/agents/neuroassist/ops/mobile-overview")
+    interventions_response = client.get("/api/v1/agents/neuroassist/ops/interventions")
+    template_response = client.get("/api/v1/agents/neuroassist/ops/templates/export")
+    skill_packs_response = client.get("/api/v1/agents/neuroassist/ops/skill-packs")
+    boundary_response = client.get("/api/v1/agents/neuroassist/ops/plugin-boundary-review")
+
+    assert intervention_response.status_code == 200
+    assert intervention_response.json()["resulting_status"] == "paused"
+    assert dashboard_response.status_code == 200
+    assert dashboard_response.json()["intervention_count"] == 1
+    assert mobile_response.status_code == 200
+    assert mobile_response.json()["top_actions"]
+    assert interventions_response.status_code == 200
+    assert interventions_response.json()[0]["action"] == "pause"
+    assert template_response.status_code == 200
+    assert template_response.json()["budgets"]
+    assert skill_packs_response.status_code == 200
+    assert skill_packs_response.json()[0]["skill_pack_key"].endswith(".pack")
+    assert boundary_response.status_code == 200
+    assert boundary_response.json()["forbidden_patterns"]
+
+
+def test_neuroassist_control_center_and_config_revision_endpoints():
+    ops = get_agent_ops_service()
+    ops.record_run(
+        tenant_id="system",
+        run_id="run-control-center",
+        capability_key="finance_skonto_assistant",
+        role_key="finance_action_assistant",
+        status="pending_approval",
+        current_stage_key="analysis",
+        runtime={
+            "current_stage_key": "analysis",
+            "stage_runs": [{"stage_key": "analysis", "status": "completed"}],
+            "gate_decisions": [{"gate_type": "approval_gate", "status": "deferred"}],
+        },
+        result={"current_stage_key": "analysis"},
+    )
+    client = _client()
+
+    budget_response = client.post(
+        "/api/v1/agents/neuroassist/ops/budgets/finance_skonto_assistant",
+        json={"tenant_id": "system", "monthly_budget_cents": 1100, "changed_by": "ops-admin"},
+    )
+    heartbeat_response = client.post(
+        "/api/v1/agents/neuroassist/ops/heartbeats/finance_skonto_assistant",
+        json={"tenant_id": "system", "cadence": "hourly", "stale_after_hours": 2, "changed_by": "ops-admin"},
+    )
+    profile_response = client.post(
+        "/api/v1/agents/neuroassist/ops/profiles/finance_skonto_assistant",
+        json={
+            "tenant_id": "system",
+            "review_sla_hours": 2,
+            "stale_after_hours": 2,
+            "allowed_actions": ["approve", "pause", "escalate"],
+            "changed_by": "ops-admin",
+        },
+    )
+    skill_pack_response = client.post(
+        "/api/v1/agents/neuroassist/ops/skill-packs/finance_action_assistant.pack",
+        json={
+            "tenant_id": "system",
+            "skills": ["policy_guardrails", "cost_control"],
+            "changed_by": "ops-admin",
+        },
+    )
+    control_center_response = client.get("/api/v1/agents/neuroassist/ops/control-center")
+    revisions_response = client.get("/api/v1/agents/neuroassist/ops/config-revisions")
+
+    assert budget_response.status_code == 200
+    assert budget_response.json()["version"] == 2
+    assert heartbeat_response.status_code == 200
+    assert heartbeat_response.json()["cadence"] == "hourly"
+    assert profile_response.status_code == 200
+    assert profile_response.json()["review_sla_hours"] == 2
+    assert skill_pack_response.status_code == 200
+    assert skill_pack_response.json()["version"] == 2
+    assert control_center_response.status_code == 200
+    control_center = control_center_response.json()
+    assert control_center["dashboard"]["review_queue_count"] >= 1
+    assert control_center["tickets"][0]["requires_review"] is True
+    assert control_center["tickets"][0]["owner_role"] == "finance_action_assistant"
+    assert control_center["chain_of_command"]
+    assert control_center["config_revisions"]
+    assert revisions_response.status_code == 200
+    assert any(item["config_type"] == "budget" and item["changed_by"] == "ops-admin" for item in revisions_response.json())
