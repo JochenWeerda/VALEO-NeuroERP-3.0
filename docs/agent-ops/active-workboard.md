@@ -1364,7 +1364,18 @@ Alle 6 Router registriert in `app/api/v1/api.py` unter `/api/v1/neuro/*`. Commit
 ## REF-ERP-001
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Die externe ERP-Referenzanalyse gegen AMIC, Odoo/OCA und SAP Fiori/OpenUI5 als belastbare MD-Referenz fuer spaetere Profiausbauslices dokumentieren.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, neue Referenzdatei unter `docs/project-context/`, ggf. benachbarte Gap-/Architektur-Doku falls zur Verlinkung noetig.
 **Abnahmekriterien:** Eine eigenstaendige MD-Datei beschreibt die aus AMIC abgeleiteten fachlichen Tiefenbereiche, den Abgleich mit VALEO, priorisierte Ausbaukandidaten sowie geeignete Upstream-Referenzquellen aus Odoo/OCA und SAP Fiori/OpenUI5 inklusive Lizenzhinweis fuer spaetere kommerzielle Nutzung.
+**Erledigt:** `docs/project-context/erp-reference-gap-analysis-amic-odoo-fiori-2026-04-08.md` dokumentiert jetzt die Vergleichserkenntnisse gegen AMIC, priorisierte VALEO-Gap-Bloecke, geeignete Referenzquellen aus Odoo/OCA und SAP Fiori/OpenUI5 sowie eine Lizenzampel fuer spaetere kommerzielle Nutzung.
+**Tests / Checks:** `node scripts/docs-governance-check.cjs`
+**Offene Risiken:** Die Datei ist bewusst Referenz- und Priorisierungsmaterial, keine abschliessende Rechtsbewertung. Vor echter Codeuebernahme aus Odoo/OCA oder SAP-nahen Quellen bleibt eine modulgenaue Lizenzpruefung Pflicht.
+
+## KTR-PRO-001
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Den Kontraktarbeitsplatz auf professionelles ERP-Niveau ziehen, indem die vorhandenen Kontraktmodule als einheitliche Steuerungsoberflaeche fuer Quelle, Risiko, naechste Aktion und Folgearbeitsplaetze zusammengefuehrt werden.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/contracts-v2.tsx`, ggf. direkt benoetigte Kontraktseiten oder gemeinsame UI-Helfer.
+**Abnahmekriterien:** `contracts-v2.tsx` zeigt neben der Liste eine professionelle Steuerungssicht mit Quellenbild, Ablauf-/Risikohinweisen, Quick Links in Positionsmonitor/Alarme/Detailarbeitsplaetze und klaren naechsten Aktionen je Kontrakt statt nur CRUD-Listencharakter.
