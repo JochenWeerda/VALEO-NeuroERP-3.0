@@ -1299,8 +1299,9 @@ Alle 6 Router registriert in `app/api/v1/api.py` unter `/api/v1/neuro/*`. Commit
 ## PCP-027
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Die zentrale Leitstandsseite UX-seitig verdichten, damit Status, Prioritaeten und Aktionen schneller erfassbar und mit weniger Scroll-/Leselast bedienbar sind.
 **Enthaelt:** Filter- und Fokusmechaniken fuer Vorfaelle/Planung, klarere KPI-/Statuskarten, handlungsorientierte Quick-Actions, robustere Loading-/Empty-/Error-Surface und lesbarere Detaildarstellung.
 **Dateibesitz:** `packages/frontend-web/src/pages/admin/control-center/index.tsx`, zugehoerige Frontend-Tests, `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`.
-**Naechster konkreter Schritt:** UX-Schwachstellen auf `admin/control-center` direkt im bestehenden Leitstands-Flow beheben und mit einem gezielten Frontend-Test absichern.
+**Erledigt:** `packages/frontend-web/src/pages/admin/control-center/index.tsx` ist jetzt UX-seitig als echte Leitstandsoberflaeche verdichtet: KPI-Karten, Prioritaets-/Quick-Action-Bereich, Filter fuer Planung und Incidents, Suchfeld, robustere Loading-/Error-/Empty-States und lesbarere Status-/Detailkarten reduzieren die Scroll- und Leselast deutlich. Der gezielte Frontend-Test liegt in `packages/frontend-web/src/__tests__/pages/admin/control-center-index.test.tsx`.
+**Tests / Checks:** `pnpm --dir packages/frontend-web exec vitest run src/__tests__/pages/admin/control-center-index.test.tsx`; `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`; `node scripts/docs-governance-check.cjs`
