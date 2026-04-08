@@ -1273,3 +1273,11 @@ Alle 6 Router registriert in `app/api/v1/api.py` unter `/api/v1/neuro/*`. Commit
 **Tests / Checks:** `pytest tests/test_neuroassist_service.py tests/test_agents_neuroassist_api.py -q --no-cov`; `pnpm --dir packages/frontend-web exec vitest run src/__tests__/pages/admin/agenten-integration.test.tsx`; `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`; `python -m py_compile app/agents/agent_ops.py app/agents/neuroassist_service.py app/api/v1/endpoints/agents.py tests/test_neuroassist_service.py tests/test_agents_neuroassist_api.py`; `node scripts/docs-governance-check.cjs`
 **Offene Risiken:** Die Agent-Ops-Runtime bleibt weiterhin bewusst in-memory; fuer produktive Mehrinstanz-/Historisierungspfade waere spaeter ein persistentes Modell fuer Tickets, Revisions und Interventionen sinnvoll.
 **Naechster konkreter Schritt:** Falls gewuenscht, Revisions-/Ticket-Historie und Interventionen aus der In-Memory-Runtime in persistente Read-Models ueberfuehren oder die Control-Center-Surface fachlich auf weitere Agentfamilien ausrollen.
+
+## PCP-019 bis PCP-021
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Den Agent-/Superglue-Leitstand aus der Sammelseite in einen eigenen Admin-Unterbereich mit klarer Navigation und getrennten Detailseiten ueberfuehren.
+**Enthaelt:** `PCP-019` Admin Control Center Subdirectory, `PCP-020` Control-Center Routing And Navigation, `PCP-021` Split Admin Surfaces For Agent Ops And Superglue.
+**Dateibesitz:** `packages/frontend-web/src/pages/admin/**`, Frontend-Routing/Nav-Komponenten, zugehoerige Frontend-Tests, `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`.
