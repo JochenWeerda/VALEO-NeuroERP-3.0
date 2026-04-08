@@ -10,6 +10,11 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+from .agent_ops_persistence import (
+    build_agent_ops_persistence_status,
+    load_agent_ops_tenant_snapshot,
+    save_agent_ops_tenant_snapshot,
+)
 from .neuroassist import get_productive_neuroassist_capabilities
 
 
@@ -249,6 +254,67 @@ class AgentOpsService:
     _config_revisions: dict[str, list[AgentConfigRevision]] = defaultdict(list)
 
     @classmethod
+    def _tenant_snapshot(cls, tenant_id: str) -> dict[str, Any]:
+        return {
+            "budgets": [item.model_dump(mode="json") for item in cls._budgets[tenant_id].values()],
+            "ledger": [item.model_dump(mode="json") for item in cls._ledger[tenant_id]],
+            "heartbeats": [item.model_dump(mode="json") for item in cls._heartbeats[tenant_id].values()],
+            "roles": [item.model_dump(mode="json") for item in cls._roles[tenant_id].values()],
+            "profiles": [item.model_dump(mode="json") for item in cls._profiles[tenant_id].values()],
+            "goals": [item.model_dump(mode="json") for item in cls._goals[tenant_id].values()],
+            "tickets": [item.model_dump(mode="json") for item in cls._tickets[tenant_id].values()],
+            "interventions": [item.model_dump(mode="json") for item in cls._interventions[tenant_id]],
+            "skill_packs": [item.model_dump(mode="json") for item in cls._skill_packs[tenant_id].values()],
+            "config_revisions": [item.model_dump(mode="json") for item in cls._config_revisions[tenant_id]],
+        }
+
+    @classmethod
+    def _restore_tenant_snapshot(cls, tenant_id: str, snapshot: dict[str, Any]) -> bool:
+        if not snapshot:
+            return False
+        cls._budgets[tenant_id] = {
+            item["capability_key"]: AgentBudgetSummary.model_validate(item)
+            for item in snapshot.get("budgets", [])
+        }
+        cls._ledger[tenant_id] = [AgentCostLedgerEntry.model_validate(item) for item in snapshot.get("ledger", [])]
+        cls._heartbeats[tenant_id] = {
+            item["capability_key"]: AgentHeartbeat.model_validate(item)
+            for item in snapshot.get("heartbeats", [])
+        }
+        cls._roles[tenant_id] = {
+            item["role_key"]: AgentRoleNode.model_validate(item)
+            for item in snapshot.get("roles", [])
+        }
+        cls._profiles[tenant_id] = {
+            item["capability_key"]: AgentProfile.model_validate(item)
+            for item in snapshot.get("profiles", [])
+        }
+        cls._goals[tenant_id] = {
+            item["goal_key"]: AgentGoalNode.model_validate(item)
+            for item in snapshot.get("goals", [])
+        }
+        cls._tickets[tenant_id] = {
+            item["run_id"]: AgentTicket.model_validate(item)
+            for item in snapshot.get("tickets", [])
+        }
+        cls._interventions[tenant_id] = [
+            AgentInterventionRecord.model_validate(item) for item in snapshot.get("interventions", [])
+        ]
+        cls._skill_packs[tenant_id] = {
+            item["skill_pack_key"]: AgentSkillPack.model_validate(item)
+            for item in snapshot.get("skill_packs", [])
+        }
+        cls._config_revisions[tenant_id] = [
+            AgentConfigRevision.model_validate(item) for item in snapshot.get("config_revisions", [])
+        ]
+        cls._tenant_initialized.add(tenant_id)
+        return True
+
+    @classmethod
+    def _persist_tenant(cls, tenant_id: str, *, reason: str) -> None:
+        save_agent_ops_tenant_snapshot(tenant_id, cls._tenant_snapshot(tenant_id), reason=reason)
+
+    @classmethod
     def _append_revision(
         cls,
         tenant_id: str,
@@ -275,6 +341,9 @@ class AgentOpsService:
     @classmethod
     def _ensure_tenant(cls, tenant_id: str) -> None:
         if tenant_id in cls._tenant_initialized:
+            return
+
+        if cls._restore_tenant_snapshot(tenant_id, load_agent_ops_tenant_snapshot(tenant_id) or {}):
             return
 
         capabilities = get_productive_neuroassist_capabilities()
@@ -397,6 +466,7 @@ class AgentOpsService:
         cls._roles[tenant_id]["tenant_operations_lead"].manages_roles = sorted(managed_roles)
 
         cls._tenant_initialized.add(tenant_id)
+        cls._persist_tenant(tenant_id, reason="bootstrap")
 
     @classmethod
     def _estimate_run_cost_cents(cls, capability_key: str, runtime: dict[str, Any], result: dict[str, Any]) -> int:
@@ -478,6 +548,7 @@ class AgentOpsService:
             changed_by=changed_by,
             summary=f"Monthly budget changed to {monthly_budget_cents} cents",
         )
+        cls._persist_tenant(tenant_id, reason=f"budget:{capability_key}")
         return budget
 
     @classmethod
@@ -508,6 +579,7 @@ class AgentOpsService:
             changed_by=changed_by,
             summary=f"Heartbeat updated: cadence={heartbeat.cadence}, enabled={heartbeat.enabled}",
         )
+        cls._persist_tenant(tenant_id, reason=f"heartbeat:{capability_key}")
         return heartbeat
 
     @classmethod
@@ -544,6 +616,7 @@ class AgentOpsService:
             changed_by=changed_by,
             summary=f"Profile updated: owner={profile.owner_role}, escalation={profile.escalation_role}",
         )
+        cls._persist_tenant(tenant_id, reason=f"profile:{capability_key}")
         return profile
 
     @classmethod
@@ -571,6 +644,7 @@ class AgentOpsService:
             changed_by=changed_by,
             summary=f"Skill pack updated with {len(skill_pack.skills)} skills",
         )
+        cls._persist_tenant(tenant_id, reason=f"skill-pack:{skill_pack_key}")
         return skill_pack
 
     @classmethod
@@ -646,6 +720,7 @@ class AgentOpsService:
             ticket.requires_review = requires_review
 
         cls._recount_goal_tickets(tenant_id)
+        cls._persist_tenant(tenant_id, reason=f"run:{run_id}")
 
     @classmethod
     def _recount_goal_tickets(cls, tenant_id: str) -> None:
@@ -738,6 +813,7 @@ class AgentOpsService:
         )
         cls._interventions[tenant_id].append(intervention)
         cls._recount_goal_tickets(tenant_id)
+        cls._persist_tenant(tenant_id, reason=f"intervention:{action}")
         return intervention
 
     @classmethod
@@ -775,6 +851,7 @@ class AgentOpsService:
             cls._goals[tenant_id][goal.goal_key] = goal.model_copy(deep=True)
         for skill_pack in template.skill_packs:
             cls._skill_packs[tenant_id][skill_pack.skill_pack_key] = skill_pack.model_copy(deep=True)
+        cls._persist_tenant(tenant_id, reason=f"template-import:{template.template_key}")
         return cls.export_template(tenant_id, template_key=template.template_key)
 
     @classmethod
@@ -876,6 +953,11 @@ class AgentOpsService:
         cls._interventions.clear()
         cls._skill_packs.clear()
         cls._config_revisions.clear()
+
+    @classmethod
+    def build_persistence_status(cls, tenant_id: str = "system") -> dict[str, Any]:
+        cls._ensure_tenant(tenant_id)
+        return build_agent_ops_persistence_status(tenant_id)
 
 
 def get_agent_ops_service() -> AgentOpsService:

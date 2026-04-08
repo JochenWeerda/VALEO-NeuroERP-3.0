@@ -661,6 +661,257 @@ async def get_article_stock(
     }
 
 
+@router.get("/{article_id}/position-context", response_model=dict)
+async def get_article_position_context(
+    article_id: str,
+    customer_id: Optional[str] = Query(None, description="Customer ID for pricing history"),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Aggregated context for adding an article to a delivery note position.
+
+    Returns stock, incoming orders, batches, pricing history and current
+    price in a single call so the frontend does not need 3-4 round-trips.
+    """
+    effective_tenant = tenant_id
+    article = _get_article_or_404(db, article_id, effective_tenant)
+
+    # ------------------------------------------------------------------
+    # 1. Stock summary (reuse logic from get_article_stock)
+    # ------------------------------------------------------------------
+    movements = (
+        db.query(StockMovement)
+        .filter(
+            StockMovement.article_id == article_id,
+            StockMovement.tenant_id == effective_tenant,
+        )
+        .all()
+    )
+
+    stock_by_warehouse: dict = {}
+    for m in movements:
+        wh = m.warehouse_id
+        if wh not in stock_by_warehouse:
+            stock_by_warehouse[wh] = {"warehouse_id": wh, "available": 0.0, "reserved": 0.0}
+        qty = float(m.quantity or 0)
+        if m.movement_type in ("in", "adjustment_in"):
+            stock_by_warehouse[wh]["available"] += qty
+        elif m.movement_type in ("out", "adjustment_out"):
+            stock_by_warehouse[wh]["available"] -= qty
+        elif m.movement_type == "reservation":
+            stock_by_warehouse[wh]["reserved"] += qty
+
+    from ....infrastructure.models import Warehouse
+
+    warehouses = (
+        db.query(Warehouse)
+        .filter(Warehouse.tenant_id == effective_tenant, Warehouse.is_active == True)  # noqa: E712
+        .all()
+    )
+    warehouse_map = {w.id: w.name for w in warehouses}
+
+    by_warehouse = [
+        {
+            "warehouse_id": d["warehouse_id"],
+            "warehouse_name": warehouse_map.get(d["warehouse_id"], d["warehouse_id"]),
+            "available": d["available"],
+            "reserved": d["reserved"],
+        }
+        for d in stock_by_warehouse.values()
+    ]
+
+    total_available = float(article.available_stock or 0)
+    total_reserved = float(article.reserved_stock or 0)
+    total_physical = float(article.current_stock or 0)
+
+    stock = {
+        "total_available": total_available,
+        "total_reserved": total_reserved,
+        "total_physical": total_physical,
+        "by_warehouse": by_warehouse,
+    }
+
+    # ------------------------------------------------------------------
+    # 2. Open purchase orders (incoming goods)
+    # ------------------------------------------------------------------
+    incoming_orders: dict = {"total_quantity": 0.0, "orders": []}
+    try:
+        rows = db.execute(
+            text(
+                """
+                SELECT b.bestellnummer, bp.menge, b.liefertermin
+                FROM domain_einkauf.bestellung_positionen bp
+                JOIN domain_einkauf.bestellungen b ON b.id = bp.bestellung_id
+                WHERE bp.artikel_id = :article_id
+                  AND b.tenant_id = :tenant_id
+                  AND b.status NOT IN ('abgeschlossen', 'storniert')
+                ORDER BY b.liefertermin ASC NULLS LAST
+                """
+            ),
+            {"article_id": article_id, "tenant_id": effective_tenant},
+        ).fetchall()
+        orders_list = []
+        total_incoming_qty = 0.0
+        for row in rows:
+            qty = float(row[1] or 0)
+            total_incoming_qty += qty
+            orders_list.append(
+                {
+                    "order_number": row[0],
+                    "quantity": qty,
+                    "expected_date": row[2].isoformat() if row[2] else None,
+                }
+            )
+        incoming_orders = {"total_quantity": total_incoming_qty, "orders": orders_list}
+    except Exception:
+        pass  # table may not exist
+
+    # ------------------------------------------------------------------
+    # 3. Available batches
+    # ------------------------------------------------------------------
+    batches: list = []
+    try:
+        rows = db.execute(
+            text(
+                """
+                SELECT batch_number,
+                       SUM(CASE WHEN movement_type IN ('in','adjustment_in') THEN quantity
+                                WHEN movement_type IN ('out','adjustment_out') THEN -quantity
+                                ELSE 0 END) AS qty,
+                       MAX(expiry_date) AS expiry_date,
+                       warehouse_id
+                FROM domain_inventory.stock_movements
+                WHERE article_id = :article_id
+                  AND tenant_id = :tenant_id
+                  AND batch_number IS NOT NULL
+                GROUP BY batch_number, warehouse_id
+                HAVING SUM(CASE WHEN movement_type IN ('in','adjustment_in') THEN quantity
+                                WHEN movement_type IN ('out','adjustment_out') THEN -quantity
+                                ELSE 0 END) > 0
+                ORDER BY batch_number
+                """
+            ),
+            {"article_id": article_id, "tenant_id": effective_tenant},
+        ).fetchall()
+        for row in rows:
+            batches.append(
+                {
+                    "batch_number": row[0],
+                    "quantity": float(row[1] or 0),
+                    "expiry_date": row[2].isoformat() if row[2] else None,
+                    "warehouse_id": row[3],
+                }
+            )
+    except Exception:
+        pass  # table may not exist
+
+    # ------------------------------------------------------------------
+    # 4. Freely sellable quantity
+    # ------------------------------------------------------------------
+    freely_available = total_available - total_reserved
+
+    # ------------------------------------------------------------------
+    # 5. Customer pricing history
+    # ------------------------------------------------------------------
+    customer_pricing: dict = {
+        "last_sale_price": None,
+        "last_sale_date": None,
+        "last_sale_quantity": None,
+    }
+    if customer_id:
+        try:
+            row = db.execute(
+                text(
+                    """
+                    SELECT dp.unit_price, dn.created_at, dp.quantity
+                    FROM domain_sales.delivery_note_positions dp
+                    JOIN domain_sales.delivery_notes dn ON dn.id = dp.delivery_note_id
+                    WHERE dp.article_id = :article_id
+                      AND dn.customer_id = :customer_id
+                      AND dn.tenant_id = :tenant_id
+                    ORDER BY dn.created_at DESC
+                    LIMIT 1
+                    """
+                ),
+                {
+                    "article_id": article_id,
+                    "customer_id": customer_id,
+                    "tenant_id": effective_tenant,
+                },
+            ).fetchone()
+            if row:
+                customer_pricing = {
+                    "last_sale_price": float(row[0]) if row[0] is not None else None,
+                    "last_sale_date": row[1].isoformat() if row[1] else None,
+                    "last_sale_quantity": float(row[2]) if row[2] is not None else None,
+                }
+        except Exception:
+            pass  # table may not exist
+
+    # ------------------------------------------------------------------
+    # 6. Purchase pricing (avg 90d + last)
+    # ------------------------------------------------------------------
+    purchase_pricing: dict = {
+        "avg_purchase_price_90d": None,
+        "last_purchase_price": None,
+        "last_purchase_date": None,
+    }
+    try:
+        row = db.execute(
+            text(
+                """
+                SELECT AVG(bp.einzelpreis) AS avg_price,
+                       (SELECT bp2.einzelpreis
+                        FROM domain_einkauf.bestellung_positionen bp2
+                        JOIN domain_einkauf.bestellungen b2 ON b2.id = bp2.bestellung_id
+                        WHERE bp2.artikel_id = :article_id AND b2.tenant_id = :tenant_id
+                        ORDER BY b2.bestelldatum DESC LIMIT 1) AS last_price,
+                       (SELECT b2.bestelldatum
+                        FROM domain_einkauf.bestellung_positionen bp2
+                        JOIN domain_einkauf.bestellungen b2 ON b2.id = bp2.bestellung_id
+                        WHERE bp2.artikel_id = :article_id AND b2.tenant_id = :tenant_id
+                        ORDER BY b2.bestelldatum DESC LIMIT 1) AS last_date
+                FROM domain_einkauf.bestellung_positionen bp
+                JOIN domain_einkauf.bestellungen b ON b.id = bp.bestellung_id
+                WHERE bp.artikel_id = :article_id
+                  AND b.tenant_id = :tenant_id
+                  AND b.bestelldatum >= NOW() - INTERVAL '90 days'
+                """
+            ),
+            {"article_id": article_id, "tenant_id": effective_tenant},
+        ).fetchone()
+        if row:
+            purchase_pricing = {
+                "avg_purchase_price_90d": float(row[0]) if row[0] is not None else None,
+                "last_purchase_price": float(row[1]) if row[1] is not None else None,
+                "last_purchase_date": row[2].isoformat() if row[2] else None,
+            }
+    except Exception:
+        pass  # table may not exist
+
+    # ------------------------------------------------------------------
+    # 7. Current list price
+    # ------------------------------------------------------------------
+    list_price = float(article.sales_price) if article.sales_price is not None else 0.0
+    current_price = {
+        "list_price": list_price,
+        "source": "base",
+    }
+
+    return {
+        "article_id": article_id,
+        "article_number": article.article_number,
+        "article_name": article.name,
+        "stock": stock,
+        "incoming_orders": incoming_orders,
+        "batches": batches,
+        "freely_available": freely_available,
+        "customer_pricing": customer_pricing,
+        "purchase_pricing": purchase_pricing,
+        "current_price": current_price,
+    }
+
+
 @router.get("/{article_id}/stock-movements", response_model=dict)
 async def get_article_stock_movements(
     article_id: str,

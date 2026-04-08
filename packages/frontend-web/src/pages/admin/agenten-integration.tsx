@@ -4,6 +4,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query'
+import { Link } from 'react-router-dom'
 import {
   BookOpen,
   Bot,
@@ -21,6 +22,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ErrorState, LoadingState } from '@/components/ErrorState'
 import { apiClient } from '@/lib/api-client'
+
+type ControlCenterSection = 'all' | 'overview' | 'superglue' | 'agents'
 
 type AgentManifest = {
   version: string
@@ -433,8 +436,21 @@ function downloadTextArtifact(filename: string, content: string, mimeType = 'tex
   URL.revokeObjectURL(url)
 }
 
-export default function AgentenIntegrationPage(): JSX.Element {
+type AgentenIntegrationWorkspaceProps = {
+  section?: ControlCenterSection
+  title?: string
+  subtitle?: string
+}
+
+export function AgentenIntegrationWorkspace({
+  section = 'all',
+  title = 'Agenten-Integration',
+  subtitle = 'Offene Integrationsfaehigkeit fuer externe Agenten mit maschinenlesbarem Einstiegspunkt. Gap 048.',
+}: AgentenIntegrationWorkspaceProps): JSX.Element {
   const stale5m = 5 * 60 * 1000
+  const showOverview = section === 'all' || section === 'overview'
+  const showSuperglue = section === 'all' || section === 'superglue'
+  const showAgents = section === 'all' || section === 'agents'
 
   // ── Overview: always enabled (small payloads) ──
   const manifestQuery = useQuery({
@@ -725,7 +741,7 @@ export default function AgentenIntegrationPage(): JSX.Element {
         <div>
           <h1 className="flex items-center gap-2 text-2xl font-semibold">
             <Bot className="h-6 w-6" />
-            Agenten-Integration
+            {title}
           </h1>
           <p className="mt-1 text-muted-foreground">
             Offene Integrationsfähigkeit für externe Agenten mit maschinenlesbarem Einstiegspunkt. Gap 048.
@@ -737,6 +753,49 @@ export default function AgentenIntegrationPage(): JSX.Element {
         </Button>
       </div>
 
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card>
+          <CardHeader>
+            <CardTitle>Leitstand</CardTitle>
+            <CardDescription>
+              Zentrale Uebersicht fuer API, Zugang, Monitoring und Betriebszustand.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild variant={section === 'overview' ? 'default' : 'outline'} size="sm">
+              <Link to="/admin/control-center">Zur Leitstandsuebersicht</Link>
+            </Button>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Superglue Ops</CardTitle>
+            <CardDescription>
+              Connector-Betrieb, Onboarding, Quarantaene, Monitoring und Live Readiness.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild variant={section === 'superglue' ? 'default' : 'outline'} size="sm">
+              <Link to="/admin/control-center/superglue">Superglue oeffnen</Link>
+            </Button>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Agent Ops</CardTitle>
+            <CardDescription>
+              Tickets, Chain of Command, Revisions, Eingriffe und Mobile-Ops fuer NeuroASSIST.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild variant={section === 'agents' ? 'default' : 'outline'} size="sm">
+              <Link to="/admin/control-center/agent-ops">Agent Ops oeffnen</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+
+      {showOverview ? (
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
@@ -823,7 +882,9 @@ export default function AgentenIntegrationPage(): JSX.Element {
           </CardContent>
         </Card>
       </div>
+      ) : null}
 
+      {showSuperglue ? (
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
@@ -948,6 +1009,7 @@ export default function AgentenIntegrationPage(): JSX.Element {
           </CardContent>
         </Card>
       </div>
+      ) : null}
 
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
@@ -1016,7 +1078,7 @@ export default function AgentenIntegrationPage(): JSX.Element {
         </Card>
       </div>
 
-      {idempotencyOverview ? (
+      {showOverview && idempotencyOverview ? (
         <div className="grid gap-4 xl:grid-cols-[1.4fr_0.9fr]">
           <AgentUxPanel
             title="Agent UX Panel"
@@ -1036,6 +1098,7 @@ export default function AgentenIntegrationPage(): JSX.Element {
         </div>
       ) : null}
 
+      {showAgents ? (
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <Card>
           <CardHeader>
@@ -1101,7 +1164,9 @@ export default function AgentenIntegrationPage(): JSX.Element {
           </CardContent>
         </Card>
       </div>
+      ) : null}
 
+      {showAgents ? (
       <div className="grid gap-4 xl:grid-cols-[1.15fr_0.85fr]">
         <Card>
           <CardHeader>
@@ -1148,7 +1213,9 @@ export default function AgentenIntegrationPage(): JSX.Element {
           </CardContent>
         </Card>
       </div>
+      ) : null}
 
+      {showAgents ? (
       <div className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
         <Card>
           <CardHeader>
@@ -1213,7 +1280,9 @@ export default function AgentenIntegrationPage(): JSX.Element {
           </CardContent>
         </Card>
       </div>
+      ) : null}
 
+      {showAgents ? (
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
@@ -1249,7 +1318,9 @@ export default function AgentenIntegrationPage(): JSX.Element {
           </CardContent>
         </Card>
       </div>
+      ) : null}
 
+      {showAgents ? (
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
@@ -1286,7 +1357,9 @@ export default function AgentenIntegrationPage(): JSX.Element {
           </CardContent>
         </Card>
       </div>
+      ) : null}
 
+      {showOverview ? (
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -1308,7 +1381,9 @@ export default function AgentenIntegrationPage(): JSX.Element {
           </Badge>
         </CardContent>
       </Card>
+      ) : null}
 
+      {showOverview ? (
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -1336,7 +1411,9 @@ export default function AgentenIntegrationPage(): JSX.Element {
           ))}
         </CardContent>
       </Card>
+      ) : null}
 
+      {showOverview ? (
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -1363,7 +1440,9 @@ export default function AgentenIntegrationPage(): JSX.Element {
           ))}
         </CardContent>
       </Card>
+      ) : null}
 
+      {showOverview ? (
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -1385,6 +1464,17 @@ export default function AgentenIntegrationPage(): JSX.Element {
           </div>
         </CardContent>
       </Card>
+      ) : null}
     </div>
+  )
+}
+
+export default function AgentenIntegrationPage(): JSX.Element {
+  return (
+    <AgentenIntegrationWorkspace
+      section="all"
+      title="Agenten-Integration"
+      subtitle="Legacy-Sammelseite fuer Agenten, Superglue und externe Einstiegspunkte. Fuer den Leitstand bitte den Admin-Unterbereich /admin/control-center verwenden."
+    />
   )
 }

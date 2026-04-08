@@ -149,6 +149,18 @@ class AgentSkillPackUpdateRequest(BaseModel):
     changed_by: str = "admin-ui"
 
 
+class AgentPersistenceStatusResponse(BaseModel):
+    tenant_id: str
+    state_path: str
+    history_path: str
+    persisted: bool
+    persisted_at: str | None = None
+    history_count: int
+    recent_events: list[dict] = Field(default_factory=list)
+    snapshot_counts: dict = Field(default_factory=dict)
+    schema_version: int = 1
+
+
 def _get_neuroassist_service():
     try:
         from ....agents import get_neuroassist_service
@@ -368,6 +380,15 @@ async def list_neuroassist_config_revisions(tenant_id: str = "system"):
     except Exception as exc:
         logger.error("NeuroASSIST config revisions failed: %s", exc, exc_info=True)
         raise HTTPException(status_code=500, detail=f"NeuroASSIST config revisions failed: {str(exc)}")
+
+
+@router.get("/neuroassist/ops/persistence", response_model=AgentPersistenceStatusResponse)
+async def get_neuroassist_persistence_status(tenant_id: str = "system"):
+    try:
+        return AgentPersistenceStatusResponse(**_get_agent_ops_service().build_persistence_status(tenant_id))
+    except Exception as exc:
+        logger.error("NeuroASSIST persistence status failed: %s", exc, exc_info=True)
+        raise HTTPException(status_code=500, detail=f"NeuroASSIST persistence status failed: {str(exc)}")
 
 
 @router.post("/neuroassist/ops/tickets/{ticket_id}/interventions", response_model=dict)
