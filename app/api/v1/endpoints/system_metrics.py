@@ -5,6 +5,7 @@ Provides real-time metrics for Auto-Scaling and Optimization
 
 from datetime import datetime, timedelta
 import logging
+import time
 from typing import Any, Dict, List
 
 from fastapi import APIRouter, Depends
@@ -19,6 +20,9 @@ from app.core.tenant import get_tenant_id
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
+_metrics_cache: dict = {}
+_CACHE_TTL = 30  # seconds
 
 
 @router.get("/system")
@@ -101,6 +105,11 @@ async def get_business_metrics(
     Returns: Queue lengths, processing times, error rates
     """
     try:
+        cache_key = f"business_metrics:{tenant_id}"
+        now = time.time()
+        if cache_key in _metrics_cache and (now - _metrics_cache[cache_key]["ts"]) < _CACHE_TTL:
+            return _metrics_cache[cache_key]["data"]
+
         # 1. Database Connection Pool Status
         from app.core.database import engine
         pool_status = engine.pool.status()
@@ -185,7 +194,7 @@ async def get_business_metrics(
             "avg_processing_time_seconds": 0
         }
         
-        return {
+        result = {
             "timestamp": datetime.utcnow().isoformat(),
             "tenant_id": tenant_id,
             "user_id": current_user.get("sub", ""),
@@ -199,6 +208,8 @@ async def get_business_metrics(
             "documents": document_metrics,
             "recommendations": _generate_recommendations(event_bus_metrics, workflow_metrics)
         }
+        _metrics_cache[cache_key] = {"data": result, "ts": time.time()}
+        return result
     except Exception as e:
         logger.error(f"Failed to collect business metrics: {e}")
         return {

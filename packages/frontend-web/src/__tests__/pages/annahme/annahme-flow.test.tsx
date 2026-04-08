@@ -131,7 +131,8 @@ vi.mock('react-router-dom', async (importOriginal) => {
   return {
     ...actual,
     useNavigate: () => vi.fn(),
-    useLocation: () => ({ state: null, pathname: '/annahme' }),
+    useLocation: () => ({ state: null, pathname: '/annahme', search: '', hash: '', key: 'default' }),
+    useSearchParams: () => [new URLSearchParams(), vi.fn()],
   }
 })
 vi.mock('@/components/navigation/ModuleToolbar', () => ({

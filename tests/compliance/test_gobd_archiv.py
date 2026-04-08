@@ -21,6 +21,11 @@ DEFAULT_TENANT = "00000000-0000-0000-0000-000000000001"
 @pytest.fixture(scope="module")
 def client():
     from main import app
+    from app.core.config import settings
+    from app.core import security
+    # Dev-Token muss gesetzt sein bevor TestClient den OIDC-Check macht
+    settings.API_DEV_TOKEN = "dev-token"
+    security.settings.API_DEV_TOKEN = "dev-token"
     with TestClient(app, raise_server_exceptions=False) as c:
         yield c
 

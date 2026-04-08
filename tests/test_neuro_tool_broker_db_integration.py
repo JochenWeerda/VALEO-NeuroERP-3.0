@@ -31,7 +31,7 @@ def _registry_and_idempotency():
 def test_broker_create_purchase_order_command_step_with_db_session():
     db = SessionLocal()
     try:
-        db.execute(text("SELECT 1 FROM public.einkauf_bestellungen LIMIT 1"))
+        db.execute(text("SELECT 1 FROM domain_einkauf.bestellungen LIMIT 1"))
         db.rollback()
     except SQLAlchemyError:
         pytest.skip("DB nicht erreichbar oder einkauf_bestellungen fehlt")

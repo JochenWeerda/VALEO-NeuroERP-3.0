@@ -7,10 +7,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
 import LKWRegistrierungPage from '@/pages/annahme/lkw-registrierung'
 
-const toastMock = vi.fn()
-const navigateMock = vi.fn()
-const apiGetMock = vi.fn()
-const apiPostMock = vi.fn()
+const toastMock = vi.hoisted(() => vi.fn())
+const navigateMock = vi.hoisted(() => vi.fn())
+const apiGetMock = vi.hoisted(() => vi.fn())
+const apiPostMock = vi.hoisted(() => vi.fn())
 
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom')

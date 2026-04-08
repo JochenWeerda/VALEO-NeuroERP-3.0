@@ -79,7 +79,7 @@ class BookingTemplateResponse(BaseModel):
 
 class ApplyTemplateRequest(BaseModel):
     """Request to apply a booking template"""
-    template_id: str
+    template_id: Optional[str] = Field(None, description="Template ID (optional, taken from URL path)")
     amount: Optional[Decimal] = Field(None, ge=0, description="Amount to use (overrides template default)")
     entry_date: date = Field(..., description="Entry date for the journal entry")
     description: Optional[str] = Field(None, description="Override description")
@@ -135,15 +135,18 @@ async def list_booking_templates(
         result = []
         for row in rows:
             import json
-            lines_data = json.loads(row[5]) if row[5] else []
-            
+            lines_raw = row[6]
+            lines_data = json.loads(lines_raw) if isinstance(lines_raw, str) else (lines_raw or [])
+            trigger_raw = row[5]
+            trigger_config = json.loads(trigger_raw) if isinstance(trigger_raw, str) else (trigger_raw or {})
+
             result.append(BookingTemplateResponse(
                 id=str(row[0]),
                 name=str(row[1]),
                 description=str(row[2]) if row[2] else None,
                 category=str(row[3]),
                 trigger_type=str(row[4]),
-                trigger_config=json.loads(row[5]) if row[5] and isinstance(row[5], str) else row[5],
+                trigger_config=trigger_config,
                 lines=[BookingTemplateLine(**line) for line in lines_data],
                 default_amount=Decimal(str(row[7])) if row[7] else None,
                 currency=str(row[8]),
@@ -185,15 +188,18 @@ async def get_booking_template(
             raise HTTPException(status_code=404, detail="Booking template not found")
         
         import json
-        lines_data = json.loads(row[6]) if row[6] else []
-        
+        lines_raw = row[6]
+        lines_data = json.loads(lines_raw) if isinstance(lines_raw, str) else (lines_raw or [])
+        trigger_raw = row[5]
+        trigger_config = json.loads(trigger_raw) if isinstance(trigger_raw, str) else (trigger_raw or {})
+
         return BookingTemplateResponse(
             id=str(row[0]),
             name=str(row[1]),
             description=str(row[2]) if row[2] else None,
             category=str(row[3]),
             trigger_type=str(row[4]),
-            trigger_config=json.loads(row[5]) if row[5] and isinstance(row[5], str) else row[5],
+            trigger_config=trigger_config,
             lines=[BookingTemplateLine(**line) for line in lines_data],
             default_amount=Decimal(str(row[7])) if row[7] else None,
             currency=str(row[8]),
@@ -531,15 +537,18 @@ async def update_booking_template(
         db.commit()
         
         import json
-        lines_data = json.loads(row[6]) if row[6] else []
-        
+        lines_raw = row[6]
+        lines_data = json.loads(lines_raw) if isinstance(lines_raw, str) else (lines_raw or [])
+        trigger_raw = row[5]
+        trigger_config = json.loads(trigger_raw) if isinstance(trigger_raw, str) else (trigger_raw or {})
+
         return BookingTemplateResponse(
             id=str(row[0]),
             name=str(row[1]),
             description=str(row[2]) if row[2] else None,
             category=str(row[3]),
             trigger_type=str(row[4]),
-            trigger_config=json.loads(row[5]) if row[5] and isinstance(row[5], str) else row[5],
+            trigger_config=trigger_config,
             lines=[BookingTemplateLine(**line) for line in lines_data],
             default_amount=Decimal(str(row[7])) if row[7] else None,
             currency=str(row[8]),

@@ -241,6 +241,186 @@ describe('AgentenIntegrationPage', () => {
           ],
         },
       })
+      .mockResolvedValueOnce({
+        data: {
+          tenant_id: 'default',
+          schema_version: 1,
+          budget_total_cents: 5000,
+          spent_total_cents: 420,
+          remaining_total_cents: 4580,
+          blocked_budget_count: 0,
+          monthly_run_count: 3,
+          budget_summaries: [
+            {
+              capability_key: 'finance_skonto_assistant',
+              monthly_budget_cents: 900,
+              spent_cents: 120,
+              remaining_cents: 780,
+              blocked: false,
+            },
+          ],
+          heartbeats: [
+            {
+              capability_key: 'finance_skonto_assistant',
+              cadence: 'daily',
+              enabled: true,
+              last_status: 'completed',
+            },
+          ],
+          roles: [
+            {
+              role_key: 'finance_action_assistant',
+              reports_to: 'tenant_operations_lead',
+              owns_capabilities: ['finance_skonto_assistant'],
+            },
+          ],
+          goals: [
+            {
+              goal_key: 'finance_ops',
+              title: 'Finance Agent Operations',
+              active_ticket_count: 1,
+            },
+          ],
+          open_tickets: [
+            {
+              ticket_id: 'agt-run-1',
+              capability_key: 'finance_skonto_assistant',
+              status: 'pending_approval',
+              latest_summary: 'analysis',
+            },
+          ],
+        },
+      })
+      .mockResolvedValueOnce({
+        data: {
+          tenant_id: 'default',
+          budget_health: 'healthy',
+          active_ticket_count: 1,
+          intervention_count: 1,
+          blocked_capabilities: [],
+          top_budget_pressures: [{ capability_key: 'finance_skonto_assistant', remaining_cents: 780 }],
+          recent_interventions: [{ intervention_id: 'agi-1', ticket_id: 'agt-run-1', action: 'pause', resulting_status: 'paused', requested_by: 'admin-ui' }],
+          stale_work_count: 1,
+          review_queue_count: 1,
+          open_blocker_count: 1,
+          mobile_actions: ['Freigeben'],
+        },
+      })
+      .mockResolvedValueOnce({
+        data: [
+          {
+            intervention_id: 'agi-1',
+            ticket_id: 'agt-run-1',
+            action: 'pause',
+            resulting_status: 'paused',
+            requested_by: 'admin-ui',
+            note: 'Applied from Agent Ops Dashboard: pause',
+          },
+        ],
+      })
+      .mockResolvedValueOnce({
+        data: {
+          tenant_id: 'default',
+          template_key: 'default',
+          exported_at: '2026-04-07T10:00:00Z',
+          budgets: [{ capability_key: 'finance_skonto_assistant', monthly_budget_cents: 900 }],
+          heartbeats: [{ capability_key: 'finance_skonto_assistant', cadence: 'daily' }],
+          roles: [{ role_key: 'finance_action_assistant' }],
+          goals: [{ goal_key: 'finance_ops' }],
+          skill_packs: [{ skill_pack_key: 'finance_action_assistant.pack', display_name: 'Finance Skill Pack' }],
+        },
+      })
+      .mockResolvedValueOnce({
+        data: [
+          {
+            skill_pack_key: 'finance_action_assistant.pack',
+            display_name: 'Finance Skill Pack',
+            role_key: 'finance_action_assistant',
+            capability_keys: ['finance_skonto_assistant'],
+            skills: ['policy_guardrails', 'human_handoff_contract'],
+            prompt_contracts: ['finance_skonto_assistant.prompt.default'],
+          },
+        ],
+      })
+      .mockResolvedValueOnce({
+        data: {
+          tenant_id: 'default',
+          urgent_ticket_count: 1,
+          blocked_budget_count: 0,
+          pending_intervention_count: 1,
+          review_ticket_count: 1,
+          top_actions: ['Freigeben', 'Pausieren'],
+        },
+      })
+      .mockResolvedValueOnce({
+        data: {
+          tenant_id: 'default',
+          schema_version: 1,
+          approved_patterns: ['thin UI wrappers over Agent Ops endpoints'],
+          forbidden_patterns: ['second agent orchestrator beside NeuroASSIST'],
+          rationale: ['VALEO keeps one orchestrator and one governance path for agentic work.'],
+        },
+      })
+      .mockResolvedValueOnce({
+        data: {
+          tenant_id: 'default',
+          dashboard: {
+            tenant_id: 'default',
+            budget_health: 'healthy',
+            active_ticket_count: 1,
+            intervention_count: 1,
+            blocked_capabilities: [],
+            top_budget_pressures: [{ capability_key: 'finance_skonto_assistant', remaining_cents: 780 }],
+            recent_interventions: [{ intervention_id: 'agi-1', ticket_id: 'agt-run-1', action: 'pause', resulting_status: 'paused', requested_by: 'admin-ui' }],
+            stale_work_count: 1,
+            review_queue_count: 1,
+            open_blocker_count: 1,
+            mobile_actions: ['Freigeben', 'Pausieren'],
+          },
+          tickets: [
+            {
+              ticket_id: 'agt-run-1',
+              capability_key: 'finance_skonto_assistant',
+              status: 'pending_approval',
+              latest_summary: 'analysis',
+              work_item_id: 'wf-1',
+              work_item_title: 'Finance Approval Case',
+              owner_role: 'finance_action_assistant',
+              escalation_role: 'tenant_operations_lead',
+              blocker_reasons: ['approval_gate'],
+              requires_review: true,
+              is_stale: true,
+              age_minutes: 180,
+            },
+          ],
+          chain_of_command: [
+            {
+              role_key: 'finance_action_assistant',
+              reports_to: 'tenant_operations_lead',
+              owns_capabilities: ['finance_skonto_assistant'],
+              can_intervene: true,
+            },
+          ],
+          config_revisions: [
+            {
+              revision_id: 'rev-budget-finance_skonto_assistant-2',
+              config_type: 'budget',
+              config_key: 'finance_skonto_assistant',
+              version: 2,
+              changed_by: 'admin-ui',
+              summary: 'Monthly budget changed to 900 cents',
+            },
+          ],
+          mobile_overview: {
+            tenant_id: 'default',
+            urgent_ticket_count: 1,
+            blocked_budget_count: 0,
+            pending_intervention_count: 1,
+            review_ticket_count: 1,
+            top_actions: ['Freigeben', 'Pausieren', 'Eskalieren'],
+          },
+        },
+      })
   })
 
   it('zeigt Agent UX Panel und Idempotency Monitoring', async () => {
@@ -257,9 +437,30 @@ describe('AgentenIntegrationPage', () => {
     expect(screen.getByText('Connector Monitoring')).toBeInTheDocument()
     expect(screen.getByText('Superglue Live Readiness')).toBeInTheDocument()
     expect(screen.getByText('Superglue Onboarding Pack')).toBeInTheDocument()
+    expect(screen.getByText('Agent Ops Budgeting')).toBeInTheDocument()
+    expect(screen.getByText('Agent Cost Ledger')).toBeInTheDocument()
+    expect(screen.getByText('Agent Heartbeats')).toBeInTheDocument()
+    expect(screen.getByText('Agent Roles And Goals')).toBeInTheDocument()
+    expect(screen.getByText('Agent Control Center')).toBeInTheDocument()
+    expect(screen.getByText('Mobile Ops Surface')).toBeInTheDocument()
+    expect(screen.getByText('Ticket-Centered Agent Work')).toBeInTheDocument()
+    expect(screen.getByText('Chain Of Command')).toBeInTheDocument()
+    expect(screen.getByText('Config Versions')).toBeInTheDocument()
+    expect(screen.getByText('Portable Agent Templates')).toBeInTheDocument()
+    expect(screen.getByText('Agent Skill Packs')).toBeInTheDocument()
+    expect(screen.getByText('Plugin Boundary Review')).toBeInTheDocument()
+    expect(screen.getByText('Finance Approval Case')).toBeInTheDocument()
+    expect(screen.getByText('stale')).toBeInTheDocument()
+    expect(screen.getByText('review')).toBeInTheDocument()
+    expect(screen.getByText(/approval_gate/i)).toBeInTheDocument()
+    expect(screen.getByText(/Monthly budget changed to 900 cents/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Freigeben' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Pausieren' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Eskalieren' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Onboarding JSON' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'ENV Template' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Vault Template' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Template Export' })).toBeInTheDocument()
     expect(screen.getByText('Domain Rollouts')).toBeInTheDocument()
     expect(screen.getByText('84%')).toBeInTheDocument()
     expect(screen.getByText('Command Catalog')).toBeInTheDocument()

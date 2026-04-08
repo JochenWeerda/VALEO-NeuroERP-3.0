@@ -16,6 +16,7 @@ from .neuroassist import (
     get_productive_neuroassist_capabilities,
     resolve_neuroassist_capability,
 )
+from .agent_ops import AgentBudgetGuardrailExceededError, get_agent_ops_service
 from .neuroassist_audit import (
     build_neuroassist_audit_record,
     build_neuroassist_process_audit_entry,
@@ -463,6 +464,14 @@ class NeuroAssistService:
             status=status,
             result=payload,
         )
+        cls._record_agent_ops(
+            run_id=run_id,
+            tenant_id=tenant_id,
+            capability_key=capability_key,
+            status=status,
+            runtime=runtime,
+            result=payload,
+        )
         return {
             "run_id": run_id,
             "correlation_id": run_id,
@@ -516,6 +525,29 @@ class NeuroAssistService:
         }
 
     @classmethod
+    def _record_agent_ops(
+        cls,
+        *,
+        run_id: str,
+        tenant_id: str,
+        capability_key: str,
+        status: str,
+        runtime: dict[str, Any],
+        result: dict[str, Any],
+    ) -> None:
+        capability = resolve_neuroassist_capability(capability_key)
+        get_agent_ops_service().record_run(
+            tenant_id=tenant_id,
+            run_id=run_id,
+            capability_key=capability_key,
+            role_key=capability.role_key,
+            status=status,
+            current_stage_key=runtime.get("current_stage_key") or result.get("current_stage_key") or "closure",
+            runtime=runtime,
+            result=result,
+        )
+
+    @classmethod
     def _resolve_registered_run(cls, run_id: str) -> dict[str, Any]:
         run = cls._run_registry.get(run_id)
         if run is None:
@@ -554,6 +586,10 @@ class NeuroAssistService:
             raise NeuroAssistInputContractError(str(exc)) from exc
 
         capability = resolve_neuroassist_capability(capability_key)
+        try:
+            get_agent_ops_service().enforce_budget(tenant_id, capability_key)
+        except AgentBudgetGuardrailExceededError as exc:
+            raise NeuroAssistInputContractError(str(exc)) from exc
         # Use generic workflow runner if available, otherwise fall back to direct execution
         try:
             workflow_runner = self._resolve_workflow_runner(capability_key)
@@ -608,13 +644,22 @@ class NeuroAssistService:
                 status=workflow_result.get("status", "pending_approval"),
                 result=payload,
             )
+            runtime = workflow_result.get("runtime", {})
+            self._record_agent_ops(
+                run_id=correlation_id,
+                tenant_id=tenant_id,
+                capability_key=capability_key,
+                status=workflow_result.get("status", "pending_approval"),
+                runtime=runtime,
+                result=payload,
+            )
             return {
                 "run_id": correlation_id,
                 "correlation_id": correlation_id,
                 "capability_key": capability_key,
                 "status": workflow_result.get("status", "pending_approval"),
                 "started_at": started_at,
-                "runtime": workflow_result.get("runtime", {}),
+                "runtime": runtime,
                 "result": payload,
             }
         except (KeyError, NeuroAssistInputContractError):
@@ -744,6 +789,14 @@ class NeuroAssistService:
             tenant_id=contract.tenant_id,
             started_at=result["started_at"],
             status=result["status"],
+            result=payload,
+        )
+        self._record_agent_ops(
+            run_id=run_id,
+            tenant_id=contract.tenant_id,
+            capability_key="bestellvorschlag_assistant",
+            status=result["status"],
+            runtime=result["runtime"],
             result=payload,
         )
         return {
@@ -967,6 +1020,14 @@ class NeuroAssistService:
             result=projected_result,
         )
         self._update_registered_run(run_id, status=status, result=payload)
+        self._record_agent_ops(
+            run_id=run_id,
+            tenant_id=run["tenant_id"],
+            capability_key="bestellvorschlag_assistant",
+            status=status,
+            runtime=runtime,
+            result=payload,
+        )
         return {
             "run_id": run_id,
             "correlation_id": run_id,
@@ -1060,6 +1121,26 @@ class NeuroAssistService:
             "capability_key": "bestellvorschlag_assistant",
             "runtime": runtime,
         }
+
+    async def list_runs(
+        self,
+        *,
+        status: str | None = None,
+        limit: int = 50,
+    ) -> list[dict[str, Any]]:
+        runs = sorted(
+            self._run_registry.items(),
+            key=lambda item: item[1]["started_at"],
+            reverse=True,
+        )
+        payload: list[dict[str, Any]] = []
+        for run_id, run in runs:
+            if status is not None and run["status"] != status:
+                continue
+            payload.append(await self.get_run_status(run_id))
+            if len(payload) >= limit:
+                break
+        return payload
 
     async def run_skonto_assistant(
         self,

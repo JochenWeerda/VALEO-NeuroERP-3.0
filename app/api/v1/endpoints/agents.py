@@ -64,6 +64,91 @@ class NeuroAssistGateActionResponse(BaseModel):
     result: dict = Field(default_factory=dict)
 
 
+class AgentBudgetUpdateRequest(BaseModel):
+    tenant_id: str = "system"
+    monthly_budget_cents: int = Field(ge=0)
+    changed_by: str = "admin-ui"
+
+
+class AgentOpsOverviewResponse(BaseModel):
+    tenant_id: str
+    schema_version: int
+    budget_total_cents: int
+    spent_total_cents: int
+    remaining_total_cents: int
+    blocked_budget_count: int
+    monthly_run_count: int
+    budget_summaries: list[dict] = Field(default_factory=list)
+    cost_ledger: list[dict] = Field(default_factory=list)
+    heartbeats: list[dict] = Field(default_factory=list)
+    roles: list[dict] = Field(default_factory=list)
+    profiles: list[dict] = Field(default_factory=list)
+    goals: list[dict] = Field(default_factory=list)
+    open_tickets: list[dict] = Field(default_factory=list)
+
+
+class AgentTicketResponse(BaseModel):
+    tenant_id: str
+    ticket_id: str
+    run_id: str
+    capability_key: str
+    role_key: str
+    goal_key: str
+    status: str
+    opened_at: str
+    updated_at: str
+    latest_stage_key: str
+    latest_summary: str
+    work_item_type: str = "agent_case"
+    work_item_id: str | None = None
+    work_item_title: str | None = None
+    owner_role: str | None = None
+    escalation_role: str | None = None
+    allowed_actions: list[str] = Field(default_factory=list)
+    blocker_reasons: list[str] = Field(default_factory=list)
+    requires_review: bool = False
+    is_stale: bool = False
+    review_due_at: str | None = None
+    age_minutes: int = 0
+
+
+class AgentInterventionRequest(BaseModel):
+    tenant_id: str = "system"
+    action: str
+    requested_by: str = "admin-ui"
+    note: str | None = None
+
+
+class AgentTemplateImportRequest(BaseModel):
+    tenant_id: str = "system"
+    template: dict
+
+
+class AgentHeartbeatUpdateRequest(BaseModel):
+    tenant_id: str = "system"
+    cadence: str | None = None
+    enabled: bool | None = None
+    stale_after_hours: int | None = Field(default=None, ge=1)
+    changed_by: str = "admin-ui"
+
+
+class AgentProfileUpdateRequest(BaseModel):
+    tenant_id: str = "system"
+    owner_role: str | None = None
+    escalation_role: str | None = None
+    review_sla_hours: int | None = Field(default=None, ge=1)
+    stale_after_hours: int | None = Field(default=None, ge=1)
+    allowed_actions: list[str] | None = None
+    changed_by: str = "admin-ui"
+
+
+class AgentSkillPackUpdateRequest(BaseModel):
+    tenant_id: str = "system"
+    skills: list[str] | None = None
+    prompt_contracts: list[str] | None = None
+    changed_by: str = "admin-ui"
+
+
 def _get_neuroassist_service():
     try:
         from ....agents import get_neuroassist_service
@@ -87,6 +172,24 @@ class _NeuroAssistServiceProxy:
 
 
 neuroassist_service = _NeuroAssistServiceProxy()
+
+
+def _get_agent_ops_service():
+    try:
+        from ....agents import get_agent_ops_service
+    except ModuleNotFoundError as exc:
+        logger.error("Agent Ops dependencies are not available: %s", exc)
+        raise HTTPException(
+            status_code=503,
+            detail="Agent Ops runtime dependencies are not installed on this backend",
+        ) from exc
+    return get_agent_ops_service()
+
+
+def _get_agent_ops_template_model():
+    from ....agents import AgentTemplateExport
+
+    return AgentTemplateExport
 
 
 def _list_capability_responses(productive_only: bool) -> list[CapabilityResponse]:
@@ -184,4 +287,196 @@ async def apply_neuroassist_gate_action(run_id: str, request: NeuroAssistGateAct
     except Exception as exc:
         logger.error("NeuroASSIST gate action failed: %s", exc, exc_info=True)
         raise HTTPException(status_code=500, detail=f"NeuroASSIST gate action failed: {str(exc)}")
+
+
+@router.get("/neuroassist/ops/overview", response_model=AgentOpsOverviewResponse)
+async def get_neuroassist_ops_overview(tenant_id: str = "system"):
+    try:
+        return AgentOpsOverviewResponse(**_get_agent_ops_service().build_overview(tenant_id).model_dump(mode="json"))
+    except Exception as exc:
+        logger.error("NeuroASSIST ops overview failed: %s", exc, exc_info=True)
+        raise HTTPException(status_code=500, detail=f"NeuroASSIST ops overview failed: {str(exc)}")
+
+
+@router.get("/neuroassist/ops/tickets", response_model=list[AgentTicketResponse])
+async def list_neuroassist_ops_tickets(tenant_id: str = "system", include_closed: bool = False):
+    try:
+        tickets = _get_agent_ops_service().list_tickets(tenant_id, include_closed=include_closed)
+        return [AgentTicketResponse(**ticket.model_dump(mode="json")) for ticket in tickets]
+    except Exception as exc:
+        logger.error("NeuroASSIST ops tickets failed: %s", exc, exc_info=True)
+        raise HTTPException(status_code=500, detail=f"NeuroASSIST ops tickets failed: {str(exc)}")
+
+
+@router.post("/neuroassist/ops/budgets/{capability_key}", response_model=dict)
+async def update_neuroassist_budget(capability_key: str, request: AgentBudgetUpdateRequest):
+    try:
+        budget = _get_agent_ops_service().set_budget(
+            request.tenant_id,
+            capability_key,
+            request.monthly_budget_cents,
+            changed_by=request.changed_by,
+        )
+        return budget.model_dump(mode="json")
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+    except Exception as exc:
+        logger.error("NeuroASSIST budget update failed: %s", exc, exc_info=True)
+        raise HTTPException(status_code=500, detail=f"NeuroASSIST budget update failed: {str(exc)}")
+
+
+@router.get("/neuroassist/ops/dashboard", response_model=dict)
+async def get_neuroassist_ops_dashboard(tenant_id: str = "system"):
+    try:
+        return _get_agent_ops_service().build_dashboard(tenant_id).model_dump(mode="json")
+    except Exception as exc:
+        logger.error("NeuroASSIST ops dashboard failed: %s", exc, exc_info=True)
+        raise HTTPException(status_code=500, detail=f"NeuroASSIST ops dashboard failed: {str(exc)}")
+
+
+@router.get("/neuroassist/ops/control-center", response_model=dict)
+async def get_neuroassist_control_center(tenant_id: str = "system"):
+    try:
+        return _get_agent_ops_service().build_control_center(tenant_id).model_dump(mode="json")
+    except Exception as exc:
+        logger.error("NeuroASSIST control center failed: %s", exc, exc_info=True)
+        raise HTTPException(status_code=500, detail=f"NeuroASSIST control center failed: {str(exc)}")
+
+
+@router.get("/neuroassist/ops/mobile-overview", response_model=dict)
+async def get_neuroassist_mobile_ops_overview(tenant_id: str = "system"):
+    try:
+        return _get_agent_ops_service().build_mobile_overview(tenant_id).model_dump(mode="json")
+    except Exception as exc:
+        logger.error("NeuroASSIST mobile ops overview failed: %s", exc, exc_info=True)
+        raise HTTPException(status_code=500, detail=f"NeuroASSIST mobile ops overview failed: {str(exc)}")
+
+
+@router.get("/neuroassist/ops/interventions", response_model=list[dict])
+async def list_neuroassist_interventions(tenant_id: str = "system"):
+    try:
+        return [item.model_dump(mode="json") for item in _get_agent_ops_service().list_interventions(tenant_id)]
+    except Exception as exc:
+        logger.error("NeuroASSIST interventions failed: %s", exc, exc_info=True)
+        raise HTTPException(status_code=500, detail=f"NeuroASSIST interventions failed: {str(exc)}")
+
+
+@router.get("/neuroassist/ops/config-revisions", response_model=list[dict])
+async def list_neuroassist_config_revisions(tenant_id: str = "system"):
+    try:
+        return [item.model_dump(mode="json") for item in _get_agent_ops_service().list_config_revisions(tenant_id)]
+    except Exception as exc:
+        logger.error("NeuroASSIST config revisions failed: %s", exc, exc_info=True)
+        raise HTTPException(status_code=500, detail=f"NeuroASSIST config revisions failed: {str(exc)}")
+
+
+@router.post("/neuroassist/ops/tickets/{ticket_id}/interventions", response_model=dict)
+async def apply_neuroassist_intervention(ticket_id: str, request: AgentInterventionRequest):
+    try:
+        return _get_agent_ops_service().apply_intervention(
+            request.tenant_id,
+            ticket_id,
+            action=request.action,
+            requested_by=request.requested_by,
+            note=request.note,
+        ).model_dump(mode="json")
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+    except Exception as exc:
+        logger.error("NeuroASSIST intervention failed: %s", exc, exc_info=True)
+        raise HTTPException(status_code=500, detail=f"NeuroASSIST intervention failed: {str(exc)}")
+
+
+@router.get("/neuroassist/ops/templates/export", response_model=dict)
+async def export_neuroassist_template(tenant_id: str = "system", template_key: str = "default"):
+    try:
+        return _get_agent_ops_service().export_template(tenant_id, template_key=template_key).model_dump(mode="json")
+    except Exception as exc:
+        logger.error("NeuroASSIST template export failed: %s", exc, exc_info=True)
+        raise HTTPException(status_code=500, detail=f"NeuroASSIST template export failed: {str(exc)}")
+
+
+@router.post("/neuroassist/ops/templates/import", response_model=dict)
+async def import_neuroassist_template(request: AgentTemplateImportRequest):
+    try:
+        template = _get_agent_ops_template_model().model_validate(request.template)
+        return _get_agent_ops_service().import_template(request.tenant_id, template).model_dump(mode="json")
+    except Exception as exc:
+        logger.error("NeuroASSIST template import failed: %s", exc, exc_info=True)
+        raise HTTPException(status_code=500, detail=f"NeuroASSIST template import failed: {str(exc)}")
+
+
+@router.post("/neuroassist/ops/heartbeats/{capability_key}", response_model=dict)
+async def update_neuroassist_heartbeat(capability_key: str, request: AgentHeartbeatUpdateRequest):
+    try:
+        return _get_agent_ops_service().set_heartbeat(
+            request.tenant_id,
+            capability_key,
+            cadence=request.cadence,
+            enabled=request.enabled,
+            stale_after_hours=request.stale_after_hours,
+            changed_by=request.changed_by,
+        ).model_dump(mode="json")
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+    except Exception as exc:
+        logger.error("NeuroASSIST heartbeat update failed: %s", exc, exc_info=True)
+        raise HTTPException(status_code=500, detail=f"NeuroASSIST heartbeat update failed: {str(exc)}")
+
+
+@router.post("/neuroassist/ops/profiles/{capability_key}", response_model=dict)
+async def update_neuroassist_profile(capability_key: str, request: AgentProfileUpdateRequest):
+    try:
+        return _get_agent_ops_service().set_profile(
+            request.tenant_id,
+            capability_key,
+            owner_role=request.owner_role,
+            escalation_role=request.escalation_role,
+            review_sla_hours=request.review_sla_hours,
+            stale_after_hours=request.stale_after_hours,
+            allowed_actions=request.allowed_actions,
+            changed_by=request.changed_by,
+        ).model_dump(mode="json")
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+    except Exception as exc:
+        logger.error("NeuroASSIST profile update failed: %s", exc, exc_info=True)
+        raise HTTPException(status_code=500, detail=f"NeuroASSIST profile update failed: {str(exc)}")
+
+
+@router.post("/neuroassist/ops/skill-packs/{skill_pack_key}", response_model=dict)
+async def update_neuroassist_skill_pack(skill_pack_key: str, request: AgentSkillPackUpdateRequest):
+    try:
+        return _get_agent_ops_service().update_skill_pack(
+            request.tenant_id,
+            skill_pack_key,
+            skills=request.skills,
+            prompt_contracts=request.prompt_contracts,
+            changed_by=request.changed_by,
+        ).model_dump(mode="json")
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+    except Exception as exc:
+        logger.error("NeuroASSIST skill pack update failed: %s", exc, exc_info=True)
+        raise HTTPException(status_code=500, detail=f"NeuroASSIST skill pack update failed: {str(exc)}")
+
+
+@router.get("/neuroassist/ops/skill-packs", response_model=list[dict])
+async def list_neuroassist_skill_packs(tenant_id: str = "system"):
+    try:
+        return [item.model_dump(mode="json") for item in _get_agent_ops_service().list_skill_packs(tenant_id)]
+    except Exception as exc:
+        logger.error("NeuroASSIST skill packs failed: %s", exc, exc_info=True)
+        raise HTTPException(status_code=500, detail=f"NeuroASSIST skill packs failed: {str(exc)}")
+
+
+@router.get("/neuroassist/ops/plugin-boundary-review", response_model=dict)
+async def get_neuroassist_plugin_boundary_review(tenant_id: str = "system"):
+    try:
+        return _get_agent_ops_service().build_plugin_boundary_review(tenant_id).model_dump(mode="json")
+    except Exception as exc:
+        logger.error("NeuroASSIST plugin boundary review failed: %s", exc, exc_info=True)
+        raise HTTPException(status_code=500, detail=f"NeuroASSIST plugin boundary review failed: {str(exc)}")
 

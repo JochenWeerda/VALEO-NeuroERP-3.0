@@ -5,7 +5,14 @@ from decimal import Decimal
 
 import pytest
 
+from app.agents import get_agent_ops_service
 from app.agents.neuroassist_service import NeuroAssistService
+
+
+@pytest.fixture(autouse=True)
+def _reset_agent_ops_state() -> None:
+    get_agent_ops_service().reset()
+    NeuroAssistService._run_registry.clear()
 
 
 def test_neuroassist_service_lists_productive_capabilities():
@@ -119,6 +126,12 @@ def test_neuroassist_service_runs_generic_finance_capability():
     assert result["result"]["context_resolution"]["process_definition_key"] == "settlement_to_finance"
     assert "process_audit_entry" not in result["result"]
 
+    overview = get_agent_ops_service().build_overview("system")
+    assert overview.monthly_run_count == 1
+    assert overview.spent_total_cents > 0
+    assert overview.cost_ledger[0].capability_key == "finance_skonto_assistant"
+    assert any(heartbeat.last_run_id == result["run_id"] for heartbeat in overview.heartbeats)
+
 
 def test_neuroassist_service_runs_data_quality_capability():
     service = NeuroAssistService()
@@ -170,6 +183,11 @@ def test_neuroassist_service_runs_operations_exception_capability():
     assert result["result"]["context_resolution"]["status"] == "resolved"
     assert result["result"]["process_audit_entry"]["process_definition_key"] == "quality_to_settlement"
     assert result["result"]["process_audit_entry"]["aggregate_type"] == "agrar_settlement"
+
+    tickets = get_agent_ops_service().list_tickets()
+    assert tickets
+    assert tickets[0].goal_key == "operations_exception_assistant.goal"
+    assert tickets[0].capability_key == "operations_exception_assistant"
 
 
 def test_neuroassist_service_reads_generic_run_status_for_sync_capability():
@@ -335,3 +353,102 @@ def test_neuroassist_service_rejects_invalid_generic_input_contract():
                 parameters={},
             )
         )
+
+
+def test_neuroassist_service_blocks_run_when_budget_is_exhausted():
+    service = NeuroAssistService()
+    get_agent_ops_service().set_budget("system", "finance_skonto_assistant", 10)
+
+    with pytest.raises(ValueError, match="would be exceeded"):
+        asyncio.run(
+            service.run_capability(
+                "finance_skonto_assistant",
+                parameters={"available_cash": "10000.00"},
+            )
+        )
+
+
+def test_agent_ops_service_supports_interventions_templates_and_mobile_views():
+    service = NeuroAssistService()
+    run = asyncio.run(
+        service.run_capability(
+            "operations_exception_assistant",
+            parameters={
+                "process_definition_key": "quality_to_settlement",
+                "exception_code": "SETTLEMENT_MISMATCH",
+                "aggregate_type": "agrar_settlement",
+                "aggregate_id": "SET-1",
+                "exception_context": {"deviation": "weight_mismatch"},
+            },
+        )
+    )
+    ops = get_agent_ops_service()
+    ticket = ops.list_tickets()[0]
+
+    intervention = ops.apply_intervention(
+        "system",
+        ticket.ticket_id,
+        action="escalate",
+        requested_by="tester",
+        note="Need owner review",
+    )
+    dashboard = ops.build_dashboard("system")
+    mobile = ops.build_mobile_overview("system")
+    template = ops.export_template("system", template_key="default")
+    imported = ops.import_template("system", template)
+    skill_packs = ops.list_skill_packs("system")
+    boundary = ops.build_plugin_boundary_review("system")
+
+    assert intervention.resulting_status == "escalated"
+    assert dashboard.intervention_count == 1
+    assert mobile.urgent_ticket_count >= 1
+    assert imported.template_key == "default"
+    assert skill_packs
+    assert any("second agent orchestrator" in item for item in boundary.forbidden_patterns)
+
+
+def test_agent_ops_service_builds_control_center_and_config_revisions():
+    ops = get_agent_ops_service()
+    ops.record_run(
+        tenant_id="system",
+        run_id="run-control-center",
+        capability_key="finance_skonto_assistant",
+        role_key="finance_action_assistant",
+        status="pending_approval",
+        current_stage_key="analysis",
+        runtime={
+            "current_stage_key": "analysis",
+            "stage_runs": [{"stage_key": "analysis", "status": "completed"}],
+            "gate_decisions": [{"gate_type": "approval_gate", "status": "deferred"}],
+        },
+        result={"current_stage_key": "analysis"},
+    )
+
+    budget = ops.set_budget("system", "finance_skonto_assistant", 1100, changed_by="ops-admin")
+    heartbeat = ops.set_heartbeat("system", "finance_skonto_assistant", cadence="hourly", stale_after_hours=2, changed_by="ops-admin")
+    profile = ops.set_profile(
+        "system",
+        "finance_skonto_assistant",
+        review_sla_hours=2,
+        stale_after_hours=2,
+        allowed_actions=["approve", "pause", "escalate"],
+        changed_by="ops-admin",
+    )
+    skill_pack = ops.update_skill_pack(
+        "system",
+        "finance_action_assistant.pack",
+        skills=["policy_guardrails", "cost_control"],
+        changed_by="ops-admin",
+    )
+    control_center = ops.build_control_center("system")
+
+    assert budget.version == 2
+    assert heartbeat.version == 2
+    assert profile.version == 2
+    assert skill_pack.version == 2
+    assert control_center.dashboard.review_queue_count >= 1
+    assert control_center.dashboard.open_blocker_count >= 1
+    assert control_center.tickets[0].requires_review is True
+    assert control_center.tickets[0].owner_role == "finance_action_assistant"
+    assert control_center.chain_of_command[0].can_intervene is True
+    assert any(revision.config_type == "budget" and revision.changed_by == "ops-admin" for revision in control_center.config_revisions)

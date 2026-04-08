@@ -130,42 +130,63 @@ def test_data_retention_policy_enforced():
     pass  # Placeholder
 
 
-@pytest.mark.skip(reason="Endpoint not yet implemented")
-def test_gdpr_data_export_complete():
+def test_gdpr_data_export_complete(db: Session):
     """Test that data-export returns all user data."""
-    response = client.get("/api/v1/gdpr/data-export/test-user-id", headers=AUTH_HEADERS)
-    
+    _require_table(db, "domain_shared", "users")
+    # Seed user in the default tenant
+    tenant = db.query(Tenant).filter(Tenant.id == "default").first()
+    if tenant is None:
+        tenant = Tenant(id="default", name="Default", domain="default.local", is_active=True)
+        db.add(tenant)
+        db.flush()
+    user = db.query(User).filter(User.id == "test-export-user").first()
+    if user is None:
+        user = User(
+            id="test-export-user", tenant_id="default", first_name="Export",
+            last_name="Tester", username="export-tester", email="export@test.local", is_active=True,
+        )
+        db.add(user)
+    db.commit()
+
+    response = client.get(
+        "/api/v1/gdpr/data-export/test-export-user",
+        headers={**AUTH_HEADERS, "X-Tenant-ID": "default"},
+    )
     assert response.status_code == 200
     data = response.json()
-    
-    # Should include all personal data
     assert "personal_data" in data
-    assert "transactions" in data
     assert "audit_logs" in data
-    assert "consents" in data
+    assert "export_metadata" in data
+    assert data["personal_data"]["username"] == "export-tester"
 
 
-@pytest.mark.skip(reason="Endpoint not yet implemented")
-def test_gdpr_right_to_delete():
-    """Test that user can be deleted with cascade."""
-    # Create test user
-    user_id = "test-delete-user"
-    
-    # Delete user
-    response = client.delete(f"/api/v1/gdpr/delete-user/{user_id}", headers=AUTH_HEADERS)
+def test_gdpr_right_to_delete(db: Session):
+    """Test that user can be anonymized (soft-delete) via GDPR endpoint."""
+    _require_table(db, "domain_shared", "users")
+    tenant = db.query(Tenant).filter(Tenant.id == "default").first()
+    if tenant is None:
+        tenant = Tenant(id="default", name="Default", domain="default.local", is_active=True)
+        db.add(tenant)
+        db.flush()
+    user = db.query(User).filter(User.id == "test-delete-user").first()
+    if user is None:
+        user = User(
+            id="test-delete-user", tenant_id="default", first_name="Delete",
+            last_name="Me", username="delete-me", email="delete@test.local", is_active=True,
+        )
+        db.add(user)
+    db.commit()
+
+    response = client.delete(
+        "/api/v1/gdpr/delete-user/test-delete-user",
+        headers={**AUTH_HEADERS, "X-Tenant-ID": "default"},
+    )
     assert response.status_code == 204
-    
-    # Verify deletion
-    db = SessionLocal()
-    user = db.query(User).filter(User.id == user_id).first()
-    assert user is None
-    
-    # Verify cascade: Related data should be anonymized
-    customers = db.query(Customer).filter(
-        Customer.created_by == user_id
-    ).all()
-    for customer in customers:
-        assert customer.created_by == "anonymized"
-    
-    db.close()
+
+    # Verify anonymization (not hard-delete, GoBD requires audit trail)
+    db.expire_all()
+    user = db.query(User).filter(User.id == "test-delete-user").first()
+    assert user is not None  # still exists
+    assert user.is_active is False
+    assert "anonymized" in user.email
 

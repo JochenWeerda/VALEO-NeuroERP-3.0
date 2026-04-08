@@ -32,19 +32,45 @@ _TIMEOUT = 10.0
 timezone_utc = timezone.utc
 
 
+_http_client: httpx.AsyncClient | None = None
+
+
+def _get_http_client() -> httpx.AsyncClient:
+    global _http_client
+    if _http_client is None or _http_client.is_closed:
+        _http_client = httpx.AsyncClient(timeout=_TIMEOUT)
+    return _http_client
+
+
 async def _get(url: str, params: dict) -> dict:
-    """HTTP-GET mit Timeout-Handling."""
-    async with httpx.AsyncClient(timeout=_TIMEOUT) as client:
-        try:
-            resp = await client.get(url, params=params)
-            resp.raise_for_status()
-            return resp.json()
-        except httpx.TimeoutException:
-            raise HTTPException(status_code=504, detail="Wetter-API Timeout")
-        except httpx.HTTPStatusError as e:
-            raise HTTPException(status_code=502, detail=f"Wetter-API Fehler: {e.response.status_code}")
-        except Exception as e:
-            raise HTTPException(status_code=502, detail=f"Wetter-API nicht erreichbar: {str(e)}")
+    """HTTP-GET mit Timeout-Handling und Connection-Pooling."""
+    client = _get_http_client()
+    try:
+        resp = await client.get(url, params=params)
+        resp.raise_for_status()
+        return resp.json()
+    except httpx.TimeoutException:
+        raise HTTPException(status_code=504, detail="Wetter-API Timeout")
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(status_code=502, detail=f"Wetter-API Fehler: {e.response.status_code}")
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Wetter-API nicht erreichbar: {str(e)}")
+
+
+_weather_cache: dict = {}
+_WEATHER_CACHE_TTL = 300  # 5 minutes
+
+
+async def _cached_get(url: str, params: dict, cache_ttl: int = _WEATHER_CACHE_TTL) -> dict:
+    """HTTP-GET with TTL caching for weather data."""
+    import hashlib, json, time
+    cache_key = hashlib.md5(f"{url}:{json.dumps(params, sort_keys=True)}".encode()).hexdigest()
+    now = time.time()
+    if cache_key in _weather_cache and (now - _weather_cache[cache_key]["ts"]) < cache_ttl:
+        return _weather_cache[cache_key]["data"]
+    data = await _get(url, params)
+    _weather_cache[cache_key] = {"data": data, "ts": now}
+    return data
 
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -124,7 +150,7 @@ async def get_wetter_aktuell(
     lon: float = Query(..., description="Längengrad (WGS84)"),
 ):
     """Aktuelles Wetter vom nächsten DWD-Messgerät (via BrightSky)."""
-    data = await _get(
+    data = await _cached_get(
         f"{BRIGHTSKY_BASE}/current_weather",
         {"lat": lat, "lon": lon, "units": "dwd"},
     )
@@ -159,7 +185,7 @@ async def get_wetter_warnungen(
     lon: float = Query(..., description="Längengrad"),
 ):
     """DWD-Wetterwarnungen für eine Geokoordinate (via BrightSky)."""
-    data = await _get(
+    data = await _cached_get(
         f"{BRIGHTSKY_BASE}/alerts",
         {"lat": lat, "lon": lon},
     )
@@ -194,7 +220,7 @@ async def get_wetter_stunden(
     if not bis:
         bis = (date.today() + timedelta(days=1)).isoformat()
 
-    data = await _get(
+    data = await _cached_get(
         f"{BRIGHTSKY_BASE}/weather",
         {"lat": lat, "lon": lon, "date": datum, "last_date": bis, "units": "dwd"},
     )
@@ -226,7 +252,7 @@ async def get_wetter_prognose(
     start = date.today().isoformat()
     end = (date.today() + timedelta(days=tage - 1)).isoformat()
 
-    data = await _get(
+    data = await _cached_get(
         f"{OPEN_METEO_BASE}/dwd-icon",
         {
             "latitude": lat,
@@ -285,7 +311,7 @@ async def get_wetter_boden(
     start = datetime.now(tz=timezone_utc).strftime("%Y-%m-%d")
     end = (datetime.now(tz=timezone_utc) + timedelta(hours=stunden)).strftime("%Y-%m-%d")
 
-    data = await _get(
+    data = await _cached_get(
         f"{OPEN_METEO_BASE}/dwd-icon",
         {
             "latitude": lat,

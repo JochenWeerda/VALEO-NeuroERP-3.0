@@ -1231,6 +1231,8 @@ async def create_business_partner(
 async def list_business_partners(
     status: Optional[str] = Query(None),
     search: Optional[str] = Query(None),
+    skip: int = Query(0, ge=0, description="Skip N records"),
+    limit: int = Query(50, ge=1, le=500, description="Max records to return"),
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
@@ -1240,7 +1242,7 @@ async def list_business_partners(
     if search:
         s = f"%{search}%"
         q = q.filter((BusinessPartner.partner_number.ilike(s)) | (BusinessPartner.name_1.ilike(s)))
-    rows = q.order_by(BusinessPartner.name_1.asc()).limit(500).all()
+    rows = q.order_by(BusinessPartner.name_1.asc()).offset(skip).limit(limit).all()
     return [_to_out(r) for r in rows]
 
 
@@ -1785,12 +1787,18 @@ def _to_cpd_account(row: BusinessPartnerCpdAccount) -> CpdAccount:
 
 
 @router.get("/{partner_id}/instructions", response_model=list[Instruction])
-async def list_instructions(partner_id: str, db: Session = Depends(get_db)):
+async def list_instructions(
+    partner_id: str,
+    skip: int = Query(0, ge=0, description="Skip N records"),
+    limit: int = Query(50, ge=1, le=500, description="Max records to return"),
+    db: Session = Depends(get_db),
+):
     _ensure_partner_exists(partner_id, db)
     rows = (
         db.query(BusinessPartnerInstruction)
         .filter(BusinessPartnerInstruction.partner_id == partner_id)
         .order_by(BusinessPartnerInstruction.created_at.desc())
+        .offset(skip).limit(limit)
         .all()
     )
     return [_to_instruction(r) for r in rows]
@@ -1904,12 +1912,18 @@ async def delete_instruction(partner_id: str, instruction_id: str, db: Session =
 
 
 @router.get("/{partner_id}/contacts", response_model=list[Contact])
-async def list_contacts(partner_id: str, db: Session = Depends(get_db)):
+async def list_contacts(
+    partner_id: str,
+    skip: int = Query(0, ge=0, description="Skip N records"),
+    limit: int = Query(50, ge=1, le=500, description="Max records to return"),
+    db: Session = Depends(get_db),
+):
     _ensure_partner_exists(partner_id, db)
     rows = (
         db.query(BusinessPartnerContact)
         .filter(BusinessPartnerContact.partner_id == partner_id)
         .order_by(BusinessPartnerContact.priority.asc(), BusinessPartnerContact.last_name.asc())
+        .offset(skip).limit(limit)
         .all()
     )
     return [_to_contact(r) for r in rows]
@@ -2068,13 +2082,15 @@ async def delete_contact(partner_id: str, contact_id: str, db: Session = Depends
 async def list_addresses(
     partner_id: str,
     address_type: Optional[str] = Query(None),
+    skip: int = Query(0, ge=0, description="Skip N records"),
+    limit: int = Query(50, ge=1, le=500, description="Max records to return"),
     db: Session = Depends(get_db),
 ):
     _ensure_partner_exists(partner_id, db)
     q = db.query(BusinessPartnerAddress).filter(BusinessPartnerAddress.partner_id == partner_id)
     if address_type:
         q = q.filter(BusinessPartnerAddress.address_type == address_type)
-    rows = q.order_by(BusinessPartnerAddress.is_default.desc(), BusinessPartnerAddress.created_at.asc()).all()
+    rows = q.order_by(BusinessPartnerAddress.is_default.desc(), BusinessPartnerAddress.created_at.asc()).offset(skip).limit(limit).all()
     return [_to_address(r) for r in rows]
 
 
@@ -2308,12 +2324,18 @@ async def patch_billing_config(
 
 
 @router.get("/{partner_id}/cpd-accounts", response_model=list[CpdAccount])
-async def list_cpd_accounts(partner_id: str, db: Session = Depends(get_db)):
+async def list_cpd_accounts(
+    partner_id: str,
+    skip: int = Query(0, ge=0, description="Skip N records"),
+    limit: int = Query(50, ge=1, le=500, description="Max records to return"),
+    db: Session = Depends(get_db),
+):
     _ensure_partner_exists(partner_id, db)
     rows = (
         db.query(BusinessPartnerCpdAccount)
         .filter(BusinessPartnerCpdAccount.partner_id == partner_id)
         .order_by(BusinessPartnerCpdAccount.cpd_customer_number.asc())
+        .offset(skip).limit(limit)
         .all()
     )
     return [_to_cpd_account(r) for r in rows]
@@ -2503,12 +2525,18 @@ def _to_pricing_rule(row: BusinessPartnerPricingRule) -> PricingRule:
 
 
 @router.get("/{partner_id}/pricing-rules", response_model=list[PricingRule])
-async def list_pricing_rules(partner_id: str, db: Session = Depends(get_db)):
+async def list_pricing_rules(
+    partner_id: str,
+    skip: int = Query(0, ge=0, description="Skip N records"),
+    limit: int = Query(50, ge=1, le=500, description="Max records to return"),
+    db: Session = Depends(get_db),
+):
     _ensure_partner_exists(partner_id, db)
     rows = (
         db.query(BusinessPartnerPricingRule)
         .filter(BusinessPartnerPricingRule.partner_id == partner_id)
         .order_by(BusinessPartnerPricingRule.created_at.desc())
+        .offset(skip).limit(limit)
         .all()
     )
     return [_to_pricing_rule(r) for r in rows]
@@ -2626,12 +2654,18 @@ def _to_interest_setting(row: BusinessPartnerInterestSetting) -> InterestSetting
 
 
 @router.get("/{partner_id}/interest-settings", response_model=list[InterestSetting])
-async def list_interest_settings(partner_id: str, db: Session = Depends(get_db)):
+async def list_interest_settings(
+    partner_id: str,
+    skip: int = Query(0, ge=0, description="Skip N records"),
+    limit: int = Query(50, ge=1, le=500, description="Max records to return"),
+    db: Session = Depends(get_db),
+):
     _ensure_partner_exists(partner_id, db)
     rows = (
         db.query(BusinessPartnerInterestSetting)
         .filter(BusinessPartnerInterestSetting.partner_id == partner_id)
         .order_by(BusinessPartnerInterestSetting.created_at.desc())
+        .offset(skip).limit(limit)
         .all()
     )
     return [_to_interest_setting(r) for r in rows]
@@ -2717,12 +2751,18 @@ def _to_dispatch_medium(row: BusinessPartnerDispatchMedium) -> DispatchMedium:
 
 
 @router.get("/{partner_id}/dispatch-media", response_model=list[DispatchMedium])
-async def list_dispatch_media(partner_id: str, db: Session = Depends(get_db)):
+async def list_dispatch_media(
+    partner_id: str,
+    skip: int = Query(0, ge=0, description="Skip N records"),
+    limit: int = Query(50, ge=1, le=500, description="Max records to return"),
+    db: Session = Depends(get_db),
+):
     _ensure_partner_exists(partner_id, db)
     rows = (
         db.query(BusinessPartnerDispatchMedium)
         .filter(BusinessPartnerDispatchMedium.partner_id == partner_id)
         .order_by(BusinessPartnerDispatchMedium.document_type.asc(), BusinessPartnerDispatchMedium.dispatch_channel.asc())
+        .offset(skip).limit(limit)
         .all()
     )
     return [_to_dispatch_medium(r) for r in rows]
@@ -2810,12 +2850,18 @@ def _to_coop(row: BusinessPartnerCooperativeMembership) -> CooperativeMembership
 
 
 @router.get("/{partner_id}/cooperative-memberships", response_model=list[CooperativeMembership])
-async def list_cooperative_memberships(partner_id: str, db: Session = Depends(get_db)):
+async def list_cooperative_memberships(
+    partner_id: str,
+    skip: int = Query(0, ge=0, description="Skip N records"),
+    limit: int = Query(50, ge=1, le=500, description="Max records to return"),
+    db: Session = Depends(get_db),
+):
     _ensure_partner_exists(partner_id, db)
     rows = (
         db.query(BusinessPartnerCooperativeMembership)
         .filter(BusinessPartnerCooperativeMembership.partner_id == partner_id)
         .order_by(BusinessPartnerCooperativeMembership.created_at.desc())
+        .offset(skip).limit(limit)
         .all()
     )
     return [_to_coop(r) for r in rows]
@@ -2887,12 +2933,18 @@ def _to_email_distribution(row: BusinessPartnerEmailDistribution) -> EmailDistri
 
 
 @router.get("/{partner_id}/email-distributions", response_model=list[EmailDistribution])
-async def list_email_distributions(partner_id: str, db: Session = Depends(get_db)):
+async def list_email_distributions(
+    partner_id: str,
+    skip: int = Query(0, ge=0, description="Skip N records"),
+    limit: int = Query(50, ge=1, le=500, description="Max records to return"),
+    db: Session = Depends(get_db),
+):
     _ensure_partner_exists(partner_id, db)
     rows = (
         db.query(BusinessPartnerEmailDistribution)
         .filter(BusinessPartnerEmailDistribution.partner_id == partner_id)
         .order_by(BusinessPartnerEmailDistribution.distribution_name.asc(), BusinessPartnerEmailDistribution.email.asc())
+        .offset(skip).limit(limit)
         .all()
     )
     return [_to_email_distribution(r) for r in rows]

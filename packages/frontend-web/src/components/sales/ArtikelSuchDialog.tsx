@@ -79,77 +79,58 @@ export function ArtikelSuchDialog({
     return () => clearTimeout(timer)
   }, [searchTerm])
 
-  // Load all articles once, filter client-side (like CustomerSelectionDialog)
+  // Server-side search: only fetch when debounced search term has 2+ chars
   const { data: articles = [], isLoading, error } = useQuery({
-    queryKey: ['articles', 'all'], // Load all articles once, filter client-side
+    queryKey: ['articles', 'search', debouncedSearchTerm],
     queryFn: async () => {
       const params = new URLSearchParams()
-      params.append('limit', '200') // Get enough results for client-side filtering/sorting
-      
-      console.log('[ArtikelSuchDialog] Fetching articles with params:', params.toString())
-      
-      try {
-        const response = await apiClient.get<any>('/api/v1/articles', { params })
-        console.log('[ArtikelSuchDialog] API Response (raw):', response)
-        
-        let items: any[] = []
-        if (Array.isArray(response)) {
-          items = response
-        } else if (response?.items && Array.isArray(response.items)) {
-          items = response.items
-        } else if (response?.data?.items && Array.isArray(response.data.items)) {
-          items = response.data.items
-        } else if (response?.data && Array.isArray(response.data)) {
-          items = response.data
-        }
-        
-        if (items.length === 0 && response) {
-          console.warn('[ArtikelSuchDialog] No items found in expected structure, searching response:', Object.keys(response))
-          for (const key of Object.keys(response)) {
-            if (Array.isArray((response as any)[key])) {
-              console.warn(`[ArtikelSuchDialog] Found array in key "${key}":`, (response as any)[key])
-              items = (response as any)[key]
-              break
-            }
+      params.append('search', debouncedSearchTerm)
+      params.append('limit', '50')
+
+      const response = await apiClient.get<any>('/api/v1/articles', { params })
+
+      let items: any[] = []
+      if (Array.isArray(response)) {
+        items = response
+      } else if (response?.items && Array.isArray(response.items)) {
+        items = response.items
+      } else if (response?.data?.items && Array.isArray(response.data.items)) {
+        items = response.data.items
+      } else if (response?.data && Array.isArray(response.data)) {
+        items = response.data
+      }
+
+      if (items.length === 0 && response) {
+        for (const key of Object.keys(response)) {
+          if (Array.isArray((response as any)[key])) {
+            items = (response as any)[key]
+            break
           }
         }
-        
-        console.log('[ArtikelSuchDialog] Extracted items:', {
-          itemsCount: items.length,
-          firstItem: items[0],
-          allItems: items,
-        })
-        
-        // Map backend article format to frontend format
-        const mapped = items.map((a: any) => ({
-          id: a.id,
-          articleNumber: a.article_number || a.articleNumber || '',
-          description: (a.name || a.description || '').trim(), // Prefer name (backend field) over description
-          description2: a.description2 || a.description_2 || '', // Now available in DB
-          shortDescription: a.short_description || a.shortDescription || a.suchbegriff || '', // Now available in DB
-          articleType: a.article_type || a.articleType || a.category || '',
-          unit: a.unit || a.me || '',
-          matchcode2: a.matchcode2 || a.matchcode_2 || a.suchbegriff || '', // Now available in DB
-          articleGroup: a.article_group || a.articleGroup || a.warengruppe || a.category || '',
-          customerArticleNumber: a.customer_article_number || a.customerArticleNumber || '', // Now available in DB
-          // Backend fields (for reference)
-          name: a.name,
-          article_number: a.article_number,
-          suchbegriff: a.suchbegriff,
-          barcode: a.barcode,
-          ean: a.barcode, // EAN is typically stored in barcode
-          supplier_number: a.supplier_number,
-          is_active: a.is_active ?? true,
-        }))
-        
-        console.log('[ArtikelSuchDialog] Mapped articles:', mapped.length, 'items', mapped.slice(0, 3))
-        return mapped
-      } catch (err) {
-        console.error('[ArtikelSuchDialog] Error fetching articles:', err)
-        throw err
       }
+
+      // Map backend article format to frontend format
+      return items.map((a: any) => ({
+        id: a.id,
+        articleNumber: a.article_number || a.articleNumber || '',
+        description: (a.name || a.description || '').trim(),
+        description2: a.description2 || a.description_2 || '',
+        shortDescription: a.short_description || a.shortDescription || a.suchbegriff || '',
+        articleType: a.article_type || a.articleType || a.category || '',
+        unit: a.unit || a.me || '',
+        matchcode2: a.matchcode2 || a.matchcode_2 || a.suchbegriff || '',
+        articleGroup: a.article_group || a.articleGroup || a.warengruppe || a.category || '',
+        customerArticleNumber: a.customer_article_number || a.customerArticleNumber || '',
+        name: a.name,
+        article_number: a.article_number,
+        suchbegriff: a.suchbegriff,
+        barcode: a.barcode,
+        ean: a.barcode,
+        supplier_number: a.supplier_number,
+        is_active: a.is_active ?? true,
+      }))
     },
-    enabled: open,
+    enabled: open && debouncedSearchTerm.length >= 2,
     staleTime: 30_000,
     retry: (failureCount, error: any) => {
       if (error?.response?.status === 401) {

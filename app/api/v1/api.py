@@ -1208,6 +1208,15 @@ api_router.include_router(
     tags=["etiketten", "druck"],
 )
 
+# GDPR (Right-to-Access, Right-to-Delete, Data-Portability)
+from app.api.v1.endpoints import gdpr
+
+api_router.include_router(
+    gdpr.router,
+    prefix="/gdpr",
+    tags=["gdpr", "compliance"],
+)
+
 # Process Kernel: Domain-Mutationen fuer Business-Commands registrieren
 from app.services.command_handlers_procurement import register_command_mutations
 from app.services.command_handlers_finance import register_finance_command_mutations
