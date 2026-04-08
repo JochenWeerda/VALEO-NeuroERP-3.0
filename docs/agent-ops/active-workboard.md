@@ -1309,8 +1309,18 @@ Alle 6 Router registriert in `app/api/v1/api.py` unter `/api/v1/neuro/*`. Commit
 ## OTC-012
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Den Lieferschein im Positionsdialog um echten Artikelkontext aus dem vorhandenen Backend-Aggregat erweitern und die bekannten toten UI-Handler auf belastbare Aktionen ziehen.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/workflows/otc-010-order-to-cash.md`, `packages/frontend-web/src/pages/verkauf/lieferschein-erfassung.tsx`, `packages/frontend-web/src/pages/agribusiness/farmers.tsx`, `packages/frontend-web/src/pages/agribusiness/field-service-tasks.tsx`, `packages/frontend-web/src/pages/admin/compliance-dashboard.tsx`, `packages/frontend-web/src/pages/disposition/LstCommodityPositionMatrix.tsx`, `packages/frontend-web/src/__tests__/pages/verkauf/lieferschein-erfassung.test.tsx`
 **Abnahmekriterien:** Der Lieferschein liest `/api/v1/articles/{id}/position-context` bei Artikelwechsel, zeigt Bestand/Preiskontext sichtbar im UI und befuellt `verfuegbar` nicht mehr hart mit `0`; die bekannten leeren Button-/Action-Handler sind entweder echt verdrahtet oder geben einen belastbaren Navigations-/Detailpfad statt `coming soon`.
-**Offene Risiken:** Das Backend liefert Kontextdaten tenant- und demoabhaengig; einige Zielseiten fuer UI-Handler koennen nur auf bestehende Bestandsseiten verdrahtet werden, wenn kein vollstaendiger Create-Flow existiert.
+**Erledigt:** `packages/frontend-web/src/pages/verkauf/lieferschein-erfassung.tsx` zieht jetzt den vorhandenen Aggregat-Endpoint `/api/v1/articles/{id}/position-context`, zeigt Lagerorte, offene Bestellungen, Chargen sowie Preisverlauf in einem eigenen `Artikel-Kontext`-Panel und befuellt das Feld `verfuegbar` live aus dem Backend statt mit `0`; `packages/frontend-web/src/pages/agribusiness/field-service-tasks.tsx`, `packages/frontend-web/src/pages/admin/compliance-dashboard.tsx` und `packages/frontend-web/src/pages/disposition/LstCommodityPositionMatrix.tsx` nutzen jetzt echte Zielmasken/Arbeitsflaechen, waehrend `packages/frontend-web/src/pages/agribusiness/farmers.tsx` in die vorhandenen CRM-Betriebsprofilmasken verzweigt.
+**Tests / Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`; `python -m py_compile app/api/v1/endpoints/articles.py`; `node scripts/docs-governance-check.cjs`
+**Offene Risiken:** Die Landwirt-Liste verzweigt mangels eigener Agribusiness-Editmaske in die bestehenden CRM-Betriebsprofile; falls spaeter ein eigenstaendiger Farmer-CRUD kommt, sollte der Pfad dort wieder direkt landen.
+
+## OTC-013
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Die verbleibenden operativen UI-Restluecken in Einkauf und Annahme auf echte Workflow-Zustaende, belastbare Scanner-/Erfassungswege und sichtbare naechste Aktionen ziehen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, relevante Einkaufs-/Annahme-Workflow-Doku, `packages/frontend-web/src/pages/einkauf/angebote-liste.tsx`, `packages/frontend-web/src/pages/einkauf/anfragen-liste.tsx`, `packages/frontend-web/src/pages/einkauf/bestellung-stamm.tsx`, `packages/frontend-web/src/pages/annahme/lkw-registrierung.tsx`, ggf. zugehoerige Backend-Compat-/Router-Dateien und passende Frontend-/Backend-Tests.
+**Abnahmekriterien:** Einkaufsaktionen `Pruefen`, `Genehmigen`, `Ablehnen`, `Freigeben`, `In Bestellung`, `Stornieren` und aehnliche Uebergaenge arbeiten gegen echte Endpunkte oder belastbare Folgeobjekte statt nur gegen Toaster; die Annahme bietet fuer Kennzeichen/Lieferschein einen realen Scan-/Erfassungspfad statt Platzhaltertext; die Oberflaechen spiegeln den naechsten operativen Schritt sichtbar wider.
