@@ -1305,3 +1305,12 @@ Alle 6 Router registriert in `app/api/v1/api.py` unter `/api/v1/neuro/*`. Commit
 **Dateibesitz:** `packages/frontend-web/src/pages/admin/control-center/index.tsx`, zugehoerige Frontend-Tests, `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`.
 **Erledigt:** `packages/frontend-web/src/pages/admin/control-center/index.tsx` ist jetzt UX-seitig als echte Leitstandsoberflaeche verdichtet: KPI-Karten, Prioritaets-/Quick-Action-Bereich, Filter fuer Planung und Incidents, Suchfeld, robustere Loading-/Error-/Empty-States und lesbarere Status-/Detailkarten reduzieren die Scroll- und Leselast deutlich. Der gezielte Frontend-Test liegt in `packages/frontend-web/src/__tests__/pages/admin/control-center-index.test.tsx`.
 **Tests / Checks:** `pnpm --dir packages/frontend-web exec vitest run src/__tests__/pages/admin/control-center-index.test.tsx`; `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`; `node scripts/docs-governance-check.cjs`
+
+## OTC-012
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Den Lieferschein im Positionsdialog um echten Artikelkontext aus dem vorhandenen Backend-Aggregat erweitern und die bekannten toten UI-Handler auf belastbare Aktionen ziehen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/workflows/otc-010-order-to-cash.md`, `packages/frontend-web/src/pages/verkauf/lieferschein-erfassung.tsx`, `packages/frontend-web/src/pages/agribusiness/farmers.tsx`, `packages/frontend-web/src/pages/agribusiness/field-service-tasks.tsx`, `packages/frontend-web/src/pages/admin/compliance-dashboard.tsx`, `packages/frontend-web/src/pages/disposition/LstCommodityPositionMatrix.tsx`, `packages/frontend-web/src/__tests__/pages/verkauf/lieferschein-erfassung.test.tsx`
+**Abnahmekriterien:** Der Lieferschein liest `/api/v1/articles/{id}/position-context` bei Artikelwechsel, zeigt Bestand/Preiskontext sichtbar im UI und befuellt `verfuegbar` nicht mehr hart mit `0`; die bekannten leeren Button-/Action-Handler sind entweder echt verdrahtet oder geben einen belastbaren Navigations-/Detailpfad statt `coming soon`.
+**Offene Risiken:** Das Backend liefert Kontextdaten tenant- und demoabhaengig; einige Zielseiten fuer UI-Handler koennen nur auf bestehende Bestandsseiten verdrahtet werden, wenn kein vollstaendiger Create-Flow existiert.
