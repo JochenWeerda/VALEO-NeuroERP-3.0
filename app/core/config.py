@@ -128,6 +128,7 @@ class Settings(BaseSettings):
     SUPERGLUE_ARTIFACT_RETENTION_DAYS: int = 14
     AGENT_OPS_STATE_PATH: str = "runtime/agent-ops/state.json"
     AGENT_OPS_HISTORY_PATH: str = "runtime/agent-ops/history.jsonl"
+    AGENT_OPS_PLAN_PATH: str = "runtime/agent-ops/planning.json"
     SECURITY_EVENT_PERSISTENCE_ENABLED: bool = True
     SECURITY_EVENT_LOG_PATH: str = "runtime/security-events/security-events.jsonl"
 

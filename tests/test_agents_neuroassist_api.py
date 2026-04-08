@@ -7,6 +7,7 @@ import pytest
 from app.agents import get_agent_ops_service
 from app.agents.neuroassist_service import NeuroAssistService
 from app.api.v1.endpoints import agents
+from app.integrations.services.superglue_quarantine import append_quarantine_entry
 
 
 def _client() -> TestClient:
@@ -540,3 +541,69 @@ def test_neuroassist_persistence_status_endpoint_persists_snapshot():
     assert body["persisted"] is True
     assert body["snapshot_counts"]["ticket_count"] >= 1
     assert body["history_count"] >= 1
+
+
+def test_neuroassist_control_center_planning_and_incidents(tmp_path, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr("app.agents.agent_control_center.settings.AGENT_OPS_PLAN_PATH", str(tmp_path / "planning.json"))
+    monkeypatch.setattr("app.integrations.services.superglue_quarantine.settings.SUPERGLUE_QUARANTINE_LOG_PATH", str(tmp_path / "quarantine.jsonl"))
+
+    ops = get_agent_ops_service()
+    ops.record_run(
+        tenant_id="system",
+        run_id="run-incident",
+        capability_key="finance_skonto_assistant",
+        role_key="finance_action_assistant",
+        status="pending_approval",
+        current_stage_key="analysis",
+        runtime={"current_stage_key": "analysis", "stage_runs": [], "gate_decisions": [{"gate_type": "approval_gate", "status": "deferred"}]},
+        result={"current_stage_key": "analysis"},
+    )
+    append_quarantine_entry(
+        tenant_id="system",
+        tool_id="system.sg.document.search",
+        execution_mode="read",
+        outcome="degraded",
+        reason="temporary backend outage",
+    )
+    client = _client()
+
+    upsert_response = client.post(
+        "/api/v1/agents/neuroassist/ops/planning/items",
+        json={
+            "tenant_id": "system",
+            "plan_id": "manual:test-slot",
+            "title": "Daily Review",
+            "kind": "manual_ops",
+            "owner": "tenant_operations_lead",
+            "scheduled_for": "2026-04-09T09:00:00Z",
+            "status": "planned",
+            "notes": "control center",
+        },
+    )
+    planning_response = client.get("/api/v1/agents/neuroassist/ops/planning")
+    incidents_response = client.get("/api/v1/agents/neuroassist/ops/incidents")
+
+    assert upsert_response.status_code == 200
+    assert planning_response.status_code == 200
+    planning = planning_response.json()
+    assert planning["planned_items"][0]["plan_id"] == "manual:test-slot"
+    assert incidents_response.status_code == 200
+    incidents = incidents_response.json()
+    assert incidents["incident_count"] >= 2
+    assert any(item["source"] == "agent_ops" for item in incidents["incidents"])
+    assert any(item["source"] == "superglue_quarantine" for item in incidents["incidents"])
+
+    quarantine_incident = next(item for item in incidents["incidents"] if item["source"] == "superglue_quarantine")
+    resolve_response = client.post(
+        f"/api/v1/agents/neuroassist/ops/incidents/{quarantine_incident['incident_id']}/actions",
+        json={"tenant_id": "system", "action": "resolve", "requested_by": "ops-admin"},
+    )
+    agent_incident = next(item for item in incidents["incidents"] if item["source"] == "agent_ops")
+    escalate_response = client.post(
+        f"/api/v1/agents/neuroassist/ops/incidents/{agent_incident['incident_id']}/actions",
+        json={"tenant_id": "system", "action": "escalate", "requested_by": "ops-admin"},
+    )
+
+    assert resolve_response.status_code == 200
+    assert escalate_response.status_code == 200
+    assert escalate_response.json()["result"]["resulting_status"] == "escalated"

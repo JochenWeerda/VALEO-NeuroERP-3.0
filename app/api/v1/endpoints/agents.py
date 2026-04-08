@@ -161,6 +161,24 @@ class AgentPersistenceStatusResponse(BaseModel):
     schema_version: int = 1
 
 
+class ControlCenterPlanItemRequest(BaseModel):
+    tenant_id: str = "system"
+    plan_id: str
+    title: str
+    kind: str
+    owner: str
+    scheduled_for: str
+    status: str
+    notes: str | None = None
+
+
+class ControlCenterIncidentActionRequest(BaseModel):
+    tenant_id: str = "system"
+    action: str
+    requested_by: str = "admin-ui"
+    note: str | None = None
+
+
 def _get_neuroassist_service():
     try:
         from ....agents import get_neuroassist_service
@@ -202,6 +220,22 @@ def _get_agent_ops_template_model():
     from ....agents import AgentTemplateExport
 
     return AgentTemplateExport
+
+
+def _get_control_center_helpers():
+    from ....agents import (
+        apply_control_center_incident_action,
+        build_control_center_incidents,
+        build_control_center_planning,
+        upsert_control_center_plan_item,
+    )
+
+    return {
+        "build_planning": build_control_center_planning,
+        "build_incidents": build_control_center_incidents,
+        "upsert_plan_item": upsert_control_center_plan_item,
+        "apply_incident_action": apply_control_center_incident_action,
+    }
 
 
 def _list_capability_responses(productive_only: bool) -> list[CapabilityResponse]:
@@ -389,6 +423,61 @@ async def get_neuroassist_persistence_status(tenant_id: str = "system"):
     except Exception as exc:
         logger.error("NeuroASSIST persistence status failed: %s", exc, exc_info=True)
         raise HTTPException(status_code=500, detail=f"NeuroASSIST persistence status failed: {str(exc)}")
+
+
+@router.get("/neuroassist/ops/planning", response_model=dict)
+async def get_neuroassist_control_center_planning(tenant_id: str = "system"):
+    try:
+        return _get_control_center_helpers()["build_planning"](tenant_id)
+    except Exception as exc:
+        logger.error("NeuroASSIST control-center planning failed: %s", exc, exc_info=True)
+        raise HTTPException(status_code=500, detail=f"NeuroASSIST control-center planning failed: {str(exc)}")
+
+
+@router.post("/neuroassist/ops/planning/items", response_model=dict)
+async def upsert_neuroassist_control_center_plan_item(request: ControlCenterPlanItemRequest):
+    try:
+        return _get_control_center_helpers()["upsert_plan_item"](
+            request.tenant_id,
+            plan_id=request.plan_id,
+            title=request.title,
+            kind=request.kind,
+            owner=request.owner,
+            scheduled_for=request.scheduled_for,
+            status=request.status,
+            notes=request.notes,
+        )
+    except Exception as exc:
+        logger.error("NeuroASSIST control-center plan update failed: %s", exc, exc_info=True)
+        raise HTTPException(status_code=500, detail=f"NeuroASSIST control-center plan update failed: {str(exc)}")
+
+
+@router.get("/neuroassist/ops/incidents", response_model=dict)
+async def get_neuroassist_control_center_incidents(tenant_id: str = "system"):
+    try:
+        return _get_control_center_helpers()["build_incidents"](tenant_id)
+    except Exception as exc:
+        logger.error("NeuroASSIST control-center incidents failed: %s", exc, exc_info=True)
+        raise HTTPException(status_code=500, detail=f"NeuroASSIST control-center incidents failed: {str(exc)}")
+
+
+@router.post("/neuroassist/ops/incidents/{incident_id}/actions", response_model=dict)
+async def apply_neuroassist_control_center_incident_action(incident_id: str, request: ControlCenterIncidentActionRequest):
+    try:
+        return _get_control_center_helpers()["apply_incident_action"](
+            request.tenant_id,
+            incident_id,
+            action=request.action,
+            requested_by=request.requested_by,
+            note=request.note,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+    except Exception as exc:
+        logger.error("NeuroASSIST control-center incident action failed: %s", exc, exc_info=True)
+        raise HTTPException(status_code=500, detail=f"NeuroASSIST control-center incident action failed: {str(exc)}")
 
 
 @router.post("/neuroassist/ops/tickets/{ticket_id}/interventions", response_model=dict)
