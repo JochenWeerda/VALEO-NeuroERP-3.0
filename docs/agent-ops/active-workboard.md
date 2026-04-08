@@ -1375,7 +1375,19 @@ Alle 6 Router registriert in `app/api/v1/api.py` unter `/api/v1/neuro/*`. Commit
 ## KTR-PRO-001
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Den Kontraktarbeitsplatz auf professionelles ERP-Niveau ziehen, indem die vorhandenen Kontraktmodule als einheitliche Steuerungsoberflaeche fuer Quelle, Risiko, naechste Aktion und Folgearbeitsplaetze zusammengefuehrt werden.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/contracts-v2.tsx`, ggf. direkt benoetigte Kontraktseiten oder gemeinsame UI-Helfer.
 **Abnahmekriterien:** `contracts-v2.tsx` zeigt neben der Liste eine professionelle Steuerungssicht mit Quellenbild, Ablauf-/Risikohinweisen, Quick Links in Positionsmonitor/Alarme/Detailarbeitsplaetze und klaren naechsten Aktionen je Kontrakt statt nur CRUD-Listencharakter.
+**Erledigt:** `packages/frontend-web/src/pages/contracts-v2.tsx` ist jetzt als Kontrakt-Steuerungsseite ausgezogen: Portfolio-Karten fuer offene und auslaufende Kontrakte, Quellenbild ueber Kontraktmodul/Rahmenvertrag/Agrar, Quick Links in Kontraktliste, Positionsmonitor, Alarmdashboard und Dokumentenablage, quellenabhaengige Arbeitsplatznavigation sowie eine `Naechste empfohlene Aktion`-Karte und detailseitige Aktionsfuehrung im Drawer ziehen den bisherigen CRUD-Charakter auf einen professionelleren Arbeitsmodus.
+**Tests / Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`; `node scripts/docs-governance-check.cjs`; gezielter Textscan in `contracts-v2.tsx`
+**Offene Risiken:** Der Slice nutzt bewusst die bereits vorhandenen Kontraktmodule und fuehrt noch keine neuen fachlichen Stammdatentabellen wie Klassen, Gruppen, Varianten oder Paritaeten ein. Diese bleiben der naechste echte Vertiefungsblock.
+
+## KTR-PRO-002
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Die vorhandene Kontraktstrecke um professionelle Steuerparameter erweitern: Kontraktklassen, Gruppen, Varianten, Paritaeten, Dispositionskennzeichen sowie vorbereitende Sicht auf Hedging, Marktpreisbewertung und Mahnstatus.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `app/api/v1/endpoints/kontrakte.py`, `packages/frontend-web/src/lib/api/kontrakte.ts`, `packages/frontend-web/src/pages/kontrakte/FrmKontraktDetail.tsx`, `packages/frontend-web/src/pages/kontrakte/KontraktAlarmDashboard.tsx`, `packages/frontend-web/src/pages/kontrakte/KontraktPositionsmonitor.tsx`, `packages/frontend-web/src/pages/contracts-v2.tsx`.
+**Abnahmekriterien:** Kontrakte besitzen erfassbare und sichtbare Profi-Parameter fuer Klasse/Gruppe/Variante/Paritaet/Disposition; Arbeitsplaetze zeigen diese Parameter in Liste, Detail und Monitoring; Hedging-, Marktbewertungs- und Mahnindikatoren sind mindestens als professionelle Steuer- und Statussicht integriert statt nur als spaetere Idee.
+**Offene Risiken:** Fuer echte Marktpreisbewertung und Mahnlogik koennen im Repo noch keine vollstaendigen Bewertungs- oder Mahnservices existieren; in diesem Slice ist deshalb gegebenenfalls eine belastbare Vorstufe ueber vorhandene Preis- und Alarmdaten noetig.
