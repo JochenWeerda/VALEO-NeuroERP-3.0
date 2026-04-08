@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException, Query
+from pydantic import BaseModel, Field
 
 from app.core.external_agent_catalog import (
     build_external_agent_install_pack,
@@ -16,6 +17,15 @@ from app.integrations.adapters.superglue.tool_sync import (
     refresh_superglue_sync_snapshot,
 )
 from app.integrations.services.superglue_execution_journal import build_execution_journal_summary
+from app.integrations.services.superglue_admin_state import (
+    get_superglue_admin_state,
+    update_superglue_connector_override,
+    update_superglue_policy_override,
+)
+from app.integrations.services.superglue_admin_wizard import (
+    apply_superglue_onboarding_wizard,
+    build_superglue_onboarding_wizard,
+)
 from app.integrations.services.superglue_domain_rollouts import (
     build_superglue_domain_rollout_summary,
     preview_superglue_domain_rollout,
@@ -36,6 +46,34 @@ from app.integrations.services.superglue_tool_provisioning import (
 )
 
 router = APIRouter(prefix="/agent/integrations", tags=["agents", "integrations", "openapi", "mcp"])
+
+
+class SuperglueConnectorConfigRequest(BaseModel):
+    system_url: str | None = None
+    system_name: str | None = None
+    system_instructions: str | None = None
+
+
+class SupergluePolicyOverrideRequest(BaseModel):
+    require_tenant_secrets: bool | None = None
+    execution_enabled: bool | None = None
+    alert_error_rate_pct: float | None = Field(default=None, ge=0)
+    alert_open_quarantine_count: int | None = Field(default=None, ge=0)
+    run_retention_days: int | None = Field(default=None, ge=1)
+    artifact_retention_days: int | None = Field(default=None, ge=1)
+
+
+class SuperglueWizardApplyRequest(BaseModel):
+    connector_key: str | None = None
+    system_url: str | None = None
+    execution_enabled: bool | None = None
+    require_tenant_secrets: bool | None = None
+    alert_error_rate_pct: float | None = Field(default=None, ge=0)
+    alert_open_quarantine_count: int | None = Field(default=None, ge=0)
+    run_retention_days: int | None = Field(default=None, ge=1)
+    artifact_retention_days: int | None = Field(default=None, ge=1)
+    completed_step: str | None = None
+    next_step: str | None = None
 
 
 @router.get("", summary="External Agent Integration Catalog")
@@ -139,6 +177,57 @@ def get_superglue_live_readiness(tenant_id: str = Query(default="default")) -> d
 @router.get("/providers/superglue/onboarding-pack", summary="Superglue onboarding pack for tenant ops")
 def get_superglue_onboarding_pack(tenant_id: str = Query(default="default")) -> dict:
     return build_superglue_onboarding_pack(tenant_id)
+
+
+@router.get("/providers/superglue/tenants/{tenant_id}/admin-state", summary="Superglue admin mutation state for a tenant")
+def get_superglue_tenant_admin_state(tenant_id: str) -> dict:
+    return get_superglue_admin_state(tenant_id)
+
+
+@router.post("/providers/superglue/tenants/{tenant_id}/connectors/{connector_key}/config", summary="Update tenant connector override")
+def set_superglue_tenant_connector_config(tenant_id: str, connector_key: str, request: SuperglueConnectorConfigRequest) -> dict:
+    return update_superglue_connector_override(
+        tenant_id,
+        connector_key,
+        system_url=request.system_url,
+        system_name=request.system_name,
+        system_instructions=request.system_instructions,
+    )
+
+
+@router.post("/providers/superglue/tenants/{tenant_id}/policy", summary="Update tenant Superglue policy override")
+def set_superglue_tenant_policy(tenant_id: str, request: SupergluePolicyOverrideRequest) -> dict:
+    return update_superglue_policy_override(
+        tenant_id,
+        require_tenant_secrets=request.require_tenant_secrets,
+        execution_enabled=request.execution_enabled,
+        alert_error_rate_pct=request.alert_error_rate_pct,
+        alert_open_quarantine_count=request.alert_open_quarantine_count,
+        run_retention_days=request.run_retention_days,
+        artifact_retention_days=request.artifact_retention_days,
+    )
+
+
+@router.get("/providers/superglue/tenants/{tenant_id}/wizard", summary="Tenant onboarding wizard for Superglue")
+def get_superglue_tenant_onboarding_wizard(tenant_id: str) -> dict:
+    return build_superglue_onboarding_wizard(tenant_id)
+
+
+@router.post("/providers/superglue/tenants/{tenant_id}/wizard/apply", summary="Apply a tenant onboarding wizard step for Superglue")
+def apply_superglue_tenant_onboarding_wizard(tenant_id: str, request: SuperglueWizardApplyRequest) -> dict:
+    return apply_superglue_onboarding_wizard(
+        tenant_id,
+        connector_key=request.connector_key,
+        system_url=request.system_url,
+        execution_enabled=request.execution_enabled,
+        require_tenant_secrets=request.require_tenant_secrets,
+        alert_error_rate_pct=request.alert_error_rate_pct,
+        alert_open_quarantine_count=request.alert_open_quarantine_count,
+        run_retention_days=request.run_retention_days,
+        artifact_retention_days=request.artifact_retention_days,
+        completed_step=request.completed_step,
+        next_step=request.next_step,
+    )
 
 
 @router.post("/providers/superglue/pilot-tools/provision", summary="Provision canonical Superglue pilot tools")

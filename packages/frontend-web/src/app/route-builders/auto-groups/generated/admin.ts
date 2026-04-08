@@ -6,6 +6,18 @@ export const entries: AutoGroupRouteEntry[] = [
     "path": "agenten-integration"
   },
   {
+    "module": "@/pages/admin/control-center/index",
+    "path": "control-center"
+  },
+  {
+    "module": "@/pages/admin/control-center/agent-ops",
+    "path": "control-center/agent-ops"
+  },
+  {
+    "module": "@/pages/admin/control-center/superglue",
+    "path": "control-center/superglue"
+  },
+  {
     "module": "@/pages/admin/ai-approvals",
     "path": "ai-approvals"
   },

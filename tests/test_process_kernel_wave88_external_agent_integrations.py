@@ -71,6 +71,40 @@ def test_external_agent_use_cases_surface_install_pack_and_domain_filter():
 
 
 def test_superglue_provider_routes_surface_sync_and_health():
+    external_agent_integrations.get_superglue_admin_state = lambda tenant_id: {
+        "tenant_id": tenant_id,
+        "storage_path": "runtime/superglue/admin-state.json",
+        "connector_overrides": {"document_search": {"system_url": "https://documents.example.invalid/api"}},
+        "policy_overrides": {"execution_enabled": True},
+        "wizard": {"current_step": "policy", "completed_steps": ["credentials", "systems"]},
+        "schema_version": 1,
+    }
+    external_agent_integrations.update_superglue_connector_override = lambda tenant_id, connector_key, **kwargs: {
+        "tenant_id": tenant_id,
+        "connector_key": connector_key,
+        "override": kwargs,
+        "updated_at": "2026-04-08T10:00:00Z",
+        "schema_version": 1,
+    }
+    external_agent_integrations.update_superglue_policy_override = lambda tenant_id, **kwargs: {
+        "tenant_id": tenant_id,
+        "policy_overrides": kwargs,
+        "updated_at": "2026-04-08T10:00:00Z",
+        "schema_version": 1,
+    }
+    external_agent_integrations.build_superglue_onboarding_wizard = lambda tenant_id: {
+        "tenant_id": tenant_id,
+        "current_step": "systems",
+        "completed_steps": ["credentials"],
+        "recommended_actions": ["set URLs"],
+        "steps": [{"step_key": "systems", "title": "Zielsysteme", "status": "pending", "details": ["document_search"]}],
+        "schema_version": 1,
+    }
+    external_agent_integrations.apply_superglue_onboarding_wizard = lambda tenant_id, **kwargs: {
+        "tenant_id": tenant_id,
+        "wizard": {"current_step": kwargs.get("next_step", "bootstrap"), "completed_steps": [kwargs.get("completed_step", "systems")]},
+        "schema_version": 1,
+    }
     external_agent_integrations.provision_superglue_pilot_tools = lambda: {
         "provider_key": "superglue",
         "tool_count": 3,
@@ -182,6 +216,11 @@ def test_superglue_provider_routes_surface_sync_and_health():
     monitoring = client.get("/agent/integrations/providers/superglue/monitoring?tenant_id=tenant-a")
     live_readiness = client.get("/agent/integrations/providers/superglue/live-readiness?tenant_id=tenant-a")
     onboarding_pack = client.get("/agent/integrations/providers/superglue/onboarding-pack?tenant_id=tenant-a")
+    admin_state = client.get("/agent/integrations/providers/superglue/tenants/tenant-a/admin-state")
+    connector_config = client.post("/agent/integrations/providers/superglue/tenants/tenant-a/connectors/document_search/config", json={"system_url": "https://live.example/api"})
+    policy_override = client.post("/agent/integrations/providers/superglue/tenants/tenant-a/policy", json={"execution_enabled": True, "run_retention_days": 45})
+    wizard = client.get("/agent/integrations/providers/superglue/tenants/tenant-a/wizard")
+    wizard_apply = client.post("/agent/integrations/providers/superglue/tenants/tenant-a/wizard/apply", json={"completed_step": "systems", "next_step": "policy"})
     refresh = client.post("/agent/integrations/providers/superglue/sync-status/refresh")
     provision = client.post("/agent/integrations/providers/superglue/pilot-tools/provision")
     smoke = client.post("/agent/integrations/providers/superglue/pilot-tools/smoke-run")
@@ -218,6 +257,16 @@ def test_superglue_provider_routes_surface_sync_and_health():
     assert live_readiness.json()["blocked_connector_count"] == 7
     assert onboarding_pack.status_code == 200
     assert onboarding_pack.json()["vault_path_prefix"] == "valeo-neuroerp"
+    assert admin_state.status_code == 200
+    assert admin_state.json()["storage_path"].endswith("admin-state.json")
+    assert connector_config.status_code == 200
+    assert connector_config.json()["connector_key"] == "document_search"
+    assert policy_override.status_code == 200
+    assert policy_override.json()["policy_overrides"]["execution_enabled"] is True
+    assert wizard.status_code == 200
+    assert wizard.json()["current_step"] == "systems"
+    assert wizard_apply.status_code == 200
+    assert wizard_apply.json()["wizard"]["current_step"] == "policy"
     assert refresh.status_code == 200
     assert refresh.json()["provider_key"] == "superglue"
     assert provision.status_code == 200

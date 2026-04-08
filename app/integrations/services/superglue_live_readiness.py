@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from app.core.config import settings
+from app.integrations.services.superglue_admin_state import get_superglue_policy_override
 from app.integrations.services.superglue_connector_registry import list_superglue_connector_bindings
 from app.integrations.services.superglue_monitoring import build_superglue_monitoring_summary
 
@@ -12,6 +13,7 @@ from app.integrations.services.superglue_monitoring import build_superglue_monit
 def build_superglue_live_readiness(tenant_id: str) -> dict[str, Any]:
     bindings = list_superglue_connector_bindings(tenant_id)
     monitoring = build_superglue_monitoring_summary(tenant_id)
+    policy_override = get_superglue_policy_override(tenant_id)
     connectors: list[dict[str, Any]] = []
     ready_count = 0
     blocked_count = 0
@@ -28,7 +30,8 @@ def build_superglue_live_readiness(tenant_id: str) -> dict[str, Any]:
             blockers.append("missing_credentials")
         if uses_placeholder_url:
             blockers.append("placeholder_system_url")
-        if execute_capable and not settings.SUPERGLUE_EXECUTION_ENABLED:
+        execution_enabled = bool(policy_override.get("execution_enabled", settings.SUPERGLUE_EXECUTION_ENABLED))
+        if execute_capable and not execution_enabled:
             blockers.append("execute_mode_disabled")
 
         is_ready = not blockers
@@ -65,12 +68,12 @@ def build_superglue_live_readiness(tenant_id: str) -> dict[str, Any]:
         "blocked_connector_count": blocked_count,
         "execute_ready_count": execute_ready_count,
         "policy": {
-            "require_tenant_secrets": settings.SUPERGLUE_REQUIRE_TENANT_SECRETS,
-            "execution_enabled": settings.SUPERGLUE_EXECUTION_ENABLED,
-            "alert_error_rate_pct": settings.SUPERGLUE_ALERT_ERROR_RATE_PCT,
-            "alert_open_quarantine_count": settings.SUPERGLUE_ALERT_OPEN_QUARANTINE_COUNT,
-            "run_retention_days": settings.SUPERGLUE_RUN_RETENTION_DAYS,
-            "artifact_retention_days": settings.SUPERGLUE_ARTIFACT_RETENTION_DAYS,
+            "require_tenant_secrets": bool(policy_override.get("require_tenant_secrets", settings.SUPERGLUE_REQUIRE_TENANT_SECRETS)),
+            "execution_enabled": bool(policy_override.get("execution_enabled", settings.SUPERGLUE_EXECUTION_ENABLED)),
+            "alert_error_rate_pct": float(policy_override.get("alert_error_rate_pct", settings.SUPERGLUE_ALERT_ERROR_RATE_PCT)),
+            "alert_open_quarantine_count": int(policy_override.get("alert_open_quarantine_count", settings.SUPERGLUE_ALERT_OPEN_QUARANTINE_COUNT)),
+            "run_retention_days": int(policy_override.get("run_retention_days", settings.SUPERGLUE_RUN_RETENTION_DAYS)),
+            "artifact_retention_days": int(policy_override.get("artifact_retention_days", settings.SUPERGLUE_ARTIFACT_RETENTION_DAYS)),
         },
         "monitoring": {
             "run_count": monitoring["run_count"],

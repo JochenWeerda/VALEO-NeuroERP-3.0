@@ -1,6 +1,18 @@
 {
   "aliases": [
     {
+      "module": "@/pages/admin/control-center/index",
+      "path": "admin/control-center"
+    },
+    {
+      "module": "@/pages/admin/control-center/superglue",
+      "path": "admin/control-center/superglue"
+    },
+    {
+      "module": "@/pages/admin/control-center/agent-ops",
+      "path": "admin/control-center/agent-ops"
+    },
+    {
       "module": "@/pages/admin/compliance-dashboard",
       "path": "admin/compliance"
     },

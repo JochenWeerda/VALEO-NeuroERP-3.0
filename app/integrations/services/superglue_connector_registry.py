@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from app.integrations.contracts import SuperglueConnectorBinding, SuperglueSystemBinding
+from app.integrations.services.superglue_admin_state import get_superglue_connector_override
 from app.integrations.services.superglue_secret_resolver import resolve_superglue_connector_value
 
 
@@ -121,6 +122,7 @@ def build_superglue_connector_binding(*, tenant_id: str, connector_key: str) -> 
         raise KeyError(f"Unknown Superglue connector key: {connector_key}")
 
     defaults = _CONNECTOR_DEFAULTS[normalized_connector_key]
+    overrides = get_superglue_connector_override(tenant_id, normalized_connector_key)
     normalized_tenant = _normalize_tenant_slug(tenant_id)
     tool_family = str(defaults["tool_family"])
     system_id = resolve_superglue_connector_value(
@@ -133,7 +135,7 @@ def build_superglue_connector_binding(*, tenant_id: str, connector_key: str) -> 
         tenant_id=tenant_id,
         connector_key=normalized_connector_key,
         field_name="SYSTEM_URL",
-        fallback=str(defaults["default_url"]),
+        fallback=str(overrides.get("system_url") or defaults["default_url"]),
     )
     tool_id = resolve_superglue_connector_value(
         tenant_id=tenant_id,
@@ -145,13 +147,13 @@ def build_superglue_connector_binding(*, tenant_id: str, connector_key: str) -> 
         tenant_id=tenant_id,
         connector_key=normalized_connector_key,
         field_name="SYSTEM_NAME",
-        fallback=str(defaults["system_name"]),
+        fallback=str(overrides.get("system_name") or defaults["system_name"]),
     )
     instructions = resolve_superglue_connector_value(
         tenant_id=tenant_id,
         connector_key=normalized_connector_key,
         field_name="SYSTEM_INSTRUCTIONS",
-        fallback=str(defaults["specific_instructions"]),
+        fallback=str(overrides.get("system_instructions") or defaults["specific_instructions"]),
     )
     credentials = {
         field: value

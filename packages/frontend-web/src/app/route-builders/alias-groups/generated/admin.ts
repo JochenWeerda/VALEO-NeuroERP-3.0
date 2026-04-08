@@ -2,6 +2,18 @@ import type { AliasGroupRouteEntry } from '@/app/route-builders/types'
 
 export const entries: AliasGroupRouteEntry[] = [
   {
+    "module": "@/pages/admin/control-center/index",
+    "path": "control-center"
+  },
+  {
+    "module": "@/pages/admin/control-center/superglue",
+    "path": "control-center/superglue"
+  },
+  {
+    "module": "@/pages/admin/control-center/agent-ops",
+    "path": "control-center/agent-ops"
+  },
+  {
     "module": "@/pages/admin/compliance-dashboard",
     "path": "compliance"
   },

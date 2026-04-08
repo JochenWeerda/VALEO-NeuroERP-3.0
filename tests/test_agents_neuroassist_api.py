@@ -16,7 +16,9 @@ def _client() -> TestClient:
 
 
 @pytest.fixture(autouse=True)
-def _reset_agent_ops_state() -> None:
+def _reset_agent_ops_state(tmp_path: pytest.TempPathFactory, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr("app.agents.agent_ops_persistence.settings.AGENT_OPS_STATE_PATH", str(tmp_path / "agent-ops-state.json"))
+    monkeypatch.setattr("app.agents.agent_ops_persistence.settings.AGENT_OPS_HISTORY_PATH", str(tmp_path / "agent-ops-history.jsonl"))
     get_agent_ops_service().reset()
     NeuroAssistService._run_registry.clear()
 
@@ -515,3 +517,26 @@ def test_neuroassist_control_center_and_config_revision_endpoints():
     assert control_center["config_revisions"]
     assert revisions_response.status_code == 200
     assert any(item["config_type"] == "budget" and item["changed_by"] == "ops-admin" for item in revisions_response.json())
+
+
+def test_neuroassist_persistence_status_endpoint_persists_snapshot():
+    ops = get_agent_ops_service()
+    ops.record_run(
+        tenant_id="system",
+        run_id="run-persisted",
+        capability_key="finance_skonto_assistant",
+        role_key="finance_action_assistant",
+        status="pending_approval",
+        current_stage_key="analysis",
+        runtime={"current_stage_key": "analysis", "stage_runs": [], "gate_decisions": []},
+        result={"current_stage_key": "analysis"},
+    )
+    client = _client()
+
+    response = client.get("/api/v1/agents/neuroassist/ops/persistence")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["persisted"] is True
+    assert body["snapshot_counts"]["ticket_count"] >= 1
+    assert body["history_count"] >= 1
