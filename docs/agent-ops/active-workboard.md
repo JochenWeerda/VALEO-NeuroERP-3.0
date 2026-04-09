@@ -1449,15 +1449,43 @@ Alle 6 Router registriert in `app/api/v1/api.py` unter `/api/v1/neuro/*`. Commit
 ## DOC-PRO-001
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Die Dokumentenverwaltung von einer allgemeinen Ablage zu einem professionellen Vorgangs- und Nachweisraum ausbauen: Objektbezug, Dokumentstatus, Wiedervorlage, Freigabe-/Nachweisbild und direkte Folgepfade in die operativen Kernworkflows.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/{dokumente/ablage,portal/dokumente,einkauf/lieferanten-dokumente}.tsx`, bei Bedarf zugehoerige API-Hooks unter `packages/frontend-web/src/lib/api/`.
 **Abnahmekriterien:** Dokumente zeigen nicht nur Dateiliste, sondern klares Vorgangsbild mit Objektzuordnung, Status/Nachweis, Wiedervorlage und nutzbaren Folgeaktionen; dieselbe Dokumentensicht ist an den fachlich naheliegenden Arbeitsplaetzen verankert.
+**Erledigt:** `packages/frontend-web/src/lib/professional-workspaces.ts` liefert jetzt ein gemeinsames Dokument-Read-Model fuer Objektbezug, Nachweisstatus und Wiedervorlagen. `packages/frontend-web/src/pages/dokumente/ablage.tsx`, `packages/frontend-web/src/pages/portal/dokumente.tsx` und `packages/frontend-web/src/pages/einkauf/lieferanten-dokumente.tsx` arbeiten damit nicht mehr nur als Dateilisten, sondern als professionelle Vorgangs- und Nachweisraeume mit Status, Objektreferenz, Folgeaktion und Compliance-/Wiedervorlage-Hinweisen.
+**Tests / Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`; `node scripts/docs-governance-check.cjs`
 
 ## PRICE-PRO-001
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Preis-, Konditions- und Stammdatenfuehrung auf professionelles ERP-Niveau ziehen: Preisstory pro Objekt, kunden- und lieferantenspezifische Sonderregeln, Staffel-/Listen-/Historienbild und direkte operative Folgepfade fuer Verkauf, Einkauf und Portal.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/{preise/konditionen,preise/historie,pricing,portal/shop,vertrieb/kundenumsatz,artikel/stamm}.tsx`, bei Bedarf `packages/frontend-web/src/lib/api/{pricing,articles}.ts` und vorhandene Pricing-/Article-Endpunkte.
 **Abnahmekriterien:** Preise und Konditionen werden als zusammenhaengender Arbeitsraum sichtbar, nicht nur als Einzelmaske; Anwender sehen Listenpreis, Staffelung, Verlauf, Kunden-/Lieferantenbezug und empfohlene Folgeaktion direkt im Arbeitskontext.
+**Erledigt:** `packages/frontend-web/src/lib/api/price-lists.ts` und `packages/frontend-web/src/lib/professional-workspaces.ts` stellen jetzt eine gemeinsame Preislisten- und Preisstory-Schicht bereit. Darauf ziehen `packages/frontend-web/src/pages/preise/konditionen.tsx`, `packages/frontend-web/src/pages/preise/historie.tsx`, `packages/frontend-web/src/pages/pricing.tsx`, `packages/frontend-web/src/pages/portal/shop.tsx`, `packages/frontend-web/src/pages/vertrieb/kundenumsatz.tsx` und `packages/frontend-web/src/pages/artikel/stamm.tsx` jetzt ein professionelles Preisbild mit Preisdruck, Staffelung, Historie, aktiven Sondervereinbarungen und klarer naechster Aktion.
+**Tests / Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`; `node scripts/docs-governance-check.cjs`
+
+## KTR-PRO-005
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Die verbleibende Kontrakt-Tiefe ueber einen eigenen Hedge-/Fixierungs- und Marktbewertungsarbeitsplatz schliessen: Hedge-Luecken, Fixierungsbedarf, Marktwertdruck, Mahn-/Washout-Kontext und direkte Folgewege fuer Disposition und Management.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/{kontrakte/KontraktPositionsmonitor,contracts-v2}.tsx`, ggf. neue Kontrakt-/Hedge-Helfer unter `packages/frontend-web/src/lib/api/` und vorhandene Endpunkte unter `app/api/v1/endpoints/{kontrakte,price_hedge_api}.py`.
+**Abnahmekriterien:** Kontrakte haben nicht nur Hedge-Indikatoren, sondern einen klaren eigenen Arbeitsraum fuer Hedge-/Fixierungsdruck, priorisierte Luecken, Marktwertkontext und direkte Folgeaktionen.
+
+## FIBU-PRO-002
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Die verbleibende FIBU-Profi-Tiefe ueber einen eigenen Zinswesen-/Jahreswechsel-/Reorganisator-Leitstand schliessen: Zinskandidaten, Dunning-/Interest-Parameter, Periodenlage, Reorg-Risiken, Connector-/Revisionseinfluss und naechste Abschlussaktionen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/{finance/mahnwesen,fibu/abschluss-cockpit,fibu/schnittstellen-center}.tsx`, ggf. `packages/frontend-web/src/lib/api/fibu.ts`.
+**Abnahmekriterien:** Zinswesen, Jahreswechsel und Reorganisator sind nicht nur Teilzahlen im Cockpit, sondern ein eigener professioneller Arbeits- und Fuehrungsraum mit klaren Folgeaktionen und Parameterrisiken.
+
+## SUPPLY-E2E-002
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Die physische Kette zu einem operativen Leitstand verdichten: Rohware, Warteschlange, Waage, Charge, Fracht und Abrechnung mit Ausnahmefuehrung, Prioritaeten, Blockerbild und naechster Aktion in einer gemeinsamen Surface.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/{annahme/rohware,annahme/warteschlange,waage/liste,logistik/frachtbriefe}.tsx`, ggf. `packages/frontend-web/src/lib/api/supply-chain.ts`.
+**Abnahmekriterien:** Die physische Objektkette ist nicht nur verteilt sichtbar, sondern als eigener Operationsraum mit Prioritaeten, Blockern, Handlungsbild und klarer Ausnahmefuehrung nutzbar.
