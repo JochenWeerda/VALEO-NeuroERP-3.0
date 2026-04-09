@@ -458,6 +458,38 @@ export type BenchmarkData = {
   comparison: Record<string, { own: number; branch: number | null; deviation_pct: number | null }>
 }
 
+export type BenchmarkCategorySummary = {
+  kategorie: string
+  kennzahl_count: number
+  top10_count: number
+  improvement_count: number
+  avg_score: number
+}
+
+export type BenchmarkCatalog = {
+  report_id: string
+  tenant_id: string
+  frequenz: string
+  kennzahl_count: number
+  category_count: number
+  top10_count: number
+  improvement_count: number
+  trend_series_count: number
+  best_metric: string
+  weakest_metric: string
+  categories: BenchmarkCategorySummary[]
+}
+
+export type BenchmarkReadModel = {
+  report: {
+    top10_kennzahlen?: Array<{ bezeichnung: string; eigenwert: number; einheit?: string }>
+    verbesserungspotenzial?: Array<{ bezeichnung: string; eigenwert: number; einheit?: string }>
+  }
+  catalog: BenchmarkCatalog
+  coverage_notes: string[]
+  schema_version: number
+}
+
 export function useBenchmark(startDate?: string | null, endDate?: string | null) {
   return useQuery({
     queryKey: ['analytics', 'benchmark', startDate ?? '', endDate ?? ''],
@@ -467,6 +499,17 @@ export function useBenchmark(startDate?: string | null, endDate?: string | null)
       if (endDate) params.set('end_date', endDate)
       const suffix = params.toString() ? `?${params.toString()}` : ''
       const res = await apiClient.get<BenchmarkData>(`/api/v1/analytics/benchmark${suffix}`)
+      return res.data
+    },
+    staleTime: 60 * 1000,
+  })
+}
+
+export function useBenchmarkReadModel() {
+  return useQuery({
+    queryKey: ['analytics', 'benchmark-read-model'],
+    queryFn: async () => {
+      const res = await apiClient.get<BenchmarkReadModel>('/api/v1/benchmark/read-model')
       return res.data
     },
     staleTime: 60 * 1000,

@@ -12,6 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { useToast } from '@/hooks/use-toast'
 import { AlertTriangle, FileDown, Plus, Scale, Search } from 'lucide-react'
+import { useSupplyChainOverview } from '@/lib/api/supply-chain'
 
 function LoadingSkeleton(): JSX.Element {
   return (
@@ -49,6 +50,7 @@ function ErrorState({ error, onRetry }: { error: Error | null; onRetry: () => vo
 export default function WaageListePage(): JSX.Element {
   const navigate = useNavigate()
   const { toast } = useToast()
+  const { data: chain } = useSupplyChainOverview()
   const searchInputRef = useRef<HTMLInputElement | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const { data: waagen = [], isLoading, isError, error, refetch } = useWaagen()
@@ -152,6 +154,15 @@ export default function WaageListePage(): JSX.Element {
               </span>
             </CardContent>
           </Card>
+        </div>
+      </PageSection>
+
+      <PageSection title="Kettenlage" description="Einheitliche Sicht auf Annahme, Wiegung, Charge und Fracht direkt an der Waage.">
+        <div className="grid gap-4 md:grid-cols-4">
+          <Card><CardContent className="pt-6"><div className="text-xs text-muted-foreground">Annahme offen</div><div className="text-2xl font-semibold">{chain.waitingInbound}</div></CardContent></Card>
+          <Card><CardContent className="pt-6"><div className="text-xs text-muted-foreground">Wiegungen offen</div><div className="text-2xl font-semibold">{chain.openWeighingTickets}</div></CardContent></Card>
+          <Card><CardContent className="pt-6"><div className="text-xs text-muted-foreground">Chargen in Prüfung</div><div className="text-2xl font-semibold">{chain.blockedCharges}</div></CardContent></Card>
+          <Card><CardContent className="pt-6"><div className="text-xs text-muted-foreground">Fracht unterwegs</div><div className="text-2xl font-semibold">{chain.freightInTransit}</div></CardContent></Card>
         </div>
       </PageSection>
 

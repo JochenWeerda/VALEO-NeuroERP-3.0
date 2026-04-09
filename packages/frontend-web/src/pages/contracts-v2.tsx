@@ -38,6 +38,17 @@ interface Contract {
   commodity: string;
   counterpartyId: string;
   status: string;
+  contractClass?: string | null;
+  contractGroup?: string | null;
+  contractVariant?: string | null;
+  parityCode?: string | null;
+  dispositionFlag?: string | null;
+  hedgeQuotePct?: number | null;
+  marketValuationEur?: number | null;
+  dunningLevel?: number | null;
+  writeoffCandidate?: boolean;
+  printReady?: boolean;
+  alternateArticles?: string[];
   qty: {
     contracted: number;
     unit: string;
@@ -48,6 +59,20 @@ interface Contract {
   };
   createdAt: string;
   updatedAt: string;
+}
+
+function daysUntil(dateValue: string): number | null {
+  const target = new Date(dateValue);
+  if (Number.isNaN(target.getTime())) return null;
+  const now = new Date();
+  return Math.ceil((target.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+}
+
+function getSourceBadgeLabel(sourceType?: Contract['sourceType']): string {
+  if (sourceType === 'kon') return 'Kontraktmodul';
+  if (sourceType === 'rahmen') return 'Rahmenvertrag';
+  if (sourceType === 'agrar') return 'Agrar / Flow Spine';
+  return 'Allgemein';
 }
 
 interface Amendment {
@@ -307,6 +332,72 @@ export default function ContractsPageV2(): JSX.Element {
     }
   };
 
+  const handleCopilot = () => {
+    navigate('/admin/control-center/agent-ops?context=contracts&intent=margin-risk-review');
+    toast({
+      title: 'Agent Ops geoeffnet',
+      description: 'Vertragspruefungen laufen jetzt ueber den Leitstand fuer Preis-, Mengen- und Aenderungsrisiken.',
+    });
+  };
+
+  const openContractEditWorkspace = (contract: Contract) => {
+    if (contract.sourceType === 'kon') {
+      navigate(`/kontrakte/${contract.id}`);
+      return;
+    }
+    if (contract.sourceType === 'rahmen') {
+      navigate(`/vertrag/${contract.id}`);
+      return;
+    }
+    if (contract.sourceType === 'agrar') {
+      navigate(`/workflow/flow-spine-contract-to-settlement?contractId=${encodeURIComponent(contract.id)}`);
+      toast({
+        title: 'Prozessarbeitsplatz geoeffnet',
+        description: 'Agrarvertraege werden ueber den zugeordneten Flow-Spine-Arbeitsplatz weiterbearbeitet.',
+      });
+      return;
+    }
+    navigate(`/kontrakte/${contract.id}`);
+  };
+
+  const openContractWorkspace = (contract: Contract) => {
+    openContractEditWorkspace(contract);
+  };
+
+  const openContractAlarms = () => navigate('/kontrakte/alarme');
+  const openContractPositions = () => navigate('/kontrakte/positionen');
+  const openContractOverview = () => navigate('/kontrakte');
+
+  const openContracts = useMemo(
+    () => contracts.filter((contract) => !['cancelled', 'fulfilled'].includes(contract.status.toLowerCase())),
+    [contracts],
+  );
+
+  const expiringContracts = useMemo(
+    () =>
+      openContracts.filter((contract) => {
+        const days = daysUntil(contract.deliveryWindow.to);
+        return days !== null && days >= 0 && days <= 30;
+      }),
+    [openContracts],
+  );
+
+  const sourceBreakdown = useMemo(
+    () => ({
+      kon: contracts.filter((contract) => contract.sourceType === 'kon').length,
+      rahmen: contracts.filter((contract) => contract.sourceType === 'rahmen').length,
+      agrar: contracts.filter((contract) => contract.sourceType === 'agrar').length,
+      unknown: contracts.filter((contract) => !contract.sourceType).length,
+    }),
+    [contracts],
+  );
+
+  const nextActionContract = useMemo(() => {
+    const expiring = expiringContracts[0];
+    if (expiring) return expiring;
+    return openContracts[0] ?? null;
+  }, [expiringContracts, openContracts]);
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -332,8 +423,96 @@ export default function ContractsPageV2(): JSX.Element {
 
       <Toolbar
         onSearch={setQuery}
-        onCopilot={() => toast({ title: 'Copilot', description: 'KI-Analyse fÃ¼r VertrÃ¤ge wird in KÃ¼rze verfÃ¼gbar.' })}
+        onCopilot={handleCopilot}
       />
+
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card className="p-4">
+          <div className="text-xs uppercase tracking-wide text-muted-foreground">Offene Kontrakte</div>
+          <div className="mt-2 text-2xl font-semibold">{openContracts.length}</div>
+          <p className="mt-1 text-xs text-muted-foreground">Aktiv bearbeitbare Vertragsobjekte</p>
+        </Card>
+        <Card className="p-4">
+          <div className="text-xs uppercase tracking-wide text-muted-foreground">Ablauf in 30 Tagen</div>
+          <div className="mt-2 text-2xl font-semibold">{expiringContracts.length}</div>
+          <p className="mt-1 text-xs text-muted-foreground">Frühwarnung für Mengen- und Friststeuerung</p>
+        </Card>
+        <Card className="p-4">
+          <div className="text-xs uppercase tracking-wide text-muted-foreground">Kontraktmodul</div>
+          <div className="mt-2 text-2xl font-semibold">{sourceBreakdown.kon}</div>
+          <p className="mt-1 text-xs text-muted-foreground">Direkt im Kontrakt-Arbeitsplatz gepflegt</p>
+        </Card>
+        <Card className="p-4">
+          <div className="text-xs uppercase tracking-wide text-muted-foreground">Flow / Rahmen</div>
+          <div className="mt-2 text-2xl font-semibold">{sourceBreakdown.agrar + sourceBreakdown.rahmen}</div>
+          <p className="mt-1 text-xs text-muted-foreground">Quellenübergreifende Vertragsherkunft</p>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+        <Card className="p-4">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <h3 className="font-semibold">Kontrakt-Steuerung</h3>
+              <p className="text-sm text-muted-foreground">Schneller Einstieg in die vorhandenen Risiko- und Detailarbeitsplätze.</p>
+            </div>
+            <Badge variant="outline">Profi-Arbeitsplatz</Badge>
+          </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Button variant="outline" onClick={openContractOverview}>Kontraktliste</Button>
+            <Button variant="outline" onClick={openContractPositions}>Positionsmonitor</Button>
+            <Button variant="outline" onClick={openContractAlarms}>Alarmdashboard</Button>
+            <Button variant="outline" onClick={() => navigate('/dokumente/ablage')}>Dokumentenablage</Button>
+          </div>
+          <div className="mt-4 grid gap-3 md:grid-cols-2">
+            <div className="rounded-lg border p-3">
+              <div className="text-xs uppercase tracking-wide text-muted-foreground">Quellenbild</div>
+              <div className="mt-2 space-y-1 text-sm">
+                <p>Kontraktmodul: {sourceBreakdown.kon}</p>
+                <p>Rahmenvertrag: {sourceBreakdown.rahmen}</p>
+                <p>Agrar / Flow Spine: {sourceBreakdown.agrar}</p>
+                {sourceBreakdown.unknown > 0 ? <p>Ohne Quelltyp: {sourceBreakdown.unknown}</p> : null}
+              </div>
+            </div>
+            <div className="rounded-lg border p-3">
+              <div className="text-xs uppercase tracking-wide text-muted-foreground">Arbeitslage</div>
+              <div className="mt-2 space-y-1 text-sm">
+                <p>{expiringContracts.length > 0 ? `${expiringContracts.length} Kontrakte laufen in 30 Tagen ab.` : 'Keine kurzfristigen Ablauffristen im gefilterten Bestand.'}</p>
+                <p>{openContracts.length > 0 ? `${openContracts.length} offene Kontrakte erfordern aktive Steuerung.` : 'Keine offenen Kontrakte im aktuellen Bestand.'}</p>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="p-4">
+          <h3 className="font-semibold">Nächste empfohlene Aktion</h3>
+          {nextActionContract ? (
+            <div className="mt-3 space-y-3">
+              <div>
+                <p className="font-medium">{nextActionContract.contractNo}</p>
+                <p className="text-sm text-muted-foreground">
+                  {nextActionContract.commodity} · {getSourceBadgeLabel(nextActionContract.sourceType)}
+                </p>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {(() => {
+                  const days = daysUntil(nextActionContract.deliveryWindow.to);
+                  if (days !== null && days >= 0 && days <= 30) {
+                    return `Friststeuerung priorisieren: Kontrakt läuft in ${days} Tagen ab.`;
+                  }
+                  return 'Vertrag in den passenden Arbeitsplatz ziehen und Mengen-, Preis- oder Änderungslogik prüfen.';
+                })()}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <Button size="sm" onClick={() => openContractWorkspace(nextActionContract)}>Arbeitsplatz öffnen</Button>
+                <Button size="sm" variant="outline" onClick={() => setSelectedContract(nextActionContract)}>Kurzsicht</Button>
+              </div>
+            </div>
+          ) : (
+            <p className="mt-3 text-sm text-muted-foreground">Aktuell liegt kein offener Kontrakt für eine Priorisierung vor.</p>
+          )}
+        </Card>
+      </div>
 
       <Card className="p-4">
         {isLoading ? (
@@ -345,6 +524,8 @@ export default function ContractsPageV2(): JSX.Element {
             <TableHeader>
               <TableRow>
                 <TableHead>{t('crud.fields.number')}</TableHead>
+                <TableHead>Quelle</TableHead>
+                <TableHead>Steuerung</TableHead>
                 <TableHead>{t('crud.fields.type')}</TableHead>
                 <TableHead>{t('crud.fields.commodity')}</TableHead>
                 <TableHead>{t('crud.fields.status')}</TableHead>
@@ -357,12 +538,28 @@ export default function ContractsPageV2(): JSX.Element {
               {filtered.map((contract) => (
                 <TableRow key={contract.id}>
                   <TableCell className="font-mono">{contract.contractNo}</TableCell>
+                  <TableCell>
+                    <Badge variant="outline">{getSourceBadgeLabel(contract.sourceType)}</Badge>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-wrap gap-1">
+                      {contract.contractClass ? <Badge variant="outline">{contract.contractClass}</Badge> : null}
+                      {contract.parityCode ? <Badge variant="outline">{contract.parityCode}</Badge> : null}
+                      {contract.dispositionFlag ? <Badge variant="outline">{contract.dispositionFlag}</Badge> : null}
+                    </div>
+                  </TableCell>
                   <TableCell>{contract.type}</TableCell>
                   <TableCell>{contract.commodity}</TableCell>
                   <TableCell>
                     <Badge className={getStatusColor(contract.status)}>
                       {getStatusLabel(t, contract.status.toLowerCase(), contract.status)}
                     </Badge>
+                    {(() => {
+                      const days = daysUntil(contract.deliveryWindow.to);
+                      return days !== null && days >= 0 && days <= 30 ? (
+                        <p className="mt-1 text-xs text-amber-700">Ablauf in {days} Tagen</p>
+                      ) : null;
+                    })()}
                   </TableCell>
                   <TableCell>
                     {contract.qty.contracted} {contract.qty.unit}
@@ -383,16 +580,7 @@ export default function ContractsPageV2(): JSX.Element {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => {
-                          if (contract.sourceType === 'kon') {
-                            navigate(`/kontrakte/${contract.id}`);
-                            return;
-                          }
-                          toast({
-                            title: 'Hinweis',
-                            description: 'Direktes Editieren ist aktuell nur fÃ¼r das neue Kontraktmodul aktiv.',
-                          });
-                        }}
+                        onClick={() => openContractEditWorkspace(contract)}
                       >
                         {t('crud.actions.edit')}
                       </Button>
@@ -566,11 +754,38 @@ export default function ContractsPageV2(): JSX.Element {
               <h3 className="font-semibold mb-2">{t('crud.detail.basicInfo')}</h3>
               <div className="space-y-2">
                 <p><strong>{t('crud.fields.number')}:</strong> {selectedContract.contractNo}</p>
+                <p><strong>Quelle:</strong> {getSourceBadgeLabel(selectedContract.sourceType)}</p>
+                <p><strong>Klasse / Gruppe / Variante:</strong> {[selectedContract.contractClass, selectedContract.contractGroup, selectedContract.contractVariant].filter(Boolean).join(' / ') || '-'}</p>
+                <p><strong>Paritaet / Disposition:</strong> {[selectedContract.parityCode, selectedContract.dispositionFlag].filter(Boolean).join(' / ') || '-'}</p>
+                <p><strong>Ausweichung / Druck:</strong> {selectedContract.alternateArticles?.join(', ') || '-'} / {selectedContract.printReady ? 'druckbereit' : 'Druck offen'}</p>
                 <p><strong>{t('crud.fields.type')}:</strong> {selectedContract.type}</p>
                 <p><strong>{t('crud.fields.commodity')}:</strong> {selectedContract.commodity}</p>
                 <p><strong>{t('crud.fields.status')}:</strong> {getStatusLabel(t, selectedContract.status.toLowerCase(), selectedContract.status)}</p>
                 <p><strong>{t('crud.fields.quantity')}:</strong> {selectedContract.qty.contracted} {selectedContract.qty.unit}</p>
                 <p><strong>{t('crud.fields.deliveryWindow')}:</strong> {new Date(selectedContract.deliveryWindow.from).toLocaleDateString('de-DE')} - {new Date(selectedContract.deliveryWindow.to).toLocaleDateString('de-DE')}</p>
+                <p><strong>Hedge / Marktwert / Mahnung:</strong> {selectedContract.hedgeQuotePct != null ? `${selectedContract.hedgeQuotePct.toFixed(1)}%` : '-'} / {selectedContract.marketValuationEur != null ? `${selectedContract.marketValuationEur.toFixed(2)} EUR` : '-'} / {selectedContract.dunningLevel != null ? `Stufe ${selectedContract.dunningLevel}` : '-'}</p>
+                <p><strong>Washout:</strong> {selectedContract.writeoffCandidate ? 'vorgemerkt' : 'nicht vorgemerkt'}</p>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="font-semibold mb-2">Naechste Aktion</h3>
+              <div className="rounded-lg border p-3 text-sm text-muted-foreground">
+                {(() => {
+                  const days = daysUntil(selectedContract.deliveryWindow.to);
+                  if (days !== null && days >= 0 && days <= 30) {
+                    return `Friststeuerung priorisieren: dieser Kontrakt laeuft in ${days} Tagen ab.`;
+                  }
+                  if (selectedContract.status.toLowerCase() === 'draft') {
+                    return 'Kontrakt vervollstaendigen und in den fachlich passenden Arbeitsplatz ueberfuehren.';
+                  }
+                  return 'Detailarbeitsplatz, Positionsmonitor und Alarmdashboard fuer Mengen-, Preis- und Ablaufpruefung nutzen.';
+                })()}
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Button size="sm" variant="outline" onClick={() => openContractWorkspace(selectedContract)}>Arbeitsplatz</Button>
+                <Button size="sm" variant="outline" onClick={openContractPositions}>Positionsmonitor</Button>
+                <Button size="sm" variant="outline" onClick={openContractAlarms}>Alarme</Button>
               </div>
             </div>
 

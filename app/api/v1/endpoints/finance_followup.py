@@ -221,6 +221,187 @@ def _kasse_csv_rows(db: Session, tenant_id: str) -> list[list[object]]:
     return rows
 
 
+def _safe_count_result(db: Session, query: str, params: dict) -> dict | None:
+    try:
+        row = db.execute(text(query), params).mappings().first()
+        return dict(row) if row else None
+    except Exception:
+        return None
+
+
+@router.get("/fibu/cockpit", response_model=dict)
+async def get_fibu_cockpit(
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    debitor = _safe_count_result(
+        db,
+        """
+        SELECT
+            COUNT(*) AS item_count,
+            COALESCE(SUM(balance), 0) AS open_amount,
+            COUNT(*) FILTER (WHERE overdue_days > 0) AS overdue_count,
+            COALESCE(SUM(balance) FILTER (WHERE overdue_days > 0), 0) AS overdue_amount,
+            COUNT(*) FILTER (WHERE COALESCE(dunning_level, 0) > 0) AS dunning_items,
+            COUNT(*) FILTER (WHERE overdue_days > 30) AS interest_candidates,
+            COALESCE(SUM(balance) FILTER (WHERE overdue_days > 30), 0) AS interest_amount
+        FROM domain_shared.open_items
+        WHERE tenant_id = :tid AND status = 'open' AND type = 'debitor'
+        """,
+        {"tid": tenant_id},
+    ) or {}
+    kreditor = _safe_count_result(
+        db,
+        """
+        SELECT
+            COUNT(*) AS item_count,
+            COALESCE(SUM(balance), 0) AS open_amount,
+            COUNT(*) FILTER (WHERE overdue_days > 0) AS overdue_count,
+            COALESCE(SUM(balance) FILTER (WHERE overdue_days > 0), 0) AS overdue_amount,
+            COUNT(*) FILTER (WHERE COALESCE(zahlbar, false) = true) AS payable_count
+        FROM domain_shared.open_items
+        WHERE tenant_id = :tid AND status = 'open' AND type = 'kreditor'
+        """,
+        {"tid": tenant_id},
+    ) or {}
+    connector_rows = []
+    try:
+        connector_rows = db.execute(
+            text(
+                """
+                SELECT connector_type, COUNT(*) AS profile_count, COALESCE(MAX(version), 0) AS latest_version, MAX(updated_at) AS updated_at
+                FROM domain_erp.fibu_connector_profiles
+                WHERE tenant_id = :tid
+                GROUP BY connector_type
+                ORDER BY connector_type
+                """
+            ),
+            {"tid": tenant_id},
+        ).mappings().all()
+    except Exception:
+        connector_rows = []
+    vat = _safe_count_result(
+        db,
+        """
+        SELECT
+            COUNT(*) AS return_count,
+            COUNT(*) FILTER (WHERE status = 'validated') AS validated_count,
+            COUNT(*) FILTER (WHERE status = 'approved') AS approved_count,
+            COUNT(*) FILTER (WHERE status = 'submitted') AS submitted_count,
+            MAX(period) AS latest_period,
+            MAX(submitted_at) AS latest_submission_at
+        FROM domain_erp.vat_returns
+        WHERE tenant_id = :tid
+        """,
+        {"tid": tenant_id},
+    ) or {}
+    exports = []
+    try:
+        exports = [
+            {
+                "kind": row["kind"],
+                "count": int(row["export_count"] or 0),
+                "record_count": int(row["record_count"] or 0),
+                "latest_created_at": row["latest_created_at"].isoformat() if row["latest_created_at"] else None,
+                "has_artifacts": bool(row["artifact_count"] or 0),
+            }
+            for row in db.execute(
+                text(
+                    """
+                    SELECT
+                        kind,
+                        COUNT(*) AS export_count,
+                        COALESCE(SUM(record_count), 0) AS record_count,
+                        MAX(created_at) AS latest_created_at,
+                        COUNT(*) FILTER (WHERE dms_document_id IS NOT NULL OR dms_view_url IS NOT NULL) AS artifact_count
+                    FROM domain_shared.finance_followup_exports
+                    WHERE tenant_id = :tid
+                    GROUP BY kind
+                    ORDER BY kind
+                    """
+                ),
+                {"tid": tenant_id},
+            ).mappings().all()
+        ]
+    except Exception:
+        exports = []
+    journal = _safe_count_result(
+        db,
+        """
+        SELECT
+            COUNT(*) FILTER (WHERE entry_date >= CURRENT_DATE - INTERVAL '31 day') AS recent_entries,
+            MAX(entry_date) AS last_entry_date
+        FROM domain_shared.journal_entries
+        WHERE tenant_id = :tid
+        """,
+        {"tid": tenant_id},
+    ) or {}
+
+    annual_close = {
+        "open_item_count": int((debitor.get("item_count") or 0) + (kreditor.get("item_count") or 0)),
+        "overdue_item_count": int((debitor.get("overdue_count") or 0) + (kreditor.get("overdue_count") or 0)),
+        "recent_journal_entries": int(journal.get("recent_entries") or 0),
+        "latest_vat_period": vat.get("latest_period"),
+        "ready_for_year_close": bool(
+            (debitor.get("overdue_count") or 0) == 0
+            and (kreditor.get("overdue_count") or 0) == 0
+            and (vat.get("validated_count") or 0) >= 0
+        ),
+    }
+
+    return {
+        "tenant_id": tenant_id,
+        "schema_version": 1,
+        "master_data": {
+            "dunning_parameters_ready": bool(debitor.get("item_count") or 0),
+            "interest_groups_ready": bool(debitor.get("interest_candidates") or 0),
+            "connector_profile_count": sum(int(row["profile_count"] or 0) for row in connector_rows),
+            "connector_profiles": [
+                {
+                    "connector_type": row["connector_type"],
+                    "profile_count": int(row["profile_count"] or 0),
+                    "latest_version": int(row["latest_version"] or 0),
+                    "updated_at": row["updated_at"].isoformat() if row["updated_at"] else None,
+                }
+                for row in connector_rows
+            ],
+        },
+        "dunning": {
+            "open_items": int(debitor.get("item_count") or 0),
+            "overdue_items": int(debitor.get("overdue_count") or 0),
+            "overdue_amount": float(debitor.get("overdue_amount") or 0.0),
+            "dunning_items": int(debitor.get("dunning_items") or 0),
+        },
+        "interest": {
+            "candidate_count": int(debitor.get("interest_candidates") or 0),
+            "candidate_amount": float(debitor.get("interest_amount") or 0.0),
+        },
+        "creditor": {
+            "open_items": int(kreditor.get("item_count") or 0),
+            "payable_items": int(kreditor.get("payable_count") or 0),
+            "open_amount": float(kreditor.get("open_amount") or 0.0),
+            "overdue_amount": float(kreditor.get("overdue_amount") or 0.0),
+        },
+        "tax": {
+            "vat_return_count": int(vat.get("return_count") or 0),
+            "validated_count": int(vat.get("validated_count") or 0),
+            "approved_count": int(vat.get("approved_count") or 0),
+            "submitted_count": int(vat.get("submitted_count") or 0),
+            "latest_period": vat.get("latest_period"),
+            "latest_submission_at": vat.get("latest_submission_at").isoformat() if vat.get("latest_submission_at") else None,
+            "e_bilanz_ready": bool(vat.get("return_count") or exports),
+            "e_clearing_ready": bool(exports),
+        },
+        "exports": exports,
+        "annual_close": annual_close,
+        "revision": {
+            "recent_journal_entries": int(journal.get("recent_entries") or 0),
+            "last_entry_date": journal.get("last_entry_date").isoformat() if journal.get("last_entry_date") else None,
+            "export_runs": sum(int(item["count"] or 0) for item in exports),
+        },
+    }
+
+
 # ---------------------------------------------------------------------------
 # Mahnwesen
 # ---------------------------------------------------------------------------

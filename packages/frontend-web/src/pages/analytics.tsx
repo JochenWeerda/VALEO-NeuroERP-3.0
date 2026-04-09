@@ -73,7 +73,10 @@ export default function AnalyticsDashboard(): JSX.Element {
       {showEmptyState && (
         <Alert variant="default" className="border-amber-200 bg-amber-50 text-amber-800">
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription>Aktuell keine Daten gefunden. Die Widgets zeigen Platzhalter.</AlertDescription>
+          <AlertDescription>
+            Aktuell liegen keine Analytics-Daten vor. Die Uebersicht bleibt betriebsbereit und fuellt sich, sobald
+            Kennzahlen oder Trends aus den Quellsystemen eintreffen.
+          </AlertDescription>
         </Alert>
       )}
 

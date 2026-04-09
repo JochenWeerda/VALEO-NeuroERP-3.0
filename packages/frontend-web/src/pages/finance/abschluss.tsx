@@ -10,6 +10,8 @@ import { buildDecisionView } from '@/policy/decision-view'
 import { ProcessStatusPanel } from '@/components/workflow/ProcessStatusPanel'
 import { useApprovalDensityProfile } from '@/features/workflow/useApprovalDensityProfile'
 import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useAccountingPeriods, useFibuCockpit } from '@/lib/api/fibu'
 
 const abschlussConfig: MaskConfig = {
   title: 'Monats-/Jahresabschluss',
@@ -447,6 +449,8 @@ export default function AbschlussPage(): JSX.Element {
   const [actionLoadingKey, setActionLoadingKey] = useState<string | null>(null)
   const [workspaceData, setWorkspaceData] = useState<any>({})
   const currentActor = localStorage.getItem('userEmail') || localStorage.getItem('username') || 'api'
+  const { data: fibuCockpit } = useFibuCockpit()
+  const { data: periods } = useAccountingPeriods()
 
   const { data, loading } = useMaskData({
     apiUrl: abschlussConfig.api.baseUrl,
@@ -618,6 +622,7 @@ export default function AbschlussPage(): JSX.Element {
   }
 
   const approvalDensityProfile = useApprovalDensityProfile('finance-closing', approvalDecisionView)
+  const adjustingPeriods = periods.filter((period) => period.status === 'ADJUSTING').length
 
   return (
     <>
@@ -646,6 +651,24 @@ export default function AbschlussPage(): JSX.Element {
           description="Periode, Abstimmung, Meldewesen und Freigaben werden jetzt im Abschlussarbeitsplatz gepflegt. Der Flow-Fall bleibt als Referenz erhalten."
         />
       ) : null}
+      <div className="grid gap-4 px-4 pb-4 md:grid-cols-4">
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm">Jahreswechsel</CardTitle></CardHeader>
+          <CardContent><div className="text-sm font-semibold">{fibuCockpit.annual_close.ready_for_year_close ? 'stabil' : 'offene Klärungen'}</div></CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm">Reorganisator</CardTitle></CardHeader>
+          <CardContent><div className="text-2xl font-semibold">{adjustingPeriods}</div></CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm">Journal zuletzt</CardTitle></CardHeader>
+          <CardContent><div className="text-sm font-semibold">{fibuCockpit.revision.last_entry_date ?? 'n/a'}</div></CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm">VAT-Periode</CardTitle></CardHeader>
+          <CardContent><div className="text-sm font-semibold">{fibuCockpit.annual_close.latest_vat_period ?? 'n/a'}</div></CardContent>
+        </Card>
+      </div>
       <ObjectPage
         config={abschlussConfig}
         data={effectiveData}

@@ -13,6 +13,7 @@ import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { useToast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/api-client'
 import { type WeighingTicket } from '@/lib/api/weighing-tickets'
+import { useSupplyChainOverview } from '@/lib/api/supply-chain'
 import { ArrowRight, CheckCircle, Clock, FileText, Link, Scale, Truck } from 'lucide-react'
 
 // ── Tabs ─────────────────────────────────────────────────────────────────────
@@ -156,6 +157,7 @@ export default function WiegescheinDetailPage(): JSX.Element {
   const [activeTab, setActiveTab] = useState<TabId>('gewichte')
   const [allocateOpen, setAllocateOpen] = useState(false)
   const [contractInput, setContractInput] = useState('')
+  const { data: chain } = useSupplyChainOverview()
 
   // ── Fetch ticket ────────────────────────────────────────────────────────────
   const {
@@ -415,6 +417,18 @@ export default function WiegescheinDetailPage(): JSX.Element {
               )}
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm">Objektkette zu diesem Wiegeschein</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4 md:grid-cols-4">
+          <div><div className="text-xs text-muted-foreground">Wartende Annahmen</div><div className="text-2xl font-semibold">{chain.waitingInbound}</div></div>
+          <div><div className="text-xs text-muted-foreground">Offene Wiegungen</div><div className="text-2xl font-semibold">{chain.openWeighingTickets}</div></div>
+          <div><div className="text-xs text-muted-foreground">Gesperrte Chargen</div><div className="text-2xl font-semibold">{chain.blockedCharges}</div></div>
+          <div><div className="text-xs text-muted-foreground">Fracht in Transit</div><div className="text-2xl font-semibold">{chain.freightInTransit}</div></div>
         </CardContent>
       </Card>
 

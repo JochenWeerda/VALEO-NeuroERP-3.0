@@ -11,6 +11,9 @@ import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { LeaveConfirmDialog } from '@/components/LeaveConfirmDialog'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import { apiClient } from '@/lib/api-client'
+import { useFibuCockpit } from '@/lib/api/fibu'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 const createMahnwesenConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
@@ -197,6 +200,7 @@ export default function MahnwesenPage(): JSX.Element {
   const entityType = 'dunning'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Mahnwesen')
   const mahnwesenConfig = createMahnwesenConfig(t, entityTypeLabel)
+  const { data: fibuCockpit } = useFibuCockpit()
 
   const { data, loading, saveData } = useMaskData({
     apiUrl: mahnwesenConfig.api.baseUrl,
@@ -337,6 +341,40 @@ export default function MahnwesenPage(): JSX.Element {
     <>
       <ModuleToolbar backTarget="/finance/mahnwesen" closeTarget="/finance/mahnwesen" title={entityTypeLabel} />
       <LeaveConfirmDialog blocker={blocker} onSave={() => handleSave(data)} title={t('crud.messages.unsavedChanges', { defaultValue: 'Ungespeicherte Änderungen' })} description={t('crud.messages.unsavedChangesDescription', { defaultValue: 'Möchten Sie speichern, verwerfen oder hier bleiben?' })} />
+      <div className="grid gap-4 px-6 pt-4 md:grid-cols-4">
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm">Überfällige OP</CardTitle></CardHeader>
+          <CardContent><div className="text-2xl font-semibold">{fibuCockpit.dunning.overdue_items}</div></CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm">Rückstand</CardTitle></CardHeader>
+          <CardContent><div className="text-2xl font-semibold">{fibuCockpit.dunning.overdue_amount.toFixed(2)} EUR</div></CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm">Zinskandidaten</CardTitle></CardHeader>
+          <CardContent><div className="text-2xl font-semibold">{fibuCockpit.interest.candidate_count}</div></CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm">Connector-Profile</CardTitle></CardHeader>
+          <CardContent><div className="text-2xl font-semibold">{fibuCockpit.master_data.connector_profile_count}</div></CardContent>
+        </Card>
+      </div>
+      <div className="px-6 pt-4">
+        <div className="rounded-lg border bg-muted/30 p-4 text-sm">
+          <div className="font-semibold">FIBU-Stammdaten und Parameter</div>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <Badge variant={fibuCockpit.master_data.dunning_parameters_ready ? 'outline' : 'secondary'}>
+              Mahnparameter {fibuCockpit.master_data.dunning_parameters_ready ? 'bereit' : 'prüfen'}
+            </Badge>
+            <Badge variant={fibuCockpit.master_data.interest_groups_ready ? 'outline' : 'secondary'}>
+              Zinsgruppen {fibuCockpit.master_data.interest_groups_ready ? 'bereit' : 'ergänzen'}
+            </Badge>
+            <Badge variant={fibuCockpit.interest.candidate_count > 0 ? 'secondary' : 'outline'}>
+              Zinswesen {fibuCockpit.interest.candidate_count > 0 ? `${fibuCockpit.interest.candidate_count} Kandidaten` : 'keine Rückstände'}
+            </Badge>
+          </div>
+        </div>
+      </div>
       <ObjectPage
         config={mahnwesenConfig}
         data={data}

@@ -12,6 +12,7 @@ import { ErrorState } from '@/components/ErrorState'
 import { apiClient } from '@/lib/api-client'
 import { useToast } from '@/hooks/use-toast'
 import { Calculator, FileText, Save, Truck } from 'lucide-react'
+import { useSupplyChainOverview } from '@/lib/api/supply-chain'
 import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
 import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { buildDecisionView } from '@/policy/decision-view'
@@ -225,6 +226,7 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
   const [searchParams] = useSearchParams()
   const { toast } = useToast()
   const queryClient = useQueryClient()
+  const { data: chain } = useSupplyChainOverview()
   const [form, setForm] = useState<FormState>(initialForm)
   const [approvalActor, setApprovalActor] = useState({ actorId: 'ui-user', actorType: 'SACHBEARBEITER' })
 
@@ -611,6 +613,30 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
           </CardContent>
         </Card>
       ) : null}
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Partie bis Abrechnung</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-3 md:grid-cols-4">
+          <div>
+            <div className="text-xs text-muted-foreground">Wartende Annahmen</div>
+            <div className="font-semibold">{chain.waitingInbound}</div>
+          </div>
+          <div>
+            <div className="text-xs text-muted-foreground">Offene Wiegungen</div>
+            <div className="font-semibold">{chain.openWeighingTickets}</div>
+          </div>
+          <div>
+            <div className="text-xs text-muted-foreground">Gesperrte Chargen</div>
+            <div className="font-semibold">{chain.blockedCharges}</div>
+          </div>
+          <div>
+            <div className="text-xs text-muted-foreground">Fracht in Transit</div>
+            <div className="font-semibold">{chain.freightInTransit}</div>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid gap-6 md:grid-cols-2">
         <Card>

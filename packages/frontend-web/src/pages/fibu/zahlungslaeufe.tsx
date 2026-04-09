@@ -9,7 +9,7 @@ import { Calendar, CheckCircle, Euro, FileDown } from 'lucide-react'
 import { ErrorState } from '@/components/ErrorState'
 import { toast } from '@/hooks/use-toast'
 import { getAxiosErrorMessage } from '@/lib/api-client'
-import { useDATEVExport, useZahlungslauf, useZahlungsvorschlaege, type Zahlungsvorschlag } from '@/lib/api/fibu'
+import { useDATEVExport, useFibuCockpit, useZahlungslauf, useZahlungsvorschlaege, type Zahlungsvorschlag } from '@/lib/api/fibu'
 
 type ZahlungslaufData = {
   bezeichnung: string
@@ -19,6 +19,7 @@ type ZahlungslaufData = {
 
 export default function ZahlungslaeufeePage(): JSX.Element {
   const navigate = useNavigate()
+  const { data: fibuCockpit } = useFibuCockpit()
   const { data: zahlungsvorschlaege = [], isLoading, isError, error, refetch } = useZahlungsvorschlaege()
   const createZahlungslauf = useZahlungslauf()
   const exportDatev = useDATEVExport()
@@ -229,6 +230,20 @@ export default function ZahlungslaeufeePage(): JSX.Element {
 
   return (
     <div className="p-6">
+      <div className="mb-6 grid gap-4 md:grid-cols-4">
+        <Card>
+          <CardContent className="pt-6"><div className="text-xs text-muted-foreground">Zahlbare OP</div><div className="text-2xl font-semibold">{fibuCockpit.creditor.payable_items}</div></CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6"><div className="text-xs text-muted-foreground">Offene Kreditoren</div><div className="text-2xl font-semibold">{fibuCockpit.creditor.open_items}</div></CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6"><div className="text-xs text-muted-foreground">Revisionsläufe</div><div className="text-2xl font-semibold">{fibuCockpit.revision.export_runs}</div></CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6"><div className="text-xs text-muted-foreground">Jahreswechsel</div><div className="text-sm font-semibold">{fibuCockpit.annual_close.ready_for_year_close ? 'stabil' : 'offene Klärungen'}</div></CardContent>
+        </Card>
+      </div>
       <Wizard
         title="Zahlungslauf erstellen"
         steps={steps}

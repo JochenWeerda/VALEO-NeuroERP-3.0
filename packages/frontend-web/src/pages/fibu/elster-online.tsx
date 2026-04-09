@@ -22,6 +22,7 @@ import { useToast } from '@/hooks/use-toast'
 import {
   useVATReturns,
   useCalculateVATReturn,
+  useFibuCockpit,
   downloadELSTERXml,
   type VATReturn,
 } from '@/lib/api/fibu'
@@ -61,6 +62,7 @@ export default function ElsterOnlinePage(): JSX.Element {
   const { toast } = useToast()
   const [period, setPeriod] = useState('2025-01')
 
+  const { data: fibuCockpit } = useFibuCockpit()
   const { data: returns = [], isLoading: listLoading, refetch } = useVATReturns()
   const calculateMutation = useCalculateVATReturn()
 
@@ -108,6 +110,25 @@ export default function ElsterOnlinePage(): JSX.Element {
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
+          <div className="grid gap-4 md:grid-cols-4">
+            <Card>
+              <CardHeader className="pb-2"><CardTitle className="text-sm">UStVA-Läufe</CardTitle></CardHeader>
+              <CardContent><div className="text-2xl font-semibold">{fibuCockpit.tax.vat_return_count}</div></CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2"><CardTitle className="text-sm">eBilanz</CardTitle></CardHeader>
+              <CardContent><div className="text-sm font-semibold">{fibuCockpit.tax.e_bilanz_ready ? 'bereit' : 'Kontext ergänzen'}</div></CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2"><CardTitle className="text-sm">E-Clearing</CardTitle></CardHeader>
+              <CardContent><div className="text-sm font-semibold">{fibuCockpit.tax.e_clearing_ready ? 'bereit' : 'Rückmeldung offen'}</div></CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2"><CardTitle className="text-sm">Letzte Einreichung</CardTitle></CardHeader>
+              <CardContent><div className="text-sm font-semibold">{fibuCockpit.tax.latest_submission_at ? new Date(fibuCockpit.tax.latest_submission_at).toLocaleDateString('de-DE') : 'noch nicht'}</div></CardContent>
+            </Card>
+          </div>
+
           {/* Schritt 1: Berechnen */}
           <section>
             <h3 className="text-sm font-semibold flex items-center gap-2 mb-3">

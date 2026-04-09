@@ -16,7 +16,7 @@ function daysUntil(dateStr: string | null | undefined): number | null {
 }
 
 type AlarmItem = KontraktListItem & {
-  alarmType: 'expiring' | 'low_rest' | 'matif_open'
+  alarmType: 'expiring' | 'low_rest' | 'matif_open' | 'hedge_gap' | 'dunning_due' | 'market_valuation' | 'washout_candidate' | 'print_missing'
   alarmText: string
   daysLeft: number | null
 }
@@ -70,10 +70,56 @@ export default function KontraktAlarmDashboard(): JSX.Element {
           })
         }
       }
+
+      const hedgeGap = item.steering?.hedge_gap_pct ?? null
+      if ((hedgeGap ?? 0) > 0) {
+        result.push({
+          ...item,
+          alarmType: 'hedge_gap',
+          alarmText: `Absicherungsluecke von ${hedgeGap?.toFixed(1)}% zum Hedge-Ziel`,
+          daysLeft: null,
+        })
+      }
+
+      if (item.steering?.dunning_candidate) {
+        result.push({
+          ...item,
+          alarmType: 'dunning_due',
+          alarmText: `Kontrakt-Mahnung faellig${item.steering?.dunning_reason ? `: ${item.steering.dunning_reason}` : ''}`,
+          daysLeft: null,
+        })
+      }
+
+      if ((item.steering?.market_valuation_eur ?? 0) < 0) {
+        result.push({
+          ...item,
+          alarmType: 'market_valuation',
+          alarmText: `Negative Marktbewertung ${item.steering?.market_valuation_eur?.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} EUR`,
+          daysLeft: null,
+        })
+      }
+
+      if (item.steering?.writeoff_candidate) {
+        result.push({
+          ...item,
+          alarmType: 'washout_candidate',
+          alarmText: `Washout/Abschreibung vorgemerkt${item.steering?.washout_reason ? `: ${item.steering.washout_reason}` : ''}`,
+          daysLeft: null,
+        })
+      }
+
+      if (item.status === 'OFFEN' && !item.steering?.print_ready) {
+        result.push({
+          ...item,
+          alarmType: 'print_missing',
+          alarmText: 'Drucksteuerung unvollstaendig (Vorlage oder Kanal fehlt)',
+          daysLeft: null,
+        })
+      }
     }
 
     return result.sort((a, b) => {
-      const prio = { expiring: 0, matif_open: 1, low_rest: 2 }
+      const prio = { expiring: 0, dunning_due: 1, hedge_gap: 2, market_valuation: 3, washout_candidate: 4, print_missing: 5, matif_open: 6, low_rest: 7 }
       const diff = prio[a.alarmType] - prio[b.alarmType]
       if (diff !== 0) return diff
       return (a.daysLeft ?? 999) - (b.daysLeft ?? 999)
@@ -83,12 +129,21 @@ export default function KontraktAlarmDashboard(): JSX.Element {
   const expiringCount = alarms.filter((a) => a.alarmType === 'expiring').length
   const lowRestCount = alarms.filter((a) => a.alarmType === 'low_rest').length
   const matifCount = alarms.filter((a) => a.alarmType === 'matif_open').length
+  const hedgeGapCount = alarms.filter((a) => a.alarmType === 'hedge_gap').length
+  const dunningCount = alarms.filter((a) => a.alarmType === 'dunning_due').length
+  const washoutCount = alarms.filter((a) => a.alarmType === 'washout_candidate').length
+  const printCount = alarms.filter((a) => a.alarmType === 'print_missing').length
 
   const alarmIcon = (type: AlarmItem['alarmType']): JSX.Element => {
     switch (type) {
       case 'expiring': return <Clock className="h-4 w-4 text-amber-600" />
       case 'low_rest': return <Package className="h-4 w-4 text-orange-600" />
       case 'matif_open': return <TrendingUp className="h-4 w-4 text-blue-600" />
+      case 'hedge_gap': return <TrendingUp className="h-4 w-4 text-fuchsia-600" />
+      case 'dunning_due': return <AlertTriangle className="h-4 w-4 text-red-600" />
+      case 'market_valuation': return <AlertTriangle className="h-4 w-4 text-rose-700" />
+      case 'washout_candidate': return <AlertTriangle className="h-4 w-4 text-amber-700" />
+      case 'print_missing': return <Package className="h-4 w-4 text-slate-700" />
     }
   }
 
@@ -97,8 +152,13 @@ export default function KontraktAlarmDashboard(): JSX.Element {
       expiring: 'bg-amber-100 text-amber-800',
       low_rest: 'bg-orange-100 text-orange-800',
       matif_open: 'bg-blue-100 text-blue-800',
+      hedge_gap: 'bg-fuchsia-100 text-fuchsia-800',
+      dunning_due: 'bg-red-100 text-red-800',
+      market_valuation: 'bg-rose-100 text-rose-800',
+      washout_candidate: 'bg-amber-100 text-amber-800',
+      print_missing: 'bg-slate-100 text-slate-800',
     }
-    const labels = { expiring: 'Ablauf', low_rest: 'Restmenge', matif_open: 'MATIF' }
+    const labels = { expiring: 'Ablauf', low_rest: 'Restmenge', matif_open: 'MATIF', hedge_gap: 'Hedge', dunning_due: 'Mahnung', market_valuation: 'Marktwert', washout_candidate: 'Washout', print_missing: 'Druck' }
     return <Badge className={styles[type]}>{labels[type]}</Badge>
   }
 
@@ -112,7 +172,7 @@ export default function KontraktAlarmDashboard(): JSX.Element {
         <Button variant="outline" onClick={() => navigate('/kontrakte')}>Zur Kontraktliste</Button>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-7">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-base">
@@ -149,6 +209,58 @@ export default function KontraktAlarmDashboard(): JSX.Element {
           <CardContent>
             <div className="text-3xl font-bold text-blue-700">{matifCount}</div>
             <p className="text-xs text-muted-foreground">Preisfixierung ausstehend</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <TrendingUp className="h-4 w-4 text-fuchsia-600" />
+              Hedge-Luecken
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-fuchsia-700">{hedgeGapCount}</div>
+            <p className="text-xs text-muted-foreground">Unter Zielabsicherung</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <AlertTriangle className="h-4 w-4 text-red-600" />
+              Mahnfaellige
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-red-700">{dunningCount}</div>
+            <p className="text-xs text-muted-foreground">Kontrakte mit Mahnbedarf</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <AlertTriangle className="h-4 w-4 text-amber-700" />
+              Washout
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-amber-700">{washoutCount}</div>
+            <p className="text-xs text-muted-foreground">Vorgemerkte Abschreibung / Washout</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Package className="h-4 w-4 text-slate-700" />
+              Druck fehlt
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-slate-700">{printCount}</div>
+            <p className="text-xs text-muted-foreground">Formular- oder Kanalsteuerung offen</p>
           </CardContent>
         </Card>
       </div>

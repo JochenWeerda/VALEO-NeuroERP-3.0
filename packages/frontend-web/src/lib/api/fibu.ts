@@ -56,6 +56,94 @@ export type Anlage = {
   buchwert: number
 }
 
+export type FibuCockpitReadModel = {
+  tenant_id: string
+  schema_version: number
+  master_data: {
+    dunning_parameters_ready: boolean
+    interest_groups_ready: boolean
+    connector_profile_count: number
+    connector_profiles: Array<{
+      connector_type: string
+      profile_count: number
+      latest_version: number
+      updated_at?: string | null
+    }>
+  }
+  dunning: {
+    open_items: number
+    overdue_items: number
+    overdue_amount: number
+    dunning_items: number
+  }
+  interest: {
+    candidate_count: number
+    candidate_amount: number
+  }
+  creditor: {
+    open_items: number
+    payable_items: number
+    open_amount: number
+    overdue_amount: number
+  }
+  tax: {
+    vat_return_count: number
+    validated_count: number
+    approved_count: number
+    submitted_count: number
+    latest_period?: string | null
+    latest_submission_at?: string | null
+    e_bilanz_ready: boolean
+    e_clearing_ready: boolean
+  }
+  exports: Array<{
+    kind: string
+    count: number
+    record_count: number
+    latest_created_at?: string | null
+    has_artifacts: boolean
+  }>
+  annual_close: {
+    open_item_count: number
+    overdue_item_count: number
+    recent_journal_entries: number
+    latest_vat_period?: string | null
+    ready_for_year_close: boolean
+  }
+  revision: {
+    recent_journal_entries: number
+    last_entry_date?: string | null
+    export_runs: number
+  }
+}
+
+export type AccountingPeriod = {
+  id: string
+  tenant_id: string
+  period: string
+  status: 'OPEN' | 'CLOSED' | 'ADJUSTING'
+  start_date: string
+  end_date: string
+  closed_at?: string | null
+  closed_by?: string | null
+  metadata: Record<string, unknown>
+}
+
+export type FibuConnectorProfile = {
+  id: string
+  tenant_id: string
+  connector_type: 'PAYROLL' | 'ASSET_LEDGER'
+  name: string
+  is_default: boolean
+  settings: Record<string, unknown>
+  mapping: Record<string, unknown>
+  version: number
+  created_at?: string | null
+  updated_at?: string | null
+  created_by?: string | null
+  updated_by?: string | null
+}
+
 // ========== QUERY KEYS ==========
 
 export const fibuKeys = {
@@ -70,6 +158,9 @@ export const fibuKeys = {
   bwa: () => [...fibuKeys.all, 'bwa'] as const,
   opVerwaltung: () => [...fibuKeys.all, 'op-verwaltung'] as const,
   stats: () => [...fibuKeys.all, 'stats'] as const,
+  cockpit: () => [...fibuKeys.all, 'cockpit'] as const,
+  periods: () => [...fibuKeys.all, 'periods'] as const,
+  connectorProfiles: (connectorType: 'PAYROLL' | 'ASSET_LEDGER') => [...fibuKeys.all, 'connector-profiles', connectorType] as const,
 }
 
 const EMPTY_RECORD: Record<string, unknown> = {}
@@ -321,6 +412,95 @@ export function useFibuStats() {
       return response.data
     },
     initialData: EMPTY_RECORD,
+  })
+}
+
+export function useFibuCockpit() {
+  return useQuery({
+    queryKey: fibuKeys.cockpit(),
+    queryFn: async () => {
+      const response = await apiClient.get<FibuCockpitReadModel>('/api/v1/finance/followup/fibu/cockpit')
+      return response.data
+    },
+    initialData: {
+      tenant_id: '',
+      schema_version: 1,
+      master_data: {
+        dunning_parameters_ready: false,
+        interest_groups_ready: false,
+        connector_profile_count: 0,
+        connector_profiles: [],
+      },
+      dunning: {
+        open_items: 0,
+        overdue_items: 0,
+        overdue_amount: 0,
+        dunning_items: 0,
+      },
+      interest: {
+        candidate_count: 0,
+        candidate_amount: 0,
+      },
+      creditor: {
+        open_items: 0,
+        payable_items: 0,
+        open_amount: 0,
+        overdue_amount: 0,
+      },
+      tax: {
+        vat_return_count: 0,
+        validated_count: 0,
+        approved_count: 0,
+        submitted_count: 0,
+        latest_period: null,
+        latest_submission_at: null,
+        e_bilanz_ready: false,
+        e_clearing_ready: false,
+      },
+      exports: [],
+      annual_close: {
+        open_item_count: 0,
+        overdue_item_count: 0,
+        recent_journal_entries: 0,
+        latest_vat_period: null,
+        ready_for_year_close: false,
+      },
+      revision: {
+        recent_journal_entries: 0,
+        last_entry_date: null,
+        export_runs: 0,
+      },
+    } satisfies FibuCockpitReadModel,
+    staleTime: 60 * 1000,
+  })
+}
+
+export function useAccountingPeriods(status?: 'OPEN' | 'CLOSED' | 'ADJUSTING') {
+  return useQuery({
+    queryKey: [...fibuKeys.periods(), status ?? 'all'],
+    queryFn: async () => {
+      const params = new URLSearchParams()
+      if (status) {
+        params.set('status', status)
+      }
+      const suffix = params.size > 0 ? `?${params.toString()}` : ''
+      const response = await apiClient.get<AccountingPeriod[]>(`/api/v1/finance/periods/${suffix}`)
+      return Array.isArray(response.data) ? response.data : []
+    },
+    initialData: [],
+  })
+}
+
+export function useFibuConnectorProfiles(connectorType: 'PAYROLL' | 'ASSET_LEDGER') {
+  return useQuery({
+    queryKey: fibuKeys.connectorProfiles(connectorType),
+    queryFn: async () => {
+      const response = await apiClient.get<FibuConnectorProfile[]>(
+        `/api/v1/connectors/profiles?type=${connectorType}`
+      )
+      return Array.isArray(response.data) ? response.data : []
+    },
+    initialData: [],
   })
 }
 

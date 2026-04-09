@@ -15,6 +15,7 @@ import { Badge } from '@/components/ui/badge'
 import { Building2, LayoutGrid, Save, RefreshCw, ArrowRightLeft, FileUp, Upload, CheckCircle2, BookOpen, Undo2 } from 'lucide-react'
 import { apiClient } from '@/lib/api-client'
 import { useToast } from '@/hooks/use-toast'
+import { useFibuCockpit } from '@/lib/api/fibu'
 
 const CONNECTOR_BASE = '/api/v1/finance/connectors'
 
@@ -58,6 +59,7 @@ function useAssetLedgerConfig() {
 export default function AnlagenSuitePage(): JSX.Element {
   const navigate = useNavigate()
   const { toast } = useToast()
+  const { data: fibuCockpit } = useFibuCockpit()
   const qc = useQueryClient()
   const { data: config, isLoading } = useAssetLedgerConfig()
   const [name, setName] = useState('VALEO Suite Anlagen (Asset Ledger)')
@@ -219,6 +221,21 @@ export default function AnlagenSuitePage(): JSX.Element {
           </p>
         </div>
       </div>
+
+      <Card className="border-primary/20">
+        <CardHeader>
+          <CardTitle>FIBU-Stammdaten und Revision</CardTitle>
+          <CardDescription>
+            Connector-Profile, Exportpfade und Jahreswechsel-Readiness für die exklusive FIBU-Tiefe.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4 md:grid-cols-4">
+          <div><div className="text-xs text-muted-foreground">Connector-Profile</div><div className="text-2xl font-semibold">{fibuCockpit.master_data.connector_profile_count}</div></div>
+          <div><div className="text-xs text-muted-foreground">Exportläufe</div><div className="text-2xl font-semibold">{fibuCockpit.revision.export_runs}</div></div>
+          <div><div className="text-xs text-muted-foreground">Journal zuletzt</div><div className="text-sm font-semibold">{fibuCockpit.revision.last_entry_date ?? 'n/a'}</div></div>
+          <div><div className="text-xs text-muted-foreground">Jahreswechsel</div><div className="text-sm font-semibold">{fibuCockpit.annual_close.ready_for_year_close ? 'stabil' : 'offene Klärungen'}</div></div>
+        </CardContent>
+      </Card>
 
       {/* Anlagenverwaltung – zentrale Karte */}
       <Card className="border-primary/20">

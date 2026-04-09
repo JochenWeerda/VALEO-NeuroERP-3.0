@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { Euro, Search, AlertCircle, CheckCircle2, Clock, Plus, Pencil, Trash2, Layers } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from 'sonner'
+import { useFibuCockpit } from '@/lib/api/fibu'
 
 type OpStatus = 'offen' | 'teilweise' | 'geschlossen' | 'storniert'
 
@@ -87,6 +88,7 @@ function statusBadge(op: OpenItem) {
 
 export default function OpKreditorenPage(): JSX.Element {
   const queryClient = useQueryClient()
+  const { data: fibuCockpit } = useFibuCockpit()
   const [search, setSearch] = useState('')
   const [createOpen, setCreateOpen] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
@@ -316,6 +318,17 @@ export default function OpKreditorenPage(): JSX.Element {
 
   return (
     <div className="space-y-6 p-6">
+      <Card className="border-primary/20">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">FIBU-Kernlage Kreditoren</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-3 md:grid-cols-4">
+          <div><div className="text-xs text-muted-foreground">Zahlbare OP</div><div className="text-2xl font-semibold">{fibuCockpit.creditor.payable_items}</div></div>
+          <div><div className="text-xs text-muted-foreground">Offener Betrag</div><div className="text-2xl font-semibold">{fmt(fibuCockpit.creditor.open_amount)}</div></div>
+          <div><div className="text-xs text-muted-foreground">Überfällig</div><div className="text-2xl font-semibold">{fmt(fibuCockpit.creditor.overdue_amount)}</div></div>
+          <div><div className="text-xs text-muted-foreground">Jahreswechsel</div><div className="text-sm font-semibold">{fibuCockpit.annual_close.ready_for_year_close ? 'stabil' : 'offene Klärungen'}</div></div>
+        </CardContent>
+      </Card>
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold">Offene Posten - Kreditoren</h1>

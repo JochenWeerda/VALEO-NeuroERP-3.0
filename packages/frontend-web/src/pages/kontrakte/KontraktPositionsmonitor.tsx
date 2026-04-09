@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { apiClient } from '@/lib/api-client'
+import { listKontrakte } from '@/lib/api/kontrakte'
 import {
   AlertTriangle,
   ArrowDownRight,
@@ -104,6 +105,12 @@ export default function KontraktPositionsmonitor(): JSX.Element {
     refetchInterval: 30_000,
   })
 
+  const contractMetaQuery = useQuery({
+    queryKey: ['kontrakte', 'positionen', 'contract-master'],
+    queryFn: () => listKontrakte({ include_done: includeDone, skip: 0, limit: 500 }),
+    refetchInterval: 60_000,
+  })
+
   const data = query.data ?? null
   const positions = useMemo(() => {
     if (!data) return []
@@ -115,6 +122,11 @@ export default function KontraktPositionsmonitor(): JSX.Element {
   const longCount = data?.total_long_articles ?? 0
   const balancedCount = data?.total_balanced_articles ?? 0
   const critical = data?.most_critical ?? null
+  const steeringItems = contractMetaQuery.data?.items ?? []
+  const dispositionCount = steeringItems.filter((item) => Boolean(item.steering?.disposition_flag)).length
+  const parityCount = steeringItems.filter((item) => Boolean(item.steering?.parity_code)).length
+  const hedgeGapCount = steeringItems.filter((item) => (item.steering?.hedge_gap_pct ?? 0) > 0).length
+  const negativeValuationCount = steeringItems.filter((item) => (item.steering?.market_valuation_eur ?? 0) < 0).length
 
   return (
     <div className="space-y-4 p-6">
@@ -218,6 +230,45 @@ export default function KontraktPositionsmonitor(): JSX.Element {
               {critical?.spread != null ? fmtEur(critical.spread) : '-'}
             </div>
             <p className="text-xs text-muted-foreground">VK-Preis minus EK-Preis (kritischster Artikel)</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Disposition</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-semibold">{dispositionCount}</div>
+            <p className="text-xs text-muted-foreground">Kontrakte mit Dispositionskennzeichen</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Paritaet</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-semibold">{parityCount}</div>
+            <p className="text-xs text-muted-foreground">Kontrakte mit Paritaetssteuerung</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Hedge-Luecken</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-semibold text-fuchsia-700">{hedgeGapCount}</div>
+            <p className="text-xs text-muted-foreground">Unter Zielquote abgesicherte Kontrakte</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Negative Marktwerte</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-semibold text-red-700">{negativeValuationCount}</div>
+            <p className="text-xs text-muted-foreground">Kontrakte mit negativer Marktbewertung</p>
           </CardContent>
         </Card>
       </div>

@@ -1419,23 +1419,29 @@ Alle 6 Router registriert in `app/api/v1/api.py` unter `/api/v1/neuro/*`. Commit
 ## FIBU-PRO-001
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Die bislang seitenweise verteilte Finanzbuchhaltung zu einem professionellen FIBU-Kern verdichten: Stammdaten/Parameter, eBilanz- und E-Clearing-Lage, Zinswesen, Jahreswechsel/Reorganisator sowie zusammenhaengende Schnittstellen- und Revisionssicht.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `app/api/v1/endpoints/finance_followup.py`, `app/api/v1/endpoints/fibu_connectors.py`, ggf. neue Finance-Read-Model-Endpunkte, `packages/frontend-web/src/lib/api/fibu.ts`, `packages/frontend-web/src/pages/{finance/mahnwesen,finance/op-debitoren,finance/op-kreditoren,finance/ustva,fibu/anlagen-suite,fibu/zahlungslaeufe}.tsx`.
 **Abnahmekriterien:** FIBU zeigt nicht mehr nur Einzelmasken, sondern ein zusammenhaengendes professionelles Fuehrungsbild mit Stammdaten-/Parameterlage, Dunning-/Zins-/Payment-/Tax-/Asset-/Connector-Status, Readiness fuer eBilanz/E-Clearing/Jahreswechsel, klaren Revisionspfaden und naechsten Aktionen.
+**Erledigt:** `app/api/v1/endpoints/finance_followup.py` liefert jetzt `GET /api/v1/finance/followup/fibu/cockpit` als verdichtetes FIBU-Read-Model fuer Dunning, Zinskandidaten, Kreditorenlage, VAT-/eBilanz-/E-Clearing-Readiness, Connector-Profile, Exportlaeufe, Revisionsstand und Jahreswechsel-Readiness. `packages/frontend-web/src/lib/api/fibu.ts` stellt zusaetzlich `useFibuCockpit()`, `useAccountingPeriods()` und `useFibuConnectorProfiles()` bereit; damit surfacen jetzt auch `packages/frontend-web/src/pages/fibu/schnittstellen-center.tsx`, `packages/frontend-web/src/pages/fibu/elster-online.tsx`, `packages/frontend-web/src/pages/finance/abschluss.tsx` und `packages/frontend-web/src/pages/fibu/abschluss-cockpit.tsx` dieselbe Profi-Tiefe fuer Stammdaten/Parameter, eBilanz-/E-Clearing-Lage, Jahreswechsel/Reorganisator und Revisionspfade direkt in den Kernarbeitsplaetzen. `packages/frontend-web/src/pages/finance/mahnwesen.tsx`, `packages/frontend-web/src/pages/finance/op-debitoren.tsx`, `packages/frontend-web/src/pages/finance/op-kreditoren.tsx`, `packages/frontend-web/src/pages/finance/ustva.tsx`, `packages/frontend-web/src/pages/fibu/anlagen-suite.tsx` und `packages/frontend-web/src/pages/fibu/zahlungslaeufe.tsx` bleiben der operative Fuehrungsrahmen fuer Mahnung, OP, Steuer und Assets.
+**Tests / Checks:** `python -m py_compile app/api/v1/endpoints/finance_followup.py`; `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`; `node scripts/docs-governance-check.cjs`
 
 ## MELD-PRO-001
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Das Meldewesen vom reinen Betriebsstatus auf echte Rueckkopplung erweitern: externe Rueckmeldelogik, Artefakt-/Bescheid-/Fehlerpfade direkt am Vorgang sowie staerkere Verzahnung mit Fracht, Waage, Rohware und Dokumenten.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, ggf. neue Meldewesen-/Finance-Read-Model-Endpunkte, `packages/frontend-web/src/lib/api/meldewesen.ts`, `packages/frontend-web/src/pages/{fibu/atlas,compliance/meldewesen-konsole}.tsx`.
 **Abnahmekriterien:** Atlas und Meldewesen-Konsole zeigen nicht nur Connector-/Joblage, sondern auch Rueckmeldungen, Bescheide/Artefakte, Fehlerpfade, Objektbezug und direkte Folgewege in Dokumente, Waage, Rohware und Fracht.
+**Erledigt:** `packages/frontend-web/src/pages/fibu/atlas.tsx` zeigt jetzt zum letzten Meldejob sichtbare Artefakte, Fehlerpfade und den Objektbezug zu Dokumenten, Wiegungen, Warteschlange und Frachtbriefen statt nur Connector-/Jobzustand. `packages/frontend-web/src/pages/compliance/meldewesen-konsole.tsx` surfact im Jobs-Bereich denselben Rueckmelde- und Objektkontext mit Artefaktzaehlern und direkter Verzahnung zu Rohware, Waage, Fracht und Dokumenten.
+**Tests / Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`; `node scripts/docs-governance-check.cjs`
 
 ## SUPPLY-E2E-001
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Die bislang verteilte Partie-/Rohware-/Waage-/Fracht-Kette zu einem durchgaengigen E2E-Arbeitsbild verdichten: Partie -> Annahme -> Wiegung -> Lager/Charge -> Fracht -> Abrechnung.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, ggf. neue Aggregatendpunkte unter `app/api/v1/endpoints/{charges,waage}.py`, `packages/frontend-web/src/lib/api/{inventory,betrieb,misc-modules}.ts`, `packages/frontend-web/src/pages/{charge/rueckverfolgung,annahme/rohware,waage/liste,logistik/frachtbriefe}.tsx`.
 **Abnahmekriterien:** Die betroffenen Seiten spiegeln dieselbe Objektkette wieder, zeigen Mengen-, Status-, Dokument- und Ausnahmebezug ueber die Kette hinweg und bieten klare Folgepfade statt isolierter Listen.
+**Erledigt:** `packages/frontend-web/src/lib/api/supply-chain.ts` liefert jetzt einen gemeinsamen `useSupplyChainOverview()`-Snapshot ueber Annahme-Warteschlange, Wiegescheine, Chargen und Frachtbriefe. `packages/frontend-web/src/pages/charge/rueckverfolgung.tsx`, `packages/frontend-web/src/pages/annahme/rohware.tsx`, `packages/frontend-web/src/pages/waage/liste.tsx` und `packages/frontend-web/src/pages/logistik/frachtbriefe.tsx` zeigen diese physische Kette jetzt mit denselben Mengen- und Statuswahrheiten statt als isolierte Teilmasken. Die Objektkette ist ausserdem direkt in `packages/frontend-web/src/pages/annahme/warteschlange.tsx`, `packages/frontend-web/src/pages/charge/wareneingang.tsx`, `packages/frontend-web/src/pages/waage/wiegeschein-detail.tsx`, `packages/frontend-web/src/pages/annahme/abrechnung.tsx` und `packages/frontend-web/src/pages/logistik/tourenplanung.tsx` sichtbar und verbindet Partie, Annahme, Wiegung, Charge, Fracht und Abrechnung in denselben operativen Kennzahlen.
+**Tests / Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`; `node scripts/docs-governance-check.cjs`
