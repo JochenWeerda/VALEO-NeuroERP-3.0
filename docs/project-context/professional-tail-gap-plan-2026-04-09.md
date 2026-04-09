@@ -196,6 +196,8 @@ Die grossen priorisierten ERP-Kernluecken aus dem AMIC-Vergleich sind geschlosse
 
 ## Nächste Tail-Serie
 
+Stand `2026-04-09`: abgeschlossen. Die sechs Folge-Slices unten sind umgesetzt und im Workboard auf `abgeschlossen` gezogen.
+
 ### 6. CRM Opportunity Operations
 
 Betroffene Dateien:
@@ -282,3 +284,91 @@ Ist-Zustand:
 Profi-Zielbild:
 
 - Rezeptur-Arbeitsplatz mit echter Berechnung, Validierung, Speichern und Folgepfaden in Produktion, Qualitaet und Dokumentation.
+
+## Naechste Tail-Serie B
+
+Stand `2026-04-09`: geplant.
+
+### 12. Zertifikate Leitstand
+
+Betroffene Dateien:
+
+- `packages/frontend-web/src/pages/zertifikate/liste.tsx`
+
+Ist-Zustand:
+
+- Suche und Ablaufwarnung sind da, aber Export und Folgewege fuer Audit, Dokumente und Verlaengerung fehlen als echte Operator-Aktionen.
+
+Profi-Zielbild:
+
+- Export, Ablauf-Fokus und Folgepfade in Dokumente, Detail und Zertifikatsverlaengerung sind direkt verfuegbar.
+
+### 13. Schaeden Operations
+
+Betroffene Dateien:
+
+- `packages/frontend-web/src/pages/schaeden/liste.tsx`
+
+Ist-Zustand:
+
+- Die Liste zeigt KPI und Meldungsstart, aber kein echter Export- und Folgepfad fuer Regulierung, Dokumente und offene Prueffaelle.
+
+Profi-Zielbild:
+
+- Export, offene-Regulierungs-Sicht und Folgewege in Meldung und Vorgang sind direkt aus dem Arbeitsraum verfuegbar.
+
+### 14. Fahrer Einsatzsicht
+
+Betroffene Dateien:
+
+- `packages/frontend-web/src/pages/transporte/fahrer-liste.tsx`
+
+Ist-Zustand:
+
+- Fahrerstatus ist sichtbar, aber Export und Dispositions-Folgepfad fehlen.
+
+Profi-Zielbild:
+
+- Fahrerarbeitsplatz mit Export, Verfuegbarkeitsfokus und Sprung in Tourenplanung/Disposition.
+
+### 15. Tankstellen Zapfungsraum
+
+Betroffene Dateien:
+
+- `packages/frontend-web/src/pages/tankstelle/zapfungen.tsx`
+
+Ist-Zustand:
+
+- Die Zapfungsliste ist nur eine Tabelle mit KPI; Export und Folgewege in Abrechnung/Vehicle/Ops fehlen.
+
+Profi-Zielbild:
+
+- Zapfungsarbeitsplatz mit Export, Verbrauchsfokus und Folgepfaden in Betrieb/Disposition.
+
+### 16. Bodenproben Leitstand
+
+Betroffene Dateien:
+
+- `packages/frontend-web/src/pages/agrar/bodenproben/liste.tsx`
+
+Ist-Zustand:
+
+- Export ist vorhanden, aber der Arbeitsraum endet noch an der Liste statt an klaren Folgewegen fuer Analyse, Beratung und Auftrag.
+
+Profi-Zielbild:
+
+- Professioneller Labor-/Beratungsraum mit Export, Offene-Proben-Fokus und direkten Folgewegen.
+
+### 17. Saatgut Listenfuehrung
+
+Betroffene Dateien:
+
+- `packages/frontend-web/src/pages/agrar/saatgut-liste.tsx`
+
+Ist-Zustand:
+
+- Liste und Export existieren, aber der Arbeitsplatz zeigt noch zu wenig operative Folgeaktionen und Bestands-/Zulassungsfokus.
+
+Profi-Zielbild:
+
+- Saatgut-Leitstand mit Export, operative Fokussegmente und direkte Folgewege in Stamm, Sicht und Bestand.
