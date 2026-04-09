@@ -34,13 +34,16 @@ def _create_purchase_order_mutation(
         logger.debug("CreatePurchaseOrder: keine lieferant_id im Payload — keine DB-Mutation")
         return
 
-    lieferant_id = str(lid).strip()
+    try:
+        lieferant_id = int(lid)
+    except (TypeError, ValueError):
+        logger.warning("CreatePurchaseOrder: ungueltige lieferant_id: %s", lid)
+        return
 
-    tenant_id = request.tenant_id
     if payload.get("bestellnummer") or payload.get("order_number"):
         bn = str(
             payload.get("bestellnummer") or payload.get("order_number")
-        ).strip()[:50]
+        ).strip()[:80]
     else:
         safe_tenant = "".join(c if c.isalnum() else "_" for c in tenant_id)[:48]
         tenant_prefix = os.environ.get(f"TENANT_PO_PREFIX_{safe_tenant.upper()}")
@@ -49,13 +52,14 @@ def _create_purchase_order_mutation(
             f"{tenant_prefix}{core}"
             if tenant_prefix
             else core
-        )[:50]
+        )[:80]
     if not bn:
         bn = f"AE-{request.idempotency_key}"[:40]
 
+    tenant_id = request.tenant_id
     check = db.execute(
         text(
-            "SELECT id FROM domain_einkauf.bestellungen "
+            "SELECT id FROM einkauf_bestellungen "
             "WHERE bestellnummer = :nummer AND tenant_id = :tenant_id LIMIT 1"
         ),
         {"nummer": bn, "tenant_id": tenant_id},
@@ -64,7 +68,6 @@ def _create_purchase_order_mutation(
         logger.debug("CreatePurchaseOrder: Bestellnummer %s existiert bereits", bn)
         return
 
-    from uuid import uuid4
     bestelldatum = date.today()
     gd = payload.get("gewuenschtes_lieferdatum")
     gew_dt = None
@@ -74,34 +77,35 @@ def _create_purchase_order_mutation(
         except Exception:
             gew_dt = None
 
-    status = str(payload.get("status") or "entwurf")[:30]
+    status = str(payload.get("status") or "entwurf")[:50]
     netto = payload.get("netto_summe")
     mwst = payload.get("mwst_betrag")
     brutto = payload.get("brutto_summe")
+    erstellt = str(payload.get("erstellt_von") or request.issuer_role or "kernel")[:100]
 
     db.execute(
         text(
             """
-            INSERT INTO domain_einkauf.bestellungen (
-                id, tenant_id, bestellnummer, lieferant_id, bestelldatum, lieferdatum_wunsch,
-                status, netto_summe, mwst_betrag, brutto_summe
+            INSERT INTO einkauf_bestellungen (
+                bestellnummer, lieferant_id, bestelldatum, gewuenschtes_lieferdatum,
+                status, netto_summe, mwst_betrag, brutto_summe, erstellt_von, tenant_id
             ) VALUES (
-                :id, :tenant_id, :bestellnummer, :lieferant_id, :bestelldatum, :lieferdatum_wunsch,
-                :status, :netto_summe, :mwst_betrag, :brutto_summe
+                :bestellnummer, :lieferant_id, :bestelldatum, :gewuenschtes_lieferdatum,
+                :status, :netto_summe, :mwst_betrag, :brutto_summe, :erstellt_von, :tenant_id
             )
             """
         ),
         {
-            "id": str(uuid4()),
-            "tenant_id": tenant_id,
             "bestellnummer": bn,
             "lieferant_id": lieferant_id,
             "bestelldatum": bestelldatum,
-            "lieferdatum_wunsch": gew_dt,
+            "gewuenschtes_lieferdatum": gew_dt,
             "status": status,
             "netto_summe": float(netto) if netto is not None else None,
             "mwst_betrag": float(mwst) if mwst is not None else None,
             "brutto_summe": float(brutto) if brutto is not None else None,
+            "erstellt_von": erstellt,
+            "tenant_id": tenant_id,
         },
     )
 

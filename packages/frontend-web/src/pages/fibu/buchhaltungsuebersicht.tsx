@@ -155,7 +155,6 @@ export default function BuchhaltungsuebersichtPage(): JSX.Element {
   const handleDrilldown = (monthIndex: number): void => {
     const period = `${jahr}-${String(monthIndex + 1).padStart(2, '0')}`
     navigate(`/fibu/buchungsjournal?period=${period}`)
-    toast({ title: 'Drilldown', description: `Journal für ${MONTHS[monthIndex]} ${jahr} öffnen.` })
   }
 
   const handleJetztAuswerten = (): void => {
@@ -164,7 +163,7 @@ export default function BuchhaltungsuebersichtPage(): JSX.Element {
   }
 
   const handleDrucken = (): void => {
-    toast({ title: 'Drucken', description: 'Druckauftrag wird vorbereitet.' })
+    window.print()
   }
 
   const handleExcel = (): void => {
@@ -244,13 +243,17 @@ export default function BuchhaltungsuebersichtPage(): JSX.Element {
           </TabsContent>
           <TabsContent value="datei" className="mt-0 border-0 p-0">
             <div className="flex flex-wrap items-center gap-4 px-4 py-2 bg-muted/20">
-              <Button variant="ghost" size="sm" className="gap-1.5"><FolderOpen className="h-4 w-4" /> Laden</Button>
+              <Link to="/fibu/schnittstellen-center">
+                <Button variant="ghost" size="sm" className="gap-1.5"><FolderOpen className="h-4 w-4" /> Laden</Button>
+              </Link>
               <Button variant="ghost" size="sm" className="gap-1.5" onClick={handleExcel}><FileDown className="h-4 w-4" /> Export</Button>
             </div>
           </TabsContent>
           <TabsContent value="allgemein" className="mt-0 border-0 p-0">
             <div className="flex flex-wrap items-center gap-4 px-4 py-2 bg-muted/20">
-              <Button variant="ghost" size="sm" className="gap-1.5"><Settings className="h-4 w-4" /> Einstellungen</Button>
+              <Link to="/fibu/schnittstellen-center">
+                <Button variant="ghost" size="sm" className="gap-1.5"><Settings className="h-4 w-4" /> Einstellungen</Button>
+              </Link>
             </div>
           </TabsContent>
           <TabsContent value="postbearbeitung" className="mt-0 border-0 p-0">
@@ -260,7 +263,9 @@ export default function BuchhaltungsuebersichtPage(): JSX.Element {
                   <Sigma className="h-4 w-4" /> Summen und Salden
                 </Button>
               </Link>
-              <Button variant="ghost" size="sm" className="gap-1.5"><ArrowLeftRight className="h-4 w-4" /> Umbuchen</Button>
+              <Link to="/finance/buchungserfassung">
+                <Button variant="ghost" size="sm" className="gap-1.5"><ArrowLeftRight className="h-4 w-4" /> Umbuchen</Button>
+              </Link>
               <Link to="/fibu/bwa">
                 <Button variant="ghost" size="sm" className="gap-1.5"><Calculator className="h-4 w-4" /> Deckungsbeitrag Monat</Button>
               </Link>
@@ -275,7 +280,9 @@ export default function BuchhaltungsuebersichtPage(): JSX.Element {
           </TabsContent>
           <TabsContent value="fenster" className="mt-0 border-0 p-0">
             <div className="flex flex-wrap items-center gap-4 px-4 py-2 bg-muted/20">
-              <Button variant="ghost" size="sm" className="gap-1.5">Fenster anordnen</Button>
+              <Link to="/fibu/monatswerte">
+                <Button variant="ghost" size="sm" className="gap-1.5">Fenster anordnen</Button>
+              </Link>
             </div>
           </TabsContent>
         </Tabs>
@@ -494,12 +501,20 @@ export default function BuchhaltungsuebersichtPage(): JSX.Element {
       {/* Fußleiste */}
       <div className="border-t bg-muted/30 px-4 py-2 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={handleDrucken}>Drucker einrichten</Button>
+          <Link to="/fibu/schnittstellen-center">
+            <Button variant="outline" size="sm">Drucker einrichten</Button>
+          </Link>
           <Button variant="outline" size="sm" onClick={handleDrucken}>Drucken</Button>
-          <Button variant="outline" size="sm">Journal</Button>
+          <Link to="/fibu/buchungsjournal">
+            <Button variant="outline" size="sm">Journal</Button>
+          </Link>
           <Button variant="outline" size="sm" onClick={handleExcel}>Excel</Button>
-          <Button variant="outline" size="sm">Kontenbewegung</Button>
-          <Button variant="ghost" size="sm">Ende</Button>
+          <Link to="/fibu/hauptbuch">
+            <Button variant="outline" size="sm">Kontenbewegung</Button>
+          </Link>
+          <Link to="/fibu/monatswerte">
+            <Button variant="ghost" size="sm">Ende</Button>
+          </Link>
         </div>
         <div className="flex items-center gap-4 text-sm">
           <span className="text-muted-foreground">Soll Mw.: <strong className="tabular-nums">0,00</strong></span>

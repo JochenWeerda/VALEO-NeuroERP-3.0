@@ -248,11 +248,13 @@ export default function ChargeVerfolgungPage(): JSX.Element {
         label: 'Rückverfolgung',
         type: 'secondary' as const,
         onClick: (items: any[]) => {
+          if (items.length === 0) return
           if (items.length === 1) {
-            navigate(`/futtermittel/chargen/${items[0].id}/trace`)
-          } else {
-            toast({ title: 'Rückverfolgung', description: `${items.length} Chargen ausgewählt — bitte einzeln öffnen.` })
+            navigate(`/charge/rueckverfolgung?chargeId=${items[0].id}`)
+            return
           }
+          const selected = items.map((item) => item.id).join(',')
+          navigate(`/charge/rueckverfolgung?selected=${selected}`)
         }
       }
     ]
