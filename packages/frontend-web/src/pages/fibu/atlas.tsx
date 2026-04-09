@@ -72,7 +72,12 @@ export default function AtlasPage(): JSX.Element {
   const latestJob = jobs[0]
   const latestArtifactsQuery = useQuery({
     queryKey: ['meldewesen', 'job-artifacts', latestJob?.id],
-    queryFn: () => getJobArtifacts(latestJob!.id),
+    queryFn: () => {
+      if (!latestJob?.id) {
+        return Promise.resolve([])
+      }
+      return getJobArtifacts(latestJob.id)
+    },
     enabled: Boolean(latestJob?.id),
     staleTime: 30_000,
   })
