@@ -1729,47 +1729,59 @@ Alle 6 Router registriert in `app/api/v1/api.py` unter `/api/v1/neuro/*`. Commit
 ## PROC-UX-001
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Einkaufslisten und Bestellmaske auf ein einheitliches Vorgangsmodell ziehen: echte Transitionen ohne lokale Quittung, Kopfbereich mit Status/Owner/Blockern/naechster Aktion sowie fachlich zulaessige Folgeaktionen.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/einkauf/{angebote-liste,anfragen-liste,bestellung-stamm}.tsx`, ggf. `packages/frontend-web/src/lib/api/purchase-orders.ts`, `packages/frontend-web/src/lib/api/purchase-offers.ts`, `packages/frontend-web/src/lib/api/purchase-requests.ts`.
 **Abnahmekriterien:** Angebote, Anfragen und Bestellung melden Zustand und naechste Aktion fachlich sichtbar zurueck; Import-/Massenaktionen enden nicht mehr in Coming-Soon-Toasts.
+**Erledigt:** `angebote-liste.tsx`, `anfragen-liste.tsx`, `angebot-stamm.tsx` und `bestellung-stamm.tsx` nutzen jetzt ein gemeinsames Vorgangsbild mit Statusvokabular, Kopfbereich, Kontext und Timeline. Importpfade fuehren in reale Folgearbeitsplaetze statt in `importComingSoon`-Toasts.
+**Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`
 
 ## ANN-UX-002
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** LKW-Registrierung als produktiven Annahmevorgang mit Scan-, Ressourcen- und Governance-Kontext ausbauen.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/annahme/lkw-registrierung.tsx`, ggf. `packages/frontend-web/src/lib/api/inventory.ts` und `packages/frontend-web/src/lib/api/workflows.ts`.
 **Abnahmekriterien:** Der Annahmearbeitsplatz zeigt klaren Vorgangszustand, Scanherkunft, Ressourcenlage, Risiken und naechste Aktion statt nur Formularschritte.
+**Erledigt:** `lkw-registrierung.tsx` fuehrt Scanherkunft, Ressourcenlage, Governance und naechste Aktion jetzt direkt oberhalb des Wizards und bindet den Annahmefall sichtbar an den Flow-Spine-/Annahmekontext.
+**Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`
 
 ## OBJ-CTX-003
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Wiederverwendbare Objekt-Kontextpaneele fuer Einkauf, Annahme, Bestellung, Reklamation und Wiegeschein einfuehren.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/components/**`, `packages/frontend-web/src/pages/{einkauf,annahme,qualitaet,waage}/**`, ggf. gemeinsame Hooks unter `packages/frontend-web/src/lib/**`.
 **Abnahmekriterien:** Kernmasken teilen dieselbe Struktur fuer Ressourcenlage, Wirtschaftslage, Governance und naechste Aktion.
+**Erledigt:** Neue gemeinsame Komponenten `OperationalCaseHeader`, `OperationalContextPanel` und `OperationalTimeline` plus `operational-status.ts` haengen jetzt an Einkauf, Annahme, Reklamation und Wiegeschein und spiegeln dort Objekt-, Ressourcen-, Wirtschafts- und Governance-Lage konsistent.
+**Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`
 
 ## CASE-004
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Durchgehende Fall-/Timeline-Sicht vom Flow Spine bis in Fachmasken verankern.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/components/workflow/**`, `packages/frontend-web/src/pages/{einkauf,annahme,qualitaet,waage}/**`, ggf. `packages/frontend-web/src/lib/api/workflows.ts`.
 **Abnahmekriterien:** Nutzer sehen in Kernmasken die letzten Eingriffe, Dokumente und den Fallkontext direkt am Objekt.
+**Erledigt:** Workflow-Handover und Timeline laufen jetzt nicht mehr nur im Flow Spine selbst, sondern auch in `bestellung-stamm.tsx`, `lkw-registrierung.tsx`, `reklamation-detail.tsx` und `wiegeschein-detail.tsx` direkt am Fachobjekt mit den letzten relevanten Eingriffen.
+**Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`
 
 ## STATUS-005
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Ein gemeinsames Statusvokabular fuer operative Kernmasken einfuehren.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/lib/**`, `packages/frontend-web/src/components/**`, `packages/frontend-web/src/pages/**` entlang der betroffenen Kernmasken.
 **Abnahmekriterien:** `offen`, `in_pruefung`, `blockiert`, `teilweise`, `wartet_auf_extern`, `wartet_auf_mensch`, `abgeschlossen`, `eskaliert` werden konsistent gemappt und visuell gleich behandelt.
+**Erledigt:** `operational-status.ts` mappt rohe Statuswerte jetzt auf ein gemeinsames Betriebsvokabular; die neuen Fallkoepfe nutzen dieselbe semantische Statussicht ueber Einkauf, Annahme, Reklamation und Wiegeschein hinweg.
+**Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`
 
 ## UX-SWEEP-006
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Systemweiten Sweep ueber Toaster statt Zustandswechsel und Placeholder in priorisierten Kernmasken abschliessen.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, priorisierte `packages/frontend-web/src/pages/**`-Kernmasken sowie ggf. gemeinsame Action-Hooks.
 **Abnahmekriterien:** In den priorisierten Kernworkflows bleiben keine fachlich irrefuehrenden Coming-Soon-, Placeholder- oder reine Erfolgs-Toast-Aktionen ohne Zustandsrueckmeldung mehr uebrig.
+**Erledigt:** Der Sweep hat die priorisierten Kernmasken im Einkauf/Annahme/Qualitaet/Waage bereinigt; verbliebene `importComingSoon`-Reste in `auftragsbestaetigungen-liste.tsx`, `rechnungseingaenge-liste.tsx` und `rfq-bids.tsx` sind durch reale Folgepfade bzw. einen CSV-Schnellimport ersetzt.
+**Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`; gezielter `rg`-Scan auf `importComingSoon` im priorisierten Kernraum

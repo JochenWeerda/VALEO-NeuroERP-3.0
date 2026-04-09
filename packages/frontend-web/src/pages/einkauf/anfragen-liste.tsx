@@ -10,6 +10,10 @@ import { getEntityTypeLabel, getStatusLabel } from '@/features/crud/utils/i18n-h
 import { toast } from '@/hooks/use-toast'
 import { useEinkaufAnfragen, type EinkaufAnfrage, einkaufKeys } from '@/lib/api/einkauf'
 import { apiClient } from '@/lib/api-client'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 const createAnfragenConfig = (t: any, entityTypeLabel: string): ListConfig => ({
   title: entityTypeLabel,
@@ -204,6 +208,16 @@ export default function AnfragenListePage(): JSX.Element {
     [apiData]
   )
   const total = data.length
+  const openCount = data.filter((item) => normalizeOperationalStatus(item.status) === 'offen').length
+  const humanCount = data.filter((item) => normalizeOperationalStatus(item.status) === 'wartet_auf_mensch').length
+  const reviewCount = data.filter((item) => normalizeOperationalStatus(item.status) === 'in_pruefung').length
+  const externalCount = data.filter((item) => normalizeOperationalStatus(item.status) === 'wartet_auf_extern').length
+  const urgentCount = data.filter((item) => item.prioritaet === 'dringend' || item.prioritaet === 'hoch').length
+  const latestCreatedAt = data
+    .map((item) => item.createdAt)
+    .filter(Boolean)
+    .sort()
+    .at(-1)
   const entityType = 'purchaseRequest'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Anfrage')
   const baseConfig = createAnfragenConfig(t, entityTypeLabel)
@@ -305,21 +319,99 @@ export default function AnfragenListePage(): JSX.Element {
   }
 
   return (
-    <ListReport
-      config={anfragenConfig}
-      data={data}
-      total={total}
-      onCreate={handleCreate}
-      onEdit={handleEdit}
-      onDelete={handleDelete}
-      onExport={handleExport}
-      onImport={() => {
-        toast({
-          title: t('crud.messages.importInfo'),
-          description: t('crud.messages.importComingSoon'),
-        })
-      }}
-      isLoading={isLoading}
-    />
+    <div className="space-y-6">
+      <OperationalCaseHeader
+        title="Beschaffungsvorgang Anfragen"
+        description="Anfragen steuern Bedarf, Angebotsphase und Folgebelege als zusammenhaengender Fall statt als lokale Listenquittung."
+        status={
+          urgentCount > 0
+            ? 'eskaliert'
+            : humanCount > 0
+              ? 'wartet_auf_mensch'
+              : reviewCount > 0
+                ? 'in_pruefung'
+                : externalCount > 0
+                  ? 'wartet_auf_extern'
+                  : 'offen'
+        }
+        owner="Einkauf / Bedarfsmeldung"
+        blocker={urgentCount > 0 ? `${urgentCount} priorisierte Anfrage(n) brauchen zeitnahe Bearbeitung.` : null}
+        nextAction={
+          humanCount > 0
+            ? `${humanCount} freigegebene Anfragen in Bestellung ueberfuehren`
+            : openCount > 0
+              ? `${openCount} offene Anfragen in die Angebotsphase geben`
+              : 'Neue Bedarfslage aufnehmen'
+        }
+        caseLabel={`${total} Anfragevorgaenge`}
+        tags={['Bedarf', 'Angebotsphase', 'Bestellung']}
+      />
+
+      <div className="grid gap-6 xl:grid-cols-[1.4fr_0.9fr]">
+        <OperationalTimeline
+          title="Fall- und Vorgangsbild"
+          items={[
+            latestCreatedAt
+              ? {
+                  label: 'Zuletzt erfasste Bedarfslage',
+                  detail: `${total} Beschaffungsvorgaenge sind im Arbeitsraum sichtbar.`,
+                  timestamp: latestCreatedAt,
+                }
+              : {
+                  label: 'Noch keine Bedarfsdaten geladen',
+                  detail: 'Sobald Anfragen vorhanden sind, erscheint hier die letzte Aktivitaet.',
+                },
+            {
+              label: 'Freigabe und Angebotsphase',
+              detail: `${openCount} offen, ${reviewCount} in Angebotsphase, ${humanCount} fuer Folgebeleg bereit.`,
+            },
+            {
+              label: 'Risikobild',
+              detail: urgentCount > 0 ? `${urgentCount} Anfrage(n) mit hoher oder dringender Prioritaet.` : 'Keine akut eskalierten Bedarfsvorgaenge.',
+            },
+          ]}
+        />
+        <OperationalContextPanel
+          title="Kontext"
+          sections={[
+            {
+              title: 'Ressourcenlage',
+              items: [
+                { label: 'Offene Bedarfsvorgaenge', value: String(openCount) },
+                { label: 'Bestellreife Anfragen', value: String(humanCount) },
+              ],
+            },
+            {
+              title: 'Wirtschaftslage',
+              items: [
+                { label: 'Dringende Prioritaeten', value: String(urgentCount) },
+                { label: 'Externe Phase', value: String(externalCount) },
+              ],
+            },
+            {
+              title: 'Governance',
+              items: [
+                { label: 'Naechster Schritt', value: humanCount > 0 ? 'Bestellung erzeugen' : 'Freigabe zur Angebotsphase' },
+                { label: 'Owner', value: 'Einkauf / Bedarfsmeldung' },
+              ],
+            },
+          ]}
+        />
+      </div>
+
+      <ListReport
+        config={anfragenConfig}
+        data={data}
+        total={total}
+        onCreate={handleCreate}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onExport={handleExport}
+        onImport={() => {
+          navigate('/einkauf/bestellungen?importContext=anfragen')
+        }}
+        isLoading={isLoading}
+      />
+    </div>
   )
 }

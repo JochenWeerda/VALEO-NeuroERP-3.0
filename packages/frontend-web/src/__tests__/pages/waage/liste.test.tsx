@@ -18,6 +18,14 @@ vi.mock('@/hooks/use-toast', () => ({
   useToast: () => ({ toast: toastMock }),
 }))
 
+vi.mock('@/lib/api/supply-chain', () => ({
+  useSupplyChainOverview: () => ({ data: null, isLoading: false }),
+}))
+
+vi.mock('@/lib/professional-control-centers', () => ({
+  summarizeSupplyOps: () => ({ totalOpen: 0, totalInTransit: 0, totalDelivered: 0, kpis: [] }),
+}))
+
 vi.mock('@/lib/api/betrieb', () => ({
   useWaagen: () => ({
     data: [

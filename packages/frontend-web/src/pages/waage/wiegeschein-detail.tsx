@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -15,6 +15,11 @@ import { apiClient } from '@/lib/api-client'
 import { type WeighingTicket } from '@/lib/api/weighing-tickets'
 import { useSupplyChainOverview } from '@/lib/api/supply-chain'
 import { ArrowRight, CheckCircle, Clock, FileText, Link, Scale, Truck } from 'lucide-react'
+import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 // ── Tabs ─────────────────────────────────────────────────────────────────────
 type TabId = 'gewichte' | 'qualitaet' | 'kontrakt' | 'verlauf'
@@ -151,6 +156,7 @@ function TimelineStep({
 // ── Main Component ────────────────────────────────────────────────────────────
 export default function WiegescheinDetailPage(): JSX.Element {
   const { id = '' } = useParams<{ id: string }>()
+  const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const { toast } = useToast()
   const queryClient = useQueryClient()
@@ -158,6 +164,7 @@ export default function WiegescheinDetailPage(): JSX.Element {
   const [allocateOpen, setAllocateOpen] = useState(false)
   const [contractInput, setContractInput] = useState('')
   const { data: chain } = useSupplyChainOverview()
+  const workflowContext = readWorkflowEntryContext(searchParams)
 
   // ── Fetch ticket ────────────────────────────────────────────────────────────
   const {
@@ -360,6 +367,17 @@ export default function WiegescheinDetailPage(): JSX.Element {
   return (
     <div className="flex flex-col">
     <div className="p-6 space-y-6">
+      {workflowContext ? <WorkflowEntryBanner context={workflowContext} /> : null}
+      <OperationalCaseHeader
+        title={ticket.ticket_number}
+        description="Wiegeschein als operativer Brueckenvorgang zwischen Annahme, Qualitaet, Kontrakt und Abrechnung."
+        status={ticket.allocation_status === 'unallocated' ? 'wartet_auf_mensch' : normalizeOperationalStatus(ticket.status)}
+        owner="Waage / Disposition"
+        blocker={ticket.allocation_status === 'unallocated' ? 'Der Wiegeschein ist noch keinem Kontrakt zugeordnet.' : null}
+        nextAction={ticket.allocation_status === 'unallocated' ? 'Kontrakt zuordnen' : 'Abrechnung fortsetzen'}
+        caseLabel={workflowContext?.caseNumber || 'Wiegevorgang'}
+        tags={[ticket.direction, ticket.article_group || 'Artikelgruppe offen']}
+      />
       <ModuleToolbar
         backTarget="/waage/wiegungen"
         closeTarget="/waage/wiegungen"
@@ -431,6 +449,43 @@ export default function WiegescheinDetailPage(): JSX.Element {
           <div><div className="text-xs text-muted-foreground">Fracht in Transit</div><div className="text-2xl font-semibold">{chain.freightInTransit}</div></div>
         </CardContent>
       </Card>
+
+      <div className="grid gap-6 xl:grid-cols-[1.2fr_1fr]">
+        <OperationalTimeline
+          title="Vorgangstimeline"
+          items={[
+            { label: 'Erstwiegung', timestamp: ticket.first_weighing_at, detail: ticket.vehicle_plate || undefined },
+            { label: 'Zweitwiegung', timestamp: ticket.second_weighing_at, detail: ticket.ticket_number },
+            { label: 'Objektkettenabgleich', detail: `${chain.waitingInbound} wartend / ${chain.openWeighingTickets} offen / ${chain.freightInTransit} Transit` },
+          ]}
+        />
+        <OperationalContextPanel
+          title="Wiegescheinkontext"
+          sections={[
+            {
+              title: 'Ressourcenlage',
+              items: [
+                { label: 'Nettogewicht', value: netWeight != null ? `${netWeight.toLocaleString('de-DE')} kg` : '-' },
+                { label: 'Artikel', value: ticket.article_group || ticket.article_id || '-' },
+              ],
+            },
+            {
+              title: 'Logistiklage',
+              items: [
+                { label: 'Fahrzeug', value: ticket.vehicle_plate || '-' },
+                { label: 'Richtung', value: ticket.direction || '-' },
+              ],
+            },
+            {
+              title: 'Governance',
+              items: [
+                { label: 'Zuordnung', value: allocationStatusLabel(ticket.allocation_status) },
+                { label: 'Naechster Schritt', value: ticket.allocation_status === 'unallocated' ? 'Kontrakt zuordnen' : 'Settlement vorbereiten' },
+              ],
+            },
+          ]}
+        />
+      </div>
 
       {/* Tab-Navigation */}
       <div className="border-b">

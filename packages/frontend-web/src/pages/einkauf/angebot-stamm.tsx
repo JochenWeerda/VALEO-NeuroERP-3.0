@@ -7,6 +7,9 @@ import { MaskConfig } from '@/components/mask-builder/types'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/api-client'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 const createAngebotConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
@@ -175,35 +178,81 @@ export default function AngebotStammPage(): JSX.Element {
   }
 
   return (
-    <ObjectPage
-      config={angebotConfig}
-      data={data}
-      onSave={handleSave}
-      onCancel={handleCancel}
-      isLoading={loading}
-      onAction={async (actionKey) => {
-        if (!id || !transitionMap[actionKey]) {
-          toast({ title: 'Aktion nicht moeglich', description: 'Das Angebot muss zuerst gespeichert werden.', variant: 'destructive' })
-          return
+    <div className="space-y-6">
+      <OperationalCaseHeader
+        title={data?.angebotNummer || 'Angebot'}
+        description="Angebot als eigenstaendiger Einkaufsvorgang mit Preis-, Governance- und Folgebelegkontext."
+        status={normalizeOperationalStatus(data?.status)}
+        owner={data?.lieferantId ? 'Lieferantenbezug gepflegt' : 'Lieferant offen'}
+        blocker={data?.status === 'ABGELEHNT' ? 'Dieses Angebot ist abgelehnt und blockiert den Folgeprozess.' : null}
+        nextAction={
+          data?.status === 'ERFASST'
+            ? 'Angebot pruefen'
+            : data?.status === 'GEPRUEFT'
+              ? 'Angebot freigeben'
+              : data?.status === 'GENEHMIGT'
+                ? 'Bestellung erzeugen'
+                : 'Vorgang abschliessen'
         }
-        setLoading(true)
-        try {
-          const response = await apiClient.post<{ purchaseOrderId?: string; purchaseOrderNumber?: string }>(
-            `/api/v1/einkauf/angebote/${encodeURIComponent(id)}/${transitionMap[actionKey]}`,
-          )
-          if (actionKey === 'inBestellung' && response.data?.purchaseOrderId) {
-            toast({ title: 'Bestellung erzeugt', description: response.data.purchaseOrderNumber || 'Folgebeleg erzeugt.' })
-            navigate(`/einkauf/bestellungen/${encodeURIComponent(response.data.purchaseOrderId)}`)
+        caseLabel="Angebotsvorgang"
+        tags={[data?.status || 'Status offen', data?.waehrung || 'EUR']}
+      />
+      <OperationalContextPanel
+        title="Angebotskontext"
+        sections={[
+          {
+            title: 'Ressourcenlage',
+            items: [
+              { label: 'Artikel', value: data?.artikel || '-' },
+              { label: 'Menge', value: data?.menge != null ? `${data.menge} ${data?.einheit || ''}`.trim() : '-' },
+            ],
+          },
+          {
+            title: 'Wirtschaftslage',
+            items: [
+              { label: 'Preis', value: data?.preis != null ? `${data.preis} ${data?.waehrung || 'EUR'}` : '-' },
+              { label: 'Gueltig bis', value: data?.gueltigBis || '-' },
+            ],
+          },
+          {
+            title: 'Governance',
+            items: [
+              { label: 'Anfragebezug', value: data?.anfrageId || '-' },
+              { label: 'Naechster Schritt', value: data?.status === 'GENEHMIGT' ? 'Bestellung erzeugen' : 'Review abschliessen' },
+            ],
+          },
+        ]}
+      />
+      <ObjectPage
+        config={angebotConfig}
+        data={data}
+        onSave={handleSave}
+        onCancel={handleCancel}
+        isLoading={loading}
+        onAction={async (actionKey) => {
+          if (!id || !transitionMap[actionKey]) {
+            toast({ title: 'Aktion nicht moeglich', description: 'Das Angebot muss zuerst gespeichert werden.', variant: 'destructive' })
             return
           }
-          toast({ title: 'Aktion ausgefuehrt', description: `Angebot ${id} wurde aktualisiert.` })
-          navigate('/einkauf/angebote')
-        } catch (error: any) {
-          toast({ title: 'Aktion fehlgeschlagen', description: error.response?.data?.detail || error.message, variant: 'destructive' })
-        } finally {
-          setLoading(false)
-        }
-      }}
-    />
+          setLoading(true)
+          try {
+            const response = await apiClient.post<{ purchaseOrderId?: string; purchaseOrderNumber?: string }>(
+              `/api/v1/einkauf/angebote/${encodeURIComponent(id)}/${transitionMap[actionKey]}`,
+            )
+            if (actionKey === 'inBestellung' && response.data?.purchaseOrderId) {
+              toast({ title: 'Bestellung erzeugt', description: response.data.purchaseOrderNumber || 'Folgebeleg erzeugt.' })
+              navigate(`/einkauf/bestellungen/${encodeURIComponent(response.data.purchaseOrderId)}`)
+              return
+            }
+            toast({ title: 'Aktion ausgefuehrt', description: `Angebot ${id} wurde aktualisiert.` })
+            navigate('/einkauf/angebote')
+          } catch (error: any) {
+            toast({ title: 'Aktion fehlgeschlagen', description: error.response?.data?.detail || error.message, variant: 'destructive' })
+          } finally {
+            setLoading(false)
+          }
+        }}
+      />
+    </div>
   )
 }

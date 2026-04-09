@@ -3,7 +3,7 @@
  * Prioritaet via TouchCards statt <select>, alle Touch-Targets >= 44px
  */
 import { useState, useCallback, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useDropzone } from 'react-dropzone'
 import { useToast } from '@/hooks/use-toast'
 import { Wizard } from '@/components/patterns/Wizard'
@@ -22,6 +22,10 @@ import {
   TouchCardGroup,
   TouchConfirmCard,
 } from '@/components/touch/TouchFieldLayout'
+import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 
 type LKWData = {
   kennzeichen: string
@@ -50,7 +54,9 @@ const FALLBACK_ARTIKEL_OPTIONEN: ArticleOption[] = [
 
 export default function LKWRegistrierungPage(): JSX.Element {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { toast } = useToast()
+  const workflowContext = readWorkflowEntryContext(searchParams)
   const [lkw, setLKW] = useState<LKWData>({
     kennzeichen: '',
     lieferant: '',
@@ -432,6 +438,70 @@ export default function LKWRegistrierungPage(): JSX.Element {
   return (
     <div className="flex flex-col">
       <div className="p-6">
+        {workflowContext ? <div className="mb-6"><WorkflowEntryBanner context={workflowContext} /></div> : null}
+        <div className="mb-6 space-y-6">
+          <OperationalCaseHeader
+            title={lkw.kennzeichen || 'LKW-Registrierung'}
+            description="Anlieferung als gefuehrter Annahmevorgang mit Scanquelle, Ressourcenlage und naechster Aktion."
+            status={attachmentIds.length > 0 || lkw.lieferscheinNr ? 'in_pruefung' : 'offen'}
+            owner="Annahme / Waage"
+            blocker={!lkw.kennzeichen ? 'Kennzeichen fehlt fuer die eindeutige Fahrzeugzuordnung.' : null}
+            nextAction={
+              !lkw.kennzeichen
+                ? 'Kennzeichen erfassen'
+                : !lkw.lieferant || (!lkw.articleId && !lkw.artikel)
+                  ? 'Lieferant und Artikel zuordnen'
+                  : 'Annahme registrieren und in Warteschlange uebergeben'
+            }
+            caseLabel={workflowContext?.caseNumber || 'Annahmevorgang'}
+            tags={[lkw.prioritaet, lkw.articleId ? 'Artikel zugeordnet' : 'Artikel offen']}
+          />
+          <div className="grid gap-6 xl:grid-cols-[1.2fr_1fr]">
+            <OperationalTimeline
+              title="Annahme-Timeline"
+              items={[
+                {
+                  label: 'Fahrzeugdaten',
+                  detail: lkw.kennzeichen ? `Kennzeichen ${lkw.kennzeichen} uebernommen.` : 'Kennzeichen noch offen.',
+                },
+                {
+                  label: 'Beleg- und Scanpfad',
+                  detail: lkw.lieferscheinNr ? `Lieferschein ${lkw.lieferscheinNr} uebernommen.` : 'Lieferschein noch nicht uebernommen.',
+                },
+                {
+                  label: 'Bildanhaenge',
+                  detail: attachmentIds.length > 0 ? `${attachmentIds.length} Bild-/Scananhaenge verknuepft.` : 'Noch keine Bildanhaenge vorhanden.',
+                },
+              ]}
+            />
+            <OperationalContextPanel
+              title="Annahmekontext"
+              sections={[
+                {
+                  title: 'Ressourcenlage',
+                  items: [
+                    { label: 'Artikel', value: lkw.artikel || 'Noch nicht zugeordnet' },
+                    { label: 'Ankunft', value: lkw.ankunftszeit ? new Date(lkw.ankunftszeit).toLocaleString('de-DE') : '-' },
+                  ],
+                },
+                {
+                  title: 'Logistiklage',
+                  items: [
+                    { label: 'Lieferant', value: lkw.lieferant || 'Noch offen' },
+                    { label: 'Prioritaet', value: lkw.prioritaet },
+                  ],
+                },
+                {
+                  title: 'Governance',
+                  items: [
+                    { label: 'Scanquelle', value: scanDialogField ? 'Scanner/OCR aktiv' : 'Touch / Upload' },
+                    { label: 'Naechste Aktion', value: lkw.kennzeichen && (lkw.articleId || lkw.artikel) ? 'Warteschlange buchen' : 'Pflichtfelder vervollstaendigen' },
+                  ],
+                },
+              ]}
+            />
+          </div>
+        </div>
         <ModuleToolbar backTarget="/annahme/warteschlange" closeTarget="/annahme/warteschlange" title="LKW-Registrierung" />
         <Wizard
           title="LKW-Registrierung"

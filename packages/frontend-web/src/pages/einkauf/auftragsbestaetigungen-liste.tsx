@@ -227,10 +227,7 @@ export default function AuftragsbestaetigungenListePage(): JSX.Element {
       onDelete={handleDelete}
       onExport={handleExport}
       onImport={() => {
-        toast({
-          title: t('crud.messages.importInfo'),
-          description: t('crud.messages.importComingSoon'),
-        })
+        navigate('/einkauf/bestellungen?importContext=auftragsbestaetigungen')
       }}
       isLoading={isLoading}
     />

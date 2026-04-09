@@ -19,6 +19,10 @@ import {
   WorkflowEntryBanner,
   readWorkflowEntryContext,
 } from '@/components/workflow/WorkflowEntryBanner'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 import {
   ArrowLeft,
   CheckCircle,
@@ -291,6 +295,60 @@ export default function ReklamationDetailPage(): JSX.Element {
           description="Reklamationsfall, Kundenbezug, Dokumente und Bearbeitungsstatus werden hier gepflegt."
         />
       )}
+
+      <OperationalCaseHeader
+        title={`Reklamation ${reklamation.reklamation_id.slice(0, 8)}`}
+        description="Reklamationsvorgang mit SLA-, CRM-, DMS- und Auditbezug."
+        status={reklamation.ist_ueberfaellig ? 'eskaliert' : normalizeOperationalStatus(reklamation.status)}
+        owner={reklamation.zustaendiger || 'Qualitaet / Service'}
+        blocker={reklamation.ist_ueberfaellig ? 'Die Reklamation ist ueberfaellig und braucht Eskalation.' : null}
+        nextAction={
+          reklamation.status === 'offen'
+            ? 'In Pruefung nehmen'
+            : reklamation.status === 'in_pruefung'
+              ? 'Entscheidung treffen'
+              : 'Vorgang abschliessen'
+        }
+        caseLabel={workflowContext?.caseNumber || 'Reklamationsfall'}
+        tags={[SLA_LABELS[reklamation.sla_status] ?? reklamation.sla_status, STATUS_LABELS[reklamation.status] ?? reklamation.status]}
+      />
+
+      <div className="grid gap-4 xl:grid-cols-[1.2fr_1fr]">
+        <OperationalTimeline
+          title="Fallhistorie"
+          items={(auditData?.audit_trail || []).slice(0, 4).map((entry) => ({
+            label: entry.aktion,
+            detail: entry.beschreibung,
+            timestamp: entry.zeitstempel,
+          }))}
+        />
+        <OperationalContextPanel
+          title="Reklamationskontext"
+          sections={[
+            {
+              title: 'Objekt',
+              items: [
+                { label: 'Typ', value: reklamation.typ },
+                { label: 'Kontrakt', value: reklamation.kontrakt_id || '-' },
+              ],
+            },
+            {
+              title: 'Wirtschaftslage',
+              items: [
+                { label: 'Beanstandet', value: `${reklamation.gesamtwert_beanstandet_eur.toFixed(2)} EUR` },
+                { label: 'Anerkannt', value: `${reklamation.gesamtwert_anerkannt_eur.toFixed(2)} EUR` },
+              ],
+            },
+            {
+              title: 'Governance',
+              items: [
+                { label: 'CRM-Bezug', value: reklamation.hat_crm_bezug ? 'Vorhanden' : 'Offen' },
+                { label: 'DMS-Bezug', value: reklamation.hat_dms_bezug ? 'Vorhanden' : 'Offen' },
+              ],
+            },
+          ]}
+        />
+      </div>
 
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-4">

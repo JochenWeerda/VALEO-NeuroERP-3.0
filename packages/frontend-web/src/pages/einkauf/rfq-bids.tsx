@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -46,6 +46,7 @@ type Bid = {
 
 export default function RfqBidsPage(): JSX.Element {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const { rfqId } = useParams<{ rfqId: string }>()
   const [loading] = useState(false)
   const [rfq, setRfq] = useState<any>(null)
@@ -151,12 +152,58 @@ export default function RfqBidsPage(): JSX.Element {
     })
   }
 
-  const handleImportBids = async (_file?: File) => {
+  const handleImportBids = async (file?: File) => {
     try {
-      // Import parser wird als eigener Schritt angebunden
+      if (!file) {
+        throw new Error('Bitte eine CSV-Datei waehlen.')
+      }
+      if (!file.name.toLowerCase().endsWith('.csv')) {
+        throw new Error('Aktuell werden fuer den Schnellimport nur CSV-Dateien unterstuetzt.')
+      }
+      const raw = await file.text()
+      const rows = raw
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean)
+      const [, ...dataRows] = rows
+      if (dataRows.length === 0) {
+        throw new Error('Die Importdatei enthaelt keine Angebotszeilen.')
+      }
+
+      const imported: Bid[] = dataRows.map((row, index) => {
+        const [supplierName, quantityRaw, unitPriceRaw, currency = 'EUR', notes = 'CSV-Import'] = row.split(';').map((cell) => cell.trim())
+        const quantity = Number(quantityRaw || 0)
+        const unitPrice = Number(unitPriceRaw || 0)
+        return {
+          id: `import-${Date.now()}-${index}`,
+          rfqId: rfqId || 'rfq-import',
+          supplierId: supplierName.toLowerCase().replace(/\s+/g, '-') || `lieferant-${index + 1}`,
+          supplierName: supplierName || `Lieferant ${index + 1}`,
+          items: [
+            {
+              rfqItemId: `import-item-${index + 1}`,
+              quantity,
+              unitPrice,
+              totalPrice: quantity * unitPrice,
+              currency,
+              deliveryDate: new Date().toISOString().split('T')[0],
+              leadTime: 0,
+              notes,
+            },
+          ],
+          totalValue: quantity * unitPrice,
+          currency,
+          submittedBy: 'CSV-Import',
+          submittedAt: new Date().toISOString(),
+          status: 'SUBMITTED',
+        }
+      })
+
+      setBids((prev) => [...imported, ...prev])
+      setImportDialogOpen(false)
       toast({
-        title: t('crud.messages.importInfo'),
-        description: t('crud.messages.importComingSoon'),
+        title: t('crud.messages.importSuccess'),
+        description: `${imported.length} Angebot(e) wurden aus ${file.name} uebernommen.`,
       })
     } catch (error: any) {
       toast({
@@ -164,6 +211,9 @@ export default function RfqBidsPage(): JSX.Element {
         title: t('crud.messages.importError'),
         description: error.message,
       })
+      if (String(error.message || '').includes('CSV-Dateien')) {
+        navigate('/einkauf/angebote')
+      }
     }
   }
 
