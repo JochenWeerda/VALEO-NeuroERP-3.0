@@ -1096,6 +1096,8 @@ class StockMovement(Base):
     storage_fee_start_date = Column(Date, nullable=True)
     storage_fee_monthly_rate = Column(DECIMAL(12, 4), nullable=True)
     storage_fee_last_charged_until = Column(Date, nullable=True)
+    source_document_id = Column(String(64), nullable=True)        # FK to origin document (Inventur, Lieferschein, etc.)
+    source_document_type = Column(String(40), nullable=True)     # inventory_count, delivery_note, stock_correction, etc.
     previous_stock = Column(DECIMAL(10, 2), nullable=False)
     new_stock = Column(DECIMAL(10, 2), nullable=False)
     total_cost = Column(DECIMAL(12, 2), nullable=True)

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useRef, type ChangeEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ListReport } from '@/components/mask-builder'
@@ -14,7 +14,15 @@ import { toast } from '@/hooks/use-toast'
 const apiClient = createApiClient('/api/v1/crm')
 
 // Konfiguration für Opportunities ListReport (wird in Komponente mit i18n erstellt)
-const createOpportunitiesConfig = (t: any, entityTypeLabel: string): ListConfig => ({
+const createOpportunitiesConfig = (
+  t: any,
+  entityTypeLabel: string,
+  handlers: {
+    convertToQuote: (items: any[]) => void
+    markAsWon: (items: any[]) => void
+    markAsLost: (items: any[]) => void
+  },
+): ListConfig => ({
   title: entityTypeLabel,
   titleKey: 'crud.list.title',
   subtitle: t('crud.subtitles.manageOpportunities'),
@@ -169,21 +177,21 @@ const createOpportunitiesConfig = (t: any, entityTypeLabel: string): ListConfig 
       label: t('crud.actions.convertToQuote'),
       labelKey: 'crud.actions.convertToQuote',
       type: 'primary',
-      onClick: () => toast({ title: 'In Angebot konvertieren', description: 'Opportunity wurde in ein Angebot umgewandelt.' })
+      onClick: handlers.convertToQuote,
     },
     {
       key: 'markAsWon',
       label: t('crud.actions.markAsWon'),
       labelKey: 'crud.actions.markAsWon',
       type: 'default',
-      onClick: () => toast({ title: 'Gewonnen', description: 'Opportunity wurde als gewonnen markiert.' })
+      onClick: handlers.markAsWon,
     },
     {
       key: 'markAsLost',
       label: t('crud.actions.markAsLost'),
       labelKey: 'crud.actions.markAsLost',
       type: 'secondary',
-      onClick: () => toast({ title: 'Verloren', description: 'Opportunity wurde als verloren markiert.', variant: 'destructive' })
+      onClick: handlers.markAsLost,
     }
   ],
   defaultSort: { field: 'expected_close_date', direction: 'desc' },
@@ -210,7 +218,7 @@ export default function OpportunitiesListePage(): JSX.Element {
   const [loading, setLoading] = useState(true)
   const entityType = 'opportunity'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Opportunity')
-  const opportunitiesConfig = createOpportunitiesConfig(t, entityTypeLabel)
+  const importInputRef = useRef<HTMLInputElement>(null)
 
   const { handleAction } = useMaskActions(async (action: string, item: any) => {
     if (action === 'edit' && item) {
@@ -257,6 +265,145 @@ export default function OpportunitiesListePage(): JSX.Element {
     navigate('/crm/opportunity/new')
   }
 
+  const updateSelectedOpportunities = async (
+    items: any[],
+    payload: Record<string, unknown>,
+    successTitle: string,
+    successDescription: string,
+    errorTitle: string,
+  ): Promise<void> => {
+    if (!items.length) {
+      toast({
+        variant: 'destructive',
+        title: 'Keine Auswahl',
+        description: 'Bitte mindestens eine Opportunity auswaehlen.',
+      })
+      return
+    }
+
+    try {
+      await Promise.all(items.map((item) => apiClient.put(`/opportunities/${item.id}`, payload)))
+      toast({ title: successTitle, description: successDescription })
+      await loadData()
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: errorTitle,
+        description: 'Der Statuswechsel konnte nicht fuer alle Opportunities abgeschlossen werden.',
+      })
+    }
+  }
+
+  const handleConvertToQuote = (items: any[]) => {
+    if (!items.length) {
+      toast({
+        variant: 'destructive',
+        title: 'Keine Auswahl',
+        description: 'Bitte mindestens eine Opportunity auswaehlen.',
+      })
+      return
+    }
+
+    const lead = items[0]
+    if (items.length === 1) {
+      navigate(`/sales/angebot-erstellen?opportunityId=${lead.id}`)
+      return
+    }
+
+    void updateSelectedOpportunities(
+      items,
+      { status: 'proposal', stage: 'proposal_price_quote' },
+      'Quote-Phase vorbereitet',
+      `${items.length} Opportunities wurden in die Angebotsphase ueberfuehrt.`,
+      'Konvertierung fehlgeschlagen',
+    ).then(() => navigate('/crm/opportunities-kanban'))
+  }
+
+  const handleMarkAsWon = (items: any[]) => {
+    void updateSelectedOpportunities(
+      items,
+      { status: 'closed_won', stage: 'closed_won' },
+      'Als gewonnen markiert',
+      `${items.length} Opportunities wurden abgeschlossen.`,
+      'Gewinnstatus fehlgeschlagen',
+    )
+  }
+
+  const handleMarkAsLost = (items: any[]) => {
+    void updateSelectedOpportunities(
+      items,
+      { status: 'closed_lost', stage: 'closed_lost' },
+      'Als verloren markiert',
+      `${items.length} Opportunities wurden als verloren gesetzt.`,
+      'Verluststatus fehlgeschlagen',
+    )
+  }
+
+  const handleImportFile = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    try {
+      const raw = await file.text()
+      const rows = raw
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean)
+
+      if (rows.length <= 1) {
+        toast({ variant: 'destructive', title: 'Import fehlgeschlagen', description: 'Die CSV-Datei enthaelt keine Datenzeilen.' })
+        return
+      }
+
+      const headers = rows[0].split(';').map((value) => value.replace(/^"|"$/g, '').trim().toLowerCase())
+      const dataRows = rows.slice(1)
+      let created = 0
+
+      for (const row of dataRows) {
+        const values = row.split(';').map((value) => value.replace(/^"|"$/g, '').trim())
+        const get = (names: string[]) => {
+          const idx = headers.findIndex((header) => names.includes(header))
+          return idx >= 0 ? values[idx] ?? '' : ''
+        }
+
+        const payload = {
+          number: get(['number', 'nummer']) || `OPP-${Date.now()}-${created + 1}`,
+          name: get(['name', 'bezeichnung', 'titel']) || 'Importierte Opportunity',
+          stage: get(['stage', 'stufe']) || 'initial_contact',
+          status: get(['status']) || 'prospecting',
+          amount: Number(get(['amount', 'betrag']).replace(',', '.')) || 0,
+          probability: Number(get(['probability', 'wahrscheinlichkeit']).replace(',', '.')) || 0,
+          expected_revenue: Number(get(['expected_revenue', 'erwarteter_umsatz']).replace(',', '.')) || 0,
+          customer_name: get(['customer', 'kunde', 'customer_name']) || undefined,
+          owner_id: get(['owner', 'owner_id']) || undefined,
+        }
+        await apiClient.post('/opportunities', payload)
+        created += 1
+      }
+
+      toast({ title: 'Import abgeschlossen', description: `${created} Opportunities angelegt.` })
+      await loadData()
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Import fehlgeschlagen',
+        description: error.response?.data?.detail ?? error.message,
+      })
+    } finally {
+      event.target.value = ''
+    }
+  }
+
+  const opportunitiesConfig = useMemo(
+    () =>
+      createOpportunitiesConfig(t, entityTypeLabel, {
+        convertToQuote: handleConvertToQuote,
+        markAsWon: handleMarkAsWon,
+        markAsLost: handleMarkAsLost,
+      }),
+    [t, entityTypeLabel],
+  )
+
   const handleEdit = (item: any) => {
     handleAction('edit', item)
   }
@@ -297,21 +444,19 @@ export default function OpportunitiesListePage(): JSX.Element {
   }
 
   return (
-    <ListReport
-      config={opportunitiesConfig}
-      data={data}
-      total={total}
-      onCreate={handleCreate}
-      onEdit={handleEdit}
-      onDelete={handleDelete}
-      onExport={handleExport}
-      onImport={() => {
-        toast({
-          title: t('crud.messages.importInfo'),
-          description: t('crud.messages.importComingSoon'),
-        })
-      }}
-      isLoading={loading}
-    />
+    <>
+      <input ref={importInputRef} type="file" accept=".csv" className="hidden" onChange={handleImportFile} />
+      <ListReport
+        config={opportunitiesConfig}
+        data={data}
+        total={total}
+        onCreate={handleCreate}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onExport={handleExport}
+        onImport={() => importInputRef.current?.click()}
+        isLoading={loading}
+      />
+    </>
   )
 }

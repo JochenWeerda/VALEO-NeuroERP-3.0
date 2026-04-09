@@ -55,15 +55,7 @@ def apply_accepted_action_mutations(
 
     handler = _DOMAIN_MUTATIONS.get(request.command_name)
     if handler is not None:
-        try:
-            handler(db, request, result)
-        except Exception as exc:
-            logger.warning("Domain mutation %s failed: %s", request.command_name, exc)
-            try:
-                db.rollback()
-            except Exception:
-                pass
-            return
+        handler(db, request, result)
 
     try:
         db.commit()

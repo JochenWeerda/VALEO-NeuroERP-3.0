@@ -74,6 +74,14 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         mcp: { businessDomain: 'inventory', scope: 'inventory:read' },
       },
       {
+        id: 'bestandskorrektur',
+        label: 'Bestandskorrektur',
+        icon: RefreshCw,
+        module: '@/pages/lager/bestandskorrektur',
+        keywords: ['bestandskorrektur', 'schwund', 'bruch', 'mhd', 'korrektur'],
+        mcp: { businessDomain: 'inventory', scope: 'inventory:write' },
+      },
+      {
         id: 'lagerbewegungen',
         label: 'Lagerbewegungen',
         icon: ArrowUpDown,

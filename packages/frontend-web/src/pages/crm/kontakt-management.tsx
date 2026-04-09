@@ -1,18 +1,22 @@
-import { useState, useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Badge } from '@/components/ui/badge'
 import { ListReport } from '@/components/mask-builder'
 import { useMaskActions } from '@/components/mask-builder/hooks'
-import { createApiClient } from '@/components/mask-builder/utils/api'
-import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
+import { createApiClient } from '@/components/mask-builder/utils/api'
 import { toast } from '@/hooks/use-toast'
 import { api } from '@/lib/axios'
 
-// API Client für Kontakte
 const apiClient = createApiClient('/api/v1/crm')
 
-// Konfiguration für Kontakt-Management ListReport
-const kontaktListConfig: ListConfig = {
+const createKontaktListConfig = (handlers: {
+  exportSelected: (items: any[]) => void
+  emailSelected: (items: any[]) => void
+  callSelected: (items: any[]) => void
+  meetingSelected: (items: any[]) => void
+  deactivateSelected: (items: any[]) => void
+}): ListConfig => ({
   title: 'Kontakt-Management',
   subtitle: 'Zentrales Management aller Kunden- und Lieferanten-Kontakte',
   type: 'list-report',
@@ -25,9 +29,9 @@ const kontaktListConfig: ListConfig = {
       render: (value, row) => (
         <div>
           <div className="font-medium">{value}</div>
-          <div className="text-sm text-muted-foreground">{row.position || row.funktion}</div>
+          <div className="text-sm text-muted-foreground">{row.position || row.funktion || '-'}</div>
         </div>
-      )
+      ),
     },
     {
       key: 'firma',
@@ -42,69 +46,66 @@ const kontaktListConfig: ListConfig = {
             <div className="text-sm text-muted-foreground">{row.kundeId ? 'Kunde' : 'Lieferant'}</div>
           </div>
         )
-      }
+      },
     },
     {
       key: 'email',
       label: 'E-Mail',
       filterable: true,
-      render: (value) => value ? <a href={`mailto:${value}`} className="text-blue-600 hover:underline">{value}</a> : '-'
+      render: (value) => (value ? <a href={`mailto:${value}`} className="text-blue-600 hover:underline">{value}</a> : '-'),
     },
     {
       key: 'telefon',
       label: 'Telefon',
-      render: (value) => value || '-'
+      render: (value) => value || '-',
     },
     {
       key: 'mobil',
       label: 'Mobil',
-      render: (value) => value || '-'
+      render: (value) => value || '-',
     },
     {
       key: 'abteilung',
       label: 'Abteilung',
       filterable: true,
-      render: (value) => value || '-'
+      render: (value) => value || '-',
     },
     {
       key: 'prioritaet',
-      label: 'Priorität',
+      label: 'Prioritaet',
       sortable: true,
       filterable: true,
       render: (value) => {
         const priorities = {
-          'a': { label: 'A - Sehr wichtig', color: 'bg-red-100 text-red-800' },
-          'b': { label: 'B - Wichtig', color: 'bg-orange-100 text-orange-800' },
-          'c': { label: 'C - Normal', color: 'bg-yellow-100 text-yellow-800' },
-          'd': { label: 'D - Niedrig', color: 'bg-green-100 text-green-800' }
+          a: { label: 'A - Sehr wichtig', color: 'bg-red-100 text-red-800' },
+          b: { label: 'B - Wichtig', color: 'bg-orange-100 text-orange-800' },
+          c: { label: 'C - Normal', color: 'bg-yellow-100 text-yellow-800' },
+          d: { label: 'D - Niedrig', color: 'bg-green-100 text-green-800' },
         }
         const priority = priorities[value as keyof typeof priorities] || priorities.c
         return <Badge className={priority.color}>{priority.label}</Badge>
-      }
+      },
     },
     {
       key: 'letzterKontakt',
       label: 'Letzter Kontakt',
       sortable: true,
-      render: (value) => value ? new Date(value).toLocaleDateString('de-DE') : '-'
+      render: (value) => (value ? new Date(value).toLocaleDateString('de-DE') : '-'),
     },
     {
       key: 'naechsterKontakt',
-      label: 'Nächster Kontakt',
+      label: 'Naechster Kontakt',
       sortable: true,
       render: (value) => {
         if (!value) return '-'
         const date = new Date(value)
-        const today = new Date()
-        const daysUntil = Math.ceil((date.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
-
+        const daysUntil = Math.ceil((date.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
         let color = 'text-gray-600'
         if (daysUntil < 0) color = 'text-red-600'
         else if (daysUntil <= 7) color = 'text-orange-600'
         else if (daysUntil <= 30) color = 'text-blue-600'
-
         return <span className={color}>{date.toLocaleDateString('de-DE')}</span>
-      }
+      },
     },
     {
       key: 'kontaktart',
@@ -112,15 +113,15 @@ const kontaktListConfig: ListConfig = {
       filterable: true,
       render: (value) => {
         const types = {
-          'telefon': '📞 Telefon',
-          'email': '📧 E-Mail',
-          'besuch': '🏢 Besuch',
-          'messe': '🎪 Messe',
-          'webinar': '💻 Webinar',
-          'social': '📱 Social Media'
+          telefon: 'Telefon',
+          email: 'E-Mail',
+          besuch: 'Besuch',
+          messe: 'Messe',
+          webinar: 'Webinar',
+          social: 'Social Media',
         }
-        return types[value as keyof typeof types] || value
-      }
+        return types[value as keyof typeof types] || value || '-'
+      },
     },
     {
       key: 'status',
@@ -129,31 +130,31 @@ const kontaktListConfig: ListConfig = {
       filterable: true,
       render: (value) => {
         const statuses = {
-          'aktiv': { label: 'Aktiv', variant: 'default' as const },
-          'inaktiv': { label: 'Inaktiv', variant: 'secondary' as const },
-          'gesperrt': { label: 'Gesperrt', variant: 'destructive' as const }
+          aktiv: { label: 'Aktiv', variant: 'default' as const },
+          inaktiv: { label: 'Inaktiv', variant: 'secondary' as const },
+          gesperrt: { label: 'Gesperrt', variant: 'destructive' as const },
         }
         const status = statuses[value as keyof typeof statuses] || statuses.aktiv
         return <Badge variant={status.variant}>{status.label}</Badge>
-      }
+      },
     },
     {
       key: 'notizen',
       label: 'Notizen',
-      render: (value) => value ? <span title={value}>📝</span> : '-'
-    }
+      render: (value) => (value ? <span title={value}>Vorhanden</span> : '-'),
+    },
   ],
   filters: [
     {
       name: 'prioritaet',
-      label: 'Priorität',
+      label: 'Prioritaet',
       type: 'select',
       options: [
         { value: 'a', label: 'A - Sehr wichtig' },
         { value: 'b', label: 'B - Wichtig' },
         { value: 'c', label: 'C - Normal' },
-        { value: 'd', label: 'D - Niedrig' }
-      ]
+        { value: 'd', label: 'D - Niedrig' },
+      ],
     },
     {
       name: 'kontaktart',
@@ -165,21 +166,21 @@ const kontaktListConfig: ListConfig = {
         { value: 'besuch', label: 'Besuch' },
         { value: 'messe', label: 'Messe' },
         { value: 'webinar', label: 'Webinar' },
-        { value: 'social', label: 'Social Media' }
-      ]
+        { value: 'social', label: 'Social Media' },
+      ],
     },
     {
       name: 'abteilung',
       label: 'Abteilung',
       type: 'select',
       options: [
-        { value: 'geschaeftsfuehrung', label: 'Geschäftsführung' },
+        { value: 'geschaeftsfuehrung', label: 'Geschaeftsfuehrung' },
         { value: 'einkauf', label: 'Einkauf' },
         { value: 'verkauf', label: 'Verkauf' },
         { value: 'technik', label: 'Technik' },
-        { value: 'qualitaet', label: 'Qualität' },
-        { value: 'logistik', label: 'Logistik' }
-      ]
+        { value: 'qualitaet', label: 'Qualitaet' },
+        { value: 'logistik', label: 'Logistik' },
+      ],
     },
     {
       name: 'status',
@@ -188,46 +189,21 @@ const kontaktListConfig: ListConfig = {
       options: [
         { value: 'aktiv', label: 'Aktiv' },
         { value: 'inaktiv', label: 'Inaktiv' },
-        { value: 'gesperrt', label: 'Gesperrt' }
-      ]
+        { value: 'gesperrt', label: 'Gesperrt' },
+      ],
     },
     {
       name: 'firma',
       label: 'Firma',
-      type: 'text'
-    }
+      type: 'text',
+    },
   ],
   bulkActions: [
-    {
-      key: 'export',
-      label: 'Exportieren',
-      type: 'secondary',
-      onClick: () => toast({ title: 'Export', description: 'Kontaktdaten werden exportiert.' })
-    },
-    {
-      key: 'email',
-      label: 'E-Mail senden',
-      type: 'secondary',
-      onClick: () => toast({ title: 'E-Mail', description: 'E-Mail-Funktion wird geöffnet.' })
-    },
-    {
-      key: 'call',
-      label: 'Anruf planen',
-      type: 'secondary',
-      onClick: () => toast({ title: 'Anruf', description: 'Anruf-Funktion wird geöffnet.' })
-    },
-    {
-      key: 'meeting',
-      label: 'Meeting planen',
-      type: 'secondary',
-      onClick: () => toast({ title: 'Termin', description: 'Terminplanung wird geöffnet.' })
-    },
-    {
-      key: 'deactivate',
-      label: 'Deaktivieren',
-      type: 'danger',
-      onClick: () => toast({ title: 'Deaktiviert', description: 'Kontakt wurde deaktiviert.', variant: 'destructive' })
-    }
+    { key: 'export', label: 'Exportieren', type: 'secondary', onClick: handlers.exportSelected },
+    { key: 'email', label: 'E-Mail senden', type: 'secondary', onClick: handlers.emailSelected },
+    { key: 'call', label: 'Anruf planen', type: 'secondary', onClick: handlers.callSelected },
+    { key: 'meeting', label: 'Meeting planen', type: 'secondary', onClick: handlers.meetingSelected },
+    { key: 'deactivate', label: 'Deaktivieren', type: 'danger', onClick: handlers.deactivateSelected },
   ],
   defaultSort: { field: 'prioritaet', direction: 'asc' },
   pageSize: 25,
@@ -238,12 +214,12 @@ const kontaktListConfig: ListConfig = {
       get: '/api/v1/crm/contacts/{id}',
       create: '/api/v1/crm/contacts',
       update: '/api/v1/crm/contacts/{id}',
-      delete: '/api/v1/crm/contacts/{id}'
-    }
+      delete: '/api/v1/crm/contacts/{id}',
+    },
   },
   permissions: ['crm.read', 'contacts.read'],
-  actions: []
-}
+  actions: [],
+})
 
 export default function KontaktManagementPage(): JSX.Element {
   const navigate = useNavigate()
@@ -251,25 +227,6 @@ export default function KontaktManagementPage(): JSX.Element {
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
   const importInputRef = useRef<HTMLInputElement>(null)
-
-  const { handleAction } = useMaskActions(async (action: string, item: any) => {
-    if (action === 'edit' && item) {
-      navigate(`/crm/kontakte/${item.id}`)
-    } else if (action === 'delete' && item) {
-      if (confirm(`Kontakt "${item.name}" wirklich löschen?`)) {
-        try {
-          await apiClient.delete(`/kontakte/${item.id}`)
-          loadData() // Liste neu laden
-        } catch (error) {
-          toast({
-            variant: 'destructive',
-            title: 'Fehler beim Löschen',
-            description: 'Der Kontakt konnte nicht gelöscht werden.',
-          })
-        }
-      }
-    }
-  })
 
   const loadData = async () => {
     setLoading(true)
@@ -287,33 +244,45 @@ export default function KontaktManagementPage(): JSX.Element {
   }
 
   useEffect(() => {
-    loadData()
+    void loadData()
   }, [])
 
-  const handleCreate = () => {
-    navigate('/crm/kontakte/new')
-  }
+  const { handleAction } = useMaskActions(async (action: string, item: any) => {
+    if (action === 'edit' && item) {
+      navigate(`/crm/kontakte/${item.id}`)
+      return
+    }
 
-  const handleEdit = (item: any) => {
-    handleAction('edit', item)
-  }
+    if (action === 'delete' && item) {
+      if (!confirm(`Kontakt "${item.name}" wirklich loeschen?`)) return
+      try {
+        await apiClient.delete(`/kontakte/${item.id}`)
+        await loadData()
+      } catch {
+        toast({
+          variant: 'destructive',
+          title: 'Fehler beim Loeschen',
+          description: 'Der Kontakt konnte nicht geloescht werden.',
+        })
+      }
+    }
+  })
 
-  const handleDelete = (item: any) => {
-    handleAction('delete', item)
-  }
+  const handleCreate = () => navigate('/crm/kontakte/new')
+  const handleEdit = (item: any) => { void handleAction('edit', item) }
+  const handleDelete = (item: any) => { void handleAction('delete', item) }
 
-  const handleExport = () => {
+  const handleExport = (rows: any[] = data) => {
     try {
-      // Create CSV content
-      const csvHeader = 'Name;Firma;E-Mail;Telefon;Mobil;Abteilung;Priorität;Status\n'
-      const csvContent = data.map((kontakt: any) =>
-        `"${kontakt.name}";"${kontakt.firma || ''}";"${kontakt.email || ''}";"${kontakt.telefon || ''}";"${kontakt.mobil || ''}";"${kontakt.abteilung || ''}";"${kontakt.prioritaet || ''}";"${kontakt.status || 'aktiv'}"`
-      ).join('\n')
+      const csvHeader = 'Name;Firma;E-Mail;Telefon;Mobil;Abteilung;Prioritaet;Status\n'
+      const csvContent = rows
+        .map(
+          (kontakt: any) =>
+            `"${kontakt.name}";"${kontakt.firma || ''}";"${kontakt.email || ''}";"${kontakt.telefon || ''}";"${kontakt.mobil || ''}";"${kontakt.abteilung || ''}";"${kontakt.prioritaet || ''}";"${kontakt.status || 'aktiv'}"`,
+        )
+        .join('\n')
 
-      const csv = csvHeader + csvContent
-
-      // Create and download file
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+      const blob = new Blob([csvHeader + csvContent], { type: 'text/csv;charset=utf-8;' })
       const link = document.createElement('a')
       const url = URL.createObjectURL(blob)
       link.setAttribute('href', url)
@@ -325,9 +294,9 @@ export default function KontaktManagementPage(): JSX.Element {
 
       toast({
         title: 'Export erfolgreich',
-        description: `${data.length} Kontakte wurden exportiert.`,
+        description: `${rows.length} Kontakte wurden exportiert.`,
       })
-    } catch (error) {
+    } catch {
       toast({
         variant: 'destructive',
         title: 'Export fehlgeschlagen',
@@ -336,7 +305,17 @@ export default function KontaktManagementPage(): JSX.Element {
     }
   }
 
-  const handleImportFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const ensureSelection = (items: any[]): boolean => {
+    if (items.length > 0) return true
+    toast({
+      variant: 'destructive',
+      title: 'Keine Auswahl',
+      description: 'Bitte mindestens einen Kontakt auswaehlen.',
+    })
+    return false
+  }
+
+  const handleImportFile = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
     const formData = new FormData()
@@ -350,12 +329,77 @@ export default function KontaktManagementPage(): JSX.Element {
         title: 'Import abgeschlossen',
         description: `${created} neu, ${updated} aktualisiert${errors.length ? `, ${errors.length} Fehler` : ''}.`,
       })
-      void loadData()
+      await loadData()
     } catch (err: any) {
       toast({ title: 'Import fehlgeschlagen', description: err.response?.data?.detail ?? err.message, variant: 'destructive' })
     }
     e.target.value = ''
   }
+
+  const kontaktListConfig = useMemo(
+    () =>
+      createKontaktListConfig({
+        exportSelected: (items) => {
+          if (!ensureSelection(items)) return
+          handleExport(items)
+        },
+        emailSelected: (items) => {
+          if (!ensureSelection(items)) return
+          const recipients = items
+            .map((item) => item.email)
+            .filter((value): value is string => typeof value === 'string' && value.trim().length > 0)
+
+          if (recipients.length === 0) {
+            toast({
+              variant: 'destructive',
+              title: 'Keine E-Mail-Adressen',
+              description: 'In der Auswahl sind keine gueltigen E-Mail-Adressen vorhanden.',
+            })
+            return
+          }
+
+          window.location.href = `mailto:?bcc=${encodeURIComponent(recipients.join(';'))}`
+        },
+        callSelected: (items) => {
+          if (!ensureSelection(items)) return
+          if (items.length === 1) {
+            const phone = items[0].mobil || items[0].telefon
+            if (phone) {
+              window.location.href = `tel:${String(phone).replace(/\s+/g, '')}`
+              return
+            }
+          }
+          navigate('/crm/aktivitaet/neu')
+          toast({
+            title: 'Aktivitaet vorbereitet',
+            description: 'Bitte den geplanten Kontakt im Aktivitaetsarbeitsplatz dokumentieren.',
+          })
+        },
+        meetingSelected: (items) => {
+          if (!ensureSelection(items)) return
+          navigate('/crm/aktivitaet/neu')
+        },
+        deactivateSelected: async (items) => {
+          if (!ensureSelection(items)) return
+          try {
+            await Promise.all(items.map((item) => apiClient.put(`/kontakte/${item.id}`, { status: 'inaktiv' })))
+            toast({
+              title: 'Kontakte deaktiviert',
+              description: `${items.length} Kontakt(e) wurden auf inaktiv gesetzt.`,
+              variant: 'destructive',
+            })
+            await loadData()
+          } catch {
+            toast({
+              variant: 'destructive',
+              title: 'Deaktivierung fehlgeschlagen',
+              description: 'Die ausgewaehlten Kontakte konnten nicht aktualisiert werden.',
+            })
+          }
+        },
+      }),
+    [data, navigate],
+  )
 
   return (
     <>
@@ -367,7 +411,7 @@ export default function KontaktManagementPage(): JSX.Element {
         onCreate={handleCreate}
         onEdit={handleEdit}
         onDelete={handleDelete}
-        onExport={handleExport}
+        onExport={() => handleExport()}
         onImport={() => importInputRef.current?.click()}
         isLoading={loading}
       />

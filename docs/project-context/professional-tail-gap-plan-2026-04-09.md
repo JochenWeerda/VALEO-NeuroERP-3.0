@@ -375,7 +375,7 @@ Profi-Zielbild:
 
 ## Naechste Tail-Serie C
 
-Stand `2026-04-09`: geplant.
+Stand `2026-04-09`: abgeschlossen.
 
 ### 18. Zulassungen Register
 

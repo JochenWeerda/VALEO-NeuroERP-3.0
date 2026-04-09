@@ -69,6 +69,7 @@ from app.api.v1.endpoints import (
     portal_shop,
     # L3-Connect gap closure
     inventory_counts,
+    inventory_operations,
     weighing_tickets,
     warehouse_transfers,
     preparation_lists,
@@ -777,6 +778,12 @@ api_router.include_router(
     inventory_counts.router,
     prefix="/inventory/counts",
     tags=["inventory", "counts"]
+)
+
+api_router.include_router(
+    inventory_operations.router,
+    prefix="/lager",
+    tags=["lager", "inventory"]
 )
 
 api_router.include_router(

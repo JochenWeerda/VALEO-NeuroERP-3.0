@@ -36,6 +36,8 @@ export default function BodenprobenPage(): JSX.Element {
         [p.schlag, p.labor, p.status].some((v) => (v ?? '').toLowerCase().includes(searchTerm.toLowerCase()))
       )
     : proben
+  const offeneProben = filteredProben.filter((p) => p.status === 'beauftragt')
+  const analysierteProben = filteredProben.filter((p) => p.status === 'analysiert')
 
   const handleExport = () => {
     const header = 'Schlag;Datum;Labor;N;P;K;pH;Status\n'
@@ -114,7 +116,7 @@ export default function BodenprobenPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Analysiert</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold text-green-600">{proben.filter((p) => p.status === 'analysiert').length}</span>
+            <span className="text-2xl font-bold text-green-600">{analysierteProben.length}</span>
           </CardContent>
         </Card>
 
@@ -123,7 +125,7 @@ export default function BodenprobenPage(): JSX.Element {
             <CardTitle className="text-sm font-medium">Offen</CardTitle>
           </CardHeader>
           <CardContent>
-            <span className="text-2xl font-bold">{proben.filter((p) => p.status === 'beauftragt').length}</span>
+            <span className="text-2xl font-bold">{offeneProben.length}</span>
           </CardContent>
         </Card>
       </div>
@@ -143,6 +145,19 @@ export default function BodenprobenPage(): JSX.Element {
               Export
             </Button>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Labor- und Beratungsfolge</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-wrap gap-3">
+          <Button variant="outline" onClick={() => offeneProben[0] && navigate(`/agrar/bodenprobe/${offeneProben[0].id}`)} disabled={offeneProben.length === 0}>
+            Offene Probe oeffnen
+          </Button>
+          <Button variant="outline" onClick={() => navigate('/agrar/psm/beratung')}>Beratung</Button>
+          <Button variant="outline" onClick={() => navigate('/dokumente/ablage')}>Dokumente</Button>
         </CardContent>
       </Card>
 
