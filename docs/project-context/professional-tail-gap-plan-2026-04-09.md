@@ -193,3 +193,92 @@ Wenn fuer diese Tail-Bloecke externer Referenzcode noetig wird:
 ## Folgerung
 
 Die grossen priorisierten ERP-Kernluecken aus dem AMIC-Vergleich sind geschlossen. Der verbleibende Ausbau ist jetzt ein geordneter Fachmodul-Tail. Er sollte nicht breit parallelisiert, sondern blockweise nach betrieblichem Nutzen, Anwenderhaeufigkeit und Verdrahtungstiefe abgearbeitet werden.
+
+## Nächste Tail-Serie
+
+### 6. CRM Opportunity Operations
+
+Betroffene Dateien:
+
+- `packages/frontend-web/src/pages/crm/opportunities-liste.tsx`
+- `packages/frontend-web/src/pages/crm/opportunities-kanban.tsx`
+
+Ist-Zustand:
+
+- Bulk-Aktionen fuer Konvertierung, Gewinn/Verlust und Import laufen in der Listenmaske noch als Toast oder Hinweis.
+- Die Opportunity-Pipeline ist sichtbar, aber Listen- und Kanban-Arbeitsplatz bilden den Vertriebsfortschritt noch nicht gleich tief ab.
+
+Profi-Zielbild:
+
+- Opportunity-Bulk-Aktionen fuehren in echte Folgepfade fuer Angebot, Gewinn, Verlust und Pipeline-Wechsel.
+- Listen- und Kanban-Sicht teilen dieselbe operative Story: naechste Aktion, Konvertierungspfad und Vertriebsdruck.
+
+### 7. CRM Kontaktmanagement
+
+Betroffene Dateien:
+
+- `packages/frontend-web/src/pages/crm/kontakt-management.tsx`
+
+Ist-Zustand:
+
+- Export, E-Mail, Anruf, Termin und Deaktivierung sind sichtbar, enden aber noch nur in Toast-/Hinweislogik.
+
+Profi-Zielbild:
+
+- Kontakte fuehren in echte Kommunikations-, Termin-, Deaktivierungs- und Folgeobjektpfade.
+
+### 8. FIBU Buchhaltungsuebersicht
+
+Betroffene Dateien:
+
+- `packages/frontend-web/src/pages/fibu/buchhaltungsuebersicht.tsx`
+
+Ist-Zustand:
+
+- Drilldown ist bereits verlinkt, aber Toolbar-/Footer-Aktionen wie Drucken, Journal, Kontenbewegung oder Fensterraum sind noch nicht als echter Folgearbeitsplatz verdichtet.
+
+Profi-Zielbild:
+
+- Die Buchhaltungsuebersicht ist ein belastbarer FIBU-Leitstand mit echten Folgepfaden fuer Journal, Kontenbewegung, Druck, Export und Periodenauswertung.
+
+### 9. Futtermittel Chargenverfolgung
+
+Betroffene Dateien:
+
+- `packages/frontend-web/src/pages/futtermittel/charge-verfolgung.tsx`
+
+Ist-Zustand:
+
+- Export, Rueckruf und Rueckverfolgung sind noch Toast-Aktionen.
+
+Profi-Zielbild:
+
+- Chargenverfolgung fuehrt in reale Rueckruf-, Export- und Traceability-Pfade mit Dokument- und Qualitaetsbezug.
+
+### 10. Futtermittel Einzelfuttermittel-Stamm
+
+Betroffene Dateien:
+
+- `packages/frontend-web/src/pages/futtermittel/einzelfuttermittel-stamm.tsx`
+
+Ist-Zustand:
+
+- Validierung und Speichern sind noch auf Hinweislogik reduziert.
+
+Profi-Zielbild:
+
+- Stammdatenpruefung, Speichern und Folgebezug zu Rezeptur, Einkauf und Qualitaet sind professionell verdrahtet.
+
+### 11. Futtermittel Mischfuttermittel-Stamm
+
+Betroffene Dateien:
+
+- `packages/frontend-web/src/pages/futtermittel/mischfuttermittel-stamm.tsx`
+
+Ist-Zustand:
+
+- Berechnung, Validierung und Speichern laufen noch nur als Toast.
+
+Profi-Zielbild:
+
+- Rezeptur-Arbeitsplatz mit echter Berechnung, Validierung, Speichern und Folgepfaden in Produktion, Qualitaet und Dokumentation.

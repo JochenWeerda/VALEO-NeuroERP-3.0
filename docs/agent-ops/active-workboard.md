@@ -1545,3 +1545,51 @@ Alle 6 Router registriert in `app/api/v1/api.py` unter `/api/v1/neuro/*`. Commit
 **Abnahmekriterien:** Service-/Field-Kommunikation und Abschluss besitzen durchgaengigen Folgeobjekt-, Dokument- und Wiedervorlagepfad; `field-service-task-neu.tsx` traegt keinen Demo-Fallback-Charakter mehr.
 **Erledigt:** `packages/frontend-web/src/pages/service/anfragen.tsx` exportiert und filtert jetzt echte Ticketdaten und zeigt Folgeaktionen fuer Rueckmeldung und Aussendienst. `packages/frontend-web/src/pages/service/anfrage-detail.tsx` besitzt einen echten Vorgangsverlauf mit Folgeobjekten fuer Rueckmeldung, Aussendienst, Dokumente und Abschluss statt Placeholder-Tabs. `packages/frontend-web/src/pages/agribusiness/field-service-task-neu.tsx` ist als realer Folgepfad aus Service-/Workflow-Vorgaengen beschrieben und zeigt den Servicebezug sichtbar an.
 **Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`; `node scripts/docs-governance-check.cjs`
+
+## TAIL-CRM-002
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Opportunity-Liste und Pipeline auf echte Folgeaktionen fuer Konvertierung, Gewinn/Verlust und Import ziehen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/professional-tail-gap-plan-2026-04-09.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/crm/{opportunities-liste,opportunities-kanban}.tsx`, ggf. passende CRM-Hooks/Endpoints.
+**Abnahmekriterien:** Bulk- und Folgeaktionen enden nicht mehr nur in Toasts; Listen- und Kanban-Sicht teilen dieselbe professionelle Vertriebslogik.
+
+## TAIL-CRM-003
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Kontaktmanagement von Hinweislogik auf echte Kommunikations- und Folgeobjektpfade ziehen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/professional-tail-gap-plan-2026-04-09.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/crm/kontakt-management.tsx`, ggf. CRM-/Dokumenten-/Terminpfade.
+**Abnahmekriterien:** Export, E-Mail, Anruf, Termin und Deaktivierung fuehren in reale Arbeits- oder Folgepfade.
+
+## TAIL-FIBU-001
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Die Buchhaltungsuebersicht als echten FIBU-Leitstand mit durchgaengigen Folgepfaden verdichten.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/professional-tail-gap-plan-2026-04-09.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/fibu/buchhaltungsuebersicht.tsx`, ggf. vorhandene FIBU-Seiten.
+**Abnahmekriterien:** Toolbar-, Footer- und Drilldown-Aktionen fuehren in reale Journal-, Bewegungs-, Druck- und Auswertungsraeume.
+
+## TAIL-FEED-001
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Chargenverfolgung im Futtermittelraum auf reale Rueckruf-, Export- und Traceability-Folgepfade ziehen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/professional-tail-gap-plan-2026-04-09.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/futtermittel/charge-verfolgung.tsx`, ggf. Qualitaets-/Dokumentenpfade.
+**Abnahmekriterien:** Rueckruf, Rueckverfolgung und Export sind echte Arbeitsfunktionen statt Toast-Hinweis.
+
+## TAIL-FEED-002
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Einzelfuttermittel-Stamm auf echte Validierungs-, Speicher- und Folgepfade ziehen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/professional-tail-gap-plan-2026-04-09.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/futtermittel/einzelfuttermittel-stamm.tsx`, ggf. Rezeptur-/Qualitaets-/Dokumentenpfade.
+**Abnahmekriterien:** Validierung und Speichern sind echte Arbeitsfunktionen mit Folgebezug statt Toast.
+
+## TAIL-FEED-003
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Mischfuttermittel-Stamm auf echte Berechnungs-, Validierungs- und Produktionsfolgepfade ziehen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/professional-tail-gap-plan-2026-04-09.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/futtermittel/mischfuttermittel-stamm.tsx`, ggf. Produktions-/Qualitaets-/Dokumentenpfade.
+**Abnahmekriterien:** Berechnung, Validierung und Speichern enden nicht mehr nur in Toasts; Produktions- und Qualitaetsfolge sind sichtbar.
