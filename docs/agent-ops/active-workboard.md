@@ -1609,47 +1609,107 @@ Alle 6 Router registriert in `app/api/v1/api.py` unter `/api/v1/neuro/*`. Commit
 ## TAIL-CERT-001
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Zertifikatsliste als echten Operator-Arbeitsplatz mit Export-, Ablauf- und Folgepfaden verdichten.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/professional-tail-gap-plan-2026-04-09.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/zertifikate/liste.tsx`.
 **Abnahmekriterien:** Export, Ablaufwarnungen und Folgewege in Detail-/Verlaengerungs-/Dokumentpfade sind direkt aus der Liste nutzbar.
+**Erledigt:** `packages/frontend-web/src/pages/zertifikate/liste.tsx` exportiert den gefilterten Zertifikatsbestand jetzt als CSV, trennt ablaufende Zertifikate operativ sichtbar ab und bietet direkte Folgewege in Detail, Dokumentenablage und Verlaengerung.
+**Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`; `node scripts/docs-governance-check.cjs`
 
 ## TAIL-CLM-001
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Schadenliste auf professionelle Regulierungs- und Folgeobjektlogik ziehen.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/professional-tail-gap-plan-2026-04-09.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/schaeden/liste.tsx`.
 **Abnahmekriterien:** Export, offene Schaeden und Folgepfade in Meldung/Regulierung sind aus dem Arbeitsraum verfuegbar.
+**Erledigt:** `packages/frontend-web/src/pages/schaeden/liste.tsx` filtert und exportiert jetzt den Schadenbestand belastbar, zeigt offene Prueffaelle als eigenen Fokus und bietet direkte Folgewege in Vorgang, Dokumente und neue Meldung.
+**Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`; `node scripts/docs-governance-check.cjs`
 
 ## TAIL-LOG-001
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Fahrerarbeitsplatz mit Export- und Dispositionsfolge vervollstaendigen.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/professional-tail-gap-plan-2026-04-09.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/transporte/fahrer-liste.tsx`.
 **Abnahmekriterien:** Export, Verfuegbarkeitsfokus und Folgeweg in Tourenplanung/Disposition sind verdrahtet.
+**Erledigt:** `packages/frontend-web/src/pages/transporte/fahrer-liste.tsx` besitzt jetzt Suchfilter, CSV-Export, Verfuegbarkeitsfokus und direkte Folgewege in Fahrerdetail, Tourenplanung und Dokumente.
+**Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`; `node scripts/docs-governance-check.cjs`
 
 ## TAIL-FUEL-001
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Tankstellen-Zapfungen auf einen professionellen Verbrauchs- und Folgearbeitsplatz ziehen.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/professional-tail-gap-plan-2026-04-09.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/tankstelle/zapfungen.tsx`.
 **Abnahmekriterien:** Export, Verbrauchsfokus und Folgewege in Betrieb/Disposition sind sichtbar und nutzbar.
+**Erledigt:** `packages/frontend-web/src/pages/tankstelle/zapfungen.tsx` arbeitet jetzt als Verbrauchsarbeitsplatz mit Suchfilter, CSV-Export und direkten Folgewegen in Disposition, Dokumente und Abrechnung statt als reine KPI-Tabelle.
+**Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`; `node scripts/docs-governance-check.cjs`
 
 ## TAIL-AGRI-002
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Bodenprobenliste zu einem echten Labor-/Beratungsarbeitsplatz verdichten.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/professional-tail-gap-plan-2026-04-09.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/agrar/bodenproben/liste.tsx`.
 **Abnahmekriterien:** Offene Proben, Export und Folgewege in Analyse/Beratung/Auftrag sind direkt im Arbeitsraum sichtbar.
+**Erledigt:** `packages/frontend-web/src/pages/agrar/bodenproben/liste.tsx` zeigt offene und analysierte Proben jetzt als eigenen Arbeitskontext und bietet direkte Folgewege in Probe, Beratung und Dokumente.
+**Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`; `node scripts/docs-governance-check.cjs`
 
 ## TAIL-AGRI-003
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Saatgut-Liste als professionellen Bestands-, Zulassungs- und Folgearbeitsplatz ausbauen.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/professional-tail-gap-plan-2026-04-09.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/agrar/saatgut-liste.tsx`.
 **Abnahmekriterien:** Export, Fokussegmente und Folgewege in Stamm, Sicht und Bestand sind direkt aus dem Arbeitsplatz nutzbar.
+**Erledigt:** `packages/frontend-web/src/pages/agrar/saatgut-liste.tsx` verdichtet Bestand, Zulassung und Niedrigbestand jetzt in KPI-Segmente und bietet direkte Folgewege in Stammsatz, Dokumente und CSV-Export.
+**Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`; `node scripts/docs-governance-check.cjs`
+
+## TAIL-COMP-001
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Zulassungsregister als professionellen Operator-Arbeitsplatz mit Filter-, Export- und Folgepfaden verdichten.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/professional-tail-gap-plan-2026-04-09.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/compliance/zulassungen-register.tsx`.
+**Abnahmekriterien:** Suche wirkt auf die operative Sicht; CSV-Export ist vorhanden; auslaufende Zulassungen besitzen direkte Folgewege in Detail, Dokumente und Registerkontext.
+
+## TAIL-COMP-002
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** VVVO-Register auf echte Arbeitssegmente, Export und Folgepfade ziehen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/professional-tail-gap-plan-2026-04-09.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/compliance/vvvo-register.tsx`.
+**Abnahmekriterien:** Suche/Filter wirken; Export ist vorhanden; direkte Folgewege in Betriebsprofil, Dokumente und Neuanlage sind aus dem Register nutzbar.
+
+## TAIL-CONTRACT-001
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Rahmenvertraege als echten Vertragsarbeitsplatz mit Auslauf- und Restmengenfokus ausbauen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/professional-tail-gap-plan-2026-04-09.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/vertrag/rahmenvertraege.tsx`.
+**Abnahmekriterien:** Gefilterte Sicht und CSV-Export sind vorhanden; kritische Vertraege besitzen direkte Folgewege in Detail, Dokumente und Kontraktsteuerung.
+
+## TAIL-INS-001
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Versicherungsliste als professionellen Ablauf- und Policenarbeitsplatz verdichten.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/professional-tail-gap-plan-2026-04-09.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/versicherungen/liste.tsx`.
+**Abnahmekriterien:** Suche/Filter und CSV-Export wirken; auslaufende Policen haben direkte Folgewege in Detail, Dokumente und Neuanlage.
+
+## TAIL-QM-002
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Laborliste zu einem operativen Qualitaets-Arbeitsplatz mit Fokussegmenten und Folgepfaden ziehen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/professional-tail-gap-plan-2026-04-09.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/qualitaet/labor-liste.tsx`.
+**Abnahmekriterien:** Gefilterte Sicht und Export sind vorhanden; offene/in Bearbeitung Auftraege besitzen direkte Folgewege in Detail, Dokumente und Neuanlage.
+
+## TAIL-PROJ-001
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Projektliste als echten Projektarbeitsplatz mit Fokussegmenten, Export und Folgepfaden professionalisieren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/professional-tail-gap-plan-2026-04-09.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/projekte/liste.tsx`.
+**Abnahmekriterien:** Suche/Filter wirken; Export ist vorhanden; aktive/stockende Projekte haben direkte Folgewege in Detail, Dokumente und Neuanlage.

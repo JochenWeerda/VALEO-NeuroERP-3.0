@@ -287,7 +287,7 @@ Profi-Zielbild:
 
 ## Naechste Tail-Serie B
 
-Stand `2026-04-09`: geplant.
+Stand `2026-04-09`: abgeschlossen.
 
 ### 12. Zertifikate Leitstand
 
@@ -372,3 +372,91 @@ Ist-Zustand:
 Profi-Zielbild:
 
 - Saatgut-Leitstand mit Export, operative Fokussegmente und direkte Folgewege in Stamm, Sicht und Bestand.
+
+## Naechste Tail-Serie C
+
+Stand `2026-04-09`: geplant.
+
+### 18. Zulassungen Register
+
+Betroffene Dateien:
+
+- `packages/frontend-web/src/pages/compliance/zulassungen-register.tsx`
+
+Ist-Zustand:
+
+- Suche, KPI und Ablaufwarnung sind vorhanden, aber Export, Filterwirkung und echte Folgepfade fuer Dokumente, Registerpflege und auslaufende Zulassungen fehlen.
+
+Profi-Zielbild:
+
+- Zulassungsregister als Operator-Arbeitsplatz mit gefilterter Sicht, CSV-Export, Fokus auf auslaufende Faelle und direkten Folgewegen in Detail, Dokumente und Melde-/Registerkontext.
+
+### 19. VVVO Register
+
+Betroffene Dateien:
+
+- `packages/frontend-web/src/pages/compliance/vvvo-register.tsx`
+
+Ist-Zustand:
+
+- Betriebserfassung und Detailsprung existieren, aber Export, fokussierte Arbeitssegmente und Folgepfade fuer Dokumente und Pflege sind noch duenn.
+
+Profi-Zielbild:
+
+- VVVO-Register mit belastbarer Suche, Export, Aktiv-/Inaktiv-Fokus und klaren Folgewegen in Betriebsprofil, Dokumente und Neuanlage.
+
+### 20. Rahmenvertraege Leitstand
+
+Betroffene Dateien:
+
+- `packages/frontend-web/src/pages/vertrag/rahmenvertraege.tsx`
+
+Ist-Zustand:
+
+- KPI und Listenansicht existieren, aber Export, operative Fokussegmente und Folgepfade in Dokumente und Kontraktsteuerung sind noch nicht professionell verdichtet.
+
+Profi-Zielbild:
+
+- Rahmenvertraege als echter Vertragsarbeitsplatz mit gefilterter Sicht, Export, Auslauf-/Niedrigrestmengen-Fokus und direkten Folgewegen in Detail, Dokumente und Kontraktsteuerung.
+
+### 21. Versicherungen Leitstand
+
+Betroffene Dateien:
+
+- `packages/frontend-web/src/pages/versicherungen/liste.tsx`
+
+Ist-Zustand:
+
+- Versicherungsliste zeigt Kennzahlen, aber Export, Ablauffokus und Folgepfade in Dokumente und Verlängerung fehlen.
+
+Profi-Zielbild:
+
+- Versicherungsarbeitsplatz mit Such- und Exportfunktion, Ablaufwarnung, Fokus auf kritische Policen und klaren Folgewegen in Detail, Dokumente und Neuanlage.
+
+### 22. Laborliste
+
+Betroffene Dateien:
+
+- `packages/frontend-web/src/pages/qualitaet/labor-liste.tsx`
+
+Ist-Zustand:
+
+- Laborauftraege sind sichtbar, aber Suche filtert noch nicht operativ, Export fehlt und Folgepfade fuer offene Analysen, Dokumente und Neuanlage sind duenn.
+
+Profi-Zielbild:
+
+- Laborliste als Qualitaets-Arbeitsplatz mit gefilterter Sicht, Export, Fokus auf offene/in Bearbeitung Auftraege und direkten Folgewegen in Detail, Auftrag und Dokumente.
+
+### 23. Projekte Liste
+
+Betroffene Dateien:
+
+- `packages/frontend-web/src/pages/projekte/liste.tsx`
+
+Ist-Zustand:
+
+- Projektliste zeigt Status und Fortschritt, aber Export, operative Fokussegmente und Folgepfade in Dokumente und Neuanlage sind noch nicht professionell ausgebildet.
+
+Profi-Zielbild:
+
+- Projektarbeitsplatz mit gefilterter Sicht, Export, Fokus auf aktive und stockende Projekte und direkten Folgewegen in Detail, Dokumente und Neuanlage.
