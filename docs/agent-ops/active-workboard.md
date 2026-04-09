@@ -1725,3 +1725,51 @@ Alle 6 Router registriert in `app/api/v1/api.py` unter `/api/v1/neuro/*`. Commit
 **Abnahmekriterien:** Suche/Filter wirken; Export ist vorhanden; aktive/stockende Projekte haben direkte Folgewege in Detail, Dokumente und Neuanlage.
 **Erledigt:** `packages/frontend-web/src/pages/projekte/liste.tsx` zeigt jetzt stockende Projekte als eigenen Fokus, exportiert die gefilterte Projektlage als CSV und fuehrt Folgeaktionen belastbar in Dokumentenablage, Massnahmenraum oder fokussierende In-Page-Arbeitsmodi statt in nicht existente Detailrouten.
 **Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`; `node scripts/docs-governance-check.cjs`
+
+## PROC-UX-001
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Einkaufslisten und Bestellmaske auf ein einheitliches Vorgangsmodell ziehen: echte Transitionen ohne lokale Quittung, Kopfbereich mit Status/Owner/Blockern/naechster Aktion sowie fachlich zulaessige Folgeaktionen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/einkauf/{angebote-liste,anfragen-liste,bestellung-stamm}.tsx`, ggf. `packages/frontend-web/src/lib/api/purchase-orders.ts`, `packages/frontend-web/src/lib/api/purchase-offers.ts`, `packages/frontend-web/src/lib/api/purchase-requests.ts`.
+**Abnahmekriterien:** Angebote, Anfragen und Bestellung melden Zustand und naechste Aktion fachlich sichtbar zurueck; Import-/Massenaktionen enden nicht mehr in Coming-Soon-Toasts.
+
+## ANN-UX-002
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** LKW-Registrierung als produktiven Annahmevorgang mit Scan-, Ressourcen- und Governance-Kontext ausbauen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/annahme/lkw-registrierung.tsx`, ggf. `packages/frontend-web/src/lib/api/inventory.ts` und `packages/frontend-web/src/lib/api/workflows.ts`.
+**Abnahmekriterien:** Der Annahmearbeitsplatz zeigt klaren Vorgangszustand, Scanherkunft, Ressourcenlage, Risiken und naechste Aktion statt nur Formularschritte.
+
+## OBJ-CTX-003
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Wiederverwendbare Objekt-Kontextpaneele fuer Einkauf, Annahme, Bestellung, Reklamation und Wiegeschein einfuehren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/components/**`, `packages/frontend-web/src/pages/{einkauf,annahme,qualitaet,waage}/**`, ggf. gemeinsame Hooks unter `packages/frontend-web/src/lib/**`.
+**Abnahmekriterien:** Kernmasken teilen dieselbe Struktur fuer Ressourcenlage, Wirtschaftslage, Governance und naechste Aktion.
+
+## CASE-004
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Durchgehende Fall-/Timeline-Sicht vom Flow Spine bis in Fachmasken verankern.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/components/workflow/**`, `packages/frontend-web/src/pages/{einkauf,annahme,qualitaet,waage}/**`, ggf. `packages/frontend-web/src/lib/api/workflows.ts`.
+**Abnahmekriterien:** Nutzer sehen in Kernmasken die letzten Eingriffe, Dokumente und den Fallkontext direkt am Objekt.
+
+## STATUS-005
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Ein gemeinsames Statusvokabular fuer operative Kernmasken einfuehren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/lib/**`, `packages/frontend-web/src/components/**`, `packages/frontend-web/src/pages/**` entlang der betroffenen Kernmasken.
+**Abnahmekriterien:** `offen`, `in_pruefung`, `blockiert`, `teilweise`, `wartet_auf_extern`, `wartet_auf_mensch`, `abgeschlossen`, `eskaliert` werden konsistent gemappt und visuell gleich behandelt.
+
+## UX-SWEEP-006
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Systemweiten Sweep ueber Toaster statt Zustandswechsel und Placeholder in priorisierten Kernmasken abschliessen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, priorisierte `packages/frontend-web/src/pages/**`-Kernmasken sowie ggf. gemeinsame Action-Hooks.
+**Abnahmekriterien:** In den priorisierten Kernworkflows bleiben keine fachlich irrefuehrenden Coming-Soon-, Placeholder- oder reine Erfolgs-Toast-Aktionen ohne Zustandsrueckmeldung mehr uebrig.
