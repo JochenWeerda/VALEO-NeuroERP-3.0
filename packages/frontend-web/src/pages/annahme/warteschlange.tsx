@@ -262,19 +262,19 @@ export default function WarteschlangePage(): JSX.Element {
         <div className="grid gap-4 md:grid-cols-4">
           <Card>
             <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Offene Wiegungen</CardTitle></CardHeader>
-            <CardContent><span className="text-2xl font-bold">{chain.openWeighingTickets}</span></CardContent>
+            <CardContent><span className="text-2xl font-bold">{chain?.openWeighingTickets ?? 0}</span></CardContent>
           </Card>
           <Card>
             <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Gesperrte Chargen</CardTitle></CardHeader>
-            <CardContent><span className="text-2xl font-bold">{chain.blockedCharges}</span></CardContent>
+            <CardContent><span className="text-2xl font-bold">{chain?.blockedCharges ?? 0}</span></CardContent>
           </Card>
           <Card>
             <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Fracht unterwegs</CardTitle></CardHeader>
-            <CardContent><span className="text-2xl font-bold">{chain.freightInTransit}</span></CardContent>
+            <CardContent><span className="text-2xl font-bold">{chain?.freightInTransit ?? 0}</span></CardContent>
           </Card>
           <Card>
             <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Aktive Fahrzeuge</CardTitle></CardHeader>
-            <CardContent><span className="text-2xl font-bold">{chain.activeVehiclePlates.length}</span></CardContent>
+            <CardContent><span className="text-2xl font-bold">{chain?.activeVehiclePlates?.length ?? 0}</span></CardContent>
           </Card>
         </div>
         <div className="grid gap-4 md:grid-cols-3">

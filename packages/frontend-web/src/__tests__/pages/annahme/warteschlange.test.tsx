@@ -14,6 +14,14 @@ vi.mock('react-router-dom', async () => {
   }
 })
 
+vi.mock('@/lib/api/supply-chain', () => ({
+  useSupplyChainOverview: () => ({ data: null, isLoading: false }),
+}))
+
+vi.mock('@/lib/professional-control-centers', () => ({
+  summarizeSupplyOps: () => ({ totalOpen: 0, totalInTransit: 0, totalDelivered: 0, kpis: [] }),
+}))
+
 vi.mock('@/lib/api/inventory', () => ({
   useWarteschlange: () => ({
     data: {

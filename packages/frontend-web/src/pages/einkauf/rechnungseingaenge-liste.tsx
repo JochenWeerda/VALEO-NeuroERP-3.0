@@ -313,13 +313,9 @@ export default function RechnungseingaengeListePage(): JSX.Element {
       onDelete={handleDelete}
       onExport={handleExport}
       onImport={() => {
-        toast({
-          title: t('crud.messages.importInfo'),
-          description: t('crud.messages.importComingSoon'),
-        })
+        navigate('/einkauf/bestellungen?importContext=rechnungseingaenge')
       }}
       isLoading={isLoading}
     />
   )
 }
-

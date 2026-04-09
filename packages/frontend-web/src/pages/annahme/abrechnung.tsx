@@ -614,6 +614,7 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
         </Card>
       ) : null}
 
+      {chain && (
       <Card>
         <CardHeader>
           <CardTitle>Partie bis Abrechnung</CardTitle>
@@ -637,6 +638,7 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
           </div>
         </CardContent>
       </Card>
+      )}
 
       <div className="grid gap-6 md:grid-cols-2">
         <Card>

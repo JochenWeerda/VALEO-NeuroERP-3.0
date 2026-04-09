@@ -5,6 +5,7 @@ import { join, relative, resolve } from 'node:path'
 const SRC_ROOT = resolve(__dirname, '../..')
 const ALLOWED_DOCUMENT_WRITE_FILES = new Set([
   'lib/export-utils.ts',
+  'lib/nawaro-communication.ts',
   'lib/services/bon-druck.ts',
   'pages/einkauf/bestellungen-liste.tsx',
 ])

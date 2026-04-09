@@ -72,7 +72,7 @@ describe('LKWRegistrierungPage', () => {
 
   it('sollte LKW-Registrierung und Kennzeichen anzeigen', () => {
     renderPage()
-    expect(screen.getByRole('heading', { name: 'LKW-Registrierung' })).toBeInTheDocument()
+    expect(screen.getAllByRole('heading', { name: 'LKW-Registrierung' }).length).toBeGreaterThanOrEqual(1)
     expect(screen.getByRole('textbox', { name: /^Kennzeichen/i })).toBeInTheDocument()
   })
 

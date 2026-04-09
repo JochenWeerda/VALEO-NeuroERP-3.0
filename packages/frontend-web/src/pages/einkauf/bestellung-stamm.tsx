@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData } from '@/components/mask-builder/hooks'
@@ -22,6 +22,11 @@ import { useApprovePurchaseOrder, useCancelPurchaseOrder } from '@/lib/api/purch
 import { useAuth } from '@/hooks/useAuth'
 import { useTenant } from '@/hooks/useTenant'
 import type { ChangeLog } from '@/features/crud/components/CrudAuditTrailPanel'
+import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 const createBestellungConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
@@ -222,6 +227,7 @@ export default function BestellungStammPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
+  const [searchParams] = useSearchParams()
   const { user } = useAuth()
   const { tenantId } = useTenant()
   const [loading, setLoading] = useState(false)
@@ -237,6 +243,7 @@ export default function BestellungStammPage(): JSX.Element {
   const entityType = 'purchaseOrder'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Bestellung')
   const bestellungConfig = createBestellungConfig(t, entityTypeLabel)
+  const workflowContext = readWorkflowEntryContext(searchParams)
 
   const { data, saveData } = useMaskData({
     apiUrl: bestellungConfig.api.baseUrl,
@@ -415,8 +422,103 @@ export default function BestellungStammPage(): JSX.Element {
     ],
   }
 
+  const normalizedStatus = normalizeOperationalStatus(data?.status)
+  const blocker =
+    data?.status === 'STORNIERT'
+      ? 'Die Bestellung ist storniert und kann nicht weiter disponiert werden.'
+      : approvalRequired
+        ? 'Aenderungen an einer bereits freigegebenen Bestellung brauchen erneute Freigabe.'
+        : undefined
+  const timelineItems = [
+    data?.createdAt
+      ? {
+          label: 'Bestellung angelegt',
+          detail: `Beleg ${data?.nummer || data?.purchaseOrderNumber || id || 'neu'} wurde als Vorgang erfasst.`,
+          timestamp: data.createdAt,
+        }
+      : null,
+    data?.approvedAt
+      ? {
+          label: 'Freigabe erteilt',
+          detail: data?.approvedBy ? `Freigegeben durch ${data.approvedBy}.` : 'Freigabe liegt vor.',
+          timestamp: data.approvedAt,
+        }
+      : null,
+    poCommunications[0]
+      ? {
+          label: 'Letzte Lieferantenkommunikation',
+          detail: `${poCommunications[0].channel || 'email'} / ${poCommunications[0].status || 'offen'}`,
+          timestamp: poCommunications[0].createdAt,
+        }
+      : null,
+    changeLogs[0]
+      ? {
+          label: 'Letzter Eingriff',
+          detail: `${changeLogs[0].action} durch ${changeLogs[0].userName}`,
+          timestamp: changeLogs[0].timestamp instanceof Date ? changeLogs[0].timestamp.toISOString() : undefined,
+        }
+      : null,
+  ].filter(Boolean) as Array<{ label: string; detail?: string; timestamp?: string | null }>
+
   return (
     <div className="space-y-6">
+      {workflowContext ? <WorkflowEntryBanner context={workflowContext} /> : null}
+
+      <OperationalCaseHeader
+        title={data?.nummer || data?.purchaseOrderNumber || 'Bestellung'}
+        description="Bestellung als gefuehrter Beschaffungsvorgang mit Objekt-, Governance- und Kommunikationskontext."
+        status={normalizedStatus}
+        owner={data?.lieferant || data?.supplierName || 'Einkauf'}
+        blocker={blocker}
+        nextAction={
+          data?.status === 'ENTWURF'
+            ? 'Bestellung pruefen und freigeben'
+            : data?.status === 'FREIGEGEBEN'
+              ? 'Lieferantenkommunikation ausloesen'
+              : data?.status === 'TEILGELIEFERT'
+                ? 'Restmengen und Liefertermine nachsteuern'
+                : data?.status === 'VOLLGELIEFERT'
+                  ? 'Abschluss und Rechnungseingang abstimmen'
+                  : 'Vorgang pruefen'
+        }
+        caseLabel={workflowContext?.caseNumber || 'Beschaffungsvorgang'}
+        tags={[
+          data?.zahlungsbedingungen || 'Zahlungsziel offen',
+          data?.incoterms || 'Incoterms offen',
+          data?.status || 'Status offen',
+        ]}
+      />
+
+      <div className="grid gap-6 xl:grid-cols-[1.25fr_0.95fr]">
+        <OperationalTimeline title="Vorgang und Timeline" items={timelineItems} />
+        <OperationalContextPanel
+          title="Bestellkontext"
+          sections={[
+            {
+              title: 'Ressourcenlage',
+              items: [
+                { label: 'Positionen', value: String(data?.positionen?.length ?? data?.items?.length ?? 0) },
+                { label: 'Liefertermin', value: data?.liefertermin || data?.deliveryDate || '-' },
+              ],
+            },
+            {
+              title: 'Wirtschaftslage',
+              items: [
+                { label: 'Zahlungsbedingungen', value: data?.zahlungsbedingungen || data?.paymentTerms || '-' },
+                { label: 'Incoterms', value: data?.incoterms || '-' },
+              ],
+            },
+            {
+              title: 'Governance',
+              items: [
+                { label: 'Version', value: String(data?.version ?? 0) },
+                { label: 'Audit-Eintraege', value: String(changeLogs.length) },
+              ],
+            },
+          ]}
+        />
+      </div>
+
       <ObjectPage
         config={extendedConfig}
         data={data}

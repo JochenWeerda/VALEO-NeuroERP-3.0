@@ -10,6 +10,10 @@ import { getEntityTypeLabel, getStatusLabel } from '@/features/crud/utils/i18n-h
 import { toast } from '@/hooks/use-toast'
 import { useEinkaufAngebote, type EinkaufAngebot, einkaufKeys } from '@/lib/api/einkauf'
 import { apiClient } from '@/lib/api-client'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 const createAngeboteConfig = (t: any, entityTypeLabel: string): ListConfig => ({
   title: entityTypeLabel,
@@ -182,6 +186,15 @@ export default function AngeboteListePage(): JSX.Element {
     einheit: 'Stk',
   })), [apiData])
   const total = data.length
+  const approvedCount = data.filter((item) => normalizeOperationalStatus(item.status) === 'wartet_auf_mensch').length
+  const externalCount = data.filter((item) => normalizeOperationalStatus(item.status) === 'wartet_auf_extern').length
+  const blockedCount = data.filter((item) => normalizeOperationalStatus(item.status) === 'blockiert').length
+  const reviewedCount = data.filter((item) => normalizeOperationalStatus(item.status) === 'in_pruefung').length
+  const latestCreatedAt = data
+    .map((item) => item.createdAt)
+    .filter(Boolean)
+    .sort()
+    .at(-1)
   const entityType = 'purchaseOffer'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Angebot')
   const baseConfig = createAngeboteConfig(t, entityTypeLabel)
@@ -313,21 +326,99 @@ export default function AngeboteListePage(): JSX.Element {
   }
 
   return (
-    <ListReport
-      config={angeboteConfig}
-      data={data}
-      total={total}
-      onCreate={handleCreate}
-      onEdit={handleEdit}
-      onDelete={handleDelete}
-      onExport={handleExport}
-      onImport={() => {
-        toast({
-          title: t('crud.messages.importInfo'),
-          description: t('crud.messages.importComingSoon'),
-        })
-      }}
-      isLoading={isLoading}
-    />
+    <div className="space-y-6">
+      <OperationalCaseHeader
+        title="Einkaufsvorgang Angebote"
+        description="Angebote werden nicht mehr nur gesammelt quittiert, sondern als operativer Vorgangsraum mit Review-, Freigabe- und Folgebeleglage gefuehrt."
+        status={
+          blockedCount > 0
+            ? 'eskaliert'
+            : approvedCount > 0
+              ? 'wartet_auf_mensch'
+              : reviewedCount > 0
+                ? 'in_pruefung'
+                : externalCount > 0
+                  ? 'wartet_auf_extern'
+                  : 'offen'
+        }
+        owner="Einkauf / Lieferantenmanagement"
+        blocker={blockedCount > 0 ? `${blockedCount} Angebot(e) sind blockiert oder abgelehnt und brauchen Nachsteuerung.` : null}
+        nextAction={
+          approvedCount > 0
+            ? `${approvedCount} freigabereife Angebote in Bestellung ueberfuehren`
+            : reviewedCount > 0
+              ? `${reviewedCount} gepruefte Angebote genehmigen`
+              : 'Neue Angebote erfassen oder bestehende Vorgangsbelege nachziehen'
+        }
+        caseLabel={`${total} Angebotsvorgaenge`}
+        tags={['Vorgang', 'Preisvergleich', 'Folgebeleg']}
+      />
+
+      <div className="grid gap-6 xl:grid-cols-[1.4fr_0.9fr]">
+        <OperationalTimeline
+          title="Vorgangstimeline"
+          items={[
+            latestCreatedAt
+              ? {
+                  label: 'Zuletzt erfasste Angebotslage aktualisiert',
+                  detail: `${total} Angebote stehen im aktuellen Arbeitsraum.`,
+                  timestamp: latestCreatedAt,
+                }
+              : {
+                  label: 'Noch keine Angebotslage geladen',
+                  detail: 'Sobald Angebote vorliegen, erscheint hier die zuletzt erkannte Aktivitaet.',
+                },
+            {
+              label: 'Review-Fokus',
+              detail: `${reviewedCount} Vorgaenge stehen in Pruefung; ${approvedCount} warten auf menschliche Freigabe.`,
+            },
+            {
+              label: 'Risikobild',
+              detail: blockedCount > 0 ? `${blockedCount} blockierte oder abgelehnte Angebote belasten den Folgeprozess.` : 'Aktuell kein akuter Angebotsblocker.',
+            },
+          ]}
+        />
+        <OperationalContextPanel
+          title="Kontext"
+          sections={[
+            {
+              title: 'Ressourcenlage',
+              items: [
+                { label: 'Geprueft', value: String(reviewedCount) },
+                { label: 'In Bestellung', value: String(externalCount) },
+              ],
+            },
+            {
+              title: 'Wirtschaftslage',
+              items: [
+                { label: 'Angebote gesamt', value: String(total) },
+                { label: 'Freigabereif', value: String(approvedCount) },
+              ],
+            },
+            {
+              title: 'Governance',
+              items: [
+                { label: 'Blockiert/abgelehnt', value: String(blockedCount) },
+                { label: 'Naechster Schritt', value: approvedCount > 0 ? 'Folgebeleg erzeugen' : 'Review abschliessen' },
+              ],
+            },
+          ]}
+        />
+      </div>
+
+      <ListReport
+        config={angeboteConfig}
+        data={data}
+        total={total}
+        onCreate={handleCreate}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onExport={handleExport}
+        onImport={() => {
+          navigate('/einkauf/bestellungen?importContext=angebote')
+        }}
+        isLoading={isLoading}
+      />
+    </div>
   )
 }
