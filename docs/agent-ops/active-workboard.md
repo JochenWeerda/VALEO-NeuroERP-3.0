@@ -1469,23 +1469,69 @@ Alle 6 Router registriert in `app/api/v1/api.py` unter `/api/v1/neuro/*`. Commit
 ## KTR-PRO-005
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Die verbleibende Kontrakt-Tiefe ueber einen eigenen Hedge-/Fixierungs- und Marktbewertungsarbeitsplatz schliessen: Hedge-Luecken, Fixierungsbedarf, Marktwertdruck, Mahn-/Washout-Kontext und direkte Folgewege fuer Disposition und Management.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/{kontrakte/KontraktPositionsmonitor,contracts-v2}.tsx`, ggf. neue Kontrakt-/Hedge-Helfer unter `packages/frontend-web/src/lib/api/` und vorhandene Endpunkte unter `app/api/v1/endpoints/{kontrakte,price_hedge_api}.py`.
 **Abnahmekriterien:** Kontrakte haben nicht nur Hedge-Indikatoren, sondern einen klaren eigenen Arbeitsraum fuer Hedge-/Fixierungsdruck, priorisierte Luecken, Marktwertkontext und direkte Folgeaktionen.
+**Erledigt:** `contracts-v2.tsx` und `KontraktPositionsmonitor.tsx` verdichten Hedge-Luecken, Marktwertdruck, Mahn-/Washout-Kontext und naechste Folgeaktion jetzt zu einem eigenen Fuehrungsbild; `professional-control-centers.ts` liefert den gemeinsamen Hedge-/Marktbewertungs-Summary-Layer fuer denselben Arbeitsplatz.
+**Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`; `node scripts/docs-governance-check.cjs`
 
 ## FIBU-PRO-002
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Die verbleibende FIBU-Profi-Tiefe ueber einen eigenen Zinswesen-/Jahreswechsel-/Reorganisator-Leitstand schliessen: Zinskandidaten, Dunning-/Interest-Parameter, Periodenlage, Reorg-Risiken, Connector-/Revisionseinfluss und naechste Abschlussaktionen.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/{finance/mahnwesen,fibu/abschluss-cockpit,fibu/schnittstellen-center}.tsx`, ggf. `packages/frontend-web/src/lib/api/fibu.ts`.
 **Abnahmekriterien:** Zinswesen, Jahreswechsel und Reorganisator sind nicht nur Teilzahlen im Cockpit, sondern ein eigener professioneller Arbeits- und Fuehrungsraum mit klaren Folgeaktionen und Parameterrisiken.
+**Erledigt:** `mahnwesen.tsx`, `abschluss-cockpit.tsx` und `schnittstellen-center.tsx` zeigen Zinsdruck, Reorg-Risiko und naechste Abschlussaktion jetzt als eigenen FIBU-Profi-Leitstand; `professional-control-centers.ts` verdichtet die gemeinsame Interest-/Year-Close-/Reorganisator-Sicht fuer dieselben Fuehrungskarten.
+**Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`; `node scripts/docs-governance-check.cjs`
 
 ## SUPPLY-E2E-002
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Die physische Kette zu einem operativen Leitstand verdichten: Rohware, Warteschlange, Waage, Charge, Fracht und Abrechnung mit Ausnahmefuehrung, Prioritaeten, Blockerbild und naechster Aktion in einer gemeinsamen Surface.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/{annahme/rohware,annahme/warteschlange,waage/liste,logistik/frachtbriefe}.tsx`, ggf. `packages/frontend-web/src/lib/api/supply-chain.ts`.
 **Abnahmekriterien:** Die physische Objektkette ist nicht nur verteilt sichtbar, sondern als eigener Operationsraum mit Prioritaeten, Blockern, Handlungsbild und klarer Ausnahmefuehrung nutzbar.
+**Erledigt:** `rohware.tsx`, `warteschlange.tsx`, `waage/liste.tsx` und `frachtbriefe.tsx` teilen jetzt denselben Supply-Ops-Leitstand mit Bottleneck, Druck und naechster Aktion; `professional-control-centers.ts` verdichtet die gemeinsame Objektkette aus Annahme, Wiegung, Charge und Fracht zu einem konsistenten Operationsraum.
+**Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`; `node scripts/docs-governance-check.cjs`
+
+## TAIL-CRM-001
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Den verbleibenden Profi-Tail im modernen CRM-Stamm schliessen: Dublettenpruefung, RAG-/Wissenspanel, Intent Bar und klare Folgepfade fuer Vertrieb, Service und Dokumente.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/professional-tail-gap-plan-2026-04-09.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/crm/kunden-stamm-modern/LegacyKundenStammModern.tsx`, ggf. passende CRM-/Neuro-API-Hooks.
+**Abnahmekriterien:** `LegacyKundenStammModern.tsx` enthaelt keine TODO-Assistenzreste mehr; Duplicate Detection, RAG-/Intent-Surface und Folgewege sind als professioneller CRM-Arbeitsplatz sichtbar.
+
+## TAIL-NAWARO-001
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** NaWaRo-Kommunikation und Druck von Toast-/Hinweislogik auf einen professionellen Dokument-, Vorschau-, Serienbrief- und Versandpfad ziehen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/professional-tail-gap-plan-2026-04-09.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/nawaro/{anbauflaechen,mitteilung-drucken,vertraege,raps-profil}.tsx`, ggf. Dokument-/Print-Helfer.
+**Abnahmekriterien:** Vorschau, Druck und Serienbrief enden nicht mehr nur in Toasts; NaWaRo zeigt einen professionellen Kommunikations- und Dokumentpfad mit Folgeaktion und Artefaktbezug.
+
+## TAIL-AGRI-001
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Die verbliebenen Demo-/Placeholder-Reste in Agrar-Beratung und Saatgut-Stamm schliessen und zu belastbaren Facharbeitsplaetzen verdichten.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/professional-tail-gap-plan-2026-04-09.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/agrar/psm/beratung.tsx`, `packages/frontend-web/src/pages/agrar/saatgut/stamm.tsx`, ggf. zugehoerige API-Hooks.
+**Abnahmekriterien:** PSM-Beratung arbeitet ohne stillen Demo-Fallback; Saatgut-Stamm besitzt einen echten Edit-/Folgepfad statt Placeholder-Kommentar.
+
+## TAIL-SALES-001
+
+**Von:** offen
+**Stand:** offen
+**Ziel des Slices:** Die verbleibenden Massen- und Folgeaktionen der modernen Sales-Einstiegsflaeche professionalisieren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/professional-tail-gap-plan-2026-04-09.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/sales/orders-modern.tsx`, ggf. zugehoerige Sales-API-Hooks.
+**Abnahmekriterien:** Export, Import, Filter und Archivierung sind echte Arbeitsfunktionen mit Folgepfad statt Toast-Hinweis.
+
+## TAIL-SERVICE-001
+
+**Von:** offen
+**Stand:** offen
+**Ziel des Slices:** Den Service-/Field-Tail auf professionellen Vorgangs- und Folgebelegcharakter ziehen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/professional-tail-gap-plan-2026-04-09.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/service/{anfrage-neu,anfrage-detail,anfragen,rueckmeldung,abschluss}.tsx`, `packages/frontend-web/src/pages/agribusiness/field-service-task-neu.tsx`, ggf. Service-/CRM-Hooks.
+**Abnahmekriterien:** Service-/Field-Kommunikation und Abschluss besitzen durchgaengigen Folgeobjekt-, Dokument- und Wiedervorlagepfad; `field-service-task-neu.tsx` traegt keinen Demo-Fallback-Charakter mehr.
