@@ -1785,3 +1785,51 @@ Alle 6 Router registriert in `app/api/v1/api.py` unter `/api/v1/neuro/*`. Commit
 **Abnahmekriterien:** In den priorisierten Kernworkflows bleiben keine fachlich irrefuehrenden Coming-Soon-, Placeholder- oder reine Erfolgs-Toast-Aktionen ohne Zustandsrueckmeldung mehr uebrig.
 **Erledigt:** Der Sweep hat die priorisierten Kernmasken im Einkauf/Annahme/Qualitaet/Waage bereinigt; verbliebene `importComingSoon`-Reste in `auftragsbestaetigungen-liste.tsx`, `rechnungseingaenge-liste.tsx` und `rfq-bids.tsx` sind durch reale Folgepfade bzw. einen CSV-Schnellimport ersetzt.
 **Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`; gezielter `rg`-Scan auf `importComingSoon` im priorisierten Kernraum
+
+## OP-ROLL-007
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Das operative Fallmodell in Rohware, Qualitaets-Check und angrenzende Annahmekernmasken ausrollen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/annahme/{rohware,qualitaets-check}.tsx`.
+**Abnahmekriterien:** Die Annahme-Folgemasken zeigen Fallkopf, Objektkontext, Timeline und naechste Aktion konsistent ohne Ueberfrachtung.
+
+## OP-ROLL-008
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Einkaufs-Objektmasken fuer Anfrage- und Rechnungseingang auf das gemeinsame Vorgangsbild ziehen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/einkauf/{anfrage-stamm,rechnungseingang}.tsx`.
+**Abnahmekriterien:** Anfrage- und Rechnungseingang zeigen Status, Owner, Blocker, Kontext und naechste Aktion direkt am Arbeitsobjekt.
+
+## OP-ROLL-009
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Finance-to-Close-Kernmasken mit dem gemeinsamen Fallmodell verdichten.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/finance/{abschluss,buchungserfassung}.tsx`.
+**Abnahmekriterien:** Abschluss und Buchungserfassung surfacen Periodenfall, Risiken, Governance und naechste Aktion direkt im Arbeitsraum.
+
+## OP-ROLL-010
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Workflow-nahe Service- und CRM-Objektmasken auf sinnvolle Fallkopf-/Kontextbausteine heben.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/service/anfrage-detail.tsx`, `packages/frontend-web/src/pages/crm/opportunity-detail.tsx`.
+**Abnahmekriterien:** Die Objektmasken gewinnen sichtbaren Vorgangsmehrwert, ohne bestehende Fachoberflaechen zu ueberladen.
+
+## OP-ROLL-011
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Weitere geeignete Listenraeume mit leichtgewichtiger Fallkopf-Sicht harmonisieren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, ausgewaehlte `packages/frontend-web/src/pages/**/liste*.tsx` nach Mehrwertkriterium.
+**Abnahmekriterien:** Nur Seiten mit echtem operativem Zusatznutzen bekommen den neuen Kopf; reine Register oder simple Tabellen bleiben bewusst schlank.
+
+## OP-ROLL-012
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Den Rollout dokumentieren und die verbleibenden bewusst schlank gelassenen Masken begruenden.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, ggf. neue Referenzdatei unter `docs/project-context/`.
+**Abnahmekriterien:** Es ist nachvollziehbar dokumentiert, wo das Zielbild sinnvoll eingesetzt wurde und wo bewusst nicht.
