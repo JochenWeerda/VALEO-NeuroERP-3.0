@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useAccountingPeriods, useFibuCockpit, useFibuConnectorProfiles } from '@/lib/api/fibu'
+import { summarizeFibuOps } from '@/lib/professional-control-centers'
 import {
   ArrowRight,
   Building2,
@@ -130,6 +131,7 @@ export default function SchnittstellenCenterPage(): JSX.Element {
 
   const openPeriods = periods.filter((period) => period.status === 'OPEN').length
   const adjustingPeriods = periods.filter((period) => period.status === 'ADJUSTING').length
+  const fibuOps = summarizeFibuOps(fibuCockpit, adjustingPeriods)
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6">
@@ -153,9 +155,24 @@ export default function SchnittstellenCenterPage(): JSX.Element {
           <CardHeader className="pb-2"><CardTitle className="text-sm">Perioden offen</CardTitle></CardHeader>
           <CardContent><div className="text-2xl font-semibold">{openPeriods}</div></CardContent>
         </Card>
+      <Card>
+        <CardHeader className="pb-2"><CardTitle className="text-sm">Reorganisator</CardTitle></CardHeader>
+        <CardContent><div className="text-sm font-semibold">{adjustingPeriods > 0 ? `${adjustingPeriods} in Nachbearbeitung` : 'stabil'}</div></CardContent>
+      </Card>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-3">
         <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm">Reorganisator</CardTitle></CardHeader>
-          <CardContent><div className="text-sm font-semibold">{adjustingPeriods > 0 ? `${adjustingPeriods} in Nachbearbeitung` : 'stabil'}</div></CardContent>
+          <CardHeader className="pb-2"><CardTitle className="text-sm">Interest Pressure</CardTitle></CardHeader>
+          <CardContent><Badge variant={fibuOps.interestPressure === 'hoch' ? 'destructive' : 'outline'}>{fibuOps.interestPressure}</Badge></CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm">Reorg-Risiko</CardTitle></CardHeader>
+          <CardContent><Badge variant={fibuOps.reorgRisk === 'hoch' ? 'destructive' : 'outline'}>{fibuOps.reorgRisk}</Badge></CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm">Naechste Aktion</CardTitle></CardHeader>
+          <CardContent><div className="text-sm font-semibold">{fibuOps.nextAction}</div></CardContent>
         </Card>
       </div>
 

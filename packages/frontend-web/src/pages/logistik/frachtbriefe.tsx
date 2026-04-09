@@ -9,6 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { FileDown, FileText, Plus, Search } from 'lucide-react'
 import { useFrachtbriefe, type Frachtbrief } from '@/lib/api/misc-modules'
 import { useSupplyChainOverview } from '@/lib/api/supply-chain'
+import { summarizeSupplyOps } from '@/lib/professional-control-centers'
 
 export default function FrachtbriefePage(): JSX.Element {
   const navigate = useNavigate()
@@ -16,6 +17,7 @@ export default function FrachtbriefePage(): JSX.Element {
   const [searchTerm, setSearchTerm] = useState('')
   const { data: frachtbriefe, isLoading } = useFrachtbriefe()
   const list = useMemo(() => frachtbriefe ?? [], [frachtbriefe])
+  const supplyOps = useMemo(() => summarizeSupplyOps(chain), [chain])
 
   const columns = [
     {
@@ -110,6 +112,12 @@ export default function FrachtbriefePage(): JSX.Element {
         <Card><CardContent className="pt-6"><div className="text-xs text-muted-foreground">Wiegungen offen</div><div className="text-2xl font-semibold">{chain.openWeighingTickets}</div></CardContent></Card>
         <Card><CardContent className="pt-6"><div className="text-xs text-muted-foreground">Chargen gesperrt / Prüfung</div><div className="text-2xl font-semibold">{chain.blockedCharges}</div></CardContent></Card>
         <Card><CardContent className="pt-6"><div className="text-xs text-muted-foreground">Aktive Kennzeichen</div><div className="text-sm font-semibold">{chain.activeVehiclePlates.slice(0, 3).join(', ') || 'n/a'}</div></CardContent></Card>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Bottleneck</CardTitle></CardHeader><CardContent><div className="text-2xl font-semibold">{supplyOps.bottleneck}</div></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Druck</CardTitle></CardHeader><CardContent><Badge variant={supplyOps.pressure === 'hoch' ? 'destructive' : 'outline'}>{supplyOps.pressure}</Badge></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Naechste Aktion</CardTitle></CardHeader><CardContent><div className="text-sm font-semibold">{supplyOps.nextAction}</div></CardContent></Card>
       </div>
 
       <Card>

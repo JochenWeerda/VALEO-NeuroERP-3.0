@@ -29,6 +29,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { NativeSelect } from '@/components/ui/native-select';
 import { useAuth } from '@/hooks/useAuth';
 import { useTenant } from '@/hooks/useTenant';
+import { summarizeContractHedge } from '@/lib/professional-control-centers';
 
 interface Contract {
   id: string;
@@ -397,6 +398,7 @@ export default function ContractsPageV2(): JSX.Element {
     if (expiring) return expiring;
     return openContracts[0] ?? null;
   }, [expiringContracts, openContracts]);
+  const hedgeSummary = useMemo(() => summarizeContractHedge(contracts), [contracts]);
 
   return (
     <div className="space-y-4">
@@ -449,6 +451,28 @@ export default function ContractsPageV2(): JSX.Element {
         </Card>
       </div>
 
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card className="p-4">
+          <div className="text-xs uppercase tracking-wide text-muted-foreground">Hedge-Luecken</div>
+          <div className="mt-2 text-2xl font-semibold">{hedgeSummary.hedgeGapCount}</div>
+          <p className="mt-1 text-xs text-muted-foreground">Absicherung und Fixierungsbedarf im Bestand</p>
+        </Card>
+        <Card className="p-4">
+          <div className="text-xs uppercase tracking-wide text-muted-foreground">Marktwertdruck</div>
+          <div className="mt-2 text-2xl font-semibold">{hedgeSummary.marketPressureCount}</div>
+          <p className="mt-1 text-xs text-muted-foreground">Kontrakte mit negativer Bewertung zum Markt</p>
+        </Card>
+        <Card className="p-4">
+          <div className="text-xs uppercase tracking-wide text-muted-foreground">Mahnkontext</div>
+          <div className="mt-2 text-2xl font-semibold">{hedgeSummary.dunningPressureCount}</div>
+          <p className="mt-1 text-xs text-muted-foreground">Rueckstaende mit Einfluss auf Washout oder Abwicklung</p>
+        </Card>
+        <Card className="p-4">
+          <div className="text-xs uppercase tracking-wide text-muted-foreground">Naechster Hedge-Schritt</div>
+          <div className="mt-2 text-sm font-semibold">{hedgeSummary.nextAction}</div>
+        </Card>
+      </div>
+
       <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
         <Card className="p-4">
           <div className="flex items-center justify-between gap-3">
@@ -462,6 +486,7 @@ export default function ContractsPageV2(): JSX.Element {
             <Button variant="outline" onClick={openContractOverview}>Kontraktliste</Button>
             <Button variant="outline" onClick={openContractPositions}>Positionsmonitor</Button>
             <Button variant="outline" onClick={openContractAlarms}>Alarmdashboard</Button>
+            <Button variant="outline" onClick={openContractPositions}>Hedge / Fixierung</Button>
             <Button variant="outline" onClick={() => navigate('/dokumente/ablage')}>Dokumentenablage</Button>
           </div>
           <div className="mt-4 grid gap-3 md:grid-cols-2">
@@ -479,6 +504,7 @@ export default function ContractsPageV2(): JSX.Element {
               <div className="mt-2 space-y-1 text-sm">
                 <p>{expiringContracts.length > 0 ? `${expiringContracts.length} Kontrakte laufen in 30 Tagen ab.` : 'Keine kurzfristigen Ablauffristen im gefilterten Bestand.'}</p>
                 <p>{openContracts.length > 0 ? `${openContracts.length} offene Kontrakte erfordern aktive Steuerung.` : 'Keine offenen Kontrakte im aktuellen Bestand.'}</p>
+                <p>{hedgeSummary.nextAction}</p>
               </div>
             </div>
           </div>

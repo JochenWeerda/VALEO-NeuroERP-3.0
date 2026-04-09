@@ -8,6 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { apiClient } from '@/lib/api-client'
 import { listKontrakte } from '@/lib/api/kontrakte'
+import { summarizeContractHedge } from '@/lib/professional-control-centers'
 import {
   AlertTriangle,
   ArrowDownRight,
@@ -127,6 +128,17 @@ export default function KontraktPositionsmonitor(): JSX.Element {
   const parityCount = steeringItems.filter((item) => Boolean(item.steering?.parity_code)).length
   const hedgeGapCount = steeringItems.filter((item) => (item.steering?.hedge_gap_pct ?? 0) > 0).length
   const negativeValuationCount = steeringItems.filter((item) => (item.steering?.market_valuation_eur ?? 0) < 0).length
+  const hedgeSummary = useMemo(
+    () =>
+      summarizeContractHedge(
+        steeringItems.map((item) => ({
+          hedgeQuotePct: item.steering?.hedge_quote_pct,
+          marketValuationEur: item.steering?.market_valuation_eur,
+          dunningLevel: item.steering?.dunning_level,
+        })),
+      ),
+    [steeringItems],
+  )
 
   return (
     <div className="space-y-4 p-6">
@@ -230,6 +242,36 @@ export default function KontraktPositionsmonitor(): JSX.Element {
               {critical?.spread != null ? fmtEur(critical.spread) : '-'}
             </div>
             <p className="text-xs text-muted-foreground">VK-Preis minus EK-Preis (kritischster Artikel)</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-base">Hedge-Pressure</CardTitle></CardHeader>
+          <CardContent>
+            <div className="text-2xl font-semibold">{hedgeSummary.hedgeGapCount}</div>
+            <p className="text-xs text-muted-foreground">Positionen mit Fixierungs- oder Absicherungsluecke</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-base">Marktbewertung</CardTitle></CardHeader>
+          <CardContent>
+            <div className="text-2xl font-semibold">{hedgeSummary.marketPressureCount}</div>
+            <p className="text-xs text-muted-foreground">Negative Marktwerte im relevanten Steuerbestand</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-base">Mahndruck</CardTitle></CardHeader>
+          <CardContent>
+            <div className="text-2xl font-semibold">{hedgeSummary.dunningPressureCount}</div>
+            <p className="text-xs text-muted-foreground">Rueckstaende mit Einfluss auf Vertragssteuerung</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-base">Naechste Aktion</CardTitle></CardHeader>
+          <CardContent>
+            <div className="text-sm font-semibold">{hedgeSummary.nextAction}</div>
           </CardContent>
         </Card>
       </div>

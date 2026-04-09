@@ -13,6 +13,7 @@ import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboar
 import { useToast } from '@/hooks/use-toast'
 import { AlertTriangle, FileDown, Plus, Scale, Search } from 'lucide-react'
 import { useSupplyChainOverview } from '@/lib/api/supply-chain'
+import { summarizeSupplyOps } from '@/lib/professional-control-centers'
 
 function LoadingSkeleton(): JSX.Element {
   return (
@@ -54,6 +55,7 @@ export default function WaageListePage(): JSX.Element {
   const searchInputRef = useRef<HTMLInputElement | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const { data: waagen = [], isLoading, isError, error, refetch } = useWaagen()
+  const supplyOps = useMemo(() => summarizeSupplyOps(chain), [chain])
 
   const filteredWaagen = useMemo(() => {
     if (!searchTerm) return waagen
@@ -163,6 +165,34 @@ export default function WaageListePage(): JSX.Element {
           <Card><CardContent className="pt-6"><div className="text-xs text-muted-foreground">Wiegungen offen</div><div className="text-2xl font-semibold">{chain.openWeighingTickets}</div></CardContent></Card>
           <Card><CardContent className="pt-6"><div className="text-xs text-muted-foreground">Chargen in Prüfung</div><div className="text-2xl font-semibold">{chain.blockedCharges}</div></CardContent></Card>
           <Card><CardContent className="pt-6"><div className="text-xs text-muted-foreground">Fracht unterwegs</div><div className="text-2xl font-semibold">{chain.freightInTransit}</div></CardContent></Card>
+        </div>
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">Bottleneck</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-lg font-semibold capitalize">{supplyOps.bottleneck}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">Druck</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Badge variant={supplyOps.pressure === 'hoch' ? 'destructive' : supplyOps.pressure === 'mittel' ? 'secondary' : 'outline'}>
+                {supplyOps.pressure}
+              </Badge>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">Naechste Aktion</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-sm font-semibold">{supplyOps.nextAction}</div>
+            </CardContent>
+          </Card>
         </div>
       </PageSection>
 

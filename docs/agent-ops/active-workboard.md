@@ -1529,15 +1529,19 @@ Alle 6 Router registriert in `app/api/v1/api.py` unter `/api/v1/neuro/*`. Commit
 ## TAIL-SALES-001
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Die verbleibenden Massen- und Folgeaktionen der modernen Sales-Einstiegsflaeche professionalisieren.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/professional-tail-gap-plan-2026-04-09.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/sales/orders-modern.tsx`, ggf. zugehoerige Sales-API-Hooks.
 **Abnahmekriterien:** Export, Import, Filter und Archivierung sind echte Arbeitsfunktionen mit Folgepfad statt Toast-Hinweis.
+**Erledigt:** `packages/frontend-web/src/pages/sales/orders-modern.tsx` ist jetzt an die reale Sales-Order-Liste angebunden, exportiert die gefilterte operative Sicht als CSV, toggelt echte Statusfilter, fuehrt den Import in den produktiven Auftragsarbeitsplatz und oeffnet die Archivvorbereitung ueber die kanonische Auftragsliste statt ueber Toast-Hinweise.
+**Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`; `node scripts/docs-governance-check.cjs`
 
 ## TAIL-SERVICE-001
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Den Service-/Field-Tail auf professionellen Vorgangs- und Folgebelegcharakter ziehen.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/professional-tail-gap-plan-2026-04-09.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/service/{anfrage-neu,anfrage-detail,anfragen,rueckmeldung,abschluss}.tsx`, `packages/frontend-web/src/pages/agribusiness/field-service-task-neu.tsx`, ggf. Service-/CRM-Hooks.
 **Abnahmekriterien:** Service-/Field-Kommunikation und Abschluss besitzen durchgaengigen Folgeobjekt-, Dokument- und Wiedervorlagepfad; `field-service-task-neu.tsx` traegt keinen Demo-Fallback-Charakter mehr.
+**Erledigt:** `packages/frontend-web/src/pages/service/anfragen.tsx` exportiert und filtert jetzt echte Ticketdaten und zeigt Folgeaktionen fuer Rueckmeldung und Aussendienst. `packages/frontend-web/src/pages/service/anfrage-detail.tsx` besitzt einen echten Vorgangsverlauf mit Folgeobjekten fuer Rueckmeldung, Aussendienst, Dokumente und Abschluss statt Placeholder-Tabs. `packages/frontend-web/src/pages/agribusiness/field-service-task-neu.tsx` ist als realer Folgepfad aus Service-/Workflow-Vorgaengen beschrieben und zeigt den Servicebezug sichtbar an.
+**Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`; `node scripts/docs-governance-check.cjs`

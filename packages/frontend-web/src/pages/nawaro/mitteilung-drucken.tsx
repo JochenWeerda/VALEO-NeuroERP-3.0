@@ -8,6 +8,7 @@ import { NativeSelect } from '@/components/ui/native-select'
 import { Checkbox } from '@/components/ui/checkbox'
 import { useToast } from '@/hooks/use-toast'
 import { Eye, Printer, Save, Trash2 } from 'lucide-react'
+import { buildCsvArtifact, downloadArtifact, openHtmlPreview } from '@/lib/nawaro-communication'
 import {
   createPrintNotification,
   deletePrintNotification,
@@ -115,6 +116,19 @@ export default function NaWaRoMitteilungDruckenPage(): JSX.Element {
     }
   }, [deliveryOption])
 
+  const communicationSummary = useMemo(
+    () => [
+      { label: 'Dokument', value: documentName },
+      { label: 'Erntejahr', value: String(ernteJahr) },
+      { label: 'Artikel', value: artikelNr || '-' },
+      { label: 'Debitoren', value: `${debitorVon || '-'} bis ${debitorBis || '-'}` },
+      { label: 'Meldungsart', value: optionLabel },
+      { label: 'Formular', value: formular },
+      { label: 'Drucker', value: drucker || '-' },
+    ],
+    [artikelNr, debitorBis, debitorVon, documentName, drucker, ernteJahr, formular, optionLabel],
+  )
+
   function clearForm(): void {
     setSelectedId('')
     setDocumentName(documentOptions[0])
@@ -151,6 +165,29 @@ export default function NaWaRoMitteilungDruckenPage(): JSX.Element {
     { key: 'berichtigung', label: 'Berichtigung' },
     { key: 'nachmeldung', label: 'Nachmeldung' },
   ]
+
+  function handlePreview(): void {
+    openHtmlPreview(`${documentName} (${formular})`, communicationSummary)
+    toast({ title: 'Vorschau erstellt', description: `${documentName} wurde im neuen Fenster geoeffnet.` })
+  }
+
+  function handlePrint(): void {
+    downloadArtifact({
+      fileName: `nawaro-mitteilung-${ernteJahr}-${formular}.txt`,
+      content: communicationSummary.map((entry) => `${entry.label}: ${entry.value}`).join('\n'),
+    })
+    toast({ title: 'Druckartefakt erstellt', description: `Datei fuer ${documentName} wurde heruntergeladen.` })
+  }
+
+  function handleExportRecipients(): void {
+    const artifact = buildCsvArtifact(
+      `nawaro-mitteilung-${ernteJahr}-${formular}-empfaenger.csv`,
+      ['Dokument', 'Erntejahr', 'DebitorVon', 'DebitorBis', 'Formular', 'Drucker'],
+      [[documentName, ernteJahr, debitorVon || '', debitorBis || '', formular, drucker || '']],
+    )
+    downloadArtifact(artifact, 'text/csv;charset=utf-8')
+    toast({ title: 'Empfaengerliste exportiert', description: 'Der Versand- und Druckkontext wurde als CSV exportiert.' })
+  }
 
   return (
     <div className="space-y-6 p-6">
@@ -240,7 +277,7 @@ export default function NaWaRoMitteilungDruckenPage(): JSX.Element {
 
       <Card>
         <CardHeader>
-          <CardTitle>Vorschau</CardTitle>
+          <CardTitle>Kommunikations- und Versandbild</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2 text-sm">
           <p><span className="font-medium">Dokument:</span> {documentName}</p>
@@ -251,17 +288,26 @@ export default function NaWaRoMitteilungDruckenPage(): JSX.Element {
           <p><span className="font-medium">Formular:</span> {formular}</p>
           <p><span className="font-medium">Anzahl:</span> {anzahl}</p>
           <p><span className="font-medium">Drucker:</span> {drucker}</p>
+          <div className="rounded border bg-muted/40 p-3">
+            <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Naechste Aktion</div>
+            <div className="mt-1 font-medium">
+              {selectedId ? 'Dokumentvorschau und Empfaengerexport vor dem Druck pruefen.' : 'Datensatz zuerst speichern, dann Druck- und Versandartefakte erzeugen.'}
+            </div>
+          </div>
         </CardContent>
       </Card>
 
       <div className="flex flex-wrap gap-2">
-        <Button variant="outline" className="gap-2" onClick={() => toast({ title: 'Vorschau erstellt', description: `${documentName} (${formular})` })}>
+        <Button variant="outline" className="gap-2" onClick={handlePreview}>
           <Eye className="h-4 w-4" />
           Vorschau
         </Button>
-        <Button variant="outline" className="gap-2" onClick={() => toast({ title: 'Druckauftrag erstellt', description: `${documentName} (${formular})` })}>
+        <Button variant="outline" className="gap-2" onClick={handlePrint}>
           <Printer className="h-4 w-4" />
           Drucken
+        </Button>
+        <Button variant="outline" className="gap-2" onClick={handleExportRecipients}>
+          Empfaenger exportieren
         </Button>
         <Button className="gap-2" onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}>
           <Save className="h-4 w-4" />

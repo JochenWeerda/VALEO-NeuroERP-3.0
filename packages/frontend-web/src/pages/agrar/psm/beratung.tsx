@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -65,7 +65,14 @@ export default function PSMBeratungPage(): JSX.Element {
   const verfuegbareKulturen = kulturen.map(k => k.name)
   const isLoading = isLoadingSchadbilder || isLoadingKulturen
 
-  /** Empfehlungen aus PSM-Stammdaten (usePSM) mappen; falls API leer, Demo-Fallback nutzen. */
+  const psmDataReadiness = useMemo(() => {
+    const count = psmResponse?.items?.length ?? 0
+    if (count === 0) return { level: 'kritisch', text: 'Keine aktiven PSM-Stammdaten verfuegbar. Beratung bleibt auf Analyse ohne Produktempfehlung.' }
+    if (count < 5) return { level: 'beobachten', text: 'Nur wenige PSM-Stammdaten verfuegbar. Empfehlungstiefe kann eingeschraenkt sein.' }
+    return { level: 'ok', text: `${count} aktive PSM-Datensaetze stehen fuer die Beratung bereit.` }
+  }, [psmResponse?.items])
+
+  /** Empfehlungen ausschliesslich aus vorhandenen PSM-Stammdaten ableiten. */
   const generateEmpfehlungen = (schadbild: Schadbild): PSMEmpfehlung[] => {
     const psmItems = psmResponse?.items ?? []
     const fromStammdaten: PSMEmpfehlung[] = psmItems.map((p) => {
@@ -93,7 +100,7 @@ export default function PSMBeratungPage(): JSX.Element {
         return true
       })
 
-    return filterRelevant(fromStammdaten)
+    return filterRelevant(fromStammdaten).slice(0, 5)
   }
 
   const analysiereSchadbild = async () => {
@@ -163,15 +170,20 @@ export default function PSMBeratungPage(): JSX.Element {
   }
 
   const renderSchritt1 = () => (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Search className="h-5 w-5" />
-          Schritt 1: Schadbild beschreiben
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid gap-4 md:grid-cols-2">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Search className="h-5 w-5" />
+            Schritt 1: Schadbild beschreiben
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Alert>
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>PSM-Datenlage</AlertTitle>
+            <AlertDescription>{psmDataReadiness.text}</AlertDescription>
+          </Alert>
+          <div className="grid gap-4 md:grid-cols-2">
           <div>
             <Label>Kultur</Label>
             <NativeSelect
@@ -448,6 +460,25 @@ export default function PSMBeratungPage(): JSX.Element {
           </div>
         </CardContent>
       </Card>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card>
+          <CardHeader><CardTitle className="text-sm">Kulturdaten</CardTitle></CardHeader>
+          <CardContent><div className="text-2xl font-semibold">{verfuegbareKulturen.length}</div></CardContent>
+        </Card>
+        <Card>
+          <CardHeader><CardTitle className="text-sm">Schadbilder</CardTitle></CardHeader>
+          <CardContent><div className="text-2xl font-semibold">{schadbilder.length}</div></CardContent>
+        </Card>
+        <Card>
+          <CardHeader><CardTitle className="text-sm">PSM-Readiness</CardTitle></CardHeader>
+          <CardContent>
+            <Badge variant={psmDataReadiness.level === 'kritisch' ? 'destructive' : psmDataReadiness.level === 'beobachten' ? 'secondary' : 'outline'}>
+              {psmDataReadiness.level}
+            </Badge>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Schritt-Inhalt */}
       {schritt === 1 ? renderSchritt1() : renderSchritt2()}

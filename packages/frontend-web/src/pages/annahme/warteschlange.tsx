@@ -13,6 +13,7 @@ import { Clock, Search, Truck } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { useRepairWarteschlangeArticle, useWarteschlange, type LKWEintrag } from '@/lib/api/inventory'
 import { useSupplyChainOverview } from '@/lib/api/supply-chain'
+import { summarizeSupplyOps } from '@/lib/professional-control-centers'
 
 export default function WarteschlangePage(): JSX.Element {
   const navigate = useNavigate()
@@ -21,6 +22,7 @@ export default function WarteschlangePage(): JSX.Element {
   const [searchTerm, setSearchTerm] = useState('')
   const { data, isLoading, refetch } = useWarteschlange()
   const { data: chain } = useSupplyChainOverview()
+  const supplyOps = useMemo(() => summarizeSupplyOps(chain), [chain])
   const repairArticle = useRepairWarteschlangeArticle()
   const warteschlange = useMemo(() => {
     const items = data?.items ?? []
@@ -273,6 +275,24 @@ export default function WarteschlangePage(): JSX.Element {
           <Card>
             <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Aktive Fahrzeuge</CardTitle></CardHeader>
             <CardContent><span className="text-2xl font-bold">{chain.activeVehiclePlates.length}</span></CardContent>
+          </Card>
+        </div>
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card>
+            <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Bottleneck</CardTitle></CardHeader>
+            <CardContent><div className="text-lg font-semibold capitalize">{supplyOps.bottleneck}</div></CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Druck</CardTitle></CardHeader>
+            <CardContent>
+              <Badge variant={supplyOps.pressure === 'hoch' ? 'destructive' : supplyOps.pressure === 'mittel' ? 'secondary' : 'outline'}>
+                {supplyOps.pressure}
+              </Badge>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Naechste Aktion</CardTitle></CardHeader>
+            <CardContent><div className="text-sm font-semibold">{supplyOps.nextAction}</div></CardContent>
           </Card>
         </div>
       </PageSection>

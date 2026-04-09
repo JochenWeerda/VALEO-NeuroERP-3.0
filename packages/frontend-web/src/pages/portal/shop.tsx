@@ -53,6 +53,8 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { Progress } from '@/components/ui/progress'
+import { usePriceLists } from '@/lib/api/price-lists'
+import { extractTierBreaks, fallbackTierBreaks, getTierInfo } from '@/lib/professional-workspaces'
 import { portalService } from '@/lib/services/portal-service'
 import { getAxiosErrorMessage } from '@/lib/api-client'
 
@@ -128,64 +130,17 @@ function isBulkProduct(product: Product): boolean {
   return BULK_CATEGORIES.includes(product.kategorie)
 }
 
-// Preisstaffel-Definition (aus Artikelstammdaten / Artikelgruppe)
-interface PriceStaffel {
-  abMenge: number      // Ab dieser Menge gilt der Preis
-  preis: number        // Preis pro Einheit
-  zuschlag: number     // Zuschlag pro Einheit (bei kleinen Mengen)
-}
-
-// Mock: Staffeltabellen pro Artikelgruppe (später aus Backend)
-const STAFFEL_TABELLEN: Record<string, PriceStaffel[]> = {
-  futtermittel: [
-    { abMenge: 240, preis: 0, zuschlag: 0 },      // Ganzer LKW - kein Zuschlag
-    { abMenge: 120, preis: 0, zuschlag: 0.50 },   // Halber LKW - 0,50 €/dt
-    { abMenge: 50, preis: 0, zuschlag: 1.00 },    // Teilladung - 1,00 €/dt
-    { abMenge: 1, preis: 0, zuschlag: 2.00 },     // Kleinmenge - 2,00 €/dt
-  ],
-  duenger: [
-    { abMenge: 240, preis: 0, zuschlag: 0 },      // Ganzer LKW - kein Zuschlag
-    { abMenge: 100, preis: 0, zuschlag: 0.80 },   // Teilladung - 0,80 €/dt
-    { abMenge: 25, preis: 0, zuschlag: 1.50 },    // Kleinmenge - 1,50 €/dt
-    { abMenge: 1, preis: 0, zuschlag: 2.50 },     // Mini - 2,50 €/dt
-  ],
-}
-
-// Berechnet Staffelzuschlag basierend auf Menge und Kategorie
-function getStaffelInfo(kategorie: string, menge: number): { 
+function getStaffelInfo(product: Product, menge: number, staffelByProduct: Record<string, ReturnType<typeof fallbackTierBreaks>>): {
   zuschlag: number
   naechsteStaffel?: { abMenge: number; ersparnis: number }
 } {
-  const staffeln = STAFFEL_TABELLEN[kategorie]
-  if (!staffeln) return { zuschlag: 0 }
-  
-  // Staffeln sind absteigend nach Menge sortiert
-  let aktuelleStaffel: PriceStaffel | undefined
-  let naechsteBessereStaffel: PriceStaffel | undefined
-  
-  for (const staffel of staffeln) {
-    if (menge >= staffel.abMenge) {
-      aktuelleStaffel = staffel
-      break
-    }
-    naechsteBessereStaffel = staffel
+  const fallbackPrice = product.rabattPreis || product.contractPrice || product.preis
+  const tiers = staffelByProduct[product.id] ?? fallbackTierBreaks(product.kategorie, fallbackPrice)
+  const tierInfo = getTierInfo(tiers, menge, fallbackPrice)
+  return {
+    zuschlag: tierInfo.surcharge,
+    naechsteStaffel: tierInfo.nextTier ? { abMenge: tierInfo.nextTier.minQuantity, ersparnis: tierInfo.nextTier.savings } : undefined,
   }
-  
-  const zuschlag = aktuelleStaffel?.zuschlag || 0
-  
-  // Nächste günstigere Staffel berechnen
-  let naechsteStaffel: { abMenge: number; ersparnis: number } | undefined
-  if (naechsteBessereStaffel && aktuelleStaffel) {
-    const ersparnis = aktuelleStaffel.zuschlag - naechsteBessereStaffel.zuschlag
-    if (ersparnis > 0) {
-      naechsteStaffel = {
-        abMenge: naechsteBessereStaffel.abMenge,
-        ersparnis
-      }
-    }
-  }
-  
-  return { zuschlag, naechsteStaffel }
 }
 
 interface CartItem extends Product {
@@ -225,6 +180,7 @@ export default function PortalShop() {
   const [actionError, setActionError] = useState<string | null>(null)
   const [orderSubmitting, setOrderSubmitting] = useState(false)
   const [inquirySubmitting, setInquirySubmitting] = useState(false)
+  const { data: priceLists = [] } = usePriceLists()
 
   const loadProducts = useCallback(async () => {
     setLoading(true)
@@ -249,6 +205,19 @@ export default function PortalShop() {
   useEffect(() => {
     loadProducts()
   }, [loadProducts])
+
+  const staffelByProduct = useMemo(() => {
+    const result: Record<string, ReturnType<typeof fallbackTierBreaks>> = {}
+    for (const product of products) {
+      const activeTierBreaks = extractTierBreaks(priceLists, {
+        articleId: product.id,
+        articleNumber: product.artikelnummer,
+        articleGroup: product.kategorie,
+      })
+      result[product.id] = activeTierBreaks.length > 0 ? activeTierBreaks : fallbackTierBreaks(product.kategorie, product.rabattPreis || product.contractPrice || product.preis)
+    }
+    return result
+  }, [priceLists, products])
 
   const REORDER_DAYS = 42 // Zeitraum für "Erneut bestellen" Markierung
 
@@ -300,7 +269,7 @@ export default function PortalShop() {
   const cartStaffelGesamt = useMemo(() => {
     return cart.reduce((sum, item) => {
       if (isBulkProduct(item)) {
-        const { zuschlag } = getStaffelInfo(item.kategorie, item.menge)
+        const { zuschlag } = getStaffelInfo(item, item.menge, staffelByProduct)
         return sum + zuschlag * item.menge
       }
       return sum
@@ -720,7 +689,7 @@ export default function PortalShop() {
 
                       {/* Staffel-Info und Zusatzkosten für lose Ware */}
                       {isBulk && (() => {
-                        const staffelInfo = getStaffelInfo(item.kategorie, item.menge)
+              const staffelInfo = getStaffelInfo(item, item.menge, staffelByProduct)
                         const staffelKosten = staffelInfo.zuschlag * item.menge
                         
                         return (

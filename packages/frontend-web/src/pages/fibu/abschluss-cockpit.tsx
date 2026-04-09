@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { apiClient } from '@/lib/api-client'
 import { useAccountingPeriods, useFibuCockpit } from '@/lib/api/fibu'
+import { summarizeFibuOps } from '@/lib/professional-control-centers'
 
 type CockpitChecklist = {
   id: string
@@ -53,6 +54,7 @@ export default function AbschlussCockpitPage(): JSX.Element {
 
   const blockers = useMemo(() => data.blockers, [data])
   const adjustingPeriods = periods.filter((period) => period.status === 'ADJUSTING').length
+  const fibuOps = summarizeFibuOps(fibuCockpit, adjustingPeriods)
 
   if (isLoading) {
     return <div className="p-6 text-sm text-muted-foreground">Lade Abschluss-Cockpit...</div>
@@ -90,6 +92,21 @@ export default function AbschlussCockpitPage(): JSX.Element {
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm">Blocker</CardTitle></CardHeader>
           <CardContent><div className="text-2xl font-bold text-red-600">{blockers.length}</div></CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm">Zinsdruck</CardTitle></CardHeader>
+          <CardContent><Badge variant={fibuOps.interestPressure === 'hoch' ? 'destructive' : 'outline'}>{fibuOps.interestPressure}</Badge></CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm">Reorg-Risiko</CardTitle></CardHeader>
+          <CardContent><Badge variant={fibuOps.reorgRisk === 'hoch' ? 'destructive' : 'outline'}>{fibuOps.reorgRisk}</Badge></CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm">Naechste Aktion</CardTitle></CardHeader>
+          <CardContent><div className="text-sm font-semibold">{fibuOps.nextAction}</div></CardContent>
         </Card>
       </div>
 
