@@ -1549,47 +1549,107 @@ Alle 6 Router registriert in `app/api/v1/api.py` unter `/api/v1/neuro/*`. Commit
 ## TAIL-CRM-002
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Opportunity-Liste und Pipeline auf echte Folgeaktionen fuer Konvertierung, Gewinn/Verlust und Import ziehen.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/professional-tail-gap-plan-2026-04-09.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/crm/{opportunities-liste,opportunities-kanban}.tsx`, ggf. passende CRM-Hooks/Endpoints.
 **Abnahmekriterien:** Bulk- und Folgeaktionen enden nicht mehr nur in Toasts; Listen- und Kanban-Sicht teilen dieselbe professionelle Vertriebslogik.
+**Erledigt:** `packages/frontend-web/src/pages/crm/opportunities-liste.tsx` fuehrt Bulk-Konvertierung jetzt in den echten Angebotsarbeitsplatz oder ueber einen realen Statuswechsel in die Angebotsphase, markiert selektierte Opportunities als gewonnen/verloren via API und importiert CSV-Dateien direkt in den Opportunity-Bestand. Listen- und Kanban-Sicht nutzen damit dieselbe professionelle Opportunity-Logik.
+**Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`; `node scripts/docs-governance-check.cjs`
 
 ## TAIL-CRM-003
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Kontaktmanagement von Hinweislogik auf echte Kommunikations- und Folgeobjektpfade ziehen.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/professional-tail-gap-plan-2026-04-09.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/crm/kontakt-management.tsx`, ggf. CRM-/Dokumenten-/Terminpfade.
 **Abnahmekriterien:** Export, E-Mail, Anruf, Termin und Deaktivierung fuehren in reale Arbeits- oder Folgepfade.
+**Erledigt:** `packages/frontend-web/src/pages/crm/kontakt-management.tsx` exportiert selektierte Kontakte jetzt als echten CSV-Ausschnitt, startet Mail-Versand ueber vorhandene Adressen, nutzt fuer Einzelkontakte direkte `tel:`-Folgewege oder den Aktivitaetsarbeitsplatz und setzt selektierte Kontakte per API auf `inaktiv`.
+**Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`; `node scripts/docs-governance-check.cjs`
 
 ## TAIL-FIBU-001
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Die Buchhaltungsuebersicht als echten FIBU-Leitstand mit durchgaengigen Folgepfaden verdichten.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/professional-tail-gap-plan-2026-04-09.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/fibu/buchhaltungsuebersicht.tsx`, ggf. vorhandene FIBU-Seiten.
 **Abnahmekriterien:** Toolbar-, Footer- und Drilldown-Aktionen fuehren in reale Journal-, Bewegungs-, Druck- und Auswertungsraeume.
+**Erledigt:** `packages/frontend-web/src/pages/fibu/buchhaltungsuebersicht.tsx` navigiert jetzt aus Ribbon und Footer in reale Schnittstellen-, Buchungserfassungs-, Journal-, Kontenbewegungs- und Monatswert-Arbeitsplaetze; Drilldowns oeffnen das passende Journal direkt und Drucken nutzt den echten Browser-Printpfad.
+**Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`; `node scripts/docs-governance-check.cjs`
 
 ## TAIL-FEED-001
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Chargenverfolgung im Futtermittelraum auf reale Rueckruf-, Export- und Traceability-Folgepfade ziehen.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/professional-tail-gap-plan-2026-04-09.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/futtermittel/charge-verfolgung.tsx`, ggf. Qualitaets-/Dokumentenpfade.
 **Abnahmekriterien:** Rueckruf, Rueckverfolgung und Export sind echte Arbeitsfunktionen statt Toast-Hinweis.
+**Erledigt:** `packages/frontend-web/src/pages/futtermittel/charge-verfolgung.tsx` exportiert Chargen bereits ueber den echten Exportpfad, setzt Recall via API und fuehrt Rueckverfolgung jetzt immer in den kanonischen Charge-/Rueckverfolgungsarbeitsplatz statt in einen Placeholder.
+**Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`; `node scripts/docs-governance-check.cjs`
 
 ## TAIL-FEED-002
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Einzelfuttermittel-Stamm auf echte Validierungs-, Speicher- und Folgepfade ziehen.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/professional-tail-gap-plan-2026-04-09.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/futtermittel/einzelfuttermittel-stamm.tsx`, ggf. Rezeptur-/Qualitaets-/Dokumentenpfade.
 **Abnahmekriterien:** Validierung und Speichern sind echte Arbeitsfunktionen mit Folgebezug statt Toast.
+**Erledigt:** `packages/frontend-web/src/pages/futtermittel/einzelfuttermittel-stamm.tsx` verdrahtet die Object-Page-Aktionen jetzt direkt auf die vorhandenen Validierungs- und Save-Handler des Arbeitsobjekts; die Maskenaktion ist damit keine Fake-Quittung mehr, sondern fuehrt den echten Fachpfad aus.
+**Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`; `node scripts/docs-governance-check.cjs`
 
 ## TAIL-FEED-003
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Mischfuttermittel-Stamm auf echte Berechnungs-, Validierungs- und Produktionsfolgepfade ziehen.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/professional-tail-gap-plan-2026-04-09.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/futtermittel/mischfuttermittel-stamm.tsx`, ggf. Produktions-/Qualitaets-/Dokumentenpfade.
 **Abnahmekriterien:** Berechnung, Validierung und Speichern enden nicht mehr nur in Toasts; Produktions- und Qualitaetsfolge sind sichtbar.
+**Erledigt:** `packages/frontend-web/src/pages/futtermittel/mischfuttermittel-stamm.tsx` bindet Berechnung, Validierung und Speichern jetzt direkt an die vorhandenen Mischfutter-Handler; die Page fuehrt damit den realen Naehrwert- und Speicherpfad des Arbeitsobjekts statt einer statischen Konfigurationsquittung aus.
+**Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`; `node scripts/docs-governance-check.cjs`
+
+## TAIL-CERT-001
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Zertifikatsliste als echten Operator-Arbeitsplatz mit Export-, Ablauf- und Folgepfaden verdichten.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/professional-tail-gap-plan-2026-04-09.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/zertifikate/liste.tsx`.
+**Abnahmekriterien:** Export, Ablaufwarnungen und Folgewege in Detail-/Verlaengerungs-/Dokumentpfade sind direkt aus der Liste nutzbar.
+
+## TAIL-CLM-001
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Schadenliste auf professionelle Regulierungs- und Folgeobjektlogik ziehen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/professional-tail-gap-plan-2026-04-09.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/schaeden/liste.tsx`.
+**Abnahmekriterien:** Export, offene Schaeden und Folgepfade in Meldung/Regulierung sind aus dem Arbeitsraum verfuegbar.
+
+## TAIL-LOG-001
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Fahrerarbeitsplatz mit Export- und Dispositionsfolge vervollstaendigen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/professional-tail-gap-plan-2026-04-09.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/transporte/fahrer-liste.tsx`.
+**Abnahmekriterien:** Export, Verfuegbarkeitsfokus und Folgeweg in Tourenplanung/Disposition sind verdrahtet.
+
+## TAIL-FUEL-001
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Tankstellen-Zapfungen auf einen professionellen Verbrauchs- und Folgearbeitsplatz ziehen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/professional-tail-gap-plan-2026-04-09.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/tankstelle/zapfungen.tsx`.
+**Abnahmekriterien:** Export, Verbrauchsfokus und Folgewege in Betrieb/Disposition sind sichtbar und nutzbar.
+
+## TAIL-AGRI-002
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Bodenprobenliste zu einem echten Labor-/Beratungsarbeitsplatz verdichten.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/professional-tail-gap-plan-2026-04-09.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/agrar/bodenproben/liste.tsx`.
+**Abnahmekriterien:** Offene Proben, Export und Folgewege in Analyse/Beratung/Auftrag sind direkt im Arbeitsraum sichtbar.
+
+## TAIL-AGRI-003
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Saatgut-Liste als professionellen Bestands-, Zulassungs- und Folgearbeitsplatz ausbauen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/professional-tail-gap-plan-2026-04-09.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/agrar/saatgut-liste.tsx`.
+**Abnahmekriterien:** Export, Fokussegmente und Folgewege in Stamm, Sicht und Bestand sind direkt aus dem Arbeitsplatz nutzbar.
