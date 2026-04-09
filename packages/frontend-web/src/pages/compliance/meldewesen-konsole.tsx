@@ -23,6 +23,7 @@ import {
   listReportingUnits,
   listSchedules,
   listJobs,
+  getJobArtifacts,
   runJob,
   createConnector,
   updateConnector,
@@ -36,6 +37,9 @@ import {
   type ScheduleApi,
   type JobApi,
 } from "@/lib/api/meldewesen"
+import { useDokumenteAblage, useWiegungen } from "@/lib/api/betrieb"
+import { useWarteschlange } from "@/lib/api/inventory"
+import { useFrachtbriefe } from "@/lib/api/misc-modules"
 
 type ReportType = "INTRASTAT_DE" | "BLE_MVO" | "ZOLL_ATLAS_PROVIDER" | "EUDR_DDS"
 type TransportKind = "file-drop" | "https" | "sftp" | "email" | "provider"
@@ -295,6 +299,16 @@ export default function MeldewesenKonsole() {
   const units = useMemo(() => unitsApi.map(unitFromApi), [unitsApi])
   const schedules = useMemo(() => schedulesApi.map(scheduleFromApi), [schedulesApi])
   const jobs = useMemo(() => jobsApi.map(jobFromApi), [jobsApi])
+  const latestJob = jobs[0]
+  const artifactsQuery = useQuery({
+    queryKey: ["meldewesen", "jobs", "artifacts", latestJob?.id],
+    queryFn: () => getJobArtifacts(latestJob!.id),
+    enabled: Boolean(latestJob?.id),
+  })
+  const { data: dokumente = [] } = useDokumenteAblage()
+  const { data: wiegungen = [] } = useWiegungen()
+  const { data: warteschlange } = useWarteschlange()
+  const { data: frachtbriefe = [] } = useFrachtbriefe()
 
   const createConnectorMu = useMutation({
     mutationFn: createConnector,
@@ -338,13 +352,50 @@ export default function MeldewesenKonsole() {
     if (schedules.length && !activeScheduleId) setActiveScheduleId(schedules[0].id)
   }, [schedules, activeScheduleId])
 
-  const thresholds = useMemo(
-    () => ({
-      INTRASTAT_ARRIVAL: { reached: false, progressPct: 62 },
-      INTRASTAT_DISPATCH: { reached: false, progressPct: 18 },
-    }),
-    []
-  )
+  const thresholds = useMemo(() => {
+    const intrastatUnits = units.filter((unit) => unit.intrastatEnabled)
+    const arrivalSchedules = schedules.filter((schedule) => schedule.thresholdKey === "INTRASTAT_ARRIVAL" || schedule.reportType === "INTRASTAT_DE")
+    const dispatchSchedules = schedules.filter((schedule) => schedule.thresholdKey === "INTRASTAT_DISPATCH" || schedule.reportType === "INTRASTAT_DE")
+    const arrivalJobs = jobs.filter((job) => job.reportType === "INTRASTAT_DE" && job.status !== "failed")
+    const dispatchJobs = jobs.filter((job) => job.reportType === "INTRASTAT_DE")
+    const failedIntrastatJobs = jobs.filter((job) => job.reportType === "INTRASTAT_DE" && job.status === "failed").length
+
+    const buildThreshold = (
+      matchingSchedules: Schedule[],
+      matchingJobs: JobRun[],
+      hasRelevantUnits: boolean,
+      blockedByFailures: boolean,
+    ) => {
+      const readinessParts = [
+        hasRelevantUnits ? 35 : 0,
+        matchingSchedules.some((schedule) => schedule.enabled) ? 35 : 0,
+        matchingJobs.some((job) => job.status === "success") ? 20 : matchingJobs.some((job) => job.status === "running" || job.status === "queued") ? 10 : 0,
+        blockedByFailures ? 0 : 10,
+      ]
+      const progressPct = Math.max(0, Math.min(100, readinessParts.reduce((sum, part) => sum + part, 0)))
+      return {
+        reached: hasRelevantUnits && matchingSchedules.some((schedule) => schedule.enabled),
+        progressPct,
+        scheduleCount: matchingSchedules.length,
+        jobCount: matchingJobs.length,
+        statusLabel: blockedByFailures ? "Stoerung" : progressPct >= 80 ? "arbeitsfaehig" : progressPct >= 50 ? "in Vorbereitung" : "unvollstaendig",
+        hint: blockedByFailures
+          ? "Fehlgeschlagene Intrastat-Laeufe blockieren derzeit den sauberen Aktivierungspfad."
+          : !hasRelevantUnits
+            ? "Noch keine geeignete Reporting Unit mit Intrastat-Aktivierung vorhanden."
+            : matchingSchedules.length === 0
+              ? "Reporting Unit vorhanden, aber noch kein belastbarer Zeitplan eingerichtet."
+              : matchingJobs.length === 0
+                ? "Zeitplaene stehen, aber es fehlt noch ein erster erfolgreicher Lauf."
+                : "Zeitplaene und Laeufe liefern einen belastbaren Aktivierungsstand.",
+      }
+    }
+
+    return {
+      INTRASTAT_ARRIVAL: buildThreshold(arrivalSchedules, arrivalJobs, intrastatUnits.length > 0, failedIntrastatJobs > 0),
+      INTRASTAT_DISPATCH: buildThreshold(dispatchSchedules, dispatchJobs, intrastatUnits.length > 0, failedIntrastatJobs > 0),
+    }
+  }, [jobs, schedules, units])
 
   const upsertConnector = useCallback(
     (next: Connector) => {
@@ -736,11 +787,12 @@ export default function MeldewesenKonsole() {
 
             <Card className="lg:col-span-2">
               <CardHeader>
-                <CardTitle>Schwellen / Aktivierungslogik (Demo)</CardTitle>
+                <CardTitle>Schwellen / Aktivierungslogik</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="text-sm text-muted-foreground">
-                  In echt: Schwellen automatisch aus Jahresdaten ermitteln (YTD + Vorjahr) pro Reporting Unit.
+                  Die Bewertung verdichtet vorhandene Reporting Units, Zeitplaene und bisherige Laeufe zu einem
+                  belastbaren Aktivierungsstand fuer Intrastat.
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <Card>
@@ -749,9 +801,18 @@ export default function MeldewesenKonsole() {
                     </CardHeader>
                     <CardContent className="space-y-2">
                       <div className="flex items-center justify-between text-sm">
-                        <span>Fortschritt (Demo)</span>
+                        <span>Aktivierungsstand</span>
                         <span className="font-medium">{thresholds.INTRASTAT_ARRIVAL.progressPct}%</span>
                       </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span>Status</span>
+                        <Badge variant={thresholds.INTRASTAT_ARRIVAL.reached ? "default" : "secondary"}>{thresholds.INTRASTAT_ARRIVAL.statusLabel}</Badge>
+                      </div>
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <span>Zeitplaene / Laeufe</span>
+                        <span>{thresholds.INTRASTAT_ARRIVAL.scheduleCount} / {thresholds.INTRASTAT_ARRIVAL.jobCount}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">{thresholds.INTRASTAT_ARRIVAL.hint}</p>
                     </CardContent>
                   </Card>
                   <Card>
@@ -760,9 +821,18 @@ export default function MeldewesenKonsole() {
                     </CardHeader>
                     <CardContent className="space-y-2">
                       <div className="flex items-center justify-between text-sm">
-                        <span>Fortschritt (Demo)</span>
+                        <span>Aktivierungsstand</span>
                         <span className="font-medium">{thresholds.INTRASTAT_DISPATCH.progressPct}%</span>
                       </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span>Status</span>
+                        <Badge variant={thresholds.INTRASTAT_DISPATCH.reached ? "default" : "secondary"}>{thresholds.INTRASTAT_DISPATCH.statusLabel}</Badge>
+                      </div>
+                      <div className="flex items-center justify-between text-xs text-muted-foreground">
+                        <span>Zeitplaene / Laeufe</span>
+                        <span>{thresholds.INTRASTAT_DISPATCH.scheduleCount} / {thresholds.INTRASTAT_DISPATCH.jobCount}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">{thresholds.INTRASTAT_DISPATCH.hint}</p>
                     </CardContent>
                   </Card>
                 </div>
@@ -1050,9 +1120,25 @@ export default function MeldewesenKonsole() {
 
             <Card className="lg:col-span-1">
               <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
+                <CardTitle>Rückmeldungen und Objektbezug</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2">
+              <CardContent className="space-y-3">
+                <div className="rounded-lg border p-3 text-sm">
+                  <div className="font-medium">{latestJob?.reportType ?? "Noch kein Lauf"}</div>
+                  <div className="text-xs text-muted-foreground">{latestJob?.createdAt ? new Date(latestJob.createdAt).toLocaleString() : "n/a"}</div>
+                  <div className="mt-2 flex items-center justify-between">
+                    <span className="text-muted-foreground">Artefakte</span>
+                    <Badge variant="outline">{(artifactsQuery.data ?? []).length}</Badge>
+                  </div>
+                </div>
+                <div className="grid gap-2 text-sm">
+                  <div className="flex items-center justify-between rounded border px-3 py-2"><span>Warteschlange</span><span className="font-medium">{warteschlange?.items?.length ?? 0}</span></div>
+                  <div className="flex items-center justify-between rounded border px-3 py-2"><span>Wiegungen</span><span className="font-medium">{wiegungen.length}</span></div>
+                  <div className="flex items-center justify-between rounded border px-3 py-2"><span>Frachtbriefe</span><span className="font-medium">{frachtbriefe.length}</span></div>
+                  <div className="flex items-center justify-between rounded border px-3 py-2"><span>Dokumente</span><span className="font-medium">{dokumente.length}</span></div>
+                </div>
+                <Separator />
+                <div className="font-medium text-sm">Quick Actions</div>
                 <Dialog>
                   <DialogTrigger asChild>
                     <Button variant="outline" className="w-full">

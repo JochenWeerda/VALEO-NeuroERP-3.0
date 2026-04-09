@@ -24,6 +24,7 @@ import {
   getKontrakt,
   type Kontrakt,
   type KontraktLine,
+  type KontraktSteering,
   updateKontrakt,
 } from '@/lib/api/kontrakte'
 import DlgAuswahlVerkaufKontrakte from '@/pages/kontrakte/DlgAuswahlVerkaufKontrakte'
@@ -33,12 +34,88 @@ import FrmKontraktProtokoll from '@/pages/kontrakte/FrmKontraktProtokoll'
 import { buildDecisionView } from '@/policy/decision-view'
 import { ProcessStatusPanel } from '@/components/workflow/ProcessStatusPanel'
 import { apiClient } from '@/lib/api-client'
+import { useTenant } from '@/hooks/useTenant'
 import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
 import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
 import { ShieldAlert, ShieldCheck } from 'lucide-react'
 
 type FormState = Omit<Kontrakt, 'contract_id' | 'rest_quantity'>
+type SteeringKey = keyof KontraktSteering
+
+function getSteeringSnapshot(state: FormState): KontraktSteering {
+  const conditions = (state.conditions_json ?? {}) as Record<string, unknown>
+  return {
+    contract_class: typeof conditions.contract_class === 'string' ? conditions.contract_class : null,
+    contract_group: typeof conditions.contract_group === 'string' ? conditions.contract_group : null,
+    contract_variant: typeof conditions.contract_variant === 'string' ? conditions.contract_variant : null,
+    disposition_flag: typeof conditions.disposition_flag === 'string' ? conditions.disposition_flag : null,
+    parity_code: typeof conditions.parity_code === 'string' ? conditions.parity_code : null,
+    parity_label: typeof conditions.parity_label === 'string' ? conditions.parity_label : null,
+    fallback_route: typeof conditions.fallback_route === 'string' ? conditions.fallback_route : null,
+    alternate_articles: Array.isArray(conditions.alternate_articles)
+      ? conditions.alternate_articles.filter((item): item is string => typeof item === 'string')
+      : typeof conditions.alternate_articles === 'string'
+        ? conditions.alternate_articles.split(',').map((item) => item.trim()).filter(Boolean)
+        : [],
+    print_template: typeof conditions.print_template === 'string' ? conditions.print_template : null,
+    print_channel: typeof conditions.print_channel === 'string' ? conditions.print_channel : null,
+    print_copy_count: typeof conditions.print_copy_count === 'number' ? conditions.print_copy_count : null,
+    last_printed_at: typeof conditions.last_printed_at === 'string' ? conditions.last_printed_at : null,
+    print_ready: state.steering?.print_ready ?? false,
+    washout_status: typeof conditions.washout_status === 'string' ? conditions.washout_status : null,
+    washout_quantity_t: typeof conditions.washout_quantity_t === 'number' ? conditions.washout_quantity_t : null,
+    washout_reason: typeof conditions.washout_reason === 'string' ? conditions.washout_reason : null,
+    writeoff_quantity_t: typeof conditions.writeoff_quantity_t === 'number' ? conditions.writeoff_quantity_t : null,
+    writeoff_reason: typeof conditions.writeoff_reason === 'string' ? conditions.writeoff_reason : null,
+    writeoff_candidate: state.steering?.writeoff_candidate ?? false,
+    hedge_strategy: typeof conditions.hedge_strategy === 'string' ? conditions.hedge_strategy : null,
+    hedge_market: typeof conditions.hedge_market === 'string' ? conditions.hedge_market : null,
+    hedge_status: typeof conditions.hedge_status === 'string' ? conditions.hedge_status : null,
+    hedge_target_pct: typeof conditions.hedge_target_pct === 'number' ? conditions.hedge_target_pct : null,
+    hedge_quantity_t: typeof conditions.hedge_quantity_t === 'number' ? conditions.hedge_quantity_t : null,
+    market_price_source: typeof conditions.market_price_source === 'string' ? conditions.market_price_source : null,
+    market_price_eur_t: typeof conditions.market_price_eur_t === 'number' ? conditions.market_price_eur_t : null,
+    market_price_date: typeof conditions.market_price_date === 'string' ? conditions.market_price_date : null,
+    dunning_level: typeof conditions.dunning_level === 'number' ? conditions.dunning_level : null,
+    dunning_blocked: Boolean(conditions.dunning_blocked),
+    dunning_due_at: typeof conditions.dunning_due_at === 'string' ? conditions.dunning_due_at : null,
+    dunning_last_at: typeof conditions.dunning_last_at === 'string' ? conditions.dunning_last_at : null,
+    dunning_reason: typeof conditions.dunning_reason === 'string' ? conditions.dunning_reason : null,
+    hedge_quote_pct: state.steering?.hedge_quote_pct ?? null,
+    hedge_gap_pct: state.steering?.hedge_gap_pct ?? null,
+    market_price_delta_eur_t: state.steering?.market_price_delta_eur_t ?? null,
+    market_valuation_eur: state.steering?.market_valuation_eur ?? null,
+    reference_price_eur_t: state.steering?.reference_price_eur_t ?? null,
+    dunning_candidate: state.steering?.dunning_candidate ?? false,
+  }
+}
+
+function updateSteeringValue(state: FormState, key: SteeringKey, value: unknown): FormState {
+  return {
+    ...state,
+    conditions_json: {
+      ...(state.conditions_json || {}),
+      [key]: value,
+    },
+  }
+}
+
+function updateSteeringList(state: FormState, key: 'alternate_articles', rawValue: string): FormState {
+  return updateSteeringValue(
+    state,
+    key,
+    rawValue
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean),
+  )
+}
+
+function formatNumber(value: number | null | undefined, decimals = 0): string {
+  if (value == null) return '-'
+  return value.toLocaleString('de-DE', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })
+}
 
 function createEmptyLine(position_no: number): KontraktLine {
   return {
@@ -94,6 +171,7 @@ export default function FrmKontraktDetail(): JSX.Element {
   const [searchParams] = useSearchParams()
   const { toast } = useToast()
   const { hasRole } = useAuth()
+  const { tenantId } = useTenant()
   const workflowContext = readWorkflowEntryContext(searchParams)
 
   const isEdit = Boolean(id)
@@ -111,6 +189,7 @@ export default function FrmKontraktDetail(): JSX.Element {
   const canDelete = hasRole('KONTRAKT_LOESCHEN') || hasRole('KONTRAKT_ADMIN')
   const isAdmin = hasRole('KONTRAKT_ADMIN')
   const isDraftEditable = canEdit && (!isEdit || state.status === 'OFFEN')
+  const steering = useMemo(() => getSteeringSnapshot(state), [state])
 
   const detailQuery = useQuery({
     queryKey: ['kontrakte', 'detail', id],
@@ -214,6 +293,32 @@ export default function FrmKontraktDetail(): JSX.Element {
     },
   })
 
+  const hedgeMutation = useMutation({
+    mutationFn: async () => {
+      if (!isEdit || !id) throw new Error('Kontrakt muss zuerst gespeichert werden')
+      if (!steering.hedge_market) throw new Error('Terminmarktprodukt fehlt')
+      if (!steering.hedge_quantity_t || steering.hedge_quantity_t <= 0) throw new Error('Hedge-Menge fehlt')
+      const hedgeType = state.contract_type === 'VERKAUF' ? 'short' : 'long'
+      return apiClient.post('/api/v1/price-hedge/hedges', {
+        tenant_id: tenantId || 'default',
+        produkt: steering.hedge_market,
+        typ: hedgeType,
+        menge_t: steering.hedge_quantity_t,
+        basis_preis_eur_t: steering.reference_price_eur_t ?? state.min_price ?? state.lines[0]?.unit_price ?? 0,
+        verfall_datum: (state.valid_to || new Date().toISOString()).slice(0, 10),
+        kontrakt_id: id,
+        broker_referenz: steering.fallback_route || null,
+      })
+    },
+    onSuccess: () => {
+      toast({ title: 'Hedge angelegt', description: 'Die Hedge-Referenz wurde aus dem Kontrakt heraus erzeugt.' })
+      setState((prev) => updateSteeringValue(prev, 'hedge_status', 'offen'))
+    },
+    onError: (err: any) => {
+      toast({ title: 'Hedge fehlgeschlagen', description: err?.message || 'Hedge konnte nicht angelegt werden', variant: 'destructive' })
+    },
+  })
+
   const deleteMutation = useMutation({
     mutationFn: async () => deleteKontrakt(String(id)),
     onSuccess: () => {
@@ -229,6 +334,19 @@ export default function FrmKontraktDetail(): JSX.Element {
     const total = state.lines.reduce((acc, l) => acc + Number(l.qty_contract || 0), 0)
     return Number(state.total_quantity || total)
   }, [state.lines, state.total_quantity])
+
+  const steeringHighlights = useMemo(
+    () => [
+      steering.contract_class ? { label: 'Klasse', value: steering.contract_class } : null,
+      steering.contract_group ? { label: 'Gruppe', value: steering.contract_group } : null,
+      steering.contract_variant ? { label: 'Variante', value: steering.contract_variant } : null,
+      steering.parity_code ? { label: 'Paritaet', value: [steering.parity_code, steering.parity_label].filter(Boolean).join(' · ') } : null,
+      steering.disposition_flag ? { label: 'Disposition', value: steering.disposition_flag } : null,
+      steering.hedge_strategy ? { label: 'Hedging', value: steering.hedge_strategy } : null,
+      steering.dunning_level ? { label: 'Mahnstufe', value: `Stufe ${steering.dunning_level}` } : null,
+    ].filter(Boolean) as Array<{ label: string; value: string }>,
+    [steering],
+  )
 
   const kontraktStatusView = useMemo(() => {
     const explainability = {
@@ -319,11 +437,122 @@ export default function FrmKontraktDetail(): JSX.Element {
             {state.pricing_model === 'matif' && isEdit && (
               <Button variant="outline" onClick={() => setShowMatifDialog(true)}>MATIF-Preisfixierung</Button>
             )}
+            <Button
+              variant="outline"
+              disabled={!isEdit || hedgeMutation.isPending || !steering.hedge_market || !steering.hedge_quantity_t}
+              onClick={() => hedgeMutation.mutate()}
+            >
+              Hedge anlegen
+            </Button>
+            <Button variant="outline" disabled={!isEdit} onClick={() => navigate('/finance/mahnwesen')}>
+              Mahnwesen
+            </Button>
             <Button variant="outline" disabled={!isEdit || !canEdit || cancelMutation.isPending} onClick={() => cancelMutation.mutate()}>Workflow erledigt/stornieren</Button>
           </div>
 
           {isEdit && kontraktStatusView ? (
             <ProcessStatusPanel view={kontraktStatusView} title="Prozessstatus" />
+          ) : null}
+
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
+            <Card>
+              <CardContent className="py-4">
+                <div className="text-xs uppercase tracking-wide text-muted-foreground">Kontrakt-Steuerung</div>
+                <div className="mt-2 text-sm font-medium">
+                  {[steering.contract_class, steering.contract_group, steering.contract_variant].filter(Boolean).join(' / ') || 'Noch nicht klassifiziert'}
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">Klasse, Gruppe und Variante fuer Vertragslogik und Reporting.</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="py-4">
+                <div className="text-xs uppercase tracking-wide text-muted-foreground">Paritaet / Disposition</div>
+                <div className="mt-2 text-sm font-medium">
+                  {steering.parity_code || 'Keine Paritaet'}{steering.disposition_flag ? ` · ${steering.disposition_flag}` : ''}
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">{steering.parity_label || 'Liefer- und Dispositionssteuerung noch nicht hinterlegt.'}</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="py-4">
+                <div className="text-xs uppercase tracking-wide text-muted-foreground">Hedging / Marktwert</div>
+                <div className="mt-2 text-sm font-medium">
+                  {steering.hedge_quote_pct != null ? `${formatNumber(steering.hedge_quote_pct, 1)}% abgesichert` : 'Keine Hedge-Quote'}
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {steering.market_valuation_eur != null
+                    ? `Marktbewertung ${formatNumber(steering.market_valuation_eur, 2)} EUR`
+                    : 'Noch keine Marktpreisbewertung hinterlegt.'}
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="py-4">
+                <div className="text-xs uppercase tracking-wide text-muted-foreground">Mahnung / Druck</div>
+                <div className="mt-2 text-sm font-medium">
+                  {steering.dunning_candidate
+                    ? 'Mahnung faellig'
+                    : steering.dunning_level
+                      ? `Mahnstufe ${steering.dunning_level}`
+                      : 'Keine Mahnstufe'}
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {steering.print_template || 'Ohne Formulardefinition'}
+                  {steering.print_channel ? ` · ${steering.print_channel}` : ''}
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+            <Card>
+              <CardContent className="py-4">
+                <div className="text-xs uppercase tracking-wide text-muted-foreground">Ausweichliste</div>
+                <div className="mt-2 text-sm font-medium">
+                  {steering.alternate_articles && steering.alternate_articles.length > 0
+                    ? steering.alternate_articles.join(', ')
+                    : 'Keine Ausweichartikel'}
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {steering.fallback_route || 'Keine definierte Ausweichroute'}
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="py-4">
+                <div className="text-xs uppercase tracking-wide text-muted-foreground">Washout / Abschreibung</div>
+                <div className="mt-2 text-sm font-medium">
+                  {steering.writeoff_candidate
+                    ? `${formatNumber(steering.washout_quantity_t ?? steering.writeoff_quantity_t, 3)} t vorgemerkt`
+                    : 'Keine Abschreibung vorgemerkt'}
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {steering.washout_status || steering.writeoff_reason || 'Noch kein Washout-/Abschreibungspfad definiert.'}
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="py-4">
+                <div className="text-xs uppercase tracking-wide text-muted-foreground">Druckpaket</div>
+                <div className="mt-2 text-sm font-medium">
+                  {steering.print_ready ? 'Druckfaehig' : 'Druckkonfiguration unvollstaendig'}
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {steering.print_copy_count ? `${steering.print_copy_count} Kopien` : 'Kopien nicht hinterlegt'}
+                  {steering.last_printed_at ? ` · zuletzt ${steering.last_printed_at.slice(0, 10)}` : ''}
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {steeringHighlights.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {steeringHighlights.map((item) => (
+                <Badge key={item.label} variant="outline">
+                  {item.label}: {item.value}
+                </Badge>
+              ))}
+            </div>
           ) : null}
 
           {isEdit && shortArticles.length > 0 && (
@@ -457,6 +686,7 @@ export default function FrmKontraktDetail(): JSX.Element {
               <TabsTrigger value="lieferanschrift">LIEFERANSCHR.</TabsTrigger>
               <TabsTrigger value="zahlungsbed">ZAHLUNGSBED.</TabsTrigger>
               <TabsTrigger value="preismodell">PREISMODELL</TabsTrigger>
+              <TabsTrigger value="steuerung">STEUERUNG</TabsTrigger>
               <TabsTrigger value="bedingungen">BEDINGUNGEN</TabsTrigger>
               <TabsTrigger value="notizen">NOTIZEN</TabsTrigger>
               <TabsTrigger value="unterlagen">UNTERLAGEN</TabsTrigger>
@@ -595,6 +825,379 @@ export default function FrmKontraktDetail(): JSX.Element {
                       disabled={!isDraftEditable}
                     />
                   </div>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="steuerung">
+              <div className="space-y-4 py-2">
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                  <div className="space-y-1">
+                    <Label>Kontraktklasse</Label>
+                    <NativeSelect
+                      value={steering.contract_class || ''}
+                      onValueChange={(v) => setState((s) => updateSteeringValue(s, 'contract_class', v))}
+                      options={[
+                        { value: 'standard', label: 'Standard' },
+                        { value: 'saison', label: 'Saisonvertrag' },
+                        { value: 'pool', label: 'Pool / Sammelvertrag' },
+                        { value: 'basis', label: 'Basis-/Preisvertrag' },
+                        { value: 'sonder', label: 'Sonderkontrakt' },
+                      ]}
+                      placeholder="Bitte waehlen"
+                      disabled={!isDraftEditable}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Kontraktgruppe</Label>
+                    <Input
+                      value={steering.contract_group || ''}
+                      onChange={(e) => setState((s) => updateSteeringValue(s, 'contract_group', e.target.value))}
+                      disabled={!isDraftEditable}
+                      placeholder="z. B. Ernte 2026"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Variante</Label>
+                    <Input
+                      value={steering.contract_variant || ''}
+                      onChange={(e) => setState((s) => updateSteeringValue(s, 'contract_variant', e.target.value))}
+                      disabled={!isDraftEditable}
+                      placeholder="z. B. Qualitaetsstaffel A"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                  <div className="space-y-1">
+                    <Label>Paritaet</Label>
+                    <NativeSelect
+                      value={steering.parity_code || ''}
+                      onValueChange={(v) => setState((s) => updateSteeringValue(s, 'parity_code', v))}
+                      options={[
+                        { value: 'ab_hof', label: 'ab Hof' },
+                        { value: 'frei_lager', label: 'frei Lager' },
+                        { value: 'frei_rampon', label: 'frei Rampe' },
+                        { value: 'franko_werk', label: 'franko Werk' },
+                      ]}
+                      placeholder="Bitte waehlen"
+                      disabled={!isDraftEditable}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Paritaetstext</Label>
+                    <Input
+                      value={steering.parity_label || ''}
+                      onChange={(e) => setState((s) => updateSteeringValue(s, 'parity_label', e.target.value))}
+                      disabled={!isDraftEditable}
+                      placeholder="Liefer- / Uebergabetext"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Dispositionskennzeichen</Label>
+                    <NativeSelect
+                      value={steering.disposition_flag || ''}
+                      onValueChange={(v) => setState((s) => updateSteeringValue(s, 'disposition_flag', v))}
+                      options={[
+                        { value: 'fix_zuweisen', label: 'Fix zuweisen' },
+                        { value: 'frei_disponieren', label: 'Frei disponieren' },
+                        { value: 'andienung', label: 'Andienung / Androhung' },
+                        { value: 'ausweichartikel', label: 'Ausweichartikel zulassen' },
+                      ]}
+                      placeholder="Bitte waehlen"
+                      disabled={!isDraftEditable}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                  <div className="space-y-1">
+                    <Label>Ausweichroute / Brokerreferenz</Label>
+                    <Input
+                      value={steering.fallback_route || ''}
+                      onChange={(e) => setState((s) => updateSteeringValue(s, 'fallback_route', e.target.value))}
+                      disabled={!isDraftEditable}
+                      placeholder="z. B. Lager Ost, Broker 42"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Ausweichartikel / Alternativen</Label>
+                    <Input
+                      value={(steering.alternate_articles || []).join(', ')}
+                      onChange={(e) => setState((s) => updateSteeringList(s, 'alternate_articles', e.target.value))}
+                      disabled={!isDraftEditable}
+                      placeholder="z. B. WEIZEN_A, WEIZEN_B"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
+                  <div className="space-y-1">
+                    <Label>Druckvorlage</Label>
+                    <Input
+                      value={steering.print_template || ''}
+                      onChange={(e) => setState((s) => updateSteeringValue(s, 'print_template', e.target.value))}
+                      disabled={!isDraftEditable}
+                      placeholder="z. B. KON_STD_A4"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Druck-/Versandkanal</Label>
+                    <NativeSelect
+                      value={steering.print_channel || ''}
+                      onValueChange={(v) => setState((s) => updateSteeringValue(s, 'print_channel', v))}
+                      options={[
+                        { value: 'print', label: 'Druck' },
+                        { value: 'mail', label: 'E-Mail' },
+                        { value: 'portal', label: 'Portal' },
+                        { value: 'edi', label: 'EDI / Datentransfer' },
+                      ]}
+                      placeholder="Bitte waehlen"
+                      disabled={!isDraftEditable}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Kopien</Label>
+                    <Input
+                      type="number"
+                      value={steering.print_copy_count ?? ''}
+                      onChange={(e) => setState((s) => updateSteeringValue(s, 'print_copy_count', e.target.value ? Number(e.target.value) : 0))}
+                      disabled={!isDraftEditable}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Letzter Druck</Label>
+                    <Input
+                      type="date"
+                      value={(steering.last_printed_at || '').slice(0, 10)}
+                      onChange={(e) => setState((s) => updateSteeringValue(s, 'last_printed_at', e.target.value || null))}
+                      disabled={!isDraftEditable}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Mahnstufe</Label>
+                    <NativeSelect
+                      value={String(steering.dunning_level ?? '')}
+                      onValueChange={(v) => setState((s) => updateSteeringValue(s, 'dunning_level', v ? Number(v) : 0))}
+                      options={[
+                        { value: '0', label: 'Keine Mahnstufe' },
+                        { value: '1', label: 'Mahnstufe 1' },
+                        { value: '2', label: 'Mahnstufe 2' },
+                        { value: '3', label: 'Mahnstufe 3 / Inkasso-Vorstufe' },
+                      ]}
+                      disabled={!isDraftEditable}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
+                  <div className="space-y-1">
+                    <Label>Washout-Status</Label>
+                    <NativeSelect
+                      value={steering.washout_status || ''}
+                      onValueChange={(v) => setState((s) => updateSteeringValue(s, 'washout_status', v))}
+                      options={[
+                        { value: 'keiner', label: 'Keiner' },
+                        { value: 'pruefen', label: 'Pruefen' },
+                        { value: 'vereinbart', label: 'Vereinbart' },
+                        { value: 'abgeschlossen', label: 'Abgeschlossen' },
+                      ]}
+                      placeholder="Bitte waehlen"
+                      disabled={!isDraftEditable}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Washout-Menge t</Label>
+                    <Input
+                      type="number"
+                      value={steering.washout_quantity_t ?? ''}
+                      onChange={(e) => setState((s) => updateSteeringValue(s, 'washout_quantity_t', e.target.value ? Number(e.target.value) : null))}
+                      disabled={!isDraftEditable}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Abschreibungsmenge t</Label>
+                    <Input
+                      type="number"
+                      value={steering.writeoff_quantity_t ?? ''}
+                      onChange={(e) => setState((s) => updateSteeringValue(s, 'writeoff_quantity_t', e.target.value ? Number(e.target.value) : null))}
+                      disabled={!isDraftEditable}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Washout-/Abschreibungsgrund</Label>
+                    <Input
+                      value={steering.washout_reason || steering.writeoff_reason || ''}
+                      onChange={(e) => {
+                        const value = e.target.value
+                        setState((s) => updateSteeringValue(updateSteeringValue(s, 'washout_reason', value), 'writeoff_reason', value))
+                      }}
+                      disabled={!isDraftEditable}
+                      placeholder="z. B. Qualitaetsabweichung / Kunde storniert"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                  <div className="space-y-1">
+                    <Label>Hedge-Strategie</Label>
+                    <NativeSelect
+                      value={steering.hedge_strategy || ''}
+                      onValueChange={(v) => setState((s) => updateSteeringValue(s, 'hedge_strategy', v))}
+                      options={[
+                        { value: 'keine', label: 'Keine' },
+                        { value: 'vollabsicherung', label: 'Vollabsicherung' },
+                        { value: 'teilabsicherung', label: 'Teilabsicherung' },
+                        { value: 'preisfenster', label: 'Preisfenster / Optionsstrategie' },
+                      ]}
+                      placeholder="Bitte waehlen"
+                      disabled={!isDraftEditable}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Terminmarktprodukt</Label>
+                    <NativeSelect
+                      value={steering.hedge_market || ''}
+                      onValueChange={(v) => setState((s) => updateSteeringValue(s, 'hedge_market', v))}
+                      options={[
+                        { value: 'weizen_matif', label: 'Weizen MATIF' },
+                        { value: 'mais_matif', label: 'Mais MATIF' },
+                        { value: 'raps_matif', label: 'Raps MATIF' },
+                        { value: 'sojaschrot_cbot', label: 'Sojaschrot CBOT' },
+                        { value: 'futtergerste_matif', label: 'Futtergerste MATIF' },
+                      ]}
+                      placeholder="Bitte waehlen"
+                      disabled={!isDraftEditable}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Hedge-Status</Label>
+                    <NativeSelect
+                      value={steering.hedge_status || ''}
+                      onValueChange={(v) => setState((s) => updateSteeringValue(s, 'hedge_status', v))}
+                      options={[
+                        { value: 'offen', label: 'Offen' },
+                        { value: 'teilweise_gesichert', label: 'Teilweise gesichert' },
+                        { value: 'voll_gesichert', label: 'Voll gesichert' },
+                        { value: 'verfallen', label: 'Verfallen / glattgestellt' },
+                      ]}
+                      placeholder="Bitte waehlen"
+                      disabled={!isDraftEditable}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
+                  <div className="space-y-1">
+                    <Label>Hedge-Ziel %</Label>
+                    <Input
+                      type="number"
+                      value={steering.hedge_target_pct ?? ''}
+                      onChange={(e) => setState((s) => updateSteeringValue(s, 'hedge_target_pct', e.target.value ? Number(e.target.value) : null))}
+                      disabled={!isDraftEditable}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Hedge-Menge t</Label>
+                    <Input
+                      type="number"
+                      value={steering.hedge_quantity_t ?? ''}
+                      onChange={(e) => setState((s) => updateSteeringValue(s, 'hedge_quantity_t', e.target.value ? Number(e.target.value) : null))}
+                      disabled={!isDraftEditable}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Marktpreis EUR/t</Label>
+                    <Input
+                      type="number"
+                      value={steering.market_price_eur_t ?? ''}
+                      onChange={(e) => setState((s) => updateSteeringValue(s, 'market_price_eur_t', e.target.value ? Number(e.target.value) : null))}
+                      disabled={!isDraftEditable}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Marktpreis-Datum</Label>
+                    <Input
+                      type="date"
+                      value={(steering.market_price_date || '').slice(0, 10)}
+                      onChange={(e) => setState((s) => updateSteeringValue(s, 'market_price_date', e.target.value || null))}
+                      disabled={!isDraftEditable}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
+                  <div className="space-y-1">
+                    <Label>Marktpreisquelle</Label>
+                    <Input
+                      value={steering.market_price_source || ''}
+                      onChange={(e) => setState((s) => updateSteeringValue(s, 'market_price_source', e.target.value))}
+                      disabled={!isDraftEditable}
+                      placeholder="z. B. MATIF Settlement"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Mahnfaellig ab</Label>
+                    <Input
+                      type="date"
+                      value={(steering.dunning_due_at || '').slice(0, 10)}
+                      onChange={(e) => setState((s) => updateSteeringValue(s, 'dunning_due_at', e.target.value || null))}
+                      disabled={!isDraftEditable}
+                    />
+                  </div>
+                  <div className="flex items-center gap-2 pt-6">
+                    <Checkbox
+                      checked={Boolean(steering.dunning_blocked)}
+                      onCheckedChange={(v) => setState((s) => updateSteeringValue(s, 'dunning_blocked', v === true))}
+                      disabled={!isDraftEditable}
+                    />
+                    <Label>Mahnung gesperrt</Label>
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Mahn-Hinweis</Label>
+                    <Input
+                      value={steering.dunning_reason || ''}
+                      onChange={(e) => setState((s) => updateSteeringValue(s, 'dunning_reason', e.target.value))}
+                      disabled={!isDraftEditable}
+                      placeholder="z. B. Wartet auf Qualitaetsabrechnung"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                  <Card>
+                    <CardContent className="py-4 text-sm">
+                      <div className="text-xs uppercase tracking-wide text-muted-foreground">Hedge-Quote</div>
+                      <div className="mt-2 text-lg font-semibold">
+                        {steering.hedge_quote_pct != null ? `${formatNumber(steering.hedge_quote_pct, 1)}%` : '-'}
+                      </div>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {steering.hedge_gap_pct != null ? `Noch ${formatNumber(steering.hedge_gap_pct, 1)}% bis zum Ziel.` : 'Noch keine Absicherungsquote berechnet.'}
+                      </p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="py-4 text-sm">
+                      <div className="text-xs uppercase tracking-wide text-muted-foreground">Referenzpreis vs. Markt</div>
+                      <div className="mt-2 text-lg font-semibold">
+                        {steering.market_price_delta_eur_t != null ? `${formatNumber(steering.market_price_delta_eur_t, 2)} EUR/t` : '-'}
+                      </div>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Referenz {steering.reference_price_eur_t != null ? `${formatNumber(steering.reference_price_eur_t, 2)} EUR/t` : 'nicht gesetzt'}
+                      </p>
+                    </CardContent>
+                  </Card>
+                  <Card>
+                    <CardContent className="py-4 text-sm">
+                      <div className="text-xs uppercase tracking-wide text-muted-foreground">Marktbewertung Restmenge</div>
+                      <div className="mt-2 text-lg font-semibold">
+                        {steering.market_valuation_eur != null ? `${formatNumber(steering.market_valuation_eur, 2)} EUR` : '-'}
+                      </div>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Mahnung {steering.dunning_candidate ? 'waere heute faellig.' : 'aktuell nicht automatisch faellig.'}
+                      </p>
+                    </CardContent>
+                  </Card>
                 </div>
               </div>
             </TabsContent>

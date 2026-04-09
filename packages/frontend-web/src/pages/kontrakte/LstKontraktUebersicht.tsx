@@ -56,6 +56,21 @@ export default function LstKontraktUebersicht(): JSX.Element {
       }),
   })
 
+  const engagementQuery = useQuery({
+    queryKey: ['kontrakte', 'engagement', contractType, statusFilter, dateFrom, dateTo, matchcode1, matchcode2, alsoDone],
+    queryFn: () =>
+      listKontrakte({
+        contract_type: contractType || undefined,
+        status: statusFilter || undefined,
+        valid_from: dateFrom || undefined,
+        valid_to: dateTo || undefined,
+        query: `${matchcode1} ${matchcode2}`.trim() || undefined,
+        include_done: alsoDone,
+        skip: 0,
+        limit: 500,
+      }),
+  })
+
   const shortcuts = buildCoreMaskShortcuts({
     onNew: () => navigate('/kontrakte/neu'),
     onSearch: () => matchcodeRef.current?.focus(),
@@ -73,6 +88,57 @@ export default function LstKontraktUebersicht(): JSX.Element {
     return source.sort((a, b) => (sortDir === 'asc' ? a.contract_no.localeCompare(b.contract_no) : b.contract_no.localeCompare(a.contract_no)))
   }, [query.data, contractNoFrom, contractNoTo, sortDir])
 
+  const steeringSummary = useMemo(() => {
+    return {
+      fallbackReady: rows.filter((row) => (row.steering?.alternate_articles?.length ?? 0) > 0 || row.steering?.fallback_route).length,
+      writeoffCandidates: rows.filter((row) => row.steering?.writeoff_candidate).length,
+      printReady: rows.filter((row) => row.steering?.print_ready).length,
+      dunningDue: rows.filter((row) => row.steering?.dunning_candidate).length,
+    }
+  }, [rows])
+
+  const engagement = useMemo(() => {
+    const items = engagementQuery.data?.items ?? []
+    const summary = {
+      offeneVerkaufMenge: 0,
+      offeneEinkaufMenge: 0,
+      offeneZukaufMenge: 0,
+      negativeMarktbewertung: 0,
+      hedgeGapMenge: 0,
+      topRisiken: [] as typeof items,
+    }
+
+    for (const item of items) {
+      if (item.status !== 'OFFEN') continue
+      if (item.contract_type === 'VERKAUF') summary.offeneVerkaufMenge += item.rest_quantity
+      if (item.contract_type === 'EINKAUF') summary.offeneEinkaufMenge += item.rest_quantity
+      if (item.contract_type === 'ZUKAUF') summary.offeneZukaufMenge += item.rest_quantity
+      summary.negativeMarktbewertung += Math.min(0, item.steering?.market_valuation_eur ?? 0)
+      if ((item.steering?.hedge_gap_pct ?? 0) > 0) {
+        summary.hedgeGapMenge += item.rest_quantity
+      }
+    }
+
+    summary.topRisiken = [...items]
+      .filter((item) => item.status === 'OFFEN')
+      .sort((a, b) => {
+        const aScore =
+          Math.abs(Math.min(0, a.steering?.market_valuation_eur ?? 0)) +
+          (a.steering?.hedge_gap_pct ?? 0) * 10 +
+          (a.steering?.dunning_candidate ? 1000 : 0) +
+          (a.steering?.writeoff_candidate ? 500 : 0)
+        const bScore =
+          Math.abs(Math.min(0, b.steering?.market_valuation_eur ?? 0)) +
+          (b.steering?.hedge_gap_pct ?? 0) * 10 +
+          (b.steering?.dunning_candidate ? 1000 : 0) +
+          (b.steering?.writeoff_candidate ? 500 : 0)
+        return bScore - aScore
+      })
+      .slice(0, 5)
+
+    return summary
+  }, [engagementQuery.data])
+
   const totalPages = Math.ceil((query.data?.total ?? 0) / PAGE_SIZE)
 
   return (
@@ -83,6 +149,68 @@ export default function LstKontraktUebersicht(): JSX.Element {
           <CardTitle>Kontrakt-Uebersicht</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
+            <Card>
+              <CardContent className="py-4">
+                <div className="text-xs uppercase tracking-wide text-muted-foreground">Ausweichbereit</div>
+                <div className="mt-2 text-2xl font-semibold">{steeringSummary.fallbackReady}</div>
+                <p className="mt-1 text-xs text-muted-foreground">Kontrakte mit Ausweichroute oder Alternativartikel</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="py-4">
+                <div className="text-xs uppercase tracking-wide text-muted-foreground">Washout / Abschreibung</div>
+                <div className="mt-2 text-2xl font-semibold text-amber-700">{steeringSummary.writeoffCandidates}</div>
+                <p className="mt-1 text-xs text-muted-foreground">Kontrakte mit vorgemerktem Abschreibungsbedarf</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="py-4">
+                <div className="text-xs uppercase tracking-wide text-muted-foreground">Druckbereit</div>
+                <div className="mt-2 text-2xl font-semibold text-blue-700">{steeringSummary.printReady}</div>
+                <p className="mt-1 text-xs text-muted-foreground">Formular und Kanal bereits definiert</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="py-4">
+                <div className="text-xs uppercase tracking-wide text-muted-foreground">Mahnfaellig</div>
+                <div className="mt-2 text-2xl font-semibold text-red-700">{steeringSummary.dunningDue}</div>
+                <p className="mt-1 text-xs text-muted-foreground">Offene Kontrakte mit Mahnindikator</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
+            <Card>
+              <CardContent className="py-4">
+                <div className="text-xs uppercase tracking-wide text-muted-foreground">VK-Exposure offen</div>
+                <div className="mt-2 text-2xl font-semibold text-red-700">{engagement.offeneVerkaufMenge.toLocaleString('de-DE')}</div>
+                <p className="mt-1 text-xs text-muted-foreground">Offene Verkaufsrestmenge</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="py-4">
+                <div className="text-xs uppercase tracking-wide text-muted-foreground">EK-/Zukauf-Exposure</div>
+                <div className="mt-2 text-2xl font-semibold text-green-700">{(engagement.offeneEinkaufMenge + engagement.offeneZukaufMenge).toLocaleString('de-DE')}</div>
+                <p className="mt-1 text-xs text-muted-foreground">Offene Einkaufs- und Zukaufsmengen</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="py-4">
+                <div className="text-xs uppercase tracking-wide text-muted-foreground">Negative Marktwerte</div>
+                <div className="mt-2 text-2xl font-semibold text-amber-700">{engagement.negativeMarktbewertung.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                <p className="mt-1 text-xs text-muted-foreground">Aggregierte operative Marktbewertung in EUR</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="py-4">
+                <div className="text-xs uppercase tracking-wide text-muted-foreground">Hedge-Lueckenmenge</div>
+                <div className="mt-2 text-2xl font-semibold text-fuchsia-700">{engagement.hedgeGapMenge.toLocaleString('de-DE')}</div>
+                <p className="mt-1 text-xs text-muted-foreground">Restmenge mit offener Absicherungsluecke</p>
+              </CardContent>
+            </Card>
+          </div>
+
           <div className="grid grid-cols-1 gap-3 md:grid-cols-5">
             <div className="space-y-1">
               <Label>Kontrakt-Art</Label>
@@ -202,6 +330,7 @@ export default function LstKontraktUebersicht(): JSX.Element {
                   <TableHead>Partner</TableHead>
                   <TableHead>Artikel-Nr</TableHead>
                   <TableHead>Bezeichnung</TableHead>
+                  <TableHead>Steuerung</TableHead>
                   <TableHead className="text-right">Kontrakt-Menge</TableHead>
                   <TableHead className="text-right">Verk.-Menge</TableHead>
                   <TableHead className="text-right">Rest-Menge</TableHead>
@@ -220,6 +349,14 @@ export default function LstKontraktUebersicht(): JSX.Element {
                     <TableCell title={row.party_id}>{row.party_name || row.party_id}</TableCell>
                     <TableCell>{row.first_article_id ?? '-'}</TableCell>
                     <TableCell>{row.first_article_desc ?? '-'}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {row.steering?.parity_code ? <Badge variant="outline">{row.steering.parity_code}</Badge> : null}
+                        {row.steering?.disposition_flag ? <Badge variant="outline">{row.steering.disposition_flag}</Badge> : null}
+                        {row.steering?.writeoff_candidate ? <Badge className="bg-amber-100 text-amber-800">Washout</Badge> : null}
+                        {row.steering?.print_ready ? <Badge className="bg-blue-100 text-blue-800">Druck</Badge> : null}
+                      </div>
+                    </TableCell>
                     <TableCell className="text-right">{row.total_quantity.toLocaleString('de-DE')}</TableCell>
                     <TableCell className="text-right">{Math.max(0, row.total_quantity - row.rest_quantity).toLocaleString('de-DE')}</TableCell>
                     <TableCell className="text-right">{row.rest_quantity.toLocaleString('de-DE')}</TableCell>
@@ -237,6 +374,53 @@ export default function LstKontraktUebersicht(): JSX.Element {
               <Button variant="outline" size="sm" disabled={page >= totalPages - 1} onClick={() => setPage((p) => p + 1)}>Weiter</Button>
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Top-Risiko-Kontrakte</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="max-h-[320px] overflow-auto rounded border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Kontrakt</TableHead>
+                  <TableHead>Partner</TableHead>
+                  <TableHead className="text-right">Rest-Menge</TableHead>
+                  <TableHead className="text-right">Marktwert</TableHead>
+                  <TableHead className="text-right">Hedge-Luecke</TableHead>
+                  <TableHead>Flags</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {engagement.topRisiken.map((row) => (
+                  <TableRow key={`risk-${row.contract_id}`} className="cursor-pointer" onDoubleClick={() => navigate(`/kontrakte/${row.contract_id}`)}>
+                    <TableCell className="font-mono">{row.contract_no}</TableCell>
+                    <TableCell>{row.party_name || row.party_id}</TableCell>
+                    <TableCell className="text-right">{row.rest_quantity.toLocaleString('de-DE')}</TableCell>
+                    <TableCell className="text-right font-mono">{(row.steering?.market_valuation_eur ?? 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+                    <TableCell className="text-right">{row.steering?.hedge_gap_pct?.toFixed(1) ?? '-'}%</TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {row.steering?.dunning_candidate ? <Badge className="bg-red-100 text-red-800">Mahnung</Badge> : null}
+                        {row.steering?.writeoff_candidate ? <Badge className="bg-amber-100 text-amber-800">Washout</Badge> : null}
+                        {!row.steering?.print_ready ? <Badge variant="outline">Druck offen</Badge> : null}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {engagement.topRisiken.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="py-6 text-center text-sm text-muted-foreground">
+                      Kein offenes Risiko-Exposure im aktuellen Filter.
+                    </TableCell>
+                  </TableRow>
+                ) : null}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
     </div>

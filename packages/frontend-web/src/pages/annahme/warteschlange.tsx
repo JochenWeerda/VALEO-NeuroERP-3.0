@@ -12,6 +12,7 @@ import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboar
 import { Clock, Search, Truck } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { useRepairWarteschlangeArticle, useWarteschlange, type LKWEintrag } from '@/lib/api/inventory'
+import { useSupplyChainOverview } from '@/lib/api/supply-chain'
 
 export default function WarteschlangePage(): JSX.Element {
   const navigate = useNavigate()
@@ -19,6 +20,7 @@ export default function WarteschlangePage(): JSX.Element {
   const searchInputRef = useRef<HTMLInputElement | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const { data, isLoading, refetch } = useWarteschlange()
+  const { data: chain } = useSupplyChainOverview()
   const repairArticle = useRepairWarteschlangeArticle()
   const warteschlange = useMemo(() => {
     const items = data?.items ?? []
@@ -250,6 +252,27 @@ export default function WarteschlangePage(): JSX.Element {
             <CardContent>
               <span className="text-2xl font-bold text-green-600">{abgeschlossen}</span>
             </CardContent>
+          </Card>
+        </div>
+      </PageSection>
+
+      <PageSection title="Objektkette" description="Einlauf, Wiegung, Charge und Fracht in einer gemeinsamen Lageansicht.">
+        <div className="grid gap-4 md:grid-cols-4">
+          <Card>
+            <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Offene Wiegungen</CardTitle></CardHeader>
+            <CardContent><span className="text-2xl font-bold">{chain.openWeighingTickets}</span></CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Gesperrte Chargen</CardTitle></CardHeader>
+            <CardContent><span className="text-2xl font-bold">{chain.blockedCharges}</span></CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Fracht unterwegs</CardTitle></CardHeader>
+            <CardContent><span className="text-2xl font-bold">{chain.freightInTransit}</span></CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Aktive Fahrzeuge</CardTitle></CardHeader>
+            <CardContent><span className="text-2xl font-bold">{chain.activeVehiclePlates.length}</span></CardContent>
           </Card>
         </div>
       </PageSection>

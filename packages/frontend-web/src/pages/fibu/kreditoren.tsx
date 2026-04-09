@@ -160,7 +160,7 @@ export default function KreditorenPage(): JSX.Element {
               <Input placeholder="Suche..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
             </div>
             <Button onClick={() => navigate('/fibu/zahlungslaeufe')}>Zahlungslauf</Button>
-            <Button variant="outline" className="gap-2" onClick={() => { navigate('/fibu/kontenplan'); toast({ title: 'DATEV Export', description: 'Buchungsexport unter Kontenplan (DATEV-Export). Kreditoren-Stammexport folgt.' }); }}>
+            <Button variant="outline" className="gap-2" onClick={() => { navigate('/fibu/schnittstelle-fibu'); toast({ title: 'DATEV Export', description: 'Buchungsübergabe und DATEV-nahe Exportpfade sind im Schnittstellen-Center verdrahtet.' }); }}>
               <FileDown className="h-4 w-4" />
               DATEV Export
             </Button>

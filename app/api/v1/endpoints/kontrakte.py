@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timezone
 from decimal import Decimal
 from typing import Any, Literal, Optional
 
@@ -130,7 +130,168 @@ def _line_to_out(line: KonContractLine, rest: Optional[Decimal] = None) -> dict[
     }
 
 
+def _num(value: Any) -> Optional[float]:
+    if value is None or value == "":
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _text(value: Any) -> Optional[str]:
+    if value is None:
+        return None
+    text = str(value).strip()
+    return text or None
+
+
+def _iso(value: Any) -> Optional[str]:
+    if value is None:
+        return None
+    if isinstance(value, datetime):
+        return value.isoformat()
+    return _text(value)
+
+
+def _date(value: Any) -> Optional[datetime]:
+    if value is None:
+        return None
+    if isinstance(value, datetime):
+        return value
+    text = _text(value)
+    if not text:
+        return None
+    try:
+        parsed = datetime.fromisoformat(text.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        return parsed.replace(tzinfo=timezone.utc)
+    return parsed
+
+
+def _bool(value: Any) -> bool:
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        return value.strip().lower() in {"1", "true", "yes", "ja", "y"}
+    return bool(value)
+
+
+def _string_list(value: Any) -> list[str]:
+    if isinstance(value, list):
+        result = []
+        for item in value:
+            text = _text(item)
+            if text:
+                result.append(text)
+        return result
+    if isinstance(value, str):
+        return [part.strip() for part in value.split(",") if part.strip()]
+    return []
+
+
+def _contract_reference_price(contract: KonContract, first_line_price: Optional[float]) -> Optional[float]:
+    if first_line_price is not None and first_line_price > 0:
+        return first_line_price
+    if contract.min_price is not None:
+        return float(contract.min_price)
+    return None
+
+
+def _build_contract_steering(
+    contract: KonContract,
+    contract_rest: Decimal,
+    first_line_price: Optional[float] = None,
+) -> dict[str, Any]:
+    conditions = contract.conditions_json or {}
+
+    hedge_quantity_t = _num(conditions.get("hedge_quantity_t"))
+    hedge_target_pct = _num(conditions.get("hedge_target_pct"))
+    market_price_eur_t = _num(conditions.get("market_price_eur_t"))
+    reference_price = _contract_reference_price(contract, first_line_price)
+    rest_quantity = float(contract_rest)
+
+    hedge_quote_pct = None
+    if hedge_quantity_t is not None:
+        total_qty = float(contract.total_quantity or 0)
+        if total_qty > 0:
+            hedge_quote_pct = min(100.0, (hedge_quantity_t / total_qty) * 100.0)
+
+    hedge_gap_pct = None
+    if hedge_target_pct is not None:
+        hedge_gap_pct = round(max(0.0, hedge_target_pct - float(hedge_quote_pct or 0.0)), 2)
+
+    market_price_delta_eur_t = None
+    market_valuation_eur = None
+    if market_price_eur_t is not None and reference_price is not None:
+        market_price_delta_eur_t = round(market_price_eur_t - reference_price, 2)
+        market_valuation_eur = round(market_price_delta_eur_t * rest_quantity, 2)
+
+    dunning_level = int(_num(conditions.get("dunning_level")) or 0)
+    dunning_blocked = _bool(conditions.get("dunning_blocked"))
+    alternate_articles = _string_list(conditions.get("alternate_articles"))
+    washout_quantity_t = _num(conditions.get("washout_quantity_t"))
+    writeoff_quantity_t = _num(conditions.get("writeoff_quantity_t"))
+    print_copy_count = int(_num(conditions.get("print_copy_count")) or 0)
+    today = datetime.now(timezone.utc)
+    dunning_due_at = _date(conditions.get("dunning_due_at")) or contract.valid_to
+    dunning_candidate = bool(
+        contract.status == "OFFEN"
+        and not dunning_blocked
+        and rest_quantity > 0
+        and dunning_due_at is not None
+        and dunning_due_at < today
+    )
+
+    return {
+        "contract_class": _text(conditions.get("contract_class")),
+        "contract_group": _text(conditions.get("contract_group")),
+        "contract_variant": _text(conditions.get("contract_variant")),
+        "disposition_flag": _text(conditions.get("disposition_flag")),
+        "parity_code": _text(conditions.get("parity_code")),
+        "parity_label": _text(conditions.get("parity_label")),
+        "fallback_route": _text(conditions.get("fallback_route")),
+        "alternate_articles": alternate_articles,
+        "print_template": _text(conditions.get("print_template")),
+        "print_channel": _text(conditions.get("print_channel")),
+        "print_copy_count": print_copy_count,
+        "last_printed_at": _iso(conditions.get("last_printed_at")),
+        "print_ready": bool(_text(conditions.get("print_template")) and _text(conditions.get("print_channel"))),
+        "washout_status": _text(conditions.get("washout_status")),
+        "washout_quantity_t": washout_quantity_t,
+        "washout_reason": _text(conditions.get("washout_reason")),
+        "writeoff_quantity_t": writeoff_quantity_t,
+        "writeoff_reason": _text(conditions.get("writeoff_reason")),
+        "writeoff_candidate": bool((writeoff_quantity_t or 0) > 0 or (washout_quantity_t or 0) > 0),
+        "hedge_strategy": _text(conditions.get("hedge_strategy")),
+        "hedge_market": _text(conditions.get("hedge_market")),
+        "hedge_status": _text(conditions.get("hedge_status")),
+        "hedge_target_pct": hedge_target_pct,
+        "hedge_quantity_t": hedge_quantity_t,
+        "hedge_quote_pct": hedge_quote_pct,
+        "hedge_gap_pct": hedge_gap_pct,
+        "market_price_source": _text(conditions.get("market_price_source")),
+        "market_price_eur_t": market_price_eur_t,
+        "market_price_date": _iso(conditions.get("market_price_date")),
+        "market_price_delta_eur_t": market_price_delta_eur_t,
+        "market_valuation_eur": market_valuation_eur,
+        "reference_price_eur_t": reference_price,
+        "dunning_level": dunning_level,
+        "dunning_blocked": dunning_blocked,
+        "dunning_due_at": _iso(dunning_due_at),
+        "dunning_last_at": _iso(conditions.get("dunning_last_at")),
+        "dunning_candidate": dunning_candidate,
+        "dunning_reason": _text(conditions.get("dunning_reason")),
+    }
+
+
 def _contract_to_out(contract: KonContract, line_out: list[dict[str, Any]], contract_rest: Decimal) -> dict[str, Any]:
+    first_line_price = None
+    if line_out:
+        first_line_price = _num(line_out[0].get("unit_price"))
+    steering = _build_contract_steering(contract, contract_rest, first_line_price)
     return {
         "contract_id": contract.contract_id,
         "contract_no": contract.contract_no,
@@ -159,6 +320,7 @@ def _contract_to_out(contract: KonContract, line_out: list[dict[str, Any]], cont
         "pricing_window_from": contract.pricing_window_from,
         "pricing_window_to": contract.pricing_window_to,
         "rest_quantity": float(contract_rest),
+        "steering": steering,
         "created_at": contract.created_at,
         "created_by": contract.created_by,
         "updated_at": contract.updated_at,
@@ -222,6 +384,8 @@ async def list_kontrakte(
             .first()
         )
         party_name = party_adapter.get_name(c.party_id)
+        first_unit_price = float(first_line.unit_price) if first_line and first_line.unit_price is not None else None
+        steering = _build_contract_steering(c, rest.contract_rest, first_unit_price)
         payload.append(
             {
                 "contract_id": c.contract_id,
@@ -240,7 +404,8 @@ async def list_kontrakte(
                 "allow_overdelivery": bool(c.allow_overdelivery),
                 "first_article_id": first_line.article_id if first_line else None,
                 "first_article_desc": first_line.description1 if first_line else None,
-                "first_unit_price": float(first_line.unit_price) if first_line and first_line.unit_price is not None else None,
+                "first_unit_price": first_unit_price,
+                "steering": steering,
             }
         )
     return {"items": payload, "total": total, "skip": skip, "limit": limit}

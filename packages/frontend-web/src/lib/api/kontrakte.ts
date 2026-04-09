@@ -21,6 +21,47 @@ export type KontraktLine = {
   is_matif?: boolean
 }
 
+export type KontraktSteering = {
+  contract_class?: string | null
+  contract_group?: string | null
+  contract_variant?: string | null
+  disposition_flag?: string | null
+  parity_code?: string | null
+  parity_label?: string | null
+  fallback_route?: string | null
+  alternate_articles?: string[]
+  print_template?: string | null
+  print_channel?: string | null
+  print_copy_count?: number | null
+  last_printed_at?: string | null
+  print_ready?: boolean
+  washout_status?: string | null
+  washout_quantity_t?: number | null
+  washout_reason?: string | null
+  writeoff_quantity_t?: number | null
+  writeoff_reason?: string | null
+  writeoff_candidate?: boolean
+  hedge_strategy?: string | null
+  hedge_market?: string | null
+  hedge_status?: string | null
+  hedge_target_pct?: number | null
+  hedge_quantity_t?: number | null
+  hedge_quote_pct?: number | null
+  hedge_gap_pct?: number | null
+  market_price_source?: string | null
+  market_price_eur_t?: number | null
+  market_price_date?: string | null
+  market_price_delta_eur_t?: number | null
+  market_valuation_eur?: number | null
+  reference_price_eur_t?: number | null
+  dunning_level?: number | null
+  dunning_blocked?: boolean
+  dunning_due_at?: string | null
+  dunning_last_at?: string | null
+  dunning_candidate?: boolean
+  dunning_reason?: string | null
+}
+
 export type Kontrakt = {
   contract_id: string
   contract_no: string
@@ -49,6 +90,7 @@ export type Kontrakt = {
   pricing_window_from?: string | null
   pricing_window_to?: string | null
   rest_quantity?: number
+  steering?: KontraktSteering
   lines: KontraktLine[]
 }
 
@@ -70,6 +112,7 @@ export type KontraktListItem = {
   first_article_id?: string | null
   first_article_desc?: string | null
   first_unit_price?: number | null
+  steering?: KontraktSteering
 }
 
 export type KontraktListResponse = {

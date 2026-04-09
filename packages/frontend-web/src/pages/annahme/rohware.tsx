@@ -19,6 +19,7 @@ import { useToast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/api-client'
 import { CheckCircle, Truck } from 'lucide-react'
 import { AgentSuggestionBadge, AgentProcessPanel } from '@/components/agent'
+import { useSupplyChainOverview } from '@/lib/api/supply-chain'
 import {
   TouchSection,
   TouchTextInput,
@@ -70,6 +71,7 @@ const LAGER_OPTIONEN = [
 export default function RohwareAnnahmePage(): JSX.Element {
   const navigate = useNavigate()
   const { toast } = useToast()
+  const { data: chain } = useSupplyChainOverview()
 
   const [form, setForm] = useState<RohwareFormState>({
     lieferant: '',
@@ -187,6 +189,14 @@ export default function RohwareAnnahmePage(): JSX.Element {
           closeTarget="/annahme/warteschlange"
           title="Rohware-Annahme"
         />
+        <Card className="mx-auto max-w-md mt-4">
+          <CardContent className="grid gap-3 pt-6 md:grid-cols-2">
+            <div><div className="text-xs text-muted-foreground">Annahme offen</div><div className="text-xl font-semibold">{chain.waitingInbound}</div></div>
+            <div><div className="text-xs text-muted-foreground">Wiegungen offen</div><div className="text-xl font-semibold">{chain.openWeighingTickets}</div></div>
+            <div><div className="text-xs text-muted-foreground">Chargen in Prüfung</div><div className="text-xl font-semibold">{chain.blockedCharges}</div></div>
+            <div><div className="text-xs text-muted-foreground">Fracht unterwegs</div><div className="text-xl font-semibold">{chain.freightInTransit}</div></div>
+          </CardContent>
+        </Card>
         <Card className="mx-auto max-w-md mt-8">
           <CardContent className="pt-8 pb-8 flex flex-col items-center gap-6 text-center">
             <CheckCircle className="h-16 w-16 text-green-600" />
@@ -453,6 +463,14 @@ export default function RohwareAnnahmePage(): JSX.Element {
           closeTarget="/annahme/warteschlange"
           title="Rohware-Annahme"
         />
+        <Card className="mt-4">
+          <CardContent className="grid gap-3 pt-6 md:grid-cols-4">
+            <div><div className="text-xs text-muted-foreground">Annahme offen</div><div className="text-xl font-semibold">{chain.waitingInbound}</div></div>
+            <div><div className="text-xs text-muted-foreground">Wiegungen offen</div><div className="text-xl font-semibold">{chain.openWeighingTickets}</div></div>
+            <div><div className="text-xs text-muted-foreground">Chargen gesperrt / Prüfung</div><div className="text-xl font-semibold">{chain.blockedCharges}</div></div>
+            <div><div className="text-xs text-muted-foreground">Fracht unterwegs</div><div className="text-xl font-semibold">{chain.freightInTransit}</div></div>
+          </CardContent>
+        </Card>
         <AgentProcessPanel domain="annahme" className="mb-4" />
         <Wizard
           title="Rohware-Annahme"

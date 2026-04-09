@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
+import { useFibuCockpit } from '@/lib/api/fibu'
 import { FileDown, Filter, CheckCircle2, AlertCircle, FolderOpen } from 'lucide-react'
 
 // Standard-Buchungsarten die gefiltert werden können
@@ -47,6 +48,7 @@ function twoWeeksAgo(): string {
 }
 
 export default function SchnittstelleFibuPage(): JSX.Element {
+  const { data: fibuCockpit } = useFibuCockpit()
   const [von, setVon] = useState(twoWeeksAgo())
   const [bis, setBis] = useState(today())
   const [bediener, setBediener] = useState('')
@@ -119,6 +121,24 @@ export default function SchnittstelleFibuPage(): JSX.Element {
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-4 space-y-5">
+          <div className="grid gap-3 md:grid-cols-4">
+            <div className="rounded-lg border p-3">
+              <div className="text-xs text-muted-foreground">Exportläufe</div>
+              <div className="text-2xl font-semibold">{fibuCockpit.revision.export_runs}</div>
+            </div>
+            <div className="rounded-lg border p-3">
+              <div className="text-xs text-muted-foreground">Journal zuletzt</div>
+              <div className="text-sm font-semibold">{fibuCockpit.revision.last_entry_date ?? 'n/a'}</div>
+            </div>
+            <div className="rounded-lg border p-3">
+              <div className="text-xs text-muted-foreground">Jahreswechsel</div>
+              <div className="text-sm font-semibold">{fibuCockpit.annual_close.ready_for_year_close ? 'stabil' : 'offene Klärungen'}</div>
+            </div>
+            <div className="rounded-lg border p-3">
+              <div className="text-xs text-muted-foreground">eBilanz / E-Clearing</div>
+              <div className="text-sm font-semibold">{fibuCockpit.tax.e_bilanz_ready ? 'bereit' : 'prüfen'} / {fibuCockpit.tax.e_clearing_ready ? 'bereit' : 'offen'}</div>
+            </div>
+          </div>
 
           {/* Info-Bereich */}
           <div className="bg-blue-50 border border-blue-200 rounded p-3 text-sm">

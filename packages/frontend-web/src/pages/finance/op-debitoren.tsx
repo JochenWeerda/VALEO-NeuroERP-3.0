@@ -11,6 +11,7 @@ import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/api-client'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Banknote } from 'lucide-react'
+import { useFibuCockpit } from '@/lib/api/fibu'
 
 /** Mappt GET /finance/open-items/{id} (API) auf Masken-Felder (OTC-011). */
 function mapOpenItemApiToForm(row: Record<string, unknown>): Record<string, unknown> {
@@ -397,6 +398,7 @@ export default function OPDebitorenPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
+  const { data: fibuCockpit } = useFibuCockpit()
   const [isDirty, setIsDirty] = useState(false)
   const [actionLoadingKey, setActionLoadingKey] = useState<string | null>(null)
   const entityType = 'openItem'
@@ -611,6 +613,14 @@ export default function OPDebitorenPage(): JSX.Element {
 
   return (
     <div className="space-y-4 p-4">
+      <Alert>
+        <Banknote className="h-4 w-4" />
+        <AlertTitle>FIBU-Kernlage Debitoren</AlertTitle>
+        <AlertDescription>
+          {fibuCockpit.dunning.overdue_items} überfällige OP, {fibuCockpit.interest.candidate_count} Zinskandidaten und
+          {` ${fibuCockpit.master_data.connector_profile_count} `}Connector-Profile im Revisionspfad.
+        </AlertDescription>
+      </Alert>
       {showOtcHandoverHint ? (
         <Alert>
           <Banknote className="h-4 w-4" />

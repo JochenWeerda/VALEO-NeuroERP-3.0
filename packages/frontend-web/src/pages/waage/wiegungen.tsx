@@ -17,6 +17,7 @@ import {
   useWeighingTickets,
   type WeighingTicket,
 } from '@/lib/api/weighing-tickets'
+import { useSupplyChainOverview } from '@/lib/api/supply-chain'
 import { Scale, Search, Plus, Link2 } from 'lucide-react'
 
 type NewTicketForm = {
@@ -47,6 +48,7 @@ export default function WiegungenPage(): JSX.Element {
   const [form, setForm] = useState<NewTicketForm>(initialForm)
   const searchRef = useRef<HTMLInputElement | null>(null)
   const ticketNumberRef = useRef<HTMLInputElement | null>(null)
+  const { data: chain } = useSupplyChainOverview()
 
   const ticketsQuery = useWeighingTickets({ limit: 100 })
   const contractsQuery = useOpenContracts()
@@ -174,6 +176,25 @@ export default function WiegungenPage(): JSX.Element {
           <CardContent>
             <span className="text-2xl font-bold">{totalBillingKg.toFixed(3)}</span>
           </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Wartende Annahmen</CardTitle></CardHeader>
+          <CardContent><span className="text-2xl font-bold">{chain.waitingInbound}</span></CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Offene Wiegungen</CardTitle></CardHeader>
+          <CardContent><span className="text-2xl font-bold">{chain.openWeighingTickets}</span></CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Gesperrte Chargen</CardTitle></CardHeader>
+          <CardContent><span className="text-2xl font-bold">{chain.blockedCharges}</span></CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Fracht in Transit</CardTitle></CardHeader>
+          <CardContent><span className="text-2xl font-bold">{chain.freightInTransit}</span></CardContent>
         </Card>
       </div>
 

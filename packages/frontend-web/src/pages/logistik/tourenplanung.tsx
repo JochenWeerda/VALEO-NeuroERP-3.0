@@ -4,9 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Calendar, MapPin, Truck } from 'lucide-react'
 import { useTouren } from '@/lib/api/misc-modules'
+import { useSupplyChainOverview } from '@/lib/api/supply-chain'
 
 export default function TourenplanungPage(): JSX.Element {
   const { data: touren, isLoading } = useTouren()
+  const { data: chain } = useSupplyChainOverview()
 
   if (isLoading || !touren) {
     return (
@@ -59,6 +61,25 @@ export default function TourenplanungPage(): JSX.Element {
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Abgeschlossen</CardTitle></CardHeader>
           <CardContent><span className="text-2xl font-bold text-green-600">{touren.abgeschlossen}</span></CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Wartende Annahmen</CardTitle></CardHeader>
+          <CardContent><span className="text-2xl font-bold">{chain.waitingInbound}</span></CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Offene Wiegungen</CardTitle></CardHeader>
+          <CardContent><span className="text-2xl font-bold">{chain.openWeighingTickets}</span></CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Gesperrte Chargen</CardTitle></CardHeader>
+          <CardContent><span className="text-2xl font-bold">{chain.blockedCharges}</span></CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Aktive Fahrzeuge</CardTitle></CardHeader>
+          <CardContent><span className="text-2xl font-bold">{chain.activeVehiclePlates.length}</span></CardContent>
         </Card>
       </div>
 

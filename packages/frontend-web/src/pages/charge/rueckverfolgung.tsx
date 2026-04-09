@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { apiClient } from '@/lib/api-client'
 import { LotTrace, useLotTrace } from '@/lib/api/inventory'
+import { useSupplyChainOverview } from '@/lib/api/supply-chain'
 
 type TimelineEntry = {
   stufe: string
@@ -31,6 +32,7 @@ export default function RueckverfolgungPage(): JSX.Element {
   const [isResolving, setIsResolving] = useState(false)
 
   const query = useLotTrace(activeLotId)
+  const { data: chain } = useSupplyChainOverview()
 
   const traceData: LotTrace | undefined = query.data ?? undefined
 
@@ -117,6 +119,13 @@ export default function RueckverfolgungPage(): JSX.Element {
         </CardContent>
       </Card>
 
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card><CardContent className="pt-6"><div className="text-xs text-muted-foreground">Annahme offen</div><div className="text-2xl font-semibold">{chain.waitingInbound}</div></CardContent></Card>
+        <Card><CardContent className="pt-6"><div className="text-xs text-muted-foreground">Wiegungen offen</div><div className="text-2xl font-semibold">{chain.openWeighingTickets}</div></CardContent></Card>
+        <Card><CardContent className="pt-6"><div className="text-xs text-muted-foreground">Chargen in Prüfung</div><div className="text-2xl font-semibold">{chain.blockedCharges}</div></CardContent></Card>
+        <Card><CardContent className="pt-6"><div className="text-xs text-muted-foreground">Fracht unterwegs</div><div className="text-2xl font-semibold">{chain.freightInTransit}</div></CardContent></Card>
+      </div>
+
       <Card>
         <CardHeader>
           <CardTitle>
@@ -134,7 +143,7 @@ export default function RueckverfolgungPage(): JSX.Element {
               {traceData ? traceData.sku : 'Weizen Premium'}
             </div>
             <Badge variant="outline">
-              {query.isFetching ? 'Rückverfolgung lädt...' : traceData ? 'Live-Daten' : 'Demo-Daten'}
+              {query.isFetching ? 'Rückverfolgung lädt...' : traceData ? 'Live-Daten' : 'Fallback-Sicht'}
             </Badge>
           </div>
 

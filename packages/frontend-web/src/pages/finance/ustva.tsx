@@ -11,6 +11,8 @@ import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { buildDecisionView } from '@/policy/decision-view'
 import { ProcessStatusPanel } from '@/components/workflow/ProcessStatusPanel'
 import { useApprovalDensityProfile } from '@/features/workflow/useApprovalDensityProfile'
+import { useFibuCockpit } from '@/lib/api/fibu'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 const createUstvaConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
@@ -391,6 +393,7 @@ export default function UStVAPage(): JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
+  const { data: fibuCockpit } = useFibuCockpit()
   const workflowInstanceId = searchParams.get('workflowInstanceId')
   const workflowProcess = searchParams.get('workflowProcess')
   const workflowCase = searchParams.get('workflowCase')
@@ -598,6 +601,24 @@ export default function UStVAPage(): JSX.Element {
 
   return (
     <>
+      <div className="grid gap-4 px-4 pb-4 md:grid-cols-4">
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm">UStVA-Läufe</CardTitle></CardHeader>
+          <CardContent><div className="text-2xl font-semibold">{fibuCockpit.tax.vat_return_count}</div></CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm">Validiert / Freigegeben</CardTitle></CardHeader>
+          <CardContent><div className="text-2xl font-semibold">{fibuCockpit.tax.validated_count} / {fibuCockpit.tax.approved_count}</div></CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm">eBilanz / E-Clearing</CardTitle></CardHeader>
+          <CardContent><div className="text-sm font-semibold">{fibuCockpit.tax.e_bilanz_ready ? 'bereit' : 'vorbereiten'} / {fibuCockpit.tax.e_clearing_ready ? 'bereit' : 'offen'}</div></CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm">Letzte Periode</CardTitle></CardHeader>
+          <CardContent><div className="text-sm font-semibold">{fibuCockpit.tax.latest_period ?? 'n/a'}</div></CardContent>
+        </Card>
+      </div>
       {workflowInstanceId && (
         <div className="mb-4 rounded-md border border-indigo-500/30 bg-indigo-500/10 px-4 py-2 text-sm text-indigo-200">
           Flow-Spine: {workflowCase || workflowProcess} (Instanz {workflowInstanceId.slice(0, 8)}...)

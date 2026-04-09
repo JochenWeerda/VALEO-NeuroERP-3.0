@@ -10,6 +10,7 @@ import { Camera, FileCheck, MapPin, Package } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { useCreateCharge } from '@/lib/api/charges'
 import { getAxiosErrorMessage } from '@/lib/api-client'
+import { useSupplyChainOverview } from '@/lib/api/supply-chain'
 
 type WareneingangData = {
   lieferant: string
@@ -31,6 +32,7 @@ export default function WareneingangPage(): JSX.Element {
   const navigate = useNavigate()
   const { toast } = useToast()
   const createCharge = useCreateCharge()
+  const { data: chain } = useSupplyChainOverview()
   const [wareneingang, setWareneingang] = useState<WareneingangData>({
     lieferant: '',
     lieferscheinNr: '',
@@ -103,6 +105,14 @@ export default function WareneingangPage(): JSX.Element {
       title: 'Lieferant',
       content: (
         <div className="space-y-4">
+          <Card>
+            <CardContent className="grid gap-4 pt-6 md:grid-cols-4">
+              <div><div className="text-xs text-muted-foreground">Warteschlange</div><div className="text-2xl font-semibold">{chain.waitingInbound}</div></div>
+              <div><div className="text-xs text-muted-foreground">Offene Wiegungen</div><div className="text-2xl font-semibold">{chain.openWeighingTickets}</div></div>
+              <div><div className="text-xs text-muted-foreground">Gesperrte Chargen</div><div className="text-2xl font-semibold">{chain.blockedCharges}</div></div>
+              <div><div className="text-xs text-muted-foreground">Fracht unterwegs</div><div className="text-2xl font-semibold">{chain.freightInTransit}</div></div>
+            </CardContent>
+          </Card>
           <div>
             <Label htmlFor="lieferant">Lieferant *</Label>
             <Input
