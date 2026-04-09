@@ -1,29 +1,94 @@
-/**
- * Sales Orders Page - Mit moderner Navigation (KEIN RIBBON!)
- * Zeigt Best-Practice für Page-Layout mit:
- * - AppShell (Sidebar + TopBar)
- * - PageToolbar (kontextuelle Aktionen)
- * - Command Palette (Ctrl+K)
- * 
- * MCP-ready für Phase 3
- */
-
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { PageToolbar, ToolbarAction } from '@/components/navigation/PageToolbar';
-import { Archive, Download, Filter, Plus, Sparkles, Upload } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { getEntityTypeLabel, getListTitle } from '@/features/crud/utils/i18n-helpers';
-import { toast } from '@/hooks/use-toast';
-import { PageSection, PageSurface } from '@/components/patterns/PageSurface';
+import { useNavigate } from 'react-router-dom'
+import { Archive, Download, Filter, Plus, Search, Sparkles, Upload } from 'lucide-react'
+import { PageToolbar, type ToolbarAction } from '@/components/navigation/PageToolbar'
+import { PageSection, PageSurface } from '@/components/patterns/PageSurface'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { DataTable } from '@/components/ui/data-table'
+import { getEntityTypeLabel, getListTitle, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
+import { useAuftraege, type Auftrag, type AuftragStatus } from '@/lib/api/sales'
+
+const STATUS_OPTIONS: Array<{ value: AuftragStatus | 'alle'; label: string }> = [
+  { value: 'alle', label: 'Alle Status' },
+  { value: 'offen', label: 'Offen' },
+  { value: 'teilgeliefert', label: 'Teilgeliefert' },
+  { value: 'geliefert', label: 'Geliefert' },
+  { value: 'fakturiert', label: 'Fakturiert' },
+  { value: 'storniert', label: 'Storniert' },
+]
+
+const statusVariantMap: Record<AuftragStatus, 'default' | 'outline' | 'secondary' | 'destructive'> = {
+  open: 'default',
+  offen: 'default',
+  teilgeliefert: 'secondary',
+  geliefert: 'outline',
+  fakturiert: 'outline',
+  storniert: 'destructive',
+}
+
+function downloadCsv(rows: Auftrag[]): void {
+  const header = ['Auftragsnummer', 'Datum', 'Kunde', 'Betrag', 'Liefertermin', 'Status']
+  const lines = rows.map((auftrag) =>
+    [
+      auftrag.nummer,
+      auftrag.datum,
+      auftrag.kunde,
+      auftrag.betrag.toFixed(2).replace('.', ','),
+      auftrag.liefertermin,
+      auftrag.status,
+    ]
+      .map((value) => `"${String(value).replaceAll('"', '""')}"`)
+      .join(';'),
+  )
+  const csv = [header.join(';'), ...lines].join('\n')
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `sales-orders-${new Date().toISOString().slice(0, 10)}.csv`
+  link.click()
+  URL.revokeObjectURL(url)
+}
 
 export default function SalesOrdersModernPage(): JSX.Element {
   const { t } = useTranslation()
-  const navigate = useNavigate();
+  const navigate = useNavigate()
   const entityType = 'salesOrder'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Verkaufsauftrag')
   const pageTitle = getListTitle(t, entityTypeLabel)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [statusFilter, setStatusFilter] = useState<AuftragStatus | 'alle'>('alle')
+  const [showFilters, setShowFilters] = useState(false)
 
-  // Primäraktionen (max 3-4) - direkt sichtbar
+  const { data: orders = [] } = useAuftraege()
+
+  const filteredOrders = useMemo(() => {
+    return orders.filter((order) => {
+      const matchesSearch =
+        !searchTerm ||
+        order.nummer.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.kunde.toLowerCase().includes(searchTerm.toLowerCase())
+      const matchesStatus = statusFilter === 'alle' || order.status === statusFilter
+      return matchesSearch && matchesStatus
+    })
+  }, [orders, searchTerm, statusFilter])
+
+  const quickStats = useMemo(() => {
+    const open = filteredOrders.filter((order) => order.status === 'offen' || order.status === 'open').length
+    const partial = filteredOrders.filter((order) => order.status === 'teilgeliefert').length
+    const invoiceReady = filteredOrders.filter((order) => order.status === 'geliefert').length
+    const archiveReady = filteredOrders.filter(
+      (order) => order.status === 'fakturiert' || order.status === 'storniert',
+    ).length
+    return { open, partial, invoiceReady, archiveReady }
+  }, [filteredOrders])
+
+  const focusOrder = filteredOrders[0]
+
   const primaryActions: ToolbarAction[] = [
     {
       id: 'new-order',
@@ -41,22 +106,21 @@ export default function SalesOrdersModernPage(): JSX.Element {
       id: 'export',
       label: t('crud.actions.export'),
       icon: <Download className="h-4 w-4" />,
-      onClick: () => toast({ title: t('crud.actions.export'), description: 'Exportiert alle angezeigten Aufträge als CSV.' }),
+      onClick: () => downloadCsv(filteredOrders),
       variant: 'outline',
       mcp: {
         intent: 'export-data',
         requiredData: ['selection'],
       },
     },
-  ];
+  ]
 
-  // Overflow-Aktionen - im ⋯-Menu
   const overflowActions: ToolbarAction[] = [
     {
       id: 'import',
       label: t('crud.actions.import'),
       icon: <Upload className="h-4 w-4" />,
-      onClick: () => toast({ title: t('crud.actions.import'), description: 'CSV-Import für Aufträge.' }),
+      onClick: () => navigate('/sales/auftraege-liste'),
       mcp: {
         intent: 'import-data',
       },
@@ -65,7 +129,7 @@ export default function SalesOrdersModernPage(): JSX.Element {
       id: 'filter',
       label: t('crud.actions.filter'),
       icon: <Filter className="h-4 w-4" />,
-      onClick: () => toast({ title: t('crud.actions.filter'), description: 'Erweiterte Filteroptionen.' }),
+      onClick: () => setShowFilters((current) => !current),
       mcp: {
         intent: 'filter-data',
       },
@@ -74,7 +138,7 @@ export default function SalesOrdersModernPage(): JSX.Element {
       id: 'archive',
       label: t('crud.actions.archive'),
       icon: <Archive className="h-4 w-4" />,
-      onClick: () => toast({ title: t('crud.actions.archive'), description: 'Ausgewählte Aufträge archivieren.' }),
+      onClick: () => navigate('/sales/auftraege-liste?status=fakturiert'),
       variant: 'destructive',
       mcp: {
         intent: 'archive-data',
@@ -82,74 +146,200 @@ export default function SalesOrdersModernPage(): JSX.Element {
         requiredData: ['selection'],
       },
     },
-  ];
+  ]
+
+  const columns = [
+    {
+      key: 'nummer' as const,
+      label: t('crud.fields.number'),
+      render: (order: Auftrag) => (
+        <button
+          onClick={() => navigate(`/sales/order-editor?id=${order.id}`)}
+          className="font-medium text-blue-600 hover:underline"
+        >
+          {order.nummer}
+        </button>
+      ),
+    },
+    {
+      key: 'kunde' as const,
+      label: t('crud.entities.customer'),
+    },
+    {
+      key: 'betrag' as const,
+      label: t('crud.fields.total'),
+      render: (order: Auftrag) =>
+        new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(order.betrag),
+    },
+    {
+      key: 'liefertermin' as const,
+      label: t('crud.fields.deliveryDate'),
+    },
+    {
+      key: 'status' as const,
+      label: t('crud.fields.status'),
+      render: (order: Auftrag) => (
+        <Badge variant={statusVariantMap[order.status]}>
+          {getStatusLabel(t, order.status, order.status)}
+        </Badge>
+      ),
+    },
+  ]
 
   return (
     <>
-      {/* Kontextuelle Page-Toolbar (KEIN Ribbon!) */}
       <PageToolbar
         title={pageTitle}
-        subtitle={t('crud.list.overview', { entityType: entityTypeLabel })}
+        subtitle="Vertriebslage, Folgeaktionen und operative Arbeitsplaetze fuer offene Auftraege."
         primaryActions={primaryActions}
         overflowActions={overflowActions}
         mcpContext={{
           pageDomain: 'sales',
-          currentDocument: undefined,
+          currentDocument: focusOrder?.id,
           availableActions: ['create', 'export', 'import', 'filter', 'archive'],
         }}
       />
 
-      {/* Page Content */}
       <PageSurface data-page-surface="sales-orders-modern">
         <PageSection
           title={pageTitle}
-          description="Legacy-Seite rückwirkend auf den DS-Rahmen gezogen: PageToolbar, Surface, strukturierte Inhaltssektionen."
+          description="Die Seite ist jetzt an die reale Auftragslage angebunden und fuehrt in die produktiven Arbeitsplaetze fuer Export, Import, Bearbeitung und Archivvorbereitung."
         >
-          <h3 className="text-lg font-semibold mb-4">{pageTitle}</h3>
-          
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              {t('crud.list.modernNavigationPattern')}
-            </p>
-            
-            <ul className="list-disc list-inside space-y-2 text-sm">
-              <li>✅ <strong>{t('crud.list.sidebarLeft')}</strong> - {t('crud.list.domainNavigation')}</li>
-              <li>✅ <strong>{t('crud.list.topBar')}</strong> - {t('crud.list.searchAndUserMenu')}</li>
-              <li>✅ <strong>{t('crud.list.pageToolbar')}</strong> - {t('crud.list.relevantActionsOnly')}</li>
-              <li>✅ <strong>{t('crud.list.commandPalette')}</strong> - {t('crud.list.pressCtrlK')}</li>
-              <li>✅ <strong>{t('crud.list.noRibbon')}</strong> - {t('crud.list.savesSpace')}</li>
-              <li>✅ <strong>{t('crud.list.responsive')}</strong> - {t('crud.list.mobileReady')}</li>
-              <li>✅ <strong>{t('crud.list.mcpMetadata')}</strong> - {t('crud.list.preparedForAI')}</li>
-            </ul>
+          <div className="grid gap-4 md:grid-cols-4">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Offene Auftraege</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{quickStats.open}</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Teilgeliefert</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{quickStats.partial}</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Rechnungsfaehig</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{quickStats.invoiceReady}</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Archivkandidaten</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{quickStats.archiveReady}</div>
+              </CardContent>
+            </Card>
+          </div>
 
-            <div className="mt-6 rounded-2xl bg-muted p-4">
-              <h4 className="font-semibold mb-2">💡 {t('crud.list.testNavigation')}</h4>
-              <ul className="space-y-1 text-sm">
-                <li>→ <kbd className="px-2 py-1 bg-background rounded">Ctrl+K</kbd> - {t('crud.list.commandPalette')}</li>
-                <li>→ <kbd className="px-2 py-1 bg-background rounded">Ctrl+B</kbd> - {t('crud.list.sidebarToggle')}</li>
-                <li>→ <kbd className="px-2 py-1 bg-background rounded">Ctrl+N</kbd> - {t('crud.actions.new')} {entityTypeLabel}</li>
-                <li>→ {t('crud.list.clickOn')} <strong>⋯</strong> - {t('crud.list.overflowMenu')}</li>
-              </ul>
-            </div>
+          <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
+            <Card>
+              <CardHeader>
+                <CardTitle>Operative Sicht</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex flex-col gap-3 lg:flex-row">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      value={searchTerm}
+                      onChange={(event) => setSearchTerm(event.target.value)}
+                      placeholder="Auftragsnummer oder Kunde suchen"
+                      className="pl-10"
+                    />
+                  </div>
+                  <Button variant="outline" onClick={() => setShowFilters((current) => !current)} className="gap-2">
+                    <Filter className="h-4 w-4" />
+                    Filter
+                  </Button>
+                  <Button variant="outline" onClick={() => navigate('/sales/auftraege-liste')} className="gap-2">
+                    <Upload className="h-4 w-4" />
+                    Importarbeitsplatz
+                  </Button>
+                </div>
 
-            <div className="mt-4 rounded-2xl bg-primary/10 p-4">
-              <h4 className="font-semibold mb-2 flex items-center gap-2">
-                <Sparkles className="h-4 w-4" />
-                {t('crud.list.mcpIntegration')}
-              </h4>
-              <p className="text-sm text-muted-foreground">
-                {t('crud.list.allActionsHaveMCP')}
-              </p>
-              <ul className="mt-2 space-y-1 text-sm">
-                <li>• {t('crud.list.aiExplainsActions')}</li>
-                <li>• {t('crud.list.aiSuggestsActions')}</li>
-                <li>• {t('crud.list.contextAware')}</li>
-              </ul>
-            </div>
+                {showFilters ? (
+                  <div className="rounded-2xl border bg-muted/40 p-4">
+                    <label className="mb-2 block text-sm font-medium">Statusfilter</label>
+                    <select
+                      value={statusFilter}
+                      onChange={(event) => setStatusFilter(event.target.value as AuftragStatus | 'alle')}
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    >
+                      {STATUS_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ) : null}
+
+                <DataTable data={filteredOrders} columns={columns} />
+                <p className="text-sm text-muted-foreground">
+                  {filteredOrders.length} von {orders.length} Auftraegen sichtbar.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4" />
+                  Naechste empfohlene Aktion
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {focusOrder ? (
+                  <>
+                    <div className="rounded-2xl border bg-muted/40 p-4">
+                      <div className="text-sm text-muted-foreground">Fokusauftrag</div>
+                      <div className="font-semibold">{focusOrder.nummer}</div>
+                      <div className="text-sm">{focusOrder.kunde}</div>
+                      <div className="mt-2">
+                        <Badge variant={statusVariantMap[focusOrder.status]}>
+                          {getStatusLabel(t, focusOrder.status, focusOrder.status)}
+                        </Badge>
+                      </div>
+                    </div>
+                    <div className="space-y-2 text-sm text-muted-foreground">
+                      <p>
+                        Offene und teilgelieferte Auftraege gehoeren in die operative Bearbeitung, fakturierte oder stornierte Faelle in die Archivvorbereitung.
+                      </p>
+                      <p>
+                        Export und Import laufen nicht mehr als Platzhalter, sondern ueber CSV-Download und den produktiven Auftragsarbeitsplatz.
+                      </p>
+                    </div>
+                    <div className="grid gap-2">
+                      <Button onClick={() => navigate(`/sales/order-editor?id=${focusOrder.id}`)}>
+                        Auftrag bearbeiten
+                      </Button>
+                      <Button variant="outline" onClick={() => navigate('/sales/auftraege-liste')}>
+                        Auftragsliste mit Import oeffnen
+                      </Button>
+                      <Button variant="outline" onClick={() => navigate('/sales/auftraege-liste?status=fakturiert')}>
+                        Archivvorbereitung anzeigen
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <div className="rounded-2xl border border-dashed p-4 text-sm text-muted-foreground">
+                    Keine Auftraege fuer die aktuelle Filterlage gefunden.
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
         </PageSection>
       </PageSurface>
     </>
-  );
+  )
 }
-

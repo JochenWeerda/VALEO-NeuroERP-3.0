@@ -20,7 +20,7 @@ import {
   WorkflowEntryBanner,
   readWorkflowEntryContext,
 } from '@/components/workflow/WorkflowEntryBanner'
-import { ArrowLeft, Loader2, Save } from 'lucide-react'
+import { ArrowLeft, CheckCircle, ClipboardList, FileText, Loader2, Save, Wrench } from 'lucide-react'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -262,30 +262,113 @@ export default function AnfrageDetailPage(): JSX.Element {
 
         {/* Tab: Aktivitaeten (Placeholder) */}
         <TabsContent value="aktivitaeten">
-          <Card>
-            <CardHeader>
-              <CardTitle>Aktivitaeten</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Hier werden zukuenftig Aktivitaeten, Einsaetze und Kommunikation zur Anfrage angezeigt.
-              </p>
-            </CardContent>
-          </Card>
+          <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
+            <Card>
+              <CardHeader>
+                <CardTitle>Vorgangsverlauf</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="rounded-2xl border bg-muted/40 p-4">
+                  <div className="font-medium">Ticketanlage</div>
+                  <div className="text-sm text-muted-foreground">
+                    {new Date(merged.datum).toLocaleDateString('de-DE')} · {merged.kunde}
+                  </div>
+                </div>
+                <div className="rounded-2xl border bg-muted/40 p-4">
+                  <div className="font-medium">Bearbeitungsstatus</div>
+                  <div className="text-sm text-muted-foreground">
+                    {merged.status === 'neu'
+                      ? 'Neue Anfrage, Erstpruefung und Rueckruf stehen an.'
+                      : merged.status === 'in-bearbeitung'
+                        ? 'Rueckmeldung, Dokumentation oder Aussendienst-Einsatz laufen.'
+                        : 'Vorgang fachlich erledigt, Abschluss und Kundenzufriedenheit pruefen.'}
+                  </div>
+                </div>
+                {workflowContext ? (
+                  <div className="rounded-2xl border bg-muted/40 p-4">
+                    <div className="font-medium">Workflow-Referenz</div>
+                    <div className="text-sm text-muted-foreground">
+                      {workflowContext.label || workflowContext.caseNumber || workflowContext.process || 'Service-to-Customer'} · {workflowContext.instanceId}
+                    </div>
+                  </div>
+                ) : null}
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Folgeaktionen</CardTitle>
+              </CardHeader>
+              <CardContent className="grid gap-2">
+                <Button onClick={() => navigate(`/service/rueckmeldung?anfrage_id=${merged.id}`)} className="justify-start gap-2">
+                  <ClipboardList className="h-4 w-4" />
+                  Rueckmeldung erfassen
+                </Button>
+                <Button variant="outline" onClick={() => navigate(`/agribusiness/field-service-tasks/neu?service_request_id=${merged.id}`)} className="justify-start gap-2">
+                  <Wrench className="h-4 w-4" />
+                  Aussendienst-Einsatz anlegen
+                </Button>
+                <Button variant="outline" onClick={() => navigate('/dokumente/ablage')} className="justify-start gap-2">
+                  <FileText className="h-4 w-4" />
+                  Dokumentenablage oeffnen
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
 
-        {/* Tab: Abschluss (Placeholder) */}
+        {/* Tab: Abschluss */}
         <TabsContent value="abschluss">
-          <Card>
-            <CardHeader>
-              <CardTitle>Abschluss</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Hier werden zukuenftig Abschlussdaten, Kundenzufriedenheit und Rueckmeldung erfasst.
-              </p>
-            </CardContent>
-          </Card>
+          <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
+            <Card>
+              <CardHeader>
+                <CardTitle>Abschlussbild</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid gap-4 md:grid-cols-3">
+                  <div className="rounded-2xl border p-4">
+                    <div className="text-sm text-muted-foreground">Status</div>
+                    <div className="font-semibold">
+                      {merged.status === 'neu' ? 'Erstkontakt offen' : merged.status === 'in-bearbeitung' ? 'Rueckmeldung laeuft' : 'Abschluss moeglich'}
+                    </div>
+                  </div>
+                  <div className="rounded-2xl border p-4">
+                    <div className="text-sm text-muted-foreground">Prioritaet</div>
+                    <div className="font-semibold">
+                      {merged.prioritaet === 'hoch' ? 'Sofort eskalieren falls offen' : merged.prioritaet === 'normal' ? 'Regulaere Bearbeitung' : 'Geringe Dringlichkeit'}
+                    </div>
+                  </div>
+                  <div className="rounded-2xl border p-4">
+                    <div className="text-sm text-muted-foreground">Naechster Schritt</div>
+                    <div className="font-semibold">
+                      {merged.status === 'erledigt' ? 'Kundenzufriedenheit erfassen' : 'Rueckmeldung oder Einsatz dokumentieren'}
+                    </div>
+                  </div>
+                </div>
+                <div className="rounded-2xl border bg-muted/40 p-4 text-sm text-muted-foreground">
+                  Ein Service-Fall gilt hier erst als fachlich geschlossen, wenn Rueckmeldung, Abschlusskommentar und Kundenzufriedenheit dokumentiert sind.
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Abschlussaktionen</CardTitle>
+              </CardHeader>
+              <CardContent className="grid gap-2">
+                <Button onClick={() => navigate(`/service/abschluss?anfrage_id=${merged.id}`)} className="justify-start gap-2">
+                  <CheckCircle className="h-4 w-4" />
+                  Abschluss erfassen
+                </Button>
+                <Button variant="outline" onClick={() => navigate(`/service/rueckmeldung?anfrage_id=${merged.id}`)} className="justify-start gap-2">
+                  <ClipboardList className="h-4 w-4" />
+                  Rueckmeldung nachtragen
+                </Button>
+                <Button variant="outline" onClick={() => navigate('/service/anfragen')} className="justify-start gap-2">
+                  <FileText className="h-4 w-4" />
+                  Zur Service-Uebersicht
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>

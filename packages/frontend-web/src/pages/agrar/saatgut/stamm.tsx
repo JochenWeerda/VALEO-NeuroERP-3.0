@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { ObjectPage, type ObjectPageSection } from '@/components/patterns/ObjectPage'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -127,6 +127,7 @@ const buildSections = (product: SeedProduct): ObjectPageSection[] => [
 ]
 
 export default function SeedMasterPage(): JSX.Element {
+  const navigate = useNavigate()
   const [params] = useSearchParams()
   const productId = params.get('id') ?? 'SEED-00123'
   const { data, isLoading, error } = useSeedProduct(productId)
@@ -158,9 +159,7 @@ export default function SeedMasterPage(): JSX.Element {
       subtitle={data.id}
       keyInfo={buildKeyInfo(data)}
       sections={sections}
-      onEdit={() => {
-        // placeholder for edit flow
-      }}
+      onEdit={() => navigate(`/agrar/saatgut-stamm/${data.id}`)}
       mcpContext={{
         pageDomain: 'agrar-saatgut',
         entityType: 'seed-product',

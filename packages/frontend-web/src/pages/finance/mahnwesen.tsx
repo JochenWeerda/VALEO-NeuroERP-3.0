@@ -12,6 +12,7 @@ import { LeaveConfirmDialog } from '@/components/LeaveConfirmDialog'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import { apiClient } from '@/lib/api-client'
 import { useFibuCockpit } from '@/lib/api/fibu'
+import { summarizeFibuOps } from '@/lib/professional-control-centers'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
@@ -201,6 +202,7 @@ export default function MahnwesenPage(): JSX.Element {
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Mahnwesen')
   const mahnwesenConfig = createMahnwesenConfig(t, entityTypeLabel)
   const { data: fibuCockpit } = useFibuCockpit()
+  const fibuOps = fibuCockpit ? summarizeFibuOps(fibuCockpit, 0) : null
 
   const { data, loading, saveData } = useMaskData({
     apiUrl: mahnwesenConfig.api.baseUrl,
@@ -375,6 +377,22 @@ export default function MahnwesenPage(): JSX.Element {
           </div>
         </div>
       </div>
+      {fibuOps ? (
+        <div className="grid gap-4 px-6 pt-4 md:grid-cols-3">
+          <Card>
+            <CardHeader className="pb-2"><CardTitle className="text-sm">Interest Pressure</CardTitle></CardHeader>
+            <CardContent><Badge variant={fibuOps.interestPressure === 'hoch' ? 'destructive' : 'outline'}>{fibuOps.interestPressure}</Badge></CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2"><CardTitle className="text-sm">Reorg-Risiko</CardTitle></CardHeader>
+            <CardContent><Badge variant={fibuOps.reorgRisk === 'hoch' ? 'destructive' : 'outline'}>{fibuOps.reorgRisk}</Badge></CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2"><CardTitle className="text-sm">Naechste Aktion</CardTitle></CardHeader>
+            <CardContent><div className="text-sm font-semibold">{fibuOps.nextAction}</div></CardContent>
+          </Card>
+        </div>
+      ) : null}
       <ObjectPage
         config={mahnwesenConfig}
         data={data}

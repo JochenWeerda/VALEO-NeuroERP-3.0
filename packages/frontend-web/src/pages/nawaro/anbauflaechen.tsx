@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useToast } from '@/hooks/use-toast'
 import { FileText, Plus, Printer, Save, Trash2 } from 'lucide-react'
 import { createAreaSheet, deleteAreaSheet, listAreaSheets, updateAreaSheet } from '@/lib/api/nawaro'
+import { buildCsvArtifact, downloadArtifact, openHtmlPreview } from '@/lib/nawaro-communication'
 
 type AreaRow = {
   id: number
@@ -182,6 +183,35 @@ export default function NaWaRoAnbauflaechenPage(): JSX.Element {
     setRows((prev) => prev.map((row) => (row.id === id ? { ...row, [field]: value } : row)))
   }
 
+  function handlePreview(): void {
+    openHtmlPreview('NaWaRo-Anbauflaechen', [
+      { label: 'Erntejahre', value: `${erntejahrVon} - ${erntejahrBis}` },
+      { label: 'Artikel-Nr.', value: artikelNr || '-' },
+      { label: 'Saison', value: [sommer ? 'Sommer' : null, winter ? 'Winter' : null].filter(Boolean).join(', ') || '-' },
+      { label: 'Positionen', value: String(rows.length) },
+      { label: 'Gesamtflaeche 2026', value: (sums.flaeche2026 || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) },
+    ])
+    toast({ title: 'Vorschau erstellt', description: 'Die Anbauflaechen-Vorschau wurde geoeffnet.' })
+  }
+
+  function handlePrint(): void {
+    const artifact = buildCsvArtifact(
+      `nawaro-anbauflaechen-${erntejahrVon}-${erntejahrBis}.csv`,
+      ['Kundenname', 'Name1', 'PLZ', 'Ort', 'Telefon', '2024', '2025', '2026'],
+      rows.map((row) => [row.kundenname, row.name1, row.plz, row.ort, row.telefon, row.flaeche2024, row.flaeche2025, row.flaeche2026]),
+    )
+    downloadArtifact(artifact, 'text/csv;charset=utf-8')
+    toast({ title: 'Druckjob vorbereitet', description: 'Die Anbauflaechen wurden als Druck-/Exportdatei erzeugt.' })
+  }
+
+  function handleSerialLetter(): void {
+    const content = rows
+      .map((row) => `${row.kundenname || 'Empfaenger offen'};${row.ort || '-'};Flaeche 2026: ${row.flaeche2026 || '0'}`)
+      .join('\n')
+    downloadArtifact({ fileName: `nawaro-serienbrief-${erntejahrBis}.txt`, content })
+    toast({ title: 'Serienbrief erzeugt', description: `${rows.length} Empfaenger wurden fuer die Kommunikation exportiert.` })
+  }
+
   function addRow(): void {
     setRows((prev) => [...prev, emptyRow(prev.length ? Math.max(...prev.map((r) => r.id)) + 1 : 1)])
   }
@@ -304,12 +334,17 @@ export default function NaWaRoAnbauflaechenPage(): JSX.Element {
             <span>2025: <strong>{(sums.flaeche2025 || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></span>
             <span>2026: <strong>{(sums.flaeche2026 || 0).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></span>
           </div>
+          <div className="mt-4 rounded border bg-muted/40 p-3">
+            <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Naechste Aktion</div>
+            <div className="mt-1 font-medium">{rows.length > 0 ? 'Flaechen pruefen, Vorschau oeffnen und Serienbrief-/Druckartefakte erzeugen.' : 'Mindestens eine Position erfassen, bevor Kommunikation erstellt wird.'}</div>
+          </div>
         </CardContent>
       </Card>
 
       <div className="flex flex-wrap gap-2">
-        <Button variant="outline" className="gap-2" onClick={() => toast({ title: 'Druckjob erstellt' })}><Printer className="h-4 w-4" />Drucken</Button>
-        <Button variant="outline" className="gap-2" onClick={() => toast({ title: 'Serienbrief erstellt' })}><FileText className="h-4 w-4" />Serienbrief erstellen</Button>
+        <Button variant="outline" className="gap-2" onClick={handlePreview}><Printer className="h-4 w-4" />Vorschau</Button>
+        <Button variant="outline" className="gap-2" onClick={handlePrint}><Printer className="h-4 w-4" />Drucken</Button>
+        <Button variant="outline" className="gap-2" onClick={handleSerialLetter}><FileText className="h-4 w-4" />Serienbrief erstellen</Button>
         <Button className="gap-2" onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending}><Save className="h-4 w-4" />Speichern</Button>
         <Button variant="destructive" className="gap-2" onClick={() => deleteMutation.mutate()} disabled={!selectedId || deleteMutation.isPending}><Trash2 className="h-4 w-4" />Loeschen</Button>
       </div>

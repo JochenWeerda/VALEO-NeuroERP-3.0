@@ -20,6 +20,7 @@ import { apiClient } from '@/lib/api-client'
 import { CheckCircle, Truck } from 'lucide-react'
 import { AgentSuggestionBadge, AgentProcessPanel } from '@/components/agent'
 import { useSupplyChainOverview } from '@/lib/api/supply-chain'
+import { summarizeSupplyOps } from '@/lib/professional-control-centers'
 import {
   TouchSection,
   TouchTextInput,
@@ -72,6 +73,7 @@ export default function RohwareAnnahmePage(): JSX.Element {
   const navigate = useNavigate()
   const { toast } = useToast()
   const { data: chain } = useSupplyChainOverview()
+  const supplyOps = useMemo(() => summarizeSupplyOps(chain), [chain])
 
   const [form, setForm] = useState<RohwareFormState>({
     lieferant: '',
@@ -469,6 +471,24 @@ export default function RohwareAnnahmePage(): JSX.Element {
             <div><div className="text-xs text-muted-foreground">Wiegungen offen</div><div className="text-xl font-semibold">{chain.openWeighingTickets}</div></div>
             <div><div className="text-xs text-muted-foreground">Chargen gesperrt / Prüfung</div><div className="text-xl font-semibold">{chain.blockedCharges}</div></div>
             <div><div className="text-xs text-muted-foreground">Fracht unterwegs</div><div className="text-xl font-semibold">{chain.freightInTransit}</div></div>
+          </CardContent>
+        </Card>
+        <Card className="mt-4">
+          <CardContent className="grid gap-3 pt-6 md:grid-cols-3">
+            <div>
+              <div className="text-xs text-muted-foreground">Bottleneck</div>
+              <div className="text-lg font-semibold capitalize">{supplyOps.bottleneck}</div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground">Druck</div>
+              <Badge variant={supplyOps.pressure === 'hoch' ? 'destructive' : supplyOps.pressure === 'mittel' ? 'secondary' : 'outline'}>
+                {supplyOps.pressure}
+              </Badge>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground">Naechste Aktion</div>
+              <div className="text-sm font-semibold">{supplyOps.nextAction}</div>
+            </div>
           </CardContent>
         </Card>
         <AgentProcessPanel domain="annahme" className="mb-4" />

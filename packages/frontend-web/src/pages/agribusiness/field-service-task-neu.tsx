@@ -1,5 +1,6 @@
 /**
- * Neue Field-Service-Aufgabe (CRM-Fall / Demo-Fallback)
+ * Neue Field-Service-Aufgabe
+ * Folgepfad aus CRM-, Service- und Workflow-Vorgaengen.
  */
 
 import React, { useMemo } from 'react';
@@ -31,6 +32,7 @@ export default function FieldServiceTaskNeuPage(): JSX.Element {
   const [searchParams] = useSearchParams();
   const workflowInstanceId = searchParams.get('workflowInstanceId') || '';
   const workflowCase = searchParams.get('workflowCase') || '';
+  const serviceRequestId = searchParams.get('service_request_id') || '';
 
   const [title, setTitle] = React.useState('');
   const [taskType, setTaskType] = React.useState<string>('FIELD_SERVICE');
@@ -95,6 +97,12 @@ export default function FieldServiceTaskNeuPage(): JSX.Element {
         <div className="rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-xs text-blue-900">
           {workflowCase ? `Workflow ${workflowCase}` : 'Workflow'}
           {workflowInstanceId ? ` · ${workflowInstanceId}` : ''}
+        </div>
+      )}
+
+      {serviceRequestId && (
+        <div className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-900">
+          Service-Vorgang {serviceRequestId} · Einsatz wird direkt aus der Anfrage geplant.
         </div>
       )}
 

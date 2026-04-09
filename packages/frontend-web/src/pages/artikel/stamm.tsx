@@ -14,7 +14,7 @@
  * - Einstellungen (Settings)
  */
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import {
@@ -55,6 +55,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { NativeSelect } from '@/components/ui/native-select'
+import { usePriceLists } from '@/lib/api/price-lists'
 import {
   articleService,
   type Article,
@@ -65,6 +66,14 @@ import {
   type ArticlePrice,
   type ArticleDocument,
 } from '@/lib/services/article-service'
+import {
+  buildDocumentRecord,
+  buildDocumentWorkspace,
+  buildPriceWorkspace,
+  extractTierBreaks,
+  fallbackTierBreaks,
+  formatCurrency,
+} from '@/lib/professional-workspaces'
 import { getAxiosErrorMessage } from '@/lib/api-client'
 
 // ============================================================================
@@ -416,6 +425,42 @@ export default function ArtikelStammPage(): JSX.Element {
       setArtikel((prev) => ({ ...prev, dokumente: documentsQuery.data ?? [] }))
     }
   }, [documentsQuery.data])
+
+  const { data: priceLists = [] } = usePriceLists()
+
+  const articleTierBreaks = useMemo(() => {
+    const extracted = extractTierBreaks(priceLists, {
+      articleId: artikel.id,
+      articleNumber: artikel.artikelnr,
+      articleGroup: artikel.kategorie,
+    })
+    return extracted.length > 0 ? extracted : fallbackTierBreaks(artikel.kategorie, artikel.vkPreis)
+  }, [artikel.id, artikel.artikelnr, artikel.kategorie, artikel.vkPreis, priceLists])
+
+  const documentWorkspace = useMemo(() => buildDocumentWorkspace(
+    artikel.dokumente.map((document) => buildDocumentRecord({
+      id: document.id,
+      name: document.document_name,
+      category: document.document_type,
+      type: document.document_type,
+      date: document.created_at,
+      sizeLabel: 'Datei',
+      owner: artikel.artikelnr || 'Artikel',
+      source: 'Artikel',
+    })),
+  ), [artikel.artikelnr, artikel.dokumente])
+
+  const priceWorkspace = useMemo(() => buildPriceWorkspace({
+    listPrice: artikel.vkPreis,
+    purchasePrice: artikel.ekPreis,
+    agreements: artikel.preise.map((price) => ({
+      partnerName: price.customer_name ?? 'Allgemein',
+      priceNet: price.price_net ?? artikel.vkPreis,
+      validFrom: price.valid_from,
+      validTo: price.valid_to,
+    })),
+    tierBreaks: articleTierBreaks,
+  }), [artikel.ekPreis, artikel.preise, artikel.vkPreis, articleTierBreaks])
 
   // Save mutation
   const saveMutation = useMutation({
@@ -1173,6 +1218,22 @@ export default function ArtikelStammPage(): JSX.Element {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="grid gap-3 md:grid-cols-3">
+                <div className="rounded-lg border p-4">
+                  <div className="text-sm text-muted-foreground">Dokumente</div>
+                  <div className="mt-2 text-2xl font-bold">{documentWorkspace.total}</div>
+                  <div className="mt-1 text-sm text-muted-foreground">Artikelbezogene Unterlagen und Nachweise</div>
+                </div>
+                <div className="rounded-lg border p-4">
+                  <div className="text-sm text-muted-foreground">Nachweis / Wiedervorlage</div>
+                  <div className="mt-2 text-2xl font-bold">{documentWorkspace.evidenceCount + documentWorkspace.followUpCount}</div>
+                  <div className="mt-1 text-sm text-muted-foreground">Zertifikate, Deklarationen und pruefpflichtige Unterlagen</div>
+                </div>
+                <div className="rounded-lg border p-4">
+                  <div className="text-sm text-muted-foreground">Naechste Aktion</div>
+                  <div className="mt-2 font-semibold">{documentWorkspace.nextAction}</div>
+                </div>
+              </div>
               <div className="flex justify-end">
                 <Button variant="outline" size="sm">
                   <Upload className="h-4 w-4 mr-2" />
@@ -1303,11 +1364,41 @@ export default function ArtikelStammPage(): JSX.Element {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="grid gap-3 md:grid-cols-4">
+                <div className="rounded-lg border p-4">
+                  <div className="text-sm text-muted-foreground">Listenpreis</div>
+                  <div className="mt-2 text-xl font-bold">{formatCurrency(artikel.vkPreis)} / {artikel.einheit}</div>
+                </div>
+                <div className="rounded-lg border p-4">
+                  <div className="text-sm text-muted-foreground">Deckungsbeitrag / Einheit</div>
+                  <div className="mt-2 text-xl font-bold">{formatCurrency(priceWorkspace.marginPerUnit)}</div>
+                </div>
+                <div className="rounded-lg border p-4">
+                  <div className="text-sm text-muted-foreground">Sonderpreise aktiv</div>
+                  <div className="mt-2 text-xl font-bold">{priceWorkspace.activeAgreements}</div>
+                </div>
+                <div className="rounded-lg border p-4">
+                  <div className="text-sm text-muted-foreground">Naechste Aktion</div>
+                  <div className="mt-2 font-semibold">{priceWorkspace.nextAction}</div>
+                </div>
+              </div>
               <div className="flex justify-end">
                 <Button variant="outline" size="sm">
                   <Plus className="h-4 w-4 mr-2" />
                   Preisvereinbarung hinzufuegen
                 </Button>
+              </div>
+              <div className="rounded-lg border p-4">
+                <h4 className="mb-2 font-medium">Staffel- und Preisbild</h4>
+                <div className="grid gap-3 md:grid-cols-3">
+                  {articleTierBreaks.slice(0, 3).map((tier) => (
+                    <div key={`${tier.sourceLabel}-${tier.minQuantity}`} className="rounded-lg border bg-muted/30 p-3">
+                      <div className="text-sm text-muted-foreground">ab {tier.minQuantity} {artikel.einheit}</div>
+                      <div className="font-semibold">{formatCurrency(tier.price)} / {artikel.einheit}</div>
+                      <div className="text-xs text-muted-foreground">{tier.sourceLabel}</div>
+                    </div>
+                  ))}
+                </div>
               </div>
               {/* Base Price Card */}
               <div className="rounded-lg border p-4">
