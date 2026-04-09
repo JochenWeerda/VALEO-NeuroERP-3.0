@@ -1499,39 +1499,45 @@ Alle 6 Router registriert in `app/api/v1/api.py` unter `/api/v1/neuro/*`. Commit
 ## TAIL-CRM-001
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Den verbleibenden Profi-Tail im modernen CRM-Stamm schliessen: Dublettenpruefung, RAG-/Wissenspanel, Intent Bar und klare Folgepfade fuer Vertrieb, Service und Dokumente.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/professional-tail-gap-plan-2026-04-09.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/crm/kunden-stamm-modern/LegacyKundenStammModern.tsx`, ggf. passende CRM-/Neuro-API-Hooks.
 **Abnahmekriterien:** `LegacyKundenStammModern.tsx` enthaelt keine TODO-Assistenzreste mehr; Duplicate Detection, RAG-/Intent-Surface und Folgewege sind als professioneller CRM-Arbeitsplatz sichtbar.
+**Erledigt:** `LegacyKundenStammModern.tsx` besitzt jetzt eine echte Assistenzseite mit Dublettensicht auf Basis der CRM-Kundenliste, Wissenspanel, Intent-/Naechste-Aktion-Surface, Keyboard-Sprung via `Ctrl/Cmd+K` und professionellen Folgewegen in Dokumente, Service und Vertrieb; die bisherigen TODO-Reste sind entfernt.
+**Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`; gezielter Textscan auf `TODO|Demo-Fallback|placeholder`
 
 ## TAIL-NAWARO-001
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** NaWaRo-Kommunikation und Druck von Toast-/Hinweislogik auf einen professionellen Dokument-, Vorschau-, Serienbrief- und Versandpfad ziehen.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/professional-tail-gap-plan-2026-04-09.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/nawaro/{anbauflaechen,mitteilung-drucken,vertraege,raps-profil}.tsx`, ggf. Dokument-/Print-Helfer.
 **Abnahmekriterien:** Vorschau, Druck und Serienbrief enden nicht mehr nur in Toasts; NaWaRo zeigt einen professionellen Kommunikations- und Dokumentpfad mit Folgeaktion und Artefaktbezug.
+**Erledigt:** `mitteilung-drucken.tsx` und `anbauflaechen.tsx` erzeugen jetzt echte Vorschau-, Druck- und Exportartefakte ueber `nawaro-communication.ts` statt reiner Toast-Hinweise; die Seiten zeigen zusaetzlich den Kommunikationskontext und die naechste professionelle Folgeaktion.
+**Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`
 
 ## TAIL-AGRI-001
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Die verbliebenen Demo-/Placeholder-Reste in Agrar-Beratung und Saatgut-Stamm schliessen und zu belastbaren Facharbeitsplaetzen verdichten.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/professional-tail-gap-plan-2026-04-09.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/agrar/psm/beratung.tsx`, `packages/frontend-web/src/pages/agrar/saatgut/stamm.tsx`, ggf. zugehoerige API-Hooks.
 **Abnahmekriterien:** PSM-Beratung arbeitet ohne stillen Demo-Fallback; Saatgut-Stamm besitzt einen echten Edit-/Folgepfad statt Placeholder-Kommentar.
+**Erledigt:** `beratung.tsx` arbeitet jetzt mit expliziter PSM-Readiness und ausschliesslich realen PSM-Stammdaten statt stiller Demo-Herleitung; `agrar/saatgut/stamm.tsx` fuehrt `Bearbeiten` in den realen Saatgut-Stamm-Arbeitsplatz statt in einen Placeholder-Handler.
+**Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`; gezielter Textscan auf `TODO|Demo-Fallback|placeholder`
 
 ## TAIL-SALES-001
 
-**Von:** offen
-**Stand:** offen
+**Von:** Codex
+**Stand:** reserviert
 **Ziel des Slices:** Die verbleibenden Massen- und Folgeaktionen der modernen Sales-Einstiegsflaeche professionalisieren.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/professional-tail-gap-plan-2026-04-09.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/sales/orders-modern.tsx`, ggf. zugehoerige Sales-API-Hooks.
 **Abnahmekriterien:** Export, Import, Filter und Archivierung sind echte Arbeitsfunktionen mit Folgepfad statt Toast-Hinweis.
 
 ## TAIL-SERVICE-001
 
-**Von:** offen
-**Stand:** offen
+**Von:** Codex
+**Stand:** reserviert
 **Ziel des Slices:** Den Service-/Field-Tail auf professionellen Vorgangs- und Folgebelegcharakter ziehen.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/professional-tail-gap-plan-2026-04-09.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/service/{anfrage-neu,anfrage-detail,anfragen,rueckmeldung,abschluss}.tsx`, `packages/frontend-web/src/pages/agribusiness/field-service-task-neu.tsx`, ggf. Service-/CRM-Hooks.
 **Abnahmekriterien:** Service-/Field-Kommunikation und Abschluss besitzen durchgaengigen Folgeobjekt-, Dokument- und Wiedervorlagepfad; `field-service-task-neu.tsx` traegt keinen Demo-Fallback-Charakter mehr.
