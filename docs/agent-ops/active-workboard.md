@@ -1445,3 +1445,19 @@ Alle 6 Router registriert in `app/api/v1/api.py` unter `/api/v1/neuro/*`. Commit
 **Abnahmekriterien:** Die betroffenen Seiten spiegeln dieselbe Objektkette wieder, zeigen Mengen-, Status-, Dokument- und Ausnahmebezug ueber die Kette hinweg und bieten klare Folgepfade statt isolierter Listen.
 **Erledigt:** `packages/frontend-web/src/lib/api/supply-chain.ts` liefert jetzt einen gemeinsamen `useSupplyChainOverview()`-Snapshot ueber Annahme-Warteschlange, Wiegescheine, Chargen und Frachtbriefe. `packages/frontend-web/src/pages/charge/rueckverfolgung.tsx`, `packages/frontend-web/src/pages/annahme/rohware.tsx`, `packages/frontend-web/src/pages/waage/liste.tsx` und `packages/frontend-web/src/pages/logistik/frachtbriefe.tsx` zeigen diese physische Kette jetzt mit denselben Mengen- und Statuswahrheiten statt als isolierte Teilmasken. Die Objektkette ist ausserdem direkt in `packages/frontend-web/src/pages/annahme/warteschlange.tsx`, `packages/frontend-web/src/pages/charge/wareneingang.tsx`, `packages/frontend-web/src/pages/waage/wiegeschein-detail.tsx`, `packages/frontend-web/src/pages/annahme/abrechnung.tsx` und `packages/frontend-web/src/pages/logistik/tourenplanung.tsx` sichtbar und verbindet Partie, Annahme, Wiegung, Charge, Fracht und Abrechnung in denselben operativen Kennzahlen.
 **Tests / Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`; `node scripts/docs-governance-check.cjs`
+
+## DOC-PRO-001
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Die Dokumentenverwaltung von einer allgemeinen Ablage zu einem professionellen Vorgangs- und Nachweisraum ausbauen: Objektbezug, Dokumentstatus, Wiedervorlage, Freigabe-/Nachweisbild und direkte Folgepfade in die operativen Kernworkflows.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/{dokumente/ablage,portal/dokumente,einkauf/lieferanten-dokumente}.tsx`, bei Bedarf zugehoerige API-Hooks unter `packages/frontend-web/src/lib/api/`.
+**Abnahmekriterien:** Dokumente zeigen nicht nur Dateiliste, sondern klares Vorgangsbild mit Objektzuordnung, Status/Nachweis, Wiedervorlage und nutzbaren Folgeaktionen; dieselbe Dokumentensicht ist an den fachlich naheliegenden Arbeitsplaetzen verankert.
+
+## PRICE-PRO-001
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Preis-, Konditions- und Stammdatenfuehrung auf professionelles ERP-Niveau ziehen: Preisstory pro Objekt, kunden- und lieferantenspezifische Sonderregeln, Staffel-/Listen-/Historienbild und direkte operative Folgepfade fuer Verkauf, Einkauf und Portal.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/{preise/konditionen,preise/historie,pricing,portal/shop,vertrieb/kundenumsatz,artikel/stamm}.tsx`, bei Bedarf `packages/frontend-web/src/lib/api/{pricing,articles}.ts` und vorhandene Pricing-/Article-Endpunkte.
+**Abnahmekriterien:** Preise und Konditionen werden als zusammenhaengender Arbeitsraum sichtbar, nicht nur als Einzelmaske; Anwender sehen Listenpreis, Staffelung, Verlauf, Kunden-/Lieferantenbezug und empfohlene Folgeaktion direkt im Arbeitskontext.
