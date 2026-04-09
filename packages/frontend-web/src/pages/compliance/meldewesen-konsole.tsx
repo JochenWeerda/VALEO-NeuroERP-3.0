@@ -302,7 +302,12 @@ export default function MeldewesenKonsole() {
   const latestJob = jobs[0]
   const artifactsQuery = useQuery({
     queryKey: ["meldewesen", "jobs", "artifacts", latestJob?.id],
-    queryFn: () => getJobArtifacts(latestJob!.id),
+    queryFn: () => {
+      if (!latestJob?.id) {
+        return Promise.resolve([])
+      }
+      return getJobArtifacts(latestJob.id)
+    },
     enabled: Boolean(latestJob?.id),
   })
   const { data: dokumente = [] } = useDokumenteAblage()
