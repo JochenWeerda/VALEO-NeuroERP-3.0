@@ -11,10 +11,13 @@ from app.domains.shared.events import (
     shutdown_event_consumer,
 )
 from app.middleware.audit_middleware import AuditMiddleware
+from app.middleware.tenant_enforcement import TenantEnforcementMiddleware
 from app.services.secrets_vault import validate_startup_secrets
 
 app = FastAPI(title="VALEO-NeuroERP Test App")
+# Middleware stack: outermost first → Tenant runs before Audit
 app.add_middleware(AuditMiddleware)
+app.add_middleware(TenantEnforcementMiddleware)
 app.include_router(api_router, prefix="/api/v1")
 
 

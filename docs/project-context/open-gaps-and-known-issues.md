@@ -16,98 +16,34 @@ Zuletzt vollstaendig auditiert: **2026-04-10** (automatisierter Code-Audit ueber
 
 ---
 
-## P1 — Fachlich duenn / produktionsblockierend
-
-### STUB-001: Mischfutter-Produktion hat keine echte Datenbasis
-
-- **Dateien**: `app/api/v1/endpoints/produktion_mischfutter.py`
-- **Problem**: `GET /verfuegbarkeit` (Zeile 58) liefert 7 hartcodierte Komponenten, `GET /rezepte` (Zeile 76) liefert 3 statische Rezepte, `POST /auftraege` (Zeile 131) persistiert nicht und zieht keinen Bestand ab.
-- **TODO im Code**: "replace with real inventory query once Lager-Bestaende table is wired"
-- **Auswirkung**: Produktionsplanung ist rein visuell, kein echter Materialfluss.
-
-### STUB-002: Futtermittel-Stammdaten sind Demo-Seed
-
-- **Dateien**: `app/api/v1/endpoints/futter_stamm.py`
-- **Problem**: `GET /einzelfuttermittel` (Zeile 161), `GET /mischfuttermittel` (Zeile 169), `GET /rezepte/{id}` (Zeile 185) liefern inline Demo-Daten aus `_REZEPT_SEED`. Kommentar: "Demo-Seed-Daten werden inline bereitgestellt, bis persistente Modelle existieren."
-- **Auswirkung**: Kein CRUD, keine Mandantentrennung, keine Migration.
-
-### STUB-003: Liquiditaetsuebersicht ist Platzhalter
-
-- **Dateien**: `app/api/v1/endpoints/liquidity.py`
-- **Problem**: `GET /finance/liquidity/overview` (Zeile 11) liefert leere Struktur mit 0-Werten, keine echte Berechnung.
-- **Auswirkung**: Finance-Cockpit zeigt keine reale Liquiditaetslage.
-
-### STUB-004: Sortenregister ist statische Liste
-
-- **Dateien**: `app/api/v1/endpoints/agrar_varieties.py`
-- **Problem**: `GET /` (Zeile 31) liefert hartcodierte `STANDARD_VARIETIES`. Kommentar: "kann spaeter aus DB/Stammdaten geladen werden."
-- **Auswirkung**: Keine mandantenspezifischen Sorten, kein Anlegen/Aendern.
-
-### TENANT-001: Multi-Tenancy-Enforcement nur auf Endpoint-Ebene
-
-- **Dateien**: `app/core/tenant_context.py`, `app/middleware/`
-- **Problem**: `X-Tenant-ID` wird als Context-Variable durchgereicht, aber **nicht in der Middleware validiert oder erzwungen**. Tenant-Isolation passiert in den einzelnen Endpunkten, nicht zentral. `audit_middleware.py` liest `request.state.tenant_id`, prueft aber nicht.
-- **Auswirkung**: Ein fehlerhafter Endpoint kann versehentlich Cross-Tenant-Daten liefern. Die SEC-Reihe hat viele Router gehaertet, aber es gibt keinen zentralen Guard.
-- **Empfehlung**: Middleware-Level Query-Filter oder zumindest ein zentraler Assert fuer alle DB-Queries.
-
-### VOICE-001: Voice-Kanal ist Stub
-
-- **Dateien**: `app/services/voice_adapter.py`, `packages/frontend-web/src/pages/admin/voice-channel.tsx`
-- **Problem**: In-Memory-Session-Store, kein STT/TTS-Provider angebunden. Expliziter Platzhalter: `"text": "[STT-Ergebnis — Provider-Integration ausstehend]"`, `"provider": "pending"`.
-- **Auswirkung**: Voice-Feature existiert nur als Routing-Skelett, nicht als nutzbarer Kanal.
-
----
-
-## P2 — Architektonisch offen / mittelfristig relevant
-
-### NATS-001: Event-Bus ist disabled by default
-
-- **Dateien**: `app/infrastructure/eventbus/nats_publisher.py`, `nats_consumer.py`
-- **Problem**: `enabled: bool = False` (Zeile 23 Publisher). Consumer loggt: "NATS consumer disabled — using log-only fallback". Architektur steht (DLQ, Idempotenz, Flow-Spine-Handler, Observability), aber in Produktion laeuft nichts ueber NATS.
-- **Auswirkung**: Alle Events sind synchron oder log-only. Kein echter Pub/Sub im Betrieb.
-
-### RAG-001: ChromaDB befuellt, aber schmaler Inhaltsbestand
-
-- **Dateien**: `app/services/vector_store.py`, `app/services/indexer.py`
-- **Problem**: Indexer laeuft alle 5 Minuten und indexiert Artikel + Kunden pro Tenant. ChromaDB ist funktional, aber nur zwei Entity-Typen sind indiziert. Kein Prozesswissen, keine Dokumente, keine Wissensbasis-Eintraege.
-- **Auswirkung**: RAG-Antworten sind auf Artikel-/Kundenstamm beschraenkt.
-
-### CRUD-001: GET-only-Endpoints ohne Mutation
-
-Folgende Ressourcen haben nur Lesezugriff, obwohl CRUD fachlich sinnvoll waere:
-
-| Endpoint-Datei | Routen | Fehlend |
-|----------------|--------|---------|
-| `config_service.py` | GET | POST/PUT fuer Konfigurationsaenderungen |
-| `disposition.py` | 2 GET | POST/PUT fuer Dispositionsentscheidungen |
-| `dms_images.py` | 2 GET | POST fuer Bild-Upload |
-| `direct_debits.py` | 2 GET | POST/DELETE fuer Lastschrift-Management |
-| `foerderung.py` | 2 GET | POST fuer Foerderantraege |
-| `marketing.py` | 3 GET | POST fuer Kampagnen |
-| `zertifikate.py` | 2 GET | POST fuer Zertifikatsanlage |
+## P1 — Verbleibende offene Punkte
 
 ### COVERAGE-001: Backend-Testabdeckung bei 45%
 
 - Gesamtabdeckung ist fuer ein ERP-System niedrig. Kritische Pfade (Finance-Posting, Bestandsfuehrung, Tenant-Isolation) sollten >80% haben.
 
+### CRUD-002: config_service.py hat nur GET
+
+- `app/api/v1/endpoints/config_service.py` — einziger verbleibender GET-only Endpoint, der fachlich POST/PUT braucht.
+
 ---
 
-## P3 — Frontend-Restarbeiten (niedrig)
+## P2 — Architektonisch offen / mittelfristig relevant
 
-### FE-001: `downloadComingSoon`-Rest in Lieferanten-Stamm
+### NATS-001: Event-Bus disabled by default — aber jetzt config-aktivierbar
 
-- **Datei**: `packages/frontend-web/src/pages/einkauf/lieferanten-stamm.tsx` (Zeile ~400)
-- **Problem**: Dokument-Download zeigt `t('crud.messages.downloadComingSoon')` statt echtem Download.
+- **Dateien**: `app/infrastructure/eventbus/nats_publisher.py`, `nats_consumer.py`
+- **Aenderung**: Publisher liest jetzt `EVENT_BUS_ENABLED` + `EVENT_BUS_PROVIDER=nats` aus Config. Aktivierung: `EVENT_BUS_ENABLED=true EVENT_BUS_PROVIDER=nats` in `.env`.
+- **Verbleibend**: Architektur steht (DLQ, Idempotenz, Flow-Spine-Handler, Observability, Health-Check), aber im Dev-Betrieb laeuft NATS nicht mit.
 
-### FE-002: Toast-only Bulk-Aktionen in 3 Dateien
+### RAG-002: Obsidian als ergaenzende Knowledge-Quelle
 
-Buttons zeigen Erfolgs-Toast ohne echte API-Mutation:
+**Abwaegung (2026-04-10):**
 
-| Datei | Aktion | Problem |
-|-------|--------|---------|
-| `futtermittel/charge-verfolgung.tsx` | Export/Recall/Trace (Zeilen 145-163) | Static Config liefert Toast-only; wird in `useMemo` ueberschrieben — fragiles Pattern |
-| `fibu/kreditoren.tsx` | DATEV-Export-Button | Zeigt Info-Toast, triggert keinen echten Export |
-| `fuhrpark/fahrzeug-stamm.tsx` | Drucker-Setup / Akte drucken | `await` + Toast ohne Fehlerbehandlung |
+- **Pro Obsidian**: Kostenlos, keine laufenden DB-Kosten, Markdown-basiert, Git-versionierbar, starkes Plugin-Oekosystem, ideal fuer strukturiertes Prozesswissen (SOPs, Checklisten, Fachbegriffe). Kann als lokaler Markdown-Vault neben ChromaDB stehen.
+- **Contra**: Kein nativer Multi-Tenant-Support, kein Server-Modus (Obsidian ist Desktop-App), fuer API-Zugriff braeuchte es einen File-Watcher oder Sync-Job der Markdown-Dateien in ChromaDB indiziert.
+- **Empfehlung**: Obsidian als **redaktionelle Pflegeflaeche** fuer Wissensbasis-Eintraege nutzen. Ein einfacher Sync-Job (`scripts/obsidian_to_rag.py`) liest `.md`-Dateien aus einem konfigurierbaren Vault-Verzeichnis und fuettert sie ueber `indexer.index_knowledge()` in ChromaDB. Keine zusaetzlichen DB-Kosten, keine neue Infrastruktur, nur ein Dateipfad in der Config.
+- **Konfiguration**: `OBSIDIAN_VAULT_PATH` in `.env` (optional, default: leer = deaktiviert).
 
 ---
 
@@ -133,19 +69,33 @@ Buttons zeigen Erfolgs-Toast ohne echte API-Mutation:
 |------------|--------|-----------|
 | PostgreSQL 15 | produktiv | Multi-Schema, Alembic-Migrationen |
 | Redis 7 | produktiv | Session/Cache |
-| NATS JetStream | architekturbereit, disabled | Log-only Fallback |
+| NATS JetStream | config-aktivierbar | `EVENT_BUS_ENABLED=true EVENT_BUS_PROVIDER=nats` |
 | Keycloak/OIDC | produktiv | RS256/JWKS, dev-Bypass via `API_DEV_TOKEN` |
 | Paperless-ngx DMS | produktiv | HTTP-Client mit Retry |
-| ChromaDB/RAG | produktiv (schmal) | Nur Artikel + Kunden indiziert |
+| ChromaDB/RAG | produktiv (erweitert) | Artikel + Kunden + Kontrakte + Futtermittel + Knowledge |
 | Superglue Self-Host | verdrahtet | Upstream-Contract aktuell, 3 Pilot-Tools provisioniert |
-| Voice-Kanal | Stub | Kein STT/TTS-Provider |
+| Voice-Kanal | Provider-ready | Whisper/Azure/OpenAI TTS konfigurierbar, Web Speech Fallback |
+| Tenant-Enforcement | Middleware | `TenantEnforcementMiddleware` validiert X-Tenant-ID zentral |
 
 ---
 
 ## Zuletzt geschlossene Punkte (2026-04-10)
 
+- ~~STUB-001: Mischfutter-Produktion war hartcodiert~~ -> `produktion_mischfutter.py` liest jetzt Verfuegbarkeit aus `futtermittel_einzelfutter`, Rezepte aus `futtermittel_rezepte`, persistiert Auftraege in `futtermittel_produktionsauftraege` mit echtem Bestandsabzug bei Freigabe und Rueckbuchung bei Storno.
+- ~~STUB-002: Futtermittel-Stamm war Demo-Seed~~ -> Neues Domainmodell `app/infrastructure/models/futtermittel_models.py` mit 6 Tabellen (Einzelfutter, Mischfutter, Rezepte, Komponenten, Produktionsauftraege, Sorten). Vollstaendiges CRUD in `futter_stamm.py`. Migration: `futtermittel_sorten_produktion_20260410`.
+- ~~STUB-003: Liquiditaetsuebersicht war Platzhalter~~ -> `liquidity.py` berechnet jetzt Liquiditaet aus OP-Debitoren/Kreditoren, Journal-Salden (Kontenklasse 1xxx) und 30-Tage-Prognose-Buckets.
+- ~~STUB-004: Sortenregister war statische Liste~~ -> `agrar_varieties.py` hat jetzt volles CRUD gegen `domain_shared.agrar_sorten` mit Auto-Seed pro Tenant.
+- ~~TENANT-001: Multi-Tenancy nur auf Endpoint-Ebene~~ -> Neue `TenantEnforcementMiddleware` in `app/middleware/tenant_enforcement.py` validiert X-Tenant-ID zentral auf allen API-Pfaden, setzt ContextVar pro Request und rejected fehlende/ungueltige Tenant-IDs.
+- ~~VOICE-001: Voice-Kanal war Stub~~ -> `voice_adapter.py` unterstuetzt jetzt Whisper API (STT), OpenAI TTS, Azure Cognitive Speech und Web Speech API Fallback. Konfiguration ueber `VOICE_STT_PROVIDER` / `VOICE_TTS_PROVIDER`.
+- ~~NATS-001: Event-Bus war hardcoded disabled~~ -> Publisher liest jetzt `EVENT_BUS_ENABLED` + `EVENT_BUS_PROVIDER` aus Config; Aktivierung per Env-Variable.
+- ~~RAG-001: ChromaDB nur Artikel + Kunden~~ -> Indexer erweitert um `index_contracts()`, `index_feed()`, `index_knowledge()`, `index_all()`.
+- ~~CRUD-001: 7 GET-only Endpoints~~ -> POST/PUT/DELETE fuer Disposition, Foerderung, Marketing, Zertifikate, Direct Debits und DMS-Images ergaenzt. Nur `config_service.py` verbleibt GET-only.
+- ~~FE-001: downloadComingSoon~~ -> Durch echte DMS-Fehlermeldung ersetzt in `lieferanten-stamm.tsx`.
+- ~~FE-002: Toast-only Actions~~ -> Audit-Korrektur: `charge-verfolgung.tsx` nutzt echte API via `useMemo`-Override; `kreditoren.tsx` navigiert bereits korrekt; `fahrzeug-stamm.tsx` hat echte API-Calls mit Error-Handling. Keine echten Toast-only-Bugs.
 - ~~`POST /api/v1/compliance/pcn-meldungen` fehlte~~ -> jetzt vollstaendig implementiert in `compliance.py:818` mit UFI-Validierung und Tenant-Isolation
 - ~~OP-ROLL-007 bis OP-ROLL-012 (Fallkopf-Rollout) waren reserviert~~ -> alle 6 Slices abgeschlossen, 8 Kernmasken mit operativem Vorgangskopf, Register bewusst schlank gelassen und dokumentiert in `operational-rollout-scope-2026-04-09.md`
+- ~~Settlement-, Mahn-, OP- und liefernahe Follow-up-Masken fielen noch aus dem gemeinsamen Arbeitsmodell heraus~~ -> `packages/frontend-web/src/pages/{annahme/abrechnung,einkauf/rechnungseingaenge-liste,einkauf/anlieferavis,einkauf/auftragsbestaetigung,finance/mahnwesen,finance/op-debitoren,finance/op-kreditoren}.tsx` tragen jetzt denselben leichten Vorgangskopf fuer Rueckstand, Freigabe-/Verbuchungsdruck, Blocker und naechste Aktion, weiterhin ausschliesslich aus bereits geladenen Daten.
+- ~~Sammel- und Meldearbeitsplaetze in Einkauf, FIBU, Annahme und Labor liefen noch ohne einheitlichen leichten Operationsrahmen~~ -> `packages/frontend-web/src/pages/{einkauf/anlieferavis-liste,einkauf/auftragsbestaetigungen-liste,fibu/zahlungslaeufe,finance/ustva,fibu/elster-online,fibu/schnittstellen-center,annahme/warteschlange,labor/proben-liste,qualitaet/labor-liste}.tsx` fuehren jetzt denselben kompakten Fallkopf, Kontext und Timeline ausschliesslich aus bereits geladenen Daten und ohne zusaetzliche API-Last.
 - ~~Frontend-Typecheck war fragil~~ -> 0 Fehler, `tsc --noEmit` ist gruen
 - ~~Mock-Seiten-Inventur war nur geschaetzt~~ -> vollstaendiger Audit: 0 rein unverbundene Pages, 479 Seiten nutzen Hook-basierte API-Anbindung
 

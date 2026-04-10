@@ -67,3 +67,92 @@ async def get_new_direct_debit_template(tenant_id: str = Depends(get_tenant_id))
         "status": "draft",
         "lastschriften": [],
     }
+
+
+# --------------- Pydantic Schemas ---------------
+from pydantic import BaseModel
+from typing import Optional, List
+from datetime import datetime
+from starlette.responses import Response
+from fastapi import HTTPException
+import uuid
+
+
+class DirectDebitItemCreate(BaseModel):
+    debitor_name: str
+    iban: str
+    bic: Optional[str] = None
+    mandate_id: str
+    amount: float
+    verwendungszweck: Optional[str] = None
+
+
+class DirectDebitRunCreate(BaseModel):
+    faelligkeitsdatum: date
+    ausfuehrungsdatum: date
+    sepa_schema: str = "CORE"
+    sequenz_typ: str = "RCUR"
+    glaeubiger_id: str
+    abbucher_name: str
+    items: List[DirectDebitItemCreate]
+
+
+# --------------- POST / DELETE ---------------
+
+
+@router.post("", response_model=dict, status_code=201)
+async def create_direct_debit_run(
+    body: DirectDebitRunCreate,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Create a new direct debit run with items."""
+    run_id = f"LS-{date.today().strftime('%Y%m%d')}-{uuid.uuid4().hex[:6].upper()}"
+    now = datetime.utcnow()
+
+    for item in body.items:
+        db.execute(text("""
+            INSERT INTO domain_shared.direct_debit_items
+                (run_id, debitor_name, iban, bic, mandate_id, amount,
+                 verwendungszweck, status, created_at)
+            VALUES
+                (:run_id, :debitor_name, :iban, :bic, :mandate_id, :amount,
+                 :verwendungszweck, 'pending', :created_at)
+        """), {
+            "run_id": run_id,
+            "debitor_name": item.debitor_name,
+            "iban": item.iban,
+            "bic": item.bic,
+            "mandate_id": item.mandate_id,
+            "amount": item.amount,
+            "verwendungszweck": item.verwendungszweck,
+            "created_at": now,
+        })
+    db.commit()
+
+    return {
+        "id": run_id,
+        "laufnummer": run_id,
+        "anzahlLastschriften": len(body.items),
+        "gesamtbetrag": sum(i.amount for i in body.items),
+        "status": "pending",
+        "erstellt_am": now.isoformat(),
+    }
+
+
+@router.delete("/{run_id}", response_class=Response, status_code=204)
+async def cancel_direct_debit_run(
+    run_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> Response:
+    """Cancel a direct debit run by setting all its items to 'cancelled'."""
+    result = db.execute(text("""
+        UPDATE domain_shared.direct_debit_items
+        SET status = 'cancelled'
+        WHERE run_id = :run_id AND status != 'exported'
+    """), {"run_id": run_id})
+    db.commit()
+    if result.rowcount == 0:
+        raise HTTPException(status_code=404, detail="Lastschriftlauf nicht gefunden oder bereits exportiert")
+    return Response(status_code=204)

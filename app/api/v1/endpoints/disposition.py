@@ -104,3 +104,102 @@ async def get_disposition_stats(db: Session = Depends(get_db)) -> dict:
         },
         "generated_at": datetime.utcnow().isoformat(),
     }
+
+
+# --------------- Pydantic Schemas ---------------
+from pydantic import BaseModel
+
+
+class DispositionPositionCreate(BaseModel):
+    artikel: str
+    artikel_id: str
+    bestand: float = 0
+    mindestbestand: float = 0
+    bedarf: float = 0
+    empfehlung: Optional[str] = None
+    prioritaet: str = "mittel"
+
+
+class DispositionPositionUpdate(BaseModel):
+    artikel: Optional[str] = None
+    artikel_id: Optional[str] = None
+    bestand: Optional[float] = None
+    mindestbestand: Optional[float] = None
+    bedarf: Optional[float] = None
+    empfehlung: Optional[str] = None
+    prioritaet: Optional[str] = None
+
+
+# --------------- POST / PUT / DELETE ---------------
+from fastapi import HTTPException
+from starlette.responses import Response
+
+
+@router.post("", response_model=dict, status_code=201)
+async def create_disposition_position(
+    body: DispositionPositionCreate,
+    db: Session = Depends(get_db),
+) -> dict:
+    """Create a new disposition position."""
+    pos = DispositionPosition(
+        artikel=body.artikel,
+        artikel_id=body.artikel_id,
+        bestand=body.bestand,
+        mindestbestand=body.mindestbestand,
+        bedarf=body.bedarf,
+        empfehlung=body.empfehlung,
+        prioritaet=body.prioritaet,
+    )
+    db.add(pos)
+    db.commit()
+    db.refresh(pos)
+    return {
+        "id": pos.id,
+        "artikel": pos.artikel,
+        "artikel_id": pos.artikel_id,
+        "bestand": float(pos.bestand or 0),
+        "mindestbestand": float(pos.mindestbestand or 0),
+        "bedarf": float(pos.bedarf or 0),
+        "empfehlung": pos.empfehlung,
+        "prioritaet": pos.prioritaet,
+    }
+
+
+@router.put("/{position_id}", response_model=dict)
+async def update_disposition_position(
+    position_id: int,
+    body: DispositionPositionUpdate,
+    db: Session = Depends(get_db),
+) -> dict:
+    """Update an existing disposition position."""
+    pos = db.query(DispositionPosition).filter(DispositionPosition.id == position_id).first()
+    if not pos:
+        raise HTTPException(status_code=404, detail="Position nicht gefunden")
+    for field, value in body.model_dump(exclude_unset=True).items():
+        setattr(pos, field, value)
+    db.commit()
+    db.refresh(pos)
+    return {
+        "id": pos.id,
+        "artikel": pos.artikel,
+        "artikel_id": pos.artikel_id,
+        "bestand": float(pos.bestand or 0),
+        "mindestbestand": float(pos.mindestbestand or 0),
+        "bedarf": float(pos.bedarf or 0),
+        "empfehlung": pos.empfehlung,
+        "prioritaet": pos.prioritaet,
+    }
+
+
+@router.delete("/{position_id}", response_class=Response, status_code=204)
+async def delete_disposition_position(
+    position_id: int,
+    db: Session = Depends(get_db),
+) -> Response:
+    """Delete a disposition position."""
+    pos = db.query(DispositionPosition).filter(DispositionPosition.id == position_id).first()
+    if not pos:
+        raise HTTPException(status_code=404, detail="Position nicht gefunden")
+    db.delete(pos)
+    db.commit()
+    return Response(status_code=204)

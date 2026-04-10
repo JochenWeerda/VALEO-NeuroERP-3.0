@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+﻿import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Badge } from '@/components/ui/badge'
@@ -74,7 +74,7 @@ type LieferantData = {
   bemerkungen?: string
 }
 
-/** Dokumenttypen im Lieferantenstamm (häufig bis seltener) */
+/** Dokumenttypen im Lieferantenstamm (hÃ¤ufig bis seltener) */
 export type DokumentTyp =
   | 'rahmenvertrag'      // Lieferantenvertrag / Rahmenvertrag
   | 'preisliste'         // Preislisten / Konditionenblatt
@@ -87,7 +87,7 @@ export type DokumentTyp =
   | 'rohstoff_deklaration' // Rohstoffdeklarationen / Herkunftsnachweise
   | 'kommunikation'     // Kommunikation / Schriftverkehr
   | 'foto_scan'         // Fotos / Scanbelege
-  | 'signatur'          // Signatur-/Prüfdateien (z. B. PGP)
+  | 'signatur'          // Signatur-/PrÃ¼fdateien (z. B. PGP)
   | 'nda'
   | 'esg'
   | 'sonstiges'
@@ -104,13 +104,13 @@ const DOKUMENT_TYP_LABELS: Record<DokumentTyp, string> = {
   rohstoff_deklaration: 'Rohstoffdeklarationen / Herkunftsnachweise',
   kommunikation: 'Kommunikation / Schriftverkehr',
   foto_scan: 'Fotos / Scanbelege',
-  signatur: 'Signatur-/Prüfdateien (z. B. PGP)',
+  signatur: 'Signatur-/PrÃ¼fdateien (z. B. PGP)',
   nda: 'NDA',
   esg: 'ESG',
   sonstiges: 'Sonstiges',
 }
 
-/** Kurzbezeichnungen für die Dokumenttyp-Spalte (Tabelle) */
+/** Kurzbezeichnungen fÃ¼r die Dokumenttyp-Spalte (Tabelle) */
 const DOKUMENT_TYP_SHORT: Record<DokumentTyp, string> = {
   rahmenvertrag: 'Rahmenvertrag',
   preisliste: 'Preisliste/Konditionen',
@@ -123,7 +123,7 @@ const DOKUMENT_TYP_SHORT: Record<DokumentTyp, string> = {
   rohstoff_deklaration: 'Rohstoff/Herkunft',
   kommunikation: 'Kommunikation',
   foto_scan: 'Foto/Scan',
-  signatur: 'Signatur/Prüfdatei',
+  signatur: 'Signatur/PrÃ¼fdatei',
   nda: 'NDA',
   esg: 'ESG',
   sonstiges: 'Sonstiges',
@@ -186,7 +186,7 @@ export default function LieferantenStammPage(): JSX.Element {
           toast({
             variant: 'destructive',
             title: 'Lieferant konnte nicht geladen werden',
-            description: 'Bitte prüfen Sie die Verbindung oder ob der Lieferant existiert.',
+            description: 'Bitte prÃ¼fen Sie die Verbindung oder ob der Lieferant existiert.',
           })
           setLieferant((prev) => ({ ...prev, id: id || '', name: '', legalName: '' }))
           setLoading(false)
@@ -468,7 +468,7 @@ export default function LieferantenStammPage(): JSX.Element {
                     onValueChange={(value) => setLieferant(prev => ({ ...prev, kategorie: value }))}
                     options={[
                       { value: 'Saatgut', label: t('crud.fields.categorySeed') },
-                      { value: 'Düngemittel', label: t('crud.fields.categoryFertilizer') },
+                      { value: 'DÃ¼ngemittel', label: t('crud.fields.categoryFertilizer') },
                       { value: 'Landtechnik', label: t('crud.fields.categoryMachinery') },
                       { value: 'Sonstiges', label: t('common.other') },
                     ]}
@@ -821,28 +821,30 @@ export default function LieferantenStammPage(): JSX.Element {
                                 onClick={async () => {
                                   try {
                                     const url = `/api/v1/einkauf/lieferanten/${id}/dokumente/${doc.id}/download`
-                                    const res = await apiClient.get<Blob>(url, { responseType: 'blob' }).catch(() => null)
-                                    if (res instanceof Blob && res.size > 0) {
-                                      const a = document.createElement('a')
-                                      a.href = URL.createObjectURL(res)
-                                      a.download = doc.dateiname || doc.titel || 'dokument'
-                                      a.click()
-                                      URL.revokeObjectURL(a.href)
-                                      toast({ title: t('crud.messages.downloadInfo'), description: doc.dateiname })
-                                    } else {
-                                      const blob = new Blob([`Dokument: ${doc.titel}\nDateiname: ${doc.dateiname}\nTyp: ${doc.typ}\nGültig bis: ${doc.gueltigBis ?? '-'}`], { type: 'text/plain' })
-                                      const a = document.createElement('a')
-                                      a.href = URL.createObjectURL(blob)
-                                      a.download = `${(doc.dateiname || doc.titel || 'dokument').replace(/\.[^.]+$/, '')  }.txt`
-                                      a.click()
-                                      URL.revokeObjectURL(a.href)
-                                      toast({ title: t('crud.messages.downloadInfo'), description: 'Info-Datei erstellt (Dokument in DMS hinterlegen für echten Download).' })
+                                    const response = await fetch(url, { credentials: 'include' })
+                                    if (!response.ok) {
+                                      throw new Error(`HTTP ${response.status}`)
                                     }
-                                  } catch {
-                                    toast({ title: t('crud.messages.downloadInfo'), description: t('crud.messages.downloadComingSoon'), variant: 'default' })
+                                    const blob = await response.blob()
+                                    if (!blob || blob.size === 0) {
+                                      throw new Error('empty-file')
+                                    }
+                                    const objectUrl = URL.createObjectURL(blob)
+                                    const a = document.createElement('a')
+                                    a.href = objectUrl
+                                    a.download = doc.dateiname || doc.titel || 'dokument'
+                                    a.click()
+                                    URL.revokeObjectURL(objectUrl)
+                                    toast({ title: t('crud.messages.downloadInfo'), description: doc.dateiname })
+                                  } catch (error: any) {
+                                    toast({
+                                      title: t('crud.messages.downloadInfo'),
+                                      description: 'Dokument konnte nicht geladen werden. Bitte DMS-Verbindung pruefen.',
+                                      variant: 'destructive'
+                                    })
                                   }
-                                }}
-                              >
+                                }}>
+
                                 {t('crud.actions.download')}
                               </Button>
                               <Button
@@ -939,7 +941,7 @@ export default function LieferantenStammPage(): JSX.Element {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="kreditlimit">{t('crud.fields.creditLimit')} (€)</Label>
+                  <Label htmlFor="kreditlimit">{t('crud.fields.creditLimit')} (â‚¬)</Label>
                   <Input
                     id="kreditlimit"
                     type="number"
@@ -1252,7 +1254,7 @@ export default function LieferantenStammPage(): JSX.Element {
                   value: typ,
                   label: DOKUMENT_TYP_LABELS[typ],
                 }))}
-                placeholder="Dokumenttyp wählen"
+                placeholder="Dokumenttyp wÃ¤hlen"
               />
             </div>
             <div>
@@ -1493,7 +1495,7 @@ function NewClassificationForm({ onSave, onCancel }: { onSave: (klass: any) => v
               { value: 'Branche', label: t('crud.fields.industry') },
               { value: 'Zertifizierung', label: t('crud.fields.certification') },
               { value: 'Risiko', label: t('crud.fields.risk') },
-              { value: 'Größe', label: t('crud.fields.size') },
+              { value: 'GrÃ¶ÃŸe', label: t('crud.fields.size') },
             ]}
             placeholder={t('crud.fields.selectType')}
           />

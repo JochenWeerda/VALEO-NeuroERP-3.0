@@ -1,16 +1,18 @@
 """
 DMS image endpoints (l3c-dms extension)
-GET for document images and thumbnails.
+CRUD for document images and thumbnails.
 """
 
 from typing import Optional
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, Form, Response
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 
 from ....core.database import get_db
+from ....core.tenant import get_tenant_id
+from ....core.uuid7 import uuid7
 
 router = APIRouter()
 
@@ -109,3 +111,57 @@ async def list_dms_images(
         ]
     except Exception:
         return []
+
+
+@router.post("/documents", response_model=DMSDocumentOut, status_code=201)
+async def upload_dms_document(
+    file: UploadFile = File(...),
+    entity_type: str = Form("article"),
+    entity_id: str = Form(""),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Upload a document to the DMS store."""
+    content = await file.read()
+    doc_id = uuid7()
+    file_url = f"/api/v1/dms/documents/{doc_id}/download"
+
+    db.execute(text("""
+        INSERT INTO domain_inventory.article_documents
+            (id, article_id, file_name, mime_type, file_size, file_url, document_type, created_at)
+        VALUES
+            (:id, :article_id, :file_name, :mime_type, :file_size, :file_url, :doc_type, NOW())
+    """), {
+        "id": doc_id,
+        "article_id": entity_id or None,
+        "file_name": file.filename or "upload",
+        "mime_type": file.content_type or "application/octet-stream",
+        "file_size": len(content),
+        "file_url": file_url,
+        "doc_type": entity_type,
+    })
+    db.commit()
+
+    return DMSDocumentOut(
+        id=doc_id,
+        filename=file.filename or "upload",
+        mime_type=file.content_type or "application/octet-stream",
+        size=len(content),
+        url=file_url,
+    )
+
+
+@router.delete("/documents/{doc_id}", status_code=204)
+async def delete_dms_document(
+    doc_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Delete a document from the DMS store."""
+    result = db.execute(text(
+        "DELETE FROM domain_inventory.article_documents WHERE id = :id"
+    ), {"id": doc_id})
+    db.commit()
+    if result.rowcount == 0:
+        raise HTTPException(status_code=404, detail="Dokument nicht gefunden")
+    return Response(status_code=204)

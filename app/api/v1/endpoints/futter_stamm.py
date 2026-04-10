@@ -1,196 +1,428 @@
 """
 Futtermittel-Stammdaten & Rezepte API
 
-Liefert Einzelfuttermittel-, Mischfuttermittel- und Rezept-Stammdaten.
-Demo-Seed-Daten werden inline bereitgestellt, bis persistente Modelle existieren.
+Vollstaendiges CRUD fuer Einzelfuttermittel, Mischfuttermittel und Rezepte.
+Persistenz ueber SQLAlchemy-Modelle in domain_shared.
 """
 
 from typing import Optional
+from datetime import date
 
-from fastapi import APIRouter, Header, HTTPException
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, Response
 from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session, joinedload
+from sqlalchemy import and_
+
+from app.core.database import get_db
+from app.core.tenant import get_tenant_id
+from app.core.uuid7 import uuid7
+from app.infrastructure.models.futtermittel_models import (
+    Einzelfuttermittel,
+    Mischfuttermittel,
+    FuttermittelRezept,
+    RezeptKomponente,
+)
 
 router = APIRouter(tags=["futter", "stammdaten"])
 
 
 # ── Schemas ─────────────────────────────────────────────────────
 
-class EinzelfuttermittelDetail(BaseModel):
+class EinzelfuttermittelIn(BaseModel):
+    artikel_nummer: str = Field(..., min_length=1, max_length=50)
+    name: str = Field(..., min_length=1, max_length=255)
+    art: str = Field(..., min_length=1, max_length=100)
+    herkunft: Optional[str] = None
+    lieferant: Optional[str] = None
+    protein: Optional[float] = None
+    energie: Optional[float] = None
+    faser: Optional[float] = None
+    fett: Optional[float] = None
+    asche: Optional[float] = None
+    trockensubstanz: Optional[float] = None
+    gvo_status: Optional[str] = None
+    qs_milch: bool = False
+    gmp_plus: bool = False
+    bio_zertifiziert: bool = False
+    verfuegbar_t: float = 0
+    einheit: str = "t"
+    min_bestand_t: Optional[float] = None
+    preis_pro_t: Optional[float] = None
+
+
+class EinzelfuttermittelOut(EinzelfuttermittelIn):
     id: str
-    artikel: str
-    art: str
-    herkunft: str
-    lieferant: str
-    protein: float
-    energie: float
-    gvo_status: str
-    qs_milch: bool
-    verfuegbar: float
+    aktiv: bool = True
+
+    class Config:
+        from_attributes = True
 
 
-class MischfutterKomponente(BaseModel):
-    komponente: str
-    anteil: float
+class MischfuttermittelIn(BaseModel):
+    produkt_code: str = Field(..., min_length=1, max_length=50)
+    name: str = Field(..., min_length=1, max_length=255)
+    tierart: str = Field(..., min_length=1, max_length=100)
+    leistungsstufe: Optional[str] = None
+    protein: Optional[float] = None
+    energie: Optional[float] = None
+    beschreibung: Optional[str] = None
 
 
-class MischfuttermittelDetail(BaseModel):
+class MischfuttermittelOut(MischfuttermittelIn):
     id: str
-    typ: str
-    tierart: str
-    leistungsstufe: str
-    rezeptur: list[MischfutterKomponente]
-    protein: float
-    energie: float
+    aktiv: bool = True
+
+    class Config:
+        from_attributes = True
 
 
-class RezeptKomponente(BaseModel):
+class RezeptKomponenteIn(BaseModel):
+    einzelfutter_id: Optional[str] = None
+    komponente_name: str = Field(..., min_length=1)
+    anteil: float = Field(..., gt=0, le=1)
+    min_anteil: Optional[float] = None
+    max_anteil: Optional[float] = None
+    sortierung: int = 0
+
+
+class RezeptKomponenteOut(RezeptKomponenteIn):
     id: str
+
+    class Config:
+        from_attributes = True
+
+
+class RezeptIn(BaseModel):
+    rezept_code: str = Field(..., min_length=1, max_length=50)
+    name: str = Field(..., min_length=1, max_length=255)
+    tierart: str = Field(..., min_length=1, max_length=100)
+    mischfutter_id: Optional[str] = None
+    protein_ziel: Optional[float] = None
+    energie_ziel: Optional[float] = None
+    bemerkung: Optional[str] = None
+    gueltig_ab: Optional[date] = None
+    gueltig_bis: Optional[date] = None
+    komponenten: list[RezeptKomponenteIn] = []
+
+
+class RezeptOut(BaseModel):
+    id: str
+    rezept_code: str
     name: str
-    anteil: float
-
-
-class RezeptDetail(BaseModel):
-    id: str
-    name: str
     tierart: str
-    komponenten: list[RezeptKomponente]
-    protein: float
-    energie: float
+    mischfutter_id: Optional[str] = None
+    version: int = 1
+    protein_ziel: Optional[float] = None
+    energie_ziel: Optional[float] = None
+    bemerkung: Optional[str] = None
+    aktiv: bool = True
+    gueltig_ab: Optional[date] = None
+    gueltig_bis: Optional[date] = None
+    komponenten: list[RezeptKomponenteOut] = []
+
+    class Config:
+        from_attributes = True
 
 
-# ── Demo-Seed-Daten ─────────────────────────────────────────────
+# ── Einzelfuttermittel CRUD ────────────────────────────────────
 
-_EINZELFUTTER_SEED: dict[str, EinzelfuttermittelDetail] = {
-    "EF-001": EinzelfuttermittelDetail(
-        id="EF-001",
-        artikel="Sojaschrot 44% Protein",
-        art="Eiweißfutter",
-        herkunft="Brasilien",
-        lieferant="Agrar Import GmbH",
-        protein=44.0,
-        energie=13.2,
-        gvo_status="gvo-frei-zertifiziert",
-        qs_milch=True,
-        verfuegbar=150,
-    ),
-    "EF-002": EinzelfuttermittelDetail(
-        id="EF-002",
-        artikel="Rapsschrot",
-        art="Eiweißfutter",
-        herkunft="Deutschland",
-        lieferant="Raiffeisen Waren GmbH",
-        protein=35.0,
-        energie=11.5,
-        gvo_status="gvo-frei",
-        qs_milch=True,
-        verfuegbar=280,
-    ),
-}
-
-_MISCHFUTTER_SEED: dict[str, MischfuttermittelDetail] = {
-    "MF-001": MischfuttermittelDetail(
-        id="MF-001",
-        typ="Milchviehfutter Hochleistung",
-        tierart="Rind (Milch)",
-        leistungsstufe="Hochleistung (>30 l/Tag)",
-        rezeptur=[
-            MischfutterKomponente(komponente="Sojaschrot 44%", anteil=25),
-            MischfutterKomponente(komponente="Weizen", anteil=30),
-            MischfutterKomponente(komponente="Mais", anteil=20),
-            MischfutterKomponente(komponente="Mineralfutter", anteil=5),
-        ],
-        protein=18.5,
-        energie=11.8,
-    ),
-    "MF-002": MischfuttermittelDetail(
-        id="MF-002",
-        typ="Schweinemastfutter Phase 2",
-        tierart="Schwein (Mast)",
-        leistungsstufe="Mittelmast (60-90 kg)",
-        rezeptur=[
-            MischfutterKomponente(komponente="Gerste", anteil=40),
-            MischfutterKomponente(komponente="Weizen", anteil=25),
-            MischfutterKomponente(komponente="Sojaschrot 44%", anteil=18),
-            MischfutterKomponente(komponente="Mineralfutter", anteil=3),
-        ],
-        protein=16.0,
-        energie=13.0,
-    ),
-}
-
-_REZEPT_SEED: dict[str, RezeptDetail] = {
-    "REZ-001": RezeptDetail(
-        id="REZ-001",
-        name="Milchviehfutter Hochleistung",
-        tierart="Rind (Milch)",
-        komponenten=[
-            RezeptKomponente(id="1", name="Sojaschrot 44%", anteil=25),
-            RezeptKomponente(id="2", name="Weizen", anteil=30),
-            RezeptKomponente(id="3", name="Mais", anteil=20),
-            RezeptKomponente(id="4", name="Mineralfutter", anteil=5),
-        ],
-        protein=18.5,
-        energie=11.8,
-    ),
-    "REZ-002": RezeptDetail(
-        id="REZ-002",
-        name="Legehennenfutter Standard",
-        tierart="Geflügel (Legehenne)",
-        komponenten=[
-            RezeptKomponente(id="1", name="Weizen", anteil=35),
-            RezeptKomponente(id="2", name="Mais", anteil=25),
-            RezeptKomponente(id="3", name="Sojaschrot 44%", anteil=20),
-            RezeptKomponente(id="4", name="Kalk", anteil=8),
-            RezeptKomponente(id="5", name="Mineralfutter", anteil=4),
-        ],
-        protein=17.0,
-        energie=11.2,
-    ),
-}
+@router.get("/einzelfuttermittel", response_model=list[EinzelfuttermittelOut],
+            summary="Alle Einzelfuttermittel auflisten")
+async def list_einzelfuttermittel(
+    art: Optional[str] = Query(None, description="Filtern nach Art"),
+    aktiv: bool = Query(True, description="Nur aktive"),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    q = db.query(Einzelfuttermittel).filter(Einzelfuttermittel.tenant_id == tenant_id)
+    if aktiv:
+        q = q.filter(Einzelfuttermittel.aktiv.is_(True))
+    if art:
+        q = q.filter(Einzelfuttermittel.art == art)
+    return q.order_by(Einzelfuttermittel.name).all()
 
 
-# ── Endpoints ───────────────────────────────────────────────────
-
-@router.get(
-    "/einzelfuttermittel/{futter_id}",
-    response_model=EinzelfuttermittelDetail,
-    summary="Einzelfuttermittel-Stammdaten abrufen",
-)
+@router.get("/einzelfuttermittel/{futter_id}", response_model=EinzelfuttermittelOut,
+            summary="Einzelfuttermittel-Stammdaten abrufen")
 async def get_einzelfuttermittel(
     futter_id: str,
-    x_tenant_id: Optional[str] = Header(None, alias="X-Tenant-ID"),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
 ):
-    item = _EINZELFUTTER_SEED.get(futter_id)
+    item = db.query(Einzelfuttermittel).filter(
+        and_(Einzelfuttermittel.id == futter_id, Einzelfuttermittel.tenant_id == tenant_id)
+    ).first()
     if not item:
         raise HTTPException(status_code=404, detail=f"Einzelfuttermittel '{futter_id}' nicht gefunden")
     return item
 
 
-@router.get(
-    "/mischfuttermittel/{misch_id}",
-    response_model=MischfuttermittelDetail,
-    summary="Mischfuttermittel-Stammdaten abrufen",
-)
+@router.post("/einzelfuttermittel", response_model=EinzelfuttermittelOut, status_code=201,
+             summary="Einzelfuttermittel anlegen")
+async def create_einzelfuttermittel(
+    payload: EinzelfuttermittelIn,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    item = Einzelfuttermittel(id=uuid7(), tenant_id=tenant_id, **payload.model_dump())
+    db.add(item)
+    db.commit()
+    db.refresh(item)
+    return item
+
+
+@router.put("/einzelfuttermittel/{futter_id}", response_model=EinzelfuttermittelOut,
+            summary="Einzelfuttermittel aktualisieren")
+async def update_einzelfuttermittel(
+    futter_id: str,
+    payload: EinzelfuttermittelIn,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    item = db.query(Einzelfuttermittel).filter(
+        and_(Einzelfuttermittel.id == futter_id, Einzelfuttermittel.tenant_id == tenant_id)
+    ).first()
+    if not item:
+        raise HTTPException(status_code=404, detail=f"Einzelfuttermittel '{futter_id}' nicht gefunden")
+    for k, v in payload.model_dump().items():
+        setattr(item, k, v)
+    db.commit()
+    db.refresh(item)
+    return item
+
+
+@router.delete("/einzelfuttermittel/{futter_id}", status_code=204,
+               summary="Einzelfuttermittel deaktivieren")
+async def delete_einzelfuttermittel(
+    futter_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    item = db.query(Einzelfuttermittel).filter(
+        and_(Einzelfuttermittel.id == futter_id, Einzelfuttermittel.tenant_id == tenant_id)
+    ).first()
+    if not item:
+        raise HTTPException(status_code=404, detail=f"Einzelfuttermittel '{futter_id}' nicht gefunden")
+    item.aktiv = False
+    db.commit()
+    return Response(status_code=204)
+
+
+# ── Mischfuttermittel CRUD ─────────────────────────────────────
+
+@router.get("/mischfuttermittel", response_model=list[MischfuttermittelOut],
+            summary="Alle Mischfuttermittel auflisten")
+async def list_mischfuttermittel(
+    tierart: Optional[str] = Query(None),
+    aktiv: bool = Query(True),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    q = db.query(Mischfuttermittel).filter(Mischfuttermittel.tenant_id == tenant_id)
+    if aktiv:
+        q = q.filter(Mischfuttermittel.aktiv.is_(True))
+    if tierart:
+        q = q.filter(Mischfuttermittel.tierart == tierart)
+    return q.order_by(Mischfuttermittel.name).all()
+
+
+@router.get("/mischfuttermittel/{misch_id}", response_model=MischfuttermittelOut,
+            summary="Mischfuttermittel-Stammdaten abrufen")
 async def get_mischfuttermittel(
     misch_id: str,
-    x_tenant_id: Optional[str] = Header(None, alias="X-Tenant-ID"),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
 ):
-    item = _MISCHFUTTER_SEED.get(misch_id)
+    item = db.query(Mischfuttermittel).filter(
+        and_(Mischfuttermittel.id == misch_id, Mischfuttermittel.tenant_id == tenant_id)
+    ).first()
     if not item:
         raise HTTPException(status_code=404, detail=f"Mischfuttermittel '{misch_id}' nicht gefunden")
     return item
 
 
-@router.get(
-    "/rezepte/{rezept_id}",
-    response_model=RezeptDetail,
-    summary="Rezept-Stammdaten abrufen",
-)
+@router.post("/mischfuttermittel", response_model=MischfuttermittelOut, status_code=201,
+             summary="Mischfuttermittel anlegen")
+async def create_mischfuttermittel(
+    payload: MischfuttermittelIn,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    item = Mischfuttermittel(id=uuid7(), tenant_id=tenant_id, **payload.model_dump())
+    db.add(item)
+    db.commit()
+    db.refresh(item)
+    return item
+
+
+@router.put("/mischfuttermittel/{misch_id}", response_model=MischfuttermittelOut,
+            summary="Mischfuttermittel aktualisieren")
+async def update_mischfuttermittel(
+    misch_id: str,
+    payload: MischfuttermittelIn,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    item = db.query(Mischfuttermittel).filter(
+        and_(Mischfuttermittel.id == misch_id, Mischfuttermittel.tenant_id == tenant_id)
+    ).first()
+    if not item:
+        raise HTTPException(status_code=404, detail=f"Mischfuttermittel '{misch_id}' nicht gefunden")
+    for k, v in payload.model_dump().items():
+        setattr(item, k, v)
+    db.commit()
+    db.refresh(item)
+    return item
+
+
+@router.delete("/mischfuttermittel/{misch_id}", status_code=204,
+               summary="Mischfuttermittel deaktivieren")
+async def delete_mischfuttermittel(
+    misch_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    item = db.query(Mischfuttermittel).filter(
+        and_(Mischfuttermittel.id == misch_id, Mischfuttermittel.tenant_id == tenant_id)
+    ).first()
+    if not item:
+        raise HTTPException(status_code=404, detail=f"Mischfuttermittel '{misch_id}' nicht gefunden")
+    item.aktiv = False
+    db.commit()
+    return Response(status_code=204)
+
+
+# ── Rezepte CRUD ───────────────────────────────────────────────
+
+@router.get("/rezepte", response_model=list[RezeptOut],
+            summary="Alle Rezepte auflisten")
+async def list_rezepte(
+    tierart: Optional[str] = Query(None),
+    aktiv: bool = Query(True),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    q = db.query(FuttermittelRezept).options(
+        joinedload(FuttermittelRezept.komponenten)
+    ).filter(FuttermittelRezept.tenant_id == tenant_id)
+    if aktiv:
+        q = q.filter(FuttermittelRezept.aktiv.is_(True))
+    if tierart:
+        q = q.filter(FuttermittelRezept.tierart == tierart)
+    return q.order_by(FuttermittelRezept.name).all()
+
+
+@router.get("/rezepte/{rezept_id}", response_model=RezeptOut,
+            summary="Rezept-Stammdaten abrufen")
 async def get_rezept(
     rezept_id: str,
-    x_tenant_id: Optional[str] = Header(None, alias="X-Tenant-ID"),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
 ):
-    item = _REZEPT_SEED.get(rezept_id)
+    item = db.query(FuttermittelRezept).options(
+        joinedload(FuttermittelRezept.komponenten)
+    ).filter(
+        and_(FuttermittelRezept.id == rezept_id, FuttermittelRezept.tenant_id == tenant_id)
+    ).first()
     if not item:
         raise HTTPException(status_code=404, detail=f"Rezept '{rezept_id}' nicht gefunden")
     return item
+
+
+@router.post("/rezepte", response_model=RezeptOut, status_code=201,
+             summary="Rezept anlegen")
+async def create_rezept(
+    payload: RezeptIn,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    rezept = FuttermittelRezept(
+        id=uuid7(),
+        tenant_id=tenant_id,
+        rezept_code=payload.rezept_code,
+        name=payload.name,
+        tierart=payload.tierart,
+        mischfutter_id=payload.mischfutter_id,
+        protein_ziel=payload.protein_ziel,
+        energie_ziel=payload.energie_ziel,
+        bemerkung=payload.bemerkung,
+        gueltig_ab=payload.gueltig_ab,
+        gueltig_bis=payload.gueltig_bis,
+    )
+    for komp in payload.komponenten:
+        rezept.komponenten.append(RezeptKomponente(
+            id=uuid7(),
+            komponente_name=komp.komponente_name,
+            einzelfutter_id=komp.einzelfutter_id,
+            anteil=komp.anteil,
+            min_anteil=komp.min_anteil,
+            max_anteil=komp.max_anteil,
+            sortierung=komp.sortierung,
+        ))
+    db.add(rezept)
+    db.commit()
+    db.refresh(rezept)
+    return rezept
+
+
+@router.put("/rezepte/{rezept_id}", response_model=RezeptOut,
+            summary="Rezept aktualisieren (inkl. Komponenten)")
+async def update_rezept(
+    rezept_id: str,
+    payload: RezeptIn,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    rezept = db.query(FuttermittelRezept).options(
+        joinedload(FuttermittelRezept.komponenten)
+    ).filter(
+        and_(FuttermittelRezept.id == rezept_id, FuttermittelRezept.tenant_id == tenant_id)
+    ).first()
+    if not rezept:
+        raise HTTPException(status_code=404, detail=f"Rezept '{rezept_id}' nicht gefunden")
+
+    rezept.rezept_code = payload.rezept_code
+    rezept.name = payload.name
+    rezept.tierart = payload.tierart
+    rezept.mischfutter_id = payload.mischfutter_id
+    rezept.protein_ziel = payload.protein_ziel
+    rezept.energie_ziel = payload.energie_ziel
+    rezept.bemerkung = payload.bemerkung
+    rezept.gueltig_ab = payload.gueltig_ab
+    rezept.gueltig_bis = payload.gueltig_bis
+    rezept.version = (rezept.version or 1) + 1
+
+    # Replace components
+    for old in rezept.komponenten:
+        db.delete(old)
+    db.flush()
+    for komp in payload.komponenten:
+        rezept.komponenten.append(RezeptKomponente(
+            id=uuid7(),
+            komponente_name=komp.komponente_name,
+            einzelfutter_id=komp.einzelfutter_id,
+            anteil=komp.anteil,
+            min_anteil=komp.min_anteil,
+            max_anteil=komp.max_anteil,
+            sortierung=komp.sortierung,
+        ))
+    db.commit()
+    db.refresh(rezept)
+    return rezept
+
+
+@router.delete("/rezepte/{rezept_id}", status_code=204,
+               summary="Rezept deaktivieren")
+async def delete_rezept(
+    rezept_id: str,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    item = db.query(FuttermittelRezept).filter(
+        and_(FuttermittelRezept.id == rezept_id, FuttermittelRezept.tenant_id == tenant_id)
+    ).first()
+    if not item:
+        raise HTTPException(status_code=404, detail=f"Rezept '{rezept_id}' nicht gefunden")
+    item.aktiv = False
+    db.commit()
+    return Response(status_code=204)

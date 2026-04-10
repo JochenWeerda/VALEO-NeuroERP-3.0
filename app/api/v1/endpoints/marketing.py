@@ -100,3 +100,107 @@ async def get_kampagne_kpis(kampagne_id: int, db: Session = Depends(get_db)) -> 
         "conversion_rate": None,
         "roi": None,
     }
+
+
+# --------------- Pydantic Schemas ---------------
+from pydantic import BaseModel
+from datetime import date
+
+
+class MarketingKampagneCreate(BaseModel):
+    name: str
+    typ: str
+    zielgruppe: str
+    startdatum: date
+    enddatum: Optional[date] = None
+    budget: float = 0
+    status: str = "geplant"
+
+
+class MarketingKampagneUpdate(BaseModel):
+    name: Optional[str] = None
+    typ: Optional[str] = None
+    zielgruppe: Optional[str] = None
+    startdatum: Optional[date] = None
+    enddatum: Optional[date] = None
+    budget: Optional[float] = None
+    status: Optional[str] = None
+
+
+# --------------- POST / PUT / DELETE ---------------
+from starlette.responses import Response
+
+
+@router.post("/kampagnen", response_model=dict, status_code=201)
+async def create_kampagne(
+    body: MarketingKampagneCreate,
+    db: Session = Depends(get_db),
+) -> dict:
+    """Create a new marketing campaign."""
+    kampagne = MarketingKampagneEntry(
+        name=body.name,
+        typ=body.typ,
+        zielgruppe=body.zielgruppe,
+        startdatum=datetime.combine(body.startdatum, datetime.min.time()),
+        enddatum=datetime.combine(body.enddatum, datetime.min.time()) if body.enddatum else None,
+        budget=body.budget,
+        status=body.status,
+    )
+    db.add(kampagne)
+    db.commit()
+    db.refresh(kampagne)
+    return {
+        "id": kampagne.id,
+        "name": kampagne.name,
+        "typ": kampagne.typ,
+        "zielgruppe": kampagne.zielgruppe,
+        "startdatum": _dt(kampagne.startdatum),
+        "enddatum": _dt(kampagne.enddatum),
+        "budget": float(kampagne.budget or 0),
+        "status": kampagne.status,
+    }
+
+
+@router.put("/kampagnen/{kampagne_id}", response_model=dict)
+async def update_kampagne(
+    kampagne_id: int,
+    body: MarketingKampagneUpdate,
+    db: Session = Depends(get_db),
+) -> dict:
+    """Update an existing marketing campaign."""
+    k = db.query(MarketingKampagneEntry).filter(MarketingKampagneEntry.id == kampagne_id).first()
+    if not k:
+        raise HTTPException(status_code=404, detail="Kampagne nicht gefunden")
+    update_data = body.model_dump(exclude_unset=True)
+    if "startdatum" in update_data and update_data["startdatum"] is not None:
+        update_data["startdatum"] = datetime.combine(update_data["startdatum"], datetime.min.time())
+    if "enddatum" in update_data and update_data["enddatum"] is not None:
+        update_data["enddatum"] = datetime.combine(update_data["enddatum"], datetime.min.time())
+    for field, value in update_data.items():
+        setattr(k, field, value)
+    db.commit()
+    db.refresh(k)
+    return {
+        "id": k.id,
+        "name": k.name,
+        "typ": k.typ,
+        "zielgruppe": k.zielgruppe,
+        "startdatum": _dt(k.startdatum),
+        "enddatum": _dt(k.enddatum),
+        "budget": float(k.budget or 0),
+        "status": k.status,
+    }
+
+
+@router.delete("/kampagnen/{kampagne_id}", response_class=Response, status_code=204)
+async def delete_kampagne(
+    kampagne_id: int,
+    db: Session = Depends(get_db),
+) -> Response:
+    """Delete a marketing campaign."""
+    k = db.query(MarketingKampagneEntry).filter(MarketingKampagneEntry.id == kampagne_id).first()
+    if not k:
+        raise HTTPException(status_code=404, detail="Kampagne nicht gefunden")
+    db.delete(k)
+    db.commit()
+    return Response(status_code=204)
