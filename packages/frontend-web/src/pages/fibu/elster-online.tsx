@@ -4,8 +4,11 @@
  * Referenz: JuryOberst/Elster (GitHub), offizielle ELSTER-Doku (elster.de)
  */
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -26,6 +29,7 @@ import {
   downloadELSTERXml,
   type VATReturn,
 } from '@/lib/api/fibu'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 const MEIN_ELSTER_URL = 'https://www.elster.de/eportal/login'
 const MONATE = [
@@ -65,6 +69,43 @@ export default function ElsterOnlinePage(): JSX.Element {
   const { data: fibuCockpit } = useFibuCockpit()
   const { data: returns = [], isLoading: listLoading, refetch } = useVATReturns()
   const calculateMutation = useCalculateVATReturn()
+  const latestReturn = useMemo(() => returns[0], [returns])
+  const operationalStatus = normalizeOperationalStatus(
+    returns.some((item) => item.status === 'validated') ? 'wartet_auf_mensch' : latestReturn?.status || 'offen',
+  )
+  const contextSections = [
+    {
+      title: 'ELSTER-Lage',
+      items: [
+        { label: 'UStVA-Laeufe', value: `${fibuCockpit.tax.vat_return_count}` },
+        { label: 'Freigegeben', value: `${fibuCockpit.tax.approved_count}` },
+        { label: 'Letzte Periode', value: fibuCockpit.tax.latest_period ?? 'n/a' },
+      ],
+    },
+    {
+      title: 'Rueckkopplung',
+      items: [
+        { label: 'eBilanz', value: fibuCockpit.tax.e_bilanz_ready ? 'bereit' : 'vorbereiten' },
+        { label: 'E-Clearing', value: fibuCockpit.tax.e_clearing_ready ? 'bereit' : 'Rueckmeldung offen' },
+        { label: 'Letzte Einreichung', value: fibuCockpit.tax.latest_submission_at ? new Date(fibuCockpit.tax.latest_submission_at).toLocaleDateString('de-DE') : 'noch nicht' },
+      ],
+    },
+  ]
+  const timelineItems = [
+    {
+      label: latestReturn ? `Aktive Periode ${latestReturn.period}` : 'Noch keine Periode berechnet',
+      detail: latestReturn
+        ? `Status ${latestReturn.status} mit Zahllast ${formatCurrency(Number(latestReturn.vat_payable))}.`
+        : 'Schritt 1 erzeugt den ersten belastbaren UStVA-Lauf.',
+    },
+    {
+      label: fibuCockpit.tax.latest_submission_at ? 'Letzte Einreichung vorhanden' : 'Noch keine Einreichung',
+      detail: fibuCockpit.tax.latest_submission_at
+        ? 'Der Meldepfad hat bereits eine uebermittelte Vorperiode.'
+        : 'Der Online-Pfad dient aktuell als erster produktiver Einreichungspfad.',
+      timestamp: fibuCockpit.tax.latest_submission_at ?? null,
+    },
+  ]
 
   const handleCalculate = async () => {
     try {
@@ -95,6 +136,20 @@ export default function ElsterOnlinePage(): JSX.Element {
 
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6">
+      <OperationalCaseHeader
+        title="ELSTER Online"
+        description="Der Online-Meldepfad zeigt Berechnungsstand, Freigabedruck und Rueckkopplung vor dem XML-Export."
+        status={operationalStatus}
+        owner="Steuer / FIBU"
+        blocker={returns.length === 0 ? 'Es liegt noch kein berechneter UStVA-Lauf fuer den Export vor.' : null}
+        nextAction={returns.length === 0 ? 'Periode berechnen' : returns.some((item) => item.status === 'validated') ? 'Freigegebene UStVA exportieren und einreichen' : 'Aktuelle Periode pruefen'}
+        caseLabel="Vorgang: ELSTER-Einreichung"
+        tags={['FIBU', 'Meldewesen']}
+      />
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_360px]">
+        <OperationalTimeline title="Meldepfad" items={timelineItems} />
+        <OperationalContextPanel title="ELSTER-Kontext" sections={contextSections} />
+      </div>
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">

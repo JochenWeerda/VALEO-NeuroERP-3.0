@@ -10,9 +10,13 @@ import { apiClient } from '@/lib/api-client'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { buildDecisionView } from '@/policy/decision-view'
 import { ProcessStatusPanel } from '@/components/workflow/ProcessStatusPanel'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { useApprovalDensityProfile } from '@/features/workflow/useApprovalDensityProfile'
 import { useFibuCockpit } from '@/lib/api/fibu'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 const createUstvaConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
@@ -598,9 +602,65 @@ export default function UStVAPage(): JSX.Element {
   const effectiveData = Object.keys(workspaceData).length > 0 ? workspaceData : data
   const approvalDecisionView = buildDecisionView(effectiveData?.approval_explainability)
   const approvalDensityProfile = useApprovalDensityProfile('finance-vat', approvalDecisionView)
+  const operationalStatus = normalizeOperationalStatus(
+    effectiveData?.status || (effectiveData?.approval_can_submit ? 'wartet_auf_mensch' : workflowInstanceId ? 'in_pruefung' : 'offen'),
+  )
+  const operationalBlocker =
+    effectiveData?.approval_can_submit === false
+      ? 'Die UStVA ist noch nicht abgabefaehig. Freigabe- oder Regelkontext fehlt.'
+      : null
+  const contextSections = [
+    {
+      title: 'Meldekontext',
+      items: [
+        { label: 'Periode', value: effectiveData?.periode || fibuCockpit.tax.latest_period || 'n/a' },
+        { label: 'Status', value: effectiveData?.status || 'Entwurf' },
+        { label: 'ELSTER-Referenz', value: effectiveData?.elsterReferenz || 'noch nicht vergeben' },
+      ],
+    },
+    {
+      title: 'FIBU-Lage',
+      items: [
+        { label: 'UStVA-Laeufe', value: `${fibuCockpit.tax.vat_return_count}` },
+        { label: 'Validiert / Freigegeben', value: `${fibuCockpit.tax.validated_count} / ${fibuCockpit.tax.approved_count}` },
+        { label: 'eBilanz / E-Clearing', value: `${fibuCockpit.tax.e_bilanz_ready ? 'bereit' : 'vorbereiten'} / ${fibuCockpit.tax.e_clearing_ready ? 'bereit' : 'offen'}` },
+      ],
+    },
+  ]
+  const timelineItems = [
+    {
+      label: effectiveData?.status === 'submitted' ? 'UStVA eingereicht' : 'UStVA in Bearbeitung',
+      detail: effectiveData?.status === 'submitted'
+        ? 'Die Meldung hat den fachlichen Uebergang in den Einreichungspfad erreicht.'
+        : 'Der Vorgang befindet sich noch in Berechnung, Pruefung oder Freigabe.',
+      timestamp: effectiveData?.abgegebenAm || effectiveData?.freigegebenAm || null,
+    },
+    {
+      label: workflowInstanceId ? 'Flow-Spine aktiv' : 'Kein Workflowpfad aktiv',
+      detail: workflowInstanceId
+        ? `${workflowCase || workflowProcess} fuehrt den Vorgang aktuell mit.`
+        : 'Die Maske laeuft ohne expliziten Flow-Spine-Kontext.',
+    },
+  ]
 
   return (
     <>
+      <div className="space-y-4 px-4 pb-4">
+        <OperationalCaseHeader
+          title="UStVA-Follow-up"
+          description="Der Meldevorgang wird als Freigabe- und Einreichungsfall ueber dem Fachformular gefuehrt."
+          status={operationalStatus}
+          owner="Steuer / FIBU"
+          blocker={operationalBlocker}
+          nextAction={effectiveData?.approval_can_submit ? 'ELSTER-Einreichung vorbereiten' : 'Abweichungen, Regeln oder Freigabe klaeren'}
+          caseLabel="Vorgang: Steueranmeldung"
+          tags={['FIBU', 'ELSTER']}
+        />
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_360px]">
+          <OperationalTimeline title="Meldeverlauf" items={timelineItems} />
+          <OperationalContextPanel title="UStVA-Kontext" sections={contextSections} />
+        </div>
+      </div>
       <div className="grid gap-4 px-4 pb-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm">UStVA-Läufe</CardTitle></CardHeader>

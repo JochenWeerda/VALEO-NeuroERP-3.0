@@ -6,6 +6,9 @@
 import { useState, useMemo } from 'react'
 import { useQueries } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -25,6 +28,7 @@ import {
 import { financeService } from '@/lib/services/finance-service'
 import { useToast } from '@/hooks/use-toast'
 import { exportToCSV } from '@/lib/export-utils'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 const MONTHS = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember']
 
@@ -97,6 +101,42 @@ export default function MonatswertePage(): JSX.Element {
   }, [bwaQueries, monthIndices])
 
   const displayedMonths = monthIndices.map((i) => MONTHS[i])
+  const negativeRows = gridRows.filter((row) => row.total < 0).length
+  const operationalStatus = normalizeOperationalStatus(
+    isError ? 'eskaliert' : isLoading ? 'in_pruefung' : negativeRows > 0 ? 'wartet_auf_mensch' : gridRows.length > 0 ? 'abgeschlossen' : 'offen',
+  )
+  const contextSections = [
+    {
+      title: 'L3/FIBU-Kontext',
+      items: [
+        { label: 'Wirtschaftsjahr', value: wirtschaftsjahr },
+        { label: 'Zeitraum', value: `${zeitraumVon} bis ${zeitraumBis}` },
+        { label: 'Monate', value: `${displayedMonths.length}` },
+      ],
+    },
+    {
+      title: 'Auswertungslage',
+      items: [
+        { label: 'BWA-Zeilen', value: `${gridRows.length}` },
+        { label: 'Negative Positionen', value: `${negativeRows}` },
+        { label: 'Naechste Aktion', value: isError ? 'Filter pruefen und neu laden' : negativeRows > 0 ? 'Negative Positionen in Journal pruefen' : 'Auswertung exportieren oder Drilldown nutzen' },
+      ],
+    },
+  ]
+  const timelineItems = [
+    {
+      label: isLoading ? 'Monatswerte werden geladen' : 'Monatswerte geladen',
+      detail: isLoading
+        ? 'Die ausgewaehlten Monate werden aus BWA-Daten zusammengestellt.'
+        : `${gridRows.length} Positionen fuer ${displayedMonths.length} Monat(e) aufbereitet.`,
+    },
+    {
+      label: isError ? 'Datenluecke erkannt' : 'Drilldown verfuegbar',
+      detail: isError
+        ? 'Fuer den gewaehlten Zeitraum liegen derzeit keine gueltigen Daten vor.'
+        : 'Buchungsjournal, BWA und Bilanzpfade sind direkt aus dem Raum erreichbar.',
+    },
+  ]
 
   const handleAnwenden = (): void => {
     refetch()
@@ -266,6 +306,23 @@ export default function MonatswertePage(): JSX.Element {
           </div>
         </CardContent>
       </Card>
+
+      <div className="px-4 pb-4 space-y-4">
+        <OperationalCaseHeader
+          title="Monatswerte fuer mehrere Monate"
+          description="Der Raum bildet den L3/FIBU-Auswertungsfall mit Zeitraum, Risikoindikatoren und naechster Aktion kompakt ab."
+          status={operationalStatus}
+          owner="FIBU / Controlling"
+          blocker={isError ? 'Fuer den gewaehlten Zeitraum fehlen auswertbare Buchungsdaten.' : null}
+          nextAction={isError ? 'Zeitraum anpassen und erneut laden' : negativeRows > 0 ? 'Negative Positionen im Journal pruefen' : 'Auswertung exportieren'}
+          caseLabel="Vorgang: Monatswerte"
+          tags={['L3', 'FIBU']}
+        />
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_360px]">
+          <OperationalTimeline title="Auswertungsverlauf" items={timelineItems} />
+          <OperationalContextPanel title="Monatswerte-Kontext" sections={contextSections} />
+        </div>
+      </div>
 
       {/* Inhalt: linke Liste + Grid */}
       <div className="flex-1 min-h-0 flex overflow-hidden">

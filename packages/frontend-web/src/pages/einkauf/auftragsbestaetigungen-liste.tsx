@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
 import { ListReport } from '@/components/mask-builder'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { formatDate } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
@@ -10,6 +13,7 @@ import { getEntityTypeLabel, getStatusLabel } from '@/features/crud/utils/i18n-h
 import { toast } from '@/hooks/use-toast'
 import { useAuftragsbestaetigungen, type Auftragsbestaetigung, einkaufKeys } from '@/lib/api/einkauf'
 import { apiClient } from '@/lib/api-client'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 const createAuftragsbestaetigungenConfig = (t: any, entityTypeLabel: string): ListConfig => ({
   title: entityTypeLabel,
@@ -125,8 +129,47 @@ export default function AuftragsbestaetigungenListePage(): JSX.Element {
     bestellung: { nummer: item.bestellung },
   })), [apiData])
   const total = data.length
+  const reviewedCount = data.filter((item) => item.status === 'GEPRUEFT').length
+  const confirmedCount = data.filter((item) => item.status === 'BESTAETIGT').length
+  const openCount = data.filter((item) => item.status === 'OFFEN').length
   const entityType = 'orderConfirmation'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Auftragsbestaetigung')
+  const operationalStatus = normalizeOperationalStatus(
+    openCount > 0 ? 'in_pruefung' : reviewedCount > 0 ? 'wartet_auf_mensch' : confirmedCount === total && total > 0 ? 'abgeschlossen' : 'offen',
+  )
+  const blocker = openCount > 0 ? `${openCount} Bestaetigung(en) sind noch ungeprueft.` : null
+  const contextSections = [
+    {
+      title: 'Bestaetigungsstand',
+      items: [
+        { label: 'Offen', value: `${openCount}` },
+        { label: 'Geprueft', value: `${reviewedCount}` },
+        { label: 'Bestaetigt', value: `${confirmedCount}` },
+      ],
+    },
+    {
+      title: 'Vorgangslage',
+      items: [
+        { label: 'Lieferanten', value: `${new Set(data.map((item) => item.lieferant).filter(Boolean)).size}` },
+        { label: 'Bezug zu Bestellungen', value: `${data.filter((item) => item.bestellung?.nummer).length}` },
+        { label: 'Naechste Bulk-Aktion', value: openCount > 0 ? 'Pruefen' : reviewedCount > 0 ? 'Bestaetigen' : 'Archivieren' },
+      ],
+    },
+  ]
+  const timelineItems = [
+    {
+      label: openCount > 0 ? 'Pruefrueckstand vorhanden' : 'Pruefstand stabil',
+      detail: openCount > 0
+        ? `${openCount} Bestaetigungen muessen noch fachlich geprueft werden.`
+        : 'Alle erfassten Bestaetigungen haben mindestens einen Pruefstand erreicht.',
+    },
+    {
+      label: confirmedCount > 0 ? 'Bestaetigungen in Folgeabwicklung' : 'Noch keine final bestaetigten Dokumente',
+      detail: confirmedCount > 0
+        ? `${confirmedCount} Dokumente koennen in Liefer- und Rechnungsfolge uebergehen.`
+        : 'Finale Lieferfreigaben entstehen erst nach Bestaetigung.',
+    },
+  ]
   const baseConfig = createAuftragsbestaetigungenConfig(t, entityTypeLabel)
   const auftragsbestaetigungenConfig = useMemo<ListConfig>(() => ({
     ...baseConfig,
@@ -218,18 +261,34 @@ export default function AuftragsbestaetigungenListePage(): JSX.Element {
   }
 
   return (
-    <ListReport
-      config={auftragsbestaetigungenConfig}
-      data={data}
-      total={total}
-      onCreate={handleCreate}
-      onEdit={handleEdit}
-      onDelete={handleDelete}
-      onExport={handleExport}
-      onImport={() => {
-        navigate('/einkauf/bestellungen?importContext=auftragsbestaetigungen')
-      }}
-      isLoading={isLoading}
-    />
+    <div className="space-y-4">
+      <OperationalCaseHeader
+        title="Auftragsbestaetigungen"
+        description="Bestaetigungen werden als Pruef- und Freigabevorgang mit klarer Bulk-Aktion ueber der Liste gefuehrt."
+        status={operationalStatus}
+        owner="Einkauf"
+        blocker={blocker}
+        nextAction={openCount > 0 ? 'Offene Bestaetigungen pruefen' : reviewedCount > 0 ? 'Gepruefte Bestaetigungen final bestaetigen' : 'Bestaetigte Folgewege nutzen'}
+        caseLabel="Vorgang: Lieferfreigabe"
+        tags={['Einkauf', 'Bestellung']}
+      />
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_360px]">
+        <OperationalTimeline title="Pruef- und Freigabeverlauf" items={timelineItems} />
+        <OperationalContextPanel title="Bestaetigungskontext" sections={contextSections} />
+      </div>
+      <ListReport
+        config={auftragsbestaetigungenConfig}
+        data={data}
+        total={total}
+        onCreate={handleCreate}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onExport={handleExport}
+        onImport={() => {
+          navigate('/einkauf/bestellungen?importContext=auftragsbestaetigungen')
+        }}
+        isLoading={isLoading}
+      />
+    </div>
   )
 }

@@ -15,6 +15,10 @@ import { useFibuCockpit } from '@/lib/api/fibu'
 import { summarizeFibuOps } from '@/lib/professional-control-centers'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 const createMahnwesenConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
@@ -203,11 +207,44 @@ export default function MahnwesenPage(): JSX.Element {
   const mahnwesenConfig = createMahnwesenConfig(t, entityTypeLabel)
   const { data: fibuCockpit } = useFibuCockpit()
   const fibuOps = fibuCockpit ? summarizeFibuOps(fibuCockpit, 0) : null
+  const operationalStatus = normalizeOperationalStatus(
+    fibuCockpit.dunning.overdue_items > 0
+      ? 'wartet_auf_mensch'
+      : fibuCockpit.interest.candidate_count > 0
+        ? 'in_pruefung'
+        : 'abgeschlossen',
+  )
+  const operationalBlocker = fibuCockpit.dunning.overdue_items > 0
+    ? `${fibuCockpit.dunning.overdue_items} ueberfaellige OP brauchen Mahnlauf oder Eskalation.`
+    : null
 
   const { data, loading, saveData } = useMaskData({
     apiUrl: mahnwesenConfig.api.baseUrl,
     id: 'new'
   })
+  const contextSections = [
+    {
+      title: 'Mahnlage',
+      items: [
+        { label: 'Ueberfaellige OP', value: `${fibuCockpit.dunning.overdue_items}` },
+        { label: 'Rueckstand', value: `${fibuCockpit.dunning.overdue_amount.toFixed(2)} EUR` },
+        { label: 'Zinskandidaten', value: `${fibuCockpit.interest.candidate_count}` },
+      ],
+    },
+    {
+      title: 'Governance',
+      items: [
+        { label: 'Mahnparameter', value: fibuCockpit.master_data.dunning_parameters_ready ? 'bereit' : 'pruefen' },
+        { label: 'Zinsgruppen', value: fibuCockpit.master_data.interest_groups_ready ? 'bereit' : 'ergaenzen' },
+        { label: 'Connector-Profile', value: `${fibuCockpit.master_data.connector_profile_count}` },
+      ],
+    },
+  ]
+  const timelineItems = [
+    { label: 'Mahnwesen geladen', detail: `${fibuCockpit.dunning.overdue_items} ueberfaellige Posten im Cockpit.` },
+    ...(fibuOps ? [{ label: 'Naechste FIBU-Aktion', detail: fibuOps.nextAction }] : []),
+    ...(fibuCockpit.interest.candidate_count > 0 ? [{ label: 'Zinswesen relevant', detail: `${fibuCockpit.interest.candidate_count} Kandidaten fuer Folgepruefung.` }] : []),
+  ]
 
   const validate = (formData: any) => validateFields(getFieldsFromMaskConfig(mahnwesenConfig), formData ?? {})
   const showValidationToast = (errors: Record<string, string>) => {
@@ -343,6 +380,22 @@ export default function MahnwesenPage(): JSX.Element {
     <>
       <ModuleToolbar backTarget="/finance/mahnwesen" closeTarget="/finance/mahnwesen" title={entityTypeLabel} />
       <LeaveConfirmDialog blocker={blocker} onSave={() => handleSave(data)} title={t('crud.messages.unsavedChanges', { defaultValue: 'Ungespeicherte Änderungen' })} description={t('crud.messages.unsavedChangesDescription', { defaultValue: 'Möchten Sie speichern, verwerfen oder hier bleiben?' })} />
+      <div className="space-y-4 px-6 pt-4">
+        <OperationalCaseHeader
+          title="Mahnfall steuern"
+          description="Mahnlauf, Zinsdruck und Stammdatenlage werden vor dem eigentlichen Objektarbeitsplatz auf das Wesentliche verdichtet."
+          status={operationalStatus}
+          owner="FIBU / Forderungsmanagement"
+          blocker={operationalBlocker}
+          nextAction={fibuCockpit.dunning.overdue_items > 0 ? 'Mahnlauf generieren oder senden' : 'Mahnparameter und Zinswesen nachhalten'}
+          caseLabel="Mahnwesen"
+          tags={['FIBU', 'Follow-up']}
+        />
+        <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+          <OperationalTimeline title="Mahnlage" items={timelineItems} />
+          <OperationalContextPanel title="Mahnkontext" sections={contextSections} />
+        </div>
+      </div>
       <div className="grid gap-4 px-6 pt-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm">Überfällige OP</CardTitle></CardHeader>

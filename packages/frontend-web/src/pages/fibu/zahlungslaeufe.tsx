@@ -1,5 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { Wizard } from '@/components/patterns/Wizard'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -10,6 +13,7 @@ import { ErrorState } from '@/components/ErrorState'
 import { toast } from '@/hooks/use-toast'
 import { getAxiosErrorMessage } from '@/lib/api-client'
 import { useDATEVExport, useFibuCockpit, useZahlungslauf, useZahlungsvorschlaege, type Zahlungsvorschlag } from '@/lib/api/fibu'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 type ZahlungslaufData = {
   bezeichnung: string
@@ -65,12 +69,49 @@ export default function ZahlungslaeufeePage(): JSX.Element {
     }
   }
 
+  const selectedZahlungen = zahlungsvorschlaege.filter((z) => selectedIds.includes(z.id))
+  const gesamtbetrag = selectedZahlungen.reduce((sum, z) => sum + z.betrag, 0)
+  const overdueItems = useMemo(
+    () => selectedZahlungen.filter((zahlung) => new Date(zahlung.faelligAm) < new Date()).length,
+    [selectedZahlungen],
+  )
+
   if (isError) {
     return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
   }
-
-  const selectedZahlungen = zahlungsvorschlaege.filter((z) => selectedIds.includes(z.id))
-  const gesamtbetrag = selectedZahlungen.reduce((sum, z) => sum + z.betrag, 0)
+  const operationalStatus = normalizeOperationalStatus(
+    overdueItems > 0 ? 'eskaliert' : selectedZahlungen.length > 0 ? 'wartet_auf_mensch' : 'offen',
+  )
+  const contextSections = [
+    {
+      title: 'Zahlungslage',
+      items: [
+        { label: 'Ausgewaehlt', value: `${selectedZahlungen.length}` },
+        { label: 'Gesamtbetrag', value: new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(gesamtbetrag) },
+        { label: 'Ueberfaellig', value: `${overdueItems}` },
+      ],
+    },
+    {
+      title: 'FIBU-Kontext',
+      items: [
+        { label: 'Zahlbare OP', value: `${fibuCockpit.creditor.payable_items}` },
+        { label: 'Exportlaeufe', value: `${fibuCockpit.revision.export_runs}` },
+        { label: 'Jahreswechsel', value: fibuCockpit.annual_close.ready_for_year_close ? 'stabil' : 'offene Klaerungen' },
+      ],
+    },
+  ]
+  const timelineItems = [
+    {
+      label: selectedZahlungen.length > 0 ? 'Zahlungsvorschlaege selektiert' : 'Noch keine Zahlungen ausgewaehlt',
+      detail: selectedZahlungen.length > 0
+        ? `${selectedZahlungen.length} Positionen stehen fuer den Lauf bereit.`
+        : 'Der Lauf benoetigt eine Selektion aus den Vorschlaegen.',
+    },
+    {
+      label: zahlungslauf.format === 'datev' ? 'DATEV-Export vorgesehen' : 'SEPA-Lauf vorgesehen',
+      detail: `Ausfuehrung geplant fuer ${new Date(zahlungslauf.ausfuehrungsdatum).toLocaleDateString('de-DE')}.`,
+    },
+  ]
 
   const steps = [
     {
@@ -230,6 +271,22 @@ export default function ZahlungslaeufeePage(): JSX.Element {
 
   return (
     <div className="p-6">
+      <div className="mb-4 space-y-4">
+        <OperationalCaseHeader
+          title="Zahlungslauf"
+          description="Der Zahlungsraum zeigt Freigabe-, Faelligkeits- und Exportdruck vor dem eigentlichen Lauf."
+          status={operationalStatus}
+          owner="Kreditorenbuchhaltung"
+          blocker={overdueItems > 0 ? `${overdueItems} ausgewaehlte Zahlungen sind bereits ueberfaellig.` : null}
+          nextAction={selectedZahlungen.length > 0 ? 'Lauf pruefen und ausfuehren' : 'Zahlungsvorschlaege auswaehlen'}
+          caseLabel="Vorgang: Kreditoren-Zahlung"
+          tags={['FIBU', 'SEPA/DATEV']}
+        />
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_360px]">
+          <OperationalTimeline title="Zahlungspfad" items={timelineItems} />
+          <OperationalContextPanel title="Zahlungskontext" sections={contextSections} />
+        </div>
+      </div>
       <div className="mb-6 grid gap-4 md:grid-cols-4">
         <Card>
           <CardContent className="pt-6"><div className="text-xs text-muted-foreground">Zahlbare OP</div><div className="text-2xl font-semibold">{fibuCockpit.creditor.payable_items}</div></CardContent>

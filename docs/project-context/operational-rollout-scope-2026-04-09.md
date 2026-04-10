@@ -36,9 +36,32 @@ Diese Masken haben jetzt einen kompakten Fallkopf, einen knappen Kontextblock un
 - Finance:
   - `abschluss.tsx`
   - `buchungserfassung.tsx`
+  - `mahnwesen.tsx`
+  - `op-debitoren.tsx`
+  - `op-kreditoren.tsx`
+  - `fibu/kreditoren.tsx`
+  - `fibu/zahlungslaeufe.tsx`
+  - `finance/ustva.tsx`
+  - `fibu/elster-online.tsx`
+  - `fibu/schnittstellen-center.tsx`
+  - `fibu/schnittstelle-fibu.tsx`
+  - `fibu/monatswerte.tsx`
 - Service / CRM:
   - `service/anfrage-detail.tsx`
   - `crm/opportunity-detail.tsx`
+- Weitere Sammel-/Follow-up-Masken:
+  - `annahme/abrechnung.tsx`
+  - `annahme/warteschlange.tsx`
+  - `einkauf/rechnungseingaenge-liste.tsx`
+  - `einkauf/anlieferavis.tsx`
+  - `einkauf/anlieferavis-liste.tsx`
+  - `einkauf/auftragsbestaetigung.tsx`
+  - `einkauf/auftragsbestaetigungen-liste.tsx`
+  - `labor/proben-liste.tsx`
+  - `qualitaet/labor-liste.tsx`
+  - `fuhrpark/fahrzeug-stamm.tsx`
+  - `futtermittel/charge-verfolgung.tsx`
+  - `einkauf/lieferanten-stamm.tsx`
 
 ## Mehrwertkriterien
 

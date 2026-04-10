@@ -19,6 +19,10 @@ import { buildDecisionView } from '@/policy/decision-view'
 import { ProcessStatusPanel } from '@/components/workflow/ProcessStatusPanel'
 import { useApprovalDensityProfile } from '@/features/workflow/useApprovalDensityProfile'
 import { CompactDecisionCard } from '@/components/workflow/CompactDecisionCard'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 type DeductionType = 'drying' | 'cleaning' | 'freight' | 'other'
 type DeductionMode = 'per_ton' | 'fixed'
@@ -570,6 +574,51 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
   const filteredOpenCount = filteredSettlements.filter(
     (settlement) => settlement.status !== 'posted' || settlement.approval_status !== 'VERBUCHT',
   ).length
+  const operationalStatus = normalizeOperationalStatus(
+    previewData?.exception_hints?.length
+      ? 'wartet_auf_mensch'
+      : previewData
+        ? 'in_pruefung'
+        : qualityOk
+          ? 'offen'
+          : 'blockiert',
+  )
+  const operationalBlocker = previewData?.exception_hints?.length
+    ? 'Die Settlement-Vorschau meldet Ausnahmehinweise. Freigabe oder Korrektur ist vor dem Buchen erforderlich.'
+    : !qualityOk
+      ? 'Qualitaetsabzuege sind aktiv. Billing- und Settlement-Vorschau zuerst absichern.'
+      : null
+  const contextSections = [
+    {
+      title: 'Vorgang',
+      items: [
+        { label: 'Lieferant', value: form.supplierId || 'Noch offen' },
+        { label: 'Artikel', value: form.articleId || 'Noch offen' },
+        { label: 'Settlement', value: form.settlementNumber || 'Automatik / neu' },
+      ],
+    },
+    {
+      title: 'Ressourcen & Preis',
+      items: [
+        { label: 'Netto', value: `${nettoGewicht.toLocaleString('de-DE')} kg` },
+        { label: 'Abrechnungsgewicht', value: `${(previewData?.billing_quantity_kg ?? dryingCompute.data?.invoice_weight_kg ?? billingData?.billing_weight_kg ?? nettoGewicht).toLocaleString('de-DE')} kg` },
+        { label: 'Basispreis', value: `${money(form.basisPreis)} / t` },
+      ],
+    },
+    {
+      title: 'Governance',
+      items: [
+        { label: 'Offene Settlements', value: `${filteredOpenCount}` },
+        { label: 'Netto gesamt', value: money(filteredNetTotal) },
+        { label: 'Freigaberolle', value: approvalActor.actorType },
+      ],
+    },
+  ]
+  const timelineItems = [
+    { label: 'Abrechnungsfall aktiv', detail: campaignName ? `Kampagne ${campaignName}` : 'Settlement wird vorbereitet.' },
+    { label: 'Qualitaetslage', detail: qualityOk ? 'ohne kritische Abzuege' : 'Abzuege / Trocknung aktiv' },
+    ...(previewData ? [{ label: 'Settlement-Vorschau vorhanden', detail: `Netto ${money(previewData.net_amount_eur)}` }] : []),
+  ]
 
   return (
     <div className="flex flex-col">
@@ -590,6 +639,22 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
             Settlement speichern
           </Button>
         </div>
+      </div>
+      <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+        <div className="space-y-4">
+          <OperationalCaseHeader
+            title="Settlement-Fall steuern"
+            description="Die Abrechnung zeigt nur die entscheidende Lage aus Gewicht, Preis, Ausnahmen und naechster Aktion oberhalb des Settlement-Arbeitsplatzes."
+            status={operationalStatus}
+            owner="Annahme / Settlement"
+            blocker={operationalBlocker}
+            nextAction={previewData ? 'Settlement pruefen und speichern' : 'Billing- und Settlement-Vorschau erzeugen'}
+            caseLabel={form.settlementNumber || 'Settlement-Fall'}
+            tags={['Annahme', 'Settlement']}
+          />
+          <OperationalTimeline title="Abrechnungsverlauf" items={timelineItems} />
+        </div>
+        <OperationalContextPanel title="Abrechnungskontext" sections={contextSections} />
       </div>
 
       {campaignName ? (
