@@ -2,100 +2,158 @@
 
 ## Zweck
 
-Diese Datei sammelt die fuer neue Analysen wichtigsten offenen Restthemen und bekannten Unsicherheiten.
+Ehrliche, aktuelle Bestandsaufnahme aller offenen Restthemen, fachlichen Duennstellen und bekannten Risiken.
+Zuletzt vollstaendig auditiert: **2026-04-10** (automatisierter Code-Audit ueber Frontend, Backend, Architektur und Build-Health).
 
-## Aktuell besonders relevant
+---
 
-- einzelne Prozessstarts muessen weiter auf Praxisrealismus gegen Landhandelsablaeufe geprueft werden
-- Browser-Use- und CRUD-Pruefungen muessen pro Workflow fortgeschrieben werden
-- Security-Triage 2026-03-31: `SEC-001` ist abgearbeitet (harte Repo-Secrets und kritische Credential-Defaults entfernt), `SEC-002` liefert lokale zentrale Secret-Pflege ueber Vault + optionales OS-Keyring + CLI, `SEC-003` haertet Metrics und Copilot-WebSocket gegen unauthentifizierten Zugriff und Tenant-Spoofing, `SEC-004` zieht Supplier-Portal-Queries auf tenant-gebundene parametrisierte Statements, `SEC-005` schliesst die generischen Realtime-WebSockets fuer POS/Workflow/Policy, `SEC-006` zieht Accounting-Periods auf kontextgebundene Tenant-Isolation, `SEC-007` haertet den Creditor-Router gegen Payload-/Query-/ID-basierte Cross-Tenant-Zugriffe, `SEC-008` bis `SEC-013` schliessen Tenant-Isolation/Mass-Assignment im Einkauf, SQL-Identifier-Whitelists fuer Admin Mobile, XML-Injection im VIES-Client, Information Disclosure im Documents-Router, SSRF bei Webhooks und XSS in browserbasierten Print-Pfaden, `SEC-014` verdrahtet HashiCorp Vault als externen Secret-Provider mit Production-Startup-Fail-Fast, `SEC-015` zieht Accruals/Provisions auf kontextgebundene Tenant-Isolation, `SEC-016` zentralisiert die Egress-/SSRF-Policy fuer Webhooks sowie externe Broker-HTTP-Pfade, `SEC-017` verankert die behobenen Security-Pfade als feste CI-Regression-Lane, `SEC-018` inventarisiert die verbleibenden Frontend-HTML-Sinks mit einem festen Guard-Test, `SEC-019` bis `SEC-021` binden AP-Approval-Workflow, Nebenbuch-Abstimmung und Tax-Keys an den Kontext-Tenant, `SEC-022` bis `SEC-024` schliessen dieselbe Tenant-Luecke fuer VAT-Return, Sales Credit Notes/Returns und Sales Reports, `SEC-025` bis `SEC-027` haerten Sales Delivery Notes, Articles API sowie Warehouse Transfers gegen freie Query-/Payload-/ID-basierte Cross-Tenant-Zugriffe, `SEC-028` surfact blockierte Outbound-Targets sowie denied Cross-Tenant-Zugriffe zentral ueber Security-Monitoring-Endpoints, `SEC-029` zieht Agrar Contracts auf kontextgebundene Tenant-Isolation, `SEC-030` bindet die Security-Surface an Admin-Dashboard und Alerting-Konfiguration an, `SEC-031` und `SEC-032` schliessen die verbleibenden freien Tenant-Pfade in Sales Orders und Sales Offers, und `SEC-034` macht Security-Events append-only restart-stabil. Offen bleiben vor allem weitere routerweise P1-SAST-Funde ausserhalb des bisherigen Sales-/Finance-Clusters sowie laengerfristig DB-/Audit-Bridge und externes Alerting fuer Security-Events. Roadmap und Folge-Slices: `docs/roadmap/status/2026-04-03-security-hardening-phase-2.md`
-- NATS-Consumer + Core-Handler: DLQ, Idempotenz, zusaetzlich Flow-Spine-Handler und Event-Observability (`flow_spine_handlers.py`, `observability.py`) sind umgesetzt; produktives Surfacing im Betrieb/Monitoring steht ueber `neuro_event_monitoring.py` bereit, die gleichen Zaehler werden zusaetzlich als Prometheus-Counters auf `GET /metrics` exportiert (`valeo_event_bus_*`). Offen bleibt vor allem die Anbindung der Scrapes an externe Dashboards/Alerting (Grafana/Prometheus-Stack)
-- Der zentrale Neuro Tool Broker ist umgesetzt (NC-A6/NC-A7 inkl. interner OpenAPI-Execution); NC-A14/NC-A16 ziehen Tenant-Override-Propagation, externe HTTP-Execution und contract-gesteuerte Request-Payloads nach. Offen bleiben primaer weitere produktive Tool-Adapter und breitere UI-/Runtime-Nutzung
-- Verification und Policy Engine sind in Wave 2 (NC-A8) gekoppelt; Wave 3 ist mit NC-A9 (LLM-Fallback) und NC-D5 (Hash-Chain-Tests) umgesetzt; Wave 4 ist mit NC-A10 (dynamische Plan-Generierung), NC-A11 (Cross-Entity-Integrity), NC-A12 (Risk-Scoring) und NC-A13 (Tenant-Overrides) abgeschlossen. Offen bleiben nun vor allem tiefere Broker-/UI-Folgepfade und produktive Monitoring-/RAG-Ausbaustufen. Details in `docs/project-context/neuro-stack-gap-matrix-2026-03-29.md`
-- ChromaDB fuer produktive RAG-Nutzung muss mit Prozesswissen befuellt werden
-- Voice-Kanal setzt Web Speech API voraus (Chrome/Edge); Firefox und Safari nicht unterstuetzt
-- Agentenarchitektur-Diagramm zeigt weiterhin Restluecken bei produktiver Vault-Anbindung, Memory-Governance, Process-Kernel-Contracts und tieferer Observability (siehe `docs/project-context/agent-architecture-gaps-2026-03-28.md`)
-- Neuro-Stack-Status und P1-Luecken sind als Matrix dokumentiert (siehe `docs/project-context/neuro-stack-gap-matrix-2026-03-29.md`)
-- Knowledge Store (`knowledge_store.py`, `/neuro/knowledge`) ist umgesetzt; offen bleiben breitere produktive Nutzung in RAG-/Resolver-Pfaden und ggf. dedizierte Migrationen je nach Deploy-Strategie
-- Multi-Channel: WhatsApp, E-Mail, Voice, Live-Chat (Backend-REST), Channel-Ingress; offen bleiben outbound Routing und vollstaendige Live-Chat-WebSocket-Anbindung im Produkt-UI
-- Superglue Self-Host ist mit `INT-SG-035` bis `INT-SG-066` auf den aktuellen Upstream-Runtime-/REST-Vertrag gezogen; CRM-/Masterdata, Artifact-/Idempotenz-/Retry-Pfade, Admin-/Monitoring-/CI-Surfaces sowie Procurement-, Finance-, Logistics-, Agribusiness-, Service- und Analytics-Rollouts liegen jetzt als thin-wrapper Connector-Familien im VALEO-Pfad vor. `INT-SG-061` bis `INT-SG-066` schliessen auch die letzten implementierbaren Ops-Pfade: Live-Readiness, Tenant-Onboarding-Pack, CLI-/Shell-Exports, ENV-/Vault-Templates, CI-Validierung und Admin-Downloads. **Operativ offen bleiben** damit nur noch die echte Befuellung je Tenant/Environment: Live-Credentials, produktive Zielsystem-URLs und Ops-seitige Alerting-/Retention-Werte ausserhalb des Repos. **Kernel/Finance:** `PostAPInvoice` fuehrt Journal+OP+Outbox im Kernel-Pfad aus (`app/services/ap_invoice_kernel_posting.py`); Execute-Request braucht `human_confirmation: true`. Einkauf: optionale Tenant-Praefixe `TENANT_PO_PREFIX_<SANITIZED_TENANT>`; Duplikat-Bereinigung+Unique per Migration `einkauf_bestellungen_dedupe_unique_20260407`. Finance-Export: zweiter Upload-Weg S3/MinIO (`FINANCE_EXPORT_S3_*`, `finance_export_upload.py`).
-- Erstinstallation und Migration aus bestehendem `service-erp`/L3 sind repo-seitig jetzt soweit geschlossen, wie es ohne Live-Betriebsdaten moeglich ist: `scripts/prepare_first_install.py` erzeugt ein Bundle fuer jungfraeuliche Installationen; `scripts/bootstrap_db.py` haertet Force-/Backup-/Superglue-Onboarding-Pfade; `scripts/import_l3.py` validiert Legacy-Exporte, fuehrt Dry-Runs aus und laedt Rohdaten nachvollziehbar nach `l3_staging` mit Run-Tracking in `app_control.l3_import_runs`. **Extern offen bleiben** dafuer nur noch die echten Quelldumps, produktiven Secrets/Zielsysteme sowie fachlich freigegebene FIBU-/Konten-/Steuer-Mappings fuer den finalen Cutover.
-- Der naechste ERP-Ausbau ist kein grosser Kernblock mehr, sondern ein geordneter Fachmodul-Tail. Referenz und Slice-Plan liegen in `docs/project-context/professional-tail-gap-plan-2026-04-09.md`. Die fruehen Tail-Slices fuer CRM, NaWaRo, Agrar, Sales-Modern und Service-/Field-Folgeobjekte sind geschlossen; offen bleibt jetzt vor allem der laengere Resttail einzelner Fachmodule ausserhalb dieser priorisierten Gruppen.
+## Build-Health (Stand 2026-04-10)
 
-## Zuletzt geschlossene Punkte (Wave 104, 2026-03-27)
+- **TypeScript**: 0 Fehler (`tsc --noEmit`)
+- **Backend-Tests**: 7.010 gesammelt, Gesamtabdeckung ~45%
+- **Frontend-Imports**: 0 gebrochene Importe
+- **Endpoints**: 1.836 registriert (916 GET, 666 POST, 121 PUT, 133 DELETE), 231+ Router in `api.py`
 
-- ~~Copilot-/Voice-Pfade sind nicht ueberall gleich tief produktiv~~ -> Voice-Kanal Admin-Seite (`pages/admin/voice-channel.tsx`) im Nav verankert (GAP-104-I)
-- ~~RAG-/Knowledge-Tiefe ist nicht in jedem Agentenpfad vollstaendig verdrahtet~~ -> `POST /agent-action` mit ChromaDB-RAG produktiv (graceful degradation, GAP-104-H)
-- ~~Flow Spine Outbox-Events nicht verdrahtet~~ -> `FlowSpineInstanceCreated` / `FlowSpineTransitionOccurred` via Outbox (GAP-104-G)
+---
 
-## Zuletzt geschlossene Punkte (2026-03-31)
+## P1 — Fachlich duenn / produktionsblockierend
 
-- ~~SVC-001-P4 Field-Service: `fetch()` statt apiClient~~ — `field-service-tasks.tsx` nutzt `apiClient` + TanStack Query; Backend-Endpunkte unter `/api/v1/agribusiness/field-service-tasks` in `app/api/v1/endpoints/compat.py` (CRM-Mapping, Demo-Fallback).
-- ~~Kurz-IDs aus `uuid7()[:8]` bei schnellen Mehrfach-Inserts~~ — Praefix-IDs verwenden `uuid7_short_suffix()` / `default_prefixed_id()` / `prefixed_id()` in `app/core/uuid7.py` (Zeit-Praefix der v7-String-Darstellung war in derselben Millisekunde nicht eindeutig).
+### STUB-001: Mischfutter-Produktion hat keine echte Datenbasis
 
-## Zuletzt geschlossene Punkte (2026-04-06)
+- **Dateien**: `app/api/v1/endpoints/produktion_mischfutter.py`
+- **Problem**: `GET /verfuegbarkeit` (Zeile 58) liefert 7 hartcodierte Komponenten, `GET /rezepte` (Zeile 76) liefert 3 statische Rezepte, `POST /auftraege` (Zeile 131) persistiert nicht und zieht keinen Bestand ab.
+- **TODO im Code**: "replace with real inventory query once Lager-Bestaende table is wired"
+- **Auswirkung**: Produktionsplanung ist rein visuell, kein echter Materialfluss.
 
-- ~~Test-Suite scheitert ohne laufende DB/Keycloak an fehlender `API_DEV_TOKEN`-Konfiguration und ungefangenen DB-Verbindungsfehlern~~ — zentrales `tests/conftest.py` setzt `API_DEV_TOKEN` fuer alle Tests via autouse-Fixture; `require_db`-Fixture und `skip_if_db_unavailable()` sorgen fuer sauberes Skippen bei fehlender PostgreSQL-Verbindung. 10 Testdateien gefixt, 49 vorherige Failures/Errors auf 0 reduziert.
-- ~~FastAPI Deprecation-Warnung: `regex=` in `Query()`~~ — `app/routers/translations_router.py` nutzt jetzt `pattern=` statt `regex=`.
-- Mock-Seiten-Inventur: 10 Frontend-Seiten mit Hardcoded-Daten statt API-Anbindung identifiziert (Futter, Rezepte, Produktion, Kasse, Etiketten, Strecke — zur Mock-API-Migration vorgemerkt).
-- ~~Superglue-Restblock ab CRM-/Masterdata bis breitem Domain-Rollout war noch offen~~ — INT-SG-049 bis INT-SG-060 liefern CRM-/Masterdata-Read, Artifact-/Idempotenz-/Retry-Pfade, Admin-/Monitoring-/CI-Surfaces sowie Procurement-, Finance-, Logistics-, Agribusiness-, Service- und Analytics-Rollouts ueber denselben upstream-first Connector-Standard.
-- ~~Superglue-Live-Betriebsfreigabe war nur als Restluecke dokumentiert~~ — `INT-SG-061` surfact fehlende Tenant-Credentials, Platzhalter-Zielsysteme sowie Alerting-/Retention-Policies jetzt als `GET /providers/superglue/live-readiness` und in der Admin-Seite `Agenten-Integration`.
-- ~~Superglue-Ops mussten fehlende Secret-Keys und Zielsystem-Felder weiter manuell aus mehreren Stellen zusammensuchen~~ — `INT-SG-062` liefert `GET /providers/superglue/onboarding-pack` plus Admin-Surface `Superglue Onboarding Pack` mit den konkreten Secret-Key-Kandidaten und Policy-Werten pro Tenant.
-- ~~Superglue-Onboarding-Artefakte mussten nach dem Pack noch manuell in Dateien/Downloads ueberfuehrt werden~~ — `INT-SG-063` bis `INT-SG-066` liefern CLI-/Shell-Exports, ENV-/Vault-Templates, CI-Validierung und direkte Admin-Downloads.
+### STUB-002: Futtermittel-Stammdaten sind Demo-Seed
 
-## Zuletzt geschlossene Punkte (2026-04-07)
+- **Dateien**: `app/api/v1/endpoints/futter_stamm.py`
+- **Problem**: `GET /einzelfuttermittel` (Zeile 161), `GET /mischfuttermittel` (Zeile 169), `GET /rezepte/{id}` (Zeile 185) liefern inline Demo-Daten aus `_REZEPT_SEED`. Kommentar: "Demo-Seed-Daten werden inline bereitgestellt, bis persistente Modelle existieren."
+- **Auswirkung**: Kein CRUD, keine Mandantentrennung, keine Migration.
 
-- ~~Jungfraeuliche Erstinstallation hatte kein konsolidiertes repo-seitiges Ops-Bundle~~ -> `scripts/prepare_first_install.py` erzeugt jetzt unter `runtime/first-install/bundle` Installationskontext, Kommandopfad sowie Superglue-Onboarding-Templates fuer Tenant und Environment.
-- ~~`bootstrap_db.py` war fuer produktionsnaehere Reset-/Neuaufsetzpfade zu grob~~ -> der Bootstrap erkennt jetzt Environments, fordert exakte `DELETE-<ENV>`-Tokens, kann vor Force-Reset automatisch `pg_dump` ziehen und exportiert optional direkt repo-lokale Superglue-Onboarding-Artefakte.
-- ~~L3-/service-erp-Migration endete an einem unvollstaendigen ETL-Skript~~ -> `scripts/import_l3.py` validiert jetzt den Legacy-Vertrag strikt, laedt roh nach `l3_staging`, protokolliert Execute-Laeufe in `app_control.l3_import_runs`, unterstuetzt Reports, Logging, inkrementelle Vorbereitung via `--since` und Backup vor Execute.
-- ~~Mock-Frontendseiten fuer Futter, Etiketten, Schaeden, Strecke, Produktion und Kasse waren noch nicht an echte API-Pfade angebunden~~ -> neue Router unter `app/api/v1/endpoints/{futter_stamm,etiketten,schaeden,strecke,produktion_mischfutter,kasse_tagesabschluss}.py` plus passende Frontend-API-Clients/Pages schliessen diese Parallelpfade.
-- ~~Die L3-/Erstinstallationsdoku entsprach nicht mehr dem aktuellen Script-Stand~~ -> `docs/db/l3_import.md` und `docs/db/first-install-and-l3-cutover.md` beschreiben jetzt den realen Bootstrap-, Landing-Zone- und Cutover-Pfad inklusive FIBU-Vorbereitung.
-- ~~NeuroASSIST hatte noch keinen gemeinsamen Agent-Ops-Pfad fuer Budgets, Kosten, Heartbeats, Rollen, Tickets und Ziele~~ -> `PCP-001` bis `PCP-006` liefern jetzt `app/agents/agent_ops.py` als gemeinsame Runtime, Budget-Guardrails im `NeuroAssistService`, neue Ops-Endpunkte unter `/api/v1/agents/neuroassist/ops/*` und die Admin-Surface `Agent Ops Budgeting / Cost Ledger / Heartbeats / Roles And Goals` in `packages/frontend-web/src/pages/admin/agenten-integration.tsx`.
-- ~~Die restlichen Paperclip-inspirierten Agent-Ops-Folgeslices waren noch offen~~ -> `PCP-007` bis `PCP-012` liefern jetzt Intervention Console, zentrales Dashboard, Template-Export/Import, Skill-Pack-Manifest, Mobile-Ops-Read-Model und einen expliziten Plugin-Boundary-Review ueber `app/agents/agent_ops.py`, `app/api/v1/endpoints/agents.py`, `docs/workflows/pcp-007-012-agent-ops-rollout.md` und `docs/architecture/agent-plugin-boundary-review-2026-04-07.md`.
+### STUB-003: Liquiditaetsuebersicht ist Platzhalter
 
-## Zuletzt geschlossene Punkte (2026-04-05)
+- **Dateien**: `app/api/v1/endpoints/liquidity.py`
+- **Problem**: `GET /finance/liquidity/overview` (Zeile 11) liefert leere Struktur mit 0-Werten, keine echte Berechnung.
+- **Auswirkung**: Finance-Cockpit zeigt keine reale Liquiditaetslage.
 
-- ~~CRM-Kunde/Business-Partner-Verknuepfung persistiert implizit gegen den Default-Tenant~~ — `app/api/v1/endpoints/customers.py` validiert und persistiert `business_partner_id` jetzt tenant-gebunden auch im Create-/Update-Pfad; Regressionen liegen in `tests/test_crm_customer_business_partner_link.py`.
-- ~~Globaler Frontend-Typecheck ist breit an inkonsistenten `apiClient`-/Axios-Contracts rot~~ — `packages/frontend-web/src/lib/api-client.ts` stellt jetzt einen hybriden `ApiResult<T>` bereit; betroffene Call Sites und Typstubs wurden nachgezogen, `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false` ist wieder gruen.
-- ~~Superglue Self-Host lief auf einem veralteten Runtime-Vertrag und scheiterte im echten Compose-Smoke~~ — Compose/K8s/Helm sprechen jetzt den aktuellen Upstream-Port-/Env-/Run-Contract (`/v1/*`, `3001/3002`, `OPENAI_API_KEY`, `POSTGRES_SSL=false`, `MASTER_ENCRYPTION_KEY`); der lokale Upstream-Container liefert wieder `GET /v1/health` und `GET /v1/tools`.
-- Process-Kernel: Migration `neuro_step_audit_einkauf_tenant_20260405` legt `domain_shared.neuro_step_audit_trace` an und ergaenzt `einkauf_bestellungen.tenant_id` wo fehlend; Kernel-Actions und Broker schreiben Audit bei gesetzter DB-Session; optionale Mutation `CreatePurchaseOrder` (Einkauf); Finance-Follow-up-Erweiterung Kasse (`/finance/followup/kasse/*`); PCN nutzt `X-Tenant-ID`. Doku: `docs/workflows/kernel-action-execution-mutations.md`.
+### STUB-004: Sortenregister ist statische Liste
 
-- ~~Superglue-Katalog blieb im frischen lokalen Stack leer und ein echter Tool-Run war nicht nachgewiesen~~ — `app/integrations/services/superglue_tool_provisioning.py` provisioniert jetzt drei kanonische Pilot-Tools via `POST/PUT /v1/tools`; der lokale Upstream-Container liefert `total=3` auf `GET /v1/tools`, und `POST /v1/tools/sg.document.search/run` endet erfolgreich.
+- **Dateien**: `app/api/v1/endpoints/agrar_varieties.py`
+- **Problem**: `GET /` (Zeile 31) liefert hartcodierte `STANDARD_VARIETIES`. Kommentar: "kann spaeter aus DB/Stammdaten geladen werden."
+- **Auswirkung**: Keine mandantenspezifischen Sorten, kein Anlegen/Aendern.
 
-- ~~Lokaler In-App-Smoke ueber `SuperglueClient` blockierte `localhost` vollstaendig~~ — `SUPERGLUE_ALLOW_LOOPBACK_DEV_EGRESS` erlaubt jetzt explizit und default-off nur im Debug-Kontext Loopback fuer Superglue; `.internal`-Hosts und private Netze bleiben weiter geblockt.
+### TENANT-001: Multi-Tenancy-Enforcement nur auf Endpoint-Ebene
 
-## Zuletzt geschlossene Punkte (2026-04-09)
+- **Dateien**: `app/core/tenant_context.py`, `app/middleware/`
+- **Problem**: `X-Tenant-ID` wird als Context-Variable durchgereicht, aber **nicht in der Middleware validiert oder erzwungen**. Tenant-Isolation passiert in den einzelnen Endpunkten, nicht zentral. `audit_middleware.py` liest `request.state.tenant_id`, prueft aber nicht.
+- **Auswirkung**: Ein fehlerhafter Endpoint kann versehentlich Cross-Tenant-Daten liefern. Die SEC-Reihe hat viele Router gehaertet, aber es gibt keinen zentralen Guard.
+- **Empfehlung**: Middleware-Level Query-Filter oder zumindest ein zentraler Assert fuer alle DB-Queries.
 
-- ~~Das reale Arbeitsweltmodell war in Einkauf, Annahme, Reklamation und Wiegeschein noch nicht durchgaengig sichtbar~~ -> `packages/frontend-web/src/lib/operational-status.ts` und die neuen Komponenten `packages/frontend-web/src/components/workflow/{OperationalCaseHeader,OperationalContextPanel,OperationalTimeline}.tsx` geben den Kernmasken jetzt ein gemeinsames Vorgangsmodell aus Status, Owner, Blocker, naechster Aktion, Objektkontext und Timeline.
-- ~~Einkauf arbeitete noch teilweise mit Listenquittung statt sichtbarem Vorgangszustand~~ -> `packages/frontend-web/src/pages/einkauf/{angebote-liste,anfragen-liste,angebot-stamm,bestellung-stamm}.tsx` zeigen jetzt Kopfbereich, Ressourcen-/Wirtschafts-/Governance-Kontext und reale Folgepfade statt `importComingSoon`- oder bloßer Erfolgsquittung.
-- ~~Die LKW-Registrierung war funktional, aber nicht als echter Annahmevorgang surfact~~ -> `packages/frontend-web/src/pages/annahme/lkw-registrierung.tsx` fuehrt jetzt Scanherkunft, Ressourcenlage, Risiken und naechste Aktion direkt im Annahmekopf und bindet den Vorgang sichtbar an Flow-Spine-/Warteschlangenkontext.
-- ~~Reklamation und Wiegeschein hatten noch keine konsistente Fall-/Timeline-Sicht im selben Betriebsmodell wie die neuen Kernmasken~~ -> `packages/frontend-web/src/pages/qualitaet/reklamation-detail.tsx` und `packages/frontend-web/src/pages/waage/wiegeschein-detail.tsx` verwenden jetzt dieselben Fallkopf-, Kontext- und Timeline-Bausteine.
-- ~~Im priorisierten Kernraum blieben einzelne `importComingSoon`-Reste stehen~~ -> `packages/frontend-web/src/pages/einkauf/{auftragsbestaetigungen-liste,rechnungseingaenge-liste,rfq-bids}.tsx` fuehren Import jetzt in reale Folgearbeitsplaetze oder verarbeiten CSV-Schnellimporte direkt.
-- ~~Dokumentenverwaltung war trotz vieler Dokumentlisten noch zu sehr Archiv statt professioneller Vorgangs- und Nachweisraum~~ -> `packages/frontend-web/src/lib/professional-workspaces.ts` verdichtet jetzt Objektreferenz, Dokumentstatus, Nachweisrelevanz und Wiedervorlage; `packages/frontend-web/src/pages/dokumente/ablage.tsx`, `packages/frontend-web/src/pages/portal/dokumente.tsx` und `packages/frontend-web/src/pages/einkauf/lieferanten-dokumente.tsx` zeigen damit denselben professionellen Dokumentenkontext mit Folgeaktion und Compliance-Hinweisen.
-- ~~Preis- und Konditionsseiten zeigten weiter Einzelsichten statt einer durchgehenden Preisstory ueber Portal, Stammdaten und Vertrieb~~ -> `packages/frontend-web/src/lib/api/price-lists.ts` und `packages/frontend-web/src/lib/professional-workspaces.ts` liefern jetzt eine gemeinsame Preislisten-/Preisstory-Schicht; `packages/frontend-web/src/pages/preise/konditionen.tsx`, `packages/frontend-web/src/pages/preise/historie.tsx`, `packages/frontend-web/src/pages/pricing.tsx`, `packages/frontend-web/src/pages/portal/shop.tsx`, `packages/frontend-web/src/pages/vertrieb/kundenumsatz.tsx` und `packages/frontend-web/src/pages/artikel/stamm.tsx` verdichten Listenpreis, Staffelung, Sonderkonditionen, Historie, Preisdruck und naechste Aktion in einem professionellen Arbeitsbild.
-- ~~Kontrakte hatten zwar Hedge- und Marktpreisindikatoren, aber noch keinen eigenen Fuehrungsraum fuer Fixierungs- und Marktbewertungsdruck~~ -> `packages/frontend-web/src/lib/professional-control-centers.ts` fasst Hedge-Luecken, Marktwertdruck und Mahnbezug zusammen; `packages/frontend-web/src/pages/contracts-v2.tsx` und `packages/frontend-web/src/pages/kontrakte/KontraktPositionsmonitor.tsx` zeigen daraus jetzt einen eigenen Hedge-/Fixierungsarbeitsplatz mit priorisierter Folgeaktion.
-- ~~FIBU-Jahreswechsel, Zinswesen und Reorganisator blieben zu sehr Teilzahlen statt professioneller Leitstand~~ -> `packages/frontend-web/src/lib/professional-control-centers.ts` verdichtet Interest-/Reorg-Risiko und Abschlussaktion; `packages/frontend-web/src/pages/finance/mahnwesen.tsx`, `packages/frontend-web/src/pages/fibu/abschluss-cockpit.tsx` und `packages/frontend-web/src/pages/fibu/schnittstellen-center.tsx` surfacen jetzt denselben FIBU-Profi-Leitstand fuer Zinsdruck, Reorg-Risiko und naechste Abschlussmassnahme.
-- ~~Die physische Kette blieb trotz neuer Supply-Read-Models noch zu verteilt statt als gemeinsamer Operationsraum fuehrbar~~ -> `packages/frontend-web/src/lib/professional-control-centers.ts` fasst Annahme-, Waage-, Charge- und Frachtstau zu Bottleneck, Druck und naechster Aktion zusammen; `packages/frontend-web/src/pages/annahme/rohware.tsx`, `packages/frontend-web/src/pages/annahme/warteschlange.tsx`, `packages/frontend-web/src/pages/waage/liste.tsx` und `packages/frontend-web/src/pages/logistik/frachtbriefe.tsx` nutzen jetzt dieselbe physische Leitstandssicht.
-- ~~Im modernen CRM-Stamm fehlten noch Dublettenpruefung, Wissenspanel und Intent-/Naechste-Aktion-Surface~~ -> `packages/frontend-web/src/pages/crm/kunden-stamm-modern/LegacyKundenStammModern.tsx` nutzt jetzt die vorhandene CRM-Kundenliste fuer Dublettensicht, zeigt Wissens- und Folgeaktionspanel und fuehrt per `Ctrl/Cmd+K` in einen echten Assistenzraum statt offener TODOs.
-- ~~NaWaRo-Kommunikation und Druck endeten teilweise nur in Toast-Hinweisen~~ -> `packages/frontend-web/src/lib/nawaro-communication.ts` erzeugt jetzt Vorschau-, Druck- und Exportartefakte; `packages/frontend-web/src/pages/nawaro/mitteilung-drucken.tsx` und `packages/frontend-web/src/pages/nawaro/anbauflaechen.tsx` zeigen damit einen professionellen Kommunikations- und Versandpfad.
-- ~~Agrar-Beratung und Saatgut-Stamm trugen noch Demo-/Placeholder-Reste~~ -> `packages/frontend-web/src/pages/agrar/psm/beratung.tsx` arbeitet jetzt mit expliziter PSM-Readiness und ohne stillen Demo-Fallback; `packages/frontend-web/src/pages/agrar/saatgut/stamm.tsx` leitet `Bearbeiten` in den echten Saatgut-Stammpfad statt in einen Placeholder.
-- ~~Die moderne Sales-Einstiegsflaeche hatte weiterhin nur Toast-Aktionen fuer Export, Import, Filter und Archivierung~~ -> `packages/frontend-web/src/pages/sales/orders-modern.tsx` bindet jetzt die reale Sales-Order-Liste an, exportiert die gefilterte Sicht als CSV, toggelt produktive Statusfilter und fuehrt fuer Import bzw. Archivvorbereitung in die kanonischen Auftragsarbeitsplaetze.
-- ~~Service war bereits CRUD-faehig, aber noch nicht als durchgehender Vorgang mit Folgeobjekten und Abschlussbild surfact~~ -> `packages/frontend-web/src/pages/service/anfragen.tsx` und `packages/frontend-web/src/pages/service/anfrage-detail.tsx` zeigen jetzt echte Ticket-/Vorgangs- und Folgeaktionsraeume fuer Rueckmeldung, Aussendienst, Dokumente und Abschluss; `packages/frontend-web/src/pages/agribusiness/field-service-task-neu.tsx` traegt keinen Demo-Fallback-Charakter mehr und nimmt Servicebezug direkt auf.
-- ~~Der naechste CRM-/FIBU-/Futtermittel-Tail enthielt noch Massenaktionen, Ribbon-Folgewege und Maskenaktionen mit Placeholder-Charakter~~ -> `packages/frontend-web/src/pages/crm/opportunities-liste.tsx`, `packages/frontend-web/src/pages/crm/kontakt-management.tsx`, `packages/frontend-web/src/pages/fibu/buchhaltungsuebersicht.tsx`, `packages/frontend-web/src/pages/futtermittel/{charge-verfolgung,einzelfuttermittel-stamm,mischfuttermittel-stamm}.tsx` fuehren ihre Bulk-, Ribbon- und Object-Page-Aktionen jetzt ueber reale Statuswechsel, Imports, Kommunikationspfade, Journal-/Konten-Folgewege, Recall-/Traceability-Pfade sowie die vorhandenen Fach-Handler aus.
-- ~~Im verbleibenden Operations-/Agrar-Tail fehlten noch professionelle Listenarbeitsplaetze fuer Zertifikate, Schaeden, Fahrer, Tankstelle, Bodenproben und Saatgut~~ -> `packages/frontend-web/src/pages/{zertifikate/liste,schaeden/liste,transporte/fahrer-liste,tankstelle/zapfungen,agrar/bodenproben/liste,agrar/saatgut-liste}.tsx` liefern jetzt Such-/Exportpfade, operative Fokussegmente und direkte Folgewege in Detail, Dokumente, Disposition, Beratung oder Verlaengerung statt reiner Tabellen-/KPI-Flaechen.
-- ~~Im Compliance-/Register-, Versicherungs-, Labor- und Projekt-Tail fehlten noch belastbare Export-, Fokus- und Folgepfade~~ -> `packages/frontend-web/src/pages/{compliance/zulassungen-register,compliance/vvvo-register,vertrag/rahmenvertraege,versicherungen/liste,qualitaet/labor-liste,projekte/liste}.tsx` arbeiten jetzt mit operativen Suchfiltern, CSV-Exporten und belastbaren Folgeaktionen ueber vorhandene Arbeitsplaetze oder fokussierende In-Page-Aktionen statt ueber statische Suchkarten.
-- ~~Das gemeinsame Arbeitsmodell war noch nicht auf die naechsten geeigneten Fachmasken uebertragen und drohte zugleich in Informationsueberlastung zu kippen~~ -> `packages/frontend-web/src/pages/{annahme/rohware,annahme/qualitaets-check,einkauf/anfrage-stamm,einkauf/rechnungseingang,finance/abschluss,finance/buchungserfassung,service/anfrage-detail,crm/opportunity-detail}.tsx` nutzen jetzt denselben leichten Fallkopf mit Kontext und Timeline aus bereits geladenen Daten; Scope und Begruendung fuer bewusst schlank gelassene Register stehen in `docs/project-context/operational-rollout-scope-2026-04-09.md`.
+### VOICE-001: Voice-Kanal ist Stub
+
+- **Dateien**: `app/services/voice_adapter.py`, `packages/frontend-web/src/pages/admin/voice-channel.tsx`
+- **Problem**: In-Memory-Session-Store, kein STT/TTS-Provider angebunden. Expliziter Platzhalter: `"text": "[STT-Ergebnis — Provider-Integration ausstehend]"`, `"provider": "pending"`.
+- **Auswirkung**: Voice-Feature existiert nur als Routing-Skelett, nicht als nutzbarer Kanal.
+
+---
+
+## P2 — Architektonisch offen / mittelfristig relevant
+
+### NATS-001: Event-Bus ist disabled by default
+
+- **Dateien**: `app/infrastructure/eventbus/nats_publisher.py`, `nats_consumer.py`
+- **Problem**: `enabled: bool = False` (Zeile 23 Publisher). Consumer loggt: "NATS consumer disabled — using log-only fallback". Architektur steht (DLQ, Idempotenz, Flow-Spine-Handler, Observability), aber in Produktion laeuft nichts ueber NATS.
+- **Auswirkung**: Alle Events sind synchron oder log-only. Kein echter Pub/Sub im Betrieb.
+
+### RAG-001: ChromaDB befuellt, aber schmaler Inhaltsbestand
+
+- **Dateien**: `app/services/vector_store.py`, `app/services/indexer.py`
+- **Problem**: Indexer laeuft alle 5 Minuten und indexiert Artikel + Kunden pro Tenant. ChromaDB ist funktional, aber nur zwei Entity-Typen sind indiziert. Kein Prozesswissen, keine Dokumente, keine Wissensbasis-Eintraege.
+- **Auswirkung**: RAG-Antworten sind auf Artikel-/Kundenstamm beschraenkt.
+
+### CRUD-001: GET-only-Endpoints ohne Mutation
+
+Folgende Ressourcen haben nur Lesezugriff, obwohl CRUD fachlich sinnvoll waere:
+
+| Endpoint-Datei | Routen | Fehlend |
+|----------------|--------|---------|
+| `config_service.py` | GET | POST/PUT fuer Konfigurationsaenderungen |
+| `disposition.py` | 2 GET | POST/PUT fuer Dispositionsentscheidungen |
+| `dms_images.py` | 2 GET | POST fuer Bild-Upload |
+| `direct_debits.py` | 2 GET | POST/DELETE fuer Lastschrift-Management |
+| `foerderung.py` | 2 GET | POST fuer Foerderantraege |
+| `marketing.py` | 3 GET | POST fuer Kampagnen |
+| `zertifikate.py` | 2 GET | POST fuer Zertifikatsanlage |
+
+### COVERAGE-001: Backend-Testabdeckung bei 45%
+
+- Gesamtabdeckung ist fuer ein ERP-System niedrig. Kritische Pfade (Finance-Posting, Bestandsfuehrung, Tenant-Isolation) sollten >80% haben.
+
+---
+
+## P3 — Frontend-Restarbeiten (niedrig)
+
+### FE-001: `downloadComingSoon`-Rest in Lieferanten-Stamm
+
+- **Datei**: `packages/frontend-web/src/pages/einkauf/lieferanten-stamm.tsx` (Zeile ~400)
+- **Problem**: Dokument-Download zeigt `t('crud.messages.downloadComingSoon')` statt echtem Download.
+
+### FE-002: Toast-only Bulk-Aktionen in 3 Dateien
+
+Buttons zeigen Erfolgs-Toast ohne echte API-Mutation:
+
+| Datei | Aktion | Problem |
+|-------|--------|---------|
+| `futtermittel/charge-verfolgung.tsx` | Export/Recall/Trace (Zeilen 145-163) | Static Config liefert Toast-only; wird in `useMemo` ueberschrieben — fragiles Pattern |
+| `fibu/kreditoren.tsx` | DATEV-Export-Button | Zeigt Info-Toast, triggert keinen echten Export |
+| `fuhrpark/fahrzeug-stamm.tsx` | Drucker-Setup / Akte drucken | `await` + Toast ohne Fehlerbehandlung |
+
+---
+
+## P4 — Externe Abhaengigkeiten (nicht repo-seitig loesbar)
+
+### EXT-001: Live-Credentials und Zielsystem-URLs
+
+- Superglue-Connectors, L3-Import, Erstinstallation und Finance-Export brauchen produktive Tenant-Secrets, Zielsystem-URLs und Ops-Alerting-Werte, die ausserhalb des Repos gepflegt werden.
+
+### EXT-002: FIBU-Mappings fuer Cutover
+
+- Fachlich freigegebene Konten-/Steuer-/Kostenstellen-Mappings fuer die L3-Migration stehen noch aus.
+
+### EXT-003: Externes Monitoring/Alerting
+
+- Prometheus-Metriken (`valeo_event_bus_*`) werden exportiert, aber Grafana-Dashboards und Alerting-Regeln sind nicht im Repo und muessen ops-seitig aufgesetzt werden.
+
+---
+
+## Infrastruktur-Status (Kurzreferenz)
+
+| Komponente | Status | Bemerkung |
+|------------|--------|-----------|
+| PostgreSQL 15 | produktiv | Multi-Schema, Alembic-Migrationen |
+| Redis 7 | produktiv | Session/Cache |
+| NATS JetStream | architekturbereit, disabled | Log-only Fallback |
+| Keycloak/OIDC | produktiv | RS256/JWKS, dev-Bypass via `API_DEV_TOKEN` |
+| Paperless-ngx DMS | produktiv | HTTP-Client mit Retry |
+| ChromaDB/RAG | produktiv (schmal) | Nur Artikel + Kunden indiziert |
+| Superglue Self-Host | verdrahtet | Upstream-Contract aktuell, 3 Pilot-Tools provisioniert |
+| Voice-Kanal | Stub | Kein STT/TTS-Provider |
+
+---
+
+## Zuletzt geschlossene Punkte (2026-04-10)
+
+- ~~`POST /api/v1/compliance/pcn-meldungen` fehlte~~ -> jetzt vollstaendig implementiert in `compliance.py:818` mit UFI-Validierung und Tenant-Isolation
+- ~~OP-ROLL-007 bis OP-ROLL-012 (Fallkopf-Rollout) waren reserviert~~ -> alle 6 Slices abgeschlossen, 8 Kernmasken mit operativem Vorgangskopf, Register bewusst schlank gelassen und dokumentiert in `operational-rollout-scope-2026-04-09.md`
+- ~~Frontend-Typecheck war fragil~~ -> 0 Fehler, `tsc --noEmit` ist gruen
+- ~~Mock-Seiten-Inventur war nur geschaetzt~~ -> vollstaendiger Audit: 0 rein unverbundene Pages, 479 Seiten nutzen Hook-basierte API-Anbindung
+
+---
 
 ## Analysepflicht
 
-Wenn in Code, Tests oder UI ein Widerspruch zwischen:
-
-- Doku
-- Implementierung
-- Fachlogik
-- Benutzerfuehrung
-
-auftaucht, ist das hier oder in der passenden Workflow-Datei zu dokumentieren.
+Wenn in Code, Tests oder UI ein Widerspruch zwischen Doku, Implementierung, Fachlogik oder Benutzerfuehrung auftaucht, ist das hier oder in der passenden Workflow-Datei zu dokumentieren.
 
 ## Verweis
 
@@ -103,3 +161,5 @@ Formale Projekt- und Lieferstaende liegen weiterhin in:
 
 - [Process Kernel Status](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/architecture/process-kernel/STATUS.md)
 - `docs/roadmap/status/*.md`
+- `docs/project-context/operational-rollout-scope-2026-04-09.md`
+- `docs/roadmap/status/2026-04-03-security-hardening-phase-2.md`
