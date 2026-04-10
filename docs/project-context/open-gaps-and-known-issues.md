@@ -22,10 +22,6 @@ Zuletzt vollstaendig auditiert: **2026-04-10** (automatisierter Code-Audit ueber
 
 - Gesamtabdeckung ist fuer ein ERP-System niedrig. Kritische Pfade (Finance-Posting, Bestandsfuehrung, Tenant-Isolation) sollten >80% haben.
 
-### CRUD-002: config_service.py hat nur GET
-
-- `app/api/v1/endpoints/config_service.py` — einziger verbleibender GET-only Endpoint, der fachlich POST/PUT braucht.
-
 ---
 
 ## P2 — Architektonisch offen / mittelfristig relevant
@@ -93,6 +89,7 @@ Zuletzt vollstaendig auditiert: **2026-04-10** (automatisierter Code-Audit ueber
 - ~~FE-001: downloadComingSoon~~ -> Durch echte DMS-Fehlermeldung ersetzt in `lieferanten-stamm.tsx`.
 - ~~FE-002: Toast-only Actions~~ -> Audit-Korrektur: `charge-verfolgung.tsx` nutzt echte API via `useMemo`-Override; `kreditoren.tsx` navigiert bereits korrekt; `fahrzeug-stamm.tsx` hat echte API-Calls mit Error-Handling. Keine echten Toast-only-Bugs.
 - ~~`POST /api/v1/compliance/pcn-meldungen` fehlte~~ -> jetzt vollstaendig implementiert in `compliance.py:818` mit UFI-Validierung und Tenant-Isolation
+- ~~CRUD-002: config_service.py hat nur GET~~ -> `config_service.py` hat bereits vollstaendiges CRUD (GET/PUT/PATCH/DELETE) fuer Connectors, Reporting Units und Schedules. War faelschlich als offen dokumentiert.
 - ~~OP-ROLL-007 bis OP-ROLL-012 (Fallkopf-Rollout) waren reserviert~~ -> alle 6 Slices abgeschlossen, 8 Kernmasken mit operativem Vorgangskopf, Register bewusst schlank gelassen und dokumentiert in `operational-rollout-scope-2026-04-09.md`
 - ~~Settlement-, Mahn-, OP- und liefernahe Follow-up-Masken fielen noch aus dem gemeinsamen Arbeitsmodell heraus~~ -> `packages/frontend-web/src/pages/{annahme/abrechnung,einkauf/rechnungseingaenge-liste,einkauf/anlieferavis,einkauf/auftragsbestaetigung,finance/mahnwesen,finance/op-debitoren,finance/op-kreditoren}.tsx` tragen jetzt denselben leichten Vorgangskopf fuer Rueckstand, Freigabe-/Verbuchungsdruck, Blocker und naechste Aktion, weiterhin ausschliesslich aus bereits geladenen Daten.
 - ~~Sammel- und Meldearbeitsplaetze in Einkauf, FIBU, Annahme und Labor liefen noch ohne einheitlichen leichten Operationsrahmen~~ -> `packages/frontend-web/src/pages/{einkauf/anlieferavis-liste,einkauf/auftragsbestaetigungen-liste,fibu/zahlungslaeufe,finance/ustva,fibu/elster-online,fibu/schnittstellen-center,annahme/warteschlange,labor/proben-liste,qualitaet/labor-liste}.tsx` fuehren jetzt denselben kompakten Fallkopf, Kontext und Timeline ausschliesslich aus bereits geladenen Daten und ohne zusaetzliche API-Last.
