@@ -20,6 +20,10 @@ import {
   WorkflowEntryBanner,
   readWorkflowEntryContext,
 } from '@/components/workflow/WorkflowEntryBanner'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 import { ArrowLeft, CheckCircle, ClipboardList, FileText, Loader2, Save, Wrench } from 'lucide-react'
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -119,6 +123,44 @@ export default function AnfrageDetailPage(): JSX.Element {
     )
   }
 
+  const operationalStatus = normalizeOperationalStatus(
+    merged.status === 'neu' ? 'offen' : merged.status === 'in-bearbeitung' ? 'in_pruefung' : 'abgeschlossen',
+  )
+  const operationalBlocker = merged.prioritaet === 'hoch' && merged.status !== 'erledigt'
+    ? 'Hohe Prioritaet: Rueckmeldung oder Einsatz darf nicht liegen bleiben.'
+    : null
+  const contextSections = [
+    {
+      title: 'Vorgang',
+      items: [
+        { label: 'Kunde', value: merged.kunde },
+        { label: 'Betreff', value: merged.betreff },
+        { label: 'Ticket', value: merged.nummer },
+      ],
+    },
+    {
+      title: 'Service',
+      items: [
+        { label: 'Prioritaet', value: merged.prioritaet },
+        { label: 'Status', value: merged.status },
+        { label: 'Datum', value: new Date(merged.datum).toLocaleDateString('de-DE') },
+      ],
+    },
+    {
+      title: 'Governance',
+      items: [
+        { label: 'Workflow', value: workflowContext?.label || workflowContext?.process || 'Kein Handover' },
+        { label: 'Owner', value: 'Service' },
+        { label: 'Naechster Fokus', value: merged.status === 'erledigt' ? 'Abschluss und Zufriedenheit' : 'Rueckmeldung oder Einsatz' },
+      ],
+    },
+  ]
+  const timelineItems = [
+    { label: 'Servicefall angelegt', detail: `${merged.nummer} / ${merged.kunde}`, timestamp: merged.datum },
+    { label: 'Aktueller Bearbeitungsstand', detail: merged.status === 'neu' ? 'Erstpruefung offen' : merged.status === 'in-bearbeitung' ? 'Bearbeitung laeuft' : 'Fachlich erledigt' },
+    ...(workflowContext?.instanceId ? [{ label: 'Workflow-Handover', detail: workflowContext.label || workflowContext.process || undefined }] : []),
+  ]
+
   return (
     <div className="space-y-6 p-6">
       {/* Workflow Banner */}
@@ -172,6 +214,22 @@ export default function AnfrageDetailPage(): JSX.Element {
             {saveMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
             Speichern
           </Button>
+        </div>
+      </div>
+      <div className="space-y-4">
+        <OperationalCaseHeader
+          title="Servicefall steuern"
+          description="Der Kopf reduziert die Service-Anfrage auf Zustand, Risiko und die naechste fachliche Aktion."
+          status={operationalStatus}
+          owner="Service"
+          blocker={operationalBlocker}
+          nextAction={merged.status === 'erledigt' ? 'Abschluss und Kundenzufriedenheit erfassen' : 'Rueckmeldung oder Aussendienst dokumentieren'}
+          caseLabel={merged.nummer}
+          tags={['Service', 'Kunde']}
+        />
+        <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+          <OperationalTimeline title="Fallverlauf" items={timelineItems} />
+          <OperationalContextPanel title="Servicekontext" sections={contextSections} />
         </div>
       </div>
 

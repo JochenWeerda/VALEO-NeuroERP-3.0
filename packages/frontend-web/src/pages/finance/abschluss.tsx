@@ -12,6 +12,10 @@ import { useApprovalDensityProfile } from '@/features/workflow/useApprovalDensit
 import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useAccountingPeriods, useFibuCockpit } from '@/lib/api/fibu'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 const abschlussConfig: MaskConfig = {
   title: 'Monats-/Jahresabschluss',
@@ -623,6 +627,53 @@ export default function AbschlussPage(): JSX.Element {
 
   const approvalDensityProfile = useApprovalDensityProfile('finance-closing', approvalDecisionView)
   const adjustingPeriods = periods.filter((period) => period.status === 'ADJUSTING').length
+  const operationalStatus = normalizeOperationalStatus(
+    !effectiveData?.approval_can_close && effectiveData?.id
+      ? 'wartet_auf_mensch'
+      : effectiveData?.status,
+  )
+  const operationalBlocker = !effectiveData?.approval_can_close && effectiveData?.id
+    ? 'Die Periode ist noch nicht abschliessbar. Freigabe- oder Abstimmungsbedarf ist offen.'
+    : fibuCockpit.annual_close.ready_for_year_close
+      ? null
+      : 'Jahreswechsel ist noch nicht stabil. Reorganisator und Abstimmung muessen weiter bereinigt werden.'
+  const contextSections = [
+    {
+      title: 'Periode',
+      items: [
+        { label: 'Periode', value: effectiveData?.periode || 'Noch offen' },
+        { label: 'Typ', value: effectiveData?.abschlussTyp || 'Monatsabschluss' },
+        { label: 'Status', value: effectiveData?.status || 'offen' },
+      ],
+    },
+    {
+      title: 'Revisionslage',
+      items: [
+        { label: 'Journal zuletzt', value: fibuCockpit.revision.last_entry_date ?? 'n/a' },
+        { label: 'VAT-Periode', value: fibuCockpit.annual_close.latest_vat_period ?? 'n/a' },
+        { label: 'Reorganisator', value: `${adjustingPeriods} offene Perioden` },
+      ],
+    },
+    {
+      title: 'Governance',
+      items: [
+        { label: 'Freigabe', value: effectiveData?.approval_status || 'offen' },
+        { label: 'Abschliessbar', value: effectiveData?.approval_can_close ? 'Ja' : 'Nein' },
+        { label: 'Owner', value: effectiveData?.freigegebenDurch || effectiveData?.abgeschlossenDurch || 'Finance' },
+      ],
+    },
+  ]
+  const timelineItems = [
+    ...(effectiveData?.freigegebenAm
+      ? [{ label: 'Freigegeben', timestamp: effectiveData.freigegebenAm, detail: effectiveData.freigegebenDurch || undefined }]
+      : [{ label: 'Abschlussfall aktiv', detail: 'Periode wird abgestimmt, geprueft und vorbereitet.' }]),
+    ...(effectiveData?.abgeschlossenAm
+      ? [{ label: 'Abgeschlossen', timestamp: effectiveData.abgeschlossenAm, detail: effectiveData.abgeschlossenDurch || undefined }]
+      : [{ label: 'Jahreswechsel-Lage', detail: fibuCockpit.annual_close.ready_for_year_close ? 'stabil' : 'offene Klaerungen' }]),
+    ...(fibuCockpit.revision.last_entry_date
+      ? [{ label: 'Letzter Revisionseintrag', detail: fibuCockpit.revision.last_entry_date }]
+      : []),
+  ]
 
   return (
     <>
@@ -651,6 +702,22 @@ export default function AbschlussPage(): JSX.Element {
           description="Periode, Abstimmung, Meldewesen und Freigaben werden jetzt im Abschlussarbeitsplatz gepflegt. Der Flow-Fall bleibt als Referenz erhalten."
         />
       ) : null}
+      <div className="space-y-4 px-4 pb-4">
+        <OperationalCaseHeader
+          title="Abschlussfall steuern"
+          description="Die Seite verdichtet Periodenlage, Governance und Revisionssicherheit in einer schlanken Leitansicht ueber dem eigentlichen Abschlussarbeitsplatz."
+          status={operationalStatus}
+          owner={effectiveData?.freigegebenDurch || effectiveData?.abgeschlossenDurch || 'Finance'}
+          blocker={operationalBlocker}
+          nextAction={effectiveData?.approval_can_close ? 'Abschluss berechnen oder abschliessen' : 'Freigabe- und Abstimmungsluecken schliessen'}
+          caseLabel={effectiveData?.periode ? `Periode ${effectiveData.periode}` : 'Abschlussfall'}
+          tags={['FIBU', 'Abschluss']}
+        />
+        <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+          <OperationalTimeline title="Abschlussverlauf" items={timelineItems} />
+          <OperationalContextPanel title="Abschlusskontext" sections={contextSections} />
+        </div>
+      </div>
       <div className="grid gap-4 px-4 pb-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm">Jahreswechsel</CardTitle></CardHeader>

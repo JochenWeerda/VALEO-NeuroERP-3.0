@@ -21,6 +21,10 @@ import { CheckCircle, Truck } from 'lucide-react'
 import { AgentSuggestionBadge, AgentProcessPanel } from '@/components/agent'
 import { useSupplyChainOverview } from '@/lib/api/supply-chain'
 import { summarizeSupplyOps } from '@/lib/professional-control-centers'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 import {
   TouchSection,
   TouchTextInput,
@@ -101,6 +105,58 @@ export default function RohwareAnnahmePage(): JSX.Element {
     () => Math.max(0, form.bruttoKg - form.taraKg),
     [form.bruttoKg, form.taraKg],
   )
+  const operationalStatus = normalizeOperationalStatus(
+    form.artikel && nettoKg > 0
+      ? 'in_pruefung'
+      : supplyOps.pressure === 'hoch'
+        ? 'eskaliert'
+        : 'offen',
+  )
+  const operationalBlocker = !form.lagerZiel && form.artikel
+    ? 'Lagerziel ist fuer die Annahme noch nicht festgelegt.'
+    : supplyOps.pressure === 'hoch'
+      ? `Physische Kette unter Druck: ${supplyOps.bottleneck}.`
+      : null
+  const operationalNextAction = !form.lieferant
+    ? 'Lieferant und Kennzeichen erfassen'
+    : !form.artikel
+      ? 'Ware und Lagerziel festlegen'
+      : nettoKg <= 0
+        ? 'Brutto/Tara pruefen und Nettogewicht absichern'
+        : 'Annahme pruefen und uebernehmen'
+  const contextSections = [
+    {
+      title: 'Vorgang',
+      items: [
+        { label: 'Lieferant', value: form.lieferant || 'Noch offen' },
+        { label: 'Kennzeichen', value: form.kennzeichen || 'Noch offen' },
+        { label: 'Lieferschein', value: form.lieferscheinNr || 'Noch offen' },
+      ],
+    },
+    {
+      title: 'Ressourcenlage',
+      items: [
+        { label: 'Artikel', value: form.artikel || 'Nicht zugewiesen' },
+        { label: 'Netto', value: `${nettoKg.toLocaleString('de-DE')} kg` },
+        { label: 'Lagerziel', value: form.lagerZiel || 'Nicht festgelegt' },
+      ],
+    },
+    {
+      title: 'Betrieb',
+      items: [
+        { label: 'Bottleneck', value: supplyOps.bottleneck },
+        { label: 'Druck', value: supplyOps.pressure },
+        { label: 'Naechster Hebel', value: supplyOps.nextAction },
+      ],
+    },
+  ]
+  const timelineItems = [
+    { label: 'Annahmekontext geladen', detail: `${chain.waitingInbound} offene Annahmen in der Warteschlange.` },
+    ...(form.datum ? [{ label: 'Geplanter Erfassungszeitpunkt', timestamp: new Date(form.datum).toISOString() }] : []),
+    form.artikel
+      ? { label: 'Ware zugeordnet', detail: `${form.artikel} -> ${form.lagerZiel || 'Lagerziel offen'}` }
+      : { label: 'Vorgang angelegt', detail: 'Lieferant, Fahrzeug und Ware werden jetzt aufgenommen.' },
+  ]
 
   function validateRohwareStep(stepId: string): string | null {
     if (stepId === 'lieferant-fahrzeug') {
@@ -465,6 +521,22 @@ export default function RohwareAnnahmePage(): JSX.Element {
           closeTarget="/annahme/warteschlange"
           title="Rohware-Annahme"
         />
+        <div className="mt-4 space-y-4">
+          <OperationalCaseHeader
+            title="Rohware-Annahme steuern"
+            description="Der Leitstand zeigt nur die naechste noetige Entscheidung: Vorgang, Ressourcenlage und physischen Druck auf einen Blick."
+            status={operationalStatus}
+            owner="Annahme / Hofannahme"
+            blocker={operationalBlocker}
+            nextAction={operationalNextAction}
+            caseLabel={form.lieferscheinNr ? `Lieferschein ${form.lieferscheinNr}` : 'Annahmefall'}
+            tags={['Annahme', 'Rohware']}
+          />
+          <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+            <OperationalTimeline title="Vorgangslage" items={timelineItems} />
+            <OperationalContextPanel title="Kontext" sections={contextSections} />
+          </div>
+        </div>
         <Card className="mt-4">
           <CardContent className="grid gap-3 pt-6 md:grid-cols-4">
             <div><div className="text-xs text-muted-foreground">Annahme offen</div><div className="text-xl font-semibold">{chain.waitingInbound}</div></div>

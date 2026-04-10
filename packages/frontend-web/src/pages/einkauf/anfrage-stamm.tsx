@@ -14,6 +14,11 @@ import { toast } from '@/hooks/use-toast'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { CheckCircle, XCircle, ShoppingCart, Send, Mail } from 'lucide-react'
 import { Checkbox } from '@/components/ui/checkbox'
+import { apiClient } from '@/lib/api-client'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 const createAnfrageConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
@@ -190,11 +195,8 @@ export default function AnfrageStammPage(): JSX.Element {
   useEffect(() => {
     const loadSuppliers = async () => {
       try {
-        const response = await fetch('/api/v1/crm/business-partners?type=supplier')
-        if (response.ok) {
-          const suppliers = await response.json()
-          setAvailableSuppliers(Array.isArray(suppliers) ? suppliers : suppliers?.data || [])
-        }
+        const suppliers = (await apiClient.get<any[] | { data?: any[] }>('/api/v1/crm/business-partners?type=supplier')).data
+        setAvailableSuppliers(Array.isArray(suppliers) ? suppliers : suppliers?.data || [])
       } catch (error) {
         console.error('Fehler beim Laden der Lieferanten:', error)
       }
@@ -380,18 +382,10 @@ export default function AnfrageStammPage(): JSX.Element {
       await saveData(updateData)
 
       // Send RFQ to suppliers
-      const sendResponse = await fetch(`/api/v1/einkauf/anfragen/${id}/send`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      await apiClient.post(`/api/v1/einkauf/anfragen/${id}/send`, {
           supplierIds: selectedSuppliers,
           method: sendMethod,
-        }),
       })
-
-      if (!sendResponse.ok) {
-        throw new Error(await sendResponse.text())
-      }
 
       toast({
         title: t('crud.messages.rfqSentSuccess'),
@@ -417,10 +411,73 @@ export default function AnfrageStammPage(): JSX.Element {
   const canReject = data?.status === 'ENTWURF' || data?.status === 'FREIGEGEBEN'
   const canConvert = data?.status === 'FREIGEGEBEN' || data?.status === 'ANGEBOTSPHASE'
   const canSendRfq = data?.status === 'FREIGEGEBEN'
+  const operationalStatus = normalizeOperationalStatus(data?.status)
+  const operationalBlocker = data?.status === 'ABGELEHNT'
+    ? 'Die Anfrage ist abgelehnt und braucht eine neue fachliche Entscheidung.'
+    : data?.status === 'FREIGEGEBEN' && selectedSuppliers.length === 0
+      ? 'Fuer die Angebotsphase sind noch keine Lieferanten ausgewaehlt.'
+      : null
+  const contextSections = data ? [
+    {
+      title: 'Bedarf',
+      items: [
+        { label: 'Artikel', value: data.artikel || 'Noch offen' },
+        { label: 'Menge', value: data.menge ? `${data.menge} ${data.einheit || ''}`.trim() : 'Noch offen' },
+        { label: 'Faelligkeit', value: data.faelligkeit || 'Nicht gesetzt' },
+      ],
+    },
+    {
+      title: 'Wirtschaft',
+      items: [
+        { label: 'Prioritaet', value: data.prioritaet || 'normal' },
+        { label: 'Kostenstelle', value: data.kostenstelle || 'Nicht zugeordnet' },
+        { label: 'Projekt', value: data.projekt || 'Kein Projekt' },
+      ],
+    },
+    {
+      title: 'Governance',
+      items: [
+        { label: 'Anforderer', value: data.anforderer || 'Unbekannt' },
+        { label: 'Status', value: data.status || 'offen' },
+        { label: 'Lieferanten bereit', value: availableSuppliers.length > 0 ? `${availableSuppliers.length}` : 'keine geladen' },
+      ],
+    },
+  ] : []
+  const timelineItems = data ? [
+    { label: 'Anfrage angelegt', detail: data.anfrageNummer || data.id || 'Unnummeriert' },
+    { label: 'Aktueller Status', detail: data.status || 'ENTWURF' },
+    ...(data.faelligkeit ? [{ label: 'Bedarf faellig', detail: data.faelligkeit }] : []),
+  ] : []
 
   return (
     <div className="space-y-6">
       <ModuleToolbar backTarget="/einkauf/anfragen" closeTarget="/einkauf/anfragen" title={entityTypeLabel} />
+      {id && data ? (
+        <div className="space-y-4">
+          <OperationalCaseHeader
+            title="Beschaffungsanfrage steuern"
+            description="Die Anfrage zeigt nur den freizugebenden Bedarf, den wirtschaftlichen Kontext und die naechste zulassige Folgeaktion."
+            status={operationalStatus}
+            owner={data.anforderer || 'Einkauf'}
+            blocker={operationalBlocker}
+            nextAction={
+              data.status === 'ENTWURF'
+                ? 'Freigeben oder fachlich ablehnen'
+                : data.status === 'FREIGEGEBEN'
+                  ? 'Lieferanten fuer RFQ auswaehlen'
+                  : data.status === 'ANGEBOTSPHASE'
+                    ? 'In Bestellung ueberfuehren oder ablehnen'
+                    : 'Vorgang nachhalten'
+            }
+            caseLabel={data.anfrageNummer || 'Anfrage'}
+            tags={['Einkauf', 'Bedarf']}
+          />
+          <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+            <OperationalTimeline title="Vorgangsverlauf" items={timelineItems} />
+            <OperationalContextPanel title="Anfragekontext" sections={contextSections} />
+          </div>
+        </div>
+      ) : null}
       <ObjectPage
         config={anfrageConfig}
         data={data}
