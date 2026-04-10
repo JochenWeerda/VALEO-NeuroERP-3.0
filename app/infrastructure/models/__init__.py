@@ -1263,6 +1263,16 @@ from .l3c_models import (
     ArticleSelection,
 )
 
+# Futtermittel (Feed) domain
+from .futtermittel_models import (
+    Einzelfuttermittel,
+    Mischfuttermittel,
+    FuttermittelRezept,
+    RezeptKomponente,
+    ProduktionsAuftrag,
+    AgrarSorte,
+)
+
 # Neuro State Graph + Confidence Ledger
 from .neuro_state_models import (
     StateNodeRecord,

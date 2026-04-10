@@ -1,6 +1,14 @@
 """
 RAG Indexer
-Indexes domain entities into vector store
+Indexes domain entities into vector store.
+
+Indexed collections:
+  - articles: Artikel-Stammdaten
+  - customers: Kunden-Stammdaten
+  - contracts: Einkaufs- und Verkaufskontrakte
+  - feed: Futtermittel (Einzelfutter + Rezepte)
+  - knowledge: Wissensbasis-Einträge
+  - documents: DMS-Dokument-Metadaten
 """
 
 import logging
@@ -165,6 +173,177 @@ class RAGIndexer:
                 }],
                 ids=[customer.id]
             )
+
+    async def index_contracts(self, db: Session, tenant_id: str) -> int:
+        """Index Einkaufs-Kontrakte for semantic search."""
+        try:
+            from app.infrastructure.models.einkauf_models import EinkaufKontrakt
+        except ImportError:
+            logger.debug("EinkaufKontrakt model not available — skipping contract indexing")
+            return 0
+
+        contracts = db.query(EinkaufKontrakt).filter(
+            EinkaufKontrakt.tenant_id == tenant_id,
+        ).all()
+
+        if not contracts:
+            return 0
+
+        documents, metadatas, ids = [], [], []
+        for c in contracts:
+            text = f"Kontrakt {getattr(c, 'kontraktnummer', c.id)}"
+            if hasattr(c, 'artikel_bezeichnung') and c.artikel_bezeichnung:
+                text += f" — {c.artikel_bezeichnung}"
+            if hasattr(c, 'lieferant_name') and c.lieferant_name:
+                text += f" Lieferant: {c.lieferant_name}"
+            if hasattr(c, 'menge') and c.menge:
+                text += f" Menge: {c.menge}"
+
+            documents.append(text)
+            metadatas.append({
+                "kontraktnummer": getattr(c, "kontraktnummer", ""),
+                "status": getattr(c, "status", ""),
+                "tenant_id": tenant_id,
+                "type": "einkauf_kontrakt",
+            })
+            ids.append(c.id)
+
+        await self.vector_store.add_documents(
+            collection_name="contracts",
+            documents=documents,
+            metadatas=metadatas,
+            ids=ids,
+        )
+        logger.info("Indexed %d contracts", len(contracts))
+        return len(contracts)
+
+    async def index_feed(self, db: Session, tenant_id: str) -> int:
+        """Index Futtermittel (Einzelfutter + Rezepte) for semantic search."""
+        try:
+            from app.infrastructure.models.futtermittel_models import (
+                Einzelfuttermittel, FuttermittelRezept,
+            )
+        except ImportError:
+            logger.debug("Futtermittel models not available — skipping feed indexing")
+            return 0
+
+        total = 0
+
+        # Einzelfuttermittel
+        items = db.query(Einzelfuttermittel).filter(
+            Einzelfuttermittel.tenant_id == tenant_id,
+            Einzelfuttermittel.aktiv.is_(True),
+        ).all()
+        if items:
+            documents, metadatas, ids = [], [], []
+            for ef in items:
+                text = f"{ef.name} ({ef.art})"
+                if ef.herkunft:
+                    text += f" Herkunft: {ef.herkunft}"
+                if ef.protein:
+                    text += f" Protein: {ef.protein}%"
+                if ef.gvo_status:
+                    text += f" GVO: {ef.gvo_status}"
+                documents.append(text)
+                metadatas.append({
+                    "artikel_nummer": ef.artikel_nummer,
+                    "art": ef.art,
+                    "tenant_id": tenant_id,
+                    "type": "einzelfutter",
+                })
+                ids.append(ef.id)
+            await self.vector_store.add_documents(
+                collection_name="feed",
+                documents=documents,
+                metadatas=metadatas,
+                ids=ids,
+            )
+            total += len(items)
+
+        # Rezepte
+        rezepte = db.query(FuttermittelRezept).filter(
+            FuttermittelRezept.tenant_id == tenant_id,
+            FuttermittelRezept.aktiv.is_(True),
+        ).all()
+        if rezepte:
+            documents, metadatas, ids = [], [], []
+            for r in rezepte:
+                text = f"Rezept: {r.name} für {r.tierart}"
+                if r.protein_ziel:
+                    text += f" Protein-Ziel: {r.protein_ziel}%"
+                if r.bemerkung:
+                    text += f" — {r.bemerkung}"
+                documents.append(text)
+                metadatas.append({
+                    "rezept_code": r.rezept_code,
+                    "tierart": r.tierart,
+                    "tenant_id": tenant_id,
+                    "type": "rezept",
+                })
+                ids.append(r.id)
+            await self.vector_store.add_documents(
+                collection_name="feed",
+                documents=documents,
+                metadatas=metadatas,
+                ids=ids,
+            )
+            total += len(rezepte)
+
+        if total:
+            logger.info("Indexed %d feed items", total)
+        return total
+
+    async def index_knowledge(self, db: Session, tenant_id: str) -> int:
+        """Index Knowledge Store entries for RAG retrieval."""
+        from sqlalchemy import text as sql_text
+
+        try:
+            rows = db.execute(sql_text(
+                "SELECT id, title, body, category, tags "
+                "FROM domain_shared.knowledge_entries "
+                "WHERE tenant_id = :tid AND status = 'published'"
+            ), {"tid": tenant_id}).fetchall()
+        except Exception:
+            logger.debug("knowledge_entries table not available — skipping")
+            return 0
+
+        if not rows:
+            return 0
+
+        documents, metadatas, ids = [], [], []
+        for row in rows:
+            text = f"{row.title}"
+            if row.body:
+                # Truncate body for embedding (first 500 chars)
+                text += f" — {row.body[:500]}"
+            documents.append(text)
+            metadatas.append({
+                "category": row.category or "",
+                "tags": row.tags or "",
+                "tenant_id": tenant_id,
+                "type": "knowledge",
+            })
+            ids.append(row.id)
+
+        await self.vector_store.add_documents(
+            collection_name="knowledge",
+            documents=documents,
+            metadatas=metadatas,
+            ids=ids,
+        )
+        logger.info("Indexed %d knowledge entries", len(rows))
+        return len(rows)
+
+    async def index_all(self, db: Session, tenant_id: str) -> dict[str, int]:
+        """Index all entity types for a tenant. Returns counts per collection."""
+        counts = {}
+        counts["articles"] = await self.index_articles(db, tenant_id)
+        counts["customers"] = await self.index_customers(db, tenant_id)
+        counts["contracts"] = await self.index_contracts(db, tenant_id)
+        counts["feed"] = await self.index_feed(db, tenant_id)
+        counts["knowledge"] = await self.index_knowledge(db, tenant_id)
+        logger.info("Full RAG index for tenant %s: %s", tenant_id, counts)
+        return counts
 
 
 # Global instance

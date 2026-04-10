@@ -103,4 +103,17 @@ class NATSEventPublisher(IEventPublisher):
         self._connected = False
 
 
-nats_publisher = NATSEventPublisher()
+def _create_publisher() -> NATSEventPublisher:
+    """Create publisher from application config."""
+    try:
+        from app.core.config import settings
+        enabled = settings.EVENT_BUS_ENABLED and settings.EVENT_BUS_PROVIDER == "nats"
+        return NATSEventPublisher(
+            nats_url=settings.EVENT_BUS_NATS_URL,
+            enabled=enabled,
+        )
+    except Exception:
+        return NATSEventPublisher(enabled=False)
+
+
+nats_publisher = _create_publisher()
