@@ -12,6 +12,10 @@ import { apiClient } from '@/lib/api-client'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Banknote } from 'lucide-react'
 import { useFibuCockpit } from '@/lib/api/fibu'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 /** Mappt GET /finance/open-items/{id} (API) auf Masken-Felder (OTC-011). */
 function mapOpenItemApiToForm(row: Record<string, unknown>): Record<string, unknown> {
@@ -610,9 +614,54 @@ export default function OPDebitorenPage(): JSX.Element {
     }
     navigate('/finance/offene-posten')
   }
+  const operationalStatus = normalizeOperationalStatus(
+    fibuCockpit.dunning.overdue_items > 0 ? 'wartet_auf_mensch' : data?.offen > 0 ? 'in_pruefung' : 'abgeschlossen',
+  )
+  const operationalBlocker = noOpMatch
+    ? `Kein Debitoren-OP fuer Rechnungsnr. "${rechnungsnrParam}" gefunden.`
+    : fibuCockpit.dunning.overdue_items > 0
+      ? `${fibuCockpit.dunning.overdue_items} ueberfaellige Debitoren-OP sind im Follow-up.`
+      : null
+  const contextSections = [
+    {
+      title: 'OP-Lage',
+      items: [
+        { label: 'OP-Nummer', value: String(data?.opNummer ?? rechnungsnrParam ?? 'Noch offen') },
+        { label: 'Debitor', value: String(data?.debitorId ?? 'Nicht zugeordnet') },
+        { label: 'Offener Betrag', value: `${Number(data?.offen ?? 0).toLocaleString('de-DE', { minimumFractionDigits: 2 })} EUR` },
+      ],
+    },
+    {
+      title: 'Governance',
+      items: [
+        { label: 'Mahnstufe', value: `${Number(data?.mahnstufe ?? 0)}` },
+        { label: 'Rueckstand', value: `${fibuCockpit.dunning.overdue_amount.toFixed(2)} EUR` },
+        { label: 'Naechste Aktion', value: Number(data?.offen ?? 0) > 0 ? 'Ausgleich oder Mahnung' : 'Vorgang abgeschlossen' },
+      ],
+    },
+  ]
+  const timelineItems = [
+    { label: 'Debitoren-OP aktiv', detail: String(data?.opNummer ?? rechnungsnrParam ?? 'Neuer OP') },
+    ...(showOtcHandoverHint ? [{ label: 'OTC-Handover', detail: rechnungsnrParam ? `Rechnung ${rechnungsnrParam}` : `OP ${opIdParam}` }] : []),
+    ...(Number(data?.offen ?? 0) > 0 ? [{ label: 'Offener Betrag', detail: `${Number(data?.offen ?? 0).toLocaleString('de-DE', { minimumFractionDigits: 2 })} EUR` }] : []),
+  ]
 
   return (
     <div className="space-y-4 p-4">
+      <OperationalCaseHeader
+        title="Debitoren-OP steuern"
+        description="Der Forderungsfall zeigt oben nur Rueckstand, Mahnbezug und die naechste zulaessige Folgeaktion."
+        status={operationalStatus}
+        owner="FIBU / Debitoren"
+        blocker={operationalBlocker}
+        nextAction={Number(data?.offen ?? 0) > 0 ? 'Zahlung erfassen, ausgleichen oder Mahnung erzeugen' : 'Vorgang nur noch revisionssicher nachhalten'}
+        caseLabel={String(data?.opNummer ?? 'Debitoren-OP')}
+        tags={['FIBU', 'Debitoren']}
+      />
+      <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+        <OperationalTimeline title="Forderungsverlauf" items={timelineItems} />
+        <OperationalContextPanel title="OP-Kontext" sections={contextSections} />
+      </div>
       <Alert>
         <Banknote className="h-4 w-4" />
         <AlertTitle>FIBU-Kernlage Debitoren</AlertTitle>

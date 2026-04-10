@@ -8,6 +8,10 @@ import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/api-client'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 const createAuftragsbestaetigungConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
@@ -119,6 +123,33 @@ export default function AuftragsbestaetigungPage(): JSX.Element {
     apiUrl: auftragsbestaetigungConfig.api.baseUrl,
     id: id || undefined
   })
+  const operationalStatus = normalizeOperationalStatus(data?.status)
+  const operationalBlocker = data?.status === 'OFFEN'
+    ? 'Die Auftragsbestaetigung ist noch nicht geprueft und kann Termin- oder Preisabweichungen enthalten.'
+    : null
+  const contextSections = [
+    {
+      title: 'Bestaetigung',
+      items: [
+        { label: 'Nummer', value: String(data?.bestaetigungsNummer ?? 'Neu') },
+        { label: 'Bestellung', value: String(data?.bestellungId ?? 'Noch offen') },
+        { label: 'Status', value: String(data?.status ?? 'OFFEN') },
+      ],
+    },
+    {
+      title: 'Pruefkontext',
+      items: [
+        { label: 'Terminabweichungen', value: `${Array.isArray(data?.bestaetigteTermine) ? data.bestaetigteTermine.length : 0}` },
+        { label: 'Preisabweichungen', value: `${Array.isArray(data?.preisabweichungen) ? data.preisabweichungen.length : 0}` },
+        { label: 'Naechste Aktion', value: data?.status === 'BESTAETIGT' ? 'Bestellung nachhalten' : data?.status === 'GEPRUEFT' ? 'Bestaetigen' : 'Pruefen' },
+      ],
+    },
+  ]
+  const timelineItems = [
+    { label: 'Auftragsbestaetigung aktiv', detail: String(data?.bestaetigungsNummer ?? 'Neue Bestaetigung') },
+    ...(data?.status ? [{ label: 'Status', detail: String(data.status) }] : []),
+    ...(Array.isArray(data?.bestaetigteTermine) && data.bestaetigteTermine.length > 0 ? [{ label: 'Terminbezug vorhanden', detail: `${data.bestaetigteTermine.length} bestaetigte Termine.` }] : []),
+  ]
 
   const handleSave = async (formData: any) => {
     setLoading(true)
@@ -141,6 +172,22 @@ export default function AuftragsbestaetigungPage(): JSX.Element {
   return (
     <>
       <ModuleToolbar backTarget="/einkauf/auftragsbestaetigungen" closeTarget="/einkauf/auftragsbestaetigungen" title={entityTypeLabel} />
+      <div className="space-y-4">
+        <OperationalCaseHeader
+          title="Auftragsbestaetigung steuern"
+          description="Termin- und Preisabweichungen werden vor der Fachmaske knapp eingeordnet, damit die Pruefung zielgerichtet bleibt."
+          status={operationalStatus}
+          owner="Einkauf"
+          blocker={operationalBlocker}
+          nextAction={data?.status === 'BESTAETIGT' ? 'Abgleich mit Bestellung weiterfuehren' : data?.status === 'GEPRUEFT' ? 'Bestaetigung freigeben' : 'Abweichungen pruefen'}
+          caseLabel={String(data?.bestaetigungsNummer ?? 'Auftragsbestaetigung')}
+          tags={['Einkauf', 'Lieferant']}
+        />
+        <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+          <OperationalTimeline title="Bestaetigungsverlauf" items={timelineItems} />
+          <OperationalContextPanel title="Bestaetigungskontext" sections={contextSections} />
+        </div>
+      </div>
       <ObjectPage
         config={auftragsbestaetigungConfig}
         data={data}

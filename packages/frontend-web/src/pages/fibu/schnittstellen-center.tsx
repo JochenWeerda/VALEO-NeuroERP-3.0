@@ -1,8 +1,12 @@
 import { Link } from 'react-router-dom'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useAccountingPeriods, useFibuCockpit, useFibuConnectorProfiles } from '@/lib/api/fibu'
 import { summarizeFibuOps } from '@/lib/professional-control-centers'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 import {
   ArrowRight,
   Building2,
@@ -132,9 +136,59 @@ export default function SchnittstellenCenterPage(): JSX.Element {
   const openPeriods = periods.filter((period) => period.status === 'OPEN').length
   const adjustingPeriods = periods.filter((period) => period.status === 'ADJUSTING').length
   const fibuOps = summarizeFibuOps(fibuCockpit, adjustingPeriods)
+  const operationalStatus = normalizeOperationalStatus(
+    fibuOps.reorgRisk === 'hoch' ? 'eskaliert' : fibuOps.interestPressure === 'hoch' ? 'wartet_auf_mensch' : 'offen',
+  )
+  const contextSections = [
+    {
+      title: 'Revisionslage',
+      items: [
+        { label: 'Connector-Profile', value: `${fibuCockpit.master_data.connector_profile_count}` },
+        { label: 'Exportlaeufe', value: `${fibuCockpit.revision.export_runs}` },
+        { label: 'Perioden offen', value: `${openPeriods}` },
+      ],
+    },
+    {
+      title: 'Masterdaten',
+      items: [
+        { label: 'Mahnparameter', value: fibuCockpit.master_data.dunning_parameters_ready ? 'bereit' : 'offen' },
+        { label: 'Zinsgruppen', value: fibuCockpit.master_data.interest_groups_ready ? 'bereit' : 'ergaenzen' },
+        { label: 'Reorganisator', value: adjustingPeriods > 0 ? `${adjustingPeriods} in Nachbearbeitung` : 'stabil' },
+      ],
+    },
+  ]
+  const timelineItems = [
+    {
+      label: fibuOps.reorgRisk === 'hoch' ? 'Periodennacharbeit aktiv' : 'Periodenlage stabil',
+      detail: fibuOps.reorgRisk === 'hoch'
+        ? `${adjustingPeriods} Perioden befinden sich in Nachbearbeitung.`
+        : 'Der Reorganisator zeigt aktuell keine kritische Nacharbeit.',
+    },
+    {
+      label: fibuCockpit.tax.latest_submission_at ? 'Meldepfad rueckgekoppelt' : 'Noch keine Steuer-Einreichung',
+      detail: fibuCockpit.tax.latest_submission_at
+        ? 'Steuerexporte und Connector-Lage koennen revisionsseitig nachvollzogen werden.'
+        : 'Der Revisionspfad bleibt aktuell connector-zentriert ohne eingereichte Steuerperiode.',
+      timestamp: fibuCockpit.tax.latest_submission_at ?? fibuCockpit.revision.last_entry_date ?? null,
+    },
+  ]
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-6">
+      <OperationalCaseHeader
+        title="Schnittstellen-Center"
+        description="Profile, Exportpfade, Revisionslage und Periodenstatus werden als technischer FIBU-Fall gefuehrt."
+        status={operationalStatus}
+        owner="FIBU / Systembetreuung"
+        blocker={fibuOps.reorgRisk === 'hoch' ? 'Nachbearbeitete Perioden oder Profilkontext muessen geklaert werden.' : null}
+        nextAction={fibuOps.nextAction}
+        caseLabel="Vorgang: FIBU-Connectoren"
+        tags={['FIBU', 'Revision']}
+      />
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_360px]">
+        <OperationalTimeline title="Connector- und Revisionspfad" items={timelineItems} />
+        <OperationalContextPanel title="Schnittstellenkontext" sections={contextSections} />
+      </div>
       <div>
         <h1 className="text-2xl font-bold">Schnittstellen-Center</h1>
         <p className="mt-1 text-muted-foreground">

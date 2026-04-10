@@ -8,12 +8,16 @@ import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
 import { PageSection, PageSurface } from '@/components/patterns/PageSurface'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { Clock, Search, Truck } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { useRepairWarteschlangeArticle, useWarteschlange, type LKWEintrag } from '@/lib/api/inventory'
 import { useSupplyChainOverview } from '@/lib/api/supply-chain'
 import { summarizeSupplyOps } from '@/lib/professional-control-centers'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 export default function WarteschlangePage(): JSX.Element {
   const navigate = useNavigate()
@@ -175,6 +179,45 @@ export default function WarteschlangePage(): JSX.Element {
   const avgWartezeit = warteschlange.length > 0
     ? Math.round(warteschlange.reduce((sum, l) => sum + l.wartezeit, 0) / warteschlange.length)
     : 0
+  const operationalStatus = normalizeOperationalStatus(
+    warteschlange.some((entry) => entry.status === 'gesperrt')
+      ? 'eskaliert'
+      : wartend > 0
+        ? 'wartet_auf_mensch'
+        : inBearbeitung > 0
+          ? 'in_pruefung'
+          : 'abgeschlossen',
+  )
+  const contextSections = [
+    {
+      title: 'Queue-Kontext',
+      items: [
+        { label: 'Wartend', value: `${wartend}` },
+        { label: 'In Bearbeitung', value: `${inBearbeitung}` },
+        { label: 'Abgeschlossen', value: `${abgeschlossen}` },
+      ],
+    },
+    {
+      title: 'Objektkette',
+      items: [
+        { label: 'Offene Wiegungen', value: `${chain?.openWeighingTickets ?? 0}` },
+        { label: 'Gesperrte Chargen', value: `${chain?.blockedCharges ?? 0}` },
+        { label: 'Fracht unterwegs', value: `${chain?.freightInTransit ?? 0}` },
+      ],
+    },
+  ]
+  const timelineItems = [
+    {
+      label: wartend > 0 ? 'Queue unter Last' : 'Keine wartenden Fahrzeuge',
+      detail: wartend > 0
+        ? `${wartend} Fahrzeuge warten aktuell auf den naechsten Schritt.`
+        : 'Die Annahmewarteschlange ist derzeit frei.',
+    },
+    {
+      label: supplyOps.bottleneck ? `Bottleneck ${supplyOps.bottleneck}` : 'Kein dominanter Bottleneck',
+      detail: supplyOps.nextAction,
+    },
+  ]
 
   if (isLoading) {
     return (
@@ -211,6 +254,21 @@ export default function WarteschlangePage(): JSX.Element {
           </div>
         </div>
       </PageSection>
+
+      <OperationalCaseHeader
+        title="Annahme-Warteschlange"
+        description="Die Queue wird als operativer Annahmefall mit Prioritaet, Blockern und naechster Massnahme ueber der Liste gefuehrt."
+        status={operationalStatus}
+        owner="Annahme / Disposition"
+        blocker={warteschlange.some((entry) => entry.status === 'gesperrt') ? 'Mindestens ein Fahrzeug ist gesperrt und benoetigt Klaerung.' : null}
+        nextAction={supplyOps.nextAction}
+        caseLabel="Vorgang: Annahme-Queue"
+        tags={['Annahme', 'Logistik']}
+      />
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_360px]">
+        <OperationalTimeline title="Queue-Verlauf" items={timelineItems} />
+        <OperationalContextPanel title="Queue-Kontext" sections={contextSections} />
+      </div>
 
       <PageSection title="Queue-Lage" description="Live-Zahlen fuer wartende, laufende und abgeschlossene Abfertigungen.">
         <div className="grid gap-4 md:grid-cols-4">

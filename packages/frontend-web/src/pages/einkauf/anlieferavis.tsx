@@ -5,6 +5,11 @@ import { useMaskData } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/api-client'
+import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 const anlieferavisConfig: MaskConfig = {
   title: 'Anlieferavis',
@@ -131,30 +136,76 @@ export default function AnlieferavisPage(): JSX.Element {
     bestaetigen: 'confirm',
     stornieren: 'cancel',
   }
+  const operationalStatus = normalizeOperationalStatus(data?.status)
+  const operationalBlocker = data?.status === 'STORNIERT'
+    ? 'Das Avis ist storniert. Fuer weitere Schritte braucht es ein neues oder korrigiertes Avis.'
+    : !data?.bestellungId
+      ? 'Dem Avis fehlt noch eine zugeordnete Bestellung.'
+      : null
+  const contextSections = [
+    {
+      title: 'Avis',
+      items: [
+        { label: 'Avis-Nummer', value: String(data?.avisNummer ?? 'Neu') },
+        { label: 'Bestellung', value: String(data?.bestellungId ?? 'Noch offen') },
+        { label: 'Status', value: String(data?.status ?? 'GESENDET') },
+      ],
+    },
+    {
+      title: 'Logistik',
+      items: [
+        { label: 'Anlieferdatum', value: String(data?.geplantesAnlieferDatum ?? 'Nicht gesetzt') },
+        { label: 'Kennzeichen', value: String(data?.fahrzeug?.kennzeichen ?? 'Noch offen') },
+        { label: 'Fahrer', value: String(data?.fahrzeug?.fahrer ?? 'Noch offen') },
+      ],
+    },
+  ]
+  const timelineItems = [
+    { label: 'Avis-Fall aktiv', detail: String(data?.avisNummer ?? 'Neues Avis') },
+    ...(data?.geplantesAnlieferDatum ? [{ label: 'Geplante Anlieferung', detail: String(data.geplantesAnlieferDatum) }] : []),
+    { label: 'Naechster Schritt', detail: data?.status === 'BESTAETIGT' ? 'Wareneingang vorbereiten' : 'Avis senden oder bestaetigen' },
+  ]
 
   return (
-    <ObjectPage
-      config={anlieferavisConfig}
-      data={data}
-      onSave={handleSave}
-      onCancel={handleCancel}
-      isLoading={loading}
-      onAction={async (actionKey) => {
-        if (!id || !actionMap[actionKey]) {
-          toast({ title: 'Aktion nicht moeglich', description: 'Das Avis muss zuerst gespeichert werden.', variant: 'destructive' })
-          return
-        }
-        setLoading(true)
-        try {
-          await apiClient.post(`/api/v1/einkauf/anlieferavis/${encodeURIComponent(id)}/${actionMap[actionKey]}`)
-          toast({ title: 'Aktion ausgefuehrt', description: `Anlieferavis ${id} wurde aktualisiert.` })
-          navigate('/einkauf/anlieferavis')
-        } catch (error: any) {
-          toast({ title: 'Aktion fehlgeschlagen', description: error.response?.data?.detail || error.message, variant: 'destructive' })
-        } finally {
-          setLoading(false)
-        }
-      }}
-    />
+    <div className="space-y-6">
+      <ModuleToolbar backTarget="/einkauf/anlieferavis" closeTarget="/einkauf/anlieferavis" title="Anlieferavis" />
+      <OperationalCaseHeader
+        title="Anlieferavis steuern"
+        description="Das Avis bleibt eine Fachmaske, bekommt aber oben einen kompakten Logistik- und Blockerkontext."
+        status={operationalStatus}
+        owner="Einkauf / Wareneingang"
+        blocker={operationalBlocker}
+        nextAction={data?.status === 'BESTAETIGT' ? 'Wareneingang vorbereiten' : 'Avis senden oder bestaetigen'}
+        caseLabel={String(data?.avisNummer ?? 'Anlieferavis')}
+        tags={['Einkauf', 'Logistik']}
+      />
+      <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+        <OperationalTimeline title="Avisverlauf" items={timelineItems} />
+        <OperationalContextPanel title="Aviskontext" sections={contextSections} />
+      </div>
+      <ObjectPage
+        config={anlieferavisConfig}
+        data={data}
+        onSave={handleSave}
+        onCancel={handleCancel}
+        isLoading={loading}
+        onAction={async (actionKey) => {
+          if (!id || !actionMap[actionKey]) {
+            toast({ title: 'Aktion nicht moeglich', description: 'Das Avis muss zuerst gespeichert werden.', variant: 'destructive' })
+            return
+          }
+          setLoading(true)
+          try {
+            await apiClient.post(`/api/v1/einkauf/anlieferavis/${encodeURIComponent(id)}/${actionMap[actionKey]}`)
+            toast({ title: 'Aktion ausgefuehrt', description: `Anlieferavis ${id} wurde aktualisiert.` })
+            navigate('/einkauf/anlieferavis')
+          } catch (error: any) {
+            toast({ title: 'Aktion fehlgeschlagen', description: error.response?.data?.detail || error.message, variant: 'destructive' })
+          } finally {
+            setLoading(false)
+          }
+        }}
+      />
+    </div>
   )
 }

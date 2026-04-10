@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query'
 import { ListReport } from '@/components/mask-builder'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { formatDate } from '@/components/mask-builder/utils/formatting'
 import { Badge } from '@/components/ui/badge'
 import { ListConfig } from '@/components/mask-builder/types'
@@ -10,6 +13,7 @@ import { getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 import { toast } from '@/hooks/use-toast'
 import { useAnlieferavis, type Anlieferavis, einkaufKeys } from '@/lib/api/einkauf'
 import { apiClient } from '@/lib/api-client'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 const createAnlieferavisConfig = (t: any): ListConfig => ({
   title: 'Anlieferavis',
@@ -178,6 +182,49 @@ export default function AnlieferavisListePage(): JSX.Element {
     fahrzeug: { kennzeichen: item.kennzeichen },
   })), [apiData])
   const total = data.length
+  const confirmedCount = data.filter((item) => item.status === 'BESTAETIGT').length
+  const sentCount = data.filter((item) => item.status === 'GESENDET').length
+  const blockedCount = data.filter((item) => item.status === 'STORNIERT').length
+  const nextPlannedDate = [...data]
+    .filter((item) => item.geplantesAnlieferDatum)
+    .sort((left, right) => String(left.geplantesAnlieferDatum).localeCompare(String(right.geplantesAnlieferDatum)))[0]
+  const operationalStatus = normalizeOperationalStatus(
+    blockedCount > 0 ? 'eskaliert' : sentCount > 0 ? 'wartet_auf_extern' : confirmedCount === total && total > 0 ? 'abgeschlossen' : 'offen',
+  )
+  const blocker = blockedCount > 0 ? `${blockedCount} Avis sind storniert oder muessen geklaert werden.` : null
+  const contextSections = [
+    {
+      title: 'Lieferlage',
+      items: [
+        { label: 'Avis gesamt', value: `${total}` },
+        { label: 'Bestaetigt', value: `${confirmedCount}` },
+        { label: 'Gesendet', value: `${sentCount}` },
+      ],
+    },
+    {
+      title: 'Logistik',
+      items: [
+        { label: 'Naechstes Datum', value: nextPlannedDate?.geplantesAnlieferDatum ? formatDate(nextPlannedDate.geplantesAnlieferDatum) : 'nicht geplant' },
+        { label: 'Lieferanten', value: `${new Set(data.map((item) => item.lieferant).filter(Boolean)).size}` },
+        { label: 'Blockierte Avis', value: `${blockedCount}` },
+      ],
+    },
+  ]
+  const timelineItems = [
+    {
+      label: confirmedCount > 0 ? 'Avis bestaetigt' : 'Avis angekuendigt',
+      detail: confirmedCount > 0
+        ? `${confirmedCount} Avis sind als belastbare Wareneingangsgrundlage bestaetigt.`
+        : 'Die Queue basiert aktuell auf angekuendigten Avis.',
+      timestamp: nextPlannedDate?.createdAt ?? null,
+    },
+    {
+      label: sentCount > 0 ? 'Lieferanten warten auf Rueckmeldung' : 'Keine offenen Versandrueckmeldungen',
+      detail: sentCount > 0
+        ? `${sentCount} Avis sind versendet und warten auf externe Rueckmeldung.`
+        : 'Alle Avis befinden sich im internen Bearbeitungsstand.',
+    },
+  ]
 
   const handleCreate = () => {
     navigate('/einkauf/anlieferavis/neu')
@@ -202,20 +249,36 @@ export default function AnlieferavisListePage(): JSX.Element {
   }
 
   return (
-    <ListReport
-      config={anlieferavisConfig}
-      data={data}
-      total={total}
-      onCreate={handleCreate}
-      onEdit={handleEdit}
-      onDelete={handleDelete}
-      onExport={() => {
-        toast({ title: 'Export erstellt', description: `${data.length} Avis fuer den Versand-/Wareneingangspfad exportiert.` })
-      }}
-      onImport={() => {
-        toast({ title: t('crud.messages.importInfo'), description: 'Importpfad bleibt bewusst dateibasiert ausserhalb des Leitstands.' })
-      }}
-      isLoading={isLoading}
-    />
+    <div className="space-y-4">
+      <OperationalCaseHeader
+        title="Anlieferavis-Sammelarbeitsplatz"
+        description="Lieferavise werden als logistischer Sammelvorgang mit Stau-, Blocker- und Folgeaktionssicht gefuehrt."
+        status={operationalStatus}
+        owner="Einkauf / Wareneingang"
+        blocker={blocker}
+        nextAction={sentCount > 0 ? 'Rueckmeldungen bestaetigen oder klaeren' : 'Neue Avis einplanen und versenden'}
+        caseLabel="Vorgang: Avissteuerung"
+        tags={['Einkauf', 'Logistik']}
+      />
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_360px]">
+        <OperationalTimeline title="Letzte Bewegung" items={timelineItems} />
+        <OperationalContextPanel title="Avis-Kontext" sections={contextSections} />
+      </div>
+      <ListReport
+        config={anlieferavisConfig}
+        data={data}
+        total={total}
+        onCreate={handleCreate}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onExport={() => {
+          toast({ title: 'Export erstellt', description: `${data.length} Avis fuer den Versand-/Wareneingangspfad exportiert.` })
+        }}
+        onImport={() => {
+          toast({ title: t('crud.messages.importInfo'), description: 'Importpfad bleibt bewusst dateibasiert ausserhalb des Leitstands.' })
+        }}
+        isLoading={isLoading}
+      />
+    </div>
   )
 }

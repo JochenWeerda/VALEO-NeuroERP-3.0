@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react'
+﻿import { useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { ListReport } from '@/components/mask-builder'
@@ -9,10 +9,10 @@ import { ListConfig } from '@/components/mask-builder/types'
 import { toast } from '@/hooks/use-toast'
 import { api } from '@/lib/axios'
 
-// Konfiguration für Charge-Verfolgung ListReport
+// Konfiguration fÃ¼r Charge-Verfolgung ListReport
 const chargeVerfolgungConfig: ListConfig = {
   title: 'Charge-Verfolgung',
-  subtitle: 'Rückverfolgbarkeit nach EU 178/2002 - Vom Feld bis zum Tier',
+  subtitle: 'RÃ¼ckverfolgbarkeit nach EU 178/2002 - Vom Feld bis zum Tier',
   type: 'list-report',
   columns: [
     {
@@ -93,7 +93,7 @@ const chargeVerfolgungConfig: ListConfig = {
     },
     {
       key: 'rueckverfolgbarkeit',
-      label: 'Rückverfolgung',
+      label: 'RÃ¼ckverfolgung',
       render: (value) => (
         <div className="flex gap-1">
           {value?.feld && <Badge variant="outline" className="text-xs">Feld</Badge>}
@@ -142,26 +142,7 @@ const chargeVerfolgungConfig: ListConfig = {
       ]
     }
   ],
-  bulkActions: [
-    {
-      key: 'export',
-      label: 'Exportieren',
-      type: 'secondary',
-      onClick: () => toast({ title: 'Export', description: 'Chargendaten werden exportiert.' })
-    },
-    {
-      key: 'recall',
-      label: 'Recall einleiten',
-      type: 'danger',
-      onClick: () => toast({ title: 'Rückruf', description: 'Chargen-Rückruf wurde eingeleitet.', variant: 'destructive' })
-    },
-    {
-      key: 'trace',
-      label: 'Rückverfolgung',
-      type: 'secondary',
-      onClick: () => toast({ title: 'Rückverfolgung', description: 'Chargen-Rückverfolgung wird gestartet.' })
-    }
-  ],
+  bulkActions: [],
   defaultSort: { field: 'produktionsdatum', direction: 'desc' },
   pageSize: 25,
   api: {
@@ -227,7 +208,7 @@ export default function ChargeVerfolgungPage(): JSX.Element {
         label: 'Recall einleiten',
         type: 'danger' as const,
         onClick: async (items: any[]) => {
-          if (!confirm(`Rückruf für ${items.length} Charge(n) einleiten?`)) return
+          if (!confirm(`RÃ¼ckruf fÃ¼r ${items.length} Charge(n) einleiten?`)) return
           let ok = 0; let err = 0
           for (const item of items) {
             try {
@@ -237,7 +218,7 @@ export default function ChargeVerfolgungPage(): JSX.Element {
           }
           queryClient.invalidateQueries({ queryKey: ['futter', 'chargen'] })
           toast({
-            title: 'Rückruf eingeleitet',
+            title: 'RÃ¼ckruf eingeleitet',
             description: `${ok} Charge(n) auf Recall gesetzt${err ? `, ${err} Fehler` : ''}.`,
             variant: 'destructive'
           })
@@ -245,7 +226,7 @@ export default function ChargeVerfolgungPage(): JSX.Element {
       },
       {
         key: 'trace',
-        label: 'Rückverfolgung',
+        label: 'RÃ¼ckverfolgung',
         type: 'secondary' as const,
         onClick: (items: any[]) => {
           if (items.length === 0) return
@@ -270,13 +251,13 @@ export default function ChargeVerfolgungPage(): JSX.Element {
 
   const handleDelete = async (item: any) => {
     if (!item?.id) return
-    if (!confirm(`Charge "${item.chargenNummer ?? item.id}" wirklich löschen?`)) return
+    if (!confirm(`Charge "${item.chargenNummer ?? item.id}" wirklich lÃ¶schen?`)) return
     try {
       await api.delete(`/api/v1/futter/chargen/${item.id}`)
-      toast({ title: 'Gelöscht', description: 'Charge wurde gelöscht.' })
+      toast({ title: 'GelÃ¶scht', description: 'Charge wurde gelÃ¶scht.' })
       queryClient.invalidateQueries({ queryKey: ['futter', 'chargen'] })
     } catch (e: any) {
-      toast({ title: 'Löschen fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
+      toast({ title: 'LÃ¶schen fehlgeschlagen', description: e.response?.data?.detail ?? e.message, variant: 'destructive' })
     }
   }
 

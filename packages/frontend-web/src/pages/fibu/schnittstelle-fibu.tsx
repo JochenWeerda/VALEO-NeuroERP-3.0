@@ -6,6 +6,9 @@
 import { useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -14,6 +17,7 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { useFibuCockpit } from '@/lib/api/fibu'
 import { FileDown, Filter, CheckCircle2, AlertCircle, FolderOpen } from 'lucide-react'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 // Standard-Buchungsarten die gefiltert werden können
 const ALLE_BUCHUNGSARTEN = [
@@ -110,9 +114,56 @@ export default function SchnittstelleFibuPage(): JSX.Element {
       prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
     )
   }
+  const operationalStatus = normalizeOperationalStatus(
+    error ? 'eskaliert' : exportMutation.isPending ? 'in_pruefung' : summary ? 'abgeschlossen' : 'offen',
+  )
+  const contextSections = [
+    {
+      title: 'Uebergabekontext',
+      items: [
+        { label: 'Zeitraum', value: `${von} bis ${bis}` },
+        { label: 'Sortierung', value: sortierung === 'datum' ? 'Buchungsdatum' : 'Rechnungsnummer' },
+        { label: 'Buchungsarten', value: selectedArten.length > 0 ? `${selectedArten.length} aktiv` : 'alle' },
+      ],
+    },
+    {
+      title: 'FIBU-Revisionslage',
+      items: [
+        { label: 'Exportlaeufe', value: `${fibuCockpit.revision.export_runs}` },
+        { label: 'Journal zuletzt', value: fibuCockpit.revision.last_entry_date ?? 'n/a' },
+        { label: 'Jahreswechsel', value: fibuCockpit.annual_close.ready_for_year_close ? 'stabil' : 'offene Klaerungen' },
+      ],
+    },
+  ]
+  const timelineItems = [
+    {
+      label: summary ? 'Vorschau erfolgreich erzeugt' : 'Noch keine Vorschau',
+      detail: summary
+        ? `${summary.anzahl_buchungen} Buchungen fuer ${summary.von} bis ${summary.bis}.`
+        : 'Die Uebergabe startet mit Vorschau oder direktem Download.',
+    },
+    {
+      label: error ? 'Uebergabefehler vorhanden' : 'Uebergabepfad bereit',
+      detail: error ? error : 'Filter, Sortierung und Buchungsarten koennen vor dem Export gesteuert werden.',
+    },
+  ]
 
   return (
     <div className="max-w-2xl mx-auto p-6 space-y-4">
+      <OperationalCaseHeader
+        title="Schnittstelle Finanzbuchhaltung"
+        description="Die Buchungsuebergabe wird als L3/FIBU-Cutover-Fall mit Revisions- und Governance-Kontext gefuehrt."
+        status={operationalStatus}
+        owner="FIBU / Migration"
+        blocker={error ? 'Der letzte Exportlauf ist fehlgeschlagen und muss geklaert werden.' : null}
+        nextAction={summary ? 'Export herunterladen und Folgeverbuchung pruefen' : 'Vorschau erzeugen oder Uebertragung starten'}
+        caseLabel="Vorgang: Buchungsuebergabe"
+        tags={['L3', 'FIBU', 'Cutover']}
+      />
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_360px]">
+        <OperationalTimeline title="Uebergabeverlauf" items={timelineItems} />
+        <OperationalContextPanel title="Schnittstellenkontext" sections={contextSections} />
+      </div>
       {/* Titelbereich im Dialog-Stil */}
       <Card className="border-2">
         <CardHeader className="pb-2 bg-muted/40 rounded-t-lg">

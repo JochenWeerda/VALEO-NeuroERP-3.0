@@ -255,22 +255,45 @@ export default function FuhrparkFahrzeugStammPage(): JSX.Element {
             <Button
               variant="outline"
               disabled={actionsDisabled}
-              onClick={async () => { await setupFuhrparkDrucker(id as string, printerName); toast({ title: 'Drucker eingerichtet' }) }}
+              onClick={async () => {
+                try {
+                  await setupFuhrparkDrucker(id as string, printerName)
+                  toast({ title: 'Drucker eingerichtet' })
+                } catch (error) {
+                  toast({ title: 'Drucker-Setup fehlgeschlagen', description: getAxiosErrorMessage(error), variant: 'destructive' })
+                }
+              }}
             >
               Drucker einrichten
             </Button>
           </div>
-          <Button variant="outline" disabled={actionsDisabled} onClick={async () => { await printFuhrparkAkte(id as string); toast({ title: 'Fahrzeugakte gedruckt' }) }}>
+          <Button
+            variant="outline"
+            disabled={actionsDisabled}
+            onClick={async () => {
+              try {
+                await printFuhrparkAkte(id as string)
+                toast({ title: 'Fahrzeugakte gedruckt' })
+              } catch (error) {
+                toast({ title: 'Druck fehlgeschlagen', description: getAxiosErrorMessage(error), variant: 'destructive' })
+              }
+            }}
+          >
             Drucken
           </Button>
           <Button
             variant="destructive"
             disabled={actionsDisabled}
             onClick={async () => {
-              await deleteFuhrparkFahrzeug(id as string)
-              toast({ title: 'Fahrzeug geloescht' })
-              void queryClient.invalidateQueries({ queryKey: ['fuhrpark', 'fahrzeuge'] })
-              navigate('/fuhrpark/fahrzeuge')
+              if (!confirm('Fahrzeug wirklich loeschen? Dieser Vorgang ist nicht rueckgaengig.')) return
+              try {
+                await deleteFuhrparkFahrzeug(id as string)
+                toast({ title: 'Fahrzeug geloescht' })
+                void queryClient.invalidateQueries({ queryKey: ['fuhrpark', 'fahrzeuge'] })
+                navigate('/fuhrpark/fahrzeuge')
+              } catch (error) {
+                toast({ title: 'Loeschen fehlgeschlagen', description: getAxiosErrorMessage(error), variant: 'destructive' })
+              }
             }}
           >
             Fahrzeug loeschen
@@ -281,10 +304,14 @@ export default function FuhrparkFahrzeugStammPage(): JSX.Element {
             variant="outline"
             disabled={actionsDisabled || !unfallOrt || !unfallBeschreibung}
             onClick={async () => {
-              await unfallAnzeige(id as string, { datum: new Date().toISOString(), ort: unfallOrt, beschreibung: unfallBeschreibung })
-              toast({ title: 'Unfallanzeige erfasst' })
-              setUnfallOrt('')
-              setUnfallBeschreibung('')
+              try {
+                await unfallAnzeige(id as string, { datum: new Date().toISOString(), ort: unfallOrt, beschreibung: unfallBeschreibung })
+                toast({ title: 'Unfallanzeige erfasst' })
+                setUnfallOrt('')
+                setUnfallBeschreibung('')
+              } catch (error) {
+                toast({ title: 'Unfallanzeige fehlgeschlagen', description: getAxiosErrorMessage(error), variant: 'destructive' })
+              }
             }}
           >
             Unfall - Anzeige

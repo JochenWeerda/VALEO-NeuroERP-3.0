@@ -10,6 +10,10 @@ import { getEntityTypeLabel, getStatusLabel } from '@/features/crud/utils/i18n-h
 import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/api-client'
 import { useRechnungseingaenge, type Rechnungseingang, einkaufKeys } from '@/lib/api/einkauf'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 const createRechnungseingaengeConfig = (t: any, entityTypeLabel: string): ListConfig => ({
   title: entityTypeLabel,
@@ -164,10 +168,51 @@ export default function RechnungseingaengeListePage(): JSX.Element {
     bestellung: { nummer: item.bestellung },
     wareneingang: { nummer: item.wareneingang },
   })), [apiData])
+  const reviewedCount = data.filter((item) => String(item.status || '').toUpperCase() === 'GEPRUEFT').length
+  const approvedCount = data.filter((item) => String(item.status || '').toUpperCase() === 'FREIGEGEBEN').length
+  const draftCount = data.filter((item) => ENTWURF_STATUSES.includes(String(item.status || '').toUpperCase())).length
+  const totalAmount = data.reduce((sum, item) => sum + Number(item.bruttoBetrag || 0), 0)
   const total = data.length
   const entityType = 'invoiceReceipt'
   const entityTypeLabel = getEntityTypeLabel(t, entityType, 'Rechnungseingang')
   const baseConfig = createRechnungseingaengeConfig(t, entityTypeLabel)
+  const operationalStatus = normalizeOperationalStatus(
+    approvedCount > 0
+      ? 'wartet_auf_mensch'
+      : reviewedCount > 0
+        ? 'in_pruefung'
+        : draftCount > 0
+          ? 'offen'
+          : 'abgeschlossen',
+  )
+  const blocker = approvedCount > 0
+    ? `${approvedCount} Rechnungseingaenge warten auf Verbuchung.`
+    : reviewedCount > 0
+      ? `${reviewedCount} Rechnungseingaenge warten auf Freigabe.`
+      : null
+  const contextSections = [
+    {
+      title: 'Workflowdruck',
+      items: [
+        { label: 'Erfasst/Entwurf', value: `${draftCount}` },
+        { label: 'Geprueft', value: `${reviewedCount}` },
+        { label: 'Freigegeben', value: `${approvedCount}` },
+      ],
+    },
+    {
+      title: 'Wirtschaft',
+      items: [
+        { label: 'Gesamtbetrag', value: `${formatNumber(totalAmount, 2)} EUR` },
+        { label: 'Anzahl', value: `${total}` },
+        { label: 'Naechster Hebel', value: approvedCount > 0 ? 'Verbuchen' : reviewedCount > 0 ? 'Freigeben' : 'Pruefen' },
+      ],
+    },
+  ]
+  const timelineItems = [
+    { label: 'Sammelarbeitsplatz geladen', detail: `${total} Rechnungseingaenge in der aktuellen Sicht.` },
+    ...(approvedCount > 0 ? [{ label: 'Verbuchungsstau', detail: `${approvedCount} Positionen koennen jetzt gepostet werden.` }] : []),
+    ...(reviewedCount > 0 ? [{ label: 'Freigabestau', detail: `${reviewedCount} Positionen stehen zur Freigabe.` }] : []),
+  ]
 
   const rechnungseingaengeConfig: ListConfig = useMemo(() => ({
     ...baseConfig,
@@ -304,18 +349,34 @@ export default function RechnungseingaengeListePage(): JSX.Element {
   }
 
   return (
-    <ListReport
-      config={rechnungseingaengeConfig}
-      data={data}
-      total={total}
-      onCreate={handleCreate}
-      onEdit={handleEdit}
-      onDelete={handleDelete}
-      onExport={handleExport}
-      onImport={() => {
-        navigate('/einkauf/bestellungen?importContext=rechnungseingaenge')
-      }}
-      isLoading={isLoading}
-    />
+    <div className="space-y-6">
+      <OperationalCaseHeader
+        title="Rechnungseingaenge steuern"
+        description="Die Liste bleibt schlank, zeigt aber direkt den Freigabe- und Verbuchungsdruck der aktuellen Sicht."
+        status={operationalStatus}
+        owner="Einkauf / FIBU"
+        blocker={blocker}
+        nextAction={approvedCount > 0 ? 'Freigegebene Eingaenge verbuchen' : reviewedCount > 0 ? 'Gepruefte Eingaenge freigeben' : 'Neue Eingaenge pruefen'}
+        caseLabel="Sammelarbeitsplatz"
+        tags={['Einkauf', 'FIBU']}
+      />
+      <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+        <OperationalTimeline title="Aktuelle Lage" items={timelineItems} />
+        <OperationalContextPanel title="Listenkontext" sections={contextSections} />
+      </div>
+      <ListReport
+        config={rechnungseingaengeConfig}
+        data={data}
+        total={total}
+        onCreate={handleCreate}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onExport={handleExport}
+        onImport={() => {
+          navigate('/einkauf/bestellungen?importContext=rechnungseingaenge')
+        }}
+        isLoading={isLoading}
+      />
+    </div>
   )
 }

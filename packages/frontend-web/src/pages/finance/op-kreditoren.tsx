@@ -11,6 +11,10 @@ import { Euro, Search, AlertCircle, CheckCircle2, Clock, Plus, Pencil, Trash2, L
 import { Checkbox } from '@/components/ui/checkbox'
 import { toast } from 'sonner'
 import { useFibuCockpit } from '@/lib/api/fibu'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 type OpStatus = 'offen' | 'teilweise' | 'geschlossen' | 'storniert'
 
@@ -207,6 +211,12 @@ export default function OpKreditorenPage(): JSX.Element {
   const sumOffen = summary?.op_summe ?? 0
   const sumUeberfaellig = summary?.faellig ?? 0
   const sumGesamt = items.reduce((s, op) => s + Number(op.op_betrag ?? 0), 0)
+  const operationalStatus = normalizeOperationalStatus(
+    sumUeberfaellig > 0 ? 'wartet_auf_mensch' : sumOffen > 0 ? 'in_pruefung' : 'abgeschlossen',
+  )
+  const operationalBlocker = sumUeberfaellig > 0
+    ? `${fmt(sumUeberfaellig)} sind ueberfaellig und muessen disponiert oder ausgeglichen werden.`
+    : null
 
   const onSubmitCreate = () => {
     if (!formData.rechnungsnr || !formData.konto_name || formData.op_betrag <= 0) {
@@ -315,9 +325,46 @@ export default function OpKreditorenPage(): JSX.Element {
       })),
     })
   }
+  const contextSections = [
+    {
+      title: 'OP-Lage',
+      items: [
+        { label: 'Gesamt offen', value: fmt(sumOffen) },
+        { label: 'Ueberfaellig', value: fmt(sumUeberfaellig) },
+        { label: 'Positionen', value: `${summary?.count ?? 0}` },
+      ],
+    },
+    {
+      title: 'Governance',
+      items: [
+        { label: 'Jahreswechsel', value: fibuCockpit.annual_close.ready_for_year_close ? 'stabil' : 'offene Klaerungen' },
+        { label: 'Naechste Aktion', value: sumUeberfaellig > 0 ? 'Ausgleich / Faelligkeiten priorisieren' : 'OP nachhalten' },
+        { label: 'Sammelausgleich', value: `${selectedIds.size} markiert` },
+      ],
+    },
+  ]
+  const timelineItems = [
+    { label: 'Kreditoren-OP geladen', detail: `${filtered.length} Positionen in der aktuellen Sicht.` },
+    ...(sumUeberfaellig > 0 ? [{ label: 'Ueberfaelligkeitsdruck', detail: fmt(sumUeberfaellig) }] : []),
+    ...(selectedIds.size > 0 ? [{ label: 'Sammelausgleich vorbereitet', detail: `${selectedIds.size} Positionen selektiert.` }] : []),
+  ]
 
   return (
     <div className="space-y-6 p-6">
+      <OperationalCaseHeader
+        title="Kreditoren-OP steuern"
+        description="Der Sammelarbeitsplatz zeigt nur Rueckstand, Ueberfaelligkeit und die naechste Massnahme ueber der Liste."
+        status={operationalStatus}
+        owner="FIBU / Kreditoren"
+        blocker={operationalBlocker}
+        nextAction={sumUeberfaellig > 0 ? 'Ueberfaellige Positionen ausgleichen' : 'OP bestaetigen oder Sammelausgleich vorbereiten'}
+        caseLabel="Offene Posten Kreditoren"
+        tags={['FIBU', 'Kreditoren']}
+      />
+      <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+        <OperationalTimeline title="Aktuelle Lage" items={timelineItems} />
+        <OperationalContextPanel title="OP-Kontext" sections={contextSections} />
+      </div>
       <Card className="border-primary/20">
         <CardHeader className="pb-2">
           <CardTitle className="text-base">FIBU-Kernlage Kreditoren</CardTitle>
