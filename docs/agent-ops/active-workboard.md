@@ -1789,47 +1789,59 @@ Alle 6 Router registriert in `app/api/v1/api.py` unter `/api/v1/neuro/*`. Commit
 ## OP-ROLL-007
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Das operative Fallmodell in Rohware, Qualitaets-Check und angrenzende Annahmekernmasken ausrollen.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/annahme/{rohware,qualitaets-check}.tsx`.
 **Abnahmekriterien:** Die Annahme-Folgemasken zeigen Fallkopf, Objektkontext, Timeline und naechste Aktion konsistent ohne Ueberfrachtung.
+**Erledigt:** `rohware.tsx` und `qualitaets-check.tsx` nutzen jetzt denselben leichten Fallkopf mit Ressourcen-, QS- und Governance-Kontext aus bereits vorhandenen Query-/Formdaten; die Wizard- und QS-Flaechen selbst blieben bewusst schlank.
+**Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`
 
 ## OP-ROLL-008
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Einkaufs-Objektmasken fuer Anfrage- und Rechnungseingang auf das gemeinsame Vorgangsbild ziehen.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/einkauf/{anfrage-stamm,rechnungseingang}.tsx`.
 **Abnahmekriterien:** Anfrage- und Rechnungseingang zeigen Status, Owner, Blocker, Kontext und naechste Aktion direkt am Arbeitsobjekt.
+**Erledigt:** `anfrage-stamm.tsx` und `rechnungseingang.tsx` zeigen jetzt vor der ObjectPage einen kompakten Beschaffungs- bzw. Rechnungsfall mit Bedarf, Wirtschaft, Match-/Freigabelage und naechster Aktion; es wurden keine zusaetzlichen Requests eingefuehrt.
+**Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`
 
 ## OP-ROLL-009
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Finance-to-Close-Kernmasken mit dem gemeinsamen Fallmodell verdichten.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/finance/{abschluss,buchungserfassung}.tsx`.
 **Abnahmekriterien:** Abschluss und Buchungserfassung surfacen Periodenfall, Risiken, Governance und naechste Aktion direkt im Arbeitsraum.
+**Erledigt:** `abschluss.tsx` und `buchungserfassung.tsx` verdichten jetzt Periodenlage, Revisionskontext, Differenz-/Freigaberisiken und die naechste zulaessige Finance-Aktion ueber dem bestehenden Arbeitsraum.
+**Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`
 
 ## OP-ROLL-010
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Workflow-nahe Service- und CRM-Objektmasken auf sinnvolle Fallkopf-/Kontextbausteine heben.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `packages/frontend-web/src/pages/service/anfrage-detail.tsx`, `packages/frontend-web/src/pages/crm/opportunity-detail.tsx`.
 **Abnahmekriterien:** Die Objektmasken gewinnen sichtbaren Vorgangsmehrwert, ohne bestehende Fachoberflaechen zu ueberladen.
+**Erledigt:** `service/anfrage-detail.tsx` und `crm/opportunity-detail.tsx` haben jetzt einen schlanken Fallkopf fuer Service- bzw. Vertriebssteuerung; die bestehenden Tabs, History- und Quote-Karten blieben unveraendert tief und wurden nicht dupliziert.
+**Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`
 
 ## OP-ROLL-011
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Weitere geeignete Listenraeume mit leichtgewichtiger Fallkopf-Sicht harmonisieren.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, ausgewaehlte `packages/frontend-web/src/pages/**/liste*.tsx` nach Mehrwertkriterium.
 **Abnahmekriterien:** Nur Seiten mit echtem operativem Zusatznutzen bekommen den neuen Kopf; reine Register oder simple Tabellen bleiben bewusst schlank.
+**Erledigt:** Der Sweep wurde bewusst gestoppt: fuer die verbleibenden reinen Register-/Listenraeume waere der Fallkopf mehr Duplikat als Mehrwert. Diese Entscheidung ist jetzt explizit dokumentiert statt implizit offenzulassen.
+**Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`
 
 ## OP-ROLL-012
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Den Rollout dokumentieren und die verbleibenden bewusst schlank gelassenen Masken begruenden.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, ggf. neue Referenzdatei unter `docs/project-context/`.
 **Abnahmekriterien:** Es ist nachvollziehbar dokumentiert, wo das Zielbild sinnvoll eingesetzt wurde und wo bewusst nicht.
+**Erledigt:** `docs/project-context/operational-rollout-scope-2026-04-09.md` beschreibt jetzt Ausrollkriterien, Performance-Regel, die konkret ausgerollten Masken und die bewusst schlank gelassenen Register-/Listenraeume.
+**Checks:** `node scripts/docs-governance-check.cjs`

@@ -13,6 +13,11 @@ import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import { financeService } from '@/lib/services/finance-service'
 import { toast } from '@/hooks/use-toast'
 import { apiClient, getAxiosErrorMessage } from '@/lib/api-client'
+import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 
 // Konfiguration für Buchungserfassung ObjectPage (wird in Komponente mit i18n erstellt)
@@ -288,6 +293,7 @@ export default function BuchungserfassungPage(): JSX.Element {
   const workflowInstanceId = searchParams.get('workflowInstanceId')
   const workflowProcess = searchParams.get('workflowProcess')
   const workflowCase = searchParams.get('workflowCase')
+  const workflowContext = readWorkflowEntryContext(searchParams)
   const entryId = searchParams.get('id')
   const isEditMode = !!entryId
   const [isDirty, setIsDirty] = useState(false)
@@ -477,6 +483,53 @@ export default function BuchungserfassungPage(): JSX.Element {
       setIsStornoLoading(false)
     }
   }
+  const lineCount = Array.isArray(formData?.buchungszeilen) ? formData.buchungszeilen.length : 0
+  const operationalStatus = normalizeOperationalStatus(
+    data?.id
+      ? 'abgeschlossen'
+      : lineCount === 0
+        ? 'offen'
+        : Math.abs((formData?.differenz ?? 0)) >= 0.01
+          ? 'blockiert'
+          : 'in_pruefung',
+  )
+  const operationalBlocker = Math.abs((formData?.differenz ?? 0)) >= 0.01
+    ? 'Soll und Haben sind noch nicht ausgeglichen.'
+    : null
+  const contextSections = [
+    {
+      title: 'Vorgang',
+      items: [
+        { label: 'Belegart', value: formData?.belegart || 'BANK' },
+        { label: 'Belegnummer', value: formData?.belegnummer || 'Noch offen' },
+        { label: 'Periode', value: formData?.periode || 'Nicht gesetzt' },
+      ],
+    },
+    {
+      title: 'Buchungslage',
+      items: [
+        { label: 'Zeilen', value: `${lineCount}` },
+        { label: 'Soll', value: `${formData?.gesamtSoll ?? 0}` },
+        { label: 'Haben', value: `${formData?.gesamtHaben ?? 0}` },
+      ],
+    },
+    {
+      title: 'Governance',
+      items: [
+        { label: 'Differenz', value: `${formData?.differenz ?? 0}` },
+        { label: 'Workflow', value: workflowContext?.label || workflowCase || workflowProcess || 'Kein Handover' },
+        { label: 'Instanz', value: workflowInstanceId ? `${workflowInstanceId.slice(0, 8)}...` : 'lokal' },
+        { label: 'Owner', value: 'FIBU' },
+      ],
+    },
+  ]
+  const timelineItems = [
+    ...(workflowContext?.instanceId
+      ? [{ label: 'Flow-Spine uebernommen', detail: workflowContext.label || workflowContext.process || undefined }]
+      : [{ label: 'Buchungsfall aktiv', detail: 'Manuelle Buchung wird jetzt validiert und verbucht.' }]),
+    { label: 'Aktuelle Zeilenlage', detail: `${lineCount} Buchungszeilen / Differenz ${formData?.differenz ?? 0}` },
+    ...(formData?.buchungsdatum ? [{ label: 'Buchungsdatum', detail: formData.buchungsdatum }] : []),
+  ]
 
   return (
     <>
@@ -485,11 +538,29 @@ export default function BuchungserfassungPage(): JSX.Element {
         closeTarget="/finance/buchungen"
         title={entityTypeLabel}
       />
-      {workflowInstanceId && (
-        <div className="mb-4 rounded-md border border-indigo-500/30 bg-indigo-500/10 px-4 py-2 text-sm text-indigo-200">
-          Flow-Spine: {workflowCase || workflowProcess} (Instanz {workflowInstanceId.slice(0, 8)}...)
+      {workflowContext ? (
+        <WorkflowEntryBanner
+          context={workflowContext}
+          title="Workflow-Handover in die Buchungserfassung"
+          description="Der Flow-Fall bleibt sichtbar, die fachliche Arbeit passiert hier in der Buchungsmaske."
+        />
+      ) : null}
+      <div className="space-y-4 px-4 pb-4">
+        <OperationalCaseHeader
+          title="Buchungsfall steuern"
+          description="Nur die fuer den Abschluss der Buchung relevanten Informationen bleiben oben sichtbar: Ausgleich, Governance und naechste Aktion."
+          status={operationalStatus}
+          owner="FIBU"
+          blocker={operationalBlocker}
+          nextAction={data?.id ? 'Storno oder Export bei Bedarf ausloesen' : Math.abs((formData?.differenz ?? 0)) >= 0.01 ? 'Buchungszeilen ausgleichen' : 'Validieren und buchen'}
+          caseLabel={formData?.belegnummer || 'Buchungsfall'}
+          tags={['FIBU', 'Journal']}
+        />
+        <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+          <OperationalTimeline title="Buchungsverlauf" items={timelineItems} />
+          <OperationalContextPanel title="Buchungskontext" sections={contextSections} />
         </div>
-      )}
+      </div>
       <LeaveConfirmDialog
         blocker={blocker}
         onSave={() => handleSave(latestFormData ?? formData)}

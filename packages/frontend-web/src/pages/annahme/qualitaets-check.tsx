@@ -16,6 +16,10 @@ import { useToast } from '@/hooks/use-toast'
 import { useWarteschlangeEintrag, usePatchWarteschlangeStatus } from '@/lib/api/inventory'
 import { buildDecisionView } from '@/policy/decision-view'
 import { ProcessStatusPanel } from '@/components/workflow/ProcessStatusPanel'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 import {
   TouchSection,
   TouchNumericInput,
@@ -428,6 +432,54 @@ export default function QualitaetsCheckPage(): JSX.Element {
       },
     })
   }
+  const operationalStatus = normalizeOperationalStatus(
+    qualitaet.ergebnis === 'gesperrt'
+      ? 'blockiert'
+      : qualitaet.ergebnis === 'bedingt'
+        ? 'wartet_auf_mensch'
+        : 'in_pruefung',
+  )
+  const blocker = qualitaet.ergebnis === 'gesperrt'
+    ? 'QS hat eine Sperre gesetzt. Klaerung oder Freigabeentscheidung ist erforderlich.'
+    : qualitaet.ergebnis === 'bedingt'
+      ? 'Grenzfall erkannt. Freigabe oder Sonderbehandlung muss entschieden werden.'
+      : null
+  const contextSections = [
+    {
+      title: 'Vorgang',
+      items: [
+        { label: 'Lieferant', value: lkwEintrag?.lieferant || 'Noch offen' },
+        { label: 'Lieferschein', value: qualitaet.lieferscheinNr || 'Noch offen' },
+        { label: 'Artikel', value: qualitaet.artikel || 'Noch offen' },
+      ],
+    },
+    {
+      title: 'Messwerte',
+      items: [
+        { label: 'Feuchte', value: `${qualitaet.feuchtigkeit}%` },
+        { label: 'Protein', value: `${qualitaet.protein}%` },
+        { label: 'Verunreinigung', value: `${qualitaet.verunreinigung}%` },
+      ],
+    },
+    {
+      title: 'Governance',
+      items: [
+        { label: 'Ergebnis', value: qualitaet.ergebnis },
+        { label: 'Queue-Status', value: lkwEintrag?.status || 'nicht verknuepft' },
+        { label: 'Referenz', value: savedReferenceContext?.anchor_id || 'Noch kein Anker' },
+      ],
+    },
+  ]
+  const timelineItems = [
+    { label: 'QS-Fall aktiv', detail: lkwEintrag?.kennzeichen ? `Fahrzeug ${lkwEintrag.kennzeichen}` : 'Sichtpruefung und Messwerte werden jetzt dokumentiert.' },
+    { label: 'Aktueller QS-Stand', detail: `Ergebnis: ${qualitaet.ergebnis}` },
+    ...(savedReferenceContext?.anchor_id
+      ? [{
+          label: 'Prozessanker geschrieben',
+          detail: `${savedReferenceContext.anchor_entity}:${savedReferenceContext.anchor_id}`,
+        }]
+      : []),
+  ]
 
   return (
     <div className="flex flex-col">
@@ -442,6 +494,22 @@ export default function QualitaetsCheckPage(): JSX.Element {
           </Button>
         }
       />
+      <div className="mb-6 mt-4 space-y-4">
+        <OperationalCaseHeader
+          title="Qualitaetspruefung steuern"
+          description="Der Fallkopf verdichtet QS-Zustand, Blocker und die naechste fachliche Entscheidung ohne den Laborarbeitsplatz zu ueberfrachten."
+          status={operationalStatus}
+          owner="Qualitaetssicherung"
+          blocker={blocker}
+          nextAction={qualitaet.ergebnis === 'gesperrt' ? 'Klaerung oder Sperrfreigabe ausloesen' : qualitaet.ergebnis === 'bedingt' ? 'Bedingte Freigabe abstimmen' : 'Messwerte abschliessen und uebergeben'}
+          caseLabel={qualitaet.lieferscheinNr ? `QS ${qualitaet.lieferscheinNr}` : 'QS-Fall'}
+          tags={['Annahme', 'QS']}
+        />
+        <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+          <OperationalTimeline title="QS-Verlauf" items={timelineItems} />
+          <OperationalContextPanel title="QS-Kontext" sections={contextSections} />
+        </div>
+      </div>
       <div className="mb-6 grid gap-4 lg:grid-cols-2">
         {qualityDecisionView ? (
           <Card>

@@ -16,6 +16,10 @@ import { Button } from '@/components/ui/button'
 import { formatDate, formatCurrency } from '@/components/mask-builder/utils/formatting'
 import { toast } from '@/hooks/use-toast'
 import { ArrowLeft, History, FileText } from 'lucide-react'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 const apiClient = createApiClient('/api/v1/crm')
 
@@ -554,6 +558,52 @@ export default function OpportunityDetailPage(): JSX.Element {
     }
   }
 
+  const operationalStatus = normalizeOperationalStatus(
+    data?.status === 'closed_won'
+      ? 'abgeschlossen'
+      : data?.status === 'closed_lost'
+        ? 'blockiert'
+        : data?.stage === 'proposal_price_quote' || data?.status === 'proposal'
+          ? 'wartet_auf_mensch'
+          : data?.status || 'offen',
+  )
+  const operationalBlocker = data?.status === 'closed_lost'
+    ? 'Die Opportunity ist verloren. Reaktivierung braucht einen neuen Vertriebsansatz.'
+    : data?.probability != null && data.probability < 30
+      ? 'Niedrige Abschlusswahrscheinlichkeit. Qualifizierung oder Exit entscheiden.'
+      : null
+  const contextSections = data ? [
+    {
+      title: 'Deal',
+      items: [
+        { label: 'Kunde', value: customerOpts.find((option) => option.value === data.customer_id)?.label || data.customer_id || 'Nicht zugeordnet' },
+        { label: 'Betrag', value: data.amount ? formatCurrency(data.amount, data.currency || 'EUR') : 'Noch offen' },
+        { label: 'Wahrscheinlichkeit', value: data.probability != null ? `${data.probability}%` : 'Nicht bewertet' },
+      ],
+    },
+    {
+      title: 'Vertrieb',
+      items: [
+        { label: 'Stage', value: data.stage || 'initial_contact' },
+        { label: 'Status', value: data.status || 'prospecting' },
+        { label: 'Owner', value: data.owner_id || data.assigned_to || 'Nicht zugewiesen' },
+      ],
+    },
+    {
+      title: 'Naechster Hebel',
+      items: [
+        { label: 'Angebotspfad', value: data.status === 'closed_won' ? 'Abgeschlossen' : 'Angebot / Quote moeglich' },
+        { label: 'Zieldatum', value: data.expected_close_date || 'Nicht geplant' },
+        { label: 'Quelle', value: data.source || data.lead_source || 'Unbekannt' },
+      ],
+    },
+  ] : []
+  const timelineItems = data ? [
+    { label: 'Opportunity aktiv', detail: data.number || id || undefined },
+    ...(data.expected_close_date ? [{ label: 'Erwarteter Abschluss', detail: formatDate(data.expected_close_date) }] : []),
+    data.actual_close_date ? { label: 'Tatsaechlicher Abschluss', detail: formatDate(data.actual_close_date) } : { label: 'Aktuelle Stage', detail: data.stage || 'initial_contact' },
+  ] : []
+
   if (dataLoading && !isNew) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -581,6 +631,24 @@ export default function OpportunityDetailPage(): JSX.Element {
           </h1>
         </div>
       </div>
+      {!isNew && data ? (
+        <div className="space-y-4">
+          <OperationalCaseHeader
+            title="Opportunity steuern"
+            description="Der Vertriebsfall bleibt oben verdichtet: Deal-Lage, Wahrscheinlichkeit und die naechste saubere Folgeaktion."
+            status={operationalStatus}
+            owner={data.owner_id || data.assigned_to || 'Vertrieb'}
+            blocker={operationalBlocker}
+            nextAction={data.status === 'closed_won' ? 'Angebot und Auftrag nachhalten' : data.status === 'closed_lost' ? 'Verlustgrund sichern' : 'Qualifizieren oder in Angebot ueberfuehren'}
+            caseLabel={data.number || 'Opportunity'}
+            tags={['CRM', 'Vertrieb']}
+          />
+          <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+            <OperationalTimeline title="Verkaufsverlauf" items={timelineItems} />
+            <OperationalContextPanel title="Deal-Kontext" sections={contextSections} />
+          </div>
+        </div>
+      ) : null}
 
       <div className="grid grid-cols-4 gap-4">
         <div className="col-span-3">

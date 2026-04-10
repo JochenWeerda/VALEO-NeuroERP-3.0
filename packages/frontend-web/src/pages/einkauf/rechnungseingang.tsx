@@ -11,6 +11,11 @@ import {
   useRechnungseingangFreigeben,
   useRechnungseingangVerbuchen,
 } from '@/lib/api/einkauf'
+import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 const createRechnungseingangConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
@@ -329,6 +334,41 @@ export default function RechnungseingangPage(): JSX.Element {
 
   const status = (data?.status as string) || ''
   const statusUpper = status.toUpperCase()
+  const operationalStatus = normalizeOperationalStatus(status)
+  const operationalBlocker = data?.matchStatus === 'EXCEPTION' || data?.matchStatus === 'UNMATCHED'
+    ? 'Der Rechnungsabgleich meldet offene Abweichungen. Vor Freigabe ist fachliche Klaerung erforderlich.'
+    : null
+  const contextSections = data ? [
+    {
+      title: 'Vorgang',
+      items: [
+        { label: 'Rechnung', value: data.rechnungsNummer || data.id || 'Noch offen' },
+        { label: 'Lieferant', value: data.lieferantId || 'Nicht zugeordnet' },
+        { label: 'Bestellung', value: data.bestellungId || 'Keine Referenz' },
+      ],
+    },
+    {
+      title: 'Wirtschaft',
+      items: [
+        { label: 'Brutto', value: data.bruttoBetrag != null ? `${data.bruttoBetrag} EUR` : 'Noch offen' },
+        { label: 'Netto', value: data.nettoBetrag != null ? `${data.nettoBetrag} EUR` : 'Noch offen' },
+        { label: 'Skonto', value: data?.skonto?.prozent != null ? `${data.skonto.prozent}%` : 'Kein Skonto' },
+      ],
+    },
+    {
+      title: 'Governance',
+      items: [
+        { label: 'Status', value: statusUpper || 'ERFASST' },
+        { label: 'Match', value: data.matchStatus || 'offen' },
+        { label: 'Abweichungen', value: Array.isArray(data.abweichungen) ? `${data.abweichungen.length}` : '0' },
+      ],
+    },
+  ] : []
+  const timelineItems = data ? [
+    { label: 'Rechnung erfasst', detail: data.rechnungsDatum || 'Datum offen' },
+    { label: 'Workflowstatus', detail: statusUpper || 'ERFASST' },
+    ...(data.zahlungsziel ? [{ label: 'Zahlungsziel', detail: data.zahlungsziel }] : []),
+  ] : []
 
   const rechnungseingangConfig: MaskConfig = useMemo(() => ({
     ...baseConfig,
@@ -433,12 +473,41 @@ export default function RechnungseingangPage(): JSX.Element {
   }
 
   return (
-    <ObjectPage
-      config={rechnungseingangConfig}
-      data={data}
-      onSave={handleSave}
-      onCancel={handleCancel}
-      isLoading={loading}
-    />
+    <div className="space-y-6">
+      <ModuleToolbar backTarget="/einkauf/rechnungseingaenge" closeTarget="/einkauf/rechnungseingaenge" title={entityTypeLabel} />
+      {id && data ? (
+        <div className="space-y-4">
+          <OperationalCaseHeader
+            title="Rechnungseingang steuern"
+            description="Pruefung, Freigabe und Verbuchung werden als ein Vorgang mit klarer naechster Aktion gefuehrt."
+            status={operationalStatus}
+            owner="Einkauf / FIBU"
+            blocker={operationalBlocker}
+            nextAction={
+              ENTWURF_STATUSES.includes(statusUpper)
+                ? 'Rechnung pruefen'
+                : statusUpper === 'GEPRUEFT'
+                  ? 'Freigeben'
+                  : statusUpper === 'FREIGEGEBEN'
+                    ? 'Verbuchen'
+                    : 'Vorgang revisionssicher nachhalten'
+            }
+            caseLabel={data.rechnungsNummer || 'Rechnungseingang'}
+            tags={['Einkauf', 'FIBU']}
+          />
+          <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+            <OperationalTimeline title="Verlauf" items={timelineItems} />
+            <OperationalContextPanel title="Rechnungskontext" sections={contextSections} />
+          </div>
+        </div>
+      ) : null}
+      <ObjectPage
+        config={rechnungseingangConfig}
+        data={data}
+        onSave={handleSave}
+        onCancel={handleCancel}
+        isLoading={loading}
+      />
+    </div>
   )
 }
