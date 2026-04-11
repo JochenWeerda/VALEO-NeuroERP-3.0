@@ -266,95 +266,311 @@ Archiv des vorherigen Boards:
 ## OP-ROLL-037
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Bankabgleich als echter Klaerungs- und Ausgleichsfall mit Owner, Matching-Druck und naechster Aktion verdichten.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/project-context/operational-rollout-scope-2026-04-09.md`, `packages/frontend-web/src/pages/finance/bank-abgleich.tsx`
 **Abnahmekriterien:** `bank-abgleich.tsx` nutzt den leichten Fallrahmen ohne neue Requests und macht offene Matching-Lage sofort lesbar.
+**Erledigt:** `finance/bank-abgleich.tsx` verdichtet Importstand, Abgleichsdifferenz, Zuordnungsdruck und naechste Aktion jetzt direkt ueber dem Object-Page-Arbeitsraum.
+**Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`, `node scripts/docs-governance-check.cjs`
 
 ## OP-ROLL-038
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Payment-Matching als FIBU-Klaerungsarbeitsplatz mit Kontext, Timeline und Folgepfad professionalisieren.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/project-context/operational-rollout-scope-2026-04-09.md`, `packages/frontend-web/src/pages/finance/payment-matching.tsx`
 **Abnahmekriterien:** `payment-matching.tsx` fuehrt Rueckstand, Matching-Risiko und naechste Aktion komprimiert ueber dem Arbeitsraum.
+**Erledigt:** `finance/payment-matching.tsx` surfact Matching-Stau, manuellen Klaerungsbedarf und Importkontext als kompakten Vorgangsrahmen ohne Zusatz-Last.
+**Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`, `node scripts/docs-governance-check.cjs`
 
 ## OP-ROLL-039
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** AP-Invoices-Liste als operativer Pruef- und Freigabestauplatz statt reine Tabelle verdichten.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/project-context/operational-rollout-scope-2026-04-09.md`, `packages/frontend-web/src/pages/finance/ap-invoices-list.tsx`
 **Abnahmekriterien:** `ap-invoices-list.tsx` zeigt Stau, Blocker und naechste Sammelaktion aus vorhandenen Listen-/Statusdaten.
+**Erledigt:** `finance/ap-invoices-list.tsx` zeigt jetzt Freigabestau, buchbare Rechnungen und die naechste Sammelaktion direkt ueber der Liste.
+**Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`, `node scripts/docs-governance-check.cjs`
 
 ## OP-ROLL-040
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** AP-Invoice-Form als echter Pruef- und Buchungsfall mit Governance- und Dokumentdruck fuehren.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/project-context/operational-rollout-scope-2026-04-09.md`, `packages/frontend-web/src/pages/finance/ap-invoice-form.tsx`
 **Abnahmekriterien:** `ap-invoice-form.tsx` erhaelt den leichten Fallrahmen fuer Freigabe, Blocker und naechste Massnahme ohne neue API-Last.
+**Erledigt:** `finance/ap-invoice-form.tsx` fuehrt Freigabestatus, Buchbarkeit und Summenlage jetzt als kompakten Pruef- und Buchungsfall.
+**Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`, `node scripts/docs-governance-check.cjs`
 
 ## OP-ROLL-041
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** FIBU-Offene-Posten-Gesamtraum als operatorischer Sammelfall zwischen Debitoren und Kreditoren verdichten.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/project-context/operational-rollout-scope-2026-04-09.md`, `packages/frontend-web/src/pages/fibu/offene-posten.tsx`
 **Abnahmekriterien:** `fibu/offene-posten.tsx` zeigt OP-Druck, Ausgleichslage und Folgeweg ueber dem Arbeitsraum.
+**Erledigt:** `fibu/offene-posten.tsx` verdichtet OP-Druck, Ueberfaelligkeit und Mahnfolge als klares Arbeitsbild vor der Liste.
+**Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`, `node scripts/docs-governance-check.cjs`
 
 ## OP-ROLL-042
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Zahlungseingaenge als echter Clearing- und Rueckstandsraum mit kompaktem Vorgangsbild heben.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/project-context/operational-rollout-scope-2026-04-09.md`, `packages/frontend-web/src/pages/fibu/zahlungseingaenge.tsx`
 **Abnahmekriterien:** `zahlungseingaenge.tsx` surfact Rueckstand, Abgleichslage und naechste Aktion oberhalb der Facharbeit.
+**Erledigt:** `fibu/zahlungseingaenge.tsx` fuehrt Rueckstand, Trefferquote und Import-/Klaerungskontext jetzt als einheitlichen Clearing-Rahmen.
+**Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`, `node scripts/docs-governance-check.cjs`
 
 ## OP-ROLL-043
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Zahlungsvorschlaege als FIBU-Entscheidungsraum mit Priorisierung und Governance-Kontext fuehren.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/project-context/operational-rollout-scope-2026-04-09.md`, `packages/frontend-web/src/pages/fibu/zahlungsvorschlaege.tsx`
 **Abnahmekriterien:** `zahlungsvorschlaege.tsx` zeigt Prioritaet, Liquiditaetsdruck und naechste Folgeaktion ohne neue Requests.
+**Erledigt:** `fibu/zahlungsvorschlaege.tsx` zeigt jetzt Prioritaet, Skonto-Potenzial und Zahlungsfreigabe als kompakten Entscheidungsraum.
+**Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`, `node scripts/docs-governance-check.cjs`
 
 ## OP-ROLL-044
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** BWA als Fiori-artigen Analysearbeitsplatz mit Perioden-, Abweichungs- und Folgekontext aufwerten.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/project-context/operational-rollout-scope-2026-04-09.md`, `packages/frontend-web/src/pages/fibu/bwa.tsx`
 **Abnahmekriterien:** `bwa.tsx` fuehrt Fallkopf, Kontext und Timeline aus bereits geladenen Auswertungsdaten.
+**Erledigt:** `fibu/bwa.tsx` verdichtet Periodenlage, Ergebnisabweichung und Folgeaktion als leichten Analysearbeitsplatz ueber der Auswertung.
+**Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`, `node scripts/docs-governance-check.cjs`
 
 ## OP-ROLL-045
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Bilanz als L3/FIBU-Abschlussraum mit Risiko- und Folgepfad konsistent zum neuen Arbeitsmodell ziehen.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/project-context/operational-rollout-scope-2026-04-09.md`, `packages/frontend-web/src/pages/fibu/bilanz.tsx`
 **Abnahmekriterien:** `bilanz.tsx` liefert kompakten Operatorrahmen fuer Abschlusslage, Revisionskontext und Drilldown-Folgewege.
+**Erledigt:** `fibu/bilanz.tsx` fuehrt Bilanzsumme, EK-Quote, Ausgleichslage und Abschlussfolge nun als kompakten Abschlussrahmen.
+**Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`, `node scripts/docs-governance-check.cjs`
 
 ## OP-ROLL-046
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Rueckverfolgung als physischer Ausnahme- und Nachweisfall mit Charge-/Dokumentdruck fuehren.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/project-context/operational-rollout-scope-2026-04-09.md`, `packages/frontend-web/src/pages/charge/rueckverfolgung.tsx`
 **Abnahmekriterien:** `charge/rueckverfolgung.tsx` zeigt Status, Blocker und Folgewege fuer Charge-/Nachweisfaelle ohne neuen Datenpfad.
+**Erledigt:** `charge/rueckverfolgung.tsx` verdichtet Spurpfad, Lieferkettenblocker und Nachweisfolge ueber der eigentlichen Timeline.
+**Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`, `node scripts/docs-governance-check.cjs`
 
 ## OP-ROLL-047
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Wareneingang als physischer Fall zwischen Annahme, Charge und Lager deutlich mit dem Zielbild verknuepfen.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/project-context/operational-rollout-scope-2026-04-09.md`, `packages/frontend-web/src/pages/charge/wareneingang.tsx`
 **Abnahmekriterien:** `charge/wareneingang.tsx` fuehrt den leichten Fallrahmen fuer Ressource, Blocker und naechste Aktion aus vorhandenen Daten.
+**Erledigt:** `charge/wareneingang.tsx` fuehrt Lieferant, Charge, Lagerort und QS-Lage nun als kompakten Eingangsvorgang vor dem Wizard.
+**Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`, `node scripts/docs-governance-check.cjs`
 
 ## OP-ROLL-048
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Tourenplanung als Logistik-Leitraum mit Folgecharakter, Bottleneck und Aktionspriorisierung verdichten.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/project-context/operational-rollout-scope-2026-04-09.md`, `packages/frontend-web/src/pages/logistik/tourenplanung.tsx`
 **Abnahmekriterien:** `tourenplanung.tsx` bekommt den kompakten Vorgangsrahmen fuer Druck, Blocker und naechste Massnahme ohne Zusatz-Requests.
+**Erledigt:** `logistik/tourenplanung.tsx` zeigt Dispositionslage, Ressourcenengpaesse und die naechste Aktionsprioritaet jetzt direkt ueber den Touren.
+**Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`, `node scripts/docs-governance-check.cjs`
+
+## OP-ROLL-049
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Debitorische Ausgangsrechnungen als echter Freigabe-, Druck- und Forderungsfall statt reine Listenmaske fuehren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/project-context/operational-rollout-scope-2026-04-09.md`, `packages/frontend-web/src/pages/finance/invoices-list.tsx`
+**Abnahmekriterien:** `invoices-list.tsx` zeigt Rueckstand, Druck-/Versanddruck und naechste Sammelaktion aus bestehender Listenlage.
+
+## OP-ROLL-050
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Ausgangsrechnungsformular als echter Faktura-, Freigabe- und Folgebelegfall verdichten.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/project-context/operational-rollout-scope-2026-04-09.md`, `packages/frontend-web/src/pages/finance/invoice-form.tsx`
+**Abnahmekriterien:** `invoice-form.tsx` fuehrt Status, Blocker und naechste Aktion oberhalb der Fachbearbeitung.
+
+## OP-ROLL-051
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Dunning-Editor als echter Mahn- und Eskalationsfall professionalisieren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/project-context/operational-rollout-scope-2026-04-09.md`, `packages/frontend-web/src/pages/finance/dunning-editor.tsx`
+**Abnahmekriterien:** `dunning-editor.tsx` surfact Mahnstufe, Eskalationspfad und naechste Aktion ohne neue Requests.
+
+## OP-ROLL-052
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Buchungsimport als echter Import-, Pruef- und Verbuchungsfall aufwerten.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/project-context/operational-rollout-scope-2026-04-09.md`, `packages/frontend-web/src/pages/finance/buchungsimport.tsx`
+**Abnahmekriterien:** `buchungsimport.tsx` zeigt Importdruck, Fehlerlage und Folgepfad aus bereits vorhandenen Daten.
+
+## OP-ROLL-053
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Audit-Trail als FIBU-Revisionsraum mit Follow-up und Ausnahmebild fuehren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/project-context/operational-rollout-scope-2026-04-09.md`, `packages/frontend-web/src/pages/finance/audit-trail.tsx`
+**Abnahmekriterien:** `audit-trail.tsx` fuehrt Revisionslage, offene Auffaelligkeiten und naechste Pruefaktion kompakt.
+
+## OP-ROLL-054
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Nebenbuch-Abstimmung als echter Clearing- und Differenzraum verdichten.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/project-context/operational-rollout-scope-2026-04-09.md`, `packages/frontend-web/src/pages/finance/nebenbuch-abstimmung.tsx`
+**Abnahmekriterien:** `nebenbuch-abstimmung.tsx` zeigt Differenzen, Blocker und naechste Klaerungsschritte im leichten Fallmodell.
+
+## OP-ROLL-055
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Hauptbuch als echter Abschluss- und Revisionsraum aufwerten.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/project-context/operational-rollout-scope-2026-04-09.md`, `packages/frontend-web/src/pages/fibu/hauptbuch.tsx`
+**Abnahmekriterien:** `hauptbuch.tsx` fuehrt Abschlusslage, Journaldruck und naechste Aktion oberhalb der Sachkontensicht.
+
+## OP-ROLL-056
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** GuV als FIBU-Abweichungs- und Ergebnisraum konsistent zum Operationsmodell verdichten.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/project-context/operational-rollout-scope-2026-04-09.md`, `packages/frontend-web/src/pages/fibu/guv.tsx`
+**Abnahmekriterien:** `guv.tsx` zeigt Ergebnisdruck, Ausreisser und Folgeweg ohne Zusatz-Requests.
+
+## OP-ROLL-057
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Kontenplan als professionellen Steuerungsraum mit Revisions- und Nutzungskontext ausbauen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/project-context/operational-rollout-scope-2026-04-09.md`, `packages/frontend-web/src/pages/fibu/kontenplan.tsx`
+**Abnahmekriterien:** `kontenplan.tsx` surfact Kontenlogik, Sperr-/Nutzungslage und naechste Verwaltungsaktion ohne Ueberladung.
+
+## OP-ROLL-058
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** OP-Verwaltung als querliegender FIBU-Klaerungsraum zwischen Debitoren und Kreditoren fuehren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/project-context/operational-rollout-scope-2026-04-09.md`, `packages/frontend-web/src/pages/fibu/op-verwaltung.tsx`
+**Abnahmekriterien:** `op-verwaltung.tsx` zeigt Blocker, Rueckstand und Eskalationspfad ueber der Sammelmaske.
+
+## OP-ROLL-059
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Anlagen-Suite als echter Revisions-, Abschreibungs- und Abschlussfall verdichten.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/project-context/operational-rollout-scope-2026-04-09.md`, `packages/frontend-web/src/pages/fibu/anlagen-suite.tsx`
+**Abnahmekriterien:** `anlagen-suite.tsx` fuehrt Abschreibungsdruck, Revisionslage und naechste Periode kompakt.
+
+## OP-ROLL-060
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Kreditlinien als Risiko- und Freigaberaum fuer Finanzierung und Forderungsschutz aufwerten.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/project-context/operational-rollout-scope-2026-04-09.md`, `packages/frontend-web/src/pages/fibu/kreditlinien.tsx`
+**Abnahmekriterien:** `kreditlinien.tsx` zeigt Auslastung, Grenzverletzungen und naechste Massnahme im einheitlichen Arbeitsmodell.
+
+## OP-ROLL-061
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Bestandsuebersicht als echter Lager- und Reservierungsraum mit Folgepfad verdichten.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/project-context/operational-rollout-scope-2026-04-09.md`, `packages/frontend-web/src/pages/lager/bestandsuebersicht.tsx`
+**Abnahmekriterien:** `bestandsuebersicht.tsx` zeigt Verfuegbarkeit, Engpaesse und naechste Lageraktion ohne neue API-Last.
+
+## OP-ROLL-062
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Bestandskorrektur als echter Pruef-, Freigabe- und Auditfall fuehren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/project-context/operational-rollout-scope-2026-04-09.md`, `packages/frontend-web/src/pages/lager/bestandskorrektur.tsx`
+**Abnahmekriterien:** `bestandskorrektur.tsx` surfact Differenz, Begruendung und Folgeaktion oberhalb der Erfassung.
+
+## OP-ROLL-063
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Einlagerung als physischer Vorgang zwischen Bestand, Charge und Lagerplatz klar verdichten.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/project-context/operational-rollout-scope-2026-04-09.md`, `packages/frontend-web/src/pages/lager/einlagerung.tsx`
+**Abnahmekriterien:** `einlagerung.tsx` fuehrt Ressourcenlage, Blocker und naechste Massnahme ohne neue Requests.
+
+## OP-ROLL-064
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Auslagerung als echter Liefer- und Verfuegbarkeitsfall professionalisieren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/project-context/operational-rollout-scope-2026-04-09.md`, `packages/frontend-web/src/pages/lager/auslagerung.tsx`
+**Abnahmekriterien:** `auslagerung.tsx` zeigt Verfuegbarkeit, Reservierungsdruck und Folgeweg oberhalb der Facharbeit.
+
+## OP-ROLL-065
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Lagerbewegungen als Revisions- und Rueckverfolgungsraum einheitlich aufwerten.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/project-context/operational-rollout-scope-2026-04-09.md`, `packages/frontend-web/src/pages/lager/lagerbewegungen.tsx`
+**Abnahmekriterien:** `lagerbewegungen.tsx` verdichtet Bewegungsdruck, Audit-Lage und Folgepfad ohne zusaetzliche Datenlast.
+
+## OP-ROLL-066
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Inventur als echter Klaerungs- und Differenzraum zwischen Lager und FIBU fuehren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/project-context/operational-rollout-scope-2026-04-09.md`, `packages/frontend-web/src/pages/lager/inventur.tsx`
+**Abnahmekriterien:** `inventur.tsx` zeigt Differenzdruck, Owner und naechste Inventuraktion im leichten Fallmodell.
+
+## OP-ROLL-067
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Lagerterminal als physischer Arbeitsraum fuer schnelle Entscheidungen mit kompaktem Kontext aufwerten.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/project-context/operational-rollout-scope-2026-04-09.md`, `packages/frontend-web/src/pages/lager/terminal.tsx`
+**Abnahmekriterien:** `terminal.tsx` fuehrt Status, Blocker und naechste Aktion ohne die Touch-Bedienung zu ueberfrachten.
+
+## OP-ROLL-068
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Qualitaetsausnahmen als echter Eskalations- und Freigaberaum fuehren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/project-context/operational-rollout-scope-2026-04-09.md`, `packages/frontend-web/src/pages/qualitaet/ausnahmen.tsx`
+**Abnahmekriterien:** `ausnahmen.tsx` zeigt Risiko, Owner, naechste Massnahme und Eskalationsdruck ueber dem Arbeitsraum.
+
+## OP-ROLL-069
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Reklamationsliste als Sammelraum fuer Eskalationen, Wiedervorlagen und Folgewege verdichten.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/project-context/operational-rollout-scope-2026-04-09.md`, `packages/frontend-web/src/pages/qualitaet/reklamationen.tsx`
+**Abnahmekriterien:** `reklamationen.tsx` surfact Rueckstand, Risikobild und naechste Sammelaktion kompakt aus vorhandenen Daten.
+
+## OP-ROLL-070
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Labor-Detail als echter Pruef- und Freigabefall zwischen Probe, Charge und QS fuehren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/project-context/operational-rollout-scope-2026-04-09.md`, `packages/frontend-web/src/pages/qualitaet/labor-detail.tsx`
+**Abnahmekriterien:** `labor-detail.tsx` fuehrt Befundlage, Blocker und naechste Aktion konsistent ueber der Fachmaske.
+
+## OP-ROLL-071
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Frachtbriefe als echter Logistik- und Nachweisraum zwischen Tour, Charge und Dokument professionalisieren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/project-context/operational-rollout-scope-2026-04-09.md`, `packages/frontend-web/src/pages/logistik/frachtbriefe.tsx`
+**Abnahmekriterien:** `frachtbriefe.tsx` zeigt Blocker, Dokumentdruck und naechste Aktion ohne neue Requests.
+
+## OP-ROLL-072
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Wiegungen als operative Sammelmaske zwischen Waage, Annahme und Abrechnung verdichten.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docs/project-context/operational-rollout-scope-2026-04-09.md`, `packages/frontend-web/src/pages/waage/wiegungen.tsx`
+**Abnahmekriterien:** `wiegungen.tsx` surfact Rueckstand, Blocker und Folgepfad im leichten Fallmodell aus bereits geladenen Daten.
