@@ -15,6 +15,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Application code
 COPY app/ ./app/
 COPY modules/ ./modules/
+COPY scripts/ ./scripts/
 COPY main.py ./
 COPY alembic/ ./alembic/
 COPY alembic.ini ./
@@ -23,7 +24,7 @@ COPY alembic.ini ./
 ENV PYTHONUNBUFFERED=1
 
 # Run
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "-lc", "python scripts/init_db.py && uvicorn main:app --host 0.0.0.0 --port 8000"]
 
 
 

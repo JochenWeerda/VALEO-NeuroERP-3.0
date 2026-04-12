@@ -29,7 +29,6 @@ try:
                 password=password,
                 dbname=dbname
             )
-            version = conn.fetchone()[0] if conn else "unknown"
             conn.close()
             print(f"✅ PostgreSQL ready! (Attempt {i+1})")
             break
@@ -45,7 +44,9 @@ except Exception as e:
 PY
 
 echo "📦 Führe Alembic Migrations aus..."
-if [ -f "alembic.ini" ]; then
+if [ -f "scripts/init_db.py" ]; then
+  python scripts/init_db.py
+elif [ -f "alembic.ini" ]; then
   if ! alembic upgrade head; then
     echo "❌ Alembic migration failed. Bei Release/Neuinstallation muss die DB konsistent sein (leer oder alle Vorgänger-Migrationen angewendet)."
     exit 1

@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # PostgreSQL Database (Staging)
   postgres-staging:
@@ -90,7 +88,7 @@ services:
     restart: unless-stopped
     working_dir: /app
     command: >
-      sh -c "apt-get update -qq && apt-get install -y -qq curl libpq-dev && pip install --quiet -r requirements.txt && pip install --quiet email-validator && python main.py"
+      sh -c "apt-get update -qq && apt-get install -y -qq curl libpq-dev && pip install --quiet -r requirements.txt && pip install --quiet email-validator && python scripts/init_db.py && python main.py"
     environment:
       # Application
       APP_ENV: staging

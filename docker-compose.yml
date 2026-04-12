@@ -283,10 +283,11 @@ services:
     volumes:
       - ./app:/app/app
       - ./modules:/app/modules
+      - ./scripts:/app/scripts
       - ./alembic:/app/alembic
       - ./alembic.ini:/app/alembic.ini
       - ./main.py:/app/main.py
-    command: sh -c "alembic upgrade head 2>/dev/null || true && uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+    command: sh -c "python scripts/init_db.py && uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
 
   inventory-service:
     build:
@@ -762,4 +763,3 @@ networks:
     ipam:
       config:
         - subnet: 172.20.0.0/16
-

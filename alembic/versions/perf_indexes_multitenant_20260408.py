@@ -41,31 +41,31 @@ def upgrade():
     # ── 1. tenant_id indexes (CRITICAL — every query filters by tenant) ──
 
     # domain_shared
-    op.execute(
+    _safe(
         "CREATE INDEX IF NOT EXISTS ix_audit_logs_tenant_id "
         "ON domain_shared.audit_logs (tenant_id)"
     )
-    op.execute(
+    _safe(
         "CREATE INDEX IF NOT EXISTS ix_users_tenant_id "
         "ON domain_shared.users (tenant_id)"
     )
 
     # domain_erp — journal_entries
-    op.execute(
+    _safe(
         "CREATE INDEX IF NOT EXISTS ix_journal_entries_tenant_id "
         "ON domain_erp.journal_entries (tenant_id)"
     )
     # domain_erp — journal_entry_lines (composite: tenant + parent FK)
-    op.execute(
+    _safe(
         "CREATE INDEX IF NOT EXISTS ix_journal_entry_lines_tenant_je "
         "ON domain_erp.journal_entry_lines (tenant_id, journal_entry_id)"
     )
     # domain_erp — chart_of_accounts (single + composite)
-    op.execute(
+    _safe(
         "CREATE INDEX IF NOT EXISTS ix_coa_tenant_id "
         "ON domain_erp.chart_of_accounts (tenant_id)"
     )
-    op.execute(
+    _safe(
         "CREATE INDEX IF NOT EXISTS ix_coa_tenant_account_number "
         "ON domain_erp.chart_of_accounts (tenant_id, account_number)"
     )
@@ -79,7 +79,7 @@ def upgrade():
         "CREATE INDEX IF NOT EXISTS ix_sales_order_items_order_tenant "
         "ON domain_crm.sales_order_items (order_id, tenant_id)"
     )
-    op.execute(
+    _safe(
         "CREATE INDEX IF NOT EXISTS ix_business_partners_tenant_id "
         "ON domain_crm.business_partners (tenant_id)"
     )
@@ -89,49 +89,49 @@ def upgrade():
     )
 
     # domain_einkauf
-    op.execute(
+    _safe(
         "CREATE INDEX IF NOT EXISTS ix_bestellungen_tenant_id "
         "ON domain_einkauf.bestellungen (tenant_id)"
     )
-    op.execute(
+    _safe(
         "CREATE INDEX IF NOT EXISTS ix_bestellung_positionen_bestellung_id "
         "ON domain_einkauf.bestellung_positionen (bestellung_id)"
     )
-    op.execute(
+    _safe(
         "CREATE INDEX IF NOT EXISTS ix_lieferanten_tenant_id "
         "ON domain_einkauf.lieferanten (tenant_id)"
     )
-    op.execute(
+    _safe(
         "CREATE INDEX IF NOT EXISTS ix_kontrakte_tenant_id "
         "ON domain_einkauf.kontrakte (tenant_id)"
     )
 
     # ── 2. Status / filter indexes ──
 
-    op.execute(
+    _safe(
         "CREATE INDEX IF NOT EXISTS ix_journal_entries_tenant_status "
         "ON domain_erp.journal_entries (tenant_id, status)"
     )
-    op.execute(
+    _safe(
         "CREATE INDEX IF NOT EXISTS ix_audit_logs_entity "
         "ON domain_shared.audit_logs (entity_type, entity_id)"
     )
-    op.execute(
+    _safe(
         "CREATE INDEX IF NOT EXISTS ix_audit_logs_user_id "
         "ON domain_shared.audit_logs (user_id)"
     )
-    op.execute(
+    _safe(
         "CREATE INDEX IF NOT EXISTS ix_blockchain_anchors_tenant_subject "
         "ON domain_shared.blockchain_anchors (tenant_id, subject_type)"
     )
 
     # ── 3. Timestamp indexes for range queries ──
 
-    op.execute(
+    _safe(
         "CREATE INDEX IF NOT EXISTS ix_audit_logs_timestamp "
         "ON domain_shared.audit_logs (timestamp)"
     )
-    op.execute(
+    _safe(
         "CREATE INDEX IF NOT EXISTS ix_journal_entries_entry_date "
         "ON domain_erp.journal_entries (entry_date)"
     )

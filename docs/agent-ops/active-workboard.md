@@ -26,11 +26,12 @@ Archiv des vorherigen Boards:
 ## DB-BOOT-001
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Erstinstallation ueber Alembic und Docker auf leerer Postgres-DB deterministisch machen und die Mehr-Domaenen-Struktur automatisiert pruefen.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `alembic/env.py`, `alembic/versions/*`, `scripts/init_db.py`, `scripts/check_required_domain_schemas.py`, `docker-compose*.yml`, `Dockerfile*`, `.github/workflows/quality-gate.yml`
 **Abnahmekriterien:** `python scripts/init_db.py` laeuft auf leerer DB bis `head`; der Compose-/Docker-Pfad verschluckt keine Migrationsfehler; eine Strukturpruefung bestaetigt zentrale ERP-Domaenen und Kernobjekte.
-**Risiken:** Compose-Varianten nutzen derzeit unterschiedliche Bootstrappfade; historische Migrationen enthalten partielle Fallback-DDL.
+**Erledigt:** `add_business_partners_tenant_id_20260219.py` ist jetzt neuinstallationssicher und ersetzt den falschen globalen Business-Partner-Unique-Pfad; `perf_indexes_multitenant_20260408.py` legt optionale Indexe nur noch fehlertolerant an; `docker-compose.yml`, `docker-compose.staging.yml`, `docker-compose.dev.yml`, `entrypoint.sh`, `Dockerfile` und `Dockerfile.backend` starten Backend-Prozesse erst nach erfolgreichem `python scripts/init_db.py`; Legacy-SQL-Tabellenpfade sind aus dem Dev-Erststart entfernt; `scripts/check_required_domain_schemas.py` verifiziert die zentrale Mehr-Domaenen-Struktur im CI und `scripts/smoke_first_install_docker.ps1/.sh` liefern einen reproduzierbaren First-Install-Smoke fuer frische GitHub-Spiegel.
+**Checks:** frische Postgres-Container-DB via `python scripts/init_db.py`, `python scripts/check_required_domain_schemas.py`, `powershell -ExecutionPolicy Bypass -File scripts/smoke_first_install_docker.ps1 -HostPort 55434`, `python -m py_compile scripts/init_db.py scripts/check_required_domain_schemas.py alembic/env.py alembic/versions/add_business_partners_tenant_id_20260219.py alembic/versions/perf_indexes_multitenant_20260408.py`, `docker compose -f docker-compose.yml config -q`, `docker compose -f docker-compose.staging.yml config -q`, `docker compose -f docker-compose.dev.yml config -q`, `node scripts/docs-governance-check.cjs`
 
 ## OP-ROLL-013
 

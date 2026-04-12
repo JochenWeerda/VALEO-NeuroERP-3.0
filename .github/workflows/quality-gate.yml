@@ -139,6 +139,9 @@ jobs:
       - name: Migrate DB schema (Alembic)
         run: python scripts/init_db.py
 
+      - name: Check required ERP domain structure
+        run: python scripts/check_required_domain_schemas.py
+
       - name: Run tests
         run: pytest -q
 
