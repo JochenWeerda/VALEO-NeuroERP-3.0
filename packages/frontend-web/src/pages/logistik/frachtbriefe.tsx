@@ -19,6 +19,19 @@ export default function FrachtbriefePage(): JSX.Element {
   const list = useMemo(() => frachtbriefe ?? [], [frachtbriefe])
   const supplyOps = useMemo(() => summarizeSupplyOps(chain), [chain])
 
+  const fallkopf = useMemo(() => {
+    const unterwegs = list.filter((f) => f.status === 'unterwegs').length
+    const erstellt = list.filter((f) => f.status === 'erstellt').length
+    const total = list.length
+    return {
+      status: erstellt > 0 ? `${erstellt} Frachtbrief(e) noch nicht versendet` : unterwegs > 0 ? `${unterwegs} unterwegs` : 'Keine offenen Frachtbriefe',
+      statusColor: erstellt > 0 ? 'text-amber-700 bg-amber-50 border-amber-300' : unterwegs > 0 ? 'text-blue-700 bg-blue-50 border-blue-300' : 'text-green-700 bg-green-50 border-green-300',
+      blocker: erstellt > 0 ? `${erstellt} Dokument(e) warten auf Versand` : 'Kein Blocker',
+      dokumentdruck: total > 0 ? `${total} Frachtbriefe gesamt, ${unterwegs} in Transit` : 'Keine Dokumente',
+      naechsteAktion: erstellt > 0 ? 'Erstellte Frachtbriefe pruefen und versenden' : unterwegs > 0 ? 'Zustellung verfolgen' : 'Neuen Frachtbrief anlegen',
+    }
+  }, [list])
+
   const columns = [
     {
       key: 'nummer' as const,
@@ -72,6 +85,16 @@ export default function FrachtbriefePage(): JSX.Element {
 
   return (
     <div className="space-y-4 p-3 md:p-6">
+      {/* Operativer Fallkopf */}
+      <Card className={`border ${fallkopf.statusColor}`}>
+        <CardContent className="pt-4 pb-3 text-sm space-y-1">
+          <div className="font-semibold">Frachtbriefe: {fallkopf.status}</div>
+          <div>Blocker: {fallkopf.blocker}</div>
+          <div>Dokumentdruck: {fallkopf.dokumentdruck}</div>
+          <div>Naechste Aktion: {fallkopf.naechsteAktion}</div>
+        </CardContent>
+      </Card>
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Frachtbriefe</h1>

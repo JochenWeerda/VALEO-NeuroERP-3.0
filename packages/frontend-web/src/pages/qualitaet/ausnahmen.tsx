@@ -3,7 +3,7 @@
  * Zeigt offene Ausnahmen/Eskalationen mit KI-gestützter Priorisierung
  */
 
-import { useRef } from 'react'
+import { useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Badge } from '@/components/ui/badge'
@@ -57,6 +57,16 @@ export default function AusnahmenPage(): JSX.Element {
   const eskaliert = ausnahmen.filter((a) => a.status === 'eskaliert').length
   const hochprio = ausnahmen.filter((a) => a.priorität === 'hoch' && a.status !== 'geschlossen').length
 
+  const fallkopf = useMemo(() => {
+    return {
+      status: eskaliert > 0 ? 'Eskalation aktiv' : hochprio > 0 ? 'Hohe Prioritaet offen' : offen > 0 ? 'Offene Ausnahmen' : 'Keine offenen Ausnahmen',
+      statusColor: eskaliert > 0 ? 'text-red-700 bg-red-50 border-red-300' : hochprio > 0 ? 'text-amber-700 bg-amber-50 border-amber-300' : 'text-green-700 bg-green-50 border-green-300',
+      risiko: hochprio > 0 ? `${hochprio} Ausnahme(n) mit hoher Prioritaet` : 'Kein hohes Risiko',
+      owner: eskaliert > 0 ? 'Betriebsleitung — sofortige Bearbeitung' : 'Qualitaetsteam',
+      eskalationsdruck: eskaliert > 0 ? `${eskaliert} eskaliert — SLA-kritisch` : offen > 0 ? `${offen} offen — Bearbeitung ausstehend` : 'Kein Druck',
+    }
+  }, [offen, eskaliert, hochprio])
+
   const columns = [
     {
       key: 'typ' as const,
@@ -97,6 +107,16 @@ export default function AusnahmenPage(): JSX.Element {
   return (
     <div className="flex flex-col">
     <div className="space-y-4 p-6">
+      {/* Operativer Fallkopf */}
+      <Card className={`border ${fallkopf.statusColor}`}>
+        <CardContent className="pt-4 pb-3 text-sm space-y-1">
+          <div className="font-semibold">Ausnahmen-Lage: {fallkopf.status}</div>
+          <div>Risiko: {fallkopf.risiko}</div>
+          <div>Owner: {fallkopf.owner}</div>
+          <div>Eskalationsdruck: {fallkopf.eskalationsdruck}</div>
+        </CardContent>
+      </Card>
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Betriebs-Ausnahmen</h1>

@@ -11,6 +11,10 @@ import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { LeaveConfirmDialog } from '@/components/LeaveConfirmDialog'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 const createDunningConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
@@ -219,6 +223,51 @@ export default function DunningEditorPage(): JSX.Element {
     id: id ?? 'new'
   })
 
+  // --- Operational Case Header (Fallkopf) ---
+  const dunningLevel = Number(data?.dunningLevel || 0)
+  const dunningStatus = String(data?.status || 'created')
+  const isEscalated = dunningStatus === 'escalated' || dunningStatus === 'collection'
+  const isPaid = dunningStatus === 'paid'
+  const isSent = dunningStatus === 'sent'
+  const operationalStatus = normalizeOperationalStatus(
+    isPaid ? 'abgeschlossen' : isEscalated ? 'eskaliert' : isSent ? 'wartet_auf_mensch' : 'offen'
+  )
+  const escalationPath = dunningLevel >= 3 ? 'Inkasso / Rechtsabteilung' : dunningLevel === 2 ? 'Eskalation auf Stufe 3' : 'Eskalation auf Stufe 2'
+  const nextAction = isPaid ? 'Vorgang archivieren' : isEscalated ? 'Inkassouebergabe pruefen' : isSent ? 'Zahlungseingang ueberwachen' : dunningLevel > 0 ? 'Mahnung versenden' : 'Mahnung erstellen und versenden'
+  const contextSections = [
+    {
+      title: 'Mahnvorgang',
+      items: [
+        { label: 'Mahnstufe', value: dunningLevel > 0 ? `Stufe ${dunningLevel}` : 'Neu' },
+        { label: 'Status', value: dunningStatus === 'created' ? 'Erstellt' : dunningStatus === 'sent' ? 'Versendet' : dunningStatus === 'paid' ? 'Bezahlt' : dunningStatus === 'escalated' ? 'Eskaliert' : dunningStatus === 'collection' ? 'Inkasso' : dunningStatus },
+        { label: 'Offener Betrag', value: `${Number(data?.totalAmount || 0).toFixed(2)} EUR` },
+      ],
+    },
+    {
+      title: 'Eskalation',
+      items: [
+        { label: 'Eskalationspfad', value: escalationPath },
+        { label: 'Mahngebuehr', value: `${Number(data?.dunningFee || 0).toFixed(2)} EUR` },
+        { label: 'Zinsen', value: `${Number(data?.interest || 0).toFixed(2)} EUR` },
+      ],
+    },
+    {
+      title: 'Governance',
+      items: [
+        { label: 'Naechste Aktion', value: nextAction },
+        { label: 'Erinnerungen', value: `${Number(data?.reminderCount || 0)} versendet` },
+        { label: 'Blocker', value: isEscalated ? 'Eskalation aktiv – Inkassouebergabe erforderlich' : 'Kein akuter Blocker' },
+      ],
+    },
+  ]
+  const timelineItems = [
+    { label: 'Mahnvorgang geoeffnet', detail: id && id !== 'new' ? `Mahnung ${id}` : 'Neue Mahnung' },
+    dunningLevel > 0 ? { label: `Mahnstufe ${dunningLevel} erreicht`, detail: `Offener Betrag: ${Number(data?.totalAmount || 0).toFixed(2)} EUR` } : null,
+    isSent ? { label: 'Mahnung versendet', detail: data?.sentDate || 'Versanddatum unbekannt' } : null,
+    isEscalated ? { label: 'Eskalation eingeleitet', detail: escalationPath } : null,
+    isPaid ? { label: 'Zahlung eingegangen', detail: data?.paymentDate || '' } : null,
+  ].filter((item): item is { label: string; detail: string } => item !== null)
+
   const validate = (formData: any) => validateFields(getFieldsFromMaskConfig(dunningConfig), formData ?? {})
   const showValidationToast = (errors: Record<string, string>) => {
     toast({ variant: 'destructive', title: t('crud.messages.validationError'), description: `${Object.keys(errors).length} Feld(er) muessen korrigiert werden.` })
@@ -375,6 +424,22 @@ export default function DunningEditorPage(): JSX.Element {
     <>
       <ModuleToolbar backTarget="/finance/dunning" closeTarget="/finance/dunning" title={entityTypeLabel} />
       <LeaveConfirmDialog blocker={blocker} onSave={() => handleSave(data ?? {})} title={t('crud.messages.unsavedChanges', { defaultValue: 'Ungespeicherte Änderungen' })} description={t('crud.messages.unsavedChangesDescription', { defaultValue: 'Möchten Sie speichern, verwerfen oder hier bleiben?' })} />
+      <div className="space-y-4 p-4">
+        <OperationalCaseHeader
+          title={entityTypeLabel}
+          description="Mahnvorgang bearbeiten: Mahnstufe, Eskalationspfad und offene Betraege auf einen Blick."
+          status={operationalStatus}
+          owner="Debitorenbuchhaltung"
+          blocker={isEscalated ? 'Eskalation aktiv – Inkassouebergabe erforderlich.' : null}
+          nextAction={nextAction}
+          caseLabel={id && id !== 'new' ? `Mahnung ${id}` : 'Neue Mahnung'}
+          tags={['FIBU', 'Mahnwesen']}
+        />
+        <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
+          <OperationalTimeline title="Mahnverlauf" items={timelineItems} />
+          <OperationalContextPanel sections={contextSections} />
+        </div>
+      </div>
       <ObjectPage
         config={dunningConfig}
         data={data}

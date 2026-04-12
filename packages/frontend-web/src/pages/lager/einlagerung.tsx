@@ -5,6 +5,7 @@
 import { useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery } from '@tanstack/react-query'
+import { Card, CardContent } from '@/components/ui/card'
 import { Wizard } from '@/components/patterns/Wizard'
 import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
 import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
@@ -131,6 +132,19 @@ export default function EinlagerungPage(): JSX.Element {
 
   const lagerLabel = LAGERORTE.find((l) => l.id === einlagerung.lagerort)?.label ?? einlagerung.lagerort
 
+  const fallkopf = useMemo(() => {
+    const lagerortCount = LAGERORTE.length
+    const artikelCount = ARTIKEL.length
+    const hatPflichtfelder = einlagerung.chargenId !== '' && einlagerung.artikel !== '' && einlagerung.menge > 0
+    return {
+      status: hatPflichtfelder ? 'Buchungsbereit' : 'Eingabe laeuft',
+      statusColor: hatPflichtfelder ? 'text-green-700 bg-green-50 border-green-300' : 'text-blue-700 bg-blue-50 border-blue-300',
+      ressourcen: `${artikelCount} Artikel, ${lagerortCount} Lagerorte verfuegbar`,
+      blocker: artikelCount === 0 || lagerortCount === 0 ? 'Stammdaten fehlen — Artikel oder Lagerorte anlegen' : 'Keine Blocker',
+      naechsteMassnahme: hatPflichtfelder ? 'Lagerort waehlen und buchen' : 'Charge, Artikel und Menge erfassen',
+    }
+  }, [LAGERORTE, ARTIKEL, einlagerung.chargenId, einlagerung.artikel, einlagerung.menge])
+
   const steps = [
     {
       id: 'charge',
@@ -243,6 +257,15 @@ export default function EinlagerungPage(): JSX.Element {
           </div>
         )}
         <AgentProcessPanel domain="lager" className="mb-4" />
+        {/* Operativer Fallkopf */}
+        <Card className={`border mb-4 ${fallkopf.statusColor}`}>
+          <CardContent className="pt-4 pb-3 text-sm space-y-1">
+            <div className="font-semibold">Einlagerung: {fallkopf.status}</div>
+            <div>Ressourcenlage: {fallkopf.ressourcen}</div>
+            <div>Blocker: {fallkopf.blocker}</div>
+            <div>Naechste Massnahme: {fallkopf.naechsteMassnahme}</div>
+          </CardContent>
+        </Card>
         <Wizard
           title="Einlagerung"
           steps={steps}

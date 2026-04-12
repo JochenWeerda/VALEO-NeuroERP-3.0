@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -44,6 +44,19 @@ export default function InventurPage(): JSX.Element {
     isSaveDisabled: selected.size === 0 || completeMutation.isPending,
   })
   useKeyboardShortcuts(shortcuts)
+
+  const fallkopf = useMemo(() => {
+    const offen = positionen.filter((p) => p.status === 'offen').length
+    const mitDifferenz = positionen.filter((p) => p.differenz !== 0).length
+    const total = positionen.length
+    return {
+      status: offen > 0 ? `${offen} Positionen offen` : total > 0 ? 'Alle Positionen gezaehlt' : 'Keine Positionen',
+      statusColor: offen > 0 ? 'text-amber-700 bg-amber-50 border-amber-300' : 'text-green-700 bg-green-50 border-green-300',
+      differenzdruck: mitDifferenz > 0 ? `${mitDifferenz} Position(en) mit Abweichung` : 'Keine Differenzen',
+      owner: 'Lagerleitung',
+      naechsteAktion: offen > 0 ? 'Offene Positionen zaehlen und abschliessen' : mitDifferenz > 0 ? 'Differenzen klaeren' : 'Inventur abgeschlossen',
+    }
+  }, [positionen])
 
   const columns = [
     {
@@ -130,6 +143,16 @@ export default function InventurPage(): JSX.Element {
           Flow-Spine: {workflowCase || workflowProcess} (Instanz {workflowInstanceId.slice(0, 8)}...)
         </div>
       )}
+      {/* Operativer Fallkopf */}
+      <Card className={`border ${fallkopf.statusColor}`}>
+        <CardContent className="pt-4 pb-3 text-sm space-y-1">
+          <div className="font-semibold">Inventur-Status: {fallkopf.status}</div>
+          <div>Differenzdruck: {fallkopf.differenzdruck}</div>
+          <div>Owner: {fallkopf.owner}</div>
+          <div>Naechste Inventuraktion: {fallkopf.naechsteAktion}</div>
+        </CardContent>
+      </Card>
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Inventur</h1>

@@ -97,6 +97,21 @@ export default function LagerbewegungenPage(): JSX.Element {
   const articleMap = useMemo(() => new Map(articles.map((a) => [a.id, a])), [articles])
   const warehouseMap = useMemo(() => new Map(warehouses.map((w) => [w.id, w])), [warehouses])
 
+  const fallkopf = useMemo(() => {
+    const total = movements.length
+    const zugaenge = movements.filter((m) => m.movement_type === 'in').length
+    const abgaenge = movements.filter((m) => m.movement_type === 'out').length
+    const korrekturen = movements.filter((m) => m.movement_type === 'adjustment').length
+    const hatBewegungen = total > 0
+    return {
+      status: hatBewegungen ? `${total} Bewegungen erfasst` : 'Keine Bewegungen',
+      statusColor: korrekturen > 0 ? 'text-amber-700 bg-amber-50 border-amber-300' : hatBewegungen ? 'text-green-700 bg-green-50 border-green-300' : 'text-slate-700 bg-slate-50 border-slate-300',
+      bewegungsdruck: `${zugaenge} Zugaenge, ${abgaenge} Abgaenge, ${korrekturen} Korrekturen`,
+      auditLage: korrekturen > 0 ? `${korrekturen} Korrektur(en) — Audit-relevant` : 'Keine Korrekturen',
+      folgepfad: korrekturen > 0 ? 'Korrekturbuchungen pruefen' : hatBewegungen ? 'Bewegungsjournal aktuell' : 'Neue Buchung erfassen',
+    }
+  }, [movements])
+
   const resetDialog = () => {
     setEditing(null)
     setForm(EMPTY_FORM)
@@ -215,6 +230,16 @@ export default function LagerbewegungenPage(): JSX.Element {
           Flow-Spine: {workflowCase || workflowProcess} (Instanz {workflowInstanceId.slice(0, 8)}...)
         </div>
       )}
+      {/* Operativer Fallkopf */}
+      <Card className={`border ${fallkopf.statusColor}`}>
+        <CardContent className="pt-4 pb-3 text-sm space-y-1">
+          <div className="font-semibold">Bewegungslage: {fallkopf.status}</div>
+          <div>Bewegungsdruck: {fallkopf.bewegungsdruck}</div>
+          <div>Audit-Lage: {fallkopf.auditLage}</div>
+          <div>Folgepfad: {fallkopf.folgepfad}</div>
+        </CardContent>
+      </Card>
+
       <div className="flex items-center justify-between gap-3">
         <div>
           <h1 className="text-3xl font-bold">Lagerbewegungen</h1>
