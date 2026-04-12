@@ -23,6 +23,14 @@ Archiv des vorherigen Boards:
   - [operational-rollout-scope-2026-04-09.md](C:/Users/Jochen/VALEO-NeuroERP-3.0/docs/project-context/operational-rollout-scope-2026-04-09.md)
 - Der naechste Block betrifft Sammel- und Follow-up-Masken mit echtem operativem Mehrwert.
 
+## DOC-REF-002
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Externe ERP-Referenzdoku neutralisieren, Lizenz-/Referenzlage scharfziehen und direkte Nennungen des angefragten Systems aus den aktiven Repo-Dokumenten entfernen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/*.md`
+**Abnahmekriterien:** Die Referenzanalyse bleibt fachlich brauchbar, benennt aber nur noch neutrale Vergleichsklassen bzw. permissive/kommerzielle Lizenzrisiken; direkte Nennungen des angefragten Systems sind aus den aktiven Projektkontext-Dateien entfernt.
+
 ## COV-FIN-002
 
 **Von:** Codex
