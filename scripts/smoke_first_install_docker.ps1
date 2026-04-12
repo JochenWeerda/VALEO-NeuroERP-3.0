@@ -18,6 +18,14 @@ docker run --name $ContainerName `
     -d postgres:15 | Out-Null
 
 try {
+    function Invoke-Step([string]$Command, [string]$Label) {
+        Write-Host $Label
+        Invoke-Expression $Command
+        if ($LASTEXITCODE -ne 0) {
+            throw "$Label failed with exit code $LASTEXITCODE"
+        }
+    }
+
     for ($i = 0; $i -lt 40; $i++) {
         docker exec $ContainerName pg_isready -U postgres -d valeo_test *> $null
         if ($LASTEXITCODE -eq 0) {
@@ -27,8 +35,9 @@ try {
     }
 
     $env:DATABASE_URL = "postgresql://postgres:postgres@127.0.0.1:${HostPort}/valeo_test"
-    python scripts/init_db.py
-    python scripts/check_required_domain_schemas.py
+    Invoke-Step "python scripts/init_db.py" "Running init_db.py"
+    Invoke-Step "python scripts/check_required_domain_schemas.py" "Checking required domain schemas"
+    Invoke-Step "python scripts/check_domain_table_ownership.py" "Checking domain table ownership"
     Write-Host "First-install smoke passed." -ForegroundColor Green
 }
 finally {
