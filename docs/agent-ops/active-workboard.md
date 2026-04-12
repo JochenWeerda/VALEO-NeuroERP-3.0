@@ -36,10 +36,60 @@ Archiv des vorherigen Boards:
 ## DOC-REF-003
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Eine neutrale ERP-Referenzmatrix im Repo festhalten und daraus die naechsten sechs fachlichen Vertiefungs-Slices fuer VALEO ableiten.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/*.md`
 **Abnahmekriterien:** Es gibt eine eigenstaendige Matrix mit Referenzmustern, Lizenz-/Uebernahmeregeln und VALEO-Istbild; daraus sind sechs konkrete Slices mit Zielbild und Prioritaet im Workboard abgeleitet.
+**Erledigt:** `docs/project-context/erp-reference-matrix-2026-04-12.md` verdichtet jetzt fachliches Tiefenbild, Community-ERP-Referenzmuster, Fiori-/OpenUI5-UIX-Muster, Lizenzregeln und konkrete Slice-Ableitung; die naechsten sechs fachlichen Vertiefungs-Slices sind daraus direkt abgeleitet.
+**Checks:** `node scripts/docs-governance-check.cjs`
+
+## DOM-FIN-003
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** FIBU-Operatorpfade fuer Abschluss, Reorganisator, Zinswesen und Revisionssicht semantisch verdichten.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `packages/frontend-web/src/pages/finance/*`, `packages/frontend-web/src/pages/fibu/*`, relevante Finance-/FIBU-Read-Models und Endpunkte
+**Abnahmekriterien:** Abschluss- und FIBU-Operatorraeume tragen denselben klaren Status-, Fristen-, Revisions- und Folgeaktionsrahmen.
+
+## DOM-SUPPLY-003
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Die physische Kette `Partie -> Annahme -> Wiegung -> Charge -> Fracht -> Abrechnung` fachlich und statusseitig durchgaengig harmonisieren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `packages/frontend-web/src/pages/annahme/*`, `packages/frontend-web/src/pages/waage/*`, `packages/frontend-web/src/pages/charge/*`, `packages/frontend-web/src/pages/logistik/*`
+**Abnahmekriterien:** Jeder Uebergabepunkt zeigt Objektbezug, Abweichung, naechste Aktion und Folgeobjekt konsistent.
+
+## DOM-PROC-003
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Einkaufsausnahmen, Matching, Nachforderung und Lieferantenkommunikation auf echte Folgefaelle heben.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `packages/frontend-web/src/pages/einkauf/*`, relevante Beschaffungsendpunkte, Dokument- und Kommunikationspfade
+**Abnahmekriterien:** Beschaffungsfaelle bilden Matching-Ausnahmen, Nachforderung und Folgekommunikation als echte Arbeitsobjekte ab.
+
+## DOM-CON-003
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Kontraktfixierung, Marktbewertung, Mahnung und Engagement als vollwertige Operatorraeume ausbauen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `packages/frontend-web/src/pages/kontrakte/*`, `packages/frontend-web/src/pages/contracts-v2.tsx`, relevante Kontraktendpunkte
+**Abnahmekriterien:** Fixierungs-, Markt- und Mahnlogik ist nicht nur sichtbar, sondern als klarer Operatorpfad bedienbar.
+
+## DOM-CRM-003
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** CRM-/Servicefaelle mit Ownership, Folgeobjekten, Dubletten- und Abschlusslogik angleichen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `packages/frontend-web/src/pages/crm/*`, `packages/frontend-web/src/pages/service/*`, zugehoerige APIs und Agent-Ops-Verknuepfung
+**Abnahmekriterien:** CRM und Service tragen denselben Fallbezug, Ownership-Rahmen und Abschlusspfad.
+
+## DOM-DOC-003
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Nachweis-, Bescheid-, Artefakt- und Rueckmeldungskette ueber Dokumente, Meldungen und Vorgangskontext vereinheitlichen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `packages/frontend-web/src/pages/dokumente/*`, `packages/frontend-web/src/pages/compliance/*`, `packages/frontend-web/src/pages/fibu/atlas.tsx`, `packages/frontend-web/src/pages/compliance/meldewesen-konsole.tsx`
+**Abnahmekriterien:** Dokumente und Meldungen zeigen revisionsrelevanten Nachweisstatus, Rueckmeldungspfad und Wiedervorlage konsistent.
 
 ## COV-FIN-002
 
