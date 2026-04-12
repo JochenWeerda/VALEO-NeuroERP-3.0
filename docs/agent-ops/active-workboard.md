@@ -23,6 +23,15 @@ Archiv des vorherigen Boards:
   - [operational-rollout-scope-2026-04-09.md](C:/Users/Jochen/VALEO-NeuroERP-3.0/docs/project-context/operational-rollout-scope-2026-04-09.md)
 - Der naechste Block betrifft Sammel- und Follow-up-Masken mit echtem operativem Mehrwert.
 
+## DB-BOOT-001
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Erstinstallation ueber Alembic und Docker auf leerer Postgres-DB deterministisch machen und die Mehr-Domaenen-Struktur automatisiert pruefen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `alembic/env.py`, `alembic/versions/*`, `scripts/init_db.py`, `scripts/check_required_domain_schemas.py`, `docker-compose*.yml`, `Dockerfile*`, `.github/workflows/quality-gate.yml`
+**Abnahmekriterien:** `python scripts/init_db.py` laeuft auf leerer DB bis `head`; der Compose-/Docker-Pfad verschluckt keine Migrationsfehler; eine Strukturpruefung bestaetigt zentrale ERP-Domaenen und Kernobjekte.
+**Risiken:** Compose-Varianten nutzen derzeit unterschiedliche Bootstrappfade; historische Migrationen enthalten partielle Fallback-DDL.
+
 ## OP-ROLL-013
 
 **Von:** Codex
