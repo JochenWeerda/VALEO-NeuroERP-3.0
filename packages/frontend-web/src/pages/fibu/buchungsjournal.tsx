@@ -1,6 +1,10 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -10,6 +14,7 @@ import { BookOpen, FileDown, Loader2, Search, Undo2 } from 'lucide-react'
 import { apiClient } from '@/lib/api-client'
 import { ErrorState } from '@/components/ErrorState'
 import { StornoDialog } from '@/components/finance/StornoDialog'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 import { toast } from 'sonner'
 
 type Buchung = {
@@ -50,6 +55,7 @@ function mapApiEntry(e: JournalEntryAPI): Buchung {
 
 export default function BuchungsjournalPage(): JSX.Element {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [searchTerm, setSearchTerm] = useState('')
   const [referenceFilter, setReferenceFilter] = useState('')
@@ -77,11 +83,20 @@ export default function BuchungsjournalPage(): JSX.Element {
     staleTime: 2 * 60 * 1000,
   })
 
+  const buchungen = data ?? []
+  const filteredBuchungen = useMemo(() => {
+    const needle = searchTerm.trim().toLowerCase()
+    if (!needle) return buchungen
+    return buchungen.filter((buchung) =>
+      [buchung.belegnr, buchung.sollKonto, buchung.habenKonto, buchung.text]
+        .filter(Boolean)
+        .some((value) => String(value).toLowerCase().includes(needle)),
+    )
+  }, [buchungen, searchTerm])
+
   if (isError) {
     return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
   }
-
-  const buchungen = data ?? []
 
   const openStorno = (b: Buchung) => {
     setStornoEntry(b)
@@ -143,13 +158,64 @@ export default function BuchungsjournalPage(): JSX.Element {
     },
   ]
 
-  const gesamtBetrag = buchungen.reduce((sum, b) => sum + b.betrag, 0)
+  const gesamtBetrag = filteredBuchungen.reduce((sum, b) => sum + b.betrag, 0)
+  const stornoFaelle = filteredBuchungen.filter((b) => b.belegart === 'EB').length
+  const operationalStatus = normalizeOperationalStatus(
+    stornoFaelle > 0 ? 'wartet_auf_mensch' : filteredBuchungen.length > 0 ? 'in_pruefung' : 'offen',
+  )
+  const contextSections = [
+    {
+      title: 'Revisionslage',
+      items: [
+        { label: 'Journalbuchungen', value: `${filteredBuchungen.length}` },
+        { label: 'Referenzfilter', value: referenceFilter.trim() || 'Keine Einschraenkung' },
+        { label: 'Stornorelevante Saetze', value: `${stornoFaelle}` },
+      ],
+    },
+    {
+      title: 'Folgepfad',
+      items: [
+        { label: 'Periode', value: filteredBuchungen[0]?.datum?.slice(0, 7) || 'Keine Periode aktiv' },
+        { label: 'Naechste Aktion', value: stornoFaelle > 0 ? 'Storno- und Referenzpfad pruefen' : 'Export oder Drilldown in Buchungsuebergabe' },
+        { label: 'Buchungswert', value: new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(gesamtBetrag) },
+      ],
+    },
+  ]
+  const timelineItems = [
+    {
+      label: referenceFilter.trim() ? 'Journal auf Referenz eingeschraenkt' : 'Gesamtjournal aktiv',
+      detail: referenceFilter.trim()
+        ? `Aktiver Filter fuer Referenz oder Importlauf: ${referenceFilter.trim()}.`
+        : 'Es wird die ungefilterte Journalsicht des aktuellen Arbeitsraums gezeigt.',
+    },
+    {
+      label: stornoFaelle > 0 ? 'Ruecknahmefaehige Saetze vorhanden' : 'Keine akute Ruecknahme markiert',
+      detail: stornoFaelle > 0
+        ? `${stornoFaelle} Eingangssaetze sollten vor Export und Periodenabschluss geprueft werden.`
+        : 'Es liegt kein akuter Storno-Hinweis aus dem aktuellen Ausschnitt vor.',
+    },
+  ]
 
   return (
     <div className="space-y-4 p-6">
       <div>
         <h1 className="text-3xl font-bold">Buchungsjournal</h1>
         <p className="text-muted-foreground">Alle Buchungssaetze</p>
+      </div>
+
+      <OperationalCaseHeader
+        title="Buchungsjournal"
+        description="Journalsaetze werden als Revisions- und Exportfall gefuehrt, damit Perioden- und Referenzdruck sichtbar bleiben."
+        status={operationalStatus}
+        owner="Finanzbuchhaltung"
+        blocker={stornoFaelle > 0 ? `${stornoFaelle} Saetze sollten vor dem Export rueckgeprueft werden.` : null}
+        nextAction={stornoFaelle > 0 ? 'Stornofaehige Saetze klaeren oder ruecknehmen' : 'Buchungsuebergabe und Periodenlage abstimmen'}
+        caseLabel="Vorgang: Journal"
+        tags={['FIBU', 'Revision', 'L3']}
+      />
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_360px]">
+        <OperationalTimeline title="Journalverlauf" items={timelineItems} />
+        <OperationalContextPanel title="Journalkontext" sections={contextSections} />
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
@@ -160,7 +226,7 @@ export default function BuchungsjournalPage(): JSX.Element {
           <CardContent>
             <div className="flex items-center gap-2">
               <BookOpen className="h-5 w-5 text-blue-600" />
-              <span className="text-2xl font-bold">{buchungen.length}</span>
+              <span className="text-2xl font-bold">{filteredBuchungen.length}</span>
             </div>
           </CardContent>
         </Card>
@@ -206,7 +272,7 @@ export default function BuchungsjournalPage(): JSX.Element {
                 className="font-mono text-sm"
               />
             </div>
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" onClick={() => navigate('/fibu/schnittstelle-fibu?context=journal')}>
               <FileDown className="h-4 w-4" />
               DATEV Export
             </Button>
@@ -222,7 +288,7 @@ export default function BuchungsjournalPage(): JSX.Element {
               <span className="ml-2 text-sm text-muted-foreground">Lade Buchungen...</span>
             </div>
           ) : (
-            <DataTable data={buchungen} columns={columns} />
+            <DataTable data={filteredBuchungen} columns={columns} />
           )}
         </CardContent>
       </Card>

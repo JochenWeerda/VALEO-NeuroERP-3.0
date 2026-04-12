@@ -8,6 +8,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Calendar, CheckCircle, Search, TrendingDown } from 'lucide-react'
 import { useZahlungsvorschlaege, type Zahlungsvorschlag } from '@/lib/api/fibu'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 const vorschlagVariantMap: Record<Zahlungsvorschlag['vorschlag'], 'default' | 'secondary' | 'outline'> = {
   skonto: 'default',
@@ -65,6 +69,43 @@ export default function ZahlungsvorschlaegePage(): JSX.Element {
   const skontoErsparnis = filteredVorschlaege
     .filter((v) => selected.has(v.id) && v.skonto > 0)
     .reduce((sum, v) => sum + (v.betrag * v.skonto) / 100, 0)
+  const skontoFaelle = filteredVorschlaege.filter((item) => item.skonto > 0).length
+  const operationalStatus = normalizeOperationalStatus(selected.size > 0 ? 'wartet_auf_mensch' : skontoFaelle > 0 ? 'in_pruefung' : 'offen')
+  const contextSections = [
+    {
+      title: 'Vorgang',
+      items: [
+        { label: 'Vorschlaege gesamt', value: String(list.length) },
+        { label: 'Gefiltert', value: String(filteredVorschlaege.length) },
+        { label: 'Skonto-Faelle', value: String(skontoFaelle) },
+      ],
+    },
+    {
+      title: 'Wirtschaftslage',
+      items: [
+        {
+          label: 'Ausgewaehlter Betrag',
+          value: new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(gesamtBetrag),
+        },
+        {
+          label: 'Skonto-Ersparnis',
+          value: new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(skontoErsparnis),
+        },
+      ],
+    },
+    {
+      title: 'Governance',
+      items: [
+        { label: 'Naechste Aktion', value: selected.size > 0 ? 'Zahlungslauf erstellen' : 'Skonto- und Faelligkeitslogik pruefen' },
+        { label: 'Blocker', value: selected.size > 0 ? 'Auswahl wartet auf Zahlungsfreigabe' : 'Kein akuter Blocker' },
+      ],
+    },
+  ]
+  const timelineItems = [
+    { label: 'Vorschlagsliste geladen', detail: `${list.length} Zahlungsvorschlaege verfuegbar` },
+    skontoFaelle > 0 ? { label: 'Skonto-Potenzial erkannt', detail: `${skontoFaelle} Faelle mit Einsparung` } : null,
+    selected.size > 0 ? { label: 'Selektion aktiv', detail: `${selected.size} Position(en) fuer Zahlungslauf markiert` } : null,
+  ].filter((item): item is { label: string; detail: string } => item !== null)
 
   const columns = [
     {
@@ -157,6 +198,20 @@ export default function ZahlungsvorschlaegePage(): JSX.Element {
 
   return (
     <div className="space-y-4 p-3 md:p-6">
+      <OperationalCaseHeader
+        title="Zahlungsvorschlaege"
+        description="Skonto- und faelligkeitsorientierte Zahlungsplanung fuer Kreditoren."
+        status={operationalStatus}
+        owner="Kreditorenbuchhaltung"
+        blocker={selected.size > 0 ? 'Auswahl ist noch nicht in einen Zahlungslauf ueberfuehrt.' : null}
+        nextAction={selected.size > 0 ? 'Zahlungslauf erstellen' : 'Faellige und skontofaehige Rechnungen selektieren'}
+        caseLabel="Zahlungsplanung"
+        tags={['FIBU', 'Kreditoren']}
+      />
+      <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
+        <OperationalTimeline title="Verlauf" items={timelineItems} />
+        <OperationalContextPanel sections={contextSections} />
+      </div>
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Zahlungsvorschläge</h1>

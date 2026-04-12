@@ -15,6 +15,10 @@ import { toast } from '@/hooks/use-toast'
 import { useTenant } from '@/hooks/useTenant'
 import { apiClient, getAxiosErrorMessage } from '@/lib/api-client'
 import { ErrorState } from '@/components/ErrorState'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 type Zahlungseingang = {
   id: string
@@ -156,6 +160,41 @@ export default function ZahlungseingangsPage(): JSX.Element {
   const gesamtBetrag = filteredZahlungen.reduce((sum, z) => sum + z.amount, 0)
   const matchedCount = zahlungen.filter((z) => z.match_status === 'MATCHED').length
   const matchRate = zahlungen.length > 0 ? Math.round((matchedCount / zahlungen.length) * 100) : 0
+  const operationalStatus = normalizeOperationalStatus(
+    offeneZahlungen > 0 ? (selectedPayment ? 'wartet_auf_mensch' : 'in_pruefung') : 'abgeschlossen'
+  )
+  const contextSections = [
+    {
+      title: 'Vorgang',
+      items: [
+        { label: 'Zahlungen gesamt', value: String(zahlungen.length) },
+        { label: 'Offen', value: String(offeneZahlungen) },
+        { label: 'Trefferquote', value: `${matchRate}%` },
+      ],
+    },
+    {
+      title: 'Wirtschaftslage',
+      items: [
+        {
+          label: 'Gefilterter Betrag',
+          value: new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(gesamtBetrag),
+        },
+        { label: 'Bankkonto', value: bankImportAccountId || 'Noch nicht gewaehlt' },
+      ],
+    },
+    {
+      title: 'Governance',
+      items: [
+        { label: 'Naechste Aktion', value: offeneZahlungen > 0 ? 'Zuordnen oder Auto-Match starten' : 'Verlauf abschliessen' },
+        { label: 'Blocker', value: selectedPayment ? 'Manuelle Zuordnung offen' : 'Kein akuter Blocker' },
+      ],
+    },
+  ]
+  const timelineItems = [
+    { label: 'Zahlungseingaenge geladen', detail: `${zahlungen.length} Datensaetze` },
+    selectedPayment ? { label: 'Manuelle Zuordnung offen', detail: selectedPayment.id } : null,
+    bankImportFile ? { label: 'Bankimport vorbereitet', detail: `${bankImportFile.name} (${bankImportFormat})` } : null,
+  ].filter((item): item is { label: string; detail: string } => item !== null)
 
   const handleAutoMatch = async () => {
     setAutoMatching(true)
@@ -306,6 +345,20 @@ export default function ZahlungseingangsPage(): JSX.Element {
 
   return (
     <div className="space-y-4 p-6">
+      <OperationalCaseHeader
+        title="Zahlungseingaenge"
+        description="Bankimport, Matching und Klaerung offener Debitorenzahlungen."
+        status={operationalStatus}
+        owner="Debitorenbuchhaltung"
+        blocker={selectedPayment ? 'Ausgewaehlte Zahlung wartet auf OP-Zuordnung.' : offeneZahlungen > 0 ? 'Nicht zugeordnete Zahlungseingaenge vorhanden.' : null}
+        nextAction={offeneZahlungen > 0 ? 'Offene Zahlung klaeren oder Auto-Match starten' : 'Status pruefen und archivieren'}
+        caseLabel="Bankimport"
+        tags={['FIBU', 'Debitoren']}
+      />
+      <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
+        <OperationalTimeline title="Vorgangsverlauf" items={timelineItems} />
+        <OperationalContextPanel sections={contextSections} />
+      </div>
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">{t('crud.messages.paymentMatching.title')}</h1>

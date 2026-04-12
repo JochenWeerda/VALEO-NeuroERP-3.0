@@ -6,8 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { AlertTriangle, CreditCard, Plus, Search, TrendingDown } from 'lucide-react'
 import { useKreditlinien, type Kreditlinie } from '@/lib/api/fibu'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 type FilterMode = 'alle' | 'ueberzogen' | 'bonitaet_cd'
 
@@ -114,9 +118,56 @@ export default function KreditlinienPage(): JSX.Element {
   const gesamtLimit = filteredList.reduce((sum, k) => sum + k.limit, 0)
   const gesamtAusgenutzt = filteredList.reduce((sum, k) => sum + k.ausgenutzt, 0)
   const gesamtVerfuegbar = filteredList.reduce((sum, k) => sum + k.verfuegbar, 0)
+  const operationalStatus = normalizeOperationalStatus(
+    ueberzogen > 0 ? 'eskaliert' : filteredList.some((k) => k.bonitaet === 'C' || k.bonitaet === 'D') ? 'wartet_auf_mensch' : 'in_pruefung'
+  )
+  const contextSections = [
+    {
+      title: 'Limitlage',
+      items: [
+        { label: 'Kreditlinien', value: String(filteredList.length) },
+        { label: 'Ueberzogen', value: String(ueberzogen) },
+        { label: 'Filter', value: filterMode },
+      ],
+    },
+    {
+      title: 'Wirtschaftslage',
+      items: [
+        { label: 'Gesamtlimit', value: new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(gesamtLimit) },
+        { label: 'Ausgenutzt', value: new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(gesamtAusgenutzt) },
+        { label: 'Verfuegbar', value: new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(gesamtVerfuegbar) },
+      ],
+    },
+    {
+      title: 'Governance',
+      items: [
+        { label: 'Naechste Aktion', value: ueberzogen > 0 ? 'Ueberzogene Linien eskalieren' : 'Bonitaet und Limits pruefen' },
+        { label: 'Blocker', value: ueberzogen > 0 ? 'Mindestens eine Kreditlinie ist ueberzogen.' : 'Kein akuter Blocker' },
+      ],
+    },
+  ]
+  const timelineItems = [
+    { label: 'Kreditlinienraum geladen', detail: `${filteredList.length} Linie(n) im Fokus` },
+    ueberzogen > 0 ? { label: 'Ueberziehung erkannt', detail: `${ueberzogen} Linie(n) ueberzogen` } : null,
+    filteredList.some((k) => k.bonitaet === 'C' || k.bonitaet === 'D') ? { label: 'Bonitaetsrisiko aktiv', detail: 'Linien mit C/D-Bonitaet im Ausschnitt' } : null,
+  ].filter((item): item is { label: string; detail: string } => item !== null)
 
   return (
     <div className="space-y-4 p-3 md:p-6">
+      <OperationalCaseHeader
+        title="Kreditlinien-Verwaltung"
+        description="Risiko-, Limit- und Bonitaetsraum fuer Forderungsschutz und Freigabeentscheidungen."
+        status={operationalStatus}
+        owner="Kreditmanagement"
+        blocker={ueberzogen > 0 ? 'Es liegen ueberzogene Kreditlinien vor.' : null}
+        nextAction={ueberzogen > 0 ? 'Ueberzogene Linien sperren oder eskalieren' : 'Bonitaet und Limitauslastung pruefen'}
+        caseLabel="Kreditlinien"
+        tags={['FIBU', 'Risiko']}
+      />
+      <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
+        <OperationalTimeline title="Kreditlinienverlauf" items={timelineItems} />
+        <OperationalContextPanel sections={contextSections} />
+      </div>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <CreditCard className="h-10 w-10 text-primary" />

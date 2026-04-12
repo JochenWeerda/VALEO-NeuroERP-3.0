@@ -12,10 +12,14 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { Building2, LayoutGrid, Save, RefreshCw, ArrowRightLeft, FileUp, Upload, CheckCircle2, BookOpen, Undo2 } from 'lucide-react'
 import { apiClient } from '@/lib/api-client'
 import { useToast } from '@/hooks/use-toast'
 import { useFibuCockpit } from '@/lib/api/fibu'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 const CONNECTOR_BASE = '/api/v1/finance/connectors'
 
@@ -209,9 +213,62 @@ export default function AnlagenSuitePage(): JSX.Element {
   const canPost = importRun && importRun.status === 'VALIDATED'
   const canCancel = importRun && ['DRAFT', 'PARSED', 'VALIDATED'].includes(importRun.status)
   const canReverse = importRun && importRun.status === 'POSTED'
+  const operationalStatus = normalizeOperationalStatus(
+    importRun?.status === 'POSTED'
+      ? 'abgeschlossen'
+      : importRun?.status === 'VALIDATED'
+        ? 'wartet_auf_mensch'
+        : importRun?.status
+          ? 'in_pruefung'
+          : 'offen'
+  )
+  const contextSections = [
+    {
+      title: 'Anlagen & Connector',
+      items: [
+        { label: 'Connector aktiv', value: isActive ? 'Ja' : 'Nein' },
+        { label: 'Importlauf', value: importRun?.id || 'Kein aktiver Lauf' },
+        { label: 'Status', value: importRun?.status || 'Kein aktiver Lauf' },
+      ],
+    },
+    {
+      title: 'Revisionslage',
+      items: [
+        { label: 'Connector-Profile', value: String(fibuCockpit.master_data.connector_profile_count) },
+        { label: 'Exportlaeufe', value: String(fibuCockpit.revision.export_runs) },
+        { label: 'Jahreswechsel', value: fibuCockpit.annual_close.ready_for_year_close ? 'stabil' : 'offene Klaerungen' },
+      ],
+    },
+    {
+      title: 'Governance',
+      items: [
+        { label: 'Naechste Aktion', value: canPost ? 'Importlauf buchen' : canValidate ? 'Importlauf validieren' : 'Anlagenraum oder Connector pruefen' },
+        { label: 'Blocker', value: importRun?.error_summary || 'Kein akuter Blocker' },
+      ],
+    },
+  ]
+  const timelineItems = [
+    { label: 'Anlagen-Suite geladen', detail: name },
+    importRun ? { label: 'Importlauf aktiv', detail: `${importRun.status} / ${importRun.id}` } : null,
+    selectedFile ? { label: 'Datei bereit', detail: selectedFile.name } : null,
+  ].filter((item): item is { label: string; detail: string } => item !== null)
 
   return (
     <div className="p-4 md:p-6 max-w-4xl mx-auto space-y-8">
+      <OperationalCaseHeader
+        title="VALEO Suite Anlagen"
+        description="Anlagenbuchhaltung mit Connector-, Import- und Revisionskontext in einem kompakten Steuerungsbild."
+        status={operationalStatus}
+        owner="Anlagenbuchhaltung"
+        blocker={importRun?.error_summary || null}
+        nextAction={canPost ? 'Importlauf buchen' : canValidate ? 'Importlauf validieren' : 'Anlagenraum oder Connector pruefen'}
+        caseLabel="Asset Ledger"
+        tags={['FIBU', 'Anlagen']}
+      />
+      <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
+        <OperationalTimeline title="Anlagenverlauf" items={timelineItems} />
+        <OperationalContextPanel sections={contextSections} />
+      </div>
       <div className="flex items-center gap-3">
         <LayoutGrid className="h-9 w-9 text-primary" />
         <div>

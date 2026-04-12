@@ -19,6 +19,10 @@ import { Save, X } from 'lucide-react'
 import { apiClient } from '@/lib/api-client'
 import { buildDecisionView } from '@/policy/decision-view'
 import { ProcessStatusPanel } from '@/components/workflow/ProcessStatusPanel'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 const ISO_DATE_LENGTH = 10
 const DAYS_IN_MS = 24 * 60 * 60 * 1000
@@ -150,9 +154,62 @@ export default function APInvoiceFormPage(): JSX.Element {
 
   // Eingangsrechnung ist End-Beleg, keine Folgebelege
   const nextTypes: Array<{ to: string; label: string }> = []
+  const approvalProgress =
+    typeof invoice.approval_current_approvals === 'number' && typeof invoice.approval_required_approvals === 'number'
+      ? `${invoice.approval_current_approvals}/${invoice.approval_required_approvals}`
+      : '-'
+  const operationalStatus = normalizeOperationalStatus(
+    invoice.approval_status || invoice.status || (invoice.approval_can_post ? 'wartet_auf_mensch' : 'offen')
+  )
+  const contextSections = [
+    {
+      title: 'Objekt',
+      items: [
+        { label: 'Lieferant', value: invoice.customerId || 'Noch nicht gesetzt' },
+        { label: 'Faelligkeit', value: invoice.dueDate || '-' },
+        { label: 'Positionen', value: String(invoice.lines.length) },
+      ],
+    },
+    {
+      title: 'Wirtschaftslage',
+      items: [
+        { label: 'Netto', value: `${invoice.subtotalNet.toFixed(2)} EUR` },
+        { label: 'Steuer', value: `${invoice.totalTax.toFixed(2)} EUR` },
+        { label: 'Brutto', value: `${invoice.totalGross.toFixed(2)} EUR` },
+      ],
+    },
+    {
+      title: 'Governance',
+      items: [
+        { label: 'Freigaben', value: approvalProgress },
+        { label: 'Buchbar', value: invoice.approval_can_post ? 'Ja' : 'Nein' },
+        { label: 'Naechste Aktion', value: invoice.approval_can_post ? 'Verbuchen oder abschliessen' : 'Zur Freigabe vorlegen' },
+      ],
+    },
+  ]
+  const timelineItems = [
+    { label: 'Beleg aktiv', detail: `${invoice.number} im Status ${invoice.approval_status || invoice.status}` },
+    invoice.sourceOrder ? { label: 'Bezugsauftrag verknuepft', detail: invoice.sourceOrder } : null,
+    invoice.sourceDelivery ? { label: 'Wareneingang verknuepft', detail: invoice.sourceDelivery } : null,
+    invoice.dueDate ? { label: 'Faelligkeit gesetzt', detail: invoice.dueDate } : null,
+  ].filter((item): item is { label: string; detail: string } => item !== null)
 
   return (
     <div className="space-y-4 p-4">
+      <OperationalCaseHeader
+        title="Eingangsrechnung"
+        description="Pruefung, Freigabe und Verbuchung eines Kreditorenbelegs."
+        status={operationalStatus}
+        owner="Kreditorenbuchhaltung"
+        blocker={invoice.approval_can_post ? null : 'Beleg ist noch nicht vollstaendig freigegeben oder fachlich geprueft.'}
+        nextAction={invoice.approval_can_post ? 'Verbuchen oder Abschluss dokumentieren' : 'Freigabe anstossen'}
+        caseLabel={invoice.number}
+        tags={['FIBU', 'Kreditoren']}
+      />
+      <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
+        <OperationalTimeline title="Vorgangsverlauf" items={timelineItems} />
+        <OperationalContextPanel sections={contextSections} />
+      </div>
       <BelegFlowPanel
         current={{
           id: invoice.number,

@@ -2,6 +2,9 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { getFieldsFromMaskConfig, validateFields } from '@/components/mask-builder/validation'
@@ -14,6 +17,7 @@ import { validateIBAN, formatIBAN, lookupIBAN } from '@/lib/utils/iban-validator
 import { buildDecisionView } from '@/policy/decision-view'
 import { ProcessStatusPanel } from '@/components/workflow/ProcessStatusPanel'
 import { useApprovalDensityProfile } from '@/features/workflow/useApprovalDensityProfile'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 const createZahlungslaufConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
@@ -741,11 +745,72 @@ export default function ZahlungslaufKreditorenPage(): JSX.Element {
   const effectiveData = data || formData
   const approvalDecisionView = buildDecisionView(effectiveData?.approval_explainability)
   const approvalDensityProfile = useApprovalDensityProfile('finance-payment-run', approvalDecisionView)
+  const payments = Array.isArray(effectiveData?.zahlungen) ? effectiveData.zahlungen : []
+  const totalAmount = Number(effectiveData?.gesamtBetrag || 0)
+  const paymentCount = Number(effectiveData?.anzahlZahlungen || payments.length || 0)
+  const skontoCount = payments.filter((payment: any) => payment.skontoGenutzt && Number(payment.skontoBetrag || 0) > 0).length
+  const operationalStatus = normalizeOperationalStatus(
+    effectiveData?.status === 'executed'
+      ? 'abgeschlossen'
+      : effectiveData?.approval_can_execute
+        ? 'wartet_auf_mensch'
+        : paymentCount > 0
+          ? 'in_pruefung'
+          : 'offen',
+  )
+  const contextSections = [
+    {
+      title: 'Zahlungslage',
+      items: [
+        { label: 'Laufnummer', value: effectiveData?.laufNummer || effectiveData?.run_number || 'Noch kein Lauf' },
+        { label: 'Zahlungen', value: `${paymentCount}` },
+        { label: 'Ausfuehrung', value: effectiveData?.ausfuehrungsDatum || '-' },
+      ],
+    },
+    {
+      title: 'Governance',
+      items: [
+        { label: 'Approval-Status', value: effectiveData?.approval_status || effectiveData?.status || 'draft' },
+        { label: 'Skonto genutzt', value: `${skontoCount}` },
+        { label: 'Naechste Aktion', value: effectiveData?.approval_can_execute ? 'SEPA exportieren oder Lauf ausfuehren' : paymentCount > 0 ? 'Freigabe und Pruefung abschliessen' : 'Zahlungen erfassen' },
+      ],
+    },
+  ]
+  const timelineItems = [
+    {
+      label: paymentCount > 0 ? 'Zahlungen im Lauf vorbereitet' : 'Lauf noch leer',
+      detail: paymentCount > 0
+        ? `${paymentCount} Zahlungen mit ${new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(totalAmount)} im aktuellen Lauf.`
+        : 'Der Zahlungslauf enthaelt noch keine operativen Positionen.',
+    },
+    {
+      label: effectiveData?.approval_can_execute ? 'Freigabe liegt vor' : 'Freigabe noch offen',
+      detail: effectiveData?.approval_can_execute
+        ? 'Der Lauf kann in die Ausfuehrung oder den SEPA-Export uebergehen.'
+        : 'Approval- und Policy-Pruefung halten den Lauf noch vor der Ausfuehrung.',
+    },
+  ]
 
   return (
     <>
       <ModuleToolbar backTarget="/finance/zahlungslauf-kreditoren" closeTarget="/finance/zahlungslauf-kreditoren" title={entityTypeLabel} />
       <LeaveConfirmDialog blocker={blocker} onSave={() => handleSave(formData)} title={t('crud.messages.unsavedChanges', { defaultValue: 'Ungespeicherte Änderungen' })} description={t('crud.messages.unsavedChangesDescription', { defaultValue: 'Möchten Sie speichern, verwerfen oder hier bleiben?' })} />
+      <div className="mx-4 mt-4 space-y-4">
+        <OperationalCaseHeader
+          title="Zahlungslauf Kreditoren"
+          description="Der Kreditorenlauf wird als FIBU-Operatorraum mit Freigabe-, Skonto- und Ausfuehrungsdruck gefuehrt."
+          status={operationalStatus}
+          owner="Zahlungsverkehr"
+          blocker={!effectiveData?.approval_can_execute && paymentCount > 0 ? 'Der Lauf ist noch nicht freigegeben oder policy-konform ausfuehrbar.' : null}
+          nextAction={effectiveData?.approval_can_execute ? 'SEPA-Datei erstellen oder Lauf ausfuehren' : paymentCount > 0 ? 'Freigabe und Policy-Pruefung abschliessen' : 'Zahlungen in den Lauf aufnehmen'}
+          caseLabel="Vorgang: Kreditorenlauf"
+          tags={['FIBU', 'SEPA', 'L3']}
+        />
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_360px]">
+          <OperationalTimeline title="Zahlungspfad" items={timelineItems} />
+          <OperationalContextPanel title="Zahlungslauf-Kontext" sections={contextSections} />
+        </div>
+      </div>
       {effectiveData?.id && approvalDecisionView !== null ? (
         <ProcessStatusPanel view={approvalDecisionView} className="mb-4 px-4 py-3" densityProfileOverride={approvalDensityProfile}>
           <div className="mt-3 grid gap-3 md:grid-cols-3">

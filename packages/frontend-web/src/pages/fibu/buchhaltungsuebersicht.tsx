@@ -7,6 +7,9 @@
 import { useState, useMemo } from 'react'
 import { useQueries } from '@tanstack/react-query'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -31,6 +34,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { financeService, type BalanceSheetItem } from '@/lib/services/finance-service'
 import { useToast } from '@/hooks/use-toast'
 import { exportToCSV } from '@/lib/export-utils'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 const MONTHS = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember']
 
@@ -151,6 +155,42 @@ export default function BuchhaltungsuebersichtPage(): JSX.Element {
     )
   }, [gridRows])
   const detailRows: { firma: string; sachkonto: string; bezeichnung: string; summeJahr: number; months: number[] }[] = []
+  const negativeMonths = footerSums.months.filter((value) => value < 0).length
+  const operationalStatus = normalizeOperationalStatus(
+    isError ? 'eskaliert' : isLoading ? 'in_pruefung' : negativeMonths > 0 ? 'wartet_auf_mensch' : gridRows.length > 0 ? 'abgeschlossen' : 'offen',
+  )
+  const contextSections = [
+    {
+      title: 'Periodenlage',
+      items: [
+        { label: 'Firma', value: firma },
+        { label: 'Bilanzstichtag', value: bilanzStichtag },
+        { label: 'Monatsfenster', value: `${monatVon} bis ${monatBis}` },
+      ],
+    },
+    {
+      title: 'Revisionslage',
+      items: [
+        { label: 'Schnittstelle', value: schnittstelle },
+        { label: 'Negative Monate', value: `${negativeMonths}` },
+        { label: 'Naechste Aktion', value: negativeMonths > 0 ? 'Journal und Umbuchungen fuer Negativmonate pruefen' : 'Auswertung exportieren oder Drilldown nutzen' },
+      ],
+    },
+  ]
+  const timelineItems = [
+    {
+      label: isLoading ? 'Bilanzdaten werden geladen' : 'Auswertung aufgebaut',
+      detail: isLoading
+        ? 'Die Bilanz- und GuV-Sicht wird fuer die gewaehlte Periode neu berechnet.'
+        : `${gridRows.length} Hierarchiezeilen stehen fuer Drilldown und Export bereit.`,
+    },
+    {
+      label: negativeMonths > 0 ? 'Abweichende Monatslagen erkannt' : 'Keine kritische Monatslage',
+      detail: negativeMonths > 0
+        ? `${negativeMonths} Monatswerte liegen unter Null und sollten vor Abschluss oder Export geprueft werden.`
+        : 'Die aktuelle Uebersicht zeigt keine kritischen Monatsabweichungen.',
+    },
+  ]
 
   const handleDrilldown = (monthIndex: number): void => {
     const period = `${jahr}-${String(monthIndex + 1).padStart(2, '0')}`
@@ -289,6 +329,22 @@ export default function BuchhaltungsuebersichtPage(): JSX.Element {
       </div>
 
       {/* Kopfbereich / Filter */}
+      <div className="p-4 pb-0">
+        <OperationalCaseHeader
+          title="Buchhaltungsuebersicht"
+          description="Das L3/FIBU-Cockpit zeigt Periodenlage, Revisionskontext und naechste Folgeaktion direkt ueber der Auswertung."
+          status={operationalStatus}
+          owner="Finanzbuchhaltung"
+          blocker={negativeMonths > 0 ? `${negativeMonths} Monate zeigen eine kritische Lage fuer Review oder Umbuchung.` : null}
+          nextAction={negativeMonths > 0 ? 'Negativmonate im Journal pruefen und Umbuchungspfad nutzen' : 'Auswertung exportieren oder in Journal/BWA drillen'}
+          caseLabel="Vorgang: FIBU-Uebersicht"
+          tags={['FIBU', 'L3', 'Periodenabschluss']}
+        />
+        <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,2fr)_360px]">
+          <OperationalTimeline title="Auswertungsverlauf" items={timelineItems} />
+          <OperationalContextPanel title="Buchhaltungskontext" sections={contextSections} />
+        </div>
+      </div>
       <Card className="rounded-none border-x-0 border-t-0 shrink-0">
         <CardContent className="p-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

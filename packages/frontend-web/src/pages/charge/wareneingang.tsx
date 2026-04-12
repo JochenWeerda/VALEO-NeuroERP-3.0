@@ -11,6 +11,10 @@ import { useToast } from '@/hooks/use-toast'
 import { useCreateCharge } from '@/lib/api/charges'
 import { getAxiosErrorMessage } from '@/lib/api-client'
 import { useSupplyChainOverview } from '@/lib/api/supply-chain'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 type WareneingangData = {
   lieferant: string
@@ -48,6 +52,39 @@ export default function WareneingangPage(): JSX.Element {
     lagerort: '',
     lagerplatz: '',
   })
+  const operationalStatus = normalizeOperationalStatus(
+    wareneingang.artikel && wareneingang.menge > 0 ? (wareneingang.lagerort ? 'in_pruefung' : 'wartet_auf_mensch') : 'offen'
+  )
+  const contextSections = [
+    {
+      title: 'Objekt',
+      items: [
+        { label: 'Lieferant', value: wareneingang.lieferant || 'Noch nicht gesetzt' },
+        { label: 'Lieferschein', value: wareneingang.lieferscheinNr || 'Noch nicht gesetzt' },
+        { label: 'Charge', value: wareneingang.chargenId || 'Noch nicht generiert' },
+      ],
+    },
+    {
+      title: 'Ressourcenlage',
+      items: [
+        { label: 'Menge', value: `${wareneingang.menge || 0} ${wareneingang.einheit}` },
+        { label: 'Lagerort', value: wareneingang.lagerort || 'Noch offen' },
+        { label: 'Warteschlange', value: String(chain.waitingInbound) },
+      ],
+    },
+    {
+      title: 'Governance',
+      items: [
+        { label: 'QS-Status', value: wareneingang.gvoStatus },
+        { label: 'Naechste Aktion', value: wareneingang.lagerort ? 'Wareneingang buchen' : 'Lagerort und Qualitaetsattribute vervollstaendigen' },
+      ],
+    },
+  ]
+  const timelineItems = [
+    { label: 'Wareneingang geoeffnet', detail: 'Erfassung einer neuen Charge vorbereitet' },
+    wareneingang.lieferscheinNr ? { label: 'Lieferschein erfasst', detail: wareneingang.lieferscheinNr } : null,
+    wareneingang.chargenId ? { label: 'Chargen-ID bereit', detail: wareneingang.chargenId } : null,
+  ].filter((item): item is { label: string; detail: string } => item !== null)
 
   function updateField<K extends keyof WareneingangData>(key: K, value: WareneingangData[K]): void {
     const updated = { ...wareneingang, [key]: value }
@@ -421,7 +458,21 @@ export default function WareneingangPage(): JSX.Element {
   ]
 
   return (
-    <div className="p-3 md:p-6">
+    <div className="space-y-4 p-3 md:p-6">
+      <OperationalCaseHeader
+        title="Wareneingang buchen"
+        description="Lieferung, Qualitaetsmerkmale und Lagerort in einem gefuehrten Eingangsvorgang."
+        status={operationalStatus}
+        owner="Annahme"
+        blocker={!wareneingang.artikel && !wareneingang.lieferant ? null : !wareneingang.lagerort ? 'Lagerort fehlt noch fuer die Buchung.' : null}
+        nextAction={wareneingang.lagerort ? 'Wareneingang abschliessen' : 'Pflichtdaten vervollstaendigen'}
+        caseLabel={wareneingang.chargenId || 'Neuer Wareneingang'}
+        tags={['Charge', 'Annahme']}
+      />
+      <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
+        <OperationalTimeline title="Erfassungsverlauf" items={timelineItems} />
+        <OperationalContextPanel sections={contextSections} />
+      </div>
       <Wizard
         title="Wareneingang buchen"
         steps={steps}

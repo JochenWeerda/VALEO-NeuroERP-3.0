@@ -6,6 +6,10 @@ import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { TrendingUp, RefreshCw } from 'lucide-react'
 import { financeService } from '@/lib/services/finance-service'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 const fmtNum = (n: number) => new Intl.NumberFormat('de-DE').format(Math.round(n))
 
@@ -35,9 +39,54 @@ export default function BwaPage(): JSX.Element {
   const totalCosts = bwa ? Number(bwa.total_costs) : 0
   const netResult = bwa ? Number(bwa.net_result) : 0
   const netResultPct = totalRevenue > 0 ? ((netResult / totalRevenue) * 100).toFixed(1) : '0.0'
+  const operationalStatus = normalizeOperationalStatus(!bwa ? 'offen' : netResult < 0 ? 'eskaliert' : 'in_pruefung')
+  const contextSections = [
+    {
+      title: 'Vorgang',
+      items: [
+        { label: 'Periode', value: bwa?.period ?? period },
+        { label: 'Positionen', value: String(bwa?.items.length ?? 0) },
+        { label: 'Status', value: bwa ? 'BWA geladen' : 'Keine Daten' },
+      ],
+    },
+    {
+      title: 'Wirtschaftslage',
+      items: [
+        { label: 'Umsatz', value: `${fmtNum(totalRevenue)} EUR` },
+        { label: 'Kosten', value: `${fmtNum(totalCosts)} EUR` },
+        { label: 'Ergebnisquote', value: `${netResultPct}%` },
+      ],
+    },
+    {
+      title: 'Governance',
+      items: [
+        { label: 'Naechste Aktion', value: netResult < 0 ? 'Ergebnisabweichung analysieren' : 'Periode gegen Vorlauf pruefen' },
+        { label: 'Blocker', value: !bwa ? `Keine BWA-Daten fuer ${period}` : 'Kein akuter Blocker' },
+      ],
+    },
+  ]
+  const timelineItems = [
+    { label: 'BWA geladen', detail: bwa ? `Periode ${bwa.period}` : `Keine Daten fuer ${period}` },
+    bwa ? { label: 'Ergebnis berechnet', detail: `${fmtNum(netResult)} EUR` } : null,
+    bwa && netResult < 0 ? { label: 'Negatives Ergebnis erkannt', detail: 'Deckungsbeitrag und Kosten pruefen' } : null,
+  ].filter((item): item is { label: string; detail: string } => item !== null)
 
   return (
     <div className="space-y-6 p-6">
+      <OperationalCaseHeader
+        title="BWA"
+        description="Verdichtete Ergebnislage fuer die gewaehlte Periode mit Fokus auf Abweichungen."
+        status={operationalStatus}
+        owner="Controlling"
+        blocker={!bwa ? `Fuer ${period} liegen keine BWA-Daten vor.` : netResult < 0 ? 'Ergebnis ist negativ.' : null}
+        nextAction={netResult < 0 ? 'Kosten- und Umsatztreiber analysieren' : 'Periode freigeben oder exportieren'}
+        caseLabel={bwa?.period ?? period}
+        tags={['FIBU', 'Controlling']}
+      />
+      <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
+        <OperationalTimeline title="BWA-Verlauf" items={timelineItems} />
+        <OperationalContextPanel sections={contextSections} />
+      </div>
       <div className="flex items-center gap-4 flex-wrap">
         <div>
           <h1 className="text-3xl font-bold">Betriebswirtschaftliche Auswertung (BWA)</h1>

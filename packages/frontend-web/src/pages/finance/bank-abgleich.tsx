@@ -9,6 +9,10 @@ import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/api-client'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { useTenant } from '@/hooks/useTenant'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 const createBankAbgleichConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
@@ -312,6 +316,40 @@ export default function BankAbgleichPage(): JSX.Element {
     apiUrl: bankAbgleichConfig.api.baseUrl,
     id: 'new'
   })
+  const operationalStatus = normalizeOperationalStatus(
+    !data ? 'offen' : Math.abs(Number(data.abgleichsDifferenz || 0)) >= 0.01 ? 'blockiert' : Number(data.nichtZugeordnet || 0) > 0 ? 'wartet_auf_mensch' : 'abgeschlossen'
+  )
+  const contextSections = [
+    {
+      title: 'Objekt',
+      items: [
+        { label: 'Bankkonto', value: data?.kontoId || 'Noch nicht gewaehlt' },
+        { label: 'Statement', value: data?.statementId || 'Noch nicht importiert' },
+        { label: 'Periode', value: data?.periode || '-' },
+      ],
+    },
+    {
+      title: 'Wirtschaftslage',
+      items: [
+        { label: 'Startsaldo', value: `${Number(data?.startSaldo || 0).toFixed(2)} EUR` },
+        { label: 'Endsaldo', value: `${Number(data?.endSaldo || 0).toFixed(2)} EUR` },
+        { label: 'Differenz', value: `${Math.abs(Number(data?.abgleichsDifferenz || 0)).toFixed(2)} EUR` },
+      ],
+    },
+    {
+      title: 'Governance',
+      items: [
+        { label: 'Nicht zugeordnet', value: String(Number(data?.nichtZugeordnet || 0)) },
+        { label: 'Importfehler', value: String(Array.isArray(data?.importErrors) ? data.importErrors.length : 0) },
+        { label: 'Naechste Aktion', value: Number(data?.nichtZugeordnet || 0) > 0 ? 'Zuordnung pruefen und validieren' : 'Abgleich verbuchen' },
+      ],
+    },
+  ]
+  const timelineItems = [
+    { label: 'Bankabgleich geoeffnet', detail: entityTypeLabel },
+    data?.statementId ? { label: 'Statement importiert', detail: data.statementId } : null,
+    Number(data?.nichtZugeordnet || 0) > 0 ? { label: 'Manuelle Klaerung offen', detail: `${data.nichtZugeordnet} Umsatzzeile(n) ohne Zuordnung` } : null,
+  ].filter((item): item is { label: string; detail: string } => item !== null)
 
   const validate = (formData: any) => validateFields(getFieldsFromMaskConfig(bankAbgleichConfig), formData ?? {})
   const showValidationToast = (errors: Record<string, string>) => {
@@ -582,14 +620,30 @@ export default function BankAbgleichPage(): JSX.Element {
   }
 
   return (
-    <ObjectPage
-      config={bankAbgleichConfig}
-      data={data}
-      onSave={handleSave}
-      onCancel={handleCancel}
-      isLoading={loading}
-      onAction={(key, formData) => handleAction(key, formData)}
-      loadingActionKey={actionLoadingKey}
-    />
+    <div className="space-y-4 p-4">
+      <OperationalCaseHeader
+        title="Bankabgleich"
+        description="Import, Validierung und Buchung von Bankkontoauszuegen ohne Medienbruch."
+        status={operationalStatus}
+        owner="Finanzbuchhaltung"
+        blocker={Math.abs(Number(data?.abgleichsDifferenz || 0)) >= 0.01 ? 'Abgleichsdifferenz ist noch nicht null.' : Number(data?.nichtZugeordnet || 0) > 0 ? 'Es gibt noch nicht zugeordnete Umsatzzeilen.' : null}
+        nextAction={Number(data?.nichtZugeordnet || 0) > 0 ? 'Zuordnung abschliessen' : data?.statementId ? 'Validieren und verbuchen' : 'Kontoauszug importieren'}
+        caseLabel={data?.statementId || 'Neuer Abgleich'}
+        tags={['FIBU', 'Bank']}
+      />
+      <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
+        <OperationalTimeline title="Abgleichsverlauf" items={timelineItems} />
+        <OperationalContextPanel sections={contextSections} />
+      </div>
+      <ObjectPage
+        config={bankAbgleichConfig}
+        data={data}
+        onSave={handleSave}
+        onCancel={handleCancel}
+        isLoading={loading}
+        onAction={(key, formData) => handleAction(key, formData)}
+        loadingActionKey={actionLoadingKey}
+      />
+    </div>
   )
 }

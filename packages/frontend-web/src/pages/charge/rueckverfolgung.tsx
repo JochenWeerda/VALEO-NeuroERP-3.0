@@ -10,6 +10,10 @@ import { Label } from '@/components/ui/label'
 import { apiClient } from '@/lib/api-client'
 import { LotTrace, useLotTrace } from '@/lib/api/inventory'
 import { useSupplyChainOverview } from '@/lib/api/supply-chain'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 type TimelineEntry = {
   stufe: string
@@ -47,6 +51,39 @@ export default function RueckverfolgungPage(): JSX.Element {
       datum: txn.created_at,
     }))
   }, [traceData])
+  const operationalStatus = normalizeOperationalStatus(
+    chain.blockedCharges > 0 ? 'eskaliert' : traceData ? 'in_pruefung' : 'offen'
+  )
+  const contextSections = [
+    {
+      title: 'Objekt',
+      items: [
+        { label: 'Charge', value: traceData?.lot_number || 'Noch nicht aufgeloest' },
+        { label: 'Artikel', value: traceData?.sku || 'Noch keine Auswahl' },
+        { label: 'Transaktionen', value: String(traceData?.transactions.length ?? 0) },
+      ],
+    },
+    {
+      title: 'Ressourcenlage',
+      items: [
+        { label: 'Wartende Annahmen', value: String(chain.waitingInbound) },
+        { label: 'Offene Wiegungen', value: String(chain.openWeighingTickets) },
+        { label: 'Gesperrte Chargen', value: String(chain.blockedCharges) },
+      ],
+    },
+    {
+      title: 'Governance',
+      items: [
+        { label: 'Naechste Aktion', value: traceData ? 'Spurpfad pruefen oder Bericht exportieren' : 'Charge suchen' },
+        { label: 'Blocker', value: lookupError || (chain.blockedCharges > 0 ? 'Lieferkette enthaelt gesperrte Chargen.' : 'Kein akuter Blocker') },
+      ],
+    },
+  ]
+  const timelineItems = timeline.slice(0, 4).map((item) => ({
+    label: item.stufe,
+    detail: `${item.name} - ${item.ort}`,
+    timestamp: item.datum,
+  }))
 
   const handleSearch = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -84,6 +121,20 @@ export default function RueckverfolgungPage(): JSX.Element {
 
   return (
     <div className="space-y-6 p-3 md:p-6">
+      <OperationalCaseHeader
+        title="Chargen-Rueckverfolgung"
+        description="Durchgaengiger Spurpfad von Annahme bis Auslieferung."
+        status={operationalStatus}
+        owner="Qualitaetssicherung"
+        blocker={lookupError || (chain.blockedCharges > 0 ? 'In der Lieferkette befinden sich gesperrte Chargen.' : null)}
+        nextAction={traceData ? 'Pfad pruefen oder Bericht exportieren' : 'Charge identifizieren'}
+        caseLabel={traceData?.lot_number || 'Traceability'}
+        tags={['Charge', 'QS']}
+      />
+      <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
+        <OperationalTimeline title="Spurpfad" items={timelineItems} />
+        <OperationalContextPanel sections={contextSections} />
+      </div>
       <div>
         <h1 className="text-3xl font-bold">Chargen-Rückverfolgung</h1>
         <p className="text-muted-foreground">Lieferketten-Transparenz</p>

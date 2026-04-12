@@ -10,12 +10,16 @@ import { FileDown, FileText, Receipt, Search } from 'lucide-react'
 import { getEntityTypeLabel, getListTitle, getStatusLabel } from '@/features/crud/utils/i18n-helpers'
 import { AdvancedFilters, FilterConfig } from '@/components/list/AdvancedFilters'
 import { CSVImport } from '@/components/list/CSVImport'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { useToast } from '@/hooks/use-toast'
 import { useListActions } from '@/hooks/useListActions'
 import { formatDateForExport, formatCurrencyForExport } from '@/lib/export-utils'
 import { saveDocument } from '@/lib/document-api'
 import { getAxiosErrorMessage } from '@/lib/api-client'
 import { useRechnungen, type Rechnung, type RechnungStatus } from '@/lib/api/sales'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 const statusVariantMap: Record<RechnungStatus, 'default' | 'outline' | 'secondary' | 'destructive'> = {
   offen: 'default',
@@ -106,6 +110,42 @@ export default function RechnungenListePage(): JSX.Element {
     data: exportData,
     entityName: 'rechnungen',
   })
+  const overdueCount = filteredRechnungen.filter((rechnung) => rechnung.status === 'ueberfaellig').length
+  const openCount = filteredRechnungen.filter((rechnung) => rechnung.status === 'offen' || rechnung.status === 'teilbezahlt').length
+  const totalVolume = filteredRechnungen.reduce((sum, rechnung) => sum + rechnung.betrag, 0)
+  const operationalStatus = normalizeOperationalStatus(
+    overdueCount > 0 ? 'eskaliert' : openCount > 0 ? 'wartet_auf_mensch' : filteredRechnungen.length > 0 ? 'abgeschlossen' : 'offen'
+  )
+  const contextSections = [
+    {
+      title: 'Vorgang',
+      items: [
+        { label: 'Gefilterte Rechnungen', value: String(filteredRechnungen.length) },
+        { label: 'Offen/Teilbezahlt', value: String(openCount) },
+        { label: 'Ueberfaellig', value: String(overdueCount) },
+      ],
+    },
+    {
+      title: 'Wirtschaftslage',
+      items: [
+        { label: 'Volumen', value: new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(totalVolume) },
+        { label: 'Statusfilter', value: statusFilter === 'alle' ? 'Alle' : statusFilter },
+        { label: 'Suchbegriff', value: searchTerm || 'Keine Einschraenkung' },
+      ],
+    },
+    {
+      title: 'Governance',
+      items: [
+        { label: 'Naechste Aktion', value: overdueCount > 0 ? 'Ueberfaellige Rechnungen klaeren' : openCount > 0 ? 'Offene Rechnungen drucken oder versenden' : 'Neue Rechnung anlegen oder Liste exportieren' },
+        { label: 'Blocker', value: overdueCount > 0 ? 'Mindestens eine Rechnung ist ueberfaellig.' : 'Kein akuter Blocker' },
+      ],
+    },
+  ]
+  const timelineItems = [
+    { label: 'Rechnungsliste geladen', detail: `${rechnungen.length} Rechnungen gesamt` },
+    overdueCount > 0 ? { label: 'Ueberfaellige Forderungen erkannt', detail: `${overdueCount} Rechnung(en)` } : null,
+    showImport ? { label: 'Importmodus aktiv', detail: 'CSV-Import fuer Faktura geoeffnet' } : null,
+  ].filter((item): item is { label: string; detail: string } => item !== null)
 
   const handleImport = async (importData: any[]) => {
     try {
@@ -196,6 +236,20 @@ export default function RechnungenListePage(): JSX.Element {
 
   return (
     <div className="space-y-4 p-6">
+      <OperationalCaseHeader
+        title={pageTitle}
+        description="Faktura- und Forderungsraum fuer offene, ueberfaellige und bereits versandte Rechnungen."
+        status={operationalStatus}
+        owner="Vertriebsinnendienst"
+        blocker={overdueCount > 0 ? 'Ueberfaellige Rechnungen muessen geklaert oder angemahnt werden.' : null}
+        nextAction={overdueCount > 0 ? 'Ueberfaellige Rechnungen priorisieren' : openCount > 0 ? 'Offene Rechnungen drucken oder versenden' : 'Neue Rechnung anlegen'}
+        caseLabel="Ausgangsrechnungen"
+        tags={['Sales', 'FIBU']}
+      />
+      <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
+        <OperationalTimeline title="Rechnungsverlauf" items={timelineItems} />
+        <OperationalContextPanel sections={contextSections} />
+      </div>
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">{pageTitle}</h1>

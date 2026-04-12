@@ -2,6 +2,9 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ObjectPage } from '@/components/mask-builder'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { useMaskData, useMaskActions } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
 import { getFieldsFromMaskConfig, validateFields } from '@/components/mask-builder/validation'
@@ -16,6 +19,7 @@ import { Card } from '@/components/ui/card'
 import { buildDecisionView } from '@/policy/decision-view'
 import { ProcessStatusPanel } from '@/components/workflow/ProcessStatusPanel'
 import { useApprovalDensityProfile } from '@/features/workflow/useApprovalDensityProfile'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 const createLastschriftenConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
   title: entityTypeLabel,
@@ -414,6 +418,53 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
   const safeFormData = { ...initialFormData, ...(data ?? formData ?? {}) }
   const approvalDecisionView = buildDecisionView(safeFormData.approval_explainability)
   const approvalDensityProfile = useApprovalDensityProfile('finance-direct-debit', approvalDecisionView)
+  const directDebits = Array.isArray(safeFormData.lastschriften) ? safeFormData.lastschriften : []
+  const debitCount = Number(safeFormData.anzahlLastschriften || directDebits.length || 0)
+  const totalAmount = Number(safeFormData.gesamtBetrag || 0)
+  const missingMandates = directDebits.filter((entry: any) => !entry.mandatReferenz || !entry.mandatDatum).length
+  const operationalStatus = normalizeOperationalStatus(
+    safeFormData.status === 'ausgefuehrt'
+      ? 'abgeschlossen'
+      : missingMandates > 0
+        ? 'wartet_auf_mensch'
+        : safeFormData.approval_can_execute
+          ? 'in_pruefung'
+          : debitCount > 0
+            ? 'teilweise'
+            : 'offen',
+  )
+  const contextSections = [
+    {
+      title: 'Debitorenlauf',
+      items: [
+        { label: 'Laufnummer', value: safeFormData.laufNummer || 'Noch kein Lauf' },
+        { label: 'Lastschriften', value: `${debitCount}` },
+        { label: 'Ausfuehrung', value: safeFormData.ausfuehrungsDatum || '-' },
+      ],
+    },
+    {
+      title: 'Mandatslage',
+      items: [
+        { label: 'Fehlende Mandate', value: `${missingMandates}` },
+        { label: 'Approval-Status', value: safeFormData.approval_status || safeFormData.status || 'draft' },
+        { label: 'Naechste Aktion', value: missingMandates > 0 ? 'Mandate vervollstaendigen' : safeFormData.approval_can_execute ? 'SEPA-Export oder Ausfuehrung starten' : 'Freigabe vorbereiten' },
+      ],
+    },
+  ]
+  const timelineItems = [
+    {
+      label: debitCount > 0 ? 'Lastschriftlauf aufgebaut' : 'Kein Debitorenlauf vorbereitet',
+      detail: debitCount > 0
+        ? `${debitCount} Debitoren mit ${new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(totalAmount)} im aktuellen Lauf.`
+        : 'Es sind noch keine Lastschriften fuer den aktuellen Lauf vorhanden.',
+    },
+    {
+      label: missingMandates > 0 ? 'Mandatsluecken erkannt' : 'Mandate konsistent',
+      detail: missingMandates > 0
+        ? `${missingMandates} Eintraege blockieren Freigabe oder Ausfuehrung wegen fehlender Mandatsdaten.`
+        : 'Mandats- und Debitorenlage erlaubt den naechsten Freigabeschritt.',
+    },
+  ]
 
   const validate = (currentFormData: any) => validateFields(getFieldsFromMaskConfig(lastschriftenConfig), currentFormData ?? {})
   const showValidationToast = (errors: Record<string, string>) => {
@@ -629,6 +680,22 @@ export default function LastschriftenDebitorenPage(): JSX.Element {
     <>
       <ModuleToolbar backTarget="/finance/lastschriften-debitoren" closeTarget="/finance/lastschriften-debitoren" title={entityTypeLabel} />
       <LeaveConfirmDialog blocker={blocker} onSave={() => handleSave(safeFormData)} title={t('crud.messages.unsavedChanges', { defaultValue: 'Ungespeicherte Aenderungen' })} description={t('crud.messages.unsavedChangesDescription', { defaultValue: 'Moechten Sie speichern, verwerfen oder hier bleiben?' })} />
+      <div className="mx-4 mt-4 space-y-4">
+        <OperationalCaseHeader
+          title="Lastschriften Debitoren"
+          description="Der Debitorenlauf wird als Mandats-, Freigabe- und Ausfuehrungsfall komprimiert dargestellt."
+          status={operationalStatus}
+          owner="Debitorenbuchhaltung"
+          blocker={missingMandates > 0 ? `${missingMandates} Lastschriften haben unvollstaendige Mandatsdaten.` : null}
+          nextAction={missingMandates > 0 ? 'Mandatsdaten vervollstaendigen und erneut pruefen' : safeFormData.approval_can_execute ? 'SEPA-Datei exportieren oder Lastschriften ausfuehren' : 'Freigabe vorbereiten'}
+          caseLabel="Vorgang: Debitorenlauf"
+          tags={['FIBU', 'SEPA', 'Mandat']}
+        />
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_360px]">
+          <OperationalTimeline title="Lastschriftverlauf" items={timelineItems} />
+          <OperationalContextPanel title="Lastschrift-Kontext" sections={contextSections} />
+        </div>
+      </div>
       {approvalDecisionView !== null ? (
         <ProcessStatusPanel view={approvalDecisionView} className="mx-4 mt-4 px-4 py-3" densityProfileOverride={approvalDensityProfile}>
           <div className="mt-3 grid gap-3 md:grid-cols-3">

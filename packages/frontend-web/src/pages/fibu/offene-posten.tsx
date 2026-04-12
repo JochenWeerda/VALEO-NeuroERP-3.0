@@ -13,6 +13,10 @@ import { apiClient } from '@/lib/api-client'
 import { exportToCSV } from '@/lib/export-utils'
 import { useToast } from '@/hooks/use-toast'
 import { ErrorState } from '@/components/ErrorState'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 type OffenerPosten = {
   id: string
@@ -216,6 +220,44 @@ export default function OffenePostenPage(): JSX.Element {
 
   const gesamtOffen = filteredPosten.reduce((sum, p) => sum + p.offen, 0)
   const ueberfaellig = filteredPosten.filter((p) => p.tageUeberfaellig > 0)
+  const operationalStatus = normalizeOperationalStatus(
+    ueberfaellig.length > 0 ? (ueberfaellig.some((item) => item.tageUeberfaellig > 30) ? 'eskaliert' : 'wartet_auf_mensch') : 'in_pruefung'
+  )
+  const contextSections = [
+    {
+      title: 'Vorgang',
+      items: [
+        { label: 'Posten gesamt', value: String(allePosten.length) },
+        { label: 'Gefiltert', value: String(filteredPosten.length) },
+        { label: 'Ueberfaellig', value: String(ueberfaellig.length) },
+      ],
+    },
+    {
+      title: 'Wirtschaftslage',
+      items: [
+        {
+          label: 'Gesamt offen',
+          value: new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(gesamtOffen),
+        },
+        {
+          label: 'Kritisch ueberfaellig',
+          value: `${ueberfaellig.filter((item) => item.tageUeberfaellig > 30).length} Posten`,
+        },
+      ],
+    },
+    {
+      title: 'Governance',
+      items: [
+        { label: 'Naechste Aktion', value: ueberfaellig.length > 0 ? 'Mahnlauf oder Bearbeitung starten' : 'Offene Posten pruefen' },
+        { label: 'Blocker', value: editingId ? 'Datensatz wird bearbeitet' : 'Kein akuter Blocker' },
+      ],
+    },
+  ]
+  const timelineItems = [
+    { label: 'OP-Liste geladen', detail: `${allePosten.length} Posten verfuegbar` },
+    ueberfaellig.length > 0 ? { label: 'Mahnfaellige Posten erkannt', detail: `${ueberfaellig.length} Position(en)` } : null,
+    editingId ? { label: 'Bearbeitung aktiv', detail: `Posten ${editingId} wird angepasst` } : null,
+  ].filter((item): item is { label: string; detail: string } => item !== null)
 
   const columns = [
     {
@@ -286,6 +328,20 @@ export default function OffenePostenPage(): JSX.Element {
 
   return (
     <div className="space-y-4 p-6">
+      <OperationalCaseHeader
+        title="Offene Posten"
+        description="Forderungsmanagement mit Fokus auf Faelligkeit, Mahnstufe und naechste Eskalation."
+        status={operationalStatus}
+        owner="Debitorenmanagement"
+        blocker={ueberfaellig.length > 0 ? 'Es liegen ueberfaellige Forderungen vor.' : null}
+        nextAction={ueberfaellig.length > 0 ? 'Mahnlauf anstossen oder Posten klaeren' : 'Offene Posten periodisch pruefen'}
+        caseLabel="OP-Management"
+        tags={['FIBU', 'Mahnwesen']}
+      />
+      <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
+        <OperationalTimeline title="Aktuelle Lage" items={timelineItems} />
+        <OperationalContextPanel sections={contextSections} />
+      </div>
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Offene Posten</h1>
