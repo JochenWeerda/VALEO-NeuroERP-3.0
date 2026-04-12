@@ -23,6 +23,54 @@ Archiv des vorherigen Boards:
   - [operational-rollout-scope-2026-04-09.md](C:/Users/Jochen/VALEO-NeuroERP-3.0/docs/project-context/operational-rollout-scope-2026-04-09.md)
 - Der naechste Block betrifft Sammel- und Follow-up-Masken mit echtem operativem Mehrwert.
 
+## COV-FIN-002
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Coverage-Tiefe fuer FIBU-Kernpfade aufbauen: Journal, Zahlungslaeufe, DATEV/ELSTER-nahe Follow-up-Logik und Abschlusskontext.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `tests/**`, relevante Finance-/FIBU-Services und Endpunkte
+**Abnahmekriterien:** Kritische FIBU-Kernpfade besitzen gezielte Tests statt nur allgemeiner Gesamtquote; Ratchet kann fuer Finance spaeter angehoben werden.
+
+## COV-INV-002
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Coverage fuer Bestandsfuehrung, Lagerbewegung, Inventur und physische Objektkette erweitern.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `tests/**`, Inventory-/Ops-/Logistik-Endpunkte und Services
+**Abnahmekriterien:** Stock-Movements, Inventur und kritische Lagerpfade sind ueber gezielte Tests gegen Regressionen abgesichert.
+
+## COV-INT-002
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Integrations-Governance tiefer testen: Superglue, Secrets, Outbound-Gates, Bootstrap und Tenant-Schutz.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `tests/**`, `app/services/**`, `app/integrations/**`
+**Abnahmekriterien:** Integrationsnahe Kernpfade werden nicht nur konfiguriert, sondern auch testseitig breiter abgesichert.
+
+## DOM-FIN-002
+
+**Von:** Codex
+**Stand:** offen
+**Ziel des Slices:** FIBU-/L3-Parity fachlich weiter vertiefen, insbesondere Abschluss-, Revisions- und Operator-Pfade.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, relevante FIBU-/Finance-Module, Doku unter `docs/project-context/`
+**Abnahmekriterien:** Finance/FIBU ist nicht nur breit, sondern in den priorisierten Operatorpfaden semantisch konsistenter und tiefer.
+
+## DOM-INV-002
+
+**Von:** Codex
+**Stand:** offen
+**Ziel des Slices:** Inventory-/Ops-/Logistik-Parity weiterziehen, insbesondere physische Objektkette, Queue, Wiegung, Fracht und Charge.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, relevante Inventory-/Ops-/Logistik-Module, Doku unter `docs/project-context/`
+**Abnahmekriterien:** Die physische Kette ist fachlich tiefer und konsistenter ueber mehrere Kernmasken und Backend-Pfade hinweg.
+
+## DOM-CRM-002
+
+**Von:** Codex
+**Stand:** offen
+**Ziel des Slices:** CRM-/Sales-/Service-Parity angleichen, insbesondere Vorgangsbezug, Folgeobjekte und echte Arbeitsobjekte statt Listenbreite.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, relevante CRM-/Sales-/Service-Module, Doku unter `docs/project-context/`
+**Abnahmekriterien:** CRM-/Sales-/Service-Raeume besitzen vergleichbare fachliche Tiefe in den priorisierten Kernobjekten.
+
 ## ARCH-DOM-001
 
 **Von:** Codex
