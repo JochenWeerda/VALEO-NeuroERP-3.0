@@ -143,7 +143,7 @@ class JournalEntryBase(BaseModel):
     @field_validator('source')
     @classmethod
     def validate_source(cls, v):
-        valid_sources = ['manual', 'system', 'integration', 'import']
+        valid_sources = ['manual', 'system', 'integration', 'import', 'cash_close']
         if v not in valid_sources:
             raise ValueError(f'Source must be one of: {valid_sources}')
         return v

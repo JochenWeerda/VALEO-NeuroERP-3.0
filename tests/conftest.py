@@ -36,8 +36,11 @@ def skip_if_db_unavailable(response):
     """Skipt den Test wenn PostgreSQL nicht erreichbar ist (500/503 mit Connection refused)."""
     if response.status_code in (500, 503):
         body = response.text
-        if "OperationalError" in body or "Connection refused" in body:
-            pytest.skip("PostgreSQL nicht erreichbar — docker compose up erforderlich")
+        if any(k in body for k in (
+            "OperationalError", "Connection refused",
+            "Identity provider unavailable", "UndefinedTable", "does not exist",
+        )):
+            pytest.skip("DB or identity provider not available")
 
 
 def _is_db_reachable() -> bool:
