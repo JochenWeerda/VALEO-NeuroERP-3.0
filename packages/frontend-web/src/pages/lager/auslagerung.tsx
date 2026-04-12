@@ -2,7 +2,7 @@
  * Auslagerung — Touch-optimierter Kernflow (Gap 024, Wave 92)
  * TouchCards für Artikel- und Strategieauswahl, Keyboard-Shortcuts für Desktop
  */
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Wizard } from '@/components/patterns/Wizard'
@@ -12,6 +12,7 @@ import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboar
 import { apiClient } from '@/lib/api-client'
 import { useToast } from '@/hooks/use-toast'
 import { Badge } from '@/components/ui/badge'
+import { Card, CardContent } from '@/components/ui/card'
 import { CheckCircle } from 'lucide-react'
 import { AgentSuggestionBadge, AgentProcessPanel } from '@/components/agent'
 import {
@@ -111,6 +112,19 @@ export default function AuslagerungPage(): JSX.Element {
   useKeyboardShortcuts(shortcuts)
 
   const strategieLabel = STRATEGIEN.find((s) => s.id === auslagerung.strategie)?.label ?? auslagerung.strategie
+
+  const fallkopf = useMemo(() => {
+    const artikelVerfuegbar = ARTIKEL.length
+    const hatArtikel = auslagerung.artikel !== ''
+    const hatMenge = auslagerung.menge > 0
+    return {
+      status: hatArtikel && hatMenge ? 'Auslagerung vorbereitet' : 'Artikelauswahl offen',
+      statusColor: hatArtikel && hatMenge ? 'text-green-700 bg-green-50 border-green-300' : 'text-blue-700 bg-blue-50 border-blue-300',
+      verfuegbarkeit: `${artikelVerfuegbar} Artikel im Katalog`,
+      reservierungsdruck: hatArtikel ? `${auslagerung.artikel}: ${auslagerung.menge} t angefordert (${strategieLabel})` : 'Noch kein Artikel gewaehlt',
+      folgeweg: hatArtikel && hatMenge ? 'Strategie bestaetigen und buchen' : 'Artikel und Menge festlegen',
+    }
+  }, [ARTIKEL.length, auslagerung.artikel, auslagerung.menge, strategieLabel])
 
   const steps = [
     {
@@ -228,6 +242,15 @@ export default function AuslagerungPage(): JSX.Element {
           </div>
         )}
         <AgentProcessPanel domain="lager" className="mb-4" />
+        {/* Operativer Fallkopf */}
+        <Card className={`border mb-4 ${fallkopf.statusColor}`}>
+          <CardContent className="pt-4 pb-3 text-sm space-y-1">
+            <div className="font-semibold">Auslagerung: {fallkopf.status}</div>
+            <div>Verfuegbarkeit: {fallkopf.verfuegbarkeit}</div>
+            <div>Reservierungsdruck: {fallkopf.reservierungsdruck}</div>
+            <div>Folgeweg: {fallkopf.folgeweg}</div>
+          </CardContent>
+        </Card>
         <Wizard title="Auslagerung" steps={steps} onFinish={handleFinish} onCancel={() => navigate('/lager/bestandsuebersicht')} />
       </div>
       <KeyboardShortcutBar shortcuts={shortcuts} />

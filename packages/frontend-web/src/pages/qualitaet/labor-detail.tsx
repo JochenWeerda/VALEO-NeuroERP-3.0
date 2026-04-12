@@ -3,6 +3,7 @@
  * GET /api/v1/qualitaet/labor-auftraege/{id}
  */
 
+import { useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { apiClient } from '@/lib/api-client'
@@ -23,6 +24,27 @@ export default function LaborDetailPage(): JSX.Element {
       (await apiClient.get<LaborAuftrag>(`/api/v1/qualitaet/labor-auftraege/${id}`)).data,
     enabled: !!id,
   })
+
+  const fallkopf = useMemo(() => {
+    if (!auftrag) {
+      return {
+        status: 'Laden...',
+        statusColor: 'text-slate-700 bg-slate-50 border-slate-300',
+        befundlage: '—',
+        blocker: '—',
+        naechsteAktion: '—',
+      }
+    }
+    const istOffen = auftrag.status === 'offen'
+    const inBearbeitung = auftrag.status === 'in-bearbeitung'
+    return {
+      status: istOffen ? 'Auftrag offen' : inBearbeitung ? 'Analyse laeuft' : 'Abgeschlossen',
+      statusColor: istOffen ? 'text-amber-700 bg-amber-50 border-amber-300' : inBearbeitung ? 'text-blue-700 bg-blue-50 border-blue-300' : 'text-green-700 bg-green-50 border-green-300',
+      befundlage: `Charge ${auftrag.chargenId} · ${auftrag.analysen} Analyse(n)`,
+      blocker: istOffen ? 'Laborergebnis steht aus' : 'Kein Blocker',
+      naechsteAktion: istOffen ? 'Probe an Labor uebergeben' : inBearbeitung ? 'Ergebnis abwarten / nachfragen' : 'Ergebnis in Freigabe uebernehmen',
+    }
+  }, [auftrag])
 
   if (isLoading) {
     return (
@@ -50,6 +72,16 @@ export default function LaborDetailPage(): JSX.Element {
 
   return (
     <div className="space-y-6 p-6">
+      {/* Operativer Fallkopf */}
+      <Card className={`border ${fallkopf.statusColor}`}>
+        <CardContent className="pt-4 pb-3 text-sm space-y-1">
+          <div className="font-semibold">Labor-Auftrag: {fallkopf.status}</div>
+          <div>Befundlage: {fallkopf.befundlage}</div>
+          <div>Blocker: {fallkopf.blocker}</div>
+          <div>Naechste Aktion: {fallkopf.naechsteAktion}</div>
+        </CardContent>
+      </Card>
+
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => navigate('/qualitaet/labor')}>

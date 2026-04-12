@@ -2,7 +2,7 @@
  * Warehouse Terminal
  */
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   WarehouseLayout,
@@ -55,6 +55,18 @@ export default function WarehouseTerminalPage(): JSX.Element {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [recentScans, setRecentScans] = useState<Array<{ barcode: string; name: string; time: string }>>([])
+
+  const fallkopf = useMemo(() => {
+    const scanCount = recentScans.length
+    const hatArtikel = article !== null
+    const hatFehler = error !== null
+    return {
+      status: loading ? 'Suche laeuft...' : hatFehler ? 'Fehler beim letzten Scan' : hatArtikel ? 'Artikel geladen' : 'Bereit zum Scannen',
+      statusColor: hatFehler ? 'text-red-700 bg-red-50 border-red-300' : hatArtikel ? 'text-green-700 bg-green-50 border-green-300' : 'text-blue-700 bg-blue-50 border-blue-300',
+      blocker: hatFehler ? (error ?? 'Unbekannter Fehler') : 'Kein Blocker',
+      naechsteAktion: hatArtikel ? 'Eingang, Ausgang oder Umlagerung waehlen' : 'Barcode scannen oder eingeben',
+    }
+  }, [recentScans.length, article, error, loading])
 
   const searchArticle = useCallback(async (barcode: string) => {
     setLoading(true)
@@ -137,6 +149,12 @@ export default function WarehouseTerminalPage(): JSX.Element {
   return (
     <WarehouseLayout title="Lager-Terminal" subtitle="Scan & Go" showScanner onScan={handleScan}>
       <div className="space-y-4 max-w-3xl mx-auto">
+        {/* Operativer Fallkopf — touch-friendly */}
+        <div className={`rounded-xl border p-4 text-sm space-y-1 ${fallkopf.statusColor}`}>
+          <div className="font-semibold text-base">Terminal: {fallkopf.status}</div>
+          <div>Blocker: {fallkopf.blocker}</div>
+          <div>Naechste Aktion: {fallkopf.naechsteAktion}</div>
+        </div>
         {workflowInstanceId && (
           <div className="mb-4 rounded-md border border-indigo-500/30 bg-indigo-500/10 px-4 py-2 text-sm text-indigo-200">
             Flow-Spine: {workflowCase || workflowProcess} (Instanz {workflowInstanceId.slice(0, 8)}...)

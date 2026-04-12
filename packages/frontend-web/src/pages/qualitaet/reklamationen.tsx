@@ -34,6 +34,18 @@ export default function ReklamationenPage(): JSX.Element {
   }, [reklamationen, searchTerm])
 
   const neu = list.filter((r) => r.status === 'neu').length
+  const inBearbeitung = list.filter((r) => r.status === 'in-bearbeitung').length
+  const hochprio = list.filter((r) => r.prioritaet === 'hoch' && r.status !== 'geloest' && r.status !== 'abgelehnt').length
+
+  const fallkopf = useMemo(() => {
+    return {
+      status: neu > 0 ? `${neu} neue Reklamation(en)` : inBearbeitung > 0 ? 'Bearbeitung laeuft' : 'Keine offenen Faelle',
+      statusColor: neu > 0 || hochprio > 0 ? 'text-red-700 bg-red-50 border-red-300' : inBearbeitung > 0 ? 'text-amber-700 bg-amber-50 border-amber-300' : 'text-green-700 bg-green-50 border-green-300',
+      rueckstand: neu > 0 ? `${neu} unbearbeitete Reklamation(en)` : 'Kein Rueckstand',
+      risikobild: hochprio > 0 ? `${hochprio} mit hoher Prioritaet — SLA beachten` : 'Kein erhoehtes Risiko',
+      naechsteSammelaktion: neu > 0 ? 'Neue Reklamationen sichten und zuweisen' : inBearbeitung > 0 ? 'Laufende Faelle pruefen' : 'Keine dringende Aktion',
+    }
+  }, [neu, inBearbeitung, hochprio])
 
   const shortcuts = buildCoreMaskShortcuts({
     onNew: () => navigate('/qualitaet/reklamation/neu'),
@@ -133,6 +145,16 @@ export default function ReklamationenPage(): JSX.Element {
           description="Hier werden Reklamationsfall, Kundenbezug, Dokumente und Bearbeitungsstatus gepflegt. Der Flow-Fall bleibt als Referenz erhalten."
         />
       ) : null}
+      {/* Operativer Fallkopf */}
+      <Card className={`border ${fallkopf.statusColor}`}>
+        <CardContent className="pt-4 pb-3 text-sm space-y-1">
+          <div className="font-semibold">Reklamationen: {fallkopf.status}</div>
+          <div>Rueckstand: {fallkopf.rueckstand}</div>
+          <div>Risikobild: {fallkopf.risikobild}</div>
+          <div>Naechste Sammelaktion: {fallkopf.naechsteSammelaktion}</div>
+        </CardContent>
+      </Card>
+
       <PageSection
         description="CRM- und DMS-verbundene Reklamationssicht im einheitlichen DS-Rahmen mit Keyboard-first-Liste."
       >

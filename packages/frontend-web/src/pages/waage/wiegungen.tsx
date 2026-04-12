@@ -74,6 +74,19 @@ export default function WiegungenPage(): JSX.Element {
   const totalNetKg = tickets.reduce((sum, t) => sum + Number(t.net_weight ?? 0), 0)
   const totalBillingKg = tickets.reduce((sum, t) => sum + Number(t.billing_weight ?? t.net_weight ?? 0), 0)
 
+  const fallkopf = useMemo(() => {
+    const offeneTickets = tickets.filter((t) => t.status !== 'closed').length
+    const ohneKontrakt = tickets.filter((t) => !t.contract_id).length
+    const total = tickets.length
+    return {
+      status: offeneTickets > 0 ? `${offeneTickets} offene Wiegung(en)` : total > 0 ? 'Alle Wiegungen abgeschlossen' : 'Keine Wiegungen',
+      statusColor: offeneTickets > 0 ? 'text-amber-700 bg-amber-50 border-amber-300' : 'text-green-700 bg-green-50 border-green-300',
+      rueckstand: offeneTickets > 0 ? `${offeneTickets} Ticket(s) noch offen` : 'Kein Rueckstand',
+      blocker: ohneKontrakt > 0 ? `${ohneKontrakt} Ticket(s) ohne Kontraktzuordnung` : 'Alle Tickets zugeordnet',
+      folgepfad: offeneTickets > 0 ? 'Offene Tickets schliessen' : ohneKontrakt > 0 ? 'Kontraktzuordnung durchfuehren' : 'Keine dringende Aktion',
+    }
+  }, [tickets])
+
   async function onCreate(): Promise<void> {
     if (!form.ticketNumber.trim()) {
       toast({ title: 'Fehlende Ticketnummer', description: 'ticket_number ist erforderlich', variant: 'destructive' })
@@ -148,6 +161,16 @@ export default function WiegungenPage(): JSX.Element {
         <h1 className="text-3xl font-bold">Wiegungen</h1>
         <p className="text-muted-foreground">Wiegeschein-Erfassung und Kontraktzuordnung</p>
       </div>
+
+      {/* Operativer Fallkopf */}
+      <Card className={`border ${fallkopf.statusColor}`}>
+        <CardContent className="pt-4 pb-3 text-sm space-y-1">
+          <div className="font-semibold">Wiegungen: {fallkopf.status}</div>
+          <div>Rueckstand: {fallkopf.rueckstand}</div>
+          <div>Blocker: {fallkopf.blocker}</div>
+          <div>Folgepfad: {fallkopf.folgepfad}</div>
+        </CardContent>
+      </Card>
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card>

@@ -5,6 +5,7 @@
 import { useMemo, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery } from '@tanstack/react-query'
+import { Card, CardContent } from '@/components/ui/card'
 import { Wizard } from '@/components/patterns/Wizard'
 import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
 import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
@@ -139,6 +140,18 @@ export default function BestandskorrekturPage(): JSX.Element {
 
   const grundLabel = GRUND_OPTIONS.find((g) => g.code === data.grund)?.label || data.grund
 
+  const fallkopf = useMemo(() => {
+    const hatDifferenz = data.menge > 0
+    const hatGrund = data.grund !== ''
+    return {
+      status: hatDifferenz && hatGrund ? 'Buchungsbereit' : 'Eingabe unvollstaendig',
+      statusColor: hatDifferenz && hatGrund ? 'text-green-700 bg-green-50 border-green-300' : 'text-amber-700 bg-amber-50 border-amber-300',
+      differenz: hatDifferenz ? `-${data.menge} t (${grundLabel})` : 'Noch keine Menge erfasst',
+      begruendung: hatGrund ? grundLabel : 'Grund noch nicht gewaehlt',
+      folgeaktion: hatDifferenz && hatGrund ? 'Korrektur pruefen und buchen' : 'Alle Pflichtfelder ausfuellen',
+    }
+  }, [data.menge, data.grund, grundLabel])
+
   const steps = [
     {
       id: 'artikel',
@@ -239,6 +252,15 @@ export default function BestandskorrekturPage(): JSX.Element {
   return (
     <div className="flex flex-col">
       <div className="p-4 sm:p-6">
+        {/* Operativer Fallkopf */}
+        <Card className={`border mb-4 ${fallkopf.statusColor}`}>
+          <CardContent className="pt-4 pb-3 text-sm space-y-1">
+            <div className="font-semibold">Korrektur-Status: {fallkopf.status}</div>
+            <div>Differenz: {fallkopf.differenz}</div>
+            <div>Begruendung: {fallkopf.begruendung}</div>
+            <div>Folgeaktion: {fallkopf.folgeaktion}</div>
+          </CardContent>
+        </Card>
         <Wizard
           title="Bestandskorrektur"
           steps={steps}

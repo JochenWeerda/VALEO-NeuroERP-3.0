@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Skeleton } from '@/components/ui/skeleton'
 import { BarChart3, TrendingDown, TrendingUp, Warehouse, Package, AlertCircle, ArrowUpDown, Clock, Calendar, ShieldAlert, Zap, Snail, ChevronRight } from 'lucide-react'
+import { useMemo } from 'react'
 import { useInventoryDashboard } from '@/lib/api/dashboard'
 import { useMhdItems, useRennerItems, usePennerItems } from '@/lib/api/inventory'
 import { useNavigate, useSearchParams } from 'react-router-dom'
@@ -35,6 +36,20 @@ export default function BestandsuebersichtPage(): JSX.Element {
   // Prüfe ob echte Daten vorhanden sind
   const hasData = Boolean(bestand && bestand.totalArticles > 0)
   const topArticles = hasData && bestand ? bestand.topArticles : EMPTY_TOP_ARTICLES
+
+  const fallkopf = useMemo(() => {
+    const mhdCount = (mhdItems ?? []).length
+    const lowStock = hasData && bestand ? bestand.lowStockCount : 0
+    const total = hasData && bestand ? bestand.totalArticles : 0
+    const engpass = lowStock > 0
+    return {
+      status: engpass ? 'Engpaesse vorhanden' : 'Verfuegbarkeit stabil',
+      statusColor: engpass ? 'text-orange-700 bg-orange-50 border-orange-300' : 'text-green-700 bg-green-50 border-green-300',
+      engpaesse: `${lowStock} von ${total} Artikeln unter Mindestbestand`,
+      mhd: mhdCount > 0 ? `${mhdCount} Artikel mit MHD-Ablauf in 90 Tagen` : 'Keine MHD-kritischen Artikel',
+      naechsteAktion: lowStock > 0 ? 'Bestellvorschlaege pruefen' : mhdCount > 0 ? 'MHD-Ware priorisiert auslagern' : 'Keine dringende Aktion',
+    }
+  }, [bestand, hasData, mhdItems])
 
   return (
     <div className="space-y-6 p-6">
@@ -69,6 +84,16 @@ export default function BestandsuebersichtPage(): JSX.Element {
           </AlertDescription>
         </Alert>
       )}
+
+      {/* Operativer Fallkopf */}
+      <Card className={`border ${fallkopf.statusColor}`}>
+        <CardContent className="pt-4 pb-3 text-sm space-y-1">
+          <div className="font-semibold">Operative Lage: {fallkopf.status}</div>
+          <div>Engpaesse: {fallkopf.engpaesse}</div>
+          <div>MHD-Lage: {fallkopf.mhd}</div>
+          <div>Naechste Aktion: {fallkopf.naechsteAktion}</div>
+        </CardContent>
+      </Card>
 
       {/* KPI-Karten */}
       <div className="grid gap-4 md:grid-cols-4">
