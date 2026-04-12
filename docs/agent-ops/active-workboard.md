@@ -26,10 +26,20 @@ Archiv des vorherigen Boards:
 ## DOC-REF-002
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Externe ERP-Referenzdoku neutralisieren, Lizenz-/Referenzlage scharfziehen und direkte Nennungen des angefragten Systems aus den aktiven Repo-Dokumenten entfernen.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/*.md`
 **Abnahmekriterien:** Die Referenzanalyse bleibt fachlich brauchbar, benennt aber nur noch neutrale Vergleichsklassen bzw. permissive/kommerzielle Lizenzrisiken; direkte Nennungen des angefragten Systems sind aus den aktiven Projektkontext-Dateien entfernt.
+**Erledigt:** Die aktive Referenzdatei wurde auf `docs/project-context/erp-reference-gap-analysis-amic-community-erp-fiori-2026-04-08.md` umgestellt; Tail-Plan, i18n-, Setup-, Roadmap- und Archivdoku nutzen jetzt neutrale Bezeichnungen; ein repo-weiter Textscan auf die direkte Nennung liefert keine Treffer mehr.
+**Checks:** `rg -n -i "\\bodoo\\b" . --glob '!node_modules/**' --glob '!.git/**' --glob '!packages/frontend-web/node_modules/**' --glob '!venv/**' --glob '!coverage_html/**'`, `node scripts/docs-governance-check.cjs`
+
+## DOC-REF-003
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Eine neutrale ERP-Referenzmatrix im Repo festhalten und daraus die naechsten sechs fachlichen Vertiefungs-Slices fuer VALEO ableiten.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/*.md`
+**Abnahmekriterien:** Es gibt eine eigenstaendige Matrix mit Referenzmustern, Lizenz-/Uebernahmeregeln und VALEO-Istbild; daraus sind sechs konkrete Slices mit Zielbild und Prioritaet im Workboard abgeleitet.
 
 ## COV-FIN-002
 
