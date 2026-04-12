@@ -23,6 +23,38 @@ Archiv des vorherigen Boards:
   - [operational-rollout-scope-2026-04-09.md](C:/Users/Jochen/VALEO-NeuroERP-3.0/docs/project-context/operational-rollout-scope-2026-04-09.md)
 - Der naechste Block betrifft Sammel- und Follow-up-Masken mit echtem operativem Mehrwert.
 
+## ARCH-DOM-001
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Fachliche Schema-Zuordnung der Tabellen nicht nur behaupten, sondern mit einem expliziten Audit- und Guardrail-Pfad pruefbar machen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `scripts/check_required_domain_schemas.py`, neues Domain-Mapping-Audit unter `scripts/`
+**Abnahmekriterien:** Es gibt einen automatisierten Check fuer Kern-Schemaanker plus fachlich schiefe bzw. bewusst tolerierte Cross-Domain-Zuordnungen.
+
+## COVERAGE-ERP-001
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Backend-Coverage fuer ERP-Kernpfade auf einen belastbaren Ratchet-Pfad bringen statt pauschal 100% zu behaupten.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `.github/workflows/quality-gate.yml`, `pytest.ini`, neue Coverage-Guard-Skripte/Tests unter `scripts/` und `tests/`
+**Abnahmekriterien:** CI prueft einen expliziten Mindeststandard fuer kritische Pfade; die Doku benennt ehrlich, was repo-seitig erreichbar ist und was nicht.
+
+## NATS-DEV-001
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Event-Bus/NATS im Dev-Betrieb automatisch mit Docker laufen lassen, statt nur config-aktivierbar zu sein.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `docker-compose*.yml`, `.env.example`, ggf. `app/core/config.py`, Event-Bus-Tests
+**Abnahmekriterien:** Standard-Dev-Compose bringt NATS mit hoch und Backend laeuft dabei automatisch auf NATS statt Memory-Fallback.
+
+## INT-BOOT-001
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Externe Integrationen soweit repo-seitig vorbereiten, dass lokale oder frische Installationen nicht an fehlenden Bootstrap-Hinweisen fuer Secrets, Zielsysteme und Ops-Parameter scheitern.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/open-gaps-and-known-issues.md`, `.env.example`, `scripts/`, ggf. Integrations-README unter `docs/`
+**Abnahmekriterien:** Es gibt einen reproduzierbaren Readiness-/Bootstrap-Check fuer Live-Integrationen und klare env-/secret-Vorlagen fuer lokale bzw. ops-seitige Aktivierung.
+
 ## DOCS-README-001
 
 **Von:** Codex
