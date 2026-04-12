@@ -26,10 +26,12 @@ Archiv des vorherigen Boards:
 ## DOCS-README-001
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Root-README gegen den aktuellen Repo-, Delivery- und Bootstrap-Stand aufraeumen und wieder als belastbaren Einstiegspunkt ausrichten.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `README.md`
 **Abnahmekriterien:** README ist encoding-sauber, verweist auf die echten Source-of-Truth-Dokumente, ueberzeichnet den Produktreifegrad nicht und bildet den aktuellen Docker-/Bootstrap-Pfad korrekt ab.
+**Erledigt:** `README.md` ist von veralteter Langform und Mojibake auf einen knappen, ehrlichen Einstiegspunkt umgestellt; der aktuelle Reifegrad, der Alembic-/Docker-Erstinstallationspfad, die Mehr-Domaenen-Struktur, lokale Prüfkommandos sowie die maßgeblichen Source-of-Truth-Dokumente sind jetzt korrekt referenziert; ueberspannte Vollstaendigkeits- und Production-Claims wurden entfernt.
+**Checks:** `node scripts/docs-governance-check.cjs`, `rg -n "ð|â|Ã|�" README.md`
 
 ## DB-BOOT-001
 
