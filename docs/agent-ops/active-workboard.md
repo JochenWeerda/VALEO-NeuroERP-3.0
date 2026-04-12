@@ -23,6 +23,14 @@ Archiv des vorherigen Boards:
   - [operational-rollout-scope-2026-04-09.md](C:/Users/Jochen/VALEO-NeuroERP-3.0/docs/project-context/operational-rollout-scope-2026-04-09.md)
 - Der naechste Block betrifft Sammel- und Follow-up-Masken mit echtem operativem Mehrwert.
 
+## DOCS-README-001
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Root-README gegen den aktuellen Repo-, Delivery- und Bootstrap-Stand aufraeumen und wieder als belastbaren Einstiegspunkt ausrichten.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `README.md`
+**Abnahmekriterien:** README ist encoding-sauber, verweist auf die echten Source-of-Truth-Dokumente, ueberzeichnet den Produktreifegrad nicht und bildet den aktuellen Docker-/Bootstrap-Pfad korrekt ab.
+
 ## DB-BOOT-001
 
 **Von:** Codex
