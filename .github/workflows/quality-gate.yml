@@ -142,8 +142,14 @@ jobs:
       - name: Check required ERP domain structure
         run: python scripts/check_required_domain_schemas.py
 
+      - name: Check domain table ownership
+        run: python scripts/check_domain_table_ownership.py
+
       - name: Run tests
         run: pytest -q
+
+      - name: Check critical backend coverage
+        run: python scripts/check_critical_backend_coverage.py
 
   frontend:
     name: Frontend (lint + typecheck + build)

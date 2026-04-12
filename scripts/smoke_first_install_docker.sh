@@ -29,4 +29,5 @@ done
 export DATABASE_URL="postgresql://postgres:postgres@127.0.0.1:${HOST_PORT}/valeo_test"
 python scripts/init_db.py
 python scripts/check_required_domain_schemas.py
+python scripts/check_domain_table_ownership.py
 echo "First-install smoke passed."
