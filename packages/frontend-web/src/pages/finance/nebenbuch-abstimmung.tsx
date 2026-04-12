@@ -5,10 +5,14 @@ import { apiClient } from '@/lib/api-client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { NativeSelect } from '@/components/ui/native-select'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/hooks/use-toast'
 import { Loader2, CheckCircle2, XCircle, ChevronRight, Download } from 'lucide-react'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 export default function NebenbuchAbstimmungPage(): JSX.Element {
   const { t } = useTranslation()
@@ -156,9 +160,57 @@ export default function NebenbuchAbstimmungPage(): JSX.Element {
     { value: 'AP', label: `${t('crud.entities.creditor')} (AP)` },
     { value: 'BANK', label: t('crud.fields.bankAccount') },
   ]
+  const unbalancedAccounts = Number(summary?.unbalanced_accounts ?? reconciliationData?.entries?.filter((entry: any) => !entry.is_balanced).length ?? 0)
+  const operationalStatus = normalizeOperationalStatus(
+    unbalancedAccounts > 0 ? 'eskaliert' : reconciliationData ? 'in_pruefung' : 'offen'
+  )
+  const contextSections = [
+    {
+      title: 'Abstimmung',
+      items: [
+        { label: 'Ledger-Typ', value: ledgerType },
+        { label: 'Periode', value: period },
+        { label: 'Unbalanciert', value: String(unbalancedAccounts) },
+      ],
+    },
+    {
+      title: 'Klaerungslage',
+      items: [
+        { label: 'Konten gesamt', value: String(summary?.total_accounts ?? reconciliationData?.total_accounts ?? 0) },
+        { label: 'Ausgeglichen', value: String(summary?.balanced_accounts ?? reconciliationData?.balanced_accounts ?? 0) },
+        { label: 'Detailkonto', value: selectedAccount || 'Keins geoeffnet' },
+      ],
+    },
+    {
+      title: 'Governance',
+      items: [
+        { label: 'Naechste Aktion', value: unbalancedAccounts > 0 ? 'Differenzkonten klaeren' : 'Export oder Abschlussfreigabe' },
+        { label: 'Blocker', value: unbalancedAccounts > 0 ? 'Es bestehen unausgeglichene Konten.' : 'Kein akuter Blocker' },
+      ],
+    },
+  ]
+  const timelineItems = [
+    { label: 'Abstimmungsraum geladen', detail: `${ledgerType} fuer ${period}` },
+    selectedAccount ? { label: 'Detailkonto geoeffnet', detail: selectedAccount } : null,
+    unbalancedAccounts > 0 ? { label: 'Differenzen erkannt', detail: `${unbalancedAccounts} Konto/Konten nicht ausgeglichen` } : null,
+  ].filter((item): item is { label: string; detail: string } => item !== null)
 
   return (
     <div className="container mx-auto p-6 space-y-6">
+      <OperationalCaseHeader
+        title={t('crud.fields.subsidiaryLedgerReconciliation')}
+        description="Abgleich zwischen Nebenbuch und Hauptbuch mit Fokus auf Differenzen und Folgeklaerung."
+        status={operationalStatus}
+        owner="Finanzbuchhaltung"
+        blocker={unbalancedAccounts > 0 ? 'Es liegen unausgeglichene Konten im aktuellen Abstimmungsraum vor.' : null}
+        nextAction={unbalancedAccounts > 0 ? 'Differenzkonten und Einzelposten klaeren' : 'Abgleich exportieren oder Periode freigeben'}
+        caseLabel={`${ledgerType} ${period}`}
+        tags={['FIBU', 'Abstimmung']}
+      />
+      <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
+        <OperationalTimeline title="Abstimmungsverlauf" items={timelineItems} />
+        <OperationalContextPanel sections={contextSections} />
+      </div>
       {workflowInstanceId && (
         <div className="mb-4 rounded-md border border-indigo-500/30 bg-indigo-500/10 px-4 py-2 text-sm text-indigo-200">
           Flow-Spine: {workflowCase || workflowProcess} (Instanz {workflowInstanceId.slice(0, 8)}...)

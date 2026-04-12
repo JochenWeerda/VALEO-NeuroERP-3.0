@@ -9,6 +9,10 @@ import { TrendingUp, RefreshCw, Download } from 'lucide-react'
 import { financeService, type BalanceSheetItem } from '@/lib/services/finance-service'
 import { exportToCSV } from '@/lib/export-utils'
 import { useToast } from '@/hooks/use-toast'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 const fmt = (n: number) =>
   new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n)
@@ -93,6 +97,37 @@ export default function BilanzPage(): JSX.Element {
   const eigenkapital = Number(bilanz.total_equity)
   const fremdkapital = Number(bilanz.total_liabilities)
   const ekQuote = bilanzsumme > 0 ? ((eigenkapital / bilanzsumme) * 100).toFixed(1) : '0.0'
+  const operationalStatus = normalizeOperationalStatus(!bilanz.is_balanced ? 'eskaliert' : Number(ekQuote) < 20 ? 'wartet_auf_mensch' : 'in_pruefung')
+  const contextSections = [
+    {
+      title: 'Bilanzstichtag',
+      items: [
+        { label: 'Stichtag', value: bilanz.as_of_date },
+        { label: 'Aktiva', value: String(bilanz.assets.length) },
+        { label: 'Passiva', value: String(bilanz.equity.length + bilanz.liabilities.length) },
+      ],
+    },
+    {
+      title: 'Wirtschaftslage',
+      items: [
+        { label: 'Bilanzsumme', value: fmt(bilanzsumme) },
+        { label: 'Eigenkapital', value: fmt(eigenkapital) },
+        { label: 'EK-Quote', value: `${ekQuote}%` },
+      ],
+    },
+    {
+      title: 'Governance',
+      items: [
+        { label: 'Ausgeglichen', value: bilanz.is_balanced ? 'Ja' : 'Nein' },
+        { label: 'Naechste Aktion', value: bilanz.is_balanced ? 'Bilanz pruefen oder exportieren' : 'Differenzkette aufklaeren' },
+      ],
+    },
+  ]
+  const timelineItems = [
+    { label: 'Bilanz geladen', detail: `Stichtag ${bilanz.as_of_date}` },
+    { label: 'Bilanzsumme berechnet', detail: fmt(bilanzsumme) },
+    !bilanz.is_balanced ? { label: 'Bilanz ist nicht ausgeglichen', detail: 'Buchungsjournal und Abschlusscheck pruefen' } : null,
+  ].filter((item): item is { label: string; detail: string } => item !== null)
 
   // Assets nach Typ gruppieren
   const anlagevermoegen = bilanz.assets.filter(a => a.account_type === 'ASSET' && a.level === 0)
@@ -118,6 +153,20 @@ export default function BilanzPage(): JSX.Element {
 
   return (
     <div className="space-y-6 p-6">
+      <OperationalCaseHeader
+        title="Bilanz"
+        description="Vermoegens- und Kapitalstruktur zum gewaehlten Stichtag."
+        status={operationalStatus}
+        owner="Finanzbuchhaltung"
+        blocker={!bilanz.is_balanced ? 'Bilanz ist nicht ausgeglichen.' : Number(ekQuote) < 20 ? 'Niedrige Eigenkapitalquote erfordert Pruefung.' : null}
+        nextAction={bilanz.is_balanced ? 'Bilanz exportieren oder freigeben' : 'Differenzen im Abschlusslauf klaeren'}
+        caseLabel={bilanz.as_of_date}
+        tags={['FIBU', 'Abschluss']}
+      />
+      <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
+        <OperationalTimeline title="Bilanzverlauf" items={timelineItems} />
+        <OperationalContextPanel sections={contextSections} />
+      </div>
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-4">
           <div>

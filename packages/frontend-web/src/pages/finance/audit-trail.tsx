@@ -12,11 +12,15 @@ import { Input } from '@/components/ui/input'
 import { NativeSelect } from '@/components/ui/native-select'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { FileText, Shield, CheckCircle2, XCircle, AlertTriangle } from 'lucide-react'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
 import { useToast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/api-client'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 type AuditLogEntry = {
   id: string
@@ -222,9 +226,57 @@ export default function AuditTrailPage(): JSX.Element {
     { value: 'all', label: t('common.all') },
     ...uniqueActions.map((action) => ({ value: action, label: action })),
   ]
+  const criticalLogs = filteredLogs.filter((log) => ['delete', 'storno', 'reverse'].includes(log.action.toLowerCase())).length
+  const operationalStatus = normalizeOperationalStatus(
+    criticalLogs > 0 ? 'wartet_auf_mensch' : filteredLogs.length > 0 ? 'in_pruefung' : 'offen'
+  )
+  const contextSections = [
+    {
+      title: 'Revisionslage',
+      items: [
+        { label: 'Eintraege', value: String(filteredLogs.length) },
+        { label: 'Kritische Aktionen', value: String(criticalLogs) },
+        { label: 'Entity-Typen', value: String(uniqueEntityTypes.length) },
+      ],
+    },
+    {
+      title: 'Filterkontext',
+      items: [
+        { label: 'Entity-Filter', value: entityTypeFilter === 'all' ? 'Alle' : entityTypeFilter },
+        { label: 'Action-Filter', value: actionFilter === 'all' ? 'Alle' : actionFilter },
+        { label: 'Suche', value: searchTerm || 'Keine Einschraenkung' },
+      ],
+    },
+    {
+      title: 'Governance',
+      items: [
+        { label: 'Naechste Aktion', value: criticalLogs > 0 ? 'Kritische Journalaktionen pruefen' : 'Audit-Trail exportieren oder filtern' },
+        { label: 'Blocker', value: criticalLogs > 0 ? 'Es liegen loeschende oder stornierende Aktionen im Ausschnitt vor.' : 'Kein akuter Blocker' },
+      ],
+    },
+  ]
+  const timelineItems = [
+    { label: 'Audit-Trail geladen', detail: `${logs.length} Audit-Logs im aktuellen Fenster` },
+    stats ? { label: 'Statistik verfuegbar', detail: `${stats.total_entries} Gesamteintraege` } : null,
+    criticalLogs > 0 ? { label: 'Kritische Aktionen erkannt', detail: `${criticalLogs} potenziell sensible Vorgaenge` } : null,
+  ].filter((item): item is { label: string; detail: string } => item !== null)
 
   return (
     <div className="space-y-6 p-6">
+      <OperationalCaseHeader
+        title={t('finance.auditTrail.title')}
+        description={t('finance.auditTrail.description')}
+        status={operationalStatus}
+        owner="Revision"
+        blocker={criticalLogs > 0 ? 'Kritische Audit-Aktionen muessen fachlich bewertet werden.' : null}
+        nextAction={criticalLogs > 0 ? 'Auffaellige Aktionen pruefen' : 'Audit-Trail exportieren oder Detailfilter setzen'}
+        caseLabel="GoBD / Audit"
+        tags={['FIBU', 'Revision']}
+      />
+      <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
+        <OperationalTimeline title="Revisionsverlauf" items={timelineItems} />
+        <OperationalContextPanel sections={contextSections} />
+      </div>
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">{t('finance.auditTrail.title')}</h2>

@@ -5,8 +5,12 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { TrendingUp, RefreshCw } from 'lucide-react'
 import { financeService } from '@/lib/services/finance-service'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 const fmt = (n: number) =>
   new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n)
@@ -38,9 +42,54 @@ export default function GuvPage(): JSX.Element {
   const gesamtertraege = guv ? Number(guv.total_revenue) : 0
   const gesamtaufwendungen = guv ? Number(guv.total_expenses) : 0
   const umsatzrendite = gesamtertraege > 0 ? ((jahresueberschuss / gesamtertraege) * 100).toFixed(1) : '0.0'
+  const operationalStatus = normalizeOperationalStatus(!guv ? 'offen' : jahresueberschuss < 0 ? 'eskaliert' : 'in_pruefung')
+  const contextSections = [
+    {
+      title: 'Periode',
+      items: [
+        { label: 'Periode', value: guv?.period ?? period },
+        { label: 'Ertragspositionen', value: String(guv?.revenue.length ?? 0) },
+        { label: 'Aufwandspositionen', value: String(guv?.expenses.length ?? 0) },
+      ],
+    },
+    {
+      title: 'Wirtschaftslage',
+      items: [
+        { label: 'Ertraege', value: fmt(gesamtertraege) },
+        { label: 'Aufwendungen', value: fmt(gesamtaufwendungen) },
+        { label: 'Rendite', value: `${umsatzrendite}%` },
+      ],
+    },
+    {
+      title: 'Governance',
+      items: [
+        { label: 'Naechste Aktion', value: jahresueberschuss < 0 ? 'Ergebnisabweichung analysieren' : 'Periode validieren oder exportieren' },
+        { label: 'Blocker', value: !guv ? `Keine GuV-Daten fuer ${period}` : jahresueberschuss < 0 ? 'Negatives Periodenergebnis.' : 'Kein akuter Blocker' },
+      ],
+    },
+  ]
+  const timelineItems = [
+    { label: 'GuV geladen', detail: guv ? `Periode ${guv.period}` : `Keine Daten fuer ${period}` },
+    guv ? { label: 'Ergebnis ermittelt', detail: fmt(jahresueberschuss) } : null,
+    guv && jahresueberschuss < 0 ? { label: 'Negatives Ergebnis erkannt', detail: 'Ertrags- und Kostenpositionen pruefen' } : null,
+  ].filter((item): item is { label: string; detail: string } => item !== null)
 
   return (
     <div className="space-y-6 p-6">
+      <OperationalCaseHeader
+        title="Gewinn- und Verlustrechnung"
+        description="Ergebnisraum fuer Ertraege, Aufwendungen und Periodenergebnis."
+        status={operationalStatus}
+        owner="Controlling"
+        blocker={!guv ? `Fuer ${period} liegen keine GuV-Daten vor.` : jahresueberschuss < 0 ? 'Negatives Ergebnis in der gewaehlten Periode.' : null}
+        nextAction={jahresueberschuss < 0 ? 'Kosten- und Ertragsabweichungen pruefen' : 'Periode freigeben oder exportieren'}
+        caseLabel={guv?.period ?? period}
+        tags={['FIBU', 'Controlling']}
+      />
+      <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
+        <OperationalTimeline title="GuV-Verlauf" items={timelineItems} />
+        <OperationalContextPanel sections={contextSections} />
+      </div>
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-4">
           <div>

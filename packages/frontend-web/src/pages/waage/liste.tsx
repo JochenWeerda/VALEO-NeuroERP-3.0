@@ -1,6 +1,9 @@
 import { useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { PageSection, PageSurface } from '@/components/patterns/PageSurface'
 import { useWaagen, type Waage } from '@/lib/api/betrieb'
 import { Badge } from '@/components/ui/badge'
@@ -14,6 +17,7 @@ import { useToast } from '@/hooks/use-toast'
 import { AlertTriangle, FileDown, Plus, Scale, Search } from 'lucide-react'
 import { useSupplyChainOverview } from '@/lib/api/supply-chain'
 import { summarizeSupplyOps } from '@/lib/professional-control-centers'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 function LoadingSkeleton(): JSX.Element {
   return (
@@ -106,6 +110,46 @@ export default function WaageListePage(): JSX.Element {
     URL.revokeObjectURL(url)
     toast({ title: 'Export', description: `${filteredWaagen.length} Waagen exportiert.` })
   }
+  const dueCalibrations = filteredWaagen.filter((w) => new Date(w.naechsteEichung) <= new Date()).length
+  const operationalStatus = normalizeOperationalStatus(
+    supplyOps.pressure === 'hoch'
+      ? 'eskaliert'
+      : dueCalibrations > 0
+        ? 'wartet_auf_mensch'
+        : filteredWaagen.length > 0
+          ? 'in_pruefung'
+          : 'offen',
+  )
+  const contextSections = [
+    {
+      title: 'Waagenlage',
+      items: [
+        { label: 'Standorte', value: `${filteredWaagen.length}` },
+        { label: 'Eichung faellig', value: `${dueCalibrations}` },
+        { label: 'Bottleneck', value: supplyOps.bottleneck },
+      ],
+    },
+    {
+      title: 'Physische Kette',
+      items: [
+        { label: 'Annahme offen', value: `${chain?.waitingInbound ?? 0}` },
+        { label: 'Wiegungen offen', value: `${chain?.openWeighingTickets ?? 0}` },
+        { label: 'Naechste Aktion', value: supplyOps.nextAction },
+      ],
+    },
+  ]
+  const timelineItems = [
+    {
+      label: supplyOps.pressure === 'hoch' ? 'Hoher physischer Druck' : 'Kettenlage stabil',
+      detail: `Druck ${supplyOps.pressure}, Bottleneck ${supplyOps.bottleneck}, Fracht unterwegs ${chain?.freightInTransit ?? 0}.`,
+    },
+    {
+      label: dueCalibrations > 0 ? 'Eichpruefung faellig' : 'Eichlage unkritisch',
+      detail: dueCalibrations > 0
+        ? `${dueCalibrations} Waagen sollten vor weiterer Belastung neu geprueft oder eingeplant werden.`
+        : 'Im aktuellen Ausschnitt gibt es keine ueberfaelligen Eichtermine.',
+    },
+  ]
 
   return (
     <PageSurface data-page-surface="waage-liste" contentClassName="space-y-6">
@@ -120,6 +164,23 @@ export default function WaageListePage(): JSX.Element {
           <Button onClick={() => navigate('/waage/neu')} className="min-h-touch gap-2 touch-manipulation">
             <Plus className="h-4 w-4" />Neue Waage
           </Button>
+        </div>
+      </PageSection>
+
+      <PageSection>
+        <OperationalCaseHeader
+          title="Waagensteuerung"
+          description="Die Waagenliste fuehrt die physische Kette als kompakten Vorgang zwischen Annahme, Wiegung, Charge und Fracht."
+          status={operationalStatus}
+          owner="Waagenleitstand"
+          blocker={supplyOps.pressure === 'hoch' ? `Bottleneck ${supplyOps.bottleneck} erzeugt aktuell hohen operativen Druck.` : dueCalibrations > 0 ? `${dueCalibrations} Waagen haben einen faelligen Eichtermin.` : null}
+          nextAction={supplyOps.nextAction}
+          caseLabel="Vorgang: Wiegung"
+          tags={['Waage', 'Physische Kette', 'Operator']}
+        />
+        <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,2fr)_360px]">
+          <OperationalTimeline title="Kettenverlauf" items={timelineItems} />
+          <OperationalContextPanel title="Waagen-Kontext" sections={contextSections} />
         </div>
       </PageSection>
 

@@ -5,6 +5,10 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Calendar, MapPin, Truck } from 'lucide-react'
 import { useTouren } from '@/lib/api/misc-modules'
 import { useSupplyChainOverview } from '@/lib/api/supply-chain'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 export default function TourenplanungPage(): JSX.Element {
   const { data: touren, isLoading } = useTouren()
@@ -21,9 +25,55 @@ export default function TourenplanungPage(): JSX.Element {
       </div>
     )
   }
+  const operationalStatus = normalizeOperationalStatus(
+    touren.unterwegs > 0 ? 'in_pruefung' : touren.offen > 0 ? 'wartet_auf_mensch' : 'abgeschlossen'
+  )
+  const contextSections = [
+    {
+      title: 'Disposition',
+      items: [
+        { label: 'Touren heute', value: String(touren.heute) },
+        { label: 'Geplant', value: String(touren.offen) },
+        { label: 'Unterwegs', value: String(touren.unterwegs) },
+      ],
+    },
+    {
+      title: 'Ressourcenlage',
+      items: [
+        { label: 'Wartende Annahmen', value: String(chain.waitingInbound) },
+        { label: 'Offene Wiegungen', value: String(chain.openWeighingTickets) },
+        { label: 'Aktive Fahrzeuge', value: String(chain.activeVehiclePlates.length) },
+      ],
+    },
+    {
+      title: 'Governance',
+      items: [
+        { label: 'Gesperrte Chargen', value: String(chain.blockedCharges) },
+        { label: 'Naechste Aktion', value: touren.offen > 0 ? 'Offene Touren disponieren' : 'Laufende Touren ueberwachen' },
+      ],
+    },
+  ]
+  const timelineItems = touren.tourenListe.slice(0, 4).map((tour) => ({
+    label: `${tour.id} - ${tour.status === 'unterwegs' ? 'Unterwegs' : tour.status === 'geplant' ? 'Geplant' : 'Abgeschlossen'}`,
+    detail: `${tour.fahrer}, ${tour.stopps} Stopps, ${tour.km} km`,
+  }))
 
   return (
     <div className="space-y-6 p-3 md:p-6">
+      <OperationalCaseHeader
+        title="Tourenplanung"
+        description="Disposition, Fahrzeugbelegung und Status laufender Liefertouren."
+        status={operationalStatus}
+        owner="Logistikdisposition"
+        blocker={chain.blockedCharges > 0 ? 'Gesperrte Chargen koennen Touren beeinflussen.' : null}
+        nextAction={touren.offen > 0 ? 'Geplante Touren disponieren' : 'Aktive Touren monitoren'}
+        caseLabel="Disposition"
+        tags={['Logistik', 'Tour']}
+      />
+      <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
+        <OperationalTimeline title="Tourenlage" items={timelineItems} />
+        <OperationalContextPanel sections={contextSections} />
+      </div>
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Tourenplanung</h1>

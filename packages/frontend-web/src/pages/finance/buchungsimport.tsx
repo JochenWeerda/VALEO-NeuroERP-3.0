@@ -9,7 +9,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { Upload, FileText, CheckCircle2, AlertCircle, ArrowRight, RotateCcw } from 'lucide-react'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 type ImportError = {
   row_number: number
@@ -125,9 +129,64 @@ export default function BuchungsimportPage(): JSX.Element {
     importMutation.reset()
     if (fileRef.current) fileRef.current.value = ''
   }
+  const activeResult = result ?? preview
+  const operationalStatus = normalizeOperationalStatus(
+    step === 'result'
+      ? (result?.failed ? 'eskaliert' : 'abgeschlossen')
+      : step === 'preview'
+        ? (preview?.failed ? 'wartet_auf_mensch' : 'in_pruefung')
+        : file
+          ? 'in_pruefung'
+          : 'offen'
+  )
+  const contextSections = [
+    {
+      title: 'Importvorgang',
+      items: [
+        { label: 'Schritt', value: step },
+        { label: 'Datei', value: file?.name || 'Noch nicht gewaehlt' },
+        { label: 'Periode', value: period },
+      ],
+    },
+    {
+      title: 'Prueflage',
+      items: [
+        { label: 'Zeilen gesamt', value: String(activeResult?.total_rows ?? 0) },
+        { label: 'Gueltig', value: String(activeResult?.successful ?? 0) },
+        { label: 'Fehler', value: String(activeResult?.failed ?? 0) },
+      ],
+    },
+    {
+      title: 'Governance',
+      items: [
+        { label: 'Naechste Aktion', value: step === 'preview' ? 'Vorschau freigeben oder Fehler korrigieren' : step === 'result' ? 'Ergebnis pruefen oder neuen Lauf starten' : 'Datei auswaehlen und Vorschau starten' },
+        { label: 'Blocker', value: activeResult?.failed ? 'Import enthaelt Validierungsfehler.' : 'Kein akuter Blocker' },
+      ],
+    },
+  ]
+  const timelineItems = [
+    { label: 'Importarbeitsplatz geoeffnet', detail: `Schritt ${step}` },
+    file ? { label: 'Datei geladen', detail: file.name } : null,
+    preview ? { label: 'Vorschau erstellt', detail: `${preview.successful} gueltig / ${preview.failed} fehlerhaft` } : null,
+    result ? { label: 'Import abgeschlossen', detail: `${result.successful} Buchungen uebernommen` } : null,
+  ].filter((item): item is { label: string; detail: string } => item !== null)
 
   return (
     <div className="space-y-6 p-6">
+      <OperationalCaseHeader
+        title="Massen-Buchungsimport"
+        description="Import, Vorschau und Uebernahme grosser Buchungspakete in einem gefuehrten Vorgangsbild."
+        status={operationalStatus}
+        owner="Finanzbuchhaltung"
+        blocker={activeResult?.failed ? 'Der Import enthaelt Validierungsfehler.' : null}
+        nextAction={step === 'preview' ? 'Vorschau freigeben oder korrigieren' : step === 'result' ? 'Ergebnis pruefen oder neuen Lauf starten' : 'CSV-Datei waehlen'}
+        caseLabel={file?.name || 'Importlauf'}
+        tags={['FIBU', 'Import']}
+      />
+      <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
+        <OperationalTimeline title="Importverlauf" items={timelineItems} />
+        <OperationalContextPanel sections={contextSections} />
+      </div>
       <div>
         <h1 className="text-3xl font-bold">Massen-Buchungsimport</h1>
         <p className="text-muted-foreground">CSV-Datei mit Buchungen hochladen, prüfen und importieren</p>

@@ -39,19 +39,35 @@ Diese Masken haben jetzt einen kompakten Fallkopf, einen knappen Kontextblock un
   - `mahnwesen.tsx`
   - `op-debitoren.tsx`
   - `op-kreditoren.tsx`
+  - `finance/bank-abgleich.tsx`
+  - `finance/payment-matching.tsx`
+  - `finance/ap-invoices-list.tsx`
+  - `finance/ap-invoice-form.tsx`
   - `fibu/kreditoren.tsx`
   - `fibu/zahlungslaeufe.tsx`
+  - `fibu/offene-posten.tsx`
+  - `fibu/zahlungseingaenge.tsx`
+  - `fibu/zahlungsvorschlaege.tsx`
   - `finance/ustva.tsx`
   - `fibu/elster-online.tsx`
   - `fibu/schnittstellen-center.tsx`
   - `fibu/schnittstelle-fibu.tsx`
   - `fibu/monatswerte.tsx`
+  - `fibu/buchungsjournal.tsx`
+  - `fibu/abschluss-checklist-detail.tsx`
+  - `fibu/bwa.tsx`
+  - `fibu/bilanz.tsx`
+  - `finance/zahlungslauf-kreditoren.tsx`
+  - `finance/lastschriften-debitoren.tsx`
+  - `fibu/buchhaltungsuebersicht.tsx`
 - Service / CRM:
   - `service/anfrage-detail.tsx`
   - `crm/opportunity-detail.tsx`
 - Weitere Sammel-/Follow-up-Masken:
   - `annahme/abrechnung.tsx`
   - `annahme/warteschlange.tsx`
+  - `charge/rueckverfolgung.tsx`
+  - `charge/wareneingang.tsx`
   - `einkauf/rechnungseingaenge-liste.tsx`
   - `einkauf/anlieferavis.tsx`
   - `einkauf/anlieferavis-liste.tsx`
@@ -62,6 +78,8 @@ Diese Masken haben jetzt einen kompakten Fallkopf, einen knappen Kontextblock un
   - `fuhrpark/fahrzeug-stamm.tsx`
   - `futtermittel/charge-verfolgung.tsx`
   - `einkauf/lieferanten-stamm.tsx`
+  - `logistik/tourenplanung.tsx`
+  - `waage/liste.tsx`
 
 ## Mehrwertkriterien
 

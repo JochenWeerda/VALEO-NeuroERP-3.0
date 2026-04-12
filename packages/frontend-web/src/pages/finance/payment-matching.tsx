@@ -14,11 +14,15 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
 import { NativeSelect } from '@/components/ui/native-select'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { Upload, CheckCircle2, Link2 } from 'lucide-react'
 import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
 import { useToast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/api-client'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 type PaymentEntry = {
   id: string
@@ -293,9 +297,74 @@ export default function PaymentMatchingPage(): JSX.Element {
       currency: op.currency,
     }).format(op.open_amount)} offen`,
   }))
+  const offeneZahlungen = payments.filter((payment) => payment.match_status === 'UNMATCHED').length
+  const gesamtBetrag = payments.reduce((sum, payment) => sum + payment.amount, 0)
+  const matchRate = payments.length > 0 ? Math.round((payments.filter((payment) => payment.match_status === 'MATCHED').length / payments.length) * 100) : 0
+  const manualReviewCount = payments.filter((payment) => payment.match_status === 'PARTIAL' || payment.match_status === 'MANUAL').length
+  const operationalStatus = normalizeOperationalStatus(
+    offeneZahlungen > 0 ? (manualReviewCount > 0 ? 'eskaliert' : 'wartet_auf_mensch') : 'abgeschlossen'
+  )
+  const contextSections = [
+    {
+      title: 'Vorgang',
+      items: [
+        { label: 'Offene Zahlungen', value: String(offeneZahlungen) },
+        { label: 'Manuelle Klaerung', value: String(manualReviewCount) },
+        { label: 'Auto-Match-Rate', value: `${matchRate}%` },
+      ],
+    },
+    {
+      title: 'Wirtschaftslage',
+      items: [
+        {
+          label: 'Gefilterter Betrag',
+          value: new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(gesamtBetrag),
+        },
+        { label: 'Importformat', value: 'CSV' },
+        { label: 'Bankkonto', value: bankAccount || 'Noch nicht gesetzt' },
+      ],
+    },
+    {
+      title: 'Governance',
+      items: [
+        { label: 'Naechste Aktion', value: offeneZahlungen > 0 ? 'Zuordnung pruefen oder Auto-Match starten' : 'Abgleich archivieren' },
+        { label: 'Blocker', value: selectedPayment ? 'Zahlung wartet auf Zuordnung' : 'Kein akuter Blocker' },
+      ],
+    },
+  ]
+  const timelineItems = [
+    { label: 'Unmatched-Liste geladen', detail: `${payments.length} Zahlung(en) im Matchingraum` },
+    selectedPayment
+      ? {
+          label: 'Manuelle Zuordnung aktiv',
+          detail: `${selectedPayment.id} wartet auf OP-Entscheidung`,
+          timestamp: selectedPayment.booking_date,
+        }
+      : null,
+    csvFile
+      ? {
+          label: 'Import vorbereitet',
+          detail: `${csvFile.name} fuer CSV-Import`,
+        }
+      : null,
+  ].filter((item): item is { label: string; detail: string; timestamp?: string } => item !== null)
 
   return (
     <div className="space-y-6 p-6">
+      <OperationalCaseHeader
+        title={t('finance.payments.title')}
+        description={t('finance.payments.description')}
+        status={operationalStatus}
+        owner="Debitorenbuchhaltung"
+        blocker={selectedPayment ? 'Ausgewaehlte Zahlung ist noch keinem OP zugeordnet.' : offeneZahlungen > 0 ? 'Zahlungseingaenge warten auf Matching.' : null}
+        nextAction={offeneZahlungen > 0 ? 'Offene Zahlungen matchen oder Auto-Match ausfuehren' : 'Abgleich dokumentieren'}
+        caseLabel="Zahlungseingang"
+        tags={['FIBU', 'Matching']}
+      />
+      <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
+        <OperationalTimeline title="Letzte Aktivitaeten" items={timelineItems} />
+        <OperationalContextPanel sections={contextSections} />
+      </div>
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">{t('finance.payments.title')}</h2>

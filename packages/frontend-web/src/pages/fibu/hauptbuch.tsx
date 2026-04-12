@@ -5,8 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { BookOpen, FileDown, Search } from 'lucide-react'
 import { useHauptbuch, type HauptbuchBuchung } from '@/lib/api/fibu'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 export default function HauptbuchPage(): JSX.Element {
   const [searchTerm, setSearchTerm] = useState('')
@@ -54,9 +58,55 @@ export default function HauptbuchPage(): JSX.Element {
     soll: list.reduce((sum, b) => sum + b.soll, 0),
     haben: list.reduce((sum, b) => sum + b.haben, 0),
   }
+  const diff = Math.abs(summen.soll - summen.haben)
+  const operationalStatus = normalizeOperationalStatus(
+    diff >= 0.01 ? 'eskaliert' : list.length > 0 ? 'in_pruefung' : 'offen'
+  )
+  const contextSections = [
+    {
+      title: 'Journal',
+      items: [
+        { label: 'Buchungen', value: String(list.length) },
+        { label: 'Suche', value: searchTerm || 'Keine Einschraenkung' },
+        { label: 'Differenz', value: new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(diff) },
+      ],
+    },
+    {
+      title: 'Wirtschaftslage',
+      items: [
+        { label: 'Soll', value: new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(summen.soll) },
+        { label: 'Haben', value: new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(summen.haben) },
+      ],
+    },
+    {
+      title: 'Governance',
+      items: [
+        { label: 'Naechste Aktion', value: diff >= 0.01 ? 'Journaldifferenz pruefen' : 'DATEV-Export oder Abschlussfolge' },
+        { label: 'Blocker', value: diff >= 0.01 ? 'Soll und Haben sind nicht ausgeglichen.' : 'Kein akuter Blocker' },
+      ],
+    },
+  ]
+  const timelineItems = [
+    { label: 'Hauptbuch geladen', detail: `${list.length} Buchungen im Journal` },
+    diff >= 0.01 ? { label: 'Journaldifferenz erkannt', detail: new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(diff) } : null,
+  ].filter((item): item is { label: string; detail: string } => item !== null)
 
   return (
     <div className="space-y-4 p-3 md:p-6">
+      <OperationalCaseHeader
+        title="Hauptbuch"
+        description="Journalraum fuer Buchungsmenge, Ausgleich und DATEV-Folgepfad."
+        status={operationalStatus}
+        owner="Finanzbuchhaltung"
+        blocker={diff >= 0.01 ? 'Soll- und Haben-Summen weichen ab.' : null}
+        nextAction={diff >= 0.01 ? 'Journaldifferenz klaeren' : 'DATEV-Export oder Abschlusspruefung'}
+        caseLabel="Hauptbuch"
+        tags={['FIBU', 'Journal']}
+      />
+      <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
+        <OperationalTimeline title="Journalverlauf" items={timelineItems} />
+        <OperationalContextPanel sections={contextSections} />
+      </div>
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Hauptbuch</h1>

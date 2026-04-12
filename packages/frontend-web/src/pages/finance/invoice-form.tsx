@@ -25,9 +25,13 @@ import {
 } from "@/components/ui/command";
 import { Plus, Trash2, Save, X, Check, ChevronsUpDown } from "lucide-react";
 import { ModuleToolbar } from "@/components/navigation/ModuleToolbar";
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { useToast } from "@/hooks/use-toast";
 import { apiClient, getAxiosErrorMessage } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 const CUSTOMER_SEARCH_DEBOUNCE_MS = 300;
 const MIN_SEARCH_LENGTH = 2;
@@ -236,10 +240,57 @@ export default function FinanceInvoiceFormPage(): JSX.Element {
       setLoading(false);
     }
   };
+  const operationalStatus = normalizeOperationalStatus(
+    totalGross > 0 ? (customerId ? 'in_pruefung' : 'wartet_auf_mensch') : 'offen'
+  )
+  const contextSections = [
+    {
+      title: 'Objekt',
+      items: [
+        { label: 'Rechnungsnummer', value: invoiceNumber || 'Wird automatisch vergeben' },
+        { label: 'Kunde', value: customerName || 'Noch nicht gewaehlt' },
+        { label: 'Positionen', value: String(lines.length) },
+      ],
+    },
+    {
+      title: 'Wirtschaftslage',
+      items: [
+        { label: 'Netto', value: `${subtotalNet.toFixed(2)} EUR` },
+        { label: 'Steuer', value: `${totalTax.toFixed(2)} EUR` },
+        { label: 'Brutto', value: `${totalGross.toFixed(2)} EUR` },
+      ],
+    },
+    {
+      title: 'Governance',
+      items: [
+        { label: 'Zahlungsziel', value: paymentTerms },
+        { label: 'Naechste Aktion', value: customerId && lines.length > 0 ? 'Rechnung speichern' : 'Kunde und Positionen vervollstaendigen' },
+      ],
+    },
+  ]
+  const timelineItems = [
+    { label: 'Faktura geoeffnet', detail: 'Neue Ausgangsrechnung in Bearbeitung' },
+    customerName ? { label: 'Kunde gesetzt', detail: customerName } : null,
+    lines.length > 0 ? { label: 'Positionen erfasst', detail: `${lines.length} Position(en)` } : null,
+  ].filter((item): item is { label: string; detail: string } => item !== null)
 
   return (
     <div className="container mx-auto p-6 max-w-6xl">
       <ModuleToolbar backTarget="/finance/invoices" closeTarget="/finance/invoices" title="Rechnung erstellen" />
+      <OperationalCaseHeader
+        title="Rechnung erstellen"
+        description="Faktura mit Kundenwahl, Positionen und Zahlungsziel in einem kompakten Vorgangsrahmen."
+        status={operationalStatus}
+        owner="Vertriebsinnendienst"
+        blocker={customerId || lines.length > 0 ? (!customerId ? 'Kunde fehlt fuer die Faktura.' : lines.length === 0 ? 'Mindestens eine Position ist erforderlich.' : null) : null}
+        nextAction={customerId && lines.length > 0 ? 'Rechnung speichern' : 'Pflichtdaten vervollstaendigen'}
+        caseLabel={invoiceNumber || 'Neue Rechnung'}
+        tags={['Sales', 'Faktura']}
+      />
+      <div className="mb-6 grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
+        <OperationalTimeline title="Fakturaverlauf" items={timelineItems} />
+        <OperationalContextPanel sections={contextSections} />
+      </div>
       <div className="mb-6">
         <h1 className="text-3xl font-bold">Rechnung erstellen</h1>
         <p className="text-muted-foreground mt-2">

@@ -2,7 +2,11 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useNavigate } from 'react-router-dom'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { AlertTriangle, Euro, FileText, TrendingUp } from 'lucide-react'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 export default function OPVerwaltungPage(): JSX.Element {
   const navigate = useNavigate()
@@ -27,9 +31,56 @@ export default function OPVerwaltungPage(): JSX.Element {
       prognose: 294200,
     },
   }
+  const operationalStatus = normalizeOperationalStatus(
+    opData.debitoren.ueberfaellig > 0 ? 'eskaliert' : opData.kreditoren.zahlbar > 0 ? 'wartet_auf_mensch' : 'in_pruefung'
+  )
+  const contextSections = [
+    {
+      title: 'Forderungen & Verbindlichkeiten',
+      items: [
+        { label: 'Debitoren offen', value: String(opData.debitoren.gesamt) },
+        { label: 'Kreditoren offen', value: String(opData.kreditoren.gesamt) },
+        { label: 'Ueberfaellig', value: String(opData.debitoren.ueberfaellig) },
+      ],
+    },
+    {
+      title: 'Liquiditaet',
+      items: [
+        { label: 'Bank', value: new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(opData.liquiditaet.bank) },
+        { label: 'Erwartete Eingaenge', value: new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(opData.liquiditaet.erwarteteEingaenge) },
+        { label: 'Faellige Ausgaben', value: new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(opData.liquiditaet.falligeAusgaben) },
+      ],
+    },
+    {
+      title: 'Governance',
+      items: [
+        { label: 'Naechste Aktion', value: opData.debitoren.ueberfaellig > 0 ? 'Debitoreneskalation pruefen' : 'Kreditoren- und Liquiditaetslage steuern' },
+        { label: 'Blocker', value: opData.debitoren.ueberfaellig > 0 ? 'Ueberfaellige Debitoren belasten den OP-Raum.' : 'Kein akuter Blocker' },
+      ],
+    },
+  ]
+  const timelineItems = [
+    { label: 'OP-Verwaltung geladen', detail: `${opData.debitoren.gesamt + opData.kreditoren.gesamt} Positionen im Fokus` },
+    opData.debitoren.ueberfaellig > 0 ? { label: 'Ueberfaellige Forderungen erkannt', detail: `${opData.debitoren.ueberfaellig} Debitorenfall/Faelle` } : null,
+    { label: 'Liquiditaetsprognose aktiv', detail: new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(opData.liquiditaet.prognose) },
+  ].filter((item): item is { label: string; detail: string } => item !== null)
 
   return (
     <div className="space-y-6 p-6">
+      <OperationalCaseHeader
+        title="Offene Posten Verwaltung"
+        description="Sammelraum fuer Forderungen, Verbindlichkeiten und kurzfristige Liquiditaetssteuerung."
+        status={operationalStatus}
+        owner="Finanzbuchhaltung"
+        blocker={opData.debitoren.ueberfaellig > 0 ? 'Mindestens eine Debitorenrechnung ist ueberfaellig.' : null}
+        nextAction={opData.debitoren.ueberfaellig > 0 ? 'Debitoreneskalation anstossen' : 'Kreditoren und Skonto priorisieren'}
+        caseLabel="OP-Clearing"
+        tags={['FIBU', 'Liquiditaet']}
+      />
+      <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
+        <OperationalTimeline title="OP-Verlauf" items={timelineItems} />
+        <OperationalContextPanel sections={contextSections} />
+      </div>
       <div>
         <h1 className="text-3xl font-bold">Offene Posten Verwaltung</h1>
         <p className="text-muted-foreground">Überblick Debitoren & Kreditoren</p>

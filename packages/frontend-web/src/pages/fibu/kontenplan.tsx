@@ -6,11 +6,15 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { BookMarked, FileDown, Loader2, Plus, Search } from 'lucide-react'
 import { apiClient } from '@/lib/api-client'
 import { exportToCSV } from '@/lib/export-utils'
 import { useToast } from '@/hooks/use-toast'
 import { ErrorState } from '@/components/ErrorState'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 type Konto = {
   id: string
@@ -117,9 +121,55 @@ export default function KontenplanPage(): JSX.Element {
       ),
     },
   ]
+  const ertragskonten = konten.filter((k) => k.typ === 'ertrag').length
+  const aufwandskonten = konten.filter((k) => k.typ === 'aufwand').length
+  const operationalStatus = normalizeOperationalStatus(filteredKonten.length > 0 ? 'in_pruefung' : 'offen')
+  const contextSections = [
+    {
+      title: 'Kontenraum',
+      items: [
+        { label: 'Konten gesamt', value: String(konten.length) },
+        { label: 'Gefiltert', value: String(filteredKonten.length) },
+        { label: 'Suche', value: searchTerm || 'Keine Einschraenkung' },
+      ],
+    },
+    {
+      title: 'Struktur',
+      items: [
+        { label: 'Aktiva', value: String(konten.filter((k) => k.typ === 'aktiv').length) },
+        { label: 'Aufwand', value: String(aufwandskonten) },
+        { label: 'Ertrag', value: String(ertragskonten) },
+      ],
+    },
+    {
+      title: 'Governance',
+      items: [
+        { label: 'Naechste Aktion', value: filteredKonten.length > 0 ? 'Konten pruefen oder exportieren' : 'Konto anlegen oder Suchraum erweitern' },
+        { label: 'Blocker', value: 'Kein akuter Blocker' },
+      ],
+    },
+  ]
+  const timelineItems = [
+    { label: 'Kontenplan geladen', detail: `${konten.length} Konten im aktuellen Stand` },
+    filteredKonten.length !== konten.length ? { label: 'Filter aktiv', detail: `${filteredKonten.length} Konten im Fokus` } : null,
+  ].filter((item): item is { label: string; detail: string } => item !== null)
 
   return (
     <div className="space-y-4 p-6">
+      <OperationalCaseHeader
+        title="Kontenplan"
+        description="Steuerungsraum fuer Kontenstruktur, Nutzung und Folgepfade ins Sachkonto."
+        status={operationalStatus}
+        owner="Finanzbuchhaltung"
+        blocker={null}
+        nextAction={filteredKonten.length > 0 ? 'Konten pruefen oder exportieren' : 'Konto anlegen oder Filter anpassen'}
+        caseLabel="SKR03"
+        tags={['FIBU', 'Stammdaten']}
+      />
+      <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
+        <OperationalTimeline title="Kontenverlauf" items={timelineItems} />
+        <OperationalContextPanel sections={contextSections} />
+      </div>
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Kontenplan</h1>

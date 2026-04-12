@@ -7,6 +7,9 @@ import { useMemo, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -23,6 +26,7 @@ import { apiClient } from '@/lib/api-client'
 import { ErrorState } from '@/components/ErrorState'
 import { buildDecisionView } from '@/policy/decision-view'
 import { CompactDecisionCard } from '@/components/workflow/CompactDecisionCard'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 type APInvoice = {
   number: string
@@ -236,12 +240,64 @@ export default function APInvoicesListPage(): JSX.Element {
     return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
   }
 
+  const pendingApproval = invoices.filter((invoice) => (invoice.semantic_status ?? invoice.status) === 'ZUR_FREIGABE').length
+  const readyToPost = invoices.filter((invoice) => invoice.approval_can_post === true).length
+  const operationalStatus = normalizeOperationalStatus(
+    pendingApproval > 0 ? 'wartet_auf_mensch' : readyToPost > 0 ? 'in_pruefung' : invoices.length > 0 ? 'abgeschlossen' : 'offen',
+  )
+  const contextSections = [
+    {
+      title: 'Pruef- und Freigabelage',
+      items: [
+        { label: 'Rechnungen', value: `${invoices.length}` },
+        { label: 'Zur Freigabe', value: `${pendingApproval}` },
+        { label: 'Buchbar', value: `${readyToPost}` },
+      ],
+    },
+    {
+      title: 'Folgepfad',
+      items: [
+        { label: 'Suchbegriff', value: searchTerm || 'Keine Einschraenkung' },
+        { label: 'Statusfilter', value: String(filters.status || 'Alle') },
+        { label: 'Naechste Aktion', value: pendingApproval > 0 ? 'Freigabestau abbauen' : readyToPost > 0 ? 'Buchbare Rechnungen verbuchen' : 'Neue Eingangsrechnung anlegen oder importieren' },
+      ],
+    },
+  ]
+  const timelineItems = [
+    {
+      label: pendingApproval > 0 ? 'Freigabestau aktiv' : 'Keine offene Freigabestufe',
+      detail: pendingApproval > 0
+        ? `${pendingApproval} Eingangsrechnungen warten derzeit auf eine menschliche Freigabeentscheidung.`
+        : 'Der aktuelle Listenstand zeigt keinen offenen Freigabestau.',
+    },
+    {
+      label: readyToPost > 0 ? 'Buchbare Rechnungen vorhanden' : 'Kein Buchungspuffer aktiv',
+      detail: readyToPost > 0
+        ? `${readyToPost} Rechnungen koennen direkt in den Buchungspfad uebergehen.`
+        : 'Im aktuellen Ausschnitt ist keine unmittelbar buchbare Rechnung sichtbar.',
+    },
+  ]
+
   const handleImport = async (): Promise<void> => {
     toast({ title: t('common.success'), description: t('crud.feedback.createSuccess', { entityType: entityTypeLabel }) })
   }
 
   return (
     <div className="space-y-4 p-4">
+      <OperationalCaseHeader
+        title="AP Invoices"
+        description="Eingangsrechnungen werden als Pruef-, Freigabe- und Buchungsstauplatz gefuehrt."
+        status={operationalStatus}
+        owner="Kreditorenbuchhaltung"
+        blocker={pendingApproval > 0 ? `${pendingApproval} Rechnungen blockieren den naechsten Buchungsschritt.` : null}
+        nextAction={pendingApproval > 0 ? 'Freigaben einholen' : readyToPost > 0 ? 'Rechnungen verbuchen' : 'Neue Rechnung importieren oder erfassen'}
+        caseLabel="Vorgang: AP-Invoices"
+        tags={['FIBU', 'AP', 'Freigabe']}
+      />
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_360px]">
+        <OperationalTimeline title="AP-Verlauf" items={timelineItems} />
+        <OperationalContextPanel title="AP-Kontext" sections={contextSections} />
+      </div>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0">
           <CardTitle className="text-2xl font-bold">{pageTitle}</CardTitle>
