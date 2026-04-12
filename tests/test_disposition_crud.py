@@ -199,12 +199,12 @@ class TestDispositionEndpoints:
         assert data["artikel_id"] == "ART-TEST-001"
 
     def test_delete_nonexistent_returns_404(self):
-        resp = client.delete("/api/v1/disposition/999999", headers=AUTH)
+        resp = client.delete("/api/v1/disposition/NONEXISTENT-ID-000", headers=AUTH)
         _skip_if_unavailable(resp)
         assert resp.status_code == 404
 
     def test_put_nonexistent_returns_404(self):
         payload = {"bestand": 999}
-        resp = client.put("/api/v1/disposition/999999", headers=AUTH, json=payload)
+        resp = client.put("/api/v1/disposition/NONEXISTENT-ID-000", headers=AUTH, json=payload)
         _skip_if_unavailable(resp)
         assert resp.status_code == 404

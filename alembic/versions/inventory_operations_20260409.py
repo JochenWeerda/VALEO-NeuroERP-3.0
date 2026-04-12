@@ -1,7 +1,7 @@
 """Add source_document fields to stock_movements
 
 Revision ID: inventory_operations_20260409
-Revises: perf_indexes_multitenant_20260408
+Revises: perf_indexes_20260408
 Create Date: 2026-04-09
 """
 
@@ -9,7 +9,7 @@ from alembic import op
 import sqlalchemy as sa
 
 revision = "inventory_operations_20260409"
-down_revision = "perf_indexes_multitenant_20260408"
+down_revision = "perf_indexes_20260408"
 branch_labels = None
 depends_on = None
 
