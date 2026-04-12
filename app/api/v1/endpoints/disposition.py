@@ -167,7 +167,7 @@ async def create_disposition_position(
 
 @router.put("/{position_id}", response_model=dict)
 async def update_disposition_position(
-    position_id: int,
+    position_id: str,
     body: DispositionPositionUpdate,
     db: Session = Depends(get_db),
 ) -> dict:
@@ -193,7 +193,7 @@ async def update_disposition_position(
 
 @router.delete("/{position_id}", response_class=Response, status_code=204)
 async def delete_disposition_position(
-    position_id: int,
+    position_id: str,
     db: Session = Depends(get_db),
 ) -> Response:
     """Delete a disposition position."""
