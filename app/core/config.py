@@ -229,6 +229,9 @@ class Settings(BaseSettings):
     # Agrar Feature-Flags
     AGRAR_ZONEN_FROM_API: bool = False  # True = Zonen via WFS/PostGIS statt Seed-Daten
 
+    # Obsidian Knowledge Vault (RAG-002)
+    OBSIDIAN_VAULT_PATH: Optional[str] = None  # z.B. /data/obsidian-vault oder C:\Users\...\vault
+
     # Rationsoptimierung Microservice
     RATIONS_OPTIMIZATION_URL: Optional[str] = None  # z.B. http://rations-optimization:8000
     RATIONS_OPTIMIZATION_API_KEY: str = "dev-api-key-change-in-production"
