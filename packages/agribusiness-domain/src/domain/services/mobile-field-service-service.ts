@@ -1,20 +1,20 @@
-/**
+﻿/**
  * Mobile Field Service Service
  * Task Management for Field Operations
- * Based on Odoo project.task pattern
+ * Based on Community ERP project.task pattern
  */
 
 import {
+  CreateFieldServiceTaskInput,
+  FieldServiceAttachment,
+  FieldServiceChecklistItem,
+  FieldServiceMeasurement,
+  FieldServiceNote,
   FieldServiceTask,
   FieldServiceTaskEntity,
-  CreateFieldServiceTaskInput,
-  UpdateFieldServiceTaskInput,
   FieldServiceTaskStatus,
   FieldServiceTaskType,
-  FieldServiceNote,
-  FieldServiceAttachment,
-  FieldServiceMeasurement,
-  FieldServiceChecklistItem,
+  UpdateFieldServiceTaskInput,
 } from '../entities/field-service-task';
 
 export interface FieldServiceTaskRepository {
@@ -197,7 +197,7 @@ export class MobileFieldServiceService {
     content: string,
     authorId: string,
     authorName: string,
-    isInternal: boolean = false
+    isInternal = false
   ): Promise<FieldServiceTask> {
     const task = await this.getTaskById(taskId);
     const updated = FieldServiceTaskEntity.addNote(task, content, authorId, authorName, isInternal);
@@ -346,7 +346,7 @@ export class MobileFieldServiceService {
   /**
    * Search tasks
    */
-  async searchTasks(query: string, limit: number = 20): Promise<FieldServiceTask[]> {
+  async searchTasks(query: string, limit = 20): Promise<FieldServiceTask[]> {
     const result = await this.deps.taskRepository.findMany(
       { search: query },
       { page: 1, pageSize: limit },
@@ -385,4 +385,5 @@ export class MobileFieldServiceService {
     return await this.deps.taskRepository.update(updated);
   }
 }
+
 

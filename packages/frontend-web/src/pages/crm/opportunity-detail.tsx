@@ -19,6 +19,7 @@ import { ArrowLeft, History, FileText } from 'lucide-react'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import { summarizeOpportunityOperations } from '@/lib/domain-depth'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 const apiClient = createApiClient('/api/v1/crm')
@@ -572,6 +573,16 @@ export default function OpportunityDetailPage(): JSX.Element {
     : data?.probability != null && data.probability < 30
       ? 'Niedrige Abschlusswahrscheinlichkeit. Qualifizierung oder Exit entscheiden.'
       : null
+  const opportunityOps = data
+    ? summarizeOpportunityOperations({
+        probability: data.probability,
+        status: data.status,
+        hasOwner: Boolean(data.owner_id || data.assigned_to),
+        hasCustomer: Boolean(data.customer_id),
+        quoteCount: data.status === 'proposal' || data.stage === 'proposal_price_quote' ? 1 : 0,
+        expectedCloseDate: data.expected_close_date,
+      })
+    : null
   const contextSections = data ? [
     {
       title: 'Deal',
@@ -639,13 +650,34 @@ export default function OpportunityDetailPage(): JSX.Element {
             status={operationalStatus}
             owner={data.owner_id || data.assigned_to || 'Vertrieb'}
             blocker={operationalBlocker}
-            nextAction={data.status === 'closed_won' ? 'Angebot und Auftrag nachhalten' : data.status === 'closed_lost' ? 'Verlustgrund sichern' : 'Qualifizieren oder in Angebot ueberfuehren'}
+            nextAction={
+              opportunityOps?.nextAction ||
+              (data.status === 'closed_won'
+                ? 'Angebot und Auftrag nachhalten'
+                : data.status === 'closed_lost'
+                  ? 'Verlustgrund sichern'
+                  : 'Qualifizieren oder in Angebot ueberfuehren')
+            }
             caseLabel={data.number || 'Opportunity'}
             tags={['CRM', 'Vertrieb']}
           />
           <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
             <OperationalTimeline title="Verkaufsverlauf" items={timelineItems} />
             <OperationalContextPanel title="Deal-Kontext" sections={contextSections} />
+          </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            <Card>
+              <CardHeader className="pb-2"><CardTitle className="text-sm">Deal-Risiko</CardTitle></CardHeader>
+              <CardContent><Badge variant={opportunityOps?.dealRisk === 'hoch' ? 'destructive' : 'outline'}>{opportunityOps?.dealRisk || 'niedrig'}</Badge></CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2"><CardTitle className="text-sm">Angebotspfad</CardTitle></CardHeader>
+              <CardContent><div className="text-sm font-semibold">{data.status === 'closed_won' ? 'bereits gewonnen' : data.stage === 'proposal_price_quote' || data.status === 'proposal' ? 'Angebot aktiv' : 'noch offen'}</div></CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2"><CardTitle className="text-sm">Naechste Fallaktion</CardTitle></CardHeader>
+              <CardContent><div className="text-sm font-semibold">{opportunityOps?.nextAction || 'Deal sauber nachhalten'}</div></CardContent>
+            </Card>
           </div>
         </div>
       ) : null}

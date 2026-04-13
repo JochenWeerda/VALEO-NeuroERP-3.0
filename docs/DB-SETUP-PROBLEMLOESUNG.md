@@ -9,7 +9,7 @@ psycopg2.OperationalError
 Verbindung zu Port 5432 funktioniert nicht.
 
 ### Ursache
-- Lokaler Windows PostgreSQL (PostgreSQL_For_Odoo Service) belegt Port 5432
+- Lokaler Windows-PostgreSQL-Service belegt Port 5432
 - Docker PostgreSQL Container kann nicht auf Port 5432 binden
 
 ### Lösung
@@ -38,7 +38,7 @@ docker run -d --name valeo-neuro-erp-postgres \
 Get-Service -Name *postgres*
 
 # Service stoppen (als Administrator)
-Stop-Service -Name PostgreSQL_For_Odoo -Force
+Stop-Service -Name <postgres-service> -Force
 ```
 
 ### Konfiguration aktualisieren

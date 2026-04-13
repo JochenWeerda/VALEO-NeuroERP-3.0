@@ -1,118 +1,118 @@
 # GAP-Analyse: Agriculture Management
 
 **Domain:** Agrar / Landwirtschaft
-**Referenz:** Odoo Agriculture Management Module
+**Referenz:** Community ERP Agriculture Management Module
 **Status:** In Progress
 **Erstellt:** 2025-11-27
 
 ---
 
-## 📋 Übersicht
+## ðŸ“‹ Ãœbersicht
 
-### Odoo Agriculture Management Features (Referenz)
+### Community ERP Agriculture Management Features (Referenz)
 
-| Feature | Beschreibung | Priorität |
+| Feature | Beschreibung | PrioritÃ¤t |
 |---------|-------------|-----------|
-| Kulturverwaltung | Planung und Verfolgung verschiedener Kulturen, Dokumentation von Kulturtypen und Pflanzplänen, Überwachung von Wachstumsstadien | P0 |
-| Inventarverfolgung | Verwaltung von Saatgut, Düngemitteln, Pestiziden mit Echtzeit-Überwachung und automatischer Nachbestellung | P1 |
-| Feldoperationen | Planung, Terminierung und Aufzeichnung aller Feldaktivitäten (Pflügen, Säen, Jäten, Ernten) mit Mapping-Tools | P0 |
-| Bewässerungsmanagement | Planung und Überwachung von Bewässerungssystemen mit IoT-Integration | P2 |
-| Viehverwaltung | Detaillierte Aufzeichnungen über Tiere, Zuchtprogramme, Fütterungspläne, Gesundheitsüberwachung | P3 |
+| Kulturverwaltung | Planung und Verfolgung verschiedener Kulturen, Dokumentation von Kulturtypen und PflanzplÃ¤nen, Ãœberwachung von Wachstumsstadien | P0 |
+| Inventarverfolgung | Verwaltung von Saatgut, DÃ¼ngemitteln, Pestiziden mit Echtzeit-Ãœberwachung und automatischer Nachbestellung | P1 |
+| Feldoperationen | Planung, Terminierung und Aufzeichnung aller FeldaktivitÃ¤ten (PflÃ¼gen, SÃ¤en, JÃ¤ten, Ernten) mit Mapping-Tools | P0 |
+| BewÃ¤sserungsmanagement | Planung und Ãœberwachung von BewÃ¤sserungssystemen mit IoT-Integration | P2 |
+| Viehverwaltung | Detaillierte Aufzeichnungen Ã¼ber Tiere, Zuchtprogramme, FÃ¼tterungsplÃ¤ne, GesundheitsÃ¼berwachung | P3 |
 | Vertrieb und Verkauf | Preisgestaltung, Auftrags- und Liefermanagement, E-Commerce-Integration | P1 |
 | Finanzmanagement | Budgetierung, Finanzberichterstattung, Kostenverfolgung | P1 |
-| Compliance und Berichterstattung | Regulatorische Compliance, Umweltbewertungen, Subventionsanträge | P0 |
-| Personalmanagement | Gehaltsabrechnung, Zeitpläne, Leistungsbeurteilungen | P2 |
+| Compliance und Berichterstattung | Regulatorische Compliance, Umweltbewertungen, SubventionsantrÃ¤ge | P0 |
+| Personalmanagement | Gehaltsabrechnung, ZeitplÃ¤ne, Leistungsbeurteilungen | P2 |
 | Technologieintegration | Drohnen, autonome Traktoren, KI-Modelle | P3 |
 | Feldbesuche | Dokumentation von Feldbesuchen und Inspektionen | P1 |
 | Kulturkrankheiten | Verfolgung von Krankheiten und Behandlungen | P1 |
 
 ---
 
-## 🎯 Spezifische Anforderungen VALEO NeuroERP
+## ðŸŽ¯ Spezifische Anforderungen VALEO NeuroERP
 
 ### Kernmodul: Ackerschlagkartei (Feldbuch)
 
-**Anforderung:** Multi-Tenant Ackerschlagkartei für Dienstleister
+**Anforderung:** Multi-Tenant Ackerschlagkartei fÃ¼r Dienstleister
 
-- **Hintergrund:** Als Dienstleister führen wir Düngen und PSM-Behandlungen für unsere Kunden aus und dokumentieren dies in kundenspezifischen Ackerschlagkarteien (Feldbuch)
-- **Mandantenfähigkeit:** Jeder Kunde (Landwirt) ist ein eigener Tenant mit eigenen Schlägen und Maßnahmen
-- **Feldblockfinder-Integration:** Verknüpfung mit dem deutschen Feldblockfinder per iframe
+- **Hintergrund:** Als Dienstleister fÃ¼hren wir DÃ¼ngen und PSM-Behandlungen fÃ¼r unsere Kunden aus und dokumentieren dies in kundenspezifischen Ackerschlagkarteien (Feldbuch)
+- **MandantenfÃ¤higkeit:** Jeder Kunde (Landwirt) ist ein eigener Tenant mit eigenen SchlÃ¤gen und MaÃŸnahmen
+- **Feldblockfinder-Integration:** VerknÃ¼pfung mit dem deutschen Feldblockfinder per iframe
 
 ---
 
-## 📊 GAP-Matrix
+## ðŸ“Š GAP-Matrix
 
 ### AGR-FLD: Feldverwaltung
 
-| ID | Capability | Subcapability | Status | Gap-Beschreibung | Lösungstyp | Priorität |
+| ID | Capability | Subcapability | Status | Gap-Beschreibung | LÃ¶sungstyp | PrioritÃ¤t |
 |----|-----------|---------------|--------|------------------|------------|-----------|
-| AGR-FLD-01 | Schlagverwaltung | Schläge anlegen/bearbeiten | Partial | Basis vorhanden, keine API-Anbindung | Type B | P0 |
-| AGR-FLD-02 | Schlagverwaltung | Mandantenfähigkeit | No | Keine Multi-Tenant-Unterstützung für Kundenschläge | Type C | P0 |
+| AGR-FLD-01 | Schlagverwaltung | SchlÃ¤ge anlegen/bearbeiten | Partial | Basis vorhanden, keine API-Anbindung | Type B | P0 |
+| AGR-FLD-02 | Schlagverwaltung | MandantenfÃ¤higkeit | No | Keine Multi-Tenant-UnterstÃ¼tzung fÃ¼r KundenschlÃ¤ge | Type C | P0 |
 | AGR-FLD-03 | Feldblockfinder | iframe-Integration | No | Kein Feldblockfinder integriert | Type B | P0 |
 | AGR-FLD-04 | Feldkarten | GIS-Visualisierung | Partial | Basis Kartendarstellung vorhanden | Type C | P1 |
-| AGR-FLD-05 | Feldgrenzen | Polygon-Erfassung | No | Keine Polygon-Erfassung möglich | Type C | P2 |
+| AGR-FLD-05 | Feldgrenzen | Polygon-Erfassung | No | Keine Polygon-Erfassung mÃ¶glich | Type C | P2 |
 
 ### AGR-OPS: Feldoperationen
 
-| ID | Capability | Subcapability | Status | Gap-Beschreibung | Lösungstyp | Priorität |
+| ID | Capability | Subcapability | Status | Gap-Beschreibung | LÃ¶sungstyp | PrioritÃ¤t |
 |----|-----------|---------------|--------|------------------|------------|-----------|
-| AGR-OPS-01 | Maßnahmen-Dokumentation | Erfassung Düngung/PSM | Partial | Basis vorhanden, keine API | Type B | P0 |
-| AGR-OPS-02 | Maßnahmen-Dokumentation | Mandantenfähigkeit | No | Keine Zuordnung zu Kunden-Tenants | Type C | P0 |
-| AGR-OPS-03 | Maßnahmen-Dokumentation | Mitarbeiter-Zuordnung | No | Keine Dienstleister-Mitarbeiter-Zuordnung | Type C | P1 |
+| AGR-OPS-01 | MaÃŸnahmen-Dokumentation | Erfassung DÃ¼ngung/PSM | Partial | Basis vorhanden, keine API | Type B | P0 |
+| AGR-OPS-02 | MaÃŸnahmen-Dokumentation | MandantenfÃ¤higkeit | No | Keine Zuordnung zu Kunden-Tenants | Type C | P0 |
+| AGR-OPS-03 | MaÃŸnahmen-Dokumentation | Mitarbeiter-Zuordnung | No | Keine Dienstleister-Mitarbeiter-Zuordnung | Type C | P1 |
 | AGR-OPS-04 | Feldkalender | Planung/Terminierung | No | Kein Planungskalender vorhanden | Type C | P1 |
 | AGR-OPS-05 | GPS-Tracking | Maschinen-Position | No | Keine GPS-Integration | Type B | P3 |
 
 ### AGR-INV: Betriebsmittelverwaltung
 
-| ID | Capability | Subcapability | Status | Gap-Beschreibung | Lösungstyp | Priorität |
+| ID | Capability | Subcapability | Status | Gap-Beschreibung | LÃ¶sungstyp | PrioritÃ¤t |
 |----|-----------|---------------|--------|------------------|------------|-----------|
-| AGR-INV-01 | Düngemittel | Bestandsverwaltung | Partial | Stammdaten vorhanden, keine Bestandsführung | Type A | P1 |
+| AGR-INV-01 | DÃ¼ngemittel | Bestandsverwaltung | Partial | Stammdaten vorhanden, keine BestandsfÃ¼hrung | Type A | P1 |
 | AGR-INV-02 | Pflanzenschutzmittel | PSM-Register | Partial | Stammdaten vorhanden, PSM-Auflagen fehlen | Type A | P1 |
 | AGR-INV-03 | Saatgut | Sortenregister | Partial | Basis vorhanden | Type A | P2 |
 | AGR-INV-04 | Automatische Nachbestellung | Mindestbestand-Warnung | No | Keine automatische Nachbestellung | Type B | P2 |
 
 ### AGR-COM: Compliance & Berichterstattung
 
-| ID | Capability | Subcapability | Status | Gap-Beschreibung | Lösungstyp | Priorität |
+| ID | Capability | Subcapability | Status | Gap-Beschreibung | LÃ¶sungstyp | PrioritÃ¤t |
 |----|-----------|---------------|--------|------------------|------------|-----------|
-| AGR-COM-01 | Düngebilanz | Stoffstrombilanz | No | Keine Düngebilanz-Berechnung | Type C | P0 |
+| AGR-COM-01 | DÃ¼ngebilanz | Stoffstrombilanz | No | Keine DÃ¼ngebilanz-Berechnung | Type C | P0 |
 | AGR-COM-02 | PSM-Dokumentation | Spritztagebuch | Partial | Basis vorhanden, nicht compliant | Type A | P0 |
 | AGR-COM-03 | Cross-Compliance | CC-Berichte | No | Keine Cross-Compliance-Berichte | Type C | P1 |
-| AGR-COM-04 | GQS/QS-Export | Qualitätssicherung | No | Kein QS-Export | Type B | P2 |
-| AGR-COM-05 | LEA-Export | Förderanträge | No | Kein LEA-Export | Type B | P2 |
+| AGR-COM-04 | GQS/QS-Export | QualitÃ¤tssicherung | No | Kein QS-Export | Type B | P2 |
+| AGR-COM-05 | LEA-Export | FÃ¶rderantrÃ¤ge | No | Kein LEA-Export | Type B | P2 |
 
 ---
 
-## 🏗️ Implementierungsplan
+## ðŸ—ï¸ Implementierungsplan
 
-### Phase 1: Mandantenfähige Ackerschlagkartei (P0) - 4-6 Wochen
+### Phase 1: MandantenfÃ¤hige Ackerschlagkartei (P0) - 4-6 Wochen
 
 #### 1.1 Backend: Multi-Tenant Datenmodell
-- [ ] Tenant-Erweiterung für Agrar-Entitäten (Schläge, Maßnahmen)
+- [ ] Tenant-Erweiterung fÃ¼r Agrar-EntitÃ¤ten (SchlÃ¤ge, MaÃŸnahmen)
 - [ ] Kunden-Schlag-Zuordnung
-- [ ] Dienstleister-Maßnahmen-Dokumentation
+- [ ] Dienstleister-MaÃŸnahmen-Dokumentation
 
 #### 1.2 Frontend: Mandantenauswahl
 - [ ] Kundenauswahl-Komponente in Schlagkartei
 - [ ] Filterung nach Kunden-Tenant
-- [ ] Maßnahmen-Zuordnung zu Kunden
+- [ ] MaÃŸnahmen-Zuordnung zu Kunden
 
 #### 1.3 Feldblockfinder-Integration
-- [ ] iframe-Komponente für Feldblockfinder
+- [ ] iframe-Komponente fÃ¼r Feldblockfinder
 - [ ] URL-Konfiguration pro Bundesland
-- [ ] Schlag-Übernahme aus Feldblockfinder
+- [ ] Schlag-Ãœbernahme aus Feldblockfinder
 
 ### Phase 2: Compliance-Module (P0-P1) - 3-4 Wochen
 
-#### 2.1 Düngebilanz
+#### 2.1 DÃ¼ngebilanz
 - [ ] Stoffstrombilanz-Berechnung
-- [ ] Nährstoffvergleich
+- [ ] NÃ¤hrstoffvergleich
 - [ ] Export (PDF/CSV)
 
 #### 2.2 PSM-Dokumentation
-- [ ] Spritztagebuch gemäß PflSchG
+- [ ] Spritztagebuch gemÃ¤ÃŸ PflSchG
 - [ ] Anwenderschutz-Dokumentation
-- [ ] Auflagenprüfung
+- [ ] AuflagenprÃ¼fung
 
 ### Phase 3: Erweiterte Features (P1-P2) - 4-6 Wochen
 
@@ -123,9 +123,9 @@
 
 ---
 
-## 🔗 Feldblockfinder-Integration
+## ðŸ”— Feldblockfinder-Integration
 
-### Verfügbare Feldblockfinder nach Bundesland
+### VerfÃ¼gbare Feldblockfinder nach Bundesland
 
 | Bundesland | URL | Hinweise |
 |------------|-----|----------|
@@ -146,19 +146,19 @@ interface FeldblockfinderProps {
 const FELDBLOCKFINDER_URLS: Record<string, string> = {
   'niedersachsen': 'https://sla.niedersachsen.de/mapbender_sla/frames/login_flink.php',
   'bayern': 'https://www.lfl.bayern.de/iab/bodenschutz/019127/index.php',
-  // ... weitere Bundesländer
+  // ... weitere BundeslÃ¤nder
 };
 ```
 
 ### Hinweise zur Integration
 
 1. **Cross-Origin-Policy:** Einige Feldblockfinder blockieren iframe-Einbettung
-2. **Alternative:** Link in neuem Tab öffnen + manuelle Datenübernahme
-3. **Responsives Design:** iframe sollte sich an Bildschirmgröße anpassen
+2. **Alternative:** Link in neuem Tab Ã¶ffnen + manuelle DatenÃ¼bernahme
+3. **Responsives Design:** iframe sollte sich an BildschirmgrÃ¶ÃŸe anpassen
 
 ---
 
-## 📈 Status-Zusammenfassung
+## ðŸ“ˆ Status-Zusammenfassung
 
 | Domain | Gesamt | Yes | Partial | No |
 |--------|--------|-----|---------|-----|
@@ -170,55 +170,55 @@ const FELDBLOCKFINDER_URLS: Record<string, string> = {
 
 ---
 
-## 📝 Nächste Schritte
+## ðŸ“ NÃ¤chste Schritte
 
-1. ✅ Gap-Analyse erstellt
-2. ✅ Frontend: Mandantenauswahl in Schlagkartei implementiert
-3. ✅ Frontend: Feldblockfinder iframe-Integration erstellt
-4. ✅ Frontend: Maßnahmen-Dokumentation mit Spritztagebuch erweitert
-5. ✅ Navigation: Futtermittel-Routen verdrahtet
-6. ✅ **Kundenportal komplett implementiert** (siehe unten)
-7. ✅ **Compliance: Düngebilanz-Modul / Stoffstrombilanz** implementiert
-8. ⏳ Backend: Multi-Tenant Erweiterung für Agrar-Entitäten (API)
-9. ⏳ GIS: Erweiterte Kartenintegration mit Leaflet/OpenLayers
+1. âœ… Gap-Analyse erstellt
+2. âœ… Frontend: Mandantenauswahl in Schlagkartei implementiert
+3. âœ… Frontend: Feldblockfinder iframe-Integration erstellt
+4. âœ… Frontend: MaÃŸnahmen-Dokumentation mit Spritztagebuch erweitert
+5. âœ… Navigation: Futtermittel-Routen verdrahtet
+6. âœ… **Kundenportal komplett implementiert** (siehe unten)
+7. âœ… **Compliance: DÃ¼ngebilanz-Modul / Stoffstrombilanz** implementiert
+8. â³ Backend: Multi-Tenant Erweiterung fÃ¼r Agrar-EntitÃ¤ten (API)
+9. â³ GIS: Erweiterte Kartenintegration mit Leaflet/OpenLayers
 
 ---
 
-## ✅ Implementierte Features (2025-11-27)
+## âœ… Implementierte Features (2025-11-27)
 
-### Mandantenfähige Ackerschlagkartei
+### MandantenfÃ¤hige Ackerschlagkartei
 - **Datei:** `packages/frontend-web/src/pages/agrar/feldbuch/schlagkartei.tsx`
 - Multi-Tenant Kundenauswahl
 - Filterung nach Kunde, Status, Kultur
 - KPI-Dashboard mit Skeleton-Loading
-- Tabs: Liste, Karte, Kulturübersicht
+- Tabs: Liste, Karte, KulturÃ¼bersicht
 
 ### Feldblockfinder-Integration
 - **Datei:** `packages/frontend-web/src/components/agrar/FeldblockfinderIntegration.tsx`
-- Bundesland-Auswahl für alle 16 Bundesländer
+- Bundesland-Auswahl fÃ¼r alle 16 BundeslÃ¤nder
 - Fallback auf externen Link wenn iframe blockiert
 - Manuelle Schlagdaten-Eingabe
 - Dialog-Integration in Schlagkartei
 
-### Maßnahmen-Dokumentation / Spritztagebuch
+### MaÃŸnahmen-Dokumentation / Spritztagebuch
 - **Datei:** `packages/frontend-web/src/pages/agrar/feldbuch/massnahmen.tsx`
 - Multi-Tenant Kundenzuordnung
-- Spritztagebuch-Tab gemäß § 11 PflSchG
+- Spritztagebuch-Tab gemÃ¤ÃŸ Â§ 11 PflSchG
 - PSM-Auflagen-Dokumentation
 - Wetterdaten (Wind, Temperatur)
-- Anwender/Geräte-Zuordnung
+- Anwender/GerÃ¤te-Zuordnung
 
 ### Futtermittel-Navigation
-- Vollständiges Untermenü für Futtermittel
+- VollstÃ¤ndiges UntermenÃ¼ fÃ¼r Futtermittel
 - Einzelfuttermittel, Mischfuttermittel
-- Wareneingang, Qualitätskontrolle, Statistik
+- Wareneingang, QualitÃ¤tskontrolle, Statistik
 
 ---
 
-## 🛒 Kundenportal (Implementiert 2025-11-28)
+## ðŸ›’ Kundenportal (Implementiert 2025-11-28)
 
-### Übersicht
-Vollständiges Self-Service-Portal für Kunden mit mobilem Zugang (Handy/Tablet)
+### Ãœbersicht
+VollstÃ¤ndiges Self-Service-Portal fÃ¼r Kunden mit mobilem Zugang (Handy/Tablet)
 
 **Route:** `/portal/*`
 **Layout:** `CustomerPortalLayout.tsx` (separates, mobil-optimiertes Layout)
@@ -228,23 +228,23 @@ Vollständiges Self-Service-Portal für Kunden mit mobilem Zugang (Handy/Tablet)
 #### 1. Portal Dashboard (`/portal`)
 - **Datei:** `packages/frontend-web/src/pages/portal/index.tsx`
 - Willkommens-Header mit Kundendaten
-- KPI-Übersicht (offene Bestellungen, Verträge, Rechnungen, Dokumente)
+- KPI-Ãœbersicht (offene Bestellungen, VertrÃ¤ge, Rechnungen, Dokumente)
 - Letzte Bestellungen mit Status-Badges
 - Neue Dokumente zum Download
-- Schnellzugriff-Karten für häufige Funktionen
+- Schnellzugriff-Karten fÃ¼r hÃ¤ufige Funktionen
 
 #### 2. E-Shop (`/portal/shop`)
 - **Datei:** `packages/frontend-web/src/pages/portal/shop.tsx`
-- Produktkatalog mit Kategorien (Saatgut, Dünger, PSM, Futtermittel)
+- Produktkatalog mit Kategorien (Saatgut, DÃ¼nger, PSM, Futtermittel)
 - Suchfunktion und Filterung
-- Warenkorb mit Mengenänderung
+- Warenkorb mit MengenÃ¤nderung
 - Bestellabschluss
-- Anfrage-Dialog für individuelle Angebote
+- Anfrage-Dialog fÃ¼r individuelle Angebote
 - Produktkarten mit Zertifikats-Badges
 
 #### 3. Meine Bestellungen (`/portal/bestellungen`)
 - **Datei:** `packages/frontend-web/src/pages/portal/bestellungen.tsx`
-- Bestellübersicht mit Status-Filter
+- BestellÃ¼bersicht mit Status-Filter
 - Detailansicht mit Positionen
 - Sendungsverfolgung (Trackingnummer)
 - Rechnungs-Download
@@ -253,14 +253,14 @@ Vollständiges Self-Service-Portal für Kunden mit mobilem Zugang (Handy/Tablet)
 #### 4. Anfragen (`/portal/anfragen`)
 - **Datei:** `packages/frontend-web/src/pages/portal/anfragen.tsx`
 - Angebotsanfragen, Bestellanfragen, Dienstleistungen
-- Status-Tracking (Offen → In Bearbeitung → Beantwortet → Abgeschlossen)
+- Status-Tracking (Offen â†’ In Bearbeitung â†’ Beantwortet â†’ Abgeschlossen)
 - Dialog zum Erstellen neuer Anfragen
 - Antwort-Anzeige vom VALEO-Team
 
-#### 5. Verträge & Kontrakte (`/portal/vertraege`)
+#### 5. VertrÃ¤ge & Kontrakte (`/portal/vertraege`)
 - **Datei:** `packages/frontend-web/src/pages/portal/vertraege.tsx`
-- Rahmenverträge, Lieferverträge, Preiskontrakte
-- Vertragserfüllung mit Fortschrittsbalken
+- RahmenvertrÃ¤ge, LiefervertrÃ¤ge, Preiskontrakte
+- VertragserfÃ¼llung mit Fortschrittsbalken
 - Status: Aktiv, Auslaufend, Abgelaufen
 - Vertragsvolumen und Preise
 - PDF-Download
@@ -268,14 +268,14 @@ Vollständiges Self-Service-Portal für Kunden mit mobilem Zugang (Handy/Tablet)
 #### 6. Rechnungen (`/portal/rechnungen`)
 - **Datei:** `packages/frontend-web/src/pages/portal/rechnungen.tsx`
 - Offene und bezahlte Rechnungen
-- Überfälligkeits-Warnung
+- ÃœberfÃ¤lligkeits-Warnung
 - Zahlungsstatus und Teilzahlungen
-- Brutto/Netto/MwSt-Aufschlüsselung
+- Brutto/Netto/MwSt-AufschlÃ¼sselung
 - PDF-Download
 
 #### 7. Dokumente (`/portal/dokumente`)
 - **Datei:** `packages/frontend-web/src/pages/portal/dokumente.tsx`
-- Kategorien: Nährstoffbilanzen, Analysen, Deklarationen, Rechnungen, Lieferscheine
+- Kategorien: NÃ¤hrstoffbilanzen, Analysen, Deklarationen, Rechnungen, Lieferscheine
 - Jahresfilter
 - Schnellzugriff nach Dokumenttyp
 - PDF/CSV/XLSX Download
@@ -283,37 +283,38 @@ Vollständiges Self-Service-Portal für Kunden mit mobilem Zugang (Handy/Tablet)
 #### 8. Zertifikate (`/portal/zertifikate`)
 - **Datei:** `packages/frontend-web/src/pages/portal/zertifikate.tsx`
 - GMP+, VLOG, QS, Bio, ISO, GLOBALG.A.P., AMA
-- Gültigkeitsstatus mit Auslauf-Warnung
+- GÃ¼ltigkeitsstatus mit Auslauf-Warnung
 - Aussteller und Beschreibung
 - PDF-Download
 
 #### 9. Ackerschlagkartei (`/portal/feldbuch`)
 - **Datei:** `packages/frontend-web/src/pages/portal/feldbuch.tsx`
-- Schlagübersicht mit FLIK-Nummern
-- Maßnahmen-Dokumentation (Düngung, PSM, Aussaat, Ernte)
-- CSV-Export für Schläge und Maßnahmen
-- CSV-Import für Datenübernahme
+- SchlagÃ¼bersicht mit FLIK-Nummern
+- MaÃŸnahmen-Dokumentation (DÃ¼ngung, PSM, Aussaat, Ernte)
+- CSV-Export fÃ¼r SchlÃ¤ge und MaÃŸnahmen
+- CSV-Import fÃ¼r DatenÃ¼bernahme
 - VALEO-Dienstleistungen markiert
 
-#### 10. Nährstoffbilanzen (`/portal/naehrstoffbilanzen`)
+#### 10. NÃ¤hrstoffbilanzen (`/portal/naehrstoffbilanzen`)
 - **Datei:** `packages/frontend-web/src/pages/portal/naehrstoffbilanzen.tsx`
-- Stoffstrombilanz gemäß DüV
-- N-, P-, K-Salden mit Grenzwertprüfung
+- Stoffstrombilanz gemÃ¤ÃŸ DÃ¼V
+- N-, P-, K-Salden mit GrenzwertprÃ¼fung
 - 3-Jahres-Durchschnitt-Berechnung
-- Schlagbezogene Übersicht
-- Compliance-Status (Grenzwerte eingehalten/überschritten)
+- Schlagbezogene Ãœbersicht
+- Compliance-Status (Grenzwerte eingehalten/Ã¼berschritten)
 - Historische Bilanzen
 - PDF-Download
 
 ### Technische Features
-- **Responsives Design:** Optimiert für Mobile/Tablet
-- **Bottom Navigation:** Touch-freundliche Navigation auf mobilen Geräten
-- **Skeleton Loading:** Platzhalter während Datenladung
+- **Responsives Design:** Optimiert fÃ¼r Mobile/Tablet
+- **Bottom Navigation:** Touch-freundliche Navigation auf mobilen GerÃ¤ten
+- **Skeleton Loading:** Platzhalter wÃ¤hrend Datenladung
 - **Toast Notifications:** Feedback bei Aktionen
-- **Dialoge:** Modale Dialoge für Details und Formulare
+- **Dialoge:** Modale Dialoge fÃ¼r Details und Formulare
 
 ---
 
 **Letzte Aktualisierung:** 2025-11-28
+
 
 

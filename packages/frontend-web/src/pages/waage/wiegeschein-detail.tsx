@@ -14,6 +14,7 @@ import { useToast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/api-client'
 import { type WeighingTicket } from '@/lib/api/weighing-tickets'
 import { useSupplyChainOverview } from '@/lib/api/supply-chain'
+import { summarizeSupplyTransfer } from '@/lib/domain-depth'
 import { ArrowRight, CheckCircle, Clock, FileText, Link, Scale, Truck } from 'lucide-react'
 import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
@@ -165,6 +166,7 @@ export default function WiegescheinDetailPage(): JSX.Element {
   const [contractInput, setContractInput] = useState('')
   const { data: chain } = useSupplyChainOverview()
   const workflowContext = readWorkflowEntryContext(searchParams)
+  const transferSummary = summarizeSupplyTransfer(chain)
 
   // ── Fetch ticket ────────────────────────────────────────────────────────────
   const {
@@ -485,6 +487,20 @@ export default function WiegescheinDetailPage(): JSX.Element {
             },
           ]}
         />
+      </div>
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm">Uebergabedruck</CardTitle></CardHeader>
+          <CardContent><Badge variant={transferSummary.transferPressure === 'hoch' ? 'destructive' : 'outline'}>{transferSummary.transferPressure}</Badge></CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm">Offene Kettenpunkte</CardTitle></CardHeader>
+          <CardContent><div className="text-2xl font-semibold">{transferSummary.handoverRisk}</div></CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm">Naechste Kettenaktion</CardTitle></CardHeader>
+          <CardContent><div className="text-sm font-semibold">{transferSummary.nextAction}</div></CardContent>
+        </Card>
       </div>
 
       {/* Tab-Navigation */}

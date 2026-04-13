@@ -46,50 +46,56 @@ Archiv des vorherigen Boards:
 ## DOM-FIN-003
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** in arbeit
 **Ziel des Slices:** FIBU-Operatorpfade fuer Abschluss, Reorganisator, Zinswesen und Revisionssicht semantisch verdichten.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `packages/frontend-web/src/pages/finance/*`, `packages/frontend-web/src/pages/fibu/*`, relevante Finance-/FIBU-Read-Models und Endpunkte
 **Abnahmekriterien:** Abschluss- und FIBU-Operatorraeume tragen denselben klaren Status-, Fristen-, Revisions- und Folgeaktionsrahmen.
+**Fortschritt:** Die erste Codewelle zieht den Operatorrahmen auf `fibu/abschluss-cockpit.tsx`; die zweite Welle verdichtet jetzt `fibu/schnittstellen-center.tsx` mit Connector-Readiness, Perioden-/Profilrisiko und klarer Folgeaktion ohne neue Requests.
 
 ## DOM-SUPPLY-003
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** in arbeit
 **Ziel des Slices:** Die physische Kette `Partie -> Annahme -> Wiegung -> Charge -> Fracht -> Abrechnung` fachlich und statusseitig durchgaengig harmonisieren.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `packages/frontend-web/src/pages/annahme/*`, `packages/frontend-web/src/pages/waage/*`, `packages/frontend-web/src/pages/charge/*`, `packages/frontend-web/src/pages/logistik/*`
 **Abnahmekriterien:** Jeder Uebergabepunkt zeigt Objektbezug, Abweichung, naechste Aktion und Folgeobjekt konsistent.
+**Fortschritt:** Die erste Codewelle verdichtet Uebergaberisiken in `waage/liste.tsx` und `logistik/tourenplanung.tsx`; die zweite Welle zieht `charge/wareneingang.tsx` mit Scan-Assist, Kettenrisiko und Operator-Schritt in denselben physischen Rahmen.
 
 ## DOM-PROC-003
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** in arbeit
 **Ziel des Slices:** Einkaufsausnahmen, Matching, Nachforderung und Lieferantenkommunikation auf echte Folgefaelle heben.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `packages/frontend-web/src/pages/einkauf/*`, relevante Beschaffungsendpunkte, Dokument- und Kommunikationspfade
 **Abnahmekriterien:** Beschaffungsfaelle bilden Matching-Ausnahmen, Nachforderung und Folgekommunikation als echte Arbeitsobjekte ab.
+**Fortschritt:** Die erste Codewelle hebt `einkauf/rechnung-abgleich.tsx` auf einen echten Ausnahme- und Folgefallrahmen; die zweite Welle zieht `einkauf/rechnungseingang.tsx` mit Abweichungsdruck, Wareneingangsbezug und naechster Freigabeaktion nach.
 
 ## DOM-CON-003
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** in arbeit
 **Ziel des Slices:** Kontraktfixierung, Marktbewertung, Mahnung und Engagement als vollwertige Operatorraeume ausbauen.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `packages/frontend-web/src/pages/kontrakte/*`, `packages/frontend-web/src/pages/contracts-v2.tsx`, relevante Kontraktendpunkte
 **Abnahmekriterien:** Fixierungs-, Markt- und Mahnlogik ist nicht nur sichtbar, sondern als klarer Operatorpfad bedienbar.
+**Fortschritt:** Die erste Codewelle zieht Operator-Druck, ungesicherte Mengen und naechsten Pfad in `contracts-v2.tsx` hoch; die zweite Welle verdichtet `kontrakte/KontraktPositionsmonitor.tsx` zum echten Exposure-, Fixierungs- und Mahnoperatorraum.
 
 ## DOM-CRM-003
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** in arbeit
 **Ziel des Slices:** CRM-/Servicefaelle mit Ownership, Folgeobjekten, Dubletten- und Abschlusslogik angleichen.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `packages/frontend-web/src/pages/crm/*`, `packages/frontend-web/src/pages/service/*`, zugehoerige APIs und Agent-Ops-Verknuepfung
 **Abnahmekriterien:** CRM und Service tragen denselben Fallbezug, Ownership-Rahmen und Abschlusspfad.
+**Fortschritt:** Die erste Codewelle verdichtet Ownership-/Folgeobjektlogik in `crm/kunden-stamm-modern/LegacyKundenStammModern.tsx` und `service/anfrage-detail.tsx`; die zweite Welle zieht `crm/opportunity-detail.tsx` mit Deal-Risiko, Angebotspfad und naechster Folgeaktion nach.
 
 ## DOM-DOC-003
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** in arbeit
 **Ziel des Slices:** Nachweis-, Bescheid-, Artefakt- und Rueckmeldungskette ueber Dokumente, Meldungen und Vorgangskontext vereinheitlichen.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `packages/frontend-web/src/pages/dokumente/*`, `packages/frontend-web/src/pages/compliance/*`, `packages/frontend-web/src/pages/fibu/atlas.tsx`, `packages/frontend-web/src/pages/compliance/meldewesen-konsole.tsx`
 **Abnahmekriterien:** Dokumente und Meldungen zeigen revisionsrelevanten Nachweisstatus, Rueckmeldungspfad und Wiedervorlage konsistent.
+**Fortschritt:** Die erste Codewelle fuehrt Nachweisrisiko in `dokumente/ablage.tsx` und Rueckmeldungsrisiko in `compliance/meldewesen-konsole.tsx` zusammen; die zweite Welle verdichtet `fibu/atlas.tsx` mit Artefakt-, Rueckmelde- und Objektkettenkontext zum revisionsnahen Nachweisfall.
 
 ## COV-FIN-002
 

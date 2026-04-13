@@ -1,16 +1,16 @@
-# CRM & Marketing Capability Model (Referenz für GAP-Analyse)
+# CRM & Marketing Capability Model (Referenz fÃ¼r GAP-Analyse)
 
 Version: 1.0
 
-Zweck: Referenzmodell zur Funktionsabdeckung in Valero NeuroERP für CRM & Marketing
+Zweck: Referenzmodell zur Funktionsabdeckung in Valero NeuroERP fÃ¼r CRM & Marketing
 
-Baseline: Vollumfängliches CRM/ERP-Niveau (SAP CX/CRM, Oracle CX, Odoo CRM+Marketing, MS Dynamics)
+Baseline: VollumfÃ¤ngliches CRM/ERP-Niveau (SAP CX/CRM, Oracle CX, Community ERP CRM+Marketing, MS Dynamics)
 
-Legende Priorität:
+Legende PrioritÃ¤t:
 
-- MUSS = Kern für Vertrieb/Marketingbetrieb
+- MUSS = Kern fÃ¼r Vertrieb/Marketingbetrieb
 
-- SOLL = Standard in großen CRM/ERPs
+- SOLL = Standard in groÃŸen CRM/ERPs
 
 - KANN = nice-to-have / branchenspezifisch
 
@@ -24,35 +24,35 @@ Evidence:
 
 - API/Events (falls vorhanden)
 
-## 1. Stammdaten & 360° Customer View
+## 1. Stammdaten & 360Â° Customer View
 
 ### CRM-ACC-01 Accounts / Firmenstamm
 
-Priorität: MUSS  
+PrioritÃ¤t: MUSS
 
 Inhalt:
 
 - Firmenstamm, Klassifikation, Status, Owner/Team
 
-- Mehrere Adressen (Rechnung/Lieferung), Länder, USt-ID
+- Mehrere Adressen (Rechnung/Lieferung), LÃ¤nder, USt-ID
 
-Evidence: Account-Create/Edit/History  
+Evidence: Account-Create/Edit/History
 
 Akzeptanz:
 
-- Dublettencheck + Änderungsprotokoll
+- Dublettencheck + Ã„nderungsprotokoll
 
 ### CRM-CON-01 Kontakte / Personenstamm
 
-Priorität: MUSS  
+PrioritÃ¤t: MUSS
 
 Inhalt:
 
 - Kontakte pro Account, Rollen, Opt-ins
 
-- Kommunikationskanäle, Präferenzen
+- KommunikationskanÃ¤le, PrÃ¤ferenzen
 
-Evidence: Contact-UI  
+Evidence: Contact-UI
 
 Akzeptanz:
 
@@ -60,27 +60,27 @@ Akzeptanz:
 
 ### CRM-REL-01 Beziehungen & Hierarchien
 
-Priorität: SOLL  
+PrioritÃ¤t: SOLL
 
 Inhalt:
 
 - Konzernhierarchie, Tochter/Partner/Standorte
 
-Evidence: Relationship-UI  
+Evidence: Relationship-UI
 
 Akzeptanz:
 
 - Hierarchie in Reports nutzbar
 
-### CRM-360-01 Customer Timeline / Aktivitätenhistorie
+### CRM-360-01 Customer Timeline / AktivitÃ¤tenhistorie
 
-Priorität: SOLL  
+PrioritÃ¤t: SOLL
 
 Inhalt:
 
 - Alle Interaktionen zeitlich (Email, Call, Meeting, Ticket, Bestellung)
 
-Evidence: Timeline-View  
+Evidence: Timeline-View
 
 Akzeptanz:
 
@@ -90,7 +90,7 @@ Akzeptanz:
 
 ### CRM-LED-01 Lead-Erfassung & Quellen
 
-Priorität: MUSS  
+PrioritÃ¤t: MUSS
 
 Inhalt:
 
@@ -98,7 +98,7 @@ Inhalt:
 
 - Quelle, Kampagne, Status
 
-Evidence: Lead-Create + Import  
+Evidence: Lead-Create + Import
 
 Akzeptanz:
 
@@ -106,7 +106,7 @@ Akzeptanz:
 
 ### CRM-LED-02 Lead-Qualifizierung & Scoring
 
-Priorität: SOLL  
+PrioritÃ¤t: SOLL
 
 Inhalt:
 
@@ -114,7 +114,7 @@ Inhalt:
 
 - Regelbasiertes Scoring (Fit/Intent)
 
-Evidence: Lead-Scoring UI  
+Evidence: Lead-Scoring UI
 
 Akzeptanz:
 
@@ -122,7 +122,7 @@ Akzeptanz:
 
 ### CRM-LED-03 Lead-Routing / Zuweisung
 
-Priorität: SOLL  
+PrioritÃ¤t: SOLL
 
 Inhalt:
 
@@ -130,7 +130,7 @@ Inhalt:
 
 - SLA & Eskalation
 
-Evidence: Routing-Regeln  
+Evidence: Routing-Regeln
 
 Akzeptanz:
 
@@ -138,31 +138,31 @@ Akzeptanz:
 
 ### CRM-LED-04 Dedupe & Merge
 
-Priorität: SOLL  
+PrioritÃ¤t: SOLL
 
 Inhalt:
 
-- Dubletten erkennen/zusammenführen
+- Dubletten erkennen/zusammenfÃ¼hren
 
-Evidence: Merge-UI  
+Evidence: Merge-UI
 
 Akzeptanz:
 
-- Merge behält Historie/Audit
+- Merge behÃ¤lt Historie/Audit
 
 ## 3. Opportunity & Pipeline
 
 ### CRM-OPP-01 Opportunities / Deals
 
-Priorität: MUSS  
+PrioritÃ¤t: MUSS
 
 Inhalt:
 
 - Deal mit Stage, Wert, Wahrscheinlichkeit, Close-Date
 
-- Aktivitäten, Anhänge, Notizen
+- AktivitÃ¤ten, AnhÃ¤nge, Notizen
 
-Evidence: Opportunity-Flow  
+Evidence: Opportunity-Flow
 
 Akzeptanz:
 
@@ -170,7 +170,7 @@ Akzeptanz:
 
 ### CRM-OPP-02 Stage-/Process-Templates
 
-Priorität: SOLL  
+PrioritÃ¤t: SOLL
 
 Inhalt:
 
@@ -178,21 +178,21 @@ Inhalt:
 
 - Pflichtfelder je Stage
 
-Evidence: Stage-Setup  
+Evidence: Stage-Setup
 
 Akzeptanz:
 
-- Validierung schützt Prozessqualität
+- Validierung schÃ¼tzt ProzessqualitÃ¤t
 
 ### CRM-OPP-03 Forecasting
 
-Priorität: SOLL/KANN je Unternehmen  
+PrioritÃ¤t: SOLL/KANN je Unternehmen
 
 Inhalt:
 
 - Forecast nach Stage/Owner/Periode
 
-Evidence: Forecast-Report  
+Evidence: Forecast-Report
 
 Akzeptanz:
 
@@ -200,43 +200,43 @@ Akzeptanz:
 
 ### CRM-OPP-04 Angebots-/Auftragsbezug
 
-Priorität: SOLL  
+PrioritÃ¤t: SOLL
 
 Inhalt:
 
-- Link Opportunity → Quote/Order/Invoice
+- Link Opportunity â†’ Quote/Order/Invoice
 
-Evidence: Cross-Link UI  
+Evidence: Cross-Link UI
 
 Akzeptanz:
 
-- Belegkette drilldown-fähig
+- Belegkette drilldown-fÃ¤hig
 
-## 4. Aktivitäten & Aufgaben
+## 4. AktivitÃ¤ten & Aufgaben
 
 ### CRM-ACT-01 Aufgaben, Calls, Meetings
 
-Priorität: MUSS  
+PrioritÃ¤t: MUSS
 
 Inhalt:
 
-- Aufgaben mit Fälligkeit/Reminder, Call-Logging, Meetings
+- Aufgaben mit FÃ¤lligkeit/Reminder, Call-Logging, Meetings
 
-Evidence: Activity-UI  
+Evidence: Activity-UI
 
 Akzeptanz:
 
-- Aktivitäten sind Account/Lead/Deal zugeordnet
+- AktivitÃ¤ten sind Account/Lead/Deal zugeordnet
 
 ### CRM-ACT-02 Kalender-/Email-Integration
 
-Priorität: SOLL  
+PrioritÃ¤t: SOLL
 
 Inhalt:
 
 - Sync Outlook/Google, Mail-Logging
 
-Evidence: Integration-Settings  
+Evidence: Integration-Settings
 
 Akzeptanz:
 
@@ -244,13 +244,13 @@ Akzeptanz:
 
 ### CRM-ACT-03 Vorlagen / Sequenzen
 
-Priorität: KANN/SOLL  
+PrioritÃ¤t: KANN/SOLL
 
 Inhalt:
 
 - Email-Templates, Call-Skripte, Sequenzen
 
-Evidence: Template-UI  
+Evidence: Template-UI
 
 Akzeptanz:
 
@@ -260,7 +260,7 @@ Akzeptanz:
 
 ### MKT-CAM-01 Kampagnenmanagement
 
-Priorität: MUSS  
+PrioritÃ¤t: MUSS
 
 Inhalt:
 
@@ -268,7 +268,7 @@ Inhalt:
 
 - Status (plan/aktiv/pausiert/abgeschlossen)
 
-Evidence: Campaign-Flow  
+Evidence: Campaign-Flow
 
 Akzeptanz:
 
@@ -276,7 +276,7 @@ Akzeptanz:
 
 ### MKT-SEG-01 Segmente & Zielgruppen
 
-Priorität: MUSS  
+PrioritÃ¤t: MUSS
 
 Inhalt:
 
@@ -284,7 +284,7 @@ Inhalt:
 
 - Import/Lookups
 
-Evidence: Segment-Builder  
+Evidence: Segment-Builder
 
 Akzeptanz:
 
@@ -292,13 +292,13 @@ Akzeptanz:
 
 ### MKT-AUT-01 Nurture / Journeys
 
-Priorität: SOLL  
+PrioritÃ¤t: SOLL
 
 Inhalt:
 
 - Multi-step Journeys (Email, Task, Wait, Branch)
 
-Evidence: Journey-Editor  
+Evidence: Journey-Editor
 
 Akzeptanz:
 
@@ -306,7 +306,7 @@ Akzeptanz:
 
 ### MKT-EML-01 Email-Marketing
 
-Priorität: MUSS  
+PrioritÃ¤t: MUSS
 
 Inhalt:
 
@@ -314,7 +314,7 @@ Inhalt:
 
 - Bounce/Unsubscribe/Opt-In Handling
 
-Evidence: Email-Flow  
+Evidence: Email-Flow
 
 Akzeptanz:
 
@@ -322,13 +322,13 @@ Akzeptanz:
 
 ### MKT-LND-01 Landingpages & Forms
 
-Priorität: SOLL  
+PrioritÃ¤t: SOLL
 
 Inhalt:
 
 - Form Builder, Captchas, Double-Opt-In
 
-Evidence: Form-UI  
+Evidence: Form-UI
 
 Akzeptanz:
 
@@ -336,27 +336,27 @@ Akzeptanz:
 
 ### MKT-EVT-01 Event-/Webinar-Marketing
 
-Priorität: KANN/SOLL  
+PrioritÃ¤t: KANN/SOLL
 
 Inhalt:
 
 - Registrierungen, Teilnehmerlisten, Follow-ups
 
-Evidence: Event-Flow  
+Evidence: Event-Flow
 
 Akzeptanz:
 
-- Teilnehmer → Leads/Kontakte
+- Teilnehmer â†’ Leads/Kontakte
 
 ### MKT-SOC-01 Social/Ads Tracking
 
-Priorität: KANN  
+PrioritÃ¤t: KANN
 
 Inhalt:
 
 - UTM/Ads Import, Attribution
 
-Evidence: Tracking-Setup  
+Evidence: Tracking-Setup
 
 Akzeptanz:
 
@@ -366,7 +366,7 @@ Akzeptanz:
 
 ### CRM-CNS-01 Opt-in/Opt-out & Consent Log
 
-Priorität: MUSS  
+PrioritÃ¤t: MUSS
 
 Inhalt:
 
@@ -374,37 +374,37 @@ Inhalt:
 
 - Consent Historie revisionssicher
 
-Evidence: Consent-View  
+Evidence: Consent-View
 
 Akzeptanz:
 
-- Jede Kommunikation prüft Consent
+- Jede Kommunikation prÃ¼ft Consent
 
 ### CRM-CNS-02 DSGVO-Funktionen
 
-Priorität: MUSS  
+PrioritÃ¤t: MUSS
 
 Inhalt:
 
-- Auskunft, Löschung/Anonymisierung, Export
+- Auskunft, LÃ¶schung/Anonymisierung, Export
 
-Evidence: GDPR-Tools UI  
+Evidence: GDPR-Tools UI
 
 Akzeptanz:
 
-- Requests workflowfähig & protokolliert
+- Requests workflowfÃ¤hig & protokolliert
 
 ## 7. Reporting & Analytics
 
 ### CRM-REP-01 Standard-CRM-Reports
 
-Priorität: MUSS  
+PrioritÃ¤t: MUSS
 
 Inhalt:
 
 - Lead-Quellen, Conversion Funnel, Pipeline, Win-Rate
 
-Evidence: Dashboards  
+Evidence: Dashboards
 
 Akzeptanz:
 
@@ -412,37 +412,37 @@ Akzeptanz:
 
 ### CRM-REP-02 Marketing-KPIs
 
-Priorität: SOLL  
+PrioritÃ¤t: SOLL
 
 Inhalt:
 
 - Open/Click/CTR, CAC, ROI, Attribution
 
-Evidence: MKT Dashboards  
+Evidence: MKT Dashboards
 
 Akzeptanz:
 
 - KPIs pro Kampagne/Segment
 
-### CRM-REP-03 Drilldown Beleg-/Aktivitätskette
+### CRM-REP-03 Drilldown Beleg-/AktivitÃ¤tskette
 
-Priorität: SOLL  
+PrioritÃ¤t: SOLL
 
 Inhalt:
 
-- Kampagne → Lead → Deal → Quote/Order
+- Kampagne â†’ Lead â†’ Deal â†’ Quote/Order
 
-Evidence: Drilldown-Trace  
+Evidence: Drilldown-Trace
 
 Akzeptanz:
 
-- Kette ist lückenlos
+- Kette ist lÃ¼ckenlos
 
 ## 8. Rollen, Berechtigungen, Workflows
 
 ### CRM-AUTH-01 Rollenmodell CRM/MKT
 
-Priorität: MUSS  
+PrioritÃ¤t: MUSS
 
 Inhalt:
 
@@ -450,7 +450,7 @@ Inhalt:
 
 - Team-/Region-/Account-basierte Rechte
 
-Evidence: Role-Setup  
+Evidence: Role-Setup
 
 Akzeptanz:
 
@@ -458,7 +458,7 @@ Akzeptanz:
 
 ### CRM-AUTH-02 Workflow-Engines
 
-Priorität: SOLL  
+PrioritÃ¤t: SOLL
 
 Inhalt:
 
@@ -466,17 +466,17 @@ Inhalt:
 
 - Eskalation/Vertretung
 
-Evidence: Workflow UI  
+Evidence: Workflow UI
 
 Akzeptanz:
 
 - Regeln konfigurierbar
 
-## 9. Integrationen & Datenflüsse
+## 9. Integrationen & DatenflÃ¼sse
 
 ### CRM-INT-01 API / Import / Export
 
-Priorität: MUSS  
+PrioritÃ¤t: MUSS
 
 Inhalt:
 
@@ -484,7 +484,7 @@ Inhalt:
 
 - CSV/Excel/API/Webhooks
 
-Evidence: Import-UI + API  
+Evidence: Import-UI + API
 
 Akzeptanz:
 
@@ -492,13 +492,13 @@ Akzeptanz:
 
 ### CRM-INT-02 Tracking/Event Bus
 
-Priorität: SOLL  
+PrioritÃ¤t: SOLL
 
 Inhalt:
 
-- Events für Öffnungen, Klicks, Webform, Orders
+- Events fÃ¼r Ã–ffnungen, Klicks, Webform, Orders
 
-Evidence: Event Log  
+Evidence: Event Log
 
 Akzeptanz:
 
@@ -506,16 +506,17 @@ Akzeptanz:
 
 ### CRM-INT-03 Dritttools (Ads, Email, Kalender)
 
-Priorität: KANN/SOLL  
+PrioritÃ¤t: KANN/SOLL
 
 Inhalt:
 
 - Connectoren (Meta/Google Ads, Mailchimp, Outlook/Google)
 
-Evidence: Connector-UI  
+Evidence: Connector-UI
 
 Akzeptanz:
 
 - Status + Fehlerhandling sichtbar
+
 
 

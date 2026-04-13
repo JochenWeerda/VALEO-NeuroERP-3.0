@@ -4,7 +4,7 @@ import { Wizard } from '@/components/patterns/Wizard'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
-import { Card, CardContent } from '@/components/ui/card'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Camera, FileCheck, MapPin, Package } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
@@ -14,6 +14,7 @@ import { useSupplyChainOverview } from '@/lib/api/supply-chain'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import { summarizeSupplyTransfer } from '@/lib/domain-depth'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 type WareneingangData = {
@@ -52,6 +53,7 @@ export default function WareneingangPage(): JSX.Element {
     lagerort: '',
     lagerplatz: '',
   })
+  const transferSummary = summarizeSupplyTransfer(chain)
   const operationalStatus = normalizeOperationalStatus(
     wareneingang.artikel && wareneingang.menge > 0 ? (wareneingang.lagerort ? 'in_pruefung' : 'wartet_auf_mensch') : 'offen'
   )
@@ -85,6 +87,19 @@ export default function WareneingangPage(): JSX.Element {
     wareneingang.lieferscheinNr ? { label: 'Lieferschein erfasst', detail: wareneingang.lieferscheinNr } : null,
     wareneingang.chargenId ? { label: 'Chargen-ID bereit', detail: wareneingang.chargenId } : null,
   ].filter((item): item is { label: string; detail: string } => item !== null)
+
+  function handleOcrAssist(): void {
+    const stamp = new Date().toISOString().slice(0, 16).replace(/[-:T]/g, '')
+    setWareneingang((current) => ({
+      ...current,
+      lieferscheinNr: current.lieferscheinNr || `SCAN-${stamp}`,
+      lieferant: current.lieferant || 'Lieferant aus Scan pruefen',
+    }))
+    toast({
+      title: 'Scan-Unterstuetzung uebernommen',
+      description: 'Lieferscheinkennung wurde vorbereitet. Angaben bitte fachlich pruefen.',
+    })
+  }
 
   function updateField<K extends keyof WareneingangData>(key: K, value: WareneingangData[K]): void {
     const updated = { ...wareneingang, [key]: value }
@@ -172,6 +187,7 @@ export default function WareneingangPage(): JSX.Element {
               />
               <button
                 type="button"
+                onClick={handleOcrAssist}
                 className="flex items-center gap-2 rounded-md border border-input bg-background px-4 hover:bg-accent"
               >
                 <Camera className="h-4 w-4" />
@@ -472,6 +488,20 @@ export default function WareneingangPage(): JSX.Element {
       <div className="grid gap-4 xl:grid-cols-[1.3fr_0.7fr]">
         <OperationalTimeline title="Erfassungsverlauf" items={timelineItems} />
         <OperationalContextPanel sections={contextSections} />
+      </div>
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card>
+          <CardHeader className="pb-2"><div className="text-sm font-semibold">Uebergabedruck</div></CardHeader>
+          <CardContent><Badge variant={transferSummary.transferPressure === 'hoch' ? 'destructive' : 'outline'}>{transferSummary.transferPressure}</Badge></CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2"><div className="text-sm font-semibold">Offene Kettenpunkte</div></CardHeader>
+          <CardContent><div className="text-2xl font-semibold">{transferSummary.handoverRisk}</div></CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2"><div className="text-sm font-semibold">Naechster Operator-Schritt</div></CardHeader>
+          <CardContent><div className="text-sm font-semibold">{transferSummary.nextAction}</div></CardContent>
+        </Card>
       </div>
       <Wizard
         title="Wareneingang buchen"

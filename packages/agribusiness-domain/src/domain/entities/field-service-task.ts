@@ -1,7 +1,7 @@
-/**
+﻿/**
  * Field Service Task Entity
  * Mobile Field Service - Task Management for Field Operations
- * Based on Odoo project.task pattern with field service extensions
+ * Based on Community ERP project.task pattern with field service extensions
  */
 
 import { randomUUID } from 'crypto';
@@ -13,13 +13,13 @@ export type FieldServiceTaskStatus =
   | 'ON_HOLD'          // Pausiert
   | 'COMPLETED'        // Abgeschlossen
   | 'CANCELLED'        // Abgebrochen
-  | 'REQUIRES_REVIEW'; // Benötigt Überprüfung
+  | 'REQUIRES_REVIEW'; // BenÃ¶tigt ÃœberprÃ¼fung
 
 export type FieldServiceTaskType =
   | 'INSPECTION'       // Inspektion
   | 'HARVEST'          // Ernte
   | 'PLANTING'         // Pflanzung
-  | 'TREATMENT'        // Behandlung (Düngung, Pflanzenschutz)
+  | 'TREATMENT'        // Behandlung (DÃ¼ngung, Pflanzenschutz)
   | 'SAMPLE_COLLECTION' // Probenahme
   | 'EQUIPMENT_MAINTENANCE' // Wartung
   | 'TRAINING'         // Schulung
@@ -34,11 +34,11 @@ export type TaskPriority =
 
 export type WeatherCondition =
   | 'SUNNY'            // Sonnig
-  | 'CLOUDY'           // Bewölkt
+  | 'CLOUDY'           // BewÃ¶lkt
   | 'RAINY'            // Regnerisch
   | 'WINDY'            // Windig
   | 'FOGGY'            // Neblig
-  | 'STORMY';          // Stürmisch
+  | 'STORMY';          // StÃ¼rmisch
 
 export interface FieldServiceLocation {
   id: string;
@@ -323,7 +323,7 @@ export class FieldServiceTaskEntity {
     };
   }
 
-  static addNote(task: FieldServiceTask, content: string, authorId: string, authorName: string, isInternal: boolean = false): FieldServiceTask {
+  static addNote(task: FieldServiceTask, content: string, authorId: string, authorName: string, isInternal = false): FieldServiceTask {
     const note: FieldServiceNote = {
       id: randomUUID(),
       content,
@@ -414,4 +414,5 @@ export class FieldServiceTaskEntity {
     return cancelledTask;
   }
 }
+
 

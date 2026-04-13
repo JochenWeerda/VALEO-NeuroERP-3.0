@@ -1,12 +1,18 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ListReport } from '@/components/mask-builder'
 import { useMaskActions } from '@/components/mask-builder/hooks'
 import { ListConfig } from '@/components/mask-builder/types'
 import { createApiClient } from '@/components/mask-builder/utils/api'
 import { toast } from '@/hooks/use-toast'
 import { api } from '@/lib/axios'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import { summarizeCustomerOperations } from '@/lib/domain-depth'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 const apiClient = createApiClient('/api/v1/crm')
 
@@ -401,9 +407,92 @@ export default function KontaktManagementPage(): JSX.Element {
     [data, navigate],
   )
 
+  const duplicateCount = useMemo(() => {
+    const seen = new Set<string>()
+    let duplicates = 0
+    for (const item of data) {
+      const key = `${item.email || ''}|${item.telefon || ''}`.toLowerCase()
+      if (!key || key === '|') continue
+      if (seen.has(key)) duplicates += 1
+      else seen.add(key)
+    }
+    return duplicates
+  }, [data])
+  const inactiveCount = useMemo(() => data.filter((item) => item.status === 'inaktiv').length, [data])
+  const dueContacts = useMemo(
+    () =>
+      data.filter((item) => {
+        if (!item.naechsterKontakt) return false
+        return new Date(item.naechsterKontakt).getTime() < Date.now()
+      }).length,
+    [data],
+  )
+  const customerOps = summarizeCustomerOperations({
+    duplicateCount,
+    hasOwner: data.some((item) => Boolean(item.assigned_to || item.owner_id || item.verantwortlich)),
+    hasReachableContact: data.some((item) => Boolean(item.email || item.telefon || item.mobil)),
+    nextActions: dueContacts,
+  })
+  const operationalStatus = normalizeOperationalStatus(
+    dueContacts > 0 ? 'wartet_auf_mensch' : duplicateCount > 0 ? 'in_pruefung' : 'offen',
+  )
+  const contextSections = [
+    {
+      title: 'Kontaktlage',
+      items: [
+        { label: 'Kontakte', value: `${total}` },
+        { label: 'Faellige Folgekontakte', value: `${dueContacts}` },
+        { label: 'Inaktive', value: `${inactiveCount}` },
+      ],
+    },
+    {
+      title: 'Ownership',
+      items: [
+        { label: 'Dubletten', value: `${duplicateCount}` },
+        { label: 'Naechste Aktion', value: customerOps.nextAction },
+        { label: 'Follow-up-Druck', value: `${dueContacts}` },
+      ],
+    },
+  ]
+  const timelineItems = [
+    { label: 'Kontaktbestand geladen', detail: `${total} Kontakte im Arbeitsraum.` },
+    { label: dueContacts > 0 ? 'Faellige Folgekontakte offen' : 'Keine ueberfaelligen Folgekontakte', detail: `${dueContacts} Kontakte mit faelligem naechsten Kontakt.` },
+    { label: 'Ownership-Pfad', detail: customerOps.nextAction },
+  ]
+
   return (
     <>
       <input ref={importInputRef} type="file" accept=".csv" className="hidden" onChange={handleImportFile} />
+      <div className="space-y-4 p-6">
+        <OperationalCaseHeader
+          title="Kontaktmanagement steuern"
+          description="Ownership, Dubletten und faellige Folgekontakte werden ueber der Listenarbeit verdichtet."
+          status={operationalStatus}
+          owner="CRM / Vertrieb"
+          blocker={duplicateCount > 0 ? 'Dubletten oder uneinheitliche Kontaktkanaele sollten vor neuer Folgearbeit bereinigt werden.' : null}
+          nextAction={customerOps.nextAction}
+          caseLabel="Kontakt-Arbeitsraum"
+          tags={['CRM', 'Kontakte']}
+        />
+        <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+          <OperationalTimeline title="Kontaktverlauf" items={timelineItems} />
+          <OperationalContextPanel title="Kontaktkontext" sections={contextSections} />
+        </div>
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card>
+            <CardHeader className="pb-2"><CardTitle className="text-sm">Ownership-Risiko</CardTitle></CardHeader>
+            <CardContent><Badge variant={customerOps.ownershipRisk === 'hoch' ? 'destructive' : 'outline'}>{customerOps.ownershipRisk}</Badge></CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2"><CardTitle className="text-sm">Dubletten</CardTitle></CardHeader>
+            <CardContent><div className="text-2xl font-semibold">{duplicateCount}</div></CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2"><CardTitle className="text-sm">Naechste Fallaktion</CardTitle></CardHeader>
+            <CardContent><div className="text-sm font-semibold">{customerOps.nextAction}</div></CardContent>
+          </Card>
+        </div>
+      </div>
       <ListReport
         config={kontaktListConfig}
         data={data}

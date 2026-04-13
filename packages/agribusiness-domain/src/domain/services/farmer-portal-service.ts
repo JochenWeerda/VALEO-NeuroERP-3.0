@@ -1,10 +1,10 @@
-/**
+﻿/**
  * Farmer Portal Service
  * Self-Service Features for Farmers
- * Based on Odoo portal pattern
+ * Based on Community ERP portal pattern
  */
 
-import { Farmer, FarmerEntity, CreateFarmerInput, UpdateFarmerInput, FarmerCertification, FarmerCrop, FarmerLocation } from '../entities/farmer';
+import { CreateFarmerInput, Farmer, FarmerCertification, FarmerCrop, FarmerEntity, FarmerLocation, UpdateFarmerInput } from '../entities/farmer';
 import { ChangeLogService } from '@valeo-neuroerp/audit-domain';
 
 export interface FarmerRepository {
@@ -339,7 +339,7 @@ export class FarmerPortalService {
   /**
    * Search farmers
    */
-  async searchFarmers(query: string, limit: number = 20): Promise<Farmer[]> {
+  async searchFarmers(query: string, limit = 20): Promise<Farmer[]> {
     const result = await this.deps.farmerRepository.findMany(
       { search: query },
       { page: 1, pageSize: limit },
@@ -432,4 +432,5 @@ export class FarmerPortalService {
     return await this.deps.farmerRepository.update(updated);
   }
 }
+
 

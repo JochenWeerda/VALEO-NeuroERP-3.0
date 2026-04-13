@@ -20,6 +20,7 @@ import { apiClient } from '@/lib/api-client'
 import { CheckCircle, Truck } from 'lucide-react'
 import { AgentSuggestionBadge, AgentProcessPanel } from '@/components/agent'
 import { useSupplyChainOverview } from '@/lib/api/supply-chain'
+import { summarizeSupplyTransfer } from '@/lib/domain-depth'
 import { summarizeSupplyOps } from '@/lib/professional-control-centers'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
@@ -78,6 +79,7 @@ export default function RohwareAnnahmePage(): JSX.Element {
   const { toast } = useToast()
   const { data: chain } = useSupplyChainOverview()
   const supplyOps = useMemo(() => summarizeSupplyOps(chain), [chain])
+  const transferSummary = useMemo(() => summarizeSupplyTransfer(chain), [chain])
 
   const [form, setForm] = useState<RohwareFormState>({
     lieferant: '',
@@ -560,6 +562,24 @@ export default function RohwareAnnahmePage(): JSX.Element {
             <div>
               <div className="text-xs text-muted-foreground">Naechste Aktion</div>
               <div className="text-sm font-semibold">{supplyOps.nextAction}</div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="mt-4">
+          <CardContent className="grid gap-3 pt-6 md:grid-cols-3">
+            <div>
+              <div className="text-xs text-muted-foreground">Uebergabedruck</div>
+              <Badge variant={transferSummary.transferPressure === 'hoch' ? 'destructive' : 'outline'}>
+                {transferSummary.transferPressure}
+              </Badge>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground">Offene Kettenpunkte</div>
+              <div className="text-lg font-semibold">{transferSummary.handoverRisk}</div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground">Naechste Kettenaktion</div>
+              <div className="text-sm font-semibold">{transferSummary.nextAction}</div>
             </div>
           </CardContent>
         </Card>

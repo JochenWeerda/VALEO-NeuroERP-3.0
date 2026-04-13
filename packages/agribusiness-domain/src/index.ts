@@ -1,7 +1,7 @@
-/**
+﻿/**
  * Agribusiness Domain
  * Complete Agribusiness Management for Landhandel
- * Based on Odoo stock_agriculture and quality module patterns
+ * Based on Community ERP stock_agriculture and quality module patterns
  */
 
 // Export entities
@@ -42,3 +42,4 @@ export * from './app/routes/agribusiness-workflows';
 export * from './app/routes/agribusiness-compliance';
 export * from './app/routes/agribusiness-export';
 export * from './app/routes/agribusiness-integration';
+

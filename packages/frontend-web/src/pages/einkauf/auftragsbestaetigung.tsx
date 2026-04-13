@@ -11,6 +11,9 @@ import { apiClient } from '@/lib/api-client'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { summarizeProcurementMatch } from '@/lib/domain-depth'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 const createAuftragsbestaetigungConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
@@ -123,6 +126,14 @@ export default function AuftragsbestaetigungPage(): JSX.Element {
     apiUrl: auftragsbestaetigungConfig.api.baseUrl,
     id: id || undefined
   })
+  const confirmationOps = summarizeProcurementMatch({
+    exceptionsCount:
+      (Array.isArray(data?.bestaetigteTermine) ? data.bestaetigteTermine.length : 0) +
+      (Array.isArray(data?.preisabweichungen) ? data.preisabweichungen.length : 0),
+    variancePercentage: data?.status === 'BESTAETIGT' ? 0 : data?.status === 'GEPRUEFT' ? 4 : 9,
+    autoApprovalEligible: data?.status === 'GEPRUEFT' || data?.status === 'BESTAETIGT',
+    hasGoodsReceipt: Boolean(data?.bestellungId),
+  })
   const operationalStatus = normalizeOperationalStatus(data?.status)
   const operationalBlocker = data?.status === 'OFFEN'
     ? 'Die Auftragsbestaetigung ist noch nicht geprueft und kann Termin- oder Preisabweichungen enthalten.'
@@ -179,13 +190,27 @@ export default function AuftragsbestaetigungPage(): JSX.Element {
           status={operationalStatus}
           owner="Einkauf"
           blocker={operationalBlocker}
-          nextAction={data?.status === 'BESTAETIGT' ? 'Abgleich mit Bestellung weiterfuehren' : data?.status === 'GEPRUEFT' ? 'Bestaetigung freigeben' : 'Abweichungen pruefen'}
+          nextAction={confirmationOps.nextAction}
           caseLabel={String(data?.bestaetigungsNummer ?? 'Auftragsbestaetigung')}
           tags={['Einkauf', 'Lieferant']}
         />
         <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
           <OperationalTimeline title="Bestaetigungsverlauf" items={timelineItems} />
           <OperationalContextPanel title="Bestaetigungskontext" sections={contextSections} />
+        </div>
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card>
+            <CardHeader className="pb-2"><CardTitle className="text-sm">Abweichungsdruck</CardTitle></CardHeader>
+            <CardContent><Badge variant={confirmationOps.exceptionPressure === 'hoch' ? 'destructive' : 'outline'}>{confirmationOps.exceptionPressure}</Badge></CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2"><CardTitle className="text-sm">Termin-/Preisfall</CardTitle></CardHeader>
+            <CardContent><div className="text-sm font-semibold">{`${Array.isArray(data?.bestaetigteTermine) ? data.bestaetigteTermine.length : 0} Termine / ${Array.isArray(data?.preisabweichungen) ? data.preisabweichungen.length : 0} Preise`}</div></CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2"><CardTitle className="text-sm">Naechste Fallaktion</CardTitle></CardHeader>
+            <CardContent><div className="text-sm font-semibold">{confirmationOps.nextAction}</div></CardContent>
+          </Card>
         </div>
       </div>
       <ObjectPage

@@ -6,9 +6,14 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { apiClient } from '@/lib/api-client'
 import { listKontrakte } from '@/lib/api/kontrakte'
+import { summarizeContractOperations } from '@/lib/domain-depth'
 import { summarizeContractHedge } from '@/lib/professional-control-centers'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 import {
   AlertTriangle,
   ArrowDownRight,
@@ -139,9 +144,83 @@ export default function KontraktPositionsmonitor(): JSX.Element {
       ),
     [steeringItems],
   )
+  const contractOps = useMemo(
+    () =>
+      summarizeContractOperations(
+        steeringItems.map((item) => ({
+          hedgeQuotePct: item.steering?.hedge_quote_pct,
+          marketValuationEur: item.steering?.market_valuation_eur,
+          dunningLevel: item.steering?.dunning_level,
+          writeoffCandidate: item.steering?.writeoff_candidate,
+          printReady: item.steering?.print_ready,
+        })),
+      ),
+    [steeringItems],
+  )
+  const operationalStatus = normalizeOperationalStatus(
+    shortCount > 0 ? 'eskaliert' : hedgeGapCount > 0 || negativeValuationCount > 0 ? 'wartet_auf_mensch' : 'offen',
+  )
+  const contextSections = [
+    {
+      title: 'Engagement',
+      items: [
+        { label: 'Short-Artikel', value: `${shortCount}` },
+        { label: 'Long-Artikel', value: `${longCount}` },
+        { label: 'Balanced', value: `${balancedCount}` },
+      ],
+    },
+    {
+      title: 'Steuerung',
+      items: [
+        { label: 'Disposition', value: `${dispositionCount}` },
+        { label: 'Paritaet', value: `${parityCount}` },
+        { label: 'Hedge-Luecken', value: `${hedgeGapCount}` },
+      ],
+    },
+    {
+      title: 'Risiko',
+      items: [
+        { label: 'Negative Marktwerte', value: `${negativeValuationCount}` },
+        { label: 'Mahndruck', value: `${contractOps.dunningCount}` },
+        { label: 'Naechste Aktion', value: contractOps.nextAction },
+      ],
+    },
+  ]
+  const timelineItems = [
+    {
+      label: critical ? 'Kritische Unterdeckung aktiv' : 'Keine kritische Unterdeckung',
+      detail: critical
+        ? `${critical.article_desc} mit ${critical.coverage_pct != null ? `${critical.coverage_pct.toFixed(1)}% Deckung` : 'offener Deckung'}`
+        : 'Der Monitor sieht aktuell keinen dominanten Short-Artikel.',
+    },
+    {
+      label: hedgeGapCount > 0 ? 'Fixierungsluecken offen' : 'Fixierungsbild stabil',
+      detail: hedgeGapCount > 0 ? `${hedgeGapCount} Kontrakte liegen unter Zielquote.` : 'Keine offenen Hedge-Luecken im Steuerbestand.',
+    },
+    {
+      label: negativeValuationCount > 0 ? 'Marktbewertung negativ' : 'Marktbewertung stabil',
+      detail: negativeValuationCount > 0
+        ? `${negativeValuationCount} Kontrakte mit negativer Marktbewertung.`
+        : 'Keine negativen Marktwerte im Fokusbestand.',
+    },
+  ]
 
   return (
     <div className="space-y-4 p-6">
+      <OperationalCaseHeader
+        title="Rohwaren-Positionen steuern"
+        description="Exposure, Fixierung, Paritaet und Mahndruck werden als gemeinsamer Kontraktoperatorpfad gefuehrt."
+        status={operationalStatus}
+        owner="Kontrakt / Handel"
+        blocker={shortCount > 0 ? 'Unterdeckte Artikel muessen vor neuem Verkaufsdruck abgesichert oder disponiert werden.' : null}
+        nextAction={contractOps.nextAction}
+        caseLabel="Kontrakt-Exposure"
+        tags={['Kontrakte', 'Markt']}
+      />
+      <div className="grid gap-4 xl:grid-cols-[1.35fr_1fr]">
+        <OperationalTimeline title="Operatorverlauf" items={timelineItems} />
+        <OperationalContextPanel title="Exposure-Kontext" sections={contextSections} />
+      </div>
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold flex items-center gap-2">
           <ShieldAlert className="h-5 w-5 text-red-600" />

@@ -13,6 +13,7 @@ import { ErrorState } from '@/components/ErrorState'
 import { toast } from '@/hooks/use-toast'
 import { getAxiosErrorMessage } from '@/lib/api-client'
 import { useDATEVExport, useFibuCockpit, useZahlungslauf, useZahlungsvorschlaege, type Zahlungsvorschlag } from '@/lib/api/fibu'
+import { summarizeFibuConnectorOperations } from '@/lib/domain-depth'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 type ZahlungslaufData = {
@@ -75,6 +76,15 @@ export default function ZahlungslaeufeePage(): JSX.Element {
     () => selectedZahlungen.filter((zahlung) => new Date(zahlung.faelligAm) < new Date()).length,
     [selectedZahlungen],
   )
+  const paymentOps = summarizeFibuConnectorOperations({
+    connectorProfiles: fibuCockpit.master_data.connector_profile_count,
+    exportRuns: fibuCockpit.revision.export_runs,
+    openPeriods: fibuCockpit.annual_close.open_item_count,
+    adjustingPeriods: 0,
+    dunningReady: fibuCockpit.master_data.dunning_parameters_ready,
+    interestReady: fibuCockpit.master_data.interest_groups_ready,
+    taxReady: fibuCockpit.tax.e_bilanz_ready && fibuCockpit.tax.e_clearing_ready,
+  })
 
   if (isError) {
     return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
@@ -278,7 +288,7 @@ export default function ZahlungslaeufeePage(): JSX.Element {
           status={operationalStatus}
           owner="Kreditorenbuchhaltung"
           blocker={overdueItems > 0 ? `${overdueItems} ausgewaehlte Zahlungen sind bereits ueberfaellig.` : null}
-          nextAction={selectedZahlungen.length > 0 ? 'Lauf pruefen und ausfuehren' : 'Zahlungsvorschlaege auswaehlen'}
+          nextAction={selectedZahlungen.length > 0 ? paymentOps.nextAction : 'Zahlungsvorschlaege auswaehlen'}
           caseLabel="Vorgang: Kreditoren-Zahlung"
           tags={['FIBU', 'SEPA/DATEV']}
         />
@@ -299,6 +309,17 @@ export default function ZahlungslaeufeePage(): JSX.Element {
         </Card>
         <Card>
           <CardContent className="pt-6"><div className="text-xs text-muted-foreground">Jahreswechsel</div><div className="text-sm font-semibold">{fibuCockpit.annual_close.ready_for_year_close ? 'stabil' : 'offene Klärungen'}</div></CardContent>
+        </Card>
+      </div>
+      <div className="mb-6 grid gap-4 md:grid-cols-3">
+        <Card>
+          <CardContent className="pt-6"><div className="text-xs text-muted-foreground">Readiness-Risiko</div><Badge variant={paymentOps.readinessRisk === 'hoch' ? 'destructive' : 'outline'}>{paymentOps.readinessRisk}</Badge></CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6"><div className="text-xs text-muted-foreground">Ausgewaehlte OP</div><div className="text-2xl font-semibold">{selectedZahlungen.length}</div></CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6"><div className="text-xs text-muted-foreground">Naechste Operator-Aktion</div><div className="text-sm font-semibold">{paymentOps.nextAction}</div></CardContent>
         </Card>
       </div>
       <Wizard

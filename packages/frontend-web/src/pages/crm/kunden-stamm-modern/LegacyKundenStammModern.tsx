@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { useToast } from '@/hooks/use-toast'
 import { useCreateCustomer, useCustomers, type Customer } from '@/lib/api/crm'
+import { summarizeCustomerOperations } from '@/lib/domain-depth'
 import {
   AlertTriangle,
   Brain,
@@ -152,6 +153,16 @@ function LegacyKundenStammModern(): JSX.Element {
     () => buildNextActions(customerData, duplicateCandidates),
     [customerData, duplicateCandidates],
   )
+  const customerOps = useMemo(
+    () =>
+      summarizeCustomerOperations({
+        duplicateCount: duplicateCandidates.length,
+        hasOwner: Boolean(customerData['customer.account_manager']),
+        hasReachableContact: Boolean(customerData['contact.email'] || customerData['contact.phone_primary']),
+        nextActions: nextActions.length,
+      }),
+    [customerData, duplicateCandidates.length, nextActions.length],
+  )
 
   useEffect(() => {
     const handleResize = () => {
@@ -279,6 +290,35 @@ function LegacyKundenStammModern(): JSX.Element {
             <CardTitle className="flex items-center gap-2 text-sm font-medium"><Users className="h-4 w-4 text-blue-500" />Folgewege</CardTitle>
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground">Dokumente, Service und Vertrieb sind als naechste Aktionen schon am Kunden sichtbar.</CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium">Ownership-Risiko</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-lg font-semibold">{customerOps.ownershipRisk}</div>
+            <div className="mt-1 text-sm text-muted-foreground">Dubletten, Owner und Kontaktkanal werden als gemeinsamer Arbeitszustand bewertet.</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium">Naechste Aktion</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-sm font-semibold">{customerOps.nextAction}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium">Folgeobjekte bereit</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-lg font-semibold">{nextActions.length}</div>
+            <div className="mt-1 text-sm text-muted-foreground">Vertrieb, Service, Dokumente und Compliance sind direkt ansteuerbar.</div>
+          </CardContent>
         </Card>
       </div>
 

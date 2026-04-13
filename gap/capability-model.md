@@ -1,6 +1,6 @@
 # ERP Capability Model - Reference Taxonomy
 
-Dieses Dokument definiert die Referenz-Taxonomie für ERP-Funktionalitäten, basierend auf SAP, Oracle, Odoo und anderen führenden ERP-Systemen.
+Dieses Dokument definiert die Referenz-Taxonomie fÃ¼r ERP-FunktionalitÃ¤ten, basierend auf SAP, Oracle, Community ERP und anderen fÃ¼hrenden ERP-Systemen.
 
 ## 1. Finance (Finanzwesen)
 
@@ -76,7 +76,7 @@ Dieses Dokument definiert die Referenz-Taxonomie für ERP-Funktionalitäten, bas
 - Supplier Performance
 - Contract Management
 
-**Hinweis:** Das vollständige Procurement Capability Model mit 28 Capabilities (PROC-SUP-01 bis PROC-INT-03) ist in `procurement-capability-model.md` dokumentiert und in `matrix.csv` für die GAP-Analyse verfügbar.
+**Hinweis:** Das vollstÃ¤ndige Procurement Capability Model mit 28 Capabilities (PROC-SUP-01 bis PROC-INT-03) ist in `procurement-capability-model.md` dokumentiert und in `matrix.csv` fÃ¼r die GAP-Analyse verfÃ¼gbar.
 
 ## 3. Sales & CRM (Verkauf & Kundenbeziehung)
 
@@ -175,7 +175,7 @@ Dieses Dokument definiert die Referenz-Taxonomie für ERP-Funktionalitäten, bas
 - Data Visualization
 - Ad-hoc Analysis
 
-## 9. Workflow / BPM / Roles (Workflow / Geschäftsprozessmanagement / Rollen)
+## 9. Workflow / BPM / Roles (Workflow / GeschÃ¤ftsprozessmanagement / Rollen)
 
 ### 9.1 Workflow Engine
 - Workflow Definition
@@ -209,10 +209,11 @@ Dieses Dokument definiert die Referenz-Taxonomie für ERP-Funktionalitäten, bas
 
 ## Reifegrad-Bewertung
 
-- **SAP-ähnlich**: Vollständige Funktionalität auf Enterprise-Level
-- **Odoo-ähnlich**: Gute Funktionalität für mittelständische Unternehmen
-- **Basic**: Grundlegende Funktionalität vorhanden
+- **SAP-Ã¤hnlich**: VollstÃ¤ndige FunktionalitÃ¤t auf Enterprise-Level
+- **Community ERP-Ã¤hnlich**: Gute FunktionalitÃ¤t fÃ¼r mittelstÃ¤ndische Unternehmen
+- **Basic**: Grundlegende FunktionalitÃ¤t vorhanden
 - **Partial**: Teilweise implementiert
 - **Missing**: Nicht vorhanden
+
 
 

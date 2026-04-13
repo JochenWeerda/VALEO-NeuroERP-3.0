@@ -1,21 +1,21 @@
-/**
+﻿/**
  * Quality Certificate Entity
  * Complete Quality Certificate Management for Agribusiness
- * Based on Odoo quality module pattern
+ * Based on Community ERP quality module pattern
  */
 
 import { randomUUID } from 'crypto';
 
 export type QualityCertificateType = 
-  | 'SEED'             // Saatgut-Qualität
-  | 'FERTILIZER'       // Düngemittel-Analyse
-  | 'FEED'             // Futtermittel-Qualität
-  | 'CROP';            // Ernte-Qualität
+  | 'SEED'             // Saatgut-QualitÃ¤t
+  | 'FERTILIZER'       // DÃ¼ngemittel-Analyse
+  | 'FEED'             // Futtermittel-QualitÃ¤t
+  | 'CROP';            // Ernte-QualitÃ¤t
 
 export type QualityCertificateStatus = 
   | 'DRAFT'            // Entwurf
   | 'ISSUED'           // Ausgestellt
-  | 'VALID'            // Gültig
+  | 'VALID'            // GÃ¼ltig
   | 'EXPIRED'          // Abgelaufen
   | 'REVOKED';         // Widerrufen
 
@@ -251,7 +251,7 @@ export class QualityCertificate {
     return new Date() > this.validUntil;
   }
 
-  public isExpiringSoon(days: number = 30): boolean {
+  public isExpiringSoon(days = 30): boolean {
     const now = new Date();
     const daysUntilExpiry = Math.ceil((this.validUntil.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
     return daysUntilExpiry <= days && daysUntilExpiry > 0;
@@ -308,3 +308,4 @@ export class QualityCertificate {
     };
   }
 }
+

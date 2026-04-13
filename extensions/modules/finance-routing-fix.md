@@ -1,9 +1,9 @@
 # Feature Implementation Plan - Finance Routing Fix
 
-**Erstellt:** 2025-11-24  
-**Basis:** GAP-FIN-001 (Routing-Inkonsistenz Finance-Modul)  
-**Status:** Planned  
-**Priorität:** P0 (Kritisch)
+**Erstellt:** 2025-11-24
+**Basis:** GAP-FIN-001 (Routing-Inkonsistenz Finance-Modul)
+**Status:** Planned
+**PrioritÃ¤t:** P0 (Kritisch)
 
 ## Problem
 
@@ -15,9 +15,9 @@ Finance-Modul zeigt falsche URLs:
 
 ### Routing-Korrekturen
 
-1. **Finance-Modul Übersicht**
+1. **Finance-Modul Ãœbersicht**
    - URL: `/finance` (statt `/crm/betriebsprofile`)
-   - Zeigt Finance-Modul Übersicht mit Navigation zu:
+   - Zeigt Finance-Modul Ãœbersicht mit Navigation zu:
      - General Ledger
      - Accounts Receivable (Invoices)
      - Accounts Payable
@@ -34,41 +34,41 @@ Finance-Modul zeigt falsche URLs:
 
 ## Implementierungsplan
 
-### Phase 1: Routing-Definitionen (Priorität: Hoch)
+### Phase 1: Routing-Definitionen (PrioritÃ¤t: Hoch)
 
 1. **Frontend Routes**
    - `packages/frontend-web/src/app/route-aliases.json`
-     - `/finance` → Finance-Modul Übersicht
-     - `/finance/invoices` → Invoices-Liste
-     - `/finance/invoices/new` → Create Invoice
+     - `/finance` â†’ Finance-Modul Ãœbersicht
+     - `/finance/invoices` â†’ Invoices-Liste
+     - `/finance/invoices/new` â†’ Create Invoice
 
 2. **Auto-Routing**
-   - Prüfe ob Auto-Routing korrekt funktioniert
-   - Falls nicht, manuelle Routes in `App.tsx` hinzufügen
+   - PrÃ¼fe ob Auto-Routing korrekt funktioniert
+   - Falls nicht, manuelle Routes in `App.tsx` hinzufÃ¼gen
 
-### Phase 2: Navigation-Komponenten (Priorität: Hoch)
+### Phase 2: Navigation-Komponenten (PrioritÃ¤t: Hoch)
 
-1. **Finance-Modul Übersicht**
+1. **Finance-Modul Ãœbersicht**
    - Erstelle `packages/frontend-web/src/pages/finance/index.tsx`
-   - Zeigt Finance-Modul Übersicht mit Navigation
+   - Zeigt Finance-Modul Ãœbersicht mit Navigation
 
 2. **Navigation-Links**
-   - Korrigiere Links in Navigation-Menü
+   - Korrigiere Links in Navigation-MenÃ¼
    - Stelle sicher, dass alle Finance-Links auf `/finance/*` zeigen
 
-### Phase 3: Komponenten-Migration (Priorität: Mittel)
+### Phase 3: Komponenten-Migration (PrioritÃ¤t: Mittel)
 
 1. **Invoices-Liste**
-   - Prüfe ob `packages/frontend-web/src/pages/sales/invoice.tsx` existiert
+   - PrÃ¼fe ob `packages/frontend-web/src/pages/sales/invoice.tsx` existiert
    - Falls ja, migriere zu `packages/frontend-web/src/pages/finance/invoices.tsx`
    - Falls nein, erstelle neue Komponente
 
 2. **Create Invoice**
-   - Prüfe ob `packages/frontend-web/src/pages/finance/bookings/new.tsx` existiert
+   - PrÃ¼fe ob `packages/frontend-web/src/pages/finance/bookings/new.tsx` existiert
    - Falls ja, migriere zu `packages/frontend-web/src/pages/finance/invoices/new.tsx`
    - Falls nein, erstelle neue Komponente
 
-### Phase 4: Testing (Priorität: Hoch)
+### Phase 4: Testing (PrioritÃ¤t: Hoch)
 
 1. **Navigation Tests**
    - Teste Navigation zu `/finance`
@@ -84,23 +84,23 @@ Finance-Modul zeigt falsche URLs:
 ### SAP
 - Klare Modul-Trennung: `/finance`, `/sales`, `/procurement`
 - Konsistente URL-Struktur
-- Keine Überschneidungen zwischen Modulen
+- Keine Ãœberschneidungen zwischen Modulen
 
-### Odoo
+### Community ERP
 - Modul-basierte URLs: `/finance/invoices`, `/sales/orders`
 - Klare Hierarchie
 - Konsistente Navigation
 
 ## Akzeptanzkriterien
 
-- [ ] `/finance` zeigt Finance-Modul Übersicht
+- [ ] `/finance` zeigt Finance-Modul Ãœbersicht
 - [ ] `/finance/invoices` zeigt Invoices-Liste
 - [ ] `/finance/invoices/new` zeigt Create Invoice Formular
-- [ ] Navigation-Menü zeigt korrekte Links
+- [ ] Navigation-MenÃ¼ zeigt korrekte Links
 - [ ] Keine 404-Fehler bei Navigation
 - [ ] URLs sind konsistent und logisch
 
-## Geschätzter Aufwand
+## GeschÃ¤tzter Aufwand
 
 - **Routing-Definitionen:** 0.5 Tage
 - **Navigation-Komponenten:** 1 Tag
@@ -108,10 +108,10 @@ Finance-Modul zeigt falsche URLs:
 - **Testing:** 0.5 Tage
 - **Gesamt:** 3-4 Tage
 
-## Nächste Schritte
+## NÃ¤chste Schritte
 
 1. **Frontend-Entwickler:** Beginne mit Routing-Definitionen
-2. **Frontend-Entwickler:** Erstelle Finance-Modul Übersicht
+2. **Frontend-Entwickler:** Erstelle Finance-Modul Ãœbersicht
 3. **Frontend-Entwickler:** Migriere/Erstelle Invoices-Komponenten
 4. **Tester:** Teste Navigation und Routing
 
@@ -120,8 +120,9 @@ Finance-Modul zeigt falsche URLs:
 - GAP-Analyse: `gap/gaps.md` (GAP-FIN-001)
 - Test-Plan: `specs/finance.md` (TC-FIN-001, TC-FIN-002)
 - Handoff-Notiz: `swarm/handoffs/ui-explorer-finance-2025-11-24T08-51-19.344194.md`
-- Screenshots: 
+- Screenshots:
   - `evidence/screenshots/finance/20251124_095102_03_finance_module.png`
   - `evidence/screenshots/finance/20251124_095105_04_invoices_list.png`
+
 
 

@@ -4,8 +4,12 @@ import { useQuery } from '@tanstack/react-query'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { listKontrakte, type KontraktListItem } from '@/lib/api/kontrakte'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 import { AlertTriangle, Clock, TrendingUp, Package } from 'lucide-react'
 
 function daysUntil(dateStr: string | null | undefined): number | null {
@@ -133,6 +137,32 @@ export default function KontraktAlarmDashboard(): JSX.Element {
   const dunningCount = alarms.filter((a) => a.alarmType === 'dunning_due').length
   const washoutCount = alarms.filter((a) => a.alarmType === 'washout_candidate').length
   const printCount = alarms.filter((a) => a.alarmType === 'print_missing').length
+  const operationalStatus = normalizeOperationalStatus(
+    alarms.length > 0 ? 'eskaliert' : 'abgeschlossen',
+  )
+  const contextSections = [
+    {
+      title: 'Alarmdruck',
+      items: [
+        { label: 'Ablauf', value: `${expiringCount}` },
+        { label: 'Hedge', value: `${hedgeGapCount}` },
+        { label: 'Mahnung', value: `${dunningCount}` },
+      ],
+    },
+    {
+      title: 'Sonderfaelle',
+      items: [
+        { label: 'MATIF offen', value: `${matifCount}` },
+        { label: 'Washout', value: `${washoutCount}` },
+        { label: 'Druck fehlt', value: `${printCount}` },
+      ],
+    },
+  ]
+  const timelineItems = [
+    { label: alarms.length > 0 ? 'Aktive Alarme vorhanden' : 'Keine aktiven Alarme', detail: `${alarms.length} Alarmfaelle im Dashboard.` },
+    { label: expiringCount > 0 ? 'Ablaufdruck aktiv' : 'Kein Ablaufdruck', detail: `${expiringCount} Kontrakte laufen kurzfristig aus.` },
+    { label: hedgeGapCount + dunningCount > 0 ? 'Steuerungsdruck offen' : 'Fixierung und Mahnung stabil', detail: `${hedgeGapCount} Hedge-Luecken, ${dunningCount} Mahnfaelle.` },
+  ]
 
   const alarmIcon = (type: AlarmItem['alarmType']): JSX.Element => {
     switch (type) {
@@ -164,6 +194,20 @@ export default function KontraktAlarmDashboard(): JSX.Element {
 
   return (
     <div className="space-y-4 p-6">
+      <OperationalCaseHeader
+        title="Kontrakt-Alarme steuern"
+        description="Ablauf, Hedge-Luecken, Mahnfaelle und Washout-Druck werden als ein Operatorraum priorisiert."
+        status={operationalStatus}
+        owner="Kontrakt / Handel"
+        blocker={alarms.length > 0 ? 'Offene Alarmfaelle muessen vor weiterem Vertragsdruck priorisiert werden.' : null}
+        nextAction={alarms.length > 0 ? 'Kritischste Alarmfaelle zuerst oeffnen und bearbeiten' : 'Kein unmittelbarer Eingriff erforderlich'}
+        caseLabel="Kontrakt-Alarmraum"
+        tags={['Kontrakte', 'Risiko']}
+      />
+      <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+        <OperationalTimeline title="Alarmverlauf" items={timelineItems} />
+        <OperationalContextPanel title="Alarmkontext" sections={contextSections} />
+      </div>
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold flex items-center gap-2">
           <AlertTriangle className="h-5 w-5 text-amber-600" />

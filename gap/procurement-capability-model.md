@@ -1,14 +1,14 @@
-# Einkauf / Procurement Capability Model (Referenz für GAP-Analyse)
+# Einkauf / Procurement Capability Model (Referenz fÃ¼r GAP-Analyse)
 
-**Version:** 1.0  
-**Datum:** 2025-01-27  
-**Zweck:** Referenzmodell zur Funktionsabdeckung von Valero NeuroERP im Bereich Einkauf (Source-to-Pay)  
-**Baseline:** Vollumfängliches ERP-Niveau (SAP MM / Oracle Procurement / Odoo Enterprise Purchase)
+**Version:** 1.0
+**Datum:** 2025-01-27
+**Zweck:** Referenzmodell zur Funktionsabdeckung von Valero NeuroERP im Bereich Einkauf (Source-to-Pay)
+**Baseline:** VollumfÃ¤ngliches ERP-Niveau (SAP MM / Oracle Procurement / Community ERP Enterprise Purchase)
 
-## Legende Priorität
+## Legende PrioritÃ¤t
 
 - **MUSS** = rechtlich/operativ zwingend / Kernprozess
-- **SOLL** = Standard in großen ERPs
+- **SOLL** = Standard in groÃŸen ERPs
 - **KANN** = nice-to-have / branchenspezifisch
 
 ## Beleg-Evidence
@@ -24,14 +24,14 @@
 
 ### PROC-SUP-01 Lieferantenstamm
 
-**Priorität:** MUSS  
+**PrioritÃ¤t:** MUSS
 
 **Inhalt:**
-- Lieferant anlegen/ändern/sperren/archivieren
+- Lieferant anlegen/Ã¤ndern/sperren/archivieren
 - Adressen, Ansprechpartner, Bankdaten, Steuerinfos
 - Lieferantengruppen, Klassifikationen
 
-**Evidence:** Supplier-Create/Edit UI  
+**Evidence:** Supplier-Create/Edit UI
 
 **Akzeptanz:**
 - Pflichtfelder + Dublettencheck + Historie
@@ -40,13 +40,13 @@
 
 ### PROC-SUP-02 Lieferantenbewertung
 
-**Priorität:** SOLL  
+**PrioritÃ¤t:** SOLL
 
 **Inhalt:**
-- Kriterien: Qualität, Termintreue, Preis, Service
+- Kriterien: QualitÃ¤t, Termintreue, Preis, Service
 - Scores + Trends, Sperr-/Freigabelogik
 
-**Evidence:** Supplier-Score UI/Report  
+**Evidence:** Supplier-Score UI/Report
 
 **Akzeptanz:**
 - Bewertung wirkt auf Auswahl/Workflows
@@ -55,16 +55,16 @@
 
 ### PROC-SUP-03 Compliance / Dokumente
 
-**Priorität:** SOLL  
+**PrioritÃ¤t:** SOLL
 
 **Inhalt:**
-- Zertifikate, Rahmenverträge, NDA, ESG
-- Gültigkeit/Erinnerungen
+- Zertifikate, RahmenvertrÃ¤ge, NDA, ESG
+- GÃ¼ltigkeit/Erinnerungen
 
-**Evidence:** Supplier-Docs UI  
+**Evidence:** Supplier-Docs UI
 
 **Akzeptanz:**
-- Ablauf löst Hinweis/Sperre aus
+- Ablauf lÃ¶st Hinweis/Sperre aus
 
 ---
 
@@ -72,29 +72,29 @@
 
 ### PROC-REQ-01 Bedarfsmeldung (Purchase Requisition)
 
-**Priorität:** MUSS  
+**PrioritÃ¤t:** MUSS
 
 **Inhalt:**
 - Bedarf erfassen (Artikel/Service/Projekt)
 - Mengen, Termin, Kostenstelle/Projekt
-- Status: Entwurf → Freigabe → Bestellung
+- Status: Entwurf â†’ Freigabe â†’ Bestellung
 
-**Evidence:** Requisition-Flow  
+**Evidence:** Requisition-Flow
 
 **Akzeptanz:**
-- Bedarf erzeugt prüfbaren Vorgang
+- Bedarf erzeugt prÃ¼fbaren Vorgang
 
 ---
 
 ### PROC-REQ-02 Bedarfsgenehmigung
 
-**Priorität:** MUSS/SOLL je Unternehmen  
+**PrioritÃ¤t:** MUSS/SOLL je Unternehmen
 
 **Inhalt:**
 - Freigabe nach Betrag/Warengruppe/Kostenstelle
 - Vertretung/Eskalation
 
-**Evidence:** Approval-UI  
+**Evidence:** Approval-UI
 
 **Akzeptanz:**
 - Ohne Freigabe keine Bestellung
@@ -103,16 +103,16 @@
 
 ### PROC-REQ-03 Katalog / Guided Buying
 
-**Priorität:** KANN/SOLL  
+**PrioritÃ¤t:** KANN/SOLL
 
 **Inhalt:**
 - interne Kataloge, Punchout
-- geführte Auswahl
+- gefÃ¼hrte Auswahl
 
-**Evidence:** Catalog-UI  
+**Evidence:** Catalog-UI
 
 **Akzeptanz:**
-- Requisition aus Katalog möglich
+- Requisition aus Katalog mÃ¶glich
 
 ---
 
@@ -120,13 +120,13 @@
 
 ### PROC-RFQ-01 Anfrage / RFQ
 
-**Priorität:** SOLL  
+**PrioritÃ¤t:** SOLL
 
 **Inhalt:**
-- Lieferanten auswählen, RFQ versenden
+- Lieferanten auswÃ¤hlen, RFQ versenden
 - Positionen, Spezifikationen, Fristen
 
-**Evidence:** RFQ-Create/Send  
+**Evidence:** RFQ-Create/Send
 
 **Akzeptanz:**
 - RFQ-Status nachvollziehbar
@@ -135,43 +135,43 @@
 
 ### PROC-RFQ-02 Lieferantenangebote / Bids
 
-**Priorität:** SOLL  
+**PrioritÃ¤t:** SOLL
 
 **Inhalt:**
 - Angebote erfassen/importieren
 - Preise, Lieferzeiten, Nebenbedingungen
 
-**Evidence:** Bid-UI  
+**Evidence:** Bid-UI
 
 **Akzeptanz:**
-- Mehrere Angebote pro RFQ möglich
+- Mehrere Angebote pro RFQ mÃ¶glich
 
 ---
 
 ### PROC-RFQ-03 Angebotsvergleich / Award
 
-**Priorität:** SOLL  
+**PrioritÃ¤t:** SOLL
 
 **Inhalt:**
 - Vergleichsmatrix Preis/Leadtime/Score
 - Entscheidungsdoku
 
-**Evidence:** Comparison-UI  
+**Evidence:** Comparison-UI
 
 **Akzeptanz:**
-- Award erzeugt Vorschlag für Bestellung
+- Award erzeugt Vorschlag fÃ¼r Bestellung
 
 ---
 
-### PROC-CTR-01 Rahmenverträge
+### PROC-CTR-01 RahmenvertrÃ¤ge
 
-**Priorität:** SOLL  
+**PrioritÃ¤t:** SOLL
 
 **Inhalt:**
 - Vertragslaufzeit, Kontingente, Preise
 - Abrufe gegen Vertrag
 
-**Evidence:** Contract-UI  
+**Evidence:** Contract-UI
 
 **Akzeptanz:**
 - Order referenziert Vertrag
@@ -182,58 +182,58 @@
 
 ### PROC-PO-01 Bestellung (PO) erstellen
 
-**Priorität:** MUSS  
+**PrioritÃ¤t:** MUSS
 
 **Inhalt:**
 - PO aus Bedarf/RFQ/Vertrag oder direkt
 - Positionen, Lieferadresse, Incoterms, Zahlungsbedingungen
 
-**Evidence:** PO-Create-Flow  
+**Evidence:** PO-Create-Flow
 
 **Akzeptanz:**
 - PO hat eindeutige Nummer, Status
 
 ---
 
-### PROC-PO-02 PO-Änderungen & Storno
+### PROC-PO-02 PO-Ã„nderungen & Storno
 
-**Priorität:** MUSS  
+**PrioritÃ¤t:** MUSS
 
 **Inhalt:**
 - Change-Log, Versionierung
-- Genehmigungslogik bei Änderungen
+- Genehmigungslogik bei Ã„nderungen
 
-**Evidence:** PO-Change-Flow  
+**Evidence:** PO-Change-Flow
 
 **Akzeptanz:**
-- Jede Änderung auditierbar
+- Jede Ã„nderung auditierbar
 
 ---
 
 ### PROC-PO-03 PO-Kommunikation
 
-**Priorität:** SOLL  
+**PrioritÃ¤t:** SOLL
 
 **Inhalt:**
 - PO-Dokumente (PDF/Email/Portal)
 - Sprachen/Branding
 
-**Evidence:** PO-Print/Send  
+**Evidence:** PO-Print/Send
 
 **Akzeptanz:**
-- Lieferant erhält korrekte PO
+- Lieferant erhÃ¤lt korrekte PO
 
 ---
 
-### PROC-PO-04 Bestellabrufe / Lieferpläne
+### PROC-PO-04 Bestellabrufe / LieferplÃ¤ne
 
-**Priorität:** KANN/SOLL  
+**PrioritÃ¤t:** KANN/SOLL
 
 **Inhalt:**
 - Abrufe gegen Kontrakte
 - Lieferplan/Release-Logik
 
-**Evidence:** Schedule-UI  
+**Evidence:** Schedule-UI
 
 **Akzeptanz:**
 - Abrufe reduzieren Kontingent
@@ -244,14 +244,14 @@
 
 ### PROC-GR-01 Wareneingang
 
-**Priorität:** MUSS  
+**PrioritÃ¤t:** MUSS
 
 **Inhalt:**
 - Eingang buchen gegen PO
 - Teil-/Restmengen, Backorder
-- Qualitätsprüfung optional
+- QualitÃ¤tsprÃ¼fung optional
 
-**Evidence:** GR-Flow  
+**Evidence:** GR-Flow
 
 **Akzeptanz:**
 - GR erzeugt Lagerbewegung + Status
@@ -260,43 +260,43 @@
 
 ### PROC-GR-02 Retouren an Lieferant
 
-**Priorität:** SOLL  
+**PrioritÃ¤t:** SOLL
 
 **Inhalt:**
-- Rücksendung, Gründe, Gutschriftbezug
+- RÃ¼cksendung, GrÃ¼nde, Gutschriftbezug
 
-**Evidence:** Return-Flow  
+**Evidence:** Return-Flow
 
 **Akzeptanz:**
-- Rückgabe korrigiert Lager/FiBU
+- RÃ¼ckgabe korrigiert Lager/FiBU
 
 ---
 
 ### PROC-SE-01 Leistungsnachweis (Service Entry Sheet)
 
-**Priorität:** SOLL (MUSS wenn Services in Scope)  
+**PrioritÃ¤t:** SOLL (MUSS wenn Services in Scope)
 
 **Inhalt:**
-- Leistungen erfassen, prüfen, freigeben
+- Leistungen erfassen, prÃ¼fen, freigeben
 
-**Evidence:** SES-Flow  
+**Evidence:** SES-Flow
 
 **Akzeptanz:**
-- SES Voraussetzung für Rechnung
+- SES Voraussetzung fÃ¼r Rechnung
 
 ---
 
-## 6. Rechnungsprüfung / Invoice-to-Pay
+## 6. RechnungsprÃ¼fung / Invoice-to-Pay
 
 ### PROC-IV-01 Eingangsrechnung
 
-**Priorität:** MUSS  
+**PrioritÃ¤t:** MUSS
 
 **Inhalt:**
 - Rechnung erfassen/importieren (PDF/OCR/API)
 - Steuer, Kontierung, Anlagebezug
 
-**Evidence:** Invoice-Create-Flow  
+**Evidence:** Invoice-Create-Flow
 
 **Akzeptanz:**
 - Rechnung erzeugt AP-OP
@@ -305,42 +305,42 @@
 
 ### PROC-IV-02 2/3-Wege-Abgleich (PO-GR-IV)
 
-**Priorität:** MUSS  
+**PrioritÃ¤t:** MUSS
 
 **Inhalt:**
 - Abgleich Menge/Preis/Toleranzen
 - Blockierung bei Abweichungen
 
-**Evidence:** Match-UI  
+**Evidence:** Match-UI
 
 **Akzeptanz:**
-- Abweichungen werden begründet/gelöst
+- Abweichungen werden begrÃ¼ndet/gelÃ¶st
 
 ---
 
 ### PROC-IV-03 Rechnungsfreigabe
 
-**Priorität:** MUSS/SOLL  
+**PrioritÃ¤t:** MUSS/SOLL
 
 **Inhalt:**
 - Freigabe nach Toleranzen/Betrag/Warengruppe
 - Eskalation/Vertretung
 
-**Evidence:** Approval-Flow  
+**Evidence:** Approval-Flow
 
 **Akzeptanz:**
 - Ohne Freigabe keine Zahlung
 
 ---
 
-### PROC-PAY-01 Zahlungsläufe
+### PROC-PAY-01 ZahlungslÃ¤ufe
 
-**Priorität:** MUSS (wenn AP-Zahlung in Scope)  
+**PrioritÃ¤t:** MUSS (wenn AP-Zahlung in Scope)
 
 **Inhalt:**
 - SEPA Export, Zahlungsstatus, Skonto
 
-**Evidence:** Payment-Run UI  
+**Evidence:** Payment-Run UI
 
 **Akzeptanz:**
 - Zahlung gleicht OP aus
@@ -349,12 +349,12 @@
 
 ### PROC-PAY-02 Lieferantengutschriften / Belastungen
 
-**Priorität:** SOLL  
+**PrioritÃ¤t:** SOLL
 
 **Inhalt:**
 - Credit Memo, Debit Memo, Verrechnung
 
-**Evidence:** Memo-Flow  
+**Evidence:** Memo-Flow
 
 **Akzeptanz:**
 - Korrekte FiBU-Buchung
@@ -365,14 +365,14 @@
 
 ### PROC-REP-01 Standardreports Einkauf
 
-**Priorität:** MUSS  
+**PrioritÃ¤t:** MUSS
 
 **Inhalt:**
 - Offene Bestellungen, Spend-Analyse
 - Lieferantenperformance
 - Toleranz-/Abweichungsreports
 
-**Evidence:** Dashboards/Reports  
+**Evidence:** Dashboards/Reports
 
 **Akzeptanz:**
 - Filter, Drilldown, Export
@@ -381,15 +381,15 @@
 
 ### PROC-REP-02 Belegkette / Audit Trail
 
-**Priorität:** SOLL  
+**PrioritÃ¤t:** SOLL
 
 **Inhalt:**
-- Bedarf → RFQ → PO → GR/SES → IV → Pay
+- Bedarf â†’ RFQ â†’ PO â†’ GR/SES â†’ IV â†’ Pay
 
-**Evidence:** Drilldown-Trace  
+**Evidence:** Drilldown-Trace
 
 **Akzeptanz:**
-- lückenlose Nachvollziehbarkeit
+- lÃ¼ckenlose Nachvollziehbarkeit
 
 ---
 
@@ -397,12 +397,12 @@
 
 ### PROC-AUTH-01 Rollenmodell Einkauf
 
-**Priorität:** MUSS  
+**PrioritÃ¤t:** MUSS
 
 **Inhalt:**
-- Bedarfsersteller, Genehmiger, Einkäufer, Wareneingang, AP, Admin
+- Bedarfsersteller, Genehmiger, EinkÃ¤ufer, Wareneingang, AP, Admin
 
-**Evidence:** Role-Setup  
+**Evidence:** Role-Setup
 
 **Akzeptanz:**
 - RBAC verhindert unberechtigte Aktionen
@@ -411,12 +411,12 @@
 
 ### PROC-AUTH-02 Workflow-Regeln
 
-**Priorität:** MUSS/SOLL  
+**PrioritÃ¤t:** MUSS/SOLL
 
 **Inhalt:**
 - Freigaben, Toleranzen, Eskalation
 
-**Evidence:** Workflow-UI  
+**Evidence:** Workflow-UI
 
 **Akzeptanz:**
 - Regeln sind konfigurierbar
@@ -427,28 +427,28 @@
 
 ### PROC-INT-01 API / Import / Export
 
-**Priorität:** MUSS  
+**PrioritÃ¤t:** MUSS
 
 **Inhalt:**
 - Supplier/Item/PO/GR/IV
 - CSV/Excel/API/Webhooks
 
-**Evidence:** Import-UI, API-Docs  
+**Evidence:** Import-UI, API-Docs
 
 **Akzeptanz:**
-- Datenrundtrip möglich
+- Datenrundtrip mÃ¶glich
 
 ---
 
 ### PROC-INT-02 EDI / Lieferantenportal
 
-**Priorität:** KANN/SOLL je Branche  
+**PrioritÃ¤t:** KANN/SOLL je Branche
 
 **Inhalt:**
 - ORDERS, ORDRSP, DESADV, INVOIC
 - Portal-Self-Service
 
-**Evidence:** EDI/Portal-Flows  
+**Evidence:** EDI/Portal-Flows
 
 **Akzeptanz:**
 - Statusmapping sauber
@@ -457,29 +457,30 @@
 
 ### PROC-INT-03 Katalog/Punchout
 
-**Priorität:** KANN  
+**PrioritÃ¤t:** KANN
 
 **Inhalt:**
 - OCI/cXML Punchout, Preis-Sync
 
-**Evidence:** Punchout-UI  
+**Evidence:** Punchout-UI
 
 **Akzeptanz:**
-- Requisition aus Punchout möglich
+- Requisition aus Punchout mÃ¶glich
 
 ---
 
 ## Zusammenfassung
 
-**Gesamt Capabilities:** 28  
-**MUSS:** 12  
-**SOLL:** 13  
+**Gesamt Capabilities:** 28
+**MUSS:** 12
+**SOLL:** 13
 **KANN:** 3
 
-**Nächste Schritte:**
-1. GAP-Analyse durchführen (Status: Yes/Partial/No)
+**NÃ¤chste Schritte:**
+1. GAP-Analyse durchfÃ¼hren (Status: Yes/Partial/No)
 2. Evidence sammeln (Screenshots, Flows, API-Docs)
 3. GAP-Matrix aktualisieren (`gap/matrix.csv`)
 4. Implementierungsplan erstellen
+
 
 

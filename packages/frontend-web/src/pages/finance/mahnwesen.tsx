@@ -12,6 +12,7 @@ import { LeaveConfirmDialog } from '@/components/LeaveConfirmDialog'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import { apiClient } from '@/lib/api-client'
 import { useFibuCockpit } from '@/lib/api/fibu'
+import { summarizeFibuConnectorOperations } from '@/lib/domain-depth'
 import { summarizeFibuOps } from '@/lib/professional-control-centers'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -207,6 +208,17 @@ export default function MahnwesenPage(): JSX.Element {
   const mahnwesenConfig = createMahnwesenConfig(t, entityTypeLabel)
   const { data: fibuCockpit } = useFibuCockpit()
   const fibuOps = fibuCockpit ? summarizeFibuOps(fibuCockpit, 0) : null
+  const dunningOps = fibuCockpit
+    ? summarizeFibuConnectorOperations({
+        connectorProfiles: fibuCockpit.master_data.connector_profile_count,
+        exportRuns: fibuCockpit.revision.export_runs,
+        openPeriods: fibuCockpit.annual_close.open_item_count,
+        adjustingPeriods: 0,
+        dunningReady: fibuCockpit.master_data.dunning_parameters_ready,
+        interestReady: fibuCockpit.master_data.interest_groups_ready,
+        taxReady: fibuCockpit.tax.e_bilanz_ready && fibuCockpit.tax.e_clearing_ready,
+      })
+    : null
   const operationalStatus = normalizeOperationalStatus(
     fibuCockpit.dunning.overdue_items > 0
       ? 'wartet_auf_mensch'
@@ -442,7 +454,23 @@ export default function MahnwesenPage(): JSX.Element {
           </Card>
           <Card>
             <CardHeader className="pb-2"><CardTitle className="text-sm">Naechste Aktion</CardTitle></CardHeader>
-            <CardContent><div className="text-sm font-semibold">{fibuOps.nextAction}</div></CardContent>
+            <CardContent><div className="text-sm font-semibold">{dunningOps?.nextAction || fibuOps.nextAction}</div></CardContent>
+          </Card>
+        </div>
+      ) : null}
+      {dunningOps ? (
+        <div className="grid gap-4 px-6 pt-4 md:grid-cols-3">
+          <Card>
+            <CardHeader className="pb-2"><CardTitle className="text-sm">Readiness-Risiko</CardTitle></CardHeader>
+            <CardContent><Badge variant={dunningOps.readinessRisk === 'hoch' ? 'destructive' : 'outline'}>{dunningOps.readinessRisk}</Badge></CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2"><CardTitle className="text-sm">Mahn-/Zinsstamm</CardTitle></CardHeader>
+            <CardContent><div className="text-sm font-semibold">{fibuCockpit.master_data.dunning_parameters_ready && fibuCockpit.master_data.interest_groups_ready ? 'stabil' : 'nachziehen'}</div></CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2"><CardTitle className="text-sm">Revisionspfad</CardTitle></CardHeader>
+            <CardContent><div className="text-sm font-semibold">{fibuCockpit.revision.export_runs > 0 ? `${fibuCockpit.revision.export_runs} Exportlaeufe sichtbar` : 'noch kein Lauf'}</div></CardContent>
           </Card>
         </div>
       ) : null}

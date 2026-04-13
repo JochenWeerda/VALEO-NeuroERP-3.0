@@ -1,16 +1,16 @@
-/**
+﻿/**
  * Warehouse Entity
  * Multi-Location Warehouse System for Agribusiness
- * Based on Odoo stock Multi-Location pattern
+ * Based on Community ERP stock Multi-Location pattern
  */
 
 import { v4 as uuidv4 } from 'uuid';
 
 export type WarehouseLocationType = 
-  | 'SILO'           // Silo (für Getreide, Saatgut)
-  | 'OUTDOOR'        // Freilager (für Düngemittel, Futtermittel)
-  | 'INDOOR'         // Hallenlager (für verpackte Produkte)
-  | 'COLD_STORAGE'   // Kühllager
+  | 'SILO'           // Silo (fÃ¼r Getreide, Saatgut)
+  | 'OUTDOOR'        // Freilager (fÃ¼r DÃ¼ngemittel, Futtermittel)
+  | 'INDOOR'         // Hallenlager (fÃ¼r verpackte Produkte)
+  | 'COLD_STORAGE'   // KÃ¼hllager
   | 'HAZMAT';        // Gefahrstofflager
 
 export type WarehouseStatus = 
@@ -365,3 +365,4 @@ export class Warehouse {
     };
   }
 }
+

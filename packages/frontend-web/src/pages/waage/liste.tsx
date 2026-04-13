@@ -17,6 +17,7 @@ import { useToast } from '@/hooks/use-toast'
 import { AlertTriangle, FileDown, Plus, Scale, Search } from 'lucide-react'
 import { useSupplyChainOverview } from '@/lib/api/supply-chain'
 import { summarizeSupplyOps } from '@/lib/professional-control-centers'
+import { summarizeSupplyTransfer } from '@/lib/domain-depth'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 function LoadingSkeleton(): JSX.Element {
@@ -60,6 +61,7 @@ export default function WaageListePage(): JSX.Element {
   const [searchTerm, setSearchTerm] = useState('')
   const { data: waagen = [], isLoading, isError, error, refetch } = useWaagen()
   const supplyOps = useMemo(() => summarizeSupplyOps(chain), [chain])
+  const transferSummary = useMemo(() => summarizeSupplyTransfer(chain), [chain])
 
   const filteredWaagen = useMemo(() => {
     if (!searchTerm) return waagen
@@ -253,6 +255,20 @@ export default function WaageListePage(): JSX.Element {
             <CardContent>
               <div className="text-sm font-semibold">{supplyOps.nextAction}</div>
             </CardContent>
+          </Card>
+        </div>
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card>
+            <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Uebergaberisiko</CardTitle></CardHeader>
+            <CardContent><div className="text-lg font-semibold">{transferSummary.transferPressure}</div></CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Offene Uebergaben</CardTitle></CardHeader>
+            <CardContent><div className="text-2xl font-semibold">{transferSummary.handoverRisk}</div></CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Kettenfokus</CardTitle></CardHeader>
+            <CardContent><div className="text-sm font-semibold">{transferSummary.nextAction}</div></CardContent>
           </Card>
         </div>
       </PageSection>

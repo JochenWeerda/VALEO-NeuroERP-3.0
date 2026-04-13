@@ -1,6 +1,6 @@
-/**
+﻿/**
  * Tooltip Helper Functions
- * Utilities for field tooltips and help texts based on Odoo 19.0 German translations
+ * Utilities for field tooltips and help texts based on Community ERP 19.0 German translations
  */
 
 import { TFunction } from 'i18next';
@@ -58,4 +58,5 @@ export function getActionTooltip(
   
   return fallback || '';
 }
+
 

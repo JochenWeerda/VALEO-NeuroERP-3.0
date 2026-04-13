@@ -1,10 +1,10 @@
-/**
+﻿/**
  * Batch Traceability Service
- * Complete Traceability Logic based on Odoo stock_agriculture pattern
+ * Complete Traceability Logic based on Community ERP stock_agriculture pattern
  */
 
-import { Batch, BatchTraceabilityTree, BatchTraceabilityNode, CreateBatchInput, UpdateBatchInput } from '../entities/batch';
-import { BatchRepository, BatchFilter, BatchSort, PaginatedBatchResult } from '../../infra/repositories/batch-repository';
+import { Batch, BatchTraceabilityNode, BatchTraceabilityTree, CreateBatchInput, UpdateBatchInput } from '../entities/batch';
+import { BatchFilter, BatchRepository, BatchSort, PaginatedBatchResult } from '../../infra/repositories/batch-repository';
 
 export interface BatchTraceabilityServiceDependencies {
   batchRepository: BatchRepository;
@@ -123,7 +123,7 @@ export class BatchTraceabilityService {
     const rootNode = await buildNode(batch);
 
     // Calculate depth and total batches
-    const calculateDepth = (node: BatchTraceabilityNode, currentDepth: number = 0): number => {
+    const calculateDepth = (node: BatchTraceabilityNode, currentDepth = 0): number => {
       if (!node.children || node.children.length === 0) {
         return currentDepth;
       }
@@ -246,8 +246,8 @@ export class BatchTraceabilityService {
   async listBatches(
     filter: BatchFilter = {},
     sort: BatchSort = { field: 'createdAt', direction: 'desc' },
-    page: number = 1,
-    pageSize: number = 20
+    page = 1,
+    pageSize = 20
   ): Promise<PaginatedBatchResult> {
     return await this.deps.batchRepository.list(filter, sort, page, pageSize);
   }
@@ -264,7 +264,7 @@ export class BatchTraceabilityService {
     return await this.deps.batchRepository.findExpiredBatches();
   }
 
-  async getExpiringSoonBatches(days: number = 30): Promise<Batch[]> {
+  async getExpiringSoonBatches(days = 30): Promise<Batch[]> {
     return await this.deps.batchRepository.findExpiringSoonBatches(days);
   }
 
@@ -289,3 +289,4 @@ export class BatchTraceabilityService {
     return await this.deps.batchRepository.getStatistics();
   }
 }
+

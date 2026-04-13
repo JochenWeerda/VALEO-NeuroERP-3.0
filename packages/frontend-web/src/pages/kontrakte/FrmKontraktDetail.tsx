@@ -38,7 +38,12 @@ import { useTenant } from '@/hooks/useTenant'
 import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
 import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { ShieldAlert, ShieldCheck } from 'lucide-react'
+import { summarizeContractOperations } from '@/lib/domain-depth'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 type FormState = Omit<Kontrakt, 'contract_id' | 'rest_quantity'>
 type SteeringKey = keyof KontraktSteering
@@ -347,6 +352,57 @@ export default function FrmKontraktDetail(): JSX.Element {
     ].filter(Boolean) as Array<{ label: string; value: string }>,
     [steering],
   )
+  const contractOps = useMemo(
+    () =>
+      summarizeContractOperations([
+        {
+          hedgeQuotePct: steering.hedge_quote_pct,
+          marketValuationEur: steering.market_valuation_eur,
+          dunningLevel: steering.dunning_level,
+          writeoffCandidate: steering.writeoff_candidate,
+          printReady: steering.print_ready,
+        },
+      ]),
+    [steering],
+  )
+  const operationalStatus = normalizeOperationalStatus(
+    state.status === 'STORNIERT'
+      ? 'blockiert'
+      : (steering.hedge_gap_pct ?? 0) > 0 || (steering.market_valuation_eur ?? 0) < 0 || Boolean(steering.dunning_candidate)
+        ? 'wartet_auf_mensch'
+        : state.status || 'offen',
+  )
+  const contextSections = [
+    {
+      title: 'Kontrakt',
+      items: [
+        { label: 'Nummer', value: state.contract_no || 'Neu' },
+        { label: 'Partner', value: selectedCustomerName || state.party_id || 'Noch offen' },
+        { label: 'Restmenge', value: `${formatNumber(detailQuery.data?.rest_quantity ?? restMenge, 2)} ${state.unit}` },
+      ],
+    },
+    {
+      title: 'Steuerung',
+      items: [
+        { label: 'Klasse / Gruppe', value: [steering.contract_class, steering.contract_group].filter(Boolean).join(' / ') || 'nicht gesetzt' },
+        { label: 'Paritaet / Disposition', value: [steering.parity_code, steering.disposition_flag].filter(Boolean).join(' / ') || 'nicht gesetzt' },
+        { label: 'Naechste Aktion', value: contractOps.nextAction },
+      ],
+    },
+    {
+      title: 'Risiko',
+      items: [
+        { label: 'Hedge-Luecke', value: steering.hedge_gap_pct != null ? `${formatNumber(steering.hedge_gap_pct, 1)}%` : '-' },
+        { label: 'Marktbewertung', value: steering.market_valuation_eur != null ? `${formatNumber(steering.market_valuation_eur, 2)} EUR` : '-' },
+        { label: 'Mahnung', value: steering.dunning_candidate ? `Stufe ${steering.dunning_level ?? 0}` : 'aktuell nicht faellig' },
+      ],
+    },
+  ]
+  const timelineItems = [
+    { label: 'Kontrakt aktiv', detail: state.contract_no || 'Neuer Kontrakt' },
+    ...(state.valid_to ? [{ label: 'Gueltig bis', detail: state.valid_to.slice(0, 10) }] : []),
+    { label: 'Operatorpfad', detail: contractOps.nextAction },
+  ]
 
   const kontraktStatusView = useMemo(() => {
     const explainability = {
@@ -422,6 +478,20 @@ export default function FrmKontraktDetail(): JSX.Element {
           description="Kontraktstammdaten, Mengen, Preise, Staffeln und Bedingungen werden jetzt in der Kontraktmaske gepflegt. Der Flow-Fall bleibt als Referenz erhalten."
         />
       ) : null}
+      <OperationalCaseHeader
+        title="Kontrakt steuern"
+        description="Fixierung, Marktbewertung, Mahnung und Restmengenlage bleiben ueber dem Detailarbeitsplatz verdichtet sichtbar."
+        status={operationalStatus}
+        owner="Kontrakt / Handel"
+        blocker={state.status === 'STORNIERT' ? 'Der Kontrakt ist storniert und kann nicht weiter disponiert werden.' : (steering.hedge_gap_pct ?? 0) > 0 ? 'Fixierungs- oder Absicherungsluecke muss fachlich bearbeitet werden.' : null}
+        nextAction={contractOps.nextAction}
+        caseLabel={state.contract_no || 'Kontrakt'}
+        tags={['Kontrakte', state.contract_type || 'Typ offen']}
+      />
+      <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+        <OperationalTimeline title="Kontraktverlauf" items={timelineItems} />
+        <OperationalContextPanel title="Kontraktkontext" sections={contextSections} />
+      </div>
       <Card>
         <CardHeader>
           <CardTitle>FrmKontraktDetail</CardTitle>

@@ -1,7 +1,7 @@
-/**
+﻿/**
  * Agribusiness Export Service
  * Data Export & Import for Agribusiness Operations
- * Based on Odoo export patterns
+ * Based on Community ERP export patterns
  */
 
 import { Farmer } from '../entities/farmer';
@@ -180,7 +180,7 @@ export class AgribusinessExportService {
     let csv = '';
 
     if (includeHeaders) {
-      csv += fields.join(delimiter) + '\n';
+      csv += `${fields.join(delimiter)  }\n`;
     }
 
     for (const record of data) {
@@ -193,7 +193,7 @@ export class AgribusinessExportService {
         }
         return stringValue;
       });
-      csv += row.join(delimiter) + '\n';
+      csv += `${row.join(delimiter)  }\n`;
     }
 
     return csv;
@@ -522,4 +522,5 @@ export class AgribusinessExportService {
     return jobs.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
 }
+
 
