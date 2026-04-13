@@ -1,29 +1,29 @@
-# GAP-Analyse Konsolidierte Übersicht
+# GAP-Analyse Konsolidierte Ãœbersicht
 
-**Datum:** 2025-01-27  
-**Status:** In Progress  
-**Zweck:** Gesamtübersicht aller GAP-Analysen für VALEO NeuroERP
+**Datum:** 2025-01-27
+**Status:** In Progress
+**Zweck:** GesamtÃ¼bersicht aller GAP-Analysen fÃ¼r VALEO NeuroERP
 
 ---
 
-## 📊 Domain-Übersicht
+## ðŸ“Š Domain-Ãœbersicht
 
-| Domain | Capabilities | Status | Maturity | Priorität |
+| Domain | Capabilities | Status | Maturity | PrioritÃ¤t |
 |--------|--------------|--------|----------|-----------|
-| **Finance/FiBU** | 33 | ✅ Analysiert | 48% | P1 |
-| **Procurement/Einkauf** | 28 | ✅ Analysiert | 35% | P1 |
-| **Sales/Order-to-Cash** | 31 | ✅ Analysiert | ~40%* | P0 |
-| **CRM & Marketing** | 32 | ✅ Analysiert | ~30%* | P2 |
+| **Finance/FiBU** | 33 | âœ… Analysiert | 48% | P1 |
+| **Procurement/Einkauf** | 28 | âœ… Analysiert | 35% | P1 |
+| **Sales/Order-to-Cash** | 31 | âœ… Analysiert | ~40%* | P0 |
+| **CRM & Marketing** | 32 | âœ… Analysiert | ~30%* | P2 |
 | **Gesamt** | **124** | **In Progress** | **~38%** | - |
 
-*Geschätzt basierend auf vorhandenen Analysen
+*GeschÃ¤tzt basierend auf vorhandenen Analysen
 
 ---
 
-## 🎯 Kritische Gaps (P0) - Top 10
+## ðŸŽ¯ Kritische Gaps (P0) - Top 10
 
 ### Finance/FiBU (4 kritische Gaps)
-1. **FIBU-AR-03:** Zahlungseingänge & Matching
+1. **FIBU-AR-03:** ZahlungseingÃ¤nge & Matching
 2. **FIBU-AP-02:** Eingangsrechnungen
 3. **FIBU-GL-05:** Periodensteuerung
 4. **FIBU-COMP-01:** GoBD / Audit Trail UI
@@ -31,17 +31,17 @@
 ### Procurement (4 kritische Gaps)
 1. **PROC-GR-01:** Wareneingang
 2. **PROC-IV-02:** 2/3-Wege-Abgleich
-3. **PROC-PO-02:** PO-Änderungen & Storno
-4. **PROC-REQ-01:** Bedarfsmeldung vervollständigen
+3. **PROC-PO-02:** PO-Ã„nderungen & Storno
+4. **PROC-REQ-01:** Bedarfsmeldung vervollstÃ¤ndigen
 
 ### Sales (Top kritische Gaps)
-- Siehe `gaps-sales.md` für detaillierte Priorisierung
+- Siehe `gaps-sales.md` fÃ¼r detaillierte Priorisierung
 
 ---
 
-## 📈 Maturity-Vergleich
+## ðŸ“ˆ Maturity-Vergleich
 
-| Domain | VALEO | SAP | Oracle | Odoo | Gap |
+| Domain | VALEO | SAP | Oracle | Community ERP | Gap |
 |--------|-------|-----|--------|------|-----|
 | **Finance** | 48% | 100% | 100% | 85% | 52% |
 | **Procurement** | 35% | 100% | 100% | 80% | 65% |
@@ -49,16 +49,16 @@
 | **CRM/Marketing** | ~30%* | 90% | 85% | 75% | ~60% |
 | **Gesamt** | **~38%** | **96%** | **94%** | **81%** | **~58%** |
 
-*Geschätzt
+*GeschÃ¤tzt
 
 ---
 
-## 🚀 Implementierungs-Roadmap
+## ðŸš€ Implementierungs-Roadmap
 
 ### Phase 1: Kritische Gaps (P0) - 12-16 Wochen
 
 **Finance (4 Gaps):**
-- FIBU-AR-03: Zahlungseingänge & Matching (2-3 Wochen)
+- FIBU-AR-03: ZahlungseingÃ¤nge & Matching (2-3 Wochen)
 - FIBU-AP-02: Eingangsrechnungen (2-3 Wochen)
 - FIBU-GL-05: Periodensteuerung (2 Wochen)
 - FIBU-COMP-01: GoBD / Audit Trail UI (1-2 Wochen)
@@ -66,131 +66,131 @@
 **Procurement (4 Gaps):**
 - PROC-GR-01: Wareneingang (3-4 Wochen)
 - PROC-IV-02: 2/3-Wege-Abgleich (2-3 Wochen)
-- PROC-PO-02: PO-Änderungen & Storno (2 Wochen)
-- PROC-REQ-01: Bedarfsmeldung vervollständigen (1 Woche)
+- PROC-PO-02: PO-Ã„nderungen & Storno (2 Wochen)
+- PROC-REQ-01: Bedarfsmeldung vervollstÃ¤ndigen (1 Woche)
 
 **Sales (Top Gaps):**
-- Siehe `gaps-sales.md` für detaillierte Planung
+- Siehe `gaps-sales.md` fÃ¼r detaillierte Planung
 
 ### Phase 2: Wichtige Gaps (P1) - 10-14 Wochen
 
-**Finance:** 7 Capabilities  
-**Procurement:** 4 Capabilities  
-**Sales:** Top Prioritäten
+**Finance:** 7 Capabilities
+**Procurement:** 4 Capabilities
+**Sales:** Top PrioritÃ¤ten
 
 ### Phase 3: Nice-to-Have (P2-P3) - 30-40 Wochen
 
-**Finance:** 18 Capabilities  
-**Procurement:** 12 Capabilities  
-**Sales:** Weitere Capabilities  
+**Finance:** 18 Capabilities
+**Procurement:** 12 Capabilities
+**Sales:** Weitere Capabilities
 **CRM/Marketing:** 32 Capabilities
 
 ---
 
-## 📋 Status pro Domain
+## ðŸ“‹ Status pro Domain
 
-### ✅ Finance/FiBU - Vollständig analysiert
+### âœ… Finance/FiBU - VollstÃ¤ndig analysiert
 - **Dokument:** `gaps.md`
 - **Matrix:** `matrix.csv` (Zeilen 2-39)
 - **Capabilities:** 33
 - **Kritische Gaps:** 4
 - **Maturity:** 48%
 
-### ✅ Procurement/Einkauf - Vollständig analysiert
+### âœ… Procurement/Einkauf - VollstÃ¤ndig analysiert
 - **Dokument:** `procurement-gaps.md`
 - **Matrix:** `matrix.csv` (Zeilen 40-68)
 - **Capabilities:** 28
 - **Kritische Gaps:** 4
 - **Maturity:** 35%
 
-### ✅ Sales/Order-to-Cash - Vollständig analysiert
+### âœ… Sales/Order-to-Cash - VollstÃ¤ndig analysiert
 - **Dokument:** `gaps-sales.md`
 - **Matrix:** `matrix-sales.csv`
 - **Capabilities:** 31
 - **Priorisierung:** Score-basiert (siehe Dokument)
-- **Maturity:** ~40% (geschätzt)
+- **Maturity:** ~40% (geschÃ¤tzt)
 
-### ✅ CRM & Marketing - Vollständig analysiert
+### âœ… CRM & Marketing - VollstÃ¤ndig analysiert
 - **Dokument:** `gaps-crm-marketing.md`
 - **Matrix:** `matrix-crm-marketing.csv`
 - **Capabilities:** 32
 - **Top Gaps:** Opportunities, Consent/DSGVO, Segmente
-- **Maturity:** ~30% (geschätzt)
+- **Maturity:** ~30% (geschÃ¤tzt)
 
 ---
 
-## 🔍 Nächste Schritte
+## ðŸ” NÃ¤chste Schritte
 
-1. ✅ Finance GAP-Analyse abgeschlossen
-2. ✅ Procurement GAP-Analyse abgeschlossen
-3. ✅ Sales GAP-Analyse vorhanden
-4. ✅ CRM/Marketing GAP-Analyse vorhanden
-5. ⏳ Konsolidierte Matrix erstellen (alle Domains)
-6. ⏳ Evidence sammeln (Screenshots, Traces, API-Docs)
-7. ⏳ Implementierungsplan mit Stakeholdern abstimmen
-8. ⏳ Weitere Domains analysieren (Inventory, Production, Quality, etc.)
+1. âœ… Finance GAP-Analyse abgeschlossen
+2. âœ… Procurement GAP-Analyse abgeschlossen
+3. âœ… Sales GAP-Analyse vorhanden
+4. âœ… CRM/Marketing GAP-Analyse vorhanden
+5. â³ Konsolidierte Matrix erstellen (alle Domains)
+6. â³ Evidence sammeln (Screenshots, Traces, API-Docs)
+7. â³ Implementierungsplan mit Stakeholdern abstimmen
+8. â³ Weitere Domains analysieren (Inventory, Production, Quality, etc.)
 
 ---
 
-## 📚 Dokumentationsstruktur
+## ðŸ“š Dokumentationsstruktur
 
 ```
 gap/
-├── README.md                          # Diese Übersicht
-├── consolidated-overview.md           # Konsolidierte Übersicht (dieses Dokument)
-│
-├── capability-model.md                # Allgemeines Capability Model
-├── procurement-capability-model.md    # Procurement Capability Model
-├── capability-model-sales.md          # Sales Capability Model
-├── capability-model-crm-marketing.md # CRM/Marketing Capability Model
-│
-├── gaps.md                            # Finance GAP-Analyse
-├── procurement-gaps.md                # Procurement GAP-Analyse
-├── gaps-sales.md                      # Sales GAP-Analyse
-├── gaps-crm-marketing.md              # CRM/Marketing GAP-Analyse
-│
-├── matrix.csv                         # Finance + Procurement Matrix
-├── matrix-sales.csv                   # Sales Matrix
-└── matrix-crm-marketing.csv           # CRM/Marketing Matrix
+â”œâ”€â”€ README.md                          # Diese Ãœbersicht
+â”œâ”€â”€ consolidated-overview.md           # Konsolidierte Ãœbersicht (dieses Dokument)
+â”‚
+â”œâ”€â”€ capability-model.md                # Allgemeines Capability Model
+â”œâ”€â”€ procurement-capability-model.md    # Procurement Capability Model
+â”œâ”€â”€ capability-model-sales.md          # Sales Capability Model
+â”œâ”€â”€ capability-model-crm-marketing.md # CRM/Marketing Capability Model
+â”‚
+â”œâ”€â”€ gaps.md                            # Finance GAP-Analyse
+â”œâ”€â”€ procurement-gaps.md                # Procurement GAP-Analyse
+â”œâ”€â”€ gaps-sales.md                      # Sales GAP-Analyse
+â”œâ”€â”€ gaps-crm-marketing.md              # CRM/Marketing GAP-Analyse
+â”‚
+â”œâ”€â”€ matrix.csv                         # Finance + Procurement Matrix
+â”œâ”€â”€ matrix-sales.csv                   # Sales Matrix
+â””â”€â”€ matrix-crm-marketing.csv           # CRM/Marketing Matrix
 ```
 
 ---
 
-## 🎯 Priorisierungs-Methodik
+## ðŸŽ¯ Priorisierungs-Methodik
 
 ### Finance & Procurement
-- **Priorität 1-5:** Basierend auf MUSS/SOLL/KANN und Business Impact
-- **P0:** Kritisch (MUSS, Priorität 1)
-- **P1:** Hoch (MUSS, Priorität 2)
-- **P2:** Mittel (SOLL, Priorität 3)
-- **P3:** Niedrig (KANN, Priorität 4-5)
+- **PrioritÃ¤t 1-5:** Basierend auf MUSS/SOLL/KANN und Business Impact
+- **P0:** Kritisch (MUSS, PrioritÃ¤t 1)
+- **P1:** Hoch (MUSS, PrioritÃ¤t 2)
+- **P2:** Mittel (SOLL, PrioritÃ¤t 3)
+- **P3:** Niedrig (KANN, PrioritÃ¤t 4-5)
 
 ### Sales
-- **Score-basiert:** PS = (BI × PF × RC) / IA
+- **Score-basiert:** PS = (BI Ã— PF Ã— RC) / IA
 - **BI:** Business Impact (1-5)
 - **PF:** Pflichtgrad (MUSS=5, SOLL=3, KANN=1)
 - **RC:** Risk/Compliance (1-5)
 - **IA:** Implementierungsaufwand (1-5)
 
 ### CRM/Marketing
-- **Score-basiert:** PS = (BI × PF × RC) / IA
-- Siehe `gaps-crm-marketing.md` für Details
+- **Score-basiert:** PS = (BI Ã— PF Ã— RC) / IA
+- Siehe `gaps-crm-marketing.md` fÃ¼r Details
 
 ---
 
-## 📊 Zusammenfassung
+## ðŸ“Š Zusammenfassung
 
-**Gesamt Capabilities analysiert:** 124  
-**Domains analysiert:** 4 (Finance, Procurement, Sales, CRM/Marketing)  
-**Durchschnittliche Maturity:** ~38%  
-**Gap zu SAP/Oracle:** ~58%  
-**Gap zu Odoo:** ~43%
+**Gesamt Capabilities analysiert:** 124
+**Domains analysiert:** 4 (Finance, Procurement, Sales, CRM/Marketing)
+**Durchschnittliche Maturity:** ~38%
+**Gap zu SAP/Oracle:** ~58%
+**Gap zu Community ERP:** ~43%
 
-**Kritische Gaps (P0):** ~12-15 Capabilities  
-**Wichtige Gaps (P1):** ~15-20 Capabilities  
+**Kritische Gaps (P0):** ~12-15 Capabilities
+**Wichtige Gaps (P1):** ~15-20 Capabilities
 **Nice-to-Have (P2-P3):** ~90 Capabilities
 
-**Geschätzter Gesamt-Aufwand:**
+**GeschÃ¤tzter Gesamt-Aufwand:**
 - Phase 1 (P0): 12-16 Wochen
 - Phase 2 (P1): 10-14 Wochen
 - Phase 3 (P2-P3): 30-40 Wochen
@@ -199,5 +199,6 @@ gap/
 ---
 
 **Letzte Aktualisierung:** 2025-01-27
+
 
 

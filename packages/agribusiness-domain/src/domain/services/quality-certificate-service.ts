@@ -1,10 +1,10 @@
-/**
+﻿/**
  * Quality Certificate Service
- * Complete Quality Certificate Management based on Odoo quality module pattern
+ * Complete Quality Certificate Management based on Community ERP quality module pattern
  */
 
-import { QualityCertificate, QualityTestResult, CreateQualityCertificateInput, UpdateQualityCertificateInput, QualityCertificateStatus } from '../entities/quality-certificate';
-import { QualityCertificateRepository, QualityCertificateFilter, QualityCertificateSort, PaginatedQualityCertificateResult } from '../../infra/repositories/quality-certificate-repository';
+import { CreateQualityCertificateInput, QualityCertificate, QualityCertificateStatus, QualityTestResult, UpdateQualityCertificateInput } from '../entities/quality-certificate';
+import { PaginatedQualityCertificateResult, QualityCertificateFilter, QualityCertificateRepository, QualityCertificateSort } from '../../infra/repositories/quality-certificate-repository';
 
 export interface QualityCertificateServiceDependencies {
   qualityCertificateRepository: QualityCertificateRepository;
@@ -170,8 +170,8 @@ export class QualityCertificateService {
   async listQualityCertificates(
     filter: QualityCertificateFilter = {},
     sort: QualityCertificateSort = { field: 'createdAt', direction: 'desc' },
-    page: number = 1,
-    pageSize: number = 20
+    page = 1,
+    pageSize = 20
   ): Promise<PaginatedQualityCertificateResult> {
     return await this.deps.qualityCertificateRepository.list(filter, sort, page, pageSize);
   }
@@ -192,7 +192,7 @@ export class QualityCertificateService {
     return await this.deps.qualityCertificateRepository.findExpiredCertificates();
   }
 
-  async getExpiringSoonCertificates(days: number = 30): Promise<QualityCertificate[]> {
+  async getExpiringSoonCertificates(days = 30): Promise<QualityCertificate[]> {
     return await this.deps.qualityCertificateRepository.findExpiringSoonCertificates(days);
   }
 
@@ -215,3 +215,4 @@ export class QualityCertificateService {
     return await this.deps.qualityCertificateRepository.getStatistics();
   }
 }
+

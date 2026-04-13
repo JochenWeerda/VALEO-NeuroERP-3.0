@@ -2,7 +2,7 @@
 
 ## Übersicht
 
-Diese Dokumentation beschreibt die vollständige Integration von i18n (Internationalisierung) in das CRUD-Framework basierend auf Odoo 19.0 deutschen Übersetzungen. Alle CRUD-Komponenten und Frontend-Seiten wurden auf i18n umgestellt, um eine konsistente und wartbare Übersetzungsstruktur zu gewährleisten.
+Diese Dokumentation beschreibt die vollständige Integration von i18n (Internationalisierung) in das CRUD-Framework basierend auf externen deutschsprachigen ERP-Uebersetzungsquellen. Alle CRUD-Komponenten und Frontend-Seiten wurden auf i18n umgestellt, um eine konsistente und wartbare Übersetzungsstruktur zu gewährleisten.
 
 ## Änderungsübersicht
 
@@ -229,11 +229,11 @@ export function MyCrudComponent({ entityType }: Props) {
 ```typescript
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { 
-  getEntityTypeLabel, 
-  getListTitle, 
+import {
+  getEntityTypeLabel,
+  getListTitle,
   getDetailTitle,
-  getFieldLabel 
+  getFieldLabel
 } from '@/features/crud/utils/i18n-helpers';
 import { CrudDeleteDialog } from '@/features/crud/components';
 
@@ -253,7 +253,7 @@ export default function MyEntityPage() {
           </tr>
         </thead>
       </table>
-      
+
       <CrudDeleteDialog
         entityType={entityTypeLabel}
         // ... andere Props
@@ -552,7 +552,7 @@ Alle verwendeten Übersetzungsschlüssel in `translation.json` definieren.
 
 ## Referenzen
 
-- **Odoo 19.0 Essentials (Deutsch):** https://github.com/odoo/documentation/blob/19.0/locale/de/LC_MESSAGES/essentials.po
+- **Externe ERP-Essentials (Deutsch):** historische deutsche ERP-Uebersetzungsquelle, nur als Terminologiereferenz verwendet
 - **i18next Dokumentation:** https://www.i18next.com/
 - **React i18next:** https://react.i18next.com/
 
@@ -583,8 +583,8 @@ Alle verwendeten Übersetzungsschlüssel in `translation.json` definieren.
 
 ---
 
-**Erstellt:** 2025-01-20  
-**Version:** 1.0  
+**Erstellt:** 2025-01-20
+**Version:** 1.0
 **Autor:** AI Assistant
 
 

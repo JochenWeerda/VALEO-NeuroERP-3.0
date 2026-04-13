@@ -1,7 +1,7 @@
-/**
+﻿/**
  * Farmer Entity
  * Farmer Portal - Self-Service Features for Farmers
- * Based on Odoo res.partner pattern with farmer-specific extensions
+ * Based on Community ERP res.partner pattern with farmer-specific extensions
  */
 
 import { randomUUID } from 'crypto';
@@ -304,4 +304,5 @@ export class FarmerEntity {
     };
   }
 }
+
 

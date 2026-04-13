@@ -1,7 +1,7 @@
-/**
+﻿/**
  * Agribusiness Analytics Service
  * Advanced Analytics & Reporting for Agribusiness Operations
- * Based on Odoo reporting patterns
+ * Based on Community ERP reporting patterns
  */
 
 import { Farmer } from '../entities/farmer';
@@ -508,4 +508,5 @@ export class AgribusinessAnalyticsService {
     return analytics;
   }
 }
+
 

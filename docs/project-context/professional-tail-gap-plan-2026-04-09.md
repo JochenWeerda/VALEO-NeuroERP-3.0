@@ -48,7 +48,7 @@ Profi-Zielbild:
 Referenzmuster:
 
 - SAP Fiori Object Page / Worklist fuer Kommunikationsobjekte
-- Odoo/OCA Agreement- und Document-Patterns als Daten-/Statusreferenz
+- Community-Agreement- und Dokumentmuster als Daten-/Statusreferenz
 
 ### 2. CRM Modernisierung und Assistenz
 
@@ -95,7 +95,7 @@ Profi-Zielbild:
 Referenzmuster:
 
 - Fiori Wizard/Object Page fuer Pflege und Beratungsentscheidungen
-- Odoo/OCA Stammdaten-/Catalog-Patterns als Status- und CRUD-Referenz
+- Community-Stammdaten-/Katalogmuster als Status- und CRUD-Referenz
 
 ### 4. Sales Modern Surface Restlogik
 
@@ -117,7 +117,7 @@ Profi-Zielbild:
 Referenzmuster:
 
 - SAP Fiori Worklist / Massenaktion
-- Odoo Sales Operations als Zustands- und Bulk-Action-Referenz
+- Community-Sales-Operations-Muster als Zustands- und Bulk-Action-Referenz
 
 ### 5. Service-/Field-Kommunikation und Folgebelege
 
@@ -144,7 +144,7 @@ Profi-Zielbild:
 Referenzmuster:
 
 - Fiori Object Page / Timeline
-- Odoo Field Service / Helpdesk als Referenz fuer Status-/Folgeobjekte
+- Community-Field-Service-/Helpdesk-Muster als Referenz fuer Status-/Folgeobjekte
 
 ## Priorisierung
 
@@ -186,8 +186,8 @@ Referenzmuster:
 Wenn fuer diese Tail-Bloecke externer Referenzcode noetig wird:
 
 1. zuerst UI- und Datenmodellmuster aus SAP Fiori / OpenUI5 nutzen
-2. dann permissive oder kompatible Odoo-/OCA-Quellen modulweise pruefen
-3. AGPL- oder Odoo-Enterprise-Code nicht unkritisch uebernehmen
+2. dann permissive oder kompatible Community-Quellen modulweise pruefen
+3. AGPL- oder proprietaeren Enterprise-Code nicht unkritisch uebernehmen
 4. Codeuebernahme immer separat dokumentieren
 
 ## Folgerung

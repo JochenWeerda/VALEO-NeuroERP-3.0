@@ -30,6 +30,7 @@ import { NativeSelect } from '@/components/ui/native-select';
 import { useAuth } from '@/hooks/useAuth';
 import { useTenant } from '@/hooks/useTenant';
 import { summarizeContractHedge } from '@/lib/professional-control-centers';
+import { summarizeContractOperations } from '@/lib/domain-depth';
 
 interface Contract {
   id: string;
@@ -399,6 +400,7 @@ export default function ContractsPageV2(): JSX.Element {
     return openContracts[0] ?? null;
   }, [expiringContracts, openContracts]);
   const hedgeSummary = useMemo(() => summarizeContractHedge(contracts), [contracts]);
+  const contractOps = useMemo(() => summarizeContractOperations(contracts), [contracts]);
 
   return (
     <div className="space-y-4">
@@ -473,6 +475,24 @@ export default function ContractsPageV2(): JSX.Element {
         </Card>
       </div>
 
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card className="p-4">
+          <div className="text-xs uppercase tracking-wide text-muted-foreground">Operator-Druck</div>
+          <div className="mt-2 text-lg font-semibold">{contractOps.operatorPressure}</div>
+          <p className="mt-1 text-xs text-muted-foreground">Fixierung, Markt und Mahnung als gemeinsamer Operatorzustand</p>
+        </Card>
+        <Card className="p-4">
+          <div className="text-xs uppercase tracking-wide text-muted-foreground">Ungesicherte Mengen</div>
+          <div className="mt-2 text-2xl font-semibold">{contractOps.unhedgedCount}</div>
+          <p className="mt-1 text-xs text-muted-foreground">Kontrakte mit offenem Fixierungs- oder Hedgebedarf</p>
+        </Card>
+        <Card className="p-4">
+          <div className="text-xs uppercase tracking-wide text-muted-foreground">Naechster Operatorpfad</div>
+          <div className="mt-2 text-sm font-semibold">{contractOps.nextAction}</div>
+          <p className="mt-1 text-xs text-muted-foreground">Arbeitsfokus fuer Markt, Mahnung oder Abschreibung</p>
+        </Card>
+      </div>
+
       <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
         <Card className="p-4">
           <div className="flex items-center justify-between gap-3">
@@ -497,6 +517,7 @@ export default function ContractsPageV2(): JSX.Element {
                 <p>Rahmenvertrag: {sourceBreakdown.rahmen}</p>
                 <p>Agrar / Flow Spine: {sourceBreakdown.agrar}</p>
                 {sourceBreakdown.unknown > 0 ? <p>Ohne Quelltyp: {sourceBreakdown.unknown}</p> : null}
+                <p>Mahnfaelle: {contractOps.dunningCount}</p>
               </div>
             </div>
             <div className="rounded-lg border p-3">
@@ -504,7 +525,7 @@ export default function ContractsPageV2(): JSX.Element {
               <div className="mt-2 space-y-1 text-sm">
                 <p>{expiringContracts.length > 0 ? `${expiringContracts.length} Kontrakte laufen in 30 Tagen ab.` : 'Keine kurzfristigen Ablauffristen im gefilterten Bestand.'}</p>
                 <p>{openContracts.length > 0 ? `${openContracts.length} offene Kontrakte erfordern aktive Steuerung.` : 'Keine offenen Kontrakte im aktuellen Bestand.'}</p>
-                <p>{hedgeSummary.nextAction}</p>
+                <p>{contractOps.nextAction}</p>
               </div>
             </div>
           </div>

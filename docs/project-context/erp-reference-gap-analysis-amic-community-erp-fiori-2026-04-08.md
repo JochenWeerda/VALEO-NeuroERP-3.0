@@ -1,6 +1,6 @@
-# ERP Reference Gap Analysis: AMIC, Odoo, SAP Fiori
+# ERP Reference Gap Analysis: AMIC, Community ERP, SAP Fiori
 
-Stand: `2026-04-08`
+Stand: `2026-04-12`
 
 ## Zweck
 
@@ -25,15 +25,16 @@ Die Datei dient als:
 Beobachtung:
 AMIC bildet ERP-Funktionalitaet sehr fein in fachlichen Untermodulen ab. Besonders auffaellig sind die Tiefe bei Kontrakt, Finanzbuchhaltung, Frachtwesen, Waagen-/Rohwarenlogik und den dazugehoerigen Parametern, Sonderfaellen und Auswertungen.
 
-### Odoo / OCA
+### Community-ERP-Addons und Community-Funktionsrepositorien
 
-- Odoo Lizenzen: <https://www.odoo.com/documentation/19.0/legal/licenses.html>
-- OCA Agreement Repository: <https://github.com/OCA/agreement>
-- OCA Stock Logistics Workflow: <https://github.com/OCA/stock-logistics-workflow>
-- OCA Account Financial Tools: <https://github.com/OCA/account-financial-tools>
+- Community Agreement Repository: <https://github.com/OCA/agreement>
+- Community Stock Logistics Workflow: <https://github.com/OCA/stock-logistics-workflow>
+- Community Account Financial Tools: <https://github.com/OCA/account-financial-tools>
+- Community Purchase Workflow: <https://github.com/OCA/purchase-workflow>
+- Community Helpdesk: <https://github.com/OCA/helpdesk>
 
 Beobachtung:
-Odoo und besonders OCA liefern reife Referenzmuster fuer Geschaeftsobjekte, States, Parameterisierung, Dokumenten-/Workflowlogik und Integrationsmuster. Sie sind als Funktions- und Datenmodell-Referenz wertvoll, aber lizenzseitig differenziert zu behandeln.
+Diese Repositorien liefern reife Referenzmuster fuer Geschaeftsobjekte, States, Parameterisierung, Dokumenten-/Workflowlogik und Integrationsmuster. Sie sind als Funktions- und Datenmodell-Referenz wertvoll, aber lizenzseitig differenziert zu behandeln.
 
 ### SAP Fiori / OpenUI5
 
@@ -195,7 +196,7 @@ mittel bis hoch
 
 ## Geeignete Upstream-Referenzen fuer spaetere Ausbauslices
 
-### Odoo / OCA als fachliche und technische Referenz
+### Community-ERP-Addons als fachliche und technische Referenz
 
 Sinnvoll als Referenz fuer:
 
@@ -209,13 +210,15 @@ Empfehlung:
 
 - zuerst Modell, Felder, States, Guards und Arbeitslogik studieren
 - nur dann Code uebernehmen, wenn Lizenz und Kopplung zum Ziel passen
-- bei AGPL-lizenzierten OCA-Modulen nur sehr vorsichtig mit echter Codeuebernahme umgehen
+- bei AGPL-lizenzierten Community-Modulen nur sehr vorsichtig mit echter Codeuebernahme umgehen
 
 Besonders plausible Referenzfamilien:
 
-- OCA `agreement`
-- OCA `stock-logistics-workflow`
-- OCA `account-financial-tools`
+- `agreement`
+- `stock-logistics-workflow`
+- `account-financial-tools`
+- `purchase-workflow`
+- `helpdesk`
 
 ### SAP Fiori / OpenUI5 als UIX-Referenz
 
@@ -231,33 +234,32 @@ Empfehlung:
 
 - Fiori nicht als Funktion kopieren, sondern als UI-Architekturprinzip nutzen
 - OpenUI5 nur dann als Codequelle heranziehen, wenn wirklich Komponenten oder Strukturen daraus noetig sind
-- primar Designmuster und Interaktionslogik uebernehmen
+- primaer Designmuster und Interaktionslogik uebernehmen
 
 ## Lizenzampel fuer spaetere kommerzielle Nutzung
 
 ### Gruen
 
 - OpenUI5: Apache 2.0
-- Odoo Community / Dokumentation: je nach Modul-/Quellpfad pruefen, Community-Basis ist grundsaetzlich deutlich besser geeignet als Enterprise-Code
 - SAP Fiori Design Guidelines als Referenz fuer Informationsarchitektur und Interaktionsmuster
 
 ### Gelb
 
-- Odoo Community-/OCA-Code unter LGPL oder aehnlichen kompatiblen Open-Source-Lizenzen:
+- Community-Repositorien unter LGPL oder aehnlichen kompatiblen Open-Source-Lizenzen:
   vor echter Codeuebernahme immer modulweise pruefen
 
 ### Rot / Vorsicht
 
-- Odoo Enterprise Code:
-  nicht als freie Copy-Source behandeln; kommerzielle Lizenzbedingungen beachten
-- OCA-Repositories unter AGPL-3.0:
+- AGPL-3.0-Repositorien:
   fuer ein proprietaer oder gemischt kommerziell vertriebenes ERP in der Regel keine unkritische Copy-Paste-Quelle
+- kommerziell lizenzierte Enterprise-Codebasen:
+  nicht als freie Copy-Source behandeln; proprietaere Lizenzbedingungen beachten
 
 Kurzregel:
 
 - Ideen, Fachstruktur und UX-Muster aus allen drei Referenzwelten nutzbar
 - direkter Code vor allem aus permissiven oder klar kompatiblen Quellen
-- AGPL und Odoo Enterprise nur nach expliziter Lizenzentscheidung
+- starke Copyleft- oder proprietaere Quellen nur nach expliziter Lizenzentscheidung
 
 ## Priorisierte Ausbaukandidaten fuer VALEO
 
@@ -278,6 +280,6 @@ Wenn fuer einen Ausbau echte Referenzimplementierung noetig ist:
 
 Kein Ziel ist:
 
-- AMIC, Odoo oder SAP Fiori als Ganzes nachzubauen
+- AMIC oder SAP Fiori als Ganzes nachzubauen
 - einen zweiten Orchestrator oder ein zweites Produktmodell einzubetten
 - Lizenzrisiken durch unkritische Codeuebernahme einzugehen

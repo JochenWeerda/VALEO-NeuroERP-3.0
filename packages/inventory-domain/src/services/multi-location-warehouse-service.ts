@@ -1,10 +1,10 @@
-/**
+﻿/**
  * Multi-Location Warehouse Service
  * Complete Multi-Location Warehouse Management for Agribusiness
- * Based on Odoo stock Multi-Location pattern
+ * Based on Community ERP stock Multi-Location pattern
  */
 
-import { Warehouse, WarehouseLocation, WarehouseLocationType, CreateWarehouseInput, UpdateWarehouseInput, WarehouseStatus } from '../core/entities/warehouse';
+import { CreateWarehouseInput, UpdateWarehouseInput, Warehouse, WarehouseLocation, WarehouseLocationType, WarehouseStatus } from '../core/entities/warehouse';
 
 export interface MultiLocationWarehouseServiceDependencies {
   // Repository would be injected here in production
@@ -243,3 +243,4 @@ export class MultiLocationWarehouseService {
     };
   }
 }
+

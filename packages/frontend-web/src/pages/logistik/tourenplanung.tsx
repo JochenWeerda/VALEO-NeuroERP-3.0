@@ -9,10 +9,12 @@ import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHead
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { summarizeSupplyTransfer } from '@/lib/domain-depth'
 
 export default function TourenplanungPage(): JSX.Element {
   const { data: touren, isLoading } = useTouren()
   const { data: chain } = useSupplyChainOverview()
+  const transferSummary = summarizeSupplyTransfer(chain)
 
   if (isLoading || !touren) {
     return (
@@ -130,6 +132,21 @@ export default function TourenplanungPage(): JSX.Element {
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Aktive Fahrzeuge</CardTitle></CardHeader>
           <CardContent><span className="text-2xl font-bold">{chain.activeVehiclePlates.length}</span></CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Uebergaberisiko</CardTitle></CardHeader>
+          <CardContent><div className="text-lg font-semibold">{transferSummary.transferPressure}</div></CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Offene Kettenpunkte</CardTitle></CardHeader>
+          <CardContent><div className="text-2xl font-bold">{transferSummary.handoverRisk}</div></CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Kettenfokus</CardTitle></CardHeader>
+          <CardContent><div className="text-sm font-semibold">{transferSummary.nextAction}</div></CardContent>
         </Card>
       </div>
 

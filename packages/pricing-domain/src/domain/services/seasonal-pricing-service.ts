@@ -1,9 +1,9 @@
-/**
+﻿/**
  * Seasonal Pricing Service
  * Based on OCA sale_agriculture Seasonal Pricing pattern
  */
 
-import { SeasonalPricingRule, Season, getSeasonFromDate, isDateInMonthRange } from '../entities/seasonal-pricing-rule';
+import { Season, SeasonalPricingRule, getSeasonFromDate, isDateInMonthRange } from '../entities/seasonal-pricing-rule';
 import { randomUUID } from 'crypto';
 
 export interface SeasonalPricingServiceDependencies {
@@ -27,7 +27,7 @@ export class SeasonalPricingService {
 
   /**
    * Get seasonal price for a product
-   * Based on Odoo sale_agriculture pattern: _get_seasonal_multiplier()
+   * Based on Community ERP sale_agriculture pattern: _get_seasonal_multiplier()
    */
   async getSeasonalPrice(
     tenantId: string,
@@ -136,7 +136,7 @@ export class SeasonalPricingService {
 
   /**
    * Find applicable seasonal pricing rule
-   * Based on Odoo pattern: _compute_season()
+   * Based on Community ERP pattern: _compute_season()
    */
   private async findApplicableRule(
     tenantId: string,
@@ -280,3 +280,4 @@ export class SeasonalPricingService {
     return this.rules.delete(id);
   }
 }
+

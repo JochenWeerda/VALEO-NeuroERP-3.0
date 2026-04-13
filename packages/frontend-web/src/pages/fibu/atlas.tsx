@@ -4,6 +4,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import {
   ArrowLeft,
   ArrowRight,
@@ -18,10 +21,12 @@ import {
   Clock3,
   CheckCircle2,
 } from 'lucide-react'
+import { summarizeMeldewesenFeedback } from '@/lib/domain-depth'
 import { getJobArtifacts, listConnectors, listJobs, listReportingUnits, listSchedules } from '@/lib/api/meldewesen'
 import { useDokumenteAblage, useWiegungen } from '@/lib/api/betrieb'
 import { useWarteschlange } from '@/lib/api/inventory'
 import { useFrachtbriefe } from '@/lib/api/misc-modules'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 function formatDateTime(value?: string | null): string {
   if (!value) return 'n/a'
@@ -83,6 +88,69 @@ export default function AtlasPage(): JSX.Element {
   })
   const latestArtifacts = latestArtifactsQuery.data ?? []
   const isLoading = connectorsQuery.isLoading || unitsQuery.isLoading || schedulesQuery.isLoading || jobsQuery.isLoading
+  const feedbackSummary = summarizeMeldewesenFeedback({
+    failedJobs: failedJobs.length,
+    runningJobs: runningJobs.length,
+    artifactCount: latestArtifacts.length,
+    queueCount: warteschlange?.items?.length ?? 0,
+    weighingCount: wiegungen.length,
+    freightCount: frachtbriefe.length,
+    documentCount: dokumente.length,
+  })
+  const operationalStatus = normalizeOperationalStatus(
+    feedbackSummary.feedbackRisk === 'hoch'
+      ? 'eskaliert'
+      : runningJobs.length > 0
+        ? 'in_pruefung'
+        : atlasConnectors.length > 0
+          ? 'offen'
+          : 'wartet_auf_extern',
+  )
+  const contextSections = [
+    {
+      title: 'Meldeobjekt',
+      items: [
+        { label: 'Connectoren', value: `${atlasConnectors.length}` },
+        { label: 'Reporting Units', value: `${reportingUnits.length}` },
+        { label: 'Aktive Zeitplaene', value: `${activeSchedules.length}` },
+      ],
+    },
+    {
+      title: 'Rueckmeldung',
+      items: [
+        { label: 'Artefakte letzter Lauf', value: `${latestArtifacts.length}` },
+        { label: 'Fehlerjobs', value: `${failedJobs.length}` },
+        { label: 'Naechste Aktion', value: feedbackSummary.nextAction },
+      ],
+    },
+    {
+      title: 'Objektkette',
+      items: [
+        { label: 'Rohware-Faelle', value: `${warteschlange?.items?.length ?? 0}` },
+        { label: 'Wiegungen', value: `${wiegungen.length}` },
+        { label: 'Fracht / Dokumente', value: `${frachtbriefe.length} / ${dokumente.length}` },
+      ],
+    },
+  ]
+  const timelineItems = [
+    {
+      label: latestJob ? 'Letzter Meldejob vorhanden' : 'Noch kein Meldejob',
+      detail: latestJob ? `${latestJob.job_type} mit Status ${latestJob.status}` : 'Der Rueckmeldepfad startet erst mit dem ersten Joblauf.',
+      timestamp: latestJob?.triggered_at ?? latestJob?.created_at ?? null,
+    },
+    {
+      label: latestArtifacts.length > 0 ? 'Artefakte rueckgekoppelt' : 'Artefaktpfad offen',
+      detail: latestArtifacts.length > 0
+        ? `${latestArtifacts.length} Artefakte sind dem letzten Lauf zugeordnet.`
+        : 'Fuer den letzten sichtbaren Lauf liegen noch keine Artefakte vor.',
+    },
+    {
+      label: failedJobs.length > 0 ? 'Rueckmeldefehler offen' : 'Keine offenen Rueckmeldefehler',
+      detail: failedJobs.length > 0
+        ? `${failedJobs.length} Jobs muessen fachlich nachverfolgt werden.`
+        : 'Der sichtbare Rueckmeldepfad ist aktuell ohne Fehler.',
+    },
+  ]
 
   const workstreams = [
     {
@@ -139,6 +207,22 @@ export default function AtlasPage(): JSX.Element {
             Zurueck zum Schnittstellen-Center
           </Button>
         </Link>
+      </div>
+
+      <OperationalCaseHeader
+        title="Zoll- und Meldepfad steuern"
+        description="Rueckmeldungen, Artefakte und die physische Objektkette werden in einem kompakten Nachweisfall verdichtet."
+        status={operationalStatus}
+        owner="Compliance / Export"
+        blocker={feedbackSummary.feedbackRisk === 'hoch' ? 'Fehlgeschlagene Jobs oder fehlende Artefakte blockieren den revisionssicheren Nachweis.' : null}
+        nextAction={feedbackSummary.nextAction}
+        caseLabel="Melde- und Bescheidpfad"
+        tags={['Compliance', 'Nachweis']}
+      />
+
+      <div className="grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
+        <OperationalTimeline title="Rueckmeldungsverlauf" items={timelineItems} />
+        <OperationalContextPanel title="Nachweiskontext" sections={contextSections} />
       </div>
 
       <Alert className="border-amber-200 bg-amber-50 text-amber-900">

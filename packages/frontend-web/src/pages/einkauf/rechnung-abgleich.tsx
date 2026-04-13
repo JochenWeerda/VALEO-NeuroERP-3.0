@@ -12,6 +12,11 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/api-client'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { summarizeProcurementMatch } from '@/lib/domain-depth'
 import { CheckCircle, XCircle, AlertTriangle, FileCheck, Receipt } from 'lucide-react'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 
@@ -375,6 +380,73 @@ export default function RechnungAbgleichPage(): JSX.Element {
     }
   }
 
+  const matchOps = matchResult
+    ? summarizeProcurementMatch({
+        exceptionsCount: matchResult.exceptionsCount,
+        variancePercentage: matchResult.variancePercentage,
+        autoApprovalEligible: matchResult.autoApprovalEligible,
+        hasGoodsReceipt: matchResult.matchType === 'three_way',
+      })
+    : null
+
+  const operationalStatus = matchResult
+    ? normalizeOperationalStatus(
+        blocked || matchOps?.exceptionPressure === 'hoch'
+          ? 'eskaliert'
+          : matchResult.overallStatus === 'matched'
+            ? 'abgeschlossen'
+            : matchResult.overallStatus === 'partial_match'
+              ? 'wartet_auf_mensch'
+              : 'in_pruefung',
+      )
+    : normalizeOperationalStatus(selectedInvoiceId ? 'in_pruefung' : 'offen')
+
+  const contextSections = matchResult
+    ? [
+        {
+          title: 'Abgleich',
+          items: [
+            { label: 'Match-Typ', value: matchResult.matchType === 'three_way' ? '3-Wege' : '2-Wege' },
+            { label: 'Ausnahmen', value: String(matchResult.exceptionsCount) },
+            { label: 'Varianz', value: `${matchResult.variancePercentage.toFixed(2)}%` },
+          ],
+        },
+        {
+          title: 'Folgefall',
+          items: [
+            { label: 'Freigabefaehig', value: matchResult.autoApprovalEligible ? 'ja' : 'nein' },
+            { label: 'Lieferbezug', value: matchResult.matchType === 'three_way' ? 'Wareneingang vorhanden' : 'Wareneingang offen' },
+            { label: 'Naechster Schritt', value: matchOps?.nextAction ?? 'Abgleich pruefen' },
+          ],
+        },
+        {
+          title: 'Governance',
+          items: [
+            { label: 'Blockiert', value: blocked ? 'ja' : 'nein' },
+            { label: 'Begruendung', value: exceptionReason ? 'erfasst' : 'offen' },
+            { label: 'Status', value: matchResult.overallStatus },
+          ],
+        },
+      ]
+    : []
+
+  const timelineItems = matchResult
+    ? [
+        {
+          label: 'Abgleich gerechnet',
+          detail: `${matchResult.itemMatches.length} Positionen mit ${matchResult.exceptionsCount} Ausnahmefaellen.`,
+        },
+        {
+          label: matchResult.matchType === 'three_way' ? 'Wareneingang einbezogen' : 'Ohne Wareneingang',
+          detail: matchResult.matchType === 'three_way' ? 'Mengen- und Qualitaetsbezug wurde gegen den Wareneingang geprueft.' : 'Es liegt nur ein 2-Wege-Abgleich gegen Bestellung und Rechnung vor.',
+        },
+        {
+          label: blocked ? 'Freigabe blockiert' : 'Freigabepfad offen',
+          detail: blocked ? 'Die aktuelle Varianz verlangt Begruendung oder Nachforderung vor der Freigabe.' : 'Die Rechnung kann kontrolliert in den Freigabefall uebergehen.',
+        },
+      ]
+    : []
+
   return (
     <div className="space-y-6 p-6">
       <div className="flex items-center justify-between">
@@ -386,6 +458,24 @@ export default function RechnungAbgleichPage(): JSX.Element {
           {t('common.cancel')}
         </Button>
       </div>
+
+      <OperationalCaseHeader
+        title="Beschaffungsfall abstimmen"
+        description="Der Abgleich fuehrt Bestellung, Wareneingang und Rechnung als einen Freigabe- und Ausnahmefall zusammen."
+        status={operationalStatus}
+        owner="Einkauf / Kreditoren"
+        blocker={blocked ? 'Varianz oder fehlender Nachweis blockiert die direkte Freigabe.' : null}
+        nextAction={matchOps?.nextAction ?? 'Rechnung auswaehlen und Abgleich starten'}
+        caseLabel={selectedInvoiceId ? `Rechnung ${selectedInvoiceId}` : 'Kein Rechnungsfall gewaehlt'}
+        tags={['Beschaffung', 'Abgleich', 'Freigabe']}
+      />
+
+      {matchResult ? (
+        <div className="grid gap-4 lg:grid-cols-[1.25fr_1fr]">
+          <OperationalTimeline title="Abgleichsverlauf" items={timelineItems} />
+          <OperationalContextPanel title="Ausnahme- und Freigabekontext" sections={contextSections} />
+        </div>
+      ) : null}
 
       <Card>
         <CardHeader>
@@ -459,7 +549,22 @@ export default function RechnungAbgleichPage(): JSX.Element {
                 {getStatusBadge(matchResult.overallStatus)}
               </CardTitle>
             </CardHeader>
-            <CardContent>
+          <CardContent>
+              <div className="mb-4 grid gap-4 md:grid-cols-3">
+                <div className="rounded-lg border p-3">
+                  <div className="text-sm text-muted-foreground">Ausnahmedruck</div>
+                  <div className="mt-2 text-lg font-semibold">{matchOps?.exceptionPressure ?? 'niedrig'}</div>
+                </div>
+                <div className="rounded-lg border p-3">
+                  <div className="text-sm text-muted-foreground">Freigabepfad</div>
+                  <div className="mt-2 text-lg font-semibold">{matchResult.autoApprovalEligible ? 'kontrolliert offen' : 'manuelle Klaerung'}</div>
+                </div>
+                <div className="rounded-lg border p-3">
+                  <div className="text-sm text-muted-foreground">Naechste Aktion</div>
+                  <div className="mt-2 text-sm font-semibold">{matchOps?.nextAction}</div>
+                </div>
+              </div>
+
               <div className="grid gap-4 md:grid-cols-4 mb-4">
                 <div>
                   <div className="text-sm text-muted-foreground">{t('crud.fields.matchType')}</div>

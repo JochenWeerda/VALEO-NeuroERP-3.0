@@ -1,6 +1,6 @@
 # Sales & Order-to-Cash Capability Model - Reference Taxonomy
 
-Dieses Dokument definiert die Referenz-Taxonomie für Sales/Order-to-Cash-Funktionalitäten, basierend auf SAP SD, Oracle Sales Cloud, Odoo Sales und anderen führenden ERP-Systemen.
+Dieses Dokument definiert die Referenz-Taxonomie fÃ¼r Sales/Order-to-Cash-FunktionalitÃ¤ten, basierend auf SAP SD, Oracle Sales Cloud, Community ERP Sales und anderen fÃ¼hrenden ERP-Systemen.
 
 ## 1. CRM / Lead-to-Opportunity
 
@@ -31,12 +31,12 @@ Dieses Dokument definiert die Referenz-Taxonomie für Sales/Order-to-Cash-Funkti
 - Opportunity Value & Revenue Recognition
 - Opportunity Team Assignment (Sales Rep, Manager)
 - Opportunity Products/Items
-- Opportunity Quotes (Angebote verknüpfen)
+- Opportunity Quotes (Angebote verknÃ¼pfen)
 
-### 1.4 Aktivitäten & Aufgaben (SALES-CRM-04)
-- Aktivitäten (Calls, Meetings, Emails, Tasks)
-- Aktivitätszuordnung (zu Lead, Opportunity, Customer, Contact)
-- Aktivitätshistorie (Activity History, Interaction Log)
+### 1.4 AktivitÃ¤ten & Aufgaben (SALES-CRM-04)
+- AktivitÃ¤ten (Calls, Meetings, Emails, Tasks)
+- AktivitÃ¤tszuordnung (zu Lead, Opportunity, Customer, Contact)
+- AktivitÃ¤tshistorie (Activity History, Interaction Log)
 - Aufgabenverwaltung (Task Management, Reminders, Follow-ups)
 - Kalenderintegration (Calendar Sync)
 
@@ -50,10 +50,10 @@ Dieses Dokument definiert die Referenz-Taxonomie für Sales/Order-to-Cash-Funkti
 
 ### 2.1 Produktkatalog Verkauf (SALES-PRD-01)
 - Produktstamm (Product Master: Name, Beschreibung, EAN, SKU)
-- Produktvarianten (Product Variants: Größe, Farbe, etc.)
+- Produktvarianten (Product Variants: GrÃ¶ÃŸe, Farbe, etc.)
 - Produktkategorien (Product Categories, Hierarchie)
 - Produktbilder (Product Images, Media)
-- Produktverfügbarkeit (Stock Status, Availability)
+- ProduktverfÃ¼gbarkeit (Stock Status, Availability)
 - Produktpreise (Product Prices, Price Lists)
 
 ### 2.2 Preislisten & Preisfindung (SALES-PRC-01)
@@ -74,7 +74,7 @@ Dieses Dokument definiert die Referenz-Taxonomie für Sales/Order-to-Cash-Funkti
 - Gutschriften (Credit Notes, Bonuses)
 
 ### 2.4 Steuern im Verkauf (SALES-PRC-03)
-- Steuerschlüssel (Tax Codes, Tax Categories)
+- SteuerschlÃ¼ssel (Tax Codes, Tax Categories)
 - Steuerberechnung (Tax Calculation: VAT, Sales Tax)
 - Steuerregeln (Tax Rules: Country, Region, Product Type)
 - Reverse Charge (Reverse Charge Mechanism)
@@ -86,7 +86,7 @@ Dieses Dokument definiert die Referenz-Taxonomie für Sales/Order-to-Cash-Funkti
 ### 3.1 Angebotsmanagement (SALES-QTN-01)
 - Angebotserstellung (manuell, aus Opportunity, aus Template)
 - Angebotspositionen (Items, Mengen, Preise, Rabatte)
-- Angebotsvalidierung (Preise, Verfügbarkeit, Kreditlimit)
+- Angebotsvalidierung (Preise, VerfÃ¼gbarkeit, Kreditlimit)
 - Angebotsversionierung (Revisionen, Version History)
 - Angebotsablauf (Expiry Date, Auto-Expiry)
 - Angebotskonvertierung zu Auftrag
@@ -107,16 +107,16 @@ Dieses Dokument definiert die Referenz-Taxonomie für Sales/Order-to-Cash-Funkti
 ### 4.1 Auftragserfassung (Sales Order) (SALES-ORD-01)
 - Auftragserstellung (aus Quote, manuell, Import)
 - Auftragspositionen (Items, Mengen, Preise, Rabatte)
-- Auftragsvalidierung (Kreditlimit, Verfügbarkeit, Preise)
+- Auftragsvalidierung (Kreditlimit, VerfÃ¼gbarkeit, Preise)
 - Auftragsstatus (Draft, Confirmed, In Delivery, Delivered, Invoiced, Cancelled)
-- Auftragsbestätigung (Order Confirmation PDF/Email)
+- AuftragsbestÃ¤tigung (Order Confirmation PDF/Email)
 - Auftragskopie (Copy Order, Repeat Order)
 
-### 4.2 Auftragsänderung & Storno (SALES-ORD-02)
-- Auftragsänderungen (Change Management, Amendments)
-- Änderungshistorie (Change History, Audit Trail)
+### 4.2 AuftragsÃ¤nderung & Storno (SALES-ORD-02)
+- AuftragsÃ¤nderungen (Change Management, Amendments)
+- Ã„nderungshistorie (Change History, Audit Trail)
 - Auftragsstorno (Cancellation, Reason Codes)
-- Stornobestätigung (Cancellation Confirmation)
+- StornobestÃ¤tigung (Cancellation Confirmation)
 
 ## 5. Fulfillment
 
@@ -125,7 +125,7 @@ Dieses Dokument definiert die Referenz-Taxonomie für Sales/Order-to-Cash-Funkti
 - Teil-/Restlieferungen (Partial Delivery, Backorder)
 - Lieferpositionen (Items, Mengen, Lagerort)
 - Lieferstatus (Draft, Picked, Shipped, Delivered)
-- Lieferbestätigung (Delivery Note PDF)
+- LieferbestÃ¤tigung (Delivery Note PDF)
 - Lieferstorno (Return Delivery)
 
 ### 5.2 Versandarten & Tracking (SALES-DLV-02)
@@ -149,7 +149,7 @@ Dieses Dokument definiert die Referenz-Taxonomie für Sales/Order-to-Cash-Funkti
 - Rechnungsstatus (Draft, Posted, Paid, Cancelled)
 - Rechnungsversand (PDF, Email)
 - Rechnungsstorno (Credit Memo, Reversal)
-- Rechnungsänderungen (Corrections, Amendments)
+- RechnungsÃ¤nderungen (Corrections, Amendments)
 
 ### 6.2 E-Rechnung & Formate (SALES-BIL-02)
 - E-Rechnung Export (XRechnung, ZUGFeRD, PEPPOL)
@@ -159,12 +159,12 @@ Dieses Dokument definiert die Referenz-Taxonomie für Sales/Order-to-Cash-Funkti
 
 ### 6.3 Forderungsmanagement / Mahnung (SALES-COL-01)
 - Mahnstufen (Dunning Levels: Reminder 1, Reminder 2, Final Notice)
-- Mahngebühren (Dunning Fees, Late Payment Fees)
+- MahngebÃ¼hren (Dunning Fees, Late Payment Fees)
 - Mahnversand (Dunning Letter PDF/Email)
 - Mahnsperre (Dunning Block: keine Lieferung bei offenen Forderungen)
 - Inkasso-Integration (Collection Agency Integration)
 
-### 6.4 Zahlungseingänge & Ausgleich (SALES-PAY-01)
+### 6.4 ZahlungseingÃ¤nge & Ausgleich (SALES-PAY-01)
 - Zahlungseingang (Payment Receipt, Bank Import)
 - Zahlungszuordnung (Payment Matching zu Rechnungen)
 - Zahlungsarten (Cash, Bank Transfer, Credit Card, SEPA)
@@ -175,14 +175,14 @@ Dieses Dokument definiert die Referenz-Taxonomie für Sales/Order-to-Cash-Funkti
 
 ### 7.1 Retourenprozess (RMA) (SALES-RMA-01)
 - RMA-Erstellung (Return Merchandise Authorization)
-- Retourengründe (Return Reasons, Return Codes)
+- RetourengrÃ¼nde (Return Reasons, Return Codes)
 - Retourenvalidierung (Original Order/Invoice Reference)
 - Retourenstatus (Requested, Approved, Received, Processed)
 - Retourenverarbeitung (Return Processing, Refund)
 
 ### 7.2 Reklamation & Ersatz (SALES-RMA-02)
 - Reklamationserfassung (Complaint Management)
-- Reklamationsgründe (Complaint Reasons, Categories)
+- ReklamationsgrÃ¼nde (Complaint Reasons, Categories)
 - Ersatzlieferung (Replacement Delivery)
 - Ersatzprodukt (Replacement Product)
 
@@ -196,7 +196,7 @@ Dieses Dokument definiert die Referenz-Taxonomie für Sales/Order-to-Cash-Funkti
 - Kundenberichte (Customer Reports: Customer Revenue, Customer Activity)
 
 ### 8.2 Drilldown & Belegkette (SALES-REP-02)
-- Belegkette (Document Chain: Quote → Order → Delivery → Invoice)
+- Belegkette (Document Chain: Quote â†’ Order â†’ Delivery â†’ Invoice)
 - Drilldown (Drilldown from Summary to Detail)
 - Belegverfolgung (Document Tracking, Document Flow)
 
@@ -220,15 +220,15 @@ Dieses Dokument definiert die Referenz-Taxonomie für Sales/Order-to-Cash-Funkti
 - Freigabestufen (Multi-Level Approval)
 - Freigabestatus (Pending, Approved, Rejected)
 - Freigabehistorie (Audit Trail)
-- Freigabebenen (Sales Rep → Manager → Director)
+- Freigabebenen (Sales Rep â†’ Manager â†’ Director)
 
 ## 10. Integrationen
 
 ### 10.1 API / Import / Export (SALES-INT-01)
-- REST API (REST API für Sales-Daten)
-- GraphQL API (GraphQL API für Sales-Daten)
+- REST API (REST API fÃ¼r Sales-Daten)
+- GraphQL API (GraphQL API fÃ¼r Sales-Daten)
 - Import/Export (CSV, Excel, JSON)
-- Webhooks (Webhooks für Events)
+- Webhooks (Webhooks fÃ¼r Events)
 
 ### 10.2 EDI / B2B Integration (SALES-INT-02)
 - EDI Standards (EDIFACT, X12)
@@ -236,7 +236,7 @@ Dieses Dokument definiert die Referenz-Taxonomie für Sales/Order-to-Cash-Funkti
 - EDI Communication (EDI Communication, Protocols)
 - B2B Integration (B2B Partner Integration)
 
-### 10.3 Shop / POS / Marktplätze (SALES-INT-03)
+### 10.3 Shop / POS / MarktplÃ¤tze (SALES-INT-03)
 - Webshop-Integration (Order Import, Product Sync)
 - POS-Integration (Point of Sale Integration)
 - Marketplace-Integration (Amazon, eBay, etc.)
@@ -244,10 +244,11 @@ Dieses Dokument definiert die Referenz-Taxonomie für Sales/Order-to-Cash-Funkti
 
 ## Reifegrad-Bewertung
 
-- **SAP SD-ähnlich**: Vollständige Funktionalität auf Enterprise-Level
-- **Odoo Sales-ähnlich**: Gute Funktionalität für mittelständische Unternehmen
-- **Basic**: Grundlegende Funktionalität vorhanden
+- **SAP SD-Ã¤hnlich**: VollstÃ¤ndige FunktionalitÃ¤t auf Enterprise-Level
+- **Community ERP Sales-Ã¤hnlich**: Gute FunktionalitÃ¤t fÃ¼r mittelstÃ¤ndische Unternehmen
+- **Basic**: Grundlegende FunktionalitÃ¤t vorhanden
 - **Partial**: Teilweise implementiert
 - **Missing**: Nicht vorhanden
+
 
 

@@ -1,14 +1,14 @@
-/**
+﻿/**
  * Batch Entity
  * Complete Batch Traceability for Agribusiness
- * Based on Odoo stock_agriculture pattern
+ * Based on Community ERP stock_agriculture pattern
  */
 
 import { randomUUID } from 'crypto';
 
 export type BatchStatus = 
   | 'ACTIVE'           // Aktiv
-  | 'ON_HOLD'          // Zurückgestellt
+  | 'ON_HOLD'          // ZurÃ¼ckgestellt
   | 'BLOCKED'          // Gesperrt
   | 'EXPIRED'          // Abgelaufen
   | 'CONSUMED';        // Verbraucht
@@ -16,7 +16,7 @@ export type BatchStatus =
 export type BatchType = 
   | 'SEED'             // Saatgut
   | 'CROP'             // Ernte
-  | 'FERTILIZER'       // Düngemittel
+  | 'FERTILIZER'       // DÃ¼ngemittel
   | 'FEED'             // Futtermittel
   | 'PRODUCT';         // Endprodukt
 
@@ -244,7 +244,7 @@ export class Batch {
     return new Date() > this.expiryDate;
   }
 
-  public isExpiringSoon(days: number = 30): boolean {
+  public isExpiringSoon(days = 30): boolean {
     if (!this.expiryDate) return false;
     const now = new Date();
     const daysUntilExpiry = Math.ceil((this.expiryDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
@@ -306,3 +306,4 @@ export class Batch {
     };
   }
 }
+

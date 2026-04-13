@@ -1,6 +1,6 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 """
-Aktiviert den REFLECT-ARCHIVE-Mode und befüllt die MongoDB mit Daten aus dem AI_driven_ERP-Verzeichnis.
+Aktiviert den REFLECT-ARCHIVE-Mode und befÃ¼llt die MongoDB mit Daten aus dem AI_driven_ERP-Verzeichnis.
 """
 
 import os
@@ -10,15 +10,15 @@ import logging
 import subprocess
 from pathlib import Path
 
-# Füge das Projektverzeichnis zum Pfad hinzu
+# FÃ¼ge das Projektverzeichnis zum Pfad hinzu
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Importiere die benötigten Module
+# Importiere die benÃ¶tigten Module
 try:
     from backend.apm_framework.reflect_archive_data_loader import ReflectArchiveDataLoader
     from backend.mongodb_restart_manager import MongoDBRestartManager
 except ImportError as e:
-    print(f"Fehler beim Importieren der benötigten Module: {e}")
+    print(f"Fehler beim Importieren der benÃ¶tigten Module: {e}")
     sys.exit(1)
 
 # Logger konfigurieren
@@ -34,12 +34,12 @@ logger = logging.getLogger("ActivateReflectArchive")
 
 def check_mongodb_status():
     """
-    Überprüft den Status von MongoDB und startet den Dienst bei Bedarf.
+    ÃœberprÃ¼ft den Status von MongoDB und startet den Dienst bei Bedarf.
     
     Returns:
-        bool: True, wenn MongoDB läuft oder gestartet werden konnte, sonst False
+        bool: True, wenn MongoDB lÃ¤uft oder gestartet werden konnte, sonst False
     """
-    logger.info("Überprüfe MongoDB-Status...")
+    logger.info("ÃœberprÃ¼fe MongoDB-Status...")
     
     # MongoDB Restart Manager initialisieren
     restart_manager = MongoDBRestartManager(
@@ -48,14 +48,14 @@ def check_mongodb_status():
         retry_delay=5
     )
     
-    # Verbindung prüfen
+    # Verbindung prÃ¼fen
     if restart_manager.connect():
-        logger.info("MongoDB läuft bereits.")
+        logger.info("MongoDB lÃ¤uft bereits.")
         restart_manager.close()
         return True
     
     # Versuche MongoDB zu starten
-    logger.info("MongoDB läuft nicht. Versuche zu starten...")
+    logger.info("MongoDB lÃ¤uft nicht. Versuche zu starten...")
     if restart_manager.restart_mongodb_service():
         logger.info("MongoDB erfolgreich gestartet.")
         restart_manager.close()
@@ -92,7 +92,7 @@ def activate_reflect_archive_mode():
 
 def load_data_to_mongodb(source_dir):
     """
-    Lädt die Daten aus dem angegebenen Verzeichnis in die MongoDB.
+    LÃ¤dt die Daten aus dem angegebenen Verzeichnis in die MongoDB.
     
     Args:
         source_dir: Pfad zum Quellverzeichnis
@@ -121,7 +121,7 @@ def load_data_to_mongodb(source_dir):
 
 def create_reflection_document():
     """
-    Erstellt ein Reflexionsdokument für den REFLECT-ARCHIVE-Mode.
+    Erstellt ein Reflexionsdokument fÃ¼r den REFLECT-ARCHIVE-Mode.
     
     Returns:
         bool: True, wenn das Dokument erfolgreich erstellt wurde, sonst False
@@ -138,24 +138,24 @@ def create_reflection_document():
         # Inhalt des Reflexionsdokuments
         content = """# Reflexion: AI_driven_ERP-Projekt
 
-## Projektübersicht
-Das AI_driven_ERP-Projekt ist ein KI-gestütztes ERP-System mit Fokus auf Stammdatenpflege. Es orientiert sich am Design und der Funktionalität von ORB-FMS, einem gemeinnützigen Farm-Management-System.
+## ProjektÃ¼bersicht
+Das AI_driven_ERP-Projekt ist ein KI-gestÃ¼tztes ERP-System mit Fokus auf Stammdatenpflege. Es orientiert sich am Design und der FunktionalitÃ¤t von ORB-FMS, einem gemeinnÃ¼tzigen Farm-Management-System.
 
 ## Hauptkomponenten
 - Backend: FastAPI-basiertes Backend mit Mikroservice-Architektur
 - Frontend: React-basiertes Frontend im ORB-FMS-Design
-- Datenmodelle: Optimierte Modelle für Partner, Artikel, Lager und Finanzen
+- Datenmodelle: Optimierte Modelle fÃ¼r Partner, Artikel, Lager und Finanzen
 
 ## Erkenntnisse
 - Die Projektstruktur folgt einer klaren Trennung von Backend und Frontend
-- Das Backend nutzt FastAPI für eine performante API-Entwicklung
+- Das Backend nutzt FastAPI fÃ¼r eine performante API-Entwicklung
 - Das Frontend basiert auf React und implementiert verschiedene Themes
-- Es gibt eine umfangreiche Aufgabenliste mit verschiedenen Komplexitätsstufen
+- Es gibt eine umfangreiche Aufgabenliste mit verschiedenen KomplexitÃ¤tsstufen
 
-## Nächste Schritte
-1. Vervollständigung der Dashboard-Implementierung für VALERO Enterprise Suite
-2. Entwicklung der Modelle für die Geschäftslogik
-3. Integration der Module mit bestehenden Odoo-Funktionen
+## NÃ¤chste Schritte
+1. VervollstÃ¤ndigung der Dashboard-Implementierung fÃ¼r VALERO Enterprise Suite
+2. Entwicklung der Modelle fÃ¼r die GeschÃ¤ftslogik
+3. Integration der Module mit bestehenden Community ERP-Funktionen
 4. Testen der Module unter realen Bedingungen
 
 ## Archivierte Artefakte
@@ -168,7 +168,7 @@ Das AI_driven_ERP-Projekt ist ein KI-gestütztes ERP-System mit Fokus auf Stammd
 Datum: {datetime}
 """
         
-        # Datum einfügen
+        # Datum einfÃ¼gen
         import datetime
         content = content.replace("{datetime}", datetime.datetime.now().strftime("%d.%m.%Y %H:%M"))
         
@@ -184,19 +184,19 @@ Datum: {datetime}
 
 def main():
     """
-    Hauptfunktion für die Aktivierung des REFLECT-ARCHIVE-Mode und das Befüllen der MongoDB.
+    Hauptfunktion fÃ¼r die Aktivierung des REFLECT-ARCHIVE-Mode und das BefÃ¼llen der MongoDB.
     """
     import argparse
     
-    parser = argparse.ArgumentParser(description="Aktiviert den REFLECT-ARCHIVE-Mode und befüllt die MongoDB mit Daten.")
+    parser = argparse.ArgumentParser(description="Aktiviert den REFLECT-ARCHIVE-Mode und befÃ¼llt die MongoDB mit Daten.")
     parser.add_argument("--source-dir", default="C:/AI_driven_ERP",
-                        help="Quellverzeichnis für die Daten")
+                        help="Quellverzeichnis fÃ¼r die Daten")
     
     args = parser.parse_args()
     
-    # MongoDB-Status prüfen
+    # MongoDB-Status prÃ¼fen
     if not check_mongodb_status():
-        logger.error("MongoDB ist nicht verfügbar. Bitte starten Sie MongoDB und versuchen Sie es erneut.")
+        logger.error("MongoDB ist nicht verfÃ¼gbar. Bitte starten Sie MongoDB und versuchen Sie es erneut.")
         sys.exit(1)
     
     # REFLECT-ARCHIVE-Mode aktivieren
@@ -214,9 +214,10 @@ def main():
         logger.error("Konnte Reflexionsdokument nicht erstellen.")
         sys.exit(1)
     
-    logger.info("REFLECT-ARCHIVE-Mode erfolgreich aktiviert und MongoDB mit Daten befüllt.")
+    logger.info("REFLECT-ARCHIVE-Mode erfolgreich aktiviert und MongoDB mit Daten befÃ¼llt.")
     sys.exit(0)
 
 
 if __name__ == "__main__":
     main() 
+

@@ -18,6 +18,7 @@ import { ErrorState } from "@/components/ErrorState"
 import { KeyboardShortcutBar } from "@/components/keyboard/KeyboardShortcutBar"
 import { buildCoreMaskShortcuts, useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts"
 import { AgentProcessPanel } from "@/components/agent"
+import { summarizeMeldewesenFeedback } from "@/lib/domain-depth"
 import {
   listConnectors,
   listReportingUnits,
@@ -401,6 +402,19 @@ export default function MeldewesenKonsole() {
       INTRASTAT_DISPATCH: buildThreshold(dispatchSchedules, dispatchJobs, intrastatUnits.length > 0, failedIntrastatJobs > 0),
     }
   }, [jobs, schedules, units])
+  const feedbackSummary = useMemo(
+    () =>
+      summarizeMeldewesenFeedback({
+        failedJobs: jobs.filter((job) => job.status === 'failed').length,
+        runningJobs: jobs.filter((job) => job.status === 'running' || job.status === 'queued').length,
+        artifactCount: (artifactsQuery.data ?? []).length,
+        queueCount: warteschlange?.items?.length ?? 0,
+        weighingCount: wiegungen.length,
+        freightCount: frachtbriefe.length,
+        documentCount: dokumente.length,
+      }),
+    [artifactsQuery.data, dokumente.length, frachtbriefe.length, jobs, warteschlange?.items?.length, wiegungen.length],
+  )
 
   const upsertConnector = useCallback(
     (next: Connector) => {
@@ -536,6 +550,33 @@ export default function MeldewesenKonsole() {
             </Button>
           </label>
         </div>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">Rueckmeldungsrisiko</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-lg font-semibold">{feedbackSummary.feedbackRisk}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">Artefakte letzter Lauf</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-semibold">{(artifactsQuery.data ?? []).length}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">Naechster Nachweisschritt</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-sm font-semibold">{feedbackSummary.nextAction}</div>
+          </CardContent>
+        </Card>
       </div>
 
       <AgentProcessPanel domain="compliance" />

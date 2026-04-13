@@ -5,6 +5,7 @@ import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useAccountingPeriods, useFibuCockpit, useFibuConnectorProfiles } from '@/lib/api/fibu'
+import { summarizeFibuConnectorOperations } from '@/lib/domain-depth'
 import { summarizeFibuOps } from '@/lib/professional-control-centers'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
 import {
@@ -136,8 +137,21 @@ export default function SchnittstellenCenterPage(): JSX.Element {
   const openPeriods = periods.filter((period) => period.status === 'OPEN').length
   const adjustingPeriods = periods.filter((period) => period.status === 'ADJUSTING').length
   const fibuOps = summarizeFibuOps(fibuCockpit, adjustingPeriods)
+  const connectorOps = summarizeFibuConnectorOperations({
+    connectorProfiles: fibuCockpit.master_data.connector_profile_count,
+    exportRuns: fibuCockpit.revision.export_runs,
+    openPeriods,
+    adjustingPeriods,
+    dunningReady: fibuCockpit.master_data.dunning_parameters_ready,
+    interestReady: fibuCockpit.master_data.interest_groups_ready,
+    taxReady: fibuCockpit.tax.e_bilanz_ready && fibuCockpit.tax.e_clearing_ready,
+  })
   const operationalStatus = normalizeOperationalStatus(
-    fibuOps.reorgRisk === 'hoch' ? 'eskaliert' : fibuOps.interestPressure === 'hoch' ? 'wartet_auf_mensch' : 'offen',
+    connectorOps.readinessRisk === 'hoch'
+      ? 'eskaliert'
+      : fibuOps.interestPressure === 'hoch'
+        ? 'wartet_auf_mensch'
+        : 'offen',
   )
   const contextSections = [
     {
@@ -180,8 +194,14 @@ export default function SchnittstellenCenterPage(): JSX.Element {
         description="Profile, Exportpfade, Revisionslage und Periodenstatus werden als technischer FIBU-Fall gefuehrt."
         status={operationalStatus}
         owner="FIBU / Systembetreuung"
-        blocker={fibuOps.reorgRisk === 'hoch' ? 'Nachbearbeitete Perioden oder Profilkontext muessen geklaert werden.' : null}
-        nextAction={fibuOps.nextAction}
+        blocker={
+          connectorOps.readinessRisk === 'hoch'
+            ? 'Profil-, Perioden- oder Rueckmeldekontext ist noch nicht exportbereit.'
+            : fibuOps.reorgRisk === 'hoch'
+              ? 'Nachbearbeitete Perioden oder Profilkontext muessen geklaert werden.'
+              : null
+        }
+        nextAction={connectorOps.readinessRisk !== 'niedrig' ? connectorOps.nextAction : fibuOps.nextAction}
         caseLabel="Vorgang: FIBU-Connectoren"
         tags={['FIBU', 'Revision']}
       />
@@ -217,6 +237,10 @@ export default function SchnittstellenCenterPage(): JSX.Element {
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm">Readiness-Risiko</CardTitle></CardHeader>
+          <CardContent><Badge variant={connectorOps.readinessRisk === 'hoch' ? 'destructive' : 'outline'}>{connectorOps.readinessRisk}</Badge></CardContent>
+        </Card>
+        <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm">Interest Pressure</CardTitle></CardHeader>
           <CardContent><Badge variant={fibuOps.interestPressure === 'hoch' ? 'destructive' : 'outline'}>{fibuOps.interestPressure}</Badge></CardContent>
         </Card>
@@ -226,7 +250,7 @@ export default function SchnittstellenCenterPage(): JSX.Element {
         </Card>
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm">Naechste Aktion</CardTitle></CardHeader>
-          <CardContent><div className="text-sm font-semibold">{fibuOps.nextAction}</div></CardContent>
+          <CardContent><div className="text-sm font-semibold">{connectorOps.readinessRisk !== 'niedrig' ? connectorOps.nextAction : fibuOps.nextAction}</div></CardContent>
         </Card>
       </div>
 

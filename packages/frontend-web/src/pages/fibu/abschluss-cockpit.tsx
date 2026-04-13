@@ -4,9 +4,13 @@ import { useQuery } from '@tanstack/react-query'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { apiClient } from '@/lib/api-client'
 import { useAccountingPeriods, useFibuCockpit } from '@/lib/api/fibu'
 import { summarizeFibuOps } from '@/lib/professional-control-centers'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 type CockpitChecklist = {
   id: string
@@ -55,6 +59,58 @@ export default function AbschlussCockpitPage(): JSX.Element {
   const blockers = useMemo(() => data.blockers, [data])
   const adjustingPeriods = periods.filter((period) => period.status === 'ADJUSTING').length
   const fibuOps = summarizeFibuOps(fibuCockpit, adjustingPeriods)
+  const operationalStatus = normalizeOperationalStatus(
+    blockers.length > 0 || fibuOps.reorgRisk === 'hoch'
+      ? 'eskaliert'
+      : !fibuCockpit.annual_close.ready_for_year_close || fibuOps.interestPressure === 'mittel'
+        ? 'wartet_auf_mensch'
+        : data.checklists.in_progress > 0
+          ? 'in_pruefung'
+          : 'abgeschlossen',
+  )
+  const contextSections = [
+    {
+      title: 'Periodenlage',
+      items: [
+        { label: 'Offen', value: String(data.periods.open) },
+        { label: 'Adjusting', value: String(data.periods.adjusting) },
+        { label: 'Geschlossen', value: String(data.periods.closed) },
+      ],
+    },
+    {
+      title: 'Operatorbild',
+      items: [
+        { label: 'Zinsdruck', value: fibuOps.interestPressure },
+        { label: 'Reorg-Risiko', value: fibuOps.reorgRisk },
+        { label: 'Naechste Aktion', value: fibuOps.nextAction },
+      ],
+    },
+    {
+      title: 'Revision',
+      items: [
+        { label: 'Exportlaeufe', value: String(fibuCockpit.revision.export_runs) },
+        { label: 'Letzter Eintrag', value: fibuCockpit.revision.last_entry_date || 'n/a' },
+        { label: 'Jahreswechsel', value: fibuCockpit.annual_close.ready_for_year_close ? 'bereit' : 'offen' },
+      ],
+    },
+  ]
+  const timelineItems = [
+    {
+      label: blockers.length > 0 ? 'Blocker im Abschluss' : 'Keine kritischen Blocker',
+      detail: blockers.length > 0 ? `${blockers.length} Checklisten oder Perioden mit Eskalationsbedarf.` : 'Aktuell kein Abschlussblocker in den letzten Checklisten.',
+      timestamp: blockers[0]?.updated_at || undefined,
+    },
+    {
+      label: adjustingPeriods > 0 ? 'Reorganisator aktiv' : 'Reorganisator ruhig',
+      detail: adjustingPeriods > 0 ? `${adjustingPeriods} Adjusting-Perioden sind in Nachbearbeitung.` : 'Keine offenen Adjusting-Perioden im aktuellen Ausschnitt.',
+    },
+    {
+      label: fibuCockpit.interest.candidate_count > 0 ? 'Zinskandidaten offen' : 'Zinslage unkritisch',
+      detail: fibuCockpit.interest.candidate_count > 0
+        ? `${fibuCockpit.interest.candidate_count} Zinskandidaten mit ${fibuCockpit.interest.candidate_amount.toFixed(0)} EUR Bezugsmenge.`
+        : 'Kein aktueller Zinsdruck im ausgewerteten Cockpit.',
+    },
+  ]
 
   if (isLoading) {
     return <div className="p-6 text-sm text-muted-foreground">Lade Abschluss-Cockpit...</div>
@@ -74,6 +130,22 @@ export default function AbschlussCockpitPage(): JSX.Element {
       <div>
         <h1 className="text-3xl font-bold">Abschluss-Cockpit</h1>
         <p className="text-muted-foreground">Status der Perioden und Abschluss-Checklisten inkl. Blocker-Uebersicht.</p>
+      </div>
+
+      <OperationalCaseHeader
+        title="FIBU-Operatorlauf"
+        description="Der Abschlussraum fuehrt Periodendruck, Reorganisator, Zinslage und Revisionspfad als einen Operatorfall."
+        status={operationalStatus}
+        owner="Finance Operations"
+        blocker={blockers.length > 0 ? `${blockers.length} Blocker bremsen den Abschluss oder die technische Nacharbeit.` : null}
+        nextAction={fibuOps.nextAction}
+        caseLabel={data.period || 'Laufender Abschluss'}
+        tags={['FIBU', 'Abschluss', 'Operator']}
+      />
+
+      <div className="grid gap-4 lg:grid-cols-[1.3fr_1fr]">
+        <OperationalTimeline title="Abschlussverlauf" items={timelineItems} />
+        <OperationalContextPanel title="FIBU-Kontext" sections={contextSections} />
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">

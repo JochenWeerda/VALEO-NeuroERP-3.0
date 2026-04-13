@@ -1,19 +1,19 @@
 # GAP-Analyse FiBU - Abgeschlossen
 
-**Datum:** 2025-11-24  
-**Basis:** FiBU Capability Model v1.0 (Lastenheft)  
-**Status:** ✅ Complete
+**Datum:** 2025-11-24
+**Basis:** FiBU Capability Model v1.0 (Lastenheft)
+**Status:** âœ… Complete
 
 ## Zusammenfassung
 
 ### Gesamt-Statistik
 
 - **Gesamt Capabilities:** 33
-- **Yes (Vollständig):** 1 (3%)
+- **Yes (VollstÃ¤ndig):** 1 (3%)
 - **Partial (Teilweise):** 15 (45%)
 - **No (Fehlend):** 17 (52%)
 
-### Nach Priorität (Lastenheft)
+### Nach PrioritÃ¤t (Lastenheft)
 
 **MUSS (15 Capabilities):**
 - Yes: 0
@@ -30,10 +30,10 @@
 - Partial: 0
 - No: 5
 
-## Kritische GAPs (P0 - Priorität 1)
+## Kritische GAPs (P0 - PrioritÃ¤t 1)
 
-1. **FIBU-AR-03: Zahlungseingänge & Matching** (No)
-   - Kein Payment-Match-UI, keine Bankimport-Funktionalität
+1. **FIBU-AR-03: ZahlungseingÃ¤nge & Matching** (No)
+   - Kein Payment-Match-UI, keine Bankimport-FunktionalitÃ¤t
    - Typ: C (Neues Feature/Modul)
    - Owner: Backend + Frontend
 
@@ -59,28 +59,28 @@
 - Status (Yes/Partial/No)
 - Evidence Screenshot IDs
 - Gap-Beschreibungen
-- Lösungstypen (A/B/C/D)
-- Prioritäten (1-5)
+- LÃ¶sungstypen (A/B/C/D)
+- PrioritÃ¤ten (1-5)
 - Baseline-ERP-Vergleich
 
 ### 2. GAP-Liste (`gap/gaps.md`)
 - Priorisierte Liste aller GAPs
 - Detaillierte Beschreibungen
 - Impact-Bewertungen
-- Lösungsvorschläge
+- LÃ¶sungsvorschlÃ¤ge
 - Owner-Zuordnungen
-- Vergleich mit SAP/Odoo
+- Vergleich mit SAP/Community ERP
 
-## Nächste Schritte
+## NÃ¤chste Schritte
 
 ### Sofort (P0)
-1. Zahlungseingänge & Matching implementieren
+1. ZahlungseingÃ¤nge & Matching implementieren
 2. Eingangsrechnungen-Modul implementieren
 3. Periodensteuerung implementieren
 4. Audit-Trail-UI implementieren
 
 ### Kurzfristig (P1)
-1. Alle Partial-Status GAPs prüfen und vervollständigen
+1. Alle Partial-Status GAPs prÃ¼fen und vervollstÃ¤ndigen
 2. OP-Verwaltung & Ausgleich (Kreditoren) implementieren
 3. Nebenbuch-Abstimmung implementieren
 
@@ -104,5 +104,6 @@
 - **Matrix:** `gap/matrix.csv`
 - **GAP-Liste:** `gap/gaps.md`
 - **Mission-Report:** `swarm/MISSION-REPORT.md`
+
 
 

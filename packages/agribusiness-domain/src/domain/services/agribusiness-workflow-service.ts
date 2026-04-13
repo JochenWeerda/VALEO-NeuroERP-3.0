@@ -1,7 +1,7 @@
-/**
+﻿/**
  * Agribusiness Workflow Service
  * Automated Workflows & Notifications for Agribusiness Operations
- * Based on Odoo automation patterns
+ * Based on Community ERP automation patterns
  */
 
 import { Farmer } from '../entities/farmer';
@@ -358,4 +358,5 @@ export class AgribusinessWorkflowService {
     this.workflowRules.delete(id);
   }
 }
+
 

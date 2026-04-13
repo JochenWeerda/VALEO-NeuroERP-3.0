@@ -1,7 +1,7 @@
-/**
+﻿/**
  * Agribusiness Integration Service
  * Cross-Domain Integration & API Management
- * Based on Odoo integration patterns
+ * Based on Community ERP integration patterns
  */
 
 export interface IntegrationEndpoint {
@@ -472,4 +472,5 @@ export class AgribusinessIntegrationService {
     return webhooks;
   }
 }
+
 

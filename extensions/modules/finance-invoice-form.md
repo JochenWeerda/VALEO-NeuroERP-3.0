@@ -1,13 +1,13 @@
 # Feature Implementation Plan - Finance Invoice Form
 
-**Erstellt:** 2025-11-24  
-**Basis:** GAP-FIN-002 (Create Invoice Formular unvollständig)  
-**Status:** Planned  
-**Priorität:** P0 (Kritisch)
+**Erstellt:** 2025-11-24
+**Basis:** GAP-FIN-002 (Create Invoice Formular unvollstÃ¤ndig)
+**Status:** Planned
+**PrioritÃ¤t:** P0 (Kritisch)
 
 ## Problem
 
-Das Create Invoice Formular zeigt nur 1 Feld (Suchfeld) und ist damit nicht funktionsfähig. Rechnungen können nicht erstellt werden.
+Das Create Invoice Formular zeigt nur 1 Feld (Suchfeld) und ist damit nicht funktionsfÃ¤hig. Rechnungen kÃ¶nnen nicht erstellt werden.
 
 ## Anforderungen
 
@@ -16,9 +16,9 @@ Das Create Invoice Formular zeigt nur 1 Feld (Suchfeld) und ist damit nicht funk
 1. **Grundinformationen**
    - Rechnungsnummer (automatisch generiert)
    - Rechnungsdatum (Standard: heute)
-   - Fälligkeitsdatum (basierend auf Zahlungsbedingungen)
+   - FÃ¤lligkeitsdatum (basierend auf Zahlungsbedingungen)
    - Kunde (Pflichtfeld, Suche/Auswahl)
-   - Rechnungsadresse (automatisch vom Kunden übernommen, editierbar)
+   - Rechnungsadresse (automatisch vom Kunden Ã¼bernommen, editierbar)
 
 2. **Positionen**
    - Artikel/Leistung (Pflichtfeld)
@@ -37,7 +37,7 @@ Das Create Invoice Formular zeigt nur 1 Feld (Suchfeld) und ist damit nicht funk
    - Summe MwSt
    - Summe Brutto
    - Zahlungsbedingungen (30 Tage netto, etc.)
-   - Zahlungsart (Überweisung, Lastschrift, etc.)
+   - Zahlungsart (Ãœberweisung, Lastschrift, etc.)
 
 4. **Aktionen**
    - Speichern (als Entwurf)
@@ -48,16 +48,16 @@ Das Create Invoice Formular zeigt nur 1 Feld (Suchfeld) und ist damit nicht funk
 ### Technische Anforderungen
 
 1. **Frontend**
-   - React-Komponente für Invoice-Formular
+   - React-Komponente fÃ¼r Invoice-Formular
    - Form-Validation (Zod Schema)
-   - Auto-Berechnung von Beträgen
+   - Auto-Berechnung von BetrÃ¤gen
    - Responsive Design
 
 2. **Backend**
    - API-Endpoint: `POST /api/v1/finance/invoices`
    - API-Endpoint: `GET /api/v1/finance/invoices/{id}`
    - API-Endpoint: `PUT /api/v1/finance/invoices/{id}`
-   - Datenbank-Schema für Invoices
+   - Datenbank-Schema fÃ¼r Invoices
 
 3. **Integration**
    - Kunden-Daten aus CRM-Modul
@@ -66,7 +66,7 @@ Das Create Invoice Formular zeigt nur 1 Feld (Suchfeld) und ist damit nicht funk
 
 ## Implementierungsplan
 
-### Phase 1: Backend API (Priorität: Hoch)
+### Phase 1: Backend API (PrioritÃ¤t: Hoch)
 
 1. **Datenbank-Schema**
    - Tabelle `invoices`
@@ -84,7 +84,7 @@ Das Create Invoice Formular zeigt nur 1 Feld (Suchfeld) und ist damit nicht funk
    - Betrags-Berechnung (Netto, MwSt, Brutto)
    - Validierung
 
-### Phase 2: Frontend Formular (Priorität: Hoch)
+### Phase 2: Frontend Formular (PrioritÃ¤t: Hoch)
 
 1. **Komponenten**
    - `InvoiceForm.tsx` - Hauptformular
@@ -93,7 +93,7 @@ Das Create Invoice Formular zeigt nur 1 Feld (Suchfeld) und ist damit nicht funk
    - `CustomerSelector.tsx` - Kunden-Auswahl
 
 2. **Form-Validation**
-   - Zod Schema für Invoice
+   - Zod Schema fÃ¼r Invoice
    - Client-side Validation
    - Error-Handling
 
@@ -103,23 +103,23 @@ Das Create Invoice Formular zeigt nur 1 Feld (Suchfeld) und ist damit nicht funk
    - Loading States
    - Success/Error Messages
 
-### Phase 3: Integration (Priorität: Mittel)
+### Phase 3: Integration (PrioritÃ¤t: Mittel)
 
 1. **Kunden-Integration**
    - Kunden-Suche aus CRM
    - Kunden-Daten laden
-   - Rechnungsadresse übernehmen
+   - Rechnungsadresse Ã¼bernehmen
 
 2. **Artikel-Integration**
    - Artikel-Suche aus Inventory
    - Artikel-Daten laden
-   - Preise übernehmen
+   - Preise Ã¼bernehmen
 
 3. **Steuer-Integration**
-   - MwSt-Sätze aus Steuer-Modul
+   - MwSt-SÃ¤tze aus Steuer-Modul
    - MwSt-Berechnung
 
-### Phase 4: Testing (Priorität: Hoch)
+### Phase 4: Testing (PrioritÃ¤t: Hoch)
 
 1. **Unit Tests**
    - Form-Validation
@@ -137,31 +137,31 @@ Das Create Invoice Formular zeigt nur 1 Feld (Suchfeld) und ist damit nicht funk
 ## Vergleich mit Referenz-Systemen
 
 ### SAP
-- Vollständiges Invoice-Formular mit allen Feldern
-- Auto-Berechnung von Beträgen
+- VollstÃ¤ndiges Invoice-Formular mit allen Feldern
+- Auto-Berechnung von BetrÃ¤gen
 - Integration mit Kunden, Artikeln, Steuern
-- Workflow (Entwurf → Gebucht)
+- Workflow (Entwurf â†’ Gebucht)
 
-### Odoo
-- Einfacheres Formular, aber vollständig
+### Community ERP
+- Einfacheres Formular, aber vollstÃ¤ndig
 - Auto-Berechnung
 - Integration mit anderen Modulen
-- Direktes Buchen möglich
+- Direktes Buchen mÃ¶glich
 
 ## Akzeptanzkriterien
 
 - [ ] Formular zeigt alle notwendigen Felder
 - [ ] Rechnung kann erstellt werden
-- [ ] Beträge werden automatisch berechnet
-- [ ] Kunde kann ausgewählt werden
-- [ ] Positionen können hinzugefügt/entfernt werden
+- [ ] BetrÃ¤ge werden automatisch berechnet
+- [ ] Kunde kann ausgewÃ¤hlt werden
+- [ ] Positionen kÃ¶nnen hinzugefÃ¼gt/entfernt werden
 - [ ] Rechnung kann gespeichert werden
 - [ ] Rechnung kann gebucht werden
 - [ ] Validierung funktioniert korrekt
 - [ ] Integration mit Kunden funktioniert
 - [ ] Integration mit Artikeln funktioniert
 
-## Geschätzter Aufwand
+## GeschÃ¤tzter Aufwand
 
 - **Backend Modul:** 2-3 Tage
 - **Frontend Formular:** 3-4 Tage
@@ -169,7 +169,7 @@ Das Create Invoice Formular zeigt nur 1 Feld (Suchfeld) und ist damit nicht funk
 - **Testing:** 2-3 Tage
 - **Gesamt:** 9-13 Tage
 
-## Nächste Schritte
+## NÃ¤chste Schritte
 
 1. **Backend-Entwickler:** Beginne mit Datenbank-Schema und API-Endpoints
 2. **Frontend-Entwickler:** Beginne mit Formular-Komponenten
@@ -181,5 +181,6 @@ Das Create Invoice Formular zeigt nur 1 Feld (Suchfeld) und ist damit nicht funk
 - Test-Plan: `specs/finance.md` (TC-FIN-003)
 - Handoff-Notiz: `swarm/handoffs/ui-explorer-finance-2025-11-24T08-51-19.344194.md`
 - Screenshot: `evidence/screenshots/finance/20251124_095108_05_create_invoice_form.png`
+
 
 

@@ -42,7 +42,7 @@ Alle Schritte aus dem Blueprint wurden erfolgreich umgesetzt.
 - Global Setup mit App-Ready-Check
 
 ### 7. GAP-Analyse Templates ✅
-- `gap/capability-model.md` - ERP-Referenztaxonomie (SAP/Oracle/Odoo-Level)
+- `gap/capability-model.md` - ERP-Referenztaxonomie (SAP/Oracle/Community-ERP-Level)
 - `gap/matrix.csv` - Capability-Matrix Template
 - `gap/gaps.md` - GAP-Liste Template mit Priorisierung
 

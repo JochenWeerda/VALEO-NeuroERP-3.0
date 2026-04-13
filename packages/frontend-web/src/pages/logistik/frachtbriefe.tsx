@@ -6,10 +6,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import { summarizeSupplyTransfer } from '@/lib/domain-depth'
 import { FileDown, FileText, Plus, Search } from 'lucide-react'
 import { useFrachtbriefe, type Frachtbrief } from '@/lib/api/misc-modules'
 import { useSupplyChainOverview } from '@/lib/api/supply-chain'
 import { summarizeSupplyOps } from '@/lib/professional-control-centers'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 export default function FrachtbriefePage(): JSX.Element {
   const navigate = useNavigate()
@@ -18,6 +23,7 @@ export default function FrachtbriefePage(): JSX.Element {
   const { data: frachtbriefe, isLoading } = useFrachtbriefe()
   const list = useMemo(() => frachtbriefe ?? [], [frachtbriefe])
   const supplyOps = useMemo(() => summarizeSupplyOps(chain), [chain])
+  const transferSummary = useMemo(() => summarizeSupplyTransfer(chain), [chain])
 
   const fallkopf = useMemo(() => {
     const unterwegs = list.filter((f) => f.status === 'unterwegs').length
@@ -83,17 +89,70 @@ export default function FrachtbriefePage(): JSX.Element {
     )
   }
 
+  const operationalStatus = normalizeOperationalStatus(
+    list.some((f) => f.status === 'erstellt')
+      ? 'wartet_auf_mensch'
+      : list.some((f) => f.status === 'unterwegs')
+        ? 'in_pruefung'
+        : 'offen',
+  )
+  const contextSections = [
+    {
+      title: 'Frachtlage',
+      items: [
+        { label: 'Frachtbriefe gesamt', value: `${list.length}` },
+        { label: 'Unterwegs', value: `${list.filter((f) => f.status === 'unterwegs').length}` },
+        { label: 'Erstellt', value: `${list.filter((f) => f.status === 'erstellt').length}` },
+      ],
+    },
+    {
+      title: 'Objektkette',
+      items: [
+        { label: 'Wartende Annahmen', value: `${chain.waitingInbound}` },
+        { label: 'Offene Wiegungen', value: `${chain.openWeighingTickets}` },
+        { label: 'Gesperrte Chargen', value: `${chain.blockedCharges}` },
+      ],
+    },
+    {
+      title: 'Naechster Schritt',
+      items: [
+        { label: 'Frachtoperator', value: fallkopf.naechsteAktion },
+        { label: 'Kettenblick', value: transferSummary.nextAction },
+        { label: 'Bottleneck', value: supplyOps.bottleneck },
+      ],
+    },
+  ]
+  const timelineItems = [
+    {
+      label: list.some((f) => f.status === 'erstellt') ? 'Versandfaehige Frachtbriefe offen' : 'Kein offener Versand',
+      detail: `${list.filter((f) => f.status === 'erstellt').length} Dokumente warten auf Versand.`,
+    },
+    {
+      label: list.some((f) => f.status === 'unterwegs') ? 'Transporte unterwegs' : 'Keine Transporte unterwegs',
+      detail: `${list.filter((f) => f.status === 'unterwegs').length} Frachtbriefe sind in Transit.`,
+    },
+    {
+      label: 'Physische Kette',
+      detail: transferSummary.nextAction,
+    },
+  ]
+
   return (
     <div className="space-y-4 p-3 md:p-6">
-      {/* Operativer Fallkopf */}
-      <Card className={`border ${fallkopf.statusColor}`}>
-        <CardContent className="pt-4 pb-3 text-sm space-y-1">
-          <div className="font-semibold">Frachtbriefe: {fallkopf.status}</div>
-          <div>Blocker: {fallkopf.blocker}</div>
-          <div>Dokumentdruck: {fallkopf.dokumentdruck}</div>
-          <div>Naechste Aktion: {fallkopf.naechsteAktion}</div>
-        </CardContent>
-      </Card>
+      <OperationalCaseHeader
+        title="Frachtbriefe steuern"
+        description="Versandstatus, Dokumentdruck und physische Kettenlage bleiben oben als ein kompakter Frachtfall sichtbar."
+        status={operationalStatus}
+        owner="Logistik / Disposition"
+        blocker={fallkopf.blocker !== 'Kein Blocker' ? fallkopf.blocker : null}
+        nextAction={fallkopf.naechsteAktion}
+        caseLabel="Frachtfall"
+        tags={['Logistik', 'Fracht']}
+      />
+      <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+        <OperationalTimeline title="Frachtverlauf" items={timelineItems} />
+        <OperationalContextPanel title="Frachtkontext" sections={contextSections} />
+      </div>
 
       <div className="flex items-center justify-between">
         <div>
@@ -141,6 +200,11 @@ export default function FrachtbriefePage(): JSX.Element {
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Bottleneck</CardTitle></CardHeader><CardContent><div className="text-2xl font-semibold">{supplyOps.bottleneck}</div></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Druck</CardTitle></CardHeader><CardContent><Badge variant={supplyOps.pressure === 'hoch' ? 'destructive' : 'outline'}>{supplyOps.pressure}</Badge></CardContent></Card>
         <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Naechste Aktion</CardTitle></CardHeader><CardContent><div className="text-sm font-semibold">{supplyOps.nextAction}</div></CardContent></Card>
+      </div>
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Uebergabedruck</CardTitle></CardHeader><CardContent><Badge variant={transferSummary.transferPressure === 'hoch' ? 'destructive' : 'outline'}>{transferSummary.transferPressure}</Badge></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Offene Kettenpunkte</CardTitle></CardHeader><CardContent><div className="text-2xl font-semibold">{transferSummary.handoverRisk}</div></CardContent></Card>
+        <Card><CardHeader className="pb-2"><CardTitle className="text-sm font-medium">Naechster Kettenpfad</CardTitle></CardHeader><CardContent><div className="text-sm font-semibold">{transferSummary.nextAction}</div></CardContent></Card>
       </div>
 
       <Card>

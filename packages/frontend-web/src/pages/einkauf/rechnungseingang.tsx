@@ -12,9 +12,12 @@ import {
   useRechnungseingangVerbuchen,
 } from '@/lib/api/einkauf'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import { summarizeProcurementMatch } from '@/lib/domain-depth'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 const createRechnungseingangConfig = (t: any, entityTypeLabel: string): MaskConfig => ({
@@ -334,6 +337,12 @@ export default function RechnungseingangPage(): JSX.Element {
 
   const status = (data?.status as string) || ''
   const statusUpper = status.toUpperCase()
+  const procurementOps = summarizeProcurementMatch({
+    exceptionsCount: Array.isArray(data?.abweichungen) ? data.abweichungen.length : 0,
+    variancePercentage: data?.matchStatus === 'MATCHED' ? 0 : data?.matchStatus === 'PARTIAL' ? 5 : data?.matchStatus === 'EXCEPTION' ? 12 : 8,
+    autoApprovalEligible: statusUpper === 'GEPRUEFT' || statusUpper === 'FREIGEGEBEN' || statusUpper === 'VERBUCHT',
+    hasGoodsReceipt: Boolean(data?.wareneingangId),
+  })
   const operationalStatus = normalizeOperationalStatus(status)
   const operationalBlocker = data?.matchStatus === 'EXCEPTION' || data?.matchStatus === 'UNMATCHED'
     ? 'Der Rechnungsabgleich meldet offene Abweichungen. Vor Freigabe ist fachliche Klaerung erforderlich.'
@@ -483,21 +492,27 @@ export default function RechnungseingangPage(): JSX.Element {
             status={operationalStatus}
             owner="Einkauf / FIBU"
             blocker={operationalBlocker}
-            nextAction={
-              ENTWURF_STATUSES.includes(statusUpper)
-                ? 'Rechnung pruefen'
-                : statusUpper === 'GEPRUEFT'
-                  ? 'Freigeben'
-                  : statusUpper === 'FREIGEGEBEN'
-                    ? 'Verbuchen'
-                    : 'Vorgang revisionssicher nachhalten'
-            }
+            nextAction={procurementOps.nextAction}
             caseLabel={data.rechnungsNummer || 'Rechnungseingang'}
             tags={['Einkauf', 'FIBU']}
           />
           <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
             <OperationalTimeline title="Verlauf" items={timelineItems} />
             <OperationalContextPanel title="Rechnungskontext" sections={contextSections} />
+          </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            <Card>
+              <CardHeader className="pb-2"><CardTitle className="text-sm">Abweichungsdruck</CardTitle></CardHeader>
+              <CardContent><Badge variant={procurementOps.exceptionPressure === 'hoch' ? 'destructive' : 'outline'}>{procurementOps.exceptionPressure}</Badge></CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2"><CardTitle className="text-sm">Wareneingangsbezug</CardTitle></CardHeader>
+              <CardContent><div className="text-sm font-semibold">{data.wareneingangId ? 'verknuepft' : 'offen'}</div></CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2"><CardTitle className="text-sm">Naechste Fallaktion</CardTitle></CardHeader>
+              <CardContent><div className="text-sm font-semibold">{procurementOps.nextAction}</div></CardContent>
+            </Card>
           </div>
         </div>
       ) : null}

@@ -1,13 +1,18 @@
 import { useMemo, useState } from 'react'
 import { useDokumenteAblage, type Dokument } from '@/lib/api/betrieb'
 import { buildDocumentRecord, buildDocumentWorkspace } from '@/lib/professional-workspaces'
+import { summarizeDocumentEvidence } from '@/lib/domain-depth'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { DataTable } from '@/components/ui/data-table'
 import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { AlertTriangle, FileDown, FileText, Search, Upload } from 'lucide-react'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 function LoadingSkeleton(): JSX.Element {
   return (
@@ -77,6 +82,7 @@ export default function DokumentenAblagePage(): JSX.Element {
     [documentRecords, filteredDokumente],
   )
   const workspace = useMemo(() => buildDocumentWorkspace(filteredRecords), [filteredRecords])
+  const evidenceSummary = useMemo(() => summarizeDocumentEvidence(filteredRecords), [filteredRecords])
 
   if (isError && !isLoading) {
     return <ErrorState error={error} onRetry={refetch} />
@@ -135,9 +141,49 @@ export default function DokumentenAblagePage(): JSX.Element {
   ]
 
   const gesamtGroesse = filteredDokumente.reduce((sum, dokument) => sum + dokument.groesse, 0)
+  const operationalStatus = normalizeOperationalStatus(
+    evidenceSummary.evidenceRisk === 'hoch' ? 'eskaliert' : filteredRecords.length > 0 ? 'in_pruefung' : 'offen',
+  )
+  const contextSections = [
+    {
+      title: 'Nachweislage',
+      items: [
+        { label: 'Nachweisrelevant', value: `${workspace.evidenceCount}` },
+        { label: 'Wiedervorlagen', value: `${workspace.followUpCount}` },
+        { label: 'Ohne Objektbezug', value: `${evidenceSummary.unassignedCount}` },
+      ],
+    },
+    {
+      title: 'Vorgangsbezug',
+      items: [
+        { label: 'Workflow-Belege', value: `${workspace.workflowCount}` },
+        { label: 'Naechste Aktion', value: evidenceSummary.nextAction },
+        { label: 'Arbeitsbild', value: workspace.nextAction },
+      ],
+    },
+  ]
+  const timelineItems = [
+    { label: filteredRecords.length > 0 ? 'Dokumentraum geladen' : 'Noch keine Dokumente', detail: `${filteredRecords.length} Dokumente im aktuellen Filterraum.` },
+    { label: workspace.latestDate ? 'Letzte Dokumentbewegung vorhanden' : 'Noch keine Bewegung', detail: workspace.latestDate ? new Date(workspace.latestDate).toLocaleDateString('de-DE') : 'Kein letzter Eingang vorhanden.' },
+    { label: 'Naechster Nachweisschritt', detail: evidenceSummary.nextAction },
+  ]
 
   return (
     <div className="space-y-4 p-6">
+      <OperationalCaseHeader
+        title="Dokumenten-Nachweise steuern"
+        description="Nachweisrisiko, Wiedervorlagen und fehlender Objektbezug bleiben ueber der Ablage als ein Fall sichtbar."
+        status={operationalStatus}
+        owner="Dokumentenablage / Fachbereich"
+        blocker={evidenceSummary.unassignedCount > 0 ? 'Ein Teil der Dokumente ist noch keinem fachlichen Objekt sauber zugeordnet.' : null}
+        nextAction={evidenceSummary.nextAction}
+        caseLabel="Dokumenten-Nachweisfall"
+        tags={['Dokumente', 'Nachweis']}
+      />
+      <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+        <OperationalTimeline title="Nachweisverlauf" items={timelineItems} />
+        <OperationalContextPanel title="Nachweiskontext" sections={contextSections} />
+      </div>
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Dokumenten-Ablage</h1>
@@ -173,6 +219,32 @@ export default function DokumentenAblagePage(): JSX.Element {
           </CardHeader>
           <CardContent>
             <span className="text-2xl font-bold">{workspace.evidenceCount}</span>
+          </CardContent>
+        </Card>
+      </div>
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Nachweisrisiko</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-lg font-semibold">{evidenceSummary.evidenceRisk}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Ohne Objektbezug</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{evidenceSummary.unassignedCount}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Naechster Nachweisschritt</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-sm font-semibold">{evidenceSummary.nextAction}</div>
           </CardContent>
         </Card>
       </div>

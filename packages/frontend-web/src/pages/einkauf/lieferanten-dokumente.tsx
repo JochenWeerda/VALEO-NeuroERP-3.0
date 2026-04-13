@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { buildDocumentRecord, buildDocumentWorkspace } from '@/lib/professional-workspaces'
+import { summarizeDocumentEvidence } from '@/lib/domain-depth'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -13,6 +14,10 @@ import {
   useSupplierDocuments,
   type SupplierDocument,
 } from '@/lib/api/procurement-plus'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
+import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 export default function LieferantenDokumentePage(): JSX.Element {
   const [supplierId, setSupplierId] = useState('')
@@ -43,6 +48,7 @@ export default function LieferantenDokumentePage(): JSX.Element {
     [data, supplierId],
   )
   const workspace = useMemo(() => buildDocumentWorkspace(documentRecords), [documentRecords])
+  const evidenceSummary = useMemo(() => summarizeDocumentEvidence(documentRecords), [documentRecords])
 
   if (isError) {
     return <ErrorState error={error as Error} onRetry={() => { void refetch() }} />
@@ -59,8 +65,49 @@ export default function LieferantenDokumentePage(): JSX.Element {
     await deleteDoc.mutateAsync(docId)
   }
 
+  const operationalStatus = normalizeOperationalStatus(
+    evidenceSummary.evidenceRisk === 'hoch' ? 'eskaliert' : supplierId ? 'in_pruefung' : 'offen',
+  )
+  const contextSections = [
+    {
+      title: 'Lieferantenfall',
+      items: [
+        { label: 'Lieferant', value: supplierId || 'Noch offen' },
+        { label: 'Dokumente', value: `${workspace.total}` },
+        { label: 'Nachweis / Wiedervorlage', value: `${workspace.evidenceCount + workspace.followUpCount}` },
+      ],
+    },
+    {
+      title: 'Nachweis',
+      items: [
+        { label: 'Ohne Objektbezug', value: `${evidenceSummary.unassignedCount}` },
+        { label: 'Naechste Aktion', value: evidenceSummary.nextAction },
+        { label: 'Arbeitsbild', value: workspace.nextAction },
+      ],
+    },
+  ]
+  const timelineItems = [
+    { label: supplierId ? 'Lieferantenkontext aktiv' : 'Noch kein Lieferant gewaehlt', detail: supplierId || 'Bitte Supplier ID fuer den Vorgang setzen.' },
+    { label: workspace.total > 0 ? 'Dokumentbestand geladen' : 'Noch keine Dokumente', detail: `${workspace.total} Dokumente im aktuellen Lieferantenfall.` },
+    { label: 'Folgepfad', detail: evidenceSummary.nextAction },
+  ]
+
   return (
     <div className="space-y-6 p-3 md:p-6">
+      <OperationalCaseHeader
+        title="Lieferanten-Dokumente steuern"
+        description="Lieferantenbelege, Nachweise und Wiedervorlagen werden als Beschaffungsfolgefall verdichtet."
+        status={operationalStatus}
+        owner="Einkauf"
+        blocker={evidenceSummary.unassignedCount > 0 ? 'Ein Teil der Dokumente ist noch keinem fachlichen Objekt sauber zugeordnet.' : null}
+        nextAction={evidenceSummary.nextAction}
+        caseLabel={supplierId ? `Lieferant ${supplierId}` : 'Lieferanten-Dokumente'}
+        tags={['Einkauf', 'Dokumente']}
+      />
+      <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
+        <OperationalTimeline title="Dokumentverlauf" items={timelineItems} />
+        <OperationalContextPanel title="Lieferantenkontext" sections={contextSections} />
+      </div>
       <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
         <Card>
           <CardHeader>

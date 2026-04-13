@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+﻿#!/usr/bin/env python
 """
 Vereinfachte Version des Skripts zum Aktivieren des REFLECT-ARCHIVE-Mode und Befuellen der MongoDB.
 """
@@ -152,7 +152,7 @@ Das AI_driven_ERP-Projekt ist ein KI-gestuetztes ERP-System mit Fokus auf Stammd
 ## Naechste Schritte
 1. Vervollstaendigung der Dashboard-Implementierung fuer VALERO Enterprise Suite
 2. Entwicklung der Modelle fuer die Geschaeftslogik
-3. Integration der Module mit bestehenden Odoo-Funktionen
+3. Integration der Module mit bestehenden Community ERP-Funktionen
 4. Testen der Module unter realen Bedingungen
 
 ## Archivierte Artefakte
@@ -339,3 +339,4 @@ def main():
 
 if __name__ == "__main__":
     sys.exit(main())
+

@@ -3,12 +3,15 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { ObjectPage } from '@/components/mask-builder'
 import { useMaskData } from '@/components/mask-builder/hooks'
 import { MaskConfig } from '@/components/mask-builder/types'
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from '@/hooks/use-toast'
 import { apiClient } from '@/lib/api-client'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
+import { summarizeProcurementMatch } from '@/lib/domain-depth'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
 
 const anlieferavisConfig: MaskConfig = {
@@ -137,6 +140,12 @@ export default function AnlieferavisPage(): JSX.Element {
     stornieren: 'cancel',
   }
   const operationalStatus = normalizeOperationalStatus(data?.status)
+  const avisOps = summarizeProcurementMatch({
+    exceptionsCount: Array.isArray(data?.positionen) ? data.positionen.filter((row: any) => !row?.chargenNummer).length : 0,
+    variancePercentage: data?.status === 'STORNIERT' ? 12 : data?.status === 'BESTAETIGT' ? 0 : 5,
+    autoApprovalEligible: data?.status === 'BESTAETIGT',
+    hasGoodsReceipt: Boolean(data?.bestellungId),
+  })
   const operationalBlocker = data?.status === 'STORNIERT'
     ? 'Das Avis ist storniert. Fuer weitere Schritte braucht es ein neues oder korrigiertes Avis.'
     : !data?.bestellungId
@@ -175,13 +184,27 @@ export default function AnlieferavisPage(): JSX.Element {
         status={operationalStatus}
         owner="Einkauf / Wareneingang"
         blocker={operationalBlocker}
-        nextAction={data?.status === 'BESTAETIGT' ? 'Wareneingang vorbereiten' : 'Avis senden oder bestaetigen'}
+        nextAction={avisOps.nextAction}
         caseLabel={String(data?.avisNummer ?? 'Anlieferavis')}
         tags={['Einkauf', 'Logistik']}
       />
       <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
         <OperationalTimeline title="Avisverlauf" items={timelineItems} />
         <OperationalContextPanel title="Aviskontext" sections={contextSections} />
+      </div>
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm">Abweichungsdruck</CardTitle></CardHeader>
+          <CardContent><Badge variant={avisOps.exceptionPressure === 'hoch' ? 'destructive' : 'outline'}>{avisOps.exceptionPressure}</Badge></CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm">Positionsreife</CardTitle></CardHeader>
+          <CardContent><div className="text-sm font-semibold">{Array.isArray(data?.positionen) ? `${data.positionen.length} Positionen` : 'noch offen'}</div></CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-sm">Naechste Fallaktion</CardTitle></CardHeader>
+          <CardContent><div className="text-sm font-semibold">{avisOps.nextAction}</div></CardContent>
+        </Card>
       </div>
       <ObjectPage
         config={anlieferavisConfig}

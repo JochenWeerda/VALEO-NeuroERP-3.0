@@ -1,7 +1,7 @@
-/**
+﻿/**
  * Agribusiness Compliance Service
  * Compliance & Audit Management for Agribusiness Operations
- * Based on Odoo compliance patterns
+ * Based on Community ERP compliance patterns
  */
 
 import { Farmer } from '../entities/farmer';
@@ -480,4 +480,5 @@ export class AgribusinessComplianceService {
     return report;
   }
 }
+
 

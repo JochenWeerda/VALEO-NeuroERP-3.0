@@ -24,6 +24,7 @@ import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHead
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
+import { summarizeCustomerOperations } from '@/lib/domain-depth'
 import { ArrowLeft, CheckCircle, ClipboardList, FileText, Loader2, Save, Wrench } from 'lucide-react'
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -160,6 +161,12 @@ export default function AnfrageDetailPage(): JSX.Element {
     { label: 'Aktueller Bearbeitungsstand', detail: merged.status === 'neu' ? 'Erstpruefung offen' : merged.status === 'in-bearbeitung' ? 'Bearbeitung laeuft' : 'Fachlich erledigt' },
     ...(workflowContext?.instanceId ? [{ label: 'Workflow-Handover', detail: workflowContext.label || workflowContext.process || undefined }] : []),
   ]
+  const serviceOps = summarizeCustomerOperations({
+    duplicateCount: 0,
+    hasOwner: true,
+    hasReachableContact: Boolean(merged.kunde),
+    nextActions: merged.status === 'erledigt' ? 1 : 2,
+  })
 
   return (
     <div className="space-y-6 p-6">
@@ -230,6 +237,20 @@ export default function AnfrageDetailPage(): JSX.Element {
         <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
           <OperationalTimeline title="Fallverlauf" items={timelineItems} />
           <OperationalContextPanel title="Servicekontext" sections={contextSections} />
+        </div>
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card>
+            <CardHeader className="pb-2"><CardTitle className="text-sm">Ownership-Rahmen</CardTitle></CardHeader>
+            <CardContent><div className="text-lg font-semibold">{serviceOps.ownershipRisk}</div></CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2"><CardTitle className="text-sm">Naechste Aktion</CardTitle></CardHeader>
+            <CardContent><div className="text-sm font-semibold">{serviceOps.nextAction}</div></CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2"><CardTitle className="text-sm">Folgeobjekte</CardTitle></CardHeader>
+            <CardContent><div className="text-sm text-muted-foreground">{merged.status === 'erledigt' ? 'Abschluss, Dokumentation, Kundenzufriedenheit' : 'Rueckmeldung, Aussendienst, Dokumente'}</div></CardContent>
+          </Card>
         </div>
       </div>
 

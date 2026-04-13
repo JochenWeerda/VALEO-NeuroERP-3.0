@@ -8,7 +8,7 @@ Die Datei `.env.swarm` ist bereits erstellt mit Standard-Credentials:
 - User: `admin`
 - Pass: `admin123`
 
-Falls du andere Credentials benötigst, bearbeite `.env.swarm`:
+Falls du andere Credentials benÃ¶tigst, bearbeite `.env.swarm`:
 
 ```bash
 # .env.swarm bearbeiten
@@ -33,11 +33,11 @@ export NEUROERP_USER=admin
 export NEUROERP_PASS=admin123
 ```
 
-## Schritt 2: Frontend starten (falls nicht bereits läuft)
+## Schritt 2: Frontend starten (falls nicht bereits lÃ¤uft)
 
 ### Option A: Bestehendes Frontend nutzen
 
-Wenn das Frontend bereits auf `localhost:3000` läuft, kannst du es direkt nutzen.
+Wenn das Frontend bereits auf `localhost:3000` lÃ¤uft, kannst du es direkt nutzen.
 
 **Wichtig:** Stelle sicher, dass der Health-Endpoint funktioniert:
 ```bash
@@ -46,7 +46,7 @@ curl http://localhost:3000/health
 curl http://localhost:3000/health.html
 ```
 
-### Option B: Neues Frontend für Swarm starten
+### Option B: Neues Frontend fÃ¼r Swarm starten
 
 ```bash
 # Frontend im Swarm-Netzwerk starten (Port 3001)
@@ -63,7 +63,7 @@ docker compose -f docker-compose.swarm.yml logs -f neuroerp-frontend
 NEUROERP_URL=http://localhost:3001
 ```
 
-## Schritt 3: UI-Explorer ausführen
+## Schritt 3: UI-Explorer ausfÃ¼hren
 
 ### Mit Docker (empfohlen)
 
@@ -82,7 +82,7 @@ docker compose -f docker-compose.swarm.yml logs -f neuroerp-ui-explorer
 # Python-Dependencies installieren
 pip install -r swarm/requirements.ui-explorer.txt
 
-# UI-Explorer ausführen
+# UI-Explorer ausfÃ¼hren
 python swarm/ui_explorer.py
 ```
 
@@ -90,12 +90,12 @@ python swarm/ui_explorer.py
 - Screenshots in `/evidence/screenshots/`
 - Handoff-Notizen in `/swarm/handoffs/`
 
-## Schritt 4: Tests generieren und ausführen
+## Schritt 4: Tests generieren und ausfÃ¼hren
 
 ### Playwright Tests
 
 ```bash
-# Tests mit Swarm-Config ausführen
+# Tests mit Swarm-Config ausfÃ¼hren
 npx playwright test --config=playwright.swarm.config.ts
 
 # Oder mit Docker:
@@ -106,50 +106,50 @@ docker compose -f docker-compose.swarm.yml up neuroerp-tests
 - Test-Results in `/evidence/traces/`
 - HTML-Reports in `/evidence/traces/html-report/`
 
-### Playwright Agentic Testing (Planner → Generator → Healer)
+### Playwright Agentic Testing (Planner â†’ Generator â†’ Healer)
 
 ```bash
 # 1. Test-Plan erstellen (aus UI-Explorer Handoff)
-# Im Cursor-Chat: "Nutze Playwright planner agent. Erstelle Testplan für /swarm/handoffs/ui-explorer-finance.md"
+# Im Cursor-Chat: "Nutze Playwright planner agent. Erstelle Testplan fÃ¼r /swarm/handoffs/ui-explorer-finance.md"
 
 # 2. Tests generieren
 # Im Cursor-Chat: "Nutze generator agent, verwandle /specs/finance.md in Playwright-Tests"
 
-# 3. Tests ausführen und heilen
+# 3. Tests ausfÃ¼hren und heilen
 npx playwright test --config=playwright.swarm.config.ts
 # Healer repariert automatisch flaky/failing tests
 ```
 
-## Schritt 5: GAP-Analyse durchführen
+## Schritt 5: GAP-Analyse durchfÃ¼hren
 
 ### 1. Evidence sammeln
 
-- Prüfe Screenshots in `/evidence/screenshots/`
-- Prüfe Handoff-Notizen in `/swarm/handoffs/`
-- Prüfe Test-Traces in `/evidence/traces/`
+- PrÃ¼fe Screenshots in `/evidence/screenshots/`
+- PrÃ¼fe Handoff-Notizen in `/swarm/handoffs/`
+- PrÃ¼fe Test-Traces in `/evidence/traces/`
 
-### 2. Matrix ausfüllen
+### 2. Matrix ausfÃ¼llen
 
-Öffne `gap/matrix.csv` und fülle für jede Capability:
+Ã–ffne `gap/matrix.csv` und fÃ¼lle fÃ¼r jede Capability:
 - **NeuroERP Status**: Yes / Partial / No / ?
 - **Evidence Screenshot IDs**: Links zu Screenshots
 - **Notes**: Beschreibung
-- **Comparable ERP baseline**: SAP-ähnlich / Odoo-ähnlich / Basic
+- **Comparable ERP baseline**: SAP-Ã¤hnlich / Community ERP-Ã¤hnlich / Basic
 
 ### 3. GAP-Liste erstellen
 
-Öffne `gap/gaps.md` und erstelle priorisierte Liste:
+Ã–ffne `gap/gaps.md` und erstelle priorisierte Liste:
 - **GAP-ID**: Eindeutige ID
 - **Status**: Missing / Partial / Basic
-- **Priorität**: P0 (Kritisch) / P1 (Hoch) / P2 (Mittel) / P3 (Niedrig)
+- **PrioritÃ¤t**: P0 (Kritisch) / P1 (Hoch) / P2 (Mittel) / P3 (Niedrig)
 - **Typ**: A (Config) / B (Integration) / C (Module) / D (UX)
 
-### 4. Automatisierte Vor-Befüllung (optional)
+### 4. Automatisierte Vor-BefÃ¼llung (optional)
 
 Im Cursor-Chat:
 ```
-Nimm Evidence aus /evidence/screenshots und /swarm/handoffs/*. 
-Fülle gap/matrix.csv nach Capability-Modell. 
+Nimm Evidence aus /evidence/screenshots und /swarm/handoffs/*.
+FÃ¼lle gap/matrix.csv nach Capability-Modell.
 Markiere Unsicherheiten mit ?.
 ```
 
@@ -158,13 +158,13 @@ Markiere Unsicherheiten mit ?.
 ### Frontend nicht erreichbar
 
 ```bash
-# Prüfe ob Frontend läuft
+# PrÃ¼fe ob Frontend lÃ¤uft
 curl http://localhost:3000/health
 
-# Prüfe Docker-Logs
+# PrÃ¼fe Docker-Logs
 docker compose -f docker-compose.swarm.yml logs neuroerp-frontend
 
-# Prüfe ob Port belegt ist
+# PrÃ¼fe ob Port belegt ist
 netstat -ano | findstr :3000  # Windows
 lsof -i :3000  # Linux/Mac
 ```
@@ -172,31 +172,31 @@ lsof -i :3000  # Linux/Mac
 ### UI-Explorer Fehler
 
 ```bash
-# Prüfe Python-Dependencies
+# PrÃ¼fe Python-Dependencies
 pip list | grep browser-use
 
-# Prüfe ENV-Variablen
+# PrÃ¼fe ENV-Variablen
 echo $NEUROERP_URL  # Linux/Mac
 echo $env:NEUROERP_URL  # Windows PowerShell
 
-# Prüfe Docker-Logs
+# PrÃ¼fe Docker-Logs
 docker compose -f docker-compose.swarm.yml logs neuroerp-ui-explorer
 ```
 
 ### Tests schlagen fehl
 
 ```bash
-# Prüfe Traces
+# PrÃ¼fe Traces
 ls evidence/traces/
 
-# Prüfe Screenshots
+# PrÃ¼fe Screenshots
 ls evidence/screenshots/
 
 # Tests mit Debug-Output
 npx playwright test --config=playwright.swarm.config.ts --debug
 ```
 
-## Nächste Schritte nach Quickstart
+## NÃ¤chste Schritte nach Quickstart
 
 1. **Weitere Module explorieren**
    - Erstelle neue Missions in `/swarm/missions/`
@@ -207,10 +207,10 @@ npx playwright test --config=playwright.swarm.config.ts --debug
    - Erstelle weitere Tests in `/tests/e2e/`
 
 3. **GAP-Analyse vertiefen**
-   - Fülle `gap/matrix.csv` vollständig aus
-   - Priorisiere Lücken in `gap/gaps.md`
+   - FÃ¼lle `gap/matrix.csv` vollstÃ¤ndig aus
+   - Priorisiere LÃ¼cken in `gap/gaps.md`
 
-4. **Lücken schließen**
+4. **LÃ¼cken schlieÃŸen**
    - Feature-Engineer arbeitet GAP-Liste ab
    - Code in `/extensions/` erstellen
 
@@ -219,5 +219,6 @@ npx playwright test --config=playwright.swarm.config.ts --debug
 - **Swarm README**: `swarm/README.md`
 - **Setup-Status**: `SWARM-SETUP-COMPLETE.md`
 - **Cursor Rules**: `.cursorrules`
+
 
 
