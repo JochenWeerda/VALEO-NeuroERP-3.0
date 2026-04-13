@@ -100,10 +100,11 @@ Archiv des vorherigen Boards:
 ## COV-FIN-002
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** in arbeit
 **Ziel des Slices:** Coverage-Tiefe fuer FIBU-Kernpfade aufbauen: Journal, Zahlungslaeufe, DATEV/ELSTER-nahe Follow-up-Logik und Abschlusskontext.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `tests/**`, relevante Finance-/FIBU-Services und Endpunkte
 **Abnahmekriterien:** Kritische FIBU-Kernpfade besitzen gezielte Tests statt nur allgemeiner Gesamtquote; Ratchet kann fuer Finance spaeter angehoben werden.
+**Fortschritt:** Start auf den API-/Service-Kern fuer Follow-up, Mahnwesen, Lastschrift- und Kassenexport sowie FIBU-nahe Exportpersistenz; Ziel ist erst belastbare Pfadabdeckung, dann ein Finance-spezifischer Ratchet.
 
 ## COV-INV-002
 
