@@ -19,6 +19,8 @@ import { KeyboardShortcutBar } from "@/components/keyboard/KeyboardShortcutBar"
 import { buildCoreMaskShortcuts, useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts"
 import { AgentProcessPanel } from "@/components/agent"
 import { summarizeMeldewesenFeedback } from "@/lib/domain-depth"
+import { OperationalCaseHeader } from "@/components/workflow/OperationalCaseHeader"
+import { normalizeOperationalStatus } from "@/lib/operational-status"
 import {
   listConnectors,
   listReportingUnits,
@@ -519,9 +521,18 @@ export default function MeldewesenKonsole() {
     )
   }
 
+  const operationalStatus = normalizeOperationalStatus(feedbackSummary.feedbackRisk)
+
   return (
     <div className="flex flex-col">
     <div className="p-4 md:p-6 space-y-4">
+      <OperationalCaseHeader
+        title="Meldewesen-Konsole"
+        status={operationalStatus}
+        blocker={jobs.filter((j) => j.status === 'failed').length > 0 ? `${jobs.filter((j) => j.status === 'failed').length} fehlgeschlagene(r) Lauf/Läufe` : null}
+        nextAction={feedbackSummary.nextAction}
+        caseLabel="Compliance"
+      />
       <div className="flex items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Meldewesen-Konsole</h1>
