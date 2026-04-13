@@ -9,6 +9,8 @@ import { Separator } from '@/components/ui/separator'
 import { useToast } from '@/hooks/use-toast'
 import { useCreateCustomer, useCustomers, type Customer } from '@/lib/api/crm'
 import { summarizeCustomerOperations } from '@/lib/domain-depth'
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
+import { normalizeOperationalStatus } from '@/lib/operational-status'
 import {
   AlertTriangle,
   Brain,
@@ -241,8 +243,17 @@ function LegacyKundenStammModern(): JSX.Element {
     navigate('/crm/customers')
   }
 
+  const operationalStatus = normalizeOperationalStatus(customerOps.ownershipRisk)
+
   return (
     <div className="container mx-auto space-y-6 p-6">
+      <OperationalCaseHeader
+        title="Kunden-Stamm"
+        status={operationalStatus}
+        blocker={duplicateCandidates.length > 0 ? `${duplicateCandidates.length} Dublettenkandidat(en)` : null}
+        nextAction={customerOps.nextAction}
+        caseLabel="CRM"
+      />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Kunden-Stamm Modern</h1>
