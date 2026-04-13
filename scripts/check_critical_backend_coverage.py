@@ -23,6 +23,12 @@ CRITICAL_THRESHOLDS: dict[str, float] = {
     "api/v1/endpoints/booking_templates.py": 0.40,
     "api/v1/endpoints/chart_of_accounts.py": 0.50,
     "api/v1/endpoints/finance_read_models.py": 0.60,
+    # Inventory / Warehouse (COV-INV-001)
+    "api/v1/endpoints/waage.py": 0.75,
+    "api/v1/endpoints/warehouses.py": 0.90,
+    "api/v1/endpoints/warehouse_transfers.py": 0.60,
+    "api/v1/endpoints/inventory_counts.py": 0.50,
+    "api/v1/endpoints/inventory_operations.py": 0.50,
 }
 
 
