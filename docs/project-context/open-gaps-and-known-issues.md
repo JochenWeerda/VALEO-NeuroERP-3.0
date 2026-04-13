@@ -23,6 +23,8 @@ Zuletzt vollstaendig auditiert: **2026-04-13**.
 
 - Gesamtabdeckung ist fuer ein ERP-System weiterhin zu niedrig. `100%` repo-weit ist kurzfristig kein belastbares Ziel.
 - Neu ist ein Ratchet fuer kritische Kernpfade ueber `scripts/check_critical_backend_coverage.py` und `.github/workflows/quality-gate.yml`.
+- Die naechste Finance-Welle ist angelaufen: `tests/test_finance_followup_api.py` haertet Preview-, Export-, Download-, DMS-Redirect- und Upload-Metadatenpfade von `app/api/v1/endpoints/finance_followup.py`; `tests/test_fibu_connectors_api.py` deckt Profile, Import-Laeufe, Run-Items und Folgeaktionen in `app/api/v1/endpoints/fibu_connectors.py` ab; `tests/test_finance_actions.py` deckt jetzt reale Finance-Aktionspfade in `app/api/v1/endpoints/finance_actions.py` ab. Die drei Pfade haengen jetzt mit Mindestabdeckung (`70%`, `80%`, `90%`) im kritischen Coverage-Ratchet.
+- Die frueheren `skipped`-Faelle in Mahnwesen, Wechselkursen und Zahlungslaufen sind nicht mehr an eine zufaellige Live-DB gekoppelt. Die API-Tests laufen jetzt mit deterministischen Test-Doubles, und eine Reparaturmigration zieht die fehlenden Finance-API-Tabellen (`dunning_*`, `payment_*`, `exchange_rates`) auch auf Bestandsdatenbanken nach.
 - Der naechste sinnvolle Schritt ist systematischer Ausbau der Testtiefe fuer Finance-Posting, Bestandsfuehrung, Tenant-Isolation und Integrations-Governance.
 
 ### DOMAIN-PARITY-001: Fachliche Tiefe der Domains ist weiterhin ungleich

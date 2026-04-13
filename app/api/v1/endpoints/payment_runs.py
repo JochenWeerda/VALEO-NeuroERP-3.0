@@ -384,7 +384,7 @@ async def create_payment_run(
         total_amount = sum(payment.amount for payment in payment_run.payments)
         
         import json
-        payments_json = json.dumps([p.dict() for p in payment_run.payments])
+        payments_json = json.dumps([p.model_dump(mode="json") for p in payment_run.payments])
         
         insert_query = text("""
             INSERT INTO domain_erp.payment_runs
@@ -836,7 +836,7 @@ async def return_payment(
         payment_item_id = str(payment_row[0])
         payment_run_id = str(payment_row[1])
         op_id = str(payment_row[2]) if payment_row[2] else None
-        amount = Decimal(str(payment_row[4]))
+        amount = Decimal(str(payment_row[3]))
         
         # Update payment item status
         update_payment_query = text("""
@@ -909,4 +909,3 @@ async def return_payment(
         db.rollback()
         logger.error(f"Error processing payment return: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to process payment return: {str(e)}")
-

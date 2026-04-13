@@ -94,16 +94,24 @@ Archiv des vorherigen Boards:
 ## COV-FIN-002
 
 **Von:** Codex
+<<<<<<< HEAD
 **Stand:** in arbeit
 **Ziel des Slices:** Coverage-Tiefe fuer FIBU-Kernpfade aufbauen: Journal, Zahlungslaeufe, DATEV/ELSTER-nahe Follow-up-Logik und Abschlusskontext.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `tests/**`, relevante Finance-/FIBU-Services und Endpunkte
 **Abnahmekriterien:** Kritische FIBU-Kernpfade besitzen gezielte Tests statt nur allgemeiner Gesamtquote; Ratchet kann fuer Finance spaeter angehoben werden.
 **Fortschritt:** Start auf den API-/Service-Kern fuer Follow-up, Mahnwesen, Lastschrift- und Kassenexport sowie FIBU-nahe Exportpersistenz; `tests/test_finance_followup_api.py` deckt jetzt Preview-, Export-, Download-, DMS-Redirect- und Upload-Metadatenpfade ab, und `scripts/check_critical_backend_coverage.py` fuehrt dafuer einen ersten Finance-Ratchet auf `api/v1/endpoints/finance_followup.py` ein.
+=======
+**Stand:** erledigt
+**Ziel des Slices:** Coverage-Tiefe fuer FIBU-Kernpfade aufbauen: Journal, Zahlungslaeufe, DATEV/ELSTER-nahe Follow-up-Logik und Abschlusskontext.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `tests/**`, relevante Finance-/FIBU-Services und Endpunkte
+**Abnahmekriterien:** Kritische FIBU-Kernpfade besitzen gezielte Tests statt nur allgemeiner Gesamtquote; Ratchet kann fuer Finance spaeter angehoben werden.
+**Fortschritt:** Start auf den API-/Service-Kern fuer Follow-up, Mahnwesen, Lastschrift- und Kassenexport sowie FIBU-nahe Exportpersistenz; `tests/test_finance_followup_api.py` deckt jetzt Preview-, Export-, Download-, DMS-Redirect- und Upload-Metadatenpfade ab. Zusaetzlich haertet `tests/test_fibu_connectors_api.py` jetzt Profile-CRUD, Import-Upload, Run-Summary, Run-Items und Workflow-Folgeaktionen in `api/v1/endpoints/fibu_connectors.py`. `tests/test_finance_actions.py` deckt Bankabgleich, Buchungsfreigabe, Kassenabschluss, Lastschriftlauf, Periodenabschluss, Kreditlimits, Sicherheiten, Zahlungsvorschlaege und Buchungsuebergabe ab. Die zuvor `skipped` Finance-API-Tests wurden auf deterministische Test-Doubles umgestellt (`tests/test_finance_dunning_api.py`, `tests/test_finance_exchange_rates_api.py`, `tests/test_finance_payment_runs_api.py`), damit sie nicht mehr an einer zufaelligen Live-DB haengen. Nebenbei wurden echte Ursachen im Code behoben: Geldbetraege im Mahnwesen werden jetzt quantisiert, `payment_runs.py` serialisiert Zahlungsobjekte sauber und der Ruecklaeuferpfad nutzt wieder den korrekten Betrag. Fuer Bestandsinstallationen erzwingt `ensure_finance_api_tables_20260413` die fehlenden Finance-API-Tabellen auch dann, wenn ein aelterer Migrationspfad sie ausgelassen hat.
+>>>>>>> develop
 
 ## COV-INV-002
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** in arbeit
 **Ziel des Slices:** Coverage fuer Bestandsfuehrung, Lagerbewegung, Inventur und physische Objektkette erweitern.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `tests/**`, Inventory-/Ops-/Logistik-Endpunkte und Services
 **Abnahmekriterien:** Stock-Movements, Inventur und kritische Lagerpfade sind ueber gezielte Tests gegen Regressionen abgesichert.

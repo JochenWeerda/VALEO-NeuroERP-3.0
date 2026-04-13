@@ -21,7 +21,16 @@ if str(PROJECT_ROOT) not in sys.path:
 REQUIRED_STRUCTURE: dict[str, tuple[str, ...]] = {
     "domain_shared": ("tenants", "users", "audit_logs"),
     "domain_crm": ("business_partners", "customers", "sales_orders"),
-    "domain_erp": ("journal_entries", "journal_entry_lines", "chart_of_accounts"),
+    "domain_erp": (
+        "journal_entries",
+        "journal_entry_lines",
+        "chart_of_accounts",
+        "dunning_rules",
+        "dunning_notices",
+        "payment_runs",
+        "payment_run_items",
+        "exchange_rates",
+    ),
     "domain_inventory": ("articles", "stock_movements", "inventory_counts", "lkw_annahme_queue"),
     "domain_einkauf": ("bestellungen", "lieferanten", "kontrakte"),
     "domain_ops": ("ops_wiegungen", "ops_chargen", "ops_labor_proben"),
