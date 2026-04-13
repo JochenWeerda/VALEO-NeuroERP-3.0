@@ -20,6 +20,12 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/dunning", tags=["finance", "dunning"])
 
+MONEY_QUANT = Decimal("0.01")
+
+
+def _money(value: Decimal) -> Decimal:
+    return value.quantize(MONEY_QUANT)
+
 
 class DunningRule(BaseModel):
     """Dunning rule configuration"""
@@ -404,7 +410,9 @@ async def process_dunning(
             if applicable_rule.interest_rate > 0:
                 interest = open_amount * (applicable_rule.interest_rate / Decimal("100.00")) * Decimal(str(days_overdue)) / Decimal("365.00")
             
-            total_amount = open_amount + dunning_fee + interest
+            dunning_fee = _money(dunning_fee)
+            interest = _money(interest)
+            total_amount = _money(open_amount + dunning_fee + interest)
             payment_deadline = today + timedelta(days=applicable_rule.payment_deadline_days)
             
             # Create dunning notice
@@ -574,7 +582,9 @@ async def create_dunning(
         if dunning.custom_interest is not None:
             interest = dunning.custom_interest
         
-        total_amount = dunning.open_amount + dunning_fee + interest
+        dunning_fee = _money(dunning_fee)
+        interest = _money(interest)
+        total_amount = _money(dunning.open_amount + dunning_fee + interest)
         payment_deadline = dunning.dunning_date + timedelta(days=payment_deadline_days)
         
         # Create dunning notice
