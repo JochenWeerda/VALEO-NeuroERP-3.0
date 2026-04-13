@@ -46,56 +46,50 @@ Archiv des vorherigen Boards:
 ## DOM-FIN-003
 
 **Von:** Codex
-**Stand:** in arbeit
+**Stand:** erledigt
 **Ziel des Slices:** FIBU-Operatorpfade fuer Abschluss, Reorganisator, Zinswesen und Revisionssicht semantisch verdichten.
-**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `packages/frontend-web/src/pages/finance/*`, `packages/frontend-web/src/pages/fibu/*`, relevante Finance-/FIBU-Read-Models und Endpunkte
 **Abnahmekriterien:** Abschluss- und FIBU-Operatorraeume tragen denselben klaren Status-, Fristen-, Revisions- und Folgeaktionsrahmen.
-**Fortschritt:** Die erste Codewelle zieht den Operatorrahmen auf `fibu/abschluss-cockpit.tsx`; die zweite Welle verdichtet `fibu/schnittstellen-center.tsx`; die dritte Welle zieht jetzt `finance/mahnwesen.tsx` und `fibu/zahlungslaeufe.tsx` mit Readiness-, Revisions- und Folgeaktionsrahmen auf dasselbe Operatorniveau.
+**Ergebnis:** Alle 4 FIBU-Masken (abschluss-cockpit, schnittstellen-center, mahnwesen, zahlungslaeufe) tragen OperationalCaseHeader mit Status/Blocker/Folgeaktion.
 
 ## DOM-SUPPLY-003
 
 **Von:** Codex
-**Stand:** in arbeit
+**Stand:** erledigt
 **Ziel des Slices:** Die physische Kette `Partie -> Annahme -> Wiegung -> Charge -> Fracht -> Abrechnung` fachlich und statusseitig durchgaengig harmonisieren.
-**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `packages/frontend-web/src/pages/annahme/*`, `packages/frontend-web/src/pages/waage/*`, `packages/frontend-web/src/pages/charge/*`, `packages/frontend-web/src/pages/logistik/*`
 **Abnahmekriterien:** Jeder Uebergabepunkt zeigt Objektbezug, Abweichung, naechste Aktion und Folgeobjekt konsistent.
-**Fortschritt:** Die erste Codewelle verdichtet Uebergaberisiken in `waage/liste.tsx` und `logistik/tourenplanung.tsx`; die zweite Welle zieht `charge/wareneingang.tsx`; die dritte Welle harmonisiert `waage/wiegeschein-detail.tsx`, `annahme/rohware.tsx` und `logistik/frachtbriefe.tsx` mit demselben Uebergabe- und Kettenmodell.
+**Ergebnis:** Alle 6 Supply-Masken (waage/liste, tourenplanung, wareneingang, wiegeschein-detail, rohware, frachtbriefe) tragen OperationalCaseHeader.
 
 ## DOM-PROC-003
 
 **Von:** Codex
-**Stand:** in arbeit
+**Stand:** erledigt
 **Ziel des Slices:** Einkaufsausnahmen, Matching, Nachforderung und Lieferantenkommunikation auf echte Folgefaelle heben.
-**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `packages/frontend-web/src/pages/einkauf/*`, relevante Beschaffungsendpunkte, Dokument- und Kommunikationspfade
 **Abnahmekriterien:** Beschaffungsfaelle bilden Matching-Ausnahmen, Nachforderung und Folgekommunikation als echte Arbeitsobjekte ab.
-**Fortschritt:** Die erste Codewelle hebt `einkauf/rechnung-abgleich.tsx` auf einen echten Ausnahme- und Folgefallrahmen; die zweite Welle zieht `einkauf/rechnungseingang.tsx` nach; die dritte Welle verdichtet `einkauf/lieferanten-dokumente.tsx`, `einkauf/anlieferavis.tsx` und `einkauf/auftragsbestaetigung.tsx` zu echten Beschaffungsfolgefaellen.
+**Ergebnis:** Alle 5 Einkauf-Masken (rechnung-abgleich, rechnungseingang, lieferanten-dokumente, anlieferavis, auftragsbestaetigung) tragen OperationalCaseHeader.
 
 ## DOM-CON-003
 
 **Von:** Codex
-**Stand:** in arbeit
+**Stand:** erledigt
 **Ziel des Slices:** Kontraktfixierung, Marktbewertung, Mahnung und Engagement als vollwertige Operatorraeume ausbauen.
-**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `packages/frontend-web/src/pages/kontrakte/*`, `packages/frontend-web/src/pages/contracts-v2.tsx`, relevante Kontraktendpunkte
 **Abnahmekriterien:** Fixierungs-, Markt- und Mahnlogik ist nicht nur sichtbar, sondern als klarer Operatorpfad bedienbar.
-**Fortschritt:** Die erste Codewelle zieht Operator-Druck, ungesicherte Mengen und naechsten Pfad in `contracts-v2.tsx` hoch; die zweite Welle verdichtet `kontrakte/KontraktPositionsmonitor.tsx`; die dritte Welle zieht `kontrakte/FrmKontraktDetail.tsx` und `kontrakte/KontraktAlarmDashboard.tsx` auf denselben Fixierungs-, Markt- und Mahnoperatorraum.
+**Ergebnis:** Alle 4 Kontrakt-Masken (contracts-v2, KontraktPositionsmonitor, FrmKontraktDetail, KontraktAlarmDashboard) tragen OperationalCaseHeader.
 
 ## DOM-CRM-003
 
 **Von:** Codex
-**Stand:** in arbeit
+**Stand:** erledigt
 **Ziel des Slices:** CRM-/Servicefaelle mit Ownership, Folgeobjekten, Dubletten- und Abschlusslogik angleichen.
-**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `packages/frontend-web/src/pages/crm/*`, `packages/frontend-web/src/pages/service/*`, zugehoerige APIs und Agent-Ops-Verknuepfung
 **Abnahmekriterien:** CRM und Service tragen denselben Fallbezug, Ownership-Rahmen und Abschlusspfad.
-**Fortschritt:** Die erste Codewelle verdichtet Ownership-/Folgeobjektlogik in `crm/kunden-stamm-modern/LegacyKundenStammModern.tsx` und `service/anfrage-detail.tsx`; die zweite Welle zieht `crm/opportunity-detail.tsx` nach; die dritte Welle harmonisiert `crm/kontakt-management.tsx` mit demselben Ownership- und Folgeaktionsrahmen.
+**Ergebnis:** Alle 4 CRM-/Service-Masken (LegacyKundenStammModern, anfrage-detail, opportunity-detail, kontakt-management) tragen OperationalCaseHeader.
 
 ## DOM-DOC-003
 
 **Von:** Codex
-**Stand:** in arbeit
+**Stand:** erledigt
 **Ziel des Slices:** Nachweis-, Bescheid-, Artefakt- und Rueckmeldungskette ueber Dokumente, Meldungen und Vorgangskontext vereinheitlichen.
-**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `packages/frontend-web/src/pages/dokumente/*`, `packages/frontend-web/src/pages/compliance/*`, `packages/frontend-web/src/pages/fibu/atlas.tsx`, `packages/frontend-web/src/pages/compliance/meldewesen-konsole.tsx`
 **Abnahmekriterien:** Dokumente und Meldungen zeigen revisionsrelevanten Nachweisstatus, Rueckmeldungspfad und Wiedervorlage konsistent.
-**Fortschritt:** Die erste Codewelle fuehrt Nachweisrisiko in `dokumente/ablage.tsx` und Rueckmeldungsrisiko in `compliance/meldewesen-konsole.tsx` zusammen; die zweite Welle verdichtet `fibu/atlas.tsx`; die dritte Welle zieht `dokumente/ablage.tsx` selbst auf den vollen Nachweisfallrahmen und koppelt Lieferanten-Dokumente im Beschaffungspfad an denselben Beleg-/Wiedervorlagekontext.
+**Ergebnis:** Alle 3 Dokumenten-/Compliance-Masken (ablage, meldewesen-konsole, atlas) tragen OperationalCaseHeader.
 
 ## COV-FIN-002
 
@@ -104,7 +98,7 @@ Archiv des vorherigen Boards:
 **Ziel des Slices:** Coverage-Tiefe fuer FIBU-Kernpfade aufbauen: Journal, Zahlungslaeufe, DATEV/ELSTER-nahe Follow-up-Logik und Abschlusskontext.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `tests/**`, relevante Finance-/FIBU-Services und Endpunkte
 **Abnahmekriterien:** Kritische FIBU-Kernpfade besitzen gezielte Tests statt nur allgemeiner Gesamtquote; Ratchet kann fuer Finance spaeter angehoben werden.
-**Fortschritt:** Start auf den API-/Service-Kern fuer Follow-up, Mahnwesen, Lastschrift- und Kassenexport sowie FIBU-nahe Exportpersistenz; Ziel ist erst belastbare Pfadabdeckung, dann ein Finance-spezifischer Ratchet.
+**Fortschritt:** Start auf den API-/Service-Kern fuer Follow-up, Mahnwesen, Lastschrift- und Kassenexport sowie FIBU-nahe Exportpersistenz; `tests/test_finance_followup_api.py` deckt jetzt Preview-, Export-, Download-, DMS-Redirect- und Upload-Metadatenpfade ab, und `scripts/check_critical_backend_coverage.py` fuehrt dafuer einen ersten Finance-Ratchet auf `api/v1/endpoints/finance_followup.py` ein.
 
 ## COV-INV-002
 

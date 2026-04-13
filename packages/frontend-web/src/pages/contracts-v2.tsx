@@ -31,6 +31,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useTenant } from '@/hooks/useTenant';
 import { summarizeContractHedge } from '@/lib/professional-control-centers';
 import { summarizeContractOperations } from '@/lib/domain-depth';
+import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader';
+import { normalizeOperationalStatus } from '@/lib/operational-status';
 
 interface Contract {
   id: string;
@@ -401,9 +403,18 @@ export default function ContractsPageV2(): JSX.Element {
   }, [expiringContracts, openContracts]);
   const hedgeSummary = useMemo(() => summarizeContractHedge(contracts), [contracts]);
   const contractOps = useMemo(() => summarizeContractOperations(contracts), [contracts]);
+  const operationalStatus = normalizeOperationalStatus(contractOps.operatorPressure);
 
   return (
     <div className="space-y-4">
+      <OperationalCaseHeader
+        title="Kontraktübersicht"
+        status={operationalStatus}
+        blocker={contractOps.unhedgedCount > 0 ? `${contractOps.unhedgedCount} ungesicherte Kontrakte` : null}
+        nextAction={contractOps.nextAction}
+        caseLabel="Kontrakte"
+        tags={contractOps.dunningCount > 0 ? [`${contractOps.dunningCount} Mahnung(en)`] : []}
+      />
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">{entityTypeLabel}</h2>
         <div className="flex gap-2">
