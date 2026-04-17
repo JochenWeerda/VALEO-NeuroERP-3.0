@@ -22,6 +22,28 @@ Archiv des vorherigen Boards:
 - Der Rollout-Scope ist dokumentiert in:
   - [operational-rollout-scope-2026-04-09.md](C:/Users/Jochen/VALEO-NeuroERP-3.0/docs/project-context/operational-rollout-scope-2026-04-09.md)
 - Der naechste Block betrifft Sammel- und Follow-up-Masken mit echtem operativem Mehrwert.
+- Fuer den Flow-Spine-Kern liegt jetzt eine gemeinsame Lifecycle-Zieldoku vor:
+  - [flow-spine-instance-lifecycle-overview.md](C:/Users/Jochen/VALEO-NeuroERP-3.0/docs/workflows/flow-spine-instance-lifecycle-overview.md)
+
+## FLOW-LC-001
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Flow-Spine-Instanzen vom reinen Routing-/Node-Status-Anker auf einen echten, restart-sicheren Lifecycle mit Timeline und Resume-Vertrag heben.
+**Owner:** Codex
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/workflows/flow-spine-instance-lifecycle-overview.md`, `app/domains/operations/models.py`, `alembic/versions/*`, `app/api/v1/endpoints/flow_spines.py`, `tests/test_flow_spines_api.py`
+**Abnahmekriterien:** `FlowSpineInstance` traegt technische Lifecycle-Felder; eine Event-/Timeline-Spur ist modelliert; API-Contracts fuer `save`, `resume`, `hold`, `complete`, `cancel`, `fail` sind dokumentiert oder implementiert; bestehende `transition`-Logik ist sauber in den Gesamtvertrag eingeordnet.
+**Naechster Schritt:** zuerst `FLOW-LC-001` umsetzen, danach `FLOW-LC-002` bis `FLOW-LC-006` entlang der neuen Lifecycle-Uebersicht staffeln.
+
+## CRM-PICKER-001
+
+**Von:** Claude Code / Codex
+**Stand:** abgeschlossen
+**Ziel des Slices:** Order-to-Cash-Kundenauswahl im Flow-Spine-Startdialog von Modal-Auswahl auf schnellen Inline-Typeahead mit Neuanlage-Ruecksprung umstellen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/CUSTOMER-PICKER-PLAN.md`, `app/api/v1/endpoints/customers.py`, `alembic/versions/crm_customers_search_index_20260414.py`, `packages/frontend-web/src/components/crm/CustomerCombobox.tsx`, `packages/frontend-web/src/components/workflow/FlowSpineWorkspace.tsx`, `packages/frontend-web/src/pages/verkauf/kunde-neu.tsx`, `packages/frontend-web/src/pages/verkauf/kunden-stamm.tsx`
+**Abnahmekriterien:** Typeahead nutzt schlanke Quick-/Recent-Endpoints; neuer Kunde kann aus dem Flow-Spine-Dialog angelegt werden; nach Speichern kehrt die App in den Dialog mit vorausgewaehltem Kunden zurueck; erweiterte Kundensuche bleibt erreichbar.
+**Erledigt:** `CustomerCombobox` ist fuer `order-to-cash` integriert; `/quick-search` und `/recent` liefern schlanke Picker-Daten; `returnTo` bleibt ueber den Alias-Redirect erhalten; kanonischer Kundenstamm liest `initialName` und navigiert nach Save zurueck; `FlowSpineWorkspace` setzt `customerId` und `customerNumber` im Order-Editor-Handover; der `order-editor` prefilled den uebergebenen Kunden jetzt direkt beim Workflow-Einstieg; bestehende Flow-Spine-Instanzen loesen den kompakten Kundenkontext robust ueber `business_partner_id`; `CustomerSelectionDialog` ist als "Erweiterte Suche" angebunden.
+**Checks:** Browser-Use Roundtrip `Flow Spine -> Kunde neu -> Flow Spine Dialog -> Order Editor`, `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`, `pytest tests/test_flow_spines_api.py tests/test_customers_picker_api.py -q --no-cov`, `node scripts/docs-governance-check.cjs`, `GET /api/v1/crm/customers/recent`, `GET /api/v1/crm/customers/quick-search`
 
 ## DOC-REF-002
 
