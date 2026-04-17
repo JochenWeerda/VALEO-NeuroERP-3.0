@@ -40,12 +40,36 @@ Archiv des vorherigen Boards:
 ## FLOW-LC-003
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Gemeinsamen Workspace-Lifecycle-Rahmen fuer alle 9 Flow-Spines einziehen: Aktionsleiste, Resume-Hinweis, Timeline und generische Dialoge fuer `save`, `hold`, `complete`, `cancel`, `fail`.
 **Owner:** Codex
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/workflows/flow-spine-instance-lifecycle-overview.md`, `packages/frontend-web/src/components/workflow/FlowSpineWorkspace.tsx`, `packages/frontend-web/src/lib/api/flow-spines.ts`, relevante UI-Tests falls vorhanden
 **Abnahmekriterien:** Der Workspace zeigt Lifecycle-Status, Resume-Ziel und Timeline; die generischen Lifecycle-Aktionen sprechen den neuen Backend-Vertrag an; `cancel` und `fail` erzwingen Pflichtgruende auch im UI; der Rahmen ist prozessneutral fuer alle 9 Flows nutzbar.
-**Naechster Schritt:** Claim committen, dann API-Hooks fuer Lifecycle und den gemeinsamen Workspace-Rahmen implementieren.
+**Erledigt:** `flow-spines.ts` kennt jetzt Lifecycle-Status, Timeline-Events und Mutationen fuer `save`, `resume`, `hold`, `complete`, `cancel`, `fail`; `FlowSpineWorkspace.tsx` zeigt fuer geladene Instanzen eine generische Lifecycle-Leiste mit Status, Resume-Ziel, Timeline und prozessneutralen Dialogen; die Instanzliste zeigt den Lifecycle-Status direkt in der Sidebar.
+**Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`, `node scripts/docs-governance-check.cjs`
+**Naechster Schritt:** `FLOW-LC-004` fuer OTC / P2P / Inventory aufsetzen und dort Resume-/Handover-Pfade mit den jeweiligen Fachmasken wirklich durchgaengig machen.
+
+## FLOW-LC-004
+
+**Von:** Codex
+**Stand:** abgeschlossen
+**Ziel des Slices:** OTC, P2P und Inventory so an den Lifecycle-Vertrag anbinden, dass `save` und `resume` nicht nur im Workspace leben, sondern in reale Wiedereinstiegspfade der Fachmasken zeigen.
+**Owner:** Codex
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/workflows/flow-spine-instance-lifecycle-overview.md`, `packages/frontend-web/src/lib/api/flow-spines.ts`, `packages/frontend-web/src/pages/sales/order-editor.tsx`, `packages/frontend-web/src/pages/einkauf/bestellung-anlegen.tsx`, `packages/frontend-web/src/pages/lager/bestandsuebersicht.tsx`
+**Abnahmekriterien:** OTC speichert einen belastbaren Resume-Punkt in die Auftragsmaske; P2P speichert nach Erstanlage in die echte Bestell-Detailroute; Inventory speichert vor vertieften Dashboard-Spruengen den operativen Zielpfad als Resume-Ziel.
+**Erledigt:** `flow-spines.ts` bietet jetzt einen schlanken `saveFlowSpineResumeCheckpoint()`-Helper; `order-editor.tsx` schreibt beim Speichern den Resume-Punkt auf die konkrete Auftragsmaske und ersetzt nach Erstanlage die URL auf `?id=...`; `bestellung-anlegen.tsx` schreibt nach Erstanlage den Resume-Punkt auf die echte Bestell-Detailroute `/einkauf/bestellungen/{id}`; `bestandsuebersicht.tsx` persistiert vor den Spruengen in `mhd-uebersicht`, `psm-abverkauf`, `renner-liste` und `penner-liste` den jeweiligen Zielpfad als Inventory-Resume-Ziel und traegt den Workflow-Kontext dorthin weiter.
+**Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`
+**Naechster Schritt:** `FLOW-LC-005` aufsetzen und die restlichen sechs Prozessraeume mit denselben Resume-/Handover-Mustern nachziehen.
+
+## FLOW-LC-005
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Die restlichen sechs Flow-Spine-Prozessraeume mit denselben Resume-/Handover-Mustern wie OTC, P2P und Inventory anbinden.
+**Owner:** Codex
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/workflows/flow-spine-instance-lifecycle-overview.md`, relevante Zielseiten unter `packages/frontend-web/src/pages/**`, ggf. `packages/frontend-web/src/lib/api/flow-spines.ts`
+**Abnahmekriterien:** `harvest-to-settlement`, `contract-to-settlement`, `complaint-to-resolution`, `service-to-customer`, `finance-to-close` und `compliance-to-report` schreiben oder tragen echte Resume-/Handover-Ziele in ihre Fachmasken; die Workflow-Kontexte bleiben beim Wiedereinstieg erhalten.
+**Naechster Schritt:** Claim committen, dann die sechs Zielpfade gegen die realen Fachmasken mappen und jeweils eine schlanke Resume-Bridge einziehen.
 
 ## CRM-PICKER-001
 
