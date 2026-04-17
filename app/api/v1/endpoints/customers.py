@@ -35,6 +35,40 @@ logger = logging.getLogger(__name__)
 DEFAULT_TENANT = "00000000-0000-0000-0000-000000000001"
 
 
+def _extract_customer_picker_location(
+    *,
+    city: Any = None,
+    postal_code: Any = None,
+    address: Any = None,
+) -> tuple[str | None, str | None]:
+    resolved_city = str(city).strip() if city else None
+    resolved_postal_code = str(postal_code).strip() if postal_code else None
+
+    if resolved_city or resolved_postal_code:
+        return resolved_city, resolved_postal_code
+
+    if isinstance(address, dict):
+        return (
+            address.get("city") or None,
+            address.get("postal_code") or address.get("postalCode") or None,
+        )
+
+    if isinstance(address, str):
+        try:
+            import json as _json
+
+            parsed = _json.loads(address)
+        except Exception:
+            return None, None
+        if isinstance(parsed, dict):
+            return (
+                parsed.get("city") or None,
+                parsed.get("postal_code") or parsed.get("postalCode") or None,
+            )
+
+    return None, None
+
+
 def _ensure_bp_belongs_to_tenant(partner_id: str, tenant_id: str, db: Session) -> None:
     """Prüft, dass der Business-Partner im gleichen Mandanten existiert."""
     from sqlalchemy import text
@@ -459,6 +493,115 @@ async def list_customers(
                 has_next=False,
                 has_prev=False,
             )
+
+
+@router.get("/quick-search")
+def quick_search_customers(
+    q: str = Query("", description="Suchterm (Name oder Kundennummer)"),
+    limit: int = Query(8, ge=1, le=25),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> list[dict[str, Any]]:
+    """Schlanker Typeahead-Endpoint — nur die Felder, die die Combobox braucht.
+
+    Sortierung: Exakt-/Prefix-Matches auf Kundennummer zuerst, dann Prefix auf Name,
+    danach Trigram-Ähnlichkeit. Nutzt pg_trgm GIN-Indizes
+    (siehe Migration crm_customers_search_index_20260414).
+    """
+    from sqlalchemy import text
+
+    effective_tenant = tenant_id or DEFAULT_TENANT
+    term = (q or "").strip()
+    if not term:
+        return []
+
+    like = f"{term}%"
+    contains = f"%{term}%"
+    sql = text(
+        """
+        SELECT
+            id,
+            customer_number,
+            company_name,
+            address,
+            is_active,
+            CASE
+                WHEN customer_number ILIKE :like THEN 0
+                WHEN company_name ILIKE :like THEN 1
+                ELSE 2
+            END AS rank
+        FROM domain_crm.customers
+        WHERE tenant_id = :tid
+          AND (
+              company_name ILIKE :contains
+              OR customer_number ILIKE :contains
+          )
+        ORDER BY rank ASC, company_name ASC
+        LIMIT :lim
+        """
+    )
+    rows = db.execute(
+        sql,
+        {"tid": effective_tenant, "like": like, "contains": contains, "lim": limit},
+    ).fetchall()
+
+    out: list[dict[str, Any]] = []
+    for row in rows:
+        city, postal_code = _extract_customer_picker_location(
+            address=row.address,
+        )
+        out.append(
+            {
+                "id": str(row.id),
+                "customer_number": row.customer_number or "",
+                "company_name": row.company_name or "",
+                "city": city,
+                "postal_code": postal_code,
+                "is_active": bool(row.is_active) if row.is_active is not None else True,
+            }
+        )
+    return out
+
+
+@router.get("/recent")
+def recent_customers(
+    limit: int = Query(10, ge=1, le=25),
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+) -> list[dict[str, Any]]:
+    """Zuletzt aktualisierte Kunden des Mandanten — MVP-Prefetch fuer die Combobox.
+
+    Sobald ein echtes user-last-used-Log existiert, pro User sortieren.
+    """
+    from sqlalchemy import text
+
+    effective_tenant = tenant_id or DEFAULT_TENANT
+    sql = text(
+        """
+        SELECT id, customer_number, company_name, address, is_active, updated_at
+        FROM domain_crm.customers
+        WHERE tenant_id = :tid AND COALESCE(is_active, TRUE) = TRUE
+        ORDER BY updated_at DESC NULLS LAST
+        LIMIT :lim
+        """
+    )
+    rows = db.execute(sql, {"tid": effective_tenant, "lim": limit}).fetchall()
+    out: list[dict[str, Any]] = []
+    for row in rows:
+        city, postal_code = _extract_customer_picker_location(
+            address=row.address,
+        )
+        out.append(
+            {
+                "id": str(row.id),
+                "customer_number": row.customer_number or "",
+                "company_name": row.company_name or "",
+                "city": city,
+                "postal_code": postal_code,
+                "is_active": bool(row.is_active) if row.is_active is not None else True,
+            }
+        )
+    return out
 
 
 @router.get("/{customer_id}/sales-eligibility")

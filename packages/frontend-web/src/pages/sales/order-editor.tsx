@@ -19,6 +19,7 @@ import type { PrintOptions } from '@/components/sales/LieferscheinDruckDialog'
 import type { BelegfolgePosition } from '@/components/sales/BelegfolgePositionenDialog'
 import { useAuftraege, type Auftrag } from '@/lib/api/sales'
 import { apiClient } from '@/lib/api-client'
+import { saveFlowSpineResumeCheckpoint } from '@/lib/api/flow-spines'
 import { useKontraktLookup } from '@/hooks/useKontraktLookup'
 import { useAuth } from '@/hooks/useAuth'
 import { globalShortcutManager } from '@/lib/shortcuts/global-shortcuts'
@@ -236,9 +237,42 @@ export default function SalesOrderEditorPage(): JSX.Element {
   const workflowCase = searchParams.get('workflowCase') || ''
   const workflowLabel = searchParams.get('workflowLabel') || ''
   const workflowCustomerName = searchParams.get('customerName') || ''
+  const workflowCustomerId = searchParams.get('customerId') || ''
+  const workflowCustomerNumber = searchParams.get('customerNumber') || ''
   const workflowSubject = searchParams.get('subject') || ''
   const workflowEntryMode = searchParams.get('entryMode') || ''
   const isWorkflowEntry = !editId && Boolean(workflowCase || workflowInstanceId || workflowProcess)
+
+  const buildWorkflowResumeQuery = (orderId?: string | null): string => {
+    const params = new URLSearchParams()
+    if (orderId) params.set('id', orderId)
+    if (workflowProcess) params.set('workflowProcess', workflowProcess)
+    if (workflowInstanceId) params.set('workflowInstanceId', workflowInstanceId)
+    if (workflowCase) params.set('workflowCase', workflowCase)
+    if (workflowLabel) params.set('workflowLabel', workflowLabel)
+    if (workflowCustomerName) params.set('customerName', workflowCustomerName)
+    if (workflowCustomerId) params.set('customerId', workflowCustomerId)
+    if (workflowCustomerNumber) params.set('customerNumber', workflowCustomerNumber)
+    if (workflowSubject) params.set('subject', workflowSubject)
+    if (workflowEntryMode) params.set('entryMode', workflowEntryMode)
+    return params.toString()
+  }
+
+  const persistWorkflowResume = async (orderId?: string | null): Promise<void> => {
+    if (!workflowProcess || !workflowInstanceId) return
+    const query = buildWorkflowResumeQuery(orderId)
+    await saveFlowSpineResumeCheckpoint(workflowProcess, workflowInstanceId, {
+      resume_node_id: 'order',
+      resume_route: `/sales/order-editor${query ? `?${query}` : ''}`,
+      resume_payload: {
+        screen: 'order-editor',
+        orderId: orderId || undefined,
+        workflowCase: workflowCase || undefined,
+      },
+      business_status: orderId ? 'auftrag_erfasst' : 'auftrag_in_bearbeitung',
+      action_label: orderId ? 'Auftrag gespeichert' : 'Auftrag begonnen',
+    })
+  }
   
   // Refs for focus management
   const customerInputRef = useRef<HTMLInputElement>(null)
@@ -377,6 +411,57 @@ export default function SalesOrderEditorPage(): JSX.Element {
         .join(' | '),
     }))
   }, [isWorkflowEntry, workflowCase, workflowEntryMode, workflowLabel, workflowSubject])
+
+  useEffect(() => {
+    if (!isWorkflowEntry || !workflowCustomerId) return
+    if (state.customer?.id === workflowCustomerId) return
+
+    let active = true
+    const loadWorkflowCustomer = async (): Promise<void> => {
+      try {
+        const cd = await apiClient.get<any>(`/api/v1/crm/customers/${workflowCustomerId}`)
+        if (!active) return
+        const customer: Customer = {
+          id: cd.id ?? workflowCustomerId,
+          customerNumber: cd.customer_number ?? cd.customerNumber ?? workflowCustomerNumber,
+          name: cd.company_name ?? cd.name ?? workflowCustomerName,
+          debitorAccount: cd.customer_number ?? cd.customerNumber ?? workflowCustomerNumber,
+          representative: cd.contact_person ?? cd.representative,
+          postalCode: cd.postal_code ?? cd.postalCode,
+          city: cd.city,
+          creditLimit: cd.credit_limit?.toString(),
+          address: cd.address,
+          phone: cd.phone,
+          email: cd.email,
+          chefanweisung: cd.chefanweisung ?? cd.executive_note,
+          paymentTerms: cd.payment_terms,
+        }
+        setState((prev) => ({ ...prev, customer }))
+      } catch {
+        if (!active || !workflowCustomerName) return
+        setState((prev) => ({
+          ...prev,
+          customer: {
+            id: workflowCustomerId,
+            customerNumber: workflowCustomerNumber,
+            name: workflowCustomerName,
+            debitorAccount: workflowCustomerNumber,
+          },
+        }))
+      }
+    }
+
+    void loadWorkflowCustomer()
+    return () => {
+      active = false
+    }
+  }, [
+    isWorkflowEntry,
+    state.customer?.id,
+    workflowCustomerId,
+    workflowCustomerName,
+    workflowCustomerNumber,
+  ])
 
   // Preis automatisch berechnen
   useEffect(() => {
@@ -685,11 +770,15 @@ export default function SalesOrderEditorPage(): JSX.Element {
 
       if (state.id) {
         await apiClient.put(`/api/v1/sales/orders/${state.id}`, payload)
+        await persistWorkflowResume(state.id)
         push('Auftrag gespeichert')
         return state.id
       } else {
         const saved = await apiClient.post<{ id: string; order_number: string }>('/api/v1/sales/orders/', payload)
         setState((prev) => ({ ...prev, id: saved.id, auftragNr: saved.order_number }))
+        await persistWorkflowResume(saved.id)
+        const resumeQuery = buildWorkflowResumeQuery(saved.id)
+        navigate(`/sales/order-editor${resumeQuery ? `?${resumeQuery}` : ''}`, { replace: true })
         push('Auftrag angelegt')
         return saved.id
       }

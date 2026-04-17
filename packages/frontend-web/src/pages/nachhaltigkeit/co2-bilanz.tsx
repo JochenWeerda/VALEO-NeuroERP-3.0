@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useSearchParams } from 'react-router-dom'
 import { Badge } from '@/components/ui/badge'
@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { ErrorState } from '@/components/ErrorState'
 import { apiClient } from '@/lib/api-client'
+import { saveFlowSpineResumeCheckpoint } from '@/lib/api/flow-spines'
 import { BarChart3, Leaf, TrendingDown } from 'lucide-react'
 import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
 
@@ -20,6 +21,21 @@ export default function CO2BilanzPage(): JSX.Element {
   const [searchParams] = useSearchParams()
   const [year] = useState(currentYear)
   const workflowContext = readWorkflowEntryContext(searchParams)
+
+  useEffect(() => {
+    if (!workflowContext?.process || !workflowContext.instanceId) return
+    void saveFlowSpineResumeCheckpoint(workflowContext.process, workflowContext.instanceId, {
+      resume_node_id: 'aggregation',
+      resume_route: `/nachhaltigkeit/co2-bilanz?${searchParams.toString()}`,
+      resume_payload: {
+        screen: 'co2-balance',
+        year,
+        workflowCase: workflowContext.caseNumber || undefined,
+      },
+      business_status: 'reporting_in_bearbeitung',
+      action_label: 'CO2-Bilanz geoeffnet',
+    })
+  }, [searchParams, workflowContext, year])
 
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ['sustainability', 'esg-report', 'co2', year],

@@ -38,6 +38,7 @@ import { useTenant } from '@/hooks/useTenant'
 import { KeyboardShortcutBar } from '@/components/keyboard/KeyboardShortcutBar'
 import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { saveFlowSpineResumeCheckpoint } from '@/lib/api/flow-spines'
 import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHeader'
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
@@ -179,6 +180,30 @@ export default function FrmKontraktDetail(): JSX.Element {
   const { tenantId } = useTenant()
   const workflowContext = readWorkflowEntryContext(searchParams)
 
+  const buildWorkflowResumeQuery = (savedId?: string): string => {
+    const params = new URLSearchParams(searchParams)
+    if (savedId) params.set('id', savedId)
+    return params.toString()
+  }
+
+  const persistWorkflowResume = async (savedId?: string): Promise<void> => {
+    if (!workflowContext?.process || !workflowContext.instanceId) return
+    const contractId = savedId || id || undefined
+    const query = buildWorkflowResumeQuery(contractId)
+    const basePath = contractId ? `/kontrakte/${contractId}` : '/kontrakte/neu'
+    await saveFlowSpineResumeCheckpoint(workflowContext.process, workflowContext.instanceId, {
+      resume_node_id: 'contract',
+      resume_route: `${basePath}${query ? `?${query}` : ''}`,
+      resume_payload: {
+        screen: contractId ? 'contract-detail' : 'contract-create',
+        contractId,
+        workflowCase: workflowContext.caseNumber || undefined,
+      },
+      business_status: contractId ? 'kontrakt_erfasst' : 'kontrakt_in_bearbeitung',
+      action_label: contractId ? 'Kontrakt gespeichert' : 'Kontrakt begonnen',
+    })
+  }
+
   const isEdit = Boolean(id)
   const [state, setState] = useState<FormState>(createEmptyState())
   const [showLookupDlg, setShowLookupDlg] = useState(false)
@@ -282,8 +307,10 @@ export default function FrmKontraktDetail(): JSX.Element {
       return createKontrakt(state)
     },
     onSuccess: (saved) => {
+      void persistWorkflowResume(saved.contract_id)
       toast({ title: 'Gespeichert', description: `Kontrakt ${saved.contract_no}` })
-      navigate(`/kontrakte/${saved.contract_id}`)
+      const query = buildWorkflowResumeQuery(saved.contract_id)
+      navigate(`/kontrakte/${saved.contract_id}${query ? `?${query}` : ''}`)
     },
     onError: (err: any) => {
       toast({ title: 'Fehler', description: err?.message || 'Speichern fehlgeschlagen', variant: 'destructive' })

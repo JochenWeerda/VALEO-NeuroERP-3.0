@@ -29,6 +29,7 @@ import { useGlobalShortcutsWithVoice } from '@/features/ki-usability'
 import { ShortcutHintButton } from '@/components/shortcuts/ShortcutHelpPanel'
 import { ModuleToolbar } from '@/components/navigation/ModuleToolbar'
 import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { saveFlowSpineResumeCheckpoint } from '@/lib/api/flow-spines'
 import { ChevronLeft, ChevronRight, MoreHorizontal, Save, FileText, Folder, Calculator, Printer, Trash2, Download } from 'lucide-react'
 
 const CustomerSelectionDialog = lazy(() =>
@@ -249,6 +250,30 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
   const { user } = useAuth()
   const { id: acceptanceId } = useParams<{ id?: string }>()
   const workflowContext = useMemo(() => readWorkflowEntryContext(searchParams), [searchParams])
+
+  const buildWorkflowResumeQuery = (savedId?: string | null): string => {
+    const params = new URLSearchParams(searchParams)
+    if (savedId) params.set('id', savedId)
+    return params.toString()
+  }
+
+  const persistWorkflowResume = async (savedId?: string | null): Promise<void> => {
+    if (!workflowContext?.process || !workflowContext.instanceId) return
+    const effectiveId = savedId || state.id || acceptanceId || undefined
+    const query = buildWorkflowResumeQuery(effectiveId)
+    const basePath = effectiveId ? `/agrar/ernte-annahme-erfassung/${effectiveId}` : '/agrar/ernte-annahme-erfassung'
+    await saveFlowSpineResumeCheckpoint(workflowContext.process, workflowContext.instanceId, {
+      resume_node_id: 'acceptance',
+      resume_route: `${basePath}${query ? `?${query}` : ''}`,
+      resume_payload: {
+        screen: 'harvest-acceptance',
+        acceptanceId: effectiveId,
+        workflowCase: workflowContext.caseNumber || undefined,
+      },
+      business_status: effectiveId ? 'annahme_erfasst' : 'annahme_in_bearbeitung',
+      action_label: effectiveId ? 'Ernte-Annahme gespeichert' : 'Ernte-Annahme begonnen',
+    })
+  }
   const qualityCheckHandoverState = (location.state as QualityCheckHandoverState | null) ?? null
 
   // Helper: Format date to yyyy-MM-dd for input field
@@ -665,6 +690,11 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
         id: response.id,
         acceptanceNumber: response.acceptance_number,
       }))
+      await persistWorkflowResume(response.id)
+      if (!state.id) {
+        const query = buildWorkflowResumeQuery(response.id)
+        navigate(`/agrar/ernte-annahme-erfassung/${response.id}${query ? `?${query}` : ''}`, { replace: true })
+      }
       push('Ernte-Annahme erfolgreich gespeichert')
       return response.id
     } catch (error: any) {

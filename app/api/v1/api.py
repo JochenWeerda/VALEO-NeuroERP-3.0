@@ -81,6 +81,7 @@ from app.api.v1.endpoints import (
     nutrient_compositions,
     customer_extensions,
     business_partners,
+    number_ranges,
     messages,
     channel_work_surfaces,
     dms_images,
@@ -850,6 +851,12 @@ api_router.include_router(
     business_partners.router,
     prefix="/crm/business-partners",
     tags=["crm", "business-partners"]
+)
+
+api_router.include_router(
+    number_ranges.router,
+    prefix="/admin/number-ranges",
+    tags=["admin", "number-ranges"]
 )
 
 api_router.include_router(
