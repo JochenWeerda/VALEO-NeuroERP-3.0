@@ -28,12 +28,24 @@ Archiv des vorherigen Boards:
 ## FLOW-LC-001
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Flow-Spine-Instanzen vom reinen Routing-/Node-Status-Anker auf einen echten, restart-sicheren Lifecycle mit Timeline und Resume-Vertrag heben.
 **Owner:** Codex
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/workflows/flow-spine-instance-lifecycle-overview.md`, `app/domains/operations/models.py`, `alembic/versions/*`, `app/api/v1/endpoints/flow_spines.py`, `tests/test_flow_spines_api.py`
 **Abnahmekriterien:** `FlowSpineInstance` traegt technische Lifecycle-Felder; eine Event-/Timeline-Spur ist modelliert; API-Contracts fuer `save`, `resume`, `hold`, `complete`, `cancel`, `fail` sind dokumentiert oder implementiert; bestehende `transition`-Logik ist sauber in den Gesamtvertrag eingeordnet.
-**Naechster Schritt:** zuerst `FLOW-LC-001` umsetzen, danach `FLOW-LC-002` bis `FLOW-LC-006` entlang der neuen Lifecycle-Uebersicht staffeln.
+**Erledigt:** `FlowSpineInstance` fuehrt jetzt Lifecycle-, Resume-, Owner-, Grund- und Abschlussfelder; `domain_ops.ops_flow_spine_instance_events` bildet Timeline/Audit persistent ab; `flow_spines.py` bietet jetzt `PATCH`, `save`, `resume`, `hold`, `complete`, `cancel`, `fail` und `timeline`; `transition` schreibt ebenfalls in die Eventspur und hebt `draft` auf `in_progress`.
+**Checks:** `python -m py_compile app/api/v1/endpoints/flow_spines.py app/domains/operations/models.py alembic/versions/flow_spine_lifecycle_20260417.py tests/test_flow_spines_api.py`, `pytest tests/test_flow_spines_api.py -q --no-cov`
+**Naechster Schritt:** `FLOW-LC-002` bis `FLOW-LC-006` entlang der neuen Lifecycle-Uebersicht staffeln, beginnend mit generischen Workspace-Actions und Resume-/Abbruch-Dialogen im Frontend.
+
+## FLOW-LC-003
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Gemeinsamen Workspace-Lifecycle-Rahmen fuer alle 9 Flow-Spines einziehen: Aktionsleiste, Resume-Hinweis, Timeline und generische Dialoge fuer `save`, `hold`, `complete`, `cancel`, `fail`.
+**Owner:** Codex
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/workflows/flow-spine-instance-lifecycle-overview.md`, `packages/frontend-web/src/components/workflow/FlowSpineWorkspace.tsx`, `packages/frontend-web/src/lib/api/flow-spines.ts`, relevante UI-Tests falls vorhanden
+**Abnahmekriterien:** Der Workspace zeigt Lifecycle-Status, Resume-Ziel und Timeline; die generischen Lifecycle-Aktionen sprechen den neuen Backend-Vertrag an; `cancel` und `fail` erzwingen Pflichtgruende auch im UI; der Rahmen ist prozessneutral fuer alle 9 Flows nutzbar.
+**Naechster Schritt:** Claim committen, dann API-Hooks fuer Lifecycle und den gemeinsamen Workspace-Rahmen implementieren.
 
 ## CRM-PICKER-001
 
