@@ -4,6 +4,7 @@ Business partner master data endpoints.
 
 from __future__ import annotations
 
+import json
 from datetime import datetime, date
 from decimal import Decimal, ROUND_HALF_UP
 from typing import Any, Optional
@@ -999,12 +1000,23 @@ LEGACY_CUSTOMER_FIELD_NAMES = [
 ]
 
 
+_LEGACY_JSON_LIST_FIELDS = {"discount_items", "price_agreements"}
+_LEGACY_JSON_OBJECT_FIELDS = {"tab_23"}
+
+
 def _to_out(row: BusinessPartner) -> BusinessPartnerEnvelope:
     legacy_data: dict[str, Any] = {}
     for field_name in LEGACY_CUSTOMER_FIELD_NAMES:
         value = getattr(row, field_name, None)
         if isinstance(value, Decimal):
             value = float(value)
+        if isinstance(value, str) and (
+            field_name in _LEGACY_JSON_LIST_FIELDS or field_name in _LEGACY_JSON_OBJECT_FIELDS
+        ):
+            try:
+                value = json.loads(value)
+            except (TypeError, ValueError):
+                value = [] if field_name in _LEGACY_JSON_LIST_FIELDS else None
         legacy_data[field_name] = value
 
     return BusinessPartnerEnvelope(
@@ -1221,6 +1233,20 @@ async def create_business_partner(
     partner_id = payload.business_partner.core_identity.partner_id or uuid7()
     row = BusinessPartner(partner_id=partner_id, tenant_id=tenant_id)
     _apply_payload(row, payload.business_partner)
+
+    from app.services.number_range_service import NumberRangeService
+    nrs = NumberRangeService(db)
+    if row.is_customer and not row.debtor_account:
+        try:
+            row.debtor_account = nrs.next_number('debtor_account', tenant_id)
+        except ValueError:
+            pass
+    if row.is_supplier and not row.creditor_account:
+        try:
+            row.creditor_account = nrs.next_number('creditor_account', tenant_id)
+        except ValueError:
+            pass
+
     db.add(row)
     db.commit()
     db.refresh(row)

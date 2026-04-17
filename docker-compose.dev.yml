@@ -49,6 +49,7 @@ services:
     environment:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/valeo
       PYTHONUNBUFFERED: "1"
+      API_DEV_TOKEN: dev-token
       EVENT_BUS_ENABLED: "true"
       EVENT_BUS_PROVIDER: nats
       EVENT_BUS_NATS_URL: nats://nats:4222

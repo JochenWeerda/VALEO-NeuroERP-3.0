@@ -64,12 +64,14 @@ Archiv des vorherigen Boards:
 ## FLOW-LC-005
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Die restlichen sechs Flow-Spine-Prozessraeume mit denselben Resume-/Handover-Mustern wie OTC, P2P und Inventory anbinden.
 **Owner:** Codex
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/workflows/flow-spine-instance-lifecycle-overview.md`, relevante Zielseiten unter `packages/frontend-web/src/pages/**`, ggf. `packages/frontend-web/src/lib/api/flow-spines.ts`
 **Abnahmekriterien:** `harvest-to-settlement`, `contract-to-settlement`, `complaint-to-resolution`, `service-to-customer`, `finance-to-close` und `compliance-to-report` schreiben oder tragen echte Resume-/Handover-Ziele in ihre Fachmasken; die Workflow-Kontexte bleiben beim Wiedereinstieg erhalten.
-**Naechster Schritt:** Claim committen, dann die sechs Zielpfade gegen die realen Fachmasken mappen und jeweils eine schlanke Resume-Bridge einziehen.
+**Erledigt:** `ernte-annahme-erfassung.tsx` schreibt beim Speichern den Resume-Punkt auf die konkrete Annahme-Route und ersetzt nach Erstsave die URL auf `/agrar/ernte-annahme-erfassung/{id}`; `FrmKontraktDetail.tsx` schreibt nach Save auf die echte Kontrakt-Detailroute; `reklamationen.tsx` und `service/anfragen.tsx` sichern vor `neu`- und Detail-Spruengen die jeweiligen Zielpfade; `abschluss-cockpit.tsx` speichert beim Oeffnen den Cockpit-Resume-Punkt und vor Detail-Spruengen den Checklistenpfad; `co2-bilanz.tsx` persistiert die Reporting-Maske selbst als Resume-Ziel.
+**Checks:** `pnpm --dir packages/frontend-web exec tsc --noEmit --pretty false`, `node scripts/docs-governance-check.cjs`
+**Naechster Schritt:** Die verbleibende Vertiefung ist kein generischer Resume-Rahmen mehr, sondern fachliche Feinarbeit: pro Flow konkrete Grundcode-Kataloge, weitergehende Handover in Untermasken und Abschluss-/Abbruchregeln.
 
 ## CRM-PICKER-001
 

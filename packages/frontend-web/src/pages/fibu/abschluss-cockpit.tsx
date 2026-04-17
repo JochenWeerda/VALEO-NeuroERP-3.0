@@ -1,5 +1,5 @@
-import { useMemo } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { useEffect, useMemo } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -8,6 +8,7 @@ import { OperationalCaseHeader } from '@/components/workflow/OperationalCaseHead
 import { OperationalContextPanel } from '@/components/workflow/OperationalContextPanel'
 import { OperationalTimeline } from '@/components/workflow/OperationalTimeline'
 import { apiClient } from '@/lib/api-client'
+import { saveFlowSpineResumeCheckpoint } from '@/lib/api/flow-spines'
 import { useAccountingPeriods, useFibuCockpit } from '@/lib/api/fibu'
 import { summarizeFibuOps } from '@/lib/professional-control-centers'
 import { normalizeOperationalStatus } from '@/lib/operational-status'
@@ -43,6 +44,7 @@ const EMPTY_CLOSING_COCKPIT_SUMMARY: ClosingCockpitSummary = {
 
 export default function AbschlussCockpitPage(): JSX.Element {
   const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
   const workflowInstanceId = searchParams.get('workflowInstanceId')
   const workflowProcess = searchParams.get('workflowProcess')
   const workflowCase = searchParams.get('workflowCase')
@@ -111,6 +113,39 @@ export default function AbschlussCockpitPage(): JSX.Element {
         : 'Kein aktueller Zinsdruck im ausgewerteten Cockpit.',
     },
   ]
+
+  useEffect(() => {
+    if (!workflowProcess || !workflowInstanceId) return
+    void saveFlowSpineResumeCheckpoint(workflowProcess, workflowInstanceId, {
+      resume_node_id: 'close',
+      resume_route: `/fibu/abschluss-cockpit?${searchParams.toString()}`,
+      resume_payload: {
+        screen: 'closing-cockpit',
+        workflowCase: workflowCase || undefined,
+      },
+      business_status: 'abschluss_in_bearbeitung',
+      action_label: 'Close-Cockpit geoeffnet',
+    })
+  }, [workflowCase, workflowInstanceId, workflowProcess, searchParams])
+
+  const openChecklistDetail = async (itemId: string) => {
+    const query = workflowInstanceId ? `?workflowInstanceId=${workflowInstanceId}&workflowProcess=${workflowProcess ?? ''}&workflowCase=${workflowCase ?? ''}` : ''
+    const target = `/fibu/abschluss-checklist-detail/${itemId}${query}`
+    if (workflowProcess && workflowInstanceId) {
+      await saveFlowSpineResumeCheckpoint(workflowProcess, workflowInstanceId, {
+        resume_node_id: 'close',
+        resume_route: target,
+        resume_payload: {
+          screen: 'closing-checklist-detail',
+          checklistId: itemId,
+          workflowCase: workflowCase || undefined,
+        },
+        business_status: 'abschluss_checkliste_in_bearbeitung',
+        action_label: 'Abschluss-Checkliste geoeffnet',
+      })
+    }
+    navigate(target)
+  }
 
   if (isLoading) {
     return <div className="p-6 text-sm text-muted-foreground">Lade Abschluss-Cockpit...</div>
@@ -214,8 +249,8 @@ export default function AbschlussCockpitPage(): JSX.Element {
               </div>
               <div className="flex items-center gap-2">
                 <Badge variant={item.status === 'blocked' ? 'destructive' : 'outline'}>{item.status}</Badge>
-                <Button variant="outline" size="sm" asChild>
-                  <Link to={`/fibu/abschluss-checklist-detail/${item.id}${workflowInstanceId ? `?workflowInstanceId=${workflowInstanceId}&workflowProcess=${workflowProcess ?? ''}&workflowCase=${workflowCase ?? ''}` : ''}`}>Details</Link>
+                <Button variant="outline" size="sm" onClick={() => { void openChecklistDetail(item.id) }}>
+                  Details
                 </Button>
               </div>
             </div>

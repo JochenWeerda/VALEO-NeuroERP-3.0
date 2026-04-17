@@ -4,6 +4,7 @@ import { FileDown, HeadphonesIcon, Plus, Search, Wrench } from 'lucide-react'
 import { useServiceAnfragen, type ServiceAnfrage } from '@/lib/api/betrieb'
 import { ErrorState } from '@/components/ErrorState'
 import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { saveFlowSpineResumeCheckpoint } from '@/lib/api/flow-spines'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -33,6 +34,29 @@ export default function ServiceAnfragenPage(): JSX.Element {
   const { data: anfragen = [], isError, error, refetch } = useServiceAnfragen()
   const workflowContext = readWorkflowEntryContext(searchParams)
 
+  const navigateWithWorkflowResume = async (targetPath: string, resumeNodeId: string): Promise<void> => {
+    const query = workflowContext ? searchParams.toString() : ''
+    const target = `${targetPath}${query ? `?${query}` : ''}`
+    if (workflowContext?.process && workflowContext.instanceId) {
+      await saveFlowSpineResumeCheckpoint(workflowContext.process, workflowContext.instanceId, {
+        resume_node_id: resumeNodeId,
+        resume_route: target,
+        resume_payload: {
+          screen: targetPath.includes('/neu')
+            ? 'service-request-create'
+            : targetPath.includes('/rueckmeldung')
+              ? 'service-feedback'
+              : 'service-request-detail',
+          targetPath,
+          workflowCase: workflowContext.caseNumber || undefined,
+        },
+        business_status: 'servicefall_in_bearbeitung',
+        action_label: `Service-Resume nach ${targetPath}`,
+      })
+    }
+    navigate(target)
+  }
+
   const filteredAnfragen = useMemo(() => {
     if (!searchTerm) return anfragen
     const query = searchTerm.toLowerCase()
@@ -59,7 +83,7 @@ export default function ServiceAnfragenPage(): JSX.Element {
       label: 'Ticket-Nr.',
       render: (a: ServiceAnfrage) => (
         <button
-          onClick={() => navigate(`/service/anfrage/${a.id}`)}
+          onClick={() => { void navigateWithWorkflowResume(`/service/anfrage/${a.id}`, 'service') }}
           className="font-medium text-blue-600 hover:underline"
         >
           {a.nummer}
@@ -108,7 +132,7 @@ export default function ServiceAnfragenPage(): JSX.Element {
           <h1 className="text-3xl font-bold">Service-Anfragen</h1>
           <p className="text-muted-foreground">Kundenservice, Rueckmeldung und Aussendienst in einem Vorgang.</p>
         </div>
-        <Button onClick={() => navigate(`/service/anfrage/neu${workflowContext ? `?${searchParams.toString()}` : ''}`)} className="gap-2">
+        <Button onClick={() => { void navigateWithWorkflowResume('/service/anfrage/neu', 'service') }} className="gap-2">
           <Plus className="h-4 w-4" />
           Neue Anfrage
         </Button>
@@ -154,8 +178,8 @@ export default function ServiceAnfragenPage(): JSX.Element {
                   <p>Export, Dokumentation und Eskalation sind keine isolierten Aktionen mehr, sondern Teil des Ticket-Fortschritts.</p>
                 </div>
                 <div className="grid gap-2">
-                  <Button onClick={() => navigate(`/service/anfrage/${focusRequest.id}`)}>Anfrage oeffnen</Button>
-                  <Button variant="outline" onClick={() => navigate(`/service/rueckmeldung?anfrage_id=${focusRequest.id}`)}>Rueckmeldung erfassen</Button>
+                  <Button onClick={() => { void navigateWithWorkflowResume(`/service/anfrage/${focusRequest.id}`, 'service') }}>Anfrage oeffnen</Button>
+                  <Button variant="outline" onClick={() => { void navigateWithWorkflowResume(`/service/rueckmeldung?anfrage_id=${focusRequest.id}`, 'service') }}>Rueckmeldung erfassen</Button>
                   <Button variant="outline" onClick={() => navigate('/agribusiness/field-service-tasks')}>
                     <Wrench className="mr-2 h-4 w-4" />
                     Aussendienst koordinieren

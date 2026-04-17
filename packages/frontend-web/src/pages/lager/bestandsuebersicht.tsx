@@ -8,6 +8,7 @@ import { useMemo } from 'react'
 import { useInventoryDashboard } from '@/lib/api/dashboard'
 import { useMhdItems, useRennerItems, usePennerItems } from '@/lib/api/inventory'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { saveFlowSpineResumeCheckpoint } from '@/lib/api/flow-spines'
 import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
 
 type PsmArtikel = {
@@ -32,6 +33,37 @@ export default function BestandsuebersichtPage(): JSX.Element {
   const workflowInstanceId = searchParams.get('workflowInstanceId')
   const workflowProcess = searchParams.get('workflowProcess')
   const workflowCase = searchParams.get('workflowCase')
+
+  const buildWorkflowQuery = (): string => {
+    const params = new URLSearchParams()
+    if (workflowContext?.process) params.set('workflowProcess', workflowContext.process)
+    if (workflowContext?.instanceId) params.set('workflowInstanceId', workflowContext.instanceId)
+    if (workflowContext?.caseNumber) params.set('workflowCase', workflowContext.caseNumber)
+    if (workflowContext?.label) params.set('workflowLabel', workflowContext.label)
+    if (workflowContext?.partnerName) params.set('partnerName', workflowContext.partnerName)
+    if (workflowContext?.subject) params.set('subject', workflowContext.subject)
+    if (workflowContext?.entryMode) params.set('entryMode', workflowContext.entryMode)
+    return params.toString()
+  }
+
+  const navigateWithWorkflowResume = async (targetPath: string, resumeNodeId: string): Promise<void> => {
+    const query = buildWorkflowQuery()
+    const target = `${targetPath}${query ? `?${query}` : ''}`
+    if (workflowContext?.process && workflowContext.instanceId) {
+      await saveFlowSpineResumeCheckpoint(workflowContext.process, workflowContext.instanceId, {
+        resume_node_id: resumeNodeId,
+        resume_route: target,
+        resume_payload: {
+          screen: 'inventory-dashboard',
+          targetPath,
+          workflowCase: workflowContext.caseNumber || undefined,
+        },
+        business_status: 'lagerfall_in_bearbeitung',
+        action_label: `Inventory-Resume nach ${targetPath}`,
+      })
+    }
+    navigate(target)
+  }
 
   // Prüfe ob echte Daten vorhanden sind
   const hasData = Boolean(bestand && bestand.totalArticles > 0)
@@ -254,7 +286,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
                 variant="outline" 
                 size="sm" 
                 className="text-orange-700 border-orange-300 hover:bg-orange-100"
-                onClick={() => navigate('/lager/mhd-uebersicht')}
+                onClick={() => { void navigateWithWorkflowResume('/lager/mhd-uebersicht', 'quality') }}
               >
                 Zur Übersicht <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
@@ -302,7 +334,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
                 variant="outline" 
                 size="sm" 
                 className="text-red-700 border-red-300 hover:bg-red-100"
-                onClick={() => navigate('/lager/psm-abverkauf')}
+                onClick={() => { void navigateWithWorkflowResume('/lager/psm-abverkauf', 'quality') }}
               >
                 Zur Übersicht <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
@@ -353,7 +385,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
                 variant="outline" 
                 size="sm" 
                 className="text-green-700 border-green-300 hover:bg-green-100"
-                onClick={() => navigate('/lager/renner-liste')}
+                onClick={() => { void navigateWithWorkflowResume('/lager/renner-liste', 'inventory') }}
               >
                 Vollständige Liste <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
@@ -397,7 +429,7 @@ export default function BestandsuebersichtPage(): JSX.Element {
                 variant="outline" 
                 size="sm" 
                 className="text-slate-700 border-slate-300 hover:bg-slate-100"
-                onClick={() => navigate('/lager/penner-liste')}
+                onClick={() => { void navigateWithWorkflowResume('/lager/penner-liste', 'inventory') }}
               >
                 Vollständige Liste <ChevronRight className="h-4 w-4 ml-1" />
               </Button>

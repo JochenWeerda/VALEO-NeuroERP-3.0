@@ -19,6 +19,10 @@ def _new_flow_spine_instance_id() -> str:
     return str(uuid4())
 
 
+def _new_flow_spine_event_id() -> str:
+    return str(uuid4())
+
+
 class WaageStatus(str, enum.Enum):
     """Waage Status Enum"""
     AKTIV = "aktiv"
@@ -995,11 +999,61 @@ class FlowSpineInstance(Base):
     entry_mode = Column(String(80), nullable=True)
     linked_document_id = Column(String(120), nullable=True)
     linked_document_type = Column(String(80), nullable=True)
+    lifecycle_status = Column(String(32), nullable=False, default="draft", index=True)
+    business_status = Column(String(120), nullable=True)
     node_statuses = Column(JSONB, nullable=False, default=dict)
     active_node_id = Column(String(120), nullable=True)
+    resume_node_id = Column(String(120), nullable=True)
+    resume_route = Column(String(255), nullable=True)
+    resume_payload = Column(JSONB, nullable=False, default=dict)
+    assigned_owner = Column(String(120), nullable=True)
     last_actor = Column(String(120), nullable=True)
     last_action_label = Column(String(255), nullable=True)
+    last_activity_at = Column(DateTime(timezone=True), server_default=func.now())
+    blocked_until = Column(DateTime(timezone=True), nullable=True)
+    completion_reason_code = Column(String(120), nullable=True)
+    cancellation_reason_category = Column(String(80), nullable=True)
+    cancellation_reason_code = Column(String(120), nullable=True)
+    failure_reason_category = Column(String(80), nullable=True)
+    failure_reason_code = Column(String(120), nullable=True)
+    reason_note = Column(Text, nullable=True)
+    closed_at = Column(DateTime(timezone=True), nullable=True)
+    closed_by = Column(String(120), nullable=True)
+    cancelled_at = Column(DateTime(timezone=True), nullable=True)
+    cancelled_by = Column(String(120), nullable=True)
+    failed_at = Column(DateTime(timezone=True), nullable=True)
+    failed_by = Column(String(120), nullable=True)
+    version_no = Column(Integer, nullable=False, default=1)
     tenant_id = Column(String(120), nullable=False, default="default", index=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class FlowSpineInstanceEvent(Base):
+    """Timeline- und Auditspur fuer Flow-Spine-Instanzen."""
+
+    __tablename__ = "ops_flow_spine_instance_events"
+    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+
+    id = Column(String, primary_key=True, default=_new_flow_spine_event_id)
+    instance_id = Column(
+        String(36),
+        ForeignKey("domain_ops.ops_flow_spine_instances.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    process_key = Column(String(120), nullable=False, index=True)
+    tenant_id = Column(String(120), nullable=False, default="default", index=True)
+    event_type = Column(String(60), nullable=False, index=True)
+    from_lifecycle_status = Column(String(32), nullable=True)
+    to_lifecycle_status = Column(String(32), nullable=True)
+    from_business_status = Column(String(120), nullable=True)
+    to_business_status = Column(String(120), nullable=True)
+    node_id = Column(String(120), nullable=True)
+    actor_id = Column(String(120), nullable=True)
+    reason_category = Column(String(80), nullable=True)
+    reason_code = Column(String(120), nullable=True)
+    reason_note = Column(Text, nullable=True)
+    payload = Column(JSONB, nullable=False, default=dict)
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)
 
