@@ -31,6 +31,7 @@ import {
   Users,
   Zap,
   Search,
+  Microscope,
 } from 'lucide-react'
 import type { RawNavItem } from '@/app/navigation/types'
 
@@ -256,6 +257,14 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
             icon: Calculator,
             module: '@/pages/futtermittel/rationsoptimierung',
             preferredPath: 'futtermittel/rationsoptimierung',
+            mcp: { businessDomain: 'agrar', scope: 'agrar:read' },
+          },
+          {
+            id: 'grundfutteranalysen',
+            label: 'Grundfutter-Analysen',
+            icon: Microscope,
+            module: '@/pages/futtermittel/grundfutteranalysen',
+            preferredPath: 'futtermittel/grundfutteranalysen',
             mcp: { businessDomain: 'agrar', scope: 'agrar:read' },
           },
         ],

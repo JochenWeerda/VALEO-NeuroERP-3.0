@@ -111,6 +111,7 @@ from app.api.v1.endpoints import (
     agrar_settlements,
     harvest_acceptance,
     rations_optimization,
+    grundfutter_analysen,
     quality_protocols,
     daily_prices,
     self_billing,
@@ -771,6 +772,13 @@ api_router.include_router(
     rations_optimization.router,
     prefix="/agrar/rations-optimization",
     tags=["agrar", "futtermittel", "rations-optimization"]
+)
+
+# Grundfutter-Laboranalysen (LUFA / VDLUFA-Import)
+api_router.include_router(
+    grundfutter_analysen.router,
+    prefix="/agrar",
+    tags=["agrar", "futtermittel", "grundfutter-analysen"]
 )
 
 # ── L3-Connect Gap Closure Routers ──────────────────────────────
