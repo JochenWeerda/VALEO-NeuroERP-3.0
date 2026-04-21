@@ -63,6 +63,7 @@ import {
   type SeasonProfile,
   type FanCalibrationPayload,
   type ConstraintStatusItem,
+  type PenaltySummary,
 } from '@/lib/api/rations-optimization'
 
 // ---------------------------------------------------------------------------
@@ -1144,7 +1145,7 @@ function Wizard({
                       Weide-/Frischgrasaufnahme wird separat bilanziert (DLG 417/443).
                       Weidemineral Mg/Na wird automatisch als Sicherheitsbaustein gefuehrt.
                     </div>
-                    {seasonProfile && seasonProfile.startsWith('spring') && (
+                    {seasonProfile?.startsWith('spring') && (
                       <div className="font-semibold">
                         Aktives Profil: <span className="font-mono">pmr_pasture_spring</span> (saisonale
                         Fruehjahrsweide mit K/Mg-Risiko-Korridoren).
@@ -1765,11 +1766,17 @@ function FanCalibrationPanel({
   )
 }
 
-function ConstraintStatusPanel({ items }: { items: ConstraintStatusItem[] }) {
+function ConstraintStatusPanel({
+  items,
+  summary,
+}: {
+  items: ConstraintStatusItem[]
+  summary?: PenaltySummary
+}) {
   const hardViolations = items.filter((it) => it.status === 'hard_violated')
   const softViolations = items.filter((it) => it.status === 'violated')
   const ok = items.filter((it) => it.status === 'ok')
-  const totalPenalty = items.reduce((s, it) => s + (it.penalty_cost ?? 0), 0)
+  const totalPenalty = summary?.total ?? items.reduce((s, it) => s + (it.penalty_cost ?? 0), 0)
 
   return (
     <div className={card()}>
@@ -1811,9 +1818,19 @@ function ConstraintStatusPanel({ items }: { items: ConstraintStatusItem[] }) {
         })}
       </div>
       {totalPenalty > 0 && (
-        <div className="mt-2 flex justify-between text-[11px] pt-1 border-t" style={{ borderColor: '#F3F4F6' }}>
-          <span style={{ color: C.muted }}>Summe Strafkosten</span>
-          <span className="font-semibold font-mono">{totalPenalty.toFixed(2)}</span>
+        <div className="mt-2 pt-1 border-t" style={{ borderColor: '#F3F4F6' }}>
+          <div className="flex justify-between text-[11px]">
+            <span style={{ color: C.muted }}>Summe Strafkosten</span>
+            <span className="font-semibold font-mono">{totalPenalty.toFixed(2)}</span>
+          </div>
+          {summary?.by_class && (
+            <div className="flex justify-between text-[10px] mt-0.5 font-mono" style={{ color: C.muted }}>
+              <span>Klassen A / B / C</span>
+              <span>
+                {summary.by_class.A.toFixed(2)} · {summary.by_class.B.toFixed(2)} · {summary.by_class.C.toFixed(2)}
+              </span>
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -2119,7 +2136,10 @@ function Workbench({
 
         {/* Constraint-Status: hart / weich mit Klasse A/B/C -------------------- */}
         {result?.constraint_status && result.constraint_status.length > 0 && (
-          <ConstraintStatusPanel items={result.constraint_status} />
+          <ConstraintStatusPanel
+            items={result.constraint_status}
+            summary={result.penalty_summary}
+          />
         )}
 
         {/* DLG Strukturkontrolle (kompakt) */}
