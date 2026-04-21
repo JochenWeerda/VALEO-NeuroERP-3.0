@@ -24,7 +24,7 @@ import math
 import os
 import re
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 import httpx
 from fastapi import APIRouter, File, Header, HTTPException, Query, Request, UploadFile
@@ -1202,7 +1202,32 @@ def _diagnose_infeasibility(
             ),
         })
 
-    return {"gaps": gaps, "suggestions": suggestions}
+    # FAN-MODE-002: Infeasibility-Reason kategorisieren, damit Bruder-Regression (§10.1)
+    # keine pauschalen infeasibles mehr toleriert, sondern einen expliziten Grund erwartet.
+    reason: Optional[str] = None
+    text = " ".join(gaps).lower()
+    if "magnesiumdichte" in text or "magnesium" in text and "mg" in text:
+        reason = "mg_deficit"
+    elif "kalium" in text or "k/mg" in text or "k:mg" in text:
+        reason = "k_mg_antagonism"
+    elif "me-kapaz" in text or "energie" in text:
+        reason = "energy_deficit"
+    elif "sidp" in text or "protein" in text:
+        reason = "protein_deficit"
+    elif "xl" in text:
+        reason = "fat_density"
+    elif "cp" in text:
+        reason = "cp_density"
+    elif "calcium" in text:
+        reason = "ca_deficit"
+    elif "phosphor" in text:
+        reason = "p_deficit"
+    elif "natrium" in text:
+        reason = "na_deficit"
+    else:
+        reason = "generic"
+
+    return {"reason": reason, "gaps": gaps, "suggestions": suggestions}
 
 
 # ---------------------------------------------------------------------------
@@ -1271,70 +1296,186 @@ def _concentrate_displacement_factor(feeding_type: str, concentrate_dmi_kg: floa
 
 
 # ---------------------------------------------------------------------------
-# FAN-MODE-V1: Constraint-Klassifikation (Spec §5.2.2)
+# FAN-MODE-V1 / FAN-MODE-002: Hart/Weich-Klassifikation und Penalty-Score (Spec §5.2)
 # ---------------------------------------------------------------------------
 
-# Mapping: Constraint-Name (wie in _cr() gebildet) -> (Kategorie, Klasse, Normalisierungsbreite)
-# Klasse None = hart (nicht relaxierbar); sonst "A" | "B" | "C".
-# Normalisierungsbasis richtet sich nach Spec §5.2 und ist als dimensionslose Toleranzbreite zu verstehen.
-_CONSTRAINT_CLASSIFICATION: Dict[str, Tuple[str, Optional[str], str, float]] = {
-    # name                  -> (hart_or_weich, Klasse, normalisierungs_einheit, halbbreite)
-    "ME (MJ/d)":              ("hart",  None, "MJ/d",       0.0),   # hart bei Unterdeckung (>= target ueber _cr)
-    "sidP (g/d)":             ("hart",  None, "g/d",        0.0),
-    "TM-Aufnahme (kg/d)":     ("hart",  None, "kg/d",       0.0),
-    "aNDFom (g/d)":           ("weich", "B",  "g/d",        0.0),   # Struktur
-    "aNDFomGF (g/kg TM)":     ("weich", "B",  "g/kg TM",   30.0),
-    "pabKH (g/kg TM)":        ("weich", "B",  "g/kg TM",   20.0),
-    "XL Rohfett (g/kg TM)":   ("weich", "C",  "g/kg TM",    6.0),
-    "peNDF (g/kg TM)":        ("weich", "B",  "g/kg TM",   15.0),
-    "Magnesium (g/d)":        ("hart",  None, "g/d",        0.0),
-    "Calcium (g/d)":          ("hart",  None, "g/d",        0.0),
-    "Phosphor (g/d)":         ("hart",  None, "g/d",        0.0),
-    "Grundfutteranteil (%TM)":("weich", "B",  "%TM",        5.0),
+# Signatur eines klassifizierten Constraints:
+#   kind       -> "hart" | "weich"    (Slice 2: weich hat immer eine Klasse)
+#   klass      -> "A" | "B" | "C" | None
+#   unit       -> Anzeige-Einheit
+#   halfwidth  -> dimensionslose Toleranzbreite des Zielkorridors (Spec §5.2.1)
+#   direction  -> "min" (actual muss >= target sein) | "max" (actual <= target) | "target" (bilateral)
+_CONSTRAINT_CLASSIFICATION: Dict[str, Tuple[str, Optional[str], str, float, str]] = {
+    # name                        -> (kind,   class, unit,      halfwidth, direction)
+    "ME (MJ/d)":                    ("hart",  None,  "MJ/d",     0.0,     "min"),
+    "sidP (g/d)":                   ("hart",  None,  "g/d",      0.0,     "min"),
+    "TM-Aufnahme (kg/d)":           ("hart",  None,  "kg/d",     0.0,     "target"),
+    "aNDFom (g/d)":                 ("weich", "B",   "g/d",    400.0,     "min"),
+    "aNDFomGF (g/kg TM)":           ("weich", "B",   "g/kg TM", 30.0,     "min"),
+    "pabKH (g/kg TM)":              ("weich", "B",   "g/kg TM", 20.0,     "max"),
+    "XL Rohfett (g/kg TM)":         ("weich", "C",   "g/kg TM",  6.0,     "max"),
+    "peNDF (g/kg TM)":              ("weich", "B",   "g/kg TM", 15.0,     "min"),
+    "Magnesium (g/d)":              ("hart",  None,  "g/d",      0.0,     "min"),
+    "Calcium (g/d)":                ("hart",  None,  "g/d",      0.0,     "min"),
+    "Phosphor (g/d)":               ("hart",  None,  "g/d",      0.0,     "min"),
+    "Grundfutteranteil (%TM)":      ("weich", "B",   "%TM",      5.0,     "min"),
+    # Zusatz-Constraints, die im LP aktiv sind und ueber _build_constraint_status_v2
+    # direkt aus supply/density Werten gespeist werden:
+    "RMD (g N/kg TM)":              ("weich", "A",   "g N/kg TM", 1.5,    "target"),
+    "Kalium (g/d)":                 ("weich", "A",   "g/d",     30.0,     "max"),
+    "ME-Dichte (MJ/kg TM)":         ("weich", "A",   "MJ/kg TM", 0.5,     "max"),
+    "sidP-Zielkorridor (g/d)":      ("weich", "A",   "g/d",    100.0,     "target"),
+    "CP-Dichte (g/kg TM)":          ("weich", "C",   "g/kg TM", 20.0,     "max"),
+    "K:Mg-Ratio":                   ("weich", "A",   "",         2.0,     "max"),
 }
 
 
-def _derive_constraint_status_from_report(
+def _classify_constraint(name: str) -> Tuple[str, Optional[str], str, float, str]:
+    """Liefert Klassifikationstupel; unbekannte Namen fallen auf weich/C/keine Normierung."""
+    return _CONSTRAINT_CLASSIFICATION.get(name, ("weich", "C", "", 0.0, "target"))
+
+
+def _compute_penalty(
+    name: str,
+    actual: float,
+    target: float,
+    halfwidth: float,
+    direction: str,
+    relaxation_policy: str,
+    kind: str,
+    klass: Optional[str],
+) -> Tuple[float, float, str]:
+    """Berechnet (deviation_norm, penalty_cost, status_string) gemaess Spec §5.2.1.
+
+    Verletzungen werden nur in Richtung der Constraint-Bedingung gewertet:
+      - direction=min:  actual < target   => violation (target - actual)
+      - direction=max:  actual > target   => violation (actual - target)
+      - direction=target: beide Richtungen => |actual - target|
+    """
+    if halfwidth <= 0 or kind == "hart":
+        # Harte Constraints: keine Penalty im weichen Sinn; Verletzung => hard_violated
+        if direction == "min" and actual < target:
+            return 0.0, 0.0, "hard_violated"
+        if direction == "max" and actual > target:
+            return 0.0, 0.0, "hard_violated"
+        return 0.0, 0.0, "ok"
+
+    if direction == "min":
+        violation = max(0.0, target - actual)
+    elif direction == "max":
+        violation = max(0.0, actual - target)
+    else:
+        violation = abs(actual - target)
+
+    deviation_norm = violation / halfwidth if halfwidth > 0 else 0.0
+    factor = _RELAXATION_FACTORS.get(relaxation_policy, 1.0)
+    klass_weight = _PENALTY_CLASS_WEIGHTS.get(klass or "C", 1.0)
+    penalty = _PENALTY_BASE_COST * klass_weight * factor * deviation_norm
+    status = "ok" if deviation_norm < 1e-6 else "violated"
+    return deviation_norm, penalty, status
+
+
+def _build_constraint_status_v2(
     constraint_report: List[Dict[str, Any]],
     relaxation_policy: str,
+    extras: Optional[List[Dict[str, Any]]] = None,
 ) -> List[Dict[str, Any]]:
-    """Leitet aus dem bestehenden constraint_report einen FAN-V1-konformen Status ab.
+    """FAN-MODE-002 Constraint-Status: echte Penalty-Kosten je Constraint (Spec §5.2).
 
-    Slice 1: der Solver ist noch nicht dreistufig umgestellt, deshalb ist penalty_cost
-    in der Regel 0. Spaetestens in Slice 2/6 werden hier echte Strafkosten befuellt.
+    Aufbau:
+      1. Jeder Eintrag aus constraint_report wird klassifiziert.
+      2. Zusaetzliche, im Report nicht aufgefuehrte weiche Kennzahlen (RMD, K:Mg, etc.)
+         koennen ueber 'extras' nachgereicht werden.
+      3. Fuer jede weiche Nebenbedingung wird penalty_cost nach der Formel aus §5.2.1
+         berechnet: penalty = base × class_weight × relaxation_factor × deviation_norm.
     """
-    factor = _RELAXATION_FACTORS.get(relaxation_policy, 1.0)
     out: List[Dict[str, Any]] = []
+    seen_names: Set[str] = set()
+
     for item in constraint_report:
         name = item.get("name", "")
-        kind, klass, unit, halfwidth = _CONSTRAINT_CLASSIFICATION.get(
-            name, ("weich", "C", item.get("unit", ""), 0.0)
-        )
+        seen_names.add(name)
+        kind, klass, unit, halfwidth, direction = _classify_constraint(name)
         actual = float(item.get("actual") or 0.0)
         target = float(item.get("target") or 0.0)
-        deviation_norm = 0.0
-        penalty = 0.0
-        status = "ok" if item.get("fulfilled") else "violated"
-        if halfwidth > 0 and target > 0:
-            deviation_norm = abs(actual - target) / halfwidth
-        if kind == "weich" and klass:
-            klass_w = _PENALTY_CLASS_WEIGHTS.get(klass, 1.0)
-            penalty = _PENALTY_BASE_COST * klass_w * factor * deviation_norm
+        dev, pen, status = _compute_penalty(
+            name, actual, target, halfwidth, direction, relaxation_policy, kind, klass,
+        )
+        # Hard-check via bestehendes fulfilled-Flag
+        if kind == "hart" and not item.get("fulfilled", True):
+            status = "hard_violated"
         out.append({
             "name": name,
             "kind": kind,
             "class": klass,
-            "unit": unit,
-            "target": target,
-            "actual": actual,
+            "unit": unit or item.get("unit", ""),
+            "target": round(target, 3),
+            "actual": round(actual, 3),
             "difference": item.get("difference"),
-            "fulfilled": bool(item.get("fulfilled")),
-            "deviation_norm": round(deviation_norm, 3),
-            "penalty_cost": round(penalty, 4),
+            "fulfilled": bool(item.get("fulfilled", True)),
+            "deviation_norm": round(dev, 3),
+            "penalty_cost": round(pen, 4),
             "status": status,
             "source": "constraint_report",
         })
+
+    for extra in extras or []:
+        name = extra.get("name", "")
+        if name in seen_names:
+            continue
+        kind, klass, unit, halfwidth, direction = _classify_constraint(name)
+        actual = float(extra.get("actual") or 0.0)
+        target = float(extra.get("target") or 0.0)
+        dev, pen, status = _compute_penalty(
+            name, actual, target, halfwidth, direction, relaxation_policy, kind, klass,
+        )
+        out.append({
+            "name": name,
+            "kind": kind,
+            "class": klass,
+            "unit": extra.get("unit", unit),
+            "target": round(target, 3),
+            "actual": round(actual, 3),
+            "difference": round(actual - target, 3),
+            "fulfilled": dev < 1e-6,
+            "deviation_norm": round(dev, 3),
+            "penalty_cost": round(pen, 4),
+            "status": status,
+            "source": extra.get("source", "supply_metric"),
+        })
+
     return out
+
+
+def _summarize_penalty(status: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """Aggregiert die Strafkosten pro Klasse und insgesamt."""
+    totals = {"A": 0.0, "B": 0.0, "C": 0.0}
+    hard_violations = 0
+    soft_violations = 0
+    for row in status:
+        if row["kind"] == "hart":
+            if row["status"] == "hard_violated":
+                hard_violations += 1
+            continue
+        klass = row.get("class") or "C"
+        totals[klass] = totals.get(klass, 0.0) + float(row.get("penalty_cost") or 0.0)
+        if row["status"] == "violated":
+            soft_violations += 1
+    total = sum(totals.values())
+    return {
+        "total": round(total, 4),
+        "by_class": {k: round(v, 4) for k, v in totals.items()},
+        "soft_violations": soft_violations,
+        "hard_violations": hard_violations,
+    }
+
+
+# Backwards-compat Alias (Slice 1 hat diese Funktion bereits aufgerufen)
+def _derive_constraint_status_from_report(
+    constraint_report: List[Dict[str, Any]],
+    relaxation_policy: str,
+) -> List[Dict[str, Any]]:
+    return _build_constraint_status_v2(constraint_report, relaxation_policy)
 
 
 def _build_response(
@@ -1391,6 +1532,7 @@ def _build_response(
             "nutrient_supply": {},
             "constraint_report": [],
             "constraint_status": constraint_status_from_lp,
+            "penalty_summary": {"total": 0.0, "by_class": {"A": 0.0, "B": 0.0, "C": 0.0}, "soft_violations": 0, "hard_violations": 0},
             "dlg_indicators": {},
             "warnings": warnings,
             "feed_suggestions": hint.get("suggestions", []),
@@ -1807,11 +1949,55 @@ def _build_response(
         }
         warnings.extend(pasture_warnings)
 
-    # FAN-MODE-V1: Constraint-Status aus LP (Slice 2 befuellt penalty_cost; Slice 1 leitet ab).
-    constraint_status = constraint_status_from_lp or _derive_constraint_status_from_report(
+    # FAN-MODE-002: Constraint-Status mit echter Penalty-Berechnung je weichem Constraint.
+    # Neben den constraint_report-Eintraegen werden weitere weiche Metriken (RMD, Kalium,
+    # K:Mg-Ratio, ME-Dichte, sidP-Oberkorridor, CP-Dichte) aus der Versorgung abgeleitet.
+    k_mg_ratio = (k_sup / mg_sup) if mg_sup > 0 else 0.0
+    me_density_actual = (me_sup / total_dmi) if total_dmi > 0 else 0.0
+    constraint_status_extras: List[Dict[str, Any]] = [
+        {
+            "name": "RMD (g N/kg TM)",
+            "actual": rmd_ration if rmd_ration is not None else 0.0,
+            "target": 0.0,  # DLG-Ziel -1.5..0, Halbbreite 1.5 (bilateral)
+            "unit": "g N/kg TM",
+        },
+        {
+            "name": "Kalium (g/d)",
+            "actual": k_sup,
+            "target": req.k_max_g,
+            "unit": "g/d",
+        },
+        {
+            "name": "ME-Dichte (MJ/kg TM)",
+            "actual": me_density_actual,
+            "target": 12.5,
+            "unit": "MJ/kg TM",
+        },
+        {
+            "name": "sidP-Zielkorridor (g/d)",
+            "actual": sidp_sup,
+            "target": req.sidp_g,
+            "unit": "g/d",
+        },
+        {
+            "name": "CP-Dichte (g/kg TM)",
+            "actual": (cp_sup / total_dmi) if total_dmi > 0 else 0.0,
+            "target": 165.0 if not pasture_pmr else 185.0,
+            "unit": "g/kg TM",
+        },
+        {
+            "name": "K:Mg-Ratio",
+            "actual": k_mg_ratio,
+            "target": 4.0,  # Zielobergrenze; ab > 6 Grastetanie-Risiko
+            "unit": "",
+        },
+    ]
+    constraint_status = constraint_status_from_lp or _build_constraint_status_v2(
         constraint_report,
         relaxation_policy,
+        extras=constraint_status_extras,
     )
+    penalty_summary = _summarize_penalty(constraint_status)
 
     return {
         "status": "optimal",
@@ -1822,6 +2008,7 @@ def _build_response(
         "nutrient_supply": nutrient_supply,
         "constraint_report": constraint_report,
         "constraint_status": constraint_status,
+        "penalty_summary": penalty_summary,
         "dlg_indicators": dlg_indicators,
         "forage_performance": {
             "feeding_type": feeding_type,
