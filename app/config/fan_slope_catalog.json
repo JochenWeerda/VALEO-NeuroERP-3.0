@@ -1,0 +1,91 @@
+{
+  "_meta": {
+    "version": "2026-04-21-v1",
+    "source": "VALEO-NeuroERP internal derivation from DLG-Merkblatt 503 / 504 (GfE 2023)",
+    "description": "FAN-abhaengige Koeffizienten slope_ME [MJ/kg TM] und k_FAN1 [1/FAN] je Futtergruppe. ME(FANi) = ME_FAN1 + slope_ME * (FANi - 1). Passage-k-Update fuer den sidP-Transport folgt einer linearen FAN-Kurve. Eintrage tragen ein source-Flag: 'exact' = direkt aus DLG 503/504-Beispielreihen; 'mapped' = aus der naechsten DLG-Hauptgruppe uebertragen; 'fallback' = konservativer Gruppenstandard, in der Response als Warnhinweis sichtbar."
+  },
+  "base_fan": 1.0,
+  "groups": {
+    "roughage_pasture_spring_young": {
+      "label": "Weide Fruehjahr jung",
+      "slope_me": -0.12,
+      "k_fan1": 0.06,
+      "source": "exact",
+      "season_profiles": ["spring_young"]
+    },
+    "roughage_pasture_spring_mid": {
+      "label": "Weide Fruehjahr mittel",
+      "slope_me": -0.10,
+      "k_fan1": 0.05,
+      "source": "exact",
+      "season_profiles": ["spring_mid"]
+    },
+    "roughage_pasture_other": {
+      "label": "Weide Sommer/Herbst",
+      "slope_me": -0.08,
+      "k_fan1": 0.04,
+      "source": "mapped",
+      "season_profiles": ["summer_young", "summer_mid", "summer_late", "autumn"]
+    },
+    "roughage_grass_silage": {
+      "label": "Grassilage",
+      "slope_me": -0.08,
+      "k_fan1": 0.04,
+      "source": "mapped"
+    },
+    "roughage_maize_silage": {
+      "label": "Maissilage",
+      "slope_me": -0.06,
+      "k_fan1": 0.03,
+      "source": "exact"
+    },
+    "roughage_hay": {
+      "label": "Heu",
+      "slope_me": -0.05,
+      "k_fan1": 0.02,
+      "source": "mapped"
+    },
+    "roughage_straw": {
+      "label": "Stroh",
+      "slope_me": -0.03,
+      "k_fan1": 0.01,
+      "source": "fallback"
+    },
+    "roughage_juice_feed": {
+      "label": "Saftfutter / Nassnebenprodukt",
+      "slope_me": -0.04,
+      "k_fan1": 0.02,
+      "source": "mapped"
+    },
+    "concentrate_cereal": {
+      "label": "Getreide (Mais/Weizen/Gerste)",
+      "slope_me": -0.04,
+      "k_fan1": 0.03,
+      "source": "exact"
+    },
+    "concentrate_protein": {
+      "label": "Proteinkonzentrat (RES/SES)",
+      "slope_me": -0.05,
+      "k_fan1": 0.03,
+      "source": "exact"
+    },
+    "concentrate_mix": {
+      "label": "Milchleistungsfutter",
+      "slope_me": -0.05,
+      "k_fan1": 0.03,
+      "source": "mapped"
+    },
+    "mineral_supplement": {
+      "label": "Mineralfutter / Supplement",
+      "slope_me": 0.0,
+      "k_fan1": 0.0,
+      "source": "exact"
+    },
+    "default": {
+      "label": "Generische Fallback-Gruppe",
+      "slope_me": -0.05,
+      "k_fan1": 0.025,
+      "source": "fallback"
+    }
+  }
+}
