@@ -124,6 +124,13 @@ export interface ConstraintStatusItem {
   source?: string
 }
 
+export interface PenaltySummary {
+  total: number
+  by_class: { A: number; B: number; C: number }
+  soft_violations: number
+  hard_violations: number
+}
+
 export interface FeedIngredient {
   id: string
   name: string
@@ -240,6 +247,7 @@ export interface OptimizationResult {
   nutrient_supply: NutrientSupply
   constraint_report: ConstraintReportItem[]
   constraint_status?: ConstraintStatusItem[]
+  penalty_summary?: PenaltySummary
   dlg_indicators?: DlgIndicators
   warnings: string[]
   metadata?: Record<string, unknown>
