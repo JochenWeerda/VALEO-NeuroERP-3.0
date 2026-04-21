@@ -25,23 +25,29 @@ Archiv des vorherigen Boards:
 - Fuer den Flow-Spine-Kern liegt jetzt eine gemeinsame Lifecycle-Zieldoku vor:
   - [flow-spine-instance-lifecycle-overview.md](C:/Users/Jochen/VALEO-NeuroERP-3.0/docs/workflows/flow-spine-instance-lifecycle-overview.md)
 
-## FAN-MODE-V1 (Spec freigegeben)
+## FAN-MODE-V1 (abgeschlossen 2026-04-21)
 
 **Von:** Codex
-**Stand:** Spezifikation freigegeben, Umsetzung noch nicht gestartet
-**Ziel:** Integration von GfE-2023 / FAN1 ⇄ FANi in Solver, API-Contract und Wizard. Sechs Slices `FAN-MODE-001` … `FAN-MODE-006`, jeder einzeln abnahmefähig.
+**Stand:** alle sechs Slices umgesetzt, committed und gruen; 63 FAN-MODE-Gate-Tests plus bestehende Rations-Regression passen (266 pass + 6 pre-existing wave74-Fehler, unabhaengig von FAN-MODE).
 **Freigegebene Spezifikation:** [docs/project-context/rations-optimization-fan1-fani-spec-2026-04-21.md](C:/Users/Jochen/VALEO-NeuroERP-3.0/docs/project-context/rations-optimization-fan1-fani-spec-2026-04-21.md)
 **Kernentscheidungen V1 (alle 2026-04-21 freigegeben, siehe §11.1):**
 - `fan_tolerance=0.05`, warn `0.10`, max 5 Iterationen
 - FAN-Presets `2.5 / 3.0 / 3.5` + Freiwert
 - `relaxation_policy` dreistufig `strict` / `standard` / `soft`, Default `standard`
-- Strafterme **dimensionslos normiert** auf Zielkorridor, Basis 1,0 €, Klassen A ×10 / B ×3 / C ×1
+- Strafterme **dimensionslos normiert** auf Zielkorridor, Basis 1,0 EUR, Klassen A x10 / B x3 / C x1
 - Drei-Block-Limits als versionierte **Policy-Profile** (`tmr_standard`, `pmr_standard`, `pmr_pasture_spring`), Override nur im Expertenmodus
 - FAN-Formel-Katalog mit **Herkunftsflag** `exact | mapped | fallback` (Mapping auf DLG-Hauptgruppen GF/KF/SF, saisonal bei Weide/Gras)
 - Wizard-FAN-Modus **sichtbar-kompakt** (Default `auto_iterative` direkt sichtbar, Reference/EvaluationOnly einklappbar)
 - Bruder-Regression als **fachlich differenziertes** Abnahmekriterium (kein technisches False-Infeasible)
-**Offene Risiken:** siehe §13 der Spec (numerische Stabilität FAN-Iteration, UX-Komplexität, additive API, DLG-Tabellenpflege).
-**Nächster Schritt:** Slice `FAN-MODE-001` claimen (Datenvertrag + Request/Response-Erweiterung, ohne Solver-Änderung).
+**Abgeschlossene Slices und zugehoerige Commits:**
+- FAN-MODE-001: additiver Datenvertrag, neue Request-/Response-Felder, `_resolve_runtime_options`, Policy-/Season-Enums (commit vor dieser Session, +11 Gate-Tests).
+- FAN-MODE-002: Hart/Weich-Split mit normierter Penalty (`_build_constraint_status_v2`, `_compute_penalty`, `_summarize_penalty`), erweiterte Infeasibility-Diagnose (commit `82b02735c`, +11 Gate-Tests).
+- FAN-MODE-003: Fixpunkt-FAN-Iteration (`_apply_fan_effect`, `_fani_from_result`) mit Katalog `app/config/fan_slope_catalog.json` und drei Modi `auto_iterative` / `reference` / `evaluation_only`; Startwert aus geschaetzter DMI fuer schnelle Konvergenz (commit `f0dce8abb`, +12 Gate-Tests).
+- FAN-MODE-004: Wizard-UI-Erweiterung in `rationsoptimierung.tsx` (Bewertungsmodus-Block, Reference-Presets, Advanced-Optionen) und Ergebnispanels `FanCalibrationPanel` + `ConstraintStatusPanel` in der Workbench (commit `b6bd983c7`).
+- FAN-MODE-005: Saisonales Weideprofil im UI (PMR+Weide oeffnet Advanced, preset `spring_mid`, zeigt aktives Profil `pmr_pasture_spring`); Backend-Auto-Mapping in `_resolve_policy_profile` abgedeckt (commit `9a035ddd8`, +7 Gate-Tests).
+- FAN-MODE-006: Strafsatz-Konfiguration vollstaendig sichtbar (Normalisierung, Klassen A/B/C, relaxation-Policy Monotonie), `penalty_summary` im Response und in der UI (commit `769cd1527`, +10 Gate-Tests).
+**Offene Risiken / Follow-ups:** siehe §13 der Spec; ausserdem `tests/test_process_kernel_wave74_rations_optimization.py` setzt noch auf die entfallene Funktion `get_rations_base_url` und ist damit **unabhaengig von FAN-MODE-V1 pre-existing rot** (eigene Slice-Aufgabe).
+**Naechster Schritt:** Beobachtung der Fruehjahrsration-Regression unter `pmr_pasture_spring` in der Praxis, anschliessend optionaler Spec-Folge-Slice fuer explizite Slack-Variablen im Solver (Vollwert-3-Stage-Objective statt Post-Solve-Penalty) – nur bei konkretem Bedarf.
 
 ## RAT-OPT-001
 
