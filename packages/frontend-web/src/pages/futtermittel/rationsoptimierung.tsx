@@ -285,7 +285,7 @@ function PastureRiskPanel({
   risk: PastureRiskPayload | null | undefined
   compact?: boolean
 }) {
-  if (!risk || !risk.active) return null
+  if (!risk?.active) return null
 
   const kMg = risk.pasture_k_mg_ratio
   const kMgState: AmpelState =
@@ -1116,7 +1116,13 @@ function Wizard({
                     <button
                       key={opt.key}
                       type="button"
-                      onClick={() => setFeedingType(opt.key)}
+                      onClick={() => {
+                        setFeedingType(opt.key)
+                        if (opt.key === 'PMR+Weide') {
+                          setShowFanAdvanced(true)
+                          if (!seasonProfile) setSeasonProfile('spring_mid')
+                        }
+                      }}
                       title={opt.hint}
                       className="flex-1 py-2 rounded-lg text-xs font-bold border transition-all"
                       style={{
@@ -1131,11 +1137,25 @@ function Wizard({
                 </div>
                 {feedingType === 'PMR+Weide' && (
                   <div
-                    className="text-[11px] leading-tight mt-1 px-2 py-1.5 rounded border"
+                    className="text-[11px] leading-tight mt-1 px-2 py-1.5 rounded border space-y-1"
                     style={{ background: '#F0F7ED', borderColor: C.accent, color: C.dark }}
                   >
-                    Weide-/Frischgrasaufnahme wird separat bilanziert (DLG 417/443).
-                    Weidemineral Mg/Na wird automatisch als Sicherheitsbaustein gefuehrt.
+                    <div>
+                      Weide-/Frischgrasaufnahme wird separat bilanziert (DLG 417/443).
+                      Weidemineral Mg/Na wird automatisch als Sicherheitsbaustein gefuehrt.
+                    </div>
+                    {seasonProfile && seasonProfile.startsWith('spring') && (
+                      <div className="font-semibold">
+                        Aktives Profil: <span className="font-mono">pmr_pasture_spring</span> (saisonale
+                        Fruehjahrsweide mit K/Mg-Risiko-Korridoren).
+                      </div>
+                    )}
+                    {!seasonProfile && (
+                      <div style={{ color: C.muted }}>
+                        Hinweis: Bitte Saison unter &quot;mehr Optionen&quot; setzen, damit das richtige
+                        Weideprofil aktiv wird.
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -1649,7 +1669,17 @@ function Wizard({
 // FAN-MODE-V1 Panels: Bewertung + Constraint-Status
 // ---------------------------------------------------------------------------
 
-function FanCalibrationPanel({ fan }: { fan: FanCalibrationPayload }) {
+function FanCalibrationPanel({
+  fan,
+  policyProfile,
+  seasonProfile,
+  relaxationPolicy,
+}: {
+  fan: FanCalibrationPayload
+  policyProfile?: string
+  seasonProfile?: SeasonProfile | null
+  relaxationPolicy?: RelaxationPolicy
+}) {
   const mode = fan.mode
   const ref = fan.fani_final ?? fan.reference
   const converged = fan.converged
@@ -1692,6 +1722,16 @@ function FanCalibrationPanel({ fan }: { fan: FanCalibrationPayload }) {
             <span style={{ color: C.muted }}>Futterwert-Quelle</span>
             <span className="font-mono">
               {fan.feeds_exact ?? 0} exakt · {fan.feeds_mapped ?? 0} gemappt · {fallbackCount} fallback
+            </span>
+          </div>
+        )}
+        {(policyProfile || seasonProfile || relaxationPolicy) && (
+          <div className="col-span-2 flex justify-between pt-1 border-t" style={{ borderColor: '#F3F4F6' }}>
+            <span style={{ color: C.muted }}>Policy</span>
+            <span className="font-mono text-[10px]">
+              {policyProfile ?? '–'}
+              {seasonProfile ? ` · ${seasonProfile}` : ''}
+              {relaxationPolicy ? ` · ${relaxationPolicy}` : ''}
             </span>
           </div>
         )}
@@ -2069,7 +2109,12 @@ function Workbench({
 
         {/* FAN-Kalibrierung (GfE 2023) ---------------------------------------- */}
         {result?.fan_calibration && (
-          <FanCalibrationPanel fan={result.fan_calibration} />
+          <FanCalibrationPanel
+            fan={result.fan_calibration}
+            policyProfile={result.active_policy_profile}
+            seasonProfile={result.season_profile ?? wizardData?.seasonProfile ?? null}
+            relaxationPolicy={result.relaxation_policy}
+          />
         )}
 
         {/* Constraint-Status: hart / weich mit Klasse A/B/C -------------------- */}
