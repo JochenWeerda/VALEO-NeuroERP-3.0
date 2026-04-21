@@ -25,6 +25,16 @@ Archiv des vorherigen Boards:
 - Fuer den Flow-Spine-Kern liegt jetzt eine gemeinsame Lifecycle-Zieldoku vor:
   - [flow-spine-instance-lifecycle-overview.md](C:/Users/Jochen/VALEO-NeuroERP-3.0/docs/workflows/flow-spine-instance-lifecycle-overview.md)
 
+## RAT-OPT-001
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Rationsoptimierung fachlich und technisch auf belastbaren DLG-01|23-Stand ziehen: Frontend-Submit stabilisieren, TMR/PMR-Logik explizit machen und Ergebnisdarstellung um Grundfutter-/Kraftfutter-Leistungsbeitrag inklusive Grundfutterverdrängung ergänzen.
+**Owner:** Codex
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `app/api/v1/endpoints/rations_optimization.py`, `packages/frontend-web/src/lib/api/rations-optimization.ts`, `packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx`, ggf. gezielte Tests unter `tests/`
+**Abnahmekriterien:** Optimierung startet stabil aus dem Wizard ohne State-Race; Response und UI zeigen Milch aus Energie/Protein als IST-/Soll-Sicht aus Grundfutter sowie Zusatz-Kraftfutter für Zielmilch; PMR berücksichtigt Konzentratgabe und Grundfutterverdrängung nachvollziehbar; DLG-01|23-Abgleich ist dokumentiert.
+**Offene Risiken:** DLG-Dokument liefert fachliche Leitplanken, aber keine 1:1-Formeln für jede Betriebsheuristik; Grundfutterverdrängung muss daher als dokumentierte Näherung implementiert und klar gekennzeichnet werden.
+
 ## FLOW-LC-001
 
 **Von:** Codex
