@@ -52,6 +52,76 @@ export interface CowProfile {
   lactation_stage_days?: number
   parity?: number
   target_dmi_kg?: number
+  feeding_type?: 'TMR' | 'PMR' | 'PMR+Weide'
+  season_profile?: SeasonProfile | null
+}
+
+export type FeedingMode = 'TMR' | 'PMR' | 'PMR+Weide'
+
+// --- FAN-MODE-V1 (Spec §4/§6/§8, freigegeben 2026-04-21) ---
+
+export type FanMode = 'auto_iterative' | 'reference' | 'evaluation_only'
+export type RelaxationPolicy = 'strict' | 'standard' | 'soft'
+export type ObjectiveStrategy = 'balance_then_cost' | 'balance_only' | 'cost_only'
+export type PolicyProfile = 'tmr_standard' | 'pmr_standard' | 'pmr_pasture_spring'
+export type SeasonProfile =
+  | 'spring_young'
+  | 'spring_mid'
+  | 'spring_late'
+  | 'summer_young'
+  | 'summer_mid'
+  | 'summer_late'
+  | 'autumn'
+  | 'winter'
+
+export interface FanOptions {
+  mode?: FanMode
+  reference?: number
+  tolerance?: number
+  tolerance_warn?: number
+  max_iterations?: number
+}
+
+export const FAN_REFERENCE_PRESETS: readonly number[] = [2.5, 3.0, 3.5] as const
+export const FAN_DEFAULTS = {
+  mode: 'auto_iterative' as FanMode,
+  tolerance: 0.05,
+  tolerance_warn: 0.10,
+  max_iterations: 5,
+  relaxation_policy: 'standard' as RelaxationPolicy,
+  objective_strategy: 'balance_then_cost' as ObjectiveStrategy,
+} as const
+
+export interface FanCalibrationPayload {
+  mode: FanMode
+  reference: number | null
+  tolerance: number
+  tolerance_warn: number
+  max_iterations: number
+  iterations: Array<{ i: number; fan_in: number; fan_out: number; delta: number }>
+  iteration_count: number
+  converged: boolean | null
+  fani_final: number | null
+  catalog_version?: string | null
+  feeds_exact?: number
+  feeds_mapped?: number
+  feeds_fallback?: number
+  fallback_warning?: string | null
+}
+
+export interface ConstraintStatusItem {
+  name: string
+  kind: 'hart' | 'weich'
+  class: 'A' | 'B' | 'C' | null
+  unit: string
+  target: number
+  actual: number
+  difference?: number | null
+  fulfilled: boolean
+  deviation_norm: number
+  penalty_cost: number
+  status: 'ok' | 'violated' | 'hard_violated'
+  source?: string
 }
 
 export interface FeedIngredient {
@@ -81,6 +151,7 @@ export interface RationItem {
   kgfm: number
   unit_cost: number
   total_cost: number
+  fan_slope_source?: 'exact' | 'mapped' | 'fallback'
 }
 
 export interface NutrientSupply {
@@ -120,6 +191,44 @@ export interface DlgIndicators {
   rmd_ziel: string
   forage_share_pct: number
   forage_share_ziel: string
+  // GfE-Workshop 2023
+  pendf_kgdm?: number
+  pendf_min_kgdm?: number
+  pendf_ziel?: string
+  pendf_erfuellt?: boolean
+  ph_predicted?: number
+  ph_ziel?: string
+  ph_ok?: boolean
+}
+
+export interface NutrientSupplyExtended {
+  dmi_kg: number
+  me_mj: number
+  sidp_g: number
+  andfom_g: number
+  starch_g: number
+  sugar_g: number
+  fat_g: number
+  ca_g: number
+  p_g: number
+  na_g: number
+  mg_g?: number
+  k_g?: number
+  forage_share_pct: number
+  // GfE-Workshop 2023
+  pendf_kgdm?: number
+  pendf_min_kgdm?: number
+  staerke_kgdm?: number
+  ph_predicted?: number
+  sidlys_g?: number
+  sidmet_g?: number
+  sidlys_sidmet_ratio?: number
+}
+
+export interface OptimizationDiagnosis {
+  reason: string | null
+  gaps: string[]
+  suggestions: string[]
 }
 
 export interface OptimizationResult {
@@ -130,9 +239,112 @@ export interface OptimizationResult {
   ration_items: RationItem[]
   nutrient_supply: NutrientSupply
   constraint_report: ConstraintReportItem[]
+  constraint_status?: ConstraintStatusItem[]
   dlg_indicators?: DlgIndicators
   warnings: string[]
   metadata?: Record<string, unknown>
+  forage_performance?: {
+    feeding_type: FeedingMode
+    target_milk_kg: number
+    forage_only: {
+      forage_dmi_kg: number
+      milk_from_energy_kg: number
+      milk_from_protein_kg: number
+      limiting_milk_kg: number
+    }
+    supplemented: {
+      total_dmi_kg: number
+      concentrate_dmi_kg: number
+      forage_displacement_dmi_kg: number
+      forage_displacement_factor: number
+      milk_from_energy_kg: number
+      milk_from_protein_kg: number
+      limiting_milk_kg: number
+    }
+  }
+  pasture_risk?: PastureRiskPayload | null
+  fan_calibration?: FanCalibrationPayload
+  active_policy_profile?: PolicyProfile
+  policy_overrides?: Record<string, unknown>
+  relaxation_policy?: RelaxationPolicy
+  objective_strategy?: ObjectiveStrategy
+  season_profile?: SeasonProfile | null
+  diagnosis?: OptimizationDiagnosis | null
+}
+
+export interface MilkFromSupply {
+  milk_from_energy_kg: number
+  milk_from_protein_kg: number
+  limiting_milk_kg: number
+}
+
+export interface PastureRiskPayload {
+  active: boolean
+  feeding_type: FeedingMode
+  pasture_dmi_kg: number
+  grass_silage_dmi_kg: number
+  pasture_cp_g_kgdm: number | null
+  pasture_k_mg_ratio: number | null
+  pasture_k_mg_ratio_ziel: string
+  mg_supplement_dmi_kg: number
+  mg_supplement_ziel: string
+  milk_from_pasture: MilkFromSupply | null
+  milk_from_grass_silage: MilkFromSupply | null
+  milk_from_pasture_plus_grass_silage: MilkFromSupply | null
+  warnings: string[]
+}
+
+export interface CompoundFeedComponent {
+  name: string
+  inclusion_pct: number
+  matched_feed_id?: string | null
+  matched_feed_name?: string | null
+}
+
+export interface CompoundFeedDeclaredAnalysis {
+  crude_protein_pct?: number | null
+  crude_fat_pct?: number | null
+  crude_fiber_pct?: number | null
+  crude_ash_pct?: number | null
+  calcium_pct?: number | null
+  phosphorus_pct?: number | null
+  sodium_pct?: number | null
+  magnesium_pct?: number | null
+  nel_mj_kg?: number | null
+}
+
+export interface CompoundFeedGfeEstimate {
+  basis: string
+  match_coverage_pct: number
+  me_fan1_mj_kgdm?: number | null
+  me_fani_mj_kgdm?: number | null
+  nel_mj_kgdm?: number | null
+  sidp_g_kgdm?: number | null
+  nxp_g_kgdm?: number | null
+  cp_g_kgdm?: number | null
+  andfom_g_kgdm?: number | null
+  starch_g_kgdm?: number | null
+  sugar_g_kgdm?: number | null
+  fat_g_kgdm?: number | null
+  omd_method?: string | null
+}
+
+export interface UploadedCompoundFeed {
+  source_filename: string
+  source_type: string
+  product_name: string
+  supplier_name?: string | null
+  declared_analysis: CompoundFeedDeclaredAnalysis
+  composition: CompoundFeedComponent[]
+  gfe2023_estimate: CompoundFeedGfeEstimate
+  optimizer_feed: Record<string, unknown>
+  warnings: string[]
+  raw_text_preview: string
+}
+
+export interface CompoundFeedUploadResult {
+  parsed: UploadedCompoundFeed
+  warnings: string[]
 }
 
 export async function fetchRationsHealth(): Promise<{ success: boolean; configured?: boolean }> {
@@ -146,19 +358,47 @@ export async function fetchFeeds(group?: string): Promise<FeedIngredient[]> {
   return data
 }
 
+export interface OptimizeFromProfileExtras {
+  fan_options?: FanOptions
+  relaxation_policy?: RelaxationPolicy
+  objective_strategy?: ObjectiveStrategy
+  season_profile?: SeasonProfile
+  policy_profile?: PolicyProfile
+  policy_overrides?: Record<string, unknown>
+}
+
 export async function optimizeFromProfile(
   cowProfile: CowProfile,
-  feedIds?: string[]
+  feedIds?: string[],
+  customFeeds?: object[],
+  priceOverrides?: Record<string, number>,
+  maxTmOverrides?: Record<string, number>,
+  extras?: OptimizeFromProfileExtras,
 ): Promise<OptimizationResult> {
   const { data } = await apiClient.post<OptimizationResult>(`${BASE}/optimize/from-profile`, {
     cow_profile: cowProfile,
     feeds: feedIds,
+    custom_feeds: customFeeds,
+    price_overrides: priceOverrides,
+    max_tm_overrides: maxTmOverrides,
+    ...(extras ?? {}),
   })
   return data
 }
 
 export async function optimizeDemo(): Promise<OptimizationResult> {
   const { data } = await apiClient.post<OptimizationResult>(`${BASE}/optimize/demo`)
+  return data
+}
+
+export async function uploadCompoundFeedDocument(file: File): Promise<CompoundFeedUploadResult> {
+  const form = new FormData()
+  form.append('file', file)
+  const { data } = await apiClient.post<CompoundFeedUploadResult>(
+    `${BASE}/compound-feed/upload`,
+    form,
+    { headers: { 'Content-Type': 'multipart/form-data' } }
+  )
   return data
 }
 
@@ -170,6 +410,92 @@ export async function calculateRequirements(cowProfile: CowProfile): Promise<Rec
 export async function validateFeeds(feeds: FeedIngredient[]): Promise<{ valid: boolean; errors: string[] }> {
   const { data } = await apiClient.post<{ valid: boolean; errors: string[] }>(`${BASE}/feeds/validate`, { feeds })
   return data
+}
+
+// ---------------------------------------------------------------------------
+// DLG Datenbank-Status
+// ---------------------------------------------------------------------------
+
+export interface DlgDbInfo {
+  feed_count: number
+  source: string
+  is_fallback: boolean
+  last_update: string | null
+  days_since_update: number | null
+  needs_update: boolean
+  update_interval_days: number
+  dlg_info_url: string
+  hint: string
+}
+
+export async function fetchDlgInfo(): Promise<DlgDbInfo> {
+  const { data } = await apiClient.get<DlgDbInfo>(`${BASE}/dlg/info`)
+  return data
+}
+
+export async function triggerDlgRefresh(): Promise<{ refreshed: boolean; feed_count: number; message: string }> {
+  const { data } = await apiClient.post<{ refreshed: boolean; feed_count: number; message: string }>(
+    `${BASE}/dlg/refresh`
+  )
+  return data
+}
+
+// ---------------------------------------------------------------------------
+// Betriebseigene Grundfuttermittel (aus GrundfutterAnalysen)
+// ---------------------------------------------------------------------------
+
+export interface CustomFeedFromGfa {
+  id: string
+  name: string
+  group: string
+  forage: boolean
+  dm_pct: number
+  price_eur_kgdm: number
+  me_mj_kgdm: number
+  sidp_g_kgdm: number
+  cp_g_kgdm: number
+  andfom_g_kgdm: number
+  xl_g_kgdm: number
+  rmd_gn_kgdm: number | null
+  ca_g_kgdm: number
+  p_g_kgdm: number
+  _optimizer_feed: object
+}
+
+export async function feedsFromGrundfutterAnalysen(
+  analysen: GrundfutterAnalyse[]
+): Promise<CustomFeedFromGfa[]> {
+  const { data } = await apiClient.post<CustomFeedFromGfa[]>(`${BASE}/feeds/from-grundfutter`, analysen)
+  return data
+}
+
+/**
+ * Konvertiert eine GrundfutterAnalyse lokal (ohne API-Roundtrip) in ein FeedIngredient-Objekt
+ * das in der Futtermitteltabelle angezeigt werden kann.
+ */
+export function gfaToDisplayFeed(gfa: GrundfutterAnalyse): FeedIngredient & { _isCustom: true; _analyseId: string } {
+  const dm = (gfa.trockensubstanz_os ?? 86) / 100
+  return {
+    id: `gfa_${gfa.id}`,
+    name: gfa.bezeichnung,
+    group: 'Grundfutter/Betrieb',
+    dm_frac: dm,
+    price_eur_kgdm: 0.065,
+    me_mj_kgdm: gfa.me_gfe2023_ts ?? gfa.me_rind_gfe2008_ts ?? 9.5,
+    sidp_g_kgdm: gfa.sidp_ts ?? (gfa.nxp_ts ? gfa.nxp_ts * 0.95 : 0),
+    andfom_g_kgdm: (gfa.andfom_ts ?? 0) * 10,
+    starch_g_kgdm: 0,
+    sugar_g_kgdm: (gfa.gesamtzucker_ts ?? 0) * 10,
+    fat_g_kgdm: (gfa.rohfett_ts ?? 0) * 10,
+    ca_g_kgdm: (gfa.calcium_ts ?? 0) * 10,
+    p_g_kgdm: (gfa.phosphor_ts ?? 0) * 10,
+    na_g_kgdm: (gfa.natrium_ts ?? 0) * 10,
+    min_kgdm: 0,
+    max_kgdm: 12,
+    active: true,
+    _isCustom: true,
+    _analyseId: gfa.id,
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -338,8 +664,8 @@ export async function uploadGrundfutterCsv(
   return data
 }
 
-export async function promoteAsFeed(id: string): Promise<{ einzelfuttermittel_id: string; artikel_nummer: string }> {
-  const { data } = await apiClient.post<{ einzelfuttermittel_id: string; artikel_nummer: string }>(
+export async function promoteAsFeed(id: string): Promise<{ einzelfuttermittel_id: string; artikel_nummer: string; name?: string }> {
+  const { data } = await apiClient.post<{ einzelfuttermittel_id: string; artikel_nummer: string; name?: string }>(
     `${GFA_BASE}/${id}/as-feed`
   )
   return data
