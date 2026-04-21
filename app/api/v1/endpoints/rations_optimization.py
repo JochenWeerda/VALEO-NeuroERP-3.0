@@ -2538,6 +2538,187 @@ def _parse_compound_feed_text(text: str, filename: str, source_type: str) -> _Co
 
 
 # ---------------------------------------------------------------------------
+# FAN-MODE-003: Katalog mit Herkunftsflag (Spec §8.2) und FAN-Iteration (§8.4)
+# ---------------------------------------------------------------------------
+
+import json as _json_fan
+
+_FAN_CATALOG_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "..", "config", "fan_slope_catalog.json")
+_fan_catalog_cache: Optional[Dict[str, Any]] = None
+
+
+def _load_fan_catalog() -> Dict[str, Any]:
+    """Laedt den FAN-Slope-Katalog (Spec §8.2.2) inkl. Herkunftsflag exact/mapped/fallback."""
+    global _fan_catalog_cache
+    if _fan_catalog_cache is not None:
+        return _fan_catalog_cache
+    try:
+        path = os.path.abspath(_FAN_CATALOG_PATH)
+        with open(path, "r", encoding="utf-8") as f:
+            data = _json_fan.load(f)
+        _fan_catalog_cache = data
+        return data
+    except Exception as exc:  # pragma: no cover
+        logger.warning("FAN-Katalog konnte nicht geladen werden (%s) – Fallback aktiv.", exc)
+        _fan_catalog_cache = {
+            "_meta": {"version": "fallback"},
+            "base_fan": 1.0,
+            "groups": {
+                "default": {"label": "Fallback", "slope_me": -0.05, "k_fan1": 0.025, "source": "fallback"},
+            },
+        }
+        return _fan_catalog_cache
+
+
+def _classify_feed_to_fan_group(feed: Dict[str, Any], season_profile: Optional[str] = None) -> str:
+    """Mappt ein Feed-Dict auf die passende FAN-Katalog-Gruppe (Spec §8.2.1).
+
+    Praeferenz:
+      1. _fan_group Override (explizit)
+      2. Spezialfutter (z. B. Weidemineral) -> mineral_supplement
+      3. futterart + Name-Keywords + season_profile
+      4. Fallback -> default
+    """
+    override = feed.get("_fan_group")
+    if override:
+        return str(override)
+    if feed.get("_special") == "pasture_mg":
+        return "mineral_supplement"
+    name_l = (feed.get("name") or "").lower()
+    fart_l = (feed.get("futterart") or "").lower()
+    group_l = (feed.get("group") or "").lower()
+    is_pasture = "weide" in name_l or "frischgras" in name_l or ("gras" in name_l and "frisch" in name_l)
+    is_grass_silage = "grassilage" in name_l or ("gras" in name_l and "silage" in name_l)
+    is_maize_silage = ("maissilage" in name_l or "mais" in name_l and "silage" in name_l)
+    is_hay = "heu" in name_l
+    is_straw = "stroh" in name_l
+    is_juice = "saftfutter" in fart_l or "saftfutter" in group_l or "biertreber" in name_l or "schlempe" in name_l
+    is_cereal = any(k in name_l for k in ("mais", "maiskorn", "weizen", "gerste", "hafer", "roggen", "triticale", "maismehl", "gerstenmehl"))
+    is_protein = any(k in name_l for k in ("soja", "raps", "sonnenblumen", "ackerbohnen", "leinsamen", "proteinschrot", "extraktionsschrot"))
+    is_mineral = "mineral" in name_l or "mineralf" in group_l or "kalk" in name_l or "magnesiumoxid" in name_l
+    is_compound = any(k in name_l for k in ("milchleistungsfutter", "kraftfutter", "laktations", "mischfutter"))
+
+    if is_pasture:
+        if season_profile == "spring_young":
+            return "roughage_pasture_spring_young"
+        if season_profile == "spring_mid":
+            return "roughage_pasture_spring_mid"
+        if season_profile in ("summer_young", "summer_mid", "summer_late", "autumn"):
+            return "roughage_pasture_other"
+        return "roughage_pasture_other"
+    if is_grass_silage:
+        return "roughage_grass_silage"
+    if is_maize_silage:
+        return "roughage_maize_silage"
+    if is_hay:
+        return "roughage_hay"
+    if is_straw:
+        return "roughage_straw"
+    if is_juice:
+        return "roughage_juice_feed"
+    if is_compound:
+        return "concentrate_mix"
+    if is_protein:
+        return "concentrate_protein"
+    if is_cereal:
+        return "concentrate_cereal"
+    if is_mineral:
+        return "mineral_supplement"
+    return "default"
+
+
+def _annotate_feeds_with_fan_catalog(
+    feeds: List[Dict[str, Any]],
+    season_profile: Optional[str] = None,
+) -> Dict[str, Any]:
+    """Markiert jede Futterposition mit FAN-Gruppe, slope_me, k_fan1 und Herkunftsflag.
+
+    Gibt ein Info-Dict zurueck mit catalog_version + Zaehler (exact/mapped/fallback).
+    """
+    catalog = _load_fan_catalog()
+    groups = catalog.get("groups", {})
+    info = {
+        "version": catalog.get("_meta", {}).get("version"),
+        "feeds_exact": 0,
+        "feeds_mapped": 0,
+        "feeds_fallback": 0,
+    }
+    for feed in feeds:
+        grp_id = _classify_feed_to_fan_group(feed, season_profile)
+        grp_def = groups.get(grp_id) or groups.get("default") or {
+            "label": "default", "slope_me": -0.05, "k_fan1": 0.025, "source": "fallback",
+        }
+        source = grp_def.get("source", "fallback")
+        feed["_fan_group"] = grp_id
+        feed["_fan_group_label"] = grp_def.get("label", grp_id)
+        feed["_fan_slope_me"] = float(grp_def.get("slope_me", 0.0))
+        feed["_fan_k_fan1"] = float(grp_def.get("k_fan1", 0.0))
+        feed["_fan_slope_source"] = source
+        if source == "exact":
+            info["feeds_exact"] += 1
+        elif source == "mapped":
+            info["feeds_mapped"] += 1
+        else:
+            info["feeds_fallback"] += 1
+    if info["feeds_fallback"] > 0:
+        info["fallback_warning"] = (
+            f"{info['feeds_fallback']} Futterposition(en) verwenden einen konservativen "
+            f"Fallback-Slope; Ergebnis ist plausibel, aber nicht exakt DLG-tabellarisch belegt."
+        )
+    else:
+        info["fallback_warning"] = None
+    return info
+
+
+def _fan1_reference_kg(profile: Dict[str, Any]) -> float:
+    """FAN1 [kg TM/d] Referenzwert: 50 g TM je kg^0.75 LM (DLG 503).
+
+    Konservative Wahl mit 50 (statt 55) entspricht der DLG-503-Definition fuer die
+    FAN1-Tabellenwerte. Ergibt bei 650 kg LM etwa 6.4 kg TM/d.
+    """
+    bw = float(profile.get("body_weight_kg") or 650.0)
+    return max(0.001, 0.050 * (bw ** 0.75))
+
+
+def _apply_fan_effect(feeds: List[Dict[str, Any]], fani: float) -> List[Dict[str, Any]]:
+    """Passt ME und sidP-Koeffizienten jedes Feeds an das gewaehlte FAN-Niveau an.
+
+    Spec §8.2: ME(FANi) = ME_FAN1 + slope_me * (FANi - 1)
+    Der Proteinwert (sidP) wird entsprechend der Passage-k-Steigerung um
+    (1 + k_fan1 * (FANi - 1)) multipliziert, was eine konservative Annaeherung an das
+    in DLG 504 beschriebene lineare Passageraten-Modell ist.
+    """
+    out: List[Dict[str, Any]] = []
+    delta = fani - 1.0
+    for feed in feeds:
+        base = feed.get("_me_fan1")
+        if base is None:
+            base = float(feed.get("me") or 0.0)
+            feed["_me_fan1"] = base
+        sidp_base = feed.get("_sidp_fan1")
+        if sidp_base is None:
+            sidp_base = float(feed.get("sidp") or 0.0)
+            feed["_sidp_fan1"] = sidp_base
+        slope_me = float(feed.get("_fan_slope_me") or 0.0)
+        k_fan1 = float(feed.get("_fan_k_fan1") or 0.0)
+        new_me = max(0.0, base + slope_me * delta)
+        sidp_factor = max(0.0, 1.0 + k_fan1 * delta)
+        new_sidp = sidp_base * sidp_factor
+        adjusted = dict(feed)
+        adjusted["me"] = new_me
+        adjusted["sidp"] = new_sidp
+        out.append(adjusted)
+    return out
+
+
+def _fani_from_result(amounts: List[float], profile: Dict[str, Any]) -> float:
+    """Berechnet FANi aus einer LP-Loesung: FANi = DMI [kg TM/d] / FAN1 [kg TM/d]."""
+    dmi = float(sum(amounts))
+    fan1 = _fan1_reference_kg(profile)
+    return dmi / fan1 if fan1 > 0 else 1.0
+
+
+# ---------------------------------------------------------------------------
 # FAN-MODE-V1 Runtime-Options (Spec §4, §6, §8 freigegeben 2026-04-21)
 # ---------------------------------------------------------------------------
 
@@ -2692,8 +2873,101 @@ def _optimize_internal(
                     feeds.append(dict(supplement))
                     break
 
-    lp_out = _run_lp(req, feeds, profile, runtime_options=runtime_options)
+    # FAN-MODE-003: FAN-Katalog auf Feeds anwenden (exact/mapped/fallback) + Iteration starten.
+    season = runtime_options.get("season_profile")
+    catalog_info = _annotate_feeds_with_fan_catalog(feeds, season_profile=season)
+
+    fan_opts = runtime_options.get("fan", {}) or {}
+    fan_mode = fan_opts.get("mode", _FAN_DEFAULT_MODE)
+    fan_tol = float(fan_opts.get("tolerance") or _FAN_DEFAULT_TOLERANCE)
+    fan_tol_warn = float(fan_opts.get("tolerance_warn") or _FAN_DEFAULT_TOLERANCE_WARN)
+    fan_max_iter = int(fan_opts.get("max_iterations") or _FAN_DEFAULT_MAX_ITERATIONS)
+    fan_reference = fan_opts.get("reference")
+
+    iterations: List[Dict[str, Any]] = []
+    converged: Optional[bool] = None
+    fani_final: Optional[float] = None
+
+    if fan_mode == "evaluation_only":
+        # Keine FAN-Korrektur – reine Bewertung mit FAN1-Tabellenwerten.
+        lp_out = _run_lp(req, feeds, profile, runtime_options=runtime_options)
+        if lp_out["scipy_result"].status == 0:
+            fani_final = _fani_from_result([_f(v) for v in lp_out["scipy_result"].x], profile)
+        converged = True
+        iterations.append({
+            "i": 0, "fan_in": 1.0, "fan_out": fani_final or 1.0,
+            "delta": None, "mode": "evaluation_only",
+        })
+    elif fan_mode == "reference":
+        # Einmalige Rechnung bei festgeklemmtem FANi = fan_reference.
+        target_fani = float(fan_reference or 3.0)
+        adjusted = _apply_fan_effect(feeds, target_fani)
+        lp_out = _run_lp(req, adjusted, profile, runtime_options=runtime_options)
+        fani_out = (
+            _fani_from_result([_f(v) for v in lp_out["scipy_result"].x], profile)
+            if lp_out["scipy_result"].status == 0 else target_fani
+        )
+        fani_final = target_fani  # bei reference ist das der ausgewiesene Wert
+        converged = True
+        iterations.append({
+            "i": 0, "fan_in": target_fani, "fan_out": fani_out,
+            "delta": round(fani_out - target_fani, 4),
+            "mode": "reference",
+        })
+    else:
+        # auto_iterative: Fixpunktiteration bis |fani_out - fani_in| <= tolerance.
+        # Startwert aus geschaetzter DMI (Gruber 2004): ~0.025*BW + 0.15*Milch. Das verkuerzt
+        # die Konvergenz gegenueber einem naiven Start bei FANi=1 drastisch, weil laktierende
+        # Kuehe tatsaechlich im Bereich FANi 2.5..4.0 operieren.
+        bw_init = float(profile.get("body_weight_kg") or 650.0)
+        milk_init = float(profile.get("milk_kg_day") or 0.0)
+        est_dmi = max(8.0, 0.025 * bw_init + 0.15 * milk_init if milk_init > 0 else 0.025 * bw_init)
+        fan1_init = _fan1_reference_kg(profile)
+        fani_in = max(1.0, est_dmi / fan1_init) if fan1_init > 0 else 2.5
+        lp_out = None
+        for i in range(fan_max_iter):
+            adjusted = _apply_fan_effect(feeds, fani_in)
+            lp_out = _run_lp(req, adjusted, profile, runtime_options=runtime_options)
+            if lp_out["scipy_result"].status != 0:
+                iterations.append({
+                    "i": i, "fan_in": round(fani_in, 4), "fan_out": None,
+                    "delta": None, "status": "infeasible",
+                })
+                converged = False
+                break
+            amounts_i = [_f(v) for v in lp_out["scipy_result"].x]
+            fani_out = _fani_from_result(amounts_i, profile)
+            delta = fani_out - fani_in
+            iterations.append({
+                "i": i, "fan_in": round(fani_in, 4), "fan_out": round(fani_out, 4),
+                "delta": round(delta, 4),
+            })
+            if abs(delta) <= fan_tol:
+                converged = True
+                fani_final = fani_out
+                break
+            # Leichte Unterrelaxation fuer monotones Einschwingen
+            fani_in = 0.3 * fani_in + 0.7 * fani_out
+        else:
+            converged = False
+            fani_final = iterations[-1].get("fan_out") if iterations else None
+        if lp_out is None:  # pragma: no cover
+            lp_out = _run_lp(req, feeds, profile, runtime_options=runtime_options)
+
+    if fani_final is not None and not converged and abs(iterations[-1].get("delta") or 0.0) > fan_tol_warn:
+        catalog_info = dict(catalog_info)
+        fw = catalog_info.get("fallback_warning")
+        hint = (
+            f"FAN-Iteration nicht konvergiert (|Delta|={abs(iterations[-1].get('delta') or 0):.3f} "
+            f"> Warnschwelle {fan_tol_warn})."
+        )
+        catalog_info["fallback_warning"] = f"{fw} {hint}" if fw else hint
+
     lp_out["_runtime_options"] = runtime_options
+    lp_out["_fan_iterations"] = iterations
+    lp_out["_fan_converged"] = converged
+    lp_out["_fan_final"] = round(fani_final, 4) if fani_final is not None else None
+    lp_out["_fan_catalog_info"] = catalog_info
     return _build_response(lp_out, req, profile)
 
 
