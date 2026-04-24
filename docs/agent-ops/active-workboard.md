@@ -2,6 +2,24 @@
 
 Stand: `2026-04-23`
 
+## RATIONS-HARD-001
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Rations-/Fuetterungsmodul nach Punkt 4 gezielt haerten, ohne den Solver grossflaechig umzubauen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `app/api/v1/endpoints/rations_optimization.py`, `tests/test_rations_optimization_feeding_system.py`
+**Abnahmekriterien:** Weide wird auch bei nominellem TMR-Input nicht ins Mischprotokoll aufgenommen; Auto-Promotion TMR -> PMR_pasture ist regressionsgesichert; Mischprotokoll nutzt die vorhandene Feed-Dataclass als typisierte Solver-Sicht.
+**Offene Risiken:** In `app/api/v1/endpoints/rations_optimization.py` liegt bereits ein uncommitted Arbeitsstand vor; Slice arbeitet darauf auf, ohne fremde Aenderungen zu revertieren.
+
+## INT-LIVE-001
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Produktnahe Live-Integrationspruefung nach Punkt 6 repo-seitig konkreter machen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `app/services/integration_bootstrap.py`, `scripts/check_integration_bootstrap.py`, `tests/test_integration_bootstrap.py`, `docs/project-context/integration-bootstrap-readiness-2026-04-12.md`, `docs/project-context/open-gaps-and-known-issues.md`
+**Abnahmekriterien:** Bootstrap-Readiness liefert zusaetzlich einen Probe-Plan fuer echte Connectivity-Pruefungen; CLI kann diesen Plan ausgeben; Tests unterscheiden ready, disabled, blocked und manual/external.
+**Offene Risiken:** Echte Produktivtests benoetigen weiterhin externe Tenant-Secrets, Zielsystem-URLs und Ops-Freigaben.
+
 ## RATIONS-REFACTOR Schritte 1-5 (abgeschlossen 2026-04-23)
 
 **Von:** Cursor
