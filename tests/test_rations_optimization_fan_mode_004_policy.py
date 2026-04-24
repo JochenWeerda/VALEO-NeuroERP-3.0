@@ -27,9 +27,17 @@ def test_pmr_pasture_spring_activates_for_any_spring_subseason():
         assert got == "pmr_pasture_spring", f"{season}: {got}"
 
 
-def test_pmr_without_spring_falls_back_to_pmr_standard():
-    assert _resolve_policy_profile("PMR+Weide", "summer_mid") == "pmr_standard"
+def test_pmr_pasture_season_specific_profiles():
+    """Spec §12 Erweiterung: PMR+Weide mit summer_* / autumn bekommt eigene Policy."""
+    assert _resolve_policy_profile("PMR+Weide", "summer_young") == "pmr_pasture_summer"
+    assert _resolve_policy_profile("PMR+Weide", "summer_mid") == "pmr_pasture_summer"
+    assert _resolve_policy_profile("PMR+Weide", "summer_late") == "pmr_pasture_summer"
+    assert _resolve_policy_profile("PMR+Weide", "autumn") == "pmr_pasture_autumn"
+
+
+def test_pmr_without_season_falls_back_to_pmr_standard():
     assert _resolve_policy_profile("PMR+Weide", None) == "pmr_standard"
+    assert _resolve_policy_profile("PMR+Weide", "winter") == "pmr_standard"
     assert _resolve_policy_profile("PMR", None) == "pmr_standard"
 
 

@@ -61,9 +61,13 @@ import {
   type FanMode,
   type RelaxationPolicy,
   type SeasonProfile,
+  type PolicyProfile,
   type FanCalibrationPayload,
   type ConstraintStatusItem,
   type PenaltySummary,
+  type ConcentrateCallUp,
+  type RationBlocks,
+  type MixingProtocol,
 } from '@/lib/api/rations-optimization'
 
 // ---------------------------------------------------------------------------
@@ -127,6 +131,9 @@ type WizardData = {
   fanReference: number              // nur relevant bei fanMode === 'reference'
   relaxationPolicy: RelaxationPolicy
   seasonProfile: SeasonProfile | null
+  // DLG 01|2025 Tab. 13-15: optionale Leistungs-/Physiologiestufe.
+  // null = Backend-Auto-Mapping aus Fuetterungstyp/Saison.
+  policyProfile: PolicyProfile | null
 }
 
 // localStorage-Key für persistierte Feed-Auswahl
@@ -380,6 +387,254 @@ function PastureRiskPanel({
           ))}
         </div>
       )}
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Slice 2 (2026-04-23): Konzentrat-Futterabruf-Staffel
+// ---------------------------------------------------------------------------
+//
+// Zeigt eine lineare / stueckweise lineare Staffel oberhalb der Basisleistung
+// aus Grobfutter/Weide. 0,45-0,50 kg Konzentrat (FM) je kg Zusatzmilch.
+// Einzelgabe-Limit + empfohlenes Tagesmax + 1,5x-Sicherheitsnetz sichtbar.
+function ConcentrateCallUpPanel({
+  callUp,
+  compact = false,
+}: {
+  callUp: ConcentrateCallUp | null | undefined
+  compact?: boolean
+}) {
+  if (!callUp) return null
+  const distributionLabels: Record<string, string> = {
+    transponder: 'Transponder (Abrufstation)',
+    ams: 'AMS (Melkroboter)',
+    milkparlor: 'Melkstand',
+    included_in_tmr: 'Im TMR enthalten',
+  }
+  const dist = callUp.basis.concentrate_distribution
+  const distLabel = distributionLabels[dist] ?? dist
+
+  return (
+    <div className={card(compact ? 'space-y-3' : 'space-y-4')}>
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <p className="text-[11px] uppercase font-bold tracking-[0.5px]" style={{ color: C.muted }}>
+            Futterabruf-Staffel Konzentrat
+          </p>
+          <p className="text-sm font-semibold" style={{ color: C.dark }}>
+            Leistungsabhaengige Konzentratgabe ({distLabel})
+          </p>
+          <p className="text-[11px]" style={{ color: C.muted }}>
+            Basis: Milch aus Grobfutter = {fmt(callUp.basis.milk_from_forage_kg, 1)} kg; Ziel =
+            {' '}{fmt(callUp.basis.target_milk_kg, 1)} kg; Band{' '}
+            {fmt(callUp.basis.kg_conc_per_additional_milk_low, 2)}-
+            {fmt(callUp.basis.kg_conc_per_additional_milk_high, 2)} kg FM/kg Zusatzmilch.
+          </p>
+        </div>
+        <div className="text-right text-[11px]" style={{ color: C.muted }}>
+          {callUp.basis.concentrate_max_per_serving_kg_fm != null && (
+            <div>Einzelgabe max: {fmt(callUp.basis.concentrate_max_per_serving_kg_fm, 1)} kg FM</div>
+          )}
+          {callUp.basis.concentrate_max_per_day_kg_fm != null && (
+            <div>Tagesmax: {fmt(callUp.basis.concentrate_max_per_day_kg_fm, 1)} kg FM</div>
+          )}
+          {callUp.basis.hard_safety_daily_cap_kg_fm != null && (
+            <div style={{ color: C.error }}>
+              Hart (1,5x): {fmt(callUp.basis.hard_safety_daily_cap_kg_fm, 1)} kg FM
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full text-[11px]">
+          <thead>
+            <tr style={{ background: '#F9FAFB' }}>
+              {['Milch (kg/d)', 'Zusatzmilch', 'Konz. low', 'Konz. mid', 'Konz. high', 'je Abruf', 'Status'].map((h) => (
+                <th
+                  key={h}
+                  className="py-2 px-2 border-b text-[10px] font-semibold text-[#4B5563] text-right first:text-left"
+                  style={{ borderColor: C.border }}
+                >
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {callUp.rows.map((r) => {
+              const status: AmpelState = r.exceeds_hard_safety_limit
+                ? 'error'
+                : r.exceeds_per_serving_limit || r.exceeds_recommended_daily_limit
+                ? 'warn'
+                : 'ok'
+              return (
+                <tr key={r.milk_kg_day} className="border-b" style={{ borderColor: '#F3F4F6' }}>
+                  <td className="p-2 font-medium" style={{ color: C.dark }}>
+                    {fmt(r.milk_kg_day, 1)}
+                  </td>
+                  <td className="p-2 text-right font-mono">{fmt(r.additional_milk_kg, 1)}</td>
+                  <td className="p-2 text-right font-mono">{fmt(r.concentrate_kg_fm_day_low, 2)}</td>
+                  <td className="p-2 text-right font-mono font-bold">
+                    {fmt(r.concentrate_kg_fm_day_mid, 2)}
+                  </td>
+                  <td className="p-2 text-right font-mono">{fmt(r.concentrate_kg_fm_day_high, 2)}</td>
+                  <td className="p-2 text-right font-mono">{fmt(r.per_serving_kg_fm, 2)}</td>
+                  <td className="p-2 text-right">{ampelDot(status)}</td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {callUp.warnings.length > 0 && (
+        <div className="space-y-2">
+          {callUp.warnings.map((w, i) => (
+            <div
+              key={i}
+              className="flex gap-2 text-xs rounded border px-3 py-2"
+              style={{ background: C.deltaBg, borderColor: C.deltaBorder, color: C.deltaText }}
+            >
+              <AlertTriangle size={14} className="mt-[2px] shrink-0" />
+              <span>{w}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <p className="text-[10px] italic" style={{ color: C.muted }}>
+        Praxisrichtwert 0,45-0,50 kg Konzentrat je kg Zusatzmilch (entspricht ~1 l
+        Konzentrat / 2 l Milch). Keine KI-Bildwerte. Annahme TM-Gehalt
+        Konzentrat: {fmt(callUp.basis.assumed_concentrate_dm_frac * 100, 0)} %.
+      </p>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Slice 3 (2026-04-23): Misch- und Fuetterungsprotokoll (TMR/PMR)
+// ---------------------------------------------------------------------------
+//
+// Zeigt das Mischprotokoll fuer den Futtertisch-Anteil (TMR-Block):
+// - Reihenfolge: Grobfutter (struktur) -> Silagen -> Saftfutter/CoP -> KF/Mineral -> Wasser
+// - Wasser-Zugabe zur Ziel-TM-Homogenitaet (typisch Ziel-TM 38-42 % fuer PMR)
+// - Uebermenge (Futterrest): Praxisfaktor ~+5 % je Mischung, als Orientierung
+function MixingProtocolPanel({
+  protocol,
+  compact = false,
+}: {
+  protocol: MixingProtocol | null | undefined
+  compact?: boolean
+}) {
+  if (!protocol || protocol.steps.length === 0) return null
+
+  return (
+    <div className={card(compact ? 'space-y-3' : 'space-y-4')}>
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <p className="text-[11px] uppercase font-bold tracking-[0.5px]" style={{ color: C.muted }}>
+            Mischprotokoll (TMR-Mischmasse)
+          </p>
+          <p className="text-sm font-semibold" style={{ color: C.dark }}>
+            Reihenfolge Mischwagen, Wasserzugabe, Uebermenge
+          </p>
+          <p className="text-[11px]" style={{ color: C.muted }}>
+            System: {protocol.basis.feeding_system}; TMR-Block: {fmt(protocol.totals.tmr_kgfm_without_water, 1)} kg FM /{' '}
+            {fmt(protocol.totals.tmr_kgdm, 1)} kg TM.
+          </p>
+        </div>
+        <div className="text-right text-[11px]" style={{ color: C.muted }}>
+          <div>Ziel-TM Mischung: ~{fmt(protocol.basis.target_dm_frac * 100, 0)} %</div>
+          <div>Wasser: +{fmt(protocol.water_addition_kg_fm, 1)} kg FM</div>
+          <div>Uebermenge (+{fmt(protocol.basis.overfill_pct, 0)} %): {fmt(protocol.overfill_kg_fm, 1)} kg FM</div>
+        </div>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full text-[11px]">
+          <thead>
+            <tr style={{ background: '#F9FAFB' }}>
+              {['Schritt', 'Gruppe', 'Futtermittel', 'kg FM', 'kg TM', 'Anteil'].map((h) => (
+                <th
+                  key={h}
+                  className="py-2 px-2 border-b text-[10px] font-semibold text-[#4B5563] text-right first:text-left"
+                  style={{ borderColor: C.border }}
+                >
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {protocol.steps.map((item) => (
+              <tr key={item.feed_id ?? item.name} className="border-b" style={{ borderColor: '#F3F4F6' }}>
+                <td className="p-2 font-medium" style={{ color: C.dark }}>
+                  {item.step}
+                </td>
+                <td className="p-2 text-xs" style={{ color: C.muted }}>
+                  {item.group_label}
+                </td>
+                <td className="p-2 font-medium" style={{ color: C.dark }}>
+                  {item.name}
+                </td>
+                <td className="p-2 text-right font-mono">{fmt(item.kgfm, 1)}</td>
+                <td className="p-2 text-right font-mono">{fmt(item.kgdm, 2)}</td>
+                <td className="p-2 text-right font-mono">{fmt(item.share_fm_pct, 1)}%</td>
+              </tr>
+            ))}
+            <tr style={{ background: '#F9FAFB' }} className="font-semibold">
+              <td className="p-2" style={{ color: C.dark }}>
+                +
+              </td>
+              <td className="p-2 text-xs" style={{ color: C.muted }}>
+                Wasser (Homogenitaet)
+              </td>
+              <td className="p-2" style={{ color: C.dark }}>
+                Wasser zur Ziel-TM {fmt(protocol.basis.target_dm_frac * 100, 0)} %
+              </td>
+              <td className="p-2 text-right font-mono">{fmt(protocol.water_addition_kg_fm, 1)}</td>
+              <td className="p-2 text-right font-mono">0,00</td>
+              <td className="p-2 text-right font-mono">–</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr className="font-bold" style={{ background: '#F9FAFB' }}>
+              <td className="p-2" style={{ color: C.dark }} colSpan={3}>
+                Mischung gesamt (je Kuh · Tag)
+              </td>
+              <td className="p-2 text-right font-mono">
+                {fmt(protocol.totals.tmr_kgfm_with_water, 1)}
+              </td>
+              <td className="p-2 text-right font-mono">{fmt(protocol.totals.tmr_kgdm, 2)}</td>
+              <td className="p-2 text-right font-mono">100%</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      {protocol.warnings.length > 0 && (
+        <div className="space-y-2">
+          {protocol.warnings.map((w, i) => (
+            <div
+              key={i}
+              className="flex gap-2 text-xs rounded border px-3 py-2"
+              style={{ background: C.deltaBg, borderColor: C.deltaBorder, color: C.deltaText }}
+            >
+              <AlertTriangle size={14} className="mt-[2px] shrink-0" />
+              <span>{w}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <p className="text-[10px] italic" style={{ color: C.muted }}>
+        Reihenfolge und Wasserzugabe sind Praxis-Richtwerte (Vertikalmischer:
+        Strukturfutter zuerst, Mineral/Konzentrat zuletzt; Wasser zur
+        Ziel-TM 38-42 %). Uebermenge +{fmt(protocol.basis.overfill_pct, 0)} %
+        fuer Futterrest/Transportverlust. Bitte betriebsspezifisch anpassen.
+      </p>
     </div>
   )
 }
@@ -909,6 +1164,9 @@ function Wizard({
   const [fanReference, setFanReference] = useState<number>(FAN_REFERENCE_PRESETS[1]) // 3.0 als mittlerer Preset
   const [relaxationPolicy, setRelaxationPolicy] = useState<RelaxationPolicy>(FAN_DEFAULTS.relaxation_policy)
   const [seasonProfile, setSeasonProfile] = useState<SeasonProfile | null>(null)
+  // DLG 01|2025 Tab. 13-15: optionale Leistungs-/Physiologiestufen-Auswahl.
+  // Leer = Auto-Mapping aus Fuetterungstyp/Saison (pmr_pasture_spring etc.).
+  const [policyProfile, setPolicyProfile] = useState<PolicyProfile | null>(null)
   const [showFanAdvanced, setShowFanAdvanced] = useState(false)
   const [selectedFeedIds, setSelectedFeedIds] = useState<Set<string>>(new Set())
   const [feedMaxFm, setFeedMaxFm] = useState<Record<string, number>>({})
@@ -975,7 +1233,7 @@ function Wizard({
     onComplete({
       group, milkYield, fatPercent, proteinPercent, dmiTarget, feedingType, mode,
       selectedFeedIds, customFeeds, compoundFeeds, feedMaxFm,
-      fanMode, fanReference, relaxationPolicy, seasonProfile,
+      fanMode, fanReference, relaxationPolicy, seasonProfile, policyProfile,
     })
   }
 
@@ -1151,6 +1409,20 @@ function Wizard({
                         Fruehjahrsweide mit K/Mg-Risiko-Korridoren).
                       </div>
                     )}
+                    {seasonProfile?.startsWith('summer') && (
+                      <div className="font-semibold">
+                        Aktives Profil: <span className="font-mono">pmr_pasture_summer</span> –
+                        Hitzestress-Korridor: reduzierte TM-Aufnahme (-3 % bis -12 %), erhoehter
+                        Na-Bedarf, Pansenpuffer NaHCO3 als Pflichtbaustein.
+                      </div>
+                    )}
+                    {seasonProfile === 'autumn' && (
+                      <div className="font-semibold">
+                        Aktives Profil: <span className="font-mono">pmr_pasture_autumn</span> –
+                        stickstoffreicher Grasaufwuchs: CP-Dichte-Obergrenze 175 g/kg TM
+                        (Harnstoffschutz), aNDFomGF-Boost fuer Strukturstuetzung.
+                      </div>
+                    )}
                     {!seasonProfile && (
                       <div style={{ color: C.muted }}>
                         Hinweis: Bitte Saison unter &quot;mehr Optionen&quot; setzen, damit das richtige
@@ -1274,6 +1546,42 @@ function Wizard({
                         <option value="autumn">Herbst</option>
                         <option value="winter">Winter</option>
                       </select>
+                    </div>
+                    {/* DLG 01|2025 Tab. 13-15: Leistungs-/Physiologiestufe */}
+                    <div>
+                      <label className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 block mb-1">
+                        Leistungsstufe (DLG 01|2025 Tab. 13-15)
+                      </label>
+                      <select
+                        value={policyProfile ?? ''}
+                        onChange={(e) => setPolicyProfile((e.target.value || null) as PolicyProfile | null)}
+                        className={cn(inputCls, 'text-[12px] py-1.5')}
+                        style={{ borderColor: C.border }}
+                        title="Bindet die Ration an DLG-Referenzkorridore fuer ME/CP/sidP/pabKH/aNDFomGF+CoP. Leer = Auto-Mapping aus Fuetterungstyp + Saison."
+                      >
+                        <option value="">— Auto (aus Fuetterungstyp/Saison) —</option>
+                        <optgroup label="TMR Laktation">
+                          <option value="tmr_fresh_lactation">Frischmelker (0-60 LT)</option>
+                          <option value="tmr_high_yield">Hochleistung (≥ 35 kg)</option>
+                          <option value="tmr_mid_yield">Mittellaktation (25-34 kg)</option>
+                          <option value="tmr_late_lactation">Altmelker (&lt; 25 kg)</option>
+                        </optgroup>
+                        <optgroup label="TMR Trockenphase">
+                          <option value="tmr_transit">Transit / Anfuetterung</option>
+                          <option value="tmr_dry_cow">Trockensteher</option>
+                        </optgroup>
+                        <optgroup label="Saisonale PMR-Profile">
+                          <option value="tmr_standard">TMR Standard</option>
+                          <option value="pmr_standard">PMR Standard</option>
+                          <option value="pmr_pasture_spring">PMR + Weide Fruehjahr</option>
+                          <option value="pmr_pasture_summer">PMR + Weide Sommer</option>
+                          <option value="pmr_pasture_autumn">PMR + Weide Herbst</option>
+                        </optgroup>
+                      </select>
+                      <div className="text-[10px] mt-1" style={{ color: C.muted }}>
+                        Bei Auswahl greift die DLG-01|2025-Bandauswertung als
+                        <em> weiche </em> Constraint (Klasse B, relaxation-policy-skaliert).
+                      </div>
                     </div>
                   </div>
                 )}
@@ -2098,6 +2406,10 @@ function Workbench({
 
         <ForagePerformancePanel result={result} compact />
         <PastureRiskPanel risk={result?.pasture_risk ?? null} compact />
+        {/* Slice 2: Konzentrat-Futterabruf-Staffel (nur gestaffelte Verteilungen). */}
+        <ConcentrateCallUpPanel callUp={result?.concentrate_call_up ?? null} compact />
+        {/* Slice 3: Misch- und Fuetterungsprotokoll (TMR-Mischmasse). */}
+        <MixingProtocolPanel protocol={result?.mixing_protocol ?? null} compact />
       </main>
 
       {/* ── Rechte Spalte: KPI + AI ── */}
@@ -2142,17 +2454,40 @@ function Workbench({
           />
         )}
 
-        {/* DLG Strukturkontrolle (kompakt) */}
+        {/* DLG Strukturkontrolle (kompakt).
+            Reihenfolge spiegelt die Priorisierung nach DLG 01|2023 wider:
+            Strukturindex + aNDFomGF sind die PRIMAEREN Planungsgroessen,
+            peNDF ist eine KONTROLL-/VALIDIERUNGSGROESSE (darunter gruppiert). */}
         {dlg && (
           <div id="dlg-panel" className={card()} style={tourRing('dlg-panel')}>
             <div className="text-[11px] uppercase font-bold mb-2 tracking-[0.5px]" style={{ color: C.muted }}>DLG 01|25 / GfE-Workshop 2023</div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.4px] mb-1" style={{ color: C.muted }}>
+              Planung (primaer)
+            </div>
             {[
               { label: 'Strukturindex', val: dlg.strukturindex != null ? `${fmt(dlg.strukturindex, 0)}` : '–', ok: dlg.strukturindex_erfuellt },
-              { label: 'aNDFomGF', val: `${fmt(dlg.andfom_gf_kgdm, 0)} g/kg TM`, ok: dlg.andfom_gf_kgdm >= 200 },
+              {
+                label: 'aNDFomGF',
+                val: dlg.andfom_gf_starch_uplift != null && dlg.andfom_gf_base != null
+                  ? `${fmt(dlg.andfom_gf_kgdm, 0)} g/kg TM (Ziel ${fmt(dlg.andfom_gf_base, 0)}+${fmt(dlg.andfom_gf_starch_uplift, 0)})`
+                  : `${fmt(dlg.andfom_gf_kgdm, 0)} g/kg TM`,
+                ok: dlg.andfom_gf_kgdm >= 200,
+              },
+              // DLG 01|25 Kap. 8.2: aNDFomGF + strukturwirksame Co-Produkte ist die
+              // aktuell empfohlene Planungsgroesse (binaere Kaskade 200/280).
+              ...(dlg.andfom_gf_cop_kgdm != null
+                ? [{
+                    label: 'aNDFomGF+CoP',
+                    val: dlg.andfom_gf_cop_target_kgdm != null
+                      ? `${fmt(dlg.andfom_gf_cop_kgdm, 0)} / ≥${fmt(dlg.andfom_gf_cop_target_kgdm, 0)} g/kg TM`
+                      : `${fmt(dlg.andfom_gf_cop_kgdm, 0)} g/kg TM`,
+                    ok: dlg.andfom_gf_cop_target_kgdm != null
+                      ? dlg.andfom_gf_cop_kgdm >= dlg.andfom_gf_cop_target_kgdm
+                      : null,
+                  }]
+                : []),
               { label: 'pabKH', val: `${fmt(dlg.pabkh_kgdm, 0)} g/kg TM`, ok: dlg.pabkh_kgdm <= 210 },
               { label: 'RMD', val: dlg.rmd_gn_kgdm != null ? `${fmt(dlg.rmd_gn_kgdm, 2)} g N/kg TM` : '–', ok: dlg.rmd_gn_kgdm != null ? (dlg.rmd_gn_kgdm >= -1 && dlg.rmd_gn_kgdm <= 0.5) : null },
-              { label: 'peNDF', val: dlg.pendf_kgdm != null ? `${fmt(dlg.pendf_kgdm, 0)} / ${fmt(dlg.pendf_min_kgdm ?? 0, 0)} g/kg TM` : '–', ok: dlg.pendf_erfuellt ?? null },
-              { label: 'Pansen-pH (sim.)', val: dlg.ph_predicted != null ? `${fmt(dlg.ph_predicted, 2)}` : '–', ok: dlg.ph_ok ?? null },
             ].map((row) => (
               <div key={row.label} className="flex justify-between items-center text-[11px] py-1 border-b" style={{ borderColor: '#F3F4F6' }}>
                 <span className="flex items-center gap-1.5">
@@ -2162,6 +2497,210 @@ function Workbench({
                 <span className="font-mono font-medium">{row.val}</span>
               </div>
             ))}
+
+            <div className="text-[10px] font-semibold uppercase tracking-[0.4px] mt-2 mb-1" style={{ color: C.muted }}>
+              Kontrolle / Validierung (DLG 01|2023)
+            </div>
+            {/* peNDF-Status-Zeile: peNDF-Modell im kalibrierten Bereich oder Fallback. */}
+            {dlg.pendf_model_status && (
+              <div className="flex items-start gap-1.5 text-[10px] mb-1" style={{ color: C.muted }}>
+                <span
+                  className="inline-block h-2 w-2 rounded-full mt-0.5"
+                  style={{ background: dlg.pendf_model_calibrated === false ? '#f59e0b' : '#94a3b8' }}
+                />
+                <span>{dlg.pendf_model_status}</span>
+              </div>
+            )}
+            {[
+              {
+                label: 'peNDF (Kontrolle)',
+                val: dlg.pendf_kgdm != null
+                  ? `${fmt(dlg.pendf_kgdm, 0)} / ${fmt(dlg.pendf_min_kgdm ?? 0, 0)} g/kg TM`
+                  : '–',
+                ok: dlg.pendf_model_calibrated === false ? null : (dlg.pendf_erfuellt ?? null),
+              },
+              {
+                label: 'Pansen-pH (sim.)',
+                val: dlg.ph_predicted != null
+                  ? (dlg.ph_formula_applicable === false
+                      ? `${fmt(dlg.ph_predicted, 2)} (Formel ausserhalb Validitaetsbereich)`
+                      : `${fmt(dlg.ph_predicted, 2)}`)
+                  : '–',
+                ok: dlg.ph_formula_applicable === false ? null : (dlg.ph_ok ?? null),
+              },
+              // DLG 01|25 Kap. 8.4: Fermentationsindex Kohlenhydrate (FIKH),
+              // Ziel >= 50 %. Neutrale Ampel wenn keine NDFD-Werte verfuegbar.
+              ...(dlg.fikh_pct !== undefined
+                ? [{
+                    label: 'FIKH',
+                    val: dlg.fikh_pct != null
+                      ? `${fmt(dlg.fikh_pct, 0)} % (Ziel ≥ 50)`
+                      : (dlg.fikh_diagnose ? `– (${dlg.fikh_diagnose})` : '–'),
+                    ok: dlg.fikh_pct != null ? (dlg.fikh_erfuellt ?? null) : null,
+                  }]
+                : []),
+            ].map((row) => (
+              <div key={row.label} className="flex justify-between items-center text-[11px] py-1 border-b" style={{ borderColor: '#F3F4F6' }}>
+                <span className="flex items-center gap-1.5">
+                  <span className="inline-block h-2 w-2 rounded-full" style={{ background: row.ok === null ? '#94a3b8' : row.ok ? C.success : C.error }} />
+                  {row.label}
+                </span>
+                <span className="font-mono font-medium">{row.val}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* DLG 01|2025-Policy-Profil-Auswertung (Tab. 13-15 Bandchecks) ------
+            Zeigt die Leistungsstufen-Korridore des aktiven Profils und welche
+            weichen Bandchecks verletzt sind. Penalty fliesst in Klasse B ein. */}
+        {result?.policy_profile_evaluation && (
+          <div className={card()}>
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-[11px] uppercase font-bold tracking-[0.5px]" style={{ color: C.muted }}>
+                Leistungsstufen-Check (DLG 01|2025)
+              </div>
+              <span
+                className="text-[10px] font-bold px-2 py-0.5 rounded border"
+                style={{
+                  background: '#F9FAFB',
+                  borderColor: result.policy_profile_evaluation.violation_count === 0 ? C.success : '#f59e0b',
+                  color: result.policy_profile_evaluation.violation_count === 0 ? C.success : '#b45309',
+                }}
+              >
+              {result.policy_profile_evaluation.violation_count === 0
+                ? 'alle Baender im Korridor'
+                : `${result.policy_profile_evaluation.violation_count} Abweichung(en)`}
+              </span>
+            </div>
+            <div className="text-[11px] mb-2" style={{ color: C.muted }}>
+              Profil: <span className="font-semibold">{result.policy_profile_evaluation.label ?? result.active_policy_profile}</span>
+              {' · '}
+              Strafe gesamt (Klasse B):{' '}
+              <span className="font-mono">{(result.policy_profile_evaluation.penalty_total ?? 0).toFixed(2)}</span>
+              {result.policy_profile_lp_mode === 'stage2_cost_plus_policy_slack' && (
+                <span
+                  className="ml-2 text-[10px] font-bold px-1.5 py-0.5 rounded border"
+                  title="Die Policy-Baender sind als native Slack-Variablen im LP gebunden. Der Solver minimiert Kosten und Korridor-Abweichung gemeinsam."
+                  style={{ background: '#ECFDF5', borderColor: C.success, color: C.success }}
+                >
+                  LP-Slack aktiv
+                </span>
+              )}
+            </div>
+            <div className="space-y-0.5">
+              {result.policy_profile_evaluation.bands.map((band) => {
+                const dotBg = band.status === 'ok' ? C.success : '#f59e0b'
+                const range = (band.target_min != null || band.target_max != null)
+                  ? `${band.target_min != null ? fmt(band.target_min, 1) : '–'} … ${band.target_max != null ? fmt(band.target_max, 1) : '–'}`
+                  : fmt(band.target, 1)
+                return (
+                  <div key={band.name} className="flex justify-between items-center text-[11px] py-1 border-b" style={{ borderColor: '#F3F4F6' }}>
+                    <span className="flex items-center gap-1.5">
+                      <span className="inline-block h-2 w-2 rounded-full" style={{ background: dotBg }} />
+                      {band.name.replace(/^DLG-Policy:\s*/, '')}
+                    </span>
+                    <span className="font-mono text-[10px]">
+                      {fmt(band.actual, 1)} {band.unit}
+                      {' · Ziel '}
+                      {range} {band.unit}
+                      {band.status !== 'ok' && (
+                        <span className="ml-1" style={{ color: '#b45309' }}>
+                          (dev {fmt(band.deviation_norm ?? 0, 2)})
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                )
+              })}
+            </div>
+            {/* LP-Slack-Details: welche Baender hat der Solver selbst relaxiert? */}
+            {Array.isArray(result.policy_profile_lp_slacks) && result.policy_profile_lp_slacks.length > 0 && (
+              <div className="mt-3 pt-2 border-t" style={{ borderColor: '#E5E7EB' }}>
+                <div className="text-[10px] uppercase font-bold tracking-[0.5px] mb-1" style={{ color: C.muted }}>
+                  LP-Solver-Slacks (aktive Korridor-Verletzungen)
+                </div>
+                {(() => {
+                  const active = (result.policy_profile_lp_slacks ?? []).filter((s) => s.active)
+                  if (active.length === 0) {
+                    return (
+                      <div className="text-[11px]" style={{ color: C.muted }}>
+                        keine – alle Slacks sind 0 (Korridore eingehalten).
+                      </div>
+                    )
+                  }
+                  return (
+                    <div className="space-y-0.5">
+                      {active.map((s) => (
+                        <div key={s.name} className="flex justify-between text-[11px] font-mono">
+                          <span>{s.name.replace(/^DLG-Policy:\s*/, '')}</span>
+                          <span>
+                            slack {fmt(s.slack_value, 2)} {s.unit}
+                            {' · '}Penalty {fmt(s.penalty_cost, 2)}
+                          </span>
+                        </div>
+                      ))}
+                      <div className="flex justify-between text-[11px] font-mono pt-1 border-t" style={{ borderColor: '#F3F4F6' }}>
+                        <span className="font-semibold">Summe LP-Penalty</span>
+                        <span>{fmt(result.policy_profile_lp_total_penalty ?? 0, 2)}</span>
+                      </div>
+                    </div>
+                  )
+                })()}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* SARA-Safety-Reopt-Badge: nur sichtbar, wenn der Azidose-Schutz-Loop
+            greifen musste. Zeigt, welche Constraints verschaerft wurden und ob
+            das Problem geloest werden konnte. */}
+        {result?.sara_safety_reopt?.triggered && (
+          <div
+            className={card()}
+            style={{
+              borderColor: result.sara_safety_reopt.resolved ? '#f59e0b' : '#dc2626',
+              background: result.sara_safety_reopt.resolved ? '#fffbeb' : '#fef2f2',
+            }}
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <span
+                className="inline-block h-2.5 w-2.5 rounded-full"
+                style={{ background: result.sara_safety_reopt.resolved ? '#f59e0b' : '#dc2626' }}
+              />
+              <div className="text-[11px] uppercase font-bold tracking-[0.5px]">
+                SARA-Safety-Reopt {result.sara_safety_reopt.resolved ? 'aktiv (geloest)' : 'aktiv (ungeloest)'}
+              </div>
+            </div>
+            {result.sara_safety_reopt.reason && (
+              <div className="text-[11px] mb-2" style={{ color: C.muted }}>
+                Ausloeser: {result.sara_safety_reopt.reason}
+              </div>
+            )}
+            {(result.sara_safety_reopt.actions ?? []).length > 0 && (
+              <ul className="text-[11px] list-disc pl-4 mb-2 space-y-0.5">
+                {(result.sara_safety_reopt.actions ?? []).map((a, i) => (
+                  <li key={i}>{a}</li>
+                ))}
+              </ul>
+            )}
+            {result.sara_safety_reopt.metrics_before && result.sara_safety_reopt.metrics_after && (
+              <div className="grid grid-cols-2 gap-1 text-[11px] font-mono">
+                <div className="font-semibold">vorher</div>
+                <div className="font-semibold">nachher</div>
+                <div>pH {result.sara_safety_reopt.metrics_before.ph_predicted ?? '–'}</div>
+                <div>pH {result.sara_safety_reopt.metrics_after.ph_predicted ?? '–'}</div>
+                <div>peNDF {result.sara_safety_reopt.metrics_before.pendf_kgdm ?? '–'}</div>
+                <div>peNDF {result.sara_safety_reopt.metrics_after.pendf_kgdm ?? '–'}</div>
+                <div>pabKH {result.sara_safety_reopt.metrics_before.pabkh_kgdm ?? '–'}</div>
+                <div>pabKH {result.sara_safety_reopt.metrics_after.pabkh_kgdm ?? '–'}</div>
+              </div>
+            )}
+            {result.sara_safety_reopt.resolution_note && (
+              <div className="text-[11px] mt-2" style={{ color: C.muted }}>
+                {result.sara_safety_reopt.resolution_note}
+              </div>
+            )}
           </div>
         )}
 
@@ -2521,6 +3060,9 @@ export default function Rationsoptimierung() {
         },
         relaxation_policy: nextWizardData.relaxationPolicy,
         ...(nextWizardData.seasonProfile ? { season_profile: nextWizardData.seasonProfile } : {}),
+        // DLG 01|2025 Tab. 13-15: explizite Leistungs-/Physiologiestufe. Ohne
+        // Angabe bestimmt das Backend das Profil aus Fuetterungstyp + Saison.
+        ...(nextWizardData.policyProfile ? { policy_profile: nextWizardData.policyProfile } : {}),
       }
       if (nextWizardData.seasonProfile) {
         profile.season_profile = nextWizardData.seasonProfile

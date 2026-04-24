@@ -31,7 +31,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.uuid7 import uuid7
-from app.infrastructure.models.futtermittel_models import GrundfutterAnalyse
+from app.infrastructure.models.futtermittel_models import GrundfutterAnalyse, RationsZugang
 
 logger = logging.getLogger(__name__)
 
@@ -501,6 +501,84 @@ def _get_tenant(x_tenant_id: Optional[str] = Header(default=None)) -> str:
     return x_tenant_id or "default"
 
 
+def _is_portal_request(x_share_token: Optional[str], x_user_email: Optional[str]) -> bool:
+    """
+    Heuristik: Ein Request gilt als Portal-Request (extern, DSGVO-pflichtig) wenn
+    ein Share-Token vorliegt. Interne ERP-Nutzer senden keinen Share-Token und
+    sind bereits durch die OIDC-Middleware authentifiziert.
+    """
+    return bool(x_share_token)
+
+
+def _check_rations_read(
+    tenant_id: str,
+    db: Session,
+    x_user_email: Optional[str] = None,
+    x_share_token: Optional[str] = None,
+) -> None:
+    """
+    DSGVO-Lesezugang: nur für Share-Token-basierte Portal-Zugriffe erzwungen.
+    Interne ERP-Nutzer (OIDC-authentifiziert, kein Share-Token) haben immer Zugang
+    zu den Daten ihres Mandanten.
+    """
+    if not _is_portal_request(x_share_token, x_user_email):
+        return  # interner ERP-Request — OIDC-Auth reicht
+
+    from datetime import timezone
+    now = datetime.now(timezone.utc)
+
+    def _has_access(q_filter) -> bool:
+        row = db.query(RationsZugang).filter(
+            RationsZugang.tenant_id == tenant_id,
+            RationsZugang.ist_aktiv.is_(True),
+            RationsZugang.darf_lesen.is_(True),
+            *q_filter,
+        ).first()
+        if row is None:
+            return False
+        return row.gueltig_bis is None or row.gueltig_bis > now
+
+    if x_share_token and _has_access([RationsZugang.share_token == x_share_token]):
+        return
+    if x_user_email and _has_access([RationsZugang.empfaenger_email == x_user_email]):
+        return
+
+    raise HTTPException(
+        status_code=403,
+        detail="Kein Lesezugang auf betriebseigene Grundfutterdaten dieses Mandanten.",
+    )
+
+
+def _check_rations_write(
+    tenant_id: str,
+    db: Session,
+    x_user_email: Optional[str] = None,
+    x_share_token: Optional[str] = None,
+) -> None:
+    """
+    DSGVO-Schreibzugang: nur für Share-Token-basierte Portal-Zugriffe geprüft.
+    Interne ERP-Nutzer schreiben immer (OIDC-authentifiziert).
+    """
+    if not _is_portal_request(x_share_token, x_user_email):
+        return  # interner ERP-Request
+
+    from datetime import timezone
+    now = datetime.now(timezone.utc)
+    if not x_user_email:
+        raise HTTPException(status_code=403, detail="Authentifizierung erforderlich.")
+    row = db.query(RationsZugang).filter(
+        RationsZugang.tenant_id == tenant_id,
+        RationsZugang.empfaenger_email == x_user_email,
+        RationsZugang.ist_aktiv.is_(True),
+        RationsZugang.darf_grundfutter_anlegen.is_(True),
+    ).first()
+    if not row or (row.gueltig_bis and row.gueltig_bis < now):
+        raise HTTPException(
+            status_code=403,
+            detail="Keine Berechtigung zum Anlegen/Bearbeiten von Grundfutter-Analysen.",
+        )
+
+
 def _analyse_to_dict(a: GrundfutterAnalyse) -> Dict[str, Any]:
     return {c.name: getattr(a, c.name) for c in a.__table__.columns}
 
@@ -517,7 +595,10 @@ def list_analysen(
     offset: int = Query(default=0),
     db: Session = Depends(get_db),
     tenant_id: str = Depends(_get_tenant),
+    x_user_email: Optional[str] = Header(default=None),
+    x_share_token: Optional[str] = Header(default=None),
 ):
+    _check_rations_read(tenant_id, db, x_user_email, x_share_token)
     q = db.query(GrundfutterAnalyse).filter(GrundfutterAnalyse.tenant_id == tenant_id)
     if probenart:
         q = q.filter(GrundfutterAnalyse.probenart == probenart)
@@ -533,7 +614,10 @@ def get_analyse(
     analyse_id: str,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(_get_tenant),
+    x_user_email: Optional[str] = Header(default=None),
+    x_share_token: Optional[str] = Header(default=None),
 ):
+    _check_rations_read(tenant_id, db, x_user_email, x_share_token)
     a = db.query(GrundfutterAnalyse).filter(
         GrundfutterAnalyse.id == analyse_id,
         GrundfutterAnalyse.tenant_id == tenant_id,
@@ -548,7 +632,27 @@ def create_analyse(
     data: GrundfutterAnalyseIn,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(_get_tenant),
+    x_user_email: Optional[str] = Header(default=None),
 ):
+    _check_rations_write(tenant_id, db, x_user_email, None)
+
+    # Dublettenprüfung: gleiche Bezeichnung + Probe-Nr. im gleichen Mandanten?
+    dupe_q = db.query(GrundfutterAnalyse).filter(
+        GrundfutterAnalyse.tenant_id == tenant_id,
+        GrundfutterAnalyse.bezeichnung == data.bezeichnung,
+    )
+    if data.probe_nr:
+        dupe_q = dupe_q.filter(GrundfutterAnalyse.probe_nr == data.probe_nr)
+    existing = dupe_q.first()
+    if existing:
+        hint = f" (Probe-Nr. {existing.probe_nr})" if existing.probe_nr else ""
+        raise HTTPException(
+            409,
+            f"Eine Analyse mit der Bezeichnung '{data.bezeichnung}'{hint} wurde bereits gespeichert "
+            f"(angelegt am {existing.created_at.strftime('%d.%m.%Y') if existing.created_at else '–'}). "
+            f"Bitte Bezeichnung oder Probe-Nr. anpassen, falls es sich um eine neue Probe handelt."
+        )
+
     a = GrundfutterAnalyse(id=uuid7(), tenant_id=tenant_id, **data.model_dump(exclude_none=True))
     db.add(a)
     db.commit()
@@ -562,7 +666,9 @@ def patch_analyse(
     data: GrundfutterAnalysePatch,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(_get_tenant),
+    x_user_email: Optional[str] = Header(default=None),
 ):
+    _check_rations_write(tenant_id, db, x_user_email, None)
     a = db.query(GrundfutterAnalyse).filter(
         GrundfutterAnalyse.id == analyse_id,
         GrundfutterAnalyse.tenant_id == tenant_id,
@@ -581,7 +687,9 @@ def delete_analyse(
     analyse_id: str,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(_get_tenant),
+    x_user_email: Optional[str] = Header(default=None),
 ):
+    _check_rations_write(tenant_id, db, x_user_email, None)
     a = db.query(GrundfutterAnalyse).filter(
         GrundfutterAnalyse.id == analyse_id,
         GrundfutterAnalyse.tenant_id == tenant_id,
@@ -719,6 +827,19 @@ def promote_as_feed(
     if not a.verifiziert:
         raise HTTPException(409, "Analyse muss zuerst verifiziert werden (PATCH verifiziert=true)")
 
+    # Dublettenprüfung: gleicher Name + Tenant bereits vorhanden?
+    existing = db.query(Einzelfuttermittel).filter(
+        Einzelfuttermittel.tenant_id == tenant_id,
+        Einzelfuttermittel.name == a.bezeichnung,
+    ).first()
+    if existing:
+        raise HTTPException(
+            409,
+            f"Futtermittel '{a.bezeichnung}' ist bereits in der Datenbank vorhanden "
+            f"(Artikel-Nr. {existing.artikel_nummer}). Bitte zuerst das bestehende prüfen oder "
+            f"die Bezeichnung der Analyse ändern."
+        )
+
     ef = Einzelfuttermittel(
         id=uuid7(),
         tenant_id=tenant_id,
@@ -737,4 +858,8 @@ def promote_as_feed(
     db.add(ef)
     db.commit()
     db.refresh(ef)
-    return {"einzelfuttermittel_id": ef.id, "artikel_nummer": ef.artikel_nummer}
+    return {
+        "einzelfuttermittel_id": ef.id,
+        "artikel_nummer": ef.artikel_nummer,
+        "name": ef.name,
+    }

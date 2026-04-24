@@ -76,13 +76,17 @@ def test_resolve_runtime_options_clamps_bad_values():
 
 
 def test_policy_profile_selection_spec_6_2():
-    """Spec §6.2: TMR -> tmr_standard, PMR+Weide+spring_* -> pmr_pasture_spring, sonst pmr_standard."""
+    """Spec §6.2 + §12: TMR -> tmr_standard, PMR+Weide saisonal differenziert."""
     assert _resolve_policy_profile("TMR", None) == "tmr_standard"
     assert _resolve_policy_profile("PMR", None) == "pmr_standard"
     assert _resolve_policy_profile("PMR+Weide", None) == "pmr_standard"
     assert _resolve_policy_profile("PMR+Weide", "spring_young") == "pmr_pasture_spring"
     assert _resolve_policy_profile("PMR+Weide", "spring_mid") == "pmr_pasture_spring"
-    assert _resolve_policy_profile("PMR+Weide", "autumn") == "pmr_standard"
+    # Spec §12 Erweiterung 2026-04-21: Sommer-/Herbst-Weide bekommen eigene Policy
+    assert _resolve_policy_profile("PMR+Weide", "summer_mid") == "pmr_pasture_summer"
+    assert _resolve_policy_profile("PMR+Weide", "summer_late") == "pmr_pasture_summer"
+    assert _resolve_policy_profile("PMR+Weide", "autumn") == "pmr_pasture_autumn"
+    assert _resolve_policy_profile("PMR+Weide", "winter") == "pmr_standard"
 
 
 def test_fan_reference_presets_match_spec():

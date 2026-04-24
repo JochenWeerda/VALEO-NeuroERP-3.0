@@ -197,7 +197,16 @@ class TestCowProfileSchema:
 
 
 # ===========================================================================
-# C) ERP Proxy-Contract: 503 wenn RATIONS_OPTIMIZATION_URL nicht gesetzt
+# C) ERP Hybrid-Contract (wave74 v2): Interner GfE-2023-Solver als Default
+#
+# Kontrakt-Update 2026-04-21 (FAN-MODE-V1):
+# Frueherer wave74-Vertrag verlangte 503 fuer alle Endpunkte, wenn
+# RATIONS_OPTIMIZATION_URL fehlt. Mit FAN-MODE-V1 ist jedoch ein vollstaendiger
+# interner GfE-2023-LP-Solver aktiv, der ohne externen Proxy arbeitet. Der
+# neue Vertrag ist hybrid:
+#   - Kein Proxy gesetzt -> interner Solver liefert Ergebnisse (200)
+#   - /health meldet success=True mit solver="internal-gfe2023"
+#   - 503 nur wenn proxy gesetzt UND nicht erreichbar
 # ===========================================================================
 
 from fastapi import FastAPI
@@ -221,34 +230,101 @@ def no_rations_url():
 
 
 def test_health_returns_200_unconfigured(proxy_client, no_rations_url):
-    """Wenn nicht konfiguriert: /health liefert 200 mit configured=False."""
+    """Ohne externen Proxy: /health liefert 200 mit aktivem internen Solver."""
     resp = proxy_client.get("/health")
     assert resp.status_code == 200
     body = resp.json()
-    assert body["configured"] is False
-    assert body["success"] is False
+    # Interner Solver ist aktiv, Service ist betriebsbereit
+    assert body["success"] is True
+    assert body["configured"] is True
+    assert body.get("solver") == "internal-gfe2023"
+    assert body.get("energy_system") == "ME-FAN1"
+    assert body.get("protein_system") == "sidP"
 
 
-def test_optimize_returns_503_unconfigured(proxy_client, no_rations_url):
+def test_optimize_uses_internal_solver_when_proxy_unconfigured(proxy_client, no_rations_url):
+    """Ohne externen Proxy: /optimize bedient sich des internen Solvers.
+
+    Leerer Body -> Solver optimiert mit Default-Demo-Profil (kein 503).
+    """
     resp = proxy_client.post("/optimize", json={})
-    assert resp.status_code == 503
+    assert resp.status_code == 200
+    body = resp.json()
+    # Response liefert immer Solver-Metadaten (Policy-Profil, constraint_report,
+    # diagnosis ODER Ration je nach Feasibility)
+    assert "active_policy_profile" in body
+    assert any(k in body for k in ("ration", "diagnosis", "constraint_report", "solver_status"))
 
 
-def test_feeds_returns_503_unconfigured(proxy_client, no_rations_url):
+def test_feeds_returns_catalog_when_proxy_unconfigured(proxy_client, no_rations_url):
+    """Ohne externen Proxy: /feeds liefert den bundled DLG-Katalog."""
     resp = proxy_client.get("/feeds")
-    assert resp.status_code == 503
+    assert resp.status_code == 200
+    feeds = resp.json()
+    assert isinstance(feeds, list)
+    assert len(feeds) >= 5  # mindestens der Fallback-Katalog
 
 
-def test_requirements_calculate_returns_503_unconfigured(proxy_client, no_rations_url):
-    resp = proxy_client.post("/requirements/calculate", json={})
-    assert resp.status_code == 503
+def test_requirements_calculate_uses_internal_solver(proxy_client, no_rations_url):
+    """Ohne externen Proxy: /requirements/calculate berechnet via GfE-2023."""
+    resp = proxy_client.post(
+        "/requirements/calculate",
+        json={
+            "body_weight_kg": 650,
+            "milk_kg_day": 35,
+            "milk_fat_pct": 3.8,
+            "milk_protein_pct": 3.2,
+            "lactation_stage_days": 150,
+            "parity": 2,
+        },
+    )
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["energy_system"] == "ME-FAN1-GfE2023"
+    assert body["protein_system"] == "sidP-GfE2023"
+    assert body["me_mj_day"] > 0
+    assert body["sidp_g_day"] > 0
 
 
-def test_optimize_from_profile_returns_503_unconfigured(proxy_client, no_rations_url):
-    resp = proxy_client.post("/optimize/from-profile", json={})
-    assert resp.status_code == 503
+def test_optimize_from_profile_uses_internal_solver(proxy_client, no_rations_url):
+    """Ohne externen Proxy: /optimize/from-profile loest via internem LP-Solver."""
+    resp = proxy_client.post(
+        "/optimize/from-profile",
+        json={
+            "cow_profile": {
+                "body_weight_kg": 650,
+                "milk_kg_day": 30,
+                "milk_fat_pct": 3.8,
+                "milk_protein_pct": 3.2,
+                "lactation_stage_days": 150,
+                "parity": 2,
+                "feeding_type": "TMR",
+            }
+        },
+    )
+    assert resp.status_code == 200
+    body = resp.json()
+    # Antwort enthaelt mindestens einen der Kernbausteine aus dem internen Solver
+    assert any(k in body for k in ("ration", "status", "solver_status", "success"))
 
 
-def test_503_detail_mentions_not_configured(proxy_client, no_rations_url):
-    resp = proxy_client.post("/optimize", json={})
-    assert "konfiguriert" in resp.json()["detail"].lower() or "url" in resp.json()["detail"].lower()
+def test_proxy_error_returns_503_when_configured_but_unreachable():
+    """Wenn Proxy konfiguriert ABER nicht erreichbar: 503 vom Endpoint."""
+    import httpx
+
+    app = FastAPI()
+    app.include_router(rations_optimization.router)
+    client = TestClient(app)
+
+    async def _fail(*_args, **_kwargs):
+        raise httpx.ConnectError("connection refused")
+
+    with patch.object(rations_optimization, "get_rations_base_url", return_value="http://localhost:9"), \
+         patch("httpx.AsyncClient") as mock_client:
+        instance = mock_client.return_value.__aenter__.return_value
+        instance.get.side_effect = _fail
+        instance.post.side_effect = _fail
+        resp = client.post("/optimize", json={})
+        assert resp.status_code == 503
+        detail = resp.json().get("detail", "").lower()
+        assert "erreichbar" in detail or "konfiguriert" in detail or "url" in detail

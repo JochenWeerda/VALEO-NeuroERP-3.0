@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:element name="GFE2023">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="FUTTERMITTEL" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="FUTTERART" type="xs:string"/>
+              <xs:element name="LID" type="xs:integer"/>
+	      <xs:element name="LIDDIFF" type="xs:integer"/>
+              <xs:element name="NOMENKLATUR" type="xs:string"/>
+              <xs:element name="KURZBEZEICHNUNG" type="xs:string"/>
+              <xs:element name="AUFWUCHS" type="xs:string" minOccurs="0"/>
+              <xs:element name="FUTTERMITTELBEZEICHNUNG" type="xs:string"/>
+              <xs:element name="KONSERVIERUNG" type="xs:string"/>
+              <xs:element name="TMGEHALT" type="ValueWithUnit"/>
+              <xs:element name="CA" type="ValueWithUnit" minOccurs="0" maxOccurs="unbounded"/>
+              <xs:element name="CP" type="ValueWithUnit" minOccurs="0"/>
+              <xs:element name="CL" type="ValueWithUnit" minOccurs="0" maxOccurs="unbounded"/>
+              <xs:element name="STAERKE" type="ValueWithUnit" minOccurs="0"/>
+              <xs:element name="BESTSTAERKE" type="ValueWithUnit" minOccurs="0"/>
+              <xs:element name="ZUCKER" type="ValueWithUnit" minOccurs="0"/>
+              <xs:element name="ANDFOM" type="ValueWithUnit" minOccurs="0"/>
+              <xs:element name="ADFOM" type="ValueWithUnit" minOccurs="0"/>
+              <xs:element name="NFC" type="ValueWithUnit" minOccurs="0"/>
+              <xs:element name="OMDFAN1" type="ValueWithUnit" minOccurs="0"/>
+              <xs:element name="NDFD" type="ValueWithUnit" minOccurs="0"/>
+              <xs:element name="GE" type="ValueWithUnit" minOccurs="0"/>
+              <xs:element name="MEFAN1" type="ValueWithUnit" minOccurs="0"/>
+              <xs:element name="CAMIN" type="ValueWithUnit" minOccurs="0"/>
+              <xs:element name="P" type="ValueWithUnit" minOccurs="0"/>
+              <xs:element name="NA" type="ValueWithUnit" minOccurs="0"/>
+              <xs:element name="MG" type="ValueWithUnit" minOccurs="0"/>
+              <xs:element name="K" type="ValueWithUnit" minOccurs="0"/>
+              <xs:element name="CLMIN" type="ValueWithUnit" minOccurs="0"/>
+              <xs:element name="S" type="ValueWithUnit" minOccurs="0"/>
+              <xs:element name="DCAB" type="ValueWithUnit" minOccurs="0"/>
+              <xs:element name="FE" type="ValueWithUnit" minOccurs="0"/>
+              <xs:element name="ZN" type="ValueWithUnit" minOccurs="0"/>
+              <xs:element name="MN" type="ValueWithUnit" minOccurs="0"/>
+              <xs:element name="CU" type="ValueWithUnit" minOccurs="0"/>
+              <xs:element name="SE" type="ValueWithUnit" minOccurs="0"/>
+              <xs:element name="LYS" type="ValueWithUnit" minOccurs="0"/>
+              <xs:element name="MET" type="ValueWithUnit" minOccurs="0"/>
+              <xs:element name="PASSAGERATE1" type="ValueWithUnit" minOccurs="0"/>
+              <xs:element name="EDGFAN1" type="ValueWithUnit" minOccurs="0"/>
+              <xs:element name="RMDFAN1" type="ValueWithUnit" minOccurs="0"/>
+              <xs:element name="SIDUDP" type="ValueWithUnit" minOccurs="0"/>
+              <xs:element name="SIDLYSUDP" type="ValueWithUnit" minOccurs="0"/>
+              <xs:element name="SIDMETUDP" type="ValueWithUnit" minOccurs="0"/>
+              <xs:element name="SIDMPFAN1" type="ValueWithUnit" minOccurs="0"/>
+              <xs:element name="SIDUDPFAN1" type="ValueWithUnit" minOccurs="0"/>
+              <xs:element name="SIDPFAN1" type="ValueWithUnit" minOccurs="0"/>
+              <xs:element name="SIDLYSAUSMCPFAN1" type="ValueWithUnit" minOccurs="0"/>
+              <xs:element name="SIDMETAUSMCPFAN1" type="ValueWithUnit" minOccurs="0"/>
+              <xs:element name="SIDUDLYSFAN1" type="ValueWithUnit" minOccurs="0"/>
+              <xs:element name="SIDMETUDPFAN1" type="ValueWithUnit" minOccurs="0"/>
+              <xs:element name="SIDLYSFAN1" type="ValueWithUnit" minOccurs="0"/>
+              <xs:element name="SIDMETFAN1" type="ValueWithUnit" minOccurs="0"/>
+              <xs:element name="A" type="ValueWithUnit" minOccurs="0"/>
+              <xs:element name="B" type="ValueWithUnit" minOccurs="0"/>
+              <xs:element name="C" type="ValueWithUnit" minOccurs="0"/>
+              <xs:element name="LAGTIME" type="ValueWithUnit" minOccurs="0"/>
+            </xs:sequence>
+            <xs:attribute name="PRIMARYID" type="xs:integer" use="required"/>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:complexType name="ValueWithUnit">
+    <xs:simpleContent>
+      <xs:extension base="xs:decimal">
+        <xs:attribute name="UNIT" type="xs:string" use="optional"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+</xs:schema>

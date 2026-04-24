@@ -280,6 +280,7 @@ class AgrarSorte(Base):
     id = Column(String, primary_key=True, default=uuid7)
     tenant_id = Column(String, nullable=False)
     variety_number = Column(String(20), nullable=False)
+
     name = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
     crop_type = Column(String(50), nullable=True, comment="WHEAT, MAIZE, BARLEY, OATS, RAPESEED, ...")
@@ -288,5 +289,75 @@ class AgrarSorte(Base):
     reifezahl = Column(String(10), nullable=True, comment="Reifezahl / maturity rating")
     qualitaetsgruppe = Column(String(50), nullable=True, comment="E, A, B, C, K bei Weizen")
     aktiv = Column(Boolean, default=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class RationsZugang(Base):
+    """
+    Zugangsliste für betriebsspezifische Rations- und Grundfutterdaten.
+
+    Datenschutzmodell (DSGVO-konform):
+    - Betriebseigene Grundfutter und Rationen sind mandantenspezifisch und
+      dürfen nur von explizit berechtigten Personen eingesehen werden.
+    - DLG-Futterdaten (öffentlich) sind von dieser Einschränkung ausgenommen.
+
+    Berechtigte Rollen:
+    - 'admin'           – systemweiter Admin, immer berechtigt
+    - 'vertriebsberater'– dem Betrieb zugeordneter Berater (durch Admin/Betrieb)
+    - 'portal_user'     – durch Betrieb eingeladener Portal-Nutzer
+    - 'share_link'      – zeitlich begrenzter Token-Zugang (z.B. Beratungsbesuch)
+
+    CRUD-Berechtigungen pro Datensatz:
+    - darf_lesen              – Grundfutter und Rationen lesen
+    - darf_rationen_anlegen   – neue Optimierung starten / speichern
+    - darf_grundfutter_anlegen– eigene Analysen hochladen
+    - darf_zugang_verwalten   – Zugangsliste bearbeiten (nur admin/betrieb)
+    """
+    __tablename__ = "rations_zugang"
+    __table_args__ = (
+        Index("ix_rz_tenant", "tenant_id"),
+        Index("ix_rz_token", "share_token"),
+        Index("ix_rz_email", "empfaenger_email"),
+        {"schema": "domain_shared"},
+    )
+
+    id = Column(String, primary_key=True, default=uuid7)
+    tenant_id = Column(String, nullable=False, comment="Betrieb / Mandant, dem dieser Zugang gilt")
+
+    # ── Empfänger ──────────────────────────────────────────────────────────────
+    empfaenger_email = Column(String(255), nullable=False, comment="E-Mail-Adresse des Zugangangs-Inhabers")
+    empfaenger_name  = Column(String(255), nullable=True,  comment="Anzeigename (optional)")
+
+    # ── Typ & Token ────────────────────────────────────────────────────────────
+    zugang_typ = Column(
+        String(50), nullable=False, default="portal_user",
+        comment="admin | vertriebsberater | portal_user | share_link"
+    )
+    share_token = Column(String(64), nullable=True, unique=True,
+                         comment="UUID-Token für Link-basierten Zugang (nur typ=share_link)")
+
+    # ── Gültigkeit ─────────────────────────────────────────────────────────────
+    gueltig_ab  = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    gueltig_bis = Column(DateTime(timezone=True), nullable=True,
+                         comment="None = unbegrenzt; nur für share_link empfohlen zu setzen")
+
+    # ── Datenschutz-Berechtigungen ─────────────────────────────────────────────
+    darf_lesen               = Column(Boolean, nullable=False, default=True)
+    darf_rationen_anlegen    = Column(Boolean, nullable=False, default=False)
+    darf_grundfutter_anlegen = Column(Boolean, nullable=False, default=False)
+    darf_zugang_verwalten    = Column(Boolean, nullable=False, default=False,
+                                      comment="Darf selbst weitere Zugänge erteilen/entziehen")
+
+    # ── Status ─────────────────────────────────────────────────────────────────
+    ist_aktiv    = Column(Boolean, nullable=False, default=True)
+    gesperrt_am  = Column(DateTime(timezone=True), nullable=True)
+    gesperrt_durch = Column(String(255), nullable=True)
+    sperrgrund   = Column(Text, nullable=True)
+
+    # ── Verwaltung / Audit ─────────────────────────────────────────────────────
+    erstellt_von_email = Column(String(255), nullable=False)
+    erstellt_von_name  = Column(String(255), nullable=True)
+    notizen    = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

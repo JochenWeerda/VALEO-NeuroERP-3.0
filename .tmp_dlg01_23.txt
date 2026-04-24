@@ -1,0 +1,2441 @@
+
+=== PAGE 1 ===
+01|2023
+www.DLG.org
+DLG Information
+Rationsoptimierung und Fütterungskontrolle 
+bei Milchkühen
+=== PAGE 2 ===
+2
+Titelbild: IStock.com/VanderWolf-Images
+Alle Informationen und Hinweise ohne jede Gewähr und Haftung
+Herausgeber: 
+DLG e. V. 
+Fachzentrum Landwirtschaft
+Eschborner Landstraße 122, 60489 Frankfurt am Main
+1. Auflage, Stand: 09/2023 
+© 2023
+Vervielfältigung und Übertragung einzelner Textabschnitte, Zeichnungen oder Bilder (auch für den Zweck der Unterrichtsgestaltung)  
+sowie Bereitstellung der Broschüre im Ganzen oder in Teilen zur Ansicht oder zum Download durch Dritte nur nach vorheriger 
+ Genehmigung durch DLG e.V., Servicebereich Marketing, Eschborner Landstraße 122, 60489 Frankfurt am Main, Tel. +49 69 24788-209, 
+M.Biallowons@DLG.org 
+=== PAGE 3 ===
+3
+DLG Information 01 | 23
+Rationsoptimierung und Fütterungskontrolle 
+bei Milchkühen
+Eine Information des DLG-Arbeitskreises Futter und Fütterung in Zusammenarbeit mit dem Bundesarbeitskreis der 
+Fütterungsreferenten in der DLG und mit Unterstützung der VDLUFA-Fachgruppe VI Futtermitteluntersuchung 
+Autoren:
+• Thomas Bonsels, Landesbetrieb Landwirtschaft Hessen, Kassel
+• Dr. Christian Böttger, Landwirtschaftskammer Nordrhein-Westfalen, Bad Sassendorf
+• Dr. Jana Denißen, AGRAVIS Raiffeisen AG, Münster
+• Thomas Engelhard, Landesanstalt für Landwirtschaft und Gartenbau Sachsen-Anhalt, Iden
+• Dr. Thomas Ettle, Bayerische Landesanstalt für Landwirtschaft, Grub
+• Dr. Elisabeth Gerster, Landwirtschaftliches Zentrum für Rinderhaltung, Grünlandwirtschaft, Milchwirtschaft, Wild 
+und Fischerei, Baden-Württemberg, Aulendorf
+• Dr. Sandra Hoedtke, LMS Agrarberatung GmbH – Landwirtschaftliche Untersuchungs- und Forschungsanstalt, 
+Rostock
+• Dr. Detlef Kampf, Deutsche Landwirtschafts-Gesellschaft, Frankfurt am Main
+• Dr. Christian Koch, Lehr- und Versuchsanstalt für Viehhaltung Hofgut Neumühle, Münchweiler an der Alsenz
+• Dr. Maria Ledinek, Rheinische Friedrich-Wilhelms-Universität, Bonn
+• Viktor Lorenz, Deutscher Raiffeisenverband, Berlin
+• Dr. Bernd Losand, Landesforschungsanstalt für Landwirtschaft und Fischerei Mecklenburg-Vorpommern,  
+Dummerstorf
+• Prof. Dr. Katrin Mahlkow-Nerge, Fachhochschule Kiel, Osterrönfeld
+• Dr. Martin Pries, Meschede
+• Dr. Wolfram Richardt, Landwirtschaftliche Kommunikations- und Servicegesellschaft mbH, Lichtenwalde
+• Dr. Hubert Schuster, Bayerische Landesanstalt für Landwirtschaft, Grub
+• Prof. Dr. Olaf Steinhöfel, Sächsisches Landesamt für Umwelt, Landwirtschaft und Geologie, Köllitsch
+Unter fachlich kritischer Prüfung von Prof. Dr. Karl-Heinz Südekum, Rheinische Friedrich-Wilhelms-Universität, 
+Bonn, im Auftrag des Ausschusses für Bedarfsnormen der Gesellschaft für Ernährungsphysiologie
+Gender-Hinweis
+In der vorliegenden Fachinformation wird aus Gründen der besseren Lesbarkeit bei Personenbezeichnungen und 
+personenbezogenen Hauptwörtern häufig das generische Maskulinum verwendet. Entsprechende Begriffe gelten 
+im Sinne der Gleichbehandlung aber grundsätzlich für alle Geschlechter. Die verkürzte Sprachform hat daher nur 
+redaktionelle Gründe und beinhaltet keine Wertung.
+=== PAGE 4 ===
+Abkürzungen
+ADF Säure-Detergenzien-Faser (Acid Detergent Fibre)
+ADFom Säure-Detergenzien-Faser nach Veraschung  
+(Acid Detergent Fibre without residual ash) = aschefreie ADF
+ADL Säure-Detergenzien-Lignin (Acid Detergent Lignin)
+bXS  Beständige Stärke 
+BSQ Basen-Säure-Quotient
+DCAB Dietary Cation Anion Balance
+Duodenum Zwölffingerdarm (erster Teil des Dünndarms) 
+ECM Energiekorrigierte Milch (4 % Fett, 3,4 % Eiweiß)  
+Umrechnung von Milch in ECM: 
+1 kg ECM = (0,38 • Fettkonzentration % + 0,21 • Eiweißkonzentration % + 1,05) 
+ELOS Enzymlösliche organische Substanz
+GE Bruttoenergie (Gross Energy)
+GF Grobfutter
+GfE Gesellschaft für Ernährungsphysiologie
+HFT Hohenheimer Futterwerttest
+KF Konzentratfuttermittel (Synonym Kraftfutter)
+KH Kohlenhydrate 
+L Liter
+LE Energiemenge in der Milch und Bestandteil der Bewertung der Energie-Effizienz 
+der Milcherzeugung
+ME Umsetzbare Energie (Metabolisable Energy)
+MXP Mikrobielles Rohprotein
+NDF Neutral-Detergenzien-Faser (Neutral Detergent Fibre)
+NDFom Neutral-Detergenzien-Faser nach Veraschung (Neutral Detergent Fibre without residual ash)
+aNDFom Neutral-Detergenzien-Faser nach Veraschung und Vorbehandlung mit alpha-Amylase 
+(Neutral Detergent Fibre without residual ash and pretreatment with alpha amylase) 
+= aschefreie aNDF
+aNDFomGF Anteil der aNDFom aus dem Grobfutter an der Gesamtration
+NEL Nettoenergie Laktation
+NFC Nicht-Faser-Kohlenhydrate (Non-Fibre Carbohydrates)  
+(NFC = TM - (XA + XL+ XP+ NDF))
+NfE N-freie Extraktstoffe (NfE = TM - (XA + XL + XP + XF))
+NPN Nicht-Protein-Stickstoff
+NSP Nicht-Stärke-Polysaccharide 
+NSBA Netto-Säure-Basen-Ausscheidung
+nXP Nutzbares Rohprotein am Duodenum
+pabKH Pansenabbaubare Kohlenhydrate
+peNDF Physikalisch effektive NDF
+PMR Teilmischration (Partial Mixed Ration)
+RNB Ruminale N-Bilanz 
+TM Trockenmasse 
+TMR Gesamtmischration (Total Mixed Ration)
+UDP Im Pansen nicht abgebautes Futter-Rohprotein (Ruminally Undegraded Crude Protein)
+VQ NDF Verdaulichkeit der aNDFom
+XA Rohasche
+XF Rohfaser
+XL Rohfett
+XP Rohprotein
+XS Stärke
+XZ Zucker
+4
+=== PAGE 5 ===
+5
+DLG Information 01 | 235
+DLG Information 01  | 23
+Inhaltsverzeichnis
+1 Einführung  6
+2 Kenngrößen der Kohlenhydratversorgung 6
+2.1 Mono- und Disaccharide  7
+2.2 Stärke  7
+2.3 Nicht-Stärke-Polysaccharide 8
+2.4 Verdauliche aNDFom 9
+2.5 Kurzkettige Fettsäuren 9
+3 Kenngrößen der Futterfette 10
+4 Kenngrößen der Verdaulichkeit und der Energiekonzentration 11
+5 Zusätzliche Kenngrößen zum Futterwert 12
+6 Kenngrößen der Proteinversorgung 12
+6.1 N-Stoffwechsel beim Wiederkäuer 12
+6.2 Im Pansen nicht abgebautes Futter-Rohprotein 14
+6.3 Nutzbares Rohprotein am Duodenum 14
+7 Synchronismus  14
+8 Analytische Aspekte 15
+8.1 Grundsätze der Futtermittelanalyse 15
+8.2 Analysenmethoden 15
+9 Indikatoren und Bewertung der wiederkäuergerechten Fütterung  16
+9.1 Systeme zur Bewertung der Strukturwirksamkeit der Ration 16
+9.2 Physikalisch effektive NDF (peNDF) 18
+9.3 Strukturindex (SI) 19
+10 Vorgaben zur Rationsplanung und -gestaltung  20
+10.1 Futteraufnahme maximieren 20
+10.2 Ausrichtung der Rationen 22
+10.3 Empfehlungen zur Nährstoffversorgung 23
+10.3.1 Nährstoffversorgung der Trockensteher 24
+10.3.2 Leistungsbezogene Fütterung der laktierenden Kühe mit TMR 26
+11 Futter- und Energie-Effizienz zur Beurteilung der Fütterung nutzen 29
+12 Empfehlungen zur Rationskontrolle  31
+13 Instrumente zum Fütterungscontrolling 32
+14 Fazit und Ausblick 36
+Literaturquellen  38
+Anhang   40
+=== PAGE 6 ===
+6
+1 Einführung
+Seit über 20 Jahren wird in der modernen Milchkuhhaltung das Fütterungsverfahren der Mischration praktiziert.  
+Die dafür notwendige Technik basiert meistens auf traktorgezogenen oder mobilen selbstfahrenden Futtermisch-
+wagen. Eine andere Variante ist die Nutzung stationärer Mischer und Verteilbänder oder mobiler Verteilroboter.  
+Die Verfahren dafür sind inzwischen so weit entwickelt, dass homogene, wiederholbare und dem Bedarf der Tiere 
+entsprechende Mischrationen vorgelegt und protokolliert werden können. Sie decken entweder in Form einer 
+Gesamt misch ration (TMR) den Tagesbedarf oder ermöglichen als Teilmischration (PMR) noch eine zusätzliche, 
+milchleistungsabhängige Konzentratfuttergabe (synonym Kraftfutter) über in der Regel vom Managementsystem 
+gesteuerte Kraftfutterautomaten. Zur richtigen Zusammenstellung solcher Mischrationen sind umfassende Aspekte 
+der Verdauungsphysiologie, wie zum Bedarf an Nährstoffen und Energie, Wiederkäuergerechtheit, Synchronität  
+der Nährstoffbereitstellung und Optimierung der Vormagenverdauung zu beachten. Darüber hinaus müssen eben-
+so praktische Gesichtspunkte wie Mischgenauigkeit und Homogenität, Rationskontrolle, Bewertung der Fütterung, 
+Fütterungscontrolling und Umweltwirkungen berücksichtigt werden. 
+Doch wieviel kann eine Kuh von einer Ration mit bestimmter Zusammensetzung verzehren? Diese Frage hat 
+insgesamt Priorität, da nur gefressenes Futter auch eine Fütterungswirkung erzielen kann. 
+Wie muss eine TMR gestaltet sein, damit sie gut gefressen und allen Kühen einer Gruppe weitestgehend gerecht 
+wird? Und wie setzt sich eine PMR zusammen, damit sie durch zusätzliche Konzentratfuttergaben am Automaten 
+leistungsgerecht in einem Fütterungssystem umgesetzt werden kann? 
+Mit welchen Nährstoffen, welcher Energieform und welchen Qualitätsparametern eine Fütterung bewertet wird,  
+hat sich in den letzten Jahren sehr verändert und vornehmlich verfeinert. 
+Die vorliegende Broschüre gibt einen kompakten Überblick über die für die Rationsoptimierung notwendigen 
+ Futterwert-Kenngrößen, deren Eigenschaften und die für ihre Charakterisierung erforderlichen chemischen, biolo-
+gischen und physikalischen Methoden und macht Vorgaben für die Rationsplanung. Darüber hinaus werden die 
+Möglich keiten der Fütterungskontrolle, beginnend mit der Futteraufnahme, der Futtermittelhygiene, der Beurteilung 
+re präsentativer Futtermittelproben und der Wiederkäuergerechtheit dargestellt. Das Fütterungscontrolling, d. h. die 
+Be urteilung der Fütterungswirkung als Teil der Produktionskontrolle, stellt schlussendlich die Reaktion des Tieres 
+auf die gefressene Ration dar. 
+Der Fütterungserfolg wird unter anderem an der Gesundheit, der Fruchtbarkeit und der Milchleistung der Milchkühe 
+gemessen. Diese Merkmale kann der Landwirt sofort erkennen und beurteilen. Dazu ist nicht auszuschließen, dass 
+es zukünftig auch „online“-Informationen zu den Stoffwechselreaktionen aus dem Pansen oder über das Blut geben 
+wird. Für die allgemeine, flächendeckende Anwendung sind diese Informationssysteme aber noch nicht ausgereift. 
+Einflussfaktoren auf den Fütterungserfolg sind:
+•  die Qualität der Rationskomponenten und des Fütterungsmanagements selbst, 
+•  die Haltungsbedingungen, Haltungs- und Produktionsverfahren,
+•  die Genetik,
+•  das Stallklima und 
+•  das Herden- und Betriebsmanagement.
+Letzter Punkt besagt auch, dass der Landwirt als Tierhalter selbst stets ein wesentlicher Teil der Einflussgrößen auf 
+den Fütterungserfolg ist. Die vorliegende DLG Information 1/2023 basiert auf den derzeit gültigen Empfehlungen 
+zur Energie-, Nähr- und Wirkstoffversorgung der GfE unter Beachtung der anstehenden Weiterentwicklungen. Bei 
+der GfE ist eine grundlegende Neufassung der Empfehlungen in Vorbereitung. Die sich daraus ergebenden Ände-
+rungen werden nach entsprechender Abstimmung in Wissenschaft und Praxis für die Fortschreibung aufgenom-
+men. Hierdurch wird gewährleistet, dass mit der entsprechenden Sorgfalt und Praxisnähe der jeweils neue Kennt-
+nisstand Anwendung finden kann.  
+2 Kenngrößen der Kohlenhydratversorgung
+Kohlenhydrate (KH) sind zu den Nährstoffen zählende organische Verbindungen, die sich aus Kohlenstoff, Was-
+serstoff und Sauerstoff zusammensetzen. Chemisch gesehen handelt es sich bei Kohlenhydraten um Polyhydroxy-
+Alde hyde oder -Ketone. Abhängig vom Aufbau können Kohlenhydrate in Monosaccharide (Einfachzucker), Di-
+saccharide (Zweifachzucker), Oligosaccharide (Drei- bis Zehnfachzucker) und Polysaccharide (Mehrfachzucker  
+mit > 10 verbundenen Monosacchariden wie z. B. Stärke, Zellulose, Pektin, Glykogen) unterschieden werden. 
+=== PAGE 7 ===
+7
+DLG Information 01 | 23
+Für den tierischen Körper stellen Kohlenhydrate wichtige Energielieferanten dar und müssen diesem mit der Nah-
+rung zugeführt werden. Sie sind mengenmäßig der wichtigste Nährstoff für den Körper. Dem Körper dienen sie in 
+ihrer verdaulichen Form primär als Energielieferant.
+Der größte Teil der Futterration für Wiederkäuer besteht aus Kohlenhydraten (siehe Abbildung 1). Im Zellinneren 
+sind die hochverdaulichen Kohlenhydrate wie Stärke (XS) und Zucker (XZ) enthalten, in den Zellzwischenräumen 
+die Pektine. In der Zellwand finden sich Zellulose und Hemizellulosen, deren Verdaulichkeit stark vom Grad der 
+Lignifizierung und vom Fütterungsniveau abhängt. Die einzelnen Kohlenhydrate haben in stark unterschiedlichem 
+Maß Einfluss: 
+•  als Gesamtheit auf die Strukturwirkung der Ration (Pansenfüllung, Wiederkauverhalten, Passagerate des Ver-
+dauungsbreis aus dem Pansen, Speichelfluss, pH-Wert im Pansen) durch das Zusammenwirken physikalischer 
+und chemischer Eigenschaften (DLG, 2001b),
+•  in ihrer verdaulichen Form:
+ -  auf die Produktivität der Pansenmikroben, deren Wachstum und die gebildete Menge hochverdaulichen 
+ Mikrobenrohproteins,
+ -  auf die Freisetzung von Futterenergie im Vormagensystem,
+ -  auf die Bildung organischer Säuren,
+ -  auf den Umfang der intermediären Synthese von Glukose,
+ -  auf die Bildung von Milchzucker und Milchfett, 
+•  auf den Verdauungsort und die Absorptionsrate im Verdauungstrakt und damit auf die Höhe der Futteraufnahme 
+sowie 
+•  auf die hormonelle Steuerung des Stoffwechsels der Kuh. 
+2.1 Mono- und Disaccharide 
+Die einzelnen Kohlenhydrate haben aufgrund ihrer unterschiedlichen chemischen Charakterisierung (chemische 
+Bindungen, funktionelle Gruppen, Molekülstruktur und -größe) und ihrer physikalischen Eigenschaften sowie 
+entsprechend ihrer Anteile im Futter unterschiedliche Wirkungen im Verdauungstrakt. Mono- und Disaccharide, 
+wie beispielsweise Glukose, Fruktose oder Laktose und Saccharose, sind im wässrigen Medium leicht löslich und 
+werden sehr schnell und überwiegend bereits im Pansen durch die Mikroorganismen zunächst zu Milch-, Essig-, 
+Propion- und Buttersäure abgebaut (DLG, 2001b). Der Essigsäureanteil ist vorherrschend, im Vergleich zum Abbau 
+der faserbildenden Kohlenhydrate fällt dieser aber geringer aus. Diese Säuren gelangen durch die Pansenwand 
+oder auch später im Verdauungstrakt in die Blutbahn und stehen nach Oxidation zum Energiegewinn oder als 
+Bausteine z. B. für die Fettsäuresynthese im Euter oder zur Neubildung von Glukose (Gluconeogenese) zur 
+Verfügung. 
+2.2 Stärke
+Das Polysaccharid Stärke besteht aus α-glycosidisch gebundenen Glukosemolekülen und ist daher für die körper-
+eigenen Verdauungsenzyme angreifbar und somit hochverdaulich. Sie wird je nach Herkunft (z. B. Getreidesamen, 
+Kartoffeln, Leguminosensamen) und aufgrund ihrer sehr variierenden physikochemischen Eigenschaften sehr 
+unterschiedlich verdaut. Einflussfaktoren sind z. B. Löslichkeit und Größenstruktur im Verdauungstrakt. Ein großer 
+Wasser
+Rohfaser
+Rohasche
+Rohprotein
+Rohfett
+N-freie 
+Extraktstoffe
+Kohlenhydrate
+Weender Analyse
+Zellinhalt
+inkl. Wasser 
+und  
+Mineralstoffe
+Zellwand
+inkl. Wasser 
+und  
+Mineralstoffe
+Rohasche
+Rohprotein
+Rohfett
+Erweiterte Analyse
+Stärke
+Zucker
+Organischer Rest/ 
+Pektine
+Hemicellulosen
+Zellulose
+Lignin
+NFC
+aNDFom
+ADLADFom
+Wasser
+Abbildung 1: Chemische Zusammensetzung einer Pflanze (verändert nach Kirchgeßner, 1997) 
+=== PAGE 8 ===
+8
+Teil der Stärke wird im Pansen mikrobiell aufgeschlossen, zu Di- und Monosacchariden und weiter zu Propionsäure 
+abgebaut. Diese wird entweder durch die Mikroben energetisch genutzt oder in die Blutbahn abgegeben. Aus 
+Propionsäure entsteht in der Leber durch Gluconeogenese Glukose, die im Intermediärstoffwechsel energetisch 
+verwertet wird. Glukose bzw. das im tierischen Körper speicherfähige Glykogen dienen auch als Baustein für die 
+Milchzuckersynthese (Laktose aus Glukose und Galaktose) im Euter. Ein kleinerer Teil der Futterstärke widersteht 
+dem mikrobiellen Abbau aufgrund seiner physikochemischen Eigenschaften bzw. höherer Passageraten durch  
+den Pansen. Dieser Teil wird „unabgebaute“ bzw. „pansenstabile“ Stärke oder Durchflussstärke genannt. Bis zu 
+einem gewissen Umfang kann diese im Dünndarm aufgrund der in der Bauchspeicheldrüse gebildeten Amylase zu 
+Glukose verdaut und in die Blutbahn eingeschleust werden. Ist nicht genügend Amylase bei beispielsweise zu 
+hohen Stärkemengen vorhanden bzw. die Futterstärke zu sehr „geschützt“, entgeht die Stärke der enzymatischen 
+Verdauung im Dünndarm und kann nur noch im Dickdarm mikrobiell genutzt werden und/oder zu Dysbiosen führen. 
+Nicht fermentierte Anteile werden unverdaut mit dem Kot ausgeschieden. 
+2.3 Nicht-Stärke-Polysaccharide
+Zur Gruppe der Nicht-Stärke-Polysaccharide (NSP) zählen Zellulose, Pektine, Glukane und Fruktane wie z. B. 
+Inulin, dem beim monogastrischen Tier eine größere Bedeutung beikommt. Beim Wiederkäuer sind eher andere 
+Fruktane zu beachten. Die auch als Fruktosane bezeichneten wasserlöslichen Oligo- und Polysaccharide ersetzen 
+oder ergänzen in einigen Pflanzengruppen Stärke als Speicherkohlenhydrat und sind fast vollständig aus D-Fruk-
+tose-Einheiten (meistens ein Molekül Saccharose und ein bis zehn ß-glycosidisch gebundene Moleküle Fruktose) 
+aufgebaut (Durst et al., 2021; Steinhöfel und Hoffmann, 2020). Aufgrund ihres enzymatischen Abbaus im Pansen 
+sind sie zusammen mit anderen leichtlöslichen Kohlenhydraten zu bewerten und in der Summe der wasserlös-
+lichen Kohlenhydrate zu berücksichtigen. Zu beachten ist, dass Fruktane über die analytische Bestimmung der 
+Stärke- und Zuckergehalte größtenteils nicht erfasst werden und dann separat zu analysieren sind (Richardt, 
+2021).
+Bei der Zellulose sind im Gegensatz zum Polysaccharid Stärke die einzelnen Glukosemoleküle über eine ß-glyco-
+sidische Bindung miteinander verknüpft und damit für die körpereigenen Enzyme nicht angreifbar. Sie können 
+jedoch durch die Enzyme der im Pansen bzw. im Dickdarm lebenden Mikroorganismen gespalten werden. Der für 
+Monogastriden weitestgehend unverdauliche Anteil der ß-glycosidisch gebundenen Kohlenhydrate wurde ursprüng-
+lich über die Methodik der Rohfaseranalyse charakterisiert. Im Umkehrschluss stellt die Differenz zwischen der 
+Summe aller Kohlenhydrate und der Rohfaser (XF) den Anteil der leicht verdaulichen Kohlenhydrate, also die soge-
+nannten N-freien Extraktstoffe (NfE), dar. 
+Mit der Methode der Rohfaseranalyse und der Differenzbildung aus Gesamtkohlenhydraten und Rohfaser zu den 
+NfE werden die Kohlenhydrate im Hinblick auf den Futterwert in Abhängigkeit von der Futterart aber nur unzurei-
+chend differenziert. So geht z. B. bei den Gräsern der größte Teil des weitgehend unverdaulichen Lignins während 
+der Rohfaseranalytik in Lösung und wird damit den NfE zugerechnet. Eine differenzierte Analytik der Kohlenhydrate 
+(Zucker, Stärke, Zellulose, Hemizellulose) und des Lignins für die Routinefutteruntersuchung ist jedoch zu auf-
+wändig. Mit der erweiterten Faseranalytik nach van Soest werden die sich vorrangig in den Zellwänden befind-
+lichen schwerer verdaulichen Faserstoffe Zellulose, Hemizellulosen und Lignin besser und umfangreicher erfasst 
+(van Soest et al., 1991). 
+Analytisch erfolgt dies mit dem in neutraler Detergenzienlösung unlöslichen Rest. Die ursprüngliche NDF-Analytik 
+beschreibt allerdings nur den Anteil des nach der Behandlung mit neutraler Detergenzienlösung getrockneten 
+Rückstands an der eingewogenen Futterprobe und beinhaltet daher auch noch mineralische Anteile aus den 
+Zellwänden und des der Probe anhaftenden Schmutzes. Dieser mineralische Anteil kann durch eine Veraschung 
+des Rückstands genau bemessen und abgezogen werden. Mit dieser Prozedur wird dann der Anteil der organi-
+schen NDF, die NDFom bestimmt (van Soest et al., 1991). 
+Bei stärkehaltigen Grobfuttermitteln (GF), insbesondere der Maisganzpflanze, führt die Behandlung mit neutraler 
+Detergenzienlösung aber nicht zur vollständigen Lösung der Stärke, so dass überhöhte NDF-Konzentrationen 
+berechnet werden. Deshalb wird in der Futterwertbestimmung eine Amylase-Vorbehandlung durchgeführt, um 
+diese Stärke zu eliminieren. Das Ergebnis wird als aNDFom bezeichnet. Vom Gesamtverständnis umfassen die 
+aNDFom alle schwerverdaulichen, im Verdauungstrakt nur mikrobiell abbaubaren Kohlenhydrate. 
+Die Differenz aus dem gesamten organischen Anteil des Futters (organische Masse – OM) und der Summe aus 
+aNDFom, Rohfett (XL) und Rohprotein (XP) wird als Nicht-Faser-Kohlenhydrate (NFC) bezeichnet und soll den 
+leicht verdaulichen Anteil der Kohlenhydrate des Futters charakterisieren. Die organischen Säuren im Futter 
+(kurzkettige Gärsäuren bzw. nativen Ursprungs) und ein Teil des Pektins werden analytisch teilweise durch die 
+NDF-Analyse miterfasst. Mit der in saurer Detergenzienlösung unlöslichen Faser (ADF) werden im Wesentlichen 
+die Zellulose und das Lignin beschrieben. Auch hier wird der nach der Prozedur verbleibende und getrocknete 
+Rückstand anschließend verascht und der organische Anteil der Säure-Detergenzienfaser (ADFom) an der 
+=== PAGE 9 ===
+9
+DLG Information 01 | 23
+Trocken masse (TM) bestimmt. ADFom ist als Bestandteil der aNDFom anzusehen. Die aNDFom umfasst gegen-
+über der ADFom zusätzlich die Hemizellulosen. Hemizellulosen sind ebenfalls Polysaccharide, die aber auch aus 
+anderen Monosacchariden als Glukose, wie aus den Pentosen Xylose und Arabinose sowie anderen Hexosen wie 
+Mannose und Galactose, bestehen können. Entscheidend ist ihr amorpher Charakter, weswegen sie in alkalischer 
+und in saurer Umgebung löslich und meist auch verdaulicher sind als Zellulose, sofern sie nicht mit Teilen des 
+Lignins kovalent verbunden sind.
+2.4 Verdauliche aNDFom
+Der verdauliche Anteil der Kohlenhydrate ist der größte Energie- und Substratlieferant für die im Pansen statt-
+findenden mikrobiellen Aktivitäten. Um die Produktivität der Pansenmikroben im Hinblick auf die Umsetzung der 
+ Nährstoffe des Futters in hochverdauliche mikrobielle Biomasse (mikrobielles Protein) einschätzen zu können, ist 
+es wichtig, neben den hochverdaulichen NFC bzw. dem Stärke-, Zucker-, und Fruktananteil auch den Energie-
+beitrag der verdaulichen Faserkohlenhydrate (verdauliche aNDFom) zu kennen. Da bei wiederkäuergerechten 
+Rationen der Anteil der Faserkohlenhydrate größer ist als der der anderen Kohlenhydrate, sollte die Verdaulichkeit 
+der NDF (VQ NDF) bekannt sein (Oba und Allen, 1999). Der Kenngröße VQ NDF wird künftig eine größere Bedeu-
+tung für die Rationsoptimierung zukommen (Tabelle 1). Bei noch wachsenden Pflanzen verringert sich die VQ NDF 
+mit zunehmendem Vegetationsstadium bzw. Reifegrad. 
+Für Futterstoffe in einem hohen vegetativen Reifestadium (Stroh, GPS, Silomais) bzw. für Samen und deren 
+Verarbeitungsprodukte nimmt der Zusammenhang zwischen der Verdaulichkeit der Faser und der Höhe des 
+Fasergehaltes selbst ab.
+Tabelle 1: Aus Verdaulichkeitsuntersuchungen am Hammel ermittelte Angaben zur Verdaulichkeit der NDF1) verschiedener Futtermittel  
+(Denißen, 2020; Priepke, 2021)
+aNDFom VQ NDF
+Prüfungen Mittlerer Gehalt
+(g je kg TM)
+Spannweite
+(g je kg TM)
+Mittlere  
+Verdau lichkeit (%)
+Spannweite 
+(%)
+Grasernteprodukte 109 487 334 – 708 74 47 – 89
+Silomais 43 390 308 – 489 58 28 – 74
+Luzerneprodukte 23 464 345 – 640 53 41 – 73
+Rotklee 11 427 375 – 466 74 69 – 82
+Ganzpflanzensilagen 9 516 386 – 586 48 30 – 67
+Mischrationen2) 18 377 255 – 479 71 63 – 82
+Getreideschlempen 12 471 316 – 606 69 44 – 90
+Zuckerrübenprodukte 15 396 112 – 615 88 70 – 99
+Getreidearten 68 220 101 – 350 66 2 – 91
+Körnerleguminosen 14 206 150 – 302 83 44 – 100
+Rapsprodukte 5 269 209 – 322 54 46 – 63 
+Biertreber 4 643 613 – 673 66 64 – 68 
+Stroh 1 813 57
+1) hier für aNDFom  2) verschiedene Nutzungsrichtungen
+2.5 Kurzkettige Fettsäuren
+Bei den kurzkettigen Fettsäuren sind sowohl die Gehalte in den Futtermitteln (vor allem Silagen, siehe Kapitel 5) 
+als auch ihre Entstehung im Pansenstoffwechsel zu betrachten. 
+Während des Abbaus der KH im Pansen entsteht aus faserreichen Rationen vermehrt Essigsäure, dazu geringe 
+Anteile an Propion- und Buttersäure. Aus konzentrat- bzw. stärkereichen Rationen werden, bezogen auf das 
+ Verhältnis der Fettsäuren zueinander, höhere Mengen an Propion- und Buttersäure und geringere Mengen an 
+=== PAGE 10 ===
+10
+Essigsäure als beim Abbau faserreicher Rationen gebildet. Bei sehr hohen Anteilen an leichtlöslichen Kohlen-
+hydraten kommt es über den Zwischenschritt der Laktatbildung im Zuge der Propionsäuresynthese zu einer 
+ Anhäufung an Milchsäure und in der Folge einer deutlichen Reduktion des pH-Wertes im Pansen, womit das 
+ Risiko des Auftretens von Pansenazidosen erhöht ist (Jeroch et al., 2020). Dies kann z. B. durch Überschreitung 
+der Kapazität zum Weiterabbau zu Propionsäure durch laktatverwertende Mikroben wie Streptococcus bovis und 
+Selenomonas ruminantium passieren. Die kurzkettigen Fettsäuren gelten grundsätzlich als physiologisch wert-
+volle Energielieferanten.
+Aus den vorgenannten Gründen ist für die Rationsplanung bei der hochleistenden Kuh eine gezielte Kohlenhyd-
+rat-Versorgung unerlässlich. Zu den wichtigsten weiteren Kenngrößen des Futterwertes zählen im Wesentlichen 
+die Angaben zu den Struktur-KH und zur Strukturwirksamkeit sowie zu den Konzentrationen an Energie und an 
+hydrolysierbaren KH wie Stärke, Zucker und Fruktane (Tabelle 2).
+Tabelle 2: Bewertung der verschiedenen Kohlenhydratfraktionen
+Kenngröße Zielfunktion
+aNDFom Strukturversorgung, Energieanteil, Futteraufnahme; Berechnung peNDF
+NFC Energieversorgung Pansenmikroben
+ADFom Wiederkauen, Hemizelluloseanteil als Differenzbildung aus NDF und ADF
+Stärke Versorgung der Pansenmikroben mit Energie; Berechnung pansenstabile Stärke; Einschätzung Pansen-pH-Wert
+Zucker Versorgung der Pansenmikroben mit schnell verfügbarer Energie; Einschätzung Pansen-pH-Wert
+Fruktane Einschätzung Pansen-pH-Wert, Energieversorgung
+Hemizellulosen pansenverdauliche Kohlenhydrate für Produktivität Pansenmikroben; Stabilisierung Pansenmikroben
+Verdauliche NDF Energieversorgung Pansenmikroben; Einschätzung Pansen-pH-Wert
+3 Kenngrößen der Futterfette
+Grobfuttermittel wie Mais und Gras bzw. deren Verarbeitungsprodukte enthalten gegenüber fettreichen bzw. 
+fettreicheren Samen der Ölsaaten, Hülsenfrüchte und Leguminosen geringe Fettanteile. Die Milchkuh hat an sich 
+keinen Bedarf an Futterfett, da die Futterfette durch die Pansenmikroben zum größten Teil abgebaut und inter-
+mediär wieder gebildet werden. Die Kuh deckt ihren Energiebedarf über die aufgenommene Futtermenge und die 
+entsprechende Energiedichte der Ration. Reicht die aufgenommene Energiemenge nicht aus, wird Körpersubstanz 
+abgebaut. 
+Eine Möglichkeit der Erhöhung der Energiedichte, z. B. bei hohen Leistungen und einer begrenzten Futterauf-
+nahmekapazität, stellt der Einsatz von Futterfetten dar. Hohe Zulagen an Fett in Rationen für Milchkühe sind im 
+Allgemeinen aber unerwünscht, da dies zu einer Beeinträchtigung insbesondere der zellulolytischen Pansenmikro-
+ben und damit verbunden zu einer Abnahme des Abbaus von NSP im Pansen führen kann (Jeroch et al., 2020). 
+Dies begründet sich vornehmlich mit der Sensitivität und damit verbunden der begrenzten Kapazität der Pansen-
+mikroben zur Hydrierung ungesättigter Fettsäuren im Pansen. Daher sollte die über das Futter zugeführte Fett-
+menge einen Anteil von ca. 40 g je kg TM bzw. 800 g je Tier und Tag der Gesamtration nicht überschreiten (be-
+zogen auf eine Futteraufnahme von 20 kg TM je Tag; DLG, 2001a). Höhere Fettzusätze sind möglich, wenn diese 
+über Fettquellen erfolgen, die im Pansen nicht abgebaut werden können. Mit solchen pansengeschützten Fetten 
+kann der Fettgehalt auf max. ca. 60 g je kg TM bzw. 1200 g je Tier und Tag der Gesamtration angehoben werden 
+(Hoffmann, 2021). Eine max. Menge von 0,5 kg pansengeschütztem Fett je Tier und Tag sollte nicht überschritten 
+werden. Allerdings müssen die pansengeschützten Fette qualitativ so aufgebaut sein, dass mindestens 90 % der 
+Fettsäuren unverändert durch den Pansen hindurch in den Dünndarm (hoher Anteil Durchflussfettsäuren) gelangen 
+und dabei eine hohe Gesamtverdaulichkeit (vorwiegend im Dünndarm) aufweisen (Hoffmann, 2021).
+Schematische Einordnung der Pansenstabilität von pansengeschützten Fetten (nach Hoffmann, 
+2021):
+Öle < kristalline Fette < gehärtete Fette < fraktionierte Fette < Ca-verseifte Fette < umhüllte/
+gekapselte Fette*
+* unter Berücksichtigung der technologischen Weiterverarbeitungseigenschaften wie Pelletierung
+=== PAGE 11 ===
+11
+DLG Information 01 | 23
+Generell ist beim Einsatz von höheren Fettmengen zu beachten, dass mit einer gezielten Beeinflussung der Futter-
+aufnahme ein vergleichbarer Effekt auf die Energieaufnahme gegenüber der Erhöhung der Energiekonzentration in 
+der Ration durch den Einsatz von pansengeschütztem Fett zu erreichen ist.
+Beispiel: 
+  1,0 kg höhere TM-Futteraufnahme mit 7,0 MJ NEL je kg TM der Gesamtration  
+= + 7,0 MJ NEL je Tier und Tag 
+  0,4 kg Ca-verseiftes, pansengeschütztes Fett mit 16,0 MJ NEL je kg TM  
+= + 6,4 MJ NEL je Tier und Tag
+4 Kenngrößen der Verdaulichkeit und der Energiekonzentration
+Die Verdaulichkeit eines Futtermittels insgesamt steht, unter Beachtung des Fettgehaltes im Futtermittel, in einem 
+sehr engen Zusammenhang mit dem Energiegehalt des Futtermittels. Sie kann realistisch nur in einem Verdau-
+ungsversuch am Zieltier ermittelt werden. Als Modelltier für alle Wiederkäuer wird dafür das Schaf genutzt. Ver-
+daulichkeitsversuche am Tier sind aufwändig, relativ langwierig und werden bezüglich des Tierwohls und des Tier-
+schutzes durchaus kritisch betrachtet. Daher wurden für die Schätzung der Energiekonzentration von Futtermitteln, 
+ausgehend von deren Inhaltsstoffen, Gleichungen entwickelt, die auch auf in-vitro-Kenngrößen zur Beurteilung  
+der Verdaulichkeit basieren. In-vitro-Verfahren ahmen Verdauungsvorgänge unter Laborbedingungen nach. Dabei 
+wird unter standardisierten Bedingungen gewonnener und aktiver Pansensaft (Verfahren nach Tilly und Terry, Gas-
+bildung nach dem Hohenheimer Futterwertest – HFT), aber auch kommerziell hergestellte Enzympräparate wie 
+Zellulase und Pepsin (Zellulasemethode nach Nehring und Friedel, Enzymlöslichkeit der organischen Substanz 
+– ELOS nach DeBoever) genutzt. In den deutschen Futtermittellaboren werden der Hohenheimer Futterwerttest 
+(HFT) und die Enzymlöslichkeit der organischen Substanz (ELOS) (VDLUFA, 2012) angewendet. Beide Methoden 
+erzeugen Aussagen zur potenziellen Verdaulichkeit der organischen Substanz des Futtermittels (Steingass und 
+Menke, 1986; De Boever et al., 1986). Dennoch sind neben der Nutzung zur Evaluierung von in-vitro-Methoden die 
+Verdaulichkeitsbestimmungen am Tier unerlässlich.
+Gegenwärtiger Maßstab für Informationen zur vom Tier nutzbaren Energiekonzentration von Futtermitteln für die 
+Wie der käuerfütterung sind die Umsetzbare Energie (ME, metabolizable energy) und die Nettoenergie-Laktation 
+(NEL) (siehe Abbildung 2). Bei wachsenden Tieren wird das Futter auf der Stufe der umsetzbaren Energie berechnet, 
+weil sich die Verwertbarkeit der ME im Laufe des Wachstums der Tiere in Abhängigkeit von der Zusammensetzung 
+des täglichen Körpermassewachstums (Anteile Körpereiweiß, Körperfett, Mineralisierung, Wasseranteil) deutlich 
+ver ändert. Die Verwertung der ME ist für die verschiedenen Stoffwechselziele wie Muskelwachstum, Fettansatz, Milch-
+bildung oder Reproduktion deutlich unterschiedlich. So geht die GfE (2001) davon aus, dass die für die Milchbildung 
+verwendete Umsetzbare Energie zu 60 % in Milchenergie umgesetzt wird. Bei wachsenden Tieren ist die Verwertung 
+für den Körpermasseansatz mit 40 % (Mastbullen, Aufzuchtrinder) deutlich niedriger. Wachsende Tiere mit höherem 
+Fettanteil im Körpermasseansatz (Mastfärsen, Ochsen) verwerten die ME für den Ansatz mit 43 % etwas günstiger. 
+Bruttoenergie (Brennwert, gross energy, GE)
+Verdauliche Energie (digestible energy, DE) Energie im Kot
+Umsetzbare Energie  
+(metabolizable energy, ME)
+Energie im Harn  
+und Methan
+Nettoenergie (net energy, NE) 
+(Milchkühe, NEL)
+Stoffwechselverluste  
+= Wärmebildung
+Abbildung 2: Schema des Umsatzes von Futterenergie im Tier
+=== PAGE 12 ===
+12
+5 Zusätzliche Kenngrößen zum Futterwert
+In Ergänzung zu den fütterungsrelevanten Kennzahlen sollten zur Beurteilung der Gärqualität die Kenngrößen des 
+DLG-Bewertungsschlüssels für Grobfutter herangezogen werden (DLG, 2004; DLG, 2006b). 
+Hierbei werden zur analytischen Bestimmung des Futterwertes des Grobfutters insbesondere die analytisch ermit-
+telten Konzentrationen an Essig- und Buttersäure, an Ammoniakstickstoff sowie der gemessene pH-Wert in Ab-
+hängigkeit von der TM berücksichtigt und über eine Gesamtpunktzahl ausgedrückt (DLG, 2006b). Dazu hat es sich 
+bewährt, zusätzlich auch die Gehalte an Milchsäure zu analysieren.
+In Ergänzung zur chemischen Untersuchung des Grobfutters ist als weitere wichtige Bewertung die Sinnenprüfung 
+zu nennen, die hinsichtlich der Eignung zur Fütterung ebenso wesentlich zur Erfassung des Konserviererfolges 
+(DLG, 2004; DLG, 2006b) beiträgt. Hiermit kann insbesondere die hygienische Beschaffenheit der Silagen anhand 
+einer Geruchsprüfung auf Fehlgärung, Erwärmung sowie Hefen- und Schimmelbildung bewertet werden. Dazu 
+werden über eine Sicht- und Farbprüfung Witterungseinflüsse und Fehlgärungen, die mikrobielle Zersetzung von 
+Pflanzenteilen sowie Schimmel und Verschmutzung eingeschätzt. Auch hier ergibt sich über eine Einzelbenotung 
+eine Gesamtpunktezahl.
+Die Gärsäuren Milch-, Essig- und Buttersäure sind, im Gegensatz zu den Umsetzungen im Pansen, als Indikato-
+ren für den Siliererfolg und die Gärqualität zu bewerten und in diesem Zusammenhang von großer Bedeutung.  
+Für den Konserviererfolg ist es maßgeblich, Schadkeime möglichst rasch durch Milchsäurebakterien zu unter-
+drücken, indem über die stark säuernde Milchsäure der pH-Wert abgesenkt wird. Neben Milchsäure wird je nach 
+Gärsubstrat und der am Silierprozess beteiligten Bakterien auch Essigsäure gebildet. Ein guter Siliererfolg wird 
+über möglichst hohe Gehalte an Milchsäure (min. 3 – 5 % in der TM in Abhängigkeit von der TM und des XP-Gehal-
+tes bzw. der Pufferkapazität) sowie max. 3 % Essigsäure in der TM und dem Fehlen von Buttersäure ausgedrückt. 
+Der (kritische) pH-Wert gilt gegenüber den vorgenannten Parametern als das geeignetere Mittel, um die Güte des 
+Gärerfolges zu bewerten. Höhere Essigsäureanteile sichern zwar die (aerobe) Stabilität der Silage ab, können sich 
+allerdings negativ auf die gefressene Menge an Silage auswirken. Das Auftreten von Buttersäure steht in engem 
+Zusammenhang mit Fehlgärungen, Verderb und Verschmutzungen des Futters. Weiterführende Informationen sind 
+dem Praxishandbuch Futter- und Substratkonservierung zu entnehmen (DLG, 2011).
+Alkohole zählen zu den flüchtigen organischen Verbindungen und gelten als unerwünscht. Der Geruch nach 
+Alkohol, Most oder Hefen deutet auf Vermehrung von Hefepilzen hin. Dabei stellt weniger der Alkohol selbst, als 
+vielmehr die sich dabei vermehrenden Hefepilze, ein Risiko hinsichtlich Nacherwärmung bei der Futterentnahme 
+dar. Ethanolgehalte, insbesondere in Maissilagen, sind meist mit erhöhten Konzentrationen an geruchsintensiven 
+und flüchtigen Estern wie Ethylacetat und Ethyllactat verbunden, die einen fruchtester- bzw. klebstoffähnlichen 
+Geruch aufweisen und mit Futteraufnahme- und Leistungseinbußen sowie Beeinträchtigungen der Tiergesundheit 
+in Verbindung gebracht werden. Für die Einschätzung des Gebrauchswertes von Silagen sind Ethanolgehalte 
+> 1,0 % als kritisch zu bewerten (DLG, 2011). Dem gegenüber kann als erwünschter Alkohol 1,2-Propandiol als 
+Produkt der heterofermentativen Milchsäuregärung sowohl in Gras- als auch in Maissilagen häufig in beträchtlichen 
+Konzentrationen auftreten. 
+Darüber hinaus sind die Konzentrationen an Rohasche als Hinweis auf die Verschmutzung sowie an Ammoniak-
+stickstoff als Indikator für den Protein bzw. Aminosäurenabbau während des Silierprozesses zu betrachten. Weiter-
+führende Informationen enthält das Handbuch Futter- und Substratkonservierung (DLG, 2011).
+6 Kenngrößen der Proteinversorgung
+6.1 N-Stoffwechsel beim Wiederkäuer
+Beim Wiederkäuer geht der Verdauung durch körpereigene Enzyme eine Verdauung durch proteolytische Enzyme 
+von Mikroorganismen (vor allem Bakterien, ferner Protozoen und Pilze) des Vormagensystems, insbesondere des 
+Pansens, voraus. Mit dem Futter nimmt das Tier stickstoffhaltige Verbindungen (Proteine/Aminosäuren und Nicht- 
+Protein-Stickstoff (NPN)) auf (siehe Abbildung 3). Vom gesamten Futter-XP werden im Pansen ca. drei Viertel 
+durch die Mikroben ab- und in mikrobielles XP (MXP) umgebaut. Etwa ein Viertel gelangt als nicht abgebautes XP 
+direkt in den Dünndarm. Beide Fraktionen können dort zur Verdauung genutzt werden. Insgesamt wird von dem 
+gefütterten Stickstoff in Form des Futter-XP etwa ein Drittel vom Tier verwertet, ca. zwei Drittel werden über Kot 
+und Harn wieder ausgeschieden.
+Mikrobielle Proteinsynthese
+Im Pansen existieren mehr als 200 verschiedene Arten von Mikroben, die sich in der Nutzung der Stickstoffquelle 
+unterscheiden. Während die meisten Pansenbakterien, nämlich die zellulose- und hemizelluloseabbauenden 
+=== PAGE 13 ===
+13
+DLG Information 01 | 23
+Bakterien, hauptsächlich Ammoniak als Stickstoffquelle für ihre Proteinsynthese verwenden, nutzen andere Arten 
+mehrere Stickstoffquellen oder ganz bestimmte Aminosäuren. Durch Transaminierungsprozesse sind die Mikro-
+organismen in der Lage, Stickstoff auf N-freie Moleküle zu übertragen und somit Aminosäuren und Proteine selbst 
+aufzubauen (Loeffler und Gäbel, 2013). 
+Grundsätzlich sind die Bakterien und Protozoen im Pansen in der Lage, aus NPN-Verbindungen alle essenziellen 
+und nicht-essenziellen Aminosäuren herzustellen (Stangl, 2014). Dafür müssen die Energieversorgung sowie eine 
+ausreichende Lieferung mit Stickstoff und essenziellen Wirkstoffen (z. B. die Mineralstoffe P, S, Co und fettlösliche 
+Vitamine A, D und E) für das Wachstum und die Aktivität der Bakterien sichergestellt sein (Lebzien, 2005) und die 
+Verfügbarkeit des Stickstoffs an die Futterenergie (Pansensynchronisation) angepasst werden.
+Mit steigender Energieversorgung nimmt die MXP-Synthese linear zu, wenn seitens der Rationsgestaltung kein 
+negativer Einfluss auf die Mikrobenvielfalt und die Proteinsyntheseleistung besteht. Unter optimalen Bedingungen 
+werden so ca. 10 g MXP pro MJ ME bzw. ca. 16 g MXP pro MJ NEL erzeugt. Nach Kaufmann und Hagemeister 
+(1975, zitiert in Stangl, 2014) muss für die energieabhängige Proteinsynthese eine entsprechende Menge an Stick-
+stoff, vor allem als Ammoniak zur Verfügung stehen. Um die MXP-Synthese zu optimieren und zu maximieren, ist 
+die Energieversorgung über Kohlenhydrate von fundamentaler Bedeutung. Werden jedoch zu hohe Mengen an 
+leicht und umfangreich abbaubaren Kohlenhydraten in Form von Stärke (z. B. aus Getreide wie Weizen) verfüttert, 
+kann dies zu Störungen der Pansenfermentation, wie Pansenazidosen bzw. -dysbiosen, führen, wodurch die Effi-
+zienz der Proteinsynthese der Mikroben reduziert und nicht vollständig ausgenutzt wird. Werden hingegen hoch 
+verdauliche Kohlenhydrate aus Pflanzenfasern (NDF und ADF) verfüttert, wird bei optimaler Stickstoffversorgung 
+die MXP-Synthese maximiert (siehe Abbildung 4 zur Abbaugeschwindigkeit von Kohlenhydraten und XP verschie-
+dener Futtermittel und Tabelle 12 zu den empfohlenen Mengen an Stärke in Rationen für Milchkühe).
+Harnstoffzyklus
+Enthält die Futterration zwischen 13 und 15 % XP in der TM, wird das bei den Abbauvorgängen im Pansen  
+ent stehende Ammonium vor allem für die MXP-Synthese verwendet. Bei höheren XP-Gehalten in der Ration ent-
+stehen Ammoniumüberschüsse (Weiß, 2011). Das über den Bedarf der Pansenbakterien hinaus im Pansen 
+ vorliegende Ammonium wird über die Pansenwand in die Blutbahn aufgenommen oder in späteren Abschnitten  
+des Magen-Darm-Traktes absorbiert. 
+Da Ammonium (Ammoniak) ein starkes Zellgift ist, wird dieses normalerweise schnell zu unschädlichem Harnstoff 
+umgewandelt (Stangl, 2014). Dies geschieht über die Passage des Ammoniums über die Pfortader zur Leber, wo 
+der Umwandlungsprozess und somit die Entgiftung stattfindet. Ein Teil des so entstandenen Harnstoffs wird in der 
+Niere herausgefiltert und über den Harn ausgeschieden. Über einen zweiten Entsorgungsweg gelangt Harnstoff mit 
+dem Blut in das sezernierende Eutergewebe und wird mit der Milch ausgeschieden (Weiß, 2011). 
+Leber
+Harnstoff
+Peptide
+Aminosäuren
+NH4
++/NH3
+Mikrobielles Rohprotein (MXP)
+(ca. 10 g je MJ ME)
+Pansen
+Labmagen
+Dünndarm Im Pansen nicht abgebautes Futter-Rohprotein (UDP)
+RNB
+nXP = MXP+UDP
+absorbiert
+Kot, Harn
+Harn
+Futterprotein (Protein / 
+Aminosäuren und NPN)
+und Futter-Energie
+KörpereiweißMilcheiweiß Rumino-hepatischer
+N-Kreislauf
+Rumino-hepatischer
+N-Kreislauf
+Abbildung 3:  
+Schematische Darstellung  
+des Proteinstoffwechsels  
+des Wiederkäuers  
+(Mahlkow-Nerge, 2023)
+=== PAGE 14 ===
+14
+Die Situation des Ammoniaküberschusses in den Vormägen ist häufig verbunden mit einer für diese Menge nicht 
+ausreichenden Versorgung mit energieliefernden Kohlenhydraten. Durch die Mangelsituation in diesem Bereich 
+fehlt den Mikroorganismen die benötigte Energie für die XP-Synthese, was durch die RNB und den Milchharnstoff 
+beurteilt werden kann. Die Stickstoffausnutzung wird ineffizient, eine Stoffwechselbelastung des Tieres sowie eine 
+erhöhte Ausscheidung an Stickstoff (Stangl, 2014) und unter Umständen Umweltbelastungen sind die Folgen 
+(Lebzien, 2005).
+Ruminohepatischer Stickstoffkreislauf
+Bei einer bedarfsgerechten Versorgung mit XP wird über die Niere nur wenig Harnstoff abgegeben. Der Harnstoff 
+gelangt in dieser Situation vermehrt über die Speichelflüssigkeit in den Pansen oder diffundiert aus dem Blut direkt 
+zurück in den Pansen (Weiß, 2011). Der erneut im Pansen angekommene Harnstoff wird durch die von den Mikro-
+organismen gebildeten Ureasen zu Ammonium gespalten und steht somit den Pansenmikroorganismen wieder als 
+Stickstoffquelle zur Verfügung. Dieser Kreislauf des rezirkulierenden Harnstoffs wird als ruminohepatischer N-Kreis-
+lauf bezeichnet. Je nach Versorgungszustand mit Stickstoff wird dieser kontinuierliche Kreislauf angepasst, wes-
+halb Wiederkäuer über eine sehr effiziente Stickstoffausnutzung verfügen (Stangl, 2014). Somit reduziert sich die 
+Harnstoffabgabe über den Harn bei einer im Vergleich zur Energieversorgung geringen Versorgung mit XP (< 13 % 
+in der TM) weiter, bei einer im Vergleich zur Energieversorgung höheren Versorgung mit XP (> 16 % in der TM) 
+steigt die Harnstoffabgabe über den Harn hingegen an.
+6.2 Im Pansen nicht abgebautes Futter-Rohprotein
+Ein Teil des mit dem Futter zugeführten Proteins wird nicht im Pansen abgebaut, sondern gelangt direkt in den 
+Darm (Im Pansen nicht abgebautes Futter-XP (Ruminally Undegraded Crude Protein = UDP)). Der Umfang des 
+Proteinabbaus im Pansen hängt von der Sekundär- und Tertiärstruktur der Futterproteine sowie der Struktur der 
+Disulfidbrücken ab. Neben der Löslichkeit der Proteine können auch mögliche Vorbehandlungen der Futterproteine 
+die Abbaubarkeit beeinflussen. Die Abbaurate der Proteine der verschiedenen Futtermittel schwankt demnach. 
+Zudem spielt auch die Höhe der Futteraufnahme eine Rolle, da diese die Passagegeschwindigkeit des Futters 
+beeinflusst. Im Durchschnitt kann von einer Schwankung der UDP-Gehalte von 5 bis 45 % für nicht speziell be-
+handelte Futtermittel ausgegangen werden (Jeroch et al., 2020). Mit zunehmender Leistung steigt, infolge der nicht 
+linear mit ansteigenden mikrobiellen Proteinsynthese, die Bedeutung der Versorgung mit höheren Anteilen UDP 
+(Jeroch et al., 2020). 
+6.3 Nutzbares Rohprotein am Duodenum
+Das MXP ergibt zusammen mit dem UDP das nutzbare Rohprotein am Duodenum (nXP) und stellt damit die 
+Proteinmenge dar, die den Kühen nach dem Vormagensystem für die Proteinverdauung zur Verfügung steht. Das nXP 
+gelangt durch den Labmagen in den Dünndarm und wird durch Ansäuerung sowie die körpereigenen Enzyme des 
+Wiederkäuers verdaut und bis zu den Grundbausteinen der Aminosäuren abgebaut und resorbiert. Da der größere 
+Anteil des am Dünndarm anflutenden nXP aus Mikrobenprotein (bei sehr gut abgestimmten Rationen bis zu 85 bis 
+90 % der nXP-Menge am Dünndarm) besteht, wird die biologische Wertigkeit des nXP im Dünndarm gegenüber dem 
+ursprünglich gefütterten Futter-XP optimiert. Dennoch ist zu berücksichtigen, dass der Prozentsatz bei einer geringe-
+ren Futteraufnahme gegenüber Hochleistungskühen mit sehr hohen Futteraufnahmen insgesamt höher ausfällt.
+7 Synchronismus
+Um Milchkühe art- und bedarfsgerecht mit Nährstoffen zu versorgen, muss insbesondere der Pansenstoffwechsel 
+über eine hohe Aktivität der Pansenmikroorganismen funktionieren. Dazu ist ein ausgeglichenes Verhältnis von  
+im Pansen nutzbarem Stickstoff und Energie anzustreben, welches über die ruminale Stickstoffbilanz (RNB) in der 
+Ration um 0 ausgedrückt wird. Der optimale Bereich deckt eine leicht negative bis ausgeglichene RNB in der Ra-
+tion ab (-1 bis 0 g RNB je kg TM). Eine RNB bis +1 g je kg TM tolerieren Kühe gut, da sie ihre Harnstoffausschei-
+dungen über Blut, Leber und Niere erhöhen bzw. reduzieren und damit ohne Gesundheits- und Leistungsschäden 
+sehr gut regulieren können. Aus Umweltaspekten (N- Effizienz und -Ausscheidung) sollte eine positive RNB aber 
+möglichst vermieden werden.
+Das Konzept des Synchronismus beruht darauf, dass Menge und zeitlicher Verlauf des Kohlenhydrat- und  
+XP- Abbaus im Pansen aufeinander abgestimmt („synchronisiert“) werden. Dabei wird eine maximale Effizienz  
+der mikrobiellen Synthese, ausgedrückt in Gramm mikrobielles XP je kg im Pansen abgebauter/fermentierter 
+(XP- freier) organischer Masse oder Kohlenhydrate, erreicht. Insbesondere bei höheren Leistungen steigt die 
+Bedeutung, Energie und Protein für die Mikroben im Pansen möglichst synchron bereitzustellen. Eine Übersicht  
+zur Abbaugeschwindigkeit von Kohlenhydraten und XP verschiedener Futtermittel zeigt Abbildung 4, hier ist auch 
+die jeweilige Kombination der schnell, mittel und langsam verfügbaren Nährstoffquellen zu entnehmen. Bei einer 
+TMR-Fütterung mit ad libitum Vorlage überlappen sich die verschiedenen Abbauspezifika der einzelnen Futtermittel 
+stärker als bei getrennter Vorlage von Futtermitteln (z. B. PMR + Konzentratfutter im AMS oder an der Kraftfutter-
+station), wodurch bei einer TMR-Fütterung grundsätzlich eine bessere Nährstoffsynchronität gegeben ist.
+=== PAGE 15 ===
+15
+DLG Information 01 | 23
+Zeit
+Futterharnstoff
+Grassilage
+Heu
+Rapsextraktionschrot/
+Biertreber
+Körnermais
+Maissilage
+Getreideschrot/Erbsen
+Melasse
+Kohlenhydrat eRohprotei n
+Abbildung 4: Abbaugeschwindigkeit der Kohlenhydrate und des Rohproteins verschiedener Futtermittel (abnehmend jeweils von links nach 
+rechts) (Quelle: LfL, 2021)
+8 Analytische Aspekte
+8.1 Grundsätze der Futtermittelanalyse
+Die Untersuchung und Bewertung eines Futtermittels beginnt mit der Probenahme. Der jeweilige Auftraggeber  
+der Untersuchung trägt die Verantwortung für eine repräsentative und ordnungsgemäße Probenahme und die 
+Verbringung der Probe ins Labor. Als Orientierung sollte dabei auf DIN EN ISO 6497 (2005) zur „Probenahme von 
+ Futtermitteln zur Eigenkontrolle“, VO (EG) 152/2009 mit Ergänzung VO(EG) 691/2013 zur „Festlegung der Probe-
+nahmeverfahren und Analysemethoden für die amtliche Untersuchung von Futtermitteln“ und die VDLUFA – 
+ Verbandsmethode „Probenahme von Futtermitteln“ (VDLUFA, 2012) zurückgegriffen werden. 
+Im Interesse der Analysensicherheit sollten zudem die Untersuchungseinrichtungen zertifiziert sein, d. h. einer 
+regelmäßigen externen und internen Qualitätssicherung unterliegen. Dazu gehören zum Zwecke der Nachvollzieh-
+barkeit und der Transparenz der Analytik sowohl die ausführliche Dokumentation der Untersuchungen als auch das 
+Mitführen von Standard- oder Referenzproben, die beispielsweise aus Ringuntersuchungen gewonnen wurden. 
+Im Gegensatz zur amtlichen Futtermittelkontrolle, die an das Futtermittelgesetz gebunden nach bundes- bzw. 
+EU-weit einheitlicher Methodik vorgehen muss, gibt es für die Futtermitteluntersuchung und -bewertung im Rah-
+men der Produktionskontrolle jedoch keine verbindlichen Regelungen. Futtermitteluntersuchungen und -bewertun-
+gen können deshalb zwischen den Bundesländern und auch zwischen den Laboren eines Bundeslandes variieren. 
+Beispielhaft ist hier die Stärkeanalytik zu nennen, die im Rahmen der Futtermittelüberwachung mit der vom Ge-
+setzgeber vorgeschriebenen polarimetrischen Methode durchzuführen, aus wissenschaftlicher Sicht die enzyma-
+tische Methode allerdings als die genauere Methode anzusehen ist (Südekum, 2009).
+8.2 Analysenmethoden
+Referenzmethode: Der Begriff bezeichnet die für einen Analysenparameter allgemein anerkannte Methode. Es 
+können auch mehrere Methoden als Referenzmethoden anerkannt sein (vgl. XP). Da die Methode in erheblichen 
+Maß das Analysenergebnis beeinflussen kann, sind eine Standardisierung und exakte Beschreibung der Methode 
+dringend notwendig. Zu jedem Analysenparameter ist es deshalb erforderlich, auch die Analysenmethode auf dem 
+Attest mit anzugeben. Die Festlegung einer Methode kann regional, national oder im internationalen Maßstab 
+erfolgen. Im deutschsprachigen Raum ist der Verband Deutscher Landwirtschaftlicher Untersuchungs- und For-
+schungsanstalten (VDLUFA) dafür zuständig. Die Methoden sind in entsprechenden Methodenbüchern veröffent-
+=== PAGE 16 ===
+16
+licht und grundsätzlich für alle Labore zugänglich (VDLUFA, 2012). Im europäischen oder internationalen Maßstab 
+sind es die DIN-ISO-Methoden oder AOAC-Methoden, welche länderübergreifend standardisiert und anerkannt 
+sind.
+NIRS: Parallel zu den in der Regel material- und zeitaufwändigen Referenzmethoden hat sich für die Bestimmung 
+organischer Inhaltsstoffe die NIRS (Nah-Infrarot-Spektroskopie) etabliert. Aufgrund des Messprinzips können  
+nur organische Bestandteile erfasst werden (VDLUFA, 2003). Die Messung des Gehaltes an Mineralstoffen oder 
+anderen anorganischen Bestandteilen ist nicht möglich. Weiterhin ist die Messung von Bestandteilen in geringer 
+Konzentration (in der Regel unter 1 %) nur bedingt möglich und mit größeren Fehlern behaftet. Die Genauigkeit der 
+Messung orientiert sich an der Referenzmethode. Die Vorteile der NIRS liegen in einer kürzeren Untersuchungs-
+dauer, geringeren Kosten und gegenüber nasschemischer Untersuchungen entfallenden Analysechemikalien.
+Eine detaillierte Beschreibung der Methoden mit Bezug zu den methodischen Vorschriften ist Anhang A1 zu 
+entnehmen.
+9 Indikatoren und Bewertung der wiederkäuergerechten Fütterung 
+9.1 Systeme zur Bewertung der Strukturwirksamkeit der Ration
+Grobfutter spielt in der Fütterung aller Wiederkäuer eine besondere Rolle. Es ist das Wiederkäuerfutter schlechthin. 
+Auch in sehr leistungsorientierten Rationen sollten mindestens 55 bis 65 % der täglichen TM-Futteraufnahme aus 
+Grobfutter bestehen. Es ist als ursprüngliches Alleinfutter aller Wiederkäuer damit auch der grundlegende Energie- 
+und Nährstofflieferant der Mikroorganismen des Vormagens. Erst die durch diese mikrobielle „Vorverdauung“ 
+ entstehende Mikrobenmasse kann im weiteren Verdauungstrakt durch tiereigene Enzyme verdaut werden. Daher 
+geht es bei der Rationsgestaltung vordergründig um eine möglichst hohe mikrobielle Verdaulichkeit der Rations-
+kom ponenten. Dafür muss das Futter durch das Tier selbst mechanisch so zerkleinert werden, dass die Mikroben 
+es mit ihren Enzymen vorverdauen können. Das passiert durch das Kauen, Wiederkauen und das damit verbunde-
+ne  Einspeicheln im Zusammenspiel mit regelmäßigen Pansenbewegungen zum Durchmischen des Verdauungs-
+breies. Die Mikroorganismen des Vormagensystems aus Pansen, Netz- und Blättermagen haben konkrete 
+ An sprüche an ihre Lebensumgebung, die sich im Verlauf der Evolution der Wiederkäuer als optimal herausgestellt 
+haben. Durch das Kauen und ständige intensive Wiederkauen wird das Futter stark zerkleinert und damit die 
+ Ansatzfläche für die Pansenbakterien vergrößert. Gleichzeitig wird über die alkalischen Bestandteile des Speichels 
+(Natriumbikarbonat, Phosphat) auch der Pansen-pH-Wert infolge der aus dem mikrobiellen Abbau des Futters 
+massenhaft freigesetzten, kurzkettigen und energiereichen Fettsäuren (Essig-, Propion-, Buttersäure) abgepuffert. 
+Ohne diese „Abpufferung“ der Säuren würde der Panseninhalt übersäuern und damit die Lebensfähigkeit der ge-
+wünschten Mikroorganismen eingeschränkt. Hier hat sich in der evolutionären Entwicklung ein Verdauungs system 
+aus mikrobieller Vorverdauung und anschließender Verdauung mit tiereigenen Verdauungsenzymen herausgebil-
+det, welches nur über die Gestaltung mikrobenfreundlicher und wiederkäuergerechter Bedingungen im Pansen als 
+Ganzes funktioniert. 
+Neben der ausreichenden Versorgung mit Energie und Nährstoffen hat die Fütterung daher auch die Aufgabe,  
+das Wiederkauen zu garantieren, um durch diese Zerkleinerung gleichzeitig mit den Puffersubstanzen des 
+ Speichels den Pansen-pH-Wert zu stabilisieren, insbesondere dann, wenn viele Fettsäuren im Pansen freigesetzt 
+werden. Diese Funktion kann das Futter am besten erfüllen, wenn es ausreichend „grob“ oder „rau“, also zerkleine-
+rungswürdig (Partikelgröße > 8 mm) ist und damit eine geeignete physikalische Strukturwirksamkeit hat. Um die 
+Erfüllung dieser Struktur-Funktion bewerten zu können, werden Methoden und Kennzahlen gebraucht, die zu 
+wiederholbaren Bewertungsergebnissen führen. Als Möglichkeiten für die Anwendung in der Praxis wurden die 
+strukturwirksame Rohfaser (swXF) nach Hoffmann (1990), der Strukturwert (SW) nach De Brabander et al. (1999) 
+und der Strukturindex (SI) mit der zugrundeliegenden aNDFom aus dem Grobfutter nach Rutzmoser et al. (2011) 
+vorgestellt (Tabelle 3). In den Mitteilungen des Ausschusses für Bedarfsnormen der Gesellschaft für Ernährungs-
+physiologie (GfE, 2014) wurde das System der physikalisch effektiven NDF (peNDF) veröffentlicht und damit zur 
+Anwendung in Deutschland zur Bewertung der Strukturwirksamkeit in Mischrationen vorgeschlagen. 
+Die swXF berücksichtigt ausschließlich den Kau- und Wiederkauaufwand für das jeweilige Futtermittel und wird 
+grundsätzlich für Grobfutter sowie bestimmte Saftfutter berechnet. Sie ergibt sich aus dem analytisch bestimm-
+baren Rohfasergehalt und einem Faktor für die Strukturwirksamkeit dieser Rohfaser (Tabelle 3). Der Bedarf an 
+swXF ergibt sich als Menge je Tier und Tag sowie aus der Körpermasse des Tieres und verringert sich mit steigen-
+der Futteraufnahme je kg Futter.
+Der SW nach De Brabander wird für alle Futtermittel, nicht nur für Grobfutter, ermittelt oder angegeben. Die Ab-
+leitung der Werte und Schätzgleichungen sowie des Bedarfs erfolgte auf Basis von Versuchen an Milchkühen und 
+Mastrindern mit gestaffelten Anteilen des zu prüfenden Futtermittels. Der SW ist bei den Grobfuttermitteln grund-
+sätzlich abhängig vom analytisch bestimmten Fasergehalt. Der Strukturwert berücksichtigt aber z. B. auch die 
+=== PAGE 17 ===
+17
+DLG Information 01 | 23
+Häcksellänge und -aufbereitung sowie den Stärkegehalt bei den Mais- und anderen Getreideganzpflanzensilagen 
+und Konzentratfuttermitteln, weil deren Häcksellänge den Kau- und Wiederkauaufwand und damit die Beimischung 
+des abpuffernden Speichels einerseits beeinflusst und andererseits der Stärkeanteil eine schnelle und umfas-
+sendere Freisetzung von Säuren im Pansen verursacht. Der Bedarf an SW ergibt sich je kg TM-Futteraufnahme. 
+Wegen der Berücksichtigung des Einflusses der höheren ruminalen Säurefreisetzung bei stärkereicheren Futtermit-
+teln muss bei deren Einsatz gleichzeitig der Strukturwert je kg TM in energiereichen Rationen angehoben werden. 
+Der Strukturindex wurde anhand von Daten aus einem Fütterungsversuch mit Milchkühen abgeleitet. Ein Struk-
+turindex von 50 beschreibt dabei etwa das Verhältnis an aufgenommener Menge aNDFom aus dem Grobfutter zu 
+den insgesamt aufgenommenen Kohlenhydraten, bei dem ein ruminaler pH-Wert von 6,15 erwartet wird (Ettle et 
+al., 2015). Der ruminale pH-Wert wurde anhand einer von Zebeli et al. (2008) erarbeiteten Gleichung berechnet. 
+Der Strukturindex bietet den didaktischen Vorteil, dass er die entgegengesetzten Wirkungen von leicht löslichen 
+Kohlenhydraten und von Faserbestandteilen in der Ration in einer Zahl zusammenfasst. Er basiert auf der interna-
+tional genutzten Faserfraktion aNDFom, bezieht sich direkt auf die eigentliche Zielgröße Pansen-pH-Wert und ist 
+über die aNDFom aus dem Grobfutter an das System peNDF angebunden. 
+Die physikalisch effektive NDF (peNDF) stellt eine Kombination aus der Ermittlung der Partikelgrößenverteilung der 
+Ration mit der analytisch erfassten aNDFom-Konzentration der Ration dar. Die peNDF erfasst die Strukturwirk-
+samkeit der Ration retrospektiv sehr genau, kann jedoch nicht für die Rationsplanung verwendet werden. Daher 
+wird die Rationsplanung im System der peNDF mit Hilfe der NDF aus dem Grobfutter umgesetzt. Das aus der 
+ameri kanischen Fütterungspraxis abgeleitete System der peNDF wurde in den Mitteilungen des Ausschusses für 
+Bedarfsnormen der Gesellschaft für Ernährungsphysiologie (GfE, 2014) vorgestellt. Da die peNDF in Deutschland 
+Anwendung finden soll, erfolgt in Kapitel 9.2 eine ausführlichere Darstellung. 
+Die angeführten Strukturbewertungsgrößen zielen auf die Vormägen ab. Nicht vollständig erfasst werden die 
+Effekte auf die Kotkonsistenz. Hier ist die Eindickung im Dickdarm und damit die Formung des Kotes von entschei-
+dender Bedeutung. Eine „dünne“ Kotkonsistenz ist unter anderem durch einen höheren Wasser- oder K-Gehalt der 
+Ration und somit eine ungenügende Eindickung bedingt, wie dies z. B. bei grasbetonten Rationen der Fall ist. Die 
+Strukturwirksamkeit in den Vormägen ist hier nicht der beschränkende Faktor. Darüber hinaus können zu hohe 
+Anteile an Durchflussstärke oder Protein infolge der Überschreitung der Verdauungskapazität durch körpereigene 
+Enzyme zu Dysbiosen im Dickdarm mit der Konsequenz der Beeinflussung der Kotqualität führen.
+Die Versorgung des Wiederkäuers mit ausreichenden Mengen an strukturwirksamem Futter ist bei Hochleistungs-
+kühen das erstrangige Kriterium in der Rationsplanung. So sollte weder ein Strukturmangel vorhanden sein, der die 
+Gesundheit des Pansens und des Tieres gefährdet, noch ein Überschuss, der sich negativ auf Futteraufnahme und 
+Leistung auswirkt. Die verschiedenen Bewertungssysteme zur Versorgung des Wiederkäuers mit ausreichenden 
+Mengen an strukturwirksamen Futter weisen in der Praxis jedoch mehr oder weniger ausgeprägte Unzulänglich-
+keiten auf. Aufgrund der bestehenden Unsicherheiten bei der strukturwirksamen Rohfaser und dem Strukturwert 
+werden beide Systeme von GfE und DLG nicht mehr für die Anwendung in der Rationsplanung empfohlen. 
+Tabelle 3: Kenngrößen zur Bewertung der Strukturwirkung von Wiederkäuerfutter
+Bewertungsgröße Abkürzung Dimension Beschreibung
+Strukturwirksame Rohfaser1) swXF g je 100 kg KM Faktor f Strukturwirksamkeit der Rohfaser in Abhängigkeit 
+vom XF-Gehalt
+Strukturwert2) SW je kg TM Für einzelne Futtermittel angegeben, Ableitung aus 
+ Versuchen mit gestaffelter Gabe des Prüffutters
+SW für Grobfutter nach Fasergehalt (Rohfaser oder NDF), 
+Häcksellänge, Stärke bei Ganzpflanzensilagen
+Konzentratfutter nach im Pansen abgebauten Stärke- und 
+Zuckergehalt sowie Pansenbeständigkeit
+Strukturindex3) SI (dimensionslos) Bezieht pansenabbaubare Stärke und Zucker sowie aNDFom 
+aus dem Grobfutter gleichzeitig mit ein
+Physikalisch effektive NDF4) peNDF g je kg TM Mechanische Fraktionierung der Gesamtration nach Par-
+tikellänge über standardisierte Prozedur der „PennState“- 
+Schüttelbox. Festlegung im Orientierungsbereich nach 
+ Futteraufnahme und Stärkegehalt
+aNDFom aus Grobfutter aNDFomGF g je kg TM Anteil aNDFom aus Grobfutter an der Gesamtration 
+1) nach Hoffmann (1990)   2) nach De Brabander et al. (1999)   3) nach Rutzmoser et al. (2011)   4) nach GfE (2014)
+=== PAGE 18 ===
+18
+9.2 Physikalisch effektive NDF (peNDF)
+Aufgrund der Kombination der physikalischen Komponente des biochemisch zu beschreibenden Effektes der 
+Strukturwirksamkeit mit den chemischen Eigenschaften der Futtermittel und den dadurch beeinflussten biochemi-
+schen und pansenphysiologischen Vorgängen hat sich die peNDF als der am besten geeignete Indikator für die 
+Bewertung der Strukturwirksamkeit einer Wiederkäuerration erwiesen. Zielstellung für die normale Versorgung 
+mit peNDF ist ein pH-Wert im Mittel des Tages von nicht weniger als 6,15 (gerundet nach GfE, 2014). Wegen der 
+möglichen Schwankungen des Pansen-pH-Wertes im Laufe des Tages in Abhängigkeit von der Futteraufnahme 
+und der unterschiedlichen Fermentationsrate schnell und langsam abbaubarer Kohlenhydrate sollten längere 
+Phasen niedrigerer pH-Werte vermieden werden und Phasen eines pH-Wertes < 5,8 nicht länger als 5,25 Stunden 
+je Tag andauern. Der Gehalt an peNDF wird wegen der Gesamtheit der Wirkung aller Futtermittel einer Tages-
+ration, deren Verzehr und Wiederkaustimulation ausschließlich in der Gesamtration charakterisiert. Dazu wird die 
+Partikelgrößenverteilung der Ration in einer definierten Schüttelbox (Pennsylvania State Particle Separator; 3- oder 
+4-stufige Schüttelbox) nach standardisiertem Vorgehen ermittelt (siehe Anhang A2). Anschließend wird der Anteil 
+der Partikel > 8 mm an der gesamten Masse der Futterprobe mit dem Gehalt an aNDFom in der Ration (g je kg 
+TM) multipliziert. Alternativ kann auch der Anteil der Partikel > 1,18 mm berechnet und genutzt werden.
+peNDF = aNDFom in der Gesamtration • Masse-Anteil der Obersiebe
+(peNDF in g/kg TM; aNDFom in der Gesamtration in g/kg TM; Masseanteil der Obersiebe = Masse der 
+Rückstände in den beiden/drei Obersieben in g dividiert durch die Masse der Gesamtprobe in g)
+In den meisten Laboren wird die Ermittlung der Siebfraktionen nicht als Serviceleistung angeboten. Daher muss 
+der Landwirt oder Berater den vom Labor gelieferten Gehalt an aNDFom mit den selbst ermittelten Siebgrößen-
+fraktionen eigenständig verrechnen. 
+Das System peNDF gibt Mindestgehalte zur Aufrechterhaltung physiologisch normaler Fermentationsbedingungen 
+vor (Tabellen 4 und 5). Diese Mindestgehalte variieren jedoch in Abhängigkeit von der Stärkemenge und der 
+Verdaulichkeit der NDF. Im Verfahren der peNDF> 1,18 mm spielt auch die Abbaubarkeit der Stärke eine Rolle. Bei 
+Kühen zum Laktationsstart sollte sich, aufgrund der geringeren Anpassung der Pansenzotten an die schnell 
+steigenden Mengen leicht verdaulicher Kohlenhydrate, die Versorgung mit peNDF eher an der oberen Grenze der 
+Empfehlungen orientieren. Das System berücksichtigt auch, dass zu hohe peNDF-Anteile (> 220 g je kg TM bei 
+peNDF> 8 mm bzw. > 320 g je kg TM bei peNDF> 1,18 mm) zu einem Rückgang der möglichen Futteraufnahme führen 
+können, wenn die zugrunde gelegte Verdaulichkeit der Mischration gering ist. Die Wasserzugabe zu Mischrationen 
+oder der Einsatz von pelletierten Futterkomponenten beeinflussen die Ergebnisse der Siebfraktionierung. Die 
+Vorgaben zum richtigen Einsatz der Schüttelbox sind Anhang A2 zu entnehmen. 
+Den Zusammenhang zwischen Gesamt-Stärke bzw. im Pansen abbaubarer Stärke aus Getreide und notwendigem 
+Anteil peNDF zeigen die Tabellen 4 und 5. In den dargestellten Tabellenwerten ist ein Zuckergehalt der Ration im 
+üblichen Umfang von 30 bis 50 g je kg TM berücksichtigt. Hier wird deutlich, dass mit zunehmender Stärkeverfüg-
+barkeit im Pansen verstärkt mit der Freisetzung von Pansenpuffern über die Speichelbildung reagiert werden muss. 
+Es ist aber auch damit zu rechnen, dass bei mehr als 3,5 kg pansenverfügbarer Stärke je Tag der physikalischen 
+Wirksamkeit von mehr Faseranteilen Grenzen gesetzt sind, da dies den Futterverzehr zunehmend einschränkt. Für 
+die praktische Anwendung bietet die peNDF> 8 mm Vorteile, da keine Annahmen bezüglich der ruminalen Abbaubar-
+keit der Stärke (aus Getreide) getroffen werden müssen. Darüber hinaus kann diese auch bei Teilmischrationen 
+angewandt werden, da die Fraktion > 8 mm nicht durch separat gefüttertes Konzentrat beeinflusst ist. 
+Tabelle 4: Notwendiger Anteil peNDF> 8 mm (g je kg TM der Gesamtration) für einen Pansen-pH-Wert von 6,15 in Abhängigkeit von der täglichen 
+TM-Futteraufnahme je Kuh und dem Gehalt an Gesamtstärke der Ration (in Anlehnung an GfE, 2014)
+Gesamtstärke  
+(g je kg TM)
+Futteraufnahme (kg TM je Tag)
+18 20 22 24 26
+140 120 130 150 160 180
+180 140 150 170 180 210
+220 160 170 190 210 2201)
+260 180 200 220 2201) 2201)
+1)  peNDF> 8 mm muss zur Vermeidung eines Rückgangs des TM-Futteraufnahme begrenzt werden; mittlerer Pansen-pH-Wert von 6,15 wird 
+erreicht
+=== PAGE 19 ===
+19
+DLG Information 01 | 23
+Tabelle 5: Notwendiger Anteil peNDF> 1,18 mm (g je kg TM der Gesamtration) für einen Pansen-pH-Wert von 6,15 in Abhängigkeit von der 
+täglichen TM-Futteraufnahme je Kuh und dem Gehalt an pansenabbaubarer Stärke in der Ration (in Anlehnung an GfE, 2014)
+Abbaubare Stärke  
+(g je kg TM)
+Futteraufnahme (kg TM je Tag)
+18 20 22 24 26
+80 180 200 210 230 250
+120 210 230 250 275 310
+160 250 280 3201) 3201) 3201)
+200 320 350 3201) 3201) pabKH  
+reduzieren
+1)  peNDF> 1,18 mm muss zur Vermeidung eines Rückgangs des TM-Futteraufnahme begrenzt werden; mittlerer Pansen-pH-Wert von 6,15 wird 
+erreicht; pabKH = im Pansen abbaubare Kohlenhydrate
+Es ist davon auszugehen, dass in Abhängigkeit vom System der Futtervorlage, der erreichten Futteraufnahme und 
+dem Verhältnis von langsamer abbaubaren Faserkohlenhydraten zu schnell pansenverfügbaren Kohlenhydraten 
+hier auch ein gewisser betriebsspezifischer Spielraum vorhanden ist. 
+Die Empfehlungen zur Versorgung der Milchkuh mit peNDF beruhen auf einer wissenschaftlich 
+fundierten Ableitung. 
+Für die Rationsplanung steht peNDF nicht zur Verfügung, daher wird hierfür die Verwendung von 
+aNDFom aus dem Grobfutter empfohlen. 
+Zielwert aNDFom aus Grobfutter für Hochleistungsrationen: 
+≥ 200 g je kg TM bei max. 210 g pansenabbaubarer Stärke und Zucker je kg TM
+9.3 Strukturindex (SI)
+Der Strukturindex vereint die Größen der Strukturwirksamkeit (Zebeli et al., 2010) und der pansenabbaubaren 
+Kohlenhydrate (Stärke und Zucker) in einer Zahl (Rutzmoser et al., 2011). Der Strukturindex wurde anhand von 
+individuellen Kuhdaten aus einem Fütterungsversuch mit Milchkühen und unter Nutzung einer von Zebeli (2008) 
+entwickelten Gleichung zur Schätzung des Pansen-pH-Wert aus der TM-Futteraufnahme von Milchkühen und der 
+in dieser Futteraufnahme enthaltenen peNDF einerseits und der pansenabbaubaren Stärke andererseits abgeleitet:
+pH-Wert = 6,05 + 0,044 • peNDF – 0,0006 • peNDF2 – 0,017 • abbaubare Stärke – 0,016 • TM-Futteraufnahme
+(peNDF, abbaubare Stärke in % der TM; Futteraufnahme in kg TM je Tag; GfE, 2014)
+Anhand der tierindividuell innerhalb von zweiwöchigen Perioden verzehrten TM, peNDF und pansenabbaubarer 
+Stärke und Zucker wurde der zu erwartende pH-Wert berechnet. Bei Gegenüberstellung der pansenabbaubaren 
+KH (Stärke und Zucker) und dem jeweiligen Verzehr an peNDF (unterstellt wurde, dass der Verzehr an peNDF dem 
+Verzehr an Grobfutter-NDF gleich ist) in einem Diagramm ergab sich dabei eine lineare Grenzlinie für die Verhält-
+nisse aus pansenabbaubaren KH (Stärke und Zucker) und peNDF zwischen pH-Wert > 6,15 und pH-Wert < 6,15. 
+Diese Grenzlinie stellt die Menge an pansenabbaubaren KH (g je kg TM) dar, die bei gegebener Menge an peNDF 
+(g je kg TM) nicht überschritten werden darf, um einen Pansen-pH-Wert > 6,15 zu gewährleisten:
+Pansenabbaubare Kohlenhydrate (pabKH, kg je Tag) = 2,8 + 0,36 • NDFomGF (kg je Tag)
+(NDFomGF ist hier mit der Menge an peNDF gleichgesetzt)
+Durch Umstellung wurde hieraus der allgemeingültige Strukturindex entwickelt, der den Anteil aNDFomGF an der 
+Summe aus aNDFomGF und pansenverfügbaren KH (Stärke und Zucker) darstellt. 
+StrukturindexNDFom =  NDFomGF / (NDFomGF + (pabKH – 2,8) / 0,36) • 100
+(NDFomGF und pabKH (Stärke und Zucker) in kg je Tag)
+Der so berechnete Strukturindex soll mindestens 50 betragen. Bei einem Strukturindex der Ration von 50 wird ein 
+Pansen-pH-Wert von 6,15 erwartet. Ein Strukturindex über 50 lässt höhere Pansen-pH-Werte erwarten, ein Struk-
+turindex unter 50 weist auf zu erwartende azidotische Bedingungen hin. 
+=== PAGE 20 ===
+20
+Werte des Strukturindex (SI) > 50 beschreiben einen Pansen-pH-Wert > 6,15, Werte < 50 
+einen Pansen-pH-Wert < 6,15.
+Abweichend von dem ursprünglichen Ansatz peNDF = NDFomGF (Ettle et al., 2014) ist die peNDF in der Rations-
+planung auf faserreiche Nebenprodukte (Koprodukte der Lebensmittel- und Bioenergieherstellung wie Rüben-
+schnitzel, Biertreber, Schlempe) auszudehnen. 
+10 Vorgaben zur Rationsplanung und -gestaltung 
+10.1 Futteraufnahme maximieren
+Grundsätzlich ist in der Nutztierhaltung die Deckung des Nährstoffbedarfs der Tiere durch Fütterungsmaßnahmen 
+sicherzustellen. Die Nährstoffaufnahme kann durch die Nährstoffkonzentration in der Futterration und durch die 
+Höhe der Futteraufnahme beeinflusst werden. Der Erhöhung der Nährstoffdichte sind jedoch beim Wiederkäuer 
+enge Grenzen gesetzt, da neben der Nährstoffkonzentration auch die Strukturwirksamkeit zur Aufrechterhaltung 
+eines stabilen Pansenmilieus und zur Gewährleistung einer ausreichenden Wiederkauaktivität beachtet werden 
+muss. Aus diesem Grund besitzt die Sicherung einer hohen Futteraufnahme oberste Priorität. 
+Die Höhe der Futteraufnahme wird von physikalischen Parametern (Pansenfüllung, Passagegeschwindigkeit), 
+chemischen Faktoren (Fettsäuren, Glukose) und bedarfsabhängigen Größen (Milchmenge) über das Kleinhirn 
+unwillkürlich gesteuert. Umfangreiche Auswertungen von tierindividuellen Futteraufnahmedaten aus den Versuchs-
+betrieben in Deutschland, Österreich und der Schweiz haben ergeben, dass das Laktationsstadium die größte 
+Bedeutung für die Futteraufnahme hat, da fast alle weiteren Faktoren, wie z. B. die Körpermasse, die Milch- oder 
+die Konzentratfuttermenge, hiervon abhängig sind (siehe Abbildung 5). In der Frühlaktation, insbesondere im 
+ersten Laktationsmonat, ist die Futteraufnahme am niedrigsten, obwohl der Bedarf der Tiere an Energie und 
+Nährstoffen in dieser Phase am höchsten ist. Deshalb muss in dieser Phase zur Absicherung einer hohen (Grob-)
+Futteraufnahme bestes Grobfutter in Kombination mit Konzentratanteilen nach dem Motto „So viel wie nötig!“ 
+gefüttert werden. Der Einfluss der Körpermasse und des Konzentratfutters auf die Gesamt- und Grobfutterauf-
+nahme ist in der ersten Laktationshälfte deutlich ausgeprägter als im zweiten Laktationsabschnitt. Erst in der 
+zweiten Laktationshälfte erfolgt eine bedeutsame Regelung der Futteraufnahme nach der Milchmenge.
+Neben den technischen (z. B. Tierfressplatz-Verhältnis) und tierbedingten Faktoren haben die futterbedingten 
+Faktoren in etwa einen ebenso großen Einfluss auf die Futteraufnahme. Von besonderer Bedeutung sind hier die 
+Energiedichte im Grobfutter, die Grobfutterart, die Menge bzw. der Anteil an Konzentratfutter sowie die Gär- und 
+Silagequalität, also die hygienische Beschaffenheit und die aerobe Stabilität der Silagen. Schließlich nimmt als 
+dritter Komplex das Betriebsmanagement (z. B. Belegdichte, Futtervorlagehäufigkeit) großen Einfluss auf die 
+ Fressbereitschaft der Kühe. Die meisten tierbedingten Einflussfaktoren auf die Futteraufnahme, wie Konzentrat-
+futtermenge, Körpermasse und Milchleistung, wirken in Abhängigkeit vom Laktationsstadium. Abbildung 5 zeigt den 
+grundsätzlichen Zusammenhang der abnehmenden Intensität der Wirkung mit zunehmender Laktationsdauer. 
+Im Rahmen der Rationsplanung ist die Schätzung bzw. Vorhersage der Futteraufnahme von elementarer Bedeu-
+tung. Aus den oben erwähnten tierindividuellen Futteraufnahmemessungen wurden Schätzgleichungen zur Bestim-
+mung der Futteraufnahme abgeleitet. Für die Anwendung dieser Gleichungen müssen folgende Daten bekannt 
+sein:
+1. Vom Tier: Rasse (Deutsche Holstein, Fleckvieh, Braunvieh)
+ Körpermasse (kg)
+ Laktationsnummer (1, 2 und 3, ≥ 4)
+ Laktationstag
+ Milchleistung (kg je Tag)
+2. Vom Futter: Energiedichte im Grobfutter (MJ NEL je kg TM)
+ Konzentratfutterverzehr (kg TM je Tag) bzw. Konzentratfutteranteil in der Ration in % der TM
+3. Vom Betrieb: Region (Deutschland/Österreich, Schweiz)
+ Managementniveau (hoch/mittel)
+ Fütterungssystem (getrennte Vorlage, Mischration)
+Anhang A3 zeigt die Schätzgleichungen für die Vorlage einer PMR (Gleichung 1) sowie für die Vorlage einer TMR 
+(Gleichung 5). PMR mit tierindividuellen Konzentratfuttergaben in Kraftfutterstationen, im Melkstand oder im 
+Melkroboter sind mit Hilfe der Gleichung 1 zu kalkulieren. Die Gleichungen sind sehr komplex, da fast alle Bestim-
+=== PAGE 21 ===
+21
+DLG Information 01 | 23
+mungsgrößen in Abhängigkeit vom Laktationsstadium gesehen werden. Für die Anwendung sind deshalb compu-
+tergestützte Rationsberechnungsprogramme  erforderlich. Es ist wichtig, an dieser Stelle zu betonen, dass sich das 
+Futteraufnahmemodell von Gruber et al. (2004) im Rahmen einer internationalen, unabhängigen Evaluierung als 
+genau und robust erwiesen und dazu in diesem Vergleich die besten Ergebnisse geliefert hat (Jensen et al., 2015). 
+Daher können darauf aufbauende Rationsberechnungen als verlässlich angesehen werden (Gruber, 2016). Die 
+stete wissenschaftliche Begleitung und Weiterbearbeitung sowie die regelmäßige Anpassung und Validierung 
+sichert dies zusätzlich ab. 
+Auch das Haltungssystem und das Futtertischmanagement beeinflussen die Futteraufnahme. Eine tiergerechte 
+Gestaltung des Fressplatzes sowie ein optimiertes Tierfressplatz-Verhältnis stehen hierbei im Vordergrund. 
+ Gefordert wird, dass die Kuh ungehindert fressen kann. Die Fressplatzbreite muss die veränderten Kuhgrößen 
+berücksichtigen und zwischen laktierenden und trockenstehenden Kühen differenzieren. Das Tierfressplatz-Ver-
+hältnis sollte nicht über 1,2 zu 1 hinausgehen. Dort, wo dies nicht möglich ist (z. B. Altstallgebäude wie klassische 
+3-Reiher mit einem Tierfressplatz-Verhältnis von 1,5 – 2 zu 1), lässt sich eine hohe Futteraufnahme nur erzielen, 
+wenn durch häufigere Futtervorlage (min. 2 x täglich Vorlage von frischem Futter, nicht auf „leeren Futtertisch 
+füttern“, min. 22 h täglich Futter auf dem Futtertisch) ständig frisches Futter vorliegt und in kürzeren Intervallen das 
+Futter (min. 3 – 4 x täglich) wieder angeschoben wird. Automatische Fütterungssysteme mit täglich mehrmaliger 
+Futtervorlage können diesbezüglich Vorteile aufweisen. Weitere Einzelheiten und Vorgaben sind beispielsweise 
+DLG (2012) zu entnehmen. 
+Des Weiteren ist sicher zu stellen, dass eine vorgelegte Ration nicht selektiv gefressen wird. Kühe sind in der 
+Lage, durch Kopf- und Maulbewegungen feine Futterpartikel, meistens Konzentratfutteranteile, auszusortieren 
+und bevorzugt zu fressen. Dies führt zu einer ungleichmäßigen Futteraufnahme im Tagesverlauf und zwischen 
+den Tieren. Durch Einhalten der Mischreihenfolge und der Mischzeiten, durch scharfe Messer und durch eine 
+Zugabe von Wasser in der Mischration kann dies vermieden oder zumindest nahezu unterbunden werden. Durch 
+die Wasserzugabe zur Mischration vermindert sich die Wasseraufnahme über Tränkebecken im gleichen Umfang 
+wie dem Wasserzusatz im Mischwagen. In neueren Versuchen wurde häufig eine höhere TM-Futteraufnahme  
+bei Wasserzugabe festgestellt. Hohe Wasseranteile in der Ration erhöhen allerdings das Risiko des mikrobiellen 
+Verderbs und erfordern daher eine erhöhte Aufmerksamkeit hinsichtlich der hygienischen Anforderungen an die 
+Mischration.
+Bei konsequenter Umsetzung der Schätzgleichung nach Gruber et al. (2004) ergeben sich Eckdaten zur Futter -
+aufnahme und Rationsgestaltung, die in Tabelle 6 dargestellt sind. Im Bereich hoher Milchleistungen kann es in 
+der Frühlaktation zu unzureichenden Futteraufnahmen (vgl. Tabelle 6) bzw. bei abnehmenden Milchleistungen  
+in der Spätlaktation zu einem höheren TM-Verzehr kommen. Daraus resultiert Körpermassemobilisierung oder 
+-ansatz. Dies ist im Controlling zu berücksichtigen. Es wird deutlich, dass hohe Milchleistungen steigende Grob -
+futterqualitäten erfordern.
+Laktationsstadium (T age)
+0,0
+-0,5
+-1,0
+-1,5
+-2,0
+-2,5
+-3,0
+-3,5
+-4,0
+03 0 60 90 120 150 180 210 240 270 300 330
+Einfluss auf die Futternahme (kg TM/T ag)
+Abbildung 5: Fixe Effekte des Laktationsstadiums auf die Höhe der Futteraufnahme in kg TM je Tier und Tag (Gruber et al., 2004) 
+=== PAGE 22 ===
+22
+Tabelle 6: Futteraufnahme aus Grob- und Konzentratfutter bei unterschiedlicher Grobfutterqualität und variierenden Anteilen an Konzentratfutter 
+an der Tagesration (675 kg Körpermasse, 100. Laktationstag, 2./3. Laktation, Deutsche Holstein)
+Milchleistung Futterverzehr Konzentratfutter Energiekonzentration
+Grobfutter Gesamt Anteil Grobfutter Ration1)
+kg TM je Tag (%) (MJ NEL je kg TM
+20 16,0 – 18,0 17,0 – 18,0 0 – 10 ≥ 5,6 5,8 – 6,0
+25 15,5 – 18,0 19,0 – 20,0 5 – 20 ≥ 5,8 6,2 – 6,3
+30 15,0 – 17,5 20,5 – 21,5 15 – 30 ≥ 5,8 6,4 – 6,6
+35 14,0 – 17,0 22,5 – 23,5 25 – 40 ≥ 6,0 6,7 – 6,8
+40 13,5 – 17,0 24,5 – 24,5 30 – 45 ≥ 6,2 6,9 – 7,1
+45 14,0 – 17,0 25,5 – 26,0 30 – 45 ≥ 6,4 7,2 – 7,3
+50 15,0 – 16,5 27,0 – 28,0 40 – 45 ≥ 6,7 7,3 – 7,4
+1)  Wenn die angegebenen Energiekonzentrationen der Gesamtration nicht erreicht werden, ist für das Erreichen der angestrebten Milchleistung 
+eine höhere Futteraufnahme notwendig. 
+10.2 Ausrichtung der Rationen
+Die Vorlage gemischter Rationen ist mittlerweile zum Standard in der Milchkuhfütterung geworden und hat damit 
+die getrennte Vorlage einzelner Futtermittel abgelöst. Eine zusätzliche leistungsbezogene Mischfuttergabe erlaubt 
+eine sehr gute Anpassung an den Bedarf der Tiere, wobei mit steigenden Milchleistungen und Kon zentrat futter-
+gaben die Grobfutterverdrängung zu berücksichtigen ist.
+Bei Mischrationen ist zu unterscheiden zwischen TMR und PMR mit Konzentratfutterzuteilung über Transponder 
+in Kraftfutterstationen, im Melkstand oder im automatischen Melksystem. Bei der TMR-Fütterung werden alle Fut-
+terkomponenten zu einer im Gruppendurchschnitt wiederkäuergerechten und bedarfsdeckenden Futterration ge-
+mischt, so dass die Kuh mit jedem Bissen alle Nähr- und Wirkstoffe gleichmäßig aufnimmt. Dies ist Voraussetzung 
+für eine möglichst gleichmäßige Pansenfermentation, so dass dieses Verfahren aus ernährungsphysiologischer 
+Sicht zu bevorzugen ist. Auch bei einer TMR-Fütterung ist sicherzustellen, dass die Nährstoffversorgung im Verlauf 
+der Laktation der nachlassenden Milchleistung aber relativ stabilen Futteraufnahme angepasst wird. Andernfalls 
+führt dies zu erhöhten N- und P-Ausscheidungen. Deshalb sollten nach Möglichkeit unterschiedliche Rationen im 
+Laktationsverlauf eingesetzt werden, was insbesondere bei größeren Herden organisatorisch und auch aus bau-
+lichen Gründen leichter umsetzbar ist. So können unausgeglichene Versorgungslagen mit Nährstoffen und physi-
+kalischer Struktur sowie eine übermäßige Verfettung der Tiere im letzten Laktationsdrittel verhindert werden. Auch 
+können die relevanten Nährstoffausscheidungen von N und P durch angepasste Rationen deutlich vermindert wer-
+den (siehe DLG, 2020).
+Betriebe mit Kraftfutterstationen setzen häufig eine PMR ein, bei der die vorhandenen Grobfutter mit Konzentrat- 
+und Mineralfutter gemischt werden, so dass eine ausgewogene Nährstoffversorgung für eine gewünschte Milch-
+leistung sichergestellt ist. Für darüber hinaus gehende Leistungen wird Konzentratfutter tierindividuell in Kraftfutter-
+stationen oder im Melkstand zur Verfügung gestellt. Dieses Verfahren gewinnt durch die zunehmende Verbreitung 
+automatischer Melksysteme an Bedeutung, da die Kühe über Konzentratfuttergaben zum Melkroboter gelockt 
+werden. Über die Höhe der Konzentratfuttergaben lässt sich die Melkhäufigkeit steuern. Die über die Mischration 
+abzudeckende Leistung ist abhängig von der Herdenleistung (Tabelle 7). Bei automatischen Melksystemen hat sich 
+bewährt, die angestrebte Milchleistung aus der Mischration etwa 3 bis 5 kg Milch niedriger als die mittlere Leistung 
+der Herde (Kuhgruppe) einzustellen.
+Tabelle 7: Empfehlungen zur Ausrichtung der Teilmischration (PMR) der laktierenden Kühe
+Leistungsniveau
+kg Milch je Kuh und Jahr 6.000 8.000 10.000 12.000
+Über die PMR abzudeckende Milchleistung
+kg Milch je Kuh und Tag 18 – 21 21 – 24 25 – 28 29 – 32
+=== PAGE 23 ===
+23
+DLG Information 01 | 23
+Bei der Konzentratfutterzuteilung in der Kraftfutterstation bzw. am Melkroboter ist eine Verdrängungswirkung der 
+Mischration durch die Konzentratfuttergaben zu berücksichtigen. Diese Grobfutterverdrängung spiegelt sich auch in 
+den Gleichungen zur Abschätzung der Futteraufnahme von DLG (2006a) wider.
+10.3 Empfehlungen zur Nährstoffversorgung
+Zur Erstellung von bedarfsdeckenden Rationen werden die Empfehlungen der GfE (2001) sowie die DLG-Informa-
+tion 1/2006 (DLG, 2006a) in Verbindung mit den DLG-Futterwerttabellen (1997) herangezogen. Der Tabelle 8 ist 
+die empfohlene Versorgung der Milchkühe mit Energie, nXP und Mineralstoffen als Tagesbedarf und als Konzentra-
+tionsangabe je kg TM-Futteraufnahme entsprechend der Futteraufnahme nach Tabelle 6 zu entnehmen. Unterstellt 
+sind eine Körpermasse von 675 kg und freier Zugang zum Futter. Wenn die mittlere Körpermasse der Herde oder 
+Gruppe um ±25 kg abweicht, ist ein ±1,1 MJ NEL bzw. 10 g nXP abweichender Erhaltungsbedarf anzusetzen. Der 
+Milchfettgehalt ist mit 4 % und der Milcheiweißgehalt mit 3,4 % angesetzt. Von den angegebenen Durchschnitts-
+werten abweichende Inhaltsstoffe in der Milch sind entsprechend zu berücksichtigen. Die Anforderungen der Tiere 
+hinsichtlich einer bedarfsgerechten Versorgung mit Mineralstoffen, Spurenelementen und Vitaminen sind ebenfalls 
+zu beachten. Außerdem soll die ausreichende Zufuhr von strukturwirksamen Kohlenhydraten (peNDF) eine wieder-
+käuergerechte Ration gewährleisten.
+Tabelle 8: Empfohlene Versorgung von Milchkühen mit Energie, nutzbarem Rohprotein am Duodenum und Mengenelementen  
+(675 kg KM, 4 % Fett, 3,4 % Eiweiß)
+Leistung Futteraufnahme1) Energie nXP Ca P Na Mg
+kg Milch kg TM je Tag MJ NEL g g
+Angaben je Kuh und Tag
+10 12,5 – 13,5 72 1.310 50 32 14 18
+15 15,0 – 16,0 88 1.735 67 42 18 22
+20 17,0 – 18,0 105 2.160 85 54 21 25
+25 19,0 – 20,0 121 2.585 102 64 25 29
+30 20,5 – 21,5 138 3.010 117 73 28 32
+35 22,5 – 23,5 154 3.435 134 83 32 33
+40 24,0 – 24,5 171 3.860 149 92 35 34
+45 25,5 – 26,0 187 4.285 164 101 38 36
+50 27,0 – 28,0 204 4.710 180 111 41 38
+Angaben je kg TM (gelten nur in Verbindung mit der angegebenen Futteraufnahme)
+10 12,5 – 13,5 5,6 1202) 3,8 2,5 1,1 1,4
+15 15,0 – 16,0 5,8 1202) 4,3 2,7 1,2 1,4
+20 17,0 – 18,0 6,0 123 4,9 3,1 1,2 1,4
+25 19,0 – 20,0 6,3 133 5,2 3,3 1,3 1,5
+30 20,5 – 21,5 6,6 143 5,6 3,5 1,3 1,5
+35 22,5 – 23,5 6,8 149 5,8 3,6 1,4 1,4
+40 24,0 – 24,5 7,1 159 6,1 3,8 1,4 1,4
+45 25,5 – 26,0 7,3 166 6,4 3,9 1,5 1,4
+50 27,0 – 28,0 7,4 171 6,5 4,0 1,5 1,4
+1) ab 60. Laktationstag   2) zur Absicherung des mikrobiellen N-Bedarfes der Pansenmikroben
+=== PAGE 24 ===
+24
+10.3.1 Nährstoffversorgung der Trockensteher
+In der Trockenstehphase kann die Fütterung von Kühen zweiphasig mit differenzierten Rationen für Frühtrocken-
+steher und Vorbereitungsphase oder einphasig mit einer möglichst konstanten Ration über den gesamten Zeitraum 
+vorgenommen werden. Die Festlegung auf eine der Varianten erfolgt in der Praxis auf Basis der jeweiligen betrieb-
+lichen Rahmenbedingungen für die exakte und vom entstehenden Aufwand vertretbare Umsetzung sowie anhand 
+von Schwerpunktsetzungen hinsichtlich der jeweiligen Möglichkeiten der Verfahren (Übersicht 1).
+Übersicht 1: Eckpunkte des fütterungsseitigen Trockenstehermanagements  
+Zweiphasig Einphasig
+• Gezielte Unterstützung physiologischer Rück- und Neubildungs-
+phase von Milchdrüse und Verdauungstrakt in den beiden 
+Abschnitten, deutliche Vorbereitungseffekte mit der Ration im 
+zweiten Abschnitt 
+• In Abhängigkeit von der Leistungsbeanspruchung des Verdauungs-
+traktes mehr oder weniger starker Umbau der Pansenmikroben in 
+Größe und Zusammensetzung in beiden Abschnitten
+• Anpassung des Pansens auf Fütterung nach der Kalbung (Zusam-
+mensetzung Mikrobenpopulation, Absorptionspotenzial Pansen-
+wand mit zunehmender Durchlässigkeit, Zottenanzahl/-größe) 
+• Möglichkeit der Beeinflussung der Körperkondition durch angepasste 
+Energiekonzentrationen der Ration im ersten Abschnitt, energiearme 
+Ration für vorzeitig trockengestellte Kühe bei Bedarf, gleichzeitig 
+einphasige Fütterung möglich (tierindividuell, z. B. bei niedrigem BCS) 
+• Spezialfuttereinsatz gegebenenfalls gezielt in der Vorbereitungs-
+phase (Gebärparese- und Ketoseprophylaxe)
+• Kein Gruppen- und Futterwechsel, weniger deutliche notwendige 
+Umstellungs- und Anpassungsprozesse für die Kühe (ethologisch/
+Haltung und pansenphysiologisch/Ration)
+• Pansenphysiologisch von Vorteil bei hohen Milchleistungen zum 
+Trockenstellen
+• Trockenperiode nicht über 6 – 8 Wochen hinaus
+• Arbeitswirtschaftliche Aspekte: eine größere Fütterungsgruppe und 
+Ladung/Mischung, reduzierter Arbeitsaufwand (laden, mischen, 
+füttern), bauliche und bewirtschaftungsseitige Gruppenteilung nicht 
+zwingend notwendig, höhere Mischgenauigkeit durch größere 
+Lademengen insbesondere in kleineren Herden
+• Bei einphasiger energiereicherer Fütterung Gebärpareseprophy-
+laxe beachten
+Im zweiphasigen Verfahren sollen im ersten Abschnitt des Trockenstehens von etwa 4 bis 5 Wochen mit geringeren 
+Rationsgehalten an Energie und an leicht verdaulichen Kohlenhydraten die angestrebten Rückbildungs- und Re-
+generationsprozesse unterstützt werden. Der Orientierungsbereich der Energiegehalte wird in einer weiten Spanne 
+angegeben (Tabelle 9). Die genaue Festlegung erfolgt dann in der Ausrichtung an der Körperkondition der Kühe 
+(beurteilt mittels body condition score, BCS), um diese im angestrebten Bereich zu halten oder auf deren Erreichen 
+hinzuwirken. Ein Fettansatz kann bei den Kühen im Bedarfsfall mit dem Energieangebot gefördert oder reduziert 
+bzw. verhindert werden.
+Grundsätzlich ist in der Fütterungspraxis die tatsächliche Höhe der Futteraufnahmen der frühen Trockensteher zu 
+beachten, welche mit zum Teil deutlich > 13 kg TM je Kuh und Tag erheblich über den bisher getätigten Annahmen 
+liegen kann. Von stabilen Kühen und bei guten Haltungsbedingungen können auch mehr als 15 kg TM je Tag im 
+Mittel gefressen werden. Insbesondere bei hohen Futteraufnahmen kommt es mit gleichzeitig höheren Energie-
+konzentrationen der Rationen zu Energieaufnahmen weit oberhalb der ausgewiesenen Versorgungsempfehlungen. 
+Ob dies dann zu akzeptieren oder dem über eine Absenkung der Energiekonzentration entgegenzuwirken ist, muss 
+wiederum anhand des jeweiligen aktuellen BCS und der zu erreichenden Kalbekondition entschieden werden.
+Die Körperkondition der Kühe ist ein wichtiger Indikator sowie eine Orientierungsgröße für die Trockensteherfütte-
+rung und deshalb bereits in der Altmelkerphase/Spätlaktation zu beachten und im Bedarfsfall im Rahmen der 
+bestehenden Möglichkeiten schon vor dem Trockenstellen zu beeinflussen.   
+Während der drei- bis zweiwöchigen Vorbereitungszeit sollen Kühe für Erhaltung und etwa 8 bis 12 kg Milch je Kuh 
+und Tag versorgt werden (ca. 65 – 80 MJ NEL je Kuh und Tag bei 725 kg Körpermasse). Zu beachten sind für die 
+dafür notwendigen Energiekonzentrationen der Rationen wiederum die jeweiligen Futteraufnahmen. Einerseits 
+kann es zum physiologisch bedingten Rückgang der Futteraufnahme auf ein niedriges Niveau von < 11 kg TM je 
+Kuh und Tag kommen. Dieser Prozess ist bei Kühen mit vergleichsweise schlechtem Allgemeinzustand und/oder 
+zu hohem BCS stärker ausgeprägt. Die Umstellung von energieärmeren Frühtrockensteher-Rationen auf energie-
+reichere und höher verdauliche Vorbereitungsrationen kann den Futterverzehr aber auch fördern, besonders bei 
+fitten Tieren mit optimaler oder auch knapper Körperkondition. Rationen mit höheren Energie- und Stärkegehalten 
+verfolgen neben der angepassten Energieversorgung das Ziel der Vorbereitung des Pansens auf diese energie-
+reicheren Futterkomponenten mit der Anpassung der Mikroorganismen und der Schleimhäute der Pansenwand.  
+Mit einer so ausgerichteten Fütterung wird auch auf hohe Startleistungen abgezielt. Bei geringeren Energie- und 
+Stärkegehalten kann eher mit moderaten Milchleistungen zum unmittelbaren Laktationsstart gerechnet werden, 
+was dann ohne zu erwartende Beeinträchtigung oder gleichzeitiger Förderung der Futteraufnahmen zur Entlastung 
+des Fett- und Energiestoffwechsels führen kann. Unter Berücksichtigung der beschriebenen Wechselwirkungen 
+sowie ausgerichtet auf die jeweiligen Zielstellungen (Ausrichtung des Betriebsmanagements) für den Laktations-
+start sind die Rationen konkret zu gestalten.
+=== PAGE 25 ===
+25
+DLG Information 01 | 23
+Herausragende Bedeutung für die Vorbereitungsfütterung besitzt die Hypocalcämie-Prophylaxe (subklinisches/
+klinisches „Milchfieber“, Gebärparese). Dazu sind die Kationen-Anionen-Bilanzen ( dietary-cation-anion-balance , 
+DCAB) der Rationen zu berücksichtigen und soweit möglich zusammen mit den Ca-Gehalten im Optimum des 
+gewählten und umsetzbaren Prophylaxe-Konzeptes einzustellen (Ca- und K-arm, moderate DCAB-Absenkung 
+oder anionische Fütterung durch Einsatz saurer Salze). Die P- und Mg-Gehalte sind ebenso zu berücksich-
+tigen. Weitere Verfahren und Spezialfuttermittel werden für die „Milchfieber“-Prophylaxe angeboten (z. B. 
+Ca-Binder). 
+Zum Zweck der Vorbereitung wird empfohlen, in der Trockensteherfütterung und insbesondere in der Vorberei-
+tungsration schon die Futtermittel zu verwenden, welche nach der Kalbung in der Laktationsration zum Einsatz 
+kommen. Diese Zielstellung ist den Anforderungen an eine wirksame „Milchfieber“-Prophylaxe jedoch nachzuord-
+nen. Ebenso sind die Auswahl sowie die Anteile der eingesetzten Futtermittel oder Ergänzungen (z. B. mit Stroh)  
+an die für das jeweilige Fütterungsziel angestrebten Energie- und Nährstoffkonzentrationen anzupassen.    
+Tabelle 9: Nährstoffvorgaben für Mischrationen für trockenstehende Milchkühe (6 bis 8 Wochen vor der Kalbung bis zur Kalbung)
+Frühtrockensteher Vorbereitungsfütterung Einphasige Fütterung
+Woche 8(6) vor bis 6(5)  
+vor der Kalbung
+Woche 5(4)  
+vor bis zur Kalbung
+Woche 6  
+vor bis zur Kalbung
+TM-Verzehr, kg je Tag > 12 > 12 > 12
+TM, g je kg1) 300 – 420 350 – 420 300 – 420 
+XL, g je kg TM < 40 < 40 < 40
+XZ+XS-bXS, g je kg TM 120 – 220 120 – 220
+bXS, g je kg TM > 15 > 15
+aNDFom, g je kg TM > 460 > 400 > 420
+aNDFomGF, g je kg TM > 400 > 260 > 280
+Strukturindex > 50 > 50 > 50
+NEL, MJ je kg TM 5,2 – 5,81) 6,2 – 6,7 5,6 – 6,2
+nXP, g je kg TM2) 110 – 120 125 – 140 120 – 135 
+RNB, g je kg TM -0,5 – 0 -0,5 – 0 -0,5 – 0 
+Ca, g je kg TM 4,0 – 6,0 4,5 – 6,03) 4,5 – 6,0
+P, g je kg TM > 2,54) > 2,54) > 2,54)
+Na, g je kg TM 1,5 – 2,5 1,5 – 2,0 1,5 – 2,0
+Mg, g je kg TM > 1,5 > 2,0 > 2,0
+K, g je kg TM < 15 < 15 < 15
+1) gilt nicht für Rationen mit sehr hohen Strohanteilen / Trocken-TMR   
+2)  der Proteinbedarf orientiert sich hier am Bedarf der Pansenmikroben für die Proteinsynthese (10,1 g MP je MJ ME und einem mittleren 
+UDP-Anteil im Futterprotein von 17 %). Ab einem TM-Verzehr von 10 kg je Tag ist der Bruttobedarf der Tiere gedeckt.   
+3) zunehmende Ca-Gehalte bei abnehmenden DCAB-Gehalten: 
+ DCAB  > 200 meq je kg TM    < 4 g Ca je kg TM
+ DCAB  100 bis 200 meq je kg TM    ca. 6 g Ca je kg TM
+ DCAB  50 bis 100 meq je kg TM    ca. 9 g Ca je kg TM
+ DCAB  – 50 bis + 50 meq je kg TM    > 9 g Ca je kg TM
+ Beachte: K-, Na-, Cl- und S-Gehalte der Ration sind unbedingt zu analysieren.
+4) größere Überschüsse sollten vermieden werden.
+=== PAGE 26 ===
+26
+Insbesondere bei zweiphasiger Fütterung können die Rationen mit verschiedenen Spezialfuttermitteln ergänzt 
+werden, um den Stoffwechsel und die Verdauungsvorgänge der Kühe in der sensiblen Übergangsphase zu unter-
+stützen und zu stabilisieren. Dies betrifft die Hypocalcämie-Prophylaxe (z. B. saure Salze), aber auch den Energie- 
+und Fettstoffwechsel (z. B. glukoplastische Substanzen) oder die Vormagenverdauung (z. B. probiotisch wirkende 
+Substanzen). Pansenpuffer (z. B. NaHCO3) sind unbedingt auszuschließen, da sie die Freisetzung der Körper-
+reserven an Ca eher unterbinden und damit das Milchfieberrisiko deutlich erhöhen. Pansenstabiles Futterfett, 
+insbesondere Ca-verseiftes Fett, ist ebenso als kritisch für die Vorbereitungsfütterung einzuordnen, da dadurch 
+eine zunehmende ketogene Belastung zum Laktationsstart nicht auszuschließen ist.      
+Für Herden, die aufgrund betrieblicher Rahmenbedingungen und/oder der Zielstellungen für die Fütterung das 
+einphasige Verfahren praktizieren, ergeben sich ähnliche Ansätze für die Festlegung der Gehaltswerte der Ration. 
+Futteraufnahme und Körperkondition sind ebenso unbedingt zu berücksichtigen, dies insbesondere für die Fest-
+legung der NEL- und Stärkegehalte der Ration. Notwendige oder gezielt eingestellte knappere Energie und Nähr-
+stoffkonzentrationen lassen wiederum geringere Startleistungen erwarten. Eine wirksame und physiologisch 
+erfolgreich umsetzbare Milchfieberprophylaxe ist in jedem Fall anzustreben.
+10.3.2 Leistungsbezogene Fütterung der laktierenden Kühe mit TMR
+Mit Einsetzen der Laktation wird die zusätzliche Konzentrafuttergabe bei der Vorlage einer Teilmischration bis zur 
+energetischen Abdeckung der vollen Milchleistung langsam erhöht, ohne die Wiederkäuergerechtheit der Ration zu 
+vernachlässigen. Ein Beispiel der Anfütterung ist der Tabelle 10 zu entnehmen. Die über den Mischwagen verab-
+reichten Konzentratfuttermengen sind in diesen 
+Angaben eingeschlossen. In der Praxis ist zu 
+Beginn der Laktation oft ein Versorgungsdefizit 
+besonders an Energie zu beobachten, so dass 
+die Kuh auf Körperreserven zurückgreifen 
+muss. Dies ist insbesondere dann der Fall, 
+wenn Kühe einerseits überkonditioniert sind 
+und/oder während der Trockenstehzeit über-
+versorgt wurden.
+Bis mindestens zum 100. Laktationstag sollte 
+eine Mindestmenge an Konzentratfutter gefüt-
+tert werden, die sich am mittleren Leistungspo-
+tenzial der Herde/Gruppe orientiert. Dies erfolgt 
+mit dem Ziel, einerseits die Auswirkungen der 
+bis dahin andauernden negativen Energiebilanz 
+(NEB) auf die Gesundheit zu minimieren und 
+andererseits das Leistungspotenzial der Tiere 
+bestmöglich auszuschöpfen. Bei Kühen, die bis 
+zu diesem Zeitpunkt bereits über dem mittleren 
+Herdenpotenzial liegen, ist die Konzentratfutter-
+zuteilung anzupassen. Ab dem 100. Laktations-
+tag sollte sich diese ausschließlich an der 
+tatsächlichen Leistung orientieren. 
+Bei den laktierenden Kühen entspricht die 
+ Aufteilung in zwei oder drei Leistungsgruppen 
+einer guten fachlichen Praxis, um die Nährstoff-
+ansprü che der Tiere möglichst genau zu er-
+füllen. Tiere mit ähnlichem Anspruch an die 
+Energie- und Nährstoffkonzentration der Ra tion 
+können so bedarfsgerechter versorgt und die 
+ernährungsphysiologischen, ökonomischen 
+sowie ökologischen Anforderungen an die 
+Milchkuhfütterung optimiert werden. Üblich ist die Gruppierung in mindestens eine frischmelkende/hochleistende 
+und eine altmelkende Gruppe. Neben der Leistung und dem Laktationsstand ist die Körperkondition als Kriterium 
+heranzuziehen, um Defizite in der Körperkondition auszugleichen oder unerwünschten Ansatz zu begrenzen. Als 
+Leistungskriterium sollte die Menge an energiekorrigierter Milch (ECM) Verwendung finden, um Unterschiede in 
+den Milchinhaltsstoffen zu berücksichtigen. Dabei ist jedoch zu berücksichtigen, dass Jungkühe eine geringere 
+tägliche Milchleistung umsetzen, bei geringerer Körpermasse eine geringere Futteraufnahme und durch das noch 
+vorhandene Körperwachstum einen zusätzlichen Leistungsbedarf haben. Hier sollte das Umgruppierungskriterium 
+Milchleistung nach unten angepasst werden. 
+Tabelle 10: Beispiel für die Konzentratfutterzuteilung in der Frühlaktation
+Phase Maximale Konzentratfuttermenge, kg je Tag1)
+Jungkühe Kühe
+Vorbereitungsfütterung
+1. Woche 2,0 2,0
+2. Woche 4,0 4,0
+Anfütterung
+1. Laktationswoche 5 6
+2.          „ 6 8
+3.          „ 7 10
+4.          „ 8 12
+5.          „ 9 12
+6.          „ 9 122)
+7.          „ 9 122)
+8.          „ 92) 122)
+1) gilt für hochleistungsveranlagte und optimal konditionierte Tiere
+2) Menge in Abhängigkeit vom Leistungsniveau
+=== PAGE 27 ===
+27
+DLG Information 01 | 23
+Wie bereits ausgeführt, ist bei laktierenden Kühen zwischen frisch- und altmelkenden Tieren zu unterscheiden.  
+In Tabelle 11 sind die Vorgaben zur Energie- und Nährstoffausstattung der Tagesration für hochleistende Kühe  
+in Herden mit 8.000 bis 12.000 kg Herdenleistung aufgeführt. Die abzudeckenden Milchleistungen betragen je 
+nach Herdenleistung 37 bis 47 kg Milch je Kuh und Tag. Die Anforderungen an die Energie- und Nährstoffdichte 
+orientieren sich an den Eckdaten zur Futteraufnahme (Tabelle 6, 8) und steigen entsprechend der Leistung der 
+Herde an.
+Tabelle 11: Empfehlungen zu Nähr- und Mineralstoffkonzentrationen in Mischrationen für Frischmelker und Hochleistungs-Milchkühe bei 8.000, 
+10.000 und 12.000 kg Herdenleistung 
+Herdenleistung  8.000 10.000 12.000
+Abgedeckte Milchleistung kg je Kuh und Tag 37 42 47
+  von bis von bis von bis
+Futteraufnahme kg TM je Kuh und Tag 23 24 24 26 26 28
+TM g je kg 300 420 300 420 300 420
+XL g je kg TM 40 40 40
+XL, inkl. pansenstabil g je kg TM 60 60 60
+XS+XZ-bXS1) g je kg TM 150 210 150 210 175 210
+XS+XZ g je kg TM 170 260 180 260 225 260
+bXS g je kg TM 50 50 50
+aNDFom g je kg TM 340 325 325
+aNDFomGF,  
+inkl. Neben produkte2) g je kg TM 250 220 200
+Strukturindex 50 50 50
+NEL MJ je kg TM 6,9 7,1 7,1 7,3 7,3 7,4
+nXP g je kg TM 145 155 155 165 165 175
+XP g je kg TM 140 150 155
+RNB g je kg TM -1 0 -1 0 -1 0
+Ca g je kg TM 5,9 6,1 6,4
+P g je kg TM 3,7 3,9 3,7 3,9 3,9 4,0
+Na g je kg TM 1,4 2,5 1,4 2,5 1,5 2,5
+Mg g je kg TM 1,5 1,4 1,4
+1)  Kann der Wert von max. 210 g pansenabbaubarer Stärke und Zucker je kg TM nicht eingehalten werden, so ist die Menge an aNDFom aus 
+dem Grobfutter entsprechend zu erhöhen (≥ 280 g je kg TM bei max. 250 g pansenabbaubarer Stärke und Zucker je kg TM). Dieses Verhält-
+nis lässt sich über den Strukturindex überprüfen und einstellen.
+2)  Eine Deckelung der Anteile und Mengen an Stärke- und Zucker mit zunehmenden Leistungsanforderungen erfordert steigende Anteile höher 
+verdaulicher Faserkohlenhydrate, um höhere Futteraufnahmen und den steigenden Energiebedarf zu sichern.
+Einzelbetriebliche Situationen der Futtermittelverfügbarkeit (Grobfutter) und der Futtermittelauswahl oder beste -
+hende Einsatzrestriktionen (Zukauffutter) können insbesondere die Höhe der Konzentrationen an NEL und/oder 
+nXP begrenzen. Die unter Sicherung wiederkäuergerechter Versorgung höchstmöglichen Energiekonzentratio -
+nen sollten angestrebt werden, um dem hohen genetischen Milchleistungspotenzial der Kühe zu entsprechen 
+und um die zu starke Ausprägung einer negativen Energiebilanz zu verhindern. Bei nachlassender Milchleistung 
+und/oder zunehmender Körperkondition ist die Umstellung in eine energieärmer versorgte Altmelkergruppe 
+konsequent umzusetzen.     
+=== PAGE 28 ===
+28
+Die Vorgaben für die altmelkenden Tiere liegen entsprechend niedriger (Tabelle 12). Abgedeckt werden sollen 
+Leistungen je nach Herdenniveau zwischen 22 und 29 kg Milch je Kuh und Tag. Abgestuft sind neben den Werten 
+für die Energiedichte die Vorgaben für die Versorgung mit nXP und mit Kohlenhydraten.
+Tabelle 12: Empfehlungen zu Nähr- und Mineralstoffkonzentrationen in Mischrationen für altmelkende Milchkühe bei 8.000, 10.000 und 
+12.000 kg Herdenleistung
+Herdenleistung  8.000 10.000 12.000
+  von bis von bis von bis
+Futteraufnahme kg TM je Kuh und Tag 17 19 19 20 20 21
+TM g je kg 300 420 300 420 300 420
+XL g je kg TM 40 40 40
+XL, inkl. pansenstabil g je kg TM 55 55 55
+XS+XZ-bXS g je kg TM 160 180 170 190 180 200
+bXS g je kg TM 30 30 30
+aNDFom g je kg TM 400 450 370 420 350 400
+aNDFomGF,  
+inkl. Neben produkte g je kg TM 280 280 280
+Strukturindex 50 50 50
+NEL MJ je kg TM 6,4 6,6 6,5 6,7 6,7 6,9
+nXP g je kg TM 140 145 145 150 150 155
+XP g je kg TM 135 140 145
+RNB g je kg TM -1 0 -1 0 -1 0
+Ca g je kg TM 4,9 5,1 5,5
+P g je kg TM 3,0 3,2 3,1 3,3 3,3 3,5
+Na g je kg TM 1,2 1,3 1,3 1,4 1,3 1,4
+Mg g je kg TM 1,4 1,5 1,5
+In der Altmelker-Phase kann es insbesondere bei Fütterung energiereicher Rationen häufig zu höheren Futterauf-
+nahmen kommen als in der Tabelle 12 unterstellt. Dann ist zu kontrollieren, ob und wie sich die daraus resultieren-
+de Energieversorgung oberhalb des Leistungsbedarfs auf die mittlere Körperkondition der Kühe auswirkt. Nehmen 
+die Kühe nicht zu stark zu oder füllen noch unzureichende Körperreserven auf, kann dies toleriert werden. Ergibt 
+sich dagegen aus dem BCS für einen relevanten Anteil von Kühen ein deutliches Verfettungsrisiko, muss die Ener-
+giekonzentration der Ration abgesenkt werden. Für Einzeltiere kann anhand der Leistung und des BCS auch die 
+Entscheidung zum vorzeitigen Trockenstellen getroffen werden. Grundsätzlich ist die Fütterung der Altmelker am 
+BCS und an der gewünschten Kondition zum Trockenstellen auszurichten. In der Trockenstehphase sind die Mög-
+lichkeiten insbesondere zur Korrektur zu hoher Körperkondition kaum oder gar nicht gegeben.
+Bei mehr als zwei Leistungsgruppen der laktierenden Tiere können die Frischmelker in den ersten 30 bis 60 Lak-
+tationstagen und die Kühe in der Hochleistungsphase separat gehalten und gefüttert werden. Bei geringerem 
+ Leistungsniveau besteht die Möglichkeit, mit den Rationen zwischen Gruppen mit mittleren und/oder niedrigen 
+Durchschnittsleistungen zu unterscheiden. Die Gruppeneinteilung und Versorgung der Tiere hat nach Leistung und 
+Kondition zu erfolgen. Im Mittel ist die Ration etwa 3 kg oberhalb der mittleren Tagesmilchleistung der Gruppe ein-
+zustellen. Die Angaben gelten für Herdenleistungen oberhalb 10.000 kg.
+Wird eine Haltungsgruppe für Frischmelker gebildet, können Haltungssysteme und Haltungstechnik an die beson-
+deren Ansprüche der Tiere in dieser sensiblen Phase der Laktation angepasst werden (Tierfressplatz-Verhältnis, 
+=== PAGE 29 ===
+29
+DLG Information 01 | 23
+Fressplatzbreite, Kuhkomfort, etc.). Des Weiteren erleichtert die Eingruppierung der Frischmelker in eine separate 
+Gruppe die notwendigen, intensiven Tierbeobachtungen und das Controlling zum Laktationsstart.
+In der Frühlaktation können mit dem Einsatz von Spezialfuttermitteln zur Verbesserung der Energie- und Nährstoff-
+versorgung und insbesondere der Stoffwechselstabilität häufig positive Effekte für die Bedarfsdeckung und die 
+Gesundheit der Kühe erreicht werden. Im nachfolgenden Laktationsabschnitt ist der Einsatz dieser Futtermittel für 
+Kühe mit dann höheren Futteraufnahmen und besserer Versorgungslage in aller Regel nicht mehr erforderlich. So 
+bleibt die Verwendung der kostenintensiven Spezialfuttermittel auf die Frühlaktation beschränkt.
+11 Futter- und Energie-Effizienz zur Beurteilung der Fütterung nutzen
+Beim Milchrind wird sowohl in der Züchtung als auch in der betrieblichen Praxis Effizienz eingefordert. Effizienz 
+stellt dabei die Menge an produziertem Produkt (z. B. Milch und Fleisch) dem dafür benötigten Aufwand, insbeson-
+dere dem Futter, gegenüber (Effizienz = Output/Input). Je höher der Wert ist, desto effizienter wurde das Produkt 
+erzeugt. Neben dem ursprünglich ökonomischen Gedanken geht es heutzutage zusätzlich um die Verringerung von 
+negativen Umweltwirkungen (Emissionen, …) und um einen schonenderen Umgang mit Ressourcen (Wasser, 
+Boden, Atmosphäre, …). 
+Die Effizienz der Kuh:
+Bei der Milchkuh geht es darum, wieviel Milch aus den aufgenommenen Nährstoffen produziert wird. Bekanntere 
+Effizienzkenngrößen sind:
+Körpermasse-Effizienz  = kg ECM je kg Körpermasse oder kg0,75 metabolischer Körpergröße
+Futter-Effizienz  = kg ECM je kg TM-Futteraufnahme
+Energie-Effizienz  = Energie in der Milch je MJ NEL-Energieaufnahme
+Folgendes Beispiel vergleicht die Futter- und Energie-Effizienz anhand zweier (gleicher) Kühe: Beide Tiere wiegen 
+700 kg, fressen 23 kg TM und geben 30 kg ECM pro Tag. Die Energiemenge in der Milch beträgt 30 kg • 3,2 MJ je 
+kg = 96 MJ. Die eine Kuh bekommt eine Ration mit 6,5 und die andere mit 6,8 MJ NEL je kg TM. Die Energieauf-
+nahme beträgt somit 150 bzw. 156 MJ NEL je Tag.
+Futter-Effizienz beider Kühe  =  30/23 = 1,3 kg ECM je kg TM
+Energie-Effizienz Kuh A  =  96/(23•6,5) = 0,64 MJ Energie in der Milch je MJ NEL
+Energie-Effizienz Kuh B  =  96/(23•6,8) = 0,61 MJ Energie in der Milch je MJ NEL
+Nur die Energie-Effizienz zeigt, dass die Kuh mit der geringeren Energiedichte im Futter und daher geringeren 
+Energieaufnahme (z. B. durch weniger Konzentratfutter) effizienter ist. Ob beide Tiere ihren Energiebedarf für die 
+erbrachte Leistung auch wirklich decken konnten, lässt sich durch Futterkontrolle bzw. das Fütterungscontrolling 
+beurteilen.
+Merkmale wie kg ECM je kg TM Futteraufnahme sagen nichts über die für die erbrachte Leistung notwendigen 
+Energie- oder Nährstoffmengen aus. Daher gelten Effizienzmerkmale auf Energie- oder Nährstoff-Basis seit bereits 
+frühen Studien (z. B. Dickinson et al., 1969) als State-of-the-Art. Die unterschiedliche Milchzusammensetzung wird 
+nach den Empfehlungen der GfE miteinbezogen (GfE, 2001). Die Körpermasse spielt dahingehend eine Rolle, 
+dass schwere Kühe ihren höheren Erhaltungsbedarf durch eine besonders hohe Milchleistung ausgleichen müss-
+ten, um gleich effizient wie eine leichtere Kuh zu sein. Tatsächlich bleiben die schwereren Tiere einer Population 
+ in Fragen der Effizienz hinter den leichteren zurück.
+Die zusätzliche Berücksichtigung des Koppelproduktes Schlachtkörper/Fleisch (Altkuh, Nachkommen) in Effizienz-
+merkmalen erfolgt mit gleicher Einheit zumeist als Energie-Effizienz. Der Berechnungszeitraum (Laktation, Zwi-
+schenkalbezeit, alle Laktationen oder Zwischenkalbezeiten, Lebenszeit) bestimmt, wie gut physiologische Abläufe 
+(s. u.), wie jene im Produktionszyklus der Milchkuh oder der benötigte Aufwand in der Aufzuchtzeit, berücksichtigt 
+werden.
+Was ist bei Effizienzkenngrößen zu beachten?
+Kühe, die in Relation zu ihrer Milchleistung wenig fressen und daher viel Körperfett einschmelzen, erscheinen 
+rechnerisch als effizienter, weil sie vermeintlich Futter „einsparen“. Der Abbau von Körperreserven – besonders gut 
+ersichtlich in den ersten Laktationsmonaten – täuscht zu hohe Effizienzwerte vor (siehe Abbildung 6). Zu Lakta-
+tions ende führen die geringere Milchleistung und der notwendige Aufbau der Körperreserven für die nächste 
+Laktation dann zu niedrigen Werten. Werden jedoch ergänzend die Veränderungen in der Körpermasse oder des 
+BCS berücksichtigt, gleichen sich die Kurven aus.
+=== PAGE 30 ===
+30
+Je höher die Milchbetonung/Milchleistung 
+einer Rasse oder einer Kuh ist, desto 
+ausgeprägter ist das Energiedefizit und 
+desto später setzt die Regeneration ein 
+(Ledinek et al., 2021). Ebenfalls erschei-
+nen jene Tiere rechnerisch effizienter,  
+die die notwendigen Körper reserven für 
+die nächste Laktation nicht vollständig 
+aufbauen und mager bleiben (und so 
+insgesamt im Produktionszyklus ver-
+meintlich Futter „einsparen“). Auch eine 
+unzureichende Futterqualität und eine 
+damit unterversorgende Ration führen zu 
+scheinbar hohen Effizienzwerten.
+Bei der Interpretation der Effizienz ist 
+darauf achten, welche Details mit dem 
+Effizienzwert einer Kuh oder einer 
+Leistungsgruppe beschrieben werden:
+•  Aus welchem Laktationsmonat oder 
+-abschnitt stammen die Effizienzwerte?
+•  Wurde die Effizienzkenngröße nur in 
+einem kurzen Abschnitt der Laktation, 
+über einen längeren Zeit abschnitt  
+(z. B. Zwischenkalbezeit) oder über 
+mehrere Jahre bis hin zur Lebenszeit 
+berechnet?
+•  Wie hat sich die Körperkondition der 
+Kühe verändert?
+•  Deckt die Ration den Energie- und 
+Nährstoffbedarf der Kühe?
+•  Treten Probleme mit Gesundheit, 
+Fruchtbarkeit oder in anderen Berei-
+chen auf?
+Bei gutem Stallmanagement und Fütterungskontrolle schließen Effizienz, Tierwohl und 
+Ressourcenschutz einander nicht aus!
+Die Energie-Effizienz gilt als Mittel der Wahl, da diese gegenüber der Futter-Effi zienz auch 
+die Futterqualität berücksichtigt!
+Die Effizienz der Milcherzeugung auf Betriebsebene
+Berechnungen auf Betriebsebene zielen auf verringerte Futter- sowie Nährstoffverluste in der Futter- und Dünge-
+wirtschaft oder durch die Rationsgestaltung ab. Sie bergen ein sehr hohes Potenzial für einen effizienten Umgang 
+mit Ressourcen, insbesondere den Futtermitteln. Für die Reduktion der Klimawirksamkeit und die Verbesserung 
+der Wirtschaftlichkeit der Milchproduktion spielt auch die Nutzungsdauer/Langlebigkeit der Kühe eine große Rolle. 
+An sich nährstoffeffiziente Tiere können aber ungeeignete Futterrationen oder Versäumnisse in der Futterwirtschaft 
+nicht wettmachen.
+Wie erfolgt die Einschätzung der Effizienz der Tiere und der Effizienz des Betriebes?
+Über den Futtermischwagen lässt sich die vorgelegte Futtermenge gut erfassen. Nach Abzug der Futterreste ergibt 
+sich die gefressene Energie- und Futtermenge. Diese ist der erbrachten Milch- und gegebenenfalls auch Fleisch-
+leistung gegenüberzustellen. Man erreicht zwar keine tierindividuellen Werte, weil die Futteraufnahme für die Herde 
+bzw. Leistungsgruppe bestimmt wird, jedoch den Effizienzwert der Durchschnittskuh des Betriebes bzw. der Leis-
+tungsgruppe. Probewiegungen und daraus abgeleitete Skalierungen (z. B. geringe, mittlere, hohe Menge) erfassen 
+die Futterreste.
+Zur Berechnung der Effizienz auf Betriebsebene wird die Produktmenge der geernteten Futtermenge gegenüber-
+gestellt. Die Flächen-Effizienz hingegen drückt die erzeugte Produktmenge oder Leistung (z. B. die Milchmenge) je 
+ha Grünland, Weide oder allgemein je ha Futterfläche aus. Beide Kennzahlen eignen sich auch zum Vergleich von 
+Betrieben. Allerdings sollte die erforderliche Fläche für die zugekaufte Futtermenge und negative Umweltwirkungen 
+03 06 09 0 120 150 180 210 240 270 300 330
+0,4
+0,5
+0,6
+0,7
+0,8
+0,9
+1,0
+1,1
+Laktation (Tage)
+Energie Eff. (MJ LE je MJ NEL)
+BCS-Veränderung unberücksichtigt
+Fleckvieh
+Deutsche Holsten
+03 06 09 0 120 150 180 210 240 270 300 330
+0,4
+0,5
+0,6
+0,7
+0,8
+0,9
+1,0
+1,1
+Laktation (Tage)
+Energie Eff. (MJ LE je MJ NEL)
+BCS-Veränderung berücksichtigt
+Fleckvieh
+Deutsche Holsten
+Abbildung 6: Energie-Effizienz der Milcherzeugung (MJ LE je MJ Energieaufnahme; 
+LE Energiemenge in der Milch) mit und ohne Berücksichtigung der BCS-Veränderung 
+am Beispiel der optiKuh-Daten für Deutsche Holstein (DH) und Fleckvieh (FV). Die 
+Energiekonzentration pro Einheit der BCS-Veränderung wurde nach Fox et al. (1999) 
+berechnet.
+=== PAGE 31 ===
+31
+DLG Information 01 | 23
+z. B. durch Rodung oder Überdüngung mitberücksichtigt werden. Je mehr Futter vom Aufwuchs bzw. Feld bis zur 
+Kuh „liegen bleibt“, desto ineffizienter und verlustreicher arbeitet der Betrieb. Diese Verluste sind nicht dem Tier 
+zuzuschreiben.
+Alle Ebenen (Tier, Betrieb, Produktionssystem) betreffend beugt ein umfassender und vernetzter Blick innerhalb 
+und zwischen den Ebenen der Verlagerung einer Problematik von einem (Merkmals-)Bereich in den anderen vor 
+(Ledinek et al., 2022), da die ressourcenschonende und kostenreduzierende Wirkung von Effizienz nur dann zu 
+tragen kommt, wenn sie nicht durch Verlagerungseffekte oder durch eine Steigerung der Gesamtproduktionsmenge 
+(Rebound-Effekt) wieder geschluckt wird.
+12 Empfehlungen zur Rationskontrolle 
+Futter und Fütterung sind Teil des Produktionsprozesses Nutztierhaltung und müssen kontrolliert werden! Die 
+Rationskontrolle ist im Zusammenhang mit dem Fütterungscontrolling zu sehen, dass neben der Planung auch die 
+Steuerung und die Kontrolle der einzelnen Prozesse beinhaltet. Die Kontrolle ist unverzichtbar und muss in der 
+Erfassung und gesamtheitlichen Bewertung komplex über die Aufgaben Messen, Steuern und Regeln ausgerichtet 
+sein. Die Grundsätze und Rückkopplungen verdeutlicht Abbildung 7. 
+Füttern – ein Regelkreis
+Empfehlungen SOLL-Wert
+PLANUNG
+FÜTTERN
+Kontrolle IST-Wert
+ANPASSUNG
+Abbildung 7: Grundsätze und Rückkopplungen im Bereich Fütterungsplanung, Fütterung und Fütterungskontrolle (Gerster, 2023)
+Kontrolle der Futtervorlage
+Hierbei geht es zuerst um die Überprüfung der vorgelegten Menge und der vorberechneten Zusammensetzung 
+nach Komponentenanteilen. Das tägliche Mischwagenprotokoll ist dafür bestens geeignet. 
+Um den täglichen TM-Verzehr je Kuh ermitteln zu können, 
+•  braucht es zusätzlich den dazu gehörigen geschätzten oder gewogenen Anfall an Restfutter,
+•  die Anzahl der tatsächlich in der jeweiligen Gruppe anwesenden Kühe und
+•  die tatsächlich von einer repräsentativen Probe ermittelte TM-Konzentration der vorgelegten Ration. Die TM 
+kann vor Ort mittels Mikrowelle, Heißluftfritteuse oder anderer Schnelltrocknungsverfahren ermittelt werden. 
+=== PAGE 32 ===
+32
+Die Mischgenauigkeit zeigt erstens, ob alle Rationskomponenten entsprechend der Vorgaben durch die Rations-
+berechnung in den gewünschten Mengen und Anteilen geladen wurden. Das lässt sich ausschließlich anhand des 
+Mischprotokolls kontrollieren, dass entweder durch den Fahrer über das Programm des Mischwagens oder hand-
+schriftliche Protokolle über jede Ladung und die anschließende Ausgabe an die Futtergruppe erstellt wird. Zweitens 
+sagt sie etwas darüber aus, ob die Rationskomponenten auch ausreichend gemischt wurden, so dass praktisch 
+jeder Bissen jeder fressenden Kuh gleich, also homogen, zusammengesetzt ist. Die (subjektive) Homogenität der 
+Ration kann visuell schnell erfasst werden. Objektive Hinweise gibt die wiederholte Anwendung der Schüttelbox 
+mindestens am Anfang und am Ende (besser mindestens an drei Stellen) der Vorlage einer Mischwagenfüllung. 
+Die Homogenität der vorgelegten Mischung über den ganzen Futtertisch ist wichtig, um selektives Fressen zu 
+begrenzen und damit kritische Stoffwechsellagen zu vermeiden.
+Eine Aussage zur tatsächlichen Strukturwirksamkeit der Ration kann relativ genau und standardisiert mithilfe 
+einer Schüttelbox getroffen werden. Schüttelboxen gibt es in mehreren Modellen/Typen auf dem Markt, die mit 
+unterschiedlichen Empfehlungen zu den Schüttelprozeduren vertrieben werden. Die Ergebnisse sind daher unter-
+einander meistens nicht direkt vergleichbar. Wichtig ist demzufolge, die eigene Anwendung, beginnend bei der 
+Probenahme, zu standardisieren, wiederholt durchzuführen und die Ergebnisse der Siebanteile mit den für den  
+Typ vorhandenen Empfehlungen oder eigenen Orientierungen zu vergleichen. Die in der vorliegenden Broschüre 
+beschriebenen Anwendungen beziehen sich auf die drei- bzw. vierstufigen Modelle des PennState-Particle Separa-
+tor (PennState-Schüttelbox) mit Sieb-Lochgrößen 19 und 8 bzw. 19, 8 und 1,18 mm. Eine Methodenbeschreibung 
+ist dem Anhang A2 zu entnehmen.
+Für die Überprüfung der Strukturwirksamkeit von Rationen und Futtermitteln wird die 
+Anwendung der drei- bzw. vierstufigen Modelle vom Typ des PennState-Particle Separator 
+(PennState-Schüttelbox) mit Sieb-Lochgrößen 19 und 8 bzw. 19, 8 und 1,18 mm empfohlen.
+Als strukturwirksam oder physikalisch effektiv gilt demnach der Mengen-Anteil in den Siebkästen oberhalb  
+des 8 mm-Siebes (dreistufige Schüttelbox) bzw. des 1,18 mm-Siebes (vierstufige Schüttelbox). Die dem Anteil der 
+nach der Schüttelprozedur auf dem Obersieb verbleibenden sehr groben Partikel zugeordnete Aussagekraft im 
+Hinblick auf die Strukturwirksamkeit bei der Rationsbeurteilung entfällt zwar, dieser Anteil liefert jedoch einen 
+wichtigen Hinweis auf die Entmischbarkeit durch das typische Hin- und Herschieben des Futters beim Fressen und 
+damit auf das Risiko selektiven Fressens insbesondere von trockenen Mischrationen. Die zusätzliche Anwen-
+dung der Schüttelbox bei den Futterresten erlaubt ebenso Aussagen zum selektiven Fressen. Die Ergebnisse der 
+Prüfung auf Strukturwirksamkeit bzw. physikalische Effektivität sind ausschließlich aussagekräftig im Hinblick auf 
+den physikalischen Aspekt der Futterwirkung auf das Wiederkauen, die Speichelbildung und damit das Pansen-
+milieu. Diese stehen im Wettstreit mit dem Umfang und der Schnelligkeit des Kohlenhydratabbaus insbesondere 
+aus Zucker und Stärke und damit der Konzentration der im Pansen entstehenden Fettsäuren. Eine relative geringe 
+Ausprägung der physikalischen Struktur der Ration aufgrund übermäßiger Zerkleinerung führt daher nicht zwin-
+gend zu niedrigen Pansen-pH-Werten, wenn der Anteil leicht verfügbarer Kohlenhydrate bzw. die Abbaugeschwin-
+digkeit begrenzt bleibt.
+Beim Kontrollgang über den Futtertisch sollten auch die Sauberkeit des Futtertisches, die Sensorik und sich 
+verändernde Temperaturen in der vorgelegten Ration erfasst werden. Gegenüber der „Normaltemperatur“ 
+deutlich erhöhte Temperaturen geben Hinweise auf „Nacherwärmung“, die durch mikrobielle Nährstoffumsetzungen 
+entsteht und den Verbrauch leicht umsetzbarer Nährstoffe wie Zucker, Stärke, Proteine und stabilisierender Gär-
+säuren, wie Milchsäure, sowie die Abnahme der Energiekonzentration des Futters bzw. der Ration widerspiegelt. 
+Dies verringert neben dem direkten Nährstoffverlust vor allem den Futterverzehr und fördert die Bildung schäd-
+licher Stoffwechselprodukte. Routineparameter wie Zeitpunkt der Futtervorlage, Häufigkeit und Zeitpunkt des 
+Wieder-Heranschiebens sollten ebenfalls beachtet und dokumentiert werden.
+13 Instrumente zum Fütterungscontrolling
+Fütterungscontrolling unter betriebswirtschaftlichen Aspekten 
+Die tägliche Futteraufnahme, der Konzentratfutterverbrauch und die aktuelle Milchleistung je Kuh können mit  
+den aktuellen Preisen/Kosten der eingesetzten Futtermittel verbunden werden. Dies ermöglicht die Darstellung 
+öko nomisch relevanter Kennzahlen, wie z. B. die Futterkosten je kg Milch oder den Konzentratfutteraufwand  
+bzw. Income-over-feed-cost (IOFC; Erlös nach Futterkosten).
+Kontrollmaßnahmen im Stall 
+•  Fressverhalten
+Dem geübten Beobachter entgehen Veränderungen im Verhalten der Tiere nicht. Fressen die Tiere z. B. gierig  
+von oben herab oder fangen sie an, mit dem Flotzmaul Löcher zu wühlen und am Fuße der Löcher das Futter hin- 
+=== PAGE 33 ===
+33
+DLG Information 01 | 23
+und herzuschieben, um das Konzentratfutter bzw. die schmackhafteren, meist trockeneren Futterkomponenten  
+„herauszulesen“? Dies gibt zum einen Hinweise auf die Schmackhaftigkeit/Akzeptanz der Ration oder einzelner 
+Futter komponenten, zeigt aber vor allen Dingen an, dass sich die Ration beim Fressen entmischen lässt. Das  
+kann mehrere Ursachen haben, die es herauszufinden gilt. 
+• Erreichbarkeit des Futters und der Tränken
+Geringe tägliche Futteraufnahmen oder ein erhöhter Anteil Kühe mit festgestelltem Energiemangel können ihre 
+Ursache auch in Behinderungen beim Fressen bzw. beim Laufen zum Futter durch erhöhte Konkurrenz aufgrund 
+einer Überbelegung oder dominanter „Mitbewohner“ sowie baulicher oder technologischer Mängel haben. Dieses 
+gilt sowohl bei Fütterung mit getrennter Grob- und Konzentratfuttergabe, als auch bei Mischrationen oder Weide-
+fütterung. Hinsichtlich der Fressplatzbreite sollten jedem Tier optimalerweise 85 cm (für kleinrahmige Rassen 
+gelten niedrigere Werte), mindestens jedoch 75 cm, zur Verfügung stehen (BLE, 2022). Bieten Nackenriegel und 
+Futtertischabgrenzung am Futtertisch genug Raum, um an das Futter zu gelangen? Ist der Futtertisch gegenüber 
+der Standfläche der Kuh 15 bis 20 cm erhöht? Können Sackgassen auf dem Weg zum Futter entstehen? Gibt es 
+ausreichend Platz zum Ausweichen vor dominanten Kühen? Ist hinter den fressenden Kühen ausreichend Platz 
+zum gegenläufigen Kuhverkehr?
+Ebenso wie der „Weg zum Fressen“ auf Hindernisse aller Art zu überprüfen ist, gilt dies auch für die Erreichbarkeit 
+der Tränke. Wieviel Tränkeplätze stehen zur Verfügung, sind sie konkurrenzlos erreichbar, sind sie in der richtigen 
+Höhe angebracht, wie hoch ist der Wasserdurchlauf, funktionieren die Tränken wie vorgesehen, sind sie sauber? 
+• Kotbewertung
+Die Bewertung der Konsistenz repräsentativer Kothaufen mittels standardisierter Bewertungsmaßstäbe wie der 
+Kotbonitur nach dem „manure scoring system“ von Skidmore et al. (1996) (Anhang A4) oder dem Kotsieben 
+(Auswaschen) kann Auskunft über die Pansengesundheit liefern. Vereinzelt wird an der Entwicklung mobiler, 
+digitaler Tools zur Bewertung von Kothaufen gearbeitet. Diese könnten dann zusätzliche Möglichkeiten der weite-
+ren Objektivierung und digitalen Dokumentation bieten.
+•  Tierbeobachtung
+Kühe signalisieren, ob das Futter ausreichend, schmackhaft, wiederkäuergerecht und gesund ist. Diese Signale  
+gilt es zu erkennen und zu werten. Neben der Art und Weise der Futteraufnahme, ihrer Fressgier und der Futter-
+selektion sollte routinemäßig, am besten täglich, auch das Wiederkauen bewertet werden. Sind die Kühe nicht 
+zum Melken unterwegs oder beim Fressen oder Saufen (Futtersuche), sollten sie liegen und wiederkauen oder 
+ruhen. Wenigstens 60, besser 70 % der etwa eine Stunde nach der Hauptfresszeit liegenden Kühe sollten wieder-
+kauen. 50 bis 60 Wiederkauschläge je Minute spiegeln eine ausreichende Struktur in der Ration wider, um das 
+Wiederkauen anzuregen und durch die Speichelbildung einen optimalen Pansen-pH-Wert abzusichern. Wird 
+weniger wiedergekaut, z. B. weil nicht genügend Material zum Zerkleinern vorhanden ist, kann dies als Indiz für  
+die Gefahr subakuter Pansenazidosen gewertet werden. Kaut die Kuh mehr wieder, ist dies ein Zeichen für einen 
+hohen Kaubedarf verbunden mit einem möglichen Strukturüberangebot und im Umkehrschluss vielleicht auch mit 
+einer nicht leistungsgerechten Fütterung. In der Praxis werden immer häufiger Aktivitätssensoren eingesetzt, die 
+auch das Wiederkauen miterfassen. Hier besteht die Möglichkeit einer automatisierten Fütterungskontrolle. 
+Das Laufverhalten, die Rückenlinie und die Schrittlänge, bewertet z. B. nach dem Dairy Cattle Locomotion Score 
+von Sprecher et al. (1997), geben Auskunft über die Lauffreude der Kühe. Von Natur aus ebenso wie in Anbe -
+tracht von Tierwohlaspekten muss sich die Kuh frei von Schmerzen bzw. anderer Hinderungsgründe bewegen 
+können, um beispielsweise an ihr Futter zu gelangen. Das gilt auch für die modernen Laufställe und die Trennung 
+des Liegebereiches sowie des Melkens vom Fress-Ort. Tiere, die nicht gut laufen, fressen auch nicht dem Bedarf 
+entsprechend und zeigen weniger Brunstsignale. Das kann Ausdruck einer nicht tiergerechten Laufbodengestal -
+tung, aber auch stoffwechselbedingter Schädigungen der kleinsten Blutgefäße in den Klauen sein (  z. B. Klauen-
+rehe).
+Die Hungergrubenbonitur, z. B. nach Zaaijer und Noordhuizen (2003), ist besonders im Bereich des Transit-
+kuhmanagements, also unmittelbar vor und nach der Kalbung, von hoher Aussagekraft über die Pansenfüllung  
+und damit über die aktuelle Futteraufnahme, bevor andere äußere Anzeichen eines akuten Energiemangels bei 
+mög lichen Risikotieren zu sehen sind.
+Die Bewertung des Ernährungszustandes, d. h. mangel-, ausreichend oder überernährt, wird nach standardisierten 
+Vorgaben meist über das Verfahren des body condition scoring nach Edmonson et al. (1989) vorgenommen. Sie 
+erlaubt Aussagen über die Fütterung einer Haltungsgruppe, wenn die Einzeltierbewertungen zusammengefasst 
+werden. Für die Bewertung einzelner Kühe im Hinblick auf ihre Gruppierung in Fütterungsniveaus oder die Indika-
+tion einer gesundheitlichen Gefährdung in bestimmten Laktationsabschnitten ist es wichtig, die Veränderung der 
+Körperkondition zur vorhergehenden Bewertung zu beurteilen. So sind z. B. Kühe, die nach der Kalbung innerhalb 
+=== PAGE 34 ===
+34
+kurzer Zeit sehr viel Körpergewicht verlieren, sehr gut an der kurzfristigen Veränderung der Fettauflage zu erken-
+nen. Daher kann es wichtig sein, die Kühe in bestimmten Laktationsabschnitten, z. B. zum Trockenstellen, zum 
+Abkalben sowie während und am Ende der Frühlaktation, eingebettet in Arbeitsroutinen, häufiger zu bewerten, um 
+rechtzeitig individuell reagieren zu können (Anhang A5).
+• Stoffwechseluntersuchungen von Blut und Harn 
+In dringenden Fällen können Blutuntersuchungen, die durch den Tierarzt veranlasst werden, futter- und fütterungs-
+bedingte Problemsituationen genauer widerspiegeln als die normal im Management nach guter fachlicher Praxis 
+erfassten Informationen. In Bezug auf die Fütterung im Transitbereich und das Risiko des Auftretens einer Ketose 
+bzw. subklinischen Ketose sind hier vor allem die Gehaltswerte an β-Hydroxybutyrat (Ketonkörper, BHB oder 
+BHOB) und an nichtveresterten Fettsäuren (NEFA) als Ausdruck eines zu schnellen Abbaus des für die energe-
+tische Verwertung gebrauchten Körperfettes von Interesse. Wie die nachfolgend dargestellten Konzentrationsberei-
+che zeigen, kennzeichnen zu hohe Werte die Gefahr bzw. das Auftreten einer Ketose (Losand und Glatz-Hoppe, 
+2022; Hajek, 2021). 
+Energiemangel BHB ≥ 0,8 mmol je L Blut
+Subklinische Ketose BHB ≥ 1,2 ≤ 2,9 mmol je L Blut
+Klinische Ketose BHB ≥ 3,0 mmol je L Blut
+Der Harn-pH-Wert gilt als Gradmesser für den Charakter des Intermediärstoffwechsels. Während akute Störungen 
+des Säure-Basen-Status (z. B. infolge eines Schockgeschehens oder bei starken Durchfallgeschehen) durch eine 
+Blutgasanalyse abgeklärt werden sollten, bietet sich zur Verlaufskontrolle über einen längeren Zeitraum oder für  
+die Überprüfung der Fütterung nach dem DCAB-Konzept zur Gebärpareseprophylaxe die Harnanalyse an. Als 
+ physiologisch werden ein Harn-pH-Wert von 7,8 bis 8,4 bzw. die im Harn der Tiere bestimmte Netto-Säure-Basen- 
+Ausscheidung (NSBA) von 100 bis 200 mmol je L angesehen (Staufenbiel et al., 2016). Allerdings ist zu berück-
+sichtigen, dass die NSBA in enger Beziehung zur DCAB der Ration steht. So geben Staufenbiel et al. (2016) als 
+Kalkulationsbasis an, dass eine Änderung der DCAB um 100 meq je kg TM zu einer gleichgerichteten Änderung 
+des NSBA-Wertes um 30 mmol je L Harn führt.
+Bei dem Einsatz von DCAB-Regulatoren (Saure Salze) wird neben einem abgesenkten pH-Wert und einer/m 
+erniedrigten NSBA und BSQ (Basen-Säure-Quotient) eine erhöhte renale Ausscheidung von Ca im Harn sichtbar 
+(forcierte Ca-Mobilisierung aus den Knochen). Bei der Verfütterung von DCAB-Regulatoren zur Prophylaxe der 
+Gebärparese vor der Kalbung wird ein Harn-pH-Wert von 6,0 bis 7,0 als Hinweis auf hinreichende Säuerung 
+empfohlen.
+Die Referenzbereiche für die wichtigsten Harnparameter ändern sich mit dem Einsatz saurer Salze wie folgt:
+Tabelle 13: Einfluss saurer Salze auf wichtige Harnparameter (Kraft und Dürr, 2013)
+NBSA Basen (mmol je L) Säuren (mmol je L) NH4
++ (mmol je L) BSQ
+normale Trockensteher-
+fütterung 80 – 220 150 – 250 50 – 100 < 10 2,5 – 4,8
+Fütterung nach DCAB 0 – 60 20 – 250 20 – 120 < 25 1,5 – 4,2
+Die NSBA zeigt bereits sehr sensibel frühe Beanspruchungen im Puffersystem an, während der Harn-pH-Wert erst 
+nach Erschöpfung des Puffersystems reagiert. Während die NSBA durch variierende Harnmengen beeinflusst wird, 
+werden diese Diureseschwankungen durch die Interpretation des BSQ eliminiert (Kraft und Dürr, 2013).
+•  Fütterungscontrolling über die Milch 
+Die Milch selbst in Menge und Zusammensetzung ist in erster Linie das Produkt der Versorgung des Stoffwechsels 
+der Kuh mit Nährstoffen und Energie. Eine besondere Rolle spielt dabei die Versorgung der Mikroorganismen des 
+Pansens, da er die eigentliche Aufbereitung des Wiederkäuerfutters zu absorbierbaren Nährstoffverbindungen bzw. 
+energiehaltigen Substanzen ermöglicht. Die Milch ist daher in besonderer Weise dazu geeignet, Auskunft über die 
+Qualität der Fütterung bzw. der Futteraufnahme in Beziehung zum Bedarf der Kühe zu geben. Von vorrangigem 
+Interesse sind dabei der milchleistungsunabhängige Fett/Eiweiß-Quotient (FEQ) sowie der Eiweiß- Fett- und 
+Harnstoffgehalt der Milch (Spohr und Wiesner, 1989; Glatz-Hoppe et al., 2019a,b; DLG, 2022). Der FEQ dient 
+primär der Beurteilung der Versorgungssituation der Kuh mit Futterenergie. Mit Ausnahme der Rassen Jersey und 
+Angler-Rotvieh (neue Zuchtrichtung) ist davon auszugehen, dass ein FEQ > 1,4 einen individuellen Energiemangel 
+in der Frühlaktation kennzeichnet (siehe auch Anhang A6). Außergewöhnliche Energiemangelsituationen, die durch 
+extrem hohe FEQ-Werte widergespiegelt werden, können als Ketoserisiko interpretiert werden. Einige LKV bestim-
+=== PAGE 35 ===
+35
+DLG Information 01 | 23
+men bereits zusätzliche Parameter in der Milch (wie z. B. Ketonkörper und das Fettsäuremuster; mittels MIRS) und 
+nehmen daraus eine tierindividuelle Beurteilung des Ketoserisikos bei allen Kühen bis zum 110. Laktationstag vor.
+Milchharnstoffkonzentrationen von > 250 mg je L Milch im Mittel der Herde oder Fütterungsgruppe deuten darauf 
+hin, dass den Pansenbakterien im Verhältnis zur verfügbaren Energie zu viel abgebautes Futterprotein in Form 
+von Ammonium zur Verfügung stehen könnte, um es in Mikrobeneiweiß umzusetzen. Milchharnstoffkonzentratio -
+nen < 150 mg je L wiederum können eine suboptimale Futterproteinversorgung in Beziehung zum Bedarf der Kuh 
+kennzeichnen. Ergebnisse zu Milchmenge und -inhaltsstoffen werden regelmäßig und in gleichbleibender Quali -
+tät kostengünstig durch die Prüfstelle bereitgestellt. Diese eignen sich in besonderer Weise für die automatisierte 
+Fütterungskontrolle. Eine tabellarische Übersicht zur Interpretation der Milchleistung und der Milchinhaltsstoffe 
+zeigt Anhang A6.
+Entscheidend für die Feststellung der Fütterungsqualität ist das Bewertungsergebnis der gesamten Fütterungs-
+gruppe bzw. Herde. Einen Hinweis gibt die Höhe des jeweiligen Anteils der problematisch versorgten Kühe. Gerade 
+in den stoffwechselsensiblen Haltungsabschnitten der Früh- und Hochlaktation, aber auch hinsichtlich der Verfet-
+tungsgefahr in den späteren Laktationsabschnitten lohnt es sich, Benchmarks als Mindestzielstellung der Fütterung 
+für eine stoffwechselgesunde Versorgung der laktierenden Kühe zu setzen. So sollte z. B. der Anteil der als „Ener-
+giemangel“-versorgt angezeigten Kühe im ersten Laktationsmonat nicht mehr als 25 % betragen. 
+• TMR-Analyse
+Die Untersuchung von TMR oder PMR ist ein etablierter Baustein im Fütterungscontrolling. Ein Untersuchungsziel 
+kann dabei die Kontrolle der Mischgenauigkeit sein. Dafür eignen sich die Rohnährstoffe, welche auch in der 
+Rationsberechnung mit ausgewiesen werden und welche analytisch gut zu fassen sind (TM, XA, XP, XL, NDFom, 
+ADFom und Zucker). Weniger gut geeignet sind Rechenwerte wie die Energie oder das nXP. Bei der Untersuchung 
+von Stärke werden in der Regel in Mischrationen 2 – 6 % höhere Werte gefunden. Dies ist methodisch bedingt, da 
+einige Futtermittel (Pressschnitzel, Trockenschnitzel) Pektine und andere Kohlenhydrate enthalten, welche fälsch-
+licherweise als Stärke mit ausgewiesen werden. Ein weiteres Ziel kann die Untersuchung von Parametern sein, 
+welche nicht bei jeder Komponente durchgeführt wird (Mengen- und Spurenelemente, Mykotoxine, Hefen und 
+Schimmelpilze).
+Die größte Fehlerquelle stellt die Probenahme dar. Mischrationen neigen dazu, sich zu entmischen, was aus der 
+unterschiedlichen Partikelgröße und TM der verwendeten Komponenten resultiert. Die Probenahme sollte wie folgt 
+durchgeführt werden:
+•  Futtertisch in 3 bis 4 Abschnitte unterteilen (10 – 15 m Länge pro Abschnitt),
+•  Entnahme der Einzelprobe in der Mitte eines jeden Abschnittes,
+•  Probenahme über die gesamte Vertikale ( ) mittels Schaufel („Vertikale“ meint die gesamte Höhe des Futter-
+stapels, also auch dem Futter, welches ganz unten auf dem Futtertisch liegt und nicht nur das Futter, welches 
+leicht zugänglich oben auf liegt.),
+•  dies ergibt 3 – 4 Einzelproben zu je 10 – 15 kg,
+•  alle Einzelproben zu einer Gesamtprobe vereinen,
+•  Gesamtprobe gut durchmischen und mittels Teilungskreuz mehrfach teilen,
+•  Endprobe ca. 0,5 – 1,0 kg einsenden,
+•  Probenahme unmittelbar nach der Futtervorlage, da sich nach mehreren Stunden bereits durch selektives 
+Fressen die Nährstoffkonzentration verändern kann.
+Fütterungskontrolle in Arbeitsroutinen einbinden
+Eine weitestgehende Standardisierung der Kontrollmaßnahmen und die Integration in die individuellen Arbeits-
+aufgaben und -abläufe der Mitarbeiter sind eine Grundvoraussetzung für eine wirksame Fütterungskontrolle. Nicht 
+jede Kontrollmaßnahme muss mit gleicher Häufigkeit durchgeführt werden. Dafür sollten Pläne aufgestellt bzw. 
+direkt in Arbeitsroutinen umgesetzt werden. Tabelle 14 gibt einen Überblick über Routine-Kontrollpunkte.
+Wichtig ist aber, dass der Blick ständig offen ist für Anzeichen von Veränderungen, Abweichungen vom Gewohnten 
+und Erwarteten. Die Tiere unterliegen unserer Verantwortung und können hinsichtlich der Erreichbarkeit des 
+not wendigen Futters und dessen Qualität nur begrenzt eigene „Entscheidungen“ umsetzen, um ihre Bedürfnisse  
+zu befriedigen. 
+Es gibt bereits Management- und Rationsoptimierungsprogramme, die einen Teil eigentlicher typischer Cont-
+rolling-Parameter abfragen, die als gute fachliche Praxis vom Tierhalter und seinen Mitarbeitern erwartet werden. 
+ Auch geht der Trend zur automatischen Erfassung von Daten bzw. zur Digitalisierung dieser Daten, so dass diese 
+=== PAGE 36 ===
+36
+automatisch in den Managementsystemen verarbeitet werden können. Dazu gehört z. B. die Nutzung von Pan-
+sen-Boli, die kontinuierlich die Temperatur (manche auch den pH-Wert) im Vormagensystem und die Wiederkau-
+aktivitäten erfassen können und die automatisch über ein Antennensystem in das Managementsystem eingespeist 
+und dort ausgewertet werden. Darüber hinaus sind seit vielen Jahren z. B. am Hals angebrachte Aktivitätssensoren 
+verbreitet, die ebenfalls das Wiederkauverhalten aufzeichnen. 
+Absicherung der Aussagefähigkeit der Kontrollparameter
+Es gibt Kontrollparameter wie die aufgenommene Futtermenge in TM oder die Energiemenge je Kuh und Tag, die 
+direkt Auskunft über die Qualität der Fütterung geben. Andere Parameter wie die Kotkonsistenz, die Wiederkau-
+dauer und die Milchinhaltsstoffe sind auch von anderen Bedingungen abhängig. Hier sollte die Aussage anhand 
+weiterer Parameter untermauert werden. Der Rückschluss von den Milchinhaltsstoffen auf das Energieversor-
+gungsniveau oder die Strukturversorgung sollte z. B. anhand der Tierbeobachtung, der Milchleistungsentwicklung, 
+der Veränderungen der Körperkondition und an konkreten Futterverbräuchen validiert werden.
+14 Fazit und Ausblick
+Die Zusammenstellung von Mischrationen erfordert die Beachtung umfassender Aspekte zum Bedarf an Nähr-
+stoffen und Energie, zur Wiederkäuergerechtheit, Synchronität der Nährstoffbereitstellung und Optimierung der 
+Vor magenverdauung, darüber hinaus auch praktische Gesichtspunkte wie Mischgenauigkeit und Homogenität, 
+Rationskontrolle, Bewertung der Fütterung, Fütterungscontrolling und Umweltwirkungen. 
+Die vorliegende Broschüre gibt einen kompakten Überblick über die für die Rationsoptimierung notwendigen Futter-
+wert-Kenngrößen, deren Eigenschaften und die für ihre Charakterisierung erforderlichen chemischen, biologischen 
+und physikalischen Methoden und macht Vorgaben für die Rationsplanung. Darüber hinaus werden die Möglich-
+keiten der Fütterungskontrolle, beginnend mit der Futteraufnahme, der Futtermittelhygiene, der Beurteilung reprä-
+sentativer Futtermittelproben und der Wiederkäuergerechtheit, aufgezeigt. 
+Auf Basis der dargestellten Informationen, Vorgaben und den Erfordernissen in der Praxis leiten sich Empfehlun-
+gen für die landwirtschaftliche Praxis, die Fütterungsberatung, das Versuchswesen und die Futtermittelwirtschaft 
+sowie Anregungen für die Wissenschaft ab. 
+Tabelle 14: Im betrieblichen Arbeitsablauf einzurichtende Kontrollroutinen1) 
+Täglich Wöchentlich Monatlich
+Stalldurchgang (Pansenfüllung, Brunst, …) TM-Bestimmung (wirtschaftseigene 
+ Futtermittel)
+TM-Futteraufnahme (Mischration und 
+ Grobfutter)
+Tankmilchmenge, tägliche Milchleistung  
+je Kuh, Milchinhaltsstoffe in der Tankmilch
+Inhaltsstoffe nach Molkereiangaben MLP
+Futteraufnahme, Fressverhalten, Rations-
+zusammensetzung, Futtereffizienzgrößen
+Wiederkauen
+Futtereffizienzgrößen
+Rationsberechnung
+Futtereffizienzgrößen lt. Buchhaltung
+Restfutterzusammensetzung Schüttelbox Konzentratfutterverbrauch
+Tränken Kot (-sieb) BCS, Wägung oder RFD (monatlich bzw. an 
+Stichtagen)
+Gesundheitsdaten Gesundheitsdaten Gesundheitsdaten
+Wiederkauverhalten Futteranalysen (bei Bedarf wie z. B. bei 
+ Futterwechsel auch öfter)
+Digitale Assistenzsysteme nutzen sowie 
+ problembezogene Ergänzung weiterer 
+ Parameter (z. B. Stoffwechselparameter  
+in Blut und Harn, TMR-Analyse)
+1) Jeder Tierhalter ist zur betrieblichen Eigenkontrolle verpflichtet und muss daher tierbezogene Indikatoren entsprechend dokumentieren.
+=== PAGE 37 ===
+37
+DLG Information 01 | 23
+Zur Rationsoptimierung und Fütterungskontrolle werden folgende Empfehlungen gegeben: 
+I. Erweiterung der Rationsplanung um aNDFom und ADFom
+• Etablierung und Beachtung von ADFom und aNDFom (inkl. aNDFomGrobfutter und aNDFomNebenprodukte) in der 
+Rationsplanung
+• Weiterentwicklung der Orientierungsgrößen und Anwendung in Abhängigkeit von Laktationsstadium und 
+Leistungshöhe
+•  Entwicklung und Optimierung der Bereitstellung verdaulicher aNDFom mit der Ration
+•  Beurteilung und Berücksichtigung der Gärqualität der Grobfuttermittel als einen wesentlichen Einflussfaktor 
+auf hohe (Grob-)Futteraufnahmen
+II. Bewertung der Strukturwirkung über peNDF und Strukturindex 
+• Überprüfung der Strukturwirksamkeit der Ration über Einschätzung der peNDF durch Anwendung der  drei- 
+bzw. vierstufigen Schüttelbox
+•  Verrechnung des im Labor aus der Gesamtration analysierten bzw. additiv aus den Einzelfuttermitteln 
+ errechneten aNDFom-Gehaltes mit selbst ermittelten Siebgrößenfraktionen 
+•  Strukturindex vereint Größen der Strukturwirksamkeit und pansenabbaubarer Kohlenhydrate wie Stärke und 
+Zucker
+•  Zielstellungen: 
+ -  aNDFomGrobfutter für Hochleistungsrationen ≥ 200 g je kg TM bei max. 210 g je kg TM pansenabbaubarer 
+Stärke und Zucker 
+ -  Pansen-pH-Wert im Mittel des Tages von ≥ 6,15 bei Strukturindex > 50
+III. Notwendige Weiterentwicklung des Synchronismus
+•  Beurteilung von Ausmaß und Geschwindigkeit des Nährstoffabbaus in den Vormägen für Kohlenhydrate und 
+Rohprotein
+•  Anwendung der Maßgaben für Versuchszwecke und Erprobung in der Praxis
+IV. Konsequente Fütterungskontrolle
+•  Konsequente Ausrichtung auf die Bereitstellung hoher Grobfutterqualitäten als Basis hoher (Grob-)Futter-
+aufnahmen
+•  Maximierung und Überprüfung der über die Rationsplanung geschätzten Futtertrockenmasseaufnahme, 
+insbesondere an Grobfutter
+•  Beachtung der Grundsätze bei Fütterungsplanung, Fütterung und Fütterungskontrolle im Sinne eines  Mess- 
+und Regelkreises 
+•  Folgerichtige Anwendung korrigierender Maßnahmen bei notwendigen Anpassungen 
+Darüber hinaus lassen sich aus den grundlegenden Zusammenhängen und den Erfahrungen in Wissenschaft und 
+Praxis Effizienzkenngrößen in der Milchkuhhaltung empfehlen. Wichtig ist die Entscheidung für Energie-Effizienz-
+merkmale, die Wahl genügend langer Berechnungszeiträume sowie eine bedarfsgerechte Fütterung, um Fehlinter-
+pretationen zu vermeiden. Effizienz und Tierwohl stehen bei sachgerechter Anwendung nicht in Widerspruch.
+Die noch offenen Fragen sollten weiterbearbeitet und mit Vorliegen entsprechender Erfahrungen und Ergebnisse 
+neu diskutiert werden, um die Empfehlungen dann gegebenenfalls anzupassen und dadurch weiter zu verbessern.
+=== PAGE 38 ===
+38
+Literaturquellen
+Agroscope (2021): Frisst die Kuh genug? Vorgehen bei der Bewertung der Hungergrube. Agroscope Tänikon, Merkblatt 127/2021.
+BLE [Bundesanstalt für Landwirtschaft und Ernährung] (2022): Gesamtbetriebliches Haltungskonzept Rind – Milchkühe. Informationsbroschüre 
+0074/2022, Bonn.
+Dickinson FN, McDaniel BT, McDowell RE (1969): Comparative efficiency of feed utilization during first lactation of Ayrshire, Brown Swiss and 
+Holstein cows. J. Dairy Sci. 52:489-497.
+De Boever JL, Cottyn BG, Buysse FX, Wainman FW, Vanacker JM (1986): The use of an enzymatic technique to predict digestibility, metaboliz-
+able and net energy of compound feedstuffs for ruminants. Anim. Feed Sci. Technol. 14:203-214.
+De Brabander DL, De Boever JL, Vanacker JM, Boucqué ChV, Bollerman SM (1999): Evaluation of physical structure in daily cattle nutrition.  
+In: Recent Advance in Animal Nutrition (Ed.: Garnsworthy RC, Wiseman J), Nottingham University Press, Loughborough, 111-145.
+Denißen J (2020): unveröffentlichte Ergebnisse aus Verdaulichkeitsprüfungen am Hammel, Landwirtschaftskammer NRW.
+DIN EN ISO 6497 (2005): Probenahme von Futtermitteln zur Eigenkontrolle. www.bvl.bund.de.
+DLG-Futterwerttabellen Wiederkäuer (1997): Universität Hohenheim – Dokumentationsstelle (Hrsg.). DLG-Verlag, Frankfurt am Main. 
+DLG [Deutsche Landwirtschafts-Gesellschaft] (2001a): Empfehlungen zum Einsatz von Mischrationen bei Milchkühen. DLG-Information 1/2001, 
+Frankfurt am Main.
+DLG [Deutsche Landwirtschafts-Gesellschaft] (2001b): Struktur- und Kohlenhydratversorgung der Milchkuh. DLG-Information 2/2001, Frankfurt 
+am Main.
+DLG [Deutsche Landwirtschafts-Gesellschaft] (2004): Grobfutterbewertung. Teil A – DLG-Schlüssel zur Bewertung von Grünfutter, Silage und 
+Heu mit Hilfe der Sinnenprüfung. DLG-Information 1/2004, Frankfurt am Main.
+DLG [Deutsche Landwirtschafts-Gesellschaft] (2006a): Schätzung der Futteraufnahme bei der Milchkuh. DLG-Information 1/2006, Frankfurt am 
+Main.
+DLG [Deutsche Landwirtschafts-Gesellschaft] (2006b): Grobfutterbewertung. Teil B – DLG-Schlüssel zur Beurteilung der Gärqualität von 
+Grünfuttersilagen auf Basis der chemischen Untersuchung. DLG-Information 2/2006, Frankfurt am Main.
+DLG [Deutsche Landwirtschafts-Gesellschaft] (2011): Praxishandbuch Futter- und Substratkonservierung. 8. überarbeitete Auflage, DLG-Verlag, 
+Frankfurt am Main.
+DLG [Deutsche Landwirtschafts-Gesellschaft] (2012): Fütterungsempfehlungen für Milchkühe im geburtsnahen Zeitraum. DLG-Arbeitskreis 
+Futter und Fütterung, DLG-Verlag, Frankfurt am Main.
+DLG [Deutsche Landwirtschafts-Gesellschaft] (2020): Berücksichtigung N- und P-reduzierter Fütterungsverfahren bei den Nährstoffausschei-
+dungen von Milchkühen. DLG-Merkblatt 444, Frankfurt am Main.
+DLG [Deutsche Landwirtschafts-Gesellschaft] (2022): Nutzung von Milchkontrolldaten zur Fütterungs- und Gesundheitskontrolle bei Milchkühen. 
+Die neue Dummerstorfer Fütterungsbewertung. DLG-Merkblatt 451, Frankfurt am Main.
+Durst L, Freitag M, Bellof G (2021): Futtermittel für landwirtschaftliche Nutztiere. 1. Auflage, DLG-Verlag , Frankfurt am Main.
+Edmonson AJ, Lean IJ, Weaver LD, Farver T, Webster G (1989): A body condition scoring chart for Holstein dairy cows. J Dairy Sci. 72:68-78.
+Ettle T, Schuster H, Rutzmoser K (2015): Bewertung der Strukturversorgung beim Rind. Schule und Beratung, 4/5, 63-67.
+Ettle T, Schuster H, Rutzmoser K (2014): Bewertung der Strukturversorgung beim Rind: Ableitung und praktische Anwendung des Systems 
+“Strukturindex”. Tagungsunterlage Forum angewandte Forschung in der Rinder- und Schweinefütterung, 1.-2. April (Fulda), 13-18.
+Fox DG, van Amburgh ME, Tylutki TP (1999): Predicting requirements for growth, maturity, and body reserves in dairy cattle. J. Dairy Sci. 
+82:1968-1977.
+Gerster E (2023): DLG-Broschüre „Rationsoptimierung und Fütterungskontrolle bei Milchkühen“ – Praktische Umsetzung: Rationsplanung & 
+Rationskontrolle. Vortragspräsentation auf dem Forum angewandte Forschung in der Rinder- und Schweinefütterung. 25./26.04.2023, Fulda.
+GfE [Gesellschaft für Ernährungsphysiologie] (2001): Energie- und Nährstoffbedarf landwirtschaftlicher Nutztiere, Nr. 8: Empfehlungen zur 
+Energie- und Nährstoffversorgung der Milchkühe und Aufzuchtrinder. DLG-Verlag, Frankfurt am Main.
+GfE [Gesellschaft für Ernährungsphysiologie] (2014): Mitteilungen des Ausschusses für Bedarfsnormen der Gesellschaft für Ernährungsphysio-
+logie. Bewertung der Strukturwirkung von Mischrationen für Milchkühe – Stand und Perspektiven. Proc. Soc. Nutr. Physiol. 23:166-178.
+Glatz-Hoppe J, Onken F, Eggert A, Mohr E, Losand B (2019a): Nutzung von Milchinhaltsstoffen zur Beurteilung der Versorgungssituation von 
+Milchkühen. 1. Mitteilung: Milchleistung und Inhaltsstoffe deutscher Milchrindrassen im Vergleich. Züchtungskunde 91:423-448.
+Glatz-Hoppe J, Mohr E, Losand B (2019b): Nutzung von Milchinhaltsstoffen zur Beurteilung der Versorgungssituation von Milchkühen. 2. 
+Mitteilung: Bewertungsschema zur Beurteilung der Inhaltsstoffe auf Betriebsebene. Züchtungskunde 91:449-473.
+Gruber L, Schwarz FJ, Erdin D, Fischer B, Spiekers H, Steingaß H, Meyer U, Chassot A, Jilg T, Obermaier A, Guggenberger T (2004): Vorher-
+sage der Futteraufnahme von Milchkühen – Datenbasis von 10 Forschungs- und Universitätsinstituten Deutschlands, Österreichs und der 
+Schweiz. Kongressband 116. VDLUFA-Kongress, 13.-17. September (Rostock), 484-504.
+Gruber L (2016): Evaluierung von Modellen zur Vorhersage der Futteraufnahme von Milchkühen. Tagungsunterlage Forum angewandte 
+Forschung in der Rinder- und Schweinefütterung, 12.-13. April (Fulda), 47-50. 
+Hajek FE (2021): Untersuchungen zum Stoffwechsel-Monitoring bei Milchkühen unter besonderer Berücksichtigung von Haptoglobin und 
+aus gewählten klinischen Parametern. Dissertation, Ludwig-Maximilians-Universität München, Tierärztliche Fakultät.
+Hoffmann M (2021): Zum Einsatz von Futterfett in Rationen für Milchkühe. Sächsischer Landeskontrollverband e.V., Lichtenwalde,  
+www.lkvsachsen.de/fuetterungsberater/, März 2021, Download am 13.08.2021.
+Hoffmann M (1990): Tierfütterung. 2. Auflage, Deutscher Landwirtschaftsverlag, Berlin.
+Jensen LM, Nielsen NI, Nadeau E, Markussen B, Nørgaard P (2015: Evaluation of five models predicting feed intake by dairy cows fed total 
+mixed rations. Livest. Sci. 176:91-103.
+Jeroch H, Drochner W, Rodehutscord M, Simon A, Simon O, Zentek J (2020): Ernährung landwirtschaftlicher Nutztiere. 3. Auflage, Verlag 
+Eugen Ulmer, Stuttgart.
+Kraft W, Dürr UM (2013): Klinische Labordiagnostik in der Tiermedizin. 7. Auflage, Schattauer Verlag, Stuttgart.
+=== PAGE 39 ===
+39
+DLG Information 01 | 23
+Lebzien P (2005): Ernährungsphysiologische Grundlagen. In: Brade W, Flachowsky G (Hrsg.) Rinderzucht und Milcherzeugung - Empfehlungen 
+für die Praxis. Landbauforschung Völkenrode, Sonderheft 289, 2. Auflage, 89-101, https://d-nb.info/982466730/34. 
+Ledinek M, Spiekers H, Gruber L, Obermaier A, Stamer E (2021): Effizienz – Ein Begriff mit vielen Gesichtern. Abschlussworkshop optiKuh2/
+eMissionCow, 28.-29. September (Braunschweig). LfL-Schriftenreihe 2021/5:28-46.
+Ledinek, M., Gruber, L., Thaller, G., Götz, K.-U., Südekum, K.-H., Spiekers, H. (2022): Effizienzmerkmale beim Milchrind: Definieren – Ein-
+ordnen – Anwenden. Züchtungskunde 94, 81-109.
+LfL [Bayerische Landesanstalt für Landwirtschaft] (2021): Gruber Tabelle zur Fütterung der Milchkühe, Zuchtrinder, Schafe, Ziegen. Bayerische 
+Landesanstalt für Landwirtschaft (Hrsg.). LfL-Information. www.lfl.bayern.de/mam/cms07/publikationen/daten/informationen/gruber_tabelle_fuet-
+terung_milchkuehe_zuchtrinder_schafe_ziegen_lfl-information.pdf.
+Loeffler K, Gäbel G (2013): Anatomie und Physiologie der Haustiere. 13. Auflage, Eugen Ulmer Verlag, Stuttgart.
+Losand B, Glatz-Hoppe J (2022): Lässt sich die Indikation einer Ketose aus den Milchinhaltsstoffen ableiten? LFA M-V und Fachschule für 
+ Landwirtschaft M-V, unveröffentlichte Ergebnisse aus der Auswertung von Ergebnissen des Verbundprojektes optiKuh.
+Mahlkow-Nerge K (2023): persönliche Mitteilung. 
+Oba M, Allen MS (1999): Evaluation of the importance of the digestibility of neutral detergent fiber from forage: Effects on dry matter intake and 
+milk yield of dairy cows. J. Dairy Sci. 82:589-596.
+Priepke A (2021): Müssen wir wissen, was im Futter ist? Vortragspräsentation auf dem 30. Milchrindtag MV von LFA, MRV und RinderAllianz, 
+online-Veranstaltung, 02.03.2021, www.lfamv.de. 
+Richardt, W. (2021): Fruktangehalt in Grasaufwüchsen und Grassilagen. Sächsischer Landeskontrollverband e.V., Lichtenwalde,  
+www.lkvsachsen.de/fuetterungsberater/, April 2021, Download am 13.08.2021.
+Rutzmoser K, Ettle T, Obermaier A, Schuster H (2011): Ein Strukturindex als Fortführung zur Beschreibung der Strukturwirkung mit der 
+physikalisch effektiven NDF. Tagungsband 10. BOKU-Symposium Tierernährung, 231-236.
+Skidmore AL, Brand A, Sniffen CJ (1996): Monitoring milk production: defining pre-set targets and execution. In: Brand A, Noordhuizen JPTM, 
+Schukken YH (eds.) Herd health and production management in dairy practice. WageningenPress, Wageningen, the Netherlands, 223-262.
+Spohr M, Wiesner HU (1991): Kontrolle der Herdengesundheit und Milchproduktion mit Hilfe der erweiterten Milchleistungsprüfung. Milchpraxis 
+29:231-236.
+Sprecher DJ, Hostetler DE, Kaneene JB (1997): A lameness scoring system that uses posture and gait to predict dairy cattle reproductive 
+performance. Theriogenology 47:1179-1187.
+Stangl GI (2014): Die Nährstoffe und ihr Stoffwechsel. In: Kirchgeßner M (Hrsg.): Tierernährung. 14. Auflage, DLG-Verlag, Frankfurt am Main, 
+47-134.
+Staufenbiel R, Roder A, Pieper L (2016): Die DCAB der Futterration als eine bisher wenig beachtete Ursache für eine azidotische Stoffwechsel-
+lage von Jungrindern und Milchkühen. 41. Leipziger Fortbildungsveranstaltung Labordiagnostik in der Bestandsbetreuung – Manfred Fürll 
+(Hrsg.) Leipzig: Medizinische Tierklinik der Veterinärmedizinischen Fakultät Leipzig, 43-45.
+Steingass H, Menke KH (1986): Schätzung des energetischen Futterwerts aus der in vitro mit Pansensaft bestimmten Gasbildung und der 
+chemischen Analyse. I. Untersuchungen zur Methode. Übers. Tierernährg. 14:251-270.
+Steinhöfel O, Hoffmann M (2020): Handbuch Grobfutter. 2. Überarbeitete Auflage, Agrar- und Veterinär-Akademie, Steinfurt-Burgsteinfurt.
+Südekum K-H (2009): Zucker und Speicherkohlenhydrate – Analytische Kenngrößen als Voraussetzung für eine moderne Rationsgestaltung. 
+Übers. Tierernährg. 37:27-44.
+van Soest PJ, Robertson JB, Lewis BA (1991): Methods of dietary fiber, neutral detergent fiber and nonstarch polysaccharides in relation to 
+animal nutrition. J. Dairy Sci. 74:3583-3597.
+VDLUFA [Verband Deutscher Landwirtschaftlicher Untersuchungs- und Forschungsanstalten] (2003): VDLUFA Standpunkt: Die Anwendung  
+der Nahinfrarotspektroskopie (NIRS) bei der Untersuchung von Futtermitteln und pflanzlichen Produkten.  
+https://www.vdlufa.de/wp-content/uploads/2021/05/07-nirs.pdf. 
+VDLUFA [Verband Deutscher Landwirtschaftlicher Untersuchungs- und Forschungsanstalten] (2012): Handbuch der landwirtschaftlichen 
+Versuchs- und Untersuchungsmethodik (Methodenbuch des VDLUFA), Bd. III. Die chemische Untersuchung von Futtermitteln. VDLUFA-Verlag, 
+Darmstadt.
+VO (EG) 152/2009 (Ergänzung VO(EG) 691/2013): Festlegung der Probenahmeverfahren und Analysemethoden für die amtliche Untersuchung 
+von Futtermitteln. http://eur-lex.europa.eu.
+Weiß J (2011): Grundlagen der Tierernährung. In: Weiß J, Pabst W, Granz S (Hrsg.): Tierproduktion. 14. Auflage, Enke Verlag, Stuttgart, 
+145-188.
+Zaaijer D, Noordhuizen, JPTM (2003): A novel scoring system for monitoring the relationship between nutritional efficiency and fertility in dairy 
+cows. Irish Vet. J. 56:145-151. 
+Zebeli Q, Dijkstra J, Tafaj M, Steingass H, Ametaj BN, Drochner W (2008): Modeling the adequacy of dietary fiber in dairy cows based on the 
+responses of ruminal pH and milk fat production to composition of the diet. J. Dairy Sci. 91:2046-2066.
+Zebeli Q, Mansmann D, Ametaj B, Steingass H, Drochner W (2010): A model to optimise the requirements of lactating dairy cows for physically 
+effective neutral detergent fibre. Arch. Anim. Nutr. 64:265-278.
+=== PAGE 40 ===
+40
+Anhang
+Anhang A1: Definition ausgewählter Parameter zur Charakterisierung von Futtermitteln und die verwendeten 
+Analysemethoden
+Parameter Beschreibung/Definition Methode
+ADFom Die ADFom ist der nach Kochen in saurer Detergenzienlösung unlösliche, 
+aschefreie Rückstand.
+VDLUFA MB Bd. III, 6.5.2,  
+8.  Ergänzung, 2012
+ADL Das ADL ist der im Anschluss an die ADF-Bestimmung mit Schwefelsäure 
+behandelte, aschefreie Rückstand.
+VDLUFA MB Bd. III, 6.5.3,  
+8.  Ergänzung, 2012
+Aminosäuren (Ausnahme Tryptophan  
+ Methode 4.11.2)
+Aminosäuren zeichnen sich durch eine oder mehrere Amino- und Carboxyl-
+gruppen aus und sind die monomeren Bausteine von Proteinen.
+VDLUFA MB Bd. III, 4.11.1,  
+4. Ergänzung, 1997
+aNDFom Die aNDFom ist der nach Amylasebehandlung und Kochen in neutraler 
+ Detergenzienlösung unlösliche, aschefreie Rück stand.
+VDLUFA MB Bd. III, 6.5.1,  
+8.  Ergänzung, 2012
+ELOS Die ELOS berechnet sich unter Berücksichtigung der Gehalte an TM und 
+ Rohasche aus dem Glühverlust einer mit Pepsin- Salzsäure- und Zellulase- 
+Lösung behandelten Probe.
+VDLUFA MB Bd. III, 6.6.1,  
+3.  Ergänzung, 1996
+Gärsäuren und Alkohole Die Gehalte flüchtiger Fettsäuren (v. a. Essig-, Propion- und Butter säure) 
+und ausgewählter ein- und zweiwertiger Alkohole (v. a. Ethanol, Propanol, 
+2,3-Butandiol) sind Ausdruck un erwünschter Sekundärfermentationen während 
+des Silier prozesses.
+Überwiegend  Hausmethoden
+Gasbildung
+nach HFT
+Das von einer in gepuffertem Pansensaft dispergierten Fut ter probe gebildete 
+Gasvolumen erlaubt in Verbindung mit den Weender Rohnährstoffen die 
+Schätzung der Umsetzbaren Energie (ME).
+VDLUFA MB Bd. III, 25.1,  
+8.  Ergänzung, 2012
+Proteinlöslichkeit Ist der Anteil an XP, welcher sich durch eine Behandlung des Futtermittels mit 
+einem Borat-Phosphat-Puffer herauslösen lässt.
+Licitra et al. (1996)
+Reinprotein
+nach Barnstein
+Fällbarer Anteil des XP, der durch Zusatz von Kupfersulfat  denaturiert wird und 
+nach Filtration gemäß VDLUFA MB Bd. III, 4.1.1 (XP) auf Stickstoff analysiert 
+wird. 
+VDLUFA MB Bd. III, 4.4.1,   
+Grundwerk
+XA Der nach Veraschung verbleibende Anteil einer Probe. Er enthält neben 
+ Mengen- und Spurenelemente auch andere anorganische Verunreinigungen 
+(v. a. Silikate).
+VDLUFA MB Bd. III, 8.1,  
+Grundwerk
+XF Der nach Kochen in Schwefelsäure und Kalilauge unlösliche  fett-, stickstoff- 
+und aschefreie Rückstand.
+VDLUFA MB Bd. III, 6.1.1,  
+3.  Ergänzung, 1993
+XL Nach Extraktion mit Petrolether, Abdestillation des Extraktionsmittels und 
+ Trocknung wird der XL-Rückstand gravimetrisch ermittelt.
+VDLUFA MB Bd. III, 5.1.1,  
+2.  Ergänzung, 1988
+XP
+nach Kjeldahl
+Nach Kochen mit konzentrierter Schwefelsäure und Destillation wird der 
+freigesetzte Ammoniak mit Natronlauge titriert. Das XP errechnet sich aus dem 
+Produkt des so ermittelten N-Gehaltes und dem Faktor 6,25 (5,7 für Weizen).
+VDLUFA MB Bd. III, 4.1.1,  
+3.  Ergänzung, 1993
+XS
+polarimetrische Methode
+Nach einer Heißbehandlung mit Salzsäure sowie Klärung und Filtration wird  
+die optische Drehung der Lösung gemessen. Aus der Differenz dieser und 
+einer zuvor mit Ethanol extrahierten Probenlösung wird bei bekanntem Dreh-
+winkel verschiedener reiner Stärkearten der Stärkegehalt der Probe berechnet.
+VDLUFA MB Bd. III, 7.2.1,  
+8.  Ergänzung, 2012
+XS
+enzymatische Methode
+XS wird durch das Enzym Amyloglukosidase (AGS) bei einem pH-Wert 4,6 zu 
+D-Glukose gespalten und dann zu D-Glukose-6-phosphat oxidiert. Die dabei 
+entstandene Menge an NADPH ist der Menge an D-Glukose proportional und 
+kann über die Absorption bei λ = 340 nm spektroskopisch bestimmt werden.
+Boehringer Mannheim/r-Biopharm  
+UV-Test (Best. Nr.10 207 748 035)
+Stärkeabbaubarkeit Bestimmung der Stärke Abbaubarkeit mittels in-vitro Nylon bag Methode  
+(nach 7 Stunden Inkubation)
+ANKOM, Operator Manual  Appendix 
+A, Rev C 01/18/23
+TM Die TM errechnet sich aus dem Gewichtsverlust einer Probe nach einer in 
+Abhängigkeit von der Futtermittelart definierten Trocknung. Bei feuchten 
+Futtermitteln ist eine Vortrocknung erforderlich. Eine Angabe von wertgebenden 
+Inhaltsstoffen erfolgt üblicherweise bezogen auf die absolute TM bzw. auf 88 % 
+TM (z. B. Mischfuttermittel).
+VDLUFA MB Bd. III, 3.1,  
+Grundwerk
+XZ
+gravimetrische Methode
+Nach Reduktion von Kupfersalzen durch Invertzucker wird Kupfer oxid ab-
+getrennt und gewogen. Der entsprechende Zuckergehalt kann einer Tabelle 
+entnommen werden und wird berechnet auf Saccharose angegeben.
+VDLUFA MB Bd. III, 7.1.3,   
+Grundwerk
+=== PAGE 41 ===
+41
+DLG Information 01 | 23
+Anhang A2: Anwendung der Schüttelbox
+Diese ist weitestgehend standardisiert vorzunehmen. Folgende Abfolge wird empfohlen:
+1.  Probeentnahme: Probe vom Mischwagen oder der frisch vorgelegten Ration entnehmen. Futtermenge 
+ca. 300 g. Entnahmevorgang sollte zügig und ohne weitere, die Entmischung begünstigende, Zwischenschritte 
+(reflexartiges Schütteln der Hand, um Krümel abzuschütteln; Teilen der genommenen Probe; Portionierung auf 
+die korrekte Menge) direkt in das Endgefäß erfolgen. Futterklumpen (z. B. nasse Silagen) müssen aufgelockert 
+werden. Allerdings begünstigt ein zusätzliches Bewegen des Futters die Entmischung insbesondere der kleinen 
+und trockenen Partikel. Auf eine repräsentative Probenahme ist also besonders zu achten! Beim Futterschwad 
+einmal von oben und einmal von unten entnehmen! 
+2.  Schütteln: Die Box insgesamt 40-mal auf ebener Fläche hin- und herschieben („schütteln“) - die Intensität des 
+Schüttelns sollte gleich bleiben! Zur Orientierung kann ein Schubweg von 17 cm bei einer Frequenz von einer 
+Hin- und Her-Bewegung pro Sekunde dienen. Nach jedem fünften „Schütteln“ wird die Box um 90 ° gedreht.
+3.  Auswiegen: Vor dem Wiegen des Inhalts des Obersiebes sind untypische Grobteile – solche, die von der Milch-
+kuh vermutlich nicht verzehrt werden (z. B. große Maisspindeln oder -stängel) – ggf. auszusortieren. Konzentrat-
+futterpellets sind nicht strukturbildend und daher vom Ober- bzw. Mittelsieb in den unteren Kasten zu legen. 
+Pellets von Nebenprodukten wie getrockneten Zuckerrübenschnitzeln (z. B. Melasseschnitzel) sind dem Mittel-
+sieb (> 8 mm) zuzuordnen. Inhalte der einzelnen Siebkästen wiegen und Ergebnisse im Protokoll notieren. Zur 
+Fehlerminimierung werden jeweils drei Schüttelergebnisse zu einem gemittelten Endergebnis zusammengefasst.
+4.  Berechnung: Aus den jeweiligen Teilmengen in den Sieben wird die Gesamtmenge gebildet, aus der die prozen-
+tualen Anteile der Inhalte der einzelnen Siebkästen zu berechnen sind. Diese Berechnung gilt nur für die dem 
+Futterstapel entnommene Probe. Soll bei Einsatz von Teilmischrationen auf die Strukturwirksamkeit der gesam-
+ten Tagesration geschlossen werden, so ist das zusätzlich zu verabreichende Konzentratfutter dem unteren 
+Siebkasten zuzurechnen. Dabei gilt, je 0,5 kg Konzentratfutter ist 1 Prozent anzusetzen. Die Anteile im Ober- 
+bzw. Mittelsieb werden dadurch entsprechend niedriger.
+Bei der Ergebnisbewertung ist immer zu beachten, dass unterschiedliche TM-Gehalte bei identischen Rationen, 
+beispielsweise durch zusätzliches Wassereinmischen, auch zu unterschiedlichen Ergebnissen führen können. 
+Diese Tatsache beschreibt jedoch keine unterschiedliche physikalische Strukturwirkung, sondern widerspiegelt den 
+Effekt auf die Entmischbarkeit der Ration. 
+Zielwerte für die Anteile der auf den Siebstufen verbleibenden Originalmasse an der gesamten Probenmenge, wie 
+sie bisher ausgewiesen wurden, werden nicht mehr empfohlen. Entscheidend für die Einschätzung der physikali-
+schen Strukturwirkung ist die peNDF, die wie folgt berechnet wird:
+peNDF = aNDFom in der Gesamtration • Masse-Anteil der Obersiebe (= Ober- und Mittelsiebe)
+(peNDF in g/kg TM; aNDFom in der Gesamtration in g/kg TM; Masseanteil der Obersiebe = Masse der 
+Rückstände in den beiden/drei Obersieben in g dividiert durch die Masse der Gesamtprobe in g)
+Der Anteil Originalmasse auf dem Obersieb (> 19 mm) an der Gesamtprobe kann Anhaltspunkte für die Selektier- 
+und Entmischbarkeit der Ration liefern. Bei ausgeprägtem Selektionsverhalten der feinen gegen die groben Partikel 
+können in etwa Anteile > 10 % auf dem Obersieb zu einer unzureichenden Strukturversorgung führen.
+5 x
+17      cm
+1.
+17      cm
+5 x
+5.
+17      cm
+5 x
+2.
+17      cm
+5 x
+6.
+17      cm
+5 x
+3.
+17      cm
+5 x
+7.
+17      cm
+5 x
+4.
+17      cm
+5 x
+8.
+=== PAGE 42 ===
+42
+Anhang A3: Schätzgleichungen für die Futteraufnahme (Gesamtfutteraufnahme [IT], kg TM je Tag);  
+fixe Faktoren und Koeffizienten in Abhängigkeit vom Laktationstag (Gruber et al., 2004)
+Anwendungsbereich getrennte Vorlage TMR
+Futtersituation Standard Standard
+Parameter Einheit Gleichung Nr. 1 Nr. 5
+Intercept 3,878 2,274
+Effekt Land x Rasse FV [D+A] -2,631 -2,169
+BS [D+A] -1,826 -1,391
+HFm [D+A] -2,720 -1,999
+HFh [D+A] -1,667 -0,898
+FV [CH] -0,275 -0,315
+BS [CH] -0,882 -0,593
+HF [CH] 0,000 0,000
+Effekt der Laktationszahl n 1 -0,728 -0,658
+2 – 3 0,218 0,236
+≥ 4 0,000 0,000
+Effekt des Laktationstages Tag a -4,287 -5,445
+b 4,153 5,298
+Modell: a + b • (1 – exp(-c • Laktag)) c 0,01486 0,01838
+Regressionskoeffizient für Körpermasse kg a 0,0148 0,0173
+b1 -0,0000474 -0,0000514
+Modell: a + b1 • (Laktag) + b2 • (Laktag)² b2 0,0000000904 0,0000000999
+Regressionskoeffizient für Milchleistung kg a 0,0825 0,2010
+b1 0,0008098 0,0008080
+Modell: a + b1 • (Laktag) + b2 • (Laktag)² b2 -0,000000966 -0,000001299
+Regressionskoeffizient für Konzentrat-
+futter-Menge
+kg TM a 0,6962 –
+b1 -0,0023289 –
+Modell: a + b1 • (Laktag) + b2 • (Laktag)² b2 0,0000040634 –
+Regressionskoeffizient für Konzentrat-
+futter-Anteil
+% IT a – 0,0631
+b1 – -0,0002096
+Modell: a + b1 • (Laktag) + b2 • (Laktag)² b2 – 0,0000001213
+Reg.koeffizient NELGF MJ je kg TM – 0,8580 0,6090
+R² % – 86,7 83,5
+RSD kg TM – 1,32 1,46
+CV % – 7,1 7,9
+Korrekturfaktor ITkorrigiert = a + b • ITpredicted 0,47 + 0,930 • ITp. 0,71 + 0,920 • ITp.
+DH = Deutsche Holstein; FV = Fleckvieh; BS = Brown Swiss (Braunvieh)
+=== PAGE 43 ===
+43
+DLG Information 01 | 23
+Anhang A4a: Beurteilung der Kotkonsistenz (nach Skidmore et al., 1996)
+Note Charakterisierung Ernährungsfehler 
+1 • Sehr flüssig, Erbsensuppenkonsistenz
+• Keine Ringe oder Grübchen
+• Kotpfützen
+• Strukturarme, zu energiereiche Ration
+• Zu hoher Konzentratfutteranteil
+• Zu junges Gras/Weide mit hohem XP-Gehalt, zu hohe Viehsalz- 
+oder Mineralfuttermengen, verpilztes Futter!
+• Überversorgung mit pansenverfügbarem XP und XS
+2 • Macht keine Haufen, verläuft weniger als bei 1 
+• Etwa 2,5 cm tief, macht Ringe
+• Wie bei Note 1 
+• Saftige Weide
+3 • Haferbrei - Konsistenz steht bei etwa 4 cm Höhe
+• 4 – 6 konzentrische Ringe/Grübchen
+• Ausgewogene, dem Bedarf angepasste Ration, keine Hinweise  
+auf gravierende Fütterungsfehler erkennbar
+4 • Kot ist dick 
+• Klebt nicht an den Klauen
+• Bildet keine Ringe/Grübchen
+• Mangel an pansenverfügbarem XP und/oder pansenlöslicher XS
+• Zu geringe Wasseraufnahme
+• Überangebot an Struktur, zu altes Futter
+5 • Feste Kotballen 
+• Stapel von ca. 5 – 10 cm Höhe
+• Austrocknungserscheinungen der Kuh
+• Ansonsten wie Note 4
+Zur Kotauswaschung wird eine Kaffeetasse voll frischem Kot so lange im Sieb auswaschen, bis die Flüssigkeit  
+hell/transparent wird. Die Bewertung erfolgt anhand nachfolgender Übersicht.
+Anhang A4b: Beurteilung der Futterreste nach einer Kotauswaschung (nach Skidmore et al., 1996) 
+Befund Bewertung 
+Homogene Matte aus kurzen, feinverfilzten Halmen, 
+wenige unverdaute Mais- und Getreidekörner 
+• Optimale Rationszusammensetzung und  
+Verdauung
+Relativ große Menge Auswaschrest, steigende Antei-
+le an langen Futterpartikeln, unverdaute Blattstücke, 
+grobe Struktur mit gut erkennbarer Herkunft der 
+Strukturteilchen 
+• Zunehmend suboptimale Grobfutterverdauung 
+• Mögliche Mängel in der gleichzeitigen Energie- und Proteinbereitstellung  
+im Pansen
+• Überprüfen, ob synchron schnelle, mittelschnelle und langsame KH- und  
+XP- Quellen zur Verfügung stehen
+• Evtl. zu wenig Protein im Futter 
+Feinfaseriger Auswaschrest in relativ geringen 
+Mengen 
+• Deutlicher Mangel an strukturwirksamer Faser bei noch funktionierender Pansen-
+verdauung (gute Ausnutzung) 
+Gut erhaltene Getreidekörner oder Bruchstücke 
+(unterscheiden nach Herkunft): Körner zwischen 
+den Fingern zerquetschen, um den Stärkegehalt 
+einzuschätzen 
+• Können aus Einstreu stammen 
+• Bei Einsatz von Maissilage/GPS: unzureichende Zerkleinerung oder nicht optimaler 
+Erntezeitpunkt 
+• Bei Herkunft aus Getreideschrot: Mühle/Quetsche überprüfen: Für die Passage-
+geschwindigkeit des Verdauungsbreies unzureichender Zerkleinerungsgrad 
+• Gut erhaltene Körner- oder Körnerteile im Kot verringern die Stärkeausnutzung um 
+bis zu 20 % und die Energieausbeute um bis zu 10 % 
+Hohe Anteile gut erhaltener Rapsschalen im Kot • Fehlen von mittelschnell fermentierbaren KH-Quellen
+• Zu schneller Pansendurchgang 
+Grauschwarze Schleimhautreste • Zu hohe Mengen an pabKH bzw. Strukturmangel
+=== PAGE 44 ===
+44
+Anhang A4c: Kot – Ergebnisprotokoll (nach Skidmore et al., 1996)
+Kuhgruppe Kotbenotung Körneranteil  
+im Kot
+Partikelgröße
+> 0,64 cm* Bemerkungen
+* siebgrößenabhängig
+=== PAGE 45 ===
+45
+DLG Information 01 | 23
+Anhang A5: Tierbeobachtung
+Die Körperkondition der Kühe (nach Edmonson et al., 
+1989) sollte wöchentlich bis monatlich überprüft und  
+die entsprechenden Maßnahmen ergriffen werden, um 
+eine optimale Bewertung zu erhalten bzw. zu erreichen. 
+Die wichtigsten Körperstellen für die Beurteilung der 
+Körperkondition sind in Anlehnung an die Gruber 
+Tabelle zur Milchviehfütterung (LfL, 2021):
+A)  Bereich zwischen Dorn- und Querfortsätzen  
+der Lendenwirbel
+B) Bereich zwischen Hüft- und Sitzbeinhöckern
+C) Bereich zwischen den Hüfthöckern
+D) Beckengrube mit Schwanzansatz
+Bei der Bewertung sind Abweichungen von ± 0,25 
+tolerierbar. Bei separater Konzentratfuttergabe und 
+einer Abweichung der BCS-Note von ± 0,5 sollte die 
+Konzentratfuttergabe um ± 1 kg korrigiert; bei Verfütte-
+rung von TMR beim Einzeltier ein Leistungsgruppen-
+wechsel und bei der Gruppe eine Anpassung des 
+Energiegehaltes der Ration vollzogen werden (Ver-
+fettung bzw. Mobilisation vermeiden). Die Verläufe der 
+Körperkondition unterscheiden sich zwischen Deutsch 
+Holstein und Fleckvieh, dies muss bei der Bewertung 
+berücksichtigt werden.
+300
+2,00
+2,25
+2,50
+2,75
+3,00
+3,25
+3,50
+3,75
+4,00
+Laktationstage
+1. Laktationsdrittel 2. Laktationsdrittel 3. Laktationsdrittel TrockenstehenTrockenstehen
+BCS-Note
+obere Grenz
+e
+untere Grenze
+03 06 09 0 120 150 180 210 240 270 300 0
+BCS-Verlaufs- und Bewertungsschema für Deutsche Holstein
+Kalbung
+Optimalverlauf
+2,75
+3,50
+A
+C
+B
+D
+(© Mariana Schneider, LfL-ITE)
+=== PAGE 46 ===
+46
+300
+2,50
+2,75
+3,00
+3,25
+3,50
+3,75
+4,00
+4,25
+4,50
+Laktationstage
+1. Laktationsdrittel 2. Laktationsdrittel 3. Laktationsdrittel TrockenstehenTrockenstehen
+BCS-Note
+obere Grenze
+untere Grenze
+03 06 09 0 120 150 180 210 240 270 300 0
+BCS-Verlaufsschema für Fleckvieh (nach Jilg, 1998)
+Kalbung
+3,50
+4,00
+Optimalverlauf
+Hungergrubenbonitur (nach Zaaijer und Noordhuizen, 2003; zitiert bei Agroscope, 2021)
+In den Niederlanden wurde ein Bonitursystem für die Bewertung der Pansenfüllung anhand der Hungergrube 
+erarbeitet, das auf einer Notenvergabe von 1 bis 5 basiert (Zaaijer und Noordhuizen, 2003). Bei Note 3 ist die 
+Futteraufnahme ausreichend und die Passagerate hoch. Dies ist vor allem für den Laktationsstart und während  
+der Hochleistungsphase erwünscht. Bei Note 4 liegen eine ausreichende Futteraufnahme und/oder eine niedrige 
+Passagerate vor. Die Note 4 sollte für Kühe in der Vorbereitungsphase anvisiert werden. Note 5 indiziert eine 
+reduzierte Passagerate und ist ebenfalls bei Kühen in der Vorbereitungsphase typisch. Die Note 2 zeigt eine 
+geringe Futteraufnahme und/oder eine sehr schnelle Passagerate an. Dies ist gleich nach dem Abkalben häufig, 
+aber bei Tieren in der Laktation oder beim Trockenstehen bedenklich.
+Hüftknochen
+Hautfalte
+Querfortsätze
+letzte Rippe
+=== PAGE 47 ===
+47
+DLG Information 01 | 23
+Anhang A6: Interpretation der milchleistungsunabhängigen und -abhängigen Milchinhaltsstoffe unter Berücksichti-
+gung rassespezifischer Einflüsse (nach DLG, 2022)
+Rasse/Rassegruppe
+Parameter Mehrheit der Rassen1) Angler Jersey
+Fett-Eiweiß-Quotient (FEQ)
+mittlerer FEQ 1,20 1,29 1,41
+FEQGrenz 1,4 1,5 1,6
+optimale Energieversorgung bei FEQ ≤ FEQGrenz
+unzureichende Energieversorgung bei FEQ > FEQGrenz
+Milchharnstoff (mg je L) 150 – 250
+Ketosegefahr (obere, untere Grenze des Normalbereichs für Milcheiweiß und -fett)
+Milcheiweißmin (%) = (4,11 – 0,023 • kg Milch 
+ je Tag) • (1 – 0,35/3,51)
+= (4,46 – 0,030 • kg Milch  
+je Tag) • (1 – 0,38/3,72)
+= (4,78 – 0,035 • kg Milch  
+je Tag) • (1 – 0,44/4,06)
+Milcheiweißmax (%) = (4,11 – 0,023 • kg Milch  
+je Tag) • (1 + 0,35/3,51)
+= (4,46 – 0,030 • kg Milch 
+ je Tag) • (1 + 0,38/3,72)
+= (4,78 – 0,035 • kg Milch  
+je Tag) • (1 + 0,44/4,06)
+Milchfettmin (%) = (5,06 – 0,033 • kg Milch  
+je Tag) • (1 – 0,68/4,20)
+= (5,83 – 0,042 • kg Milch  
+je Tag) • (1 – 0,82/4,79)
+= (6,99 – 0,061 • kg Milch  
+je Tag) • (1 – 1,03/5,72)
+Milchfettmax (%) = (5,06 – 0,033 • kg Milch 
+ je Tag) • (1 + 0,68/4,20)
+= (5,83 – 0,042 • kg Milch  
+je Tag) • (1 + 0,82/4,79)
+= (6,99 – 0,061 • kg Milch  
+je Tag) • (1 + 1,03/5,72)
+FEQ > FEQGrenz und Eiweiß < Eiweißmin oder
+FEQ > FEQGrenz und Fett > Fettmax
+Subklinische Pansenazidose / Energieüberversorgung
+Milchfett (%) Fett < Fettmin
+Milcheiweiß (%) > 200 Tage nach der Kalbung Eiweiß > Eiweißmax
+1)  Holstein-Schwarzbunt, Holstein-Rotbunt, Braunvieh, Rotvieh alter Angler Zuchtrichtung, Rotbuntes Niederungsrind, Deutsches Schwarzbuntes 
+Niederungsrind, Fleckvieh, Vorderwälder, Braunvieh alter Zuchtrichtung, Montbéliard, Sonstige Rassen, Kreuzung Fleischrind x Milchrind, 
+Kreuzung Milchrind x Milchrind
+=== PAGE 48 ===
+DLG e.V. 
+Eschborner Landstraße 122 
+60489 Frankfurt am Main
+Deutschland 
+Tel. +49 69 24788-0
+Info@DLG.org • www.DLG.org

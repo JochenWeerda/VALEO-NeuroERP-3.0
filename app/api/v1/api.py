@@ -112,6 +112,7 @@ from app.api.v1.endpoints import (
     harvest_acceptance,
     rations_optimization,
     grundfutter_analysen,
+    rations_zugang,
     quality_protocols,
     daily_prices,
     self_billing,
@@ -779,6 +780,13 @@ api_router.include_router(
     grundfutter_analysen.router,
     prefix="/agrar",
     tags=["agrar", "futtermittel", "grundfutter-analysen"]
+)
+
+# Rationsoptimierung – DSGVO-Zugangsverwaltung
+api_router.include_router(
+    rations_zugang.router,
+    prefix="/agrar/rations",
+    tags=["agrar", "futtermittel", "rations-zugang"]
 )
 
 # ── L3-Connect Gap Closure Routers ──────────────────────────────
