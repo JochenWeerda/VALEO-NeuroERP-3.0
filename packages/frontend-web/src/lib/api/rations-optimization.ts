@@ -58,6 +58,50 @@ export interface CowProfile {
 
 export type FeedingMode = 'TMR' | 'PMR' | 'PMR+Weide'
 
+/** Entspricht Backend `FeedingSystemConfig` (Slice 1h, snake_case im JSON). */
+export type FeedingSystemKind = 'TMR' | 'PMR_stall' | 'PMR_pasture'
+
+export type ConcentrateDistribution =
+  | 'included_in_tmr'
+  | 'transponder'
+  | 'ams'
+  | 'milkparlor'
+
+export interface ConcentrateRecipeProfile {
+  starch_breakdown_class?: 'slow' | 'mixed' | 'rapid'
+  mill_byproduct_share?: number | null
+  slow_starch_share?: number | null
+  rumen_buffer_present?: boolean
+  source?: 'declared' | 'scanned_ocr' | 'manual_estimate' | 'default'
+}
+
+export interface FeedingSystemConfig {
+  system: FeedingSystemKind
+  concentrate_distribution: ConcentrateDistribution
+  concentrate_max_per_serving_kg?: number | null
+  concentrate_max_per_day_kg?: number | null
+  concentrate_servings_per_day?: number | null
+  treat_as_primiparous?: boolean
+  default_concentrate_recipe?: ConcentrateRecipeProfile | null
+}
+
+export interface FeedBlockAssignment {
+  feed_id: string
+  block: 'pasture' | 'tmr' | 'concentrate_staged'
+  concentrate_recipe?: ConcentrateRecipeProfile | null
+}
+
+/** Ableitung aus Wizard-Fuetterungstyp (Backend-Defaults spiegeln). */
+export function defaultFeedingSystemConfig(feedingType: FeedingMode): FeedingSystemConfig {
+  if (feedingType === 'TMR') {
+    return { system: 'TMR', concentrate_distribution: 'included_in_tmr' }
+  }
+  if (feedingType === 'PMR') {
+    return { system: 'PMR_stall', concentrate_distribution: 'transponder' }
+  }
+  return { system: 'PMR_pasture', concentrate_distribution: 'milkparlor' }
+}
+
 // --- FAN-MODE-V1 (Spec §4/§6/§8, freigegeben 2026-04-21) ---
 
 export type FanMode = 'auto_iterative' | 'reference' | 'evaluation_only'
@@ -403,6 +447,8 @@ export interface RationBlocks {
     concentrate_max_per_day_kg: number | null
     treat_as_primiparous?: boolean
     default_concentrate_recipe?: Record<string, unknown> | null
+    /** Backend: TMR -> PMR_pasture wenn Weide in der Loesung > 0 kg TM/d. */
+    auto_promoted_from_tmr?: boolean
   }
   tmr_block: RationBlockSummary
   pasture_block: RationBlockSummary
@@ -443,6 +489,13 @@ export interface MixingProtocolStep {
   share_fm_pct: number
 }
 
+export interface MixingProtocolExcludedPastureItem {
+  feed_id: string
+  name: string
+  kgdm: number
+  reason?: string
+}
+
 export interface MixingProtocol {
   basis: {
     feeding_system: string
@@ -459,6 +512,11 @@ export interface MixingProtocol {
     tmr_kgfm_without_water: number
     tmr_kgfm_with_water: number
     tmr_kgfm_with_water_and_overfill: number
+  }
+  /** Weideanteile, die bewusst nicht im Mischwagen landen. */
+  excluded_pasture?: {
+    kgdm: number
+    items: MixingProtocolExcludedPastureItem[]
   }
   warnings: string[]
 }
@@ -525,7 +583,12 @@ export interface OptimizationResult {
   // Vorhanden nur wenn der erweiterte Solve mit Policy-Targets erfolgreich war.
   policy_profile_lp_slacks?: PolicyProfileLpSlack[] | null
   policy_profile_lp_total_penalty?: number | null
-  policy_profile_lp_mode?: 'stage2_cost_plus_policy_slack' | null
+  policy_profile_lp_mode?:
+    | 'stage2_cost_plus_policy_slack'
+    | 'stage2_cost_plus_concentrate_slack'
+    | null
+  concentrate_max_lp_slack_kg?: number | null
+  concentrate_max_lp_slack_penalty?: number | null
   policy_overrides?: Record<string, unknown>
   relaxation_policy?: RelaxationPolicy
   objective_strategy?: ObjectiveStrategy
@@ -632,6 +695,9 @@ export interface OptimizeFromProfileExtras {
   season_profile?: SeasonProfile
   policy_profile?: PolicyProfile
   policy_overrides?: Record<string, unknown>
+  /** Slice 1h: explizites Fuetterungssystem (snake_case wie FastAPI-Body). */
+  feeding_system_config?: FeedingSystemConfig
+  feed_block_overrides?: FeedBlockAssignment[]
 }
 
 export async function optimizeFromProfile(

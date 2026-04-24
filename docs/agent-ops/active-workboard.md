@@ -1,59 +1,66 @@
 # Active Workboard
 
-Stand: `2026-04-23`
+Stand: `2026-04-24`
 
 ## ERP-CRIT-001
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Backend-Testabdeckung und Vertragsstabilitaet fuer kritische ERP-Pfade zuerst an real roten Tests und Ratchet-Pfaden verbessern.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `app/api/v1/endpoints/payment_runs.py`, `tests/test_process_kernel_wave1_contracts.py`, relevante Coverage-/Ratchet-Doku.
 **Abnahmekriterien:** Der aktuell rote Payment-Return-Vertrag laeuft wieder; Coverage-Ratchet-Status ist dokumentiert; naechste unterdeckte Pfade sind als konkrete Test-Slices priorisiert.
-**Offene Risiken:** Mehrere Ratchet-Pfade sind historisch unterdeckt und koennen nicht durch einen Einzeltest realistisch geschlossen werden.
+**Erledigt:** `payment_runs.return_payment` toleriert aktuelle und Legacy-Zeilenformate fuer Ruecklaeufer-Betraege; der rote Vertragstest ist gruen. Coverage-Ratchet-Folgereihenfolge ist dokumentiert in `docs/quality-assurance/critical-backend-coverage-plan-2026-04-24.md`.
+**Checks:** `pytest tests/test_process_kernel_wave1_contracts.py::test_return_payment_persists_outbox_event tests/test_process_kernel_wave1_contracts.py::test_payment_return_amount_accepts_current_and_legacy_row_shapes -q`
+**Offene Risiken:** `check_critical_backend_coverage.py` bleibt nach dem gruenen Sammellauf noch rot fuer `dunning.py`, `booking_templates.py`, `chart_of_accounts.py`, `finance_read_models.py`, `waage.py`, `warehouses.py`, `warehouse_transfers.py`; diese Pfade sind in der Coverage-Plan-Datei als Folgeslices priorisiert.
 
 ## ERP-CRUD-001
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Browser-/CRUD-Abnahme der wichtigsten E2E-Prozesse in eine ausfuehrbare, priorisierte Testmatrix ueberfuehren.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/quality-assurance/browser-use-checklists.md`, `docs/quality-assurance/e2e-crud-acceptance-matrix-2026-04-24.md`, ggf. vorhandene Frontend-E2E-Testkonfiguration.
 **Abnahmekriterien:** Die neun Flow-Spine-Prozesse besitzen eine priorisierte CRUD-/Statuswechsel-/Korrekturmatrix mit klaren P0/P1-Prueffaellen und Repo-Pruefkommandos.
+**Erledigt:** Neue priorisierte E2E-CRUD-Matrix fuer P0/P1-Flow-Spine-Prozesse erstellt und in den Browser-Use-Checklisten verlinkt.
 **Offene Risiken:** Echte Browser-Ausfuehrung haengt vom lokal startbaren Fullstack und Seed-Daten ab.
 
 ## ERP-LIVE-001
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Live-Integrations-Readiness mit echten Secrets/Zielsystemen so weit repo-seitig vorbereiten, dass Ops nur noch Werte eintragen und Pruefkommandos ausfuehren muss.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/integration-bootstrap-readiness-2026-04-12.md`, `scripts/check_integration_bootstrap.py`, `app/services/integration_bootstrap.py`, `.env.example`.
 **Abnahmekriterien:** Readiness-Bericht trennt deterministische Repo-Pruefung und externe Live-Probes; fehlende Secrets/Ziele werden maschinenlesbar als Blocker ausgewiesen.
+**Erledigt:** `--strict-live` ergaenzt; Live-Probe-Plan und Gate sind dokumentiert.
 **Offene Risiken:** Produktive Tenant-Secrets und Zielsystem-URLs liegen ausserhalb des Repos.
 
 ## FIBU-CUTOVER-001
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** FIBU-Cutover-Mappings fachlich abschliessbar machen, indem Pflichtmapping, Freigabezustand und Validierung formalisiert werden.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/fibu-cutover-mapping-readiness-2026-04-24.md`, `config/fibu_cutover_mapping.template.yaml`, `scripts/check_fibu_cutover_mapping.py`, `tests/test_fibu_cutover_mapping.py`.
 **Abnahmekriterien:** Konten-, Steuer-, Kostenstellen- und Gegenkonto-Mappings haben eine Vorlage, einen Validator und einen klaren Blockerstatus fuer fachliche Freigabe.
+**Erledigt:** FIBU-Cutover-Template, Validator, Tests und Readiness-Doku erstellt.
 **Offene Risiken:** Fachlich freigegebene Zielkonten/-steuerschluessel muessen vom Fachbereich geliefert werden.
 
 ## RATIONS-SPLIT-001
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Rations-Solver technisch weiter entkoppeln, ohne die LP-Semantik zu aendern.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `app/api/v1/endpoints/rations_optimization.py`, `app/agrar/rations/solver/*`, relevante Rations-Tests.
 **Abnahmekriterien:** Ein weiterer klarer Solver-Baustein wird aus `rations_optimization.py` in das Solver-Paket gezogen oder mit typisierter Hilfslogik isoliert; Regression bleibt gruen.
+**Erledigt:** Mischgruppen-Reihenfolge als `app/agrar/rations/solver/mixing.py` aus dem Endpoint-Pfad herausgezogen und separat getestet.
 **Offene Risiken:** Vollstaendige `_run_lp`-Zerlegung ist ein mehrstufiger Refactor.
 
 ## DOMAIN-PARITY-001
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Domänenparitaet in schwächeren Bereichen als messbares Ausbauprogramm statt loser Absicht fuehren.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/domain-parity-roadmap-2026-04-24.md`, `docs/project-context/open-gaps-and-known-issues.md`.
 **Abnahmekriterien:** Finance, Supply/Inventory, Procurement, Contracts, CRM und Documents sind nach Fachlogik, Testtiefe, Integration und UI-Operationalisierung bewertet; naechste Code-/Test-Slices sind priorisiert.
+**Erledigt:** Domain-Parity-Roadmap mit Bewertungsraster, Prioritaeten und naechsten Code-Slices erstellt und in `open-gaps` verlinkt.
 **Offene Risiken:** Tiefe fachliche Paritaet braucht weitere domänenspezifische Arbeit und Fachentscheidungen.
 
 ## RATIONS-HARD-001
@@ -65,7 +72,18 @@ Stand: `2026-04-23`
 **Abnahmekriterien:** Weide wird auch bei nominellem TMR-Input nicht ins Mischprotokoll aufgenommen; Auto-Promotion TMR -> PMR_pasture ist regressionsgesichert; Mischprotokoll nutzt die vorhandene Feed-Dataclass als typisierte Solver-Sicht.
 **Erledigt:** Mischprotokoll nutzt `Feed.from_dict()` fuer die typisierte Feed-Sicht; TMR+verfuegbare Weide wird auf PMR_pasture auto-promoted; falsch als `tmr_block` gelabelte Weide wird aus der Mischung ausgeschlossen und im Protokoll als `excluded_pasture` ausgewiesen.
 **Checks:** `pytest tests/test_rations_feeding_system.py tests/test_rations_mixing_protocol.py tests/test_rations_feed_dataclass.py -q`
-**Offene Risiken:** Vollstaendige Zerlegung von `_run_lp`, regelbasiertes Warnsystem und echte LP-Slacks fuer Konzentrat-Tagesmax bleiben eigene Folgeslices.
+**Offene Risiken:** Vollstaendige Zerlegung von `_run_lp` und regelbasiertes Warnsystem bleiben Folgeslices. Konzentrat-Tagesmax wird jetzt als Stage-2-LP-Slack abgebildet (siehe RATIONS-POLICY-PIPE-001).
+
+## RATIONS-POLICY-PIPE-001
+
+**Von:** Cursor
+**Stand:** abgeschlossen 2026-04-24
+**Ziel des Slices:** Rationspipeline policy-/fachlich schaerfer machen (Saftfutter-Caps, PMR-Weide-Profile, k_l, Infeasibility-Hilfen, Konzentrat-Slack) und Frontend/TS an die erweiterte API anbinden.
+**Dateibesitz:** `app/api/v1/endpoints/rations_optimization.py`, `packages/frontend-web/src/lib/api/rations-optimization.ts`, `packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx`, `tests/test_rations_feeding_system.py`, ggf. `app/agrar/rations/solver/mixing.py` / `tests/test_rations_solver_mixing.py`.
+**Abnahmekriterien:** Backend liefert die neuen Meta-Felder (u. a. Konzentrat-Slack, `ration_blocks.feeding_system.auto_promoted_from_tmr`, Mixing `excluded_pasture`); Frontend sendet `feeding_system_config` und zeigt RationBlocks/Mixing/KF-Slack; Regression gruen.
+**Erledigt:** Saftfutter/nasse CoP: weiche/harte Caps, LP-hart, Soft-Constraint + Referenz-HTML; `_POLICY_PROFILE_TARGETS` um `tmr_standard`, `pmr_standard`, `pmr_pasture_spring/summer/autumn`; Stage-2 Konzentrat-Tagesmax-Slack + Response `concentrate_max_lp_slack_*`; nach Solve FS mit Ist-Mengen neu aufgeloest, `_block_labels` aktualisiert; Infeasibility: Heu/Stroh-Abdeckung, aNDFom-Kapazitaet (`ndf_capacity`), generischer Zweig nur bei grobfutterarmem Set; k_l bei PMR+Weide ueber FANi + TMR-ME-Dichte (`_kl_milk_from_me_density`); `result.x` auf Feed-Laenge begrenzt. Frontend: Typen, Default-Config im Request, Panels, Policy-Badge fuer KF-Slack.
+**Checks:** `pytest tests/test_rations_feeding_system.py tests/test_rations_optimization_milk_plausibility.py -q`; im Paket `frontend-web`: `pnpm run type-check`
+**Offene Risiken:** Optional Wizard fuer manuelle `feeding_system_config`-Overrides; E2E-Smoke Rations-UI; weiteres Zerlegen von `_run_lp`.
 
 ## INT-LIVE-001
 
