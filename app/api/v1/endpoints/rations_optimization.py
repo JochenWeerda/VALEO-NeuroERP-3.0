@@ -234,6 +234,69 @@ def _is_structural_coproduct(name: str, futterart: str) -> bool:
     return False
 
 
+# Nass-Saftfutter / CoP: LP nutzt eine **kg-TM/d-Summenplanke** (weich/hart unten).
+# DLG Information 01|2025 Kap. 1.1/8.4/Tab. 14: Zuordnung zu Konzentraten,
+# dichtebezogene FIKH/pabKH-Logik; keine tabellierte Tagesmenge „Saftfutter gesamt“.
+# Ergaenzende **Quellenkette (HTML)** inkl. komponentenspezifischer %-TM-Studienlagen:
+_JUICE_WET_CAP_REFERENCES_HTML = """
+<ul>
+<li>
+<a href="https://www.dlg.org/mediacenter/dlg-merkblaetter/dlg-merkblatt-504-leitfaden-zur-proteinbewertung-und-versorgung-von-milchkuehen" target="_blank">DLG-Merkblatt 504 – Proteinbewertung und Versorgung von Milchkühen</a>.
+Wichtig: Saftfuttermittel werden bei der Rationsberechnung den Konzentratfuttermitteln zugerechnet.
+</li>
+<li>
+<a href="https://www.kws.com/de/de/beratung/fuetterung/fuetterungs-ratgeber/bereich-ration.html" target="_blank">KWS Fütterungsratgeber – Futterration Milchkuh</a>:
+optimaler TM-Gehalt der TMR am Trog 35–45 % TM; nasse Rationen unter 35 % TM können die TM-Aufnahme senken und die Strukturwirksamkeit verschlechtern.
+</li>
+<li>
+<a href="https://www.sciencedirect.com/science/article/pii/S0022030203738880" target="_blank">Journal of Dairy Science – Wet Brewers’ Grain bei Milchkühen</a>:
+Versuch mit 15 % Biertreber in der Rations-TM; Leistung und Futteraufnahme waren vergleichbar.
+</li>
+<li>
+<a href="https://www.ncbi.nlm.nih.gov/books/NBK600591/" target="_blank">NASEM / NCBI Bookshelf – Nutrient Requirements of Dairy Cattle: By-Product Feedstuffs</a>:
+Pressschnitzel/Beet pulp wurden in Studien bis 24 % der Rations-TM eingesetzt, ohne Milchleistung negativ zu beeinflussen.
+</li>
+<li>
+<a href="https://www.agproud.com/articles/26871-1808-pd-maximizing-dry-matter-intake-when-using-a-tmr" target="_blank">Ag Proud / Progressive Dairy – TMR moisture and dry matter intake</a>:
+günstiger Feuchtebereich 35–50 % Wasser; über 50 % Feuchte aus fermentierten Futtermitteln kann die TM-Aufnahme sinken.
+</li>
+</ul>
+<p><strong>Fazit:</strong> Eine harte pauschale Obergrenze „Saftfutter max. x % TM“ findet man selten.
+Belastbar ist: TMR nicht zu nass halten, Struktur sichern, und feuchte Nebenprodukte eher komponentenspezifisch begrenzen —
+z. B. Biertreber ca. 15 % TM, Pressschnitzel etwa bis 24 % TM als Studien-/Praxisbereich.</p>
+""".strip()
+
+_JUICE_WET_CAP_SOFT_KG_DM = 2.0
+_JUICE_WET_CAP_HARD_KG_DM = 3.0
+
+
+def _feed_counts_toward_saftfutter_wet_cap(feed: Dict[str, Any]) -> bool:
+    """Position zaehlt zur Summe Saftfutter/nasse CoP (DLG 01|2025 Kap. 1.1).
+
+    Ausgeschlossen: Weide/Grassilage/Gras-Heu (strukturelles Grobfutter),
+    Mineralien/Zusatzstoffe. Literaturlinks: siehe ``_JUICE_WET_CAP_REFERENCES_HTML``.
+    """
+    name_l = (feed.get("name") or "").lower()
+    group_l = (feed.get("group") or "").lower()
+    fa_l = (feed.get("futterart") or "").lower()
+    if "mineral" in group_l or "mineral" in name_l or "zusatzstoff" in fa_l:
+        return False
+    gk = _grass_feed_kind(feed)
+    if gk in ("pasture", "grass_silage", "grass_hay"):
+        return False
+    if "saftfutter" in group_l or "saftfutter" in fa_l:
+        return True
+    if bool(feed.get("structural_coproduct")):
+        return True
+    keywords = (
+        "schlempe", "treber", "trester", "pülpe", "pulpe", "puelpe",
+        "pressschnitzel", "pressschlempe", "melasse", "molke",
+        "biertreber", "dünnschlempe", "duennschlempe", "blattsilage",
+        "rübenklein", "ruebenklein", "kleinteile", "extraktionsschrot",
+    )
+    return any(k in name_l for k in keywords)
+
+
 # ---------------------------------------------------------------------------
 # Gras-/Silage-/Heu-Klassifikation nach TM-Gehalt (fachlich korrekt).
 # ---------------------------------------------------------------------------
@@ -1418,6 +1481,27 @@ def _portfolio_has_pasture(feeds: Optional[List[Dict[str, Any]]]) -> bool:
     return False
 
 
+def _feeds_for_fs_resolve_after_solve(
+    feeds: List[Dict[str, Any]],
+    amounts: List[float],
+) -> List[Dict[str, Any]]:
+    """Kopiert Feeds mit max_kg = Ist-Menge (kg TM/d) fuer FS-Aufloesung.
+
+    Damit greift die Auto-Eskalation TMR -> PMR_pasture nur, wenn die
+    optimale Ration Weide tatsaechlich > 0 kg TM/d enthaelt (nicht nur,
+    wenn Weide im Katalog mit Kapazitaet steht).
+    """
+    if not feeds or len(amounts) != len(feeds):
+        return feeds
+    out: List[Dict[str, Any]] = []
+    for f, a in zip(feeds, amounts):
+        amt = max(0.0, float(a or 0.0))
+        ff = dict(f)
+        ff["max_kg"] = amt if amt > 1e-6 else 0.0
+        out.append(ff)
+    return out
+
+
 def _resolve_feeding_system_config(
     raw: Optional[Any],
     profile: Optional[Dict[str, Any]] = None,
@@ -1633,6 +1717,9 @@ def _run_lp(
     """
     Minimiere Futterkosten (€/d) via scipy.optimize.linprog (LP, HiGHS-Solver).
 
+    Ablauf: Welfare-Stage-1, danach Kosten-Stage-2 inkl. optionaler Policy-
+    und Konzentrat-Tagesmax-Slacks (empfohlenes Limit weich, 1,5x weiterhin hart).
+
     Nebenbedingungen nach GfE 2023 / DLG 01|2023 / GfE-Workshop 2023:
       ME   ≥ Bedarf                           [GfE 2023]
       sidP ≥ Bedarf                           [GfE 2023]
@@ -1644,6 +1731,8 @@ def _run_lp(
       Ca, P, Na, Mg ≥ Minimum
       DMI ≥ Minimum, DMI ≤ Maximum
     """
+    conc_max_lp_slack_kg_out: Optional[float] = None
+    conc_max_lp_slack_penalty_out: Optional[float] = None
     from scipy.optimize import linprog  # type: ignore[import]
 
     n = len(feeds)
@@ -1858,18 +1947,13 @@ def _run_lp(
     k_per_kg = [f.get("k", 0.0) for f in feeds]
     _leq(k_per_kg, k_max)
 
-    # Saftfutter-Gruppengrenze: max. 6 kg TM/d als Nassnebenprodukte (gesamt)
-    # Verhindert: Labmagenverlagerung, peNDF-Absturz, übermäßige Feuchtfutter-Dominanz.
-    # Grundfutter-Saftfutter (Biertreber, Schlempe, Kartoffelpülpe etc.) ist forage=False
-    # bei is_forage=False und group "Grundfutter/Saftfutter" → Saftfutter-Gruppe
-    saftfutter_mask = [
-        1.0 if (
-            "saftfutter" in f.get("group", "").lower() or
-            "saftfutter" in f.get("futterart", "").lower()
-        ) else 0.0
+    # Saftfutter / nasse CoP: harte Summen-Obergrenze kg TM/d (DLG 01|2025
+    # Kap. 1.1, 8.4, Tab. 14 – siehe Konstanten-Kommentar oben).
+    juice_wet_cap_mask = [
+        1.0 if _feed_counts_toward_saftfutter_wet_cap(f) else 0.0
         for f in feeds
     ]
-    _leq(saftfutter_mask, 6.0)
+    _leq(juice_wet_cap_mask, _JUICE_WET_CAP_HARD_KG_DM)
 
     # Frischgras/Weide nur in TMR strikt begrenzen; PMR/Weidesysteme duerfen das gezielt nutzen.
     # Klassifikation TM-basiert: echte Weide = TM < 30 %. Grassilage (konserviert,
@@ -1917,11 +2001,11 @@ def _run_lp(
     #     - Einzelgabe-Grenze: UI-Validierung im Futterabruf-Tab
     #       (Slice 2), nicht LP-Ebene.
     _conc_max_per_day = float(_fs_cfg.get("concentrate_max_per_day_kg") or 0.0)
+    conc_mask = [
+        1.0 if block_labels[i] == "concentrate_staged_block" else 0.0
+        for i in range(n)
+    ]
     if _conc_max_per_day > 0 and _has_staged_concentrate:
-        conc_mask = [
-            1.0 if block_labels[i] == "concentrate_staged_block" else 0.0
-            for i in range(n)
-        ]
         _leq(conc_mask, _CONC_HARD_SAFETY_FACTOR * _conc_max_per_day)
 
     bounds = [(f["min_kg"], f["max_kg"]) for f in feeds]
@@ -2085,10 +2169,54 @@ def _run_lp(
             A_stage2.append(_tmr_only(cp_ceil_coeffs))
             b_stage2.append(0.0)
 
-            # Standard-Stage-2-Cost-Solve (ohne Policy-Slacks)
-            cost_result = _solve(prices, A_stage2, b_stage2)
-            if cost_result.status == 0:
-                result = cost_result
+            # Stage-2: empfohlenes Konzentrat-Tagesmax weich (Slack s >= 0):
+            #   sum(conc_mask * x) <= empfohlen + s,  Ziel min Kosten + w*s.
+            # Hartes 1,5x-Sicherheitsnetz bleibt in A_stage2 erhalten.
+            policy_relax = str((runtime_options or {}).get("relaxation_policy", "standard"))
+            _conc_slack_halfwidth = 1.5
+            _conc_relax_f = _RELAXATION_FACTORS.get(policy_relax, 1.0)
+            w_conc_slack = (
+                _PENALTY_BASE_COST
+                * _PENALTY_CLASS_WEIGHTS.get("B", 3.0)
+                * _conc_relax_f
+                / _conc_slack_halfwidth
+            )
+            conc_slack_needed = _conc_max_per_day > 0 and _has_staged_concentrate
+            n_cs = 1 if conc_slack_needed else 0
+            A_s2 = [list(row) + [0.0] * n_cs for row in A_stage2]
+            b_s2 = list(b_stage2)
+            if conc_slack_needed:
+                A_s2.append(list(conc_mask) + [-1.0])
+                b_s2.append(_conc_max_per_day)
+            c_s2 = list(prices) + ([w_conc_slack] if conc_slack_needed else [])
+            bounds_s2 = list(bounds) + ([(0.0, None)] if conc_slack_needed else [])
+
+            try:
+                cost_result = linprog(
+                    c=c_s2,
+                    A_ub=A_s2,
+                    b_ub=b_s2,
+                    bounds=bounds_s2,
+                    method="highs",
+                    options={"disp": False},
+                )
+            except Exception:  # pragma: no cover
+                cost_result = None
+
+            if cost_result is not None and cost_result.status == 0:
+                class _Stage2Trim:
+                    pass
+                _s2r = _Stage2Trim()
+                _s2r.x = list(cost_result.x[:n])
+                _s2r.fun = float(sum(prices[i] * cost_result.x[i] for i in range(n)))
+                _s2r.status = 0
+                _s2r.message = getattr(cost_result, "message", "")
+                result = _s2r
+                if conc_slack_needed:
+                    c_sl = max(0.0, float(cost_result.x[n]))
+                    if c_sl > 1e-6:
+                        conc_max_lp_slack_kg_out = round(c_sl, 4)
+                        conc_max_lp_slack_penalty_out = round(w_conc_slack * c_sl, 4)
 
             # DLG-01|2025-Slack-Erweiterung (nur wenn Policy-Profil Targets liefert).
             # Ziel: Policy-Baender werden nicht nur post-solve bewertet, sondern
@@ -2096,24 +2224,25 @@ def _run_lp(
             # policy-skaliert). Falls der erweiterte Solve scheitert, bleibt
             # cost_result aus dem Standard-Solve bestehen.
             policy_profile_key = (runtime_options or {}).get("policy_profile")
-            policy_relax = (runtime_options or {}).get("relaxation_policy", "standard")
             policy_targets = _policy_profile_targets(policy_profile_key)
             if policy_targets:
                 dmi_typ = 0.5 * (float(req.dmi_min_kg) + float(req.dmi_max_kg))
                 ext = _build_policy_band_lp_extension(
                     targets=policy_targets,
                     feeds=feeds,
-                    relaxation_policy=str(policy_relax),
+                    relaxation_policy=policy_relax,
                     dmi_typ_kg=dmi_typ,
                 )
-                n_slacks = int(ext.get("n_slacks") or 0)
-                if n_slacks > 0:
-                    # Erweitere bestehende Stage-2-Matrix um Nullspalten fuer Slacks
-                    A_ext = [list(row) + [0.0] * n_slacks for row in A_stage2]
-                    A_ext.extend(ext["rows"])
-                    b_ext = list(b_stage2) + list(ext["rhs"])
-                    c_ext = list(prices) + list(ext["slack_costs"])
-                    bounds_ext = list(bounds) + list(ext["slack_bounds"])
+                n_pol = int(ext.get("n_slacks") or 0)
+                if n_pol > 0:
+                    A_ext = [list(row) + [0.0] * n_pol for row in A_s2]
+                    for prow in ext["rows"]:
+                        feed_part = prow[:n]
+                        pol_part = prow[n:]
+                        A_ext.append(list(feed_part) + [0.0] * n_cs + list(pol_part))
+                    b_ext = list(b_s2) + list(ext["rhs"])
+                    c_ext = list(c_s2) + list(ext["slack_costs"])
+                    bounds_ext = list(bounds_s2) + list(ext["slack_bounds"])
                     try:
                         ext_result = linprog(
                             c=c_ext,
@@ -2126,12 +2255,29 @@ def _run_lp(
                     except Exception:  # pragma: no cover - Solver-Fehler fallback
                         ext_result = None
                     if ext_result is not None and ext_result.status == 0:
-                        # Slack-Werte fuer Response sammeln
-                        slack_values = [float(v) for v in ext_result.x[n - len(ext_result.x) + n_slacks:]]
-                        # sauberer: letzten n_slacks nehmen
-                        slack_values = [float(v) for v in ext_result.x[-n_slacks:]]
+                        slack_values = [float(v) for v in ext_result.x[-n_pol:]]
                         policy_lp_slacks: List[Dict[str, Any]] = []
                         total_slack_penalty = 0.0
+                        if n_cs > 0:
+                            c_sl = max(0.0, float(ext_result.x[n]))
+                            c_pen = w_conc_slack * c_sl
+                            total_slack_penalty += c_pen
+                            if c_sl > 1e-6:
+                                policy_lp_slacks.append({
+                                    "name": "Konzentrat-Tagesmax (empfohlen, LP-Slack)",
+                                    "unit": "kg TM/d",
+                                    "direction": "max",
+                                    "band_min": None,
+                                    "band_max": round(float(_conc_max_per_day), 3),
+                                    "halfwidth": round(_conc_slack_halfwidth, 3),
+                                    "weight": round(float(w_conc_slack), 6),
+                                    "slack_value": round(c_sl, 4),
+                                    "penalty_cost": round(c_pen, 4),
+                                    "active": True,
+                                    "source": "stage2_concentrate_slack",
+                                })
+                                conc_max_lp_slack_kg_out = round(c_sl, 4)
+                                conc_max_lp_slack_penalty_out = round(c_pen, 4)
                         for meta, val in zip(ext["slack_meta"], slack_values):
                             val = max(0.0, val)
                             penalty = float(meta["weight"]) * val
@@ -2148,10 +2294,7 @@ def _run_lp(
                                 "penalty_cost": round(penalty, 4),
                                 "active": val > 1e-6,
                             })
-                        # Nur Feed-Anteile der Loesung uebernehmen (Slacks werden verworfen)
                         feed_x = list(ext_result.x[:n])
-                        # Rebuild ein "result-aehnliches" Objekt: wir brauchen
-                        # .x / .fun / .status fuer die weitere Verarbeitung.
                         class _ExtResult:
                             pass
                         _r = _ExtResult()
@@ -2170,6 +2313,8 @@ def _run_lp(
                             "_policy_lp_slack_objective_mode": "stage2_cost_plus_policy_slack",
                             "_feeding_system_config": _fs_cfg,
                             "_block_labels": list(block_labels),
+                            "_concentrate_max_lp_slack_kg": conc_max_lp_slack_kg_out,
+                            "_concentrate_max_lp_slack_penalty": conc_max_lp_slack_penalty_out,
                         }
 
     return {
@@ -2179,7 +2324,18 @@ def _run_lp(
         "_infeasibility_hint": infeasibility_hint,
         "_feeding_system_config": _fs_cfg,
         "_block_labels": list(block_labels),
+        "_concentrate_max_lp_slack_kg": conc_max_lp_slack_kg_out,
+        "_concentrate_max_lp_slack_penalty": conc_max_lp_slack_penalty_out,
     }
+
+
+def _suggestions_already_cover_hay_straw(suggestions: List[Dict[str, Any]]) -> bool:
+    """True, wenn bereits ein Vorschlag Heu/Stroh/Raufutter implizit abdeckt."""
+    for s in suggestions:
+        blob = f"{s.get('feed', '')} {s.get('action', '')}".lower()
+        if any(k in blob for k in ("stroh", "heu", "raufutter", "grasheu")):
+            return True
+    return False
 
 
 def _diagnose_infeasibility(
@@ -2223,6 +2379,27 @@ def _diagnose_infeasibility(
             "sidp": "190 / 250 g/kg TM",
             "action": "Proteinergänzer bis 2,5 kg TM/d zufüttern.",
         })
+
+    # Rohfaser-Deckel: gewählte max_kg reichen selbst bei voller Auslastung nicht
+    # für das aNDFom-Minimum (harte LP-Nebenbedingung) -> Heu/Stroh als
+    # nachvollziehbare Portfolio-Erweiterung / Argumentationshilfe.
+    if max_ndf + 1e-6 < req.ndf_min_g:
+        gaps.append(
+            f"aNDFom-Kapazität {max_ndf:.0f} g/d < Mindestbedarf {req.ndf_min_g:.0f} g/d"
+        )
+        if not _suggestions_already_cover_hay_straw(suggestions):
+            suggestions.append({
+                "feed": "Wiesenheu / Raufutter oder Weizenstroh",
+                "ndf": "Heu typ. 450–650 g/kg TM; Stroh oft >750 g/kg TM (DLG-Tabellen)",
+                "action": (
+                    "Futtermittelliste um strukturreiches Grobfutter erweitern, z. B. "
+                    "0,5–3 kg TM/d Heu oder 0,3–1,5 kg TM/d Stroh. Stroh verdünnt stark "
+                    "Energie und Protein – ME/sidP der Gesamtration neu bewerten. "
+                    "Hinweis: Nur sinnvoll, wenn die Infeasibility mit zu geringer "
+                    "Rohfaser-/Strukturdeckung im gewählten Portfolio zusammenhängt."
+                ),
+                "rationale": "infeasible_ndf_capacity",
+            })
 
     cp_density_current = (
         sum(f["cp"] * f["max_kg"] for f in feeds) / max_dmi if max_dmi > 0 else 0
@@ -2278,6 +2455,11 @@ def _diagnose_infeasibility(
             "action": "Die aktuelle Weide-/PMR-Auswahl liefert je MJ Energie zu wenig Magnesium; Mg gezielt separat ergaenzen.",
         })
 
+    n_forage_pos = sum(
+        1 for f in feeds if f.get("forage") and float(f.get("max_kg") or 0.0) > 0.0
+    )
+    fiber_density_cap_g_kg = (max_ndf / max_dmi) if max_dmi > 1e-6 else 0.0
+
     if not gaps:
         gaps.append("Unbekannte Infeasibility – möglicherweise widersprüchliche Futter-Mengengrenzen.")
         suggestions.append({
@@ -2287,6 +2469,22 @@ def _diagnose_infeasibility(
                 "und Einzelkomponenten-Grenzen prüfen."
             ),
         })
+        # Argumentationshilfe nur bei plausibel grobfutter-/strukturarmem Set:
+        # wenig echtes Grobfutter im Portfolio oder geringe maximale Faserdichte.
+        if (
+            not _suggestions_already_cover_hay_straw(suggestions)
+            and (n_forage_pos <= 1 or fiber_density_cap_g_kg < 300.0)
+        ):
+            suggestions.append({
+                "feed": "Heu oder Stroh (Struktur/Rohfaser, nur bei passendem Kontext)",
+                "action": (
+                    "Wenn die Nicht-Lösbarkeit mit knapper Struktur, zu wenig "
+                    "wählbarem Grobfutter oder mit Rohfaser-/TMR-Dichtezielen zusammenhängen "
+                    "könnte: zusätzlich 0,5–2 kg TM/d Heu bzw. 0,3–1 kg TM/d Stroh ins "
+                    "Portfolio aufnehmen und Grenzen prüfen (Verdünnung von Energie/Protein)."
+                ),
+                "rationale": "infeasible_generic_structure_argument",
+            })
 
     # FAN-MODE-002: Infeasibility-Reason kategorisieren, damit Bruder-Regression (§10.1)
     # keine pauschalen infeasibles mehr toleriert, sondern einen expliziten Grund erwartet.
@@ -2302,6 +2500,8 @@ def _diagnose_infeasibility(
         reason = "protein_deficit"
     elif "xl" in text:
         reason = "fat_density"
+    elif "andfom-kapaz" in text:
+        reason = "ndf_capacity"
     elif "cp" in text:
         reason = "cp_density"
     elif "calcium" in text:
@@ -2327,37 +2527,42 @@ def _f(v: Any) -> float:
 def _kl_milk_from_me_density(
     me_density_mj_per_kg_tm: Optional[float],
     feeding_system: Optional[str] = None,
+    *,
+    tmr_me_density_mj_per_kg_tm: Optional[float] = None,
+    fani: Optional[float] = None,
 ) -> float:
     """GfE 2001 §5: k_l (ME->NEL-Verwertung fuer Laktation) = 0,463 + 0,24*q.
 
     q = ME/GE mit GE ~ 18,4 MJ/kg TM (grobe Annahme fuer Wiederkaeuer-
     Mischrationen). Das Resultat wird auf den Arbeitsbereich 0,58-0,64
-    begrenzt, da ausserhalb dieses q-Bereiches die Linearisierung nicht
-    mehr zuverlaessig gilt.
+    begrenzt.
 
-    PMR+Weide-Spezialfall (User-Praxisabstimmung 2026-04-21):
-        Bei Weidefuetterung wird nicht als Mischration gefressen - Weide,
-        TMR-Block und Lockfutter werden gestaffelt ueber den Tag
-        aufgenommen. Eine "gemittelte ME-Dichte der Ration" existiert in
-        diesem Fall physiologisch nicht. Wir setzen k_l deshalb fix auf
-        0,60, unabhaengig davon welche Zahl fuer `me_density_mj_per_kg_tm`
-        uebergeben wird.
+    PMR+Weide / PMR_pasture:
+        Die Weide wird nicht im Mischwagen gefressen; die **physikalische**
+        Mischration ist der **TMR-Block** (Mischwagen). Wenn
+        ``tmr_me_density_mj_per_kg_tm`` aus der optimalen Loesung bekannt
+        ist, wird k_l daraus wie bei TMR berechnet (nicht aus Weide-ME-
+        Dichte). Ohne TMR-Anteil (>0 kg TM) bleibt der konservative
+        Fallback 0,60.
 
-    WICHTIG - Spec-Note zur Einordnung (User-Review 2026-04-23, §3):
-        Der fixe Wert 0,60 ist ein bewusstes SOFTWARE-FALLBACK und kein
-        fachliches Endmodell. GfE-2023 / DLG 01|25 betonen die FANi-
-        Abhaengigkeit der Nutzbarkeit von ME und die dynamische Passage.
-        Die aktuelle Fassung ist eine robuste Zwischennaeherung, die
-        einen optimistischen Bias bei Weide-Dichten vermeidet. Ein FANi-
-        bezogenes k_l-Modell (dynamisch, block- und zeitbezogen) ist als
-        Folgeslice vorgesehen und sollte diesen Fallback spaeter ersetzen.
+        Optional: ``fani`` (Futteraufnahmeintensitaet) verschiebt k_l um
+        0,01 je Einheit Abweichung von FANi=3,0 (GfE 2023: Nutzbarkeit/
+        Passage grob), erneut auf 0,58-0,64 begrenzt.
 
-    Wenn keine ME-Dichte uebergeben wird, liefert die Funktion ebenfalls
-    den konservativen GfE-Default 0,60 zurueck.
+    Ohne gueltige ME-Dichte (und ohne PMR-Weide-TMR-Fall) -> 0,60.
     """
-    # PMR+Weide: fix 0,60 erzwingen, egal was die Dichte sagt
     sys_norm = (feeding_system or "").strip().upper()
-    if sys_norm in {"PMR_PASTURE", "PMRPASTURE", "PMR+WEIDE"}:
+    is_pmr_pasture = sys_norm in {"PMR_PASTURE", "PMRPASTURE", "PMR+WEIDE"}
+
+    if is_pmr_pasture:
+        tmr_d = tmr_me_density_mj_per_kg_tm
+        if tmr_d is not None and tmr_d > 0:
+            q = tmr_d / 18.4
+            kl = 0.463 + 0.24 * q
+            kl = max(0.58, min(0.64, kl))
+            if fani is not None and fani > 0:
+                kl = max(0.58, min(0.64, kl + 0.01 * (float(fani) - 3.0)))
+            return kl
         return 0.60
 
     if me_density_mj_per_kg_tm is None or me_density_mj_per_kg_tm <= 0:
@@ -2371,6 +2576,9 @@ def _milk_requirement_factors(
     profile: Dict[str, Any],
     me_density_mj_per_kg_tm: Optional[float] = None,
     feeding_system: Optional[str] = None,
+    *,
+    tmr_me_density_mj_per_kg_tm: Optional[float] = None,
+    fani: Optional[float] = None,
 ) -> Tuple[float, float, float, float]:
     """Return maintenance ME plus milk coefficients for ME and sidP.
 
@@ -2381,11 +2589,9 @@ def _milk_requirement_factors(
     Weide-Aktivitaetszuschlag: bei feeding_type == "PMR+Weide" wird der
     ME-Erhaltungsbedarf um +15 % erhoeht (DLG-Merkblatt 417 / GfE 2001).
 
-    k_l dichte-abhaengig (TMR / PMR_stall): `me_density_mj_per_kg_tm`
-    passt den ME->NEL-Faktor fuer Milch an die tatsaechliche ME-Dichte der
-    Ration an. Bei PMR+Weide wird k_l unabhaengig davon auf 0,60 gesetzt,
-    weil Weide nicht als Mischration gefressen wird (gestaffelte Fress-
-    phasen).
+    k_l: bei TMR/PMR_stall aus ``me_density_mj_per_kg_tm``; bei PMR+Weide/
+    PMR_pasture aus TMR-Block-Dichte (``tmr_me_density_mj_per_kg_tm``) und
+    optional ``fani`` (siehe ``_kl_milk_from_me_density``).
     """
     bw = float(profile.get("body_weight_kg") or 650)
     fat_pct = float(profile.get("milk_fat_pct") or 4.0)
@@ -2401,7 +2607,12 @@ def _milk_requirement_factors(
     if fs_for_kl is None and feeding_type == "PMR+Weide":
         fs_for_kl = "PMR_pasture"
 
-    k_l = _kl_milk_from_me_density(me_density_mj_per_kg_tm, fs_for_kl)
+    k_l = _kl_milk_from_me_density(
+        me_density_mj_per_kg_tm,
+        fs_for_kl,
+        tmr_me_density_mj_per_kg_tm=tmr_me_density_mj_per_kg_tm,
+        fani=fani,
+    )
 
     me_maint = (0.308 * bw75 * pasture_factor) / 0.73
     nel_per_kg_milk = 0.38 * fat_pct + 0.21 * prot_pct + 0.95
@@ -2417,9 +2628,16 @@ def _milk_from_supply(
     profile: Dict[str, Any],
     me_density_mj_per_kg_tm: Optional[float] = None,
     feeding_system: Optional[str] = None,
+    *,
+    tmr_me_density_mj_per_kg_tm: Optional[float] = None,
+    fani: Optional[float] = None,
 ) -> Dict[str, float]:
     me_maint, me_per_kg_milk, sidp_maint, sidp_per_kg_milk = _milk_requirement_factors(
-        profile, me_density_mj_per_kg_tm, feeding_system
+        profile,
+        me_density_mj_per_kg_tm,
+        feeding_system,
+        tmr_me_density_mj_per_kg_tm=tmr_me_density_mj_per_kg_tm,
+        fani=fani,
     )
     milk_from_energy = max(0.0, (me_sup - me_maint) / me_per_kg_milk) if me_per_kg_milk > 0 else 0.0
     milk_from_protein = max(0.0, (sidp_sup - sidp_maint) / sidp_per_kg_milk) if sidp_per_kg_milk > 0 else 0.0
@@ -2492,6 +2710,9 @@ _CONSTRAINT_CLASSIFICATION: Dict[str, Tuple[str, Optional[str], str, float, str]
     # selbst wird weich bewertet. Klasse B (Struktur-/Komfort-nahe), Halb-
     # breite 1,5 kg TM/d, Richtung "max" (Ueberschreitung = Verletzung).
     "Konzentrat-Tagesmax (kg TM/d)": ("weich", "B",   "kg TM/d",  1.5,     "max"),
+    # Saftfutter / nasse CoP: weiche Leitplanke (Ziel), vgl. Konstanten
+    # _JUICE_WET_CAP_SOFT_KG_DM / LP-harte Deckelung separat.
+    "Saftfutter/nasse CoP (kg TM/d)": ("weich", "B", "kg TM/d", 0.5, "max"),
 }
 
 
@@ -3026,7 +3247,8 @@ def _build_response(
             } if hint else None,
         }
 
-    amounts = [_f(v) for v in result.x]
+    n_feeds = len(feeds)
+    amounts = [_f(v) for v in result.x[:n_feeds]]
     total_cost = sum(amounts[i] * feeds[i]["price"] for i in range(len(feeds)))
     total_dmi = sum(amounts)
 
@@ -3147,12 +3369,43 @@ def _build_response(
     displacement_factor = _concentrate_displacement_factor(feeding_type, concentrate_kg)
     forage_displacement_dmi = concentrate_kg * displacement_factor
     # ME-Dichte [MJ ME/kg TM] je Analyseebene fuer dichte-abhaengige k_l-Wahl
-    # (GfE 2001 §5: k_l = 0,463 + 0,24*q). Ohne Dichte verwendet
-    # _milk_from_supply den konservativen Default k_l = 0,60.
+    # (GfE 2001 §5: k_l = 0,463 + 0,24*q). PMR+Weide: k_l aus TMR-Block-Dichte
+    # + optional FANi (siehe _kl_milk_from_me_density).
     forage_me_density = forage_me_sup / forage_kg if forage_kg > 0 else None
     total_me_density = me_sup / total_dmi if total_dmi > 0 else None
-    forage_only_milk = _milk_from_supply(forage_me_sup, forage_sidp_sup, profile, forage_me_density)
-    supplemented_milk = _milk_from_supply(me_sup, sidp_sup, profile, total_me_density)
+    _fs_sys_for_kl = str(_fs_cfg_resp.get("system") or "").strip().upper()
+    _pmr_pasture_kl = _fs_sys_for_kl in {"PMR_PASTURE", "PMRPASTURE"} or (
+        feeding_type == "PMR+Weide" and pasture_pmr
+    )
+    tmr_me_density_for_kl: Optional[float] = None
+    if _block_labels_resp and len(_block_labels_resp) == len(feeds) and _pmr_pasture_kl:
+        _tmr_kg_sum = sum(
+            amounts[i] for i in range(len(feeds)) if _block_labels_resp[i] == "tmr_block"
+        )
+        if _tmr_kg_sum > 1e-6:
+            _tmr_me_sum = sum(
+                amounts[i] * feeds[i]["me"]
+                for i in range(len(feeds))
+                if _block_labels_resp[i] == "tmr_block"
+            )
+            tmr_me_density_for_kl = _tmr_me_sum / _tmr_kg_sum
+    _fani_for_kl: Optional[float] = None
+    if fan_final is not None and _pmr_pasture_kl:
+        try:
+            _fani_for_kl = float(fan_final)
+        except (TypeError, ValueError):
+            _fani_for_kl = None
+    _milk_kl_kw: Dict[str, Any] = {}
+    if _pmr_pasture_kl:
+        _milk_kl_kw["tmr_me_density_mj_per_kg_tm"] = tmr_me_density_for_kl
+        if _fani_for_kl is not None:
+            _milk_kl_kw["fani"] = _fani_for_kl
+    forage_only_milk = _milk_from_supply(
+        forage_me_sup, forage_sidp_sup, profile, forage_me_density, **_milk_kl_kw
+    )
+    supplemented_milk = _milk_from_supply(
+        me_sup, sidp_sup, profile, total_me_density, **_milk_kl_kw
+    )
 
     # --- Weide-/Grobfutter-spezifische Leistungs- und Risiko-Auswertung (DLG 417/443) ---
     # Wichtig: DLG-Futterwerttabellen fuehren Futterwerte unter Namen wie
@@ -3192,11 +3445,19 @@ def _build_response(
     )
 
     pasture_milk = (
-        _milk_from_supply(pasture_me_sup, pasture_sidp_sup, profile, pasture_me_density)
+        _milk_from_supply(
+            pasture_me_sup, pasture_sidp_sup, profile, pasture_me_density, **_milk_kl_kw
+        )
         if pasture_kg > 0 else None
     )
     grass_silage_milk = (
-        _milk_from_supply(grass_silage_me_sup, grass_silage_sidp_sup, profile, grass_silage_me_density)
+        _milk_from_supply(
+            grass_silage_me_sup,
+            grass_silage_sidp_sup,
+            profile,
+            grass_silage_me_density,
+            **_milk_kl_kw,
+        )
         if grass_silage_kg > 0 else None
     )
     pasture_plus_grass_milk = (
@@ -3205,6 +3466,7 @@ def _build_response(
             pasture_sidp_sup + grass_silage_sidp_sup,
             profile,
             pasture_plus_grass_me_density,
+            **_milk_kl_kw,
         )
         if pasture_plus_grass_kg > 0 else None
     )
@@ -3456,6 +3718,18 @@ def _build_response(
             f"RMD {rmd_ration:.2f} g N/kg TM – Pansen-N-Mangel möglich; "
             f"MXP-Synthese eingeschränkt."
         )
+    _juice_wet_sum = sum(
+        amounts[i]
+        for i in range(len(feeds))
+        if _feed_counts_toward_saftfutter_wet_cap(feeds[i])
+    )
+    if _juice_wet_sum > _JUICE_WET_CAP_SOFT_KG_DM + 1e-6:
+        warnings.append(
+            f"Saftfutter und nasse CoP summiert {_juice_wet_sum:.2f} kg TM/d – über "
+            f"der konservativen Leitplanke {_JUICE_WET_CAP_SOFT_KG_DM:.1f} kg TM/d "
+            f"(DLG 01|2025 Kap. 1.1/8.4; LP-hart bis {_JUICE_WET_CAP_HARD_KG_DM:.1f} kg TM/d). "
+            f"SARA-/Klauenrisiko beobachten."
+        )
     # ME: Toleranz bis +10%; +10–12% gelb (LP-Ceiling bei +12%); > +12% blockiert vom LP
     me_overshoot_pct = (me_sup / req.me_mj - 1.0) * 100 if req.me_mj > 0 else 0.0
     if me_overshoot_pct > 12:
@@ -3611,6 +3885,20 @@ def _build_response(
             "target": 4.0,  # Zielobergrenze; ab > 6 Grastetanie-Risiko
             "unit": "",
         },
+        {
+            "name": "Saftfutter/nasse CoP (kg TM/d)",
+            "actual": round(
+                sum(
+                    amounts[i]
+                    for i in range(len(feeds))
+                    if _feed_counts_toward_saftfutter_wet_cap(feeds[i])
+                ),
+                3,
+            ),
+            "target": _JUICE_WET_CAP_SOFT_KG_DM,
+            "unit": "kg TM/d",
+            "source": "dlg_01_2025_juice_wet_cap",
+        },
     ]
 
     # Slice 1e-Nachschaerfung §4: Konzentrat-Tagesmax als weicher Constraint.
@@ -3702,6 +3990,7 @@ def _build_response(
             "concentrate_max_per_day_kg": _fs_cfg_resp.get("concentrate_max_per_day_kg"),
             "treat_as_primiparous": _fs_cfg_resp.get("treat_as_primiparous", False),
             "default_concentrate_recipe": _fs_cfg_resp.get("default_concentrate_recipe"),
+            "auto_promoted_from_tmr": bool(_fs_cfg_resp.get("auto_promoted_from_tmr")),
         },
         "tmr_block": _block_summary("tmr_block"),
         "pasture_block": _block_summary("pasture_block"),
@@ -3771,6 +4060,8 @@ def _build_response(
         "policy_profile_lp_slacks": lp_out.get("_policy_lp_slacks"),
         "policy_profile_lp_total_penalty": lp_out.get("_policy_lp_slack_total_penalty"),
         "policy_profile_lp_mode": lp_out.get("_policy_lp_slack_objective_mode"),
+        "concentrate_max_lp_slack_kg": lp_out.get("_concentrate_max_lp_slack_kg"),
+        "concentrate_max_lp_slack_penalty": lp_out.get("_concentrate_max_lp_slack_penalty"),
         "policy_overrides": policy_overrides,
         "relaxation_policy": relaxation_policy,
         "objective_strategy": objective_strategy,
@@ -3782,7 +4073,11 @@ def _build_response(
             "optimization_strategy": (
                 "stage1_balance_then_stage2_cost_plus_policy_slack"
                 if lp_out.get("_policy_lp_slack_objective_mode")
-                else "stage1_balance_then_stage2_cost"
+                else (
+                    "stage1_balance_then_stage2_cost_plus_concentrate_slack"
+                    if lp_out.get("_concentrate_max_lp_slack_kg")
+                    else "stage1_balance_then_stage2_cost"
+                )
             ),
             "objective_strategy": objective_strategy,
             "pasture_pmr_mode": pasture_pmr,
@@ -4368,7 +4663,9 @@ def _optimize_internal(
         # Keine FAN-Korrektur – reine Bewertung mit FAN1-Tabellenwerten.
         lp_out = _run_lp(req, feeds, profile, runtime_options=runtime_options)
         if lp_out["scipy_result"].status == 0:
-            fani_final = _fani_from_result([_f(v) for v in lp_out["scipy_result"].x], profile)
+            fani_final = _fani_from_result(
+                [_f(v) for v in lp_out["scipy_result"].x[: len(feeds)]], profile
+            )
         converged = True
         iterations.append({
             "i": 0, "fan_in": 1.0, "fan_out": fani_final or 1.0,
@@ -4380,7 +4677,9 @@ def _optimize_internal(
         adjusted = _apply_fan_effect(feeds, target_fani)
         lp_out = _run_lp(req, adjusted, profile, runtime_options=runtime_options)
         fani_out = (
-            _fani_from_result([_f(v) for v in lp_out["scipy_result"].x], profile)
+            _fani_from_result(
+                [_f(v) for v in lp_out["scipy_result"].x[: len(feeds)]], profile
+            )
             if lp_out["scipy_result"].status == 0 else target_fani
         )
         fani_final = target_fani  # bei reference ist das der ausgewiesene Wert
@@ -4411,7 +4710,7 @@ def _optimize_internal(
                 })
                 converged = False
                 break
-            amounts_i = [_f(v) for v in lp_out["scipy_result"].x]
+            amounts_i = [_f(v) for v in lp_out["scipy_result"].x[: len(feeds)]]
             fani_out = _fani_from_result(amounts_i, profile)
             delta = fani_out - fani_in
             iterations.append({
@@ -4464,6 +4763,24 @@ def _optimize_internal(
             seasonal=seasonal,
             buffer_min_kg=buffer_min_kg,
         )
+
+    # Feeding-System nach optimaler Ration neu aufloesen (Weide-Istmenge > 0
+    # kann TMR -> PMR_pasture ausloesen; Block-Labels folgen dem System).
+    if lp_out["scipy_result"].status == 0:
+        amounts_post = [_f(v) for v in lp_out["scipy_result"].x[: len(feeds)]]
+        raw_fs = (runtime_options or {}).get("feeding_system_config")
+        feeds_eff = _feeds_for_fs_resolve_after_solve(feeds, amounts_post)
+        fs_post = _resolve_feeding_system_config(raw_fs, profile, feeds=feeds_eff)
+        lp_out["_feeding_system_config"] = fs_post
+        _blk_ov = (runtime_options or {}).get("feed_block_overrides") or []
+        _post_buckets = _split_feeds_by_block(feeds, fs_post, _blk_ov)
+        _post_by_id: Dict[str, str] = {}
+        for blk_nm, blk_fd in _post_buckets.items():
+            for f in blk_fd:
+                _post_by_id[str(f.get("id") or id(f))] = blk_nm
+        lp_out["_block_labels"] = [
+            _post_by_id.get(str(f.get("id") or id(f)), "tmr_block") for f in feeds
+        ]
 
     return _build_response(lp_out, req, profile)
 
@@ -4768,6 +5085,53 @@ _POLICY_PROFILES = (
 #   ndf_kgdm_min:       Gesamt-aNDFom-Mindestdichte [g/kg TM]
 # ---------------------------------------------------------------------------
 _POLICY_PROFILE_TARGETS: Dict[str, Dict[str, Any]] = {
+    # Generische API-Profile: gleicher Referenzkorridor wie Mittellaktation (Tab. 14),
+    # bis der Client explizit eine Leistungsstufe setzt.
+    "tmr_standard": {
+        "me_kgdm_min": 6.60, "me_kgdm_max": 7.00,
+        "cp_kgdm_min": 140.0, "cp_kgdm_max": 160.0,
+        "sidp_kgdm_min": 90.0,
+        "pabkh_max": 200.0, "xl_kgdm_max": 38.0,
+        "forage_share_min_pct": 60.0,
+        "andfom_gf_cop_min": 220.0, "ndf_kgdm_min": 320.0,
+        "label": "TMR Standard (entspricht Tab. 14 Mittellaktation, DLG 01|2025)",
+    },
+    "pmr_standard": {
+        "me_kgdm_min": 6.60, "me_kgdm_max": 7.00,
+        "cp_kgdm_min": 140.0, "cp_kgdm_max": 160.0,
+        "sidp_kgdm_min": 90.0,
+        "pabkh_max": 200.0, "xl_kgdm_max": 38.0,
+        "forage_share_min_pct": 60.0,
+        "andfom_gf_cop_min": 220.0, "ndf_kgdm_min": 320.0,
+        "label": "PMR Standard (Stall; Referenz wie Tab. 14 Mittellaktation)",
+    },
+    "pmr_pasture_spring": {
+        "me_kgdm_min": 6.60, "me_kgdm_max": 7.00,
+        "cp_kgdm_min": 140.0, "cp_kgdm_max": 160.0,
+        "sidp_kgdm_min": 90.0,
+        "pabkh_max": 195.0, "xl_kgdm_max": 38.0,
+        "forage_share_min_pct": 58.0,
+        "andfom_gf_cop_min": 220.0, "ndf_kgdm_min": 320.0,
+        "label": "PMR+Weide Fruehjahr (junges Grün, Tab. 14 angepasst, konserv. pabKH)",
+    },
+    "pmr_pasture_summer": {
+        "me_kgdm_min": 6.60, "me_kgdm_max": 7.00,
+        "cp_kgdm_min": 140.0, "cp_kgdm_max": 160.0,
+        "sidp_kgdm_min": 90.0,
+        "pabkh_max": 200.0, "xl_kgdm_max": 38.0,
+        "forage_share_min_pct": 58.0,
+        "andfom_gf_cop_min": 220.0, "ndf_kgdm_min": 320.0,
+        "label": "PMR+Weide Sommer (Tab. 14 Mittellaktation, Weideanteil im PMR)",
+    },
+    "pmr_pasture_autumn": {
+        "me_kgdm_min": 6.30, "me_kgdm_max": 6.90,
+        "cp_kgdm_min": 135.0, "cp_kgdm_max": 155.0,
+        "sidp_kgdm_min": 85.0,
+        "pabkh_max": 185.0, "xl_kgdm_max": 36.0,
+        "forage_share_min_pct": 62.0,
+        "andfom_gf_cop_min": 225.0, "ndf_kgdm_min": 330.0,
+        "label": "PMR+Weide Herbst (nach Tab. 14 Altmelker verschoben, hoehere Faserziele)",
+    },
     "tmr_fresh_lactation": {
         "me_kgdm_min": 7.00, "me_kgdm_max": 7.40,
         "cp_kgdm_min": 160.0, "cp_kgdm_max": 175.0,

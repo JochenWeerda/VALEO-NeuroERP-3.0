@@ -50,6 +50,7 @@ import {
   gfaToDisplayFeed,
   FAN_DEFAULTS,
   FAN_REFERENCE_PRESETS,
+  defaultFeedingSystemConfig,
   type CowProfile,
   type FeedIngredient,
   type OptimizationResult,
@@ -207,6 +208,47 @@ type AmpelState = 'ok' | 'warn' | 'error'
 function ampelDot(state: AmpelState) {
   const col = state === 'ok' ? C.success : state === 'warn' ? C.warn : C.error
   return <span className="inline-block h-3 w-3 rounded-full" style={{ backgroundColor: col }} />
+}
+
+function RationBlocksPanel({
+  blocks,
+  compact = false,
+}: {
+  blocks: RationBlocks | null | undefined
+  compact?: boolean
+}) {
+  if (!blocks) return null
+  const fs = blocks.feeding_system
+  const blk = (label: string, b: RationBlocks['tmr_block']) => (
+    <div className="rounded-lg border px-3 py-2" style={{ borderColor: C.border }}>
+      <div className="text-[10px] uppercase font-bold" style={{ color: C.muted }}>{label}</div>
+      <div className="text-sm font-bold" style={{ color: C.dark }}>{fmt(b.dmi_kg, 2)} kg TM</div>
+      <div className="text-[10px]" style={{ color: C.muted }}>{fmt(b.dmi_share_pct, 0)} % der Ration</div>
+    </div>
+  )
+
+  return (
+    <div className={card(compact ? 'space-y-3' : 'space-y-4')}>
+      <div>
+        <p className="text-[11px] uppercase font-bold tracking-[0.5px]" style={{ color: C.muted }}>
+          Fütterungssystem & Blöcke
+        </p>
+        <p className="text-sm font-semibold" style={{ color: C.dark }}>
+          {fs.system ?? '–'} · {fs.concentrate_distribution ?? '–'}
+        </p>
+        {fs.auto_promoted_from_tmr && (
+          <p className="text-[11px] mt-1 px-2 py-1 rounded border" style={{ background: '#FFFBEB', borderColor: C.deltaBorder, color: C.deltaText }}>
+            Automatisch von TMR auf PMR+Weide angehoben: Weide liegt in der Lösung, wird nicht im Mischwagen geführt.
+          </p>
+        )}
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+        {blk('TMR / Mischwagen', blocks.tmr_block)}
+        {blk('Weide', blocks.pasture_block)}
+        {blk('Kraftfutter gestaffelt', blocks.concentrate_staged_block)}
+      </div>
+    </div>
+  )
 }
 
 function ForagePerformancePanel({
@@ -544,6 +586,15 @@ function MixingProtocolPanel({
             System: {protocol.basis.feeding_system}; TMR-Block: {fmt(protocol.totals.tmr_kgfm_without_water, 1)} kg FM /{' '}
             {fmt(protocol.totals.tmr_kgdm, 1)} kg TM.
           </p>
+          {protocol.excluded_pasture && protocol.excluded_pasture.kgdm > 0.001 && (
+            <p className="text-[11px] mt-1 font-medium" style={{ color: C.deltaText }}>
+              Nicht im Mischwagen: Weide gesamt {fmt(protocol.excluded_pasture.kgdm, 2)} kg TM
+              {protocol.excluded_pasture.items?.length
+                ? ` (${protocol.excluded_pasture.items.map((i) => i.name).join(', ')})`
+                : ''}
+              .
+            </p>
+          )}
         </div>
         <div className="text-right text-[11px]" style={{ color: C.muted }}>
           <div>Ziel-TM Mischung: ~{fmt(protocol.basis.target_dm_frac * 100, 0)} %</div>
@@ -2404,6 +2455,7 @@ function Workbench({
           </div>
         )}
 
+        <RationBlocksPanel blocks={result?.ration_blocks ?? null} compact />
         <ForagePerformancePanel result={result} compact />
         <PastureRiskPanel risk={result?.pasture_risk ?? null} compact />
         {/* Slice 2: Konzentrat-Futterabruf-Staffel (nur gestaffelte Verteilungen). */}
@@ -2585,6 +2637,15 @@ function Workbench({
                   style={{ background: '#ECFDF5', borderColor: C.success, color: C.success }}
                 >
                   LP-Slack aktiv
+                </span>
+              )}
+              {result.concentrate_max_lp_slack_kg != null && result.concentrate_max_lp_slack_kg > 0 && (
+                <span
+                  className="ml-2 text-[10px] font-bold px-1.5 py-0.5 rounded border"
+                  title="Empfohlenes Konzentrat-Tagesmaximum wurde im Stage-2-LP mit einer Slack-Variable weich überschritten."
+                  style={{ background: '#FFFBEB', borderColor: C.deltaBorder, color: C.deltaText }}
+                >
+                  KF-Tagesmax-Slack {fmt(result.concentrate_max_lp_slack_kg, 3)} kg TM
                 </span>
               )}
             </div>
@@ -3063,6 +3124,7 @@ export default function Rationsoptimierung() {
         // DLG 01|2025 Tab. 13-15: explizite Leistungs-/Physiologiestufe. Ohne
         // Angabe bestimmt das Backend das Profil aus Fuetterungstyp + Saison.
         ...(nextWizardData.policyProfile ? { policy_profile: nextWizardData.policyProfile } : {}),
+        feeding_system_config: defaultFeedingSystemConfig(nextWizardData.feedingType),
       }
       if (nextWizardData.seasonProfile) {
         profile.season_profile = nextWizardData.seasonProfile

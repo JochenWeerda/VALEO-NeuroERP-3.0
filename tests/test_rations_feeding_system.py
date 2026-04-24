@@ -508,27 +508,48 @@ class TestSplitFeedsByBlock:
 # Slice 1d: k_l-Logik systembewusst
 # ---------------------------------------------------------------------------
 
-class TestKlForcedAtPasture:
-    """PMR+Weide: k_l fix 0,60, auch bei hoher ME-Dichte.
+class TestKlPastureUsesTmrBlockDensity:
+    """PMR+Weide: ohne TMR-Block-Dichte Fallback k_l=0,60; mit TMR-Dichte GfE-Formel.
 
-    Begruendung: Weide wird nicht als Mischration gefressen, sondern in
-    gestaffelten Fressphasen. Eine "Gesamtrations-ME-Dichte" existiert
-    physiologisch nicht; die dichteabhaengige Formel (0,463 + 0,24*q)
-    darf nicht angewendet werden.
+    Die Weide-ME-Dichte (erstes Argument) zaehlt nicht fuer k_l; relevant ist
+    die ME-Dichte des Mischwagens (TMR-Block), optional FANi-Korrektur.
     """
 
-    def test_high_density_is_ignored_for_pasture(self) -> None:
-        # Weide 11,8 MJ ME/kg TM wuerde per Formel k_l~0,617 ergeben -
-        # muss aber auf 0,60 geclippt werden bei PMR_pasture
+    def test_high_pasture_density_without_tmr_stays_fallback(self) -> None:
+        # Nur Weide-Dichte 11,8 MJ/kg – ohne tmr_me_density -> Fallback 0,60
         kl = ro._kl_milk_from_me_density(11.8, feeding_system="PMR_pasture")
         assert kl == pytest.approx(0.60)
 
-    def test_medium_density_also_clipped_for_pasture(self) -> None:
+    def test_tmr_block_density_drives_kl_at_pasture(self) -> None:
+        # TMR-Block 12 MJ/kg TM -> q~0,652 -> k_l~0,619 (geclippt)
+        kl = ro._kl_milk_from_me_density(
+            11.8,
+            feeding_system="PMR_pasture",
+            tmr_me_density_mj_per_kg_tm=12.0,
+        )
+        assert 0.615 <= kl <= 0.64
+
+    def test_fani_nudges_kl_within_band(self) -> None:
+        kl_base = ro._kl_milk_from_me_density(
+            10.0,
+            feeding_system="PMR_pasture",
+            tmr_me_density_mj_per_kg_tm=11.0,
+            fani=3.0,
+        )
+        kl_hi = ro._kl_milk_from_me_density(
+            10.0,
+            feeding_system="PMR_pasture",
+            tmr_me_density_mj_per_kg_tm=11.0,
+            fani=4.0,
+        )
+        assert kl_hi > kl_base
+        assert kl_hi <= 0.64
+
+    def test_medium_pasture_density_without_tmr_fallback(self) -> None:
         kl = ro._kl_milk_from_me_density(10.5, feeding_system="PMR_pasture")
         assert kl == pytest.approx(0.60)
 
-    def test_low_density_stays_at_060(self) -> None:
-        # Niedrige Dichte (<10 MJ) wuerde ohnehin 0,60 ergeben
+    def test_low_pasture_density_without_tmr_fallback(self) -> None:
         kl = ro._kl_milk_from_me_density(9.5, feeding_system="PMR_pasture")
         assert kl == pytest.approx(0.60)
 

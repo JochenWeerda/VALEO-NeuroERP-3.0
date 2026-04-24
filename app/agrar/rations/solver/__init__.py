@@ -1,6 +1,7 @@
 """LP-Solver-Logik (Constraint-Registry, Aggregation, Relaxation)."""
 
 from .feed import Feed
+from .mixing import mix_group_order
 from .constraint_registry import (
     CONSTR_ANDFOM_GF_GEQ,
     CONSTR_ANDFOM_TOT_GEQ,
@@ -25,6 +26,7 @@ from .constraint_registry import (
 
 __all__ = [
     "Feed",
+    "mix_group_order",
     "ConstraintDef",
     "ConstraintRegistry",
     "CONSTR_ME_GEQ",
