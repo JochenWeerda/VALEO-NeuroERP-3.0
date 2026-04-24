@@ -2,6 +2,60 @@
 
 Stand: `2026-04-23`
 
+## ERP-CRIT-001
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Backend-Testabdeckung und Vertragsstabilitaet fuer kritische ERP-Pfade zuerst an real roten Tests und Ratchet-Pfaden verbessern.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `app/api/v1/endpoints/payment_runs.py`, `tests/test_process_kernel_wave1_contracts.py`, relevante Coverage-/Ratchet-Doku.
+**Abnahmekriterien:** Der aktuell rote Payment-Return-Vertrag laeuft wieder; Coverage-Ratchet-Status ist dokumentiert; naechste unterdeckte Pfade sind als konkrete Test-Slices priorisiert.
+**Offene Risiken:** Mehrere Ratchet-Pfade sind historisch unterdeckt und koennen nicht durch einen Einzeltest realistisch geschlossen werden.
+
+## ERP-CRUD-001
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Browser-/CRUD-Abnahme der wichtigsten E2E-Prozesse in eine ausfuehrbare, priorisierte Testmatrix ueberfuehren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/quality-assurance/browser-use-checklists.md`, `docs/quality-assurance/e2e-crud-acceptance-matrix-2026-04-24.md`, ggf. vorhandene Frontend-E2E-Testkonfiguration.
+**Abnahmekriterien:** Die neun Flow-Spine-Prozesse besitzen eine priorisierte CRUD-/Statuswechsel-/Korrekturmatrix mit klaren P0/P1-Prueffaellen und Repo-Pruefkommandos.
+**Offene Risiken:** Echte Browser-Ausfuehrung haengt vom lokal startbaren Fullstack und Seed-Daten ab.
+
+## ERP-LIVE-001
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Live-Integrations-Readiness mit echten Secrets/Zielsystemen so weit repo-seitig vorbereiten, dass Ops nur noch Werte eintragen und Pruefkommandos ausfuehren muss.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/integration-bootstrap-readiness-2026-04-12.md`, `scripts/check_integration_bootstrap.py`, `app/services/integration_bootstrap.py`, `.env.example`.
+**Abnahmekriterien:** Readiness-Bericht trennt deterministische Repo-Pruefung und externe Live-Probes; fehlende Secrets/Ziele werden maschinenlesbar als Blocker ausgewiesen.
+**Offene Risiken:** Produktive Tenant-Secrets und Zielsystem-URLs liegen ausserhalb des Repos.
+
+## FIBU-CUTOVER-001
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** FIBU-Cutover-Mappings fachlich abschliessbar machen, indem Pflichtmapping, Freigabezustand und Validierung formalisiert werden.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/fibu-cutover-mapping-readiness-2026-04-24.md`, `config/fibu_cutover_mapping.template.yaml`, `scripts/check_fibu_cutover_mapping.py`, `tests/test_fibu_cutover_mapping.py`.
+**Abnahmekriterien:** Konten-, Steuer-, Kostenstellen- und Gegenkonto-Mappings haben eine Vorlage, einen Validator und einen klaren Blockerstatus fuer fachliche Freigabe.
+**Offene Risiken:** Fachlich freigegebene Zielkonten/-steuerschluessel muessen vom Fachbereich geliefert werden.
+
+## RATIONS-SPLIT-001
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Rations-Solver technisch weiter entkoppeln, ohne die LP-Semantik zu aendern.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `app/api/v1/endpoints/rations_optimization.py`, `app/agrar/rations/solver/*`, relevante Rations-Tests.
+**Abnahmekriterien:** Ein weiterer klarer Solver-Baustein wird aus `rations_optimization.py` in das Solver-Paket gezogen oder mit typisierter Hilfslogik isoliert; Regression bleibt gruen.
+**Offene Risiken:** Vollstaendige `_run_lp`-Zerlegung ist ein mehrstufiger Refactor.
+
+## DOMAIN-PARITY-001
+
+**Von:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Domänenparitaet in schwächeren Bereichen als messbares Ausbauprogramm statt loser Absicht fuehren.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/project-context/domain-parity-roadmap-2026-04-24.md`, `docs/project-context/open-gaps-and-known-issues.md`.
+**Abnahmekriterien:** Finance, Supply/Inventory, Procurement, Contracts, CRM und Documents sind nach Fachlogik, Testtiefe, Integration und UI-Operationalisierung bewertet; naechste Code-/Test-Slices sind priorisiert.
+**Offene Risiken:** Tiefe fachliche Paritaet braucht weitere domänenspezifische Arbeit und Fachentscheidungen.
+
 ## RATIONS-HARD-001
 
 **Von:** Codex
