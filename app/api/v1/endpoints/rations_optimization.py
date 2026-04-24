@@ -79,6 +79,7 @@ from app.agrar.rations.solver import (  # noqa: E402
     CONSTR_SIDP_GEQ as _CONSTR_SIDP_GEQ,
     CONSTR_XL_DENSITY as _CONSTR_XL_DENSITY,
     ConstraintRegistry as _NewConstraintRegistry,
+    Feed as _SolverFeed,
 )
 
 
@@ -1395,9 +1396,32 @@ def _feeding_system_defaults(
     }
 
 
+def _portfolio_has_pasture(feeds: Optional[List[Dict[str, Any]]]) -> bool:
+    """Prueft, ob im Futter-Portfolio mindestens eine Weide-Position mit
+    Kapazitaet (max_kg > 0) enthalten ist.
+
+    Dient der Auto-Eskalation des Feeding-Systems: sobald Weide als
+    verfuegbares Futtermittel im Portfolio ist, sollte das System nicht
+    mehr nominell TMR sein, weil Weide nicht in den Mischwagen gehoert.
+    """
+    if not feeds:
+        return False
+    for feed in feeds:
+        try:
+            max_kg = float(feed.get("max_kg") or 0.0)
+        except (TypeError, ValueError):
+            max_kg = 0.0
+        if max_kg <= 0.0:
+            continue
+        if _grass_feed_kind(feed) == "pasture":
+            return True
+    return False
+
+
 def _resolve_feeding_system_config(
     raw: Optional[Any],
     profile: Optional[Dict[str, Any]] = None,
+    feeds: Optional[List[Dict[str, Any]]] = None,
 ) -> Dict[str, Any]:
     """Normalisiert einen FeedingSystemConfig-Input (dict/Model/None).
 
@@ -1406,6 +1430,14 @@ def _resolve_feeding_system_config(
       - PMR+Weide im Profil       -> system=PMR_pasture, distribution=milkparlor
       - PMR im Profil             -> system=PMR_stall, distribution=transponder
       - TMR / unbekannt           -> system=TMR, distribution=included_in_tmr
+
+    Auto-Eskalation (fachlicher Fix 2026-04-24):
+      Wenn das resultierende System TMR waere, aber das Futter-Portfolio
+      Weide mit Kapazitaet enthaelt, wird automatisch auf PMR_pasture +
+      milkparlor eskaliert und ``auto_promoted_from_tmr=True`` gesetzt.
+      Grund: Weide wird gegrast, nicht gemischt - ein reiner TMR-Modus
+      mit Weide im Portfolio fuehrt sonst dazu, dass Weide faelschlich
+      ins Mischprotokoll laeuft.
 
     Grenzen werden ueber `_feeding_system_defaults()` aufgefuellt, falls
     nicht explizit angegeben.
@@ -1432,6 +1464,14 @@ def _resolve_feeding_system_config(
     distribution = str(data.get("concentrate_distribution", "included_in_tmr")).strip().lower()
     if distribution not in {"included_in_tmr", "transponder", "ams", "milkparlor"}:
         distribution = "included_in_tmr"
+
+    # Auto-Eskalation TMR -> PMR_pasture, falls Weide im Portfolio.
+    auto_promoted_from_tmr = False
+    if system == "TMR" and _portfolio_has_pasture(feeds):
+        system = "PMR_pasture"
+        if distribution == "included_in_tmr":
+            distribution = "milkparlor"
+        auto_promoted_from_tmr = True
 
     treat_primi = bool(data.get("treat_as_primiparous", False))
     if (profile or {}).get("parity") == 1 or (profile or {}).get("is_primiparous"):
@@ -1464,6 +1504,7 @@ def _resolve_feeding_system_config(
         "default_concentrate_recipe": (
             recipe_model.model_dump() if recipe_model is not None else None
         ),
+        "auto_promoted_from_tmr": auto_promoted_from_tmr,
     }
     return resolved
 
@@ -1472,7 +1513,11 @@ def _auto_assign_block(feed: Dict[str, Any], system: str) -> str:
     """Ordnet ein Feed automatisch einem Rationsblock zu.
 
     Regeln (konservativ, gut vorhersehbar):
-      - Weide (Gras, TM < 30 %)                -> pasture_block
+      - Weide (Gras, TM < 30 %)                -> IMMER pasture_block
+        (auch wenn das System TMR ist - fachlich wird Weide nie in den
+        Mischwagen gefuellt; sie wird direkt auf dem Gruenland gefressen.
+        Das TMR-System eskaliert in diesem Fall ueber
+        ``_resolve_feeding_system_config`` automatisch auf PMR_pasture.)
       - andere Grobfutter (Silage, Heu, Stroh) -> tmr_block
       - Mineral                                -> tmr_block
       - Kraftfutter / Konzentrat               -> bei TMR: tmr_block
@@ -1497,7 +1542,13 @@ def _auto_assign_block(feed: Dict[str, Any], system: str) -> str:
 
     grass_kind = _grass_feed_kind(feed)
     if grass_kind == "pasture":
-        return "pasture_block" if sys_norm == "PMR_PASTURE" else "tmr_block"
+        # Fachlicher Fix 2026-04-24 (User-Review Mischprotokoll): Weide
+        # darf unter keinen Umstaenden in den TMR-/Mischwagen-Block
+        # landen. Selbst wenn das System nominell TMR ist, wird Weide
+        # gegrast, nicht gemischt. Die automatische Systemeskalation
+        # erfolgt in ``_resolve_feeding_system_config`` (TMR+Weide-Feed
+        # im Portfolio => PMR_pasture).
+        return "pasture_block"
 
     is_forage = bool(feed.get("forage"))
     if is_forage:
@@ -1622,7 +1673,7 @@ def _run_lp(
     #   eigene Bewertungs- und Risikologiken (pasture_block, K/Mg-Ratio,
     #   Saisonprofile), die tages- und aufnahmebezogen ausgewertet werden.
     _fs_cfg = _resolve_feeding_system_config(
-        (runtime_options or {}).get("feeding_system_config"), profile
+        (runtime_options or {}).get("feeding_system_config"), profile, feeds=feeds
     )
     _fs_overrides = (runtime_options or {}).get("feed_block_overrides") or []
     _fs_buckets = _split_feeds_by_block(feeds, _fs_cfg, _fs_overrides)
@@ -2795,20 +2846,40 @@ def _build_mixing_protocol(
 
     # TMR-Block-Positionen extrahieren. Wenn keine Block-Labels, behandeln
     # wir alle Feeds als TMR-Block (klassischer TMR).
+    #
+    # Sicherheitsnetz (User-Review 2026-04-24): Weide (TM < 30 %) wird
+    # grundsaetzlich NIE in die Mischung aufgenommen, auch wenn das
+    # Block-Label faelschlich "tmr_block" waere. Weide wird auf dem
+    # Gruenland gefressen, nicht im Mischwagen gemischt. Die Block-
+    # Zuordnung wird in ``_auto_assign_block`` bereits korrigiert -
+    # dieser Filter ist bewusst redundant (Guertel und Hosentraeger).
     tmr_rows: List[Dict[str, Any]] = []
+    excluded_pasture_kgdm = 0.0
+    excluded_pasture_items: List[Dict[str, Any]] = []
     for idx, feed in enumerate(feeds):
+        feed_view = _SolverFeed.from_dict(feed)
         kg_dm = amounts[idx] if idx < len(amounts) else 0.0
         if kg_dm < 0.001:
             continue
         label = block_labels[idx] if idx < len(block_labels) else "tmr_block"
+        # Harter fachlicher Ausschluss: Weide niemals in Mischung.
+        if _grass_feed_kind(feed) == "pasture":
+            excluded_pasture_kgdm += kg_dm
+            excluded_pasture_items.append({
+                "feed_id": feed_view.id,
+                "name": feed_view.name or "?",
+                "kgdm": round(kg_dm, 3),
+                "reason": "pasture_not_mixed",
+            })
+            continue
         if label != "tmr_block":
             continue
-        dm_frac = float(feed.get("dm_frac") or 0.0)
+        dm_frac = feed_view.dm_frac
         kg_fm = kg_dm / dm_frac if dm_frac > 0 else kg_dm
         tmr_rows.append({
-            "feed_id": feed.get("id"),
-            "name": feed.get("name", "?"),
-            "group_idx": _mix_group_order(feed.get("name", "")),
+            "feed_id": feed_view.id,
+            "name": feed_view.name or "?",
+            "group_idx": _mix_group_order(feed_view.name),
             "kgdm": round(kg_dm, 3),
             "kgfm": round(kg_fm, 3),
             "dm_frac": dm_frac,
@@ -2848,6 +2919,14 @@ def _build_mixing_protocol(
             "Wasserzugabe nicht noetig; ggf. trockene Komponenten (Heu/Stroh) erhoehen."
         )
 
+    if excluded_pasture_kgdm > 0.001:
+        warnings_list.append(
+            f"Weide ({excluded_pasture_kgdm:.2f} kg TM) ist NICHT Teil der "
+            "Mischung - wird separat auf dem Gruenland gefressen "
+            "(DLG-Merkblatt 417: Weide/Gruenland-Nutzung). Ration wird "
+            "als PMR (Partial Mixed Ration) gefuehrt."
+        )
+
     return {
         "basis": {
             "feeding_system": system or "TMR",
@@ -2866,6 +2945,10 @@ def _build_mixing_protocol(
             "tmr_kgfm_with_water_and_overfill": round(
                 total_tmr_kgfm + water_kg + overfill_kg_fm, 2
             ),
+        },
+        "excluded_pasture": {
+            "kgdm": round(excluded_pasture_kgdm, 3),
+            "items": excluded_pasture_items,
         },
         "warnings": warnings_list,
     }
@@ -2950,7 +3033,7 @@ def _build_response(
     # Slice 1f: Block-Zuordnung je Feed - abgeleitet aus lp_out oder
     # (Fallback) neu berechnet, damit ration_items["block"] und die
     # aggregierte ration_blocks-Sektion stets verfuegbar sind.
-    _fs_cfg_resp = lp_out.get("_feeding_system_config") or _resolve_feeding_system_config(None, profile)
+    _fs_cfg_resp = lp_out.get("_feeding_system_config") or _resolve_feeding_system_config(None, profile, feeds=feeds)
     _block_labels_resp = lp_out.get("_block_labels")
     if not _block_labels_resp or len(_block_labels_resp) != len(feeds):
         _fs_buckets_resp = _split_feeds_by_block(feeds, _fs_cfg_resp, [])
