@@ -1535,13 +1535,21 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
               {lifecycleDialog.mode !== 'complete' ? (
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
-                    <Label className="text-slate-300">Kategorie</Label>
+                    <Label className="text-slate-300">
+                      Kategorie <span className="text-rose-400">*</span>
+                    </Label>
                     <Select
                       value={lifecycleDialog.reasonCategory}
                       onValueChange={(value) => setLifecycleDialog({ ...lifecycleDialog, reasonCategory: value })}
                     >
-                      <SelectTrigger className="border-white/10 bg-white/5 text-slate-100">
-                        <SelectValue placeholder="Kategorie waehlen" />
+                      <SelectTrigger
+                        aria-required="true"
+                        className={cn(
+                          'border-white/10 bg-white/5 text-slate-100',
+                          !lifecycleDialog.reasonCategory && 'border-rose-400/40',
+                        )}
+                      >
+                        <SelectValue placeholder="Kategorie waehlen …" />
                       </SelectTrigger>
                       <SelectContent>
                         {REASON_CATEGORY_OPTIONS.map((option) => (
@@ -1549,15 +1557,27 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                         ))}
                       </SelectContent>
                     </Select>
+                    {!lifecycleDialog.reasonCategory && (
+                      <p className="text-[11px] text-rose-400">Pflichtfeld</p>
+                    )}
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-slate-300">Grundcode</Label>
+                    <Label className="text-slate-300">
+                      Grundcode <span className="text-rose-400">*</span>
+                    </Label>
                     <Input
+                      aria-required="true"
                       value={lifecycleDialog.reasonCode}
                       onChange={(e) => setLifecycleDialog({ ...lifecycleDialog, reasonCode: e.target.value })}
                       placeholder="z.B. customer_order_cancelled"
-                      className="border-white/10 bg-white/5 text-slate-100 placeholder:text-slate-500"
+                      className={cn(
+                        'border-white/10 bg-white/5 text-slate-100 placeholder:text-slate-500',
+                        !lifecycleDialog.reasonCode.trim() && 'border-rose-400/40',
+                      )}
                     />
+                    {!lifecycleDialog.reasonCode.trim() && (
+                      <p className="text-[11px] text-rose-400">Pflichtfeld</p>
+                    )}
                   </div>
                 </div>
               ) : (
@@ -1596,7 +1616,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
               disabled={
                 !lifecycleDialog ||
                 lifecycleBusy ||
-                ((lifecycleDialog.mode === 'cancel' || lifecycleDialog.mode === 'fail') &&
+                (lifecycleDialog.mode !== 'complete' &&
                   (!lifecycleDialog.reasonCategory || !lifecycleDialog.reasonCode.trim()))
               }
               className="bg-indigo-500 text-white hover:bg-indigo-400"

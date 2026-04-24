@@ -109,19 +109,19 @@ async def lifespan(app: FastAPI):
         if not settings.SECRET_KEY:
             settings.SECRET_KEY = _secrets.token_urlsafe(32)
             logger.warning(
-                "⚠️  SECRET_KEY nicht gesetzt — ephemerer Dev-Key generiert. "
-                "Tokens werden nach Restart ungültig."
+                "WARNING: SECRET_KEY nicht gesetzt - ephemerer Dev-Key generiert. "
+                "Tokens werden nach Restart ungueltig."
             )
         if not settings.ENCRYPTION_KEY:
             settings.ENCRYPTION_KEY = _secrets.token_urlsafe(32)
             logger.warning(
-                "⚠️  ENCRYPTION_KEY nicht gesetzt — ephemerer Dev-Key generiert."
+                "WARNING: ENCRYPTION_KEY nicht gesetzt - ephemerer Dev-Key generiert."
             )
         # Dev-Modus: API_DEV_TOKEN auf 'dev-token' setzen falls nicht konfiguriert
         if not settings.API_DEV_TOKEN:
             settings.API_DEV_TOKEN = "dev-token"
             logger.warning(
-                "⚠️  API_DEV_TOKEN nicht gesetzt — Dev-Token 'dev-token' aktiv. "
+                "WARNING: API_DEV_TOKEN nicht gesetzt - Dev-Token 'dev-token' aktiv. "
                 "In Produktion APP_ENV=production setzen!"
             )
 

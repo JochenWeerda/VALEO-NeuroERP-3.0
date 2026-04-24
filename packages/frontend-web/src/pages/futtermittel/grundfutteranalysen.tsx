@@ -455,9 +455,32 @@ export default function GrundfutterAnalysenPage() {
     queryFn: () => fetchGrundfutterAnalysen(filterArt ? { probenart: filterArt } : {}),
   })
 
+  const [saveError, setSaveError] = useState<string | null>(null)
+  const [saveSuccess, setSaveSuccess] = useState<string | null>(null)
+
   const createMut = useMutation({
     mutationFn: createGrundfutterAnalyse,
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['grundfutter-analysen'] }); setShowForm(false); setFormData(EMPTY) },
+    onSuccess: (saved) => {
+      qc.invalidateQueries({ queryKey: ['grundfutter-analysen'] })
+      setShowForm(false)
+      setFormData(EMPTY)
+      setParseWarnings([])
+      setSaveError(null)
+      setSaveSuccess(saved.bezeichnung)
+    },
+    onError: (err: unknown) => {
+      const detail =
+        err && typeof err === 'object' && 'response' in err
+          ? (err as { response?: { data?: { detail?: string } } }).response?.data?.detail
+          : null
+      const msg = detail ?? (err instanceof Error ? err.message : 'Speichern fehlgeschlagen.')
+      // 409 = Dublette
+      if (detail?.includes('bereits')) {
+        setSaveError(`Dublette: ${msg}`)
+      } else {
+        setSaveError(msg)
+      }
+    },
   })
 
   const patchMut = useMutation({
@@ -471,9 +494,24 @@ export default function GrundfutterAnalysenPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['grundfutter-analysen'] }),
   })
 
+  const [promoteSuccess, setPromoteSuccess] = useState<{ name: string; artikel_nr: string } | null>(null)
+  const [promoteError, setPromoteError] = useState<string | null>(null)
+
   const promoteMut = useMutation({
     mutationFn: promoteAsFeed,
-    onSuccess: () => alert('Futtermittel erfolgreich in Stammdaten übernommen!'),
+    onSuccess: (res) => {
+      setPromoteError(null)
+      setPromoteSuccess({ name: res.name ?? '', artikel_nr: res.artikel_nummer })
+      qc.invalidateQueries({ queryKey: ['grundfutter-analysen'] })
+    },
+    onError: (err: unknown) => {
+      setPromoteSuccess(null)
+      const msg =
+        err && typeof err === 'object' && 'response' in err
+          ? (err as { response?: { data?: { detail?: string } } }).response?.data?.detail ?? 'Unbekannter Fehler'
+          : String(err)
+      setPromoteError(msg)
+    },
   })
 
   const handleUploadResult = (result: PdfUploadResult, _file: File) => {
@@ -518,6 +556,60 @@ export default function GrundfutterAnalysenPage() {
         <Info size={16} />
         Unterstützte Labore: LUFA Nord-West · LUFA NRW · LUFA Bayern (TLL) · LKS Sachsen · AGRIlab. PDF mit Textlayer oder CSV-Export.
       </div>
+
+      {/* Speichern-Erfolg */}
+      {saveSuccess && (
+        <div style={{ background: '#F0FDF4', border: '1px solid #86EFAC', borderRadius: 8, padding: '10px 16px', marginBottom: 16, fontSize: 13, color: '#166534', display: 'flex', alignItems: 'center', gap: 10 }}>
+          <Check size={16} />
+          <span>
+            <strong>{saveSuccess}</strong> wurde gespeichert.{' '}
+            <a href="/futtermittel/rationsoptimierung" style={{ color: '#166534', fontWeight: 700, textDecoration: 'underline' }}>
+              → Zur Rationsoptimierung
+            </a>
+          </span>
+          <button onClick={() => setSaveSuccess(null)} style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: '#166534' }}>
+            <X size={14} />
+          </button>
+        </div>
+      )}
+
+      {/* Speichern-Fehler (Dublette etc.) */}
+      {saveError && (
+        <div style={{ background: '#FFF7ED', border: '1px solid #FDBA74', borderRadius: 8, padding: '10px 16px', marginBottom: 16, fontSize: 13, color: '#9A3412', display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+          <AlertTriangle size={16} style={{ flexShrink: 0, marginTop: 1 }} />
+          <span>{saveError}</span>
+          <button onClick={() => setSaveError(null)} style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: '#9A3412' }}>
+            <X size={14} />
+          </button>
+        </div>
+      )}
+
+      {/* Promote-Erfolg */}
+      {promoteSuccess && (
+        <div style={{ background: '#F0FDF4', border: '1px solid #86EFAC', borderRadius: 8, padding: '10px 16px', marginBottom: 16, fontSize: 13, color: '#166534', display: 'flex', alignItems: 'center', gap: 10 }}>
+          <Check size={16} />
+          <span>
+            <strong>{promoteSuccess.name}</strong> wurde als Futtermittel übernommen (Art.-Nr. {promoteSuccess.artikel_nr}).{' '}
+            <a href="/futtermittel/rationsoptimierung" style={{ color: '#166534', fontWeight: 700, textDecoration: 'underline' }}>
+              → Zur Rationsoptimierung
+            </a>
+          </span>
+          <button onClick={() => setPromoteSuccess(null)} style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: '#166534' }}>
+            <X size={14} />
+          </button>
+        </div>
+      )}
+
+      {/* Promote-Fehler (Dublette o. ä.) */}
+      {promoteError && (
+        <div style={{ background: '#FFF7ED', border: '1px solid #FDBA74', borderRadius: 8, padding: '10px 16px', marginBottom: 16, fontSize: 13, color: '#9A3412', display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+          <AlertTriangle size={16} style={{ flexShrink: 0, marginTop: 1 }} />
+          <span>{promoteError}</span>
+          <button onClick={() => setPromoteError(null)} style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: '#9A3412' }}>
+            <X size={14} />
+          </button>
+        </div>
+      )}
 
       {/* Upload-Zone */}
       <UploadZone onResult={handleUploadResult} />

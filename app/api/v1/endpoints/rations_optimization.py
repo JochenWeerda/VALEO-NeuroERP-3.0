@@ -24,7 +24,7 @@ import math
 import os
 import re
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Literal, Optional, Set, Tuple
 
 import httpx
 from fastapi import APIRouter, File, Header, HTTPException, Query, Request, UploadFile
@@ -37,86 +37,55 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["agrar", "rations-optimization"])
 
-RATIONS_TIMEOUT = 30.0
+# Refactor 2026-04-23: HTTP-Proxy ausgelagert nach app.agrar.rations.http.proxy.
+# Re-Exports halten die oeffentliche Schnittstelle stabil (Tests patchen z. T.
+# ``rations_optimization.get_rations_base_url``).
+from app.agrar.rations.http.proxy import (  # noqa: E402
+    RATIONS_TIMEOUT as RATIONS_TIMEOUT,
+    get_rations_base_url as get_rations_base_url,
+    _rations_api_key as _rations_api_key,
+)
 
-# ---------------------------------------------------------------------------
-# Config helpers
-# ---------------------------------------------------------------------------
-
-def _rations_base_url() -> Optional[str]:
-    return getattr(settings, "RATIONS_OPTIMIZATION_URL", None) or None
-
-
-def _rations_api_key() -> str:
-    return getattr(settings, "RATIONS_OPTIMIZATION_API_KEY", "") or "dev-api-key-change-in-production"
-
-
-def _dlg_json_path() -> Optional[str]:
-    configured = getattr(settings, "RATIONS_DLG_DATA_PATH", None)
-    if configured:
-        return configured
-    # Bundled DLG-Futterwerttabellen 2025 (offizieller DLG-JSON-Export)
-    here = os.path.dirname(os.path.abspath(__file__))
-    for candidate in ["DLG_FWT_WK_2025.json", "dlg_feeds_raw.json"]:
-        bundled = os.path.normpath(os.path.join(here, "..", "..", "..", "data", candidate))
-        if os.path.isfile(bundled):
-            return bundled
-    return None
+# Backwards-compat alias (interne Altaufrufer).
+_rations_base_url = get_rations_base_url  # noqa: E305
 
 
-def _tenant_from_request(request: Request, x_tenant_id: Optional[str]) -> Optional[str]:
-    if x_tenant_id:
-        return x_tenant_id
-    return (
-        request.headers.get("x-tenant-id")
-        or request.headers.get("X-Tenant-Id")
-        or request.headers.get("X-Tenant-ID")
-    )
+# Refactor 2026-04-23: DLG-JSON-Pfadaufloesung ausgelagert
+from app.agrar.rations.repository.dlg_loader import _dlg_json_path as _dlg_json_path  # noqa: E402
+
+# Refactor 2026-04-23 (Schritt 2): Zentrale Rations-Aggregation
+from app.agrar.rations.response import (  # noqa: E402
+    RationAggregates,
+    aggregate_ration,
+)
+
+# Refactor 2026-04-23 (Schritt 3): Constraint-Registry statt Magic-Index
+from app.agrar.rations.solver import (  # noqa: E402
+    CONSTR_ANDFOM_GF_GEQ as _CONSTR_ANDFOM_GF_GEQ,
+    CONSTR_ANDFOM_TOT_GEQ as _CONSTR_ANDFOM_TOT_GEQ,
+    CONSTR_ANDFOM_TOT_LEQ as _CONSTR_ANDFOM_TOT_LEQ,
+    CONSTR_CA_LEQ as _CONSTR_CA_LEQ,
+    CONSTR_CP_DENSITY as _CONSTR_CP_DENSITY,
+    CONSTR_DMI_GEQ as _CONSTR_DMI_GEQ,
+    CONSTR_DMI_LEQ as _CONSTR_DMI_LEQ,
+    CONSTR_ME_ABS_LEQ as _CONSTR_ME_ABS_LEQ,
+    CONSTR_ME_DENSITY as _CONSTR_ME_DENSITY,
+    CONSTR_ME_GEQ as _CONSTR_ME_GEQ,
+    CONSTR_MG_LEQ as _CONSTR_MG_LEQ,
+    CONSTR_NA_LEQ as _CONSTR_NA_LEQ,
+    CONSTR_P_LEQ as _CONSTR_P_LEQ,
+    CONSTR_PABKH_LEQ as _CONSTR_PABKH_LEQ,
+    CONSTR_RMD_DENSITY as _CONSTR_RMD_DENSITY,
+    CONSTR_SIDP_GEQ as _CONSTR_SIDP_GEQ,
+    CONSTR_XL_DENSITY as _CONSTR_XL_DENSITY,
+    ConstraintRegistry as _NewConstraintRegistry,
+)
 
 
-# ---------------------------------------------------------------------------
-# External proxy
-# ---------------------------------------------------------------------------
-
-async def _proxy_request(
-    method: str,
-    path: str,
-    tenant_id: Optional[str] = None,
-    json_body: Optional[Dict[str, Any]] = None,
-    params: Optional[Dict[str, Any]] = None,
-) -> JSONResponse:
-    base_url = _rations_base_url()
-    if not base_url:
-        raise HTTPException(
-            status_code=503,
-            detail="Rationsoptimierungs-Service ist nicht konfiguriert (RATIONS_OPTIMIZATION_URL fehlt)",
-        )
-    url = f"{base_url.rstrip('/')}{path}"
-    headers: Dict[str, str] = {
-        "Content-Type": "application/json",
-        "X-API-Key": _rations_api_key(),
-    }
-    if tenant_id:
-        headers["X-Tenant-Id"] = tenant_id
-
-    async with httpx.AsyncClient(timeout=RATIONS_TIMEOUT) as client:
-        try:
-            if method.upper() == "GET":
-                resp = await client.get(url, headers=headers, params=params)
-            elif method.upper() == "POST":
-                resp = await client.post(url, headers=headers, json=json_body or {}, params=params)
-            else:
-                raise HTTPException(status_code=405, detail="Methode nicht unterstützt")
-            try:
-                body = resp.json()
-            except Exception:
-                body = {"detail": resp.text}
-            return JSONResponse(status_code=resp.status_code, content=body)
-        except httpx.ConnectError as exc:
-            logger.warning("Rationsoptimierung nicht erreichbar: %s", exc)
-            raise HTTPException(status_code=503, detail="Rationsoptimierungs-Service ist nicht erreichbar")
-        except httpx.TimeoutException:
-            raise HTTPException(status_code=504, detail="Rationsoptimierungs-Service hat nicht rechtzeitig geantwortet")
+from app.agrar.rations.http.proxy import (  # noqa: E402
+    _tenant_from_request as _tenant_from_request,
+    _proxy_request as _proxy_request,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -224,6 +193,118 @@ def _estimate_price(name: str, futterart: str) -> float:
     return 0.200
 
 
+# Faserreiche Co-Produkte nach DLG 01|2025, Kap. 8.2/8.3. Diese Produkte haben
+# zwar eine geringere Partikelgroesse als Grobfutter, aber eine hohe aNDFom und
+# sind strukturwirksam genug, um als aNDFomGF+CoP gerechnet zu werden.
+_STRUCTURAL_COPRODUCT_KEYWORDS = (
+    "biertreber",
+    "maltreber",
+    "malztreber",
+    "treber",
+    "schlempe",
+    "trester",
+    "pressschnitzel",
+    "nassschnitzel",
+    "trockenschnitzel",
+    "rübenschnitzel",
+    "ruebenschnitzel",
+    "zuckerruebenschnitzel",
+    "melasseschnitzel",
+    "pülpe",
+    "puelpe",
+    "pulpe",
+    "kartoffelpülpe",
+    "rueben",  # generische Zuckerrueben-Koppelprodukte (nicht jedoch "rübenblatt")
+)
+
+
+def _is_structural_coproduct(name: str, futterart: str) -> bool:
+    """Faserreiches Co-Produkt nach DLG 01|2025?
+
+    Wird in der Planungsgroesse aNDFomGF+CoP mitgerechnet. Grobfutter selbst
+    ist KEIN Co-Produkt und wird ueber ``forage=True`` separat gefuehrt.
+    """
+    n = (name or "").lower()
+    # Rübenblattsilage ist Grobfutter (Blatt/Kopf der Ruebe), kein Co-Produkt
+    if "rübenblatt" in n or "ruebenblatt" in n or "blattsilage" in n:
+        return False
+    if any(kw in n for kw in _STRUCTURAL_COPRODUCT_KEYWORDS):
+        return True
+    return False
+
+
+# ---------------------------------------------------------------------------
+# Gras-/Silage-/Heu-Klassifikation nach TM-Gehalt (fachlich korrekt).
+# ---------------------------------------------------------------------------
+# Fachliche Grundlage (Futtermittelkunde / DLG-Futterwerttabellen 2025):
+#   Frischgras/Weide:    TM < 30 % (typisch 15-25 %)
+#   Grassilage:          TM 30-40 % (anaerobe Milchsaeuregaerung)
+#   Anwelksilage:        TM 40-50 %
+#   Heulage:             TM 50-80 % (trockene Silage, oft Rundballen-HD)
+#   Heu:                 TM >= 85 %
+# Die DLG-Label "Gras, frisch o. konserviert" fuehren per "KONSERVIERUNG"
+# drei Varianten mit exakt diesen TM-Spruengen (175/350/860 g/kg). Deshalb
+# ist der TM-Gehalt das **primaere** Klassifikationskriterium - der Name
+# dient nur als Rueckfall, falls dm_frac fehlt.
+# ---------------------------------------------------------------------------
+
+
+def _grass_feed_kind(feed: Dict[str, Any]) -> Optional[str]:
+    """Klassifiziert ein Gras-/Grobfutter nach TM-Gehalt und Name.
+
+    Rueckgabe einer von:
+        "pasture"       - Frischgras / Weide (TM < 30 %)
+        "grass_silage"  - Grassilage inkl. Anwelksilage (30 % <= TM < 80 %)
+        "grass_hay"     - Heu / Heulage bei Gras (TM >= 80 %)
+        None            - weder gras- noch weidebasiert (Mais, Heu, etc.)
+    """
+    name_l = (feed.get("name") or "").lower()
+    # Konserviertes Gras im Namen liefert bereits eine sehr starke Aussage,
+    # die ggf. Namens-Mehrdeutigkeit aufloest ("Gras, frisch o. konserviert, siliert").
+    name_has_silage_keyword = (
+        "grassilage" in name_l
+        or (("siliert" in name_l or "konserviert" in name_l) and "gras" in name_l)
+        or "anwelksilage" in name_l
+        or "heulage" in name_l
+    )
+    name_has_hay_keyword = ("heu" in name_l and "heulage" not in name_l) or (
+        "gras" in name_l and "trocken" in name_l
+    )
+    name_has_pasture_keyword = (
+        "weide" in name_l
+        or "frischgras" in name_l
+    )
+    name_has_gras = "gras" in name_l
+
+    dm = feed.get("dm_frac")
+    try:
+        dm_f = float(dm) if dm is not None else None
+    except (TypeError, ValueError):
+        dm_f = None
+
+    # Name-basierte Fallbacks wenn TM-Gehalt fehlt
+    if dm_f is None or dm_f <= 0.0:
+        if name_has_hay_keyword:
+            return "grass_hay"
+        if name_has_silage_keyword:
+            return "grass_silage"
+        if name_has_pasture_keyword or ("gras" in name_l and "frisch" in name_l):
+            return "pasture"
+        return None
+
+    # Primaere TM-basierte Klassifikation - nur greifen, wenn der Kontext
+    # auf Gras/Weide hinweist. Andernfalls koennten Mais-, Heu- oder
+    # Kraftfutterzuordnungen falsch ueberschrieben werden.
+    if not (name_has_gras or name_has_pasture_keyword or name_has_silage_keyword or name_has_hay_keyword):
+        return None
+
+    if dm_f < 0.30:
+        return "pasture"
+    if dm_f < 0.80:
+        return "grass_silage"
+    return "grass_hay"
+
+
 def _max_kg_for(name: str, futterart: str, dm_frac: float) -> float:
     """
     LP-Obergrenze kg TM/d für Milchkuh (TMR ~22 kg TM/d).
@@ -251,14 +332,31 @@ def _max_kg_for(name: str, futterart: str, dm_frac: float) -> float:
         return 4.0
     if "maissilage" in n or ("mais" in n and "siliert" in n):
         return 14.0
-    if "grassilage" in n or ("gras" in n and "siliert" in n):
+    # Gras-basierte Klassifikation primaer ueber TM-Gehalt (fachlich korrekt):
+    #   TM < 30 %  -> Frischgras/Weide        -> 14 kg TM/d
+    #   TM 30-80 % -> Grassilage (inkl. Anwelksilage/Heulage) -> 12 kg TM/d
+    #   TM >= 85 % -> Heu (wird oben ueber "heu" im Namen erfasst, 5 kg TM/d)
+    # Reihenfolge wichtig: Silage vor Weide pruefen.
+    _gk = _grass_feed_kind({"name": name, "dm_frac": dm_frac})
+    if _gk == "grass_silage":
         return 12.0
     if "ganzpflanzensil" in n or "gps" in n:
         return 8.0
-    if "weide" in n or "frischgras" in n or ("gras" in n and "frisch" in n):
-        # Fuer Weide-/PMR-Systeme muss deutlich mehr Frischgrasaufnahme moeglich sein.
-        # Die TMR-spezifische Deckelung erfolgt spaeter im Solver nur fuer feeding_type=TMR.
-        return 14.0
+    if _gk == "pasture":
+        # Planungs-RICHTWERT (nicht starre Obergrenze) fuer Weideaufnahme.
+        # DLG-Merkblatt 417: Hochleistungs-Standweide praxistypisch ca.
+        # 10-12 kg TM/d, Spitzenaufnahme bei 24/7-Kurzrasen bis 13-14 kg.
+        # Default 12 kg TM/d als mittlerer Planungswert - die tatsaechliche
+        # Weideaufnahme haengt von Jahreszeit, Aufwuchs, Zuteilung, Besatz,
+        # Wetter und Ergaenzungsfutter ab. Saisonale Feinsteuerung erfolgt
+        # aktuell ueber `season_profile` und policy_overrides; eine dedi-
+        # zierte Weideaufnahme-/Substitutions-Logik ist als Folgeslice
+        # vorgesehen (User-Review 2026-04-23, §2).
+        # Die TMR-spezifische Deckelung (4 kg TM/d) erfolgt spaeter im
+        # Solver nur fuer feeding_type=TMR.
+        return 12.0
+    if _gk == "grass_hay":
+        return 5.0
 
     # Saftfutter – Nassnebenprodukte: einzeln max 3 kg TM/d (DLG Praxisempfehlung)
     # Gefährlich: zu viel → NDF-Dichte sinkt, peNDF unzureichend, Labmagenverlagerung
@@ -369,6 +467,10 @@ def _load_dlg_feeds_from_json(json_path: str) -> List[Dict[str, Any]]:
             "group": group,
             "futterart": futterart,
             "forage": is_forage,
+            # DLG 01|2025: Faserreiche Co-Produkte (Biertreber, Rueben-/Pressschnitzel,
+            # Schlempe, Pulpe ...) zaehlen gemeinsam mit dem Grobfutter in die
+            # Planungsgroesse aNDFomGF+CoP. Siehe ``_is_structural_coproduct``.
+            "structural_coproduct": _is_structural_coproduct(name, futterart),
             "dm_frac": dm_frac,
             "price": price,
             "min_kg": 0.0,
@@ -530,6 +632,52 @@ _SPECIAL_SUPPLEMENTS: List[Dict[str, Any]] = [
         sidmet=None,
         _special="pasture_mg",
     ),
+    # Sommer-Pansenpuffer (DLG-Merkblatt 417 / GfE-Workshop 2023):
+    # Natriumbicarbonat (NaHCO3) glaettet Pansen-pH-Abfaelle im Sommer, wenn
+    # hohe Umgebungstemperaturen zu reduzierter TM-Aufnahme + vermehrtem Hecheln
+    # und damit respiratorischer Alkalose fuehren. Wirkt als ruminaler Puffer
+    # gegen SARA und deckt gleichzeitig erhoehten Natriumbedarf (Hitzestress)
+    # zusammen mit bodenseitigem Elektrolytverlust. Typische Einsatzmenge 150-250 g
+    # je Kuh und Tag (entspricht 0,15-0,25 kg TM bei ~99 % TM-Gehalt).
+    dict(
+        id="special_summer_rumen_buffer",
+        lid="sp2",
+        name="Pansenpuffer NaHCO3 (Sommerhitze)",
+        konservierung="trocken",
+        group="Zusatzstoffe",
+        futterart="Konzentratfutter, Trockenkonzentrate, Zusatzstoffe",
+        forage=False,
+        dm_frac=0.990,
+        price=0.950,
+        min_kg=0.0,
+        max_kg=0.25,
+        me=0.0,
+        sidp=0.0,
+        cp=0.0,
+        ndf=0.0,
+        adf=0.0,
+        st=0.0,
+        bst=0.0,
+        zu=0.0,
+        nfc=0.0,
+        xl=0.0,
+        ca=0.0,
+        p=0.0,
+        # Natriumgehalt NaHCO3: 22 %; 22 g Na je 100 g Produkt = 220 g/kg TM
+        na=220.0,
+        mg=0.0,
+        k=0.0,
+        # DCAB-Effekt (kationenbetonter Puffer)
+        dcab=600.0,
+        edg=None,
+        rmd=None,
+        omdfan1=None,
+        ndfd=None,
+        ge=None,
+        sidlys=None,
+        sidmet=None,
+        _special="summer_buffer",
+    ),
 ]
 
 
@@ -542,23 +690,37 @@ def _with_special_supplements(feeds: List[Dict[str, Any]]) -> List[Dict[str, Any
     return merged
 
 
+def _ensure_structural_coproduct_flag(feeds: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Setzt ``structural_coproduct`` auf Feeds, die diesen Flag noch nicht tragen.
+
+    Das schliesst den Fallback-Katalog (``_FEEDS_FALLBACK``), die Special-
+    Supplemente und alle weiteren Feeds ein, die evtl. aus Testfixtures kommen.
+    """
+    for feed in feeds:
+        if "structural_coproduct" not in feed:
+            feed["structural_coproduct"] = _is_structural_coproduct(
+                feed.get("name", ""), feed.get("futterart", "")
+            )
+    return feeds
+
+
 def _get_feeds() -> List[Dict[str, Any]]:
     global _FEEDS_CACHE
     if _FEEDS_CACHE is not None:
-        return _with_special_supplements(_FEEDS_CACHE)
+        return _ensure_structural_coproduct_flag(_with_special_supplements(_FEEDS_CACHE))
 
     json_path = _dlg_json_path()
     if json_path and os.path.isfile(json_path):
         try:
             _FEEDS_CACHE = _load_dlg_feeds_from_json(json_path)
             logger.info("DLG-Futterdatenbank geladen: %d Einträge aus %s", len(_FEEDS_CACHE), json_path)
-            return _with_special_supplements(_FEEDS_CACHE)
+            return _ensure_structural_coproduct_flag(_with_special_supplements(_FEEDS_CACHE))
         except Exception as exc:
             logger.warning("DLG JSON konnte nicht geladen werden: %s – verwende Fallback", exc)
 
     _FEEDS_CACHE = _FEEDS_FALLBACK
     logger.info("DLG-Futterdatenbank: Fallback mit %d Einträgen", len(_FEEDS_CACHE))
-    return _with_special_supplements(_FEEDS_CACHE)
+    return _ensure_structural_coproduct_flag(_with_special_supplements(_FEEDS_CACHE))
 
 
 # ---------------------------------------------------------------------------
@@ -610,14 +772,28 @@ def _gfe_requirements(profile: Dict[str, Any]) -> _CowReq:
 
     bw75 = bw ** 0.75
 
+    # --- Weide-Aktivitaetszuschlag (DLG-Merkblatt 417 / GfE 2001) ---
+    # Weidegang erhoeht den Erhaltungsbedarf durch Lauf-, Rupf- und
+    # Thermoregulations-Aktivitaet um 10-25 %. Default: +15 % bei echtem
+    # Weidegang (feeding_type == "PMR+Weide"). Das ist **zusaetzlich** zu
+    # den bereits in 0.308 enthaltenen 5 % Grundaktivitaetszuschlag.
+    feeding_type = _normalize_feeding_type(profile.get("feeding_type"))
+    pasture_factor = 1.15 if feeding_type == "PMR+Weide" else 1.00
+
     # --- NEL (für Referenzausgabe) ---
-    nel_maint = 0.308 * bw75            # inkl. 5% Aktivitätszuschlag
+    nel_maint = 0.308 * bw75 * pasture_factor
     nel_milk = (0.38 * fat_pct + 0.21 * prot_pct + 0.95) * milk if milk > 0 else 0.0
     nel_total = nel_maint + nel_milk
 
     # --- ME (GfE 2023 dreistufig) ---
     me_maint = nel_maint / 0.73         # k_m = 0.73 für laktierende Kühe
-    me_milk = nel_milk / 0.62          # k_l = 0.62 für Milch
+    # k_l dichte-abhaengig (GfE 2001, §5): k_l = 0.463 + 0.24·q mit q = ME/GE.
+    # Die effektive Ration-ME-Dichte ist beim Bedarfsaufruf noch unbekannt;
+    # wir setzen konservativ k_l_fix = 0.60 als Planungsbasis. Der
+    # rationsspezifische k_l wird nur fuer die Anzeige "Milch aus Grundfutter"
+    # im _milk_from_supply dynamisch ermittelt.
+    k_l_planning = 0.60
+    me_milk = nel_milk / k_l_planning if milk > 0 else 0.0
     me_total = me_maint + me_milk
 
     # --- sidP ≈ nXP (GfE 2001, aus DLG Tab.8 validiert) ---
@@ -705,7 +881,14 @@ _PENDF_TABLE: Dict[str, Any] = {
 
 
 def _pendf_minimum(staerke_density: float, dmi_kg: float) -> float:
-    """Minimale peNDF-Dichte [g/kg TM] aus Lookup-Tabelle (GfE-Workshop 2023)."""
+    """Minimale peNDF-Dichte [g/kg TM] aus Lookup-Tabelle (GfE-Workshop 2023).
+
+    Hinweis (DLG 01|2023): peNDF ist fachlich eine Kontroll- und Validierungsgroesse,
+    keine praktikable Planungsgroesse fuer die LP-Optimierung. Dieser Wert wird
+    deshalb im Ergebnis-Panel als Ampel angezeigt, aber nicht mehr als harte
+    Stage-2-Nebenbedingung verwendet. Die eigentliche Planungsgroesse fuer die
+    Pansengesundheit ist die aNDFomGF-Dichte (siehe `_andfom_gf_min_target`).
+    """
     s_bands = _PENDF_TABLE["staerke_bands"]
     d_bands = _PENDF_TABLE["dmi_bands"]
     matrix  = _PENDF_TABLE["matrix"]
@@ -714,35 +897,326 @@ def _pendf_minimum(staerke_density: float, dmi_kg: float) -> float:
     return float(matrix[s_idx][d_idx])
 
 
-def _ph_predict(pendf_density: float, staerke_density: float, dmi_kg: float) -> float:
-    """
-    Pansen-pH-Vorhersage nach GfE-Workshop 2023 (Zebeli/Schwarz-Formel):
-      pH = 6.237 + 0.03332×peNDF - 0.00055×peNDF² - 0.01091×Stärke - 0.0089×TM
+# aNDFomGF-Mindestdichte als **primaere Planungsgroesse** (DLG 01|2025, Kap. 8.2).
+#
+# Neue binaere Kaskade (Tab. 12 / Fussnoten S. 32):
+#   pabKH <= 210 g/kg TM  ->  aNDFomGF+CoP >= 200 g/kg TM
+#   pabKH  > 210 g/kg TM  ->  aNDFomGF+CoP >= 280 g/kg TM
+#   pabKH  > 260 g/kg TM  ->  Warnung "abbaubare Staerke zu hoch" (bST aufstocken)
+#
+# Dabei ist der Nenner "aNDFomGF+CoP" = aNDFom aus Grobfutter UND faserreichen
+# Co-Produkten (Biertreber, Pressschnitzel, Schlempe ...). pabKH = ST+ZU-bST.
+#
+# Aelteres, staerkeadaptives Modell (DLG 01|2023) bleibt als Fallback erhalten,
+# wenn keine pabKH-Dichte uebergeben wird.
+# Refactor 2026-04-23: ausgelagert nach app.agrar.rations.constants.dlg2025
+from app.agrar.rations.constants.dlg2025 import (
+    ANDFOM_GF_BASE_NON_PASTURE as _ANDFOM_GF_BASE_NON_PASTURE,
+    ANDFOM_GF_BASE_PASTURE as _ANDFOM_GF_BASE_PASTURE,
+    ANDFOM_GF_STARCH_THRESHOLD as _ANDFOM_GF_STARCH_THRESHOLD,
+    ANDFOM_GF_STARCH_STEP as _ANDFOM_GF_STARCH_STEP,
+    ANDFOM_GF_STARCH_ADD_PER_STEP as _ANDFOM_GF_STARCH_ADD_PER_STEP,
+    ANDFOM_GF_STARCH_ADD_CAP as _ANDFOM_GF_STARCH_ADD_CAP,
+    PABKH_THRESHOLD_LOW as _DLG2025_PABKH_THRESHOLD_LOW,
+    PABKH_WARNING_HIGH as _DLG2025_PABKH_WARNING_HIGH,
+    ANDFOMGF_COP_LOW as _DLG2025_ANDFOMGF_COP_LOW,
+    ANDFOMGF_COP_HIGH as _DLG2025_ANDFOMGF_COP_HIGH,
+    ANDFOMGF_COP_LOW_PASTURE as _DLG2025_ANDFOMGF_COP_LOW_PASTURE,
+)
 
-    peNDF [g/kg TM], Stärke [g/kg TM], TM-Aufnahme [kg/d].
-    Gültig für pH 5.8–6.8, peNDF 60–250 g/kg TM, Stärke 50–350 g/kg TM.
+
+def _andfom_gf_starch_uplift(staerke_density_kgdm: float) -> float:
+    """Staerkeadaptiver Aufschlag auf die aNDFomGF-Mindestdichte (g/kg TM).
+
+    DLG 01|2023 (superseded by DLG 01|2025): "bei hoeheren pansenabbaubaren
+    Kohlenhydraten entsprechend mehr". Wird nur noch als Fallback verwendet,
+    wenn keine pabKH-Dichte vorliegt. Neue Planung: siehe
+    ``_andfom_gf_dlg2025_cascade``.
     """
-    p = pendf_density
-    s = staerke_density
-    t = dmi_kg
-    ph = 6.237 + 0.03332 * p - 0.00055 * p * p - 0.01091 * s - 0.0089 * t
+    excess = max(0.0, float(staerke_density_kgdm) - _ANDFOM_GF_STARCH_THRESHOLD)
+    steps = excess / _ANDFOM_GF_STARCH_STEP
+    uplift = steps * _ANDFOM_GF_STARCH_ADD_PER_STEP
+    return float(min(uplift, _ANDFOM_GF_STARCH_ADD_CAP))
+
+
+def _andfom_gf_dlg2025_cascade(
+    pabkh_density_kgdm: float,
+    pasture_pmr: bool,
+) -> Tuple[float, str]:
+    """Binaere DLG-01|2025-Kaskade fuer aNDFomGF+CoP [g/kg TM].
+
+    Returns (target_kgdm, step_label):
+      step_label in {"<=210", ">210", ">260_warn"}.
+    """
+    pabkh = float(pabkh_density_kgdm or 0.0)
+    low = _DLG2025_ANDFOMGF_COP_LOW_PASTURE if pasture_pmr else _DLG2025_ANDFOMGF_COP_LOW
+    if pabkh <= _DLG2025_PABKH_THRESHOLD_LOW:
+        return float(low), "<=210"
+    if pabkh > _DLG2025_PABKH_WARNING_HIGH:
+        return float(_DLG2025_ANDFOMGF_COP_HIGH), ">260_warn"
+    return float(_DLG2025_ANDFOMGF_COP_HIGH), ">210"
+
+
+def _andfom_gf_min_target(
+    staerke_density_kgdm: float,
+    pasture_pmr: bool,
+    seasonal_boost: float = 0.0,
+    sara_boost: float = 0.0,
+    pabkh_density_kgdm: Optional[float] = None,
+) -> float:
+    """Primaere aNDFomGF+CoP-Mindestdichte [g/kg TM].
+
+    Ab DLG 01|2025: binaere pabKH-Kaskade (200 / 280 g/kg TM) hat Vorrang,
+    sofern ``pabkh_density_kgdm`` gesetzt ist. Falls nicht (z. B. in Stage-1
+    ohne bereits bestimmte pabKH), wird das alte staerkeadaptive Modell
+    (DLG 01|2023) als Fallback verwendet. Saisonale und SARA-Boosts werden
+    in beiden Faellen additiv aufgeschlagen.
+    """
+    if pabkh_density_kgdm is not None:
+        base, _step = _andfom_gf_dlg2025_cascade(pabkh_density_kgdm, pasture_pmr)
+    else:
+        base_kgdm = _ANDFOM_GF_BASE_PASTURE if pasture_pmr else _ANDFOM_GF_BASE_NON_PASTURE
+        base = base_kgdm + _andfom_gf_starch_uplift(staerke_density_kgdm)
+    return float(base + float(seasonal_boost or 0.0) + float(sara_boost or 0.0))
+
+
+def _pendf_model_calibrated(staerke_density_kgdm: float, dmi_kg: float) -> bool:
+    """Liegt die Ration im kalibrierten Bereich des peNDF-Lookup-Modells?
+
+    Kalibrierter Bereich: Staerke 0-250 g/kg TM und TM-Aufnahme 10-25 kg/d.
+    Ausserhalb werden die Werte der Lookup-Tabelle extrapoliert (Fallback).
+    """
+    st_ok = 0.0 <= float(staerke_density_kgdm) <= 250.0
+    dmi_ok = 10.0 <= float(dmi_kg) <= 25.0
+    return bool(st_ok and dmi_ok)
+
+
+# pH-Predictor nach Zebeli et al. 2008 J. Dairy Sci. 91:2046-2066, wörtlich
+# zitiert in DLG-Information 01|2025, Kap. 8.3 (Strukturindex), S. 34:
+#
+#   pH = 6,05 + 0,044·peNDF − 0,0006·peNDF² − 0,017·abbauSt − 0,016·TM
+#
+# Einheiten (DLG 01|2025):
+#   peNDF:   % der TM                  (Validitaetsbereich ca. 6 - 25 %)
+#   abbauSt: pansenabbaubare Staerke (ST - bST) in % der TM
+#                                      (Validitaetsbereich ca. 5 - 35 %)
+#   TM:      kg TM/Tag                 (Validitaetsbereich 10 - 25 kg/d)
+#
+# Wichtig: DLG 01|2025 bezieht den Staerke-Eingang ausdruecklich auf die
+# *pansenabbaubare* Staerke (ST - bST), nicht auf Gesamt-ST und NICHT auf
+# pabKH = ST + ZU - bST.
+#
+# Aenderungshistorie:
+#   - vor 2026-04-21: Eingaenge in g/kg TM (Unit-Bug) -> false-positive SARA.
+#   - 2026-04-21 (SARA-Reopt): Umrechnung g/kg TM -> % TM + Clipping eingefuehrt,
+#       aber mit alternativer Koeffizientenvariante (6.237/0.03332/0.00055/
+#       0.01091/0.0089) aus dem GfE-Workshop 2023 (Zebeli/Schwarz-Adaption).
+#   - 2026-04-21 (DLG2025-PH-FORMEL): Rueckkehr auf die von DLG 01|2025
+#       offiziell zitierten Zebeli-2008-Koeffizienten. Staerke-Eingang auf
+#       pansenabbaubare Staerke (ST - bST) umgestellt; Zucker gehoert nach
+#       DLG NICHT in diese Formel.
+# Refactor 2026-04-23: ausgelagert nach app.agrar.rations.constants.gfe2023
+from app.agrar.rations.constants.gfe2023 import (
+    PH_PEN_DENS_MIN_KGDM as _PH_PEN_DENS_MIN_KGDM,
+    PH_PEN_DENS_MAX_KGDM as _PH_PEN_DENS_MAX_KGDM,
+    PH_STARCH_MIN_KGDM as _PH_STARCH_MIN_KGDM,
+    PH_STARCH_MAX_KGDM as _PH_STARCH_MAX_KGDM,
+    PH_DMI_MIN as _PH_DMI_MIN,
+    PH_DMI_MAX as _PH_DMI_MAX,
+)
+
+
+def _ph_inputs_in_range(
+    pendf_density: float, abbaust_density: float, dmi_kg: float
+) -> bool:
+    """Alle Eingaenge im Validitaetsbereich der Zebeli-2008-Formel?
+
+    Eingaenge in g/kg TM (peNDF, abbaubare Staerke ST-bST) und kg/d (DMI).
+    """
+    return (
+        _PH_PEN_DENS_MIN_KGDM <= pendf_density <= _PH_PEN_DENS_MAX_KGDM
+        and _PH_STARCH_MIN_KGDM <= abbaust_density <= _PH_STARCH_MAX_KGDM
+        and _PH_DMI_MIN <= dmi_kg <= _PH_DMI_MAX
+    )
+
+
+def _ph_predict(pendf_density: float, abbaust_density: float, dmi_kg: float) -> float:
+    """Pansen-pH-Vorhersage nach Zebeli et al. 2008 (DLG 01|2025, Kap. 8.3).
+
+    Formel:
+        pH = 6,05 + 0,044·peNDF − 0,0006·peNDF² − 0,017·abbauSt − 0,016·TM
+
+    Eingaenge:
+        pendf_density:    peNDF-Dichte in g/kg TM
+        abbaust_density:  pansenabbaubare Staerke (ST - bST) in g/kg TM
+        dmi_kg:           TM-Aufnahme in kg/d
+
+    Die DLG/Zebeli-Formel arbeitet intern mit % der TM. Umrechnung g/kg TM x 0.1
+    = % TM; Eingaenge werden auf den publizierten Validitaetsbereich geclippt,
+    damit die Formel ausserhalb ihres Bereichs keine unphysikalischen Werte
+    produziert (Clipping nur defensiv, Anwendbarkeit ueber
+    ``_ph_inputs_in_range`` gepruefen).
+    """
+    p_pct = max(_PH_PEN_DENS_MIN_KGDM, min(_PH_PEN_DENS_MAX_KGDM, float(pendf_density))) / 10.0
+    s_pct = max(_PH_STARCH_MIN_KGDM, min(_PH_STARCH_MAX_KGDM, float(abbaust_density))) / 10.0
+    t = max(_PH_DMI_MIN, min(_PH_DMI_MAX, float(dmi_kg)))
+    ph = 6.05 + 0.044 * p_pct - 0.0006 * p_pct * p_pct - 0.017 * s_pct - 0.016 * t
     return round(max(5.5, min(7.0, ph)), 2)
 
 
-def _feed_pendf_factor(feed: Dict[str, Any]) -> float:
-    pendf_map: Dict[str, float] = {
-        "Grundfutter/Grobfutter": 0.90,
-        "Grundfutter/Saftfutter": 0.85,
-        "Grundfutter/Betrieb": 0.90,
-        "Kraftfutter/Trocken": 0.25,
-        "Kraftfutter/Feucht": 0.30,
-        "Zusatzstoffe": 0.0,
-        "Sonstige": 0.30,
+def _abbaust_density_kgdm(
+    feeds: List[Dict[str, Any]],
+    amounts: List[float],
+    total_dmi_kg: float,
+) -> float:
+    """Dichte der pansenabbaubaren Staerke (ST - bST) in g/kg TM.
+
+    Zucker wird hier bewusst NICHT eingerechnet: DLG 01|2025 Kap. 8.3 zitiert
+    Zebeli 2008 explizit mit "abbaubare Staerke", nicht "pabKH" (ST+ZU-bST).
+    """
+    if total_dmi_kg <= 0:
+        return 0.0
+    abbaust_g = 0.0
+    for amt, feed in zip(amounts, feeds):
+        st = float(feed.get("st") or 0.0)
+        bst = float(feed.get("bst") or 0.0)
+        abbaust_g += float(amt) * max(0.0, st - bst)
+    return abbaust_g / total_dmi_kg
+
+
+# ---------------------------------------------------------------------------
+# DLG 01|2025, Kap. 8.4: Fermentationsindex Kohlenhydrate (FIKH)
+#   FIKH [%] = DNDF / (DNDF + pabKH) * 100
+# mit
+#   DNDF  = aNDFom * NDFD / 100     [g/kg TM]   (verdauliche aNDFom)
+#   pabKH = ST + ZU - bST            [g/kg TM]   (pansenabbaubare KH)
+# Ziel: >= 50 %. Unter 50 % steht die Fermentation im Pansen einseitig auf
+# Staerke/Zucker, was das SARA-Risiko erhoeht (DLG 01|2025 S. 35).
+# ---------------------------------------------------------------------------
+# Refactor 2026-04-23: ausgelagert nach app.agrar.rations.constants.gfe2023
+from app.agrar.rations.constants.gfe2023 import FIKH_TARGET_PCT as _FIKH_TARGET_PCT
+
+
+def _fikh_percent(
+    feeds: List[Dict[str, Any]],
+    amounts: List[float],
+    total_dmi_kg: float,
+) -> Tuple[Optional[float], Dict[str, Any]]:
+    """Fermentationsindex Kohlenhydrate (FIKH) in %, DLG 01|2025 Kap. 8.4.
+
+    Returns (fikh_pct, diagnostics). ``fikh_pct`` ist ``None``, wenn fuer keinen
+    Feed ein NDFD-Wert vorliegt (dann ist DNDF nicht bestimmbar, der Index ist
+    nicht aussagekraeftig).
+    """
+    if total_dmi_kg <= 0:
+        return None, {"reason": "total_dmi_kg <= 0"}
+
+    dndf_g = 0.0
+    ndf_with_ndfd_g = 0.0
+    ndf_total_g = 0.0
+    pabkh_g = 0.0
+    missing_ndfd_kg = 0.0
+    covered_ndfd_kg = 0.0
+    for amt, feed in zip(amounts, feeds):
+        amt_f = float(amt or 0.0)
+        if amt_f <= 0:
+            continue
+        ndf = float(feed.get("ndf") or 0.0)
+        st = float(feed.get("st") or 0.0)
+        zu = float(feed.get("zu") or 0.0)
+        bst = float(feed.get("bst") or 0.0)
+        pabkh_g += amt_f * max(0.0, st + zu - bst)
+        ndf_total_g += amt_f * ndf
+        ndfd = feed.get("ndfd")
+        if ndfd is None or ndf <= 0:
+            missing_ndfd_kg += amt_f
+            continue
+        dndf_g += amt_f * ndf * float(ndfd) / 100.0
+        ndf_with_ndfd_g += amt_f * ndf
+        covered_ndfd_kg += amt_f
+
+    if dndf_g + pabkh_g <= 0 or covered_ndfd_kg <= 0:
+        return None, {
+            "reason": "no_ndfd_data",
+            "missing_ndfd_kg": round(missing_ndfd_kg, 2),
+        }
+
+    # Falls ein Teil der Ration keinen NDFD-Wert hat, rechnen wir einen konservativen
+    # Fallback NDFD = 0.50 (Literaturmittel fuer Grobfutter) auf den Rest, damit der
+    # Gesamtindex nicht systematisch zu guenstig dasteht.
+    if missing_ndfd_kg > 0:
+        dndf_g += max(0.0, ndf_total_g - ndf_with_ndfd_g) * 0.50
+
+    denom = dndf_g + pabkh_g
+    if denom <= 0:
+        return None, {"reason": "denom_zero"}
+    fikh = dndf_g / denom * 100.0
+    return round(fikh, 1), {
+        "dndf_g": round(dndf_g, 1),
+        "pabkh_g": round(pabkh_g, 1),
+        "missing_ndfd_kg": round(missing_ndfd_kg, 2),
+        "covered_ndfd_kg": round(covered_ndfd_kg, 2),
+        "ndfd_coverage_pct": round(
+            covered_ndfd_kg / max(covered_ndfd_kg + missing_ndfd_kg, 1e-9) * 100.0, 1
+        ),
     }
-    base = pendf_map.get(feed.get("group", "Sonstige"), 0.30)
+
+
+def _feed_pendf_factor(feed: Dict[str, Any]) -> float:
+    """Physikalisch effektiver NDF-Anteil am Gesamt-NDF (peNDF/NDF), fachlich
+    kalibriert nach Zebeli 2012 / DLG 01|2023 / DLG-Workshop 2023.
+
+    Typische peNDF/NDF-Quoten:
+      Langfaser (Heu, Stroh, >3 cm)        0.95 - 1.00
+      Luzernesilage / -heu                 0.65 - 0.75
+      Grassilage (Standard-Haecksel)       0.50 - 0.60
+      Frischgras / Weide                   0.50 - 0.60
+      GPS (Ganzpflanzensilage)             0.45 - 0.55
+      Maissilage (Haecksel 0.7-1.2 cm)     0.35 - 0.50
+      Ruebenblattsilage                    0.30 - 0.40
+      Saftfutter (Biertreber, Schlempe)    0.20 - 0.30
+      Ruebenschnitzel (nass)               0.20 - 0.30
+      Kraftfutter (Getreide, Schrote)      0.05 - 0.15
+
+    Vor 2026-04-21 waren die Defaults fuer Grobfutter auf 0.90 gesetzt, was
+    die peNDF-Dichte systematisch auf ~370 g/kg TM ueberschaetzte und
+    false-positive SARA-Alarme (pH-Formel extrapoliert) ausloeste.
+    """
+    pendf_map: Dict[str, float] = {
+        "Grundfutter/Grobfutter": 0.50,
+        "Grundfutter/Saftfutter": 0.25,
+        "Grundfutter/Betrieb": 0.50,
+        "Kraftfutter/Trocken": 0.10,
+        "Kraftfutter/Feucht": 0.15,
+        "Zusatzstoffe": 0.0,
+        "Sonstige": 0.20,
+    }
+    base = pendf_map.get(feed.get("group", "Sonstige"), 0.20)
     name_l = feed.get("name", "").lower()
-    if "heu" in name_l or "stroh" in name_l:
-        return 1.0
+    if "stroh" in name_l:
+        return 1.00
+    if "heu" in name_l:
+        return 0.95
+    if "luzerne" in name_l:
+        return 0.70
+    # Gras-basierte Faktoren konsistent ueber TM-klassifizierte Gruppe
+    _gk = _grass_feed_kind(feed)
+    if _gk == "grass_silage":
+        return 0.55
+    if "maissilage" in name_l or ("mais" in name_l and "siliert" in name_l):
+        return 0.45
+    if "ganzpflanzen" in name_l or "gps" in name_l:
+        return 0.50
+    if _gk == "pasture":
+        return 0.55
+    if _gk == "grass_hay":
+        return 0.95
+    if "rübenblatt" in name_l or "ruebenblatt" in name_l or "blattsilage" in name_l:
+        return 0.35
+    if "treber" in name_l or "schlempe" in name_l or "pülpe" in name_l or "puelpe" in name_l:
+        return 0.25
+    if "rübenschnitzel" in name_l or "ruebenschnitzel" in name_l:
+        return 0.25
     return base
 
 
@@ -776,11 +1250,9 @@ def _normalize_feeding_type(raw: Optional[str]) -> str:
 
 
 def _has_pasture_forage(feeds: List[Dict[str, Any]]) -> bool:
-    for feed in feeds:
-        name_l = feed.get("name", "").lower()
-        if "weide" in name_l or "frischgras" in name_l or ("gras" in name_l and "frisch" in name_l):
-            return True
-    return False
+    # TM-basierte Klassifikation: echte Weide nur bei TM < 30 %.
+    # Grassilage (30-80 % TM) zaehlt hier bewusst nicht als Weide.
+    return any(_grass_feed_kind(feed) == "pasture" for feed in feeds)
 
 
 def _is_pasture_pmr_system(feeds: List[Dict[str, Any]], profile: Optional[Dict[str, Any]]) -> bool:
@@ -790,6 +1262,315 @@ def _is_pasture_pmr_system(feeds: List[Dict[str, Any]], profile: Optional[Dict[s
     if mode != "PMR":
         return False
     return _has_pasture_forage(feeds)
+
+
+# ---------------------------------------------------------------------------
+# Fuetterungssystem / Ration-Block-Aufteilung
+# ---------------------------------------------------------------------------
+#
+# Fachliches Modell: eine Ration ist in der Praxis kein homogener Korb, sondern
+# ein System gestaffelter Angebote (DLG-Merkblatt 417/443; GfE-Workshop 2023):
+#
+#   - pasture_block            Weide, freie Aufnahme auf der Flaeche
+#   - tmr_block                Misch-/Teilmisch-Wagen (Grundfutter + Mineral
+#                              + ggf. Grund-Kraftfutter; homogen vermischt)
+#   - concentrate_staged_block Leistungs-Kraftfutter (Transponder / AMS /
+#                              Melkstand; gestaffelt nach Milchleistung)
+#
+# Struktur-/Pansen-Constraints (peNDF, SI, pabKH) wirken physiologisch nur
+# im TMR-Block; Weide und gestaffeltes Konzentrat werden getrennt gefressen
+# und gehen daher nicht in die Strukturbilanz des Mischwagens ein.
+
+
+def _feeding_system_defaults(
+    system: str,
+    distribution: str,
+    treat_as_primiparous: bool = False,
+    recipe: Optional[ConcentrateRecipeProfile] = None,
+) -> Dict[str, float]:
+    """Liefert Standardgrenzen fuer die Konzentratzuteilung.
+
+    Abgeleitet aus Praxis-Richtwerten (User-Abstimmung 2026-04-21) plus
+    Rezepturklassen-Adjustierung (User-Review 2026-04-23, §5):
+
+    Basiswerte nach Verteilungssystem:
+      - Transponder:   2.5 kg/Abruf, Basis 8 kg/Tag
+      - AMS (Roboter): 2.0 kg/Melkung, 3 Melkungen, Basis 6 kg/Tag
+      - Melkstand:     4.5 kg/Melkzeit Holstein Mehrlakt (9 kg/d Basis),
+                       4.0 kg/Melkzeit bei Faersen 1. Lakt. (8 kg/d Basis)
+      - TMR/included:  keine zusaetzliche Staffelung
+
+    Rezepturklassen-Adjustierung auf das empfohlene Tagesmaximum
+    (Einzelgaben bleiben physiologisch unveraendert bzw. werden beim
+    rapid-Pfad sanft abgesenkt):
+
+      recipe.starch_breakdown_class:
+        - "slow"   + rumen_buffer_present == True   -> PREMIUM
+              Tagesmax +1,0 kg (pansenfreundlich, hohe ME-Nutzung)
+              Einzelgabe ggf. erhoeht (nur Melkstand: 4,5->5,0 kg)
+        - "slow"   ohne Puffer                      -> LEICHT ERHOEHT
+              Tagesmax +0,5 kg (pansenfreundlich, aber kein Premium)
+        - "mixed"  (Default)                        -> STANDARD
+              Basiswerte unveraendert
+        - "rapid"  (Muehlennebenprodukt / schnell)  -> SARA-SCHUTZ
+              Tagesmax -1,5 kg (Reduktion gegen Pansenuebersaeuerung)
+              Einzelgabe: -0,5 kg bei Melkstand/Transponder
+    """
+    dist = (distribution or "").strip().lower()
+    sys_norm = (system or "").strip().upper()
+
+    starch_class = (
+        (recipe.starch_breakdown_class if recipe else "mixed") or "mixed"
+    ).lower()
+    rumen_buffer = bool(recipe and recipe.rumen_buffer_present)
+    is_premium = starch_class == "slow" and rumen_buffer
+
+    if dist == "transponder":
+        base = {
+            "concentrate_max_per_serving_kg": 2.5,
+            "concentrate_servings_per_day": 4.0,
+            "concentrate_max_per_day_kg": 8.0,
+        }
+        if is_premium:
+            base["concentrate_max_per_day_kg"] = 9.0
+        elif starch_class == "slow":
+            base["concentrate_max_per_day_kg"] = 8.5
+        elif starch_class == "rapid":
+            base["concentrate_max_per_serving_kg"] = 2.0
+            base["concentrate_max_per_day_kg"] = 6.5
+        return base
+
+    if dist == "ams":
+        base = {
+            "concentrate_max_per_serving_kg": 2.0,
+            "concentrate_servings_per_day": 3.0,
+            "concentrate_max_per_day_kg": 6.0,
+        }
+        if is_premium:
+            base["concentrate_max_per_day_kg"] = 7.0
+        elif starch_class == "rapid":
+            base["concentrate_max_per_serving_kg"] = 1.5
+            base["concentrate_max_per_day_kg"] = 4.5
+        return base
+
+    if dist == "milkparlor":
+        if is_premium:
+            # Premium-Konzentrat (slow starch + rumen buffer): erhoehte
+            # Einzelgabe und Tagesmax vertretbar.
+            return {
+                "concentrate_max_per_serving_kg": 5.0,
+                "concentrate_servings_per_day": 2.0,
+                "concentrate_max_per_day_kg": 10.0,
+            }
+        if treat_as_primiparous:
+            base = {
+                "concentrate_max_per_serving_kg": 4.0,
+                "concentrate_servings_per_day": 2.0,
+                "concentrate_max_per_day_kg": 8.0,
+            }
+        else:
+            base = {
+                "concentrate_max_per_serving_kg": 4.5,
+                "concentrate_servings_per_day": 2.0,
+                "concentrate_max_per_day_kg": 9.0,
+            }
+        if starch_class == "slow":
+            # slow allein (ohne Puffer): vorsichtige +0,5 kg/d
+            base["concentrate_max_per_day_kg"] += 0.5
+        elif starch_class == "rapid":
+            # rapid / Muehlennebenprodukt: Einzelgabe -0,5 kg, Tagesmax -1,5 kg
+            base["concentrate_max_per_serving_kg"] = max(
+                0.0, base["concentrate_max_per_serving_kg"] - 0.5
+            )
+            base["concentrate_max_per_day_kg"] = max(
+                0.0, base["concentrate_max_per_day_kg"] - 1.5
+            )
+        return base
+
+    # included_in_tmr / TMR-only: keine zusaetzlichen Staffelgrenzen
+    return {
+        "concentrate_max_per_serving_kg": 0.0,
+        "concentrate_servings_per_day": 0.0,
+        "concentrate_max_per_day_kg": 0.0,
+    }
+
+
+def _resolve_feeding_system_config(
+    raw: Optional[Any],
+    profile: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
+    """Normalisiert einen FeedingSystemConfig-Input (dict/Model/None).
+
+    Fallback-Logik (Abwaertskompatibilitaet):
+      - None oder leer            -> aus profile.feeding_type ableiten
+      - PMR+Weide im Profil       -> system=PMR_pasture, distribution=milkparlor
+      - PMR im Profil             -> system=PMR_stall, distribution=transponder
+      - TMR / unbekannt           -> system=TMR, distribution=included_in_tmr
+
+    Grenzen werden ueber `_feeding_system_defaults()` aufgefuellt, falls
+    nicht explizit angegeben.
+    """
+    data: Dict[str, Any] = {}
+    if isinstance(raw, FeedingSystemConfig):
+        data = raw.model_dump()
+    elif isinstance(raw, dict):
+        data = dict(raw)
+
+    if not data:
+        feeding_type = _normalize_feeding_type((profile or {}).get("feeding_type"))
+        if feeding_type == "PMR+Weide":
+            data = {"system": "PMR_pasture", "concentrate_distribution": "milkparlor"}
+        elif feeding_type == "PMR":
+            data = {"system": "PMR_stall", "concentrate_distribution": "transponder"}
+        else:
+            data = {"system": "TMR", "concentrate_distribution": "included_in_tmr"}
+
+    system = str(data.get("system", "TMR")).strip()
+    if system not in {"TMR", "PMR_stall", "PMR_pasture"}:
+        system = "TMR"
+
+    distribution = str(data.get("concentrate_distribution", "included_in_tmr")).strip().lower()
+    if distribution not in {"included_in_tmr", "transponder", "ams", "milkparlor"}:
+        distribution = "included_in_tmr"
+
+    treat_primi = bool(data.get("treat_as_primiparous", False))
+    if (profile or {}).get("parity") == 1 or (profile or {}).get("is_primiparous"):
+        treat_primi = True
+
+    recipe_raw = data.get("default_concentrate_recipe")
+    recipe_model: Optional[ConcentrateRecipeProfile] = None
+    if isinstance(recipe_raw, ConcentrateRecipeProfile):
+        recipe_model = recipe_raw
+    elif isinstance(recipe_raw, dict):
+        try:
+            recipe_model = ConcentrateRecipeProfile(**recipe_raw)
+        except Exception:
+            recipe_model = None
+
+    defaults = _feeding_system_defaults(system, distribution, treat_primi, recipe_model)
+    resolved: Dict[str, Any] = {
+        "system": system,
+        "concentrate_distribution": distribution,
+        "treat_as_primiparous": treat_primi,
+        "concentrate_max_per_serving_kg": float(
+            data.get("concentrate_max_per_serving_kg") or defaults["concentrate_max_per_serving_kg"]
+        ),
+        "concentrate_servings_per_day": float(
+            data.get("concentrate_servings_per_day") or defaults["concentrate_servings_per_day"]
+        ),
+        "concentrate_max_per_day_kg": float(
+            data.get("concentrate_max_per_day_kg") or defaults["concentrate_max_per_day_kg"]
+        ),
+        "default_concentrate_recipe": (
+            recipe_model.model_dump() if recipe_model is not None else None
+        ),
+    }
+    return resolved
+
+
+def _auto_assign_block(feed: Dict[str, Any], system: str) -> str:
+    """Ordnet ein Feed automatisch einem Rationsblock zu.
+
+    Regeln (konservativ, gut vorhersehbar):
+      - Weide (Gras, TM < 30 %)                -> pasture_block
+      - andere Grobfutter (Silage, Heu, Stroh) -> tmr_block
+      - Mineral                                -> tmr_block
+      - Kraftfutter / Konzentrat               -> bei TMR: tmr_block
+                                                  bei PMR: concentrate_staged_block
+    Grobe Heuristik ueber Feed-Group + _grass_feed_kind.
+    """
+    sys_norm = (system or "TMR").strip().upper()
+
+    group = str(feed.get("group", "") or "").strip().lower()
+    name = str(feed.get("name", "") or "").strip().lower()
+    futterart = str(feed.get("futterart", "") or "").strip().lower()
+
+    # Mineral-Check zuerst: "Weidemineral" darf nicht faelschlich wegen
+    # dem Wortteil "weide" im _grass_feed_kind-Fallback als Weide gelten.
+    is_mineral = (
+        "mineral" in group
+        or "mineral" in name
+        or "mineral" in futterart
+    )
+    if is_mineral:
+        return "tmr_block"
+
+    grass_kind = _grass_feed_kind(feed)
+    if grass_kind == "pasture":
+        return "pasture_block" if sys_norm == "PMR_PASTURE" else "tmr_block"
+
+    is_forage = bool(feed.get("forage"))
+    if is_forage:
+        return "tmr_block"
+
+    is_concentrate = (
+        "kraftfutter" in group
+        or "konzentrat" in group
+        or "kraftfutter" in futterart
+        or "milchleistungsfutter" in name
+        or "milchleistungsfutter" in futterart
+        or group.startswith("mlf")
+    )
+    if is_concentrate:
+        if sys_norm in {"PMR_STALL", "PMR_PASTURE"}:
+            return "concentrate_staged_block"
+        return "tmr_block"
+
+    # Fallback: TMR
+    return "tmr_block"
+
+
+def _split_feeds_by_block(
+    feeds: List[Dict[str, Any]],
+    system_config: Dict[str, Any],
+    overrides: Optional[List[Dict[str, Any]]] = None,
+) -> Dict[str, List[Dict[str, Any]]]:
+    """Zerlegt die Feed-Liste in pasture/tmr/concentrate_staged.
+
+    `overrides` ist eine Liste von {"feed_id": ..., "block": ...} und gewinnt
+    gegenueber der Automatik.
+    """
+    override_map: Dict[str, str] = {}
+    if overrides:
+        for entry in overrides:
+            if not isinstance(entry, dict):
+                continue
+            fid = str(entry.get("feed_id") or "").strip()
+            blk = str(entry.get("block") or "").strip().lower()
+            if fid and blk in {"pasture", "tmr", "concentrate_staged"}:
+                override_map[fid] = f"{blk}_block"
+
+    system = system_config.get("system", "TMR")
+
+    buckets: Dict[str, List[Dict[str, Any]]] = {
+        "pasture_block": [],
+        "tmr_block": [],
+        "concentrate_staged_block": [],
+    }
+
+    for feed in feeds:
+        fid = str(feed.get("id") or "").strip()
+        target = override_map.get(fid) or _auto_assign_block(feed, system)
+        if target not in buckets:
+            target = "tmr_block"
+        buckets[target].append(feed)
+
+    return buckets
+
+
+# ---------------------------------------------------------------------------
+# Slice 2 (2026-04-23): Futterabruf-Staffel Konstanten (Modul-Scope)
+# ---------------------------------------------------------------------------
+# Umrechnungs-Praxisfaktor: kg Konzentrat (FM) je kg Zusatzmilch oberhalb
+# der Basisleistung aus Grobfutter/Weide. Unteres Band = 0,45 (Hochleistungs-
+# Kraftfutter, hohe Energiedichte), oberes Band = 0,50 (Standard).
+# Refactor 2026-04-23: ausgelagert nach app.agrar.rations.constants.feeding_system
+from app.agrar.rations.constants.feeding_system import (
+    CONC_PER_ADDITIONAL_MILK_LOW as _CONC_PER_ADDITIONAL_MILK_LOW,
+    CONC_PER_ADDITIONAL_MILK_HIGH as _CONC_PER_ADDITIONAL_MILK_HIGH,
+    CONC_DEFAULT_DM_FRAC as _CONC_DEFAULT_DM_FRAC,
+    CONC_HARD_SAFETY_FACTOR as _CONC_HARD_SAFETY_FACTOR,
+)
 
 
 def _run_lp(
@@ -824,14 +1605,103 @@ def _run_lp(
     cp_max = 185.0 if pasture_pmr else 165.0
     k_max = req.k_max_g * (1.15 if pasture_pmr else 1.0)
 
+    # --- Feeding-System / Block-Scoping (Slice 1c/1e) -----------------------
+    # Abgeleitet aus runtime_options["feeding_system_config"] (oder Fallback
+    # aus profile.feeding_type). Block-Scoping wirkt nur, wenn das System
+    # gestaffelt ist (PMR_stall / PMR_pasture) - bei reinem TMR bleiben alle
+    # Feeds im TMR-Block und das Verhalten ist unveraendert (Abwaerts-
+    # kompatibel mit bestehender Nutzung ohne feeding_system_config).
+    #
+    # Fachlicher Scope der Scoping-Regel (User-Review 2026-04-23, §1):
+    #   Die Struktur-/Kohlenhydrat-/Fett-/CP-Dichte-Limits gelten fuer die
+    #   Mischmasse des TMR-Blocks (homogene Ration im Mischwagen). Weide
+    #   und gestaffeltes Lockfutter werden daraus ausgenommen, weil sie
+    #   nicht Bestandteil der Mischung sind. Das bedeutet NICHT, dass Weide
+    #   strukturphysiologisch irrelevant waere - lange Partikel, Kaudauer,
+    #   Speichelbildung wirken strukturell weiter. Fuer die Weide gelten
+    #   eigene Bewertungs- und Risikologiken (pasture_block, K/Mg-Ratio,
+    #   Saisonprofile), die tages- und aufnahmebezogen ausgewertet werden.
+    _fs_cfg = _resolve_feeding_system_config(
+        (runtime_options or {}).get("feeding_system_config"), profile
+    )
+    _fs_overrides = (runtime_options or {}).get("feed_block_overrides") or []
+    _fs_buckets = _split_feeds_by_block(feeds, _fs_cfg, _fs_overrides)
+    _block_by_id: Dict[str, str] = {}
+    for blk_name, blk_feeds in _fs_buckets.items():
+        for f in blk_feeds:
+            _block_by_id[str(f.get("id") or id(f))] = blk_name
+    block_labels = [_block_by_id.get(str(f.get("id") or id(f)), "tmr_block") for f in feeds]
+    _is_staged_system = _fs_cfg.get("system") in {"PMR_stall", "PMR_pasture"}
+    _has_pasture_block = any(lab == "pasture_block" for lab in block_labels)
+    _has_staged_concentrate = any(lab == "concentrate_staged_block" for lab in block_labels)
+    # Mischmasse-Scoping nur, wenn PMR-System mit tatsaechlich befuelltem
+    # Nicht-TMR-Block vorliegt (sonst keine Staffelung = keine Trennung).
+    _block_scoping_struct = _is_staged_system and (_has_pasture_block or _has_staged_concentrate)
+
+    def _tmr_only(col_vals: List[float]) -> List[float]:
+        """Beschraenkt Mischmasse-Struktur-Koeffizienten auf TMR-Block-Feeds.
+
+        Hintergrund: Struktur-Dichten (aNDFomGF, pabKH, XL, CP) wirken
+        auf die homogene Mischung des Mischwagens. Weide und gestaffeltes
+        Lockfutter werden getrennt gefressen und gehen deshalb nicht in
+        die Mischmasse-Bilanz ein. Das ist nicht zu verwechseln mit der
+        tagesbezogenen Strukturversorgung der Kuh - die wird separat ueber
+        Weide-Logik / pasture_block abgedeckt.
+
+        Bei TMR (keine Staffelung) ist _block_scoping_struct=False und
+        die Funktion gibt die Liste unveraendert zurueck (alle Feeds
+        zaehlen zur TMR-Mischmasse, weil es nur einen TMR-Block gibt).
+        """
+        if not _block_scoping_struct:
+            return list(col_vals)
+        return [
+            v if block_labels[i] == "tmr_block" else 0.0
+            for i, v in enumerate(col_vals)
+        ]
+
+    # Saisonale Feinsteuerung (Spec §12):
+    #   autumn              -> haertere CP-Dichte-Obergrenze (Harnstoffschutz)
+    #   autumn/summer_late  -> aNDFomGF-Boost zur Strukturstuetzung
+    #   autumn              -> kontrolliertes RMD-Relax um Weidecharakteristik
+    _season = (runtime_options or {}).get("season_profile") if runtime_options else None
+    _seasonal = _seasonal_adjustments(_season)
+    if "cp_density_max_override" in _seasonal:
+        cp_max = min(cp_max, float(_seasonal["cp_density_max_override"]))
+    if "andfom_gf_min_boost" in _seasonal:
+        andfom_gf_min = andfom_gf_min + float(_seasonal["andfom_gf_min_boost"])
+
+    # SARA-Safety-Reopt-Overrides (§13 Pansenazidose-Reopt, 2026-04-21):
+    # Wenn der erste Solve ph_predicted < 5.9 oder peNDF unter Minimum liefert,
+    # wird _optimize_internal _run_lp mit verschaerften Constraints aufrufen.
+    _sara = (runtime_options or {}).get("sara_overrides") or {}
+    if _sara.get("pabkh_max") is not None:
+        pabkh_max = min(pabkh_max, float(_sara["pabkh_max"]))
+    if _sara.get("andfom_gf_min_boost"):
+        andfom_gf_min = andfom_gf_min + float(_sara["andfom_gf_min_boost"])
+    if _sara.get("xl_max") is not None:
+        xl_max = min(xl_max, float(_sara["xl_max"]))
+    if _sara.get("cp_density_max_override") is not None:
+        cp_max = min(cp_max, float(_sara["cp_density_max_override"]))
+    _sara_pendf_floor_boost = float(_sara.get("pendf_floor_boost") or 0.0)
+
     A_ub: List[List[float]] = []
     b_ub: List[float] = []
+    # Refactor Schritt 3 (2026-04-23): Constraint-Registry. Statt hartkodiertem
+    # ``_IDX_XL = 5`` wird bei jedem Hinzufuegen einer Row ein symbolischer Name
+    # registriert; die Relaxationen unten greifen dann via
+    # ``_constraint_registry.index_of(CONSTR_XL_DENSITY)`` darauf zu. Eine
+    # verspaete Umsortierung/Einschub verschiebt damit keine Indizes mehr.
+    _constraint_registry = _NewConstraintRegistry()
 
-    def _geq(col_vals: List[float], rhs: float) -> None:
+    def _geq(col_vals: List[float], rhs: float, *, name: Optional[str] = None) -> None:
+        if name is not None:
+            _constraint_registry.add(name)
         A_ub.append([-v for v in col_vals])
         b_ub.append(-rhs)
 
-    def _leq(col_vals: List[float], rhs: float) -> None:
+    def _leq(col_vals: List[float], rhs: float, *, name: Optional[str] = None) -> None:
+        if name is not None:
+            _constraint_registry.add(name)
         A_ub.append(col_vals)
         b_ub.append(rhs)
 
@@ -849,33 +1719,47 @@ def _run_lp(
     pabkh_per_kg = [f["st"] + f["zu"] - f["bst"] for f in feeds]
 
     # Energie und Protein
-    _geq(me_per_kg,   req.me_mj)           # ME ≥ Bedarf
-    _geq(sidp_per_kg, req.sidp_g)          # sidP ≥ Bedarf
+    _geq(me_per_kg,   req.me_mj,   name=_CONSTR_ME_GEQ)           # ME ≥ Bedarf
+    _geq(sidp_per_kg, req.sidp_g,  name=_CONSTR_SIDP_GEQ)          # sidP ≥ Bedarf
 
     # Faserversorgung
-    _geq(ndf_per_kg,  req.ndf_min_g)       # aNDFom ≥ Minimum gesamt
+    _geq(ndf_per_kg,  req.ndf_min_g, name=_CONSTR_ANDFOM_TOT_GEQ) # aNDFom ≥ Minimum gesamt
 
-    # aNDFomGF-Dichte ≥ 200 g/kg TM (linearisiert):
-    #   sum_i(amounts_i × (aNDFom_i × is_forage_i - 200)) ≥ 0
-    andfom_gf_density = [
-        f["ndf"] - andfom_gf_min if f.get("forage") else -andfom_gf_min
+    # aNDFomGF+CoP-Dichte >= Mindestwert (DLG 01|2025, linearisiert):
+    #   sum_i(amounts_i × (aNDFom_i × is_forage_or_cop_i - min)) >= 0
+    #
+    # "CoP" = faserreiche Co-Produkte (Biertreber, Pressschnitzel, Schlempe).
+    # Diese werden ab DLG 01|2025 zusammen mit Grobfutter als strukturelle
+    # Faserbasis gewertet (Kap. 8.2).
+    def _is_forage_or_cop(feed: Dict[str, Any]) -> bool:
+        return bool(feed.get("forage") or feed.get("structural_coproduct"))
+
+    # Slice 1c: Mischmasse-Dichten (Struktur, pabKH, XL, CP) werden auf den
+    # TMR-Block beschraenkt - das ist die homogene Mischung im Mischwagen
+    # (bzw. komplette Ration bei TMR). Weide und Lockfutter werden getrennt
+    # gefressen und gehen nicht in die Mischmassenbilanz ein. Die
+    # tagesbezogene Strukturversorgung (Kaudauer, Speichelbildung, lange
+    # Partikel) bleibt ueber die eigene Weide-/Aufnahmelogik erhalten
+    # (pasture_block, K/Mg, Saisonprofile).
+    andfom_gf_cop_density = [
+        f["ndf"] - andfom_gf_min if _is_forage_or_cop(f) else -andfom_gf_min
         for f in feeds
     ]
-    _geq(andfom_gf_density, 0.0)
+    _geq(_tmr_only(andfom_gf_cop_density), 0.0, name=_CONSTR_ANDFOM_GF_GEQ)
 
     # pabKH-Dichte ≤ 210 g/kg TM (linearisiert):
     #   sum_i(amounts_i × (pabKH_i - 210)) ≤ 0
     pabkh_density = [v - pabkh_max for v in pabkh_per_kg]
-    _leq(pabkh_density, 0.0)
+    _leq(_tmr_only(pabkh_density), 0.0, name=_CONSTR_PABKH_LEQ)
 
     # XL-Dichte ≤ 40 g/kg TM (Fettlimit Milchkuh ohne pansengeschütztes Fett)
     xl_density = [v - xl_max for v in xl_per_kg]
-    _leq(xl_density, 0.0)
+    _leq(_tmr_only(xl_density), 0.0, name=_CONSTR_XL_DENSITY)
 
     # CP-Dichte ≤ 165 g/kg TM (DLG 01|25 Tab. 14 Optimalbereich 135-165 g/kg TM – verhindert überhöhten RNB/RMD)
     cp_per_kg = [f["cp"] for f in feeds]
     cp_density = [v - cp_max for v in cp_per_kg]
-    _leq(cp_density, 0.0)
+    _leq(_tmr_only(cp_density), 0.0, name=_CONSTR_CP_DENSITY)
 
     # RMD-Dichte (DLG 01|25: Ziel -1,5 bis 0 g N/kg TM, Toleranzbereich bis +1,5).
     # In Weidesystemen ist ein strukturell hoeherer N-Ueberschuss real (DLG-Merkblatt 417):
@@ -894,26 +1778,30 @@ def _run_lp(
         rmd_max = 3.0
     else:
         rmd_max = 1.5
+    # Herbst: leicht erhoehtes RMD-Limit zulassen (stickstoffreicher Grasaufwuchs),
+    # aber nur dosiert (max. +1 g N/kg TM) um Harnstoff-Belastung zu begrenzen.
+    if "rmd_max_boost" in _seasonal:
+        rmd_max = rmd_max + float(_seasonal["rmd_max_boost"])
     rmd_per_kg = [float(f.get("rmd") or 0.0) for f in feeds]
     rmd_density = [v - rmd_max for v in rmd_per_kg]
-    _leq(rmd_density, 0.0)
+    _leq(rmd_density, 0.0, name=_CONSTR_RMD_DENSITY)
 
     # ME-Dichte ≤ 12.5 MJ/kg TM (DLG 01|25 Tab. 14 – Energiedichte-Obergrenze Hochleistung)
     me_density_max = [v - 12.5 for v in me_per_kg]
-    _leq(me_density_max, 0.0)
+    _leq(me_density_max, 0.0, name=_CONSTR_ME_DENSITY)
 
     # ME absolut ≤ Bedarf × 1.12 (max. 12% Überversorgung – DLG Toleranz 10%, LP-Spielraum +2%)
-    _leq(me_per_kg, req.me_mj * 1.12)
+    _leq(me_per_kg, req.me_mj * 1.12, name=_CONSTR_ME_ABS_LEQ)
 
     # aNDFom-Dichte ≤ 420 g/kg TM (DLG 01|25 Tab. 14 – verhindert Überversorgung mit Rohfaser)
     andfom_density_max = [v - 420.0 for v in ndf_per_kg]
-    _leq(andfom_density_max, 0.0)
+    _leq(andfom_density_max, 0.0, name=_CONSTR_ANDFOM_TOT_LEQ)
 
     # Mengenelemente
-    _geq(ca_per_kg, req.ca_min_g)
-    _geq(p_per_kg,  req.p_min_g)
-    _geq(na_per_kg, req.na_min_g)
-    _geq(mg_per_kg, req.mg_min_g)
+    _geq(ca_per_kg, req.ca_min_g, name=_CONSTR_CA_LEQ)
+    _geq(p_per_kg,  req.p_min_g,  name=_CONSTR_P_LEQ)
+    _geq(na_per_kg, req.na_min_g, name=_CONSTR_NA_LEQ)
+    _geq(mg_per_kg, req.mg_min_g, name=_CONSTR_MG_LEQ)
 
     # K/Mg-Antagonismus: max. Kalium ≤ 28 g/kg TM × DMI (GfE-Workshop 2023)
     k_per_kg = [f.get("k", 0.0) for f in feeds]
@@ -933,9 +1821,11 @@ def _run_lp(
     _leq(saftfutter_mask, 6.0)
 
     # Frischgras/Weide nur in TMR strikt begrenzen; PMR/Weidesysteme duerfen das gezielt nutzen.
+    # Klassifikation TM-basiert: echte Weide = TM < 30 %. Grassilage (konserviert,
+    # TM >= 30 %) zaehlt hier bewusst NICHT als Weide und wird nicht gedeckelt.
     if feeding_type == "TMR":
         weide_mask = [
-            1.0 if ("weide" in f.get("name", "").lower() or "frischgras" in f.get("name", "").lower()) else 0.0
+            1.0 if _grass_feed_kind(f) == "pasture" else 0.0
             for f in feeds
         ]
         _leq(weide_mask, 4.0)
@@ -958,8 +1848,30 @@ def _run_lp(
     _leq(grobfutter_neg, 0.0)
 
     # DMI
-    _geq(ones, req.dmi_min_kg)
-    _leq(ones, req.dmi_max_kg)
+    _geq(ones, req.dmi_min_kg, name=_CONSTR_DMI_GEQ)
+    _leq(ones, req.dmi_max_kg, name=_CONSTR_DMI_LEQ)
+
+    # Slice 1e (nachgeschaerft 2026-04-23, §4 - hart/weich-Trennung):
+    #   Die Einzelgabe-Grenzen je Abruf/Melkung sind PHYSIOLOGISCH hart
+    #   (Pansensicherheit, SARA-Schutz). Das empfohlene Tagesmaximum ist
+    #   eher wirtschaftlich/Management-motiviert und wird weich bewertet.
+    #
+    #   Umsetzung:
+    #     - LP-harte Obergrenze: 1,5 x empfohlenes Tagesmaximum als
+    #       Sicherheitsnetz (kein Infeasible bei leicht ueber Limit, aber
+    #       keine absurden Mengen wie 25 kg Kraftfutter/Tag).
+    #     - Empfohlenes Tagesmax selbst: wird Post-Solve in
+    #       _build_constraint_status_v2 als weicher Constraint gewertet
+    #       (Klasse B, mit Strafkostenbeitrag und UI-Hinweis).
+    #     - Einzelgabe-Grenze: UI-Validierung im Futterabruf-Tab
+    #       (Slice 2), nicht LP-Ebene.
+    _conc_max_per_day = float(_fs_cfg.get("concentrate_max_per_day_kg") or 0.0)
+    if _conc_max_per_day > 0 and _has_staged_concentrate:
+        conc_mask = [
+            1.0 if block_labels[i] == "concentrate_staged_block" else 0.0
+            for i in range(n)
+        ]
+        _leq(conc_mask, _CONC_HARD_SAFETY_FACTOR * _conc_max_per_day)
 
     bounds = [(f["min_kg"], f["max_kg"]) for f in feeds]
 
@@ -976,65 +1888,72 @@ def _run_lp(
     stage1_objective = [_welfare_objective_coeff(feed) for feed in feeds]
     result = _solve(stage1_objective, A_ub, b_ub)
 
-    # Constraint-Index-Karte (entspricht der Reihenfolge der _geq/_leq-Aufrufe):
-    #   0: ME ≥ Bedarf
-    #   1: sidP ≥ Bedarf
-    #   2: aNDFom ≥ Minimum gesamt
-    #   3: aNDFomGF-Dichte ≥ 200 g/kg TM
-    #   4: pabKH-Dichte ≤ 210 g/kg TM
-    #   5: XL-Dichte ≤ 40 g/kg TM        ← weiche Grenze, zuerst relaxieren
-    #   6: CP-Dichte ≤ 165 g/kg TM        ← DLG 01|25 Tab.14 Optimal-Obergrenze
-    #   7: RMD-Dichte ≤ 1.5 g N/kg TM    ← DLG 01|25 Toleranzbereich
-    #   8: ME-Dichte ≤ 12.5 MJ/kg TM     ← DLG 01|25 Tab.14, Energiedichte-Ceiling
-    #   9: ME absolut ≤ Bedarf × 1.15    ← max. 15% Überversorgung
-    #  10: aNDFom-Dichte ≤ 420 g/kg TM  ← DLG 01|25 Tab.14, Faserdeckel
-    #  11..14: Ca, P, Na, Mg
-    #  15: DMI ≥ Minimum
-    #  16: DMI ≤ Maximum                 ← NIEMALS relaxieren (physiologisches Limit)
-    _IDX_XL = 5
-    _IDX_ANDFOM_GF = 3
-    _IDX_RMD = 7      # RMD-Dichte (weich – relaxierbar wenn zu eng)
-    _IDX_ME_ABS = 9   # ME absolut-Obergrenze (weich – nach XL relaxierbar)
+    # Refactor Schritt 3 (2026-04-23): Constraint-Indizes werden ueber die
+    # ``_constraint_registry`` symbolisch aufgeloest. Die historische
+    # Reihenfolge (ME/sidP/aNDFom-tot/aNDFomGF/pabKH/XL/CP/RMD/ME-dichte/
+    # ME-abs/aNDFom-max/Ca/P/Na/Mg/DMI-min/DMI-max) wird bewusst nicht
+    # veraendert; ein verspaetetes Umordnen ist aber nicht mehr
+    # fehleranfaellig, weil alle relaxations-relevanten Rows per Name
+    # angesprochen werden.
+    _IDX_XL = _constraint_registry.index_of(_CONSTR_XL_DENSITY)
+    _IDX_ANDFOM_GF = _constraint_registry.index_of(_CONSTR_ANDFOM_GF_GEQ)
+    _IDX_RMD = _constraint_registry.index_of(_CONSTR_RMD_DENSITY)
+    _IDX_ME_ABS = _constraint_registry.index_of(_CONSTR_ME_ABS_LEQ)
+    # Regressions-Absicherung: die historische Reihenfolge bleibt (Tests).
+    assert _IDX_XL == 5, f"XL-Index erwartet 5, ist {_IDX_XL}"
+    assert _IDX_ANDFOM_GF == 3, f"aNDFomGF-Index erwartet 3, ist {_IDX_ANDFOM_GF}"
+    assert _IDX_RMD == 7, f"RMD-Index erwartet 7, ist {_IDX_RMD}"
+    assert _IDX_ME_ABS == 9, f"ME-abs-Index erwartet 9, ist {_IDX_ME_ABS}"
 
-    if result.status not in (0, 1):
-        # Relaxation 1: XL-Dichte auf 60 g/kg TM lockern (z.B. wenn Biertreber/DDGS im Plan)
-        # DMI-Obergrenze bleibt UNVERÄNDERT – physiologisches Limit nach DLG 01|25.
-        xl_density_r = [v - (60.0 if not pasture_pmr else 48.0) for v in xl_per_kg]
-        A_ub_r_full = list(A_ub)
-        A_ub_r_full[_IDX_XL] = xl_density_r
-        b_ub_r = b_ub.copy()
-        b_ub_r[_IDX_XL] = 0.0          # XL ≤ 60 g/kg TM: linearisiertes RHS bleibt 0
-        result = _solve(stage1_objective, A_ub_r_full, b_ub_r)
+    # Refactor Schritt 4 (2026-04-23): Relaxations-Kaskade gekapselt.
+    # Die vier historischen Relaxations-Stufen (XL -> RMD -> aNDFomGF-drop
+    # -> sidP-85%) werden aus ``_run_lp`` in eine benannte Closure
+    # ausgezogen. Dadurch bleibt die Haupt-Funktion lesbarer und spaetere
+    # Verfeinerungen (selektives Ueberspringen, Protokollierung,
+    # Strafkosten-Variante) koennen lokal geaendert werden, ohne den
+    # 1300-zeiligen LP-Build zu beruehren.
+    def _relax_stage1(current_result):
+        """Wendet sequentiell die 4 Relaxations-Stufen an, bis feasible.
 
-    if result.status not in (0, 1):
-        # Relaxation 2: RMD-Dichte um eine Stufe weicher als die Basis-Grenze (rmd_max).
-        # Basis: TMR 1.5 / PMR 3.0 / PMR+Weide 8.0 g N/kg TM.
-        # Relax: TMR 3.0 / PMR 5.0 / PMR+Weide 12.0 g N/kg TM
-        # (DLG 417: Weidesysteme toleriert strukturell hoehere N-Ueberschuesse bei Weide;
-        # ueber Jungweide-Spitze wird ueber den Harnstoff-Indikator kommuniziert).
-        rmd_relax = rmd_max + (4.0 if feeding_type == "PMR+Weide" else 1.5)
-        b_ub_r2a = b_ub.copy()
-        b_ub_r2a[_IDX_RMD] = 0.0
-        A_ub_r2a = list(A_ub)
-        A_ub_r2a[_IDX_RMD] = [v - rmd_relax for v in rmd_per_kg]
-        result = _solve(stage1_objective, A_ub_r2a, b_ub_r2a)
+        Die verwendeten Indizes kommen ausschliesslich aus der
+        ``_constraint_registry`` und sind damit namensbasiert stabil.
+        """
+        r = current_result
+        # Stufe 1: XL-Dichte weicher (60 bzw. 48 g/kg TM bei PMR+Weide)
+        if r.status not in (0, 1):
+            xl_density_r = [v - (60.0 if not pasture_pmr else 48.0) for v in xl_per_kg]
+            A_loc = list(A_ub)
+            A_loc[_IDX_XL] = xl_density_r
+            b_loc = b_ub.copy()
+            b_loc[_IDX_XL] = 0.0  # linearisiertes RHS bleibt 0
+            r = _solve(stage1_objective, A_loc, b_loc)
+        # Stufe 2: RMD-Dichte um eine Stufe weicher als rmd_max
+        if r.status not in (0, 1):
+            rmd_relax = rmd_max + (4.0 if feeding_type == "PMR+Weide" else 1.5)
+            b_loc = b_ub.copy()
+            b_loc[_IDX_RMD] = 0.0
+            A_loc = list(A_ub)
+            A_loc[_IDX_RMD] = [v - rmd_relax for v in rmd_per_kg]
+            r = _solve(stage1_objective, A_loc, b_loc)
+        # Stufe 3: aNDFomGF-Dichte-Constraint vollstaendig entfernen
+        A_r3 = A_ub
+        b_r3 = b_ub
+        if r.status not in (0, 1):
+            A_r3 = [row for i, row in enumerate(A_ub) if i != _IDX_ANDFOM_GF]
+            b_r3 = [v for i, v in enumerate(b_ub) if i != _IDX_ANDFOM_GF]
+            r = _solve(stage1_objective, A_r3, b_r3)
+        # Stufe 4: sidP auf 85% des Bedarfs reduzieren (letzter Ausweg)
+        if r.status not in (0, 1):
+            A_r4 = list(A_r3)
+            b_r4 = list(b_r3)
+            for idx, row in enumerate(A_r4):
+                if all(abs(row[j] + (feeds[j]["sidp"] or 0)) < 0.01 for j in range(n)):
+                    b_r4[idx] = -req.sidp_g * 0.85
+                    break
+            r = _solve(stage1_objective, A_r4, b_r4)
+        return r
 
-    if result.status not in (0, 1):
-        # Relaxation 3: aNDFomGF-Dichte deaktivieren
-        A_ub_r = [row for i, row in enumerate(A_ub) if i != _IDX_ANDFOM_GF]
-        b_ub_r = [v for i, v in enumerate(b_ub) if i != _IDX_ANDFOM_GF]
-        result = _solve(stage1_objective, A_ub_r, b_ub_r)
-
-    if result.status not in (0, 1):
-        # Relaxation 4: sidP auf 85% des Bedarfs reduzieren (Proteinverfügbarkeit-Kompromiss)
-        # Constraint-Index 1 = sidP (zweite _geq nach ME)
-        A_ub_r2 = list(A_ub_r)
-        b_ub_r2 = list(b_ub_r)
-        for idx, row in enumerate(A_ub_r2):
-            if all(abs(row[j] + (feeds[j]["sidp"] or 0)) < 0.01 for j in range(n)):
-                b_ub_r2[idx] = -req.sidp_g * 0.85
-                break
-        result = _solve(stage1_objective, A_ub_r2, b_ub_r2)
+    result = _relax_stage1(result)
 
     infeasibility_hint = None
     if result.status not in (0, 1):
@@ -1065,34 +1984,150 @@ def _run_lp(
             ])
             b_stage2.append(0.0)
 
-            pendf_floor = max(_pendf_minimum(stage1_starch_density, stage1_total_dmi), stage1_pendf_density - 5.0)
-            A_stage2.append([
-                pendf_floor - (feed["ndf"] * _feed_pendf_factor(feed))
+            # DLG 01|2023: peNDF wird in der Rationsplanung NICHT mehr als harte
+            # Stage-2-Nebenbedingung verwendet; DLG empfiehlt stattdessen aNDFom
+            # aus dem Grobfutter (aNDFomGF) als primaere Planungsgroesse, mit
+            # staerkeadaptiver Erhoehung bei hohen pansenabbaubaren KH. Wir
+            # hebeln deshalb das aNDFomGF-Dichteminimum fuer Stage 2 an, angepasst
+            # an die tatsaechliche Staerke-Dichte aus Stage 1, und addieren den
+            # SARA-Reopt-Floor-Boost (falls gesetzt) hier - nicht am peNDF.
+            stage2_andfom_gf_min = _andfom_gf_min_target(
+                staerke_density_kgdm=stage1_starch_density,
+                pabkh_density_kgdm=stage1_pabkh_density,
+                pasture_pmr=pasture_pmr,
+                seasonal_boost=float(_seasonal.get("andfom_gf_min_boost") or 0.0),
+                sara_boost=float(_sara.get("andfom_gf_min_boost") or 0.0)
+                + _sara_pendf_floor_boost,
+            )
+            if stage2_andfom_gf_min > andfom_gf_min:
+                stage2_andfom_gf_cop_density = [
+                    f["ndf"] - stage2_andfom_gf_min if _is_forage_or_cop(f) else -stage2_andfom_gf_min
+                    for f in feeds
+                ]
+                # Slice 1c: Struktur-Dichte Stage-2 ebenfalls auf TMR-Block beschraenken
+                A_stage2.append([-v for v in _tmr_only(stage2_andfom_gf_cop_density)])
+                b_stage2.append(0.0)
+
+            # Absolute peNDF-Untergrenze nur als physiologischer Schutz (nicht als
+            # Planungsgroesse): verhindert Kollaps bei extrem struktur-armen Rationen,
+            # liegt aber deutlich unter der Lookup-Tabelle (reine Sicherheitsfloor).
+            _PENDF_SAFETY_FLOOR = 120.0
+            pendf_floor_coeffs = [
+                _PENDF_SAFETY_FLOOR - (feed["ndf"] * _feed_pendf_factor(feed))
                 for feed in feeds
-            ])
+            ]
+            A_stage2.append(_tmr_only(pendf_floor_coeffs))
             b_stage2.append(0.0)
 
             pabkh_ceiling = min(pabkh_max, stage1_pabkh_density + 10.0)
-            A_stage2.append([value - pabkh_ceiling for value in pabkh_per_kg])
+            pabkh_ceil_coeffs = [value - pabkh_ceiling for value in pabkh_per_kg]
+            A_stage2.append(_tmr_only(pabkh_ceil_coeffs))
             b_stage2.append(0.0)
 
             xl_ceiling = min(xl_max, stage1_xl_density + 2.0)
-            A_stage2.append([value - xl_ceiling for value in xl_per_kg])
+            xl_ceil_coeffs = [value - xl_ceiling for value in xl_per_kg]
+            A_stage2.append(_tmr_only(xl_ceil_coeffs))
             b_stage2.append(0.0)
 
             cp_ceiling = min(cp_max, stage1_cp_density + 5.0)
-            A_stage2.append([value - cp_ceiling for value in cp_per_kg])
+            cp_ceil_coeffs = [value - cp_ceiling for value in cp_per_kg]
+            A_stage2.append(_tmr_only(cp_ceil_coeffs))
             b_stage2.append(0.0)
 
+            # Standard-Stage-2-Cost-Solve (ohne Policy-Slacks)
             cost_result = _solve(prices, A_stage2, b_stage2)
             if cost_result.status == 0:
                 result = cost_result
+
+            # DLG-01|2025-Slack-Erweiterung (nur wenn Policy-Profil Targets liefert).
+            # Ziel: Policy-Baender werden nicht nur post-solve bewertet, sondern
+            # sind im LP als weiche Constraints gebunden (Klasse B, relaxation-
+            # policy-skaliert). Falls der erweiterte Solve scheitert, bleibt
+            # cost_result aus dem Standard-Solve bestehen.
+            policy_profile_key = (runtime_options or {}).get("policy_profile")
+            policy_relax = (runtime_options or {}).get("relaxation_policy", "standard")
+            policy_targets = _policy_profile_targets(policy_profile_key)
+            if policy_targets:
+                dmi_typ = 0.5 * (float(req.dmi_min_kg) + float(req.dmi_max_kg))
+                ext = _build_policy_band_lp_extension(
+                    targets=policy_targets,
+                    feeds=feeds,
+                    relaxation_policy=str(policy_relax),
+                    dmi_typ_kg=dmi_typ,
+                )
+                n_slacks = int(ext.get("n_slacks") or 0)
+                if n_slacks > 0:
+                    # Erweitere bestehende Stage-2-Matrix um Nullspalten fuer Slacks
+                    A_ext = [list(row) + [0.0] * n_slacks for row in A_stage2]
+                    A_ext.extend(ext["rows"])
+                    b_ext = list(b_stage2) + list(ext["rhs"])
+                    c_ext = list(prices) + list(ext["slack_costs"])
+                    bounds_ext = list(bounds) + list(ext["slack_bounds"])
+                    try:
+                        ext_result = linprog(
+                            c=c_ext,
+                            A_ub=A_ext,
+                            b_ub=b_ext,
+                            bounds=bounds_ext,
+                            method="highs",
+                            options={"disp": False},
+                        )
+                    except Exception:  # pragma: no cover - Solver-Fehler fallback
+                        ext_result = None
+                    if ext_result is not None and ext_result.status == 0:
+                        # Slack-Werte fuer Response sammeln
+                        slack_values = [float(v) for v in ext_result.x[n - len(ext_result.x) + n_slacks:]]
+                        # sauberer: letzten n_slacks nehmen
+                        slack_values = [float(v) for v in ext_result.x[-n_slacks:]]
+                        policy_lp_slacks: List[Dict[str, Any]] = []
+                        total_slack_penalty = 0.0
+                        for meta, val in zip(ext["slack_meta"], slack_values):
+                            val = max(0.0, val)
+                            penalty = float(meta["weight"]) * val
+                            total_slack_penalty += penalty
+                            policy_lp_slacks.append({
+                                "name": meta["name"],
+                                "unit": meta["unit"],
+                                "direction": meta["direction"],
+                                "band_min": meta["band_min"],
+                                "band_max": meta["band_max"],
+                                "halfwidth": round(float(meta["halfwidth"]), 3),
+                                "weight": round(float(meta["weight"]), 6),
+                                "slack_value": round(val, 4),
+                                "penalty_cost": round(penalty, 4),
+                                "active": val > 1e-6,
+                            })
+                        # Nur Feed-Anteile der Loesung uebernehmen (Slacks werden verworfen)
+                        feed_x = list(ext_result.x[:n])
+                        # Rebuild ein "result-aehnliches" Objekt: wir brauchen
+                        # .x / .fun / .status fuer die weitere Verarbeitung.
+                        class _ExtResult:
+                            pass
+                        _r = _ExtResult()
+                        _r.x = feed_x
+                        _r.fun = float(sum(prices[i] * feed_x[i] for i in range(n)))
+                        _r.status = 0
+                        _r.message = "stage2_policy_slack"
+                        result = _r
+                        return {
+                            "scipy_result": result,
+                            "feeds": feeds,
+                            "_relaxed": True,
+                            "_infeasibility_hint": infeasibility_hint,
+                            "_policy_lp_slacks": policy_lp_slacks,
+                            "_policy_lp_slack_total_penalty": round(total_slack_penalty, 4),
+                            "_policy_lp_slack_objective_mode": "stage2_cost_plus_policy_slack",
+                            "_feeding_system_config": _fs_cfg,
+                            "_block_labels": list(block_labels),
+                        }
 
     return {
         "scipy_result": result,
         "feeds": feeds,
         "_relaxed": result.status == 0,
         "_infeasibility_hint": infeasibility_hint,
+        "_feeding_system_config": _fs_cfg,
+        "_block_labels": list(block_labels),
     }
 
 
@@ -1238,19 +2273,88 @@ def _f(v: Any) -> float:
     return float(v)
 
 
-def _milk_requirement_factors(profile: Dict[str, Any]) -> Tuple[float, float, float, float]:
+def _kl_milk_from_me_density(
+    me_density_mj_per_kg_tm: Optional[float],
+    feeding_system: Optional[str] = None,
+) -> float:
+    """GfE 2001 §5: k_l (ME->NEL-Verwertung fuer Laktation) = 0,463 + 0,24*q.
+
+    q = ME/GE mit GE ~ 18,4 MJ/kg TM (grobe Annahme fuer Wiederkaeuer-
+    Mischrationen). Das Resultat wird auf den Arbeitsbereich 0,58-0,64
+    begrenzt, da ausserhalb dieses q-Bereiches die Linearisierung nicht
+    mehr zuverlaessig gilt.
+
+    PMR+Weide-Spezialfall (User-Praxisabstimmung 2026-04-21):
+        Bei Weidefuetterung wird nicht als Mischration gefressen - Weide,
+        TMR-Block und Lockfutter werden gestaffelt ueber den Tag
+        aufgenommen. Eine "gemittelte ME-Dichte der Ration" existiert in
+        diesem Fall physiologisch nicht. Wir setzen k_l deshalb fix auf
+        0,60, unabhaengig davon welche Zahl fuer `me_density_mj_per_kg_tm`
+        uebergeben wird.
+
+    WICHTIG - Spec-Note zur Einordnung (User-Review 2026-04-23, §3):
+        Der fixe Wert 0,60 ist ein bewusstes SOFTWARE-FALLBACK und kein
+        fachliches Endmodell. GfE-2023 / DLG 01|25 betonen die FANi-
+        Abhaengigkeit der Nutzbarkeit von ME und die dynamische Passage.
+        Die aktuelle Fassung ist eine robuste Zwischennaeherung, die
+        einen optimistischen Bias bei Weide-Dichten vermeidet. Ein FANi-
+        bezogenes k_l-Modell (dynamisch, block- und zeitbezogen) ist als
+        Folgeslice vorgesehen und sollte diesen Fallback spaeter ersetzen.
+
+    Wenn keine ME-Dichte uebergeben wird, liefert die Funktion ebenfalls
+    den konservativen GfE-Default 0,60 zurueck.
+    """
+    # PMR+Weide: fix 0,60 erzwingen, egal was die Dichte sagt
+    sys_norm = (feeding_system or "").strip().upper()
+    if sys_norm in {"PMR_PASTURE", "PMRPASTURE", "PMR+WEIDE"}:
+        return 0.60
+
+    if me_density_mj_per_kg_tm is None or me_density_mj_per_kg_tm <= 0:
+        return 0.60
+    q = me_density_mj_per_kg_tm / 18.4
+    kl = 0.463 + 0.24 * q
+    return max(0.58, min(0.64, kl))
+
+
+def _milk_requirement_factors(
+    profile: Dict[str, Any],
+    me_density_mj_per_kg_tm: Optional[float] = None,
+    feeding_system: Optional[str] = None,
+) -> Tuple[float, float, float, float]:
     """Return maintenance ME plus milk coefficients for ME and sidP.
 
-    The milk coefficients follow the same simplified GfE basis that `_gfe_requirements`
-    uses for the main requirement calculation, so the display stays consistent with the
-    optimizer contract.
+    Die Milch-Koeffizienten folgen der gleichen GfE-Basis wie
+    `_gfe_requirements`, damit die Anzeige "Milch aus Grundfutter" mit dem
+    Solver-Kontrakt konsistent bleibt.
+
+    Weide-Aktivitaetszuschlag: bei feeding_type == "PMR+Weide" wird der
+    ME-Erhaltungsbedarf um +15 % erhoeht (DLG-Merkblatt 417 / GfE 2001).
+
+    k_l dichte-abhaengig (TMR / PMR_stall): `me_density_mj_per_kg_tm`
+    passt den ME->NEL-Faktor fuer Milch an die tatsaechliche ME-Dichte der
+    Ration an. Bei PMR+Weide wird k_l unabhaengig davon auf 0,60 gesetzt,
+    weil Weide nicht als Mischration gefressen wird (gestaffelte Fress-
+    phasen).
     """
     bw = float(profile.get("body_weight_kg") or 650)
     fat_pct = float(profile.get("milk_fat_pct") or 4.0)
     prot_pct = float(profile.get("milk_protein_pct") or 3.4)
     bw75 = bw ** 0.75
-    me_maint = (0.308 * bw75) / 0.73
-    me_per_kg_milk = (0.38 * fat_pct + 0.21 * prot_pct + 0.95) / 0.62
+
+    feeding_type = _normalize_feeding_type(profile.get("feeding_type"))
+    pasture_factor = 1.15 if feeding_type == "PMR+Weide" else 1.00
+
+    # Fallback: wenn kein feeding_system explizit gegeben ist, das
+    # vorhandene feeding_type als Signalquelle nehmen.
+    fs_for_kl = feeding_system
+    if fs_for_kl is None and feeding_type == "PMR+Weide":
+        fs_for_kl = "PMR_pasture"
+
+    k_l = _kl_milk_from_me_density(me_density_mj_per_kg_tm, fs_for_kl)
+
+    me_maint = (0.308 * bw75 * pasture_factor) / 0.73
+    nel_per_kg_milk = 0.38 * fat_pct + 0.21 * prot_pct + 0.95
+    me_per_kg_milk = nel_per_kg_milk / k_l
     sidp_maint = (3.47 * bw75) * 0.95
     sidp_per_kg_milk = 52.0 * 0.95
     return me_maint, me_per_kg_milk, sidp_maint, sidp_per_kg_milk
@@ -1260,8 +2364,12 @@ def _milk_from_supply(
     me_sup: float,
     sidp_sup: float,
     profile: Dict[str, Any],
+    me_density_mj_per_kg_tm: Optional[float] = None,
+    feeding_system: Optional[str] = None,
 ) -> Dict[str, float]:
-    me_maint, me_per_kg_milk, sidp_maint, sidp_per_kg_milk = _milk_requirement_factors(profile)
+    me_maint, me_per_kg_milk, sidp_maint, sidp_per_kg_milk = _milk_requirement_factors(
+        profile, me_density_mj_per_kg_tm, feeding_system
+    )
     milk_from_energy = max(0.0, (me_sup - me_maint) / me_per_kg_milk) if me_per_kg_milk > 0 else 0.0
     milk_from_protein = max(0.0, (sidp_sup - sidp_maint) / sidp_per_kg_milk) if sidp_per_kg_milk > 0 else 0.0
     return {
@@ -1327,6 +2435,12 @@ _CONSTRAINT_CLASSIFICATION: Dict[str, Tuple[str, Optional[str], str, float, str]
     "sidP-Zielkorridor (g/d)":      ("weich", "A",   "g/d",    100.0,     "target"),
     "CP-Dichte (g/kg TM)":          ("weich", "C",   "g/kg TM", 20.0,     "max"),
     "K:Mg-Ratio":                   ("weich", "A",   "",         2.0,     "max"),
+    # Konzentrat-Tagesmaximum nach FeedingSystemConfig (Slice 1e-Nachschaerfung
+    # 2026-04-23, §4): Einzelgabe-Limits sind physiologisch hart (SARA-Schutz,
+    # im LP als 1,5x-Sicherheitsnetz aktiv), das empfohlene Tagesmaximum
+    # selbst wird weich bewertet. Klasse B (Struktur-/Komfort-nahe), Halb-
+    # breite 1,5 kg TM/d, Richtung "max" (Ueberschreitung = Verletzung).
+    "Konzentrat-Tagesmax (kg TM/d)": ("weich", "B",   "kg TM/d",  1.5,     "max"),
 }
 
 
@@ -1478,6 +2592,285 @@ def _derive_constraint_status_from_report(
     return _build_constraint_status_v2(constraint_report, relaxation_policy)
 
 
+# ---------------------------------------------------------------------------
+# Slice 2 (2026-04-23): Futterabruf-Staffel (Concentrate Call-Up Table)
+# ---------------------------------------------------------------------------
+#
+# Fachliche Grundlage (User-Review 2026-04-23, §4 "Futterabruf"):
+#   - Staffel linear bzw. stueckweise linear OBERHALB Basisleistung.
+#   - Basisleistung = Milch aus Grundfutter/Weide (limiting_milk_kg aus
+#     forage_only_milk bei PMR, bzw. aus supplemented_milk bei TMR ohne
+#     gestaffeltem Block).
+#   - Umrechnungsfaktor: 0,45-0,50 kg Konzentrat (FM) je kg Zusatzmilch
+#     (Praxisrichtwert, entspricht ~1 l Konzentrat / 2 l Milch bei
+#     Dichte ~0,5 kg/l). Dies ist als BAND angegeben (low/high).
+#   - Einzelgabe-Limit (Pansenphysiologie) je Verteilungssystem wird
+#     strikt geprueft und markiert.
+#   - Tagesmaximum aus FeedingSystemConfig wird als Soft-Warnung
+#     markiert (Kombination mit _CONC_HARD_SAFETY_FACTOR als harte
+#     Obergrenze).
+#
+# Die Staffel ersetzt das frueher diskutierte "KI-Bildwerte" -Nachbauen.
+# Konstanten siehe oben (direkt vor _run_lp): _CONC_PER_ADDITIONAL_MILK_LOW,
+# _CONC_PER_ADDITIONAL_MILK_HIGH, _CONC_DEFAULT_DM_FRAC, _CONC_HARD_SAFETY_FACTOR.
+
+
+def _build_concentrate_call_up_table(
+    profile: Dict[str, Any],
+    feeding_system_config: Dict[str, Any],
+    base_milk_from_forage_kg: float,
+    milk_kg_steps: Optional[List[float]] = None,
+) -> Optional[Dict[str, Any]]:
+    """Erzeugt eine Konzentrat-Futterabruf-Staffel (linear, stueckweise).
+
+    Parameter:
+        profile                 : Profil der Kuh (u.a. milk_kg_day als Ziel).
+        feeding_system_config   : aufgeloeste FeedingSystemConfig-Werte.
+        base_milk_from_forage_kg: kg Milch aus Grundfutter/Weide (Basis).
+        milk_kg_steps           : optional explizite Leistungsstufen; sonst
+                                  25/30/35/40/45 kg + Ziel aus Profil.
+
+    Rueckgabe:
+        None, wenn das System keine gestaffelte Konzentratgabe kennt
+        (TMR / included_in_tmr) oder wenn feeding_system_config leer ist.
+        Sonst Dict mit 'basis', 'rows' (je Leistungsstufe) und 'warnings'.
+    """
+    if not feeding_system_config:
+        return None
+
+    system = (feeding_system_config.get("system") or "").strip().upper()
+    distribution = (feeding_system_config.get("concentrate_distribution") or "").strip().lower()
+    # Nur gestaffelte Systeme (Transponder, AMS, Melkstand) liefern eine Staffel.
+    if distribution not in {"transponder", "ams", "milkparlor"}:
+        return None
+
+    per_serving_max = float(feeding_system_config.get("concentrate_max_per_serving_kg") or 0.0)
+    servings_per_day = float(feeding_system_config.get("concentrate_servings_per_day") or 0.0)
+    per_day_max = float(feeding_system_config.get("concentrate_max_per_day_kg") or 0.0)
+
+    target_milk = float(profile.get("milk_kg_day") or 0.0)
+    basis_milk = max(0.0, float(base_milk_from_forage_kg or 0.0))
+
+    # Stufen: 25/30/35/40/45 kg + Zielleistung (falls ausserhalb), sortiert & dedup.
+    raw_steps: List[float] = list(milk_kg_steps) if milk_kg_steps else [25.0, 30.0, 35.0, 40.0, 45.0]
+    if target_milk > 0 and target_milk not in raw_steps:
+        raw_steps.append(round(target_milk, 1))
+    # Duplikate entfernen, sortieren, auf positive Werte beschraenken
+    steps = sorted({float(round(s, 1)) for s in raw_steps if s > 0})
+
+    rows: List[Dict[str, Any]] = []
+    warnings_list: List[str] = []
+
+    for milk_kg in steps:
+        # Stueckweise linear: unter Basis wird kein Konzentrat ergaenzt.
+        additional_milk = max(0.0, milk_kg - basis_milk)
+        conc_fm_low = additional_milk * _CONC_PER_ADDITIONAL_MILK_LOW
+        conc_fm_high = additional_milk * _CONC_PER_ADDITIONAL_MILK_HIGH
+        conc_fm_mid = 0.5 * (conc_fm_low + conc_fm_high)
+
+        # Einzelgabe = Tagesmenge / Servings (wenn Servings > 0).
+        per_serving_mid = (
+            conc_fm_mid / servings_per_day if servings_per_day > 0 else conc_fm_mid
+        )
+
+        exceeds_serving = per_serving_max > 0 and per_serving_mid > per_serving_max + 1e-6
+        exceeds_daily = per_day_max > 0 and conc_fm_mid > per_day_max + 1e-6
+        hard_daily_cap = _CONC_HARD_SAFETY_FACTOR * per_day_max if per_day_max > 0 else 0.0
+        exceeds_hard = hard_daily_cap > 0 and conc_fm_mid > hard_daily_cap + 1e-6
+
+        row = {
+            "milk_kg_day": round(milk_kg, 1),
+            "additional_milk_kg": round(additional_milk, 1),
+            # Band: low/high je kg FM (Praxisband 0,45-0,50 kg Konzentrat je kg Zusatzmilch)
+            "concentrate_kg_fm_day_low": round(conc_fm_low, 2),
+            "concentrate_kg_fm_day_high": round(conc_fm_high, 2),
+            "concentrate_kg_fm_day_mid": round(conc_fm_mid, 2),
+            # TM-Umrechnung (Richtwert 88 % TM-Gehalt Praxis-Konzentrat)
+            "concentrate_kg_tm_day_mid": round(conc_fm_mid * _CONC_DEFAULT_DM_FRAC, 2),
+            # Einzelgabe je Abruf/Melkung (kg FM) auf Basis mid
+            "per_serving_kg_fm": round(per_serving_mid, 2),
+            # Limit-Checks
+            "exceeds_per_serving_limit": bool(exceeds_serving),
+            "exceeds_recommended_daily_limit": bool(exceeds_daily),
+            "exceeds_hard_safety_limit": bool(exceeds_hard),
+        }
+        rows.append(row)
+
+        if exceeds_hard:
+            warnings_list.append(
+                f"{milk_kg:.0f} kg Milch: errechnete Konzentratmenge "
+                f"({conc_fm_mid:.1f} kg FM/Tag) ueberschreitet die physiologische "
+                f"Obergrenze ({hard_daily_cap:.1f} kg FM/Tag; 1,5x Tagesmax). "
+                "Bei dieser Leistung sollte die Grundration energie-/proteindichter werden."
+            )
+        elif exceeds_serving:
+            warnings_list.append(
+                f"{milk_kg:.0f} kg Milch: Einzelgabe {per_serving_mid:.2f} kg FM "
+                f"ueberschreitet Einzelgaben-Limit {per_serving_max:.1f} kg FM "
+                f"({distribution}). Verteilung auf mehr Abrufe empfohlen."
+            )
+
+    return {
+        "basis": {
+            "feeding_system": system,
+            "concentrate_distribution": distribution,
+            "milk_from_forage_kg": round(basis_milk, 1),
+            "target_milk_kg": round(target_milk, 1),
+            "concentrate_max_per_serving_kg_fm": round(per_serving_max, 2) if per_serving_max > 0 else None,
+            "concentrate_servings_per_day": servings_per_day if servings_per_day > 0 else None,
+            "concentrate_max_per_day_kg_fm": round(per_day_max, 2) if per_day_max > 0 else None,
+            "hard_safety_daily_cap_kg_fm": round(_CONC_HARD_SAFETY_FACTOR * per_day_max, 2) if per_day_max > 0 else None,
+            "kg_conc_per_additional_milk_low": _CONC_PER_ADDITIONAL_MILK_LOW,
+            "kg_conc_per_additional_milk_high": _CONC_PER_ADDITIONAL_MILK_HIGH,
+            "assumed_concentrate_dm_frac": _CONC_DEFAULT_DM_FRAC,
+        },
+        "rows": rows,
+        "warnings": warnings_list,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Slice 3 (2026-04-23): Mischprotokoll / Fuetterungsprotokoll
+# ---------------------------------------------------------------------------
+#
+# Fachliche Grundlage (User-Review 2026-04-23, §5):
+#   - Nur sinnvoll, wenn ein TMR-Block im Futtergang vorliegt (TMR oder
+#     PMR_stall). Bei reinem PMR+Weide ohne TMR liefert das Protokoll
+#     None (kein Mischwagen im Einsatz).
+#   - Reihenfolge Vertikalmischer (Praxis):
+#     1. Strukturfutter (Heu, Stroh)
+#     2. Silagen (Grassilage, Maissilage)
+#     3. Saftfutter / Co-Produkte (Ruebenschnitzel, Treber, Melasse)
+#     4. Sonstiges
+#     5. Kraftfutter + Mineralien
+#   - Wasser zur Homogenitaet auf Ziel-TM 38-42 % (Default 40 %).
+#   - Uebermenge: Praxisfaktor 5 % (Mischverluste / Futterreste).
+#
+# Abwaertskompatibel: None, wenn keine TMR-Komponenten im Ergebnis liegen.
+# Refactor 2026-04-23: ausgelagert nach app.agrar.rations.constants.feeding_system
+from app.agrar.rations.constants.feeding_system import (
+    MIX_TARGET_DM_FRAC_DEFAULT as _MIX_TARGET_DM_FRAC_DEFAULT,
+    MIX_OVERFILL_PCT_DEFAULT as _MIX_OVERFILL_PCT_DEFAULT,
+)
+
+
+def _mix_group_order(name: str) -> int:
+    """Heuristische Mischreihenfolge anhand Futtername (Praxis-Regeln)."""
+    n = (name or "").lower()
+    if any(k in n for k in ("stroh", "heu")):
+        return 1
+    if any(k in n for k in ("silage", "gras", "mais")):
+        return 2
+    if any(k in n for k in ("ruebe", "rübe", "biertreber", "melasse", "schnitzel", "cop")):
+        return 3
+    if any(k in n for k in ("mineral", "kraftfutter", "konzentrat", "milchleistung")):
+        return 5
+    return 4
+
+
+# Refactor 2026-04-23: ausgelagert nach app.agrar.rations.constants.feeding_system
+from app.agrar.rations.constants.feeding_system import MIX_GROUP_LABELS as _MIX_GROUP_LABELS
+
+
+def _build_mixing_protocol(
+    ration_items: List[Dict[str, Any]],
+    block_labels: List[str],
+    feeds: List[Dict[str, Any]],
+    amounts: List[float],
+    feeding_system_config: Dict[str, Any],
+    target_dm_frac: float = _MIX_TARGET_DM_FRAC_DEFAULT,
+    overfill_pct: float = _MIX_OVERFILL_PCT_DEFAULT,
+) -> Optional[Dict[str, Any]]:
+    """Erzeugt das Misch- und Fuetterungsprotokoll fuer den TMR-Block.
+
+    Rueckgabe None, wenn kein TMR-Block existiert oder das System rein
+    weidebasiert ohne Mischwagen ist. Sonst Dict mit basis, steps,
+    totals und warnings.
+    """
+    if not feeds or not amounts:
+        return None
+
+    system = (feeding_system_config.get("system") or "").strip().upper() if feeding_system_config else ""
+    distribution = (feeding_system_config.get("concentrate_distribution") or "").strip().lower() if feeding_system_config else ""
+
+    # TMR-Block-Positionen extrahieren. Wenn keine Block-Labels, behandeln
+    # wir alle Feeds als TMR-Block (klassischer TMR).
+    tmr_rows: List[Dict[str, Any]] = []
+    for idx, feed in enumerate(feeds):
+        kg_dm = amounts[idx] if idx < len(amounts) else 0.0
+        if kg_dm < 0.001:
+            continue
+        label = block_labels[idx] if idx < len(block_labels) else "tmr_block"
+        if label != "tmr_block":
+            continue
+        dm_frac = float(feed.get("dm_frac") or 0.0)
+        kg_fm = kg_dm / dm_frac if dm_frac > 0 else kg_dm
+        tmr_rows.append({
+            "feed_id": feed.get("id"),
+            "name": feed.get("name", "?"),
+            "group_idx": _mix_group_order(feed.get("name", "")),
+            "kgdm": round(kg_dm, 3),
+            "kgfm": round(kg_fm, 3),
+            "dm_frac": dm_frac,
+        })
+
+    if not tmr_rows:
+        return None
+
+    tmr_rows.sort(key=lambda r: (r["group_idx"], -r["kgdm"]))
+    for step, row in enumerate(tmr_rows, start=1):
+        row["step"] = step
+        row["group_label"] = _MIX_GROUP_LABELS.get(row["group_idx"], "Sonstiges")
+        anteil = 0.0  # wird nachher berechnet
+        row["share_fm_pct"] = anteil
+
+    total_tmr_kgdm = sum(r["kgdm"] for r in tmr_rows)
+    total_tmr_kgfm = sum(r["kgfm"] for r in tmr_rows)
+    target_dm_frac = max(0.20, min(0.60, float(target_dm_frac)))
+    target_total_fm = total_tmr_kgdm / target_dm_frac if target_dm_frac > 0 else total_tmr_kgfm
+    water_kg = max(0.0, target_total_fm - total_tmr_kgfm)
+    overfill_kg_fm = total_tmr_kgfm * (max(0.0, float(overfill_pct)) / 100.0)
+    if total_tmr_kgfm > 0:
+        for row in tmr_rows:
+            row["share_fm_pct"] = round(row["kgfm"] / total_tmr_kgfm * 100.0, 1)
+
+    warnings_list: List[str] = []
+    actual_dm_frac = total_tmr_kgdm / total_tmr_kgfm if total_tmr_kgfm > 0 else 0.0
+    if actual_dm_frac > target_dm_frac + 0.05:
+        warnings_list.append(
+            f"Mischung sehr trocken ({actual_dm_frac * 100:.0f} % TM). "
+            f"Wasserzugabe {water_kg:.1f} kg empfohlen zur Homogenitaet auf "
+            f"Ziel-TM {target_dm_frac * 100:.0f} %."
+        )
+    if actual_dm_frac < target_dm_frac - 0.08:
+        warnings_list.append(
+            f"Mischung sehr nass ({actual_dm_frac * 100:.0f} % TM). "
+            "Wasserzugabe nicht noetig; ggf. trockene Komponenten (Heu/Stroh) erhoehen."
+        )
+
+    return {
+        "basis": {
+            "feeding_system": system or "TMR",
+            "concentrate_distribution": distribution or None,
+            "target_dm_frac": round(target_dm_frac, 3),
+            "actual_dm_frac_before_water": round(actual_dm_frac, 3),
+            "overfill_pct": round(float(overfill_pct), 1),
+        },
+        "steps": tmr_rows,
+        "water_addition_kg_fm": round(water_kg, 2),
+        "overfill_kg_fm": round(overfill_kg_fm, 2),
+        "totals": {
+            "tmr_kgdm": round(total_tmr_kgdm, 2),
+            "tmr_kgfm_without_water": round(total_tmr_kgfm, 2),
+            "tmr_kgfm_with_water": round(total_tmr_kgfm + water_kg, 2),
+            "tmr_kgfm_with_water_and_overfill": round(
+                total_tmr_kgfm + water_kg + overfill_kg_fm, 2
+            ),
+        },
+        "warnings": warnings_list,
+    }
+
+
 def _build_response(
     lp_out: Dict[str, Any],
     req: _CowReq,
@@ -1554,6 +2947,21 @@ def _build_response(
     total_cost = sum(amounts[i] * feeds[i]["price"] for i in range(len(feeds)))
     total_dmi = sum(amounts)
 
+    # Slice 1f: Block-Zuordnung je Feed - abgeleitet aus lp_out oder
+    # (Fallback) neu berechnet, damit ration_items["block"] und die
+    # aggregierte ration_blocks-Sektion stets verfuegbar sind.
+    _fs_cfg_resp = lp_out.get("_feeding_system_config") or _resolve_feeding_system_config(None, profile)
+    _block_labels_resp = lp_out.get("_block_labels")
+    if not _block_labels_resp or len(_block_labels_resp) != len(feeds):
+        _fs_buckets_resp = _split_feeds_by_block(feeds, _fs_cfg_resp, [])
+        _block_by_id_resp: Dict[str, str] = {}
+        for _blk_name, _blk_feeds in _fs_buckets_resp.items():
+            for _f_item in _blk_feeds:
+                _block_by_id_resp[str(_f_item.get("id") or id(_f_item))] = _blk_name
+        _block_labels_resp = [
+            _block_by_id_resp.get(str(f.get("id") or id(f)), "tmr_block") for f in feeds
+        ]
+
     # --- Rationsposten ---
     ration_items = []
     for i, feed in enumerate(feeds):
@@ -1575,68 +2983,110 @@ def _build_response(
             "me_mj": round(kg_dm * feed["me"], 2),
             "sidp_g": round(kg_dm * feed["sidp"], 1),
             "cp_g": round(kg_dm * feed["cp"], 1),
+            # Slice 1f: Block-Zuordnung (tmr_block / pasture_block /
+            # concentrate_staged_block). Bei reinem TMR immer "tmr_block".
+            "block": _block_labels_resp[i] if i < len(_block_labels_resp) else "tmr_block",
             # FAN-MODE-V1: Herkunft der FAN-abhaengigen Koeffizienten (Spec §8.2.3).
             # In Slice 1 noch komplett "fallback"; Slice 3 ersetzt dies durch den Katalog.
             "fan_slope_source": feed.get("_fan_slope_source", "fallback"),
         })
 
-    # --- Nährstoffversorgung ---
-    def _sum(key: str) -> float:
-        return sum(amounts[i] * float(feeds[i].get(key) or 0) for i in range(len(feeds)))
+    # --- Nährstoffversorgung (Refactor Schritt 2, 2026-04-23) -------------
+    # Alle Tagesaggregate werden in einem einzigen Pass berechnet;
+    # Legacy-Variablennamen bleiben als Aliase erhalten, damit der Rest
+    # von ``_build_response`` unveraendert bleibt.
+    _agg = aggregate_ration(
+        feeds,
+        amounts,
+        block_labels=_block_labels_resp,
+        pendf_factor_fn=_feed_pendf_factor,
+    )
+    me_sup = _agg.me
+    sidp_sup = _agg.sidp
+    cp_sup = _agg.cp
+    ndf_sup = _agg.ndf
+    adf_sup = _agg.adf
+    st_sup = _agg.st
+    bst_sup = _agg.bst
+    zu_sup = _agg.zu
+    xl_sup = _agg.xl
+    ca_sup = _agg.ca
+    p_sup = _agg.p
+    na_sup = _agg.na
+    mg_sup = _agg.mg
+    k_sup = _agg.k
+    sidlys_sup = _agg.sidlys
+    sidmet_sup = _agg.sidmet
 
-    me_sup    = _sum("me")
-    sidp_sup  = _sum("sidp")
-    cp_sup    = _sum("cp")
-    ndf_sup   = _sum("ndf")
-    adf_sup   = _sum("adf")
-    st_sup    = _sum("st")
-    bst_sup   = _sum("bst")
-    zu_sup    = _sum("zu")
-    xl_sup    = _sum("xl")
-    ca_sup    = _sum("ca")
-    p_sup     = _sum("p")
-    na_sup    = _sum("na")
-    mg_sup    = _sum("mg")
-    k_sup     = _sum("k")
-    sidlys_sup = _sum("sidlys")
-    sidmet_sup = _sum("sidmet")
+    pendf_sup = _agg.pendf
+    pendf_density = _agg.pendf_density
 
-    pendf_sup = sum(amounts[i] * feeds[i]["ndf"] * _feed_pendf_factor(feeds[i]) for i in range(len(feeds)))
-    pendf_density = pendf_sup / total_dmi if total_dmi > 0 else 0.0
-
-    # Stärke-Dichte
-    st_density = st_sup / total_dmi if total_dmi > 0 else 0.0
+    # Stärke-Dichten
+    st_density = _agg.st_density
+    # Pansenabbaubare Staerke (ST - bST) als Input der Zebeli-2008-Formel (DLG 01|2025)
+    abbaust_density = _abbaust_density_kgdm(feeds, amounts, total_dmi)
     pendf_min_val = _pendf_minimum(st_density, total_dmi)
+    pendf_model_calibrated = _pendf_model_calibrated(st_density, total_dmi)
 
-    # Pansen-pH-Vorhersage (GfE-Workshop 2023 Zebeli/Schwarz-Formel)
-    ph_predicted = _ph_predict(pendf_density, st_density, total_dmi)
+    # Pansen-pH-Vorhersage nach Zebeli 2008 (DLG 01|2025, Kap. 8.3)
+    ph_predicted = _ph_predict(pendf_density, abbaust_density, total_dmi)
+    ph_formula_applicable = _ph_inputs_in_range(pendf_density, abbaust_density, total_dmi)
 
     # Grundfutter-Anteile
-    forage_kg = sum(amounts[i] for i in range(len(feeds)) if feeds[i].get("forage"))
+    forage_kg = _agg.forage_kg
     concentrate_kg = max(total_dmi - forage_kg, 0.0)
-    forage_ndf = sum(amounts[i] * feeds[i]["ndf"] for i in range(len(feeds)) if feeds[i].get("forage"))
-    forage_share_pct = forage_kg / total_dmi * 100.0 if total_dmi > 0 else 0.0
-    forage_me_sup = sum(amounts[i] * feeds[i]["me"] for i in range(len(feeds)) if feeds[i].get("forage"))
-    forage_sidp_sup = sum(amounts[i] * feeds[i]["sidp"] for i in range(len(feeds)) if feeds[i].get("forage"))
+    forage_ndf = _agg.forage_ndf
+    forage_share_pct = _agg.forage_share_pct
+    forage_me_sup = _agg.forage_me
+    forage_sidp_sup = _agg.forage_sidp
+    # DLG 01|2025: aNDFomGF+CoP - faserreiche Co-Produkte (Biertreber, Press-
+    # schnitzel, Schlempe) werden gemeinsam mit Grobfutter als strukturelle
+    # Faserbasis gewertet.
+    cop_kg = _agg.cop_kg
+    cop_ndf_sup = _agg.cop_ndf
+    forage_plus_cop_ndf = _agg.forage_plus_cop_ndf
     feeding_type = _normalize_feeding_type(profile.get("feeding_type"))
     pasture_pmr = _is_pasture_pmr_system(feeds, profile)
-    andfom_gf_target = 180.0 if pasture_pmr else 200.0
+    # pabKH [g/kg TM] fuer die aNDFomGF+CoP-Kaskade (DLG 01|2025, Kap. 8.2).
+    _pre_pabkh_sup = _agg.pabkh
+    _pre_pabkh_density = _agg.pabkh_density
+    # Primaere Planungsgroesse (DLG 01|2025, Kap. 8.2): binaere pabKH-Kaskade
+    # fuer aNDFomGF+CoP-Mindestdichte.
+    andfom_gf_cop_target, _andfom_gf_cop_step = _andfom_gf_dlg2025_cascade(
+        pabkh_density_kgdm=_pre_pabkh_density, pasture_pmr=pasture_pmr
+    )
+    andfom_gf_base = andfom_gf_cop_target          # fuer UI-Aufriss
+    andfom_gf_starch_uplift = 0.0                  # Legacy-Aufschlag nicht mehr aktiv
+    andfom_gf_target = andfom_gf_cop_target
     pabkh_target = 225.0 if pasture_pmr else 210.0
     xl_target = 42.0 if pasture_pmr else 40.0
     forage_share_target = 60.0 if pasture_pmr else 55.0
     displacement_factor = _concentrate_displacement_factor(feeding_type, concentrate_kg)
     forage_displacement_dmi = concentrate_kg * displacement_factor
-    forage_only_milk = _milk_from_supply(forage_me_sup, forage_sidp_sup, profile)
-    supplemented_milk = _milk_from_supply(me_sup, sidp_sup, profile)
+    # ME-Dichte [MJ ME/kg TM] je Analyseebene fuer dichte-abhaengige k_l-Wahl
+    # (GfE 2001 §5: k_l = 0,463 + 0,24*q). Ohne Dichte verwendet
+    # _milk_from_supply den konservativen Default k_l = 0,60.
+    forage_me_density = forage_me_sup / forage_kg if forage_kg > 0 else None
+    total_me_density = me_sup / total_dmi if total_dmi > 0 else None
+    forage_only_milk = _milk_from_supply(forage_me_sup, forage_sidp_sup, profile, forage_me_density)
+    supplemented_milk = _milk_from_supply(me_sup, sidp_sup, profile, total_me_density)
 
     # --- Weide-/Grobfutter-spezifische Leistungs- und Risiko-Auswertung (DLG 417/443) ---
-    def _is_pasture_feed(feed: Dict[str, Any]) -> bool:
-        name_l = feed.get("name", "").lower()
-        return "weide" in name_l or "frischgras" in name_l or ("gras" in name_l and "frisch" in name_l)
-
+    # Wichtig: DLG-Futterwerttabellen fuehren Futterwerte unter Namen wie
+    # "Gras, frisch o. konserviert, 2. Aufwuchs". In der Praxis ist die
+    # "konservierte" Variante grundsaetzlich **Grassilage** (konserviertes
+    # Gras = siliertes Gras). Wir werten deshalb jeden Namen mit dem
+    # Stichwort "konserviert" als Grassilage und NICHT als Weide - auch
+    # wenn gleichzeitig "frisch" im Namen steht. Entscheidend ist dabei
+    # der explizite Hinweis auf Lagerung/Konservierung.
     def _is_grass_silage(feed: Dict[str, Any]) -> bool:
-        name_l = feed.get("name", "").lower()
-        return "grassilage" in name_l or ("gras" in name_l and "siliert" in name_l)
+        # TM-basierte Klassifikation (siehe _grass_feed_kind):
+        #   Grassilage = TM 30-80 % (inkl. Anwelksilage / Heulage)
+        return _grass_feed_kind(feed) == "grass_silage"
+
+    def _is_pasture_feed(feed: Dict[str, Any]) -> bool:
+        # Weide/Frischgras = TM < 30 %. Grassilage (>= 30 % TM) hat Vorrang.
+        return _grass_feed_kind(feed) == "pasture"
 
     pasture_kg = sum(amounts[i] for i in range(len(feeds)) if _is_pasture_feed(feeds[i]))
     pasture_me_sup = sum(amounts[i] * feeds[i]["me"] for i in range(len(feeds)) if _is_pasture_feed(feeds[i]))
@@ -1649,13 +3099,32 @@ def _build_response(
     grass_silage_me_sup = sum(amounts[i] * feeds[i]["me"] for i in range(len(feeds)) if _is_grass_silage(feeds[i]))
     grass_silage_sidp_sup = sum(amounts[i] * feeds[i]["sidp"] for i in range(len(feeds)) if _is_grass_silage(feeds[i]))
 
-    pasture_milk = _milk_from_supply(pasture_me_sup, pasture_sidp_sup, profile) if pasture_kg > 0 else None
-    grass_silage_milk = _milk_from_supply(grass_silage_me_sup, grass_silage_sidp_sup, profile) if grass_silage_kg > 0 else None
-    pasture_plus_grass_milk = _milk_from_supply(
-        pasture_me_sup + grass_silage_me_sup,
-        pasture_sidp_sup + grass_silage_sidp_sup,
-        profile,
-    ) if (pasture_kg + grass_silage_kg) > 0 else None
+    # Dichte-spezifisches k_l je Teilfutter (GfE 2001 §5)
+    pasture_me_density = pasture_me_sup / pasture_kg if pasture_kg > 0 else None
+    grass_silage_me_density = grass_silage_me_sup / grass_silage_kg if grass_silage_kg > 0 else None
+    pasture_plus_grass_kg = pasture_kg + grass_silage_kg
+    pasture_plus_grass_me_density = (
+        (pasture_me_sup + grass_silage_me_sup) / pasture_plus_grass_kg
+        if pasture_plus_grass_kg > 0 else None
+    )
+
+    pasture_milk = (
+        _milk_from_supply(pasture_me_sup, pasture_sidp_sup, profile, pasture_me_density)
+        if pasture_kg > 0 else None
+    )
+    grass_silage_milk = (
+        _milk_from_supply(grass_silage_me_sup, grass_silage_sidp_sup, profile, grass_silage_me_density)
+        if grass_silage_kg > 0 else None
+    )
+    pasture_plus_grass_milk = (
+        _milk_from_supply(
+            pasture_me_sup + grass_silage_me_sup,
+            pasture_sidp_sup + grass_silage_sidp_sup,
+            profile,
+            pasture_plus_grass_me_density,
+        )
+        if pasture_plus_grass_kg > 0 else None
+    )
 
     pasture_k_mg_ratio = pasture_k_sup / pasture_mg_sup if pasture_mg_sup > 0 else None
     pasture_cp_density = pasture_cp_sup / pasture_kg if pasture_kg > 0 else None
@@ -1663,13 +3132,17 @@ def _build_response(
         amounts[i] for i in range(len(feeds)) if feeds[i].get("_special") == "pasture_mg"
     )
 
-    # aNDFomGF-Dichte [g/kg TM]
+    # aNDFomGF-Dichte [g/kg TM] (nur Grobfutter, Legacy-Anzeige)
     andfom_gf_density = forage_ndf / total_dmi if total_dmi > 0 else 0.0
+    # DLG 01|2025: aNDFomGF+CoP-Dichte [g/kg TM] (Grobfutter + faserreiche Co-Produkte)
+    andfom_gf_cop_density = forage_plus_cop_ndf / total_dmi if total_dmi > 0 else 0.0
 
     # pabKH [g/kg TM]
-    pabkh_sup = sum(amounts[i] * (feeds[i]["st"] + feeds[i]["zu"] - feeds[i]["bst"])
-                    for i in range(len(feeds)))
-    pabkh_density = pabkh_sup / total_dmi if total_dmi > 0 else 0.0
+    pabkh_sup = _pre_pabkh_sup
+    pabkh_density = _pre_pabkh_density
+
+    # Fermentationsindex Kohlenhydrate (DLG 01|2025 Kap. 8.4)
+    fikh_pct, fikh_diag = _fikh_percent(feeds, amounts, total_dmi)
 
     # XL-Dichte [g/kg TM]
     xl_density = xl_sup / total_dmi if total_dmi > 0 else 0.0
@@ -1706,6 +3179,8 @@ def _build_response(
         "andfom_g": round(ndf_sup, 0),
         "andfom_kgdm": round(ndf_sup / total_dmi, 1) if total_dmi > 0 else None,
         "andfom_gf_kgdm": round(andfom_gf_density, 1),
+        # DLG 01|2025: aNDFomGF+CoP (Grobfutter + faserreiche Co-Produkte)
+        "andfom_gf_cop_kgdm": round(andfom_gf_cop_density, 1),
         "adfom_g": round(adf_sup, 0),
         "staerke_g": round(st_sup, 0),
         "pabkh_kgdm": round(pabkh_density, 1),
@@ -1726,6 +3201,7 @@ def _build_response(
         "pendf_kgdm": round(pendf_density, 1),
         "pendf_min_kgdm": round(pendf_min_val, 1),
         "staerke_kgdm": round(st_density, 1),
+        "abbaust_kgdm": round(abbaust_density, 1),
         "ph_predicted": ph_predicted,
     }
 
@@ -1763,7 +3239,7 @@ def _build_response(
         _cr("sidP (g/d)",             sidp_sup,      req.sidp_g,   unit="g/d"),
         _cr("TM-Aufnahme (kg/d)",     total_dmi,     req.dmi_min_kg, req.dmi_max_kg, unit="kg/d"),
         _cr("aNDFom (g/d)",           ndf_sup,       req.ndf_min_g, unit="g/d"),
-        _cr("aNDFomGF (g/kg TM)",     andfom_gf_density, andfom_gf_target,   unit="g/kg TM"),
+        _cr("aNDFomGF+CoP (g/kg TM)", andfom_gf_cop_density, andfom_gf_target, unit="g/kg TM"),
         _cr("pabKH (g/kg TM)",        pabkh_target,         pabkh_density, unit="g/kg TM"),  # max-check
         _cr("XL Rohfett (g/kg TM)",   xl_target,          xl_density,   unit="g/kg TM"),   # max-check
         _cr("peNDF (g/kg TM)",        pendf_density, pendf_min_val,                   unit="g/kg TM"),
@@ -1773,13 +3249,23 @@ def _build_response(
         _cr("Grundfutteranteil (%TM)", forage_share_pct, forage_share_target,     unit="%TM"),
     ]
 
-    # --- DLG-Indikatoren (01|2023) ---
+    # --- DLG-Indikatoren (01|2025) ---
     dlg_indicators: Dict[str, Any] = {
         "strukturindex": round(si, 1) if si is not None else None,
         "strukturindex_ziel": ">= 50",
         "strukturindex_erfuellt": bool(si is not None and si >= 50.0),
         "andfom_gf_kgdm": round(andfom_gf_density, 1),
-        "andfom_gf_ziel": f">= {andfom_gf_target:.0f} g/kg TM",
+        "andfom_gf_cop_kgdm": round(andfom_gf_cop_density, 1),
+        "andfom_gf_ziel": (
+            f">= {andfom_gf_target:.0f} g/kg TM aNDFomGF+CoP "
+            f"(DLG 01|2025 Kap. 8.2, pabKH={pabkh_density:.0f} -> "
+            f"Stufe {_andfom_gf_cop_step}, Ziel {andfom_gf_cop_target:.0f})"
+        ),
+        "andfom_gf_base": round(andfom_gf_base, 1),
+        "andfom_gf_starch_uplift": round(andfom_gf_starch_uplift, 1),
+        "andfom_gf_cop_step": _andfom_gf_cop_step,
+        "andfom_gf_cop_target_kgdm": round(andfom_gf_cop_target, 1),
+        "andfom_gf_cop_erfuellt": bool(andfom_gf_cop_density >= andfom_gf_cop_target * 0.98),
         "pabkh_kgdm": round(pabkh_density, 1),
         "pabkh_ziel": f"<= {pabkh_target:.0f} g/kg TM",
         "xl_kgdm": round(xl_density, 1),
@@ -1790,11 +3276,34 @@ def _build_response(
         "forage_share_ziel": f">= {forage_share_target:.0f}% TM",
         "pendf_kgdm": round(pendf_density, 1),
         "pendf_min_kgdm": round(pendf_min_val, 1),
-        "pendf_ziel": f">= {pendf_min_val:.0f} g/kg TM (stärkeabhängig, GfE-Workshop 2023)",
+        # DLG 01|2023: peNDF dient in der Rationsplanung nur als Kontroll- und
+        # Validierungsgroesse, nicht als primaerer Steuerhebel. Die Planung laeuft
+        # ueber aNDFomGF. Deshalb wird das peNDF-Ziel explizit als "Kontrolle"
+        # gekennzeichnet; die eigentliche Steuergroesse steht unter andfom_gf_ziel.
+        "pendf_ziel": (
+            f"Kontrolle: >= {pendf_min_val:.0f} g/kg TM (staerkeabhaengig, GfE-Workshop 2023). "
+            f"Primaer-Planung: aNDFomGF."
+        ),
         "pendf_erfuellt": bool(pendf_density >= pendf_min_val),
+        "pendf_model_calibrated": pendf_model_calibrated,
+        "pendf_model_status": (
+            "peNDF-Modell im kalibrierten Bereich"
+            if pendf_model_calibrated
+            else "peNDF ausserhalb Modellbereich; Fallback-Regeln verwendet"
+        ),
+        "pendf_role": "Kontrolle/Validierung (DLG 01|2023)",
         "ph_predicted": ph_predicted,
         "ph_ziel": ">= 6.2 (kritisch < 5.9)",
         "ph_ok": bool(ph_predicted >= 6.2),
+        "ph_formula_applicable": ph_formula_applicable,
+        "ph_formula_source": "Zebeli et al. 2008; DLG 01|2025 Kap. 8.3",
+        "abbaust_kgdm": round(abbaust_density, 1),
+        # DLG 01|2025, Kap. 8.4: Fermentationsindex Kohlenhydrate
+        "fikh_pct": fikh_pct,
+        "fikh_ziel": f">= {_FIKH_TARGET_PCT:.0f} %",
+        "fikh_erfuellt": bool(fikh_pct is not None and fikh_pct >= _FIKH_TARGET_PCT),
+        "fikh_diagnose": fikh_diag,
+        "fikh_quelle": "DLG 01|2025 Kap. 8.4",
     }
 
     # Amino acid ratio (post-check only, not in LP)
@@ -1807,14 +3316,27 @@ def _build_response(
             f"Strukturindex {si:.1f} < 50 – Pansen-pH < 6,15 wahrscheinlich. "
             f"aNDFomGF erhöhen oder pabKH (Stärke+Zucker) reduzieren."
         )
-    if andfom_gf_density < andfom_gf_target:
+    if andfom_gf_cop_density < andfom_gf_target:
         warnings.append(
-            f"aNDFomGF {andfom_gf_density:.0f} g/kg TM < {andfom_gf_target:.0f} – "
-            f"Grundfutter-Faserversorgung unzureichend."
+            f"aNDFomGF+CoP {andfom_gf_cop_density:.0f} g/kg TM < {andfom_gf_target:.0f} – "
+            f"Struktur-Faserversorgung (Grobfutter + faserreiche Co-Produkte) unzureichend "
+            f"(DLG 01|2025 Kap. 8.2)."
         )
     if pabkh_density > pabkh_target:
         warnings.append(
             f"pabKH {pabkh_density:.0f} g/kg TM > {pabkh_target:.0f} – Pansenazidose-Risiko erhöht."
+        )
+    if _andfom_gf_cop_step == ">260_warn":
+        warnings.append(
+            f"pabKH {pabkh_density:.0f} g/kg TM > 260 g/kg TM – abbaubare Staerke zu hoch. "
+            f"DLG 01|2025 empfiehlt Umstellung auf Sorten/Konservate mit hoeherem bST-Anteil "
+            f"(resistenter Staerke) oder CCM statt Mais-/Getreideflocken."
+        )
+    if fikh_pct is not None and fikh_pct < _FIKH_TARGET_PCT:
+        warnings.append(
+            f"FIKH {fikh_pct:.0f} % < {_FIKH_TARGET_PCT:.0f} % – Fermentation im Pansen einseitig "
+            f"auf Staerke/Zucker. DLG 01|2025 Kap. 8.4 empfiehlt Anhebung der verdaulichen "
+            f"aNDFom (DNDF) z. B. durch juengere Grassilage, Biertreber oder Pressschnitzel."
         )
     # XL: Weide/PMR-Systeme etwas toleranter, aber weiter tierwohlbegrenzt.
     if xl_density > (xl_target + 4.0):
@@ -1869,25 +3391,40 @@ def _build_response(
             f"Proteinversorgung kritisch."
         )
 
-    # peNDF-Versorgung (GfE-Workshop 2023)
-    if pendf_density < pendf_min_val:
+    # peNDF-Versorgung (GfE-Workshop 2023). Gem. DLG 01|2023 ist peNDF hier eine
+    # Kontroll-/Validierungsgroesse; die eigentliche Planung laeuft ueber
+    # aNDFomGF (s. andfom_gf_ziel). Warnung nur, wenn peNDF-Modell kalibriert.
+    if not pendf_model_calibrated:
         warnings.append(
-            f"peNDF {pendf_density:.0f} g/kg TM unter Minimum {pendf_min_val:.0f} g/kg TM "
+            f"peNDF ausserhalb Modellbereich (Staerke {st_density:.0f} g/kg TM, "
+            f"TM-Aufnahme {total_dmi:.1f} kg/d). Fallback-Regeln verwendet - "
+            f"peNDF-Ampel nur eingeschraenkt belastbar."
+        )
+    elif pendf_density < pendf_min_val:
+        warnings.append(
+            f"peNDF {pendf_density:.0f} g/kg TM unter Modell-Minimum {pendf_min_val:.0f} g/kg TM "
             f"(Stärke {st_density:.0f} g/kg TM, TM-Aufnahme {total_dmi:.1f} kg/d). "
-            f"Pufferwirkung unzureichend – langfaseriges Raufutter (Heu, Stroh) ergänzen."
+            f"Kontrollgroesse im Warnbereich - aNDFomGF und pabKH pruefen, ggf. "
+            f"langfaseriges Raufutter (Heu, Stroh) ergaenzen."
         )
 
-    # Pansen-pH-Simulation (GfE-Workshop 2023)
-    if ph_predicted < 5.9:
-        warnings.append(
-            f"Simulierter Pansen-pH {ph_predicted:.2f} < 5,9 – SARA (subakute Pansenazidose) wahrscheinlich! "
-            f"peNDF erhöhen, Stärke reduzieren, gepufferte Kraftfuttergabe prüfen."
-        )
-    elif ph_predicted < 6.2:
-        warnings.append(
-            f"Simulierter Pansen-pH {ph_predicted:.2f} – Grenzbereich (Ziel ≥ 6,2). "
-            f"peNDF-Versorgung und Fütterungsmanagement (TMR-Qualität, Kraftfuttergaben) prüfen."
-        )
+    # Pansen-pH-Simulation (Zebeli 2008, DLG 01|2025 Kap. 8.3).
+    # Nur warnen, wenn die Eingaenge auch im Validitaetsbereich der Formel
+    # liegen (peNDF 60-250 g/kg TM, abbaubare Staerke 50-350 g/kg TM,
+    # TM 10-25 kg/d). Sehr hohe peNDF-Dichten (>250 g/kg TM) sind strukturell
+    # ueberversorgt und azidotisch NICHT gefaehrdet - hier wuerde die Formel
+    # sonst falsch-positive SARA-Alarme ausloesen.
+    if ph_formula_applicable:
+        if ph_predicted < 5.9:
+            warnings.append(
+                f"Simulierter Pansen-pH {ph_predicted:.2f} < 5,9 – SARA (subakute Pansenazidose) wahrscheinlich! "
+                f"peNDF erhöhen, Stärke reduzieren, gepufferte Kraftfuttergabe prüfen."
+            )
+        elif ph_predicted < 6.2:
+            warnings.append(
+                f"Simulierter Pansen-pH {ph_predicted:.2f} – Grenzbereich (Ziel ≥ 6,2). "
+                f"peNDF-Versorgung und Fütterungsmanagement (TMR-Qualität, Kraftfuttergaben) prüfen."
+            )
 
     # sidLys:sidMet-Verhältnis (GfE-Workshop 2023 – Ziel 3:1)
     if sidlys_sidmet_ratio is not None:
@@ -1992,12 +3529,118 @@ def _build_response(
             "unit": "",
         },
     ]
+
+    # Slice 1e-Nachschaerfung §4: Konzentrat-Tagesmax als weicher Constraint.
+    # Einzelgabe-Limit bleibt physiologisch hart ueber 1,5x-Sicherheitsnetz
+    # im LP (siehe _run_lp), das empfohlene Tagesmax selbst wird weich
+    # bewertet - Ueberschreitung fuehrt zu Penalty, nicht zu Infeasible.
+    _fs_cfg_resp = lp_out.get("_feeding_system_config") or {}
+    _block_labels_resp = lp_out.get("_block_labels") or []
+    _conc_max_per_day_resp = float(_fs_cfg_resp.get("concentrate_max_per_day_kg") or 0.0)
+    if _conc_max_per_day_resp > 0 and _block_labels_resp and len(_block_labels_resp) == len(feeds):
+        _conc_staged_total = sum(
+            amounts[i]
+            for i in range(len(feeds))
+            if _block_labels_resp[i] == "concentrate_staged_block"
+        )
+        if _conc_staged_total > 0:
+            constraint_status_extras.append({
+                "name": "Konzentrat-Tagesmax (kg TM/d)",
+                "actual": round(_conc_staged_total, 2),
+                "target": round(_conc_max_per_day_resp, 2),
+                "unit": "kg TM/d",
+                "source": "feeding_system_config",
+            })
+
     constraint_status = constraint_status_from_lp or _build_constraint_status_v2(
         constraint_report,
         relaxation_policy,
         extras=constraint_status_extras,
     )
+
+    # DLG-01|2025-Policy-Profil: Post-Solve-Band-Auswertung (weiche Bindung).
+    # Die Bandchecks werden als zusaetzliche Eintraege in constraint_status
+    # mit source="policy_profile" gefuehrt und fliessen in penalty_summary ein.
+    policy_profile_targets_dict = _policy_profile_targets(policy_profile)
+    policy_profile_bands = _policy_profile_band_evaluate(
+        policy_profile_targets_dict,
+        nutrient_supply,
+        relaxation_policy,
+    )
+    if policy_profile_bands:
+        constraint_status = list(constraint_status) + policy_profile_bands
+    policy_profile_evaluation = _build_policy_profile_evaluation(
+        policy_profile,
+        policy_profile_targets_dict,
+        policy_profile_bands,
+    )
+
     penalty_summary = _summarize_penalty(constraint_status)
+
+    # Slice 1f: Block-Aggregate (TMR-Mischmasse / Weide / gestaffeltes
+    # Konzentrat). Enthaelt je Block Summen und Anteile (Gesamt-TM, Kosten,
+    # Energie, Protein, Item-Liste). Abwaertskompatibel: bei reinem TMR
+    # sind pasture_block / concentrate_staged_block leer (0-Kennzahlen).
+    def _block_summary(block_name: str) -> Dict[str, Any]:
+        block_indices = [i for i, lab in enumerate(_block_labels_resp) if lab == block_name]
+        block_dmi = sum(amounts[i] for i in block_indices)
+        block_cost = sum(amounts[i] * feeds[i]["price"] for i in block_indices)
+        block_me = sum(amounts[i] * feeds[i]["me"] for i in block_indices)
+        block_sidp = sum(amounts[i] * feeds[i]["sidp"] for i in block_indices)
+        block_cp = sum(amounts[i] * feeds[i]["cp"] for i in block_indices)
+        block_items = [
+            {
+                "feed_id": feeds[i]["id"],
+                "name": feeds[i]["name"],
+                "kgdm": round(amounts[i], 3),
+                "kgfm": round(
+                    amounts[i] / feeds[i]["dm_frac"] if feeds[i]["dm_frac"] > 0 else amounts[i], 3
+                ),
+            }
+            for i in block_indices
+            if amounts[i] >= 0.001
+        ]
+        return {
+            "dmi_kg": round(block_dmi, 3),
+            "dmi_share_pct": round(block_dmi / total_dmi * 100, 1) if total_dmi > 0 else 0.0,
+            "cost_eur_day": round(block_cost, 4),
+            "me_mj": round(block_me, 2),
+            "sidp_g": round(block_sidp, 1),
+            "cp_g": round(block_cp, 1),
+            "items": block_items,
+        }
+
+    ration_blocks = {
+        "feeding_system": {
+            "system": _fs_cfg_resp.get("system"),
+            "concentrate_distribution": _fs_cfg_resp.get("concentrate_distribution"),
+            "concentrate_max_per_serving_kg": _fs_cfg_resp.get("concentrate_max_per_serving_kg"),
+            "concentrate_servings_per_day": _fs_cfg_resp.get("concentrate_servings_per_day"),
+            "concentrate_max_per_day_kg": _fs_cfg_resp.get("concentrate_max_per_day_kg"),
+            "treat_as_primiparous": _fs_cfg_resp.get("treat_as_primiparous", False),
+            "default_concentrate_recipe": _fs_cfg_resp.get("default_concentrate_recipe"),
+        },
+        "tmr_block": _block_summary("tmr_block"),
+        "pasture_block": _block_summary("pasture_block"),
+        "concentrate_staged_block": _block_summary("concentrate_staged_block"),
+    }
+
+    # Slice 2: Konzentrat-Futterabruf-Staffel (nur fuer gestaffelte Systeme).
+    # Basis = Milch aus Grundfutter (forage_only_milk.limiting_milk_kg).
+    concentrate_call_up = _build_concentrate_call_up_table(
+        profile=profile,
+        feeding_system_config=_fs_cfg_resp,
+        base_milk_from_forage_kg=float(forage_only_milk.get("limiting_milk_kg") or 0.0),
+    )
+
+    # Slice 3: Misch- und Fuetterungsprotokoll (nur bei TMR-Block).
+    mixing_protocol = _build_mixing_protocol(
+        ration_items=ration_items,
+        block_labels=_block_labels_resp,
+        feeds=feeds,
+        amounts=amounts,
+        feeding_system_config=_fs_cfg_resp,
+    )
 
     return {
         "status": "optimal",
@@ -2005,6 +3648,12 @@ def _build_response(
         "total_cost_eur_day": round(total_cost, 4),
         "total_cost_eur_100kg_milk": round(total_cost / (float(profile.get("milk_kg_day") or 1)) * 100, 2),
         "ration_items": ration_items,
+        # Slice 1f: Block-Aggregate je Fuetterungssystem (leer/0 bei reinem TMR).
+        "ration_blocks": ration_blocks,
+        # Slice 2: Konzentrat-Abruf-Staffel (nur bei gestaffelter Gabe; sonst None).
+        "concentrate_call_up": concentrate_call_up,
+        # Slice 3: Mischprotokoll TMR-Block (nur wenn TMR-Block existiert; sonst None).
+        "mixing_protocol": mixing_protocol,
         "nutrient_supply": nutrient_supply,
         "constraint_report": constraint_report,
         "constraint_status": constraint_status,
@@ -2026,10 +3675,19 @@ def _build_response(
             },
         },
         "pasture_risk": pasture_risk_payload,
+        "sara_safety_reopt": lp_out.get("_sara_reopt") or {"triggered": False},
         "warnings": warnings,
         "feed_suggestions": [],
         "fan_calibration": fan_calibration,
         "active_policy_profile": policy_profile,
+        "policy_profile_targets": policy_profile_targets_dict,
+        "policy_profile_evaluation": policy_profile_evaluation,
+        # DLG 01|2025 native LP-Slacks (Stage-2-Cost-Solve mit Policy-Penalty):
+        # vorhanden, wenn der erweiterte LP-Solve erfolgreich war. Sonst None -
+        # dann liegt nur die Post-Solve-Auswertung vor.
+        "policy_profile_lp_slacks": lp_out.get("_policy_lp_slacks"),
+        "policy_profile_lp_total_penalty": lp_out.get("_policy_lp_slack_total_penalty"),
+        "policy_profile_lp_mode": lp_out.get("_policy_lp_slack_objective_mode"),
         "policy_overrides": policy_overrides,
         "relaxation_policy": relaxation_policy,
         "objective_strategy": objective_strategy,
@@ -2038,7 +3696,11 @@ def _build_response(
             "solver": "scipy-highs-internal",
             # Historischer Schluessel (bleibt stabil fuer alte Clients).
             # Der neue API-steuerbare Wert wird separat als "objective_strategy" ausgewiesen.
-            "optimization_strategy": "stage1_balance_then_stage2_cost",
+            "optimization_strategy": (
+                "stage1_balance_then_stage2_cost_plus_policy_slack"
+                if lp_out.get("_policy_lp_slack_objective_mode")
+                else "stage1_balance_then_stage2_cost"
+            ),
             "objective_strategy": objective_strategy,
             "pasture_pmr_mode": pasture_pmr,
             "energy_system": "ME-FAN1-GfE2023",
@@ -2160,380 +3822,32 @@ def _gfa_to_feed(gfa: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-_COMPOUND_FEED_MATCHERS: List[Tuple[Tuple[str, ...], str]] = [
-    (("mais", "korn"), "dlg_30880030"),
-    (("mais",), "dlg_30880030"),
-    (("gerste",), "dlg_30820030"),
-    (("weizenkleie",), "dlg_31210030"),
-    (("weizengriesskleie",), "dlg_31230030"),
-    (("weizen",), "dlg_31190030"),
-    (("melasseschnitzel",), "dlg_30940030"),
-    (("ruebenmelasse",), "dlg_41290030"),
-    (("melasse",), "dlg_41290030"),
-    (("rapsextraktionsschrot", "thermisch"), "dlg_30980130"),
-    (("rapsextraktionsschrot",), "dlg_30970130"),
-    (("sojaextraktionsschrot", "geschaelter saat"), "dlg_31060030"),
-    (("sojaextraktionsschrot", "geschalter saat"), "dlg_31060030"),
-    (("sojaextraktionsschrot",), "dlg_31050130"),
-    (("haferschaelkleie",), "dlg_30850030"),
-    (("haferschalkleie",), "dlg_30850030"),
-    (("hafer",), "dlg_30840030"),
-]
+# Refactor 2026-04-23 (Schritt 1e): Compound-Feed-Parser ausgelagert nach
+# app.agrar.rations.compound_feed.parser. Re-Exports unter den alten Namen
+# erhalten die oeffentliche Schnittstelle (Tests + Endpoint).
+from app.agrar.rations.compound_feed.parser import (  # noqa: E402
+    COMPOUND_FEED_MATCHERS as _COMPOUND_FEED_MATCHERS,
+    ascii_slug as _ascii_slug,
+    normalize_feed_label as _normalize_feed_label,
+    parse_localized_float as _parse_localized_float,
+    extract_value as _extract_value,
+    extract_labelled_value as _extract_labelled_value,
+    extract_document_text as _extract_document_text,
+    match_compound_component as _match_compound_component,
+    aggregate_compound_components as _aggregate_compound_components,
+    build_compound_estimate as _build_compound_estimate,
+    parse_compound_feed_text as _parse_compound_feed_text_impl,
+)
 
 
-def _ascii_slug(value: str) -> str:
-    return re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-") or "custom-feed"
+def _parse_compound_feed_text(text: str, filename: str, source_type: str):
+    """Backwards-kompatibler Wrapper: nutzt ``_get_feeds`` als Feeds-Provider.
 
-
-def _normalize_feed_label(value: str) -> str:
-    replacements = {
-        "ä": "ae",
-        "ö": "oe",
-        "ü": "ue",
-        "ß": "ss",
-        "é": "e",
-        "è": "e",
-    }
-    normalized = value.lower()
-    for source, target in replacements.items():
-        normalized = normalized.replace(source, target)
-    normalized = normalized.replace("&", " und ")
-    normalized = re.sub(r"[^a-z0-9]+", " ", normalized)
-    return " ".join(normalized.split())
-
-
-def _parse_localized_float(raw: str) -> Optional[float]:
-    candidate = raw.strip().replace(" ", "").replace("%", "").replace("mj", "").replace("kg", "")
-    candidate = candidate.replace(",", ".")
-    try:
-        return float(candidate)
-    except (TypeError, ValueError):
-        return None
-
-
-def _extract_value(text: str, pattern: str) -> Optional[float]:
-    match = re.search(pattern, text, flags=re.IGNORECASE)
-    if not match:
-        return None
-    return _parse_localized_float(match.group(1))
-
-
-def _extract_labelled_value(text: str, label: str, suffix_pattern: str) -> Optional[float]:
-    """Liest einen beschrifteten Deklarationswert aus einem Futtermittel-Etikett.
-
-    Wichtig: das "Label zuerst"-Muster muss vor dem "Wert zuerst"-Muster stehen.
-    In Fliesstexten wie
-        "Rohprotein 16,50 % Rohfett 2,80 % Rohasche 4,00 %"
-    wuerde das inverse Muster (Zahl vor Label) sonst fuer "Rohfett" die 16,5
-    aus "Rohprotein" zurueckgeben (Off-by-one-Verschub ueber die Inhaltsstoff-
-    Liste). Das hat zuvor zu stark verfaelschten Compound-Feed-Werten gefuehrt
-    (Ca = 7,2% statt 0,28%, XL = 165 g/kg statt 31 g/kg usw.).
+    Siehe ``app.agrar.rations.compound_feed.parser.parse_compound_feed_text``
+    fuer die ausgelagerte Implementation.
     """
-    lines = [line.strip() for line in text.splitlines() if line.strip()]
-    # Zuerst zeilenbasiert mit "Label zuerst" (am robustesten).
-    for line in lines:
-        if label.lower() not in line.lower():
-            continue
-        patterns = [
-            rf"{label}\s*[:=]?\s*([0-9]+[.,][0-9]+)\s*{suffix_pattern}",
-            rf"([0-9]+[.,][0-9]+)\s*{suffix_pattern}\s*{label}",
-        ]
-        for pattern in patterns:
-            value = _extract_value(line, pattern)
-            if value is not None:
-                return value
-    # Fallback auf das gesamte (ggf. flache) Dokument - ebenfalls Label zuerst bevorzugt.
-    compact_patterns = [
-        rf"{label}\s*[:=]?\s*([0-9]+[.,][0-9]+)\s*{suffix_pattern}",
-        rf"([0-9]+[.,][0-9]+)\s*{suffix_pattern}\s*{label}",
-    ]
-    for pattern in compact_patterns:
-        value = _extract_value(text, pattern)
-        if value is not None:
-            return value
-    return None
-
-
-def _extract_document_text(filename: str, content: bytes) -> Tuple[str, str, List[str]]:
-    suffix = Path(filename).suffix.lower()
-    warnings: List[str] = []
-    if suffix == ".pdf":
-        try:
-            import io as _io
-            import pdfplumber
-            with pdfplumber.open(_io.BytesIO(content)) as pdf:
-                text = "\n".join((page.extract_text() or "") for page in pdf.pages)
-        except ImportError as exc:
-            raise HTTPException(503, f"PDF-Parsing nicht verfuegbar: {exc}")
-        except Exception as exc:
-            raise HTTPException(422, f"PDF konnte nicht gelesen werden: {exc}")
-        if not text.strip():
-            raise HTTPException(
-                422,
-                "Das PDF enthaelt keinen Textlayer. Bitte Lieferschein als Foto/JPG/PNG hochladen.",
-            )
-        return text, "pdf_text", warnings
-    if suffix not in {".png", ".jpg", ".jpeg", ".webp", ".bmp", ".tif", ".tiff"}:
-        raise HTTPException(400, "Nur PDF- oder Bilddateien (PNG/JPG/WebP/TIFF) erlaubt")
-    try:
-        from io import BytesIO
-        from PIL import Image
-        import pytesseract
-        image = Image.open(BytesIO(content))
-        text = pytesseract.image_to_string(image, lang="deu+eng")
-    except ImportError as exc:
-        raise HTTPException(503, f"OCR nicht verfuegbar: {exc}")
-    except Exception as exc:
-        raise HTTPException(422, f"Bild konnte nicht via OCR gelesen werden: {exc}")
-    if not text.strip():
-        raise HTTPException(422, "Im Bild wurde kein lesbarer Text erkannt")
-    warnings.append("OCR-Erkennung aktiv - Werte vor der Verwendung fachlich pruefen.")
-    return text, "image_ocr", warnings
-
-
-def _match_compound_component(name: str, feeds_by_id: Dict[str, Dict[str, Any]]) -> Tuple[Optional[str], Optional[str]]:
-    normalized = _normalize_feed_label(name)
-    for tokens, feed_id in _COMPOUND_FEED_MATCHERS:
-        if all(token in normalized for token in tokens):
-            feed = feeds_by_id.get(feed_id)
-            if feed:
-                return feed_id, feed["name"]
-    return None, None
-
-
-def _aggregate_compound_components(
-    components: List[_CompoundFeedComponent],
-    feeds_by_id: Dict[str, Dict[str, Any]],
-) -> Tuple[Dict[str, float], float]:
-    matched = [c for c in components if c.matched_feed_id and c.inclusion_pct > 0]
-    matched_share = sum(c.inclusion_pct for c in matched)
-    if matched_share <= 0:
-        return {}, 0.0
-    numeric_fields = [
-        "dm_frac", "price", "me", "sidp", "cp", "ndf", "adf", "st", "bst", "zu", "nfc",
-        "xl", "ca", "p", "na", "mg", "k", "rmd", "omdfan1",
-    ]
-    aggregate = {field: 0.0 for field in numeric_fields}
-    for component in matched:
-        feed = feeds_by_id[component.matched_feed_id]
-        weight = component.inclusion_pct / matched_share
-        for field in numeric_fields:
-            aggregate[field] += float(feed.get(field) or 0.0) * weight
-    return aggregate, matched_share
-
-
-def _build_compound_estimate(
-    product_name: str,
-    declared: _CompoundFeedDeclaredAnalysis,
-    aggregate: Dict[str, float],
-    matched_share: float,
-) -> Tuple[_CompoundFeedGfeEstimate, Dict[str, Any]]:
-    from modules.agrar.services.naehrwert_service import (
-        AnalytikInput,
-        FutterTyp,
-        QuelleTyp,
-        berechne_naehrwerte as _berechne_naehrwerte,
-    )
-
-    # Deklaration auf Futtermittel-Etiketten ist in % FM (Frischmasse).
-    # Der Optimizer arbeitet in g/kg TM - daher mit 1/dm_frac auf TM-Basis umrechnen.
-    dm_frac = float(aggregate.get("dm_frac") or 0.88)
-    if dm_frac <= 0.0:
-        dm_frac = 0.88
-    pct_to_g_per_kg_tm = 10.0 / dm_frac  # %-FM -> g/kg TM
-
-    def _declared_to_tm(pct: Optional[float], fallback: float) -> float:
-        if pct is None:
-            return fallback
-        return float(pct) * pct_to_g_per_kg_tm
-
-    cp_g = _declared_to_tm(declared.crude_protein_pct, float(aggregate.get("cp") or 0.0))
-    fat_g = _declared_to_tm(declared.crude_fat_pct, float(aggregate.get("xl") or 0.0))
-    ash_g = (
-        _declared_to_tm(declared.crude_ash_pct, 0.0)
-        if declared.crude_ash_pct is not None
-        else max(35.0, 1000.0 - float(aggregate.get("nfc") or 820.0))
-    )
-    fiber_pct = declared.crude_fiber_pct
-    ndf_g = float(aggregate.get("ndf") or max((fiber_pct or 8.0) * 22.0 / dm_frac * 0.1 * 10.0, 130.0))
-    adf_g = float(aggregate.get("adf") or max((fiber_pct or 8.0) * 12.0 / dm_frac * 0.1 * 10.0, 75.0))
-    starch_g = float(aggregate.get("st") or 220.0)
-    sugar_g = float(aggregate.get("zu") or 65.0)
-
-    analytik = AnalytikInput(
-        tm=max(float(aggregate.get("dm_frac") or 0.88) * 1000.0, 870.0),
-        cp=round(cp_g, 2),
-        cl=round(fat_g, 2),
-        ca=round(ash_g, 2),
-        zucker=round(sugar_g, 2),
-        staerke=round(starch_g, 2),
-        adfom=round(adf_g, 2),
-        andFom=round(ndf_g, 2),
-        fan=2.5,
-        futtertyp=FutterTyp.MISCHFUTTER,
-        quelle=QuelleTyp.USER,
-    )
-    result = _berechne_naehrwerte(analytik, modus="beratung")
-
-    ca_g = _declared_to_tm(declared.calcium_pct, float(aggregate.get("ca") or 1.5))
-    p_g = _declared_to_tm(declared.phosphorus_pct, float(aggregate.get("p") or 4.5))
-    na_g = _declared_to_tm(declared.sodium_pct, float(aggregate.get("na") or 1.5))
-    mg_g = _declared_to_tm(declared.magnesium_pct, float(aggregate.get("mg") or 2.5))
-    nfc_g = max(1000.0 - cp_g - fat_g - ash_g - ndf_g, 0.0)
-    product_slug = _ascii_slug(product_name)
-
-    estimate = _CompoundFeedGfeEstimate(
-        basis="composition_match" if matched_share >= 60.0 else "declared_analysis_fallback",
-        match_coverage_pct=round(matched_share, 1),
-        me_fan1_mj_kgdm=round(result.energie.me_fan1_mj_kg_tm, 3),
-        me_fani_mj_kgdm=round(result.energie.me_fani_mj_kg_tm, 3),
-        nel_mj_kgdm=round(result.nel_mj_kg_tm, 3),
-        sidp_g_kgdm=round(result.protein.sidp_gesamt, 1),
-        nxp_g_kgdm=round(result.nxp_g_kg_tm, 1),
-        cp_g_kgdm=round(cp_g, 1),
-        andfom_g_kgdm=round(ndf_g, 1),
-        starch_g_kgdm=round(starch_g, 1),
-        sugar_g_kgdm=round(sugar_g, 1),
-        fat_g_kgdm=round(fat_g, 1),
-        omd_method=result.energie.omd_methode,
-    )
-    optimizer_feed = {
-        "id": f"compound_{product_slug}",
-        "lid": None,
-        "name": product_name,
-        "konservierung": "",
-        "group": "Kraftfutter/Betrieb",
-        "futterart": "Kraftfutter, Mischfutter",
-        "forage": False,
-        "dm_frac": round(float(aggregate.get("dm_frac") or 0.88), 3),
-        "price": round(float(aggregate.get("price") or 0.38), 3),
-        "min_kg": 0.0,
-        "max_kg": 8.0,
-        "me": float(estimate.me_fan1_mj_kgdm or 0.0),
-        "sidp": float(estimate.sidp_g_kgdm or 0.0),
-        "cp": round(cp_g, 1),
-        "ndf": round(ndf_g, 1),
-        "adf": round(adf_g, 1),
-        "st": round(starch_g, 1),
-        "bst": round(starch_g * 0.60, 1),
-        "zu": round(sugar_g, 1),
-        "nfc": round(nfc_g, 1),
-        "xl": round(fat_g, 1),
-        "ca": round(ca_g, 2),
-        "p": round(p_g, 2),
-        "na": round(na_g, 2),
-        "mg": round(mg_g, 2),
-        "k": round(float(aggregate.get("k") or 8.0), 2),
-        "dcab": None,
-        "edg": None,
-        "rmd": round(float(aggregate.get("rmd") or result.protein.rmd), 2),
-        "omdfan1": round(float(aggregate.get("omdfan1") or result.energie.omd_fan1), 2),
-        "ndfd": None,
-        "ge": None,
-        "sidlys": None,
-        "sidmet": None,
-        "_source": "compound_upload",
-        "_match_coverage_pct": round(matched_share, 1),
-        "_legacy_nel_mj_kg": declared.nel_mj_kg,
-    }
-    return estimate, optimizer_feed
-
-
-def _parse_compound_feed_text(text: str, filename: str, source_type: str) -> _CompoundFeedParsed:
-    lines = [line.strip() for line in text.splitlines() if line.strip()]
-    flat_text = re.sub(r"\s+", " ", text.replace("-\n", "").replace("\n", " "))
-    product_name = "Milchleistungsfutter"
-    product_match = re.search(r"(Milchleistungsfutter[^\n]+)", text.replace("-\n", ""), flags=re.IGNORECASE)
-    if product_match:
-        product_name = " ".join(product_match.group(1).split())
-    else:
-        for idx, line in enumerate(lines):
-            if "Inhaltsstoffe" in line:
-                for back in range(max(0, idx - 2), idx):
-                    candidate = lines[back]
-                    if len(candidate) > 12 and not re.search(r"^[0-9./ -]+$", candidate):
-                        product_name = candidate
-                        break
-                break
-    analysis_match = re.search(
-        r"Inhaltsstoffe:\s*(.+?)(?:\s+Zusatzstoffe:|\s+Zusammensetzung:)",
-        flat_text,
-        flags=re.IGNORECASE,
-    )
-    analysis_text = analysis_match.group(1) if analysis_match else flat_text
-    declared = _CompoundFeedDeclaredAnalysis(
-        crude_protein_pct=_extract_labelled_value(analysis_text, "Rohprotein", "%"),
-        crude_fat_pct=_extract_labelled_value(analysis_text, "Rohfett", "%"),
-        crude_fiber_pct=_extract_labelled_value(analysis_text, "Rohfaser", "%"),
-        crude_ash_pct=_extract_labelled_value(analysis_text, "Rohasche", "%"),
-        calcium_pct=_extract_labelled_value(analysis_text, "Calcium", "%"),
-        phosphorus_pct=_extract_labelled_value(analysis_text, "Phosphor", "%"),
-        sodium_pct=_extract_labelled_value(analysis_text, "Natrium", "%"),
-        magnesium_pct=_extract_labelled_value(analysis_text, "Magnesium", "%"),
-        nel_mj_kg=(
-            _extract_value(analysis_text, r"NEL/?kg\s*([0-9]+[.,][0-9]+)\s*MJ")
-            or _extract_value(analysis_text, r"([0-9]+[.,][0-9]+)\s*MJ\s*NEL/?kg")
-        ),
-    )
-    components: List[_CompoundFeedComponent] = []
-    composition_match = re.search(
-        r"Zusammensetzung:\s*(.+?)(?:\s+(?:Tel\.|Fax|Email:|Ernährungsphysiologische Zusatzstoffe|Ernaehrungsphysiologische Zusatzstoffe|Fütterungshinweis|Fuetterungshinweis|GmbH\s*&|$))",
-        flat_text,
-        flags=re.IGNORECASE,
-    )
-    composition_text = composition_match.group(1) if composition_match else ""
-    parts = re.findall(
-        r"([0-9]+[.,][0-9]+)\s*%\s*([^%]+?)(?=(?:[0-9]+[.,][0-9]+\s*%|$))",
-        composition_text,
-        flags=re.IGNORECASE,
-    )
-    feeds_by_id = {feed["id"]: feed for feed in _get_feeds()}
-    for pct_raw, name_raw in parts:
-        pct = _parse_localized_float(pct_raw)
-        if pct is None:
-            continue
-        cleaned_name = name_raw.strip(" ,.;")
-        matched_feed_id, matched_feed_name = _match_compound_component(cleaned_name, feeds_by_id)
-        components.append(
-            _CompoundFeedComponent(
-                name=cleaned_name,
-                inclusion_pct=round(pct, 2),
-                matched_feed_id=matched_feed_id,
-                matched_feed_name=matched_feed_name,
-            )
-        )
-    aggregate, matched_share = _aggregate_compound_components(components, feeds_by_id)
-    estimate, optimizer_feed = _build_compound_estimate(product_name, declared, aggregate, matched_share)
-    warnings: List[str] = []
-    if matched_share < 100.0:
-        warnings.append(
-            f"Rezeptur-Match deckt {matched_share:.1f}% der Zusammensetzung gegen DLG-Futtermittel ab."
-        )
-    if declared.nel_mj_kg is not None and estimate.nel_mj_kgdm is not None:
-        # Deklarierte NEL auf Futtermitteletiketten steht ueblicherweise in MJ/kg FM.
-        # Fuer den Vergleich mit der GfE-Schaetzung (MJ/kg TM) auf TM-Basis umrechnen.
-        dm_frac_for_nel = float(optimizer_feed.get("dm_frac") or 0.88)
-        declared_nel_tm = declared.nel_mj_kg / dm_frac_for_nel if dm_frac_for_nel > 0 else declared.nel_mj_kg
-        delta = abs(declared_nel_tm - estimate.nel_mj_kgdm)
-        if delta > 0.4:
-            warnings.append(
-                "Abweichung zwischen deklarierter NEL "
-                f"({declared.nel_mj_kg:.1f} MJ/kg FM ≈ {declared_nel_tm:.2f} MJ/kg TM) und geschaetzter NEL "
-                f"({estimate.nel_mj_kgdm:.2f} MJ/kg TM) beachten."
-            )
-    if not components:
-        warnings.append("Keine verwertbare Rezeptur-Zusammensetzung erkannt; GfE-Schaetzung basiert auf Deklarationsanalyse.")
-    return _CompoundFeedParsed(
-        source_filename=filename,
-        source_type=source_type,
-        product_name=product_name,
-        supplier_name=None,
-        declared_analysis=declared,
-        composition=components,
-        gfe2023_estimate=estimate,
-        optimizer_feed=optimizer_feed,
-        warnings=warnings,
-        raw_text_preview=text[:1200],
+    return _parse_compound_feed_text_impl(
+        text, filename, source_type, feeds_provider=_get_feeds
     )
 
 
@@ -2587,10 +3901,16 @@ def _classify_feed_to_fan_group(feed: Dict[str, Any], season_profile: Optional[s
     name_l = (feed.get("name") or "").lower()
     fart_l = (feed.get("futterart") or "").lower()
     group_l = (feed.get("group") or "").lower()
-    is_pasture = "weide" in name_l or "frischgras" in name_l or ("gras" in name_l and "frisch" in name_l)
-    is_grass_silage = "grassilage" in name_l or ("gras" in name_l and "silage" in name_l)
+    # Gras-basierte Klassifikation zentral ueber TM-Gehalt (siehe _grass_feed_kind).
+    # Die DLG-Daten fuehren "Gras, frisch o. konserviert" mit drei TM-Varianten
+    # (175 / 350 / 860 g/kg) - nur der TM-Gehalt loest sauber zwischen Weide,
+    # Silage und Heu auf. Der Name dient nur als Fallback.
+    _gk = _grass_feed_kind(feed)
+    is_grass_silage = _gk == "grass_silage"
+    is_pasture = _gk == "pasture"
+    is_grass_hay = _gk == "grass_hay"
     is_maize_silage = ("maissilage" in name_l or "mais" in name_l and "silage" in name_l)
-    is_hay = "heu" in name_l
+    is_hay = "heu" in name_l or is_grass_hay
     is_straw = "stroh" in name_l
     is_juice = "saftfutter" in fart_l or "saftfutter" in group_l or "biertreber" in name_l or "schlempe" in name_l
     is_cereal = any(k in name_l for k in ("mais", "maiskorn", "weizen", "gerste", "hafer", "roggen", "triticale", "maismehl", "gerstenmehl"))
@@ -2740,8 +4060,13 @@ def _resolve_policy_profile(
     season = (season_profile or "").lower()
     if ft == "TMR":
         return "tmr_standard"
-    if ft == "PMR+Weide" and season in ("spring_young", "spring_mid", "spring_late"):
-        return "pmr_pasture_spring"
+    if ft == "PMR+Weide":
+        if season in ("spring_young", "spring_mid", "spring_late"):
+            return "pmr_pasture_spring"
+        if season in ("summer_young", "summer_mid", "summer_late"):
+            return "pmr_pasture_summer"
+        if season == "autumn":
+            return "pmr_pasture_autumn"
     return "pmr_standard"
 
 
@@ -2753,6 +4078,8 @@ def _resolve_runtime_options(
     season_profile: Optional[str] = None,
     policy_profile: Optional[str] = None,
     policy_overrides: Optional[Dict[str, Any]] = None,
+    feeding_system_config: Optional[Any] = None,
+    feed_block_overrides: Optional[List[Any]] = None,
 ) -> Dict[str, Any]:
     """Vereinheitlicht FAN-/Policy-/Relaxation-Optionen und setzt V1-Defaults.
 
@@ -2802,6 +4129,19 @@ def _resolve_runtime_options(
 
     overrides = dict(policy_overrides or {})
 
+    # Slice 1h: FeedingSystemConfig + Block-Overrides normalisieren.
+    # Eingabe kann FeedingSystemConfig-Instanz, dict oder None sein.
+    # Wir normieren ueber _resolve_feeding_system_config(), damit die
+    # Defaults (Konzentratgrenzen je Verteilungssystem) gleich gesetzt
+    # werden. Die Overrides werden als Liste normalisiert.
+    fs_cfg = _resolve_feeding_system_config(feeding_system_config, profile)
+    block_overrides_norm: List[Dict[str, Any]] = []
+    for ovr in feed_block_overrides or []:
+        if isinstance(ovr, FeedBlockAssignment):
+            block_overrides_norm.append(ovr.model_dump())
+        elif isinstance(ovr, dict):
+            block_overrides_norm.append(dict(ovr))
+
     return {
         "fan": {
             "mode": fan_mode,
@@ -2815,6 +4155,9 @@ def _resolve_runtime_options(
         "season_profile": season or None,
         "policy_profile": profile_name,
         "policy_overrides": overrides,
+        # Slice 1h: Fuetterungssystem + Block-Overrides
+        "feeding_system_config": fs_cfg,
+        "feed_block_overrides": block_overrides_norm,
     }
 
 
@@ -2873,8 +4216,58 @@ def _optimize_internal(
                     feeds.append(dict(supplement))
                     break
 
-    # FAN-MODE-003: FAN-Katalog auf Feeds anwenden (exact/mapped/fallback) + Iteration starten.
+    # Saisonale Anpassungen (Spec §12 Sommer/Herbst):
+    #  - Hitzestress-Saisonprofile reduzieren DMI (Gruber korrigiert um dmi_factor)
+    #  - Na-Bedarf wird um Schwitzverlust-Faktor angehoben
+    #  - NaHCO3-Pansenpuffer wird bei Sommerprofilen automatisch als
+    #    Pflichtbaustein mit Mindestmenge eingefuehrt
     season = runtime_options.get("season_profile")
+    seasonal = _seasonal_adjustments(season)
+    dmi_factor = float(seasonal.get("dmi_factor", 1.0))
+    na_boost = float(seasonal.get("na_boost_factor", 1.0))
+    inject_buffer = bool(seasonal.get("inject_buffer", 0.0))
+    buffer_min_kg = float(seasonal.get("buffer_min_kg", 0.0))
+
+    if dmi_factor != 1.0:
+        req = _CowReq(
+            me_mj=req.me_mj,
+            sidp_g=req.sidp_g,
+            nel_mj=req.nel_mj,
+            nxp_g=req.nxp_g,
+            dmi_min_kg=req.dmi_min_kg * dmi_factor,
+            dmi_max_kg=req.dmi_max_kg * dmi_factor,
+            dmi_target_kg=req.dmi_target_kg * dmi_factor,
+            ndf_min_g=req.ndf_min_g * dmi_factor,
+            ca_min_g=req.ca_min_g,
+            p_min_g=req.p_min_g,
+            na_min_g=req.na_min_g * na_boost,
+            mg_min_g=req.mg_min_g,
+            k_max_g=req.k_max_g * dmi_factor,
+        )
+    elif na_boost != 1.0:
+        req = _CowReq(**{**req.model_dump(), "na_min_g": req.na_min_g * na_boost})
+
+    if inject_buffer:
+        buffer_idx = next(
+            (i for i, feed in enumerate(feeds) if feed.get("_special") == "summer_buffer"),
+            None,
+        )
+        if buffer_idx is None:
+            for supplement in _SPECIAL_SUPPLEMENTS:
+                if supplement.get("_special") == "summer_buffer":
+                    buf = dict(supplement)
+                    if buffer_min_kg > 0.0:
+                        buf["min_kg"] = max(float(buf.get("min_kg", 0.0)), buffer_min_kg)
+                    feeds.append(buf)
+                    break
+        elif buffer_min_kg > 0.0:
+            # Bereits vorhanden (z. B. aus _with_special_supplements): Mindestmenge
+            # saisonal hochziehen, damit der LP-Solver ihn als Pflichtbaustein fuehrt.
+            existing = dict(feeds[buffer_idx])
+            existing["min_kg"] = max(float(existing.get("min_kg", 0.0)), buffer_min_kg)
+            feeds[buffer_idx] = existing
+
+    # FAN-MODE-003: FAN-Katalog auf Feeds anwenden (exact/mapped/fallback) + Iteration starten.
     catalog_info = _annotate_feeds_with_fan_catalog(feeds, season_profile=season)
 
     fan_opts = runtime_options.get("fan", {}) or {}
@@ -2968,7 +4361,256 @@ def _optimize_internal(
     lp_out["_fan_converged"] = converged
     lp_out["_fan_final"] = round(fani_final, 4) if fani_final is not None else None
     lp_out["_fan_catalog_info"] = catalog_info
+
+    # SARA-Safety-Reopt-Loop (Pansenazidose-Schutz, 2026-04-21):
+    # Wenn der erste Solve fachlich rot ist (pH < 5.9 ODER peNDF < Minimum ODER
+    # pabKH am Limit), wird mit verschaerften Constraints erneut optimiert.
+    # Die Prevention ist sonst nur implizit ueber LP-Constraints; dieser Loop
+    # macht den Feedback-Zyklus explizit und sichtbar (DLG 01|23 Regelkreis).
+    if lp_out["scipy_result"].status == 0 and not runtime_options.get("sara_overrides"):
+        lp_out = _maybe_run_sara_safety_reopt(
+            lp_out=lp_out,
+            req=req,
+            feeds=feeds,
+            profile=profile,
+            runtime_options=runtime_options,
+            fan_mode=fan_mode,
+            fan_reference=fan_reference,
+            fan_tol=fan_tol,
+            fan_max_iter=fan_max_iter,
+            seasonal=seasonal,
+            buffer_min_kg=buffer_min_kg,
+        )
+
     return _build_response(lp_out, req, profile)
+
+
+# ---------------------------------------------------------------------------
+# SARA-Safety-Reopt-Loop
+# ---------------------------------------------------------------------------
+# Fachliche Logik (GfE-Workshop 2023 / DLG 01|2023 / DLG-Merkblatt 417):
+#   Der erste Solve wird auf pH_predicted, peNDF-Deckung und pabKH geprueft.
+#   Wenn fachlich rot, wird mit verschaerften Constraints erneut gerechnet:
+#     - pabKH-Deckel um 20 g/kg TM senken
+#     - peNDF-Floor (Stage-2) um 10 g/kg TM heben
+#     - aNDFomGF-Mindestdichte um 10 g/kg TM heben
+#     - NaHCO3-Pansenpuffer als Pflichtbaustein (min_kg >= 0.15 kg TM/d)
+#   Wenn der zweite Solve infeasible ist oder keine Verbesserung bringt,
+#   behalten wir das erste Ergebnis und flaggen es als "reopt_attempted".
+def _detect_sara_risk(lp_out: Dict[str, Any], profile: Dict[str, Any]) -> Dict[str, Any]:
+    """Bewerte den ersten Solver-Output auf Pansenazidose-Risiko.
+
+    Liefert `{"triggered": bool, "reason": str | None, "metrics": dict}`.
+    """
+    result = lp_out.get("scipy_result")
+    feeds_res = lp_out.get("feeds") or []
+    if result is None or result.status != 0 or not feeds_res:
+        return {"triggered": False, "reason": None, "metrics": {}}
+
+    amounts = [_f(v) for v in result.x]
+    total_dmi = sum(amounts)
+    if total_dmi <= 0:
+        return {"triggered": False, "reason": None, "metrics": {}}
+
+    pendf_sup = sum(
+        amounts[i] * float(feeds_res[i].get("ndf") or 0.0) * _feed_pendf_factor(feeds_res[i])
+        for i in range(len(feeds_res))
+    )
+    pendf_density = pendf_sup / total_dmi
+    pabkh_sup = sum(
+        amounts[i] * (
+            float(feeds_res[i].get("st") or 0.0)
+            + float(feeds_res[i].get("zu") or 0.0)
+            - float(feeds_res[i].get("bst") or 0.0)
+        )
+        for i in range(len(feeds_res))
+    )
+    pabkh_density = pabkh_sup / total_dmi
+    st_density = sum(
+        amounts[i] * float(feeds_res[i].get("st") or 0.0) for i in range(len(feeds_res))
+    ) / total_dmi
+    # Pansenabbaubare Staerke (DLG 01|2025 -> Input der Zebeli-2008-pH-Formel)
+    abbaust_density = _abbaust_density_kgdm(feeds_res, amounts, total_dmi)
+    pendf_min_val = _pendf_minimum(st_density, total_dmi)
+    pendf_model_ok = _pendf_model_calibrated(st_density, total_dmi)
+    ph = _ph_predict(pendf_density, abbaust_density, total_dmi)
+    ph_valid = _ph_inputs_in_range(pendf_density, abbaust_density, total_dmi)
+
+    pasture_pmr = _is_pasture_pmr_system(feeds_res, profile)
+    pabkh_limit = 225.0 if pasture_pmr else 210.0
+    # Primaere Planungsgroesse (DLG 01|2025 Kap. 8.2): aNDFomGF+CoP-Mindestdichte
+    # als binaere pabKH-Kaskade. Co-Produkte (Biertreber, Pressschnitzel, ...)
+    # zaehlen hier mit zu den strukturwirksamen Fasertraegern.
+    forage_ndf_sup = sum(
+        amounts[i] * float(feeds_res[i].get("ndf") or 0.0)
+        for i in range(len(feeds_res))
+        if feeds_res[i].get("forage")
+    )
+    cop_ndf_sup = sum(
+        amounts[i] * float(feeds_res[i].get("ndf") or 0.0)
+        for i in range(len(feeds_res))
+        if feeds_res[i].get("structural_coproduct") and not feeds_res[i].get("forage")
+    )
+    andfom_gf_cop_density = (forage_ndf_sup + cop_ndf_sup) / total_dmi if total_dmi > 0 else 0.0
+    andfom_gf_target = _andfom_gf_min_target(
+        staerke_density_kgdm=st_density,
+        pabkh_density_kgdm=pabkh_density,
+        pasture_pmr=pasture_pmr,
+    )
+
+    triggers: List[str] = []
+    if ph_valid and ph < 5.9:
+        triggers.append(f"pH_predicted={ph:.2f} < 5.9 (SARA-Schwelle)")
+    # peNDF ist laut DLG 01|2023 eine Kontrollgroesse; als SARA-Trigger nur, wenn
+    # das peNDF-Modell im kalibrierten Bereich ist (ausserhalb extrapolieren wir
+    # nur Fallback-Werte, die keinen Reopt rechtfertigen).
+    if pendf_model_ok and pendf_density < pendf_min_val:
+        triggers.append(
+            f"peNDF={pendf_density:.0f} < Minimum {pendf_min_val:.0f} g/kg TM (Kontrollgroesse)"
+        )
+    # aNDFomGF+CoP ist die primaere Planungsgroesse (DLG 01|2025) - hier
+    # deutlich unter Ziel ist ein valider SARA-Trigger unabhaengig vom
+    # peNDF-Modellstatus.
+    if andfom_gf_cop_density < andfom_gf_target - 10.0:
+        triggers.append(
+            f"aNDFomGF+CoP={andfom_gf_cop_density:.0f} < Ziel {andfom_gf_target:.0f} g/kg TM"
+        )
+    if pabkh_density > pabkh_limit - 3.0:
+        triggers.append(
+            f"pabKH={pabkh_density:.0f} g/kg TM am Limit {pabkh_limit:.0f} (Puffer <= 3)"
+        )
+
+    metrics = {
+        "ph_predicted": ph,
+        "ph_formula_applicable": ph_valid,
+        "pendf_kgdm": round(pendf_density, 1),
+        "pendf_min_kgdm": round(pendf_min_val, 1),
+        "pendf_model_calibrated": pendf_model_ok,
+        "andfom_gf_cop_kgdm": round(andfom_gf_cop_density, 1),
+        "andfom_gf_target_kgdm": round(andfom_gf_target, 1),
+        "pabkh_kgdm": round(pabkh_density, 1),
+        "pabkh_limit_kgdm": pabkh_limit,
+        "starch_kgdm": round(st_density, 1),
+        "abbaust_kgdm": round(abbaust_density, 1),
+        "total_dmi_kg": round(total_dmi, 2),
+    }
+    return {
+        "triggered": bool(triggers),
+        "reason": "; ".join(triggers) if triggers else None,
+        "metrics": metrics,
+    }
+
+
+def _maybe_run_sara_safety_reopt(
+    *,
+    lp_out: Dict[str, Any],
+    req: "_CowReq",
+    feeds: List[Dict[str, Any]],
+    profile: Dict[str, Any],
+    runtime_options: Dict[str, Any],
+    fan_mode: str,
+    fan_reference: Optional[float],
+    fan_tol: float,
+    fan_max_iter: int,
+    seasonal: Dict[str, Any],
+    buffer_min_kg: float,
+) -> Dict[str, Any]:
+    """Loese Rationsoptimierung bei SARA-Risiko mit verschaerften Constraints erneut.
+
+    Immer return: entweder `lp_out` (unveraendert, ggf. mit `_sara_reopt` Block)
+    oder neuer `lp_out_tight` mit `_sara_reopt = {triggered, actions, before, after}`.
+    """
+    risk = _detect_sara_risk(lp_out, profile)
+    if not risk["triggered"]:
+        lp_out["_sara_reopt"] = {
+            "triggered": False,
+            "reason": None,
+            "metrics_before": risk["metrics"],
+        }
+        return lp_out
+
+    # Verschaerfte Constraints fuer Reopt-Versuch.
+    tight_overrides = {
+        "pabkh_max": max(160.0, (225.0 if _is_pasture_pmr_system(feeds, profile) else 210.0) - 20.0),
+        "pendf_floor_boost": 15.0,
+        "andfom_gf_min_boost": 10.0,
+    }
+
+    # Pansenpuffer als Pflichtbaustein mit erhoehter Mindestmenge.
+    feeds_tight: List[Dict[str, Any]] = [dict(f) for f in feeds]
+    buffer_target_min = max(buffer_min_kg, 0.15)
+    buffer_idx = next(
+        (i for i, f in enumerate(feeds_tight) if f.get("_special") == "summer_buffer"),
+        None,
+    )
+    if buffer_idx is None:
+        for supplement in _SPECIAL_SUPPLEMENTS:
+            if supplement.get("_special") == "summer_buffer":
+                buf = dict(supplement)
+                buf["min_kg"] = buffer_target_min
+                feeds_tight.append(buf)
+                break
+    else:
+        feeds_tight[buffer_idx]["min_kg"] = max(
+            float(feeds_tight[buffer_idx].get("min_kg", 0.0)), buffer_target_min
+        )
+
+    runtime_tight = dict(runtime_options)
+    runtime_tight["sara_overrides"] = tight_overrides
+
+    # FAN-Modus exakt nachbilden (einfache Umsetzung: ein Solve mit aktueller FAN-Ref).
+    # Fuer die Reopt-Runde reicht ein einmaliger Solve; Iteration wuerde nur bei
+    # starker Mengenaenderung helfen, die verschaerften Constraints dominieren hier.
+    fani_ref = lp_out.get("_fan_final") or fan_reference or 3.0
+    adjusted = _apply_fan_effect(feeds_tight, float(fani_ref))
+    lp_tight = _run_lp(req, adjusted, profile, runtime_options=runtime_tight)
+
+    actions = [
+        f"pabKH-Deckel -20 -> {tight_overrides['pabkh_max']:.0f} g/kg TM",
+        "peNDF-Floor +15 g/kg TM (Stage-2)",
+        "aNDFomGF-Mindestdichte +10 g/kg TM",
+        f"NaHCO3-Pansenpuffer Pflichtmenge >= {buffer_target_min:.2f} kg TM/d",
+    ]
+
+    if lp_tight["scipy_result"].status != 0:
+        # Reopt infeasible -> wir behalten das urspruengliche Ergebnis,
+        # markieren aber, dass der Safety-Loop versucht wurde und hart wurde.
+        lp_out["_sara_reopt"] = {
+            "triggered": True,
+            "reason": risk["reason"],
+            "actions": actions,
+            "resolved": False,
+            "resolution_note": (
+                "Reoptimierung mit verschaerften Constraints infeasible – bestehende Ration "
+                "beibehalten, aber fachlich rot. Grobfutterangebot ueberpruefen (peNDF-Quellen, "
+                "langfaseriges Heu/Stroh, Luzerne) oder Zielmilchleistung reduzieren."
+            ),
+            "metrics_before": risk["metrics"],
+        }
+        return lp_out
+
+    # Zweitmessung der Metriken nach Reopt.
+    lp_tight["_runtime_options"] = runtime_tight
+    lp_tight["_fan_iterations"] = lp_out.get("_fan_iterations", []) + [
+        {"i": "sara_reopt", "mode": "safety_reopt", "delta": 0.0}
+    ]
+    lp_tight["_fan_converged"] = lp_out.get("_fan_converged")
+    lp_tight["_fan_final"] = lp_out.get("_fan_final")
+    lp_tight["_fan_catalog_info"] = lp_out.get("_fan_catalog_info")
+    post = _detect_sara_risk(lp_tight, profile)
+    lp_tight["_sara_reopt"] = {
+        "triggered": True,
+        "reason": risk["reason"],
+        "actions": actions,
+        "resolved": not post["triggered"],
+        "resolution_note": (
+            "Reoptimierung mit verschaerften Azidose-Constraints erfolgreich." if not post["triggered"]
+            else "Reoptimierung hat Risiko reduziert, aber Indikatoren bleiben grenzwertig."
+        ),
+        "metrics_before": risk["metrics"],
+        "metrics_after": post["metrics"],
+    }
+    return lp_tight
 
 
 def _demo_profile() -> Dict[str, Any]:
@@ -2988,9 +4630,12 @@ def _demo_profile() -> Dict[str, Any]:
 # Pydantic Models für API
 # ---------------------------------------------------------------------------
 
-_FAN_MODES = ("auto_iterative", "reference", "evaluation_only")
-_RELAXATION_POLICIES = ("strict", "standard", "soft")
-_OBJECTIVE_STRATEGIES = ("balance_then_cost", "balance_only", "cost_only")
+# Refactor 2026-04-23: ausgelagert nach app.agrar.rations.constants
+from app.agrar.rations.constants.gfe2023 import FAN_MODES as _FAN_MODES
+from app.agrar.rations.constants.solver_defaults import (
+    RELAXATION_POLICIES as _RELAXATION_POLICIES,
+    OBJECTIVE_STRATEGIES as _OBJECTIVE_STRATEGIES,
+)
 _SEASON_PROFILES = (
     "spring_young",
     "spring_mid",
@@ -3001,20 +4646,592 @@ _SEASON_PROFILES = (
     "autumn",
     "winter",
 )
-_POLICY_PROFILES = ("tmr_standard", "pmr_standard", "pmr_pasture_spring")
+_POLICY_PROFILES = (
+    # Generische Profile (Abwaerts-Kompatibilitaet)
+    "tmr_standard",
+    "pmr_standard",
+    "pmr_pasture_spring",
+    "pmr_pasture_summer",
+    "pmr_pasture_autumn",
+    # DLG 01|2025 Tab. 13-15: Leistungs- und Physiologiestufen.
+    # Namen halten wir bewusst kurz und eindeutig fuer API-Kompatibilitaet.
+    "tmr_fresh_lactation",   # Frischmelker 0-60 LT
+    "tmr_high_yield",        # Hochleistung (>=35 kg Milch/d)
+    "tmr_mid_yield",         # Mittellaktation (25-34 kg Milch/d)
+    "tmr_late_lactation",    # Altmelker (<25 kg Milch/d)
+    "tmr_dry_cow",           # Trockensteher (frueh/Standard)
+    "tmr_transit",           # Transit/Anfuetterung (~-3 LT bis Abkalbung)
+)
+
+
+# ---------------------------------------------------------------------------
+# DLG 01|2025 Tab. 13-15: Referenzkorridore je Leistungs-/Physiologiestufe.
+#
+# Alle Angaben in Rations-TM-Bezug (g/kg TM), sofern nicht anders vermerkt.
+# Die Werte dienen als Zielkorridore (UI / Soft-Konfiguration) und greifen
+# nicht in die harten LP-Constraints ein. Quellen:
+#   - DLG-Information 01|2025, Tab. 13 (Fresh Cow / High Yield)
+#   - DLG-Information 01|2025, Tab. 14 (Mid + Late Lactation)
+#   - DLG-Information 01|2025, Tab. 15 (Dry Cow / Transit)
+#
+# Spalten:
+#   me_kgdm_min/max:    Energiedichte  (MJ ME/kg TM)
+#   cp_kgdm_min/max:    Rohprotein     (g/kg TM)
+#   sidp_kgdm_min:      sidP           (g/kg TM)   (sofern DLG angibt)
+#   pabkh_max:          pabKH-Obergrenze [g/kg TM]
+#   xl_kgdm_max:        Rohfett [g/kg TM]
+#   forage_share_min_pct: Grundfutter-Mindestanteil [% TM]
+#   andfom_gf_cop_min:  aNDFomGF+CoP-Mindestdichte [g/kg TM] (bei niedrigem pabKH)
+#   ndf_kgdm_min:       Gesamt-aNDFom-Mindestdichte [g/kg TM]
+# ---------------------------------------------------------------------------
+_POLICY_PROFILE_TARGETS: Dict[str, Dict[str, Any]] = {
+    "tmr_fresh_lactation": {
+        "me_kgdm_min": 7.00, "me_kgdm_max": 7.40,
+        "cp_kgdm_min": 160.0, "cp_kgdm_max": 175.0,
+        "sidp_kgdm_min": 105.0,
+        "pabkh_max": 210.0, "xl_kgdm_max": 42.0,
+        "forage_share_min_pct": 50.0,
+        "andfom_gf_cop_min": 200.0, "ndf_kgdm_min": 300.0,
+        "label": "Frischmelker (0-60 LT, DLG 01|2025 Tab. 13)",
+    },
+    "tmr_high_yield": {
+        "me_kgdm_min": 7.00, "me_kgdm_max": 7.20,
+        "cp_kgdm_min": 155.0, "cp_kgdm_max": 170.0,
+        "sidp_kgdm_min": 100.0,
+        "pabkh_max": 210.0, "xl_kgdm_max": 40.0,
+        "forage_share_min_pct": 55.0,
+        "andfom_gf_cop_min": 200.0, "ndf_kgdm_min": 310.0,
+        "label": "Hochleistung (>=35 kg Milch, DLG 01|2025 Tab. 13)",
+    },
+    "tmr_mid_yield": {
+        "me_kgdm_min": 6.60, "me_kgdm_max": 7.00,
+        "cp_kgdm_min": 140.0, "cp_kgdm_max": 160.0,
+        "sidp_kgdm_min": 90.0,
+        "pabkh_max": 200.0, "xl_kgdm_max": 38.0,
+        "forage_share_min_pct": 60.0,
+        "andfom_gf_cop_min": 220.0, "ndf_kgdm_min": 320.0,
+        "label": "Mittellaktation (25-34 kg Milch, DLG 01|2025 Tab. 14)",
+    },
+    "tmr_late_lactation": {
+        "me_kgdm_min": 6.30, "me_kgdm_max": 6.80,
+        "cp_kgdm_min": 130.0, "cp_kgdm_max": 150.0,
+        "sidp_kgdm_min": 80.0,
+        "pabkh_max": 180.0, "xl_kgdm_max": 35.0,
+        "forage_share_min_pct": 65.0,
+        "andfom_gf_cop_min": 230.0, "ndf_kgdm_min": 340.0,
+        "label": "Altmelker (<25 kg Milch, DLG 01|2025 Tab. 14)",
+    },
+    "tmr_dry_cow": {
+        "me_kgdm_min": 5.80, "me_kgdm_max": 6.20,
+        "cp_kgdm_min": 115.0, "cp_kgdm_max": 135.0,
+        "sidp_kgdm_min": 60.0,
+        "pabkh_max": 140.0, "xl_kgdm_max": 30.0,
+        "forage_share_min_pct": 75.0,
+        "andfom_gf_cop_min": 300.0, "ndf_kgdm_min": 380.0,
+        "label": "Trockensteher (DLG 01|2025 Tab. 15)",
+    },
+    "tmr_transit": {
+        "me_kgdm_min": 6.30, "me_kgdm_max": 6.70,
+        "cp_kgdm_min": 135.0, "cp_kgdm_max": 155.0,
+        "sidp_kgdm_min": 80.0,
+        "pabkh_max": 170.0, "xl_kgdm_max": 35.0,
+        "forage_share_min_pct": 65.0,
+        "andfom_gf_cop_min": 260.0, "ndf_kgdm_min": 350.0,
+        "label": "Transit / Anfuetterung (DLG 01|2025 Tab. 15)",
+    },
+}
+
+
+def _policy_profile_targets(profile_key: Optional[str]) -> Optional[Dict[str, Any]]:
+    """Gibt die DLG-01|2025-Referenzkorridore fuer ein Policy-Profil zurueck."""
+    if not profile_key:
+        return None
+    return _POLICY_PROFILE_TARGETS.get(profile_key)
+
+
+# ---------------------------------------------------------------------------
+# DLG-01|2025-Policy-Profil-Auswertung als weiche Band-Constraints
+# ---------------------------------------------------------------------------
+# Jedes Leistungsstufen-Profil aus _POLICY_PROFILE_TARGETS liefert Referenz-
+# korridore fuer die zentralen Rationsparameter (ME, CP, sidP, pabKH, XL,
+# Grundfutteranteil, aNDFomGF+CoP, aNDFom). Diese werden hier nach dem LP-Lauf
+# als **weiche** Band-Checks (min/max-Korridor) gegen die tatsaechlich erreichte
+# Ration ausgewertet und als zusaetzliche Eintraege in die Penalty-Statistik
+# gefuehrt.
+#
+# Bewusste Design-Entscheidung (2026-04-21):
+# - Kein harter LP-Constraint -> keine zusaetzliche Infeasibility-Gefahr bei
+#   schwierigen Praxis-Rationen (Fruehjahrsweide, Hitzestress, Trockensteher
+#   auf betriebseigenem GF).
+# - Klasse B (Balance, Basisgewicht 3.0) nach Spec §5.2: unter Tierwohl-Klasse
+#   A, ueber Komfort-Klasse C. relaxation_policy skaliert wie gewohnt.
+# - Band-Modell: Penalty nur, wenn actual ausserhalb [min, max]; innerhalb
+#   des Bandes deviation_norm = 0.
+# ---------------------------------------------------------------------------
+_POLICY_BAND_SPECS: Tuple[Tuple[str, str, str, str, str, float], ...] = (
+    # (anzeige_name, value_key,           min_key,                max_key,            unit,       min_halfwidth)
+    ("DLG-Policy: ME-Dichte",          "me_kgdm",              "me_kgdm_min",          "me_kgdm_max",        "MJ/kg TM",  0.20),
+    ("DLG-Policy: CP-Dichte",          "cp_kgdm",              "cp_kgdm_min",          "cp_kgdm_max",        "g/kg TM",  10.00),
+    ("DLG-Policy: sidP-Dichte",        "sidp_kgdm",            "sidp_kgdm_min",        "sidp_kgdm_max",      "g/kg TM",   8.00),
+    ("DLG-Policy: pabKH (max)",        "pabkh_kgdm",           None,                   "pabkh_max",          "g/kg TM",  15.00),
+    ("DLG-Policy: Rohfett XL (max)",   "xl_kgdm",              "xl_kgdm_min",          "xl_kgdm_max",        "g/kg TM",   5.00),
+    ("DLG-Policy: Grundfutteranteil",  "forage_share_pct",     "forage_share_min_pct", "forage_share_max_pct","%TM",      5.00),
+    ("DLG-Policy: aNDFomGF+CoP (min)", "andfom_gf_cop_kgdm",   "andfom_gf_cop_min",    None,                 "g/kg TM",  20.00),
+    ("DLG-Policy: aNDFom (min)",       "andfom_kgdm",          "ndf_kgdm_min",         None,                 "g/kg TM",  20.00),
+)
+
+
+def _policy_profile_band_evaluate(
+    targets: Optional[Dict[str, Any]],
+    values: Dict[str, Any],
+    relaxation_policy: str,
+) -> List[Dict[str, Any]]:
+    """Bewertet die Ist-Werte einer Ration gegen DLG-01|2025-Referenzkorridore.
+
+    Rueckgabe: Liste von constraint_status-kompatiblen Eintraegen mit Klasse B.
+    Jedes Band ist ein weicher Constraint (direction=min/max/target je nach
+    Lage). Innerhalb des Bandes gilt deviation_norm = 0, also penalty = 0.
+    """
+    if not targets:
+        return []
+
+    out: List[Dict[str, Any]] = []
+    factor = _RELAXATION_FACTORS.get(relaxation_policy, 1.0)
+    klass_weight = _PENALTY_CLASS_WEIGHTS.get("B", 3.0)
+
+    for display_name, value_key, min_key, max_key, unit, min_halfwidth in _POLICY_BAND_SPECS:
+        raw_value = values.get(value_key)
+        if raw_value is None:
+            continue
+        try:
+            actual = float(raw_value)
+        except (TypeError, ValueError):
+            continue
+
+        lo_raw = targets.get(min_key) if min_key else None
+        hi_raw = targets.get(max_key) if max_key else None
+        lo = float(lo_raw) if lo_raw is not None else None
+        hi = float(hi_raw) if hi_raw is not None else None
+        if lo is None and hi is None:
+            continue
+
+        # Halbbreite: halbe Bandbreite, mindestens min_halfwidth
+        if lo is not None and hi is not None:
+            halfwidth = max(min_halfwidth, 0.5 * (hi - lo))
+        else:
+            anchor = lo if lo is not None else hi
+            halfwidth = max(min_halfwidth, 0.10 * abs(anchor or 1.0))
+
+        if lo is not None and actual < lo:
+            violation = lo - actual
+            target_display = lo
+            direction = "min"
+            status = "violated"
+        elif hi is not None and actual > hi:
+            violation = actual - hi
+            target_display = hi
+            direction = "max"
+            status = "violated"
+        else:
+            violation = 0.0
+            # Bei Bandkonformitaet: Target als Bandmitte darstellen
+            if lo is not None and hi is not None:
+                target_display = 0.5 * (lo + hi)
+            else:
+                target_display = lo if lo is not None else hi
+            direction = "target"
+            status = "ok"
+
+        deviation_norm = violation / halfwidth if halfwidth > 0 else 0.0
+        penalty = _PENALTY_BASE_COST * klass_weight * factor * deviation_norm
+
+        out.append({
+            "name": display_name,
+            "kind": "weich",
+            "class": "B",
+            "unit": unit,
+            "target": round(float(target_display or 0.0), 3),
+            "target_min": round(lo, 3) if lo is not None else None,
+            "target_max": round(hi, 3) if hi is not None else None,
+            "direction": direction,
+            "actual": round(actual, 3),
+            "difference": round(actual - float(target_display or 0.0), 3),
+            "fulfilled": deviation_norm < 1e-6,
+            "deviation_norm": round(deviation_norm, 3),
+            "penalty_cost": round(penalty, 4),
+            "status": status,
+            "source": "policy_profile",
+        })
+
+    return out
+
+
+# ---------------------------------------------------------------------------
+# DLG-01|2025-Policy-Profil: native LP-Slack-Integration (Stage-2-Cost)
+# ---------------------------------------------------------------------------
+# Zusaetzlich zur Post-Solve-Band-Auswertung koennen die DLG-Referenz-
+# korridore direkt im LP als **weiche Nebenbedingungen** gebunden werden.
+# Jedes Band bekommt eine Slack-Variable s_min/s_max >= 0 mit einer
+# normierten Penalty im Objective, so dass der Solver gemeinsam Futter-
+# kosten UND Korridor-Abweichung minimiert.
+#
+# Mathematisch entspricht das exakt der bisherigen Klasse-B-Penalty:
+#   penalty_eur = base × class_weight × relax × deviation_norm
+#               = base × class_weight × relax × (violation / halfwidth)
+# In LP-Einheiten (s_min ist in g/d bei Dichte-Bands bzw. kg TM/d × 100
+# bei Grundfutteranteil) wird der Gewichtungsfaktor deshalb noch durch
+# eine typische DMI skaliert, damit sich LP-Slack und Post-Solve-Penalty
+# vergleichbar verhalten.
+# ---------------------------------------------------------------------------
+
+
+def _policy_band_coeffs(band_key: str, feeds: List[Dict[str, Any]]) -> Optional[List[float]]:
+    """Liefert die Futtermittel-Koeffizienten fuer das angegebene Band.
+
+    Rueckgabe `None` bedeutet: Band hat kein lineares LP-Modell und wird
+    ausschliesslich post-solve ausgewertet.
+    """
+    if band_key == "me_kgdm":
+        return [float(f.get("me") or 0.0) for f in feeds]
+    if band_key == "cp_kgdm":
+        return [float(f.get("cp") or 0.0) for f in feeds]
+    if band_key == "sidp_kgdm":
+        return [float(f.get("sidp") or 0.0) for f in feeds]
+    if band_key == "pabkh_kgdm":
+        return [
+            float(f.get("st") or 0.0)
+            + float(f.get("zu") or 0.0)
+            - float(f.get("bst") or 0.0)
+            for f in feeds
+        ]
+    if band_key == "xl_kgdm":
+        return [float(f.get("xl") or 0.0) for f in feeds]
+    if band_key == "andfom_gf_cop_kgdm":
+        return [
+            float(f.get("ndf") or 0.0) if (f.get("forage") or f.get("structural_coproduct")) else 0.0
+            for f in feeds
+        ]
+    if band_key == "andfom_kgdm":
+        return [float(f.get("ndf") or 0.0) for f in feeds]
+    if band_key == "forage_share_pct":
+        # Koeffizient a_i = 100  falls Grobfutter, sonst 0; Dichte = Σ(a_i·x_i)/Σx_i = %TM Grobfutter
+        return [100.0 if f.get("forage") else 0.0 for f in feeds]
+    return None
+
+
+def _build_policy_band_lp_extension(
+    targets: Optional[Dict[str, Any]],
+    feeds: List[Dict[str, Any]],
+    relaxation_policy: str,
+    dmi_typ_kg: float,
+) -> Dict[str, Any]:
+    """Baut die Slack-Erweiterung des LP fuer die DLG-01|2025-Band-Constraints.
+
+    Rueckgabe-Dict mit:
+      - `n_slacks`        Anzahl eingefuehrter Slack-Variablen
+      - `rows`            zusaetzliche A_ub-Zeilen (mit Slack-Einintraegen)
+      - `rhs`             zusaetzliche b_ub-Werte (immer 0.0 bei Dichte-Bands)
+      - `slack_costs`     Objective-Anteile je Slack (EUR pro g-Verletzung)
+      - `slack_bounds`    Bounds je Slack (immer (0, None))
+      - `slack_meta`      Liste mit {`name`, `unit`, `direction`, `class`,
+                          `halfwidth`, `weight`}
+    """
+    out: Dict[str, Any] = {
+        "n_slacks": 0,
+        "rows": [],
+        "rhs": [],
+        "slack_costs": [],
+        "slack_bounds": [],
+        "slack_meta": [],
+    }
+    if not targets or not feeds:
+        return out
+
+    n_feeds = len(feeds)
+    factor = _RELAXATION_FACTORS.get(relaxation_policy, 1.0)
+    klass_weight = _PENALTY_CLASS_WEIGHTS.get("B", 3.0)
+    # Schutz gegen 0: mindestens 1 kg TM/d als Skalierungsbasis
+    dmi_scale = max(1.0, float(dmi_typ_kg))
+
+    slacks: List[Dict[str, Any]] = []
+    slack_rows: List[List[float]] = []   # jede Zeile hat Laenge n_feeds + (akt. n_slacks); wird am Ende aufgefuellt
+
+    for display_name, value_key, min_key, max_key, unit, min_halfwidth in _POLICY_BAND_SPECS:
+        coeffs = _policy_band_coeffs(value_key, feeds)
+        if coeffs is None:
+            continue
+        lo_raw = targets.get(min_key) if min_key else None
+        hi_raw = targets.get(max_key) if max_key else None
+        lo = float(lo_raw) if lo_raw is not None else None
+        hi = float(hi_raw) if hi_raw is not None else None
+        if lo is None and hi is None:
+            continue
+
+        if lo is not None and hi is not None:
+            halfwidth = max(min_halfwidth, 0.5 * (hi - lo))
+        else:
+            anchor = lo if lo is not None else hi
+            halfwidth = max(min_halfwidth, 0.10 * abs(anchor or 1.0))
+
+        # Gewichtung: LP-Slack ist "absolut" (g/d fuer Dichten, %TM × kg TM/d
+        # fuer Grundfutteranteil). Um den Post-Solve-Penalty von
+        #   w_post = base × class × relax × (violation_density / halfwidth)
+        # nachzubilden, teilen wir zusaetzlich durch halfwidth und durch eine
+        # typische DMI. Dadurch entspricht 1 g Abweichung/d bei 20 kg DMI
+        # approximativ 0,05 g/kg TM Dichte-Abweichung.
+        weight = _PENALTY_BASE_COST * klass_weight * factor / (halfwidth * dmi_scale)
+
+        if lo is not None:
+            # Constraint (density >= lo), linearisiert: Σ (coeff_i − lo) · x_i + s_min ≥ 0
+            # scipy linprog arbeitet mit A_ub (≤), daher negiert:
+            #   -Σ (coeff_i − lo) · x_i − s_min ≤ 0
+            feed_row = [-(c - lo) for c in coeffs]
+            slack_rows.append(feed_row)    # Slack-Spalte wird spaeter als -1 eingesetzt
+            slacks.append({
+                "name": f"{display_name} (min)",
+                "unit": unit,
+                "direction": "min",
+                "band_min": lo,
+                "band_max": hi,
+                "halfwidth": halfwidth,
+                "weight": weight,
+                "slack_sign": -1.0,
+            })
+
+        if hi is not None:
+            # Constraint (density <= hi), linearisiert: Σ (coeff_i − hi) · x_i − s_max ≤ 0
+            feed_row = [(c - hi) for c in coeffs]
+            slack_rows.append(feed_row)
+            slacks.append({
+                "name": f"{display_name} (max)",
+                "unit": unit,
+                "direction": "max",
+                "band_min": lo,
+                "band_max": hi,
+                "halfwidth": halfwidth,
+                "weight": weight,
+                "slack_sign": -1.0,
+            })
+
+    if not slacks:
+        return out
+
+    n_slacks = len(slacks)
+    full_rows: List[List[float]] = []
+    for row_idx, feed_row in enumerate(slack_rows):
+        slack_cols = [0.0] * n_slacks
+        slack_cols[row_idx] = float(slacks[row_idx].get("slack_sign") or -1.0)
+        full_rows.append(feed_row + slack_cols)
+
+    out.update({
+        "n_slacks": n_slacks,
+        "rows": full_rows,               # Shape: (n_slacks, n_feeds + n_slacks)
+        "rhs": [0.0] * n_slacks,
+        "slack_costs": [float(s["weight"]) for s in slacks],
+        "slack_bounds": [(0.0, None)] * n_slacks,
+        "slack_meta": slacks,
+    })
+    return out
+
+
+def _build_policy_profile_evaluation(
+    profile_key: Optional[str],
+    targets: Optional[Dict[str, Any]],
+    bands: List[Dict[str, Any]],
+) -> Optional[Dict[str, Any]]:
+    """Liefert das kompakte Policy-Profil-Evaluation-Objekt fuer das Response.
+
+    - `bands`: alle ausgewerteten Band-Checks (auch `ok`-Zeilen, damit die UI
+       einen kompletten Plancheck rendern kann).
+    - `violations`: nur verletzte Baender.
+    - `penalty_total`: Summe Penalty-Kosten aus dem Policy-Profil.
+    """
+    if not profile_key or not targets:
+        return None
+    violations = [b for b in bands if b.get("status") == "violated"]
+    penalty_total = sum(float(b.get("penalty_cost") or 0.0) for b in bands)
+    return {
+        "profile": profile_key,
+        "label": targets.get("label"),
+        "bands": bands,
+        "violation_count": len(violations),
+        "violations": violations,
+        "penalty_total": round(penalty_total, 4),
+        "source": "DLG 01|2025 Tab. 13-15 (Leistungs-/Physiologiestufen)",
+    }
+
+
+# ---------------------------------------------------------------------------
+# Saisonprofile – fachliche Anpassungen (Spec §12 Sommer/Herbst)
+# ---------------------------------------------------------------------------
+# Quellen:
+#   - DLG-Merkblatt 417 (Weidehaltung, Sommer-/Herbstweide)
+#   - DLG-Information 01|2023 (Strukturversorgung, RNB/RMD)
+#   - GfE-Workshop 2023 (K/Mg-Antagonismus, Hitzestress, NaHCO3)
+#
+# dmi_factor:           Multiplikator auf dmi_target/min/max (Hitzestress).
+# na_boost_factor:      Multiplikator auf Na-Mindestbedarf (Schweissverlust).
+# inject_buffer:        Bool – automatischer Pansenpuffer (NaHCO3).
+# buffer_min_kg:        Untergrenze fuer NaHCO3 (Pflichtmenge bei Hitzestress).
+# cp_density_max:       Harte Obergrenze CP-Dichte [g/kg TM] (Harnstoffschutz Herbst).
+# ndf_density_min_boost: Additiver Aufschlag auf aNDFom-Mindestdichte [g/kg TM].
+# rmd_max_override:     Obergrenze RMD [g N/kg TM] (wird gegen Fuetterungstyp minimiert).
+# andfom_gf_min_boost:  Aufschlag auf aNDFomGF-Dichteminimum [g/kg TM] (Strukturverstaerkung).
+
+_SEASONAL_ADJUSTMENTS: Dict[str, Dict[str, float]] = {
+    "spring_young": {
+        "dmi_factor": 1.00,
+        "na_boost_factor": 1.00,
+        "inject_buffer": 0.0,
+        "buffer_min_kg": 0.0,
+    },
+    "spring_mid": {
+        "dmi_factor": 1.00,
+        "na_boost_factor": 1.00,
+        "inject_buffer": 0.0,
+        "buffer_min_kg": 0.0,
+    },
+    "spring_late": {
+        "dmi_factor": 1.00,
+        "na_boost_factor": 1.00,
+        "inject_buffer": 0.0,
+        "buffer_min_kg": 0.0,
+    },
+    # Sommer: Hitzestress fuehrt zu reduzierter TM-Aufnahme (GfE-Workshop 2023 /
+    # DLG-Merkblatt 417). Typische Reduktion: -5 % bei moderaten Temperaturen
+    # (summer_young/mid) bis -12 % bei Hochsommer/Abend (summer_late). Na-Bedarf
+    # steigt durch Schwitzen um 20-30 %. NaHCO3 als Pansenpuffer wirkt der
+    # subakuten Azidose entgegen.
+    "summer_young": {
+        "dmi_factor": 0.97,
+        "na_boost_factor": 1.15,
+        "inject_buffer": 1.0,
+        "buffer_min_kg": 0.05,
+    },
+    "summer_mid": {
+        "dmi_factor": 0.93,
+        "na_boost_factor": 1.25,
+        "inject_buffer": 1.0,
+        "buffer_min_kg": 0.10,
+    },
+    "summer_late": {
+        "dmi_factor": 0.88,
+        "na_boost_factor": 1.30,
+        "inject_buffer": 1.0,
+        "buffer_min_kg": 0.12,
+        # Zusaetzliche Strukturstuetze fuer reduzierte Aufnahme
+        "andfom_gf_min_boost": 10.0,
+    },
+    # Herbst: Stickstoffreicher Grasaufwuchs mit hohem RNB. Schutz der Tiere vor
+    # Harnstoffbelastung ueber harte CP-Dichte-Obergrenze (140 g/kg TM fuer Stall-
+    # orientierung, 175 g/kg TM als Grundfutterkorridor bei Weide) und zusaetzliche
+    # Stuetzung ueber Strukturfutter.
+    "autumn": {
+        "dmi_factor": 0.98,
+        "na_boost_factor": 1.05,
+        "inject_buffer": 0.0,
+        "buffer_min_kg": 0.0,
+        # Harnstoffschutz: CP-Obergrenze staerker limitieren
+        "cp_density_max_override": 175.0,
+        # Strukturverstaerkung gegen N-Ueberschuss
+        "andfom_gf_min_boost": 15.0,
+        # Leichte RMD-Entspannung (weidetypisch), aber nicht beliebig
+        "rmd_max_boost": 1.0,
+    },
+    "winter": {
+        "dmi_factor": 1.00,
+        "na_boost_factor": 1.00,
+        "inject_buffer": 0.0,
+        "buffer_min_kg": 0.0,
+    },
+}
+
+
+def _seasonal_adjustments(season_profile: Optional[str]) -> Dict[str, float]:
+    """Gibt die fachliche Saisonanpassung (Spec §12) zurueck oder neutralen Default."""
+    if not season_profile:
+        return {
+            "dmi_factor": 1.0,
+            "na_boost_factor": 1.0,
+            "inject_buffer": 0.0,
+            "buffer_min_kg": 0.0,
+        }
+    return dict(_SEASONAL_ADJUSTMENTS.get(season_profile, {
+        "dmi_factor": 1.0,
+        "na_boost_factor": 1.0,
+        "inject_buffer": 0.0,
+        "buffer_min_kg": 0.0,
+    }))
 
 # FAN-V1 Defaults (Spec §11.1 freigegeben 2026-04-21)
-_FAN_DEFAULT_MODE = "auto_iterative"
-_FAN_DEFAULT_TOLERANCE = 0.05
-_FAN_DEFAULT_TOLERANCE_WARN = 0.10
-_FAN_DEFAULT_MAX_ITERATIONS = 5
-_FAN_REFERENCE_PRESETS: Tuple[float, ...] = (2.5, 3.0, 3.5)
-_FAN_REFERENCE_MIN = 2.0
-_FAN_REFERENCE_MAX = 5.0
-_RELAXATION_DEFAULT = "standard"
-_RELAXATION_FACTORS: Dict[str, float] = {"strict": 3.0, "standard": 1.0, "soft": 0.3}
-_PENALTY_BASE_COST = 1.0
-_PENALTY_CLASS_WEIGHTS: Dict[str, float] = {"A": 10.0, "B": 3.0, "C": 1.0}
+# Refactor 2026-04-23: ausgelagert nach app.agrar.rations.constants
+from app.agrar.rations.constants.gfe2023 import (
+    FAN_DEFAULT_MODE as _FAN_DEFAULT_MODE,
+    FAN_DEFAULT_TOLERANCE as _FAN_DEFAULT_TOLERANCE,
+    FAN_DEFAULT_TOLERANCE_WARN as _FAN_DEFAULT_TOLERANCE_WARN,
+    FAN_DEFAULT_MAX_ITERATIONS as _FAN_DEFAULT_MAX_ITERATIONS,
+    FAN_REFERENCE_PRESETS as _FAN_REFERENCE_PRESETS,
+    FAN_REFERENCE_MIN as _FAN_REFERENCE_MIN,
+    FAN_REFERENCE_MAX as _FAN_REFERENCE_MAX,
+)
+from app.agrar.rations.constants.solver_defaults import (
+    RELAXATION_DEFAULT as _RELAXATION_DEFAULT,
+    RELAXATION_FACTORS as _RELAXATION_FACTORS,
+    PENALTY_BASE_COST as _PENALTY_BASE_COST,
+    PENALTY_CLASS_WEIGHTS as _PENALTY_CLASS_WEIGHTS,
+)
+
+
+class ConcentrateRecipeProfile(BaseModel):
+    """Rezeptur-/Pansen-Charakteristik eines Konzentratfutters.
+
+    Entscheidet (zusammen mit `FeedingSystemConfig`) ueber die zulaessigen
+    Einzelgaben im Melkstand/Transponder/AMS.
+
+    - starch_breakdown_class: 'slow' (Trockenschnitzel+Maismehl dominant),
+      'rapid' (Muehlennebenprodukte dominant), 'mixed' (Default).
+    - rumen_buffer_present: NaHCO3 oder MgO als Zusatz in der Rezeptur.
+    - Quelle kennzeichnet, ob Werte deklariert, per OCR gescannt, manuell
+      geschaetzt oder Default sind (UI zeigt Badge an).
+    """
+    starch_breakdown_class: Literal["slow", "mixed", "rapid"] = "mixed"
+    mill_byproduct_share: Optional[float] = None        # 0..1, optional
+    slow_starch_share: Optional[float] = None           # 0..1 (Trockenschnitzel + Maismehl)
+    rumen_buffer_present: bool = False
+    source: Literal["declared", "scanned_ocr", "manual_estimate", "default"] = "default"
+
+
+class FeedingSystemConfig(BaseModel):
+    """Fuetterungssystem-Konfiguration (steuert Block-Aufteilung + Limits).
+
+    - system: TMR (alles im Mischwagen), PMR_stall (Stall + Kraftfutter-
+      Staffelung), PMR_pasture (Weide + ergaenzende Stallfuetterung).
+    - concentrate_distribution: wie Kraftfutter zugeteilt wird.
+    - Praxisgrenzen werden aus System + Verteilung + Parity + Rezeptur abgeleitet.
+    """
+    system: Literal["TMR", "PMR_stall", "PMR_pasture"] = "TMR"
+    concentrate_distribution: Literal[
+        "included_in_tmr", "transponder", "ams", "milkparlor"
+    ] = "included_in_tmr"
+
+    # Optionale Praxiseinstellungen (werden sonst aus Defaults abgeleitet)
+    concentrate_max_per_serving_kg: Optional[float] = None
+    concentrate_max_per_day_kg: Optional[float] = None
+    concentrate_servings_per_day: Optional[float] = None
+
+    # Bei Milchvieh: 1. Laktation bekommt tendenziell kleinere Einzelgaben
+    treat_as_primiparous: bool = False
+
+    # Default-Konzentrat-Rezepturprofil (kann pro Feed ueberschrieben werden)
+    default_concentrate_recipe: Optional[ConcentrateRecipeProfile] = None
+
+
+class FeedBlockAssignment(BaseModel):
+    """Manuelles Override: explizite Block-Zuordnung fuer ein Feed."""
+    feed_id: str
+    block: Literal["pasture", "tmr", "concentrate_staged"]
+    # optionale Rezepturdaten, falls Feed als Konzentrat-Staged klassifiziert ist
+    concentrate_recipe: Optional[ConcentrateRecipeProfile] = None
 
 
 class _FanOptions(BaseModel):
@@ -3043,6 +5260,17 @@ class _OptimizeFromProfileBody(BaseModel):
     season_profile: Optional[str] = None               # spring_young | ...; steuert Policy-Profil (§6)
     policy_profile: Optional[str] = None               # Explicit Override; sonst aus feeding_type+season abgeleitet
     policy_overrides: Optional[Dict[str, Any]] = None  # Expertenmodus: Block-Limit-Overrides
+
+    # Slice 1h (2026-04-23): Fuetterungssystem-Architektur
+    # - feeding_system_config: TMR / PMR_stall / PMR_pasture + Verteilungssystem
+    #   (transponder/ams/milkparlor/included_in_tmr) + optionale Rezeptur-Profile
+    # - feed_block_overrides: optionale manuelle Zuordnung Feed -> Block,
+    #   falls die Heuristik (_auto_assign_block) nicht passt
+    # Abwaertskompatibel: Wenn beide None sind, wird aus profile.feeding_type
+    # automatisch ein FeedingSystemConfig abgeleitet (PMR+Weide -> PMR_pasture
+    # mit milkparlor; PMR -> PMR_stall mit transponder; sonst TMR/included).
+    feeding_system_config: Optional[FeedingSystemConfig] = None
+    feed_block_overrides: Optional[List[FeedBlockAssignment]] = None
 
 
 class _RequirementsBody(BaseModel):
@@ -3108,7 +5336,7 @@ class _CompoundFeedParsed(BaseModel):
 
 @router.get("/health")
 async def rations_health():
-    base_url = _rations_base_url()
+    base_url = get_rations_base_url()
     feeds = _get_feeds()
     json_path = _dlg_json_path()
     if not base_url:
@@ -3136,7 +5364,7 @@ async def get_feeds(
     forage_only: bool = Query(False, description="Nur Grundfutter"),
     x_tenant_id: Optional[str] = Header(None, alias="X-Tenant-Id"),
 ):
-    if not _rations_base_url():
+    if not get_rations_base_url():
         feeds = _get_feeds()
         if group:
             feeds = [f for f in feeds if group.lower() in f.get("group", "").lower()]
@@ -3192,7 +5420,7 @@ async def get_feed(
     request: Request,
     x_tenant_id: Optional[str] = Header(None, alias="X-Tenant-Id"),
 ):
-    if not _rations_base_url():
+    if not get_rations_base_url():
         feeds = _get_feeds()
         feed = next((f for f in feeds if f["id"] == feed_id), None)
         if not feed:
@@ -3208,7 +5436,7 @@ async def optimize_from_profile(
     request: Request,
     x_tenant_id: Optional[str] = Header(None, alias="X-Tenant-Id"),
 ):
-    if not _rations_base_url():
+    if not get_rations_base_url():
         try:
             custom = None
             if body.custom_feeds:
@@ -3224,6 +5452,8 @@ async def optimize_from_profile(
                 season_profile=body.season_profile,
                 policy_profile=body.policy_profile,
                 policy_overrides=body.policy_overrides,
+                feeding_system_config=body.feeding_system_config,
+                feed_block_overrides=body.feed_block_overrides,
             )
             result = _optimize_internal(
                 body.cow_profile,
@@ -3250,7 +5480,7 @@ async def optimize_demo(
     request: Request,
     x_tenant_id: Optional[str] = Header(None, alias="X-Tenant-Id"),
 ):
-    if not _rations_base_url():
+    if not get_rations_base_url():
         try:
             result = _optimize_internal(_demo_profile())
             return JSONResponse(content=result)
@@ -3267,7 +5497,7 @@ async def optimize(
     x_tenant_id: Optional[str] = Header(None, alias="X-Tenant-Id"),
 ):
     body = await request.json()
-    if not _rations_base_url():
+    if not get_rations_base_url():
         profile = body.get("cow_profile", body)
         try:
             result = _optimize_internal(profile)
@@ -3284,7 +5514,7 @@ async def calculate_requirements(
     x_tenant_id: Optional[str] = Header(None, alias="X-Tenant-Id"),
 ):
     body = await request.json()
-    if not _rations_base_url():
+    if not get_rations_base_url():
         try:
             req = _gfe_requirements(body)
             return JSONResponse(content={
@@ -3314,7 +5544,7 @@ async def maintenance_requirements(
     body_weight_kg: float = Query(...),
     x_tenant_id: Optional[str] = Header(None, alias="X-Tenant-Id"),
 ):
-    if not _rations_base_url():
+    if not get_rations_base_url():
         bw75 = body_weight_kg ** 0.75
         nel_maint = 0.308 * bw75
         me_maint = nel_maint / 0.73
@@ -3338,7 +5568,7 @@ async def validate_feeds(
     x_tenant_id: Optional[str] = Header(None, alias="X-Tenant-Id"),
 ):
     body = await request.json()
-    if not _rations_base_url():
+    if not get_rations_base_url():
         return JSONResponse(content={"valid": True, "errors": []})
     tenant_id = _tenant_from_request(request, x_tenant_id)
     return await _proxy_request("POST", "/api/v1/feeds/validate", tenant_id=tenant_id, json_body=body)

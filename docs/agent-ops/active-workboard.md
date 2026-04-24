@@ -1,6 +1,31 @@
 # Active Workboard
 
-Stand: `2026-04-10`
+Stand: `2026-04-23`
+
+## RATIONS-REFACTOR Schritte 1-5 (abgeschlossen 2026-04-23)
+
+**Von:** Cursor
+**Auslöser:** User-Feedback "rations_optimization.py: too large, too much in one pass, Refactoring-Roadmap in 5 Schritten".
+**Stand:** Alle 5 Refactoring-Schritte umgesetzt; 561 passende Tests in der Rations-Regression (547 + 8 Aggregator + 6 Feed).
+
+**Auslieferung:**
+- **Paketstruktur** (Schritt 1a-e): Neues Paket `app/agrar/rations/` mit Subpackages `constants/`, `compound_feed/`, `repository/`, `http/`, `solver/`, `response/`. Konstanten, HTTP-Proxy, DLG-JSON-Loader und Compound-Feed-Parser (OCR/PDF/Etikett) leben jetzt in dedizierten Modulen; Re-Exports in `rations_optimization.py` halten die öffentliche Schnittstelle stabil.
+- **Zentrale Aggregation** (Schritt 2): `RationAggregates` @dataclass(slots=True) + `aggregate_ration()` in `app/agrar/rations/response/aggregator.py`. `_build_response` nutzt sie jetzt in einem einzigen Pass statt 16+ `_sum()`-Aufrufen plus separaten Schleifen für Forage, CoP, pabKH und pendf. Block-Aggregation (Slice 1f) ist integriert.
+- **Constraint-Registry** (Schritt 3): `ConstraintRegistry` + 17 symbolische Constraint-Namen in `app/agrar/rations/solver/constraint_registry.py`. `_run_lp` registriert jeden `_geq`/`_leq`-Aufruf benannt; die 4 historisch magischen Relaxations-Indizes (`_IDX_XL`, `_IDX_ANDFOM_GF`, `_IDX_RMD`, `_IDX_ME_ABS`) werden jetzt via `registry.index_of(...)` aufgelöst. Regressions-Asserts sichern die historische Reihenfolge.
+- **Relaxations-Kapselung** (Schritt 4): Die 4-stufige Relaxations-Kaskade (XL → RMD → aNDFomGF-Drop → sidP-85%) ist aus dem LP-Hauptblock in eine benannte Closure `_relax_stage1()` ausgezogen. Semantik unverändert.
+- **Feed-Dataclass** (Schritt 5): `Feed` @dataclass(slots=True) in `app/agrar/rations/solver/feed.py` als read-only View auf die Dict-Struktur. Bietet `Feed.from_dict()` mit konsistenter Typkonvertierung (None → 0.0 bei numerischen Pflichtfeldern, Optional bei unsicheren). Slot-Schutz verhindert unbeobachtete Attributerweiterungen. **Keine Breitenumstellung**, Opt-in für künftige Module.
+
+**Tests:**
+- Neue Unit-Tests `tests/test_rations_aggregator.py` (8 Tests) und `tests/test_rations_feed_dataclass.py` (6 Tests).
+- Volle Rations-Regression: **561 pass** (davon 547 bestehende, unverändert grün).
+
+**Offene Folgeschritte (bewusst separat):**
+- Vollständige Zerlegung von `_run_lp` in Constraint-Builder/Relaxation/Stage2-Cost/Solve-Orchestrator (Schritt 4 ist bewusst minimal invasiv geblieben; ein echter Split ist ein eigener, größerer Slice).
+- Breitenumstellung `Feed.from_dict`-basiert in `_run_lp` und `_build_response` (Schritt 5 legt nur das Fundament).
+- Warnsystem regelbasiert (`WarningRule` statt if-Kaskade).
+- Feed-Matrix mit NumPy für den Koeffizienten-Aufbau.
+
+
 
 Dieses Board ist bewusst schlank gehalten, damit Session-Starts und Agent-Handoffs weniger Kontext verbrauchen.
 
@@ -25,6 +50,23 @@ Archiv des vorherigen Boards:
 - Fuer den Flow-Spine-Kern liegt jetzt eine gemeinsame Lifecycle-Zieldoku vor:
   - [flow-spine-instance-lifecycle-overview.md](C:/Users/Jochen/VALEO-NeuroERP-3.0/docs/workflows/flow-spine-instance-lifecycle-overview.md)
 
+## FEEDING-SYSTEM-ARCHITECTURE Slices 1-3 (abgeschlossen 2026-04-23)
+
+**Von:** Cursor
+**Stand:** Slice 1a-1f/1h + Slice 2 (Futterabruf-Staffel) + Slice 3 (Mischprotokoll) komplett implementiert und gruen; 98 Slice-spezifische Tests plus 386 pass in der vollen Rations-Regression.
+**Auslieferung:**
+- **Datenmodell** (Slice 1a): Neue Pydantic-Modelle `ConcentrateRecipeProfile` (starch_breakdown_class rapid/mixed/slow, rumen_buffer_present, source), `FeedingSystemConfig` (system TMR/PMR_stall/PMR_pasture, concentrate_distribution transponder/ams/milkparlor/included_in_tmr, Grenzen je Verteilung), `FeedBlockAssignment` (manuelles Override fuer Feed->Block).
+- **Block-Zuordnung** (Slice 1b): Helper `_feeding_system_defaults`, `_resolve_feeding_system_config`, `_auto_assign_block`, `_split_feeds_by_block`; Mineralfutter wird prioritaer ins `tmr_block` gesetzt (auch wenn im Namen "Weide" steht).
+- **k_l-Logik** (Slice 1d): `_kl_milk_from_me_density` setzt bei `PMR_pasture` fix `k_l=0.60` (dokumentiertes Uebergangs-Fallback; FANi-basiertes k_l ist Folgeslice).
+- **Solver-Scoping** (Slice 1c): Struktur-/CP-/XL-/pabKH-Dichten im LP nur auf den TMR-Block, wenn PMR-System mit aktivem pasture_block oder concentrate_staged_block vorliegt. Weide wird nicht als strukturell irrelevant behandelt (eigene Weide-/Aufnahmelogik weiterhin aktiv).
+- **Konzentrat-Limits** (Slice 1e, nachgeschaerft): Einzelgabe physiologisch hart als 1.5x-Sicherheitsnetz im LP; empfohlenes Tagesmax weich im Constraint-Status (Klasse B, Halbbreite 1,5 kg). Rezepturklassen wirken: rapid REDUZIERT Tagesmax (SARA-Schutz), slow+Puffer = Premium.
+- **Response-Payload** (Slice 1f): Neue Felder `ration_items[*].block` und `ration_blocks` (feeding_system + tmr_block/pasture_block/concentrate_staged_block mit DMI, Kosten, ME, sidP, CP und Items-Liste). Abwaertskompatibel: bei TMR bleibt pasture_block/concentrate_staged_block leer.
+- **Wire-up** (Slice 1h): `_OptimizeFromProfileBody.feeding_system_config` und `feed_block_overrides` freigegeben; `_resolve_runtime_options` normalisiert beide und reicht sie bis in den Solver durch.
+- **Regressionstests erweitert**: Bruder-Fall (PMR+Weide Fruehjahr) prueft jetzt explizit (a) keine harte globale Strukturstrafe, (b) plausible Milch-aus-Grobfutter (10-40 kg nach 1-kg-Milch/kg-TM-Praxisregel), (c) vollstaendige Mg/K-Diagnose, (d) kein technisches False-Infeasible, (e) ration_blocks-Aggregat deckungsgleich mit Gesamt-DMI.
+- **Slice 2 - Konzentrat-Futterabruf-Staffel** (`_build_concentrate_call_up_table`): Linear / stueckweise linear oberhalb Basisleistung (Milch aus Grobfutter). Band 0,45-0,50 kg Konzentrat (FM) je kg Zusatzmilch (Praxisrichtwert, nicht KI-Bildwerte). Einzelgabe-Limit je Verteilungssystem (Transponder/AMS/Melkstand), empfohlenes Tagesmax (weich) und physiologische Obergrenze 1,5x (hart) werden explizit geprueft. Nur fuer gestaffelte Systeme; `None` bei TMR/included_in_tmr. Response-Feld: `concentrate_call_up`. Neues UI-Panel `ConcentrateCallUpPanel` unterhalb des Weide-Risiko-Panels. 12 neue Tests.
+- **Slice 3 - Misch- und Fuetterungsprotokoll** (`_build_mixing_protocol`): Nur bei TMR-Block (TMR / PMR_stall). Reihenfolge Vertikalmischer: Strukturfutter -> Silagen -> Saftfutter/CoP -> Sonstiges -> KF/Mineralien. Wasserzugabe auf Ziel-TM 40 % (Standard), Uebermenge +5 % fuer Mischverluste. Transparente Warnungen bei sehr trockener / sehr nasser Mischung. Response-Feld: `mixing_protocol`. UI-Panel `MixingProtocolPanel` rendert direkt aus Backend-Daten (keine Heuristik im Frontend mehr). 11 neue Tests.
+**Offene Folgeslices / Mittelfristig:** FANi-basiertes dynamisches k_l (statt fixem 0,60 bei PMR_pasture); dedizierte Weideaufnahme-/Substitutionslogik mit saisonalen Profilen (Sommer-Hitzestress, Herbst-N-Ueberschuss); echte LP-Slacks fuer das Konzentrat-Tagesmax (aktuell Post-Solve-Penalty); Wizard-UI fuer `feeding_system_config` (derzeit nur ueber API).
+
 ## FAN-MODE-V1 (abgeschlossen 2026-04-21)
 
 **Von:** Codex
@@ -46,8 +88,166 @@ Archiv des vorherigen Boards:
 - FAN-MODE-004: Wizard-UI-Erweiterung in `rationsoptimierung.tsx` (Bewertungsmodus-Block, Reference-Presets, Advanced-Optionen) und Ergebnispanels `FanCalibrationPanel` + `ConstraintStatusPanel` in der Workbench (commit `b6bd983c7`).
 - FAN-MODE-005: Saisonales Weideprofil im UI (PMR+Weide oeffnet Advanced, preset `spring_mid`, zeigt aktives Profil `pmr_pasture_spring`); Backend-Auto-Mapping in `_resolve_policy_profile` abgedeckt (commit `9a035ddd8`, +7 Gate-Tests).
 - FAN-MODE-006: Strafsatz-Konfiguration vollstaendig sichtbar (Normalisierung, Klassen A/B/C, relaxation-Policy Monotonie), `penalty_summary` im Response und in der UI (commit `769cd1527`, +10 Gate-Tests).
-**Offene Risiken / Follow-ups:** siehe §13 der Spec; ausserdem `tests/test_process_kernel_wave74_rations_optimization.py` setzt noch auf die entfallene Funktion `get_rations_base_url` und ist damit **unabhaengig von FAN-MODE-V1 pre-existing rot** (eigene Slice-Aufgabe).
+**Offene Risiken / Follow-ups:** siehe §13 der Spec.
 **Naechster Schritt:** Beobachtung der Fruehjahrsration-Regression unter `pmr_pasture_spring` in der Praxis, anschliessend optionaler Spec-Folge-Slice fuer explizite Slack-Variablen im Solver (Vollwert-3-Stage-Objective statt Post-Solve-Penalty) – nur bei konkretem Bedarf.
+
+## peNDF als Kontrollgroesse + aNDFomGF-staerkeadaptiv (abgeschlossen 2026-04-21)
+
+**Von:** Cursor
+**Stand:** implementiert, gruen; 22 neue peNDF-Demotion-Gate-Tests plus volle Rations-Regression `357 pass` (keine Regression gegenueber vorherigem Stand).
+**Kontext / DLG-Position:** Die DLG 01|2023 stellt explizit fest: peNDF steht fuer die Rationsplanung **nicht zur Verfuegung**. Empfohlene primaere Planungsgroesse ist die aNDFomGF-Dichte (Grobfutter-NDF) mit Zielwert >= 200 g/kg TM fuer Hochleistungsrationen, bei hoeheren pansenabbaubaren Kohlenhydraten entsprechend mehr. peNDF bleibt als Kontroll-/Validierungsgroesse erhalten.
+**Auslieferung:**
+- **Neuer Helper `_andfom_gf_min_target`**: aNDFomGF-Mindestdichte setzt sich zusammen aus Basis (200 g/kg TM non-pasture, 180 g/kg TM PMR+Weide) + staerkeadaptivem Aufschlag (+10 g/kg TM pro 20 g/kg TM Staerke oberhalb 180, Cap +40) + Saisonal-Boost + SARA-Boost. Ist jetzt die primaere Pansenstruktur-Planungsgroesse.
+- **Stage-2-LP umgebaut** (`_run_lp`): Der bisherige harte `pendf_floor` in Stage 2 (Cost-Stage) wurde durch ein staerkeadaptives `stage2_andfom_gf_min` ersetzt. peNDF bleibt nur noch als absolute physiologische Sicherheits-Floor (120 g/kg TM) im LP, nicht mehr als Planungsgroesse.
+- **Kalibrierungsstatus `_pendf_model_calibrated`**: Das peNDF-Lookup-Modell gilt als kalibriert, wenn Staerke in [0, 250] g/kg TM und TM-Aufnahme in [10, 25] kg/d liegt. Ausserhalb laufen Fallback-Regeln. In `dlg_indicators` neu: `pendf_model_calibrated: bool`, `pendf_model_status: "peNDF-Modell im kalibrierten Bereich" | "peNDF ausserhalb Modellbereich; Fallback-Regeln verwendet"`, `pendf_role: "Kontrolle/Validierung (DLG 01|2023)"`. Ebenfalls neu: `andfom_gf_base` und `andfom_gf_starch_uplift` als transparente Herkunfts-Aufschluesselung.
+- **Warnungen angepasst**: peNDF-Warnung laueft jetzt **primaer ueber den Kalibrierungs-Status** - ausserhalb Modellbereich erscheint ein expliziter Fallback-Hinweis statt einer pauschalen Unterdeckungs-Ampel. Innerhalb des Modellbereichs wird peNDF als "Kontrollgroesse im Warnbereich" markiert, mit Verweis auf aNDFomGF und pabKH als eigentliche Steuergroessen.
+- **SARA-Trigger-Logik angepasst** (`_detect_sara_risk`): peNDF-Trigger feuert nur, wenn das Modell kalibriert ist. Zusaetzlich feuert jetzt ein expliziter `aNDFomGF < Ziel - 10`-Trigger als primaerer Struktur-Sicherheitspfad. pH-Trigger und pabKH-Trigger bleiben unveraendert.
+- **Frontend-Panel `rationsoptimierung.tsx`** neu zweigeteilt: oberhalb "Planung (primaer)" mit Strukturindex, aNDFomGF (inkl. Staerke-Aufschlag-Zerlegung), pabKH, RMD - darunter "Kontrolle / Validierung (DLG 01|2023)" mit peNDF-Modell-Status-Zeile und peNDF/pH-Ampel. peNDF-Zeile heisst jetzt explizit "peNDF (Kontrolle)" und die Ampel wird neutralisiert (grau), wenn das Modell im Fallback-Bereich laeuft.
+**Geaenderte Dateien:** `app/api/v1/endpoints/rations_optimization.py`, `packages/frontend-web/src/lib/api/rations-optimization.ts`, `packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx`, `tests/test_rations_optimization_pendf_demotion.py` (neu, 22 Tests).
+**Tests:** `pytest -k "rations or optim or wave74"` -> **357 pass**. Neue Suite `tests/test_rations_optimization_pendf_demotion.py`: staerkeadaptive aNDFomGF-Berechnung parametrisiert, Kalibrierungsflag fuer typische und Extremwerte, `dlg_indicators`-Zeichenketten ("Kontrolle"/"aNDFomGF"/Fallback-Status), SARA-Trigger respektiert Kalibrierungsstatus, Warnung bei peNDF-Fallback.
+**Simulation bestaetigt:** Variant B (Hochleistung 48 kg Milch, DMI 26.6 kg/d > 25) liefert jetzt den Hinweis "peNDF ausserhalb Modellbereich ... Fallback-Regeln verwendet - peNDF-Ampel nur eingeschraenkt belastbar". Keine False-Alarme bei fachlich guten Rationen.
+**Offene Follow-ups:** Praxisvalidierung der staerkeadaptiven aNDFomGF-Staffelung mit echten Hochleistungsrationen. Ggf. Sekundaer-Kalibrierungs-Flag fuer die pH-Formel analog dokumentieren (ist bereits via `ph_formula_applicable` verfuegbar).
+
+## Gras-/Silage-/Heu-Klassifikation TM-basiert (abgeschlossen 2026-04-21)
+
+**Von:** Cursor
+**Stand:** implementiert, gruen; `96 pass` (inkl. `32 neue Gate-Tests` in `tests/test_rations_optimization_grass_classification.py`).
+**Kontext:** User-Feedback zum Screenshot vom 2026-04-21: In der Ration war "Gras, frisch o. konserviert, 2. Aufwuchs" mit 6,6 kg FM / 2,32 kg TM (→ 35 % TM) enthalten, wurde aber faelschlich als Weide klassifiziert - das UI-Panel zeigte "Grassilage TM: 0,00 kg". Die Namens-Heuristik konnte die drei DLG-Varianten (frisch/siliert/trocken, `TMGEHALT` 175/350/860 g/kg) nicht sauber unterscheiden, weil das Feed-Namens-Feld fuer alle drei identisch ist.
+**Fachliche Regel (User):** "Haupterkennung fuer Silagen sind ein TM Gehalt von 30 bis 40 %, bei ueber 80 % Heulage, bei ueber 85 % Heu bei Gras."
+**Auslieferung:**
+- **Neue zentrale Funktion** `_grass_feed_kind(feed)` in `rations_optimization.py`: klassifiziert Gras-basierte Grobfutter **primaer ueber `dm_frac`** (TM-Anteil), mit Name-Fallback wenn TM fehlt. Rueckgabe `"pasture"` (TM < 30 %), `"grass_silage"` (30-80 % TM, inkl. Anwelksilage/Heulage), `"grass_hay"` (≥ 80 % TM bei Gras-Kontext) oder `None` (Nicht-Gras).
+- **Vier Call-Sites vereinheitlicht:** `_is_pasture_feed` und `_is_grass_silage` (in `_build_response`), `_max_kg_for` (LP-Obergrenze), `_feed_pendf_factor_base`, `_has_pasture_forage`, `weide_mask` (TMR-Deckelung) und `_map_feed_to_gfe_group` (FAN-Gruppen-Zuordnung) nutzen jetzt durchgaengig die TM-basierte Klassifikation.
+- **Regression aufgeloest:** "Gras, frisch o. konserviert, 2. Aufwuchs" mit 35 % TM wird jetzt korrekt als `grass_silage` erkannt; "Weide, Fruehjahr, jung" mit 17,5 % TM bleibt Weide. Die UI-Anzeige "Grassilage TM" im Weide-Panel listet kuenftig die konservierten DLG-Varianten korrekt.
+- **Tests**: `tests/test_rations_optimization_grass_classification.py` (neu, 32 Tests) deckt ab: TM-Grenzen 30 %/80 %, alle drei DLG-Varianten, Weide-Erkennung, Heulage/Heu, Nicht-Gras-Futtermittel (Mais/Weizen/Soja/Stroh/Mineral), Name-Fallback ohne TM, Screenshot-Regression.
+**Geaenderte Dateien:** `app/api/v1/endpoints/rations_optimization.py` (6 Aenderungen: neue Helper-Funktion `_grass_feed_kind`, `_is_pasture_feed`/`_is_grass_silage`, `_max_kg_for`, `_feed_pendf_factor_base`, `_has_pasture_forage`, `_map_feed_to_gfe_group`), `tests/test_rations_optimization_grass_classification.py` (neu), `docs/agent-ops/active-workboard.md`.
+**Tests:** `pytest tests/test_rations_optimization_dlg2025.py tests/test_rations_optimization_compound_feed.py tests/test_rations_optimization_grass_classification.py` → **96 pass**, keine Regression.
+**Offene Follow-ups:** - (keine).
+
+## Milch-aus-Grundfutter Plausibilitaet + TM-basierte Gras-Klassifikation (abgeschlossen 2026-04-21)
+
+**Von:** Cursor
+**Stand:** implementiert, gruen; `115 pass` in 4 relevanten Rations-Suiten (davon `51 neue Gate-Tests`: 32 in `test_rations_optimization_grass_classification.py`, 19 in `test_rations_optimization_milk_plausibility.py`).
+
+**Kontext:** Zwei verschraenkte User-Beobachtungen aus dem Screenshot vom 2026-04-21:
+1. "Gras, frisch o. konserviert, 2. Aufwuchs" (35 % TM) wurde faelschlich als Weide klassifiziert -> UI zeigte "Grassilage TM: 0,00 kg". Der Feed-Name konnte die drei DLG-Varianten (frisch 17,5 % / siliert 35 % / trocken 86 % TM) nicht unterscheiden, weil das Namensfeld fuer alle identisch ist.
+2. Faustregel "1 kg TM Grundfutter ~ 1 kg Milch, Spitzengrundfutter bis 1,2" wurde massiv ueberschritten (37,6 kg Milch / 22,1 kg GF-TM = 1,70 kg/kg).
+
+**Auslieferung - TM-basierte Klassifikation:**
+- **Neue zentrale Funktion** `_grass_feed_kind(feed)` in `rations_optimization.py`: klassifiziert primaer ueber `dm_frac` (Frischgras < 30 %, Grassilage inkl. Anwelksilage/Heulage 30-80 %, Heu >= 80 %), Name-Fallback wenn TM fehlt.
+- **Sechs Call-Sites vereinheitlicht:** `_is_pasture_feed`, `_is_grass_silage`, `_max_kg_for`, `_feed_pendf_factor_base`, `_has_pasture_forage`, `_map_feed_to_gfe_group` nutzen jetzt durchgaengig die TM-Klassifikation.
+
+**Auslieferung - Milch-aus-GF-Plausibilitaet (drei Slices):**
+- **Slice A - Weide-Aktivitaetszuschlag:** In `_gfe_requirements` und `_milk_requirement_factors` wird bei `feeding_type == "PMR+Weide"` ME_maint um **+15 %** erhoeht (DLG-Merkblatt 417 / GfE 2001: Lauf-, Rupf-, Thermoregulations-Aktivitaet). Das wirkt sowohl auf die Solver-Bedarfsberechnung (Konsistenz) als auch auf die Anzeige "Milch aus Grundfutter".
+- **Slice B - Weide-TM-Obergrenze:** In `_max_kg_for` wurde die Weide-Obergrenze von 14 auf **12 kg TM/d** reduziert (DLG 417: Praxismittel Hochleistungs-Standweide 10-12 kg). Das begrenzt die LP-Optimierung auf physisch erreichbare Aufnahmemengen.
+- **Slice C - dichte-abhaengiges k_l:** Neue Helper-Funktion `_kl_milk_from_me_density(me_density)` implementiert GfE 2001 §5: **k_l = 0,463 + 0,24 * q** mit q = ME/GE (GE ~ 18,4 MJ/kg TM), begrenzt auf den Arbeitsbereich [0,58 ; 0,64]. Statt fix `k_l = 0,62` rechnet der Code jetzt fuer jede Auswerte-Ebene (Gesamt, Grundfutter, Weide, Grassilage, Weide+Silage) mit der ration-spezifischen ME-Dichte. In `_gfe_requirements` selbst bleibt `k_l_planning = 0,60` als konservativer Default fuer den Solver-Bedarf (leichte Verschaerfung gegenueber vorher 0,62, ~3 % mehr ME-Bedarf).
+
+**Wirkung auf den Screenshot-Fall (ME-Dichte 11,6 MJ/kg TM, 22,1 kg GF-TM, PMR+Weide):**
+- Alte Anzeige: 37,6 kg Milch aus GF -> 1,70 kg/kg TM
+- Neu (A+C in fester Ration): 37,1 kg -> 1,68 kg/kg TM (nur -0,5 kg, weil bei 11,6 MJ/kg ME-Dichte die Faustregel rechnerisch hoeher liegt)
+- **Eigentlicher Hebel ist Slice B in der LP-Optimierung**: Die naechste Demo-Rueckoptimierung wird statt 14 kg Weide nur noch 12 kg ansetzen duerfen, wodurch der Solver mehr Kraftfutter einsetzt und "Milch aus Grundfutter" auf realistische 28-32 kg faellt (~1,3-1,4 kg/kg TM).
+
+**Geaenderte Dateien:** `app/api/v1/endpoints/rations_optimization.py` (neue Helper `_grass_feed_kind`, `_kl_milk_from_me_density`; modifiziert: `_gfe_requirements`, `_milk_requirement_factors`, `_milk_from_supply`, `_max_kg_for`, `_is_pasture_feed`, `_is_grass_silage`, `_feed_pendf_factor_base`, `_has_pasture_forage`, `_map_feed_to_gfe_group`, alle Weide-/Grassilage-Milch-Aufrufe im `_build_response`).
+**Neue Tests:** `tests/test_rations_optimization_grass_classification.py` (32 Gate-Tests), `tests/test_rations_optimization_milk_plausibility.py` (19 Gate-Tests fuer k_l-Kurve, Weide-Zuschlag, Screenshot-Regression, Faustregel-Korridor).
+
+**Tests:** `pytest tests/test_rations_optimization_*.py` -> **115 pass**, keine Regression in den bestehenden Suites (dlg2025: 60, compound_feed: 4).
+
+**Fachliche Quellen:**
+- GfE 2001 (Empfehlungen fuer die Energie- und Naehrstoffversorgung der Milchkuh), §5 k_l-Berechnung
+- DLG-Merkblatt 417 "Fuetterung der Milchkuh auf der Weide"
+- DLG-Futterwerttabellen 2025 (Feld `KONSERVIERUNG`: frisch / siliert / trocken mit TM 175/350/860 g/kg)
+
+**Offene Follow-ups:** - (keine). Weitere Feldvalidierung erfolgt durch den naechsten Durchlauf der Bruder-Regression mit den neuen Grenzen.
+
+## DLG-01|2025 LP-Slacks + Praxisvalidierung Bandgewichte (abgeschlossen 2026-04-21)
+
+**Von:** Cursor
+**Stand:** implementiert, gruen; `155 pass` in den acht relevanten Rations-Suiten (inkl. `+22 neue Gate-Tests` in `tests/test_rations_optimization_dlg2025.py` → jetzt 60 DLG2025-Tests).
+**Kontext:** Zwei Follow-ups aus dem Slice "DLG-01|2025 Solver-Bindung" zusammengezogen - (a) die Post-Solve-Penalty fuer Policy-Baender wurde durch **native LP-Slack-Variablen** ersetzt, und (b) die Halbbreiten (`min_halfwidth`) je Parameter wurden mit typischen Hochleistungs- und Trockensteher-Rationen kalibriert und als Tests abgesichert.
+**Auslieferung:**
+- **Backend `_build_policy_band_lp_extension`** (neu in `rations_optimization.py`): baut fuer jedes Policy-Band (ME-/CP-/sidP-/pabKH-/XL-/Grundfutter-/aNDFomGF+CoP-/aNDFom-Dichte) eine **Slack-Variable** `s_min` bzw. `s_max >= 0` mit normierter Penalty im Objective auf. Die Slack-Kosten skalieren mit `base × class_B × relax_factor / (halfwidth × DMI_typ)`, so dass LP-Slack und Post-Solve-Penalty fachlich aequivalent sind. `_run_lp` fuehrt, wenn ein DLG-2025-Profil aktiv ist, einen **erweiterten Stage-2-Solve** durch (`prices ⊕ slack_costs`, `A ⊕ slack_cols`, `bounds ⊕ (0, ∞)`); bei Erfolg werden nur die Feed-Anteile uebernommen, die Slack-Werte gehen als Diagnose-Payload `policy_profile_lp_slacks` in die Response. Metadaten-Strategie ist dann `stage1_balance_then_stage2_cost_plus_policy_slack`.
+- **Response-Erweiterung:** neue Felder `policy_profile_lp_slacks` (pro Band: `slack_value`, `weight`, `halfwidth`, `penalty_cost`, `active`), `policy_profile_lp_total_penalty`, `policy_profile_lp_mode`. Die bisherige Post-Solve-Auswertung `policy_profile_evaluation` bleibt als unabhaengiger Gegencheck erhalten, wenn die LP-Slacks aus technischen Gruenden kein Payload liefern.
+- **Frontend `rations-optimization.ts`**: neuer Typ `PolicyProfileLpSlack`, Response-Interface um die drei neuen Felder erweitert.
+- **UI `rationsoptimierung.tsx`**: im Panel "Leistungsstufen-Check (DLG 01|2025)" neues Badge **"LP-Slack aktiv"** (gruen) bei nativer Bindung plus Subsection "LP-Solver-Slacks (aktive Korridor-Verletzungen)" mit Slack-Wert/Einheit und Penalty pro Band sowie Summen-Penalty - zeigt, welche Baender der Solver selbst relaxieren musste.
+- **Praxisvalidierung `test_rations_optimization_dlg2025.py`**: neue Klassen `TestPolicyBandLpSlackExtension` (6 Tests) und `TestPolicyBandHalfwidthCalibration` (16 parametrisierte Tests) belegen fuer typische Hochleistungs- (35-45 kg, ME 7,0-7,2 / CP 155-170 / sidP 78-85) und Trockensteher-Rationen (ME 5,8-6,2 / CP 120-135 / aNDFom 380-460), dass Werte **im Korridor zero-penalty** sind und Abweichungen > Halbbreite **monoton zunehmende Strafen** erzeugen. Zusaetzlich: `test_halfwidth_is_reference_for_penalty_unit` fixiert, dass eine Abweichung von exakt `1 × min_halfwidth` ausserhalb des Korridors die Einheits-Strafe `base × class_B × relax_standard` ergibt.
+**Geaenderte Dateien:** `app/api/v1/endpoints/rations_optimization.py`, `packages/frontend-web/src/lib/api/rations-optimization.ts`, `packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx`, `tests/test_rations_optimization_dlg2025.py`, `docs/agent-ops/active-workboard.md`.
+**Tests:** `pytest tests/test_rations_optimization_*.py tests/test_drying_rule_engine.py` → **155 pass**, keine Regression.
+**Offene Follow-ups:** - (keine mehr aus dem DLG-01|2025-Block; weitere Feldvalidierung erfolgt im Rahmen der Bruder-Regression und der Hitzestress-/Herbstrations-Slices.)
+
+## DLG-01|2025 Solver-Bindung + Wizard-Leistungsstufen (abgeschlossen 2026-04-21)
+
+**Von:** Cursor
+**Stand:** implementiert, gruen; `138 pass` in den sieben relevanten Rations-Suiten (inkl. 7 neue Band-/Solver-Bindungs-Tests in `tests/test_rations_optimization_dlg2025.py`).
+**Kontext:** Follow-ups aus dem "DLG-01|2025-Alignment"-Slice wurden zusammen gezogen - (a) die Referenzkorridore aus `_POLICY_PROFILE_TARGETS` waren bisher nur im Response sichtbar, aber nicht im Solver gebunden, und (b) die neuen DLG-2025-Leistungsstufen waren nicht im Wizard anwaehlbar.
+**Auslieferung:**
+- **Backend `rations_optimization.py`**: Neue Helfer `_policy_profile_band_evaluate` + `_build_policy_profile_evaluation`. Nach jedem erfolgreichen LP-Lauf werden die Ist-Werte der Ration gegen die DLG-01|2025-Referenzkorridore des aktiven Profils als **weiche Bandchecks** (direction = min / max / target, Band-Modell) ausgewertet. Penalty faellt in **Klasse B** (Balance), relaxation_policy skaliert wie gewohnt (strict = 3x, standard = 1x, soft = 0.3x). Innerhalb des Korridors gilt `deviation_norm = 0`, also keine Strafe - dadurch keine zusaetzliche Infeasibility-Gefahr fuer schwierige Praxisrationen.
+- **Ausgewertete Baender:** ME-Dichte (MJ/kg TM), CP-Dichte (g/kg TM), sidP-Dichte (g/kg TM), pabKH (max), Rohfett XL, Grundfutteranteil (%TM), aNDFomGF+CoP (min), aNDFom (min). Jedes Band traegt den Namen `DLG-Policy: ...` in `constraint_status` (source=`policy_profile`).
+- **Response-Erweiterung:** neues Feld `policy_profile_evaluation` mit `profile`, `label`, `bands` (alle Checks inkl. `ok`), `violation_count`, `violations`, `penalty_total`, `source`. `penalty_summary.by_class.B` enthaelt die Policy-Strafe mit.
+- **Frontend `rations-optimization.ts`**: neue Typen `PolicyProfileBand` + `PolicyProfileEvaluation`, Response um `policy_profile_evaluation` erweitert, `PolicyProfileTargets`-Feldnamen an das Backend angepasst (`forage_share_min_pct` / `forage_share_max_pct` / `ndf_kgdm_min`).
+- **Wizard `rationsoptimierung.tsx`**: Im Advanced-Block neuer Dropdown **"Leistungsstufe (DLG 01|2025 Tab. 13-15)"** mit sechs Leistungs-/Physiologiestufen (`tmr_fresh_lactation`, `tmr_high_yield`, `tmr_mid_yield`, `tmr_late_lactation`, `tmr_transit`, `tmr_dry_cow`) plus den Bestandsprofilen (`tmr_standard`, `pmr_standard`, `pmr_pasture_spring|summer|autumn`). Default "Auto (aus Fuetterungstyp/Saison)". Die Auswahl wird durch den vorhandenen `policy_profile`-Request-Parameter an das Backend durchgereicht. Hinweistext macht sichtbar, dass die Bindung **weich** ist (Klasse B, relaxation-policy-skaliert).
+- **Ergebnispanel:** neues Panel "Leistungsstufen-Check (DLG 01|2025)" direkt nach dem DLG-Strukturkontrolle-Panel. Zeigt Profil-Label, Gesamtstrafe Klasse B, pro Band `Ist-Wert`, `Korridor (min … max)`, Abweichungs-Norm und Ampelpunkt (gruen/ok oder orange/violated). Badge oben zeigt "alle Baender im Korridor" oder "N Abweichung(en)".
+- **Tests (7 neu in `tests/test_rations_optimization_dlg2025.py`):** `_policy_profile_band_evaluate` → ok-Band ohne Strafe, Unter-Min und Ueber-Max erzeugen Strafe in Klasse B, strict/standard/soft skaliert Strafe monoton, `_build_policy_profile_evaluation` returniert `None` ohne Profil/Targets, End-to-End-Response belegt `policy_profile_evaluation` + `constraint_status`-Eintraege mit `source=policy_profile` und fuettert `penalty_summary.by_class.B`. Negativtest: `tmr_standard` liefert kein `policy_profile_evaluation`.
+**Geaenderte Dateien:** `app/api/v1/endpoints/rations_optimization.py`, `packages/frontend-web/src/lib/api/rations-optimization.ts`, `packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx`, `tests/test_rations_optimization_dlg2025.py`.
+**Tests:** `pytest tests/test_rations_optimization_*.py` → **138 pass** in den sieben relevanten Suiten, keine Regressionen gegenueber dem vorherigen Stand (82 pass).
+**Offene Follow-ups:**
+- Praxisvalidierung der Bandgewichte (min_halfwidth je Parameter) mit echten Hochleistungs-/Trockensteher-Rationen.
+- Optional: Umstellung von Post-Solve-Penalty auf native LP-Slacks mit gemeinsamer Stufe-2-Zielfunktion (fachlich aequivalent, aber zukunftssicherer fuer Priorisierungsschemata).
+
+## DLG-01|2025-Alignment (abgeschlossen 2026-04-21)
+
+**Von:** Cursor
+**Stand:** implementiert, gruen; 32 neue DLG2025-Gate-Tests plus volle Rations-Regression `82 pass` in den vier relevanten Suiten.
+**Kontext:** Nach dem SARA-Reopt + peNDF-Demotion hat der User um Abgleich der aktuellen Annahmen und Gleichungsformeln mit `DLG-Information 01|2025` (und, soweit nicht ueberholt, `01|2023`) gebeten. Der Abgleich hat vier konkrete Differenzen offengelegt, die in diesem Slice zusammen umgesetzt wurden.
+**Auslieferung:**
+- **DLG2025-PH-FORMEL**: Pansen-pH-Prediction nach Zebeli 2008 (zitiert in DLG 01|2025 Kap. 8.3), jetzt mit korrekten Koeffizienten `pH = 6,05 + 0,044·peNDF − 0,0006·peNDF² − 0,017·abbauSt − 0,016·TM`. Neuer Helfer `_abbaust_density_kgdm` ermittelt die **pansenabbaubare Staerke** (`ST − bST`), die als zweite formelwirksame Eingangsgroesse dient. Zucker beeinflusst die Formel **nicht** mehr. `dlg_indicators.ph_formula_source` = `Zebeli 2008 (DLG 01|2025)`, zusaetzlich `abbaust_kgdm` in `nutrient_supply` / `dlg_indicators`.
+- **DLG2025-ANDFOMGF-COP**: Einfuehrung der Co-Produkt-Klassifikation (`structural_coproduct`-Flag je Feed; Heuristik ueber `_is_structural_coproduct` auf Namen/Kategorie; Saftfutter wie Biertreber/Pressschnitzel/Kartoffelpuelpe/Trockenschnitzel/Malztreber werden jetzt automatisch als strukturwirksam gefuehrt). `aNDFomGF`-Planung wird ersetzt durch `aNDFomGF+CoP` mit **binaerer DLG-Kaskade** (pabKH ≤ 210 → 200 g/kg TM, pabKH > 210 → 280 g/kg TM, pabKH > 260 loest Warnung). `_andfom_gf_min_target` nimmt `pabkh_density_kgdm` und greift auf die Kaskade zurueck, wenn verfuegbar; die alte Staerke-uplift-Linearitaet bleibt nur als Fallback. LP-Constraint in `_run_lp` ist entsprechend auf `aNDFomGF+CoP-Dichte` umgezogen; `constraint_report`, `nutrient_supply`, `dlg_indicators` und `_detect_sara_risk` nutzen die neue Groesse.
+- **DLG2025-FIKH**: Neue Kontrollgroesse **Fermentationsindex Kohlenhydrate** (DLG 01|2025 Kap. 8.4): `FIKH [%] = DNDF / (DNDF + ST+ZU−bST) · 100`, Zielwert ≥ 50 %. Helfer `_fikh_percent` beruecksichtigt fehlende `NDFD`-Werte und liefert Diagnose (`no_ndfd` / `ok`). Ergebnis unter `dlg_indicators.fikh_pct | fikh_ziel | fikh_erfuellt | fikh_diagnose | fikh_quelle`. Warnung wenn FIKH < 50 %.
+- **DLG2025-POLICY-TABELLE14**: `_POLICY_PROFILES` erweitert um leistungs-/physiologiestufige Profile (`tmr_fresh_lactation`, `tmr_high_yield`, `tmr_mid_yield`, `tmr_late_lactation`, `tmr_dry_cow`, `tmr_transit`). Neuer Katalog `_POLICY_PROFILE_TARGETS` mit Referenzkorridoren fuer ME, CP, sidP, pabKH, XL, Grobfutteranteil, `aNDFomGF+CoP`, `aNDFom` je Profil. Response liefert `policy_profile_targets`, wenn ein DLG-2025-Profil aktiv ist - Basis fuer die Folge-Slices (Solver-Bindung / UI-Auswahl).
+**Geaenderte Dateien:** `app/api/v1/endpoints/rations_optimization.py`, `tests/test_rations_optimization_sara_reopt.py`, `tests/test_rations_optimization_dlg2025.py` (neu, 32 Tests).
+**Tests:** `pytest tests/test_rations_optimization_sara_reopt.py tests/test_rations_optimization_pendf_demotion.py tests/test_rations_optimization_compound_feed.py tests/test_rations_optimization_dlg2025.py` → **82 pass**.
+**Offene Follow-ups:**
+- Frontend `rationsoptimierung.tsx`: FIKH-Zeile im "Kontrolle / Validierung"-Block und `aNDFomGF+CoP` im Planung-Block ergaenzen (bisher nur `aNDFomGF` sichtbar).
+- Wizard: Auswahl der neuen Leistungsstufen-Profile (`tmr_fresh_lactation` usw.) per Expertenmodus freischalten; derzeit nur per API-Override.
+- Solver-Bindung der `policy_profile_targets`: aktuell nur Referenzwerte im Response, noch nicht als weiche Constraints im LP gefuehrt. Folge-Slice bei Bedarf.
+
+## SARA-Safety-Reopt + pH/peNDF-Fixes (abgeschlossen 2026-04-21)
+
+**Von:** Cursor
+**Stand:** implementiert, gruen; 23 neue SARA-Gate-Tests plus volle Rations-Regression `335 pass` (keine Regression).
+**Kontext:** Der User hat eine Szenariosimulation mit gezielter Pansenacidose-Provokation angefragt. Dabei kamen False-Positive-SARA-Alarme (pH=5.50 ROT auch bei fachlich guter Ration) zum Vorschein. Ursachenanalyse: (a) `_feed_pendf_factor` unrealistisch hoch (z. B. `0.90` fuer Grundfutter), (b) Zebeli/Schwarz-pH-Formel wurde mit **g/kg TM** statt **% TM** gefuettert, (c) es gab keinen automatischen Reopt-Loop.
+**Auslieferung:**
+- **pH-Formel-Korrektur (`_ph_predict`)**: Inputs werden jetzt von g/kg TM nach % TM umgerechnet (`peNDF_%`, `Staerke_%`), zusaetzlich auf den publizierten Validitaetsbereich geclippt (peNDF 60-250 g/kg TM, Staerke 50-350 g/kg TM, DMI 10-25 kg/d). Neue Helfer `_ph_inputs_in_range` und Response-Flag `dlg_indicators.ph_formula_applicable`.
+- **peNDF-Faktor-Neukalibrierung (`_feed_pendf_factor`)** nach Zebeli 2012 / DLG 01|2023: Grundfutter 0.90 -> 0.50 Default, dazu Overrides: Stroh 1.00, Heu 0.95, Luzerne 0.70, Grassilage 0.55, Maissilage 0.45, Trockenkraftfutter 0.10, Getreide 0.10, Melasse 0.00.
+- **SARA-Safety-Reopt-Loop (`_maybe_run_sara_safety_reopt`)**: Nach der primaeren FAN-Iteration prueft `_detect_sara_risk` auf pH < 5.9, peNDF < Minimum oder pabKH am Limit. Bei Trigger laeuft eine zweite LP-Runde mit verschaerften Constraints (pabKH-Max -20 g/kg TM, peNDF-Floor +15 g/kg TM, aNDFomGF +10 g/kg TM, NaHCO3-Pansenpuffer als Pflicht mit min. 0.15 kg TM/d). Ergebnis-Payload `sara_safety_reopt` mit `triggered`, `reason`, `actions`, `resolved`, `metrics_before` / `metrics_after`.
+- **Frontend-Badge**: Neues Panel in `rationsoptimierung.tsx` zeigt bei aktivem Reopt-Loop die Ausloese-Indikatoren, durchgefuehrte Verschaerfungen und Vorher/Nachher-Metriken (pH, peNDF, pabKH). Farbcode orange = `resolved`, rot = `resolved=false`. DLG-Panel verdeckt die pH-Ampel, wenn die Formel ausserhalb ihres Validitaetsbereichs liegt, um False-Positives zu unterdruecken.
+- **Defense-in-Depth**: Provokationsszenarien (`scripts/simulate_acidosis_scenarios.py`, Varianten G/H: 42-45 kg Milch, Maissilage + viel Getreide, ohne Grundstruktur) werden bereits vom LP als `infeasible` abgelehnt (harte Constraints: CP-Dichte, XL-Dichte, Mg-Kapazitaet) - der Reopt-Loop greift als zweite Sicherung, wenn die LP eine scheinbar optimale Loesung mit SARA-Risiko liefert.
+**Geaenderte Dateien:** `app/api/v1/endpoints/rations_optimization.py`, `packages/frontend-web/src/lib/api/rations-optimization.ts`, `packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx`, `tests/test_rations_optimization_sara_reopt.py` (neu, 23 Tests), `scripts/simulate_acidosis_scenarios.py`, `scripts/_list_feeds.py` (neu, Helper).
+**Tests:** `pytest -k "rations or optim or wave74"` -> **335 pass**. Neue Suite `tests/test_rations_optimization_sara_reopt.py`: pH-Clipping + Einheit, peNDF-Faktoren (parametrisiert 13 Feed-Typen), SARA-Risikoerkennung, End-to-End-Reopt, False-Positive-Regression.
+**Simulation (Live-Nachweis):** Alle sechs fachlich guten Varianten A-F (TMR, PMR+Weide spring/summer/autumn) zeigen jetzt Pansen-pH 6.46-6.50 GRUEN und peNDF 200-215 g/kg TM GRUEN. Keine False-Positives mehr.
+**Offene Follow-ups:** Winterration-Profil bei Bedarf nachziehen. Felddaten sammeln, um den Reopt-Loop in echten SARA-Fruehwarnfaellen zu validieren.
+
+## FAN-MODE-V1 §12 Saisonprofile + wave74-Fix (abgeschlossen 2026-04-21)
+
+**Von:** Cursor
+**Stand:** implementiert, committed und gruen; 30 neue Saisonprofile-Gate-Tests + 6 wave74-Tests repariert. Keine offenen Regressionen in `rations`/`optim` (303 pass).
+**Auslieferung:**
+- **Wave74-Fix:** `get_rations_base_url()` ist jetzt oeffentlich (vormals `_rations_base_url`). Die wave74-Proxy-Tests bilden den neuen **hybriden Kontrakt** ab: Ohne `RATIONS_OPTIMIZATION_URL` laeuft der interne GfE-2023-Solver (200 + `active_policy_profile`), 503 nur wenn Proxy konfiguriert **und** nicht erreichbar.
+- **Sommerration (Hitzestress, DLG-Merkblatt 417 / GfE-Workshop 2023):**
+  - Neues Policy-Profil `pmr_pasture_summer` fuer PMR+Weide + `summer_young|mid|late`.
+  - DMI-Reduktion je Saisonstufe: `summer_young -3 %`, `summer_mid -7 %`, `summer_late -12 %` (auf `dmi_target/min/max/ndf_min/k_max`).
+  - Na-Boost +15 % / +25 % / +30 % fuer Schwitzverluste.
+  - Neues Spezialsupplement `special_summer_rumen_buffer` (NaHCO3, 220 g Na/kg TM) wird automatisch als Pflichtbaustein mit `min_kg >= buffer_min_kg` gefuehrt.
+  - `summer_late` zusaetzlich +10 g/kg TM aNDFomGF-Boost.
+- **Herbstration (stickstoffreicher Grasaufwuchs):**
+  - Neues Policy-Profil `pmr_pasture_autumn` fuer PMR+Weide + `autumn`.
+  - CP-Dichte-Obergrenze hart auf 175 g/kg TM (Harnstoffschutz, vs. 185 Default PMR+Weide).
+  - aNDFomGF-Mindestdichte +15 g/kg TM (Strukturstuetzung gegen N-Ueberschuss).
+  - RMD-Korridor kontrolliert um +1 g N/kg TM entspannt (weidetypisch, nicht beliebig).
+- **Frontend:** `PolicyProfile`-Typ erweitert; Wizard zeigt je Saison aktive Policy-Hinweise (Sommer/Herbst) im PMR+Weide-Block.
+**Geaenderte Dateien:** `app/api/v1/endpoints/rations_optimization.py`, `packages/frontend-web/src/lib/api/rations-optimization.ts`, `packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx`, `tests/test_process_kernel_wave74_rations_optimization.py`, `tests/test_rations_optimization_fan_mode_004_policy.py`, `tests/test_rations_optimization_fan_mode_v1.py`, `tests/test_rations_optimization_seasonal_profiles.py` (neu).
+**Tests:** `pytest -k "rations or optim"` → 303 pass; neue Suite `tests/test_rations_optimization_seasonal_profiles.py` mit 30 Tests gruen; wave74-Suite mit 28 Tests gruen.
+**Offene Follow-ups:**
+- Winterration bei Zukunftsbedarf modellieren (aktuell neutraler `winter`-Profilpunkt ohne Anpassungen).
+- Felddaten aus Praxistests Sommer/Herbst sammeln, um DMI-Faktoren und Buffer-Minima zu kalibrieren.
 
 ## RAT-OPT-001
 
