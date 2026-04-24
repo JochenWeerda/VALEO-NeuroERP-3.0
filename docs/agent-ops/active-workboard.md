@@ -5,19 +5,23 @@ Stand: `2026-04-23`
 ## RATIONS-HARD-001
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Rations-/Fuetterungsmodul nach Punkt 4 gezielt haerten, ohne den Solver grossflaechig umzubauen.
-**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `app/api/v1/endpoints/rations_optimization.py`, `tests/test_rations_optimization_feeding_system.py`
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `app/api/v1/endpoints/rations_optimization.py`, `tests/test_rations_feeding_system.py`, `tests/test_rations_mixing_protocol.py`
 **Abnahmekriterien:** Weide wird auch bei nominellem TMR-Input nicht ins Mischprotokoll aufgenommen; Auto-Promotion TMR -> PMR_pasture ist regressionsgesichert; Mischprotokoll nutzt die vorhandene Feed-Dataclass als typisierte Solver-Sicht.
-**Offene Risiken:** In `app/api/v1/endpoints/rations_optimization.py` liegt bereits ein uncommitted Arbeitsstand vor; Slice arbeitet darauf auf, ohne fremde Aenderungen zu revertieren.
+**Erledigt:** Mischprotokoll nutzt `Feed.from_dict()` fuer die typisierte Feed-Sicht; TMR+verfuegbare Weide wird auf PMR_pasture auto-promoted; falsch als `tmr_block` gelabelte Weide wird aus der Mischung ausgeschlossen und im Protokoll als `excluded_pasture` ausgewiesen.
+**Checks:** `pytest tests/test_rations_feeding_system.py tests/test_rations_mixing_protocol.py tests/test_rations_feed_dataclass.py -q`
+**Offene Risiken:** Vollstaendige Zerlegung von `_run_lp`, regelbasiertes Warnsystem und echte LP-Slacks fuer Konzentrat-Tagesmax bleiben eigene Folgeslices.
 
 ## INT-LIVE-001
 
 **Von:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen
 **Ziel des Slices:** Produktnahe Live-Integrationspruefung nach Punkt 6 repo-seitig konkreter machen.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `app/services/integration_bootstrap.py`, `scripts/check_integration_bootstrap.py`, `tests/test_integration_bootstrap.py`, `docs/project-context/integration-bootstrap-readiness-2026-04-12.md`, `docs/project-context/open-gaps-and-known-issues.md`
 **Abnahmekriterien:** Bootstrap-Readiness liefert zusaetzlich einen Probe-Plan fuer echte Connectivity-Pruefungen; CLI kann diesen Plan ausgeben; Tests unterscheiden ready, disabled, blocked und manual/external.
+**Erledigt:** `build_integration_bootstrap_summary()` liefert jetzt `probe_plan`; `scripts/check_integration_bootstrap.py --probe-plan` gibt nur diesen Live-Probe-Plan aus; Tests decken ready/blocked/disabled fuer OIDC, NATS, Superglue, Voice und CRM-Downstream ab.
+**Checks:** `pytest tests/test_integration_bootstrap.py -q`
 **Offene Risiken:** Echte Produktivtests benoetigen weiterhin externe Tenant-Secrets, Zielsystem-URLs und Ops-Freigaben.
 
 ## RATIONS-REFACTOR Schritte 1-5 (abgeschlossen 2026-04-23)

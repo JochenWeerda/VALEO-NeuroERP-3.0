@@ -15,9 +15,15 @@ from app.services.integration_bootstrap import build_integration_bootstrap_summa
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--strict", action="store_true")
+    parser.add_argument(
+        "--probe-plan",
+        action="store_true",
+        help="Print only the live connectivity probe plan derived from readiness checks.",
+    )
     args = parser.parse_args()
     summary = build_integration_bootstrap_summary()
-    print(json.dumps(summary, indent=2, ensure_ascii=False))
+    payload = summary["probe_plan"] if args.probe_plan else summary
+    print(json.dumps(payload, indent=2, ensure_ascii=False))
     if args.strict and summary["required_blockers"]:
         raise SystemExit(
             "Required integration bootstrap blockers present: "

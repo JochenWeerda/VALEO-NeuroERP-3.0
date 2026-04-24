@@ -284,6 +284,50 @@ class TestResolveFeedingSystemConfigFallback:
         r = ro._resolve_feeding_system_config(None, {"feeding_type": "TMR"})
         assert r["system"] == "TMR"
 
+    def test_tmr_with_pasture_feed_auto_promotes_to_pmr_pasture(self) -> None:
+        feeds = [
+            {
+                "id": "weide_fruehjahr",
+                "name": "Weide, Fruehjahr jung",
+                "dm_frac": 0.18,
+                "forage": True,
+                "max_kg": 12.0,
+            },
+            {
+                "id": "grassilage",
+                "name": "Grassilage",
+                "dm_frac": 0.35,
+                "forage": True,
+                "max_kg": 15.0,
+            },
+        ]
+        r = ro._resolve_feeding_system_config(
+            {"system": "TMR", "concentrate_distribution": "included_in_tmr"},
+            {"feeding_type": "TMR"},
+            feeds=feeds,
+        )
+        assert r["system"] == "PMR_pasture"
+        assert r["concentrate_distribution"] == "milkparlor"
+        assert r["auto_promoted_from_tmr"] is True
+
+    def test_tmr_with_unavailable_pasture_feed_stays_tmr(self) -> None:
+        feeds = [
+            {
+                "id": "weide_fruehjahr",
+                "name": "Weide, Fruehjahr jung",
+                "dm_frac": 0.18,
+                "forage": True,
+                "max_kg": 0.0,
+            }
+        ]
+        r = ro._resolve_feeding_system_config(
+            {"system": "TMR", "concentrate_distribution": "included_in_tmr"},
+            None,
+            feeds=feeds,
+        )
+        assert r["system"] == "TMR"
+        assert r["auto_promoted_from_tmr"] is False
+
     def test_explicit_config_wins_over_profile(self) -> None:
         cfg = {"system": "PMR_stall", "concentrate_distribution": "ams"}
         r = ro._resolve_feeding_system_config(cfg, {"feeding_type": "PMR+Weide"})
@@ -327,10 +371,11 @@ class TestAutoAssignBlockPasture:
         feed = {"name": "Weide Fruehjahr jung", "dm_frac": 0.18, "forage": True}
         assert ro._auto_assign_block(feed, "PMR_pasture") == "pasture_block"
 
-    def test_weide_in_tmr_system_goes_to_tmr(self) -> None:
-        # Wenn System TMR ist, gibt es keinen pasture_block - alles landet im TMR
+    def test_weide_in_tmr_system_still_goes_to_pasture_block(self) -> None:
+        # Weide wird fachlich gegrast und darf nie in den Mischwagen-Block.
+        # Der Runtime-Pfad eskaliert TMR+Weide zusaetzlich auf PMR_pasture.
         feed = {"name": "Weide Fruehjahr jung", "dm_frac": 0.18, "forage": True}
-        assert ro._auto_assign_block(feed, "TMR") == "tmr_block"
+        assert ro._auto_assign_block(feed, "TMR") == "pasture_block"
 
     def test_grass_silage_is_tmr_not_pasture(self) -> None:
         # 35 % TM = Grassilage -> TMR (nicht pasture)
@@ -418,12 +463,13 @@ class TestSplitFeedsByBlock:
         assert len(buckets["concentrate_staged_block"]) == 1
         assert buckets["concentrate_staged_block"][0]["id"] == "mlf_184"
 
-    def test_tmr_system_everything_in_tmr(self) -> None:
+    def test_tmr_system_keeps_pasture_out_of_tmr(self) -> None:
         cfg = {"system": "TMR", "concentrate_distribution": "included_in_tmr"}
         buckets = ro._split_feeds_by_block(self._pmr_weide_feeds(), cfg)
-        assert len(buckets["pasture_block"]) == 0
+        assert len(buckets["pasture_block"]) == 1
+        assert buckets["pasture_block"][0]["id"] == "weide_fruehjahr"
         assert len(buckets["concentrate_staged_block"]) == 0
-        assert len(buckets["tmr_block"]) == 5
+        assert len(buckets["tmr_block"]) == 4
 
     def test_manual_override_wins(self) -> None:
         cfg = {"system": "PMR_pasture", "concentrate_distribution": "milkparlor"}

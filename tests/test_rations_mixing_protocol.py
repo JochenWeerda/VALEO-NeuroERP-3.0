@@ -98,6 +98,24 @@ class TestMixingProtocolStructure:
         # Mineral am Ende
         assert first_names[-1] == "Mineralfutter Ca/P"
 
+    def test_pasture_is_excluded_even_with_wrong_tmr_label(self) -> None:
+        feeds = [
+            _feed("weide", "Weide, Fruehjahr jung", dm_frac=0.18),
+            _feed("f_mais", "Maissilage", dm_frac=0.35),
+        ]
+        protocol = _build_mixing_protocol(
+            ration_items=[],
+            block_labels=["tmr_block", "tmr_block"],
+            feeds=feeds,
+            amounts=[6.0, 8.0],
+            feeding_system_config={"system": "PMR_pasture", "concentrate_distribution": "milkparlor"},
+        )
+        assert protocol is not None
+        assert [step["feed_id"] for step in protocol["steps"]] == ["f_mais"]
+        assert protocol["excluded_pasture"]["kgdm"] == pytest.approx(6.0)
+        assert protocol["excluded_pasture"]["items"][0]["reason"] == "pasture_not_mixed"
+        assert any("nicht teil der mischung" in warning.lower() for warning in protocol["warnings"])
+
 
 class TestMixingProtocolWater:
     def test_water_adds_to_target_dm_frac(self) -> None:

@@ -50,6 +50,7 @@ Zuletzt vollstaendig auditiert: **2026-04-13**.
 
 - Superglue-Connectors, L3-Import, Erstinstallation und Finance-Export brauchen produktive Tenant-Secrets, Zielsystem-URLs und Ops-Alerting-Werte, die ausserhalb des Repos gepflegt werden.
 - Repo-seitig ist die Bootstrap-Reife jetzt besser vorbereitet ueber `.env.example`, `scripts/check_integration_bootstrap.py` und [integration-bootstrap-readiness-2026-04-12.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/project-context/integration-bootstrap-readiness-2026-04-12.md).
+- Der Bootstrap-Bericht liefert jetzt zusaetzlich `probe_plan`; `python scripts/check_integration_bootstrap.py --probe-plan` zeigt je Integration den produktionsnahen Live-Pruefpfad inklusive Ziel, Command-Hinweis und Blockern. Echte Requests bleiben bewusst ops-seitig, weil produktive Tenant-Secrets und Zielsysteme extern sind.
 
 ### EXT-002: FIBU-Mappings fuer Cutover
 
