@@ -399,7 +399,9 @@ export interface NutrientSupplyExtended {
   me_mj: number
   sidp_g: number
   andfom_g: number
-  starch_g: number
+  starch_g?: number
+  staerke_g?: number
+  staerke_kgdm?: number
   sugar_g: number
   fat_g: number
   ca_g: number
@@ -539,6 +541,20 @@ export interface ConcentrateCallUp {
   warnings: string[]
 }
 
+/** Maschinenlesbarer Patch fuer Re-Optimierung (UI „Vorschlag übernehmen“). */
+export interface RationAdjustmentApplyPatch {
+  relaxation_policy?: RelaxationPolicy
+  policy_profile?: PolicyProfile | null
+  add_feed_ids?: string[]
+}
+
+export interface RationAdjustmentSuggestion {
+  id: string
+  title: string
+  detail: string
+  apply_patch: RationAdjustmentApplyPatch
+}
+
 export interface OptimizationResult {
   status: 'optimal' | 'infeasible' | 'unbounded' | 'error'
   objective_value?: number
@@ -551,6 +567,8 @@ export interface OptimizationResult {
   penalty_summary?: PenaltySummary
   dlg_indicators?: DlgIndicators
   warnings: string[]
+  /** Vorschläge zur Rationsanpassung inkl. optional anwendbarem Patch. */
+  ration_adjustment_suggestions?: RationAdjustmentSuggestion[]
   metadata?: Record<string, unknown>
   forage_performance?: {
     feeding_type: FeedingMode
@@ -706,6 +724,7 @@ export async function optimizeFromProfile(
   customFeeds?: object[],
   priceOverrides?: Record<string, number>,
   maxTmOverrides?: Record<string, number>,
+  minTmOverrides?: Record<string, number>,
   extras?: OptimizeFromProfileExtras,
 ): Promise<OptimizationResult> {
   const { data } = await apiClient.post<OptimizationResult>(`${BASE}/optimize/from-profile`, {
@@ -714,6 +733,7 @@ export async function optimizeFromProfile(
     custom_feeds: customFeeds,
     price_overrides: priceOverrides,
     max_tm_overrides: maxTmOverrides,
+    min_tm_overrides: minTmOverrides,
     ...(extras ?? {}),
   })
   return data
