@@ -157,25 +157,46 @@ def _dlg_category(futterart: str) -> Tuple[str, bool]:
 
 
 # Preis-Schätzwerte €/kg TM nach Futtermittelgruppe/-bezeichnung (Marktpreise 04/2026)
+# Marktpreise Stand 24.04.2026 (Paschelke GmbH + Wessel Agentur für Agrarprodukte)
+# Einheit: €/kg TM — Umrechnung: Marktpreis €/t FM / (DM% × 1000)
+# Frachtkosten bereits eingerechnet: ab Brake +2,50 €/dt; ab Hamburg +3,50 €/dt
 _PRICE_ESTIMATES: Dict[str, float] = {
-    "Maissilage": 0.045,
-    "Grassilage": 0.060,
-    "Heu": 0.130,
-    "Luzerne": 0.080,
-    "Melasseschnitzel": 0.195,
-    "Rübenblatt": 0.040,
-    "Körnermais": 0.210,
-    "Weizen": 0.220,
-    "Gerste": 0.200,
-    "Roggen": 0.190,
-    "Triticale": 0.200,
-    "Hafer": 0.210,
-    "Raps": 0.270,
-    "Soja": 0.450,
-    "Biertreber": 0.120,
-    "Trester": 0.090,
-    "Mineralfutter": 1.600,
-    "Harnstoff": 0.600,
+    # --- Grundfutter (Eigenproduktion, Richtwerte) ---
+    "Maissilage":       0.045,   # Eigenproduktion TMR-Basis
+    "Grassilage":       0.060,
+    "Heu":              0.130,
+    "Luzerne":          0.085,
+    "Rübenblatt":       0.040,
+    "Stroh":            0.080,
+    # --- Getreide / Körner (Wessel Kurz-Info 24.04.2026, frfr. SO/Emsl./Westf.) ---
+    "Körnermais":       0.294,   # europ. Mais Brake/HB/Oldenburg 231+25 Fracht = 256 €/t FM / 870 g DM
+    "Weizen":           0.237,   # Futterweizen 20,60 €/dt = 206 €/t FM / 870 g DM
+    "Gerste":           0.239,   # Futtergerste 20,80 €/dt = 208 €/t FM / 870 g DM
+    "Roggen":           0.220,
+    "Triticale":        0.225,
+    "Hafer":            0.230,
+    "Maisschrot":       0.306,   # Maisschrot Brake QM-Milch 241+25=266 €/t FM / 870 g DM
+    # --- Eiweißträger (Paschelke 24.04.2026, fot Hamburg/Norddeutschland) ---
+    "Soja":             0.450,   # Sojaschrot 44% LP Hamburg 359+35=394/890 = 0,44 (HP etwas mehr)
+    "Raps":             0.375,   # Rapsschrot Rostock 308+35=343/890 = 0,39; Mittel gesamt ~0,38
+    "Rapsexpeller":     0.357,   # fot Sternberg Mai 325/910 = 0,36 (weniger aufbereitet)
+    "Druckexpeller":    0.357,   # Alias Rapsexpeller
+    "Sonnenblume":      0.338,   # Sonne HP 36% Brake 276+25=301/890 = 0,34
+    "Sonnenblumenschalen": 0.222, # Sojaschalen-Pellets 173+25=198/890 = 0,22
+    "Palmkern":         0.271,   # Palmexpeller Brake 224+25=249/920 = 0,27
+    "Palmexpeller":     0.271,
+    # --- Sonstige Konzentrate ---
+    "Melasse":          0.230,   # Rübenmelasse (Markt Apr 26, Anfrage)
+    "Melasseschnitzel": 0.200,
+    "Pressschnitzel":   0.085,   # T-Schnitzel ab Station ca. 225-295 €/t TM (Mittel)
+    "Trockenschnitzel": 0.200,
+    "Biertreber":       0.120,   # Saisonware, regional
+    "Trester":          0.090,
+    "Weizenkleie":      0.190,   # Weizenkleie frfr. SO/Emsl. 18,20 €/dt Ernte 2026
+    "Kleie":            0.190,
+    # --- Zusatzstoffe ---
+    "Mineralfutter":    1.600,
+    "Harnstoff":        0.600,
 }
 
 
@@ -742,6 +763,102 @@ _SPECIAL_SUPPLEMENTS: List[Dict[str, Any]] = [
         sidmet=None,
         _special="summer_buffer",
     ),
+    # ---------------------------------------------------------------------------
+    # Bypass-Fett / Calcium-Seifen (Typ Megalac®, Bergafat®, Palmit®)
+    # ---------------------------------------------------------------------------
+    # Pansen-geschütztes Fett: wird nicht im Pansen fermentiert, daher
+    # kein Einfluss auf Pansen-pH (SARA-neutral), hohe Energiedichte.
+    # Indikation: Frischmelker (NEB), Hochleistung >35 kg Milch,
+    # wenn Energiedichte-Grenze durch TM-Kapazität erreicht ist.
+    # Quellen: Weiss/Eastridge JDS 2003; DLG-Merkblatt 369 (Fettfütterung).
+    # Nährstoffe nach Herstellerangaben Ca-Seifen (Palmöl-Basis):
+    #   XL ~830 g/kg TM, ME ~33 MJ/kg TM, Ca ~90 g/kg TM (Ca-Salz-Typ)
+    # Preis: Markt 2026 ca. 1.100-1.300 €/t FM (Standard-Bypass-Fett)
+    dict(
+        id="special_bypass_fat",
+        lid="sp3",
+        name="Bypass-Fett Ca-Seifen (Pansen-geschützt)",
+        konservierung="trocken",
+        group="Energieergänzung",
+        futterart="Konzentratfutter, Trockenkonzentrate, Fettergänzung",
+        forage=False,
+        structural_coproduct=False,
+        dm_frac=0.970,
+        price=1.20,       # €/kg TM; Ca-Seifen-Typ, Markt Apr 2026
+        min_kg=0.0,
+        max_kg=0.50,      # max 500 g TM/d (DLG-Empfehlung: ≤5% der Rations-TM)
+        me=33.0,          # MJ/kg TM — Bypass-Fett, GfE 2023 Koeff. 0,92 × 36 MJ/kg XL
+        sidp=0.0,
+        cp=0.0,
+        ndf=0.0,
+        adf=0.0,
+        st=0.0,
+        bst=0.0,
+        zu=0.0,
+        nfc=0.0,
+        xl=830.0,         # g/kg TM Rohfett (hohe Energiedichte)
+        ca=90.0,          # g/kg TM Ca-Seifen-Typ
+        p=0.0,
+        na=0.0,
+        mg=0.0,
+        k=0.0,
+        dcab=None,
+        edg=None,
+        rmd=None,
+        omdfan1=None,
+        ndfd=None,
+        ge=None,
+        sidlys=0.0,
+        sidmet=0.0,
+        _special="bypass_fat",
+    ),
+    # ---------------------------------------------------------------------------
+    # Protigrain® (hitzebehandeltes Sojaprotein, hoher Pansen-Bypass-Anteil)
+    # ---------------------------------------------------------------------------
+    # Herst.: Agrana Stärke GmbH; Behandlung: Feuchthitze + Trocknung →
+    # ~85% UDP (undegraded dietary protein), geringer EDG-Wert (~15-18%).
+    # Ideal: Deckung des sidP-Bedarfs bei begrenzter Gesamtproteinmenge.
+    # Nährstoffe (Herstellerangaben + eigene Analyse-Mittelwerte 2024/25):
+    #   CP 430 g/kg TM, sidP 360 g/kg TM, ME 13,4 MJ/kg TM
+    # Preise (Paschelke 24.04.2026): Zeitz 240 €/t FM, Drentwede (8-10) 260 €/t FM
+    dict(
+        id="special_protigrain",
+        lid="sp4",
+        name="Protigrain® (Bypass-Sojaprotein, hitzebehandelt)",
+        konservierung="trocken",
+        group="Eiweißergänzung",
+        futterart="Konzentratfutter, Trockenkonzentrate, Proteinergänzung",
+        forage=False,
+        structural_coproduct=False,
+        dm_frac=0.900,
+        price=0.267,      # €/kg TM; 240 €/t FM / 0,90 DM (Zeitz loko Apr 26)
+        min_kg=0.0,
+        max_kg=2.0,       # max 2 kg TM/d (Empfehlung: ≤1,5 kg TM für ausgewogenes AA-Profil)
+        me=13.4,          # MJ/kg TM
+        sidp=360.0,       # g/kg TM — hoher UDP-Anteil (~85%)
+        cp=430.0,         # g/kg TM
+        ndf=115.0,        # g/kg TM
+        adf=55.0,
+        st=85.0,
+        bst=15.0,
+        zu=30.0,
+        nfc=260.0,
+        xl=28.0,
+        ca=3.5,
+        p=6.5,
+        na=1.5,
+        mg=2.5,
+        k=22.0,
+        dcab=None,
+        edg=16.0,         # % EDG (enzymatisch abgebautes Protein im Pansen)
+        rmd=None,
+        omdfan1=None,
+        ndfd=None,
+        ge=None,
+        sidlys=21.0,      # g/kg TM
+        sidmet=5.2,       # g/kg TM
+        _special="protigrain",
+    ),
 ]
 
 
@@ -1285,16 +1402,57 @@ def _feed_pendf_factor(feed: Dict[str, Any]) -> float:
 
 
 def _welfare_objective_coeff(feed: Dict[str, Any]) -> float:
+    """
+    Qualitäts-Koeffizient für Stage-1-LP (linprog minimiert c·x → niedriger Wert = bevorzugt).
+
+    Prinzip: Strukturanforderungen kommen ausschließlich aus LP-Constraints
+    (aNDFomGF ≥ 200, forage_share ≥ 55 %, peNDF-Floor, pabKH-Ceil, CP-Ceil, XL-Ceil).
+    Die Zielfunktion belohnt *Nährstoffeffizienz*, nicht pauschal „Grobfutter".
+
+    Dimensionen:
+      - ME-Dichte-Reward:  hohe Energiedichte → bevorzugt (Maissilage > Grassilage > Stroh)
+      - sidP-Effizienz:    hohes sidP/ME-Verhältnis → bevorzugt (Protein-Effizienz)
+      - peNDF-Reward:      hohe effektive Strukturfaser → leichter bevorzugt (Pansen-pH)
+      - Penalitäten:       pabKH ↑, XL ↑, CP > Zielkorridor ↑, K ↑ → bestraft
+      - Kostenbeitrag:     5 % des normierten Preises als Tiebreaker (nicht dominant)
+    """
+    me = float(feed.get("me") or 0.0)
+    sidp = float(feed.get("sidp") or 0.0)
+    ndf = float(feed.get("ndf") or 0.0)
     pabkh = float(feed.get("st") or 0.0) + float(feed.get("zu") or 0.0) - float(feed.get("bst") or 0.0)
-    pendf_reward = min((float(feed.get("ndf") or 0.0) * _feed_pendf_factor(feed)) / 1000.0, 0.25)
+    xl = float(feed.get("xl") or 0.0)
+    cp = float(feed.get("cp") or 0.0)
+    k = float(feed.get("k") or 0.0)
+    price = float(feed.get("price") or 0.0)
+
     score = 1.0
-    if feed.get("forage"):
-        score -= 0.35
+
+    # ME-Dichte-Reward: Reward pro MJ ME/kg TM (typischer Bereich 7–13 MJ)
+    # Maissilage ~12.3 MJ → -0.246; Grassilage ~10.4 → -0.208; Stroh ~7.0 → -0.140
+    me_reward = min(me / 50.0, 0.26)
+    score -= me_reward
+
+    # sidP-Effizienz-Reward: sidP [g/kg TM] / ME [MJ/kg TM] als Protein-Effizienzkennzahl
+    # Rapsschrot: 265/11.8 = 22.5 → reward 0.18; Grassilage: 88/10.4 = 8.5 → reward 0.07
+    if me > 0.0:
+        sidp_eff = min(sidp / me / 30.0, 0.20)
+        score -= sidp_eff
+
+    # peNDF-Reward: NDF × peNDF-Faktor / 1000 (max 0.15)
+    pendf_reward = min((ndf * _feed_pendf_factor(feed)) / 1000.0, 0.15)
     score -= pendf_reward
-    score += max(pabkh - 140.0, 0.0) / 400.0
-    score += max(float(feed.get("xl") or 0.0) - 30.0, 0.0) / 120.0
-    score += max(float(feed.get("cp") or 0.0) - 155.0, 0.0) / 300.0
-    score += max(float(feed.get("k") or 0.0) - 25.0, 0.0) / 400.0
+
+    # Penalitäten: Risikofaktoren nach DLG 01|2023
+    score += max(pabkh - 140.0, 0.0) / 400.0    # pabKH-Überschuss (Pansenazidose)
+    score += max(xl - 30.0, 0.0) / 120.0          # Rohfett-Überschuss (XL > 40 g/kg)
+    score += max(cp - 155.0, 0.0) / 300.0         # CP im Überschuss → NH3-Verluste
+    score += max(k - 25.0, 0.0) / 400.0           # K-Überschuss (Grastetanie)
+
+    # Kosten-Tiebreaker: 5 % des normierten Preises (€/kg TM / 3.0 als Normierung)
+    # Damit wird bei gleicher Qualität das günstigere Futter leicht bevorzugt,
+    # aber Qualitätsunterschiede dominieren.
+    score += 0.05 * (price / 3.0)
+
     return round(score, 6)
 
 
@@ -2648,6 +2806,127 @@ def _milk_from_supply(
     }
 
 
+# Abgleich UI „Milch aus Protein“ vs. „Milch aus Energie“ (kg Milch ~ l).
+_ADJUST_EP_MAX_PROTEIN_EXCESS_KG = 2.0
+
+
+def _build_ration_adjustment_suggestions(
+    *,
+    status: str,
+    warnings: List[str],
+    relaxation_policy: str,
+    milk_p_excess_forage: Optional[float] = None,
+    milk_p_excess_total: Optional[float] = None,
+) -> List[Dict[str, Any]]:
+    """UI/API: maschinenlesbare Vorschlaege zur Rationsanpassung (Patch fuer Re-Optimierung).
+
+    Prioritaet bleibt bei harten fachlichen Grenzen; Patches lockern hoechstens
+    weiche Solver-Relaxation oder erweitern die Feed-Auswahl.
+    """
+    out: List[Dict[str, Any]] = []
+    seen: Set[str] = set()
+
+    def add(sid: str, title: str, detail: str, apply_patch: Dict[str, Any]) -> None:
+        if sid in seen:
+            return
+        seen.add(sid)
+        out.append({
+            "id": sid,
+            "title": title,
+            "detail": detail,
+            "apply_patch": apply_patch,
+        })
+
+    blob = " ".join(warnings).lower()
+    ep_f = float(milk_p_excess_forage or 0.0)
+    ep_t = float(milk_p_excess_total or 0.0)
+    show_ep_f = ep_f > _ADJUST_EP_MAX_PROTEIN_EXCESS_KG + 1e-6
+    show_ep_t = ep_t > _ADJUST_EP_MAX_PROTEIN_EXCESS_KG + 1e-6
+    need_intervention = bool(warnings) or status != "optimal" or show_ep_f or show_ep_t
+
+    if need_intervention:
+        if relaxation_policy == "strict":
+            add(
+                "relax_standard",
+                "Relaxation auf „standard“",
+                "Lockert ausgewaehlte weiche Nebenbedingungen moderat; kann die Loesbarkeit verbessern.",
+                {"relaxation_policy": "standard"},
+            )
+        if relaxation_policy in ("strict", "standard"):
+            add(
+                "relax_soft",
+                "Relaxation auf „soft“",
+                "Maximale Lockerung weicher Constraints im Solver (Kosten koennen steigen; harte Grenzen bleiben).",
+                {"relaxation_policy": "soft"},
+            )
+
+    if status == "infeasible":
+        if "cp-dichte" in blob or "xl-dichte" in blob or "xl-konflikt" in blob:
+            add(
+                "widen_basket_cp_xl",
+                "Futtermittelkorb erweitern (CP/XL)",
+                "Weitere Grobfutterpositionen mit moderatem Rohprotein/Rohfett waehlen oder stark fetthaltige "
+                "Konzentrate begrenzen; dann erneut optimieren.",
+                {},
+            )
+        if (
+            "me-kapazit" in blob
+            or "me-kapazität" in blob
+            or ("energie" in blob and "kapaz" in blob)
+        ):
+            add(
+                "widen_basket_me",
+                "Energiebasis vergroessern",
+                "Energiereichere Silage/Getreide zulassen oder Ziel-Leistung pruefen; Max-FM-Grenzen lockern.",
+                {},
+            )
+
+    if "saftfutter" in blob or "nasse cop" in blob:
+        add(
+            "reduce_wet_cop",
+            "Saftfutter / nasse CoP begrenzen",
+            "Max-FM bei Rueben, Trebern, Kleinteilen senken oder Trockenkomponenten ergaenzen.",
+            {},
+        )
+
+    if "k:mg" in blob or "tetanie" in blob or "grastetanie" in blob:
+        add(
+            "mg_mineral_pasture",
+            "Weidemineral Mg/Na pruefen",
+            "Mg-betontes Mineral sicherstellen; Weideanteil oder K-Zufuhr bewerten.",
+            {},
+        )
+
+    if show_ep_f:
+        add(
+            "ep_balance_forage",
+            "E/P auf Grundfutter ausgleichen",
+            "Protein-Milchaequivalent liegt ueber dem Energie-Aequivalent (>"
+            f" {_ADJUST_EP_MAX_PROTEIN_EXCESS_KG:g} kg): energiereicheres Grobfutter oder Getreide/Mais "
+            "ergaenzen, stark proteinreiche Grobfutteranteile begrenzen.",
+            {},
+        )
+    if show_ep_t and (not show_ep_f or ep_t > ep_f + 0.05):
+        add(
+            "ep_balance_after_concentrate",
+            "E/P nach Kraftfutter pruefen",
+            "Nach Modell-Konzentrat bleibt ein grosser Protein-Ueberhang: eher energielastiges Kraftfutter "
+            "oder weniger proteinreiches Konzentrat.",
+            {},
+        )
+
+    if need_intervention:
+        add(
+            "wizard_manual",
+            "Eigene Anpassung im Assistenten",
+            "Futtermittel-Auswahl, Max-FM je Position, FAN/Relaxation oder Saisonprofil anpassen, "
+            "dann erneut „Optimieren“.",
+            {},
+        )
+
+    return out
+
+
 def _concentrate_displacement_factor(feeding_type: str, concentrate_dmi_kg: float) -> float:
     """
     Heuristic forage-displacement factor for concentrate supplements.
@@ -3223,6 +3502,11 @@ def _build_response(
         warnings = ["Keine optimale Lösung gefunden – Eingaben prüfen."]
         if hint.get("gaps"):
             warnings += [f"Ursache: {g}" for g in hint["gaps"]]
+        _adj_inf = _build_ration_adjustment_suggestions(
+            status="infeasible",
+            warnings=warnings,
+            relaxation_policy=str(relaxation_policy or _RELAXATION_DEFAULT),
+        )
         return {
             "status": "infeasible",
             "ration_items": [],
@@ -3233,6 +3517,7 @@ def _build_response(
             "dlg_indicators": {},
             "warnings": warnings,
             "feed_suggestions": hint.get("suggestions", []),
+            "ration_adjustment_suggestions": _adj_inf,
             "total_cost_eur_day": None,
             "fan_calibration": fan_calibration,
             "active_policy_profile": policy_profile,
@@ -4014,6 +4299,24 @@ def _build_response(
         feeding_system_config=_fs_cfg_resp,
     )
 
+    _ex_pf = max(
+        0.0,
+        float(forage_only_milk.get("milk_from_protein_kg") or 0.0)
+        - float(forage_only_milk.get("milk_from_energy_kg") or 0.0),
+    )
+    _ex_sup = max(
+        0.0,
+        float(supplemented_milk.get("milk_from_protein_kg") or 0.0)
+        - float(supplemented_milk.get("milk_from_energy_kg") or 0.0),
+    )
+    ration_adjustment_suggestions = _build_ration_adjustment_suggestions(
+        status="optimal",
+        warnings=warnings,
+        relaxation_policy=str(relaxation_policy or _RELAXATION_DEFAULT),
+        milk_p_excess_forage=_ex_pf,
+        milk_p_excess_total=_ex_sup,
+    )
+
     return {
         "status": "optimal",
         "objective_value": round(_f(result.fun), 4),
@@ -4050,6 +4353,7 @@ def _build_response(
         "sara_safety_reopt": lp_out.get("_sara_reopt") or {"triggered": False},
         "warnings": warnings,
         "feed_suggestions": [],
+        "ration_adjustment_suggestions": ration_adjustment_suggestions,
         "fan_calibration": fan_calibration,
         "active_policy_profile": policy_profile,
         "policy_profile_targets": policy_profile_targets_dict,
@@ -4545,6 +4849,7 @@ def _optimize_internal(
     feed_ids: Optional[List[str]] = None,
     price_overrides: Optional[Dict[str, float]] = None,
     max_tm_overrides: Optional[Dict[str, float]] = None,
+    min_tm_overrides: Optional[Dict[str, float]] = None,
     runtime_options: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     req = _gfe_requirements(profile)
@@ -4553,14 +4858,6 @@ def _optimize_internal(
     # FAN-MODE-V1: alle Laufzeit-Optionen zentral aufloesen
     if runtime_options is None:
         runtime_options = _resolve_runtime_options(profile)
-
-    # Betriebseigene Grundfuttermittel aus GrundfutterAnalysen einmischen
-    if custom_feeds:
-        for cf in custom_feeds:
-            if cf.get("_source") == "gfa":
-                feeds.append(cf)
-            else:
-                feeds.append(cf)
 
     # Preisüberschreibungen anwenden
     if price_overrides:
@@ -4576,10 +4873,24 @@ def _optimize_internal(
             for f in feeds
         ]
 
+    # Mindestmengen (kg TM/Tag) z. B. aus Min-FM-Grenzen der UI
+    if min_tm_overrides:
+        feeds = [
+            {**f, "min_kg": float(min_tm_overrides[f["id"]])} if f["id"] in min_tm_overrides else f
+            for f in feeds
+        ]
+
     # Filter auf ausgewählte Feed-IDs
     if feed_ids:
         id_set = set(feed_ids)
         feeds = [f for f in feeds if f["id"] in id_set]
+
+    # Betriebseigene Grundfuttermittel / Custom Feeds NACH dem Feed-ID-Filter einmischen.
+    # Wichtig: custom_feeds werden immer hinzugefügt, unabhängig von feed_ids,
+    # da sie betriebsspezifisch sind und nicht in der DLG-Datenbank stehen.
+    if custom_feeds:
+        for cf in custom_feeds:
+            feeds.append(cf)
 
     # PMR+Weide: Weidemineral automatisch als Pflichtbaustein fuehren,
     # damit das K/Mg-Antagonismus-Risiko (DLG 417 / DLG 01|2023) sauber abgedeckt ist.
@@ -5023,6 +5334,23 @@ def _demo_profile() -> Dict[str, Any]:
         "lactation_stage_days": 100,
         "parity": 2,
         "production_group": "Hochleistung",
+        # Kuratierte Feed-Auswahl für Demo — praxisübliche TMR norddeutscher Milchviehbetriebe.
+        # Verhindert, dass der LP-Solver zu günstige Nassnebenprodukte dominieren lässt.
+        # Kuratierter Feed-Set: typische Norddeutsche Milchvieh-TMR ohne
+        # Nassnebenprodukt-Dominanz. Mais Korn entfernt (XL-Konflikt bei vollem
+        # Stärkeportfolio). Grassilage-Anteil durch Max-Overrides begrenzt.
+        "_demo_feed_ids": [
+            "dlg_10490020",  # Mais, Ganzpflanze, hohe OMD (siliert) — TMR-Backbone
+            "dlg_10500020",  # Mais, Ganzpflanze, mittlere OMD (siliert)
+            "dlg_10320020",  # Gras, gute OMD (siliert)
+            "dlg_10150030",  # Gras, gute OMD (Heu)
+            "dlg_10610000",  # Stroh, Gerste — Struktursicherung / peNDF
+            "dlg_30970130",  # Raps, Extraktionsschrot — Proteinträger
+            "dlg_31050130",  # Soja, Extraktionsschrot — sidLys
+            "dlg_30820030",  # Gerste, Samen — Stärke/Energie
+            "dlg_20750012",  # Rübenpressschnitzel — faserhaltiger Saftfutter-Beitrag
+            "dlg_41290030",  # Zuckerrüben-Melasse — Schmackhaftigkeit/DCAB
+        ],
     }
 
 
@@ -5085,56 +5413,57 @@ _POLICY_PROFILES = (
 #   ndf_kgdm_min:       Gesamt-aNDFom-Mindestdichte [g/kg TM]
 # ---------------------------------------------------------------------------
 _POLICY_PROFILE_TARGETS: Dict[str, Dict[str, Any]] = {
-    # Generische API-Profile: gleicher Referenzkorridor wie Mittellaktation (Tab. 14),
-    # bis der Client explizit eine Leistungsstufe setzt.
+    # ME-Dichte-Korridore in MJ ME/kg TM (GfE-System).
+    # Umrechnung aus DLG 01|2025 NEL-Werten: ME = NEL / k_l (k_l ≈ 0,62 Laktation / 0,57 TS).
+    # Beispiel Mittellaktation: NEL 6,8 MJ → ME ≈ 11,0 MJ/kg TM.
     "tmr_standard": {
-        "me_kgdm_min": 6.60, "me_kgdm_max": 7.00,
-        "cp_kgdm_min": 140.0, "cp_kgdm_max": 160.0,
+        "me_kgdm_min": 10.50, "me_kgdm_max": 11.50,
+        "cp_kgdm_min": 140.0, "cp_kgdm_max": 165.0,
         "sidp_kgdm_min": 90.0,
         "pabkh_max": 200.0, "xl_kgdm_max": 38.0,
-        "forage_share_min_pct": 60.0,
+        "forage_share_min_pct": 55.0,
         "andfom_gf_cop_min": 220.0, "ndf_kgdm_min": 320.0,
         "label": "TMR Standard (entspricht Tab. 14 Mittellaktation, DLG 01|2025)",
     },
     "pmr_standard": {
-        "me_kgdm_min": 6.60, "me_kgdm_max": 7.00,
-        "cp_kgdm_min": 140.0, "cp_kgdm_max": 160.0,
+        "me_kgdm_min": 10.50, "me_kgdm_max": 11.50,
+        "cp_kgdm_min": 140.0, "cp_kgdm_max": 165.0,
         "sidp_kgdm_min": 90.0,
         "pabkh_max": 200.0, "xl_kgdm_max": 38.0,
-        "forage_share_min_pct": 60.0,
+        "forage_share_min_pct": 55.0,
         "andfom_gf_cop_min": 220.0, "ndf_kgdm_min": 320.0,
         "label": "PMR Standard (Stall; Referenz wie Tab. 14 Mittellaktation)",
     },
     "pmr_pasture_spring": {
-        "me_kgdm_min": 6.60, "me_kgdm_max": 7.00,
-        "cp_kgdm_min": 140.0, "cp_kgdm_max": 160.0,
+        "me_kgdm_min": 10.50, "me_kgdm_max": 11.80,
+        "cp_kgdm_min": 140.0, "cp_kgdm_max": 170.0,
         "sidp_kgdm_min": 90.0,
         "pabkh_max": 195.0, "xl_kgdm_max": 38.0,
         "forage_share_min_pct": 58.0,
-        "andfom_gf_cop_min": 220.0, "ndf_kgdm_min": 320.0,
+        "andfom_gf_cop_min": 200.0, "ndf_kgdm_min": 300.0,
         "label": "PMR+Weide Fruehjahr (junges Grün, Tab. 14 angepasst, konserv. pabKH)",
     },
     "pmr_pasture_summer": {
-        "me_kgdm_min": 6.60, "me_kgdm_max": 7.00,
-        "cp_kgdm_min": 140.0, "cp_kgdm_max": 160.0,
+        "me_kgdm_min": 10.50, "me_kgdm_max": 11.80,
+        "cp_kgdm_min": 140.0, "cp_kgdm_max": 165.0,
         "sidp_kgdm_min": 90.0,
         "pabkh_max": 200.0, "xl_kgdm_max": 38.0,
         "forage_share_min_pct": 58.0,
-        "andfom_gf_cop_min": 220.0, "ndf_kgdm_min": 320.0,
+        "andfom_gf_cop_min": 200.0, "ndf_kgdm_min": 300.0,
         "label": "PMR+Weide Sommer (Tab. 14 Mittellaktation, Weideanteil im PMR)",
     },
     "pmr_pasture_autumn": {
-        "me_kgdm_min": 6.30, "me_kgdm_max": 6.90,
-        "cp_kgdm_min": 135.0, "cp_kgdm_max": 155.0,
+        "me_kgdm_min": 10.00, "me_kgdm_max": 11.20,
+        "cp_kgdm_min": 135.0, "cp_kgdm_max": 160.0,
         "sidp_kgdm_min": 85.0,
         "pabkh_max": 185.0, "xl_kgdm_max": 36.0,
-        "forage_share_min_pct": 62.0,
+        "forage_share_min_pct": 60.0,
         "andfom_gf_cop_min": 225.0, "ndf_kgdm_min": 330.0,
         "label": "PMR+Weide Herbst (nach Tab. 14 Altmelker verschoben, hoehere Faserziele)",
     },
     "tmr_fresh_lactation": {
-        "me_kgdm_min": 7.00, "me_kgdm_max": 7.40,
-        "cp_kgdm_min": 160.0, "cp_kgdm_max": 175.0,
+        "me_kgdm_min": 11.50, "me_kgdm_max": 12.50,
+        "cp_kgdm_min": 160.0, "cp_kgdm_max": 185.0,
         "sidp_kgdm_min": 105.0,
         "pabkh_max": 210.0, "xl_kgdm_max": 42.0,
         "forage_share_min_pct": 50.0,
@@ -5142,8 +5471,8 @@ _POLICY_PROFILE_TARGETS: Dict[str, Dict[str, Any]] = {
         "label": "Frischmelker (0-60 LT, DLG 01|2025 Tab. 13)",
     },
     "tmr_high_yield": {
-        "me_kgdm_min": 7.00, "me_kgdm_max": 7.20,
-        "cp_kgdm_min": 155.0, "cp_kgdm_max": 170.0,
+        "me_kgdm_min": 11.00, "me_kgdm_max": 12.00,
+        "cp_kgdm_min": 155.0, "cp_kgdm_max": 180.0,
         "sidp_kgdm_min": 100.0,
         "pabkh_max": 210.0, "xl_kgdm_max": 40.0,
         "forage_share_min_pct": 55.0,
@@ -5151,25 +5480,25 @@ _POLICY_PROFILE_TARGETS: Dict[str, Dict[str, Any]] = {
         "label": "Hochleistung (>=35 kg Milch, DLG 01|2025 Tab. 13)",
     },
     "tmr_mid_yield": {
-        "me_kgdm_min": 6.60, "me_kgdm_max": 7.00,
-        "cp_kgdm_min": 140.0, "cp_kgdm_max": 160.0,
+        "me_kgdm_min": 10.50, "me_kgdm_max": 11.50,
+        "cp_kgdm_min": 140.0, "cp_kgdm_max": 165.0,
         "sidp_kgdm_min": 90.0,
         "pabkh_max": 200.0, "xl_kgdm_max": 38.0,
-        "forage_share_min_pct": 60.0,
+        "forage_share_min_pct": 58.0,
         "andfom_gf_cop_min": 220.0, "ndf_kgdm_min": 320.0,
         "label": "Mittellaktation (25-34 kg Milch, DLG 01|2025 Tab. 14)",
     },
     "tmr_late_lactation": {
-        "me_kgdm_min": 6.30, "me_kgdm_max": 6.80,
-        "cp_kgdm_min": 130.0, "cp_kgdm_max": 150.0,
+        "me_kgdm_min": 10.00, "me_kgdm_max": 11.00,
+        "cp_kgdm_min": 130.0, "cp_kgdm_max": 155.0,
         "sidp_kgdm_min": 80.0,
         "pabkh_max": 180.0, "xl_kgdm_max": 35.0,
-        "forage_share_min_pct": 65.0,
+        "forage_share_min_pct": 62.0,
         "andfom_gf_cop_min": 230.0, "ndf_kgdm_min": 340.0,
         "label": "Altmelker (<25 kg Milch, DLG 01|2025 Tab. 14)",
     },
     "tmr_dry_cow": {
-        "me_kgdm_min": 5.80, "me_kgdm_max": 6.20,
+        "me_kgdm_min": 9.00, "me_kgdm_max": 10.00,
         "cp_kgdm_min": 115.0, "cp_kgdm_max": 135.0,
         "sidp_kgdm_min": 60.0,
         "pabkh_max": 140.0, "xl_kgdm_max": 30.0,
@@ -5178,11 +5507,11 @@ _POLICY_PROFILE_TARGETS: Dict[str, Dict[str, Any]] = {
         "label": "Trockensteher (DLG 01|2025 Tab. 15)",
     },
     "tmr_transit": {
-        "me_kgdm_min": 6.30, "me_kgdm_max": 6.70,
-        "cp_kgdm_min": 135.0, "cp_kgdm_max": 155.0,
+        "me_kgdm_min": 10.00, "me_kgdm_max": 11.00,
+        "cp_kgdm_min": 135.0, "cp_kgdm_max": 160.0,
         "sidp_kgdm_min": 80.0,
         "pabkh_max": 170.0, "xl_kgdm_max": 35.0,
-        "forage_share_min_pct": 65.0,
+        "forage_share_min_pct": 62.0,
         "andfom_gf_cop_min": 260.0, "ndf_kgdm_min": 350.0,
         "label": "Transit / Anfuetterung (DLG 01|2025 Tab. 15)",
     },
@@ -5699,6 +6028,7 @@ class _OptimizeFromProfileBody(BaseModel):
     custom_feeds: Optional[List[Dict[str, Any]]] = None  # Betriebseigene Werte
     price_overrides: Optional[Dict[str, float]] = None   # Preisüberschreibung
     max_tm_overrides: Optional[Dict[str, float]] = None  # Max kg TM/Tag je Feed (saisonale Limits)
+    min_tm_overrides: Optional[Dict[str, float]] = None  # Min kg TM/Tag je Feed (UI Min-FM)
 
     # FAN-MODE-V1 additive Felder (Spec §4 freigegeben 2026-04-21)
     fan_options: Optional[_FanOptions] = None          # GfE-2023 FAN1/FANi-Bewertungsoptionen
@@ -5908,6 +6238,7 @@ async def optimize_from_profile(
                 feed_ids=body.feeds,
                 price_overrides=body.price_overrides,
                 max_tm_overrides=body.max_tm_overrides,
+                min_tm_overrides=body.min_tm_overrides,
                 runtime_options=runtime_options,
             )
             return JSONResponse(content=result)
@@ -5929,7 +6260,55 @@ async def optimize_demo(
 ):
     if not get_rations_base_url():
         try:
-            result = _optimize_internal(_demo_profile())
+            demo = _demo_profile()
+            demo_feed_ids = demo.pop("_demo_feed_ids", None)
+            # Praxistypische Mindest-/Höchstmengen für TMR Hochleistung (Musterbetrieb).
+            # Ziel: Maissilage als TMR-Rückgrat, Grassilage als Ergänzung.
+            demo_min = {
+                "dlg_10490020": 5.0,   # Maissilage hohe OMD ≥ 5 kg TM (TMR-Backbone)
+                "dlg_30970130": 2.0,   # Raps-Extraktionsschrot ≥ 2 kg TM (Protein/CP)
+                "dlg_31050130": 0.8,   # Sojaschrot ≥ 0.8 kg TM (sidP, Lys)
+                "dlg_30820030": 2.5,   # Gerste ≥ 2.5 kg TM (Stärke-Quelle)
+            }
+            demo_max = {
+                "dlg_10490020": 9.0,   # Maissilage hohe OMD ≤ 9 kg TM
+                "dlg_10500020": 3.0,   # Maissilage mittlere OMD ≤ 3 kg TM
+                "dlg_10320020": 3.5,   # Grassilage gute OMD ≤ 3.5 kg TM
+                "dlg_10150030": 1.5,   # Heu gute OMD ≤ 1.5 kg TM
+                "dlg_10610000": 2.0,   # Stroh Gerste ≤ 2 kg TM (peNDF-Puffer)
+                "dlg_20750012": 2.0,   # Rübenpressschnitzel ≤ 2 kg TM
+                "dlg_41290030": 0.5,   # Melasse ≤ 0.5 kg TM
+            }
+            # Mineralfutter Milchvieh: Nicht im DLG-FWT enthalten → als Custom-Feed.
+            # Typische Zusammensetzung für Laktation (Ca:Mg 2:1 Typ, 250g/d Gabe).
+            demo_custom: List[Dict[str, Any]] = [{
+                "id": "demo_mineralfutter",
+                "name": "Mineralfutter Milchvieh (Demo)",
+                "group": "Mineralfutter",
+                "futterart": "Mineralien/Zusatzstoffe",
+                "forage": False,
+                "structural_coproduct": False,
+                "dm_frac": 0.970,
+                "price": 1.80,     # EUR/kg TM
+                "min_kg": 0.05,    # min. 50 g TM/d als Pflichtbaustein
+                "max_kg": 0.25,    # max 250 g TM/d
+                "me": 0.0, "sidp": 0.0, "cp": 0.0,
+                "ndf": 0.0, "adf": 0.0, "st": 0.0,
+                "bst": 0.0, "zu": 0.0, "nfc": 0.0,
+                "xl": 0.0,
+                "ca": 150.0,   # g/kg TM — typisches Laktations-Mineralfutter
+                "p": 50.0,
+                "na": 80.0,
+                "mg": 180.0,   # g/kg TM — Mg-reich für Grastetanie-Prophylaxe
+                "k": 0.0,
+                "sidlys": 0.0, "sidmet": 0.0,
+            }]
+            result = _optimize_internal(
+                demo, feed_ids=demo_feed_ids,
+                custom_feeds=demo_custom,
+                min_tm_overrides=demo_min,
+                max_tm_overrides=demo_max,
+            )
             return JSONResponse(content=result)
         except Exception as exc:
             logger.exception("Demo-Optimierung fehlgeschlagen: %s", exc)

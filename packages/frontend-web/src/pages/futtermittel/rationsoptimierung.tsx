@@ -69,6 +69,8 @@ import {
   type ConcentrateCallUp,
   type RationBlocks,
   type MixingProtocol,
+  type RationAdjustmentApplyPatch,
+  type RationAdjustmentSuggestion,
 } from '@/lib/api/rations-optimization'
 
 // ---------------------------------------------------------------------------
@@ -93,6 +95,28 @@ const C = {
   warn: '#D97706',
 } as const
 
+/** Beratungs-Orientierung: max. Mehr-Menge „Milch aus Protein“ vs. „Milch aus Energie“ (kg Milch ≈ l). */
+const MILK_EP_BALANCE_MAX_PROTEIN_EXCESS_KG = 2
+
+type ForagePerformancePayload = NonNullable<OptimizationResult['forage_performance']>
+
+function getMilkEpExcessKg(fp: ForagePerformancePayload): { ist: number; neu: number } {
+  const fo = fp.forage_only
+  const sup = fp.supplemented
+  const eIst = Number(fo.milk_from_energy_kg ?? 0)
+  const pIst = Number(fo.milk_from_protein_kg ?? 0)
+  const eNeu = Number(sup.milk_from_energy_kg ?? 0)
+  const pNeu = Number(sup.milk_from_protein_kg ?? 0)
+  return {
+    ist: Math.max(0, pIst - eIst),
+    neu: Math.max(0, pNeu - eNeu),
+  }
+}
+
+function epBalanceWithinGuidance(excessKg: number): boolean {
+  return excessKg <= MILK_EP_BALANCE_MAX_PROTEIN_EXCESS_KG + 1e-6
+}
+
 // ---------------------------------------------------------------------------
 // Static Data
 // ---------------------------------------------------------------------------
@@ -115,6 +139,31 @@ const GROUPS: CowGroup[] = [
 
 type OptMode = 'Kosten minimieren' | 'IOFC maximieren' | 'Leistung absichern' | 'Tiergesundheit'
 
+/** Relative Gewichtung der Zielkriterien (0–100), UI / spätere Solver-Anbindung */
+type PriorityWeights = {
+  cost: number
+  performance: number
+  rumen: number
+  health: number
+  simplicity: number
+}
+
+const DEFAULT_PRIORITY_WEIGHTS: PriorityWeights = {
+  cost: 80,
+  performance: 60,
+  rumen: 70,
+  health: 65,
+  simplicity: 40,
+}
+
+const PRIORITY_SLIDER_ROWS: { key: keyof PriorityWeights; label: string }[] = [
+  { key: 'cost', label: 'Kosten (Wirtschaftlichkeit)' },
+  { key: 'performance', label: 'Leistung (Milch kg)' },
+  { key: 'rumen', label: 'Pansensicherheit (Struktur)' },
+  { key: 'health', label: 'Tiergesundheit (Proxys)' },
+  { key: 'simplicity', label: 'Einfachheit (Management)' },
+]
+
 type WizardData = {
   group: CowGroup
   milkYield: number
@@ -127,6 +176,8 @@ type WizardData = {
   customFeeds: GrundfutterAnalyse[]
   compoundFeeds: UploadedCompoundFeed[]
   feedMaxFm: Record<string, number>  // feed_id → max kg FM/Tag (0 = unbegrenzt)
+  /** Min kg FM/Tag je Feed; fehlend/leer = keine Untergrenze */
+  feedMinFm?: Record<string, number>
   // FAN-MODE-V1 (GfE 2023): Bewertungsmodus + Solver-Relaxation (Spec §4/§6/§8)
   fanMode: FanMode
   fanReference: number              // nur relevant bei fanMode === 'reference'
@@ -135,6 +186,28 @@ type WizardData = {
   // DLG 01|2025 Tab. 13-15: optionale Leistungs-/Physiologiestufe.
   // null = Backend-Auto-Mapping aus Fuetterungstyp/Saison.
   policyProfile: PolicyProfile | null
+  /** Schritt 3: Prioritäts-Gewichte (0–100), Schieberegler */
+  priorityWeights?: PriorityWeights
+}
+
+function applyRationPatch(wd: WizardData, patch: RationAdjustmentApplyPatch): WizardData {
+  const next: WizardData = { ...wd }
+  if (patch.relaxation_policy != null) next.relaxationPolicy = patch.relaxation_policy
+  if (patch.policy_profile !== undefined) next.policyProfile = patch.policy_profile
+  if (patch.add_feed_ids?.length) {
+    const s = new Set(next.selectedFeedIds)
+    for (const id of patch.add_feed_ids) s.add(id)
+    next.selectedFeedIds = s
+  }
+  return next
+}
+
+function patchHasSolverKeys(patch: RationAdjustmentApplyPatch): boolean {
+  return (
+    patch.relaxation_policy != null
+    || patch.policy_profile !== undefined
+    || (patch.add_feed_ids?.length ?? 0) > 0
+  )
 }
 
 // localStorage-Key für persistierte Feed-Auswahl
@@ -144,6 +217,7 @@ interface PersistedFeedSelection {
   selectedFeedIds: string[]
   customFeedIds: string[]  // GFA-ids (müssen beim Laden neu abgefragt werden)
   feedMaxFm: Record<string, number>
+  feedMinFm: Record<string, number>
   savedAt: string
 }
 
@@ -201,6 +275,36 @@ function compoundFeedToDisplayFeed(doc: UploadedCompoundFeed): FeedIngredient & 
     _compoundId: String(optimizerFeed.id ?? `compound_${doc.product_name}`),
     _docName: doc.source_filename,
   }
+}
+
+function buildFeedDmById(baseFeeds: FeedIngredient[], wd: WizardData): Map<string, number> {
+  const m = new Map<string, number>()
+  for (const f of baseFeeds) m.set(f.id, f.dm_frac)
+  for (const gfa of wd.customFeeds ?? []) {
+    const d = gfaToDisplayFeed(gfa)
+    m.set(d.id, d.dm_frac)
+  }
+  for (const doc of wd.compoundFeeds ?? []) {
+    const d = compoundFeedToDisplayFeed(doc)
+    m.set(d.id, d.dm_frac)
+  }
+  return m
+}
+
+/** DLG + Betriebsanalysen + Lieferschein-Rezepturen: gleiche Keys wie `ration_items[].feed_id` für ME/sidP-Spalten. */
+function buildFeedLookupMap(baseFeeds: FeedIngredient[], wd: WizardData | null): Map<string, FeedIngredient> {
+  const m = new Map<string, FeedIngredient>()
+  for (const f of baseFeeds) m.set(f.id, f)
+  if (!wd) return m
+  for (const gfa of wd.customFeeds ?? []) {
+    const d = gfaToDisplayFeed(gfa)
+    m.set(d.id, d)
+  }
+  for (const doc of wd.compoundFeeds ?? []) {
+    const d = compoundFeedToDisplayFeed(doc)
+    m.set(d.id, d)
+  }
+  return m
 }
 
 type AmpelState = 'ok' | 'warn' | 'error'
@@ -261,6 +365,10 @@ function ForagePerformancePanel({
   const performance = result?.forage_performance
   if (!performance) return null
 
+  const epEx = getMilkEpExcessKg(performance)
+  const epIstOk = epBalanceWithinGuidance(epEx.ist)
+  const epNeuOk = epBalanceWithinGuidance(epEx.neu)
+
   const rows = [
     {
       label: 'Milch aus Energie Grundfutter',
@@ -290,7 +398,7 @@ function ForagePerformancePanel({
             Grundfutterleistung {performance.feeding_type}
           </p>
           <p className="text-sm font-semibold" style={{ color: C.dark }}>
-            IST aus Grundfutter, SOLL aus Zielleistung, NEU nach empfohlenem Kraftfutter
+            IST = nur Grobfutter; Ziel (Profil) = gewünschte Leistung; NEU = nach Modell-Kraftfutter und Verdrängung
           </p>
         </div>
         <div className="text-right text-xs" style={{ color: C.muted }}>
@@ -299,15 +407,65 @@ function ForagePerformancePanel({
         </div>
       </div>
 
+      {!compact && (
+        <div className="rounded-lg border px-3 py-2.5 text-[11px] leading-relaxed space-y-1.5" style={{ borderColor: C.border, background: '#F8FAFC', color: C.muted }}>
+          <p>
+            <span className="font-semibold" style={{ color: C.dark }}>Priorität:</span>{' '}
+            Zuerst fachliche und tiergesundheitliche Grenzen (GfE/DLG, Aufnahme, Struktur). Wirtschaftliche Optimierung nur innerhalb dieser Grenzen — niedrigere Kosten ersetzen keine sichere Fütterung.
+          </p>
+          <p>
+            <span className="font-semibold" style={{ color: C.dark }}>Ausgewogene Ration:</span>{' '}
+            „Milch aus Energie“ und „Milch aus Protein“ sollten ähnlich liegen. Orientierung: Mehrleistung auf Protein-Seite höchstens{' '}
+            <span className="font-mono font-semibold" style={{ color: C.dark }}>{MILK_EP_BALANCE_MAX_PROTEIN_EXCESS_KG} kg</span>{' '}
+            (≈{' '}
+            <span className="font-mono font-semibold" style={{ color: C.dark }}>{MILK_EP_BALANCE_MAX_PROTEIN_EXCESS_KG} l</span>
+            ) über der Energie-Seite; darüber bitte bewerten.
+          </p>
+        </div>
+      )}
+
+      {compact && (
+        <p className="text-[10px] leading-snug" style={{ color: C.muted }}>
+          E/P-Abgleich: Überhang Protein vs. Energie max. {MILK_EP_BALANCE_MAX_PROTEIN_EXCESS_KG} kg (≈ l). Ziel-Spalte = Profil-Leistung.
+        </p>
+      )}
+
       <div className="grid gap-2">
+        <div className="grid grid-cols-[1.7fr_0.8fr_0.8fr_0.8fr] gap-2 px-1 text-[10px] font-bold uppercase tracking-wide" style={{ color: C.muted }}>
+          <span>Kennzahl</span>
+          <span className="text-right">IST</span>
+          <span className="text-right">Ziel (Profil)</span>
+          <span className="text-right">NEU</span>
+        </div>
         {rows.map((row) => (
           <div key={row.label} className="grid grid-cols-[1.7fr_0.8fr_0.8fr_0.8fr] gap-2 rounded-lg border px-3 py-2 text-xs" style={{ borderColor: C.border, background: '#F9FAFB' }}>
             <div className="font-semibold" style={{ color: C.dark }}>{row.label}</div>
-            <div className="text-right" style={{ color: C.muted }}>IST {row.ist}</div>
-            <div className="text-right" style={{ color: C.deltaText }}>SOLL {row.soll}</div>
-            <div className="text-right font-bold" style={{ color: C.accent }}>NEU {row.neu}</div>
+            <div className="text-right" style={{ color: C.muted }}>{row.ist}</div>
+            <div className="text-right" style={{ color: C.deltaText }}>{row.soll}</div>
+            <div className="text-right font-bold" style={{ color: C.accent }}>{row.neu}</div>
           </div>
         ))}
+        <div
+          className="grid grid-cols-[1.7fr_0.8fr_0.8fr_0.8fr] gap-2 rounded-lg border px-3 py-2 text-xs"
+          style={{
+            borderColor: epIstOk && epNeuOk ? C.border : C.deltaBorder,
+            background: epIstOk && epNeuOk ? '#F0FDF4' : C.deltaBg,
+          }}
+        >
+          <div className="font-semibold" style={{ color: C.dark }}>
+            Mehr „Milch aus Protein“ vs. „Milch aus Energie“
+            <span className="block font-normal text-[10px] font-mono mt-0.5" style={{ color: C.muted }}>
+              Orientierung ≤ {MILK_EP_BALANCE_MAX_PROTEIN_EXCESS_KG} kg (≈ l)
+            </span>
+          </div>
+          <div className="text-right font-mono" style={{ color: epIstOk ? C.success : C.deltaText }}>
+            {fmt(epEx.ist, 1)} kg{!epIstOk ? ' ⚠' : ''}
+          </div>
+          <div className="text-right font-mono" style={{ color: C.muted }}>≤ {MILK_EP_BALANCE_MAX_PROTEIN_EXCESS_KG}</div>
+          <div className="text-right font-bold font-mono" style={{ color: epNeuOk ? C.accent : C.deltaText }}>
+            {fmt(epEx.neu, 1)} kg{!epNeuOk ? ' ⚠' : ''}
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
@@ -324,6 +482,131 @@ function ForagePerformancePanel({
           <div className="font-bold" style={{ color: C.dark }}>{fmt(performance.supplemented.forage_displacement_factor, 2)}</div>
         </div>
       </div>
+    </div>
+  )
+}
+
+function RationWarningAdjustmentsPanel({
+  result,
+  wizardData,
+  isOptimizing,
+  onApplySuggestion,
+  onGoWizard,
+  onReoptimizeSame,
+}: {
+  result: OptimizationResult | null
+  wizardData: WizardData | null
+  isOptimizing: boolean
+  onApplySuggestion: (patch: RationAdjustmentApplyPatch) => void
+  onGoWizard: () => void
+  onReoptimizeSame: () => void
+}) {
+  if (!result) return null
+  const warn = result.warnings ?? []
+  const raw = result.ration_adjustment_suggestions
+  const suggestions: RationAdjustmentSuggestion[] =
+    raw && raw.length > 0
+      ? raw
+      : warn.length > 0
+        ? [
+            {
+              id: 'fallback_wizard',
+              title: 'Eigene Anpassung im Assistenten',
+              detail:
+                'Backend liefert noch keine strukturierten Vorschläge: bitte Futtermittel, Grenzen und Relaxation im Assistenten prüfen und erneut optimieren.',
+              apply_patch: {},
+            },
+          ]
+        : []
+
+  if (warn.length === 0 && suggestions.length === 0) return null
+
+  return (
+    <div
+      className="p-3 rounded-lg border text-[12px] space-y-3"
+      style={{ background: C.deltaBg, borderColor: C.deltaBorder, color: C.deltaText }}
+    >
+      <div className="text-[11px] font-bold uppercase tracking-wider">Hinweise &amp; Rationsanpassung</div>
+      <p className="text-[10px] leading-snug opacity-90">
+        Vorschlag übernehmen wendet den Patch an und startet die Optimierung erneut. Eigene Anpassung öffnet den Assistenten.
+        {wizardData ? ' Ohne Änderung erneut rechnen ist nur sinnvoll nach manuellen Schritten.' : ' Ohne Assistenten-Daten (z. B. reine Demo) zuerst „Neue Ration“ oder Demo mit Profil nutzen.'}
+      </p>
+      {warn.length > 0 && (
+        <ul className="space-y-1">
+          {warn.map((w, i) => (
+            <li key={i} className="flex items-start gap-1.5">
+              <AlertTriangle size={12} className="mt-0.5 flex-shrink-0" />
+              <span>{w}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+      {suggestions.length > 0 && (
+        <div className="space-y-2 border-t pt-2" style={{ borderColor: C.deltaBorder }}>
+          <div className="text-[10px] font-bold uppercase" style={{ color: C.muted }}>
+            Vorschläge zur Anpassung
+          </div>
+          {suggestions.map((s) => {
+            const hasPatch = patchHasSolverKeys(s.apply_patch)
+            return (
+              <div
+                key={s.id}
+                className="rounded-md border p-2 space-y-2"
+                style={{ borderColor: C.deltaBorder, background: 'rgba(255,255,255,0.65)' }}
+              >
+                <div className="font-semibold" style={{ color: C.dark }}>
+                  {s.title}
+                </div>
+                <div className="text-[11px] leading-snug" style={{ color: '#374151' }}>
+                  {s.detail}
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    disabled={isOptimizing}
+                    onClick={() => {
+                      if (!wizardData) {
+                        onGoWizard()
+                        return
+                      }
+                      if (hasPatch) onApplySuggestion(s.apply_patch)
+                      else onGoWizard()
+                    }}
+                    className="px-3 py-1.5 rounded text-xs font-bold text-white disabled:opacity-40"
+                    style={{ background: C.accent }}
+                  >
+                    {!wizardData
+                      ? 'Zum Assistenten'
+                      : hasPatch
+                        ? 'Vorschlag übernehmen & neu optimieren'
+                        : 'Zum Assistenten (manuell anpassen)'}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isOptimizing}
+                    onClick={onGoWizard}
+                    className="px-3 py-1.5 rounded text-xs font-semibold border transition-colors hover:bg-white/80"
+                    style={{ borderColor: C.border, color: C.dark }}
+                  >
+                    Eigene Anpassung
+                  </button>
+                  {wizardData && (
+                    <button
+                      type="button"
+                      disabled={isOptimizing}
+                      onClick={onReoptimizeSame}
+                      className="px-3 py-1.5 rounded text-xs font-semibold border transition-colors hover:bg-white/80"
+                      style={{ borderColor: C.border, color: C.dark }}
+                    >
+                      Nur erneut optimieren
+                    </button>
+                  )}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }
@@ -1195,42 +1478,57 @@ function GfaPickerModal({
 function Wizard({
   feeds,
   feedsLoading,
+  resumeFrom,
+  initialStep = 1,
   onComplete,
   onCancel,
 }: {
   feeds: FeedIngredient[]
   feedsLoading: boolean
+  resumeFrom?: WizardData | null
+  initialStep?: number
   onComplete: (data: WizardData) => void
   onCancel: () => void
 }) {
-  const [step, setStep] = useState(1)
-  const [group, setGroup] = useState<CowGroup>(GROUPS[0])
-  const [milkYield, setMilkYield] = useState(38.0)
-  const [fatPercent, setFatPercent] = useState(4.1)
-  const [proteinPercent, setProteinPercent] = useState(3.5)
-  const [dmiTarget, setDmiTarget] = useState(24.0)
-  const [feedingType, setFeedingType] = useState<FeedingMode>('TMR')
-  const [mode, setMode] = useState<OptMode>('Kosten minimieren')
-  const [fanMode, setFanMode] = useState<FanMode>(FAN_DEFAULTS.mode)
-  const [fanReference, setFanReference] = useState<number>(FAN_REFERENCE_PRESETS[1]) // 3.0 als mittlerer Preset
-  const [relaxationPolicy, setRelaxationPolicy] = useState<RelaxationPolicy>(FAN_DEFAULTS.relaxation_policy)
-  const [seasonProfile, setSeasonProfile] = useState<SeasonProfile | null>(null)
+  const [step, setStep] = useState(() => initialStep)
+  const [group, setGroup] = useState<CowGroup>(() => resumeFrom?.group ?? GROUPS[0])
+  const [milkYield, setMilkYield] = useState(() => resumeFrom?.milkYield ?? 38.0)
+  const [fatPercent, setFatPercent] = useState(() => resumeFrom?.fatPercent ?? 4.1)
+  const [proteinPercent, setProteinPercent] = useState(() => resumeFrom?.proteinPercent ?? 3.5)
+  const [dmiTarget, setDmiTarget] = useState(() => resumeFrom?.dmiTarget ?? 24.0)
+  const [feedingType, setFeedingType] = useState<FeedingMode>(() => resumeFrom?.feedingType ?? 'TMR')
+  const [mode, setMode] = useState<OptMode>(() => resumeFrom?.mode ?? 'Kosten minimieren')
+  const [fanMode, setFanMode] = useState<FanMode>(() => resumeFrom?.fanMode ?? FAN_DEFAULTS.mode)
+  const [fanReference, setFanReference] = useState<number>(() => resumeFrom?.fanReference ?? FAN_REFERENCE_PRESETS[1]) // 3.0 als mittlerer Preset
+  const [relaxationPolicy, setRelaxationPolicy] = useState<RelaxationPolicy>(() => resumeFrom?.relaxationPolicy ?? FAN_DEFAULTS.relaxation_policy)
+  const [seasonProfile, setSeasonProfile] = useState<SeasonProfile | null>(() => resumeFrom?.seasonProfile ?? null)
   // DLG 01|2025 Tab. 13-15: optionale Leistungs-/Physiologiestufen-Auswahl.
   // Leer = Auto-Mapping aus Fuetterungstyp/Saison (pmr_pasture_spring etc.).
-  const [policyProfile, setPolicyProfile] = useState<PolicyProfile | null>(null)
+  const [policyProfile, setPolicyProfile] = useState<PolicyProfile | null>(() => resumeFrom?.policyProfile ?? null)
+  const [priorityWeights, setPriorityWeights] = useState<PriorityWeights>(() => ({
+    ...DEFAULT_PRIORITY_WEIGHTS,
+    ...resumeFrom?.priorityWeights,
+  }))
   const [showFanAdvanced, setShowFanAdvanced] = useState(false)
-  const [selectedFeedIds, setSelectedFeedIds] = useState<Set<string>>(new Set())
-  const [feedMaxFm, setFeedMaxFm] = useState<Record<string, number>>({})
+  const [selectedFeedIds, setSelectedFeedIds] = useState<Set<string>>(() =>
+    resumeFrom ? new Set(resumeFrom.selectedFeedIds) : new Set(),
+  )
+  const [feedMaxFm, setFeedMaxFm] = useState<Record<string, number>>(() => ({ ...resumeFrom?.feedMaxFm }))
+  const [feedMinFm, setFeedMinFm] = useState<Record<string, number>>(() => ({ ...resumeFrom?.feedMinFm }))
   const [searchQuery, setSearchQuery] = useState('')
-  const [customFeeds, setCustomFeeds] = useState<GrundfutterAnalyse[]>([])
-  const [compoundFeeds, setCompoundFeeds] = useState<UploadedCompoundFeed[]>([])
+  const [customFeeds, setCustomFeeds] = useState<GrundfutterAnalyse[]>(() => [...(resumeFrom?.customFeeds ?? [])])
+  const [compoundFeeds, setCompoundFeeds] = useState<UploadedCompoundFeed[]>(() => [...(resumeFrom?.compoundFeeds ?? [])])
   const [showGfaPicker, setShowGfaPicker] = useState(false)
-  const [restoredFromStorage, setRestoredFromStorage] = useState(false)
+  const [restoredFromStorage, setRestoredFromStorage] = useState(() => !!resumeFrom)
   const compoundUploadRef = useRef<HTMLInputElement | null>(null)
 
-  // Beim ersten Laden: gespeicherte Auswahl aus localStorage wiederherstellen
+  // Beim ersten Laden: gespeicherte Auswahl aus localStorage wiederherstellen (nicht bei Nachoptimierung / Resume)
   useEffect(() => {
     if (feeds.length === 0 || restoredFromStorage) return
+    if (resumeFrom) {
+      setRestoredFromStorage(true)
+      return
+    }
     setRestoredFromStorage(true)
     try {
       const raw = localStorage.getItem(LS_FEED_SELECTION)
@@ -1241,13 +1539,14 @@ function Wizard({
         if (restored.length > 0) {
           setSelectedFeedIds(new Set(restored))
           setFeedMaxFm(saved.feedMaxFm ?? {})
+          setFeedMinFm(saved.feedMinFm ?? {})
           return
         }
       }
     } catch { /* ignore */ }
     // Fallback: alle DLG-Feeds aktivieren
     setSelectedFeedIds(new Set(feeds.map((f) => f.id)))
-  }, [feeds, restoredFromStorage])
+  }, [feeds, restoredFromStorage, resumeFrom])
 
   // Auswahl in localStorage speichern (debounced via effect)
   useEffect(() => {
@@ -1257,11 +1556,12 @@ function Wizard({
         selectedFeedIds: [...selectedFeedIds],
         customFeedIds: customFeeds.map((c) => c.id),
         feedMaxFm,
+        feedMinFm,
         savedAt: new Date().toISOString(),
       }
       localStorage.setItem(LS_FEED_SELECTION, JSON.stringify(payload))
     } catch { /* ignore */ }
-  }, [selectedFeedIds, customFeeds, feedMaxFm])
+  }, [selectedFeedIds, customFeeds, feedMaxFm, feedMinFm])
 
   // Custom feeds (betriebseigen) immer oben, dann DLG alphabetisch
   const allDisplayFeeds = useMemo(() => {
@@ -1283,8 +1583,9 @@ function Wizard({
   function handleComplete() {
     onComplete({
       group, milkYield, fatPercent, proteinPercent, dmiTarget, feedingType, mode,
-      selectedFeedIds, customFeeds, compoundFeeds, feedMaxFm,
+      selectedFeedIds, customFeeds, compoundFeeds, feedMaxFm, feedMinFm,
       fanMode, fanReference, relaxationPolicy, seasonProfile, policyProfile,
+      priorityWeights,
     })
   }
 
@@ -1772,6 +2073,8 @@ function Wizard({
                       <button
                         onClick={() => {
                           setCompoundFeeds((prev) => prev.filter((item) => item.product_name !== doc.product_name))
+                          setFeedMaxFm((prev) => { const n = { ...prev }; delete n[compoundId]; return n })
+                          setFeedMinFm((prev) => { const n = { ...prev }; delete n[compoundId]; return n })
                           setSelectedFeedIds((prev) => {
                             const next = new Set(prev)
                             next.delete(compoundId)
@@ -1804,6 +2107,7 @@ function Wizard({
                     <th className="px-4 py-3 border-b text-xs font-semibold text-right" style={{ borderColor: C.border, color: '#4B5563' }}>sidP</th>
                     <th className="px-4 py-3 border-b text-xs font-semibold text-right" style={{ borderColor: C.border, color: '#4B5563' }}>Stärke</th>
                     <th className="px-4 py-3 border-b text-xs font-semibold text-right" style={{ borderColor: C.border, color: '#4B5563' }}>€/kg TM</th>
+                    <th className="px-4 py-3 border-b text-xs font-semibold text-right" style={{ borderColor: C.border, color: '#4B5563' }} title="Mindestverzehr in kg Frischmasse/Tag (leer = keine Untergrenze).">Min FM kg/d</th>
                     <th className="px-4 py-3 border-b text-xs font-semibold text-right" style={{ borderColor: C.border, color: '#4B5563' }} title="Max. Verzehrsgrenze in kg Frischmasse/Tag (0 = unbegrenzt). Sinnvoll bei saisonal begrenzten Vorräten.">Max FM kg/d</th>
                     <th className="px-4 py-3 border-b text-xs font-semibold w-8" style={{ borderColor: C.border }} />
                   </tr>
@@ -1851,6 +2155,27 @@ function Wizard({
                             type="number"
                             min={0}
                             step={0.5}
+                            value={feedMinFm[f.id] ?? ''}
+                            onChange={(e) => {
+                              const v = parseFloat(e.target.value)
+                              setFeedMinFm((prev) => {
+                                const next = { ...prev }
+                                if (isNaN(v) || v <= 0) delete next[f.id]
+                                else next[f.id] = v
+                                return next
+                              })
+                            }}
+                            placeholder="—"
+                            className="w-16 border rounded px-2 py-0.5 text-xs text-right outline-none focus:ring-1 focus:ring-[#88B04B]"
+                            style={{ borderColor: feedMinFm[f.id] ? C.accent : C.border }}
+                            title="Min. kg Frischmasse/Tag (leer = keine Untergrenze)"
+                          />
+                        </td>
+                        <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
+                          <input
+                            type="number"
+                            min={0}
+                            step={0.5}
                             value={feedMaxFm[f.id] ?? ''}
                             onChange={(e) => {
                               const v = parseFloat(e.target.value)
@@ -1882,6 +2207,8 @@ function Wizard({
                                     prev.filter((cf) => String((cf.optimizer_feed as Record<string, unknown>).id ?? '') !== compoundId)
                                   )
                                 }
+                                setFeedMaxFm((prev) => { const n = { ...prev }; delete n[f.id]; return n })
+                                setFeedMinFm((prev) => { const n = { ...prev }; delete n[f.id]; return n })
                                 setSelectedFeedIds((prev) => { const next = new Set(prev); next.delete(f.id); return next })
                               }}
                               className="text-slate-300 hover:text-red-400 transition-colors"
@@ -1895,7 +2222,7 @@ function Wizard({
                   })}
                   {filteredFeeds.length === 0 && (
                     <tr>
-                      <td colSpan={10} className="py-10 text-center text-sm" style={{ color: C.muted }}>
+                      <td colSpan={11} className="py-10 text-center text-sm" style={{ color: C.muted }}>
                         Keine Futtermittel gefunden
                       </td>
                     </tr>
@@ -1969,23 +2296,42 @@ function Wizard({
             <div className="space-y-8">
               <div className="space-y-4">
                 <h3 className="text-xs font-bold uppercase tracking-widest" style={{ color: C.accent }}>Prioritäten</h3>
-                {[
-                  { label: 'Kosten (Wirtschaftlichkeit)', val: 80 },
-                  { label: 'Leistung (Milch kg)', val: 60 },
-                  { label: 'Pansensicherheit (Struktur)', val: 70 },
-                  { label: 'Tiergesundheit (Proxys)', val: 65 },
-                  { label: 'Einfachheit (Management)', val: 40 },
-                ].map((p) => (
-                  <div key={p.label} className="space-y-1.5">
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="font-medium text-slate-700">{p.label}</span>
-                      <span className="font-bold" style={{ color: C.accent }}>{p.val}%</span>
+                <p className="text-xs" style={{ color: C.muted }}>
+                  Gewichtung per Schieberegler (0–100). Höher = stärkeres Gewicht im Optimierungskontext; die Werte werden mit der Ration gespeichert.
+                </p>
+                {PRIORITY_SLIDER_ROWS.map(({ key, label }) => {
+                  const val = priorityWeights[key]
+                  return (
+                    <div key={key} className="space-y-2">
+                      <div className="flex justify-between items-center text-sm gap-3">
+                        <span className="font-medium text-slate-700">{label}</span>
+                        <span className="font-bold tabular-nums shrink-0 min-w-[3rem] text-right" style={{ color: C.accent }}>{val}%</span>
+                      </div>
+                      <input
+                        type="range"
+                        min={0}
+                        max={100}
+                        step={1}
+                        value={val}
+                        onChange={(e) => {
+                          const n = Number(e.target.value)
+                          setPriorityWeights((prev) => ({ ...prev, [key]: Number.isFinite(n) ? n : prev[key] }))
+                        }}
+                        className="w-full h-2 rounded-full appearance-none cursor-pointer bg-slate-100
+                          [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4
+                          [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white
+                          [&::-webkit-slider-thumb]:shadow [&::-webkit-slider-thumb]:bg-[#88B04B]
+                          [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2
+                          [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:shadow-sm [&::-moz-range-thumb]:bg-[#88B04B]"
+                        style={{ accentColor: C.accent }}
+                        aria-label={`${label}: ${val} Prozent`}
+                      />
+                      <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden -mt-1 pointer-events-none">
+                        <div className="h-full rounded-full transition-[width] duration-75" style={{ width: `${val}%`, background: C.accent }} />
+                      </div>
                     </div>
-                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                      <div className="h-full rounded-full" style={{ width: `${p.val}%`, background: C.accent }} />
-                    </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
 
               <div className="p-6 rounded-2xl text-white space-y-4" style={{ background: '#1B3022' }}>
@@ -2210,6 +2556,8 @@ function Workbench({
   onDemo,
   onReset,
   onGoReview,
+  onGoWizard,
+  onApplySuggestionPatch,
   chatSeed,
   tourStep,
   onTourNext: _onTourNext,
@@ -2223,6 +2571,8 @@ function Workbench({
   onDemo: () => void
   onReset: () => void
   onGoReview: () => void
+  onGoWizard: () => void
+  onApplySuggestionPatch: (patch: RationAdjustmentApplyPatch) => void
   chatSeed?: { role: 'ai' | 'user'; text: string }[]
   tourStep?: number | null
   onTourNext?: () => void
@@ -2233,6 +2583,8 @@ function Workbench({
     ? chatSeed
     : [{ role: 'ai' as const, text: 'Guten Tag! Starten Sie die Optimierung oder beschreiben Sie Ihr Ziel.' }]
   const [chatLog, setChatLog] = useState<{ role: 'ai' | 'user'; text: string }[]>(defaultChat)
+
+  const feedById = useMemo(() => buildFeedLookupMap(feeds, wizardData), [feeds, wizardData])
 
   const rationItems = result?.ration_items.filter((r) => r.kgdm > 0.001) ?? []
   const totalKgdm = rationItems.reduce((s, r) => s + r.kgdm, 0)
@@ -2245,12 +2597,25 @@ function Workbench({
     return tourStep === idx ? { outline: `2.5px solid ${C.accent}`, outlineOffset: '2px' } : {}
   }
 
+  const maeKg = (result?.forage_performance as any)?.supplemented?.milk_from_energy_kg as number | undefined
+  const mapKg = (result?.forage_performance as any)?.supplemented?.milk_from_protein_kg as number | undefined
+  const maeMapDiff = (maeKg != null && mapKg != null) ? Math.abs(maeKg - mapKg) : null
+  const maeMapStatus: 'success' | 'warn' | 'error' =
+    maeMapDiff == null ? 'warn' : maeMapDiff <= 2 ? 'success' : maeMapDiff <= 5 ? 'warn' : 'error'
+
   const kpis = result
     ? [
         { label: 'Kosten', value: fmt(result.total_cost_eur_day ?? 0), unit: '€/Kuh', status: 'success' as const },
         { label: 'ME (MJ/kg)', value: fmt(result.nutrient_supply.me_mj / (result.nutrient_supply.dmi_kg || 1), 2), unit: 'MJ/kg TM', status: 'success' as const },
         { label: 'sidP (g/d)', value: fmt(result.nutrient_supply.sidp_g, 0), unit: 'g/Tag', status: 'success' as const },
-        { label: 'Stärke', value: fmt((result.nutrient_supply.starch_g / (result.nutrient_supply.dmi_kg || 1) / 10), 1), unit: '%TM', status: 'success' as const },
+        {
+          label: 'MaE / MaP',
+          value: maeKg != null && mapKg != null ? `${fmt(maeKg, 1)} / ${fmt(mapKg, 1)}` : '–',
+          unit: 'kg Milch',
+          status: maeMapStatus,
+          title: `Milch aus Energie: ${fmt(maeKg, 1)} kg · Milch aus Protein: ${fmt(mapKg, 1)} kg · Differenz ${fmt(maeMapDiff, 1)} kg (Ziel ≤2 kg)`,
+        },
+        { label: 'Stärke', value: fmt(((result.nutrient_supply.staerke_g ?? result.nutrient_supply.starch_g ?? 0) / (result.nutrient_supply.dmi_kg || 1) / 10), 1), unit: '%TM', status: 'success' as const },
         { label: 'GF-Anteil', value: fmt(result.nutrient_supply.forage_share_pct, 1), unit: '%', status: result.nutrient_supply.forage_share_pct >= 55 ? 'success' as const : 'warn' as const },
         { label: 'Struktur-SI', value: result.dlg_indicators?.strukturindex != null ? fmt(result.dlg_indicators.strukturindex, 0) : '–', unit: '', status: (result.dlg_indicators?.strukturindex_erfuellt ? 'success' : 'error') as 'success' | 'error' },
       ]
@@ -2401,7 +2766,7 @@ function Workbench({
               </thead>
               <tbody>
                 {rationItems.map((item) => {
-                  const feed = feeds.find((f) => f.id === item.feed_id)
+                  const feed = feedById.get(item.feed_id)
                   const anteil = totalKgdm > 0 ? (item.kgdm / totalKgdm) * 100 : 0
                   const meBeitrag = feed ? item.kgdm * feed.me_mj_kgdm : 0
                   const sidpBeitrag = feed ? item.kgdm * feed.sidp_g_kgdm : 0
@@ -2442,18 +2807,14 @@ function Workbench({
           )}
         </div>
 
-        {/* Delta Bar */}
-        {result && result.warnings.length > 0 && (
-          <div className="p-3 rounded-lg border text-[12px]" style={{ background: C.deltaBg, borderColor: C.deltaBorder, color: C.deltaText }}>
-            <div className="text-[11px] font-bold uppercase tracking-wider mb-1.5">Hinweise des Optimierers</div>
-            {result.warnings.slice(0, 3).map((w, i) => (
-              <div key={i} className="flex items-start gap-1.5 mb-1">
-                <AlertTriangle size={12} className="mt-0.5 flex-shrink-0" />
-                <span>{w}</span>
-              </div>
-            ))}
-          </div>
-        )}
+        <RationWarningAdjustmentsPanel
+          result={result}
+          wizardData={wizardData}
+          isOptimizing={isOptimizing}
+          onApplySuggestion={onApplySuggestionPatch}
+          onGoWizard={onGoWizard}
+          onReoptimizeSame={onOptimize}
+        />
 
         <RationBlocksPanel blocks={result?.ration_blocks ?? null} compact />
         <ForagePerformancePanel result={result} compact />
@@ -2471,7 +2832,7 @@ function Workbench({
           <div className="text-[11px] uppercase font-bold mb-2.5 tracking-[0.5px]" style={{ color: C.muted }}>KPI Status</div>
           <div className="grid grid-cols-2 gap-2">
             {kpis.map((kpi, i) => (
-              <div key={i} className="border p-2 rounded text-center" style={{ background: '#F9FAFB', borderColor: C.border }}>
+              <div key={i} className="border p-2 rounded text-center" style={{ background: '#F9FAFB', borderColor: C.border }} title={(kpi as any).title}>
                 <div className="text-[10px] uppercase mb-1" style={{ color: C.muted }}>{kpi.label}</div>
                 <div className="text-[15px] font-bold">{kpi.value}</div>
                 <div
@@ -2832,11 +3193,19 @@ function Review({
   result,
   onBack,
   onFinalize,
+  isOptimizing,
+  onGoWizard,
+  onApplySuggestionPatch,
+  onReoptimize,
 }: {
   wizardData: WizardData | null
   result: OptimizationResult | null
   onBack: () => void
   onFinalize: () => void
+  isOptimizing: boolean
+  onGoWizard: () => void
+  onApplySuggestionPatch: (patch: RationAdjustmentApplyPatch) => void
+  onReoptimize: () => void
 }) {
   const comparison = result
     ? [
@@ -2848,21 +3217,39 @@ function Review({
       ]
     : []
 
-  const forageComparison = result?.forage_performance
-    ? [
-        {
-          label: 'Milch aus Energie',
-          ist: `${fmt(result.forage_performance.forage_only.milk_from_energy_kg, 1)} kg`,
-          soll: `${fmt(result.forage_performance.target_milk_kg, 1)} kg`,
-          neu: `${fmt(result.forage_performance.supplemented.milk_from_energy_kg, 1)} kg`,
-        },
-        {
-          label: 'Milch aus Protein',
-          ist: `${fmt(result.forage_performance.forage_only.milk_from_protein_kg, 1)} kg`,
-          soll: `${fmt(result.forage_performance.target_milk_kg, 1)} kg`,
-          neu: `${fmt(result.forage_performance.supplemented.milk_from_protein_kg, 1)} kg`,
-        },
-      ]
+  const fpReview = result?.forage_performance
+  let epReview: { ist: number; neu: number } | null = null
+  const forageComparison = fpReview
+    ? (() => {
+        const ex = getMilkEpExcessKg(fpReview)
+        epReview = ex
+        return [
+          {
+            label: 'Milch aus Energie',
+            ist: `${fmt(fpReview.forage_only.milk_from_energy_kg, 1)} kg`,
+            soll: `${fmt(fpReview.target_milk_kg, 1)} kg`,
+            neu: `${fmt(fpReview.supplemented.milk_from_energy_kg, 1)} kg`,
+          },
+          {
+            label: 'Milch aus Protein',
+            ist: `${fmt(fpReview.forage_only.milk_from_protein_kg, 1)} kg`,
+            soll: `${fmt(fpReview.target_milk_kg, 1)} kg`,
+            neu: `${fmt(fpReview.supplemented.milk_from_protein_kg, 1)} kg`,
+          },
+          {
+            label: 'Limitierende Milchmenge',
+            ist: `${fmt(fpReview.forage_only.limiting_milk_kg, 1)} kg`,
+            soll: `${fmt(fpReview.target_milk_kg, 1)} kg`,
+            neu: `${fmt(fpReview.supplemented.limiting_milk_kg, 1)} kg`,
+          },
+          {
+            label: `Mehr „Milch aus Protein“ vs. Energie (max. ${MILK_EP_BALANCE_MAX_PROTEIN_EXCESS_KG} kg ≈ l)`,
+            ist: `${fmt(ex.ist, 1)} kg`,
+            soll: `≤ ${MILK_EP_BALANCE_MAX_PROTEIN_EXCESS_KG} kg`,
+            neu: `${fmt(ex.neu, 1)} kg`,
+          },
+        ]
+      })()
     : []
 
   const changeLog = result?.ration_items.filter((r) => r.kgdm > 0.001).slice(0, 5) ?? []
@@ -2933,39 +3320,78 @@ function Review({
 
       <ForagePerformancePanel result={result} />
 
+      <RationWarningAdjustmentsPanel
+        result={result}
+        wizardData={wizardData}
+        isOptimizing={isOptimizing}
+        onApplySuggestion={onApplySuggestionPatch}
+        onGoWizard={onGoWizard}
+        onReoptimizeSame={onReoptimize}
+      />
+
       <PastureRiskPanel risk={result?.pasture_risk ?? null} />
 
       {forageComparison.length > 0 && (
         <div className={card('overflow-hidden p-0')}>
-          <div className="px-5 py-3 border-b font-bold text-[11px] uppercase tracking-widest" style={{ background: '#F9FAFB', borderColor: C.border, color: C.muted }}>
-            Grundfutterleistung und Ergänzung
+          <div className="px-5 py-3 border-b space-y-1" style={{ background: '#F9FAFB', borderColor: C.border }}>
+            <div className="font-bold text-[11px] uppercase tracking-widest" style={{ color: C.muted }}>
+              Grundfutterleistung und Ergänzung
+            </div>
+            <p className="text-[11px] leading-snug max-w-3xl" style={{ color: C.muted }}>
+              Ziel (Profil) = gewünschte Milchleistung. E/P-Orientierung: Überhang Protein vs. Energie höchstens{' '}
+              {MILK_EP_BALANCE_MAX_PROTEIN_EXCESS_KG} kg (≈ l). Fachliche Sicherheit vor Kosten.
+            </p>
           </div>
           <table className="w-full text-left border-collapse text-[12px]">
             <thead>
               <tr>
                 <th className="px-4 py-2.5 border-b text-xs font-semibold" style={{ borderColor: C.border, color: '#4B5563' }}>Kennzahl</th>
                 <th className="px-4 py-2.5 border-b text-xs font-semibold text-right" style={{ borderColor: C.border, color: '#4B5563' }}>IST Grundfutter</th>
-                <th className="px-4 py-2.5 border-b text-xs font-semibold text-right" style={{ borderColor: C.border, color: '#4B5563' }}>SOLL</th>
+                <th className="px-4 py-2.5 border-b text-xs font-semibold text-right" style={{ borderColor: C.border, color: '#4B5563' }}>Ziel (Profil)</th>
                 <th className="px-4 py-2.5 border-b text-xs font-semibold text-right" style={{ borderColor: C.border, color: '#4B5563' }}>NEU mit Kraftfutter</th>
               </tr>
             </thead>
             <tbody>
-              {forageComparison.map((row) => (
-                <tr key={row.label} className="border-b hover:bg-slate-50 transition-colors" style={{ borderColor: '#F3F4F6' }}>
-                  <td className="px-4 py-2.5 font-bold text-[#374151]">{row.label}</td>
-                  <td className="px-4 py-2.5 text-right font-mono text-xs" style={{ color: C.muted }}>{row.ist}</td>
-                  <td className="px-4 py-2.5 text-right font-mono text-xs" style={{ color: C.deltaText }}>{row.soll}</td>
-                  <td className="px-4 py-2.5 text-right font-mono text-xs font-bold" style={{ color: C.accent }}>{row.neu}</td>
-                </tr>
-              ))}
+              {forageComparison.map((row) => {
+                const isEpRow = row.label.includes('Mehr „Milch aus Protein“')
+                const epOkIst = epReview && epBalanceWithinGuidance(epReview.ist)
+                const epOkNeu = epReview && epBalanceWithinGuidance(epReview.neu)
+                return (
+                  <tr
+                    key={row.label}
+                    className="border-b hover:bg-slate-50 transition-colors"
+                    style={{
+                      borderColor: '#F3F4F6',
+                      background: isEpRow && (!epOkIst || !epOkNeu) ? C.deltaBg : undefined,
+                    }}
+                  >
+                    <td className="px-4 py-2.5 font-bold text-[#374151]">{row.label}</td>
+                    <td
+                      className="px-4 py-2.5 text-right font-mono text-xs"
+                      style={{ color: isEpRow && !epOkIst ? C.deltaText : C.muted }}
+                    >
+                      {row.ist}
+                    </td>
+                    <td className="px-4 py-2.5 text-right font-mono text-xs" style={{ color: C.deltaText }}>{row.soll}</td>
+                    <td
+                      className="px-4 py-2.5 text-right font-mono text-xs font-bold"
+                      style={{ color: isEpRow && !epOkNeu ? C.deltaText : C.accent }}
+                    >
+                      {row.neu}
+                    </td>
+                  </tr>
+                )
+              })}
               <tr className="border-b" style={{ borderColor: '#F3F4F6' }}>
                 <td className="px-4 py-2.5 font-bold text-[#374151]">Kraftfutter / Verdrängung</td>
-                <td className="px-4 py-2.5 text-right font-mono text-xs" style={{ color: C.muted }}>â€“</td>
+                <td className="px-4 py-2.5 text-right font-mono text-xs" style={{ color: C.muted }}>–</td>
                 <td className="px-4 py-2.5 text-right font-mono text-xs" style={{ color: C.deltaText }}>
                   {result?.forage_performance?.feeding_type}
                 </td>
                 <td className="px-4 py-2.5 text-right font-mono text-xs font-bold" style={{ color: C.accent }}>
-                  {result?.forage_performance ? `${fmt(result.forage_performance.supplemented.concentrate_dmi_kg, 2)} kg TM / ${fmt(result.forage_performance.supplemented.forage_displacement_dmi_kg, 2)} kg TM` : 'â€“'}
+                  {result?.forage_performance
+                    ? `${fmt(result.forage_performance.supplemented.concentrate_dmi_kg, 2)} kg TM / ${fmt(result.forage_performance.supplemented.forage_displacement_dmi_kg, 2)} kg TM`
+                    : '–'}
                 </td>
               </tr>
             </tbody>
@@ -2993,32 +3419,29 @@ function Review({
         <div className="space-y-4">
           <h3 className="text-sm font-bold uppercase tracking-widest" style={{ color: C.dark }}>Sicherheits-Checkliste</h3>
           <div className="space-y-2">
-            {[
-              'Analysewerte der Silagen aktuell',
-              'Marktpreise für Kraftfutter verifiziert',
-              'Verfügbarkeit der Komponenten bestätigt',
-              'Biologische Plausibilität geprüft (Pansen/RMD)',
-            ].map((check, i) => (
+            {(
+              [
+                { text: 'Analysewerte der Silagen aktuell', defaultChecked: true },
+                { text: 'Marktpreise für Kraftfutter verifiziert', defaultChecked: true },
+                { text: 'Verfügbarkeit der Komponenten bestätigt', defaultChecked: true },
+                {
+                  text: `E/P-Milchäquivalent: Überhang Protein vs. Energie ≤ ${MILK_EP_BALANCE_MAX_PROTEIN_EXCESS_KG} kg (≈ l) — IST & NEU`,
+                  defaultChecked: Boolean(
+                    epReview && epBalanceWithinGuidance(epReview.ist) && epBalanceWithinGuidance(epReview.neu),
+                  ),
+                },
+                { text: 'Biologische Plausibilität geprüft (Pansen/RMD)', defaultChecked: false },
+              ] as const
+            ).map((check, i) => (
               <label key={i} className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl cursor-pointer group hover:bg-white border border-transparent hover:border-slate-200 transition-all">
-                <input type="checkbox" defaultChecked={i < 3} className="w-5 h-5 rounded border-slate-300" style={{ accentColor: C.accent }} />
-                <span className="text-sm font-medium text-slate-600 group-hover:text-slate-900 transition-colors">{check}</span>
+                <input type="checkbox" defaultChecked={check.defaultChecked} className="w-5 h-5 rounded border-slate-300" style={{ accentColor: C.accent }} />
+                <span className="text-sm font-medium text-slate-600 group-hover:text-slate-900 transition-colors">{check.text}</span>
               </label>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Warnings */}
-      {result?.warnings && result.warnings.length > 0 && (
-        <div className="p-4 rounded-xl border space-y-2" style={{ background: C.deltaBg, borderColor: C.deltaBorder }}>
-          <div className="flex items-center gap-2 font-bold text-xs uppercase tracking-wider" style={{ color: C.deltaText }}>
-            <AlertTriangle size={14} /> Hinweise des Optimierers
-          </div>
-          <ul className="space-y-1">
-            {result.warnings.map((w, i) => <li key={i} className="text-sm" style={{ color: C.deltaText }}>• {w}</li>)}
-          </ul>
-        </div>
-      )}
 
       {/* Footer */}
       <div className="flex items-center justify-between pt-8 border-t" style={{ borderColor: C.border }}>
@@ -3054,6 +3477,11 @@ type AppView = 'dashboard' | 'wizard' | 'workbench' | 'review'
 
 export default function Rationsoptimierung() {
   const [view, setView] = useState<AppView>('dashboard')
+  const [wizardBoot, setWizardBoot] = useState<{
+    key: number
+    resumeFrom: WizardData | null
+    initialStep: number
+  }>({ key: 0, resumeFrom: null, initialStep: 1 })
   const [wizardData, setWizardData] = useState<WizardData | null>(null)
   const [result, setResult] = useState<OptimizationResult | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -3101,16 +3529,18 @@ export default function Rationsoptimierung() {
           _source: 'compound_upload',
         }))),
       ]
-      // max FM → max TM-Grenzen für den Solver (kg FM × TM-Anteil = kg TM)
+      // min/max FM → TM-Grenzen für den Solver (kg FM × TM-Anteil = kg TM)
+      const dmById = buildFeedDmById(feeds, nextWizardData)
       const maxFmMap = nextWizardData.feedMaxFm ?? {}
-      const allFeeds = feeds
+      const minFmMap = nextWizardData.feedMinFm ?? {}
       const maxTmOverrides = Object.keys(maxFmMap).length > 0
         ? Object.fromEntries(
-            Object.entries(maxFmMap).map(([id, maxFm]) => {
-              const feed = allFeeds.find((f) => f.id === id)
-              const dmFrac = feed?.dm_frac ?? 0.86
-              return [id, maxFm * dmFrac]
-            })
+            Object.entries(maxFmMap).map(([id, maxFm]) => [id, maxFm * (dmById.get(id) ?? 0.86)]),
+          )
+        : undefined
+      const minTmOverrides = Object.keys(minFmMap).length > 0
+        ? Object.fromEntries(
+            Object.entries(minFmMap).map(([id, minFm]) => [id, minFm * (dmById.get(id) ?? 0.86)]),
           )
         : undefined
       // FAN-MODE-V1: Bewertungsmodus + Relaxation aus Wizard durchreichen
@@ -3135,6 +3565,7 @@ export default function Rationsoptimierung() {
         customOptimizerFeeds.length > 0 ? customOptimizerFeeds : undefined,
         undefined,
         maxTmOverrides,
+        minTmOverrides,
         extras,
       )
     },
@@ -3147,6 +3578,29 @@ export default function Rationsoptimierung() {
       setError(getRationsApiErrorMessage(err, 'Optimierung fehlgeschlagen'))
     },
   })
+
+  const openWizardFresh = useCallback(() => {
+    setWizardBoot((b) => ({ key: b.key + 1, resumeFrom: null, initialStep: 1 }))
+    setView('wizard')
+  }, [])
+
+  const openWizardReoptimize = useCallback((data: WizardData) => {
+    setWizardBoot((b) => ({ key: b.key + 1, resumeFrom: data, initialStep: 2 }))
+    setView('wizard')
+  }, [])
+
+  const handleApplySuggestionPatch = useCallback(
+    (patch: RationAdjustmentApplyPatch) => {
+      if (!wizardData) {
+        openWizardFresh()
+        return
+      }
+      const next = patchHasSolverKeys(patch) ? applyRationPatch(wizardData, patch) : wizardData
+      setWizardData(next)
+      optimizeMutation.mutate(next)
+    },
+    [wizardData, optimizeMutation, openWizardFresh],
+  )
 
   const demoMutation = useMutation({
     mutationFn: optimizeDemo,
@@ -3258,6 +3712,9 @@ export default function Rationsoptimierung() {
             onClick={() => {
               if (tab.id === 'workbench' && !result) return
               if (tab.id === 'review' && !result) return
+              if (tab.id === 'wizard') {
+                setWizardBoot((b) => ({ key: b.key + 1, resumeFrom: null, initialStep: 1 }))
+              }
               setView(tab.id)
             }}
             className="font-semibold text-[13px] h-full flex items-center relative transition-colors cursor-pointer disabled:opacity-40"
@@ -3288,12 +3745,15 @@ export default function Rationsoptimierung() {
       {/* Content */}
       <main className="flex-1 flex flex-col w-full overflow-auto">
         {view === 'dashboard' && (
-          <Dashboard onStart={() => setView('wizard')} onDemo={() => handleDemoStart(0)} />
+          <Dashboard onStart={openWizardFresh} onDemo={() => handleDemoStart(0)} />
         )}
         {view === 'wizard' && (
           <Wizard
+            key={wizardBoot.key}
             feeds={feeds}
             feedsLoading={feedsLoading}
+            resumeFrom={wizardBoot.resumeFrom}
+            initialStep={wizardBoot.initialStep}
             onComplete={handleWizardComplete}
             onCancel={() => setView('dashboard')}
           />
@@ -3310,6 +3770,8 @@ export default function Rationsoptimierung() {
             onDemo={() => demoMutation.mutate()}
             onReset={handleReset}
             onGoReview={() => setView('review')}
+            onGoWizard={() => (wizardData ? openWizardReoptimize(wizardData) : openWizardFresh())}
+            onApplySuggestionPatch={handleApplySuggestionPatch}
             chatSeed={demoChatSeed}
             tourStep={tourStep}
             onTourNext={() => tourStep !== null && tourStep < TOUR_STEPS.length - 1 ? setTourStep(tourStep + 1) : setTourStep(null)}
@@ -3323,6 +3785,10 @@ export default function Rationsoptimierung() {
             onFinalize={() => {
               setView('dashboard')
             }}
+            isOptimizing={isOptimizing}
+            onGoWizard={() => (wizardData ? openWizardReoptimize(wizardData) : openWizardFresh())}
+            onApplySuggestionPatch={handleApplySuggestionPatch}
+            onReoptimize={() => optimizeMutation.mutate(wizardData)}
           />
         )}
       </main>
