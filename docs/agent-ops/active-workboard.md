@@ -6,11 +6,22 @@ Stand: `2026-04-24`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen 2026-05-05
 **Ziel des Slices:** Symphony als Blaupause fuer einen VALEO-eigenen Agent-Orchestrator in einem kleinen, repo-sicheren Pilot umsetzen.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/agent-orchestrator-pilot.md`, `scripts/agent_workboard_supervisor.py`, `tests/test_agent_workboard_supervisor.py`
 **Abnahmekriterien:** Ein CLI-Pilot erkennt Workboard-Slices, erzeugt Claim-Vorschlaege, listet Checks und Handoff-Geruest, ohne automatisch zu claimen, zu committen, zu pushen oder Agents zu starten.
+**Erledigt:** Read-only Supervisor `scripts/agent_workboard_supervisor.py` eingefuehrt; Parser erkennt Slice-IDs, Statusklassen, Owner, Dateibesitz, Checks und Risiken; CLI liefert `list`, `claim-proposal`, `checks` und `handoff-template`. Pilotdoku liegt in `docs/agent-ops/agent-orchestrator-pilot.md`.
+**Checks:** `pytest tests/test_agent_workboard_supervisor.py -q --no-cov`; `python scripts/agent_workboard_supervisor.py list --status open`; `python scripts/agent_workboard_supervisor.py claim-proposal DOM-FIN-002 --owner Codex`; `node scripts/docs-governance-check.cjs`
 **Offene Risiken:** Markdown-Workboard ist kein striktes Datenformat; der Pilot muss konservativ parsen und unklare Bloecke melden statt still zu raten.
+
+## AGENT-ORCH-002
+
+**Von:** Codex
+**Stand:** offen
+**Ziel des Slices:** Maschinenlesbare Slice-Dateien oder ein Validierungs-Gate fuer Workboard-Claims einfuehren, damit der Orchestrator nicht dauerhaft auf weichem Markdown basiert.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/**`, `scripts/agent_workboard_supervisor.py`, passende Tests.
+**Abnahmekriterien:** Claim-Pflicht ist maschinenlesbar validierbar; unklare Status-/Owner-/Dateibesitz-Felder werden als Fehler gemeldet, ohne automatische Git-Aktionen auszufuehren.
+**Offene Risiken:** Bestehende historische Workboard-Bloecke sind uneinheitlich und duerfen nicht durch ein zu striktes Gate blockieren.
 
 ## ERP-CRIT-001
 
