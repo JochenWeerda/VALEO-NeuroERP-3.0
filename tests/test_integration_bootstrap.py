@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
+import os
+import subprocess
+import sys
 
 from app.services import integration_bootstrap
 
@@ -109,3 +112,25 @@ def test_build_integration_probe_plan_distinguishes_disabled_and_ready(monkeypat
     assert probe_plan["voice"]["status"] == "ready"
     assert probe_plan["crm_downstream"]["status"] == "ready"
     assert "curl -fsS http://crm-core:5600/health" in probe_plan["crm_downstream"]["command_hint"]
+
+
+def test_check_integration_bootstrap_strict_live_reports_not_ready() -> None:
+    env = os.environ.copy()
+    env.update(
+        {
+            "EVENT_BUS_ENABLED": "false",
+            "SUPERGLUE_ENABLED": "false",
+            "OIDC_CLIENT_ID": "frontend",
+            "OIDC_ISSUER_URL": "http://keycloak/realms/dev",
+        }
+    )
+    result = subprocess.run(
+        [sys.executable, "scripts/check_integration_bootstrap.py", "--strict-live"],
+        cwd=".",
+        env=env,
+        text=True,
+        capture_output=True,
+    )
+
+    assert result.returncode != 0
+    assert "Live integration probes not ready" in result.stderr

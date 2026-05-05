@@ -32,7 +32,10 @@ export default defineConfig({
                 ws: true,
             },
             '/api/events': {
-                target: process.env.VITE_SSE_PROXY || 'http://127.0.0.1:5174',
+                target:
+                    process.env.VITE_SSE_PROXY ||
+                    process.env.VITE_BACKEND_PROXY ||
+                    'http://127.0.0.1:8000',
                 changeOrigin: true,
                 ws: true,
             },

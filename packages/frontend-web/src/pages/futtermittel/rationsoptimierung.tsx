@@ -71,6 +71,7 @@ import {
   type MixingProtocol,
   type RationAdjustmentApplyPatch,
   type RationAdjustmentSuggestion,
+  type ObjectiveStrategy,
 } from '@/lib/api/rations-optimization'
 
 // ---------------------------------------------------------------------------
@@ -164,6 +165,56 @@ const PRIORITY_SLIDER_ROWS: { key: keyof PriorityWeights; label: string }[] = [
   { key: 'simplicity', label: 'Einfachheit (Management)' },
 ]
 
+/** Schritt 3: Grenzwerte (TM-Band wirkt im Solver; übrige Felder werden dokumentiert / Folge-LP). */
+type WizardHardBounds = {
+  dmiMinKg: number
+  dmiMaxKg: number
+  meMinMjPerKgDm: number
+  starchMaxPctTm: number
+  andfomMinPctTm: number
+  andfomGfMinPctTm: number
+}
+
+type WizardSoftGoals = {
+  minimizeSoya: boolean
+  minimizeDeviationFromBaseline: boolean
+  maximizeNEfficiencyRmd: boolean
+  preferHomegrown: boolean
+}
+
+const DEFAULT_WIZARD_HARD_BOUNDS: WizardHardBounds = {
+  dmiMinKg: 23.5,
+  dmiMaxKg: 25.5,
+  meMinMjPerKgDm: 11.3,
+  starchMaxPctTm: 26,
+  andfomMinPctTm: 30,
+  andfomGfMinPctTm: 20,
+}
+
+const DEFAULT_WIZARD_SOFT_GOALS: WizardSoftGoals = {
+  minimizeSoya: true,
+  minimizeDeviationFromBaseline: true,
+  maximizeNEfficiencyRmd: false,
+  preferHomegrown: false,
+}
+
+/** Prioritäten-Schieberegler → Solver-Stufe (`objective_strategy`). */
+function deriveObjectiveStrategy(mode: OptMode, w: PriorityWeights): ObjectiveStrategy {
+  const balanceSignal = w.rumen + w.performance + w.health
+  const costSignal = w.cost + w.simplicity * 0.5
+  if (mode === 'Kosten minimieren' && w.cost >= 72 && costSignal > balanceSignal + 25) {
+    return 'cost_only'
+  }
+  if (
+    mode === 'Tiergesundheit'
+    || mode === 'Leistung absichern'
+    || (balanceSignal > costSignal + 35 && w.cost < 62)
+  ) {
+    return 'balance_only'
+  }
+  return 'balance_then_cost'
+}
+
 type WizardData = {
   group: CowGroup
   milkYield: number
@@ -188,6 +239,8 @@ type WizardData = {
   policyProfile: PolicyProfile | null
   /** Schritt 3: Prioritäts-Gewichte (0–100), Schieberegler */
   priorityWeights?: PriorityWeights
+  wizardHardBounds?: WizardHardBounds
+  wizardSoftGoals?: WizardSoftGoals
 }
 
 function applyRationPatch(wd: WizardData, patch: RationAdjustmentApplyPatch): WizardData {
@@ -1509,6 +1562,14 @@ function Wizard({
     ...DEFAULT_PRIORITY_WEIGHTS,
     ...resumeFrom?.priorityWeights,
   }))
+  const [wizardHardBounds, setWizardHardBounds] = useState<WizardHardBounds>(() => ({
+    ...DEFAULT_WIZARD_HARD_BOUNDS,
+    ...resumeFrom?.wizardHardBounds,
+  }))
+  const [wizardSoftGoals, setWizardSoftGoals] = useState<WizardSoftGoals>(() => ({
+    ...DEFAULT_WIZARD_SOFT_GOALS,
+    ...resumeFrom?.wizardSoftGoals,
+  }))
   const [showFanAdvanced, setShowFanAdvanced] = useState(false)
   const [selectedFeedIds, setSelectedFeedIds] = useState<Set<string>>(() =>
     resumeFrom ? new Set(resumeFrom.selectedFeedIds) : new Set(),
@@ -1586,6 +1647,8 @@ function Wizard({
       selectedFeedIds, customFeeds, compoundFeeds, feedMaxFm, feedMinFm,
       fanMode, fanReference, relaxationPolicy, seasonProfile, policyProfile,
       priorityWeights,
+      wizardHardBounds,
+      wizardSoftGoals,
     })
   }
 
@@ -2026,6 +2089,7 @@ function Wizard({
                 ref={compoundUploadRef}
                 type="file"
                 accept=".pdf,image/*"
+                data-testid="rations-compound-upload-input"
                 className="hidden"
                 onChange={(e) => {
                   const file = e.target.files?.[0]
@@ -2251,25 +2315,62 @@ function Wizard({
             <div className="space-y-8">
               <div className="space-y-4">
                 <h3 className="text-xs font-bold uppercase tracking-widest" style={{ color: C.accent }}>Harte Grenzen</h3>
+                <p className="text-xs" style={{ color: C.muted }}>
+                  TM-Band wird an den Solver übergeben (min/max kg/Tag). Weitere Grenzwerte werden mit der Optimierung dokumentiert und können später fest ins LP eingebunden werden.
+                </p>
                 <div className="space-y-4">
-                  {[
-                    { label: 'TM-Aufnahme (kg/Tag)', defaultMin: 23.5, defaultMax: 25.5, range: true },
-                    { label: 'ME min (MJ/kg TM)', defaultMin: 11.3, range: false },
-                    { label: 'Stärke max (% d. TM)', defaultMin: 26, range: false },
-                    { label: 'aNDFom min (% d. TM)', defaultMin: 30, range: false },
-                    { label: 'aNDFom GF min (% d. TM)', defaultMin: 20, range: false },
-                  ].map((row) => (
-                    <div key={row.label} className="flex items-center justify-between gap-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <span className="text-sm font-medium text-slate-700">TM-Aufnahme (kg/Tag)</span>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        step={0.1}
+                        value={wizardHardBounds.dmiMinKg}
+                        onChange={(e) => {
+                          const v = Number(e.target.value)
+                          if (!Number.isFinite(v)) return
+                          setWizardHardBounds((prev) => ({ ...prev, dmiMinKg: v }))
+                        }}
+                        className="w-16 border rounded px-2 py-1 text-sm text-center"
+                        style={{ borderColor: C.border }}
+                        aria-label="TM-Aufnahme Minimum kg pro Tag"
+                      />
+                      <span style={{ color: C.muted }}>–</span>
+                      <input
+                        type="number"
+                        step={0.1}
+                        value={wizardHardBounds.dmiMaxKg}
+                        onChange={(e) => {
+                          const v = Number(e.target.value)
+                          if (!Number.isFinite(v)) return
+                          setWizardHardBounds((prev) => ({ ...prev, dmiMaxKg: v }))
+                        }}
+                        className="w-16 border rounded px-2 py-1 text-sm text-center"
+                        style={{ borderColor: C.border }}
+                        aria-label="TM-Aufnahme Maximum kg pro Tag"
+                      />
+                    </div>
+                  </div>
+                  {([
+                    { label: 'ME min (MJ/kg TM)', field: 'meMinMjPerKgDm' as const },
+                    { label: 'Stärke max (% d. TM)', field: 'starchMaxPctTm' as const },
+                    { label: 'aNDFom min (% d. TM)', field: 'andfomMinPctTm' as const },
+                    { label: 'aNDFom GF min (% d. TM)', field: 'andfomGfMinPctTm' as const },
+                  ]).map((row) => (
+                    <div key={row.field} className="flex items-center justify-between gap-4">
                       <span className="text-sm font-medium text-slate-700">{row.label}</span>
-                      <div className="flex items-center gap-2">
-                        <input type="number" defaultValue={row.defaultMin} className="w-16 border rounded px-2 py-1 text-sm text-center" style={{ borderColor: C.border }} />
-                        {row.range && (
-                          <>
-                            <span style={{ color: C.muted }}>–</span>
-                            <input type="number" defaultValue={row.defaultMax} className="w-16 border rounded px-2 py-1 text-sm text-center" style={{ borderColor: C.border }} />
-                          </>
-                        )}
-                      </div>
+                      <input
+                        type="number"
+                        step={0.1}
+                        value={wizardHardBounds[row.field]}
+                        onChange={(e) => {
+                          const v = Number(e.target.value)
+                          if (!Number.isFinite(v)) return
+                          setWizardHardBounds((prev) => ({ ...prev, [row.field]: v }))
+                        }}
+                        className="w-16 border rounded px-2 py-1 text-sm text-center"
+                        style={{ borderColor: C.border }}
+                      />
                     </div>
                   ))}
                 </div>
@@ -2278,14 +2379,22 @@ function Wizard({
               <div className="space-y-4">
                 <h3 className="text-xs font-bold uppercase tracking-widest" style={{ color: C.accent }}>Weiche Ziele</h3>
                 <div className="space-y-2">
-                  {[
-                    { label: 'Sojaanteil minimieren', checked: true },
-                    { label: 'Änderungen zur Ist-Ration gering halten', checked: true },
-                    { label: 'N-Effizienz maximieren (RMD)', checked: false },
-                    { label: 'Hofeigene Komponenten bevorzugen', checked: false },
-                  ].map((item) => (
-                    <label key={item.label} className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-100 rounded-xl cursor-pointer hover:bg-white transition-colors">
-                      <input type="checkbox" defaultChecked={item.checked} className="w-4 h-4 rounded" style={{ accentColor: C.accent }} />
+                  {([
+                    { key: 'minimizeSoya' as const, label: 'Sojaanteil minimieren' },
+                    { key: 'minimizeDeviationFromBaseline' as const, label: 'Änderungen zur Ist-Ration gering halten' },
+                    { key: 'maximizeNEfficiencyRmd' as const, label: 'N-Effizienz maximieren (RMD)' },
+                    { key: 'preferHomegrown' as const, label: 'Hofeigene Komponenten bevorzugen' },
+                  ]).map((item) => (
+                    <label key={item.key} className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-100 rounded-xl cursor-pointer hover:bg-white transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={wizardSoftGoals[item.key]}
+                        onChange={(e) => {
+                          setWizardSoftGoals((prev) => ({ ...prev, [item.key]: e.target.checked }))
+                        }}
+                        className="w-4 h-4 rounded"
+                        style={{ accentColor: C.accent }}
+                      />
                       <span className="text-sm text-slate-700">{item.label}</span>
                     </label>
                   ))}
@@ -2297,7 +2406,9 @@ function Wizard({
               <div className="space-y-4">
                 <h3 className="text-xs font-bold uppercase tracking-widest" style={{ color: C.accent }}>Prioritäten</h3>
                 <p className="text-xs" style={{ color: C.muted }}>
-                  Gewichtung per Schieberegler (0–100). Höher = stärkeres Gewicht im Optimierungskontext; die Werte werden mit der Ration gespeichert.
+                  Gewichtung per Schieberegler (0–100). Aus den Werten wird eine Solver-Stufe abgeleitet (
+                  <span className="font-semibold text-slate-600">{deriveObjectiveStrategy(mode, priorityWeights)}</span>
+                  ); Details werden zusätzlich unter <code className="text-[11px]">policy_overrides.wizard_priorities</code> mitgeschickt.
                 </p>
                 {PRIORITY_SLIDER_ROWS.map(({ key, label }) => {
                   const val = priorityWeights[key]
@@ -2587,6 +2698,14 @@ function Workbench({
   const feedById = useMemo(() => buildFeedLookupMap(feeds, wizardData), [feeds, wizardData])
 
   const rationItems = result?.ration_items.filter((r) => r.kgdm > 0.001) ?? []
+  const rationNameDupCounts = useMemo(() => {
+    const m = new Map<string, number>()
+    const items = result?.ration_items.filter((r) => r.kgdm > 0.001) ?? []
+    for (const r of items) {
+      m.set(r.name, (m.get(r.name) ?? 0) + 1)
+    }
+    return m
+  }, [result?.ration_items])
   const totalKgdm = rationItems.reduce((s, r) => s + r.kgdm, 0)
   const totalCost = rationItems.reduce((s, r) => s + r.total_cost, 0)
 
@@ -2770,9 +2889,15 @@ function Workbench({
                   const anteil = totalKgdm > 0 ? (item.kgdm / totalKgdm) * 100 : 0
                   const meBeitrag = feed ? item.kgdm * feed.me_mj_kgdm : 0
                   const sidpBeitrag = feed ? item.kgdm * feed.sidp_g_kgdm : 0
+                  const dupName = (rationNameDupCounts.get(item.name) ?? 0) > 1
                   return (
                     <tr key={item.feed_id} className="border-b transition-colors hover:bg-slate-50 cursor-pointer" style={{ borderColor: '#F3F4F6' }}>
-                      <td className="p-2 font-medium" style={{ color: C.dark }}>{item.name}</td>
+                      <td className="p-2 font-medium" style={{ color: C.dark }} title={dupName ? item.feed_id : undefined}>
+                        {item.name}
+                        {dupName ? (
+                          <span className="text-slate-400 font-normal text-[11px] ml-1">({item.feed_id})</span>
+                        ) : null}
+                      </td>
                       <td className="p-2 text-right font-mono text-xs">{fmt(item.kgfm, 1)}</td>
                       <td className="p-2 text-right font-mono text-xs">{fmt(item.kgdm, 2)}</td>
                       <td className="p-2 text-right font-mono text-xs">{fmt(anteil, 1)}%</td>
@@ -3513,6 +3638,8 @@ export default function Rationsoptimierung() {
         lactation_stage_days: nextWizardData.group.lactationDays,
         parity: Math.round(nextWizardData.group.lactationNumber),
         target_dmi_kg: nextWizardData.dmiTarget,
+        wizard_dmi_min_kg: nextWizardData.wizardHardBounds?.dmiMinKg,
+        wizard_dmi_max_kg: nextWizardData.wizardHardBounds?.dmiMaxKg,
         feeding_type: nextWizardData.feedingType,
       }
       const totalAvail =
@@ -3543,16 +3670,34 @@ export default function Rationsoptimierung() {
             Object.entries(minFmMap).map(([id, minFm]) => [id, minFm * (dmById.get(id) ?? 0.86)]),
           )
         : undefined
+      const prio = nextWizardData.priorityWeights ?? DEFAULT_PRIORITY_WEIGHTS
+      const hb = nextWizardData.wizardHardBounds ?? DEFAULT_WIZARD_HARD_BOUNDS
+      const sg = nextWizardData.wizardSoftGoals ?? DEFAULT_WIZARD_SOFT_GOALS
+      const objective_strategy = deriveObjectiveStrategy(nextWizardData.mode, prio)
       // FAN-MODE-V1: Bewertungsmodus + Relaxation aus Wizard durchreichen
       const extras = {
+        objective_strategy,
         fan_options: {
           mode: nextWizardData.fanMode,
           ...(nextWizardData.fanMode === 'reference' ? { reference: nextWizardData.fanReference } : {}),
         },
         relaxation_policy: nextWizardData.relaxationPolicy,
         ...(nextWizardData.seasonProfile ? { season_profile: nextWizardData.seasonProfile } : {}),
-        // DLG 01|2025 Tab. 13-15: explizite Leistungs-/Physiologiestufe. Ohne
-        // Angabe bestimmt das Backend das Profil aus Fuetterungstyp + Saison.
+        policy_overrides: {
+          wizard_priorities: prio,
+          wizard_hard_bounds: {
+            me_min_mj_per_kg_dm: hb.meMinMjPerKgDm,
+            starch_max_pct_tm: hb.starchMaxPctTm,
+            andfom_min_pct_tm: hb.andfomMinPctTm,
+            andfom_gf_min_pct_tm: hb.andfomGfMinPctTm,
+          },
+          wizard_soft_goals: {
+            minimize_soya: sg.minimizeSoya,
+            minimize_deviation_from_baseline: sg.minimizeDeviationFromBaseline,
+            maximize_n_efficiency_rmd: sg.maximizeNEfficiencyRmd,
+            prefer_homegrown: sg.preferHomegrown,
+          },
+        },
         ...(nextWizardData.policyProfile ? { policy_profile: nextWizardData.policyProfile } : {}),
         feeding_system_config: defaultFeedingSystemConfig(nextWizardData.feedingType),
       }

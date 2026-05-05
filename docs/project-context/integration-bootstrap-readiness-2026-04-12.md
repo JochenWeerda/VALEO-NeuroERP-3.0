@@ -17,6 +17,7 @@ Repo-seitige Referenz fuer Integrationen, die bei frischen GitHub-Spiegeln oder 
 - `python scripts/check_integration_bootstrap.py` liefert einen kompakten Readiness-Bericht.
 - `python scripts/check_integration_bootstrap.py --strict` bricht bei fehlenden Pflichtvoraussetzungen ab.
 - `python scripts/check_integration_bootstrap.py --probe-plan` gibt den daraus abgeleiteten Live-Probe-Plan aus.
+- `python scripts/check_integration_bootstrap.py --strict-live` bricht ab, wenn eine Integration nicht bereit fuer einen echten Live-Probe ist.
 
 ## Live-Probe-Plan
 

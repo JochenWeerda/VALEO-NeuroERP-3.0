@@ -945,6 +945,8 @@ def _gfe_requirements(profile: Dict[str, Any]) -> _CowReq:
 
     DMI-Schätzung (Gruber 2004, Deutsche Holstein 675 kg):
       DMI = 0.025×BW + 0.15×Milch  (gilt ab ~60. Laktationstag)
+      Optional: ``target_dmi_kg`` überschreibt den Planungsmittelpunkt;
+      ``wizard_dmi_min_kg`` / ``wizard_dmi_max_kg`` setzen das TM-Band für den LP.
     """
     bw = float(profile.get("body_weight_kg") or 650)
     milk = float(profile.get("milk_kg_day") or 0)
@@ -988,19 +990,43 @@ def _gfe_requirements(profile: Dict[str, Any]) -> _CowReq:
     # sidP-Bedarf: GfE 2023 Tabelle A3 empfiehlt sidP etwas unter nXP (ca. 95%)
     sidp_total = nxp_total * 0.95
 
-    # --- DMI (Gruber 2004 vereinfacht) ---
-    dmi_target = 0.025 * bw + 0.15 * milk if milk > 0 else 0.025 * bw
-    dmi_target = max(dmi_target, 8.0)
-
     # Physiologische Obergrenze nach DLG Information 01|25 Tabelle 14:
-    # Absolute Maximale TM-Aufnahme: 28,5 kg/Tag für Elite-Hochleistungskühe (>14.000 kg Herde).
-    # Normalkühe 670 kg / 38 kg Milch: Zielwert ~22,5 kg, praktisches Maximum ~25 kg.
-    # dmi_max darf NIEMALS durch LP-Relaxation überschritten werden.
     _DMI_ABS_MAX_KG = 28.5  # DLG Tab. 14 – hartes physiologisches Limit
-    dmi_max = min(dmi_target * 1.10, _DMI_ABS_MAX_KG)
 
-    # --- aNDFom-Minimum: 300 g/kg TM × DMI (DLG-Empfehlung Pansenstabilität) ---
-    ndf_min = 300.0 * dmi_target
+    # --- DMI (Gruber 2004 vereinfacht), optional durch Wizard-Ziel TM ueberschreibbar ---
+    dmi_plan = 0.025 * bw + 0.15 * milk if milk > 0 else 0.025 * bw
+    dmi_plan = max(dmi_plan, 8.0)
+    td_raw = profile.get("target_dmi_kg")
+    if td_raw is not None:
+        try:
+            td_f = float(td_raw)
+            if td_f > 0:
+                dmi_plan = max(8.0, min(td_f, _DMI_ABS_MAX_KG))
+        except (TypeError, ValueError):
+            pass
+
+    dmi_min_kg = dmi_plan * 0.90
+    dmi_max_kg = min(dmi_plan * 1.10, _DMI_ABS_MAX_KG)
+
+    wm_raw = profile.get("wizard_dmi_min_kg")
+    wx_raw = profile.get("wizard_dmi_max_kg")
+    if wm_raw is not None:
+        try:
+            dmi_min_kg = float(wm_raw)
+        except (TypeError, ValueError):
+            pass
+    if wx_raw is not None:
+        try:
+            dmi_max_kg = float(wx_raw)
+        except (TypeError, ValueError):
+            pass
+
+    dmi_min_kg = max(5.0, min(dmi_min_kg, _DMI_ABS_MAX_KG))
+    dmi_max_kg = max(dmi_min_kg, min(dmi_max_kg, _DMI_ABS_MAX_KG))
+    dmi_target_kg = (dmi_min_kg + dmi_max_kg) / 2.0
+
+    # --- aNDFom-Minimum: 300 g/kg TM × effektive TM-Aufnahme (Bandmittelpunkt) ---
+    ndf_min = 300.0 * dmi_target_kg
 
     # --- Mengenelemente (GfE 2023 / GfE-Workshop 2023) ---
     ca_min = 0.031 * bw75 + 1.22 * milk
@@ -1009,18 +1035,18 @@ def _gfe_requirements(profile: Dict[str, Any]) -> _CowReq:
     # Erhaltung: 0.048 g/kg LM (hochrechnend aus DLG Tab.12 inkl. +30% Zuschlag)
     # Leistung: 0.10 g/kg Milch (GfE 2023 Workshop Präsentation)
     mg_min = (0.048 * bw + 0.10 * milk) if milk > 0 else 0.048 * bw
-    na_min = 1.5 * dmi_target   # ~1.5 g/kg TM
+    na_min = 1.5 * dmi_target_kg   # ~1.5 g/kg TM
     # K/Mg-Antagonismus (GfE-Workshop 2023): max. K-Versorgung 28 g/kg TM
-    k_max  = 28.0 * dmi_target
+    k_max  = 28.0 * dmi_target_kg
 
     return _CowReq(
         me_mj=me_total,
         sidp_g=sidp_total,
         nel_mj=nel_total,
         nxp_g=nxp_total,
-        dmi_min_kg=dmi_target * 0.90,
-        dmi_max_kg=dmi_max,
-        dmi_target_kg=dmi_target,
+        dmi_min_kg=dmi_min_kg,
+        dmi_max_kg=dmi_max_kg,
+        dmi_target_kg=dmi_target_kg,
         ndf_min_g=ndf_min,
         ca_min_g=ca_min,
         p_min_g=p_min,

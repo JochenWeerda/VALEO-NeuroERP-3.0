@@ -3,14 +3,14 @@
 ## Zweck
 
 Ehrliche, aktuelle Bestandsaufnahme aller offenen Restthemen, fachlichen Duennstellen und bekannten Risiken.
-Zuletzt vollstaendig auditiert: **2026-04-13**.
+Zuletzt vollstaendig auditiert: **2026-05-05**.
 
 ---
 
-## Build-Health (Stand 2026-04-12)
+## Build-Health (Stand 2026-05-05)
 
 - **TypeScript**: 0 Fehler (`tsc --noEmit`)
-- **Backend-Tests**: repo-weit weiterhin deutlich zu niedrig fuer ein ERP, zuletzt grob bei ~45%
+- **Backend-Tests**: kritische Pfade werden per Ratchet gesichert; 6 der 18 Ratchet-Pfade jetzt gruen (Stand 2026-05-05)
 - **Frontend-Imports**: 0 gebrochene Importe
 - **Alembic**: 1 Head
 - **Docker-Erstinstallation**: Alembic-Bootstrap und Mehr-Domaenen-Struktur auf leerer DB abgesichert
@@ -26,6 +26,8 @@ Zuletzt vollstaendig auditiert: **2026-04-13**.
 - Die naechste Finance-Welle ist angelaufen: `tests/test_finance_followup_api.py` haertet Preview-, Export-, Download-, DMS-Redirect- und Upload-Metadatenpfade von `app/api/v1/endpoints/finance_followup.py`; `tests/test_fibu_connectors_api.py` deckt Profile, Import-Laeufe, Run-Items und Folgeaktionen in `app/api/v1/endpoints/fibu_connectors.py` ab; `tests/test_finance_actions.py` deckt jetzt reale Finance-Aktionspfade in `app/api/v1/endpoints/finance_actions.py` ab. Die drei Pfade haengen jetzt mit Mindestabdeckung (`70%`, `80%`, `90%`) im kritischen Coverage-Ratchet.
 - Die frueheren `skipped`-Faelle in Mahnwesen, Wechselkursen und Zahlungslaufen sind nicht mehr an eine zufaellige Live-DB gekoppelt. Die API-Tests laufen jetzt mit deterministischen Test-Doubles, und eine Reparaturmigration zieht die fehlenden Finance-API-Tabellen (`dunning_*`, `payment_*`, `exchange_rates`) auch auf Bestandsdatenbanken nach.
 - Der naechste sinnvolle Schritt ist systematischer Ausbau der Testtiefe fuer Finance-Posting, Bestandsfuehrung, Tenant-Isolation und Integrations-Governance.
+- Konkrete Reihenfolge und Ratchet-Hinweise liegen jetzt in [critical-backend-coverage-plan-2026-04-24.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/quality-assurance/critical-backend-coverage-plan-2026-04-24.md).
+- Stand 2026-05-05: `payment_runs.py`, `finance_read_models.py`, `dunning.py`, `waage.py`, `warehouses.py`, `warehouse_transfers.py` gruen. Naechste Ziele: `booking_templates.py`, `chart_of_accounts.py`.
 
 ### DOMAIN-PARITY-001: Fachliche Tiefe der Domains ist weiterhin ungleich
 
@@ -35,6 +37,7 @@ Zuletzt vollstaendig auditiert: **2026-04-13**.
 - Erste Codewelle ist aktiv: FIBU-Abschluss, Rechnungsabgleich, Kontraktsteuerung, moderner CRM-Stamm, Servicefall, Dokumentenablage, Meldewesen sowie Waage/Tourenplanung nutzen bereits gemeinsame Domain-Zusammenfassungen fuer Operator-, Uebergabe- und Nachweisdruck.
 - Zweite Codewelle ist ebenfalls eingezogen: `fibu/schnittstellen-center.tsx`, `charge/wareneingang.tsx`, `einkauf/rechnungseingang.tsx`, `kontrakte/KontraktPositionsmonitor.tsx`, `crm/opportunity-detail.tsx` und `fibu/atlas.tsx` bilden dieselbe Verdichtung jetzt direkt in den operativen Folgepfaden ab.
 - Dritte Codewelle ist jetzt ebenfalls aktiv: `finance/mahnwesen.tsx`, `fibu/zahlungslaeufe.tsx`, `waage/wiegeschein-detail.tsx`, `annahme/rohware.tsx`, `logistik/frachtbriefe.tsx`, `einkauf/lieferanten-dokumente.tsx`, `einkauf/anlieferavis.tsx`, `einkauf/auftragsbestaetigung.tsx`, `kontrakte/FrmKontraktDetail.tsx`, `kontrakte/KontraktAlarmDashboard.tsx`, `crm/kontakt-management.tsx` und die vertiefte `dokumente/ablage.tsx` sind auf dasselbe leichte Operator- und Nachweisbild gezogen.
+- Messbare Domaenenparitaet wird jetzt in [domain-parity-roadmap-2026-04-24.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/project-context/domain-parity-roadmap-2026-04-24.md) gefuehrt.
 
 ---
 
@@ -51,10 +54,12 @@ Zuletzt vollstaendig auditiert: **2026-04-13**.
 - Superglue-Connectors, L3-Import, Erstinstallation und Finance-Export brauchen produktive Tenant-Secrets, Zielsystem-URLs und Ops-Alerting-Werte, die ausserhalb des Repos gepflegt werden.
 - Repo-seitig ist die Bootstrap-Reife jetzt besser vorbereitet ueber `.env.example`, `scripts/check_integration_bootstrap.py` und [integration-bootstrap-readiness-2026-04-12.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/project-context/integration-bootstrap-readiness-2026-04-12.md).
 - Der Bootstrap-Bericht liefert jetzt zusaetzlich `probe_plan`; `python scripts/check_integration_bootstrap.py --probe-plan` zeigt je Integration den produktionsnahen Live-Pruefpfad inklusive Ziel, Command-Hinweis und Blockern. Echte Requests bleiben bewusst ops-seitig, weil produktive Tenant-Secrets und Zielsysteme extern sind.
+- Fuer Live-Gates mit echten Werten steht `python scripts/check_integration_bootstrap.py --strict-live` bereit; der Befehl blockiert, solange ein Probe nicht `ready` ist.
 
 ### EXT-002: FIBU-Mappings fuer Cutover
 
 - Fachlich freigegebene Konten-/Steuer-/Kostenstellen-Mappings fuer die L3-Migration stehen noch aus.
+- Repo-seitig existieren jetzt Vorlage und Gate: `config/fibu_cutover_mapping.template.yaml` plus `python scripts/check_fibu_cutover_mapping.py --mapping <datei> --strict`.
 
 ### EXT-003: Externes Monitoring/Alerting
 

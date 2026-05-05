@@ -819,6 +819,15 @@ def test_return_payment_persists_outbox_event(monkeypatch):
     assert captured["payload"]["return_id"] == "ret-1"
 
 
+def test_payment_return_amount_accepts_current_and_legacy_row_shapes():
+    assert payment_runs._payment_return_amount(
+        ("pay-1", "run-1", "op-1", Decimal("42.50"), "cred-1")
+    ) == Decimal("42.50")
+    assert payment_runs._payment_return_amount(
+        ("pay-1", "run-1", "op-1", "cred-1", Decimal("42.50"))
+    ) == Decimal("42.50")
+
+
 def test_pos_tagesabschluss_enqueues_cash_closing_outbox_event(monkeypatch):
     captured: dict[str, Any] = {}
 

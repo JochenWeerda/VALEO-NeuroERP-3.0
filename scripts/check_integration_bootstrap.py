@@ -20,6 +20,11 @@ def main() -> None:
         action="store_true",
         help="Print only the live connectivity probe plan derived from readiness checks.",
     )
+    parser.add_argument(
+        "--strict-live",
+        action="store_true",
+        help="Fail unless every live probe is ready to execute in this environment.",
+    )
     args = parser.parse_args()
     summary = build_integration_bootstrap_summary()
     payload = summary["probe_plan"] if args.probe_plan else summary
@@ -29,6 +34,14 @@ def main() -> None:
             "Required integration bootstrap blockers present: "
             + ", ".join(summary["required_blockers"])
         )
+    if args.strict_live:
+        blockers = [
+            f"{probe['integration_key']}={probe['status']}"
+            for probe in summary["probe_plan"]
+            if probe["status"] != "ready"
+        ]
+        if blockers:
+            raise SystemExit("Live integration probes not ready: " + ", ".join(blockers))
 
 
 if __name__ == "__main__":
