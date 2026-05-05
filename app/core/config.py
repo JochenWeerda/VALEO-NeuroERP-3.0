@@ -235,6 +235,7 @@ class Settings(BaseSettings):
     # Rationsoptimierung Microservice
     RATIONS_OPTIMIZATION_URL: Optional[str] = None  # z.B. http://rations-optimization:8000
     RATIONS_OPTIMIZATION_API_KEY: str = "dev-api-key-change-in-production"
+    RATIONS_DLG_DATA_PATH: Optional[str] = None  # Pfad zur DLG-FWT-2025-JSON (z.B. /data/DLG_FWT_WK_2025.json)
 
     # File Storage
     UPLOAD_DIR: str = "uploads"

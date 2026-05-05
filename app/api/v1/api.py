@@ -81,6 +81,7 @@ from app.api.v1.endpoints import (
     nutrient_compositions,
     customer_extensions,
     business_partners,
+    number_ranges,
     messages,
     channel_work_surfaces,
     dms_images,
@@ -110,6 +111,8 @@ from app.api.v1.endpoints import (
     agrar_settlements,
     harvest_acceptance,
     rations_optimization,
+    grundfutter_analysen,
+    rations_zugang,
     quality_protocols,
     daily_prices,
     self_billing,
@@ -772,6 +775,20 @@ api_router.include_router(
     tags=["agrar", "futtermittel", "rations-optimization"]
 )
 
+# Grundfutter-Laboranalysen (LUFA / VDLUFA-Import)
+api_router.include_router(
+    grundfutter_analysen.router,
+    prefix="/agrar",
+    tags=["agrar", "futtermittel", "grundfutter-analysen"]
+)
+
+# Rationsoptimierung – DSGVO-Zugangsverwaltung
+api_router.include_router(
+    rations_zugang.router,
+    prefix="/agrar/rations",
+    tags=["agrar", "futtermittel", "rations-zugang"]
+)
+
 # ── L3-Connect Gap Closure Routers ──────────────────────────────
 
 api_router.include_router(
@@ -850,6 +867,12 @@ api_router.include_router(
     business_partners.router,
     prefix="/crm/business-partners",
     tags=["crm", "business-partners"]
+)
+
+api_router.include_router(
+    number_ranges.router,
+    prefix="/admin/number-ranges",
+    tags=["admin", "number-ranges"]
 )
 
 api_router.include_router(

@@ -9,7 +9,7 @@ from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import JSONResponse, Response
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -19,7 +19,9 @@ from app.core.flow_spine_registry import (
     get_flow_spine_workspace,
     merge_instance_statuses,
 )
-from app.domains.operations.models import FlowSpineInstance
+from sqlalchemy import or_
+from app.domains.operations.models import FlowSpineInstance, FlowSpineInstanceEvent
+from app.infrastructure.models import BusinessPartner, Customer
 from app.domains.shared.events import get_event_publisher
 from app.domains.shared.process_events import (
     FlowSpineInstanceCreated,
@@ -32,6 +34,17 @@ logger = logging.getLogger(__name__)
 
 
 router = APIRouter(prefix="/process/flow-spines", tags=["process", "flow-spines"])
+LIFECYCLE_STATUSES = {"draft", "in_progress", "on_hold", "completed", "cancelled", "failed"}
+REASON_CATEGORIES = {
+    "customer",
+    "supplier",
+    "logistics",
+    "quality",
+    "finance",
+    "compliance",
+    "technical",
+    "internal",
+}
 
 
 def _utcnow() -> str:
@@ -52,13 +65,160 @@ def _instance_to_dict(inst: FlowSpineInstance) -> dict[str, Any]:
         "entry_mode": inst.entry_mode,
         "linked_document_id": inst.linked_document_id,
         "linked_document_type": inst.linked_document_type,
+        "lifecycle_status": inst.lifecycle_status,
+        "business_status": inst.business_status,
         "node_statuses": inst.node_statuses or {},
         "active_node_id": inst.active_node_id,
+        "resume_node_id": inst.resume_node_id,
+        "resume_route": inst.resume_route,
+        "resume_payload": inst.resume_payload or {},
+        "assigned_owner": inst.assigned_owner,
         "last_actor": inst.last_actor,
         "last_action_label": inst.last_action_label,
+        "last_activity_at": inst.last_activity_at.isoformat() if inst.last_activity_at else None,
+        "blocked_until": inst.blocked_until.isoformat() if inst.blocked_until else None,
+        "completion_reason_code": inst.completion_reason_code,
+        "cancellation_reason_category": inst.cancellation_reason_category,
+        "cancellation_reason_code": inst.cancellation_reason_code,
+        "failure_reason_category": inst.failure_reason_category,
+        "failure_reason_code": inst.failure_reason_code,
+        "reason_note": inst.reason_note,
+        "closed_at": inst.closed_at.isoformat() if inst.closed_at else None,
+        "closed_by": inst.closed_by,
+        "cancelled_at": inst.cancelled_at.isoformat() if inst.cancelled_at else None,
+        "cancelled_by": inst.cancelled_by,
+        "failed_at": inst.failed_at.isoformat() if inst.failed_at else None,
+        "failed_by": inst.failed_by,
+        "version_no": inst.version_no,
         "tenant_id": inst.tenant_id,
         "created_at": inst.created_at.isoformat() if inst.created_at else None,
         "updated_at": inst.updated_at.isoformat() if inst.updated_at else None,
+    }
+
+
+def _event_to_dict(event: FlowSpineInstanceEvent) -> dict[str, Any]:
+    return {
+        "event_id": event.id,
+        "instance_id": event.instance_id,
+        "process_key": event.process_key,
+        "tenant_id": event.tenant_id,
+        "event_type": event.event_type,
+        "from_lifecycle_status": event.from_lifecycle_status,
+        "to_lifecycle_status": event.to_lifecycle_status,
+        "from_business_status": event.from_business_status,
+        "to_business_status": event.to_business_status,
+        "node_id": event.node_id,
+        "actor_id": event.actor_id,
+        "reason_category": event.reason_category,
+        "reason_code": event.reason_code,
+        "reason_note": event.reason_note,
+        "payload": event.payload or {},
+        "created_at": event.created_at.isoformat() if event.created_at else None,
+    }
+
+
+def _get_instance_or_404(db: Session, process_key: str, instance_id: str) -> FlowSpineInstance:
+    tenant_id = get_current_tenant_id()
+    inst = db.get(FlowSpineInstance, instance_id)
+    if not inst or inst.process_key != process_key or inst.tenant_id != tenant_id:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Instance '{instance_id}' not found for process '{process_key}'",
+        )
+    return inst
+
+
+def _parse_datetime(value: str | None, field_name: str) -> datetime | None:
+    if not value:
+        return None
+    try:
+        parsed = datetime.fromisoformat(value)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=f"Invalid datetime for '{field_name}'.") from exc
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=UTC)
+    return parsed
+
+
+def _record_instance_event(
+    db: Session,
+    inst: FlowSpineInstance,
+    *,
+    event_type: str,
+    actor_id: str | None = None,
+    node_id: str | None = None,
+    reason_category: str | None = None,
+    reason_code: str | None = None,
+    reason_note: str | None = None,
+    payload: dict[str, Any] | None = None,
+    from_lifecycle_status: str | None = None,
+    to_lifecycle_status: str | None = None,
+    from_business_status: str | None = None,
+    to_business_status: str | None = None,
+) -> None:
+    db.add(
+        FlowSpineInstanceEvent(
+            instance_id=inst.id,
+            process_key=inst.process_key,
+            tenant_id=inst.tenant_id,
+            event_type=event_type,
+            from_lifecycle_status=from_lifecycle_status,
+            to_lifecycle_status=to_lifecycle_status,
+            from_business_status=from_business_status,
+            to_business_status=to_business_status,
+            node_id=node_id,
+            actor_id=actor_id,
+            reason_category=reason_category,
+            reason_code=reason_code,
+            reason_note=reason_note,
+            payload=payload or {},
+        )
+    )
+
+
+def _touch_instance(inst: FlowSpineInstance, *, actor_id: str | None = None, action_label: str | None = None) -> None:
+    inst.last_activity_at = datetime.now(UTC)
+    inst.version_no = (inst.version_no or 0) + 1
+    if actor_id:
+        inst.last_actor = actor_id
+    if action_label:
+        inst.last_action_label = action_label
+
+
+def _resolve_customer_data(db: Session, tenant_id: str, customer_id: str) -> dict[str, Any] | None:
+    customer = (
+        db.query(Customer)
+        .filter(
+            Customer.id == customer_id,
+            Customer.tenant_id == tenant_id,
+        )
+        .first()
+    )
+    partner_id = customer.business_partner_id if customer and customer.business_partner_id else customer_id
+    bp = (
+        db.query(BusinessPartner)
+        .filter(
+            BusinessPartner.partner_id == partner_id,
+            BusinessPartner.tenant_id == tenant_id,
+        )
+        .first()
+    )
+    if not bp:
+        return None
+    return {
+        "partner_id": bp.partner_id,
+        "partner_number": bp.partner_number,
+        "name_1": bp.name_1,
+        "name_2": bp.name_2,
+        "street": bp.street,
+        "house_number": bp.house_number,
+        "postal_code": bp.postal_code,
+        "city": bp.city,
+        "country": bp.country,
+        "phone": bp.phone,
+        "email": bp.email,
+        "debtor_account": bp.debtor_account,
+        "creditor_account": bp.creditor_account,
     }
 
 
@@ -89,6 +249,51 @@ class AgentActionRequest(BaseModel):
     context: Optional[dict[str, Any]] = None
 
 
+class InstanceUpdateRequest(BaseModel):
+    label: Optional[str] = None
+    customer_id: Optional[str] = None
+    customer_name: Optional[str] = None
+    partner_name: Optional[str] = None
+    subject: Optional[str] = None
+    entry_mode: Optional[str] = None
+    linked_document_id: Optional[str] = None
+    linked_document_type: Optional[str] = None
+    business_status: Optional[str] = None
+    assigned_owner: Optional[str] = None
+    resume_node_id: Optional[str] = None
+    resume_route: Optional[str] = None
+    resume_payload: Optional[dict[str, Any]] = None
+    user_id: Optional[str] = None
+
+
+class InstanceSaveRequest(BaseModel):
+    resume_node_id: Optional[str] = None
+    resume_route: Optional[str] = None
+    resume_payload: dict[str, Any] = Field(default_factory=dict)
+    business_status: Optional[str] = None
+    assigned_owner: Optional[str] = None
+    action_label: Optional[str] = None
+    note: Optional[str] = None
+    user_id: Optional[str] = None
+
+
+class LifecycleActionRequest(BaseModel):
+    business_status: Optional[str] = None
+    node_id: Optional[str] = None
+    assigned_owner: Optional[str] = None
+    action_label: Optional[str] = None
+    reason_category: Optional[str] = None
+    reason_code: Optional[str] = None
+    reason_note: Optional[str] = None
+    blocked_until: Optional[str] = None
+    user_id: Optional[str] = None
+
+
+class ResumeRequest(BaseModel):
+    user_id: Optional[str] = None
+    action_label: Optional[str] = None
+
+
 # ── Catalog ──────────────────────────────────────────────────────────────────
 
 @router.get("/catalog")
@@ -114,6 +319,7 @@ def get_workspace(
     lang: Optional[str] = Query(None),
     db: Session = Depends(get_db),
 ) -> JSONResponse:
+    tenant_id = get_current_tenant_id()
     try:
         workspace = get_flow_spine_workspace(process_key, lang)
     except KeyError as exc:
@@ -121,8 +327,12 @@ def get_workspace(
 
     if instance_id:
         inst = db.get(FlowSpineInstance, instance_id)
-        if inst and inst.process_key == process_key:
+        if inst and inst.process_key == process_key and inst.tenant_id == tenant_id:
             workspace = merge_instance_statuses(workspace, _instance_to_dict(inst))
+            if inst.customer_id:
+                customer_data = _resolve_customer_data(db, inst.tenant_id, inst.customer_id)
+                if customer_data:
+                    workspace["customer_data"] = customer_data
         return JSONResponse(content=workspace)
 
     body = _json.dumps(workspace, ensure_ascii=False)
@@ -171,10 +381,24 @@ async def create_instance(
         entry_mode=body.entry_mode,
         linked_document_id=body.linked_document_id,
         linked_document_type=body.linked_document_type,
+        lifecycle_status="draft",
         node_statuses={},
+        resume_payload={},
+        version_no=1,
         tenant_id=tenant_id,
     )
     db.add(inst)
+    _record_instance_event(
+        db,
+        inst,
+        event_type="created",
+        to_lifecycle_status=inst.lifecycle_status,
+        payload={
+            "case_number": case_number,
+            "entry_mode": body.entry_mode,
+            "linked_document_type": body.linked_document_type,
+        },
+    )
 
     try:
         event = FlowSpineInstanceCreated(
@@ -201,9 +425,10 @@ def list_instances(
     process_key: str,
     skip: int = Query(default=0, ge=0, description="Anzahl übersprungener Einträge"),
     limit: int = Query(default=50, ge=1, le=200, description="Maximale Anzahl Einträge"),
+    search: Optional[str] = Query(None, description="Suche in Vorgangsnummer, Kundenname, Bezeichnung"),
     db: Session = Depends(get_db),
 ) -> dict[str, Any]:
-    """List instances for a given process_key, tenant-isolated, with pagination."""
+    """List instances for a given process_key, tenant-isolated, with pagination and search."""
     tenant_id = get_current_tenant_id()
     base_q = (
         db.query(FlowSpineInstance)
@@ -213,6 +438,16 @@ def list_instances(
         )
         .order_by(FlowSpineInstance.created_at.desc())
     )
+    if search:
+        s = f"%{search}%"
+        base_q = base_q.filter(
+            or_(
+                FlowSpineInstance.case_number.ilike(s),
+                FlowSpineInstance.customer_name.ilike(s),
+                FlowSpineInstance.label.ilike(s),
+                FlowSpineInstance.subject.ilike(s),
+            )
+        )
     total = base_q.count()
     items = base_q.offset(skip).limit(limit).all()
     return {
@@ -232,13 +467,361 @@ def get_instance(
     db: Session = Depends(get_db),
 ) -> dict[str, Any]:
     """Return a single instance with full data."""
-    inst = db.get(FlowSpineInstance, instance_id)
-    if not inst or inst.process_key != process_key:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Instance '{instance_id}' not found for process '{process_key}'",
-        )
+    inst = _get_instance_or_404(db, process_key, instance_id)
     return _instance_to_dict(inst)
+
+
+@router.patch("/{process_key}/instances/{instance_id}", response_model=dict)
+def update_instance(
+    process_key: str,
+    instance_id: str,
+    body: InstanceUpdateRequest,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    inst = _get_instance_or_404(db, process_key, instance_id)
+    previous_business_status = inst.business_status
+    previous_owner = inst.assigned_owner
+    persisted_partner_name = body.partner_name or body.customer_name
+
+    if body.label is not None:
+        inst.label = body.label.strip() or inst.label
+    if body.customer_id is not None:
+        inst.customer_id = body.customer_id
+    if persisted_partner_name is not None:
+        inst.customer_name = persisted_partner_name
+    if body.subject is not None:
+        inst.subject = body.subject
+    if body.entry_mode is not None:
+        inst.entry_mode = body.entry_mode
+    if body.linked_document_id is not None:
+        inst.linked_document_id = body.linked_document_id
+    if body.linked_document_type is not None:
+        inst.linked_document_type = body.linked_document_type
+    if body.business_status is not None:
+        inst.business_status = body.business_status
+    if body.assigned_owner is not None:
+        inst.assigned_owner = body.assigned_owner
+    if body.resume_node_id is not None:
+        inst.resume_node_id = body.resume_node_id
+    if body.resume_route is not None:
+        inst.resume_route = body.resume_route
+    if body.resume_payload is not None:
+        inst.resume_payload = body.resume_payload
+
+    _touch_instance(inst, actor_id=body.user_id, action_label="Instanz aktualisiert")
+    _record_instance_event(
+        db,
+        inst,
+        event_type="metadata_updated",
+        actor_id=body.user_id,
+        from_business_status=previous_business_status,
+        to_business_status=inst.business_status,
+        payload={
+            "assigned_owner_before": previous_owner,
+            "assigned_owner_after": inst.assigned_owner,
+            "resume_node_id": inst.resume_node_id,
+            "resume_route": inst.resume_route,
+        },
+    )
+
+    db.commit()
+    db.refresh(inst)
+    return _instance_to_dict(inst)
+
+
+@router.post("/{process_key}/instances/{instance_id}/save", response_model=dict)
+def save_instance(
+    process_key: str,
+    instance_id: str,
+    body: InstanceSaveRequest,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    inst = _get_instance_or_404(db, process_key, instance_id)
+    from_lifecycle_status = inst.lifecycle_status
+    from_business_status = inst.business_status
+
+    if body.resume_node_id is not None:
+        inst.resume_node_id = body.resume_node_id
+        inst.active_node_id = body.resume_node_id
+    if body.resume_route is not None:
+        inst.resume_route = body.resume_route
+    if body.resume_payload:
+        inst.resume_payload = body.resume_payload
+    if body.business_status is not None:
+        inst.business_status = body.business_status
+    if body.assigned_owner is not None:
+        inst.assigned_owner = body.assigned_owner
+    if inst.lifecycle_status == "draft":
+        inst.lifecycle_status = "in_progress"
+
+    _touch_instance(inst, actor_id=body.user_id, action_label=body.action_label or "Zwischengespeichert")
+    _record_instance_event(
+        db,
+        inst,
+        event_type="saved",
+        actor_id=body.user_id,
+        node_id=inst.resume_node_id,
+        reason_note=body.note,
+        from_lifecycle_status=from_lifecycle_status,
+        to_lifecycle_status=inst.lifecycle_status,
+        from_business_status=from_business_status,
+        to_business_status=inst.business_status,
+        payload={
+            "resume_route": inst.resume_route,
+            "resume_payload": inst.resume_payload or {},
+        },
+    )
+
+    db.commit()
+    db.refresh(inst)
+    return _instance_to_dict(inst)
+
+
+@router.post("/{process_key}/instances/{instance_id}/resume", response_model=dict)
+def resume_instance(
+    process_key: str,
+    instance_id: str,
+    body: ResumeRequest,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    inst = _get_instance_or_404(db, process_key, instance_id)
+    if inst.lifecycle_status in {"completed", "cancelled", "failed"}:
+        raise HTTPException(
+            status_code=409,
+            detail=f"Instance '{instance_id}' cannot be resumed from lifecycle_status '{inst.lifecycle_status}'",
+        )
+
+    from_lifecycle_status = inst.lifecycle_status
+    if inst.lifecycle_status in {"draft", "on_hold"}:
+        inst.lifecycle_status = "in_progress"
+
+    _touch_instance(inst, actor_id=body.user_id, action_label=body.action_label or "Vorgang wieder aufgenommen")
+    _record_instance_event(
+        db,
+        inst,
+        event_type="resumed",
+        actor_id=body.user_id,
+        node_id=inst.resume_node_id or inst.active_node_id,
+        from_lifecycle_status=from_lifecycle_status,
+        to_lifecycle_status=inst.lifecycle_status,
+        from_business_status=inst.business_status,
+        to_business_status=inst.business_status,
+        payload={
+            "resume_route": inst.resume_route,
+            "resume_payload": inst.resume_payload or {},
+        },
+    )
+
+    db.commit()
+    db.refresh(inst)
+    return {
+        **_instance_to_dict(inst),
+        "resume_target": {
+            "node_id": inst.resume_node_id or inst.active_node_id,
+            "route": inst.resume_route,
+            "payload": inst.resume_payload or {},
+        },
+    }
+
+
+@router.post("/{process_key}/instances/{instance_id}/hold", response_model=dict)
+def hold_instance(
+    process_key: str,
+    instance_id: str,
+    body: LifecycleActionRequest,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    inst = _get_instance_or_404(db, process_key, instance_id)
+    from_lifecycle_status = inst.lifecycle_status
+    from_business_status = inst.business_status
+    inst.lifecycle_status = "on_hold"
+    if body.business_status is not None:
+        inst.business_status = body.business_status
+    if body.assigned_owner is not None:
+        inst.assigned_owner = body.assigned_owner
+    inst.blocked_until = _parse_datetime(body.blocked_until, "blocked_until")
+
+    _touch_instance(inst, actor_id=body.user_id, action_label=body.action_label or "Vorgang pausiert")
+    _record_instance_event(
+        db,
+        inst,
+        event_type="hold_set",
+        actor_id=body.user_id,
+        node_id=body.node_id or inst.active_node_id,
+        reason_category=body.reason_category,
+        reason_code=body.reason_code,
+        reason_note=body.reason_note,
+        from_lifecycle_status=from_lifecycle_status,
+        to_lifecycle_status=inst.lifecycle_status,
+        from_business_status=from_business_status,
+        to_business_status=inst.business_status,
+        payload={"blocked_until": inst.blocked_until.isoformat() if inst.blocked_until else None},
+    )
+
+    db.commit()
+    db.refresh(inst)
+    return _instance_to_dict(inst)
+
+
+@router.post("/{process_key}/instances/{instance_id}/complete", response_model=dict)
+def complete_instance(
+    process_key: str,
+    instance_id: str,
+    body: LifecycleActionRequest,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    inst = _get_instance_or_404(db, process_key, instance_id)
+    from_lifecycle_status = inst.lifecycle_status
+    from_business_status = inst.business_status
+    inst.lifecycle_status = "completed"
+    if body.business_status is not None:
+        inst.business_status = body.business_status
+    inst.completion_reason_code = body.reason_code
+    inst.reason_note = body.reason_note
+    inst.closed_at = datetime.now(UTC)
+    inst.closed_by = body.user_id
+    inst.blocked_until = None
+
+    _touch_instance(inst, actor_id=body.user_id, action_label=body.action_label or "Vorgang abgeschlossen")
+    _record_instance_event(
+        db,
+        inst,
+        event_type="completed",
+        actor_id=body.user_id,
+        node_id=body.node_id or inst.active_node_id,
+        reason_code=body.reason_code,
+        reason_note=body.reason_note,
+        from_lifecycle_status=from_lifecycle_status,
+        to_lifecycle_status=inst.lifecycle_status,
+        from_business_status=from_business_status,
+        to_business_status=inst.business_status,
+    )
+
+    db.commit()
+    db.refresh(inst)
+    return _instance_to_dict(inst)
+
+
+def _validate_required_reason(body: LifecycleActionRequest) -> None:
+    if not body.reason_category or not body.reason_code:
+        raise HTTPException(
+            status_code=422,
+            detail="reason_category and reason_code are required for this lifecycle action.",
+        )
+    if body.reason_category not in REASON_CATEGORIES:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Invalid reason_category '{body.reason_category}'. Must be one of {sorted(REASON_CATEGORIES)}.",
+        )
+
+
+@router.post("/{process_key}/instances/{instance_id}/cancel", response_model=dict)
+def cancel_instance(
+    process_key: str,
+    instance_id: str,
+    body: LifecycleActionRequest,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    _validate_required_reason(body)
+    inst = _get_instance_or_404(db, process_key, instance_id)
+    from_lifecycle_status = inst.lifecycle_status
+    from_business_status = inst.business_status
+    inst.lifecycle_status = "cancelled"
+    if body.business_status is not None:
+        inst.business_status = body.business_status
+    inst.cancellation_reason_category = body.reason_category
+    inst.cancellation_reason_code = body.reason_code
+    inst.reason_note = body.reason_note
+    inst.cancelled_at = datetime.now(UTC)
+    inst.cancelled_by = body.user_id
+    inst.blocked_until = None
+
+    _touch_instance(inst, actor_id=body.user_id, action_label=body.action_label or "Vorgang abgebrochen")
+    _record_instance_event(
+        db,
+        inst,
+        event_type="cancelled",
+        actor_id=body.user_id,
+        node_id=body.node_id or inst.active_node_id,
+        reason_category=body.reason_category,
+        reason_code=body.reason_code,
+        reason_note=body.reason_note,
+        from_lifecycle_status=from_lifecycle_status,
+        to_lifecycle_status=inst.lifecycle_status,
+        from_business_status=from_business_status,
+        to_business_status=inst.business_status,
+    )
+
+    db.commit()
+    db.refresh(inst)
+    return _instance_to_dict(inst)
+
+
+@router.post("/{process_key}/instances/{instance_id}/fail", response_model=dict)
+def fail_instance(
+    process_key: str,
+    instance_id: str,
+    body: LifecycleActionRequest,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    _validate_required_reason(body)
+    inst = _get_instance_or_404(db, process_key, instance_id)
+    from_lifecycle_status = inst.lifecycle_status
+    from_business_status = inst.business_status
+    inst.lifecycle_status = "failed"
+    if body.business_status is not None:
+        inst.business_status = body.business_status
+    inst.failure_reason_category = body.reason_category
+    inst.failure_reason_code = body.reason_code
+    inst.reason_note = body.reason_note
+    inst.failed_at = datetime.now(UTC)
+    inst.failed_by = body.user_id
+    inst.blocked_until = None
+
+    _touch_instance(inst, actor_id=body.user_id, action_label=body.action_label or "Vorgang gescheitert")
+    _record_instance_event(
+        db,
+        inst,
+        event_type="failed",
+        actor_id=body.user_id,
+        node_id=body.node_id or inst.active_node_id,
+        reason_category=body.reason_category,
+        reason_code=body.reason_code,
+        reason_note=body.reason_note,
+        from_lifecycle_status=from_lifecycle_status,
+        to_lifecycle_status=inst.lifecycle_status,
+        from_business_status=from_business_status,
+        to_business_status=inst.business_status,
+    )
+
+    db.commit()
+    db.refresh(inst)
+    return _instance_to_dict(inst)
+
+
+@router.get("/{process_key}/instances/{instance_id}/timeline", response_model=dict)
+def get_instance_timeline(
+    process_key: str,
+    instance_id: str,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    inst = _get_instance_or_404(db, process_key, instance_id)
+    events = (
+        db.query(FlowSpineInstanceEvent)
+        .filter(
+            FlowSpineInstanceEvent.instance_id == instance_id,
+            FlowSpineInstanceEvent.process_key == process_key,
+            FlowSpineInstanceEvent.tenant_id == inst.tenant_id,
+        )
+        .order_by(FlowSpineInstanceEvent.created_at.asc(), FlowSpineInstanceEvent.id.asc())
+        .all()
+    )
+    return {
+        "instance_id": instance_id,
+        "process_key": process_key,
+        "tenant_id": inst.tenant_id,
+        "events": [_event_to_dict(event) for event in events],
+    }
 
 
 @router.post("/{process_key}/instances/{instance_id}/transitions", response_model=dict)
@@ -249,12 +832,7 @@ async def transition_instance(
     db: Session = Depends(get_db),
 ) -> dict[str, Any]:
     """Update a node's status in the instance, recording the transition."""
-    inst = db.get(FlowSpineInstance, instance_id)
-    if not inst or inst.process_key != process_key:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Instance '{instance_id}' not found for process '{process_key}'",
-        )
+    inst = _get_instance_or_404(db, process_key, instance_id)
 
     valid_statuses = {"ok", "active", "pending", "warning", "error"}
     if body.new_status not in valid_statuses:
@@ -264,12 +842,30 @@ async def transition_instance(
         )
 
     statuses = dict(inst.node_statuses or {})
+    previous_lifecycle_status = inst.lifecycle_status
+    previous_business_status = inst.business_status
     statuses[body.node_id] = body.new_status
     inst.node_statuses = statuses
     inst.active_node_id = body.node_id
+    inst.resume_node_id = body.node_id
+    if inst.lifecycle_status == "draft":
+        inst.lifecycle_status = "in_progress"
     if body.user_id:
         inst.last_actor = body.user_id
     inst.last_action_label = body.action_label
+    _touch_instance(inst, actor_id=body.user_id, action_label=body.action_label)
+    _record_instance_event(
+        db,
+        inst,
+        event_type="node_transition",
+        actor_id=body.user_id,
+        node_id=body.node_id,
+        payload={"new_status": body.new_status, "action_label": body.action_label},
+        from_lifecycle_status=previous_lifecycle_status,
+        to_lifecycle_status=inst.lifecycle_status,
+        from_business_status=previous_business_status,
+        to_business_status=inst.business_status,
+    )
 
     try:
         event = FlowSpineTransitionOccurred(
@@ -298,12 +894,7 @@ def delete_instance(
     db: Session = Depends(get_db),
 ) -> Response:
     """Remove an instance from the store."""
-    inst = db.get(FlowSpineInstance, instance_id)
-    if not inst or inst.process_key != process_key:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Instance '{instance_id}' not found for process '{process_key}'",
-        )
+    inst = _get_instance_or_404(db, process_key, instance_id)
     db.delete(inst)
     db.commit()
     return Response(status_code=204)

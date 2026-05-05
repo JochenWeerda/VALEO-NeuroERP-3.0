@@ -47,9 +47,11 @@ export default defineConfig(({ mode }) => {
   
   // Verwende process.env direkt, da loadEnv im Container möglicherweise nicht funktioniert
   const DEFAULT_BFF_PROXY = process.env.VITE_BFF_PROXY || env.VITE_BFF_PROXY || 'http://localhost:4001'
-  const DEFAULT_SSE_PROXY = process.env.VITE_SSE_PROXY || env.VITE_SSE_PROXY || 'http://localhost:5174'
   // Im Container: backend (Docker-Service-Name), lokal: localhost
   const DEFAULT_BACKEND_PROXY = process.env.VITE_BACKEND_PROXY || env.VITE_BACKEND_PROXY || 'http://localhost:8000'
+  // SSE: FastAPI stellt `/api/events` bereit (sse_router). Nur bei separatem SSE-Dienst VITE_SSE_PROXY setzen (z. B. :5174).
+  const DEFAULT_SSE_PROXY =
+    process.env.VITE_SSE_PROXY || env.VITE_SSE_PROXY || DEFAULT_BACKEND_PROXY
   // Standard: Haupt-Backend (ki-usability integriert); separater Service: VITE_KI_USABILITY_PROXY=http://localhost:5200
   const DEFAULT_KI_USABILITY_PROXY = process.env.VITE_KI_USABILITY_PROXY || env.VITE_KI_USABILITY_PROXY || 'http://localhost:8000'
   const DEV_PORT = Number(process.env.VITE_PORT || env.VITE_PORT || 3000)

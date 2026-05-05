@@ -12,6 +12,7 @@ import {
   FileText,
   FlaskConical,
   Globe,
+  Hash,
   LayoutDashboard,
   LayoutGrid,
   Leaf,
@@ -259,6 +260,15 @@ export const RAW_NAV_SECTIONS: RawNavItem[] = [
         module: '@/pages/admin/compliance-dashboard',
         preferredPath: 'admin/compliance',
         mcp: { businessDomain: 'admin', scope: 'admin:read' },
+      },
+      {
+        id: 'nummernkreise',
+        label: 'Nummernkreise',
+        icon: Hash,
+        module: '@/pages/admin/nummernkreise',
+        preferredPath: 'admin/nummernkreise',
+        keywords: ['nummernkreis', 'debitor', 'kreditor', 'kontonummer', 'partnernummer'],
+        mcp: { businessDomain: 'admin', scope: 'admin:write' },
       },
       {
         id: 'data-quality',

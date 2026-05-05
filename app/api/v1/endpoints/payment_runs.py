@@ -122,6 +122,39 @@ def _build_payment_run_response(row, *, payments: list[dict[str, Any]]) -> Payme
     )
 
 
+def _payment_return_amount(payment_row) -> Decimal:
+    """Return amount from current or legacy payment item row shapes.
+
+    Current SQL selects ``id, payment_run_id, op_id, amount, creditor_id``.
+    Older contract tests and a few DB doubles still expose
+    ``id, payment_run_id, op_id, creditor_id, amount``. Prefer the current
+    amount column but tolerate the legacy position when it is the only
+    decimal-like value.
+    """
+    candidates: list[Any] = []
+    try:
+        mapping = payment_row._mapping
+    except AttributeError:
+        mapping = None
+    if mapping is not None:
+        for key in ("amount", "betrag"):
+            if key in mapping:
+                candidates.append(mapping[key])
+
+    for idx in (3, 4):
+        try:
+            candidates.append(payment_row[idx])
+        except (IndexError, TypeError, KeyError):
+            continue
+
+    for candidate in candidates:
+        try:
+            return Decimal(str(candidate))
+        except Exception:
+            continue
+    raise ValueError("Payment return amount is missing or invalid")
+
+
 async def _store_payment_run_event_in_outbox(
     db,
     *,
@@ -836,7 +869,7 @@ async def return_payment(
         payment_item_id = str(payment_row[0])
         payment_run_id = str(payment_row[1])
         op_id = str(payment_row[2]) if payment_row[2] else None
-        amount = Decimal(str(payment_row[3]))
+        amount = _payment_return_amount(payment_row)
         
         # Update payment item status
         update_payment_query = text("""

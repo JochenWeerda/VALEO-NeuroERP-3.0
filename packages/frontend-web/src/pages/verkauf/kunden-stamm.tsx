@@ -594,6 +594,16 @@ export default function KundenStammPage(): JSX.Element {
   })
   const vorlageAppliedRef = useRef(false)
 
+  const initialName = searchParams.get('initialName') ?? ''
+  const returnTo = searchParams.get('returnTo') ?? ''
+  const initialNameAppliedRef = useRef(false)
+
+  useEffect(() => {
+    if (!isNew || !initialName || initialNameAppliedRef.current) return
+    initialNameAppliedRef.current = true
+    setKunde((p) => (p.name ? p : { ...p, name: initialName }))
+  }, [isNew, initialName])
+
   useEffect(() => {
     if (!vorlageId) vorlageAppliedRef.current = false
   }, [vorlageId])
@@ -705,10 +715,22 @@ export default function KundenStammPage(): JSX.Element {
     },
     onSuccess: (saved) => {
       const partnerId = saved.business_partner.core_identity.partner_id
+      const partnerName = saved.business_partner.core_identity.name_1 ?? ''
+      const partnerNumber = saved.business_partner.core_identity.partner_number ?? ''
       toast({
         title: 'Kunde gespeichert',
-        description: `${saved.business_partner.core_identity.name_1} wurde gespeichert.`,
+        description: `${partnerName} wurde gespeichert.`,
       })
+      if (isNew && returnTo && partnerId) {
+        const [path, existingQuery = ''] = returnTo.split('?')
+        const params = new URLSearchParams(existingQuery)
+        params.set('newCustomerId', partnerId)
+        if (partnerName) params.set('newCustomerName', partnerName)
+        if (partnerNumber) params.set('newCustomerNumber', partnerNumber)
+        params.set('openNewInstance', '1')
+        navigate(`${path}?${params.toString()}`, { replace: true })
+        return
+      }
       if (partnerId) {
         navigate(`/verkauf/kunde/${partnerId}`)
       }

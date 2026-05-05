@@ -3,7 +3,7 @@ SQLAlchemy models for VALEO-NeuroERP
 Database entities following domain-driven design
 """
 
-from sqlalchemy import Column, String, Integer, Float, Boolean, DateTime, Date, Time, Text, ForeignKey, DECIMAL
+from sqlalchemy import Column, String, Integer, Float, Boolean, DateTime, Date, Time, Text, ForeignKey, DECIMAL, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects import postgresql
@@ -365,8 +365,29 @@ class BusinessPartner(Base):
     webshop_customer_number = Column(String(80), nullable=True)
     webshop_description = Column(String(255), nullable=True)
 
-    discount_items = Column(postgresql.JSONB(astext_type=Text()), nullable=True, default="[]")
-    price_agreements = Column(postgresql.JSONB(astext_type=Text()), nullable=True, default="[]")
+    discount_items = Column(postgresql.JSONB(astext_type=Text()), nullable=True, default=list)
+    price_agreements = Column(postgresql.JSONB(astext_type=Text()), nullable=True, default=list)
+
+
+class NumberRange(Base):
+    """Configurable number ranges for Debitor/Kreditor accounts and partner numbers."""
+    __tablename__ = "number_ranges"
+    __table_args__ = (
+        UniqueConstraint('tenant_id', 'range_type', name='uq_number_range_tenant_type'),
+        {"schema": "domain_shared", "extend_existing": True},
+    )
+
+    id = Column(String(36), primary_key=True, default=uuid7)
+    tenant_id = Column(String, ForeignKey("domain_shared.tenants.id"), nullable=False)
+    range_type = Column(String(60), nullable=False, index=True)
+    prefix = Column(String(20), nullable=False, default="")
+    start_number = Column(Integer, nullable=False, default=10000)
+    current_value = Column(Integer, nullable=False, default=10000)
+    digit_count = Column(Integer, nullable=False, default=5)
+    reserved_prefix_digits = Column(Integer, nullable=False, default=1)
+    is_active = Column(Boolean, nullable=False, default=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
 
 class BusinessPartnerDiscountItem(Base):

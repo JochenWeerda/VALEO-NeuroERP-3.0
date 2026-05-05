@@ -12,6 +12,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Plus, Trash2 } from 'lucide-react'
 import { getEntityTypeLabel } from '@/features/crud/utils/i18n-helpers'
 import { apiClient } from '@/lib/api-client'
+import { saveFlowSpineResumeCheckpoint } from '@/lib/api/flow-spines'
 import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
 
 type BestellungData = {
@@ -97,6 +98,31 @@ export default function BestellungAnlegenPage(): JSX.Element {
   const contractId = searchParams.get('contractId')
   const rfqId = searchParams.get('rfqId')
   const workflowContext = useMemo(() => readWorkflowEntryContext(searchParams), [searchParams])
+
+  const buildWorkflowResumeQuery = (purchaseOrderId?: string): string => {
+    const params = new URLSearchParams(searchParams)
+    if (purchaseOrderId) params.set('purchaseOrderId', purchaseOrderId)
+    return params.toString()
+  }
+
+  const persistWorkflowResume = async (purchaseOrderId?: string): Promise<void> => {
+    if (!workflowContext?.process || !workflowContext.instanceId) return
+    const query = buildWorkflowResumeQuery(purchaseOrderId)
+    const basePath = purchaseOrderId
+      ? `/einkauf/bestellungen/${encodeURIComponent(purchaseOrderId)}`
+      : '/einkauf/bestellungen/neu'
+    await saveFlowSpineResumeCheckpoint(workflowContext.process, workflowContext.instanceId, {
+      resume_node_id: 'purchase-order',
+      resume_route: `${basePath}${query ? `?${query}` : ''}`,
+      resume_payload: {
+        screen: purchaseOrderId ? 'purchase-order-detail' : 'purchase-order-create',
+        purchaseOrderId: purchaseOrderId || undefined,
+        workflowCase: workflowContext.caseNumber || undefined,
+      },
+      business_status: purchaseOrderId ? 'bestellung_erfasst' : 'bestellung_in_bearbeitung',
+      action_label: purchaseOrderId ? 'Bestellung gespeichert' : 'Bestellentwurf gesichert',
+    })
+  }
   
   const [bestellung, setBestellung] = useState<BestellungData>({
     lieferant: '',
@@ -331,8 +357,17 @@ export default function BestellungAnlegenPage(): JSX.Element {
         })),
       }
 
-      await apiClient.post('/api/v1/purchase-orders', purchaseOrder)
-      navigate('/einkauf/bestellungen')
+      const created = await apiClient.post<{ id?: string; purchaseOrderNumber?: string }>(
+        '/api/v1/purchase-orders',
+        purchaseOrder,
+      )
+      const purchaseOrderId = created.id || created.purchaseOrderNumber
+      await persistWorkflowResume(purchaseOrderId)
+      if (purchaseOrderId) {
+        navigate(`/einkauf/bestellungen/${encodeURIComponent(purchaseOrderId)}?${buildWorkflowResumeQuery(purchaseOrderId)}`)
+      } else {
+        navigate('/einkauf/bestellungen')
+      }
     } catch (error) {
       console.error('Fehler beim Erstellen der Bestellung:', error)
       toast({ title: t('common.error', { defaultValue: 'Fehler' }), description: t('crud.messages.createError', { entityType: entityTypeLabel, defaultValue: 'Erstellen fehlgeschlagen.' }), variant: 'destructive' })

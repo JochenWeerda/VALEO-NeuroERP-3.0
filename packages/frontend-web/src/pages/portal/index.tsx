@@ -18,9 +18,12 @@ import {
   Receipt,
   Download,
   Leaf,
-  TrendingUp,  ChevronRight,
+  TrendingUp,
+  ChevronRight,
   Clock,
-  CheckCircle2,  Truck,
+  CheckCircle2,
+  Truck,
+  Calculator,
 } from 'lucide-react'
 
 
@@ -266,7 +269,7 @@ export default function PortalDashboard() {
           <CardDescription>Häufig verwendete Funktionen</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
             <QuickAccessCard
               title="Ackerschlagkartei"
               description="Feldbuch einsehen"
@@ -280,6 +283,13 @@ export default function PortalDashboard() {
               icon={<TrendingUp className="h-6 w-6" />}
               link="/portal/naehrstoffbilanzen"
               color="blue"
+            />
+            <QuickAccessCard
+              title="Rationsberechnung"
+              description="Kostenoptimale Ration berechnen"
+              icon={<Calculator className="h-6 w-6" />}
+              link="/portal/rationsoptimierung"
+              color="emerald"
             />
             <QuickAccessCard
               title="Zertifikate"

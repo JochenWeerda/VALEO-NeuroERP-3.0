@@ -6,13 +6,19 @@ import {
   BookOpen,
   Calculator,
   Calendar,
+  CheckCircle2,
   ChevronRight,
+  CircleAlert,
   Database,
   FileText,
+  History,
   Landmark,
   Package,
+  PauseCircle,
+  PlayCircle,
   Plus,
   Receipt,
+  Save,
   Search,
   Settings,
   ShieldCheck,
@@ -22,8 +28,11 @@ import {
   UserCircle2,
   Wallet,
   Warehouse,
+  XCircle,
 } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+import { CustomerCombobox, type CustomerLite } from '@/components/crm/CustomerCombobox'
+import { CustomerSelectionDialog, type Customer } from '@/components/sales/CustomerSelectionDialog'
 import { PageSection, PageSurface } from '@/components/patterns/PageSurface'
 import { AgentProcessPanel } from '@/components/agent'
 import { Badge } from '@/components/ui/badge'
@@ -32,7 +41,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Textarea } from '@/components/ui/textarea'
 import {
   fetchFlowSpineWorkspace,
   getFlowSpineFetchErrorMessage,
@@ -40,9 +57,17 @@ import {
   useCreateFlowSpineInstance,
   useExecuteAgentAction,
   useExecuteFlowSpineAction,
+  useFlowSpineLifecycleAction,
+  useFlowSpineInstances,
+  useFlowSpineTimeline,
+  useResumeFlowSpineInstance,
+  useSaveFlowSpineInstance,
   type FlowSpineAction,
+  type FlowSpineLifecycleActionPayload,
+  type FlowSpineLifecycleStatus,
   type FlowSpineNode,
 } from '@/lib/api/flow-spines'
+import { useDebounce } from '@/hooks/useDebounce'
 import { toast } from '@/hooks/use-toast'
 import i18n from '@/i18n/config'
 import { cn } from '@/lib/utils'
@@ -371,8 +396,81 @@ function toneClasses(tone: string): string {
   }
 }
 
-export function FlowSpineWorkspace({ processKey, instanceId }: FlowSpineWorkspaceProps): JSX.Element {
+type LifecycleDialogMode = 'hold' | 'complete' | 'cancel' | 'fail'
+
+type LifecycleDialogState = {
+  mode: LifecycleDialogMode
+  reasonCategory: string
+  reasonCode: string
+  reasonNote: string
+  businessStatus: string
+  blockedUntil: string
+}
+
+const LIFECYCLE_LABELS: Record<FlowSpineLifecycleStatus, string> = {
+  draft: 'Entwurf',
+  in_progress: 'In Bearbeitung',
+  on_hold: 'Pausiert',
+  completed: 'Abgeschlossen',
+  cancelled: 'Abgebrochen',
+  failed: 'Gescheitert',
+}
+
+const LIFECYCLE_TONE_CLASSES: Record<FlowSpineLifecycleStatus, string> = {
+  draft: 'border-slate-500/40 bg-slate-500/10 text-slate-200',
+  in_progress: 'border-indigo-400/40 bg-indigo-500/15 text-indigo-100',
+  on_hold: 'border-amber-400/40 bg-amber-500/15 text-amber-100',
+  completed: 'border-emerald-400/40 bg-emerald-500/15 text-emerald-100',
+  cancelled: 'border-rose-400/40 bg-rose-500/15 text-rose-100',
+  failed: 'border-red-400/40 bg-red-500/15 text-red-100',
+}
+
+const REASON_CATEGORY_OPTIONS = [
+  { value: 'customer', label: 'Kunde' },
+  { value: 'supplier', label: 'Lieferant' },
+  { value: 'logistics', label: 'Logistik' },
+  { value: 'quality', label: 'Qualitaet' },
+  { value: 'finance', label: 'Finanzen' },
+  { value: 'compliance', label: 'Compliance' },
+  { value: 'technical', label: 'Technik' },
+  { value: 'internal', label: 'Intern' },
+]
+
+function formatDateTime(value?: string | null): string {
+  if (!value) return '—'
+  try {
+    return new Intl.DateTimeFormat('de-DE', {
+      dateStyle: 'short',
+      timeStyle: 'short',
+    }).format(new Date(value))
+  } catch {
+    return value
+  }
+}
+
+function lifecycleSummary(workspace: {
+  lifecycle_status?: FlowSpineLifecycleStatus
+  cancellation_reason_code?: string
+  failure_reason_code?: string
+  completion_reason_code?: string
+  reason_note?: string
+}): string {
+  if (workspace.lifecycle_status === 'cancelled') {
+    return workspace.cancellation_reason_code || workspace.reason_note || 'Mit Grund beendet'
+  }
+  if (workspace.lifecycle_status === 'failed') {
+    return workspace.failure_reason_code || workspace.reason_note || 'Gescheitert'
+  }
+  if (workspace.lifecycle_status === 'completed') {
+    return workspace.completion_reason_code || workspace.reason_note || 'Fachlich abgeschlossen'
+  }
+  return workspace.reason_note || 'Kein Abschlussgrund gesetzt'
+}
+
+export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: FlowSpineWorkspaceProps): JSX.Element {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const instanceId = instanceIdProp || searchParams.get('instanceId') || undefined
   const activeLang = i18n.resolvedLanguage ?? i18n.language ?? 'de'
   const startConfig = PROCESS_START_CONFIGS[processKey] ?? PROCESS_START_CONFIGS['order-to-cash']
   const workspaceQuery = useQuery({
@@ -393,7 +491,22 @@ export function FlowSpineWorkspace({ processKey, instanceId }: FlowSpineWorkspac
   const [newInstancePartnerName, setNewInstancePartnerName] = useState('')
   const [newInstanceSubject, setNewInstanceSubject] = useState('')
   const [newInstanceEntryMode, setNewInstanceEntryMode] = useState(startConfig.entryModes[0]?.value ?? 'Direktauftrag')
+  const [newInstanceCustomer, setNewInstanceCustomer] = useState<CustomerLite | null>(null)
+  const [showAdvancedCustomerSearch, setShowAdvancedCustomerSearch] = useState(false)
   const createInstance = useCreateFlowSpineInstance(processKey)
+  const location = useLocation()
+
+  const [instanceSearch, setInstanceSearch] = useState('')
+  const debouncedInstanceSearch = useDebounce(instanceSearch, 300)
+  const instancesQuery = useFlowSpineInstances(processKey, debouncedInstanceSearch || undefined)
+  const timelineQuery = useFlowSpineTimeline(processKey, instanceId)
+  const saveInstance = useSaveFlowSpineInstance(processKey, instanceId)
+  const resumeInstance = useResumeFlowSpineInstance(processKey, instanceId)
+  const holdInstance = useFlowSpineLifecycleAction(processKey, instanceId, 'hold')
+  const completeInstance = useFlowSpineLifecycleAction(processKey, instanceId, 'complete')
+  const cancelInstance = useFlowSpineLifecycleAction(processKey, instanceId, 'cancel')
+  const failInstance = useFlowSpineLifecycleAction(processKey, instanceId, 'fail')
+  const [lifecycleDialog, setLifecycleDialog] = useState<LifecycleDialogState | null>(null)
 
   // Action execution hooks
   const executeAction = useExecuteFlowSpineAction()
@@ -404,7 +517,42 @@ export function FlowSpineWorkspace({ processKey, instanceId }: FlowSpineWorkspac
     setNewInstanceLabel('')
     setNewInstancePartnerName('')
     setNewInstanceSubject('')
+    setNewInstanceCustomer(null)
   }, [startConfig, processKey])
+
+  // Return from "+ Neuen Kunden anlegen" — KundeNeuMaskBuilderPage sendet uns
+  // ?newCustomerId=<id>&newCustomerName=<name>&newCustomerNumber=<nr>&openNewInstance=1 zurueck.
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    const newId = params.get('newCustomerId')
+    const newName = params.get('newCustomerName')
+    const newNumber = params.get('newCustomerNumber') ?? ''
+    const reopen = params.get('openNewInstance') === '1'
+    if (!reopen || !newId || !newName) return
+
+    setNewInstanceCustomer({
+      id: newId,
+      customer_number: newNumber,
+      company_name: newName,
+    })
+    setNewInstancePartnerName(newName)
+    const keepSubject = params.get('subject')
+    const keepLabel = params.get('label')
+    if (keepSubject) setNewInstanceSubject(keepSubject)
+    if (keepLabel) setNewInstanceLabel(keepLabel)
+    setShowNewInstanceDialog(true)
+
+    // Query-Params wieder aufraeumen, damit der Effect nicht zweimal feuert.
+    const cleaned = new URLSearchParams(location.search)
+    cleaned.delete('newCustomerId')
+    cleaned.delete('newCustomerName')
+    cleaned.delete('newCustomerNumber')
+    cleaned.delete('openNewInstance')
+    cleaned.delete('subject')
+    cleaned.delete('label')
+    const cleanedQuery = cleaned.toString()
+    navigate(`${location.pathname}${cleanedQuery ? `?${cleanedQuery}` : ''}`, { replace: true })
+  }, [location.search, location.pathname, navigate])
 
   useEffect(() => {
     if (workspace?.focus_node_id) {
@@ -486,12 +634,114 @@ export function FlowSpineWorkspace({ processKey, instanceId }: FlowSpineWorkspac
       setNewInstancePartnerName('')
       setNewInstanceSubject('')
       setNewInstanceEntryMode(startConfig.entryModes[0]?.value ?? 'Direktauftrag')
-      go(startConfig.buildHref(created))
+      setNewInstanceCustomer(null)
+      const baseHref = startConfig.buildHref(created)
+      const hrefWithCustomer =
+        processKey === 'order-to-cash' && newInstanceCustomer
+          ? `${baseHref}${baseHref.includes('?') ? '&' : '?'}customerId=${encodeURIComponent(newInstanceCustomer.id)}&customerNumber=${encodeURIComponent(newInstanceCustomer.customer_number)}`
+          : baseHref
+      go(hrefWithCustomer)
     } catch (e) {
       console.error('Create instance failed:', e)
       toast({
         title: 'Fehler',
         description: 'Instanz konnte nicht erstellt werden.',
+        variant: 'destructive',
+      })
+    }
+  }
+
+  const openLifecycleDialog = (mode: LifecycleDialogMode) => {
+    setLifecycleDialog({
+      mode,
+      reasonCategory: '',
+      reasonCode: '',
+      reasonNote: '',
+      businessStatus: workspace?.business_status ?? '',
+      blockedUntil: '',
+    })
+  }
+
+  const closeLifecycleDialog = () => setLifecycleDialog(null)
+
+  const handleSaveLifecycle = async (): Promise<void> => {
+    if (!instanceId) return
+    try {
+      await saveInstance.mutateAsync({
+        resume_node_id: selectedNode?.id,
+        resume_route: `${location.pathname}?instanceId=${instanceId}`,
+        resume_payload: {
+          selectedNodeId: selectedNode?.id,
+          processKey,
+          title: workspace?.title,
+        },
+        business_status: workspace?.business_status,
+        action_label: 'Arbeitsstand gespeichert',
+      })
+      toast({ title: 'Arbeitsstand gespeichert', description: 'Resume-Kontext wurde aktualisiert.' })
+    } catch (e) {
+      console.error('Save lifecycle failed:', e)
+      toast({
+        title: 'Fehler',
+        description: 'Arbeitsstand konnte nicht gespeichert werden.',
+        variant: 'destructive',
+      })
+    }
+  }
+
+  const handleResumeLifecycle = async (): Promise<void> => {
+    if (!instanceId) return
+    try {
+      const result = await resumeInstance.mutateAsync({ action_label: 'Vorgang wieder aufgenommen' })
+      toast({ title: 'Vorgang wieder aufgenommen', description: result.case_number })
+      const targetRoute = result.resume_target?.route
+      if (targetRoute) {
+        navigate(targetRoute)
+      }
+    } catch (e) {
+      console.error('Resume lifecycle failed:', e)
+      toast({
+        title: 'Fehler',
+        description: 'Vorgang konnte nicht wieder aufgenommen werden.',
+        variant: 'destructive',
+      })
+    }
+  }
+
+  const handleSubmitLifecycleDialog = async (): Promise<void> => {
+    if (!instanceId || !lifecycleDialog) return
+    const payload: FlowSpineLifecycleActionPayload = {
+      node_id: selectedNode?.id,
+      business_status: lifecycleDialog.businessStatus.trim() || undefined,
+      reason_category: lifecycleDialog.reasonCategory || undefined,
+      reason_code: lifecycleDialog.reasonCode.trim() || undefined,
+      reason_note: lifecycleDialog.reasonNote.trim() || undefined,
+      blocked_until: lifecycleDialog.blockedUntil || undefined,
+    }
+
+    const mutationByMode = {
+      hold: holdInstance,
+      complete: completeInstance,
+      cancel: cancelInstance,
+      fail: failInstance,
+    } as const
+
+    const titleByMode: Record<LifecycleDialogMode, string> = {
+      hold: 'Vorgang pausiert',
+      complete: 'Vorgang abgeschlossen',
+      cancel: 'Vorgang abgebrochen',
+      fail: 'Vorgang als gescheitert markiert',
+    }
+
+    try {
+      await mutationByMode[lifecycleDialog.mode].mutateAsync(payload)
+      toast({ title: titleByMode[lifecycleDialog.mode], description: workspace?.case_number || workspace?.instance_label })
+      closeLifecycleDialog()
+    } catch (e: any) {
+      console.error('Lifecycle action failed:', e)
+      toast({
+        title: 'Fehler',
+        description: e?.response?.data?.detail || 'Lifecycle-Aktion konnte nicht ausgefuehrt werden.',
         variant: 'destructive',
       })
     }
@@ -585,6 +835,18 @@ export function FlowSpineWorkspace({ processKey, instanceId }: FlowSpineWorkspac
     )
   }
 
+  const lifecycleStatus = workspace.lifecycle_status ?? 'draft'
+  const lifecycleLabel = LIFECYCLE_LABELS[lifecycleStatus]
+  const lifecycleToneClass = LIFECYCLE_TONE_CLASSES[lifecycleStatus]
+  const hasTerminalLifecycle = lifecycleStatus === 'completed' || lifecycleStatus === 'cancelled' || lifecycleStatus === 'failed'
+  const lifecycleBusy =
+    saveInstance.isPending ||
+    resumeInstance.isPending ||
+    holdInstance.isPending ||
+    completeInstance.isPending ||
+    cancelInstance.isPending ||
+    failInstance.isPending
+
   return (
     <PageSurface
       data-page-surface={`flow-spine-${processKey}`}
@@ -648,19 +910,59 @@ export function FlowSpineWorkspace({ processKey, instanceId }: FlowSpineWorkspac
                 ))}
               </div>
             </div>
-            {[
-              { title: 'Favoriten', items: workspace.left_navigation.favorites },
-              { title: 'Letzte Vorgaenge', items: workspace.left_navigation.recent_items },
-            ].map((section) => (
-              <div key={section.title} className="mb-6">
-                <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">{section.title}</p>
-                <div className="space-y-2 text-sm text-slate-300">
-                  {section.items.map((item) => (
-                    <div key={item} className="rounded-2xl border border-white/5 bg-white/[0.03] px-3 py-3">{item}</div>
-                  ))}
-                </div>
+            <div className="mb-6">
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">Favoriten</p>
+              <div className="space-y-2 text-sm text-slate-300">
+                {workspace.left_navigation.favorites.map((item) => (
+                  <div key={item} className="rounded-2xl border border-white/5 bg-white/[0.03] px-3 py-3">{item}</div>
+                ))}
               </div>
-            ))}
+            </div>
+            <div className="mb-6">
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">Vorgaenge</p>
+              <Input
+                placeholder="Suchen..."
+                value={instanceSearch}
+                onChange={(e) => setInstanceSearch(e.target.value)}
+                className="mb-2 h-8 border-white/10 bg-white/5 text-xs text-slate-100 placeholder:text-slate-500"
+              />
+              <div className="space-y-1.5 max-h-[300px] overflow-y-auto">
+                {instancesQuery.data?.map((inst) => (
+                  <button
+                    key={inst.instance_id}
+                    onClick={() => {
+                      const activeProcess = workspace.left_navigation.processes.find(p => p.active)
+                      const basePath = activeProcess?.route_path || window.location.pathname
+                      navigate(`${basePath}?instanceId=${inst.instance_id}`)
+                    }}
+                    className={cn(
+                      'w-full rounded-xl border px-3 py-2 text-left transition',
+                      instanceId === inst.instance_id
+                        ? 'border-indigo-400/40 bg-indigo-500/15 text-indigo-100'
+                        : 'border-white/5 bg-white/[0.03] text-slate-300 hover:bg-white/[0.06]',
+                    )}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="text-xs font-medium truncate">{inst.case_number}</div>
+                      {inst.lifecycle_status ? (
+                        <span className={cn('shrink-0 rounded-full border px-1.5 py-0.5 text-[10px]', LIFECYCLE_TONE_CLASSES[inst.lifecycle_status])}>
+                          {LIFECYCLE_LABELS[inst.lifecycle_status]}
+                        </span>
+                      ) : null}
+                    </div>
+                    <div className="text-[11px] text-slate-400 truncate">
+                      {inst.customer_name || inst.label || inst.subject || '\u2013'}
+                    </div>
+                  </button>
+                ))}
+                {instancesQuery.isLoading && (
+                  <div className="text-xs text-slate-500 py-2">Laden...</div>
+                )}
+                {!instancesQuery.isLoading && instancesQuery.data?.length === 0 && (
+                  <div className="text-xs text-slate-500 py-2">Keine Vorgaenge gefunden</div>
+                )}
+              </div>
+            </div>
             <div>
               <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">Rollenwechsel</p>
               <div className="space-y-2">
@@ -687,6 +989,137 @@ export function FlowSpineWorkspace({ processKey, instanceId }: FlowSpineWorkspac
                 ))}
               </div>
             </div>
+
+            {workspace.customer_data && (
+              <div className="mb-4 flex items-center gap-4 rounded-2xl border border-indigo-400/20 bg-indigo-500/8 px-5 py-3">
+                <Building2 className="h-5 w-5 text-indigo-300 shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-semibold text-slate-100">
+                    {workspace.customer_data.name_1}
+                    {workspace.customer_data.name_2 && ` \u2013 ${workspace.customer_data.name_2}`}
+                  </div>
+                  <div className="text-xs text-slate-400">
+                    {[workspace.customer_data.street, workspace.customer_data.house_number].filter(Boolean).join(' ')}
+                    {workspace.customer_data.postal_code && `, ${workspace.customer_data.postal_code}`}
+                    {workspace.customer_data.city && ` ${workspace.customer_data.city}`}
+                  </div>
+                </div>
+                <div className="text-right text-xs text-slate-500 shrink-0">
+                  <div>Nr. {workspace.customer_data.partner_number}</div>
+                  {workspace.customer_data.debtor_account && <div>Deb. {workspace.customer_data.debtor_account}</div>}
+                  {workspace.customer_data.creditor_account && <div>Kred. {workspace.customer_data.creditor_account}</div>}
+                </div>
+              </div>
+            )}
+
+            {instanceId ? (
+              <div className="mb-4 rounded-2xl border border-white/10 bg-slate-950/45 p-5">
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div className="space-y-3">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge className={cn('border px-2.5 py-1 text-xs', lifecycleToneClass)}>
+                        {lifecycleLabel}
+                      </Badge>
+                      {workspace.case_number ? (
+                        <Badge className="border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-slate-200">
+                          {workspace.case_number}
+                        </Badge>
+                      ) : null}
+                      {workspace.business_status ? (
+                        <Badge className="border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-slate-300">
+                          {workspace.business_status}
+                        </Badge>
+                      ) : null}
+                    </div>
+                    <div className="grid gap-2 text-xs text-slate-400 md:grid-cols-4">
+                      <div>
+                        <div className="uppercase tracking-[0.18em] text-slate-500">Resume</div>
+                        <div className="mt-1 text-slate-200">{workspace.resume_node_id || workspace.active_node_id || '—'}</div>
+                      </div>
+                      <div>
+                        <div className="uppercase tracking-[0.18em] text-slate-500">Owner</div>
+                        <div className="mt-1 text-slate-200">{workspace.assigned_owner || 'Nicht gesetzt'}</div>
+                      </div>
+                      <div>
+                        <div className="uppercase tracking-[0.18em] text-slate-500">Letzte Aktivitaet</div>
+                        <div className="mt-1 text-slate-200">{formatDateTime(workspace.last_activity_at || workspace.updated_at)}</div>
+                      </div>
+                      <div>
+                        <div className="uppercase tracking-[0.18em] text-slate-500">Zusammenfassung</div>
+                        <div className="mt-1 text-slate-200">{lifecycleSummary(workspace)}</div>
+                      </div>
+                    </div>
+                    {workspace.resume_route ? (
+                      <div className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-slate-400">
+                        Letztes Resume-Ziel: <span className="text-slate-200">{workspace.resume_route}</span>
+                      </div>
+                    ) : null}
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      size="sm"
+                      onClick={() => void handleSaveLifecycle()}
+                      disabled={!instanceId || lifecycleBusy || hasTerminalLifecycle}
+                      className="bg-white text-slate-950 hover:bg-white/90"
+                    >
+                      <Save className="mr-1.5 h-4 w-4" />
+                      Speichern
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => void handleResumeLifecycle()}
+                      disabled={!instanceId || lifecycleBusy || hasTerminalLifecycle}
+                      className="border-white/10 bg-white/5 text-slate-200 hover:bg-white/10"
+                    >
+                      <PlayCircle className="mr-1.5 h-4 w-4" />
+                      Wieder aufnehmen
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => openLifecycleDialog('hold')}
+                      disabled={!instanceId || lifecycleBusy || hasTerminalLifecycle}
+                      className="border-white/10 bg-white/5 text-slate-200 hover:bg-white/10"
+                    >
+                      <PauseCircle className="mr-1.5 h-4 w-4" />
+                      Pause
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => openLifecycleDialog('complete')}
+                      disabled={!instanceId || lifecycleBusy || hasTerminalLifecycle}
+                      className="border-emerald-400/20 bg-emerald-500/10 text-emerald-100 hover:bg-emerald-500/15"
+                    >
+                      <CheckCircle2 className="mr-1.5 h-4 w-4" />
+                      Abschliessen
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => openLifecycleDialog('cancel')}
+                      disabled={!instanceId || lifecycleBusy || hasTerminalLifecycle}
+                      className="border-rose-400/20 bg-rose-500/10 text-rose-100 hover:bg-rose-500/15"
+                    >
+                      <XCircle className="mr-1.5 h-4 w-4" />
+                      Abbrechen
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => openLifecycleDialog('fail')}
+                      disabled={!instanceId || lifecycleBusy || hasTerminalLifecycle}
+                      className="border-red-400/20 bg-red-500/10 text-red-100 hover:bg-red-500/15"
+                    >
+                      <CircleAlert className="mr-1.5 h-4 w-4" />
+                      Scheitern
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ) : null}
 
             <div className="rounded-[28px] border border-white/10 bg-white/[0.03] p-8">
               <div className="relative mb-8">
@@ -848,9 +1281,10 @@ export function FlowSpineWorkspace({ processKey, instanceId }: FlowSpineWorkspac
           <aside className="border-l border-white/5 bg-slate-950/45 p-5">
             <div className="mb-4 text-sm font-semibold text-slate-100">AI Copilot</div>
             <Tabs defaultValue="agent" className="flex h-full flex-col">
-              <TabsList className="grid w-full grid-cols-4 bg-white/5">
+              <TabsList className="grid w-full grid-cols-5 bg-white/5">
                 <TabsTrigger value="agent">Agent</TabsTrigger>
                 <TabsTrigger value="actions">Aktionen</TabsTrigger>
+                <TabsTrigger value="timeline">Timeline</TabsTrigger>
                 <TabsTrigger value="docs">Docs</TabsTrigger>
                 <TabsTrigger value="kpis">KPIs</TabsTrigger>
               </TabsList>
@@ -890,6 +1324,43 @@ export function FlowSpineWorkspace({ processKey, instanceId }: FlowSpineWorkspac
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                 ))}
+              </TabsContent>
+              <TabsContent value="timeline" className="mt-4 space-y-3">
+                {!instanceId ? (
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-slate-400">
+                    Timeline verfuegbar, sobald eine konkrete Instanz geladen ist.
+                  </div>
+                ) : timelineQuery.isLoading ? (
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-slate-400">
+                    Timeline wird geladen...
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {timelineQuery.data?.events.length ? (
+                      timelineQuery.data.events.slice().reverse().map((event) => (
+                        <div key={event.event_id} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-2 text-sm font-medium text-slate-100">
+                              <History className="h-4 w-4 text-slate-500" />
+                              {event.event_type}
+                            </div>
+                            <div className="text-[11px] text-slate-500">{formatDateTime(event.created_at)}</div>
+                          </div>
+                          <div className="mt-2 space-y-1 text-xs text-slate-400">
+                            <div>Status: {event.from_lifecycle_status || '—'} → {event.to_lifecycle_status || '—'}</div>
+                            {event.node_id ? <div>Knoten: {event.node_id}</div> : null}
+                            {event.reason_code ? <div>Grund: {event.reason_category || '—'} / {event.reason_code}</div> : null}
+                            {event.reason_note ? <div>Bemerkung: {event.reason_note}</div> : null}
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-slate-400">
+                        Noch keine Timeline-Eintraege vorhanden.
+                      </div>
+                    )}
+                  </div>
+                )}
               </TabsContent>
               <TabsContent value="docs" className="mt-4 space-y-3">
                 {selectedNode.documents.concat(workspace.right_panel.resources).map((doc) => (
@@ -944,16 +1415,38 @@ export function FlowSpineWorkspace({ processKey, instanceId }: FlowSpineWorkspac
             </div>
             <div className="space-y-2">
               <Label htmlFor="instance-partner" className="text-slate-300">{startConfig.partnerLabel}</Label>
-              <div className="relative">
-                <Building2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
-                <Input
+              {processKey === 'order-to-cash' ? (
+                <CustomerCombobox
                   id="instance-partner"
-                  value={newInstancePartnerName}
-                  onChange={(e) => setNewInstancePartnerName(e.target.value)}
-                  placeholder="z.B. Agrarhandel Nord eG"
-                  className="border-white/10 bg-white/5 pl-9 text-slate-100 placeholder:text-slate-500"
+                  value={newInstanceCustomer}
+                  onChange={(c) => {
+                    setNewInstanceCustomer(c)
+                    setNewInstancePartnerName(c ? c.company_name : '')
+                  }}
+                  onCreateNew={(initialName) => {
+                    const currentHref = `${location.pathname}${location.search}`
+                    const params = new URLSearchParams()
+                    params.set('returnTo', currentHref)
+                    if (initialName) params.set('initialName', initialName)
+                    if (newInstanceSubject.trim()) params.set('subject', newInstanceSubject.trim())
+                    if (newInstanceLabel.trim()) params.set('label', newInstanceLabel.trim())
+                    navigate(`/verkauf/kunde-neu?${params.toString()}`)
+                  }}
+                  onOpenAdvanced={() => setShowAdvancedCustomerSearch(true)}
+                  placeholder="Kunde suchen (Name oder Nummer) …"
                 />
-              </div>
+              ) : (
+                <div className="relative">
+                  <Building2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+                  <Input
+                    id="instance-partner"
+                    value={newInstancePartnerName}
+                    onChange={(e) => setNewInstancePartnerName(e.target.value)}
+                    placeholder="z.B. Agrarhandel Nord eG"
+                    className="border-white/10 bg-white/5 pl-9 text-slate-100 placeholder:text-slate-500"
+                  />
+                </div>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="instance-subject" className="text-slate-300">{startConfig.subjectLabel}</Label>
@@ -985,7 +1478,7 @@ export function FlowSpineWorkspace({ processKey, instanceId }: FlowSpineWorkspac
           <DialogFooter>
             <Button
               variant="outline"
-              onClick={() => { setShowNewInstanceDialog(false); setNewInstanceLabel(''); setNewInstancePartnerName(''); setNewInstanceSubject(''); setNewInstanceEntryMode(startConfig.entryModes[0]?.value ?? 'Direktauftrag') }}
+              onClick={() => { setShowNewInstanceDialog(false); setNewInstanceLabel(''); setNewInstancePartnerName(''); setNewInstanceSubject(''); setNewInstanceEntryMode(startConfig.entryModes[0]?.value ?? 'Direktauftrag'); setNewInstanceCustomer(null) }}
               className="border-white/10 bg-white/5 text-slate-200 hover:bg-white/10"
             >
               Abbrechen
@@ -1000,6 +1493,160 @@ export function FlowSpineWorkspace({ processKey, instanceId }: FlowSpineWorkspac
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={!!lifecycleDialog} onOpenChange={(open) => { if (!open) closeLifecycleDialog() }}>
+        <DialogContent className="border-white/10 bg-slate-900 text-slate-100">
+          <DialogHeader>
+            <DialogTitle>
+              {lifecycleDialog?.mode === 'hold' && 'Vorgang pausieren'}
+              {lifecycleDialog?.mode === 'complete' && 'Vorgang abschliessen'}
+              {lifecycleDialog?.mode === 'cancel' && 'Vorgang abbrechen'}
+              {lifecycleDialog?.mode === 'fail' && 'Vorgang als gescheitert markieren'}
+            </DialogTitle>
+            <DialogDescription className="text-slate-400">
+              Der Dialog ist bewusst prozessneutral. Flow-spezifische Grundkataloge folgen in einem spaeteren Slice.
+            </DialogDescription>
+          </DialogHeader>
+          {lifecycleDialog ? (
+            <div className="space-y-4 py-2">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label className="text-slate-300">Business-Status</Label>
+                  <Input
+                    value={lifecycleDialog.businessStatus}
+                    onChange={(e) => setLifecycleDialog({ ...lifecycleDialog, businessStatus: e.target.value })}
+                    placeholder="z.B. lieferung_blockiert"
+                    className="border-white/10 bg-white/5 text-slate-100 placeholder:text-slate-500"
+                  />
+                </div>
+                {lifecycleDialog.mode === 'hold' ? (
+                  <div className="space-y-2">
+                    <Label className="text-slate-300">Blockiert bis</Label>
+                    <Input
+                      type="datetime-local"
+                      value={lifecycleDialog.blockedUntil}
+                      onChange={(e) => setLifecycleDialog({ ...lifecycleDialog, blockedUntil: e.target.value })}
+                      className="border-white/10 bg-white/5 text-slate-100"
+                    />
+                  </div>
+                ) : null}
+              </div>
+
+              {lifecycleDialog.mode !== 'complete' ? (
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label className="text-slate-300">
+                      Kategorie <span className="text-rose-400">*</span>
+                    </Label>
+                    <Select
+                      value={lifecycleDialog.reasonCategory}
+                      onValueChange={(value) => setLifecycleDialog({ ...lifecycleDialog, reasonCategory: value })}
+                    >
+                      <SelectTrigger
+                        aria-required="true"
+                        className={cn(
+                          'border-white/10 bg-white/5 text-slate-100',
+                          !lifecycleDialog.reasonCategory && 'border-rose-400/40',
+                        )}
+                      >
+                        <SelectValue placeholder="Kategorie waehlen …" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {REASON_CATEGORY_OPTIONS.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {!lifecycleDialog.reasonCategory && (
+                      <p className="text-[11px] text-rose-400">Pflichtfeld</p>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-slate-300">
+                      Grundcode <span className="text-rose-400">*</span>
+                    </Label>
+                    <Input
+                      aria-required="true"
+                      value={lifecycleDialog.reasonCode}
+                      onChange={(e) => setLifecycleDialog({ ...lifecycleDialog, reasonCode: e.target.value })}
+                      placeholder="z.B. customer_order_cancelled"
+                      className={cn(
+                        'border-white/10 bg-white/5 text-slate-100 placeholder:text-slate-500',
+                        !lifecycleDialog.reasonCode.trim() && 'border-rose-400/40',
+                      )}
+                    />
+                    {!lifecycleDialog.reasonCode.trim() && (
+                      <p className="text-[11px] text-rose-400">Pflichtfeld</p>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Label className="text-slate-300">Abschlusscode</Label>
+                  <Input
+                    value={lifecycleDialog.reasonCode}
+                    onChange={(e) => setLifecycleDialog({ ...lifecycleDialog, reasonCode: e.target.value })}
+                    placeholder="z.B. workflow_completed"
+                    className="border-white/10 bg-white/5 text-slate-100 placeholder:text-slate-500"
+                  />
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <Label className="text-slate-300">Bemerkung</Label>
+                <Textarea
+                  value={lifecycleDialog.reasonNote}
+                  onChange={(e) => setLifecycleDialog({ ...lifecycleDialog, reasonNote: e.target.value })}
+                  placeholder="Freitext fuer Ursache, Kontext oder Lessons Learned"
+                  className="min-h-[110px] border-white/10 bg-white/5 text-slate-100 placeholder:text-slate-500"
+                />
+              </div>
+            </div>
+          ) : null}
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={closeLifecycleDialog}
+              className="border-white/10 bg-white/5 text-slate-200 hover:bg-white/10"
+            >
+              Abbrechen
+            </Button>
+            <Button
+              onClick={() => void handleSubmitLifecycleDialog()}
+              disabled={
+                !lifecycleDialog ||
+                lifecycleBusy ||
+                (lifecycleDialog.mode !== 'complete' &&
+                  (!lifecycleDialog.reasonCategory || !lifecycleDialog.reasonCode.trim()))
+              }
+              className="bg-indigo-500 text-white hover:bg-indigo-400"
+            >
+              {lifecycleBusy ? 'Wird gespeichert...' : 'Bestaetigen'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {processKey === 'order-to-cash' ? (
+        <CustomerSelectionDialog
+          open={showAdvancedCustomerSearch}
+          onClose={() => setShowAdvancedCustomerSearch(false)}
+          onSelect={(customer: Customer) => {
+            const selected: CustomerLite = {
+              id: customer.id,
+              customer_number: customer.customer_number ?? customer.customerNumber ?? '',
+              company_name: customer.company_name ?? customer.name ?? '',
+              city: customer.city ?? customer.address?.city ?? null,
+              postal_code: customer.postalCode ?? customer.address?.postalCode ?? null,
+              is_active: customer.is_active,
+            }
+            setNewInstanceCustomer(selected)
+            setNewInstancePartnerName(selected.company_name)
+            setShowAdvancedCustomerSearch(false)
+          }}
+          title="Erweiterte Kundensuche"
+        />
+      ) : null}
     </PageSurface>
   )
 }

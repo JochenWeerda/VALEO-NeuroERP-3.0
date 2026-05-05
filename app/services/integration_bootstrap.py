@@ -17,6 +17,17 @@ class IntegrationCheck:
     notes: list[str]
 
 
+@dataclass(frozen=True)
+class IntegrationProbe:
+    integration_key: str
+    status: str
+    probe_kind: str
+    target: str | None
+    command_hint: str | None
+    blocked_by: list[str]
+    notes: list[str]
+
+
 def _has_secret(*keys: str) -> bool:
     for key in keys:
         if get_secret(key, accessor="integration_bootstrap"):
@@ -138,6 +149,122 @@ def _crm_downstream_check() -> IntegrationCheck:
     )
 
 
+def _probe_status(check: IntegrationCheck) -> str:
+    if check.status == "disabled":
+        return "disabled"
+    if check.missing:
+        return "blocked"
+    if check.status == "ready":
+        return "ready"
+    return "manual"
+
+
+def _oidc_probe(check: IntegrationCheck) -> IntegrationProbe:
+    issuer = settings.OIDC_ISSUER_URL or settings.KEYCLOAK_URL
+    target = f"{str(issuer).rstrip('/')}/.well-known/openid-configuration" if issuer else None
+    return IntegrationProbe(
+        integration_key=check.integration_key,
+        status=_probe_status(check),
+        probe_kind="http_get",
+        target=target,
+        command_hint=f"curl -fsS {target}" if target else None,
+        blocked_by=list(check.missing),
+        notes=["Validates issuer reachability and OIDC discovery metadata."],
+    )
+
+
+def _event_bus_probe(check: IntegrationCheck) -> IntegrationProbe:
+    target = settings.EVENT_BUS_NATS_URL if _has_value(settings.EVENT_BUS_NATS_URL) else None
+    return IntegrationProbe(
+        integration_key=check.integration_key,
+        status=_probe_status(check),
+        probe_kind="nats_connect",
+        target=target,
+        command_hint=f"nats server check --server {target}" if target else None,
+        blocked_by=list(check.missing),
+        notes=["Requires NATS CLI or equivalent JetStream client in the target environment."],
+    )
+
+
+def _superglue_probe(check: IntegrationCheck) -> IntegrationProbe:
+    base_url = settings.SUPERGLUE_BASE_URL or settings.SUPERGLUE_REST_URL
+    target = f"{str(base_url).rstrip('/')}/health" if base_url else None
+    return IntegrationProbe(
+        integration_key=check.integration_key,
+        status=_probe_status(check),
+        probe_kind="http_get_authenticated",
+        target=target,
+        command_hint=f"curl -fsS -H \"Authorization: Bearer $SUPERGLUE_AUTH_TOKEN\" {target}" if target else None,
+        blocked_by=list(check.missing),
+        notes=["Tenant-scoped token should come from the configured secret provider."],
+    )
+
+
+def _voice_probe(check: IntegrationCheck) -> IntegrationProbe:
+    return IntegrationProbe(
+        integration_key=check.integration_key,
+        status=_probe_status(check),
+        probe_kind="provider_smoke",
+        target="configured STT/TTS provider" if check.status != "disabled" else None,
+        command_hint="POST /api/v1/neuro/voice/transcribe with a short sample audio file",
+        blocked_by=list(check.missing),
+        notes=["Browser fallback is not a substitute for server-side provider validation."],
+    )
+
+
+def _crm_downstream_probe(check: IntegrationCheck) -> IntegrationProbe:
+    targets = [
+        value
+        for value in (
+            settings.CRM_CORE_BASE_URL,
+            settings.CRM_SALES_BASE_URL,
+            settings.CRM_SERVICE_BASE_URL,
+        )
+        if _has_value(value)
+    ]
+    target = ", ".join(str(value).rstrip("/") for value in targets) if targets else None
+    command_hint = (
+        " && ".join(f"curl -fsS {str(value).rstrip('/')}/health" for value in targets)
+        if targets
+        else None
+    )
+    return IntegrationProbe(
+        integration_key=check.integration_key,
+        status=_probe_status(check),
+        probe_kind="http_get",
+        target=target,
+        command_hint=command_hint,
+        blocked_by=list(check.missing),
+        notes=["All CRM downstream services should be checked in the same tenant/network context."],
+    )
+
+
+def build_integration_probe_plan(
+    checks: list[IntegrationCheck] | None = None,
+) -> list[IntegrationProbe]:
+    checks_by_key = {
+        check.integration_key: check
+        for check in (
+            checks
+            if checks is not None
+            else [
+                _oidc_check(),
+                _event_bus_check(),
+                _superglue_check(),
+                _voice_check(),
+                _crm_downstream_check(),
+            ]
+        )
+    }
+    return [
+        _oidc_probe(checks_by_key["oidc"]),
+        _event_bus_probe(checks_by_key["event_bus_nats"]),
+        _superglue_probe(checks_by_key["superglue"]),
+        _voice_probe(checks_by_key["voice"]),
+        _crm_downstream_probe(checks_by_key["crm_downstream"]),
+    ]
+
+
 def build_integration_bootstrap_summary() -> dict[str, Any]:
     checks = [
         _oidc_check(),
@@ -161,4 +288,5 @@ def build_integration_bootstrap_summary() -> dict[str, Any]:
         "disabled_count": disabled,
         "required_blockers": required_blockers,
         "integrations": [asdict(check) for check in checks],
+        "probe_plan": [asdict(probe) for probe in build_integration_probe_plan(checks)],
     }

@@ -6,6 +6,10 @@ export const entries: AutoGroupRouteEntry[] = [
     "path": "charge-verfolgung"
   },
   {
+    "module": "@/pages/futtermittel/grundfutteranalysen",
+    "path": "grundfutteranalysen"
+  },
+  {
     "module": "@/pages/futtermittel/einzelfuttermittel-liste",
     "path": "einzelfuttermittel-liste"
   },
