@@ -4,6 +4,9 @@
 
 Diese Checklisten schaerfen die UI-, CRUD- und Live-Betriebspruefung fuer Workflow-Cards.
 
+Die priorisierte E2E-Matrix fuer die naechsten Abnahmelaeufe liegt in
+[e2e-crud-acceptance-matrix-2026-04-24.md](c:/Users/Jochen/VALEO-NeuroERP-3.0/docs/quality-assurance/e2e-crud-acceptance-matrix-2026-04-24.md).
+
 ## Pflichtfragen pro Card
 
 - Kann ein Anwender diesen Schritt real in der UI ausfuehren?

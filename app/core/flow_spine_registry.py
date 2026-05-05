@@ -575,5 +575,9 @@ def merge_instance_statuses(workspace: dict, instance: dict) -> dict:
         workspace["instance_id"] = instance["instance_id"]
     if instance.get("case_number"):
         workspace["case_number"] = instance["case_number"]
+    if instance.get("customer_id"):
+        workspace["customer_id"] = instance["customer_id"]
+    if instance.get("customer_name"):
+        workspace["customer_name"] = instance["customer_name"]
 
     return workspace

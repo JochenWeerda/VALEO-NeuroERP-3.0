@@ -1,0 +1,174 @@
+﻿
+Ampel/Azidose-Simulation ÔÇô VALEO NeuroERP Rationsoptimierung
+
+Interpretation: pH GRUEN >= 6.2, GELB 5.9..6.2, ROT < 5.9 (SARA).
+peNDF GRUEN >= min+5, GELB min..min+5, ROT < min.
+
+===== A) TMR Standard 35 kg Milch (baseline) =====
+Solver-Status: optimal
+FAN: mode=auto_iterative  fani_final=3.1973  converged=True
+Policy-Profil: tmr_standard  Saisonprofil: None
+---- Ampelkritische Indikatoren ----
+  Pansen-pH (sim):  6.45  [GRUEN]  (Ziel >= 6.2, SARA < 5.9)
+  peNDF-Dichte:      207.0 g/kg TM  (min 140.0)  [GRUEN]
+  pabKH-Dichte:       94.2 g/kg TM  (Limit 210/225)
+  Strukturindex:     134.6          (Ziel >= 50)  [GRUEN]
+  RMD:                1.50 g N/kg TM
+---- LP-Harteverletzungen ----
+  (keine)
+---- LP-Weichverletzungen (Penalty) ----
+  soft: pabKH (g/kg TM)  ist=210.0  soll=94.2  penalty=17.37
+  soft: XL Rohfett (g/kg TM)  ist=40.0  soll=23.5  penalty=2.75
+  soft: RMD (g N/kg TM)  ist=1.5  soll=0.0  penalty=10.0
+  soft: K:Mg-Ratio  ist=13.69  soll=4.0  penalty=48.4517
+Penalty-Summary: total=0.000  A=0  B=0  C=0
+---- Warnungen ----
+  ! RMD 1.50 g N/kg TM ÔÇô Toleranzbereich (Ziel 0, DLG-Toleranz bis +1,5) leicht ├╝berschritten.
+  ! Weide K:Mg 33.7 > 6 ÔÇô Grastetanie-Risiko durch K/Mg-Antagonismus. Mg-betontes Weidemineral gezielt einsetzen (GfE-Workshop 2023 / DLG 417).
+  ! Weide liefert relativ zu Kalium wenig Magnesium; Weidemineral Mg/Na aktuell kaum eingesetzt.
+
+===== B) TMR Hochleistung 48 kg Milch (Stress-Test peNDF) =====
+Solver-Status: optimal
+FAN: mode=auto_iterative  fani_final=3.9981  converged=True
+Policy-Profil: tmr_standard  Saisonprofil: None
+---- Ampelkritische Indikatoren ----
+  Pansen-pH (sim):  6.41  [GRUEN]  (Ziel >= 6.2, SARA < 5.9)
+  peNDF-Dichte:      203.6 g/kg TM  (min 135.0)  [GRUEN]
+  pabKH-Dichte:       87.9 g/kg TM  (Limit 210/225)
+  Strukturindex:     112.9          (Ziel >= 50)  [GRUEN]
+  RMD:                1.50 g N/kg TM
+---- LP-Harteverletzungen ----
+  HARD: TM-Aufnahme (kg/d)  ist=26.6  soll=21.8
+---- LP-Weichverletzungen (Penalty) ----
+  soft: pabKH (g/kg TM)  ist=210.0  soll=87.9  penalty=18.315
+  soft: XL Rohfett (g/kg TM)  ist=40.0  soll=23.5  penalty=2.75
+  soft: RMD (g N/kg TM)  ist=1.5  soll=0.0  penalty=10.0
+  soft: K:Mg-Ratio  ist=15.026  soll=4.0  penalty=55.1319
+Penalty-Summary: total=0.000  A=0  B=0  C=0
+---- Warnungen ----
+  ! RMD 1.50 g N/kg TM ÔÇô Toleranzbereich (Ziel 0, DLG-Toleranz bis +1,5) leicht ├╝berschritten.
+  ! Weide K:Mg 29.6 > 6 ÔÇô Grastetanie-Risiko durch K/Mg-Antagonismus. Mg-betontes Weidemineral gezielt einsetzen (GfE-Workshop 2023 / DLG 417).
+  ! Weide liefert relativ zu Kalium wenig Magnesium; Weidemineral Mg/Na aktuell kaum eingesetzt.
+
+===== C) PMR+Weide Fruehjahr spring_mid (Bruder-Regression) =====
+Solver-Status: optimal
+FAN: mode=auto_iterative  fani_final=2.8635  converged=True
+Policy-Profil: pmr_pasture_spring  Saisonprofil: spring_mid
+---- Ampelkritische Indikatoren ----
+  Pansen-pH (sim):  6.46  [GRUEN]  (Ziel >= 6.2, SARA < 5.9)
+  peNDF-Dichte:      202.7 g/kg TM  (min 145.0)  [GRUEN]
+  pabKH-Dichte:      101.9 g/kg TM  (Limit 210/225)
+  Strukturindex:     144.6          (Ziel >= 50)  [GRUEN]
+  RMD:                4.33 g N/kg TM
+---- LP-Harteverletzungen ----
+  (keine)
+---- LP-Weichverletzungen (Penalty) ----
+  soft: pabKH (g/kg TM)  ist=225.0  soll=101.9  penalty=18.465
+  soft: XL Rohfett (g/kg TM)  ist=42.0  soll=26.3  penalty=2.6167
+  soft: RMD (g N/kg TM)  ist=4.329  soll=0.0  penalty=28.8568
+  soft: K:Mg-Ratio  ist=12.381  soll=4.0  penalty=41.905
+Penalty-Summary: total=0.000  A=0  B=0  C=0
+---- Warnungen ----
+  ! RMD 4.33 g N/kg TM > 2,0 ÔÇô N-Effizienz sehr gering, Harnstoffbelastung wahrscheinlich. CP-Anteil reduzieren oder UDP-Futter einsetzen.
+  ! Weide K:Mg 18.8 > 6 ÔÇô Grastetanie-Risiko durch K/Mg-Antagonismus. Mg-betontes Weidemineral gezielt einsetzen (GfE-Workshop 2023 / DLG 417).
+
+===== D) PMR+Weide Sommer Hitze summer_mid (Auto-Buffer-Injection) =====
+Solver-Status: optimal
+FAN: mode=auto_iterative  fani_final=2.6931  converged=True
+Policy-Profil: pmr_pasture_summer  Saisonprofil: summer_mid
+---- Ampelkritische Indikatoren ----
+  Pansen-pH (sim):  6.48  [GRUEN]  (Ziel >= 6.2, SARA < 5.9)
+  peNDF-Dichte:      212.2 g/kg TM  (min 145.0)  [GRUEN]
+  pabKH-Dichte:       74.1 g/kg TM  (Limit 210/225)
+  Strukturindex:     224.4          (Ziel >= 50)  [GRUEN]
+  RMD:                3.50 g N/kg TM
+---- LP-Harteverletzungen ----
+  (keine)
+---- LP-Weichverletzungen (Penalty) ----
+  soft: pabKH (g/kg TM)  ist=225.0  soll=74.1  penalty=22.635
+  soft: XL Rohfett (g/kg TM)  ist=42.0  soll=24.4  penalty=2.9333
+  soft: RMD (g N/kg TM)  ist=3.501  soll=0.0  penalty=23.343
+  soft: K:Mg-Ratio  ist=11.868  soll=4.0  penalty=39.3381
+Penalty-Summary: total=0.000  A=0  B=0  C=0
+---- Warnungen ----
+  ! RMD 3.50 g N/kg TM > 2,0 ÔÇô N-Effizienz sehr gering, Harnstoffbelastung wahrscheinlich. CP-Anteil reduzieren oder UDP-Futter einsetzen.
+  ! Weide K:Mg 14.5 > 6 ÔÇô Grastetanie-Risiko durch K/Mg-Antagonismus. Mg-betontes Weidemineral gezielt einsetzen (GfE-Workshop 2023 / DLG 417).
+
+===== E) PMR+Weide Hochsommer summer_late (Extremhitze) =====
+Solver-Status: optimal
+FAN: mode=auto_iterative  fani_final=2.5182  converged=True
+Policy-Profil: pmr_pasture_summer  Saisonprofil: summer_late
+---- Ampelkritische Indikatoren ----
+  Pansen-pH (sim):  6.50  [GRUEN]  (Ziel >= 6.2, SARA < 5.9)
+  peNDF-Dichte:      215.3 g/kg TM  (min 145.0)  [GRUEN]
+  pabKH-Dichte:       93.1 g/kg TM  (Limit 210/225)
+  Strukturindex:     200.5          (Ziel >= 50)  [GRUEN]
+  RMD:                3.13 g N/kg TM
+---- LP-Harteverletzungen ----
+  (keine)
+---- LP-Weichverletzungen (Penalty) ----
+  soft: pabKH (g/kg TM)  ist=225.0  soll=93.1  penalty=19.785
+  soft: XL Rohfett (g/kg TM)  ist=42.0  soll=23.1  penalty=3.15
+  soft: RMD (g N/kg TM)  ist=3.129  soll=0.0  penalty=20.8575
+  soft: K:Mg-Ratio  ist=11.083  soll=4.0  penalty=35.4163
+Penalty-Summary: total=0.000  A=0  B=0  C=0
+---- Warnungen ----
+  ! RMD 3.13 g N/kg TM > 2,0 ÔÇô N-Effizienz sehr gering, Harnstoffbelastung wahrscheinlich. CP-Anteil reduzieren oder UDP-Futter einsetzen.
+  ! Weide K:Mg 11.0 > 6 ÔÇô Grastetanie-Risiko durch K/Mg-Antagonismus. Mg-betontes Weidemineral gezielt einsetzen (GfE-Workshop 2023 / DLG 417).
+
+===== F) PMR+Weide Herbst autumn (N-reicher Aufwuchs) =====
+Solver-Status: optimal
+FAN: mode=auto_iterative  fani_final=2.8063  converged=True
+Policy-Profil: pmr_pasture_autumn  Saisonprofil: autumn
+---- Ampelkritische Indikatoren ----
+  Pansen-pH (sim):  6.48  [GRUEN]  (Ziel >= 6.2, SARA < 5.9)
+  peNDF-Dichte:      212.7 g/kg TM  (min 145.0)  [GRUEN]
+  pabKH-Dichte:       97.8 g/kg TM  (Limit 210/225)
+  Strukturindex:     155.1          (Ziel >= 50)  [GRUEN]
+  RMD:                4.08 g N/kg TM
+---- LP-Harteverletzungen ----
+  (keine)
+---- LP-Weichverletzungen (Penalty) ----
+  soft: pabKH (g/kg TM)  ist=225.0  soll=97.8  penalty=19.08
+  soft: XL Rohfett (g/kg TM)  ist=42.0  soll=24.6  penalty=2.9
+  soft: RMD (g N/kg TM)  ist=4.081  soll=0.0  penalty=27.2098
+  soft: K:Mg-Ratio  ist=12.821  soll=4.0  penalty=44.1054
+Penalty-Summary: total=0.000  A=0  B=0  C=0
+---- Warnungen ----
+  ! RMD 4.08 g N/kg TM > 2,0 ÔÇô N-Effizienz sehr gering, Harnstoffbelastung wahrscheinlich. CP-Anteil reduzieren oder UDP-Futter einsetzen.
+  ! Weide K:Mg 23.3 > 6 ÔÇô Grastetanie-Risiko durch K/Mg-Antagonismus. Mg-betontes Weidemineral gezielt einsetzen (GfE-Workshop 2023 / DLG 417).
+
+===== G) Provokation: 45 kg Milch, sehr KF-lastig (Maissilage + viel Getreide) =====
+Solver-Status: infeasible
+FAN: mode=auto_iterative  fani_final=None  converged=False
+Policy-Profil: tmr_standard  Saisonprofil: None
+---- Ampelkritische Indikatoren ----
+  Pansen-pH: None
+---- LP-Harteverletzungen ----
+  (keine)
+---- LP-Weichverletzungen (Penalty) ----
+  (keine)
+Penalty-Summary: total=0.000  A=0  B=0  C=0
+---- Warnungen ----
+  ! Keine optimale L├Âsung gefunden ÔÇô Eingaben pr├╝fen.
+  ! Ursache: CP-Dichte bei maximaler Auslastung 178 g/kg TM > 160
+  ! Ursache: XL-Dichte-Konflikt durch: Mais, Korn
+  ! Ursache: Magnesium-Kapazitaet 34.0 < Bedarf 37.1
+
+===== H) SARA-Trigger: 42 kg Milch, Maissilage + viel Getreide, OHNE Heu/Stroh =====
+Solver-Status: infeasible
+FAN: mode=auto_iterative  fani_final=None  converged=False
+Policy-Profil: tmr_standard  Saisonprofil: None
+---- Ampelkritische Indikatoren ----
+  Pansen-pH: None
+---- LP-Harteverletzungen ----
+  (keine)
+---- LP-Weichverletzungen (Penalty) ----
+  (keine)
+Penalty-Summary: total=0.000  A=0  B=0  C=0
+---- Warnungen ----
+  ! Keine optimale L├Âsung gefunden ÔÇô Eingaben pr├╝fen.
+  ! Ursache: CP-Dichte bei maximaler Auslastung 191 g/kg TM > 160
+  ! Ursache: XL-Dichte-Konflikt durch: Mais, Korn
+  ! Ursache: Magnesium-Kapazitaet 29.0 < Bedarf 36.8
+

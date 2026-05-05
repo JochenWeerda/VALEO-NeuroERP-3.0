@@ -12,6 +12,7 @@ import { buildCoreMaskShortcuts, useKeyboardShortcuts } from '@/hooks/useKeyboar
 import { AlertCircle, FileDown, Plus, Search } from 'lucide-react'
 import { useReklamationen, type Reklamation } from '@/lib/api/misc-modules'
 import { WorkflowEntryBanner, readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBanner'
+import { saveFlowSpineResumeCheckpoint } from '@/lib/api/flow-spines'
 
 export default function ReklamationenPage(): JSX.Element {
   const navigate = useNavigate()
@@ -20,6 +21,25 @@ export default function ReklamationenPage(): JSX.Element {
   const [searchTerm, setSearchTerm] = useState('')
   const { data: reklamationen, isLoading } = useReklamationen()
   const workflowContext = readWorkflowEntryContext(searchParams)
+
+  const navigateWithWorkflowResume = async (targetPath: string, resumeNodeId: string): Promise<void> => {
+    const query = workflowContext ? searchParams.toString() : ''
+    const target = `${targetPath}${query ? `?${query}` : ''}`
+    if (workflowContext?.process && workflowContext.instanceId) {
+      await saveFlowSpineResumeCheckpoint(workflowContext.process, workflowContext.instanceId, {
+        resume_node_id: resumeNodeId,
+        resume_route: target,
+        resume_payload: {
+          screen: targetPath.includes('/neu') ? 'complaint-create' : 'complaint-detail',
+          targetPath,
+          workflowCase: workflowContext.caseNumber || undefined,
+        },
+        business_status: 'reklamation_in_bearbeitung',
+        action_label: `Complaint-Resume nach ${targetPath}`,
+      })
+    }
+    navigate(target)
+  }
   const list = useMemo(() => {
     const items = reklamationen ?? []
     if (!searchTerm.trim()) {
@@ -48,7 +68,7 @@ export default function ReklamationenPage(): JSX.Element {
   }, [neu, inBearbeitung, hochprio])
 
   const shortcuts = buildCoreMaskShortcuts({
-    onNew: () => navigate('/qualitaet/reklamation/neu'),
+    onNew: () => { void navigateWithWorkflowResume('/qualitaet/reklamation/neu', 'complaint') },
     onSearch: () => searchInputRef.current?.focus(),
   })
   useKeyboardShortcuts(shortcuts)
@@ -58,7 +78,7 @@ export default function ReklamationenPage(): JSX.Element {
       key: 'nummer' as const,
       label: 'Reklamations-Nr.',
       render: (r: Reklamation) => (
-        <button onClick={() => navigate(`/qualitaet/reklamation/${r.id}`)} className="font-medium text-blue-600 hover:underline">
+        <button onClick={() => { void navigateWithWorkflowResume(`/qualitaet/reklamation/${r.id}`, 'complaint') }} className="font-medium text-blue-600 hover:underline">
           {r.nummer}
         </button>
       ),
@@ -163,7 +183,7 @@ export default function ReklamationenPage(): JSX.Element {
             <h1 className="text-3xl font-bold">Reklamationen</h1>
             <p className="text-muted-foreground">Qualitaets-Beschwerden mit SLA-, Audit- und Export-Sicht.</p>
           </div>
-          <Button onClick={() => navigate(`/qualitaet/reklamation/neu${workflowContext ? `?${searchParams.toString()}` : ''}`)} className="min-h-touch gap-2 touch-manipulation">
+          <Button onClick={() => { void navigateWithWorkflowResume('/qualitaet/reklamation/neu', 'complaint') }} className="min-h-touch gap-2 touch-manipulation">
             <Plus className="h-4 w-4" />
             Neue Reklamation
           </Button>

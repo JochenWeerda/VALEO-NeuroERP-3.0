@@ -1,0 +1,29 @@
+metadata:
+  tenant_id: "<tenant-id>"
+  source_system: "L3"
+  chart_of_accounts_target: "SKR03/SKR04/custom"
+  approved_by: ""
+  approved_at: ""
+  approval_status: "draft"
+
+accounts:
+  - source: "L3-1000"
+    target: "1000"
+    description: "Kasse"
+    status: "draft"
+
+tax_codes:
+  - source: "L3-V19"
+    target: "UST19"
+    rate: 19.0
+    status: "draft"
+
+cost_centers:
+  - source: "L3-CC-AGRAR"
+    target: "AGRAR"
+    status: "draft"
+
+counter_accounts:
+  - source_context: "ap_invoice.goods"
+    target: "3400"
+    status: "draft"

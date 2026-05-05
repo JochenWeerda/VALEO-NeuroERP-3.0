@@ -16,6 +16,21 @@ Repo-seitige Referenz fuer Integrationen, die bei frischen GitHub-Spiegeln oder 
   - CRM-Downstream-URLs
 - `python scripts/check_integration_bootstrap.py` liefert einen kompakten Readiness-Bericht.
 - `python scripts/check_integration_bootstrap.py --strict` bricht bei fehlenden Pflichtvoraussetzungen ab.
+- `python scripts/check_integration_bootstrap.py --probe-plan` gibt den daraus abgeleiteten Live-Probe-Plan aus.
+- `python scripts/check_integration_bootstrap.py --strict-live` bricht ab, wenn eine Integration nicht bereit fuer einen echten Live-Probe ist.
+
+## Live-Probe-Plan
+
+Der Readiness-Bericht enthaelt jetzt zusaetzlich `probe_plan`.
+Dieser Plan fuehrt keine Live-Requests automatisch aus, sondern benennt pro Integration:
+
+- `status`: `ready`, `blocked`, `disabled` oder `manual`
+- `probe_kind`: z. B. `http_get`, `http_get_authenticated`, `nats_connect` oder `provider_smoke`
+- `target`: Ziel-URL oder Provider-Ziel, soweit aus der Umgebung ableitbar
+- `command_hint`: konkreter Startpunkt fuer den produktionsnahen Smoke-Test
+- `blocked_by`: fehlende Variablen oder Secrets
+
+Damit bleibt CI deterministisch, waehrend Ops in einer echten Umgebung dieselben Checks gegen reale Zielsysteme ausfuehren kann.
 
 ## Gepruefte Integrationsbereiche
 
@@ -32,6 +47,7 @@ Repo-seitige Referenz fuer Integrationen, die bei frischen GitHub-Spiegeln oder 
   - `EVENT_BUS_ENABLED=true`
   - `EVENT_BUS_PROVIDER=nats`
   - `EVENT_BUS_NATS_URL=nats://nats:4222`
+- Live-Probe: `nats server check --server <EVENT_BUS_NATS_URL>` oder aequivalenter JetStream-Client.
 
 ### Superglue
 
@@ -40,6 +56,7 @@ Repo-seitige Referenz fuer Integrationen, die bei frischen GitHub-Spiegeln oder 
   - `SUPERGLUE_BASE_URL` oder `SUPERGLUE_REST_URL`
   - `SUPERGLUE_AUTH_TOKEN` direkt oder ueber Secret-Provider
 - Tenant-spezifische Secrets bleiben fuer echte Produktivnutzung weiterhin ops-seitig notwendig
+- Live-Probe: authentifizierter HTTP-Health-Check gegen die konfigurierte Superglue-Basis-URL.
 
 ### Voice
 
@@ -52,6 +69,7 @@ Repo-seitige Referenz fuer Integrationen, die bei frischen GitHub-Spiegeln oder 
   - `CRM_CORE_BASE_URL`
   - `CRM_SALES_BASE_URL`
   - `CRM_SERVICE_BASE_URL`
+- Live-Probe: HTTP-Health-Checks gegen alle drei Downstream-URLs im gleichen Tenant-/Netzwerkkontext.
 
 ## Was repo-seitig nicht geloest werden kann
 

@@ -1,0 +1,167 @@
+﻿total: 166
+dlg_10010010                        | forage=True  | group=Grundfutter/Grobfutter         | me=10.70 | st=    0 | ndf=  420 | Ackergras, Herbst
+dlg_10020010                        | forage=True  | group=Grundfutter/Grobfutter         | me=11.60 | st=    0 | ndf=  420 | Ackergras, jung
+dlg_10030020                        | forage=True  | group=Grundfutter/Grobfutter         | me=11.30 | st=    0 | ndf=  492 | Ackergras, 1. Aufwuchs
+dlg_10040020                        | forage=True  | group=Grundfutter/Grobfutter         | me=11.20 | st=    0 | ndf=  491 | Ackergras, Folgeaufwuchs
+dlg_10050020                        | forage=True  | group=Grundfutter/Grobfutter         | me=11.30 | st=    0 | ndf=  420 | Ackergras, gut
+dlg_10060020                        | forage=True  | group=Grundfutter/Grobfutter         | me= 9.90 | st=    0 | ndf=  475 | Ackergras, mittel
+dlg_10070010                        | forage=True  | group=Grundfutter/Grobfutter         | me=10.70 | st=    0 | ndf=  518 | Gras
+dlg_10080020                        | forage=True  | group=Grundfutter/Grobfutter         | me=10.20 | st=    0 | ndf=  541 | Gras
+dlg_10090010                        | forage=True  | group=Grundfutter/Grobfutter         | me=10.70 | st=    0 | ndf=  524 | Gras, frisch o. konserviert, 1. Aufwuchs
+dlg_10090020                        | forage=True  | group=Grundfutter/Grobfutter         | me=10.70 | st=    0 | ndf=  524 | Gras, frisch o. konserviert, 1. Aufwuchs
+dlg_10090030                        | forage=True  | group=Grundfutter/Grobfutter         | me=10.70 | st=    0 | ndf=  524 | Gras, frisch o. konserviert, 1. Aufwuchs
+dlg_10100010                        | forage=True  | group=Grundfutter/Grobfutter         | me=10.00 | st=    0 | ndf=  564 | Gras, frisch o. konserviert, 2. Aufwuchs
+dlg_10100020                        | forage=True  | group=Grundfutter/Grobfutter         | me=10.00 | st=    0 | ndf=  564 | Gras, frisch o. konserviert, 2. Aufwuchs
+dlg_10100030                        | forage=True  | group=Grundfutter/Grobfutter         | me=10.00 | st=    0 | ndf=  564 | Gras, frisch o. konserviert, 2. Aufwuchs
+dlg_10110010                        | forage=True  | group=Grundfutter/Grobfutter         | me=10.10 | st=    0 | ndf=  550 | Gras, frisch o. konserviert, 3. Aufwuchs
+dlg_10110020                        | forage=True  | group=Grundfutter/Grobfutter         | me=10.10 | st=    0 | ndf=  550 | Gras, frisch o. konserviert, 3. Aufwuchs
+dlg_10110030                        | forage=True  | group=Grundfutter/Grobfutter         | me=10.10 | st=    0 | ndf=  550 | Gras, frisch o. konserviert, 3. Aufwuchs
+dlg_10120010                        | forage=True  | group=Grundfutter/Grobfutter         | me=10.20 | st=    0 | ndf=  531 | Gras, frisch o. konserviert, 4. Aufwuchs
+dlg_10120020                        | forage=True  | group=Grundfutter/Grobfutter         | me=10.20 | st=    0 | ndf=  531 | Gras, frisch o. konserviert, 4. Aufwuchs
+dlg_10120030                        | forage=True  | group=Grundfutter/Grobfutter         | me=10.20 | st=    0 | ndf=  531 | Gras, frisch o. konserviert, 4. Aufwuchs
+dlg_10130010                        | forage=True  | group=Grundfutter/Grobfutter         | me=10.40 | st=    0 | ndf=  506 | Gras, frisch o. konserviert, 5. Aufwuchs
+dlg_10130020                        | forage=True  | group=Grundfutter/Grobfutter         | me=10.40 | st=    0 | ndf=  506 | Gras, frisch o. konserviert, 5. Aufwuchs
+dlg_10130030                        | forage=True  | group=Grundfutter/Grobfutter         | me=10.40 | st=    0 | ndf=  506 | Gras, frisch o. konserviert, 5. Aufwuchs
+dlg_10140010                        | forage=True  | group=Grundfutter/Grobfutter         | me=10.10 | st=    0 | ndf=  544 | Gras, frisch o. konserviert, Folgeaufwuchs
+dlg_10140020                        | forage=True  | group=Grundfutter/Grobfutter         | me=10.10 | st=    0 | ndf=  544 | Gras, frisch o. konserviert, Folgeaufwuchs
+dlg_10140030                        | forage=True  | group=Grundfutter/Grobfutter         | me=10.10 | st=    0 | ndf=  544 | Gras, frisch o. konserviert, Folgeaufwuchs
+dlg_10150030                        | forage=True  | group=Grundfutter/Grobfutter         | me=11.20 | st=    0 | ndf=  512 | Gras, gute OMD
+dlg_10160030                        | forage=True  | group=Grundfutter/Grobfutter         | me= 9.30 | st=    0 | ndf=  605 | Gras, mittlere OMD
+dlg_10170030                        | forage=True  | group=Grundfutter/Grobfutter         | me= 8.40 | st=    0 | ndf=  645 | Gras, ├╝berst├ñndig
+dlg_10180010                        | forage=True  | group=Grundfutter/Grobfutter         | me=11.80 | st=    0 | ndf=  420 | Weide, Fr├╝hjahr, jung
+dlg_10190010                        | forage=True  | group=Grundfutter/Grobfutter         | me=11.30 | st=    0 | ndf=  450 | Weide, Fr├╝hjahr, mittel
+dlg_10200010                        | forage=True  | group=Grundfutter/Grobfutter         | me=10.80 | st=    0 | ndf=  480 | Weide, Fr├╝hjahr, ├ñlter
+dlg_10210010                        | forage=True  | group=Grundfutter/Grobfutter         | me=10.70 | st=    0 | ndf=  420 | Weide, Sommer, jung
+dlg_10220010                        | forage=True  | group=Grundfutter/Grobfutter         | me=10.10 | st=    0 | ndf=  480 | Weide, Sommer, ├ñlter
+dlg_10230010                        | forage=True  | group=Grundfutter/Grobfutter         | me=11.30 | st=    0 | ndf=  315 | Raps, Ganzpflanze
+dlg_10240010                        | forage=True  | group=Grundfutter/Grobfutter         | me= 9.60 | st=  164 | ndf=  496 | Getreideganzpflanze f├╝r GPS
+dlg_10250020                        | forage=True  | group=Grundfutter/Grobfutter         | me= 9.80 | st=  114 | ndf=  476 | GPS, siliert
+dlg_10260010                        | forage=True  | group=Grundfutter/Grobfutter         | me= 9.70 | st=  115 | ndf=  463 | GPS, Gerste
+dlg_10260020                        | forage=True  | group=Grundfutter/Grobfutter         | me= 9.70 | st=  115 | ndf=  463 | GPS, Gerste
+dlg_10270010                        | forage=True  | group=Grundfutter/Grobfutter         | me=10.00 | st=  245 | ndf=  366 | GPS, Hafer
+dlg_10270020                        | forage=True  | group=Grundfutter/Grobfutter         | me=10.00 | st=  245 | ndf=  366 | GPS, Hafer
+dlg_10280010                        | forage=True  | group=Grundfutter/Grobfutter         | me= 9.80 | st=   86 | ndf=  489 | GPS, Roggen
+dlg_10280020                        | forage=True  | group=Grundfutter/Grobfutter         | me= 9.80 | st=   86 | ndf=  489 | GPS, Roggen
+dlg_10290020                        | forage=True  | group=Grundfutter/Grobfutter         | me= 8.60 | st=   50 | ndf=  577 | GPS, Sandhafer
+dlg_10300010                        | forage=True  | group=Grundfutter/Grobfutter         | me= 9.70 | st=  236 | ndf=  462 | GPS, Weizen
+dlg_10300020                        | forage=True  | group=Grundfutter/Grobfutter         | me= 9.70 | st=  236 | ndf=  462 | GPS, Weizen
+dlg_10310020                        | forage=True  | group=Grundfutter/Grobfutter         | me=12.10 | st=    0 | ndf=  434 | Gras, sehr gute OMD
+dlg_10320020                        | forage=True  | group=Grundfutter/Grobfutter         | me=11.20 | st=    0 | ndf=  450 | Gras, gute OMD
+dlg_10330020                        | forage=True  | group=Grundfutter/Grobfutter         | me=10.10 | st=    0 | ndf=  484 | Gras, mittlere OMD
+dlg_10340020                        | forage=True  | group=Grundfutter/Grobfutter         | me= 8.70 | st=    0 | ndf=  522 | Gras, niedrige OMD
+dlg_10350010                        | forage=True  | group=Grundfutter/Grobfutter         | me=10.20 | st=   29 | ndf=  576 | Gr├╝ngetreide, mittlere OMD
+dlg_10360020                        | forage=True  | group=Grundfutter/Grobfutter         | me= 8.90 | st=    0 | ndf=  393 | Hornkleegras, mittlere OMD
+dlg_10370020                        | forage=True  | group=Grundfutter/Grobfutter         | me=10.80 | st=    0 | ndf=  507 | Kleegras, 1.Aufwuchs
+dlg_10380020                        | forage=True  | group=Grundfutter/Grobfutter         | me=10.90 | st=    0 | ndf=  495 | Kleegras, Folgeaufw├╝chse
+dlg_10390020                        | forage=True  | group=Grundfutter/Grobfutter         | me=10.70 | st=    0 | ndf=  483 | Landsberger Gemenge, Silage
+dlg_10400010                        | forage=True  | group=Grundfutter/Grobfutter         | me= 9.80 | st=    0 | ndf=  514 | Luzerne, 1. A. mittlere OMD
+dlg_10400020                        | forage=True  | group=Grundfutter/Grobfutter         | me= 9.80 | st=    0 | ndf=  514 | Luzerne, 1. A. mittlere OMD
+dlg_10410010                        | forage=True  | group=Grundfutter/Grobfutter         | me= 9.10 | st=    0 | ndf=  501 | Luzerne, 1. A. niedrige OMD
+dlg_10410020                        | forage=True  | group=Grundfutter/Grobfutter         | me= 9.10 | st=    0 | ndf=  501 | Luzerne, 1. A. niedrige OMD
+dlg_10420010                        | forage=True  | group=Grundfutter/Grobfutter         | me= 9.00 | st=    0 | ndf=  529 | Luzerne, Folgeaufw. mittlere OMD
+dlg_10420020                        | forage=True  | group=Grundfutter/Grobfutter         | me= 9.00 | st=    0 | ndf=  529 | Luzerne, Folgeaufw. mittlere OMD
+dlg_10430010                        | forage=True  | group=Grundfutter/Grobfutter         | me= 8.70 | st=    0 | ndf=  516 | Luzerne, Folgeaufw. niedrige  OMD
+dlg_10430020                        | forage=True  | group=Grundfutter/Grobfutter         | me= 8.70 | st=    0 | ndf=  516 | Luzerne, Folgeaufw. niedrige  OMD
+dlg_10440030                        | forage=True  | group=Grundfutter/Grobfutter         | me= 9.30 | st=    0 | ndf=  595 | Luzerne
+dlg_10450010                        | forage=True  | group=Grundfutter/Grobfutter         | me= 9.90 | st=    0 | ndf=  400 | Luzerne, hohe OMD
+dlg_10450020                        | forage=True  | group=Grundfutter/Grobfutter         | me= 9.90 | st=    0 | ndf=  400 | Luzerne, hohe OMD
+dlg_10460010                        | forage=True  | group=Grundfutter/Grobfutter         | me= 8.30 | st=    0 | ndf=  474 | Luzerne, sehr niedrige OMD
+dlg_10460020                        | forage=True  | group=Grundfutter/Grobfutter         | me= 8.30 | st=    0 | ndf=  474 | Luzerne, sehr niedrige OMD
+dlg_10470030                        | forage=True  | group=Grundfutter/Grobfutter         | me=11.00 | st=    0 | ndf=  444 | Luzerne
+dlg_10480020                        | forage=True  | group=Grundfutter/Grobfutter         | me=10.90 | st=    0 | ndf=  493 | Luzernegrass
+dlg_10490020                        | forage=True  | group=Grundfutter/Grobfutter         | me=11.70 | st=  319 | ndf=  389 | Mais, Ganzpflanze, hohe OMD
+dlg_10500020                        | forage=True  | group=Grundfutter/Grobfutter         | me=11.20 | st=  309 | ndf=  401 | Mais, Ganzpflanze, mittlere OMD
+dlg_10510020                        | forage=True  | group=Grundfutter/Grobfutter         | me=10.60 | st=  298 | ndf=  417 | Mais, Ganzpflanze, niedrige OMD
+dlg_10520020                        | forage=True  | group=Grundfutter/Grobfutter         | me=11.50 | st=  301 | ndf=  409 | Mais, Ganzpflanze, hohe NDFD
+dlg_10530020                        | forage=True  | group=Grundfutter/Grobfutter         | me=10.80 | st=  320 | ndf=  391 | Mais, Ganzpflanze, niedrige NDFD
+dlg_10540020                        | forage=True  | group=Grundfutter/Grobfutter         | me=11.20 | st=  358 | ndf=  381 | Mais, Ganzpflanze, St├ñrkegehalt hoch
+dlg_10550020                        | forage=True  | group=Grundfutter/Grobfutter         | me=11.10 | st=  227 | ndf=  438 | Mais, Ganzpflanze, St├ñrkegehalt niedrig
+dlg_10560010                        | forage=True  | group=Grundfutter/Grobfutter         | me= 6.30 | st=   11 | ndf=  711 | Mais, Restpflanze nach Kolbenenernte
+dlg_10570020                        | forage=True  | group=Grundfutter/Grobfutter         | me=11.30 | st=    0 | ndf=  438 | Rotklee
+dlg_10580010                        | forage=True  | group=Grundfutter/Grobfutter         | me=10.50 | st=    0 | ndf=  426 | Rotklee
+dlg_10590020                        | forage=True  | group=Grundfutter/Grobfutter         | me=10.40 | st=    0 | ndf=  441 | Rotkleegras
+dlg_10600020                        | forage=True  | group=Grundfutter/Grobfutter         | me= 9.20 | st=  177 | ndf=  493 | Sorghum-Hirse, Teigreife
+dlg_10610000                        | forage=True  | group=Grundfutter/Grobfutter         | me= 7.10 | st=   14 | ndf=  800 | Stroh, Gerste
+dlg_10620010                        | forage=True  | group=Grundfutter/Grobfutter         | me=11.00 | st=    0 | ndf=  400 | Wei├ƒklee
+dlg_10630020                        | forage=True  | group=Grundfutter/Grobfutter         | me=10.80 | st=    0 | ndf=  350 | Zuckerr├╝be, Blattsilage
+dlg_20640012                        | forage=True  | group=Grundfutter/Saftfutter         | me=11.30 | st=   22 | ndf=  643 | Biertreber
+dlg_20650020                        | forage=True  | group=Grundfutter/Saftfutter         | me=11.50 | st=   10 | ndf=  570 | Biertreber, gepresst
+dlg_20660012                        | forage=True  | group=Grundfutter/Saftfutter         | me=12.60 | st=  402 | ndf=  329 | Erbsen, P├╝lpe
+dlg_20670010                        | forage=True  | group=Grundfutter/Saftfutter         | me=11.50 | st=    0 | ndf=  125 | Futterrr├╝be
+dlg_20680010                        | forage=True  | group=Grundfutter/Saftfutter         | me=11.80 | st=   60 | ndf=  441 | Getreide, Schlempe aus der Bioethanolgewinnung
+dlg_20690010                        | forage=True  | group=Grundfutter/Saftfutter         | me=12.60 | st=  710 | ndf=   75 | Kartoffel
+dlg_20700020                        | forage=True  | group=Grundfutter/Saftfutter         | me=14.00 | st=  400 | ndf=  365 | Kartoffel, P├╝lpe
+dlg_20710012                        | forage=True  | group=Grundfutter/Saftfutter         | me=13.50 | st=    0 | ndf=  171 | Lupine, Samen, P├╝lpe
+dlg_20720020                        | forage=True  | group=Grundfutter/Saftfutter         | me=11.20 | st=    0 | ndf=  711 | Mohrr├╝be, Trester
+dlg_20730012                        | forage=True  | group=Grundfutter/Saftfutter         | me= 9.30 | st=   25 | ndf=  563 | Roggen, Pressschlempe aus der Bioethanolgewinnung
+dlg_20740012                        | forage=True  | group=Grundfutter/Saftfutter         | me=12.10 | st=    0 | ndf=  244 | Zuckerr├╝be, R├╝benkleinteile
+dlg_20750012                        | forage=True  | group=Grundfutter/Saftfutter         | me=13.30 | st=    0 | ndf=  425 | Zuckerr├╝be, R├╝benpressschnitzel
+dlg_20760010                        | forage=True  | group=Grundfutter/Saftfutter         | me=11.80 | st=    0 | ndf=  150 | Zuckerr├╝be
+dlg_30770030                        | forage=False | group=Kraftfutter/Trocken            | me=13.80 | st=  443 | ndf=  133 | Ackerbohne, Samen nativ
+dlg_30780030                        | forage=False | group=Kraftfutter/Trocken            | me= 8.50 | st=  147 | ndf=  569 | Ackerbohne, Samenschalen
+dlg_30790030                        | forage=False | group=Kraftfutter/Trocken            | me=13.50 | st=  491 | ndf=  158 | Erbsen, Samen nativ
+dlg_30800030                        | forage=False | group=Kraftfutter/Trocken            | me=14.40 | st=    0 | ndf=    6 | Erbsen, Samenproteinkonzentrat
+dlg_30810030                        | forage=False | group=Kraftfutter/Trocken            | me= 9.90 | st=  106 | ndf=  745 | Erbsen, Samenschalen
+dlg_30820030                        | forage=False | group=Kraftfutter/Trocken            | me=13.40 | st=  506 | ndf=  243 | Gerste, Samen
+dlg_30830030                        | forage=False | group=Kraftfutter/Trocken            | me=12.80 | st=   35 | ndf=  441 | Getreide, Samen, Trockenschlempe aus Bioethanolgewinnung
+dlg_30840030                        | forage=False | group=Kraftfutter/Trocken            | me=12.00 | st=  453 | ndf=  274 | Hafer, Samen
+dlg_30850030                        | forage=False | group=Kraftfutter/Trocken            | me= 9.50 | st=  104 | ndf=  560 | Hafer, Samen, Hafersch├ñlkleie
+dlg_30860030                        | forage=False | group=Kraftfutter/Trocken            | me=14.00 | st=    0 | ndf=   65 | Kartoffeleiwei├ƒ
+dlg_30870030                        | forage=False | group=Kraftfutter/Trocken            | me=12.50 | st=    0 | ndf=  520 | Kokospalme, Nuss, Fruchtfleischexpeller
+dlg_30880030                        | forage=False | group=Kraftfutter/Trocken            | me=13.20 | st=  711 | ndf=  115 | Mais, Korn
+dlg_30890030                        | forage=False | group=Kraftfutter/Trocken            | me=14.10 | st=    0 | ndf=  260 | Lein, Samen nativ
+dlg_30900030                        | forage=False | group=Kraftfutter/Trocken            | me=11.20 | st=   20 | ndf=  242 | Lein, Samen, Extraktionsschrot, aufgefettet
+dlg_30910030                        | forage=False | group=Kraftfutter/Trocken            | me=11.70 | st=   20 | ndf=  234 | Lein, Samen, Presskuchen
+dlg_30920030                        | forage=False | group=Kraftfutter/Trocken            | me=12.90 | st=  163 | ndf=  265 | Mais, Korn, Maiskleberfutter
+dlg_30930030                        | forage=False | group=Kraftfutter/Trocken            | me=11.80 | st=  199 | ndf=  350 | Getreide, Samen, Malzkeime
+dlg_30940030                        | forage=False | group=Kraftfutter/Trocken            | me=13.10 | st=    0 | ndf=  399 | Zuckerr├╝be, Melasseschnitzel
+dlg_30950030                        | forage=False | group=Kraftfutter/Trocken            | me=11.00 | st=    3 | ndf=  718 | Palmkern, Presskuchen
+dlg_30960030                        | forage=False | group=Kraftfutter/Trocken            | me=17.60 | st=   36 | ndf=  160 | Raps, Samen nativ
+dlg_30970130                        | forage=False | group=Kraftfutter/Trocken            | me=11.70 | st=   72 | ndf=  298 | Raps, Samen, Extraktionsschrot
+dlg_30970230                        | forage=False | group=Kraftfutter/Trocken            | me=11.70 | st=   72 | ndf=  298 | Raps, Samen, Extraktionsschrot
+dlg_30970330                        | forage=False | group=Kraftfutter/Trocken            | me=11.70 | st=   72 | ndf=  298 | Raps, Samen, Extraktionsschrot
+dlg_30970430                        | forage=False | group=Kraftfutter/Trocken            | me=11.70 | st=   72 | ndf=  298 | Raps, Samen, Extraktionsschrot
+dlg_30980130                        | forage=False | group=Kraftfutter/Trocken            | me=11.70 | st=   81 | ndf=  305 | Raps, Samen, Extraktionsschrot, gezielt thermisch behandelt
+dlg_30980230                        | forage=False | group=Kraftfutter/Trocken            | me=11.70 | st=   81 | ndf=  305 | Raps, Samen, Extraktionsschrot, gezielt thermisch behandelt
+dlg_30980330                        | forage=False | group=Kraftfutter/Trocken            | me=11.70 | st=   81 | ndf=  305 | Raps, Samen, Extraktionsschrot, gezielt thermisch behandelt
+dlg_30990030                        | forage=False | group=Kraftfutter/Trocken            | me=14.00 | st=   49 | ndf=  244 | Raps, Samen, Presskuchen
+dlg_31000030                        | forage=False | group=Kraftfutter/Trocken            | me=30.00 | st=    0 | ndf=    0 | Raps, ├ûl
+dlg_31010030                        | forage=False | group=Kraftfutter/Trocken            | me=13.00 | st=  592 | ndf=  162 | Roggen, Samen
+dlg_31020030                        | forage=False | group=Kraftfutter/Trocken            | me=11.70 | st=  225 | ndf=  420 | Roggen, Samen, Kleie
+dlg_31030030                        | forage=False | group=Kraftfutter/Trocken            | me=14.30 | st=  434 | ndf=  124 | Schokomehl, Erzeugnisse und Nebenerzeugnisse der Back- und S├╝├ƒwarenindustrie
+dlg_31040030                        | forage=False | group=Kraftfutter/Trocken            | me=18.40 | st=   51 | ndf=  159 | Sojabohne, Samen nativ
+dlg_31050130                        | forage=False | group=Kraftfutter/Trocken            | me=13.90 | st=   68 | ndf=  154 | Sojabohne, Samen, Extraktionsschrot
+dlg_31050230                        | forage=False | group=Kraftfutter/Trocken            | me=13.90 | st=   68 | ndf=  154 | Sojabohne, Samen, Extraktionsschrot
+dlg_31050330                        | forage=False | group=Kraftfutter/Trocken            | me=13.90 | st=   68 | ndf=  154 | Sojabohne, Samen, Extraktionsschrot
+dlg_31060030                        | forage=False | group=Kraftfutter/Trocken            | me=14.10 | st=   45 | ndf=  124 | Sojabohne, Extraktionsschrot, aus gesch├ñlter Saat
+dlg_31070030                        | forage=False | group=Kraftfutter/Trocken            | me=13.70 | st=   22 | ndf=  273 | Sojabohne, Samen, Extraktionsschrot, pansenstabil
+dlg_31080030                        | forage=False | group=Kraftfutter/Trocken            | me=15.60 | st=   60 | ndf=  136 | Sojabohne, Samen, Presskuchen
+dlg_31090030                        | forage=False | group=Kraftfutter/Trocken            | me=12.10 | st=   80 | ndf=  680 | Sojabohne, Samenschalen
+dlg_31100030                        | forage=False | group=Kraftfutter/Trocken            | me=30.60 | st=    0 | ndf=    0 | Sojabohne, ├ûl
+dlg_31110030                        | forage=False | group=Kraftfutter/Trocken            | me=10.60 | st=   44 | ndf=  225 | Sonnenblume, Samen, Extraktionsschrot, aus gesch├ñlter Saat
+dlg_31120030                        | forage=False | group=Kraftfutter/Trocken            | me= 9.50 | st=   38 | ndf=  389 | Sonnenblume, Samen, Extraktionsschrot, aus teilgesch├ñlter Saat
+dlg_31130030                        | forage=False | group=Kraftfutter/Trocken            | me= 8.80 | st=   33 | ndf=  529 | Sonnenblume, Samen, Extraktionsschrot, schalenreich
+dlg_31140030                        | forage=False | group=Kraftfutter/Trocken            | me=13.30 | st=   35 | ndf=  305 | Sonnenblume, Samen, Presskuchen
+dlg_31150030                        | forage=False | group=Kraftfutter/Trocken            | me=15.30 | st=  100 | ndf=  254 | S├╝├ƒlupine blau, Samen nativ
+dlg_31160030                        | forage=False | group=Kraftfutter/Trocken            | me=16.40 | st=   84 | ndf=  190 | S├╝├ƒlupine wei├ƒ, Samen nativ
+dlg_31170030                        | forage=False | group=Kraftfutter/Trocken            | me=12.00 | st=  671 | ndf=   75 | Maniok, Tapioca Typ 55
+dlg_31180030                        | forage=False | group=Kraftfutter/Trocken            | me=13.40 | st=  645 | ndf=  161 | Triticale, Samen
+dlg_31190030                        | forage=False | group=Kraftfutter/Trocken            | me=13.20 | st=  622 | ndf=  142 | Weizen, Samen
+dlg_31200030                        | forage=False | group=Kraftfutter/Trocken            | me=13.00 | st=   61 | ndf=  274 | Weizen, Samen, Kleber(futter?)
+dlg_31210030                        | forage=False | group=Kraftfutter/Trocken            | me=11.70 | st=  292 | ndf=  408 | Weizen, Samen, Kleie
+dlg_31220030                        | forage=False | group=Kraftfutter/Trocken            | me=11.80 | st=  194 | ndf=  396 | Weizen, Samen, Kleie
+dlg_31230030                        | forage=False | group=Kraftfutter/Trocken            | me=12.30 | st=  226 | ndf=  275 | Weizen, Samen, Weizengrie├ƒkleie
+dlg_31240030                        | forage=False | group=Kraftfutter/Trocken            | me=14.20 | st=    0 | ndf=  240 | Zitrusfrucht, Trester
+dlg_41250012                        | forage=False | group=Kraftfutter/Feucht             | me=14.00 | st=  685 | ndf=  106 | Mais, K├Ârner mit Teilen der Spindel
+dlg_41260020                        | forage=False | group=Kraftfutter/Feucht             | me=12.80 | st=  340 | ndf=  420 | Mais, Kleberfutter
+dlg_41270020                        | forage=False | group=Kraftfutter/Feucht             | me=13.00 | st=  575 | ndf=  231 | Mais, Kolben mit Lieschen
+dlg_41280030                        | forage=False | group=Kraftfutter/Feucht             | me=11.10 | st=    0 | ndf=    0 | Zuckerrohr, Melasse
+dlg_41290030                        | forage=False | group=Kraftfutter/Feucht             | me=11.20 | st=    0 | ndf=    0 | Zuckerr├╝be, Melasse
+dlg_41300010                        | forage=False | group=Kraftfutter/Feucht             | me= 9.80 | st=    0 | ndf=    0 | Milchzuckermelasse
+dlg_41310010                        | forage=False | group=Kraftfutter/Feucht             | me=12.90 | st=    0 | ndf=    0 | Zuckerr├╝be, Dicksaft, Vinasse
+dlg_51320030                        | forage=False | group=Kraftfutter/Trocken            | me=10.70 | st=    0 | ndf=    0 | Futterharnstoff
+dlg_51330000                        | forage=False | group=Kraftfutter/Trocken            | me=15.60 | st=    0 | ndf=    0 | Glycerin, rein
+dlg_51340000                        | forage=False | group=Kraftfutter/Trocken            | me=12.20 | st=    0 | ndf=    0 | Glycerin, roh
+dlg_51350000                        | forage=False | group=Kraftfutter/Trocken            | me=14.80 | st=    0 | ndf=    0 | Propylenglykol
+special_weide_mg_mineral            | forage=False | group=Zusatzstoffe                   | me= 0.50 | st=    0 | ndf=    0 | Weidemineral Mg/Na Ausgleich
+special_summer_rumen_buffer         | forage=False | group=Zusatzstoffe                   | me= 0.00 | st=    0 | ndf=    0 | Pansenpuffer NaHCO3 (Sommerhitze)

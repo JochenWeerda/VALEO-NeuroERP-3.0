@@ -34,6 +34,10 @@ const routerConfig: RouteObject[] = [
     element: <Suspense fallback={<PageLoader />}><CustomerPortalLayout /></Suspense>,
     children: [
       {
+        index: true,
+        element: <Suspense fallback={<PageLoader />}><PortalRouteRuntime /></Suspense>,
+      },
+      {
         path: '*',
         element: <Suspense fallback={<PageLoader />}><PortalRouteRuntime /></Suspense>,
       },
