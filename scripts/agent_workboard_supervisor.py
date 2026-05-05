@@ -6,12 +6,19 @@ import re
 import shlex
 import subprocess
 import sys
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Iterable
 
+try:
+    import yaml as _yaml  # type: ignore
+    _YAML_AVAILABLE = True
+except ImportError:
+    _YAML_AVAILABLE = False
+
 
 DEFAULT_WORKBOARD = Path("docs/agent-ops/active-workboard.md")
+DEFAULT_SLICES_DIR = Path("docs/agent-ops/slices")
 SLICE_HEADING_RE = re.compile(r"^##\s+([A-Za-z][A-Za-z0-9]*(?:-[A-Za-z0-9]+)+)\s*$")
 FIELD_RE = re.compile(r"^\*\*(?P<name>[^:*]+):\*\*\s*(?P<value>.*)$")
 CHECK_RE = re.compile(r"`([^`\n]+)`")
@@ -20,6 +27,8 @@ DONE_MARKERS = ("abgeschlossen", "erledigt", "implementiert")
 IN_PROGRESS_MARKERS = ("in arbeit",)
 RESERVED_MARKERS = ("reserviert",)
 OPEN_MARKERS = ("offen",)
+
+REQUIRED_FIELDS = ("status", "owner", "file_ownership")
 
 
 @dataclass(frozen=True)
@@ -36,6 +45,27 @@ class WorkboardSlice:
     risks: str | None
     start_line: int
     end_line: int
+
+
+@dataclass(frozen=True)
+class SliceFile:
+    """Represents a YAML slice file from docs/agent-ops/slices/."""
+    slice_id: str
+    status: str
+    owner: str | None
+    goal: str | None
+    file_ownership: list[str]
+    acceptance_criteria: str | None
+    checks: list[str]
+    risks: str | None
+    source_path: Path
+
+
+@dataclass
+class ValidationError:
+    slice_id: str
+    field: str
+    message: str
 
 
 def _status_class(status: str) -> str:
@@ -108,6 +138,74 @@ def parse_workboard(text: str) -> list[WorkboardSlice]:
 
 def load_slices(path: Path) -> list[WorkboardSlice]:
     return parse_workboard(path.read_text(encoding="utf-8"))
+
+
+def load_slice_files(slices_dir: Path) -> list[SliceFile]:
+    """Load all YAML slice files from slices_dir. Requires PyYAML."""
+    if not _YAML_AVAILABLE:
+        print("Warning: PyYAML not installed; YAML slice files not loaded.", file=sys.stderr)
+        return []
+    if not slices_dir.exists():
+        return []
+    result: list[SliceFile] = []
+    for yaml_path in sorted(slices_dir.glob("*.yaml")):
+        data = _yaml.safe_load(yaml_path.read_text(encoding="utf-8"))
+        if not isinstance(data, dict):
+            continue
+        file_ownership = data.get("file_ownership") or []
+        if isinstance(file_ownership, str):
+            file_ownership = [file_ownership]
+        checks_raw = data.get("checks") or []
+        result.append(SliceFile(
+            slice_id=str(data.get("id", yaml_path.stem)),
+            status=str(data.get("status", "unknown")),
+            owner=data.get("owner") or None,
+            goal=data.get("goal") or None,
+            file_ownership=list(file_ownership),
+            acceptance_criteria=data.get("acceptance_criteria") or None,
+            checks=list(checks_raw),
+            risks=data.get("risks") or None,
+            source_path=yaml_path,
+        ))
+    return result
+
+
+def validate_workboard_slices(
+    slices: list[WorkboardSlice],
+    slice_files: list[SliceFile],
+    strict_ids: set[str] | None = None,
+) -> list[ValidationError]:
+    """
+    Validate slices against REQUIRED_FIELDS.
+
+    If strict_ids is given, only those slice_ids are checked from the markdown.
+    YAML slice files are always fully validated.
+    """
+    errors: list[ValidationError] = []
+    yaml_ids = {sf.slice_id for sf in slice_files}
+
+    # Validate markdown slices that have a corresponding YAML file (or are in strict_ids)
+    for sl in slices:
+        should_check = sl.slice_id in yaml_ids or (strict_ids and sl.slice_id in strict_ids)
+        if not should_check:
+            continue
+        if not sl.status or sl.status.strip().lower() == "unknown":
+            errors.append(ValidationError(sl.slice_id, "status", "Status is missing or unknown"))
+        if not sl.owner:
+            errors.append(ValidationError(sl.slice_id, "owner", "Owner is missing"))
+        if not sl.file_ownership:
+            errors.append(ValidationError(sl.slice_id, "file_ownership", "Dateibesitz is missing"))
+
+    # Validate YAML slice files (always strict)
+    for sf in slice_files:
+        if not sf.status or sf.status.strip().lower() == "unknown":
+            errors.append(ValidationError(sf.slice_id, "status", f"status missing in {sf.source_path.name}"))
+        if not sf.owner:
+            errors.append(ValidationError(sf.slice_id, "owner", f"owner missing in {sf.source_path.name}"))
+        if not sf.file_ownership:
+            errors.append(ValidationError(sf.slice_id, "file_ownership", f"file_ownership missing in {sf.source_path.name}"))
+
+    return errors
 
 
 def claim_proposal(item: WorkboardSlice, owner: str, workboard: Path) -> str:
@@ -223,6 +321,28 @@ def cmd_handoff(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_validate(args: argparse.Namespace) -> int:
+    slices = load_slices(args.workboard)
+    slice_files = load_slice_files(args.slices_dir)
+
+    strict_ids: set[str] | None = None
+    if args.strict_ids:
+        strict_ids = set(args.strict_ids.split(","))
+
+    errors = validate_workboard_slices(slices, slice_files, strict_ids=strict_ids)
+
+    if args.json:
+        _print_json([{"slice_id": e.slice_id, "field": e.field, "message": e.message} for e in errors])
+    else:
+        if not errors:
+            print(f"OK: {len(slices)} markdown slices, {len(slice_files)} YAML slice files — no validation errors.")
+        else:
+            for e in errors:
+                print(f"ERROR [{e.slice_id}] {e.field}: {e.message}")
+
+    return 1 if errors else 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Read-only VALEO workboard supervisor inspired by Symphony."
@@ -252,6 +372,21 @@ def build_parser() -> argparse.ArgumentParser:
     handoff_parser.add_argument("slice_id")
     handoff_parser.add_argument("--owner", default="Codex")
     handoff_parser.set_defaults(func=cmd_handoff)
+
+    validate_parser = sub.add_parser(
+        "validate",
+        help="Validate workboard slices and YAML slice files for required fields.",
+    )
+    validate_parser.add_argument(
+        "--slices-dir", type=Path, default=DEFAULT_SLICES_DIR,
+        help="Directory containing YAML slice files (default: docs/agent-ops/slices).",
+    )
+    validate_parser.add_argument(
+        "--strict-ids",
+        help="Comma-separated slice IDs to validate in markdown even without YAML file.",
+    )
+    validate_parser.add_argument("--json", action="store_true")
+    validate_parser.set_defaults(func=cmd_validate)
 
     return parser
 
