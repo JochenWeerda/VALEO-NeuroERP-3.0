@@ -2,6 +2,16 @@
 
 Stand: `2026-04-24`
 
+## AGENT-ORCH-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert
+**Ziel des Slices:** Symphony als Blaupause fuer einen VALEO-eigenen Agent-Orchestrator in einem kleinen, repo-sicheren Pilot umsetzen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/agent-orchestrator-pilot.md`, `scripts/agent_workboard_supervisor.py`, `tests/test_agent_workboard_supervisor.py`
+**Abnahmekriterien:** Ein CLI-Pilot erkennt Workboard-Slices, erzeugt Claim-Vorschlaege, listet Checks und Handoff-Geruest, ohne automatisch zu claimen, zu committen, zu pushen oder Agents zu starten.
+**Offene Risiken:** Markdown-Workboard ist kein striktes Datenformat; der Pilot muss konservativ parsen und unklare Bloecke melden statt still zu raten.
+
 ## ERP-CRIT-001
 
 **Von:** Codex
