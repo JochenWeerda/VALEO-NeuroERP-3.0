@@ -160,12 +160,19 @@ def test_spring_pasture_plausible_milk_from_forage():
     aus Grundfutter typisch, da 1 kg TM Grundfutter ca. 1 kg Milch liefert
     (User-Praxisangabe 2026-04-22). Werte > 35 kg deuten auf ein zu opti-
     mistisches k_l / ME-Dichte-Modell hin, < 10 kg auf eine Unterschaetzung.
+
+    Hinweis: ``milk_from_pasture`` / ``milk_from_grass_silage`` nutzen je-
+    weils dieselbe tierbezogene Erhaltungskomponente wie die Gesamtversor-
+    gung, waehrend nur ein Teillieferant (Weide bzw. Silage) eingesetzt
+    wird; die Summe der beiden ``limiting_milk_kg`` ist daher **keine** zu-
+    laessige Gesamtplausibilitaet. Korrekt ist die gemeinsame Bilanz ueber
+    Weide + Grassilage: ``milk_from_pasture_plus_grass_silage``.
     """
     result, _ = _make_result()
     risk = result.get("pasture_risk") or {}
-    milk_pasture = (risk.get("milk_from_pasture") or {}).get("limiting_milk_kg") or 0.0
-    milk_gs = (risk.get("milk_from_grass_silage") or {}).get("limiting_milk_kg") or 0.0
-    milk_forage_total = milk_pasture + milk_gs
+    milk_forage_total = (
+        (risk.get("milk_from_pasture_plus_grass_silage") or {}).get("limiting_milk_kg") or 0.0
+    )
     # Plausibilitaets-Korridor (fachlich laut User-Regel ca. 1 kg Milch je kg TM):
     assert milk_forage_total >= 10.0, (
         f"Milch aus Grundfutter zu niedrig ({milk_forage_total:.1f} kg) - "
