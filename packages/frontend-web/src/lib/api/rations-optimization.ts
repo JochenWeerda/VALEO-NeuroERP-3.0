@@ -558,6 +558,26 @@ export interface RationAdjustmentSuggestion {
   apply_patch: RationAdjustmentApplyPatch
 }
 
+/** Detail zur zweistufigen Pipeline (Legacy-Kurzstring bleibt optimization_strategy). */
+export type OptimizationStrategyPipeline =
+  | 'stage1_balance_then_stage2_cost_plus_policy_slack'
+  | 'stage1_balance_then_stage2_cost_plus_concentrate_slack'
+  | null
+
+/** Aktive Wizard-weiche Ziele mit dokumentierter LP-/Objective-Wirkung (Echo aus Backend). */
+export interface WizardSoftGoalsLpMeta {
+  minimize_soya?: boolean
+  prefer_homegrown?: boolean
+  maximize_n_efficiency_rmd?: boolean
+  minimize_deviation_from_baseline?: boolean
+}
+
+export type RationsOptimizationMetadata = {
+  optimization_strategy?: string
+  optimization_strategy_pipeline?: OptimizationStrategyPipeline
+  wizard_soft_goals_lp?: WizardSoftGoalsLpMeta | null
+} & Record<string, unknown>
+
 export interface OptimizationResult {
   status: 'optimal' | 'infeasible' | 'unbounded' | 'error'
   objective_value?: number
@@ -572,7 +592,7 @@ export interface OptimizationResult {
   warnings: string[]
   /** Vorschläge zur Rationsanpassung inkl. optional anwendbarem Patch. */
   ration_adjustment_suggestions?: RationAdjustmentSuggestion[]
-  metadata?: Record<string, unknown>
+  metadata?: RationsOptimizationMetadata
   forage_performance?: {
     feeding_type: FeedingMode
     target_milk_kg: number
