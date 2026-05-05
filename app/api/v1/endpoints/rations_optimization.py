@@ -1427,7 +1427,24 @@ def _feed_pendf_factor(feed: Dict[str, Any]) -> float:
     return base
 
 
-def _welfare_objective_coeff(feed: Dict[str, Any]) -> float:
+def _feed_is_soya(feed: Dict[str, Any]) -> bool:
+    """Heuristik fuer Soja/Soy-Produkte (Etikett + DLG-Gruppe/Futterart)."""
+    name = str(feed.get("name") or "").lower()
+    group = str(feed.get("group") or "").lower()
+    art = str(feed.get("futterart") or "").lower()
+    blob = f"{name} {group} {art}"
+    return (
+        "soja" in blob
+        or "soy" in blob
+        or "sojaschrot" in blob
+        or "sojaextraktionsschrot" in blob.replace(" ", "")
+    )
+
+
+def _welfare_objective_coeff(
+    feed: Dict[str, Any],
+    wizard_soft_goals: Optional[Dict[str, Any]] = None,
+) -> float:
     """
     Qualitäts-Koeffizient für Stage-1-LP (linprog minimiert c·x → niedriger Wert = bevorzugt).
 
@@ -1478,6 +1495,20 @@ def _welfare_objective_coeff(feed: Dict[str, Any]) -> float:
     # Damit wird bei gleicher Qualität das günstigere Futter leicht bevorzugt,
     # aber Qualitätsunterschiede dominieren.
     score += 0.05 * (price / 3.0)
+
+    # Wizard Step 3 — weiche Ziele (Stage-1-Welfare, keine neuen Hart-Constraints)
+    if wizard_soft_goals:
+        if wizard_soft_goals.get("minimize_soya") and _feed_is_soya(feed):
+            score += 0.32
+        if wizard_soft_goals.get("prefer_homegrown"):
+            fid = str(feed.get("id") or "")
+            src = str(feed.get("_source") or "")
+            if fid.startswith("gfa_") or src == "gfa":
+                score -= 0.075
+        if wizard_soft_goals.get("maximize_n_efficiency_rmd"):
+            rmd_val = float(feed.get("rmd") or 0.0)
+            if rmd_val > 0.5:
+                score += min(rmd_val / 650.0, 0.09)
 
     return round(score, 6)
 
@@ -1923,6 +1954,7 @@ def _run_lp(
     prices = [f["price"] for f in feeds]
     feeding_type = _normalize_feeding_type((profile or {}).get("feeding_type"))
     pasture_pmr = _is_pasture_pmr_system(feeds, profile)
+    _wizard_sg = ((runtime_options or {}).get("policy_overrides") or {}).get("wizard_soft_goals") or {}
     andfom_gf_min = 180.0 if pasture_pmr else 200.0
     pabkh_max = 225.0 if pasture_pmr else 210.0
     xl_max = 42.0 if pasture_pmr else 40.0
@@ -2007,6 +2039,19 @@ def _run_lp(
     if _sara.get("cp_density_max_override") is not None:
         cp_max = min(cp_max, float(_sara["cp_density_max_override"]))
     _sara_pendf_floor_boost = float(_sara.get("pendf_floor_boost") or 0.0)
+
+    # Wizard Step 3: minimale aNDFomGF+CoP-Dichte (Nutzer-% TM vs. DLG-Kaskade).
+    _wizard_hb_early = (
+        ((runtime_options or {}).get("policy_overrides") or {}).get("wizard_hard_bounds") or {}
+    )
+    _gf_pct_user = _wizard_hb_early.get("andfom_gf_min_pct_tm")
+    if _gf_pct_user is not None:
+        try:
+            _gf_floor_g_kgdm = float(_gf_pct_user) * 10.0
+            if _gf_floor_g_kgdm > 0:
+                andfom_gf_min = max(andfom_gf_min, _gf_floor_g_kgdm)
+        except (TypeError, ValueError):
+            pass
 
     A_ub: List[List[float]] = []
     b_ub: List[float] = []
@@ -2170,6 +2215,43 @@ def _run_lp(
     _geq(ones, req.dmi_min_kg, name=_CONSTR_DMI_GEQ)
     _leq(ones, req.dmi_max_kg, name=_CONSTR_DMI_LEQ)
 
+    # Wizard Step 3 — lineare Dichte-Nebenbedingungen (ohne Registry-Namen),
+    # absichtlich NACH den relaxierbaren Standardrows eingefuegt, damit die
+    # festen Relaxations-Indizes (aNDFomGF=3, XL=5, RMD=7, ME-abs=9) stabil bleiben.
+    #
+    #   ME_min:    sum x_i (ME_i - ME_min) >= 0  ⇔ Durchschnittsdichte >= ME_min  [MJ/kg TM]
+    #   Staerke:   sum x_i (ST_i - ST_max) <= 0  ⇔ mittlere Staerke <= ST_max    [g/kg TM]
+    #   aNDFom:    sum x_i (NDF_i - NDF_min) >= 0  ⇔ mittlere NDF >= NDF_min   [g/kg TM]
+    #
+    # UI-% TM entspricht hier g/kg TM / 10 (vgl. Frontend-KPI-Stärke-% TM).
+    _wizard_hb_lp = (
+        ((runtime_options or {}).get("policy_overrides") or {}).get("wizard_hard_bounds") or {}
+    )
+    _me_min_u = _wizard_hb_lp.get("me_min_mj_per_kg_dm")
+    if _me_min_u is not None:
+        try:
+            _me_min_v = float(_me_min_u)
+            if _me_min_v > 0:
+                _geq([f["me"] - _me_min_v for f in feeds], 0.0)
+        except (TypeError, ValueError):
+            pass
+    _st_pct_u = _wizard_hb_lp.get("starch_max_pct_tm")
+    if _st_pct_u is not None:
+        try:
+            _st_cap = float(_st_pct_u) * 10.0
+            if _st_cap >= 0:
+                _leq([f["st"] - _st_cap for f in feeds], 0.0)
+        except (TypeError, ValueError):
+            pass
+    _ndf_pct_u = _wizard_hb_lp.get("andfom_min_pct_tm")
+    if _ndf_pct_u is not None:
+        try:
+            _ndf_floor_d = float(_ndf_pct_u) * 10.0
+            if _ndf_floor_d > 0:
+                _geq([f["ndf"] - _ndf_floor_d for f in feeds], 0.0)
+        except (TypeError, ValueError):
+            pass
+
     # Slice 1e (nachgeschaerft 2026-04-23, §4 - hart/weich-Trennung):
     #   Die Einzelgabe-Grenzen je Abruf/Melkung sind PHYSIOLOGISCH hart
     #   (Pansensicherheit, SARA-Schutz). Das empfohlene Tagesmaximum ist
@@ -2204,7 +2286,8 @@ def _run_lp(
             options={"disp": False},
         )
 
-    stage1_objective = [_welfare_objective_coeff(feed) for feed in feeds]
+    _sg_kw = _wizard_sg if _wizard_sg else None
+    stage1_objective = [_welfare_objective_coeff(feed, wizard_soft_goals=_sg_kw) for feed in feeds]
     result = _solve(stage1_objective, A_ub, b_ub)
 
     # Refactor Schritt 3 (2026-04-23): Constraint-Indizes werden ueber die
@@ -2367,12 +2450,18 @@ def _run_lp(
             )
             conc_slack_needed = _conc_max_per_day > 0 and _has_staged_concentrate
             n_cs = 1 if conc_slack_needed else 0
+            _prices_stage2 = list(prices)
+            if _wizard_sg.get("minimize_soya"):
+                _prices_stage2 = [
+                    float(prices[i]) + (0.095 if _feed_is_soya(feeds[i]) else 0.0)
+                    for i in range(n)
+                ]
             A_s2 = [list(row) + [0.0] * n_cs for row in A_stage2]
             b_s2 = list(b_stage2)
             if conc_slack_needed:
                 A_s2.append(list(conc_mask) + [-1.0])
                 b_s2.append(_conc_max_per_day)
-            c_s2 = list(prices) + ([w_conc_slack] if conc_slack_needed else [])
+            c_s2 = list(_prices_stage2) + ([w_conc_slack] if conc_slack_needed else [])
             bounds_s2 = list(bounds) + ([(0.0, None)] if conc_slack_needed else [])
 
             try:
@@ -3499,6 +3588,21 @@ def _build_response(
     season_profile = runtime_options.get("season_profile")
     policy_profile = runtime_options.get("policy_profile", "pmr_standard")
     policy_overrides = runtime_options.get("policy_overrides", {}) or {}
+    _wsg_meta = policy_overrides.get("wizard_soft_goals") or {}
+    _wizard_soft_lp_meta: Optional[Dict[str, bool]] = None
+    if _wsg_meta:
+        _wizard_soft_lp_meta = {
+            k: bool(_wsg_meta[k])
+            for k in (
+                "minimize_soya",
+                "prefer_homegrown",
+                "maximize_n_efficiency_rmd",
+                "minimize_deviation_from_baseline",
+            )
+            if _wsg_meta.get(k)
+        }
+        if not _wizard_soft_lp_meta:
+            _wizard_soft_lp_meta = None
 
     # FAN-Kalibrierung: Platzhalter-Payload (Slice 1) – FAN-Iteration folgt in Slice 3.
     fan_iterations = lp_out.get("_fan_iterations") or []
@@ -4398,17 +4502,19 @@ def _build_response(
         "season_profile": season_profile,
         "metadata": {
             "solver": "scipy-highs-internal",
-            # Historischer Schluessel (bleibt stabil fuer alte Clients).
-            # Der neue API-steuerbare Wert wird separat als "objective_strategy" ausgewiesen.
-            "optimization_strategy": (
+            # Historischer Schluessel (Spec §10.2): stabiler Kurzstring fuer Legacy-Clients.
+            "optimization_strategy": "stage1_balance_then_stage2_cost",
+            # Zwei-Stufen-Pipeline mit optionalen Slack-/Penalty-Erweiterungen (Detail).
+            "optimization_strategy_pipeline": (
                 "stage1_balance_then_stage2_cost_plus_policy_slack"
                 if lp_out.get("_policy_lp_slack_objective_mode")
                 else (
                     "stage1_balance_then_stage2_cost_plus_concentrate_slack"
                     if lp_out.get("_concentrate_max_lp_slack_kg")
-                    else "stage1_balance_then_stage2_cost"
+                    else None
                 )
             ),
+            "wizard_soft_goals_lp": _wizard_soft_lp_meta,
             "objective_strategy": objective_strategy,
             "pasture_pmr_mode": pasture_pmr,
             "energy_system": "ME-FAN1-GfE2023",
@@ -4918,9 +5024,15 @@ def _optimize_internal(
         for cf in custom_feeds:
             feeds.append(cf)
 
+    feeding_type_norm = _normalize_feeding_type(profile.get("feeding_type"))
+    # Reines TMR: Weidemineral-Supplement nicht als optionaler LP-Kandidat fuehren
+    # (liegt sonst via _with_special_supplements in jedem Feed-Pool und kann fuer
+    # Mineral-Klemmen gewaehlt werden; Pflicht gilt nur PMR+Weide / PMR mit Weide).
+    if feeding_type_norm == "TMR":
+        feeds = [f for f in feeds if f.get("_special") != "pasture_mg"]
+
     # PMR+Weide: Weidemineral automatisch als Pflichtbaustein fuehren,
     # damit das K/Mg-Antagonismus-Risiko (DLG 417 / DLG 01|2023) sauber abgedeckt ist.
-    feeding_type_norm = _normalize_feeding_type(profile.get("feeding_type"))
     if feeding_type_norm == "PMR+Weide" or (
         feeding_type_norm == "PMR" and _has_pasture_forage(feeds)
     ):

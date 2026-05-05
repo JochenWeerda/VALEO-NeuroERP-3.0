@@ -90,10 +90,11 @@ Stand: `2026-04-24`
 **Von:** Cursor
 **Stand:** abgeschlossen 2026-04-24
 **Ziel des Slices:** Wizard-Schritt 3 (Grenzen + weiche Ziele) als State/API an Backend anschließen, Prioritäten grob an `objective_strategy` koppeln, TM-Ziel/`target_dmi_kg` und Wizard-TM-Band im `_gfe_requirements` nutzen, Workbench-Duplikatnamen klären, Playwright mit `webServer`, kurze Pytest-Regression, QA-Checkliste ohne private Fixtures.
-**Dateibesitz:** `app/api/v1/endpoints/rations_optimization.py` (`_gfe_requirements`), `packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx`, `packages/frontend-web/playwright.config.ts`, `packages/frontend-web/src/lib/api/rations-optimization.ts`, `tests/test_rations_wizard_requirements.py`, `docs/agent-ops/rations-manual-compound-qa.md`.
+**Dateibesitz:** `app/api/v1/endpoints/rations_optimization.py` (`_gfe_requirements`, `_run_lp` Wizard-Dichten), `packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx`, `packages/frontend-web/playwright.config.ts`, `packages/frontend-web/src/lib/api/rations-optimization.ts`, `tests/test_rations_wizard_requirements.py`, `docs/agent-ops/rations-manual-compound-qa.md`.
 **Abnahmekriterien:** Frontend sendet `objective_strategy`, `policy_overrides.wizard_*`, `wizard_dmi_*` am Profil; Backend klemmt TM-Band; Playwright kann Vite selbst starten; Regressionstests gruen.
 **Checks:** `pytest tests/test_rations_wizard_requirements.py -q`; im Paket `frontend-web`: `pnpm exec playwright test tests/e2e/rations-compound-upload.spec.ts` (mit laufendem Backend) bzw. `pnpm run type-check`.
-**Offene Risiken:** ME-/Stärke-/aNDFom-Grenzen aus Schritt 3 sind dokumentiert (`wizard_hard_bounds`), aber noch nicht alle als harte LP-Constraints verdrahtet.
+**Erledigt (Folgesession LP):** `policy_overrides.wizard_hard_bounds` steuert ME-/Stärke-/aNDFom-Mindest- bzw. Höchst-Dichten (linear auf Gesamtration); `andfom_gf_min_pct_tm` schärft die aNDFomGF+CoP-Untergrenze vor LP-Aufbau.
+**Offene Risiken:** Soja-/Baseline-/RMD-/hofeigen-Ziele bleiben in `wizard_soft_goals` dokumentiert (noch keine direkten LP-Zielterm-Zweige).
 
 ## INT-LIVE-001
 
@@ -504,13 +505,25 @@ Archiv des vorherigen Boards:
 **Abnahmekriterien:** Kritische FIBU-Kernpfade besitzen gezielte Tests statt nur allgemeiner Gesamtquote; Ratchet kann fuer Finance spaeter angehoben werden.
 **Fortschritt:** Start auf den API-/Service-Kern fuer Follow-up, Mahnwesen, Lastschrift- und Kassenexport sowie FIBU-nahe Exportpersistenz; `tests/test_finance_followup_api.py` deckt jetzt Preview-, Export-, Download-, DMS-Redirect- und Upload-Metadatenpfade ab. Zusaetzlich haertet `tests/test_fibu_connectors_api.py` jetzt Profile-CRUD, Import-Upload, Run-Summary, Run-Items und Workflow-Folgeaktionen in `api/v1/endpoints/fibu_connectors.py`. `tests/test_finance_actions.py` deckt Bankabgleich, Buchungsfreigabe, Kassenabschluss, Lastschriftlauf, Periodenabschluss, Kreditlimits, Sicherheiten, Zahlungsvorschlaege und Buchungsuebergabe ab. Die zuvor `skipped` Finance-API-Tests wurden auf deterministische Test-Doubles umgestellt (`tests/test_finance_dunning_api.py`, `tests/test_finance_exchange_rates_api.py`, `tests/test_finance_payment_runs_api.py`), damit sie nicht mehr an einer zufaelligen Live-DB haengen. Nebenbei wurden echte Ursachen im Code behoben: Geldbetraege im Mahnwesen werden jetzt quantisiert, `payment_runs.py` serialisiert Zahlungsobjekte sauber und der Ruecklaeuferpfad nutzt wieder den korrekten Betrag. Fuer Bestandsinstallationen erzwingt `ensure_finance_api_tables_20260413` die fehlenden Finance-API-Tabellen auch dann, wenn ein aelterer Migrationspfad sie ausgelassen hat.
 
+## COV-FIN-003
+
+**Von:** Codex
+**Stand:** abgeschlossen 2026-05-05
+**Ziel des Slices:** Die verbliebenen Finance-Ratchet-Luecken `booking_templates.py` und `chart_of_accounts.py` ueber deterministische API-/Unit-Tests und einen stabilen JSON-Serialisierungspfad schliessen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/quality-assurance/critical-backend-coverage-plan-2026-04-24.md`, `docs/project-context/open-gaps-and-known-issues.md`, `app/api/v1/endpoints/booking_templates.py`, `tests/test_booking_templates_api.py`, `tests/test_chart_of_accounts_api.py`
+**Abnahmekriterien:** `booking_templates.py` liegt ueber 40 Prozent, `chart_of_accounts.py` ueber 50 Prozent; der kritische Coverage-Ratchet laeuft gegen die Sammelsuite gruen.
+**Erledigt:** `booking_templates.py` serialisiert Template-Lines jetzt ueber `model_dump_json()` JSON-sicher; `tests/test_booking_templates_api.py` und `tests/test_chart_of_accounts_api.py` decken Listen-, CRUD-, Validierungs-, Export- und Fehlerpfade ab. Der vollstaendige kritische Ratchet ist gruen.
+**Checks:** `pytest tests/test_booking_templates_api.py tests/test_chart_of_accounts_api.py -q --no-cov`; `pytest tests/test_tenant_enforcement.py tests/test_secrets_vault.py tests/test_event_bus_runtime.py tests/test_process_kernel_wave2_events.py tests/test_integration_bootstrap.py tests/test_finance_actions.py tests/test_finance_followup_api.py tests/test_fibu_connectors_api.py tests/test_dunning_api.py tests/test_finance_payment_runs_api.py tests/test_finance_exchange_rates_api.py tests/test_finance_read_models_api.py tests/test_process_kernel_wave1_contracts.py tests/test_inventory_operations.py tests/test_inventory_counts.py tests/test_waage_api.py tests/test_warehouses_api.py tests/test_warehouse_transfers_api.py tests/test_booking_templates_api.py tests/test_chart_of_accounts_api.py tests/test_l3c_smoke.py -q`; `python scripts/check_critical_backend_coverage.py`
+
 ## COV-INV-002
 
 **Von:** Codex
-**Stand:** in arbeit
+**Stand:** abgeschlossen 2026-05-05
 **Ziel des Slices:** Coverage fuer Bestandsfuehrung, Lagerbewegung, Inventur und physische Objektkette erweitern.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `tests/**`, Inventory-/Ops-/Logistik-Endpunkte und Services
 **Abnahmekriterien:** Stock-Movements, Inventur und kritische Lagerpfade sind ueber gezielte Tests gegen Regressionen abgesichert.
+**Erledigt:** `waage.py`, `warehouses.py`, `warehouse_transfers.py`, `inventory_counts.py` und `inventory_operations.py` liegen im kritischen Coverage-Ratchet ueber Schwelle; die Sammelsuite laeuft gruen.
+**Checks:** siehe `COV-FIN-003` Sammelsuite und `python scripts/check_critical_backend_coverage.py`
 
 ## COV-INT-002
 

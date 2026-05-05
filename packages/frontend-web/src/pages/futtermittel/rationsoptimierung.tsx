@@ -2316,7 +2316,7 @@ function Wizard({
               <div className="space-y-4">
                 <h3 className="text-xs font-bold uppercase tracking-widest" style={{ color: C.accent }}>Harte Grenzen</h3>
                 <p className="text-xs" style={{ color: C.muted }}>
-                  TM-Band wird an den Solver übergeben (min/max kg/Tag). Weitere Grenzwerte werden mit der Optimierung dokumentiert und können später fest ins LP eingebunden werden.
+                  TM-Band und die übrigen Grenzwerte gehen an den Solver (TM min/max sowie Mindest-/Höchst-Dichten für ME, Stärke und aNDFom auf Gesamtration-Basis; aNDFom GF min schärft die Struktur-Untergrenze).
                 </p>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between gap-4">
