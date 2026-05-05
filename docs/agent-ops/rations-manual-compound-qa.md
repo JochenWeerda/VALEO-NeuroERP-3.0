@@ -14,6 +14,7 @@ Kurzcheckliste ohne Pflicht zu privaten Fotos im Repo. Für Regression nutzt das
 2. Nach Upload: Produktname und mindestens eine Nährstoffspalte (z. B. ME oder sidP) plausibel > 0.
 3. Optimierung durchlaufen → Workbench: dieselbe Futtermittelzeile zeigt ME-/sidP-Beitrag konsistent (> 0 wenn das Mittel ME/sidP hat).
 4. Bei Duplikat-Anzeigenamen in der Tabelle: zweite Spalte zeigt `(feed_id)` zur Unterscheidung.
+5. Schritt-3-Grenzen: Nach Optimierung sollten Stärke-%TM / ME (MJ/kg TM) / aNDFom (g/kg TM) zu den eingestellten Korridoren passen (LP-hart, sofern das Set zulässig ist).
 
 ## Automatisierung
 

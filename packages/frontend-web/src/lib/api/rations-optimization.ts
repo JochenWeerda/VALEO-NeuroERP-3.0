@@ -228,6 +228,7 @@ export interface NutrientSupply {
   sidp_g: number
   andfom_g: number
   starch_g: number
+  staerke_g?: number
   sugar_g: number
   fat_g: number
   ca_g: number
@@ -404,7 +405,6 @@ export interface NutrientSupplyExtended {
   andfom_g: number
   starch_g?: number
   staerke_g?: number
-  staerke_kgdm?: number
   sugar_g: number
   fat_g: number
   ca_g: number

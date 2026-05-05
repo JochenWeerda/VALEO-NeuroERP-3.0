@@ -354,8 +354,8 @@ class TestPolicyProfileBandSolverBinding:
         )
         assert summary.get("by_class", {}).get("B", 0.0) >= policy_penalty - 1e-6
 
-    def test_no_policy_evaluation_for_non_dlg2025_profile(self):
-        # tmr_standard hat keine Tab.14-Targets -> evaluation soll None sein
+    def test_standard_policy_profile_evaluates_after_profile_rollout(self):
+        # tmr_standard ist seit dem Policy-Profil-Rollout ein echtes Zielprofil.
         profile = self._profile()
         runtime_options = ro._resolve_runtime_options(
             profile, policy_profile="tmr_standard"
@@ -363,9 +363,11 @@ class TestPolicyProfileBandSolverBinding:
         res = ro._optimize_internal(profile, runtime_options=runtime_options)
         if res.get("status") != "optimal":
             pytest.skip(f"LP not optimal in test environment: {res.get('status')}")
-        assert res.get("policy_profile_evaluation") is None
+        eva = res.get("policy_profile_evaluation")
+        assert eva is not None
+        assert eva["profile"] == "tmr_standard"
         cs = res.get("constraint_status") or []
-        assert not any(c.get("source") == "policy_profile" for c in cs)
+        assert any(c.get("source") == "policy_profile" for c in cs)
 
 
 # ---------------------------------------------------------------------------
@@ -464,13 +466,14 @@ class TestPolicyBandLpSlackExtension:
             assert lp_mode == "stage2_cost_plus_policy_slack"
             assert isinstance(slacks, list)
             assert res.get("policy_profile_lp_total_penalty") is not None
-            # Metadata-Strategie spiegelt den LP-Modus wider
+            # Detaillierte Pipeline separat vom Legacy-Schluessel metadata.optimization_strategy
             meta = res.get("metadata") or {}
-            assert meta.get("optimization_strategy") == (
+            assert meta.get("optimization_strategy") == "stage1_balance_then_stage2_cost"
+            assert meta.get("optimization_strategy_pipeline") == (
                 "stage1_balance_then_stage2_cost_plus_policy_slack"
             )
 
-    def test_no_lp_slack_payload_without_dlg2025_profile(self):
+    def test_standard_profile_exposes_lp_slack_payload(self):
         profile = {
             "breed": "Deutsche Holstein",
             "body_weight_kg": 670.0,
@@ -488,8 +491,8 @@ class TestPolicyBandLpSlackExtension:
         res = ro._optimize_internal(profile, runtime_options=runtime_options)
         if res.get("status") != "optimal":
             pytest.skip(f"LP not optimal in test environment: {res.get('status')}")
-        assert res.get("policy_profile_lp_slacks") is None
-        assert res.get("policy_profile_lp_mode") is None
+        assert isinstance(res.get("policy_profile_lp_slacks"), list)
+        assert res.get("policy_profile_lp_mode") in (None, "stage2_cost_plus_policy_slack")
 
 
 # ---------------------------------------------------------------------------
