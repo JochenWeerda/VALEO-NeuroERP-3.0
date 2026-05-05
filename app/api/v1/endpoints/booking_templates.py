@@ -239,7 +239,7 @@ async def create_booking_template(
         template_id = uuid7()
         
         import json
-        lines_json = json.dumps([line.dict() for line in template.lines])
+        lines_json = json.dumps([json.loads(line.model_dump_json()) for line in template.lines])
         trigger_config_json = json.dumps(template.trigger_config) if template.trigger_config else None
         
         insert_query = text("""
@@ -505,7 +505,7 @@ async def update_booking_template(
                 )
             import json
             update_fields.append("lines = :lines")
-            params["lines"] = json.dumps([line.dict() for line in template.lines])
+            params["lines"] = json.dumps([json.loads(line.model_dump_json()) for line in template.lines])
         if template.default_amount is not None:
             update_fields.append("default_amount = :default_amount")
             params["default_amount"] = template.default_amount
