@@ -17,6 +17,7 @@ import pytest
 
 from app.api.v1.endpoints.rations_optimization import (
     _kl_milk_from_me_density,
+    _maintenance_allocation_fraction,
     _milk_from_supply,
     _milk_requirement_factors,
     _max_kg_for,
@@ -91,6 +92,47 @@ class TestMilkRequirementFactorsPastureSurcharge:
         me_maint_pmr, _, _, _ = _milk_requirement_factors(self._profile("PMR"))
         me_maint_tmr, _, _, _ = _milk_requirement_factors(self._profile("TMR"))
         assert me_maint_pmr == pytest.approx(me_maint_tmr, abs=0.01)
+
+
+class TestMaintenanceAllocationFraction:
+    def test_scales_and_clamps(self):
+        assert _maintenance_allocation_fraction(50.0, 200.0) == pytest.approx(0.25)
+        assert _maintenance_allocation_fraction(500.0, 200.0) == pytest.approx(1.0)
+        assert _maintenance_allocation_fraction(50.0, 0.0) == pytest.approx(0.0)
+
+
+class TestMilkFromSupplyMaintenanceAllocation:
+    """Anteilige Erhaltung fuer Teilmengen (Weide-/Silage-Panel)."""
+
+    def test_partial_me_share_adds_energy_milk_vs_full_maintenance(self):
+        profile = {
+            "body_weight_kg": 650,
+            "milk_kg_day": 25,
+            "milk_fat_pct": 4.0,
+            "milk_protein_pct": 3.4,
+            "feeding_type": "PMR+Weide",
+        }
+        subset_me = 60.0
+        total_me = 240.0
+        density = 11.0
+        sidp_subset = 650.0
+        alloc = subset_me / total_me
+        naive = _milk_from_supply(
+            subset_me,
+            sidp_subset,
+            profile,
+            density,
+            maintenance_allocation=1.0,
+        )
+        weighted = _milk_from_supply(
+            subset_me,
+            sidp_subset,
+            profile,
+            density,
+            maintenance_allocation=alloc,
+        )
+        assert weighted["milk_from_energy_kg"] >= naive["milk_from_energy_kg"]
+        assert weighted["milk_from_energy_kg"] > naive["milk_from_energy_kg"] + 0.5
 
 
 class TestMilkFromSupplyScreenshotRegression:
