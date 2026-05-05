@@ -161,12 +161,11 @@ def test_spring_pasture_plausible_milk_from_forage():
     (User-Praxisangabe 2026-04-22). Werte > 35 kg deuten auf ein zu opti-
     mistisches k_l / ME-Dichte-Modell hin, < 10 kg auf eine Unterschaetzung.
 
-    Hinweis: ``milk_from_pasture`` / ``milk_from_grass_silage`` nutzen je-
-    weils dieselbe tierbezogene Erhaltungskomponente wie die Gesamtversor-
-    gung, waehrend nur ein Teillieferant (Weide bzw. Silage) eingesetzt
-    wird; die Summe der beiden ``limiting_milk_kg`` ist daher **keine** zu-
-    laessige Gesamtplausibilitaet. Korrekt ist die gemeinsame Bilanz ueber
-    Weide + Grassilage: ``milk_from_pasture_plus_grass_silage``.
+    ``milk_from_pasture_plus_grass_silage`` bucht Erhaltungs-ME/-sidP anteilig
+    nach ME-Anteil Weide+Grassilage an der Gesamtration; das ist die stabile
+    Kennziffer fuer den Graskomplex. (Einzelwerte Weide/Silage nutzen dieselbe
+    Logik; ihre Summe weicht i.d.R. vom kombinierten Wert ab, weil k_l je
+    Teildichte separat berechnet wird.)
     """
     result, _ = _make_result()
     risk = result.get("pasture_risk") or {}

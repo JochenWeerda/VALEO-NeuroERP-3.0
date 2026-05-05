@@ -2895,6 +2895,21 @@ def _milk_requirement_factors(
     return me_maint, me_per_kg_milk, sidp_maint, sidp_per_kg_milk
 
 
+def _maintenance_allocation_fraction(subset_me_sup: float, total_me_sup: float) -> float:
+    """Anteil der Rations-ME [0..1] fuer anteilige Erhaltungsbuchung bei Teilmengen.
+
+    Erhaltungs-ME und -sidP werden mit diesem Faktor gewichtet. Verwendung:
+    ``forage_only_milk`` (GF-ME / Gesamt-ME), Weide-/Grassilage-Kennziffern im
+    Pasture-Risk-Panel. Entspricht der ueblichen Buchhaltung bei Effizienz-
+    Kennzahlen (Aufschluesselung nach Futtergruppen ueber ME-Anteile).
+    Vergleiche zur energetischen Partitionierung bei Laktation:
+    u.a. *Journal of Dairy Science* (ME-Nutzung, Erhaltung vs. Milch).
+    """
+    if total_me_sup <= 1e-9:
+        return 0.0
+    return max(0.0, min(1.0, subset_me_sup / total_me_sup))
+
+
 def _milk_from_supply(
     me_sup: float,
     sidp_sup: float,
@@ -2904,6 +2919,7 @@ def _milk_from_supply(
     *,
     tmr_me_density_mj_per_kg_tm: Optional[float] = None,
     fani: Optional[float] = None,
+    maintenance_allocation: Optional[float] = None,
 ) -> Dict[str, float]:
     me_maint, me_per_kg_milk, sidp_maint, sidp_per_kg_milk = _milk_requirement_factors(
         profile,
@@ -2912,6 +2928,16 @@ def _milk_from_supply(
         tmr_me_density_mj_per_kg_tm=tmr_me_density_mj_per_kg_tm,
         fani=fani,
     )
+    # Anteilige Erhaltung (0..1): fuer Teilmengen (z.B. nur Weide-MJ) wird der
+    # Erhaltungsbedarf wie in Effizienz-Bilanzen ueblich nach ME-Anteil an der
+    # Gesamtration gewichtet. Vollbedarf (1,0) = bisheriges Verhalten.
+    # Hintergrund: Partitionierung von ME bei Laktation (u.a. JDS); fuer
+    # Marginalbeitraege einzelner Futtergruppen ist die pauschale Voll-Erhaltung
+    # auf Teillieferanten fachlich irrefuehrend.
+    _alloc = 1.0 if maintenance_allocation is None else float(maintenance_allocation)
+    _alloc = max(0.0, min(1.0, _alloc))
+    me_maint *= _alloc
+    sidp_maint *= _alloc
     milk_from_energy = max(0.0, (me_sup - me_maint) / me_per_kg_milk) if me_per_kg_milk > 0 else 0.0
     milk_from_protein = max(0.0, (sidp_sup - sidp_maint) / sidp_per_kg_milk) if sidp_per_kg_milk > 0 else 0.0
     return {
@@ -3266,7 +3292,8 @@ def _derive_constraint_status_from_report(
 #   - Staffel linear bzw. stueckweise linear OBERHALB Basisleistung.
 #   - Basisleistung = Milch aus Grundfutter/Weide (limiting_milk_kg aus
 #     forage_only_milk bei PMR, bzw. aus supplemented_milk bei TMR ohne
-#     gestaffeltem Block).
+#     gestaffeltem Block). Erhaltungs-ME/-sidP fuer forage_only anteilig
+#     nach GF-ME-Anteil an Gesamt-ME (_maintenance_allocation_fraction).
 #   - Umrechnungsfaktor: 0,45-0,50 kg Konzentrat (FM) je kg Zusatzmilch
 #     (Praxisrichtwert, entspricht ~1 l Konzentrat / 2 l Milch bei
 #     Dichte ~0,5 kg/l). Dies ist als BAND angegeben (low/high).
@@ -3815,8 +3842,13 @@ def _build_response(
         _milk_kl_kw["tmr_me_density_mj_per_kg_tm"] = tmr_me_density_for_kl
         if _fani_for_kl is not None:
             _milk_kl_kw["fani"] = _fani_for_kl
+    _forage_maint_alloc = _maintenance_allocation_fraction(forage_me_sup, me_sup)
     forage_only_milk = _milk_from_supply(
-        forage_me_sup, forage_sidp_sup, profile, forage_me_density, **_milk_kl_kw
+        forage_me_sup,
+        forage_sidp_sup,
+        profile,
+        forage_me_density,
+        **{**_milk_kl_kw, "maintenance_allocation": _forage_maint_alloc},
     )
     supplemented_milk = _milk_from_supply(
         me_sup, sidp_sup, profile, total_me_density, **_milk_kl_kw
@@ -3859,9 +3891,19 @@ def _build_response(
         if pasture_plus_grass_kg > 0 else None
     )
 
+    _pasture_maint_alloc = _maintenance_allocation_fraction(pasture_me_sup, me_sup)
+    _grass_silage_maint_alloc = _maintenance_allocation_fraction(grass_silage_me_sup, me_sup)
+    _pasture_plus_grass_maint_alloc = _maintenance_allocation_fraction(
+        pasture_me_sup + grass_silage_me_sup, me_sup
+    )
+
     pasture_milk = (
         _milk_from_supply(
-            pasture_me_sup, pasture_sidp_sup, profile, pasture_me_density, **_milk_kl_kw
+            pasture_me_sup,
+            pasture_sidp_sup,
+            profile,
+            pasture_me_density,
+            **{**_milk_kl_kw, "maintenance_allocation": _pasture_maint_alloc},
         )
         if pasture_kg > 0 else None
     )
@@ -3871,7 +3913,7 @@ def _build_response(
             grass_silage_sidp_sup,
             profile,
             grass_silage_me_density,
-            **_milk_kl_kw,
+            **{**_milk_kl_kw, "maintenance_allocation": _grass_silage_maint_alloc},
         )
         if grass_silage_kg > 0 else None
     )
@@ -3881,7 +3923,7 @@ def _build_response(
             pasture_sidp_sup + grass_silage_sidp_sup,
             profile,
             pasture_plus_grass_me_density,
-            **_milk_kl_kw,
+            **{**_milk_kl_kw, "maintenance_allocation": _pasture_plus_grass_maint_alloc},
         )
         if pasture_plus_grass_kg > 0 else None
     )
@@ -4251,6 +4293,8 @@ def _build_response(
             "pasture_k_mg_ratio_ziel": "<= 4 (Grastetanie-Risiko ab > 6)",
             "mg_supplement_dmi_kg": round(pasture_mg_supplement_kg, 3),
             "mg_supplement_ziel": ">= 0.05 kg TM/d bei PMR+Weide",
+            # Milch aus Teilmengen: ME-Erhaltungsanteil = Teilmengen-ME / Gesamt-ME;
+            # gleicher Faktor fuer sidP-Erhaltung (konsequent zur bilanziellen Aufschluesselung).
             "milk_from_pasture": pasture_milk,
             "milk_from_grass_silage": grass_silage_milk,
             "milk_from_pasture_plus_grass_silage": pasture_plus_grass_milk,
@@ -4413,7 +4457,8 @@ def _build_response(
     }
 
     # Slice 2: Konzentrat-Futterabruf-Staffel (nur fuer gestaffelte Systeme).
-    # Basis = Milch aus Grundfutter (forage_only_milk.limiting_milk_kg).
+    # Basis = Milch aus Grundfutter (forage_only_milk.limiting_milk_kg); dort
+    # anteilige Erhaltung wie beim Weide-/Silage-Panel (GF-ME / Gesamt-ME).
     concentrate_call_up = _build_concentrate_call_up_table(
         profile=profile,
         feeding_system_config=_fs_cfg_resp,
