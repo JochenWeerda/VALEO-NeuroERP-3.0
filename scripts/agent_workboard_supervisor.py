@@ -161,7 +161,8 @@ def _filter_slices(
 
 
 def _print_json(items: object) -> None:
-    print(json.dumps(items, indent=2, ensure_ascii=False))
+    out = json.dumps(items, indent=2, ensure_ascii=True)
+    sys.stdout.write(out + "\n")
 
 
 def cmd_list(args: argparse.Namespace) -> int:
