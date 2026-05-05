@@ -18,10 +18,12 @@ Stand: `2026-04-24`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert
+**Stand:** abgeschlossen 2026-05-05
 **Ziel des Slices:** Maschinenlesbare Slice-Dateien oder ein Validierungs-Gate fuer Workboard-Claims einfuehren, damit der Orchestrator nicht dauerhaft auf weichem Markdown basiert.
-**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/**`, `scripts/agent_workboard_supervisor.py`, passende Tests.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/**`, `scripts/agent_workboard_supervisor.py`, `tests/test_agent_workboard_supervisor.py`
 **Abnahmekriterien:** Claim-Pflicht ist maschinenlesbar validierbar; unklare Status-/Owner-/Dateibesitz-Felder werden als Fehler gemeldet, ohne automatische Git-Aktionen auszufuehren.
+**Erledigt:** YAML-Slice-Format eingefuehrt (`docs/agent-ops/slices/*.yaml`); `validate`-Subcommand in `agent_workboard_supervisor.py` ergaenzt; 14 neue Tests gruen; historische Markdown-Bloecke werden nur validiert wenn YAML-Datei oder `--strict-ids` vorhanden.
+**Checks:** `pytest tests/test_agent_workboard_supervisor.py -q --no-cov`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`
 **Offene Risiken:** Bestehende historische Workboard-Bloecke sind uneinheitlich und duerfen nicht durch ein zu striktes Gate blockieren.
 
 ## ERP-CRIT-001

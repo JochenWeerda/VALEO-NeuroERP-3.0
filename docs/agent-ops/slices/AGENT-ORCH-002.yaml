@@ -1,0 +1,21 @@
+id: AGENT-ORCH-002
+status: reserviert
+owner: Codex
+goal: >
+  Maschinenlesbare Slice-Dateien und ein Validierungs-Gate fuer Workboard-Claims einfuehren,
+  damit der Orchestrator nicht dauerhaft auf weichem Markdown basiert.
+file_ownership:
+  - docs/agent-ops/active-workboard.md
+  - docs/agent-ops/slices/**
+  - scripts/agent_workboard_supervisor.py
+  - tests/test_agent_workboard_supervisor.py
+acceptance_criteria: >
+  Claim-Pflicht ist maschinenlesbar validierbar; unklare Status-/Owner-/Dateibesitz-Felder
+  werden als Fehler gemeldet, ohne automatische Git-Aktionen auszufuehren.
+checks:
+  - pytest tests/test_agent_workboard_supervisor.py -q --no-cov
+  - python scripts/agent_workboard_supervisor.py validate
+  - node scripts/docs-governance-check.cjs
+risks: >
+  Bestehende historische Workboard-Bloecke sind uneinheitlich und duerfen nicht durch
+  ein zu striktes Gate blockieren.
