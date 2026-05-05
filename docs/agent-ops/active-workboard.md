@@ -85,6 +85,16 @@ Stand: `2026-04-24`
 **Checks:** `pytest tests/test_rations_feeding_system.py tests/test_rations_optimization_milk_plausibility.py -q`; im Paket `frontend-web`: `pnpm run type-check`
 **Offene Risiken:** Optional Wizard fuer manuelle `feeding_system_config`-Overrides; E2E-Smoke Rations-UI; weiteres Zerlegen von `_run_lp`.
 
+## RATIONS-WIZARD-E2E-001
+
+**Von:** Cursor
+**Stand:** abgeschlossen 2026-04-24
+**Ziel des Slices:** Wizard-Schritt 3 (Grenzen + weiche Ziele) als State/API an Backend anschließen, Prioritäten grob an `objective_strategy` koppeln, TM-Ziel/`target_dmi_kg` und Wizard-TM-Band im `_gfe_requirements` nutzen, Workbench-Duplikatnamen klären, Playwright mit `webServer`, kurze Pytest-Regression, QA-Checkliste ohne private Fixtures.
+**Dateibesitz:** `app/api/v1/endpoints/rations_optimization.py` (`_gfe_requirements`), `packages/frontend-web/src/pages/futtermittel/rationsoptimierung.tsx`, `packages/frontend-web/playwright.config.ts`, `packages/frontend-web/src/lib/api/rations-optimization.ts`, `tests/test_rations_wizard_requirements.py`, `docs/agent-ops/rations-manual-compound-qa.md`.
+**Abnahmekriterien:** Frontend sendet `objective_strategy`, `policy_overrides.wizard_*`, `wizard_dmi_*` am Profil; Backend klemmt TM-Band; Playwright kann Vite selbst starten; Regressionstests gruen.
+**Checks:** `pytest tests/test_rations_wizard_requirements.py -q`; im Paket `frontend-web`: `pnpm exec playwright test tests/e2e/rations-compound-upload.spec.ts` (mit laufendem Backend) bzw. `pnpm run type-check`.
+**Offene Risiken:** ME-/Stärke-/aNDFom-Grenzen aus Schritt 3 sind dokumentiert (`wizard_hard_bounds`), aber noch nicht alle als harte LP-Constraints verdrahtet.
+
 ## INT-LIVE-001
 
 **Von:** Codex

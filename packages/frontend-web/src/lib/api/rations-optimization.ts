@@ -52,6 +52,9 @@ export interface CowProfile {
   lactation_stage_days?: number
   parity?: number
   target_dmi_kg?: number
+  /** Schritt 3: harte TM-Grenzen für den Solver (kg/Tag), optional zur Standardbandberechnung */
+  wizard_dmi_min_kg?: number
+  wizard_dmi_max_kg?: number
   feeding_type?: 'TMR' | 'PMR' | 'PMR+Weide'
   season_profile?: SeasonProfile | null
 }
