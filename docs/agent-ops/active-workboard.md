@@ -94,7 +94,8 @@ Stand: `2026-04-24`
 **Abnahmekriterien:** Frontend sendet `objective_strategy`, `policy_overrides.wizard_*`, `wizard_dmi_*` am Profil; Backend klemmt TM-Band; Playwright kann Vite selbst starten; Regressionstests gruen.
 **Checks:** `pytest tests/test_rations_wizard_requirements.py -q`; im Paket `frontend-web`: `pnpm exec playwright test tests/e2e/rations-compound-upload.spec.ts` (mit laufendem Backend) bzw. `pnpm run type-check`.
 **Erledigt (Folgesession LP):** `policy_overrides.wizard_hard_bounds` steuert ME-/Stärke-/aNDFom-Mindest- bzw. Höchst-Dichten (linear auf Gesamtration); `andfom_gf_min_pct_tm` schärft die aNDFomGF+CoP-Untergrenze vor LP-Aufbau.
-**Offene Risiken:** Soja-/Baseline-/RMD-/hofeigen-Ziele bleiben in `wizard_soft_goals` dokumentiert (noch keine direkten LP-Zielterm-Zweige).
+**Erledigt (Session 2026-04-24ff):** `wizard_soft_goals` wirken solver-seitig fuer `minimize_soya` (Stage-1-Welfare-Penalty + Stage-2-Kostenzuschlag auf Soja-Futtermittel), `prefer_homegrown` (Bonus fuer `gfa_`-/`_source=="gfa"`-Feeds), `maximize_n_efficiency_rmd` (Penalty bei hohem Feed-RMD); Metadata `wizard_soft_goals_lp` listet aktive Flags. `optimization_strategy` bleibt Legacy-Kurzstring; Detail in `optimization_strategy_pipeline`. Milch-Kennziffern GF/Weide: anteilige Erhaltungsbuchung ueber GF-ME-/Teilmengen-ME-Anteil (`_maintenance_allocation_fraction`).
+**Offene Risiken:** `minimize_deviation_from_baseline` ist weiterhin ohne eigenen LP-Zielterm (nur durch aktives Flag in `wizard_soft_goals_lp` sichtbar, bis Baseline-Abstandslogik definiert ist). Optional E2E-Smoke Rations-UI; weiteres Zerlegen von `_run_lp`.
 
 ## INT-LIVE-001
 
