@@ -51,6 +51,15 @@ def _utcnow() -> str:
     return datetime.now(UTC).replace(microsecond=0).isoformat()
 
 
+def _flow_spine_etag(payload: dict[str, Any]) -> str:
+    """
+    ETag fuer JSON-Responses. SHA-256 statt MD5 — MD5 ist auf manchen Hosts (FIPS/OpenSSL)
+    blockiert und konnte bisher einen 500er beim Generieren der ETag-Header ausloesen.
+    """
+    body = _json.dumps(payload, ensure_ascii=False)
+    return f'"{hashlib.sha256(body.encode("utf-8")).hexdigest()}"'
+
+
 def _instance_to_dict(inst: FlowSpineInstance) -> dict[str, Any]:
     partner_name = inst.customer_name
     return {
@@ -299,8 +308,7 @@ class ResumeRequest(BaseModel):
 @router.get("/catalog")
 def get_catalog(lang: Optional[str] = Query(None)) -> JSONResponse:
     catalog = get_flow_spine_catalog(lang)
-    body = _json.dumps(catalog, ensure_ascii=False)
-    etag = f'"{hashlib.md5(body.encode()).hexdigest()}"'
+    etag = _flow_spine_etag(catalog)
     return JSONResponse(
         content=catalog,
         headers={
@@ -335,8 +343,7 @@ def get_workspace(
                     workspace["customer_data"] = customer_data
         return JSONResponse(content=workspace)
 
-    body = _json.dumps(workspace, ensure_ascii=False)
-    etag = f'"{hashlib.md5(body.encode()).hexdigest()}"'
+    etag = _flow_spine_etag(workspace)
     return JSONResponse(
         content=workspace,
         headers={
