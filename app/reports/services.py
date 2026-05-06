@@ -48,6 +48,19 @@ class ReportsService:
         from app.core.database import SessionLocal
         return SessionLocal()
 
+    def _rollback_session_safe(self, db: Session | None) -> None:
+        """
+        Nach SQLAlchemy-Fehlern zuruecksetzen. Ohne rollback bleibt eine injizierte Request-Session
+        im Abbruchzustand; spaetere Queries in derselben Request (z. B. KPIs Agrar-Zweig) schlagen dann
+        mit InFailedSqlTransaction fehl.
+        """
+        if db is None:
+            return
+        try:
+            db.rollback()
+        except SQLAlchemyError:
+            pass
+
     def _filter_by_date_range(self, query, start_date: Optional[str], end_date: Optional[str]):
         """Filter query by date range"""
         if start_date:
@@ -119,6 +132,7 @@ class ReportsService:
             )
         except SQLAlchemyError as e:
             logger.error(f"Database error in get_sales_performance_report: {e}")
+            self._rollback_session_safe(db)
             # Return empty report on error
             return SalesPerformanceReport(
                 totalRevenue=0,
@@ -181,6 +195,7 @@ class ReportsService:
             )
         except SQLAlchemyError as e:
             logger.error(f"Database error in get_customer_analytics_report: {e}")
+            self._rollback_session_safe(db)
             return CustomerAnalyticsReport(
                 topCustomers=[],
                 customerAcquisitionTrends={},
@@ -237,6 +252,7 @@ class ReportsService:
             )
         except SQLAlchemyError as e:
             logger.error(f"Database error in get_product_analytics_report: {e}")
+            self._rollback_session_safe(db)
             return ProductAnalyticsReport(
                 topProductsByRevenue=[],
                 topProductsByQuantity=[],
@@ -319,6 +335,7 @@ class ReportsService:
             )
         except SQLAlchemyError as e:
             logger.error(f"Database error in get_financial_analytics_report: {e}")
+            self._rollback_session_safe(db)
             return FinancialAnalyticsReport(
                 revenue={"total": 0, "paid": 0, "outstanding": 0},
                 outstandingPayments={"current": 0, "overdue30Days": 0, "overdue60Days": 0, "overdue90Days": 0},
@@ -398,6 +415,7 @@ class ReportsService:
             )
         except SQLAlchemyError as e:
             logger.error(f"Database error in get_trend_analytics_report: {e}")
+            self._rollback_session_safe(db)
             return TrendAnalyticsReport(
                 revenueTrends={},
                 orderVolumeTrends={},
@@ -453,6 +471,7 @@ class ReportsService:
             )
         except SQLAlchemyError as e:
             logger.error(f"Database error in get_dashboard_summary: {e}")
+            self._rollback_session_safe(db)
             return DashboardSummary(
                 totalRevenue=0,
                 totalOrders=0,
