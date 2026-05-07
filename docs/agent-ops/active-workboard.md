@@ -41,6 +41,17 @@ Stand: `2026-04-24`
 **Checks:** `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`
 **Offene Risiken:** Finale Rechtspruefung, Anbieter-AVV/DPA und produktive Tacho-/Telematik-Schnittstellen liegen ausserhalb des Repos.
 
+## HR-TIME-PILOT-001
+
+**Von:** Codex
+**Owner:** Codex
+**Stand:** reserviert 2026-05-07
+**Ziel des Slices:** Ersten VALEO-eigenen Driver-Time-Toolkern fuer LKW-Fahrerzeit, Tour-/Fahrzeugbezug und Plausibilitaetschecks umsetzen.
+**Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/HR-TIME-PILOT-001.yaml`, `packages/hr-domain/src/domain/entities/driver-time-event.ts`, `packages/hr-domain/src/domain/services/driver-time-service.ts`, `packages/hr-domain/src/index.ts`, `packages/hr-domain/tests/domain/driver-time-service.test.ts`, `packages/frontend-web/src/pages/personal/zeiterfassung.tsx`, `docs/project-context/hr-time-absence-driver-integration-2026-05-07.md`
+**Abnahmekriterien:** Fahrerzeitereignisse besitzen typisierte Ereignisarten, Tour-/Fahrzeugbezug, Quellen- und Auditfelder; Plausibilitaetschecks erkennen Ueberlappungen, fehlende Tour-/Fahrzeugdaten, fehlende Korrekturbegruendung und Abwesenheitskollisionen; die Zeiterfassungsseite zeigt den Driver-Time-Pilot ohne AGPL-/GPL-Codeuebernahme.
+**Checks:** `pnpm --filter @valero-neuroerp/hr-domain test`; `pnpm --filter @valero-neuroerp/frontend-web type-check`; `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`
+**Offene Risiken:** Produktive Persistenz, Tacho-/Telematik-Import und Payroll-/DATEV-Export bleiben Folgeslices.
+
 ## AGENT-ORCH-001
 
 **Von:** Codex
