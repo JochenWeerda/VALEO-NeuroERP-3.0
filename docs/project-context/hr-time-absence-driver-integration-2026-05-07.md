@@ -1,0 +1,164 @@
+# HR Time, Abwesenheit und Driver-Time-Layer
+
+## Zweck
+
+Diese Notiz haelt die Zielarchitektur fuer deutsche Arbeitszeit-/Abwesenheitsverwaltung im VALEO-Kontext fest.
+Der unmittelbare Anlass ist die Bewertung lizenzrechtlich unproblematischer Kandidaten fuer 27 Mitarbeitende, davon ein relevanter Anteil LKW-Fahrer.
+
+## Entscheidung
+
+VALEO uebernimmt keine AGPL-/GPL-Zeiterfassung als Codebasis.
+
+Stattdessen gilt:
+
+- Abwesenheiten werden mit `urlaubsverwaltung/urlaubsverwaltung` als bevorzugtem Kandidaten geprueft, weil das Projekt fachlich deutsch gepraegt und unter Apache-2.0 lizenziert ist.
+- Klassische Zeiterfassung wird entweder als kommerzieller deutscher SaaS-Dienst angebunden oder als schlanker VALEO-eigener Service gebaut.
+- Fahrerzeiten werden in einem VALEO-eigenen Driver-Time-Layer modelliert, weil LKW-Fahrer andere Ereignisse, Nachweise und Plausibilitaetsregeln brauchen als reine Buero-Zeiterfassung.
+- `urlaubsverwaltung/zeiterfassung` und vergleichbare AGPL-Projekte duerfen nur als fachliche Referenz oder unmodifizierter, klar getrennter Fremddienst bewertet werden, nicht als kopierte oder geforkte VALEO-Codebasis.
+
+## Lizenzbewertung
+
+| Kandidat | Lizenz | Bewertung fuer VALEO |
+|----------|--------|----------------------|
+| `urlaubsverwaltung/urlaubsverwaltung` | Apache-2.0 | Bevorzugter Open-Source-Kandidat fuer Urlaub, Krankheit und Abwesenheitsfreigaben. Permissiv, mit Notice-Pflichten handhabbar. |
+| `urlaubsverwaltung/zeiterfassung` | AGPL-3.0 | Fachlich passend, aber als Codebasis vermeiden. AGPL erzeugt bei modifizierter Netzbereitstellung Source-Offer-Pflichten fuer die betroffene Anwendung. |
+| Horilla | LGPL-2.1 | Als separater HRMS-Dienst moeglich, fachlich aber breiter und weniger deutsch-spezifisch. Keine bevorzugte Codebasis fuer VALEO. |
+| cityssm Attendance Tracking | MIT | Lizenzrechtlich einfach, fachlich aber eher Abwesenheits-/Call-Out-Nische, nicht ausreichend fuer deutsche Arbeitszeit plus Fahrerlogik. |
+| Kommerzieller deutscher SaaS | Vertraglich | Lizenzrechtlich oft sauber, wenn AVV/DPA, Datenexport, SSO/API und Auftragsverarbeitung passen. Fachliche Abhaengigkeit und Kosten separat pruefen. |
+
+## Zielarchitektur
+
+```text
+Keycloak / OIDC
+  |
+  +-- Urlaubsverwaltung (Apache-2.0, separater Dienst)
+  |     - Urlaub
+  |     - Krankheit
+  |     - Genehmigungen
+  |     - Abwesenheitsexporte
+  |
+  +-- VALEO HR-Time API
+        - Mitarbeitenden-/Rollen-Mapping
+        - Abwesenheits-Read-Model
+        - Zeiterfassungs-Adapter
+        - Driver-Time-Layer
+        - Payroll-/DATEV-/Lohnexport
+```
+
+Die Integrationsgrenze ist bewusst serviceorientiert. Fremdsysteme laufen getrennt, VALEO importiert oder synchronisiert definierte Read-Models und uebernimmt nicht deren fachliche Kernlogik als eingebetteten Code.
+
+## Driver-Time-Layer
+
+Der Driver-Time-Layer ist ein eigener VALEO-Bounded-Context fuer LKW-Fahrer.
+
+Kanonische Ereignisse:
+
+- `DRIVING`: Fahren
+- `LOADING`: Beladen
+- `UNLOADING`: Entladen
+- `OTHER_WORK`: sonstige Arbeit
+- `AVAILABILITY`: Bereitschaft / Wartezeit
+- `BREAK`: Pause
+- `DAILY_REST`: taegliche Ruhezeit
+- `WEEKLY_REST`: woechentliche Ruhezeit
+- `TOUR_START` / `TOUR_END`: Tourrahmen
+- `VEHICLE_CHANGE`: Fahrzeugwechsel
+- `TACHO_IMPORT`: Import aus digitalem Tachographen oder Telematik
+
+Mindestdaten pro Ereignis:
+
+- Mitarbeiter-ID
+- Zeitstempel von/bis
+- Ereignistyp
+- Fahrzeug-ID, wenn relevant
+- Tour-ID, wenn relevant
+- Standort oder Geofence, wenn vorhanden
+- Quelle: manuell, App, Tacho, Telematik, Dispo
+- Korrekturstatus und Audit-Referenz
+
+## Plausibilitaets- und Compliance-Layer
+
+Der erste VALEO-Pilot soll keine vollstaendige Rechtsauslegung automatisieren. Er soll Regeln als Hinweise und Blockerklassen fuehren:
+
+- fehlende Ruhezeit vor Tourstart
+- unplausible Ueberlappungen von Fahren, Pause und Beladen
+- Tour ohne Fahrzeug oder Fahrer
+- Tacho-Import weicht von manueller Buchung ab
+- fehlende Korrekturbegruendung
+- Abwesenheit kollidiert mit Tour oder Zeitereignis
+- Export ist blockiert, wenn Pflichtnachweise fehlen
+
+Rechtsquellen fuer die Detailkalibrierung sind insbesondere die EU-Regeln zu Lenk- und Ruhezeiten sowie deutsches Arbeitszeitrecht. Die fachliche Freigabe muss mit HR/Dispo und rechtlicher Beratung erfolgen.
+
+## Integrationsschnittstellen
+
+### Abwesenheiten
+
+Urlaubsverwaltung liefert:
+
+- Mitarbeiterstamm-Referenz
+- Abwesenheitstyp
+- Zeitraum
+- Genehmigungsstatus
+- Vertretung / Verantwortliche
+- Aenderungszeitpunkt
+
+VALEO nutzt diese Daten:
+
+- in Tourplanung und Disposition als Verfuegbarkeitsblocker
+- in Payroll-/Lohnexporten
+- in HR-Reports
+- als Kontext fuer Agenten-Hinweise
+
+### Klassische Zeiterfassung
+
+Fuer Buero, Lager, Waage und Werkstatt reichen generische Zeitereignisse:
+
+- Start
+- Ende
+- Pause
+- Kostenstelle / Arbeitsbereich
+- Korrekturgrund
+- Freigabestatus
+
+Die Umsetzung kann entweder ueber einen deutschen SaaS-Adapter oder ueber einen kleinen VALEO-Service erfolgen. Ein SaaS-Kandidat muss SSO/OIDC, AVV/DPA, Export, API und Datenportabilitaet nachweisen.
+
+### Fahrerzeit
+
+Fahrerereignisse bleiben in VALEO, weil sie mit Tour, Fahrzeug, Waage, Frachtbrief, Be-/Entladung und Spaesen gekoppelt sind.
+
+Der Tacho-/Telematik-Import wird als spaetere Adapter-Schicht geplant. Bis dahin kann der Pilot manuelle Ereignisse, Tourbezug und Plausibilitaet abbilden.
+
+## Pilotumfang
+
+Pilot `HR-TIME-PILOT-001`:
+
+- 27 Mitarbeitende als Mandanten-/Stammdatenrahmen
+- 5 Pilotnutzer, davon mindestens 2 LKW-Fahrer
+- Abwesenheit: Urlaubsverwaltung getrennt starten oder als Demo-Container bewerten
+- VALEO: Driver-Time-Datenmodell, manuelle Ereigniserfassung, Tour-/Fahrzeugbezug, Abwesenheitskollisionen
+- Export: CSV/JSON-Vertrag fuer Lohn/Payroll, noch keine produktive DATEV-Anbindung
+
+Nicht im ersten Pilot:
+
+- automatischer Tacho-Download
+- vollstaendige Bussgeld-/Rechtsbewertung
+- produktiver SaaS-Wechsel
+- tiefe Modifikation fremder Open-Source-Projekte
+
+## Offene Pruefungen
+
+- Rechtspruefung Apache-2.0-Notices und AGPL-Abgrenzung.
+- Anbieterpruefung fuer deutschen SaaS: AVV/DPA, Hostingort, Subprozessoren, Datenexport, API, SSO.
+- Fachfreigabe der Fahrerereignisse durch Dispo und HR.
+- Entscheidung, ob klassische Zeiterfassung im Pilot gebaut oder angebunden wird.
+- Tacho-/Telematik-Schnittstellen und Datenformate erheben.
+
+## Quellenstand
+
+Geprueft am 2026-05-07:
+
+- `urlaubsverwaltung/urlaubsverwaltung`: GitHub weist Apache-2.0 aus: https://github.com/urlaubsverwaltung/urlaubsverwaltung
+- `urlaubsverwaltung/zeiterfassung`: Lizenzdatei ist AGPL-3.0: https://raw.githubusercontent.com/urlaubsverwaltung/zeiterfassung/main/LICENSE.md
+- EU-Regelwerk zu Lenk- und Ruhezeiten: Verordnung (EG) Nr. 561/2006 und Folgeregeln: https://eur-lex.europa.eu/eli/reg/2006/561/oj
+- BAuA/BMAS bestaetigen die Pflicht zu einem objektiven, verlaesslichen und zugaenglichen Arbeitszeiterfassungssystem sowie den Arbeitsschutzbezug: https://www.baua.de/DE/Themen/Arbeitsgestaltung/Arbeitszeit/Arbeitszeiterfassung

@@ -33,10 +33,11 @@ Stand: `2026-04-24`
 
 **Von:** Codex
 **Owner:** Codex
-**Stand:** reserviert 2026-05-07
+**Stand:** abgeschlossen 2026-05-07
 **Ziel des Slices:** Lizenz- und Zielarchitektur fuer deutsche Abwesenheitsverwaltung, Zeiterfassung und VALEO-eigenen Driver-Time-Layer festhalten.
 **Dateibesitz:** `docs/agent-ops/active-workboard.md`, `docs/agent-ops/slices/HR-TIME-001.yaml`, `docs/project-context/hr-time-absence-driver-integration-2026-05-07.md`, `docs/project-context/open-gaps-and-known-issues.md`
 **Abnahmekriterien:** Urlaubsverwaltung wird als Apache-2.0-Abwesenheitskandidat bewertet; AGPL/GPL-Zeiterfassung ist als Codebasis ausgeschlossen; VALEO-Driver-Time-Layer, Integrationsgrenzen, Pilotumfang und Lizenzrisiken sind dokumentiert.
+**Erledigt:** Zielarchitektur und Lizenzlinie in `docs/project-context/hr-time-absence-driver-integration-2026-05-07.md` dokumentiert; `open-gaps` fuehrt HR-TIME-001 als P2-Thema mit naechstem Pilot-Slice.
 **Checks:** `python scripts/agent_workboard_supervisor.py validate`; `node scripts/docs-governance-check.cjs`
 **Offene Risiken:** Finale Rechtspruefung, Anbieter-AVV/DPA und produktive Tacho-/Telematik-Schnittstellen liegen ausserhalb des Repos.
 
