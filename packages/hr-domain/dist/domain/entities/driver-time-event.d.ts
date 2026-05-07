@@ -1,0 +1,77 @@
+import { z } from 'zod';
+export declare const DriverTimeEventTypeSchema: z.ZodEnum<["DRIVING", "LOADING", "UNLOADING", "OTHER_WORK", "AVAILABILITY", "BREAK", "DAILY_REST", "WEEKLY_REST", "TOUR_START", "TOUR_END", "VEHICLE_CHANGE", "TACHO_IMPORT"]>;
+export declare const DriverTimeEventSourceSchema: z.ZodEnum<["MANUAL", "MOBILE", "TACHO", "TELEMATICS", "DISPATCH"]>;
+export declare const DriverTimeCorrectionStatusSchema: z.ZodEnum<["ORIGINAL", "CORRECTED", "REQUIRES_REASON"]>;
+export declare const DriverTimeEventSchema: z.ZodObject<{
+    id: z.ZodString;
+    tenantId: z.ZodString;
+    employeeId: z.ZodString;
+    eventType: z.ZodEnum<["DRIVING", "LOADING", "UNLOADING", "OTHER_WORK", "AVAILABILITY", "BREAK", "DAILY_REST", "WEEKLY_REST", "TOUR_START", "TOUR_END", "VEHICLE_CHANGE", "TACHO_IMPORT"]>;
+    start: z.ZodString;
+    end: z.ZodString;
+    tourId: z.ZodOptional<z.ZodString>;
+    vehicleId: z.ZodOptional<z.ZodString>;
+    locationRef: z.ZodOptional<z.ZodString>;
+    source: z.ZodEnum<["MANUAL", "MOBILE", "TACHO", "TELEMATICS", "DISPATCH"]>;
+    correctionStatus: z.ZodDefault<z.ZodEnum<["ORIGINAL", "CORRECTED", "REQUIRES_REASON"]>>;
+    correctionReason: z.ZodOptional<z.ZodString>;
+    auditRef: z.ZodOptional<z.ZodString>;
+}, "strip", z.ZodTypeAny, {
+    id: string;
+    tenantId: string;
+    employeeId: string;
+    eventType: "DRIVING" | "LOADING" | "UNLOADING" | "OTHER_WORK" | "AVAILABILITY" | "BREAK" | "DAILY_REST" | "WEEKLY_REST" | "TOUR_START" | "TOUR_END" | "VEHICLE_CHANGE" | "TACHO_IMPORT";
+    start: string;
+    end: string;
+    source: "MANUAL" | "MOBILE" | "TACHO" | "TELEMATICS" | "DISPATCH";
+    correctionStatus: "ORIGINAL" | "CORRECTED" | "REQUIRES_REASON";
+    tourId?: string | undefined;
+    vehicleId?: string | undefined;
+    locationRef?: string | undefined;
+    correctionReason?: string | undefined;
+    auditRef?: string | undefined;
+}, {
+    id: string;
+    tenantId: string;
+    employeeId: string;
+    eventType: "DRIVING" | "LOADING" | "UNLOADING" | "OTHER_WORK" | "AVAILABILITY" | "BREAK" | "DAILY_REST" | "WEEKLY_REST" | "TOUR_START" | "TOUR_END" | "VEHICLE_CHANGE" | "TACHO_IMPORT";
+    start: string;
+    end: string;
+    source: "MANUAL" | "MOBILE" | "TACHO" | "TELEMATICS" | "DISPATCH";
+    tourId?: string | undefined;
+    vehicleId?: string | undefined;
+    locationRef?: string | undefined;
+    correctionStatus?: "ORIGINAL" | "CORRECTED" | "REQUIRES_REASON" | undefined;
+    correctionReason?: string | undefined;
+    auditRef?: string | undefined;
+}>;
+export type DriverTimeEventType = z.infer<typeof DriverTimeEventTypeSchema>;
+export type DriverTimeEventSource = z.infer<typeof DriverTimeEventSourceSchema>;
+export type DriverTimeCorrectionStatus = z.infer<typeof DriverTimeCorrectionStatusSchema>;
+export type DriverTimeEvent = z.infer<typeof DriverTimeEventSchema>;
+export declare const PRODUCTIVE_DRIVER_EVENT_TYPES: ReadonlySet<DriverTimeEventType>;
+export declare const REST_DRIVER_EVENT_TYPES: ReadonlySet<DriverTimeEventType>;
+export declare class DriverTimeEventEntity {
+    private readonly data;
+    constructor(data: DriverTimeEvent);
+    get id(): string;
+    get tenantId(): string;
+    get employeeId(): string;
+    get eventType(): DriverTimeEventType;
+    get start(): string;
+    get end(): string;
+    get tourId(): string | undefined;
+    get vehicleId(): string | undefined;
+    get source(): DriverTimeEventSource;
+    get correctionStatus(): DriverTimeCorrectionStatus;
+    get correctionReason(): string | undefined;
+    getDurationMinutes(): number;
+    isProductiveWork(): boolean;
+    isRest(): boolean;
+    requiresVehicle(): boolean;
+    requiresTour(): boolean;
+    toJSON(): DriverTimeEvent;
+    private validateBusinessRules;
+    static fromJSON(data: DriverTimeEvent): DriverTimeEventEntity;
+}
+//# sourceMappingURL=driver-time-event.d.ts.map

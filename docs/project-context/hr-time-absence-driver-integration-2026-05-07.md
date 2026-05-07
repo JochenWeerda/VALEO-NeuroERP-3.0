@@ -169,6 +169,12 @@ Pilot `HR-TIME-PILOT-001`:
 - VALEO: Driver-Time-Datenmodell, manuelle Ereigniserfassung, Tour-/Fahrzeugbezug, Abwesenheitskollisionen
 - Export: CSV/JSON-Vertrag fuer Lohn/Payroll, noch keine produktive DATEV-Anbindung
 
+Umsetzungsstand 2026-05-07:
+
+- `packages/hr-domain/src/domain/entities/driver-time-event.ts` definiert den ersten VALEO-eigenen Driver-Time-Contract mit Ereignisart, Quelle, Tour, Fahrzeug, Standort, Korrekturstatus und Audit-Referenz.
+- `packages/hr-domain/src/domain/services/driver-time-service.ts` liefert Tages-/Fahrerzusammenfassungen und Plausibilitaetsbefunde fuer Ueberlappungen, fehlenden Tour-/Fahrzeugbezug, Abwesenheitskollisionen und Tacho-/Manuell-Abweichungen.
+- `packages/frontend-web/src/pages/personal/zeiterfassung.tsx` zeigt den Driver-Time-Pilot neben klassischer Arbeitszeit, damit Dispo/HR die Fahrerzeitlogik sichtbar pruefen koennen.
+
 Nicht im ersten Pilot:
 
 - automatischer Tacho-Download
