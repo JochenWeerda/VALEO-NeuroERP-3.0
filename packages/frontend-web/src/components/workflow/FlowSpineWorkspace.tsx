@@ -62,6 +62,7 @@ import {
   useFlowSpineTimeline,
   useResumeFlowSpineInstance,
   useSaveFlowSpineInstance,
+  useFlowSpineCatalogHook,
   type FlowSpineAction,
   type FlowSpineLifecycleActionPayload,
   type FlowSpineLifecycleStatus,
@@ -483,6 +484,16 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
     refetchOnWindowFocus: false,  // don't refetch when tab regains focus
   })
   const workspace = workspaceQuery.data
+  const hasSidebarProcessList =
+    Array.isArray(workspace?.left_navigation?.processes) &&
+    (workspace.left_navigation?.processes?.length ?? 0) > 0
+  /** Katalog nur bei fehlender/leerer Prozessliste — spart Request und vermeidet Doppel-401/Netzwerk-Laerm. */
+  const catalogQuery = useFlowSpineCatalogHook({
+    enabled:
+      workspaceQuery.isSuccess &&
+      Boolean(workspace) &&
+      !hasSidebarProcessList,
+  })
   const [selectedNodeId, setSelectedNodeId] = useState<string>('')
 
   // New instance dialog state
@@ -569,6 +580,27 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
     () => nodes.find((node) => node.id === selectedNodeId) ?? nodes[0],
     [selectedNodeId, nodes],
   )
+
+  /** Prozessliste: Workspace bevorzugt; falls `left_navigation.processes` fehlt, Katalog (z. B. nach Gateway-Strip). */
+  const processNavItems = useMemo(() => {
+    const fromWorkspace = workspace?.left_navigation?.processes
+    if (Array.isArray(fromWorkspace) && fromWorkspace.length > 0) {
+      return fromWorkspace
+    }
+    const catalog = catalogQuery.data?.processes
+    if (Array.isArray(catalog) && catalog.length > 0) {
+      return catalog.map((p) => ({
+        key: p.key,
+        label: p.label,
+        route_path: p.route_path,
+        active: p.key === processKey,
+      }))
+    }
+    return []
+  }, [workspace?.left_navigation?.processes, catalogQuery.data?.processes, processKey])
+
+  const navFavorites = workspace?.left_navigation?.favorites ?? []
+  const navRoleSwitches = workspace?.left_navigation?.role_switches ?? []
 
   const completedCount = useMemo(() => nodes.filter((node) => node.status === 'ok').length, [nodes])
   const progressWidth = nodes.length
@@ -895,7 +927,12 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
             <div className="mb-6">
               <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">Prozesse</p>
               <div className="space-y-2">
-                {workspace.left_navigation.processes.map((process) => (
+                {processNavItems.length === 0 ? (
+                  <p className="rounded-2xl border border-amber-400/20 bg-amber-500/10 px-3 py-2 text-xs text-amber-100/90">
+                    Keine Prozesslinks geladen. Backend pruefen (Workspace + Katalog) oder Seite neu laden.
+                  </p>
+                ) : null}
+                {processNavItems.map((process) => (
                   <button
                     key={process.key}
                     onClick={() => go(process.route_path)}
@@ -913,7 +950,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
             <div className="mb-6">
               <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">Favoriten</p>
               <div className="space-y-2 text-sm text-slate-300">
-                {workspace.left_navigation.favorites.map((item) => (
+                {navFavorites.map((item) => (
                   <div key={item} className="rounded-2xl border border-white/5 bg-white/[0.03] px-3 py-3">{item}</div>
                 ))}
               </div>
@@ -931,7 +968,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
                   <button
                     key={inst.instance_id}
                     onClick={() => {
-                      const activeProcess = workspace.left_navigation.processes.find(p => p.active)
+                      const activeProcess = processNavItems.find(p => p.active)
                       const basePath = activeProcess?.route_path || window.location.pathname
                       navigate(`${basePath}?instanceId=${inst.instance_id}`)
                     }}
@@ -966,7 +1003,7 @@ export function FlowSpineWorkspace({ processKey, instanceId: instanceIdProp }: F
             <div>
               <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">Rollenwechsel</p>
               <div className="space-y-2">
-                {workspace.left_navigation.role_switches.map((role) => (
+                {navRoleSwitches.map((role) => (
                   <Button key={role} variant="outline" className="w-full justify-start border-white/10 bg-white/5 text-slate-200 hover:bg-white/10">
                     {role}
                   </Button>

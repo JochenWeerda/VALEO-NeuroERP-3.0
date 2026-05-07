@@ -16,8 +16,8 @@ export function useFlowSpineState(processKey: string): UseQueryResult<FlowSpineW
   return useFlowSpineWorkspace(processKey)
 }
 
-export function useFlowSpineCatalog(): UseQueryResult<FlowSpineCatalog> {
-  return useFlowSpineCatalogHook()
+export function useFlowSpineCatalog(options?: { enabled?: boolean }): UseQueryResult<FlowSpineCatalog> {
+  return useFlowSpineCatalogHook(options)
 }
 
 // Re-export the fetch helpers so existing consumers continue to work
